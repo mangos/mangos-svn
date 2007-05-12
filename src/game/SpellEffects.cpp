@@ -241,7 +241,7 @@ void Spell::EffectDummy(uint32 i)
     {
         SpellEntry const* spellInfo = sSpellStore.LookupEntry( 13481 );
 
-        if(m_caster->GetTypeId() != TYPEID_PLAYER && !spellInfo)
+        if(m_caster->GetTypeId() != TYPEID_PLAYER || !spellInfo)
             return;
 
         Spell spell(m_caster, spellInfo, true, m_triggeredByAura);
