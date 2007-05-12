@@ -411,11 +411,7 @@ void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
                         Player *pPlayer = ObjectAccessor::Instance().FindPlayer(guid);
                         if( pPlayer )
                         {
-                            WorldPacket data( MSG_QUEST_PUSH_RESULT, (8+4+1) );
-                            data << guid;
-                            data << uint32( QUEST_PARTY_MSG_SHARING_QUEST );
-                            data << uint8(0);
-                            _player->GetSession()->SendPacket(&data);
+                            _player->SendPushToPartyResponse(pPlayer, QUEST_PARTY_MSG_SHARING_QUEST);
 
                             if( _player->GetDistanceSq( pPlayer ) > 100 )
                             {

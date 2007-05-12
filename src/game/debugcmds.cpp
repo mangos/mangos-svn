@@ -50,6 +50,7 @@ bool ChatHandler::HandleDebugSpellFailCommand(const char* args)
 {
     if(!args)
         return false;
+
     char* px = strtok((char*)args, " ");
     if(!px)
         return false;
@@ -60,17 +61,14 @@ bool ChatHandler::HandleDebugSpellFailCommand(const char* args)
     data << (uint32)133;
     data << uint8(2);
     data << failnum;
-
     m_session->SendPacket(&data);
-    //char buf[256];
-    //FillSystemMessageData(&data, m_session, buf);
 
     return true;
 }
 
 bool ChatHandler::HandleSetPoiCommand(const char* args)
 {
-    Player *  pPlayer = m_session->GetPlayer();
+    Player *pPlayer = m_session->GetPlayer();
     Unit* target = getSelectedUnit();
     if(!target)
     {
@@ -100,40 +98,24 @@ bool ChatHandler::HandleSetPoiCommand(const char* args)
 bool ChatHandler::HandleSendItemErrorMsg(const char* args)
 {
     uint8 error_msg = atol((char*)args);
-    if ( error_msg > 0 )
-    {
-                                                            // guess size
-        WorldPacket data(SMSG_INVENTORY_CHANGE_FAILURE, (30));
-        data << error_msg;
-        data << uint64(0);
-        data << uint64(0);
-        data << uint8(0);
-        m_session->SendPacket( &data );
-        return true;
-    }
-    return false;
+    if(error_msg >= 0)
+        m_session->GetPlayer()->SendEquipError(error_msg, 0, 0);
+    return true;
 }
 
 bool ChatHandler::HandleSendQuestPartyMsgCommand(const char* args)
 {
     uint32 msg = atol((char*)args);
-    if ( msg >= 0 )
-    {
-        WorldPacket data( MSG_QUEST_PUSH_RESULT, (8+4+1) );
-        data << m_session->GetPlayer()->GetGUID();
-        data << uint32(msg);
-        data << uint8(0);
-        m_session->SendPacket(&data);
-    }
+    if (msg >= 0)
+        m_session->GetPlayer()->SendPushToPartyResponse(m_session->GetPlayer(), msg);
     return true;
 }
 
 bool ChatHandler::HandleSendQuestInvalidMsgCommand(const char* args)
 {
-    Player *  pPlayer = m_session->GetPlayer();
     uint32 msg = atol((char*)args);
-    if ( msg >= 0 )
-        pPlayer->SendCanTakeQuestResponse( msg );
+    if (msg >= 0)
+        m_session->GetPlayer()->SendCanTakeQuestResponse(msg);
     return true;
 }
 
@@ -183,7 +165,6 @@ bool ChatHandler::HandleGetItemState(const char* args)
                     if (item && item->GetState() == state)
                         PSendSysMessage("bag: 255 slot: %d guid: %d owner: %d", item->GetSlot(), item->GetGUIDLow(), GUID_LOPART(item->GetOwnerGUID()));
                 }
-
             }
         }
     }

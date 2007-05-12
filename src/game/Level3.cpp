@@ -993,7 +993,7 @@ bool ChatHandler::HandleLearnCommand(const char* args)
     {
         PSendSysMessage(LANG_COMMAND_LEARNINGALLLANG, m_session->GetPlayer()->GetName());
 
-        // skiping UNIVERSAL language (0)
+        // skipping UNIVERSAL language (0)
         for(int i = 1; i < LANGUAGES_COUNT; ++i)
             m_session->GetPlayer()->learnSpell(lang_description[i].spell_id);
         return true;
@@ -2231,7 +2231,6 @@ bool ChatHandler::HandleUnAuraCommand(const char* args)
 
 bool ChatHandler::HandleLinkGraveCommand(const char* args)
 {
-
     if(!*args)
         return false;
 
@@ -2350,7 +2349,6 @@ bool ChatHandler::HandleNearGraveCommand(const char* args)
 
 bool ChatHandler::HandleSpawnTransportCommand(const char* args)
 {
-
     return true;
 }
 
@@ -2637,8 +2635,6 @@ bool ChatHandler::HandleShowAreaCommand(const char* args)
 
 bool ChatHandler::HandleHideAreaCommand(const char* args)
 {
-    WorldPacket data;
-
     if (!*args)
         return false;
 
@@ -3107,10 +3103,9 @@ bool ChatHandler::HandleResetCommand (const char * args)
         // set UNIT_FIELD_BYTES_1 to init state but preserve m_form value
         player->SetUInt32Value(UNIT_FIELD_BYTES_1, player->m_form<<16 | unitfield );
 
-        player->SetUInt32Value(UNIT_FIELD_BYTES_2, 0x2800 );// 0x2800, 0x2801 2.0.8...
+        player->SetUInt32Value(UNIT_FIELD_BYTES_2, 0x2800 ); // 0x2800, 0x2801 2.0.8...
         player->SetUInt32Value(UNIT_FIELD_FLAGS , UNIT_FLAG_NONE | UNIT_FLAG_UNKNOWN1 );
 
-        //player->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_SPECIALINFO); // wrong...
                                                             //-1 is default value
         player->SetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, uint32(-1));
 

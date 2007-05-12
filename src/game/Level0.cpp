@@ -202,7 +202,6 @@ bool ChatHandler::HandleGMListCommand(const char* args)
             }
 
             SendSysMessage(itr->second->GetName());
-
         }
     }
 
@@ -301,9 +300,8 @@ bool ChatHandler::HandleShowHonor(const char* args)
 bool ChatHandler::HandlePasswordCommand(const char* args)
 {
     if(!*args)
-    {
         return false;
-    }
+
     char *old_pass = strtok ((char*)args, " ");
     char *new_pass = strtok (NULL, " ");
     char *new_pass_c  = strtok (NULL, " ");

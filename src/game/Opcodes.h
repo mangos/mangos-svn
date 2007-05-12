@@ -884,8 +884,8 @@ enum OpCodes
     CMSG_MOVE_FLY_MODE_CHANGE_ACK                   = 837, // movement related, fly on/off ack
     CMSG_MOVE_FLY_STATE_CHANGE                      = 838, // movement related, fly start/stop(land) ack, may be MSG
     CMSG_SOCKET_ITEM                                = 839, // click on "Socket Gems" button in Jewelcrafting UI, contains uint64 item guid + 3 x uint64 gems guid's
-    // 840
-    SMSG_ARENA_TEAM_COMMAND_RESULT                  = 841, // uint32(5)+uint16(0)+uint32(9) You not in arena team that size
+    // 840, CMSG?
+    SMSG_ARENA_TEAM_COMMAND_RESULT                  = 841, // uint32 command, name1, name2, uint32 errorcode
     // 842
     CMSG_ARENA_TEAM_QUERY                           = 843,
     SMSG_ARENA_TEAM_QUERY_RESPONSE                  = 844,
@@ -910,7 +910,7 @@ enum OpCodes
     CMSG_LFM_UNSET_AUTOADD                          = 863,
     CMSG_LFG_INVITE_ACCEPT                          = 864,
     CMSG_LFG_INVITE_CANCEL                          = 865,
-    // 866
+    // 866, CMSG?
     CMSG_LOOKING_FOR_GROUP_CLEAR                    = 867,
     CMSG_SET_LOOKING_FOR_NONE                       = 868,
     CMSG_SET_LOOKING_FOR_MORE                       = 869,

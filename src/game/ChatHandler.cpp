@@ -256,8 +256,6 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             }
         } break;
 
-
-
         default:
             sLog.outError("CHAT: unknown msg type %u, lang: %u", type, lang);
     }

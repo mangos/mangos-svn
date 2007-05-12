@@ -122,7 +122,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SendAuctionOutbiddedMail( AuctionEntry * auction, uint32 newPrice );
         void SendAuctionCancelledToBidderMail( AuctionEntry* auction );
 
-        //Item Enchantement
+        //Item Enchantment
         void SendEnchantmentLog(uint64 Target, uint64 Caster,uint32 ItemID,uint32 SpellID);
         void SendItemEnchantTimeUpdate(uint64 Playerguid, uint64 Itemguid,uint32 slot,uint32 Duration);
 
@@ -166,7 +166,7 @@ class MANGOS_DLL_SPEC WorldSession
         // repair
         void HandleRepairItemOpcode(WorldPacket& recvPacket);
 
-        //Knockback
+        // Knockback
         void HandleMoveKnockBackAck(WorldPacket& recvPacket);
 
         void HandleMoveTeleportAck(WorldPacket& recvPacket);

@@ -39,7 +39,6 @@ using namespace std;
 
 bool ChatHandler::HandleTargetObjectCommand(const char* args)
 {
-
     Player* pl = m_session->GetPlayer();
     QueryResult *result;
 
@@ -962,7 +961,6 @@ bool ChatHandler::HandleFactionIdCommand(const char* args)
     //pCreature->SaveToDB(); -- obsolete
     sDatabase.PExecuteLog("UPDATE `creature_template` SET `faction` = '%u' WHERE `entry` = '%u'", factionId, pCreature->GetEntry());
 
-
     return true;
 }
 
@@ -1787,7 +1785,6 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
             // Free memory
             delete result2;
         }
-
     }
 
     sLog.outDebug("DEBUG: HandleWpModifyCommand - Parameters parsed - now execute the command");

@@ -2577,10 +2577,12 @@ uint8 Spell::CheckItems()
 
                 // prevent disenchanting in trade slot
                 if( m_targets.m_itemTarget->GetOwnerGUID() != m_caster->GetGUID() )
-                    return (uint8)SPELL_FAILED_CANT_BE_DISENCHANTED;
+                    return SPELL_FAILED_CANT_BE_DISENCHANTED;
                 uint32 item_quality = m_targets.m_itemTarget->GetProto()->Quality;
                 // 2.0.x addon: Check player enchanting level agains the item desenchanting requirements
                 uint32 item_disenchantskilllevel = m_targets.m_itemTarget->GetProto()->RequiredDisenchantSkill;
+                if (item_disenchantskilllevel == uint32(-1))
+                    return SPELL_FAILED_CANT_BE_DISENCHANTED;
                 if (item_disenchantskilllevel > p_caster->GetSkillValue(SKILL_ENCHANTING))
                     return SPELL_FAILED_LOW_CASTLEVEL;
                 if(item_quality > 4 || item_quality < 2)

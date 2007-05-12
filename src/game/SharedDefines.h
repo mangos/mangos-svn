@@ -179,6 +179,7 @@ enum CharacterSlot
 
 enum Language
 {
+    LANG_UNIVERSAL2     = -1,   // used by addons?, may be LANG_ADDON?
     LANG_GLOBAL         = 0,
     LANG_UNIVERSAL      = 0,
     LANG_ORCISH         = 1,
@@ -390,12 +391,13 @@ enum GameobjectTypes
     GAMEOBJECT_TYPE_FLAGSTAND              = 24,
     GAMEOBJECT_TYPE_FISHINGHOLE            = 25,
     GAMEOBJECT_TYPE_FLAGDROP               = 26,
-    // Custom gametypes, can create problems at sending to client,
-    GAMEOBJECT_TYPE_CUSTOM_TELEPORTER      = 27,
+    GAMEOBJECT_TYPE_MINI_GAME              = 27,
     GAMEOBJECT_TYPE_LOTTERY_KIOSK          = 28,
     GAMEOBJECT_TYPE_CAPTURE_POINT          = 29,
     GAMEOBJECT_TYPE_AURA_GENERATOR         = 30,
-    GAMEOBJECT_TYPE_DUNGEON_DIFFICULTY     = 31
+    GAMEOBJECT_TYPE_DUNGEON_DIFFICULTY     = 31,
+    // Custom gametypes, can create problems at sending to client,
+    GAMEOBJECT_TYPE_CUSTOM_TELEPORTER      = 32,
 };
 
 enum TextEmote

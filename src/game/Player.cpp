@@ -340,7 +340,6 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value(UNIT_FIELD_BYTES_2, ( 0x28 << 8 ) );     // players - 0x2800, 0x2801, units - 0x1001
     SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 );
 
-    //SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_SPECIALINFO); // wrong...
                                                             //-1 is default value
     SetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, uint32(-1));
 
@@ -1228,7 +1227,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         return;
 
     // don't let enter battlegrounds without assigned battleground id (for example through areatrigger)...
-    if(!InBattleGround() && mEntry->map_type == MAP_BATTLEGROUND)
+    if(!InBattleGround() && mEntry->map_type == MAP_BATTLEGROUND && !GetSession()->GetSecurity())
         return;
 
     QueryResult *result = loginDatabase.PQuery("SELECT `tbc` FROM `account` WHERE `id`='%u'", GetSession()->GetAccountId());
@@ -2060,11 +2059,12 @@ void Player::SendInitialSpells()
         data << uint16(itr->first);
 
         time_t cooldown = 0;
-        if(itr->second.end > time(NULL))
-            cooldown = (itr->second.end-time(NULL))*1000;
+        time_t curTime = time(NULL);
+        if(itr->second.end > curTime)
+            cooldown = (itr->second.end-curTime)*1000;
 
-        data << uint16(itr->second.itemid);
-        data << uint16(sEntry->Category);
+        data << uint16(itr->second.itemid);                 // cast item id
+        data << uint16(sEntry->Category);                   // spell category
         if(sEntry->Category)                                // may be wrong, but anyway better than nothing...
         {
             data << uint32(0);
