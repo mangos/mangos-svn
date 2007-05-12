@@ -76,6 +76,10 @@ SpellCastTargets::~SpellCastTargets()
 
 void SpellCastTargets::setUnitTarget(Unit *target)
 {
+
+    if (!target)
+	return;
+	
     m_destX = target->GetPositionX();
     m_destY = target->GetPositionY();
     m_destZ = target->GetPositionZ();
