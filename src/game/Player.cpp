@@ -4670,7 +4670,11 @@ void Player::UpdateZone(uint32 newZone)
         }
         else
         {
-            sWorld.AddWeather(zone->ID);
+            if(!sWorld.AddWeather(zone->ID))
+            {
+                // send fine weather packet to remove old zone's weather
+                Weather::SendFineWeatherUpdateToPlayer(this);
+            }
         }
     }
 
