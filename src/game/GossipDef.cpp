@@ -378,11 +378,7 @@ void PlayerMenu::SendQuestQueryResponse( Quest *pQuest )
     data << uint32(pQuest->GetQuestId());
     data << uint32(pQuest->GetMinLevel()); // it's not min lvl in 2.0.x
     data << uint32(pQuest->GetQuestLevel());
-
-    if(pQuest->GetQuestSort() > 0)
-        data << uint32(pQuest->GetQuestSort() * -1);
-    else
-        data << uint32(pQuest->GetZoneId());
+    data << uint32(pQuest->GetZoneOrSort());
 
     data << uint32(pQuest->GetType());
     data << uint32(0);//SuggestedPlayers
