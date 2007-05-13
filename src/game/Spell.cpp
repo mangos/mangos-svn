@@ -2278,6 +2278,11 @@ uint8 Spell::CanCast()
                 if (m_caster->IsInWater())
                     return SPELL_FAILED_ONLY_ABOVEWATER;
 
+                uint32 form = m_caster->m_form;
+                if( form == FORM_CAT || form == FORM_TREE || form == FORM_TRAVEL || form == FORM_AQUA || form == FORM_BEAR || 
+                    form == FORM_DIREBEAR || form == FORM_CREATUREBEAR || form == FORM_GHOSTWOLF || form == FORM_FLIGHT )
+                    return SPELL_FAILED_NOT_SHAPESHIFT;
+
                 break;
             }
             case SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS:
@@ -2630,11 +2635,8 @@ uint8 Spell::CheckItems()
                         switch(pItem->GetProto()->SubClass)
                         {
                             case ITEM_SUBCLASS_WEAPON_BOW:
-                                if(ammoProto->SubClass!=ITEM_SUBCLASS_ARROW)
-                                    return SPELL_FAILED_NO_AMMO;
-                                break;
                             case ITEM_SUBCLASS_WEAPON_CROSSBOW:
-                                if(ammoProto->SubClass!=ITEM_SUBCLASS_BOLT)
+                                if(ammoProto->SubClass!=ITEM_SUBCLASS_ARROW)
                                     return SPELL_FAILED_NO_AMMO;
                                 break;
                             case ITEM_SUBCLASS_WEAPON_GUN:
