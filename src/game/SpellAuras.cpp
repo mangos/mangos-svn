@@ -826,9 +826,10 @@ void Aura::HandleAddModifier(bool apply, bool Real)
     // Sometimes a spell has more than one effect, but only the first mask is filled (e.g. rogue talent id: 13975) 
     // in this case we need a fallback and take the fist mask. This one should fit. 
     // Otherwise the mod will not have an effect at all. 
-    if(mask == 0) { 
-        mask = spellInfo->EffectItemType[0]; 
-    } 
+
+    // This hack can't be used: most spells with 2 SPELLMOD_* aura in 2 effect slots _muts_ have different values in EffectItemType
+    //if(m_effIndex > 0 && mask == 0)
+    //    mask = spellInfo->EffectItemType[0]; 
 
     if(op >= SPELLMOD_COUNT)
         return;
