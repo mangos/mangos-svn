@@ -1369,7 +1369,7 @@ void ObjectMgr::LoadGroups()
 void ObjectMgr::LoadQuests()
 {
     //                                            0       1         2          3            4
-    QueryResult *result = sDatabase.Query("SELECT `entry`,`ZoneId`, `MinLevel`,`QuestLevel`,`Type`,"
+    QueryResult *result = sDatabase.Query("SELECT `entry`,`ZoneOrSort`, `MinLevel`,`QuestLevel`,`Type`,"
     //   5                6               7               8                   9                    10
         "`RequiredRaces`,`RequiredClass`,`RequiredSkill`,`RequiredSkillValue`,`RequiredRepFaction`,`RequiredRepValue`,"
     //   11          12             13            14            15               16                 17          18             19
