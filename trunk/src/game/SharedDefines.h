@@ -395,9 +395,7 @@ enum GameobjectTypes
     GAMEOBJECT_TYPE_LOTTERY_KIOSK          = 28,
     GAMEOBJECT_TYPE_CAPTURE_POINT          = 29,
     GAMEOBJECT_TYPE_AURA_GENERATOR         = 30,
-    GAMEOBJECT_TYPE_DUNGEON_DIFFICULTY     = 31,
-    // Custom gametypes, can create problems at sending to client,
-    GAMEOBJECT_TYPE_CUSTOM_TELEPORTER      = 32,
+    GAMEOBJECT_TYPE_DUNGEON_DIFFICULTY     = 31
 };
 
 enum TextEmote

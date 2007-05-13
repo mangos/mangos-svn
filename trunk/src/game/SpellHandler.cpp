@@ -449,23 +449,6 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                 obj->Delete();
             }
             break;
-        case GAMEOBJECT_TYPE_CUSTOM_TELEPORTER:
-            info = obj->GetGOInfo();
-            if(info)
-            {
-                AreaTrigger const *at = objmgr.GetAreaTrigger( info->sound0 );
-                if(at && at->IsTeleport())
-                {
-                    sLog.outDebug( "Teleporting player %u with coordinates X: %f Y: %f Z: %f Orientation: %f Map: %u\n",
-                        _player->GetGUIDLow(), at->target_X,at->target_Y,at->target_Z,at->target_Orientation,at->target_mapId);
-                    _player->TeleportTo(at->target_mapId, at->target_X,at->target_Y,at->target_Z,at->target_Orientation);
-                    sLog.outDebug( "Player %u teleported by %u\n", _player->GetGUIDLow(), info->sound0);
-                }
-                else
-                    sLog.outDebug( "Gameobject template %u (type: GAMEOBJECT_TYPE_CUSTOM_TELEPORTER(27)) have wrong areatrigger_template id %u (sound0 field) for teleportation", info->id,info->sound0);
-                return;
-            }
-            break;
         default:
             sLog.outDebug( "Unknown Object Type %u\n", obj->GetUInt32Value(GAMEOBJECT_TYPE_ID));
             break;

@@ -709,10 +709,10 @@ void BattleGround::RemovePlayerFromQueue(uint64 guid)
 
 bool BattleGround::CanStartBattleGround()
 {
-    if(GetStatus() >= STATUS_WAIT_JOIN)     // already started or ended
+    if(GetStatus() >= STATUS_WAIT_JOIN)             // already started or ended
         return false;
 
-    if(GetQueuedPlayersSize() < GetMaxPlayers())
+    if(GetQueuedPlayersSize() < GetMinPlayers())    // queue is not ready yet
         return false;
 
     uint8 hordes = 0;

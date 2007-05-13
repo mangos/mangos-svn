@@ -131,24 +131,24 @@ void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
     data << (uint32)entry;                                  // creature entry
     data << (unit ? unit->GetName() : ci->Name);            // creature name
 
-    data << uint8(0) << uint8(0) << uint8(0);               // unk 3 x uint8
+    data << uint8(0) << uint8(0) << uint8(0);               // name2, name3, name4, always empty
 
     if (unit)
         data << ((unit->isPet()) ? "Pet" : ci->SubName);    // subname
     else
-        data << ci->Name;
+        data << ci->Name;                                   // may be it's typo? must be subname I think...
 
-    data << ci->flag1;                                      //flags          wdbFeild7=wad flags1
+    data << ci->flag1;                                      // flags          wdbFeild7=wad flags1
 
     if (unit)
-        data << (uint32)((unit->isPet()) ? 0 : ci->type);   //creatureType   wdbFeild8
+        data << (uint32)((unit->isPet()) ? 0 : ci->type);   // creatureType   wdbFeild8
     else
         data << (uint32) ci->type;
 
-    data << (uint32)ci->family;                             //family         wdbFeild9
-    data << (uint32)(unit && unit->isPet() ? 0 : ci->rank); //rank           wdbFeild10
-    data << uint32(0);                                      //unknow         wdbFeild11
-    data << uint32(0);                                      //unknow         wdbFeild12
+    data << (uint32)ci->family;                             // family         wdbFeild9
+    data << (uint32)(unit && unit->isPet() ? 0 : ci->rank); // rank           wdbFeild10
+    data << uint32(0);                                      // unknown        wdbFeild11
+    data << uint32(0);                                      // unknown        wdbFeild12
 
     if (unit)
         data << unit->GetUInt32Value(UNIT_FIELD_DISPLAYID); //DisplayID      wdbFeild13
@@ -175,60 +175,47 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
     const GameObjectInfo *info = objmgr.GetGameObjectInfo(entryID);
                                                             // guess size
     WorldPacket data ( SMSG_GAMEOBJECT_QUERY_RESPONSE, 150 );
-    data << entryID;
-
-    if( !info  )
+    if(!info)
     {
         sLog.outDebug( "WORLD: CMSG_GAMEOBJECT_QUERY - Missing game object info for entry %u", entryID);
-
-        data << uint64(0);
-        data << uint64(0);
-        data << uint64(0);
-        data << uint64(0);
-        data << uint64(0);
-        data << uint64(0);
-        data << uint64(0);
-        data << uint64(0);
-        data << uint64(0);
-        data << uint32(0);
-        data << uint16(0);
-        data << uint8(0);
-
-        data << uint64(0);                                  // Added in 1.12.x client branch
-        data << uint64(0);                                  // Added in 1.12.x client branch
-        data << uint64(0);                                  // Added in 1.12.x client branch
-        data << uint64(0);                                  // Added in 1.12.x client branch
-        data << uint8(0);                                   // Added in 1.12.x client branch
-        SendPacket( &data );
-        return;
+        data << uint32(entryID | 0x80000000);
     }
-
-    sLog.outDetail("WORLD: CMSG_GAMEOBJECT_QUERY '%s' - Entry: %u - GUID: %u.", info->name, entryID, guid);
-    
-    data << (uint32)info->type;
-    data << (uint32)info->displayId;
-    data << info->name;
-    data << uint32(0); // 2.0.3
-    data << uint16(0); // 2.0.3
-    data << uint32(info->sound0);
-    data << uint32(info->sound1);
-    data << uint32(info->sound2);
-    data << uint32(info->sound3);
-    data << uint32(info->sound4);
-    data << uint32(info->sound5);
-    data << uint32(info->sound6);
-    data << uint32(info->sound7);
-    data << uint32(info->sound8);
-    data << uint32(info->sound9);
-
-    data << uint64(0);
-    data << uint64(0);
-    data << uint64(0);
-
-    data << uint64(0);                                      // Added in 1.12.x client branch
-    data << uint64(0);                                      // Added in 1.12.x client branch
-    data << uint64(0);                                      // Added in 1.12.x client branch
-    data << uint64(0);                                      // Added in 1.12.x client branch
+    else
+    {
+        sLog.outDetail("WORLD: CMSG_GAMEOBJECT_QUERY '%s' - Entry: %u - GUID: %u.", info->name, entryID, guid);
+        data << entryID;
+        data << (uint32)info->type;
+        data << (uint32)info->displayId;
+        data << info->name;
+        data << uint8(0) << uint8(0) << uint8(0);               // name2, name3, name4
+        data << uint8(0);                                       // 2.0.3, string
+        data << uint8(0);                                       // 2.0.3, string
+        data << uint8(0);                                       // 2.0.3, probably string
+        data << uint32(info->sound0);
+        data << uint32(info->sound1);
+        data << uint32(info->sound2);
+        data << uint32(info->sound3);
+        data << uint32(info->sound4);
+        data << uint32(info->sound5);
+        data << uint32(info->sound6);
+        data << uint32(info->sound7);
+        data << uint32(info->sound8);
+        data << uint32(info->sound9);
+        data << uint32(info->sound10);
+        data << uint32(info->sound11);
+        data << uint32(info->sound12);
+        data << uint32(info->sound13);
+        data << uint32(info->sound14);
+        data << uint32(info->sound15);
+        data << uint32(info->sound16);
+        data << uint32(info->sound17);
+        data << uint32(info->sound18);
+        data << uint32(info->sound19);
+        data << uint32(info->sound20);
+        data << uint32(info->sound21);
+        data << uint32(info->sound22);
+        data << uint32(info->sound23);
+    }
     SendPacket( &data );
 }
 
@@ -255,16 +242,15 @@ void WorldSession::HandleNpcTextQueryOpcode( WorldPacket & recv_data )
     CHECK_PACKET_SIZE(recv_data,4+4+4);
 
     uint32 textID;
-    uint32 uField0, uField1;
+    uint64 guid;
     GossipText *pGossip;
     std::string GossipStr;
 
     recv_data >> textID;
-    sLog.outDetail("WORLD: CMSG_NPC_TEXT_QUERY ID '%u'", textID );
+    sLog.outDetail("WORLD: CMSG_NPC_TEXT_QUERY ID '%u'", textID);
 
-    recv_data >> uField0 >> uField1;
-    GetPlayer()->SetUInt32Value(UNIT_FIELD_TARGET, uField0);
-    GetPlayer()->SetUInt32Value(UNIT_FIELD_TARGET + 1, uField1);
+    recv_data >> guid;
+    GetPlayer()->SetUInt64Value(UNIT_FIELD_TARGET, guid);
 
     pGossip = objmgr.GetGossipText(textID);
 

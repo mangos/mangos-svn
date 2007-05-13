@@ -854,7 +854,7 @@ enum OpCodes
     // 807
     SMSG_GM_SURVEY_REQUEST                          = 808, // uint32, 1 - causes client get ticket request, 2 - hide, 3 - show
     MSG_SET_DUNGEON_DIFFICULTY                      = 809, // uint32+uint32+uint32
-    CMSG_GM_SURVEY_RESULTS                          = 810,
+    CMSG_GM_SURVEY_RESULTS                          = 810, // script function named GMSurveySubmit()
     SMSG_UNKNOWN_811                                = 811, // uint32, 0x0, SMSG_INSTANCE_RESET_ACTIVATE ?
     // 812
     // 813

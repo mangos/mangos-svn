@@ -57,8 +57,7 @@ struct BattlemasterListEntry
     uint32      type; // 3 - BG, 4 - arena
     uint32      minlvl;
     uint32      maxlvl;
-    uint32      maxplayers;
-    uint32      minplayers; // ???
+    uint32      maxplayersperteam;
     char*       name;
 };
 

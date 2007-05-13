@@ -51,6 +51,20 @@ struct GameObjectInfo
     uint32  sound7;
     uint32  sound8;
     uint32  sound9;
+    uint32  sound10;
+    uint32  sound11;
+    uint32  sound12;
+    uint32  sound13;
+    uint32  sound14;
+    uint32  sound15;
+    uint32  sound16;
+    uint32  sound17;
+    uint32  sound18;
+    uint32  sound19;
+    uint32  sound20;
+    uint32  sound21;
+    uint32  sound22;
+    uint32  sound23;
     char   *ScriptName;
 };
 

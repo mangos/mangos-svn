@@ -290,15 +290,15 @@ enum PlayerFlags
     PLAYER_FLAGS_GHOST          = 0x00000010,
     PLAYER_FLAGS_RESTING        = 0x00000020,
     PLAYER_FLAGS_FFA_PVP        = 0x00000080,
-    PLAYER_FLAGS_UNK            = 0x00000100,                   // 2.0.8, bg related?
+    PLAYER_FLAGS_UNK            = 0x00000100,                   // show PvP in tooltip
     PLAYER_FLAGS_IN_PVP         = 0x00000200,
     PLAYER_FLAGS_HIDE_HELM      = 0x00000400,
     PLAYER_FLAGS_HIDE_CLOAK     = 0x00000800,
-    PLAYER_FLAGS_UNK1           = 0x00001000,                   //played long time
-    PLAYER_FLAGS_UNK2           = 0x00002000,                   //played too long time
-    PLAYER_FLAGS_UNK3           = 0x00008000,                   //strange visual effect (2.0.1)
-    PLAYER_FLAGS_UNK4           = 0x00020000,                   //taxi benchmark mode (on/off) (2.0.1)
-    PLAYER_UNK                  = 0x00040000,                   //2.0.8...
+    PLAYER_FLAGS_UNK1           = 0x00001000,                   // played long time
+    PLAYER_FLAGS_UNK2           = 0x00002000,                   // played too long time
+    PLAYER_FLAGS_UNK3           = 0x00008000,                   // strange visual effect (2.0.1), looks like PLAYER_FLAGS_GHOST flag
+    PLAYER_FLAGS_UNK4           = 0x00020000,                   // taxi benchmark mode (on/off) (2.0.1)
+    PLAYER_UNK                  = 0x00040000,                   // 2.0.8...
 };
 
 enum PlayerKnownTitles
