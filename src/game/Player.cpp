@@ -4873,6 +4873,10 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 
     _RemoveStatsMods();
 
+    // remove ammo bonuses at un-apply
+    if( !apply && slot==EQUIPMENT_SLOT_RANGED )
+        _ApplyAmmoBonuses(apply);
+
     AuraList& mModBaseResistancePct = GetAurasByType(SPELL_AURA_MOD_BASE_RESISTANCE_PCT);
     AuraList& mModHaste             = GetAurasByType(SPELL_AURA_MOD_HASTE);
     AuraList& mModRangedHaste       = GetAurasByType(SPELL_AURA_MOD_RANGED_HASTE);
@@ -4896,6 +4900,10 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
         (*i)->ApplyModifier(true);
     for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
         (*i)->ApplyModifier(true);
+
+    // add ammo bonuses at apply
+    if( apply && slot==EQUIPMENT_SLOT_RANGED )
+        _ApplyAmmoBonuses(apply);
 
     _ApplyStatsMods();
 
