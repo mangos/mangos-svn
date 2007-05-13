@@ -1368,33 +1368,33 @@ void ObjectMgr::LoadGroups()
 
 void ObjectMgr::LoadQuests()
 {
-    //                                            0       1        2           3          4            5
-    QueryResult *result = sDatabase.Query("SELECT `entry`,`ZoneId`,`QuestSort`,`MinLevel`,`QuestLevel`,`Type`,"
-    //   6               7               8               9                    10                   11
+    //                                            0       1         2          3            4
+    QueryResult *result = sDatabase.Query("SELECT `entry`,`ZoneId`, `MinLevel`,`QuestLevel`,`Type`,"
+    //   5                6               7               8                   9                    10
         "`RequiredRaces`,`RequiredClass`,`RequiredSkill`,`RequiredSkillValue`,`RequiredRepFaction`,`RequiredRepValue`,"
-    //   12          13             14            15            16               17                 18          19             20
+    //   11          12             13            14            15               16                 17          18             19
         "`LimitTime`,`SpecialFlags`,`PrevQuestId`,`NextQuestId`,`ExclusiveGroup`,`NextQuestInChain`,`SrcItemId`,`SrcItemCount`,`SrcSpell`,"
-    //   21      22        23           24                25                 26        27               28               29               30
+    //   20      21        22           23                24                 25        26               27               28               29
         "`Title`,`Details`,`Objectives`,`OfferRewardText`,`RequestItemsText`,`EndText`,`ObjectiveText1`,`ObjectiveText2`,`ObjectiveText3`,`ObjectiveText4`,"
-    //   31           32           33           34           35              36              37              38
+    //   30           31           32           33           34              35              36              37
         "`ReqItemId1`,`ReqItemId2`,`ReqItemId3`,`ReqItemId4`,`ReqItemCount1`,`ReqItemCount2`,`ReqItemCount3`,`ReqItemCount4`,"
-    //   39             40             41             42             43                44                45                46                47              48              49              50
+    //   38             39             40             41             42                43                44                45                46              47              48              49
         "`ReqSourceId1`,`ReqSourceId2`,`ReqSourceId3`,`ReqSourceId4`,`ReqSourceCount1`,`ReqSourceCount2`,`ReqSourceCount3`,`ReqSourceCount4`,`ReqSourceRef1`,`ReqSourceRef2`,`ReqSourceRef3`,`ReqSourceRef4`,"
-    //   51                   52                   53                   54                   55                      56                      57                      58
+    //   50                   51                   52                   53                   54                      55                      56                      57
         "`ReqCreatureOrGOId1`,`ReqCreatureOrGOId2`,`ReqCreatureOrGOId3`,`ReqCreatureOrGOId4`,`ReqCreatureOrGOCount1`,`ReqCreatureOrGOCount2`,`ReqCreatureOrGOCount3`,`ReqCreatureOrGOCount4`,"
-    //   59              60              61              62
+    //   58              59              60              61
         "`ReqSpellCast1`,`ReqSpellCast2`,`ReqSpellCast3`,`ReqSpellCast4`,"
-    //   63                 64                 65                 66                 67                 68
+    //   62                 63                 64                 65                 66                 67
         "`RewChoiceItemId1`,`RewChoiceItemId2`,`RewChoiceItemId3`,`RewChoiceItemId4`,`RewChoiceItemId5`,`RewChoiceItemId6`,"
-    //   69                    70                    71                    72                    73                    74
+    //   68                    69                    70                    71                    72                    73
         "`RewChoiceItemCount1`,`RewChoiceItemCount2`,`RewChoiceItemCount3`,`RewChoiceItemCount4`,`RewChoiceItemCount5`,`RewChoiceItemCount6`,"
-    //   75           76           77           78           79              80              81              82
+    //   74           75           76           77           78              79              80              81
         "`RewItemId1`,`RewItemId2`,`RewItemId3`,`RewItemId4`,`RewItemCount1`,`RewItemCount2`,`RewItemCount3`,`RewItemCount4`,"
-    //   83               84               85               86               87               88             89             90             91             92
+    //   82               83               84               85               86               87             88             89             90             91
         "`RewRepFaction1`,`RewRepFaction2`,`RewRepFaction3`,`RewRepFaction4`,`RewRepFaction5`,`RewRepValue1`,`RewRepValue2`,`RewRepValue3`,`RewRepValue4`,`RewRepValue5`,"
-    //   93              94      95         96           97       98       99         100                101                 102              103
+    //   92              93      94         95           96       97       98         99              100             101             102
         "`RewOrReqMoney`,`RewXP`,`RewSpell`,`PointMapId`,`PointX`,`PointY`,`PointOpt`,`DetailsEmote1`,`DetailsEmote2`,`DetailsEmote3`,`DetailsEmote4`,"
-    //   104                105             106                 107                 108                 109                 110              111
+    //   103               104             105                 106                 107                 108                 109              110
         "`IncompleteEmote`,`CompleteEmote`,`OfferRewardEmote1`,`OfferRewardEmote2`,`OfferRewardEmote3`,`OfferRewardEmote4`,`CompleteScript`,`Repeatable`"
         " FROM `quest_template`");
     if(result == NULL)

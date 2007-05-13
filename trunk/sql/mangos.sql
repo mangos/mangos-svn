@@ -7586,8 +7586,7 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `quest_template`;
 CREATE TABLE `quest_template` (
   `entry` int(11) unsigned NOT NULL default '0',
-  `ZoneId` int(11) unsigned NOT NULL default '0',
-  `QuestSort` int(11) unsigned NOT NULL default '0',
+  `ZoneOrSort` int(11) NOT NULL default '0',
   `MinLevel` int(11) unsigned NOT NULL default '0',
   `QuestLevel` int(11) unsigned NOT NULL default '0',
   `Type` int(11) unsigned NOT NULL default '0',

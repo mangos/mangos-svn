@@ -135,8 +135,7 @@ class Quest
 
         // table data accessors:
         uint32 GetQuestId() { return QuestId; }
-        uint32 GetZoneId() { return ZoneId; }
-        uint32 GetQuestSort() { return QuestSort; }
+        int32  GetZoneOrSort() { return ZoneOrSort; }
         uint32 GetMinLevel() { return MinLevel; }
         uint32 GetQuestLevel() { return QuestLevel; }
         uint32 GetType() { return Type; }
@@ -210,8 +209,7 @@ class Quest
         // table data
     protected:
         uint32 QuestId;
-        uint32 ZoneId;
-        uint32 QuestSort;
+        int32  ZoneOrSort;
         uint32 MinLevel;
         uint32 QuestLevel;
         uint32 Type;
