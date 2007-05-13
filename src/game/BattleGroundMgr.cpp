@@ -206,15 +206,17 @@ void BattleGroundMgr::BuildPlayerJoinedBattleGroundPacket(WorldPacket* data, Pla
     (*data) << plr->GetGUID();
 }
 
-uint32 BattleGroundMgr::CreateBattleGround(uint32 bg_ID, uint32 MinPlayersPerTeam, uint32 MaxPlayersPerTeam, uint32 LevelMin, uint32 LevelMax, char* BattleGroundName, uint32 MapID, float Team1StartLocX, float Team1StartLocY, float Team1StartLocZ, float Team1StartLocO, float Team2StartLocX, float Team2StartLocY, float Team2StartLocZ, float Team2StartLocO)
+uint32 BattleGroundMgr::CreateBattleGround(uint32 bg_ID, uint32 MaxPlayersPerTeam, uint32 LevelMin, uint32 LevelMax, char* BattleGroundName, uint32 MapID, float Team1StartLocX, float Team1StartLocY, float Team1StartLocZ, float Team1StartLocO, float Team2StartLocX, float Team2StartLocY, float Team2StartLocZ, float Team2StartLocO)
 {
     // Create the BG
     BattleGround *bg = new BattleGround;
 
-    bg->SetInstanceID(bg_ID);   // temporary
+    bg->SetID(bg_ID);
+    bg->SetInstanceID(bg_ID);                           // temporary
     bg->SetMapId(MapID);
-    bg->SetMinPlayersPerTeam(MinPlayersPerTeam);
+    bg->SetMinPlayersPerTeam(MaxPlayersPerTeam/2);
     bg->SetMaxPlayersPerTeam(MaxPlayersPerTeam);
+    bg->SetMinPlayers(MaxPlayersPerTeam);
     bg->SetMaxPlayers(MaxPlayersPerTeam*2);
     bg->SetName(BattleGroundName);
     bg->SetTeamStartLoc(ALLIANCE, Team1StartLocX, Team1StartLocY, Team1StartLocZ, Team1StartLocO);
@@ -251,8 +253,6 @@ uint32 BattleGroundMgr::CreateBattleGround(uint32 bg_ID, uint32 MinPlayersPerTea
         bg->BerserkBonus2 = BerserkBonus2;
     }
 
-    bg->SetID(bg_ID);
-
     AddBattleGround(bg_ID, bg);
     sLog.outDetail("BattleGroundMgr: Created new battleground: %u %s (Map %u, %u players per team, Levels %u-%u)", bg_ID, bg->m_Name, bg->m_MapId, bg->m_MaxPlayersPerTeam, bg->m_LevelMin, bg->m_LevelMax);
     return bg_ID;
@@ -279,7 +279,7 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
     HStartLoc[3] = 2.27452f;    // todo: find correct coords
 
     sLog.outDetail("Creating battleground %s, %u-%u", bl->name, bl->minlvl, bl->maxlvl);
-    CreateBattleGround(bg_ID, bl->minplayers, bl->maxplayers, bl->minlvl, bl->maxlvl, bl->name, bl->mapid1, AStartLoc[0], AStartLoc[1], AStartLoc[2], AStartLoc[3], HStartLoc[0], HStartLoc[1], HStartLoc[2], HStartLoc[3]);
+    CreateBattleGround(bg_ID, bl->maxplayersperteam, bl->minlvl, bl->maxlvl, bl->name, bl->mapid1, AStartLoc[0], AStartLoc[1], AStartLoc[2], AStartLoc[3], HStartLoc[0], HStartLoc[1], HStartLoc[2], HStartLoc[3]);
 
     // Create BG, WSG
     bg_ID = 2;
@@ -295,7 +295,7 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
     HStartLoc[3] = 3.141593f;
 
     sLog.outDetail("Creating battleground %s, %u-%u", bl->name, bl->minlvl, bl->maxlvl);
-    CreateBattleGround(bg_ID, bl->minplayers, bl->maxplayers, bl->minlvl, bl->maxlvl, bl->name, bl->mapid1, AStartLoc[0], AStartLoc[1], AStartLoc[2], AStartLoc[3], HStartLoc[0], HStartLoc[1], HStartLoc[2], HStartLoc[3]);
+    CreateBattleGround(bg_ID, bl->maxplayersperteam, bl->minlvl, bl->maxlvl, bl->name, bl->mapid1, AStartLoc[0], AStartLoc[1], AStartLoc[2], AStartLoc[3], HStartLoc[0], HStartLoc[1], HStartLoc[2], HStartLoc[3]);
 
     // Create BG, AB
     bg_ID = 3;
@@ -311,7 +311,7 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
     HStartLoc[3] = 0.263892f;   // todo: find correct coords
 
     sLog.outDetail("Creating battleground %s, %u-%u", bl->name, bl->minlvl, bl->maxlvl);
-    CreateBattleGround(bg_ID, bl->minplayers, bl->maxplayers, bl->minlvl, bl->maxlvl, bl->name, bl->mapid1, AStartLoc[0], AStartLoc[1], AStartLoc[2], AStartLoc[3], HStartLoc[0], HStartLoc[1], HStartLoc[2], HStartLoc[3]);
+    CreateBattleGround(bg_ID, bl->maxplayersperteam, bl->minlvl, bl->maxlvl, bl->name, bl->mapid1, AStartLoc[0], AStartLoc[1], AStartLoc[2], AStartLoc[3], HStartLoc[0], HStartLoc[1], HStartLoc[2], HStartLoc[3]);
 
     // Create BG, EotS
     bg_ID = 7;
@@ -327,7 +327,7 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
     HStartLoc[3] = 0.263892f;   // todo: find coords
 
     sLog.outDetail("Creating battleground %s, %u-%u", bl->name, bl->minlvl, bl->maxlvl);
-    CreateBattleGround(bg_ID, bl->minplayers, bl->maxplayers, bl->minlvl, bl->maxlvl, bl->name, bl->mapid1, AStartLoc[0], AStartLoc[1], AStartLoc[2], AStartLoc[3], HStartLoc[0], HStartLoc[1], HStartLoc[2], HStartLoc[3]);
+    CreateBattleGround(bg_ID, bl->maxplayersperteam, bl->minlvl, bl->maxlvl, bl->name, bl->mapid1, AStartLoc[0], AStartLoc[1], AStartLoc[2], AStartLoc[3], HStartLoc[0], HStartLoc[1], HStartLoc[2], HStartLoc[3]);
 
     sLog.outDetail("Created initial battlegrounds.");
 }

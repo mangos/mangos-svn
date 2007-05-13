@@ -239,25 +239,35 @@ enum UnitVisibility
 // Value masks for UNIT_FIELD_FLAGS
 enum UnitFlags
 {
-    UNIT_FLAG_NONE           = 0x00000000,
+    UNIT_FLAG_UNKNOWN7       = 0x00000001,
+    UNIT_FLAG_UNKNOWN8       = 0x00000002,                  // not attackable
     UNIT_FLAG_DISABLE_MOVE   = 0x00000004,
-    UNIT_FLAG_UNKNOWN1       = 0x00000008,                  // essential for all units..
-    UNIT_FLAG_RENAME         = 0x00000010,                  // rename creature, not working in 2.0.8
+    UNIT_FLAG_UNKNOWN1       = 0x00000008,                  // for all units, make unit attackable even it's friendly in some cases...
+    UNIT_FLAG_RENAME         = 0x00000010,
     UNIT_FLAG_RESTING        = 0x00000020,
+    UNIT_FLAG_UNKNOWN9       = 0x00000040,
+    UNIT_FLAG_UNKNOWN10      = 0x00000080,
     UNIT_FLAG_UNKNOWN2       = 0x00000100,                  // 2.0.8
-    UNIT_FLAG_UNKNOWN3       = 0x00000800,                  // in combat ?2.0.8
-    UNIT_FLAG_PVP            = 0x00001000,
-    UNIT_FLAG_MOUNT          = 0x00002000,
+    UNIT_FLAG_UNKNOWN11      = 0x00000200,
+    UNIT_FLAG_UNKNOWN12      = 0x00000400,                  // loot animation
+    UNIT_FLAG_UNKNOWN3       = 0x00000800,                  // in combat?, 2.0.8
+    UNIT_FLAG_PVP            = 0x00001000,                  // ok
+    UNIT_FLAG_MOUNT          = 0x00002000,                  // silenced, 2.0.12
     UNIT_FLAG_UNKNOWN4       = 0x00004000,                  // 2.0.8
+    UNIT_FLAG_UNKNOWN13      = 0x00008000,
+    UNIT_FLAG_UNKNOWN14      = 0x00010000,
     UNIT_FLAG_PACIFIED       = 0x00020000,
     UNIT_FLAG_DISABLE_ROTATE = 0x00040000,                  // may be it's stunned flag?
     UNIT_FLAG_IN_COMBAT      = 0x00080000,
+    UNIT_FLAG_UNKNOWN15      = 0x00100000,
     UNIT_FLAG_DISARMED       = 0x00200000,                  // disable melee spells casting..., "Required melee weapon" added to melee spells tooltip.
     UNIT_FLAG_CONFUSED       = 0x00400000,
     UNIT_FLAG_FLEEING        = 0x00800000,
     UNIT_FLAG_UNKNOWN5       = 0x01000000,					// used in spell Eyes of the Beast for pet...
-    UNIT_FLAG_NOT_SELECTABLE = 0x02000000,
+    UNIT_FLAG_NOT_SELECTABLE = 0x02000000,                  // ok
     UNIT_FLAG_SKINNABLE      = 0x04000000,
+    UNIT_FLAG_UNKNOWN16      = 0x08000000,
+    UNIT_FLAG_UNKNOWN17      = 0x10000000,
     UNIT_FLAG_UNKNOWN6       = 0x20000000,                  // used in Feing Death spell
     UNIT_FLAG_SHEATHE        = 0x40000000
 };
