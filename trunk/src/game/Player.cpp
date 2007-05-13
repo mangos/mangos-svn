@@ -5506,11 +5506,8 @@ void Player::_ApplyAmmoBonuses(bool apply)
     switch(weapon_proto->SubClass)
     {
         case ITEM_SUBCLASS_WEAPON_BOW:
-            if(ammo_proto->SubClass!=ITEM_SUBCLASS_ARROW)
-                return;
-            break;
         case ITEM_SUBCLASS_WEAPON_CROSSBOW:
-            if(ammo_proto->SubClass!=ITEM_SUBCLASS_BOLT)
+            if(ammo_proto->SubClass!=ITEM_SUBCLASS_ARROW)
                 return;
             break;
         case ITEM_SUBCLASS_WEAPON_GUN:
