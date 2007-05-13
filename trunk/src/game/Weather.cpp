@@ -207,6 +207,14 @@ void Weather::SendWeatherUpdateToPlayer(Player *player)
     player->GetSession()->SendPacket( &data );
 }
 
+void Weather::SendFineWeatherUpdateToPlayer(Player *player)
+{
+    WorldPacket data( SMSG_WEATHER, (4+4+4) );
+
+    data << (uint32)0 << (float)0.0 << (uint32)WEATHER_NOSOUND << uint8(0);
+    player->GetSession()->SendPacket( &data );
+}
+
 /// Send the new weather to all players in the zone
 bool Weather::UpdateWeather()
 {
