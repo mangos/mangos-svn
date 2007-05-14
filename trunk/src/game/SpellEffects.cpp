@@ -643,7 +643,56 @@ void Spell::EffectDummy(uint32 i)
             ((Player*)m_targets.getUnitTarget())->GetSession()->SendPacket( &data );
         }
     }
-}
+    // Shaman's "Lightning Shield"
+    if(m_spellInfo->Id == 26545)
+    {
+        if(!m_caster) return;
+        if(!unitTarget) return;
+        if(!m_triggeredByAura) return;
+        uint32 spell = 0;
+
+        switch(m_triggeredByAura->GetId())
+        {
+            case   324: spell = 26364; break;               // Rank 1 
+            case   325: spell = 26365; break;               // Rank 2
+            case   905: spell = 26366; break;               // Rank 3
+            case   945: spell = 26367; break;               // Rank 4
+            case  8134: spell = 26369; break;               // Rank 5
+            case 10431: spell = 26370; break;               // Rank 6
+            case 10432: spell = 26363; break;               // Rank 7
+            case 25469: spell = 26371; break;               // Rank 8
+            case 25472: spell = 26372; break;               // Rank 9
+            default:
+                sLog.outError("Spell::EffectDummy: Spell 26545 triggered by unhandled spell %u",m_triggeredByAura->GetId());
+                break;
+        }
+        m_caster->CastSpell(unitTarget, spell, true, NULL);
+    }
+    // Priest's "Shadowguard"
+    if(m_spellInfo->Id == 28376)
+    {
+        if(!m_caster) return;
+        if(!unitTarget) return;
+        if(!m_triggeredByAura) return;
+
+        uint32 spell = 0;
+        switch(m_triggeredByAura->GetId())
+        {
+            case 18137: spell = 28377; break;               // Rank 1
+            case 19308: spell = 28378; break;               // Rank 2
+            case 19309: spell = 28379; break;               // Rank 3
+            case 19310: spell = 28380; break;               // Rank 4
+            case 19311: spell = 28381; break;               // Rank 5
+            case 19312: spell = 28382; break;               // Rank 6
+            case 25477: spell = 28385; break;               // Rank 7
+            default:
+                sLog.outError("Spell::EffectDummy: Spell 28376 triggered by unhandled spell %u",m_triggeredByAura->GetId());
+                break;
+        }
+
+        m_caster->CastSpell(unitTarget, spell, true, NULL);
+    }
+ }
 
 void Spell::EffectTriggerSpell(uint32 i)
 {

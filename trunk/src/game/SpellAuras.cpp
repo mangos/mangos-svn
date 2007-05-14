@@ -1277,10 +1277,10 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                         unit_target->ApplyStats(true);
                         if (m_modifier.m_miscvalue == FORM_CAT)
                             //if Furor procs, player gains 40 energy at shapeshift to cat form
-                            unit_target->CastSpell(unit_target,17099,true,NULL);
+                            unit_target->CastSpell(unit_target,17099,true,NULL,this);
                         else
                             //if Furor procs, player gains 10 rage at shapeshift to bear/direbear form
-                            unit_target->CastSpell(unit_target,17057,true,NULL);
+                            unit_target->CastSpell(unit_target,17057,true,NULL,this);
                         unit_target->ApplyStats(false);
                     }
                     break;
@@ -1962,7 +1962,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
                     return;
 
                 // (not modify stats and then not required ApplyStats call
-                caster->CastSpell(m_target,spellInfo,true,NULL);
+                caster->CastSpell(m_target,spellInfo,true,NULL,this);
                 return;
             }
         }
@@ -1987,7 +1987,7 @@ void Aura::HandleModStealth(bool apply, bool Real)
             if(m_target->GetTypeId()==TYPEID_PLAYER && GetId()==20580)
             {
                 m_target->ApplyStats(true);
-                m_target->CastSpell(m_target, 21009, true);
+                m_target->CastSpell(m_target, 21009, true, NULL, this);
                 m_target->ApplyStats(false);
             }
         }
@@ -2363,12 +2363,12 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool Real)
                         if(GetSpellProto()->Id == 23333)    // Warsong Flag, horde
                                                             // Horde Flag Drop
                                                             // (not modify stats and then not required ApplyStats call)
-                            m_target->CastSpell(m_target, 23334, true, 0);
+                            m_target->CastSpell(m_target, 23334, true, NULL, this);
                     if(bg->IsAllianceFlagPickedup())
                         if(GetSpellProto()->Id == 23335)    // Silverwing Flag, alliance
                                                             // Alliance Flag Drop
                                                             // (not modify stats and then not required ApplyStats call)
-                            m_target->CastSpell(m_target, 23336, true, 0);
+                            m_target->CastSpell(m_target, 23336, true, NULL, this);
                 }
             }
         }
@@ -3420,8 +3420,8 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             m_target->RemoveAurasDueToSpell(m_target->m_ShapeShiftForm);
         }
 
-        if (spellId) m_target->CastSpell(m_target, spellId, true);
-        if (spellId2) m_target->CastSpell(m_target, spellId2, true);
+        if (spellId) m_target->CastSpell(m_target, spellId, true, NULL, this );
+        if (spellId2) m_target->CastSpell(m_target, spellId2, true, NULL, this);
 
         if(m_target->GetTypeId() == TYPEID_PLAYER)
         {
@@ -3433,7 +3433,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
                 SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
                 if (!spellInfo || !IsPassiveSpell(itr->first)) continue;
                 if (spellInfo->Stances & (1<<form))
-                    m_target->CastSpell(m_target, itr->first, true);
+                    m_target->CastSpell(m_target, itr->first, true, NULL, this);
             }
         }
     }
