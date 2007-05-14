@@ -2808,7 +2808,7 @@ bool ObjectMgr::IsProfessionSpell(uint32 spellId)
 
     uint32 skill = spellInfo->EffectMiscValue[1];
 
-    return IsPrimaryProfessionSkill(skill);
+    return IsProfessionSkill(skill);
 }
 
 void ObjectMgr::LoadReputationOnKill()

@@ -458,13 +458,10 @@ struct Hostil
 
     uint64 UnitGuid;
     float Threat;
-    bool operator <(Hostil item)
+    bool operator < (Hostil const& item) const
     {
-        if(Threat < item.Threat)
-            return true;
-        else
-            return false;
-    };
+        return (Threat < item.Threat);
+    }
 };
 
 typedef std::list<Hostil> ThreatList;
