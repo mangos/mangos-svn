@@ -628,7 +628,7 @@ SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
     DEBUG_LOG("DealDamageEnd");
 }
 
-void Unit::CastSpell(Unit* Victim, uint32 spellId, bool triggered, Item *castItem)
+void Unit::CastSpell(Unit* Victim, uint32 spellId, bool triggered, Item *castItem, Aura* triggredByAura)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId );
 
@@ -638,10 +638,10 @@ void Unit::CastSpell(Unit* Victim, uint32 spellId, bool triggered, Item *castIte
         return;
     }
 
-    CastSpell(Victim,spellInfo,triggered,castItem);
+    CastSpell(Victim,spellInfo,triggered,castItem,triggredByAura);
 }
 
-void Unit::CastSpell(Unit* Victim,SpellEntry const *spellInfo, bool triggered, Item *castItem)
+void Unit::CastSpell(Unit* Victim,SpellEntry const *spellInfo, bool triggered, Item *castItem, Aura* triggredByAura)
 {
     if(!spellInfo)
     {
@@ -652,7 +652,7 @@ void Unit::CastSpell(Unit* Victim,SpellEntry const *spellInfo, bool triggered, I
     if (castItem)
         DEBUG_LOG("WORLD: cast Item spellId - %i", spellInfo->Id);
 
-    Spell *spell = new Spell(this, spellInfo, triggered, 0);
+    Spell *spell = new Spell(this, spellInfo, triggered, triggredByAura);
 
     SpellCastTargets targets;
     targets.setUnitTarget( Victim );
@@ -3286,7 +3286,17 @@ void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit *target, uint8 SwingType, 
     SendMessageToSet( &data, true );
 }
 
-typedef std::list< std::pair<SpellEntry const *,uint32> > ProcTriggeredList;
+struct ProcTriggeredData
+{
+    ProcTriggeredData(SpellEntry const * _spellInfo, uint32 _spellParam, Aura* _triggeredByAura)
+        : spellInfo(_spellInfo), spellParam(_spellParam), triggeredByAura(_triggeredByAura) {}
+
+    SpellEntry const * spellInfo;
+    uint32 spellParam;
+    Aura* triggeredByAura;
+};
+
+typedef std::list< ProcTriggeredData > ProcTriggeredList;
 
 void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVictim, uint32 damage, SpellEntry const *procSpell, bool isTriggeredSpell, WeaponAttackType attType)
 {
@@ -3420,38 +3430,38 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                         i_spell_param = i_spell_eff;
 
                     if(spellProto)
-                        procTriggered.push_back( std::pair<SpellEntry const*,uint32>(spellProto,i_spell_param) );
+                        procTriggered.push_back( ProcTriggeredData(spellProto,i_spell_param,*i) );
                 }
             }
 
-            // Handle effects proced this time
+            // Handle effects proceed this time
             for(ProcTriggeredList::iterator i = procTriggered.begin(); i != procTriggered.end(); i++)
             {
                 if(*aur == SPELL_AURA_PROC_TRIGGER_SPELL)
                 {
-                    sLog.outDebug("ProcDamageAndSpell: casting triggered by an attacker spell %u", i->first->Id);
-                    if(IsPositiveSpell(i->first->Id) && !(i->second & PROC_FLAG_HEAL))
-                        CastSpell(this,i->first->Id,true);
+                    sLog.outDebug("ProcDamageAndSpell: casting spell %u (triggered by an attacker's aura of spell %u)", i->spellInfo->Id,i->triggeredByAura->GetId());
+                    if(IsPositiveSpell(i->spellInfo->Id) && !(i->spellParam & PROC_FLAG_HEAL))
+                        CastSpell(this,i->spellInfo->Id,true,NULL,i->triggeredByAura);
                     else if(pVictim && pVictim->isAlive())
-                        CastSpell(pVictim,i->first->Id,true);
+                        CastSpell(pVictim,i->spellInfo->Id,true,NULL,i->triggeredByAura);
                 }
                 else if(*aur == SPELL_AURA_PROC_TRIGGER_DAMAGE)
                 {
-                    sLog.outDebug("ProcDamageAndSpell: doing %u damage from aura id %u (triggered by an attacker)", i->second, i->first->Id);
-                    uint32 damage = i->second;
+                    sLog.outDebug("ProcDamageAndSpell: doing %u damage from spell id %u (triggered by an attacker's aura of spell %u)", i->spellParam, i->spellInfo->Id,i->triggeredByAura->GetId());
+                    uint32 damage = i->spellParam;
                     // TODO: remove hack for Seal of Righteousness. That should not be there
-                    if(i->first->SpellVisual == 7986)
+                    if(i->spellInfo->SpellVisual == 7986)
                         damage = (damage * GetAttackTime(BASE_ATTACK))/60/1000;
                     if(pVictim && pVictim->isAlive())
-                        SpellNonMeleeDamageLog(pVictim, i->first->Id, damage, true);
+                        SpellNonMeleeDamageLog(pVictim, i->spellInfo->Id, damage, true);
                 }
                 else if(*aur == SPELL_AURA_DUMMY)
                 {
                     // TODO: write a DUMMY aura handle code
                     if (pVictim && pVictim->isAlive())
                     {
-                        sLog.outDebug("ProcDamageAndSpell: aura id %u with dummy effect (triggered by an attacker)", (*i).first->Id);
-                        HandleDummyAuraProc(pVictim, i->first, i->second, damage);
+                        sLog.outDebug("ProcDamageAndSpell: casting spell id %u (triggered by an attacker dummy aura of spell %u)", i->spellInfo->Id,i->triggeredByAura->GetId());
+                        HandleDummyAuraProc(pVictim, i->spellInfo, i->spellParam, damage, i->triggeredByAura);
                     }
                 }
             }
@@ -3473,12 +3483,12 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
     // Not much to do if no flags are set or there is no victim
     if(pVictim && pVictim->isAlive() && procVictim)
     {
-        // additinal auraTypes contains auras capable of proc'ing for victim
+        // additional auraTypes contains auras capable of proc'ing for victim
         auraTypes.push_back(SPELL_AURA_MOD_PARRY_PERCENT);
 
         for(std::list<uint32>::iterator aur = auraTypes.begin(); aur != auraTypes.end(); aur++)
         {
-            // List of spells (effects) that proced. Spell prototype and aura-specific value (damage for TRIGGER_DAMAGE)
+            // List of spells (effects) that proceed. Spell prototype and aura-specific value (damage for TRIGGER_DAMAGE)
             ProcTriggeredList procTriggered;
 
             AuraList& victimAuras = pVictim->GetAurasByType(*aur);
@@ -3513,7 +3523,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                         i_spell_param = i_spell_eff;
 
                     if(spellProto)
-                        procTriggered.push_back( std::pair<SpellEntry const*,uint32>(spellProto,i_spell_param) );
+                        procTriggered.push_back( ProcTriggeredData(spellProto,i_spell_param,*i) );
                 }
             }
 
@@ -3522,22 +3532,22 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
             {
                 if(*aur == SPELL_AURA_PROC_TRIGGER_SPELL)
                 {
-                    sLog.outDebug("ProcDamageAndSpell: casting triggered by a victim spell %u", i->first->Id);
-                    if(IsPositiveSpell(i->first->Id) && !(i->second&PROC_FLAG_HEAL))
-                        pVictim->CastSpell(pVictim,i->first->Id,true);
+                    sLog.outDebug("ProcDamageAndSpell: casting spell %u (triggered by a victim's aura of spell %u))",i->spellInfo->Id, i->triggeredByAura);
+                    if(IsPositiveSpell(i->spellInfo->Id) && !(i->spellParam&PROC_FLAG_HEAL))
+                        pVictim->CastSpell(pVictim,i->spellInfo->Id,true,NULL,i->triggeredByAura);
                     else
-                        pVictim->CastSpell(this,i->first->Id,true);
+                        pVictim->CastSpell(this,i->spellInfo->Id,true,NULL,i->triggeredByAura);
                 }
                 else if(*aur == SPELL_AURA_PROC_TRIGGER_DAMAGE)
                 {
-                    sLog.outDebug("ProcDamageAndSpell: doing %u damage from aura id %u (triggered by a victim)", i->second, i->first->Id);
-                    pVictim->SpellNonMeleeDamageLog(this, i->first->Id, i->second, true);
+                    sLog.outDebug("ProcDamageAndSpell: doing %u damage from spell id %u (triggered by a victim's aura of spell %u))", i->spellParam, i->spellInfo->Id, i->triggeredByAura);
+                    pVictim->SpellNonMeleeDamageLog(this, i->spellInfo->Id, i->spellParam, true);
                 }
                 else if(*aur == SPELL_AURA_DUMMY)
                 {
                     // TODO: write a DUMMY aura handle code
-                    sLog.outDebug("ProcDamageAndSpell: aura id %u with dummy effect (triggered by a victim)", i->first->Id);
-                    pVictim->HandleDummyAuraProc(this, i->first, i->second, damage);
+                    sLog.outDebug("ProcDamageAndSpell: casting spell %u (triggered by a victim's dummy aura of spell %u))",i->spellInfo->Id, i->triggeredByAura);
+                    pVictim->HandleDummyAuraProc(this, i->spellInfo, i->spellParam, damage, i->triggeredByAura);
                 }
             }
 
@@ -3623,7 +3633,7 @@ void Unit::CastMeleeProcDamageAndSpell(Unit* pVictim, uint32 damage, WeaponAttac
     ProcDamageAndSpell(pVictim, procAttacker, procVictim, damage, spellCasted, isTriggeredSpell, attType);
 }
 
-void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint32 effIndex, uint32 damage)
+void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint32 effIndex, uint32 damage, Aura* triggredByAura)
 {
     // Example. Ignite. Though it looks like hack, it isn't )
     if(dummySpell->Id == 11119 || dummySpell->Id == 11120 || dummySpell->Id == 12846 || dummySpell->Id == 12847 || dummySpell->Id == 12848)
@@ -3644,7 +3654,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             case 12848:
                 igniteDot.EffectBasePoints[0]=uint32(0.20f*damage);break;
         };
-        CastSpell(pVictim, &igniteDot, true, NULL);
+        CastSpell(pVictim, &igniteDot, true, NULL, triggredByAura);
     }
 }
 
