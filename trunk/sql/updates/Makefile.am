@@ -570,4 +570,9 @@ EXTRA_DIST = \
 	3605_creature_addon.sql \
 	3605_grid.sql \
 	3611_spell_learn_skill.sql \
+	3616_commands.sql \
+	3627_quest_template.sql \
+	3631_gameobject_template.sql \
+	3636_character_spell.sql \
+	3636_playercreateinfo_spell.sql \
 	README
