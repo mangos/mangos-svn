@@ -628,7 +628,7 @@ SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
     DEBUG_LOG("DealDamageEnd");
 }
 
-void Unit::CastSpell(Unit* Victim, uint32 spellId, bool triggered, Item *castItem, Aura* triggredByAura)
+void Unit::CastSpell(Unit* Victim, uint32 spellId, bool triggered, Item *castItem, Aura* triggredByAura, uint64 originalCaster)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId );
 
@@ -638,10 +638,10 @@ void Unit::CastSpell(Unit* Victim, uint32 spellId, bool triggered, Item *castIte
         return;
     }
 
-    CastSpell(Victim,spellInfo,triggered,castItem,triggredByAura);
+    CastSpell(Victim,spellInfo,triggered,castItem,triggredByAura, originalCaster);
 }
 
-void Unit::CastSpell(Unit* Victim,SpellEntry const *spellInfo, bool triggered, Item *castItem, Aura* triggredByAura)
+void Unit::CastSpell(Unit* Victim,SpellEntry const *spellInfo, bool triggered, Item *castItem, Aura* triggredByAura, uint64 originalCaster)
 {
     if(!spellInfo)
     {
@@ -652,7 +652,7 @@ void Unit::CastSpell(Unit* Victim,SpellEntry const *spellInfo, bool triggered, I
     if (castItem)
         DEBUG_LOG("WORLD: cast Item spellId - %i", spellInfo->Id);
 
-    Spell *spell = new Spell(this, spellInfo, triggered, triggredByAura);
+    Spell *spell = new Spell(this, spellInfo, triggered, triggredByAura,originalCaster);
 
     SpellCastTargets targets;
     targets.setUnitTarget( Victim );

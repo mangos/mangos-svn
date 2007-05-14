@@ -196,7 +196,7 @@ void SpellCastTargets::write ( WorldPacket * data, bool forceAppend)
         *data << (uint8)0;
 }
 
-Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur )
+Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur, uint64 originalCasterGUID )
 {
     ASSERT( Caster != NULL && info != NULL );
 
@@ -214,6 +214,13 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur )
         m_spellInfo = info;
 
     m_caster = Caster;
+
+    if(originalCasterGUID)
+        m_originalCasterGUID = originalCasterGUID;
+    else if(Aur)
+        m_originalCasterGUID = Aur->GetCasterGUID();
+    else
+        m_originalCasterGUID = m_caster->GetGUID();
 
     m_spellState = SPELL_STATE_NULL;
 
@@ -474,20 +481,24 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
                 cell.data.Part.reserved = ALL_DISTRICT;
                 cell.SetNoCreate();
 
-                MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(pUnitTarget, m_caster, radius ? radius : 5);
-                MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(TagUnitMap, u_check);
+                Unit* originalCaster = GetOriginalCaster();
+                if(originalCaster)
+                {
+                    MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(pUnitTarget, originalCaster, radius ? radius : 5);
+                    MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(TagUnitMap, u_check);
 
-                TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
-                TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
+                    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
+                    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
 
-                CellLock<GridReadGuard> cell_lock(cell, p);
-                cell_lock->Visit(cell_lock, world_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
-                cell_lock->Visit(cell_lock, grid_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+                    CellLock<GridReadGuard> cell_lock(cell, p);
+                    cell_lock->Visit(cell_lock, world_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+                    cell_lock->Visit(cell_lock, grid_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
 
-                // sort TagUnitMap  and then cut down to size
-                TagUnitMap.sort(TargetDistanceOrder(pUnitTarget));
-                if (TagUnitMap.size() > unMaxTargets)
-                    TagUnitMap.resize(unMaxTargets);
+                    // sort TagUnitMap  and then cut down to size
+                    TagUnitMap.sort(TargetDistanceOrder(pUnitTarget));
+                    if (TagUnitMap.size() > unMaxTargets)
+                        TagUnitMap.resize(unMaxTargets);
+                }
             }
         }break;
         case TARGET_ALL_ENEMY_IN_AREA:
@@ -627,7 +638,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_MINION:
         {
-            if(m_spellInfo->Effect[i] != 83) TagUnitMap.push_back(m_caster); // TODO: replace this const
+            if(m_spellInfo->Effect[i] != SPELL_EFFECT_DUEL) TagUnitMap.push_back(m_caster);
         }break;
         case TARGET_SINGLE_PARTY:
         {
@@ -2800,3 +2811,12 @@ void Spell::reflect(Unit *refunit)
         spell.prepare(&targets);
     }
 }
+
+Unit* Spell::GetOriginalCaster()
+{
+    if(m_originalCasterGUID==m_caster->GetGUID())
+        return m_caster;
+
+    return ObjectAccessor::Instance().GetUnit(*m_caster,m_originalCasterGUID);
+}
+

@@ -1456,9 +1456,9 @@ bool Creature::IsVisibleInGridForPlayer(Player* pl) const
 
 void Creature::CallAssistence()
 {
-    if (!m_AlreadyCallAssistence)
+    if( !m_AlreadyCallAssistence && getVictim() )
     {
-        CastSpell(this,SPELL_ID_AGGRO, true);
+        CastSpell(this,SPELL_ID_AGGRO, true, NULL, NULL, getVictim()->GetGUID());
     }
 }
 
