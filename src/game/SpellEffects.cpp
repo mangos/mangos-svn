@@ -237,6 +237,22 @@ void Spell::EffectDummy(uint32 i)
         return;
 
     // More spell specific code in beginning
+    if(m_spellInfo->Id == 5420)                             // Tree of Life passive
+    {
+
+        // Tree of Life area effect
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry( 34123 );
+
+        if(!spellInfo)
+            return;
+
+        int32 health_mod = int32(m_caster->GetStat(STAT_SPIRIT)/4);
+        SpellEntry customSpellInfo = *spellInfo;
+        customSpellInfo.EffectBasePoints[0] = health_mod-1;
+        m_caster->CastSpell(m_caster,&customSpellInfo,true,NULL);
+        return;
+    }
+
     if(m_spellInfo->Id == 13535)
     {
         SpellEntry const* spellInfo = sSpellStore.LookupEntry( 13481 );
@@ -287,14 +303,14 @@ void Spell::EffectDummy(uint32 i)
     // Gift of Life (warrior bwl trinket)
     if(m_spellInfo->Id == 23725)
     {
-        uint32 health_mod = uint32(m_caster->GetMaxHealth()*0.15);
+        int32 health_mod = int32(m_caster->GetMaxHealth()*0.15);
 
         SpellEntry const *OriginalHealthModSpell = sSpellStore.LookupEntry(23782);
         SpellEntry CustomHealthModSpell = *OriginalHealthModSpell;
         SpellEntry const *OriginalHealingSpell = sSpellStore.LookupEntry(23783);
         SpellEntry CustomHealingSpell = *OriginalHealingSpell;
-        CustomHealthModSpell.EffectBasePoints[0] = health_mod;
-        CustomHealingSpell.EffectBasePoints[0] = health_mod;
+        CustomHealthModSpell.EffectBasePoints[0] = health_mod-1;
+        CustomHealingSpell.EffectBasePoints[0] = health_mod-1;
         m_caster->CastSpell(m_caster,&CustomHealthModSpell,true,NULL);
         m_caster->CastSpell(m_caster,&CustomHealingSpell,true,NULL);
         return;
@@ -497,7 +513,7 @@ void Spell::EffectDummy(uint32 i)
     if (m_spellInfo->SpellIconID == 1661)
     {
         uint32 healthPerc = uint32((float(m_caster->GetHealth())/m_caster->GetMaxHealth())*100);
-        uint32 melee_mod = 10;
+        int32 melee_mod = 10;
         if (healthPerc <= 40)
             melee_mod = 30;
         if (healthPerc < 100 && healthPerc > 40)
@@ -544,11 +560,11 @@ void Spell::EffectDummy(uint32 i)
 
     if(m_spellInfo->SpellIconID == 1648)
     {
-        int32 dmg = damage-1;
+        int32 dmg = damage;
         dmg += int32(m_caster->GetPower(POWER_RAGE) * m_spellInfo->DmgMultiplier[i]);
         SpellEntry const *tspellInfo = sSpellStore.LookupEntry(20647);
         SpellEntry sInfo = *tspellInfo;
-        sInfo.EffectBasePoints[0] = dmg;
+        sInfo.EffectBasePoints[0] = dmg-1;
         m_caster->CastSpell(unitTarget, &sInfo, true, 0);
         m_caster->SetPower(POWER_RAGE,0);
     }

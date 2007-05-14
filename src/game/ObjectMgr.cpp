@@ -2768,8 +2768,10 @@ bool ObjectMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2)
         bool isModifier = false;
         for (int i = 0; i < 3; i++)
         {
-            if (spellInfo_1->EffectApplyAuraName[i] == 107 || spellInfo_1->EffectApplyAuraName[i] == 108 ||
-                spellInfo_2->EffectApplyAuraName[i] == 107 || spellInfo_2->EffectApplyAuraName[i] == 108)
+            if (spellInfo_1->EffectApplyAuraName[i] == SPELL_AURA_ADD_FLAT_MODIFIER || 
+                spellInfo_1->EffectApplyAuraName[i] == SPELL_AURA_ADD_PCT_MODIFIER  ||
+                spellInfo_2->EffectApplyAuraName[i] == SPELL_AURA_ADD_FLAT_MODIFIER || 
+                spellInfo_2->EffectApplyAuraName[i] == SPELL_AURA_ADD_PCT_MODIFIER )
                 isModifier = true;
         }
         if (!isModifier)
