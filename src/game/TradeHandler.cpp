@@ -75,21 +75,33 @@ void WorldSession::HandleBusyTradeOpcode(WorldPacket& recvPacket)
 
 void WorldSession::SendUpdateTrade()
 {
-    Player *pThis =_player;
     Item *item = NULL;
 
-    if( !pThis->pTrader ) return;
+    if( !_player->pTrader ) return;
+
+    // reset trade status
+    if (_player->acceptTrade)
+    {
+        _player->acceptTrade = false;
+        SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
+    }
+
+    if (_player->pTrader->acceptTrade)
+    {
+        _player->pTrader->acceptTrade = false;
+        _player->pTrader->GetSession()->SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
+    }
 
     WorldPacket data(SMSG_TRADE_STATUS_EXTENDED, (100));                            // guess size
     data << (uint8 ) 1;                                                             // can be different (only seen 0 and 1)
     data << (uint32) 7;                                                             // trade slots count/number?, = next field in most cases
     data << (uint32) 7;                                                             // trade slots count/number?, = prev field in most cases
-    data << (uint32) pThis->pTrader->tradeGold;                                     // trader gold
+    data << (uint32) _player->pTrader->tradeGold;                                     // trader gold
     data << (uint32) 0;                                                             // unknown
 
     for(uint8 i = 0; i < TRADE_SLOT_COUNT; i++)
     {
-        item = (pThis->pTrader->tradeItems[i] != NULL_SLOT ? pThis->pTrader->GetItemByPos( pThis->pTrader->tradeItems[i] ) : NULL);
+        item = (_player->pTrader->tradeItems[i] != NULL_SLOT ? _player->pTrader->GetItemByPos( _player->pTrader->tradeItems[i] ) : NULL);
 
         data << (uint8) i;                                                          // trade slot number, if not specified, then end of packet
 
@@ -445,21 +457,6 @@ void WorldSession::HandleSetTradeItemOpcode(WorldPacket& recvPacket)
 
     if(!_player->pTrader)
         return;
-
-
-    // reset trade status
-    if (_player->acceptTrade)
-    {
-        _player->acceptTrade = false;
-        SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
-    }
-
-    if (_player->pTrader->acceptTrade)
-    {
-        _player->pTrader->acceptTrade = false;
-        _player->pTrader->GetSession()->SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
-    }
-
 
     // send update
     uint8 tradeSlot;
