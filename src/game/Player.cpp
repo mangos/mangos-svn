@@ -2804,10 +2804,7 @@ bool Player::CanLearnProSpell(uint32 spell)
     uint32 skill = spellInfo->EffectMiscValue[1];
     uint32 value = 0;
 
-    if( skill != SKILL_HERBALISM && skill != SKILL_MINING && skill != SKILL_LEATHERWORKING
-        && skill != SKILL_BLACKSMITHING && skill != SKILL_ALCHEMY && skill != SKILL_ENCHANTING
-        && skill != SKILL_TAILORING && skill != SKILL_ENGINERING && skill != SKILL_SKINNING
-        && skill != SKILL_JEWELCRAFTING)
+    if( !IsPrimaryProfessionSkill(skill))
         return true;
 
     for (PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
@@ -2819,10 +2816,7 @@ bool Player::CanLearnProSpell(uint32 spell)
         if(pSpellInfo->Effect[1] == SPELL_EFFECT_SKILL)
         {
             uint32 pskill = pSpellInfo->EffectMiscValue[1];
-            if( pskill != SKILL_HERBALISM && pskill != SKILL_MINING && pskill != SKILL_LEATHERWORKING
-                && pskill != SKILL_BLACKSMITHING && pskill != SKILL_ALCHEMY && pskill != SKILL_ENCHANTING
-                && pskill != SKILL_TAILORING && pskill != SKILL_ENGINERING && pskill != SKILL_SKINNING
-                && pskill != SKILL_JEWELCRAFTING)
+            if( !IsPrimaryProfessionSkill(pskill))
                 continue;
 
             // not check prof count for not first prof. spells (when skill already known)
@@ -3799,11 +3793,7 @@ void Player::UpdateMaxSkills()
         if (GetUInt32Value(PLAYER_SKILL(i)))
     {
         uint32 pskill = GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF;
-        if(pskill == SKILL_HERBALISM || pskill == SKILL_MINING || pskill ==SKILL_FISHING
-            || pskill == SKILL_FIRST_AID || pskill == SKILL_COOKING || pskill == SKILL_LEATHERWORKING
-            || pskill == SKILL_BLACKSMITHING || pskill == SKILL_ALCHEMY || pskill == SKILL_ENCHANTING
-            || pskill == SKILL_TAILORING || pskill == SKILL_ENGINERING || pskill == SKILL_SKINNING
-            || pskill == SKILL_RIDING || pskill == SKILL_JEWELCRAFTING)
+        if( IsProfessionSkill(pskill) || pskill == SKILL_RIDING )
             continue;
         uint32 data = GetUInt32Value(PLAYER_SKILL(i)+1);
         uint32 max = data>>16;
@@ -3823,11 +3813,7 @@ void Player::UpdateSkillsToMaxSkillsForLevel()
         if (GetUInt32Value(PLAYER_SKILL(i)))
     {
         uint32 pskill = GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF;
-        if(pskill == SKILL_HERBALISM || pskill == SKILL_MINING || pskill ==SKILL_FISHING
-            || pskill == SKILL_FIRST_AID || pskill == SKILL_COOKING || pskill == SKILL_LEATHERWORKING
-            || pskill == SKILL_BLACKSMITHING || pskill == SKILL_ALCHEMY || pskill == SKILL_ENCHANTING
-            || pskill == SKILL_TAILORING || pskill == SKILL_ENGINERING || pskill == SKILL_SKINNING
-            || pskill == SKILL_RIDING || pskill == SKILL_JEWELCRAFTING)
+        if( IsProfessionSkill(pskill) || pskill == SKILL_RIDING )
             continue;
         uint32 data = GetUInt32Value(PLAYER_SKILL(i)+1);
 
