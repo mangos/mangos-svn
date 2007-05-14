@@ -139,7 +139,7 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
 
     WorldPacket data( SMSG_TRAINER_LIST, 200 );             // guess size
     data << guid;
-    data << uint32(0) << uint32(Tspells.size());
+    data << uint32(ci->trainer_type) << uint32(Tspells.size());
 
     for (itr = Tspells.begin(); itr != Tspells.end();itr++)
     {
@@ -185,7 +185,7 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
         data << uint8(canlearnflag);
         data << uint32((*itr)->spellcost);
         data << uint32(0);
-        data << uint32(0);
+        data << uint32(ObjectMgr::IsProfessionSpell((*itr)->spell->Id) ? 1 : 0);
         data << uint8(spellLevel);
         data << uint32((*itr)->reqskill);
         data << uint32((*itr)->reqskillvalue);

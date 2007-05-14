@@ -1155,6 +1155,19 @@ enum SkillType
     SKILL_PET_SERPENT              = 768
 };
 
+inline bool IsPrimaryProfessionSkill(uint32 skill)
+{
+    return  skill == SKILL_HERBALISM     || skill == SKILL_MINING     || skill == SKILL_LEATHERWORKING ||
+            skill == SKILL_BLACKSMITHING || skill == SKILL_ALCHEMY    || skill == SKILL_ENCHANTING     ||
+            skill == SKILL_TAILORING     || skill != SKILL_ENGINERING || skill != SKILL_SKINNING       ||
+            skill == SKILL_JEWELCRAFTING;
+}
+
+inline bool IsProfessionSkill(uint32 skill)
+{
+    return  IsPrimaryProfessionSkill(skill) || skill == SKILL_FISHING || skill == SKILL_COOKING || skill == SKILL_FIRST_AID;
+}
+
 enum TotemCategory
 {
     TC_SKINNING_SKIFE              = 1,
