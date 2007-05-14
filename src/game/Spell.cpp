@@ -222,6 +222,11 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur, u
     else
         m_originalCasterGUID = m_caster->GetGUID();
 
+    if(m_originalCasterGUID==m_caster->GetGUID())
+        m_originalCaster = m_caster;
+    else
+        m_originalCaster = ObjectAccessor::Instance().GetUnit(*m_caster,m_originalCasterGUID);
+
     m_spellState = SPELL_STATE_NULL;
 
     m_castPositionX = m_castPositionY = m_castPositionZ = 0;
@@ -858,8 +863,8 @@ void Spell::cast(bool skipCheck)
     uint32 mana = 0;
     uint8 castResult = 0;
 
-    // update targets pointers base at GUIDs to prevent access to non-existed already object
-    m_targets.Update(m_caster);
+    // update pointers base at GUIDs to prevent access to non-existed already object
+    UpdatePointers();
 
     // cancel at lost main target unit
     if(!m_targets.getUnitTarget() && m_targets.getUnitTargetGUID() && m_targets.getUnitTargetGUID() != m_caster->GetGUID())
@@ -1170,8 +1175,8 @@ void Spell::SendSpellCooldown()
 
 void Spell::update(uint32 difftime)
 {
-    // update target object based at it's GUIDs
-    m_targets.Update(m_caster);
+    // update pointers based at it's GUIDs
+    UpdatePointers();
 
     if(m_targets.getUnitTargetGUID())
     {
@@ -2812,11 +2817,13 @@ void Spell::reflect(Unit *refunit)
     }
 }
 
-Unit* Spell::GetOriginalCaster()
+void Spell::UpdatePointers()
 {
     if(m_originalCasterGUID==m_caster->GetGUID())
-        return m_caster;
+        m_originalCaster = m_caster;
+    else
+        m_originalCaster = ObjectAccessor::Instance().GetUnit(*m_caster,m_originalCasterGUID);
 
-    return ObjectAccessor::Instance().GetUnit(*m_caster,m_originalCasterGUID);
+    m_targets.Update(m_caster);
 }
 

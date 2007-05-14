@@ -546,12 +546,17 @@ class Spell
         bool IsChanneledSpell() const { return m_spellInfo->ChannelInterruptFlags != 0; }
         bool IsChannelActive() const { return m_caster->GetUInt32Value(UNIT_CHANNEL_SPELL) != 0; }
         bool IsMeleeAttackResetSpell() const { return !m_IsTriggeredSpell && (m_spellInfo->School != 0) && !(m_spellInfo->Attributes == 327680 && m_spellInfo->AttributesEx2 ==0); }
+
+        Unit* GetOriginalCaster() { return m_originalCaster; }
+
+        void UpdatePointers();                              // must be used at call Spell code after time delay (non triggered spell cast/update spell call/etc)
     protected:
 
         Unit* m_caster;
+
         uint64 m_originalCasterGUID;                        // real source of cast (aura caster/etc), used for spell targets selection
                                                             // e.g. damage around area spell trigered by victim aura and da,age emeies of aura caster
-        Unit* GetOriginalCaster();
+        Unit* m_originalCaster;                             // cached pointer for m_originalCaster, updated at Spell::UpdatePointers()
 
         bool m_autoRepeat;
         bool m_meleeSpell;
