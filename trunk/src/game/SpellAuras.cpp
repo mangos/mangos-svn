@@ -163,10 +163,10 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNoImmediateEffect,                         //112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS
     &Aura::HandleNoImmediateEffect,                         //113 SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN
     &Aura::HandleNoImmediateEffect,                         //114 SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN_PCT
-    &Aura::HandleNULL,                                      //115 SPELL_AURA_MOD_HEALING
+    &Aura::HandleNoImmediateEffect,                         //115 SPELL_AURA_MOD_HEALING
     &Aura::HandleNULL,                                      //116 SPELL_AURA_IGNORE_REGEN_INTERRUPT
     &Aura::HandleNULL,                                      //117 SPELL_AURA_MOD_MECHANIC_RESISTANCE
-    &Aura::HandleModHealingPercent,                         //118 SPELL_AURA_MOD_HEALING_PCT
+    &Aura::HandleNoImmediateEffect,                         //118 SPELL_AURA_MOD_HEALING_PCT
     &Aura::HandleNULL,                                      //119 SPELL_AURA_SHARE_PET_TRACKING useless
     &Aura::HandleAuraUntrackable,                           //120 SPELL_AURA_UNTRACKABLE
     &Aura::HandleAuraEmpathy,                               //121 SPELL_AURA_EMPATHY
@@ -273,7 +273,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
 
 Aura::Aura(SpellEntry const* spellproto, uint32 eff, Unit *target, Unit *caster, Item* castItem) :
 m_spellId(spellproto->Id), m_effIndex(eff), m_caster_guid(0), m_target(target),
-m_timeCla(1000), m_castItem(castItem), m_auraSlot(0),m_positive(false), m_permanent(false),
+m_timeCla(1000), m_castItem(castItem), m_auraSlot(MAX_AURAS),m_positive(false), m_permanent(false),
 m_isPeriodic(false), m_isTrigger(false), m_periodicTimer(0), m_PeriodicEventId(0),
 m_procCharges(0), m_absorbDmg(0), m_isPersistent(false), m_removeOnDeath(false),
 m_isAreaAura(false)
@@ -564,6 +564,17 @@ void AreaAura::Update(uint32 diff)
     }
 
     Aura::Update(diff);
+
+    if(m_caster_guid != m_target->GetGUID())                // aura at non-caster
+    {
+        Unit* caster = GetCaster();
+
+        float radius =  GetRadius(sSpellRadiusStore.LookupEntry(GetSpellProto()->EffectRadiusIndex[m_effIndex]));
+
+        // remove aura if out-of-range from caster (after teleport for example)
+        if(!caster || !caster->IsWithinDistInMap(m_target, radius) )
+            m_target->RemoveAura(m_spellId, m_effIndex);
+    }
 }
 
 void PersistentAreaAura::Update(uint32 diff)
@@ -606,7 +617,11 @@ void Aura::UpdateAuraDuration()
 {
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
+
     if(m_isPassive)
+        return;
+
+    if(m_auraSlot >= MAX_AURAS)
         return;
 
     WorldPacket data(SMSG_UPDATE_AURA_DURATION, 5);
@@ -682,15 +697,19 @@ void Aura::_AddAura()
                 }
             }
 
-            m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURA + slot), GetId());
+            if(slot < MAX_AURAS)
+            {
+                m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURA + slot), GetId());
 
-            uint8 flagslot = slot >> 3;
-            uint32 value = m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot));
+                uint8 flagslot = slot >> 3;
+                uint32 value = m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot));
 
-            uint8 value1 = (slot & 7) << 2;
-            value |= ((uint32)AFLAG_SET << value1);
+                uint8 value1 = (slot & 7) << 2;
+                value |= ((uint32)AFLAG_SET << value1);
 
-            m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot), value);
+                m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot), value);
+            }
+
         }
         else
             UpdateSlotCounter(slot,true);
@@ -720,9 +739,11 @@ void Aura::_RemoveAura()
         if (dynObj)
             dynObj->RemoveAffected(m_target);
     }
-                                                            //passive auras do not get put in slots
-    if(m_isPassive && !(caster && caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->isTotem()))
-        return;
+
+    //passive auras do not get put in slots
+    // Note: but totem can be not accessible for aura target in time remove (to far for find in grid)
+    //if(m_isPassive && !(caster && caster->GetTypeId() == TYPEID_UNIT && ((Creature*)caster)->isTotem()))
+    //    return;
 
     uint8 slot = GetAuraSlot();
 
@@ -3370,7 +3391,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             spellId = 3025;
             break;
         case FORM_TREE:
-            spellId = 3122;
+            spellId = 5420;
             break;
         case FORM_TRAVEL:
             spellId = 5419;
@@ -3454,11 +3475,6 @@ void Aura::HandleShapeshiftBoosts(bool apply)
 
     double healthPercentage = (double)m_target->GetHealth() / (double)m_target->GetMaxHealth();
     m_target->SetHealth(uint32(ceil((double)m_target->GetMaxHealth() * healthPercentage)));
-}
-
-void Aura::HandleModHealingPercent(bool apply, bool Real)
-{
-    // implemented in Unit::SpellHealingBonus
 }
 
 void Aura::HandleAuraEmpathy(bool apply, bool Real)

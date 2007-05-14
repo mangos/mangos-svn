@@ -2241,10 +2241,10 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
     if (IsPassiveSpell(spell_id) || GetTalentSpellCost(spell_id) != 0 && objmgr.IsSpellLearnSpell(spell_id))
     {
         // if spell doesn't require a stance or the player is in the required stance
-        if( (!spellInfo->Stances && spell_id != 3122 && spell_id != 5419 && spell_id != 7376 &&
+        if( (!spellInfo->Stances && spell_id != 5420 && spell_id != 5419 && spell_id != 7376 &&
             spell_id != 7381 && spell_id != 21156 && spell_id != 21009 && spell_id != 21178) ||
             m_form != 0 && (spellInfo->Stances & (1<<(m_form-1))) ||
-            (spell_id ==  3122 && m_form == FORM_TREE) ||
+            (spell_id ==  5420 && m_form == FORM_TREE) ||
             (spell_id ==  5419 && m_form == FORM_TRAVEL) ||
             (spell_id ==  7376 && m_form == FORM_DEFENSIVESTANCE) ||
             (spell_id ==  7381 && m_form == FORM_BERSERKERSTANCE) ||

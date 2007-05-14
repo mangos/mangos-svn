@@ -2289,7 +2289,11 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
 {
     if (!Aur)
         return false;
-    if (!Aur->GetSpellProto()) return false;
+
+    SpellEntry const* spellProto = Aur->GetSpellProto();
+    if (!spellProto) 
+        return false;
+
     uint32 spellId = Aur->GetId();
     uint32 effIndex = Aur->GetEffIndex();
     bool is_sec = IsSpellSingleEffectPerCaster(spellId);
@@ -2304,7 +2308,39 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
 
         uint32 i_spellId = (*i).second->GetId();
         uint32 i_effIndex = (*i).second->GetEffIndex();
-        if(i_spellId != spellId)
+
+        // prevent remove dummy triggered spells at next effect aura add
+        bool is_triggered_by_spell = false;
+        for(int j = 0; j < 3; ++j)
+        {
+            switch(spellProto->Effect[j])
+            {
+                case SPELL_EFFECT_DUMMY:
+                    switch(spellId)
+                    {
+                        case 5420: if(i_spellId==34123) is_triggered_by_spell = true; break;
+                    }
+                    break;
+
+            }
+            if(is_triggered_by_spell)
+                break;
+
+            switch(spellProto->EffectApplyAuraName[j])
+            {
+                case SPELL_AURA_MOD_SHAPESHIFT:
+                    switch(spellId)
+                    {
+                        case 33891: if(i_spellId==5420 || i_spellId==34123) is_triggered_by_spell = true; break;
+                    }
+                    break;
+            }
+
+            if(is_triggered_by_spell)
+                break;
+        }
+
+        if(i_spellId != spellId && !is_triggered_by_spell)
         {
             bool sec_match = false;
             bool is_i_sec = IsSpellSingleEffectPerCaster(i_spellId);
@@ -2495,7 +2531,7 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
             UpdateDiminishingTime(mech);
     }
 
-    // must remove before removeing from list (its remove dependent auras and _i_ is only safe iterator value
+    // must remove before removing from list (its remove dependent auras and _i_ is only safe iterator value
     // remove the shapeshift aura's boosts
     if(Aur->GetModifier()->m_auraname == SPELL_AURA_MOD_SHAPESHIFT)
         Aur->HandleShapeshiftBoosts(false);
