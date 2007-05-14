@@ -124,6 +124,9 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
         return;
     }
 
+    // we can't use ci->trainer_type for weaponmaster case
+    uint32 trainer_type = 0;
+
     std::list<TrainerSpell*> Tspells;
     std::list<TrainerSpell*>::iterator itr;
 
@@ -134,12 +137,17 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
         //if(!(*itr)->reqspell || _player->HasSpell((*itr)->reqspell))
         //    Tspells.push_back(*itr);
         if((*itr)->spell && sSpellStore.LookupEntry((*itr)->spell->EffectTriggerSpell[0]))
+        {
             Tspells.push_back(*itr);
+
+            if(ObjectMgr::IsProfessionSpell((*itr)->spell->EffectTriggerSpell[0]))
+                trainer_type = 2;
+        }
     }
 
     WorldPacket data( SMSG_TRAINER_LIST, 200 );             // guess size
     data << guid;
-    data << uint32(ci->trainer_type) << uint32(Tspells.size());
+    data << uint32(trainer_type) << uint32(Tspells.size());
 
     for (itr = Tspells.begin(); itr != Tspells.end();itr++)
     {
@@ -185,7 +193,7 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
         data << uint8(canlearnflag);
         data << uint32((*itr)->spellcost);
         data << uint32(0);
-        data << uint32(ObjectMgr::IsProfessionSpell((*itr)->spell->Id) ? 1 : 0);
+        data << uint32(ObjectMgr::IsProfessionSpell((*itr)->spell->EffectTriggerSpell[0]) ? 1 : 0);
         data << uint8(spellLevel);
         data << uint32((*itr)->reqskill);
         data << uint32((*itr)->reqskillvalue);

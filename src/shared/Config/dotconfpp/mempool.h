@@ -10,6 +10,7 @@
 
 #undef free
 #undef calloc
+#undef strdup
 
 class AsyncDNSMemPool
 {

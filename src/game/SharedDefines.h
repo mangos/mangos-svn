@@ -1160,7 +1160,7 @@ inline bool IsPrimaryProfessionSkill(uint32 skill)
 {
     return  skill == SKILL_HERBALISM     || skill == SKILL_MINING     || skill == SKILL_LEATHERWORKING ||
             skill == SKILL_BLACKSMITHING || skill == SKILL_ALCHEMY    || skill == SKILL_ENCHANTING     ||
-            skill == SKILL_TAILORING     || skill != SKILL_ENGINERING || skill != SKILL_SKINNING       ||
+            skill == SKILL_TAILORING     || skill == SKILL_ENGINERING || skill == SKILL_SKINNING       ||
             skill == SKILL_JEWELCRAFTING;
 }
 

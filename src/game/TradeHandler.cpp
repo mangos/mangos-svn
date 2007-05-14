@@ -446,6 +446,22 @@ void WorldSession::HandleSetTradeItemOpcode(WorldPacket& recvPacket)
     if(!_player->pTrader)
         return;
 
+
+    // reset trade status
+    if (_player->acceptTrade)
+    {
+        _player->acceptTrade = false;
+        SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
+    }
+
+    if (_player->pTrader->acceptTrade)
+    {
+        _player->pTrader->acceptTrade = false;
+        _player->pTrader->GetSession()->SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
+    }
+
+
+    // send update
     uint8 tradeSlot;
     uint8 bag;
     uint8 slot;
