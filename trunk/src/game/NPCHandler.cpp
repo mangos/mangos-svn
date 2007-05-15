@@ -193,7 +193,7 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
         data << uint8(canlearnflag);
         data << uint32((*itr)->spellcost);
         data << uint32(0);
-        data << uint32(ObjectMgr::IsProfessionSpell((*itr)->spell->EffectTriggerSpell[0]) ? 1 : 0);
+        data << uint32(0);
         data << uint8(spellLevel);
         data << uint32((*itr)->reqskill);
         data << uint32((*itr)->reqskillvalue);
