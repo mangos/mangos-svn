@@ -572,6 +572,9 @@ void WorldSession::SendListInventory( uint64 vendorguid )
         return;
     }
 
+    // load vendor items if not yet
+    pCreature->LoadGoods();
+
     uint8 numitems = pCreature->GetItemCount();
     uint8 count = 0;
     uint32 ptime = time(NULL);

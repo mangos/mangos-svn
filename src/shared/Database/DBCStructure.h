@@ -390,14 +390,17 @@ struct SpellDurationEntry
 
 struct SpellItemEnchantmentEntry
 {
-    uint32      ID;
-    uint32      display_type[3];
-    uint32      amount[3];
-    uint32      value2;
-    uint32      spellid[3];
-    char*       description;
-    uint32      aura_id;
-    uint32      slot;
+    uint32      ID;                                         // 0
+    uint32      display_type[3];                            // 1-3
+    uint32      amount[3];                                  // 4-6
+    //uint32    amount2[3]                                  // 7-9 always same as similar `amount` value
+    uint32      spellid[3];                                 // 10-12
+    char*       description;                                // 13
+                                                            // 14-20 description2-description8
+                                                            // 21 description flags
+    uint32      aura_id;                                    // 22
+    uint32      slot;                                       // 23
+                                                            // 24-25 not used
 };
 
 struct StableSlotPricesEntry

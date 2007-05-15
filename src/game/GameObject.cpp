@@ -175,6 +175,7 @@ void GameObject::Update(uint32 p_time)
                 {
                     m_respawnTime = 0;
                     m_SkillupList.clear();
+                    m_usetimes = 0;
 
                     switch (GetGoType())
                     {

@@ -280,8 +280,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         void CleanupCrossRefsBeforeDelete();                // used in ~Creature (or before mass creature delete to remove cross-references to already deleted creature)
 
-        typedef std::list<TrainerSpell*> SpellsList;
-
         bool Create (uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 Entry);
         bool CreateFromProto(uint32 guidlow,uint32 Entry);
         bool LoadCreaturesAddon();
@@ -344,23 +342,26 @@ class MANGOS_DLL_SPEC Creature : public Unit
         /*********************************************************/
         /***                    VENDOR SYSTEM                  ***/
         /*********************************************************/
+        void LoadGoods();                                   // must be called before access to vendor items, lazy loading at first call
+        void ReloadGoods() { m_itemsLoaded = false; LoadGoods(); }
+
         CreatureItem* GetItem(uint32 slot)
         {
-            if(slot>=m_item_list.size()) return NULL;
-            return &m_item_list[slot];
+            if(slot>=m_vendor_items.size()) return NULL;
+            return &m_vendor_items[slot];
         }
-        uint8 GetItemCount() const { return m_item_list.size(); }
+        uint8 GetItemCount() const { return m_vendor_items.size(); }
         void AddItem( uint32 item, uint32 maxcount, uint32 ptime)
         {
-            m_item_list.push_back(CreatureItem(item,maxcount,ptime));
+            m_vendor_items.push_back(CreatureItem(item,maxcount,ptime));
         }
         bool RemoveItem( uint32 item_id )
         {
-            for(CreatureItems::iterator i = m_item_list.begin(); i != m_item_list.end(); ++i )
+            for(CreatureItems::iterator i = m_vendor_items.begin(); i != m_vendor_items.end(); ++i )
             {
                 if(i->id==item_id)
                 {
-                    m_item_list.erase(i);
+                    m_vendor_items.erase(i);
                     return true;
                 }
             }
@@ -368,18 +369,22 @@ class MANGOS_DLL_SPEC Creature : public Unit
         }
         CreatureItem* FindItem(uint32 item_id)
         {
-            for(CreatureItems::iterator i = m_item_list.begin(); i != m_item_list.end(); ++i )
+            for(CreatureItems::iterator i = m_vendor_items.begin(); i != m_vendor_items.end(); ++i )
                 if(i->id==item_id)
                     return &*i;
             return NULL;
         }
 
-        CreatureInfo const *GetCreatureInfo() const;
+        /*********************************************************/
+        /***                    TRAINER SYSTEM                 ***/
+        /*********************************************************/
+        typedef std::list<TrainerSpell> SpellsList;
+        void LoadTrainerSpells();                                   // must be called before access to trainer spells, lazy loading at first call
+        void ReloadTrainerSpells() { m_trainerSpellsLoaded = false; LoadTrainerSpells(); }
+        SpellsList const& GetTrainerSpells() const { return m_trainer_spells; }
+        uint32 GetTrainerType() const { return m_trainer_type; }
 
-        void CreateTrainerSpells();
-        uint32 GetTrainerSpellsSize() const { return m_tspells.size(); }
-        std::list<TrainerSpell*>::iterator GetTspellsBegin(){ return m_tspells.begin(); }
-        std::list<TrainerSpell*>::iterator GetTspellsEnd(){ return m_tspells.end(); }
+        CreatureInfo const *GetCreatureInfo() const;
 
         uint32 getDialogStatus(Player *pPlayer, uint32 defstatus);
 
@@ -436,8 +441,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void Respawn();
         void SaveRespawnTime();
 
-        void LoadFlagRelatedData();
-
         uint32 m_groupLootTimer;                            // (msecs)timer used for group loot
         uint64 lootingGroupLeaderGUID;                      // used to find group which is looting corpse
 
@@ -446,8 +449,16 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool hasQuest(uint32 quest_id) const;
         bool hasInvolvedQuest(uint32 quest_id)  const;
     protected:
-        void _LoadGoods();
-        void _LoadMovement();
+        // vendor items
+        typedef std::vector<CreatureItem> CreatureItems;
+        CreatureItems m_vendor_items;
+        bool m_itemsLoaded;                                 // vendor items loading state
+
+        // trainer spells
+        bool m_trainerSpellsLoaded;                         // trainer spells loading state
+        SpellsList m_trainer_spells;
+        uint32 m_trainer_type;                              // trainer type based at trainer spells, can be different from creature_template value.
+                                                            // req. for correct show non-prof. trainers like weaponmaster.
         void _RealtimeSetCreatureInfo();
 
         float _GetHealthMod(int32 Rank);
@@ -462,11 +473,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 m_respawnDelay;                              // (secs) delay between corpse disappearance and respawning
         uint32 m_corpseDelay;                               // (secs) delay between death and corpse disappearance
         float m_respawnradius;
-
-        typedef std::vector<CreatureItem> CreatureItems;
-        CreatureItems m_item_list;
-
-        SpellsList m_tspells;
 
         GossipOptionList m_goptions;
 

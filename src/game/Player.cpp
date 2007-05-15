@@ -12408,6 +12408,9 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
             return;
         }
 
+        // load vendor items if not yet
+        pCreature->LoadGoods();
+
         CreatureItem* crItem = pCreature->FindItem(item);
         if(!crItem)
         {

@@ -620,6 +620,9 @@ bool ChatHandler::HandleAddVendorItemCommand(const char* args)
         return true;
     }
 
+    // load vendor items if not yet
+    vendor->LoadGoods();
+
     if(vendor->FindItem(itemId))
     {
         PSendSysMessage(LANG_ITEM_ALREADY_IN_LIST,itemId);
@@ -660,6 +663,9 @@ bool ChatHandler::HandleDelVendorItemCommand(const char* args)
         PSendSysMessage(LANG_ITEM_NOT_FOUND, itemId);
         return true;
     }
+
+    // load vendor items if not yet
+    vendor->LoadGoods();
 
     if (!vendor->RemoveItem(itemId))
     {
