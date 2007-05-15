@@ -113,6 +113,10 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
         return;
     }
 
+    // Lazy loading at first access
+    unit->LoadTrainerSpells();
+
+    // trainer list loaded at check;
     if(!unit->isCanTrainingOf(_player,true))
         return;
 
@@ -124,49 +128,30 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
         return;
     }
 
-    // we can't use ci->trainer_type for weaponmaster case
-    uint32 trainer_type = 0;
+    Creature::SpellsList const& trainer_spells = unit->GetTrainerSpells();
 
-    std::list<TrainerSpell*> Tspells;
-    std::list<TrainerSpell*>::iterator itr;
-
-    for (itr = unit->GetTspellsBegin(); itr != unit->GetTspellsEnd();itr++)
-    {
-        if(!(*itr)->spell  || _player->HasSpell((*itr)->spell->Id))
-            continue;
-        //if(!(*itr)->reqspell || _player->HasSpell((*itr)->reqspell))
-        //    Tspells.push_back(*itr);
-        if((*itr)->spell && sSpellStore.LookupEntry((*itr)->spell->EffectTriggerSpell[0]))
-        {
-            Tspells.push_back(*itr);
-
-            if(ObjectMgr::IsProfessionSpell((*itr)->spell->EffectTriggerSpell[0]))
-                trainer_type = 2;
-        }
-    }
-
-    WorldPacket data( SMSG_TRAINER_LIST, 200 );             // guess size
+    WorldPacket data( SMSG_TRAINER_LIST, 8+4+4+trainer_spells.size()*38 + strTitle.size()+1);
     data << guid;
-    data << uint32(trainer_type) << uint32(Tspells.size());
+    data << uint32(unit->GetTrainerType()) << uint32(trainer_spells.size());
 
-    for (itr = Tspells.begin(); itr != Tspells.end();itr++)
+    for(Creature::SpellsList::const_iterator itr = trainer_spells.begin(); itr != trainer_spells.end(); ++itr)
     {
         uint8 canlearnflag = 1;
         bool ReqskillValueFlag = false;
         bool LevelFlag = false;
         bool ReqspellFlag = false;
-        SpellEntry const *spellInfo = sSpellStore.LookupEntry((*itr)->spell->EffectTriggerSpell[0]);
+        SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->spell->EffectTriggerSpell[0]);
         assert(spellInfo);                                  // Tested already in prev. for loop
 
-        if((*itr)->reqskill)
+        if(itr->reqskill)
         {
-            if(_player->GetPureSkillValue((*itr)->reqskill) >= (*itr)->reqskillvalue)
+            if(_player->GetPureSkillValue(itr->reqskill) >= itr->reqskillvalue)
                 ReqskillValueFlag = true;
         }
         else
             ReqskillValueFlag = true;
 
-        uint32 spellLevel = ( (*itr)->reqlevel ? (*itr)->reqlevel : spellInfo->spellLevel);
+        uint32 spellLevel = ( itr->reqlevel ? itr->reqlevel : spellInfo->spellLevel);
         if(_player->getLevel() >= spellLevel)
             LevelFlag = true;
 
@@ -181,22 +166,22 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
         if(_player->HasSpell(spellInfo->Id))
             canlearnflag = 2;                               //gray, can't learn
         else
-        if((*itr)->spell->Effect[0] == SPELL_EFFECT_LEARN_SPELL &&
-            _player->HasSpell((*itr)->spell->EffectTriggerSpell[0]))
+        if(itr->spell->Effect[0] == SPELL_EFFECT_LEARN_SPELL &&
+            _player->HasSpell(itr->spell->EffectTriggerSpell[0]))
             canlearnflag = 2;                               //gray, can't learn
 
-        if((*itr)->spell->Effect[1] == SPELL_EFFECT_SKILL_STEP)
-            if(!_player->CanLearnProSpell((*itr)->spell->Id))
+        if(itr->spell->Effect[1] == SPELL_EFFECT_SKILL_STEP)
+            if(!_player->CanLearnProSpell(itr->spell->Id))
                 canlearnflag = 1;
 
-        data << uint32((*itr)->spell->Id);
+        data << uint32(itr->spell->Id);
         data << uint8(canlearnflag);
-        data << uint32((*itr)->spellcost);
+        data << uint32(itr->spellcost);
         data << uint32(0);
         data << uint32(0);
         data << uint8(spellLevel);
-        data << uint32((*itr)->reqskill);
-        data << uint32((*itr)->reqskillvalue);
+        data << uint32(itr->reqskill);
+        data << uint32(itr->reqskillvalue);
         data << uint32(prev_id);
         data << uint32(0);
         data << uint32(0);
@@ -204,8 +189,6 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
 
     data << strTitle;
     SendPacket( &data );
-
-    Tspells.clear();
 }
 
 void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
@@ -214,7 +197,6 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
 
     uint64 guid;
     uint32 spellId = 0;
-    TrainerSpell *proto=NULL;
 
     recv_data >> guid >> spellId;
     sLog.outDebug( "WORLD: Received CMSG_TRAINER_BUY_SPELL NpcGUID=%u, learn spell id is: %u",uint32(GUID_LOPART(guid)), spellId );
@@ -226,20 +208,26 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
         return;
     }
 
+    // Lazy loading at first access
+    unit->LoadTrainerSpells();
+
     if(!unit->isCanTrainingOf(_player,true))
         return;
 
-    std::list<TrainerSpell*>::iterator titr;
+    TrainerSpell const* proto = NULL;
 
-    for (titr = unit->GetTspellsBegin(); titr != unit->GetTspellsEnd();titr++)
+    // check present spell in trainer spell list
+    Creature::SpellsList const& trainer_spells = unit->GetTrainerSpells();
+    for(Creature::SpellsList::const_iterator itr = trainer_spells.begin(); itr != trainer_spells.end(); ++itr)
     {
-        if((*titr)->spell->Id == spellId)
+        if(itr->spell->Id == spellId)
         {
-            proto = *titr;
+            proto = &*itr;
             break;
         }
     }
 
+    // not found, cheat?
     if (proto == NULL) return;
 
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(proto->spell->EffectTriggerSpell[0]);

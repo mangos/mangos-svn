@@ -5621,7 +5621,6 @@ Creature* Unit::SummonCreature(uint32 id, uint32 mapid, float x, float y, float 
     }
 
     pCreature->Summon(spwtype, despwtime);
-    pCreature->LoadFlagRelatedData();
     
     //return the creature therewith the summoner has access to it
     return pCreature;

@@ -54,7 +54,8 @@ Creature::Creature( WorldObject *instantiator ) :
 Unit( instantiator ), i_AI(NULL), i_motionMaster(this), lootForPickPocketed(false), lootForBody(false), m_lootMoney(0), m_lootRecipient(0),
 m_deathTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_respawnradius(0.0),
 m_moveRun(false), m_emoteState(0), m_isPet(false), m_isTotem(false),
-m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE), m_groupLootTimer(0), lootingGroupLeaderGUID(0)
+m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE), m_groupLootTimer(0), lootingGroupLeaderGUID(0),
+m_itemsLoaded(false),m_trainerSpellsLoaded(false),m_trainer_type(0)
 {
     m_valuesCount = UNIT_END;
 
@@ -83,21 +84,21 @@ Creature::~Creature()
 {
     CleanupCrossRefsBeforeDelete();
 
-    for( SpellsList::iterator i = m_tspells.begin( ); i != m_tspells.end( ); i++ )
-        delete (*i);
-    m_tspells.clear();
+    m_trainer_spells.clear();
+    m_vendor_items.clear();
 
     delete i_AI;
     i_AI = NULL;
 }
 
-void Creature::CreateTrainerSpells()
+void Creature::LoadTrainerSpells()
 {
-    for(SpellsList::iterator i = m_tspells.begin(); i != m_tspells.end(); ++i)
-        delete *i;
-    m_tspells.clear();
+    if(m_trainerSpellsLoaded)
+        return; 
 
-    TrainerSpell *tspell;
+    m_trainer_spells.clear();
+    m_trainer_type = 0;
+
     Field *fields;
     QueryResult *result = sDatabase.PQuery("SELECT `spell`,`spellcost`,`reqskill`,`reqskillvalue`,`reqlevel` FROM `npc_trainer` WHERE `entry` = '%u'", GetCreatureInfo()->Entry);
 
@@ -118,22 +119,33 @@ void Creature::CreateTrainerSpells()
 
         if(spellinfo->Effect[0]!=SPELL_EFFECT_LEARN_SPELL)
         {
-            sLog.outErrorDb("TrainerBuySpell: Trainer(%u) has not learning spell(%u).", GetGUIDLow(), spellid);
+            sLog.outErrorDb("LoadTrainerSpells: Trainer(%u) has not learning spell(%u).", GetGUIDLow(), spellid);
             continue;
         }
 
-        tspell = new TrainerSpell;
-        tspell->spell = spellinfo;
-        tspell->spellcost = fields[1].GetUInt32();
-        tspell->reqskill = fields[2].GetUInt32();
-        tspell->reqskillvalue = fields[3].GetUInt32();
-        tspell->reqlevel = fields[4].GetUInt32();
+        if(!sSpellStore.LookupEntry(spellinfo->EffectTriggerSpell[0]))
+        {
+            sLog.outError("LoadTrainerSpells: Trainer(%u) has learning spell(%u) without triggered spell (bad dbc?).", GetGUIDLow(), spellid);
+            continue;
+        }
 
-        m_tspells.push_back(tspell);
+        if(ObjectMgr::IsProfessionSpell(spellinfo->EffectTriggerSpell[0]))
+            m_trainer_type = 2;
+
+        TrainerSpell tspell;
+        tspell.spell        = spellinfo;
+        tspell.spellcost    = fields[1].GetUInt32();
+        tspell.reqskill     = fields[2].GetUInt32();
+        tspell.reqskillvalue= fields[3].GetUInt32();
+        tspell.reqlevel     = fields[4].GetUInt32();
+
+        m_trainer_spells.push_back(tspell);
 
     } while( result->NextRow() );
 
     delete result;
+
+    m_trainerSpellsLoaded = true;
 }
 
 void Creature::Update(uint32 diff)
@@ -385,7 +397,7 @@ bool Creature::isCanTrainingOf(Player* pPlayer, bool msg) const
     if(!isTrainer())
         return false;
 
-    if(m_tspells.empty())
+    if(m_trainer_spells.empty())
     {
         sLog.outErrorDb("Creature %u (Entry: %u) have UNIT_NPC_FLAG_TRAINER but have empty trainer spell list.",
             GetGUIDLow(),GetCreatureInfo()->Entry);
@@ -513,6 +525,9 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                             cantalking=false;
                         break;
                     case GOSSIP_OPTION_VENDOR:
+                        // load vendor items if not yet
+                        LoadGoods();
+
                         if(!GetItemCount())
                         {
                             sLog.outErrorDb("Creature %u (Entry: %u) have UNIT_NPC_FLAG_VENDOR but have empty trading item list.",
@@ -521,6 +536,9 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                         }
                         break;
                     case GOSSIP_OPTION_TRAINER:
+                        // Lazy loading at first access
+                        LoadTrainerSpells();
+
                         if(!isCanTrainingOf(pPlayer,false))
                             cantalking=false;
                         break;
@@ -555,7 +573,10 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
     }
 
     if(pm->GetGossipMenu()->MenuItemCount()==0 && HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_TRAINER) && !pm->GetQuestMenu()->MenuItemCount())
-        isCanTrainingOf(pPlayer,true);
+    {
+        LoadTrainerSpells();                                // Lazy loading at first access
+        isCanTrainingOf(pPlayer,true);                      // output error message if need
+    }
 
     /*
     if(pm->GetGossipMenu()->MenuItemCount()==1 && ingso->Id==8 && GetGossipCount( ingso->GossipId )>0)
@@ -1159,14 +1180,18 @@ bool Creature::LoadFromDB(uint32 guid, uint32 InstanceId)
         }
     }
 
-    LoadFlagRelatedData();
-
     AIM_Initialize();
     return true;
 }
 
-void Creature::_LoadGoods()
+void Creature::LoadGoods()
 {
+    // already loaded;
+    if(m_itemsLoaded)
+        return;
+
+    m_vendor_items.clear();
+
     QueryResult *result = sDatabase.PQuery("SELECT `item`, `maxcount`,`incrtime` FROM `npc_vendor` WHERE `entry` = '%u'", GetEntry());
 
     if(!result) return;
@@ -1193,6 +1218,8 @@ void Creature::_LoadGoods()
     while( result->NextRow() );
 
     delete result;
+
+    m_itemsLoaded = true;
 }
 
 bool Creature::hasQuest(uint32 quest_id) const
@@ -1485,16 +1512,6 @@ bool Creature::IsOutOfThreatArea(Unit* pVictim) const
     GetRespawnCoord(rx, ry, rz);
     float length = pVictim->GetDistanceSq(rx,ry,rz);
     return ( length > CREATURE_THREAT_RADIUS );
-}
-
-//previously in LoadFromDB but also needed for summoned creatures
-void Creature::LoadFlagRelatedData()
-{
-    if (HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER ) )
-        CreateTrainerSpells();
-
-    if ( HasFlag( UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR ) )
-        _LoadGoods();
 }
 
 //creature_addon table
