@@ -183,26 +183,40 @@ MaNGOS::CreatureRelocationNotifier::Visit(CreatureMapType &m)
             CreatureCreatureRelocationWorker(iter->second, &i_creature);
 }
 
+inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
+{
+    if(!target->isAlive() || target->isInFlight() )
+        return;
+
+    if (!i_dynobject.IsWithinDistInMap(target, i_dynobject.GetRadius()))
+        return;
+
+    if( i_check->GetTypeId()==TYPEID_PLAYER )
+    {
+        if (i_check->IsFriendlyTo( target ))
+            return;
+    }
+    else
+    {
+        if (!i_check->IsHostileTo( target ))
+            return;
+    }
+
+    if (i_dynobject.IsAffecting(target))
+        return;
+
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(i_dynobject.GetSpellId());
+    PersistentAreaAura* Aur = new PersistentAreaAura(spellInfo, i_dynobject.GetEffIndex(), target, i_dynobject.GetCaster());
+    target->AddAura(Aur);
+    i_dynobject.AddAffected(target);
+}
+
 template<>
 inline void
 MaNGOS::DynamicObjectUpdater::Visit(CreatureMapType  &m)
 {
     for(CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
-    {
-        if(itr->second->isAlive() && !itr->second->isInFlight() )
-        {
-            if (owner.GetCaster()->IsFriendlyTo(itr->second) || !owner.IsWithinDistInMap(itr->second, owner.GetRadius()))
-                continue;
-
-            if (!owner.IsAffecting(itr->second))
-            {
-                SpellEntry const *spellInfo = sSpellStore.LookupEntry(owner.GetSpellId());
-                PersistentAreaAura* Aur = new PersistentAreaAura(spellInfo, owner.GetEffIndex(), itr->second, owner.GetCaster());
-                itr->second->AddAura(Aur);
-                owner.AddAffected(itr->second);
-            }
-        }
-    }
+        VisitHelper(itr->second);
 }
 
 template<>
@@ -210,21 +224,7 @@ inline void
 MaNGOS::DynamicObjectUpdater::Visit(PlayerMapType  &m)
 {
     for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
-    {
-        if(itr->second->isAlive() && !itr->second->isInFlight() )
-        {
-            if (owner.GetCaster()->IsFriendlyTo(itr->second) || !owner.IsWithinDistInMap(itr->second,owner.GetRadius()))
-                continue;
-
-            if (!owner.IsAffecting(itr->second))
-            {
-                SpellEntry const *spellInfo = sSpellStore.LookupEntry(owner.GetSpellId());
-                PersistentAreaAura* Aur = new PersistentAreaAura(spellInfo, owner.GetEffIndex(), itr->second, owner.GetCaster());
-                itr->second->AddAura(Aur);
-                owner.AddAffected(itr->second);
-            }
-        }
-    }
+        VisitHelper(itr->second);
 }
 
 // SEARCHERS & LIST SEARCHERS & WORKERS
