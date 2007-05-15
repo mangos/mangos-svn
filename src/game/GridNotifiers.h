@@ -256,8 +256,15 @@ namespace MaNGOS
 
     struct MANGOS_DLL_DECL DynamicObjectUpdater
     {
-        DynamicObject &owner;
-        DynamicObjectUpdater(DynamicObject &owner) : owner(owner) {}
+        DynamicObject &i_dynobject;
+        Unit* i_check;
+        DynamicObjectUpdater(DynamicObject &dynobject) : i_dynobject(dynobject)
+        {
+            i_check = i_dynobject.GetCaster();
+            Unit* owner = i_check->GetOwner();
+            if(owner)
+                i_check = owner;
+        }
 
         template<class T> inline void Visit(std::map<OBJECT_HANDLE, T *>  &m) {}
         template<class T> inline void Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m) {}
@@ -265,6 +272,8 @@ namespace MaNGOS
         template<> inline void Visit<Player>(PlayerMapType &);
         template<> inline void Visit<Creature>(CreatureMapType &);
         #endif
+
+        void VisitHelper(Unit* target);
     };
 
     // SEARCHERS & LIST SEARCHERS & WORKERS
