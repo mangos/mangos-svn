@@ -621,7 +621,6 @@ LOCK TABLES `command` WRITE;
 /*!40000 ALTER TABLE `command` DISABLE KEYS */;
 INSERT INTO `command` VALUES 
 ('acct',0,'Syntax: .acct\r\n\r\nDisplay the access level of your account.'),
-('addgo',3,'Syntax: .addgo #id <lootID> <spawntimeSecs>\r\n\r\nAdd a game object from game object templates to the world at your current location using the #id.\r\nlootID specifies the loot-template to be used and spawntimesecs sets the spawntime, both are optional.\r\n\r\nNote: this is a copy of .gameobject.'),
 ('additem',3,'Syntax: .additem #itemid/[#itemname]/#shift-click-item-link #itemcount\r\n\r\nAdds the specified number of items of id #itemid (or exact (!) name $itemname in brackets, or link created by shift-click at item in inventory or recipe) to your or selected character inventory. If #itemcount is omitted, only one item will be added.\r\n.'),
 ('additemset',3,'Syntax: .additemset #itemsetid\r\n\r\nAdd items from itemset of id #itemsetid to your or selected character inventory. Will add by one example each item from itemset.'),
 ('addmove',2,'Syntax: .addmove #creature_guid [#waittime]\r\n\r\nAdd your current location as a waypoint for creature with guid #creature_guid. And optional add wait time.'),
@@ -764,7 +763,8 @@ INSERT INTO `command` VALUES
 ('wp',2,'Using WP Command:\r\nEach Waypoint Command has it\'s own description!'),
 ('wp add',2,'Syntax: .wp add [#creature_guid or Select a Creature]'),
 ('wp modify',2,'Syntax: .wp modify [#creature_guid or Select a Creature]\r\nadd - Add a waypoint after the selected visual\r\nimport $filename for selected npc\r\nexport $filename for selected npc\r\nwaittime $time\r\nemote ID\r\nspell ID\r\ntext1| text2| text3| text4| text5 <text>\r\nmodel1 ID\r\nmodel2 ID\r\naiscript $Name\r\nmove(moves wp to player pos)\r\ndel (deletes the wp)\r\n\r\nOnly one parameter per time!'),
-('wp show',2,'Syntax: .wp show [#creature_guid or Select a Creature]\r\non\r\nfirst\r\nlast\r\noff\r\ninfo\r\n\r\nFor using info you have to do first show on and than select a Visual-Waypoint and do the show info!');
+('wp show',2,'Syntax: .wp show [#creature_guid or Select a Creature]\r\non\r\nfirst\r\nlast\r\noff\r\ninfo\r\n\r\nFor using info you have to do first show on and than select a Visual-Waypoint and do the show info!'),
+('addgo',3,'Syntax: .addgo #id <lootID> <spawntimeSecs>\r\n\r\nAdd a game object from game object templates to the world at your current location using the #id.\r\nlootID specifies the loot-template to be used and spawntimesecs sets the spawntime, both are optional.\r\n\r\nNote: this is a copy of .gameobject.');
 /*!40000 ALTER TABLE `command` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -9171,8 +9171,6 @@ INSERT INTO `spell_learn_skill` VALUES
 (2842,40,1,0),
 (33388,762,75,75),
 (33391,762,150,150),
-(34090,762,225,225), 
-(34091,762,300,300),
 (1804,633,1,0),
 (668,98,-1,-1),
 (669,109,-1,-1),
@@ -9188,7 +9186,9 @@ INSERT INTO `spell_learn_skill` VALUES
 (7341,315,-1,-1),
 (17737,673,-1,-1),
 (204,95,1,0),
-(203,162,1,0);
+(203,162,1,0),
+(34091,762,300,300),
+(34090,762,225,225);
 /*!40000 ALTER TABLE `spell_learn_skill` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -10230,4 +10230,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2007-05-07  9:01:20
+-- Dump completed on 2007-05-15  6:46:42
