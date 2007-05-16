@@ -1579,3 +1579,48 @@ bool ChatHandler::HandleSaveAllCommand(const char* args)
     SendSysMessage(LANG_PLAYERS_SAVED);
     return true;
 }
+
+bool ChatHandler::HandleSendMailCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+    char* pName = strtok((char*)args, " ");
+    char* msgSubject = strtok(NULL, " ");
+    char* msgText = strtok(NULL, "");
+
+    if (!msgText)
+        return false;
+
+    // pName, msgSubject, msgText isn't NUL after prev. check
+
+    std::string name    = pName;
+    std::string subject = msgSubject;
+    std::string text    = msgText;
+    
+    normalizePlayerName(name);
+
+    uint32 receiver_guid = objmgr.GetPlayerGUIDByName(name.c_str());
+    uint32 mailId = objmgr.GenerateMailID();
+    uint32 sender_guid = m_session->GetPlayer()->GetGUID();
+    time_t dtime = time(NULL);
+    time_t etime = dtime + (30 * DAY);
+    uint32 messagetype = MAIL_NORMAL;
+    uint32 itemTextId = 0;
+    if (text.size() > 0)
+    {
+        itemTextId = objmgr.CreateItemText( text );
+    }
+
+    Player *receiver = objmgr.GetPlayer((uint32) receiver_guid);
+    if(receiver)
+        receiver->CreateMail(mailId,messagetype,sender_guid,subject.c_str(),itemTextId,0,0,(uint64)etime,(uint64)dtime,0,0,0,0);
+
+    sDatabase.escape_string(subject);
+    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+        "VALUES ('%u', '%u', '%u', '%u', '%s', '%u', '0', '0', '" I64FMTD "','" I64FMTD "', '0', '0', '0')",
+        mailId, messagetype, sender_guid, receiver_guid, subject.c_str(), itemTextId, (uint64)etime, (uint64)dtime);
+
+    PSendSysMessage(LANG_MAIL_SENT, name.c_str());
+    return true;
+}

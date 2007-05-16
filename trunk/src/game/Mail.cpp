@@ -163,7 +163,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         pItem->SaveToDB();                                  // recursive and not have transaction guard into self
         sDatabase.CommitTransaction();
     }
-    uint32 messagetype = 0;
+    uint32 messagetype = MAIL_NORMAL;
     uint32 item_template = pItem ? pItem->GetEntry() : 0;   //item prototype
     mailId = objmgr.GenerateMailID();
 
@@ -436,12 +436,12 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         data << (*itr)->messageID;
         data << (*itr)->messageType;                        // Message Type, once = 3
         data << (*itr)->sender;                             // SenderID
-        if ((*itr)->messageType == 0)
+        if ((*itr)->messageType == MAIL_NORMAL)
             data << (uint32) 0;                             // HIGHGUID_PLAYER
         data << (*itr)->subject.c_str();                    // Subject string - once 00, when mail type = 3
         data << (uint32) (*itr)->itemTextId;                // sure about this
         data << (uint32) 0;                                 // Constant
-        if ((*itr)->messageType == 0)
+        if ((*itr)->messageType == MAIL_NORMAL)
             data << (uint32) 0x29;                          // Constant, messageType == 0 and 0x3D - message from gm...
         else
             data << (uint32) 0x3E;
