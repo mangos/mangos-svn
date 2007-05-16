@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -39,7 +39,8 @@ const char SpellCastTimefmt[]="nixx";
 const char SpellDurationfmt[]="niii";
 const char SpellEntryfmt[]="niixiiiiiiixixiiixixxiiiiiiiiiiiiiiiiiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffffffiiixxxiiiiiiiiiiiiiiifffiiiiiiiiiiiifffixiiissssssssissssssssixxxxxxxxxxxxxxxxxxiiiiiiixixxfffxxxiii";
 const char SpellFocusObjectfmt[]="nsxxxxxxxx";
-const char SpellItemEnchantmentfmt[]="niiiiiixxxiiisxxxxxxxxiixx";
+const char SpellItemEnchantmentfmt[]="niiiiiixxxiiisxxxxxxxxiiii";
+const char SpellItemEnchantmentConditionfmt[]="nbbbbbxxxxxbbbbbbbbbbiiiiiXXXXX";
 const char SpellRadiusfmt[]="nfxf";
 const char SpellRangefmt[]="nffxxxxxxxxxxxxxxxxxxx";
 const char StableSlotPricesfmt[] = "ni";

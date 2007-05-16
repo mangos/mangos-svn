@@ -25,9 +25,10 @@
 DBCFile::DBCFile()
 {
     data = NULL;
+    fieldsOffset = NULL;
 }
 
-bool DBCFile::Load(const char *filename)
+bool DBCFile::Load(const char *filename, const char *fmt)
 {
 
     uint32 header;
@@ -50,7 +51,16 @@ bool DBCFile::Load(const char *filename)
     fread(&recordSize,4,1,f);                               // Size of a record
     fread(&stringSize,4,1,f);                               // String size
 
-    if(fieldCount*4 != recordSize) return false;            // internal file structure check
+    fieldsOffset = new uint32[fieldCount];
+    fieldsOffset[0] = 0;
+    for(uint32 i = 1; i < fieldCount; i++)
+    {
+        fieldsOffset[i] = fieldsOffset[i - 1];
+        if (fmt[i - 1] == 'b' || fmt[i - 1] == 'X')         // byte fields
+            fieldsOffset[i] += 1;
+        else                                                // 4 byte fields (int32/float/strings)
+            fieldsOffset[i] += 4;
+    }
 
     data = new unsigned char[recordSize*recordCount+stringSize];
     stringTable = data + recordSize*recordCount;
@@ -63,6 +73,8 @@ DBCFile::~DBCFile()
 {
     if(data)
         delete [] data;
+    if(fieldsOffset)
+        delete [] fieldsOffset;
 }
 
 DBCFile::Record DBCFile::getRecord(size_t id)
@@ -91,6 +103,9 @@ uint32 DBCFile::GetFormatRecordSize(const char * format,int32* index_pos)
             case FT_IND:
                 i=x;
                 recordsize+=4;
+                break;
+            case FT_BYTE:
+                recordsize += 1;
                 break;
         }
 
@@ -166,6 +181,9 @@ void * DBCFile::AutoProduceData(const char * format, uint32 * records)
                     *((uint32*)(&_data[offset]))=getRecord(y).getUInt (x);
                     offset+=4;
                     break;
+                case FT_BYTE:
+                    *((uint8*)(&_data[offset]))=getRecord(y).getUInt8 (x);
+                    offset+=1;
                     break;
                 case FT_STRING:
                     uint32 l=strlen(getRecord(y).getString  (x))+1;

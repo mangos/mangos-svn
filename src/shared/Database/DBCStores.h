@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -97,7 +97,7 @@ class DBCStorage
 
             dbc = new DBCFile;
             // Check if load was sucessful, only then continue
-            bool res = dbc->Load(fn);
+            bool res = dbc->Load(fn, fmt);
             if (res)
             {
                 fieldCount = dbc->GetCols();
@@ -146,6 +146,7 @@ extern DBCStorage <SkillLineAbilityEntry>     sSkillLineAbilityStore;
 extern DBCStorage <SpellDurationEntry>        sSpellDurationStore;
 //extern DBCStorage <SpellFocusObjectEntry>     sSpellFocusObjectStore;
 extern DBCStorage <SpellItemEnchantmentEntry> sSpellItemEnchantmentStore;
+extern DBCStorage <SpellItemEnchantmentConditionEntry> sSpellItemEnchantmentConditionStore;
 extern SpellCategoryStore                     sSpellCategoryStore;
 extern DBCStorage <SpellRadiusEntry>          sSpellRadiusStore;
 extern DBCStorage <SpellRangeEntry>           sSpellRangeStore;
