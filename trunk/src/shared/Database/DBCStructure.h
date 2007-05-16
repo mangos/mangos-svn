@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -400,7 +400,17 @@ struct SpellItemEnchantmentEntry
                                                             // 21 description flags
     uint32      aura_id;                                    // 22
     uint32      slot;                                       // 23
-                                                            // 24-25 not used
+    uint32      GemID;                                      // 24
+    uint32      EnchantmentCondition;                       // 25
+};
+
+struct SpellItemEnchantmentConditionEntry
+{
+    uint32  ID;
+    uint8   Color[5];
+    uint8   Comparator[5];
+    uint8   CompareColor[5];
+    uint32  Value[5];
 };
 
 struct StableSlotPricesEntry
