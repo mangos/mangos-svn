@@ -316,8 +316,8 @@ void ObjectMgr::SendAuctionExpiredMail( AuctionEntry * auction )
         time_t etime = dtime + 30 * DAY;
 
         sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-            "VALUES ('%u', '2', '%u', '%u', '%s', '0', '%u', '%u', '" I64FMTD "','" I64FMTD "', '0', '0', '0')",
-            messageId, auction->location, auction->owner, subject.str().c_str(), auction->item_guid, auction->item_template, (uint64)etime, (uint64)dtime );
+            "VALUES ('%u', '2', '%u', '%u', '%s', '0', '%u', '%u', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
+            messageId, auction->location, auction->owner, subject.str().c_str(), auction->item_guid, auction->item_template, (uint64)etime, (uint64)dtime, NOT_READ);
         if ( seller )
         {
             seller->GetSession()->SendAuctionOwnerNotification( auction );
