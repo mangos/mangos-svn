@@ -136,53 +136,15 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
 
     for(Creature::SpellsList::const_iterator itr = trainer_spells.begin(); itr != trainer_spells.end(); ++itr)
     {
-        uint8 canlearnflag = 1;
-        bool ReqskillValueFlag = false;
-        bool LevelFlag = false;
-        bool ReqspellFlag = false;
-        SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->spell->EffectTriggerSpell[0]);
-        assert(spellInfo);                                  // Tested already in prev. for loop
-
-        if(itr->reqskill)
-        {
-            if(_player->GetPureSkillValue(itr->reqskill) >= itr->reqskillvalue)
-                ReqskillValueFlag = true;
-        }
-        else
-            ReqskillValueFlag = true;
-
-        uint32 spellLevel = ( itr->reqlevel ? itr->reqlevel : spellInfo->spellLevel);
-        if(_player->getLevel() >= spellLevel)
-            LevelFlag = true;
-
-        uint32 prev_id =  objmgr.GetPrevSpellInChain(spellInfo->Id);
-        if(!prev_id || _player->HasSpell(prev_id))
-            ReqspellFlag = true;
-
-        if(ReqskillValueFlag && LevelFlag && ReqspellFlag)
-            canlearnflag = 0;                               //green, can learn
-        else canlearnflag = 1;                              //red, can't learn
-
-        if(_player->HasSpell(spellInfo->Id))
-            canlearnflag = 2;                               //gray, can't learn
-        else
-        if(itr->spell->Effect[0] == SPELL_EFFECT_LEARN_SPELL &&
-            _player->HasSpell(itr->spell->EffectTriggerSpell[0]))
-            canlearnflag = 2;                               //gray, can't learn
-
-        if(itr->spell->Effect[1] == SPELL_EFFECT_SKILL_STEP)
-            if(!_player->CanLearnProSpell(itr->spell->Id))
-                canlearnflag = 1;
-
         data << uint32(itr->spell->Id);
-        data << uint8(canlearnflag);
+        data << uint8(_player->GetTrainerSpellState(&*itr));
         data << uint32(itr->spellcost);
         data << uint32(0);
         data << uint32(0);
-        data << uint8(spellLevel);
+        data << uint8(itr->reqlevel ? itr->reqlevel : itr->spell->spellLevel);
         data << uint32(itr->reqskill);
         data << uint32(itr->reqskillvalue);
-        data << uint32(prev_id);
+        data << uint32(objmgr.GetPrevSpellInChain(itr->spell->EffectTriggerSpell[0]));
         data << uint32(0);
         data << uint32(0);
     }
@@ -214,7 +176,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
     if(!unit->isCanTrainingOf(_player,true))
         return;
 
-    TrainerSpell const* proto = NULL;
+    TrainerSpell const* trainer_spell = NULL;
 
     // check present spell in trainer spell list
     Creature::SpellsList const& trainer_spells = unit->GetTrainerSpells();
@@ -222,69 +184,54 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
     {
         if(itr->spell->Id == spellId)
         {
-            proto = &*itr;
+            trainer_spell = &*itr;
             break;
         }
     }
 
     // not found, cheat?
-    if (proto == NULL) return;
-
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry(proto->spell->EffectTriggerSpell[0]);
-
-    if(!spellInfo) return;
-    if(_player->HasSpell(spellInfo->Id))
-        return;
-    if(_player->getLevel() < (proto->reqlevel ? proto->reqlevel : spellInfo->spellLevel))
-        return;
-    if(proto->reqskill && _player->GetSkillValue(proto->reqskill) < proto->reqskillvalue)
+    if(!trainer_spell)
         return;
 
-    uint32 prev_id =  objmgr.GetPrevSpellInChain(spellInfo->Id);
-    if(prev_id && !_player->HasSpell(prev_id))
+    // can't be learn, cheat?
+    if(_player->GetTrainerSpellState(trainer_spell) != TRAINER_SPELL_GREEN)
         return;
 
-    if(proto->spell->Effect[1] == SPELL_EFFECT_SKILL_STEP)
-        if(!_player->CanLearnProSpell(spellId))
-            return;
+    // check money requirement
+    if(_player->GetMoney() < trainer_spell->spellcost )
+        return;
 
-    if(!proto)
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(trainer_spell->spell->EffectTriggerSpell[0]);
+
+    WorldPacket data( SMSG_TRAINER_BUY_SUCCEEDED, 12 );
+    data << guid << spellId;
+    SendPacket( &data );
+
+    _player->ModifyMoney( -int32(trainer_spell->spellcost) );
+    if(spellInfo->powerType == 2)
     {
-        sLog.outErrorDb("TrainerBuySpell: Trainer(%u) has not the spell(%u).", uint32(GUID_LOPART(guid)), spellId);
+        _player->addSpell(spellId,4);                   // active = 4 for spell book of hunter's pet
         return;
     }
-    if( _player->GetMoney() >= proto->spellcost )
-    {
-        WorldPacket data( SMSG_TRAINER_BUY_SUCCEEDED, 12 );
-        data << guid << spellId;
-        SendPacket( &data );
 
-        _player->ModifyMoney( -int32(proto->spellcost) );
-        if(spellInfo->powerType == 2)
-        {
-            _player->addSpell(spellId,4);                   // active = 4 for spell book of hunter's pet
-            return;
-        }
+    Spell *spell;
+    if(trainer_spell->spell->SpellVisual == 222)
+        spell = new Spell(_player, trainer_spell->spell, false, NULL);
+    else
+        spell = new Spell(unit, trainer_spell->spell, false, NULL);
 
-        Spell *spell;
-        if(proto->spell->SpellVisual == 222)
-            spell = new Spell(_player, proto->spell, false, NULL);
-        else
-            spell = new Spell(unit, proto->spell, false, NULL);
+    SpellCastTargets targets;
+    targets.setUnitTarget( _player );
 
-        SpellCastTargets targets;
-        targets.setUnitTarget( _player );
+    float u_oprientation = unit->GetOrientation();
 
-        float u_oprientation = unit->GetOrientation();
+    // trainer always see at customer in time of training (part of client functionality)
+    unit->SetInFront(_player);
 
-        // trainer always see at customer in time of training (part of client functionality)
-        unit->SetInFront(_player);
+    spell->prepare(&targets);
 
-        spell->prepare(&targets);
-
-        // trainer always return to original orientation
-        unit->Relocate(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),u_oprientation);
-    }
+    // trainer always return to original orientation
+    unit->Relocate(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),u_oprientation);
 }
 
 void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )

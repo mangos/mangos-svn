@@ -2,7 +2,7 @@
 --
 -- Host: localhost    Database: mangos
 -- ------------------------------------------------------
--- Server version	5.0.38-Ubuntu_0ubuntu1-log
+-- Server version5.0.38-Ubuntu_0ubuntu1-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -733,7 +733,7 @@ INSERT INTO `command` VALUES
 ('save',0,'Syntax: .save\r\n\r\nSaves your character.'),
 ('saveall',1,'Syntax: .saveall\r\n\r\nSave all characters in game.'),
 ('security',3,'Syntax: .security $name #level\r\n\r\nSet the security level of player $name to a level of #level.\r\n\r\n#level may range from 0 to 5.'),
-('sendmail',1,'Syntax: .sendmail #playername #subject #text\r\n\r\nSend a mail to a player. Note: subject don\'t must have spaces.'),
+('sendmail',1,'Syntax: .sendmail #playername #subject #text\r\n\r\nSend a mail to a player. Note: subject may not contain spaces.'),
 ('setmovetype',2,'Syntax: .setmovetype [#creature_guid] stay/random/way\r\n\r\nSet for creature pointed by #creature_guid (or selected if #creature_guid not provided) movement type and move it to respawn position (if creature alive). Any existed waypoints for creature will be removed from database. If creature is dead then movement type will aplied at creature respawm.'),
 ('setvalue',3,'Syntax: .setvalue #field #value #isInt\r\n\r\nSet the field #field of the selected creature with value #value. If no creature is selected, set the content of your field.\r\n\r\nUse a #isInt of value 1 if #value is an integer.'),
 ('showarea',3,'Syntax: .showarea #areaid\r\n\r\nReveal the area of #areaid to the selected character. If no character is selected, reveal this area to you.'),
@@ -9124,11 +9124,11 @@ INSERT INTO `spell_chain` VALUES
 (29228,10448,8050,6),
 (31016,11300,2098,9),
 (31018,22829,22568,5),
-(25245,0,25245,1),
-(25246,25245,25245,2),
-(28896,25246,25245,3),
-(28899,28896,25245,4),
-(28901,28899,25245,5);
+(25229,0,25229,1),
+(25230,25229,25229,2),
+(28894,25230,25229,3),
+(28895,28894,25229,4),
+(28897,28895,25229,5);
 
 /*!40000 ALTER TABLE `spell_chain` ENABLE KEYS */;
 UNLOCK TABLES;

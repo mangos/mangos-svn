@@ -3616,6 +3616,11 @@ void Unit::CastMeleeProcDamageAndSpell(Unit* pVictim, uint32 damage, WeaponAttac
         case MELEE_HIT_CRIT:
             if(spellCasted && attType == BASE_ATTACK)
             {
+                procAttacker |= PROC_FLAG_CRIT_SPELL;
+                procVictim   |= PROC_FLAG_STRUCK_CRIT_SPELL;
+            }
+            else if(attType == BASE_ATTACK || attType == OFF_ATTACK)
+            {
                 procAttacker = PROC_FLAG_HIT_MELEE | PROC_FLAG_CRIT_MELEE;
                 procVictim = PROC_FLAG_STRUCK_MELEE | PROC_FLAG_STRUCK_CRIT_MELEE;
             }
