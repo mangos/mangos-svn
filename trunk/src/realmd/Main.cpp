@@ -132,12 +132,12 @@ int main(int argc, char **argv)
         uint32 Aff = sConfig.GetIntDefault("UseProcessors", 0);
         if(Aff > 0)
         {
-            uint32 appAff;
-            uint32 sysAff;
+            DWORD appAff;
+            DWORD sysAff;
 
             if(GetProcessAffinityMask(hProcess,&appAff,&sysAff))
             {
-                uint32 curAff = Aff & appAff;               // remove non accessible processors
+                DWORD curAff = Aff & appAff;                // remove non accessible processors
 
                 if(!curAff )
                 {
