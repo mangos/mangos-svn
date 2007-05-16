@@ -733,6 +733,7 @@ INSERT INTO `command` VALUES
 ('save',0,'Syntax: .save\r\n\r\nSaves your character.'),
 ('saveall',1,'Syntax: .saveall\r\n\r\nSave all characters in game.'),
 ('security',3,'Syntax: .security $name #level\r\n\r\nSet the security level of player $name to a level of #level.\r\n\r\n#level may range from 0 to 5.'),
+('sendmail',1,'Syntax: .sendmail #playername #subject #text\r\n\r\nSend a mail to a player. Note: subject don\'t must have spaces.'),
 ('setmovetype',2,'Syntax: .setmovetype [#creature_guid] stay/random/way\r\n\r\nSet for creature pointed by #creature_guid (or selected if #creature_guid not provided) movement type and move it to respawn position (if creature alive). Any existed waypoints for creature will be removed from database. If creature is dead then movement type will aplied at creature respawm.'),
 ('setvalue',3,'Syntax: .setvalue #field #value #isInt\r\n\r\nSet the field #field of the selected creature with value #value. If no creature is selected, set the content of your field.\r\n\r\nUse a #isInt of value 1 if #value is an integer.'),
 ('showarea',3,'Syntax: .showarea #areaid\r\n\r\nReveal the area of #areaid to the selected character. If no character is selected, reveal this area to you.'),

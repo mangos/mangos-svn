@@ -575,4 +575,6 @@ EXTRA_DIST = \
 	3631_gameobject_template.sql \
 	3636_character_spell.sql \
 	3636_playercreateinfo_spell.sql \
+	3646_spell_chain.sql \
+	3648_command.sql \
 	README

@@ -160,6 +160,8 @@
 #define LANG_COMMAND_TELE_NOREQUEST      "There are no teleport locations matching your request."
 #define LANG_COMMAND_TELE_NOLOCATION     "None locations found."
 
+#define LANG_MAIL_SENT                   "Mail sent to %s"
+
 // level 2 chat
 #define LANG_NO_SELECTION                "No selection."
 #define LANG_OBJECT_GUID                 "Object guid is: lowpart %u highpart %X"
