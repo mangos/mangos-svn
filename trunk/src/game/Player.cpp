@@ -2772,40 +2772,45 @@ bool Player::HasSpell(uint32 spell) const
 {
     PlayerSpellMap::const_iterator itr = m_spells.find((uint16)spell);
     return (itr != m_spells.end() && itr->second->state != PLAYERSPELL_REMOVED);
-
-    // Look in the effects of spell , if is a Learn Spell Effect, see if is equal to triggerspell
-    // If inst, look if have this spell.
-    /*for (PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
-    {
-        for(uint8 i=0;i<3;i++)
-        {
-            if(spellInfo->Effect[i]==36)                    // Learn Spell effect
-            {
-                if ( itr->first == spellInfo->EffectTriggerSpell[i] )
-                    return true;
-            }
-            else if(itr->first == spellInfo->Id)
-                return true;
-        }
-    }
-
-    return false;*/
 }
 
-bool Player::CanLearnProSpell(uint32 spell)
+TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell)
 {
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell);
+    if (!trainer_spell)
+        return TRAINER_SPELL_RED;
 
-    if (!spellInfo)
-        return false;
-    if(spellInfo->Effect[0] != SPELL_EFFECT_LEARN_SPELL)
-        return true;
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(trainer_spell->spell->Id);
 
+    // not learn spell
+    if (!spellInfo || spellInfo->Effect[0] != SPELL_EFFECT_LEARN_SPELL)
+        return TRAINER_SPELL_RED;
+
+    uint32 learned_spell_id = trainer_spell->spell->EffectTriggerSpell[0];
+
+    // known spell
+    if(HasSpell(learned_spell_id))
+        return TRAINER_SPELL_GRAY;
+
+    // check level requirement
+    if(getLevel() < ( trainer_spell->reqlevel ? trainer_spell->reqlevel : spellInfo->spellLevel))
+        return TRAINER_SPELL_RED;
+
+    // check prev.rank requirement
+    uint32 prev_id =  objmgr.GetPrevSpellInChain(learned_spell_id);
+    if(prev_id && !HasSpell(prev_id))
+        return TRAINER_SPELL_RED;
+
+    // check skill requirement
+    if(trainer_spell->reqskill && GetPureSkillValue(trainer_spell->reqskill) < trainer_spell->reqskillvalue)
+        return TRAINER_SPELL_RED;
+
+    // check primary prof. limit
     uint32 skill = spellInfo->EffectMiscValue[1];
     uint32 value = 0;
 
+    // secondary prof. or not prof. spell
     if( !IsPrimaryProfessionSkill(skill))
-        return true;
+        return TRAINER_SPELL_GREEN;
 
     for (PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
@@ -2821,16 +2826,18 @@ bool Player::CanLearnProSpell(uint32 spell)
 
             // not check prof count for not first prof. spells (when skill already known)
             if(pskill == skill)
-                return true;
+                return TRAINER_SPELL_GREEN;
 
             // count only first rank prof. spells
             if(objmgr.GetSpellRank(pSpellInfo->Id)==1)
                 value += 1;
         }
     }
+
     if(value >= sWorld.getConfig(CONFIG_MAX_PRIMARY_TRADE_SKILL))
-        return false;
-    else return true;
+        return TRAINER_SPELL_RED;
+
+    return TRAINER_SPELL_GREEN;
 }
 
 void Player::DeleteFromDB()

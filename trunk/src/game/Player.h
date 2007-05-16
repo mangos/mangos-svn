@@ -83,6 +83,13 @@ struct SpellCooldown
 
 typedef std::map<uint32, SpellCooldown> SpellCooldowns;
 
+enum TrainerSpellState
+{
+    TRAINER_SPELL_GREEN = 0,
+    TRAINER_SPELL_RED   = 1,
+    TRAINER_SPELL_GRAY  = 2
+};
+
 enum ActionButtonUpdateState
 {
     ACTIONBUTTON_UNCHANGED = 0,
@@ -936,7 +943,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void PetSpellInitialize();
         bool HasSpell(uint32 spell) const;
-        bool CanLearnProSpell(uint32 spell);
+        TrainerSpellState GetTrainerSpellState(TrainerSpell const* trainer_spell);
         void SendProficiency(uint8 pr1, uint32 pr2);
         void SendInitialSpells();
         bool addSpell(uint16 spell_id,uint8 active, PlayerSpellState state = PLAYERSPELL_NEW, uint16 slot_id=0xffff);
