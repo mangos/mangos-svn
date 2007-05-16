@@ -2187,6 +2187,9 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
     newspell->active = active;
     newspell->state = state;
 
+    bool superceded_old = false;
+
+    // replace spells in action bars and spellbook to bigger rank if only one spell rank must be accessible
     if(newspell->active && !objmgr.canStackSpellRank(spellInfo))
     {
         PlayerSpellMap::iterator itr;
@@ -2200,18 +2203,23 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
             {
                 if(itr->second->active)
                 {
-                    WorldPacket data(SMSG_SUPERCEDED_SPELL, (8));
+                    WorldPacket data(SMSG_SUPERCEDED_SPELL, (4));
 
                     if(objmgr.GetSpellRank(spell_id) >= objmgr.GetSpellRank(itr->first))
                     {
-                        data << uint32(itr->first);
-                        data << uint32(spell_id);
+                        data << uint16(itr->first);
+                        data << uint16(spell_id);
+
+                        // mark old spell as disable (SMSG_SUPERCEDED_SPELL replace it in client by new)
                         itr->second->active = 0;
+                        superceded_old = true;              // new spell replace old in action bars and spell book.
                     }
                     else
                     {
-                        data << uint32(spell_id);
-                        data << uint32(itr->first);
+                        data << uint16(spell_id);
+                        data << uint16(itr->first);
+
+                        // mark new spell as disable (not learned yet for client and will not learned)
                         newspell->active = 0;
                     }
 
@@ -2287,7 +2295,8 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
             learnSpell(itr->second.spell);
     }
 
-    return true;
+    // return true (for send learn packet) only if spell active (in case ranked spells) and not replace old spell
+    return newspell->active && !superceded_old;
 }
 
 bool Player::learnSpell(uint16 spell_id)
