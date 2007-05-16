@@ -182,8 +182,8 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     sDatabase.escape_string(subject);
     //not needed : sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mID);
     sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-        "VALUES ('%u', '%u', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "','" I64FMTD "', '%u', '%u', '0')",
-        mailId, messagetype, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), itemTextId, GUID_LOPART(itemId), item_template, (uint64)etime, (uint64)dtime, money, COD);
+        "VALUES ('%u', '%u', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "','" I64FMTD "', '%u', '%u', '%d')",
+        mailId, messagetype, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), itemTextId, GUID_LOPART(itemId), item_template, (uint64)etime, (uint64)dtime, money, COD, NOT_READ);
     sDatabase.BeginTransaction();
     pl->SaveInventoryAndGoldToDB();
     sDatabase.CommitTransaction();
@@ -272,8 +272,8 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
     subject = m->subject;
     sDatabase.escape_string(subject);                       //we cannot forget to delete COD, if returning mail with COD
     sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-        "VALUES ('%u', '0', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "', '" I64FMTD "', '%u', '0', '16')",
-        messageID, m->receiver, m->sender, subject.c_str(), m->itemTextId, m->item_guid, m->item_template, (uint64)etime, (uint64)dtime, m->money);
+        "VALUES ('%u', '0', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "', '" I64FMTD "', '%u', '0', '%d')",
+        messageID, m->receiver, m->sender, subject.c_str(), m->itemTextId, m->item_guid, m->item_template, (uint64)etime, (uint64)dtime, m->money,RETURNED_CHECKED);
     delete m;                                               //we can deallocate old mail
     pl->SendMailResult(mailId, MAIL_RETURNED_TO_SENDER, 0);
 }
@@ -328,8 +328,8 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
             std::string subject = m->subject;
             sDatabase.escape_string(subject);
             sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-                "VALUES ('%u', '0', '%u', '%u', '%s', '0', '0', '0', '" I64FMTD "', '" I64FMTD "', '%u', '0', '8')",
-                newMailId, m->receiver, m->sender, subject.c_str(), (uint64)etime, (uint64)dtime, m->COD);
+                "VALUES ('%u', '0', '%u', '%u', '%s', '0', '0', '0', '" I64FMTD "', '" I64FMTD "', '%u', '0', '%d')",
+                newMailId, m->receiver, m->sender, subject.c_str(), (uint64)etime, (uint64)dtime, m->COD, COD_PAYMENT_CHECKED);
 
             pl->ModifyMoney( -int32(m->COD) );
 
