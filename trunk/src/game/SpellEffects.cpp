@@ -583,6 +583,17 @@ void Spell::EffectDummy(uint32 i)
         }
     }
 
+    // Charge
+    if(m_spellInfo->SpellVisual == 867 && m_spellInfo->SpellIconID == 457)
+    {
+        uint32 rage = m_spellInfo->EffectBasePoints[i];
+        SpellEntry const* OriginalCharge = sSpellStore.LookupEntry(34846);
+        SpellEntry CustomCharge = *OriginalCharge;
+        CustomCharge.EffectBasePoints[0] = rage;
+        m_caster->CastSpell(m_caster,&CustomCharge,true);
+        return;
+    }
+
     // Judgement of command
     if (m_spellInfo->Attributes == 0x50800 && m_spellInfo->AttributesEx == 128)
     {
@@ -659,6 +670,7 @@ void Spell::EffectDummy(uint32 i)
             ((Player*)m_targets.getUnitTarget())->GetSession()->SendPacket( &data );
         }
     }
+
     // Shaman's "Lightning Shield"
     if(m_spellInfo->Id == 26545)
     {
@@ -684,6 +696,7 @@ void Spell::EffectDummy(uint32 i)
         }
         m_caster->CastSpell(unitTarget, spell, true, NULL);
     }
+
     // Priest's "Shadowguard"
     if(m_spellInfo->Id == 28376)
     {
@@ -708,7 +721,7 @@ void Spell::EffectDummy(uint32 i)
 
         m_caster->CastSpell(unitTarget, spell, true, NULL);
     }
- }
+}
 
 void Spell::EffectTriggerSpell(uint32 i)
 {

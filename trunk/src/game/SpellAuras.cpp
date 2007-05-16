@@ -1293,16 +1293,26 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                     for(Unit::AuraList::iterator i = mDummy.begin(); i != mDummy.end(); ++i)
                         if ((*i)->GetSpellProto()->SpellIconID == 238)
                             FurorChance = (*i)->GetModifier()->m_amount;
-                    if (roll_chance_f(FurorChance))
+
+                    if (m_modifier.m_miscvalue == FORM_CAT)
                     {
-                        unit_target->ApplyStats(true);
-                        if (m_modifier.m_miscvalue == FORM_CAT)
-                            //if Furor procs, player gains 40 energy at shapeshift to cat form
+                        unit_target->SetPower(POWER_ENERGY,0);
+                        if(urand(1,100) <= FurorChance)
+                        {
+                            unit_target->ApplyStats(true);
                             unit_target->CastSpell(unit_target,17099,true,NULL,this);
-                        else
-                            //if Furor procs, player gains 10 rage at shapeshift to bear/direbear form
+                            unit_target->ApplyStats(false);
+                        }
+                    }
+                    else
+                    {
+                        unit_target->SetPower(POWER_RAGE,0);
+                        if(urand(1,100) <= FurorChance)
+                        {
+                            unit_target->ApplyStats(true);
                             unit_target->CastSpell(unit_target,17057,true,NULL,this);
-                        unit_target->ApplyStats(false);
+                            unit_target->ApplyStats(false);
+                        }
                     }
                     break;
                 }
@@ -1310,27 +1320,17 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                 case FORM_DEFENSIVESTANCE:
                 case FORM_BERSERKERSTANCE:
                 {
-                    // Tactical mastery effect
                     uint32 Rage_val = 0;
+                    // Stance mastery + Tactical mastery
+                    Unit::AuraList& xDummy = m_target->GetAurasByType(SPELL_AURA_DUMMY);
+                    for(Unit::AuraList::iterator i = xDummy.begin(); i != xDummy.end(); ++i)
+                        if((*i)->GetSpellProto()->SpellIconID == 139)
+                            Rage_val += ( (*i)->GetModifier()->m_amount * 10 );
 
-                    Unit::AuraList const& aurasOverrideClassScripts = unit_target->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
-                    for(Unit::AuraList::const_iterator iter = aurasOverrideClassScripts.begin(); iter != aurasOverrideClassScripts.end(); ++iter)
-                    {
-                        // select by script id
-                        switch((*iter)->GetModifier()->m_miscvalue)
-                        {
-                            case 831: Rage_val =  50; break;
-                            case 832: Rage_val = 100; break;
-                            case 833: Rage_val = 150; break;
-                            case 834: Rage_val = 200; break;
-                            case 835: Rage_val = 250; break;
-                        }
-                        if(Rage_val!=0)
-                            break;
-                    }
-                    if (unit_target->GetPower(POWER_RAGE)>Rage_val)
+                    if (unit_target->GetPower(POWER_RAGE) > Rage_val)
                         unit_target->SetPower(POWER_RAGE,Rage_val);
-                }   break;
+                    break;
+                }
                 default:
                     break;
             }
