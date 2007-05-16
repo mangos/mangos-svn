@@ -548,6 +548,14 @@ void Spell::EffectDummy(uint32 i)
                 hurt = 25902;
                 heal = 25903;
                 break;
+            case 27174:
+                hurt = 27176;
+                heal = 27175;
+                break;
+            case 33072:
+                hurt = 33073;
+                heal = 33074;
+                break;
             default:
                 break;
         }
@@ -2086,6 +2094,8 @@ void Spell::EffectWeaponDmg(uint32 i)
             case 23892: BTAura = 23886; break;
             case 23893: BTAura = 23887; break;
             case 23894: BTAura = 23888; break;
+            case 25251: BTAura = 25252; break;
+            case 30335: BTAura = 30339; break;
             default: break;
         }
         // FIX_ME: Where this value used???
