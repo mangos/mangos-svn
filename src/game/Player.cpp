@@ -4626,7 +4626,11 @@ uint32 Player::GetGuildIdFromDB(uint64 guid)
     ss<<"SELECT `guildid` FROM `guild_member` WHERE `guid`='"<<guid<<"'";
     QueryResult *result = sDatabase.Query( ss.str().c_str() );
     if( result )
-        return (*result)[0].GetUInt32();
+    {
+        uint32 v = result->Fetch()[0].GetUInt32();
+        delete result;
+        return v;
+    }
     else
         return 0;
 }
@@ -4637,7 +4641,11 @@ uint32 Player::GetRankFromDB(uint64 guid)
     ss<<"SELECT `rank` FROM `guild_member` WHERE `guid`='"<<guid<<"'";
     QueryResult *result = sDatabase.Query( ss.str().c_str() );
     if( result )
-        return (*result)[0].GetUInt32();
+    {
+        uint32 v = result->Fetch()[0].GetUInt32();
+        delete result;
+        return v;
+    }
     else
         return 0;
 }
@@ -4650,7 +4658,15 @@ uint32 Player::GetZoneIdFromDB(uint64 guid)
     if( !result )
         return 0;
 
-    return MapManager::Instance().GetZoneId((*result)[0].GetUInt32(), (*result)[0].GetFloat(),(*result)[0].GetFloat());
+    Field* fields = result->Fetch();
+
+    uint32 map  = fields[0].GetUInt32();
+    uint32 posx = fields[1].GetFloat();
+    uint32 posy = fields[2].GetFloat();
+
+    delete result;
+
+    return MapManager::Instance().GetZoneId(map,posx,posy);
 }
 
 void Player::UpdateZone(uint32 newZone)
