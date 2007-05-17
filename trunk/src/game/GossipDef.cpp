@@ -306,9 +306,9 @@ void PlayerMenu::SendQuestGiverQuestDetails( Quest *pQuest, uint64 npcGUID, bool
     data << pQuest->GetQuestId() << pQuest->GetTitle() << pQuest->GetDetails();
     data << pQuest->GetObjectives();
     data << (uint32)ActivateAccept;
+    data << pQuest->GetSuggestedPlayers();
+    
     ItemPrototype const* IProto;
-
-    data << uint32(0); // suggested players
 
     data << pQuest->GetRewChoiceItemsCount();
     for (uint32 i=0; i < QUEST_REWARD_CHOICES_COUNT; i++)
@@ -381,7 +381,7 @@ void PlayerMenu::SendQuestQueryResponse( Quest *pQuest )
     data << uint32(pQuest->GetZoneOrSort());
 
     data << uint32(pQuest->GetType());
-    data << uint32(0);//SuggestedPlayers
+    data << uint32(pQuest->GetSuggestedPlayers());
     data << uint32(pQuest->GetRequiredRepFaction());
     data << uint32(pQuest->GetRequiredRepValue());
     data << uint32(0);

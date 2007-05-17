@@ -578,4 +578,5 @@ EXTRA_DIST = \
 	3646_spell_chain.sql \
 	3648_command.sql \
 	3653_spell.sql \
+	3655_quest_template.sql \
 	README

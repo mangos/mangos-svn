@@ -1015,6 +1015,23 @@ enum QuestSort
     QUEST_SORT_MIDSUMMER           = 369
 };
 
+inline uint8 ClassByQuestSort(int32 QuestSort)
+{
+    switch(QuestSort)
+    {
+        case QUEST_SORT_WARLOCK: return CLASS_WARLOCK;
+        case QUEST_SORT_WARRIOR: return CLASS_WARRIOR;
+        case QUEST_SORT_SHAMAN:  return CLASS_SHAMAN;
+        case QUEST_SORT_PALADIN: return CLASS_PALADIN;
+        case QUEST_SORT_MAGE:    return CLASS_MAGE;
+        case QUEST_SORT_ROGUE:   return CLASS_ROGUE;
+        case QUEST_SORT_HUNTER:  return CLASS_HUNTER;
+        case QUEST_SORT_PRIEST:  return CLASS_PRIEST;
+        case QUEST_SORT_DRUID:   return CLASS_DRUID;
+    }
+    return 0;
+}
+
 enum SkillType
 {
     SKILL_FROST                    = 6,
@@ -1167,6 +1184,23 @@ inline bool IsPrimaryProfessionSkill(uint32 skill)
 inline bool IsProfessionSkill(uint32 skill)
 {
     return  IsPrimaryProfessionSkill(skill) || skill == SKILL_FISHING || skill == SKILL_COOKING || skill == SKILL_FIRST_AID;
+}
+
+inline uint32 SkillByQuestSort(int32 QuestSort)
+{
+    switch(QuestSort)
+    {
+        case QUEST_SORT_HERBALISM:      return SKILL_HERBALISM;
+        case QUEST_SORT_FISHING:        return SKILL_FISHING;
+        case QUEST_SORT_BLACKSMITHING:  return SKILL_BLACKSMITHING;
+        case QUEST_SORT_ALCHEMY:        return SKILL_ALCHEMY;
+        case QUEST_SORT_LEATHERWORKING: return SKILL_LEATHERWORKING;
+        case QUEST_SORT_ENGINERING:     return SKILL_ENGINERING;
+        case QUEST_SORT_TAILORING:      return SKILL_TAILORING;
+        case QUEST_SORT_COOKING:        return SKILL_COOKING;
+        case QUEST_SORT_FIRST_AID:      return SKILL_FIRST_AID;
+    }
+    return 0;
 }
 
 enum TotemCategory

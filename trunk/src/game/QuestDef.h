@@ -140,11 +140,10 @@ class Quest
         uint32 GetQuestLevel() { return QuestLevel; }
         uint32 GetType() { return Type; }
         uint32 GetRequiredRaces() { return RequiredRaces; }
-        uint32 GetRequiredClass() { return RequiredClass; }
-        uint32 GetRequiredSkill() { return RequiredSkill; }
         uint32 GetRequiredSkillValue() { return RequiredSkillValue; }
         uint32 GetRequiredRepFaction() { return RequiredRepFaction; }
         uint32 GetRequiredRepValue() { return RequiredRepValue; }
+        uint32 GetSuggestedPlayers() { return SuggestedPlayers; }
         uint32 GetLimitTime() { return LimitTime; }
         int32  GetNextQuestId() { return NextQuestId; }
         uint32 GetExclusiveGroup() { return ExclusiveGroup; }
@@ -214,11 +213,10 @@ class Quest
         uint32 QuestLevel;
         uint32 Type;
         uint32 RequiredRaces;
-        uint32 RequiredClass;
-        uint32 RequiredSkill;
         uint32 RequiredSkillValue;
         uint32 RequiredRepFaction;
         uint32 RequiredRepValue;
+        uint32 SuggestedPlayers;
         uint32 LimitTime;
         uint32 SpecialFlags;
         int32  PrevQuestId;

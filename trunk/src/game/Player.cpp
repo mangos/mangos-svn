@@ -9590,17 +9590,24 @@ bool Player::SatisfyQuestClass( uint32 quest_id, bool msg )
     Quest * qInfo = objmgr.QuestTemplates[quest_id];
     if( qInfo )
     {
-        uint32 reqclasses = qInfo->GetRequiredClass();
-        if ( reqclasses == 0 )
+        int32 zoneOrSort = qInfo->GetZoneOrSort();
+
+        // skip zone case
+        if ( zoneOrSort >= 0 )
             return true;
-        if( (reqclasses & getClassMask()) == 0 )
+
+        int32 questSort = -zoneOrSort;
+
+        uint8 reqClass = ClassByQuestSort(questSort);
+
+        if(reqClass != 0 && getClass() != reqClass)
         {
             if( msg )
                 SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
             return false;
         }
-        return true;
 
+        return true;
     }
     return false;
 }
@@ -9710,10 +9717,17 @@ bool Player::SatisfyQuestSkill( uint32 quest_id, bool msg )
     Quest * qInfo = objmgr.QuestTemplates[quest_id];
     if( qInfo )
     {
-        uint32 reqskill = qInfo->GetRequiredSkill();
-        if( reqskill == QUEST_TRSKILL_NONE )
+        int32 zoneOrSort = qInfo->GetZoneOrSort();
+
+        // skip zone case
+        if ( zoneOrSort >= 0 )
             return true;
-        if( GetSkillValue( reqskill ) < qInfo->GetRequiredSkillValue() )
+
+        int32 questSort = -zoneOrSort;
+
+        uint8 reqskill = SkillByQuestSort(questSort);
+
+        if( reqskill != 0 && GetSkillValue( reqskill ) < qInfo->GetRequiredSkillValue() )
         {
             if( msg )
                 SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
