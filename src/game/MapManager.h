@@ -59,7 +59,6 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
 
         inline void SetMapUpdateInterval(uint32 t)
         {
-
             if( t > 50 )
             {
                 i_timer.SetInterval(t);

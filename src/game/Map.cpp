@@ -822,7 +822,6 @@ void Map::Update(const uint32 &t_diff)
                 NGridType &grid(*i_grids[i][j]);
                 GridInfo &info(*i_info[i][j]);
                 si_GridStates[grid.GetGridState()]->Update(*this, grid, info, i, j, t_diff);
-
             }
             mask <<= 1;
         }

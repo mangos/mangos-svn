@@ -2826,7 +2826,7 @@ void Unit::ApplyStats(bool apply)
         case CLASS_SHAMAN:  classrate = 19.7;  break;
         case CLASS_MAGE:    classrate = 19.44; break;
         case CLASS_ROGUE:   classrate = 29.0;  break;
-        case CLASS_HUNTER:  classrate = 53.0;  break;       // in 2.0.x = 33
+        case CLASS_HUNTER:  classrate = 33.0;  break;
         case CLASS_PRIEST:
         case CLASS_WARLOCK:
         case CLASS_DRUID:

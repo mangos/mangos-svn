@@ -32,13 +32,13 @@
 #include "RedZoneDistrict.h"
 #include "GridNotifiers.h"
 #include "MapManager.h"
+#include "Map.h"
 #include "CellImpl.h"
 #include "GridNotifiersImpl.h"
 #include "Opcodes.h"
 #include "ObjectDefines.h"
 
 #include <cmath>
-#include <bitset>
 
 #define CLASS_LOCK MaNGOS::ClassLevelLockable<ObjectAccessor, ZThread::FastMutex>
 INSTANTIATE_SINGLETON_2(ObjectAccessor, CLASS_LOCK);
@@ -580,7 +580,7 @@ ObjectAccessor::Update(const uint32  &diff)
             creature_locations.insert( CreatureLocationHolderType::value_type(iter->second->GetMapId(), iter->second) );
         }
 
-        uint32 map_id = 0;
+        Map *map;
         uint32 instance_id = 0;
         MaNGOS::ObjectUpdater updater(diff);
         // for creature
@@ -588,17 +588,16 @@ ObjectAccessor::Update(const uint32  &diff)
         // for pets
         TypeContainerVisitor<MaNGOS::ObjectUpdater, WorldTypeMapContainer > world_object_update(updater);
 
-        std::bitset<TOTAL_NUMBER_OF_CELLS_PER_MAP*TOTAL_NUMBER_OF_CELLS_PER_MAP> marked_cell(0);
         for(CreatureLocationHolderType::iterator iter=creature_locations.begin(); iter != creature_locations.end(); ++iter)
         {
-            if( map_id != (*iter).first || instance_id != (*iter).second->GetInstanceId())
-            {
-                map_id = (*iter).first;
-                instance_id = (*iter).second->GetInstanceId();
-                marked_cell.reset();
-            }
+            MapManager::Instance().GetMap((*iter).first, (*iter).second)->marked_cells.reset();
+        }
 
+        for(CreatureLocationHolderType::iterator iter=creature_locations.begin(); iter != creature_locations.end(); ++iter)
+        {
             Player *player = (*iter).second;
+            map = MapManager::Instance().GetMap((*iter).first, player);
+
             CellPair standing_cell(MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY()));
             CellPair update_cell(standing_cell);
             update_cell << 1;
@@ -609,15 +608,15 @@ ObjectAccessor::Update(const uint32  &diff)
                 for(CellPair cell_iter=update_cell; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
                 {
                     uint32 cell_id = (cell_iter.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_iter.x_coord;
-                    if( !marked_cell.test(cell_id) )
+                    if( !map->marked_cells.test(cell_id) )
                     {
-                        marked_cell.set(cell_id);
+                        map->marked_cells.set(cell_id);
                         Cell cell = RedZone::GetZone(cell_iter);
                         cell.data.Part.reserved = CENTER_DISTRICT;
                         cell.SetNoCreate();
                         CellLock<NullGuard> cell_lock(cell, cell_iter);
-                        cell_lock->Visit(cell_lock, grid_object_update,  *MapManager::Instance().GetMap(map_id, player));
-                        cell_lock->Visit(cell_lock, world_object_update, *MapManager::Instance().GetMap(map_id, player));
+                        cell_lock->Visit(cell_lock, grid_object_update,  *map);
+                        cell_lock->Visit(cell_lock, world_object_update, *map);
                     }
 
                     if (cell_iter.y_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)
