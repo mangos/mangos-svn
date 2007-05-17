@@ -964,7 +964,7 @@ void Player::BuildEnumData( WorldPacket * p_data )
     *p_data << uint8(bytes);
 
     *p_data << uint8(getLevel());                           //1
-    uint32 zoneId = MapManager::Instance ().GetMap(GetMapId(), this)->GetZoneId(GetPositionX(),GetPositionY());
+    uint32 zoneId = MapManager::Instance().GetMap(GetMapId(), this)->GetZoneId(GetPositionX(),GetPositionY());
 
     *p_data << zoneId;
     *p_data << GetMapId();

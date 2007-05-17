@@ -30,6 +30,8 @@
 #include "Timer.h"
 #include "SharedDefines.h"
 
+#include <bitset>
+
 class Unit;
 class WorldPacket;
 
@@ -199,7 +201,7 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
 
         GridMap *GridMaps[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
 
-        list<Player*>& GetPlayers() { return(i_Players); }
+        std::bitset<TOTAL_NUMBER_OF_CELLS_PER_MAP*TOTAL_NUMBER_OF_CELLS_PER_MAP> marked_cells;
 
     private:
         void SetTimer(uint32 t) { i_gridExpiry = t < MIN_GRID_DELAY ? MIN_GRID_DELAY : t; }

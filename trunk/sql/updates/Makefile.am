@@ -577,4 +577,5 @@ EXTRA_DIST = \
 	3636_playercreateinfo_spell.sql \
 	3646_spell_chain.sql \
 	3648_command.sql \
+	3653_spell.sql \
 	README

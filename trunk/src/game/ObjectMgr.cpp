@@ -3168,7 +3168,7 @@ void ObjectMgr::DeleteGOData(uint32 guid)
         cell_guids.gameobjects.erase(guid);
     }
 
-    mCreatureDataMap.erase(guid);
+    mGameObjectDataMap.erase(guid);
 }
 
 void ObjectMgr::AddCorpseCellData(uint32 mapid, uint32 cellid, uint32 player_guid, uint32 instance)
