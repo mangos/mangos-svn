@@ -2820,13 +2820,12 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
     if (!trainer_spell)
         return TRAINER_SPELL_RED;
 
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry(trainer_spell->spell->Id);
-
-    // not learn spell
-    if (!spellInfo || spellInfo->Effect[0] != SPELL_EFFECT_LEARN_SPELL)
-        return TRAINER_SPELL_RED;
-
     uint32 learned_spell_id = trainer_spell->spell->EffectTriggerSpell[0];
+
+    // get learned spell info
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(learned_spell_id);
+    if (!spellInfo)
+        return TRAINER_SPELL_RED;
 
     // known spell
     if(HasSpell(learned_spell_id))
@@ -2845,13 +2844,14 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
     if(trainer_spell->reqskill && GetPureSkillValue(trainer_spell->reqskill) < trainer_spell->reqskillvalue)
         return TRAINER_SPELL_RED;
 
-    // check primary prof. limit
-    uint32 skill = spellInfo->EffectMiscValue[1];
-    uint32 value = 0;
-
     // secondary prof. or not prof. spell
-    if( !IsPrimaryProfessionSkill(skill))
+    uint32 skill = spellInfo->EffectMiscValue[1];
+
+    if(spellInfo->Effect[1] != SPELL_EFFECT_SKILL || !IsPrimaryProfessionSkill(skill))
         return TRAINER_SPELL_GREEN;
+
+    // check primary prof. limit
+    uint32 value = 0;
 
     for (PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
