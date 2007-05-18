@@ -171,6 +171,8 @@ Player::Player (WorldSession *session): Unit( 0 )
 
     m_mailsLoaded = false;
     m_mailsUpdated = false;
+    unReadMails = 0;
+    m_nextMailDelivereTime = 0;
 
     m_resetTalentsCost = 0;
     m_resetTalentsTime = 0;
@@ -211,7 +213,7 @@ Player::~Player ()
         delete itr->second;
 
     //all mailed items should be deleted, also all mail should be deallocated
-    for (std::deque<Mail*>::iterator itr =  m_mail.begin(); itr != m_mail.end();++itr)
+    for (PlayerMails::iterator itr =  m_mail.begin(); itr != m_mail.end();++itr)
         delete *itr;
 
     for (ItemMap::iterator iter = mMitems.begin(); iter != mMitems.end(); ++iter)
@@ -663,6 +665,16 @@ void Player::Update( uint32 p_time )
 {
     if(!IsInWorld())
         return;
+
+    // undelivered mail
+    if(m_nextMailDelivereTime && m_nextMailDelivereTime <= time(NULL))
+    {
+        SendNewMail();
+        ++unReadMails;
+
+        // It will be recalculate at mailbox open (for unReadMails important non-0 until mailbox open, it also will be recalculated)
+        m_nextMailDelivereTime = 0;
+    }
 
     Unit::Update( p_time );
 
@@ -2084,8 +2096,7 @@ void Player::SendInitialSpells()
 
 void Player::RemoveMail(uint32 id)
 {
-    std::deque<Mail*>::iterator itr;
-    for (itr = m_mail.begin(); itr != m_mail.end();++itr)
+    for(PlayerMails::iterator itr = m_mail.begin(); itr != m_mail.end();++itr)
     {
         if ((*itr)->messageID == id)
         {
@@ -2099,6 +2110,17 @@ void Player::RemoveMail(uint32 id)
 //call this function when mail receiver is online
 void Player::CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::string subject, uint32 itemTextId, uint32 itemGuid, uint32 item_template, time_t expire_time, time_t deliver_time, uint32 money, uint32 COD, uint32 checked, Item* pItem)
 {
+    if(deliver_time <= time(NULL))                          // ready now
+    {
+        unReadMails++;
+        SendNewMail();
+    }
+    else                                                    // not ready and no have ready mails
+    {
+        if(!m_nextMailDelivereTime || m_nextMailDelivereTime > deliver_time)
+            m_nextMailDelivereTime =  deliver_time;
+    }
+
     if ( !m_mailsLoaded )
     {
         if ( pItem )
@@ -2121,7 +2143,7 @@ void Player::CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::st
     m->checked = checked;
     m->state = MAIL_STATE_UNCHANGED;
 
-    AddMail(m);
+    m_mail.push_front(m);                                   //to insert new mail to beginning of maillist
     if ( pItem )
         AddMItem(pItem);
 }
@@ -2137,20 +2159,31 @@ void Player::SendMailResult(uint32 mailId, uint32 mailAction, uint32 mailError, 
     GetSession()->SendPacket(&data);
 }
 
-//call this function only when sending new mail
-void Player::AddMail(Mail *m)
+void Player::SendNewMail()
 {
+    // deliver undelivered mail
     WorldPacket data(SMSG_RECEIVED_MAIL, 4);
     data << (uint32) 0;
     GetSession()->SendPacket(&data);
-    unReadMails++;
+}
 
-    if(!m_mailsLoaded)
+void Player::UpdateNextMailTimeAndUnreads()
+{
+    // calculate next delivery time (min. from non-delivered mails
+    // and recalculate unReadMail
+    time_t cTime = time(NULL);
+    m_nextMailDelivereTime = 0;
+    unReadMails = 0;
+    for(PlayerMails::iterator itr = m_mail.begin(); itr != m_mail.end(); ++itr)
     {
-        delete m;
-        return;
+        if((*itr)->deliver_time > cTime)
+        {
+            if(!m_nextMailDelivereTime || m_nextMailDelivereTime > (*itr)->deliver_time)
+                m_nextMailDelivereTime = (*itr)->deliver_time;
+        }
+        if(((*itr)->state | READ) == 0)
+            ++unReadMails;
     }
-    m_mail.push_front(m);                                   //to insert new mail to beginning of maillist
 }
 
 bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uint16 slot_id)
@@ -2575,8 +2608,7 @@ bool Player::_removeSpell(uint16 spell_id)
 
 Mail* Player::GetMail(uint32 id)
 {
-    std::deque<Mail*>::iterator itr;
-    for (itr = m_mail.begin(); itr != m_mail.end(); itr++)
+    for(PlayerMails::iterator itr = m_mail.begin(); itr != m_mail.end(); itr++)
     {
         if ((*itr)->messageID == id)
         {
@@ -11543,8 +11575,7 @@ void Player::_SaveMail()
     if (!m_mailsLoaded)
         return;
 
-    std::deque<Mail*>::iterator itr;
-    for (itr = m_mail.begin(); itr != m_mail.end(); itr++)
+    for (PlayerMails::iterator itr = m_mail.begin(); itr != m_mail.end(); itr++)
     {
         Mail *m = (*itr);
         if (m->state == MAIL_STATE_CHANGED)
@@ -11569,7 +11600,7 @@ void Player::_SaveMail()
     while ( continueDeleting )
     {
         continueDeleting = false;
-        for (itr = m_mail.begin(); itr != m_mail.end(); itr++)
+        for (PlayerMails::iterator itr = m_mail.begin(); itr != m_mail.end(); itr++)
         {
             if ((*itr)->state == MAIL_STATE_DELETED)
             {

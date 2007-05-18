@@ -498,6 +498,9 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
     }
     data.put<uint8>(0, mails_count);
     SendPacket(&data);
+
+    // recalculate m_nextMailDelivereTime and unReadMails
+    _player->UpdateNextMailTimeAndUnreads();
 }
 
 ///this function is called when client needs mail message body, or when player clicks on item which has ITEM_FIELD_ITEM_TEXT_ID > 0
