@@ -2914,37 +2914,6 @@ bool ChatHandler::HandleMod32Value(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleSendMailNotice(const char* args)
-{
-    char* px = strtok((char*)args, " ");
-    uint32 flag;
-    if (!px)
-        flag = 0;
-    else
-        flag = atoi(px);
-
-    WorldPacket data(SMSG_RECEIVED_MAIL, 4);
-
-    data << uint32(flag);
-    m_session->SendPacket(&data);
-    return true;
-}
-
-bool ChatHandler::HandleQueryNextMailTime(const char* args)
-{
-    char* px = strtok((char*)args, " ");
-    uint32 flag;
-    if (!px)
-        flag = 0;
-    else
-        flag = atoi(px);
-
-    WorldPacket data(MSG_QUERY_NEXT_MAIL_TIME, 4);
-    data << uint32(flag);
-    m_session->SendPacket(&data);
-    return true;
-}
-
 bool ChatHandler::HandleAddTeleCommand(const char * args)
 {
     if(!*args)

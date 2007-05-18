@@ -259,16 +259,24 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     }
     //plr->_RemoveAllItemMods();
 
-    //set a count of unread mails:
-    QueryResult *resultMails = sDatabase.PQuery("SELECT COUNT(id) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0", GUID_LOPART(playerGuid));
+    //set a count of unread mails
+    time_t cTime = time(NULL);
+    QueryResult *resultMails = sDatabase.PQuery("SELECT COUNT(id) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0 AND `deliver_time` <= '" I64FMTD "'", GUID_LOPART(playerGuid),(uint64)cTime);
     if (resultMails)
     {
         Field *fieldMail = resultMails->Fetch();
         plr->unReadMails = fieldMail[0].GetUInt8();
         delete resultMails;
     }
-    else
-        plr->unReadMails = 0;
+
+    // store nearest delivery time (it > 0 and if it < current then at next player update SendNewMaill will be called)
+    resultMails = sDatabase.PQuery("SELECT MIN(`deliver_time`) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0", GUID_LOPART(playerGuid));
+    if (resultMails)
+    {
+        Field *fieldMail = resultMails->Fetch();
+        plr->m_nextMailDelivereTime = (time_t)fieldMail[0].GetUInt64();
+        delete resultMails;
+    }
 
     SetPlayer(plr);
 

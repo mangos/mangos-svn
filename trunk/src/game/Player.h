@@ -41,6 +41,8 @@ class PlayerMenu;
 class Transport;
 class UpdateMask;
 
+typedef std::deque<Mail*> PlayerMails;
+
 enum SpellModType
 {
     SPELLMOD_FLAT         = 107,
@@ -141,7 +143,7 @@ struct PlayerLevelInfo
 
 struct PlayerInfo
 {
-    PlayerInfo() : displayId_m(0),displayId_f(0),levelInfo(NULL)             // existence checked by displayId != 0             // existance checked by displayId != 0
+    PlayerInfo() : displayId_m(0),displayId_f(0),levelInfo(NULL)             // existence checked by displayId != 0             // existence checked by displayId != 0
     {
     }
 
@@ -497,7 +499,7 @@ enum BankSlots
 
 enum BuyBackSlots
 {
-    // strored in m_buybackitems
+    // stored in m_buybackitems
     BUYBACK_SLOT_START          = 74,
     BUYBACK_SLOT_1              = 74,
     BUYBACK_SLOT_2              = 75,
@@ -895,21 +897,24 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::string subject, uint32 itemTextId, uint32 itemGuid, uint32 item_template, time_t expire_time,time_t delivery_time, uint32 money, uint32 COD, uint32 checked, Item* pItem);
         void SendMailResult(uint32 mailId, uint32 mailAction, uint32 mailError, uint32 equipError = 0);
-        void AddMail(Mail *m);
+        void SendNewMail();
+        void UpdateNextMailTimeAndUnreads();
+
         //void SetMail(Mail *m);
         void RemoveMail(uint32 id);
 
         uint32 GetMailSize() { return m_mail.size();};
         Mail* GetMail(uint32 id);
 
-        std::deque<Mail*>::iterator GetmailBegin() { return m_mail.begin();};
-        std::deque<Mail*>::iterator GetmailEnd() { return m_mail.end();};
+        PlayerMails::iterator GetmailBegin() { return m_mail.begin();};
+        PlayerMails::iterator GetmailEnd() { return m_mail.end();};
 
         /*********************************************************/
         /*** MAILED ITEMS SYSTEM ***/
         /*********************************************************/
 
         uint8 unReadMails;
+        time_t m_nextMailDelivereTime;
 
         typedef HM_NAMESPACE::hash_map<uint32, Item*> ItemMap;
 
@@ -1402,7 +1407,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 m_GuildIdInvited;
 
-        std::deque<Mail*> m_mail;
+        PlayerMails m_mail;
         PlayerSpellMap m_spells;
         SpellCooldowns m_spellCooldowns;
 
