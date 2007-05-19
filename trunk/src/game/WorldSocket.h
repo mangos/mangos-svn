@@ -132,7 +132,7 @@ class WorldSession;
 class WorldSocket : public TcpSocket
 {
     public:
-        WorldSocket(SocketHandler&);
+        WorldSocket(ISocketHandler&);
         ~WorldSocket();
 
         void SendPacket(WorldPacket* packet);
