@@ -37,6 +37,11 @@
 #include "CliRunnable.h"
 #include "RASocket.h"
 
+#include "Network/TcpSocket.h"
+#include "Network/Utility.h"
+#include "Network/Parse.h"
+#include "Network/Socket.h"
+
 /// \todo Warning disabling not useful under VC++2005. Can somebody say on which compiler it is useful?
 #pragma warning(disable:4305)
 
@@ -100,7 +105,8 @@ void Master::Run()
     ///- Launch the world listener socket
     port_t wsport = sWorld.getConfig(CONFIG_PORT_WORLD);
 
-    SocketHandler h;
+	SocketHandler h;
+
     ListenSocket<WorldSocket> worldListenSocket(h);
     if (worldListenSocket.Bind(wsport))
     {
