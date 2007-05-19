@@ -115,7 +115,7 @@ uint32 DBCFile::GetFormatRecordSize(const char * format,int32* index_pos)
     return recordsize;
 }
 
-void * DBCFile::AutoProduceData(const char * format, uint32 * records)
+void * DBCFile::AutoProduceData(const char * format, uint32 * records, char *&_data)
 {
     /*
     format STRING, NA, FLOAT,NA,INT <=>
@@ -127,8 +127,9 @@ void * DBCFile::AutoProduceData(const char * format, uint32 * records)
 
     this func will generate  entry[rows] data;
     */
+
     typedef char * ptr;
-    char * _data;
+    //char * _data;
     ptr* table;
     uint32 offset=0;
 
