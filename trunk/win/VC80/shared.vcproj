@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8,00"
+	Version="8.00"
 	Name="shared"
 	ProjectGUID="{90297C34-F231-4DF4-848E-A74BCC0E40ED}"
 	>
@@ -441,7 +441,43 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\shared\Network\IFile.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Network\Ipv4Address.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Network\Ipv4Address.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Network\Ipv6Address.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Network\Ipv6Address.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Network\ISocketHandler.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Network\ISocketHandler.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\shared\Network\ListenSocket.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Network\Mutex.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Network\Mutex.h"
 				>
 			</File>
 			<File
@@ -453,11 +489,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\shared\Network\PoolSocket.cpp"
+				RelativePath="..\..\src\shared\Network\RandomNumber.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\shared\Network\PoolSocket.h"
+				RelativePath="..\..\src\shared\Network\RandomNumber.h"
 				>
 			</File>
 			<File
@@ -477,6 +513,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\shared\Network\SctpSocket.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\shared\Network\Socket.cpp"
 				>
 			</File>
@@ -493,6 +533,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\shared\Network\SocketAddress.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\shared\Network\SocketHandler.cpp"
 				>
 			</File>
@@ -501,11 +545,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\shared\Network\SocketThread.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\shared\Network\SocketThread.h"
+				RelativePath="..\..\src\shared\Network\sockets-config.h"
 				>
 			</File>
 			<File
@@ -545,15 +585,15 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\shared\Network\Uid.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\shared\Network\Utility.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\shared\Network\Utility.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\shared\WorldPacket.h"
 				>
 			</File>
 		</Filter>
