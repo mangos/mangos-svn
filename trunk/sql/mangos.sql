@@ -376,7 +376,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `character_kill`;
 CREATE TABLE `character_kill` (
-  `guid` smallint(4) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
   `creature_template` int(11) unsigned NOT NULL default '0' COMMENT 'Creature Identifier',
   `honor` float NOT NULL default '0',
   `date` int(11) unsigned NOT NULL default '0',
