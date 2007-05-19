@@ -78,13 +78,13 @@ template<class T>
 class DBCStorage
 {
     public:
-        DBCStorage(const char *f){data = NULL;fmt=f;fieldCount = 0; nCount =0; }
-        ~DBCStorage(){if(data) delete [] data;};
+        DBCStorage(const char *f){index = NULL;fmt=f;fieldCount = 0; nCount =0; data = NULL; }
+        ~DBCStorage() { Clear(); }
 
         inline
             T const* LookupEntry(uint32 id) const
         {
-            return (id>=nCount)?NULL:data[id];
+            return (id>=nCount)?NULL:index[id];
         }
         inline
             unsigned int GetNumRows() const
@@ -101,20 +101,43 @@ class DBCStorage
             if (res)
             {
                 fieldCount = dbc->GetCols();
-                data=(T **) dbc->AutoProduceData(fmt,&nCount);
+                index=(T **) dbc->AutoProduceData(fmt,&nCount,data);
             }
             delete dbc;
 
             // error in dbc file at loading
-            if(!data)
+            if(!index)
                 res = false;
 
             return res;
         }
 
-        void Clear() {  delete[] ((char*)data); data = NULL; }
+        void Clear()
+        {
+            if (!index) return;
+            uint32 offset = 0;
+            for(uint32 x=0;x<fieldCount;x++)
+            {
+                switch(fmt[x])  {
+                case FT_IND:
+                case FT_INT:
+                case FT_FLOAT:
+                    offset += 4;
+                    break;
+                case FT_STRING:
+                    for(uint32 i = 0; i < nCount; i++) if(index[i])
+                        delete *(char**)((char*)index[i]+offset);
+                    offset+=sizeof(char*);
+                    break;
+                }
+            }
 
-        T** data;
+            delete[] ((char*)index); index = NULL;
+            delete data;
+        }
+
+        T** index;
+        char * data;
         uint32 nCount;
         uint32 fieldCount;
         const char * fmt;

@@ -87,7 +87,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
         for (unsigned int i = 0; i < numRows; i++)          // Loop through all talents.
         {
             // Someday, someone needs to revamp
-            TalentEntry *tmpTalent = sTalentStore.data[i];
+            const TalentEntry *tmpTalent = sTalentStore.LookupEntry(i);
             if (tmpTalent)                                  // the way talents are tracked
             {
                 if (tmpTalent->TalentTab == tTab)
