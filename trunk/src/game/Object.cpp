@@ -244,7 +244,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
         }
 
         *data << flags2;
-        *data << getMSTime();               // this appears to be time in ms but can be any thing
+        *data << getMSTime();               // this appears to be time in ms but can be any thing (mask, flags)
     }
 
     if (flags & UPDATEFLAG_HASPOSITION)     // 0x40
@@ -263,7 +263,10 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
             *data << ((WorldObject *)this)->GetPositionZ();
             *data << ((WorldObject *)this)->GetOrientation();
         }
+    }
 
+    if (flags & UPDATEFLAG_LIVING)          // 0x20
+    {
         if(flags2 & 0x0200)
         {
             *data << (uint64)((Player*)this)->GetTransport()->GetGUID();
@@ -271,21 +274,28 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
             *data << (float)((Player*)this)->GetTransOffsetY();
             *data << (float)((Player*)this)->GetTransOffsetZ();
             *data << (float)((Player*)this)->GetTransOffsetO();
-            *data << uint32(0x11);          //unk, was added in 2.0.3
+            *data << uint32(0x11);          //unk, mask or flags
         }
-    }
 
-    if (flags & UPDATEFLAG_LIVING)          // 0x20
-    {
-        *data << (uint32)0;                 // unknown
-
-        if(flags2 & 0x2000)                 // unknown, unused now
+        /*if(flags2 & 0x200000)
         {
             *data << (float)0;
-            *data << (float)1.0;
-            *data << (float)0.0;
+        }*/
+
+        *data << (uint32)0;                 // unknown
+
+        /*if(flags2 & 0x2000)                 // unknown, unused now
+        {
             *data << (float)0;
-        }
+            *data << (float)0;
+            *data << (float)0;
+            *data << (float)0;
+        }*/
+
+        /*if(flags2 & 0x4000000)
+        {
+            *data << uint32(0);
+        }*/
 
         *data << ((Unit*)this)->GetSpeed( MOVE_WALK );
         *data << ((Unit*)this)->GetSpeed( MOVE_RUN );
@@ -295,27 +305,62 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
         *data << ((Unit*)this)->GetSpeed( MOVE_FLY );
         *data << ((Unit*)this)->GetSpeed( MOVE_FLYBACK );
         *data << ((Unit*)this)->GetSpeed( MOVE_TURN );
+
+        /*if(flags2 & 0x8000000)              // splines?
+        {
+            uint32 flags3 = 0;
+            *data << uint32(flags3);
+            if(flags3 & 0x10000)
+            {
+                *data << (float)0;
+                *data << (float)0;
+                *data << (float)0;
+            }
+            if(flags3 & 0x20000)
+            {
+                *data << uint64(0);
+            }
+            if(flags3 & 0x40000)
+            {
+                *data << (float)0;
+            }
+
+            *data << uint32(0); // curr tick?
+            *data << uint32(0); // last tick?
+            *data << uint32(0); // ticks count?
+            uint32 poscount = 0;
+            *data << poscount;
+            for(uint32 i = 0; i < poscount; i++)
+            {
+                *data << (float)0;
+                *data << (float)0;
+                *data << (float)0;
+            }
+            // end coords
+            *data << (float)0;
+            *data << (float)0;
+            *data << (float)0;
+        }*/
     }
 
     if(flags & UPDATEFLAG_ALL)              // 0x10
     {
-        *data << uint32(1);                 // looks like flags (0x0, 0x1, 0x100, 0x20000, 0x40000)
+        *data << uint32(0);                 // unk
     }
 
     if(flags & UPDATEFLAG_HIGHGUID)         // 0x8
     {
-        *data << GetGUIDHigh();             // 2.0.6 - high guid was there, unk for 2.0.12
+        *data << uint32(0);                 // unk
     }
 
-    // if its unused, comment it. As its useless to check for it
-    //if(flags & UPDATEFLAG_FULLGUID)         // 0x4
+    //if(flags & UPDATEFLAG_FULLGUID)       // 0x4
     //{
-        // unused in mangos
+        // packed guid (probably target guid)
     //}
 
     if(flags & UPDATEFLAG_TRANSPORT)        // 0x2
     {
-        *data << getMSTime();
+        *data << getMSTime();               // unsure
     }
 }
 

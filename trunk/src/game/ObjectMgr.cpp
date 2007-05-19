@@ -250,14 +250,14 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
     {
         bidder->GetSession()->SendAuctionBidderNotification( auction->location, auction->Id, bidder_guid, 0, 0, auction->item_template);
 
-        bidder->CreateMail(mailId, AUCTIONHOUSE_MAIL, auction->location, msgAuctionWonSubject.str(), itemTextId, auction->item_guid, auction->item_template, etime, dtime, 0, 0, AUCTION_CHECKED, pItem);
+        bidder->CreateMail(mailId, MAIL_AUCTION, auction->location, msgAuctionWonSubject.str(), itemTextId, auction->item_guid, auction->item_template, etime, dtime, 0, 0, AUCTION_CHECKED, pItem);
     }
     else
         delete pItem;
 
     sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
         "VALUES ('%u', '%d', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
-        mailId, AUCTIONHOUSE_MAIL, auction->location, auction->bidder, msgAuctionWonSubject.str().c_str(), itemTextId, auction->item_guid, auction->item_template, (uint64)etime,(uint64)dtime, AUCTION_CHECKED);
+        mailId, MAIL_AUCTION, auction->location, auction->bidder, msgAuctionWonSubject.str().c_str(), itemTextId, auction->item_guid, auction->item_template, (uint64)etime,(uint64)dtime, AUCTION_CHECKED);
 }
 
 //call this method to send mail to auctionowner, when auction is successful, it does not clear ram
@@ -292,12 +292,12 @@ void ObjectMgr::SendAuctionSuccessfulMail( AuctionEntry * auction )
         //send auctionowner notification, bidder must be current!
         owner->GetSession()->SendAuctionOwnerNotification( auction );
 
-        owner->CreateMail(mailId, AUCTIONHOUSE_MAIL, auction->location, msgAuctionSuccessfulSubject.str(), itemTextId, 0, 0, etime, dtime, profit, 0, AUCTION_CHECKED, NULL);
+        owner->CreateMail(mailId, MAIL_AUCTION, auction->location, msgAuctionSuccessfulSubject.str(), itemTextId, 0, 0, etime, dtime, profit, 0, AUCTION_CHECKED, NULL);
     }
 
     sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
         "VALUES ('%u', '%d', '%u', '%u', '%s', '%u', '0', '0', '" I64FMTD "', '" I64FMTD "', '%u', '0', '%d')",
-        mailId, AUCTIONHOUSE_MAIL, auction->location, auction->owner, msgAuctionSuccessfulSubject.str().c_str(), itemTextId, (uint64)etime, (uint64)dtime, profit, AUCTION_CHECKED);
+        mailId, MAIL_AUCTION, auction->location, auction->owner, msgAuctionSuccessfulSubject.str().c_str(), itemTextId, (uint64)etime, (uint64)dtime, profit, AUCTION_CHECKED);
 }
 
 //does not clear ram
@@ -322,7 +322,7 @@ void ObjectMgr::SendAuctionExpiredMail( AuctionEntry * auction )
         {
             seller->GetSession()->SendAuctionOwnerNotification( auction );
 
-            seller->CreateMail(messageId, AUCTIONHOUSE_MAIL, auction->location, subject.str(), 0, auction->item_guid, auction->item_template, etime,dtime,0,0,NOT_READ,pItem);
+            seller->CreateMail(messageId, MAIL_AUCTION, auction->location, subject.str(), 0, auction->item_guid, auction->item_template, etime,dtime,0,0,NOT_READ,pItem);
         }
         else
         {

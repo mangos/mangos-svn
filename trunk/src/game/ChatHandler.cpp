@@ -213,6 +213,34 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             group->BroadcastPacket(&data);
         } break;
 
+        case CHAT_MSG_BATTLEGROUND_CHAT:
+        {
+            std::string msg="";
+            recv_data >> msg;
+
+            Group *group = GetPlayer()->groupInfo.group;
+            if(!group || !group->isRaidGroup())
+                return;
+
+            WorldPacket data;
+            sChatHandler.FillMessageData(&data, this, CHAT_MSG_BATTLEGROUND_CHAT, lang, "", 0, msg.c_str());
+            group->BroadcastPacket(&data);
+        } break;
+
+        case CHAT_MSG_BATTLEGROUND_LEADER:
+        {
+            std::string msg="";
+            recv_data >> msg;
+
+            Group *group = GetPlayer()->groupInfo.group;
+            if(!group || !group->isRaidGroup() || !group->IsLeader(GetPlayer()->GetGUID()))
+                return;
+
+            WorldPacket data;
+            sChatHandler.FillMessageData(&data, this, CHAT_MSG_BATTLEGROUND_LEADER, lang, "", 0, msg.c_str());
+            group->BroadcastPacket(&data);
+        } break;
+
         case CHAT_MSG_CHANNEL:
         {
             std::string channel = "", msg = "";

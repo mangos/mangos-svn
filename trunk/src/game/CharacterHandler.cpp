@@ -466,7 +466,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         (lt->tm_mday - 1) << 14 | lt->tm_wday << 11 |
         lt->tm_hour << 6 | lt->tm_min;
     data << xmitTime;
-    data << (uint32)0x3C888889;                             //(float)0.017f;
+    data << (float)0.017f;                      // game speed
     SendPacket( &data );
 
     GetPlayer()->UpdateHonorFields();
@@ -544,8 +544,10 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     if ( pCurrChar->m_deathState != ALIVE )
     {
         // not blizz like, we must correctly save and load player instead...
-        pCurrChar->CastSpell(pCurrChar, 20584, true, 0); // auras SPELL_AURA_INCREASE_SPEED(+speed in wisp form), SPELL_AURA_INCREASE_SWIM_SPEED(+swim speed in wisp form), SPELL_AURA_TRANSFORM (to wisp form)
-        pCurrChar->CastSpell(pCurrChar, 8326, true, 0); // auras SPELL_AURA_GHOST, SPELL_AURA_INCREASE_SPEED(why?), SPELL_AURA_INCREASE_SWIM_SPEED(why?)
+        if(pCurrChar->getRace() == RACE_NIGHTELF)
+            pCurrChar->CastSpell(pCurrChar, 20584, true, 0);    // auras SPELL_AURA_INCREASE_SPEED(+speed in wisp form), SPELL_AURA_INCREASE_SWIM_SPEED(+swim speed in wisp form), SPELL_AURA_TRANSFORM (to wisp form)
+        pCurrChar->CastSpell(pCurrChar, 8326, true, 0);         // auras SPELL_AURA_GHOST, SPELL_AURA_INCREASE_SPEED(why?), SPELL_AURA_INCREASE_SWIM_SPEED(why?)
+
         //pCurrChar->SetUInt32Value(UNIT_FIELD_AURA+41, 8326);
         //pCurrChar->SetUInt32Value(UNIT_FIELD_AURA+42, 20584);
         //pCurrChar->SetUInt32Value(UNIT_FIELD_AURAFLAGS+6, 238);
@@ -576,7 +578,11 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     if(pCurrChar->isGameMaster())
         SendNotification("GM mode is ON");
     m_playerLoading = false;
-    pCurrChar->SendAllowMove(); // may be add it to CMSG_SET_ACTIVE_MOVER handler?
+    pCurrChar->SendAllowMove();
+
+    data.Initialize(SMSG_UNKNOWN_811, 4);
+    data << uint32(0);
+    SendPacket(&data);
 }
 
 void WorldSession::HandleSetFactionAtWar( WorldPacket & recv_data )
@@ -680,17 +686,11 @@ void WorldSession::HandleSetWatchedFactionInactiveOpcode(WorldPacket & recv_data
 void WorldSession::HandleToggleHelmOpcode( WorldPacket & recv_data )
 {
     DEBUG_LOG("CMSG_TOGGLE_HELM for %s", _player->GetName());
-    if(_player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM))
-        _player->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM);
-    else
-        _player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM);
+    _player->ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM);
 }
 
 void WorldSession::HandleToggleCloakOpcode( WorldPacket & recv_data )
 {
     DEBUG_LOG("CMSG_TOGGLE_CLOAK for %s", _player->GetName());
-    if(_player->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK))
-        _player->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK);
-    else
-        _player->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK);
+    _player->ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK);
 }

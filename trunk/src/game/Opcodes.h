@@ -781,11 +781,9 @@ enum OpCodes
     MSG_PVP_LOG_DATA                                = 736,
     CMSG_LEAVE_BATTLEFIELD                          = 737,
     CMSG_AREA_SPIRIT_HEALER_QUERY                   = 738,
-    CMSG_AREA_SPIRIT_HEALER_QUEUE                   = 739, // WTF?
-    SMSG_AREA_SPIRIT_HEALER_TIME                    = 740, // uint64 guid+uint32 time?
-    //CMSG_GM_UNTEACH                                 = 739, // WTF?
-    //SMSG_HARDWARE_SURVEY_REQUEST                    = 740, // WTF?
-    CMSG_HARDWARE_SURVEY_RESULTS                    = 741,
+    CMSG_AREA_SPIRIT_HEALER_QUEUE                   = 739,
+    SMSG_AREA_SPIRIT_HEALER_TIME                    = 740, // uint64 guid+uint32 time
+    CMSG_GM_UNTEACH                                 = 741,
     SMSG_WARDEN_DATA                                = 742,
     CMSG_WARDEN_DATA                                = 743,
     SMSG_GROUP_JOINED_BATTLEGROUND                  = 744, // uint32 0xfffffffc, probably different error messages...
@@ -844,12 +842,12 @@ enum OpCodes
     CMSG_RESET_INSTANCES                            = 797, // reset instances, empty
     SMSG_RESET_INSTANCES_RESULT                     = 798, // uint32 mapid, chat message: %s has been reset.
     // 799
-    SMSG_UNKNOWN_800                                = 800, // uint32 mapid, instance related
+    SMSG_UNKNOWN_800                                = 800, // uint32 mapid, instance related (save?)
     MSG_RAID_ICON_TARGET                            = 801, // uint8+uint8+uint64 guid
     MSG_RAID_READY_CHECK                            = 802, // uint64+uint8
     // 803
-    SMSG_AI_UNKNOWN                                 = 804, // GUID + uint32, looks like SMSG_AI_REACTION
-    SMSG_UNKNOWN_805                                = 805, // uint32 unk + x, y, z
+    SMSG_AI_UNKNOWN                                 = 804, // GUID + uint32, looks like SMSG_AI_REACTION (pet action sound?)
+    SMSG_UNKNOWN_805                                = 805, // uint32 unk + x, y, z (pet dismiss sound?)
     // 806
     // 807
     SMSG_GM_SURVEY_REQUEST                          = 808, // uint32, 1 - causes client get ticket request, 2 - hide, 3 - show
@@ -900,7 +898,7 @@ enum OpCodes
     CMSG_ARENA_TEAM_DISBAND                         = 853,
     CMSG_ARENA_TEAM_PROMOTE_TO_CAPTAIN              = 854, // also must be demote opcode...
     SMSG_UNKNOWN_855                                = 855, // guild related...
-    // 856
+    CMSG_ARENAMASTER_JOIN                           = 856,
     MSG_MOVE_START_FLY_UP                           = 857, // movement related, fly up, possible MSG
     MSG_MOVE_STOP_FLY_UP                            = 858, // movement related, stop fly up, possible MSG
     SMSG_ARENA_TEAM_STATS                           = 859,

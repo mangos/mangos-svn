@@ -1367,10 +1367,6 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
     if(!m_target)
         return;
 
-                                                            // required creature_template=12861 with modelid=1825 in database for ghost spell
-    if(m_target->GetTypeId() == TYPEID_PLAYER && GetSpellProto()->Id == 20584 && m_target->getRace() != RACE_NIGHTELF)
-        return;
-
     if (apply)
     {
         // special case

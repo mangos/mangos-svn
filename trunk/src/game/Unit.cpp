@@ -2864,7 +2864,6 @@ void Unit::ApplyStats(bool apply)
     for (uint8 i = 0; i < 7; ++i)
         ApplyModFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1+i, val, apply);
 
-
     //dodge
     if(getClass() == CLASS_HUNTER) classrate = 26.5;
     else if(getClass() == CLASS_ROGUE)  classrate = 14.5;
