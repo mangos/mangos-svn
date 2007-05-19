@@ -4693,8 +4693,8 @@ uint32 Player::GetZoneIdFromDB(uint64 guid)
     Field* fields = result->Fetch();
 
     uint32 map  = fields[0].GetUInt32();
-    uint32 posx = fields[1].GetFloat();
-    uint32 posy = fields[2].GetFloat();
+    float posx = fields[1].GetFloat();
+    float posy = fields[2].GetFloat();
 
     delete result;
 
