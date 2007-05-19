@@ -37,8 +37,6 @@ GossipMenu::~GossipMenu()
 
 void GossipMenu::AddMenuItem(uint8 Icon, char const * Message, uint32 dtSender, uint32 dtAction, bool Coded)
 {
-    //    uint64 gtData;
-
     char* Text = new char[strlen(Message) + 1];
     strcpy( Text, Message );
 
@@ -126,9 +124,9 @@ void PlayerMenu::SendGossipMenu( uint32 TitleTextId, uint64 npcGUID )
         // 3 trainer
         // 9 BG/arena
         data << uint8( pGossipMenu->GetItem(iI).m_gCoded );
-        data << uint32(0); // req money to open menu, 2.0.3
+        data << uint32(0);                                  // req money to open menu, 2.0.3
         data << pGossipMenu->GetItem(iI).m_gMessage;
-        data << uint8(0); // 2.0.3
+        data << uint8(0);                                   // unknown, 2.0.3
     }
 
     data << uint32( pQuestMenu->MenuItemCount() );
@@ -271,8 +269,8 @@ void PlayerMenu::SendQuestGiverQuestList( QEmote eEmote, std::string Title, uint
     WorldPacket data( SMSG_QUESTGIVER_QUEST_LIST, 100 );    // guess size
     data << uint64(npcGUID);
     data << Title;
-    data << uint32(eEmote._Delay );                         //zyg: player emote
-    data << uint32(eEmote._Emote );                         //zyg: NPC emote
+    data << uint32(eEmote._Delay );                         // player emote
+    data << uint32(eEmote._Emote );                         // NPC emote
     data << uint8 ( pQuestMenu->MenuItemCount() );
 
     for ( uint16 iI = 0; iI < pQuestMenu->MenuItemCount(); iI++ )
@@ -356,15 +354,15 @@ void PlayerMenu::SendQuestGiverQuestDetails( Quest *pQuest, uint64 npcGUID, bool
         }
     }
     else
-        data << uint32(0); // reward spell
+        data << uint32(0);                                  // reward spell
 
-    data << uint32(pQuest->GetRewSpell()); // cast spell
+    data << uint32(pQuest->GetRewSpell());                  // cast spell
 
     data << uint32(QUEST_EMOTE_COUNT);
     for (uint32 i=0; i < QUEST_EMOTE_COUNT; i++)
     {
         data << pQuest->DetailsEmote[i];
-        data << uint32(0); // DetailsEmoteDelay
+        data << uint32(0);                                  // DetailsEmoteDelay
     }
     pSession->SendPacket( &data );
 
@@ -376,7 +374,7 @@ void PlayerMenu::SendQuestQueryResponse( Quest *pQuest )
     WorldPacket data( SMSG_QUEST_QUERY_RESPONSE, 100 );     // guess size
 
     data << uint32(pQuest->GetQuestId());
-    data << uint32(pQuest->GetMinLevel()); // it's not min lvl in 2.0.x
+    data << uint32(pQuest->GetMinLevel());                  // it's not min lvl in 2.0.1+ (0...2 on official)
     data << uint32(pQuest->GetQuestLevel());
     data << uint32(pQuest->GetZoneOrSort());
 
@@ -384,8 +382,8 @@ void PlayerMenu::SendQuestQueryResponse( Quest *pQuest )
     data << uint32(pQuest->GetSuggestedPlayers());
     data << uint32(pQuest->GetRequiredRepFaction());
     data << uint32(pQuest->GetRequiredRepValue());
-    data << uint32(0);
-    data << uint32(0);
+    data << uint32(0);                                      // reputation related (faction)
+    data << uint32(0);                                      // reputation related (value)
 
     data << uint32(pQuest->GetNextQuestInChain());
     data << uint32(pQuest->GetRewOrReqMoney());
@@ -411,7 +409,7 @@ void PlayerMenu::SendQuestQueryResponse( Quest *pQuest )
     else
         data << uint32(0);
 
-    data << uint32(pQuest->GetRewSpell()); // spellid, The following spell will be casted on you spell_name
+    data << uint32(pQuest->GetRewSpell());                  // spellid, The following spell will be casted on you spell_name
     data << uint32(pQuest->GetSrcItemId());
     data << uint32(pQuest->GetSpecialFlags());
 
@@ -468,7 +466,7 @@ void PlayerMenu::SendQuestGiverOfferReward( uint32 quest_id, uint64 npcGUID, boo
 
     data << uint32( EnbleNext );
 
-    data << uint32(0); //unk
+    data << uint32(0);                                      // unk
 
     uint32 EmoteCount = 0;
     for (uint32 i = 0; i < QUEST_EMOTE_COUNT; i++)
@@ -478,10 +476,10 @@ void PlayerMenu::SendQuestGiverOfferReward( uint32 quest_id, uint64 npcGUID, boo
         EmoteCount++;
     }
 
-    data << EmoteCount; //Emote Count
+    data << EmoteCount;                                     // Emote Count
     for (uint32 i = 0; i < EmoteCount; i++)
     {
-        data << uint32(0); //Delay Emote
+        data << uint32(0);                                  // Delay Emote
         data << qInfo->OfferRewardEmote[i];
     }
 
@@ -537,7 +535,7 @@ void PlayerMenu::SendQuestGiverOfferReward( uint32 quest_id, uint64 npcGUID, boo
     else
         data << uint32(0);
 
-    uint32(0x00); // new 2.0.3
+    uint32(0x00);                                           // new 2.0.3
 
     pSession->SendPacket( &data );
     //sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_OFFER_REWARD NPCGuid=%u, questid=%u",GUID_LOPART(npcGUID),quest_id );
@@ -562,7 +560,7 @@ void PlayerMenu::SendQuestGiverRequestItems( Quest *pQuest, uint64 npcGUID, bool
 
     data << pQuest->GetRequestItemsText();
 
-    data << uint32(0x00); // unk
+    data << uint32(0x00);                                   // unk
 
     if(Completable)
         data << pQuest->GetCompleteEmote();
@@ -578,7 +576,7 @@ void PlayerMenu::SendQuestGiverRequestItems( Quest *pQuest, uint64 npcGUID, bool
     // Req Money
     data << uint32(pQuest->GetRewOrReqMoney() < 0 ? -pQuest->GetRewOrReqMoney() : 0);
 
-    data << uint32(0x00); // unk
+    data << uint32(0x00);                                   // unk
 
     data << uint32( pQuest->GetReqItemsCount() );
     ItemPrototype const *pItem;

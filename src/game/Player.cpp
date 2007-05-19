@@ -341,6 +341,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value(UNIT_FIELD_BYTES_1, unitfield );
     SetUInt32Value(UNIT_FIELD_BYTES_2, ( 0x28 << 8 ) );     // players - 0x2800, 0x2801, units - 0x1001
     SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 );
+    SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);               // fix cast time showed in spell tooltip on client
 
                                                             //-1 is default value
     SetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, uint32(-1));
@@ -975,7 +976,7 @@ void Player::BuildEnumData( WorldPacket * p_data )
     bytes = GetUInt32Value(PLAYER_BYTES_2);
     *p_data << uint8(bytes);
 
-    *p_data << uint8(getLevel());                           //1
+    *p_data << uint8(getLevel());                           // player level
     uint32 zoneId = MapManager::Instance().GetMap(GetMapId(), this)->GetZoneId(GetPositionX(),GetPositionY());
 
     *p_data << zoneId;
@@ -985,15 +986,14 @@ void Player::BuildEnumData( WorldPacket * p_data )
     *p_data << GetPositionY();
     *p_data << GetPositionZ();
 
-    *p_data << GetUInt32Value(PLAYER_GUILDID);              //probably wrong
+    *p_data << uint32(0);                                   // unknown
 
-    //*p_data << GetUInt32Value(PLAYER_GUILDRANK);    //this was
     *p_data << uint8(0x0);
-    *p_data << uint8(GetUInt32Value(PLAYER_FLAGS) << 1);
-    *p_data << uint8(0x0);                                  //Bit 4 is something dono
-    *p_data << uint8(0x0);                                  //is this player_GUILDRANK????
+    *p_data << uint8(GetUInt32Value(PLAYER_FLAGS) << 1);    // probably wrong
+    *p_data << uint8(0x0);                                  // Bit 4 is something dono
+    *p_data << uint8(0x0);                                  // is this player_GUILDRANK????
 
-    *p_data << (uint8)0;
+    *p_data << (uint8)1;                                    // 0x1 there
 
     // Pets info
     {
@@ -1064,29 +1064,22 @@ void Player::BuildEnumData( WorldPacket * p_data )
             *p_data << (uint8)0;
         }
     }
-    // EQUIPMENT_SLOT_END always 0,0 <-- WRONG: should be bag!
-    *p_data << (uint32)0;
-    *p_data << (uint8)0;
+    *p_data << (uint32)0;                                   // first bag display id
+    *p_data << (uint8)0;                                    // first bag inventory type
 }
 
 bool Player::ToggleAFK()
 {
-    if(HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK))
-        RemoveFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK);
-    else
-        SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK);
+    ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK);
 
-    return HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_AFK);
+    return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK);
 }
 
 bool Player::ToggleDND()
 {
-    if(HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND))
-        RemoveFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND);
-    else
-        SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND);
+    ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_DND);
 
-    return HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_DND);
+    return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_DND);
 }
 
 uint8 Player::chatTag()
@@ -1358,6 +1351,10 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             {
                 data << (uint32)mapid << (float)x << (float)y << (float)z << (float)orientation;
             }
+            GetSession()->SendPacket( &data );
+
+            data.Initialize(SMSG_UNKNOWN_811, 4);
+            data << uint32(0);
             GetSession()->SendPacket( &data );
 
             SetMapId(mapid);
@@ -1919,6 +1916,9 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
     SetLevel( level);
     UpdateMaxSkills ();
 
+    // set default cast time multiplier
+    SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
+
     // reset size before reapply auras
     if (getRace() == RACE_TAUREN)
         SetFloatValue(OBJECT_FIELD_SCALE_X,1.35f);
@@ -2058,8 +2058,10 @@ void Player::SendInitialSpells()
             continue;
 
         data << uint16(itr->first);
-        data << uint16(itr->second->slotId);
+        //data << uint16(itr->second->slotId);
+        data << uint16(0); // it's not slot id
     }
+
     uint16 spellCooldowns = m_spellCooldowns.size();
     data << spellCooldowns;
     for(SpellCooldowns::const_iterator itr=m_spellCooldowns.begin(); itr!=m_spellCooldowns.end(); itr++)
@@ -2988,10 +2990,11 @@ void Player::SetMovement(uint8 pType)
 
 void Player::BuildPlayerRepop()
 {
-    CastSpell(this, 20584, true);                           // auras SPELL_AURA_INCREASE_SPEED(+speed in wisp form), SPELL_AURA_INCREASE_SWIM_SPEED(+swim speed in wisp form), SPELL_AURA_TRANSFORM (to wisp form)
-    // there must be SMSG.FORCE_RUN_SPEED_CHANGE, SMSG.FORCE_SWIM_SPEED_CHANGE, SMSG.MOVE_WATER_WALK
-
+    if(getRace() == RACE_NIGHTELF)
+        CastSpell(this, 20584, true);                       // auras SPELL_AURA_INCREASE_SPEED(+speed in wisp form), SPELL_AURA_INCREASE_SWIM_SPEED(+swim speed in wisp form), SPELL_AURA_TRANSFORM (to wisp form)
     CastSpell(this, 8326, true);                            // auras SPELL_AURA_GHOST, SPELL_AURA_INCREASE_SPEED(why?), SPELL_AURA_INCREASE_SWIM_SPEED(why?)
+
+    // there must be SMSG.FORCE_RUN_SPEED_CHANGE, SMSG.FORCE_SWIM_SPEED_CHANGE, SMSG.MOVE_WATER_WALK
     // there must be SMSG.STOP_MIRROR_TIMER
     // there we must send 888 opcode
 
@@ -3021,7 +3024,7 @@ void Player::BuildPlayerRepop()
     SetMovement(MOVE_UNROOT);
 
     // setting new speed
-    if (getRace() == RACE_NIGHTELF)
+    /*if (getRace() == RACE_NIGHTELF)
     {
         SetSpeed(MOVE_RUN,  1.5f*1.2f, true);
         SetSpeed(MOVE_SWIM, 1.5f*1.2f, true);
@@ -3030,7 +3033,7 @@ void Player::BuildPlayerRepop()
     {
         SetSpeed(MOVE_RUN,  1.5f, true);
         SetSpeed(MOVE_SWIM, 1.5f, true);
-    }
+    }*/
 
     //! corpse reclaim delay 30 * 1000ms
     WorldPacket data(SMSG_CORPSE_RECLAIM_DELAY, 4);
@@ -3049,7 +3052,7 @@ void Player::BuildPlayerRepop()
     StopMirrorTimer(BREATH_TIMER);
     StopMirrorTimer(FIRE_TIMER);
 
-    //SetUInt32Value(UNIT_FIELD_AURA + 32, 8326);             // set ghost form
+    //SetUInt32Value(UNIT_FIELD_AURA + 32, 8326);           // set ghost form
     //SetUInt32Value(UNIT_FIELD_AURA + 33, 20584);          //!dono
 
     //SetUInt32Value(UNIT_FIELD_AURAFLAGS + 4, 0xEE);
@@ -3061,7 +3064,7 @@ void Player::BuildPlayerRepop()
     SetUInt32Value(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_ALWAYS_STAND);
 
     //if (getRace() == RACE_NIGHTELF)
-    //    SetUInt32Value(UNIT_FIELD_DISPLAYID, 10045);        //10045 - wrong wisp model
+    //    SetUInt32Value(UNIT_FIELD_DISPLAYID, 1825);
 
     // set initial flags + set ghost + restore pvp
     //SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_NONE | UNIT_FLAG_UNKNOWN1 | (HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP)?UNIT_FLAG_PVP:0) );
@@ -3092,8 +3095,9 @@ void Player::ResurrectPlayer()
     // remove death flag + set aura
     //RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST);
     RemoveFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_ALL);
+    if(getRace() == RACE_NIGHTELF)
+        RemoveAurasDueToSpell(20584);                       // speed bonuses
     RemoveAurasDueToSpell(8326);                            // SPELL_AURA_GHOST
-    RemoveAurasDueToSpell(20584);                           // speed bonuses
 
     setDeathState(ALIVE);
 

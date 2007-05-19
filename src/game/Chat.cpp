@@ -526,10 +526,41 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
         *data << (uint32)6;                                 // unk
     }
 
-    // in CHAT_MSG_WHISPER_INFORM mode used original target_guid
-    if (type == CHAT_MSG_SAY  || type == CHAT_MSG_CHANNEL || type == CHAT_MSG_WHISPER ||
-        type == CHAT_MSG_YELL || type == CHAT_MSG_PARTY  || type == CHAT_MSG_RAID  || type == CHAT_MSG_RAID_LEADER || type == CHAT_MSG_RAID_WARN ||
-        type == CHAT_MSG_GUILD || type == CHAT_MSG_OFFICER || type == CHAT_MSG_BATTLEGROUND_ALLIANCE || type == CHAT_MSG_BATTLEGROUND_HORDE)
+    switch(type)
+    {
+        case CHAT_MSG_SAY:
+        case CHAT_MSG_PARTY:
+        case CHAT_MSG_RAID:
+        case CHAT_MSG_GUILD:
+        case CHAT_MSG_OFFICER:
+        case CHAT_MSG_YELL:
+        case CHAT_MSG_WHISPER:
+        case CHAT_MSG_CHANNEL:
+        case CHAT_MSG_RAID_LEADER:
+        case CHAT_MSG_RAID_WARN:
+        case CHAT_MSG_BATTLEGROUND_HORDE:
+        case CHAT_MSG_BATTLEGROUND_ALLIANCE:
+        case CHAT_MSG_BATTLEGROUND_CHAT:
+        case CHAT_MSG_BATTLEGROUND_LEADER:
+            target_guid = session ? session->GetPlayer()->GetGUID() : 0;
+            break;
+        case CHAT_MSG_MONSTER_SAY:
+            *data << (uint64)(((Creature *)speaker)->GetGUID());
+            *data << (uint32)(strlen(((Creature *)speaker)->GetCreatureInfo()->Name) + 1);
+            *data << ((Creature *)speaker)->GetCreatureInfo()->Name;
+            break;
+        default:
+            if (type != CHAT_MSG_WHISPER_INFORM && type != CHAT_MSG_IGNORED && type != CHAT_MSG_DND && type != CHAT_MSG_AFK)
+                target_guid = 0;                            // only for CHAT_MSG_WHISPER_INFORM used original value target_guid
+            break;
+    }
+    /*// in CHAT_MSG_WHISPER_INFORM mode used original target_guid
+    if (type == CHAT_MSG_SAY || type == CHAT_MSG_CHANNEL || type == CHAT_MSG_WHISPER ||
+        type == CHAT_MSG_YELL || type == CHAT_MSG_PARTY || type == CHAT_MSG_RAID ||
+        type == CHAT_MSG_RAID_LEADER || type == CHAT_MSG_RAID_WARN ||
+        type == CHAT_MSG_GUILD || type == CHAT_MSG_OFFICER ||
+        type == CHAT_MSG_BATTLEGROUND_ALLIANCE || type == CHAT_MSG_BATTLEGROUND_HORDE ||
+        type == CHAT_MSG_BATTLEGROUND_CHAT || type == CHAT_MSG_BATTLEGROUND_LEADER)
     {
         target_guid = session ? session->GetPlayer()->GetGUID() : 0;
     }
@@ -542,7 +573,7 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
     else if (type != CHAT_MSG_WHISPER_INFORM && type != CHAT_MSG_IGNORED && type != CHAT_MSG_DND && type != CHAT_MSG_AFK)
     {
         target_guid = 0;                                    // only for CHAT_MSG_WHISPER_INFORM used original value target_guid
-    }
+    }*/
 
     *data << target_guid;
 

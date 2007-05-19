@@ -348,27 +348,28 @@ void WorldSession::HandleGMTicketDeleteOpcode( WorldPacket & recv_data )
     sDatabase.PExecute("DELETE FROM `character_ticket` WHERE `guid` = '%u' LIMIT 1",guid);
 
     WorldPacket data( SMSG_GMTICKET_DELETETICKET, 8 );
-    data << uint32(1);
-    data << uint32(0);
+    data << uint32(9);
+    //data << uint32(0);
     SendPacket( &data );
 
-    SendGMTicketGetTicket(0x0A,0);
+    SendGMTicketGetTicket(0x0A, 0);
 }
 
 void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
 {
     WorldPacket data;
 
-    uint32 unk1, time1, time2, time3;
+    uint32 map;
+    float x, y, z;
     uint8 category;
     std::string ticketText = "";
-    std::string unk_text; // reserved for future use text
+    std::string unk_text; // "Reserved for future use" text
 
-    recv_data >> category >> unk1 >> time1 >> time2 >> time3; // last check 2.0.10
+    recv_data >> category >> map >> x >> y >> z; // last check 2.0.12
     recv_data >> ticketText;
     recv_data >> unk_text;
 
-    sLog.outDebug("TicketCreate: category %u, unk1 %u, time1 %u, time2 %u, time3 %u, text %s, unk_text %s", category, unk1, time1/1000, time2/1000, time3/1000, ticketText.c_str(), unk_text.c_str());
+    sLog.outDebug("TicketCreate: category %u, map %u, x %f, y %f, z %f, text %s, unk_text %s", category, map, x, y, z, ticketText.c_str(), unk_text.c_str());
 
     sDatabase.escape_string(ticketText);
 

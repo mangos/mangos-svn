@@ -1146,16 +1146,17 @@ void WorldSession::HandleRealmStateRequestOpcode( WorldPacket & recv_data )
     sLog.outDebug("CMSG_REALM_STATE_REQUEST");
 
     uint32 unk;
-    std::string unk_str = "01/01/01";
+    std::string split_date = "01/01/01";
     recv_data >> unk;
 
     WorldPacket data(SMSG_REALM_STATE_RESPONSE, 17);
     data << unk;
-    data << uint32(0x00000000); // reamd split state...
+    data << uint32(0x00000000); // realm split state
+    // split states:
     // 0x0 realm normal
     // 0x1 realm split
     // 0x2 realm split pending
-    data << unk_str;
+    data << split_date;
     SendPacket(&data);
     sLog.outDebug("response sent %u", unk);
 }

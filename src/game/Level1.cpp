@@ -1605,7 +1605,7 @@ bool ChatHandler::HandleSendMailCommand(const char* args)
     uint32 sender_guid = m_session->GetPlayer()->GetGUID();
     time_t dtime = time(NULL);
     time_t etime = dtime + (30 * DAY);
-    uint32 messagetype = MAIL_NORMAL;
+    uint32 messagetype = MAIL_GM;
     uint32 itemTextId = 0;
     if (text.size() > 0)
     {

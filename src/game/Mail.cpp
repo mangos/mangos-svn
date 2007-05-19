@@ -433,18 +433,39 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
             continue;
 
         mails_count++;
-        data << (*itr)->messageID;
-        data << (*itr)->messageType;                        // Message Type, once = 3
-        data << (*itr)->sender;                             // SenderID
-        if ((*itr)->messageType == MAIL_NORMAL)
+        data << (uint32) (*itr)->messageID;                 // Message ID
+
+        if((*itr)->messageType == MAIL_GM)
+            data << (uint8) 0;
+        else
+            data << (uint8) (*itr)->messageType;            // Message Type, once = 3
+
+        if((*itr)->messageType == MAIL_AUCTION)
+            data << uint32(2);                              // probably auctionhouse id(2==alliance?)
+        /*else if((*itr)->messageType == MAIL_CREATURE)
+            data << uint32(0);                              // creature entry
+        else if((*itr)->messageType == MAIL_GAMEOBJECT)
+            data << uint32(0);                              // gameobject entry
+        else if((*itr)->messageType == MAIL_ITEM)
+            data << uint32(0);                              // item entry*/
+        else
+            data << (*itr)->sender;                         // SenderID
+
+        if ((*itr)->messageType == MAIL_NORMAL || (*itr)->messageType == MAIL_GM)
             data << (uint32) 0;                             // HIGHGUID_PLAYER
+
         data << (*itr)->subject.c_str();                    // Subject string - once 00, when mail type = 3
         data << (uint32) (*itr)->itemTextId;                // sure about this
-        data << (uint32) 0;                                 // Constant
+        data << (uint32) 0;                                 // Constant, unknown
+
         if ((*itr)->messageType == MAIL_NORMAL)
-            data << (uint32) 0x29;                          // Constant, messageType == 0 and 0x3D - message from gm...
+            data << (uint32) 0x29;                          // normal mail
+        else if((*itr)->messageType == MAIL_GM)
+            data << (uint32) 0x3D;                          // customer support mail
         else
-            data << (uint32) 0x3E;
+            data << (uint32) 0x3E;                          // auction mail
+        // 0x40 - valentine mail?
+
         uint8 icount = 1;
         Item* it = NULL;
         if ((*itr)->item_guid != 0)
@@ -483,7 +504,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
 
         data << (uint32) 0;                                 // not item->creator, it is enchating?
         data << (uint8)  icount;                            // Attached item stack count
-                                                            //sometimes more than zero, not sure when
+                                                            // sometimes more than zero, not sure when
         int32 charges = (it) ? int32(it->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES)) : 0;
         data << (uint32) charges;                           // item -> charges sure
         uint32 maxDurability = (it) ? it->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) : 0;
