@@ -579,4 +579,5 @@ EXTRA_DIST = \
 	3648_command.sql \
 	3653_spell.sql \
 	3655_quest_template.sql \
+	3660_character_kill.sql \
 	README
