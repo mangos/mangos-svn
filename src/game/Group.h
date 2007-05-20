@@ -42,7 +42,7 @@ enum GroupType
 /** todo: uninvite people that not accepted invite **/
 class MANGOS_DLL_SPEC Group
 {
-    protected:
+    public:
         struct MemberSlot
         {
             uint64      guid;
@@ -50,6 +50,11 @@ class MANGOS_DLL_SPEC Group
             uint8       group;
             bool        assistant;
         };
+        typedef std::list<MemberSlot> MemberList;
+        typedef MemberList::const_iterator member_citerator;
+    protected:
+        typedef MemberList::iterator member_witerator;
+        typedef std::set<uint64> InvitesList;
 
         struct Roll
         {
@@ -84,8 +89,8 @@ class MANGOS_DLL_SPEC Group
         ~Group() {}
 
         // group manipulation methods
-        void   Create(const uint64 &guid, const char * name);
-        void   LoadGroupFromDB(const uint64 &leaderGuid);
+        bool   Create(const uint64 &guid, const char * name);
+        bool   LoadGroupFromDB(const uint64 &leaderGuid);
         bool   AddInvite(Player *player);
         uint32 RemoveInvite(Player *player);
         bool   AddMember(const uint64 &guid, const char* name);
@@ -107,37 +112,54 @@ class MANGOS_DLL_SPEC Group
         LootThreshold GetLootThreshold() const { return m_lootThreshold; }
 
         // member manipulation methods
-        bool IsMember(uint64 guid) const;
+        bool IsMember(uint64 guid) const { return _getMemberCSlot(guid) != m_members.end(); }
         bool IsLeader(uint64 guid) const { return (GetLeaderGUID() == guid); }
         bool IsAssistant(uint64 guid) const
         {
-            int8 id = _getMemberIndex(guid);
-            if(id<0)
+            member_citerator mslot = _getMemberCSlot(guid);
+            if(mslot==m_members.end())
                 return false;
 
-            return m_members[id].assistant;
+            return mslot->assistant;
+        }
+        uint64 GetNextGuidAfter(uint64 guid) const
+        {
+            member_citerator mslot = _getMemberCSlot(guid);
+            if(mslot==m_members.end())
+                return 0;
+            ++mslot;
+            return mslot->guid;
         }
         bool SameSubGroup(uint64 guid1, uint64 guid2) const
         {
-            int8 id1 = _getMemberIndex(guid1);
-            int8 id2 = _getMemberIndex(guid2);
-            if(id1<0 || id2<0)
+            member_citerator mslot2 = _getMemberCSlot(guid2);
+            if(mslot2==m_members.end())
                 return false;
 
-            return (m_members[id1].group==m_members[id2].group);
+            return SameSubGroup(guid1,&*mslot2);
         }
 
+        bool SameSubGroup(uint64 guid1, MemberSlot const* slot2) const
+        {
+            member_citerator mslot1 = _getMemberCSlot(guid1);
+            if(mslot1==m_members.end() || !slot2)
+                return false;
+
+            return (mslot1->group==slot2->group);
+        }
+
+
+        MemberList const& GetMembers() const { return m_members; }
         uint32 GetMembersCount() const { return m_members.size(); }
         uint32 GetMemberCountForXPAtKill(Unit const* victim);
-        Player* GetMemberForXPAtKill(uint8 id, Unit const* victim);
-        uint64 GetMemberGUID(uint8 id) const { if(id>=m_members.size()) return 0; else return m_members[id].guid; }
+        Player* GetMemberForXPAtKill(uint64 guid, Unit const* victim);
         uint8  GetMemberGroup(uint64 guid) const
         {
-            int8 id = _getMemberIndex(guid);
-            if(id<0)
+            member_citerator mslot = _getMemberCSlot(guid);
+            if(mslot==m_members.end())
                 return (MAXRAIDSIZE/MAXGROUPSIZE+1);
 
-            return m_members[id].group;
+            return mslot->group;
         }
 
         // some additional raid methods
@@ -227,10 +249,28 @@ class MANGOS_DLL_SPEC Group
         bool _setMainTank(const uint64 &guid);
         bool _setMainAssistant(const uint64 &guid);
 
-        int8 _getMemberIndex(uint64 Guid) const;
+        member_citerator _getMemberCSlot(uint64 Guid) const
+        {
+            for(member_citerator itr = m_members.begin(); itr != m_members.end(); ++itr)
+            {
+                if (itr->guid == Guid)
+                    return itr;
+            }
+            return m_members.end();
+        }
 
-        vector<MemberSlot> m_members;
-        vector<uint64> m_invitees;
+        member_witerator _getMemberWSlot(uint64 Guid)
+        {
+            for(member_witerator itr = m_members.begin(); itr != m_members.end(); ++itr)
+            {
+                if (itr->guid == Guid)
+                    return itr;
+            }
+            return m_members.end();
+        }
+
+        MemberList   m_members;
+        InvitesList  m_invitees;
         uint64       m_leaderGuid;
         std::string  m_leaderName;
         uint64       m_mainTank;

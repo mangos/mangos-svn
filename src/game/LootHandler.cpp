@@ -159,14 +159,12 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
         if (player->groupInfo.group)
         {
             Group *group = player->groupInfo.group;
-            uint32 iMembers = group->GetMembersCount();
 
-            // it is probably more costly to call getplayer for each member
-            // than temporarily storing them in a vector
             std::vector<Player*> playersNear;
-            for (int i=0; i<iMembers; i++)
+            Group::MemberList const& members = group->GetMembers();
+            for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
             {
-                Player* playerGroup = objmgr.GetPlayer(group->GetMemberGUID(i));
+                Player* playerGroup = objmgr.GetPlayer(itr->guid);
                 if(!playerGroup)
                     continue;
                 if (player->GetDistance2dSq(playerGroup) < sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))

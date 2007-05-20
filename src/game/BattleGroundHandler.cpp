@@ -114,9 +114,10 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
     if(asgroup && _player->groupInfo.group)
     {
         Group *grp = _player->groupInfo.group;
-        for(uint32 i = 0; i < grp->GetMembersCount(); i++)
+        Group::MemberList const& members = grp->GetMembers();
+        for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
         {
-            Player *member = objmgr.GetPlayer(grp->GetMemberGUID(i));
+            Player *member = objmgr.GetPlayer(itr->guid);
             if(member)
             {
                 member->SetBattleGroundQueueId(bgid); // add to queue

@@ -1318,7 +1318,12 @@ void ObjectMgr::LoadGuilds()
         count++;
 
         newguild = new Guild;
-        newguild->LoadGuildFromDB(fields[0].GetUInt32());
+        if(!newguild->LoadGuildFromDB(fields[0].GetUInt32()))
+        {
+            newguild->Disband();
+            delete newguild;
+            continue;
+        }
         AddGuild(newguild);
 
     }while( result->NextRow() );
@@ -1355,7 +1360,12 @@ void ObjectMgr::LoadGroups()
         count++;
 
         group = new Group;
-        group->LoadGroupFromDB(MAKE_GUID((*result)[0].GetUInt32(),HIGHGUID_PLAYER));
+        if(!group->LoadGroupFromDB(MAKE_GUID((*result)[0].GetUInt32(),HIGHGUID_PLAYER)))
+        {
+            group->Disband();
+            delete group;
+            continue;
+        }
         AddGroup(group);
 
     }while( result->NextRow() );

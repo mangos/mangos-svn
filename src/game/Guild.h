@@ -153,7 +153,7 @@ class Guild
         uint32 GetBackgroundColor(){ return BackgroundColor; }
 
         void SetLeader(uint64 guid);
-        void AddMember(uint64 plGuid, uint32 plRank=(uint32)GR_INITIATE);
+        bool AddMember(uint64 plGuid, uint32 plRank=(uint32)GR_INITIATE);
         void ChangeRank(uint64 guid, uint32 newRank);
         void DelMember(uint64 guid, bool isDisbanding=false);
 
@@ -167,9 +167,9 @@ class Guild
         MemberList::iterator membersbegin(){ return members.begin(); }
         MemberList::iterator membersEnd(){ return members.end(); }
 
-        void LoadGuildFromDB(uint32 GuildId);
-        void LoadRanksFromDB(uint32 GuildId);
-        void LoadMembersFromDB(uint32 GuildId);
+        bool LoadGuildFromDB(uint32 GuildId);
+        bool LoadRanksFromDB(uint32 GuildId);
+        bool LoadMembersFromDB(uint32 GuildId);
         void LoadPlayerStats(MemberSlot* memslot);
         void LoadPlayerStatsByGuid(uint64 guid);
 

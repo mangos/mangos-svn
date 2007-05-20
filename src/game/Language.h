@@ -274,6 +274,7 @@
 #define LANG_INSERT_GUILD_NAME           "You need to insert a Guild Name!"
 #define LANG_PLAYER_NOT_FOUND            "Player not found!"
 #define LANG_PLAYER_IN_GUILD             "Player already have a guild!"
+#define LANG_GUILD_NOT_CREATED           "Guild not created! (already exist?)"
 #define LANG_NO_ITEMS_FROM_ITEMSET_FOUND "No items from itemset '%u' found."
 
 #define LANG_DISTANCE                    "The distance(sqr) is: %f."

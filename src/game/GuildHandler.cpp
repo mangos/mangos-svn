@@ -770,7 +770,8 @@ void WorldSession::HandleGuildAcceptOpcode(WorldPacket& recvPacket)
     if ( !sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD) && player->GetTeam() != objmgr.GetPlayerTeamByGUID(guild->GetLeader()) )
         return;
 
-    guild->AddMember(GetPlayer()->GetGUID());
+    if(!guild->AddMember(GetPlayer()->GetGUID()))
+        return;
 
     WorldPacket data(SMSG_GUILD_EVENT, (2+10));             // guess size
     data << (uint8)GE_JOINED;

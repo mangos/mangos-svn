@@ -126,7 +126,7 @@ class DBCStorage
                     break;
                 case FT_STRING:
                     for(uint32 i = 0; i < nCount; i++) if(index[i])
-                        delete *(char**)((char*)index[i]+offset);
+                        delete[] *(char**)((char*)index[i]+offset);
                     offset+=sizeof(char*);
                     break;
                 }

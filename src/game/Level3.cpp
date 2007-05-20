@@ -1893,7 +1893,13 @@ bool ChatHandler::HandleCreateGuildCommand(const char* args)
     if(!player->GetGuildId())
     {
         guild = new Guild;
-        guild->create(player->GetGUID(),guildname);
+        if(!guild->create(player->GetGUID(),guildname))
+        {
+            delete guild;
+            SendSysMessage(LANG_GUILD_NOT_CREATED);
+            return true;
+        }
+
         objmgr.AddGuild(guild);
     }
     else

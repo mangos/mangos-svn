@@ -101,20 +101,19 @@ bool Guild::create(uint64 lGuid, std::string gname)
     rname = "Initiate";
     CreateRank(rname,GR_RIGHT_GCHATLISTEN | GR_RIGHT_GCHATSPEAK);
 
-    AddMember(lGuid, (uint32)GR_GUILDMASTER);
-    return true;
+    return AddMember(lGuid, (uint32)GR_GUILDMASTER);
 }
 
-void Guild::AddMember(uint64 plGuid, uint32 plRank)
+bool Guild::AddMember(uint64 plGuid, uint32 plRank)
 {
     std::string plName;
     uint8 plLevel, plClass;
     uint32 plZone;
 
     if(!objmgr.GetPlayerNameByGUID(plGuid, plName))         // player doesnt exist
-        return;
+        return false;
     if(Player::GetGuildIdFromDB(plGuid) != 0)               // player already in guild
-        return;
+        return false;
 
     // remove all player signs from another petitions
     // this will be prevent attempt joining player to many guilds and corrupt guild data integrity
@@ -139,7 +138,7 @@ void Guild::AddMember(uint64 plGuid, uint32 plRank)
 
         QueryResult *result = sDatabase.PQuery("SELECT `class` FROM `character` WHERE `guid`='%u'", GUID_LOPART(plGuid));
         if(!result)
-            return;
+            return false;
         plClass = (*result)[0].GetUInt8();
         delete result;
     }
@@ -174,6 +173,7 @@ void Guild::AddMember(uint64 plGuid, uint32 plRank)
         Player::SetUInt32ValueInDB(PLAYER_GUILDID, Id, plGuid);
         Player::SetUInt32ValueInDB(PLAYER_GUILDRANK, newmember.RankId, plGuid);
     }
+    return true;
 }
 
 void Guild::SetMOTD(std::string motd)
@@ -194,21 +194,25 @@ void Guild::SetGINFO(std::string ginfo)
     sDatabase.PExecute("UPDATE `guild` SET `info`='%s' WHERE `guildid`='%u'", ginfo.c_str(), Id);
 }
 
-void Guild::LoadGuildFromDB(uint32 GuildId)
+bool Guild::LoadGuildFromDB(uint32 GuildId)
 {
-    LoadRanksFromDB(GuildId);
-    LoadMembersFromDB(GuildId);
+    if(!LoadRanksFromDB(GuildId))
+        return false;
+
+    if(!LoadMembersFromDB(GuildId))
+        return false;
 
     QueryResult *result = sDatabase.PQuery("SELECT `guildid`,`name`,`leaderguid`,`EmblemStyle`,`EmblemColor`,`BorderStyle`,`BorderColor`,`BackgroundColor`,`info`,`MOTD`,`createdate` FROM `guild` WHERE `guildid` = '%u'", GuildId);
 
     if(!result)
-        return;
+        return false;
 
     Field *fields = result->Fetch();
 
     Id = fields[0].GetUInt32();
     name = fields[1].GetCppString();
     leaderGuid  = MAKE_GUID(fields[2].GetUInt32(),HIGHGUID_PLAYER);
+
     EmblemStyle = fields[3].GetUInt32();
     EmblemColor = fields[4].GetUInt32();
     BorderStyle = fields[5].GetUInt32();
@@ -224,15 +228,28 @@ void Guild::LoadGuildFromDB(uint32 GuildId)
     CreatedDay   = dTime%100;
     CreatedMonth = (dTime/100)%100;
     CreatedYear  = (dTime/10000)%10000;
+
+    // if leader not exist attempt promote other member
+    if(!objmgr.GetPlayerAccountIdByGUID(leaderGuid ))
+    {
+        DelMember(leaderGuid);
+
+        // check no members case (disbanded) 
+        if(members.size()==0)
+            return false;
+    }
+
     sLog.outDebug("Guild %u Creation time Loaded day: %u, month: %u, year: %u", GuildId, CreatedDay, CreatedMonth, CreatedYear);
+    return true;
 }
 
-void Guild::LoadRanksFromDB(uint32 GuildId)
+bool Guild::LoadRanksFromDB(uint32 GuildId)
 {
     Field *fields;
     QueryResult *result = sDatabase.PQuery("SELECT `rname`,`rights` FROM `guild_rank` WHERE `guildid` = '%u' ORDER BY `rid` ASC", GuildId);
 
-    if(!result) return;
+    if(!result)
+        return false;
 
     do
     {
@@ -241,32 +258,41 @@ void Guild::LoadRanksFromDB(uint32 GuildId)
 
     }while( result->NextRow() );
     delete result;
+
+    return true;
 }
 
-void Guild::LoadMembersFromDB(uint32 GuildId)
+bool Guild::LoadMembersFromDB(uint32 GuildId)
 {
-    Field *fields;
-    Player *pl;
-
     QueryResult *result = sDatabase.PQuery("SELECT `guid`,`rank`,`Pnote`,`OFFnote` FROM `guild_member` WHERE `guildid` = '%u'", GuildId);
 
     if(!result)
-        return;
+        return false;
 
     do
     {
-        fields = result->Fetch();
+        Field *fields = result->Fetch();
         MemberSlot newmember;
         newmember.guid = MAKE_GUID(fields[0].GetUInt32(),HIGHGUID_PLAYER);
         newmember.RankId = fields[1].GetUInt32();
-        pl = ObjectAccessor::Instance().FindPlayer(newmember.guid);
-        if(!pl || !pl->IsInWorld()) LoadPlayerStats(&newmember);
+
+        // player not exist
+        if(!objmgr.GetPlayerAccountIdByGUID(newmember.guid))
+            continue;
+
+        LoadPlayerStats(&newmember);
+
         newmember.Pnote = fields[2].GetCppString();
         newmember.OFFnote = fields[3].GetCppString();
         members.push_back(newmember);
 
     }while( result->NextRow() );
     delete result;
+
+    if(members.size()==0)
+        return false;
+
+    return true;
 }
 
 void Guild::LoadPlayerStats(MemberSlot* memslot)
@@ -347,20 +373,23 @@ void Guild::DelMember(uint64 guid, bool isDisbanding)
                 Player::SetUInt32ValueInDB(PLAYER_GUILDRANK, GR_GUILDMASTER, newLeaderGUID);
                 objmgr.GetPlayerNameByGUID(newLeaderGUID, newLeaderName);
             }
-            objmgr.GetPlayerNameByGUID(guid, oldLeaderName);
 
-            WorldPacket data(SMSG_GUILD_EVENT, (1+1+oldLeaderName.size()+1+newLeaderName.size()+1));
-            data << (uint8)GE_LEADER_CHANGED;
-            data << (uint8)2;
-            data << oldLeaderName;
-            data << newLeaderName;
-            this->BroadcastPacket(&data);
+            // when leader non-exist (at guild load with deleted leader only) not send broadcasts
+            if(objmgr.GetPlayerNameByGUID(guid, oldLeaderName))
+            {
+                WorldPacket data(SMSG_GUILD_EVENT, (1+1+oldLeaderName.size()+1+newLeaderName.size()+1));
+                data << (uint8)GE_LEADER_CHANGED;
+                data << (uint8)2;
+                data << oldLeaderName;
+                data << newLeaderName;
+                this->BroadcastPacket(&data);
 
-            data.Initialize(SMSG_GUILD_EVENT, (1+1+oldLeaderName.size()+1));
-            data << (uint8)GE_LEFT;
-            data << (uint8)1;
-            data << oldLeaderName;
-            this->BroadcastPacket(&data);
+                data.Initialize(SMSG_GUILD_EVENT, (1+1+oldLeaderName.size()+1));
+                data << (uint8)GE_LEFT;
+                data << (uint8)1;
+                data << oldLeaderName;
+                this->BroadcastPacket(&data);
+            }
 
             sLog.outDebug( "WORLD: Sent (SMSG_GUILD_EVENT)" );
         }
