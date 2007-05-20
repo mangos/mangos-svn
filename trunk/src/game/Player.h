@@ -227,11 +227,11 @@ typedef std::list<Faction> FactionsList;
 
 struct EnchantDuration
 {
-    EnchantDuration() : item(NULL), slot(0), leftduration(0) {};
-    EnchantDuration(Item * _item, uint32 _slot, uint32 _leftduration) : item(_item), slot(_slot), leftduration(_leftduration) { assert(item); };
+    EnchantDuration() : item(NULL), slot(MAX_ENCHANTMENT_SLOT), leftduration(0) {};
+    EnchantDuration(Item * _item, EnchantmentSlot _slot, uint32 _leftduration) : item(_item), slot(_slot), leftduration(_leftduration) { assert(item); };
 
     Item * item;
-    uint32 slot;
+    EnchantmentSlot slot;
     uint32 leftduration;
 };
 
@@ -749,9 +749,11 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void UpdateEnchantTime(uint32 time);
         void ReducePoisonCharges(uint32 enchantId);
-        void AddEnchantDurations(Item *item);
-        void RemoveEnchantDurations(Item *item);
-        void AddEnchantDuration(Item *item,uint32 slot,uint32 duration);
+        void AddEnchantmentDurations(Item *item);
+        void RemoveEnchantmentDurations(Item *item);
+        void AddEnchantmentDuration(Item *item,EnchantmentSlot slot,uint32 duration);
+        void ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool apply_dur = true);
+        void ApplyEnchantment(Item *item,bool apply);
         void SaveEnchant();
         void LoadEnchant();
         void LoadCorpse();
@@ -1175,10 +1177,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool CanDualWield() const { return m_canDualWield; }
         void SetCanDualWield(bool value) { m_canDualWield = value; }
 
-        void ApplyItemMods(Item *item,uint8 slot,bool apply)
-        {
-            _ApplyItemMods(item, slot, apply);
-        };
         void _ApplyItemMods(Item *item,uint8 slot,bool apply);
         void _RemoveAllItemMods();
         void _ApplyAllItemMods();

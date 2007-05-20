@@ -485,6 +485,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         else
             data << (uint32) 0;                             // Any item attached
 
+        // ?? strange code: maybe start from this 6 * (enchant_id,duration,charges) and GetItemRandomPropertyId finally
         data << (uint32) 0;                                 // items count?
 
         for(uint8 i = 0; i < 6; i++)                        // new 2.0.1
@@ -492,7 +493,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
             data << getMSTime();                            // probably time
             if(i == 5)
             {
-                data << (uint32) (it ? it->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+0*3+0) : 0);
+                data << (uint32) (it ? it->GetEchantmentId(PERM_ENCHANTMENT_SLOT) : 0);
                 data << (uint32) (it ? it->GetItemRandomPropertyId() : 0);
             }
             else

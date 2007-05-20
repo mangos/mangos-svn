@@ -1721,26 +1721,18 @@ void Spell::EffectEnchantItemPerm(uint32 i)
             return;
 
         if(item_owner!=p_caster && p_caster->GetSession()->GetSecurity() > 0 && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
-            sLog.outCommand("GM %s (Account: %u) enchanting: %s (Entry: %d) for player: %s (Account: %u)",
+            sLog.outCommand("GM %s (Account: %u) enchanting(perm): %s (Entry: %d) for player: %s (Account: %u)",
                 p_caster->GetName(),p_caster->GetSession()->GetAccountId(),
                 itemTarget->GetProto()->Name1,itemTarget->GetEntry(),
                 item_owner->GetName(),item_owner->GetSession()->GetAccountId());
 
         // remove old enchanting before applying new if equipped
-        if(itemTarget->IsEquipped())
-            if(uint32 old_enchant_id = itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT))
-                item_owner->AddItemEnchant(itemTarget,old_enchant_id,0,false);
+        item_owner->ApplyEnchantment(itemTarget,PERM_ENCHANTMENT_SLOT,false);
 
-        for(int x=0;x<3;x++)
-            itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+x,0);
-
-        itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT, enchant_id);
+        itemTarget->SetEchantment(PERM_ENCHANTMENT_SLOT, enchant_id, 0, 0);
 
         // add new enchanting if equipped
-        if(itemTarget->IsEquipped())
-            item_owner->AddItemEnchant(itemTarget,enchant_id,0,true);
-
-        itemTarget->SetState(ITEM_CHANGED);
+        item_owner->ApplyEnchantment(itemTarget,PERM_ENCHANTMENT_SLOT,true);
     }
 }
 
@@ -1772,37 +1764,20 @@ void Spell::EffectEnchantItemTmp(uint32 i)
             return;
 
         if(item_owner!=p_caster && p_caster->GetSession()->GetSecurity() > 0 && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
-            sLog.outCommand("GM %s (Account: %u) enchanting: %s (Entry: %d) for player: %s (Account: %u)",
+            sLog.outCommand("GM %s (Account: %u) enchanting(temp): %s (Entry: %d) for player: %s (Account: %u)",
                 p_caster->GetName(),p_caster->GetSession()->GetAccountId(),
                 itemTarget->GetProto()->Name1,itemTarget->GetEntry(),
                 item_owner->GetName(),item_owner->GetSession()->GetAccountId());
 
         // remove old enchanting before applying new if equipped
-        if(uint32 old_enchant_id = itemTarget->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+1*3))
-        {
-            if(itemTarget->IsEquipped())
-                item_owner->AddItemEnchant(itemTarget,old_enchant_id,1,false);
+        item_owner->ApplyEnchantment(itemTarget,TEMP_ENCHANTMENT_SLOT,false);
 
-            // duration == 0 will remove EnchantDuration
-            item_owner->AddEnchantDuration(itemTarget,1,0);
-        }
+        uint32 charges = m_spellInfo->SpellFamilyName == 8 ? 45+objmgr.GetSpellRank(m_spellInfo->Id)*15 : 0;
 
-        for(int x=0;x<3;x++)
-            itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+1*3+x,0);
-
-        itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+1*3, enchant_id);
-        itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+1*3+1, duration*1000);
-        if(m_spellInfo->SpellFamilyName == 8)
-            itemTarget->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+1*3+2, 45+objmgr.GetSpellRank(m_spellInfo->Id)*15);
+        itemTarget->SetEchantment(TEMP_ENCHANTMENT_SLOT, enchant_id, duration*1000, charges);
 
         // add new enchanting if equipped
-        if(itemTarget->IsEquipped())
-            item_owner->AddItemEnchant(itemTarget,enchant_id,1,true);
-
-        itemTarget->SetState(ITEM_CHANGED);
-
-        // set duration
-        item_owner->AddEnchantDuration(itemTarget,1,duration*1000);
+        item_owner->ApplyEnchantment(itemTarget,TEMP_ENCHANTMENT_SLOT,true);
     }
 }
 
@@ -2567,31 +2542,22 @@ void Spell::EffectEnchantHeldItem(uint32 i)
         int32 duration = GetDuration(m_spellInfo);
         if(duration == 0)
             duration = m_spellInfo->EffectBasePoints[i]+1;
-        if(duration <= 1)
+        if(duration == 1)
             duration = 300;
+
         SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
         if(!pEnchant)
             return;
 
-        // remove old enchanting before appling new
-        for (int s=0;s<3;s++)
-        {
-            if(uint32 old_enchant_id = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type[s]*3))
-                item_owner->AddItemEnchant(item,old_enchant_id,pEnchant->display_type[s],false);
+        EnchantmentSlot slot = duration <= 0 ? HELD_PERM_ENCHANTMENT_SLOT : HELD_TEMP_ENCHANTMENT_SLOT;
+        
+        // remove old enchanting before applying new
+        item_owner->ApplyEnchantment(item,slot,false);
 
-            for(int x=0;x<3;x++)
-                item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type[s]*3+x,0);
+        item->SetEchantment(slot, enchant_id, duration*1000, 0);
 
-            item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type[s]*3, enchant_id);
-            item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+pEnchant->display_type[s]*3+1, duration*1000);
-            item->SetState(ITEM_CHANGED);
-
-            // add new enchanting
-            item_owner->AddItemEnchant(item,enchant_id,pEnchant->display_type[s],true);
-
-            // set duration
-            item_owner->AddEnchantDuration(item,1,duration*1000);
-        }
+        // add new enchanting
+        item_owner->ApplyEnchantment(item,slot,true);
     }
 }
 

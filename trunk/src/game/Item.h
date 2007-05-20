@@ -133,6 +133,32 @@ enum SellFailure
     SELL_ERR_ONLY_EMPTY_BAG                      = 6  // can only do with empty bags
 };
 
+// -1 from client enchantment slot number
+enum EnchantmentSlot
+{
+    PERM_ENCHANTMENT_SLOT       = 0,
+    TEMP_ENCHANTMENT_SLOT       = 1,
+    SOCK_ENCHANTMENT_SLOT       = 2,
+    SOCK_ENCHANTMENT_SLOT_2     = 3,
+    SOCK_ENCHANTMENT_SLOT_3     = 4,
+    BONUS_ENCHANTMENT_SLOT      = 5,
+    MAX_INSPECTED_ENCHANTMENT_SLOT = 6,
+
+    HELD_PERM_ENCHANTMENT_SLOT  = 6,
+    HELD_TEMP_ENCHANTMENT_SLOT  = 7,
+    PROP_ENCHANTMENT_SLOT       = 8,
+    PROP_ENCHANTMENT_SLOT_2     = 9,
+    PROP_ENCHANTMENT_SLOT_3     = 10,
+    MAX_ENCHANTMENT_SLOT        = 11
+};
+
+enum EnchantmentOffset
+{
+    ENCHANTMENT_ID_OFFSET       = 0,
+    ENCHANTMENT_DURATION_OFFSET = 1,
+    ENCHANTMENT_CHARGES_OFFSET  = 2
+};
+
 enum ItemUpdateState
 {
     ITEM_UNCHANGED                               = 0,
@@ -194,6 +220,14 @@ class MANGOS_DLL_SPEC Item : public Object
         void SetItemRandomProperties(uint32 randomPropId);
         static uint32 GenerateItemRandomPropertyId(uint32 item_id);
         static float GetEnchantMod(uint32 enchant_id, ItemPrototype const * itemProto);
+        void SetEchantment(EnchantmentSlot slot, uint32 id, uint32 duration, uint32 charges);
+        void SetEchantmentDuration(EnchantmentSlot slot, uint32 duration);
+        void SetEchantmentCharges(EnchantmentSlot slot, uint32 charges);
+        void ClearEchantment(EnchantmentSlot slot);
+        uint32 GetEchantmentId(EnchantmentSlot slot) const { return GetUInt32Value(ITEM_FIELD_ENCHANTMENT + slot*3 + ENCHANTMENT_ID_OFFSET);}
+        uint32 GetEchantmentDuration(EnchantmentSlot slot) const { return GetUInt32Value(ITEM_FIELD_ENCHANTMENT + slot*3 + ENCHANTMENT_DURATION_OFFSET);}
+        uint32 GetEchantmentCharges(EnchantmentSlot slot) const { return GetUInt32Value(ITEM_FIELD_ENCHANTMENT + slot*3 + ENCHANTMENT_CHARGES_OFFSET);}
+
         Loot loot;
         bool m_lootGenerated;
 
@@ -215,6 +249,7 @@ class MANGOS_DLL_SPEC Item : public Object
             return itemProto && itemProto->StartQuest == quest_id;
         }
         bool hasInvolvedQuest(uint32 quest_id) const { return false; }
+
     private:
         uint8 m_slot;
         Bag *m_container;

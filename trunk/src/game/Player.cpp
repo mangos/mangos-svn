@@ -4972,12 +4972,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
             if(proto->Spells[i].SpellId)
                 RemoveAurasDueToSpell(proto->Spells[i].SpellId );
 
-    for(int enchant_slot =  0 ; enchant_slot < 11; enchant_slot++)
-    {
-        uint32 Enchant_id = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot*3);
-        if(Enchant_id)
-            AddItemEnchant(item,Enchant_id, enchant_slot, apply);
-    }
+    ApplyEnchantment(item, apply);
 
     sLog.outDebug("_ApplyItemMods complete.");
 }
@@ -5302,9 +5297,9 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
     }
 
     // item combat enchantments
-    for(int e_slot = 0; e_slot < 11; e_slot++)
+    for(int e_slot = 0; e_slot < MAX_ENCHANTMENT_SLOT; ++e_slot)
     {
-        uint32 enchant_id = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+e_slot*3);
+        uint32 enchant_id = item->GetEchantmentId(EnchantmentSlot(e_slot));
         SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
         if(!pEnchant) continue;
         for (int s=0;s<3;s++)
@@ -5404,12 +5399,7 @@ void Player::_RemoveAllItemMods()
                     RemoveAurasDueToSpell(proto->Spells[m].SpellId );
             }
 
-            for(int enchant_slot =  0 ; enchant_slot < 11; ++enchant_slot)
-            {
-                uint32 Enchant_id = m_items[i]->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot*3);
-                if(Enchant_id)
-                    AddItemEnchant(m_items[i],Enchant_id, enchant_slot, false);
-            }
+            ApplyEnchantment(m_items[i], false);
         }
     }
 
@@ -5524,12 +5514,7 @@ void Player::_ApplyAllItemMods()
 
             CastItemEquipSpell(m_items[i]);
 
-            for(int enchant_slot =  0 ; enchant_slot < 11; enchant_slot++)
-            {
-                uint32 Enchant_id = m_items[i]->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot*3);
-                if(Enchant_id)
-                    AddItemEnchant(m_items[i],Enchant_id, enchant_slot, true);
-            }
+            ApplyEnchantment(m_items[i], true);
         }
     }
 
@@ -6221,18 +6206,17 @@ void Player::SetVirtualItemSlot( uint8 i, Item* item)
     SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY+i,item ? item->GetProto()->DisplayInfoID : 0);
     if(i < 2 && item)
     {
-        if(!item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+3))
+        if(!item->GetEchantmentId(TEMP_ENCHANTMENT_SLOT))
             return;
-        uint32 charges = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+3+2);
+        uint32 charges = item->GetEchantmentCharges(TEMP_ENCHANTMENT_SLOT);
         if(charges == 0)
             return;
         if(charges > 1)
-            item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3+2,charges-1);
+            item->SetEchantmentCharges(TEMP_ENCHANTMENT_SLOT,charges-1);
         else if(charges <= 1)
         {
-            AddItemEnchant(item,item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+3),1,false);
-            for(int y=0;y<3;y++)
-                item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3+y,0);
+            ApplyEnchantment(item,TEMP_ENCHANTMENT_SLOT,false);
+            item->ClearEchantment(TEMP_ENCHANTMENT_SLOT);
         }
     }
 }
@@ -7820,7 +7804,7 @@ Item* Player::StoreItem( uint16 pos, Item *pItem, bool update )
                 }
             }
 
-            AddEnchantDurations(pItem);
+            AddEnchantmentDurations(pItem);
         }
         else
         {
@@ -7840,8 +7824,8 @@ Item* Player::StoreItem( uint16 pos, Item *pItem, bool update )
             pItem->SetState(ITEM_REMOVED, this);
             pItem2->SetState(ITEM_CHANGED, this);
 
-            RemoveEnchantDurations(pItem);
-            AddEnchantDurations(pItem2);
+            RemoveEnchantmentDurations(pItem);
+            AddEnchantmentDurations(pItem2);
             return pItem2;
         }
     }
@@ -7867,7 +7851,7 @@ Item* Player::EquipItem( uint16 pos, Item *pItem, bool update )
 {
     if( pItem )
     {
-        AddEnchantDurations(pItem);
+        AddEnchantmentDurations(pItem);
 
         uint8 bag = pos >> 8;
         uint8 slot = pos & 255;
@@ -7916,8 +7900,8 @@ Item* Player::EquipItem( uint16 pos, Item *pItem, bool update )
             pItem->SetState(ITEM_REMOVED, this);
             pItem2->SetState(ITEM_CHANGED, this);
 
-            RemoveEnchantDurations(pItem);
-            AddEnchantDurations(pItem2);
+            RemoveEnchantmentDurations(pItem);
+            AddEnchantmentDurations(pItem2);
             return pItem2;
         }
     }
@@ -7964,10 +7948,10 @@ void Player::VisualizeItem( uint16 pos, Item *pItem)
         int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 16);
         SetUInt32Value(VisibleBase, pItem->GetEntry());
 
-        for(int i = 0; i < 11; ++i)
-            SetUInt32Value(VisibleBase + 1 + i, pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + i*3 ));
+        for(int i = 0; i < MAX_ENCHANTMENT_SLOT; ++i)
+            SetUInt32Value(VisibleBase + 1 + i, pItem->GetEchantmentId(EnchantmentSlot(i)));
 
-        SetUInt32Value(VisibleBase + 8, pItem->GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID));
+        SetUInt32Value(VisibleBase + 8, pItem->GetItemRandomPropertyId());
     }
 
     pItem->SetState(ITEM_CHANGED, this);
@@ -7991,12 +7975,22 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
     {
         sLog.outDebug( "STORAGE: RemoveItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
 
-        RemoveEnchantDurations(pItem);
+        RemoveEnchantmentDurations(pItem);
 
         if( bag == INVENTORY_SLOT_BAG_0 )
         {
             if ( slot < INVENTORY_SLOT_BAG_END )
+            {
                 _ApplyItemMods(pItem, slot, false);
+
+                // and remove held enchantments
+                if ( slot == EQUIPMENT_SLOT_MAINHAND )
+                {
+                    pItem->ClearEchantment(HELD_PERM_ENCHANTMENT_SLOT);
+                    pItem->ClearEchantment(HELD_TEMP_ENCHANTMENT_SLOT);
+                }
+            }
+
 
             m_items[slot] = NULL;
             SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), 0);
@@ -8126,7 +8120,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
         pItem->SetUInt64Value( ITEM_FIELD_CONTAINED, 0 );
         ItemPrototype const *pProto = pItem->GetProto();
 
-        RemoveEnchantDurations(pItem);
+        RemoveEnchantmentDurations(pItem);
 
         if( bag == INVENTORY_SLOT_BAG_0 )
         {
@@ -8140,37 +8134,6 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
                 int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 16);
                 for (int i = VisibleBase; i < VisibleBase + 12; ++i)
                     SetUInt32Value(i, 0);
-                for(int enchant_slot = 0 ; enchant_slot < 11 ; enchant_slot++)
-                {
-                    uint32 Enchant_id = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+enchant_slot*3);
-                    if( Enchant_id)
-                    {
-                        for (int s=0;s<3;s++)
-                        {
-                            SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(Enchant_id);
-                            if(!pEnchant)
-                                continue;
-                            uint32 enchant_display = pEnchant->display_type[s];
-                            uint32 enchant_value1 = pEnchant->amount[s];
-                            //uint32 enchant_value2 = pEnchant->value2;
-                            uint32 enchant_spell_id = pEnchant->spellid[s];
-                            //uint32 enchant_aura_id = pEnchant->aura_id;
-                            //uint32 enchant_description = pEnchant->description;
-                            //SpellEntry *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
-                            if(enchant_display ==4)
-                                SetArmor(GetArmor()-enchant_value1);
-                            else if(enchant_display ==2)
-                            {
-                                SetFloatValue(UNIT_FIELD_MINDAMAGE,GetFloatValue(UNIT_FIELD_MINDAMAGE)-enchant_value1);
-                                SetFloatValue(UNIT_FIELD_MAXDAMAGE,GetFloatValue(UNIT_FIELD_MAXDAMAGE)-enchant_value1);
-                            }
-                            else
-                            {
-                                RemoveAurasDueToSpell(enchant_spell_id);
-                            }
-                        }
-                    }
-                }
             }
 
             m_items[slot] = NULL;
@@ -8865,15 +8828,14 @@ void Player::UpdateEnchantTime(uint32 time)
     {
         assert(itr->item);
         next=itr;
-        if(!itr->item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+itr->slot*3))
+        if(!itr->item->GetEchantmentId(itr->slot))
         {
             next = m_enchantDuration.erase(itr);
         }
         else if(itr->leftduration <= time)
         {
-            AddItemEnchant(itr->item,itr->item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+itr->slot*3),itr->slot,false);
-            for(int y=0;y<3;y++)
-                itr->item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+itr->slot*3+y,0);
+            ApplyEnchantment(itr->item,itr->slot,false,false);
+            itr->item->ClearEchantment(itr->slot);
             next = m_enchantDuration.erase(itr);
         }
         else if(itr->leftduration > time)
@@ -8884,28 +8846,26 @@ void Player::UpdateEnchantTime(uint32 time)
     }
 }
 
-void Player::AddEnchantDurations(Item *item)
+void Player::AddEnchantmentDurations(Item *item)
 {
-    for(int x=0;x<7;x++)
+    for(int x=0;x<MAX_ENCHANTMENT_SLOT;++x)
     {
-        uint32 duration = item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+x*3+1);
+        uint32 duration = item->GetEchantmentDuration(EnchantmentSlot(x));
         if( duration == 0 )
             continue;
         else if( duration > 0 )
-            AddEnchantDuration(item,x,duration);
+            AddEnchantmentDuration(item,EnchantmentSlot(x+1),duration);
     }
 }
 
-void Player::RemoveEnchantDurations(Item *item)
+void Player::RemoveEnchantmentDurations(Item *item)
 {
     for(EnchantDurationList::iterator itr = m_enchantDuration.begin();itr != m_enchantDuration.end();)
     {
         if(itr->item == item)
         {
             // save duration in item
-            item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+itr->slot*3+1,itr->leftduration);
-            item->SetState(ITEM_CHANGED);
-
+            item->SetEchantmentDuration(EnchantmentSlot(itr->slot),itr->leftduration);
             itr = m_enchantDuration.erase(itr);
         }
         else
@@ -8914,10 +8874,14 @@ void Player::RemoveEnchantDurations(Item *item)
 }
 
 // duration == 0 will remove item enchant
-void Player::AddEnchantDuration(Item *item,uint32 slot,uint32 duration)
+void Player::AddEnchantmentDuration(Item *item,EnchantmentSlot slot,uint32 duration)
 {
     if(!item)
         return;
+
+    if(slot >= MAX_ENCHANTMENT_SLOT)
+        return;
+
     for(EnchantDurationList::iterator itr = m_enchantDuration.begin();itr != m_enchantDuration.end();++itr)
     {
         if(itr->item == item && itr->slot == slot)
@@ -8930,6 +8894,187 @@ void Player::AddEnchantDuration(Item *item,uint32 slot,uint32 duration)
     {
         GetSession()->SendItemEnchantTimeUpdate(GetGUID(), item->GetGUID(),slot,uint32(duration/1000));
         m_enchantDuration.push_back(EnchantDuration(item,slot,duration));
+    }
+}
+
+void Player::ApplyEnchantment(Item *item,bool apply)
+{
+    for(uint32 slot = 0; slot < MAX_ENCHANTMENT_SLOT; ++slot)
+        ApplyEnchantment(item, EnchantmentSlot(slot), apply);
+}
+
+void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool apply_dur)
+{
+    if(!item)
+        return;
+
+    if(!item->IsEquipped())
+        return;
+
+    if(slot > MAX_ENCHANTMENT_SLOT)
+        return;
+
+    uint32 enchant_id = item->GetEchantmentId(slot);
+    if(!enchant_id)
+        return;
+
+    SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+    if(!pEnchant)
+        return;
+
+    for (int s=0; s<3; s++)
+    {
+        uint32 enchant_display_type = pEnchant->display_type[s];
+        uint32 enchant_amount = pEnchant->amount[s];
+        uint32 enchant_spell_id = pEnchant->spellid[s];
+
+        if (enchant_display_type == 0)
+        {
+            // Nothing
+        }
+        else if(enchant_display_type ==4)
+        {
+            ApplyArmorMod(enchant_amount,apply);
+        }
+        else if(enchant_display_type == 6) // Shaman Rockbiter Weapon
+        {
+            // enchant_amount is then containing the number of damage per second to add to the weapon
+            if(getClass() == CLASS_SHAMAN)
+            {
+                ApplyModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,enchant_amount,apply);
+                //ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,enchant_amount,apply);
+            }
+        }
+        else if(enchant_display_type == 5) // 
+        {
+            sLog.outDebug("Adding %u to stat nb %u",enchant_amount,enchant_spell_id);
+            switch (enchant_spell_id)
+            {
+            case ITEM_STAT_AGILITY:
+                sLog.outDebug("+ %u AGILITY",enchant_amount);
+                ApplyPosStatMod(STAT_AGILITY, enchant_amount, apply);
+                ApplyStatMod(STAT_AGILITY, enchant_amount, apply);
+                break;
+            case ITEM_STAT_STRENGTH:
+                sLog.outDebug("+ %u STRENGTH",enchant_amount);
+                ApplyPosStatMod(STAT_STRENGTH, enchant_amount, apply);
+                ApplyStatMod(STAT_STRENGTH, enchant_amount, apply);
+                break;
+            case ITEM_STAT_INTELLECT:
+                sLog.outDebug("+ %u INTELLECT",enchant_amount);
+                ApplyPosStatMod(STAT_INTELLECT, enchant_amount, apply);
+                ApplyStatMod(STAT_INTELLECT, enchant_amount, apply);
+                break;
+            case ITEM_STAT_SPIRIT:
+                sLog.outDebug("+ %u SPIRIT",enchant_amount);
+                ApplyPosStatMod(STAT_SPIRIT, enchant_amount, apply);
+                ApplyStatMod(STAT_SPIRIT, enchant_amount, apply);
+                break;
+            case ITEM_STAT_STAMINA:
+                sLog.outDebug("+ %u STAMINA",enchant_amount);
+                ApplyPosStatMod(STAT_STAMINA, enchant_amount, apply);
+                ApplyStatMod(STAT_STAMINA, enchant_amount, apply);
+                break;
+            case ITEM_STAT_DEFENCE_RATING:
+                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_DEFENCE_RATING, enchant_amount, apply);
+                sLog.outDebug("+ %u DEFENCE", enchant_amount);
+                break;
+            case ITEM_STAT_DODGE_RATING:
+                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_DODGE_RATING, enchant_amount, apply);
+                sLog.outDebug("+ %u DODGE", enchant_amount);
+                break;
+            case ITEM_STAT_PARRY_RATING:
+                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_PARRY_RATING, enchant_amount, apply);
+                sLog.outDebug("+ %u PARRY", enchant_amount);
+                break;
+            case ITEM_STAT_SHIELD_BLOCK_RATING:
+                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_BLOCK_RATING, enchant_amount, apply);
+                sLog.outDebug("+ %u SHIELD_BLOCK", enchant_amount);
+                break;
+            case ITEM_STAT_MELEE_HIT_RATING:
+                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_HIT_RATING, enchant_amount, apply);
+                sLog.outDebug("+ %u MELEE_HIT", enchant_amount);
+                break;
+            case ITEM_STAT_RANGED_HIT_RATING:
+                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_HIT_RATING, enchant_amount, apply);
+                sLog.outDebug("+ %u RANGED_HIT", enchant_amount);
+                break;
+            case ITEM_STAT_SPELL_HIT_RATING:
+                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_HIT_RATING, enchant_amount, apply);
+                sLog.outDebug("+ %u SPELL_HIT", enchant_amount);
+                break;
+            case ITEM_STAT_MELEE_CS_RATING: // CS = Critical Strike
+                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_CRIT_RATING, enchant_amount, apply);
+                sLog.outDebug("+ %u MELEE_CRIT", enchant_amount);
+                break;
+            case ITEM_STAT_RANGED_CS_RATING:
+                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_CRIT_RATING, enchant_amount, apply);
+                sLog.outDebug("+ %u RANGED_CRIT", enchant_amount);
+                break;
+            case ITEM_STAT_SPELL_CS_RATING:
+                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_CRIT_RATING, enchant_amount, apply);
+                sLog.outDebug("+ %u SPELL_CRIT", enchant_amount);
+                break;
+                // Values from ITEM_STAT_MELEE_HA_RATING to ITEM_STAT_SPELL_HASTE_RATING are never used
+                // in Enchantments
+            case ITEM_STAT_HIT_RATING:
+                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_HIT_RATING, enchant_amount, apply);
+                sLog.outDebug("+ %u HIT", enchant_amount);
+                break;
+            case ITEM_STAT_CS_RATING:
+                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_CRIT_RATING, enchant_amount, apply);
+                sLog.outDebug("+ %u CRITICAL", enchant_amount);
+                break;
+                // Values ITEM_STAT_HA_RATING and ITEM_STAT_CA_RATING are never used in Enchantment
+            case ITEM_STAT_RESILIENCE_RATING:
+                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RESILIENCE_RATING, enchant_amount, apply);
+                sLog.outDebug("+ %u RESILIENCE", enchant_amount);
+                break;
+                // Value ITEM_STAT_HASTE_RATING is never used in Enchantment
+            }
+        }
+        else if(enchant_display_type ==2)
+        {
+            if(getClass() == CLASS_HUNTER)
+            {
+                ApplyModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE,enchant_amount,apply);
+                ApplyModFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE,enchant_amount,apply);
+            }
+            else
+            {
+                ApplyModFloatValue(UNIT_FIELD_MINDAMAGE,enchant_amount,apply);
+                ApplyModFloatValue(UNIT_FIELD_MAXDAMAGE,enchant_amount,apply);
+            }
+        }
+
+        if(enchant_spell_id)
+        {
+            if(apply)
+                CastSpell(this,enchant_spell_id,true, NULL);
+            else
+                RemoveAurasDueToSpell(enchant_spell_id);
+        }
+    }
+
+    // visualize enchantment at player and equipped items
+    int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (item->GetSlot() * 16);
+    SetUInt32Value(VisibleBase+1 + slot +1, apply? item->GetEchantmentId(slot) : 0);
+
+
+    if(apply_dur)
+    {
+        if(apply)
+        {
+            // set duration
+            uint32 duration = item->GetEchantmentDuration(slot);
+            if(duration)
+                AddEnchantmentDuration(item,TEMP_ENCHANTMENT_SLOT,duration);
+        }
+        else
+        {
+            // duration == 0 will remove EnchantDuration
+            AddEnchantmentDuration(item,slot,0);
+        }
     }
 }
 
@@ -8949,21 +9094,20 @@ void Player::ReducePoisonCharges(uint32 enchantId)
         pItem = GetItemByPos( pos );
         if(!pItem)
             continue;
-        for(int x=0;x<11;x++)
+        for(int x=0;x<MAX_ENCHANTMENT_SLOT;x++)
         {
-            charges = pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+x*3+2);
+            charges = pItem->GetEchantmentCharges(EnchantmentSlot(x));
             if(charges == 0)
                 continue;
             if(charges <= 1)
             {
-                AddItemEnchant(pItem,enchantId,x,false);
-                for(int y=0;y<3;y++)
-                    pItem->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+x*3+y,0);
+                ApplyEnchantment(pItem,EnchantmentSlot(x),false);
+                pItem->ClearEchantment(EnchantmentSlot(x));
                 break;
             }
             else
             {
-                pItem->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+x*3+2,charges-1);
+                pItem->SetEchantmentCharges(EnchantmentSlot(x),charges-1);
                 break;
             }
         }
@@ -8976,10 +9120,7 @@ void Player::SaveEnchant()
     {
         assert(itr->item);
         if(itr->leftduration > 0)
-        {
-            itr->item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+itr->slot*3+1,itr->leftduration);
-            itr->item->SetState(ITEM_CHANGED, this);
-        }
+            itr->item->SetEchantmentDuration(itr->slot,itr->leftduration);
     }
 }
 
@@ -9000,7 +9141,7 @@ void Player::LoadEnchant()
         if(pItem->GetProto()->Class != ITEM_CLASS_WEAPON && pItem->GetProto()->Class != ITEM_CLASS_ARMOR)
             continue;
 
-        AddEnchantDurations(pItem);
+        AddEnchantmentDurations(pItem);
     }
     Bag *pBag;
     ItemPrototype const *pBagProto;
@@ -9021,7 +9162,7 @@ void Player::LoadEnchant()
                         continue;
                     if(pItem->GetProto()->Class != ITEM_CLASS_WEAPON && pItem->GetProto()->Class != ITEM_CLASS_ARMOR)
                         continue;
-                    AddEnchantDurations(pItem);
+                    AddEnchantmentDurations(pItem);
                 }
             }
         }
@@ -9043,7 +9184,7 @@ void Player::LoadEnchant()
                         continue;
                     if(pItem->GetProto()->Class != ITEM_CLASS_WEAPON && pItem->GetProto()->Class != ITEM_CLASS_ARMOR)
                         continue;
-                    AddEnchantDurations(pItem);
+                    AddEnchantmentDurations(pItem);
                 }
             }
         }
