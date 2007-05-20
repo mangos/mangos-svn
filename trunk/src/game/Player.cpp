@@ -9050,10 +9050,14 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
         if(enchant_spell_id)
         {
             if(apply)
-                CastSpell(this,enchant_spell_id,true, NULL);
+            {
+                if(enchant_display_type == 3)
+                    CastSpell(this,enchant_spell_id,true, NULL);
+            }
             else
                 RemoveAurasDueToSpell(enchant_spell_id);
         }
+
     }
 
     // visualize enchantment at player and equipped items
