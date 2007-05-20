@@ -80,7 +80,12 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
     if(!group)
     {
         group = new Group;
-        group->Create(GetPlayer()->GetGUID(), GetPlayer()->GetName());
+        if(!group->Create(GetPlayer()->GetGUID(), GetPlayer()->GetName()))
+        {
+            delete group;
+            return;
+        }
+
         objmgr.AddGroup(group);
         newGroup = true;
     }
@@ -124,7 +129,8 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
     /********************/
 
     // everything's fine, do it
-    group->AddInvite(player);
+    if(!group->AddInvite(player))
+        return;
 
     WorldPacket data(SMSG_GROUP_INVITE, 10);                // guess size
     data << GetPlayer()->GetName();
@@ -145,7 +151,9 @@ void WorldSession::HandleGroupAcceptOpcode( WorldPacket & recv_data )
 
     // everything's fine, do it
     group->RemoveInvite(GetPlayer());
-    group->AddMember(GetPlayer()->GetGUID(), GetPlayer()->GetName());
+    if(!group->AddMember(GetPlayer()->GetGUID(), GetPlayer()->GetName()))
+        return;
+
     GetPlayer()->groupInfo.group  = group;
 }
 

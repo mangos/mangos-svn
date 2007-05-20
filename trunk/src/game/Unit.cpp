@@ -450,9 +450,10 @@ SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
                     if(count)
                     {
                         xp /= count;
-                        for (uint32 i = 0; i < pGroup->GetMembersCount(); i++)
+                        Group::MemberList const& members = pGroup->GetMembers();
+                        for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
                         {
-                            Player *pGroupGuy = pGroup->GetMemberForXPAtKill(i,pVictim);
+                            Player *pGroupGuy = pGroup->GetMemberForXPAtKill(itr->guid,pVictim);
                             if(!pGroupGuy)
                                 continue;
 
@@ -2497,12 +2498,13 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
             //float radius =  GetRadius(sSpellRadiusStore.LookupEntry((*i).second->GetSpellProto()->EffectRadiusIndex[(*i).second->GetEffIndex()]));
             if(pGroup)
             {
-                for(uint32 p=0;p<pGroup->GetMembersCount();p++)
+                Group::MemberList const& members = pGroup->GetMembers();
+                for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
                 {
-                    if(!pGroup->SameSubGroup(i_caster->GetGUID(), pGroup->GetMemberGUID(p)))
+                    if(!pGroup->SameSubGroup(i_caster->GetGUID(), &*itr))
                         continue;
 
-                    Unit* Target = objmgr.GetPlayer(pGroup->GetMemberGUID(p));
+                    Unit* Target = objmgr.GetPlayer(itr->guid);
                     if(!Target || Target->GetGUID() == i_caster->GetGUID())
                         continue;
                     Aura *t_aura = Target->GetAura((*i).second->GetId(), (*i).second->GetEffIndex());

@@ -402,10 +402,10 @@ void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
             if( pGroup )
             {
                 uint32 pguid = _player->GetGUID();
-                uint32 memberscount = pGroup->GetMembersCount();
-                for (uint32 i = 0; i < memberscount; i++)
+                Group::MemberList const& members = pGroup->GetMembers();
+                for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
                 {
-                    guid = pGroup->GetMemberGUID(i);
+                    guid = itr->guid;
                     if( guid !=  pguid )
                     {
                         Player *pPlayer = ObjectAccessor::Instance().FindPlayer(guid);

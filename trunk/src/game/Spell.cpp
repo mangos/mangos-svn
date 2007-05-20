@@ -551,9 +551,10 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
 
             if(pGroup)
             {
-                for(uint32 p=0;p<pGroup->GetMembersCount();p++)
+                Group::MemberList const& members = pGroup->GetMembers();
+                for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
                 {
-                    Unit* Target = objmgr.GetPlayer(pGroup->GetMemberGUID(p));
+                    Unit* Target = objmgr.GetPlayer(itr->guid);
                     if(Target && m_caster->IsWithinDistInMap(Target, radius))
                         TagUnitMap.push_back(Target);
                 }
@@ -665,9 +666,10 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
 
             if(pGroup)
             {
-                for(uint32 p=0;p<pGroup->GetMembersCount();p++)
+                Group::MemberList const& members = pGroup->GetMembers();
+                for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
                 {
-                    Unit* Target = objmgr.GetPlayer(pGroup->GetMemberGUID(p));
+                    Unit* Target = objmgr.GetPlayer(itr->guid);
                     if(Target && targetPlayer->IsWithinDistInMap(Target, radius) )
                         TagUnitMap.push_back(Target);
                 }
@@ -733,9 +735,10 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
             Group* pGroup = targetPlayer ? targetPlayer->groupInfo.group : NULL;
             if(pGroup)
             {
-                for(uint32 p=0;p<pGroup->GetMembersCount();p++)
+                Group::MemberList const& members = pGroup->GetMembers();
+                for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
                 {
-                    Unit* Target = objmgr.GetPlayer(pGroup->GetMemberGUID(p));
+                    Unit* Target = objmgr.GetPlayer(itr->guid);
                     if(Target && targetPlayer->IsWithinDistInMap(Target, radius) && targetPlayer->getClass() == Target->getClass())
                         TagUnitMap.push_back(Target);
                 }

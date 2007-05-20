@@ -502,19 +502,20 @@ void AreaAura::Update(uint32 diff)
         float radius =  GetRadius(sSpellRadiusStore.LookupEntry(GetSpellProto()->EffectRadiusIndex[m_effIndex]));
         if(pGroup)
         {
-            for(uint32 p=0;p<pGroup->GetMembersCount();p++)
+            Group::MemberList const& members = pGroup->GetMembers();
+            for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
             {
-                Unit* Target = objmgr.GetPlayer(pGroup->GetMemberGUID(p));
+                Unit* Target = objmgr.GetPlayer(itr->guid);
 
                 if (caster->GetTypeId() == TYPEID_PLAYER)
                 {
-                    if(!Target || Target->GetGUID() == m_caster_guid || !Target->isAlive() || !pGroup->SameSubGroup(m_caster_guid, Target->GetGUID()))
+                    if(!Target || Target->GetGUID() == m_caster_guid || !Target->isAlive() || !pGroup->SameSubGroup(m_caster_guid, &*itr))
                         continue;
                 }
                 else if(((Creature*)caster)->isTotem())
                 {
                     Unit *owner = ((Totem*)caster)->GetOwner();
-                    if(!Target || !Target->isAlive() || !pGroup->SameSubGroup(owner->GetGUID(), Target->GetGUID()))
+                    if(!Target || !Target->isAlive() || !pGroup->SameSubGroup(owner->GetGUID(), &*itr))
                         continue;
                 }
 

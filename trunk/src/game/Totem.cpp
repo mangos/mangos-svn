@@ -90,12 +90,13 @@ void Totem::UnSummon()
         pGroup = ((Player*)owner)->groupInfo.group;
         if (pGroup)
         {
-            for(uint32 p=0;p<pGroup->GetMembersCount();p++)
+            Group::MemberList const& members = pGroup->GetMembers();
+            for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
             {
-                if(!pGroup->SameSubGroup(owner->GetGUID(), pGroup->GetMemberGUID(p)))
+                if(!pGroup->SameSubGroup(owner->GetGUID(), &*itr))
                     continue;
 
-                Unit* Target = objmgr.GetPlayer(pGroup->GetMemberGUID(p));
+                Unit* Target = objmgr.GetPlayer(itr->guid);
                 if (Target) Target->RemoveAurasDueToSpell(m_spell);
             }
         }

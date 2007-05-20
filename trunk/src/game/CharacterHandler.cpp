@@ -486,13 +486,6 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         pCurrChar->SetRank(0);
     }
 
-    // this remained from raid group load (raid group load was moved to player code)
-    if(pCurrChar->groupInfo.group)
-    {
-        //pCurrChar->groupInfo.group->SendInit(this); // useless
-        pCurrChar->groupInfo.group->SendUpdate();
-    }
-
     if (!MapManager::Instance().GetMap(pCurrChar->GetMapId(), pCurrChar)->AddInstanced(pCurrChar))
     {
         // TODO : Teleport to zone-in area
@@ -522,6 +515,13 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         data.append(pCurrChar->GetPackGUID());
         data << (uint32)2;
         pCurrChar->SendMessageToSet(&data,true);
+    }
+
+    // announce group about member online (must be after add to player list to receive announce to self)
+    if(pCurrChar->groupInfo.group)
+    {
+        //pCurrChar->groupInfo.group->SendInit(this); // useless
+        pCurrChar->groupInfo.group->SendUpdate();
     }
 
     // friend status

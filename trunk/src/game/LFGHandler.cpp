@@ -168,9 +168,10 @@ void WorldSession::SendLfgResult(uint32 type, uint32 entry)
                 if(group)
                 {
                     data << group->GetMembersCount()-1; // count of group members without group leader
-                    for(uint8 i = 0; i < group->GetMembersCount(); i++)
+                    Group::MemberList const& members = group->GetMembers();
+                    for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
                     {
-                        Player *member = objmgr.GetPlayer(group->GetMemberGUID(i));
+                        Player *member = objmgr.GetPlayer(itr->guid);
                         if(member && member->GetGUID() != plr->GetGUID())
                         {
                             data.append(member->GetPackGUID()); // packed guid

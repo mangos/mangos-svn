@@ -5699,12 +5699,13 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                     // round robin style looting applies for all low
                     // quality items in each loot method except free for all
                     Group *group = recipient->groupInfo.group;
-                    uint32 siz = group->GetMembersCount();
-                    uint32 pos = 0;
-                    for (pos = 0; pos<siz; pos++)
-                        if (group->GetMemberGUID(pos) == group->GetLooterGuid())
-                            break;
-                    group->SetLooterGuid(group->GetMemberGUID((pos+1)%siz));
+
+                    // next by circle
+                    uint64 next_guid = group->GetNextGuidAfter(group->GetLooterGuid());
+                    if(next_guid==0)
+                        next_guid = group->GetMembers().front().guid;
+
+                    group->SetLooterGuid(next_guid);
 
                     switch (group->GetLootMethod())
                     {
@@ -12292,12 +12293,13 @@ void Player::RemoveAreaAurasFromGroup()
     if(!pGroup)
         return;
 
-    for(uint32 p=0;p<pGroup->GetMembersCount();p++)
+    Group::MemberList const& members = pGroup->GetMembers();
+    for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
     {
-        if(!pGroup->SameSubGroup(GetGUID(), pGroup->GetMemberGUID(p)))
+        if(!pGroup->SameSubGroup(GetGUID(), &*itr))
             continue;
 
-        Unit* Member = objmgr.GetPlayer(pGroup->GetMemberGUID(p));
+        Unit* Member = objmgr.GetPlayer(itr->guid);
         if(!Member)
             continue;
 
