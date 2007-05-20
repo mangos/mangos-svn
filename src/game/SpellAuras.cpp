@@ -2962,6 +2962,19 @@ void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
 void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
 {
     m_target->ApplyMaxHealthMod(m_modifier.m_amount,apply);
+
+    if(GetSpellProto()->Id == 12976 && Real) //Warrior Last Stand
+    {
+        if(apply)
+            m_target->ModifyHealth(m_modifier.m_amount);
+        else
+        {
+            if (int32(m_target->GetHealth()) > m_modifier.m_amount)
+                m_target->ModifyHealth(-m_modifier.m_amount);
+            else
+                m_target->SetHealth(1);
+        }
+    }
 }
 
 void Aura::HandleAuraModIncreaseEnergy(bool apply, bool Real)
