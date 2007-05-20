@@ -2584,13 +2584,8 @@ uint8 Spell::CheckItems()
                     return SPELL_FAILED_ITEM_NOT_FOUND;
                 break;
             case SPELL_EFFECT_ENCHANT_HELD_ITEM:
-            {
-                if(!m_targets.m_itemTarget)
-                    return SPELL_FAILED_ITEM_NOT_FOUND;
-                if (!m_targets.m_itemTarget->IsEquipped())
-                    return SPELL_FAILED_EQUIPPED_ITEM;
+                // check item existence in effect code (not output errors at offhand hold item effect to main hand for example
                 break;
-            }
             case SPELL_EFFECT_DISENCHANT:
             {
                 if(!m_targets.m_itemTarget)

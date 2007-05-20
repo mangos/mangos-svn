@@ -847,7 +847,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         AuraList const& GetAurasByType(uint8 type) const { return m_modAuras[type]; }
         long GetTotalAuraModifier(uint32 ModifierID);
         void SendMoveToPacket(float x, float y, float z, bool run, uint32 transitTime = 0);
-        void AddItemEnchant(Item *item,uint32 enchant_id,uint8 enchant_slot,bool apply);
         void setTransForm(uint32 spellid) { m_transform = spellid;}
         uint32 getTransForm() { return m_transform;}
         void AddDynObject(DynamicObject* dynObj);

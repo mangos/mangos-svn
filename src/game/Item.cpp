@@ -479,19 +479,19 @@ uint32 Item::GenerateItemRandomPropertyId(uint32 item_id)
     {
         if(cur = sItemRandomPropertiesStore.LookupEntry(i))
         {
-            ItemValue = GetEnchantMod(cur->enchant_id_1, itemProto);
+            ItemValue = GetEnchantMod(cur->enchant_id[0], itemProto);
             if(!ItemValue)
                 continue;
-            if(cur->enchant_id_2)
+            if(cur->enchant_id[1])
             {
-                tempItemValue = GetEnchantMod(cur->enchant_id_2, itemProto);
+                tempItemValue = GetEnchantMod(cur->enchant_id[1], itemProto);
                 if(!tempItemValue)
                     continue;
                 ItemValue += tempItemValue;
             }
-            if(cur->enchant_id_3)
+            if(cur->enchant_id[2])
             {
-                tempItemValue = GetEnchantMod(cur->enchant_id_3, itemProto);
+                tempItemValue = GetEnchantMod(cur->enchant_id[2], itemProto);
                 if(!tempItemValue)
                     continue;
                 ItemValue += tempItemValue;
@@ -527,9 +527,8 @@ void Item::SetItemRandomProperties(uint32 randomPropId)
     if(item_rand)
     {
         SetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID,item_rand->ID);
-        SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3*3,item_rand->enchant_id_1);
-        SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3*4,item_rand->enchant_id_2);
-        SetUInt32Value(ITEM_FIELD_ENCHANTMENT+3*5,item_rand->enchant_id_3);
+        for(uint32 i = PROP_ENCHANTMENT_SLOT; i < PROP_ENCHANTMENT_SLOT + 3; ++i)
+            SetEchantment(EnchantmentSlot(i),item_rand->enchant_id[i],0,0);
     }
 }
 
@@ -938,4 +937,30 @@ bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
     }
 
     return true;
+}
+
+void Item::SetEchantment(EnchantmentSlot slot, uint32 id, uint32 duration, uint32 charges)
+{
+    SetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+ENCHANTMENT_ID_OFFSET,id);
+    SetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+ENCHANTMENT_DURATION_OFFSET,duration);
+    SetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+ENCHANTMENT_CHARGES_OFFSET,charges);
+    SetState(ITEM_CHANGED);
+}
+
+void Item::SetEchantmentDuration(EnchantmentSlot slot, uint32 duration)
+{
+    SetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+ENCHANTMENT_DURATION_OFFSET,duration);
+    SetState(ITEM_CHANGED);
+}
+void Item::SetEchantmentCharges(EnchantmentSlot slot, uint32 charges)
+{
+    SetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+ENCHANTMENT_CHARGES_OFFSET,charges);
+    SetState(ITEM_CHANGED);
+}
+
+void Item::ClearEchantment(EnchantmentSlot slot)
+{
+    for(int x=0;x<3;x++)
+        SetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+x,0);
+    SetState(ITEM_CHANGED);
 }

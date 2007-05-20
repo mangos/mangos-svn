@@ -187,9 +187,7 @@ struct ItemExtendedCostEntry
 struct ItemRandomPropertiesEntry
 {
     uint32    ID;
-    uint32    enchant_id_1;
-    uint32    enchant_id_2;
-    uint32    enchant_id_3;
+    uint32    enchant_id[3];
 };
 
 struct ItemSetEntry

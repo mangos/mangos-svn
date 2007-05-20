@@ -90,19 +90,16 @@ bool WorldSession::SendAuctionInfo(WorldPacket & data, AuctionEntry* auction)
     data << auction->Id;
     data << pItem->GetUInt32Value(OBJECT_FIELD_ENTRY);
 
-    for (uint8 i = 0; i < 6; i++)
+    for (uint8 i = 0; i < MAX_INSPECTED_ENCHANTMENT_SLOT; i++)
     {
-        // Id
-        data << (uint32) pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + i*3 + 0);
+        data << (uint32) pItem->GetEchantmentId(EnchantmentSlot(i));
         // Unknown maybe duration, but not shown?
         data << (uint32) 0;
-        // Charges
-        //data << pItem->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES + i); iterate by 0..5 but ITEM_FIELD_SPELL_CHARGES have only 0...4 fields
-        data << (uint32) pItem->GetUInt32Value(ITEM_FIELD_ENCHANTMENT + i*3 + 2);
+        data << (uint32) pItem->GetEchantmentCharges(EnchantmentSlot(i));
                                                             
     }
 
-    data << (uint32) pItem->GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID);
+    data << (uint32) pItem->GetItemRandomPropertyId();
                                                             //random item property id
     data << (uint32) 0;                                     //not pItem->GetCreator(), Unknown
 
