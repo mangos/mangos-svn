@@ -19,7 +19,7 @@
 ## Sub-directories to parse
 
 ## CPP flags for includes, defines, etc.
-AM_CPPFLAGS = $(MYSQL_INCLUDES) -I$(srcdir) -I$(srcdir)/../../dep/include -I$(srcdir)/../framework -I$(srcdir)/../shared
+AM_CPPFLAGS = $(MYSQL_INCLUDES) -D_SQL_TRANSACTION -I$(srcdir) -I$(srcdir)/../../dep/include -I$(srcdir)/../framework -I$(srcdir)/../shared
 ## AM_CPPFLAGS += -I$(srcdir)/../game -I$(srcdir)/../realmd
 
 ## Build MaNGOS shared library and its parts as convenience library.
