@@ -128,7 +128,7 @@ void CliDelete(char*command,pPrintf zprintf)
     ///- Get the account ID from the database
     Field *fields;
     // No SQL injection (account_name escaped)
-    QueryResult *result = loginDatabase.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s'",safe_account_name.c_str());
+    QueryResult *result = loginDatabase.Query("SELECT `id` FROM `account` WHERE `username` = '%s'",safe_account_name.c_str());
 
     if (!result)
     {
@@ -142,7 +142,7 @@ void CliDelete(char*command,pPrintf zprintf)
 
     ///- Circle through characters belonging to this account ID and remove all characters related data (items, quests, ...) from the database
     // No SQL injection (account_id is db internal)
-    result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%d'",account_id);
+    result = sDatabase.Query("SELECT `guid` FROM `character` WHERE `account` = '%d'",account_id);
 
     if (result)
     {
@@ -171,14 +171,14 @@ void CliDelete(char*command,pPrintf zprintf)
     }
 
     ///- Remove characters and account from the databases
-    sDatabase.BeginTransaction();
+    //sDatabase.BeginTransaction();
 
-    bool done = sDatabase.PExecute("DELETE FROM `character` WHERE `account` = '%d'",account_id) &&
-        sDatabase.PExecute("DELETE FROM `guild_charter_sign` WHERE `player_account` = '%d'",account_id) &&
-        loginDatabase.PExecute("DELETE FROM `account` WHERE `username` = '%s'",safe_account_name.c_str()) &&
-        loginDatabase.PExecute("DELETE FROM `realmcharacters` WHERE `acctid` = '%d'",account_id);
+    bool done = sDatabase.Execute("DELETE FROM `character` WHERE `account` = '%d'",account_id) &&
+        sDatabase.Execute("DELETE FROM `guild_charter_sign` WHERE `player_account` = '%d'",account_id) &&
+        loginDatabase.Execute("DELETE FROM `account` WHERE `username` = '%s'",safe_account_name.c_str()) &&
+        loginDatabase.Execute("DELETE FROM `realmcharacters` WHERE `acctid` = '%d'",account_id);
 
-    sDatabase.CommitTransaction();
+    //sDatabase.CommitTransaction();
 
     if (done)
         zprintf("We deleted account: %s\r\n",account_name);
@@ -295,7 +295,7 @@ void CliInfo(char*,pPrintf zprintf)
 
         ///- Get the username, last IP and GM level of each account
         // No SQL injection. account is uint32.
-        QueryResult *resultLogin = loginDatabase.PQuery(
+        QueryResult *resultLogin = loginDatabase.Query(
             "SELECT `username`,`last_ip`,`gmlevel` FROM `account` WHERE `id` = '%u'",account);
 
         if(resultLogin)
@@ -473,12 +473,12 @@ void CliSetGM(char *command,pPrintf zprintf)
 
     ///- Try to find the account, then update the GM level
     // No SQL injection (account name is escaped)
-    QueryResult *result = loginDatabase.PQuery("SELECT 1 FROM `account` WHERE `username` = '%s'",safe_account_name.c_str());
+    QueryResult *result = loginDatabase.Query("SELECT 1 FROM `account` WHERE `username` = '%s'",safe_account_name.c_str());
 
     if (result)
     {
         // No SQL injection (account name is escaped)
-        loginDatabase.PExecute("UPDATE `account` SET `gmlevel` = '%d' WHERE `username` = '%s'",lev,safe_account_name.c_str());
+        loginDatabase.Execute("UPDATE `account` SET `gmlevel` = '%d' WHERE `username` = '%s'",lev,safe_account_name.c_str());
         zprintf("We added %s gmlevel %d\r\n",szAcc,lev);
 
         delete result;
@@ -523,7 +523,7 @@ void CliCreate(char *command,pPrintf zprintf)
     loginDatabase.escape_string(safe_account_name);
 
     ///- Check that the account does not exist yet
-    QueryResult *result1 = loginDatabase.PQuery("SELECT 1 FROM `account` WHERE `username` = '%s'",safe_account_name.c_str());
+    QueryResult *result1 = loginDatabase.Query("SELECT 1 FROM `account` WHERE `username` = '%s'",safe_account_name.c_str());
 
     if (result1)
     {
@@ -538,8 +538,8 @@ void CliCreate(char *command,pPrintf zprintf)
 
     ///- Insert the account in the database (account table)
     // No SQL injection (escaped account name and password)
-    sDatabase.BeginTransaction();
-    if(loginDatabase.PExecute("INSERT INTO `account` (`username`,`password`,`gmlevel`,`sessionkey`,`email`,`joindate`,`banned`,`last_ip`,`failed_logins`,`locked`) VALUES ('%s','%s','0','','',NOW(),'0','0','0','0')",safe_account_name.c_str(),safe_password.c_str()))
+    //sDatabase.BeginTransaction();
+    if(loginDatabase.Execute("INSERT INTO `account` (`username`,`password`,`gmlevel`,`sessionkey`,`email`,`joindate`,`banned`,`last_ip`,`failed_logins`,`locked`) VALUES ('%s','%s','0','','',NOW(),'0','0','0','0')",safe_account_name.c_str(),safe_password.c_str()))
     {
         ///- Make sure that the realmcharacters table is up-to-date
         loginDatabase.Execute("INSERT INTO `realmcharacters` (`realmid`, `acctid`, `numchars`) SELECT `realmlist`.`id`, `account`.`id`, 0 FROM `account`, `realmlist` WHERE `account`.`id` NOT IN (SELECT `acctid` FROM `realmcharacters`)");
@@ -547,7 +547,7 @@ void CliCreate(char *command,pPrintf zprintf)
     }
     else
         zprintf("User %s with password %s NOT created (probably sql file format was updated)\r\n",szAcc,szPassword);
-    sDatabase.CommitTransaction();
+    //sDatabase.CommitTransaction();
 }
 
 /// Command parser and dispatcher
@@ -672,12 +672,12 @@ void CliSetTBC(char *command,pPrintf zprintf)
     loginDatabase.escape_string(safe_account_name);
 
     // No SQL injection (account name is escaped)
-    QueryResult *result = loginDatabase.PQuery("SELECT 1 FROM `account` WHERE `username` = '%s'",safe_account_name.c_str());
+    QueryResult *result = loginDatabase.Query("SELECT 1 FROM `account` WHERE `username` = '%s'",safe_account_name.c_str());
 
     if (result)
     {
         // No SQL injection (account name is escaped)
-        loginDatabase.PExecute("UPDATE `account` SET `tbc` = '%d' WHERE `username` = '%s'",lev,safe_account_name.c_str());
+        loginDatabase.Execute("UPDATE `account` SET `tbc` = '%d' WHERE `username` = '%s'",lev,safe_account_name.c_str());
         zprintf("We added %s to expansion allowed %d\r\n",szAcc,lev);
 
         delete result;
@@ -694,7 +694,7 @@ void CliSetTBC(char *command,pPrintf zprintf)
 void CliRunnable::run()
 {
     ///- Init new SQL thread for the world database (one connection call enough)
-    sDatabase.ThreadStart();                                // let thread do safe mySQL requests
+    //sDatabase.ThreadStart();                                // let thread do safe mySQL requests
 
     char commandbuf[256];
 
@@ -732,5 +732,5 @@ void CliRunnable::run()
     }
 
     ///- End the database thread
-    sDatabase.ThreadEnd();                                  // free mySQL thread resources
+    //sDatabase.ThreadEnd();                                  // free mySQL thread resources
 }
