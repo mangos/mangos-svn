@@ -58,11 +58,11 @@ When you know some processing will take a long time and will freeze up a socket,
 possibility to call Detach() on that socket before starting the processing.
 When the OnDetached() callback is later called the processing can continue, now in its own thread.
 	\ingroup threading */
-class Thread
+class sThread
 {
 public:
-	Thread(bool release = true);
-	virtual ~Thread();
+	sThread(bool release = true);
+	virtual ~sThread();
 
 	static threadfunc_t STDPREFIX StartThread(threadparam_t);
 
@@ -77,8 +77,8 @@ public:
 	bool IsDestructor();
 
 private:
-	Thread(const Thread& ) {}
-	Thread& operator=(const Thread& ) { return *this; }
+	sThread(const sThread& ) {}
+	sThread& operator=(const sThread& ) { return *this; }
 #ifdef _WIN32
 	HANDLE m_thread;
 	unsigned m_dwThreadId;
