@@ -118,7 +118,11 @@ class DBCStorage
             uint32 offset = 0;
             for(uint32 x=0;x<fieldCount;x++)
             {
-                switch(fmt[x])  {
+                switch(fmt[x])
+                {
+                case FT_BYTE:
+                    offset += 1;
+                    break;
                 case FT_IND:
                 case FT_INT:
                 case FT_FLOAT:
