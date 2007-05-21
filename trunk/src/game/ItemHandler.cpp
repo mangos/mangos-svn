@@ -266,7 +266,8 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
                 data << uint32(0);
                 if (pItem)
                 {
-                    if ((s < 3) && (pItem->GetUInt32Value(ITEM_FIELD_SOCKETS_ENCHANTMENT+s*3)))
+                    // SOCK_ENCHANTMENT_SLOT.. SOCK_ENCHANTMENT_SLOT+2 is gem sockets
+                    if ((s < 3) && (pItem->GetEnchantmentId(EnchantmentSlot(SOCK_ENCHANTMENT_SLOT+ s))))
                     {
                         data << uint32(1);
                     }
@@ -907,63 +908,86 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
 
 void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
 {
-    sLog.outDebug("Received opcode CMSG_SOCKET_ITEM");
-    uint64 itemguid;
-    uint64 gemguid[3];
-    uint32 gemProperty[3];
+    sLog.outDebug("WORLD: CMSG_SOCKET_ITEM");
 
-    recv_data >> itemguid >> gemguid[0] >> gemguid[1] >> gemguid[2];
+    CHECK_PACKET_SIZE(recv_data,8*4);
 
-    bool propercolor[3], full[3];
-    Item *pItem = _player->GetItemByPos(_player->GetPosByGuid(itemguid));
-    if(pItem)
+    uint64 guids[4];
+    uint32 GemEnchants[3], OldEnchants[3];
+    Item *Gems[3];
+    bool SocketBonusActivated, SocketBonusToBeActivated;
+
+
+    for(int i = 0; i < 4; i++)
+        recv_data >> guids[i];
+
+    //cheat -> tried to socket same gem multiple times
+    if((guids[1] && (guids[1] == guids[2] || guids[1] == guids[3])) || (guids[2] && (guids[2] == guids[3]))) 
+        return;
+
+    uint16 pos = _player->GetPosByGuid(guids[0]);
+    Item *itemTarget = _player->GetItemByPos(pos);
+    if(!itemTarget) //missing item to socket
+        return;
+
+    uint16 slot = pos & 255;                                //this slot is excepted when applying / removing meta gem bonus
+
+    for(int i = 0; i < 3; i++)
     {
-        bool HasBonus = 1;
-        for(int s = 0; s < 3; s++)
+        pos = _player->GetPosByGuid(guids[i + 1]);
+        Gems[i] = _player->GetItemByPos(pos);
+    }
+
+    GemPropertiesEntry const *GemProps[3];
+    for(int i = 0; i < 3; ++i)                              //get geminfo from dbc storage
+    {
+        GemProps[i] = (Gems[i]) ? sGemPropertiesStore.LookupEntry(Gems[i]->GetProto()->GemProperties) : NULL;
+    }
+
+    for(int i = 0; i < 3; ++i)                              //check for hack maybe
+    {
+        // tried to put gem in socket where no socket exists / tried to put normal gem in meta socket
+        // tried to put meta gem in normal socket
+        if( GemProps[i] && ( (!itemTarget->GetProto()->Socket[i].Color) || (itemTarget->GetProto()->Socket[i].Color == 1 && GemProps[i]->color != 1) || (itemTarget->GetProto()->Socket[i].Color != 1 && GemProps[i]->color == 1))) 
+            return;
+    }
+
+    for(int i = 0; i < 3; ++i)                              //get new and old enchantments
+    {
+        GemEnchants[i] = (GemProps[i]) ? GemProps[i]->spellitemenchantement : 0;
+        OldEnchants[i] = itemTarget->GetEnchantmentId(EnchantmentSlot(SOCK_ENCHANTMENT_SLOT+i));
+    }
+
+    SocketBonusActivated = itemTarget->GemsFitSockets();    //save state of socketbonus
+    _player->ToggleMetaGemsActive(slot, false);             //turn off all metagems (except for the target item)
+
+    //if a meta gem is being equipped, all information has to be written to the item before testing if the conditions for the gem are met
+
+    //remove ALL enchants
+    for(uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+3; ++enchant_slot)
+        _player->ApplyEnchantment(itemTarget,EnchantmentSlot(enchant_slot),false);
+
+    for(int i = 0; i < 3; ++i)
+    {
+        if(GemEnchants[i])
         {
-            if(gemguid[s])
-            {
-                Item *pGem = _player->GetItemByPos(_player->GetPosByGuid(gemguid[s]));
-                if(pGem)
-                {
-                    gemProperty[s] = pGem->GetProto()->GemProperties;
-                    GemPropertiesEntry const *gemInfo = sGemPropertiesStore.LookupEntry(gemProperty[s]);
-                    if(gemInfo)
-                    {
-                        propercolor[s] = (gemInfo->color & pItem->GetProto()->Socket[s].Color);
-                        if ((gemInfo->color & SOCKET_COLOR_META) & !propercolor[s])
-                        {
-                            // ToDo : Error message
-                            continue;
-                        }
-                        pItem->SetUInt32Value(ITEM_FIELD_SOCKETS_ENCHANTMENT+s*3, gemInfo->spellitemenchantement);
-                        _player->DestroyItem(pGem->GetBagSlot(), pGem->GetSlot(), true);
-                        full[s] = 1;
-                    }
-                }
-            }
-            else
-            {
-                gemProperty[s] = 0;
-                propercolor[s] = 1;
-                if(pItem->GetProto()->Socket[s].Color)
-                {
-                    full[s]=0;
-                }
-                else
-                {
-                    full[s]=1;
-                }
-                HasBonus &= full[s] & propercolor[s];
-            }
-
-            // Now if all full[s] are true and all propercolor[s] are true, also apply the bonus pItemProto->socketBonus
-            if(HasBonus)
-            {
-                pItem->SetUInt32Value(ITEM_FIELD_SOCKETS_ENCHANTMENT+3*3, pItem->GetProto()->socketBonus);
-            }
-
-            _player->_ApplyItemMods(pItem, pItem->GetSlot(), true);
+            itemTarget->SetEnchantment(EnchantmentSlot(SOCK_ENCHANTMENT_SLOT+i), GemEnchants[i],0,0);
+            pos = _player->GetPosByGuid(guids[i + 1]);
+            _player->DestroyItem((pos >> 8), (pos & 255), true );
         }
     }
+
+    for(uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+3; ++enchant_slot)
+        _player->ApplyEnchantment(itemTarget,EnchantmentSlot(enchant_slot),true);
+    
+    SocketBonusToBeActivated = itemTarget->GemsFitSockets();    //current socketbonus state
+    if(SocketBonusActivated ^ SocketBonusToBeActivated)    //if there was a change...
+    {
+        _player->ApplyEnchantment(itemTarget,BONUS_ENCHANTMENT_SLOT,false);
+        itemTarget->SetEnchantment(BONUS_ENCHANTMENT_SLOT, (SocketBonusToBeActivated ? itemTarget->GetProto()->socketBonus : 0), 0, 0);
+        _player->ApplyEnchantment(itemTarget,BONUS_ENCHANTMENT_SLOT,true);
+        //it is not displayed, client has an inbuilt system to determine if the bonus is activated
+    }
+
+    _player->ToggleMetaGemsActive(slot, true);    //turn on all metagems (except for target item)
 }

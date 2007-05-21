@@ -113,7 +113,7 @@ void WorldSession::SendUpdateTrade()
             data << (uint32) 0;                                                     // probably gift=1, created_by=0?
             data << (uint32) item->GetUInt32Value(ITEM_FIELD_GIFTCREATOR);          // gift creator
             data << (uint32) 0;                                                     // unknown (maybe enchantment ids (temp, perm, 3 sockets) ?
-            data << (uint32) item->GetEchantmentId(PERM_ENCHANTMENT_SLOT);
+            data << (uint32) item->GetEnchantmentId(PERM_ENCHANTMENT_SLOT);
             data << (uint32) 0;//item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+1);        // enchantment id (permanent?)
             data << (uint32) 0;//item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+2);        // enchantment id (permanent?)
             data << (uint32) 0;//item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+3);        // enchantment id (permanent?)
