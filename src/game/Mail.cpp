@@ -493,7 +493,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
             data << getMSTime();                            // probably time
             if(i == 5)
             {
-                data << (uint32) (it ? it->GetEchantmentId(PERM_ENCHANTMENT_SLOT) : 0);
+                data << (uint32) (it ? it->GetEnchantmentId(PERM_ENCHANTMENT_SLOT) : 0);
                 data << (uint32) (it ? it->GetItemRandomPropertyId() : 0);
             }
             else

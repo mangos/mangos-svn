@@ -752,7 +752,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddEnchantmentDurations(Item *item);
         void RemoveEnchantmentDurations(Item *item);
         void AddEnchantmentDuration(Item *item,EnchantmentSlot slot,uint32 duration);
-        void ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool apply_dur = true);
+        void ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool apply_dur = true, bool ignore_condition = false);
         void ApplyEnchantment(Item *item,bool apply);
         void SaveEnchant();
         void LoadEnchant();
@@ -1095,6 +1095,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void BuildPlayerRepop();
         void DurabilityLossAll(double percent);
         void DurabilityLoss(uint8 equip_pos, double percent);
+        void DurabilityPointsLoss(uint8 equip_pos, uint32 points);
         void DurabilityRepairAll(bool cost, bool discount);
         void DurabilityRepair(uint16 pos, bool cost, bool discount);
         void RepopAtGraveyard();
@@ -1182,6 +1183,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _ApplyAllItemMods();
         void _ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply);
         void _ApplyAmmoBonuses(bool apply);
+        bool EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot);
+        void ToggleMetaGemsActive(uint16 exceptslot, bool apply);
+        void CorrectMetaGemEnchants(uint8 slot, bool apply);
         void InitDataForForm();
 
         void CastItemEquipSpell(Item *item);

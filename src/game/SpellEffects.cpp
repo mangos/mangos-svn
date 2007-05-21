@@ -1733,7 +1733,7 @@ void Spell::EffectEnchantItemPerm(uint32 i)
         // remove old enchanting before applying new if equipped
         item_owner->ApplyEnchantment(itemTarget,PERM_ENCHANTMENT_SLOT,false);
 
-        itemTarget->SetEchantment(PERM_ENCHANTMENT_SLOT, enchant_id, 0, 0);
+        itemTarget->SetEnchantment(PERM_ENCHANTMENT_SLOT, enchant_id, 0, 0);
 
         // add new enchanting if equipped
         item_owner->ApplyEnchantment(itemTarget,PERM_ENCHANTMENT_SLOT,true);
@@ -1778,7 +1778,7 @@ void Spell::EffectEnchantItemTmp(uint32 i)
 
         uint32 charges = m_spellInfo->SpellFamilyName == 8 ? 45+objmgr.GetSpellRank(m_spellInfo->Id)*15 : 0;
 
-        itemTarget->SetEchantment(TEMP_ENCHANTMENT_SLOT, enchant_id, duration*1000, charges);
+        itemTarget->SetEnchantment(TEMP_ENCHANTMENT_SLOT, enchant_id, duration*1000, charges);
 
         // add new enchanting if equipped
         item_owner->ApplyEnchantment(itemTarget,TEMP_ENCHANTMENT_SLOT,true);
@@ -2163,8 +2163,17 @@ void Spell::EffectWeaponDmg(uint32 i)
 
             if( pItem->GetProto()->InventoryType == INVTYPE_THROWN )
             {
-                uint32 count = 1;
-                ((Player*)m_caster)->DestroyItemCount( pItem, count, true);
+                if(pItem->GetMaxStackCount()==1)
+                {
+                    // decrease durability for non-stackable throw weapon
+                    ((Player*)m_caster)->DurabilityPointsLoss(EQUIPMENT_SLOT_RANGED,1);
+                }
+                else
+                {
+                    // decrease items amount for stackable throw weapon
+                    uint32 count = 1;
+                    ((Player*)m_caster)->DestroyItemCount( pItem, count, true);
+                }
             }
             else
             if(uint32 ammo = ((Player*)m_caster)->GetUInt32Value(PLAYER_AMMO_ID))
@@ -2558,7 +2567,7 @@ void Spell::EffectEnchantHeldItem(uint32 i)
         // remove old enchanting before applying new
         item_owner->ApplyEnchantment(item,slot,false);
 
-        item->SetEchantment(slot, enchant_id, duration*1000, 0);
+        item->SetEnchantment(slot, enchant_id, duration*1000, 0);
 
         // add new enchanting
         item_owner->ApplyEnchantment(item,slot,true);
