@@ -854,7 +854,7 @@ void Group::_setLeader(const uint64 &guid)
             std::ostringstream ss;
             ss << "SELECT DISTINCT(`map`) FROM `character_instance` WHERE (`guid` IN (";
 
-            for(member_citerator citr = m_members.begin(); citr != m_members.end(); ++citr)
+            for(member_citerator citr = m_members.begin(); citr != m_members.end(); )
             {
                 ss << GUID_LOPART(citr->guid);
                 player = objmgr.GetPlayer(citr->guid);
@@ -870,7 +870,7 @@ void Group::_setLeader(const uint64 &guid)
                         }
                     }
                 }
-                citr++;
+                ++citr;
                 if (citr != m_members.end()) ss << ", ";
             }
             ss << ")) AND (`leader` = '" << GUID_LOPART(old_guid) << "')";
