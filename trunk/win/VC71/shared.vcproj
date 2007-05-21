@@ -150,6 +150,18 @@
 				RelativePath="..\..\src\shared\Database\Field.h">
 			</File>
 			<File
+				RelativePath="..\..\src\shared\Database\impl\MySQLDatabase.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Database\impl\MySQLDatabase.h">
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Database\impl\PostgreDatabase.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Database\impl\PostgreDatabase.h">
+			</File>
+			<File
 				RelativePath="..\..\src\shared\Database\QueryResult.h">
 			</File>
 			<File
@@ -171,7 +183,11 @@
 				RelativePath="..\..\src\shared\Database\SQLStorage.h">
 			</File>
 			<Filter
-				Name="DataStores">
+				Name="Datastores"
+				Filter="">
+				<File
+					RelativePath="..\..\src\shared\Database\DataStore.h">
+				</File>
 				<File
 					RelativePath="..\..\src\shared\Database\dbcfile.cpp">
 				</File>
@@ -180,18 +196,6 @@
 				</File>
 				<File
 					RelativePath="..\..\src\shared\Database\DBCfmt.cpp">
-					<FileConfiguration
-						Name="Release|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-					</FileConfiguration>
-					<FileConfiguration
-						Name="Debug|Win32">
-						<Tool
-							Name="VCCLCompilerTool"
-							ObjectFile="$(IntDir)/$(InputName)1.obj"/>
-					</FileConfiguration>
 				</File>
 				<File
 					RelativePath="..\..\src\shared\Database\DBCStores.cpp">
