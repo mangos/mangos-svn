@@ -29,6 +29,7 @@
 #include "Network/ListenSocket.h"
 #include "AuthSocket.h"
 #include "SystemConfig.h"
+#include "Util.h"
 
 bool StartDB(std::string &dbstring);
 void UnhookSignals();
@@ -36,7 +37,10 @@ void HookSignals();
 
 bool stopEvent = false;                                     ///< Setting it to true stops the server
 RealmList m_realmList;                                      ///< Holds the list of realms for this server
-DatabaseMysql dbRealmServer;                                ///< Accessor to the realm server database
+//DatabaseMysql dbRealmServer;                                ///< Accessor to the realm server database
+Database * rsdb;
+#define dbRealmServer (*rsdb)
+
 
 /// Print out the usage string for this program on the console.
 void usage(const char *prog)
@@ -213,6 +217,30 @@ void OnSignal(int s)
     signal(s, OnSignal);
 }
 
+bool ConvertOldCrappyDbString(string str, MySQLDatabase * db)
+{
+    vector<string> tokens = StrSplit(str, ";");
+    vector<string>::iterator iter;
+    std::string host, port_or_socket, user, password, database;
+
+    iter = tokens.begin();
+
+    if(iter != tokens.end())
+        host = *iter++;
+    if(iter != tokens.end())
+        port_or_socket = *iter++;
+    if(iter != tokens.end())
+        user = *iter++;
+    if(iter != tokens.end())
+        password = *iter++;
+    if(iter != tokens.end())
+        database = *iter++;
+
+    // lets make it 3 connections..
+    return db->Initialize(host.c_str(), atoi(port_or_socket.c_str()), user.c_str(), password.c_str(), database.c_str(), 1, 32768);
+}
+
+
 /// Initialize connection to the database
 bool StartDB(std::string &dbstring)
 {
@@ -223,7 +251,10 @@ bool StartDB(std::string &dbstring)
     }
 
     sLog.outString("Database: %s", dbstring.c_str() );
-    if(!dbRealmServer.Initialize(dbstring.c_str()))
+    //if(!dbRealmServer.Initialize(dbstring.c_str()))
+    rsdb = CreateDatabaseInterface(DATABASE_TYPE_MYSQL);
+    assert(rsdb);
+    if(!ConvertOldCrappyDbString(dbstring, (MySQLDatabase*)rsdb))
     {
         sLog.outError("Cannot connect to database");
         return false;
