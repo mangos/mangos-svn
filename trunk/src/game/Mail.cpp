@@ -58,13 +58,13 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     if (receiver.size() == 0)
         return;
     normalizePlayerName(receiver);
-    sDatabase.escape_string(receiver);                      // prevent SQL injection
+    //sDatabase.escape_string(receiver);                      // prevent SQL injection
 
     Player* pl = _player;
 
     sLog.outDetail("Player %u is sending mail to %s with subject %s and body %s includes item %u, %u copper and %u COD copper with unk1 = %u, unk2 = %u",pl->GetGUIDLow(),receiver.c_str(),subject.c_str(),body.c_str(),GUID_LOPART(itemId),money,COD,unk1,unk2);
 
-    uint64 rc = objmgr.GetPlayerGUIDByName(receiver.c_str());
+    uint64 rc = objmgr.GetPlayerGUIDByName(receiver);
     if(pl->GetGUID() == rc)
     {
         pl->SendMailResult(0, 0, MAIL_ERR_CANNOT_SEND_TO_SELF);

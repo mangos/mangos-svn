@@ -503,13 +503,14 @@ void ObjectMgr::LoadSpellThreats()
 }
 
 // name must be checked to correctness (if received) before call this function
-uint64 ObjectMgr::GetPlayerGUIDByName(const char *name) const
+uint64 ObjectMgr::GetPlayerGUIDByName(std::string name) const
 {
     uint64 guid = 0;
 
-    // Player name safe to sending to DB (checked at login) and this function using
-    QueryResult *result = sDatabase.Query("SELECT `guid` FROM `character` WHERE `name` = '%s'", name);
+    sDatabase.escape_string(name);
 
+    // Player name safe to sending to DB (checked at login) and this function using
+    QueryResult *result = sDatabase.Query("SELECT `guid` FROM `character` WHERE `name` = '%s'", name.c_str());
     if(result)
     {
         guid = MAKE_GUID(result->Fetch()[0].GetUInt32(),HIGHGUID_PLAYER);

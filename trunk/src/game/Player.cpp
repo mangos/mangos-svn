@@ -117,6 +117,8 @@ Player::Player (WorldSession *session): Unit( 0 )
 
     m_dungeonDifficulty = DUNGEONDIFFICULTY_NORMAL;
 
+    m_needRename = false;
+
     m_dontMove = false;
 
     pTrader = 0;
@@ -986,11 +988,29 @@ void Player::BuildEnumData( WorldPacket * p_data )
     *p_data << GetPositionY();
     *p_data << GetPositionZ();
 
-    *p_data << uint32(0);                                   // unknown
+    *p_data << GetUInt32Value(PLAYER_GUILDID);              // guild id
 
-    *p_data << uint8(0x0);
-    *p_data << uint8(GetUInt32Value(PLAYER_FLAGS) << 1);    // probably wrong
-    *p_data << uint8(0x0);                                  // Bit 4 is something dono
+    *p_data << uint8(0x0);                                  // different values on off, looks like flags
+
+    uint8 flags = 0;
+    if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM))
+        flags |= 0x04;
+    if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK))
+        flags |= 0x08;
+    if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+        flags |= 0x20;
+    if(isNeedRename())
+        flags |= 0x40;
+    *p_data << uint8(flags);    // flags description below
+    // 0x01 - unknown
+    // 0x02 - unknown
+    // 0x04 - hide helm
+    // 0x08 - hide cloak
+    // 0x10 - unknown
+    // 0x20 - dead(ghost)
+    // 0x40 - need rename
+
+    *p_data << uint8(0xa0);                                 // Bit 4 is something dono
     *p_data << uint8(0x0);                                  // is this player_GUILDRANK????
 
     *p_data << (uint8)1;                                    // 0x1 there
@@ -10659,7 +10679,7 @@ void Player::SendQuestUpdateAddCreature( uint32 quest_id, uint64 guid, uint32 cr
 
 bool Player::MinimalLoadFromDB( uint32 guid )
 {
-    QueryResult *result = sDatabase.Query("SELECT `data`,`name`,`position_x`,`position_y`,`position_z`,`map`,`totaltime`,`leveltime` FROM `character` WHERE `guid` = '%u'",guid);
+    QueryResult *result = sDatabase.Query("SELECT `data`,`name`,`position_x`,`position_y`,`position_z`,`map`,`totaltime`,`leveltime`,`rename` FROM `character` WHERE `guid` = '%u'",guid);
     if(!result)
         return false;
 
@@ -10679,6 +10699,8 @@ bool Player::MinimalLoadFromDB( uint32 guid )
 
     m_Played_time[0] = fields[6].GetUInt32();
     m_Played_time[1] = fields[7].GetUInt32();
+
+    m_needRename = fields[8].GetBool();
 
     _LoadGroup();
 
@@ -10764,8 +10786,8 @@ float Player::GetFloatValueFromDB(uint16 index, uint64 guid)
 
 bool Player::LoadFromDB( uint32 guid )
 {
-    //                                                0        1       2      3      4      5         6            7            8         9        10            11         12          13         14            15          16               17                  18                 19               20        21        22       23         24          25      26
-    QueryResult *result = sDatabase.Query("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots` FROM `character` WHERE `guid` = '%u'", guid);
+    //                                                0        1       2      3      4      5         6            7            8         9        10            11         12          13         14            15          16               17                  18                 19               20        21        22       23         24          25      26            27
+    QueryResult *result = sDatabase.Query("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`rename` FROM `character` WHERE `guid` = '%u'", guid);
 
     if(!result)
     {
@@ -10911,6 +10933,8 @@ bool Player::LoadFromDB( uint32 guid )
         sLog.outError("Player can have not more 2 stable slots, but have in DB %u",uint32(m_stableSlots));
         m_stableSlots = 2;
     }
+
+    m_needRename = fields[27].GetBool();
 
     delete result;
 
@@ -11511,7 +11535,7 @@ void Player::SaveToDB()
 
     // remove restflag when save
     //this is because of the rename char stuff
-    RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+    //RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
 
     bool inworld = IsInWorld();
 
@@ -11535,7 +11559,7 @@ void Player::SaveToDB()
         "`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,"
         "`taximask`,`online`,`cinematic`,"
         "`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,"
-        "`trans_x`, `trans_y`, `trans_z`, `trans_o`, `transguid`, `gmstate`, `stable_slots` ) VALUES ("
+        "`trans_x`, `trans_y`, `trans_z`, `trans_o`, `transguid`, `gmstate`, `stable_slots`,`rename`) VALUES ("
         << GetGUIDLow() << ", "
         << GetSession()->GetAccountId() << ", '"
         << m_name << "', "
@@ -11599,6 +11623,9 @@ void Player::SaveToDB()
 
     ss << ", ";
     ss << uint32(m_stableSlots);                            // to prevent save uint8 as char
+
+    ss << ", ";
+    ss << (isNeedRename()? 1 : 0);
 
     ss << " )";
 

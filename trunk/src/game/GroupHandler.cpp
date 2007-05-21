@@ -210,7 +210,7 @@ void WorldSession::HandleGroupUninviteNameOpcode(WorldPacket & recv_data)
         return;
     normalizePlayerName(membername);
 
-    uint64 guid = objmgr.GetPlayerGUIDByName(membername.c_str());
+    uint64 guid = objmgr.GetPlayerGUIDByName(membername);
 
     // player not found
     if(!guid)
@@ -453,7 +453,7 @@ void WorldSession::HandleGroupChangeSubGroupOpcode( WorldPacket & recv_data )
     recv_data >> groupNr;
 
     Group *group = GetPlayer()->groupInfo.group;
-    uint64 guid = objmgr.GetPlayerGUIDByName(name.c_str());
+    uint64 guid = objmgr.GetPlayerGUIDByName(name);
 
     /** error handling **/
     if(!group->IsLeader(GetPlayer()->GetGUID()) && !group->IsAssistant(GetPlayer()->GetGUID()))

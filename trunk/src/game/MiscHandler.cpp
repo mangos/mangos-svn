@@ -548,7 +548,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
     sLog.outDetail( "WORLD: %s asked to add friend : '%s'",
         GetPlayer()->GetName(), friendName.c_str() );
 
-    friendGuid = objmgr.GetPlayerGUIDByName(friendName.c_str());
+    friendGuid = objmgr.GetPlayerGUIDByName(friendName);
 
     if(friendGuid)
     {
@@ -658,7 +658,7 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
     sLog.outDetail( "WORLD: %s asked to Ignore: '%s'",
         GetPlayer()->GetName(), IgnoreName.c_str() );
 
-    IgnoreGuid = objmgr.GetPlayerGUIDByName(IgnoreName.c_str());
+    IgnoreGuid = objmgr.GetPlayerGUIDByName(IgnoreName);
 
     if(IgnoreGuid)
     {
@@ -1089,12 +1089,6 @@ void WorldSession::HandleSetActionBar(WorldPacket& recv_data)
 
     temp = ((GetPlayer()->GetUInt32Value( PLAYER_FIELD_BYTES )) & 0xFFF0FFFF) + (ActionBar << 16);
     GetPlayer()->SetUInt32Value( PLAYER_FIELD_BYTES, temp);
-}
-
-void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
-{
-    // TODO
-    // need to be written
 }
 
 void WorldSession::HandleWardenDataOpcode(WorldPacket& recv_data)
