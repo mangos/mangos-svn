@@ -121,21 +121,22 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
 
         // try to counter precision differences
         if( i_destinationHolder.GetDistanceFromDestSq(i_target) > dist * dist + 0.1)
-		{
-			// UQ1: This is where our bandwidth issue is coming from I believe! This could cause
-		    // frame after frame of packets!
-			//_setTargetLocation(owner);
-			time_t timer = time(NULL);
+        {
+            // This is where our bandwidth issue is coming from I believe! This could cause
+            // frame after frame of packets!
+            //_setTargetLocation(owner);
+            time_t timer = time(NULL);
 
-			if (next_update_time <= timer)
-			{// Let's try adding a timer between them!
-				_setTargetLocation(owner);
+            if (next_update_time <= timer)
+            {
+                // Let's try adding a timer between them!
+                _setTargetLocation(owner);
 
-				// UQ1: 5 secs between movement transmissions. 
-				// They use bandwidth and also CPU time in compression!
-				next_update_time = timer + 5;
-			}
-		}
+                // 5 secs between movement transmissions. 
+                // They use bandwidth and also CPU time in compression!
+                next_update_time = timer + 5;
+            }
+        }
         // set facing if this is non angle-used target movement (not following)
         else if ( !i_angle && !owner.HasInArc( 0.1f, &i_target ))
         {

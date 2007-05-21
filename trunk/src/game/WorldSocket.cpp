@@ -103,7 +103,7 @@ void WorldSocket::OnAccept()
 {
     ///- Add the current socket to the list of sockets to be managed (WorldSocketMgr)
     sWorldSocketMgr.AddSocket(this);
-	Utility::ResolveLocal();
+    Utility::ResolveLocal();
 
     ///- Send a AUTH_CHALLENGE packet
     WorldPacket packet( SMSG_AUTH_CHALLENGE, 4 );
@@ -384,10 +384,10 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     sLog.outDebug( "SOCKET: Client '%s' authenticated successfully.", account.c_str() );
     sLog.outDebug( "Account: '%s' Logged in from IP %s.", account.c_str(), GetRemoteAddress().c_str());
-	
+
     ///- Update the last_ip in the database
     //No SQL injection, username escaped.
-	loginDatabase.Query("UPDATE `account` SET `last_ip` = '%s' WHERE `username` = '%s'",GetRemoteAddress().c_str(), safe_account.c_str());
+    loginDatabase.Query("UPDATE `account` SET `last_ip` = '%s' WHERE `username` = '%s'",GetRemoteAddress().c_str(), safe_account.c_str());
 
     // do small delay (10ms) at accepting successful authed connection to prevent droping packets by client
     // don't must harm anyone (let login ~100 accounts in 1 sec ;) )

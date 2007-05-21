@@ -40,7 +40,7 @@ class MANGOS_DLL_SPEC TargetedMovementGenerator : public MovementGenerator
 
         void spellAtack(Creature &,Unit &,uint32 spellId);
 
-		time_t next_update_time;
+        time_t next_update_time;
 
     private:
 
