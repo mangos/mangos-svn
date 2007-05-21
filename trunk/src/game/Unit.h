@@ -486,6 +486,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         typedef std::set<Creature *> InHateListOf;
         typedef std::list<DiminishingReturn> Diminishing;
         virtual ~Unit ( );
+		Unit*	targetUnit;
+		time_t	next_threat_sort_time;
+		time_t  next_threat_update_time;
+		time_t	last_threat_update_time;
 
         static DiminishingMechanics Mechanic2DiminishingMechanics(uint32 mech);
         void AddDiminishing(DiminishingMechanics mech, uint32 hitTime, uint32 hitCount);

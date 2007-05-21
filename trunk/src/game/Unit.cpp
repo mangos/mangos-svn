@@ -5035,6 +5035,7 @@ bool Unit::SelectHostilTarget()
     //next-victim-selection algorithm and evade mode are called
     //threat list sorting etc.
     assert(GetTypeId()== TYPEID_UNIT);
+	time_t timer = time(NULL);
 
     if(IsThreatListEmpty())
     {
@@ -5046,17 +5047,22 @@ bool Unit::SelectHostilTarget()
     if(HasAuraType(SPELL_AURA_MOD_TAUNT))
         return true;
 
-    if(IsThreatListNeedsSorting())                          //sort ThreatList if it is not sorted after AddThreat()
+    if(next_threat_sort_time <= timer && IsThreatListNeedsSorting())                          //sort ThreatList if it is not sorted after AddThreat()
     {
         m_threatList.sort();
         m_threatList.reverse();
         SortList(false);                                    //set not to sort ThreatList until next AddThreat() call
+		next_threat_sort_time = timer + 5; // UQ1: Only resort the threats each 5 seconds!
     }
 
     Unit* target = NULL;
     float threat = m_threatList.front().Threat;
-    if(!getVictim() || threat > 1.1f * GetCurrentVictimThreat())
-        target = SelectNextVictim();
+    
+	if(!getVictim() || threat > 1.1f * GetCurrentVictimThreat())
+	{
+		target = SelectNextVictim();
+		targetUnit = target;
+	}
     else
         return true;
 
@@ -5082,6 +5088,7 @@ Unit* Unit::SelectNextVictim()
     uint64 guid = 0;
     float threat = 0;
     Unit* target = NULL;
+	time_t timer = time(NULL);
 
     if(getVictim())
     {
@@ -5090,34 +5097,49 @@ Unit* Unit::SelectNextVictim()
         guid = getVictim()->GetGUID();
     }
 
-    for(ThreatList::iterator iter = m_threatList.begin(); iter != m_threatList.end(); ++iter)
-    {
-        target = ObjectAccessor::Instance().GetUnit(*this, iter->UnitGuid);
-        if(!target)
-            continue;
+	if (next_threat_update_time <= timer || last_threat_update_time <= timer - 10000 || !targetUnit)
+	{// UQ1: Let's not do this constantly! Use a timer!
+	    for(ThreatList::iterator iter = m_threatList.begin(); iter != m_threatList.end(); ++iter)
+		{
+	        target = ObjectAccessor::Instance().GetUnit(*this, iter->UnitGuid);
+		    if(!target)
+			    continue;
 
-        if(hasVictim)
-        {
-            if(iter->UnitGuid == guid)
-                return target;
+			if(hasVictim)
+			{
+				if(iter->UnitGuid == guid)
+					return target;
 
-            Map* map = MapManager::Instance().GetMap(GetMapId(), this);
-            if((map->Instanceable() || (!((Creature*)this)->IsOutOfThreatArea(target))) && target->isInAccessablePlaceFor( ((Creature*)this) ))
-            {
-                if((IsWithinDistInMap(target, ATTACK_DIST) && (iter->Threat > 1.1f * threat)) || (iter->Threat > 1.3f * threat))
-                {                                           //implement 110% threat rule for targets in melee range
-                    SetCurrentVictimThreat(iter->Threat);   //and 130% rule for targets in ranged distances
-                    return target;                          //for selecting alive targets
-                }
-            }
-        }
-        else if(!((Creature*)this)->IsOutOfThreatArea(target) && target->isInAccessablePlaceFor( ((Creature*)this) ) )
-        {
-            SetCurrentVictimThreat(iter->Threat);
-            return target;
-        }
+				Map* map = MapManager::Instance().GetMap(GetMapId(), this);
+	            if((map->Instanceable() || (!((Creature*)this)->IsOutOfThreatArea(target))) && target->isInAccessablePlaceFor( ((Creature*)this) ))
+		        {
+			        if((IsWithinDistInMap(target, ATTACK_DIST) && (iter->Threat > 1.1f * threat)) || (iter->Threat > 1.3f * threat))
+				    {                                           //implement 110% threat rule for targets in melee range
+					    SetCurrentVictimThreat(iter->Threat);   //and 130% rule for targets in ranged distances
+						targetUnit = target;
+						last_threat_update_time = timer;
+	                    return target;                          //for selecting alive targets
+		            }
+			    }
+			}
+	        else if(!((Creature*)this)->IsOutOfThreatArea(target) && target->isInAccessablePlaceFor( ((Creature*)this) ) )
+		    {
+			    SetCurrentVictimThreat(iter->Threat);
+				targetUnit = target;
+				last_threat_update_time = timer;
+				return target;
+			}
+	    }
 
-    }
+		next_threat_update_time = timer + 5; // UQ1: 5 secs ok?
+	}
+	else
+	{
+		if (targetUnit && targetUnit->GetHealth() > 0)
+		{
+			return targetUnit;
+		}
+	}
 
     return NULL;
 }
