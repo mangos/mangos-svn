@@ -27,8 +27,11 @@
 #include "Master.h"
 #include "SystemConfig.h"
 
-DatabaseMysql sDatabase;                                    ///< Accessor to the mangos server database
-DatabaseMysql loginDatabase;                                ///< Accessor to the realm/login database
+//DatabaseMysql sDatabase;                                    ///< Accessor to the mangos server database
+//DatabaseMysql loginDatabase;                                ///< Accessor to the realm/login database
+Database * MainDatabase;
+Database * LogonDatabase;
+
 uint32 realmID;                                             ///< Id of the realm
 
 /// Print out the usage string for this program on the console.
