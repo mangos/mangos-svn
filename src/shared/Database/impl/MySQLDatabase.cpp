@@ -19,6 +19,10 @@
 #include "../DatabaseEnv.h"
 #include "Timer.h"
 
+#ifndef _WIN32
+#include "stdarg.h"
+#endif
+
 #ifdef DATABASE_SUPPORT_MYSQL
 
 MySQLDatabase::MySQLDatabase() : Database(DATABASE_TYPE_MYSQL)
