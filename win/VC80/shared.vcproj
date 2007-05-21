@@ -209,6 +209,22 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\shared\Database\impl\MySQLDatabase.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Database\impl\MySQLDatabase.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Database\impl\PostgreDatabase.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Database\impl\PostgreDatabase.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\shared\Database\QueryResult.h"
 				>
 			</File>
