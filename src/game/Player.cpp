@@ -1776,8 +1776,14 @@ void Player::RemoveFromGroup(Group* group, uint64 guid)
 {
     if(group)
     {
-        if (group->RemoveMember(guid, 0) <= 1)
-        {
+		if (group->GetMembersCount() <= 2)
+		{// UQ1: If there is only 2 members left and 1 leave, just remove the whole group!
+			group->Disband();
+            objmgr.RemoveGroup(group);
+            delete group;
+		}
+        else if (group->RemoveMember(guid, 0) <= 1)
+        {// UQ1: group->RemoveMember(guid, 0) causes a crash with 2 members! fix above!
             group->Disband();
             objmgr.RemoveGroup(group);
             delete group;
