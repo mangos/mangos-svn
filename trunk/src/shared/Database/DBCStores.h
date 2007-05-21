@@ -78,13 +78,13 @@ template<class T>
 class DBCStorage
 {
     public:
-        DBCStorage(const char *f){index = NULL;fmt=f;fieldCount = 0; nCount =0; data = NULL; }
+        DBCStorage(const char *f){indexTable = NULL;fmt=f;fieldCount = 0; nCount =0; data = NULL; }
         ~DBCStorage() { Clear(); }
 
         inline
             T const* LookupEntry(uint32 id) const
         {
-            return (id>=nCount)?NULL:index[id];
+            return (id>=nCount)?NULL:indexTable[id];
         }
         inline
             unsigned int GetNumRows() const
@@ -101,12 +101,12 @@ class DBCStorage
             if (res)
             {
                 fieldCount = dbc->GetCols();
-                index=(T **) dbc->AutoProduceData(fmt,&nCount,data);
+                indexTable=(T **) dbc->AutoProduceData(fmt,&nCount,data);
             }
             delete dbc;
 
             // error in dbc file at loading
-            if(!index)
+            if(!indexTable)
                 res = false;
 
             return res;
@@ -114,33 +114,12 @@ class DBCStorage
 
         void Clear()
         {
-            if (!index) return;
-            uint32 offset = 0;
-            for(uint32 x=0;x<fieldCount;x++)
-            {
-                switch(fmt[x])
-                {
-                case FT_BYTE:
-                    offset += 1;
-                    break;
-                case FT_IND:
-                case FT_INT:
-                case FT_FLOAT:
-                    offset += 4;
-                    break;
-                case FT_STRING:
-                    for(uint32 i = 0; i < nCount; i++) if(index[i])
-                        delete[] *(char**)((char*)index[i]+offset);
-                    offset+=sizeof(char*);
-                    break;
-                }
-            }
-
-            delete[] ((char*)index); index = NULL;
+            if (!indexTable) return;
+            delete[] ((char*)indexTable); indexTable = NULL;
             delete data;
         }
 
-        T** index;
+        T** indexTable;
         char * data;
         uint32 nCount;
         uint32 fieldCount;
