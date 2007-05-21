@@ -307,7 +307,7 @@ void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & recv_data )
     Field *fields;
     guid = GetPlayer()->GetGUID();
 
-    QueryResult *result = sDatabase.PQuery("SELECT COUNT(`ticket_id`) FROM `character_ticket` WHERE `guid` = '%u'", GUID_LOPART(guid));
+    QueryResult *result = sDatabase.Query("SELECT COUNT(`ticket_id`) FROM `character_ticket` WHERE `guid` = '%u'", GUID_LOPART(guid));
 
     if (result)
     {
@@ -318,7 +318,7 @@ void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & recv_data )
 
         if ( cnt > 0 )
         {
-            QueryResult *result2 = sDatabase.PQuery("SELECT `ticket_text` FROM `character_ticket` WHERE `guid` = '%u'", GUID_LOPART(guid));
+            QueryResult *result2 = sDatabase.Query("SELECT `ticket_text` FROM `character_ticket` WHERE `guid` = '%u'", GUID_LOPART(guid));
             assert(result2);
             Field *fields2 = result2->Fetch();
 
@@ -338,14 +338,14 @@ void WorldSession::HandleGMTicketUpdateTextOpcode( WorldPacket & recv_data )
     recv_data >> ticketText;
 
     sDatabase.escape_string(ticketText);
-    sDatabase.PExecute("UPDATE `character_ticket` SET `ticket_text` = '%s' WHERE `guid` = '%u'", ticketText.c_str(), _player->GetGUIDLow());
+    sDatabase.Execute("UPDATE `character_ticket` SET `ticket_text` = '%s' WHERE `guid` = '%u'", ticketText.c_str(), _player->GetGUIDLow());
 }
 
 void WorldSession::HandleGMTicketDeleteOpcode( WorldPacket & recv_data )
 {
     uint32 guid = GetPlayer()->GetGUIDLow();
 
-    sDatabase.PExecute("DELETE FROM `character_ticket` WHERE `guid` = '%u' LIMIT 1",guid);
+    sDatabase.Execute("DELETE FROM `character_ticket` WHERE `guid` = '%u' LIMIT 1",guid);
 
     WorldPacket data( SMSG_GMTICKET_DELETETICKET, 8 );
     data << uint32(9);
@@ -373,7 +373,7 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
 
     sDatabase.escape_string(ticketText);
 
-    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `character_ticket` WHERE `guid` = '%u'", _player->GetGUIDLow());
+    QueryResult *result = sDatabase.Query("SELECT COUNT(*) FROM `character_ticket` WHERE `guid` = '%u'", _player->GetGUIDLow());
 
     if (result)
     {
@@ -390,7 +390,7 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
         }
         else
         {
-            sDatabase.PExecute("INSERT INTO `character_ticket` (`guid`,`ticket_text`,`ticket_category`) VALUES ('%u', '%s', '%u')", _player->GetGUIDLow(), ticketText.c_str(), category);
+            sDatabase.Execute("INSERT INTO `character_ticket` (`guid`,`ticket_text`,`ticket_category`) VALUES ('%u', '%s', '%u')", _player->GetGUIDLow(), ticketText.c_str(), category);
 
             data.Initialize( SMSG_QUERY_TIME_RESPONSE, 4 );
             data << (uint32)getMSTime();
@@ -559,7 +559,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
             friendResult = FRIEND_ENEMY;
         else
         {
-            QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character_social` WHERE `guid` = '%u' AND `flags` = 'FRIEND' AND `friend` = '%u'", GetPlayer()->GetGUIDLow(), GUID_LOPART(friendGuid));
+            QueryResult *result = sDatabase.Query("SELECT `guid` FROM `character_social` WHERE `guid` = '%u' AND `flags` = 'FRIEND' AND `friend` = '%u'", GetPlayer()->GetGUIDLow(), GUID_LOPART(friendGuid));
 
             if( result )
                 friendResult = FRIEND_ALREADY;
@@ -584,7 +584,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
         else
             friendResult = FRIEND_ADDED_OFFLINE;
 
-        sDatabase.PExecute("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) VALUES ('%u', '%s', '%u', 'FRIEND')",
+        sDatabase.Execute("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) VALUES ('%u', '%s', '%u', 'FRIEND')",
             GetPlayer()->GetGUIDLow(), friendName.c_str(), GUID_LOPART(friendGuid));
 
         sLog.outDetail( "WORLD: %s Guid found '%u' area:%u Level:%u Class:%u. ",
@@ -630,7 +630,7 @@ void WorldSession::HandleDelFriendOpcode( WorldPacket & recv_data )
 
     uint32 guidlow = GetPlayer()->GetGUIDLow();
 
-    sDatabase.PExecute("DELETE FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u' AND `friend` = '%u'",guidlow, GUID_LOPART(FriendGUID));
+    sDatabase.Execute("DELETE FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u' AND `friend` = '%u'",guidlow, GUID_LOPART(FriendGUID));
 
     SendPacket( &data );
 
@@ -747,7 +747,7 @@ void WorldSession::HandleBugOpcode( WorldPacket & recv_data )
 
     sDatabase.escape_string(type);
     sDatabase.escape_string(content);
-    sDatabase.PExecute ("INSERT INTO `bugreport` (`type`,`content`) VALUES('%s', '%s')", type.c_str( ), content.c_str( ));
+    sDatabase.Execute ("INSERT INTO `bugreport` (`type`,`content`) VALUES('%s', '%s')", type.c_str( ), content.c_str( ));
 
 }
 

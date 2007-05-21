@@ -94,7 +94,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     else
     {
         rc_team = objmgr.GetPlayerTeamByGUID(rc);
-        QueryResult* result = sDatabase.PQuery("SELECT COUNT(*) FROM `mail` WHERE `receiver` = '%u'", GUID_LOPART(rc));
+        QueryResult* result = sDatabase.Query("SELECT COUNT(*) FROM `mail` WHERE `receiver` = '%u'", GUID_LOPART(rc));
         Field *fields = result->Fetch();
         mails_count = fields[0].GetUInt32();
         delete result;
@@ -158,10 +158,10 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         pl->RemoveItem( (item_pos >> 8), (item_pos & 255), true );
         pItem->RemoveFromUpdateQueueOf( pl );
 
-        sDatabase.BeginTransaction();
+        //sDatabase.BeginTransaction();
         pItem->DeleteFromInventoryDB();                     //deletes item from character's inventory
         pItem->SaveToDB();                                  // recursive and not have transaction guard into self
-        sDatabase.CommitTransaction();
+        //sDatabase.CommitTransaction();
     }
     uint32 messagetype = MAIL_NORMAL;
     uint32 item_template = pItem ? pItem->GetEntry() : 0;   //item prototype
@@ -180,13 +180,13 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         delete pItem;                                       //item is sent, but receiver isn't online .. so remove it from RAM
     // backslash all '
     sDatabase.escape_string(subject);
-    //not needed : sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mID);
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+    //not needed : sDatabase.Execute("DELETE FROM `mail` WHERE `id` = '%u'",mID);
+    sDatabase.Execute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
         "VALUES ('%u', '%u', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "','" I64FMTD "', '%u', '%u', '%d')",
         mailId, messagetype, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), itemTextId, GUID_LOPART(itemId), item_template, (uint64)etime, (uint64)dtime, money, COD, NOT_READ);
-    sDatabase.BeginTransaction();
+    //sDatabase.BeginTransaction();
     pl->SaveInventoryAndGoldToDB();
-    sDatabase.CommitTransaction();
+    //sDatabase.CommitTransaction();
 }
 
 //called when mail is read
@@ -245,7 +245,7 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
     }
     //we can return mail now
     //so firstly delete the old one
-    sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", mailId);
+    sDatabase.Execute("DELETE FROM `mail` WHERE `id` = '%u'", mailId);
     pl->RemoveMail(mailId);
 
     uint32 messageID = objmgr.GenerateMailID();
@@ -271,7 +271,7 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
     std::string subject;
     subject = m->subject;
     sDatabase.escape_string(subject);                       //we cannot forget to delete COD, if returning mail with COD
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+    sDatabase.Execute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
         "VALUES ('%u', '0', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "', '" I64FMTD "', '%u', '0', '%d')",
         messageID, m->receiver, m->sender, subject.c_str(), m->itemTextId, m->item_guid, m->item_template, (uint64)etime, (uint64)dtime, m->money,RETURNED_CHECKED);
     delete m;                                               //we can deallocate old mail
@@ -327,7 +327,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
             //escape apostrophes
             std::string subject = m->subject;
             sDatabase.escape_string(subject);
-            sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+            sDatabase.Execute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
                 "VALUES ('%u', '0', '%u', '%u', '%s', '0', '0', '0', '" I64FMTD "', '" I64FMTD "', '%u', '0', '%d')",
                 newMailId, m->receiver, m->sender, subject.c_str(), (uint64)etime, (uint64)dtime, m->COD, COD_PAYMENT_CHECKED);
 
@@ -361,10 +361,10 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
             it->SetState(ITEM_NEW, pl);
         pl->ItemAddedQuestCheck(it2->GetEntry(),it2->GetCount());
 
-        sDatabase.BeginTransaction();
+        //sDatabase.BeginTransaction();
         pl->SaveInventoryAndGoldToDB();
         pl->_SaveMail();
-        sDatabase.CommitTransaction();
+        //sDatabase.CommitTransaction();
 
         pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, 0);
     }
@@ -397,10 +397,10 @@ void WorldSession::HandleTakeMoney(WorldPacket & recv_data )
     pl->m_mailsUpdated = true;
 
     // save money and mail to prevent cheating
-    sDatabase.BeginTransaction();
+    //sDatabase.BeginTransaction();
     pl->SetUInt32ValueInDB(PLAYER_FIELD_COINAGE,pl->GetMoney(),pl->GetGUID());
     pl->_SaveMail();
-    sDatabase.CommitTransaction();
+    //sDatabase.CommitTransaction();
 }
 
 //called when player lists his received mails

@@ -38,11 +38,11 @@
 void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
 {
     // keys can be non cleared if player open realm list and close it by 'cancel'
-    loginDatabase.PQuery("UPDATE `account` SET `v` = '0', `s` = '0' WHERE `id` = '%u'", GetAccountId());
+    loginDatabase.Query("UPDATE `account` SET `v` = '0', `s` = '0' WHERE `id` = '%u'", GetAccountId());
 
     WorldPacket data(SMSG_CHAR_ENUM, 100);                  // we guess size
 
-    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%u' ORDER BY `guid`", GetAccountId());
+    QueryResult *result = sDatabase.Query("SELECT `guid` FROM `character` WHERE `account` = '%u' ORDER BY `guid`", GetAccountId());
 
     uint8 num = 0;
 
@@ -53,9 +53,9 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
         Player *plr = new Player(this);
         do
         {
-            sLog.outDetail("Loading char guid %u from account %u.",(*result)[0].GetUInt32(),GetAccountId());
+            sLog.outDetail("Loading char guid %u from account %u.",result->Fetch()[0].GetUInt32(),GetAccountId());
 
-            if(plr->MinimalLoadFromDB( (*result)[0].GetUInt32() ))
+            if(plr->MinimalLoadFromDB( result->Fetch()[0].GetUInt32() ))
             {
                 plr->BuildEnumData( &data );
                 num++;
@@ -117,7 +117,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     }
 
     sDatabase.escape_string(name);
-    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `name` = '%s'", name.c_str());
+    QueryResult *result = sDatabase.Query("SELECT `guid` FROM `character` WHERE `name` = '%s'", name.c_str());
 
     if ( result )
     {
@@ -130,7 +130,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         return;
     }
 
-    result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%u'", GetAccountId());
+    result = sDatabase.Query("SELECT `guid` FROM `character` WHERE `account` = '%u'", GetAccountId());
 
     if ( result )
     {
@@ -148,7 +148,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     bool AllowTwoSideAccounts = sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_ACCOUNTS);
     if(sWorld.IsPvPRealm())
     {
-        QueryResult *result2 = sDatabase.PQuery("SELECT `race` FROM `character` WHERE `account` = '%u' LIMIT 1", GetAccountId());
+        QueryResult *result2 = sDatabase.Query("SELECT `race` FROM `character` WHERE `account` = '%u' LIMIT 1", GetAccountId());
         if(result2)
         {
             Field * field = result2->Fetch();
@@ -179,14 +179,14 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         // Player create
         pNewChar->SaveToDB();
 
-        QueryResult *resultCount = sDatabase.PQuery("SELECT COUNT(guid) FROM `character` WHERE `account` = '%d'", GetAccountId());
+        QueryResult *resultCount = sDatabase.Query("SELECT COUNT(guid) FROM `character` WHERE `account` = '%d'", GetAccountId());
         uint32 charCount = 0;
         if (resultCount)
         {
             Field *fields = resultCount->Fetch();
             charCount = fields[0].GetUInt32();
             delete resultCount;
-            loginDatabase.PExecute("INSERT INTO `realmcharacters` (`numchars`, `acctid`, `realmid`) VALUES (%d, %d, %d) ON DUPLICATE KEY UPDATE `numchars` = '%d'", charCount, GetAccountId(), realmID, charCount);
+            loginDatabase.Execute("INSERT INTO `realmcharacters` (`numchars`, `acctid`, `realmid`) VALUES (%d, %d, %d) ON DUPLICATE KEY UPDATE `numchars` = '%d'", charCount, GetAccountId(), realmID, charCount);
         }
 
         delete pNewChar;
@@ -261,7 +261,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     //set a count of unread mails
     time_t cTime = time(NULL);
-    QueryResult *resultMails = sDatabase.PQuery("SELECT COUNT(id) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0 AND `deliver_time` <= '" I64FMTD "'", GUID_LOPART(playerGuid),(uint64)cTime);
+    QueryResult *resultMails = sDatabase.Query("SELECT COUNT(id) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0 AND `deliver_time` <= '" I64FMTD "'", GUID_LOPART(playerGuid),(uint64)cTime);
     if (resultMails)
     {
         Field *fieldMail = resultMails->Fetch();
@@ -270,7 +270,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     }
 
     // store nearest delivery time (it > 0 and if it < current then at next player update SendNewMaill will be called)
-    resultMails = sDatabase.PQuery("SELECT MIN(`deliver_time`) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0", GUID_LOPART(playerGuid));
+    resultMails = sDatabase.Query("SELECT MIN(`deliver_time`) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0", GUID_LOPART(playerGuid));
     if (resultMails)
     {
         Field *fieldMail = resultMails->Fetch();
@@ -367,7 +367,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     // home bind stuff
     {
-        QueryResult *result4 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
+        QueryResult *result4 = sDatabase.Query("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
         if (result4)
         {
             Field *fields = result4->Fetch();
@@ -382,7 +382,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         {
             int plrace = GetPlayer()->getRace();
             int plclass = GetPlayer()->getClass();
-            QueryResult *result5 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `playercreateinfo` WHERE `race` = '%u' AND `class` = '%u'", plrace, plclass);
+            QueryResult *result5 = sDatabase.Query("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `playercreateinfo` WHERE `race` = '%u' AND `class` = '%u'", plrace, plclass);
 
             if(!result5)
             {
@@ -398,7 +398,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
             _player->m_homebindX = fields[2].GetFloat();
             _player->m_homebindY = fields[3].GetFloat();
             _player->m_homebindZ = fields[4].GetFloat();
-            sDatabase.PExecute("INSERT INTO `character_homebind` (`guid`,`map`,`zone`,`position_x`,`position_y`,`position_z`) VALUES ('%u', '%u', '%u', '%f', '%f', '%f')", GUID_LOPART(playerGuid), _player->m_homebindMapId, (uint32)_player->m_homebindZoneId, _player->m_homebindX, _player->m_homebindY, _player->m_homebindZ);
+            sDatabase.Execute("INSERT INTO `character_homebind` (`guid`,`map`,`zone`,`position_x`,`position_y`,`position_z`) VALUES ('%u', '%u', '%u', '%f', '%f', '%f')", GUID_LOPART(playerGuid), _player->m_homebindMapId, (uint32)_player->m_homebindZoneId, _player->m_homebindX, _player->m_homebindY, _player->m_homebindZ);
             delete result5;
         }
 
@@ -471,7 +471,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     GetPlayer()->UpdateHonorFields();
 
-    QueryResult *result = sDatabase.PQuery("SELECT `guildid`,`rank` FROM `guild_member` WHERE `guid` = '%u'",pCurrChar->GetGUIDLow());
+    QueryResult *result = sDatabase.Query("SELECT `guildid`,`rank` FROM `guild_member` WHERE `guid` = '%u'",pCurrChar->GetGUIDLow());
 
     if(result)
     {
@@ -501,8 +501,8 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         pCurrChar->TeleportTo(curTrans->GetMapId(), curTrans->GetPositionX(), curTrans->GetPositionY(), curTrans->GetPositionZ(), curTrans->GetOrientation(), true, false);
     }
 
-    sDatabase.PExecute("UPDATE `character` SET `online` = 1 WHERE `guid` = '%u'", pCurrChar->GetGUIDLow());
-    loginDatabase.PExecute("UPDATE `account` SET `online` = 1 WHERE `id` = '%u'", GetAccountId());
+    sDatabase.Execute("UPDATE `character` SET `online` = 1 WHERE `guid` = '%u'", pCurrChar->GetGUIDLow());
+    loginDatabase.Execute("UPDATE `account` SET `online` = 1 WHERE `id` = '%u'", GetAccountId());
     plr->SetInGameTime( getMSTime() );
 
     // set some aura effects after add player to map

@@ -34,7 +34,7 @@ namespace MaNGOS
             int standing = 0;
 
             float m_rating = plr->GetHonorRating();
-            QueryResult *result = sDatabase.PQuery("SELECT count(*) as cnt FROM `character` WHERE `rating` >= '%f'", m_rating );
+            QueryResult *result = sDatabase.Query("SELECT count(*) as cnt FROM `character` WHERE `rating` >= '%f'", m_rating );
             if(result)
             {
                 Field *fields = result->Fetch();

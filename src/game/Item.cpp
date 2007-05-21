@@ -207,7 +207,7 @@ void Item::SaveToDB()
         case ITEM_NEW:
         {
             // it's better than rebuilding indexes multiple times
-            QueryResult *result = sDatabase.PQuery("select count(*) as r from `item_instance` where `guid` = '%u'", guid);
+            QueryResult *result = sDatabase.Query("select count(*) as r from `item_instance` where `guid` = '%u'", guid);
             Field *fields = result->Fetch();
             uint32 Rows = fields[0].GetUInt32();
             delete result;
@@ -243,15 +243,15 @@ void Item::SaveToDB()
             sDatabase.Execute( ss.str().c_str() );
 
             if(HasFlag(ITEM_FIELD_FLAGS, 8))
-                sDatabase.PExecute("UPDATE `character_gifts` SET `guid` = '%u' WHERE `item_guid` = '%u'", GUID_LOPART(GetOwnerGUID()),GetGUIDLow());
+                sDatabase.Execute("UPDATE `character_gifts` SET `guid` = '%u' WHERE `item_guid` = '%u'", GUID_LOPART(GetOwnerGUID()),GetGUIDLow());
         } break;
         case ITEM_REMOVED:
         {
             if (GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID) > 0 )
-                sDatabase.PExecute("DELETE FROM `item_text` WHERE `id` = '%u'", GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID));
-            sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", guid);
+                sDatabase.Execute("DELETE FROM `item_text` WHERE `id` = '%u'", GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID));
+            sDatabase.Execute("DELETE FROM `item_instance` WHERE `guid` = '%u'", guid);
             if(HasFlag(ITEM_FIELD_FLAGS, 8))
-                sDatabase.PExecute("DELETE FROM `character_gifts` WHERE `item_guid` = '%u'", GetGUIDLow());
+                sDatabase.Execute("DELETE FROM `character_gifts` WHERE `item_guid` = '%u'", GetGUIDLow());
             delete this;
             return;
         }
@@ -263,7 +263,7 @@ void Item::SaveToDB()
 
 bool Item::LoadFromDB(uint32 guid, uint64 owner_guid)
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `data` FROM `item_instance` WHERE `guid` = '%u'", guid);
+    QueryResult *result = sDatabase.Query("SELECT `data` FROM `item_instance` WHERE `guid` = '%u'", guid);
 
     if (!result)
     {
@@ -295,12 +295,12 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid)
 
 void Item::DeleteFromDB()
 {
-    sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'",GetGUIDLow());
+    sDatabase.Execute("DELETE FROM `item_instance` WHERE `guid` = '%u'",GetGUIDLow());
 }
 
 void Item::DeleteFromInventoryDB()
 {
-    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `item` = '%u'",GetGUIDLow());
+    sDatabase.Execute("DELETE FROM `character_inventory` WHERE `item` = '%u'",GetGUIDLow());
 }
 
 ItemPrototype const *Item::GetProto() const

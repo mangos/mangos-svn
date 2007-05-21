@@ -68,18 +68,18 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
 
     if(current)
         // current pet (slot 0)           0    1       2       3         4       5     6            7        8        9        10       11       12       13        14           15     16     17        18          19
-        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`  FROM `character_pet` WHERE `owner` = '%u' AND `slot` = '0'",ownerid );
+        result = sDatabase.Query("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`  FROM `character_pet` WHERE `owner` = '%u' AND `slot` = '0'",ownerid );
     else if(petnumber)
         // known petnumber entry          0    1       2       3         4       5     6            7        8        9        10       11       12       13        14           15        16     17     18          19
-        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana` FROM `character_pet` WHERE `owner` = '%u' AND `id` = '%u'",ownerid, petnumber);
+        result = sDatabase.Query("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana` FROM `character_pet` WHERE `owner` = '%u' AND `id` = '%u'",ownerid, petnumber);
     else if(petentry)
         // known petentry entry (unique for summoned pet, but non unique for hunter pet (only from current or not stabled pets)
         //                                0    1       2       3         4       5     6            7        8        9        10       11       12       13        14           15     16     17        18          19
-        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`  FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u' AND (`slot` = '0' OR `slot` = '3') ",ownerid, petentry );
+        result = sDatabase.Query("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`  FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u' AND (`slot` = '0' OR `slot` = '3') ",ownerid, petentry );
     else
         // any current or other non-stabled pet (for hunter "call pet")
         //                                0    1       2       3         4       5     6            7        8        9        10       11       12       13        14           15     16     17        18          19
-        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`  FROM `character_pet` WHERE `owner` = '%u' AND (`slot` = '0' OR `slot` = '3') ",ownerid);
+        result = sDatabase.Query("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`  FROM `character_pet` WHERE `owner` = '%u' AND (`slot` = '0' OR `slot` = '3') ",ownerid);
 
     if(!result)
         return false;
@@ -185,10 +185,10 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     // set current pet as current
     if(fields[15].GetUInt32() != 0)
     {
-        sDatabase.BeginTransaction();
-        sDatabase.PExecute("UPDATE `character_pet` SET `slot` = '3' WHERE `owner` = '%u' AND `slot` = '0' AND `id` <> '%u'",ownerid, GetPetNumber());
-        sDatabase.PExecute("UPDATE `character_pet` SET `slot` = '0' WHERE `owner` = '%u' AND `id` = '%u'",ownerid, GetPetNumber());
-        sDatabase.CommitTransaction();
+        //sDatabase.BeginTransaction();
+        sDatabase.Execute("UPDATE `character_pet` SET `slot` = '3' WHERE `owner` = '%u' AND `slot` = '0' AND `id` <> '%u'",ownerid, GetPetNumber());
+        sDatabase.Execute("UPDATE `character_pet` SET `slot` = '0' WHERE `owner` = '%u' AND `id` = '%u'",ownerid, GetPetNumber());
+        //sDatabase.CommitTransaction();
     }
 
     delete result;
@@ -230,30 +230,30 @@ void Pet::SavePetToDB(PetSaveMode mode)
             uint32 owner = GUID_LOPART(GetOwnerGUID());
             std::string name = m_name;
             sDatabase.escape_string(name);
-            sDatabase.BeginTransaction();
+            //sDatabase.BeginTransaction();
             // remove current data
-            sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `id` = '%u'", owner,GetPetNumber() );
+            sDatabase.Execute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `id` = '%u'", owner,GetPetNumber() );
 
             // prevent duplicate using slot (except PET_SAVE_NOT_IN_SLOT)
             if(mode!=PET_SAVE_NOT_IN_SLOT)
-                sDatabase.PExecute("UPDATE `character_pet` SET `slot` = 3 WHERE `owner` = '%u' AND `slot` = '%u'", owner, uint32(mode) );
+                sDatabase.Execute("UPDATE `character_pet` SET `slot` = 3 WHERE `owner` = '%u' AND `slot` = '%u'", owner, uint32(mode) );
 
             // prevent existence another hunter pet in PET_SAVE_AS_CURRENT and PET_SAVE_NOT_IN_SLOT
             if(getPetType()==HUNTER_PET && (mode==PET_SAVE_AS_CURRENT||mode==PET_SAVE_NOT_IN_SLOT))
-                sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND (`slot` = '0' OR `slot` = '3')", owner );
+                sDatabase.Execute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND (`slot` = '0' OR `slot` = '3')", owner );
             // save pet
-            sDatabase.PExecute("INSERT INTO `character_pet` (`id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`name`,`renamed`,`slot`,`curhealth`,`curmana`) "
+            sDatabase.Execute("INSERT INTO `character_pet` (`id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`spell1`,`spell2`,`spell3`,`spell4`,`action`,`fealty`,`loyalty`,`trainpoint`,`name`,`renamed`,`slot`,`curhealth`,`curmana`) "
                 "VALUES (%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,%u,'%s','%u','%u','%u','%u')",
                 GetPetNumber(),GetEntry(), owner, GetUInt32Value(UNIT_FIELD_DISPLAYID), getLevel(), GetUInt32Value(UNIT_FIELD_PETEXPERIENCE), GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP),
                 m_spells[0], m_spells[1], m_spells[2], m_spells[3], m_actState, GetPower(POWER_HAPPINESS),getloyalty(),getUsedTrainPoint(), name.c_str(),
                 uint32(((GetUInt32Value(UNIT_FIELD_BYTES_2) >> 16) == 3)?0:1),uint32(mode),(GetHealth()<1?1:GetHealth()),GetPower(POWER_MANA));
-            sDatabase.CommitTransaction();
+            //sDatabase.CommitTransaction();
             break;
         }
         case PET_SAVE_AS_DELETED:
         {
             uint32 owner = GUID_LOPART(GetOwnerGUID());
-            sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `id` = '%u'", owner,GetPetNumber());
+            sDatabase.Execute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `id` = '%u'", owner,GetPetNumber());
             break;
         }
         default:
