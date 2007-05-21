@@ -48,6 +48,11 @@ public:
     bool WaitExecute(const char* QueryString, ...);
     bool Execute(const char* QueryString, ...);
 
+#ifdef _SQL_TRANSACTION
+	bool StartTransaction();
+	bool EndTransaction();
+#endif //_SQL_TRANSACTION
+
     void CheckConnections();
     bool Active;
     unsigned long escape_string(char *to, const char *from, unsigned long length);
