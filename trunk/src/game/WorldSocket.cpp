@@ -250,7 +250,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     std::string safe_account=account;                       // Duplicate, else will screw the SHA hash verification below
     loginDatabase.escape_string(safe_account);
     //No SQL injection, username escaped.
-    QueryResult *result = loginDatabase.PQuery("SELECT `id`,`gmlevel`,`sessionkey`,`last_ip`,`locked`, `password`, `v`, `s`, `banned`, `tbc` FROM `account` WHERE `username` = '%s'", safe_account.c_str());
+    QueryResult *result = loginDatabase.Query("SELECT `id`,`gmlevel`,`sessionkey`,`last_ip`,`locked`, `password`, `v`, `s`, `banned`, `tbc` FROM `account` WHERE `username` = '%s'", safe_account.c_str());
 
     ///- Stop if the account is not found
     if ( !result )
@@ -262,14 +262,14 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         return;
     }
 
-    tbc = (*result)[9].GetUInt8();
+    tbc = result->Fetch()[9].GetUInt8();
 
     N.SetHexStr("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7");
     g.SetDword(7);
-    password = (*result)[5].GetString();
+    password = result->Fetch()[5].GetString();
     std::transform(password.begin(), password.end(), password.begin(), std::towupper);
 
-    s.SetHexStr((*result)[7].GetString());
+    s.SetHexStr(result->Fetch()[7].GetString());
     std::string sI = account + ":" + password;
     I.UpdateData(sI);
     I.Finalize();
@@ -279,9 +279,9 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     x.SetBinary(sha1.GetDigest(), sha1.GetLength());
     v = g.ModExp(x, N);
 
-    sLog.outDebug("SOCKET: (s,v) check s: %s v_old: %s v_new: %s", s.AsHexStr(), (*result)[6].GetString(), v.AsHexStr() );
-    loginDatabase.PQuery("UPDATE `account` SET `v` = '0', `s` = '0' WHERE `username` = '%s'", safe_account.c_str());
-    if ( strcmp(v.AsHexStr(),(*result)[6].GetString() ) )
+    sLog.outDebug("SOCKET: (s,v) check s: %s v_old: %s v_new: %s", s.AsHexStr(), result->Fetch()[6].GetString(), v.AsHexStr() );
+    loginDatabase.Query("UPDATE `account` SET `v` = '0', `s` = '0' WHERE `username` = '%s'", safe_account.c_str());
+    if ( strcmp(v.AsHexStr(),result->Fetch()[6].GetString() ) )
     {
         packet.Initialize( SMSG_AUTH_RESPONSE, 1 );
         packet << uint8( AUTH_UNKNOWN_ACCOUNT );
@@ -292,9 +292,9 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     }
 
     ///- Re-check ip locking (same check as in realmd).
-    if((*result)[4].GetUInt8() == 1)                        // if ip is locked
+    if(result->Fetch()[4].GetUInt8() == 1)                        // if ip is locked
     {
-        if ( strcmp((*result)[3].GetString(),GetRemoteAddress().c_str()) )
+        if ( strcmp(result->Fetch()[3].GetString(),GetRemoteAddress().c_str()) )
         {
             packet.Initialize( SMSG_AUTH_RESPONSE, 1 );
             packet << uint8( AUTH_FAILED );
@@ -307,7 +307,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     }
 
     ///- Re-check account ban (same check as in realmd).
-    if((*result)[8].GetUInt8() == 1)                        // if account banned
+    if(result->Fetch()[8].GetUInt8() == 1)                        // if account banned
     {
         packet.Initialize( SMSG_AUTH_RESPONSE, 1 );
         packet << uint8( AUTH_BANNED );
@@ -318,9 +318,9 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         return;
     }
 
-    id = (*result)[0].GetUInt32();
-    security = (*result)[1].GetUInt16();
-    K.SetHexStr((*result)[2].GetString());
+    id = result->Fetch()[0].GetUInt32();
+    security = result->Fetch()[1].GetUInt16();
+    K.SetHexStr(result->Fetch()[2].GetString());
 
     delete result;
 
@@ -387,7 +387,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 	
     ///- Update the last_ip in the database
     //No SQL injection, username escaped.
-	loginDatabase.PQuery("UPDATE `account` SET `last_ip` = '%s' WHERE `username` = '%s'",GetRemoteAddress().c_str(), safe_account.c_str());
+	loginDatabase.Query("UPDATE `account` SET `last_ip` = '%s' WHERE `username` = '%s'",GetRemoteAddress().c_str(), safe_account.c_str());
 
     // do small delay (10ms) at accepting successful authed connection to prevent droping packets by client
     // don't must harm anyone (let login ~100 accounts in 1 sec ;) )

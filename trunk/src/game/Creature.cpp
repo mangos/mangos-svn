@@ -100,7 +100,7 @@ void Creature::LoadTrainerSpells()
     m_trainer_type = 0;
 
     Field *fields;
-    QueryResult *result = sDatabase.PQuery("SELECT `spell`,`spellcost`,`reqskill`,`reqskillvalue`,`reqlevel` FROM `npc_trainer` WHERE `entry` = '%u'", GetCreatureInfo()->Entry);
+    QueryResult *result = sDatabase.Query("SELECT `spell`,`spellcost`,`reqskill`,`reqskillvalue`,`reqlevel` FROM `npc_trainer` WHERE `entry` = '%u'", GetCreatureInfo()->Entry);
 
     if(!result) return;
 
@@ -708,7 +708,7 @@ void Creature::OnPoiSelect(Player* player, GossipOption const *gossip)
         uint16 pflag;
 
         // use the action relate to creaturetemplate.trainer_type ?
-        result= sDatabase.PQuery("SELECT `creature`.`position_x`,`creature`.`position_y` FROM `creature`,`creature_template` WHERE `creature`.`map` = '%u' AND `creature`.`id` = `creature_template`.`entry` AND `creature_template`.`trainer_type` = '%u'", mapid, gossip->Action );
+        result= sDatabase.Query("SELECT `creature`.`position_x`,`creature`.`position_y` FROM `creature`,`creature_template` WHERE `creature`.`map` = '%u' AND `creature`.`id` = `creature_template`.`entry` AND `creature_template`.`trainer_type` = '%u'", mapid, gossip->Action );
         if(!result)
             return;
         do
@@ -756,7 +756,7 @@ void Creature::OnPoiSelect(Player* player, GossipOption const *gossip)
 
 uint32 Creature::GetGossipTextId(uint32 action, uint32 zoneid)
 {
-    QueryResult *result= sDatabase.PQuery("SELECT `textid` FROM `npc_gossip_textid` WHERE `action` = '%u' AND `zoneid` ='%u'", action, zoneid );
+    QueryResult *result= sDatabase.Query("SELECT `textid` FROM `npc_gossip_textid` WHERE `action` = '%u' AND `zoneid` ='%u'", action, zoneid );
 
     if(!result)
         return 0;
@@ -782,7 +782,7 @@ uint32 Creature::GetGossipCount( uint32 gossipid )
 
 uint32 Creature::GetNpcTextId()
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `textid` FROM `npc_gossip` WHERE `npc_guid`= '%u'", m_DBTableGuid);
+    QueryResult *result = sDatabase.Query("SELECT `textid` FROM `npc_gossip` WHERE `npc_guid`= '%u'", m_DBTableGuid);
     if(result)
     {
         Field *fields = result->Fetch();
@@ -817,7 +817,7 @@ void Creature::LoadGossipOptions()
 {
     uint32 npcflags=GetUInt32Value(UNIT_NPC_FLAGS);
 
-    QueryResult *result = sDatabase.PQuery( "SELECT `id`,`gossip_id`,`npcflag`,`icon`,`action`,`option` FROM `npc_option` WHERE (npcflag & %u)!=0", npcflags );
+    QueryResult *result = sDatabase.Query( "SELECT `id`,`gossip_id`,`npcflag`,`icon`,`action`,`option` FROM `npc_option` WHERE (npcflag & %u)!=0", npcflags );
 
     if(!result)
         return;
@@ -918,9 +918,9 @@ void Creature::SaveToDB()
     data.auras = "";
 
     // updated in DB
-    sDatabase.BeginTransaction();
+//    sDatabase.BeginTransaction();
 
-    sDatabase.PExecuteLog("DELETE FROM `creature` WHERE `guid` = '%u'", m_DBTableGuid);
+    sDatabase.ExecuteLog("DELETE FROM `creature` WHERE `guid` = '%u'", m_DBTableGuid);
 
     std::ostringstream ss;
     ss << "INSERT INTO `creature` VALUES ("
@@ -944,9 +944,9 @@ void Creature::SaveToDB()
         << GetDefaultMovementType() << ","                  // default movement generator type
         << "'')";                                           // should save auras
 
-    sDatabase.PExecuteLog( ss.str( ).c_str( ) );
+    sDatabase.ExecuteLog( ss.str( ).c_str( ) );
 
-    sDatabase.CommitTransaction();
+//    sDatabase.CommitTransaction();
 }
 
 void Creature::SelectLevel(const CreatureInfo *cinfo)
@@ -1192,7 +1192,7 @@ void Creature::LoadGoods()
 
     m_vendor_items.clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT `item`, `maxcount`,`incrtime` FROM `npc_vendor` WHERE `entry` = '%u'", GetEntry());
+    QueryResult *result = sDatabase.Query("SELECT `item`, `maxcount`,`incrtime` FROM `npc_vendor` WHERE `entry` = '%u'", GetEntry());
 
     if(!result) return;
 
@@ -1248,12 +1248,12 @@ void Creature::DeleteFromDB()
 {
     objmgr.DeleteCreatureData(m_DBTableGuid);
 
-    sDatabase.BeginTransaction();
-    sDatabase.PExecuteLog("DELETE FROM `creature` WHERE `guid` = '%u'", m_DBTableGuid);
-    sDatabase.PExecuteLog("DELETE FROM `creature_addon` WHERE `guid` = '%u'", m_DBTableGuid);
-    sDatabase.PExecuteLog("DELETE FROM `creature_movement` WHERE `id` = '%u'", m_DBTableGuid);
-    sDatabase.PExecuteLog("DELETE FROM `creature_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", m_DBTableGuid, GetInstanceId());
-    sDatabase.CommitTransaction();
+//    sDatabase.BeginTransaction();
+    sDatabase.ExecuteLog("DELETE FROM `creature` WHERE `guid` = '%u'", m_DBTableGuid);
+    sDatabase.ExecuteLog("DELETE FROM `creature_addon` WHERE `guid` = '%u'", m_DBTableGuid);
+    sDatabase.ExecuteLog("DELETE FROM `creature_movement` WHERE `id` = '%u'", m_DBTableGuid);
+    sDatabase.ExecuteLog("DELETE FROM `creature_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", m_DBTableGuid, GetInstanceId());
+//    sDatabase.CommitTransaction();
 }
 
 float Creature::GetAttackDistance(Unit *pl) const
@@ -1331,7 +1331,7 @@ void Creature::Respawn()
     }
     if(getDeathState()==DEAD)
     {
-        sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", m_DBTableGuid, GetInstanceId());
+        sDatabase.Execute("DELETE FROM `creature_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", m_DBTableGuid, GetInstanceId());
         m_respawnTime = time(NULL);                         // respawn at next tick
     }
 }

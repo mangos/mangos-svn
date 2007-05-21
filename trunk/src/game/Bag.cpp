@@ -99,7 +99,7 @@ bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid)
 
     if(!IsInBag())                                          // equiped bag
     {
-        QueryResult *result = sDatabase.PQuery("SELECT `slot`,`item`,`item_template` FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u'", GUID_LOPART(GetOwnerGUID()), GetGUIDLow());
+        QueryResult *result = sDatabase.Query("SELECT `slot`,`item`,`item_template` FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u'", GUID_LOPART(GetOwnerGUID()), GetGUIDLow());
 
         if (result)
         {

@@ -178,7 +178,7 @@ void WorldSession::SendAuctionOutbiddedMail(AuctionEntry *auction, uint32 newPri
         oldBidder->CreateMail(mailId, MAIL_AUCTION, auction->location, msgAuctionOutbiddedSubject.str(), 0, 0, 0, etime,dtime, auction->bid, 0, NOT_READ, NULL);
     }
 
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+    sDatabase.Execute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
         "VALUES ('%u', '%d', '%u', '%u', '%s', '0', '0', '0', '" I64FMTD "','" I64FMTD "', '%u', '0', '%d')",
         mailId, MAIL_AUCTION, auction->location, auction->bidder, msgAuctionOutbiddedSubject.str().c_str(), (uint64)etime, (uint64)dtime, auction->bid, NOT_READ);
 }
@@ -201,7 +201,7 @@ void WorldSession::SendAuctionCancelledToBidderMail( AuctionEntry* auction )
         bidder->CreateMail(mailId, MAIL_AUCTION, auction->location, msgAuctionCancelledSubject.str(), 0, 0, 0, etime,dtime, auction->bid, 0, NOT_READ, NULL);
     }
 
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+    sDatabase.Execute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
         "VALUES ('%u', '%d', '%u', '%u', '%s', '0', '0', '0', '" I64FMTD "','" I64FMTD "', '%u', '0', '%d')",
         mailId, MAIL_AUCTION, auction->location, auction->bidder, msgAuctionCancelledSubject.str().c_str(), (uint64)etime, (uint64)dtime, auction->bid, NOT_READ);
 }
@@ -285,14 +285,14 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     pl->RemoveItem( (pos >> 8),(pos & 255), true);
     it->RemoveFromUpdateQueueOf(pl);
 
-    sDatabase.BeginTransaction();
+    //sDatabase.BeginTransaction();
     it->DeleteFromInventoryDB();
     it->SaveToDB();                                         // recursive and not have transaction guard into self
-    sDatabase.PExecute("INSERT INTO `auctionhouse` (`id`,`auctioneerguid`,`itemguid`,`item_template`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`startbid`,`deposit`,`location`) "
+    sDatabase.Execute("INSERT INTO `auctionhouse` (`id`,`auctioneerguid`,`itemguid`,`item_template`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`startbid`,`deposit`,`location`) "
         "VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u', '%u', '%u')",
         AH->Id, AH->auctioneer, AH->item_guid, AH->item_template, AH->owner, AH->buyout, (uint64)AH->time, AH->bidder, AH->bid, AH->startbid, AH->deposit, AH->location);
     pl->SaveInventoryAndGoldToDB();
-    sDatabase.CommitTransaction();
+    //sDatabase.CommitTransaction();
 
     SendAuctionCommandResult(AH->Id, AUCTION_SELL_ITEM, AUCTION_OK);
 }
@@ -362,7 +362,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             auction->bid = price;
 
             // after this update we should save player's money ...
-            sDatabase.PExecute("UPDATE `auctionhouse` SET `buyguid` = '%u',`lastbid` = '%u' WHERE `id` = '%u';", auction->bidder, auction->bid, auction->Id);
+            sDatabase.Execute("UPDATE `auctionhouse` SET `buyguid` = '%u',`lastbid` = '%u' WHERE `id` = '%u';", auction->bidder, auction->bid, auction->Id);
 
             SendAuctionCommandResult(auction->Id, AUCTION_PLACE_BID, AUCTION_OK, 0 );
         }
@@ -391,13 +391,13 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
 
             objmgr.RemoveAItem(auction->item_guid);
             mAuctions->RemoveAuction(auction->Id);
-            sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",auction->Id);
+            sDatabase.Execute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",auction->Id);
 
             delete auction;
         }
-        sDatabase.BeginTransaction();
+        //sDatabase.BeginTransaction();
         pl->SaveInventoryAndGoldToDB();
-        sDatabase.CommitTransaction();
+        //sDatabase.CommitTransaction();
     }
     else
     {
@@ -455,7 +455,7 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
             time_t etime = dtime + (30 * DAY);
 
             pl->CreateMail( messageID, MAIL_AUCTION, auction->location, msgAuctionCanceledOwner.str(), 0, auction->item_guid, auction->item_template, etime,dtime, 0, 0, 0, pItem);
-            sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+            sDatabase.Execute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
                 "VALUES ('%u', '%d', '%u', '%u', '%s', '0', '%u', '%u', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
                 messageID, MAIL_AUCTION, auction->location , pl->GetGUIDLow() , msgAuctionCanceledOwner.str().c_str(), auction->item_guid, auction->item_template, (uint64)etime, (uint64)dtime, NOT_READ);
 
@@ -478,10 +478,10 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
     //inform player, that auction is removed
     SendAuctionCommandResult( auction->Id, AUCTION_CANCEL, AUCTION_OK );
     // Now remove the auction
-    sDatabase.BeginTransaction();
-    sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",auction->Id);
+    //sDatabase.BeginTransaction();
+    sDatabase.Execute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",auction->Id);
     pl->SaveInventoryAndGoldToDB();
-    sDatabase.CommitTransaction();
+    //sDatabase.CommitTransaction();
     objmgr.RemoveAItem( auction->item_guid );
     mAuctions->RemoveAuction( auction->Id );
     delete auction;

@@ -79,7 +79,7 @@ bool Corpse::Create( uint32 guidlow, Player *owner, uint32 mapid, float x, float
 void Corpse::SaveToDB()
 {
     // prevent DB data inconsistance problems and duplicates
-    sDatabase.BeginTransaction();
+    //sDatabase.BeginTransaction();
     DeleteFromDB(false);
 
     std::ostringstream ss;
@@ -90,7 +90,7 @@ void Corpse::SaveToDB()
         ss << GetUInt32Value(i) << " ";
     ss << "', NOW(), " << int(GetType()) << ", " << int(GetInstanceId()) << ")";
     sDatabase.Execute( ss.str().c_str() );
-    sDatabase.CommitTransaction();
+    //sDatabase.CommitTransaction();
 }
 
 void Corpse::DeleteBonesFromWorld()
@@ -112,8 +112,8 @@ void Corpse::DeleteFromDB(bool inner_transaction)
 {
     std::ostringstream ss;
 
-    if(inner_transaction)
-        sDatabase.BeginTransaction();
+//    if(inner_transaction)
+//        sDatabase.BeginTransaction();
 
     if(GetType() == CORPSE_BONES)
         // only specific bones
@@ -123,15 +123,15 @@ void Corpse::DeleteFromDB(bool inner_transaction)
         ss  << "DELETE FROM `corpse` WHERE `player` = '" << GUID_LOPART(GetOwnerGUID()) << "' AND `bones_flag` = '0'";
     sDatabase.Execute( ss.str().c_str() );
 
-    if(inner_transaction)
-        sDatabase.CommitTransaction();
+//    if(inner_transaction)
+//        sDatabase.CommitTransaction();
 }
 
 bool Corpse::LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId)
 {
     bool external = (result != NULL);
     if (!external)
-        result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map`,`data`,`bones_flag`,`instance` FROM `corpse` WHERE `guid` = '%u'",guid);
+        result = sDatabase.Query("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map`,`data`,`bones_flag`,`instance` FROM `corpse` WHERE `guid` = '%u'",guid);
 
     if( ! result )
     {

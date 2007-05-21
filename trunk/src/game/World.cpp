@@ -354,10 +354,10 @@ void World::SetInitialWorldSettings()
 
     ///- Update the realm entry in the database with the realm type from the config file
     //No SQL injection as values are treated as integers
-    loginDatabase.PExecute("UPDATE `realmlist` SET `icon` = %u WHERE `id` = '%d'", m_configs[CONFIG_GAME_TYPE],realmID);
+    loginDatabase.Execute("UPDATE `realmlist` SET `icon` = %u WHERE `id` = '%d'", m_configs[CONFIG_GAME_TYPE],realmID);
 
     ///- Remove the bones after a restart
-    sDatabase.PExecute("DELETE FROM `corpse` WHERE `bones_flag` = '1'");
+    sDatabase.Execute("DELETE FROM `corpse` WHERE `bones_flag` = '1'");
 
     ///- Load the DBC files
     sLog.outString("Initialize data stores...");
@@ -586,7 +586,7 @@ void World::Update(time_t diff)
 
                     ///- In any case clear the auction
                     //No SQL injection (Id is integer)
-                    sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",itr->second->Id);
+                    sDatabase.Execute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",itr->second->Id);
                     objmgr.RemoveAItem(itr->second->item_guid);
                     delete itr->second;
                     AuctionMap->RemoveAuction(itr->first);
@@ -929,16 +929,16 @@ bool World::BanAccount(std::string nameOrIP)
     if(is_ip)
     {
         //No SQL injection as string is escaped
-        resultAccounts = loginDatabase.PQuery("SELECT `id` FROM `account` WHERE `last_ip` = '%s'",nameOrIP.c_str());
+        resultAccounts = loginDatabase.Query("SELECT `id` FROM `account` WHERE `last_ip` = '%s'",nameOrIP.c_str());
 
-        loginDatabase.PExecute("INSERT INTO `ip_banned` VALUES ('%s')",nameOrIP.c_str());
+        loginDatabase.Execute("INSERT INTO `ip_banned` VALUES ('%s')",nameOrIP.c_str());
     }
     else
     {
         //No SQL injection as string is escaped
-        resultAccounts = loginDatabase.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s'",nameOrIP.c_str());
+        resultAccounts = loginDatabase.Query("SELECT `id` FROM `account` WHERE `username` = '%s'",nameOrIP.c_str());
 
-        loginDatabase.PExecute("UPDATE `account` SET `banned` = '1' WHERE `username` = '%s'",nameOrIP.c_str());
+        loginDatabase.Execute("UPDATE `account` SET `banned` = '1' WHERE `username` = '%s'",nameOrIP.c_str());
     }
 
     ///- Disconnect all affected players (for IP it can be several)
@@ -969,13 +969,13 @@ bool World::RemoveBanAccount(std::string nameOrIP)
     {
         loginDatabase.escape_string(nameOrIP);
         //No SQL injection as string is escaped
-        loginDatabase.PExecute("DELETE FROM `ip_banned` WHERE `ip` = '%s'",nameOrIP.c_str());
+        loginDatabase.Execute("DELETE FROM `ip_banned` WHERE `ip` = '%s'",nameOrIP.c_str());
     }
     else
     {
         loginDatabase.escape_string(nameOrIP);
         //No SQL injection as string is escaped
-        loginDatabase.PExecute("UPDATE `account` SET `banned` = '0' WHERE `username` = '%s'",nameOrIP.c_str());
+        loginDatabase.Execute("UPDATE `account` SET `banned` = '0' WHERE `username` = '%s'",nameOrIP.c_str());
     }
     return true;
 }

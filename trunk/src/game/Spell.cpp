@@ -2699,7 +2699,7 @@ void Spell::HandleTeleport(uint32 id, Unit* Target)
     {
         //old code, slow:
         /*Field *fields;
-        QueryResult *result = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", m_caster->GetGUIDLow());
+        QueryResult *result = sDatabase.Query("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", m_caster->GetGUIDLow());
         if(!result)
         {
             sLog.outError( "SPELL: No homebind location set for %i\n", m_caster->GetGUIDLow());
