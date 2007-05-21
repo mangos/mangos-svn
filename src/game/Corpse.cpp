@@ -98,11 +98,14 @@ void Corpse::DeleteBonesFromWorld()
     assert(GetType()==CORPSE_BONES);
     CorpsePtr corpse = MapManager::Instance().GetMap(GetMapId(), this)->GetObjectNear<Corpse>(*this, GetGUID());
 
-    if (!corpse) {
-	sLog.outError("Bones %u not found in world.", GetGUIDLow());
-    } else {
-	ObjectAccessor::Instance().RemoveBonesFromPlayerView(corpse);
-	ObjectAccessor::Instance().AddObjectToRemoveList(this);
+    if (!corpse)
+    {
+        sLog.outError("Bones %u not found in world.", GetGUIDLow());
+    }
+    else
+    {
+        ObjectAccessor::Instance().RemoveBonesFromPlayerView(corpse);
+        ObjectAccessor::Instance().AddObjectToRemoveList(this);
     }
 
     RemoveFromWorld();
@@ -214,13 +217,14 @@ void Corpse::_ConvertCorpseToBones()
     CorpsePtr corpse = ObjectAccessor::Instance().GetCorpseForPlayerGUID(GetOwnerGUID());
     if(!corpse)
     {
-	    sLog.outError("ERROR: Try remove corpse that not in map for GUID %ul", GetOwnerGUID());
-	    return;
+        sLog.outError("ERROR: Try remove corpse that not in map for GUID %ul", GetOwnerGUID());
+        return;
     }
 
-    if ((&*corpse) != this) {
-	    sLog.outError("ERROR: Found another corpse while deleting corpse for GUID %ul", GetOwnerGUID());
-	    return;
+    if ((&*corpse) != this)
+    {
+        sLog.outError("ERROR: Found another corpse while deleting corpse for GUID %ul", GetOwnerGUID());
+        return;
     }
 
     // Removing outdated POI if at same map
@@ -242,8 +246,9 @@ void Corpse::_ConvertCorpseToBones()
     CorpsePtr bones = CorpsePtr(new Corpse(this));
     bones->Create(GetGUIDLow());
 
-    for (int i = 0; i < CORPSE_END; i++) {
-	    bones->SetUInt32Value(i, GetUInt32Value(i));
+    for (int i = 0; i < CORPSE_END; i++)
+    {
+        bones->SetUInt32Value(i, GetUInt32Value(i));
     }
     bones->m_grid = m_grid;
     bones->m_time = m_time;

@@ -720,7 +720,7 @@ bool ChatHandler::HandleAddMoveCommand(const char* args)
     QueryResult *result = sDatabase.Query( "SELECT MAX(`point`) FROM `creature_movement` WHERE `id` = '%u'",lowguid);
     if( result )
     {
-		point = result->Fetch()[0].GetUInt32()+1;
+        point = result->Fetch()[0].GetUInt32()+1;
 
         delete result;
     }
@@ -2254,7 +2254,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
     sLog.outDebug("DEBUG: HandleWpShowCommand: show_str: %s", show_str);
     sLog.outDebug("DEBUG: HandleWpShowCommand: guid_str: %s", guid_str);
     //if (!guid_str) {
-    //	return false;
+    //  return false;
     //}
 
     // Did user provide a GUID

@@ -48,11 +48,10 @@ MySQLDatabase::~MySQLDatabase()
     {
         if(Connections)
             if(Connections[i])
-			{
+            {
                 Disconnect(i);
-				delete [] Connections[i];
-			}
-
+                delete [] Connections[i];
+            }
 
         delete [] QueryBuffer[i];
     }
@@ -403,7 +402,7 @@ bool MySQLDatabase::Execute(const char* QueryString, ...)
     va_start(vlist, QueryString);
 
 #ifdef _SQL_TRANSACTION
-	StartTransaction();
+    StartTransaction();
 #endif //_SQL_TRANSACTION
 
     if(mQueryThread == 0)
@@ -430,7 +429,7 @@ bool MySQLDatabase::Execute(const char* QueryString, ...)
     DelayedQueryBufferMutex.release();
 
 #ifdef _SQL_TRANSACTION
-	EndTransaction();
+    EndTransaction();
 #endif //_SQL_TRANSACTION
 
     return true;
@@ -484,9 +483,9 @@ void MySQLDatabaseThread::Do()
     // set thread name
     //SetThreadName("MySQL Database Execute Thread");
     #ifdef WIN32
-	Sleep(2000);
+    Sleep(2000);
     #else
-	sleep(2000);
+    sleep(2000);
     #endif
     bool err = false;
     string query;
@@ -512,11 +511,11 @@ void MySQLDatabaseThread::Do()
                     if(!_db->Connect(i) || !_db->SelectDatabase(i))
                     {
                         sLog.outError("Delayed query thread failed reconnection. Trying again in 2 seconds.");
-			#ifdef WIN32
-			    Sleep(2000);
-			#else
-			    sleep(2000);
-			#endif
+                        #ifdef WIN32
+                            Sleep(2000);
+                        #else
+                            sleep(2000);
+                        #endif
                     }
                     else
                     {
@@ -533,11 +532,11 @@ void MySQLDatabaseThread::Do()
                 _db->SendQuery(i, query.c_str(), false);
             }
         }
-	#ifdef WIN32
-	    Sleep(2000);
-	#else
-	    sleep(2000);
-	#endif
+        #ifdef WIN32
+            Sleep(2000);
+        #else
+            sleep(2000);
+        #endif
     }
 }
 

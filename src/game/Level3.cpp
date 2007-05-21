@@ -106,7 +106,7 @@ bool ChatHandler::HandleSecurityCommand(const char* args)
         return true;
     }
 
-	uint32 acc_id = result->Fetch()[0].GetUInt32();
+    uint32 acc_id = result->Fetch()[0].GetUInt32();
 
     delete result;
 

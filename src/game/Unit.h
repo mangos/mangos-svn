@@ -263,7 +263,7 @@ enum UnitFlags
     UNIT_FLAG_DISARMED       = 0x00200000,                  // disable melee spells casting..., "Required melee weapon" added to melee spells tooltip.
     UNIT_FLAG_CONFUSED       = 0x00400000,
     UNIT_FLAG_FLEEING        = 0x00800000,
-    UNIT_FLAG_UNKNOWN5       = 0x01000000,					// used in spell Eyes of the Beast for pet...
+    UNIT_FLAG_UNKNOWN5       = 0x01000000,                  // used in spell Eyes of the Beast for pet...
     UNIT_FLAG_NOT_SELECTABLE = 0x02000000,                  // ok
     UNIT_FLAG_SKINNABLE      = 0x04000000,
     UNIT_FLAG_UNKNOWN16      = 0x08000000,
@@ -486,10 +486,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         typedef std::set<Creature *> InHateListOf;
         typedef std::list<DiminishingReturn> Diminishing;
         virtual ~Unit ( );
-		Unit*	targetUnit;
-		time_t	next_threat_sort_time;
-		time_t  next_threat_update_time;
-		time_t	last_threat_update_time;
+        Unit*   targetUnit;
+        time_t  next_threat_sort_time;
+        time_t  next_threat_update_time;
+        time_t  last_threat_update_time;
 
         static DiminishingMechanics Mechanic2DiminishingMechanics(uint32 mech);
         void AddDiminishing(DiminishingMechanics mech, uint32 hitTime, uint32 hitCount);
