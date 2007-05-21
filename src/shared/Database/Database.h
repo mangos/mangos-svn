@@ -102,7 +102,6 @@ protected:
 Database* CreateDatabaseInterface(DatabaseType type);
 void DestroyDatabaseInterface(Database * ptr);
 
-// shitty mangos coders
 extern Database * MainDatabase;
 extern Database * LogonDatabase;
 #define sDatabase (*MainDatabase)
