@@ -329,9 +329,10 @@ QueryResult * MySQLDatabase::Query(const char* QueryString, ...)
     return qResult;
 }
 
-bool MySQLDatabase::Execute(const char* QueryString, ...)
+#ifdef _SQL_TRANSACTION
+bool MySQLDatabase::StartTransaction()
 {
-    if(QueryString == NULL) return false;
+    const char* QueryString = "BEGIN";
 
     va_list vlist;
     va_start(vlist, QueryString);
@@ -358,6 +359,80 @@ bool MySQLDatabase::Execute(const char* QueryString, ...)
     mQueryThread->AddQuery(DelayedQueryBuffer);
 
     DelayedQueryBufferMutex.release();
+    return true;
+}
+
+bool MySQLDatabase::EndTransaction()
+{
+    const char* QueryString = "COMMIT";
+
+    va_list vlist;
+    va_start(vlist, QueryString);
+
+    if(mQueryThread == 0)
+    {
+        // No query thread.
+        // Assume we're dealing with a normal query.
+        mSearchMutex.acquire();
+        uint32 Connection = GetConnection();
+        mSearchMutex.release();
+
+        vsprintf(QueryBuffer[Connection], QueryString, vlist);
+
+        bool Result = SendQuery(Connection, QueryBuffer[Connection], false);
+        InUseMarkers[Connection].release();
+
+        return Result;
+    }
+
+    DelayedQueryBufferMutex.acquire();
+
+    vsprintf(DelayedQueryBuffer, QueryString, vlist);
+    mQueryThread->AddQuery(DelayedQueryBuffer);
+
+    DelayedQueryBufferMutex.release();
+    return true;
+}
+#endif //_SQL_TRANSACTION
+
+bool MySQLDatabase::Execute(const char* QueryString, ...)
+{
+    if(QueryString == NULL) return false;
+
+    va_list vlist;
+    va_start(vlist, QueryString);
+
+#ifdef _SQL_TRANSACTION
+	StartTransaction();
+#endif //_SQL_TRANSACTION
+
+    if(mQueryThread == 0)
+    {
+        // No query thread.
+        // Assume we're dealing with a normal query.
+        mSearchMutex.acquire();
+        uint32 Connection = GetConnection();
+        mSearchMutex.release();
+
+        vsprintf(QueryBuffer[Connection], QueryString, vlist);
+
+        bool Result = SendQuery(Connection, QueryBuffer[Connection], false);
+        InUseMarkers[Connection].release();
+
+        return Result;
+    }
+
+    DelayedQueryBufferMutex.acquire();
+
+    vsprintf(DelayedQueryBuffer, QueryString, vlist);
+    mQueryThread->AddQuery(DelayedQueryBuffer);
+
+    DelayedQueryBufferMutex.release();
+
+#ifdef _SQL_TRANSACTION
+	EndTransaction();
+#endif //_SQL_TRANSACTION
+
     return true;
 }
 
