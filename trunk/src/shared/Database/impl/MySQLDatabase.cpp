@@ -404,7 +404,11 @@ void MySQLDatabaseThread::Do()
 {
     // set thread name
     //SetThreadName("MySQL Database Execute Thread");
-    Sleep(2000);
+    #ifdef WIN32
+	Sleep(2000);
+    #else
+	sleep(2000);
+    #endif
     bool err = false;
     string query;
     MYSQL * conn = _db->Connections[_db->mDelayedID];
@@ -429,7 +433,11 @@ void MySQLDatabaseThread::Do()
                     if(!_db->Connect(i) || !_db->SelectDatabase(i))
                     {
                         sLog.outError("Delayed query thread failed reconnection. Trying again in 2 seconds.");
-                        Sleep(2000);
+			#ifdef WIN32
+			    Sleep(2000);
+			#else
+			    sleep(2000);
+			#endif
                     }
                     else
                     {
@@ -446,7 +454,11 @@ void MySQLDatabaseThread::Do()
                 _db->SendQuery(i, query.c_str(), false);
             }
         }
-        Sleep(200);
+	#ifdef WIN32
+	    Sleep(2000);
+	#else
+	    sleep(2000);
+	#endif
     }
 }
 
