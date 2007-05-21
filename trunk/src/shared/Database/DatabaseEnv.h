@@ -16,6 +16,10 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+/*
+ SQL Update and threading thanks to espire
+*/
+
 #if !defined(DATABASEENV_H)
 #define DATABASEENV_H
 

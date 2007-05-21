@@ -30,6 +30,14 @@
 #include "MapManager.h"
 #include "Policies/SingletonImp.h"
 
+#ifndef _WIN32
+#include "stdarg.h"
+#endif
+
+#ifdef LINUX
+#define TCP_NODELAY 0x0001
+#endif 
+
 LanguageDesc lang_description[LANGUAGES_COUNT] =
 {
     { LANG_UNIVERSAL2,      0, 0                       },
