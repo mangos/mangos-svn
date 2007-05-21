@@ -837,8 +837,12 @@ void Spell::EffectApplyAura(uint32 i)
 
     if (added)
     {
+        // if Aura removed and deleted, do not continue.
         if(auraDuration == 0)
+        {
             unitTarget->RemoveAura(m_spellInfo->Id,i);
+            return;
+        }
         else
         if(auraDuration != Aur->GetAuraDuration())
             unitTarget->SetAurDuration(m_spellInfo->Id,i,auraDuration);
