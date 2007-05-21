@@ -292,6 +292,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "scn",         3, &ChatHandler::HandleSendChannelNotifyCommand,"",   NULL },
         { "scm",         3, &ChatHandler::HandleSendChatMsgCommand,      "",   NULL },
         { "sendmail",    1, &ChatHandler::HandleSendMailCommand,         "",   NULL },
+        { "rename",      2, &ChatHandler::HandleRenameCommand,           "",   NULL },
 
         //! Development Commands
         { "setvalue",    3, &ChatHandler::HandleSetValue,                "",   NULL },

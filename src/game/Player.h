@@ -1297,6 +1297,9 @@ class MANGOS_DLL_SPEC Player : public Unit
                                                             // overwrite Unit version
         uint8 m_forced_speed_changes[MAX_MOVE_TYPE];
 
+        bool isNeedRename() { return m_needRename; }
+        void SetNeedRename(bool rename) { m_needRename = rename; }
+
         /*********************************************************/
         /***                 INSTANCE SYSTEM                   ***/
         /*********************************************************/
@@ -1392,6 +1395,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_dismountCost;
         uint32 m_nextSave;
         uint32 m_dungeonDifficulty;
+        bool m_needRename;
 
         Item* m_items[PLAYER_SLOTS_COUNT];
         uint32 m_currentBuybackSlot;
