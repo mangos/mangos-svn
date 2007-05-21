@@ -89,6 +89,10 @@ libmangosdatabase_a_SOURCES = \
 	Database/QueryResultSqlite.h \
 	Database/SQLStorage.cpp \
 	Database/SQLStorage.h \
+	Database/impl/MySQLDatabase.cpp \
+	Database/impl/MySQLDatabase.h \
+	Database/impl/PostgreDatabase.cpp \
+	Database/impl/PostgreDatabase.h \
 	Database/dbcfile.cpp \
 	Database/dbcfile.h
 
