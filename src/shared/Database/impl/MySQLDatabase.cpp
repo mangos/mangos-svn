@@ -329,10 +329,8 @@ QueryResult * MySQLDatabase::Query(const char* QueryString, ...)
 }
 
 #ifdef _SQL_TRANSACTION
-bool MySQLDatabase::StartTransaction()
+bool MySQLDatabase::StartTransaction(const char* QueryString, ...)
 {
-    const char* QueryString = "BEGIN";
-
     va_list vlist;
     va_start(vlist, QueryString);
 
@@ -361,10 +359,8 @@ bool MySQLDatabase::StartTransaction()
     return true;
 }
 
-bool MySQLDatabase::EndTransaction()
+bool MySQLDatabase::EndTransaction(const char* QueryString, ...)
 {
-    const char* QueryString = "COMMIT";
-
     va_list vlist;
     va_start(vlist, QueryString);
 
@@ -402,7 +398,7 @@ bool MySQLDatabase::Execute(const char* QueryString, ...)
     va_start(vlist, QueryString);
 
 #ifdef _SQL_TRANSACTION
-    StartTransaction();
+    StartTransaction("BEGIN");
 #endif //_SQL_TRANSACTION
 
     if(mQueryThread == 0)
@@ -429,7 +425,7 @@ bool MySQLDatabase::Execute(const char* QueryString, ...)
     DelayedQueryBufferMutex.release();
 
 #ifdef _SQL_TRANSACTION
-    EndTransaction();
+    EndTransaction("COMMIT");
 #endif //_SQL_TRANSACTION
 
     return true;

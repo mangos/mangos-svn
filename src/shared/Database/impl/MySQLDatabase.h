@@ -49,8 +49,8 @@ public:
     bool Execute(const char* QueryString, ...);
 
 #ifdef _SQL_TRANSACTION
-    bool StartTransaction();
-    bool EndTransaction();
+    bool StartTransaction(const char* QueryString, ...);
+    bool EndTransaction(const char* QueryString, ...);
 #endif //_SQL_TRANSACTION
 
     void CheckConnections();
