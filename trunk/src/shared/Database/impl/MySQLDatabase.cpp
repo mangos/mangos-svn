@@ -328,6 +328,7 @@ QueryResult * MySQLDatabase::Query(const char* QueryString, ...)
     return qResult;
 }
 
+#ifdef _WIN32
 #ifdef _SQL_TRANSACTION
 bool MySQLDatabase::StartTransaction(const char* QueryString, ...)
 {
@@ -430,6 +431,73 @@ bool MySQLDatabase::Execute(const char* QueryString, ...)
 
     return true;
 }
+#else //!_WIN32
+#ifdef _SQL_TRANSACTION
+bool MySQLDatabase::StartTransaction(const char* QueryString, ...)
+{
+    if(QueryString == NULL) return false;
+
+    va_list vlist;
+    va_start(vlist, QueryString);
+
+    mSearchMutex.acquire();
+    uint32 Connection = GetConnection();
+    mSearchMutex.release();
+
+    vsprintf(QueryBuffer[Connection], QueryString, vlist);
+
+    bool Result = SendQuery(Connection, QueryBuffer[Connection], false);
+    InUseMarkers[Connection].release();
+
+    return Result;
+}
+
+bool MySQLDatabase::EndTransaction(const char* QueryString, ...)
+{
+    if(QueryString == NULL) return false;
+
+    va_list vlist;
+    va_start(vlist, QueryString);
+
+    mSearchMutex.acquire();
+    uint32 Connection = GetConnection();
+    mSearchMutex.release();
+
+    vsprintf(QueryBuffer[Connection], QueryString, vlist);
+
+    bool Result = SendQuery(Connection, QueryBuffer[Connection], false);
+    InUseMarkers[Connection].release();
+
+    return Result;
+}
+
+bool MySQLDatabase::Execute(const char* QueryString, ...)
+{
+    if(QueryString == NULL) return false;
+
+#ifdef _SQL_TRANSACTION
+    StartTransaction("BEGIN");
+#endif //_SQL_TRANSACTION
+
+    va_list vlist;
+    va_start(vlist, QueryString);
+
+    mSearchMutex.acquire();
+    uint32 Connection = GetConnection();
+    mSearchMutex.release();
+
+    vsprintf(QueryBuffer[Connection], QueryString, vlist);
+
+    bool Result = SendQuery(Connection, QueryBuffer[Connection], false);
+    InUseMarkers[Connection].release();
+
+#ifdef _SQL_TRANSACTION
+    EndTransaction("COMMIT");
+#endif //_SQL_TRANSACTION
+
+    return Result;
+}
+#endif //_WIN32
 
 bool MySQLDatabase::WaitExecute(const char* QueryString, ...)
 {
