@@ -375,7 +375,7 @@ void WorldSession::SendSpiritResurrect()
             _player->TeleportTo(corpseGrave->map_id, corpseGrave->x, corpseGrave->y, corpseGrave->z, _player->GetOrientation());
     }
 
-    _player->SaveToDB();
+    _player->SaveToDB(false);
 }
 
 void WorldSession::HandleBinderActivateOpcode( WorldPacket & recv_data )

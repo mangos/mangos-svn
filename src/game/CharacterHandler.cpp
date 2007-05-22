@@ -171,7 +171,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     if(pNewChar->Create( objmgr.GenerateLowGuid(HIGHGUID_PLAYER), recv_data ))
     {
         // Player create
-        pNewChar->SaveToDB();
+        pNewChar->SaveToDB(true);
 
         QueryResult *resultCount = sDatabase.Query("SELECT COUNT(guid) FROM `character` WHERE `account` = '%d'", GetAccountId());
         uint32 charCount = 0;

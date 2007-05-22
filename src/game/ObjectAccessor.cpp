@@ -263,7 +263,7 @@ void
 ObjectAccessor::SaveAllPlayers()
 {
     for(PlayersMapType::iterator itr = i_players.begin(); itr != i_players.end(); ++itr)
-        itr->second->SaveToDB();
+        itr->second->SaveToDB(false);
 }
 
 void

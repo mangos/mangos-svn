@@ -2844,7 +2844,7 @@ void Spell::EffectSelfResurrect(uint32 i)
 
     plr->SetPosition(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), plr->GetOrientation());
 
-    plr->SaveToDB();
+    plr->SaveToDB(false);
 }
 
 void Spell::EffectSkinning(uint32 i)

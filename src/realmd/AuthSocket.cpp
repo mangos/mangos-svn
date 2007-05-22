@@ -299,7 +299,8 @@ void AuthSocket::_SetVSFields(std::string password)
     x.SetBinary(sha.GetDigest(), sha.GetLength());
     v = g.ModExp(x, N);
     // No SQL injection (username escaped)
-    dbRealmServer.Execute("UPDATE `account` SET `v` = '%s', `s` = '%s' WHERE `username` = '%s'",v.AsHexStr(),s.AsHexStr(), _safelogin.c_str() );
+    //dbRealmServer.Execute("UPDATE `account` SET `v` = '%s', `s` = '%s' WHERE `username` = '%s'",v.AsHexStr(),s.AsHexStr(), _safelogin.c_str() );
+    dbRealmServer.WaitExecute("UPDATE `account` SET `v` = '%s', `s` = '%s' WHERE `username` = '%s'",v.AsHexStr(),s.AsHexStr(), _safelogin.c_str() );
 }
 
 /// Logon Challenge command handler
@@ -572,7 +573,8 @@ bool AuthSocket::_HandleLogonProof()
 
         ///- Update the sessionkey, last_ip and last login time in the account table for this account
         // No SQL injection (escaped user name) and IP address as received by socket
-        dbRealmServer.Execute("UPDATE `account` SET `sessionkey` = '%s', `last_ip` = '%s', `last_login` = NOW() WHERE `username` = '%s'",K.AsHexStr(), GetRemoteAddress().c_str(), _safelogin.c_str() );
+        //dbRealmServer.Execute("UPDATE `account` SET `sessionkey` = '%s', `last_ip` = '%s', `last_login` = NOW() WHERE `username` = '%s'",K.AsHexStr(), GetRemoteAddress().c_str(), _safelogin.c_str() );
+        dbRealmServer.WaitExecute("UPDATE `account` SET `sessionkey` = '%s', `last_ip` = '%s', `last_login` = NOW() WHERE `username` = '%s'",K.AsHexStr(), GetRemoteAddress().c_str(), _safelogin.c_str() );
 
         ///- Finish SRP6 and send the final result to the client
         sha.Initialize();

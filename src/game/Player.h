@@ -846,7 +846,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***                   SAVE SYSTEM                     ***/
         /*********************************************************/
 
-        void SaveToDB();
+        void SaveToDB(bool first_save);
         void SaveInventoryAndGoldToDB();                    // fast save function for item/money cheating preventing
         static bool SaveValuesArrayInDB(vector<string> const& data,uint64 guid);
         static void SetUInt32ValueInArray(vector<string>& data,uint16 index, uint32 value);
@@ -1359,7 +1359,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _SaveActions();
         void _SaveAuras();
         void _SaveBoundInstances();
-        void _SaveInventory();
+        void _SaveInventory(bool first_save);
         void _SaveMail();
         void _SaveQuestStatus();
         void _SaveReputation();
