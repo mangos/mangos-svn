@@ -5097,8 +5097,8 @@ Unit* Unit::SelectNextVictim()
         guid = getVictim()->GetGUID();
     }
 
-    if (next_threat_update_time <= timer || last_threat_update_time <= timer - 10000 || !targetUnit)
-    {
+    //if (next_threat_update_time <= timer || last_threat_update_time <= timer - 10000 || !targetUnit)
+    //{
         // Let's not do this constantly! Use a timer!
         for(ThreatList::iterator iter = m_threatList.begin(); iter != m_threatList.end(); ++iter)
         {
@@ -5134,15 +5134,15 @@ Unit* Unit::SelectNextVictim()
             }
         }
 
-        next_threat_update_time = timer + 5; // UQ1: 5 secs ok?
-    }
-    else
+        //next_threat_update_time = timer + 5; // UQ1: 5 secs ok?
+    //}
+    /*else
     {
         if (targetUnit && targetUnit->isAlive())
         {
             return targetUnit;
         }
-    }
+    }*/
 
     targetUnit = NULL;
     return NULL;
