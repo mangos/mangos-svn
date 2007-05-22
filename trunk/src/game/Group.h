@@ -128,6 +128,8 @@ class MANGOS_DLL_SPEC Group
             if(mslot==m_members.end())
                 return 0;
             ++mslot;
+            if(mslot==m_members.end())
+                return 0;
             return mslot->guid;
         }
         bool SameSubGroup(uint64 guid1, uint64 guid2) const
