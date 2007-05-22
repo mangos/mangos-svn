@@ -2185,13 +2185,17 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
 
     if( text == 0 )
     {
+        // show_str check for present in list of correct values, no sql injection possible
         sDatabase.ExecuteLog("UPDATE `creature_movement` SET %s=NULL WHERE id='%u' AND point='%u'",
             show_str, lowguid, point);
     }
     else
     {
+        // show_str check for present in list of correct values, no sql injection possible
+        std::string text2 = text;
+        sDatabase.escape_string(text2);
         sDatabase.ExecuteLog("UPDATE `creature_movement` SET %s='%s' WHERE id='%u' AND point='%u'",
-            show_str, text, lowguid, point);
+            show_str, text2.c_str(), lowguid, point);
     }
 
     if(npcCreature)
