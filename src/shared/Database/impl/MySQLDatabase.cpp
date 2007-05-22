@@ -470,6 +470,7 @@ bool MySQLDatabase::EndTransaction(const char* QueryString, ...)
 
     return Result;
 }
+#endif //_SQL_TRANSACTION
 
 bool MySQLDatabase::Execute(const char* QueryString, ...)
 {
