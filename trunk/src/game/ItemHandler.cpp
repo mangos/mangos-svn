@@ -899,7 +899,7 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
     item->SetState(ITEM_CHANGED, _player);
 
     if(item->GetState()==ITEM_NEW)                          // save new item, to have alway for `character_gifts` record in `item_template`
-        item->SaveToDB();
+        item->SaveToDB(false);
     //sDatabase.CommitTransaction();
 
     uint32 count = 1;

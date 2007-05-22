@@ -78,7 +78,7 @@ bool Bag::Create(uint32 guidlow, uint32 itemid, Player* owner)
 
 void Bag::SaveToDB()
 {
-    Item::SaveToDB();
+    Item::SaveToDB(false);
 }
 
 bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid)

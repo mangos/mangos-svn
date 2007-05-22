@@ -24,7 +24,6 @@
 #ifndef _WIN32
 #include "stdarg.h"
 #endif
-#include "stdarg.h"
 
 unsigned long Database::escape_string(char *to, const char *from, unsigned long length)
 {

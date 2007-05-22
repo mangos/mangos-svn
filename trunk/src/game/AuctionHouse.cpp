@@ -287,7 +287,7 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
 
     //sDatabase.BeginTransaction();
     it->DeleteFromInventoryDB();
-    it->SaveToDB();                                         // recursive and not have transaction guard into self
+    it->SaveToDB(false);                                         // recursive and not have transaction guard into self
     sDatabase.Execute("INSERT INTO `auctionhouse` (`id`,`auctioneerguid`,`itemguid`,`item_template`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`startbid`,`deposit`,`location`) "
         "VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u', '%u', '%u')",
         AH->Id, AH->auctioneer, AH->item_guid, AH->item_template, AH->owner, AH->buyout, (uint64)AH->time, AH->bidder, AH->bid, AH->startbid, AH->deposit, AH->location);

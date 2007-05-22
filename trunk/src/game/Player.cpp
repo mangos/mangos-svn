@@ -856,7 +856,7 @@ void Player::Update( uint32 p_time )
         if(p_time >= m_nextSave)
         {
             // m_nextSave reseted in SaveToDB call
-            SaveToDB();
+            SaveToDB(false);
             sLog.outBasic("Player '%u' '%s' Saved", GetGUIDLow(), GetName());
         }
         else
@@ -1400,7 +1400,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                     ResurrectPlayer();
                     SetHealth( GetMaxHealth()/2 );
                     SpawnCorpseBones();
-                    SaveToDB();
+                    SaveToDB(false);
                 }
             }
             SetDontMove(true);
@@ -2946,7 +2946,8 @@ void Player::DeleteFromDB()
         m_items[i]->DeleteFromDB();                         // Bag items delete also by virtual call Bag::DeleteFromDB
     }
 
-    sDatabase.Execute("DELETE FROM `character` WHERE `guid` = '%u'",guid);
+    //sDatabase.Execute("DELETE FROM `character` WHERE `guid` = '%u'",guid);
+    sDatabase.WaitExecute("DELETE FROM `character` WHERE `guid` = '%u'",guid);
     sDatabase.Execute("DELETE FROM `character_aura` WHERE `guid` = '%u'",guid);
     sDatabase.Execute("DELETE FROM `character_spell` WHERE `guid` = '%u'",guid);
     sDatabase.Execute("DELETE FROM `character_tutorial` WHERE `guid` = '%u'",guid);
@@ -3298,7 +3299,7 @@ void Player::CreateCorpse()
 void Player::SpawnCorpseBones()
 {
     if(ObjectAccessor::Instance().ConvertCorpseForPlayer(GetGUID()))
-        SaveToDB();                                         // prevent loading as ghost without corpse
+        SaveToDB(false);                                         // prevent loading as ghost without corpse
 }
 
 CorpsePtr& Player::GetCorpse() const
@@ -11490,7 +11491,7 @@ void Player::_LoadTutorials()
 /***                   SAVE SYSTEM                     ***/
 /*********************************************************/
 
-void Player::SaveToDB()
+void Player::SaveToDB(bool first_save)
 {
     // delay auto save at any saves (manual, in code, or autosave)
     m_nextSave = sWorld.getConfig(CONFIG_INTERVAL_SAVE);
@@ -11554,7 +11555,9 @@ void Player::SaveToDB()
 
     //sDatabase.BeginTransaction();
 
-    sDatabase.Execute("DELETE FROM `character` WHERE `guid` = '%u'",GetGUIDLow());
+    //sDatabase.Execute("DELETE FROM `character` WHERE `guid` = '%u'",GetGUIDLow());
+    if(!first_save)
+        sDatabase.Execute("DELETE FROM `character` WHERE `guid` = '%u'",GetGUIDLow());
 
     std::ostringstream ss;
     ss << "INSERT INTO `character` (`guid`,`account`,`name`,`race`,`class`,"
@@ -11631,14 +11634,19 @@ void Player::SaveToDB()
 
     ss << " )";
 
-    sDatabase.Execute( ss.str().c_str() );
+    //sDatabase.Execute( ss.str().c_str() );
+    if(!first_save)
+        sDatabase.Execute( ss.str().c_str() );
+    else
+        sDatabase.WaitExecute(ss.str().c_str());
 
     SaveEnchant();
 
     if(m_mailsUpdated)                                      //save mails only when needed
         _SaveMail();
 
-    _SaveInventory();
+    //_SaveInventory();
+    _SaveInventory(first_save);
     _SaveQuestStatus();
     _SaveTutorials();
     _SaveSpells();
@@ -11681,7 +11689,7 @@ void Player::SaveToDB()
 // fast save function for item/money cheating preventing - save only inventory and money state
 void Player::SaveInventoryAndGoldToDB()
 {
-    _SaveInventory();
+    _SaveInventory(false);
     SetUInt32ValueInDB(PLAYER_FIELD_COINAGE,GetMoney(),GetGUID());
 }
 
@@ -11737,7 +11745,7 @@ void Player::_SaveAuras()
     }
 }
 
-void Player::_SaveInventory()
+void Player::_SaveInventory(bool first_save)
 {
     // force items in buyback slots to new state
     // and remove those that aren't already
@@ -11790,7 +11798,11 @@ void Player::_SaveInventory()
         switch(item->GetState())
         {
             case ITEM_NEW:
-                sDatabase.Execute("INSERT INTO `character_inventory` (`guid`,`bag`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), bag_guid, item->GetSlot(), item->GetGUIDLow(), item->GetEntry());
+                //sDatabase.Execute("INSERT INTO `character_inventory` (`guid`,`bag`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), bag_guid, item->GetSlot(), item->GetGUIDLow(), item->GetEntry());
+                if(!first_save)
+                        sDatabase.Execute("INSERT INTO `character_inventory` (`guid`,`bag`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), bag_guid, item->GetSlot(), item->GetGUIDLow(), item->GetEntry());
+                    else
+                        sDatabase.WaitExecute("INSERT INTO `character_inventory` (`guid`,`bag`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), bag_guid, item->GetSlot(), item->GetGUIDLow(), item->GetEntry());
                 break;
             case ITEM_CHANGED:
                 sDatabase.Execute("UPDATE `character_inventory` SET `guid`='%u', `bag`='%u', `slot`='%u', `item_template`='%u' WHERE `item`='%u'", GetGUIDLow(), bag_guid, item->GetSlot(), item->GetEntry(), item->GetGUIDLow());
@@ -11799,7 +11811,8 @@ void Player::_SaveInventory()
                 sDatabase.Execute("DELETE FROM `character_inventory` WHERE `item` = '%u'", item->GetGUIDLow());
         }
 
-        item->SaveToDB();
+        //item->SaveToDB();
+        item->SaveToDB(first_save);
     }
     m_itemUpdateQueue.clear();
 }
@@ -12582,7 +12595,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes )
     }
 
     // Save before flight (player must loaded in start taxinode is disconnected at flight,etc)
-    SaveToDB();
+    SaveToDB(false);
 
     // unsummon pet, it will be lost anyway
     RemovePet(NULL,PET_SAVE_NOT_IN_SLOT);

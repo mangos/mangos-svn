@@ -160,7 +160,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
         //sDatabase.BeginTransaction();
         pItem->DeleteFromInventoryDB();                     //deletes item from character's inventory
-        pItem->SaveToDB();                                  // recursive and not have transaction guard into self
+        pItem->SaveToDB(false);                                  // recursive and not have transaction guard into self
         //sDatabase.CommitTransaction();
     }
     uint32 messagetype = MAIL_NORMAL;

@@ -199,7 +199,7 @@ bool Item::Create( uint32 guidlow, uint32 itemid, Player* owner)
     return true;
 }
 
-void Item::SaveToDB()
+void Item::SaveToDB(bool first_save)
 {
     uint32 guid = GetGUIDLow();
     switch (uState)
@@ -221,7 +221,11 @@ void Item::SaveToDB()
                     ss << GetUInt32Value(i) << " ";
                 ss << "' )";
 
-                sDatabase.Execute( ss.str().c_str() );
+                //sDatabase.Execute( ss.str().c_str() );
+                if(first_save)
+                    sDatabase.Execute( ss.str().c_str() );
+                else
+                    sDatabase.WaitExecute(ss.str().c_str());
             } else
             {
                 std::ostringstream ss;

@@ -165,7 +165,7 @@ bool ChatHandler::HandleSaveCommand(const char* args)
     // save GM account without delay and output message (testing, etc)
     if(m_session->GetSecurity())
     {
-        player->SaveToDB();
+        player->SaveToDB(false);
         SendSysMessage(LANG_PLAYER_SAVED);
         return true;
     }
@@ -173,7 +173,7 @@ bool ChatHandler::HandleSaveCommand(const char* args)
     // save or plan save after 20 sec (logout delay) if current next save time more this value and _not_ output any messages to prevent cheat planning
     uint32 save_interval = sWorld.getConfig(CONFIG_INTERVAL_SAVE);
     if(save_interval==0 || save_interval > 20*1000 && player->GetSaveTimer() <= save_interval - 20*1000)
-        player->SaveToDB();
+        player->SaveToDB(false);
 
     return true;
 }

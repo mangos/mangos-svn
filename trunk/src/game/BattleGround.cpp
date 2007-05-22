@@ -151,7 +151,7 @@ void BattleGround::Update(time_t diff)
                     {
                         if(HasFreeSlots(plr->GetTeam()))
                         {
-                            plr->SaveToDB();
+                            plr->SaveToDB(false);
                             data = sBattleGroundMgr.BuildBattleGroundStatusPacket(this, plr->GetTeam(), STATUS_WAIT_JOIN, 120000, 0);
                             plr->GetSession()->SendPacket(&data);
                             itr->second.IsInvited = true;
@@ -750,7 +750,7 @@ void BattleGround::StartBattleGround()
         if(plr)
         {
             // Save before join (player must loaded out of bg, if disconnected at bg,etc), it's not blizz like...
-            plr->SaveToDB();
+            plr->SaveToDB(false);
             data = sBattleGroundMgr.BuildBattleGroundStatusPacket(this, plr->GetTeam(), STATUS_WAIT_JOIN, 120000, 0);  // 2 minutes to remove from queue
             plr->GetSession()->SendPacket(&data);
             itr->second.IsInvited = true;

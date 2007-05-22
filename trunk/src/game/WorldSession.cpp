@@ -613,7 +613,7 @@ void WorldSession::LogoutPlayer(bool Save)
                 _player->SetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE_1+eslot,0);
                 _player->SetUInt32Value(PLAYER_FIELD_BUYBACK_TIMESTAMP_1+eslot,0);
             }
-            _player->SaveToDB();
+            _player->SaveToDB(false);
         }
 
         ///- Leave all channels before player delete...

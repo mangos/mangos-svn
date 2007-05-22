@@ -185,7 +185,7 @@ class MANGOS_DLL_SPEC Item : public Object
         bool IsSoulBound() const { return HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_BINDED); }
         bool IsBindedNotWith(uint64 guid) const { return IsSoulBound() && GetOwnerGUID()!= guid; }
 
-        virtual void SaveToDB();
+        virtual void SaveToDB(bool first_save);
         virtual bool LoadFromDB(uint32 guid, uint64 owner_guid);
         virtual void DeleteFromDB();
         void DeleteFromInventoryDB();
