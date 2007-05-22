@@ -5138,12 +5138,13 @@ Unit* Unit::SelectNextVictim()
     }
     else
     {
-        if (targetUnit && targetUnit->GetHealth() > 0)
+        if (targetUnit && targetUnit->isAlive())
         {
             return targetUnit;
         }
     }
 
+    targetUnit = NULL;
     return NULL;
 }
 
