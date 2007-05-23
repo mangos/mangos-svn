@@ -130,8 +130,11 @@ bool MySQLDatabase::Connect(uint32 ConnectionIndex)
         Descriptor->reconnect = my_true;
     #endif
 
-    mysql_options(Descriptor,MYSQL_SET_CHARSET_NAME,"utf8");
+<<<<<<< .working
+    //mysql_options(Descriptor,MYSQL_SET_CHARSET_NAME,"utf8");
 
+=======
+>>>>>>> .merge-right.r3715
     Descriptor = mysql_real_connect(Descriptor2, mHostname.c_str(),
         mUsername.c_str(), mPassword.c_str(), "", mPort, NULL, 0);
     if(Descriptor == NULL)
