@@ -132,9 +132,12 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
                 // Let's try adding a timer between them!
                 _setTargetLocation(owner);
 
-                // 5 secs between movement transmissions. 
+                // 1 sec between movement transmissions. 
                 // They use bandwidth and also CPU time in compression!
-                next_update_time = timer + 5;
+                next_update_time = timer + 1;
+                //targetPosition[0]=i_target.GetPositionX();
+                //targetPosition[2]=i_target.GetPositionY();
+                //targetPosition[3]=i_target.GetPositionZ();
             }
         }
         // set facing if this is non angle-used target movement (not following)
