@@ -894,7 +894,7 @@ void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool 
             }
             else
             {
-                sLog.outError("Droped Packet AI......");
+                //sLog.outError("Droped Packet AI......");
                 m_movementDataList.pop_back();
                 m_movementDataList.push_back(moveData);
             }
