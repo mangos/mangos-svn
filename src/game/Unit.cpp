@@ -131,7 +131,7 @@ void Unit::Update( uint32 p_time )
         if( m_movementDataList.begin()->holdTime/100 > m_movementDataList.size() || m_movementDataList.size() > 8)
         {
             //std::list<MovementData *>::iterator i;
-            sLog.outError("Sending Move from Update::UNIT: PacketLagTime: %u, DroppedPacket:%u ",m_movementDataList.begin()->holdTime,m_movementDataList.size()-1);
+            //sLog.outError("Sending Move from Update::UNIT: PacketLagTime: %u, DroppedPacket:%u ",m_movementDataList.begin()->holdTime,m_movementDataList.size()-1);
             SendMonsterMove(0, 0, 0, 0, 0, 0, true);
             m_movementDataList.clear();
         }
@@ -219,7 +219,7 @@ void Unit::SendMoveToPacket(float x, float y, float z, bool run, uint32 transitT
         }
         else
         {
-            sLog.outError("Droped Packet UNIT......");
+            //sLog.outError("Droped Packet UNIT......");
             m_movementDataList.pop_back();
             m_movementDataList.push_back(moveData);
         }
