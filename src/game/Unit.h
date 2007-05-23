@@ -464,8 +464,17 @@ struct Hostil
     }
 };
 
+struct MovementData
+{
+    uint8 type;
+    uint32 time, holdTime;
+    bool run;
+    float x, y, z;
+};
+
 typedef std::list<Hostil> ThreatList;
 typedef std::list<Hostil> HateOfflineList;
+typedef std::list<MovementData> MovementDataList;
 
 enum MeleeHitOutcome
 {
@@ -723,7 +732,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SendAttackStateUpdate(uint32 HitInfo, Unit *target, uint8 SwingType, uint32 DamageType, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, uint32 TargetState, uint32 BlockedAmount);
         void SendSpellNonMeleeDamageLog(Unit *target,uint32 SpellID,uint32 Damage, uint8 DamageType,uint32 AbsorbedDamage, uint32 Resist,bool PhysicalDamage, uint32 Blocked, bool CriticalHit = false);
 
-        void SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, bool Run, uint32 Time);
+        void SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, bool Run, uint32 Time, bool specialBlend = false);
 
         virtual void MoveOutOfRange(Player &) {  };
 
@@ -921,6 +930,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         std::list<GameObject*> m_gameObj;
         ThreatList m_threatList;
         HateOfflineList m_offlineList;
+        MovementDataList m_movementDataList;
         InHateListOf m_inhateList;
         bool m_isSorted;
         float m_victimThreat;

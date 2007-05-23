@@ -130,13 +130,18 @@ bool MySQLDatabase::Connect(uint32 ConnectionIndex)
         Descriptor->reconnect = my_true;
     #endif
 
-    //mysql_options(Descriptor,MYSQL_SET_CHARSET_NAME,"utf8");
-
     Descriptor = mysql_real_connect(Descriptor2, mHostname.c_str(),
         mUsername.c_str(), mPassword.c_str(), "", mPort, NULL, 0);
+
     if(Descriptor == NULL)
     {
         sLog.outError("sql: Connection failed. Reason was `%s`", mysql_error(Descriptor2));
+        return false;
+    }
+
+    if(mysql_set_character_set(Descriptor2,"utf8") != 0)
+    {
+        sLog.outError("sql: mysql character set UTF8 failed. Reason was `%s`", mysql_error(Descriptor2));
         return false;
     }
 

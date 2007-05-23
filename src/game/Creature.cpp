@@ -874,7 +874,35 @@ void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool 
 
         m_startMove = getMSTime();
         m_moveTime = time;*/
-    SendMonsterMove(x,y,z,type,run,time);
+    if(GetTypeId() == TYPEID_UNIT)
+    {
+        MovementData moveData;
+        moveData.x = x;
+        moveData.y = y;
+        moveData.z = z;
+        moveData.type = type;
+        moveData.run = run;
+        moveData.time = time;
+        moveData.holdTime = 0;
+        if( !m_movementDataList.empty() )
+        {
+            MovementDataList::iterator i;
+            i = m_movementDataList.begin();
+            if( (((i->x - x) * (i->x - x)) + ((i->y - y) * (i->y - y)) + ((i->z - z)*(i->z - z))) > 4.6 )
+            {
+                m_movementDataList.push_back(moveData);
+            }
+            else
+            {
+                sLog.outError("Droped Packet AI......");
+                m_movementDataList.pop_back();
+                m_movementDataList.push_back(moveData);
+            }
+        }
+        else
+            m_movementDataList.push_back(moveData);
+    }
+    //SendMonsterMove(x,y,z,type,run,time);
 }
 
 Player *Creature::GetLootRecipient() const
