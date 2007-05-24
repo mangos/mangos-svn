@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -22,7 +22,6 @@
 #include "Common.h"
 #include "ByteBuffer.h"
 
-//#include "openssl/bn.h"
 struct bignum_st;
 
 class BigNumber
@@ -41,30 +40,34 @@ class BigNumber
         void SetRand(int numbits);
 
         BigNumber operator=(const BigNumber &bn);
-//      BigNumber operator=(Sha1Hash &hash);
 
         BigNumber operator+=(const BigNumber &bn);
-        BigNumber operator+(const BigNumber &bn) {
+        BigNumber operator+(const BigNumber &bn)
+        {
             BigNumber t(*this);
             return t += bn;
         }
         BigNumber operator-=(const BigNumber &bn);
-        BigNumber operator-(const BigNumber &bn) {
+        BigNumber operator-(const BigNumber &bn)
+        {
             BigNumber t(*this);
             return t -= bn;
         }
         BigNumber operator*=(const BigNumber &bn);
-        BigNumber operator*(const BigNumber &bn) {
+        BigNumber operator*(const BigNumber &bn)
+        {
             BigNumber t(*this);
             return t *= bn;
         }
         BigNumber operator/=(const BigNumber &bn);
-        BigNumber operator/(const BigNumber &bn) {
+        BigNumber operator/(const BigNumber &bn)
+        {
             BigNumber t(*this);
             return t /= bn;
         }
         BigNumber operator%=(const BigNumber &bn);
-        BigNumber operator%(const BigNumber &bn) {
+        BigNumber operator%(const BigNumber &bn)
+        {
             BigNumber t(*this);
             return t %= bn;
         }
@@ -88,5 +91,4 @@ class BigNumber
         struct bignum_st *_bn;
         uint8 *_array;
 };
-
 #endif

@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -73,7 +73,6 @@ void BigNumber::SetRand(int numbits)
 {
     BN_rand(_bn, numbits, 0, 1);
 }
-
 
 BigNumber BigNumber::operator=(const BigNumber &bn)
 {
@@ -162,7 +161,8 @@ uint32 BigNumber::AsDword()
 
 uint8 *BigNumber::AsByteArray()
 {
-    if (_array) {
+    if (_array)
+    {
         delete[] _array;
         _array = NULL;
     }

@@ -185,7 +185,7 @@ class MANGOS_DLL_SPEC Item : public Object
         bool IsSoulBound() const { return HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_BINDED); }
         bool IsBindedNotWith(uint64 guid) const { return IsSoulBound() && GetOwnerGUID()!= guid; }
 
-        virtual void SaveToDB(bool first_save);
+        virtual void SaveToDB();
         virtual bool LoadFromDB(uint32 guid, uint64 owner_guid);
         virtual void DeleteFromDB();
         void DeleteFromInventoryDB();
@@ -197,13 +197,11 @@ class MANGOS_DLL_SPEC Item : public Object
         bool IsInTrade() const { return mb_in_trade; }
 
         bool IsFitToSpellRequirements(SpellEntry const* spellInfo) const;
-        bool GemsFitSockets() const;
 
         uint32 GetEntry() const { return GetUInt32Value(OBJECT_FIELD_ENTRY); }
         uint32 GetCount() const { return GetUInt32Value (ITEM_FIELD_STACK_COUNT); }
         void SetCount(uint32 value) { SetUInt32Value (ITEM_FIELD_STACK_COUNT, value); }
         uint32 GetMaxStackCount() const { return GetProto()->Stackable ? GetProto()->Stackable : 1; }
-        uint8 GetGemCountWithID(uint32 GemID) const;
 
         uint8 GetSlot() const {return m_slot;}
         Bag *GetContainer() { return m_container; }
@@ -222,13 +220,13 @@ class MANGOS_DLL_SPEC Item : public Object
         void SetItemRandomProperties(uint32 randomPropId);
         static uint32 GenerateItemRandomPropertyId(uint32 item_id);
         static float GetEnchantMod(uint32 enchant_id, ItemPrototype const * itemProto);
-        void SetEnchantment(EnchantmentSlot slot, uint32 id, uint32 duration, uint32 charges);
-        void SetEnchantmentDuration(EnchantmentSlot slot, uint32 duration);
-        void SetEnchantmentCharges(EnchantmentSlot slot, uint32 charges);
-        void ClearEnchantment(EnchantmentSlot slot);
-        uint32 GetEnchantmentId(EnchantmentSlot slot) const { return GetUInt32Value(ITEM_FIELD_ENCHANTMENT + slot*3 + ENCHANTMENT_ID_OFFSET);}
-        uint32 GetEnchantmentDuration(EnchantmentSlot slot) const { return GetUInt32Value(ITEM_FIELD_ENCHANTMENT + slot*3 + ENCHANTMENT_DURATION_OFFSET);}
-        uint32 GetEnchantmentCharges(EnchantmentSlot slot) const { return GetUInt32Value(ITEM_FIELD_ENCHANTMENT + slot*3 + ENCHANTMENT_CHARGES_OFFSET);}
+        void SetEchantment(EnchantmentSlot slot, uint32 id, uint32 duration, uint32 charges);
+        void SetEchantmentDuration(EnchantmentSlot slot, uint32 duration);
+        void SetEchantmentCharges(EnchantmentSlot slot, uint32 charges);
+        void ClearEchantment(EnchantmentSlot slot);
+        uint32 GetEchantmentId(EnchantmentSlot slot) const { return GetUInt32Value(ITEM_FIELD_ENCHANTMENT + slot*3 + ENCHANTMENT_ID_OFFSET);}
+        uint32 GetEchantmentDuration(EnchantmentSlot slot) const { return GetUInt32Value(ITEM_FIELD_ENCHANTMENT + slot*3 + ENCHANTMENT_DURATION_OFFSET);}
+        uint32 GetEchantmentCharges(EnchantmentSlot slot) const { return GetUInt32Value(ITEM_FIELD_ENCHANTMENT + slot*3 + ENCHANTMENT_CHARGES_OFFSET);}
 
         Loot loot;
         bool m_lootGenerated;

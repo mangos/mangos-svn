@@ -29,7 +29,6 @@
 BattleGround::BattleGround()
 {
     m_ID = 0;
-    m_Type = 0;
     m_InstanceID = 0;
     m_Status = 0;
     m_StartTime = 0;
@@ -62,10 +61,10 @@ BattleGround::BattleGround()
     m_AllianceFlagPickerGUID = 0;
     m_HordeFlagPickerGUID = 0;
 
-    m_HordeFlag = NULL;
-    m_AllianceFlag = NULL;
-    m_HordeRaid = NULL;
-    m_AllianceRaid = NULL;
+    hf = NULL;
+    af = NULL;
+    bg_raid_a = NULL;
+    bg_raid_h = NULL;
     SpeedBonus1 = NULL;
     SpeedBonus2 = NULL;
     RegenBonus1 = NULL;
@@ -97,8 +96,6 @@ BattleGround::~BattleGround()
 
 void BattleGround::Update(time_t diff)
 {
-    WorldPacket data;
-
     if(!GetPlayersSize() && !GetQueuedPlayersSize() && !GetRemovedPlayersSize()) // BG is empty
         return;
 
@@ -119,8 +116,7 @@ void BattleGround::Update(time_t diff)
                 else if(plr->InBattleGroundQueue() && itr->second) // currently in queue and was removed from queue
                 {
                     RemovePlayerFromQueue(itr->first);
-                    data = sBattleGroundMgr.BuildBattleGroundStatusPacket(this, plr->GetTeam(), STATUS_NONE, 0, 0);
-                    plr->GetSession()->SendPacket(&data);
+                    sBattleGroundMgr.SendBattleGroundStatusPacket(plr, this, STATUS_NONE, 0, 0);
                 }
             }
             else // player currently offline
@@ -151,9 +147,8 @@ void BattleGround::Update(time_t diff)
                     {
                         if(HasFreeSlots(plr->GetTeam()))
                         {
-                            plr->SaveToDB(false);
-                            data = sBattleGroundMgr.BuildBattleGroundStatusPacket(this, plr->GetTeam(), STATUS_WAIT_JOIN, 120000, 0);
-                            plr->GetSession()->SendPacket(&data);
+                            plr->SaveToDB();
+                            sBattleGroundMgr.SendBattleGroundStatusPacket(plr, this, STATUS_WAIT_JOIN, 120000, 0);
                             itr->second.IsInvited = true;
                             itr->second.InviteTime = getMSTime();
                             itr->second.LastInviteTime = getMSTime();
@@ -171,8 +166,7 @@ void BattleGround::Update(time_t diff)
                     }
                     else if(t >= 30000)         // remind every 30 seconds
                     {
-                        data = sBattleGroundMgr.BuildBattleGroundStatusPacket(this, plr->GetTeam(), STATUS_WAIT_JOIN, 120000 - tt, 0);
-                        plr->GetSession()->SendPacket(&data);
+                        sBattleGroundMgr.SendBattleGroundStatusPacket(plr, this, STATUS_WAIT_JOIN, 120000 - tt, 0);
                         itr->second.LastInviteTime = getMSTime();
                     }
                 }
@@ -236,8 +230,8 @@ void BattleGround::Update(time_t diff)
             AllianceFlagSpawn[1] = 1;
             HordeFlagSpawn[1] = 1;
             sLog.outError("Flags activated...");
-            MapManager::Instance().GetMap(m_AllianceFlag->GetMapId(), m_AllianceFlag)->Add(m_AllianceFlag);
-            MapManager::Instance().GetMap(m_HordeFlag->GetMapId(), m_HordeFlag)->Add(m_HordeFlag);
+            MapManager::Instance().GetMap(af->GetMapId(), af)->Add(af);
+            MapManager::Instance().GetMap(hf->GetMapId(), hf)->Add(hf);
             sLog.outError("Flags respawned...");
             SpeedBonus1Spawn[1] = 1;
             SpeedBonus2Spawn[1] = 1;
@@ -390,17 +384,29 @@ void BattleGround::SendPacketToTeam(uint32 TeamID, WorldPacket *packet)
         {
             plr->GetSession()->SendPacket(packet);
         }
-        else if(plr->GetTeam() == TeamID)
+        else
         {
-            sLog.outError("Player " I64FMTD " not found!", itr->first);
+            sLog.outError("Player " I64FMTD " not found or other team!", itr->first);
         }
     }
 }
 
 void BattleGround::PlaySoundToAll(uint32 SoundID)
 {
-    WorldPacket data = sBattleGroundMgr.BuildPlaySoundPacket(SoundID);
-    SendPacketToAll(&data);
+    for(std::map<uint64, BattleGroundPlayer>::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+    {
+        Player *plr = objmgr.GetPlayer(itr->first);
+        if(plr)
+        {
+            WorldPacket packet(SMSG_PLAY_SOUND, 4);
+            packet << SoundID;
+            plr->GetSession()->SendPacket(&packet);
+        }
+        else
+        {
+            sLog.outError("Player " I64FMTD " not found!", itr->first);
+        }
+    }
 }
 
 void BattleGround::PlaySoundToTeam(uint32 SoundID, uint32 TeamID)
@@ -414,9 +420,9 @@ void BattleGround::PlaySoundToTeam(uint32 SoundID, uint32 TeamID)
             packet << SoundID;
             plr->GetSession()->SendPacket(&packet);
         }
-        else if(plr->GetTeam() == TeamID)
+        else
         {
-            sLog.outError("Player " I64FMTD " not found!", itr->first);
+            sLog.outError("Player " I64FMTD " not found or other team!", itr->first);
         }
     }
 }
@@ -430,17 +436,30 @@ void BattleGround::CastSpellOnTeam(uint32 SpellID, uint32 TeamID)
         {
             plr->CastSpell(plr, SpellID, true, 0);
         }
-        else if(plr->GetTeam() == TeamID)
+        else
         {
-            sLog.outError("Player " I64FMTD " not found!", itr->first);
+            sLog.outError("Player " I64FMTD " not found or other team!", itr->first);
         }
     }
 }
 
 void BattleGround::UpdateWorldState(uint32 Field, uint32 Value)
 {
-    WorldPacket data = sBattleGroundMgr.BuildUpdateWorldStatePacket(Field, Value);
-    SendPacketToAll(&data);
+    for(std::map<uint64, BattleGroundPlayer>::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+    {
+        Player *plr = objmgr.GetPlayer(itr->first);
+        if(plr)
+        {
+            WorldPacket data(SMSG_UPDATE_WORLD_STATE, 4+4);
+            data << Field;
+            data << Value;
+            plr->GetSession()->SendPacket(&data);
+        }
+        else
+        {
+            sLog.outError("Player " I64FMTD " not found!", itr->first);
+        }
+    }
 }
 
 void BattleGround::EndBattleGround(uint32 winner)
@@ -448,7 +467,6 @@ void BattleGround::EndBattleGround(uint32 winner)
     SetStatus(STATUS_WAIT_LEAVE);
     SetEndTime(getMSTime());
 
-    WorldPacket data;
     uint32 mark = 0, reputation = 0;
 
     for(std::map<uint64, BattleGroundPlayer>::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
@@ -466,15 +484,14 @@ void BattleGround::EndBattleGround(uint32 winner)
         BlockMovement(plr);
 
         uint32 time1 = getMSTime() - GetStartTime();
-        data = sBattleGroundMgr.BuildBattleGroundStatusPacket(this, plr->GetTeam(), STATUS_INPROGRESS, 120000, time1); // 2 minutes to auto leave BG
-        plr->GetSession()->SendPacket(&data);
+        sBattleGroundMgr.SendBattleGroundStatusPacket(plr, this, STATUS_INPROGRESS, 120000, time1); // 2 minutes to auto leave BG
 
         if(plr->GetTeam() == winner)
         {
             switch(GetID())
             {
                 case 1:
-                    // Create AV Mark of Honor (Winner)
+                    //Create AV Mark of Honor (Winner)
                     mark = 24955;
                     if(plr->GetTeam() == ALLIANCE)
                         reputation = 23534; //need test on offi
@@ -482,7 +499,7 @@ void BattleGround::EndBattleGround(uint32 winner)
                         reputation = 23529; //need test on offi
                     break;
                 case 2:
-                    // Create WSG Mark of Honor (Winner)
+                    //Create WSG Mark of Honor (Winner)
                     mark = 24951;
                     if(plr->GetTeam() == ALLIANCE)
                         reputation = 23524; //need test on offi
@@ -490,7 +507,7 @@ void BattleGround::EndBattleGround(uint32 winner)
                         reputation = 23526; //need test on offi
                     break;
                 case 3:
-                    // Create AB Mark of Honor (Winner)
+                    //Create AB Mark of Honor (Winner)
                     mark = 24953;
                     if(plr->GetTeam() == ALLIANCE)
                         reputation = 24182; //need test on offi
@@ -533,9 +550,9 @@ Group *BattleGround::GetBgRaid(uint32 TeamId) const
     switch(TeamId)
     {
         case ALLIANCE:
-            return m_AllianceRaid;
+            return bg_raid_a;
         case HORDE:
-            return m_HordeRaid;
+            return bg_raid_h;
         default:
             sLog.outDebug("unknown teamid in BattleGround::SetBgRaid(): %u", TeamId);
             return NULL;
@@ -547,10 +564,10 @@ void BattleGround::SetBgRaid(uint32 TeamId, Group *bg_raid)
     switch(TeamId)
     {
         case ALLIANCE:
-            m_AllianceRaid = bg_raid;
+            bg_raid_a = bg_raid;
             break;
         case HORDE:
-            m_HordeRaid = bg_raid;
+            bg_raid_h = bg_raid;
             break;
         default:
             sLog.outDebug("unknown teamid in BattleGround::SetBgRaid(): %u", TeamId);
@@ -567,16 +584,12 @@ void BattleGround::BlockMovement(Player *plr)
 
 void BattleGround::RemovePlayer(uint64 guid, bool Transport, bool SendPacket)
 {
-    // Remove from lists/maps
-    std::map<uint64, BattleGroundPlayer>::iterator itr = m_Players.find(guid);
-    if(itr != m_Players.end())
-        m_Players.erase(itr);
-
-    std::map<uint64, BattleGroundScore>::iterator itr2 = m_PlayerScores.find(guid);
-    if(itr2 != m_PlayerScores.end())
-        m_PlayerScores.erase(itr2);
-
     Player *plr = objmgr.GetPlayer(guid);
+
+    // Remove from lists/maps
+    std::map<uint64, BattleGroundScore>::iterator itr = m_PlayerScores.find(guid);
+    if(itr != m_PlayerScores.end())
+        m_PlayerScores.erase(itr);
 
     if(plr && !plr->isAlive())      // resurrect on exit
         plr->ResurrectPlayer();
@@ -611,15 +624,14 @@ void BattleGround::RemovePlayer(uint64 guid, bool Transport, bool SendPacket)
         }
     }
 
+    std::map<uint64, BattleGroundPlayer>::iterator itr2 = m_Players.find(guid);
+    if(itr2 != m_Players.end())
+        m_Players.erase(itr2);
+
     if(plr)
     {
-        WorldPacket data;
-
         if(SendPacket)
-        {
-            data = sBattleGroundMgr.BuildBattleGroundStatusPacket(this, plr->GetTeam(), STATUS_NONE, 0, 0);
-            plr->GetSession()->SendPacket(&data);
-        }
+            sBattleGroundMgr.SendBattleGroundStatusPacket(plr, this, STATUS_NONE, 0, 0);
 
         if(!plr->GetBattleGroundId())
             return;
@@ -629,13 +641,12 @@ void BattleGround::RemovePlayer(uint64 guid, bool Transport, bool SendPacket)
             if(!GetBgRaid(plr->GetTeam())->RemoveMember(guid, 0))   // group was disbanded
                 SetBgRaid(plr->GetTeam(), NULL);
 
-        //plr->RemoveFromGroup();
-
         // Do next only if found in battleground
         plr->SetBattleGroundId(0);      // We're not in BG.
 
         // Let others know
-        data = sBattleGroundMgr.BuildPlayerLeftBattleGroundPacket(plr);
+        WorldPacket data;
+        sBattleGroundMgr.BuildPlayerLeftBattleGroundPacket(&data, plr);
         SendPacketToAll(&data);
 
         // Log
@@ -660,14 +671,14 @@ void BattleGround::RemovePlayer(uint64 guid, bool Transport, bool SendPacket)
         m_TeamScores[1] = 0;
         if(GetID() == 2)
         {
-            MapManager::Instance().GetMap(m_AllianceFlag->GetMapId(), m_AllianceFlag)->Remove(m_AllianceFlag, false);
-            MapManager::Instance().GetMap(m_HordeFlag->GetMapId(), m_HordeFlag)->Remove(m_HordeFlag, false);
+            MapManager::Instance().GetMap(af->GetMapId(), af)->Remove(af, false);
+            MapManager::Instance().GetMap(hf->GetMapId(), hf)->Remove(hf, false);
             sLog.outDebug("Flags despawned...");
         }
     }
 }
 
-void BattleGround::AddPlayerToQueue(uint64 guid)
+void BattleGround::AddPlayerToQueue(Player *plr)
 {
     if(GetQueuedPlayersSize() < GetMaxPlayers())
     {
@@ -676,7 +687,7 @@ void BattleGround::AddPlayerToQueue(uint64 guid)
         q.LastInviteTime = 0;
         q.IsInvited = false;
         q.LastOnlineTime = 0;
-        m_QueuedPlayers.insert(pair<uint64, BattleGroundQueue>(guid,q));
+        m_QueuedPlayers.insert(pair<uint64, BattleGroundQueue>(plr->GetGUID(),q));
     }
 }
 
@@ -700,12 +711,6 @@ bool BattleGround::CanStartBattleGround()
 {
     if(GetStatus() >= STATUS_WAIT_JOIN)             // already started or ended
         return false;
-
-    if(GetQueuedPlayersSize() >= 2)                 // for testing only
-    {
-        SetStatus(STATUS_WAIT_JOIN);
-        return true;
-    }
 
     if(GetQueuedPlayersSize() < GetMinPlayers())    // queue is not ready yet
         return false;
@@ -742,17 +747,14 @@ void BattleGround::StartBattleGround()
 {
     SetStartTime(getMSTime());
 
-    WorldPacket data;
-
     for(std::map<uint64, BattleGroundQueue>::iterator itr = m_QueuedPlayers.begin(); itr != m_QueuedPlayers.end(); ++itr)
     {
         Player *plr = objmgr.GetPlayer(itr->first);
         if(plr)
         {
             // Save before join (player must loaded out of bg, if disconnected at bg,etc), it's not blizz like...
-            plr->SaveToDB(false);
-            data = sBattleGroundMgr.BuildBattleGroundStatusPacket(this, plr->GetTeam(), STATUS_WAIT_JOIN, 120000, 0);  // 2 minutes to remove from queue
-            plr->GetSession()->SendPacket(&data);
+            plr->SaveToDB();
+            sBattleGroundMgr.SendBattleGroundStatusPacket(plr, this, STATUS_WAIT_JOIN, 120000, 0);  // 2 minutes to remove from queue
             itr->second.IsInvited = true;
             itr->second.InviteTime = getMSTime();
             itr->second.LastInviteTime = getMSTime();
@@ -806,9 +808,11 @@ void BattleGround::AddPlayer(Player *plr)
         GetBgRaid(plr->GetTeam())->AddMember(guid, plr->GetName());
     }
 
-    WorldPacket data = sBattleGroundMgr.BuildPlayerJoinedBattleGroundPacket(plr);
-    SendPacketToTeam(plr->GetTeam(), &data);
+    WorldPacket data;
+    sBattleGroundMgr.BuildPlayerJoinedBattleGroundPacket(&data, plr);
 
+    // Let others from your team know //dono if correct if team1 only get team packages?
+    SendPacketToTeam(plr->GetTeam(), &data);
     // Log
     sLog.outDetail("BATTLEGROUND: Player %s joined the battle.", plr->GetName());
 }
@@ -872,8 +876,7 @@ void BattleGround::EventPlayerCapturedFlag(Player *Source)
         PlaySoundToAll(8455);                 // alliance wins sound...
         winner = ALLIANCE;
 
-        WorldPacket data2 = sBattleGroundMgr.BuildPvpLogDataPacket(this, 1);
-        SendPacketToAll(&data2);
+        sBattleGroundMgr.SendPvpLogData(Source, 1, true);
     }
     if(GetTeamScore(HORDE) == 3)
     {
@@ -883,8 +886,7 @@ void BattleGround::EventPlayerCapturedFlag(Player *Source)
         PlaySoundToAll(8454);                 // horde wins sound...
         winner = HORDE;
 
-        WorldPacket data2 = sBattleGroundMgr.BuildPvpLogDataPacket(this, 0);
-        SendPacketToAll(&data2);
+        sBattleGroundMgr.SendPvpLogData(Source, 0, true);
     }
 
     sChatHandler.FillMessageData(&data, Source->GetSession(), CHAT_MSG_BATTLEGROUND, LANG_UNIVERSAL, NULL, Source->GetGUID(), winmsg, NULL);
@@ -988,7 +990,7 @@ void BattleGround::EventPlayerPickedUpFlag(Player *Source)
         message = LANG_BG_PICKEDUP_HF;
         type = CHAT_MSG_BATTLEGROUND_HORDE;
         PlaySoundToAll(8212);
-        MapManager::Instance().GetMap(m_HordeFlag->GetMapId(), m_HordeFlag)->Remove(m_HordeFlag, false);
+        MapManager::Instance().GetMap(hf->GetMapId(), hf)->Remove(hf, false);
         SetHordeFlagPicker(Source->GetGUID());              // pick up Horde Flag
     }
     if(Source->GetTeam() == HORDE)
@@ -996,7 +998,7 @@ void BattleGround::EventPlayerPickedUpFlag(Player *Source)
         message = LANG_BG_PICKEDUP_AF;
         type = CHAT_MSG_BATTLEGROUND_ALLIANCE;
         PlaySoundToAll(8174);
-        MapManager::Instance().GetMap(m_AllianceFlag->GetMapId(), m_AllianceFlag)->Remove(m_AllianceFlag, false);
+        MapManager::Instance().GetMap(af->GetMapId(), af)->Remove(af, false);
         SetAllianceFlagPicker(Source->GetGUID());           // pick up Alliance Flag
     }
 
@@ -1076,13 +1078,13 @@ void BattleGround::RespawnFlag(uint32 Team, bool captured)
     if(Team == ALLIANCE)
     {
         sLog.outDebug("Respawn Alliance flag");
-        MapManager::Instance().GetMap(m_AllianceFlag->GetMapId(), m_AllianceFlag)->Add(m_AllianceFlag);
+        MapManager::Instance().GetMap(af->GetMapId(), af)->Add(af);
     }
 
     if(Team == HORDE)
     {
         sLog.outDebug("Respawn Horde flag");
-        MapManager::Instance().GetMap(m_HordeFlag->GetMapId(), m_HordeFlag)->Add(m_HordeFlag);
+        MapManager::Instance().GetMap(hf->GetMapId(), hf)->Add(hf);
     }
 
     if(captured)

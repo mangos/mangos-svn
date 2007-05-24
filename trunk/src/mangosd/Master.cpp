@@ -34,7 +34,6 @@
 #include "SystemConfig.h"
 #include "Config/ConfigEnv.h"
 #include "Database/DatabaseEnv.h"
-#include "Util.h"
 #include "CliRunnable.h"
 #include "RASocket.h"
 
@@ -42,29 +41,6 @@
 #include "Network/Utility.h"
 #include "Network/Parse.h"
 #include "Network/Socket.h"
-
-bool ConvertOldCrappyDbString(string str, MySQLDatabase * db, uint32 conncount)
-{
-    vector<string> tokens = StrSplit(str, ";");
-    vector<string>::iterator iter;
-    std::string host, port_or_socket, user, password, database;
-
-    iter = tokens.begin();
-
-    if(iter != tokens.end())
-        host = *iter++;
-    if(iter != tokens.end())
-        port_or_socket = *iter++;
-    if(iter != tokens.end())
-        user = *iter++;
-    if(iter != tokens.end())
-        password = *iter++;
-    if(iter != tokens.end())
-        database = *iter++;
-
-    // lets make it 3 connections..
-    return db->Initialize(host.c_str(), atoi(port_or_socket.c_str()), user.c_str(), password.c_str(), database.c_str(), conncount, 32768);
-}
 
 /// \todo Warning disabling not useful under VC++2005. Can somebody say on which compiler it is useful?
 #pragma warning(disable:4305)
@@ -287,11 +263,7 @@ bool Master::_StartDB()
     sLog.outString("World Database: %s", dbstring.c_str());
 
     ///- Initialise the world database
-    //if(!sDatabase.Initialize(dbstring.c_str()))
-	MainDatabase = CreateDatabaseInterface(DATABASE_TYPE_MYSQL);
-    assert(MainDatabase);
-
-    if(!ConvertOldCrappyDbString(dbstring, (MySQLDatabase*)MainDatabase, 3))
+    if(!sDatabase.Initialize(dbstring.c_str()))
     {
         sLog.outError("Cannot connect to world database %s",dbstring.c_str());
         return false;
@@ -306,12 +278,7 @@ bool Master::_StartDB()
 
     ///- Initialise the login database
     sLog.outString("Login Database: %s", dbstring.c_str() );
-
-	LogonDatabase = CreateDatabaseInterface(DATABASE_TYPE_MYSQL);
-    assert(LogonDatabase);
-
-    //if(!loginDatabase.Initialize(dbstring.c_str()))
-    if(!ConvertOldCrappyDbString(dbstring, (MySQLDatabase*)LogonDatabase, 1))
+    if(!loginDatabase.Initialize(dbstring.c_str()))
     {
         sLog.outError("Cannot connect to login database %s",dbstring.c_str());
         return false;
@@ -337,7 +304,7 @@ void Master::clearOnlineAccounts()
 {
     // Cleanup online status for characters hosted at current realm
     /// \todo Only accounts with characters logged on *this* realm should have online status reset. Move the online column from 'account' to 'realmcharacters'?
-    loginDatabase.Execute(
+    loginDatabase.PExecute(
         "UPDATE `account`,`realmcharacters` SET `account`.`online` = 0 "
         "WHERE `account`.`online` > 0 AND `account`.`id` = `realmcharacters`.`acctid` "
         "  AND `realmcharacters`.`realmid` = '%d'",realmID);

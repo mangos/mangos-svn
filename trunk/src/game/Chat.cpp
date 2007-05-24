@@ -30,14 +30,6 @@
 #include "MapManager.h"
 #include "Policies/SingletonImp.h"
 
-#ifndef _WIN32
-#include "stdarg.h"
-#endif
-
-#ifdef LINUX
-#define TCP_NODELAY 0x0001
-#endif 
-
 LanguageDesc lang_description[LANGUAGES_COUNT] =
 {
     { LANG_UNIVERSAL2,      0, 0                       },
@@ -292,7 +284,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "scn",         3, &ChatHandler::HandleSendChannelNotifyCommand,"",   NULL },
         { "scm",         3, &ChatHandler::HandleSendChatMsgCommand,      "",   NULL },
         { "sendmail",    1, &ChatHandler::HandleSendMailCommand,         "",   NULL },
-        { "rename",      2, &ChatHandler::HandleRenameCommand,           "",   NULL },
 
         //! Development Commands
         { "setvalue",    3, &ChatHandler::HandleSetValue,                "",   NULL },

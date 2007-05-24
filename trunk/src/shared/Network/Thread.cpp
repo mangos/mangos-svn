@@ -43,7 +43,7 @@ namespace SOCKETS_NAMESPACE {
 #endif
 
 
-sThread::sThread(bool release)
+Thread::Thread(bool release)
 :m_thread(0)
 ,m_running(true)
 ,m_release(false)
@@ -69,7 +69,7 @@ sThread::sThread(bool release)
 }
 
 
-sThread::~sThread()
+Thread::~Thread()
 {
 	m_b_destructor = true;
 	if (m_running)
@@ -89,9 +89,9 @@ sThread::~sThread()
 }
 
 
-threadfunc_t STDPREFIX sThread::StartThread(threadparam_t zz)
+threadfunc_t STDPREFIX Thread::StartThread(threadparam_t zz)
 {
-	sThread *p = (sThread *)zz;
+	Thread *p = (Thread *)zz;
 
 	while (p -> m_running && !p -> m_release)
 	{
@@ -117,43 +117,43 @@ threadfunc_t STDPREFIX sThread::StartThread(threadparam_t zz)
 }
 
 
-bool sThread::IsRunning()
+bool Thread::IsRunning()
 {
  	return m_running;
 }
 
 
-void sThread::SetRunning(bool x)
+void Thread::SetRunning(bool x)
 {
  	m_running = x;
 }
 
 
-bool sThread::IsReleased()
+bool Thread::IsReleased()
 {
  	return m_release;
 }
 
 
-void sThread::SetRelease(bool x)
+void Thread::SetRelease(bool x)
 {
  	m_release = x;
 }
 
 
-bool sThread::DeleteOnExit()
+bool Thread::DeleteOnExit()
 {
 	return m_b_delete_on_exit;
 }
 
 
-void sThread::SetDeleteOnExit(bool x)
+void Thread::SetDeleteOnExit(bool x)
 {
 	m_b_delete_on_exit = x;
 }
 
 
-bool sThread::IsDestructor()
+bool Thread::IsDestructor()
 {
 	return m_b_destructor;
 }

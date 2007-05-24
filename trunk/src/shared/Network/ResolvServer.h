@@ -41,7 +41,7 @@ namespace SOCKETS_NAMESPACE {
 /** \defgroup async Asynchronous DNS */
 /** Async DNS resolver thread. 
 	\ingroup async */
-class ResolvServer : public sThread
+class ResolvServer : public Thread
 {
 public:
 	ResolvServer(port_t);

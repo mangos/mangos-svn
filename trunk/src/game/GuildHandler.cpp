@@ -119,12 +119,12 @@ void WorldSession::HandlePetitionBuyOpcode( WorldPacket & recv_data )
     _player->SendNewItem(charter, 1, true, false);
 
     sDatabase.escape_string(guildname);
-    //sDatabase.BeginTransaction();
-    sDatabase.Execute("DELETE FROM `guild_charter` WHERE `ownerguid` = '%u' OR `charterguid` = '%u'", _player->GetGUIDLow(), charter->GetGUIDLow());
-    sDatabase.Execute("DELETE FROM `guild_charter_sign` where `ownerguid` = '%u' OR `charterguid` = '%u'", _player->GetGUIDLow(), charter->GetGUIDLow());
-    sDatabase.Execute("INSERT INTO `guild_charter` (`ownerguid`, `charterguid`, `guildname`) VALUES ('%u', '%u', '%s')",
+    sDatabase.BeginTransaction();
+    sDatabase.PExecute("DELETE FROM `guild_charter` WHERE `ownerguid` = '%u' OR `charterguid` = '%u'", _player->GetGUIDLow(), charter->GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `guild_charter_sign` where `ownerguid` = '%u' OR `charterguid` = '%u'", _player->GetGUIDLow(), charter->GetGUIDLow());
+    sDatabase.PExecute("INSERT INTO `guild_charter` (`ownerguid`, `charterguid`, `guildname`) VALUES ('%u', '%u', '%s')",
         _player->GetGUIDLow(), charter->GetGUIDLow(), guildname.c_str());
-    //sDatabase.CommitTransaction();
+    sDatabase.CommitTransaction();
 }
 
 void WorldSession::HandlePetitionShowSignOpcode( WorldPacket & recv_data )
@@ -142,7 +142,7 @@ void WorldSession::HandlePetitionShowSignOpcode( WorldPacket & recv_data )
     // solve (possible) some strange compile problems with explicit use GUID_LOPART(petitionguid) at some GCC versions (wrong code optimization in compiler?)
     uint32 petitionguid_low = GUID_LOPART(petitionguid);
 
-    QueryResult *result = sDatabase.Query("SELECT `charterguid` FROM `guild_charter` WHERE `charterguid` = '%u'", petitionguid_low);
+    QueryResult *result = sDatabase.PQuery("SELECT `charterguid` FROM `guild_charter` WHERE `charterguid` = '%u'", petitionguid_low);
     if(!result)
     {
         sLog.outError("any charter on server...");
@@ -151,7 +151,7 @@ void WorldSession::HandlePetitionShowSignOpcode( WorldPacket & recv_data )
 
     delete result;
 
-    result = sDatabase.Query("SELECT `playerguid` FROM `guild_charter_sign` WHERE `charterguid` = '%u'", petitionguid_low);
+    result = sDatabase.PQuery("SELECT `playerguid` FROM `guild_charter_sign` WHERE `charterguid` = '%u'", petitionguid_low);
 
     // result==NULL also correct in case no sign yet
     if(result)
@@ -206,7 +206,7 @@ void WorldSession::SendPetitionQueryOpcode( uint64 petitionguid)
         0x00, 0x09, 0x00, 0x00, 0x00, 0x09, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
     };
 
-    QueryResult *result = sDatabase.Query(
+    QueryResult *result = sDatabase.PQuery(
         "SELECT `ownerguid`, `guildname`, "
         "  (SELECT COUNT(`playerguid`) FROM `guild_charter_sign` WHERE `guild_charter_sign`.`charterguid` = '%u') AS signs "
         "FROM `guild_charter` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid), GUID_LOPART(petitionguid));
@@ -259,7 +259,7 @@ void WorldSession::HandlePetitionRenameOpcode( WorldPacket & recv_data )
 
     std::string db_newguildname = newguildname;
     sDatabase.escape_string(db_newguildname);
-    sDatabase.Execute("UPDATE `guild_charter` SET `guildname` = '%s' WHERE `charterguid` = '%u'",
+    sDatabase.PExecute("UPDATE `guild_charter` SET `guildname` = '%s' WHERE `charterguid` = '%u'",
         db_newguildname.c_str(), GUID_LOPART(petitionguid));
 
     sLog.outDebug("Petition (GUID: %u) renamed to '%s'", GUID_LOPART(petitionguid), newguildname.c_str());
@@ -282,7 +282,7 @@ void WorldSession::HandlePetitionSignOpcode( WorldPacket & recv_data )
 
     uint8 signs = 0;
 
-    QueryResult *result = sDatabase.Query(
+    QueryResult *result = sDatabase.PQuery(
         "SELECT `ownerguid`, "
         "  (SELECT COUNT(`playerguid`) FROM `guild_charter_sign` WHERE `guild_charter_sign`.`charterguid` = '%u') AS signs "
         "FROM `guild_charter` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid), GUID_LOPART(petitionguid));
@@ -313,7 +313,7 @@ void WorldSession::HandlePetitionSignOpcode( WorldPacket & recv_data )
 
     //client doesn't allow to sign petition two times by one character, but not check sign by another character from same account
     //not allow sign another player from already sign player account 
-    result = sDatabase.Query("SELECT `playerguid` FROM `guild_charter_sign` WHERE `player_account` = '%u'", GetAccountId());
+    result = sDatabase.PQuery("SELECT `playerguid` FROM `guild_charter_sign` WHERE `player_account` = '%u'", GetAccountId());
 
     if(result)
     {
@@ -333,7 +333,7 @@ void WorldSession::HandlePetitionSignOpcode( WorldPacket & recv_data )
     }
 
 
-    sDatabase.Execute("INSERT INTO `guild_charter_sign` (`ownerguid`,`charterguid`, `playerguid`, `player_account`) VALUES ('%u', '%u', '%u','%u')", GUID_LOPART(ownerguid),GUID_LOPART(petitionguid), plguidlo,GetAccountId());
+    sDatabase.PExecute("INSERT INTO `guild_charter_sign` (`ownerguid`,`charterguid`, `playerguid`, `player_account`) VALUES ('%u', '%u', '%u','%u')", GUID_LOPART(ownerguid),GUID_LOPART(petitionguid), plguidlo,GetAccountId());
 
     sLog.outDebug("PETITION SIGN: GUID %u by player: %s (GUID: %u Account: %u)", GUID_LOPART(petitionguid), _player->GetName(),plguidlo,GetAccountId());
 
@@ -362,7 +362,7 @@ void WorldSession::HandlePetitionDeclineOpcode( WorldPacket & recv_data )
     recv_data >> petitionguid;                              // petition guid
     sLog.outDebug("Petition %u declined by %u", GUID_LOPART(petitionguid), _player->GetGUIDLow());
 
-    QueryResult *result = sDatabase.Query("SELECT `ownerguid` FROM `guild_charter` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
+    QueryResult *result = sDatabase.PQuery("SELECT `ownerguid` FROM `guild_charter` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
     if(!result)
         return;
 
@@ -403,7 +403,7 @@ void WorldSession::HandleOfferPetitionOpcode( WorldPacket & recv_data )
     if (!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD) && GetPlayer()->GetTeam() != player->GetTeam() )
         return;
 
-    QueryResult *result = sDatabase.Query("SELECT `charterguid` FROM `guild_charter` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
+    QueryResult *result = sDatabase.PQuery("SELECT `charterguid` FROM `guild_charter` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
     if(!result)
     {
         sLog.outError("any charter on server...");
@@ -412,7 +412,7 @@ void WorldSession::HandleOfferPetitionOpcode( WorldPacket & recv_data )
 
     delete result;
 
-    result = sDatabase.Query("SELECT `playerguid` FROM `guild_charter_sign` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
+    result = sDatabase.PQuery("SELECT `playerguid` FROM `guild_charter_sign` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
     // result==NULL also correct charter without signs
     if(result)
         signs = result->GetRowCount();
@@ -462,7 +462,7 @@ void WorldSession::HandleTurnInPetitionOpcode( WorldPacket & recv_data )
     //sLog.outDebug("Petition %u turned in by %u", GUID_LOPART(petitionguid), _player->GetGUIDLow());
 
     // Guild data
-    QueryResult *result = sDatabase.Query("SELECT `ownerguid`, `guildname` FROM `guild_charter` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
+    QueryResult *result = sDatabase.PQuery("SELECT `ownerguid`, `guildname` FROM `guild_charter` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
     if(result)
     {
         Field *fields = result->Fetch();
@@ -481,7 +481,7 @@ void WorldSession::HandleTurnInPetitionOpcode( WorldPacket & recv_data )
 
     // Guild signs
     uint8 signs;
-    result = sDatabase.Query("SELECT `playerguid` FROM `guild_charter_sign` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
+    result = sDatabase.PQuery("SELECT `playerguid` FROM `guild_charter_sign` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
     if(result)
         signs = result->GetRowCount();
     else
@@ -538,10 +538,10 @@ void WorldSession::HandleTurnInPetitionOpcode( WorldPacket & recv_data )
 
     delete result;
 
-    //sDatabase.BeginTransaction();
-    sDatabase.Execute("DELETE FROM `guild_charter` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
-    sDatabase.Execute("DELETE FROM `guild_charter_sign` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
-    //sDatabase.CommitTransaction();
+    sDatabase.BeginTransaction();
+    sDatabase.PExecute("DELETE FROM `guild_charter` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
+    sDatabase.PExecute("DELETE FROM `guild_charter_sign` WHERE `charterguid` = '%u'", GUID_LOPART(petitionguid));
+    sDatabase.CommitTransaction();
 
     // Guild created
     sLog.outDebug("TURN IN PETITION GUID %u", GUID_LOPART(petitionguid));
@@ -715,14 +715,14 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
         return;
 
     normalizePlayerName(plName);
-    //sDatabase.escape_string(plName);                        // prevent SQL injection - normal name don't must changed by this call
+    sDatabase.escape_string(plName);                        // prevent SQL injection - normal name don't must changed by this call
 
     player = ObjectAccessor::Instance().FindPlayerByName(plName.c_str());
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
     if(player)
         plGuid = player->GetGUID();
     else
-        plGuid = objmgr.GetPlayerGUIDByName(plName);
+        plGuid = objmgr.GetPlayerGUIDByName(plName.c_str());
 
     if(!guild)
     {
@@ -845,7 +845,7 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
         return;
 
     normalizePlayerName(plName);
-    //sDatabase.escape_string(plName);                        // prevent SQL injection - normal name don't must changed by this call
+    sDatabase.escape_string(plName);                        // prevent SQL injection - normal name don't must changed by this call
 
     player = ObjectAccessor::Instance().FindPlayerByName(plName.c_str());
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
@@ -857,7 +857,7 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
     }
     else
     {
-        plGuid = objmgr.GetPlayerGUIDByName(plName);
+        plGuid = objmgr.GetPlayerGUIDByName(plName.c_str());
         plGuildId = Player::GetGuildIdFromDB(plGuid);
         plRankId = Player::GetRankFromDB(plGuid);
     }
@@ -928,7 +928,7 @@ void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
         return;
 
     normalizePlayerName(plName);
-    //sDatabase.escape_string(plName);                        // prevent SQL injection - normal name don't must changed by this call
+    sDatabase.escape_string(plName);                        // prevent SQL injection - normal name don't must changed by this call
 
     player = ObjectAccessor::Instance().FindPlayerByName(plName.c_str());
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
@@ -940,7 +940,7 @@ void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
     }
     else
     {
-        plGuid = objmgr.GetPlayerGUIDByName(plName);
+        plGuid = objmgr.GetPlayerGUIDByName(plName.c_str());
         plGuildId = Player::GetGuildIdFromDB(plGuid);
         plRankId = Player::GetRankFromDB(plGuid);
     }
@@ -1074,7 +1074,7 @@ void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
         return;
 
     normalizePlayerName(name);
-    //sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
+    sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
 
     newLeader = ObjectAccessor::Instance().FindPlayerByName(name.c_str());
     if(newLeader)
@@ -1084,7 +1084,7 @@ void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
     }
     else
     {
-        newLeaderGUID = objmgr.GetPlayerGUIDByName(name);
+        newLeaderGUID = objmgr.GetPlayerGUIDByName(name.c_str());
         newLeaderGuild = Player::GetGuildIdFromDB(newLeaderGUID);
     }
     guild = objmgr.GetGuildById(oldLeader->GetGuildId());
@@ -1176,7 +1176,7 @@ void WorldSession::HandleGuildSetPublicNoteOpcode(WorldPacket& recvPacket)
         return;
 
     normalizePlayerName(name);
-    //sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
+    sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
 
     player = ObjectAccessor::Instance().FindPlayerByName(name.c_str());
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
@@ -1187,7 +1187,7 @@ void WorldSession::HandleGuildSetPublicNoteOpcode(WorldPacket& recvPacket)
     }
     else
     {
-        plGuid = objmgr.GetPlayerGUIDByName(name);
+        plGuid = objmgr.GetPlayerGUIDByName(name.c_str());
         plGuildId = Player::GetGuildIdFromDB(plGuid);
     }
 
@@ -1236,7 +1236,7 @@ void WorldSession::HandleGuildSetOfficerNoteOpcode(WorldPacket& recvPacket)
         return;
 
     normalizePlayerName(plName);
-    //sDatabase.escape_string(plName);                        // prevent SQL injection - normal name don't must changed by this call
+    sDatabase.escape_string(plName);                        // prevent SQL injection - normal name don't must changed by this call
 
     player = ObjectAccessor::Instance().FindPlayerByName(plName.c_str());
     guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
@@ -1247,7 +1247,7 @@ void WorldSession::HandleGuildSetOfficerNoteOpcode(WorldPacket& recvPacket)
     }
     else
     {
-        plGuid = objmgr.GetPlayerGUIDByName(plName);
+        plGuid = objmgr.GetPlayerGUIDByName(plName.c_str());
         plGuildId = Player::GetGuildIdFromDB(plGuid);
     }
 

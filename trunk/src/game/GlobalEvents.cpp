@@ -35,7 +35,7 @@ static void CorpsesErase(CorpseType type,uint32 delay)
 {
     ///- Get the list of eligible corpses/bones to be removed
     //No SQL injection (uint32 and enum)
-    QueryResult *result = sDatabase.Query("SELECT `guid`,`position_x`,`position_y`,`map`,`player` FROM `corpse` WHERE UNIX_TIMESTAMP()-UNIX_TIMESTAMP(`time`) > '%u' AND `bones_flag` = '%u'",delay,type );
+    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`position_x`,`position_y`,`map`,`player` FROM `corpse` WHERE UNIX_TIMESTAMP()-UNIX_TIMESTAMP(`time`) > '%u' AND `bones_flag` = '%u'",delay,type );
 
     if(result)
     {
@@ -58,7 +58,7 @@ static void CorpsesErase(CorpseType type,uint32 delay)
                 if(!ObjectAccessor::Instance().ConvertCorpseForPlayer(player_guid))
                 {
                     sLog.outDebug("Corpse %u not found in world. Delete from DB.",guidlow);
-                    sDatabase.Execute("DELETE FROM `corpse` WHERE `guid` = '%u'",guidlow);
+                    sDatabase.PExecute("DELETE FROM `corpse` WHERE `guid` = '%u'",guidlow);
                 }
             }
             else
@@ -67,7 +67,7 @@ static void CorpsesErase(CorpseType type,uint32 delay)
                 MapManager::Instance().RemoveBonesFromMap(mapid, guid, positionX, positionY);
 
                 ///- remove bones from the database
-                sDatabase.Execute("DELETE FROM `corpse` WHERE `guid` = '%u'",guidlow);
+                sDatabase.PExecute("DELETE FROM `corpse` WHERE `guid` = '%u'",guidlow);
             }
         } while (result->NextRow());
 
@@ -85,9 +85,9 @@ void CorpsesErase()
 /// thread guarded variant for call from event system
 void HandleCorpsesErase(void*)
 {
-//    sDatabase.ThreadStart();                                // let thread do safe mySQL requests
+    sDatabase.ThreadStart();                                // let thread do safe mySQL requests
 
     CorpsesErase();
 
-//    sDatabase.ThreadEnd();                                  // free mySQL thread resources
+    sDatabase.ThreadEnd();                                  // free mySQL thread resources
 }

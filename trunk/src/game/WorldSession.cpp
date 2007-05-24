@@ -580,7 +580,7 @@ void WorldSession::LogoutPlayer(bool Save)
         ///- Reset the online field in the account table
         // no point resetting online in character table here as Player::SaveToDB() will set it to 1 since player has not been removed from world at this stage
         //No SQL injection as AccountID is uint32
-        loginDatabase.Execute("UPDATE `account` SET `online` = 0 WHERE `id` = '%u'", GetAccountId());
+        loginDatabase.PExecute("UPDATE `account` SET `online` = 0 WHERE `id` = '%u'", GetAccountId());
 
         ///- If the player is in a guild, update the guild roster and broadcast a logout message to other guild members
         Guild *guild = objmgr.GetGuildById(_player->GetGuildId());
@@ -613,7 +613,7 @@ void WorldSession::LogoutPlayer(bool Save)
                 _player->SetUInt32Value(PLAYER_FIELD_BUYBACK_PRICE_1+eslot,0);
                 _player->SetUInt32Value(PLAYER_FIELD_BUYBACK_TIMESTAMP_1+eslot,0);
             }
-            _player->SaveToDB(false);
+            _player->SaveToDB();
         }
 
         ///- Leave all channels before player delete...
@@ -654,7 +654,7 @@ void WorldSession::LogoutPlayer(bool Save)
 
         ///- Since each account can only have one online character at any given time, ensure all characters for active account are marked as offline
         //No SQL injection as AccountId is uint32
-        sDatabase.Execute("UPDATE `character` SET `online` = 0 WHERE `account` = '%u'", GetAccountId());
+        sDatabase.PExecute("UPDATE `character` SET `online` = 0 WHERE `account` = '%u'", GetAccountId());
         sLog.outDebug( "SESSION: Sent SMSG_LOGOUT_COMPLETE Message" );
     }
 
@@ -1208,7 +1208,7 @@ void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
         return;
     }
 
-    QueryResult *result = loginDatabase.Query("SELECT `username`,`email`,`last_ip` FROM `account` WHERE `id`=%u", accid);
+    QueryResult *result = loginDatabase.PQuery("SELECT `username`,`email`,`last_ip` FROM `account` WHERE `id`=%u", accid);
     if(result)
     {
         fields = result->Fetch();

@@ -192,7 +192,7 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
 
     std::string name = args;
     normalizePlayerName(name);
-    //sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
+    sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
 
     Player *chr = objmgr.GetPlayer(name.c_str());
     if (chr)
@@ -249,7 +249,7 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
         m_session->GetPlayer()->GetClosePoint(NULL,x,y,z,chr->GetObjectSize());
         chr->TeleportTo(m_session->GetPlayer()->GetMapId(),x,y,z,chr->GetOrientation());
     }
-    else if (uint64 guid = objmgr.GetPlayerGUIDByName(name))
+    else if (uint64 guid = objmgr.GetPlayerGUIDByName(name.c_str()))
     {
         PSendSysMessage(LANG_SUMMONING, name.c_str()," (offline)");
 
@@ -280,7 +280,7 @@ bool ChatHandler::HandleGonameCommand(const char* args)
 
     std::string name = args;
     normalizePlayerName(name);
-    //sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
+    sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
 
     Player *chr = objmgr.GetPlayer(name.c_str());
     if (chr)
@@ -347,7 +347,7 @@ bool ChatHandler::HandleGonameCommand(const char* args)
         return true;
     }
 
-    if (uint64 guid = objmgr.GetPlayerGUIDByName(name))
+    if (uint64 guid = objmgr.GetPlayerGUIDByName(name.c_str()))
     {
         PSendSysMessage(LANG_APPEARING_AT, name.c_str());
 
@@ -390,7 +390,7 @@ bool ChatHandler::HandleRecallCommand(const char* args)
     {
         std::string name = args;
         normalizePlayerName(name);
-        //sDatabase.escape_string(name);                      // prevent SQL injection - normal name don't must changed by this call
+        sDatabase.escape_string(name);                      // prevent SQL injection - normal name don't must changed by this call
 
         chr = objmgr.GetPlayer(name.c_str());
 
@@ -1450,7 +1450,7 @@ bool ChatHandler::HandleTeleCommand(const char * args)
     }
     std::string name = args;
     sDatabase.escape_string(name);
-    result = sDatabase.Query("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `game_tele` WHERE `name` = '%s'",name.c_str());
+    result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `game_tele` WHERE `name` = '%s'",name.c_str());
     if (!result)
     {
         SendSysMessage(LANG_COMMAND_TELE_NOTFOUND);
@@ -1490,7 +1490,7 @@ bool ChatHandler::HandleLookupTeleCommand(const char * args)
 
     std::string namepart = str;
     sDatabase.escape_string(namepart);
-    result = sDatabase.Query("SELECT `name` FROM `game_tele` WHERE `name` LIKE '%%%s%%'",namepart.c_str());
+    result = sDatabase.PQuery("SELECT `name` FROM `game_tele` WHERE `name` LIKE '%%%s%%'",namepart.c_str());
     if (!result)
     {
         SendSysMessage(LANG_COMMAND_TELE_NOREQUEST);
@@ -1600,7 +1600,7 @@ bool ChatHandler::HandleSendMailCommand(const char* args)
     
     normalizePlayerName(name);
 
-    uint32 receiver_guid = objmgr.GetPlayerGUIDByName(name);
+    uint32 receiver_guid = objmgr.GetPlayerGUIDByName(name.c_str());
     uint32 mailId = objmgr.GenerateMailID();
     uint32 sender_guid = m_session->GetPlayer()->GetGUID();
     time_t dtime = time(NULL);
@@ -1617,7 +1617,7 @@ bool ChatHandler::HandleSendMailCommand(const char* args)
         receiver->CreateMail(mailId,messagetype,sender_guid,subject.c_str(),itemTextId,0,0,(uint64)etime,(uint64)dtime,0,0,0,0);
 
     sDatabase.escape_string(subject);
-    sDatabase.Execute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
         "VALUES ('%u', '%u', '%u', '%u', '%s', '%u', '0', '0', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
         mailId, messagetype, sender_guid, receiver_guid, subject.c_str(), itemTextId, (uint64)etime, (uint64)dtime, NOT_READ);
 

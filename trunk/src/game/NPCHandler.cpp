@@ -375,7 +375,7 @@ void WorldSession::SendSpiritResurrect()
             _player->TeleportTo(corpseGrave->map_id, corpseGrave->x, corpseGrave->y, corpseGrave->z, _player->GetOrientation());
     }
 
-    _player->SaveToDB(false);
+    _player->SaveToDB();
 }
 
 void WorldSession::HandleBinderActivateOpcode( WorldPacket & recv_data )
@@ -404,7 +404,7 @@ void WorldSession::SendBindPoint(Creature *npc)
     uint32 bindspell = 3286, hearthstone_itemid = 6948;
 
     // update sql homebind
-    sDatabase.Execute("UPDATE `character_homebind` SET `map` = '%u', `zone` = '%u', `position_x` = '%f', `position_y` = '%f', `position_z` = '%f' WHERE `guid` = '%u'", _player->GetMapId(), _player->GetZoneId(), _player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), _player->GetGUIDLow());
+    sDatabase.PExecute("UPDATE `character_homebind` SET `map` = '%u', `zone` = '%u', `position_x` = '%f', `position_y` = '%f', `position_z` = '%f' WHERE `guid` = '%u'", _player->GetMapId(), _player->GetZoneId(), _player->GetPositionX(), _player->GetPositionY(), _player->GetPositionZ(), _player->GetGUIDLow());
     _player->m_homebindMapId = _player->GetMapId();
     _player->m_homebindZoneId = _player->GetZoneId();
     _player->m_homebindX = _player->GetPositionX();
@@ -527,7 +527,7 @@ void WorldSession::SendStablePet(uint64 guid )
     }
 
     //                                             0       1      2    3       4       5         6
-    QueryResult* result = sDatabase.Query("SELECT `owner`,`slot`,`id`,`entry`,`level`,`loyalty`,`name` FROM `character_pet` WHERE `owner` = '%u' AND `slot` > 0 AND `slot` < 3",_player->GetGUIDLow());
+    QueryResult* result = sDatabase.PQuery("SELECT `owner`,`slot`,`id`,`entry`,`level`,`loyalty`,`name` FROM `character_pet` WHERE `owner` = '%u' AND `slot` > 0 AND `slot` < 3",_player->GetGUIDLow());
 
     if(result)
     {
@@ -585,7 +585,7 @@ void WorldSession::HandleStablePet( WorldPacket & recv_data )
 
     uint32 free_slot = 1;
 
-    QueryResult *result = sDatabase.Query("SELECT `owner`,`slot`,`id` FROM `character_pet` WHERE `owner` = '%u'  AND `slot` > 0 AND `slot` < 3 ORDER BY `slot` ",_player->GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `owner`,`slot`,`id` FROM `character_pet` WHERE `owner` = '%u'  AND `slot` > 0 AND `slot` < 3 ORDER BY `slot` ",_player->GetGUIDLow());
     if(result)
     {
         do
@@ -645,7 +645,7 @@ void WorldSession::HandleUnstablePet( WorldPacket & recv_data )
 
     Pet *newpet = NULL;
 
-    QueryResult *result = sDatabase.Query("SELECT `entry` FROM `character_pet` WHERE `owner` = '%u' AND `id` = '%u' AND `slot` > 0 AND `slot` < 3",_player->GetGUIDLow(),petnumber);
+    QueryResult *result = sDatabase.PQuery("SELECT `entry` FROM `character_pet` WHERE `owner` = '%u' AND `id` = '%u' AND `slot` > 0 AND `slot` < 3",_player->GetGUIDLow(),petnumber);
     if(result)
     {
         Field *fields = result->Fetch();
@@ -732,7 +732,7 @@ void WorldSession::HandleStableSwapPet( WorldPacket & recv_data )
         return;
 
     // find swapped pet slot in stable
-    QueryResult *result = sDatabase.Query("SELECT `slot`,`entry` FROM `character_pet` WHERE `owner` = '%u' AND `id` = '%u'",_player->GetGUIDLow(),pet_number);
+    QueryResult *result = sDatabase.PQuery("SELECT `slot`,`entry` FROM `character_pet` WHERE `owner` = '%u' AND `id` = '%u'",_player->GetGUIDLow(),pet_number);
     if(!result)
         return;
 

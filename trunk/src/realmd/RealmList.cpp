@@ -27,10 +27,7 @@
 
 INSTANTIATE_SINGLETON_1( RealmList );
 
-//extern DatabaseMysql dbRealmServer;
-extern Database * rsdb;
-#define dbRealmServer (*rsdb)
-
+extern DatabaseMysql dbRealmServer;
 
 RealmList::RealmList( )
 {

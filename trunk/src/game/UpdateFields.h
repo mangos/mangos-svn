@@ -46,6 +46,7 @@ enum EItemFields
     ITEM_FIELD_SPELL_CHARGES_04                = OBJECT_END + 0x0E,
     ITEM_FIELD_FLAGS                           = OBJECT_END + 0x0F, // Size:1
     ITEM_FIELD_ENCHANTMENT                     = OBJECT_END + 0x10, // Size: 33 = (temp+perm+sockets*3+bonus+temp2*2+property*3)*3
+    ITEM_FIELD_SOCKETS_ENCHANTMENT             = OBJECT_END + 0x16, //    include (3 slots) * 3 = 9
     ITEM_FIELD_PROPERTY_SEED                   = OBJECT_END + 0x31, // Size:1
     ITEM_FIELD_RANDOM_PROPERTIES_ID            = OBJECT_END + 0x32, // Size:1
     ITEM_FIELD_ITEM_TEXT_ID                    = OBJECT_END + 0x33, // Size:1

@@ -43,7 +43,7 @@ namespace SOCKETS_NAMESPACE {
 
 
 ResolvServer::ResolvServer(port_t port)
-:sThread()
+:Thread()
 ,m_quit(false)
 ,m_port(port)
 ,m_ready(false)

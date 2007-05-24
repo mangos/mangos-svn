@@ -183,7 +183,7 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
 
     if(pItem->HasFlag(ITEM_FIELD_FLAGS, 8))                 // wrapped?
     {
-        QueryResult *result = sDatabase.Query("SELECT `entry`, `flags` FROM `character_gifts` WHERE `item_guid` = '%u'", pItem->GetGUIDLow());
+        QueryResult *result = sDatabase.PQuery("SELECT `entry`, `flags` FROM `character_gifts` WHERE `item_guid` = '%u'", pItem->GetGUIDLow());
         if (result)
         {
             Field *fields = result->Fetch();
@@ -202,7 +202,7 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
             pUser->DestroyItem(pItem->GetBagSlot(), pItem->GetSlot(), true);
             return;
         }
-        sDatabase.Execute("DELETE FROM `character_gifts` WHERE `item_guid` = '%u'", pItem->GetGUIDLow());
+        sDatabase.PExecute("DELETE FROM `character_gifts` WHERE `item_guid` = '%u'", pItem->GetGUIDLow());
     }
     else
         pUser->SendLoot(pItem->GetGUID(),LOOT_CORPSE);
@@ -362,8 +362,6 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
         {
             Unit* caster = obj->GetOwner();
 
-            info = obj->GetGOInfo();
-
             if( !caster || caster->GetTypeId()!=TYPEID_PLAYER )
                 return;
 
@@ -373,10 +371,10 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 
             obj->AddUse(GetPlayer());
 
-            // must 2 group members use GO, or only 1 when it is meeting stone summon
-            if(obj->GetUniqueUseCount() < 2 && (info->sound0 == 2 && obj->GetUniqueUseCount() < 1))
+            // must 2 group members use GO
+            if(obj->GetUniqueUseCount() < 2)
                 return;
-
+            
             // in case summoning ritual caster is GO creator
             spellCaster = caster;
 
@@ -414,35 +412,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             // go to end function to spell casting
             break;
         }
-        case GAMEOBJECT_TYPE_MEETINGSTONE:                  //23
-        {
-            info = obj->GetGOInfo();
-
-            Player* targetPlayer = ObjectAccessor::Instance().FindPlayer(((Player*)spellCaster)->GetSelection());
-
-            // accept only use by player from same group for caster except caster itself
-            if(targetPlayer == GetPlayer() || !targetPlayer->IsInSameGroupWith(GetPlayer()))
-                return;
-
-            //required lvl checks!
-            uint8 level = _player->getLevel();
-            if (level < info->sound0 || level > info->sound1)
-                return;
-            level = targetPlayer->getLevel();
-            if (level < info->sound0 || level > info->sound1)
-                return;
-
-            spellId = 23598;
-
-            break;
-        }
-
-        case GAMEOBJECT_TYPE_FLAGSTAND:                     //24
-            //BG flag click
-            info = obj->GetGOInfo();
-            if(info)
-                spellId = info->sound1;
-        ///case GAMEOBJECT_TYPE_FLAGSTAND:                     // 24
+        case GAMEOBJECT_TYPE_FLAGSTAND:                     // 24
             if(_player->InBattleGround() &&                 // in battleground
                 !_player->IsMounted() &&                    // not mounted
                 !_player->HasStealthAura() &&               // not stealthed
