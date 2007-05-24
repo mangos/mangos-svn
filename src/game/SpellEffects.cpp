@@ -3051,6 +3051,9 @@ void Spell::EffectTransmitted(uint32 i)
     }
     else
     {
+        //if gameobject is summoning object, it should be spawned right on caster's position
+        if (pGameObj->GetGOInfo()->type == 18)
+            pGameObj->Relocate(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ());
         pGameObj->SetOwnerGUID(m_caster->GetGUID() );
         int32 duration = GetDuration(m_spellInfo);
         pGameObj->SetRespawnTime(duration > 0 ? duration/1000 : 0);
