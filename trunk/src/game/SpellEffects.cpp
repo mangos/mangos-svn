@@ -3001,12 +3001,15 @@ void Spell::EffectSummonDeadPet(uint32 i)
 
 void Spell::EffectTransmitted(uint32 i)
 {
+    /* this random code removed, because it spawned gameobject too far from players...
     float min_dis = GetMinRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
     float max_dis = GetMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
     float dis = rand_norm() * (max_dis - min_dis) + min_dis;
-
-    float fx,fy,fz;
-    m_caster->GetClosePoint(NULL,fx,fy,fz,dis);
+*/
+    float fx = m_caster->GetPositionX();
+    float fy = m_caster->GetPositionY();
+    float fz = m_caster->GetPositionZ();
+    ///m_caster->GetClosePoint(NULL,fx,fy,fz,dis);
 
     if(m_spellInfo->EffectMiscValue[i] == 35591)
     {
