@@ -1132,7 +1132,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         FactionsList m_factions;
         int32 GetBaseReputation(const FactionEntry *factionEntry) const;
-        int32 GetReputation(uint32 FactionTemplateId) const;
+        int32 GetReputation(uint32 faction_id) const;
         int32 GetReputation(const FactionEntry *factionEntry) const;
         ReputationRank GetReputationRank(uint32 faction) const;
         ReputationRank GetReputationRank(const FactionEntry *factionEntry) const;
