@@ -116,7 +116,7 @@ class BattleGround
         uint32 GetPlayerScoresSize() { return m_PlayerScores.size(); };
 
         void AddPlayer(Player* plr);
-        void AddPlayerToQueue(Player* plr);
+        void AddPlayerToQueue(uint64 guid);
         void RemovePlayerFromQueue(uint64 guid);
         bool CanStartBattleGround();
         void StartBattleGround();
@@ -192,6 +192,7 @@ class BattleGround
 
         /* Battleground */
         uint32 m_ID;
+        uint32 m_Type;
         uint32 m_InstanceID;
         uint32 m_Status;
         uint32 m_StartTime;
@@ -208,8 +209,8 @@ class BattleGround
         std::map<uint64, bool> m_RemovedPlayers;
 
         /* Raid Group */
-        Group *bg_raid_a;
-        Group *bg_raid_h;
+        Group *m_HordeRaid;
+        Group *m_AllianceRaid;
 
         /* Limits */
         uint32 m_LevelMin;
@@ -229,8 +230,8 @@ class BattleGround
         /* Flags */
         uint64 m_AllianceFlagPickerGUID;
         uint64 m_HordeFlagPickerGUID;
-        GameObject *hf;
-        GameObject *af;
+        GameObject *m_HordeFlag;
+        GameObject *m_AllianceFlag;
         GameObject *SpeedBonus1;
         GameObject *SpeedBonus2;
         GameObject *RegenBonus1;

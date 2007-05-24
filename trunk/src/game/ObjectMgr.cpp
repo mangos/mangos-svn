@@ -503,13 +503,14 @@ void ObjectMgr::LoadSpellThreats()
 }
 
 // name must be checked to correctness (if received) before call this function
-uint64 ObjectMgr::GetPlayerGUIDByName(const char *name) const
+uint64 ObjectMgr::GetPlayerGUIDByName(std::string name) const
 {
     uint64 guid = 0;
 
-    // Player name safe to sending to DB (checked at login) and this function using
-    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `name` = '%s'", name);
+    sDatabase.escape_string(name);
 
+    // Player name safe to sending to DB (checked at login) and this function using
+    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `name` = '%s'", name.c_str());
     if(result)
     {
         guid = MAKE_GUID((*result)[0].GetUInt32(),HIGHGUID_PLAYER);
@@ -1447,7 +1448,7 @@ void ObjectMgr::LoadQuests()
             // no changes, quest can't be done for this requirement
         }
 
-        if(qinfo->RequiredRepFaction && !sFactionTemplateStore.LookupEntry(qinfo->RequiredRepFaction))
+        if(qinfo->RequiredRepFaction && !sFactionStore.LookupEntry(qinfo->RequiredRepFaction))
         {
             sLog.outErrorDb("Quest %u has `RequiredRepFaction` = %u but faction template %u doesn't exist, quest can't be done.",
                 qinfo->GetQuestId(),qinfo->RequiredRepFaction,qinfo->RequiredRepFaction);

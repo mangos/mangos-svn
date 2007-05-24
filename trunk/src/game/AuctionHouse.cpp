@@ -92,10 +92,10 @@ bool WorldSession::SendAuctionInfo(WorldPacket & data, AuctionEntry* auction)
 
     for (uint8 i = 0; i < MAX_INSPECTED_ENCHANTMENT_SLOT; i++)
     {
-        data << (uint32) pItem->GetEchantmentId(EnchantmentSlot(i));
+        data << (uint32) pItem->GetEnchantmentId(EnchantmentSlot(i));
         // Unknown maybe duration, but not shown?
         data << (uint32) 0;
-        data << (uint32) pItem->GetEchantmentCharges(EnchantmentSlot(i));
+        data << (uint32) pItem->GetEnchantmentCharges(EnchantmentSlot(i));
                                                             
     }
 

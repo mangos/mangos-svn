@@ -1032,7 +1032,7 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
             py = strtok(NULL, " ");
         else
         {
-            targetGUID = objmgr.GetPlayerGUIDByName(name.c_str());
+            targetGUID = objmgr.GetPlayerGUIDByName(name);
             if(targetGUID)
                 py = strtok(NULL, " ");
             else
@@ -1199,9 +1199,9 @@ bool ChatHandler::HandleTicketCommand(const char* args)
 
     std::string name = px;
     normalizePlayerName(name);
-    sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
+    //sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
 
-    uint64 guid = objmgr.GetPlayerGUIDByName(name.c_str());
+    uint64 guid = objmgr.GetPlayerGUIDByName(name);
 
     if(!guid)
         return false;
@@ -1316,9 +1316,9 @@ bool ChatHandler::HandleDelTicketCommand(const char *args)
 
     std::string name = px;
     normalizePlayerName(name);
-    sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
+    //sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
 
-    uint64 guid = objmgr.GetPlayerGUIDByName(name.c_str());
+    uint64 guid = objmgr.GetPlayerGUIDByName(name);
 
     if(!guid)
         return false;
@@ -2185,13 +2185,17 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
 
     if( text == 0 )
     {
+        // show_str check for present in list of correct values, no sql injection possible
         sDatabase.PExecuteLog("UPDATE `creature_movement` SET %s=NULL WHERE id='%u' AND point='%u'",
             show_str, lowguid, point);
     }
     else
     {
+        // show_str check for present in list of correct values, no sql injection possible
+        std::string text2 = text;
+        sDatabase.escape_string(text2);
         sDatabase.PExecuteLog("UPDATE `creature_movement` SET %s='%s' WHERE id='%u' AND point='%u'",
-            show_str, text, lowguid, point);
+            show_str, text2.c_str(), lowguid, point);
     }
 
     if(npcCreature)
@@ -2614,3 +2618,48 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
 
     return true;
 }                                                           // HandleWpShowCommand
+
+bool ChatHandler::HandleRenameCommand(const char* args)
+{           
+    Player* target = NULL;
+    uint64 targetGUID = 0;
+    std::string oldname;
+
+    char* px = strtok((char*)args, " ");
+
+    if(px)
+    {
+        oldname = px;
+        normalizePlayerName(oldname);
+        //sDatabase.escape_string(oldname);
+        target = objmgr.GetPlayer(oldname.c_str());
+
+        if (!target)
+            targetGUID = objmgr.GetPlayerGUIDByName(oldname);
+    }
+
+    if(!target && !targetGUID)
+    {
+        target = getSelectedPlayer();
+    }
+
+    if(!target && !targetGUID)
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        return true;
+    }
+
+    if(target)
+    {
+        PSendSysMessage("Force rename will be requested on next login for player %s.", target->GetName());
+        target->SetNeedRename(true);
+        sDatabase.PExecute("UPDATE `character` SET `rename` = '1' WHERE `guid` = '%u'", target->GetGUIDLow());
+    }
+    else
+    {
+        PSendSysMessage("Force rename will be requested on next login for player %s (GUID #%u).", oldname.c_str(), GUID_LOPART(targetGUID));
+        sDatabase.PExecute("UPDATE `character` SET `rename` = '1' WHERE `guid` = '%u'", GUID_LOPART(targetGUID));
+    }
+
+    return true;
+}

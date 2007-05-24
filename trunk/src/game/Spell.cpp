@@ -79,7 +79,7 @@ void SpellCastTargets::setUnitTarget(Unit *target)
 
     if (!target)
         return;
-	
+
     m_destX = target->GetPositionX();
     m_destY = target->GetPositionY();
     m_destZ = target->GetPositionZ();
@@ -2019,7 +2019,7 @@ uint8 Spell::CanCast()
                 // Execute
                 if(m_spellInfo->SpellIconID == 1648)
                 {
-                    if(m_targets.getUnitTarget()->GetHealth() > m_targets.getUnitTarget()->GetMaxHealth()*0.2)
+                    if(!m_targets.getUnitTarget() || m_targets.getUnitTarget()->GetHealth() > m_targets.getUnitTarget()->GetMaxHealth()*0.2)
                         return SPELL_FAILED_BAD_TARGETS;
                 }
                 break;
@@ -2824,4 +2824,5 @@ void Spell::UpdatePointers()
 
     m_targets.Update(m_caster);
 }
+
 

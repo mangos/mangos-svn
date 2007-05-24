@@ -2145,7 +2145,7 @@ bool ChatHandler::HandleReviveCommand(const char* args)
     if (*args)
     {
         std::string name = args;
-        sDatabase.escape_string(name);
+        //sDatabase.escape_string(name);
         SelectedPlayer = objmgr.GetPlayer(name.c_str());
     }
     else
@@ -2544,7 +2544,7 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
         chr = objmgr.GetPlayer(name.c_str());
         if(!chr)                                            // not in game
         {
-            chr_guid = objmgr.GetPlayerGUIDByName(name.c_str());
+            chr_guid = objmgr.GetPlayerGUIDByName(name);
             if (chr_guid == 0)
             {
                 SendSysMessage(LANG_PLAYER_NOT_FOUND);

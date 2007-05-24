@@ -117,6 +117,8 @@ Player::Player (WorldSession *session): Unit( 0 )
 
     m_dungeonDifficulty = DUNGEONDIFFICULTY_NORMAL;
 
+    m_needRename = false;
+
     m_dontMove = false;
 
     pTrader = 0;
@@ -986,11 +988,29 @@ void Player::BuildEnumData( WorldPacket * p_data )
     *p_data << GetPositionY();
     *p_data << GetPositionZ();
 
-    *p_data << uint32(0);                                   // unknown
+    *p_data << GetUInt32Value(PLAYER_GUILDID);              // guild id
 
-    *p_data << uint8(0x0);
-    *p_data << uint8(GetUInt32Value(PLAYER_FLAGS) << 1);    // probably wrong
-    *p_data << uint8(0x0);                                  // Bit 4 is something dono
+    *p_data << uint8(0x0);                                  // different values on off, looks like flags
+
+    uint8 flags = 0;
+    if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM))
+        flags |= 0x04;
+    if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK))
+        flags |= 0x08;
+    if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
+        flags |= 0x20;
+    if(isNeedRename())
+        flags |= 0x40;
+    *p_data << uint8(flags);    // flags description below
+    // 0x01 - unknown
+    // 0x02 - unknown
+    // 0x04 - hide helm
+    // 0x08 - hide cloak
+    // 0x10 - unknown
+    // 0x20 - dead(ghost)
+    // 0x40 - need rename
+
+    *p_data << uint8(0xa0);                                 // Bit 4 is something dono
     *p_data << uint8(0x0);                                  // is this player_GUILDRANK????
 
     *p_data << (uint8)1;                                    // 0x1 there
@@ -1776,8 +1796,14 @@ void Player::RemoveFromGroup(Group* group, uint64 guid)
 {
     if(group)
     {
-        if (group->RemoveMember(guid, 0) <= 1)
-        {
+		if (group->GetMembersCount() <= 2)
+		{// UQ1: If there is only 2 members left and 1 leave, just remove the whole group!
+			group->Disband();
+            objmgr.RemoveGroup(group);
+            delete group;
+		}
+        else if (group->RemoveMember(guid, 0) <= 1)
+        {// UQ1: group->RemoveMember(guid, 0) causes a crash with 2 members! fix above!
             group->Disband();
             objmgr.RemoveGroup(group);
             delete group;
@@ -3311,6 +3337,28 @@ void Player::DurabilityLoss(uint8 equip_pos, double percent)
     m_items[equip_pos]->SetState(ITEM_CHANGED, this);
 }
 
+void Player::DurabilityPointsLoss(uint8 equip_pos, uint32 points)
+{
+    if(!m_items[equip_pos])
+        return;
+
+    uint32 pDurability =  m_items[equip_pos]->GetUInt32Value(ITEM_FIELD_DURABILITY);
+
+    if(!pDurability)
+        return;
+
+    uint32 pNewDurability = pDurability >= points ? pDurability - points : 0;
+
+    // we have durability 25% or 0 we should modify item stats
+    // modify item stats _before_ Durability set to 0 to pass _ApplyItemMods internal check
+    //        if ( pNewDurability == 0 || pNewDurability * 100 / pDurability < 25)
+    if ( pNewDurability == 0 )
+        _ApplyItemMods(m_items[equip_pos],equip_pos, false);
+
+    m_items[equip_pos]->SetUInt32Value(ITEM_FIELD_DURABILITY, pNewDurability);
+    m_items[equip_pos]->SetState(ITEM_CHANGED, this);
+}
+
 void Player::DurabilityRepairAll(bool cost, bool discount)
 {
     for (uint16 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
@@ -4398,16 +4446,15 @@ int32 Player::GetBaseReputation(const FactionEntry *factionEntry) const
     return 0;
 }
 
-int32 Player::GetReputation(uint32 FactionTemplateId) const
+int32 Player::GetReputation(uint32 faction_id) const
 {
-    FactionTemplateEntry const *factionTemplateEntry = sFactionTemplateStore.LookupEntry(FactionTemplateId);
+    FactionEntry const *factionEntry = sFactionStore.LookupEntry(faction_id);
 
-    if(!factionTemplateEntry)
+    if (!factionEntry)
     {
-        sLog.outError("Player::GetReputation: Can't get reputation of %s for unknown faction (faction template id) #%u.",GetName(), FactionTemplateId);
+        sLog.outError("Player::GetReputation: Can't get reputation of %s for unknown faction (faction template id) #%u.",GetName(), faction_id);
         return 0;
     }
-    FactionEntry const *factionEntry = sFactionStore.LookupEntry(factionTemplateEntry->faction);
 
     return GetReputation(factionEntry);
 }
@@ -4974,6 +5021,9 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 
     ApplyEnchantment(item, apply);
 
+    if(proto->Socket[0].Color)    //only (un)equipping of items with sockets can influence metagems, so no need to waste time with normal items
+        CorrectMetaGemEnchants(slot, apply);
+
     sLog.outDebug("_ApplyItemMods complete.");
 }
 
@@ -5299,7 +5349,7 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
     // item combat enchantments
     for(int e_slot = 0; e_slot < MAX_ENCHANTMENT_SLOT; ++e_slot)
     {
-        uint32 enchant_id = item->GetEchantmentId(EnchantmentSlot(e_slot));
+        uint32 enchant_id = item->GetEnchantmentId(EnchantmentSlot(e_slot));
         SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
         if(!pEnchant) continue;
         for (int s=0;s<3;s++)
@@ -6207,17 +6257,17 @@ void Player::SetVirtualItemSlot( uint8 i, Item* item)
     SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY+i,item ? item->GetProto()->DisplayInfoID : 0);
     if(i < 2 && item)
     {
-        if(!item->GetEchantmentId(TEMP_ENCHANTMENT_SLOT))
+        if(!item->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT))
             return;
-        uint32 charges = item->GetEchantmentCharges(TEMP_ENCHANTMENT_SLOT);
+        uint32 charges = item->GetEnchantmentCharges(TEMP_ENCHANTMENT_SLOT);
         if(charges == 0)
             return;
         if(charges > 1)
-            item->SetEchantmentCharges(TEMP_ENCHANTMENT_SLOT,charges-1);
+            item->SetEnchantmentCharges(TEMP_ENCHANTMENT_SLOT,charges-1);
         else if(charges <= 1)
         {
             ApplyEnchantment(item,TEMP_ENCHANTMENT_SLOT,false);
-            item->ClearEchantment(TEMP_ENCHANTMENT_SLOT);
+            item->ClearEnchantment(TEMP_ENCHANTMENT_SLOT);
         }
     }
 }
@@ -6454,6 +6504,16 @@ uint32 Player::GetItemCount( uint32 item, Item* eItem ) const
             count += pBag->GetItemCount(item,eItem);
     }
 
+    if(eItem && eItem->GetProto()->GemProperties)
+    {
+        for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
+        {
+            pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+            if( pItem && pItem != eItem && pItem->GetProto()->Socket[0].Color )
+                count += pItem->GetGemCountWithID(item);
+        }
+    }
+
     return count;
 }
 
@@ -6474,6 +6534,17 @@ uint32 Player::GetBankItemCount( uint32 item, Item* eItem ) const
         if( pBag )
             count += pBag->GetItemCount(item,eItem);
     }
+    
+    if(eItem && eItem->GetProto()->GemProperties)
+    {
+        for(int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; i++)
+        {
+            pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+            if( pItem && pItem != eItem && pItem->GetProto()->Socket[0].Color )
+                count += pItem->GetGemCountWithID(item);
+        }
+    }
+    
     return count;
 }
 
@@ -7950,7 +8021,7 @@ void Player::VisualizeItem( uint16 pos, Item *pItem)
         SetUInt32Value(VisibleBase, pItem->GetEntry());
 
         for(int i = 0; i < MAX_ENCHANTMENT_SLOT; ++i)
-            SetUInt32Value(VisibleBase + 1 + i, pItem->GetEchantmentId(EnchantmentSlot(i)));
+            SetUInt32Value(VisibleBase + 1 + i, pItem->GetEnchantmentId(EnchantmentSlot(i)));
 
         SetUInt32Value(VisibleBase + 8, pItem->GetItemRandomPropertyId());
     }
@@ -7987,8 +8058,8 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
                 // and remove held enchantments
                 if ( slot == EQUIPMENT_SLOT_MAINHAND )
                 {
-                    pItem->ClearEchantment(HELD_PERM_ENCHANTMENT_SLOT);
-                    pItem->ClearEchantment(HELD_TEMP_ENCHANTMENT_SLOT);
+                    pItem->ClearEnchantment(HELD_PERM_ENCHANTMENT_SLOT);
+                    pItem->ClearEnchantment(HELD_TEMP_ENCHANTMENT_SLOT);
                 }
             }
 
@@ -8829,14 +8900,14 @@ void Player::UpdateEnchantTime(uint32 time)
     {
         assert(itr->item);
         next=itr;
-        if(!itr->item->GetEchantmentId(itr->slot))
+        if(!itr->item->GetEnchantmentId(itr->slot))
         {
             next = m_enchantDuration.erase(itr);
         }
         else if(itr->leftduration <= time)
         {
             ApplyEnchantment(itr->item,itr->slot,false,false);
-            itr->item->ClearEchantment(itr->slot);
+            itr->item->ClearEnchantment(itr->slot);
             next = m_enchantDuration.erase(itr);
         }
         else if(itr->leftduration > time)
@@ -8851,7 +8922,7 @@ void Player::AddEnchantmentDurations(Item *item)
 {
     for(int x=0;x<MAX_ENCHANTMENT_SLOT;++x)
     {
-        uint32 duration = item->GetEchantmentDuration(EnchantmentSlot(x));
+        uint32 duration = item->GetEnchantmentDuration(EnchantmentSlot(x));
         if( duration == 0 )
             continue;
         else if( duration > 0 )
@@ -8866,7 +8937,7 @@ void Player::RemoveEnchantmentDurations(Item *item)
         if(itr->item == item)
         {
             // save duration in item
-            item->SetEchantmentDuration(EnchantmentSlot(itr->slot),itr->leftduration);
+            item->SetEnchantmentDuration(EnchantmentSlot(itr->slot),itr->leftduration);
             itr = m_enchantDuration.erase(itr);
         }
         else
@@ -8904,7 +8975,7 @@ void Player::ApplyEnchantment(Item *item,bool apply)
         ApplyEnchantment(item, EnchantmentSlot(slot), apply);
 }
 
-void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool apply_dur)
+void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool apply_dur, bool ignore_condition)
 {
     if(!item)
         return;
@@ -8915,12 +8986,15 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
     if(slot > MAX_ENCHANTMENT_SLOT)
         return;
 
-    uint32 enchant_id = item->GetEchantmentId(slot);
+    uint32 enchant_id = item->GetEnchantmentId(slot);
     if(!enchant_id)
         return;
 
     SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
     if(!pEnchant)
+        return;
+
+    if(!ignore_condition && pEnchant->EnchantmentCondition && !((Player*)this)->EnchantmentFitsRequirements(pEnchant->EnchantmentCondition, -1))
         return;
 
     for (int s=0; s<3; s++)
@@ -9063,7 +9137,7 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
 
     // visualize enchantment at player and equipped items
     int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (item->GetSlot() * 16);
-    SetUInt32Value(VisibleBase+1 + slot +1, apply? item->GetEchantmentId(slot) : 0);
+    SetUInt32Value(VisibleBase+1 + slot +1, apply? item->GetEnchantmentId(slot) : 0);
 
 
     if(apply_dur)
@@ -9071,7 +9145,7 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
         if(apply)
         {
             // set duration
-            uint32 duration = item->GetEchantmentDuration(slot);
+            uint32 duration = item->GetEnchantmentDuration(slot);
             if(duration)
                 AddEnchantmentDuration(item,TEMP_ENCHANTMENT_SLOT,duration);
         }
@@ -9101,18 +9175,18 @@ void Player::ReducePoisonCharges(uint32 enchantId)
             continue;
         for(int x=0;x<MAX_ENCHANTMENT_SLOT;x++)
         {
-            charges = pItem->GetEchantmentCharges(EnchantmentSlot(x));
+            charges = pItem->GetEnchantmentCharges(EnchantmentSlot(x));
             if(charges == 0)
                 continue;
             if(charges <= 1)
             {
                 ApplyEnchantment(pItem,EnchantmentSlot(x),false);
-                pItem->ClearEchantment(EnchantmentSlot(x));
+                pItem->ClearEnchantment(EnchantmentSlot(x));
                 break;
             }
             else
             {
-                pItem->SetEchantmentCharges(EnchantmentSlot(x),charges-1);
+                pItem->SetEnchantmentCharges(EnchantmentSlot(x),charges-1);
                 break;
             }
         }
@@ -9125,7 +9199,7 @@ void Player::SaveEnchant()
     {
         assert(itr->item);
         if(itr->leftduration > 0)
-            itr->item->SetEchantmentDuration(itr->slot,itr->leftduration);
+            itr->item->SetEnchantmentDuration(itr->slot,itr->leftduration);
     }
 }
 
@@ -10604,7 +10678,8 @@ void Player::SendQuestUpdateAddCreature( uint32 quest_id, uint64 guid, uint32 cr
 
 bool Player::MinimalLoadFromDB( uint32 guid )
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `data`,`name`,`position_x`,`position_y`,`position_z`,`map`,`totaltime`,`leveltime` FROM `character` WHERE `guid` = '%u'",guid);
+    //                                             0      1      2            3            4            5     6           7           8
+    QueryResult *result = sDatabase.PQuery("SELECT `data`,`name`,`position_x`,`position_y`,`position_z`,`map`,`totaltime`,`leveltime`,`rename` FROM `character` WHERE `guid` = '%u'",guid);
     if(!result)
         return false;
 
@@ -10624,6 +10699,8 @@ bool Player::MinimalLoadFromDB( uint32 guid )
 
     m_Played_time[0] = fields[6].GetUInt32();
     m_Played_time[1] = fields[7].GetUInt32();
+
+    m_needRename = fields[8].GetBool();
 
     _LoadGroup();
 
@@ -10709,8 +10786,8 @@ float Player::GetFloatValueFromDB(uint16 index, uint64 guid)
 
 bool Player::LoadFromDB( uint32 guid )
 {
-    //                                                0        1       2      3      4      5         6            7            8         9        10            11         12          13         14            15          16               17                  18                 19               20        21        22       23         24          25      26
-    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots` FROM `character` WHERE `guid` = '%u'", guid);
+    //                                                0        1       2      3      4      5         6            7            8         9        10            11         12          13         14            15          16               17                  18                 19               20        21        22       23         24          25      26            27
+    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`rename` FROM `character` WHERE `guid` = '%u'", guid);
 
     if(!result)
     {
@@ -10856,6 +10933,8 @@ bool Player::LoadFromDB( uint32 guid )
         sLog.outError("Player can have not more 2 stable slots, but have in DB %u",uint32(m_stableSlots));
         m_stableSlots = 2;
     }
+
+    m_needRename = fields[27].GetBool();
 
     delete result;
 
@@ -11456,7 +11535,7 @@ void Player::SaveToDB()
 
     // remove restflag when save
     //this is because of the rename char stuff
-    RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+    //RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
 
     bool inworld = IsInWorld();
 
@@ -11480,7 +11559,7 @@ void Player::SaveToDB()
         "`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,"
         "`taximask`,`online`,`cinematic`,"
         "`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,"
-        "`trans_x`, `trans_y`, `trans_z`, `trans_o`, `transguid`, `gmstate`, `stable_slots` ) VALUES ("
+        "`trans_x`, `trans_y`, `trans_z`, `trans_o`, `transguid`, `gmstate`, `stable_slots`,`rename`) VALUES ("
         << GetGUIDLow() << ", "
         << GetSession()->GetAccountId() << ", '"
         << m_name << "', "
@@ -11544,6 +11623,9 @@ void Player::SaveToDB()
 
     ss << ", ";
     ss << uint32(m_stableSlots);                            // to prevent save uint8 as char
+
+    ss << ", ";
+    ss << (isNeedRename()? 1 : 0);
 
     ss << " )";
 
@@ -12940,6 +13022,162 @@ uint32 Player::GetBlockValue() const
         return 0;
 
     return m_AuraModifiers[SPELL_AURA_MOD_SHIELD_BLOCKVALUE]*(m_AuraModifiers[SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT]+100)/100;
+}
+
+bool Player::EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot)    //slot to be excluded while counting
+{
+    if(!enchantmentcondition)
+        return true;
+
+    SpellItemEnchantmentConditionEntry const *Condition = sSpellItemEnchantmentConditionStore.LookupEntry(enchantmentcondition);
+
+    if(!Condition)
+            return true;
+
+    uint8 curcount[4] = {0, 0, 0, 0};
+
+    //counting current equipped gem colors
+    for(uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
+    {
+        if(i == slot)
+                continue;
+        uint16 pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
+        Item *pItem2 = GetItemByPos( pos );
+        if(pItem2 && pItem2->GetProto()->Socket[0].Color)
+        {
+            for(uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+3; ++enchant_slot)
+            {
+                uint32 enchant_id = pItem2->GetEnchantmentId(EnchantmentSlot(enchant_slot));
+                if(!enchant_id)
+                    continue;
+
+                SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+                if(!enchantEntry)
+                    continue;
+
+                uint32 gemid = enchantEntry->GemID;
+                if(!gemid)
+                    continue;
+
+                ItemPrototype const* gemProto = sItemStorage.LookupEntry<ItemPrototype>(gemid);
+                if(!gemProto)
+                    continue;
+
+                GemPropertiesEntry const* gemProperty = sGemPropertiesStore.LookupEntry(gemProto->GemProperties);
+                if(!gemProperty)
+                    continue;
+
+                uint8 GemColor = gemProperty->color;
+
+                for(uint8 b = 0, tmpcolormask = 1; b < 4; b++, tmpcolormask <<= 1)
+                {
+                    if(tmpcolormask & GemColor)
+                        curcount[b]++;
+                }
+            }
+        }
+    }
+
+    bool activate = true;
+
+    for(int i = 0; i < 5; i++)
+    {
+        if(!Condition->Color[i])
+            continue;
+
+        uint32 _cur_gem = curcount[Condition->Color[i] - 1];
+
+        // if have <CompareColor> use them as count, else use <value> from Condition
+        uint32 _cmp_gem = Condition->CompareColor[i] ? curcount[Condition->CompareColor[i] - 1]: Condition->Value[i];
+
+        switch(Condition->Comparator[i]) {
+            case 2: // requires less <color> than (<value> || <comparecolor>) gems
+                activate &= (_cur_gem < _cmp_gem) ? true : false;
+                break;
+            case 3: // requires more <color> than (<value> || <comparecolor>) gems
+                activate &= (_cur_gem > _cmp_gem) ? true : false;
+                break;
+            case 5: // requires at least <color> than (<value> || <comparecolor>) gems
+                activate &= (_cur_gem >= _cmp_gem) ? true : false;
+                break;
+        }
+    }
+
+    sLog.outDebug("Checking Condition %u, there are %u Meta Gems, %u Red Gems, %u Yellow Gems and %u Blue Gems, Activate:%s", enchantmentcondition, curcount[0], curcount[1], curcount[2], curcount[3], activate ? "yes" : "no");
+
+    return activate;
+}
+
+
+void Player::CorrectMetaGemEnchants(uint8 exceptslot, bool apply)
+{
+
+    for(uint32 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)    //cycle all equipped items
+    {
+        //enchants for the slot being socketed are handeled by Player::ApplyItemMods
+        if(slot == exceptslot)
+            continue;
+
+        uint16 pos = ( (INVENTORY_SLOT_BAG_0 << 8) | slot );
+        Item* pItem = GetItemByPos( pos );
+
+        if(!pItem || !pItem->GetProto()->Socket[0].Color)
+            continue;
+
+        for(uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+3; ++enchant_slot)
+        {
+            uint32 enchant_id = pItem->GetEnchantmentId(EnchantmentSlot(enchant_slot));
+            if(!enchant_id)
+                continue;
+
+            SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+            if(!enchantEntry)
+                continue;
+
+            uint32 condition = enchantEntry->EnchantmentCondition;
+            if(condition)
+            {
+                bool wasactive = EnchantmentFitsRequirements(condition, apply ? exceptslot : -1);    //was enchant active with/without item?
+                if(wasactive ^ EnchantmentFitsRequirements(condition, apply ? -1 : exceptslot))    //should it now be?
+                {
+                    // ignore item gem conditions
+                    ApplyEnchantment(pItem,EnchantmentSlot(enchant_slot),!wasactive,true,true);                            //if state changed, (dis)apply enchant
+                }
+            }
+        }
+    }
+}
+
+void Player::ToggleMetaGemsActive(uint16 exceptslot, bool apply)        //if false -> then toggled off if was on| if true -> toggled on if was off AND meets requirements
+{
+    for(int slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; slot++)    //cycle all equipped items
+    {
+        //enchants for the slot being socketed are handeled by WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
+        if(slot == exceptslot) continue;
+
+        uint16 pos = ( (INVENTORY_SLOT_BAG_0 << 8) | slot );
+        Item *pItem = GetItemByPos( pos );
+
+        if(!pItem || !pItem->GetProto()->Socket[0].Color)    //if item has no sockets or no item is equipped go to next item
+            continue;
+
+        //cycle all (gem)enchants
+        for(uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+3; ++enchant_slot)
+        {
+            uint32 enchant_id = pItem->GetEnchantmentId(EnchantmentSlot(enchant_slot));
+            if(!enchant_id)                                    //if no enchant go to next enchant(slot)
+                continue;
+
+            SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+            if(!enchantEntry)
+                continue;
+
+            //only metagems to be (de)activated, so only enchants with condition
+            uint32 condition = enchantEntry->EnchantmentCondition;
+            if(condition)
+                ApplyEnchantment(pItem,EnchantmentSlot(enchant_slot), apply);
+        }
+    }
 }
 
 bool Player::DropBattleGroundFlag()
