@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,99 +16,53 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/*
- SQL Update and threading thanks to espire
-*/
-
-#ifndef _DATABASE_H
-#define _DATABASE_H
-
-#include <string>
-
-using namespace std;
-class QueryResult;
-class DatabaseThread;
-
-enum DatabaseType
-{
-    DATABASE_TYPE_NONE      = 0,
-    DATABASE_TYPE_MYSQL     = 1,
-    DATABASE_TYPE_PGSQL     = 2,
-    DATABASE_TYPE_ORACLE10  = 3,
-    DATABASE_TYPE_TOTAL     = 4,
-};
+#if !defined(DATABASE_H)
+#define DATABASE_H
 
 class Database
 {
-    friend class DatabaseThread;
-public:
-    Database(DatabaseType type) : mType(type) {}
-    virtual ~Database() {}
+    protected:
+        Database() {}
 
-    virtual bool Initialize(const char* Hostname, unsigned int port,
-		const char* Username, const char* Password, const char* DatabaseName,
-		uint32 ConnectionCount, uint32 BufferSize) = 0;
+    public:
 
-    virtual void Shutdown() = 0;
+        virtual ~Database() {}
 
-    virtual QueryResult* Query(const char* QueryString, ...) = 0;
-    virtual bool WaitExecute(const char* QueryString, ...) = 0;
-    virtual bool Execute(const char* QueryString, ...) = 0;
+        virtual bool Initialize(const char *infoString);
 
-	bool ExecuteLog(const char * format,...);
-	bool PExecuteLog(const char * format,...);
+        virtual QueryResult* Query(const char *sql) = 0;
+        virtual QueryResult* PQuery(const char *format,...) = 0;
 
-    virtual void CheckConnections() = 0;
+        virtual bool Execute(const char *sql) = 0;
+        virtual bool PExecute(const char *format,...) = 0;
 
-    inline DatabaseType GetType() { return mType; }
-    
-    virtual unsigned long escape_string(char *to, const char *from, unsigned long length);
-    inline void escape_string(std::string& str)
-    {
-        if(str.size()==0)
-            return;
+        // Writes SQL commands to a LOG file (see mangosd.conf "LogSQL")
+        bool PExecuteLog(const char *format,...);
 
-        char* buf = new char[str.size()*2+1];
-        escape_string(buf,str.c_str(),str.size());
-        str = buf;
-        delete[] buf;
-    }
+        virtual bool BeginTransaction()                     // nothing do if DB not support transactions
+        {
+            return true;
+        }
+        virtual bool CommitTransaction()                    // nothing do if DB not support transactions
+        {
+            return true;
+        }
+        virtual bool RollbackTransaction()                  // can't rollback without transaction support
+        {
+            return false;
+        }
 
-protected:
-    DatabaseType mType;
+        virtual operator bool () const = 0;
 
-private:
-    // 0 - do not log, 1 - log sql commands        
-    uint32 m_logSQL;
+        virtual unsigned long escape_string(char *to, const char *from, unsigned long length) { strncpy(to,from,length); return length; }
+        void escape_string(std::string& str);
+
+        // must be called before first query in thread (one time for thread using one from existed Database objects)
+        virtual void ThreadStart();
+        // must be called before finish thread run (one time for thread using one from existed Database objects)
+        virtual void ThreadEnd();
+    private:
+        // 0 - do not log, 1 - log sql commands        
+        uint32 m_logSQL;
 };
-
-class QueryResult
-{
-public:
-    QueryResult(uint32 FieldCount, uint32 RowCount, uint32 Type);
-    virtual ~QueryResult();
-
-    virtual bool NextRow() = 0;
-
-    inline Field* Fetch() { return mCurrentRow; }
-    inline uint32 GetFieldCount() const { return mFieldCount; }
-    inline uint32 GetRowCount() const { return mRowCount; }
-
-protected:
-
-    Field *mCurrentRow;
-    uint32 mFieldCount;
-    uint32 mRowCount;
-    uint32 mType;
-
-};
-
-Database* CreateDatabaseInterface(DatabaseType type);
-void DestroyDatabaseInterface(Database * ptr);
-
-extern Database * MainDatabase;
-extern Database * LogonDatabase;
-#define sDatabase (*MainDatabase)
-#define loginDatabase (*LogonDatabase)
-
 #endif

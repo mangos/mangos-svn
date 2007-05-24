@@ -35,17 +35,14 @@
 #include "Transports.h"
 #include "Group.h"
 
-// check used symbols in player name at creating and rename
-static std::string const notAllowedChars = "\t\v\b\f\a\n\r\\\0\"\'\? <>[](){}_=+-|/!@#$%^&*~`.,0123456789";
-
 void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
 {
     // keys can be non cleared if player open realm list and close it by 'cancel'
-    loginDatabase.Query("UPDATE `account` SET `v` = '0', `s` = '0' WHERE `id` = '%u'", GetAccountId());
+    loginDatabase.PQuery("UPDATE `account` SET `v` = '0', `s` = '0' WHERE `id` = '%u'", GetAccountId());
 
     WorldPacket data(SMSG_CHAR_ENUM, 100);                  // we guess size
 
-    QueryResult *result = sDatabase.Query("SELECT `guid` FROM `character` WHERE `account` = '%u' ORDER BY `guid`", GetAccountId());
+    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%u' ORDER BY `guid`", GetAccountId());
 
     uint8 num = 0;
 
@@ -56,9 +53,9 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
         Player *plr = new Player(this);
         do
         {
-            sLog.outDetail("Loading char guid %u from account %u.",result->Fetch()[0].GetUInt32(),GetAccountId());
+            sLog.outDetail("Loading char guid %u from account %u.",(*result)[0].GetUInt32(),GetAccountId());
 
-            if(plr->MinimalLoadFromDB( result->Fetch()[0].GetUInt32() ))
+            if(plr->MinimalLoadFromDB( (*result)[0].GetUInt32() ))
             {
                 plr->BuildEnumData( &data );
                 num++;
@@ -108,6 +105,9 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 
     normalizePlayerName(name);
 
+    // check used symbols
+    static std::string const notAllowedChars = "\t\v\b\f\a\n\r\\\0\"\'\? <>[](){}_=+-|/!@#$%^&*~`.,0123456789";
+
     if(name.find_first_of(notAllowedChars)!=name.npos)
     {
         data.Initialize( SMSG_CHAR_CREATE, 1 );
@@ -116,15 +116,21 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         return;
     }
 
-    if(objmgr.GetPlayerGUIDByName(name))
+    sDatabase.escape_string(name);
+    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `name` = '%s'", name.c_str());
+
+    if ( result )
     {
+        delete result;
+
         data.Initialize(SMSG_CHAR_CREATE, 1);
-        data << (uint8)CHAR_CREATE_NAME_IN_USE;
+        data << (uint8)CHAR_LOGIN_DUPLICATE_CHARACTER;
         SendPacket( &data );
+
         return;
     }
 
-    QueryResult *result = sDatabase.Query("SELECT `guid` FROM `character` WHERE `account` = '%u'", GetAccountId());
+    result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%u'", GetAccountId());
 
     if ( result )
     {
@@ -142,7 +148,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     bool AllowTwoSideAccounts = sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_ACCOUNTS);
     if(sWorld.IsPvPRealm())
     {
-        QueryResult *result2 = sDatabase.Query("SELECT `race` FROM `character` WHERE `account` = '%u' LIMIT 1", GetAccountId());
+        QueryResult *result2 = sDatabase.PQuery("SELECT `race` FROM `character` WHERE `account` = '%u' LIMIT 1", GetAccountId());
         if(result2)
         {
             Field * field = result2->Fetch();
@@ -171,16 +177,16 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     if(pNewChar->Create( objmgr.GenerateLowGuid(HIGHGUID_PLAYER), recv_data ))
     {
         // Player create
-        pNewChar->SaveToDB(true);
+        pNewChar->SaveToDB();
 
-        QueryResult *resultCount = sDatabase.Query("SELECT COUNT(guid) FROM `character` WHERE `account` = '%d'", GetAccountId());
+        QueryResult *resultCount = sDatabase.PQuery("SELECT COUNT(guid) FROM `character` WHERE `account` = '%d'", GetAccountId());
         uint32 charCount = 0;
         if (resultCount)
         {
             Field *fields = resultCount->Fetch();
             charCount = fields[0].GetUInt32();
             delete resultCount;
-            loginDatabase.Execute("INSERT INTO `realmcharacters` (`numchars`, `acctid`, `realmid`) VALUES (%d, %d, %d) ON DUPLICATE KEY UPDATE `numchars` = '%d'", charCount, GetAccountId(), realmID, charCount);
+            loginDatabase.PExecute("INSERT INTO `realmcharacters` (`numchars`, `acctid`, `realmid`) VALUES (%d, %d, %d) ON DUPLICATE KEY UPDATE `numchars` = '%d'", charCount, GetAccountId(), realmID, charCount);
         }
 
         delete pNewChar;
@@ -255,7 +261,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     //set a count of unread mails
     time_t cTime = time(NULL);
-    QueryResult *resultMails = sDatabase.Query("SELECT COUNT(id) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0 AND `deliver_time` <= '" I64FMTD "'", GUID_LOPART(playerGuid),(uint64)cTime);
+    QueryResult *resultMails = sDatabase.PQuery("SELECT COUNT(id) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0 AND `deliver_time` <= '" I64FMTD "'", GUID_LOPART(playerGuid),(uint64)cTime);
     if (resultMails)
     {
         Field *fieldMail = resultMails->Fetch();
@@ -264,7 +270,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     }
 
     // store nearest delivery time (it > 0 and if it < current then at next player update SendNewMaill will be called)
-    resultMails = sDatabase.Query("SELECT MIN(`deliver_time`) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0", GUID_LOPART(playerGuid));
+    resultMails = sDatabase.PQuery("SELECT MIN(`deliver_time`) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0", GUID_LOPART(playerGuid));
     if (resultMails)
     {
         Field *fieldMail = resultMails->Fetch();
@@ -361,7 +367,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     // home bind stuff
     {
-        QueryResult *result4 = sDatabase.Query("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
+        QueryResult *result4 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
         if (result4)
         {
             Field *fields = result4->Fetch();
@@ -376,7 +382,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         {
             int plrace = GetPlayer()->getRace();
             int plclass = GetPlayer()->getClass();
-            QueryResult *result5 = sDatabase.Query("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `playercreateinfo` WHERE `race` = '%u' AND `class` = '%u'", plrace, plclass);
+            QueryResult *result5 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `playercreateinfo` WHERE `race` = '%u' AND `class` = '%u'", plrace, plclass);
 
             if(!result5)
             {
@@ -392,7 +398,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
             _player->m_homebindX = fields[2].GetFloat();
             _player->m_homebindY = fields[3].GetFloat();
             _player->m_homebindZ = fields[4].GetFloat();
-            sDatabase.Execute("INSERT INTO `character_homebind` (`guid`,`map`,`zone`,`position_x`,`position_y`,`position_z`) VALUES ('%u', '%u', '%u', '%f', '%f', '%f')", GUID_LOPART(playerGuid), _player->m_homebindMapId, (uint32)_player->m_homebindZoneId, _player->m_homebindX, _player->m_homebindY, _player->m_homebindZ);
+            sDatabase.PExecute("INSERT INTO `character_homebind` (`guid`,`map`,`zone`,`position_x`,`position_y`,`position_z`) VALUES ('%u', '%u', '%u', '%f', '%f', '%f')", GUID_LOPART(playerGuid), _player->m_homebindMapId, (uint32)_player->m_homebindZoneId, _player->m_homebindX, _player->m_homebindY, _player->m_homebindZ);
             delete result5;
         }
 
@@ -465,7 +471,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     GetPlayer()->UpdateHonorFields();
 
-    QueryResult *result = sDatabase.Query("SELECT `guildid`,`rank` FROM `guild_member` WHERE `guid` = '%u'",pCurrChar->GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `guildid`,`rank` FROM `guild_member` WHERE `guid` = '%u'",pCurrChar->GetGUIDLow());
 
     if(result)
     {
@@ -495,8 +501,8 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         pCurrChar->TeleportTo(curTrans->GetMapId(), curTrans->GetPositionX(), curTrans->GetPositionY(), curTrans->GetPositionZ(), curTrans->GetOrientation(), true, false);
     }
 
-    sDatabase.Execute("UPDATE `character` SET `online` = 1 WHERE `guid` = '%u'", pCurrChar->GetGUIDLow());
-    loginDatabase.Execute("UPDATE `account` SET `online` = 1 WHERE `id` = '%u'", GetAccountId());
+    sDatabase.PExecute("UPDATE `character` SET `online` = 1 WHERE `guid` = '%u'", pCurrChar->GetGUIDLow());
+    loginDatabase.PExecute("UPDATE `account` SET `online` = 1 WHERE `id` = '%u'", GetAccountId());
     plr->SetInGameTime( getMSTime() );
 
     // set some aura effects after add player to map
@@ -687,68 +693,4 @@ void WorldSession::HandleToggleCloakOpcode( WorldPacket & recv_data )
 {
     DEBUG_LOG("CMSG_TOGGLE_CLOAK for %s", _player->GetName());
     _player->ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK);
-}
-
-void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
-{
-    uint64 guid;
-    std::string newname;
-    std::string oldname;
-
-    CHECK_PACKET_SIZE(recv_data, 8+1);
-
-    recv_data >> guid;
-    recv_data >> newname;
-
-    if(!objmgr.GetPlayerNameByGUID(guid, oldname))          // character not exist, because we have no name for this guid
-    {
-        WorldPacket data(SMSG_CHAR_RENAME, 1);
-        data << (uint8)CHAR_LOGIN_NO_CHARACTER;
-        SendPacket( &data );
-        return;
-    }
-
-    // prevent character rename to invalid name
-    if(newname.size() == 0)                                 // checked by client
-    {
-        WorldPacket data(SMSG_CHAR_RENAME, 1);
-        data << (uint8)CHAR_NAME_NO_NAME;
-        SendPacket( &data );
-        return;
-    }
-
-    normalizePlayerName(newname);
-
-    if(newname.find_first_of(notAllowedChars) != newname.npos)
-    {
-        WorldPacket data(SMSG_CHAR_RENAME, 1);
-        data << (uint8)CHAR_NAME_INVALID_CHARACTER;;
-        SendPacket( &data );
-        return;
-    }
-
-    if(objmgr.GetPlayerGUIDByName(newname))         // character with this name already exist
-    {
-        WorldPacket data(SMSG_CHAR_RENAME, 1);
-        data << (uint8)CHAR_CREATE_NAME_IN_USE;
-        SendPacket( &data );
-        return;
-    }
-
-    if(newname == oldname)                                  // checked by client
-    {
-        WorldPacket data(SMSG_CHAR_RENAME, 1);
-        data << (uint8)CHAR_NAME_FAILURE;
-        SendPacket( &data );
-        return;
-    }
-
-    sDatabase.escape_string(newname);
-    sDatabase.Query("UPDATE `character` set `name` = '%s', `rename` = '0' WHERE `guid` ='%u'", newname.c_str(), GUID_LOPART(guid));
-
-    WorldPacket data(SMSG_CHAR_RENAME,1+8+(newname.size()+1));
-    data << (uint8)RESPONSE_SUCCESS;
-    data << guid;
-    data << newname;
-    SendPacket(&data);
 }

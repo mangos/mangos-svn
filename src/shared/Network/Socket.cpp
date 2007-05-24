@@ -1155,7 +1155,7 @@ void Socket::SetSlaveHandler(ISocketHandler *p)
 
 
 Socket::SocketThread::SocketThread(Socket *p)
-:sThread(false)
+:Thread(false)
 ,m_socket(p)
 {
 	// Creator will release

@@ -40,17 +40,17 @@ bool Group::Create(const uint64 &guid, const char * name)
         return false;
 
     // store group in database
-    //sDatabase.BeginTransaction();
-    sDatabase.Execute("DELETE FROM `group` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
-    sDatabase.Execute("DELETE FROM `group_member` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
-    sDatabase.Execute("INSERT INTO `group`(`leaderGuid`,`mainTank`,`mainAssistant`,`lootMethod`,`looterGuid`,`lootThreshold`,`icon1`,`icon2`,`icon3`,`icon4`,`icon5`,`icon6`,`icon7`,`icon8`,`isRaid`) VALUES('%u','%u','%u','%u','%u','%u','%u','%u','%u','%u','%u','%u','%u','%u',0)", GUID_LOPART(m_leaderGuid), GUID_LOPART(m_mainTank), GUID_LOPART(m_mainAssistant), m_lootMethod, GUID_LOPART(m_looterGuid), m_lootThreshold, m_targetIcons[0], m_targetIcons[1], m_targetIcons[2], m_targetIcons[3], m_targetIcons[4], m_targetIcons[5], m_targetIcons[6], m_targetIcons[7]);
+    sDatabase.BeginTransaction();
+    sDatabase.PExecute("DELETE FROM `group` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
+    sDatabase.PExecute("DELETE FROM `group_member` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
+    sDatabase.PExecute("INSERT INTO `group`(`leaderGuid`,`mainTank`,`mainAssistant`,`lootMethod`,`looterGuid`,`lootThreshold`,`icon1`,`icon2`,`icon3`,`icon4`,`icon5`,`icon6`,`icon7`,`icon8`,`isRaid`) VALUES('%u','%u','%u','%u','%u','%u','%u','%u','%u','%u','%u','%u','%u','%u',0)", GUID_LOPART(m_leaderGuid), GUID_LOPART(m_mainTank), GUID_LOPART(m_mainAssistant), m_lootMethod, GUID_LOPART(m_looterGuid), m_lootThreshold, m_targetIcons[0], m_targetIcons[1], m_targetIcons[2], m_targetIcons[3], m_targetIcons[4], m_targetIcons[5], m_targetIcons[6], m_targetIcons[7]);
 
     for(Group::member_citerator itr = m_members.begin(); itr != m_members.end(); ++itr)
     {
-        sDatabase.Execute("INSERT INTO `group_member`(`leaderGuid`,`memberGuid`,`assistant`,`subgroup`) VALUES('%u','%u','%u','%u')", 
+        sDatabase.PExecute("INSERT INTO `group_member`(`leaderGuid`,`memberGuid`,`assistant`,`subgroup`) VALUES('%u','%u','%u','%u')", 
             GUID_LOPART(m_leaderGuid), GUID_LOPART(itr->guid), (itr->assistant==1)?1:0, itr->group);
     }
-    //sDatabase.CommitTransaction();
+    sDatabase.CommitTransaction();
 
     return true;
 }
@@ -58,7 +58,7 @@ bool Group::Create(const uint64 &guid, const char * name)
 bool Group::LoadGroupFromDB(const uint64 &leaderGuid)
 {
     //                                             0          1               2            3            4               5       6       7       8       9       10      11      12      13
-    QueryResult *result = sDatabase.Query("SELECT `mainTank`,`mainAssistant`,`lootMethod`,`looterGuid`,`lootThreshold`,`icon1`,`icon2`,`icon3`,`icon4`,`icon5`,`icon6`,`icon7`,`icon8`,`isRaid` FROM `group` WHERE `leaderGuid`='%u'", GUID_LOPART(leaderGuid));
+    QueryResult *result = sDatabase.PQuery("SELECT `mainTank`,`mainAssistant`,`lootMethod`,`looterGuid`,`lootThreshold`,`icon1`,`icon2`,`icon3`,`icon4`,`icon5`,`icon6`,`icon7`,`icon8`,`isRaid` FROM `group` WHERE `leaderGuid`='%u'", GUID_LOPART(leaderGuid));
     if(!result)
         return false;
 
@@ -68,32 +68,32 @@ bool Group::LoadGroupFromDB(const uint64 &leaderGuid)
     if(!objmgr.GetPlayerNameByGUID(m_leaderGuid, m_leaderName))
         return false;
 
-    m_groupType  = result->Fetch()[13].GetBool() ? GROUPTYPE_RAID : GROUPTYPE_NORMAL;
-    m_mainTank = result->Fetch()[0].GetUInt64();
-    m_mainAssistant = result->Fetch()[1].GetUInt64();
-    m_lootMethod = (LootMethod)result->Fetch()[2].GetUInt8();
-    m_looterGuid = MAKE_GUID(result->Fetch()[3].GetUInt32(),HIGHGUID_PLAYER);
-    m_lootThreshold = (LootThreshold)result->Fetch()[4].GetUInt16();
+    m_groupType  = (*result)[13].GetBool() ? GROUPTYPE_RAID : GROUPTYPE_NORMAL;
+    m_mainTank = (*result)[0].GetUInt64();
+    m_mainAssistant = (*result)[1].GetUInt64();
+    m_lootMethod = (LootMethod)(*result)[2].GetUInt8();
+    m_looterGuid = MAKE_GUID((*result)[3].GetUInt32(),HIGHGUID_PLAYER);
+    m_lootThreshold = (LootThreshold)(*result)[4].GetUInt16();
 
     for(int i=0; i<TARGETICONCOUNT; i++)
-        m_targetIcons[i] = result->Fetch()[5+i].GetUInt8();
+        m_targetIcons[i] = (*result)[5+i].GetUInt8();
     delete result;
 
-    result = sDatabase.Query("SELECT `memberGuid`,`assistant`,`subgroup` FROM `group_member` WHERE `leaderGuid`='%u'", GUID_LOPART(leaderGuid));
+    result = sDatabase.PQuery("SELECT `memberGuid`,`assistant`,`subgroup` FROM `group_member` WHERE `leaderGuid`='%u'", GUID_LOPART(leaderGuid));
     if(!result)
         return false;
 
     do
     {
         MemberSlot member;
-        member.guid      = MAKE_GUID(result->Fetch()[0].GetUInt32(),HIGHGUID_PLAYER);
+        member.guid      = MAKE_GUID((*result)[0].GetUInt32(),HIGHGUID_PLAYER);
 
         // skip non-existed member
         if(!objmgr.GetPlayerNameByGUID(member.guid, member.name))
             continue;
 
-        member.group     = result->Fetch()[2].GetUInt8();
-        member.assistant = result->Fetch()[1].GetBool();
+        member.group     = (*result)[2].GetUInt8();
+        member.assistant = (*result)[1].GetBool();
         m_members.push_back(member);
     } while( result->NextRow() );
     delete result;
@@ -145,12 +145,6 @@ bool Group::AddMember(const uint64 &guid, const char* name)
 
 uint32 Group::RemoveMember(const uint64 &guid, const uint8 &method)
 {
-    if(m_members.size() <= 2)
-    {// UQ1: If there would only be 1 player left after the leader change, delete the group here!
-        Disband(true);
-        return 0;
-    }
-
     if(m_members.size() > 1)
     {
         bool leaderChanged = _removeMember(guid);
@@ -237,10 +231,10 @@ void Group::Disband(bool hideDestroy)
     }
     m_invitees.clear();
 
-    //sDatabase.BeginTransaction();
-    sDatabase.Execute("DELETE FROM `group` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
-    sDatabase.Execute("DELETE FROM `group_member` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
-    //sDatabase.CommitTransaction();
+    sDatabase.BeginTransaction();
+    sDatabase.PExecute("DELETE FROM `group` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
+    sDatabase.PExecute("DELETE FROM `group_member` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
+    sDatabase.CommitTransaction();
 
     m_leaderGuid = 0;
     m_leaderName = "";
@@ -802,7 +796,7 @@ bool Group::_addMember(const uint64 &guid, const char* name, bool isAssistant, u
     }
 
     // insert into group table
-    sDatabase.Execute("INSERT INTO `group_member`(`leaderGuid`,`memberGuid`,`assistant`,`subgroup`) VALUES('%u','%u','%u','%u')", GUID_LOPART(m_leaderGuid), GUID_LOPART(member.guid), ((member.assistant==1)?1:0), member.group);
+    sDatabase.PExecute("INSERT INTO `group_member`(`leaderGuid`,`memberGuid`,`assistant`,`subgroup`) VALUES('%u','%u','%u','%u')", GUID_LOPART(m_leaderGuid), GUID_LOPART(member.guid), ((member.assistant==1)?1:0), member.group);
 
     return true;
 }
@@ -823,7 +817,7 @@ bool Group::_removeMember(const uint64 &guid)
     if (slot != m_members.end())
         m_members.erase(slot);
 
-    sDatabase.Execute("DELETE FROM `group_member` WHERE `memberGuid`='%u'", GUID_LOPART(guid));
+    sDatabase.PExecute("DELETE FROM `group_member` WHERE `memberGuid`='%u'", GUID_LOPART(guid));
 
     if(m_leaderGuid == guid)                                // leader was removed
     {
@@ -860,7 +854,7 @@ void Group::_setLeader(const uint64 &guid)
             std::ostringstream ss;
             ss << "SELECT DISTINCT(`map`) FROM `character_instance` WHERE (`guid` IN (";
 
-            for(member_citerator citr = m_members.begin(); citr != m_members.end(); )
+            for(member_citerator citr = m_members.begin(); citr != m_members.end(); ++citr)
             {
                 ss << GUID_LOPART(citr->guid);
                 player = objmgr.GetPlayer(citr->guid);
@@ -876,7 +870,7 @@ void Group::_setLeader(const uint64 &guid)
                         }
                     }
                 }
-                ++citr;
+                citr++;
                 if (citr != m_members.end()) ss << ", ";
             }
             ss << ")) AND (`leader` = '" << GUID_LOPART(old_guid) << "')";
@@ -922,10 +916,10 @@ void Group::_setLeader(const uint64 &guid)
         }
     }
     
-    //sDatabase.BeginTransaction();
-    sDatabase.Execute("UPDATE `group` SET `leaderGuid`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(slot->guid), GUID_LOPART(m_leaderGuid));
-    sDatabase.Execute("UPDATE `group_member` SET `leaderGuid`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(slot->guid), GUID_LOPART(m_leaderGuid));
-    //sDatabase.CommitTransaction();
+    sDatabase.BeginTransaction();
+    sDatabase.PExecute("UPDATE `group` SET `leaderGuid`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(slot->guid), GUID_LOPART(m_leaderGuid));
+    sDatabase.PExecute("UPDATE `group_member` SET `leaderGuid`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(slot->guid), GUID_LOPART(m_leaderGuid));
+    sDatabase.CommitTransaction();
 
     m_leaderGuid = slot->guid;
     m_leaderName = slot->name;
@@ -955,7 +949,7 @@ void Group::_convertToRaid()
 {
     m_groupType = GROUPTYPE_RAID;
 
-    sDatabase.Execute("UPDATE `group` SET `isRaid` = 1 WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
+    sDatabase.PExecute("UPDATE `group` SET `isRaid` = 1 WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
 }
 
 bool Group::_setMembersGroup(const uint64 &guid, const uint8 &group)
@@ -965,7 +959,7 @@ bool Group::_setMembersGroup(const uint64 &guid, const uint8 &group)
         return false;
 
     slot->group = group;
-    sDatabase.Execute("UPDATE `group_member` SET `subgroup`='%u' WHERE `memberGuid`='%u'", group, GUID_LOPART(guid));
+    sDatabase.PExecute("UPDATE `group_member` SET `subgroup`='%u' WHERE `memberGuid`='%u'", group, GUID_LOPART(guid));
     return true;
 }
 
@@ -977,7 +971,7 @@ bool Group::_setAssistantFlag(const uint64 &guid, const bool &state)
 
 
     slot->assistant = state;
-    sDatabase.Execute("UPDATE `group_member` SET `assistant`='%u' WHERE `memberGuid`='%u'", (state==true)?1:0, GUID_LOPART(guid));
+    sDatabase.PExecute("UPDATE `group_member` SET `assistant`='%u' WHERE `memberGuid`='%u'", (state==true)?1:0, GUID_LOPART(guid));
     return true;
 }
 
@@ -990,7 +984,7 @@ bool Group::_setMainTank(const uint64 &guid)
     if(m_mainAssistant == guid)
         _setMainAssistant(0);
     m_mainTank = guid;
-    sDatabase.Execute("UPDATE `group` SET `mainTank`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(m_mainTank), GUID_LOPART(m_leaderGuid));
+    sDatabase.PExecute("UPDATE `group` SET `mainTank`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(m_mainTank), GUID_LOPART(m_leaderGuid));
     return true;
 }
 
@@ -1003,6 +997,6 @@ bool Group::_setMainAssistant(const uint64 &guid)
     if(m_mainTank == guid)
         _setMainTank(0);
     m_mainAssistant = guid;
-    sDatabase.Execute("UPDATE `group` SET `mainAssistant`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(m_mainAssistant), GUID_LOPART(m_leaderGuid));
+    sDatabase.PExecute("UPDATE `group` SET `mainAssistant`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(m_mainAssistant), GUID_LOPART(m_leaderGuid));
     return true;
 }

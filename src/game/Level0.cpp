@@ -122,7 +122,14 @@ bool ChatHandler::HandleStartCommand(const char* args)
     }
 
     // cast spell Stuck
-    chr->CastSpell(chr,7355,false);
+    SpellEntry const* sInfo = sSpellStore.LookupEntry(7355);
+    if(!sInfo)
+        return true;
+
+    Spell *spell = new Spell(chr, sInfo , false, 0);
+    SpellCastTargets targets;
+    targets.setUnitTarget( chr );
+    spell->prepare(&targets);
     return true;
 }
 
@@ -165,7 +172,7 @@ bool ChatHandler::HandleSaveCommand(const char* args)
     // save GM account without delay and output message (testing, etc)
     if(m_session->GetSecurity())
     {
-        player->SaveToDB(false);
+        player->SaveToDB();
         SendSysMessage(LANG_PLAYER_SAVED);
         return true;
     }
@@ -173,7 +180,7 @@ bool ChatHandler::HandleSaveCommand(const char* args)
     // save or plan save after 20 sec (logout delay) if current next save time more this value and _not_ output any messages to prevent cheat planning
     uint32 save_interval = sWorld.getConfig(CONFIG_INTERVAL_SAVE);
     if(save_interval==0 || save_interval > 20*1000 && player->GetSaveTimer() <= save_interval - 20*1000)
-        player->SaveToDB(false);
+        player->SaveToDB();
 
     return true;
 }
@@ -312,17 +319,17 @@ bool ChatHandler::HandlePasswordCommand(const char* args)
         return true;
     }
 
-    QueryResult *result = loginDatabase.Query("SELECT `password` FROM `account` WHERE `id` = '%d'",m_session->GetAccountId());
+    QueryResult *result = loginDatabase.PQuery("SELECT `password` FROM `account` WHERE `id` = '%d'",m_session->GetAccountId());
     if(result)
     {
         // in result already encoded password
         loginDatabase.escape_string(password_old);
 
-        if( result->Fetch()[0].GetCppString()==password_old && password_new == password_new_c)
+        if( (*result)[0].GetCppString()==password_old && password_new == password_new_c)
         {
             loginDatabase.escape_string(password_new);
 
-            if(loginDatabase.Execute( "UPDATE `account` SET `password` = '%s' WHERE `id` = '%d';",password_new.c_str(), m_session->GetAccountId()))
+            if(loginDatabase.PExecute( "UPDATE `account` SET `password` = '%s' WHERE `id` = '%d';",password_new.c_str(), m_session->GetAccountId()))
             {
                 SendSysMessage(LANG_COMMAND_PASSWORD);
                 return true;
@@ -350,14 +357,14 @@ bool ChatHandler::HandleLockAccountCommand(const char* args)
     std::string argstr = (char*)args;
     if (argstr == "on")
     {
-        loginDatabase.Execute( "UPDATE `account` SET `locked` = '1' WHERE `id` = '%d';",m_session->GetAccountId());
+        loginDatabase.PExecute( "UPDATE `account` SET `locked` = '1' WHERE `id` = '%d';",m_session->GetAccountId());
         PSendSysMessage(LANG_COMMAND_ACCLOCKLOCKED);
         return true;
     }
 
     if (argstr == "off")
     {
-        loginDatabase.Execute( "UPDATE `account` SET `locked` = '0' WHERE `id` = '%d';",m_session->GetAccountId());
+        loginDatabase.PExecute( "UPDATE `account` SET `locked` = '0' WHERE `id` = '%d';",m_session->GetAccountId());
         PSendSysMessage(LANG_COMMAND_ACCLOCKUNLOCKED);
         return true;
     }

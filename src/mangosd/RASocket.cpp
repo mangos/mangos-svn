@@ -152,7 +152,7 @@ void RASocket::OnRead()
                     std::string login = szLogin;
                     loginDatabase.escape_string(login);
                     // No SQL injection (escaped login)
-                    QueryResult* result = loginDatabase.Query("SELECT `password`,`gmlevel` FROM `account` WHERE `username` = '%s'",login.c_str());
+                    QueryResult* result = loginDatabase.PQuery("SELECT `password`,`gmlevel` FROM `account` WHERE `username` = '%s'",login.c_str());
 
                     ///- If the user is not found, deny access
                     if(!result)

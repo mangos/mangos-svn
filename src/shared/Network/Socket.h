@@ -66,7 +66,7 @@ protected:
 	/** Detached socket run thread. 
 		\ingroup internal */
 #ifdef ENABLE_DETACH
-	class SocketThread : public sThread
+	class SocketThread : public Thread
 	{
 	public:
 		SocketThread(Socket *p);

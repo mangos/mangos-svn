@@ -31,7 +31,7 @@ void WorldSession::HandleInspectArenaStatsOpcode( WorldPacket & recv_data )
     recv_data >> guid;
     sLog.outDebug("Inspect Arena stats " I64FMTD, guid);
 
-    QueryResult *result = sDatabase.Query("SELECT `teamslot`, `teamguid`, `rating`, `games`, `wins`, `played` FROM `arena_team_member` WHERE `guid`='%u'", _player->GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `teamslot`, `teamguid`, `rating`, `games`, `wins`, `played` FROM `arena_team_member` WHERE `guid`='%u'", _player->GetGUIDLow());
     if(result)
     {
         Field *fields = result->Fetch();

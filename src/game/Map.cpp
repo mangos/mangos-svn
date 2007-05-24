@@ -162,7 +162,7 @@ Map::Map(uint32 id, time_t expiry, uint32 ainstanceId) : i_id(id), i_gridExpiry(
     if (Instanceable())
     {
         sLog.outDetail("INSTANCEMAP: Loading instance template");
-        QueryResult* result = sDatabase.Query("SELECT `instance_template`.`maxplayers`, `instance_template`.`reset_delay`, `instance`.`resettime` FROM `instance_template` LEFT JOIN `instance` ON ((`instance_template`.`map` = `instance`.`map`) AND (`instance`.`id` = '%u')) WHERE `instance_template`.`map` = '%u'", i_InstanceId, id);
+        QueryResult* result = sDatabase.PQuery("SELECT `instance_template`.`maxplayers`, `instance_template`.`reset_delay`, `instance`.`resettime` FROM `instance_template` LEFT JOIN `instance` ON ((`instance_template`.`map` = `instance`.`map`) AND (`instance`.`id` = '%u')) WHERE `instance_template`.`map` = '%u'", i_InstanceId, id);
         if (result)
         {
             Field* fields = result->Fetch();
@@ -502,10 +502,10 @@ void Map::InitResetTime()
 
     if (Instanceable() && GetInstanceId())
     {
-        //sDatabase.BeginTransaction();
-        sDatabase.Execute("DELETE FROM `instance` WHERE `id` = '%u'", GetInstanceId());
-        sDatabase.Execute("INSERT INTO `instance` VALUES ('%u', '%u', '" I64FMTD "')", GetInstanceId(), i_id, (uint64)this->i_resetTime);
-        //sDatabase.CommitTransaction();
+        sDatabase.BeginTransaction();
+        sDatabase.PExecute("DELETE FROM `instance` WHERE `id` = '%u'", GetInstanceId());
+        sDatabase.PExecute("INSERT INTO `instance` VALUES ('%u', '%u', '" I64FMTD "')", GetInstanceId(), i_id, (uint64)this->i_resetTime);
+        sDatabase.CommitTransaction();
     }
 }
 

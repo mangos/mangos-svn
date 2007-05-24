@@ -117,8 +117,6 @@ Player::Player (WorldSession *session): Unit( 0 )
 
     m_dungeonDifficulty = DUNGEONDIFFICULTY_NORMAL;
 
-    m_needRename = false;
-
     m_dontMove = false;
 
     pTrader = 0;
@@ -856,7 +854,7 @@ void Player::Update( uint32 p_time )
         if(p_time >= m_nextSave)
         {
             // m_nextSave reseted in SaveToDB call
-            SaveToDB(false);
+            SaveToDB();
             sLog.outBasic("Player '%u' '%s' Saved", GetGUIDLow(), GetName());
         }
         else
@@ -988,29 +986,11 @@ void Player::BuildEnumData( WorldPacket * p_data )
     *p_data << GetPositionY();
     *p_data << GetPositionZ();
 
-    *p_data << GetUInt32Value(PLAYER_GUILDID);              // guild id
+    *p_data << uint32(0);                                   // unknown
 
-    *p_data << uint8(0x0);                                  // different values on off, looks like flags
-
-    uint8 flags = 0;
-    if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM))
-        flags |= 0x04;
-    if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK))
-        flags |= 0x08;
-    if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
-        flags |= 0x20;
-    if(isNeedRename())
-        flags |= 0x40;
-    *p_data << uint8(flags);    // flags description below
-    // 0x01 - unknown
-    // 0x02 - unknown
-    // 0x04 - hide helm
-    // 0x08 - hide cloak
-    // 0x10 - unknown
-    // 0x20 - dead(ghost)
-    // 0x40 - need rename
-
-    *p_data << uint8(0xa0);                                 // Bit 4 is something dono
+    *p_data << uint8(0x0);
+    *p_data << uint8(GetUInt32Value(PLAYER_FLAGS) << 1);    // probably wrong
+    *p_data << uint8(0x0);                                  // Bit 4 is something dono
     *p_data << uint8(0x0);                                  // is this player_GUILDRANK????
 
     *p_data << (uint8)1;                                    // 0x1 there
@@ -1024,7 +1004,7 @@ void Player::BuildEnumData( WorldPacket * p_data )
         // show pet at selection character in character list  only for non-ghost character
         if(isAlive())
         {
-            QueryResult *result = sDatabase.Query("SELECT `entry`,`modelid`,`level` FROM `character_pet` WHERE `owner` = '%u' AND `slot` = '0'", GetGUIDLow() );
+            QueryResult *result = sDatabase.PQuery("SELECT `entry`,`modelid`,`level` FROM `character_pet` WHERE `owner` = '%u' AND `slot` = '0'", GetGUIDLow() );
             if(result)
             {
                 Field* fields = result->Fetch();
@@ -1050,7 +1030,7 @@ void Player::BuildEnumData( WorldPacket * p_data )
     for (int i = 0; i < EQUIPMENT_SLOT_END; i++)
         items[i] = NULL;
 
-    QueryResult *result = sDatabase.Query("SELECT `slot`,`item_template` FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = 0",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `slot`,`item_template` FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = 0",GetGUIDLow());
     if (result)
     {
         do
@@ -1121,7 +1101,7 @@ void Player::SendFriendlist()
     Player* pObj;
     FriendStr friendstr[255];
 
-    QueryResult *result = sDatabase.Query("SELECT `friend` FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u'",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u'",GetGUIDLow());
     if(result)
     {
         fields = result->Fetch();
@@ -1192,20 +1172,20 @@ void Player::AddToIgnoreList(uint64 guid, std::string name)
     if(m_ignorelist.size() >= (255-1))
         return;
 
-    sDatabase.Execute("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) VALUES ('%u', '%s', '%u', 'IGNORE')",
+    sDatabase.PExecute("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) VALUES ('%u', '%s', '%u', 'IGNORE')",
         GetGUIDLow(), name.c_str(), GUID_LOPART(guid));
     m_ignorelist.insert(GUID_LOPART(guid));
 }
 
 void Player::RemoveFromIgnoreList(uint64 guid)
 {
-    sDatabase.Execute("DELETE FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u' AND `friend` = '%u'",GetGUIDLow(), GUID_LOPART(guid));
+    sDatabase.PExecute("DELETE FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u' AND `friend` = '%u'",GetGUIDLow(), GUID_LOPART(guid));
     m_ignorelist.erase(GUID_LOPART(guid));
 }
 
 void Player::LoadIgnoreList()
 {
-    QueryResult *result = sDatabase.Query("SELECT `friend` FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u'", GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u'", GetGUIDLow());
 
     if(!result) return;
 
@@ -1255,7 +1235,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     if(!InBattleGround() && mEntry->map_type == MAP_BATTLEGROUND && !GetSession()->GetSecurity())
         return;
 
-    QueryResult *result = loginDatabase.Query("SELECT `tbc` FROM `account` WHERE `id`='%u'", GetSession()->GetAccountId());
+    QueryResult *result = loginDatabase.PQuery("SELECT `tbc` FROM `account` WHERE `id`='%u'", GetSession()->GetAccountId());
 
     if(!result)
         return;                                             // unknown client or error
@@ -1400,7 +1380,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                     ResurrectPlayer();
                     SetHealth( GetMaxHealth()/2 );
                     SpawnCorpseBones();
-                    SaveToDB(false);
+                    SaveToDB();
                 }
             }
             SetDontMove(true);
@@ -1796,16 +1776,8 @@ void Player::RemoveFromGroup(Group* group, uint64 guid)
 {
     if(group)
     {
-        if (group->GetMembersCount() <= 2)
-        {   
-            // If there is only 2 members left and 1 leave, just remove the whole group!
-            group->Disband();
-            objmgr.RemoveGroup(group);
-            delete group;
-        }
-        else if (group->RemoveMember(guid, 0) <= 1)
+        if (group->RemoveMember(guid, 0) <= 1)
         {
-            // group->RemoveMember(guid, 0) causes a crash with 2 members! fix above!
             group->Disband();
             objmgr.RemoveGroup(group);
             delete group;
@@ -2475,7 +2447,7 @@ void Player::_LoadSpellCooldowns()
 {
     m_spellCooldowns.clear();
 
-    QueryResult *result = sDatabase.Query("SELECT `spell`,`item`,`time` FROM `character_spell_cooldown` WHERE `guid` = '%u'",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `spell`,`item`,`time` FROM `character_spell_cooldown` WHERE `guid` = '%u'",GetGUIDLow());
 
     if(result)
     {
@@ -2511,7 +2483,7 @@ void Player::_LoadSpellCooldowns()
 
 void Player::_SaveSpellCooldowns()
 {
-    sDatabase.Execute("DELETE FROM `character_spell_cooldown` WHERE `guid` = '%u'", GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `character_spell_cooldown` WHERE `guid` = '%u'", GetGUIDLow());
 
     time_t curTime = time(NULL);
 
@@ -2522,7 +2494,7 @@ void Player::_SaveSpellCooldowns()
             m_spellCooldowns.erase(itr++);
         else
         {
-            sDatabase.Execute("INSERT INTO `character_spell_cooldown` (`guid`,`spell`,`item`,`time`) VALUES ('%u', '%u', '%u', '" I64FMTD "')", GetGUIDLow(), itr->first, itr->second.itemid, uint64(itr->second.end));
+            sDatabase.PExecute("INSERT INTO `character_spell_cooldown` (`guid`,`spell`,`item`,`time`) VALUES ('%u', '%u', '%u', '" I64FMTD "')", GetGUIDLow(), itr->first, itr->second.itemid, uint64(itr->second.end));
             ++itr;
         }
     }
@@ -2937,7 +2909,7 @@ void Player::DeleteFromDB()
     // unsummon and delete pet not required: player deleted from CLI or character list with not loaded pet.
 
     // NOW we can finally clear other DB data releted to character
-    //sDatabase.BeginTransaction();
+    sDatabase.BeginTransaction();
 
     for(int i = 0; i < BANK_SLOT_ITEM_END; i++)
     {
@@ -2946,36 +2918,35 @@ void Player::DeleteFromDB()
         m_items[i]->DeleteFromDB();                         // Bag items delete also by virtual call Bag::DeleteFromDB
     }
 
-    //sDatabase.Execute("DELETE FROM `character` WHERE `guid` = '%u'",guid);
-    sDatabase.WaitExecute("DELETE FROM `character` WHERE `guid` = '%u'",guid);
-    sDatabase.Execute("DELETE FROM `character_aura` WHERE `guid` = '%u'",guid);
-    sDatabase.Execute("DELETE FROM `character_spell` WHERE `guid` = '%u'",guid);
-    sDatabase.Execute("DELETE FROM `character_tutorial` WHERE `guid` = '%u'",guid);
-    sDatabase.Execute("DELETE FROM `item_instance` WHERE `owner_guid` = '%u'",guid);
-    sDatabase.Execute("DELETE FROM `character_gifts` WHERE `guid` = '%u'",guid);
-    sDatabase.Execute("DELETE FROM `character_inventory` WHERE `guid` = '%u'",guid);
-    sDatabase.Execute("DELETE FROM `character_queststatus` WHERE `guid` = '%u'",guid);
-    sDatabase.Execute("DELETE FROM `character_action` WHERE `guid` = '%u'",guid);
-    sDatabase.Execute("DELETE FROM `character_reputation` WHERE `guid` = '%u'",guid);
-    sDatabase.Execute("DELETE FROM `character_homebind` WHERE `guid` = '%u'",guid);
-    sDatabase.Execute("DELETE FROM `character_kill` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_aura` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_spell` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_tutorial` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `item_instance` WHERE `owner_guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_gifts` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_queststatus` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_action` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_reputation` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_homebind` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_kill` WHERE `guid` = '%u'",guid);
 
-    sDatabase.Execute("DELETE FROM `character_social` WHERE `guid` = '%u' OR `friend`='%u'",guid,guid);
+    sDatabase.PExecute("DELETE FROM `character_social` WHERE `guid` = '%u' OR `friend`='%u'",guid,guid);
     m_ignorelist.clear();
 
-    sDatabase.Execute("DELETE FROM `mail` WHERE `receiver` = '%u'",guid);
-    sDatabase.Execute("DELETE FROM `character_pet` WHERE `owner` = '%u'",guid);
-    //sDatabase.CommitTransaction();
+    sDatabase.PExecute("DELETE FROM `mail` WHERE `receiver` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u'",guid);
+    sDatabase.CommitTransaction();
 
-    //loginDatabase.Execute("UPDATE `realmcharacters` SET `numchars` = `numchars` - 1 WHERE `acctid` = %d AND `realmid` = %d", GetSession()->GetAccountId(), realmID);
-    QueryResult *resultCount = sDatabase.Query("SELECT COUNT(guid) FROM `character` WHERE `account` = '%d'", GetSession()->GetAccountId());
+    //loginDatabase.PExecute("UPDATE `realmcharacters` SET `numchars` = `numchars` - 1 WHERE `acctid` = %d AND `realmid` = %d", GetSession()->GetAccountId(), realmID);
+    QueryResult *resultCount = sDatabase.PQuery("SELECT COUNT(guid) FROM `character` WHERE `account` = '%d'", GetSession()->GetAccountId());
     uint32 charCount = 0;
     if (resultCount)
     {
         Field *fields = resultCount->Fetch();
         charCount = fields[0].GetUInt32();
         delete resultCount;
-        loginDatabase.Execute("INSERT INTO `realmcharacters` (`numchars`, `acctid`, `realmid`) VALUES (%d, %d, %d) ON DUPLICATE KEY UPDATE `numchars` = '%d'", charCount, GetSession()->GetAccountId(), realmID, charCount);
+        loginDatabase.PExecute("INSERT INTO `realmcharacters` (`numchars`, `acctid`, `realmid`) VALUES (%d, %d, %d) ON DUPLICATE KEY UPDATE `numchars` = '%d'", charCount, GetSession()->GetAccountId(), realmID, charCount);
     }
 }
 
@@ -3299,7 +3270,7 @@ void Player::CreateCorpse()
 void Player::SpawnCorpseBones()
 {
     if(ObjectAccessor::Instance().ConvertCorpseForPlayer(GetGUID()))
-        SaveToDB(false);                                         // prevent loading as ghost without corpse
+        SaveToDB();                                         // prevent loading as ghost without corpse
 }
 
 CorpsePtr& Player::GetCorpse() const
@@ -3329,28 +3300,6 @@ void Player::DurabilityLoss(uint8 equip_pos, double percent)
         pDurabilityLoss = 1;
 
     uint32 pNewDurability = pDurability - pDurabilityLoss;
-
-    // we have durability 25% or 0 we should modify item stats
-    // modify item stats _before_ Durability set to 0 to pass _ApplyItemMods internal check
-    //        if ( pNewDurability == 0 || pNewDurability * 100 / pDurability < 25)
-    if ( pNewDurability == 0 )
-        _ApplyItemMods(m_items[equip_pos],equip_pos, false);
-
-    m_items[equip_pos]->SetUInt32Value(ITEM_FIELD_DURABILITY, pNewDurability);
-    m_items[equip_pos]->SetState(ITEM_CHANGED, this);
-}
-
-void Player::DurabilityPointsLoss(uint8 equip_pos, uint32 points)
-{
-    if(!m_items[equip_pos])
-        return;
-
-    uint32 pDurability =  m_items[equip_pos]->GetUInt32Value(ITEM_FIELD_DURABILITY);
-
-    if(!pDurability)
-        return;
-
-    uint32 pNewDurability = pDurability >= points ? pDurability - points : 0;
 
     // we have durability 25% or 0 we should modify item stats
     // modify item stats _before_ Durability set to 0 to pass _ApplyItemMods internal check
@@ -3454,7 +3403,7 @@ void Player::BroadcastPacketToFriendListers(WorldPacket *packet)
     Field *fields;
     Player *pfriend;
 
-    QueryResult *result = sDatabase.Query("SELECT `guid` FROM `character_social` WHERE `flags` = 'FRIEND' AND `friend` = '%u'", GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character_social` WHERE `flags` = 'FRIEND' AND `friend` = '%u'", GetGUIDLow());
 
     if(!result) return;
 
@@ -4449,15 +4398,16 @@ int32 Player::GetBaseReputation(const FactionEntry *factionEntry) const
     return 0;
 }
 
-int32 Player::GetReputation(uint32 faction_id) const
+int32 Player::GetReputation(uint32 FactionTemplateId) const
 {
-    FactionEntry const *factionEntry = sFactionStore.LookupEntry(faction_id);
+    FactionTemplateEntry const *factionTemplateEntry = sFactionTemplateStore.LookupEntry(FactionTemplateId);
 
-    if (!factionEntry)
+    if(!factionTemplateEntry)
     {
-        sLog.outError("Player::GetReputation: Can't get reputation of %s for unknown faction (faction template id) #%u.",GetName(), faction_id);
+        sLog.outError("Player::GetReputation: Can't get reputation of %s for unknown faction (faction template id) #%u.",GetName(), FactionTemplateId);
         return 0;
     }
+    FactionEntry const *factionEntry = sFactionStore.LookupEntry(factionTemplateEntry->faction);
 
     return GetReputation(factionEntry);
 }
@@ -4661,19 +4611,19 @@ void Player::UpdateHonorFields()
     uint32 today = uint32(time(NULL) / DAY) * DAY;
     uint32 yesterday = today - DAY;
 
-    QueryResult *result = sDatabase.Query("SELECT sum(`honor`) FROM `character_kill` WHERE `guid`='%u' AND `date`<'%u'", GUID_LOPART(GetGUID()), today);
-    if(result && result->Fetch()[0].GetFloat() != 0)
+    QueryResult *result = sDatabase.PQuery("SELECT sum(`honor`) FROM `character_kill` WHERE `guid`='%u' AND `date`<'%u'", GUID_LOPART(GetGUID()), today);
+    if(result && (*result)[0].GetFloat() != 0)
     {
         float honor=0.0, honor_yesterday=0.0;
         uint32 kills_yesterday=0;
 
-        honor = result->Fetch()[0].GetFloat();
+        honor = (*result)[0].GetFloat();
         delete result;
-        result = sDatabase.Query("SELECT sum(`honor`),count(`honor`) FROM `character_kill` WHERE `guid`='%u' AND `date`<'%u' AND `date`>='%u'", GUID_LOPART(GetGUID()), today, yesterday);
+        result = sDatabase.PQuery("SELECT sum(`honor`),count(`honor`) FROM `character_kill` WHERE `guid`='%u' AND `date`<'%u' AND `date`>='%u'", GUID_LOPART(GetGUID()), today, yesterday);
         if(result)
         {
-            honor_yesterday = result->Fetch()[0].GetFloat();
-            kills_yesterday = result->Fetch()[1].GetUInt32();
+            honor_yesterday = (*result)[0].GetFloat();
+            kills_yesterday = (*result)[1].GetUInt32();
             delete result;
         }
 
@@ -4682,7 +4632,7 @@ void Player::UpdateHonorFields()
         SetUInt32Value(PLAYER_FIELD_HONOR_YESTERDAY, (uint32)(honor_yesterday*10));
         SetUInt32Value(PLAYER_FIELD_KILLS, (kills_yesterday<<16));
 
-        sDatabase.Query("DELETE FROM `character_kill` WHERE `date`<'%u' AND `guid`='%u'", today,GUID_LOPART(GetGUID()));
+        sDatabase.PQuery("DELETE FROM `character_kill` WHERE `date`<'%u' AND `guid`='%u'", today,GUID_LOPART(GetGUID()));
     }
 }
 
@@ -4698,7 +4648,7 @@ void Player::CalculateHonor(Unit *uVictim)
 
     float honor = ((float)urand(1,80))/10;                  // honor between: 0.1 - 8.0
     float approx_honor = honor * (((float)urand(8,12))/10); // approx honor: 80% - 120% of real honor
-    sDatabase.Execute("INSERT INTO `character_kill` (`guid`,`creature_template`,`honor`,`date`) VALUES (%u, %u, %f, %u)", GUID_LOPART(GetGUID()), uVictim->GetEntry(), honor, time(0));
+    sDatabase.PExecute("INSERT INTO `character_kill` (`guid`,`creature_template`,`honor`,`date`) VALUES (%u, %u, %f, %u)", GUID_LOPART(GetGUID()), uVictim->GetEntry(), honor, time(0));
 
     ApplyModUInt32Value(PLAYER_FIELD_KILLS, 1, true);       // add 1 today_kill
                                                             // add 1 lifetime_kill
@@ -5023,9 +4973,6 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
                 RemoveAurasDueToSpell(proto->Spells[i].SpellId );
 
     ApplyEnchantment(item, apply);
-
-    if(proto->Socket[0].Color)    //only (un)equipping of items with sockets can influence metagems, so no need to waste time with normal items
-        CorrectMetaGemEnchants(slot, apply);
 
     sLog.outDebug("_ApplyItemMods complete.");
 }
@@ -5352,7 +5299,7 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
     // item combat enchantments
     for(int e_slot = 0; e_slot < MAX_ENCHANTMENT_SLOT; ++e_slot)
     {
-        uint32 enchant_id = item->GetEnchantmentId(EnchantmentSlot(e_slot));
+        uint32 enchant_id = item->GetEchantmentId(EnchantmentSlot(e_slot));
         SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
         if(!pEnchant) continue;
         for (int s=0;s<3;s++)
@@ -6260,17 +6207,17 @@ void Player::SetVirtualItemSlot( uint8 i, Item* item)
     SetUInt32Value(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY+i,item ? item->GetProto()->DisplayInfoID : 0);
     if(i < 2 && item)
     {
-        if(!item->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT))
+        if(!item->GetEchantmentId(TEMP_ENCHANTMENT_SLOT))
             return;
-        uint32 charges = item->GetEnchantmentCharges(TEMP_ENCHANTMENT_SLOT);
+        uint32 charges = item->GetEchantmentCharges(TEMP_ENCHANTMENT_SLOT);
         if(charges == 0)
             return;
         if(charges > 1)
-            item->SetEnchantmentCharges(TEMP_ENCHANTMENT_SLOT,charges-1);
+            item->SetEchantmentCharges(TEMP_ENCHANTMENT_SLOT,charges-1);
         else if(charges <= 1)
         {
             ApplyEnchantment(item,TEMP_ENCHANTMENT_SLOT,false);
-            item->ClearEnchantment(TEMP_ENCHANTMENT_SLOT);
+            item->ClearEchantment(TEMP_ENCHANTMENT_SLOT);
         }
     }
 }
@@ -6507,16 +6454,6 @@ uint32 Player::GetItemCount( uint32 item, Item* eItem ) const
             count += pBag->GetItemCount(item,eItem);
     }
 
-    if(eItem && eItem->GetProto()->GemProperties)
-    {
-        for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
-        {
-            pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-            if( pItem && pItem != eItem && pItem->GetProto()->Socket[0].Color )
-                count += pItem->GetGemCountWithID(item);
-        }
-    }
-
     return count;
 }
 
@@ -6537,17 +6474,6 @@ uint32 Player::GetBankItemCount( uint32 item, Item* eItem ) const
         if( pBag )
             count += pBag->GetItemCount(item,eItem);
     }
-    
-    if(eItem && eItem->GetProto()->GemProperties)
-    {
-        for(int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; i++)
-        {
-            pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-            if( pItem && pItem != eItem && pItem->GetProto()->Socket[0].Color )
-                count += pItem->GetGemCountWithID(item);
-        }
-    }
-    
     return count;
 }
 
@@ -8024,7 +7950,7 @@ void Player::VisualizeItem( uint16 pos, Item *pItem)
         SetUInt32Value(VisibleBase, pItem->GetEntry());
 
         for(int i = 0; i < MAX_ENCHANTMENT_SLOT; ++i)
-            SetUInt32Value(VisibleBase + 1 + i, pItem->GetEnchantmentId(EnchantmentSlot(i)));
+            SetUInt32Value(VisibleBase + 1 + i, pItem->GetEchantmentId(EnchantmentSlot(i)));
 
         SetUInt32Value(VisibleBase + 8, pItem->GetItemRandomPropertyId());
     }
@@ -8061,8 +7987,8 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
                 // and remove held enchantments
                 if ( slot == EQUIPMENT_SLOT_MAINHAND )
                 {
-                    pItem->ClearEnchantment(HELD_PERM_ENCHANTMENT_SLOT);
-                    pItem->ClearEnchantment(HELD_TEMP_ENCHANTMENT_SLOT);
+                    pItem->ClearEchantment(HELD_PERM_ENCHANTMENT_SLOT);
+                    pItem->ClearEchantment(HELD_TEMP_ENCHANTMENT_SLOT);
                 }
             }
 
@@ -8188,7 +8114,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
         sLog.outDebug( "STORAGE: DestroyItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
 
         if(pItem->HasFlag(ITEM_FIELD_FLAGS, 8))
-            sDatabase.Execute("DELETE FROM `character_gifts` WHERE `item_guid` = '%u'", pItem->GetGUIDLow());
+            sDatabase.PExecute("DELETE FROM `character_gifts` WHERE `item_guid` = '%u'", pItem->GetGUIDLow());
 
         //pItem->SetOwnerGUID(0);
         pItem->SetSlot( NULL_SLOT );
@@ -8903,14 +8829,14 @@ void Player::UpdateEnchantTime(uint32 time)
     {
         assert(itr->item);
         next=itr;
-        if(!itr->item->GetEnchantmentId(itr->slot))
+        if(!itr->item->GetEchantmentId(itr->slot))
         {
             next = m_enchantDuration.erase(itr);
         }
         else if(itr->leftduration <= time)
         {
             ApplyEnchantment(itr->item,itr->slot,false,false);
-            itr->item->ClearEnchantment(itr->slot);
+            itr->item->ClearEchantment(itr->slot);
             next = m_enchantDuration.erase(itr);
         }
         else if(itr->leftduration > time)
@@ -8925,7 +8851,7 @@ void Player::AddEnchantmentDurations(Item *item)
 {
     for(int x=0;x<MAX_ENCHANTMENT_SLOT;++x)
     {
-        uint32 duration = item->GetEnchantmentDuration(EnchantmentSlot(x));
+        uint32 duration = item->GetEchantmentDuration(EnchantmentSlot(x));
         if( duration == 0 )
             continue;
         else if( duration > 0 )
@@ -8940,7 +8866,7 @@ void Player::RemoveEnchantmentDurations(Item *item)
         if(itr->item == item)
         {
             // save duration in item
-            item->SetEnchantmentDuration(EnchantmentSlot(itr->slot),itr->leftduration);
+            item->SetEchantmentDuration(EnchantmentSlot(itr->slot),itr->leftduration);
             itr = m_enchantDuration.erase(itr);
         }
         else
@@ -8978,7 +8904,7 @@ void Player::ApplyEnchantment(Item *item,bool apply)
         ApplyEnchantment(item, EnchantmentSlot(slot), apply);
 }
 
-void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool apply_dur, bool ignore_condition)
+void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool apply_dur)
 {
     if(!item)
         return;
@@ -8989,15 +8915,12 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
     if(slot > MAX_ENCHANTMENT_SLOT)
         return;
 
-    uint32 enchant_id = item->GetEnchantmentId(slot);
+    uint32 enchant_id = item->GetEchantmentId(slot);
     if(!enchant_id)
         return;
 
     SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
     if(!pEnchant)
-        return;
-
-    if(!ignore_condition && pEnchant->EnchantmentCondition && !((Player*)this)->EnchantmentFitsRequirements(pEnchant->EnchantmentCondition, -1))
         return;
 
     for (int s=0; s<3; s++)
@@ -9140,7 +9063,7 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
 
     // visualize enchantment at player and equipped items
     int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (item->GetSlot() * 16);
-    SetUInt32Value(VisibleBase+1 + slot +1, apply? item->GetEnchantmentId(slot) : 0);
+    SetUInt32Value(VisibleBase+1 + slot +1, apply? item->GetEchantmentId(slot) : 0);
 
 
     if(apply_dur)
@@ -9148,7 +9071,7 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
         if(apply)
         {
             // set duration
-            uint32 duration = item->GetEnchantmentDuration(slot);
+            uint32 duration = item->GetEchantmentDuration(slot);
             if(duration)
                 AddEnchantmentDuration(item,TEMP_ENCHANTMENT_SLOT,duration);
         }
@@ -9178,18 +9101,18 @@ void Player::ReducePoisonCharges(uint32 enchantId)
             continue;
         for(int x=0;x<MAX_ENCHANTMENT_SLOT;x++)
         {
-            charges = pItem->GetEnchantmentCharges(EnchantmentSlot(x));
+            charges = pItem->GetEchantmentCharges(EnchantmentSlot(x));
             if(charges == 0)
                 continue;
             if(charges <= 1)
             {
                 ApplyEnchantment(pItem,EnchantmentSlot(x),false);
-                pItem->ClearEnchantment(EnchantmentSlot(x));
+                pItem->ClearEchantment(EnchantmentSlot(x));
                 break;
             }
             else
             {
-                pItem->SetEnchantmentCharges(EnchantmentSlot(x),charges-1);
+                pItem->SetEchantmentCharges(EnchantmentSlot(x),charges-1);
                 break;
             }
         }
@@ -9202,7 +9125,7 @@ void Player::SaveEnchant()
     {
         assert(itr->item);
         if(itr->leftduration > 0)
-            itr->item->SetEnchantmentDuration(itr->slot,itr->leftduration);
+            itr->item->SetEchantmentDuration(itr->slot,itr->leftduration);
     }
 }
 
@@ -10681,7 +10604,7 @@ void Player::SendQuestUpdateAddCreature( uint32 quest_id, uint64 guid, uint32 cr
 
 bool Player::MinimalLoadFromDB( uint32 guid )
 {
-    QueryResult *result = sDatabase.Query("SELECT `data`,`name`,`position_x`,`position_y`,`position_z`,`map`,`totaltime`,`leveltime`,`rename` FROM `character` WHERE `guid` = '%u'",guid);
+    QueryResult *result = sDatabase.PQuery("SELECT `data`,`name`,`position_x`,`position_y`,`position_z`,`map`,`totaltime`,`leveltime` FROM `character` WHERE `guid` = '%u'",guid);
     if(!result)
         return false;
 
@@ -10702,8 +10625,6 @@ bool Player::MinimalLoadFromDB( uint32 guid )
     m_Played_time[0] = fields[6].GetUInt32();
     m_Played_time[1] = fields[7].GetUInt32();
 
-    m_needRename = fields[8].GetBool();
-
     _LoadGroup();
 
     _LoadBoundInstances();
@@ -10721,7 +10642,7 @@ bool Player::MinimalLoadFromDB( uint32 guid )
 
 bool Player::LoadPositionFromDB(uint32& mapid, float& x,float& y,float& z,float& o, uint64 guid)
 {
-    QueryResult *result = sDatabase.Query("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `character` WHERE `guid` = '%u'",GUID_LOPART(guid));
+    QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `character` WHERE `guid` = '%u'",GUID_LOPART(guid));
     if(!result)
         return false;
 
@@ -10788,8 +10709,8 @@ float Player::GetFloatValueFromDB(uint16 index, uint64 guid)
 
 bool Player::LoadFromDB( uint32 guid )
 {
-    //                                                0        1       2      3      4      5         6            7            8         9        10            11         12          13         14            15          16               17                  18                 19               20        21        22       23         24          25      26            27
-    QueryResult *result = sDatabase.Query("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`rename` FROM `character` WHERE `guid` = '%u'", guid);
+    //                                                0        1       2      3      4      5         6            7            8         9        10            11         12          13         14            15          16               17                  18                 19               20        21        22       23         24          25      26
+    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots` FROM `character` WHERE `guid` = '%u'", guid);
 
     if(!result)
     {
@@ -10936,8 +10857,6 @@ bool Player::LoadFromDB( uint32 guid )
         m_stableSlots = 2;
     }
 
-    m_needRename = fields[27].GetBool();
-
     delete result;
 
     // clear channel spell data (if saved at channel spell casting)
@@ -11043,7 +10962,7 @@ void Player::_LoadActions()
 {
     m_actionButtons.clear();
 
-    QueryResult *result = sDatabase.Query("SELECT `button`,`action`,`type`,`misc` FROM `character_action` WHERE `guid` = '%u' ORDER BY `button`",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `button`,`action`,`type`,`misc` FROM `character_action` WHERE `guid` = '%u' ORDER BY `button`",GetGUIDLow());
 
     if(result)
     {
@@ -11074,7 +10993,7 @@ void Player::_LoadAuras(uint32 timediff)
     for(uint8 j = 0; j < 6; j++)
         SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + j), 0);
 
-    QueryResult *result = sDatabase.Query("SELECT `spell`,`effect_index`,`remaintime` FROM `character_aura` WHERE `guid` = '%u'",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `spell`,`effect_index`,`remaintime` FROM `character_aura` WHERE `guid` = '%u'",GetGUIDLow());
 
     if(result)
     {
@@ -11145,7 +11064,7 @@ void Player::LoadCorpse()
 
 void Player::_LoadInventory(uint32 timediff)
 {
-    QueryResult *result = sDatabase.Query("SELECT `slot`,`item`,`item_template` FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '0' ORDER BY `slot`",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `slot`,`item`,`item_template` FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '0' ORDER BY `slot`",GetGUIDLow());
 
     uint16 dest;
     if (result)
@@ -11225,7 +11144,7 @@ void Player::_LoadInventory(uint32 timediff)
 // load mailed items which should receive current player
 void Player::_LoadMailedItems()
 {
-    QueryResult *result = sDatabase.Query( "SELECT `item_guid`,`item_template` FROM `mail` WHERE `receiver` = '%u' AND `item_guid` > 0", GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery( "SELECT `item_guid`,`item_template` FROM `mail` WHERE `receiver` = '%u' AND `item_guid` > 0", GetGUIDLow());
 
     if( !result )
         return;
@@ -11266,7 +11185,7 @@ void Player::_LoadMail()
 
     m_mail.clear();
     //mails are in right order
-    QueryResult *result = sDatabase.Query("SELECT `id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked` FROM `mail` WHERE `receiver` = '%u' ORDER BY `id` DESC",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked` FROM `mail` WHERE `receiver` = '%u' ORDER BY `id` DESC",GetGUIDLow());
     if(result)
     {
         do
@@ -11307,7 +11226,7 @@ void Player::_LoadQuestStatus()
 
     uint32 slot = 0;
 
-    QueryResult *result = sDatabase.Query("SELECT `quest`,`status`,`rewarded`,`explored`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4` FROM `character_queststatus` WHERE `guid` = '%u'", GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `quest`,`status`,`rewarded`,`explored`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4` FROM `character_queststatus` WHERE `guid` = '%u'", GetGUIDLow());
 
     if(result)
     {
@@ -11401,7 +11320,7 @@ void Player::_LoadReputation()
 {
     m_factions.clear();
 
-    QueryResult *result = sDatabase.Query("SELECT `faction`,`reputation`,`standing`,`flags` FROM `character_reputation` WHERE `guid` = '%u'",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `faction`,`reputation`,`standing`,`flags` FROM `character_reputation` WHERE `guid` = '%u'",GetGUIDLow());
 
     if(result)
     {
@@ -11436,7 +11355,7 @@ void Player::_LoadSpells(uint32 timediff)
         delete itr->second;
     m_spells.clear();
 
-    QueryResult *result = sDatabase.Query("SELECT `spell`,`slot`,`active` FROM `character_spell` WHERE `guid` = '%u'",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `spell`,`slot`,`active` FROM `character_spell` WHERE `guid` = '%u'",GetGUIDLow());
 
     if(result)
     {
@@ -11469,7 +11388,7 @@ void Player::_LoadTaxiMask(const char* data)
 
 void Player::_LoadTutorials()
 {
-    QueryResult *result = sDatabase.Query("SELECT `tut0`,`tut1`,`tut2`,`tut3`,`tut4`,`tut5`,`tut6`,`tut7` FROM `character_tutorial` WHERE `guid` = '%u'",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `tut0`,`tut1`,`tut2`,`tut3`,`tut4`,`tut5`,`tut6`,`tut7` FROM `character_tutorial` WHERE `guid` = '%u'",GetGUIDLow());
 
     if(result)
     {
@@ -11490,7 +11409,7 @@ void Player::_LoadTutorials()
 /***                   SAVE SYSTEM                     ***/
 /*********************************************************/
 
-void Player::SaveToDB(bool first_save)
+void Player::SaveToDB()
 {
     // delay auto save at any saves (manual, in code, or autosave)
     m_nextSave = sWorld.getConfig(CONFIG_INTERVAL_SAVE);
@@ -11537,7 +11456,7 @@ void Player::SaveToDB(bool first_save)
 
     // remove restflag when save
     //this is because of the rename char stuff
-    //RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+    RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
 
     bool inworld = IsInWorld();
 
@@ -11552,18 +11471,16 @@ void Player::SaveToDB(bool first_save)
     for(uint32 i = 0; i < MAX_POWERS; ++i)
         SetFloatValue(UNIT_FIELD_POWER1+i,float(currentPower[i]));
 
-    //sDatabase.BeginTransaction();
+    sDatabase.BeginTransaction();
 
-    //sDatabase.Execute("DELETE FROM `character` WHERE `guid` = '%u'",GetGUIDLow());
-    if(!first_save)
-        sDatabase.Execute("DELETE FROM `character` WHERE `guid` = '%u'",GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `character` WHERE `guid` = '%u'",GetGUIDLow());
 
     std::ostringstream ss;
     ss << "INSERT INTO `character` (`guid`,`account`,`name`,`race`,`class`,"
         "`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,"
         "`taximask`,`online`,`cinematic`,"
         "`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,"
-        "`trans_x`, `trans_y`, `trans_z`, `trans_o`, `transguid`, `gmstate`, `stable_slots`,`rename`) VALUES ("
+        "`trans_x`, `trans_y`, `trans_z`, `trans_o`, `transguid`, `gmstate`, `stable_slots` ) VALUES ("
         << GetGUIDLow() << ", "
         << GetSession()->GetAccountId() << ", '"
         << m_name << "', "
@@ -11628,24 +11545,16 @@ void Player::SaveToDB(bool first_save)
     ss << ", ";
     ss << uint32(m_stableSlots);                            // to prevent save uint8 as char
 
-    ss << ", ";
-    ss << (isNeedRename()? 1 : 0);
-
     ss << " )";
 
-    //sDatabase.Execute( ss.str().c_str() );
-    if(!first_save)
-        sDatabase.Execute( ss.str().c_str() );
-    else
-        sDatabase.WaitExecute(ss.str().c_str());
+    sDatabase.Execute( ss.str().c_str() );
 
     SaveEnchant();
 
     if(m_mailsUpdated)                                      //save mails only when needed
         _SaveMail();
 
-    //_SaveInventory();
-    _SaveInventory(first_save);
+    _SaveInventory();
     _SaveQuestStatus();
     _SaveTutorials();
     _SaveSpells();
@@ -11655,7 +11564,7 @@ void Player::SaveToDB(bool first_save)
     _SaveReputation();
     _SaveBoundInstances();
 
-    //sDatabase.CommitTransaction();
+    sDatabase.CommitTransaction();
 
     // restore base power/health values before restore mods
     SetUInt32Value(UNIT_FIELD_HEALTH,baseHealth);
@@ -11688,7 +11597,7 @@ void Player::SaveToDB(bool first_save)
 // fast save function for item/money cheating preventing - save only inventory and money state
 void Player::SaveInventoryAndGoldToDB()
 {
-    _SaveInventory(false);
+    _SaveInventory();
     SetUInt32ValueInDB(PLAYER_FIELD_COINAGE,GetMoney(),GetGUID());
 }
 
@@ -11699,19 +11608,19 @@ void Player::_SaveActions()
         switch (itr->second.uState)
         {
             case ACTIONBUTTON_NEW:
-                sDatabase.Execute("INSERT INTO `character_action` (`guid`,`button`,`action`,`type`,`misc`) VALUES ('%u', '%u', '%u', '%u', '%u')",
+                sDatabase.PExecute("INSERT INTO `character_action` (`guid`,`button`,`action`,`type`,`misc`) VALUES ('%u', '%u', '%u', '%u', '%u')",
                     GetGUIDLow(), (uint32)itr->first, (uint32)itr->second.action, (uint32)itr->second.type, (uint32)itr->second.misc );
                 itr->second.uState = ACTIONBUTTON_UNCHANGED;
                 ++itr;
                 break;
             case ACTIONBUTTON_CHANGED:
-                sDatabase.Execute("UPDATE `character_action`  SET `action` = '%u', `type` = '%u', `misc`= '%u' WHERE `guid`= '%u' AND `button`= '%u' ",
+                sDatabase.PExecute("UPDATE `character_action`  SET `action` = '%u', `type` = '%u', `misc`= '%u' WHERE `guid`= '%u' AND `button`= '%u' ",
                     (uint32)itr->second.action, (uint32)itr->second.type, (uint32)itr->second.misc, GetGUIDLow(), (uint32)itr->first );
                 itr->second.uState = ACTIONBUTTON_UNCHANGED;
                 ++itr;
                 break;
             case ACTIONBUTTON_DELETED:
-                sDatabase.Execute("DELETE FROM `character_action` WHERE `guid` = '%u' and button = '%u'", GetGUIDLow(), (uint32)itr->first );
+                sDatabase.PExecute("DELETE FROM `character_action` WHERE `guid` = '%u' and button = '%u'", GetGUIDLow(), (uint32)itr->first );
                 m_actionButtons.erase(itr++);
                 break;
             default:
@@ -11723,7 +11632,7 @@ void Player::_SaveActions()
 
 void Player::_SaveAuras()
 {
-    sDatabase.Execute("DELETE FROM `character_aura` WHERE `guid` = '%u'",GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `character_aura` WHERE `guid` = '%u'",GetGUIDLow());
 
     AuraMap const& auras = GetAuras();
     for(AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
@@ -11738,13 +11647,13 @@ void Player::_SaveAuras()
 
         if (i == 3 && !itr->second->IsPassive())
         {
-            sDatabase.Execute("DELETE FROM `character_aura` WHERE `guid` = '%u' and `spell` = '%u' and  `effect_index`= '%u'",GetGUIDLow(),(uint32)(*itr).second->GetId(), (uint32)(*itr).second->GetEffIndex());
-            sDatabase.Execute("INSERT INTO `character_aura` (`guid`,`spell`,`effect_index`,`remaintime`) VALUES ('%u', '%u', '%u', '%d')", GetGUIDLow(), (uint32)(*itr).second->GetId(), (uint32)(*itr).second->GetEffIndex(), int((*itr).second->GetAuraDuration()));
+            sDatabase.PExecute("DELETE FROM `character_aura` WHERE `guid` = '%u' and `spell` = '%u' and  `effect_index`= '%u'",GetGUIDLow(),(uint32)(*itr).second->GetId(), (uint32)(*itr).second->GetEffIndex());
+            sDatabase.PExecute("INSERT INTO `character_aura` (`guid`,`spell`,`effect_index`,`remaintime`) VALUES ('%u', '%u', '%u', '%d')", GetGUIDLow(), (uint32)(*itr).second->GetId(), (uint32)(*itr).second->GetEffIndex(), int((*itr).second->GetAuraDuration()));
         }
     }
 }
 
-void Player::_SaveInventory(bool first_save)
+void Player::_SaveInventory()
 {
     // force items in buyback slots to new state
     // and remove those that aren't already
@@ -11752,8 +11661,8 @@ void Player::_SaveInventory(bool first_save)
     {
         Item *item = m_items[i];
         if (!item || item->GetState() == ITEM_NEW) continue;
-        sDatabase.Execute("DELETE FROM `character_inventory` WHERE `item` = '%u'", item->GetGUIDLow());
-        sDatabase.Execute("DELETE FROM `item_instance` WHERE `guid` = '%u'", item->GetGUIDLow());
+        sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `item` = '%u'", item->GetGUIDLow());
+        sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", item->GetGUIDLow());
         m_items[i]->FSetState(ITEM_NEW);
     }
 
@@ -11797,21 +11706,16 @@ void Player::_SaveInventory(bool first_save)
         switch(item->GetState())
         {
             case ITEM_NEW:
-                //sDatabase.Execute("INSERT INTO `character_inventory` (`guid`,`bag`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), bag_guid, item->GetSlot(), item->GetGUIDLow(), item->GetEntry());
-                if(!first_save)
-                        sDatabase.Execute("INSERT INTO `character_inventory` (`guid`,`bag`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), bag_guid, item->GetSlot(), item->GetGUIDLow(), item->GetEntry());
-                    else
-                        sDatabase.WaitExecute("INSERT INTO `character_inventory` (`guid`,`bag`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), bag_guid, item->GetSlot(), item->GetGUIDLow(), item->GetEntry());
+                sDatabase.PExecute("INSERT INTO `character_inventory` (`guid`,`bag`,`slot`,`item`,`item_template`) VALUES ('%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), bag_guid, item->GetSlot(), item->GetGUIDLow(), item->GetEntry());
                 break;
             case ITEM_CHANGED:
-                sDatabase.Execute("UPDATE `character_inventory` SET `guid`='%u', `bag`='%u', `slot`='%u', `item_template`='%u' WHERE `item`='%u'", GetGUIDLow(), bag_guid, item->GetSlot(), item->GetEntry(), item->GetGUIDLow());
+                sDatabase.PExecute("UPDATE `character_inventory` SET `guid`='%u', `bag`='%u', `slot`='%u', `item_template`='%u' WHERE `item`='%u'", GetGUIDLow(), bag_guid, item->GetSlot(), item->GetEntry(), item->GetGUIDLow());
                 break;
             case ITEM_REMOVED:
-                sDatabase.Execute("DELETE FROM `character_inventory` WHERE `item` = '%u'", item->GetGUIDLow());
+                sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `item` = '%u'", item->GetGUIDLow());
         }
 
-        //item->SaveToDB();
-        item->SaveToDB(first_save);
+        item->SaveToDB();
     }
     m_itemUpdateQueue.clear();
 }
@@ -11826,19 +11730,19 @@ void Player::_SaveMail()
         Mail *m = (*itr);
         if (m->state == MAIL_STATE_CHANGED)
         {
-            sDatabase.Execute("UPDATE `mail` SET `itemTextId` = '%u',`item_guid` = '%u',`item_template` = '%u',`expire_time` = '" I64FMTD "', `deliver_time` = '" I64FMTD "',`money` = '%u',`cod` = '%u',`checked` = '%u' WHERE `id` = '%u'",
+            sDatabase.PExecute("UPDATE `mail` SET `itemTextId` = '%u',`item_guid` = '%u',`item_template` = '%u',`expire_time` = '" I64FMTD "', `deliver_time` = '" I64FMTD "',`money` = '%u',`cod` = '%u',`checked` = '%u' WHERE `id` = '%u'",
                 m->itemTextId, m->item_guid, m->item_template, (uint64)m->expire_time, (uint64)m->deliver_time, m->money, m->COD, m->checked, m->messageID);
             m->state = MAIL_STATE_UNCHANGED;
         }
         else if (m->state == MAIL_STATE_DELETED)
         {
             if (m->item_guid)
-                sDatabase.Execute("DELETE FROM `item_instance` WHERE `guid` = '%u'", m->item_guid);
+                sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", m->item_guid);
             if (m->itemTextId)
             {
-                sDatabase.Execute("DELETE FROM `item_text` WHERE `id` = '%u'", m->itemTextId);
+                sDatabase.PExecute("DELETE FROM `item_text` WHERE `id` = '%u'", m->itemTextId);
             }
-            sDatabase.Execute("DELETE FROM `mail` WHERE `id` = '%u'", m->messageID);
+            sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", m->messageID);
         }
     }
     //deallocate deleted mails...
@@ -11869,11 +11773,11 @@ void Player::_SaveQuestStatus()
         switch (i->second.uState)
         {
             case QUEST_NEW :
-                sDatabase.Execute("INSERT INTO `character_queststatus` (`guid`,`quest`,`status`,`rewarded`,`explored`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4`) VALUES ('%u', '%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')",
+                sDatabase.PExecute("INSERT INTO `character_queststatus` (`guid`,`quest`,`status`,`rewarded`,`explored`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4`) VALUES ('%u', '%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')",
                     GetGUIDLow(), i->first, i->second.m_status, i->second.m_rewarded, i->second.m_explored, uint64(i->second.m_timer / 1000 + sWorld.GetGameTime()), i->second.m_creatureOrGOcount[0], i->second.m_creatureOrGOcount[1], i->second.m_creatureOrGOcount[2], i->second.m_creatureOrGOcount[3], i->second.m_itemcount[0], i->second.m_itemcount[1], i->second.m_itemcount[2], i->second.m_itemcount[3]);
                 break;
             case QUEST_CHANGED :
-                sDatabase.Execute("UPDATE `character_queststatus` SET `status` = '%u',`rewarded` = '%u',`explored` = '%u',`timer` = '" I64FMTD "',`mobcount1` = '%u',`mobcount2` = '%u',`mobcount3` = '%u',`mobcount4` = '%u',`itemcount1` = '%u',`itemcount2` = '%u',`itemcount3` = '%u',`itemcount4` = '%u'  WHERE `guid` = '%u' AND `quest` = '%u' ",
+                sDatabase.PExecute("UPDATE `character_queststatus` SET `status` = '%u',`rewarded` = '%u',`explored` = '%u',`timer` = '" I64FMTD "',`mobcount1` = '%u',`mobcount2` = '%u',`mobcount3` = '%u',`mobcount4` = '%u',`itemcount1` = '%u',`itemcount2` = '%u',`itemcount3` = '%u',`itemcount4` = '%u'  WHERE `guid` = '%u' AND `quest` = '%u' ",
                     i->second.m_status, i->second.m_rewarded, i->second.m_explored, uint64(i->second.m_timer / 1000 + sWorld.GetGameTime()), i->second.m_creatureOrGOcount[0], i->second.m_creatureOrGOcount[1], i->second.m_creatureOrGOcount[2], i->second.m_creatureOrGOcount[3], i->second.m_itemcount[0], i->second.m_itemcount[1], i->second.m_itemcount[2], i->second.m_itemcount[3], GetGUIDLow(), i->first );
                 break;
         };
@@ -11890,12 +11794,12 @@ void Player::_SaveReputation()
             case FACTION_UNCHANGED:
                 break;
             case FACTION_CHANGED:
-                sDatabase.Execute("UPDATE `character_reputation` SET `reputation`='%u', `standing`='%i', `flags`='%u' WHERE `guid` = '%u' AND `faction`='%u'",
+                sDatabase.PExecute("UPDATE `character_reputation` SET `reputation`='%u', `standing`='%i', `flags`='%u' WHERE `guid` = '%u' AND `faction`='%u'",
                     itr->ReputationListID, itr->Standing, itr->Flags, GetGUIDLow(), itr->ID );
                 itr->uState = FACTION_UNCHANGED;
                 break;
             case FACTION_NEW:
-                sDatabase.Execute("INSERT INTO `character_reputation` (`guid`,`faction`,`reputation`,`standing`,`flags`) VALUES ('%u', '%u', '%u', '%i', '%u')", GetGUIDLow(), itr->ID, itr->ReputationListID, itr->Standing, itr->Flags);
+                sDatabase.PExecute("INSERT INTO `character_reputation` (`guid`,`faction`,`reputation`,`standing`,`flags`) VALUES ('%u', '%u', '%u', '%i', '%u')", GetGUIDLow(), itr->ID, itr->ReputationListID, itr->Standing, itr->Flags);
                 itr->uState = FACTION_UNCHANGED;
                 break;
             default:
@@ -11911,9 +11815,9 @@ void Player::_SaveSpells()
     {
         next++;
         if (itr->second->state == PLAYERSPELL_REMOVED || itr->second->state == PLAYERSPELL_CHANGED)
-            sDatabase.Execute("DELETE FROM `character_spell` WHERE `guid` = '%u' and `spell` = '%u'", GetGUIDLow(), itr->first);
+            sDatabase.PExecute("DELETE FROM `character_spell` WHERE `guid` = '%u' and `spell` = '%u'", GetGUIDLow(), itr->first);
         if (itr->second->state == PLAYERSPELL_NEW || itr->second->state == PLAYERSPELL_CHANGED)
-            sDatabase.Execute("INSERT INTO `character_spell` (`guid`,`spell`,`slot`,`active`) VALUES ('%u', '%u', '%u','%u')", GetGUIDLow(), itr->first, itr->second->slotId,itr->second->active);
+            sDatabase.PExecute("INSERT INTO `character_spell` (`guid`,`spell`,`slot`,`active`) VALUES ('%u', '%u', '%u','%u')", GetGUIDLow(), itr->first, itr->second->slotId,itr->second->active);
 
         if (itr->second->state == PLAYERSPELL_REMOVED)
             _removeSpell(itr->first);
@@ -11925,18 +11829,18 @@ void Player::_SaveSpells()
 void Player::_SaveTutorials()
 {
     // it's better than rebuilding indexes multiple times
-    QueryResult *result = sDatabase.Query("SELECT count(*) AS r FROM `character_tutorial` WHERE `guid` = '%u'", GetGUIDLow() );
+    QueryResult *result = sDatabase.PQuery("SELECT count(*) AS r FROM `character_tutorial` WHERE `guid` = '%u'", GetGUIDLow() );
     Field *fields = result->Fetch();
     uint32 Rows = fields[0].GetUInt32();
     delete result;
 
     if (Rows)
     {
-        sDatabase.Execute("UPDATE `character_tutorial` SET `tut0`='%u', `tut1`='%u', `tut2`='%u', `tut3`='%u', `tut4`='%u', `tut5`='%u', `tut6`='%u', `tut7`='%u' WHERE `guid` = '%u'",
+        sDatabase.PExecute("UPDATE `character_tutorial` SET `tut0`='%u', `tut1`='%u', `tut2`='%u', `tut3`='%u', `tut4`='%u', `tut5`='%u', `tut6`='%u', `tut7`='%u' WHERE `guid` = '%u'",
             m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7], GetGUIDLow() );
     } else
     {
-        sDatabase.Execute("INSERT INTO `character_tutorial` (`guid`,`tut0`,`tut1`,`tut2`,`tut3`,`tut4`,`tut5`,`tut6`,`tut7`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7]);
+        sDatabase.PExecute("INSERT INTO `character_tutorial` (`guid`,`tut0`,`tut1`,`tut2`,`tut3`,`tut4`,`tut5`,`tut6`,`tut7`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7]);
     };
 }
 
@@ -12416,7 +12320,7 @@ void Player::SendProficiency(uint8 pr1, uint32 pr2)
 
 void Player::RemovePetitionsAndSigns(uint64 guid)
 {
-    QueryResult *result = sDatabase.Query("SELECT `ownerguid`,`charterguid` FROM `guild_charter_sign` WHERE `playerguid` = '%u'", guid);
+    QueryResult *result = sDatabase.PQuery("SELECT `ownerguid`,`charterguid` FROM `guild_charter_sign` WHERE `playerguid` = '%u'", guid);
     if(result)
     {
         do
@@ -12434,13 +12338,13 @@ void Player::RemovePetitionsAndSigns(uint64 guid)
 
         delete result;
 
-        sDatabase.Execute("DELETE FROM `guild_charter_sign` WHERE `playerguid` = '%u'",guid);
+        sDatabase.PExecute("DELETE FROM `guild_charter_sign` WHERE `playerguid` = '%u'",guid);
     }
 
-    //sDatabase.BeginTransaction();
-    sDatabase.Execute("DELETE FROM `guild_charter` WHERE `ownerguid` = '%u'",guid);
-    sDatabase.Execute("DELETE FROM `guild_charter_sign` WHERE `ownerguid` = '%u'",guid);
-    //sDatabase.CommitTransaction();
+    sDatabase.BeginTransaction();
+    sDatabase.PExecute("DELETE FROM `guild_charter` WHERE `ownerguid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `guild_charter_sign` WHERE `ownerguid` = '%u'",guid);
+    sDatabase.CommitTransaction();
 }
 
 void Player::SetRestBonus (float rest_bonus_new)
@@ -12594,7 +12498,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes )
     }
 
     // Save before flight (player must loaded in start taxinode is disconnected at flight,etc)
-    SaveToDB(false);
+    SaveToDB();
 
     // unsummon pet, it will be lost anyway
     RemovePet(NULL,PET_SAVE_NOT_IN_SLOT);
@@ -12904,10 +12808,10 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
 
 void Player::_LoadGroup()
 {
-    QueryResult *result = sDatabase.Query("SELECT `leaderGuid` FROM `group_member` WHERE `memberGuid`='%u'", GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `leaderGuid` FROM `group_member` WHERE `memberGuid`='%u'", GetGUIDLow());
     if(result)
     {
-        uint64 leaderGuid = MAKE_GUID(result->Fetch()[0].GetUInt32(),HIGHGUID_PLAYER);
+        uint64 leaderGuid = MAKE_GUID((*result)[0].GetUInt32(),HIGHGUID_PLAYER);
         delete result;
         groupInfo.group = objmgr.GetGroupByLeader(leaderGuid);
     }
@@ -12917,7 +12821,7 @@ void Player::_LoadBoundInstances()
 {
     m_BoundInstances.clear();
 
-    QueryResult *result = sDatabase.Query("SELECT `map`,`instance`,`leader` FROM `character_instance` WHERE `guid` = '%u'", GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `map`,`instance`,`leader` FROM `character_instance` WHERE `guid` = '%u'", GetGUIDLow());
     if(result)
     {
         do
@@ -12935,10 +12839,10 @@ void Player::_LoadBoundInstances()
 
 void Player::_SaveBoundInstances()
 {
-    sDatabase.Execute("DELETE FROM `character_instance` WHERE (`guid` = '%u')", GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `character_instance` WHERE (`guid` = '%u')", GetGUIDLow());
     for(BoundInstancesMap::iterator i = m_BoundInstances.begin(); i != m_BoundInstances.end(); i++)
     {
-        sDatabase.Execute("INSERT INTO `character_instance` (`guid`,`map`,`instance`,`leader`) VALUES ('%u', '%u', '%u', '%u')", GetGUIDLow(), i->first, i->second.first, i->second.second);
+        sDatabase.PExecute("INSERT INTO `character_instance` (`guid`,`map`,`instance`,`leader`) VALUES ('%u', '%u', '%u', '%u')", GetGUIDLow(), i->first, i->second.first, i->second.second);
     }
 }
 
@@ -13036,162 +12940,6 @@ uint32 Player::GetBlockValue() const
         return 0;
 
     return m_AuraModifiers[SPELL_AURA_MOD_SHIELD_BLOCKVALUE]*(m_AuraModifiers[SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT]+100)/100;
-}
-
-bool Player::EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot)    //slot to be excluded while counting
-{
-    if(!enchantmentcondition)
-        return true;
-
-    SpellItemEnchantmentConditionEntry const *Condition = sSpellItemEnchantmentConditionStore.LookupEntry(enchantmentcondition);
-
-    if(!Condition)
-            return true;
-
-    uint8 curcount[4] = {0, 0, 0, 0};
-
-    //counting current equipped gem colors
-    for(uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
-    {
-        if(i == slot)
-                continue;
-        uint16 pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
-        Item *pItem2 = GetItemByPos( pos );
-        if(pItem2 && pItem2->GetProto()->Socket[0].Color)
-        {
-            for(uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+3; ++enchant_slot)
-            {
-                uint32 enchant_id = pItem2->GetEnchantmentId(EnchantmentSlot(enchant_slot));
-                if(!enchant_id)
-                    continue;
-
-                SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
-                if(!enchantEntry)
-                    continue;
-
-                uint32 gemid = enchantEntry->GemID;
-                if(!gemid)
-                    continue;
-
-                ItemPrototype const* gemProto = sItemStorage.LookupEntry<ItemPrototype>(gemid);
-                if(!gemProto)
-                    continue;
-
-                GemPropertiesEntry const* gemProperty = sGemPropertiesStore.LookupEntry(gemProto->GemProperties);
-                if(!gemProperty)
-                    continue;
-
-                uint8 GemColor = gemProperty->color;
-
-                for(uint8 b = 0, tmpcolormask = 1; b < 4; b++, tmpcolormask <<= 1)
-                {
-                    if(tmpcolormask & GemColor)
-                        curcount[b]++;
-                }
-            }
-        }
-    }
-
-    bool activate = true;
-
-    for(int i = 0; i < 5; i++)
-    {
-        if(!Condition->Color[i])
-            continue;
-
-        uint32 _cur_gem = curcount[Condition->Color[i] - 1];
-
-        // if have <CompareColor> use them as count, else use <value> from Condition
-        uint32 _cmp_gem = Condition->CompareColor[i] ? curcount[Condition->CompareColor[i] - 1]: Condition->Value[i];
-
-        switch(Condition->Comparator[i]) {
-            case 2: // requires less <color> than (<value> || <comparecolor>) gems
-                activate &= (_cur_gem < _cmp_gem) ? true : false;
-                break;
-            case 3: // requires more <color> than (<value> || <comparecolor>) gems
-                activate &= (_cur_gem > _cmp_gem) ? true : false;
-                break;
-            case 5: // requires at least <color> than (<value> || <comparecolor>) gems
-                activate &= (_cur_gem >= _cmp_gem) ? true : false;
-                break;
-        }
-    }
-
-    sLog.outDebug("Checking Condition %u, there are %u Meta Gems, %u Red Gems, %u Yellow Gems and %u Blue Gems, Activate:%s", enchantmentcondition, curcount[0], curcount[1], curcount[2], curcount[3], activate ? "yes" : "no");
-
-    return activate;
-}
-
-
-void Player::CorrectMetaGemEnchants(uint8 exceptslot, bool apply)
-{
-
-    for(uint32 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)    //cycle all equipped items
-    {
-        //enchants for the slot being socketed are handeled by Player::ApplyItemMods
-        if(slot == exceptslot)
-            continue;
-
-        uint16 pos = ( (INVENTORY_SLOT_BAG_0 << 8) | slot );
-        Item* pItem = GetItemByPos( pos );
-
-        if(!pItem || !pItem->GetProto()->Socket[0].Color)
-            continue;
-
-        for(uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+3; ++enchant_slot)
-        {
-            uint32 enchant_id = pItem->GetEnchantmentId(EnchantmentSlot(enchant_slot));
-            if(!enchant_id)
-                continue;
-
-            SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
-            if(!enchantEntry)
-                continue;
-
-            uint32 condition = enchantEntry->EnchantmentCondition;
-            if(condition)
-            {
-                bool wasactive = EnchantmentFitsRequirements(condition, apply ? exceptslot : -1);    //was enchant active with/without item?
-                if(wasactive ^ EnchantmentFitsRequirements(condition, apply ? -1 : exceptslot))    //should it now be?
-                {
-                    // ignore item gem conditions
-                    ApplyEnchantment(pItem,EnchantmentSlot(enchant_slot),!wasactive,true,true);                            //if state changed, (dis)apply enchant
-                }
-            }
-        }
-    }
-}
-
-void Player::ToggleMetaGemsActive(uint16 exceptslot, bool apply)        //if false -> then toggled off if was on| if true -> toggled on if was off AND meets requirements
-{
-    for(int slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; slot++)    //cycle all equipped items
-    {
-        //enchants for the slot being socketed are handeled by WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
-        if(slot == exceptslot) continue;
-
-        uint16 pos = ( (INVENTORY_SLOT_BAG_0 << 8) | slot );
-        Item *pItem = GetItemByPos( pos );
-
-        if(!pItem || !pItem->GetProto()->Socket[0].Color)    //if item has no sockets or no item is equipped go to next item
-            continue;
-
-        //cycle all (gem)enchants
-        for(uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+3; ++enchant_slot)
-        {
-            uint32 enchant_id = pItem->GetEnchantmentId(EnchantmentSlot(enchant_slot));
-            if(!enchant_id)                                    //if no enchant go to next enchant(slot)
-                continue;
-
-            SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
-            if(!enchantEntry)
-                continue;
-
-            //only metagems to be (de)activated, so only enchants with condition
-            uint32 condition = enchantEntry->EnchantmentCondition;
-            if(condition)
-                ApplyEnchantment(pItem,EnchantmentSlot(enchant_slot), apply);
-        }
-    }
 }
 
 bool Player::DropBattleGroundFlag()

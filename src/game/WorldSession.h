@@ -249,7 +249,6 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleGroupDisbandOpcode(WorldPacket& recvPacket);
         void HandleLootMethodOpcode(WorldPacket& recvPacket);
         void HandleLootRoll( WorldPacket &recv_data );
-        void SendPartyMemberStatsChanged( uint64 Guid );
         void HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data );
         void HandleRaidIconTargetOpcode( WorldPacket & recv_data );
         void HandleRaidReadyCheckOpcode( WorldPacket & recv_data );

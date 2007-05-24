@@ -32,10 +32,7 @@
 #include "Auth/Sha1.h"
 
 extern RealmList m_realmList;
-//extern DatabaseMysql dbRealmServer;
-extern Database * rsdb;
-#define dbRealmServer (*rsdb)
-
+extern DatabaseMysql dbRealmServer;
 #define ChunkSize 2048
 
 enum eAuthCmd
@@ -299,8 +296,7 @@ void AuthSocket::_SetVSFields(std::string password)
     x.SetBinary(sha.GetDigest(), sha.GetLength());
     v = g.ModExp(x, N);
     // No SQL injection (username escaped)
-    //dbRealmServer.Execute("UPDATE `account` SET `v` = '%s', `s` = '%s' WHERE `username` = '%s'",v.AsHexStr(),s.AsHexStr(), _safelogin.c_str() );
-    dbRealmServer.WaitExecute("UPDATE `account` SET `v` = '%s', `s` = '%s' WHERE `username` = '%s'",v.AsHexStr(),s.AsHexStr(), _safelogin.c_str() );
+    dbRealmServer.PExecute("UPDATE `account` SET `v` = '%s', `s` = '%s' WHERE `username` = '%s'",v.AsHexStr(),s.AsHexStr(), _safelogin.c_str() );
 }
 
 /// Logon Challenge command handler
@@ -358,7 +354,7 @@ bool AuthSocket::_HandleLogonChallenge()
 
         ///- Verify that this IP is not in the ip_banned table
         // No SQL injection possible (paste the IP address as passed by the socket)
-        QueryResult *result = dbRealmServer.Query(  "SELECT * FROM `ip_banned` WHERE `ip` = '%s';",GetRemoteAddress().c_str());
+        QueryResult *result = dbRealmServer.PQuery(  "SELECT * FROM `ip_banned` WHERE `ip` = '%s';",GetRemoteAddress().c_str());
         if(result)
         {
             pkt << (uint8)REALM_AUTH_ACCOUNT_BANNED;
@@ -369,16 +365,16 @@ bool AuthSocket::_HandleLogonChallenge()
         {
             ///- Get the account details from the account table
             // No SQL injection (escaped user name)
-            QueryResult *result = dbRealmServer.Query("SELECT `password`,`banned`,`locked`,`last_ip`,`online` FROM `account` WHERE `username` = '%s'",_safelogin.c_str ());
+            QueryResult *result = dbRealmServer.PQuery("SELECT `password`,`banned`,`locked`,`last_ip`,`online` FROM `account` WHERE `username` = '%s'",_safelogin.c_str ());
             if( result )
             {
                 ///- If the IP is 'locked', check that the player comes indeed from the correct IP address
                 bool locked = false;
-                if(result->Fetch()[2].GetUInt8() == 1)            // if ip is locked
+                if((*result)[2].GetUInt8() == 1)            // if ip is locked
                 {
-                    DEBUG_LOG("[AuthChallenge] Account '%s' is locked to IP - '%s'", _login.c_str(), result->Fetch()[3].GetString());
+                    DEBUG_LOG("[AuthChallenge] Account '%s' is locked to IP - '%s'", _login.c_str(), (*result)[3].GetString());
                     DEBUG_LOG("[AuthChallenge] Player address is '%s'", GetRemoteAddress().c_str());
-                    if ( strcmp(result->Fetch()[3].GetString(),GetRemoteAddress().c_str()) )
+                    if ( strcmp((*result)[3].GetString(),GetRemoteAddress().c_str()) )
                     {
                         DEBUG_LOG("[AuthChallenge] Account IP differs");
                         pkt << (uint8) REALM_AUTH_ACCOUNT_FREEZED;
@@ -397,7 +393,7 @@ bool AuthSocket::_HandleLogonChallenge()
                 if (!locked)
                 {
                     ///- If the account is banned, reject the logon attempt
-                    if(result->Fetch()[1].GetUInt8())
+                    if((*result)[1].GetUInt8())
                     {
                         pkt << (uint8) REALM_AUTH_ACCOUNT_BANNED;
                         sLog.outBasic("[AuthChallenge] Banned account %s tries to login!",_login.c_str ());
@@ -405,7 +401,7 @@ bool AuthSocket::_HandleLogonChallenge()
                     else
                     {
                         ///- Get the password from the account table, upper it, and make the SRP6 calculation
-                        std::string password = result->Fetch()[0].GetCppString();
+                        std::string password = (*result)[0].GetCppString();
                         _SetVSFields(password);
 
                         b.SetRand(19 * 8);
@@ -573,8 +569,7 @@ bool AuthSocket::_HandleLogonProof()
 
         ///- Update the sessionkey, last_ip and last login time in the account table for this account
         // No SQL injection (escaped user name) and IP address as received by socket
-        //dbRealmServer.Execute("UPDATE `account` SET `sessionkey` = '%s', `last_ip` = '%s', `last_login` = NOW() WHERE `username` = '%s'",K.AsHexStr(), GetRemoteAddress().c_str(), _safelogin.c_str() );
-        dbRealmServer.WaitExecute("UPDATE `account` SET `sessionkey` = '%s', `last_ip` = '%s', `last_login` = NOW() WHERE `username` = '%s'",K.AsHexStr(), GetRemoteAddress().c_str(), _safelogin.c_str() );
+        dbRealmServer.PExecute("UPDATE `account` SET `sessionkey` = '%s', `last_ip` = '%s', `last_login` = NOW() WHERE `username` = '%s'",K.AsHexStr(), GetRemoteAddress().c_str(), _safelogin.c_str() );
 
         ///- Finish SRP6 and send the final result to the client
         sha.Initialize();
@@ -612,7 +607,7 @@ bool AuthSocket::_HandleRealmList()
 
     ///- Get the user id (else close the connection)
     // No SQL injection (escaped user name)
-    QueryResult *result = dbRealmServer.Query("SELECT `id`,`password` FROM `account` WHERE `username` = '%s'",_safelogin.c_str());
+    QueryResult *result = dbRealmServer.PQuery("SELECT `id`,`password` FROM `account` WHERE `username` = '%s'",_safelogin.c_str());
     if(!result)
     {
         sLog.outError("[ERROR] user %s tried to login and we cannot find him in the database.",_login.c_str());
@@ -620,8 +615,8 @@ bool AuthSocket::_HandleRealmList()
         return false;
     }
 
-    uint32 id = result->Fetch()[0].GetUInt32();
-    std::string password = result->Fetch()[1].GetCppString();
+    uint32 id = (*result)[0].GetUInt32();
+    std::string password = (*result)[1].GetCppString();
     delete result;
 
     ///- Circle through realms in the RealmList and construct the return packet (including # of user characters in each realm)
@@ -641,7 +636,7 @@ bool AuthSocket::_HandleRealmList()
         /// \todo Fix realm population
         pkt << (float) 0.0;                                 //this is population 0.5 = low 1.0 = medium 2.0 high     (float)(maxplayers / players)*2
         // No SQL injection. id of realm is controlled by the database.
-        result = dbRealmServer.Query( "SELECT `numchars` FROM `realmcharacters` WHERE `realmid` = '%d' AND `acctid`='%u'",i->second->m_ID,id);
+        result = dbRealmServer.PQuery( "SELECT `numchars` FROM `realmcharacters` WHERE `realmid` = '%d' AND `acctid`='%u'",i->second->m_ID,id);
         if( result )
         {
             Field *fields = result->Fetch();

@@ -79,7 +79,7 @@ void SpellCastTargets::setUnitTarget(Unit *target)
 
     if (!target)
         return;
-
+	
     m_destX = target->GetPositionX();
     m_destY = target->GetPositionY();
     m_destZ = target->GetPositionZ();
@@ -2019,7 +2019,7 @@ uint8 Spell::CanCast()
                 // Execute
                 if(m_spellInfo->SpellIconID == 1648)
                 {
-                    if(!m_targets.getUnitTarget() || m_targets.getUnitTarget()->GetHealth() > m_targets.getUnitTarget()->GetMaxHealth()*0.2)
+                    if(m_targets.getUnitTarget()->GetHealth() > m_targets.getUnitTarget()->GetMaxHealth()*0.2)
                         return SPELL_FAILED_BAD_TARGETS;
                 }
                 break;
@@ -2699,7 +2699,7 @@ void Spell::HandleTeleport(uint32 id, Unit* Target)
     {
         //old code, slow:
         /*Field *fields;
-        QueryResult *result = sDatabase.Query("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", m_caster->GetGUIDLow());
+        QueryResult *result = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", m_caster->GetGUIDLow());
         if(!result)
         {
             sLog.outError( "SPELL: No homebind location set for %i\n", m_caster->GetGUIDLow());

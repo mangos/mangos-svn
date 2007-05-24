@@ -29,14 +29,13 @@
 #include "ObjectAccessor.h"
 
 /* differeces from off:
-    -you can uninvite yourself - is is useful
+    -you can uninvite yourself
     -you can accept invitation even if leader went offline
 */
 /* todo:
     -group_destroyed msg is sent but not shown
     -reduce xp gaining when in raid group
     -quest sharing has to be corrected
-    -FIX sending PartyMemberStats
 */
 void WorldSession::SendPartyResult(uint32 unk, std::string member, uint32 state)
 {
@@ -211,7 +210,7 @@ void WorldSession::HandleGroupUninviteNameOpcode(WorldPacket & recv_data)
         return;
     normalizePlayerName(membername);
 
-    uint64 guid = objmgr.GetPlayerGUIDByName(membername);
+    uint64 guid = objmgr.GetPlayerGUIDByName(membername.c_str());
 
     // player not found
     if(!guid)
@@ -454,7 +453,7 @@ void WorldSession::HandleGroupChangeSubGroupOpcode( WorldPacket & recv_data )
     recv_data >> groupNr;
 
     Group *group = GetPlayer()->groupInfo.group;
-    uint64 guid = objmgr.GetPlayerGUIDByName(name);
+    uint64 guid = objmgr.GetPlayerGUIDByName(name.c_str());
 
     /** error handling **/
     if(!group->IsLeader(GetPlayer()->GetGUID()) && !group->IsAssistant(GetPlayer()->GetGUID()))
@@ -548,88 +547,38 @@ void WorldSession::HandleRaidReadyCheckOpcode( WorldPacket & recv_data )
     }
 }
 
-/*not called : this should server send when some member bits are changed:*/
-void WorldSession::SendPartyMemberStatsChanged( uint64 Guid )
-{                                               //todo FIX ME
-    //do nothing
-    return;
-
-    Player *player = objmgr.GetPlayer(Guid);
-    if(!player)
-        //if player is offline - then send nothing
-        return;
-
-    WorldPacket data(SMSG_PARTY_MEMBER_STATS, 30);
-
-    data.append(player->GetPackGUID());
-    /*we have to create update mask, not this way*/
-    uint32 mask = 7;                            //only sends info that member's HP changed
-    data << (uint32) mask;
-    if (mask && 1)
-        data << (uint8) MEMBER_STATUS_ONLINE;   //there should be member's online status
-    if (mask && 2)
-        data << (uint16) player->GetHealth();
-    if (mask && 4)
-        data << (uint16) player->GetMaxHealth();
-    Powers powerType = player->getPowerType();
-    if (powerType > 0)                          //this mask bit is always 0
-        data << (uint8)  powerType;
-    if (mask && 8)
-        data << (uint16) player->GetMaxPower(powerType);
-    if (mask && 16)
-        data << (uint16) player->GetPower(powerType);
-    if (mask && 32)
-        data << (uint16) player->getLevel();
-    if (mask && 64)
-        data << (uint16) player->GetZoneId();
-    if (mask && 128)
-        data << (uint16) 150;//player->GetPositionX();     - it should be X position on map
-    if (mask && 256)
-        data << (uint16) 100;//player->GetPositionY();     - it should be Y position on map
-    ///and some other things, like spells, pet name, pet HP, pet HP max should be send
-
-    SendPacket(&data);
-}
-
-/*this procedure handles clients CMSG_REQUEST_PARTY_MEMBER_STATS request*/
-void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
+/*?*/void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,8);
 
-    sLog.outDebug("WORLD RECIEVED CMSG_REQUEST_PARTY_MEMBER_STATS");
+    //sLog.outDebug("WORLD RECIEVE CMSG_REQUEST_PARTY_MEMBER_STATS");
     uint64 Guid;
     recv_data >> Guid;
-
+    return;
     Player *player = objmgr.GetPlayer(Guid);
     if(!player)
         return;
-    WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 30);
+
+    WorldPacket data(SMSG_PARTY_MEMBER_STATS, 30);
+    /*data << (uint16)0xFF << Guid;
+    data << (uint8)0;
+    data << (uint32)(player ? 1 : 0);*/
+
+    /*0000: 7e 00 xx xx xx xx ef 17 00 00 0b xx xx xx xx 01 : ~....M.......P..
+    0010: e8 03 01 00 6b 01 86 fd 38 ef 01 00 00 00 99 09 : ....k...8.......
+    0020: 01 00 86 20 00 -- -- -- -- -- -- -- -- -- -- -- : ... .*/
+
+    /*0000: 7e 00 xx xx xx xx 10 12 00 00 xx xx 01 00 00 00 : ~..D.N....;.....
+      0010: xx xx 00 -- -- -- -- -- -- -- -- -- -- -- -- -- : ...*/
+
+    /* mask: 0b0000 0000 - 0000 0000 - 0000 0000 - 0000 0000
+                       \ 
+                      cur_life*/
 
     data.append(player->GetPackGUID());
-    uint32 mask1 = 0x7FFC0BF7;                  //1111111111111000000101111110111
-                 //0x7FFC1BF7;                  //1111111111111000001101111110111
-                                                //1111111111111--not used in mask
-    data << (uint32) mask1;
-    data << (uint8)  MEMBER_STATUS_ONLINE;       //should be member's online status
-    data << (uint16) player->GetHealth();
-    data << (uint16) player->GetMaxHealth();
-    Powers powerType = player->getPowerType();
-    if (powerType > 0)
-        data << (uint8) powerType;
-    data << (uint16) player->GetMaxPower(powerType);
-    data << (uint16) player->GetPower(powerType);
-    data << (uint16) player->getLevel();
-    data << (uint16) player->GetZoneId();
-    data << (uint16) 2426;                      //map position X - it is somehere, need more time to fix..
-    data << (uint16) 62588;                     //map position Y - it is somehere, need more time to fix..
-    ///some unknown parts, don't know how to divide it :
-    data << (uint32) 0;
-    data << (uint16) 0;
-    data << (uint8)  0;
-    data << (uint16) 0x00FF;
-    //ending packets
-    data << (uint32) 0;
-    data << (uint32) 4278190080;                //0xFF000000
+    //data << (uint8)mask1 << (uint8)mask2;
+
+    data << (uint8)0x10 << (uint8)0x10 << (uint16)0 << (uint16) 21 << (uint32)1 << (uint16)24244 << (uint8)0;
     SendPacket(&data);
 }
 

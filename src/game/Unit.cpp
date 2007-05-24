@@ -66,8 +66,6 @@ Unit::Unit( WorldObject *instantiator ) : WorldObject( instantiator )
     m_modAttackSpeedPct[OFF_ATTACK] = 1.0f;
     m_modAttackSpeedPct[RANGED_ATTACK] = 1.0f;
 
-    MovementDataList *m_movementDataList = new MovementDataList;;
-    m_movementDataList->clear();
     m_state = 0;
     m_form = 0;
     m_deathState = ALIVE;
@@ -126,18 +124,6 @@ Unit::~Unit()
 
 void Unit::Update( uint32 p_time )
 {
-    if( !m_movementDataList.empty() )
-    {
-        if( m_movementDataList.begin()->holdTime/100 > m_movementDataList.size() || m_movementDataList.size() > 8)
-        {
-            //std::list<MovementData *>::iterator i;
-            //sLog.outError("Sending Move from Update::UNIT: PacketLagTime: %u, DroppedPacket:%u ",m_movementDataList.begin()->holdTime,m_movementDataList.size()-1);
-            SendMonsterMove(0, 0, 0, 0, 0, 0, true);
-            m_movementDataList.clear();
-        }
-        else
-            m_movementDataList.begin()->holdTime += p_time;
-    }
     /*if(p_time > m_AurasCheck)
     {
     m_AurasCheck = 2000;
@@ -201,116 +187,44 @@ void Unit::SendMoveToPacket(float x, float y, float z, bool run, uint32 transitT
         speed *= 0.001f;
         transitTime = static_cast<uint32>(dist / speed + 0.5);
     }
-    MovementData moveData;
-    moveData.x = x;
-    moveData.y = y;
-    moveData.z = z;
-    moveData.type = 0;
-    moveData.run = run;
-    moveData.time = transitTime;
-    moveData.holdTime = 0;
-
-    if( !m_movementDataList.empty() )
-    {
-        MovementDataList::iterator i = m_movementDataList.begin();
-        if( (((i->x - x) * (i->x - x)) + ((i->y - y) * (i->y - y)) + ((i->z - z)*(i->z - z))) > 4.6 )
-        {
-            m_movementDataList.push_back(moveData);
-        }
-        else
-        {
-            //sLog.outError("Droped Packet UNIT......");
-            m_movementDataList.pop_back();
-            m_movementDataList.push_back(moveData);
-        }
-    }
-    else
-        m_movementDataList.push_back(moveData);
-        
-    return;
     //float orientation = (float)atan2((double)dy, (double)dx);
     SendMonsterMove(x,y,z,0,run,transitTime);
 }
 
-void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, bool Run, uint32 Time, bool specialBlend)
+void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, bool Run, uint32 Time)
 {
-    if( specialBlend && !m_movementDataList.empty() )
-    {
-        uint8 waypointCount = m_movementDataList.size();
-        
-        MovementDataList::iterator  iter;
-        WorldPacket data( SMSG_MONSTER_MOVE, (41 + GetPackGUID().size()) );
-        data.append(GetPackGUID());
-            
-        // Point A, starting location
-        data << GetPositionX() << GetPositionY() << GetPositionZ();
-        // unknown field - unrelated to orientation
-        // seems to increment about 1000 for every 1.7 seconds
-        // for now, we'll just use mstime
-        data << getMSTime();
-        data << m_movementDataList.back().type;
-        switch(m_movementDataList.back().type)
-        {
-            case 0:                                             // normal packet
-                break;
-            case 1:                                             // stop packet
-                SendMessageToSet( &data, true );
-                return;
-            case 3:                                             // not used currently
-                data << uint64(0);                              // probably target guid
-                break;
-            case 4:                                             // not used currently
-                data << float(0);                               // probably orientation
-                break;
-        }
-        data << uint32(m_movementDataList.back().run ? 0x00000100 : 0x00000000);
+    WorldPacket data( SMSG_MONSTER_MOVE, (41+GetPackGUID().size()) );
+    data.append(GetPackGUID());
+    // Point A, starting location
+    data << GetPositionX() << GetPositionY() << GetPositionZ();
+    // unknown field - unrelated to orientation
+    // seems to increment about 1000 for every 1.7 seconds
+    // for now, we'll just use mstime
+    data << getMSTime();
 
-       // data << timeTotal/waypointCount; 
-        uint8 wayPointNumber = 1;
-        data << m_movementDataList.back().time;
-        data << uint32(1);
-        data << m_movementDataList.back().x << m_movementDataList.back().y << m_movementDataList.back().z;
-        //for( iter = m_movementDataList.begin(); iter != m_movementDataList.end(); iter++)
-        //{
-        //    data << iter->time;
-        //    data << uint32(wayPointNumber);
-        //    data << iter->x << iter->y << iter->z;
-        //}
-        SendMessageToSet( &data, true );
-        m_movementDataList.clear();
-    }
-    else if( GetTypeId() != TYPEID_UNIT)
+    data << uint8(type);                                    // unknown
+    switch(type)
     {
-        WorldPacket data( SMSG_MONSTER_MOVE, (41+GetPackGUID().size()) );
-        data.append(GetPackGUID());
-        // Point A, starting location
-        data << GetPositionX() << GetPositionY() << GetPositionZ();
-        data << getMSTime();
-
-        data << uint8(type);                                    // unknown
-        switch(type)
-        {
-            case 0:                                             // normal packet
-                break;
-            case 1:                                             // stop packet
-                SendMessageToSet( &data, true );
-                return;
-            case 3:                                             // not used currently
-                data << uint64(0);                              // probably target guid
-                break;
-            case 4:                                             // not used currently
-                data << float(0);                               // probably orientation
-                break;
-        }
-        data << uint32(Run ? 0x00000100 : 0x00000000);          // flags (0x100 - running, 0x200 - taxi)
-        /* Flags:
-        512: Floating, moving without walking/running
-        */
-        data << Time;                                           // Time in between points
-        data << uint32(1);                                      // 1 single waypoint
-        data << NewPosX << NewPosY << NewPosZ;                  // the single waypoint Point B
-        SendMessageToSet( &data, true );
+        case 0:                                             // normal packet
+            break;
+        case 1:                                             // stop packet
+            SendMessageToSet( &data, true );
+            return;
+        case 3:                                             // not used currently
+            data << uint64(0);                              // probably target guid
+            break;
+        case 4:                                             // not used currently
+            data << float(0);                               // probably orientation
+            break;
     }
+    data << uint32(Run ? 0x00000100 : 0x00000000);          // flags (0x100 - running, 0x200 - taxi)
+    /* Flags:
+    512: Floating, moving without walking/running
+    */
+    data << Time;                                           // Time in between points
+    data << uint32(1);                                      // 1 single waypoint
+    data << NewPosX << NewPosY << NewPosZ;                  // the single waypoint Point B
+    SendMessageToSet( &data, true );
 }
 
 void Unit::resetAttackTimer(WeaponAttackType type)
@@ -1318,8 +1232,8 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
     // Instant Attacks (Spellmods) 
     // TODO: AP bonus related to mainhand weapon 
     if(spellCasted) 
-    if(GetTypeId()== TYPEID_PLAYER) 
-        ((Player*)this)->ApplySpellMod(spellCasted->Id, SPELLMOD_DAMAGE, *damage); 
+	if(GetTypeId()== TYPEID_PLAYER) 
+	    ((Player*)this)->ApplySpellMod(spellCasted->Id, SPELLMOD_DAMAGE, *damage); 
 
     if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && ((Creature*)pVictim)->GetCreatureInfo()->type != CREATURE_TYPE_CRITTER )
         ((Player*)this)->UpdateCombatSkills(pVictim, attType, outcome, false);
@@ -5121,7 +5035,6 @@ bool Unit::SelectHostilTarget()
     //next-victim-selection algorithm and evade mode are called
     //threat list sorting etc.
     assert(GetTypeId()== TYPEID_UNIT);
-    time_t timer = time(NULL);
 
     if(IsThreatListEmpty())
     {
@@ -5133,22 +5046,17 @@ bool Unit::SelectHostilTarget()
     if(HasAuraType(SPELL_AURA_MOD_TAUNT))
         return true;
 
-    if(next_threat_sort_time <= timer && IsThreatListNeedsSorting())                          //sort ThreatList if it is not sorted after AddThreat()
+    if(IsThreatListNeedsSorting())                          //sort ThreatList if it is not sorted after AddThreat()
     {
         m_threatList.sort();
         m_threatList.reverse();
         SortList(false);                                    //set not to sort ThreatList until next AddThreat() call
-        next_threat_sort_time = timer + 5;                  // Only resort the threats each 5 seconds!
     }
 
     Unit* target = NULL;
     float threat = m_threatList.front().Threat;
-    
     if(!getVictim() || threat > 1.1f * GetCurrentVictimThreat())
-    {
         target = SelectNextVictim();
-        targetUnit = target;
-    }
     else
         return true;
 
@@ -5174,7 +5082,6 @@ Unit* Unit::SelectNextVictim()
     uint64 guid = 0;
     float threat = 0;
     Unit* target = NULL;
-    time_t timer = time(NULL);
 
     if(getVictim())
     {
@@ -5183,54 +5090,35 @@ Unit* Unit::SelectNextVictim()
         guid = getVictim()->GetGUID();
     }
 
-    //if (next_threat_update_time <= timer || last_threat_update_time <= timer - 10000 || !targetUnit)
-    //{
-        // Let's not do this constantly! Use a timer!
-        for(ThreatList::iterator iter = m_threatList.begin(); iter != m_threatList.end(); ++iter)
+    for(ThreatList::iterator iter = m_threatList.begin(); iter != m_threatList.end(); ++iter)
+    {
+        target = ObjectAccessor::Instance().GetUnit(*this, iter->UnitGuid);
+        if(!target)
+            continue;
+
+        if(hasVictim)
         {
-            target = ObjectAccessor::Instance().GetUnit(*this, iter->UnitGuid);
-            if(!target)
-                continue;
+            if(iter->UnitGuid == guid)
+                return target;
 
-            if(hasVictim)
+            Map* map = MapManager::Instance().GetMap(GetMapId(), this);
+            if((map->Instanceable() || (!((Creature*)this)->IsOutOfThreatArea(target))) && target->isInAccessablePlaceFor( ((Creature*)this) ))
             {
-                if(iter->UnitGuid == guid)
-                    return target;
-
-                Map* map = MapManager::Instance().GetMap(GetMapId(), this);
-                if((map->Instanceable() || (!((Creature*)this)->IsOutOfThreatArea(target))) && target->isInAccessablePlaceFor( ((Creature*)this) ))
-                {
-                    if((IsWithinDistInMap(target, ATTACK_DIST) && (iter->Threat > 1.1f * threat)) || (iter->Threat > 1.3f * threat))
-                    {
-                        //implement 110% threat rule for targets in melee range
-                        //and 130% rule for targets in ranged distances
-                        SetCurrentVictimThreat(iter->Threat);
-                        targetUnit = target;
-                        last_threat_update_time = timer;
-                        return target;                      //for selecting alive targets
-                    }
+                if((IsWithinDistInMap(target, ATTACK_DIST) && (iter->Threat > 1.1f * threat)) || (iter->Threat > 1.3f * threat))
+                {                                           //implement 110% threat rule for targets in melee range
+                    SetCurrentVictimThreat(iter->Threat);   //and 130% rule for targets in ranged distances
+                    return target;                          //for selecting alive targets
                 }
             }
-            else if(!((Creature*)this)->IsOutOfThreatArea(target) && target->isInAccessablePlaceFor( ((Creature*)this) ) )
-            {
-                SetCurrentVictimThreat(iter->Threat);
-                targetUnit = target;
-                last_threat_update_time = timer;
-                return target;
-            }
         }
-
-        //next_threat_update_time = timer + 5; // UQ1: 5 secs ok?
-    //}
-    /*else
-    {
-        if (targetUnit && targetUnit->isAlive())
+        else if(!((Creature*)this)->IsOutOfThreatArea(target) && target->isInAccessablePlaceFor( ((Creature*)this) ) )
         {
-            return targetUnit;
+            SetCurrentVictimThreat(iter->Threat);
+            return target;
         }
-    }*/
 
-    targetUnit = NULL;
+    }
+
     return NULL;
 }
 

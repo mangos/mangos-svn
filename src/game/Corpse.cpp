@@ -79,7 +79,7 @@ bool Corpse::Create( uint32 guidlow, Player *owner, uint32 mapid, float x, float
 void Corpse::SaveToDB()
 {
     // prevent DB data inconsistance problems and duplicates
-    //sDatabase.BeginTransaction();
+    sDatabase.BeginTransaction();
     DeleteFromDB(false);
 
     std::ostringstream ss;
@@ -90,7 +90,7 @@ void Corpse::SaveToDB()
         ss << GetUInt32Value(i) << " ";
     ss << "', NOW(), " << int(GetType()) << ", " << int(GetInstanceId()) << ")";
     sDatabase.Execute( ss.str().c_str() );
-    //sDatabase.CommitTransaction();
+    sDatabase.CommitTransaction();
 }
 
 void Corpse::DeleteBonesFromWorld()
@@ -98,14 +98,11 @@ void Corpse::DeleteBonesFromWorld()
     assert(GetType()==CORPSE_BONES);
     CorpsePtr corpse = MapManager::Instance().GetMap(GetMapId(), this)->GetObjectNear<Corpse>(*this, GetGUID());
 
-    if (!corpse)
-    {
-        sLog.outError("Bones %u not found in world.", GetGUIDLow());
-    }
-    else
-    {
-        ObjectAccessor::Instance().RemoveBonesFromPlayerView(corpse);
-        ObjectAccessor::Instance().AddObjectToRemoveList(this);
+    if (!corpse) {
+	sLog.outError("Bones %u not found in world.", GetGUIDLow());
+    } else {
+	ObjectAccessor::Instance().RemoveBonesFromPlayerView(corpse);
+	ObjectAccessor::Instance().AddObjectToRemoveList(this);
     }
 
     RemoveFromWorld();
@@ -115,8 +112,8 @@ void Corpse::DeleteFromDB(bool inner_transaction)
 {
     std::ostringstream ss;
 
-//    if(inner_transaction)
-//        sDatabase.BeginTransaction();
+    if(inner_transaction)
+        sDatabase.BeginTransaction();
 
     if(GetType() == CORPSE_BONES)
         // only specific bones
@@ -126,15 +123,15 @@ void Corpse::DeleteFromDB(bool inner_transaction)
         ss  << "DELETE FROM `corpse` WHERE `player` = '" << GUID_LOPART(GetOwnerGUID()) << "' AND `bones_flag` = '0'";
     sDatabase.Execute( ss.str().c_str() );
 
-//    if(inner_transaction)
-//        sDatabase.CommitTransaction();
+    if(inner_transaction)
+        sDatabase.CommitTransaction();
 }
 
 bool Corpse::LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId)
 {
     bool external = (result != NULL);
     if (!external)
-        result = sDatabase.Query("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map`,`data`,`bones_flag`,`instance` FROM `corpse` WHERE `guid` = '%u'",guid);
+        result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map`,`data`,`bones_flag`,`instance` FROM `corpse` WHERE `guid` = '%u'",guid);
 
     if( ! result )
     {
@@ -217,14 +214,13 @@ void Corpse::_ConvertCorpseToBones()
     CorpsePtr corpse = ObjectAccessor::Instance().GetCorpseForPlayerGUID(GetOwnerGUID());
     if(!corpse)
     {
-        sLog.outError("ERROR: Try remove corpse that not in map for GUID %ul", GetOwnerGUID());
-        return;
+	    sLog.outError("ERROR: Try remove corpse that not in map for GUID %ul", GetOwnerGUID());
+	    return;
     }
 
-    if ((&*corpse) != this)
-    {
-        sLog.outError("ERROR: Found another corpse while deleting corpse for GUID %ul", GetOwnerGUID());
-        return;
+    if ((&*corpse) != this) {
+	    sLog.outError("ERROR: Found another corpse while deleting corpse for GUID %ul", GetOwnerGUID());
+	    return;
     }
 
     // Removing outdated POI if at same map
@@ -246,9 +242,8 @@ void Corpse::_ConvertCorpseToBones()
     CorpsePtr bones = CorpsePtr(new Corpse(this));
     bones->Create(GetGUIDLow());
 
-    for (int i = 0; i < CORPSE_END; i++)
-    {
-        bones->SetUInt32Value(i, GetUInt32Value(i));
+    for (int i = 0; i < CORPSE_END; i++) {
+	    bones->SetUInt32Value(i, GetUInt32Value(i));
     }
     bones->m_grid = m_grid;
     bones->m_time = m_time;

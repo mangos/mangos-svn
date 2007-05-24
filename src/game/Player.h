@@ -752,7 +752,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddEnchantmentDurations(Item *item);
         void RemoveEnchantmentDurations(Item *item);
         void AddEnchantmentDuration(Item *item,EnchantmentSlot slot,uint32 duration);
-        void ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool apply_dur = true, bool ignore_condition = false);
+        void ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool apply_dur = true);
         void ApplyEnchantment(Item *item,bool apply);
         void SaveEnchant();
         void LoadEnchant();
@@ -846,7 +846,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***                   SAVE SYSTEM                     ***/
         /*********************************************************/
 
-        void SaveToDB(bool first_save);
+        void SaveToDB();
         void SaveInventoryAndGoldToDB();                    // fast save function for item/money cheating preventing
         static bool SaveValuesArrayInDB(vector<string> const& data,uint64 guid);
         static void SetUInt32ValueInArray(vector<string>& data,uint16 index, uint32 value);
@@ -1095,7 +1095,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void BuildPlayerRepop();
         void DurabilityLossAll(double percent);
         void DurabilityLoss(uint8 equip_pos, double percent);
-        void DurabilityPointsLoss(uint8 equip_pos, uint32 points);
         void DurabilityRepairAll(bool cost, bool discount);
         void DurabilityRepair(uint16 pos, bool cost, bool discount);
         void RepopAtGraveyard();
@@ -1132,7 +1131,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         FactionsList m_factions;
         int32 GetBaseReputation(const FactionEntry *factionEntry) const;
-        int32 GetReputation(uint32 faction_id) const;
+        int32 GetReputation(uint32 FactionTemplateId) const;
         int32 GetReputation(const FactionEntry *factionEntry) const;
         ReputationRank GetReputationRank(uint32 faction) const;
         ReputationRank GetReputationRank(const FactionEntry *factionEntry) const;
@@ -1183,9 +1182,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _ApplyAllItemMods();
         void _ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply);
         void _ApplyAmmoBonuses(bool apply);
-        bool EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot);
-        void ToggleMetaGemsActive(uint16 exceptslot, bool apply);
-        void CorrectMetaGemEnchants(uint8 slot, bool apply);
         void InitDataForForm();
 
         void CastItemEquipSpell(Item *item);
@@ -1297,9 +1293,6 @@ class MANGOS_DLL_SPEC Player : public Unit
                                                             // overwrite Unit version
         uint8 m_forced_speed_changes[MAX_MOVE_TYPE];
 
-        bool isNeedRename() { return m_needRename; }
-        void SetNeedRename(bool rename) { m_needRename = rename; }
-
         /*********************************************************/
         /***                 INSTANCE SYSTEM                   ***/
         /*********************************************************/
@@ -1359,7 +1352,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _SaveActions();
         void _SaveAuras();
         void _SaveBoundInstances();
-        void _SaveInventory(bool first_save);
+        void _SaveInventory();
         void _SaveMail();
         void _SaveQuestStatus();
         void _SaveReputation();
@@ -1395,7 +1388,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_dismountCost;
         uint32 m_nextSave;
         uint32 m_dungeonDifficulty;
-        bool m_needRename;
 
         Item* m_items[PLAYER_SLOTS_COUNT];
         uint32 m_currentBuybackSlot;

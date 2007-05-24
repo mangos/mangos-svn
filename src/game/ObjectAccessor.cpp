@@ -263,7 +263,7 @@ void
 ObjectAccessor::SaveAllPlayers()
 {
     for(PlayersMapType::iterator itr = i_players.begin(); itr != i_players.end(); ++itr)
-        itr->second->SaveToDB(false);
+        itr->second->SaveToDB();
 }
 
 void
@@ -355,18 +355,15 @@ void ObjectAccessor::RemoveAllObjectsInRemoveList()
         switch(obj->GetTypeId())
         {
             case TYPEID_CORPSE:
-            {
-                CorpsePtr corpse = MapManager::Instance().GetMap(obj->GetMapId(), obj)->GetObjectNear<Corpse>(*obj, obj->GetGUID());
-                if (!corpse)
-                {
-                    sLog.outError("ERROR: Try delete corpse/bones %u that not in map", obj->GetGUIDLow());
-                }
-                else
-                {
-                    MapManager::Instance().GetMap(obj->GetMapId(), obj)->Remove(corpse,true);
-                }
+		{
+		    CorpsePtr corpse = MapManager::Instance().GetMap(obj->GetMapId(), obj)->GetObjectNear<Corpse>(*obj, obj->GetGUID());
+		    if (!corpse) {
+			sLog.outError("ERROR: Try delete corpse/bones %u that not in map", obj->GetGUIDLow());
+		    } else {
+			MapManager::Instance().GetMap(obj->GetMapId(), obj)->Remove(corpse,true);
+		    }
+		}
                 break;
-            }
             case TYPEID_DYNAMICOBJECT:
                 MapManager::Instance().GetMap(obj->GetMapId(), obj)->Remove((DynamicObject*)obj,true);
                 break;

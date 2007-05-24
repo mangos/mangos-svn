@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -16,53 +16,22 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-/*
- SQL Update and threading thanks to espire
-*/
-
 #if !defined(DATABASEENV_H)
 #define DATABASEENV_H
 
-/************************************************************************/
-/* Database Support Setup                                               */
-/************************************************************************/
-// Define the databases that you would like the server to be compiled with here.
-
-#define DATABASE_SUPPORT_MYSQL
-//#define DATABASE_SUPPORT_PGSQL
-//#define DATABASE_SUPPORT_ORACLE10
-
-//! Other libs we depend on.
 #include "Common.h"
 #include "Log.h"
+#include "Errors.h"
 
-//! Our own includes.
-#include <mysql/mysql.h>
 #include "Database/DBCStores.h"
 #include "Database/Field.h"
+#include "Database/QueryResult.h"
+#include "Database/QueryResultMysql.h"
+#include "Database/QueryResultSqlite.h"
 #include "Database/Database.h"
+#include "Database/DatabaseMysql.h"
+#include "Database/DatabaseSqlite.h"
 
-// Implementations
-
-/************************************************************************/
-/* MySQL                                                                */
-/************************************************************************/
-#ifdef DATABASE_SUPPORT_MYSQL
-#include "Database/impl/MySQLDatabase.h"
-#endif
-
-/************************************************************************/
-/* PostgreSQL                                                           */
-/************************************************************************/
-#ifdef DATABASE_SUPPORT_PGSQL
-#include "Database/impl/PostgreDatabase.h"
-#endif
-
-/************************************************************************/
-/* Oracle 10g                                                           */
-/************************************************************************/
-#ifdef DATABASE_SUPPORT_ORACLE10
-//#include "Database/impl/Oracle10.h"
-#endif
-
+extern DatabaseMysql sDatabase;
+extern DatabaseMysql loginDatabase;
 #endif

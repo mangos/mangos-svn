@@ -21,8 +21,7 @@
 #include "EventSystem.h"
 #include "Log.h"
 
-extern Database*  MainDatabase;
-#define sDatabase (*MainDatabase)
+extern DatabaseMysql  sDatabase;
 
 const char CreatureInfofmt[]="iiissiiiiiiiiififfiiiiififiiiiffifiiiiiiiiiiiiiiiiiiiiiiiiiiisiis";
 const char CreatureDataAddonInfofmt[]="iiiiiiiiiiii";
@@ -68,23 +67,23 @@ void SQLStorage::Load ()
 {
     uint32 maxi;
     Field *fields;
-    QueryResult *result  = sDatabase.Query("SELECT MAX(`%s`) FROM `%s`",entry_field,table);
+    QueryResult *result  = sDatabase.PQuery("SELECT MAX(`%s`) FROM `%s`",entry_field,table);
     if(!result)
     {
         sLog.outError("Error loading `%s` table (not exist?)\n",table);
         exit(1);                                            // Stop server at loading non exited table or not accessable table
     }
 
-    maxi= result->Fetch()[0].GetUInt32()+1;
+    maxi= (*result)[0].GetUInt32()+1;
     delete result;
 
-    result = sDatabase.Query("SELECT COUNT(*) FROM `%s`",table);
+    result = sDatabase.PQuery("SELECT COUNT(*) FROM `%s`",table);
 
     fields = result->Fetch();
     RecordCount=fields[0].GetUInt32();
     delete result;
 
-    result = sDatabase.Query("SELECT * FROM `%s`",table);
+    result = sDatabase.PQuery("SELECT * FROM `%s`",table);
 
     if(!result)
     {
@@ -99,7 +98,7 @@ void SQLStorage::Load ()
     if(iNumFields!=result->GetFieldCount())
     {
         RecordCount = 0;
-        sLog.outError("Error in `%s` table, probably sql file format was updated (there should be %d fields in sql - there are %d).\n",table,iNumFields,result->GetFieldCount());
+        sLog.outError("Error in `%s` table, probably sql file format was updated (there should be %d fields in sql).\n",table,iNumFields);
         delete result;
         exit(1);                                            // Stop server at loading broken or non-compatiable table.
     }

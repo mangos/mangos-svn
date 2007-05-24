@@ -199,7 +199,7 @@ bool Item::Create( uint32 guidlow, uint32 itemid, Player* owner)
     return true;
 }
 
-void Item::SaveToDB(bool first_save)
+void Item::SaveToDB()
 {
     uint32 guid = GetGUIDLow();
     switch (uState)
@@ -207,7 +207,7 @@ void Item::SaveToDB(bool first_save)
         case ITEM_NEW:
         {
             // it's better than rebuilding indexes multiple times
-            QueryResult *result = sDatabase.Query("select count(*) as r from `item_instance` where `guid` = '%u'", guid);
+            QueryResult *result = sDatabase.PQuery("select count(*) as r from `item_instance` where `guid` = '%u'", guid);
             Field *fields = result->Fetch();
             uint32 Rows = fields[0].GetUInt32();
             delete result;
@@ -221,11 +221,7 @@ void Item::SaveToDB(bool first_save)
                     ss << GetUInt32Value(i) << " ";
                 ss << "' )";
 
-                //sDatabase.Execute( ss.str().c_str() );
-                if(first_save)
-                    sDatabase.Execute( ss.str().c_str() );
-                else
-                    sDatabase.WaitExecute(ss.str().c_str());
+                sDatabase.Execute( ss.str().c_str() );
             } else
             {
                 std::ostringstream ss;
@@ -247,15 +243,15 @@ void Item::SaveToDB(bool first_save)
             sDatabase.Execute( ss.str().c_str() );
 
             if(HasFlag(ITEM_FIELD_FLAGS, 8))
-                sDatabase.Execute("UPDATE `character_gifts` SET `guid` = '%u' WHERE `item_guid` = '%u'", GUID_LOPART(GetOwnerGUID()),GetGUIDLow());
+                sDatabase.PExecute("UPDATE `character_gifts` SET `guid` = '%u' WHERE `item_guid` = '%u'", GUID_LOPART(GetOwnerGUID()),GetGUIDLow());
         } break;
         case ITEM_REMOVED:
         {
             if (GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID) > 0 )
-                sDatabase.Execute("DELETE FROM `item_text` WHERE `id` = '%u'", GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID));
-            sDatabase.Execute("DELETE FROM `item_instance` WHERE `guid` = '%u'", guid);
+                sDatabase.PExecute("DELETE FROM `item_text` WHERE `id` = '%u'", GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID));
+            sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", guid);
             if(HasFlag(ITEM_FIELD_FLAGS, 8))
-                sDatabase.Execute("DELETE FROM `character_gifts` WHERE `item_guid` = '%u'", GetGUIDLow());
+                sDatabase.PExecute("DELETE FROM `character_gifts` WHERE `item_guid` = '%u'", GetGUIDLow());
             delete this;
             return;
         }
@@ -267,7 +263,7 @@ void Item::SaveToDB(bool first_save)
 
 bool Item::LoadFromDB(uint32 guid, uint64 owner_guid)
 {
-    QueryResult *result = sDatabase.Query("SELECT `data` FROM `item_instance` WHERE `guid` = '%u'", guid);
+    QueryResult *result = sDatabase.PQuery("SELECT `data` FROM `item_instance` WHERE `guid` = '%u'", guid);
 
     if (!result)
     {
@@ -299,12 +295,12 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid)
 
 void Item::DeleteFromDB()
 {
-    sDatabase.Execute("DELETE FROM `item_instance` WHERE `guid` = '%u'",GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'",GetGUIDLow());
 }
 
 void Item::DeleteFromInventoryDB()
 {
-    sDatabase.Execute("DELETE FROM `character_inventory` WHERE `item` = '%u'",GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `item` = '%u'",GetGUIDLow());
 }
 
 ItemPrototype const *Item::GetProto() const
@@ -532,7 +528,7 @@ void Item::SetItemRandomProperties(uint32 randomPropId)
     {
         SetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID,item_rand->ID);
         for(uint32 i = PROP_ENCHANTMENT_SLOT; i < PROP_ENCHANTMENT_SLOT + 3; ++i)
-            SetEnchantment(EnchantmentSlot(i),item_rand->enchant_id[i],0,0);
+            SetEchantment(EnchantmentSlot(i),item_rand->enchant_id[i],0,0);
     }
 }
 
@@ -943,7 +939,7 @@ bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
     return true;
 }
 
-void Item::SetEnchantment(EnchantmentSlot slot, uint32 id, uint32 duration, uint32 charges)
+void Item::SetEchantment(EnchantmentSlot slot, uint32 id, uint32 duration, uint32 charges)
 {
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+ENCHANTMENT_ID_OFFSET,id);
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+ENCHANTMENT_DURATION_OFFSET,duration);
@@ -951,79 +947,20 @@ void Item::SetEnchantment(EnchantmentSlot slot, uint32 id, uint32 duration, uint
     SetState(ITEM_CHANGED);
 }
 
-void Item::SetEnchantmentDuration(EnchantmentSlot slot, uint32 duration)
+void Item::SetEchantmentDuration(EnchantmentSlot slot, uint32 duration)
 {
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+ENCHANTMENT_DURATION_OFFSET,duration);
     SetState(ITEM_CHANGED);
 }
-void Item::SetEnchantmentCharges(EnchantmentSlot slot, uint32 charges)
+void Item::SetEchantmentCharges(EnchantmentSlot slot, uint32 charges)
 {
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+ENCHANTMENT_CHARGES_OFFSET,charges);
     SetState(ITEM_CHANGED);
 }
 
-void Item::ClearEnchantment(EnchantmentSlot slot)
+void Item::ClearEchantment(EnchantmentSlot slot)
 {
     for(int x=0;x<3;x++)
         SetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+x,0);
     SetState(ITEM_CHANGED);
-}
-
-bool Item::GemsFitSockets() const
-{
-    bool fits = true;
-    for(uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+3; ++enchant_slot)
-    {
-        uint8 SocketColor = GetProto()->Socket[enchant_slot-SOCK_ENCHANTMENT_SLOT].Color;
-
-        uint32 enchant_id = GetEnchantmentId(EnchantmentSlot(enchant_slot));
-        if(!enchant_id)
-        {
-            if(SocketColor) fits &= false;
-            continue;
-        }
-
-        SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
-        if(!enchantEntry)
-        {
-            if(SocketColor) fits &= false;
-            continue;
-        }
-
-        uint8 GemColor = 0;
-
-        uint32 gemid = enchantEntry->GemID;
-        if(gemid)
-        {
-            ItemPrototype const* gemProto = sItemStorage.LookupEntry<ItemPrototype>(gemid);
-            if(gemProto)
-            {
-                GemPropertiesEntry const* gemProperty = sGemPropertiesStore.LookupEntry(gemProto->GemProperties);
-                if(gemProperty)
-                    GemColor = gemProperty->color;
-            }
-        }
-
-        fits &= (GemColor & SocketColor) ? true : false;
-    }
-    return fits;
-}
-
-uint8 Item::GetGemCountWithID(uint32 GemID) const
-{
-    uint8 count = 0;
-    for(uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+3; ++enchant_slot)
-    {
-        uint32 enchant_id = GetEnchantmentId(EnchantmentSlot(enchant_slot));
-        if(!enchant_id)
-            continue;
-
-        SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
-        if(!enchantEntry)
-            continue;
-
-        if(GemID == enchantEntry->GemID)
-            count++;
-    }
-    return count;
 }

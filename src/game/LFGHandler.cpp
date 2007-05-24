@@ -46,13 +46,13 @@ void WorldSession::HandleLfmCancelAutoAddmembersOpcode( WorldPacket & recv_data 
 void WorldSession::HandleLfgClearOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("CMSG_LOOKING_FOR_GROUP_CLEAR");
-    sDatabase.Execute("DELETE FROM `looking_for_group` WHERE `guid` = '%u' AND `lfg_type` = '0'", _player->GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `looking_for_group` WHERE `guid` = '%u' AND `lfg_type` = '0'", _player->GetGUIDLow());
 }
 
 void WorldSession::HandleLfmSetNoneOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("CMSG_SET_LOOKING_FOR_NONE");
-    sDatabase.Execute("UPDATE `looking_for_group` SET `entry` = '0', `type` = '0' WHERE `guid` = '%u' AND `lfg_type` = '1'", _player->GetGUIDLow()); 
+    sDatabase.PExecute("UPDATE `looking_for_group` SET `entry` = '0', `type` = '0' WHERE `guid` = '%u' AND `lfg_type` = '1'", _player->GetGUIDLow()); 
 }
 
 void WorldSession::HandleLfmSetOpcode( WorldPacket & recv_data )
@@ -66,8 +66,8 @@ void WorldSession::HandleLfmSetOpcode( WorldPacket & recv_data )
 
     entry = ( temp & 0xFFFF);
     type = ( (temp >> 24) & 0xFFFF);
-    //sDatabase.Execute("UPDATE `looking_for_group` SET `entry` = '0', `type` = '0' WHERE `guid` = '%u'", _player->GetGUIDLow());
-    sDatabase.Execute("UPDATE `looking_for_group` SET `entry` = '%u', `type` = '%u', `lfg_type` = '1' WHERE `guid` = '%u' AND `slot` = '1'", entry, type, _player->GetGUIDLow()); 
+    //sDatabase.PExecute("UPDATE `looking_for_group` SET `entry` = '0', `type` = '0' WHERE `guid` = '%u'", _player->GetGUIDLow());
+    sDatabase.PExecute("UPDATE `looking_for_group` SET `entry` = '%u', `type` = '%u', `lfg_type` = '1' WHERE `guid` = '%u' AND `slot` = '1'", entry, type, _player->GetGUIDLow()); 
     sLog.outDebug("LFM set: temp %u, zone %u, type %u", temp, entry, type);
     SendLfgResult(type, entry);
 }
@@ -79,7 +79,7 @@ void WorldSession::HandleLfgSetCommentOpcode( WorldPacket & recv_data )
     uint32 number;
     recv_data.hexlike();
 
-    QueryResult *result = sDatabase.Query("SELECT COUNT(*) FROM `looking_for_group` WHERE `guid` = '%u'", _player->GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `looking_for_group` WHERE `guid` = '%u'", _player->GetGUIDLow());
 
     if(result)
     {
@@ -87,11 +87,11 @@ void WorldSession::HandleLfgSetCommentOpcode( WorldPacket & recv_data )
         number = fields[0].GetUInt32();
         if(number == 0)
             for(uint8 i = 0; i < 3; i++)
-                sDatabase.Execute("INSERT INTO `looking_for_group` (`guid`, `slot`, `comment`) VALUES ('%u', '%u', '')", _player->GetGUIDLow(), i);
+                sDatabase.PExecute("INSERT INTO `looking_for_group` (`guid`, `slot`, `comment`) VALUES ('%u', '%u', '')", _player->GetGUIDLow(), i);
         recv_data >> comment;
         sLog.outDebug("LFG comment %s", comment.c_str());
         sDatabase.escape_string(comment);
-        sDatabase.Execute("UPDATE `looking_for_group` SET `comment` = '%s' WHERE `guid` = '%u'", comment.c_str(), _player->GetGUIDLow());     
+        sDatabase.PExecute("UPDATE `looking_for_group` SET `comment` = '%s' WHERE `guid` = '%u'", comment.c_str(), _player->GetGUIDLow());     
     }
     else
         sLog.outDebug("strange, DB problem?");
@@ -106,8 +106,8 @@ void WorldSession::HandleLookingForGroup(WorldPacket& recv_data)
 
     recv_data >> type >> entry >> unk;
     sLog.outDebug("MSG_LOOKING_FOR_GROUP: type %u, entry %u, unk %u", type, entry, unk);
-    //sDatabase.Execute("UPDATE `looking_for_group` SET `entry` = '0', `type` = '0' WHERE `guid` = '%u'", _player->GetGUIDLow());
-    sDatabase.Execute("UPDATE `looking_for_group` SET `entry` = '%u', `type` = '%u', `lfg_type` = '1' WHERE `guid` = '%u' AND `slot` = '1'", entry, type, _player->GetGUIDLow()); 
+    //sDatabase.PExecute("UPDATE `looking_for_group` SET `entry` = '0', `type` = '0' WHERE `guid` = '%u'", _player->GetGUIDLow());
+    sDatabase.PExecute("UPDATE `looking_for_group` SET `entry` = '%u', `type` = '%u', `lfg_type` = '1' WHERE `guid` = '%u' AND `slot` = '1'", entry, type, _player->GetGUIDLow()); 
     SendLfgResult(type, entry);
 }
 
@@ -116,7 +116,7 @@ void WorldSession::SendLfgResult(uint32 type, uint32 entry)
     WorldPacket data;
     std::string comment;
     uint32 number;
-    QueryResult *result = sDatabase.Query("SELECT COUNT(*) FROM `looking_for_group` WHERE `type` = '%u' AND `entry` = '%u'", type, entry);
+    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `looking_for_group` WHERE `type` = '%u' AND `entry` = '%u'", type, entry);
 
     if(result)
     {
@@ -134,7 +134,7 @@ void WorldSession::SendLfgResult(uint32 type, uint32 entry)
     data << number; // count
     data << number; // count again, strange
 
-    result = sDatabase.Query("SELECT `guid`, `lfg_type`, `comment` FROM `looking_for_group` WHERE `type` = '%u' AND `entry` = '%u'", type, entry);
+    result = sDatabase.PQuery("SELECT `guid`, `lfg_type`, `comment` FROM `looking_for_group` WHERE `type` = '%u' AND `entry` = '%u'", type, entry);
     if(result)
     {
         Field *fields = result->Fetch();
@@ -151,7 +151,7 @@ void WorldSession::SendLfgResult(uint32 type, uint32 entry)
                 data << fields[1].GetUInt8();    // 0x00 - LFG, 0x01 - LFM
                 for(uint8 i = 0; i < 3; i++)     // we have three slots
                 {
-                    QueryResult *result2 = sDatabase.Query("SELECT `entry`, `type` FROM `looking_for_group` WHERE `slot` = '%u' AND `guid` = '%u'", i, plr->GetGUID());
+                    QueryResult *result2 = sDatabase.PQuery("SELECT `entry`, `type` FROM `looking_for_group` WHERE `slot` = '%u' AND `guid` = '%u'", i, plr->GetGUID());
                     if(result2)
                     {
                         Field *fields = result2->Fetch();
@@ -205,7 +205,7 @@ void WorldSession::HandleSetLfgOpcode( WorldPacket & recv_data )
     entry = ( temp & 0xFFFF);
     type = ( (temp >> 24) & 0xFFFF);
 
-    sDatabase.Execute("UPDATE `looking_for_group` SET `entry` = '%u', `type` = '%u' WHERE `guid` = '%u' and `slot` = '%u'", entry, type, _player->GetGUIDLow(), slot);
+    sDatabase.PExecute("UPDATE `looking_for_group` SET `entry` = '%u', `type` = '%u' WHERE `guid` = '%u' and `slot` = '%u'", entry, type, _player->GetGUIDLow(), slot);
 
     sLog.outDebug("LFG set: looknumber %u, temp %X, type %u, entry %u", slot, temp, type, entry);
     SendLfgResult(type, entry);

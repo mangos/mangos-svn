@@ -35,14 +35,10 @@ class BattleGroundMgr
         void Update(time_t diff);
 
         /* Packet Building */
-        WorldPacket BuildPlayerJoinedBattleGroundPacket(Player *plr);
-        WorldPacket BuildPlayerLeftBattleGroundPacket(Player *plr);
-        WorldPacket BuildBattleGroundListPacket(uint64 guid, Player *plr, uint32 bgId);
-        WorldPacket BuildGroupJoinedBattlegroundPacket(uint32 bgid);
-        WorldPacket BuildUpdateWorldStatePacket(uint32 field, uint32 value);
-        WorldPacket BuildPvpLogDataPacket(BattleGround *bg, uint8 winner);
-        WorldPacket BuildBattleGroundStatusPacket(BattleGround *bg, uint32 team, uint8 StatusID, uint32 Time1, uint32 Time2);
-        WorldPacket BuildPlaySoundPacket(uint32 soundid);
+        void BuildPlayerLeftBattleGroundPacket(WorldPacket* data, Player* plr);
+        void BuildPlayerJoinedBattleGroundPacket(WorldPacket* data, Player* plr);
+
+        void BuildBattleGroundListPacket(WorldPacket* data, uint64 guid, Player* plr, uint32 bgId);
 
         /* Battlegrounds */
         BattleGroundSet::iterator GetBattleGroundsBegin() { return m_BattleGrounds.begin(); };
@@ -63,6 +59,9 @@ class BattleGroundMgr
 
         void CreateInitialBattleGrounds();
         void SendToBattleGround(Player *pl, uint32 bgId);
+        void SendBattleGroundStatusPacket(Player *pl, BattleGround* bg, uint8 StatusID, uint32 Time1, uint32 Time2);
+        void SendPvpLogData(Player *pl, uint8 winner, bool to_all);
+        void SendGroupJoinedBattlegroundPacket(Player *Source, uint32 bgid);
 
     private:
 
