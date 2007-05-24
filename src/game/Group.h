@@ -32,6 +32,14 @@ enum RollVote
     NOT_VALID         = 4
 };
 
+enum GroupMemberOnlineStatus
+{
+    MEMBER_STATUS_OFFLINE      = 0,
+    MEMBER_STATUS_ONLINE       = 1,
+    MEMBER_STATUS_OFFLINE_PVP  = 2,
+    MEMBER_STATUS_ONLINE_PVP   = 3
+};
+
 enum GroupType
 {
     GROUPTYPE_NORMAL = 0,
