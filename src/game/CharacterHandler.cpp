@@ -35,6 +35,9 @@
 #include "Transports.h"
 #include "Group.h"
 
+// check used symbols in player name at creating and rename
+static std::string const notAllowedChars = "\t\v\b\f\a\n\r\\\0\"\'\? <>[](){}_=+-|/!@#$%^&*~`.,0123456789";
+
 void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
 {
     // keys can be non cleared if player open realm list and close it by 'cancel'
@@ -105,9 +108,6 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 
     normalizePlayerName(name);
 
-    // check used symbols
-    static std::string const notAllowedChars = "\t\v\b\f\a\n\r\\\0\"\'\? <>[](){}_=+-|/!@#$%^&*~`.,0123456789";
-
     if(name.find_first_of(notAllowedChars)!=name.npos)
     {
         data.Initialize( SMSG_CHAR_CREATE, 1 );
@@ -116,21 +116,15 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         return;
     }
 
-    sDatabase.escape_string(name);
-    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `name` = '%s'", name.c_str());
-
-    if ( result )
+    if(objmgr.GetPlayerGUIDByName(name))
     {
-        delete result;
-
         data.Initialize(SMSG_CHAR_CREATE, 1);
-        data << (uint8)CHAR_LOGIN_DUPLICATE_CHARACTER;
+        data << (uint8)CHAR_CREATE_NAME_IN_USE;
         SendPacket( &data );
-
         return;
     }
 
-    result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%u'", GetAccountId());
+    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%u'", GetAccountId());
 
     if ( result )
     {
@@ -693,4 +687,68 @@ void WorldSession::HandleToggleCloakOpcode( WorldPacket & recv_data )
 {
     DEBUG_LOG("CMSG_TOGGLE_CLOAK for %s", _player->GetName());
     _player->ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK);
+}
+
+void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
+{
+    uint64 guid;
+    std::string newname;
+    std::string oldname;
+
+    CHECK_PACKET_SIZE(recv_data, 8+1);
+
+    recv_data >> guid;
+    recv_data >> newname;
+
+    if(!objmgr.GetPlayerNameByGUID(guid, oldname))          // character not exist, because we have no name for this guid
+    {
+        WorldPacket data(SMSG_CHAR_RENAME, 1);
+        data << (uint8)CHAR_LOGIN_NO_CHARACTER;
+        SendPacket( &data );
+        return;
+    }
+
+    // prevent character rename to invalid name
+    if(newname.size() == 0)                                 // checked by client
+    {
+        WorldPacket data(SMSG_CHAR_RENAME, 1);
+        data << (uint8)CHAR_NAME_NO_NAME;
+        SendPacket( &data );
+        return;
+    }
+
+    normalizePlayerName(newname);
+
+    if(newname.find_first_of(notAllowedChars) != newname.npos)
+    {
+        WorldPacket data(SMSG_CHAR_RENAME, 1);
+        data << (uint8)CHAR_NAME_INVALID_CHARACTER;;
+        SendPacket( &data );
+        return;
+    }
+
+    if(objmgr.GetPlayerGUIDByName(newname))         // character with this name already exist
+    {
+        WorldPacket data(SMSG_CHAR_RENAME, 1);
+        data << (uint8)CHAR_CREATE_NAME_IN_USE;
+        SendPacket( &data );
+        return;
+    }
+
+    if(newname == oldname)                                  // checked by client
+    {
+        WorldPacket data(SMSG_CHAR_RENAME, 1);
+        data << (uint8)CHAR_NAME_FAILURE;
+        SendPacket( &data );
+        return;
+    }
+
+    sDatabase.escape_string(newname);
+    sDatabase.PQuery("UPDATE `character` set `name` = '%s', `rename` = '0' WHERE `guid` ='%u'", newname.c_str(), GUID_LOPART(guid));
+
+    WorldPacket data(SMSG_CHAR_RENAME,1+8+(newname.size()+1));
+    data << (uint8)RESPONSE_SUCCESS;
+    data << guid;
+    data << newname;
+    SendPacket(&data);
 }

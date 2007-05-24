@@ -192,7 +192,7 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
 
     std::string name = args;
     normalizePlayerName(name);
-    sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
+    //sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
 
     Player *chr = objmgr.GetPlayer(name.c_str());
     if (chr)
@@ -249,7 +249,7 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
         m_session->GetPlayer()->GetClosePoint(NULL,x,y,z,chr->GetObjectSize());
         chr->TeleportTo(m_session->GetPlayer()->GetMapId(),x,y,z,chr->GetOrientation());
     }
-    else if (uint64 guid = objmgr.GetPlayerGUIDByName(name.c_str()))
+    else if (uint64 guid = objmgr.GetPlayerGUIDByName(name))
     {
         PSendSysMessage(LANG_SUMMONING, name.c_str()," (offline)");
 
@@ -280,7 +280,7 @@ bool ChatHandler::HandleGonameCommand(const char* args)
 
     std::string name = args;
     normalizePlayerName(name);
-    sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
+    //sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
 
     Player *chr = objmgr.GetPlayer(name.c_str());
     if (chr)
@@ -347,7 +347,7 @@ bool ChatHandler::HandleGonameCommand(const char* args)
         return true;
     }
 
-    if (uint64 guid = objmgr.GetPlayerGUIDByName(name.c_str()))
+    if (uint64 guid = objmgr.GetPlayerGUIDByName(name))
     {
         PSendSysMessage(LANG_APPEARING_AT, name.c_str());
 
@@ -390,7 +390,7 @@ bool ChatHandler::HandleRecallCommand(const char* args)
     {
         std::string name = args;
         normalizePlayerName(name);
-        sDatabase.escape_string(name);                      // prevent SQL injection - normal name don't must changed by this call
+        //sDatabase.escape_string(name);                      // prevent SQL injection - normal name don't must changed by this call
 
         chr = objmgr.GetPlayer(name.c_str());
 
@@ -1600,7 +1600,7 @@ bool ChatHandler::HandleSendMailCommand(const char* args)
     
     normalizePlayerName(name);
 
-    uint32 receiver_guid = objmgr.GetPlayerGUIDByName(name.c_str());
+    uint32 receiver_guid = objmgr.GetPlayerGUIDByName(name);
     uint32 mailId = objmgr.GenerateMailID();
     uint32 sender_guid = m_session->GetPlayer()->GetGUID();
     time_t dtime = time(NULL);

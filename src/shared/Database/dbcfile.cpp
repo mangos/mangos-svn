@@ -160,7 +160,9 @@ void * DBCFile::AutoProduceData(const char * format, uint32 * records, char *&_d
         table = new ptr [recordCount];
     }
 
-    _data= new char[recordCount *recordsize];
+    _data= new char[recordCount*recordsize + stringSize];
+    char *stringData = _data+recordCount*recordsize;
+    memcpy(stringData,stringTable,stringSize);
 
     for(uint32 y =0;y<recordCount;y++)
     {
@@ -187,10 +189,8 @@ void * DBCFile::AutoProduceData(const char * format, uint32 * records, char *&_d
                     offset+=1;
                     break;
                 case FT_STRING:
-                    uint32 l=strlen(getRecord(y).getString  (x))+1;
-                    char * st=new char[l];
-                    memcpy(st,getRecord(y).getString  (x),l);
-                    *((char**)(&_data[offset]))=st;
+                    const char * st = getRecord(y).getString(x);
+                    *((char**)(&_data[offset]))=stringData+(st-(const char*)stringTable);
                     offset+=sizeof(char*);
                     break;
             }

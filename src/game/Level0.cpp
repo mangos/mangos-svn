@@ -122,14 +122,7 @@ bool ChatHandler::HandleStartCommand(const char* args)
     }
 
     // cast spell Stuck
-    SpellEntry const* sInfo = sSpellStore.LookupEntry(7355);
-    if(!sInfo)
-        return true;
-
-    Spell *spell = new Spell(chr, sInfo , false, 0);
-    SpellCastTargets targets;
-    targets.setUnitTarget( chr );
-    spell->prepare(&targets);
+    chr->CastSpell(chr,7355,false);
     return true;
 }
 

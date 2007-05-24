@@ -528,7 +528,7 @@ void Item::SetItemRandomProperties(uint32 randomPropId)
     {
         SetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID,item_rand->ID);
         for(uint32 i = PROP_ENCHANTMENT_SLOT; i < PROP_ENCHANTMENT_SLOT + 3; ++i)
-            SetEchantment(EnchantmentSlot(i),item_rand->enchant_id[i],0,0);
+            SetEnchantment(EnchantmentSlot(i),item_rand->enchant_id[i],0,0);
     }
 }
 
@@ -939,7 +939,7 @@ bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
     return true;
 }
 
-void Item::SetEchantment(EnchantmentSlot slot, uint32 id, uint32 duration, uint32 charges)
+void Item::SetEnchantment(EnchantmentSlot slot, uint32 id, uint32 duration, uint32 charges)
 {
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+ENCHANTMENT_ID_OFFSET,id);
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+ENCHANTMENT_DURATION_OFFSET,duration);
@@ -947,20 +947,79 @@ void Item::SetEchantment(EnchantmentSlot slot, uint32 id, uint32 duration, uint3
     SetState(ITEM_CHANGED);
 }
 
-void Item::SetEchantmentDuration(EnchantmentSlot slot, uint32 duration)
+void Item::SetEnchantmentDuration(EnchantmentSlot slot, uint32 duration)
 {
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+ENCHANTMENT_DURATION_OFFSET,duration);
     SetState(ITEM_CHANGED);
 }
-void Item::SetEchantmentCharges(EnchantmentSlot slot, uint32 charges)
+void Item::SetEnchantmentCharges(EnchantmentSlot slot, uint32 charges)
 {
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+ENCHANTMENT_CHARGES_OFFSET,charges);
     SetState(ITEM_CHANGED);
 }
 
-void Item::ClearEchantment(EnchantmentSlot slot)
+void Item::ClearEnchantment(EnchantmentSlot slot)
 {
     for(int x=0;x<3;x++)
         SetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+x,0);
     SetState(ITEM_CHANGED);
+}
+
+bool Item::GemsFitSockets() const
+{
+    bool fits = true;
+    for(uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+3; ++enchant_slot)
+    {
+        uint8 SocketColor = GetProto()->Socket[enchant_slot-SOCK_ENCHANTMENT_SLOT].Color;
+
+        uint32 enchant_id = GetEnchantmentId(EnchantmentSlot(enchant_slot));
+        if(!enchant_id)
+        {
+            if(SocketColor) fits &= false;
+            continue;
+        }
+
+        SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+        if(!enchantEntry)
+        {
+            if(SocketColor) fits &= false;
+            continue;
+        }
+
+        uint8 GemColor = 0;
+
+        uint32 gemid = enchantEntry->GemID;
+        if(gemid)
+        {
+            ItemPrototype const* gemProto = sItemStorage.LookupEntry<ItemPrototype>(gemid);
+            if(gemProto)
+            {
+                GemPropertiesEntry const* gemProperty = sGemPropertiesStore.LookupEntry(gemProto->GemProperties);
+                if(gemProperty)
+                    GemColor = gemProperty->color;
+            }
+        }
+
+        fits &= (GemColor & SocketColor) ? true : false;
+    }
+    return fits;
+}
+
+uint8 Item::GetGemCountWithID(uint32 GemID) const
+{
+    uint8 count = 0;
+    for(uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+3; ++enchant_slot)
+    {
+        uint32 enchant_id = GetEnchantmentId(EnchantmentSlot(enchant_slot));
+        if(!enchant_id)
+            continue;
+
+        SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+        if(!enchantEntry)
+            continue;
+
+        if(GemID == enchantEntry->GemID)
+            count++;
+    }
+    return count;
 }

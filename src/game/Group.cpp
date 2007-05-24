@@ -145,6 +145,12 @@ bool Group::AddMember(const uint64 &guid, const char* name)
 
 uint32 Group::RemoveMember(const uint64 &guid, const uint8 &method)
 {
+    if(m_members.size() <= 2)
+    {// UQ1: If there would only be 1 player left after the leader change, delete the group here!
+        Disband(true);
+        return 0;
+    }
+
     if(m_members.size() > 1)
     {
         bool leaderChanged = _removeMember(guid);
@@ -854,7 +860,7 @@ void Group::_setLeader(const uint64 &guid)
             std::ostringstream ss;
             ss << "SELECT DISTINCT(`map`) FROM `character_instance` WHERE (`guid` IN (";
 
-            for(member_citerator citr = m_members.begin(); citr != m_members.end(); ++citr)
+            for(member_citerator citr = m_members.begin(); citr != m_members.end(); )
             {
                 ss << GUID_LOPART(citr->guid);
                 player = objmgr.GetPlayer(citr->guid);
@@ -870,7 +876,7 @@ void Group::_setLeader(const uint64 &guid)
                         }
                     }
                 }
-                citr++;
+                ++citr;
                 if (citr != m_members.end()) ss << ", ";
             }
             ss << ")) AND (`leader` = '" << GUID_LOPART(old_guid) << "')";
