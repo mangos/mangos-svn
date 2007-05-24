@@ -4449,16 +4449,15 @@ int32 Player::GetBaseReputation(const FactionEntry *factionEntry) const
     return 0;
 }
 
-int32 Player::GetReputation(uint32 FactionTemplateId) const
+int32 Player::GetReputation(uint32 faction_id) const
 {
-    FactionTemplateEntry const *factionTemplateEntry = sFactionTemplateStore.LookupEntry(FactionTemplateId);
+    FactionEntry const *factionEntry = sFactionStore.LookupEntry(faction_id);
 
-    if(!factionTemplateEntry)
+    if (!factionEntry)
     {
-        sLog.outError("Player::GetReputation: Can't get reputation of %s for unknown faction (faction template id) #%u.",GetName(), FactionTemplateId);
+        sLog.outError("Player::GetReputation: Can't get reputation of %s for unknown faction (faction template id) #%u.",GetName(), faction_id);
         return 0;
     }
-    FactionEntry const *factionEntry = sFactionStore.LookupEntry(factionTemplateEntry->faction);
 
     return GetReputation(factionEntry);
 }

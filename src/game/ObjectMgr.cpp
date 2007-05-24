@@ -1448,7 +1448,7 @@ void ObjectMgr::LoadQuests()
             // no changes, quest can't be done for this requirement
         }
 
-        if(qinfo->RequiredRepFaction && !sFactionTemplateStore.LookupEntry(qinfo->RequiredRepFaction))
+        if(qinfo->RequiredRepFaction && !sFactionStore.LookupEntry(qinfo->RequiredRepFaction))
         {
             sLog.outErrorDb("Quest %u has `RequiredRepFaction` = %u but faction template %u doesn't exist, quest can't be done.",
                 qinfo->GetQuestId(),qinfo->RequiredRepFaction,qinfo->RequiredRepFaction);

@@ -843,7 +843,7 @@ enum OpCodes
     SMSG_RESET_INSTANCES_RESULT                     = 798, // uint32 mapid, chat message: %s has been reset.
     // 799
     SMSG_UNKNOWN_800                                = 800, // uint32 mapid, instance related (save?)
-    MSG_RAID_ICON_TARGET                            = 801, // uint8+uint8+uint64 guid
+    MSG_RAID_ICON_TARGET                            = 801, // uint8+uint8+uint64 guid, or only one uint8
     MSG_RAID_READY_CHECK                            = 802, // uint64+uint8
     // 803
     SMSG_AI_UNKNOWN                                 = 804, // GUID + uint32, looks like SMSG_AI_REACTION (pet action sound?)
