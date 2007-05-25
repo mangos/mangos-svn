@@ -97,8 +97,6 @@ BattleGround::~BattleGround()
 
 void BattleGround::Update(time_t diff)
 {
-    WorldPacket data;
-
     if(!GetPlayersSize() && !GetQueuedPlayersSize() && !GetRemovedPlayersSize()) // BG is empty
         return;
 
@@ -119,6 +117,8 @@ void BattleGround::Update(time_t diff)
                 else if(plr->InBattleGroundQueue() && itr->second) // currently in queue and was removed from queue
                 {
                     RemovePlayerFromQueue(itr->first);
+
+                    WorldPacket data;
                     data = sBattleGroundMgr.BuildBattleGroundStatusPacket(this, plr->GetTeam(), STATUS_NONE, 0, 0);
                     plr->GetSession()->SendPacket(&data);
                 }
@@ -152,6 +152,7 @@ void BattleGround::Update(time_t diff)
                         if(HasFreeSlots(plr->GetTeam()))
                         {
                             plr->SaveToDB();
+                            WorldPacket data;
                             data = sBattleGroundMgr.BuildBattleGroundStatusPacket(this, plr->GetTeam(), STATUS_WAIT_JOIN, 120000, 0);
                             plr->GetSession()->SendPacket(&data);
                             itr->second.IsInvited = true;
@@ -171,6 +172,7 @@ void BattleGround::Update(time_t diff)
                     }
                     else if(t >= 30000)         // remind every 30 seconds
                     {
+                        WorldPacket data;
                         data = sBattleGroundMgr.BuildBattleGroundStatusPacket(this, plr->GetTeam(), STATUS_WAIT_JOIN, 120000 - tt, 0);
                         plr->GetSession()->SendPacket(&data);
                         itr->second.LastInviteTime = getMSTime();
@@ -448,7 +450,6 @@ void BattleGround::EndBattleGround(uint32 winner)
     SetStatus(STATUS_WAIT_LEAVE);
     SetEndTime(getMSTime());
 
-    WorldPacket data;
     uint32 mark = 0, reputation = 0;
 
     for(std::map<uint64, BattleGroundPlayer>::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
@@ -466,6 +467,8 @@ void BattleGround::EndBattleGround(uint32 winner)
         BlockMovement(plr);
 
         uint32 time1 = getMSTime() - GetStartTime();
+
+        WorldPacket data;
         data = sBattleGroundMgr.BuildBattleGroundStatusPacket(this, plr->GetTeam(), STATUS_INPROGRESS, 120000, time1); // 2 minutes to auto leave BG
         plr->GetSession()->SendPacket(&data);
 
@@ -613,10 +616,9 @@ void BattleGround::RemovePlayer(uint64 guid, bool Transport, bool SendPacket)
 
     if(plr)
     {
-        WorldPacket data;
-
         if(SendPacket)
         {
+            WorldPacket data;
             data = sBattleGroundMgr.BuildBattleGroundStatusPacket(this, plr->GetTeam(), STATUS_NONE, 0, 0);
             plr->GetSession()->SendPacket(&data);
         }
@@ -635,6 +637,7 @@ void BattleGround::RemovePlayer(uint64 guid, bool Transport, bool SendPacket)
         plr->SetBattleGroundId(0);      // We're not in BG.
 
         // Let others know
+        WorldPacket data;
         data = sBattleGroundMgr.BuildPlayerLeftBattleGroundPacket(plr);
         SendPacketToAll(&data);
 
@@ -742,8 +745,6 @@ void BattleGround::StartBattleGround()
 {
     SetStartTime(getMSTime());
 
-    WorldPacket data;
-
     for(std::map<uint64, BattleGroundQueue>::iterator itr = m_QueuedPlayers.begin(); itr != m_QueuedPlayers.end(); ++itr)
     {
         Player *plr = objmgr.GetPlayer(itr->first);
@@ -751,6 +752,7 @@ void BattleGround::StartBattleGround()
         {
             // Save before join (player must loaded out of bg, if disconnected at bg,etc), it's not blizz like...
             plr->SaveToDB();
+            WorldPacket data;
             data = sBattleGroundMgr.BuildBattleGroundStatusPacket(this, plr->GetTeam(), STATUS_WAIT_JOIN, 120000, 0);  // 2 minutes to remove from queue
             plr->GetSession()->SendPacket(&data);
             itr->second.IsInvited = true;
@@ -818,7 +820,6 @@ void BattleGround::EventPlayerCapturedFlag(Player *Source)
     if(GetStatus() != STATUS_INPROGRESS)
         return;
 
-    WorldPacket data;
     uint8 type = 0;
     bool win = false;
     uint32 winner = 0;
@@ -855,6 +856,7 @@ void BattleGround::EventPlayerCapturedFlag(Player *Source)
         //Source->CastSpell(Source, 23525, true, 0);
     }
 
+    WorldPacket data;
     sChatHandler.FillMessageData(&data, Source->GetSession(), type, LANG_UNIVERSAL, NULL, Source->GetGUID(), message, NULL);
     SendPacketToAll(&data);
 
@@ -915,7 +917,6 @@ void BattleGround::EventPlayerDroppedFlag(Player *Source)
     if(GetStatus() != STATUS_INPROGRESS)
         return;
 
-    WorldPacket data;
     const char *message;
     uint8 type = 0;
 
@@ -934,6 +935,7 @@ void BattleGround::EventPlayerDroppedFlag(Player *Source)
 
     UpdateFlagState(Source->GetTeam(), 1);
 
+    WorldPacket data;
     sChatHandler.FillMessageData(&data, Source->GetSession(), type, LANG_UNIVERSAL, NULL, Source->GetGUID(), message, NULL);
     SendPacketToAll(&data);
 
@@ -948,7 +950,6 @@ void BattleGround::EventPlayerReturnedFlag(Player *Source)
     if(GetStatus() != STATUS_INPROGRESS)
         return;
 
-    WorldPacket data;
     const char *message;
     uint8 type = 0;
 
@@ -970,6 +971,7 @@ void BattleGround::EventPlayerReturnedFlag(Player *Source)
     PlaySoundToAll(8192);               // flag returned (common sound)
     UpdatePlayerScore(Source, 3, 1);    // +1 to flag returns...
 
+    WorldPacket data;
     sChatHandler.FillMessageData(&data, Source->GetSession(), type, LANG_UNIVERSAL, NULL, Source->GetGUID(), message, NULL);
     SendPacketToAll(&data);
 }
@@ -979,7 +981,6 @@ void BattleGround::EventPlayerPickedUpFlag(Player *Source)
     if(GetStatus() != STATUS_INPROGRESS)
         return;
 
-    WorldPacket data;
     const char *message;
     uint8 type = 0;
 
@@ -1000,6 +1001,7 @@ void BattleGround::EventPlayerPickedUpFlag(Player *Source)
         SetAllianceFlagPicker(Source->GetGUID());           // pick up Alliance Flag
     }
 
+    WorldPacket data;
     sChatHandler.FillMessageData(&data, Source->GetSession(), type, LANG_UNIVERSAL, NULL, Source->GetGUID(), message, NULL);
     SendPacketToAll(&data);
 

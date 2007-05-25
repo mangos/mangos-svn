@@ -187,7 +187,6 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
 {
-    WorldPacket data;
     Player* Target = GetPlayer();
 
     uint32 security = Target->GetSession()->GetSecurity();
@@ -207,7 +206,7 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
                                                             //...is jumping ...is falling
         Target->HasMovementFlags( MOVEMENTFLAG_JUMPING | MOVEMENTFLAG_FALLING ))
     {
-        data.Initialize( SMSG_LOGOUT_RESPONSE, (2+4) ) ;
+        WorldPacket data( SMSG_LOGOUT_RESPONSE, (2+4) ) ;
         data << (uint8)0xC;
         data << uint32(0);
         data << uint8(0);
@@ -228,14 +227,14 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
     {
         Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
 
-        data.Initialize( SMSG_FORCE_MOVE_ROOT, (8+4) );     // guess size
+        WorldPacket data( SMSG_FORCE_MOVE_ROOT, (8+4) );     // guess size
         data.append(Target->GetPackGUID());
         data << (uint32)2;
         SendPacket( &data );
         Target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
     }
 
-    data.Initialize( SMSG_LOGOUT_RESPONSE, 5 );
+    WorldPacket data( SMSG_LOGOUT_RESPONSE, 5 );
     data << uint32(0);
     data << uint8(0);
     SendPacket( &data );
@@ -250,13 +249,11 @@ void WorldSession::HandlePlayerLogoutOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleLogoutCancelOpcode( WorldPacket & recv_data )
 {
-    WorldPacket data;
-
     sLog.outDebug( "WORLD: Recvd CMSG_LOGOUT_CANCEL Message" );
 
     LogoutRequest(0);
 
-    data.Initialize( SMSG_LOGOUT_CANCEL_ACK, 0 );
+    WorldPacket data( SMSG_LOGOUT_CANCEL_ACK, 0 );
     SendPacket( &data );
 
     // not remove flags if can't free move - its not set in Logout request code.
@@ -357,8 +354,6 @@ void WorldSession::HandleGMTicketDeleteOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
 {
-    WorldPacket data;
-
     uint32 map;
     float x, y, z;
     uint8 category;
@@ -384,7 +379,7 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
 
         if ( cnt > 0 )
         {
-            data.Initialize( SMSG_GMTICKET_CREATE, 4 );
+            WorldPacket data( SMSG_GMTICKET_CREATE, 4 );
             data << uint32(1);
             SendPacket( &data );
         }
@@ -392,7 +387,7 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
         {
             sDatabase.PExecute("INSERT INTO `character_ticket` (`guid`,`ticket_text`,`ticket_category`) VALUES ('%u', '%s', '%u')", _player->GetGUIDLow(), ticketText.c_str(), category);
 
-            data.Initialize( SMSG_QUERY_TIME_RESPONSE, 4 );
+            WorldPacket data( SMSG_QUERY_TIME_RESPONSE, 4 );
             data << (uint32)getMSTime();
             SendPacket( &data );
 
@@ -817,7 +812,6 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
     if(GetPlayer()->isAlive())
         return;
 
-    WorldPacket data;
     uint64 guid;
     uint8 status;
     recv_data >> guid;
@@ -847,6 +841,7 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
 
     GetPlayer()->SpawnCorpseBones();
 
+    WorldPacket data;
     GetPlayer()->BuildTeleportAckMsg(&data, GetPlayer()->m_resurrectX, GetPlayer()->m_resurrectY, GetPlayer()->m_resurrectZ, GetPlayer()->GetOrientation());
     GetPlayer()->GetSession()->SendPacket(&data);
 
@@ -1002,8 +997,7 @@ void WorldSession::HandleMoveUnRootAck(WorldPacket& recv_data)
 
     sLog.outDebug( "WORLD: CMSG_FORCE_MOVE_UNROOT_ACK" );
     recv_data.hexlike();
-/*    WorldPacket data;
-    uint64 guid;
+/*  uint64 guid;
     uint64 unknown1;
     uint32 unknown2;
     float PositionX;
@@ -1036,8 +1030,7 @@ void WorldSession::HandleMoveRootAck(WorldPacket& recv_data)
 
     sLog.outDebug( "WORLD: CMSG_FORCE_MOVE_ROOT_ACK" );
     recv_data.hexlike();
-/*    WorldPacket data;
-    uint64 guid;
+/*  uint64 guid;
     uint64 unknown1;
     uint32 unknown2;
     float PositionX;
@@ -1068,7 +1061,6 @@ void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)
     CHECK_PACKET_SIZE(recv_data,8+4);
 
     sLog.outDebug("MSG_MOVE_TELEPORT_ACK");
-    WorldPacket data;
     uint64 guid;
     uint32 flags, time;
 
@@ -1177,7 +1169,6 @@ void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
         return;
     }
 
-    WorldPacket data;
     uint32 time;
     uint32 mapid;
     float PositionX;

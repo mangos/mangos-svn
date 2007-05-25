@@ -152,6 +152,7 @@ class ChatHandler
         bool HandleEmoteCommand(const char* args);
         bool HandleWhisperCommand(const char* args);
         bool HandleSendMailCommand(const char* args);
+        bool HandleNameTeleCommand(const char* args);
 
         bool HandleModifyKnownTitlesCommand(const char* args);
         bool HandleModifyHPCommand(const char* args);

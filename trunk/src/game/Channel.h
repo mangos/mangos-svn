@@ -158,9 +158,11 @@ class Channel
             {
                 uint8 oldFlag = GetFlag(m_ownerGUID);
                 players[m_ownerGUID].owner = true;
+
                 WorldPacket data;
                 MakeModeChange(&data,m_ownerGUID,oldFlag);
                 SendToAll(&data);
+
                 if(exclaim)
                 {
                     MakeChangeOwner(&data,m_ownerGUID);
@@ -175,6 +177,7 @@ class Channel
             {
                 uint8 oldFlag = GetFlag(p);
                 players[p].moderator = set;
+
                 WorldPacket data;
                 MakeModeChange(&data,p,oldFlag);
                 SendToAll(&data);
@@ -188,6 +191,7 @@ class Channel
                 uint8 oldFlag = GetFlag(p);
                 players[p].muted = set;
                 set = !set;
+
                 WorldPacket data;
                 MakeModeChange(&data,p,oldFlag);
                 SendToAll(&data);

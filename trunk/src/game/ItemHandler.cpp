@@ -355,7 +355,6 @@ void WorldSession::HandleReadItem( WorldPacket & recv_data )
 
     //sLog.outDebug( "WORLD: CMSG_READ_ITEM");
 
-    WorldPacket data;
     uint8 bag, slot;
     recv_data >> bag >> slot;
 
@@ -364,6 +363,8 @@ void WorldSession::HandleReadItem( WorldPacket & recv_data )
 
     if( pItem && pItem->GetProto()->PageText )
     {
+        WorldPacket data(0,0);
+
         uint8 msg = _player->CanUseItem( pItem );
         if( msg == EQUIP_ERR_OK )
         {

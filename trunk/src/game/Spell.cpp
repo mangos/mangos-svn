@@ -1589,9 +1589,7 @@ void Spell::SendLogExecute()
 
 void Spell::SendInterrupted(uint8 result)
 {
-    WorldPacket data;
-
-    data.Initialize(SMSG_SPELL_FAILURE, (8+4+1));
+    WorldPacket data(SMSG_SPELL_FAILURE, (8+4+1));
     data.append(m_caster->GetPackGUID());
     data << m_spellInfo->Id;
     data << result;

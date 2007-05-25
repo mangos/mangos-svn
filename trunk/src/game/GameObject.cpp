@@ -153,8 +153,7 @@ void GameObject::Update(uint32 p_time)
                         udata.BuildPacket(&packet);
                         ((Player*)caster)->GetSession()->SendPacket(&packet);
 
-                        WorldPacket data;
-                        data.Initialize(SMSG_GAMEOBJECT_CUSTOM_ANIM);
+                        WorldPacket data(SMSG_GAMEOBJECT_CUSTOM_ANIM,8+4);
                         data << GetGUID();
                         data << (uint32)(0);
                         ((Player*)caster)->SendMessageToSet(&data,true);
@@ -190,8 +189,7 @@ void GameObject::Update(uint32 p_time)
                                     caster->m_currentSpell->finish(false);
                                 }
 
-                                WorldPacket data;
-                                data.Initialize(SMSG_FISH_NOT_HOOKED);
+                                WorldPacket data(SMSG_FISH_NOT_HOOKED,0);
                                 ((Player*)caster)->GetSession()->SendPacket(&data);
                             }
                             m_lootState = GO_LOOTED;        // can be delete

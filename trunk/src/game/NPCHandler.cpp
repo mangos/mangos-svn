@@ -89,7 +89,6 @@ void WorldSession::HandleTrainerListOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,8);
 
-    WorldPacket data;
     uint64 guid;
 
     recv_data >> guid;
@@ -400,7 +399,6 @@ void WorldSession::HandleBinderActivateOpcode( WorldPacket & recv_data )
 
 void WorldSession::SendBindPoint(Creature *npc)
 {
-    WorldPacket data;
     uint32 bindspell = 3286, hearthstone_itemid = 6948;
 
     // update sql homebind
@@ -428,7 +426,7 @@ void WorldSession::SendBindPoint(Creature *npc)
     }
 
     // send spell for bind 3286 bind magic
-    data.Initialize(SMSG_SPELL_START, (8+8+4+2+4+2+8) );
+    WorldPacket data(SMSG_SPELL_START, (8+8+4+2+4+2+8) );
     data.append(npc->GetPackGUID());
     data.append(npc->GetPackGUID());
     data << bindspell;                                      // spell id
@@ -484,7 +482,6 @@ void WorldSession::HandleListStabledPetsOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,8);
 
-    WorldPacket data;
     sLog.outDetail("WORLD: Recv MSG_LIST_STABLED_PETS not dispose.");
     uint64 npcGUID;
 

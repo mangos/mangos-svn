@@ -94,7 +94,9 @@
 #define LANG_CANNOT_INST_INST            "You cannot go to players or summon players from instance to instance."
 #define LANG_SUMMONING                   "You are summoning %s%s."
 #define LANG_SUMMONED_BY                 "You are being summoned by %s."
-#define LANG_NO_PLAYER                   "Player (%s) does not exist or is not logged in."
+#define LANG_TELEPORTING_TO              "You are teleporting %s%s to %s."
+#define LANG_TELEPORTED_TO_BY            "You are being teleported by %s."
+#define LANG_NO_PLAYER                   "Player (%s) does not exist."
 #define LANG_APPEARING_AT                "Appearing at %s's location."
 #define LANG_APPEARING_TO                "%s is appearing to your location."
 

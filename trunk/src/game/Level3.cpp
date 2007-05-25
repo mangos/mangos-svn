@@ -2459,7 +2459,6 @@ bool ChatHandler::HandleExploreCheatCommand(const char* args)
         PSendSysMessage(LANG_YOU_SET_EXPLORE_NOTHING, chr->GetName());
     }
 
-    WorldPacket data;
     char buf[256];
 
     if (flag != 0)
@@ -2472,6 +2471,8 @@ bool ChatHandler::HandleExploreCheatCommand(const char* args)
         sprintf((char*)buf,LANG_YOURS_EXPLORE_SET_NOTHING,
             m_session->GetPlayer()->GetName());
     }
+
+    WorldPacket data;
     FillSystemMessageData(&data, m_session, buf);
     chr->GetSession()->SendPacket(&data);
 

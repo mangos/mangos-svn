@@ -444,7 +444,6 @@ void WorldSession::HandleTurnInPetitionOpcode( WorldPacket & recv_data )
     recv_data.hexlike();
 
     //sLog.outDebug("Received opcode CMSG_TURN_IN_PETITION");
-    WorldPacket data;
     uint64 petitionguid;
 
     uint32 ownerguidlo;
@@ -452,9 +451,10 @@ void WorldSession::HandleTurnInPetitionOpcode( WorldPacket & recv_data )
 
     recv_data >> petitionguid;
 
+    WorldPacket data(SMSG_TURN_IN_PETITION_RESULTS, 4);     // return with diff. values in most cases
+
     if(_player->GetGuildId())
     {
-        data.Initialize(SMSG_TURN_IN_PETITION_RESULTS, 4);
         data << (uint32)PETITION_TURN_ALREADY_IN_GUILD;                                  // already in guild
         _player->GetSession()->SendPacket(&data);
     }
@@ -489,7 +489,6 @@ void WorldSession::HandleTurnInPetitionOpcode( WorldPacket & recv_data )
 
     if(signs < sWorld.getConfig(CONFIG_MIN_PETITION_SIGNS))
     {
-        data.Initialize(SMSG_TURN_IN_PETITION_RESULTS, 4);
         data << (uint32)PETITION_TURN_NEED_MORE_SIGNATURES;                                  // need more signatures...
         SendPacket(&data);
         delete result;
@@ -546,7 +545,6 @@ void WorldSession::HandleTurnInPetitionOpcode( WorldPacket & recv_data )
     // Guild created
     sLog.outDebug("TURN IN PETITION GUID %u", GUID_LOPART(petitionguid));
 
-    data.Initialize(SMSG_TURN_IN_PETITION_RESULTS, 4);
     data << (uint32)PETITION_TURN_OK;
     SendPacket( &data );
 }
@@ -784,7 +782,6 @@ void WorldSession::HandleGuildAcceptOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildDeclineOpcode(WorldPacket& recvPacket)
 {
-    //WorldPacket data;
     //sLog.outDebug( "WORLD: Received CMSG_GUILD_DECLINE"  );
 
     GetPlayer()->SetGuildIdInvited(0);
@@ -1032,7 +1029,6 @@ void WorldSession::HandleGuildLeaveOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildDisbandOpcode(WorldPacket& recvPacket)
 {
-    WorldPacket data;
     std::string name;
     Guild *guild;
 
