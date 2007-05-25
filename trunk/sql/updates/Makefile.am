@@ -580,4 +580,6 @@ EXTRA_DIST = \
 	3653_spell.sql \
 	3655_quest_template.sql \
 	3660_character_kill.sql \
+	3700_character.sql \
+	3728_spell_proc_event.sql \
 	README
