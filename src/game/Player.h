@@ -72,6 +72,7 @@ struct SpellModifier
     uint32 mask;
     int16 charges;
     uint32 spellId;
+    uint32 effectId;
 };
 
 typedef HM_NAMESPACE::hash_map<uint16, PlayerSpell*> PlayerSpellMap;
@@ -966,6 +967,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         SpellModList *getSpellModList(int op) { return &m_spellMods[op]; }
         int32 GetTotalFlatMods(uint32 spellId, uint8 op);
         int32 GetTotalPctMods(uint32 spellId, uint8 op);
+        bool IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mod);
         template <class T> T ApplySpellMod(uint32 spellId, uint8 op, T &basevalue);
 
         bool HasSpellCooldown(uint32 spell_id) const
@@ -1498,8 +1500,10 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, uint8 op, T &basevalu
     for (SpellModList::iterator itr = m_spellMods[op].begin(); itr != m_spellMods[op].end(); ++itr)
     {
         SpellModifier *mod = *itr;
-        if (!mod) continue;
-        if ((mod->mask & spellInfo->SpellFamilyFlags) == 0) continue;
+
+        if(!IsAffectedBySpellmod(spellInfo,mod))
+            continue;
+
         if (mod->type == SPELLMOD_FLAT)
             totalflat += mod->value;
         else if (mod->type == SPELLMOD_PCT)

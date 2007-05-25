@@ -434,6 +434,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Tavern Area Triggers..." );    // must be after LoadAreaTriggers
     objmgr.LoadTavernAreaTriggers();
 
+    sLog.outString( "Loading SpellAffect definitions..." );
+    objmgr.LoadSpellAffects();
+
     sLog.outString( "Loading player Create Info & Level Stats..." );
     objmgr.LoadPlayerInfo();
 

@@ -2490,6 +2490,61 @@ void ObjectMgr::LoadAreaTriggers()
     sLog.outString( ">> Loaded %u area trigger definitions", count );
 }
 
+void ObjectMgr::LoadSpellAffects()
+{
+    uint32 count = 0;
+
+    //                                            0        1          2         3            4          5         6             7
+    QueryResult *result = sDatabase.Query("SELECT `entry`,`effectId`,`SpellId`,`SchoolMask`,`Category`,`SkillID`,`SpellFamily`,`SpellFamilyMask` FROM `spell_affect`");
+    if( !result )
+    {
+
+        barGoLink bar( 1 );
+
+        bar.step();
+
+        sLog.outString( "" );
+        sLog.outString( ">> Loaded %u spell affect definitions", count );
+        return;
+    }
+
+    barGoLink bar( result->GetRowCount() );
+
+    do
+    {
+        Field *fields = result->Fetch();
+
+        bar.step();
+
+        uint16 entry = fields[0].GetUInt16();
+
+        if (!sSpellStore.LookupEntry(entry))
+        {
+         sLog.outErrorDb("Spell %u listed in `spell_affect` not exist", entry);
+         continue;
+        }
+
+        SpellAffection sa;
+
+        sa.EffectId = fields[1].GetUInt8();
+        sa.SpellId = fields[2].GetUInt16();
+        sa.SchoolMask = fields[3].GetUInt8();
+        sa.Category = fields[4].GetUInt16();
+        sa.SkillId = fields[5].GetUInt16();
+        sa.SpellFamily = fields[6].GetUInt8();
+        sa.SpellFamilyMask = fields[7].GetUInt32();
+
+        SpellAffect.insert(SpellAffectMap::value_type(entry,sa));
+
+        count++;
+    } while( result->NextRow() );
+
+    delete result;
+
+    sLog.outString( "" );
+    sLog.outString( ">> Loaded %u spell affect definitions", count );
+}
+
 void ObjectMgr::SetHighestGuids()
 {
     QueryResult *result = sDatabase.Query( "SELECT MAX(`guid`) FROM `character`" );

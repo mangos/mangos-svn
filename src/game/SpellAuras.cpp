@@ -197,7 +197,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //146 SPELL_AURA_PERSUADED
     &Aura::HandleNULL,                                      //147 SPELL_AURA_ADD_CREATURE_IMMUNITY
     &Aura::HandleNULL,                                      //148 SPELL_AURA_RETAIN_COMBO_POINTS
-    &Aura::HandleNULL,                                      //149 SPELL_AURA_RESIST_PUSHBACK
+    &Aura::HandleNoImmediateEffect,                         //149 SPELL_AURA_RESIST_PUSHBACK
     &Aura::HandleNoImmediateEffect,                         //150 SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT
     &Aura::HandleAuraTrackStealthed,                        //151 SPELL_AURA_TRACK_STEALTHED
     &Aura::HandleNULL,                                      //152 SPELL_AURA_MOD_DETECTED_RANGE
@@ -395,7 +395,21 @@ void Aura::SetModifier(uint8 t, int32 a, uint32 pt, int32 miscValue, uint32 misc
 
     Unit* caster = GetCaster();
     if (caster && caster->GetTypeId() == TYPEID_PLAYER)
+    {
         ((Player *)caster)->ApplySpellMod(m_spellId,SPELLMOD_ALL_EFFECTS, m_modifier.m_amount);
+        switch(m_effIndex)
+        {
+            case 0:
+                ((Player*)caster)->ApplySpellMod(m_spellId,SPELLMOD_EFFECT1, m_modifier.m_amount);
+                break;
+            case 1:
+                ((Player*)caster)->ApplySpellMod(m_spellId,SPELLMOD_EFFECT2, m_modifier.m_amount);
+                break;
+            case 2:
+                ((Player*)caster)->ApplySpellMod(m_spellId,SPELLMOD_EFFECT3, m_modifier.m_amount);
+                break;
+        }
+    }
 }
 
 void Aura::Update(uint32 diff)
@@ -868,6 +882,7 @@ void Aura::HandleAddModifier(bool apply, bool Real)
         mod->mask = mask;
         mod->spellId = m_spellId;
         mod->charges = spellInfo->procCharges;
+        mod->effectId = m_effIndex;
         p_mods->push_back(mod);
         m_spellmod = mod;
 
@@ -2237,13 +2252,6 @@ void Aura::HandleAuraModIncreaseSpeedAlways(bool apply, bool Real)
     if(m_modifier.m_amount<=1)
         return;
 
-    if(apply)                                               // at first real apply
-    {
-        Unit* caster = GetCaster();
-        if (caster && caster->GetTypeId() == TYPEID_PLAYER)
-            ((Player *)caster)->ApplySpellMod(m_spellId, SPELLMOD_MOVEMENT_SPEED, m_modifier.m_amount);
-    }
-
     float rate = (100.0f + m_modifier.m_amount)/100.0f;
 
     m_target->ApplySpeedMod(MOVE_RUN, rate, false, apply );
@@ -2259,13 +2267,6 @@ void Aura::HandleAuraModIncreaseSpeed(bool apply, bool Real)
     sLog.outDebug("HandleAuraModIncreaseSpeed: Current Speed:%f \tmodify percent:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
     if(m_modifier.m_amount<=1)
         return;
-
-    if(apply)                                               // at first real apply
-    {
-        Unit* caster = GetCaster();
-        if (caster && caster->GetTypeId() == TYPEID_PLAYER)
-            ((Player *)caster)->ApplySpellMod(m_spellId, SPELLMOD_MOVEMENT_SPEED, m_modifier.m_amount);
-    }
 
     float rate = (100.0f + m_modifier.m_amount)/100.0f;
 
@@ -2284,13 +2285,6 @@ void Aura::HandleAuraModIncreaseMountedSpeed(bool apply, bool Real)
     if(m_modifier.m_amount<=1)
         return;
 
-    if(apply)                                               // at first real apply
-    {
-        Unit* caster = GetCaster();
-        if (caster && caster->GetTypeId() == TYPEID_PLAYER)
-            ((Player *)caster)->ApplySpellMod(m_spellId, SPELLMOD_MOVEMENT_SPEED, m_modifier.m_amount);
-    }
-
     float rate = (100.0f + m_modifier.m_amount)/100.0f;
 
     m_target->ApplySpeedMod(MOVE_RUN, rate, true, apply );
@@ -2307,26 +2301,12 @@ void Aura::HandleAuraModDecreaseSpeed(bool apply, bool Real)
     sLog.outDebug("HandleAuraModDecreaseSpeed: Current Speed:%f \tmodify percent:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
     if(m_modifier.m_amount <= 0)
     {                                                       //for new spell dbc
-        if(apply)                                           // at first real apply
-        {
-            Unit* caster = GetCaster();
-            if (caster && caster->GetTypeId() == TYPEID_PLAYER)
-                ((Player *)caster)->ApplySpellMod(m_spellId, SPELLMOD_MOVEMENT_SPEED, m_modifier.m_amount);
-        }
-
         float rate = (100.0f + m_modifier.m_amount)/100.0f;
 
         m_target->ApplySpeedMod(MOVE_RUN, rate, true, apply );
     }
     else
     {                                                       //for old spell dbc
-        if(apply)                                           // at first real apply
-        {
-            Unit* caster = GetCaster();
-            if (caster && caster->GetTypeId() == TYPEID_PLAYER)
-                ((Player *)caster)->ApplySpellMod(m_spellId, SPELLMOD_MOVEMENT_SPEED, m_modifier.m_amount);
-        }
-
         float rate = m_modifier.m_amount / 100.0f;
 
         m_target->ApplySpeedMod(MOVE_RUN, rate, true, apply );
@@ -2343,13 +2323,6 @@ void Aura::HandleAuraModIncreaseSwimSpeed(bool apply, bool Real)
     sLog.outDebug("HandleAuraModIncreaseSwimSpeed: Current Speed:%f \tmodify percent:%f", m_target->GetSpeed(MOVE_SWIM),(float)m_modifier.m_amount);
     if(m_modifier.m_amount<=1)
         return;
-
-    if(apply)                                               // at first real apply
-    {
-        Unit* caster = GetCaster();
-        if (caster && caster->GetTypeId() == TYPEID_PLAYER)
-            ((Player *)caster)->ApplySpellMod(m_spellId, SPELLMOD_MOVEMENT_SPEED, m_modifier.m_amount);
-    }
 
     float rate = (100.0f + m_modifier.m_amount)/100.0f;
 

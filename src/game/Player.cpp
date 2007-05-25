@@ -1557,7 +1557,6 @@ void Player::Regenerate(Powers power)
                     ManaIncreaseRate /= 100;
                 }
             }
-            ManaIncreaseRate = (ManaIncreaseRate * 100 + GetTotalAuraModifier(SPELL_AURA_MOD_POWER_REGEN_PERCENT)) / 100;
 
             switch (Class)
             {
@@ -1583,6 +1582,11 @@ void Player::Regenerate(Powers power)
         case POWER_HAPPINESS:
             break;
     }
+
+    AuraList& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
+    for(AuraList::iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
+        if ((*i)->GetModifier()->m_miscvalue == power)
+            addvalue *= ((*i)->GetModifier()->m_amount + 100) / 100.0;
 
     if (power != POWER_RAGE)
     {
@@ -12343,8 +12347,10 @@ int32 Player::GetTotalFlatMods(uint32 spellId, uint8 op)
     for (SpellModList::iterator itr = m_spellMods[op].begin(); itr != m_spellMods[op].end(); ++itr)
     {
         SpellModifier *mod = *itr;
-        if (!mod) continue;
-        if ((mod->mask & spellInfo->SpellFamilyFlags) == 0) continue;
+
+        if(!IsAffectedBySpellmod(spellInfo,mod))
+            continue;
+
         if (mod->type == SPELLMOD_FLAT)
             total += mod->value;
     }
@@ -12359,12 +12365,63 @@ int32 Player::GetTotalPctMods(uint32 spellId, uint8 op)
     for (SpellModList::iterator itr = m_spellMods[op].begin(); itr != m_spellMods[op].end(); ++itr)
     {
         SpellModifier *mod = *itr;
-        if (!mod) continue;
-        if ((mod->mask & spellInfo->SpellFamilyFlags) == 0) continue;
+
+        if(!IsAffectedBySpellmod(spellInfo,mod))
+            continue;
+
         if (mod->type == SPELLMOD_PCT)
             total += mod->value;
     }
     return total;
+}
+
+bool Player::IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mod)
+{
+    if (!mod || !spellInfo) 
+        return false;
+
+    SpellAffection const *spellAffect = objmgr.GetSpellAffection(mod->spellId, mod->effectId);
+
+    if (spellAffect)
+    {
+        if (spellAffect->SpellId && (spellAffect->SpellId != spellInfo->Id))
+            return false;
+        if (spellAffect->SchoolMask && !(spellAffect->SchoolMask & spellInfo->School))
+            return false;
+        if (spellAffect->Category && (spellAffect->Category != spellInfo->Category))
+            return false;
+        if (spellAffect->SkillId)
+        {
+            SkillLineAbilityEntry const *skillLineEntry = sSkillLineAbilityStore.LookupEntry(spellInfo->Id);
+            if(!skillLineEntry || skillLineEntry->skillId != spellAffect->SkillId)
+                return false;
+        }
+        if (spellAffect->SpellFamily)
+        {
+            uint32 family = 0;
+            switch(getClass())
+            {
+                case CLASS_WARRIOR: family = SPELLFAMILY_WARRIOR; break;
+                case CLASS_PALADIN: family = SPELLFAMILY_PALADIN; break;
+                case CLASS_HUNTER: family = SPELLFAMILY_HUNTER; break;
+                case CLASS_ROGUE: family = SPELLFAMILY_ROGUE; break;
+                case CLASS_PRIEST: family = SPELLFAMILY_PRIEST; break;
+                case CLASS_SHAMAN: family = SPELLFAMILY_SHAMAN; break;
+                case CLASS_MAGE: family = SPELLFAMILY_MAGE; break;
+                case CLASS_WARLOCK: family = SPELLFAMILY_WARLOCK; break;
+                case CLASS_DRUID: family = SPELLFAMILY_DRUID; break;
+            }
+            if (spellAffect->SpellFamily != family)
+                return false;
+        }
+        if (spellAffect->SpellFamilyMask && !(spellAffect->SpellFamilyMask & spellInfo->SpellFamilyFlags))
+            return false;
+    }
+    else
+        if ((mod->mask & spellInfo->SpellFamilyFlags) == 0)
+            return false;
+    
+    return true;
 }
 
 void Player::RemoveAreaAurasFromGroup()
