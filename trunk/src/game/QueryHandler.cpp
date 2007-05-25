@@ -157,7 +157,7 @@ void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
 
     data << (float)1;                                       // unk
     data << (float)1;                                       // unk
-    data << uint8(0);                                       // unk
+    data << uint8(ci->civilian);
     data << uint8(0);                                       // boss flag?
     SendPacket( &data );
 }
