@@ -9265,7 +9265,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `spell_proc_event`;
 CREATE TABLE `spell_proc_event` (
-  `entry` smallint(6) NOT NULL default '0',
+  `entry` smallint(6) unsigned NOT NULL default '0',
   `SchoolMask` tinyint(4) NOT NULL default '0',
   `Category` smallint(6) NOT NULL default '0',
   `SkillID` smallint(6) NOT NULL default '0',
