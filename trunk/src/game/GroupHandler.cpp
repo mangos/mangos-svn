@@ -606,22 +606,22 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
     WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 30);
 
     data.append(player->GetPackGUID());
-    uint32 mask1 = 0x7FFC0BF7;                  //1111111111111000000101111110111
+    uint32 mask1 = 0x7FFC0BFF;                  //1111111111111000000101111111111
+                 //0x7FFC0BF7;                  //1111111111111000000101111110111
                  //0x7FFC1BF7;                  //1111111111111000001101111110111
                                                 //1111111111111--not used in mask
+    Powers powerType = player->getPowerType();
     data << (uint32) mask1;
     data << (uint8)  MEMBER_STATUS_ONLINE;       //should be member's online status
     data << (uint16) player->GetHealth();
     data << (uint16) player->GetMaxHealth();
-    Powers powerType = player->getPowerType();
-    if (powerType > 0)
-        data << (uint8) powerType;
+    data << (uint8) powerType;
     data << (uint16) player->GetMaxPower(powerType);
     data << (uint16) player->GetPower(powerType);
     data << (uint16) player->getLevel();
     data << (uint16) player->GetZoneId();
-    data << (uint16) 2426;                      //map position X - it is somehere, need more time to fix..
-    data << (uint16) 62588;                     //map position Y - it is somehere, need more time to fix..
+    data << (uint16) player->GetPositionX();                //map position X - it is somehere, need more time to fix..
+    data << (uint16) player->GetPositionY();                //map position Y - it is somehere, need more time to fix..
     ///some unknown parts, don't know how to divide it :
     data << (uint32) 0;
     data << (uint16) 0;
