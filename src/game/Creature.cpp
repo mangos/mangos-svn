@@ -1559,8 +1559,7 @@ void Creature::SendZoneUnderAttackMessage(Player* attacker)
 {
     uint32 enemy_team = attacker->GetTeam();
 
-    WorldPacket data;
-    data.Initialize(SMSG_ZONE_UNDER_ATTACK);
+    WorldPacket data(SMSG_ZONE_UNDER_ATTACK,4);
     data << (uint32)GetZoneId();
     sWorld.SendGlobalMessage(&data,NULL,(enemy_team==ALLIANCE ? HORDE : ALLIANCE));
 }

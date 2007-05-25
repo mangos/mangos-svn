@@ -285,6 +285,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "scm",         3, &ChatHandler::HandleSendChatMsgCommand,      "",   NULL },
         { "sendmail",    1, &ChatHandler::HandleSendMailCommand,         "",   NULL },
         { "rename",      2, &ChatHandler::HandleRenameCommand,           "",   NULL },
+        { "nametele",    1, &ChatHandler::HandleNameTeleCommand,         "",   NULL },
 
         //! Development Commands
         { "setvalue",    3, &ChatHandler::HandleSetValue,                "",   NULL },

@@ -154,8 +154,7 @@ void WorldSession::HandleTalentWipeOpcode( WorldPacket & recv_data )
 
     if(!(_player->resetTalents()))
     {
-        WorldPacket data;
-        data.Initialize( MSG_TALENT_WIPE_CONFIRM );         //you have not any talent
+        WorldPacket data( MSG_TALENT_WIPE_CONFIRM, 0);         //you have not any talent
         SendPacket( &data );
         return;
     }

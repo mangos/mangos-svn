@@ -36,8 +36,6 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,4+4+1);
 
-    WorldPacket data;
-
     uint32 type;
     uint32 lang;
 
@@ -324,7 +322,7 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
     {
         uint32 emote_anim = em->textid;
 
-        WorldPacket data;
+        WorldPacket data(0,0);
 
         switch(emote_anim)
         {
@@ -355,7 +353,6 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
             data << (uint8)0x00;
         }
 
-        WPAssert(data.size() == 20 + namlen);
         GetPlayer()->SendMessageToSet( &data, true );
 
         //Send scripted event call
@@ -368,7 +365,6 @@ void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,8);
 
-    WorldPacket data;
     uint64 iguid;
     //sLog.outDebug("WORLD: Received CMSG_CHAT_IGNORED");
 
@@ -378,6 +374,7 @@ void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recv_data )
     if(!player || !player->GetSession())
         return;
 
+    WorldPacket data;
     sChatHandler.FillMessageData(&data, this, CHAT_MSG_IGNORED, LANG_UNIVERSAL, NULL, GetPlayer()->GetGUID(), GetPlayer()->GetName());
     player->GetSession()->SendPacket(&data);
 }

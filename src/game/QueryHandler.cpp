@@ -95,7 +95,6 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,4+8);
 
-    WorldPacket data;
     uint32 entry;
     uint64 guid;
 

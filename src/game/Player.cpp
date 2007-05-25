@@ -2978,34 +2978,32 @@ void Player::DeleteFromDB()
 
 void Player::SetMovement(uint8 pType)
 {
-    WorldPacket data;
-
     switch(pType)
     {
         case MOVE_ROOT:
         {
-            data.Initialize(SMSG_FORCE_MOVE_ROOT, GetPackGUID().size()+4);
+            WorldPacket data(SMSG_FORCE_MOVE_ROOT, GetPackGUID().size()+4);
             data.append(GetPackGUID());
             data << uint32(0);
             GetSession()->SendPacket( &data );
         }break;
         case MOVE_UNROOT:
         {
-            data.Initialize(SMSG_FORCE_MOVE_UNROOT, GetPackGUID().size()+4);
+            WorldPacket data(SMSG_FORCE_MOVE_UNROOT, GetPackGUID().size()+4);
             data.append(GetPackGUID());
             data << uint32(0);
             GetSession()->SendPacket( &data );
         }break;
         case MOVE_WATER_WALK:
         {
-            data.Initialize(SMSG_MOVE_WATER_WALK, GetPackGUID().size()+4);
+            WorldPacket data(SMSG_MOVE_WATER_WALK, GetPackGUID().size()+4);
             data.append(GetPackGUID());
             data << uint32(0);
             GetSession()->SendPacket( &data );
         }break;
         case MOVE_LAND_WALK:
         {
-            data.Initialize(SMSG_MOVE_LAND_WALK, GetPackGUID().size()+4);
+            WorldPacket data(SMSG_MOVE_LAND_WALK, GetPackGUID().size()+4);
             data.append(GetPackGUID());
             data << uint32(0);
             GetSession()->SendPacket( &data );

@@ -86,7 +86,6 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     CHECK_PACKET_SIZE(recv_data,1+1+1+1+1+1+1+1+1+1);
 
     std::string name;
-    WorldPacket data;
     uint8 race_;
 
     recv_data >> name;
@@ -97,10 +96,11 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     recv_data >> race_;
     recv_data.rpos(0);
 
+    WorldPacket data(SMSG_CHAR_CREATE, 1);                  // returned with diff.values in all cases
+
     // prevent character creating with invalid name
     if(name.size() == 0)
     {
-        data.Initialize( SMSG_CHAR_CREATE, 1 );
         data << (uint8)CHAR_NAME_INVALID_CHARACTER;
         SendPacket( &data );
         return;
@@ -110,7 +110,6 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 
     if(name.find_first_of(notAllowedChars)!=name.npos)
     {
-        data.Initialize( SMSG_CHAR_CREATE, 1 );
         data << (uint8)CHAR_NAME_INVALID_CHARACTER;;
         SendPacket( &data );
         return;
@@ -118,7 +117,6 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 
     if(objmgr.GetPlayerGUIDByName(name))
     {
-        data.Initialize(SMSG_CHAR_CREATE, 1);
         data << (uint8)CHAR_CREATE_NAME_IN_USE;
         SendPacket( &data );
         return;
@@ -130,7 +128,6 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     {
         if (result->GetRowCount() >= 10)
         {
-            data.Initialize(SMSG_CHAR_CREATE, 1);
             data << (uint8)CHAR_CREATE_ACCOUNT_LIMIT;
             SendPacket( &data );
             delete result;
@@ -158,7 +155,6 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 
             if(team != team_ && GetSecurity() < 2 && !AllowTwoSideAccounts)
             {
-                data.Initialize( SMSG_CHAR_CREATE, 1 );
                 data << (uint8)CHAR_CREATE_PVP_TEAMS_VIOLATION;
                 SendPacket( &data );
                 return;
@@ -190,14 +186,12 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         // Player not create (race/class problem?)
         delete pNewChar;
 
-        data.Initialize(SMSG_CHAR_CREATE, 1);
         data << (uint8)CHAR_CREATE_ERROR;
         SendPacket( &data );
 
         return;
     }
 
-    data.Initialize( SMSG_CHAR_CREATE, 1 );
     data << (uint8)CHAR_CREATE_SUCCESS;
     SendPacket( &data );
 

@@ -1132,7 +1132,7 @@ void Aura::HandleAuraWaterWalk(bool apply, bool Real)
     if(!Real)
         return;
 
-    WorldPacket data;
+    WorldPacket data(0,0);
     if(apply)
         data.Initialize(SMSG_MOVE_WATER_WALK, 8+4);
     else
@@ -1148,7 +1148,7 @@ void Aura::HandleAuraFeatherFall(bool apply, bool Real)
     if(!Real)
         return;
 
-    WorldPacket data;
+    WorldPacket data(0,0);
     if(apply)
         data.Initialize(SMSG_MOVE_FEATHER_FALL, 8+4);
     else
@@ -1164,7 +1164,7 @@ void Aura::HandleAuraHover(bool apply, bool Real)
     if(!Real)
         return;
 
-    WorldPacket data;
+    WorldPacket data(0,0);
     if(apply)
         data.Initialize(SMSG_MOVE_SET_HOVER, 8+4);
     else
@@ -1521,7 +1521,7 @@ void Aura::HandleAuraSafeFall(bool apply, bool Real)
     if(!Real)
         return;
 
-    WorldPacket data;
+    WorldPacket data(0,0);
     if(apply)
         data.Initialize(SMSG_MOVE_FEATHER_FALL, 8+4);
     else
@@ -3575,7 +3575,7 @@ void Aura::HandleAuraAllowFlight(bool apply, bool Real)
     // allow fly
     sLog.outDebug("%u %u %u %u %u", m_modifier.m_amount, m_modifier.m_auraname, m_modifier.m_miscvalue, m_modifier.m_miscvalue2, m_modifier.periodictime);
 
-    WorldPacket data;
+    WorldPacket data(0,0);
     if(apply)
         data.Initialize(SMSG_FLY_MODE_START, 12);
     else
@@ -3604,7 +3604,7 @@ void Aura::HandleAuraModSpeedMountedFlight(bool apply, bool Real)
     // allow fly
     sLog.outDebug("%u %u %u %u %u", m_modifier.m_amount, m_modifier.m_auraname, m_modifier.m_miscvalue, m_modifier.m_miscvalue2, m_modifier.periodictime);
 
-    WorldPacket data;
+    WorldPacket data(0,0);
     if(apply)
         data.Initialize(SMSG_FLY_MODE_START, 12);
     else

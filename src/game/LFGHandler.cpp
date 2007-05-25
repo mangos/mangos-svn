@@ -101,7 +101,6 @@ void WorldSession::HandleLookingForGroup(WorldPacket& recv_data)
 {
     sLog.outDebug("MSG_LOOKING_FOR_GROUP");
     recv_data.hexlike();
-    WorldPacket data;
     uint32 type, entry, unk;
 
     recv_data >> type >> entry >> unk;
@@ -113,7 +112,6 @@ void WorldSession::HandleLookingForGroup(WorldPacket& recv_data)
 
 void WorldSession::SendLfgResult(uint32 type, uint32 entry)
 {
-    WorldPacket data;
     std::string comment;
     uint32 number;
     QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `looking_for_group` WHERE `type` = '%u' AND `entry` = '%u'", type, entry);
@@ -128,7 +126,7 @@ void WorldSession::SendLfgResult(uint32 type, uint32 entry)
         return;
     }
 
-    data.Initialize(MSG_LOOKING_FOR_GROUP);
+    WorldPacket data(MSG_LOOKING_FOR_GROUP);
     data << type;   // type
     data << entry;  // entry from LFGDungeons.dbc
     data << number; // count

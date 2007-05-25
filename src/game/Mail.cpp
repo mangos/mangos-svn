@@ -601,9 +601,7 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
 //TODO Fix me! ... this void has probably bad condition, but good data are sent
 void WorldSession::HandleMsgQueryNextMailtime(WorldPacket & recv_data )
 {
-    WorldPacket data;
-
-    data.Initialize(MSG_QUERY_NEXT_MAIL_TIME,4);
+    WorldPacket data(MSG_QUERY_NEXT_MAIL_TIME,4);
     if( _player->unReadMails > 0 )
     {
         data << (uint32) 0;

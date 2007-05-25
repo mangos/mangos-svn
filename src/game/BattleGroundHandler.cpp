@@ -106,8 +106,6 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
     if(!bg)
         return;
 
-    WorldPacket data;
-
     if(asgroup && _player->groupInfo.group)
     {
         Group *grp = _player->groupInfo.group;
@@ -122,6 +120,7 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
                 // store entry point coords (same as leader entry point)
                 member->SetBattleGroundEntryPoint(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
 
+                WorldPacket data;
                 data = sBattleGroundMgr.BuildBattleGroundStatusPacket(bg, member->GetTeam(), STATUS_WAIT_QUEUE, 0, 0); // send status packet (in queue)
                 member->GetSession()->SendPacket(&data);
                 data = sBattleGroundMgr.BuildGroupJoinedBattlegroundPacket(bgid);
@@ -138,6 +137,7 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
         // store entry point coords
         _player->SetBattleGroundEntryPoint(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
 
+        WorldPacket data;
         data = sBattleGroundMgr.BuildBattleGroundStatusPacket(bg, _player->GetTeam(), STATUS_WAIT_QUEUE, 0, 0); // send status packet (in queue)
         SendPacket(&data);
         bg->AddPlayerToQueue(_player->GetGUID());
@@ -243,7 +243,6 @@ void WorldSession::HandleBattleGroundPlayerPortOpcode( WorldPacket &recv_data )
     {
         if(_player->InBattleGroundQueue())
         {
-            WorldPacket data;
             switch(action)
             {
                 case 1:
@@ -253,10 +252,13 @@ void WorldSession::HandleBattleGroundPlayerPortOpcode( WorldPacket &recv_data )
                     bg->AddPlayer(_player);
                     break;
                 case 0:
+                {
                     bg->RemovePlayerFromQueue(_player->GetGUID());
+                    WorldPacket data;
                     data = sBattleGroundMgr.BuildBattleGroundStatusPacket(bg, _player->GetTeam(), STATUS_NONE, 0, 0);
                     SendPacket(&data);
                     break;
+                }
                 default:
                     sLog.outError("Battleground port: unknown action %u", action);
             }

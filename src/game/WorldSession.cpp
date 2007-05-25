@@ -1174,7 +1174,6 @@ void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
 {
     sLog.outDebug("Received opcode CMSG_WHOIS");
     std::string charname, acc, email, lastip, msg;
-    WorldPacket data;
     recv_data >> charname;
 
     if (GetSecurity() < 3)
@@ -1222,7 +1221,8 @@ void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
         if(!lastip.size())
             lastip = "Unknown";
         msg = charname + "'s " + "account is " + acc + ", e-mail " + email + ", last ip: " + lastip;
-        data.Initialize(SMSG_WHOIS);
+
+        WorldPacket data(SMSG_WHOIS,msg.size()+1);
         data << msg;
         _player->GetSession()->SendPacket(&data);
     }
