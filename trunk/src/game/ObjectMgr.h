@@ -141,6 +141,17 @@ struct WeatherZoneChances
     WeatherSeasonChances data[WEATHER_SEASONS];
 };
 
+struct SpellAffection
+{
+    uint16 SpellId;
+    uint8 EffectId;
+    uint8 SchoolMask;
+    uint16 Category;
+    uint16 SkillId;
+    uint8 SpellFamily;
+    uint32 SpellFamilyMask;
+};
+
 /// Player state
 enum SessionStatus
 {
@@ -318,6 +329,24 @@ class ObjectMgr
             return NULL;
         }
 
+        typedef std::multimap<uint32, SpellAffection> SpellAffectMap;
+        SpellAffectMap SpellAffect;
+        SpellAffection const* GetSpellAffection(uint32 spellId, uint32 effectId) const
+        {
+            if(SpellAffect.count(spellId))
+            {
+                SpellAffectMap::const_iterator node_begin = SpellAffect.lower_bound(spellId);
+                SpellAffectMap::const_iterator node_end = SpellAffect.upper_bound(spellId);
+                for(SpellAffectMap::const_iterator itr = node_begin;itr != node_end;++itr)
+                {
+                    if(itr->second.EffectId == effectId)
+                        return &itr->second;
+                }
+            }
+
+            return NULL;
+        }
+
         ReputationOnKillEntry const* GetReputationOnKilEntry(uint32 id) const
         {
             RepOnKillMap::const_iterator itr = mRepOnKill.find(id);
@@ -358,6 +387,7 @@ class ObjectMgr
         void LoadGossipText();
 
         void LoadAreaTriggers();
+        void LoadSpellAffects();
         void LoadQuestAreaTriggers();
         void LoadTavernAreaTriggers();
 

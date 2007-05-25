@@ -582,4 +582,5 @@ EXTRA_DIST = \
 	3660_character_kill.sql \
 	3700_character.sql \
 	3728_spell_proc_event.sql \
+	3732_spell_affect.sql \
 	README

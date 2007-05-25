@@ -2732,6 +2732,13 @@ void Spell::Delayed(int32 delaytime)
     if(!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
+    //check resist chance
+    int32 resistChance = 100; //must be initialized to 100 for percent modifiers
+    ((Player*)m_caster)->ApplySpellMod(m_spellInfo->Id,SPELLMOD_NOT_LOSE_CASTING_TIME,resistChance);
+    resistChance += m_caster->GetTotalAuraModifier(SPELL_AURA_RESIST_PUSHBACK) - 100;
+    if (roll_chance_f(resistChance))
+        return;    
+    
     m_timer += delaytime;
 
     if(m_timer > casttime)
@@ -2749,6 +2756,13 @@ void Spell::DelayedChannel(int32 delaytime)
     if(!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER || getState() != SPELL_STATE_CASTING)
         return;
 
+    //check resist chance
+    int32 resistChance = 100; //must be initialized to 100 for percent modifiers
+    ((Player*)m_caster)->ApplySpellMod(m_spellInfo->Id,SPELLMOD_NOT_LOSE_CASTING_TIME,resistChance);
+    resistChance += m_caster->GetTotalAuraModifier(SPELL_AURA_RESIST_PUSHBACK) - 100;
+    if (roll_chance_f(resistChance))
+        return;
+    
     int32 appliedDelayTime = delaytime;
 
     if(int32(m_timer) < delaytime)

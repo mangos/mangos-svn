@@ -2167,8 +2167,6 @@ long Unit::GetTotalAuraModifier(uint32 ModifierID)
             modifier += (*i).second->GetModifier()->m_amount;
         }
     }
-    if (auraFound)
-        modifier++;
 
     return modifier;
 }
@@ -3277,6 +3275,8 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
 
                 // Need to use floats here, cuz calculated PPM chance often is about 1-2%
                 float chance = (float)spellProto->procChance;
+                if(GetTypeId() == TYPEID_PLAYER)
+                    ((Player*)this)->ApplySpellMod(spellProto->Id,SPELLMOD_CHANCE_OF_SUCCESS,chance);
                 uint32 WeaponSpeed = GetAttackTime(attType);
                 if(spellProcEvent && spellProcEvent->ppmRate != 0)
                     chance = GetPPMProcChance(WeaponSpeed, spellProcEvent->ppmRate);
@@ -3383,6 +3383,8 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
 
                 // procChance is exact number in percents anyway
                 uint32 chance = spellProto->procChance;
+                if(pVictim->GetTypeId() == TYPEID_PLAYER)
+                    ((Player*)pVictim)->ApplySpellMod(spellProto->Id,SPELLMOD_CHANCE_OF_SUCCESS,chance);
                 if(roll_chance_i(chance))
                 {
                     if((*i)->m_procCharges > 0)
@@ -4086,7 +4088,13 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     if(LvlFactor > 1.0f)
         LvlFactor = 1.0f;
 
-    float DoneActualBenefit = DoneAdvertisedBenefit * (CastingTime / 3500.0f) * (100.0f - LvlPenalty) * LvlFactor * DotFactor / 100.0f;
+    // Spellmod SpellDamage
+    float SpellModSpellDamage = 100.0f;
+    if (GetTypeId() == TYPEID_PLAYER)
+        ((Player*)this)->ApplySpellMod(spellProto->Id,SPELLMOD_SPELL_DAMAGE,SpellModSpellDamage);
+    SpellModSpellDamage /= 100.0f;
+
+    float DoneActualBenefit = DoneAdvertisedBenefit * (CastingTime / 3500.0f) * (100.0f - LvlPenalty) * LvlFactor * DotFactor * SpellModSpellDamage / 100.0f;
     float TakenActualBenefit = TakenAdvertisedBenefit * (CastingTime / 3500.0f) * (100.0f - LvlPenalty) * LvlFactor / 100.0f;
 
     float tmpDamage = (float(pdamage)+DoneActualBenefit)*DoneTotalMod;
