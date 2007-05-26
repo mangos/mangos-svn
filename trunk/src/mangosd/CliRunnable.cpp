@@ -637,7 +637,7 @@ void CliUpTime(char*,pPrintf zprintf)
 {    
     uint32 uptime = sWorld.GetUptime();
     std::string suptime = secsToTimeString(uptime,true,(uptime > 86400));
-    sLog.outBasic("Server has been up for : %s",suptime.c_str());
+    zprintf("Server has been up for: %s", suptime.c_str());
 }
 
 void CliSetTBC(char *command,pPrintf zprintf)
