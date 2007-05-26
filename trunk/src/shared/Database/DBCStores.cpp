@@ -530,13 +530,16 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                     uint32 spellTriggeredId = spellproto->EffectTriggerSpell[effIndex];
                     SpellEntry const *spellTriggeredProto = sSpellStore.LookupEntry(spellTriggeredId);
 
-                    // non-positive targets of main spell return early
-                    for(int i = 0; i < 3; ++i)
+                    if(spellTriggeredProto)
                     {
-                        // if non-positive trigger cast targeted to positive target this main cast is non-positive
-                        // this will place this spell auras as debuffs
-                        if(IsPositiveTarget(spellTriggeredProto->EffectImplicitTargetA[effIndex]) && !IsPositiveEffect(spellTriggeredId,i))
-                            return false;
+                        // non-positive targets of main spell return early
+                        for(int i = 0; i < 3; ++i)
+                        {
+                            // if non-positive trigger cast targeted to positive target this main cast is non-positive
+                            // this will place this spell auras as debuffs
+                            if(IsPositiveTarget(spellTriggeredProto->EffectImplicitTargetA[effIndex]) && !IsPositiveEffect(spellTriggeredId,i))
+                                return false;
+                        }
                     }
                 }
                 break;
