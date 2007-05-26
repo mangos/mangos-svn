@@ -1246,13 +1246,13 @@ bool Creature::hasInvolvedQuest(uint32 quest_id) const
 
 void Creature::DeleteFromDB()
 {
+    objmgr.SaveCreatureRespawnTime(m_DBTableGuid,GetInstanceId(),0);
     objmgr.DeleteCreatureData(m_DBTableGuid);
 
     sDatabase.BeginTransaction();
     sDatabase.PExecuteLog("DELETE FROM `creature` WHERE `guid` = '%u'", m_DBTableGuid);
     sDatabase.PExecuteLog("DELETE FROM `creature_addon` WHERE `guid` = '%u'", m_DBTableGuid);
     sDatabase.PExecuteLog("DELETE FROM `creature_movement` WHERE `id` = '%u'", m_DBTableGuid);
-    sDatabase.PExecuteLog("DELETE FROM `creature_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", m_DBTableGuid, GetInstanceId());
     sDatabase.CommitTransaction();
 }
 
@@ -1331,7 +1331,7 @@ void Creature::Respawn()
     }
     if(getDeathState()==DEAD)
     {
-        sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", m_DBTableGuid, GetInstanceId());
+        objmgr.SaveCreatureRespawnTime(m_DBTableGuid,GetInstanceId(),0);
         m_respawnTime = time(NULL);                         // respawn at next tick
     }
 }

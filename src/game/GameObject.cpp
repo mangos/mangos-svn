@@ -434,12 +434,9 @@ bool GameObject::LoadFromDB(uint32 guid, uint32 InstanceId)
 
 void GameObject::DeleteFromDB()
 {
+    objmgr.SaveGORespawnTime(m_DBTableGuid,GetInstanceId(),0);
     objmgr.DeleteGOData(m_DBTableGuid);
-
-    sDatabase.BeginTransaction();
     sDatabase.PExecute("DELETE FROM `gameobject` WHERE `guid` = '%u'", m_DBTableGuid);
-    sDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", m_DBTableGuid, GetInstanceId());
-    sDatabase.CommitTransaction();
 }
 
 GameObjectInfo const *GameObject::GetGOInfo() const

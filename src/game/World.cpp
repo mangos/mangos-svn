@@ -413,8 +413,14 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Creature Addon Data..." );
     objmgr.LoadCreatureAddons();
 
+    sLog.outString( "Loading Creature Respawn Data..." );   // must be after PackInstances()
+    objmgr.LoadCreatureRespawnTimes();
+
     sLog.outString( "Loading Gameobject Data..." );
     objmgr.LoadGameobjects();
+
+    sLog.outString( "Loading Gameobject Respawn Data..." ); // must be after PackInstances()
+    objmgr.LoadGameobjectRespawnTimes();
 
     sLog.outString( "Loading Weather Data..." );
     objmgr.LoadWeatherZoneChances();

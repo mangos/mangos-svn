@@ -486,6 +486,90 @@ void ObjectMgr::LoadGameobjects()
     sLog.outString( "" );
 }
 
+void ObjectMgr::LoadCreatureRespawnTimes()
+{
+    // remove outdated data
+    sDatabase.Execute("DELETE FROM `creature_respawn` WHERE `respawntime` <= UNIX_TIMESTAMP(NOW())");
+
+    uint32 count = 0; 
+
+    QueryResult *result = sDatabase.Query("SELECT `guid`,`respawntime`,`instance` FROM `creature_respawn`");
+
+    if(!result)
+    {
+        barGoLink bar(1);
+
+        bar.step();
+
+        sLog.outString("");
+        sLog.outString(">> Loaded 0 creature respawn times.");
+        return;
+    }
+
+    barGoLink bar(result->GetRowCount());
+
+    do
+    {
+        Field *fields = result->Fetch();
+        bar.step();
+
+        uint32 loguid       = fields[0].GetUInt32();
+        uint64 respawn_time = fields[1].GetUInt64();
+        uint32 instance     = fields[2].GetUInt32();
+
+        mCreatureRespawnTimes[MAKE_GUID(loguid,instance)] = time_t(respawn_time);
+
+        count++;
+    } while (result->NextRow());
+
+    delete result;
+
+    sLog.outString( ">> Loaded %u creature respawn times", mCreatureRespawnTimes.size() );
+    sLog.outString( "" );
+}
+
+void ObjectMgr::LoadGameobjectRespawnTimes()
+{
+    // remove outdated data
+    sDatabase.Execute("DELETE FROM `gameobject_respawn` WHERE `respawntime` <= UNIX_TIMESTAMP(NOW())");
+
+    uint32 count = 0; 
+
+    QueryResult *result = sDatabase.Query("SELECT `guid`,`respawntime`,`instance` FROM `gameobject_respawn`");
+
+    if(!result)
+    {
+        barGoLink bar(1);
+
+        bar.step();
+
+        sLog.outString("");
+        sLog.outString(">> Loaded 0 gameobject respawn times.");
+        return;
+    }
+
+    barGoLink bar(result->GetRowCount());
+
+    do
+    {
+        Field *fields = result->Fetch();
+        bar.step();
+
+        uint32 loguid       = fields[0].GetUInt32();
+        uint64 respawn_time = fields[1].GetUInt64();
+        uint32 instance     = fields[2].GetUInt32();
+
+        mGORespawnTimes[MAKE_GUID(loguid,instance)] = time_t(respawn_time);
+
+        count++;
+    } while (result->NextRow());
+
+    delete result;
+
+    sLog.outString( ">> Loaded %u gameobject respawn times", mGORespawnTimes.size() );
+    sLog.outString( "" );
+}
+
 void ObjectMgr::LoadSpellProcEvents()
 {
     sSpellProcEventStore.Load();
