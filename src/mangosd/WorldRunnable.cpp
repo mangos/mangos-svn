@@ -26,6 +26,8 @@
 #include "Timer.h"
 #include "ObjectAccessor.h"
 #include "MapManager.h"
+#include "EventSystem.h"
+#include "ScriptCalls.h"
 
 #include "Database/DatabaseEnv.h"
 
@@ -63,6 +65,9 @@ void WorldRunnable::run()
 
     MapManager::Instance().UnloadAll();                     // unload all grids (including locked in memory)
 
-    ///- End the database thread
+    ///- End the database thread    
     sDatabase.ThreadEnd();                                  // free mySQL thread resources
+
+    UnloadScriptingModule();
+    StopEventSystem();
 }
