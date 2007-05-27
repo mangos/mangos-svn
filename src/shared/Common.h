@@ -47,6 +47,9 @@
 
 #define EXPECTED_MANGOS_CLIENT_BUILD        {6546, 0}
 
+// must be the first thing to include for it to work
+#include "MemoryLeaks.h"
+
 #ifdef HAVE_CONFIG_H
 # include <config.h>
 #endif
@@ -81,7 +84,11 @@
 #if PLATFORM == PLATFORM_WIN32
 #  define FD_SETSIZE 1024
 #  include <winsock2.h>
+// XP winver - needed to compile with standard leak check in MemoryLeaks.h
+// uncomment later if needed
+//#define _WIN32_WINNT 0x0501
 #  include <ws2tcpip.h>
+//#undef WIN32_WINNT
 #else
 #  include <sys/types.h>
 #  include <sys/ioctl.h>
@@ -90,8 +97,6 @@
 #  include <unistd.h>
 #  include <netdb.h>
 #endif
-
-#include "MemoryLeaks.h"
 
 #if COMPILER == COMPILER_MICROSOFT
 
