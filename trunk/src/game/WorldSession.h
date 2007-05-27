@@ -49,7 +49,7 @@ class MANGOS_DLL_SPEC WorldSession
 
         void SendPacket(WorldPacket* packet);
         void SendNotification(const char *format,...);
-        void SendLfgResult(uint32 type, uint32 entry);
+        void SendLfgResult(uint32 type, uint32 entry, uint8 lfg_type);
         void SendPartyResult(uint32 unk, std::string member, uint32 state);
         void SendAreaTriggerMessage(const char* Text, ...);
 
@@ -131,6 +131,11 @@ class MANGOS_DLL_SPEC WorldSession
         void SendTaxiMenu( uint64 guid );
         void SendDoFlight( uint16 MountId, uint32 path );
         bool SendLearnNewTaxiNode( uint64 guid );
+
+        // Looking For Group
+        // TRUE values set by client sending CMSG_LFG_SET_AUTOJOIN and CMSG_LFM_UNSET_AUTOADD before player login
+        bool LookingForGroup_auto_join;
+        bool LookingForGroup_auto_add;
     protected:
 
         void HandleCharEnumOpcode(WorldPacket& recvPacket);
