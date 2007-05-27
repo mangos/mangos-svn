@@ -19,14 +19,16 @@
 #ifndef MANGOSSERVER_MEMORY_H
 #define MANGOSSERVER_MEMORY_H
 
-#include "Common.h"
-#include "Policies/Singleton.h"
-
 #if COMPILER == COMPILER_MICROSOFT
-#  define _CRTDBG_MAP_ALLOC
-#  include <stdlib.h>
-#  include <crtdbg.h>
+// Visual Leak Detector support enabled
+#include <vld/vld.h>
+// standard Visual Studio leak check disabled, 
+//#  define _CRTDBG_MAP_ALLOC
+//#  include <stdlib.h>
+//#  include <crtdbg.h>
 #endif
+
+#include "Policies/Singleton.h"
 
 struct MemoryManager : public MaNGOS::Singleton < MemoryManager >
 {

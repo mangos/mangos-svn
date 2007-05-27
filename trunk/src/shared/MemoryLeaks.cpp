@@ -25,7 +25,10 @@ INSTANTIATE_SINGLETON_1( MemoryManager ) ;
 
 MemoryManager::MemoryManager( )
 {
-    _CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
-
+    // standard leak check initialization
+    //_CrtSetDbgFlag( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF);
+    // uncomment to disable Visual Leak Detector from code
+    //VLDDisable();
 }
+
 #endif
