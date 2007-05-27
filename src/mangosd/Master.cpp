@@ -244,7 +244,12 @@ void Master::Run()
 
     #ifdef WIN32
         // this only way to terminate CLI thread exist at Win32 (alt. way exist only in Windows Vista API)
-        _exit(1);
+        //_exit(1);
+        // send keyboard input to safely unblock the CLI thread
+        keybd_event('X',0x2d,0,0);
+        keybd_event('X',0x2d,KEYEVENTF_KEYUP,0);
+        keybd_event(VK_RETURN,0x1c,0,0);
+        keybd_event(VK_RETURN,0x1c,KEYEVENTF_KEYUP,0);
     #endif
 
     return;
