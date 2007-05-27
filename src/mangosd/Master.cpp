@@ -45,28 +45,6 @@
 /// \todo Warning disabling not useful under VC++2005. Can somebody say on which compiler it is useful?
 #pragma warning(disable:4305)
 
-#if defined( WIN32 ) && (_DEBUG)
-#include <windows.h>
-#include <tchar.h>
-#include <process.h>
-#include <mmsystem.h>
-
-DWORD cthread1 = 0;
-DWORD cthread2 = 0;
-
-void __cdecl RunCLI ( void * )
-{
-    CliRunnable *client(new CliRunnable);
-    client->run();
-}
-
-void __cdecl RunWorld ( void * )
-{
-    WorldRunnable *world(new WorldRunnable);
-    world->run();
-}
-#endif //defined( WIN32 ) && (_DEBUG)
-
 INSTANTIATE_SINGLETON_1( Master );
 
 Master::Master()
@@ -120,23 +98,14 @@ void Master::Run()
     ///- Catch termination signals
     _HookSignals();
 
-    #if defined( WIN32 ) && (_DEBUG)
-        ///- Launch WorldRunnable thread - Use windows threads for debugging!
-        cthread2 = _beginthread( RunWorld, 0, LOWORD( 0) );
-    #else //!defined( WIN32 ) && (_DEBUG)
-        ///- Launch WorldRunnable thread
-        ZThread::Thread t(new WorldRunnable);
-        t.setPriority ((ZThread::Priority )2);
-    #endif //!defined( WIN32 ) && (_DEBUG)
+    ///- Launch WorldRunnable thread
+    ZThread::Thread t(new WorldRunnable);
+    t.setPriority ((ZThread::Priority )2);
 
     if (sConfig.GetBoolDefault("Console.Enable", 1))
     {
-        #if defined( WIN32 ) && (_DEBUG)
-    	    cthread1 = _beginthread( RunCLI, 0, LOWORD( 0) );
-        #else //!defined( WIN32 ) && (_DEBUG)
-            ///- Launch CliRunnable thread
-            ZThread::Thread td1(new CliRunnable);
-        #endif //!defined( WIN32 ) && (_DEBUG)
+        ///- Launch CliRunnable thread
+        ZThread::Thread td1(new CliRunnable);
     }
 
     ///- Launch the RA listener socket
@@ -231,11 +200,9 @@ void Master::Run()
     ///- Remove signal handling before leaving
     _UnhookSignals();
 
-#if defined( WIN32 ) && (_DEBUG)
-    //t.wait(); // UQ1: I don't know why this is needed.. If it is, FIXME!
-#else //!defined( WIN32 ) && (_DEBUG)
+    // when the main thread closes the singletons get unloaded
+    // since worldrunnable uses them, it will crash if unloaded after master
     t.wait();
-#endif //!defined( WIN32 ) && (_DEBUG)
 
     ///- Clean database before leaving
     clearOnlineAccounts();
@@ -246,10 +213,37 @@ void Master::Run()
         // this only way to terminate CLI thread exist at Win32 (alt. way exist only in Windows Vista API)
         //_exit(1);
         // send keyboard input to safely unblock the CLI thread
-        keybd_event('X',0x2d,0,0);
-        keybd_event('X',0x2d,KEYEVENTF_KEYUP,0);
-        keybd_event(VK_RETURN,0x1c,0,0);
-        keybd_event(VK_RETURN,0x1c,KEYEVENTF_KEYUP,0);
+        INPUT_RECORD b[5];
+        HANDLE hStdIn = GetStdHandle(STD_INPUT_HANDLE);
+        b[0].EventType = KEY_EVENT;
+        b[0].Event.KeyEvent.bKeyDown = TRUE;
+        b[0].Event.KeyEvent.uChar.AsciiChar = 'X';
+        b[0].Event.KeyEvent.wVirtualKeyCode = 'X';
+        b[0].Event.KeyEvent.wRepeatCount = 1;
+
+        b[1].EventType = KEY_EVENT;
+        b[1].Event.KeyEvent.bKeyDown = FALSE;
+        b[1].Event.KeyEvent.uChar.AsciiChar = 'X';
+        b[1].Event.KeyEvent.wVirtualKeyCode = 'X';
+        b[1].Event.KeyEvent.wRepeatCount = 1;
+
+        b[2].EventType = KEY_EVENT;
+        b[2].Event.KeyEvent.bKeyDown = TRUE;
+        b[2].Event.KeyEvent.dwControlKeyState = 0;
+        b[2].Event.KeyEvent.uChar.AsciiChar = '\r';
+        b[2].Event.KeyEvent.wVirtualKeyCode = VK_RETURN;
+        b[2].Event.KeyEvent.wRepeatCount = 1;
+        b[2].Event.KeyEvent.wVirtualScanCode = 0x1c;
+
+        b[3].EventType = KEY_EVENT;
+        b[3].Event.KeyEvent.bKeyDown = FALSE;
+        b[3].Event.KeyEvent.dwControlKeyState = 0;
+        b[3].Event.KeyEvent.uChar.AsciiChar = '\r';
+        b[3].Event.KeyEvent.wVirtualKeyCode = VK_RETURN;
+        b[3].Event.KeyEvent.wVirtualScanCode = 0x1c;
+        b[3].Event.KeyEvent.wRepeatCount = 1;
+        DWORD numb;
+        BOOL ret = WriteConsoleInput(hStdIn, b, 4, &numb);
     #endif
 
     return;
