@@ -50,16 +50,16 @@ void SQLStorage::Free ()
     for(uint32 x=0;x<iNumFields;x++)
         if(format[x]==FT_STRING)
     {
-        for(uint32 y=0;y<iOldNumRecords;y++)
-            if(pOldIndex[y])
-                delete [] ((char*)(pOldIndex[y])+offset);
+        for(uint32 y=0;y<MaxEntry;y++)
+            if(pIndex[y])
+                delete [] *(char**)((char*)(pIndex[y])+offset);
 
         offset+=sizeof(char*);
 
     }else offset+=4;
 
-    delete [] pOldIndex;
-    delete [] pOldData;
+    delete [] pIndex;
+    delete [] data;
 
 }
 
@@ -165,10 +165,6 @@ void SQLStorage::Load ()
 
     if(data)                                                //Reload table
         AddEvent((EventHandler)(&FreeStorage),this,20000);
-
-    pOldData=data;
-    pOldIndex=pIndex;
-    iOldNumRecords=MaxEntry;
 
     pIndex =newIndex;
     MaxEntry=maxi;
