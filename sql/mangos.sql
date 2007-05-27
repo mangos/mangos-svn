@@ -1942,29 +1942,6 @@ LOCK TABLES `item_text` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `looking_for_group`
---
-
-DROP TABLE IF EXISTS `looking_for_group`;
-CREATE TABLE `looking_for_group` (
-  `guid` int(12) unsigned NOT NULL default '0',
-  `slot` smallint(2) unsigned NOT NULL default '0',
-  `entry` int(12) unsigned NOT NULL default '0',
-  `type` smallint(2) unsigned NOT NULL default '0',
-  `lfg_type` smallint(2) unsigned NOT NULL default '0',
-  `comment` text NOT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `looking_for_group`
---
-
-LOCK TABLES `looking_for_group` WRITE;
-/*!40000 ALTER TABLE `looking_for_group` DISABLE KEYS */;
-/*!40000 ALTER TABLE `looking_for_group` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `mail`
 --
 

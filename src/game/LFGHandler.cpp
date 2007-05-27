@@ -23,36 +23,143 @@
 #include "WorldPacket.h"
 #include "ObjectMgr.h"
 
+static void AttemptJoin(Player* _player)
+{
+    // skip not can autojoin cases and player group case
+    if(!_player->m_lookingForGroup.canAutoJoin() || _player->groupInfo.group )
+        return;
+
+    ObjectAccessor::PlayersMapType const& players = ObjectAccessor::Instance().GetPlayers();
+
+    for(ObjectAccessor::PlayersMapType::const_iterator iter = players.begin(); iter != players.end(); ++iter)
+    {
+        uint64 guid = iter->first;
+        Player *plr = iter->second;
+
+        // skip enemies and self
+        if(!plr || plr==_player || plr->GetTeam() != _player->GetTeam())
+            continue;
+
+        // skip not auto add, not group leader cases
+        if(!plr->GetSession()->LookingForGroup_auto_add || plr->groupInfo.group && plr->groupInfo.group->GetLeaderGUID()!=plr->GetGUID())
+            continue;
+
+        // skip non auto-join or empty slots, or non compatible slots
+        if(!plr->m_lookingForGroup.more.canAutoJoin() || !_player->m_lookingForGroup.HaveInSlot(plr->m_lookingForGroup.more))
+            continue;
+
+        // attempt create group, or skip
+        if(!plr->groupInfo.group)
+        {
+            Group* group = new Group;
+            if(!group->Create(plr->GetGUID(), plr->GetName()))
+            {
+                delete group;
+                continue;
+            }
+
+            objmgr.AddGroup(group);
+        }
+
+        // stop at success join
+        if(plr->groupInfo.group->AddMember(_player->GetGUID(), _player->GetName()))
+            break;
+    }
+}
+
+static void AttemptAddMore(Player* _player)
+{
+    // skip not group leader case
+    if(_player->groupInfo.group && _player->groupInfo.group->GetLeaderGUID()!=_player->GetGUID())
+        return;
+
+    if(!_player->m_lookingForGroup.more.canAutoJoin())
+        return;
+
+    ObjectAccessor::PlayersMapType const& players = ObjectAccessor::Instance().GetPlayers();
+
+    for(ObjectAccessor::PlayersMapType::const_iterator iter = players.begin(); iter != players.end(); ++iter)
+    {
+        uint64 guid = iter->first;
+        Player *plr = iter->second;
+
+        // skip enemies and self
+        if(!plr || plr==_player || plr->GetTeam() != _player->GetTeam())
+            continue;
+
+        // skip not auto join or in group
+        if(!plr->GetSession()->LookingForGroup_auto_join || plr->groupInfo.group )
+            continue;
+
+        if(!plr->m_lookingForGroup.HaveInSlot(_player->m_lookingForGroup.more))
+            continue;
+
+        // attempt create group if need, or stop attempts
+        if(!_player->groupInfo.group)
+        {
+            Group* group = new Group;
+            if(!group->Create(_player->GetGUID(), _player->GetName()))
+            {
+                delete group;
+                return;                                     // cann't create group (??)
+            }
+
+            objmgr.AddGroup(group);
+        }
+
+        // stop at join fail (full)
+        if(!_player->groupInfo.group->AddMember(plr->GetGUID(), plr->GetName()))
+            break;
+    }
+}
+
 void WorldSession::HandleLfgAutoJoinOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("CMSG_SET_LFG_AUTO_JOIN");
+    LookingForGroup_auto_join = true;
+
+    if(!_player)
+        return;
+
+    AttemptJoin(_player);
 }
 
 void WorldSession::HandleLfgCancelAutoJoinOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("CMSG_UNSET_LFG_AUTO_JOIN");
+    LookingForGroup_auto_join = false;
 }
 
 void WorldSession::HandleLfmAutoAddMembersOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("CMSG_SET_LFM_AUTOADD");
+    LookingForGroup_auto_add = true;
+
+    if(!_player)
+        return;
+
+    AttemptAddMore(_player);
 }
 
 void WorldSession::HandleLfmCancelAutoAddmembersOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("CMSG_UNSET_LFM_AUTOADD");
+    LookingForGroup_auto_add = false;
 }
 
 void WorldSession::HandleLfgClearOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("CMSG_LOOKING_FOR_GROUP_CLEAR");
-    sDatabase.PExecute("DELETE FROM `looking_for_group` WHERE `guid` = '%u' AND `lfg_type` = '0'", _player->GetGUIDLow());
+
+    for(int i = 0; i < MAX_LOOKING_FOR_GROUP_SLOT; ++i)
+        _player->m_lookingForGroup.slots[i].Clear();
 }
 
 void WorldSession::HandleLfmSetNoneOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("CMSG_SET_LOOKING_FOR_NONE");
-    sDatabase.PExecute("UPDATE `looking_for_group` SET `entry` = '0', `type` = '0' WHERE `guid` = '%u' AND `lfg_type` = '1'", _player->GetGUIDLow()); 
+
+    _player->m_lookingForGroup.more.Clear();
 }
 
 void WorldSession::HandleLfmSetOpcode( WorldPacket & recv_data )
@@ -60,41 +167,33 @@ void WorldSession::HandleLfmSetOpcode( WorldPacket & recv_data )
     sLog.outDebug("CMSG_SET_LOOKING_FOR_MORE");
     recv_data.hexlike();
     uint32 temp, entry, type;
-    uint8 lfg_type = 1;
 
     recv_data >> temp;
 
     entry = ( temp & 0xFFFF);
     type = ( (temp >> 24) & 0xFFFF);
-    //sDatabase.PExecute("UPDATE `looking_for_group` SET `entry` = '0', `type` = '0' WHERE `guid` = '%u'", _player->GetGUIDLow());
-    sDatabase.PExecute("UPDATE `looking_for_group` SET `entry` = '%u', `type` = '%u', `lfg_type` = '1' WHERE `guid` = '%u' AND `slot` = '1'", entry, type, _player->GetGUIDLow()); 
+
+    _player->m_lookingForGroup.more.Set(entry,type);
     sLog.outDebug("LFM set: temp %u, zone %u, type %u", temp, entry, type);
-    SendLfgResult(type, entry);
+
+    if(LookingForGroup_auto_add)
+        AttemptAddMore(_player);
+
+    SendLfgResult(type, entry, 1);
 }
 
 void WorldSession::HandleLfgSetCommentOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,1);
+
     sLog.outDebug("CMSG_SET_COMMENTARY");
-    std::string comment;
-    uint32 number;
     recv_data.hexlike();
 
-    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `looking_for_group` WHERE `guid` = '%u'", _player->GetGUIDLow());
+    std::string comment;
+    recv_data >> comment;
+    sLog.outDebug("LFG comment %s", comment.c_str());
 
-    if(result)
-    {
-        Field *fields = result->Fetch();
-        number = fields[0].GetUInt32();
-        if(number == 0)
-            for(uint8 i = 0; i < 3; i++)
-                sDatabase.PExecute("INSERT INTO `looking_for_group` (`guid`, `slot`, `comment`) VALUES ('%u', '%u', '')", _player->GetGUIDLow(), i);
-        recv_data >> comment;
-        sLog.outDebug("LFG comment %s", comment.c_str());
-        sDatabase.escape_string(comment);
-        sDatabase.PExecute("UPDATE `looking_for_group` SET `comment` = '%s' WHERE `guid` = '%u'", comment.c_str(), _player->GetGUIDLow());     
-    }
-    else
-        sLog.outDebug("strange, DB problem?");
+    _player->m_lookingForGroup.comment = comment;
 }
 
 void WorldSession::HandleLookingForGroup(WorldPacket& recv_data)
@@ -105,89 +204,78 @@ void WorldSession::HandleLookingForGroup(WorldPacket& recv_data)
 
     recv_data >> type >> entry >> unk;
     sLog.outDebug("MSG_LOOKING_FOR_GROUP: type %u, entry %u, unk %u", type, entry, unk);
-    //sDatabase.PExecute("UPDATE `looking_for_group` SET `entry` = '0', `type` = '0' WHERE `guid` = '%u'", _player->GetGUIDLow());
-    sDatabase.PExecute("UPDATE `looking_for_group` SET `entry` = '%u', `type` = '%u', `lfg_type` = '1' WHERE `guid` = '%u' AND `slot` = '1'", entry, type, _player->GetGUIDLow()); 
-    SendLfgResult(type, entry);
+
+    if(LookingForGroup_auto_add)
+        AttemptAddMore(_player);
+
+    if(LookingForGroup_auto_join)
+        AttemptJoin(_player);
+
+    SendLfgResult(type, entry, 0);
 }
 
-void WorldSession::SendLfgResult(uint32 type, uint32 entry)
+void WorldSession::SendLfgResult(uint32 type, uint32 entry, uint8 lfg_type)
 {
-    std::string comment;
-    uint32 number;
-    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `looking_for_group` WHERE `type` = '%u' AND `entry` = '%u'", type, entry);
+    uint32 number = 0;
 
-    if(result)
-    {
-        Field *fields = result->Fetch();
-        number = fields[0].GetUInt32();
-    }
-    else
-    {
-        return;
-    }
-
+    // start preper packet;
     WorldPacket data(MSG_LOOKING_FOR_GROUP);
-    data << type;   // type
-    data << entry;  // entry from LFGDungeons.dbc
-    data << number; // count
-    data << number; // count again, strange
+    data << uint32(type);                                   // type
+    data << uint32(entry);                                  // entry from LFGDungeons.dbc
+    data << uint32(0);                                      // count, placeholder
+    data << uint32(0);                                      // count again, strange, placeholder
 
-    result = sDatabase.PQuery("SELECT `guid`, `lfg_type`, `comment` FROM `looking_for_group` WHERE `type` = '%u' AND `entry` = '%u'", type, entry);
-    if(result)
+    ObjectAccessor::PlayersMapType const& players = ObjectAccessor::Instance().GetPlayers();
+    
+    for(ObjectAccessor::PlayersMapType::const_iterator iter = players.begin(); iter != players.end(); ++iter)
     {
-        Field *fields = result->Fetch();
-        do
+        uint64 guid = iter->first;
+        Player *plr = iter->second;
+
+        if(!plr || plr->GetTeam() != _player->GetTeam())
+            continue;
+
+        if(!plr->m_lookingForGroup.HaveInSlot(entry,type))
+            continue;
+
+        ++number;
+
+        data.append(plr->GetPackGUID());                    // packed guid
+        data << plr->getLevel();                            // level
+        data << plr->GetZoneId();                           // current zone
+        data << lfg_type;                                   // 0x00 - LFG, 0x01 - LFM
+
+        for(uint8 j = 0; j < MAX_LOOKING_FOR_GROUP_SLOT; ++j)
         {
-            uint64 guid = fields[0].GetUInt64();
-            comment = fields[2].GetString();
-            Player *plr = objmgr.GetPlayer(guid);
-            if(plr)
+            data << uint32( plr->m_lookingForGroup.slots[j].entry | (plr->m_lookingForGroup.slots[j].type << 24) );
+        }
+        data << plr->m_lookingForGroup.comment;
+
+        Group *group = plr->groupInfo.group;
+        if(group)
+        {
+            data << group->GetMembersCount()-1; // count of group members without group leader
+            Group::MemberList const& members = group->GetMembers();
+            for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
             {
-                data.append(plr->GetPackGUID()); // packed guid
-                data << plr->getLevel();         // level
-                data << plr->GetZoneId();        // current zone
-                data << fields[1].GetUInt8();    // 0x00 - LFG, 0x01 - LFM
-                for(uint8 i = 0; i < 3; i++)     // we have three slots
+                Player *member = objmgr.GetPlayer(itr->guid);
+                if(member && member->GetGUID() != plr->GetGUID())
                 {
-                    QueryResult *result2 = sDatabase.PQuery("SELECT `entry`, `type` FROM `looking_for_group` WHERE `slot` = '%u' AND `guid` = '%u'", i, plr->GetGUID());
-                    if(result2)
-                    {
-                        Field *fields = result2->Fetch();
-                        data << uint32( fields[0].GetUInt32() | (fields[1].GetUInt32() << 24) );
-                    }
-                    else
-                    {
-                        data << uint32(0x00);
-                    }
-                    delete result2;
-                }
-                data << comment;                // commentary
-                Group *group = plr->groupInfo.group;
-                if(group)
-                {
-                    data << group->GetMembersCount()-1; // count of group members without group leader
-                    Group::MemberList const& members = group->GetMembers();
-                    for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
-                    {
-                        Player *member = objmgr.GetPlayer(itr->guid);
-                        if(member && member->GetGUID() != plr->GetGUID())
-                        {
-                            data.append(member->GetPackGUID()); // packed guid
-                            data << member->getLevel(); // player level
-                        }
-                    }
-                }
-                else
-                {
-                    data << uint32(0x00);
+                    data.append(member->GetPackGUID()); // packed guid
+                    data << member->getLevel(); // player level
                 }
             }
         }
-        while( result->NextRow() );
-        delete result;
+        else
+        {
+            data << uint32(0x00);
+        }
     }
-    else
-        return;
+
+    // fill count placeholders
+    data.put<uint32>(4+4,  number);
+    data.put<uint32>(4+4+4,number);
+
     data.hexlike();
     SendPacket(&data);
 }
@@ -203,8 +291,14 @@ void WorldSession::HandleSetLfgOpcode( WorldPacket & recv_data )
     entry = ( temp & 0xFFFF);
     type = ( (temp >> 24) & 0xFFFF);
 
-    sDatabase.PExecute("UPDATE `looking_for_group` SET `entry` = '%u', `type` = '%u' WHERE `guid` = '%u' and `slot` = '%u'", entry, type, _player->GetGUIDLow(), slot);
+    if(slot >= MAX_LOOKING_FOR_GROUP_SLOT)
+        return;
 
+    _player->m_lookingForGroup.slots[slot].Set(entry,type);
     sLog.outDebug("LFG set: looknumber %u, temp %X, type %u, entry %u", slot, temp, type, entry);
-    SendLfgResult(type, entry);
+
+    if(LookingForGroup_auto_join)
+        AttemptJoin(_player);
+
+    SendLfgResult(type, entry, 0);
 }

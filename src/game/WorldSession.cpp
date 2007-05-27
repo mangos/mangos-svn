@@ -40,7 +40,8 @@
 
 /// WorldSession constructor
 WorldSession::WorldSession(uint32 id, WorldSocket *sock, uint32 sec) : _player(NULL), _socket(sock),
-_security(sec), _accountId(id), _logoutTime(0), m_playerLoading(false), m_playerRecentlyLogout(false)
+_security(sec), _accountId(id), _logoutTime(0), m_playerLoading(false), m_playerRecentlyLogout(false),
+LookingForGroup_auto_join(false), LookingForGroup_auto_add(false)
 {
     FillOpcodeHandlerHashTable();
 }

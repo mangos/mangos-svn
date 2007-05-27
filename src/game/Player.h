@@ -238,6 +238,47 @@ struct EnchantDuration
 
 typedef std::list<EnchantDuration> EnchantDurationList;
 
+
+struct LookingForGroupSlot
+{
+    LookingForGroupSlot() : entry(0), type(0) {}
+    bool Empty() const { return !entry && !type; }
+    void Clear() { entry = 0; type = 0; }
+    void Set(uint32 _entry, uint32 _type ) { entry = _entry; type = _type; }
+    bool Is(uint32 _entry, uint32 _type) const { return entry==_entry && type==_type; }
+    bool canAutoJoin() const { return entry && (type == 1 || type == 5); }
+
+    uint32 entry;
+    uint32 type;
+};
+
+#define MAX_LOOKING_FOR_GROUP_SLOT 3
+
+struct LookingForGroup
+{
+    LookingForGroup() {}
+    bool HaveInSlot(LookingForGroupSlot const& slot) const { return HaveInSlot(slot.entry,slot.type); }
+    bool HaveInSlot(uint32 _entry, uint32 _type) const
+    {
+        for(int i = 0; i < MAX_LOOKING_FOR_GROUP_SLOT; ++i)
+            if(slots[i].Is(_entry,_type))
+                return true;
+        return false;
+    }
+
+    bool canAutoJoin() const
+    {
+        for(int i = 0; i < MAX_LOOKING_FOR_GROUP_SLOT; ++i)
+            if(slots[i].canAutoJoin())
+                return true;
+        return false;
+    }
+
+    LookingForGroupSlot slots[MAX_LOOKING_FOR_GROUP_SLOT];
+    LookingForGroupSlot more;
+    std::string comment;
+};
+
 enum PlayerMovementType
 {
     MOVE_ROOT       = 1,
@@ -1301,6 +1342,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool isNeedRename() const { return m_needRename; }
         void SetNeedRename(bool rename) { m_needRename = rename; }
+
+        LookingForGroup m_lookingForGroup;
 
         /*********************************************************/
         /***                 INSTANCE SYSTEM                   ***/
