@@ -60,9 +60,6 @@ class SQLStorage
         char** pIndex;
 
         char *data;
-        char *pOldData;
-        char **pOldIndex;
-        uint32 iOldNumRecords;
         const char *format;
         const char *table;
         const char *entry_field;
