@@ -552,12 +552,32 @@ void mpThread()
 
 }
 
+MThread *tm = NULL, *ts = NULL, *tms = NULL, *tmp = NULL, *tsp = NULL, *tmsp = NULL;
+
 void StartEventSystem()
 {
-    MThread::Start(( void (*)(void*))&mThread,NULL);
-    MThread::Start(( void (*)(void*))&sThread,NULL);
-    MThread::Start(( void (*)(void*))&msThread,NULL);
-    MThread::Start(( void (*)(void*))&mpThread,NULL);
-    MThread::Start(( void (*)(void*))&spThread,NULL);
-    MThread::Start(( void (*)(void*))&mspThread,NULL);
+    tm = MThread::Start(( void (*)(void*))&mThread,NULL);
+    ts = MThread::Start(( void (*)(void*))&sThread,NULL);
+    tms = MThread::Start(( void (*)(void*))&msThread,NULL);
+    tmp = MThread::Start(( void (*)(void*))&mpThread,NULL);
+    tsp = MThread::Start(( void (*)(void*))&spThread,NULL);
+    tmsp = MThread::Start(( void (*)(void*))&mspThread,NULL);
+}
+
+void StopEventSystem()
+{
+    while(msEvents) { Event *p = msEvents; msEvents = (Event*)p->pNext; delete p;  }
+    while(sEvents) { Event *p = sEvents; sEvents = (Event*)p->pNext; delete p; }
+    while(mEvents) { Event *p = mEvents; mEvents = (Event*)p->pNext; delete p; }
+
+    while(msPEvents) { PeriodicEvent *p = msPEvents; msPEvents = (PeriodicEvent*)p->pNext; delete p; }
+    while(sPEvents) { PeriodicEvent *p = sPEvents; sPEvents = (PeriodicEvent*)p->pNext; delete p; }
+    while(mPEvents) { PeriodicEvent *p = mPEvents; mPEvents = (PeriodicEvent*)p->pNext; delete p; }
+
+    delete tm;
+    delete ts;
+    delete tms;
+    delete tmp;
+    delete tsp;
+    delete tmsp;
 }

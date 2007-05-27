@@ -92,7 +92,14 @@ BattleGround::BattleGround()
 
 BattleGround::~BattleGround()
 {
-
+    delete m_HordeFlag;
+    delete m_AllianceFlag;
+    delete SpeedBonus1;
+    delete SpeedBonus2;
+    delete RegenBonus1;
+    delete RegenBonus2;
+    delete BerserkBonus1;
+    delete BerserkBonus2;
 }
 
 void BattleGround::Update(time_t diff)
