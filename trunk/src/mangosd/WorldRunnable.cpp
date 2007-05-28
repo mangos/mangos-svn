@@ -68,6 +68,6 @@ void WorldRunnable::run()
     ///- End the database thread    
     sDatabase.ThreadEnd();                                  // free mySQL thread resources
 
-    UnloadScriptingModule();
+    //UnloadScriptingModule();
     StopEventSystem();
 }
