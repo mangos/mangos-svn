@@ -119,7 +119,8 @@ ChatCommand * ChatHandler::getCommandTable()
         { "spell",       1, &ChatHandler::HandleModifySpellCommand,      "",   NULL },
         { "tp",          1, &ChatHandler::HandleModifyTalentCommand,     "",   NULL },
         { "titles",      1, &ChatHandler::HandleModifyKnownTitlesCommand, "",  NULL },
-
+        { "mount",       1, &ChatHandler::HandleModifyMountCommand,       "",  NULL },
+          
         { NULL,          0, NULL,                                        "",   NULL }
     };
 

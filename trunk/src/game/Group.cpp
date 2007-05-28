@@ -145,13 +145,8 @@ bool Group::AddMember(const uint64 &guid, const char* name)
 
 uint32 Group::RemoveMember(const uint64 &guid, const uint8 &method)
 {
-    if(m_members.size() <= 2)
-    {// UQ1: If there would only be 1 player left after the leader change, delete the group here!
-        Disband(true);
-        return 0;
-    }
-
-    if(m_members.size() > 1)
+    // remove member and change leader (if need) only if strong more 2 members _before_ member remove
+    if(m_members.size() > 2)
     {
         bool leaderChanged = _removeMember(guid);
 
@@ -180,6 +175,7 @@ uint32 Group::RemoveMember(const uint64 &guid, const uint8 &method)
 
         SendUpdate();
     }
+    // if group before remove <= 2 disband it
     else
         Disband(true);
 

@@ -139,7 +139,7 @@ namespace MaNGOS
         if( iter != elements._element.end() )
         {
             elements._element.erase(iter);
-	    return true;
+            return true;
         }
 
         return false; // found... terminate the search

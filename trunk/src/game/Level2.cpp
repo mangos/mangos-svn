@@ -2258,7 +2258,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
     sLog.outDebug("DEBUG: HandleWpShowCommand: show_str: %s", show_str);
     sLog.outDebug("DEBUG: HandleWpShowCommand: guid_str: %s", guid_str);
     //if (!guid_str) {
-    //	return false;
+    //    return false;
     //}
 
     // Did user provide a GUID

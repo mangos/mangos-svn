@@ -83,7 +83,7 @@ void Master::Run()
     ///- Launch the world listener socket
     port_t wsport = sWorld.getConfig(CONFIG_PORT_WORLD);
 
-	SocketHandler h;
+    SocketHandler h;
 
     ListenSocket<WorldSocket> worldListenSocket(h);
     if (worldListenSocket.Bind(wsport))
