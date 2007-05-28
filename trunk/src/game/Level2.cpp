@@ -134,6 +134,16 @@ bool ChatHandler::HandleGoObjectCommand(const char* args)
     return true;
 }
 
+/** \brief Teleport the GM to the specified creature
+ *
+ * .gocreature <GUID>      --> TP using creature.guid
+ * .gocreature azuregos    --> TP player to the mob with this name
+ *                             Warning: If there is more than one mob with this name
+ *                                      you will be teleported to the first one that is found.
+ * .gocreature id 6109     --> TP player to the mob, that has this creature_template.entry
+ *                             Warning: If there is more than one mob with this "id"
+ *                                      you will be teleported to the first one that is found.
+ */
 bool ChatHandler::HandleGoCreatureCommand(const char* args)
 {
     Player* _player = m_session->GetPlayer();
@@ -147,15 +157,65 @@ bool ChatHandler::HandleGoCreatureCommand(const char* args)
     if(!*args)
         return false;
 
-    int32 guid = atoi((char*)args);
-    if(!guid)
+    const char *tmp = args;
+
+    char* pParam1 = strtok((char*)args, " ");
+    if (!pParam1)
         return false;
 
-    QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `creature` WHERE `guid` = '%i'",guid);
+    string whereClause;
+
+    // User wants to teleport to the NPC's template entry
+    if( strcmp(pParam1, "id") == 0 )
+    {
+        //sLog.outError("DEBUG: ID found");
+
+        // Get the "creature_template.entry"
+        char* pParam2 = strtok(NULL, " ");
+        if (!pParam2)
+            return false;
+        int32 tEntry = atoi((char*)pParam2);
+        //sLog.outError("DEBUG: ID value: %d", tEntry);
+        if(!tEntry)
+            return false;
+
+        whereClause = "WHERE `id` = '";
+        whereClause.append( pParam2 );
+        whereClause.append( "'" );
+    }
+    else
+    {
+        //sLog.outError("DEBUG: ID *not found*");
+        int32 guid = atoi((char*)pParam1);
+
+        // Number is invalid - maybe the user specified the mob's name
+        if(!guid)
+        {
+            // Maybe the name of the NPC?
+            whereClause = ", creature_template ";
+            whereClause.append(  "where creature.id = creature_template.entry ");
+            whereClause.append( "and creature_template.name like '");
+            whereClause.append( tmp );
+            whereClause.append( "'" );
+        }
+        else
+        {
+            whereClause = "WHERE `guid` = '";
+            whereClause.append( pParam1 );
+            whereClause.append( "'" );
+        }
+    }
+    //sLog.outError("DEBUG: %s", whereClause.c_str());
+
+    QueryResult *result = sDatabase.Query("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `creature` %s", whereClause.c_str() );
     if (!result)
     {
         SendSysMessage(LANG_COMMAND_GOCREATNOTFOUND);
         return true;
+    }
+    if( result->GetRowCount() > 1 )
+    {
+        SendSysMessage("Warning: Mob found more than 1 time - you will be ported to the first one found inside DB.");
     }
 
     Field *fields = result->Fetch();
@@ -962,7 +1022,7 @@ bool ChatHandler::HandleFactionIdCommand(const char* args)
     }
 
     pCreature->setFaction(factionId);
-    
+
     // faction is set in creature_template - not inside creature
     //pCreature->SaveToDB(); -- obsolete
     sDatabase.PExecuteLog("UPDATE `creature_template` SET `faction` = '%u' WHERE `entry` = '%u'", factionId, pCreature->GetEntry());
@@ -2620,7 +2680,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
 }                                                           // HandleWpShowCommand
 
 bool ChatHandler::HandleRenameCommand(const char* args)
-{           
+{
     Player* target = NULL;
     uint64 targetGUID = 0;
     std::string oldname;
