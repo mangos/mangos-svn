@@ -851,6 +851,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 getTransForm() { return m_transform;}
         void AddDynObject(DynamicObject* dynObj);
         void RemoveDynObject(uint32 spellid);
+        void RemoveAllDynObjects();
         void AddGameObject(GameObject* gameObj);
         void RemoveGameObject(GameObject* gameObj, bool del);
         void RemoveGameObject(uint32 spellid, bool del);

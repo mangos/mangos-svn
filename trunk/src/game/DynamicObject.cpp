@@ -44,6 +44,8 @@ DynamicObject::DynamicObject( WorldObject *instantiator ) : WorldObject( instant
 
 bool DynamicObject::Create( uint32 guidlow, Unit *caster, uint32 spellId, uint32 effIndex, float x, float y, float z, int32 duration, float radius )
 {
+    SetInstanceId(caster->GetInstanceId());
+
     WorldObject::_Create(guidlow, 0xF0007000, caster->GetMapId(), x, y, z, 0, (uint8)-1);
 
     SetUInt32Value( OBJECT_FIELD_ENTRY, spellId );
@@ -61,35 +63,45 @@ bool DynamicObject::Create( uint32 guidlow, Unit *caster, uint32 spellId, uint32
     deleteThis = false;
     m_effIndex = effIndex;
     m_spellId = spellId;
-    m_caster = caster;
+    m_casterGuid = caster->GetGUID();
     return true;
+}
+
+Unit* DynamicObject::GetCaster() const
+{
+    // can be not found in some cases
+    return ObjectAccessor::Instance().GetUnit(*this,m_casterGuid);
 }
 
 void DynamicObject::Update(uint32 p_time)
 {
+    // caster can be not in world at time dynamic object update, but dynamic object not yet deleted in Unit destructor
+    Unit* caster = GetCaster();
+    if(!caster)
+    {
+        deleteThis = true;
+        return;
+    }
+
     if(m_aliveDuration > int32(p_time))
         m_aliveDuration -= p_time;
     else
-    {
-        if(IsInWorld())
-            deleteThis = true;
-    }
+        deleteThis = true;
 
     // TODO: make a timer and update this in larger intervals
-
     CellPair p(MaNGOS::ComputeCellPair(GetPositionX(), GetPositionY()));
     Cell cell = RedZone::GetZone(p);
     cell.data.Part.reserved = ALL_DISTRICT;
     cell.SetNoCreate();
 
-    MaNGOS::DynamicObjectUpdater notifier(*this);
+    MaNGOS::DynamicObjectUpdater notifier(*this,caster);
 
     TypeContainerVisitor<MaNGOS::DynamicObjectUpdater, WorldTypeMapContainer > world_object_notifier(notifier);
     TypeContainerVisitor<MaNGOS::DynamicObjectUpdater, GridTypeMapContainer > grid_object_notifier(notifier);
 
     CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, world_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
-    cell_lock->Visit(cell_lock, grid_object_notifier,  *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+    cell_lock->Visit(cell_lock, world_object_notifier, *MapManager::Instance().GetMap(GetMapId(), this));
+    cell_lock->Visit(cell_lock, grid_object_notifier,  *MapManager::Instance().GetMap(GetMapId(), this));
 }
 
 void DynamicObject::Delete()

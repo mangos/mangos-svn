@@ -258,9 +258,9 @@ namespace MaNGOS
     {
         DynamicObject &i_dynobject;
         Unit* i_check;
-        DynamicObjectUpdater(DynamicObject &dynobject) : i_dynobject(dynobject)
+        DynamicObjectUpdater(DynamicObject &dynobject, Unit* caster) : i_dynobject(dynobject)
         {
-            i_check = i_dynobject.GetCaster();
+            i_check = caster;
             Unit* owner = i_check->GetOwner();
             if(owner)
                 i_check = owner;
