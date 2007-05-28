@@ -443,14 +443,15 @@ void WorldSocket::_HandlePing(WorldPacket& recvPacket)
     return;
 }
 
+
 /// Handle the update order for the socket
-void WorldSocket::Update(time_t diff)
+void WorldSocket::SendSinglePacket()
 {
     WorldPacket *packet;
     ServerPktHeader hdr;
 
-    ///- While we have packets to send
-    while(!_sendQueue.empty())
+    ///- If we have packet to send
+    if (!_sendQueue.empty())
     {
         packet = _sendQueue.next();
 
@@ -488,6 +489,85 @@ void WorldSocket::Update(time_t diff)
     }
 }
 
+
+void WorldSocket::Update(time_t diff)
+{
+    const uint32 SEND_PACKETS_MAX = 100;
+    const uint32 SEND_BUFFER_SIZE = 1024;
+
+    uint8 sendBuffer[SEND_BUFFER_SIZE];
+
+    while (!_sendQueue.empty())
+    {
+        bool haveBigPacket = false;
+        uint32 bufferSize = 0;
+
+        ///- While we have packets to send
+        for (uint32 packetCount = 0; (packetCount < SEND_PACKETS_MAX) && !_sendQueue.empty(); packetCount++)
+        {
+            ServerPktHeader *hdr = (ServerPktHeader*)&sendBuffer[bufferSize];
+
+            // check merge possibility.
+            WorldPacket *front = _sendQueue.front();
+            uint32 packetSize = front->size();
+
+            if ((sizeof(*hdr) + packetSize) > SEND_BUFFER_SIZE)
+            {
+                haveBigPacket = true;
+                break;
+            }
+
+            if ((bufferSize + sizeof(*hdr) + packetSize) > sizeof(sendBuffer))
+                break;
+
+            // can be merged
+            WorldPacket *packet = _sendQueue.next();
+
+            hdr->size = ntohs((uint16)packetSize + 2);
+            hdr->cmd = packet->GetOpcode();
+
+            if( sWorldLog.LogWorld() )
+            {
+                sWorldLog.Log("SERVER:\nSOCKET: %u\nLENGTH: %u\nOPCODE: %s (0x%.4X)\nDATA:\n",
+                    (uint32)GetSocket(),
+                    packetSize,
+                    LookupName(packet->GetOpcode(), g_worldOpcodeNames),
+                    packet->GetOpcode());
+
+                uint32 p = 0;
+                while (p < packetSize)
+                {
+                    for (uint32 j = 0; j < 16 && p < packetSize; j++)
+                        sWorldLog.Log("%.2X ", (*packet)[p++]);
+
+                    sWorldLog.Log("\n");
+                }
+
+                sWorldLog.Log("\n\n");
+            }
+
+            ///- Encrypt (if needed) the header
+            _crypt.EncryptSend((uint8*)hdr, sizeof(*hdr));
+            bufferSize += sizeof(*hdr);
+
+            if (packetSize)
+            {
+                memcpy(&sendBuffer[bufferSize], packet->contents(), packetSize);
+                bufferSize += packetSize;
+            }
+
+            ///- Send the header and body to the client
+            delete packet;
+        }
+
+        // send merged packets
+        if (bufferSize) TcpSocket::SendBuf((char*)sendBuffer, bufferSize);
+        // send too big non-merged packet 
+        if (haveBigPacket) SendSinglePacket();
+    }
+}
+
+
 /// Handle the authentication waiting queue (to be completed)
 void WorldSocket::SendAuthWaitQue(uint32 PlayersInQue)
 {
@@ -502,4 +582,5 @@ void WorldSocket::SizeError(WorldPacket const& packet, uint32 size) const
     sLog.outError("Client send packet %s (%u) with size %u but expected %u (attempt crash server?), skipped",
         LookupName(packet.GetOpcode(),g_worldOpcodeNames),packet.GetOpcode(),packet.size(),size);
 }
+
 

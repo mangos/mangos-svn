@@ -1563,11 +1563,21 @@ void ObjectMgr::LoadQuests()
         for(int j = 0; j < QUEST_OBJECTIVES_COUNT; ++j )
         {
             uint32 id = qinfo->ReqItemId[j];
-            if(id && !sItemStorage.LookupEntry<ItemPrototype>(id))
+            if(id)
             {
-                sLog.outErrorDb("Quest %u has `ReqItemId%d` = %u but item with entry %u doesn't exist, quest can't be done.",
-                    qinfo->GetQuestId(),j+1,id,id);
-                // no changes, quest can't be done for this requirement
+                if((qinfo->SpecialFlags & QUEST_SPECIAL_FLAGS_DELIVER)==0)
+                {
+                    sLog.outErrorDb("Quest %u has `ReqItemId%d` = %u but `SpecialFlags` not have set delivery flag bit, quest can be done without item delivery!",
+                        qinfo->GetQuestId(),j+1,id);
+                    // no changes, quest can be incorrectly done, but we already report this
+                }
+
+                if(!sItemStorage.LookupEntry<ItemPrototype>(id))
+                {
+                    sLog.outErrorDb("Quest %u has `ReqItemId%d` = %u but item with entry %u doesn't exist, quest can't be done.",
+                        qinfo->GetQuestId(),j+1,id,id);
+                    // no changes, quest can't be done for this requirement
+                }
             }
         }
 
@@ -1627,6 +1637,13 @@ void ObjectMgr::LoadQuests()
                 sLog.outErrorDb("Quest %u has `ReqCreatureOrGOId%d` = %i but creature with entry %u doesn't exist, quest can't be done.",
                     qinfo->GetQuestId(),j+1,id,uint32(id));
                 qinfo->ReqCreatureOrGOId[j] = 0;            // quest can't be done for this requirement
+            }
+
+            if(id && (qinfo->SpecialFlags & QUEST_SPECIAL_FLAGS_KILL_OR_CAST)==0)
+            {
+                sLog.outErrorDb("Quest %u has `ReqCreatureOrGOId%d` = %u but `SpecialFlags` not have set killOrCast flag bit, quest can be done without creature/go kill/cast!",
+                    qinfo->GetQuestId(),j+1,id);
+                // no changes, quest can be incorrectly done, but we already report this
             }
         }
 
