@@ -37,7 +37,8 @@ class DynamicObject : public WorldObject
         uint32 GetSpellId() const { return m_spellId; }
         uint32 GetEffIndex() const { return m_effIndex; }
         uint32 GetDuration() const { return m_aliveDuration; }
-        Unit* GetCaster() const { return m_caster; }
+        uint64 GetCasterGUID() const { return m_casterGuid; }
+        Unit* GetCaster() const;
         float GetRadius() const { return m_radius; }
         bool IsAffecting(Unit *unit) const { return m_affected.find(unit) != m_affected.end(); }
         void AddAffected(Unit *unit) { m_affected.insert(unit); }
@@ -45,7 +46,7 @@ class DynamicObject : public WorldObject
         void Delay(int32 delaytime);
 
     protected:
-        Unit* m_caster;
+        uint64 m_casterGuid;
         uint32 m_spellId;
         uint32 m_effIndex;
         int32 m_aliveDuration;

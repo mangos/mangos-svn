@@ -112,13 +112,23 @@ Unit::Unit( WorldObject *instantiator ) : WorldObject( instantiator )
 Unit::~Unit()
 {
     // remove references to unit
-    std::list<GameObject*>::iterator i;
-    for (i = m_gameObj.begin(); i != m_gameObj.end();)
+    for(std::list<GameObject*>::iterator i = m_gameObj.begin(); i != m_gameObj.end();)
     {
         (*i)->SetOwnerGUID(0);
         (*i)->SetRespawnTime(0);
         (*i)->Delete();
         i = m_gameObj.erase(i);
+    }
+
+    RemoveAllDynObjects();
+}
+
+void Unit::RemoveAllDynObjects()
+{
+    for(std::list<DynamicObject*>::iterator i = m_dynObj.begin(); i != m_dynObj.end();)
+    {
+        (*i)->Delete();
+        i = m_dynObj.erase(i);
     }
 }
 
@@ -2051,18 +2061,17 @@ void Unit::_UpdateSpells( uint32 time )
 
     if(!m_dynObj.empty())
     {
-        std::list<DynamicObject*>::iterator ite, dnext;
-        for (ite = m_dynObj.begin(); ite != m_dynObj.end(); ite = dnext)
+        std::list<DynamicObject*>::iterator ite;
+        for (ite = m_dynObj.begin(); ite != m_dynObj.end();)
         {
-            dnext = ite;
             //(*i)->Update( difftime );
             if( (*ite)->isFinished() )
             {
                 (*ite)->Delete();
-                dnext = m_dynObj.erase(ite);
+                ite = m_dynObj.erase(ite);
             }
             else
-                ++dnext;
+                ++ite;
         }
     }
     if(!m_gameObj.empty())

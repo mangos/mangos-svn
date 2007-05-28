@@ -299,11 +299,12 @@ ObjectGridStoper::Visit(CreatureMapType &m)
     if( m.size() == 0 )
         return;
 
-    // stop any fights at grid de-activation
+    // stop any fights at grid de-activation and remove dynobjects created at cast by creatures
     for(CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
         iter->second->CombatStop(true);
         iter->second->DeleteThreatList();
+        iter->second->RemoveAllDynObjects();
     }
 }
 
