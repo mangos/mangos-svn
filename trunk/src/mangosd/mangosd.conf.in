@@ -258,7 +258,11 @@ Console.Enable = 1
 
 # Enable remote console
 # Default: 0 - off
+#          1 - on
 Ra.Enable = 0
+
+# Default remote console ip address, use 0.0.0.0 for every address
+Ra.IP = 0.0.0.0
 
 # Default remote console port
 Ra.Port = 3443
