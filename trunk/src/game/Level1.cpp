@@ -828,7 +828,7 @@ bool ChatHandler::HandleModifyASpeedCommand(const char* args)
         return true;
     }
 
-    PSendSysMessage(LANG_YOU_CHANGE_ASPEED, ASpeed*100, chr->GetName());
+    PSendSysMessage(LANG_YOU_CHANGE_ASPEED, ASpeed, chr->GetName());
 
     WorldPacket data;
     char buf[256];
