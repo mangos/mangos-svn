@@ -438,7 +438,15 @@ void PlayerMenu::SendQuestQueryResponse( Quest *pQuest )
 
     for (iI = 0; iI < QUEST_OBJECTIVES_COUNT; iI++)
     {
-        data << uint32(pQuest->ReqCreatureOrGOId[iI]);
+        if (pQuest->ReqCreatureOrGOId[iI] < 0)
+        { 
+            // client expected gameobject template id in form (id|0x80000000)
+            data << uint32((pQuest->ReqCreatureOrGOId[iI]*(-1))|0x80000000);
+        }
+        else
+        {
+            data << uint32(pQuest->ReqCreatureOrGOId[iI]);
+        }
         data << uint32(pQuest->ReqCreatureOrGOCount[iI]);
         data << uint32(pQuest->ReqItemId[iI]);
         data << uint32(pQuest->ReqItemCount[iI]);

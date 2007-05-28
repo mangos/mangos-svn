@@ -145,6 +145,9 @@ class WorldSocket : public TcpSocket
         void Update(time_t diff);
 
     protected:
+        void SendSinglePacket();
+
+    protected:
         void _HandleAuthSession(WorldPacket& recvPacket);
         void _HandlePing(WorldPacket& recvPacket);
         void SendAuthWaitQue(uint32 PlayersInQue);
