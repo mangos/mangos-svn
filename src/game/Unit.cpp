@@ -928,33 +928,40 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
     data << mod->m_auraname;
     switch(mod->m_auraname)
     {
-        case SPELL_AURA_PERIODIC_DAMAGE:
-            data << (uint32)mod->m_amount;  // ?
-            data << spellProto->School;     // ?
-            data << (uint32)0;              // ?
-            data << (uint32)0;              // ?
+        case SPELL_AURA_PERIODIC_DAMAGE:     // 3
+            data << (uint32)mod->m_amount;   // ?
+            data << spellProto->School;      // ?
+            data << spellProto->powerType;   // PowerType
+            data << (uint32)0;               // ?
+	    break;
+        case SPELL_AURA_PERIODIC_HEAL:       //8
+            data << (uint32)mod->m_amount;   //
             break;
-        case SPELL_AURA_PERIODIC_HEAL:
-            data << (uint32)mod->m_amount;  // ?
-            break;
-        case SPELL_AURA_OBS_MOD_HEALTH:
-            data << (uint32)mod->m_amount;  // ?
+        case SPELL_AURA_OBS_MOD_HEALTH:     //20
+            data << (uint32)mod->m_amount;
             break;
         //case SPELL_AURA_PERIODIC_TRIGGER_SPELL:
         //    break;
-        case SPELL_AURA_PERIODIC_ENERGIZE:
-            data << (uint32)mod->m_amount;  // ?
-            data << (uint32)0;              // ?
+        case SPELL_AURA_PERIODIC_ENERGIZE:   //24 
+	    data << spellProto->powerType;    //PowerType
+            data << (uint32)mod->m_amount;
             break;
-        //case SPELL_AURA_PERIODIC_LEECH:
+        case SPELL_AURA_PERIODIC_LEECH:      //53
+            data << (uint32)mod->m_amount;
+            data << (uint32)0;  
+            break;
+        case SPELL_AURA_PERIODIC_MANA_LEECH: //64
+            data << spellProto->powerType;   //PowerType
+            data << (uint32)mod->m_amount;              
+            data << (uint32)0;              
+            break;
+        //case SPELL_AURA_PERIODIC_TRIGGER_SPELL: //23
+        //    break;                    
+        //case SPELL_AURA_PERIODIC_HEALTH_FUNNEL: //62
         //    break;
-        //case SPELL_AURA_PERIODIC_HEALTH_FUNNEL:
+        //case SPELL_AURA_PERIODIC_MANA_FUNNEL: //63
         //    break;
-        //case SPELL_AURA_PERIODIC_MANA_FUNNEL:
-        //    break;
-        //case SPELL_AURA_PERIODIC_MANA_LEECH:
-        //    break;
-        //case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
+        //case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:  //89
         //    break;
         default:
             sLog.outError("PeriodicAuraLog: unhandled aura %u", mod->m_auraname);

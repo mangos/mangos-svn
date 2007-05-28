@@ -207,7 +207,7 @@ bool ChatHandler::HandleGoCreatureCommand(const char* args)
     }
     //sLog.outError("DEBUG: %s", whereClause.c_str());
 
-    QueryResult *result = sDatabase.Query("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `creature` %s", whereClause.c_str() );
+    QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `creature` %s", whereClause.c_str() );
     if (!result)
     {
         SendSysMessage(LANG_COMMAND_GOCREATNOTFOUND);
