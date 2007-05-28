@@ -139,7 +139,7 @@ WaypointMovementGenerator::_load(Creature &c)
                 }
             }
             //if( i_delays[count] < 30 /* millisecond */ )
-            //	i_delays[count] = (rand() % 5000);
+            //    i_delays[count] = (rand() % 5000);
             ++count;
 
         } while( result->NextRow() );

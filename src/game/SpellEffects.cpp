@@ -1473,7 +1473,7 @@ void Spell::EffectDispel(uint32 i) // PBW
         if(m_spellInfo->rangeIndex == 1)
         { 
             //ToDo: Shaman Totems (Poison Cleansing Totem[8168] and Disease Cleansing Totem[8171]) are SelfOnly spells
-			//      and will dispel one poison/disease from one party member every 5 second that activated ...
+            //      and will dispel one poison/disease from one party member every 5 second that activated ...
             m_caster->RemoveFirstAuraByDispel(m_spellInfo->EffectMiscValue[i], m_caster);
             sLog.outDebug("Spell: Removed aura type %u from caster", m_spellInfo->EffectMiscValue[i]);
         }

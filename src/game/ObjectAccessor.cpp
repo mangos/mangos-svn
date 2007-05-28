@@ -355,15 +355,18 @@ void ObjectAccessor::RemoveAllObjectsInRemoveList()
         switch(obj->GetTypeId())
         {
             case TYPEID_CORPSE:
-		{
-		    CorpsePtr corpse = MapManager::Instance().GetMap(obj->GetMapId(), obj)->GetObjectNear<Corpse>(*obj, obj->GetGUID());
-		    if (!corpse) {
-			sLog.outError("ERROR: Try delete corpse/bones %u that not in map", obj->GetGUIDLow());
-		    } else {
-			MapManager::Instance().GetMap(obj->GetMapId(), obj)->Remove(corpse,true);
-		    }
-		}
+            {
+                CorpsePtr corpse = MapManager::Instance().GetMap(obj->GetMapId(), obj)->GetObjectNear<Corpse>(*obj, obj->GetGUID());
+                if (!corpse)
+                {
+                    sLog.outError("ERROR: Try delete corpse/bones %u that not in map", obj->GetGUIDLow());
+                }
+                else
+                {
+                    MapManager::Instance().GetMap(obj->GetMapId(), obj)->Remove(corpse,true);
+                }
                 break;
+            }
             case TYPEID_DYNAMICOBJECT:
                 MapManager::Instance().GetMap(obj->GetMapId(), obj)->Remove((DynamicObject*)obj,true);
                 break;

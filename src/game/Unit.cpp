@@ -1232,11 +1232,12 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
     // Instant Attacks (Spellmods) 
     // TODO: AP bonus related to mainhand weapon 
     if(spellCasted) 
-	if(GetTypeId()== TYPEID_PLAYER) 
-	    ((Player*)this)->ApplySpellMod(spellCasted->Id, SPELLMOD_DAMAGE, *damage); 
+        if(GetTypeId()== TYPEID_PLAYER) 
+            ((Player*)this)->ApplySpellMod(spellCasted->Id, SPELLMOD_DAMAGE, *damage); 
 
     if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && ((Creature*)pVictim)->GetCreatureInfo()->type != CREATURE_TYPE_CRITTER )
         ((Player*)this)->UpdateCombatSkills(pVictim, attType, outcome, false);
+
     if(GetTypeId() != TYPEID_PLAYER && pVictim->GetTypeId() == TYPEID_PLAYER)
         ((Player*)pVictim)->UpdateCombatSkills(this, attType, outcome, true);
 
