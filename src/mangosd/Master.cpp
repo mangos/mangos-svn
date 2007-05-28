@@ -113,13 +113,16 @@ void Master::Run()
     if (sConfig.GetBoolDefault("Ra.Enable", 0))
     {
         port_t raport = sConfig.GetIntDefault( "Ra.Port", 3443 );
-
-        if (RAListenSocket.Bind(raport))
-            sLog.outError( "MaNGOS RA can not bind to port %d", raport );
+        std::string stringip = sConfig.GetStringDefault( "Ra.IP", "0.0.0.0" );
+        ipaddr_t raip;
+        if(!Utility::u2ip(stringip, raip))
+            sLog.outError( "MaNGOS RA can not bind to ip %s", stringip.c_str());
+        else if (RAListenSocket.Bind(raip, raport))
+            sLog.outError( "MaNGOS RA can not bind to port %d on %s", raport, stringip.c_str());
         else
             h.Add(&RAListenSocket);
 
-        sLog.outString("Starting Remote access listner on port %d", raport);
+        sLog.outString("Starting Remote access listner on port %d on %s", raport, stringip.c_str());
     }
 
     ///- Handle affinity for multiple processors and process priority on Windows
