@@ -27,7 +27,6 @@
 #include "ObjectAccessor.h"
 #include "MapManager.h"
 #include "EventSystem.h"
-#include "ScriptCalls.h"
 
 #include "Database/DatabaseEnv.h"
 
@@ -68,6 +67,5 @@ void WorldRunnable::run()
     ///- End the database thread    
     sDatabase.ThreadEnd();                                  // free mySQL thread resources
 
-    //UnloadScriptingModule();
     StopEventSystem();
 }

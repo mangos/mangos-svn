@@ -23,6 +23,7 @@
 #include "Player.h"
 
 bool LoadScriptingModule(char const* libName = "");
+void UnloadScriptingModule();
 
 typedef void(MANGOS_IMPORT * scriptCallScriptsInit) ();
 typedef void(MANGOS_IMPORT * scriptCallScriptsFree) ();

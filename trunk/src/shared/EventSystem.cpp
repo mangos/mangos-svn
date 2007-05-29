@@ -98,6 +98,8 @@ volatile uint32 wmpe=0;
 #define MSleep sleep
 #endif
 
+bool stopEvent = false;
+
 inline uint32 now()
 {
     #if PLATFORM == PLATFORM_WIN32
@@ -370,9 +372,10 @@ void msThread()
 
     uint32 cur=now();
 
-    while(1)
+    while(!stopEvent)
     {
         MSleep(ES_RESOLUTION-(now()-cur));                  //execution time compensation
+        if(stopEvent) break;
 
         write_mse
             Event * pos=msEvents;
@@ -399,9 +402,11 @@ void mspThread()
 {
     uint32 cur=now();
 
-    while(1)
+    while(!stopEvent)
     {
         MSleep(ES_RESOLUTION-(now()-cur));                  //execution time compensation
+        if(stopEvent) break;
+
         read_mspe
             PeriodicEvent * ppos=msPEvents;
         cur=now();
@@ -431,9 +436,11 @@ void sThread()
 
     uint32 cur=now();
 
-    while(1)
+    while(!stopEvent)
     {
         MSleep(ES_RESOLUTION*30-(now()-cur));
+        if(stopEvent) break;
+
         write_se
             Event * pos=sEvents;
         cur=now();
@@ -462,9 +469,11 @@ void spThread()
 {
     uint32 cur=now();
 
-    while(1)
+    while(!stopEvent)
     {
         MSleep(ES_RESOLUTION*30-(now()-cur));
+        if(stopEvent) break;
+
         read_spe
             PeriodicEvent * ppos=sPEvents;
         cur=now();
@@ -493,9 +502,14 @@ void mThread()
 
     uint32 cur=now();
 
-    while(1)
+    while(!stopEvent)
     {
-        MSleep(ES_RESOLUTION*30*60-(now()-cur));
+        // respond fast to shutdown events
+        MSleep(ES_RESOLUTION*30-(now()-cur));
+        for(int cnt = 0; cnt < 59 && !stopEvent; cnt++)
+            MSleep(ES_RESOLUTION*30);
+
+        if(stopEvent) break;
 
         write_me
             Event * pos=mEvents;
@@ -524,9 +538,15 @@ void mpThread()
 {
     uint32 cur=now();
 
-    while(1)
+    while(!stopEvent)
     {
-        MSleep(ES_RESOLUTION*30*60-(now()-cur));
+        // respond fast to shutdown events
+        MSleep(ES_RESOLUTION*30-(now()-cur));
+        for(int cnt = 0; cnt < 59 && !stopEvent; cnt++)
+            MSleep(ES_RESOLUTION*30);
+
+        if(stopEvent) break;
+
         read_mpe
             PeriodicEvent * ppos=mPEvents;
         cur=now();
@@ -566,6 +586,13 @@ void StartEventSystem()
 
 void StopEventSystem()
 {
+    stopEvent = true;
+
+#ifdef WIN32
+    HANDLE h[6]= {tm->th, ts->th, tms->th, tmp->th, tsp->th, tmsp->th};
+    WaitForMultipleObjects(6, h, TRUE, INFINITE);
+#endif
+
     while(msEvents) { Event *p = msEvents; msEvents = (Event*)p->pNext; delete p;  }
     while(sEvents) { Event *p = sEvents; sEvents = (Event*)p->pNext; delete p; }
     while(mEvents) { Event *p = mEvents; mEvents = (Event*)p->pNext; delete p; }

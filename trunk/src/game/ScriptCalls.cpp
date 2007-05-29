@@ -25,6 +25,18 @@
 
 ScriptsSet Script=NULL;
 
+void UnloadScriptingModule()
+{
+    if(Script)
+    {
+        //todo: some check if some func from script library is called right now
+        Script->ScriptsFree();
+        MANGOS_CLOSE_LIBRARY(Script->hScriptsLib);
+        delete Script;
+        Script = NULL;
+    }
+}
+
 bool LoadScriptingModule(char const* libName)
 {
     ScriptsSet testScript=new _ScriptSet;
@@ -72,17 +84,9 @@ bool LoadScriptingModule(char const* libName)
 
     //heh we are still there :P we have a valid library
     //we reload script
-    if(Script)
-    {
-        ScriptsSet current =Script;
-        //todo: some check if some func from script library is called right now
-        Script=testScript;
-        current->ScriptsFree();
-        MANGOS_CLOSE_LIBRARY(current->hScriptsLib);
-        delete current;
-    }else
+    UnloadScriptingModule();
+    
     Script=testScript;
-
     Script->ScriptsInit();
 
     return true;
