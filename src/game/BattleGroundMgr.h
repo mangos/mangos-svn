@@ -62,6 +62,9 @@ class BattleGroundMgr
         inline void AddBattleGround(uint32 ID, BattleGround* BG) { m_BattleGrounds[ID] = BG; };
 
         void CreateInitialBattleGrounds();
+
+        void CreateBattleground(uint32 bg_ID);
+
         void SendToBattleGround(Player *pl, uint32 bgId);
 
     private:

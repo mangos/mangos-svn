@@ -47,6 +47,10 @@
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "BattleGround.h"
+#include "BattleGroundAV.h"
+#include "BattleGroundAB.h"
+#include "BattleGroundEY.h"
+#include "BattleGroundWS.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
@@ -634,7 +638,7 @@ void Spell::EffectDummy(uint32 i)
         {
             switch(m_spellInfo->Id)
             {
-                case 23383:                             // Alliance Flag Click
+                case 23383:                                 // Alliance Flag Click
                     sLog.outDebug("Alliance Flag Click");
                     if(((Player*)m_caster)->GetTeam() == ALLIANCE)
                                                             // Alliance Flag Returns (Event)
@@ -643,7 +647,7 @@ void Spell::EffectDummy(uint32 i)
                                                             // Silverwing Flag
                         m_caster->CastSpell(m_caster, 23335, true, 0);
                     break;
-                case 23384:                             // Horde Flag Click
+                case 23384:                                 // Horde Flag Click
                     sLog.outDebug("Horde Flag Click");
                     if(((Player*)m_caster)->GetTeam() == HORDE)
                                                             // Horde Flag Returns (Event)
@@ -652,13 +656,15 @@ void Spell::EffectDummy(uint32 i)
                                                             // Warsong Flag
                         m_caster->CastSpell(m_caster, 23333, true, 0);
                     break;
-                case 23389:                             // Alliance Flag Capture
+                case 23389:                                 // Alliance Flag Capture
                     sLog.outDebug("Alliance Flag Capture");
-                    bg->EventPlayerCapturedFlag((Player*)m_caster);
+                    if(bg->GetID()==BATTLEGROUND_WS_ID)
+                        ((BattleGroundWS*)bg)->EventPlayerCapturedFlag((Player*)m_caster);
                     break;
-                case 23390:                             // Horde Flag Capture
+                case 23390:                                 // Horde Flag Capture
                     sLog.outDebug("Horde Flag Capture");
-                    bg->EventPlayerCapturedFlag((Player*)m_caster);
+                    if(bg->GetID()==BATTLEGROUND_WS_ID) 
+                        ((BattleGroundWS*)bg)->EventPlayerCapturedFlag((Player*)m_caster);
                     break;
                 default:
                     sLog.outDebug("Unknown spellid %u at BG dummy", m_spellInfo->Id);
@@ -926,28 +932,34 @@ void Spell::EffectSendEvent(uint32 i)
         {
             switch(m_spellInfo->Id)
             {
-                case 23333:                             // Pickup Horde Flag
-                    bg->EventPlayerPickedUpFlag(((Player*)m_caster));
+                case 23333:                                 // Pickup Horde Flag
+                    if(bg->GetID()==BATTLEGROUND_WS_ID)
+                        ((BattleGroundWS*)bg)->EventPlayerPickedUpFlag(((Player*)m_caster));
                     sLog.outDebug("Send Event Horde Flag Picked Up");
                     break;
-                case 23334:                             // Drop Horde Flag
-                    bg->EventPlayerDroppedFlag(((Player*)m_caster));
+                case 23334:                                 // Drop Horde Flag
+                    if(bg->GetID()==BATTLEGROUND_WS_ID)
+                        ((BattleGroundWS*)bg)->EventPlayerDroppedFlag(((Player*)m_caster));
                     sLog.outDebug("Drop Horde Flag");
                     break;
-                case 23335:                             // Pickup Alliance Flag
-                    bg->EventPlayerPickedUpFlag(((Player*)m_caster));
+                case 23335:                                 // Pickup Alliance Flag
+                    if(bg->GetID()==BATTLEGROUND_WS_ID)
+                        ((BattleGroundWS*)bg)->EventPlayerPickedUpFlag(((Player*)m_caster));
                     sLog.outDebug("Send Event Alliance Flag Picked Up");
                     break;
-                case 23336:                             // Drop Alliance Flag
-                    bg->EventPlayerDroppedFlag(((Player*)m_caster));
+                case 23336:                                 // Drop Alliance Flag
+                    if(bg->GetID()==BATTLEGROUND_WS_ID)
+                        ((BattleGroundWS*)bg)->EventPlayerDroppedFlag(((Player*)m_caster));
                     sLog.outDebug("Drop Alliance Flag");
                     break;
-                case 23385:                             // Alliance Flag Returns
-                    bg->EventPlayerReturnedFlag(((Player*)m_caster));
+                case 23385:                                 // Alliance Flag Returns
+                    if(bg->GetID()==BATTLEGROUND_WS_ID)
+                        ((BattleGroundWS*)bg)->EventPlayerReturnedFlag(((Player*)m_caster));
                     sLog.outDebug("Alliance Flag Returned");
                     break;
-                case 23386:                             // Horde Flag Returns
-                    bg->EventPlayerReturnedFlag(((Player*)m_caster));
+                case 23386:                                 // Horde Flag Returns
+                    if(bg->GetID()==BATTLEGROUND_WS_ID)
+                        ((BattleGroundWS*)bg)->EventPlayerReturnedFlag(((Player*)m_caster));
                     sLog.outDebug("Horde Flag Returned");
                     break;
                 default:

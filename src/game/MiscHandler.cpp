@@ -901,8 +901,12 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     {
         BattleGround* bg = sBattleGroundMgr.GetBattleGround(GetPlayer()->GetBattleGroundId());
         if(bg)
+        {
             if(bg->GetStatus() == STATUS_INPROGRESS)
+            {
                 bg->HandleAreaTrigger(GetPlayer(), Trigger_ID);
+            }
+        }
     }
     else if(at && at->IsTeleport())
     {

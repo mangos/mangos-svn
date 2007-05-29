@@ -163,6 +163,37 @@ LOCK TABLES `auctionhouse` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `battleground_template`
+--
+
+DROP TABLE IF EXISTS `battleground_template`;
+CREATE TABLE `battleground_template` (
+  `id` int(11) unsigned NOT NULL,
+  `MaxPlayersPerTeam` int(11) NOT NULL,
+  `MinLvl` int(11) NOT NULL,
+  `MaxLvl` int(11) NOT NULL,
+  `AllianceStartLoc` int(11) unsigned NOT NULL,
+  `AllianceStartO` float NOT NULL,
+  `HordeStartLoc` int(11) unsigned NOT NULL,
+  `HordeStartO` float NOT NULL,
+  PRIMARY KEY  (`id`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `auctionhouse`
+--
+
+LOCK TABLES `battleground_template` WRITE;
+/*!40000 ALTER TABLE `battleground_template` DISABLE KEYS */;
+INSERT INTO `battleground_template` VALUES 
+('1', '0', '0', '0',  '611', '2.72532',  '610','2.27452'),
+('2', '0', '0', '0',  '769', '3.14159',  '770','3.14159'),
+('3', '0', '0', '0',  '890', '3.40156',  '889','0.263892'),
+('7', '0', '0', '0', '1103', '3.40156', '1104','0.263892');
+/*!40000 ALTER TABLE `battleground_template` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `bugreport`
 --
 

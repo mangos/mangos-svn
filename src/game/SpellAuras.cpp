@@ -44,6 +44,10 @@
 #include "TargetedMovementGenerator.h"
 #include "Formulas.h"
 #include "BattleGround.h"
+#include "BattleGroundAV.h"
+#include "BattleGroundAB.h"
+#include "BattleGroundEY.h"
+#include "BattleGroundWS.h"
 #include "CreatureAI.h"
 
 pAuraHandler AuraHandler[TOTAL_AURAS]=
@@ -2351,16 +2355,37 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool Real)
                 BattleGround *bg = sBattleGroundMgr.GetBattleGround(((Player*)m_target)->GetBattleGroundId());
                 if(bg)
                 {
-                    if(bg->IsHordeFlagPickedup())
-                        if(GetSpellProto()->Id == 23333)    // Warsong Flag, horde
+                    switch(bg->GetID())
+                    {
+                        case BATTLEGROUND_AV_ID:
+                        {
+                            break;
+                        }
+                        case BATTLEGROUND_WS_ID:
+                        {
+                            if(((BattleGroundWS*)bg)->IsHordeFlagPickedup())
+                                                            // Warsong Flag, horde
+                                    if(GetSpellProto()->Id == 23333)
                                                             // Horde Flag Drop
                                                             // (not modify stats and then not required ApplyStats call)
-                            m_target->CastSpell(m_target, 23334, true, NULL, this);
-                    if(bg->IsAllianceFlagPickedup())
-                        if(GetSpellProto()->Id == 23335)    // Silverwing Flag, alliance
+                                    m_target->CastSpell(m_target, 23334, true, NULL, this);
+                            if(((BattleGroundWS*)bg)->IsAllianceFlagPickedup())
+                                                            // Silverwing Flag, alliance
+                                    if(GetSpellProto()->Id == 23335)
                                                             // Alliance Flag Drop
                                                             // (not modify stats and then not required ApplyStats call)
-                            m_target->CastSpell(m_target, 23336, true, NULL, this);
+                                    m_target->CastSpell(m_target, 23336, true, NULL, this);
+                            break;
+                        }
+                        case BATTLEGROUND_AB_ID:
+                        {
+                            break;
+                        }
+                        case BATTLEGROUND_EY_ID:
+                        {
+                            break;
+                        }
+                    }
                 }
             }
         }

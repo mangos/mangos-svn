@@ -200,6 +200,30 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\BattleGroundAB.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundAB.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundAV.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundAV.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundEY.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundEY.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\BattleGroundHandler.cpp"
 				>
 			</File>
@@ -209,6 +233,14 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\BattleGroundMgr.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundWS.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundWS.h"
 				>
 			</File>
 			<File
