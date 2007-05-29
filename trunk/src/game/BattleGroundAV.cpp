@@ -19,7 +19,7 @@
 #include "Object.h"
 #include "Player.h"
 #include "BattleGround.h"
-#include "BattlegroundAV.h"
+#include "BattleGroundAV.h"
 #include "Creature.h"
 #include "Chat.h"
 #include "Spell.h"
