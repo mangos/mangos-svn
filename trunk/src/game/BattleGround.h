@@ -33,7 +33,15 @@ enum BattleGroundStatus
     STATUS_WAIT_QUEUE   = 1,
     STATUS_WAIT_JOIN    = 2,
     STATUS_INPROGRESS   = 3,
-    STATUS_WAIT_LEAVE   = 4     // custom
+    STATUS_WAIT_LEAVE   = 4                                 // custom
+};
+
+enum BattleGroundABPoints
+{
+    STABLES_POINT      = 0,
+    GOLD_MINE_POINT    = 1,
+    FARM_POINT         = 2,
+    LUMBER_MILL_POINT  = 3
 };
 
 struct BattleGroundScore
@@ -51,16 +59,27 @@ struct BattleGroundScore
 
 struct BattleGroundQueue
 {
-    uint32  InviteTime;         // first invite time
-    uint32  LastInviteTime;     // last invite time
-    bool    IsInvited;          // was invited flag
-    uint32  LastOnlineTime;     // for tracking and removing offline players from queue after 5 minutes
+    uint32  InviteTime;                                     // first invite time
+    uint32  LastInviteTime;                                 // last invite time
+    bool    IsInvited;                                      // was invited flag
+    uint32  LastOnlineTime;                                 // for tracking and removing offline players from queue after 5 minutes
 };
 
 struct BattleGroundPlayer
 {
-    uint32  LastOnlineTime;     // for tracking and removing offline players from queue after 5 minutes
-    uint32  Team;               // Player's team
+    uint32  LastOnlineTime;                                 // for tracking and removing offline players from queue after 5 minutes
+    uint32  Team;                                           // Player's team
+};
+
+#define MAX_QUEUED_PLAYERS_MAP 6
+
+enum BattleGroundId
+{
+    BATTLEGROUND_AV_ID = 1,
+    BATTLEGROUND_WS_ID = 2,
+    BATTLEGROUND_AB_ID = 3,
+    BATTLEGROUND_ARENA_ID = 6,
+    BATTLEGROUND_EY_ID = 7
 };
 
 class BattleGround
@@ -71,13 +90,16 @@ class BattleGround
         /* Construction */
         BattleGround();
         ~BattleGround();
-        void Update(time_t diff);
+        virtual void Update(time_t diff);                   // must be implemented in BG subclass of BG specific update code, but must in begginning call parent version
+        virtual void SetupBattleGround() {}                 // must be implemented in BG subclass
 
         /* Battleground */
         void SetName(char const* Name) { m_Name = Name; };
         char const* GetName() const { return m_Name; };
         void SetID(uint32 ID) { m_ID = ID; };
         uint32 GetID() const { return m_ID; };
+        void SetQueueType(uint32 ID) { m_Queue_type = ID; };
+        uint32 GetQueueType() const { return m_Queue_type; };
         void SetInstanceID(uint32 InstanceID) { m_InstanceID = InstanceID; };
         uint32 GetInstanceID() const { return m_InstanceID; };
         void SetStatus(uint32 Status) { m_Status = Status; };
@@ -105,10 +127,8 @@ class BattleGround
 
         bool HasFreeSlots(uint32 Team) const;
 
-        void HandleAreaTrigger(Player* Source, uint32 Trigger);
-
         uint32 GetPlayersSize() const { return m_Players.size(); };
-        uint32 GetQueuedPlayersSize() const { return m_QueuedPlayers.size(); };
+        uint32 GetQueuedPlayersSize(uint32 level) const;
         uint32 GetRemovedPlayersSize() const { return m_RemovedPlayers.size(); };
 
         std::map<uint64, BattleGroundScore>::const_iterator GetPlayerScoresBegin() const { return m_PlayerScores.begin(); };
@@ -116,17 +136,11 @@ class BattleGround
         uint32 GetPlayerScoresSize() { return m_PlayerScores.size(); };
 
         void AddPlayer(Player* plr);
-        void AddPlayerToQueue(uint64 guid);
+        void AddPlayerToQueue(Player* plr);
         void RemovePlayerFromQueue(uint64 guid);
         bool CanStartBattleGround();
         void StartBattleGround();
         void RemovePlayer(uint64 guid, bool Transport = false, bool SendPacket = false);
-
-        /* Battleground Events */
-        void EventPlayerCapturedFlag(Player* Source);
-        void EventPlayerDroppedFlag(Player* Source);
-        void EventPlayerReturnedFlag(Player* Source);
-        void EventPlayerPickedUpFlag(Player* Source);
 
         /* Location */
         void SetMapId(uint32 MapID) { m_MapId = MapID; };
@@ -156,15 +170,6 @@ class BattleGround
         Group *GetBgRaid(uint32 TeamID) const;
         void SetBgRaid(uint32 TeamID, Group *bg_raid);
 
-        /* BG Flags */
-        uint64 GetAllianceFlagPickerGUID() const { return m_AllianceFlagPickerGUID; }
-        uint64 GetHordeFlagPickerGUID() const { return m_HordeFlagPickerGUID; }
-        void SetAllianceFlagPicker(uint64 guid) { m_AllianceFlagPickerGUID = guid; }
-        void SetHordeFlagPicker(uint64 guid) { m_HordeFlagPickerGUID = guid; }
-        bool IsAllianceFlagPickedup() const { return m_AllianceFlagPickerGUID != 0; }
-        bool IsHordeFlagPickedup() const { return m_HordeFlagPickerGUID != 0; }
-        void RespawnFlag(uint32 Team, bool captured);
-
         /* Scorekeeping */
         uint32 GetTeamScore(uint32 TeamID) const { return m_TeamScores[GetTeamIndexByTeamId(TeamID)]; }
 
@@ -187,16 +192,21 @@ class BattleGround
         void UpdatePlayerScore(Player* Source, uint32 type, uint32 value);
         void UpdateFlagState(uint32 team, uint32 value);
 
+        /* Triggers handle */
+        virtual void HandleAreaTrigger(Player* Source, uint32 Trigger) {}
+                                                            // must be implemented in BG subclass
+    protected:
+        virtual void RemovePlayer(Player *plr,uint64 guid){}// must be implemented in BG subclass
     private:
         uint8 GetTeamIndexByTeamId(uint32 Team) const { return Team==HORDE ? 0 : 1; }
 
         /* Battleground */
         uint32 m_ID;
-        uint32 m_Type;
         uint32 m_InstanceID;
         uint32 m_Status;
         uint32 m_StartTime;
         uint32 m_EndTime;
+        uint32 m_Queue_type;
         char const* m_Name;
 
         /* Scorekeeping */
@@ -205,8 +215,10 @@ class BattleGround
 
         /* Player lists */
         std::map<uint64, BattleGroundPlayer> m_Players;
-        std::map<uint64, BattleGroundQueue> m_QueuedPlayers;
         std::map<uint64, bool> m_RemovedPlayers;
+
+        typedef std::map<uint64, BattleGroundQueue> QueuedPlayersMap;
+        QueuedPlayersMap m_QueuedPlayers[MAX_QUEUED_PLAYERS_MAP];
 
         /* Raid Group */
         Group *m_HordeRaid;
@@ -227,24 +239,5 @@ class BattleGround
         float m_TeamStartLocZ[2];
         float m_TeamStartLocO[2];
 
-        /* Flags */
-        uint64 m_AllianceFlagPickerGUID;
-        uint64 m_HordeFlagPickerGUID;
-        GameObject *m_HordeFlag;
-        GameObject *m_AllianceFlag;
-        GameObject *SpeedBonus1;
-        GameObject *SpeedBonus2;
-        GameObject *RegenBonus1;
-        GameObject *RegenBonus2;
-        GameObject *BerserkBonus1;
-        GameObject *BerserkBonus2;
-        int32 SpeedBonus1Spawn[2];
-        int32 SpeedBonus2Spawn[2];
-        int32 RegenBonus1Spawn[2];
-        int32 RegenBonus2Spawn[2];
-        int32 BerserkBonus1Spawn[2];
-        int32 BerserkBonus2Spawn[2];
-        int32 AllianceFlagSpawn[2];
-        int32 HordeFlagSpawn[2];
 };
 #endif
