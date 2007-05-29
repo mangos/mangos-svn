@@ -2799,8 +2799,6 @@ void Spell::reflect(Unit *refunit)
     if (m_caster == refunit)
         return;
 
-    SpellEntry *refspell = NULL;
-
     // if the spell to reflect is a reflect spell, do nothing.
     for(int i=0; i<3; i++)
         if(m_spellInfo->Effect[i] == 6 && (m_spellInfo->EffectApplyAuraName[i] == 74 || m_spellInfo->EffectApplyAuraName[i] == 28))
@@ -2819,7 +2817,7 @@ void Spell::reflect(Unit *refunit)
 
     if (reflectchance > 0 && roll_chance_i(reflectchance))
     {
-        Spell spell(refunit, refspell, true, 0);
+        Spell spell(refunit, m_spellInfo, true, 0);
 
         SpellCastTargets targets;
         targets.setUnitTarget( m_caster );
