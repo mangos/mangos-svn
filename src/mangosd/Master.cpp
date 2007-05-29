@@ -36,6 +36,7 @@
 #include "Database/DatabaseEnv.h"
 #include "CliRunnable.h"
 #include "RASocket.h"
+#include "ScriptCalls.h"
 
 #include "Network/TcpSocket.h"
 #include "Network/Utility.h"
@@ -248,6 +249,10 @@ void Master::Run()
         DWORD numb;
         BOOL ret = WriteConsoleInput(hStdIn, b, 4, &numb);
     #endif
+
+    // for some unknown reason, unloading scripts here and not in worldrunnable
+    // fixes a memory leak related to detaching threads from the module
+    UnloadScriptingModule();
 
     return;
 }
