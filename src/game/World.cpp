@@ -259,6 +259,8 @@ void World::SetInitialWorldSettings()
     rate_values[RATE_AUCTION_CUT] = sConfig.GetFloatDefault("Rate.Auction.Cut", 1);
     rate_values[RATE_MINING_AMOUNT] = sConfig.GetFloatDefault("Rate.Mining.Amount",1);
     rate_values[RATE_MINING_NEXT]   = sConfig.GetFloatDefault("Rate.Mining.Next",1);
+    rate_values[RATE_MOVE_FILTER_RANGE] = sConfig.GetFloatDefault("ConsecutiveMovePacket.MaxRange",4.6);
+
 
     ///- Read other configuration items from the config file
 
@@ -326,7 +328,7 @@ void World::SetInitialWorldSettings()
         sLog.outError("MaxOverspeedPings (%i) must be in range 2..infinity (or 0 to disable check. Set to 2.",m_configs[CONFIG_MAX_OVERSPEED_PINGS]);
         m_configs[CONFIG_MAX_OVERSPEED_PINGS] = 2;
     }
-
+    m_configs[CONFIG_MOVE_FILTER_COUNT] = sConfig.GetIntDefault("ConsecutiveMovePacket.MaxCount",9);
     m_configs[CONFIG_SAVE_RESPAWN_TIME_IMMEDIATLY] = sConfig.GetIntDefault("SaveRespawnTimeImmediately",1);
     m_configs[CONFIG_WEATHER] = sConfig.GetIntDefault("ActivateWeather",1);
 
