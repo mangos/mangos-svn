@@ -3401,6 +3401,25 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                 if((procFlag & procFlags) == 0)
                     continue;
 
+                // Additional checks in case spell cast/hit/crit is the event
+                // Check (if set) school, category, skill line, spell talent mask
+                if(spellProcEvent)
+                {
+                    if(spellProcEvent->schoolMask && (!procSpell || !procSpell->School || ((1<<(procSpell->School-1)) & spellProcEvent->schoolMask) == 0))
+                        continue;
+                    if(spellProcEvent->category && (!procSpell || procSpell->Category != spellProcEvent->category))
+                        continue;
+                    if(spellProcEvent->skillId)
+                    {
+                        if (!procSpell) continue;
+                        SkillLineAbilityEntry const *skillLineEntry = sSkillLineAbilityStore.LookupEntry(procSpell->Id);
+                        if(!skillLineEntry || skillLineEntry->skillId != spellProcEvent->skillId)
+                            continue;
+                    }
+                    if(spellProcEvent->spellMask && (!procSpell || (spellProcEvent->spellMask & procSpell->SpellFamilyFlags) == 0))
+                        continue;
+                }
+
                 // procChance is exact number in percents anyway
                 uint32 chance = spellProto->procChance;
                 if(pVictim->GetTypeId() == TYPEID_PLAYER)
@@ -3558,6 +3577,24 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 igniteDot.EffectBasePoints[0]=uint32(0.20f*damage);break;
         };
         CastSpell(pVictim, &igniteDot, true, NULL, triggredByAura);
+    }
+
+    // VE
+    if (dummySpell->Id == 15286 && triggredByAura->GetCasterGUID() == pVictim->GetGUID())
+    {
+        SpellEntry const *VEHealTemplate = sSpellStore.LookupEntry(15290);
+        SpellEntry VEHeal = *VEHealTemplate;
+        VEHeal.EffectBasePoints[0] = triggredByAura->GetModifier()->m_amount*damage/100.0f;
+        pVictim->CastSpell(pVictim, &VEHeal, true, NULL, triggredByAura);
+    }
+
+    // VT
+    if (dummySpell->SpellIconID == 2213 && triggredByAura->GetCasterGUID() == pVictim->GetGUID())
+    {
+        SpellEntry const *VTEnergizeTemplate = sSpellStore.LookupEntry(34919);
+        SpellEntry VTEnergize = *VTEnergizeTemplate;
+        VTEnergize.EffectBasePoints[0] = triggredByAura->GetModifier()->m_amount*damage/100.0f;
+        pVictim->CastSpell(pVictim,&VTEnergize,true,NULL, triggredByAura);
     }
 }
 
