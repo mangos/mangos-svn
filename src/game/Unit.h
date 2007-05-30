@@ -476,13 +476,10 @@ struct MovementData
     //so i continue to hold the packet, that will occur at 99% of the time when running around the target.
     void Update(float _x, float _y, float _z, uint32 _time, bool _run, uint8 _type)
     {
-        if( ((x - _x) * (x - _x)) +
-            ((y - _y) * (y - _y)) + 
-            ((z - _z) * (z - _z)) > sWorld.getRate(RATE_MOVE_FILTER_RANGE) )
-            x = _x, y = _y, z = _z, time = _time, _run = run, type = _type;
-        else
-            x = _x, y = _y, z = _z, time = _time, _run = run, type = _type, packetCount += 1;
-    
+        x = _x; y = _y; z = _z; time = _time; _run = run; type = _type;
+
+        if( !Empty() && ((x-_x)*(x-_x)) + ((y-_y)*(y-_y)) + ((z-_z)*(z-_z)) > sWorld.getRate(RATE_MOVE_FILTER_RANGE) )
+            ++packetCount;
     }
     void Clear()
     {
@@ -746,7 +743,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SendAttackStateUpdate(uint32 HitInfo, Unit *target, uint8 SwingType, uint32 DamageType, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, uint32 TargetState, uint32 BlockedAmount);
         void SendSpellNonMeleeDamageLog(Unit *target,uint32 SpellID,uint32 Damage, uint8 DamageType,uint32 AbsorbedDamage, uint32 Resist,bool PhysicalDamage, uint32 Blocked, bool CriticalHit = false);
 
-        void SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, bool Run, uint32 Time, bool specialBlend = false);
+        void SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, bool Run, uint32 Time);
 
         virtual void MoveOutOfRange(Player &) {  };
 

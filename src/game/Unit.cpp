@@ -138,9 +138,9 @@ void Unit::Update( uint32 p_time )
     {
         //  If !consecutive packet or passed 9 packet SendMonsterMove(). 1 packetCount = 50-100ms
         if( m_movementData.holdTime/100 > m_movementData.packetCount || m_movementData.packetCount > sWorld.getConfig(CONFIG_MOVE_FILTER_COUNT) )
-            SendMonsterMove(0, 0, 0, 0, 0, 0, true); // send SMSG_MONSTER_MOVE specialBlend
+            SendMonsterMove(m_movementData.x,m_movementData.y, m_movementData.z, m_movementData.type, m_movementData.run, m_movementData.time);
         else
-            m_movementData.holdTime += p_time; //Update the holdTime to help with consecutive packet check
+            m_movementData.holdTime += p_time;              //Update the holdTime to help with consecutive packet check
     }
     /*if(p_time > m_AurasCheck)
     {
@@ -209,74 +209,43 @@ void Unit::SendMoveToPacket(float x, float y, float z, bool run, uint32 transitT
     m_movementData.Update(x,y,z,transitTime,run,0);  
 }
 
-void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, bool Run, uint32 Time, bool specialBlend)
+void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, bool Run, uint32 Time)
 {
-    // If specialBlend will take information from m_movementData
-    if( specialBlend && !m_movementData.Empty() )
-    {
-        WorldPacket data( SMSG_MONSTER_MOVE, (41 + GetPackGUID().size()) );
-        data.append(GetPackGUID());
-            
-        // Point A, starting location
-        data << GetPositionX() << GetPositionY() << GetPositionZ();
-        // unknown field - unrelated to orientation
-        // seems to increment about 1000 for every 1.7 seconds
-        // for now, we'll just use mstime
-        data << getMSTime();
-        data << m_movementData.type;
-        switch(m_movementData.type)
-        {
-            case 0:                                             // normal packet
-                break;
-            case 1:                                             // stop packet
-                SendMessageToSet( &data, true );
-                return;
-            case 3:                                             // not used currently
-                data << uint64(0);                              // probably target guid
-                break;
-            case 4:                                             // not used currently
-                data << float(0);                               // probably orientation
-                break;
-        }
-        data << uint32(m_movementData.run ? 0x00000100 : 0x00000000);
-        data << m_movementData.time;
-        data << uint32(1);
-        data << m_movementData.x << m_movementData.y << m_movementData.z;
+    WorldPacket data( SMSG_MONSTER_MOVE, (41 + GetPackGUID().size()) );
+    data.append(GetPackGUID());
 
+    // Point A, starting location
+    data << GetPositionX() << GetPositionY() << GetPositionZ();
+    // unknown field - unrelated to orientation
+    // seems to increment about 1000 for every 1.7 seconds
+    // for now, we'll just use mstime
+    data << getMSTime();
+    data << m_movementData.type;
+    switch(m_movementData.type)
+    {
+    case 0:                                             // normal packet
+        break;
+    case 1:                                             // stop packet
         SendMessageToSet( &data, true );
-        m_movementData.Clear();
+        return;
+    case 3:                                             // not used currently
+        data << uint64(0);                              // probably target guid
+        break;
+    case 4:                                             // not used currently
+        data << float(0);                               // probably orientation
+        break;
     }
-    else if( GetTypeId() != TYPEID_UNIT)
-    {
-        WorldPacket data( SMSG_MONSTER_MOVE, (41+GetPackGUID().size()) );
-        data.append(GetPackGUID());
-        // Point A, starting location
-        data << GetPositionX() << GetPositionY() << GetPositionZ();
-        data << getMSTime();
 
-        data << uint8(type);                                    // unknown
-        switch(type)
-        {
-            case 0:                                             // normal packet
-                break;
-            case 1:                                             // stop packet
-                SendMessageToSet( &data, true );
-                return;
-            case 3:                                             // not used currently
-                data << uint64(0);                              // probably target guid
-                break;
-            case 4:                                             // not used currently
-                data << float(0);                               // probably orientation
-                break;
-        }
-        data << uint32(Run ? 0x00000100 : 0x00000000);          // flags (0x100 - running, 0x200 - taxi)
-        /* Flags:
-        512: Floating, moving without walking/running
-        */
-        data << Time;                                           // Time in between points
-        data << uint32(1);                                      // 1 single waypoint
-        data << NewPosX << NewPosY << NewPosZ;                  // the single waypoint Point B
-    }
+    data << uint32(Run ? 0x00000100 : 0x00000000);          // flags (0x100 - running, 0x200 - taxi)
+    /* Flags:
+    512: Floating, moving without walking/running
+    */
+    data << Time;                                           // Time in between points
+    data << uint32(1);                                      // 1 single waypoint
+    data << NewPosX << NewPosY << NewPosZ;                  // the single waypoint Point B
+
+    SendMessageToSet( &data, true );
+    m_movementData.Clear();                                 // reset move cache at explicit move
 }
 
 void Unit::resetAttackTimer(WeaponAttackType type)
