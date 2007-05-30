@@ -885,8 +885,15 @@ void Aura::HandleAddModifier(bool apply, bool Real)
         mod->type = type;
         mod->mask = mask;
         mod->spellId = m_spellId;
-        mod->charges = spellInfo->procCharges;
         mod->effectId = m_effIndex;
+        mod->lastAffected = NULL;
+
+        SpellAffection const *spellAffect = objmgr.GetSpellAffection(m_spellId, m_effIndex);
+        if(spellAffect && spellAffect->Charges)
+            mod->charges = spellAffect->Charges;
+        else
+            mod->charges = spellInfo->procCharges;
+
         p_mods->push_back(mod);
         m_spellmod = mod;
 

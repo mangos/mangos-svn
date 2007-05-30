@@ -110,6 +110,8 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_resurrectX = m_resurrectY = m_resurrectZ = 0;
     m_resurrectHealth = m_resurrectMana = 0;
 
+    m_SpellModRemoveCount = 0;
+
     memset(m_items, 0, sizeof(Item*)*PLAYER_SLOTS_COUNT);
 
     groupInfo.group  = 0;
@@ -12397,48 +12399,59 @@ bool Player::IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mo
     if (!mod || !spellInfo) 
         return false;
 
+    if ((mod->charges == -1) && (mod->lastAffected != spellInfo->Id))
+        return false;
+
     SpellAffection const *spellAffect = objmgr.GetSpellAffection(mod->spellId, mod->effectId);
 
     if (spellAffect)
     {
-        if (spellAffect->SpellId && (spellAffect->SpellId != spellInfo->Id))
-            return false;
-        if (spellAffect->SchoolMask && !(spellAffect->SchoolMask & spellInfo->School))
-            return false;
-        if (spellAffect->Category && (spellAffect->Category != spellInfo->Category))
-            return false;
+        if (spellAffect->SpellId && (spellAffect->SpellId == spellInfo->Id))
+            return true;
+        if (spellAffect->SchoolMask && (spellAffect->SchoolMask & spellInfo->School))
+            return true;
+        if (spellAffect->Category && (spellAffect->Category == spellInfo->Category))
+            return true;
         if (spellAffect->SkillId)
         {
             SkillLineAbilityEntry const *skillLineEntry = sSkillLineAbilityStore.LookupEntry(spellInfo->Id);
-            if(!skillLineEntry || skillLineEntry->skillId != spellAffect->SkillId)
-                return false;
+            if(skillLineEntry && skillLineEntry->skillId == spellAffect->SkillId)
+                return true;
         }
-        if (spellAffect->SpellFamily)
-        {
-            uint32 family = 0;
-            switch(getClass())
-            {
-                case CLASS_WARRIOR: family = SPELLFAMILY_WARRIOR; break;
-                case CLASS_PALADIN: family = SPELLFAMILY_PALADIN; break;
-                case CLASS_HUNTER: family = SPELLFAMILY_HUNTER; break;
-                case CLASS_ROGUE: family = SPELLFAMILY_ROGUE; break;
-                case CLASS_PRIEST: family = SPELLFAMILY_PRIEST; break;
-                case CLASS_SHAMAN: family = SPELLFAMILY_SHAMAN; break;
-                case CLASS_MAGE: family = SPELLFAMILY_MAGE; break;
-                case CLASS_WARLOCK: family = SPELLFAMILY_WARLOCK; break;
-                case CLASS_DRUID: family = SPELLFAMILY_DRUID; break;
-            }
-            if (spellAffect->SpellFamily != family)
-                return false;
-        }
-        if (spellAffect->SpellFamilyMask && !(spellAffect->SpellFamilyMask & spellInfo->SpellFamilyFlags))
-            return false;
+        if (spellAffect->SpellFamily == spellInfo->SpellFamilyName)
+            return true;
+
+        if (spellAffect->SpellFamilyMask && (spellAffect->SpellFamilyMask & spellInfo->SpellFamilyFlags))
+            return true;
     }
     else
-        if ((mod->mask & spellInfo->SpellFamilyFlags) == 0)
-            return false;
+        if (mod->mask & spellInfo->SpellFamilyFlags)
+            return true;
     
-    return true;
+    return false;
+}
+
+void Player::RemoveSpellMods(uint32 spellId)
+{
+    if(!spellId || (m_SpellModRemoveCount == 0))
+        return;
+    
+    for(int i=0;i<SPELLMOD_COUNT;++i)
+        for (SpellModList::iterator itr = m_spellMods[i].begin(), next; itr != m_spellMods[i].end(); itr = next)
+        {
+            next = itr;
+            next++;
+            SpellModifier *mod = *itr;
+            if (mod && mod->charges == -1 && mod->lastAffected == spellId)
+            {
+                RemoveAurasDueToSpell(mod->spellId);
+                m_SpellModRemoveCount--;
+                if (m_spellMods[i].empty())
+                    break;
+                else
+                    next = m_spellMods[i].begin();
+            }
+        }
 }
 
 void Player::RemoveAreaAurasFromGroup()
