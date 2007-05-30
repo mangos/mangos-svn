@@ -63,8 +63,6 @@ class BattleGroundMgr
 
         void CreateInitialBattleGrounds();
 
-        void CreateBattleground(uint32 bg_ID);
-
         void SendToBattleGround(Player *pl, uint32 bgId);
 
     private:

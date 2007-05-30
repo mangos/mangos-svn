@@ -504,7 +504,7 @@ void World::SetInitialWorldSettings()
     sLog.outDebug("Mail timer set to: %u, mail return is called every %u minutes", mail_timer, mail_timer_expires);
 
     ///- Initialize Battlegrounds
-    sLog.outString( "WORLD: Starting BattleGround System" );
+    sLog.outString( "Starting BattleGround System" );
     sBattleGroundMgr.CreateInitialBattleGrounds();
 
     ///- Initialize MapManager, AI, Waypoints, ...
