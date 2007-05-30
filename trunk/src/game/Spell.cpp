@@ -994,6 +994,10 @@ void Spell::cast(bool skipCheck)
     if(needspelllog)
         SendLogExecute();
 
+    //remove spell mods
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        ((Player*)m_caster)->RemoveSpellMods(m_spellInfo->Id);
+
     bool canreflect = false;
     for(int j=0;j<3;j++)
     {
@@ -2834,5 +2838,6 @@ void Spell::UpdatePointers()
 
     m_targets.Update(m_caster);
 }
+
 
 

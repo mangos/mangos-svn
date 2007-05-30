@@ -2595,8 +2595,8 @@ void ObjectMgr::LoadSpellAffects()
 {
     uint32 count = 0;
 
-    //                                            0        1          2         3            4          5         6             7
-    QueryResult *result = sDatabase.Query("SELECT `entry`,`effectId`,`SpellId`,`SchoolMask`,`Category`,`SkillID`,`SpellFamily`,`SpellFamilyMask` FROM `spell_affect`");
+    //                                            0        1          2         3            4          5         6             7                 8
+    QueryResult *result = sDatabase.Query("SELECT `entry`,`effectId`,`SpellId`,`SchoolMask`,`Category`,`SkillID`,`SpellFamily`,`SpellFamilyMask`,`Charges` FROM `spell_affect`");
     if( !result )
     {
 
@@ -2634,6 +2634,7 @@ void ObjectMgr::LoadSpellAffects()
         sa.SkillId = fields[5].GetUInt16();
         sa.SpellFamily = fields[6].GetUInt8();
         sa.SpellFamilyMask = fields[7].GetUInt32();
+        sa.Charges = fields[8].GetUInt16();
 
         SpellAffect.insert(SpellAffectMap::value_type(entry,sa));
 

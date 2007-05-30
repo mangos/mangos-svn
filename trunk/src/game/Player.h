@@ -73,6 +73,7 @@ struct SpellModifier
     int16 charges;
     uint32 spellId;
     uint32 effectId;
+    uint32 lastAffected;
 };
 
 typedef HM_NAMESPACE::hash_map<uint16, PlayerSpell*> PlayerSpellMap;
@@ -1010,6 +1011,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         int32 GetTotalPctMods(uint32 spellId, uint8 op);
         bool IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mod);
         template <class T> T ApplySpellMod(uint32 spellId, uint8 op, T &basevalue);
+        void RemoveSpellMods(uint32 spellId);
 
         bool HasSpellCooldown(uint32 spell_id) const
         {
@@ -1465,6 +1467,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         ActionButtonList m_actionButtons;
 
         SpellModList m_spellMods[32];                       // 32 = SPELLMOD_COUNT
+        int32 m_SpellModRemoveCount;
         EnchantDurationList m_enchantDuration;
 
         uint64 m_resurrectGUID;
@@ -1539,14 +1542,11 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, uint8 op, T &basevalu
     if (!spellInfo) return 0;
     int32 totalpct = 0;
     int32 totalflat = 0;
-    bool remove = false;
     for (SpellModList::iterator itr = m_spellMods[op].begin(); itr != m_spellMods[op].end(); ++itr)
     {
         SpellModifier *mod = *itr;
-
         if(!IsAffectedBySpellmod(spellInfo,mod))
             continue;
-
         if (mod->type == SPELLMOD_FLAT)
             totalflat += mod->value;
         else if (mod->type == SPELLMOD_PCT)
@@ -1557,26 +1557,8 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, uint8 op, T &basevalu
             if (mod->charges == 0)
             {
                 mod->charges = -1;
-                remove = true;
-            }
-        }
-    }
-
-    if (remove)
-    {
-        for (SpellModList::iterator itr = m_spellMods[op].begin(), next; itr != m_spellMods[op].end(); itr = next)
-        {
-            next = itr;
-            next++;
-            SpellModifier *mod = *itr;
-            if (!mod) continue;
-            if (mod->charges == -1)
-            {
-                RemoveAurasDueToSpell(mod->spellId);
-                if (m_spellMods[op].empty())
-                    break;
-                else
-                    next = m_spellMods[op].begin();
+                mod->lastAffected = spellId;
+                m_SpellModRemoveCount++;
             }
         }
     }

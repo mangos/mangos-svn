@@ -150,6 +150,7 @@ struct SpellAffection
     uint16 SkillId;
     uint8 SpellFamily;
     uint32 SpellFamilyMask;
+    uint16 Charges;
 };
 
 /// Player state
