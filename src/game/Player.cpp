@@ -8221,7 +8221,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
 
             SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), 0);
 
-            if ( slot < EQUIPMENT_SLOT_END )
+            if ( slot < INVENTORY_SLOT_BAG_END )            // equipment and equipped bags can have applied bonuses
             {
                 _ApplyItemMods(pItem, slot, false);
                 int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 16);
