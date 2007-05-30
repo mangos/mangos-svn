@@ -27,6 +27,7 @@
 #include "Policies/SingletonImp.h"
 #include "MapManager.h"
 #include "ObjectMgr.h"
+#include "ProgressBar.h"
 
 INSTANTIATE_SINGLETON_1( BattleGroundMgr );
 
@@ -243,11 +244,11 @@ uint32 BattleGroundMgr::CreateBattleGround(uint32 bg_ID, uint32 MaxPlayersPerTea
     bg->SetLevelRange(LevelMin, LevelMax);
 
     AddBattleGround(bg_ID, bg);
-    sLog.outDetail("BattleGroundMgr: Created new battleground: %u %s (Map %u, %u players per team, Levels %u-%u)", bg_ID, bg->m_Name, bg->m_MapId, bg->m_MaxPlayersPerTeam, bg->m_LevelMin, bg->m_LevelMax);
+    //sLog.outDetail("BattleGroundMgr: Created new battleground: %u %s (Map %u, %u players per team, Levels %u-%u)", bg_ID, bg->m_Name, bg->m_MapId, bg->m_MaxPlayersPerTeam, bg->m_LevelMin, bg->m_LevelMax);
     return bg_ID;
 }
 
-void BattleGroundMgr::CreateBattleground(uint32 bg_ID)
+void BattleGroundMgr::CreateInitialBattleGrounds()
 {
     float AStartLoc[4];
     float HStartLoc[4];
@@ -255,75 +256,91 @@ void BattleGroundMgr::CreateBattleground(uint32 bg_ID)
     BattlemasterListEntry const* bl;
     WorldSafeLocsEntry const *start;
 
-    // can be overwrited by values from DB
-    bl = sBattlemasterListStore.LookupEntry(bg_ID);
-    if(bl)
+    uint32 count = 0; 
+
+    //                                            0     1                   2        3        4                  5                6               7
+    QueryResult *result = sDatabase.Query("SELECT `id`, `MaxPlayersPerTeam`,`MinLvl`,`MaxLvl`,`AllianceStartLoc`,`AllianceStartO`,`HordeStartLoc`,`HordeStartO` FROM `battleground_template`");
+
+    if(!result)
     {
+        barGoLink bar(1);
+
+        bar.step();
+
+        sLog.outString("");
+        sLog.outErrorDb(">> Loaded 0 battlegrounds. DB table `battleground_template` is empty.");
+        return;
+    }
+
+    barGoLink bar(result->GetRowCount());
+
+    do
+    {
+        Field *fields = result->Fetch();
+        bar.step();
+
+        uint32 bg_ID = fields[0].GetUInt32();
+
+        // can be overwrited by values from DB
+        bl = sBattlemasterListStore.LookupEntry(bg_ID);
+        if(!bl)
+        {
+            sLog.outError("Battleground ID %u not found in BattlemasterList.dbc. Battleground not created.",bg_ID);
+            continue;
+        }
+
         MaxPlayersPerTeam = bl->maxplayersperteam;
         MinLvl = bl->minlvl;
         MaxLvl = bl->maxlvl;
-    }
-
-    //                                             0                   1        2         3                  4                5               6
-    QueryResult *result = sDatabase.PQuery("SELECT `MaxPlayersPerTeam`,`MinLvl`,`MaxLvl`, `AllianceStartLoc`,`AllianceStartO`,`HordeStartLoc`,`HordeStartO` FROM `battleground_template` WHERE `id` = '%u'",bg_ID);
-    if(result)
-    {
-        Field* fields = result->Fetch();
-
-        if(fields[0].GetUInt32())
-            MaxPlayersPerTeam = fields[0].GetUInt32();
 
         if(fields[1].GetUInt32())
-            MinLvl = fields[1].GetUInt32();
+            MaxPlayersPerTeam = fields[1].GetUInt32();
 
         if(fields[2].GetUInt32())
-            MaxLvl = fields[2].GetUInt32();
+            MinLvl = fields[2].GetUInt32();
 
-        start1 = fields[3].GetUInt32();
+        if(fields[3].GetUInt32())
+            MaxLvl = fields[3].GetUInt32();
+
+        start1 = fields[4].GetUInt32();
 
         start = sWorldSafeLocsStore.LookupEntry(start1);
         if(!start)
         {
             sLog.outErrorDb("Table `battleground_template` for id %u have non-existed WorldSafeLocs.dbc id %u in field `AllianceStartLoc`. BG not created.",bg_ID,start1);
-            delete result;
-            return;
+            continue;
         }
 
         AStartLoc[0] = start->x;
         AStartLoc[1] = start->y;
         AStartLoc[2] = start->z;
-        AStartLoc[3] = fields[4].GetFloat();
+        AStartLoc[3] = fields[5].GetFloat();
 
-        start2 = fields[5].GetUInt32();
+        start2 = fields[6].GetUInt32();
 
         start = sWorldSafeLocsStore.LookupEntry(start2);
         if(!start)
         {
             sLog.outErrorDb("Table `battleground_template` for id %u have non-existed WorldSafeLocs.dbc id %u in field `HordeStartLoc`. BG not created.",bg_ID,start2);
-            delete result;
-            return;
+            continue;
         }
 
         HStartLoc[0] = start->x;
         HStartLoc[1] = start->y;
         HStartLoc[2] = start->z;
-        HStartLoc[3] = fields[6].GetFloat();
+        HStartLoc[3] = fields[7].GetFloat();
 
-        delete result;
-    }
 
-    sLog.outDetail("Creating battleground %s, %u-%u", bl->name, MinLvl, MaxLvl);
-    CreateBattleGround(bg_ID, MaxPlayersPerTeam, MinLvl, MaxLvl, bl->name, bl->mapid1, AStartLoc[0], AStartLoc[1], AStartLoc[2], AStartLoc[3], HStartLoc[0], HStartLoc[1], HStartLoc[2], HStartLoc[3]);
-}
+        //sLog.outDetail("Creating battleground %s, %u-%u", bl->name, MinLvl, MaxLvl);
+        CreateBattleGround(bg_ID, MaxPlayersPerTeam, MinLvl, MaxLvl, bl->name, bl->mapid1, AStartLoc[0], AStartLoc[1], AStartLoc[2], AStartLoc[3], HStartLoc[0], HStartLoc[1], HStartLoc[2], HStartLoc[3]);
 
-void BattleGroundMgr::CreateInitialBattleGrounds()
-{
-    CreateBattleground(1);
-    CreateBattleground(2);
-    CreateBattleground(3);
-    CreateBattleground(7);
+        count++;
+    } while (result->NextRow());
 
-    sLog.outDetail("Created initial battlegrounds.");
+    delete result;
+
+    sLog.outString( "" );
+    sLog.outString( ">> Loaded %u battlegrounds", count );
 }
 
 WorldPacket BattleGroundMgr::BuildBattleGroundListPacket(uint64 guid, Player* plr, uint32 bgId)
