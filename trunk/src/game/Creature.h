@@ -331,7 +331,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void StopMoving()
         {
             clearUnitState(UNIT_STAT_MOVING);
-            AI_SendMoveToPacket(GetPositionX(), GetPositionY(), GetPositionZ(), 0, true, 1);
+            // send explicit stop packet
+            SendMonsterMove(GetPositionX(), GetPositionY(), GetPositionZ(),0,true,0);
         }
 
         uint32 GetBlockValue() const                        //dunno mob block value
