@@ -3310,16 +3310,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                     int32 i_spell_param = (*i)->GetModifier()->m_amount;
                     if(*aur == SPELL_AURA_PROC_TRIGGER_SPELL)
                     {
-                        // special case with random selection for druid melee attack event effect
-                        if((*i)->GetId()==16864)
-                        {
-                            static uint32 spells[3] = { 12536, 16246, 16870 };
-                            spellProto = sSpellStore.LookupEntry(spells[urand(0,2)]);
-                        }
-                        // normal case
-                        else
-                            spellProto = sSpellStore.LookupEntry(spellProto->EffectTriggerSpell[i_spell_eff]);
-
+                        spellProto = sSpellStore.LookupEntry(spellProto->EffectTriggerSpell[i_spell_eff]);
                         i_spell_param = procFlag;
                     }
                     if(*aur == SPELL_AURA_DUMMY)
@@ -3566,15 +3557,15 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
         switch (dummySpell->Id)
         {
             case 11119:
-                igniteDot.EffectBasePoints[0]=uint32(0.04f*damage);break;
+                igniteDot.EffectBasePoints[0]=int32(0.04f*damage)-1;break;
             case 11120:
-                igniteDot.EffectBasePoints[0]=uint32(0.08f*damage);break;
+                igniteDot.EffectBasePoints[0]=int32(0.08f*damage)-1;break;
             case 12846:
-                igniteDot.EffectBasePoints[0]=uint32(0.12f*damage);break;
+                igniteDot.EffectBasePoints[0]=int32(0.12f*damage)-1;break;
             case 12847:
-                igniteDot.EffectBasePoints[0]=uint32(0.16f*damage);break;
+                igniteDot.EffectBasePoints[0]=int32(0.16f*damage)-1;break;
             case 12848:
-                igniteDot.EffectBasePoints[0]=uint32(0.20f*damage);break;
+                igniteDot.EffectBasePoints[0]=int32(0.20f*damage)-1;break;
         };
         CastSpell(pVictim, &igniteDot, true, NULL, triggredByAura);
     }
@@ -3584,7 +3575,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
     {
         SpellEntry const *VEHealTemplate = sSpellStore.LookupEntry(15290);
         SpellEntry VEHeal = *VEHealTemplate;
-        VEHeal.EffectBasePoints[0] = triggredByAura->GetModifier()->m_amount*damage/100.0f;
+        VEHeal.EffectBasePoints[0] = triggredByAura->GetModifier()->m_amount*damage/100; //VEHeal has a BaseDice of 0, so no decrement needed
         pVictim->CastSpell(pVictim, &VEHeal, true, NULL, triggredByAura);
     }
 
@@ -3593,7 +3584,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
     {
         SpellEntry const *VTEnergizeTemplate = sSpellStore.LookupEntry(34919);
         SpellEntry VTEnergize = *VTEnergizeTemplate;
-        VTEnergize.EffectBasePoints[0] = triggredByAura->GetModifier()->m_amount*damage/100.0f;
+        VTEnergize.EffectBasePoints[0] = triggredByAura->GetModifier()->m_amount*damage/100 - 1;
         pVictim->CastSpell(pVictim,&VTEnergize,true,NULL, triggredByAura);
     }
 }
@@ -5364,25 +5355,20 @@ int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_inde
     int32 value = 0;
     uint32 level = 0;
 
-    // currently the damage should not be increased by level
-    /*level= caster->getLevel();
-    if( level > spellproto->maxLevel && spellproto->maxLevel > 0)
-        level = spellproto->maxLevel;*/
+    level = getLevel() - spellProto->spellLevel;
+    if (level > spellProto->maxLevel && spellProto->maxLevel > 0)
+        level = spellProto->maxLevel;
 
     float basePointsPerLevel = spellProto->EffectRealPointsPerLevel[effect_index];
     float randomPointsPerLevel = spellProto->EffectDicePerLevel[effect_index];
-    int32 basePoints = int32(spellProto->EffectBasePoints[effect_index] +1 + level * basePointsPerLevel);
+    int32 basePoints = int32(spellProto->EffectBasePoints[effect_index] + level * basePointsPerLevel);
     int32 randomPoints = int32(spellProto->EffectDieSides[effect_index] + level * randomPointsPerLevel);
     float comboDamage = spellProto->EffectPointsPerComboPoint[effect_index];
     uint8 comboPoints=0;
     if(GetTypeId() == TYPEID_PLAYER)
         comboPoints = (uint8)((GetUInt32Value(PLAYER_FIELD_BYTES) & 0xFF00) >> 8);
 
-    value += spellProto->EffectBaseDice[effect_index];
-    if(randomPoints <= 1)
-        value = basePoints;
-    else
-        value = basePoints+urand(0, randomPoints-1);
+    value = basePoints + urand(spellProto->EffectBaseDice[effect_index], randomPoints);
 
     if(comboDamage > 0)
     {
