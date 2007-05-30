@@ -1006,7 +1006,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         PlayerSpellMap const& GetSpellMap() const { return m_spells; }
         PlayerSpellMap      & GetSpellMap()       { return m_spells; }
 
-        SpellModList *getSpellModList(int op) { return &m_spellMods[op]; }
+        void AddSpellMod(SpellModifier* mod, bool apply);
         int32 GetTotalFlatMods(uint32 spellId, uint8 op);
         int32 GetTotalPctMods(uint32 spellId, uint8 op);
         bool IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mod);

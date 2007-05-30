@@ -12418,7 +12418,7 @@ bool Player::IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mo
             if(skillLineEntry && skillLineEntry->skillId == spellAffect->SkillId)
                 return true;
         }
-        if (spellAffect->SpellFamily == spellInfo->SpellFamilyName)
+        if (spellAffect->SpellFamily && spellAffect->SpellFamily == spellInfo->SpellFamilyName)
             return true;
 
         if (spellAffect->SpellFamilyMask && (spellAffect->SpellFamilyMask & spellInfo->SpellFamilyFlags))
@@ -12429,6 +12429,55 @@ bool Player::IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mo
             return true;
     
     return false;
+}
+
+void Player::AddSpellMod(SpellModifier* mod, bool apply)
+{
+    if (apply)
+    {
+        m_spellMods[mod->op].push_back(mod);
+        uint16 send_val=0, send_mark=0;
+        int16 tmpval=mod->value - 1;
+        uint32 shiftdata=0x01, Opcode=SMSG_SET_FLAT_SPELL_MODIFIER;
+
+        if(tmpval != 0)
+        {
+            if(tmpval > 0)
+            {
+                send_val =  tmpval+1;
+                send_mark = 0x0;
+            }
+            else
+            {
+                send_val  = 0xFFFF + (tmpval+2);
+                send_mark = 0xFFFF;
+            }
+        }
+
+        if (mod->type == SPELLMOD_FLAT) Opcode = SMSG_SET_FLAT_SPELL_MODIFIER;
+        else if (mod->type == SPELLMOD_PCT) Opcode = SMSG_SET_PCT_SPELL_MODIFIER;
+
+        for(int eff=0;eff<32;eff++)
+        {
+            if ( mod->mask & shiftdata )
+            {
+                WorldPacket data(Opcode, (1+1+2+2));
+                data << uint8(eff);
+                data << uint8(mod->op);
+                data << uint16(send_val);
+                data << uint16(send_mark);
+                SendDirectMessage(&data);
+            }
+            shiftdata=shiftdata<<1;
+        }
+    }
+    else
+    {
+        if (mod->charges = -1)
+            m_SpellModRemoveCount--;
+        m_spellMods[mod->op].remove(mod);
+        delete mod;
+    }
 }
 
 void Player::RemoveSpellMods(uint32 spellId)
@@ -12445,7 +12494,6 @@ void Player::RemoveSpellMods(uint32 spellId)
             if (mod && mod->charges == -1 && mod->lastAffected == spellId)
             {
                 RemoveAurasDueToSpell(mod->spellId);
-                m_SpellModRemoveCount--;
                 if (m_spellMods[i].empty())
                     break;
                 else
