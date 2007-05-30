@@ -326,7 +326,7 @@ void Spell::EffectDummy(uint32 i)
         uint32 health_mod = uint32(m_caster->GetMaxHealth()*0.3);
         SpellEntry const* OriginalHealthModSpell = sSpellStore.LookupEntry(12976);
         SpellEntry CustomHealthModSpell = *OriginalHealthModSpell;
-        CustomHealthModSpell.EffectBasePoints[0] = health_mod;
+        CustomHealthModSpell.EffectBasePoints[0] = health_mod; //12976 has a base dice of 0, so no decrement needed
         m_caster->CastSpell(m_caster,&CustomHealthModSpell,true,NULL);
         return;
     }
@@ -601,7 +601,7 @@ void Spell::EffectDummy(uint32 i)
         uint32 rage = m_spellInfo->EffectBasePoints[i];
         SpellEntry const* OriginalCharge = sSpellStore.LookupEntry(34846);
         SpellEntry CustomCharge = *OriginalCharge;
-        CustomCharge.EffectBasePoints[0] = rage;
+        CustomCharge.EffectBasePoints[0] = rage-1;
         m_caster->CastSpell(m_caster,&CustomCharge,true);
         return;
     }
