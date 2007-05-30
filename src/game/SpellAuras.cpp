@@ -850,43 +850,25 @@ void Aura::UpdateSlotCounter(uint8 slot, bool add)
 /*********************************************************/
 void Aura::HandleAddModifier(bool apply, bool Real)
 {
-    if(m_target->GetTypeId() != TYPEID_PLAYER)
+    if(m_target->GetTypeId() != TYPEID_PLAYER || !Real)
         return;
-
-    Player *p_target = (Player *)m_target;
 
     SpellEntry const *spellInfo = GetSpellProto();
     if(!spellInfo) return;
 
-    uint8 op = spellInfo->EffectMiscValue[m_effIndex];
-    int32 value = spellInfo->EffectBasePoints[m_effIndex]+1;
-    uint8 type = spellInfo->EffectApplyAuraName[m_effIndex];
-    uint32 mask = spellInfo->EffectItemType[m_effIndex];
-
-    // Sometimes a spell has more than one effect, but only the first mask is filled (e.g. rogue talent id: 13975) 
-    // in this case we need a fallback and take the fist mask. This one should fit. 
-    // Otherwise the mod will not have an effect at all. 
-
-    // This hack can't be used: most spells with 2 SPELLMOD_* aura in 2 effect slots _muts_ have different values in EffectItemType
-    //if(m_effIndex > 0 && mask == 0)
-    //    mask = spellInfo->EffectItemType[0]; 
-
-    if(op >= SPELLMOD_COUNT)
+    if(spellInfo->EffectMiscValue[m_effIndex] >= SPELLMOD_COUNT)
         return;
-
-    SpellModList *p_mods = p_target->getSpellModList(op);
-    if (!p_mods) return;
 
     if (apply)
     {
         SpellModifier *mod = new SpellModifier;
-        mod->op = op;
-        mod->value = value;
-        mod->type = type;
-        mod->mask = mask;
+        mod->op = spellInfo->EffectMiscValue[m_effIndex];
+        mod->value = spellInfo->EffectBasePoints[m_effIndex]+1;
+        mod->type = spellInfo->EffectApplyAuraName[m_effIndex];
+        mod->mask = spellInfo->EffectItemType[m_effIndex];
         mod->spellId = m_spellId;
         mod->effectId = m_effIndex;
-        mod->lastAffected = NULL;
+        mod->lastAffected = 0;
 
         SpellAffection const *spellAffect = objmgr.GetSpellAffection(m_spellId, m_effIndex);
         if(spellAffect && spellAffect->Charges)
@@ -894,48 +876,10 @@ void Aura::HandleAddModifier(bool apply, bool Real)
         else
             mod->charges = spellInfo->procCharges;
 
-        p_mods->push_back(mod);
         m_spellmod = mod;
-
-        uint16 send_val=0, send_mark=0;
-        int16 tmpval=spellInfo->EffectBasePoints[m_effIndex];
-        uint32 shiftdata=0x01, Opcode=SMSG_SET_FLAT_SPELL_MODIFIER;
-
-        if(tmpval != 0)
-        {
-            if(tmpval > 0)
-            {
-                send_val =  tmpval+1;
-                send_mark = 0x0;
-            }
-            else
-            {
-                send_val  = 0xFFFF + (tmpval+2);
-                send_mark = 0xFFFF;
-            }
-        }
-
-        if (mod->type == SPELLMOD_FLAT) Opcode = SMSG_SET_FLAT_SPELL_MODIFIER;
-        else if (mod->type == SPELLMOD_PCT) Opcode = SMSG_SET_PCT_SPELL_MODIFIER;
-
-        for(int eff=0;eff<32;eff++)
-        {
-            if ( mask & shiftdata )
-            {
-                WorldPacket data(Opcode, (1+1+2+2));
-                data << uint8(eff);
-                data << uint8(mod->op);
-                data << uint16(send_val);
-                data << uint16(send_mark);
-                p_target->SendDirectMessage(&data);
-            }
-            shiftdata=shiftdata<<1;
-        }
     }
-    else
-    {
-        p_mods->remove(this->m_spellmod);
-    }
+
+    ((Player*)m_target)->AddSpellMod(m_spellmod, apply);
 }
 
 void Aura::TriggerSpell()
