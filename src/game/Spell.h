@@ -716,7 +716,7 @@ namespace MaNGOS
                     case SPELL_TARGETS_AOE_DAMAGE:
                         {
                             Unit* check = i_originalCaster;
-                            Unit* owner = i_originalCaster->GetOwner();
+                            Unit* owner = i_originalCaster->GetCharmerOrOwner();
                             if(owner)
                                 check = owner;
                             if( check->GetTypeId()==TYPEID_PLAYER )
@@ -785,7 +785,7 @@ namespace MaNGOS
                     case SPELL_TARGETS_AOE_DAMAGE:
                         {
                             Unit* check = i_originalCaster;
-                            Unit* owner = i_originalCaster->GetOwner();
+                            Unit* owner = i_originalCaster->GetCharmerOrOwner();
                             if(owner)
                                 check = owner;
                             if( check->GetTypeId()==TYPEID_PLAYER )

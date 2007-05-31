@@ -45,7 +45,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
     recv_data >> guid2;                                     //tag guid
 
     // used also for charmed creature
-    Creature* pet=ObjectAccessor::Instance().GetCreatureOrPet(*_player,guid1);
+    Unit* pet=ObjectAccessor::Instance().GetUnit(*_player,guid1);
     sLog.outDetail( "HandlePetAction.Pet %u flag is %u, spellid is %u, target %u.\n", uint32(GUID_LOPART(guid1)), flag, spellid, uint32(GUID_LOPART(guid2)) );
     if(!pet)
     {
@@ -62,33 +62,36 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
     if(!pet->isAlive())
         return;
 
+    if(pet->GetTypeId() == TYPEID_PLAYER && !(flag == ACT_COMMAND && spellid == COMMAND_ATTACK))
+        return;
+
     switch(flag)
     {
-        case 1792:                                          //0x0700
+        case ACT_COMMAND:                                   //0x0700
             switch(spellid)
             {
-                case 0x0000:                                //flat=1792  //STAY
-                    pet->StopMoving();
-                    (*pet)->Clear();
-                    (*pet)->Idle();
-                    if(pet->isPet())
+                case COMMAND_STAY:                          //flat=1792  //STAY
+                    ((Creature*)pet)->StopMoving();
+                    (*((Creature*)pet))->Clear();
+                    (*((Creature*)pet))->Idle();
+                    if(((Creature*)pet)->isPet())
                     {
                         ((Pet*)pet)->AddActState( STATE_RA_STAY );
                         ((Pet*)pet)->ClearActState( STATE_RA_FOLLOW );
                     }
                     break;
-                case 0x0001:                                //spellid=1792  //FOLLOW
+                case COMMAND_FOLLOW:                        //spellid=1792  //FOLLOW
                     DEBUG_LOG("Start shits 1");
                     pet->AttackStop();
                     DEBUG_LOG("Start shits 2");
                     pet->addUnitState(UNIT_STAT_FOLLOW);
                     DEBUG_LOG("Start shits 3");
-                    (*pet)->Clear();
+                    (*((Creature*)pet))->Clear();
                     DEBUG_LOG("Start shits 4");
-                    (*pet)->Mutate(new TargetedMovementGenerator(*_player,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE));
+                    (*((Creature*)pet))->Mutate(new TargetedMovementGenerator(*_player,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE));
                     DEBUG_LOG("Start shits 5");
 
-                    if(pet->isPet())
+                    if(((Creature*)pet)->isPet())
                     {
                         DEBUG_LOG("Start shits 6");
                         ((Pet*)pet)->AddActState( STATE_RA_FOLLOW );
@@ -96,7 +99,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                         ((Pet*)pet)->ClearActState( STATE_RA_STAY );
                     }
                     break;
-                case 0x0002:                                //spellid=1792  //ATTACK
+                case COMMAND_ATTACK:                        //spellid=1792  //ATTACK
                 {
                     pet->clearUnitState(UNIT_STAT_FOLLOW);
                     uint64 selguid = _player->GetSelection();
@@ -109,16 +112,23 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
 
                     if(TargetUnit!=pet->getVictim())
                         pet->AttackStop();
-                    (*pet)->Clear();
-                    if (pet->AI())
-                        pet->AI()->AttackStart(TargetUnit);
+
+                    if(pet->GetTypeId()!=TYPEID_PLAYER)
+                    {
+                        (*((Creature*)pet))->Clear();
+                        if (((Creature*)pet)->AI())
+                            ((Creature*)pet)->AI()->AttackStart(TargetUnit);
+                    }
+                    else
+                        pet->Attack(TargetUnit);
+
                     WorldPacket data(SMSG_AI_REACTION, 12);
                     data << guid1 << uint32(00000002);
                     SendPacket(&data);
                     break;
                 }
-                case 3:                                     // abandon (hunter pet) or dismiss (summoned pet)
-                    if(pet->isPet())
+                case COMMAND_ABANDON:                       // abandon (hunter pet) or dismiss (summoned pet)
+                    if(((Creature*)pet)->isPet())
                         _player->RemovePet((Pet*)pet,((Pet*)pet)->getPetType()==HUNTER_PET ? PET_SAVE_AS_DELETED : PET_SAVE_NOT_IN_SLOT);
                     else                                    // charmed
                         _player->Uncharm();
@@ -127,25 +137,25 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     sLog.outError("WORLD: unknown PET flag Action %i and spellid %i.\n", flag, spellid);
             }
             break;
-        case 1536:                                          // 0x600
+        case ACT_REACTION:                                  // 0x600
             switch(spellid)
             {
-                case 0:                                     //passive
-                    if(pet->isPet())
+                case REACT_PASSIVE:                         //passive
+                    if(((Creature*)pet)->isPet())
                     {
                         ((Pet*)pet)->AddActState( STATE_RA_PASSIVE );
                         ((Pet*)pet)->ClearActState( STATE_RA_PROACTIVE | STATE_RA_REACTIVE );
                     }
                     break;
-                case 1:                                     //recovery
-                    if(pet->isPet())
+                case REACT_DEFENSIVE:                       //recovery
+                    if(((Creature*)pet)->isPet())
                     {
                         ((Pet*)pet)->AddActState( STATE_RA_REACTIVE );
                         ((Pet*)pet)->ClearActState( STATE_RA_PASSIVE | STATE_RA_PROACTIVE );
                     }
                     break;
-                case 2:                                     //activete
-                    if(pet->isPet())
+                case REACT_AGGRESSIVE:                      //activete
+                    if(((Creature*)pet)->isPet())
                     {
                         ((Pet*)pet)->AddActState( STATE_RA_PROACTIVE );
                         ((Pet*)pet)->ClearActState( STATE_RA_PASSIVE | STATE_RA_REACTIVE );
@@ -153,9 +163,10 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     break;
             }
             break;
-        case 33024:                                         //0x8100    spell (disabled), ignore
+        case ACT_DISABLED:                                  //0x8100    spell (disabled), ignore
             break;
-        case 49408:                                         //0xc100    spell
+        case ACT_CAST:                                      //0x0100
+        case ACT_ENABLED:                                   //0xc100    spell
         {
             uint64 selectguid = _player->GetSelection();
             Unit* unit_target=ObjectAccessor::Instance().GetUnit(*_player,selectguid);
@@ -174,7 +185,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
             bool spell_found = false;
             for(int i = 0; i < 4; ++i)
             {
-                if(pet->m_spells[i] == spellid)
+                if(((Creature*)pet)->m_spells[i] == spellid)
                 {
                     spell_found = true;
                     break;
@@ -183,11 +194,6 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
 
             if(!spell_found)
                 return;
-
-            // FIXME: this is _wrong_ check not allow cast positive spells, but without it pet can cast negative spell at anyone
-            // do not spell attack of friends
-            //if(_player->IsFriendlyTo(unit_target))
-            //    return;
 
             // do cast now
             pet->clearUnitState(UNIT_STAT_FOLLOW);

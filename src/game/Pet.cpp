@@ -529,6 +529,12 @@ void Pet::InitStatsForLevel(uint32 petlevel)
     SetLevel( petlevel);
 
     SetArmor(petlevel*50);
+    SetAttackTime(BASE_ATTACK, 2000);
+    SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0);
+
+    // Hunter pets' size does depend on level
+    if(getPetType() == HUNTER_PET)
+        SetFloatValue(OBJECT_FIELD_SCALE_X, 0.4 + float(petlevel) / 100);
 
     switch(getPetType())
     {
