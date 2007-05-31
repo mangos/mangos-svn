@@ -754,13 +754,22 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         uint64 const& GetOwnerGUID() const { return  GetUInt64Value(UNIT_FIELD_SUMMONEDBY); }
         uint64 GetPetGUID() const { return  GetUInt64Value(UNIT_FIELD_SUMMON); }
+        uint64 GetCharmerGUID() const { return GetUInt64Value(UNIT_FIELD_CHARMEDBY); }
         uint64 GetCharmGUID() const { return  GetUInt64Value(UNIT_FIELD_CHARM); }
+        uint64 GetCharmerOrOwnerGUID() const { return GetCharmerGUID() ? GetCharmerGUID() : GetOwnerGUID(); }
+        
+        void SetCharmerGUID(uint64 owner) { SetUInt64Value(UNIT_FIELD_CHARMEDBY, owner); }
 
         Unit* GetOwner() const;
         Pet* GetPet() const;
-        Creature* GetCharm() const;
+        Unit* GetCharmer() const;
+        Unit* GetCharm() const;
+        Unit* GetCharmerOrOwner() const { return GetCharmerGUID() ? GetCharmer() : GetOwner(); }
+
         void SetPet(Pet* pet);
-        void SetCharm(Creature* pet);
+        void SetCharm(Unit* pet);
+        
+        bool isCharmed() const { return GetCharmerGUID() != 0; }
 
         bool AddAura(Aura *aur, bool uniq = false);
 

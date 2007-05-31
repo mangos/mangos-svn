@@ -69,6 +69,34 @@ enum PetDietMask
     PET_DIET_RAW_FISH = 0x80
 };
 
+enum HappinessState
+{
+    UNHAPPY = 1,
+    CONTENT = 2,
+    HAPPY   = 3
+};
+
+enum LoyaltyLevel
+{
+    REBELLIOUS  = 1,
+    UNRULY      = 2,
+    SUBMISSIVE  = 3,
+    DEPENDABLE  = 4,
+    FAITHFUL    = 5,
+    BEST_FRIEND = 6
+};
+
+enum ActiveStates
+{
+    ACT_ENABLED  = 0xC100,
+    ACT_DISABLED = 0x8100,
+    ACT_COMMAND  = 0x0700,
+    ACT_REACTION = 0x0600,
+    ACT_CAST     = 0x0100,
+    ACT_PASSIVE  = 0x0000,
+    ACT_DECIDE   = 0x0001
+};
+
 #define OWNER_MAX_DISTANCE 100
 
 #define PET_FOLLOW_DIST  1

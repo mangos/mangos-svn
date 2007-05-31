@@ -431,10 +431,10 @@ SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
                 PvP = true;
         }
         // FIXME: or charmed (can be player). Maybe must be check before GetTypeId() == TYPEID_PLAYER
-        else if(GetOwnerGUID())                             // Pet or timed creature, etc
+        else if(GetCharmerOrOwnerGUID())                             // Pet or timed creature, etc
         {
             Unit* pet = this;
-            Unit* owner = pet->GetOwner();
+            Unit* owner = pet->GetCharmerOrOwner();
 
             if(owner && owner->GetTypeId() == TYPEID_PLAYER)
             {
@@ -2506,9 +2506,9 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
             Group *pGroup = NULL;
             if (i_caster->GetTypeId() == TYPEID_PLAYER)
                 pGroup = ((Player*)i_caster)->groupInfo.group;
-            else if(((Creature*)i_caster)->isTotem())
+            else if(((Creature*)i_caster)->isTotem() || ((Creature*)i_caster)->isPet() || i_caster->isCharmed())
             {
-                Unit *owner = ((Totem*)i_caster)->GetOwner();
+                Unit* owner = i_caster->GetCharmerOrOwner();
                 if (owner && owner->GetTypeId() == TYPEID_PLAYER)
                     pGroup = ((Player*)owner)->groupInfo.group;
             }
@@ -2731,8 +2731,8 @@ void Unit::ApplyStats(bool apply)
             if (totalresmods[i] != 0)
             {
                 ApplyResistancePercentMod(SpellSchools(i), totalresmods[i], apply );
-                ((Player*)this)->ApplyResistanceBuffModsPercentMod(SpellSchools(i),true, totalresmods[i], apply);
-                ((Player*)this)->ApplyResistanceBuffModsPercentMod(SpellSchools(i),false, totalresmods[i], apply);
+                ApplyResistanceBuffModsPercentMod(SpellSchools(i),true, totalresmods[i], apply);
+                ApplyResistanceBuffModsPercentMod(SpellSchools(i),false, totalresmods[i], apply);
             }
         }
 
@@ -2913,8 +2913,8 @@ void Unit::ApplyStats(bool apply)
             if (totalresmods[i])
             {
                 ApplyResistancePercentMod(SpellSchools(i), totalresmods[i], apply );
-                ((Player*)this)->ApplyResistanceBuffModsPercentMod(SpellSchools(i),true, totalresmods[i], apply);
-                ((Player*)this)->ApplyResistanceBuffModsPercentMod(SpellSchools(i),false, totalresmods[i], apply);
+                ApplyResistanceBuffModsPercentMod(SpellSchools(i),true, totalresmods[i], apply);
+                ApplyResistanceBuffModsPercentMod(SpellSchools(i),false, totalresmods[i], apply);
             }
         }
 
@@ -3647,8 +3647,8 @@ bool Unit::IsHostileTo(Unit const* unit) const
         return true;
 
     // test pet/charm masters instead pers/charmeds
-    Unit const* testerOwner = GetOwner();
-    Unit const* targetOwner = unit->GetOwner();
+    Unit const* testerOwner = GetCharmerOrOwner();
+    Unit const* targetOwner = unit->GetCharmerOrOwner();
 
     // always hostile to owner's enemy
     if(testerOwner && (testerOwner->getVictim()==unit || unit->getVictim()==testerOwner))
@@ -3725,8 +3725,8 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
         return false;
 
     // test pet/charm masters instead pers/charmeds
-    Unit const* testerOwner = GetOwner();
-    Unit const* targetOwner = unit->GetOwner();
+    Unit const* testerOwner = GetCharmerOrOwner();
+    Unit const* targetOwner = unit->GetCharmerOrOwner();
 
     // always non-friendly to owner's enemy
     if(testerOwner && (testerOwner->getVictim()==unit || unit->getVictim()==testerOwner))
@@ -3898,7 +3898,7 @@ bool Unit::isAttackingPlayer() const
     if(pet && pet->isAttackingPlayer())
         return true;
 
-    Creature* charmed = GetCharm();
+    Unit* charmed = GetCharm();
     if(charmed && charmed->isAttackingPlayer())
         return true;
 
@@ -3946,6 +3946,14 @@ Unit *Unit::GetOwner() const
     return ObjectAccessor::Instance().GetUnit(*this, ownerid);
 }
 
+Unit *Unit::GetCharmer() const
+{
+    uint64 charmerid = GetCharmerGUID();
+    if(!charmerid)
+        return NULL;
+    return ObjectAccessor::Instance().GetUnit(*this, charmerid);
+}
+
 Pet* Unit::GetPet() const
 {
     uint64 pet_guid = GetPetGUID();
@@ -3964,12 +3972,12 @@ Pet* Unit::GetPet() const
     return NULL;
 }
 
-Creature* Unit::GetCharm() const
+Unit* Unit::GetCharm() const
 {
     uint64 charm_guid = GetCharmGUID();
     if(charm_guid)
     {
-        Creature* pet = ObjectAccessor::Instance().GetCreature(*this, charm_guid);
+        Unit* pet = ObjectAccessor::Instance().GetUnit(*this, charm_guid);
         if(!pet)
         {
             sLog.outError("Unit::GetCharm: Charmed creature %u not exist.",GUID_LOPART(charm_guid));
@@ -3994,7 +4002,7 @@ void Unit::SetPet(Pet* pet)
     }
 }
 
-void Unit::SetCharm(Creature* charmed)
+void Unit::SetCharm(Unit* charmed)
 {
     SetUInt64Value(UNIT_FIELD_CHARM,charmed ? charmed->GetGUID() : 0);
 }
@@ -4405,11 +4413,11 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
         if(getPowerType() == POWER_FOCUS)
         {
             uint32 happiness = GetPower(POWER_HAPPINESS);
-            if(happiness>=750000)
+            if(happiness>=666000)
                 *pdamage = uint32(*pdamage * 1.25);
-            else if(happiness>=500000)
-                *pdamage = uint32(*pdamage * 1.0);
-            else *pdamage = uint32(*pdamage * 0.75);
+            else if(happiness<333000)
+                *pdamage = uint32(*pdamage * 0.75);
+            else *pdamage = uint32(*pdamage * 1.0);
         }
     }
 

@@ -103,6 +103,21 @@ enum Gossip_Guard_Skill
     GOSSIP_GUARD_SKILL_ENGINERING   = 91
 };
 
+enum ReactStates
+{
+    REACT_PASSIVE    = 0,
+    REACT_DEFENSIVE  = 1,
+    REACT_AGGRESSIVE = 2
+};
+
+enum CommandStates
+{
+    COMMAND_STAY    = 0,
+    COMMAND_FOLLOW  = 1,
+    COMMAND_ATTACK  = 2,
+    COMMAND_ABANDON = 3
+};
+
 struct GossipOption
 {
     uint32 Id;

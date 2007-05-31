@@ -40,7 +40,7 @@ PetAI::PetAI(Creature &c) : i_pet(c), i_victimGuid(0), i_tracker(TIME_INTERVAL_L
 
 void PetAI::MoveInLineOfSight(Unit *u)
 {
-    if( !i_pet.getVictim() && i_pet.isPet() && ((Pet&)i_pet).HasActState(STATE_RA_PROACTIVE) &&
+    if( !i_pet.getVictim() && (i_pet.isPet() && ((Pet&)i_pet).HasActState(STATE_RA_PROACTIVE) || i_pet.isCharmed()) &&
         u->isTargetableForAttack() && i_pet.IsHostileTo( u )  &&
         u->isInAccessablePlaceFor(&i_pet))
     {
@@ -67,19 +67,6 @@ void PetAI::AttackStart(Unit *u)
         i_victimGuid = u->GetGUID();
         i_pet->Mutate(new TargetedMovementGenerator(*u));
     }
-
-    /*SpellEntry *spellInfo;
-    if( ((Pet*)&i_pet)->HasActState(STATE_RA_AUTOSPELL) && (spellInfo = i_pet.reachWithSpellAttack( u )))
-    {
-    Spell *spell = new Spell(&i_pet, spellInfo, false, 0);
-    spell->SetAutoRepeat(true);
-    SpellCastTargets targets;
-    targets.setUnitTarget( u );
-    spell->prepare(&targets);
-    i_pet.m_canMove = false;
-    DEBUG_LOG("Spell Attack.");
-    }
-    else*/
 }
 
 void PetAI::EnterEvadeMode()
@@ -102,7 +89,14 @@ bool PetAI::IsVisible(Unit *pl) const
 
 bool PetAI::_needToStop() const
 {
-    return !i_pet.getVictim() || !i_pet.getVictim()->isTargetableForAttack() || !i_pet.isAlive();
+    if(!i_pet.getVictim() || !i_pet.isAlive())
+        return true;
+
+    // This is needed for charmed creatures, as once their target was reset other effects can trigger threat
+    if(i_pet.isCharmed() && i_pet.getVictim() == i_pet.GetCharmer())
+        return true;
+
+    return !i_pet.getVictim()->isTargetableForAttack();
 }
 
 void PetAI::_stopAttack()
@@ -149,7 +143,7 @@ void PetAI::_stopAttack()
         DEBUG_LOG("Creature stopped attacking due to target out run him [guid=%u]", i_pet.GetGUIDLow());
     }
 
-    Unit* owner = i_pet.GetOwner();
+    Unit* owner = i_pet.GetCharmerOrOwner();
 
     if(((Pet*)&i_pet)->HasActState(STATE_RA_FOLLOW) && owner)
     {
@@ -174,7 +168,7 @@ void PetAI::UpdateAI(const uint32 diff)
     if(i_pet.getVictim())
         i_victimGuid = i_pet.getVictim()->GetGUID();
 
-    Unit* owner = i_pet.GetOwner();
+    Unit* owner = i_pet.GetCharmerOrOwner();
 
     // i_pet.getVictim() can't be used for check in case stop fighting, i_pet.getVictim() clearóâ at Unit death etc.
     if( i_victimGuid )

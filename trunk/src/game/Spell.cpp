@@ -531,7 +531,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_ALL_PARTY_AROUND_CASTER:
         {
-            Unit* owner = m_caster->GetOwner();
+            Unit* owner = m_caster->GetCharmerOrOwner();
             Group  *pGroup = NULL;
             Player *groupMember = NULL;
 
@@ -1607,6 +1607,12 @@ void Spell::SendInterrupted(uint8 result)
 
 void Spell::SendChannelUpdate(uint32 time)
 {
+    if(time == 0)
+    {
+        m_caster->SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT,0);
+        m_caster->SetUInt32Value(UNIT_CHANNEL_SPELL,0);
+    }
+
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
@@ -1615,12 +1621,6 @@ void Spell::SendChannelUpdate(uint32 time)
     data << time;
 
     ((Player*)m_caster)->GetSession()->SendPacket( &data );
-
-    if(time == 0)
-    {
-        m_caster->SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT,0);
-        m_caster->SetUInt32Value(UNIT_CHANNEL_SPELL,0);
-    }
 }
 
 void Spell::SendChannelStart(uint32 duration)
@@ -1945,10 +1945,10 @@ uint8 Spell::CanCast()
         }
 
         // TODO: this check can be applied and for player to prevent cheating when IsPositiveSpell will return always correct result.
-        // check target for pet casts
-        if(m_caster->GetTypeId()==TYPEID_UNIT && ((Creature*)m_caster)->isPet())
+        // check target for pet/charmed casts
+        if(m_caster->GetTypeId()==TYPEID_UNIT && m_caster->GetCharmerOrOwnerGUID())
         {
-            // check corectness positive/negative cast target (pet cast real check and cheating check)
+            // check correctness positive/negative cast target (pet cast real check and cheating check)
             if(IsPositiveSpell(m_spellInfo->Id))
             {
                 if(m_caster->IsHostileTo(target))

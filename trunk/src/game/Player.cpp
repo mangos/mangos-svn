@@ -12148,19 +12148,32 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode)
 
 void Player::Uncharm()
 {
-    Creature* charm = GetCharm();
+    Unit* charm = GetCharm();
     if(!charm) return;
 
     SetCharm(0);
-
-    CreatureInfo const *cinfo = charm->GetCreatureInfo();
     charm->SetUInt64Value(UNIT_FIELD_CHARMEDBY,0);
-    charm->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
 
-    charm->AIM_Initialize();
-    WorldPacket data(SMSG_PET_SPELLS, 8);
-    data << uint64(0);
-    GetSession()->SendPacket(&data);
+    uint32 faction = 0;
+    if(charm->GetTypeId()==TYPEID_PLAYER)
+        faction = Player::getFactionForRace(((Player*)charm)->getRace());
+    else if(Unit* owner = GetOwner())
+        faction = owner->getFaction();
+    else
+    {
+        CreatureInfo const *cinfo = ((Creature*)charm)->GetCreatureInfo();
+        faction = cinfo->faction;
+    }
+
+    charm->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,faction);
+
+    if(charm->GetTypeId()==TYPEID_UNIT && !((Creature*)charm)->isPet())
+    {
+        ((Creature*)charm)->AIM_Initialize();
+        WorldPacket data(SMSG_PET_SPELLS, 8);
+        data << uint64(0);
+        GetSession()->SendPacket(&data);
+    }
 }
 
 void Player::Say(const std::string text, const uint32 language)
@@ -12306,15 +12319,6 @@ void Player::PetSpellInitialize()
         }
 
         data << uint8(addlist);
-        /*data << uint8(0x08); // just for testing pet spell book
-        data << uint32(0x0100433a);
-        data << uint32(0x0100105f);
-        data << uint32(0x01005fe8);
-        data << uint32(0x01005f77);
-        data << uint32(0x01005f7f);
-        data << uint32(0x01005fb6);
-        data << uint32(0x01005fb1);
-        data << uint32(0x01005fb9);*/
 
         if(pet->isControlled())
         {
@@ -12350,7 +12354,7 @@ void Player::PetSpellInitialize()
         // uint32 value is spell id...
         // uint64 value is constant 0, unknown...
         data << uint32(0x6010) << uint64(0);                // if count = 1, 2 or 3
-        //data << uint32(0x5fd1) << uint64(0);  // if count = 2
+        //data << uint32(0x5fd1) << uint64(0);              // if count = 2
         data << uint32(0x8e8c) << uint64(0);                // if count = 3
         data << uint32(0x8e8b) << uint64(0);                // if count = 3
 
@@ -13110,7 +13114,7 @@ void Player::UpdatePvP(bool state, bool ovrride)
         SetPvP(state);
         if(Pet* pet = GetPet())
             pet->SetPvP(state);
-        if(Creature* charmed = GetCharm())
+        if(Unit* charmed = GetCharm())
             charmed->SetPvP(state);
 
         pvpInfo.endTimer = 0;
@@ -13125,7 +13129,7 @@ void Player::UpdatePvP(bool state, bool ovrride)
 
             if(Pet* pet = GetPet())
                 pet->SetPvP(state);
-            if(Creature* charmed = GetCharm())
+            if(Unit* charmed = GetCharm())
                 charmed->SetPvP(state);
         }
     }

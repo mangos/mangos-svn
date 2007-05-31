@@ -510,9 +510,9 @@ void AreaAura::Update(uint32 diff)
         Group *pGroup = NULL;
         if (caster->GetTypeId() == TYPEID_PLAYER)
             pGroup = ((Player*)caster)->groupInfo.group;
-        else if(((Creature*)caster)->isTotem())
+        else if(((Creature*)caster)->isTotem() || ((Creature*)caster)->isPet() || caster->isCharmed())
         {
-            Unit *owner = ((Totem*)caster)->GetOwner();
+            Unit *owner = caster->GetCharmerOrOwner();
             if (owner && owner->GetTypeId() == TYPEID_PLAYER)
                 pGroup = ((Player*)owner)->groupInfo.group;
         }
@@ -530,9 +530,9 @@ void AreaAura::Update(uint32 diff)
                     if(!Target || Target->GetGUID() == m_caster_guid || !Target->isAlive() || !pGroup->SameSubGroup(m_caster_guid, &*itr))
                         continue;
                 }
-                else if(((Creature*)caster)->isTotem())
+                else if(((Creature*)caster)->isTotem() || ((Creature*)caster)->isPet() || caster->isCharmed())
                 {
-                    Unit *owner = ((Totem*)caster)->GetOwner();
+                    Unit *owner = caster->GetCharmerOrOwner();
                     if(!Target || !Target->isAlive() || !pGroup->SameSubGroup(owner->GetGUID(), &*itr))
                         continue;
                 }
@@ -557,10 +557,10 @@ void AreaAura::Update(uint32 diff)
                 }
             }
         }
-        else if (caster->GetTypeId() != TYPEID_PLAYER && ((Creature*)caster)->isTotem())
+        else if (caster->GetTypeId() != TYPEID_PLAYER && ((Creature*)caster)->isTotem() || ((Creature*)caster)->isPet() || caster->isCharmed())
         {
             // add / remove auras from the totem's owner
-            Unit *owner = ((Totem*)caster)->GetOwner();
+            Unit *owner = caster->GetCharmerOrOwner();
             if (owner)
             {
                 Aura *o_aura = owner->GetAura(m_spellId, m_effIndex);
@@ -1583,9 +1583,9 @@ void Aura::HandleModPossess(bool apply, bool Real)
     {
         if( apply )
         {
-            m_target->SetUInt64Value(UNIT_FIELD_CHARMEDBY,GetCasterGUID());
+            m_target->SetCharmerGUID(GetCasterGUID());
             m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,caster->getFaction());
-            caster->SetCharm((Creature*)m_target);
+            caster->SetCharm(m_target);
             if(caster->GetTypeId() == TYPEID_PLAYER)
             {
                 ((Player*)caster)->PetSpellInitialize();
@@ -1594,10 +1594,16 @@ void Aura::HandleModPossess(bool apply, bool Real)
                 caster->AttackStop();
             m_target->CombatStop();
             m_target->DeleteThreatList();
+            if(m_target->GetTypeId() == TYPEID_UNIT)
+            {
+                ((Creature*)m_target)->StopMoving();
+                (*(Creature*)m_target)->Clear();
+                (*(Creature*)m_target)->Idle();
+            }
         }
         else
         {
-            m_target->SetUInt64Value(UNIT_FIELD_CHARMEDBY,0);
+            m_target->SetCharmerGUID(0);
 
             if(m_target->GetTypeId() == TYPEID_PLAYER)
             {
@@ -1668,9 +1674,9 @@ void Aura::HandleModCharm(bool apply, bool Real)
     {
         if( apply )
         {
-            m_target->SetUInt64Value(UNIT_FIELD_CHARMEDBY,GetCasterGUID());
+            m_target->SetCharmerGUID(GetCasterGUID());
             m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,caster->getFaction());
-            caster->SetCharm((Creature*)m_target);
+            caster->SetCharm(m_target);
 
             if(caster->getVictim()==m_target)
                 caster->AttackStop();
@@ -1684,7 +1690,7 @@ void Aura::HandleModCharm(bool apply, bool Real)
         }
         else
         {
-            m_target->SetUInt64Value(UNIT_FIELD_CHARMEDBY,0);
+            m_target->SetCharmerGUID(0);
 
             if(m_target->GetTypeId() == TYPEID_PLAYER)
             {
@@ -2635,7 +2641,7 @@ void Aura::HandleAuraModResistanceExclusive(bool apply, bool Real)
 
             m_target->ApplyResistanceMod(school,m_modifier.m_amount, apply);
             if(m_target->GetTypeId() == TYPEID_PLAYER)
-                ((Player*)m_target)->ApplyResistanceBuffModsMod(school,positive,m_modifier.m_amount, apply);
+                m_target->ApplyResistanceBuffModsMod(school,positive,m_modifier.m_amount, apply);
         }
     }
 }
@@ -2657,8 +2663,8 @@ void Aura::HandleAuraModResistance(bool apply, bool Real)
             SpellSchools school = SpellSchools(SPELL_SCHOOL_NORMAL + x);
 
             m_target->ApplyResistanceMod(school,m_modifier.m_amount, apply);
-            if(m_target->GetTypeId() == TYPEID_PLAYER)
-                ((Player*)m_target)->ApplyResistanceBuffModsMod(school,positive,m_modifier.m_amount, apply);
+            if(m_target->GetTypeId() == TYPEID_PLAYER || ((Creature*)m_target)->isPet())
+                m_target->ApplyResistanceBuffModsMod(school,positive,m_modifier.m_amount, apply);
         }
     }
 }
@@ -2696,10 +2702,10 @@ void Aura::HandleModResistancePercent(bool apply, bool Real)
         if(m_modifier.m_miscvalue & int32(1<<i))
         {
             m_target->ApplyResistancePercentMod(SpellSchools(i), m_modifier.m_amount, apply );
-            if(m_target->GetTypeId() == TYPEID_PLAYER)
+            if(m_target->GetTypeId() == TYPEID_PLAYER || ((Creature*)m_target)->isPet())
             {
-                ((Player*)m_target)->ApplyResistanceBuffModsPercentMod(SpellSchools(i),true,m_modifier.m_amount, apply);
-                ((Player*)m_target)->ApplyResistanceBuffModsPercentMod(SpellSchools(i),false,m_modifier.m_amount, apply);
+                m_target->ApplyResistanceBuffModsPercentMod(SpellSchools(i),true,m_modifier.m_amount, apply);
+                m_target->ApplyResistanceBuffModsPercentMod(SpellSchools(i),false,m_modifier.m_amount, apply);
             }
         }
     }
@@ -2709,7 +2715,11 @@ void Aura::HandleModBaseResistance(bool apply, bool Real)
 {
     // only players have base stats
     if(m_target->GetTypeId() != TYPEID_PLAYER)
+    {
+        if(((Creature*)m_target)->isPet() && m_modifier.m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
+            m_target->ApplyResistanceMod(SPELL_SCHOOL_NORMAL,m_modifier.m_amount, apply);
         return;
+    }
     Player *p_target = (Player*)m_target;
 
     for(int i = 0; i < MAX_SPELL_SCHOOL; i++)
@@ -2734,7 +2744,7 @@ void Aura::HandleAuraModStat(bool apply, bool Real)
         if (m_modifier.m_miscvalue == -1 || m_modifier.m_miscvalue == i)
         {
             m_target->ApplyStatMod(Stats(i), m_modifier.m_amount,apply);
-            if(m_target->GetTypeId() == TYPEID_PLAYER)
+            if(m_target->GetTypeId() == TYPEID_PLAYER || ((Creature*)m_target)->isPet())
             {
                 if (m_modifier.m_miscvalue2 == 0)
                     ((Player*)m_target)->ApplyPosStatMod(Stats(i),m_modifier.m_amount,apply);
