@@ -3346,16 +3346,7 @@ void Player::DurabilityLoss(uint8 equip_pos, double percent)
     if(pDurabilityLoss < 1 )
         pDurabilityLoss = 1;
 
-    uint32 pNewDurability = pDurability - pDurabilityLoss;
-
-    // we have durability 25% or 0 we should modify item stats
-    // modify item stats _before_ Durability set to 0 to pass _ApplyItemMods internal check
-    //        if ( pNewDurability == 0 || pNewDurability * 100 / pDurability < 25)
-    if ( pNewDurability == 0 )
-        _ApplyItemMods(m_items[equip_pos],equip_pos, false);
-
-    m_items[equip_pos]->SetUInt32Value(ITEM_FIELD_DURABILITY, pNewDurability);
-    m_items[equip_pos]->SetState(ITEM_CHANGED, this);
+    DurabilityPointsLoss(equip_pos,pDurabilityLoss);
 }
 
 void Player::DurabilityPointsLoss(uint8 equip_pos, uint32 points)
@@ -3370,9 +3361,7 @@ void Player::DurabilityPointsLoss(uint8 equip_pos, uint32 points)
 
     uint32 pNewDurability = pDurability >= points ? pDurability - points : 0;
 
-    // we have durability 25% or 0 we should modify item stats
     // modify item stats _before_ Durability set to 0 to pass _ApplyItemMods internal check
-    //        if ( pNewDurability == 0 || pNewDurability * 100 / pDurability < 25)
     if ( pNewDurability == 0 )
         _ApplyItemMods(m_items[equip_pos],equip_pos, false);
 

@@ -165,11 +165,11 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //108 SPELL_EFFECT_DISPEL_MECHANIC
     &Spell::EffectSummonDeadPet,                            //109 SPELL_EFFECT_SUMMON_DEAD_PET
     &Spell::EffectNULL,                                     //110 SPELL_EFFECT_DESTROY_ALL_TOTEMS
-    &Spell::EffectNULL,                                     //111 SPELL_EFFECT_DURABILITY_DAMAGE
+    &Spell::EffectDurabilityDamage,                         //111 SPELL_EFFECT_DURABILITY_DAMAGE
     &Spell::EffectNULL,                                     //112 SPELL_EFFECT_SUMMON_DEMON
     &Spell::EffectResurrectNew,                             //113 SPELL_EFFECT_RESURRECT_NEW
     &Spell::EffectAttackMe,                                 //114 SPELL_EFFECT_ATTACK_ME
-    &Spell::EffectNULL,                                     //115 SPELL_EFFECT_DURABILITY_DAMAGE_PCT
+    &Spell::EffectDurabilityDamagePCT,                      //115 SPELL_EFFECT_DURABILITY_DAMAGE_PCT
     &Spell::EffectNULL,                                     //116 SPELL_EFFECT_SKIN_PLAYER_CORPSE       one spell: Remove Insignia, bg usage, required special corpse flags...
     &Spell::EffectNULL,                                     //117 SPELL_EFFECT_SPIRIT_HEAL              one spell: Spirit Heal
     &Spell::EffectSkill,                                    //118 SPELL_EFFECT_SKILL                    professions and more
@@ -3009,6 +3009,48 @@ void Spell::EffectSummonDeadPet(uint32 i)
 
     _player->PetSpellInitialize();
     pet->SavePetToDB(PET_SAVE_AS_CURRENT);
+}
+
+void Spell::EffectDurabilityDamage(uint32 i)
+{
+    if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    int32 slot = m_spellInfo->EffectMiscValue[i];
+
+    // FIXME: some spells effects have value -1/-2 (don't know what do for its :/ )
+    if(slot < 0)
+        return;
+
+    // invalid slot value
+    if(slot >= INVENTORY_SLOT_BAG_END)
+        return;
+
+    if(damage <= 0)
+        return;
+
+    ((Player*)unitTarget)->DurabilityPointsLoss(slot,damage);
+}
+
+void Spell::EffectDurabilityDamagePCT(uint32 i)
+{
+    if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    int32 slot = m_spellInfo->EffectMiscValue[i];
+
+    // FIXME: some spells effects have value -1/-2 (don't know what do for its :/ )
+    if(slot < 0)
+        return;
+
+    // invalid slot value
+    if(slot >= INVENTORY_SLOT_BAG_END)
+        return;
+
+    if(damage <= 0)
+        return;
+
+    ((Player*)unitTarget)->DurabilityLoss(slot,double(damage)/100);
 }
 
 void Spell::EffectTransmitted(uint32 i)
