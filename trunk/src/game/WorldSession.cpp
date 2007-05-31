@@ -383,7 +383,6 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_CANCEL_CHANNELLING  ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleCancelChanneling              );
 
         //BattleGround
-
     objmgr.opcodeTable[ CMSG_BATTLEFIELD_STATUS ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBattlefieldStatusOpcode       );
     objmgr.opcodeTable[ CMSG_BATTLEMASTER_HELLO ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundHelloOpcode       );
     objmgr.opcodeTable[ CMSG_BATTLEMASTER_JOIN ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundJoinOpcode        );
@@ -432,6 +431,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_ARENA_TEAM_LEAVE ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamLeaveOpcode          );
     objmgr.opcodeTable[ CMSG_ARENA_TEAM_DISBAND ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamDisbandOpcode        );
     objmgr.opcodeTable[ CMSG_AREA_SPIRIT_HEALER_QUERY ]         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAreaSpiritHealerQueryOpcode   );
+    objmgr.opcodeTable[ CMSG_AREA_SPIRIT_HEALER_QUEUE ]         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAreaSpiritHealerQueueOpcode   );
     objmgr.opcodeTable[ CMSG_MOVE_SHIP_909 ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMoveShipOpcode                );
     objmgr.opcodeTable[ CMSG_MOVE_FLY_STATE_CHANGE ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMoveFlyStateChangeOpcode      );
     objmgr.opcodeTable[ CMSG_DISMOUNT ]                         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleDismountOpcode                );
@@ -1183,7 +1183,7 @@ void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if(charname.size())
+    if(!charname.size())
     {
         SendNotification("Please provide character name");
         return;
@@ -1221,7 +1221,7 @@ void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
         lastip = fields[2].GetCppString();
         if(!lastip.size())
             lastip = "Unknown";
-        msg = charname + "'s " + "account is " + acc + ", e-mail " + email + ", last ip: " + lastip;
+        msg = charname + "'s " + "account is " + acc + ", e-mail: " + email + ", last ip: " + lastip;
 
         WorldPacket data(SMSG_WHOIS,msg.size()+1);
         data << msg;
@@ -1264,12 +1264,6 @@ E4 4F B8 40 58 E7 4B 40 | 00 00 00 00 00 00 00 00
 3A B2 CD 45 C3 5B 3F 44 | E4 4F B8 40 58 E7 4B 40
 D4 D7 E0 00 CF 00 00 00 | E4 4F B8 40
 */
-}
-
-void WorldSession::HandleAreaSpiritHealerQueryOpcode( WorldPacket & recv_data )
-{
-    sLog.outDebug("WORLD: CMSG_AREA_SPIRIT_HEALER_QUERY");
-    recv_data.hexlike();
 }
 
 void WorldSession::HandleDismountOpcode( WorldPacket & recv_data )

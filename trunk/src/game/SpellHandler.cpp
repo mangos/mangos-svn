@@ -26,6 +26,7 @@
 #include "Spell.h"
 #include "SpellAuras.h"
 #include "BattleGroundMgr.h"
+#include "BattleGroundWS.h"
 #include "MapManager.h"
 #include "ScriptCalls.h"
 
@@ -401,7 +402,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             spellTarget = targetPlayer;
 
             // prepare data for final summoning (before current spell finish to prevent access to deleted GO)
-            info = obj->GetGOInfo();
+            //info = obj->GetGOInfo();
             spellId = info->sound1;
 
             // finish spell
@@ -437,16 +438,43 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             break;
         }
 
-        case GAMEOBJECT_TYPE_FLAGSTAND:                     //24
+        case GAMEOBJECT_TYPE_FLAGSTAND:                     // 24
             if(_player->InBattleGround() &&                 // in battleground
                 !_player->IsMounted() &&                    // not mounted
                 !_player->HasStealthAura() &&               // not stealthed
                 !_player->HasInvisibilityAura())            // not invisible
             {
+                BattleGround *bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundId());
+                if(!bg)
+                    return;
+                // AB:
+                // 15001
+                // 15002
+                // 15003
+                // 15004
+                // 15005
+                // WSG:
+                // 179830 - Silverwing Flag
+                // 179831 - Warsong Flag
+                // EotS:
+                // 184141 - Netherstorm Flag
                 //BG flag click
                 info = obj->GetGOInfo();
                 if(info)
-                    spellId = info->sound1;
+                {
+                    switch(info->id)
+                    {
+                        case 179830:
+                            spellId = 23335;    // Silverwing Flag
+                            break;
+                        case 179831:
+                            spellId = 23333;    // Warsong Flag
+                            break;
+                        case 184141:
+                            spellId = 34976;    // Netherstorm Flag
+                            break;
+                    }
+                }
             }
             break;
         case GAMEOBJECT_TYPE_FLAGDROP:                      // 26
@@ -455,27 +483,49 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                 !_player->HasStealthAura() &&               // not stealthed
                 !_player->HasInvisibilityAura())            // not invisible
             {
+                BattleGround *bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundId());
+                if(!bg)
+                    return;
                 //BG flag dropped
+                // WSG:
+                // 179785 - Silverwing Flag
+                // 179786 - Warsong Flag
+                // EotS:
+                // 184142 - Netherstorm Flag
                 info = obj->GetGOInfo();
-                if(info->id == 179785)                      // Silverwing Flag
+                if(info)
                 {
-                    if(_player->GetTeam() == ALLIANCE)
-                        spellId = 23385;                    // Alliance Flag Returns
-                    if(_player->GetTeam() == HORDE)
-                        spellId = 23335;                    // Silverwing Flag
-                }
-                if(info->id == 179786)                      // Warsong Flag
-                {
-                    if(_player->GetTeam() == HORDE)
-                        spellId = 23386;                    // Horde Flag Returns
-                    if(_player->GetTeam() == ALLIANCE)
-                        spellId = 23333;                    // Warsong Flag
+                    switch(info->id)
+                    {
+                        case 179785:                        // Silverwing Flag
+                            if(_player->GetTeam() == ALLIANCE)
+                            {
+                                if(bg->GetID() == BATTLEGROUND_WS_ID)
+                                    ((BattleGroundWS*)bg)->EventPlayerReturnedFlag(_player);
+                                obj->Delete();
+                                return;
+                            }
+                            if(_player->GetTeam() == HORDE)
+                                spellId = 23335;            // Silverwing Flag
+                            break;
+                        case 179786:                        // Warsong Flag
+                            if(_player->GetTeam() == HORDE)
+                            {
+                                if(bg->GetID() == BATTLEGROUND_WS_ID)
+                                    ((BattleGroundWS*)bg)->EventPlayerReturnedFlag(_player);
+                                obj->Delete();
+                                return;
+                            }
+                            if(_player->GetTeam() == ALLIANCE)
+                                spellId = 23333;            // Warsong Flag
+                            break;
+                    }
                 }
                 obj->Delete();
             }
             break;
         default:
-            sLog.outDebug( "Unknown Object Type %u\n", obj->GetUInt32Value(GAMEOBJECT_TYPE_ID));
+            sLog.outDebug("Unknown Object Type %u\n", obj->GetUInt32Value(GAMEOBJECT_TYPE_ID));
             break;
     }
 

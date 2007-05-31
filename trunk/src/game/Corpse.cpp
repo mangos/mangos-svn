@@ -192,7 +192,7 @@ bool Corpse::LoadFromDB(uint32 guid, Field *fields)
 
 void Corpse::UpdateForPlayer(Player* player, bool first)
 {
-    if(player && player->GetGUID() == GetOwnerGUID() && IsInMap(player))
+    /*if(player && player->GetGUID() == GetOwnerGUID() && IsInMap(player))
     {
         bool POI_range = (GetDistance2dSq(player) > CORPSE_RECLAIM_RADIUS*CORPSE_RECLAIM_RADIUS);
 
@@ -204,7 +204,7 @@ void Corpse::UpdateForPlayer(Player* player, bool first)
         }
 
         m_POI = POI_range;
-    }
+    }*/
 }
 
 void Corpse::_ConvertCorpseToBones()
@@ -227,9 +227,9 @@ void Corpse::_ConvertCorpseToBones()
         return;
     }
 
-    // Removing outdated POI if at same map
+    /*// Removing outdated POI if at same map
     if(player && IsInMap(player))
-        player->PlayerTalkClass->SendPointOfInterest( GetPositionX(), GetPositionY(), ICON_POI_TOMB, 0, 30, "" );
+        player->PlayerTalkClass->SendPointOfInterest( GetPositionX(), GetPositionY(), ICON_POI_TOMB, 0, 30, "" );*/
 
     DEBUG_LOG("Deleting Corpse and spawning bones.\n");
 
@@ -259,7 +259,11 @@ void Corpse::_ConvertCorpseToBones()
     // update data to bone state
     bones->m_type = CORPSE_BONES;
 
-    bones->SetUInt32Value(CORPSE_FIELD_FLAGS, 5);
+    uint32 flags = 0x05;
+    if(player->InBattleGround())
+        flags |= 0x20;                                  // make it lootable for money, TODO: implement effect
+    bones->SetUInt32Value(CORPSE_FIELD_FLAGS, flags);
+
     bones->SetUInt64Value(CORPSE_FIELD_OWNER, 0);
 
     for (int i = 0; i < EQUIPMENT_SLOT_END; i++)

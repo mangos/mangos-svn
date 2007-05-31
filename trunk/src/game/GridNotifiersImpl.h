@@ -84,7 +84,7 @@ inline void
 MaNGOS::ObjectUpdater::Visit(CreatureMapType &m)
 {
     for(CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-        if(!iter->second->isSpiritHealer())
+        if(!iter->second->isSpiritHealer() || !iter->second->isSpiritGuide())
             iter->second->Update(i_timeDiff);
 }
 

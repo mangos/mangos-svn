@@ -293,7 +293,6 @@ ConsecutiveMovePacket.MaxRange = 4.6
 #  Putting 1 will disable Filter on consecutive packet.
 ConsecutiveMovePacket.MaxCount = 9
 
-
 # Unload grids (if you have lot memory you can disbale it to speed up player move to new grids second time)
 #          0 (not unload grids)
 # Default: 1 (unload grids)

@@ -3551,4 +3551,3 @@ void ObjectMgr::LoadPlayerDump(char *file, uint32 account)
     m_hiCharGuid++;
     fclose(fin);
 }
-

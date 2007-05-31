@@ -2838,6 +2838,3 @@ void Spell::UpdatePointers()
 
     m_targets.Update(m_caster);
 }
-
-
-

@@ -997,6 +997,13 @@ void Player::BuildEnumData( WorldPacket * p_data )
     *p_data << GetUInt32Value(PLAYER_GUILDID);              // guild id
 
     *p_data << uint8(0x0);                                  // different values on off, looks like flags
+    // 0x01
+    // 0x02
+    // 0x04 - CHAR_LOGIN_LOCKED_FOR_TRANSFER
+    // 0x08
+    // 0x10
+    // 0x20
+    // 0x40
 
     uint8 flags = 0;
     if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM))
@@ -1007,7 +1014,7 @@ void Player::BuildEnumData( WorldPacket * p_data )
         flags |= 0x20;
     if(isNeedRename())
         flags |= 0x40;
-    *p_data << uint8(flags);    // flags description below
+    *p_data << uint8(flags);                                // flags description below
     // 0x01 - unknown
     // 0x02 - unknown
     // 0x04 - hide helm
@@ -1016,10 +1023,12 @@ void Player::BuildEnumData( WorldPacket * p_data )
     // 0x20 - dead(ghost)
     // 0x40 - need rename
 
-    *p_data << uint8(0xa0);                                 // Bit 4 is something dono
-    *p_data << uint8(0x0);                                  // is this player_GUILDRANK????
+    *p_data << uint8(0xa0);                                 // unknown
 
-    *p_data << (uint8)1;                                    // 0x1 there
+    *p_data << uint8(0x0);                                  // ?
+    // 0x01 - CHAR_LOGIN_LOCKED_BY_BILLING
+
+    *p_data << (uint8)1;                                    // unknown
 
     // Pets info
     {
@@ -3290,7 +3299,12 @@ void Player::CreateCorpse()
 
     corpse->SetUInt32Value( CORPSE_FIELD_BYTES_1, _cfb1 );
     corpse->SetUInt32Value( CORPSE_FIELD_BYTES_2, _cfb2 );
-    corpse->SetUInt32Value( CORPSE_FIELD_FLAGS, 4 );
+
+    uint32 flags = 0x04;
+    if(InBattleGround())
+        flags |= 0x20;                                  // make it lootable for money
+    corpse->SetUInt32Value( CORPSE_FIELD_FLAGS, flags );
+
     corpse->SetUInt32Value( CORPSE_FIELD_DISPLAY_ID, GetUInt32Value(UNIT_FIELD_DISPLAYID) );
 
     uint32 iDisplayID;
@@ -4835,7 +4849,8 @@ void Player::UpdateZone(uint32 newZone)
     }
     else                                                    // anywhere else
     {
-        if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) && GetRestType()==2)
+        //if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) && GetRestType()==2)
+        if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
         {
             RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
         }
@@ -5053,15 +5068,15 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
 
         switch (proto->ItemStat[i].ItemStatType)
         {
-            case ITEM_STAT_POWER:                           // modify MP
+            case ITEM_MOD_MANA:
                 ApplyMaxPowerMod(POWER_MANA, val, apply);
                 //typestr = "Mana";
                 break;
-            case ITEM_STAT_HEALTH:                          // modify HP
+            case ITEM_MOD_HEALTH:                          // modify HP
                 ApplyMaxHealthMod(val, apply);
                 //typestr = "Health";
                 break;
-            case ITEM_STAT_AGILITY:                         // modify agility
+            case ITEM_MOD_AGILITY:                         // modify agility
                 ApplyStatMod(STAT_AGILITY,                val, apply);
                 if(val > 0)
                     ApplyPosStatMod(STAT_AGILITY,         val, apply);
@@ -5069,7 +5084,7 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
                     ApplyNegStatMod(STAT_AGILITY,        -val, apply);
                 //typestr = "AGILITY";
                 break;
-            case ITEM_STAT_STRENGTH:                        //modify strength
+            case ITEM_MOD_STRENGTH:                        //modify strength
                 ApplyStatMod(STAT_STRENGTH,               val, apply);
                 if(val > 0)
                     ApplyPosStatMod(STAT_STRENGTH,        val, apply);
@@ -5077,7 +5092,7 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
                     ApplyNegStatMod(STAT_STRENGTH,       -val, apply);
                 //typestr = "STRENGHT";
                 break;
-            case ITEM_STAT_INTELLECT:                       //modify intellect
+            case ITEM_MOD_INTELLECT:                       //modify intellect
                 ApplyStatMod(STAT_INTELLECT,              val, apply);
                 if(val > 0)
                     ApplyPosStatMod(STAT_INTELLECT,       val, apply);
@@ -5086,7 +5101,7 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
                 //ApplyMaxPowerMod(POWER_MANA,              val*15, apply);
                 //typestr = "INTELLECT";
                 break;
-            case ITEM_STAT_SPIRIT:                          //modify spirit
+            case ITEM_MOD_SPIRIT:                          //modify spirit
                 ApplyStatMod(STAT_SPIRIT,                 val, apply);
                 if(val > 0)
                     ApplyPosStatMod(STAT_SPIRIT,          val, apply);
@@ -5094,7 +5109,7 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
                     ApplyNegStatMod(STAT_SPIRIT,         -val, apply);
                 //typestr = "SPIRIT";
                 break;
-            case ITEM_STAT_STAMINA:                         //modify stamina
+            case ITEM_MOD_STAMINA:                         //modify stamina
                 ApplyStatMod(STAT_STAMINA,                val, apply);
                 if(val > 0)
                     ApplyPosStatMod(STAT_STAMINA,         val, apply);
@@ -5104,79 +5119,79 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
                 //typestr = "STAMINA";
                 break;
 
-            case ITEM_STAT_DEFENCE_RATING:
+            case ITEM_MOD_DEFENSE_SKILL_RATING:
                 ApplyRatingMod(PLAYER_FIELD_DEFENCE_RATING, val, apply);
                 break;
-            case ITEM_STAT_DODGE_RATING:
+            case ITEM_MOD_DODGE_RATING:
                 ApplyRatingMod(PLAYER_FIELD_DODGE_RATING, val, apply);
                 break;
-            case ITEM_STAT_PARRY_RATING:
+            case ITEM_MOD_PARRY_RATING:
                 ApplyRatingMod(PLAYER_FIELD_PARRY_RATING, val, apply);
                 break;
-            case ITEM_STAT_SHIELD_BLOCK_RATING:
+            case ITEM_MOD_BLOCK_RATING:
                 ApplyRatingMod(PLAYER_FIELD_BLOCK_RATING, val, apply);
                 break;
-            case ITEM_STAT_MELEE_HIT_RATING:
+            case ITEM_MOD_HIT_MELEE_RATING:
                 ApplyRatingMod(PLAYER_FIELD_MELEE_HIT_RATING, val, apply);
                 break;
-            case ITEM_STAT_RANGED_HIT_RATING:
+            case ITEM_MOD_HIT_RANGED_RATING:
                 ApplyRatingMod(PLAYER_FIELD_RANGED_HIT_RATING, val, apply);
                 break;
-            case ITEM_STAT_SPELL_HIT_RATING:
+			case ITEM_MOD_HIT_SPELL_RATING:
                 ApplyRatingMod(PLAYER_FIELD_SPELL_HIT_RATING, val, apply);
                 break;
-            case ITEM_STAT_MELEE_CS_RATING:
+            case ITEM_MOD_CRIT_MELEE_RATING:
                 ApplyRatingMod(PLAYER_FIELD_MELEE_CRIT_RATING, val, apply);
                 break;
-            case ITEM_STAT_RANGED_CS_RATING:
+            case ITEM_MOD_CRIT_RANGED_RATING:
                 ApplyRatingMod(PLAYER_FIELD_RANGED_CRIT_RATING, val, apply);
                 break;
-            case ITEM_STAT_SPELL_CS_RATING:
+            case ITEM_MOD_CRIT_SPELL_RATING:
                 ApplyRatingMod(PLAYER_FIELD_SPELL_CRIT_RATING, val, apply);
                 break;
-            case ITEM_STAT_MELEE_HA_RATING:
+            case ITEM_MOD_HIT_TAKEN_MELEE_RATING:
                 //ApplyRatingMod(PLAYER_FIELD_MELEE_HA_RATING, val, apply);
                 break;
-            case ITEM_STAT_RANGED_HA_RATING:
+            case ITEM_MOD_HIT_TAKEN_RANGED_RATING:
                 //ApplyRatingMod(PLAYER_FIELD_RANGED_HA_RATING, val, apply);
                 break;
-            case ITEM_STAT_SPELL_HA_RATING:
+            case ITEM_MOD_HIT_TAKEN_SPELL_RATING:
                 //ApplyRatingMod(PLAYER_FIELD_SPELL_HA_RATING, val, apply);
                 break;
-            case ITEM_STAT_MELEE_CA_RATING:
+            case ITEM_MOD_CRIT_TAKEN_MELEE_RATING:
                 //ApplyRatingMod(PLAYER_FIELD_MELEE_CA_RATING, val, apply);
                 break;
-            case ITEM_STAT_RANGED_CA_RATING:
+            case ITEM_MOD_CRIT_TAKEN_RANGED_RATING:
                 //ApplyRatingMod(PLAYER_FIELD_RANGED_CA_RATING, val, apply);
                 break;
-            case ITEM_STAT_SPELL_CA_RATING:
+            case ITEM_MOD_CRIT_TAKEN_SPELL_RATING:
                 //ApplyRatingMod(PLAYER_FIELD_SPELL_CA_RATING, val, apply);
                 break;
-            case ITEM_STAT_MELEE_HASTE_RATING:
+            case ITEM_MOD_HASTE_MELEE_RATING:
                 ApplyRatingMod(PLAYER_FIELD_MELEE_HASTE_RATING, val, apply);
                 break;
-            case ITEM_STAT_RANGED_HASTE_RATING:
+            case ITEM_MOD_HASTE_RANGED_RATING:
                 ApplyRatingMod(PLAYER_FIELD_RANGED_HASTE_RATING, val, apply);
                 break;
-            case ITEM_STAT_SPELL_HASTE_RATING:
+            case ITEM_MOD_HASTE_SPELL_RATING:
                 ApplyRatingMod(PLAYER_FIELD_SPELL_HASTE_RATING, val, apply);
                 break;
-            case ITEM_STAT_HIT_RATING:
+            case ITEM_MOD_HIT_RATING:
                 ApplyRatingMod(PLAYER_FIELD_HIT_RATING, val, apply);
                 break;
-            case ITEM_STAT_CS_RATING:
+            case ITEM_MOD_CRIT_RATING:
                 ApplyRatingMod(PLAYER_FIELD_CRIT_RATING, val, apply);
                 break;
-            case ITEM_STAT_HA_RATING:
+            case ITEM_MOD_HIT_TAKEN_RATING:
                 //ApplyRatingMod(PLAYER_FIELD_HA_RATING, val, apply);
                 break;
-            case ITEM_STAT_CA_RATING:
+            case ITEM_MOD_CRIT_TAKEN_RATING:
                 //ApplyRatingMod(PLAYER_FIELD_CA_RATING, val, apply);
                 break;
-            case ITEM_STAT_RESILIENCE_RATING:
+            case ITEM_MOD_RESILIENCE_RATING:
                 ApplyRatingMod(PLAYER_FIELD_RESILIENCE_RATING, val, apply);
                 break;
-            case ITEM_STAT_HASTE_RATING:
+            case ITEM_MOD_HASTE_RATING:
                 ApplyRatingMod(PLAYER_FIELD_MELEE_HASTE_RATING, val, apply);
                 ApplyRatingMod(PLAYER_FIELD_RANGED_HASTE_RATING, val, apply);
                 ApplyRatingMod(PLAYER_FIELD_SPELL_HASTE_RATING, val, apply);
@@ -9035,83 +9050,83 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
             sLog.outDebug("Adding %u to stat nb %u",enchant_amount,enchant_spell_id);
             switch (enchant_spell_id)
             {
-            case ITEM_STAT_AGILITY:
+            case ITEM_MOD_AGILITY:
                 sLog.outDebug("+ %u AGILITY",enchant_amount);
                 ApplyPosStatMod(STAT_AGILITY, enchant_amount, apply);
                 ApplyStatMod(STAT_AGILITY, enchant_amount, apply);
                 break;
-            case ITEM_STAT_STRENGTH:
+            case ITEM_MOD_STRENGTH:
                 sLog.outDebug("+ %u STRENGTH",enchant_amount);
                 ApplyPosStatMod(STAT_STRENGTH, enchant_amount, apply);
                 ApplyStatMod(STAT_STRENGTH, enchant_amount, apply);
                 break;
-            case ITEM_STAT_INTELLECT:
+            case ITEM_MOD_INTELLECT:
                 sLog.outDebug("+ %u INTELLECT",enchant_amount);
                 ApplyPosStatMod(STAT_INTELLECT, enchant_amount, apply);
                 ApplyStatMod(STAT_INTELLECT, enchant_amount, apply);
                 break;
-            case ITEM_STAT_SPIRIT:
+            case ITEM_MOD_SPIRIT:
                 sLog.outDebug("+ %u SPIRIT",enchant_amount);
                 ApplyPosStatMod(STAT_SPIRIT, enchant_amount, apply);
                 ApplyStatMod(STAT_SPIRIT, enchant_amount, apply);
                 break;
-            case ITEM_STAT_STAMINA:
+            case ITEM_MOD_STAMINA:
                 sLog.outDebug("+ %u STAMINA",enchant_amount);
                 ApplyPosStatMod(STAT_STAMINA, enchant_amount, apply);
                 ApplyStatMod(STAT_STAMINA, enchant_amount, apply);
                 break;
-            case ITEM_STAT_DEFENCE_RATING:
+            case ITEM_MOD_DEFENSE_SKILL_RATING:
                 ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_DEFENCE_RATING, enchant_amount, apply);
                 sLog.outDebug("+ %u DEFENCE", enchant_amount);
                 break;
-            case ITEM_STAT_DODGE_RATING:
+            case  ITEM_MOD_DODGE_RATING:
                 ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_DODGE_RATING, enchant_amount, apply);
                 sLog.outDebug("+ %u DODGE", enchant_amount);
                 break;
-            case ITEM_STAT_PARRY_RATING:
+            case ITEM_MOD_PARRY_RATING:
                 ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_PARRY_RATING, enchant_amount, apply);
                 sLog.outDebug("+ %u PARRY", enchant_amount);
                 break;
-            case ITEM_STAT_SHIELD_BLOCK_RATING:
+            case ITEM_MOD_BLOCK_RATING:
                 ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_BLOCK_RATING, enchant_amount, apply);
                 sLog.outDebug("+ %u SHIELD_BLOCK", enchant_amount);
                 break;
-            case ITEM_STAT_MELEE_HIT_RATING:
+            case ITEM_MOD_HIT_MELEE_RATING:
                 ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_HIT_RATING, enchant_amount, apply);
                 sLog.outDebug("+ %u MELEE_HIT", enchant_amount);
                 break;
-            case ITEM_STAT_RANGED_HIT_RATING:
+            case ITEM_MOD_HIT_RANGED_RATING:
                 ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_HIT_RATING, enchant_amount, apply);
                 sLog.outDebug("+ %u RANGED_HIT", enchant_amount);
                 break;
-            case ITEM_STAT_SPELL_HIT_RATING:
+            case ITEM_MOD_HIT_SPELL_RATING:
                 ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_HIT_RATING, enchant_amount, apply);
                 sLog.outDebug("+ %u SPELL_HIT", enchant_amount);
                 break;
-            case ITEM_STAT_MELEE_CS_RATING: // CS = Critical Strike
+            case ITEM_MOD_CRIT_MELEE_RATING: // CS = Critical Strike
                 ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_CRIT_RATING, enchant_amount, apply);
                 sLog.outDebug("+ %u MELEE_CRIT", enchant_amount);
                 break;
-            case ITEM_STAT_RANGED_CS_RATING:
+            case ITEM_MOD_CRIT_RANGED_RATING:
                 ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_CRIT_RATING, enchant_amount, apply);
                 sLog.outDebug("+ %u RANGED_CRIT", enchant_amount);
                 break;
-            case ITEM_STAT_SPELL_CS_RATING:
+            case ITEM_MOD_CRIT_SPELL_RATING:
                 ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_CRIT_RATING, enchant_amount, apply);
                 sLog.outDebug("+ %u SPELL_CRIT", enchant_amount);
                 break;
                 // Values from ITEM_STAT_MELEE_HA_RATING to ITEM_STAT_SPELL_HASTE_RATING are never used
                 // in Enchantments
-            case ITEM_STAT_HIT_RATING:
+            case ITEM_MOD_HIT_RATING:
                 ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_HIT_RATING, enchant_amount, apply);
                 sLog.outDebug("+ %u HIT", enchant_amount);
                 break;
-            case ITEM_STAT_CS_RATING:
+            case ITEM_MOD_CRIT_RATING:
                 ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_CRIT_RATING, enchant_amount, apply);
                 sLog.outDebug("+ %u CRITICAL", enchant_amount);
                 break;
                 // Values ITEM_STAT_HA_RATING and ITEM_STAT_CA_RATING are never used in Enchantment
-            case ITEM_STAT_RESILIENCE_RATING:
+            case ITEM_MOD_RESILIENCE_RATING:
                 ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RESILIENCE_RATING, enchant_amount, apply);
                 sLog.outDebug("+ %u RESILIENCE", enchant_amount);
                 break;

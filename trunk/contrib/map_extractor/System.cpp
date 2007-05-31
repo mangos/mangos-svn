@@ -12,8 +12,8 @@ extern unsigned int iRes;
 bool ConvertADT(char*,char*);
 
 typedef struct{
-	char name[64];
-	unsigned int id;
+    char name[64];
+    unsigned int id;
 }map_id;
 
 typedef unsigned char uint8;
@@ -30,9 +30,9 @@ typedef bool extr_map[64][64];
 
 void Usage(char* prg)
 {
-	printf("Usage:\n%s -[var] [value]\n-i set input path\n-o set output path\n-r set resolution\nExample: %s -r 256 -i \"c:\\games\\game\"",
+    printf("Usage:\n%s -[var] [value]\n-i set input path\n-o set output path\n-r set resolution\nExample: %s -r 256 -i \"c:\\games\\game\"",
     prg,prg);
-	exit(1);
+    exit(1);
 }
 
 void ExtractMapsFromMpq()
@@ -43,18 +43,18 @@ void ExtractMapsFromMpq()
     //  sprintf(tmp,"%s/Data/%s",input_path,filename);
 
     //MPQArchive* p=new MPQArchive(tmp);
-    //	map_count=1;
+    //map_count=1;
     unsigned int total=map_count*64*64;
     unsigned int done=0;
 
     for(unsigned int x=0;x<64;x++)
     {
         for(unsigned int z=0;z<map_count;z++)
-        {	
+        {
             for(unsigned int y=0;y<64;y++)
             {
                 sprintf(mpq_filename,"World\\Maps\\%s\\%s_%u_%u.adt",map_ids[z].name,map_ids[z].name,x,y);
-                //	maps_extr[z][x][y]=true;
+                //maps_extr[z][x][y]=true;
                 sprintf(output_filename,"%s/maps/%03u%02u%02u.map",output_path,map_ids[z].id,y,x);
                 //maps_extr[z][x][y]=
                 ConvertADT(mpq_filename,output_filename);
@@ -82,9 +82,9 @@ int main(int argc, char * arg[])
         //o - output path
         //r - resolution, array of (r * r) heights will be created 
         if(arg[c][0]!='-')
-		
+
         Usage(arg[0]);
-		
+
         switch(arg[c][1])
         {
         case 'i':
@@ -101,9 +101,9 @@ int main(int argc, char * arg[])
             if(c+1<argc)//all ok
                 iRes=atoi(arg[(c++) +1]);
             else Usage(arg[0]);
-            break;	
-		}
-	}
+            break;
+        }
+    }
 
     std::vector<MPQArchive*> archives;
 
@@ -189,7 +189,7 @@ int main(int argc, char * arg[])
     {
         if(maxi<dbc->getRecord(x).getUInt(0))
             maxi=dbc->getRecord(x).getUInt(0);
-            //	printf("\n%d %d",dbc->getRecord(x).getUInt(0),dbc->getRecord(x).getUInt(3));
+            //printf("\n%d %d",dbc->getRecord(x).getUInt(0),dbc->getRecord(x).getUInt(3));
     }
     maxi++;//not needed actually
     areas=new uint16[maxi];
@@ -209,8 +209,8 @@ int main(int argc, char * arg[])
 /*  // This would be nice someday (don't have time to get it to work right now):
     cout << "Extracting dbc files..." << endl;
     for (size_t i=3; i>0; i--)
-	{
-		vector<string> files = archives[i]->GetFileList();
+    {
+        vector<string> files = archives[i]->GetFileList();
         for (vector<string>::iterator iter = files.begin(); iter != files.end(); iter++) {
             if (memcmp((void *)(iter->c_str()), "DBFilesClient\\", strlen("DBFilesClient\\")) == 0) {
                 string tmp = "./dbc/";
@@ -219,7 +219,7 @@ int main(int argc, char * arg[])
                 //if ((hash.blockindex != 0xFFFFFFFF) && (hash.blockindex != 0)) {
                     MPQFile m(iter->c_str());
                     if(!m.isEof ()) {
-	                    int fd = _open(tmp.c_str(), O_RDWR|O_CREAT|O_TRUNC, 0644);
+                        int fd = _open(tmp.c_str(), O_RDWR|O_CREAT|O_TRUNC, 0644);
                         _write(fd, m.getBuffer(), m.getSize());
                         _close(fd);
                     }
@@ -230,6 +230,6 @@ int main(int argc, char * arg[])
                 //cout << iter->c_str() << endl;
         }
     }
-*/	
+*/
     return (0); // Exit The Program
 }

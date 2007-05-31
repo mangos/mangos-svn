@@ -239,7 +239,6 @@ struct EnchantDuration
 
 typedef std::list<EnchantDuration> EnchantDurationList;
 
-
 struct LookingForGroupSlot
 {
     LookingForGroupSlot() : entry(0), type(0) {}

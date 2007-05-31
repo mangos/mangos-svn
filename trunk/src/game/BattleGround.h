@@ -71,7 +71,7 @@ struct BattleGroundPlayer
     uint32  Team;                                           // Player's team
 };
 
-#define MAX_QUEUED_PLAYERS_MAP 6
+#define MAX_QUEUED_PLAYERS_MAP 7
 
 enum BattleGroundId
 {
@@ -108,6 +108,8 @@ class BattleGround
         uint32 GetStartTime() const { return m_StartTime; };
         void SetEndTime(uint32 Time) { m_EndTime = Time; };
         uint32 GetEndTime() const { return m_EndTime; };
+        uint32 GetLastResurrectTime() const { return m_LastResurrectTime; };
+        void SetLastResurrectTime(uint32 Time) { m_LastResurrectTime = Time; };
         void SetMaxPlayers(uint32 MaxPlayers) { m_MaxPlayers = MaxPlayers; };
         uint32 GetMaxPlayers() const { return m_MaxPlayers; };
         void SetMinPlayers(uint32 MinPlayers) { m_MinPlayers = MinPlayers; };
@@ -135,8 +137,12 @@ class BattleGround
         std::map<uint64, BattleGroundScore>::const_iterator GetPlayerScoresEnd() const { return m_PlayerScores.end(); };
         uint32 GetPlayerScoresSize() { return m_PlayerScores.size(); };
 
+        uint32 GetReviveQueueSize() { return m_ReviveQueue.size(); };
+
         void AddPlayer(Player* plr);
-        void AddPlayerToQueue(Player* plr);
+        void AddPlayerToResurrectQueue(uint64 npc_guid, uint64 player_guid);
+        void RemovePlayerFromResurrectQueue(uint64 player_guid);
+        void AddPlayerToQueue(uint64 guid, uint32 level);
         void RemovePlayerFromQueue(uint64 guid);
         bool CanStartBattleGround();
         void StartBattleGround();
@@ -206,6 +212,7 @@ class BattleGround
         uint32 m_Status;
         uint32 m_StartTime;
         uint32 m_EndTime;
+        uint32 m_LastResurrectTime;
         uint32 m_Queue_type;
         char const* m_Name;
 
@@ -215,7 +222,8 @@ class BattleGround
 
         /* Player lists */
         std::map<uint64, BattleGroundPlayer> m_Players;
-        std::map<uint64, bool> m_RemovedPlayers;
+        std::map<uint64, uint64> m_ReviveQueue;             // Spirit Guide guid + Player guid
+        std::map<uint64, uint8> m_RemovedPlayers;           // uint8 - remove type (0 - bgqueue, 1 - bg, 2 - resurrect queue)
 
         typedef std::map<uint64, BattleGroundQueue> QueuedPlayersMap;
         QueuedPlayersMap m_QueuedPlayers[MAX_QUEUED_PLAYERS_MAP];

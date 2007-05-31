@@ -56,7 +56,6 @@ BattleGroundWS::BattleGroundWS()
     AllianceFlagSpawn[1] = 0;
     HordeFlagSpawn[0] = 0;
     HordeFlagSpawn[1] = 0;
-
 }
 
 BattleGroundWS::~BattleGroundWS()
@@ -70,6 +69,7 @@ BattleGroundWS::~BattleGroundWS()
     delete BerserkBonus1;
     delete BerserkBonus2;
 }
+
 void BattleGroundWS::Update(time_t diff)
 {
     BattleGround::Update(diff);
@@ -78,24 +78,24 @@ void BattleGroundWS::Update(time_t diff)
     {
         AllianceFlagSpawn[1] = 1;
         HordeFlagSpawn[1] = 1;
-        sLog.outError("Flags activated...");
+        sLog.outDebug("Flags activated...");
         MapManager::Instance().GetMap(m_AllianceFlag->GetMapId(), m_AllianceFlag)->Add(m_AllianceFlag);
         MapManager::Instance().GetMap(m_HordeFlag->GetMapId(), m_HordeFlag)->Add(m_HordeFlag);
-        sLog.outError("Flags respawned...");
+        sLog.outDebug("Flags respawned...");
         SpeedBonus1Spawn[1] = 1;
         SpeedBonus2Spawn[1] = 1;
         RegenBonus1Spawn[1] = 1;
         RegenBonus2Spawn[1] = 1;
         BerserkBonus1Spawn[1] = 1;
         BerserkBonus2Spawn[1] = 1;
-        sLog.outError("Bonuses activated...");
+        sLog.outDebug("Bonuses activated...");
         MapManager::Instance().GetMap(SpeedBonus1->GetMapId(), SpeedBonus1)->Add(SpeedBonus1);
         MapManager::Instance().GetMap(SpeedBonus2->GetMapId(), SpeedBonus2)->Add(SpeedBonus2);
         MapManager::Instance().GetMap(RegenBonus1->GetMapId(), RegenBonus1)->Add(RegenBonus1);
         MapManager::Instance().GetMap(RegenBonus2->GetMapId(), RegenBonus2)->Add(RegenBonus2);
         MapManager::Instance().GetMap(BerserkBonus1->GetMapId(), BerserkBonus1)->Add(BerserkBonus1);
         MapManager::Instance().GetMap(BerserkBonus2->GetMapId(), BerserkBonus2)->Add(BerserkBonus2);
-        sLog.outError("Bonuses respawned...");
+        sLog.outDebug("Bonuses respawned...");
         SetStatus(STATUS_INPROGRESS);
     }
 
@@ -178,13 +178,13 @@ void BattleGroundWS::RespawnFlag(uint32 Team, bool captured)
     // need delay between flag capture and it's respawn about 30-60 seconds...
     if(Team == ALLIANCE)
     {
-        sLog.outError("Respawn Alliance flag");
+        sLog.outDebug("Respawn Alliance flag");
         MapManager::Instance().GetMap(m_AllianceFlag->GetMapId(), m_AllianceFlag)->Add(m_AllianceFlag);
     }
 
     if(Team == HORDE)
     {
-        sLog.outError("Respawn Horde flag");
+        sLog.outDebug("Respawn Horde flag");
         MapManager::Instance().GetMap(m_HordeFlag->GetMapId(), m_HordeFlag)->Add(m_HordeFlag);
     }
 
@@ -204,7 +204,6 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
     if(GetStatus() != STATUS_INPROGRESS)
         return;
 
-    WorldPacket data;
     uint8 type = 0;
     bool win = false;
     uint32 winner = 0;
@@ -219,11 +218,6 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
         if(GetTeamScore(ALLIANCE) < 3)
             AddPoint(ALLIANCE, 1);
         PlaySoundToAll(8173);
-        if(GetID() == BATTLEGROUND_WS_ID)
-        {
-            CastSpellOnTeam(23523, ALLIANCE);               // team gain +35 reputation to WSG for each flag capture
-        }
-        //Source->CastSpell(Source, 23523, true, 0);
     }
     if(Source->GetTeam() == HORDE)
     {
@@ -234,9 +228,9 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
         if(GetTeamScore(HORDE) < 3)
             AddPoint(HORDE, 1);
         PlaySoundToAll(8213);
-        CastSpellOnTeam(23525, HORDE);                      // team gain +35 reputation to WSG for each flag capture
     }
 
+    WorldPacket data;
     sChatHandler.FillMessageData(&data, Source->GetSession(), type, LANG_UNIVERSAL, NULL, Source->GetGUID(), message, NULL);
     SendPacketToAll(&data);
 
@@ -264,19 +258,15 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
         switch(Source->GetTeam())
         {
             case ALLIANCE:
-            {
                 HordeFlagSpawn[0] = 1*60*1000;
                 HordeFlagSpawn[1] = 0;
                 //RespawnFlag(HORDE, true);
                 break;
-            }
             case HORDE:
-            {
                 AllianceFlagSpawn[0] = 1*60*1000;
                 AllianceFlagSpawn[1] = 0;
                 //RespawnFlag(ALLIANCE, true);
                 break;
-            }
         }
     }
 }
@@ -286,7 +276,6 @@ void BattleGroundWS::EventPlayerDroppedFlag(Player *Source)
     if(GetStatus() != STATUS_INPROGRESS)
         return;
 
-    WorldPacket data;
     const char *message;
     uint8 type = 0;
 
@@ -305,6 +294,7 @@ void BattleGroundWS::EventPlayerDroppedFlag(Player *Source)
 
     UpdateFlagState(Source->GetTeam(), 1);
 
+    WorldPacket data;
     sChatHandler.FillMessageData(&data, Source->GetSession(), type, LANG_UNIVERSAL, NULL, Source->GetGUID(), message, NULL);
     SendPacketToAll(&data);
 
@@ -319,7 +309,6 @@ void BattleGroundWS::EventPlayerReturnedFlag(Player *Source)
     if(GetStatus() != STATUS_INPROGRESS)
         return;
 
-    WorldPacket data;
     const char *message;
     uint8 type = 0;
 
@@ -341,6 +330,7 @@ void BattleGroundWS::EventPlayerReturnedFlag(Player *Source)
     PlaySoundToAll(8192);                                   // flag returned (common sound)
     UpdatePlayerScore(Source, 3, 1);                        // +1 to flag returns...
 
+    WorldPacket data;
     sChatHandler.FillMessageData(&data, Source->GetSession(), type, LANG_UNIVERSAL, NULL, Source->GetGUID(), message, NULL);
     SendPacketToAll(&data);
 }
@@ -350,7 +340,6 @@ void BattleGroundWS::EventPlayerPickedUpFlag(Player *Source)
     if(GetStatus() != STATUS_INPROGRESS)
         return;
 
-    WorldPacket data;
     const char *message;
     uint8 type = 0;
 
@@ -371,6 +360,7 @@ void BattleGroundWS::EventPlayerPickedUpFlag(Player *Source)
         SetAllianceFlagPicker(Source->GetGUID());           // pick up Alliance Flag
     }
 
+    WorldPacket data;
     sChatHandler.FillMessageData(&data, Source->GetSession(), type, LANG_UNIVERSAL, NULL, Source->GetGUID(), message, NULL);
     SendPacketToAll(&data);
 
@@ -417,14 +407,14 @@ void BattleGroundWS::RemovePlayer(Player *plr,uint64 guid)
     {
         MapManager::Instance().GetMap(m_AllianceFlag->GetMapId(), m_AllianceFlag)->Remove(m_AllianceFlag, false);
         MapManager::Instance().GetMap(m_HordeFlag->GetMapId(), m_HordeFlag)->Remove(m_HordeFlag, false);
-        sLog.outError("Flags despawned...");
+        sLog.outDebug("Flags despawned...");
         MapManager::Instance().GetMap(SpeedBonus1->GetMapId(), SpeedBonus1)->Remove(SpeedBonus1, false);
         MapManager::Instance().GetMap(SpeedBonus2->GetMapId(), SpeedBonus2)->Remove(SpeedBonus2, false);
         MapManager::Instance().GetMap(RegenBonus1->GetMapId(), RegenBonus1)->Remove(RegenBonus1, false);
         MapManager::Instance().GetMap(RegenBonus2->GetMapId(), RegenBonus2)->Remove(RegenBonus2, false);
         MapManager::Instance().GetMap(BerserkBonus1->GetMapId(), BerserkBonus1)->Remove(BerserkBonus1, false);
         MapManager::Instance().GetMap(BerserkBonus2->GetMapId(), BerserkBonus2)->Remove(BerserkBonus2, false);
-        sLog.outError("Bonuses despawned...");
+        sLog.outDebug("Bonuses despawned...");
     }
 }
 
@@ -437,10 +427,8 @@ void BattleGroundWS::HandleAreaTrigger(Player* Source, uint32 Trigger)
     uint32 SpellId = 0;
     switch(Trigger)
     {
-        //WSG
         case 3686:                                          //Alliance elixir of speed spawn. Trigger not working, because located inside other areatrigger, can be replaced by IsWithinDist(object, dist) in BattleGround::Update().
-        {
-            sLog.outError("SpeedBonus1SpawnState = %i, SpeedBonus1SpawnTimer = %i", SpeedBonus1Spawn[1], SpeedBonus1Spawn[0]);
+            sLog.outDebug("SpeedBonus1SpawnState = %i, SpeedBonus1SpawnTimer = %i", SpeedBonus1Spawn[1], SpeedBonus1Spawn[0]);
             if(SpeedBonus1Spawn[1] == 0)
             {
                 break;
@@ -450,10 +438,8 @@ void BattleGroundWS::HandleAreaTrigger(Player* Source, uint32 Trigger)
             SpeedBonus1Spawn[1] = 0;
             SpellId = 23451;
             break;
-        }
         case 3687:                                          //Horde elixir of speed spawn. Trigger not working, because located inside other areatrigger, can be replaced by IsWithinDist(object, dist) in BattleGround::Update().
-        {
-            sLog.outError("SpeedBonus2SpawnState = %i, SpeedBonus2SpawnTimer = %i", SpeedBonus2Spawn[1], SpeedBonus2Spawn[0]);
+            sLog.outDebug("SpeedBonus2SpawnState = %i, SpeedBonus2SpawnTimer = %i", SpeedBonus2Spawn[1], SpeedBonus2Spawn[0]);
             if(SpeedBonus2Spawn[1] == 0)
             {
                 break;
@@ -463,10 +449,8 @@ void BattleGroundWS::HandleAreaTrigger(Player* Source, uint32 Trigger)
             SpeedBonus2Spawn[1] = 0;
             SpellId = 23451;
             break;
-        }
         case 3706:                                          //Alliance elixir of regeneration spawn
-        {
-            sLog.outError("RegenBonus1SpawnState = %u, RegenBonus1SpawnTimer = %u", RegenBonus1Spawn[1], RegenBonus1Spawn[0]);
+            sLog.outDebug("RegenBonus1SpawnState = %u, RegenBonus1SpawnTimer = %u", RegenBonus1Spawn[1], RegenBonus1Spawn[0]);
             if(RegenBonus1Spawn[1] == 0)
             {
                 break;
@@ -476,10 +460,8 @@ void BattleGroundWS::HandleAreaTrigger(Player* Source, uint32 Trigger)
             RegenBonus1Spawn[1] = 0;
             SpellId = 23493;
             break;
-        }
         case 3708:                                          //Horde elixir of regeneration spawn
-        {
-            sLog.outError("RegenBonus2SpawnState = %u, RegenBonus2SpawnTimer = %u", RegenBonus2Spawn[1], RegenBonus2Spawn[0]);
+            sLog.outDebug("RegenBonus2SpawnState = %u, RegenBonus2SpawnTimer = %u", RegenBonus2Spawn[1], RegenBonus2Spawn[0]);
             if(RegenBonus2Spawn[1] == 0)
             {
                 break;
@@ -489,10 +471,8 @@ void BattleGroundWS::HandleAreaTrigger(Player* Source, uint32 Trigger)
             RegenBonus2Spawn[1] = 0;
             SpellId = 23493;
             break;
-        }
         case 3707:                                          //Alliance elixir of berserk spawn
-        {
-            sLog.outError("BerserkBonus1SpawnState = %u, BerserkBonus1SpawnTimer = %u", BerserkBonus1Spawn[1], BerserkBonus1Spawn[0]);
+            sLog.outDebug("BerserkBonus1SpawnState = %u, BerserkBonus1SpawnTimer = %u", BerserkBonus1Spawn[1], BerserkBonus1Spawn[0]);
             if(BerserkBonus1Spawn[1] == 0)
             {
                 break;
@@ -502,10 +482,8 @@ void BattleGroundWS::HandleAreaTrigger(Player* Source, uint32 Trigger)
             BerserkBonus1Spawn[1] = 0;
             SpellId = 23505;
             break;
-        }
         case 3709:                                          //Horde elixir of berserk spawn
-        {
-            sLog.outError("BerserkBonus2SpawnState = %u, BerserkBonus2SpawnTimer = %u", BerserkBonus2Spawn[1], BerserkBonus2Spawn[0]);
+            sLog.outDebug("BerserkBonus2SpawnState = %u, BerserkBonus2SpawnTimer = %u", BerserkBonus2Spawn[1], BerserkBonus2Spawn[0]);
             if(BerserkBonus2Spawn[1] == 0)
             {
                 break;
@@ -515,36 +493,31 @@ void BattleGroundWS::HandleAreaTrigger(Player* Source, uint32 Trigger)
             BerserkBonus2Spawn[1] = 0;
             SpellId = 23505;
             break;
-        }
-        case 3646:
-        {                                  //Alliance Flag spawn
+        case 3646:                                          //Alliance Flag spawn
             if(IsHordeFlagPickedup() && !IsAllianceFlagPickedup())
             {
                 if(GetHordeFlagPickerGUID() == Source->GetGUID())
                 {
-                    //SpellId = 23389; // strange, not working...
                     EventPlayerCapturedFlag(Source);
                 }
             }
             break;
-        }
         case 3647:                                          //Horde Flag spawn
-        {
             if(IsAllianceFlagPickedup() && !IsHordeFlagPickedup())
             {
                 if(GetAllianceFlagPickerGUID() == Source->GetGUID())
                 {
-                    //SpellId = 23390; // strange, not working...
                     EventPlayerCapturedFlag(Source);
                 }
             }
             break;
-        }
-        case 4631:                                          //Unk1
-        case 4633:                                          //Unk2
-            //Exits
-        case 3669:                                          //Warsong Gulch Horde Exit (removed, but trigger still exist).
-        case 3671:                                          //Warsong Gulch Alliance Exit (removed, but trigger still exist).
+        case 4628:                                          // new 2.1.0?
+        case 4629:                                          // new 2.1.0?
+        case 4631:                                          // Unk1
+        case 4633:                                          // Unk2
+            break;
+        case 3669:                                          // Warsong Gulch Horde Exit (removed, but trigger still exist).
+        case 3671:                                          // Warsong Gulch Alliance Exit (removed, but trigger still exist).
             break;
         default:
         {

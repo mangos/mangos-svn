@@ -378,6 +378,11 @@ void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask, Playe
         {
             if( updateMask->GetBit( index ) )
             {
+                // remove custom flag before send
+                if(index == UNIT_NPC_FLAGS)
+                    if((m_uint32Values[index] & UNIT_NPC_FLAG_GUARD) != 0)
+                        m_uint32Values[index] &= ~UNIT_NPC_FLAG_GUARD;
+
                 // Some values at server stored in float format but must be sended to client in uint32 format
                 if( // unit fields
                     (index >= UNIT_FIELD_POWER1         && index <= UNIT_FIELD_MAXPOWER5 ||
@@ -860,29 +865,27 @@ void WorldObject::BuildHeartBeatMsg(WorldPacket *data) const
     data->Initialize(MSG_MOVE_HEARTBEAT, 32);
 
     data->append(GetPackGUID());
-    *data << uint32(0);
-    *data << uint32(0);
-
+    *data << uint32(0);             // movement flags?
+    *data << getMSTime();           // time
     *data << m_positionX;
     *data << m_positionY;
     *data << m_positionZ;
-
     *data << m_orientation;
-    *data << uint32(0x0);
+    *data << uint32(0);
 }
 
 void WorldObject::BuildTeleportAckMsg(WorldPacket *data, float x, float y, float z, float ang) const
 {
     data->Initialize(MSG_MOVE_TELEPORT_ACK, 41);
     data->append(GetPackGUID());
-    *data << uint32(0x0);
-    *data << uint32(0x0);
-    *data << getMSTime();
+    *data << uint32(0);             // this value increments every time
+    *data << uint32(0x1000);        // movement flags? 0x10000000
+    *data << getMSTime();           // time
     *data << x;
     *data << y;
     *data << z;
     *data << ang;
-    *data << uint32(0x0);
+    *data << uint32(0);
 }
 
 void WorldObject::SendMessageToSet(WorldPacket *data, bool bToSelf)

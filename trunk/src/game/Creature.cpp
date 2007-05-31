@@ -1475,7 +1475,7 @@ bool Creature::IsVisibleInGridForPlayer(Player* pl) const
     }
 
     // Dead player see Spirit Healer
-    if(pl->isDead() && isSpiritHealer())
+    if(pl->isDead() && (isSpiritHealer() || isSpiritGuide()))
         return true;
 
     // and not see any other

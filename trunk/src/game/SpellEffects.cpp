@@ -630,7 +630,7 @@ void Spell::EffectDummy(uint32 i)
         }
     }
 
-    //BattleGround spells
+    /*//BattleGround spells
     if(m_caster->GetTypeId() == TYPEID_PLAYER && ((Player*)m_caster)->InBattleGround())
     {
         BattleGround* bg = sBattleGroundMgr.GetBattleGround(((Player*)m_caster)->GetBattleGroundId());
@@ -671,7 +671,7 @@ void Spell::EffectDummy(uint32 i)
                     break;
             }
         }
-    }
+    }*/
 
     if(m_spellInfo->Id == 17251)                            // Spirit Healer Res
     {
@@ -952,16 +952,16 @@ void Spell::EffectSendEvent(uint32 i)
                         ((BattleGroundWS*)bg)->EventPlayerDroppedFlag(((Player*)m_caster));
                     sLog.outDebug("Drop Alliance Flag");
                     break;
-                case 23385:                                 // Alliance Flag Returns
+                /*case 23385:                                 // Alliance Flag Returns
                     if(bg->GetID()==BATTLEGROUND_WS_ID)
                         ((BattleGroundWS*)bg)->EventPlayerReturnedFlag(((Player*)m_caster));
                     sLog.outDebug("Alliance Flag Returned");
                     break;
-                case 23386:                                 // Horde Flag Returns
+                case 23386:                                   // Horde Flag Returns
                     if(bg->GetID()==BATTLEGROUND_WS_ID)
                         ((BattleGroundWS*)bg)->EventPlayerReturnedFlag(((Player*)m_caster));
                     sLog.outDebug("Horde Flag Returned");
-                    break;
+                    break;*/
                 default:
                     sLog.outDebug("Unknown spellid %u in BG event", m_spellInfo->Id);
                     break;
@@ -2385,7 +2385,6 @@ void Spell::EffectAddComboPoints(uint32 i)
             comboPoints = 5;
         m_caster->SetUInt32Value(PLAYER_FIELD_BYTES,((m_caster->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (comboPoints << 8)));
     }
-
 }
 
 void Spell::EffectDuel(uint32 i)
