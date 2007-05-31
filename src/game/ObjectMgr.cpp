@@ -3388,3 +3388,167 @@ void ObjectMgr::LoadQuestRelationsHelper(QuestRelations& map,char const* table)
     sLog.outString("");
     sLog.outString(">> Loaded %u quest relations from %s", count,table);
 }
+
+std::string CreateDumpString(char *table, QueryResult *result)
+{
+    if(!table || !result) return "";
+    ostringstream ss;
+    ss << "INSERT INTO `" << table << "` VALUES (";
+    Field *fields = result->Fetch();
+    for(int i = 0; i < result->GetFieldCount(); i++)
+    {
+        if (i == 0) ss << "'";
+        else ss << ", '";
+
+        std::string s = fields[i].GetCppString();
+        sDatabase.escape_string(s);
+        ss << s;
+
+        ss << "'";
+    }
+    ss << ");";
+    return ss.str();
+}
+
+void changenth(std::string &str, int n, char *with, bool insert = false, bool nonzero = false)
+{
+    string::size_type s, e;
+    s = str.find("VALUES ('")+9;
+    if (s == string::npos) return;
+
+    do {
+        e = str.find("'",s);
+        if (e == string::npos) return;
+    } while(str[e-1] == '\\');
+
+    for(int i = 1; i < n; i++)
+    {
+        do {
+            s = e+4;
+            e = str.find("'",s);
+            if (e == string::npos) return;
+        } while (str[e-1] == '\\');
+    }
+
+    if(nonzero && str.substr(s,e-s) == "0") return;
+
+    if(!insert) str.replace(s,e-s, with);
+    else str.insert(s, with);
+}
+
+bool DumpPlayerTable(FILE *file, uint32 guid, char *tableFrom, char *tableTo, int8 type = 0)
+{
+    if (!file || !tableFrom || !tableTo) return false;
+    QueryResult *result = sDatabase.PQuery("SELECT * FROM `%s` WHERE `%s` = '%d'", tableFrom, type != 3 ? "guid" : "owner_guid", guid);
+    if (!result) return false;
+    do
+    {
+        std::string dump = CreateDumpString(tableTo, result);
+        if(type <= 2) changenth(dump, 1, "_CHAR_GUID_");    // most tables
+        if(type == 1) changenth(dump, 2, "_CHAR_ACCOUNT_"); // character t.
+        if(type == 2)                                       // character_inventory t.
+        {
+            changenth(dump, 2, "_CHAR_ITEM_", true, true);  // bag
+            changenth(dump, 4, "_CHAR_ITEM_", true);        // item
+        }
+        if(type == 3)                                       // item_instance t.
+        {
+            changenth(dump, 1, "_CHAR_ITEM_", true);        // item
+            changenth(dump, 2, "_CHAR_GUID_");              // owner
+        }
+        fprintf(file, "%s\n", dump.c_str());
+    }
+    while (result->NextRow());
+    delete result;
+    return true;
+}
+
+void ObjectMgr::WritePlayerDump(uint32 guid)
+{
+    char fname[100]; sprintf(fname, "character%d.dmp", guid);
+    FILE *fout = fopen(fname, "w");
+    if (!fout) { sLog.outError("Failed to open file!\r\n"); return; }
+
+    DumpPlayerTable(fout, guid, "character", "character", 1);
+    DumpPlayerTable(fout, guid, "character_action", "character_action");
+    DumpPlayerTable(fout, guid, "characte_aura", "characte_aura");
+    DumpPlayerTable(fout, guid, "character_homebind", "character_homebind");
+    DumpPlayerTable(fout, guid, "character_inventory", "character_inventory", 2);
+    DumpPlayerTable(fout, guid, "character_kill", "character_kill");
+    DumpPlayerTable(fout, guid, "character_queststatus", "character_queststatus");
+    DumpPlayerTable(fout, guid, "character_reputation", "character_reputation");
+    DumpPlayerTable(fout, guid, "character_spell", "character_spell");
+    DumpPlayerTable(fout, guid, "character_spell_cooldown", "character_spell_cooldown");
+    DumpPlayerTable(fout, guid, "item_instance", "item_instance", 3);
+    // TODO: Add pets/instance/group/gifts..
+    DumpPlayerTable(fout, guid, "character_ticket", "character_ticket");
+    DumpPlayerTable(fout, guid, "character_tutorial", "character_tutorial");
+    // TODO: Add a dump level option to skip these non-important tables
+    
+    fclose(fout);
+}
+
+void replaceall(std::string &str, char *from, char *to)
+{
+    for(string::size_type pos=0;;pos++)
+    {
+        pos = str.find(from, pos);
+        if (pos != string::npos) str.replace(pos,strlen(from),to);
+        else break;
+    }
+}
+
+void ObjectMgr::LoadPlayerDump(char *file, uint32 account)
+{
+    if (!file) return;
+    FILE *fin = fopen(file, "r");
+    if(!fin) return;
+
+    char newguid[20], chraccount[20], chritem[20];
+    itoa(m_hiCharGuid, newguid, 10);
+    itoa(account, chraccount, 10);
+
+    std::map<uint32, uint32> items;
+    char buf[32000] = "";
+
+    sDatabase.BeginTransaction();
+    string::size_type pos = 0, s,e;
+    while(!feof(fin))
+    {
+        if(!fgets(buf, 32000, fin))
+        {
+            if(feof(fin)) break;
+            sDatabase.RollbackTransaction();
+            return;
+        }
+
+        std::string line; line.assign(buf);
+        replaceall(line, "_CHAR_GUID_", newguid);
+        replaceall(line, "_CHAR_ACCOUNT_", chraccount);
+
+        for(pos=0;;pos++)
+        {
+            pos = line.find("_CHAR_ITEM_", pos);
+            if(pos == string::npos) break;
+            s = pos + 11;
+            e = line.find("'", s);
+            if(e == string::npos) break;
+            uint32 itemGuid = atoi(line.substr(s,e-s).c_str());
+            if(items[itemGuid] == 0) items[itemGuid] = m_hiItemGuid + items.size();
+            sprintf(chritem, "%d", items[itemGuid]);
+            line.replace(pos, e-s+11, chritem);
+        }
+
+        bool ret = sDatabase.Execute(line.c_str());
+        if(!ret)
+        {
+            sDatabase.RollbackTransaction();
+            return;
+        }
+    }
+    sDatabase.CommitTransaction();
+    m_hiItemGuid += items.size();
+    m_hiCharGuid++;
+    fclose(fin);
+}
+

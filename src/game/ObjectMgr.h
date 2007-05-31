@@ -560,6 +560,10 @@ class ObjectMgr
         time_t GetGORespawnTime(uint32 loguid, uint32 instance) { return mGORespawnTimes[MAKE_GUID(loguid,instance)]; }
         void SaveGORespawnTime(uint32 loguid, uint32 instance, time_t t);
         void DeleteRespawnTimeForInstance(uint32 instance);
+
+        // player Dumps
+        void WritePlayerDump(uint32 guid);
+        void LoadPlayerDump(char *file, uint32 account);
     protected:
         uint32 m_auctionid;
         uint32 m_mailid;

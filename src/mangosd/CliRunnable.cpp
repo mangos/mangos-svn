@@ -67,6 +67,8 @@ void CliCorpses(char*,pPrintf);
 void CliSetLogLevel(char*,pPrintf);
 void CliUpTime(char*,pPrintf);
 void CliSetTBC(char*,pPrintf);
+void CliWritePlayerDump(char*,pPrintf);
+void CliLoadPlayerDump(char*,pPrintf);
 
 /// Table of known commands
 const CliCommand Commands[]=
@@ -91,10 +93,27 @@ const CliCommand Commands[]=
     {"version", & CliVersion,"Display server version"},
     {"idleshutdown", & CliIdleShutdown,"Shutdown server with some delay when not active connections at server"},
     {"shutdown", & CliShutdown,"Shutdown server with some delay"},
-    {"exit", & CliExit,"Shutdown server NOW"}
+    {"exit", & CliExit,"Shutdown server NOW"},
+    {"writepdump", &CliWritePlayerDump,"Write a player dump to a file"},
+    {"loadpdump", &CliLoadPlayerDump,"Load a player dump from a file"}
 };
 /// \todo Need some pragma pack? Else explain why in a comment.
 #define CliTotalCmds sizeof(Commands)/sizeof(CliCommand)
+
+void CliWritePlayerDump(char*command,pPrintf zprintf)
+{
+    if(!command || !*command) return;
+    objmgr.WritePlayerDump(atoi(command));
+}
+
+void CliLoadPlayerDump(char*command,pPrintf zprintf)
+{
+    if(!command || !*command) return;
+    char * file = strtok(command, " ");
+    char * p2 = strtok(NULL, " ");
+    if(!file || !p2) return;
+    objmgr.LoadPlayerDump(file, atoi(p2));
+}
 
 /// Reload the scripts and notify the players
 void CliLoadScripts(char*command,pPrintf zprintf)
