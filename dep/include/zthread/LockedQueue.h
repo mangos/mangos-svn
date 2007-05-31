@@ -144,7 +144,6 @@ namespace ZThread {
           return _queue.front();
       }
 
-
       /**
        * @see Queue::cancel()
        */

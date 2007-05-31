@@ -39,7 +39,7 @@ void usage(const char *prog)
 
 /// Launch the mangos server
 int main(int argc, char **argv)
-{   
+{
     // - Construct Memory Manager Instance
     MaNGOS::Singleton<MemoryManager>::Instance();
 

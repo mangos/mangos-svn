@@ -489,6 +489,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleArenaTeamLeaveOpcode(WorldPacket& recv_data);
         void HandleArenaTeamDisbandOpcode(WorldPacket& recv_data);
         void HandleAreaSpiritHealerQueryOpcode(WorldPacket& recv_data);
+        void HandleAreaSpiritHealerQueueOpcode(WorldPacket& recv_data);
         void HandleDismountOpcode(WorldPacket& recv_data);
         void HandleSelfResOpcode(WorldPacket& recv_data);
 

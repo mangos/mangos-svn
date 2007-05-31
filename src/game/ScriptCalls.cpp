@@ -85,7 +85,7 @@ bool LoadScriptingModule(char const* libName)
     //heh we are still there :P we have a valid library
     //we reload script
     UnloadScriptingModule();
-    
+
     Script=testScript;
     Script->ScriptsInit();
 

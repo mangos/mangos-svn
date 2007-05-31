@@ -30,4 +30,3 @@ MemoryManager::MemoryManager( )
     //VLDDisable();
     #endif
 }
-

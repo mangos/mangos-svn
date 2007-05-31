@@ -206,7 +206,7 @@ void Unit::SendMoveToPacket(float x, float y, float z, bool run, uint32 transitT
         transitTime = static_cast<uint32>(dist / speed + 0.5);
     }
     //Will be: Checked, maybe Buffered, will be send on Unit::Update()
-    m_movementData.Update(x,y,z,transitTime,run,0);  
+    m_movementData.Update(x,y,z,transitTime,run,0);
 }
 
 void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, bool Run, uint32 Time)
@@ -223,17 +223,17 @@ void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 ty
     data << m_movementData.type;
     switch(m_movementData.type)
     {
-    case 0:                                             // normal packet
-        break;
-    case 1:                                             // stop packet
-        SendMessageToSet( &data, true );
-        return;
-    case 3:                                             // not used currently
-        data << uint64(0);                              // probably target guid
-        break;
-    case 4:                                             // not used currently
-        data << float(0);                               // probably orientation
-        break;
+        case 0:                                             // normal packet
+            break;
+        case 1:                                             // stop packet
+            SendMessageToSet( &data, true );
+            return;
+        case 3:                                             // not used currently
+            data << uint64(0);                              // probably target guid
+            break;
+        case 4:                                             // not used currently
+            data << float(0);                               // probably orientation
+            break;
     }
 
     data << uint32(Run ? 0x00000100 : 0x00000000);          // flags (0x100 - running, 0x200 - taxi)
@@ -966,6 +966,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         //case SPELL_AURA_PERIODIC_MANA_LEECH:
         //    break;
         //case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
+        //    break;
         default:
             sLog.outError("PeriodicAuraLog: unhandled aura %u", mod->m_auraname);
             break;

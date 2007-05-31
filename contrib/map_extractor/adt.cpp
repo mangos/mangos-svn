@@ -17,8 +17,6 @@
 unsigned int iRes=256;
 extern uint16*areas;
 
-
-
 vec wmoc;
 
 Cell * cell;
@@ -306,7 +304,6 @@ return ((a*p->x+c*p->z-d)/b);
 inline
 double GetZ(double x,double z)
 {
-
 	vec v[3];
 	vec p;
 	
@@ -358,7 +355,6 @@ double GetZ(double x,double z)
 
 		return -solve(v,&p);
 	}
-	
 }
 
 inline
@@ -480,7 +476,3 @@ bool ConvertADT(char * filename,char * filename2)
 	return true;
 
 }
-
-
-
-

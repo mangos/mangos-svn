@@ -281,8 +281,8 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     SendPacket(&data);
 
     data.Initialize( SMSG_ACCOUNT_DATA_MD5, 128 );
-    for(int i = 0; i < 128; i++)
-        data << uint8(0);
+    for(int i = 0; i < 32; i++)
+        data << uint32(0);
     SendPacket(&data);
 
     pCurrChar->LoadIgnoreList();

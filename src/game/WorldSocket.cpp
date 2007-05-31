@@ -443,7 +443,6 @@ void WorldSocket::_HandlePing(WorldPacket& recvPacket)
     return;
 }
 
-
 /// Handle the update order for the socket
 void WorldSocket::SendSinglePacket()
 {
@@ -488,7 +487,6 @@ void WorldSocket::SendSinglePacket()
         delete packet;
     }
 }
-
 
 void WorldSocket::Update(time_t diff)
 {
@@ -567,7 +565,6 @@ void WorldSocket::Update(time_t diff)
     }
 }
 
-
 /// Handle the authentication waiting queue (to be completed)
 void WorldSocket::SendAuthWaitQue(uint32 PlayersInQue)
 {
@@ -582,5 +579,3 @@ void WorldSocket::SizeError(WorldPacket const& packet, uint32 size) const
     sLog.outError("Client send packet %s (%u) with size %u but expected %u (attempt crash server?), skipped",
         LookupName(packet.GetOpcode(),g_worldOpcodeNames),packet.GetOpcode(),packet.size(),size);
 }
-
-

@@ -29,7 +29,6 @@
 // when renaming opcodes, replace old name by the new one
 const char* g_worldOpcodeNames[] =
 {
-
     "MSG_NULL_ACTION",                                     //MSG_NULL_ACTION
     "CMSG_BOOTME",                                         //CMSG_BOOTME
     "CMSG_DBLOOKUP",                                       //CMSG_DBLOOKUP
@@ -771,7 +770,7 @@ const char* g_worldOpcodeNames[] =
     "CMSG_AREA_SPIRIT_HEALER_QUERY",                       //CMSG_AREA_SPIRIT_HEALER_QUERY
     "CMSG_AREA_SPIRIT_HEALER_QUEUE",                       //CMSG_AREA_SPIRIT_HEALER_QUEUE
     "SMSG_AREA_SPIRIT_HEALER_TIME",                        //SMSG_AREA_SPIRIT_HEALER_TIME
-    "CMSG_HARDWARE_SURVEY_RESULTS",                        //CMSG_HARDWARE_SURVEY_RESULTS
+    "CMSG_GM_UNTEACH",                                     //CMSG_GM_UNTEACH
     "SMSG_WARDEN_DATA",                                    //SMSG_WARDEN_DATA
     "CMSG_WARDEN_DATA",                                    //CMSG_WARDEN_DATA
     "SMSG_GROUP_JOINED_BATTLEGROUND",                      //SMSG_GROUP_JOINED_BATTLEGROUND
@@ -792,7 +791,7 @@ const char* g_worldOpcodeNames[] =
     "SMSG_MINIGAME_STATE",                                 //SMSG_MINIGAME_STATE
     "CMSG_MINIGAME_MOVE",                                  //CMSG_MINIGAME_MOVE
     "SMSG_MINIGAME_MOVE_FAILED",                           //SMSG_MINIGAME_MOVE_FAILED
-    "UNKNOWN",                                             //762
+    "UNKNOWN762",                                          //762
     "SMSG_COMPRESSED_MOVE",                                //SMSG_COMPRESSED_MOVE= 763,
     "CMSG_GUILD_CHANGEINFO",                               //CMSG_GUILD_CHANGEINFO
     "SMSG_UNKNOWN_765",                                    //SMSG_UNKNOWN_765 = 765
@@ -800,8 +799,8 @@ const char* g_worldOpcodeNames[] =
     "SMSG_SET_RUN_BACK_SPEED",                             // 767
     "SMSG_SET_SWIM_SPEED",                                 // 768
     "SMSG_UNKNOWN_769",                                    // 769
-    "SMSG_SET_SWIM_BACK_SPEED",                            // 770"MSG_SET_TURN_RATE",  
-    "UNKNOWN",                                             // 771
+    "SMSG_SET_SWIM_BACK_SPEED",                            // 770
+    "MSG_SET_TURN_RATE",                                   // 771
     "SMSG_UNKNOWN_772",                                    // 772
     "SMSG_UNKNOWN_773",                                    // 773
     "SMSG_UNKNOWN_774",                                    // 774
@@ -813,56 +812,56 @@ const char* g_worldOpcodeNames[] =
     "SMSG_UNKNOWN_780",                                    // 780
     "SMSG_MOVE_STOP_WALK",                                 // 781
     "SMSG_MOVE_START_WALK",                                // 782
-    "UNKNOWN",                                             // 783
-    "UNKNOWN",                                             // 784
-    "UNKNOWN",                                             // 785
+    "UNKNOWN783",                                          // 783
+    "UNKNOWN784",                                          // 784
+    "UNKNOWN785",                                          // 785
     "CMSG_ACTIVATETAXI_FAR",                               // 786
-    "UNKNOWN",                                             // 787 causes client crash
-    "UNKNOWN",                                             // 788
-    "UNKNOWN",                                             // 789
-    "UNKNOWN",                                             // 790
+    "UNKNOWN787",                                          // 787 causes client crash
+    "UNKNOWN788",                                          // 788
+    "UNKNOWN789",                                          // 789
+    "UNKNOWN790",                                          // 790
     "CMSG_FIELD_WATCHED_FACTION_INACTIVE",                 // 791
     "CMSG_FIELD_WATCHED_FACTION_SHOW_BAR",                 // 792
     "SMSG_UNKNOWN_793",                                    // 793
     "SMSG_UNKNOWN_794",                                    // 794
-    "UNKNOWN",                                             // 795
+    "UNKNOWN795",                                             // 795
     "SMSG_UNKNOWN_796",                                    // 796
     "CMSG_RESET_INSTANCES",                                // 797
     "SMSG_RESET_INSTANCES_RESULT",                         // 798
-    "UNKNOWN",                                             // 799
+    "UNKNOWN799",                                          // 799
     "SMSG_UNKNOWN_800",                                    // 800
     "MSG_RAID_ICON_TARGET",                                // 801
     "MSG_RAID_READY_CHECK",                                // 802
-    "UNKNOWN",                                             // 803
+    "UNKNOWN803",                                          // 803
     "SMSG_AI_UNKNOWN",                                     // 804
     "SMSG_UNKNOWN_805",                                    // 805
-    "UNKNOWN",                                             // 806
-    "UNKNOWN",                                             // 807
+    "UNKNOWN806",                                          // 806
+    "UNKNOWN807",                                          // 807
     "SMSG_UNKNOWN_808",                                    // 808
     "MSG_SET_DUNGEON_DIFFICULTY",                          // 809
-    "UNKNOWN",                                             // 810
+    "UNKNOWN810",                                          // 810
     "SMSG_UNKNOWN_811",                                    // 811
-    "UNKNOWN",                                             // 812
-    "UNKNOWN",                                             // 813
-    "UNKNOWN",                                             // 814
+    "UNKNOWN812",                                          // 812
+    "UNKNOWN813",                                          // 813
+    "UNKNOWN814",                                          // 814
     "SMSG_UNKNOWN_815",                                    // 815
     "SMSG_UNKNOWN_816",                                    // 816
-    "UNKNOWN",                                             // 817
-    "SMSG_UNKNOWN_818",                                    // 818
-    "UNKNOWN",                                             // 819
-    "UNKNOWN",                                             // 820
-    "UNKNOWN",                                             // 821
-    "UNKNOWN",                                             // 822
-    "UNKNOWN",                                             // 823
-    "UNKNOWN",                                             // 824
-    "UNKNOWN",                                             // 825
+    "UNKNOWN817",                                          // 817
+    "SMSG_ANTISPAM",                                       // 818
+    "UNKNOWN819",                                          // 819
+    "UNKNOWN820",                                          // 820
+    "UNKNOWN822",                                          // 821
+    "UNKNOWN823",                                          // 822
+    "UNKNOWN824",                                          // 823
+    "UNKNOWN825",                                          // 824
+    "UNKNOWN826",                                          // 825
     "SMSG_OUTDOORPVP_NOTIFY",                              //SMSG_OUTDOORPVP_NOTIFY 826
     "SMSG_OUTDOORPVP_NOTIFY2",                             // 827
-    "UNKNOWN",                                             // 828
+    "UNKNOWN828",                                          // 828
     "SMSG_MOTD",                                           // 829
-    "UNKNOWN",                                             // 830
-    "UNKNOWN",                                             // 831
-    "UNKNOWN",                                             // 832
+    "UNKNOWN830",                                          // 830
+    "UNKNOWN831",                                          // 831
+    "UNKNOWN832",                                          // 832
     "SMSG_UNKNOWN_833",                                    // 833
     "SMSG_UNKNOWN_834",                                    // 834
     "SMSG_FLY_MODE_START",                                 // 835
@@ -870,9 +869,9 @@ const char* g_worldOpcodeNames[] =
     "CMSG_MOVE_FLY_MODE_CHANGE_ACK",                       // 837
     "CMSG_MOVE_FLY_STATE_CHANGE",                          // 838
     "CMSG_SOCKET_ITEM",                                    //CMSG_SOCKET_ITEM 839
-    "UNKNOWN",                                             // 840
+    "UNKNOWN840",                                          // 840
     "SMSG_ARENA_TEAM_COMMAND_RESULT",                      // 841
-    "UNKNOWN",                                             // 842
+    "UNKNOWN842",                                          // 842
     "CMSG_ARENA_TEAM_QUERY",                               // 843
     "SMSG_ARENA_TEAM_QUERY_RESPONSE",                      // 844
     "CMSG_ARENA_TEAM_ROSTER",                              // 845
@@ -886,7 +885,7 @@ const char* g_worldOpcodeNames[] =
     "CMSG_ARENA_TEAM_DISBAND",                             // 853
     "CMSG_ARENA_TEAM_PROMOTE_TO_CAPTAIN",                  // 854
     "SMSG_UNKNOWN_855",                                    // 855
-    "UNKNOWN",                                             // 856
+    "UNKNOWN856",                                          // 856
     "MSG_MOVE_START_FLY_UP",                               // 857
     "MSG_MOVE_STOP_FLY_UP",                                // 858
     "SMSG_ARENA_TEAM_STATS",                               // 859
@@ -896,7 +895,7 @@ const char* g_worldOpcodeNames[] =
     "CMSG_LFM_UNSET_AUTOADD",                              // 863
     "CMSG_LFG_INVITE_ACCEPT",                              // 864
     "CMSG_LFG_INVITE_CANCEL",                              // 865
-    "UNKNOWN",                                             // 866
+    "UNKNOWN866",                                          // 866
     "CMSG_LOOKING_FOR_GROUP_CLEAR",                        // 867
     "CMSG_SET_LOOKING_FOR_NONE",                           // 868
     "CMSG_SET_LOOKING_FOR_MORE",                           // 869
@@ -905,27 +904,27 @@ const char* g_worldOpcodeNames[] =
     "SMSG_LFG_872",                                        // 872
     "SMSG_LFG_873",                                        // 873
     "SMSG_LFG_874",                                        // 974
-    "UNKNOWN",                                             // 875
+    "UNKNOWN875",                                          // 875
     "SMSG_LFG_876",                                        // 876
     "SMSG_LFG_877",                                        // 877
     "SMSG_LFG_878",                                        // 878
     "SMSG_LFG_879",                                        // 879
     "SMSG_LFG_INVITE",                                     // 880
     "SMSG_LFG_881",                                        // 881
-    "UNKNOWN",                                             // 882
-    "UNKNOWN",                                             // 883
+    "UNKNOWN882",                                          // 882
+    "UNKNOWN883",                                          // 883
     "CMSG_CHOOSE_TITLE",                                   // 884
     "CMSG_DISMOUNT",                                       // 885
-    "UNKNOWN",                                             // 886
+    "UNKNOWN886",                                          // 886
     "MSG_INSPECT_ARENA_STATS",                             // 887
     "SMSG_SH_POSITION",                                    // 888
     "CMSG_CANCEL_TEMP_ITEM_ENCHANTMENT",                   // 889
-    "UNKNOWN",                                             // 890
-    "UNKNOWN",                                             // 891
-    "UNKNOWN",                                             // 892
-    "UNKNOWN",                                             // 893
+    "UNKNOWN890",                                          // 890
+    "UNKNOWN891",                                          // 891
+    "UNKNOWN892",                                          // 892
+    "UNKNOWN893",                                          // 893
     "SMSG_MOVE_SET_FLY_SPEED",                             // 894
-    "UNKNOWN",                                             // 895
+    "UNKNOWN895",                                          // 895
     "SMSG_MOVE_SET_FLY_BACK_SPEED",                        // 896
     "SMSG_FORCE_FLY_SPEED_CHANGE",                         // 897
     "CMSG_FORCE_FLY_SPEED_CHANGE_ACK",                     // 898
@@ -933,21 +932,21 @@ const char* g_worldOpcodeNames[] =
     "CMSG_FORCE_FLY_BACK_SPEED_CHANGE_ACK",                // 900
     "SMSG_MOVE_SET_FLY_SPEED2",                            // 901
     "SMSG_MOVE_SET_FLY_BACK_SPEED2",                       // 902
-    "UNKNOWN",                                             // 903
-    "UNKNOWN",                                             // 904 SMSG_FLIGHT_SPLINE_SYNC?
-    "UNKNOWN",                                             // 905
-    "UNKNOWN",                                             // 906
+    "UNKNOWN903",                                          // 903
+    "UNKNOWN904",                                          // 904 SMSG_FLIGHT_SPLINE_SYNC?
+    "UNKNOWN905",                                          // 905
+    "UNKNOWN906",                                          // 906
     "SMSG_REALM_STATE_RESPONSE",                           // 907
     "CMSG_REALM_STATE_REQUEST",                            // 908
     "CMSG_MOVE_SHIP_909",                                  // 909
     "CMSG_GROUP_PROMOTE",                                  // 910
-    "UNKNOWN",                                             // 911
+    "UNKNOWN911",                                          // 911
     "SMSG_ALLOW_MOVE",                                     // 912
     "CMSG_ALLOW_MOVE_ACK",                                 // 913
-    "UNKNOWN",                                             // 914
-    "UNKNOWN",                                             // 915
-    "UNKNOWN",                                             // 916
-    "UNKNOWN",                                             // 917
+    "UNKNOWN914",                                          // 914
+    "UNKNOWN915",                                          // 915
+    "UNKNOWN916",                                          // 916
+    "UNKNOWN917",                                          // 917
     "SMSG_UNKNOWN_918",                                    // 918
     "SMSG_UNKNOWN_919",                                    // 919
     "SMSG_UNKNOWN_920",                                    // 920 

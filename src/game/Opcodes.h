@@ -843,7 +843,7 @@ enum OpCodes
     SMSG_RESET_INSTANCES_RESULT                     = 798, // uint32 mapid, chat message: %s has been reset.
     // 799
     SMSG_UNKNOWN_800                                = 800, // uint32 mapid, instance related (save?)
-    MSG_RAID_ICON_TARGET                            = 801, // uint8+uint8+uint64 guid, or only one uint8
+    MSG_RAID_ICON_TARGET                            = 801, // uint8+uint8+uint64 guid or only uint8(0x01)
     MSG_RAID_READY_CHECK                            = 802, // uint64+uint8
     // 803
     SMSG_AI_UNKNOWN                                 = 804, // GUID + uint32, looks like SMSG_AI_REACTION (pet action sound?)
@@ -860,7 +860,7 @@ enum OpCodes
     SMSG_UNKNOWN_815                                = 815, // spell related, uint64 guid + spellid
     SMSG_UNKNOWN_816                                = 816, // spell related, uint64 guid + spellid + uint32 unk + uint64 guid (target?)
     // 817
-    SMSG_UNKNOWN_818                                = 818, // 2.0.8, received before server MOTD, strange regexp sequence, looks like anti spam filter for chat messages...
+    SMSG_ANTISPAM                                   = 818, // 2.0.8, received before server MOTD, strange regexp sequence, looks like anti spam filter for chat messages...
     // 819
     // 820
     // 821
@@ -875,8 +875,8 @@ enum OpCodes
     // 830
     // 831
     // 832
-    SMSG_UNKNOWN_833                                = 833, // teleport
-    SMSG_UNKNOWN_834                                = 834, // teleport
+    SMSG_UNKNOWN_833                                = 833, // teleport/movement opcode
+    SMSG_UNKNOWN_834                                = 834, // teleport/movement opcode
     SMSG_FLY_MODE_START                             = 835, // packed guid + uint32, start fly
     SMSG_FLY_MODE_STOP                              = 836, // packed guid + uint32, stop fly
     CMSG_MOVE_FLY_MODE_CHANGE_ACK                   = 837, // movement related, fly on/off ack
@@ -949,8 +949,8 @@ enum OpCodes
     // 904 SMSG_FLIGHT_SPLINE_SYNC?
     // 905
     // 906
-    SMSG_REALM_STATE_RESPONSE                       = 907, // response to 908 opcode, 4 x uint32 + uint8
-    CMSG_REALM_STATE_REQUEST                        = 908, // realm related, uint32+uint32+3*(uint16+uint8), appears at select character screen, uint32 0xFFFFFFFF
+    SMSG_REALM_STATE_RESPONSE                       = 907, // response to 908 opcode, uint32+uint32+string(date)
+    CMSG_REALM_STATE_REQUEST                        = 908, // realm related, uint32, appears at select character screen, uint32 0xFFFFFFFF by default
     CMSG_MOVE_SHIP_909                              = 909, // movement related, transport related(ships)
     CMSG_GROUP_PROMOTE                              = 910, // make main-tank / main-assistant
     // 911
@@ -993,22 +993,23 @@ enum FriendsResult
 /// Non Player Character flags
 enum NPCFlags
 {
-    UNIT_NPC_FLAG_NONE              = 0,
-    UNIT_NPC_FLAG_GOSSIP            = 1,
-    UNIT_NPC_FLAG_QUESTGIVER        = 2,
-    UNIT_NPC_FLAG_VENDOR            = 4,
-    UNIT_NPC_FLAG_TAXIVENDOR        = 8,
-    UNIT_NPC_FLAG_TRAINER           = 16,
-    UNIT_NPC_FLAG_SPIRITHEALER      = 32,
-    UNIT_NPC_FLAG_GUARD             = 64,                   //UQ1: ???  We can use as guard flag?, used by blizz for BattleGround spirit guides... (entry 13116 and 13117)
-    UNIT_NPC_FLAG_INNKEEPER         = 128,
-    UNIT_NPC_FLAG_BANKER            = 256,
-    UNIT_NPC_FLAG_PETITIONER        = 512,                  // 1024+512 = guild petitions, 512 = arena team petitions
-    UNIT_NPC_FLAG_TABARDVENDOR      = 1024,
-    UNIT_NPC_FLAG_BATTLEFIELDPERSON = 2048,
-    UNIT_NPC_FLAG_AUCTIONEER        = 4096,
-    UNIT_NPC_FLAG_STABLE            = 8192,
-    UNIT_NPC_FLAG_ARMORER           = 16384,
+    UNIT_NPC_FLAG_NONE              = 0x00000000,
+    UNIT_NPC_FLAG_GOSSIP            = 0x00000001,
+    UNIT_NPC_FLAG_QUESTGIVER        = 0x00000002,
+    UNIT_NPC_FLAG_VENDOR            = 0x00000004,
+    UNIT_NPC_FLAG_TAXIVENDOR        = 0x00000008,
+    UNIT_NPC_FLAG_TRAINER           = 0x00000010,
+    UNIT_NPC_FLAG_SPIRITHEALER      = 0x00000020,
+    UNIT_NPC_FLAG_SPIRITGUIDE       = 0x00000040,           // Spirit Guide
+    UNIT_NPC_FLAG_INNKEEPER         = 0x00000080,
+    UNIT_NPC_FLAG_BANKER            = 0x00000100,
+    UNIT_NPC_FLAG_PETITIONER        = 0x00000200,           // 0x600 = guild petitions, 0x200 = arena team petitions
+    UNIT_NPC_FLAG_TABARDVENDOR      = 0x00000400,
+    UNIT_NPC_FLAG_BATTLEFIELDPERSON = 0x00000800,
+    UNIT_NPC_FLAG_AUCTIONEER        = 0x00001000,
+    UNIT_NPC_FLAG_STABLE            = 0x00002000,
+    UNIT_NPC_FLAG_ARMORER           = 0x00004000,
+    UNIT_NPC_FLAG_GUARD             = 0x00010000,           // custom flag
 };
 #endif
 /// @}

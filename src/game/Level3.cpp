@@ -3523,6 +3523,3 @@ bool ChatHandler::HandleSendChatMsgCommand(const char* args)
     m_session->SendPacket(&data);
     return true;
 }
-
-// TODO Add a commando "Illegal name" to set playerflag |= 32;
-// maybe do'able with a playerclass m_Illegal_name = false
