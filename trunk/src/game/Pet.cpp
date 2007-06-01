@@ -269,8 +269,7 @@ void Pet::SavePetToDB(PetSaveMode mode)
     char *subname = "Pet";
     CreatureInfo *ci = objmgr.GetCreatureTemplate(GetEntry());
 
-    WorldPacket data;
-    data.Initialize( SMSG_CREATURE_QUERY_RESPONSE );
+    WorldPacket data( SMSG_CREATURE_QUERY_RESPONSE, 4+m_name.size()+1+3+strlen(subname)+1+4+4+4+4+4+4+4+2);
     data << (uint32)GetEntry();
     data << m_name.c_str();
     data << uint8(0) << uint8(0) << uint8(0);

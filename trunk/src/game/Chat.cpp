@@ -352,7 +352,6 @@ bool ChatHandler::hasStringAbbr(const char* s1, const char* s2)
 void ChatHandler::SendSysMultilineMessage(WorldSession* session, const char *str)
 {
     char buf[256];
-    WorldPacket data;
 
     const char* line = str;
     const char* pos = line;
@@ -361,12 +360,14 @@ void ChatHandler::SendSysMultilineMessage(WorldSession* session, const char *str
         strncpy(buf, line, pos-line);
         buf[pos-line]=0;
 
+        WorldPacket data;
         FillSystemMessageData(&data, session, buf);
         session->SendPacket(&data);
 
         line = pos+1;
     }
 
+    WorldPacket data;
     FillSystemMessageData(&data, session, line);
     session->SendPacket(&data);
 }

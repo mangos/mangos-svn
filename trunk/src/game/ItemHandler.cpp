@@ -363,7 +363,7 @@ void WorldSession::HandleReadItem( WorldPacket & recv_data )
 
     if( pItem && pItem->GetProto()->PageText )
     {
-        WorldPacket data(0,0);
+        WorldPacket data;
 
         uint8 msg = _player->CanUseItem( pItem );
         if( msg == EQUIP_ERR_OK )

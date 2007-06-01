@@ -153,7 +153,7 @@ uint32 Group::RemoveMember(const uint64 &guid, const uint8 &method)
         Player *player = objmgr.GetPlayer( guid );
         if (player)
         {
-            WorldPacket data(0,0);
+            WorldPacket data;
 
             if(method == 1)
             {
@@ -211,7 +211,7 @@ void Group::Disband(bool hideDestroy)
         player->RemoveAreaAurasFromGroup();
         player->groupInfo.group = NULL;
 
-        WorldPacket data(0,0);
+        WorldPacket data;
         if(!hideDestroy)
         {
             data.Initialize(SMSG_GROUP_DESTROYED, 0);

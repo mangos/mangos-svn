@@ -4771,7 +4771,7 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
 
 void Unit::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply)
 {
-    WorldPacket data(0,0);
+    WorldPacket data;
 
     if(apply)
         m_speed_rate[mtype] *= rate;

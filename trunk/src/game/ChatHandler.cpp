@@ -322,7 +322,7 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
     {
         uint32 emote_anim = em->textid;
 
-        WorldPacket data(0,0);
+        WorldPacket data;
 
         switch(emote_anim)
         {
