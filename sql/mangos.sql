@@ -7542,6 +7542,8 @@ INSERT INTO `playercreateinfo_spell` VALUES
 (8,1,21156,'Battle Stance Passive',0),
 (4,11,21178,'Bear Form (Passive2)',0),
 (6,11,21178,'Bear Form (Passive2)',0),
+(4,11,33948,'Flight Form (Passive)',0),
+(6,11,33948,'Flight Form (Passive)',0),
 (10,2,7355,'Stuck',1),
 (10,3,7355,'Stuck',1),
 (10,4,7355,'Stuck',1),
