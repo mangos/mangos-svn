@@ -3471,7 +3471,7 @@ void ObjectMgr::WritePlayerDump(uint32 guid)
 
     DumpPlayerTable(fout, guid, "character", "character", 1);
     DumpPlayerTable(fout, guid, "character_action", "character_action");
-    DumpPlayerTable(fout, guid, "characte_aura", "characte_aura");
+    DumpPlayerTable(fout, guid, "character_aura", "character_aura");
     DumpPlayerTable(fout, guid, "character_homebind", "character_homebind");
     DumpPlayerTable(fout, guid, "character_inventory", "character_inventory", 2);
     DumpPlayerTable(fout, guid, "character_kill", "character_kill");
