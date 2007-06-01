@@ -422,7 +422,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             Player* targetPlayer = ObjectAccessor::Instance().FindPlayer(((Player*)spellCaster)->GetSelection());
 
             // accept only use by player from same group for caster except caster itself
-            if(targetPlayer == GetPlayer() || !targetPlayer->IsInSameGroupWith(GetPlayer()))
+            if(!targetPlayer || targetPlayer == GetPlayer() || !targetPlayer->IsInSameGroupWith(GetPlayer()))
                 return;
 
             //required lvl checks!
