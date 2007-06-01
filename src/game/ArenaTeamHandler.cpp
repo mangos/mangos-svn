@@ -37,7 +37,7 @@ void WorldSession::HandleInspectArenaStatsOpcode( WorldPacket & recv_data )
         Field *fields = result->Fetch();
         do
         {
-            WorldPacket data(MSG_INSPECT_ARENA_STATS);
+            WorldPacket data(MSG_INSPECT_ARENA_STATS,8+1+4+4+4+4+4);
             data << guid;
             data << fields[0].GetUInt8();   // slot (0...2)
             data << fields[1].GetUInt32();  // arena team id
@@ -139,22 +139,22 @@ void WorldSession::HandleArenaTeamAddMemberOpcode( WorldPacket & recv_data )
 
     if(plr)
     {
-        // packet structure only quessed...
-        WorldPacket data(SMSG_ARENA_TEAM_INVITE);
-        data << _player->GetName(); // player name
-        data << teamname;           // arena team name
+        // packet structure only guessed...
+        WorldPacket data(SMSG_ARENA_TEAM_INVITE);           // FIX_ME: correct packet size set
+        data << _player->GetName();                         // player name (maybe plr instead _player ?)
+        data << teamname;                                   // arena team name
         plr->GetSession()->SendPacket(&data);
     }
 }
 
 void WorldSession::HandleArenaTeamInviteAcceptOpcode( WorldPacket & recv_data )
 {
-    sLog.outDebug("CMSG_ARENA_TEAM_INVITE_ACCEPT"); // empty opcode
+    sLog.outDebug("CMSG_ARENA_TEAM_INVITE_ACCEPT");         // empty opcode
 }
 
 void WorldSession::HandleArenaTeamInviteDeclineOpcode( WorldPacket & recv_data )
 {
-    sLog.outDebug("CMSG_ARENA_TEAM_INVITE_DECLINE"); // empty opcode
+    sLog.outDebug("CMSG_ARENA_TEAM_INVITE_DECLINE");        // empty opcode
 }
 
 void WorldSession::HandleArenaTeamLeaveOpcode( WorldPacket & recv_data )
