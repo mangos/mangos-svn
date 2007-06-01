@@ -339,14 +339,14 @@ int32 GetMaxDuration(SpellEntry const *spellInfo)
     return (du->Duration[2] == -1) ? -1 : abs(du->Duration[2]);
 }
 
-char* GetPetName(uint32 petfamily)
+char* GetPetName(uint32 petfamily, uint32 dbclang)
 {
     if(!petfamily)
         return NULL;
     CreatureFamilyEntry const *pet_family = sCreatureFamilyStore.LookupEntry(petfamily);
     if(!pet_family)
         return NULL;
-    return pet_family->Name?pet_family->Name:NULL;
+    return pet_family->Name[dbclang]?pet_family->Name[dbclang]:NULL;
 }
 
 bool IsPassiveSpell(uint32 spellId)
@@ -638,7 +638,7 @@ bool CanUsedWhileStealthed(uint32 spellId)
     return false;
 }
 
-ChatChannelsEntry const* GetChannelEntryFor(char const* name)
+ChatChannelsEntry const* GetChannelEntryFor(char const* name, uint32 dbclang)
 {
     // not sorted, numbering index from 0
     for(uint32 i = 0; i < sChatChannelsStore.nCount; ++i)
@@ -648,14 +648,14 @@ ChatChannelsEntry const* GetChannelEntryFor(char const* name)
         {
             if((ch->flags & 4) == 4)                          // global channel without zone name in pattern
             {
-                if(strcmp(name,ch->pattern)==0)
+                if(strcmp(name,ch->pattern[dbclang])==0)
                     return ch;
             }
             else
             {
                 // compare pattern (something - %s)
                 char zone_name_buf[50];
-                if(sscanf(name,ch->pattern,zone_name_buf)>0)
+                if(sscanf(name,ch->pattern[dbclang],zone_name_buf)>0)
                     return ch;
             }
         }

@@ -186,6 +186,8 @@ class World
         /// Get the current Message of the Day
         const char* GetMotd() const { return m_motd.c_str(); }
 
+        uint32 GetDBClang() const { return m_langid; }
+ 
         /// Get the path where data (dbc, maps) are stored on disk
         std::string GetDataPath() const { return m_dataPath; }
 
@@ -270,6 +272,8 @@ class World
         float rate_values[MAX_RATES];
         uint32 m_configs[CONFIG_VALUE_COUNT];
         uint32 m_playerLimit;
+        uint32 m_langid;
+        void DetectDBCLang();
         bool m_allowMovement;
         std::string m_motd;
         std::string m_dataPath;

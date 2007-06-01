@@ -24,6 +24,18 @@ WorldDatabaseInfo = "127.0.0.1;3306;mangos;mangos;mangos"
 # Settings for maximum database-ping interval (minutes between pings)
 MaxPingTime = 30
 
+# DBC Language Settings
+# 0 = English
+# 1 =
+# 2 = French
+# 3 = German
+# 4 =
+# 5 =
+# 6 =
+# 7 =
+# 8 = Auto Detect (Default)
+DBC.Locale = 8
+
 # Enable logging of GM commands - all SQL code will be written to a log file
 # All commands are written to a file: YYYY-MM-DD_logSQL.sql
 # If a new day starts (00:00:00) then a new file is created - the old
