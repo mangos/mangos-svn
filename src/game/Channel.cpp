@@ -24,7 +24,7 @@ Channel::Channel(std::string _name)
     : name(_name), announce(true), constant(false), moderate(false), m_ownerGUID(0), password("")
 {
     // set special flags if built-in channel
-    ChatChannelsEntry const* ch = GetChannelEntryFor(name.c_str());
+    ChatChannelsEntry const* ch = GetChannelEntryFor(name.c_str(), sWorld.GetDBClang());
     if(ch)
     {
         constant = true;                                    // built-in channel    

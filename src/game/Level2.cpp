@@ -1178,7 +1178,7 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
         {
             FactionEntry const *factionEntry = sFactionStore.LookupEntry(itr->ID);
             if (factionEntry)
-                FactionName = factionEntry->name;
+                FactionName = factionEntry->name[sWorld.GetDBClang()];
             else
                 FactionName = "#Not found#";
             ReputationRank Rank = target->GetReputationRank(factionEntry);

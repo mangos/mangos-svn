@@ -364,6 +364,7 @@ void World::SetInitialWorldSettings()
     ///- Load the DBC files
     sLog.outString("Initialize data stores...");
     LoadDBCStores(m_dataPath);
+    DetectDBCLang();
 
     ///- Clean up and pack instances
     sLog.outString( "Cleaning up instances..." );
@@ -529,6 +530,35 @@ void World::SetInitialWorldSettings()
     AddEvent(&HandleCorpsesErase,NULL,20*MINUTE*1000,false,true);
 
     sLog.outString( "WORLD: World initialized" );
+}
+
+void World::DetectDBCLang()
+{
+    m_langid = sConfig.GetIntDefault("DBC.Locale", 8);
+
+    ChrRacesEntry const* race = sChrRacesStore.LookupEntry(1);
+    
+    if (m_langid < 8)
+    {
+        if ( strlen(race->name[m_langid]) > 0)
+        {
+            sLog.outString("Using DBC Locale From Config (%d).\n", m_langid);
+            return;
+        }
+        else
+            sLog.outString("DBC Locale Does Not Match Config Locale (%d)!!!", m_langid);
+    }
+    for (int i = 0; i < 8; i++)
+    {
+        if ( strlen(race->name[i]) > 0)
+        {
+            m_langid = i;
+            sLog.outString("Using Autodetected DBC Locale (%d).\n", m_langid);
+            return;
+        }
+    }
+    sLog.outError("Unable to determine your DBC Locale!!");
+    exit(1);
 }
 
 /// Update the World !

@@ -1659,7 +1659,7 @@ bool ChatHandler::HandleLookupItemSetCommand(const char* args)
         ItemSetEntry const *set = sItemSetStore.LookupEntry(id);
         if(set)
         {
-            std::string name = set->name;
+            std::string name = set->name[sWorld.GetDBClang()];
 
             // converting name to lower case
             std::transform( name.begin(), name.end(), name.begin(), ::tolower );
@@ -1670,7 +1670,7 @@ bool ChatHandler::HandleLookupItemSetCommand(const char* args)
             if (name.find(namepart) != std::string::npos)
             {
                 // send item set in "id - name" format
-                PSendSysMessage("%d - %s",id,set->name);
+                PSendSysMessage("%d - %s",id,set->name[sWorld.GetDBClang()]);
                 counter++;
             }
         }
@@ -1695,7 +1695,7 @@ bool ChatHandler::HandleLookupSkillCommand(const char* args)
         if(skillInfo)
         {
             // name - is first name field from dbc (English localized)
-            std::string name = skillInfo->name[0];
+            std::string name = skillInfo->name[sWorld.GetDBClang()];
 
             // converting SkillName to lower case
             std::transform( name.begin(), name.end(), name.begin(), ::tolower );
@@ -1706,7 +1706,7 @@ bool ChatHandler::HandleLookupSkillCommand(const char* args)
             {
                 uint16 skill = m_session->GetPlayer()->GetPureSkillValue(id);
                 // send skill in "id - name" format
-                PSendSysMessage("%d - %s%s",id,skillInfo->name[0],(skill == 0 ? "" : " [known]"));
+                PSendSysMessage("%d - %s%s",id,skillInfo->name[sWorld.GetDBClang()],(skill == 0 ? "" : " [known]"));
 
                 counter++;
             }
@@ -1731,7 +1731,7 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
         if(spellInfo)
         {
             // name - is first name field from dbc (English localized)
-            std::string name = spellInfo->SpellName[0];
+            std::string name = spellInfo->SpellName[sWorld.GetDBClang()];
 
             // converting SpellName to lower case
             std::transform( name.begin(), name.end(), name.begin(), ::tolower );
@@ -1741,7 +1741,7 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
 
             if (name.find(namepart) != std::string::npos)
             {
-                std::string rank = spellInfo->Rank[0];
+                std::string rank = spellInfo->Rank[sWorld.GetDBClang()];
 
                 bool known = m_session->GetPlayer()->HasSpell(id);
 
@@ -1749,13 +1749,13 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
                 if (!rank.empty())
                 {
                     // send spell in "id - name - rank" format
-                    PSendSysMessage("%d - %s - %s%s",id,spellInfo->SpellName[0],rank.c_str(),(known ? " [known]" : ""));
+                    PSendSysMessage("%d - %s - %s%s",id,spellInfo->SpellName[sWorld.GetDBClang()],rank.c_str(),(known ? " [known]" : ""));
                     counter++;
                 }
                 else
                 {
                     // send spell in "id - name" format
-                    PSendSysMessage("%d - %s%s",id,spellInfo->SpellName[0],(known ? " [known]" : ""));
+                    PSendSysMessage("%d - %s%s",id,spellInfo->SpellName[sWorld.GetDBClang()],(known ? " [known]" : ""));
                     counter++;
                 }
             }

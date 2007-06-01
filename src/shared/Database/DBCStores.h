@@ -57,7 +57,7 @@ float GetMinRange(SpellRangeEntry const *range);
 float GetMaxRange(SpellRangeEntry const *range);
 int32 GetDuration(SpellEntry const *spellInfo);
 int32 GetMaxDuration(SpellEntry const *spellInfo);
-char* GetPetName(uint32 petfamily);
+char* GetPetName(uint32 petfamily, uint32 dbclang);
 bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);
 bool IsSealSpell(uint32 spellId);
 int32 CompareAuraRanks(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);
@@ -72,7 +72,7 @@ AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id);
 AreaTableEntry const* GetAreaEntryByAreaFlag(uint32 area_flag);
 uint32 GetAreaFlagByMapId(uint32 mapid);
 bool CanUsedWhileStealthed(uint32 spellId);
-ChatChannelsEntry const* GetChannelEntryFor(char const* name);
+ChatChannelsEntry const* GetChannelEntryFor(char const* name, uint32 dbclang);
 
 template<class T>
 class DBCStorage
