@@ -819,7 +819,8 @@ CREATE TABLE `corpse` (
   `bones_flag` tinyint(3) NOT NULL default '0',
   `instance` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`),
-  KEY `idx_bones_flag` (`bones_flag`)
+  KEY `idx_bones_flag` (`bones_flag`),
+  INDEX (`instance`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Death System';
 
 --
@@ -1038,7 +1039,8 @@ CREATE TABLE `creature_respawn` (
   `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
   `respawntime` bigint(40) NOT NULL default '0',
   `instance` int(11) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`guid`,`instance`)
+  PRIMARY KEY  (`guid`,`instance`),
+  INDEX (`instance`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Grid Loading System';
 
 --
@@ -1369,7 +1371,8 @@ CREATE TABLE `gameobject_respawn` (
   `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
   `respawntime` bigint(40) NOT NULL default '0',
   `instance` int(11) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`guid`,`instance`)
+  PRIMARY KEY  (`guid`,`instance`),
+  INDEX (`instance`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Grid Loading System';
 
 --
