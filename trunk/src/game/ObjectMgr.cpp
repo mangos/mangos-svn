@@ -3505,8 +3505,8 @@ void ObjectMgr::LoadPlayerDump(char *file, uint32 account)
     if(!fin) return;
 
     char newguid[20], chraccount[20], chritem[20];
-    itoa(m_hiCharGuid, newguid, 10);
-    itoa(account, chraccount, 10);
+    snprintf(newguid,20,"%u",m_hiCharGuid);
+    snprintf(chraccount,20,"%u",account);
 
     std::map<uint32, uint32> items;
     char buf[32000] = "";
