@@ -556,7 +556,7 @@ void WorldSession::SendPartyMemberStatsChanged( uint64 Guid )
 
     Player *player = objmgr.GetPlayer(Guid);
     if(!player)
-        //if player is offline - then send nothing
+        //if player is offline - then send nothing --- not fixed, we should send some info that player is offline!
         return;
 
     WorldPacket data(SMSG_PARTY_MEMBER_STATS, 30);
@@ -572,20 +572,20 @@ void WorldSession::SendPartyMemberStatsChanged( uint64 Guid )
     if (mask && 4)
         data << (uint16) player->GetMaxHealth();
     Powers powerType = player->getPowerType();
-    if (powerType > 0)                          //this mask bit is always 0
+    if (mask && 8)                          //this mask bit is always 0
         data << (uint8)  powerType;
-    if (mask && 8)
-        data << (uint16) player->GetMaxPower(powerType);
     if (mask && 16)
-        data << (uint16) player->GetPower(powerType);
+        data << (uint16) player->GetMaxPower(powerType);
     if (mask && 32)
-        data << (uint16) player->getLevel();
+        data << (uint16) player->GetPower(powerType);
     if (mask && 64)
-        data << (uint16) player->GetZoneId();
+        data << (uint16) player->getLevel();
     if (mask && 128)
-        data << (uint16) 150;//player->GetPositionX();     - it should be X position on map
+        data << (uint16) player->GetZoneId();
     if (mask && 256)
-        data << (uint16) 100;//player->GetPositionY();     - it should be Y position on map
+        data << (uint16) player->GetPositionX();
+    if (mask && 512)
+        data << (uint16) player->GetPositionY();
     ///and some other things, like spells, pet name, pet HP, pet HP max should be send
 
     SendPacket(&data);

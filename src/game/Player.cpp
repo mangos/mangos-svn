@@ -12877,7 +12877,12 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
         }
         if( getLevel() < pProto->RequiredLevel )
         {
-            SendBuyError( BUY_ERR_LEVEL_REQUIRE, pCreature, item, 0);
+            SendBuyError( BUY_ERR_LEVEL_REQUIRED, pCreature, item, 0);
+            return;
+        }
+        if( this->GetReputationRank(pProto->RequiredReputationFaction) < pProto->RequiredReputationRank)
+        {
+            SendBuyError( BUY_ERR_REPUTATION_REQUIRED, pCreature, item, 0);
             return;
         }
         if(pProto->ExtendedCost)

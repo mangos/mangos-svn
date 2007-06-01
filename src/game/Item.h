@@ -119,8 +119,8 @@ enum BuyFailure
     BUY_ERR_SELLER_DONT_LIKE_YOU                 = 4,
     BUY_ERR_DISTANCE_TOO_FAR                     = 5,
     BUY_ERR_CANT_CARRY_MORE                      = 8,
-    BUY_ERR_LEVEL_REQUIRE                        = 11, // 2.0.1 - rank
-    BUY_ERR_REPUTATION_REQUIRE                   = 12
+    BUY_ERR_LEVEL_REQUIRED                       = 11, // 2.0.1 - rank
+    BUY_ERR_REPUTATION_REQUIRED                  = 12
 };
 
 enum SellFailure
