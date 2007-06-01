@@ -260,7 +260,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //205                                   unused
     &Aura::HandleNULL,                                      //206 SPELL_AURA_MOD_SPEED_MOUNTED
     &Aura::HandleAuraModSpeedMountedFlight,                 //207 SPELL_AURA_MOD_SPEED_MOUNTED_FLIGHT
-    &Aura::HandleAuraAllowFlight,                           //208                                   flight related, used only in spell: Flight Form (Passive)
+    &Aura::HandleNULL,                                      //208                                   flight related, used only in spell: Flight Form (Passive)
     &Aura::HandleNULL,                                      //209                                   unused
     &Aura::HandleNULL,                                      //210                                   unused
     &Aura::HandleNULL,                                      //211                                   unused
@@ -3393,11 +3393,16 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             // aura from effect trigger spell
             spellId2 = 24907;
             break;
+        case FORM_FLIGHT:
+            spellId = 33948;
+            break;
         case FORM_GHOSTWOLF:
         case FORM_AMBIENT:
         case FORM_GHOUL:
         case FORM_SHADOW:
         case FORM_STEALTH:
+        case FORM_CREATURECAT:
+        case FORM_SPIRITOFREDEMPTION:
             spellId = 0;
             break;
     }
