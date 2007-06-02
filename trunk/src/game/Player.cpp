@@ -11749,11 +11749,13 @@ void Player::_SaveAuras()
     for(AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
     {
         // skip all auras from spell that apply at cast SPELL_AURA_MOD_SHAPESHIFT or SPELL_AURA_MOD_STEALTH auras.
+        // or need a shapeshift
         SpellEntry const *spellInfo = itr->second->GetSpellProto();
         uint8 i;
         for (i = 0; i < 3; i++)
             if (spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_SHAPESHIFT ||
-            spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_STEALTH)
+            spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MOD_STEALTH ||
+            spellInfo->Stances)
                 break;
 
         if (i == 3 && !itr->second->IsPassive())

@@ -3327,11 +3327,20 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
             {
                 if(*aur == SPELL_AURA_PROC_TRIGGER_SPELL)
                 {
-                    sLog.outDebug("ProcDamageAndSpell: casting spell %u (triggered by an attacker's aura of spell %u)", i->spellInfo->Id,i->triggeredByAura->GetId());
-                    if(IsPositiveSpell(i->spellInfo->Id) && !(i->spellParam & PROC_FLAG_HEAL))
-                        CastSpell(this,i->spellInfo->Id,true,NULL,i->triggeredByAura);
-                    else if(pVictim && pVictim->isAlive())
-                        CastSpell(pVictim,i->spellInfo->Id,true,NULL,i->triggeredByAura);
+                    if (i->spellInfo->Id != 18350)
+                    {
+                        sLog.outDebug("ProcDamageAndSpell: casting spell %u (triggered by an attacker's aura of spell %u)", i->spellInfo->Id,i->triggeredByAura->GetId());
+                        if(IsPositiveSpell(i->spellInfo->Id) && !(i->spellParam & PROC_FLAG_HEAL))
+                            CastSpell(this,i->spellInfo->Id,true,NULL,i->triggeredByAura);
+                        else if(pVictim && pVictim->isAlive())
+                            CastSpell(pVictim,i->spellInfo->Id,true,NULL,i->triggeredByAura);
+                    }
+                    else
+                    {
+                        //spell 18350 needs special handling
+                        sLog.outDebug("ProcDamageAndSpell: dummy trigger %u (triggered by an attacker's aura of spell %u)", i->spellInfo->Id,i->triggeredByAura->GetId());
+                        HandleDummyTrigger(pVictim, damage, i->triggeredByAura, procSpell);
+                    }
                 }
                 else if(*aur == SPELL_AURA_PROC_TRIGGER_DAMAGE)
                 {
@@ -3441,11 +3450,20 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
             {
                 if(*aur == SPELL_AURA_PROC_TRIGGER_SPELL)
                 {
-                    sLog.outDebug("ProcDamageAndSpell: casting spell %u (triggered by a victim's aura of spell %u))",i->spellInfo->Id, i->triggeredByAura);
-                    if(IsPositiveSpell(i->spellInfo->Id) && !(i->spellParam&PROC_FLAG_HEAL))
-                        pVictim->CastSpell(pVictim,i->spellInfo->Id,true,NULL,i->triggeredByAura);
+                    if (i->spellInfo->Id != 18350)
+                    {
+                        sLog.outDebug("ProcDamageAndSpell: casting spell %u (triggered by a victim's aura of spell %u))",i->spellInfo->Id, i->triggeredByAura);
+                        if(IsPositiveSpell(i->spellInfo->Id) && !(i->spellParam&PROC_FLAG_HEAL))
+                            pVictim->CastSpell(pVictim,i->spellInfo->Id,true,NULL,i->triggeredByAura);
+                        else
+                            pVictim->CastSpell(this,i->spellInfo->Id,true,NULL,i->triggeredByAura);
+                    }
                     else
-                        pVictim->CastSpell(this,i->spellInfo->Id,true,NULL,i->triggeredByAura);
+                    {
+                        //spell 18350 needs special handling
+                        sLog.outDebug("ProcDamageAndSpell: dummy trigger %u (triggered by an attacker's aura of spell %u)", i->spellInfo->Id,i->triggeredByAura->GetId());
+                        pVictim->HandleDummyTrigger(this, damage, i->triggeredByAura, procSpell);
+                    }
                 }
                 else if(*aur == SPELL_AURA_PROC_TRIGGER_DAMAGE)
                 {
@@ -3587,6 +3605,147 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
         SpellEntry VTEnergize = *VTEnergizeTemplate;
         VTEnergize.EffectBasePoints[0] = triggredByAura->GetModifier()->m_amount*damage/100 - 1;
         pVictim->CastSpell(pVictim,&VTEnergize,true,NULL, triggredByAura);
+    }
+}
+
+void Unit::HandleDummyTrigger(Unit *pVictim, uint32 damage, Aura* triggredByAura, SpellEntry const *procSpell)
+{
+    switch(triggredByAura->GetSpellProto()->SpellIconID)
+    {
+        case 19:
+            //Lightning Shield (Shaman T2 bonus)
+            //Effect: 23552
+            /*if (pVictim && pVictim->isAlive())
+                CastSpell(pVictim, 23552, true, NULL, triggredByAura);*/
+            break;
+        case 87:
+        {
+            //Mana Surge (Shaman T1 bonus)
+            //Effect: 23571
+            SpellEntry const *ManaSurgeTemplate = sSpellStore.LookupEntry(23571);
+            SpellEntry ManaSurgeSpell = *ManaSurgeTemplate;
+            ManaSurgeSpell.EffectBasePoints[0] = procSpell->manaCost * 35/100;
+            CastSpell(this, &ManaSurgeSpell, true, NULL, triggredByAura);
+            break;
+        }    
+        case 113:
+        {
+            //Improved Drain Soul
+            //Effect: 18371
+            Unit::AuraList& mAddFlatModifier = GetAurasByType(SPELL_AURA_ADD_FLAT_MODIFIER);
+            for(Unit::AuraList::iterator i = mAddFlatModifier.begin(); i != mAddFlatModifier.end(); ++i)
+                if ((*i)->GetModifier()->m_miscvalue == SPELLMOD_CHANCE_OF_SUCCESS && (*i)->GetSpellProto()->SpellIconID == 113)
+                {
+                    SpellEntry const *impDrainSoulTemplate = sSpellStore.LookupEntry(18371);
+                    SpellEntry impDrainSoul = *impDrainSoulTemplate;
+                    impDrainSoul.EffectBasePoints[0] = (*i)->GetSpellProto()->EffectBasePoints[2] * GetMaxPower(POWER_MANA) / 100;
+                    CastSpell(this, &impDrainSoul, true, NULL, triggredByAura);
+                }
+            break;
+        }
+        case 241:
+        {
+            //Illumination
+            //Effect: 20272
+            /*SpellEntry const *IlluminationTemplate = sSpellStore.LookupEntry(20272);
+            SpellEntry IlluminationSpell = *IlluminationTemplate;
+            IlluminationSpell.EffectBasePoints[0] = procSpell->manaCost;
+            CastSpell(this, &IlluminationSpell, true, NULL, triggredByAura);*/
+            break;    
+        }
+        case 312:
+        {
+            //Improved Leader of the Pack
+            //Effect 34299
+            //Cooldown: 6 secs
+            if (triggredByAura->GetModifier()->m_amount > 0)
+                break;
+            Unit::AuraList& mAddFlatModifier = GetAurasByType(SPELL_AURA_ADD_FLAT_MODIFIER);
+            SpellEntry const *improvedLotPTemplate = sSpellStore.LookupEntry(34299);
+            SpellEntry improvedLotP = *improvedLotPTemplate;
+            improvedLotP.EffectBasePoints[0] = triggredByAura->GetModifier()->m_amount * GetMaxHealth() / 100 - 1;
+            CastSpell(this, &improvedLotP, true, NULL, triggredByAura);
+            if (GetTypeId() == TYPEID_PLAYER)
+                ((Player*)this)->AddSpellCooldown(34299,0,time(NULL) + 6);
+            break;
+        }
+        case 1137:
+        {
+            //Pyroclasm
+            //Effect: 18093
+            float chance = 0;
+            switch (triggredByAura->GetSpellProto()->Id)
+            {
+                case 18096:
+                    chance = 13.0;
+                    break;
+                case 18073:
+                    chance = 26.0;
+                    break;
+            }
+            if (pVictim && pVictim->isAlive() && roll_chance_f(chance))
+                CastSpell(pVictim, 18093, true, NULL, triggredByAura);
+            break;
+        }
+        case 1875:
+        {
+            //Blessed Recovery
+            //Effects: 27813(Rank 1), 27817(Rank 2), 27818(Rank 3)
+            uint32 EffectId = 0;
+            switch (triggredByAura->GetSpellProto()->Id)
+            {
+                case 27811:
+                    EffectId = 27813;
+                    break;
+                case 27815:
+                    EffectId = 27817;
+                    break;
+                case 27816:
+                    EffectId = 27818;
+                    break;
+            }
+            if (EffectId == 0)
+                break;
+            SpellEntry const *BRHealTemplate = sSpellStore.LookupEntry(EffectId);
+            SpellEntry BRHeal = *BRHealTemplate;
+            BRHeal.EffectBasePoints[0] = (damage * triggredByAura->GetModifier()->m_amount / 100 - 1) / 3;
+            CastSpell(this, &BRHeal, true, NULL, triggredByAura);
+            break;
+        }
+        case 2006:
+            //Rampage
+            //Effects: 30029(Rank 1), 30031(Rank 2), 30032(Rank 3)
+            //Check EffectTriggerSpell[1] to determine correct effect id
+            //CastSpell(this, triggredByAura->GetSpellProto()->EffectTriggerSpell[1], true, NULL, triggredByAura);
+            break;
+        case 2013:
+        {
+            //Nature's Guardian
+            //Effects: 31616, 39301
+            //Cooldown: 5 secs
+            /*float HealthRatio = GetHealth() / GetMaxHealth();
+            float HealthRatioBefore = (GetHealth() + damage) / GetMaxHealth();
+            if (HealthRatio < 0.3 && HealthRatioBefore >= 0.3)
+            {
+                SpellEntry const *NGHealTemplate = sSpellStore.LookupEntry(31616);
+                SpellEntry NGHeal = *NGHealTemplate;
+                NGHeal.EffectBasePoints[0] = triggredByAura->GetModifier()->m_amount * GetMaxHealth() / 100;
+                CastSpell(this, &NGHeal, true, NULL, triggredByAura);
+                if (pVictim && pVictim->isAlive())
+                    CastSpell(pVictim, 39301, true, NULL, triggredByAura);
+                if (GetTypeId() == TYPEID_PLAYER)
+                {
+                    ((Player*)this)->AddSpellCooldown(31616,0,time(NULL) + 5);
+                    ((Player*)this)->AddSpellCooldown(39301,0,time(NULL) + 5);
+                }
+            }*/
+            break;
+        }
+        case 2127:
+            //Blazing Speed
+            //Effect: 31643
+            CastSpell(this, 31643, true, NULL, triggredByAura);
+            break;
     }
 }
 
