@@ -2979,14 +2979,14 @@ void Player::DeleteFromDB()
     sDatabase.CommitTransaction();
 
     //loginDatabase.PExecute("UPDATE `realmcharacters` SET `numchars` = `numchars` - 1 WHERE `acctid` = %d AND `realmid` = %d", GetSession()->GetAccountId(), realmID);
-    QueryResult *resultCount = sDatabase.PQuery("SELECT COUNT(guid) FROM `character` WHERE `account` = '%d'", GetSession()->GetAccountId());
+    QueryResult *resultCount = sDatabase.PQuery("SELECT COUNT(guid) FROM `character` WHERE `account` = '%u'", GetSession()->GetAccountId());
     uint32 charCount = 0;
     if (resultCount)
     {
         Field *fields = resultCount->Fetch();
         charCount = fields[0].GetUInt32();
         delete resultCount;
-        loginDatabase.PExecute("INSERT INTO `realmcharacters` (`numchars`, `acctid`, `realmid`) VALUES (%d, %d, %d) ON DUPLICATE KEY UPDATE `numchars` = '%d'", charCount, GetSession()->GetAccountId(), realmID, charCount);
+        loginDatabase.PExecute("INSERT INTO `realmcharacters` (`numchars`, `acctid`, `realmid`) VALUES (%u, %u, %u) ON DUPLICATE KEY UPDATE `numchars` = '%u'", charCount, GetSession()->GetAccountId(), realmID, charCount);
     }
 }
 
