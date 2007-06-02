@@ -601,7 +601,7 @@ void Spell::EffectDummy(uint32 i)
         uint32 rage = m_spellInfo->EffectBasePoints[i];
         SpellEntry const* OriginalCharge = sSpellStore.LookupEntry(34846);
         SpellEntry CustomCharge = *OriginalCharge;
-        CustomCharge.EffectBasePoints[0] = rage-1;
+        CustomCharge.EffectBasePoints[0] = rage;
         m_caster->CastSpell(m_caster,&CustomCharge,true);
         return;
     }

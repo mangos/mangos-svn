@@ -3461,6 +3461,13 @@ void Aura::HandleShapeshiftBoosts(bool apply)
                 if (spellInfo->Stances & (1<<form))
                     m_target->CastSpell(m_target, itr->first, true, NULL, this);
             }
+            //LotP
+            if (((Player*)m_target)->HasSpell(17007))
+            {
+                SpellEntry const *spellInfo = sSpellStore.LookupEntry(24932);
+                if (spellInfo && spellInfo->Stances & (1<<form))
+                    m_target->CastSpell(m_target, 24932, true);
+            }
         }
     }
     else
