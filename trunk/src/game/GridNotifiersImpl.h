@@ -140,15 +140,6 @@ inline void CreatureCreatureRelocationWorker(Creature* c1, Creature* c2)
 
 template<>
 inline void
-MaNGOS::PlayerRelocationNotifier::Visit(CorpseMapType &m)
-{
-    for(CorpseMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-        if( !i_player.isAlive() && iter->second->GetType()==CORPSE_RESURRECTABLE )
-            iter->second->UpdateForPlayer(&i_player,false);
-}
-
-template<>
-inline void
 MaNGOS::PlayerRelocationNotifier::Visit(CreatureMapType &m)
 {
     if(!i_player.isAlive() || i_player.isInFlight())

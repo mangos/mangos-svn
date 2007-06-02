@@ -25,6 +25,8 @@
 
 void WorldSession::HandleInspectArenaStatsOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8);
+
     sLog.outDebug("MSG_INSPECT_ARENA_STATS");
     recv_data.hexlike();
     uint64 guid;
@@ -58,6 +60,8 @@ void WorldSession::HandleInspectArenaStatsOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleArenaTeamQueryOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,4);
+
     sLog.outDebug("CMSG_ARENA_TEAM_QUERY");
     recv_data.hexlike();
 
@@ -95,6 +99,8 @@ void WorldSession::HandleArenaTeamQueryOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleArenaTeamRosterOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,1);
+
     sLog.outDebug("CMSG_ARENA_TEAM_ROSTER");
     recv_data.hexlike();
 
@@ -126,6 +132,8 @@ void WorldSession::HandleArenaTeamRosterOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleArenaTeamAddMemberOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,1+1);
+
     sLog.outDebug("CMSG_ARENA_TEAM_ADD_MEMBER");
     recv_data.hexlike();
 

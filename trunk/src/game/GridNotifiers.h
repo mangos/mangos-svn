@@ -237,7 +237,6 @@ namespace MaNGOS
         template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m) {}
         template<class T> void Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m) {}
         #ifdef WIN32
-        template<> void Visit(CorpseMapType &);
         template<> void Visit(PlayerMapType &);
         template<> void Visit(CreatureMapType &);
         #endif
@@ -594,7 +593,6 @@ namespace MaNGOS
     template<> void VisibleNotifier::Visit<Creature>(CreatureMapType &);
     template<> void VisibleNotifier::Visit<Player>(PlayerMapType &);
     template<> void NotVisibleNotifier::Visit<Creature>(CreatureMapType &);
-    template<> void PlayerRelocationNotifier::Visit<Corpse>(CorpseMapType &);
     template<> void PlayerRelocationNotifier::Visit<Creature>(CreatureMapType &);
     template<> void PlayerRelocationNotifier::Visit<Player>(PlayerMapType &);
     template<> void CreatureRelocationNotifier::Visit<Player>(PlayerMapType &);

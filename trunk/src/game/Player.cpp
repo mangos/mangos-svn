@@ -1476,10 +1476,6 @@ void Player::AddToWorld()
         if(m_items[i])
             m_items[i]->AddToWorld();
     }
-
-    CorpsePtr corpse = GetCorpse();
-    if(corpse)
-        corpse->UpdateForPlayer(this,true);
 }
 
 void Player::RemoveFromWorld()
@@ -3451,8 +3447,6 @@ void Player::RepopAtGraveyard()
             data << ClosestGrave->z;
             GetSession()->SendPacket(&data);
         }
-        if(CorpsePtr corpse = GetCorpse())
-            corpse->UpdateForPlayer(this,true);
     }
 }
 
@@ -11157,8 +11151,6 @@ void Player::LoadCorpse()
     {
         if(CorpsePtr corpse = GetCorpse())
         {
-            corpse->UpdateForPlayer(this,true);
-
             if( corpse->GetType() == CORPSE_RESURRECTABLE && IsWithinDistInMap(&*corpse,0.0))
                 RepopAtGraveyard();
         }
