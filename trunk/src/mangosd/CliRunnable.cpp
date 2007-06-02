@@ -103,7 +103,10 @@ const CliCommand Commands[]=
 void CliWritePlayerDump(char*command,pPrintf zprintf)
 {
     if(!command || !*command) return;
-    objmgr.WritePlayerDump(atoi(command));
+    char * file = strtok(command, " ");
+    char * p2 = strtok(NULL, " ");
+    if(!file || !p2) return;
+    objmgr.WritePlayerDump(file, atoi(p2));
 }
 
 void CliLoadPlayerDump(char*command,pPrintf zprintf)

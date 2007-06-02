@@ -288,6 +288,8 @@ ChatCommand * ChatHandler::getCommandTable()
         { "sendmail",    1, &ChatHandler::HandleSendMailCommand,         "",   NULL },
         { "rename",      2, &ChatHandler::HandleRenameCommand,           "",   NULL },
         { "nametele",    1, &ChatHandler::HandleNameTeleCommand,         "",   NULL },
+        { "loadpdump",   3, &ChatHandler::HandleLoadPDumpCommand,        "",   NULL },
+        { "writepdump",  3, &ChatHandler::HandleWritePDumpCommand,       "",   NULL },
 
         //! Development Commands
         { "setvalue",    3, &ChatHandler::HandleSetValue,                "",   NULL },

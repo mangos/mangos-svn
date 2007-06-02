@@ -3389,6 +3389,32 @@ void ObjectMgr::LoadQuestRelationsHelper(QuestRelations& map,char const* table)
     sLog.outString(">> Loaded %u quest relations from %s", count,table);
 }
 
+// Character Dumps (Write/Load)
+
+#define NUM_TBLS 13
+
+struct tbl
+{
+    char name[30];
+    uint8 type;
+};
+
+tbl tbls[13] = {
+    "character", 1,
+    "character_action", 0,
+    "characte_aura", 0,
+    "character_homebind", 0,
+    "character_inventory", 2,
+    "character_kill", 0, 
+    "character_queststatus", 0, 
+    "character_reputation", 0, 
+    "character_spell", 0, 
+    "character_spell_cooldown", 0, 
+    "item_instance", 3, 
+    "character_ticket", 0, 
+    "character_tutorial", 0
+};
+
 std::string CreateDumpString(char *table, QueryResult *result)
 {
     if(!table || !result) return "";
@@ -3410,32 +3436,6 @@ std::string CreateDumpString(char *table, QueryResult *result)
     return ss.str();
 }
 
-void changenth(std::string &str, int n, char *with, bool insert = false, bool nonzero = false)
-{
-    string::size_type s, e;
-    s = str.find("VALUES ('")+9;
-    if (s == string::npos) return;
-
-    do {
-        e = str.find("'",s);
-        if (e == string::npos) return;
-    } while(str[e-1] == '\\');
-
-    for(int i = 1; i < n; i++)
-    {
-        do {
-            s = e+4;
-            e = str.find("'",s);
-            if (e == string::npos) return;
-        } while (str[e-1] == '\\');
-    }
-
-    if(nonzero && str.substr(s,e-s) == "0") return;
-
-    if(!insert) str.replace(s,e-s, with);
-    else str.insert(s, with);
-}
-
 bool DumpPlayerTable(FILE *file, uint32 guid, char *tableFrom, char *tableTo, int8 type = 0)
 {
     if (!file || !tableFrom || !tableTo) return false;
@@ -3444,18 +3444,6 @@ bool DumpPlayerTable(FILE *file, uint32 guid, char *tableFrom, char *tableTo, in
     do
     {
         std::string dump = CreateDumpString(tableTo, result);
-        if(type <= 2) changenth(dump, 1, "_CHAR_GUID_");    // most tables
-        if(type == 1) changenth(dump, 2, "_CHAR_ACCOUNT_"); // character t.
-        if(type == 2)                                       // character_inventory t.
-        {
-            changenth(dump, 2, "_CHAR_ITEM_", true, true);  // bag
-            changenth(dump, 4, "_CHAR_ITEM_", true);        // item
-        }
-        if(type == 3)                                       // item_instance t.
-        {
-            changenth(dump, 1, "_CHAR_ITEM_", true);        // item
-            changenth(dump, 2, "_CHAR_GUID_");              // owner
-        }
         fprintf(file, "%s\n", dump.c_str());
     }
     while (result->NextRow());
@@ -3463,91 +3451,193 @@ bool DumpPlayerTable(FILE *file, uint32 guid, char *tableFrom, char *tableTo, in
     return true;
 }
 
-void ObjectMgr::WritePlayerDump(uint32 guid)
+bool ObjectMgr::WritePlayerDump(const char *file, uint32 guid)
 {
-    char fname[100]; sprintf(fname, "character%d.dmp", guid);
-    FILE *fout = fopen(fname, "w");
-    if (!fout) { sLog.outError("Failed to open file!\r\n"); return; }
+    if (!file) return false;
+    FILE *fout = fopen(file, "w");
+    if (!fout) { sLog.outError("Failed to open file!\r\n"); return false; }
 
-    DumpPlayerTable(fout, guid, "character", "character", 1);
-    DumpPlayerTable(fout, guid, "character_action", "character_action");
-    DumpPlayerTable(fout, guid, "character_aura", "character_aura");
-    DumpPlayerTable(fout, guid, "character_homebind", "character_homebind");
-    DumpPlayerTable(fout, guid, "character_inventory", "character_inventory", 2);
-    DumpPlayerTable(fout, guid, "character_kill", "character_kill");
-    DumpPlayerTable(fout, guid, "character_queststatus", "character_queststatus");
-    DumpPlayerTable(fout, guid, "character_reputation", "character_reputation");
-    DumpPlayerTable(fout, guid, "character_spell", "character_spell");
-    DumpPlayerTable(fout, guid, "character_spell_cooldown", "character_spell_cooldown");
-    DumpPlayerTable(fout, guid, "item_instance", "item_instance", 3);
+    for(int i = 0; i < NUM_TBLS; i++)
+        DumpPlayerTable(fout, guid, tbls[i].name, tbls[i].name, tbls[i].type);
     // TODO: Add pets/instance/group/gifts..
-    DumpPlayerTable(fout, guid, "character_ticket", "character_ticket");
-    DumpPlayerTable(fout, guid, "character_tutorial", "character_tutorial");
-    // TODO: Add a dump level option to skip these non-important tables
+    // TODO: Add a dump level option to skip some non-important tables
     
     fclose(fout);
+    return true;
 }
 
-void replaceall(std::string &str, char *from, char *to)
+bool findnth(std::string &str, int n, string::size_type &s, string::size_type &e)
 {
-    for(string::size_type pos=0;;pos++)
+    s = str.find("VALUES ('")+9;
+    if (s == string::npos) return false;
+
+    do {
+        e = str.find("'",s);
+        if (e == string::npos) return false;
+    } while(str[e-1] == '\\');
+
+    for(int i = 1; i < n; i++)
     {
-        pos = str.find(from, pos);
-        if (pos != string::npos) str.replace(pos,strlen(from),to);
-        else break;
+        do {
+            s = e+4;
+            e = str.find("'",s);
+            if (e == string::npos) return false;
+        } while (str[e-1] == '\\');
     }
+    return true;
 }
 
-void ObjectMgr::LoadPlayerDump(char *file, uint32 account)
+std::string gettablename(std::string &str)
 {
-    if (!file) return;
-    FILE *fin = fopen(file, "r");
-    if(!fin) return;
+    string::size_type s = 13, e = str.find('`', s);
+    if (e == string::npos) return "";
+    return str.substr(s, e-s);
+}
 
-    char newguid[20], chraccount[20], chritem[20];
-    snprintf(newguid,20,"%u",m_hiCharGuid);
-    snprintf(chraccount,20,"%u",account);
+bool changenth(std::string &str, int n, const char *with, bool insert = false, bool nonzero = false)
+{
+    string::size_type s, e;
+    if(!findnth(str,n,s,e)) return false;
+    if(nonzero && str.substr(s,e-s) == "0") return true;    // not an error
+    if(!insert) str.replace(s,e-s, with);
+    else str.insert(s, with);
+    return true;
+}
+
+std::string getnth(std::string &str, int n)
+{
+    string::size_type s, e;
+    if(!findnth(str,n,s,e)) return "";
+    return str.substr(s, e-s);
+}
+
+bool findtoknth(std::string &str, int n, string::size_type &s, string::size_type &e)
+{
+    int i; s = e = 0;
+    string::size_type size = str.size();
+    for(i = 1; s < size && i < n; s++) if(str[s] == ' ') i++;
+    if (i < n) return false;
+    e = str.find(' ', s);
+    return e != string::npos;
+}
+
+std::string gettoknth(std::string &str, int n)
+{
+    string::size_type s = 0, e = 0;
+    if(!findtoknth(str, n, s, e)) return "";
+    return str.substr(s, e-s);
+}
+
+bool changetoknth(std::string &str, int n, const char *with, bool insert = false, bool nonzero = false)
+{
+    string::size_type s = 0, e = 0;
+    if(!findtoknth(str, n, s, e)) return false;
+    if(nonzero && str.substr(s,e-s) == "0") return true;    // not an error
+    if(!insert) str.replace(s, e-s, with);
+    else str.insert(s, with);
+    return true;
+}
+
+uint32 registerItem(uint32 oldGuid, std::map<uint32, uint32> &items, uint32 hiGuid)
+{
+    if(items[oldGuid] == 0) items[oldGuid] = hiGuid + items.size();
+    return items[oldGuid];
+}
+
+bool changeItem(std::string &str, int n, std::map<uint32, uint32> &items, uint32 hiGuid, bool nonzero = false)
+{
+    char chritem[20];
+    uint32 oldGuid = atoi(getnth(str, n).c_str());
+    if (nonzero && oldGuid == 0) return true;               // not an error
+    uint32 newGuid = registerItem(oldGuid, items, hiGuid);
+    snprintf(chritem, 20, "%d", newGuid);
+    return changenth(str, n, chritem, false, nonzero);
+}
+
+bool changetokItem(std::string &str, int n, std::map<uint32, uint32> &items, uint32 hiGuid, bool nonzero = false)
+{
+    char chritem[20];
+    uint32 oldGuid = atoi(gettoknth(str, n).c_str());
+    if (nonzero && oldGuid == 0) return true;               // not an error
+    uint32 newGuid = registerItem(oldGuid, items, hiGuid);
+    snprintf(chritem, 20, "%d", newGuid);
+    return changetoknth(str, n, chritem, false, nonzero);
+}
+
+#define ROLLBACK {sDatabase.RollbackTransaction(); return false;}
+
+bool ObjectMgr::LoadPlayerDump(const char *file, uint32 account)
+{
+    if (!file) return false;
+    FILE *fin = fopen(file, "r");
+    if(!fin) return false;
+
+    char newguid[20], chraccount[20];
+    snprintf(newguid, 20, "%d", m_hiCharGuid);
+    snprintf(chraccount, 20, "%d", account);
 
     std::map<uint32, uint32> items;
     char buf[32000] = "";
 
     sDatabase.BeginTransaction();
-    string::size_type pos = 0, s,e;
     while(!feof(fin))
     {
         if(!fgets(buf, 32000, fin))
         {
             if(feof(fin)) break;
-            sDatabase.RollbackTransaction();
-            return;
+            sLog.outError("LoadPlayerDump: File read error!");
+            ROLLBACK;
         }
 
         std::string line; line.assign(buf);
-        replaceall(line, "_CHAR_GUID_", newguid);
-        replaceall(line, "_CHAR_ACCOUNT_", chraccount);
 
-        for(pos=0;;pos++)
+        // determine table name and load type
+        std::string tn = gettablename(line);
+        uint8 type, i;
+        for(i = 0; i < NUM_TBLS; i++)
+            if (tn == tbls[i].name) { type = tbls[i].type; break; }
+        if (i == NUM_TBLS)
         {
-            pos = line.find("_CHAR_ITEM_", pos);
-            if(pos == string::npos) break;
-            s = pos + 11;
-            e = line.find("'", s);
-            if(e == string::npos) break;
-            uint32 itemGuid = atoi(line.substr(s,e-s).c_str());
-            if(items[itemGuid] == 0) items[itemGuid] = m_hiItemGuid + items.size();
-            sprintf(chritem, "%d", items[itemGuid]);
-            line.replace(pos, e-s+11, chritem);
+            sLog.outError("LoadPlayerDump: Unknown table: '%s'!", tn.c_str());
+            ROLLBACK;
+        }
+        
+        // change the data to server values
+        if(type <= 2)                                       // most tables
+            if(!changenth(line, 1, newguid)) ROLLBACK;
+        if(type == 1)                                       // character t.
+        {
+            // guid, data field:guid, items
+            if(!changenth(line, 2, chraccount)) ROLLBACK;
+            std::string vals = getnth(line, 3);
+            if(!changetoknth(vals, OBJECT_FIELD_GUID+1, newguid)) ROLLBACK;
+            for(uint16 field = PLAYER_FIELD_INV_SLOT_HEAD; field <= PLAYER_FIELD_KEYRING_SLOT_LAST; field++)
+                if(!changetokItem(vals, field+1, items, m_hiItemGuid, true)) ROLLBACK;
+            if(!changenth(line, 3, vals.c_str())) ROLLBACK;
+        }
+        else if(type == 2)                                   // character_inventory t.
+        {
+            // bag, item
+            if(!changeItem(line, 2, items, m_hiItemGuid, true)) ROLLBACK;
+            if(!changeItem(line, 4, items, m_hiItemGuid)) ROLLBACK;
+        }
+        else if(type == 3)                                  // item_instance t.
+        {
+            // item, owner, data field:item, owner guid
+            if(!changeItem(line, 1, items, m_hiItemGuid)) ROLLBACK;
+            if(!changenth(line, 2, newguid)) ROLLBACK;
+            std::string vals = getnth(line,3);
+            if(!changetokItem(vals, OBJECT_FIELD_GUID+1, items, m_hiItemGuid)) ROLLBACK;
+            if(!changetoknth(vals, ITEM_FIELD_OWNER+1, newguid)) ROLLBACK;
+            if(!changenth(line, 3, vals.c_str())) ROLLBACK;
         }
 
-        bool ret = sDatabase.Execute(line.c_str());
-        if(!ret)
-        {
-            sDatabase.RollbackTransaction();
-            return;
-        }
+        if(!sDatabase.Execute(line.c_str())) ROLLBACK;
     }
     sDatabase.CommitTransaction();
     m_hiItemGuid += items.size();
     m_hiCharGuid++;
     fclose(fin);
+    return true;
 }
+
