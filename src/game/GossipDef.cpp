@@ -27,7 +27,7 @@
 
 GossipMenu::GossipMenu()
 {
-    m_gItemsCount = 0;
+    m_gItems.reserve(16);                                   // can be set for max from most often sizes to speedup push_back and less memory use
 }
 
 GossipMenu::~GossipMenu()
@@ -37,17 +37,17 @@ GossipMenu::~GossipMenu()
 
 void GossipMenu::AddMenuItem(uint8 Icon, char const * Message, uint32 dtSender, uint32 dtAction, bool Coded)
 {
-    char* Text = new char[strlen(Message) + 1];
-    strcpy( Text, Message );
+    ASSERT( m_gItems.size() <= GOSSIP_MAX_MENU_ITEMS  );
 
-    m_gItemsCount++;
-    ASSERT( m_gItemsCount < GOSSIP_MAX_MENU_ITEMS  );
+    GossipMenuItem gItem;
 
-    m_gItems[m_gItemsCount - 1].m_gIcon     = Icon;
-    m_gItems[m_gItemsCount - 1].m_gMessage  = Text;
-    m_gItems[m_gItemsCount - 1].m_gCoded    = Coded;
-    m_gItems[m_gItemsCount - 1].m_gSender   = dtSender;
-    m_gItems[m_gItemsCount - 1].m_gAction   = dtAction;
+    gItem.m_gIcon     = Icon;
+    gItem.m_gMessage  = Message ? Message : "";
+    gItem.m_gCoded    = Coded;
+    gItem.m_gSender   = dtSender;
+    gItem.m_gAction   = dtAction;
+
+    m_gItems.push_back(gItem);
 }
 
 void GossipMenu::AddMenuItem(uint8 Icon, char const * Message, bool Coded)
@@ -57,24 +57,21 @@ void GossipMenu::AddMenuItem(uint8 Icon, char const * Message, bool Coded)
 
 uint32 GossipMenu::MenuItemSender( unsigned int ItemId )
 {
-    if ( ItemId >= m_gItemsCount ) return 0;
+    if ( ItemId >= m_gItems.size() ) return 0;
 
     return m_gItems[ ItemId ].m_gSender;
 }
 
 uint32 GossipMenu::MenuItemAction( unsigned int ItemId )
 {
-    if ( ItemId >= m_gItemsCount ) return 0;
+    if ( ItemId >= m_gItems.size() ) return 0;
 
     return m_gItems[ ItemId ].m_gAction;
 }
 
 void GossipMenu::ClearMenu()
 {
-    for (unsigned int i=0; i<m_gItemsCount; i++)
-        delete[] m_gItems[i].m_gMessage;
-
-    m_gItemsCount = 0;
+    m_gItems.clear();
 }
 
 PlayerMenu::PlayerMenu( WorldSession *Session )
@@ -227,7 +224,7 @@ void PlayerMenu::SendTalking( char const * title, char const * text )
 
 QuestMenu::QuestMenu()
 {
-    m_qItemsCount = 0;
+    m_qItems.reserve(16);                                   // can be set for max from most often sizes to speedup push_back and less memory use
 }
 
 QuestMenu::~QuestMenu()
@@ -240,18 +237,21 @@ void QuestMenu::AddMenuItem( uint32 QuestId, uint8 Icon)
     Quest * qinfo = objmgr.QuestTemplates[QuestId];
     if (!qinfo) return;
 
-    m_qItemsCount++;
-    ASSERT( m_qItemsCount < GOSSIP_MAX_MENU_ITEMS  );
+    ASSERT( m_qItems.size() <= GOSSIP_MAX_MENU_ITEMS  );
 
-    m_qItems[m_qItemsCount - 1].m_qId        = QuestId;
-    m_qItems[m_qItemsCount - 1].m_qIcon      = Icon;
+    QuestMenuItem qItem;
+
+    qItem.m_qId        = QuestId;
+    qItem.m_qIcon      = Icon;
+
+    m_qItems.push_back(qItem);
 }
 
 bool QuestMenu::HasItem( uint32 questid )
 {
-    for(int i=0;i<m_qItemsCount;i++)
+    for (QuestMenuItemList::iterator i = m_qItems.begin(); i != m_qItems.end(); i++)
     {
-        if(m_qItems[i].m_qId==questid)
+        if(i->m_qId==questid)
         {
             return true;
         }
@@ -261,7 +261,7 @@ bool QuestMenu::HasItem( uint32 questid )
 
 void QuestMenu::ClearMenu()
 {
-    m_qItemsCount = 0;
+    m_qItems.clear();
 }
 
 void PlayerMenu::SendQuestGiverQuestList( QEmote eEmote, std::string Title, uint64 npcGUID )
