@@ -90,7 +90,7 @@ template<> void addUnitState(Creature *obj, CellPair const& cell_pair)
     Cell cell = RedZone::GetZone(cell_pair);
 
     obj->SetCurrentCell(cell);
-    if(obj->isSpiritHealer() || obj->isSpiritGuide())
+    if(obj->isSpiritService())
         obj->setDeathState(DEAD);
 }
 

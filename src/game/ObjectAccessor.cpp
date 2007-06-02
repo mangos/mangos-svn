@@ -115,10 +115,6 @@ ObjectAccessor::~ObjectAccessor() {}
 Creature*
 ObjectAccessor::GetNPCIfCanInteractWith(Player const &player, uint64 guid, uint32 npcflagmask)
 {
-    // player check
-    if(!player.CanInteractWithNPCs(npcflagmask!=UNIT_NPC_FLAG_SPIRITHEALER))
-        return NULL;
-
     // unit checks
     if (!guid)
         return NULL;
@@ -128,12 +124,16 @@ ObjectAccessor::GetNPCIfCanInteractWith(Player const &player, uint64 guid, uint3
     if (!unit)
         return NULL;
 
+    // player check
+    if(!player.CanInteractWithNPCs(!unit->isSpiritService()))
+        return NULL;
+
     // appropriate npc type
     if(npcflagmask && !unit->HasFlag( UNIT_NPC_FLAGS, npcflagmask ))
         return NULL;
 
     // alive or spirit healer
-    if(!unit->isAlive() && (!unit->isSpiritHealer() || player.isAlive() ))
+    if(!unit->isAlive() && (!unit->isSpiritService() || player.isAlive() ))
         return NULL;
 
     // not enemy

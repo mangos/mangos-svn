@@ -242,23 +242,14 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
     uint64 guid;
     recv_data >> guid;
 
-    // fix for spirit healers (temp?)
-    Creature *temp = ObjectAccessor::Instance().GetCreature(*_player, guid);
-    if (!temp)
-        return;
-
-    uint32 npcflags = UNIT_NPC_FLAG_NONE;
-    if(temp->isSpiritHealer())
-        npcflags = UNIT_NPC_FLAG_SPIRITHEALER;
-
-    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid, npcflags);
+    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid, UNIT_NPC_FLAG_NONE);
     if (!unit)
     {
         sLog.outDebug( "WORLD: HandleGossipHelloOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
         return;
     }
 
-    if((unit->isArmorer()) || (unit->isGuard()) || (unit->isCivilian()) || (unit->isQuestGiver()) || (unit->isServiceProvider()) || (unit->isVendor()))
+    if( unit->isArmorer() || unit->isCivilian() || unit->isQuestGiver() || unit->isServiceProvider())
     {
         unit->StopMoving();
         //npcIsStopped[unit->GetGUID()] = true;
@@ -282,16 +273,7 @@ void WorldSession::HandleGossipSelectOptionOpcode( WorldPacket & recv_data )
 
     recv_data >> guid >> option;
 
-    // fix for spirit healers (temp?)
-    Creature *temp = ObjectAccessor::Instance().GetCreature(*_player, guid);
-    if (!temp)
-        return;
-
-    uint32 npcflags = UNIT_NPC_FLAG_NONE;
-    if(temp->isSpiritHealer())
-        npcflags = UNIT_NPC_FLAG_SPIRITHEALER;
-
-    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid, npcflags);
+    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid, UNIT_NPC_FLAG_NONE);
     if (!unit)
     {
         sLog.outDebug( "WORLD: HandleGossipSelectOptionOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );

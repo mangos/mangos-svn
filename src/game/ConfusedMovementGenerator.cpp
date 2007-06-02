@@ -117,16 +117,10 @@ ConfusedMovementGenerator::Update(Creature &creature, const uint32 &diff)
 int
 ConfusedMovementGenerator::Permissible(const Creature *creature)
 {
-    if( creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_VENDOR)
-        || creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_GOSSIP)
-        || creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_QUESTGIVER)
-        || creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TAXIVENDOR)
-        || creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TRAINER)
-        || creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_SPIRITHEALER)
-        || creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_BANKER)
-        || creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_PETITIONER)
-        || creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_TABARDVENDOR)
-        || creature->HasFlag(UNIT_NPC_FLAGS, UNIT_NPC_FLAG_STABLE))
+    if( creature->HasFlag(UNIT_NPC_FLAGS, 
+            UNIT_NPC_FLAG_VENDOR | UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER | UNIT_NPC_FLAG_TAXIVENDOR |
+            UNIT_NPC_FLAG_TRAINER | UNIT_NPC_FLAG_SPIRITHEALER | UNIT_NPC_FLAG_SPIRITGUIDE | UNIT_NPC_FLAG_BANKER |
+            UNIT_NPC_FLAG_PETITIONER | UNIT_NPC_FLAG_TABARDVENDOR | UNIT_NPC_FLAG_STABLE) )
         return CANNOT_HANDLE_TYPE;
 
     return CONFUSED_MOTION_TYPE;

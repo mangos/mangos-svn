@@ -1467,15 +1467,15 @@ bool Creature::IsVisibleInGridForPlayer(Player* pl) const
             CorpsePtr &corpse = pl->GetCorpse();
             if(corpse)
             {
-                // 20 - aggro distance for same level, 25 - max additinal distance if player level less that creature level
+                // 20 - aggro distance for same level, 25 - max additional distance if player level less that creature level
                 if(corpse->IsWithinDistInMap(this,(20+25)*sWorld.getRate(RATE_CREATURE_AGGRO)))
                     return true;
             }
         }
     }
 
-    // Dead player see Spirit Healer
-    if(pl->isDead() && (isSpiritHealer() || isSpiritGuide()))
+    // Dead player see Spirit Healer or Spirit Guide
+    if(pl->isDead() && isSpiritService())
         return true;
 
     // and not see any other
