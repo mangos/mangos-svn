@@ -562,8 +562,8 @@ class ObjectMgr
         void DeleteRespawnTimeForInstance(uint32 instance);
 
         // player Dumps
-        void WritePlayerDump(uint32 guid);
-        void LoadPlayerDump(char *file, uint32 account);
+        bool WritePlayerDump(const char *file, uint32 guid);
+        bool LoadPlayerDump(const char *file, uint32 account);
     protected:
         uint32 m_auctionid;
         uint32 m_mailid;

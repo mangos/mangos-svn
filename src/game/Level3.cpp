@@ -3530,3 +3530,40 @@ bool ChatHandler::HandleSendChatMsgCommand(const char* args)
     m_session->SendPacket(&data);
     return true;
 }
+
+bool ChatHandler::HandleLoadPDumpCommand(const char *args)
+{
+    if(!args)
+        return false;
+
+    char* file = strtok((char*)args, " ");
+    char* acc = strtok(NULL, " ");
+
+    if(!file || !acc) return false;
+
+    if (objmgr.LoadPlayerDump(file, atoi(acc)))
+        PSendSysMessage("Character loaded successfully!");
+    else
+        PSendSysMessage("Failed to load the character!");
+
+    return true;
+}
+
+bool ChatHandler::HandleWritePDumpCommand(const char *args)
+{
+    if(!args)
+        return false;
+
+    char* file = strtok((char*)args, " ");
+    char* guid = strtok(NULL, " ");
+
+    if(!file || !guid) return false;
+
+    if(objmgr.WritePlayerDump(file, atoi(guid)))
+        PSendSysMessage("Character dumped successfully!");
+    else
+        PSendSysMessage("Character dump failed!");
+
+    return true;
+}
+
