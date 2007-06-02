@@ -1032,23 +1032,22 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_LEECH)
     {
-        uint32 tmpvalue = 0;
-        float tmpvalue2 = 0;
-        uint32 pdamage = mod->m_amount;
+        float multiplier = 0;
+        uint32 pdamage = 0;
         for(int x=0;x<3;x++)
         {
             if(mod->m_auraname != spellProto->EffectApplyAuraName[x])
                 continue;
-            tmpvalue2 = spellProto->EffectMultipleValue[x];
-            tmpvalue2 = tmpvalue2 > 0 ? tmpvalue2 : 1;
-
-            if(pVictim->GetHealth() - mod->m_amount > 0)
-                tmpvalue = uint32(mod->m_amount*tmpvalue2);
-            else
-                tmpvalue = uint32(pVictim->GetHealth()*tmpvalue2);
-
-            SendSpellNonMeleeDamageLog(pVictim, spellProto->Id, tmpvalue, spellProto->School, absorb, resist, false, 0);
+            multiplier = spellProto->EffectMultipleValue[x] > 0 ? spellProto->EffectMultipleValue[x] : 1;
+            
+            pdamage = mod->m_amount;
+            
             pdamage = SpellDamageBonus(pVictim,spellProto,pdamage,DOT);
+
+            if(pVictim->GetHealth() < pdamage)
+                pdamage = uint32(pVictim->GetHealth());
+
+            SendSpellNonMeleeDamageLog(pVictim, spellProto->Id, pdamage, spellProto->School, absorb, resist, false, 0);
             DealDamage(pVictim, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), DOT, spellProto->School, spellProto, procFlag, false);
             ProcDamageAndSpell(pVictim, PROC_FLAG_HIT_SPELL, PROC_FLAG_TAKE_DAMAGE, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), spellProto);
             if (!pVictim->isAlive() && m_currentSpell)
@@ -1059,11 +1058,11 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             break;
         }
 
-        int32 gain = ModifyHealth(tmpvalue);
+        int32 gain = ModifyHealth(pdamage * multiplier);
         ThreatAssist(this, float(gain) * 0.5f, spellProto->School, spellProto);
 
-        if(pVictim->GetTypeId() == TYPEID_PLAYER || GetTypeId() == TYPEID_PLAYER)
-            pVictim->SendHealSpellOnPlayer(this, spellProto->Id, tmpvalue);
+        if(GetTypeId() == TYPEID_PLAYER)
+            SendHealSpellOnPlayer(this, spellProto->Id, pdamage * multiplier);
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_MANA_LEECH)
     {
