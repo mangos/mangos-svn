@@ -322,6 +322,7 @@ pkgdata_DATA = \
 	3773.sql \
 	3774_playercreateinfo_spell.sql \
 	3782_command.sql \
+	3784_command.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -624,4 +625,5 @@ EXTRA_DIST = \
 	3773.sql \
 	3774_playercreateinfo_spell.sql \
 	3782_command.sql \
+	3784_command.sql \
 	README
