@@ -2145,7 +2145,7 @@ bool ChatHandler::HandleReviveCommand(const char* args)
     if (*args)
     {
         std::string name = args;
-        //sDatabase.escape_string(name);
+        normalizePlayerName(name);
         SelectedPlayer = objmgr.GetPlayer(name.c_str());
     }
     else
@@ -3012,14 +3012,27 @@ bool ChatHandler::HandleResetCommand (const char * args)
 {
     if(!*args)
         return false;
-    Player* player = getSelectedPlayer();
+
+    char* arg = strtok((char*)args, " ");
+    std::string argstr = arg;
+    char* pName = strtok(NULL, "");
+    Player *player = NULL;
+    if (pName)
+    {
+        std::string name = pName;
+        normalizePlayerName(name);
+        uint64 guid = objmgr.GetPlayerGUIDByName(name.c_str());
+        player = objmgr.GetPlayer(guid);
+    }
+    else
+        player = getSelectedPlayer();
+
     if(!player)
     {
         SendSysMessage(LANG_NO_CHAR_SELECTED);
         return true;
     }
 
-    std::string argstr = (char*)args;
     if (argstr == "stats" || argstr == "level")
     {
         PlayerInfo const *info = objmgr.GetPlayerInfo(player->getRace(), player->getClass());
@@ -3111,18 +3124,12 @@ bool ChatHandler::HandleResetCommand (const char * args)
 
     if (argstr == "spells")
     {
-        //PlayerSpellMap& pSpells = player->GetSpellMap();
         PlayerSpellMap::iterator itr;
         PlayerSpellMap smap = player->GetSpellMap();
         for(itr = smap.begin(); itr != smap.end(); itr++)
         {
             player->removeSpell(itr->first);
         }
-        /*while(!pSpells.empty())
-        {
-            // endless loop there, 100% CPU load
-            player->removeSpell(pSpells.begin()->first);
-        }*/
 
         PlayerInfo const *info = objmgr.GetPlayerInfo(player->getRace(),player->getClass());
         std::list<CreateSpellPair>::const_iterator spell_itr;
