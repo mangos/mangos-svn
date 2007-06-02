@@ -933,7 +933,7 @@ void Player::Update( uint32 p_time )
 
 void Player::setDeathState(DeathState s)
 {
-    uint32 soulstoneSpellId = 0;
+    uint32 ressSpellId = 0;
 
     bool cur = isAlive();
 
@@ -948,16 +948,19 @@ void Player::setDeathState(DeathState s)
         RemovePet(NULL,PET_SAVE_AS_CURRENT);
 
         // save value before aura remove in Unit::setDeathState
-        soulstoneSpellId = GetUInt32Value(PLAYER_SELF_RES_SPELL);
+        ressSpellId = GetUInt32Value(PLAYER_SELF_RES_SPELL);
     }
     Unit::setDeathState(s);
 
-    // restore soulstone spell id for player after aura remove
-    if(s == JUST_DIED && cur)
-        SetUInt32Value(PLAYER_SELF_RES_SPELL, soulstoneSpellId);
+    // restore resurrection spell id for player after aura remove
+    if(s == JUST_DIED && cur && ressSpellId)
+        SetUInt32Value(PLAYER_SELF_RES_SPELL, ressSpellId);
 
     if(isAlive() && !cur)
     {
+        //clear aura case after resurrection by another way (reincarnation passive will re-applied at death)
+        SetUInt32Value(PLAYER_SELF_RES_SPELL, 0);
+
         _ApplyAllItemMods();
 
         // restore default warrior stance
@@ -12445,23 +12448,7 @@ void Player::AddSpellMod(SpellModifier* mod, bool apply)
     if (apply)
     {
         m_spellMods[mod->op].push_back(mod);
-        uint16 send_val=0, send_mark=0;
-        int16 tmpval=mod->value - 1;
         uint32 shiftdata=0x01, Opcode=SMSG_SET_FLAT_SPELL_MODIFIER;
-
-        if(tmpval != 0)
-        {
-            if(tmpval > 0)
-            {
-                send_val =  tmpval+1;
-                send_mark = 0x0;
-            }
-            else
-            {
-                send_val  = 0xFFFF + (tmpval+2);
-                send_mark = 0xFFFF;
-            }
-        }
 
         if (mod->type == SPELLMOD_FLAT) Opcode = SMSG_SET_FLAT_SPELL_MODIFIER;
         else if (mod->type == SPELLMOD_PCT) Opcode = SMSG_SET_PCT_SPELL_MODIFIER;
@@ -12470,11 +12457,10 @@ void Player::AddSpellMod(SpellModifier* mod, bool apply)
         {
             if ( mod->mask & shiftdata )
             {
-                WorldPacket data(Opcode, (1+1+2+2));
+                WorldPacket data(Opcode, (1+1+4));
                 data << uint8(eff);
                 data << uint8(mod->op);
-                data << uint16(send_val);
-                data << uint16(send_mark);
+                data << uint32(mod->value);
                 SendDirectMessage(&data);
             }
             shiftdata=shiftdata<<1;

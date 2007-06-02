@@ -2821,6 +2821,12 @@ void Spell::EffectSelfResurrect(uint32 i)
         if(unitTarget->getPowerType() == POWER_MANA)
             mana = m_spellInfo->EffectMiscValue[i];
     }
+    else if(m_spellInfo->SpellVisual == 344 && m_spellInfo->SpellIconID == 24)
+    {
+        health = uint32((m_spellInfo->EffectBasePoints[i]+1)*unitTarget->GetMaxHealth()/100);
+        if(unitTarget->getPowerType() == POWER_MANA)
+            mana = uint32((m_spellInfo->EffectBasePoints[i]+1)*unitTarget->GetMaxPower(unitTarget->getPowerType())/100);
+    }
     else
     {
         if(damage < 0) return;
