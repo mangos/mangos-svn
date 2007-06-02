@@ -295,6 +295,33 @@ pkgdata_DATA = \
 	3605_creature_addon.sql \
 	3605_grid.sql \
 	3611_spell_learn_skill.sql \
+	3616_commands.sql \
+	3627_quest_template.sql \
+	3631_gameobject_template.sql \
+	3636_character_spell.sql \
+	3636_playercreateinfo_spell.sql \
+	3646_spell_chain.sql \
+	3648_command.sql \
+	3649_spell_chain.sql \
+	3653_spell.sql \
+	3655_quest_template.sql \
+	3657_command.sql \
+	3660_character_kill.sql \
+	3700_character.sql \
+	3728_spell_proc_event.sql \
+	3730_command.sql \
+	3732_spell_affect.sql \
+	3739_looking_for_group.sql \
+	3746_spell_proc_event.sql \
+	3747_command.sql \
+	3748_command.sql \
+	3753_battleground_template.sql \
+	3763_spell_affect.sql \
+	3766_spell_proc_event.sql \
+	3771_creature_template.sql \
+	3773.sql \
+	3774_playercreateinfo_spell.sql \
+	3782_command.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -577,10 +604,24 @@ EXTRA_DIST = \
 	3636_playercreateinfo_spell.sql \
 	3646_spell_chain.sql \
 	3648_command.sql \
+	3649_spell_chain.sql \
 	3653_spell.sql \
 	3655_quest_template.sql \
+	3657_command.sql \
 	3660_character_kill.sql \
 	3700_character.sql \
 	3728_spell_proc_event.sql \
+	3730_command.sql \
 	3732_spell_affect.sql \
+	3739_looking_for_group.sql \
+	3746_spell_proc_event.sql \
+	3747_command.sql \
+	3748_command.sql \
+	3753_battleground_template.sql \
+	3763_spell_affect.sql \
+	3766_spell_proc_event.sql \
+	3771_creature_template.sql \
+	3773.sql \
+	3774_playercreateinfo_spell.sql \
+	3782_command.sql \
 	README
