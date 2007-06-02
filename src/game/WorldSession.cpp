@@ -1065,7 +1065,7 @@ void WorldSession::HandleFarSightOpcode( WorldPacket & recv_data )
     CHECK_PACKET_SIZE(recv_data,1);
 
     sLog.outDebug("WORLD: CMSG_FAR_SIGHT");
-    recv_data.hexlike();
+    //recv_data.hexlike();
 
     uint8 unk;
     recv_data >> unk;
@@ -1269,7 +1269,7 @@ D4 D7 E0 00 CF 00 00 00 | E4 4F B8 40
 void WorldSession::HandleDismountOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("WORLD: CMSG_DISMOUNT");
-    recv_data.hexlike();
+    //recv_data.hexlike();
 
     //If player is not mounted, so go out :)
     if (!_player->IsMounted()) // not blizz like; no any messages on blizz
@@ -1290,9 +1290,11 @@ void WorldSession::HandleDismountOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleMoveFlyModeChangeAckOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,8+4+4);
+
     // fly mode on/off
     sLog.outDebug("WORLD: CMSG_MOVE_FLY_MODE_CHANGE_ACK");
-    recv_data.hexlike();
+    //recv_data.hexlike();
 
     uint64 guid;
     uint32 unk;
@@ -1327,7 +1329,7 @@ void WorldSession::HandleMoveFlyStateChangeOpcode( WorldPacket & recv_data )
 
     // fly state: start flying/landing
     sLog.outDebug("WORLD: CMSG_MOVE_FLY_STATE_CHANGE");
-    recv_data.hexlike();
+    //recv_data.hexlike();
     CHECK_PACKET_SIZE(recv_data,4+4+4+4+4+4);
 
     /* extract packet */

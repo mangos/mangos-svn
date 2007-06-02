@@ -214,6 +214,8 @@ void Master::Run()
     sLog.outString( "Halting process..." );
 
     #ifdef WIN32
+    if (sConfig.GetBoolDefault("Console.Enable", 1))
+    {
         // this only way to terminate CLI thread exist at Win32 (alt. way exist only in Windows Vista API)
         //_exit(1);
         // send keyboard input to safely unblock the CLI thread
@@ -248,6 +250,7 @@ void Master::Run()
         b[3].Event.KeyEvent.wRepeatCount = 1;
         DWORD numb;
         BOOL ret = WriteConsoleInput(hStdIn, b, 4, &numb);
+    }
     #endif
 
     // for some unknown reason, unloading scripts here and not in worldrunnable

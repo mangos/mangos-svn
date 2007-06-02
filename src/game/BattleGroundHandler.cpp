@@ -242,7 +242,7 @@ void WorldSession::HandleBattleGroundPlayerPortOpcode( WorldPacket &recv_data )
     CHECK_PACKET_SIZE(recv_data, 1+1+4+2+1);
 
     sLog.outDebug( "WORLD: Recvd CMSG_BATTLEFIELD_PORT Message");
-    recv_data.hexlike();
+    //recv_data.hexlike();
 
     uint8 unk1;
     uint8 unk2;                                             // unk, can be 0x0 (may be if was invited?) and 0x1

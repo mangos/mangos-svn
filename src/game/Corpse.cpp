@@ -37,7 +37,6 @@ Corpse::Corpse( WorldObject *instantiator, CorpseType type ) : WorldObject( inst
 
     m_valuesCount = CORPSE_END;
 
-    m_POI = false;
     m_type = type;
     m_time = time(NULL) - CORPSE_RECLAIM_DELAY;             // to prevent resurrecting delay at load
 }
@@ -190,30 +189,12 @@ bool Corpse::LoadFromDB(uint32 guid, Field *fields)
     return true;
 }
 
-void Corpse::UpdateForPlayer(Player* player, bool first)
-{
-    /*if(player && player->GetGUID() == GetOwnerGUID() && IsInMap(player))
-    {
-        bool POI_range = (GetDistance2dSq(player) > CORPSE_RECLAIM_RADIUS*CORPSE_RECLAIM_RADIUS);
-
-        if(first || POI_range && !m_POI)
-        {
-            std::string corpsename = player->GetName();
-            corpsename.append(" corpse.");
-            player->PlayerTalkClass->SendPointOfInterest( GetPositionX(), GetPositionY(), ICON_POI_TOMB, 6, 30, corpsename.c_str());
-        }
-
-        m_POI = POI_range;
-    }*/
-}
-
 void Corpse::_ConvertCorpseToBones()
 {
     // corpse can be converted in another thread already
     if(GetType()!=CORPSE_RESURRECTABLE)
         return;
 
-    Player* player = ObjectAccessor::Instance().FindPlayer(GetOwnerGUID());
     CorpsePtr corpse = ObjectAccessor::Instance().GetCorpseForPlayerGUID(GetOwnerGUID());
     if(!corpse)
     {
@@ -226,10 +207,6 @@ void Corpse::_ConvertCorpseToBones()
         sLog.outError("ERROR: Found another corpse while deleting corpse for GUID %ul", GetOwnerGUID());
         return;
     }
-
-    /*// Removing outdated POI if at same map
-    if(player && IsInMap(player))
-        player->PlayerTalkClass->SendPointOfInterest( GetPositionX(), GetPositionY(), ICON_POI_TOMB, 0, 30, "" );*/
 
     DEBUG_LOG("Deleting Corpse and spawning bones.\n");
 
@@ -260,8 +237,12 @@ void Corpse::_ConvertCorpseToBones()
     bones->m_type = CORPSE_BONES;
 
     uint32 flags = 0x05;
-    if(player->InBattleGround())
-        flags |= 0x20;                                  // make it lootable for money, TODO: implement effect
+    {
+        Player* player = ObjectAccessor::Instance().FindPlayer(GetOwnerGUID());
+        if(player && player->InBattleGround())
+            flags |= 0x20;                                  // make it lootable for money, TODO: implement effect
+    }
+
     bones->SetUInt32Value(CORPSE_FIELD_FLAGS, flags);
 
     bones->SetUInt64Value(CORPSE_FIELD_OWNER, 0);

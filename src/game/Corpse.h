@@ -51,10 +51,6 @@ class Corpse : public WorldObject
 
         uint64 const& GetOwnerGUID() const { return GetUInt64Value(CORPSE_FIELD_OWNER); }
 
-        void UpdateForPlayer(Player* player, bool first);
-
-        bool m_POI;
-
         time_t const& GetGhostTime() const { return m_time; }
         void ResetGhostTime() { m_time = time(NULL); }
         CorpseType GetType() const { return m_type; }

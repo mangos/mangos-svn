@@ -54,7 +54,6 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
     CHECK_PACKET_SIZE(recv_data,4+4+1+1+4+4+4+4);
 
     sLog.outDebug( "WORLD: Recvd CMSG_WHO Message" );
-    recv_data.hexlike();
 
     uint32 clientcount = 0;
 
