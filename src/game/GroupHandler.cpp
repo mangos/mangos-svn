@@ -620,8 +620,8 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
     data << (uint16) player->GetPower(powerType);
     data << (uint16) player->getLevel();
     data << (uint16) player->GetZoneId();
-    data << (uint16) player->GetPositionX();                //map position X - it is somehere, need more time to fix..
-    data << (uint16) player->GetPositionY();                //map position Y - it is somehere, need more time to fix..
+    data << (uint16) player->GetPositionX();
+    data << (uint16) player->GetPositionY();
     ///some unknown parts, don't know how to divide it :
     data << (uint32) 0;
     data << (uint16) 0;
