@@ -228,7 +228,7 @@ void Spell::EffectSchoolDMG(uint32 i)
             return EffectWeaponDmg(i);
 
         if(damage >= 0)
-            m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell);
+            m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell, true);
     }
 
     if (m_caster->GetTypeId()==TYPEID_PLAYER && m_spellInfo->Attributes == 0x150010)
@@ -996,7 +996,7 @@ void Spell::EffectPowerDrain(uint32 i)
     unitTarget->ModifyPower(POWER_MANA,-new_damage);
 
     m_caster->ModifyPower(POWER_MANA,tmpvalue);
-    m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage/2, m_IsTriggeredSpell);
+    m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage/2, m_IsTriggeredSpell, true);
 }
 
 void Spell::EffectHeal( uint32 i )
@@ -1074,7 +1074,7 @@ void Spell::EffectHealthLeach(uint32 i)
     if(unitTarget->GetTypeId() == TYPEID_PLAYER)
         SendHealSpellOnPlayer(((Player*)unitTarget), m_spellInfo->Id, uint32(tmpvalue));
 
-    m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage, m_IsTriggeredSpell);
+    m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage, m_IsTriggeredSpell, true);
 }
 
 void Spell::DoCreateItem(uint32 i, uint32 itemtype)

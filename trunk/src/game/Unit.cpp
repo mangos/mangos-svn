@@ -842,7 +842,7 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
 
 }
 
-void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, bool isTriggeredSpell)
+void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, bool isTriggeredSpell, bool useSpellDamage)
 {
     if(!this || !pVictim)
         return;
@@ -855,7 +855,8 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, 
 
     bool crit = false;
 
-    DealDamageBySchool(pVictim, spellInfo, &damage, &crit, isTriggeredSpell);
+    if (useSpellDamage)
+        DealDamageBySchool(pVictim, spellInfo, &damage, &crit, isTriggeredSpell);
 
     // If we actually dealt some damage
     if(damage > 0)
@@ -1433,7 +1434,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
     // victim's damage shield
     AuraList& vDamageShields = pVictim->GetAurasByType(SPELL_AURA_DAMAGE_SHIELD);
     for(AuraList::iterator i = vDamageShields.begin(); i != vDamageShields.end(); ++i)
-        pVictim->SpellNonMeleeDamageLog(this, (*i)->GetId(), (*i)->GetModifier()->m_amount);
+        pVictim->SpellNonMeleeDamageLog(this, (*i)->GetId(), (*i)->GetModifier()->m_amount, false, false);
 
     if(pVictim->m_currentSpell && pVictim->GetTypeId() == TYPEID_PLAYER && *damage)
     {
@@ -3350,7 +3351,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                     if(i->spellInfo->SpellVisual == 7986)
                         damage = (damage * GetAttackTime(BASE_ATTACK))/60/1000;
                     if(pVictim && pVictim->isAlive())
-                        SpellNonMeleeDamageLog(pVictim, i->spellInfo->Id, damage, true);
+                        SpellNonMeleeDamageLog(pVictim, i->spellInfo->Id, damage, true, true);
                 }
                 else if(*aur == SPELL_AURA_DUMMY)
                 {
@@ -3468,7 +3469,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                 else if(*aur == SPELL_AURA_PROC_TRIGGER_DAMAGE)
                 {
                     sLog.outDebug("ProcDamageAndSpell: doing %u damage from spell id %u (triggered by a victim's aura of spell %u))", i->spellParam, i->spellInfo->Id, i->triggeredByAura);
-                    pVictim->SpellNonMeleeDamageLog(this, i->spellInfo->Id, i->spellParam, true);
+                    pVictim->SpellNonMeleeDamageLog(this, i->spellInfo->Id, i->spellParam, true, true);
                 }
                 else if(*aur == SPELL_AURA_DUMMY)
                 {
