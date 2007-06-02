@@ -152,6 +152,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "setmovetype", 2, &ChatHandler::HandleSetMoveTypeCommand,      "",   NULL },
         { "anim",        3, &ChatHandler::HandleAnimCommand,             "",   NULL },
         { "announce",    1, &ChatHandler::HandleAnnounceCommand,         "",   NULL },
+        { "notify",      1, &ChatHandler::HandleNotifyCommand,           "",   NULL },
         { "go",          3, &ChatHandler::HandleGoCommand,               "",   NULL },
         { "goname",      1, &ChatHandler::HandleGonameCommand,           "",   NULL },
         { "namego",      1, &ChatHandler::HandleNamegoCommand,           "",   NULL },
