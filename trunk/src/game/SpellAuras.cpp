@@ -260,7 +260,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //205                                   unused
     &Aura::HandleNULL,                                      //206 SPELL_AURA_MOD_SPEED_MOUNTED
     &Aura::HandleAuraModSpeedMountedFlight,                 //207 SPELL_AURA_MOD_SPEED_MOUNTED_FLIGHT
-    &Aura::HandleNULL,                                      //208                                   flight related, used only in spell: Flight Form (Passive)
+    &Aura::HandleAuraModSpeedFlight,                        //208 SPELL_AURA_MOD_SPEED_FLIGHT, used only in spell: Flight Form (Passive)
     &Aura::HandleNULL,                                      //209                                   unused
     &Aura::HandleNULL,                                      //210                                   unused
     &Aura::HandleNULL,                                      //211                                   unused
@@ -941,16 +941,40 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 {
     Unit* caster = GetCaster();
 
-    // currently all dummy auras applied/un-applied only at real add/remove
-    if(!Real)
-        return;
-
-    if(apply && !m_procCharges)
+    // Must be processed before any auras code
+    if(apply && Real && !m_procCharges)
     {
         m_procCharges = GetSpellProto()->procCharges;
         if (!m_procCharges)
             m_procCharges = -1;
     }
+
+    // Dummy auras that must be applied at each apply/unapply
+
+    // Reincarnation (passive)
+    if (GetId() == 20608 && m_target && m_target->GetTypeId()==TYPEID_PLAYER)
+    {
+        // applied at any apply and not real unapply to catch unapply death case 
+        // when cooldown pass and required item exist to set PLAYER_SELF_RES_SPELL
+        if( (!Real || apply) && !((Player*)m_target)->HasSpellCooldown(21169) && ((Player*)m_target)->HasItemCount(17030,1) )
+        {
+            // not replace another aura spell
+            if(m_target->GetUInt32Value(PLAYER_SELF_RES_SPELL)==0)
+                m_target->SetUInt32Value(PLAYER_SELF_RES_SPELL,21169);
+        }
+        else
+        {
+            // remove only at real aura remove or apply check fail
+            // ... and only own spell_id
+            if( m_target->GetUInt32Value(PLAYER_SELF_RES_SPELL)==21169)
+                m_target->SetUInt32Value(PLAYER_SELF_RES_SPELL,0);
+        }
+        return;
+    }
+
+    // Other spells required only Real aura add/remove
+    if(!Real)
+        return;
 
     if( m_target->GetTypeId() == TYPEID_PLAYER && !apply &&
         ( GetSpellProto()->Effect[0]==72 || GetSpellProto()->Effect[0]==6 &&
@@ -1006,29 +1030,35 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             tAuraProcTriggerDamage.remove(this);
     }
 
+    // soulestone resurrection (only at real add/remove and can overwrite reincarnation spell setting)
     if(GetSpellProto()->SpellVisual == 99 && GetSpellProto()->SpellIconID == 92 &&
         caster && caster->GetTypeId() == TYPEID_PLAYER && m_target && m_target->GetTypeId() == TYPEID_PLAYER)
     {
         Player * player = (Player*)m_target;
+
+        uint32 spellid = 0;
+        switch(GetId())
+        {
+            case 20707:spellid =  3026;break;
+            case 20762:spellid = 20758;break;
+            case 20763:spellid = 20759;break;
+            case 20764:spellid = 20760;break;
+            case 20765:spellid = 20761;break;
+            case 27239:spellid = 27240;break;
+            default: return;
+        }
+
         if(apply)
         {
-            uint32 spellid = 0;
-            switch(GetId())
-            {
-                case 20707:spellid = 3026;break;
-                case 20762:spellid = 20758;break;
-                case 20763:spellid = 20759;break;
-                case 20764:spellid = 20760;break;
-                case 20765:spellid = 20761;break;
-                case 27239:spellid = 27240;break;
-                default:break;
-            }
-            if(!spellid)
-                return;
+            // overwrite any
             player->SetUInt32Value(PLAYER_SELF_RES_SPELL, spellid);
         }
         else
-            player->SetUInt32Value(PLAYER_SELF_RES_SPELL, 0);
+        {
+            // remove only own spell 
+            if(player->GetUInt32Value(PLAYER_SELF_RES_SPELL)==spellid)
+                player->SetUInt32Value(PLAYER_SELF_RES_SPELL, 0);
+        }
     }
 
     if(!apply)
@@ -3568,6 +3598,7 @@ void Aura::HandleAuraModSpeedMountedFlight(bool apply, bool Real)
     // allow fly
     sLog.outDebug("%u %u %u %u %u", m_modifier.m_amount, m_modifier.m_auraname, m_modifier.m_miscvalue, m_modifier.m_miscvalue2, m_modifier.periodictime);
 
+    // FIXME: is later code need?
     WorldPacket data;
     if(apply)
         data.Initialize(SMSG_FLY_MODE_START, 12);
@@ -3576,6 +3607,23 @@ void Aura::HandleAuraModSpeedMountedFlight(bool apply, bool Real)
     data.append(m_target->GetPackGUID());
     data << uint32(0);                                      // unk
     m_target->SendMessageToSet(&data, true);
+}
+
+void Aura::HandleAuraModSpeedFlight(bool apply, bool Real)
+{
+    // all applied/removed only at real aura add/remove
+    if(!Real)
+        return;
+
+    sLog.outDebug("HandleAuraModSpeedFlight: Current Speed:%f \tmodify percent:%f", m_target->GetSpeed(MOVE_FLY),(float)m_modifier.m_amount);
+    if(m_modifier.m_amount<=1)
+        return;
+
+    float rate = (100.0f + m_modifier.m_amount)/100.0f;
+
+    m_target->ApplySpeedMod(MOVE_FLY, rate, true, apply );
+
+    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_FLY));
 }
 
 void Aura::HandleModRating(bool apply, bool Real)

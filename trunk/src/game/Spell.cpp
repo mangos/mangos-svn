@@ -1995,9 +1995,10 @@ uint8 Spell::CanCast()
     if(m_caster->m_silenced)
         return SPELL_FAILED_SILENCED;
 
-    // always check items (focus object can be required for any type casts)
-    if(uint8 castResult = CheckItems())
-        return castResult;
+    // always (except passive spells) check items (focus object can be required for any type casts)
+    if(!IsPassiveSpell(m_spellInfo->Id))
+        if(uint8 castResult = CheckItems())
+            return castResult;
 
     if(uint8 castResult = CheckRange())
         return castResult;

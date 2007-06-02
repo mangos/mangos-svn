@@ -174,6 +174,7 @@ class Aura
         void HandleAuraGhost(bool Apply, bool Real);
         void HandleAuraAllowFlight(bool Apply, bool Real);
         void HandleAuraModSpeedMountedFlight(bool Apply, bool Real);
+        void HandleAuraModSpeedFlight(bool Apply, bool Real);
         void HandleModRating(bool apply, bool Real);
         void HandleModTargetResistance(bool apply, bool Real);
 
