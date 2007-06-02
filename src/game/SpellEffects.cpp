@@ -1292,18 +1292,17 @@ void Spell::EffectOpenLock(uint32 i)
         }
     }
 
-    uint32 type = gameObjTarget->GetUInt32Value(GAMEOBJECT_TYPE_ID);
-    if (type == GAMEOBJECT_TYPE_QUESTGIVER )
+    // special GO questgiver case
+    if (gameObjTarget && gameObjTarget->GetGoType()==GAMEOBJECT_TYPE_QUESTGIVER)
     {
         // start or end quest
         player->PrepareQuestMenu(guid);
         player->SendPreparedQuest(guid);
+        return;
     }
-    else
-    {
-        // Send loot
-        player->SendLoot(guid, loottype);
-    }
+
+    // Send loot
+    player->SendLoot(guid, loottype);
 }
 
 void Spell::EffectSummonChangeItem(uint32 i)
