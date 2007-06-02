@@ -111,6 +111,21 @@ bool ChatHandler::HandleAnnounceCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleNotifyCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+    std::string str ="Global notify:\n";
+    str += args;
+
+    WorldPacket data(SMSG_NOTIFICATION, (str.size()+1));
+    data << str;
+    sWorld.SendGlobalMessage(&data);
+
+    return true;
+}
+
 bool ChatHandler::HandleGMOnCommand(const char* args)
 {
     m_session->GetPlayer()->SetGameMaster(true);
