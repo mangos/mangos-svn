@@ -354,6 +354,7 @@ bool AuthSocket::_HandleLogonChallenge()
 
         ///- Verify that this IP is not in the ip_banned table
         // No SQL injection possible (paste the IP address as passed by the socket)
+        dbRealmServer.Execute("DELETE FROM `ip_banned` WHERE `unbandate`<=UNIX_TIMESTAMP() AND `unbandate`<>`bandate`");
         QueryResult *result = dbRealmServer.PQuery(  "SELECT * FROM `ip_banned` WHERE `ip` = '%s';",GetRemoteAddress().c_str());
         if(result)
         {
@@ -365,7 +366,7 @@ bool AuthSocket::_HandleLogonChallenge()
         {
             ///- Get the account details from the account table
             // No SQL injection (escaped user name)
-            QueryResult *result = dbRealmServer.PQuery("SELECT `password`,`banned`,`locked`,`last_ip`,`online` FROM `account` WHERE `username` = '%s'",_safelogin.c_str ());
+            QueryResult *result = dbRealmServer.PQuery("SELECT `password`,`id`,`locked`,`last_ip`,`online` FROM `account` WHERE `username` = '%s'",_safelogin.c_str ());
             if( result )
             {
                 ///- If the IP is 'locked', check that the player comes indeed from the correct IP address
@@ -393,10 +394,21 @@ bool AuthSocket::_HandleLogonChallenge()
                 if (!locked)
                 {
                     ///- If the account is banned, reject the logon attempt
-                    if((*result)[1].GetUInt8())
+                    QueryResult *banresult = dbRealmServer.PQuery("SELECT `bandate`,`unbandate` FROM `account_banned` WHERE `id` = %u AND `active` = 1 AND (`bandate`=`unbandate` OR `unbandate`>UNIX_TIMESTAMP())", (*result)[1].GetUInt32());
+                    if(banresult)
                     {
-                        pkt << (uint8) REALM_AUTH_ACCOUNT_BANNED;
-                        sLog.outBasic("[AuthChallenge] Banned account %s tries to login!",_login.c_str ());
+                        if((*banresult)[0].GetUInt32()==(*banresult)[1].GetUInt32())
+                        {
+                            pkt << (uint8) REALM_AUTH_ACCOUNT_BANNED;
+                            sLog.outBasic("[AuthChallenge] Banned account %s tries to login!",_login.c_str ());
+                        }
+                        else
+                        {
+                            pkt << (uint8) REALM_AUTH_ACCOUNT_FREEZED;
+                            sLog.outBasic("[AuthChallenge] Temporarily banned account %s tries to login!",_login.c_str ());
+                        }
+
+                        delete banresult;
                     }
                     else
                     {
