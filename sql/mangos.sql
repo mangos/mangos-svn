@@ -91,12 +91,16 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `arena_team`;
 CREATE TABLE `arena_team` (
-  `guid` int(10) unsigned NOT NULL default '0',
-  `slot` tinyint(3) unsigned NOT NULL default '0',
+  `arenateamid` int(10) unsigned NOT NULL default '0',
   `name` char(255) NOT NULL,
+  `captainguid` int(10) unsigned NOT NULL default '0',
   `type` tinyint(3) unsigned NOT NULL default '0',
-  `rank` int(10) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`guid`)
+  `EmblemStyle` int(10) unsigned NOT NULL default '0',
+  `EmblemColor` int(10) unsigned NOT NULL default '0',
+  `BorderStyle` int(10) unsigned NOT NULL default '0',
+  `BorderColor` int(10) unsigned NOT NULL default '0',
+  `BackgroundColor` int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`arenateamid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -114,13 +118,12 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `arena_team_member`;
 CREATE TABLE `arena_team_member` (
+  `arenateamid` int(10) unsigned NOT NULL default '0',
   `guid` int(10) unsigned NOT NULL default '0',
-  `teamslot` tinyint(3) unsigned NOT NULL default '0',
-  `teamguid` int(10) unsigned NOT NULL default '0',
-  `rating` int(10) unsigned NOT NULL default '0',
-  `games` int(10) unsigned NOT NULL default '0',
-  `wins` int(10) unsigned NOT NULL default '0',
-  `played` int(10) unsigned NOT NULL default '0'
+  `played_week` int(10) unsigned NOT NULL default '0',
+  `wons_week` int(10) unsigned NOT NULL default '0',
+  `played_season` int(10) unsigned NOT NULL default '0',
+  `wons_season` int(10) unsigned NOT NULL default '0'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
@@ -130,6 +133,31 @@ CREATE TABLE `arena_team_member` (
 LOCK TABLES `arena_team_member` WRITE;
 /*!40000 ALTER TABLE `arena_team_member` DISABLE KEYS */;
 /*!40000 ALTER TABLE `arena_team_member` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `arena_team_stats`
+--
+
+DROP TABLE IF EXISTS `arena_team_stats`;
+CREATE TABLE `arena_team_stats` (
+  `arenateamid` int(10) unsigned NOT NULL default '0',
+  `rating` int(10) unsigned NOT NULL default '0',
+  `games` int(10) unsigned NOT NULL default '0',
+  `wins` int(10) unsigned NOT NULL default '0',
+  `played` int(10) unsigned NOT NULL default '0',
+  `wins2` int(10) unsigned NOT NULL default '0',
+  `rank` int(10) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`arenateamid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `arena_team_stats`
+--
+
+LOCK TABLES `arena_team_stats` WRITE;
+/*!40000 ALTER TABLE `arena_team_stats` DISABLE KEYS */;
+/*!40000 ALTER TABLE `arena_team_stats` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1520,50 +1548,6 @@ LOCK TABLES `guild` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `guild_charter`
---
-
-DROP TABLE IF EXISTS `guild_charter`;
-CREATE TABLE `guild_charter` (
-  `ownerguid` int(10) unsigned NOT NULL,
-  `charterguid` int(10) unsigned default '0',
-  `guildname` varchar(255) NOT NULL default '',
-  PRIMARY KEY  (`ownerguid`),
-  UNIQUE KEY `index_ownerguid_charterguid` (`ownerguid`,`charterguid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
-
---
--- Dumping data for table `guild_charter`
---
-
-LOCK TABLES `guild_charter` WRITE;
-/*!40000 ALTER TABLE `guild_charter` DISABLE KEYS */;
-/*!40000 ALTER TABLE `guild_charter` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `guild_charter_sign`
---
-
-DROP TABLE IF EXISTS `guild_charter_sign`;
-CREATE TABLE `guild_charter_sign` (
-  `ownerguid` int(10) unsigned NOT NULL,
-  `charterguid` int(11) unsigned NOT NULL default '0',
-  `playerguid` int(11) unsigned NOT NULL default '0',
-  `player_account` int(11) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`charterguid`,`playerguid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
-
---
--- Dumping data for table `guild_charter_sign`
---
-
-LOCK TABLES `guild_charter_sign` WRITE;
-/*!40000 ALTER TABLE `guild_charter_sign` DISABLE KEYS */;
-/*!40000 ALTER TABLE `guild_charter_sign` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
 -- Table structure for table `guild_member`
 --
 
@@ -2489,6 +2473,51 @@ INSERT INTO `pet_name_generation` VALUES
 (197,'zhum',417,1),
 (198,'zun',417,1);
 /*!40000 ALTER TABLE `pet_name_generation` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `petition`
+--
+
+DROP TABLE IF EXISTS `petition`;
+CREATE TABLE `petition` (
+  `ownerguid` int(10) unsigned NOT NULL,
+  `charterguid` int(10) unsigned default '0',
+  `name` varchar(255) NOT NULL default '',
+  `type` int(10) unsigned NOT NULL default '0' AFTER `name`;
+  PRIMARY KEY  (`ownerguid`),
+  UNIQUE KEY `index_ownerguid_charterguid` (`ownerguid`,`charterguid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
+
+--
+-- Dumping data for table `petition`
+--
+
+LOCK TABLES `petition` WRITE;
+/*!40000 ALTER TABLE `petition` DISABLE KEYS */;
+/*!40000 ALTER TABLE `petition` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `petition_sign`
+--
+
+DROP TABLE IF EXISTS `petition_sign`;
+CREATE TABLE `petition_sign` (
+  `ownerguid` int(10) unsigned NOT NULL,
+  `charterguid` int(11) unsigned NOT NULL default '0',
+  `playerguid` int(11) unsigned NOT NULL default '0',
+  `player_account` int(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`charterguid`,`playerguid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
+
+--
+-- Dumping data for table `petition_sign`
+--
+
+LOCK TABLES `petition_sign` WRITE;
+/*!40000 ALTER TABLE `petition_sign` DISABLE KEYS */;
+/*!40000 ALTER TABLE `petition_sign` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
