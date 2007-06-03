@@ -1946,16 +1946,16 @@ uint8 Spell::CanCast()
             SendInterrupted(2);
             return SPELL_FAILED_NOT_INFRONT;
         }
-
-        if(m_caster->hasUnitState(UNIT_STAT_CONFUSED))
-            return SPELL_FAILED_CONFUSED;
-
-        if((m_spellInfo->AttributesEx3 & 0x800) != 0) // need check...
-            return SPELL_FAILED_ONLY_BATTLEGROUNDS;
-
-        if(m_spellInfo->AreaId && m_spellInfo->AreaId != m_caster->GetAreaId())
-            return SPELL_FAILED_REQUIRES_AREA;
     }
+
+    if(m_caster->hasUnitState(UNIT_STAT_CONFUSED))
+        return SPELL_FAILED_CONFUSED;
+
+    if((m_spellInfo->AttributesEx3 & 0x800) != 0) // need check...
+        return SPELL_FAILED_ONLY_BATTLEGROUNDS;
+
+    if(m_spellInfo->AreaId && m_spellInfo->AreaId != m_caster->GetZoneId())
+        return SPELL_FAILED_REQUIRES_AREA;
 
     if(m_caster->hasUnitState(UNIT_STAT_STUNDED))
         return SPELL_FAILED_STUNNED;
@@ -2287,6 +2287,14 @@ uint8 Spell::CanCast()
                 // can be casted at non-friendly unit or own pet/charm
                 if(m_caster->IsFriendlyTo(m_targets.getUnitTarget()))
                     return SPELL_FAILED_TARGET_FRIENDLY;
+            };break;
+            case SPELL_AURA_MOD_SPEED_MOUNTED_FLIGHT:
+            case SPELL_AURA_FLY:
+            {
+                // not allow cast fly spells at old maps
+                MapEntry const* mEntry = sMapStore.LookupEntry(m_caster->GetMapId());
+                if(!mEntry || (mEntry->map_flag & 0x10))      // non TBC map
+                    return SPELL_FAILED_NOT_HERE;
             };break;
             default:break;
         }
