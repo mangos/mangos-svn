@@ -1457,8 +1457,20 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
     UpdateZone(GetZoneId());
 
-    if(old_zone != GetZoneId() && pvpInfo.inHostileArea)    // only at zone change
-        CastSpell(this, 2479, true);
+    // new zone 
+    if(old_zone != GetZoneId())
+    {
+        // remove new continent flight forms
+        if(mEntry->map_flag & not_tbc_map)   // non TBC map
+        {
+            RemoveSpellsCausingAura(SPELL_AURA_MOD_SPEED_MOUNTED_FLIGHT);
+            RemoveSpellsCausingAura(SPELL_AURA_FLY);
+        }
+
+        // honorless target
+        if(pvpInfo.inHostileArea) 
+            CastSpell(this, 2479, true);
+    }
 }
 
 void Player::AddToWorld()
@@ -4858,6 +4870,17 @@ void Player::UpdateZone(uint32 newZone)
         {
             RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
         }
+    }
+
+    // remove auras from spells with area limitations
+    for(AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end();)
+    {
+        if(iter->second->GetSpellProto()->AreaId && iter->second->GetSpellProto()->AreaId != GetZoneId())
+        {
+            RemoveAura(iter);
+        }
+        else
+            ++iter;
     }
 }
 
