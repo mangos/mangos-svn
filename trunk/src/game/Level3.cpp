@@ -3553,12 +3553,12 @@ bool ChatHandler::HandleWritePDumpCommand(const char *args)
     if(!args)
         return false;
 
-    char* file = strtok((char*)args, " ");
-    char* guid = strtok(NULL, " ");
+    char * file = strtok((char*)args, " "); if(!file) return false;
+    char * acc = strtok(NULL, " "); if(!acc) return false;
+    char * name = strtok(NULL, " ");
+    char * guid = name ? strtok(NULL, " ") : NULL;
 
-    if(!file || !guid) return false;
-
-    if(objmgr.WritePlayerDump(file, atoi(guid)))
+    if(objmgr.LoadPlayerDump(file, atoi(acc), name ? name : "", guid ? atoi(guid) : 0))
         PSendSysMessage("Character dumped successfully!");
     else
         PSendSysMessage("Character dump failed!");

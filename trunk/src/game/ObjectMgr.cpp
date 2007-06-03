@@ -3399,10 +3399,10 @@ struct tbl
     uint8 type;
 };
 
-tbl tbls[13] = {
+tbl tbls[NUM_TBLS] = {
     "character", 1,
     "character_action", 0,
-    "characte_aura", 0,
+    "character_aura", 0,
     "character_homebind", 0,
     "character_inventory", 2,
     "character_kill", 0, 
@@ -3451,10 +3451,9 @@ bool DumpPlayerTable(FILE *file, uint32 guid, char *tableFrom, char *tableTo, in
     return true;
 }
 
-bool ObjectMgr::WritePlayerDump(const char *file, uint32 guid)
+bool ObjectMgr::WritePlayerDump(std::string file, uint32 guid)
 {
-    if (!file) return false;
-    FILE *fout = fopen(file, "w");
+    FILE *fout = fopen(file.c_str(), "w");
     if (!fout) { sLog.outError("Failed to open file!\r\n"); return false; }
 
     for(int i = 0; i < NUM_TBLS; i++)
@@ -3564,16 +3563,47 @@ bool changetokItem(std::string &str, int n, std::map<uint32, uint32> &items, uin
     return changetoknth(str, n, chritem, false, nonzero);
 }
 
-#define ROLLBACK {sDatabase.RollbackTransaction(); return false;}
+#define ROLLBACK {sDatabase.RollbackTransaction(); fclose(fin); return false;}
 
-bool ObjectMgr::LoadPlayerDump(const char *file, uint32 account)
+extern std::string notAllowedChars;
+
+bool ObjectMgr::LoadPlayerDump(std::string file, uint32 account, std::string name, uint32 guid)
 {
-    if (!file) return false;
-    FILE *fin = fopen(file, "r");
+    FILE *fin = fopen(file.c_str(), "r");
     if(!fin) return false;
 
+    QueryResult * result = NULL;
     char newguid[20], chraccount[20];
-    snprintf(newguid, 20, "%d", m_hiCharGuid);
+
+    // make sure the same guid doesn't already exist and is safe to use
+    bool incHighest = true;
+    if(guid != 0 && guid < m_hiCharGuid)
+    {
+        result = sDatabase.PQuery("SELECT * FROM `character` WHERE `guid` = '%d'", guid);
+        if (result)
+        {
+            guid = m_hiCharGuid;                            // use first free if exists
+            delete result;
+        }
+        else incHighest = false;
+    }
+    else guid = m_hiCharGuid;
+
+    // normalize the name if specified and check if it exists
+    if(name != "" && name.find_first_of(notAllowedChars) == name.npos)
+    {
+        sDatabase.escape_string(name);
+        normalizePlayerName(name);
+        result = sDatabase.PQuery("SELECT * FROM `character` WHERE `name` = '%s'", name.c_str());
+        if (result)
+        {
+            name = "";                                      // use the one from the dump
+            delete result;
+        }
+    }
+    else name = "";
+
+    snprintf(newguid, 20, "%d", guid);
     snprintf(chraccount, 20, "%d", account);
 
     std::map<uint32, uint32> items;
@@ -3614,8 +3644,17 @@ bool ObjectMgr::LoadPlayerDump(const char *file, uint32 account)
             for(uint16 field = PLAYER_FIELD_INV_SLOT_HEAD; field <= PLAYER_FIELD_KEYRING_SLOT_LAST; field++)
                 if(!changetokItem(vals, field+1, items, m_hiItemGuid, true)) ROLLBACK;
             if(!changenth(line, 3, vals.c_str())) ROLLBACK;
+            if (name == "") name = getnth(line, 4);
+
+            // check if the name already exists
+            result = sDatabase.PQuery("SELECT * FROM `character` WHERE `name` = '%s'", name.c_str());
+            if (result)
+            {
+                delete result;
+                if(!changenth(line, 29, "1")) ROLLBACK;     // rename on login
+            }
         }
-        else if(type == 2)                                   // character_inventory t.
+        else if(type == 2)                                  // character_inventory t.
         {
             // bag, item
             if(!changeItem(line, 2, items, m_hiItemGuid, true)) ROLLBACK;
@@ -3636,7 +3675,7 @@ bool ObjectMgr::LoadPlayerDump(const char *file, uint32 account)
     }
     sDatabase.CommitTransaction();
     m_hiItemGuid += items.size();
-    m_hiCharGuid++;
+    if(incHighest) m_hiCharGuid++;
     fclose(fin);
     return true;
 }

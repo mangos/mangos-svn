@@ -36,7 +36,7 @@
 #include "Group.h"
 
 // check used symbols in player name at creating and rename
-static std::string const notAllowedChars = "\t\v\b\f\a\n\r\\\0\"\'\? <>[](){}_=+-|/!@#$%^&*~`.,0123456789";
+std::string notAllowedChars = "\t\v\b\f\a\n\r\\\"\'\? <>[](){}_=+-|/!@#$%^&*~`.,0123456789\0";
 
 void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
 {
