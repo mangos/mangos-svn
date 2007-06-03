@@ -225,7 +225,7 @@ void BattleGround::Update(time_t diff)
                 // spell not working, only visual effect :(
                 sh->CastSpell(plr, 22012, true, 0, 0, 0);   // Spirit Heal, effect 117
 
-                plr->ResurrectPlayer();                     // temp
+                plr->ResurrectPlayer(1.0f);                 // temp
                 plr->SpawnCorpseBones();                    // temp
             }
         }
@@ -392,7 +392,7 @@ void BattleGround::EndBattleGround(uint32 winner)
 
         if(!plr->isAlive())
         {
-            plr->ResurrectPlayer();
+            plr->ResurrectPlayer(1.0f);
             plr->SpawnCorpseBones();
         }
 
@@ -517,7 +517,7 @@ void BattleGround::RemovePlayer(uint64 guid, bool Transport, bool SendPacket)
 
     if(plr && !plr->isAlive())                              // resurrect on exit
     {
-        plr->ResurrectPlayer();
+        plr->ResurrectPlayer(1.0f);
         plr->SpawnCorpseBones();
     }
 

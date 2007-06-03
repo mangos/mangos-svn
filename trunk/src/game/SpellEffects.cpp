@@ -2845,8 +2845,9 @@ void Spell::EffectSelfResurrect(uint32 i)
     }
 
     Player *plr = ((Player*)unitTarget);
-    plr->ResurrectPlayer();
+    plr->ResurrectPlayer(0.0f);
 
+    plr->ApplyStats(false);
     if(plr->GetMaxHealth() > health)
         plr->SetHealth( health );
     else
@@ -2860,15 +2861,9 @@ void Spell::EffectSelfResurrect(uint32 i)
     plr->SetPower(POWER_RAGE, 0 );
 
     plr->SetPower(POWER_ENERGY, plr->GetMaxPower(POWER_ENERGY) );
+    plr->ApplyStats(true);
 
     plr->SpawnCorpseBones();
-
-    // we really need this teleport?
-    WorldPacket data;
-    plr->BuildTeleportAckMsg(&data, m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), plr->GetOrientation());
-    plr->GetSession()->SendPacket(&data);
-
-    plr->SetPosition(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), plr->GetOrientation());
 
     plr->SaveToDB();
 }

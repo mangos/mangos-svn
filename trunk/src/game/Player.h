@@ -1135,7 +1135,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void CreateCorpse();
 
         void KillPlayer();
-        void ResurrectPlayer();
+        void ResurrectPlayer(float restore_percent, bool updateToWorld = true);
         void BuildPlayerRepop();
         void DurabilityLossAll(double percent);
         void DurabilityLoss(uint8 equip_pos, double percent);

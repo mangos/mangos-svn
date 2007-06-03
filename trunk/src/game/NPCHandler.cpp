@@ -322,19 +322,9 @@ void WorldSession::SendSpiritResurrect()
         _player->m_resurrectingSicknessExpire = time(NULL) + (spellLvl-10)*MINUTE;
     }
 
-    _player->ResurrectPlayer();
-
-    _player->ApplyStats(false);
-    _player->SetHealth( _player->GetMaxHealth()/2 );
-    _player->SetPower(POWER_MANA, _player->GetMaxPower(POWER_MANA)/2 );
-    _player->SetPower(POWER_RAGE, 0 );
-    _player->SetPower(POWER_ENERGY, _player->GetMaxPower(POWER_ENERGY));
-    _player->ApplyStats(true);
+    _player->ResurrectPlayer(0.5f,false);
 
     _player->DurabilityLossAll(0.25);
-
-    // update world right away
-    MapManager::Instance().GetMap(_player->GetMapId(), _player)->Add(GetPlayer());
 
     // get corpse nearest graveyard
     WorldSafeLocsEntry const *corpseGrave = NULL;
@@ -354,7 +344,13 @@ void WorldSession::SendSpiritResurrect()
 
         if(corpseGrave != ghostGrave)
             _player->TeleportTo(corpseGrave->map_id, corpseGrave->x, corpseGrave->y, corpseGrave->z, _player->GetOrientation());
+        // or update at original position
+        else
+            MapManager::Instance().GetMap(_player->GetMapId(), _player)->Add(_player);
     }
+    // or update at original position
+    else
+        MapManager::Instance().GetMap(_player->GetMapId(), _player)->Add(_player);
 
     _player->SaveToDB();
 }
