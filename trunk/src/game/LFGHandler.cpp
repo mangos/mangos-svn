@@ -167,6 +167,7 @@ void WorldSession::HandleLfmSetOpcode( WorldPacket & recv_data )
     CHECK_PACKET_SIZE(recv_data,4);
 
     sLog.outDebug("CMSG_SET_LOOKING_FOR_MORE");
+    //recv_data.hexlike();
     uint32 temp, entry, type;
 
     recv_data >> temp;
@@ -188,6 +189,7 @@ void WorldSession::HandleLfgSetCommentOpcode( WorldPacket & recv_data )
     CHECK_PACKET_SIZE(recv_data,1);
 
     sLog.outDebug("CMSG_SET_COMMENTARY");
+    //recv_data.hexlike();
 
     std::string comment;
     recv_data >> comment;
@@ -201,6 +203,7 @@ void WorldSession::HandleLookingForGroup(WorldPacket& recv_data)
     CHECK_PACKET_SIZE(recv_data,4+4+4);
 
     sLog.outDebug("MSG_LOOKING_FOR_GROUP");
+    //recv_data.hexlike();
     uint32 type, entry, unk;
 
     recv_data >> type >> entry >> unk;
@@ -285,6 +288,7 @@ void WorldSession::HandleSetLfgOpcode( WorldPacket & recv_data )
     CHECK_PACKET_SIZE(recv_data,4+4);
 
     sLog.outDebug("CMSG_SET_LOOKING_FOR_GROUP");
+    //recv_data.hexlike();
     uint32 slot, temp, entry, type;
 
     recv_data >> slot >> temp;

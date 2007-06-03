@@ -50,6 +50,7 @@
 #include "BattleGroundAB.h"
 #include "BattleGroundEY.h"
 #include "BattleGroundWS.h"
+#include "ArenaTeam.h"
 
 #include <cmath>
 
@@ -2954,7 +2955,7 @@ void Player::DeleteFromDB()
     RemoveFromGroup();
 
     // remove signs from petitions (also remove petitions if owner);
-    RemovePetitionsAndSigns(GetGUID());
+    RemovePetitionsAndSigns(GetGUID(), 10);
 
     // unsummon and delete pet not required: player deleted from CLI or character list with not loaded pet.
 
@@ -3231,11 +3232,11 @@ void Player::KillPlayer()
         {
             switch(bg->GetID())
             {
-                case BATTLEGROUND_AV_ID:
+                case BATTLEGROUND_AV:
                 {
                     break;
                 }
-                case BATTLEGROUND_WS_ID:
+                case BATTLEGROUND_WS:
                 {
                     if(GetTeam() == HORDE && ((BattleGroundWS*)bg)->IsAllianceFlagPickedup())
                     {
@@ -3255,11 +3256,11 @@ void Player::KillPlayer()
                     }
                     break;
                 }
-                case BATTLEGROUND_AB_ID:
+                case BATTLEGROUND_AB:
                 {
                     break;
                 }
-                case BATTLEGROUND_EY_ID:
+                case BATTLEGROUND_EY:
                 {
                     break;
                 }
@@ -4771,6 +4772,30 @@ uint32 Player::GetRankFromDB(uint64 guid)
     }
     else
         return 0;
+}
+
+uint32 Player::GetArenaTeamIdFromDB(uint64 guid, uint8 slot)
+{
+    // need fix it!
+    QueryResult *result = sDatabase.PQuery("SELECT `arenateamid` FROM `arena_team_member` WHERE `guid`='%u'", GUID_LOPART(guid));
+    if(result)
+    {
+        uint32 id = (*result)[0].GetUInt32();
+        do
+        {
+            QueryResult *result2 = sDatabase.PQuery("SELECT `type` FROM `arena_team` WHERE `arenateamid`='%u'", id);
+            if(result2)
+            {
+                uint8 dbslot = (*result2)[0].GetUInt32();
+                delete result2;
+                if(dbslot == slot)
+                    break;
+            }
+        } while(result->NextRow());
+        delete result;
+        return id;
+    }
+    return 0;
 }
 
 uint32 Player::GetZoneIdFromDB(uint64 guid)
@@ -12566,32 +12591,35 @@ void Player::SendProficiency(uint8 pr1, uint32 pr2)
     GetSession()->SendPacket (&data);
 }
 
-void Player::RemovePetitionsAndSigns(uint64 guid)
+void Player::RemovePetitionsAndSigns(uint64 guid, uint32 type)
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `ownerguid`,`charterguid` FROM `guild_charter_sign` WHERE `playerguid` = '%u'", guid);
+    QueryResult *result = sDatabase.PQuery("SELECT `ownerguid`,`petitionguid` FROM `petition_sign` WHERE `playerguid` = '%u'", GUID_LOPART(guid));
     if(result)
     {
         do
         {
             Field *fields = result->Fetch();
-            uint64 ownerguid   = MAKE_GUID(fields[0].GetUInt32(),HIGHGUID_PLAYER);
-            uint64 charterguid = MAKE_GUID(fields[1].GetUInt32(),HIGHGUID_ITEM);
+            uint64 ownerguid   = MAKE_GUID(fields[0].GetUInt32(), HIGHGUID_PLAYER);
+            uint64 petitionguid = MAKE_GUID(fields[1].GetUInt32(), HIGHGUID_ITEM);
 
-            // send update  if charter owner in game
+            // send update if charter owner in game
             Player* owner = objmgr.GetPlayer(ownerguid);
             if(owner)
-                owner->GetSession()->SendPetitionQueryOpcode(charterguid);
+                owner->GetSession()->SendPetitionQueryOpcode(petitionguid);
 
         } while ( result->NextRow() );
 
         delete result;
 
-        sDatabase.PExecute("DELETE FROM `guild_charter_sign` WHERE `playerguid` = '%u'",guid);
+        sDatabase.PExecute("DELETE FROM `petition_sign` WHERE `playerguid` = '%u'", GUID_LOPART(guid));
     }
 
     sDatabase.BeginTransaction();
-    sDatabase.PExecute("DELETE FROM `guild_charter` WHERE `ownerguid` = '%u'",guid);
-    sDatabase.PExecute("DELETE FROM `guild_charter_sign` WHERE `ownerguid` = '%u'",guid);
+    if(type == 10)
+        sDatabase.PExecute("DELETE FROM `petition` WHERE `ownerguid` = '%u'", GUID_LOPART(guid));
+    else
+        sDatabase.PExecute("DELETE FROM `petition` WHERE `ownerguid` = '%u' AND `type` = '%u'", GUID_LOPART(guid), type);
+    sDatabase.PExecute("DELETE FROM `petition_sign` WHERE `ownerguid` = '%u'", GUID_LOPART(guid));
     sDatabase.CommitTransaction();
 }
 
@@ -13362,7 +13390,7 @@ bool Player::DropBattleGroundFlag()
 
     if(GetTeam() == HORDE)
     {
-        if(bg->GetID()==BATTLEGROUND_WS_ID && ((BattleGroundWS*)bg)->IsAllianceFlagPickedup())
+        if(bg->GetID()==BATTLEGROUND_WS && ((BattleGroundWS*)bg)->IsAllianceFlagPickedup())
         {
             if(((BattleGroundWS*)bg)->GetAllianceFlagPickerGUID() == GetGUID())
             {
@@ -13375,7 +13403,7 @@ bool Player::DropBattleGroundFlag()
     }
     else                                                    // ALLIANCE
     {
-        if(bg->GetID()==BATTLEGROUND_WS_ID && ((BattleGroundWS*)bg)->IsHordeFlagPickedup())
+        if(bg->GetID()==BATTLEGROUND_WS && ((BattleGroundWS*)bg)->IsHordeFlagPickedup())
         {
             if(((BattleGroundWS*)bg)->GetHordeFlagPickerGUID() == GetGUID())
             {

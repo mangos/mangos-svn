@@ -94,6 +94,8 @@ void BattleGround::Update(time_t diff)
     if(CanStartBattleGround())
         StartBattleGround();                                //Queue is full, we must invite to BG
 
+    WorldPacket data;
+
     if(GetRemovedPlayersSize())
     {
         for(std::map<uint64, uint8>::iterator itr = m_RemovedPlayers.begin(); itr != m_RemovedPlayers.end(); ++itr)
@@ -105,7 +107,6 @@ void BattleGround::Update(time_t diff)
                     RemovePlayerFromQueue(itr->first);
                     if(plr)
                     {
-                        WorldPacket data;
                         sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), STATUS_NONE, 0, 0);
                         plr->GetSession()->SendPacket(&data);
                     }
@@ -137,14 +138,13 @@ void BattleGround::Update(time_t diff)
                 // update last online time
                 itr->second.LastOnlineTime = getMSTime();
 
-                if(GetStatus() == STATUS_INPROGRESS)
+                if(GetStatus() == STATUS_IN_PROGRESS)
                 {
                     if(!itr->second.IsInvited)              // not invited yet
                     {
                         if(HasFreeSlots(plr->GetTeam()))
                         {
                             plr->SaveToDB();
-                            WorldPacket data;
                             sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), STATUS_WAIT_JOIN, 120000, 0);
                             plr->GetSession()->SendPacket(&data);
                             itr->second.IsInvited = true;
@@ -164,7 +164,6 @@ void BattleGround::Update(time_t diff)
                     }
                     else if(t >= 30000)                     // remind every 30 seconds
                     {
-                        WorldPacket data;
                         sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), STATUS_WAIT_JOIN, 120000 - tt, 0);
                         plr->GetSession()->SendPacket(&data);
                         itr->second.LastInviteTime = getMSTime();
@@ -306,6 +305,8 @@ void BattleGround::PlaySoundToAll(uint32 SoundID)
 
 void BattleGround::PlaySoundToTeam(uint32 SoundID, uint32 TeamID)
 {
+    WorldPacket data;
+
     for(std::map<uint64, BattleGroundPlayer>::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
     {
         Player *plr = objmgr.GetPlayer(itr->first);
@@ -318,7 +319,6 @@ void BattleGround::PlaySoundToTeam(uint32 SoundID, uint32 TeamID)
 
         if(plr->GetTeam() == TeamID)
         {
-            WorldPacket data;
             sBattleGroundMgr.BuildPlaySoundPacket(&data, SoundID);
             plr->GetSession()->SendPacket(&data);
         }
@@ -353,6 +353,7 @@ void BattleGround::UpdateWorldState(uint32 Field, uint32 Value)
 
 void BattleGround::EndBattleGround(uint32 winner)
 {
+    WorldPacket data;
     Player *Source = NULL;
     const char *winmsg = "";
     if(winner == ALLIANCE)
@@ -361,9 +362,8 @@ void BattleGround::EndBattleGround(uint32 winner)
 
         PlaySoundToAll(8455);                               // alliance wins sound...
 
-        WorldPacket data2;
-        sBattleGroundMgr.BuildPvpLogDataPacket(&data2, this, 1);
-        SendPacketToAll(&data2);
+        sBattleGroundMgr.BuildPvpLogDataPacket(&data, this, 1);
+        SendPacketToAll(&data);
     }
     if(winner == HORDE)
     {
@@ -371,9 +371,8 @@ void BattleGround::EndBattleGround(uint32 winner)
 
         PlaySoundToAll(8454);                               // horde wins sound...
 
-        WorldPacket data2;
-        sBattleGroundMgr.BuildPvpLogDataPacket(&data2, this, 0);
-        SendPacketToAll(&data2);
+        sBattleGroundMgr.BuildPvpLogDataPacket(&data, this, 0);
+        SendPacketToAll(&data);
     }
 
     SetStatus(STATUS_WAIT_LEAVE);
@@ -400,8 +399,7 @@ void BattleGround::EndBattleGround(uint32 winner)
 
         uint32 time1 = getMSTime() - GetStartTime();
 
-        WorldPacket data;
-        sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), STATUS_INPROGRESS, 120000, time1); // 2 minutes to auto leave BG
+        sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), STATUS_IN_PROGRESS, 120000, time1); // 2 minutes to auto leave BG
         plr->GetSession()->SendPacket(&data);
 
         if(plr->GetTeam() == winner)
@@ -410,15 +408,15 @@ void BattleGround::EndBattleGround(uint32 winner)
                 Source = plr;
             switch(GetID())
             {
-                case BATTLEGROUND_AV_ID:
+                case BATTLEGROUND_AV:
                     // Create AV Mark of Honor (Winner)
                     mark = 24955;
                     break;
-                case BATTLEGROUND_WS_ID:
+                case BATTLEGROUND_WS:
                     // Create WSG Mark of Honor (Winner)
                     mark = 24951;
                     break;
-                case BATTLEGROUND_AB_ID:
+                case BATTLEGROUND_AB:
                     // Create AB Mark of Honor (Winner)
                     mark = 24953;
                     break;
@@ -428,13 +426,13 @@ void BattleGround::EndBattleGround(uint32 winner)
         {
             switch(GetID())
             {
-                case BATTLEGROUND_AV_ID:
+                case BATTLEGROUND_AV:
                     mark = 24954;                           //Create AV Mark of Honor (Loser)
                     break;
-                case BATTLEGROUND_WS_ID:
+                case BATTLEGROUND_WS:
                     mark = 24950;                           //Create WSG Mark of Honor (Loser)
                     break;
-                case BATTLEGROUND_AB_ID:
+                case BATTLEGROUND_AB:
                     mark = 24952;                           //Create AB Mark of Honor (Loser)
                     break;
             }
@@ -447,7 +445,6 @@ void BattleGround::EndBattleGround(uint32 winner)
 
     if(Source)
     {
-        WorldPacket data;
         sChatHandler.FillMessageData(&data, Source->GetSession(), CHAT_MSG_BATTLEGROUND, LANG_UNIVERSAL, NULL, Source->GetGUID(), winmsg, NULL);
         SendPacketToAll(&data);
     }
@@ -525,9 +522,9 @@ void BattleGround::RemovePlayer(uint64 guid, bool Transport, bool SendPacket)
 
     if(plr)
     {
+        WorldPacket data;
         if(SendPacket)
         {
-            WorldPacket data;
             sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), STATUS_NONE, 0, 0);
             plr->GetSession()->SendPacket(&data);
         }
@@ -547,7 +544,6 @@ void BattleGround::RemovePlayer(uint64 guid, bool Transport, bool SendPacket)
         plr->SetBattleGroundId(0);                          // We're not in BG.
 
         // Let others know
-        WorldPacket data;
         sBattleGroundMgr.BuildPlayerLeftBattleGroundPacket(&data, plr);
         SendPacketToAll(&data);
 
@@ -585,19 +581,19 @@ void BattleGround::AddPlayerToQueue(uint64 guid, uint32 level)
         q.LastOnlineTime = 0;
 
         if(level >= 10 && level <= 19)
-            m_QueuedPlayers[0].insert(pair<uint64, BattleGroundQueue>(guid, q));
+            m_QueuedPlayers[0][guid] = q;
         else if(level >= 20 && level <= 29)
-            m_QueuedPlayers[1].insert(pair<uint64, BattleGroundQueue>(guid, q));
+            m_QueuedPlayers[1][guid] = q;
         else if(level >= 30 && level <= 39)
-            m_QueuedPlayers[2].insert(pair<uint64, BattleGroundQueue>(guid, q));
+            m_QueuedPlayers[2][guid] = q;
         else if(level >= 40 && level <= 49)
-            m_QueuedPlayers[3].insert(pair<uint64, BattleGroundQueue>(guid, q));
+            m_QueuedPlayers[3][guid] = q;
         else if(level >= 50 && level <= 59)
-            m_QueuedPlayers[4].insert(pair<uint64, BattleGroundQueue>(guid, q));
+            m_QueuedPlayers[4][guid] = q;
         else if(level >= 60 && level <= 69)
-            m_QueuedPlayers[5].insert(pair<uint64, BattleGroundQueue>(guid, q));
+            m_QueuedPlayers[5][guid] = q;
         else
-            m_QueuedPlayers[6].insert(pair<uint64, BattleGroundQueue>(guid, q));
+            m_QueuedPlayers[6][guid] = q;
     }
 }
 
@@ -676,6 +672,8 @@ void BattleGround::StartBattleGround()
 
     QueuedPlayersMap& pQueue = m_QueuedPlayers[GetQueueType()];
 
+    WorldPacket data;
+
     for(QueuedPlayersMap::iterator itr = pQueue.begin(); itr != pQueue.end(); ++itr)
     {
         Player *plr = objmgr.GetPlayer(itr->first);
@@ -683,7 +681,6 @@ void BattleGround::StartBattleGround()
         {
             // Save before join (player must loaded out of bg, if disconnected at bg,etc), it's not blizz like...
             plr->SaveToDB();
-            WorldPacket data;
             sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), STATUS_WAIT_JOIN, 120000, 0);  // 2 minutes to remove from queue
             plr->GetSession()->SendPacket(&data);
             itr->second.IsInvited = true;
@@ -718,8 +715,8 @@ void BattleGround::AddPlayer(Player *plr)
     bp.Team = plr->GetTeam();
 
     // Add to list/maps
-    m_Players.insert(pair<uint64, BattleGroundPlayer>(guid, bp));
-    m_PlayerScores.insert(pair<uint64, BattleGroundScore>(guid, sc));
+    m_Players[guid] = bp;
+    m_PlayerScores[guid] = sc;
 
     plr->SendInitWorldStates();
 

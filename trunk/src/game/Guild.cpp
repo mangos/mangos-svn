@@ -117,7 +117,7 @@ bool Guild::AddMember(uint64 plGuid, uint32 plRank)
 
     // remove all player signs from another petitions
     // this will be prevent attempt joining player to many guilds and corrupt guild data integrity
-    Player::RemovePetitionsAndSigns(plGuid);
+    Player::RemovePetitionsAndSigns(plGuid, 9);
 
     Player* pl = objmgr.GetPlayer(plGuid);
     if(pl)
@@ -125,7 +125,7 @@ bool Guild::AddMember(uint64 plGuid, uint32 plRank)
         plLevel = (uint8)pl->getLevel();
         plClass = (uint8)pl->getClass();
 
-        AreaTableEntry  const* area = GetAreaEntryByAreaFlag(MapManager::Instance().GetMap(pl->GetMapId(), pl)->GetAreaFlag(pl->GetPositionX(),pl->GetPositionY()));
+        AreaTableEntry const* area = GetAreaEntryByAreaFlag(MapManager::Instance().GetMap(pl->GetMapId(), pl)->GetAreaFlag(pl->GetPositionX(),pl->GetPositionY()));
         if (area)                                           // For example: .worldport -2313 478 48 1    Zone will be 0(unkonown), even though it's a usual cave
             plZone = area->zone;                            // would cause null pointer exception
         else

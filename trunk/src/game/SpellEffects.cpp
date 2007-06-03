@@ -99,7 +99,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectSummonWild,                               // 42 SPELL_EFFECT_SUMMON_GUARDIAN
     &Spell::EffectTeleUnitsFaceCaster,                      // 43 SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER
     &Spell::EffectLearnSkill,                               // 44 SPELL_EFFECT_SKILL_STEP
-    &Spell::EffectNULL,                                     // 45                                       honor/pvp related
+    &Spell::EffectNULL,                                     // 45 SPELL_EFFECT_ADD_HONOR                honor/pvp related
     &Spell::EffectNULL,                                     // 46 SPELL_EFFECT_SPAWN                    we must spawn pet there
     &Spell::EffectTradeSkill,                               // 47 SPELL_EFFECT_TRADE_SKILL
     &Spell::EffectNULL,                                     // 48 SPELL_EFFECT_STEALTH                  one spell: Base Stealth
@@ -173,7 +173,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //116 SPELL_EFFECT_SKIN_PLAYER_CORPSE       one spell: Remove Insignia, bg usage, required special corpse flags...
     &Spell::EffectNULL,                                     //117 SPELL_EFFECT_SPIRIT_HEAL              one spell: Spirit Heal
     &Spell::EffectSkill,                                    //118 SPELL_EFFECT_SKILL                    professions and more
-    &Spell::EffectNULL,                                     //119 SPELL_EFFECT_APPLY_AURA_NEW
+    &Spell::EffectNULL,                                     //119 SPELL_EFFECT_APPLY_AURA_PET
     &Spell::EffectNULL,                                     //120 SPELL_EFFECT_TELEPORT_GRAVEYARD       two spells: Graveyard Teleport and Graveyard Teleport Test
     &Spell::EffectWeaponDmg,                                //121 SPELL_EFFECT_NORMALIZED_WEAPON_DMG
     &Spell::EffectNULL,                                     //122 SPELL_EFFECT_122                      silithist cap reward spell
@@ -182,8 +182,8 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //125 SPELL_EFFECT_125                      invis?
     &Spell::EffectNULL,                                     //126 SPELL_EFFECT_126                      spell steal effect?
     &Spell::EffectNULL,                                     //127 SPELL_EFFECT_127                      Prospecting spell
-    &Spell::EffectNULL,                                     //128 SPELL_EFFECT_128
-    &Spell::EffectNULL,                                     //129 SPELL_EFFECT_129
+    &Spell::EffectNULL,                                     //128 SPELL_EFFECT_128 probably apply aura again
+    &Spell::EffectNULL,                                     //129 SPELL_EFFECT_129 probably apply aura again
     &Spell::EffectNULL,                                     //130 SPELL_EFFECT_130                      threat redirect
     &Spell::EffectNULL,                                     //131 SPELL_EFFECT_131                      unused
     &Spell::EffectNULL,                                     //132 SPELL_EFFECT_132                      taxi related, one spell: Brazen Taxi
@@ -928,37 +928,37 @@ void Spell::EffectSendEvent(uint32 i)
     if (m_caster->GetTypeId() == TYPEID_PLAYER && ((Player*)m_caster)->InBattleGround())
     {
         BattleGround* bg = sBattleGroundMgr.GetBattleGround(((Player *)m_caster)->GetBattleGroundId());
-        if(bg && bg->GetStatus() == STATUS_INPROGRESS)
+        if(bg && bg->GetStatus() == STATUS_IN_PROGRESS)
         {
             switch(m_spellInfo->Id)
             {
                 case 23333:                                 // Pickup Horde Flag
-                    if(bg->GetID()==BATTLEGROUND_WS_ID)
+                    if(bg->GetID()==BATTLEGROUND_WS)
                         ((BattleGroundWS*)bg)->EventPlayerPickedUpFlag(((Player*)m_caster));
                     sLog.outDebug("Send Event Horde Flag Picked Up");
                     break;
                 case 23334:                                 // Drop Horde Flag
-                    if(bg->GetID()==BATTLEGROUND_WS_ID)
+                    if(bg->GetID()==BATTLEGROUND_WS)
                         ((BattleGroundWS*)bg)->EventPlayerDroppedFlag(((Player*)m_caster));
                     sLog.outDebug("Drop Horde Flag");
                     break;
                 case 23335:                                 // Pickup Alliance Flag
-                    if(bg->GetID()==BATTLEGROUND_WS_ID)
+                    if(bg->GetID()==BATTLEGROUND_WS)
                         ((BattleGroundWS*)bg)->EventPlayerPickedUpFlag(((Player*)m_caster));
                     sLog.outDebug("Send Event Alliance Flag Picked Up");
                     break;
                 case 23336:                                 // Drop Alliance Flag
-                    if(bg->GetID()==BATTLEGROUND_WS_ID)
+                    if(bg->GetID()==BATTLEGROUND_WS)
                         ((BattleGroundWS*)bg)->EventPlayerDroppedFlag(((Player*)m_caster));
                     sLog.outDebug("Drop Alliance Flag");
                     break;
                 /*case 23385:                                 // Alliance Flag Returns
-                    if(bg->GetID()==BATTLEGROUND_WS_ID)
+                    if(bg->GetID()==BATTLEGROUND_WS)
                         ((BattleGroundWS*)bg)->EventPlayerReturnedFlag(((Player*)m_caster));
                     sLog.outDebug("Alliance Flag Returned");
                     break;
                 case 23386:                                   // Horde Flag Returns
-                    if(bg->GetID()==BATTLEGROUND_WS_ID)
+                    if(bg->GetID()==BATTLEGROUND_WS)
                         ((BattleGroundWS*)bg)->EventPlayerReturnedFlag(((Player*)m_caster));
                     sLog.outDebug("Horde Flag Returned");
                     break;*/

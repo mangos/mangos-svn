@@ -429,7 +429,9 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_ARENA_TEAM_INVITE_ACCEPT ]         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamInviteAcceptOpcode   );
     objmgr.opcodeTable[ CMSG_ARENA_TEAM_INVITE_DECLINE ]        = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamInviteDeclineOpcode  );
     objmgr.opcodeTable[ CMSG_ARENA_TEAM_LEAVE ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamLeaveOpcode          );
+    objmgr.opcodeTable[ CMSG_ARENA_TEAM_REMOVE_FROM_TEAM ]      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamRemoveFromTeamOpcode );
     objmgr.opcodeTable[ CMSG_ARENA_TEAM_DISBAND ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamDisbandOpcode        );
+    objmgr.opcodeTable[ CMSG_ARENA_TEAM_PROMOTE_TO_CAPTAIN ]    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamPromoteToCaptainOpcode );
     objmgr.opcodeTable[ CMSG_AREA_SPIRIT_HEALER_QUERY ]         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAreaSpiritHealerQueryOpcode   );
     objmgr.opcodeTable[ CMSG_AREA_SPIRIT_HEALER_QUEUE ]         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAreaSpiritHealerQueueOpcode   );
     objmgr.opcodeTable[ CMSG_MOVE_SHIP_909 ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMoveShipOpcode                );

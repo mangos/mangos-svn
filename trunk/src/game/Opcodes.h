@@ -344,7 +344,7 @@ enum OpCodes
     MSG_CHANNEL_START                               = 313,
     MSG_CHANNEL_UPDATE                              = 314,
     CMSG_CANCEL_CHANNELLING                         = 315,
-    SMSG_AI_REACTION                                = 316,
+    SMSG_AI_REACTION                                = 316, // may be monser attack sound?
     CMSG_SET_SELECTION                              = 317,
 
     //CMSG_SET_TARGET                                = 318, //OBSOLETE
@@ -835,7 +835,7 @@ enum OpCodes
     // 790
     CMSG_FIELD_WATCHED_FACTION_INACTIVE             = 791,
     CMSG_FIELD_WATCHED_FACTION_SHOW_BAR             = 792,
-    SMSG_UNKNOWN_793                                = 793, // packed guid + uint32
+    SMSG_UNKNOWN_793                                = 793, // packed guid + uint32 unk
     SMSG_UNKNOWN_794                                = 794, // packed guid, movement related, set 0x1000 movement flag, all speed to 0, except turn rate
     // 795
     SMSG_UNKNOWN_796                                = 796, // uint64, guid?
@@ -858,7 +858,7 @@ enum OpCodes
     // 813
     // 814
     SMSG_UNKNOWN_815                                = 815, // spell related, uint64 guid + spellid
-    SMSG_UNKNOWN_816                                = 816, // spell related, uint64 guid + spellid + uint32 unk + uint64 guid (target?)
+    SMSG_UNKNOWN_816                                = 816, // spell related, uint64 guid + spellid + uint32 count + for(count) uint64 guid (target?)
     // 817
     SMSG_ANTISPAM                                   = 818, // 2.0.8, received before server MOTD, strange regexp sequence, looks like anti spam filter for chat messages...
     // 819
@@ -897,7 +897,7 @@ enum OpCodes
     CMSG_ARENA_TEAM_REMOVE_FROM_TEAM                = 852,
     CMSG_ARENA_TEAM_DISBAND                         = 853,
     CMSG_ARENA_TEAM_PROMOTE_TO_CAPTAIN              = 854, // also must be demote opcode...
-    SMSG_UNKNOWN_855                                = 855, // guild related...
+    SMSG_ARENA_TEAM_EVENT                           = 855, // arena team event
     CMSG_ARENAMASTER_JOIN                           = 856,
     MSG_MOVE_START_FLY_UP                           = 857, // movement related, fly up, possible MSG
     MSG_MOVE_STOP_FLY_UP                            = 858, // movement related, stop fly up, possible MSG
@@ -928,7 +928,7 @@ enum OpCodes
     SMSG_CHANGE_TITLE                               = 883, // uint32 title_id, causes message and visual effect
     CMSG_CHOOSE_TITLE                               = 884, // uint32 title_id
     CMSG_DISMOUNT                                   = 885, // /dismount command
-    SMSG_ARENA_TEAM_UNK                             = 886,
+    SMSG_ARENA_NO_TEAM                              = 886, // uint32(0) + team type
     MSG_INSPECT_ARENA_STATS                         = 887,
     SMSG_SH_POSITION                                = 888, // spirit healer position, map/x/y/z, at player death...
     CMSG_CANCEL_TEMP_ITEM_ENCHANTMENT               = 889, // cancel temporary item enchantment

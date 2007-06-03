@@ -469,6 +469,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Guilds..." );
     objmgr.LoadGuilds();
 
+    sLog.outString( "Loading ArenaTeams..." );
+    objmgr.LoadArenaTeams();
+
     sLog.outString( "Loading Groups.." );
     objmgr.LoadGroups();
 

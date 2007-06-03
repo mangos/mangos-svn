@@ -65,16 +65,16 @@ void BattleGroundMgr::BuildBattleGroundStatusPacket(WorldPacket *data, BattleGro
     *data << uint8(0x0);                                    // team type (2=2x2, 3=3x3, 5=5x5), for arenas
     switch(bg->GetID())                                     // value depends on bg id
     {
-        case BATTLEGROUND_AV_ID:
+        case BATTLEGROUND_AV:
             *data << uint8(0);
             break;
-        case BATTLEGROUND_WS_ID:
+        case BATTLEGROUND_WS:
             *data << uint8(2);
             break;
-        case BATTLEGROUND_AB_ID:
+        case BATTLEGROUND_AB:
             *data << uint8(1);
             break;
-        case BATTLEGROUND_ARENA_ID:
+        case BATTLEGROUND_ARENAS:
             *data << uint8(4);
             break;
         default:                                            // unknown
@@ -96,7 +96,7 @@ void BattleGroundMgr::BuildBattleGroundStatusPacket(WorldPacket *data, BattleGro
             *data << bg->GetMapId();                        // map id
             *data << Time1;                                 // time to remove from queue, milliseconds
             break;
-        case STATUS_INPROGRESS:                             // status_in_progress
+        case STATUS_IN_PROGRESS:                            // status_in_progress
             *data << bg->GetMapId();                        // map id
             *data << Time1;                                 // 0 at bg start, 120000 after bg end, time to bg auto leave, milliseconds
             *data << Time2;                                 // time from bg start, milliseconds
@@ -140,7 +140,7 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg,
         *data << (uint32)itr->second.DamageDone;
         switch(bg->GetID())
         {
-            case BATTLEGROUND_AV_ID:
+            case BATTLEGROUND_AV:
                 *data << (uint32)0x00000005;                // count of next fields
                 *data << (uint32)itr->second.FlagCaptures;  // unk
                 *data << (uint32)itr->second.FlagReturns;   // unk
@@ -148,12 +148,12 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg,
                 *data << (uint32)itr->second.FlagReturns;   // unk
                 *data << (uint32)itr->second.FlagCaptures;  // unk
                 break;
-            case BATTLEGROUND_WS_ID:
+            case BATTLEGROUND_WS:
                 *data << (uint32)0x00000002;                // count of next fields
                 *data << (uint32)itr->second.FlagCaptures;  // flag captures
                 *data << (uint32)itr->second.FlagReturns;   // flag returns
                 break;
-            case BATTLEGROUND_AB_ID:
+            case BATTLEGROUND_AB:
                 *data << (uint32)0x00000002;                // count of next fields
                 *data << (uint32)itr->second.FlagCaptures;  // unk
                 *data << (uint32)itr->second.FlagReturns;   // unk
@@ -213,10 +213,10 @@ uint32 BattleGroundMgr::CreateBattleGround(uint32 bg_ID, uint32 MaxPlayersPerTea
 
     switch(bg_ID)
     {
-        case BATTLEGROUND_AV_ID: bg = new BattleGroundAV; break;
-        case BATTLEGROUND_WS_ID: bg = new BattleGroundWS; break;
-        case BATTLEGROUND_AB_ID: bg = new BattleGroundAB; break;
-        case BATTLEGROUND_EY_ID: bg = new BattleGroundEY; break;
+        case BATTLEGROUND_AV: bg = new BattleGroundAV; break;
+        case BATTLEGROUND_WS: bg = new BattleGroundWS; break;
+        case BATTLEGROUND_AB: bg = new BattleGroundAB; break;
+        case BATTLEGROUND_EY: bg = new BattleGroundEY; break;
         default:bg = new BattleGround;   break;             // placeholder for non implemented BG
     }
 

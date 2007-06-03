@@ -96,10 +96,10 @@ void BattleGroundWS::Update(time_t diff)
         MapManager::Instance().GetMap(BerserkBonus1->GetMapId(), BerserkBonus1)->Add(BerserkBonus1);
         MapManager::Instance().GetMap(BerserkBonus2->GetMapId(), BerserkBonus2)->Add(BerserkBonus2);
         sLog.outDebug("Bonuses respawned...");
-        SetStatus(STATUS_INPROGRESS);
+        SetStatus(STATUS_IN_PROGRESS);
     }
 
-    if(GetStatus() == STATUS_INPROGRESS)
+    if(GetStatus() == STATUS_IN_PROGRESS)
     {
         // Flags timers
         AllianceFlagSpawn[0] -= diff;
@@ -201,7 +201,7 @@ void BattleGroundWS::RespawnFlag(uint32 Team, bool captured)
 
 void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
 {
-    if(GetStatus() != STATUS_INPROGRESS)
+    if(GetStatus() != STATUS_IN_PROGRESS)
         return;
 
     uint8 type = 0;
@@ -273,7 +273,7 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
 
 void BattleGroundWS::EventPlayerDroppedFlag(Player *Source)
 {
-    if(GetStatus() != STATUS_INPROGRESS)
+    if(GetStatus() != STATUS_IN_PROGRESS)
         return;
 
     const char *message;
@@ -306,7 +306,7 @@ void BattleGroundWS::EventPlayerDroppedFlag(Player *Source)
 
 void BattleGroundWS::EventPlayerReturnedFlag(Player *Source)
 {
-    if(GetStatus() != STATUS_INPROGRESS)
+    if(GetStatus() != STATUS_IN_PROGRESS)
         return;
 
     const char *message;
@@ -337,7 +337,7 @@ void BattleGroundWS::EventPlayerReturnedFlag(Player *Source)
 
 void BattleGroundWS::EventPlayerPickedUpFlag(Player *Source)
 {
-    if(GetStatus() != STATUS_INPROGRESS)
+    if(GetStatus() != STATUS_IN_PROGRESS)
         return;
 
     const char *message;
@@ -421,7 +421,7 @@ void BattleGroundWS::RemovePlayer(Player *plr,uint64 guid)
 void BattleGroundWS::HandleAreaTrigger(Player* Source, uint32 Trigger)
 {
     // this is wrong way to implement these things. On official it done by gameobject spell cast.
-    if(GetStatus() != STATUS_INPROGRESS)
+    if(GetStatus() != STATUS_IN_PROGRESS)
         return;
 
     uint32 SpellId = 0;
@@ -560,5 +560,4 @@ void BattleGroundWS::SetupBattleGround()
     RegenBonus2->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179904, GetMapId(), 1110.1, 1353.24, 316.513, 5.68, 0, 0, sin(5.68/2), cos(5.68/2), 0, 0);
     BerserkBonus1->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179905, GetMapId(), 1318.68, 1378.03, 314.753, 1.001, 0, 0, sin(1.001/2), cos(1.001/2), 0, 0);
     BerserkBonus2->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179905, GetMapId(), 1141.36, 1560.99, 306.791, 3.858, 0, 0, sin(3.858/2), cos(3.858/2), 0, 0);
-
 }

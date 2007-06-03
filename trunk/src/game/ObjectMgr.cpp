@@ -28,6 +28,7 @@
 #include "WorldSession.h"
 #include "Group.h"
 #include "Guild.h"
+#include "ArenaTeam.h"
 #include "Transports.h"
 #include "ProgressBar.h"
 #include "Policies/SingletonImp.h"
@@ -145,6 +146,34 @@ std::string ObjectMgr::GetGuildNameById(const uint32 GuildId) const
     }
 
     return "";
+}
+
+ArenaTeam * ObjectMgr::GetArenaTeamById(const uint32 ArenaTeamId) const
+{
+    ArenaTeamSet::const_iterator itr;
+    for (itr = mArenaTeamSet.begin(); itr != mArenaTeamSet.end(); itr++)
+    {
+        if ((*itr)->GetId() == ArenaTeamId)
+        {
+            return *itr;
+        }
+    }
+
+    return NULL;
+}
+
+ArenaTeam * ObjectMgr::GetArenaTeamByName(std::string arenateamname) const
+{
+    ArenaTeamSet::const_iterator itr;
+    for (itr = mArenaTeamSet.begin(); itr != mArenaTeamSet.end(); itr++)
+    {
+        if ((*itr)->GetName() == arenateamname)
+        {
+            return *itr;
+        }
+    }
+
+    return NULL;
 }
 
 AuctionHouseObject * ObjectMgr::GetAuctionsMap( uint32 location )
@@ -1417,6 +1446,45 @@ void ObjectMgr::LoadGuilds()
 
     sLog.outString( "" );
     sLog.outString( ">> Loaded %u guild definitions", count );
+}
+
+void ObjectMgr::LoadArenaTeams()
+{
+    ArenaTeam *newarenateam;
+    uint32 count = 0;
+
+    QueryResult *result = sDatabase.Query( "SELECT `arenateamid` FROM `arena_team`" );
+
+    if( !result )
+    {
+
+        barGoLink bar( 1 );
+
+        bar.step();
+
+        sLog.outString( "" );
+        sLog.outString( ">> Loaded %u arenateam definitions", count );
+        return;
+    }
+
+    barGoLink bar( result->GetRowCount() );
+
+    do
+    {
+        Field *fields = result->Fetch();
+
+        bar.step();
+        count++;
+
+        newarenateam = new ArenaTeam;
+        newarenateam->LoadArenaTeamFromDB(fields[0].GetUInt32());
+        AddArenaTeam(newarenateam);
+    }while( result->NextRow() );
+
+    delete result;
+
+    sLog.outString( "" );
+    sLog.outString( ">> Loaded %u arenateam definitions", count );
 }
 
 void ObjectMgr::LoadGroups()
@@ -3682,4 +3750,3 @@ bool ObjectMgr::LoadPlayerDump(std::string file, uint32 account, std::string nam
     fclose(fin);
     return true;
 }
-

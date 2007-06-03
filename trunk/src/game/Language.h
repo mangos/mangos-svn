@@ -382,3 +382,8 @@
 #define LANG_BG_PICKEDUP_HF              "The Horde flag was picked up by $n!"
 #define LANG_BG_PICKEDUP_AF              "The Alliance Flag was picked up by $n!"
 #define LANG_BG_F_PLACED                 "The flags are now placed at their bases."
+
+#define LANG_ARENA_ONE_MINUTE            "One minute until the Arena battle begins!"
+#define LANG_ARENA_THIRTY_SECONDS        "Thirty seconds until the Arena battle begins!"
+#define LANG_ARENA_FIFTEEN_SECONDS       "Fifteen seconds until the Arena battle begins!"
+#define LANG_ARENA_BEGUN                 "The Arena battle has begun!"

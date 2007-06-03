@@ -45,7 +45,7 @@ void BattleGroundAB::Update(time_t diff)
     {
 
     }
-    if(GetStatus() == STATUS_INPROGRESS)
+    if(GetStatus() == STATUS_IN_PROGRESS)
     {
         for(int i=0;i<5;i++)
             if(Points[i])                                   //If point is controled
@@ -65,7 +65,7 @@ void BattleGroundAB::RemovePlayer(Player *plr,uint64 guid)
 void BattleGroundAB::HandleAreaTrigger(Player* Source, uint32 Trigger)
 {
     // this is wrong way to implement these things. On official it done by gameobject spell cast.
-    if(GetStatus() != STATUS_INPROGRESS)
+    if(GetStatus() != STATUS_IN_PROGRESS)
         return;
 
     uint32 SpellId = 0;

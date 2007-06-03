@@ -51,6 +51,7 @@ extern SQLStorage sSpellThreatStore;
 
 class Group;
 class Guild;
+class ArenaTeam;
 class Path;
 class TransportPath;
 
@@ -181,6 +182,7 @@ class ObjectMgr
 
         typedef std::set< Group * > GroupSet;
         typedef std::set< Guild * > GuildSet;
+        typedef std::set< ArenaTeam * > ArenaTeamSet;
 
         typedef HM_NAMESPACE::hash_map<uint32, AreaTrigger*> AreaTriggerMap;
 
@@ -240,6 +242,11 @@ class ObjectMgr
         std::string GetGuildNameById(const uint32 GuildId) const;
         void AddGuild(Guild* guild) { mGuildSet.insert( guild ); }
         void RemoveGuild(Guild* guild) { mGuildSet.erase( guild ); }
+
+        ArenaTeam* GetArenaTeamById(const uint32 ArenaTeamId) const;
+        ArenaTeam* GetArenaTeamByName(std::string ArenaTeamName) const;
+        void AddArenaTeam(ArenaTeam* arenateam) { mArenaTeamSet.insert( arenateam ); }
+        void RemoveArenaTeam(ArenaTeam* arenateam) { mArenaTeamSet.erase( arenateam ); }
 
         CreatureInfo const *GetCreatureTemplate( uint32 id );
         CreatureDataAddon const *GetCreatureAddon( uint32 lowguid )
@@ -356,6 +363,7 @@ class ObjectMgr
             return NULL;
         }
         void LoadGuilds();
+        void LoadArenaTeams();
         void LoadGroups();
         void LoadQuests();
         void LoadQuestRelations()
@@ -586,6 +594,7 @@ class ObjectMgr
 
         GroupSet            mGroupSet;
         GuildSet            mGuildSet;
+        ArenaTeamSet        mArenaTeamSet;
 
         ItemMap             mItems;
         ItemMap             mAitems;

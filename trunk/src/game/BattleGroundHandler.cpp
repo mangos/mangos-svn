@@ -165,7 +165,7 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode( WorldPacket &recv_da
     if(!bg)
         return;
 
-    if(bg->GetID() == BATTLEGROUND_WS_ID)
+    if(bg->GetID() == BATTLEGROUND_WS)
     {
         uint32 count = 0;
 
@@ -311,7 +311,7 @@ void WorldSession::HandleBattlefieldStatusOpcode( WorldPacket & recv_data )
         {
             uint32 time1 = getMSTime() - bg->GetStartTime();
             WorldPacket data;
-            sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, _player->GetTeam(), STATUS_INPROGRESS, 0, time1);
+            sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, _player->GetTeam(), STATUS_IN_PROGRESS, 0, time1);
             SendPacket(&data);
         }
     }
