@@ -2484,7 +2484,7 @@ CREATE TABLE `petition` (
   `ownerguid` int(10) unsigned NOT NULL,
   `charterguid` int(10) unsigned default '0',
   `name` varchar(255) NOT NULL default '',
-  `type` int(10) unsigned NOT NULL default '0' AFTER `name`;
+  `type` int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (`ownerguid`),
   UNIQUE KEY `index_ownerguid_charterguid` (`ownerguid`,`charterguid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
