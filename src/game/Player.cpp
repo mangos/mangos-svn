@@ -1415,8 +1415,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             {
                 if( mEntry && (mEntry->map_type == MAP_INSTANCE || mEntry->map_type == MAP_RAID) )
                 {
-                    ResurrectPlayer();
-                    SetHealth( GetMaxHealth()/2 );
+                    ResurrectPlayer(0.5f,false);
                     SpawnCorpseBones();
                     SaveToDB();
                 }
@@ -3118,7 +3117,7 @@ void Player::SendDelayResponse(const uint32 ml_seconds)
     GetSession()->SendPacket( &data );
 }
 
-void Player::ResurrectPlayer()
+void Player::ResurrectPlayer(float restore_percent, bool updateToWorld)
 {
     WorldPacket data(SMSG_SH_POSITION, 4*4);                // remove spirit healer position
     data << uint32(-1);
@@ -3141,14 +3140,6 @@ void Player::ResurrectPlayer()
     SetMovement(MOVE_LAND_WALK);
     SetMovement(MOVE_UNROOT);
 
-    if(InBattleGround())                                    // special case for battleground resurrection
-    {
-        SetHealth(GetMaxHealth());
-        SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
-        SetPower(POWER_RAGE, 0);
-        SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
-    }
-
     //SetSpeed(MOVE_RUN,  1.0f, true);
     //SetSpeed(MOVE_SWIM, 1.0f, true);
 
@@ -3166,6 +3157,21 @@ void Player::ResurrectPlayer()
     //}
 
     m_deathTimer = 0;
+
+    // set health/powers (0- will be set in caller)
+    if(restore_percent>0.0f)
+    {
+        ApplyStats(false);
+        SetHealth(uint32(GetMaxHealth()*restore_percent));
+        SetPower(POWER_MANA, uint32(GetMaxPower(POWER_MANA)*restore_percent));
+        SetPower(POWER_RAGE, 0);
+        SetPower(POWER_ENERGY, uint32(GetMaxPower(POWER_ENERGY)*restore_percent));
+        ApplyStats(true);
+    }
+
+    // update world right away
+    if(updateToWorld)
+        MapManager::Instance().GetMap(GetMapId(), this)->Add(this);
 
     // set resurrection sickness if not expired
     if(!m_resurrectingSicknessExpire)
@@ -11172,7 +11178,7 @@ void Player::LoadCorpse()
         else
         {
             //Prevent Dead Player login without corpse
-            ResurrectPlayer();
+            ResurrectPlayer(0.5f);
         }
     }
 }

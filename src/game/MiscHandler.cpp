@@ -775,29 +775,10 @@ void WorldSession::HandleCorpseReclaimOpcode(WorldPacket &recv_data)
     recv_data >> guid;
 
     // resurrect
-    GetPlayer()->ResurrectPlayer();
+    GetPlayer()->ResurrectPlayer(GetPlayer()->InBattleGround() ? 1.0f : 0.5f);
 
     // spawn bones
     GetPlayer()->SpawnCorpseBones();
-
-    // set health, mana
-    GetPlayer()->ApplyStats(false);
-    if(GetPlayer()->InBattleGround())   // special case for battleground resurrection
-    {
-        GetPlayer()->SetHealth(GetPlayer()->GetMaxHealth());
-        GetPlayer()->SetPower(POWER_MANA, GetPlayer()->GetMaxPower(POWER_MANA));
-        GetPlayer()->SetPower(POWER_RAGE, 0);
-        GetPlayer()->SetPower(POWER_ENERGY, GetPlayer()->GetMaxPower(POWER_ENERGY));
-    }
-    else
-    {
-        GetPlayer()->SetHealth(GetPlayer()->GetMaxHealth()/2);
-        GetPlayer()->SetPower(POWER_MANA, GetPlayer()->GetMaxPower(POWER_MANA)/2);
-    }
-    GetPlayer()->ApplyStats(true);
-
-    // update world right away
-    MapManager::Instance().GetMap(GetPlayer()->GetMapId(), GetPlayer())->Add(GetPlayer());
 
     GetPlayer()->SaveToDB();
 }
@@ -822,8 +803,9 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
     if(GetPlayer()->m_resurrectGUID == 0)
         return;
 
-    GetPlayer()->ResurrectPlayer();
+    GetPlayer()->ResurrectPlayer(0.0f,false);
 
+    GetPlayer()->ApplyStats(false);
     if(GetPlayer()->GetMaxHealth() > GetPlayer()->m_resurrectHealth)
         GetPlayer()->SetHealth( GetPlayer()->m_resurrectHealth );
     else
@@ -837,14 +819,11 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
     GetPlayer()->SetPower(POWER_RAGE, 0 );
 
     GetPlayer()->SetPower(POWER_ENERGY, GetPlayer()->GetMaxPower(POWER_ENERGY) );
+    GetPlayer()->ApplyStats(true);
 
     GetPlayer()->SpawnCorpseBones();
 
-    WorldPacket data;
-    GetPlayer()->BuildTeleportAckMsg(&data, GetPlayer()->m_resurrectX, GetPlayer()->m_resurrectY, GetPlayer()->m_resurrectZ, GetPlayer()->GetOrientation());
-    GetPlayer()->GetSession()->SendPacket(&data);
-
-    GetPlayer()->SetPosition(GetPlayer()->m_resurrectX ,GetPlayer()->m_resurrectY ,GetPlayer()->m_resurrectZ,GetPlayer()->GetOrientation());
+    GetPlayer()->TeleportTo(GetPlayer()->GetMapId(), GetPlayer()->m_resurrectX, GetPlayer()->m_resurrectY, GetPlayer()->m_resurrectZ, GetPlayer()->GetOrientation());
 
     GetPlayer()->m_resurrectGUID = 0;
     GetPlayer()->m_resurrectHealth = GetPlayer()->m_resurrectMana = 0;
