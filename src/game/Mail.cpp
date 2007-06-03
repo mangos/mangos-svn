@@ -506,15 +506,15 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         data << (uint32) 0;                                 // not item->creator, it is enchating?
         data << (uint8)  icount;                            // Attached item stack count
                                                             // sometimes more than zero, not sure when
-        int32 charges = (it) ? int32(it->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES)) : 0;
-        data << (uint32) charges;                           // item -> charges sure
+        int32  charges = (it) ? it->GetSpellCharges() : 0;
         uint32 maxDurability = (it) ? it->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) : 0;
         uint32 curDurability = (it) ? it->GetUInt32Value(ITEM_FIELD_DURABILITY) : 0;
-        data << maxDurability;                              // MaxDurability
-        data << curDurability;                              // Durability
-        data << (*itr)->money;                              // Gold
-        data << (*itr)->COD;                                // COD
-        data << (*itr)->checked;                            // checked
+        data << uint32(charges);                            // item charges (stored as unit32 but is int32 by content)
+        data << uint32(maxDurability);                      // MaxDurability
+        data << uint32(curDurability);                      // Durability
+        data << uint32((*itr)->money);                      // Gold
+        data << uint32((*itr)->COD);                        // COD
+        data << uint32((*itr)->checked);                    // checked
         data << (float)((*itr)->expire_time-time(NULL))/DAY;// Time
         data << (uint32) 0;                                 // Constant, something like end..
     }

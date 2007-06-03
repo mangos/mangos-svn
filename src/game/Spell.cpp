@@ -1710,7 +1710,6 @@ void Spell::TakeCastItem()
 
     bool expendable = false;
     bool withoutCharges = false;
-    int32 charges;
 
     for (int i = 0; i<5; i++)
     {
@@ -1721,20 +1720,20 @@ void Spell::TakeCastItem()
             {
                 if (proto->Spells[i].SpellCharges < 0)
                     expendable = true;
-                charges = int32(m_CastItem->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES+i));
+
+                int32 charges = m_CastItem->GetSpellCharges(i);
 
                 // item has charges left
-                if (charges > 0)
+                if (charges)
                 {
-                    --charges;
+                    (charges > 0) ? charges-- : charges++;  // abs(charges) less at 1 after use
                     if (proto->Stackable < 2)
-                        m_CastItem->SetUInt32Value(ITEM_FIELD_SPELL_CHARGES+i, charges);
+                        m_CastItem->SetSpellCharges(i, charges);
                     m_CastItem->SetState(ITEM_CHANGED, (Player*)m_caster);
                 }
 
                 // all charges used
-                if (charges == 0)
-                    withoutCharges = true;
+                withoutCharges = (charges == 0);
             }
         }
     }
@@ -2454,13 +2453,13 @@ uint8 Spell::CheckItems()
             if(!proto)
                 return SPELL_FAILED_ITEM_NOT_READY;
 
-            uint32 charges;
             for (int i = 0; i<5; i++)
-                if (proto->Spells[i].SpellCharges)
             {
-                charges = m_CastItem->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES+i);
-                if (charges == 0)
-                    return SPELL_FAILED_NO_CHARGES_REMAIN;
+                if (proto->Spells[i].SpellCharges)
+                {
+                    if(m_CastItem->GetSpellCharges(i)==0)
+                        return SPELL_FAILED_NO_CHARGES_REMAIN;
+                }
             }
 
             uint32 ItemClass = proto->Class;
@@ -2539,7 +2538,8 @@ uint8 Spell::CheckItems()
             for(int s=0;s<5;s++)
             {
                 // CastItem will be used up and does not count as reagent
-                if(proto->Spells[s].SpellCharges < 0 && m_CastItem->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES+s) < 2)
+                int32 charges = m_CastItem->GetSpellCharges(s);
+                if (proto->Spells[s].SpellCharges < 0 && abs(charges) < 2)
                 {
                     itemcount++;
                     break;

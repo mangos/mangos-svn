@@ -105,7 +105,7 @@ bool WorldSession::SendAuctionInfo(WorldPacket & data, AuctionEntry* auction)
 
     data << (uint32) pItem->GetCount();                     //item->count
                                                             //item->charge FFFFFFF
-    data << (uint32) pItem->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES);
+    data << (uint32) pItem->GetSpellCharges();
     data << (uint32) 0;                                     //Unknown
     data << (uint32) auction->owner;                        //Auction->owner
     data << (uint32) 0;                                     //player high_guid

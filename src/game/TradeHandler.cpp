@@ -119,7 +119,7 @@ void WorldSession::SendUpdateTrade()
             data << (uint32) 0;//item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+3);        // enchantment id (permanent?)
             data << (uint32) item->GetUInt32Value(ITEM_FIELD_CREATOR);              // creator
             data << (uint32) 0;                                                     // unknown
-            data << (uint32) item->GetUInt32Value(ITEM_FIELD_SPELL_CHARGES);        // charges
+            data << (uint32) item->GetSpellCharges();                               // charges
             data << (uint32) 0;                                                     // strange big value (timestamp?)
             data << (uint32) item->GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID); // random properties id
             data << (uint32) item->GetProto()->LockID;                              // lock id
