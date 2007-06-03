@@ -317,26 +317,25 @@ void Spell::FillTargetMap()
                     if(m_targets.getUnitTarget())
                         tmpUnitMap.push_back(m_targets.getUnitTarget());
                     break;
-                case SPELL_EFFECT_FEED_PET:
-                    if(m_targets.m_itemTarget)
-                        tmpItemMap.push_back(m_targets.m_itemTarget);
-                    break;
                 case SPELL_EFFECT_SKILL:
                 case SPELL_EFFECT_SUMMON_CHANGE_ITEM:
                 case SPELL_EFFECT_SUMMON_GUARDIAN:
                 case SPELL_EFFECT_STUCK:
                 case SPELL_EFFECT_ADD_FARSIGHT:
+                case SPELL_EFFECT_DESTROY_ALL_TOTEMS:
                     tmpUnitMap.push_back(m_caster);
                     break;
                 case SPELL_EFFECT_LEARN_PET_SPELL:
                     if(Pet* pet = m_caster->GetPet())
                         tmpUnitMap.push_back(pet);
                     break;
+                case SPELL_EFFECT_FEED_PET:
                 case SPELL_EFFECT_DISENCHANT:
                 case SPELL_EFFECT_ENCHANT_ITEM:
                 case SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY:
                 case SPELL_EFFECT_ENCHANT_HELD_ITEM:
-                    tmpItemMap.push_back(m_targets.m_itemTarget);
+                    if(m_targets.m_itemTarget)
+                        tmpItemMap.push_back(m_targets.m_itemTarget);
                     break;
                 case SPELL_EFFECT_APPLY_AREA_AURA:
                     if(m_spellInfo->Attributes == 0x9050000)// AreaAura
@@ -1655,32 +1654,6 @@ void Spell::SendResurrectRequest(Player* target)
     data << m_caster->GetGUID();
     data << uint32(1) << uint16(0) << uint32(1);
 
-    target->GetSession()->SendPacket(&data);
-}
-
-void Spell::SendHealSpellOnPlayer(Player* target, uint32 SpellID, uint32 Damage, bool CriticalHeal)
-{
-    WorldPacket data(SMSG_HEALSPELL_ON_PLAYER_OBSOLETE, (8+8+4+4+1));
-    data.append(target->GetPackGUID());
-    data.append(m_caster->GetPackGUID());
-    data << SpellID;
-    data << Damage;
-    data << uint8(CriticalHeal);
-    target->GetSession()->SendPacket(&data);
-}
-
-void Spell::SendHealSpellOnPlayerPet(Player* target, uint32 SpellID, uint32 Damage, bool CriticalHeal)
-{
-    Pet* pet = target->GetPet();
-    if(!pet||!pet->isAlive())                               // must revive before heal
-        return;
-
-    WorldPacket data(SMSG_HEALSPELL_ON_PLAYERS_PET_OBSOLETE, (8+8+4+4+1));
-    data.append(pet->GetPackGUID());
-    data.append(m_caster->GetPackGUID());
-    data << SpellID;
-    data << Damage;
-    data << uint8(CriticalHeal);
     target->GetSession()->SendPacket(&data);
 }
 

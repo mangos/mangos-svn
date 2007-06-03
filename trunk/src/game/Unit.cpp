@@ -1062,7 +1062,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         ThreatAssist(this, float(gain) * 0.5f, spellProto->School, spellProto);
 
         if(GetTypeId() == TYPEID_PLAYER)
-            SendHealSpellOnPlayer(this, spellProto->Id, pdamage * multiplier);
+            SendHealSpellOnPlayer(this, spellProto->Id, uint32(pdamage * multiplier));
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_MANA_LEECH)
     {
@@ -4167,21 +4167,23 @@ void Unit::SetCharm(Unit* charmed)
     SetUInt64Value(UNIT_FIELD_CHARM,charmed ? charmed->GetGUID() : 0);
 }
 
-void Unit::UnsummonTotem(int8 slot)
+void Unit::UnsummonAllTotems()
 {
-    for (int8 i = 0; i < 4; i++)
+    for (int8 i = 0; i < 4; ++i)
     {
-        if (i != slot && slot != -1) continue;
+        if(!m_TotemSlot[i])
+            continue;
+
         Creature *OldTotem = ObjectAccessor::Instance().GetCreature(*this, m_TotemSlot[i]);
-        if (!OldTotem || !OldTotem->isTotem()) continue;
-        ((Totem*)OldTotem)->UnSummon();
+        if (OldTotem && OldTotem->isTotem()) 
+            ((Totem*)OldTotem)->UnSummon();
     }
 }
 
 void Unit::SendHealSpellOnPlayer(Unit *pVictim, uint32 SpellID, uint32 Damage, bool critical)
 {
     // we guess size
-    WorldPacket data(SMSG_HEALSPELL_ON_PLAYER_OBSOLETE, (9+16));
+    WorldPacket data(SMSG_HEALSPELL_ON_PLAYER_OBSOLETE, (8+8+4+4+1));
     data.append(pVictim->GetPackGUID());
     data.append(GetPackGUID());
     data << SpellID;
@@ -4192,7 +4194,7 @@ void Unit::SendHealSpellOnPlayer(Unit *pVictim, uint32 SpellID, uint32 Damage, b
 
 void Unit::SendHealSpellOnPlayerPet(Unit *pVictim, uint32 SpellID, uint32 Damage,Powers powertype, bool critical)
 {
-    WorldPacket data(SMSG_HEALSPELL_ON_PLAYERS_PET_OBSOLETE, (13+8));
+    WorldPacket data(SMSG_HEALSPELL_ON_PLAYERS_PET_OBSOLETE, (8+8+4+4+4+1));
     data.append(pVictim->GetPackGUID());
     data.append(GetPackGUID());
     data << SpellID;
@@ -5016,7 +5018,7 @@ void Unit::setDeathState(DeathState s)
     if (s == JUST_DIED)
     {
         RemoveAllAurasOnDeath();
-        UnsummonTotem();
+        UnsummonAllTotems();
     }
     if (m_deathState != ALIVE && s == ALIVE)
     {

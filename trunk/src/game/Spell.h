@@ -485,6 +485,7 @@ class Spell
         void EffectSummonCritter(uint32 i);
         void EffectKnockBack(uint32 i);
         void EffectSummonDeadPet(uint32 i);
+        void EffectDestroyAllTotems(uint32 i);
         void EffectDurabilityDamage(uint32 i);
         void EffectSkill(uint32 i);
         void EffectAttackMe(uint32 i);
@@ -531,8 +532,6 @@ class Spell
         void SendChannelUpdate(uint32 time);
         void SendChannelStart(uint32 duration);
         void SendResurrectRequest(Player* target);
-        void SendHealSpellOnPlayer(Player* target, uint32 SpellID, uint32 Damage, bool CriticalHeal = false);
-        void SendHealSpellOnPlayerPet(Player* target, uint32 SpellID, uint32 Damage, bool CriticalHeal = false);
         void SendPlaySpellVisual(uint32 SpellID);
 
         void HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTarget,uint32 i, float DamageMultiplier = 1.0);
