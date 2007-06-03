@@ -132,6 +132,12 @@ class MANGOS_DLL_SPEC WorldSession
         void SendDoFlight( uint16 MountId, uint32 path );
         bool SendLearnNewTaxiNode( uint64 guid );
 
+        // Guild/Arena Team
+        void SendGuildCommandResult(uint32 typecmd,std::string str,uint32 cmdresult);
+        void SendArenaTeamCommandResult(uint32 unk1, std::string str1, std::string str2, uint32 unk3);
+        void BuildArenaTeamEventPacket(WorldPacket *data, uint8 eventid, uint8 str_count, std::string str1, std::string str2, std::string str3);
+        void SendNotInArenaTeamPacket(uint8 type);
+
         // Looking For Group
         // TRUE values set by client sending CMSG_LFG_SET_AUTOJOIN and CMSG_LFM_UNSET_AUTOADD before player login
         bool LookingForGroup_auto_join;
@@ -293,7 +299,6 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleGuildDelRankOpcode(WorldPacket& recvPacket);
         void HandleGuildChangeInfoOpcode(WorldPacket& recvPacket);
         void HandleGuildSaveEmblemOpcode(WorldPacket& recvPacket);
-        void SendCommandResult(uint32 typecmd,std::string str,uint32 cmdresult);
 
         void HandleTaxiNodeStatusQueryOpcode(WorldPacket& recvPacket);
         void HandleTaxiQueryAvailableNodesOpcode(WorldPacket& recvPacket);
@@ -475,19 +480,24 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleLfmSetOpcode(WorldPacket& recv_data);
         void HandleLfgSetCommentOpcode(WorldPacket& recv_data);
         void HandleNewUnknownOpcode(WorldPacket& recv_data);
-        void HandleInspectArenaStatsOpcode(WorldPacket& recv_data);
-        void HandleArenaTeamQueryOpcode(WorldPacket& recv_data);
         void HandleChooseTitleOpcode(WorldPacket& recv_data);
         void HandleRealmStateRequestOpcode(WorldPacket& recv_data);
         void HandleAllowMoveAckOpcode(WorldPacket& recv_data);
         void HandleWhoisOpcode(WorldPacket& recv_data);
         void HandleResetInstancesOpcode(WorldPacket& recv_data);
+
+        // Arena Team
+        void HandleInspectArenaStatsOpcode(WorldPacket& recv_data);
+        void HandleArenaTeamQueryOpcode(WorldPacket& recv_data);
         void HandleArenaTeamRosterOpcode(WorldPacket& recv_data);
         void HandleArenaTeamAddMemberOpcode(WorldPacket& recv_data);
         void HandleArenaTeamInviteAcceptOpcode(WorldPacket& recv_data);
         void HandleArenaTeamInviteDeclineOpcode(WorldPacket& recv_data);
         void HandleArenaTeamLeaveOpcode(WorldPacket& recv_data);
+        void HandleArenaTeamRemoveFromTeamOpcode(WorldPacket& recv_data);
         void HandleArenaTeamDisbandOpcode(WorldPacket& recv_data);
+        void HandleArenaTeamPromoteToCaptainOpcode(WorldPacket& recv_data);
+
         void HandleAreaSpiritHealerQueryOpcode(WorldPacket& recv_data);
         void HandleAreaSpiritHealerQueueOpcode(WorldPacket& recv_data);
         void HandleDismountOpcode(WorldPacket& recv_data);

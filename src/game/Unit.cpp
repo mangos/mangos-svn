@@ -1041,7 +1041,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             multiplier = spellProto->EffectMultipleValue[x] > 0 ? spellProto->EffectMultipleValue[x] : 1;
             
             pdamage = mod->m_amount;
-            
+
             pdamage = SpellDamageBonus(pVictim,spellProto,pdamage,DOT);
 
             if(pVictim->GetHealth() < pdamage)

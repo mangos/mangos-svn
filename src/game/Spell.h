@@ -48,10 +48,10 @@ enum SpellCastTargetFlags
 
     TARGET_FLAG_SELF             = 0x0000,
     TARGET_FLAG_UNIT             = 0x0002,
-    TARGET_FLAG_OBJECT           = 0x0800,
-    TARGET_FLAG_ITEM             = 0x1010,
+    TARGET_FLAG_ITEM             = 0x0010,
     TARGET_FLAG_SOURCE_LOCATION  = 0x0020,
     TARGET_FLAG_DEST_LOCATION    = 0x0040,
+    TARGET_FLAG_OBJECT           = 0x0800,
     TARGET_FLAG_STRING           = 0x2000
 };
 

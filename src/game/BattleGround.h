@@ -32,7 +32,7 @@ enum BattleGroundStatus
     STATUS_NONE         = 0,
     STATUS_WAIT_QUEUE   = 1,
     STATUS_WAIT_JOIN    = 2,
-    STATUS_INPROGRESS   = 3,
+    STATUS_IN_PROGRESS  = 3,
     STATUS_WAIT_LEAVE   = 4                                 // custom
 };
 
@@ -75,11 +75,14 @@ struct BattleGroundPlayer
 
 enum BattleGroundId
 {
-    BATTLEGROUND_AV_ID = 1,
-    BATTLEGROUND_WS_ID = 2,
-    BATTLEGROUND_AB_ID = 3,
-    BATTLEGROUND_ARENA_ID = 6,
-    BATTLEGROUND_EY_ID = 7
+    BATTLEGROUND_AV     = 1,
+    BATTLEGROUND_WS     = 2,
+    BATTLEGROUND_AB     = 3,
+    BATTLEGROUND_NA     = 4,
+    BATTLEGROUND_BEA    = 5,
+    BATTLEGROUND_ARENAS = 6,
+    BATTLEGROUND_EY     = 7,
+    BATTLEGROUND_RL     = 8
 };
 
 class BattleGround

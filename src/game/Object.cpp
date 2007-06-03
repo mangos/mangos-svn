@@ -852,7 +852,6 @@ void WorldObject::GetClosePoint( const WorldObject* victim, float &x, float &y, 
 
     // FIXME: must be real z coordinate at ground in point (x,y) when it will correctly can calculated
     z = GetPositionZ();
-
 }
 
 bool WorldObject::IsPositionValid() const

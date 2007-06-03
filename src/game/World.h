@@ -187,7 +187,7 @@ class World
         const char* GetMotd() const { return m_motd.c_str(); }
 
         uint32 GetDBClang() const { return m_langid; }
- 
+
         /// Get the path where data (dbc, maps) are stored on disk
         std::string GetDataPath() const { return m_dataPath; }
 

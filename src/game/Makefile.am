@@ -33,6 +33,8 @@ libmangosgame_a_SOURCES = \
 	AggressorAI.cpp \
 	AggressorAI.h \
 	AnimalRandomMovementGenerator.h \
+	ArenaTeam.cpp \
+	ArenaTeam.h \
 	ArenaTeamHandler.cpp \
 	AuctionHouse.cpp \
 	AuctionHouseObject.h \
@@ -163,6 +165,7 @@ libmangosgame_a_SOURCES = \
 	Pet.cpp \
 	Pet.h \
 	PetHandler.cpp \
+	PetitionsHandler.cpp \
 	Player.cpp \
 	Player.h \
 	QueryHandler.cpp \

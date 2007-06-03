@@ -306,6 +306,9 @@
 				RelativePath="..\..\src\game\PetHandler.cpp">
 			</File>
 			<File
+				RelativePath="..\..\src\game\PetitionsHandler.cpp">
+			</File>
+			<File
 				RelativePath="..\..\src\game\QueryHandler.cpp">
 			</File>
 			<File
@@ -388,6 +391,12 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\AnimalRandomMovementGenerator.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\ArenaTeam.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\ArenaTeam.h">
 			</File>
 			<File
 				RelativePath="..\..\src\game\AuctionHouseObject.h">

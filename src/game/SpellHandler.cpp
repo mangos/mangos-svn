@@ -500,7 +500,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                         case 179785:                        // Silverwing Flag
                             if(_player->GetTeam() == ALLIANCE)
                             {
-                                if(bg->GetID() == BATTLEGROUND_WS_ID)
+                                if(bg->GetID() == BATTLEGROUND_WS)
                                     ((BattleGroundWS*)bg)->EventPlayerReturnedFlag(_player);
                                 obj->Delete();
                                 return;
@@ -511,7 +511,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                         case 179786:                        // Warsong Flag
                             if(_player->GetTeam() == HORDE)
                             {
-                                if(bg->GetID() == BATTLEGROUND_WS_ID)
+                                if(bg->GetID() == BATTLEGROUND_WS)
                                     ((BattleGroundWS*)bg)->EventPlayerReturnedFlag(_player);
                                 obj->Delete();
                                 return;

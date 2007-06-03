@@ -817,6 +817,7 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
     sLog.outDebug("Received opcode CMSG_WRAP_ITEM");
 
     uint8 gift_bag, gift_slot, item_bag, item_slot;
+    //recv_data.hexlike();
 
     recv_data >> gift_bag >> gift_slot;                     // paper
     recv_data >> item_bag >> item_slot;                     // item

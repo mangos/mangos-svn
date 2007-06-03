@@ -1080,7 +1080,18 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 GetRank(){ return GetUInt32Value(PLAYER_GUILDRANK); }
         static uint32 GetRankFromDB(uint64 guid);
         int GetGuildIdInvited() { return m_GuildIdInvited; }
-        static void RemovePetitionsAndSigns(uint64 guid);
+        static void RemovePetitionsAndSigns(uint64 guid, uint32 type);
+
+        // Arena Team
+        void SetInArenaTeam(uint32 ArenaTeamId, uint8 slot)
+        {
+            SetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot * 5), ArenaTeamId);
+            SetUInt32ValueInDB(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot * 5), ArenaTeamId, this->GetGUID());
+        }
+        uint32 GetArenaTeamId(uint8 slot) { return GetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot * 5)); }
+        static uint32 GetArenaTeamIdFromDB(uint64 guid, uint8 slot);
+        void SetArenaTeamIdInvited(uint32 ArenaTeamId) { m_ArenaTeamIdInvited = ArenaTeamId; }
+        uint32 GetArenaTeamIdInvited() { return m_ArenaTeamIdInvited; }
 
         void SetDungeonDifficulty(uint32 difficulty) { m_dungeonDifficulty = difficulty; }
         uint32 GetDungeonDifficulty() { return m_dungeonDifficulty; }
@@ -1458,6 +1469,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         QuestStatusMap mQuestStatus;
 
         uint32 m_GuildIdInvited;
+        uint32 m_ArenaTeamIdInvited;
 
         PlayerMails m_mail;
         PlayerSpellMap m_spells;

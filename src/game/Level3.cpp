@@ -3714,4 +3714,3 @@ bool ChatHandler::HandleWritePDumpCommand(const char *args)
 
     return true;
 }
-

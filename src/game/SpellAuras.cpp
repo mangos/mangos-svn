@@ -2344,11 +2344,11 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool Real)
                 {
                     switch(bg->GetID())
                     {
-                        case BATTLEGROUND_AV_ID:
+                        case BATTLEGROUND_AV:
                         {
                             break;
                         }
-                        case BATTLEGROUND_WS_ID:
+                        case BATTLEGROUND_WS:
                         {
                             if(((BattleGroundWS*)bg)->IsHordeFlagPickedup())
                                                             // Warsong Flag, horde
@@ -2364,11 +2364,11 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool Real)
                                     m_target->CastSpell(m_target, 23336, true, NULL, this);
                             break;
                         }
-                        case BATTLEGROUND_AB_ID:
+                        case BATTLEGROUND_AB:
                         {
                             break;
                         }
-                        case BATTLEGROUND_EY_ID:
+                        case BATTLEGROUND_EY:
                         {
                             break;
                         }
