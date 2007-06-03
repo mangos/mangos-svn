@@ -599,7 +599,7 @@ void WorldSession::LogoutPlayer(bool Save)
 
         ///- Release charmed creatures and unsummon totems
         _player->Uncharm();
-        _player->UnsummonTotem();
+        _player->UnsummonAllTotems();
         _player->InvisiblePjsNear.clear();
 
         ///- empty buyback items and save the player in the database

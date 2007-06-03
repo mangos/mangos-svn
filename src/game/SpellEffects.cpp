@@ -164,7 +164,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectSummonObject,                             //107 SPELL_EFFECT_SUMMON_OBJECT_SLOT4
     &Spell::EffectNULL,                                     //108 SPELL_EFFECT_DISPEL_MECHANIC
     &Spell::EffectSummonDeadPet,                            //109 SPELL_EFFECT_SUMMON_DEAD_PET
-    &Spell::EffectNULL,                                     //110 SPELL_EFFECT_DESTROY_ALL_TOTEMS
+    &Spell::EffectDestroyAllTotems,                         //110 SPELL_EFFECT_DESTROY_ALL_TOTEMS
     &Spell::EffectDurabilityDamage,                         //111 SPELL_EFFECT_DURABILITY_DAMAGE
     &Spell::EffectNULL,                                     //112 SPELL_EFFECT_SUMMON_DEMON
     &Spell::EffectResurrectNew,                             //113 SPELL_EFFECT_RESURRECT_NEW
@@ -1035,7 +1035,7 @@ void Spell::EffectHeal( uint32 i )
         int32 addhealth = m_caster->SpellHealingBonus(m_spellInfo, uint32(damage),HEAL);
         bool crit = m_caster->SpellCriticalBonus(m_spellInfo, &addhealth, NULL);
         if(unitTarget->GetTypeId() == TYPEID_PLAYER)
-            SendHealSpellOnPlayer(((Player*)unitTarget), m_spellInfo->Id, addhealth, crit);
+            m_caster->SendHealSpellOnPlayer(unitTarget, m_spellInfo->Id, addhealth, crit);
 
         unitTarget->ModifyHealth( addhealth );
 
@@ -1072,7 +1072,7 @@ void Spell::EffectHealthLeach(uint32 i)
     m_caster->ModifyHealth(tmpvalue);
 
     if(unitTarget->GetTypeId() == TYPEID_PLAYER)
-        SendHealSpellOnPlayer(((Player*)unitTarget), m_spellInfo->Id, uint32(tmpvalue));
+        m_caster->SendHealSpellOnPlayer(unitTarget, m_spellInfo->Id, uint32(tmpvalue));
 
     m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage, m_IsTriggeredSpell, true);
 }
@@ -2237,7 +2237,7 @@ void Spell::EffectHealMaxHealth(uint32 i)
     unitTarget->ModifyHealth(heal);
 
     if(unitTarget->GetTypeId() == TYPEID_PLAYER)
-        SendHealSpellOnPlayer((Player*)unitTarget, m_spellInfo->Id, heal);
+        m_caster->SendHealSpellOnPlayer(unitTarget, m_spellInfo->Id, heal);
 }
 
 void Spell::EffectInterruptCast(uint32 i)
@@ -2529,8 +2529,8 @@ void Spell::EffectSummonTotem(uint32 i)
     if(guid != 0)
     {
         Creature *OldTotem = ObjectAccessor::Instance().GetCreature(*m_caster, guid);
-        if(OldTotem && OldTotem->isTotem()) ((Totem*)OldTotem)->UnSummon();
-        m_caster->m_TotemSlot[slot] = 0;
+        if(OldTotem && OldTotem->isTotem())
+            ((Totem*)OldTotem)->UnSummon();
     }
 
     Totem* pTotem = new Totem(m_caster);
@@ -2551,6 +2551,7 @@ void Spell::EffectSummonTotem(uint32 i)
     pTotem->SetMaxHealth(m_spellInfo->EffectBasePoints[i]+1);
     pTotem->SetHealth(m_spellInfo->EffectBasePoints[i]+1);
     pTotem->Summon();
+    pTotem->SetUInt32Value(UNIT_CREATED_BY_SPELL,m_spellInfo->Id);
 }
 
 void Spell::EffectEnchantHeldItem(uint32 i)
@@ -3018,6 +3019,33 @@ void Spell::EffectSummonDeadPet(uint32 i)
 
     _player->PetSpellInitialize();
     pet->SavePetToDB(PET_SAVE_AS_CURRENT);
+}
+
+void Spell::EffectDestroyAllTotems(uint32 i)
+{
+    float mana = 0;
+    for(int slot = 0;  slot < 4; ++slot)
+    {
+        if(!m_caster->m_TotemSlot[slot])
+            continue;
+
+        Creature* totem = ObjectAccessor::Instance().GetCreature(*m_caster,m_caster->m_TotemSlot[slot]);
+        if(totem && totem->isTotem())
+        {
+            uint32 spell_id = totem->GetUInt32Value(UNIT_CREATED_BY_SPELL);
+            SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id);
+            if(spellInfo)
+            {
+                float percent = float(damage);
+                mana += spellInfo->manaCost*percent/100;
+            }
+            ((Totem*)totem)->UnSummon();
+        }
+    }
+
+    int32 gain = m_caster->ModifyPower(POWER_MANA,int32(mana));
+    if(m_caster->GetTypeId() == TYPEID_PLAYER)
+        m_caster->SendHealSpellOnPlayerPet(m_caster, m_spellInfo->Id, gain, POWER_MANA);
 }
 
 void Spell::EffectDurabilityDamage(uint32 i)
