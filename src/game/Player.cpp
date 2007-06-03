@@ -3992,8 +3992,8 @@ void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)
                 sLog.outError("Skill not found in SkillLineStore: skill #%u", id);
                 return;
             }
-            // enable unlearn button for professions only
-            if (pSkill->categoryId == 11)
+            // enable unlearn button for primary professions only
+            if (pSkill->categoryId == SKILL_CATEGORY_PROFESSION)
                 SetUInt32Value(PLAYER_SKILL(i), id | (1 << 16));
             else
                 SetUInt32Value(PLAYER_SKILL(i),id);
@@ -10972,9 +10972,24 @@ bool Player::LoadFromDB( uint32 guid )
     SetUInt64Value(UNIT_FIELD_SUMMONEDBY,0);
     SetUInt64Value(UNIT_FIELD_CREATEDBY,0);
 
-    // reset skill modifiers
+    // reset skill modifiers and set correct unlearn flags
     for (uint32 i = 0; i < PLAYER_MAX_SKILLS; i++)
+    {
         SetUInt32Value(PLAYER_SKILL(i)+2,0);
+
+        // set correct unlearn bit
+        uint32 id = GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF;
+        if(!id) continue;
+
+        SkillLineEntry const *pSkill = sSkillLineStore.LookupEntry(id);
+        if(!pSkill) continue;
+
+        // enable unlearn button for primary professions only
+        if (pSkill->categoryId == SKILL_CATEGORY_PROFESSION)
+            SetUInt32Value(PLAYER_SKILL(i), id | (1 << 16));
+        else
+            SetUInt32Value(PLAYER_SKILL(i), id);
+    }
 
     // make sure the unit is considered out of combat for proper loading
     ClearInCombat(true);
