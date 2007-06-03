@@ -3644,15 +3644,18 @@ bool ObjectMgr::LoadPlayerDump(std::string file, uint32 account, std::string nam
             for(uint16 field = PLAYER_FIELD_INV_SLOT_HEAD; field <= PLAYER_FIELD_KEYRING_SLOT_LAST; field++)
                 if(!changetokItem(vals, field+1, items, m_hiItemGuid, true)) ROLLBACK;
             if(!changenth(line, 3, vals.c_str())) ROLLBACK;
-            if (name == "") name = getnth(line, 4);
-
-            // check if the name already exists
-            result = sDatabase.PQuery("SELECT * FROM `character` WHERE `name` = '%s'", name.c_str());
-            if (result)
+            if (name == "")
             {
-                delete result;
-                if(!changenth(line, 29, "1")) ROLLBACK;     // rename on login
+                // check if the original name already exists
+                name = getnth(line, 4);
+                result = sDatabase.PQuery("SELECT * FROM `character` WHERE `name` = '%s'", name.c_str());
+                if (result)
+                {
+                    delete result;
+                    if(!changenth(line, 29, "1")) ROLLBACK;     // rename on login
+                }
             }
+            else if(!changenth(line, 4, name.c_str())) ROLLBACK;
         }
         else if(type == 2)                                  // character_inventory t.
         {
