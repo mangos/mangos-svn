@@ -100,6 +100,7 @@ const CliCommand Commands[]=
 /// \todo Need some pragma pack? Else explain why in a comment.
 #define CliTotalCmds sizeof(Commands)/sizeof(CliCommand)
 
+// Create a character dump file
 void CliWritePlayerDump(char*command,pPrintf zprintf)
 {
     if(!command || !*command) return;
@@ -109,13 +110,15 @@ void CliWritePlayerDump(char*command,pPrintf zprintf)
     objmgr.WritePlayerDump(file, atoi(p2));
 }
 
+// Load a character from a dump file
 void CliLoadPlayerDump(char*command,pPrintf zprintf)
 {
     if(!command || !*command) return;
-    char * file = strtok(command, " ");
-    char * p2 = strtok(NULL, " ");
-    if(!file || !p2) return;
-    objmgr.LoadPlayerDump(file, atoi(p2));
+    char * file = strtok(command, " "); if(!file) return;
+    char * acc = strtok(NULL, " "); if(!acc) return;
+    char * name = strtok(NULL, " ");
+    char * guid = name ? strtok(NULL, " ") : NULL;
+    objmgr.LoadPlayerDump(file, atoi(acc), name ? name : "", guid ? atoi(guid) : 0);
 }
 
 /// Reload the scripts and notify the players
