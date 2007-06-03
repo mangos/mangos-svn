@@ -243,8 +243,8 @@ class World
 
         bool KickPlayer(std::string playerName);
         void KickAll();
-        bool BanAccount(std::string nameOrIP);
-        bool RemoveBanAccount(std::string nameOrIP);
+        bool BanAccount(std::string type, std::string nameOrIP, std::string duration, std::string reason, std::string author);
+        bool RemoveBanAccount(std::string type, std::string nameOrIP);
 
         void ScriptsStart(map<uint32, multimap<uint32, ScriptInfo> > const& scripts, uint32 id, Object* source, Object* target);
 

@@ -250,7 +250,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     std::string safe_account=account;                       // Duplicate, else will screw the SHA hash verification below
     loginDatabase.escape_string(safe_account);
     //No SQL injection, username escaped.
-    QueryResult *result = loginDatabase.PQuery("SELECT `id`,`gmlevel`,`sessionkey`,`last_ip`,`locked`, `password`, `v`, `s`, `banned`, `tbc` FROM `account` WHERE `username` = '%s'", safe_account.c_str());
+    QueryResult *result = loginDatabase.PQuery("SELECT `id`,`gmlevel`,`sessionkey`,`last_ip`,`locked`, `password`, `v`, `s`, `tbc` FROM `account` WHERE `username` = '%s'", safe_account.c_str());
 
     ///- Stop if the account is not found
     if ( !result )
@@ -262,7 +262,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         return;
     }
 
-    tbc = (*result)[9].GetUInt8();
+    tbc = (*result)[8].GetUInt8();
 
     N.SetHexStr("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7");
     g.SetDword(7);
@@ -307,7 +307,8 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     }
 
     ///- Re-check account ban (same check as in realmd).
-    if((*result)[8].GetUInt8() == 1)                        // if account banned
+    QueryResult *banresult = loginDatabase.PQuery("SELECT `bandate`,`unbandate` FROM `account_banned` WHERE `id` = '%d' AND `active` = 1     AND (`bandate`=`unbandate` OR `unbandate`>UNIX_TIMESTAMP())", (*result)[0].GetUInt32());
+    if(banresult)                        // if account banned
     {
         packet.Initialize( SMSG_AUTH_RESPONSE, 1 );
         packet << uint8( AUTH_BANNED );

@@ -65,6 +65,42 @@ std::string secsToTimeString(uint32 timeInSecs, bool shortText, bool hoursOnly)
     return ss.str();
 }
 
+uint32 TimeStringToSecs(std::string timestring)
+{
+    uint32 secs       = 0;
+    uint32 buffer     = 0;
+    uint32 multiplier = 0;
+
+    for(std::string::iterator itr = timestring.begin(); itr != timestring.end(); itr++ )
+    {
+        if(isdigit(*itr))
+        {
+            std::string str;            //very complicated typecast char->const char*; is there no better way?
+            str += *itr;
+            const char* tmp = str.c_str();
+
+            buffer*=10;
+            buffer+=atoi(tmp);
+       }
+        else
+        {
+            switch(*itr)
+            {
+                case 'd': multiplier = 60*60*24; break;
+                case 'h': multiplier = 60*60;    break;
+                case 'm': multiplier = 60;       break;
+                case 's': multiplier = 1;        break;
+                default : return 0;       //bad format
+            }
+            buffer*=multiplier;
+            secs+=buffer;
+            buffer=0;
+        }
+
+    }
+
+    return secs;
+}
 
 /// Check if the string is a valid ip address representation
 bool IsIPAddress(char const* ipaddress)

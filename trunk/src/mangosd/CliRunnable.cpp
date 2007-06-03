@@ -357,7 +357,8 @@ void CliBanList(char*,pPrintf zprintf)
 {
     ///- Get the list of banned accounts and display them
     Field *fields;
-    QueryResult *result2 = loginDatabase.Query( "SELECT `username` FROM `account` WHERE `banned` > 0" );
+    QueryResult *result2 = loginDatabase.Query("SELECT `username` FROM `account` WHERE `id` in (SELECT `id` FROM `account_banned` WHERE `active` = 1 AND (`bandate`=`unbandate` OR `unbandate`>UNIX_TIMESTAMP()))");
+
     if(result2)
     {
         zprintf("Banned Accounts:\r\n");
@@ -389,27 +390,47 @@ void CliBanList(char*,pPrintf zprintf)
 void CliBan(char*command,pPrintf zprintf)
 {
     ///- Get the command parameter
-    char *banip = strtok(command," ");
-    if(!banip)
+    char* type = strtok((char*)command, " ");
+
+    if(!type)
     {
-        zprintf("Syntax is: ban <account|ip>\r\n");
+        zprintf("Syntax: ban <account|ip|character> <$AccountOrIpOrCharacter> <duration> <reason>\n");
+        return;
+    }
+    char* nameOrIP = strtok(NULL, " ");
+
+    if(!nameOrIP)
+    {
+        zprintf("Syntax: ban <account|ip|character> <$AccountOrIpOrCharacter> <duration> <reason>\n");
         return;
     }
 
-    // Is this IP address or account name?
-    bool is_ip = IsIPAddress(banip);
+    char* duration = strtok(NULL," ");
 
-    if(sWorld.BanAccount(banip))
+    if(!duration || !atoi(duration))
     {
-        if(is_ip)
-            zprintf("We banned IP: %s\r\n",banip);
+        zprintf("Syntax: ban <account|ip|character> <$AccountOrIpOrCharacter> <duration> <reason>\n");
+        return;
+    }
+
+    char* reason = strtok(NULL,"");
+
+    if(!reason)
+    {
+        zprintf("Syntax: ban <account|ip|character> <$AccountOrIpOrCharacter> <duration> <reason>\n");
+        return;
+    }
+    //debug
+    if(sWorld.BanAccount(type, nameOrIP, duration, reason, "Set from the console."))
+    {
+        zprintf("survived banaccount call\n");
+        if(atoi(duration)>0)
+            zprintf("%s is banned for %s for %s.\n",nameOrIP,secsToTimeString(TimeStringToSecs(duration),true,false).c_str(),reason);
         else
-            zprintf("We banned account: %s\r\n",banip);
+            zprintf("%s is banned permanently for %s.\n",nameOrIP,reason);
     }
     else
-    {
-        zprintf("Account %s not found and not banned.\r\n",banip);
-    }
+        zprintf("%s %s not found\n", type, nameOrIP);
 }
 
 /// Display %MaNGOS version
@@ -423,17 +444,17 @@ void CliVersion(char*,pPrintf zprintf)
 void CliRemoveBan(char *command,pPrintf zprintf)
 {
     ///- Get the command parameter
-    char *banip = strtok(command," ");
-    if(!banip)
-        zprintf("Syntax is: unban <account|ip>\r\n");
+    char *type = strtok(command," ");
+    char *nameorip = strtok(NULL," ");
+    if(!nameorip||!type)
+    {
+        zprintf("Syntax is: unban <account|ip|character> $nameorip\r\n");
+        return;
+    }
 
-    sWorld.RemoveBanAccount(banip);
+    sWorld.RemoveBanAccount(type, nameorip);
 
-    ///- If this is an IP address
-    if(IsIPAddress(banip))
-        zprintf("We removed banned IP: %s\r\n",banip);
-    else
-        zprintf("We removed ban from account: %s\r\n",banip);
+    zprintf("We removed ban from %s: %s\r\n",type,nameorip);
 }
 
 /// Display the list of GMs
@@ -564,7 +585,7 @@ void CliCreate(char *command,pPrintf zprintf)
     ///- Insert the account in the database (account table)
     // No SQL injection (escaped account name and password)
     sDatabase.BeginTransaction();
-    if(loginDatabase.PExecute("INSERT INTO `account` (`username`,`password`,`gmlevel`,`sessionkey`,`email`,`joindate`,`banned`,`last_ip`,`failed_logins`,`locked`) VALUES ('%s','%s','0','','',NOW(),'0','0','0','0')",safe_account_name.c_str(),safe_password.c_str()))
+    if(loginDatabase.PExecute("INSERT INTO `account` (`username`,`password`,`gmlevel`,`sessionkey`,`email`,`joindate`,`last_ip`,`failed_logins`,`locked`) VALUES ('%s','%s','0','','',NOW(),'0','0','0')",safe_account_name.c_str(),safe_password.c_str()))
     {
         ///- Make sure that the realmcharacters table is up-to-date
         loginDatabase.Execute("INSERT INTO `realmcharacters` (`realmid`, `acctid`, `numchars`) SELECT `realmlist`.`id`, `account`.`id`, 0 FROM `account`, `realmlist` WHERE `account`.`id` NOT IN (SELECT `acctid` FROM `realmcharacters`)");

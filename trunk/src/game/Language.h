@@ -226,6 +226,31 @@
 #define LANG_NO_WEATHER                  "Weather can't be changed for this zone."
 #define LANG_WEATHER_DISABLED            "Weather system disabled at server."
 
+#define LANG_BAN_YOUBANNED               "%s is banned for %s for %s."
+#define LANG_BAN_YOUPERMBANNED           "%s is banned permanently for %s."
+#define LANG_BAN_NOTFOUND                "%s %s not found"
+
+#define LANG_UNBAN_UNBANNED              "%s unbanned."
+#define LANG_UNBAN_ERROR                 "There was an error removing the ban on %s."
+
+#define LANG_BANINFO_NOACCOUNT           "There is no such account."
+#define LANG_BANINFO_NOCHARACTER         "There is no such character."
+#define LANG_BANINFO_NOIP                "There is no such IP in banlist."
+#define LANG_BANINFO_NOACCOUNTBAN        "Account %s has never been banned"
+#define LANG_BANINFO_BANHISTORY          "Ban history for account %s:"
+#define LANG_BANINFO_HISTORYENTRY        "Ban Date: %s Bantime: %s Still active: %s  Reason: %s Set by: %s"
+#define LANG_BANINFO_INFINITE            "Inf."
+#define LANG_BANINFO_NEVER               "Never"
+#define LANG_BANINFO_YES                 "Yes"
+#define LANG_BANINFO_NO                  "No"
+#define LANG_BANINFO_IPENTRY             "IP: %s\nBan Date: %s\nUnban Date: %s\nRemaining: %s\nReason: %s\nSet by: %s"
+
+#define LANG_BANLIST_NOIP                "There is no matching IPban."
+#define LANG_BANLIST_NOACCOUNT           "There is no matching account."
+#define LANG_BANLIST_NOCHARACTER         "There is no banned account owning a character matching this part."
+#define LANG_BANLIST_MATCHINGIP          "The following IPs match your pattern:"
+#define LANG_BANLIST_MATCHINGACCOUNT     "The following accounts match your query:"
+
 #define LANG_COMMAND_LEARNINGSPSK        "%s - Learning all spells/skills for its class."
 #define LANG_COMMAND_LEARNINGALLLANG     "%s - Learning all languages."
 #define LANG_COMMAND_ADDITEMCOULDNOTFIND "Could not find '%s'"

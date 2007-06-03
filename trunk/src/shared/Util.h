@@ -24,6 +24,7 @@
 std::vector<std::string> StrSplit(const std::string &src, const std::string &sep);
 
 std::string secsToTimeString(uint32 timeInSecs, bool shortText = false, bool hoursOnly = false);
+uint32 TimeStringToSecs(std::string timestring);
 
 /* Return a random number in the range min..max; (max-min) must be smaller than 32768.
  * Note: Not reentrant - if two threads call this simultaneously, they will likely
