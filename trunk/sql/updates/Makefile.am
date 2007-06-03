@@ -324,6 +324,10 @@ pkgdata_DATA = \
 	3782_command.sql \
 	3784_command.sql \
 	3787_spell_proc_event.sql \
+	3801_banAccount.sql \
+	3801_command.sql \
+	3802_arena_teams.sql \
+	3802_petitions.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -628,4 +632,8 @@ EXTRA_DIST = \
 	3782_command.sql \
 	3784_command.sql \
 	3787_spell_proc_event.sql \
+	3801_banAccount.sql \
+	3801_command.sql \
+	3802_arena_teams.sql \
+	3802_petitions.sql \
 	README
