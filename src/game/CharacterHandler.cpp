@@ -522,7 +522,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     data<<pCurrChar->getClass();
     pCurrChar->BroadcastPacketToFriendListers(&data);
 
-    pCurrChar->LoadEnchant();
+    pCurrChar->SendEnchantmentDurations();                  // must be after add to map
 
     // Place character in world (and load zone) before some object loading
     pCurrChar->LoadCorpse();
