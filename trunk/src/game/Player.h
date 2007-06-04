@@ -1301,6 +1301,13 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
 
         /*********************************************************/
+        /***               FLOOD FILTER SYSTEM                 ***/
+        /*********************************************************/
+
+        void UpdateSpeakTime();
+        bool CanSpeak() const;
+
+        /*********************************************************/
         /***                 VARIOUS SYSTEMS                   ***/
         /*********************************************************/
         uint32 GetMovementFlags() const { return m_movement_flags; }
@@ -1451,6 +1458,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_team;
         uint32 m_dismountCost;
         uint32 m_nextSave;
+        time_t m_speakTime;
         uint32 m_dungeonDifficulty;
         bool m_needRename;
 
