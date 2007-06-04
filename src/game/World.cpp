@@ -331,6 +331,7 @@ void World::SetInitialWorldSettings()
     m_configs[CONFIG_MOVE_FILTER_COUNT] = sConfig.GetIntDefault("ConsecutiveMovePacket.MaxCount",9);
     m_configs[CONFIG_SAVE_RESPAWN_TIME_IMMEDIATLY] = sConfig.GetIntDefault("SaveRespawnTimeImmediately",1);
     m_configs[CONFIG_WEATHER] = sConfig.GetIntDefault("ActivateWeather",1);
+    m_configs[CONFIG_EXPANSION] = sConfig.GetIntDefault("Expansion",1);
 
     ///- Read the "Data" directory from the config file
     m_dataPath = sConfig.GetStringDefault("DataDir","./");
@@ -347,8 +348,8 @@ void World::SetInitialWorldSettings()
         ||!MapManager::ExistMAP(0, 1676.35, 1677.45)
         ||!MapManager::ExistMAP(1, 10311.3, 832.463)
         ||!MapManager::ExistMAP(1,-2917.58,-257.98)
-        ||!MapManager::ExistMAP(530,10349.6,-6357.29)
-        ||!MapManager::ExistMAP(530,-3961.64,-13931.2))
+        ||m_configs[CONFIG_EXPANSION] && (
+            !MapManager::ExistMAP(530,10349.6,-6357.29) || !MapManager::ExistMAP(530,-3961.64,-13931.2) ) )
     {
         sLog.outError("Correct *.map files not found in path '%smaps'. Please place *.map files in the directory pointed by this path or correct the DataDir value in the mangosd.conf file.",m_dataPath.c_str());
         exit(1);

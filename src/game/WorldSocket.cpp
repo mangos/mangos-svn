@@ -221,7 +221,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     uint32 unk2;
     uint32 BuiltNumberClient;
     uint32 id, security;
-    uint8 tbc = 0;
+    bool tbc = false;
     std::string account;
     Sha1Hash I;
     Sha1Hash sha1;
@@ -262,7 +262,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         return;
     }
 
-    tbc = (*result)[8].GetUInt8();
+    tbc = (*result)[8].GetUInt8() && sWorld.getConfig(CONFIG_EXPANSION);
 
     N.SetHexStr("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7");
     g.SetDword(7);
@@ -373,10 +373,10 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     ///- Send 'Auth is ok'
     packet.Initialize( SMSG_AUTH_RESPONSE, 1+4+1+4+1 );
     packet << uint8( AUTH_OK );
-    packet << (uint32)0; // unknown random value...
+    packet << (uint32)0;                                    // unknown random value...
     packet << (uint8)2;
     packet << (uint32)0;
-    packet << tbc; // 0 - normal, 1 - TBC, must be set in database manually for each account
+    packet << (uint8)(tbc ? 1 : 0);                                // 0 - normal, 1 - TBC, must be set in database manually for each account
     SendPacket(&packet);
 
     ///- Create a new WorldSession for the player and add it to the World

@@ -1291,10 +1291,10 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     uint32 not_tbc_map = 0x10;                              // if any problems, then check 0x80000 also...
     // with 0x80000 we can teleport to Kharazan with normal client
     // with 0x10 we can't teleport to Kharazan with normal client
-    uint8 tbc = fields[0].GetUInt8();
+    bool tbc = (fields[0].GetUInt8()) && sWorld.getConfig(CONFIG_EXPANSION);
     delete result;
 
-    if(tbc == 0 && (mEntry->map_flag & not_tbc_map) == 0)   // normal client and TBC map
+    if(!tbc && (mEntry->map_flag & not_tbc_map) == 0)   // normal client and TBC map
     {
         sLog.outDebug("Player %s using Normal client and tried teleport to non existing map %u", GetName(), mapid);
 
@@ -1309,7 +1309,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
         return;                                             // normal client can't teleport to this map...
     }
-    else if(tbc == 1)                                       // can teleport to any existing map
+    else if(tbc)                                            // can teleport to any existing map
     {
         sLog.outDebug("Player %s have TBC client and will teleported to map %u", GetName(), mapid);
     }
