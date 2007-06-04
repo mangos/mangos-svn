@@ -21,6 +21,7 @@
 /// \file
 
 #include "Common.h"
+#include "Language.h"
 #include "Log.h"
 #include "World.h"
 #include "ScriptCalls.h"
@@ -212,7 +213,7 @@ void CliDelete(char*command,pPrintf zprintf)
 /// Broadcast a message to the World
 void CliBroadcast(char *text,pPrintf zprintf)
 {
-    std::string str ="|cffff0000[System Message]:|r";
+    std::string str = LANG_SYSTEMMESSAGE;
     str += text;
     sWorld.SendWorldText(str.c_str(), NULL);
     zprintf("Broadcasting to the world:%s\r\n",str.c_str());

@@ -17,6 +17,7 @@
  */
 
 #include "Common.h"
+#include "Language.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -51,7 +52,7 @@ void WorldSession::SendNameQueryOpcodeFromDB(uint64 guid)
 {
     std::string name;
     if(!objmgr.GetPlayerNameByGUID(guid, name))
-        name = "<non-existing character>";
+        name = LANG_NON_EXIST_CHARACTER;
     uint32 field = Player::GetUInt32ValueFromDB(UNIT_FIELD_BYTES_0, guid);
 
                                                             // guess size
