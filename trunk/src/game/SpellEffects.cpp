@@ -2353,7 +2353,10 @@ void Spell::EffectScriptEffect(uint32 i)
                 itemtype = 5510;                            //spell 5723;    //strong healstone
                 break;
             case 11730:
-                itemtype = 9421;                            //spell 11732;    //super healstone
+                itemtype = 9421;                            //spell 11732;   //super healstone
+                break;
+            case 27230:
+                itemtype = 22103;                           //spell 27235;   //Master Healthstone
                 break;
             default:
                 return;
