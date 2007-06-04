@@ -853,29 +853,26 @@ void Spell::EffectApplyAura(uint32 i)
         if(auraDuration != Aur->GetAuraDuration())
             unitTarget->SetAurDuration(m_spellInfo->Id,i,auraDuration);
 
-        // Check for Power Word: Shield
         // TODO Make a way so it works for every related spell!
         if(unitTarget->GetTypeId()==TYPEID_PLAYER)          // Negative buff should only be applied on players
         {
-            // This should cover all Power Word: Shield spells
-            if ((m_spellInfo->SpellVisual == 784) && (m_spellInfo->SpellIconID == 566))
-            {
-                                                            // Weakened Soul
-                SpellEntry const *WeakenedSoulSpellInfo = sSpellStore.LookupEntry( 6788 );
-                Aura* WeakenedSoulAura = new Aura(WeakenedSoulSpellInfo, 0, unitTarget,m_caster, 0);
-                unitTarget->AddAura(WeakenedSoulAura, 0);
-                sLog.outDebug("Spell: Additional Aura is: %u", WeakenedSoulSpellInfo->EffectApplyAuraName[i]);
-            }
-            // Paladin Invulnerability  spells
-            if ((m_spellInfo->SpellVisual == 154 && m_spellInfo->SpellIconID == 73)                              || //DP
+            uint32 spellId = 0;
+            if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST && m_spellInfo->SpellFamilyFlags & 1) //Power Word: Shield
+                spellId = 6788; // Weakened Soul
+            else if ((m_spellInfo->SpellVisual == 154 && m_spellInfo->SpellIconID == 73)                         || //DP
                 (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellFamilyFlags & 4194304) || //DS
                 (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellFamilyFlags & 128)     || //BoP
                 (m_spellInfo->SpellVisual == 7880 && m_spellInfo->SpellIconID == 2168))                             //AV
+                spellId = 25771; // Forbearance
+            else if (m_spellInfo->Mechanic == MECHANIC_HEAL) // Bandages
+                spellId = 11196; // Recently Bandaged
+
+            SpellEntry const *AdditionalSpellInfo = sSpellStore.LookupEntry(spellId);
+            if (AdditionalSpellInfo)
             {
-                SpellEntry const *ForbearanceSpellInfo = sSpellStore.LookupEntry( 25771 );
-                Aura* ForbearanceAura = new Aura(ForbearanceSpellInfo, 0, unitTarget,m_caster, 0);
-                unitTarget->AddAura(ForbearanceAura, 0);
-                sLog.outDebug("Spell: Additional Aura is: %u", ForbearanceSpellInfo->EffectApplyAuraName[0]);
+                Aura* AdditionalAura = new Aura(AdditionalSpellInfo, 0, unitTarget,m_caster, 0);
+                unitTarget->AddAura(AdditionalAura, 0);
+                sLog.outDebug("Spell: Additional Aura is: %u", AdditionalSpellInfo->EffectApplyAuraName[0]);
             }
         }
 
