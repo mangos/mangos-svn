@@ -199,7 +199,7 @@ void CliDelete(char*command,pPrintf zprintf)
     sDatabase.BeginTransaction();
 
     bool done = sDatabase.PExecute("DELETE FROM `character` WHERE `account` = '%d'",account_id) &&
-        sDatabase.PExecute("DELETE FROM `guild_charter_sign` WHERE `player_account` = '%d'",account_id) &&
+        sDatabase.PExecute("DELETE FROM `petition_sign` WHERE `player_account` = '%d'",account_id) &&
         loginDatabase.PExecute("DELETE FROM `account` WHERE `username` = '%s'",safe_account_name.c_str()) &&
         loginDatabase.PExecute("DELETE FROM `realmcharacters` WHERE `acctid` = '%d'",account_id);
 
