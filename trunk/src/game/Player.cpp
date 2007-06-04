@@ -1442,6 +1442,8 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
             // re-add us to the map here
             MapManager::Instance().GetMap(GetMapId(), this)->Add(this);
+
+            SendEnchantmentDurations();                     // must be after add to map
         }
     }
 
@@ -1457,7 +1459,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 SendOutOfRange(unit);
         }
 
-        // unsommon pet if lost
+        // unsummon pet if lost
         if(pet && !IsWithinDistInMap(pet, OWNER_MAX_DISTANCE))
             RemovePet(pet, PET_SAVE_NOT_IN_SLOT);
     }
@@ -9007,10 +9009,11 @@ void Player::AddEnchantmentDurations(Item *item)
 {
     for(int x=0;x<MAX_ENCHANTMENT_SLOT;++x)
     {
-        uint32 duration = item->GetEnchantmentDuration(EnchantmentSlot(x));
-        if( duration == 0 )
+        if(!item->GetEnchantmentId(EnchantmentSlot(x)))
             continue;
-        else if( duration > 0 )
+
+        uint32 duration = item->GetEnchantmentDuration(EnchantmentSlot(x));
+        if( duration > 0 )
             AddEnchantmentDuration(item,EnchantmentSlot(x+1),duration);
     }
 }
@@ -9043,6 +9046,7 @@ void Player::AddEnchantmentDuration(Item *item,EnchantmentSlot slot,uint32 durat
     {
         if(itr->item == item && itr->slot == slot)
         {
+            itr->item->SetEnchantmentDuration(itr->slot,itr->leftduration);
             m_enchantDuration.erase(itr);
             break;
         }
@@ -9231,14 +9235,22 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
         {
             // set duration
             uint32 duration = item->GetEnchantmentDuration(slot);
-            if(duration)
-                AddEnchantmentDuration(item,TEMP_ENCHANTMENT_SLOT,duration);
+            if(duration > 0)
+                AddEnchantmentDuration(item,slot,duration);
         }
         else
         {
             // duration == 0 will remove EnchantDuration
             AddEnchantmentDuration(item,slot,0);
         }
+    }
+}
+
+void Player::SendEnchantmentDurations()
+{
+    for(EnchantDurationList::iterator itr = m_enchantDuration.begin();itr != m_enchantDuration.end();++itr)
+    {
+        GetSession()->SendItemEnchantTimeUpdate(GetGUID(), itr->item->GetGUID(),itr->slot,uint32(itr->leftduration)/1000);
     }
 }
 
@@ -9273,83 +9285,6 @@ void Player::ReducePoisonCharges(uint32 enchantId)
             {
                 pItem->SetEnchantmentCharges(EnchantmentSlot(x),charges-1);
                 break;
-            }
-        }
-    }
-}
-
-void Player::SaveEnchant()
-{
-    for(EnchantDurationList::iterator itr = m_enchantDuration.begin();itr != m_enchantDuration.end();++itr)
-    {
-        assert(itr->item);
-        if(itr->leftduration > 0)
-            itr->item->SetEnchantmentDuration(itr->slot,itr->leftduration);
-    }
-}
-
-void Player::LoadEnchant()
-{
-    uint32 duration = 0;
-    Item *pItem;
-    uint16 pos;
-
-    // ignore keyring, keys can't be enchanted
-    for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
-    {
-        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
-
-        pItem = GetItemByPos( pos );
-        if(!pItem)
-            continue;
-        if(pItem->GetProto()->Class != ITEM_CLASS_WEAPON && pItem->GetProto()->Class != ITEM_CLASS_ARMOR)
-            continue;
-
-        AddEnchantmentDurations(pItem);
-    }
-    Bag *pBag;
-    ItemPrototype const *pBagProto;
-    for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
-    {
-        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
-        pBag = (Bag*)GetItemByPos( pos );
-        if( pBag )
-        {
-            pBagProto = pBag->GetProto();
-            if( pBagProto )
-            {
-                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
-                {
-                    pos = ((i << 8) | j);
-                    pItem = GetItemByPos( pos );
-                    if(!pItem)
-                        continue;
-                    if(pItem->GetProto()->Class != ITEM_CLASS_WEAPON && pItem->GetProto()->Class != ITEM_CLASS_ARMOR)
-                        continue;
-                    AddEnchantmentDurations(pItem);
-                }
-            }
-        }
-    }
-    for(int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
-    {
-        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
-        pBag = (Bag*)GetItemByPos( pos );
-        if( pBag )
-        {
-            pBagProto = pBag->GetProto();
-            if( pBagProto )
-            {
-                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
-                {
-                    pos = ((i << 8) | j);
-                    pItem = GetItemByPos( pos );
-                    if(!pItem)
-                        continue;
-                    if(pItem->GetProto()->Class != ITEM_CLASS_WEAPON && pItem->GetProto()->Class != ITEM_CLASS_ARMOR)
-                        continue;
-                    AddEnchantmentDurations(pItem);
-                }
             }
         }
     }
@@ -11740,8 +11675,6 @@ void Player::SaveToDB()
 
     sDatabase.Execute( ss.str().c_str() );
 
-    SaveEnchant();
-
     if(m_mailsUpdated)                                      //save mails only when needed
         _SaveMail();
 
@@ -11859,6 +11792,13 @@ void Player::_SaveInventory()
         m_items[i]->FSetState(ITEM_NEW);
     }
 
+    // update enchantment durations
+    for(EnchantDurationList::iterator itr = m_enchantDuration.begin();itr != m_enchantDuration.end();++itr)
+    {
+        itr->item->SetEnchantmentDuration(itr->slot,itr->leftduration);
+    }
+
+    // if no changes 
     if (m_itemUpdateQueue.empty()) return;
 
     // do not save if the update queue is corrupt

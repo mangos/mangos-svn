@@ -947,6 +947,9 @@ void Item::SetEnchantment(EnchantmentSlot slot, uint32 id, uint32 duration, uint
 
 void Item::SetEnchantmentDuration(EnchantmentSlot slot, uint32 duration)
 {
+    if(GetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+ENCHANTMENT_DURATION_OFFSET)==duration)
+        return;
+
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+ENCHANTMENT_DURATION_OFFSET,duration);
     SetState(ITEM_CHANGED);
 }
@@ -958,6 +961,9 @@ void Item::SetEnchantmentCharges(EnchantmentSlot slot, uint32 charges)
 
 void Item::ClearEnchantment(EnchantmentSlot slot)
 {
+    if(!GetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+ENCHANTMENT_ID_OFFSET))
+        return;
+
     for(int x=0;x<3;x++)
         SetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+x,0);
     SetState(ITEM_CHANGED);
