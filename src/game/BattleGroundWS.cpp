@@ -29,45 +29,16 @@
 
 BattleGroundWS::BattleGroundWS()
 {
-    m_AllianceFlagPickerGUID = 0;
-    m_HordeFlagPickerGUID = 0;
-
-    m_HordeFlag = NULL;
-    m_AllianceFlag = NULL;
-    SpeedBonus1 = NULL;
-    SpeedBonus2 = NULL;
-    RegenBonus1 = NULL;
-    RegenBonus2 = NULL;
-    BerserkBonus1 = NULL;
-    BerserkBonus2 = NULL;
-    SpeedBonus1Spawn[0] = 0;
-    SpeedBonus1Spawn[1] = 0;
-    SpeedBonus2Spawn[0] = 0;
-    SpeedBonus2Spawn[1] = 0;
-    RegenBonus1Spawn[0] = 0;
-    RegenBonus1Spawn[1] = 0;
-    RegenBonus2Spawn[0] = 0;
-    RegenBonus2Spawn[1] = 0;
-    BerserkBonus1Spawn[0] = 0;
-    BerserkBonus1Spawn[1] = 0;
-    BerserkBonus2Spawn[0] = 0;
-    BerserkBonus2Spawn[1] = 0;
-    AllianceFlagSpawn[0] = 0;
-    AllianceFlagSpawn[1] = 0;
-    HordeFlagSpawn[0] = 0;
-    HordeFlagSpawn[1] = 0;
+    FlagKeepers[0] = 0;
+    FlagKeepers[1] = 0;
 }
 
 BattleGroundWS::~BattleGroundWS()
 {
-    delete m_HordeFlag;
-    delete m_AllianceFlag;
-    delete SpeedBonus1;
-    delete SpeedBonus2;
-    delete RegenBonus1;
-    delete RegenBonus2;
-    delete BerserkBonus1;
-    delete BerserkBonus2;
+    for(uint32 i = 0; i < BG_OBJECT_MAX; i++)
+        delete m_bgobjects[i].object;
+
+    m_bgobjects.clear();
 }
 
 void BattleGroundWS::Update(time_t diff)
@@ -76,99 +47,37 @@ void BattleGroundWS::Update(time_t diff)
     //If BG-Status = WAIT_JOIN and Min players in BG, we must start BG
     if(GetStatus() == STATUS_WAIT_JOIN && GetPlayersSize() >= GetMinPlayers() )
     {
-        AllianceFlagSpawn[1] = 1;
-        HordeFlagSpawn[1] = 1;
-        sLog.outDebug("Flags activated...");
-        MapManager::Instance().GetMap(m_AllianceFlag->GetMapId(), m_AllianceFlag)->Add(m_AllianceFlag);
-        MapManager::Instance().GetMap(m_HordeFlag->GetMapId(), m_HordeFlag)->Add(m_HordeFlag);
-        sLog.outDebug("Flags respawned...");
-        SpeedBonus1Spawn[1] = 1;
-        SpeedBonus2Spawn[1] = 1;
-        RegenBonus1Spawn[1] = 1;
-        RegenBonus2Spawn[1] = 1;
-        BerserkBonus1Spawn[1] = 1;
-        BerserkBonus2Spawn[1] = 1;
-        sLog.outDebug("Bonuses activated...");
-        MapManager::Instance().GetMap(SpeedBonus1->GetMapId(), SpeedBonus1)->Add(SpeedBonus1);
-        MapManager::Instance().GetMap(SpeedBonus2->GetMapId(), SpeedBonus2)->Add(SpeedBonus2);
-        MapManager::Instance().GetMap(RegenBonus1->GetMapId(), RegenBonus1)->Add(RegenBonus1);
-        MapManager::Instance().GetMap(RegenBonus2->GetMapId(), RegenBonus2)->Add(RegenBonus2);
-        MapManager::Instance().GetMap(BerserkBonus1->GetMapId(), BerserkBonus1)->Add(BerserkBonus1);
-        MapManager::Instance().GetMap(BerserkBonus2->GetMapId(), BerserkBonus2)->Add(BerserkBonus2);
-        sLog.outDebug("Bonuses respawned...");
+        for(uint32 i = 0; i < BG_OBJECT_MAX; i++)
+        {
+            // activate
+            m_bgobjects[i].spawned = 1;
+            // respawn
+            MapManager::Instance().GetMap(m_bgobjects[i].object->GetMapId(), m_bgobjects[i].object)->Add(m_bgobjects[i].object);
+        }
+        sLog.outDebug("Objects activated and respawned...");
         SetStatus(STATUS_IN_PROGRESS);
     }
 
     if(GetStatus() == STATUS_IN_PROGRESS)
     {
-        // Flags timers
-        AllianceFlagSpawn[0] -= diff;
-        HordeFlagSpawn[0] -= diff;
-        if(AllianceFlagSpawn[0] < 0)
-            AllianceFlagSpawn[0] = 0;
-        if(HordeFlagSpawn[0] < 0)
-            HordeFlagSpawn[0] = 0;
-        if(AllianceFlagSpawn[0] == 0 && AllianceFlagSpawn[1] == 0)
+        for(uint32 i = 0; i < BG_OBJECT_MAX; i++)
         {
-            //MapManager::Instance().GetMap(m_AllianceFlag->GetMapId(), m_AllianceFlag)->Add(m_AllianceFlag);
-            RespawnFlag(ALLIANCE, true);
-            AllianceFlagSpawn[1] = 1;                       // spawned
-        }
-        if(HordeFlagSpawn[0] == 0 && HordeFlagSpawn[1] == 0)
-        {
-            //MapManager::Instance().GetMap(m_HordeFlag->GetMapId(), m_HordeFlag)->Add(m_HordeFlag);
-            RespawnFlag(HORDE, true);
-            HordeFlagSpawn[1] = 1;                          // spawned
-        }
-        //Bonuses timers
-        SpeedBonus1Spawn[0] -= diff;
-        SpeedBonus2Spawn[0] -= diff;
-        RegenBonus1Spawn[0] -= diff;
-        RegenBonus2Spawn[0] -= diff;
-        BerserkBonus1Spawn[0] -= diff;
-        BerserkBonus2Spawn[0] -= diff;
-        if(SpeedBonus1Spawn[0] < 0)
-            SpeedBonus1Spawn[0] = 0;
-        if(SpeedBonus2Spawn[0] < 0)
-            SpeedBonus2Spawn[0] = 0;
-        if(RegenBonus1Spawn[0] < 0)
-            RegenBonus1Spawn[0] = 0;
-        if(RegenBonus2Spawn[0] < 0)
-            RegenBonus2Spawn[0] = 0;
-        if(BerserkBonus1Spawn[0] < 0)
-            BerserkBonus1Spawn[0] = 0;
-        if(BerserkBonus2Spawn[0] < 0)
-            BerserkBonus2Spawn[0] = 0;
-        //If Timer==0 && SpawnStatus==0 then respawn
-        if(SpeedBonus1Spawn[0] == 0 && SpeedBonus1Spawn[1] == 0)
-        {
-            MapManager::Instance().GetMap(SpeedBonus1->GetMapId(), SpeedBonus1)->Add(SpeedBonus1);
-            SpeedBonus1Spawn[1] = 1;
-        }
-        if(SpeedBonus2Spawn[0] == 0 && SpeedBonus2Spawn[1] == 0)
-        {
-            MapManager::Instance().GetMap(SpeedBonus2->GetMapId(), SpeedBonus2)->Add(SpeedBonus2);
-            SpeedBonus2Spawn[1] = 1;
-        }
-        if(RegenBonus1Spawn[0] == 0 && RegenBonus1Spawn[1] == 0)
-        {
-            MapManager::Instance().GetMap(RegenBonus1->GetMapId(), RegenBonus1)->Add(RegenBonus1);
-            RegenBonus1Spawn[1] = 1;
-        }
-        if(RegenBonus2Spawn[0] == 0 && RegenBonus2Spawn[1] == 0)
-        {
-            MapManager::Instance().GetMap(RegenBonus2->GetMapId(), RegenBonus2)->Add(RegenBonus2);
-            RegenBonus2Spawn[1] = 1;
-        }
-        if(BerserkBonus1Spawn[0] == 0 && BerserkBonus1Spawn[1] == 0)
-        {
-            MapManager::Instance().GetMap(BerserkBonus1->GetMapId(), BerserkBonus1)->Add(BerserkBonus1);
-            BerserkBonus1Spawn[1] = 1;
-        }
-        if(BerserkBonus2Spawn[0] == 0 && BerserkBonus2Spawn[1] == 0)
-        {
-            MapManager::Instance().GetMap(BerserkBonus2->GetMapId(), BerserkBonus2)->Add(BerserkBonus2);
-            BerserkBonus2Spawn[1] = 1;
+            m_bgobjects[i].timer -= diff;
+            if(m_bgobjects[i].timer < 0)
+                m_bgobjects[i].timer = 0;
+
+            if(m_bgobjects[i].timer == 0 && !m_bgobjects[i].spawned)
+            {
+                if(i == BG_OBJECT_A_FLAG)
+                    RespawnFlag(ALLIANCE, true);
+                else if(i == BG_OBJECT_H_FLAG)
+                    RespawnFlag(HORDE, true);
+                else
+                    MapManager::Instance().GetMap(m_bgobjects[i].object->GetMapId(), m_bgobjects[i].object)->Add(m_bgobjects[i].object);
+
+                // mark as spawned
+                m_bgobjects[i].spawned = 1;
+            }
         }
     }
 }
@@ -179,13 +88,13 @@ void BattleGroundWS::RespawnFlag(uint32 Team, bool captured)
     if(Team == ALLIANCE)
     {
         sLog.outDebug("Respawn Alliance flag");
-        MapManager::Instance().GetMap(m_AllianceFlag->GetMapId(), m_AllianceFlag)->Add(m_AllianceFlag);
+        MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_A_FLAG].object->GetMapId(), m_bgobjects[BG_OBJECT_A_FLAG].object)->Add(m_bgobjects[BG_OBJECT_A_FLAG].object);
     }
 
     if(Team == HORDE)
     {
         sLog.outDebug("Respawn Horde flag");
-        MapManager::Instance().GetMap(m_HordeFlag->GetMapId(), m_HordeFlag)->Add(m_HordeFlag);
+        MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_H_FLAG].object->GetMapId(), m_bgobjects[BG_OBJECT_H_FLAG].object)->Add(m_bgobjects[BG_OBJECT_H_FLAG].object);
     }
 
     if(captured)
@@ -212,6 +121,7 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
     if(Source->GetTeam() == ALLIANCE)
     {
         SetHordeFlagPicker(0);                              // must be before aura remove to prevent 2 events (drop+capture) at the same time
+        FlagState[1] = 0;                                   // horde flag in base (but not respawned yet)
         Source->RemoveAurasDueToSpell(23333);               // Drop Horde Flag from Player
         message = LANG_BG_CAPTURED_HF;
         type = CHAT_MSG_BATTLEGROUND_HORDE;
@@ -222,6 +132,7 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
     if(Source->GetTeam() == HORDE)
     {
         SetAllianceFlagPicker(0);                           // must be before aura remove to prevent 2 events (drop+capture) at the same time
+        FlagState[0] = 0;                                   // alliance flag in base (but not respawned yet)
         Source->RemoveAurasDueToSpell(23335);               // Drop Alliance Flag from Player
         message = LANG_BG_CAPTURED_AF;
         type = CHAT_MSG_BATTLEGROUND_ALLIANCE;
@@ -258,13 +169,13 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
         switch(Source->GetTeam())
         {
             case ALLIANCE:
-                HordeFlagSpawn[0] = 1*60*1000;
-                HordeFlagSpawn[1] = 0;
+                m_bgobjects[BG_OBJECT_H_FLAG].timer = 1*60*1000;
+                m_bgobjects[BG_OBJECT_H_FLAG].spawned = 0;
                 //RespawnFlag(HORDE, true);
                 break;
             case HORDE:
-                AllianceFlagSpawn[0] = 1*60*1000;
-                AllianceFlagSpawn[1] = 0;
+                m_bgobjects[BG_OBJECT_A_FLAG].timer = 1*60*1000;
+                m_bgobjects[BG_OBJECT_A_FLAG].spawned = 0;
                 //RespawnFlag(ALLIANCE, true);
                 break;
         }
@@ -282,12 +193,14 @@ void BattleGroundWS::EventPlayerDroppedFlag(Player *Source)
     if(Source->GetTeam() == ALLIANCE)
     {
         SetHordeFlagPicker(0);
+        FlagState[1] = 1;   // horde flag dropped
         message = LANG_BG_DROPPED_HF;
         type = CHAT_MSG_BATTLEGROUND_ALLIANCE;
     }
     if(Source->GetTeam() == HORDE)
     {
         SetAllianceFlagPicker(0);
+        FlagState[0] = 1;   // alliance flag dropped
         message = LANG_BG_DROPPED_AF;
         type = CHAT_MSG_BATTLEGROUND_HORDE;
     }
@@ -314,6 +227,7 @@ void BattleGroundWS::EventPlayerReturnedFlag(Player *Source)
 
     if(Source->GetTeam() == ALLIANCE)
     {
+        FlagState[0] = 0;                                   // alliance flag in base
         message = LANG_BG_RETURNED_AF;
         type = CHAT_MSG_BATTLEGROUND_HORDE;
         UpdateFlagState(HORDE, 1);
@@ -321,6 +235,7 @@ void BattleGroundWS::EventPlayerReturnedFlag(Player *Source)
     }
     if(Source->GetTeam() == HORDE)
     {
+        FlagState[1] = 0;                                   // horde flag in base
         message = LANG_BG_RETURNED_HF;
         type = CHAT_MSG_BATTLEGROUND_ALLIANCE;
         UpdateFlagState(ALLIANCE, 1);
@@ -348,16 +263,18 @@ void BattleGroundWS::EventPlayerPickedUpFlag(Player *Source)
         message = LANG_BG_PICKEDUP_HF;
         type = CHAT_MSG_BATTLEGROUND_HORDE;
         PlaySoundToAll(8212);
-        MapManager::Instance().GetMap(m_HordeFlag->GetMapId(), m_HordeFlag)->Remove(m_HordeFlag, false);
+        MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_H_FLAG].object->GetMapId(), m_bgobjects[BG_OBJECT_H_FLAG].object)->Remove(m_bgobjects[BG_OBJECT_H_FLAG].object, false);
         SetHordeFlagPicker(Source->GetGUID());              // pick up Horde Flag
+        FlagState[1] = 1;                                   // horde flag pickedup
     }
     if(Source->GetTeam() == HORDE)
     {
         message = LANG_BG_PICKEDUP_AF;
         type = CHAT_MSG_BATTLEGROUND_ALLIANCE;
         PlaySoundToAll(8174);
-        MapManager::Instance().GetMap(m_AllianceFlag->GetMapId(), m_AllianceFlag)->Remove(m_AllianceFlag, false);
+        MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_A_FLAG].object->GetMapId(), m_bgobjects[BG_OBJECT_A_FLAG].object)->Remove(m_bgobjects[BG_OBJECT_A_FLAG].object, false);
         SetAllianceFlagPicker(Source->GetGUID());           // pick up Alliance Flag
+        FlagState[0] = 1;                                   // alliance flag pickedup
     }
 
     WorldPacket data;
@@ -372,30 +289,30 @@ void BattleGroundWS::EventPlayerPickedUpFlag(Player *Source)
         UpdateWorldState(1545, 1);
 }
 
-void BattleGroundWS::RemovePlayer(Player *plr,uint64 guid)
+void BattleGroundWS::RemovePlayer(Player *plr, uint64 guid)
 {
     if(plr)
     {
         if(IsAllianceFlagPickedup() || IsHordeFlagPickedup())
         {
             // drop flag...
-            if(m_AllianceFlagPickerGUID == guid)
+            if(FlagKeepers[0] == guid)
                 plr->RemoveAurasDueToSpell(23335);
-            if(m_HordeFlagPickerGUID == guid)
+            if(FlagKeepers[1] == guid)
                 plr->RemoveAurasDueToSpell(23333);
         }
     }
     else
     {
         // check this case...
-        if(m_AllianceFlagPickerGUID == guid)
+        if(FlagKeepers[0] == guid)
         {
             //AllianceFlagSpawn[0] = 0;
             //AllianceFlagSpawn[1] = 1;
             SetAllianceFlagPicker(0);
             RespawnFlag(ALLIANCE, false);
         }
-        if(m_HordeFlagPickerGUID == guid)
+        if(FlagKeepers[1] == guid)
         {
             //HordeFlagSpawn[0] = 0;
             //HordeFlagSpawn[1] = 1;
@@ -405,17 +322,29 @@ void BattleGroundWS::RemovePlayer(Player *plr,uint64 guid)
     }
     if(!GetPlayersSize())
     {
-        MapManager::Instance().GetMap(m_AllianceFlag->GetMapId(), m_AllianceFlag)->Remove(m_AllianceFlag, false);
-        MapManager::Instance().GetMap(m_HordeFlag->GetMapId(), m_HordeFlag)->Remove(m_HordeFlag, false);
-        sLog.outDebug("Flags despawned...");
-        MapManager::Instance().GetMap(SpeedBonus1->GetMapId(), SpeedBonus1)->Remove(SpeedBonus1, false);
-        MapManager::Instance().GetMap(SpeedBonus2->GetMapId(), SpeedBonus2)->Remove(SpeedBonus2, false);
-        MapManager::Instance().GetMap(RegenBonus1->GetMapId(), RegenBonus1)->Remove(RegenBonus1, false);
-        MapManager::Instance().GetMap(RegenBonus2->GetMapId(), RegenBonus2)->Remove(RegenBonus2, false);
-        MapManager::Instance().GetMap(BerserkBonus1->GetMapId(), BerserkBonus1)->Remove(BerserkBonus1, false);
-        MapManager::Instance().GetMap(BerserkBonus2->GetMapId(), BerserkBonus2)->Remove(BerserkBonus2, false);
-        sLog.outDebug("Bonuses despawned...");
+        for(uint32 i = 0; i < BG_OBJECT_MAX; i++)
+        {
+            // despawn
+            MapManager::Instance().GetMap(m_bgobjects[i].object->GetMapId(), m_bgobjects[i].object)->Remove(m_bgobjects[i].object, false);
+        }
+        sLog.outDebug("Objects despawned...");
     }
+}
+
+void BattleGroundWS::UpdateFlagState(uint32 team, uint32 value)
+{
+    if(team == ALLIANCE)
+        UpdateWorldState(2339, value);
+    else if(team == HORDE)
+        UpdateWorldState(2338, value);
+}
+
+void BattleGroundWS::UpdateTeamScore(uint32 team)
+{
+    if(team == ALLIANCE)
+        UpdateWorldState(1581, GetTeamScore(team));
+    if(team == HORDE)
+        UpdateWorldState(1582, GetTeamScore(team));
 }
 
 void BattleGroundWS::HandleAreaTrigger(Player* Source, uint32 Trigger)
@@ -427,101 +356,75 @@ void BattleGroundWS::HandleAreaTrigger(Player* Source, uint32 Trigger)
     uint32 SpellId = 0;
     switch(Trigger)
     {
-        case 3686:                                          //Alliance elixir of speed spawn. Trigger not working, because located inside other areatrigger, can be replaced by IsWithinDist(object, dist) in BattleGround::Update().
-            sLog.outDebug("SpeedBonus1SpawnState = %i, SpeedBonus1SpawnTimer = %i", SpeedBonus1Spawn[1], SpeedBonus1Spawn[0]);
-            if(SpeedBonus1Spawn[1] == 0)
-            {
+        case 3686:                                                  //Alliance elixir of speed spawn. Trigger not working, because located inside other areatrigger, can be replaced by IsWithinDist(object, dist) in BattleGround::Update().
+            if(m_bgobjects[BG_OBJECT_SPEEDBUFF_1].spawned == 0)
                 break;
-            }
-            MapManager::Instance().GetMap(SpeedBonus1->GetMapId(), SpeedBonus1)->Remove(SpeedBonus1, false);
-            SpeedBonus1Spawn[0] = 3*60*1000;                // 3 minutes
-            SpeedBonus1Spawn[1] = 0;
-            SpellId = 23451;
+            MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_SPEEDBUFF_1].object->GetMapId(), m_bgobjects[BG_OBJECT_SPEEDBUFF_1].object)->Remove(m_bgobjects[BG_OBJECT_SPEEDBUFF_1].object, false);
+            m_bgobjects[BG_OBJECT_SPEEDBUFF_1].timer = 3*60*1000;   // 3 minutes
+            m_bgobjects[BG_OBJECT_SPEEDBUFF_1].spawned = 0;
+            SpellId = m_bgobjects[BG_OBJECT_SPEEDBUFF_1].spellid;
             break;
-        case 3687:                                          //Horde elixir of speed spawn. Trigger not working, because located inside other areatrigger, can be replaced by IsWithinDist(object, dist) in BattleGround::Update().
-            sLog.outDebug("SpeedBonus2SpawnState = %i, SpeedBonus2SpawnTimer = %i", SpeedBonus2Spawn[1], SpeedBonus2Spawn[0]);
-            if(SpeedBonus2Spawn[1] == 0)
-            {
+        case 3687:                                                  //Horde elixir of speed spawn. Trigger not working, because located inside other areatrigger, can be replaced by IsWithinDist(object, dist) in BattleGround::Update().
+            if(m_bgobjects[BG_OBJECT_SPEEDBUFF_2].spawned == 0)
                 break;
-            }
-            MapManager::Instance().GetMap(SpeedBonus2->GetMapId(), SpeedBonus2)->Remove(SpeedBonus2, false);
-            SpeedBonus2Spawn[0] = 3*60*1000;                // 3 minutes
-            SpeedBonus2Spawn[1] = 0;
-            SpellId = 23451;
+            MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_SPEEDBUFF_2].object->GetMapId(), m_bgobjects[BG_OBJECT_SPEEDBUFF_2].object)->Remove(m_bgobjects[BG_OBJECT_SPEEDBUFF_2].object, false);
+            m_bgobjects[BG_OBJECT_SPEEDBUFF_2].timer = 3*60*1000;   // 3 minutes
+            m_bgobjects[BG_OBJECT_SPEEDBUFF_2].spawned = 0;
+            SpellId = m_bgobjects[BG_OBJECT_SPEEDBUFF_2].spellid;
             break;
-        case 3706:                                          //Alliance elixir of regeneration spawn
-            sLog.outDebug("RegenBonus1SpawnState = %u, RegenBonus1SpawnTimer = %u", RegenBonus1Spawn[1], RegenBonus1Spawn[0]);
-            if(RegenBonus1Spawn[1] == 0)
-            {
+        case 3706:                                                  //Alliance elixir of regeneration spawn
+            if(m_bgobjects[BG_OBJECT_REGENBUFF_1].spawned == 0)
                 break;
-            }
-            MapManager::Instance().GetMap(RegenBonus1->GetMapId(), RegenBonus1)->Remove(RegenBonus1, false);
-            RegenBonus1Spawn[0] = 3*60*1000;                // 3 minutes
-            RegenBonus1Spawn[1] = 0;
-            SpellId = 23493;
+            MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_REGENBUFF_1].object->GetMapId(), m_bgobjects[BG_OBJECT_REGENBUFF_1].object)->Remove(m_bgobjects[BG_OBJECT_REGENBUFF_1].object, false);
+            m_bgobjects[BG_OBJECT_REGENBUFF_1].timer = 3*60*1000;   // 3 minutes
+            m_bgobjects[BG_OBJECT_REGENBUFF_1].spawned = 0;
+            SpellId = m_bgobjects[BG_OBJECT_REGENBUFF_1].spellid;
             break;
-        case 3708:                                          //Horde elixir of regeneration spawn
-            sLog.outDebug("RegenBonus2SpawnState = %u, RegenBonus2SpawnTimer = %u", RegenBonus2Spawn[1], RegenBonus2Spawn[0]);
-            if(RegenBonus2Spawn[1] == 0)
-            {
+        case 3708:                                                  //Horde elixir of regeneration spawn
+            if(m_bgobjects[BG_OBJECT_REGENBUFF_2].spawned == 0)
                 break;
-            }
-            MapManager::Instance().GetMap(RegenBonus2->GetMapId(), RegenBonus2)->Remove(RegenBonus2, false);
-            RegenBonus2Spawn[0] = 3*60*1000;                // 3 minutes
-            RegenBonus2Spawn[1] = 0;
-            SpellId = 23493;
+            MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_REGENBUFF_2].object->GetMapId(), m_bgobjects[BG_OBJECT_REGENBUFF_2].object)->Remove(m_bgobjects[BG_OBJECT_REGENBUFF_2].object, false);
+            m_bgobjects[BG_OBJECT_REGENBUFF_2].timer = 3*60*1000;   // 3 minutes
+            m_bgobjects[BG_OBJECT_REGENBUFF_2].spawned = 0;
+            SpellId = m_bgobjects[BG_OBJECT_REGENBUFF_2].spellid;
             break;
-        case 3707:                                          //Alliance elixir of berserk spawn
-            sLog.outDebug("BerserkBonus1SpawnState = %u, BerserkBonus1SpawnTimer = %u", BerserkBonus1Spawn[1], BerserkBonus1Spawn[0]);
-            if(BerserkBonus1Spawn[1] == 0)
-            {
+        case 3707:                                                  //Alliance elixir of berserk spawn
+            if(m_bgobjects[BG_OBJECT_BERSERKBUFF_1].spawned == 0)
                 break;
-            }
-            MapManager::Instance().GetMap(BerserkBonus1->GetMapId(), BerserkBonus1)->Remove(BerserkBonus1, false);
-            BerserkBonus1Spawn[0] = 3*60*1000;              // 3 minutes
-            BerserkBonus1Spawn[1] = 0;
-            SpellId = 23505;
+            MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_BERSERKBUFF_1].object->GetMapId(), m_bgobjects[BG_OBJECT_BERSERKBUFF_1].object)->Remove(m_bgobjects[BG_OBJECT_BERSERKBUFF_1].object, false);
+            m_bgobjects[BG_OBJECT_BERSERKBUFF_1].timer = 3*60*1000; // 3 minutes
+            m_bgobjects[BG_OBJECT_BERSERKBUFF_1].spawned = 0;
+            SpellId = m_bgobjects[BG_OBJECT_BERSERKBUFF_1].spellid;
             break;
-        case 3709:                                          //Horde elixir of berserk spawn
-            sLog.outDebug("BerserkBonus2SpawnState = %u, BerserkBonus2SpawnTimer = %u", BerserkBonus2Spawn[1], BerserkBonus2Spawn[0]);
-            if(BerserkBonus2Spawn[1] == 0)
-            {
+        case 3709:                                                  //Horde elixir of berserk spawn
+            if(m_bgobjects[BG_OBJECT_BERSERKBUFF_2].spawned == 0)
                 break;
-            }
-            MapManager::Instance().GetMap(BerserkBonus2->GetMapId(), BerserkBonus2)->Remove(BerserkBonus2, false);
-            BerserkBonus2Spawn[0] = 3*60*1000;              // 3 minutes
-            BerserkBonus2Spawn[1] = 0;
-            SpellId = 23505;
+            MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_BERSERKBUFF_2].object->GetMapId(), m_bgobjects[BG_OBJECT_BERSERKBUFF_2].object)->Remove(m_bgobjects[BG_OBJECT_BERSERKBUFF_2].object, false);
+            m_bgobjects[BG_OBJECT_BERSERKBUFF_2].timer = 3*60*1000; // 3 minutes
+            m_bgobjects[BG_OBJECT_BERSERKBUFF_2].spawned = 0;
+            SpellId = m_bgobjects[BG_OBJECT_BERSERKBUFF_2].spellid;
             break;
-        case 3646:                                          //Alliance Flag spawn
-            if(IsHordeFlagPickedup() && !IsAllianceFlagPickedup())
-            {
+        case 3646:                                                  //Alliance Flag spawn
+            if(FlagState[1] && !FlagState[0])
                 if(GetHordeFlagPickerGUID() == Source->GetGUID())
-                {
                     EventPlayerCapturedFlag(Source);
-                }
-            }
             break;
-        case 3647:                                          //Horde Flag spawn
-            if(IsAllianceFlagPickedup() && !IsHordeFlagPickedup())
-            {
+        case 3647:                                                  //Horde Flag spawn
+            if(FlagState[0] && !FlagState[1])
                 if(GetAllianceFlagPickerGUID() == Source->GetGUID())
-                {
                     EventPlayerCapturedFlag(Source);
-                }
-            }
             break;
-        case 4628:                                          // new 2.1.0?
-        case 4629:                                          // new 2.1.0?
-        case 4631:                                          // Unk1
-        case 4633:                                          // Unk2
+        case 4628:                                                  // new 2.1.0?
+        case 4629:                                                  // new 2.1.0?
+        case 4631:                                                  // Unk1
+        case 4633:                                                  // Unk2
             break;
-        case 3669:                                          // Warsong Gulch Horde Exit (removed, but trigger still exist).
-        case 3671:                                          // Warsong Gulch Alliance Exit (removed, but trigger still exist).
+        case 3669:                                                  // Warsong Gulch Horde Exit (removed, but trigger still exist).
+        case 3671:                                                  // Warsong Gulch Alliance Exit (removed, but trigger still exist).
             break;
         default:
         {
-            sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %d", Trigger);
+            sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);
             Source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", Trigger);
             break;
         }
@@ -533,7 +436,7 @@ void BattleGroundWS::HandleAreaTrigger(Player* Source, uint32 Trigger)
 
         if(!Entry)
         {
-            sLog.outError("ERROR: Tried to add unknown spell id %d to plr.", SpellId);
+            sLog.outError("ERROR: Tried to cast unknown spell id %u to player.", SpellId);
             return;
         }
 
@@ -543,21 +446,34 @@ void BattleGroundWS::HandleAreaTrigger(Player* Source, uint32 Trigger)
 
 void BattleGroundWS::SetupBattleGround()
 {
-    m_AllianceFlag = new GameObject(NULL);
-    m_HordeFlag = new GameObject(NULL);
-    SpeedBonus1 = new GameObject(NULL);
-    SpeedBonus2 = new GameObject(NULL);
-    RegenBonus1 = new GameObject(NULL);
-    RegenBonus2 = new GameObject(NULL);
-    BerserkBonus1 = new GameObject(NULL);
-    BerserkBonus2 = new GameObject(NULL);
+    BattleGroundObjectInfo info;
+    for(uint32 i = 0; i < BG_OBJECT_MAX; i++)
+    {
+        info.object     = new GameObject(NULL);
+        info.spawned    = 0;
+        info.spellid    = 0;
+        info.timer      = 0;
+        m_bgobjects[i]  = info;
+    }
 
-    m_AllianceFlag->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179830, GetMapId(), 1540.35, 1481.31, 352.635, 6.24, 0, 0, sin(6.24/2), cos(6.24/2), 0, 0);
-    m_HordeFlag->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179831, GetMapId(), 915.809, 1433.73, 346.172, 3.244, 0, 0, sin(3.244/2), cos(3.244/2), 0, 0);
-    SpeedBonus1->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179871, GetMapId(), 1449.98, 1468.86, 342.66, 4.866, 0, 0, sin(4.866/2), cos(4.866/2), 0, 0);
-    SpeedBonus2->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179871, GetMapId(), 1006.22, 1445.98, 335.77, 1.683, 0, 0, sin(1.683/2), cos(1.683/2), 0, 0);
-    RegenBonus1->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179904, GetMapId(), 1316.94, 1551.99, 313.234, 5.869, 0, 0, sin(5.869/2), cos(5.869/2), 0, 0);
-    RegenBonus2->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179904, GetMapId(), 1110.1, 1353.24, 316.513, 5.68, 0, 0, sin(5.68/2), cos(5.68/2), 0, 0);
-    BerserkBonus1->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179905, GetMapId(), 1318.68, 1378.03, 314.753, 1.001, 0, 0, sin(1.001/2), cos(1.001/2), 0, 0);
-    BerserkBonus2->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179905, GetMapId(), 1141.36, 1560.99, 306.791, 3.858, 0, 0, sin(3.858/2), cos(3.858/2), 0, 0);
+    m_bgobjects[BG_OBJECT_A_FLAG].object->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179830, GetMapId(), 1540.35, 1481.31, 352.635, 6.24, 0, 0, sin(6.24/2), cos(6.24/2), 0, 0);
+    m_bgobjects[BG_OBJECT_H_FLAG].object->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179831, GetMapId(), 915.809, 1433.73, 346.172, 3.244, 0, 0, sin(3.244/2), cos(3.244/2), 0, 0);
+
+    m_bgobjects[BG_OBJECT_SPEEDBUFF_1].object->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179871, GetMapId(), 1449.98, 1468.86, 342.66, 4.866, 0, 0, sin(4.866/2), cos(4.866/2), 0, 0);
+    m_bgobjects[BG_OBJECT_SPEEDBUFF_1].spellid = 23451;
+
+    m_bgobjects[BG_OBJECT_SPEEDBUFF_2].object->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179871, GetMapId(), 1006.22, 1445.98, 335.77, 1.683, 0, 0, sin(1.683/2), cos(1.683/2), 0, 0);
+    m_bgobjects[BG_OBJECT_SPEEDBUFF_2].spellid = 23451;
+
+    m_bgobjects[BG_OBJECT_REGENBUFF_1].object->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179904, GetMapId(), 1316.94, 1551.99, 313.234, 5.869, 0, 0, sin(5.869/2), cos(5.869/2), 0, 0);
+    m_bgobjects[BG_OBJECT_REGENBUFF_1].spellid = 23493;
+
+    m_bgobjects[BG_OBJECT_REGENBUFF_2].object->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179904, GetMapId(), 1110.1, 1353.24, 316.513, 5.68, 0, 0, sin(5.68/2), cos(5.68/2), 0, 0);
+    m_bgobjects[BG_OBJECT_REGENBUFF_2].spellid = 23493;
+
+    m_bgobjects[BG_OBJECT_BERSERKBUFF_1].object->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179905, GetMapId(), 1318.68, 1378.03, 314.753, 1.001, 0, 0, sin(1.001/2), cos(1.001/2), 0, 0);
+    m_bgobjects[BG_OBJECT_BERSERKBUFF_1].spellid = 23505;
+
+    m_bgobjects[BG_OBJECT_BERSERKBUFF_2].object->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179905, GetMapId(), 1141.36, 1560.99, 306.791, 3.858, 0, 0, sin(3.858/2), cos(3.858/2), 0, 0);
+    m_bgobjects[BG_OBJECT_BERSERKBUFF_2].spellid = 23505;
 }

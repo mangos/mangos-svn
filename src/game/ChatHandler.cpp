@@ -319,6 +319,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             sLog.outError("CHAT: unknown msg type %u, lang: %u", type, lang);
     }
 }
+
 void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,4+4+8);

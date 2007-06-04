@@ -47,9 +47,9 @@ void BattleGroundAB::Update(time_t diff)
     }
     if(GetStatus() == STATUS_IN_PROGRESS)
     {
-        for(int i=0;i<5;i++)
+        for(int i = 0;i < 5; i++)
             if(Points[i])                                   //If point is controled
-                AddPoint(Points[i],diff);
+                AddPoint(Points[i], diff);
         if(GetTeamScore(ALLIANCE) >= (2000*1000))           //1 score/per second
             EndBattleGround(ALLIANCE);
         if(GetTeamScore(HORDE) >= (2000*1000))              //1 score/per second
@@ -57,12 +57,12 @@ void BattleGroundAB::Update(time_t diff)
     }
 }
 
-void BattleGroundAB::RemovePlayer(Player *plr,uint64 guid)
+void BattleGroundAB::RemovePlayer(Player *plr, uint64 guid)
 {
 
 }
 
-void BattleGroundAB::HandleAreaTrigger(Player* Source, uint32 Trigger)
+void BattleGroundAB::HandleAreaTrigger(Player *Source, uint32 Trigger)
 {
     // this is wrong way to implement these things. On official it done by gameobject spell cast.
     if(GetStatus() != STATUS_IN_PROGRESS)
@@ -71,30 +71,28 @@ void BattleGroundAB::HandleAreaTrigger(Player* Source, uint32 Trigger)
     uint32 SpellId = 0;
     switch(Trigger)
     {
-        //AB
-        case 3866:                                          //Stables
-        case 3869:                                          //Gold Mine
-        case 3867:                                          //Farm
-        case 3868:                                          //Lumber Mill
-        case 3870:                                          //Black Smith
-        case 4020:                                          //Unk1
-        case 4021:                                          //Unk2
+        case 3866:                                          // Stables
+        case 3869:                                          // Gold Mine
+        case 3867:                                          // Farm
+        case 3868:                                          // Lumber Mill
+        case 3870:                                          // Black Smith
+        case 4020:                                          // Unk1
+        case 4021:                                          // Unk2
             break;
-            //Exits
-        case 3948:                                          //Arathi Basin Alliance Exit.
+        case 3948:                                          // Arathi Basin Alliance Exit.
             if(Source->GetTeam() != ALLIANCE)
                 Source->GetSession()->SendAreaTriggerMessage("Only The Alliance can use that portal");
             else
                 ((BattleGround*)this)->RemovePlayer(Source->GetGUID(), true, true);
             break;
-        case 3949:                                          //Arathi Basin Horde Exit.
+        case 3949:                                          // Arathi Basin Horde Exit.
             if(Source->GetTeam() != HORDE)
                 Source->GetSession()->SendAreaTriggerMessage("Only The Horde can use that portal");
             else
                 ((BattleGround*)this)->RemovePlayer(Source->GetGUID(), true, true);
             break;
         default:
-            sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %d", Trigger);
+            sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);
             Source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", Trigger);
             break;
     }
@@ -105,7 +103,7 @@ void BattleGroundAB::HandleAreaTrigger(Player* Source, uint32 Trigger)
 
         if(!Entry)
         {
-            sLog.outError("ERROR: Tried to add unknown spell id %d to plr.", SpellId);
+            sLog.outError("ERROR: Tried to cast unknown spell id %u to player.", SpellId);
             return;
         }
 

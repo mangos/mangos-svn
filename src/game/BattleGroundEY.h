@@ -30,7 +30,7 @@ class BattleGroundEY : public BattleGround
         ~BattleGroundEY();
         void Update(time_t diff);
         void RemovePlayer(Player *plr,uint64 guid);
-        void HandleAreaTrigger(Player* Source, uint32 Trigger);
+        void HandleAreaTrigger(Player *Source, uint32 Trigger);
         void SetupBattleGround();
 
     private:
