@@ -17,6 +17,7 @@
  */
 
 #include "Common.h"
+#include "Language.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -452,7 +453,7 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text)
                 if(table[i].Help != "")
                     SendSysMultilineMessage(table[i].Help.c_str());
                 else
-                    SendSysMessage("There is no such subcommand.");
+                    SendSysMessage(LANG_NO_SUBCMD);
             }
 
             return true;
@@ -475,7 +476,7 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text)
             if(table[i].Help != "")
                 SendSysMultilineMessage(table[i].Help.c_str());
             else
-                SendSysMessage("Incorrect syntax.");
+                SendSysMessage(LANG_CMD_SYNTAX);
         }
 
         return true;

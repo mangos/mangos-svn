@@ -17,6 +17,7 @@
  */
 
 #include "Common.h"
+#include "Language.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "World.h"
@@ -103,7 +104,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
         // TODO: find correct opcode
         if(_player->getLevel() != 70)
         {
-            SendNotification("You must be level %u to form an arena team", 70);
+            SendNotification(LANG_ARENA_ONE_TOOLOW, 70);
             return;
         }
 

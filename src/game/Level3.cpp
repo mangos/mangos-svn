@@ -1038,7 +1038,7 @@ bool ChatHandler::HandleCooldownCommand(const char* args)
         uint32 spell_id = atol((char*)args);
         if(!sSpellStore.LookupEntry(spell_id))
         {
-            PSendSysMessage(LANG_UNKNOWN_SPELL, target==m_session->GetPlayer() ? "You" : target->GetName());
+            PSendSysMessage(LANG_UNKNOWN_SPELL, target==m_session->GetPlayer() ? LANG_YOU : target->GetName());
             return true;
         }
 
@@ -1048,7 +1048,7 @@ bool ChatHandler::HandleCooldownCommand(const char* args)
         data << uint32(0);
         target->GetSession()->SendPacket(&data);
         target->RemoveSpellCooldown(spell_id);
-        PSendSysMessage(LANG_REMOVE_COOLDOWN, spell_id, target==m_session->GetPlayer() ? "you" : target->GetName());
+        PSendSysMessage(LANG_REMOVE_COOLDOWN, spell_id, target==m_session->GetPlayer() ? LANG_YOU : target->GetName());
     }
     return true;
 }
@@ -1393,7 +1393,7 @@ bool ChatHandler::HandleListItemCommand(const char* args)
             else
                 item_pos = "";
 
-            PSendSysMessage("%d - owner: %s (guid: %u account: %u ) %s",
+            PSendSysMessage(LANG_ITEMLIST_SLOT,
                 item_guid,owner_name.c_str(),owner_guid,owner_acc,item_pos);
         } while (result->NextRow());
 
@@ -1443,7 +1443,7 @@ bool ChatHandler::HandleListItemCommand(const char* args)
 
             char const* item_pos = "[in mail]";
 
-            PSendSysMessage("%d - sender: %s (guid: %u account: %u ) receiver: %s (guid: %u account: %u ) %s",
+            PSendSysMessage(LANG_ITEMLIST_MAIL,
                 item_guid,item_s_name.c_str(),item_s,item_s_acc,item_r_name.c_str(),item_r,item_r_acc,item_pos);
         } while (result->NextRow());
 
@@ -1489,7 +1489,7 @@ bool ChatHandler::HandleListItemCommand(const char* args)
 
             char const* item_pos = "[in auction]";
 
-            PSendSysMessage("%d - owner: %s (guid: %u account: %u ) %s",item_guid,owner_name.c_str(),owner,owner_acc,item_pos);
+            PSendSysMessage(LANG_ITEMLIST_AUCTION, item_guid, owner_name.c_str(), owner, owner_acc,item_pos);
         } while (result->NextRow());
 
         delete result;
@@ -1639,7 +1639,8 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
         Field *fields = result->Fetch();
         uint32 id = fields[0].GetUInt32();
         std::string name = fields[1].GetCppString();
-        PSendSysMessage("%d - |cffffffff|Hitem:%d:0:0:0|h[%s]|h|r ",id,id,name.c_str());
+        // send item in "id - id [name]" format (??)
+        PSendSysMessage(LANG_ITEM_LIST, id,id,name.c_str());
     } while (result->NextRow());
 
     delete result;
@@ -1706,7 +1707,7 @@ bool ChatHandler::HandleLookupSkillCommand(const char* args)
             {
                 uint16 skill = m_session->GetPlayer()->GetPureSkillValue(id);
                 // send skill in "id - name" format
-                PSendSysMessage("%d - %s%s",id,skillInfo->name[sWorld.GetDBClang()],(skill == 0 ? "" : " [known]"));
+                PSendSysMessage("%d - %s%s",id,skillInfo->name[sWorld.GetDBClang()],(skill == 0 ? "" : LANG_KNOWN));
 
                 counter++;
             }
@@ -1749,13 +1750,13 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
                 if (!rank.empty())
                 {
                     // send spell in "id - name - rank" format
-                    PSendSysMessage("%d - %s - %s%s",id,spellInfo->SpellName[sWorld.GetDBClang()],rank.c_str(),(known ? " [known]" : ""));
+                    PSendSysMessage("%d - %s - %s%s",id,spellInfo->SpellName[sWorld.GetDBClang()],rank.c_str(),(known ? LANG_KNOWN : ""));
                     counter++;
                 }
                 else
                 {
                     // send spell in "id - name" format
-                    PSendSysMessage("%d - %s%s",id,spellInfo->SpellName[sWorld.GetDBClang()],(known ? " [known]" : ""));
+                    PSendSysMessage("%d - %s%s",id,spellInfo->SpellName[sWorld.GetDBClang()],(known ? LANG_KNOWN : ""));
                     counter++;
                 }
             }
@@ -1792,14 +1793,14 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
         if(status == QUEST_STATUS_COMPLETE)
         {
             if(m_session->GetPlayer()->GetQuestRewardStatus(id))
-                statusStr = " [rewarded]";
+                statusStr = LANG_COMMAND_QUEST_REWARDED;
             else
-                statusStr = " [complete]";
+                statusStr = LANG_COMMAND_QUEST_COMPLETE;
         }
         else if(status == QUEST_STATUS_INCOMPLETE)
-            statusStr = " [active]";
+            statusStr = LANG_COMMAND_QUEST_ACTIVE;
 
-        PSendSysMessage("%d - %s%s",id,name.c_str(),(status == QUEST_STATUS_COMPLETE ? " [complete]" : (status == QUEST_STATUS_INCOMPLETE ? " [active]" : "") ));
+        PSendSysMessage("%d - %s%s",id,name.c_str(),(status == QUEST_STATUS_COMPLETE ? LANG_COMPLETE : (status == QUEST_STATUS_INCOMPLETE ? LANG_ACTIVE : "") ));
     } while (result->NextRow());
 
     delete result;
@@ -2321,14 +2322,14 @@ bool ChatHandler::HandleNearGraveCommand(const char* args)
         g_team = fields[0].GetUInt32();
         delete result;
 
-        std::string team_name = "invalid team, please fix DB";
+        std::string team_name = LANG_COMMAND_GRAVEYARD_NOTEAM;
 
         if(g_team == 0)
-            team_name = "any";
+            team_name = LANG_COMMAND_GRAVEYARD_ANY;
         else if(g_team == HORDE)
-            team_name = "horde";
+            team_name = LANG_COMMAND_GRAVEYARD_HORDE;
         else if(g_team == ALLIANCE)
-            team_name = "alliance";
+            team_name = LANG_COMMAND_GRAVEYARD_ALLIANCE;
 
         PSendSysMessage(LANG_COMMAND_GRAVEYARDNEAREST, g_id,team_name.c_str(),player->GetZoneId());
     }
@@ -2337,11 +2338,11 @@ bool ChatHandler::HandleNearGraveCommand(const char* args)
         std::string team_name;
 
         if(g_team == 0)
-            team_name = "any";
+            team_name = LANG_COMMAND_GRAVEYARD_ANY;
         else if(g_team == HORDE)
-            team_name = "horde";
+            team_name = LANG_COMMAND_GRAVEYARD_HORDE;
         else if(g_team == ALLIANCE)
-            team_name = "alliance";
+            team_name = LANG_COMMAND_GRAVEYARD_ALLIANCE;
 
         if(g_team == ~uint32(0))
             PSendSysMessage(LANG_COMMAND_ZONENOGRAVEYARDS, player->GetZoneId());
@@ -2989,19 +2990,19 @@ bool ChatHandler::HandleListAurasCommand (const char * args)
     }
 
     Unit::AuraMap& uAuras = unit->GetAuras();
-    PSendSysMessage("Target unit has %d auras:", uAuras.size());
+    PSendSysMessage(LANG_COMMAND_TARGET_LISTAURAS, uAuras.size());
     for (Unit::AuraMap::iterator itr = uAuras.begin(); itr != uAuras.end(); ++itr)
     {
-        PSendSysMessage("id: %d eff: %d type: %d duration: %d name: %s", itr->second->GetId(), itr->second->GetEffIndex(), itr->second->GetModifier()->m_auraname, itr->second->GetAuraDuration(), itr->second->GetSpellProto()->SpellName[0]);
+        PSendSysMessage(LANG_COMMAND_TARGET_AURADETAIL, itr->second->GetId(), itr->second->GetEffIndex(), itr->second->GetModifier()->m_auraname, itr->second->GetAuraDuration(), itr->second->GetSpellProto()->SpellName[0]);
     }
     for (int i = 0; i < TOTAL_AURAS; i++)
     {
         Unit::AuraList& uAuraList = unit->GetAurasByType(i);
         if (!uAuraList.size()) continue;
-        PSendSysMessage("Target unit has %d auras of type %d:", uAuraList.size(), i);
+        PSendSysMessage(LANG_COMMAND_TARGET_LISTAURATYPE, uAuraList.size(), i);
         for (Unit::AuraList::iterator itr = uAuraList.begin(); itr != uAuraList.end(); ++itr)
         {
-            PSendSysMessage("id: %d eff: %d name: %s", (*itr)->GetId(), (*itr)->GetEffIndex(), (*itr)->GetSpellProto()->SpellName[0]);
+            PSendSysMessage(LANG_COMMAND_TARGET_AURASIMPLE, (*itr)->GetId(), (*itr)->GetEffIndex(), (*itr)->GetSpellProto()->SpellName[0]);
         }
     }
     return true;
@@ -3206,7 +3207,7 @@ bool ChatHandler::HandleOutOfRange(const char* args)
 
     if(!obj)
     {
-        PSendSysMessage("Game Object (GUID: %u) not found", lowguid);
+        PSendSysMessage(LANG_GAMEOBJECT_NOT_EXIST, lowguid);
         return true;
     }
 
@@ -3236,7 +3237,7 @@ bool ChatHandler::HandleAddQuest(const char* args)
 
     if(qIter == objmgr.QuestTemplates.end())
     {
-        PSendSysMessage("Quest %u not found.",entry);
+        PSendSysMessage(LANG_COMMAND_QUEST_NOTFOUND,entry);
         return true;
     }
 
@@ -3248,7 +3249,7 @@ bool ChatHandler::HandleAddQuest(const char* args)
         uint32 item_id = fields[0].GetUInt32();
         delete result;
 
-        PSendSysMessage("Quest %u started from item. For correct work, please, add item to inventory and start quest in normal way: .additem %u",entry,item_id);
+        PSendSysMessage(LANG_COMMAND_QUEST_STARTFROMITEM, entry,item_id);
         return true;
     }
 
@@ -3286,7 +3287,7 @@ bool ChatHandler::HandleRemoveQuest(const char* args)
 
     if(qIter == objmgr.QuestTemplates.end())
     {
-        PSendSysMessage("Quest %u not found.",entry);
+        PSendSysMessage(LANG_COMMAND_QUEST_NOTFOUND, entry);
         return true;
     }
 
@@ -3310,7 +3311,7 @@ bool ChatHandler::HandleRemoveQuest(const char* args)
     // reset rewarded for restart repeatable quest
     player->getQuestStatusMap()[entry].m_rewarded = false;
 
-    SendSysMessage("Quest removed.");
+    SendSysMessage(LANG_COMMAND_QUEST_REMOVED);
     return true;
 }
 
@@ -3558,13 +3559,13 @@ bool ChatHandler::HandleFlyModeCommand(const char* args)
         data.SetOpcode(SMSG_FLY_MODE_STOP);
     else
     {
-        PSendSysMessage("Incorrect arguments. Use .flymode on/off.");
+        PSendSysMessage(LANG_COMMAND_FLYMODE_WRONGARG);
         return false;
     }
     data.append(unit->GetPackGUID());
     data << uint32(0);                                      // unk
     unit->SendMessageToSet(&data, true);
-    PSendSysMessage("%s's Fly Mode %s", unit->GetName(), args);
+    PSendSysMessage(LANG_COMMAND_FLYMODE_STATUS, unit->GetName(), args);
     return true;
 }
 
@@ -3584,7 +3585,7 @@ bool ChatHandler::HandleSendOpcodeCommand(const char* args)
     data << urand(0, 1024);
     data << urand(0, 1024);
     unit->SendMessageToSet(&data, true);
-    PSendSysMessage("Opcode %u sent to %s", opcode, unit->GetName());
+    PSendSysMessage(LANG_COMMAND_OPCODESENT, opcode, unit->GetName());
     return true;
 }
 
@@ -3690,9 +3691,9 @@ bool ChatHandler::HandleLoadPDumpCommand(const char *args)
     if(!file || !acc) return false;
 
     if (objmgr.LoadPlayerDump(file, atoi(acc)))
-        PSendSysMessage("Character loaded successfully!");
+        PSendSysMessage(LANG_COMMAND_IMPORT_SUCCESS);
     else
-        PSendSysMessage("Failed to load the character!");
+        PSendSysMessage(LANG_COMMAND_IMPORT_FAILED);
 
     return true;
 }
@@ -3708,9 +3709,9 @@ bool ChatHandler::HandleWritePDumpCommand(const char *args)
     char * guid = name ? strtok(NULL, " ") : NULL;
 
     if(objmgr.LoadPlayerDump(file, atoi(acc), name ? name : "", guid ? atoi(guid) : 0))
-        PSendSysMessage("Character dumped successfully!");
+        PSendSysMessage(LANG_COMMAND_EXPORT_SUCCESS);
     else
-        PSendSysMessage("Character dump failed!");
+        PSendSysMessage(LANG_COMMAND_EXPORT_FAILED);
 
     return true;
 }

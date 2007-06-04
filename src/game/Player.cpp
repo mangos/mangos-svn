@@ -17,6 +17,7 @@
  */
 
 #include "Common.h"
+#include "Language.h"
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
 #include "Opcodes.h"
@@ -11871,7 +11872,7 @@ void Player::_SaveInventory()
     if (error)
     {
         sLog.outError("Player::_SaveInventory - one or more errors occured save aborted!");
-        sChatHandler.SendSysMessage(GetSession(), "Item save failed!");
+        sChatHandler.SendSysMessage(GetSession(), LANG_ITEM_SAVE_FAILED);
         return;
     }
 
@@ -12329,7 +12330,7 @@ void Player::Whisper(const uint64 receiver, const std::string text, const uint32
     if(!isAcceptWhispers())
     {
         SetAcceptWhispers(true);
-        sChatHandler.SendSysMessage(GetSession() ,"Whispers accepting now: ON");
+        sChatHandler.SendSysMessage(GetSession(), LANG_COMMAND_WHISPERON);
     }
 }
 

@@ -17,6 +17,7 @@
  */
 
 #include "Common.h"
+#include "Language.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "Opcodes.h"
@@ -400,7 +401,7 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
             for(ObjectAccessor::PlayersMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
             {
                 if(itr->second->GetSession()->GetSecurity() >= 2 && itr->second->isAcceptTickets())
-                    ChatHandler::PSendSysMessage(itr->second->GetSession(),"New ticket from %s",GetPlayer()->GetName());
+                    ChatHandler::PSendSysMessage(itr->second->GetSession(), LANG_COMMAND_TICKETNEW,GetPlayer()->GetName());
             }
         }
     }
@@ -526,7 +527,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Received CMSG_ADD_FRIEND"  );
 
-    std::string friendName = "UNKNOWN";
+    std::string friendName = LANG_FRIEND_IGNORE_UNKNOWN;
     unsigned char friendResult = FRIEND_NOT_FOUND;
     Player *pfriend=NULL;
     uint64 friendGuid = 0;
@@ -638,7 +639,7 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Received CMSG_ADD_IGNORE"  );
 
-    std::string IgnoreName = "UNKNOWN";
+    std::string IgnoreName = LANG_FRIEND_IGNORE_UNKNOWN;
     unsigned char ignoreResult = FRIEND_IGNORE_NOT_FOUND;
     uint64 IgnoreGuid = 0;
 
@@ -892,7 +893,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         else
         {
             std::stringstream msgstr;
-            msgstr << "You must be at least level " << (uint32)at->requiredLevel << " to enter.";
+            msgstr <<  LANG_LEVEL_MINREQUIRED << (uint32)at->requiredLevel << LANG_LEVEL_MINREQUIRED_END;
             std::string msg = msgstr.str();
 
             SendAreaTriggerMessage(msg.c_str());

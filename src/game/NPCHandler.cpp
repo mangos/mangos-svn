@@ -17,6 +17,7 @@
  */
 
 #include "Common.h"
+#include "Language.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -97,7 +98,7 @@ void WorldSession::HandleTrainerListOpcode( WorldPacket & recv_data )
 
 void WorldSession::SendTrainerList( uint64 guid )
 {
-    std::string str = "Hello! Ready for some training?";
+    std::string str = LANG_NPC_TAINER_HELO;
     SendTrainerList( guid, str );
 }
 

@@ -104,7 +104,7 @@ bool ChatHandler::HandleAnnounceCommand(const char* args)
     if(!*args)
         return false;
 
-    std::string str ="|cffff0000[System Message]:|r";
+    std::string str = LANG_SYSTEMMESSAGE;
     str += args;
     sWorld.SendWorldText(str.c_str(), NULL);
 
@@ -116,7 +116,7 @@ bool ChatHandler::HandleNotifyCommand(const char* args)
     if(!*args)
         return false;
 
-    std::string str ="Global notify:\n";
+    std::string str = LANG_GLOBAL_NOTIFY;
     str += args;
 
     WorldPacket data(SMSG_NOTIFICATION, (str.size()+1));
@@ -149,7 +149,7 @@ bool ChatHandler::HandleVisibleCommand(const char* args)
     if (option != 0 && option != 1 || !*args)
     {
         SendSysMessage(LANG_USE_BOL);
-        PSendSysMessage("Your are: %s", m_session->GetPlayer()->isGMVisible() ?  "visible" : "invisible");
+        PSendSysMessage(LANG_YOU_ARE, m_session->GetPlayer()->isGMVisible() ?  LANG_VISIBLE : LANG_INVISIBLE);
         return true;
     }
 
@@ -444,7 +444,7 @@ bool ChatHandler::HandleModifyKnownTitlesCommand(const char* args)
     }
 
     chr->SetUInt32Value(PLAYER_FIELD_KNOWN_TITLES, titles);
-    SendSysMessage("done");
+    SendSysMessage(LANG_DONE);
 
     return true;
 }
@@ -1497,7 +1497,7 @@ bool ChatHandler::HandleLookupTeleCommand(const char * args)
         SendSysMessage(LANG_COMMAND_TELE_NOLOCATION);
     else
     {
-        reply = "Locations found are:\n" + reply;
+        reply = LANG_COMMAND_TELE_LOCATION + reply;
         SendSysMultilineMessage(reply.c_str());
     }
     return true;
@@ -1510,7 +1510,7 @@ bool ChatHandler::HandleWhispersCommand(const char* args)
     // ticket<end>
     if (!px)
     {
-        PSendSysMessage(LANG_COMMAND_WHISPERACCEPTING, m_session->GetPlayer()->isAcceptWhispers() ?  "on" : "off");
+        PSendSysMessage(LANG_COMMAND_WHISPERACCEPTING, m_session->GetPlayer()->isAcceptWhispers() ?  LANG_ON : LANG_OFF);
         return true;
     }
 
@@ -1678,7 +1678,7 @@ bool ChatHandler::HandleNameTeleCommand(const char * args)
     }
     else if (uint64 guid = objmgr.GetPlayerGUIDByName(name.c_str()))
     {
-        PSendSysMessage(LANG_TELEPORTING_TO, name.c_str()," (offline)", location.c_str());
+        PSendSysMessage(LANG_TELEPORTING_TO, name.c_str(), LANG_OFFLINE, location.c_str());
         Player::SavePositionInDB(mapid,x,y,z,ort,guid);
     }
     else
