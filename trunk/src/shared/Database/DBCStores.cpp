@@ -421,9 +421,10 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             if (spellInfo->Effect[i] == 35)                 //SPELL_EFFECT_APPLY_AREA_AURA
                 return SPELL_AURA;
             // only paladin blessings / greater blessings have this
-            if (spellInfo->EffectImplicitTargetA[i] == 21   //TARGET_S_F
+            /*if (spellInfo->EffectImplicitTargetA[i] == 21   //TARGET_S_F
                 ||spellInfo->EffectImplicitTargetA[i] == 57 //TARGET_S_F_2
-                ||spellInfo->EffectImplicitTargetA[i] == 61)//TARGET_AF_PC
+                ||spellInfo->EffectImplicitTargetA[i] == 61)//TARGET_AF_PC*/
+            if (spellInfo->SpellFamilyFlags & 268435456)
                 return SPELL_BLESSING;
         }
     }
@@ -548,9 +549,10 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                 // non-positive immunities
                 switch(spellproto->EffectMiscValue[effIndex])
                 {
-                    case 16 /*MECHANIC_HEAL    */:
-                    case 19 /*MECHANIC_SHIELDED*/:
-                    case 21 /*MECHANIC_MOUNT   */:
+                    case 16 /*MECHANIC_HEAL           */:
+                    case 19 /*MECHANIC_SHIELDED       */:
+                    case 21 /*MECHANIC_MOUNT          */:
+                    case 25 /*MECHANIC_INVULNERABILITY*/:
                         return false;
                     default:
                         break;

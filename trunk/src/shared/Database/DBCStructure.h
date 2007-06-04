@@ -278,8 +278,8 @@ struct SpellEntry
     uint32    Targets;                                      //14
     uint32    TargetCreatureType;                           //15
     uint32    RequiresSpellFocus;                           //16
-                                                            //17 not used
-    uint32    CasterAuraState;                              //18
+    uint32    CasterAuraState;                              //17
+    uint32    TargetAuraState;                              //18
                                                             //19 not used
                                                             //20 not used
     uint32    CastingTimeIndex;                             //21

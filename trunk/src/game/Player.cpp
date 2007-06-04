@@ -2354,7 +2354,8 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
             (spell_id == 21156 && m_form == FORM_BATTLESTANCE)||
             (spell_id == 21178 && m_form == FORM_BEAR) ||
             (spell_id == 33948 && m_form == FORM_FLIGHT) )
-            CastSpell(this, spell_id, true);
+            if (!spellInfo->CasterAuraState || HasFlag(UNIT_FIELD_AURASTATE, spellInfo->CasterAuraState)) //Check CasterAuraStates
+                CastSpell(this, spell_id, true);
     }
 
     // update used talent points count
