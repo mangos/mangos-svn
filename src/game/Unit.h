@@ -320,13 +320,13 @@ enum ProcFlags
 
 enum AuraState
 {
-    AURA_STATE_DODGE          = 1,
-    AURA_STATE_HEALTHLESS     = 2,
-    AURA_STATE_RACE           = 3,
-    AURA_STATE_UNKNOWN1       = 4,
-    AURA_STATE_JUDGEMENT      = 5,
-    AURA_STATE_UNKNOWN2       = 6,
-    AURA_STATE_PARRY          = 7                           // unsure.
+    AURA_STATE_DODGE          = 0,
+    AURA_STATE_HEALTHLESS     = 1,
+    AURA_STATE_RACE           = 2,
+    AURA_STATE_UNKNOWN1       = 3,
+    AURA_STATE_JUDGEMENT      = 4,
+    AURA_STATE_UNKNOWN2       = 5,
+    AURA_STATE_PARRY          = 6                           // unsure.
 };
 
 enum Mechanics
@@ -892,8 +892,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void RemoveGameObject(uint32 spellid, bool del);
         DynamicObject *GetDynObject(uint32 spellId, uint32 effIndex);
         uint32 CalculateDamage(WeaponAttackType attType);
-        void SetStateFlag(uint32 index, uint32 newFlag );
-        void RemoveStateFlag(uint32 index, uint32 oldFlag );
+        void ModifyAuraState(uint32 flag, bool apply);
         void ApplyStats(bool apply);
         void UnsummonAllTotems();
         uint32 SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint32 damage, DamageEffectType damagetype);

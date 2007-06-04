@@ -866,6 +866,17 @@ void Spell::EffectApplyAura(uint32 i)
                 unitTarget->AddAura(WeakenedSoulAura, 0);
                 sLog.outDebug("Spell: Additional Aura is: %u", WeakenedSoulSpellInfo->EffectApplyAuraName[i]);
             }
+            // Paladin Invulnerability  spells
+            if ((m_spellInfo->SpellVisual == 154 && m_spellInfo->SpellIconID == 73)                              || //DP
+                (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellFamilyFlags & 4194304) || //DS
+                (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellFamilyFlags & 128)     || //BoP
+                (m_spellInfo->SpellVisual == 7880 && m_spellInfo->SpellIconID == 2168))                             //AV
+            {
+                SpellEntry const *ForbearanceSpellInfo = sSpellStore.LookupEntry( 25771 );
+                Aura* ForbearanceAura = new Aura(ForbearanceSpellInfo, 0, unitTarget,m_caster, 0);
+                unitTarget->AddAura(ForbearanceAura, 0);
+                sLog.outDebug("Spell: Additional Aura is: %u", ForbearanceSpellInfo->EffectApplyAuraName[0]);
+            }
         }
 
         if(Aur->IsTrigger())

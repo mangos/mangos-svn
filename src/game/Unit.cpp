@@ -171,8 +171,8 @@ void Unit::Update( uint32 p_time )
         setAttackTimer(BASE_ATTACK, (p_time >= base_att ? 0 : base_att - p_time) );
     }
     if(GetHealth() < GetMaxHealth()*0.2)
-        SetFlag(UNIT_FIELD_AURASTATE, uint32(1<<1));
-    else RemoveFlag(UNIT_FIELD_AURASTATE, uint32(1<<1));
+        ModifyAuraState(AURA_STATE_HEALTHLESS, true);
+    else ModifyAuraState(AURA_STATE_HEALTHLESS, false);
 }
 
 bool Unit::haveOffhandWeapon() const
@@ -777,7 +777,7 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
 
                     // Set parry flags
                     pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
-                    pVictim->SetFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_PARRY-1)));
+                    pVictim->ModifyAuraState(AURA_STATE_PARRY, true);
                     break;
                 }
                 case MELEE_HIT_DODGE:
@@ -1225,7 +1225,8 @@ void Unit::CalcAbsorbResist(Unit *pVictim,uint32 School, const uint32 damage, ui
 
 void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType, SpellEntry const *spellCasted, bool isTriggeredSpell)
 {
-    pVictim->RemoveFlag(UNIT_FIELD_AURASTATE, uint32((1<<(AURA_STATE_PARRY-1)) | 1<<(AURA_STATE_DODGE-1)));
+    pVictim->ModifyAuraState(AURA_STATE_PARRY, false);
+    pVictim->ModifyAuraState(AURA_STATE_DODGE, false);
 
     MeleeHitOutcome outcome;
 
@@ -1347,7 +1348,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
                 ((Player*)pVictim)->UpdateDefense();
 
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
-            pVictim->SetFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_PARRY-1)));
+            pVictim->ModifyAuraState(AURA_STATE_PARRY,true);
 
             CastMeleeProcDamageAndSpell(pVictim, 0, attType, outcome, spellCasted, isTriggeredSpell);
             return;
@@ -1362,7 +1363,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
                 ((Player*)pVictim)->UpdateDefense();
 
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
-            pVictim->SetFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_DODGE-1)));
+            pVictim->ModifyAuraState(AURA_STATE_DODGE, true);
 
             CastMeleeProcDamageAndSpell(pVictim, 0, attType, outcome, spellCasted, isTriggeredSpell);
             return;
@@ -1384,7 +1385,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
 
             if(pVictim->GetTypeId() == TYPEID_PLAYER)
                 ((Player*)pVictim)->UpdateDefense();
-            pVictim->SetFlag(UNIT_FIELD_AURASTATE, uint32(1<<(AURA_STATE_DODGE-1)));
+            pVictim->ModifyAuraState(AURA_STATE_DODGE,true);
             break;
 
         case MELEE_HIT_GLANCING:
@@ -4088,14 +4089,42 @@ void Unit::RemoveAllAttackers()
     }
 }
 
-void Unit::SetStateFlag(uint32 index, uint32 newFlag )
+void Unit::ModifyAuraState(uint32 flag, bool apply)
 {
-    index |= newFlag;
-}
-
-void Unit::RemoveStateFlag(uint32 index, uint32 oldFlag )
-{
-    index &= ~ oldFlag;
+    if (apply)
+    {
+        if (!HasFlag(UNIT_FIELD_AURASTATE, 1<<flag))
+        {
+            SetFlag(UNIT_FIELD_AURASTATE, 1<<flag);
+            if(GetTypeId() == TYPEID_PLAYER)
+            {
+                const PlayerSpellMap& sp_list = ((Player*)this)->GetSpellMap();
+                for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
+                {
+                    if(itr->second->state == PLAYERSPELL_REMOVED) continue;
+                    SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
+                    if (!spellInfo || !IsPassiveSpell(itr->first)) continue;
+                    if (spellInfo->CasterAuraState & uint32(1<<flag))
+                        CastSpell(this, itr->first, true, NULL);
+                }
+            }
+        }
+    }
+    else
+    {
+        if (HasFlag(UNIT_FIELD_AURASTATE,1<<flag))
+        {
+            RemoveFlag(UNIT_FIELD_AURASTATE, 1<<flag);
+            Unit::AuraMap& tAuras = GetAuras();
+            for (Unit::AuraMap::iterator itr = tAuras.begin(); itr != tAuras.end();)
+            {
+                if ((*itr).second->GetSpellProto()->CasterAuraState & uint32(1<<flag))
+                    RemoveAura(itr);
+                else
+                    ++itr;
+            }
+        }
+    }
 }
 
 Unit *Unit::GetOwner() const
