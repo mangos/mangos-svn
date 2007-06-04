@@ -31,13 +31,13 @@ MaxPingTime = 30
 
 # DBC Language Settings
 # 0 = English
-# 1 =
+# 1 = Korean
 # 2 = French
 # 3 = German
-# 4 =
-# 5 =
-# 6 =
-# 7 =
+# 4 = Chinese
+# 5 = Taiwanese
+# 6 = Spanish
+# 7 = Russian
 # 8 = Auto Detect (Default)
 DBC.Locale = 8
 
