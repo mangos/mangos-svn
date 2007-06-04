@@ -78,6 +78,7 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_transY = 0.0f;
     m_transZ = 0.0f;
     m_transO = 0.0f;
+    m_speakTime = 0;
 
     m_objectType |= TYPE_PLAYER;
     m_objectTypeId = TYPEID_PLAYER;
@@ -11236,6 +11237,17 @@ void Player::LoadCorpse()
             ResurrectPlayer(0.5f);
         }
     }
+}
+
+void Player::UpdateSpeakTime()
+{
+    m_speakTime = time (NULL) + 1;                          // 1 sec. delay after each chat message
+}
+
+
+bool Player::CanSpeak() const
+{
+    return  m_speakTime <= time (NULL);
 }
 
 void Player::_LoadInventory(uint32 timediff)

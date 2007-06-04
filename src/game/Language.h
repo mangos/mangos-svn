@@ -486,3 +486,5 @@
 #define LANG_ARENA_THIRTY_SECONDS        "Thirty seconds until the Arena battle begins!"
 #define LANG_ARENA_FIFTEEN_SECONDS       "Fifteen seconds until the Arena battle begins!"
 #define LANG_ARENA_BEGUN                 "The Arena battle has begun!"
+
+#define LANG_WAIT_BEFORE_SPEAKING        "You must wait before speaking again."

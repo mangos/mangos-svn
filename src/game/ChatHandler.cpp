@@ -31,6 +31,8 @@
 #include "MapManager.h"
 #include "ObjectAccessor.h"
 #include "ScriptCalls.h"
+#include "Player.h"
+#include "Language.h"
 
 void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 {
@@ -54,7 +56,11 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
     // send in universal language infaction iteration allowed mode and if player in .gmon mode
     if (sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHAT) || _player->isGameMaster())
         lang = LANG_UNIVERSAL;
-
+    if (!_player->CanSpeak())
+    {
+        SendNotification(LANG_WAIT_BEFORE_SPEAKING);
+        return;
+    }
     switch(type)
     {
         case CHAT_MSG_SAY:  
@@ -68,11 +74,20 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 break;
 
             if(type == CHAT_MSG_SAY)
+            {
                 GetPlayer()->Say(msg, lang);
+                GetPlayer()->UpdateSpeakTime();
+            }
             else if(type == CHAT_MSG_EMOTE)
+            {
                 GetPlayer()->TextEmote(msg);
+                GetPlayer()->UpdateSpeakTime();
+            }
             else if(type == CHAT_MSG_YELL)
+            {
                 GetPlayer()->Yell(msg, lang);
+                GetPlayer()->UpdateSpeakTime();
+            }
         } break;        
 
         case CHAT_MSG_WHISPER:
@@ -113,6 +128,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             }
 
             GetPlayer()->Whisper(player->GetGUID(), msg, lang);
+            GetPlayer()->UpdateSpeakTime();
         } break;
 
         case CHAT_MSG_PARTY:
@@ -130,6 +146,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             WorldPacket data;
             sChatHandler.FillMessageData(&data, this, CHAT_MSG_PARTY, lang, NULL, 0, msg.c_str());
             group->BroadcastPacket(&data, group->GetMemberGroup(GetPlayer()->GetGUID()));
+            GetPlayer()->UpdateSpeakTime();
         }
         break;
         case CHAT_MSG_GUILD:
@@ -144,7 +161,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             {
                 Guild *guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
                 if (guild)
+                {
                     guild->BroadcastToGuild(this, msg);
+                    GetPlayer()->UpdateSpeakTime();
+                }
             }
 
             break;
@@ -161,7 +181,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             {
                 Guild *guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
                 if (guild)
+                {
                     guild->BroadcastToOfficers(this, msg);
+                    GetPlayer()->UpdateSpeakTime();
+                }
             }
             break;
         }
@@ -180,6 +203,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             WorldPacket data;
             sChatHandler.FillMessageData(&data, this, CHAT_MSG_RAID, lang, "", 0, msg.c_str());
             group->BroadcastPacket(&data);
+            GetPlayer()->UpdateSpeakTime();
         } break;
         case CHAT_MSG_RAID_LEADER:
         {
@@ -196,6 +220,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             WorldPacket data;
             sChatHandler.FillMessageData(&data, this, CHAT_MSG_RAID_LEADER, lang, "", 0, msg.c_str());
             group->BroadcastPacket(&data);
+            GetPlayer()->UpdateSpeakTime();
         } break;
         case CHAT_MSG_RAID_WARN:
         {
@@ -209,6 +234,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             WorldPacket data;
             sChatHandler.FillMessageData(&data, this, CHAT_MSG_RAID_WARN, lang, "", 0, msg.c_str());
             group->BroadcastPacket(&data);
+            GetPlayer()->UpdateSpeakTime();
         } break;
 
         case CHAT_MSG_BATTLEGROUND_CHAT:
@@ -223,6 +249,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             WorldPacket data;
             sChatHandler.FillMessageData(&data, this, CHAT_MSG_BATTLEGROUND_CHAT, lang, "", 0, msg.c_str());
             group->BroadcastPacket(&data);
+            GetPlayer()->UpdateSpeakTime();
         } break;
 
         case CHAT_MSG_BATTLEGROUND_LEADER:
@@ -237,6 +264,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             WorldPacket data;
             sChatHandler.FillMessageData(&data, this, CHAT_MSG_BATTLEGROUND_LEADER, lang, "", 0, msg.c_str());
             group->BroadcastPacket(&data);
+            GetPlayer()->UpdateSpeakTime();
         } break;
 
         case CHAT_MSG_CHANNEL:
@@ -250,8 +278,13 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             recv_data >> msg;
 
             if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
+            {
                 if(Channel *chn = cMgr->GetChannel(channel,_player))
+                {
                     chn->Say(_player->GetGUID(),msg.c_str(),lang);
+                    GetPlayer()->UpdateSpeakTime();
+                }
+            }
         } break;
 
         case CHAT_MSG_AFK:
@@ -286,7 +319,6 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             sLog.outError("CHAT: unknown msg type %u, lang: %u", type, lang);
     }
 }
-
 void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,4+4+8);
