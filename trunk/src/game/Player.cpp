@@ -65,7 +65,7 @@ typedef struct FriendStr
     uint32 Area;
     uint32 Level;
     uint32 Class;
-} FriendStr ;
+} FriendStr;
 
 const int32 Player::ReputationRank_Length[MAX_REPUTATION_RANK] = {36000, 3000, 3000, 3000, 6000, 12000, 21000, 1000};
 
@@ -123,6 +123,7 @@ Player::Player (WorldSession *session): Unit( 0 )
     duel = 0;
 
     m_GuildIdInvited = 0;
+    m_ArenaTeamIdInvited = 0;
 
     m_dungeonDifficulty = DUNGEONDIFFICULTY_NORMAL;
 
@@ -12634,7 +12635,7 @@ void Player::HandleInvisiblePjs()
     InvisiblePjsNear.clear();
 }
 
-bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes )
+bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes)
 {
     if(nodes.size() < 2)
         return false;
@@ -12642,10 +12643,16 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes )
     // not let cheating with start flight mounted
     if(IsMounted())
     {
-        WorldPacket data(SMSG_CAST_RESULT, 6);
-        data << uint32(0);
-        data << uint8(2);
-        data << uint8(SPELL_FAILED_NOT_MOUNTED);
+        WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
+        data << uint32(ERR_TAXIPLAYERALREADYMOUNTED);
+        GetSession()->SendPacket(&data);
+        return false;
+    }
+
+    if(m_ShapeShiftForm)
+    {
+        WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
+        data << uint32(ERR_TAXIPLAYERSHAPESHIFTED);
         GetSession()->SendPacket(&data);
         return false;
     }
@@ -12653,34 +12660,34 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes )
     // not let cheating with start flight in time of logout process
     if(GetSession()->isLogingOut())
     {
-        WorldPacket data( SMSG_ACTIVATETAXIREPLY, 4 );
-        data << uint32( 7 );                                // you can't used taxi service now
-        GetSession()->SendPacket( &data );
+        WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
+        data << uint32(ERR_TAXIPLAYERBUSY);
+        GetSession()->SendPacket(&data);
         return false;
     }
 
-    if( HasFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE ))
+    if(HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_MOVE))
         return false;
 
     // not let flight if casting not finished
     if(m_currentSpell)
     {
-        WorldPacket data( SMSG_ACTIVATETAXIREPLY, 4 );
-        data << uint32( 7 );                                // you can't used taxi service now
-        GetSession()->SendPacket( &data );
+        WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
+        data << uint32(ERR_TAXIPLAYERBUSY);
+        GetSession()->SendPacket(&data);
         return false;
     }
 
-    uint32 curloc = objmgr.GetNearestTaxiNode( GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId() );
+    uint32 curloc = objmgr.GetNearestTaxiNode(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId());
 
     uint32 sourcenode = nodes[0];
 
     // starting node != nearest node (cheat?)
     if(curloc != sourcenode)
     {
-        WorldPacket data( SMSG_ACTIVATETAXIREPLY, 4 );
-        data << uint32( 4 );
-        GetSession()->SendPacket( &data );
+        WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
+        data << uint32(ERR_TAXIUNSPECIFIEDSERVERERROR);
+        GetSession()->SendPacket(&data);
         return false;
     }
 
@@ -12696,8 +12703,8 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes )
     {
         uint32 path, cost;
 
-        lastnode =  nodes[i];
-        objmgr.GetTaxiPath( prevnode, lastnode, path, cost);
+        lastnode = nodes[i];
+        objmgr.GetTaxiPath(prevnode, lastnode, path, cost);
 
         if(!path)
             break;
@@ -12714,21 +12721,21 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes )
 
     uint16 MountId = objmgr.GetTaxiMount(sourcenode, GetTeam());
 
-    if ( MountId == 0 || sourcepath == 0)
+    if (MountId == 0 || sourcepath == 0)
     {
-        WorldPacket data( SMSG_ACTIVATETAXIREPLY, 4 );
-        data << uint32( 1 );
-        GetSession()->SendPacket( &data );
+        WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
+        data << uint32(ERR_TAXIUNSPECIFIEDSERVERERROR);
+        GetSession()->SendPacket(&data);
         ClearTaxiDestinations();
         return false;
     }
 
     uint32 money = GetMoney();
-    if(money < totalcost )
+    if(money < totalcost)
     {
-        WorldPacket data( SMSG_ACTIVATETAXIREPLY, 4 );
-        data << uint32( 3 );
-        GetSession()->SendPacket( &data );
+        WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
+        data << uint32(ERR_TAXINOTENOUGHMONEY);
+        GetSession()->SendPacket(&data);
         ClearTaxiDestinations();
         return false;
     }
@@ -12740,15 +12747,15 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes )
     RemovePet(NULL,PET_SAVE_NOT_IN_SLOT);
 
     //Checks and preparations done, DO FLIGHT
-    setDismountCost( money - totalcost);
+    setDismountCost(money - totalcost);
 
-    WorldPacket data( SMSG_ACTIVATETAXIREPLY, 4 );
-    data << uint32( 0 );
-    GetSession()->SendPacket( &data );
+    WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
+    data << uint32(ERR_TAXIOK);
+    GetSession()->SendPacket(&data);
 
-    sLog.outDebug( "WORLD: Sent SMSG_ACTIVATETAXIREPLY" );
+    sLog.outDebug("WORLD: Sent SMSG_ACTIVATETAXIREPLY");
 
-    GetSession()->SendDoFlight( MountId, sourcepath );
+    GetSession()->SendDoFlight(MountId, sourcepath);
 
     return true;
 }

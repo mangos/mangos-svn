@@ -28,41 +28,39 @@
 
 BattleGround::BattleGround()
 {
-    m_ID = 0;
-    m_InstanceID = 0;
-    m_Status = 0;
-    m_StartTime = 0;
-    m_EndTime = 0;
+    m_ID                = 0;
+    m_InstanceID        = 0;
+    m_Status            = 0;
+    m_StartTime         = 0;
+    m_EndTime           = 0;
     m_LastResurrectTime = 0;
-    m_Name = "";
-    m_LevelMin = 0;
-    m_LevelMax = 0;
-
-    m_TeamScores[0] = 0;
-    m_TeamScores[1] = 0;
+    m_Name              = "";
+    m_LevelMin          = 0;
+    m_LevelMax          = 0;
 
     m_MaxPlayersPerTeam = 0;
-    m_MaxPlayers = 0;
+    m_MaxPlayers        = 0;
     m_MinPlayersPerTeam = 0;
-    m_MinPlayers = 0;
+    m_MinPlayers        = 0;
 
-    m_MapId = 0;
-    m_TeamStartLocX[0] = 0;
-    m_TeamStartLocX[1] = 0;
+    m_MapId             = 0;
 
-    m_TeamStartLocY[0] = 0;
-    m_TeamStartLocY[1] = 0;
+    m_TeamStartLocX[0]  = 0;
+    m_TeamStartLocX[1]  = 0;
 
-    m_TeamStartLocZ[0] = 0;
-    m_TeamStartLocZ[1] = 0;
+    m_TeamStartLocY[0]  = 0;
+    m_TeamStartLocY[1]  = 0;
 
-    m_TeamStartLocO[0] = 0;
-    m_TeamStartLocO[1] = 0;
+    m_TeamStartLocZ[0]  = 0;
+    m_TeamStartLocZ[1]  = 0;
 
-    m_HordeRaid = NULL;
-    m_AllianceRaid = NULL;
+    m_TeamStartLocO[0]  = 0;
+    m_TeamStartLocO[1]  = 0;
 
-    m_Queue_type = 1;
+    m_raids[0]          = NULL;
+    m_raids[1]          = NULL;
+
+    m_Queue_type        = 1;
 }
 
 BattleGround::~BattleGround()
@@ -145,7 +143,7 @@ void BattleGround::Update(time_t diff)
                         if(HasFreeSlots(plr->GetTeam()))
                         {
                             plr->SaveToDB();
-                            sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), STATUS_WAIT_JOIN, 120000, 0);
+                            sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME, 0);
                             plr->GetSession()->SendPacket(&data);
                             itr->second.IsInvited = true;
                             itr->second.InviteTime = getMSTime();
@@ -158,13 +156,13 @@ void BattleGround::Update(time_t diff)
                 {
                     uint32 t = getMSTime() - itr->second.LastInviteTime;
                     uint32 tt = getMSTime() - itr->second.InviteTime;
-                    if (tt >= 120000)                       // remove idle player from queue
+                    if (tt >= INVITE_ACCEPT_WAIT_TIME)      // remove idle player from queue
                     {
                         m_RemovedPlayers[itr->first] = 0;
                     }
-                    else if(t >= 30000)                     // remind every 30 seconds
+                    else if(t >= REMIND_INTERVAL)           // remind every 30 seconds
                     {
-                        sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), STATUS_WAIT_JOIN, 120000 - tt, 0);
+                        sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME - tt, 0);
                         plr->GetSession()->SendPacket(&data);
                         itr->second.LastInviteTime = getMSTime();
                     }
@@ -173,7 +171,7 @@ void BattleGround::Update(time_t diff)
             else
             {
                 uint32 t = getMSTime() - itr->second.LastOnlineTime;
-                if(t >= 300000)                             // 5 minutes
+                if(t >= MAX_OFFLINE_TIME)                   // 5 minutes
                 {
                     m_RemovedPlayers[itr->first] = 0;       // add to remove list (queue)
                 }
@@ -194,7 +192,7 @@ void BattleGround::Update(time_t diff)
             else
             {
                 uint32 t = getMSTime() - itr->second.LastOnlineTime;
-                if(t >= 300000)                             // 5 minutes
+                if(t >= MAX_OFFLINE_TIME)                   // 5 minutes
                 {
                     m_RemovedPlayers[itr->first] = 1;       // add to remove list (BG)
                 }
@@ -202,7 +200,7 @@ void BattleGround::Update(time_t diff)
         }
     }
 
-    bool need_res = (getMSTime() - m_LastResurrectTime) >= 30000;   // 30 seconds passed
+    bool need_res = (getMSTime() - m_LastResurrectTime) >= RESURRECTION_INTERVAL;
     if(GetReviveQueueSize() && need_res)
     {
         for(std::map<uint64, uint64>::iterator itr = m_ReviveQueue.begin(); itr != m_ReviveQueue.end(); ++itr)
@@ -222,7 +220,7 @@ void BattleGround::Update(time_t diff)
             if(plr->IsWithinDistInMap(sh, 10.0f))           // 20 yards radius
             {
                 // spell not working, only visual effect :(
-                sh->CastSpell(plr, 22012, true, 0, 0, 0);   // Spirit Heal, effect 117
+                sh->CastSpell(plr, SPELL_SPIRIT_HEAL, true, 0, 0, 0);   // Spirit Heal, effect 117
 
                 plr->ResurrectPlayer(1.0f);                 // temp
                 plr->SpawnCorpseBones();                    // temp
@@ -242,7 +240,7 @@ void BattleGround::Update(time_t diff)
     {
         // remove all players from battleground after 2 minutes
         uint32 d = getMSTime() - GetEndTime();
-        if(d >= 120000)                                     // 2 minutes
+        if(d >= TIME_TO_AUTOREMOVE)                         // 2 minutes
         {
             for(std::map<uint64, BattleGroundPlayer>::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
             {
@@ -360,7 +358,7 @@ void BattleGround::EndBattleGround(uint32 winner)
     {
         winmsg = LANG_BG_A_WINS;
 
-        PlaySoundToAll(8455);                               // alliance wins sound...
+        PlaySoundToAll(SOUND_ALLIANCE_WINS);                // alliance wins sound...
 
         sBattleGroundMgr.BuildPvpLogDataPacket(&data, this, 1);
         SendPacketToAll(&data);
@@ -369,7 +367,7 @@ void BattleGround::EndBattleGround(uint32 winner)
     {
         winmsg = LANG_BG_H_WINS;
 
-        PlaySoundToAll(8454);                               // horde wins sound...
+        PlaySoundToAll(SOUND_HORDE_WINS);                   // horde wins sound...
 
         sBattleGroundMgr.BuildPvpLogDataPacket(&data, this, 0);
         SendPacketToAll(&data);
@@ -399,7 +397,7 @@ void BattleGround::EndBattleGround(uint32 winner)
 
         uint32 time1 = getMSTime() - GetStartTime();
 
-        sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), STATUS_IN_PROGRESS, 120000, time1); // 2 minutes to auto leave BG
+        sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), STATUS_IN_PROGRESS, TIME_TO_AUTOREMOVE, time1);
         plr->GetSession()->SendPacket(&data);
 
         if(plr->GetTeam() == winner)
@@ -409,16 +407,13 @@ void BattleGround::EndBattleGround(uint32 winner)
             switch(GetID())
             {
                 case BATTLEGROUND_AV:
-                    // Create AV Mark of Honor (Winner)
-                    mark = 24955;
+                    mark = ITEM_AV_MARK_WINNER;
                     break;
                 case BATTLEGROUND_WS:
-                    // Create WSG Mark of Honor (Winner)
-                    mark = 24951;
+                    mark = ITEM_WSG_MARK_WINNER;
                     break;
                 case BATTLEGROUND_AB:
-                    // Create AB Mark of Honor (Winner)
-                    mark = 24953;
+                    mark = ITEM_AB_MARK_WINNER;
                     break;
             }
         }
@@ -427,13 +422,13 @@ void BattleGround::EndBattleGround(uint32 winner)
             switch(GetID())
             {
                 case BATTLEGROUND_AV:
-                    mark = 24954;                           //Create AV Mark of Honor (Loser)
+                    mark = ITEM_AV_MARK_LOOSER;
                     break;
                 case BATTLEGROUND_WS:
-                    mark = 24950;                           //Create WSG Mark of Honor (Loser)
+                    mark = ITEM_WSG_MARK_LOOSER;
                     break;
                 case BATTLEGROUND_AB:
-                    mark = 24952;                           //Create AB Mark of Honor (Loser)
+                    mark = ITEM_AB_MARK_LOOSER;
                     break;
             }
         }
@@ -449,38 +444,8 @@ void BattleGround::EndBattleGround(uint32 winner)
         SendPacketToAll(&data);
     }
 
-    SetTeamPoint(ALLIANCE, 0);
-    SetTeamPoint(HORDE, 0);
-}
-
-Group *BattleGround::GetBgRaid(uint32 TeamId) const
-{
-    switch(TeamId)
-    {
-        case ALLIANCE:
-            return m_AllianceRaid;
-        case HORDE:
-            return m_HordeRaid;
-        default:
-            sLog.outDebug("unknown teamid in BattleGround::SetBgRaid(): %u", TeamId);
-            return NULL;
-    }
-}
-
-void BattleGround::SetBgRaid(uint32 TeamId, Group *bg_raid)
-{
-    switch(TeamId)
-    {
-        case ALLIANCE:
-            m_AllianceRaid = bg_raid;
-            break;
-        case HORDE:
-            m_HordeRaid = bg_raid;
-            break;
-        default:
-            sLog.outDebug("unknown teamid in BattleGround::SetBgRaid(): %u", TeamId);
-            break;
-    }
+    //SetTeamPoint(ALLIANCE, 0);
+    //SetTeamPoint(HORDE, 0);
 }
 
 void BattleGround::BlockMovement(Player *plr)
@@ -565,8 +530,8 @@ void BattleGround::RemovePlayer(uint64 guid, bool Transport, bool SendPacket)
         SetStatus(STATUS_WAIT_QUEUE);
         m_Players.clear();
         m_PlayerScores.clear();
-        m_TeamScores[0] = 0;
-        m_TeamScores[1] = 0;
+        //m_TeamScores[0] = 0;
+        //m_TeamScores[1] = 0;
     }
 }
 
@@ -668,7 +633,7 @@ bool BattleGround::CanStartBattleGround()
 void BattleGround::StartBattleGround()
 {
     SetStartTime(getMSTime());
-    SetLastResurrectTime(getMSTime() + 30000);
+    SetLastResurrectTime(getMSTime() + RESURRECTION_INTERVAL);
 
     QueuedPlayersMap& pQueue = m_QueuedPlayers[GetQueueType()];
 
@@ -681,7 +646,7 @@ void BattleGround::StartBattleGround()
         {
             // Save before join (player must loaded out of bg, if disconnected at bg,etc), it's not blizz like...
             plr->SaveToDB();
-            sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), STATUS_WAIT_JOIN, 120000, 0);  // 2 minutes to remove from queue
+            sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME , 0);
             plr->GetSession()->SendPacket(&data);
             itr->second.IsInvited = true;
             itr->second.InviteTime = getMSTime();
@@ -760,14 +725,6 @@ bool BattleGround::HasFreeSlots(uint32 Team) const
     return (free < GetMaxPlayersPerTeam());
 }
 
-void BattleGround::UpdateTeamScore(uint32 team)
-{
-    if(team == ALLIANCE)
-        UpdateWorldState(1581, GetTeamScore(team));
-    if(team == HORDE)
-        UpdateWorldState(1582, GetTeamScore(team));
-}
-
 void BattleGround::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
 {
     std::map<uint64, BattleGroundScore>::iterator itr = m_PlayerScores.find(Source->GetGUID());
@@ -793,14 +750,6 @@ void BattleGround::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
                 break;
         }
     }
-}
-
-void BattleGround::UpdateFlagState(uint32 team, uint32 value)
-{
-    if(team == ALLIANCE)
-        UpdateWorldState(2339, value);
-    else if(team == HORDE)
-        UpdateWorldState(2338, value);
 }
 
 uint32 BattleGround::GetQueuedPlayersSize(uint32 level) const
@@ -829,7 +778,7 @@ void BattleGround::AddPlayerToResurrectQueue(uint64 npc_guid, uint64 player_guid
     if(!plr)
         return;
 
-    plr->CastSpell(plr, 2584, true, 0, 0, 0); // "Waiting to Resurrect"
+    plr->CastSpell(plr, SPELL_WAITING_FOR_RESURRECT, true, 0, 0, 0);
 }
 
 void BattleGround::RemovePlayerFromResurrectQueue(uint64 player_guid)
@@ -843,7 +792,7 @@ void BattleGround::RemovePlayerFromResurrectQueue(uint64 player_guid)
             if(!plr)
                 return;
 
-            plr->RemoveAurasDueToSpell(2584);
+            plr->RemoveAurasDueToSpell(SPELL_WAITING_FOR_RESURRECT);
 
             break;
         }

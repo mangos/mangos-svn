@@ -47,7 +47,7 @@ void BattleGroundEY::RemovePlayer(Player *plr,uint64 guid)
 
 }
 
-void BattleGroundEY::HandleAreaTrigger(Player* Source, uint32 Trigger)
+void BattleGroundEY::HandleAreaTrigger(Player *Source, uint32 Trigger)
 {
     // this is wrong way to implement these things. On official it done by gameobject spell cast.
     if(GetStatus() != STATUS_IN_PROGRESS)
@@ -57,8 +57,9 @@ void BattleGroundEY::HandleAreaTrigger(Player* Source, uint32 Trigger)
     switch(Trigger)
     {
         case 0:
+            break;
         default:
-            sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %d", Trigger);
+            sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);
             Source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", Trigger);
             break;
     }
@@ -69,7 +70,7 @@ void BattleGroundEY::HandleAreaTrigger(Player* Source, uint32 Trigger)
 
         if(!Entry)
         {
-            sLog.outError("ERROR: Tried to add unknown spell id %d to plr.", SpellId);
+            sLog.outError("ERROR: Tried to cast unknown spell id %u to player.", SpellId);
             return;
         }
 

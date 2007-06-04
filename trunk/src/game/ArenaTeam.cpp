@@ -74,6 +74,7 @@ bool ArenaTeam::create(uint64 captainGuid, uint32 type, std::string ArenaTeamNam
     sDatabase.PExecute("INSERT INTO `arena_team` (`arenateamid`,`name`,`captainguid`,`type`,`EmblemStyle`,`EmblemColor`,`BorderStyle`,`BorderColor`,`BackgroundColor`) "
         "VALUES('%u','%s','%u','%u','%u','%u','%u','%u','%u')",
         Id, ArenaTeamName.c_str(), GUID_LOPART(CaptainGuid), Type, EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor);
+    sDatabase.PExecute("INSERT INTO `arena_team_stats` (`arenateamid`, `rating`, `games`, `wins`, `played`, `wins2`, `rank`) VALUES ('%u', '0', '0', '0', '0', '0', '0')", Id);
     sDatabase.CommitTransaction();
 
     AddMember(CaptainGuid);

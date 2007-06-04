@@ -20,6 +20,15 @@
 
 #include "BattleGround.h"
 
+enum BattleGroundABPoints
+{
+    STABLES      = 0,
+    GOLD_MINE    = 1,
+    FARM         = 2,
+    LUMBER_MILL  = 3,
+    BLACKSMITH   = 4
+};
+
 class BattleGroundAB : public BattleGround
 {
     friend class BattleGroundMgr;
@@ -29,12 +38,17 @@ class BattleGroundAB : public BattleGround
         ~BattleGroundAB();
         void Update(time_t diff);
         void RemovePlayer(Player *plr,uint64 guid);
-        void HandleAreaTrigger(Player* Source, uint32 Trigger);
+        void HandleAreaTrigger(Player *Source, uint32 Trigger);
         void SetupBattleGround();
 
-    private:
-        /* AB */
-        uint32 Points[5];
+        /* Scorekeeping */
+        uint32 GetTeamScore(uint32 TeamID) const { return m_TeamScores[GetTeamIndexByTeamId(TeamID)]; }
+        void AddPoint(uint32 TeamID, uint32 Points = 1) { m_TeamScores[GetTeamIndexByTeamId(TeamID)] += Points; }
+        void SetTeamPoint(uint32 TeamID, uint32 Points = 0) { m_TeamScores[GetTeamIndexByTeamId(TeamID)] = Points; }
+        void RemovePoint(uint32 TeamID, uint32 Points = 1) { m_TeamScores[GetTeamIndexByTeamId(TeamID)] -= Points; }
 
+    private:
+        uint32 Points[5];
+        uint32 m_TeamScores[2];
 };
 #endif

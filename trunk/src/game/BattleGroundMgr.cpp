@@ -84,7 +84,7 @@ void BattleGroundMgr::BuildBattleGroundStatusPacket(WorldPacket *data, BattleGro
     *data << bg->GetID();                                   // id from DBC
     *data << uint16(0x1F90);                                // unk value 8080
     *data << bg->GetInstanceID();                           // instance id
-    *data << uint8(team == ALLIANCE ? 0 : 1);               // team
+    *data << bg->GetTeamIndexByTeamId(team);                // team
     *data << uint32(StatusID);                              // status
     switch(StatusID)
     {
