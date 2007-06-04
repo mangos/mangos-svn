@@ -7,6 +7,11 @@ RealmID = 1
 # 0 NORMAL 1 PVP 4 NORMAL 6 RP 8 RPPVP
 GameType = 1
 
+# Allow server use expansion content
+#          0 (not check expansion maps existence, not allow wisit its, not allow create new race characters, ignore account expansion setting)
+# Default: 1 (check expansion maps existence, and if client support expansion and account have expansion setting then allow visit expansion maps, allow create new races character)
+Expansion = 1
+
 # Data directory setting.
 # Important: DataDir needs to be quoted, as it is a string which may
 # contain space characters.
