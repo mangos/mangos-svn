@@ -2482,11 +2482,11 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `petition`;
 CREATE TABLE `petition` (
   `ownerguid` int(10) unsigned NOT NULL,
-  `charterguid` int(10) unsigned default '0',
+  `petitionguid` int(10) unsigned default '0',
   `name` varchar(255) NOT NULL default '',
   `type` int(10) unsigned NOT NULL default '0',
   PRIMARY KEY  (`ownerguid`),
-  UNIQUE KEY `index_ownerguid_charterguid` (`ownerguid`,`charterguid`)
+  UNIQUE KEY `index_ownerguid_petitionguid` (`ownerguid`,`petitionguid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
 
 --
@@ -2505,10 +2505,10 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `petition_sign`;
 CREATE TABLE `petition_sign` (
   `ownerguid` int(10) unsigned NOT NULL,
-  `charterguid` int(11) unsigned NOT NULL default '0',
+  `petitionguid` int(11) unsigned NOT NULL default '0',
   `playerguid` int(11) unsigned NOT NULL default '0',
   `player_account` int(11) unsigned NOT NULL default '0',
-  PRIMARY KEY  (`charterguid`,`playerguid`)
+  PRIMARY KEY  (`petitionguid`,`playerguid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Guild System';
 
 --
