@@ -548,7 +548,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket,4);
+    CHECK_PACKET_SIZE(recvPacket,4+2);
 
     uint32 spellId;
 

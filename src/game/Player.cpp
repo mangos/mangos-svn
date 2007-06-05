@@ -6759,14 +6759,6 @@ uint16 Player::GetPosByGuid( uint64 guid ) const
         }
     }
 
-    // In this case GUID is trade slot (enchanting fix)
-    if (guid < TRADE_SLOT_COUNT && GetTrader())
-    {
-        Item *item = GetItemByPos(tradeItems[guid]);
-        if (item)
-            return GetPosByGuid(item->GetGUID());
-    }
-
     return 0;
 }
 

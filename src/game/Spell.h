@@ -52,6 +52,7 @@ enum SpellCastTargetFlags
     TARGET_FLAG_SOURCE_LOCATION  = 0x0020,
     TARGET_FLAG_DEST_LOCATION    = 0x0040,
     TARGET_FLAG_OBJECT           = 0x0800,
+    TARGET_FLAG_TRADE_ITEM       = 0x1000,
     TARGET_FLAG_STRING           = 0x2000
 };
 
