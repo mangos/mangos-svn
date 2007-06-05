@@ -175,14 +175,16 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
             if(_player->tradeItems[i] != NULL_SLOT )
             {
                 sLog.outDebug("player trade item bag: %u slot: %u",_player->tradeItems[i] >> 8, _player->tradeItems[i] & 255 );
-                myItems[i]=_player->GetItemByPos( _player->tradeItems[i] );
-                myItems[i]->SetInTrade();
+                myItems[i]=_player->GetItemByPos( _player->tradeItems[i] ); //Can return NULL
+                if (myItems[i])
+                    myItems[i]->SetInTrade();
             }
             if(_player->pTrader->tradeItems[i] != NULL_SLOT)
             {
                 sLog.outDebug("partner trade item bag: %u slot: %u",_player->pTrader->tradeItems[i] >> 8,_player->pTrader->tradeItems[i] & 255);
-                hisItems[i]=_player->pTrader->GetItemByPos( _player->pTrader->tradeItems[i]);
-                hisItems[i]->SetInTrade();
+                hisItems[i]=_player->pTrader->GetItemByPos( _player->pTrader->tradeItems[i]); //Can return NULL
+                if(hisItems[i])
+                    hisItems[i]->SetInTrade();
             }
         }
 
