@@ -124,15 +124,16 @@ void SpellCastTargets::read ( WorldPacket * data,Unit *caster )
     if(m_targetMask & TARGET_FLAG_OBJECT)
         m_GOTargetGUID = readGUID(*data);
 
-    if((m_targetMask & TARGET_FLAG_ITEM) && caster->GetTypeId() == TYPEID_PLAYER)
+    if((m_targetMask & (TARGET_FLAG_ITEM | TARGET_FLAG_TRADE_ITEM)) && caster->GetTypeId() == TYPEID_PLAYER)
     {
         uint64 _guid = readGUID(*data);
-        m_itemTarget = ((Player*)caster)->GetItemByPos( ((Player*)caster)->GetPosByGuid(_guid));
-        if (!m_itemTarget)
+        if(m_targetMask & TARGET_FLAG_ITEM)
+            m_itemTarget = ((Player*)caster)->GetItemByPos( ((Player*)caster)->GetPosByGuid(_guid));
+        else
         {
             Player* pTrader = ((Player*)caster)->GetTrader();
-            if(pTrader)
-                m_itemTarget = pTrader->GetItemByPos(pTrader->GetPosByGuid(_guid));
+            if(pTrader && _guid < TRADE_SLOT_COUNT)
+                m_itemTarget = pTrader->GetItemByPos(pTrader->GetItemPosByTradeSlot(_guid));
         }
     }
 

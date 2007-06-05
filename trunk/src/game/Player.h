@@ -805,6 +805,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         Player* GetTrader() const { return pTrader; }
         void ClearTrade();
         void TradeCancel(bool sendback);
+        uint16 GetItemPosByTradeSlot(uint32 slot) const { return tradeItems[slot]; }
 
         void UpdateEnchantTime(uint32 time);
         void ReducePoisonCharges(uint32 enchantId);
