@@ -3497,9 +3497,11 @@ void Player::CleanupChannels()
     for(JoinedChannelsList::iterator i = m_channels.begin(), next; i != m_channels.end(); i = next)
     {
         next = i; ++next;
-        (*i)->Leave(GetGUID(),false);
+        (*i)->Leave(GetGUID(),false);                       // not send to client, not remove from player's channel list
+        std::string name = (*i)->GetName();                 // store name, (*i)erase in LeftChannel
+        LeftChannel(*i);                                    // remove from player's channel list
         if(ChannelMgr* cMgr = channelMgr(GetTeam()))
-            cMgr->LeftChannel((*i)->GetName());
+            cMgr->LeftChannel(name);                        // deleted channel if empty
     }
     sLog.outDebug("Player: channels cleaned up!");
 }
@@ -3545,8 +3547,10 @@ void Player::UpdateLocalChannels()
 
             // leave old channel
             (*i)->Leave(GetGUID(),false);                   // not send leave channel, it already replaced at client
-            cMgr->LeftChannel((*i)->GetName());
-        }
+            std::string name = (*i)->GetName();             // stroe name, (*i)erase in LeftChannel
+            LeftChannel(*i);                                // remove from player's channel list
+            cMgr->LeftChannel(name);                        // delete if empty
+       }
     }
     sLog.outDebug("Player: channels cleaned up!");
 }
