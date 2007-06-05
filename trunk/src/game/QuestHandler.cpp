@@ -333,15 +333,17 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
     {
         quest = _player->GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot + 0);
 
+        if( quest )
+        {
+            if(!_player->TakeQuestSourceItem( quest, true ))
+                return;                                     // can't un-equip some items, reject quest cancel
+
+            _player->SetQuestStatus( quest, QUEST_STATUS_NONE);
+        }
         _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot + 0, 0);
         _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot + 1, 0);
         _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot + 2, 0);
 
-        if( quest )
-        {
-            _player->SetQuestStatus( quest, QUEST_STATUS_NONE);
-            _player->TakeQuestSourceItem( quest );
-        }
     }
 }
 

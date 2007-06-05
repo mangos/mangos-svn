@@ -767,6 +767,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint8 CanStoreItems( Item **pItem,int count) const;
         uint8 CanEquipNewItem( uint8 slot, uint16 &dest, uint32 item, uint32 count, bool swap ) const;
         uint8 CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bool not_loading = true ) const;
+        uint8 CanUnequipItems( uint32 item, uint32 count ) const;
         uint8 CanUnequipItem( uint16 src, bool swap ) const;
         uint8 CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap, bool not_loading = true ) const;
         uint8 CanUseItem( Item *pItem, bool not_loading = true ) const;
@@ -783,7 +784,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void RemoveItem( uint8 bag, uint8 slot, bool update );
         void RemoveItemCount( uint32 item, uint32 count, bool update );
         void DestroyItem( uint8 bag, uint8 slot, bool update );
-        void DestroyItemCount( uint32 item, uint32 count, bool update );
+        void DestroyItemCount( uint32 item, uint32 count, bool update, bool unequip_check = false);
         void DestroyItemCount( Item* item, uint32& count, bool update );
         void SplitItem( uint16 src, uint16 dst, uint32 count );
         void SwapItem( uint16 src, uint16 dst );
@@ -854,7 +855,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool SatisfyQuestNextChain( uint32 quest_id, bool msg );
         bool SatisfyQuestPrevChain( uint32 quest_id, bool msg );
         bool GiveQuestSourceItem( uint32 quest_id );
-        void TakeQuestSourceItem( uint32 quest_id );
+        bool TakeQuestSourceItem( uint32 quest_id, bool msg );
         bool GetQuestRewardStatus( uint32 quest_id );
         QuestStatus GetQuestStatus( uint32 quest_id );
         void SetQuestStatus( uint32 quest_id, QuestStatus status );

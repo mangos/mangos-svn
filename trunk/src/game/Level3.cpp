@@ -3301,7 +3301,8 @@ bool ChatHandler::HandleRemoveQuest(const char* args)
             player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot + 1, 0);
             player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot + 2, 0);
 
-            player->TakeQuestSourceItem( quest );
+            // we ignore unequippable quest items in this case, its' still be equipped
+            player->TakeQuestSourceItem( quest, false );
         }
     }
 

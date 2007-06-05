@@ -850,6 +850,10 @@ bool Item::CanBeTraded() const
         return false;
     if(IsBag() && !((Bag*)this)->IsEmpty())
         return false;
+
+    Player* owner = GetOwner();
+    if(owner && owner->CanUnequipItem(uint16(GetBagSlot()) << 8 | GetSlot(),false) !=  EQUIP_ERR_OK )
+        return false;
     return true;
 }
 
