@@ -4712,27 +4712,31 @@ void Player::UpdateHonorFields()
     uint32 yesterday = today - DAY;
 
     QueryResult *result = sDatabase.PQuery("SELECT sum(`honor`) FROM `character_kill` WHERE `guid`='%u' AND `date`<'%u'", GUID_LOPART(GetGUID()), today);
-    if(result && (*result)[0].GetFloat() != 0)
+    if(result)
     {
-        float honor=0.0, honor_yesterday=0.0;
-        uint32 kills_yesterday=0;
-
-        honor = (*result)[0].GetFloat();
+        float honor = (*result)[0].GetFloat();
         delete result;
-        result = sDatabase.PQuery("SELECT sum(`honor`),count(`honor`) FROM `character_kill` WHERE `guid`='%u' AND `date`<'%u' AND `date`>='%u'", GUID_LOPART(GetGUID()), today, yesterday);
-        if(result)
+
+        if(honor != 0)
         {
-            honor_yesterday = (*result)[0].GetFloat();
-            kills_yesterday = (*result)[1].GetUInt32();
-            delete result;
+            float honor=0.0, honor_yesterday=0.0;
+            uint32 kills_yesterday=0;
+
+            result = sDatabase.PQuery("SELECT sum(`honor`),count(`honor`) FROM `character_kill` WHERE `guid`='%u' AND `date`<'%u' AND `date`>='%u'", GUID_LOPART(GetGUID()), today, yesterday);
+            if(result)
+            {
+                honor_yesterday = (*result)[0].GetFloat();
+                kills_yesterday = (*result)[1].GetUInt32();
+                delete result;
+            }
+
+            SetHonorPoints(GetHonorPoints()+uint32(honor));
+            SetUInt32Value(PLAYER_FIELD_HONOR_TODAY, 0);
+            SetUInt32Value(PLAYER_FIELD_HONOR_YESTERDAY, (uint32)(honor_yesterday*10));
+            SetUInt32Value(PLAYER_FIELD_KILLS, (kills_yesterday<<16));
+
+            sDatabase.PQuery("DELETE FROM `character_kill` WHERE `date`<'%u' AND `guid`='%u'", today,GUID_LOPART(GetGUID()));
         }
-
-        SetHonorPoints(GetHonorPoints()+uint32(honor));
-        SetUInt32Value(PLAYER_FIELD_HONOR_TODAY, 0);
-        SetUInt32Value(PLAYER_FIELD_HONOR_YESTERDAY, (uint32)(honor_yesterday*10));
-        SetUInt32Value(PLAYER_FIELD_KILLS, (kills_yesterday<<16));
-
-        sDatabase.PQuery("DELETE FROM `character_kill` WHERE `date`<'%u' AND `guid`='%u'", today,GUID_LOPART(GetGUID()));
     }
 }
 
@@ -5201,7 +5205,7 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
             case ITEM_MOD_HIT_RANGED_RATING:
                 ApplyRatingMod(PLAYER_FIELD_RANGED_HIT_RATING, val, apply);
                 break;
-			case ITEM_MOD_HIT_SPELL_RATING:
+            case ITEM_MOD_HIT_SPELL_RATING:
                 ApplyRatingMod(PLAYER_FIELD_SPELL_HIT_RATING, val, apply);
                 break;
             case ITEM_MOD_CRIT_MELEE_RATING:

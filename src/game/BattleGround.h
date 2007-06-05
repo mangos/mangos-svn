@@ -30,11 +30,11 @@
 #define SOUND_HORDE_WINS            8454
 #define SOUND_ALLIANCE_WINS         8455
 
-#define ITEM_WSG_MARK_LOOSER        24950
+#define ITEM_WSG_MARK_LOSER         24950
 #define ITEM_WSG_MARK_WINNER        24951
-#define ITEM_AB_MARK_LOOSER         24952
+#define ITEM_AB_MARK_LOSER          24952
 #define ITEM_AB_MARK_WINNER         24953
-#define ITEM_AV_MARK_LOOSER         24954
+#define ITEM_AV_MARK_LOSER          24954
 #define ITEM_AV_MARK_WINNER         24955
 
 #define SPELL_WAITING_FOR_RESURRECT 2584
