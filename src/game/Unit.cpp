@@ -1102,11 +1102,11 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
 
         Powers power = Powers(mod->m_miscvalue);
 
-        if(getPowerType() != power)
+        if(pVictim->getPowerType() != power)
             return;
 
-        int32 gain = ModifyPower(power,mod->m_amount);
-        ThreatAssist(this, float(gain) * 0.5f, spellProto->School, spellProto);
+        int32 gain = pVictim->ModifyPower(power,mod->m_amount);
+        ThreatAssist(pVictim, float(gain) * 0.5f, spellProto->School, spellProto);
 
         if(pVictim->GetTypeId() == TYPEID_PLAYER || GetTypeId() == TYPEID_PLAYER)
             SendHealSpellOnPlayerPet(pVictim, spellProto->Id, mod->m_amount, power);
