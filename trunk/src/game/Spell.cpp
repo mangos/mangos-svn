@@ -1933,11 +1933,21 @@ uint8 Spell::CanCast()
             }
         }
 
-		if(IsPositiveSpell(m_spellInfo->Id))
-		{
-			if(target->IsImmunedToSpell(m_spellInfo))
-				return SPELL_FAILED_TARGET_AURASTATE;
-		}
+        if(IsPositiveSpell(m_spellInfo->Id))
+        {
+            if(target->IsImmunedToSpell(m_spellInfo))
+                return SPELL_FAILED_TARGET_AURASTATE;
+        }
+
+        if (m_spellInfo->CasterAuraState && !(m_caster->HasFlag(UNIT_FIELD_AURASTATE, (1<<(m_spellInfo->CasterAuraState-1)))))
+        {
+            return SPELL_FAILED_CASTER_AURASTATE;
+        }
+
+        if (m_spellInfo->TargetAuraState && !(target->HasFlag(UNIT_FIELD_AURASTATE, (1<<(m_spellInfo->TargetAuraState-1)))))
+        {
+            return SPELL_FAILED_TARGET_AURASTATE;
+        }
 
         //Must be behind the target.
         if( m_spellInfo->AttributesEx2 == 0x100000 && (m_spellInfo->AttributesEx & 0x200) == 0x200 && target->HasInArc(M_PI, m_caster) )

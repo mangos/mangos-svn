@@ -1227,6 +1227,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
 {
     pVictim->ModifyAuraState(AURA_STATE_PARRY, false);
     pVictim->ModifyAuraState(AURA_STATE_DODGE, false);
+    ModifyAuraState(AURA_STATE_CRIT, false);
 
     MeleeHitOutcome outcome;
 
@@ -1287,6 +1288,8 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
 
             if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && ((Creature*)pVictim)->GetCreatureInfo()->type != CREATURE_TYPE_CRITTER )
                 ((Player*)this)->UpdateWeaponSkill(attType);
+
+            ModifyAuraState(AURA_STATE_CRIT, true);
 
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_WOUNDCRITICAL);
             break;
@@ -2787,8 +2790,8 @@ void Unit::ApplyStats(bool apply)
     if(apply)
         tem_att_power = GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER) + GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS);
 
-    val = GetFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER);
-    if(val>0)
+    val = 1.0f + GetFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER);
+    if(val>=0)
         tem_att_power = uint32(val*tem_att_power);
 
     val = tem_att_power/14.0f * GetAttackTime(RANGED_ATTACK)/1000;
@@ -2827,8 +2830,8 @@ void Unit::ApplyStats(bool apply)
     if(apply)
         tem_att_power = GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS);
 
-    val = GetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER);
-    if(val>0)
+    val = 1.0f + GetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER);
+    if(val>=0)
         tem_att_power = uint32(val*tem_att_power);
 
     val = tem_att_power/14.0f * GetAttackTime(BASE_ATTACK)/1000;
@@ -4093,9 +4096,9 @@ void Unit::ModifyAuraState(uint32 flag, bool apply)
 {
     if (apply)
     {
-        if (!HasFlag(UNIT_FIELD_AURASTATE, 1<<flag))
+        if (!HasFlag(UNIT_FIELD_AURASTATE, 1<<(flag-1)))
         {
-            SetFlag(UNIT_FIELD_AURASTATE, 1<<flag);
+            SetFlag(UNIT_FIELD_AURASTATE, 1<<(flag-1));
             if(GetTypeId() == TYPEID_PLAYER)
             {
                 const PlayerSpellMap& sp_list = ((Player*)this)->GetSpellMap();
@@ -4104,7 +4107,7 @@ void Unit::ModifyAuraState(uint32 flag, bool apply)
                     if(itr->second->state == PLAYERSPELL_REMOVED) continue;
                     SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
                     if (!spellInfo || !IsPassiveSpell(itr->first)) continue;
-                    if (spellInfo->CasterAuraState & uint32(1<<flag))
+                    if (spellInfo->CasterAuraState == flag)
                         CastSpell(this, itr->first, true, NULL);
                 }
             }
@@ -4112,13 +4115,13 @@ void Unit::ModifyAuraState(uint32 flag, bool apply)
     }
     else
     {
-        if (HasFlag(UNIT_FIELD_AURASTATE,1<<flag))
+        if (HasFlag(UNIT_FIELD_AURASTATE,1<<(flag-1)))
         {
-            RemoveFlag(UNIT_FIELD_AURASTATE, 1<<flag);
+            RemoveFlag(UNIT_FIELD_AURASTATE, 1<<(flag-1));
             Unit::AuraMap& tAuras = GetAuras();
             for (Unit::AuraMap::iterator itr = tAuras.begin(); itr != tAuras.end();)
             {
-                if ((*itr).second->GetSpellProto()->CasterAuraState & uint32(1<<flag))
+                if ((*itr).second->GetSpellProto()->CasterAuraState == flag)
                     RemoveAura(itr);
                 else
                     ++itr;

@@ -320,13 +320,17 @@ enum ProcFlags
 
 enum AuraState
 {
-    AURA_STATE_DODGE          = 0,
-    AURA_STATE_HEALTHLESS     = 1,
-    AURA_STATE_RACE           = 2,
-    AURA_STATE_UNKNOWN1       = 3,
-    AURA_STATE_JUDGEMENT      = 4,
-    AURA_STATE_UNKNOWN2       = 5,
-    AURA_STATE_PARRY          = 6                           // unsure.
+    AURA_STATE_DODGE          = 1,
+    AURA_STATE_HEALTHLESS     = 2,
+    AURA_STATE_RACE           = 3,
+    AURA_STATE_UNKNOWN1       = 4,
+    AURA_STATE_JUDGEMENT      = 5,
+    AURA_STATE_UNKNOWN2       = 6,
+    AURA_STATE_PARRY          = 7,                           // unsure
+    AURA_STATE_UNKNOWN3       = 8,
+    AURA_STATE_UNKNOWN4       = 9,
+    AURA_STATE_UNKNOWN5       = 10,
+    AURA_STATE_CRIT           = 11
 };
 
 enum Mechanics

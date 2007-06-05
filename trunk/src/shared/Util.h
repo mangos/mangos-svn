@@ -100,6 +100,8 @@ inline void ApplyModFloatVar(float& var, float  val, bool apply)
 
 inline void ApplyPercentModFloatVar(float& var, float val, bool apply)
 {
+    if (!apply && val == -100.0f)
+        val = -99.99f;
     var *= (apply?(100.0f+val)/100.0f : 100.0f / (100.0f+val));
 }
 

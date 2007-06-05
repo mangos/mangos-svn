@@ -218,8 +218,8 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS_MELEE
     &Aura::HandleNULL,                                      //164
     &Aura::HandleNULL,                                      //165 SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS
-    &Aura::HandleNULL,                                      //166 SPELL_AURA_MOD_ATTACK_POWER_PCT
-    &Aura::HandleNULL,                                      //167 SPELL_AURA_MOD_RANGED_ATTACK_POWER_PCT
+    &Aura::HandleAuraModAttackPowerPercent,                 //166 SPELL_AURA_MOD_ATTACK_POWER_PCT
+    &Aura::HandleAuraModRangedAttackPowerPercent,           //167 SPELL_AURA_MOD_RANGED_ATTACK_POWER_PCT
     &Aura::HandleNULL,                                      //168 SPELL_AURA_MOD_DAMAGE_DONE_VERSUS
     &Aura::HandleNULL,                                      //169 SPELL_AURA_MOD_CRIT_PERCENT_VERSUS
     &Aura::HandleNULL,                                      //170 SPELL_AURA_DETECT_AMORE       only for Detect Amore spell
@@ -3122,6 +3122,22 @@ void Aura::HandleAuraModAttackPower(bool apply, bool Real)
 void Aura::HandleAuraModRangedAttackPower(bool apply, bool Real)
 {
     m_target->ApplyModUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,m_modifier.m_amount,apply);
+}
+
+void Aura::HandleAuraModAttackPowerPercent(bool apply, bool Real)
+{
+    //UNIT_FIELD_ATTACK_POWER_MULTIPLIER = multiplier - 1
+    float val = m_target->GetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER) + 1.0f;
+    ApplyPercentModFloatVar(val,m_modifier.m_amount,apply);
+    m_target->SetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER,val - 1.0f);
+}
+
+void Aura::HandleAuraModRangedAttackPowerPercent(bool apply, bool Real)
+{
+    //UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER = multiplier - 1
+    float val = m_target->GetFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER) + 1.0f;
+    ApplyPercentModFloatVar(val,m_modifier.m_amount,apply);
+    m_target->SetFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER,val - 1.0f);
 }
 
 /********************************/

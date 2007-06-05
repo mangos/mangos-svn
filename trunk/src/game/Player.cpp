@@ -2355,7 +2355,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
             (spell_id == 21156 && m_form == FORM_BATTLESTANCE)||
             (spell_id == 21178 && m_form == FORM_BEAR) ||
             (spell_id == 33948 && m_form == FORM_FLIGHT) )
-            if (!spellInfo->CasterAuraState || HasFlag(UNIT_FIELD_AURASTATE, spellInfo->CasterAuraState)) //Check CasterAuraStates
+            if (!spellInfo->CasterAuraState || HasFlag(UNIT_FIELD_AURASTATE, (1<<(spellInfo->CasterAuraState-1)))) //Check CasterAuraStates
                 CastSpell(this, spell_id, true);
     }
 
@@ -12845,8 +12845,10 @@ void Player::InitDataForForm()
 
     SetUInt32Value(UNIT_FIELD_ATTACK_POWER,            0 );
     SetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS,       0 );
+    SetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER,0.0f);
     SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER,     0 );
-    SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,0 );
+    SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,0 ); 
+    SetFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER,0.0f);
 
     SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, 1.00);
     SetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG, 0);

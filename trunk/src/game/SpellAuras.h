@@ -177,6 +177,8 @@ class Aura
         void HandleAuraModSpeedFlight(bool Apply, bool Real);
         void HandleModRating(bool apply, bool Real);
         void HandleModTargetResistance(bool apply, bool Real);
+        void HandleAuraModAttackPowerPercent(bool apply, bool Real);
+        void HandleAuraModRangedAttackPowerPercent(bool apply, bool Real);
 
         Aura(SpellEntry const* spellproto, uint32 eff, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
         virtual ~Aura();
