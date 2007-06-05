@@ -6624,6 +6624,77 @@ uint32 Player::GetFreeSlots() const
     return count;
 }
 
+uint8 Player::CanUnequipItems( uint32 item, uint32 count ) const
+{
+    Item *pItem;
+    uint32 tempcount = 0;
+
+    uint8 res = EQUIP_ERR_OK;
+
+    for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_BAG_END; i++)
+    {
+        pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pItem && pItem->GetEntry() == item )
+        {
+            uint8 ires = CanUnequipItem(INVENTORY_SLOT_BAG_0 << 8 | i, false);
+            if(ires==EQUIP_ERR_OK)
+            {
+                tempcount += pItem->GetCount();
+                if( tempcount >= count )
+                    return EQUIP_ERR_OK;
+            }
+            else
+                res = ires;
+        }
+    }
+    for(int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
+    {
+        pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pItem && pItem->GetEntry() == item )
+        {
+            tempcount += pItem->GetCount();
+            if( tempcount >= count )
+                return EQUIP_ERR_OK;
+        }
+    }
+    for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
+    {
+        pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pItem && pItem->GetEntry() == item )
+        {
+            tempcount += pItem->GetCount();
+            if( tempcount >= count )
+                return EQUIP_ERR_OK;
+        }
+    }
+    Bag *pBag;
+    ItemPrototype const *pBagProto;
+    for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+    {
+        pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pBag )
+        {
+            pBagProto = pBag->GetProto();
+            if( pBagProto )
+            {
+                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
+                {
+                    pItem = GetItemByPos( i, j );
+                    if( pItem && pItem->GetEntry() == item )
+                    {
+                        tempcount += pItem->GetCount();
+                        if( tempcount >= count )
+                            return EQUIP_ERR_OK;
+                    }
+                }
+            }
+        }
+    }
+
+    // not found req. item count and have unequippable items
+    return res;
+}
+
 uint32 Player::GetItemCount( uint32 item, Item* eItem ) const
 {
     Item *pItem;
@@ -7528,13 +7599,13 @@ uint8 Player::CanUnequipItem( uint16 pos, bool swap ) const
     if(!swap && pItem->IsBag() && !((Bag*)pItem)->IsEmpty())
         return EQUIP_ERR_CAN_ONLY_DO_WITH_EMPTY_BAGS;
 
-    // All equiped items can swapped (not in combat case)
+    // All equipped items can swapped (not in combat case)
     if(swap)
         return EQUIP_ERR_OK;
 
     uint8 slot = pos & 255;
 
-    // can't unequip mainhand item if offhand item equiped (weapon or shield)
+    // can't unequip mainhand item if offhand item equipped (weapon or shield)
     if(slot == EQUIPMENT_SLOT_MAINHAND)
     {
         Item * offhand = GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
@@ -8320,6 +8391,13 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
     {
         sLog.outDebug( "STORAGE: DestroyItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
 
+        // start from destroy contained items (only equipped bag can have its)
+        if (pItem->IsBag())
+        {
+            for (int i = 0; i < MAX_BAG_SIZE; i++)
+                DestroyItem(slot,i,update);
+        }
+
         if(pItem->HasFlag(ITEM_FIELD_FLAGS, 8))
             sDatabase.PExecute("DELETE FROM `character_gifts` WHERE `item_guid` = '%u'", pItem->GetGUIDLow());
 
@@ -8370,19 +8448,11 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
             }
         }
 
-        if (pItem->IsBag())
-        {
-            for (int i = 0; i < MAX_BAG_SIZE; i++)
-            {
-                Item *bagItem = ((Bag*)pItem)->GetItemByPos(i);
-                if (bagItem) bagItem->SetState(ITEM_REMOVED, this);
-            }
-        }
         pItem->SetState(ITEM_REMOVED, this);
     }
 }
 
-void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
+void Player::DestroyItemCount( uint32 item, uint32 count, bool update, bool unequip_check)
 {
     sLog.outDebug( "STORAGE: DestroyItemCount item = %u, count = %u", item, count);
     Item *pItem;
@@ -8397,6 +8467,7 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
         {
             if( pItem->GetCount() + remcount <= count )
             {
+                // all items in inventory can unequipped
                 remcount += pItem->GetCount();
                 DestroyItem( INVENTORY_SLOT_BAG_0, i, update);
 
@@ -8422,6 +8493,7 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
         {
             if( pItem->GetCount() + remcount <= count )
             {
+                // all keys can be unequipped
                 remcount += pItem->GetCount();
                 DestroyItem( INVENTORY_SLOT_BAG_0, i, update);
 
@@ -8457,6 +8529,7 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
                     pItem = pBag->GetItemByPos(j);
                     if( pItem && pItem->GetEntry() == item )
                     {
+                        // all items in bags can be unequipped
                         if( pItem->GetCount() + remcount <= count )
                         {
                             remcount += pItem->GetCount();
@@ -8489,11 +8562,14 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update )
         {
             if( pItem->GetCount() + remcount <= count )
             {
-                remcount += pItem->GetCount();
-                DestroyItem( INVENTORY_SLOT_BAG_0, i, update);
+                if(!unequip_check || CanUnequipItem(INVENTORY_SLOT_BAG_0 << 8 | i,false) == EQUIP_ERR_OK )
+                {
+                    remcount += pItem->GetCount();
+                    DestroyItem( INVENTORY_SLOT_BAG_0, i, update);
 
-                if(remcount >=count)
-                    return;
+                    if(remcount >=count)
+                        return;
+                }
             }
             else
             {
@@ -10231,7 +10307,7 @@ bool Player::GiveQuestSourceItem( uint32 quest_id )
     return true;
 }
 
-void Player::TakeQuestSourceItem( uint32 quest_id )
+bool Player::TakeQuestSourceItem( uint32 quest_id, bool msg )
 {
     Quest * qInfo = objmgr.QuestTemplates[quest_id];
     if( qInfo )
@@ -10242,9 +10318,21 @@ void Player::TakeQuestSourceItem( uint32 quest_id )
             uint32 count = qInfo->GetSrcItemCount();
             if( count <= 0 )
                 count = 1;
-            DestroyItemCount(srcitem, count, true);
+
+            // exist one case when destroy source quest item not possible:
+            // non un-equippable item (equipped non-empty bag, for example)
+            uint8 res = CanUnequipItems(srcitem,count);
+            if(res != EQUIP_ERR_OK)
+            {
+                if(msg)
+                    SendEquipError( res, NULL, NULL );
+                return false;
+            }
+
+            DestroyItemCount(srcitem, count, true, true);
         }
     }
+    return true;
 }
 
 bool Player::GetQuestRewardStatus( uint32 quest_id )
