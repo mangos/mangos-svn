@@ -12712,10 +12712,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes)
         return false;
     }
 
-    if( m_ShapeShiftForm && ( 
-        m_ShapeShiftForm != FORM_BATTLESTANCE &&
-        m_ShapeShiftForm != FORM_BERSERKERSTANCE &&
-        m_ShapeShiftForm != FORM_DEFENSIVESTANCE ) )
+    if( m_ShapeShiftForm && m_form != FORM_BATTLESTANCE && m_form != FORM_BERSERKERSTANCE && m_form != FORM_DEFENSIVESTANCE )
     {
         WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
         data << uint32(ERR_TAXIPLAYERSHAPESHIFTED);
