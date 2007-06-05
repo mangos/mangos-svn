@@ -29,7 +29,13 @@
 
 BattleGroundAB::BattleGroundAB()
 {
-
+    m_TeamScores[0] = 0;
+    m_TeamScores[1] = 0;
+    m_Points[0] = 0;
+    m_Points[1] = 0;
+    m_Points[2] = 0;
+    m_Points[3] = 0;
+    m_Points[4] = 0;
 }
 
 BattleGroundAB::~BattleGroundAB()
@@ -48,8 +54,8 @@ void BattleGroundAB::Update(time_t diff)
     if(GetStatus() == STATUS_IN_PROGRESS)
     {
         for(int i = 0;i < 5; i++)
-            if(Points[i])                                   //If point is controled
-                AddPoint(Points[i], diff);
+            if(m_Points[i])                                 //If point is controled
+                AddPoint(m_Points[i], diff);
         if(GetTeamScore(ALLIANCE) >= (2000*1000))           //1 score/per second
             EndBattleGround(ALLIANCE);
         if(GetTeamScore(HORDE) >= (2000*1000))              //1 score/per second

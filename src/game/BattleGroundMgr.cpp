@@ -54,10 +54,11 @@ void BattleGroundMgr::BuildBattleGroundStatusPacket(WorldPacket *data, BattleGro
     // we can be in 3 queues in same time...
     if(StatusID == 0)
     {
-        WorldPacket data(SMSG_BATTLEFIELD_STATUS, 4*3);
-        data << uint32(0);                                  // queue id (0...2)
-        data << uint32(0);
-        data << uint32(0);
+        data->Initialize(SMSG_BATTLEFIELD_STATUS, 4*3);
+        *data << uint32(0);                                 // queue id (0...2)
+        *data << uint32(0);
+        *data << uint32(0);
+        return;
     }
     // queue sounds: 8458, 8459, 8462, 8463, is it used on official?
     data->Initialize(SMSG_BATTLEFIELD_STATUS, (4+1+1+4+2+4+1+4+4+4));

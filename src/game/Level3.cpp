@@ -3338,7 +3338,7 @@ bool ChatHandler::HandleBanCommand(const char* args)
         reason = strtok(NULL,"");
     if(!reason)
         return false;
-    
+
     if(sWorld.BanAccount(type, nameOrIP, duration, reason,m_session->GetPlayerName()))
         if(atoi(duration)>0)
             PSendSysMessage(LANG_BAN_YOUBANNED,nameOrIP,secsToTimeString(TimeStringToSecs(duration),true).c_str(),reason);

@@ -158,7 +158,7 @@ void BattleGround::Update(time_t diff)
                     uint32 tt = getMSTime() - itr->second.InviteTime;
                     if (tt >= INVITE_ACCEPT_WAIT_TIME)      // remove idle player from queue
                     {
-                        m_RemovedPlayers[itr->first] = 0;
+                        m_RemovedPlayers[itr->first] = 0;   // add to remove list (queue)
                     }
                     else if(t >= REMIND_INTERVAL)           // remind every 30 seconds
                     {
@@ -217,7 +217,7 @@ void BattleGround::Update(time_t diff)
                 continue;
             }
 
-            if(plr->IsWithinDistInMap(sh, 10.0f))           // 20 yards radius
+            if(plr->IsWithinDistInMap(sh, 20.0f))           // 20 yards radius
             {
                 // spell not working, only visual effect :(
                 sh->CastSpell(plr, SPELL_SPIRIT_HEAL, true, 0, 0, 0);   // Spirit Heal, effect 117
@@ -244,7 +244,7 @@ void BattleGround::Update(time_t diff)
         {
             for(std::map<uint64, BattleGroundPlayer>::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
             {
-                m_RemovedPlayers[itr->first] = false;       // add to remove list (BG)
+                m_RemovedPlayers[itr->first] = 1;           // add to remove list (BG)
             }
             SetStatus(STATUS_WAIT_QUEUE);
         }
@@ -363,7 +363,7 @@ void BattleGround::EndBattleGround(uint32 winner)
         sBattleGroundMgr.BuildPvpLogDataPacket(&data, this, 1);
         SendPacketToAll(&data);
     }
-    if(winner == HORDE)
+    else if(winner == HORDE)
     {
         winmsg = LANG_BG_H_WINS;
 
@@ -729,26 +729,26 @@ void BattleGround::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
 {
     std::map<uint64, BattleGroundScore>::iterator itr = m_PlayerScores.find(Source->GetGUID());
 
-    if(itr != m_PlayerScores.end())                         // player found...
+    if(itr == m_PlayerScores.end())                     // player not found...
+        return;
+
+    switch(type)
     {
-        switch(type)
-        {
-            case 1:                                         // kills
-                itr->second.KillingBlows += value;
-                break;
-            case 2:                                         // flags captured
-                itr->second.FlagCaptures += value;
-                break;
-            case 3:                                         // flags returned
-                itr->second.FlagReturns += value;
-                break;
-            case 4:                                         // deaths
-                itr->second.Deaths += value;
-                break;
-            default:
-                sLog.outDebug("Unknown player score type %u", type);
-                break;
-        }
+        case SCORE_KILLS:                               // kills
+            itr->second.KillingBlows += value;
+            break;
+        case SCORE_FLAG_CAPTURES:                       // flags captured
+            itr->second.FlagCaptures += value;
+            break;
+        case SCORE_FLAG_RETURNS:                        // flags returned
+            itr->second.FlagReturns += value;
+            break;
+        case SCODE_DEATHS:                              // deaths
+             itr->second.Deaths += value;
+            break;
+        default:
+             sLog.outDebug("Unknown player score type %u", type);
+            break;
     }
 }
 

@@ -96,6 +96,19 @@ enum BattleGroundId
     BATTLEGROUND_RL     = 8
 };
 
+enum ScoreType
+{
+    SCORE_KILLS             = 1,
+    SCORE_FLAG_CAPTURES     = 2,
+    SCORE_FLAG_RETURNS      = 3,
+    SCODE_DEATHS            = 4,
+    SCORE_DAMAGE_DONE       = 5,
+    SCORE_HEALING_DONE      = 6,
+    SCORE_BONUS_HONOR       = 7,
+    SCORE_HONORABLE_KILLS   = 8
+    // TODO: Add more
+};
+
 class BattleGround
 {
     friend class BattleGroundMgr;
