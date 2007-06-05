@@ -5098,6 +5098,10 @@ void Unit::AddThreat(Unit* pVictim, float threat, uint8 school, SpellEntry const
     //players and pets have only InHateListOf
     //HateOfflineList is used co contain unattackable victims (in-flight, in-water, GM etc.)
                                                             //pVictim = player or pet
+
+    if (pVictim == this)                                    // only for sane creatures :)
+        return;
+
     if(!pVictim || (pVictim->GetTypeId() == TYPEID_PLAYER && ((Player*)pVictim)->isGameMaster()) )
         return;
 
