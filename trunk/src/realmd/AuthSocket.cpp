@@ -243,13 +243,13 @@ void AuthSocket::OnRead()
 
         ///- Get the command out of it
         ibuf.SoftRead((char *)&_cmd, 1); // UQ1: No longer exists in new net code ???
-		//ibuf.Read((char *)&_cmd, 1);
-		/*char *command = (char *)malloc(1);
-		
-		ibuf.Read(command, 1);
+        //ibuf.Read((char *)&_cmd, 1);
+        /*char *command = (char *)malloc(1);
 
-		_cmd = (uint8)command;*/
-//		assert(0);
+        ibuf.Read(command, 1);
+
+        _cmd = (uint8)command;*/
+//      assert(0);
         size_t i;
 
         ///- Circle through known commands and call the correct command handler

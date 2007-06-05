@@ -422,13 +422,13 @@ void BattleGround::EndBattleGround(uint32 winner)
             switch(GetID())
             {
                 case BATTLEGROUND_AV:
-                    mark = ITEM_AV_MARK_LOOSER;
+                    mark = ITEM_AV_MARK_LOSER;
                     break;
                 case BATTLEGROUND_WS:
-                    mark = ITEM_WSG_MARK_LOOSER;
+                    mark = ITEM_WSG_MARK_LOSER;
                     break;
                 case BATTLEGROUND_AB:
-                    mark = ITEM_AB_MARK_LOOSER;
+                    mark = ITEM_AB_MARK_LOSER;
                     break;
             }
         }

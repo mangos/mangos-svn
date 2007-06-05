@@ -187,7 +187,7 @@ namespace MaNGOS
         struct MANGOS_DLL_DECL ObjectAccessorNotifier
     {
         T *& i_object;
-	CountedPtr<T>& i_objectptr;
+        CountedPtr<T>& i_objectptr;
 
         uint64 i_id;
         ObjectAccessorNotifier(T * &obj, uint64 id) : i_object(obj), i_id(id)
