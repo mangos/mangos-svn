@@ -21,6 +21,20 @@
 
 #include "BattleGround.h"
 
+#define MAX_TEAM_SCORE      3
+#define FLAG_RESPAWN_TIME   60000
+#define BUFF_RESPAWN_TIME   180000
+
+// WorldStates
+#define FLAG_UNK_ALLIANCE       1545
+#define FLAG_UNK_HORDE          1546
+//#define FLAG_UNK                1547
+#define FLAG_CAPTURES_ALLIANCE  1581
+#define FLAG_CAPTURES_HORDE     1582
+#define FLAG_CAPTURES_MAX       1601
+#define FLAG_STATE_HORDE        2338
+#define FLAG_STATE_ALLIANCE     2339
+
 enum BattleGroundObjectTypes
 {
     BG_OBJECT_A_FLAG        = 0,
@@ -54,12 +68,12 @@ class BattleGroundWS : public BattleGround
         void Update(time_t diff);
 
         /* BG Flags */
-        uint64 GetAllianceFlagPickerGUID() const { return FlagKeepers[0]; }
-        uint64 GetHordeFlagPickerGUID() const { return FlagKeepers[1]; }
-        void SetAllianceFlagPicker(uint64 guid) { FlagKeepers[0] = guid; }
-        void SetHordeFlagPicker(uint64 guid) { FlagKeepers[1] = guid; }
-        bool IsAllianceFlagPickedup() const { return FlagKeepers[0] != 0; }
-        bool IsHordeFlagPickedup() const { return FlagKeepers[1] != 0; }
+        uint64 GetAllianceFlagPickerGUID() const { return m_FlagKeepers[0]; }
+        uint64 GetHordeFlagPickerGUID() const { return m_FlagKeepers[1]; }
+        void SetAllianceFlagPicker(uint64 guid) { m_FlagKeepers[0] = guid; }
+        void SetHordeFlagPicker(uint64 guid) { m_FlagKeepers[1] = guid; }
+        bool IsAllianceFlagPickedup() const { return m_FlagKeepers[0] != 0; }
+        bool IsHordeFlagPickedup() const { return m_FlagKeepers[1] != 0; }
         void RespawnFlag(uint32 Team, bool captured);
 
         /* Battleground Events */
@@ -71,6 +85,7 @@ class BattleGroundWS : public BattleGround
         void RemovePlayer(Player *plr, uint64 guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         void SetupBattleGround();
+        void Reset();
 
         void UpdateFlagState(uint32 team, uint32 value);
         void UpdateTeamScore(uint32 team);
@@ -82,8 +97,8 @@ class BattleGroundWS : public BattleGround
         void RemovePoint(uint32 TeamID, uint32 Points = 1) { m_TeamScores[GetTeamIndexByTeamId(TeamID)] -= Points; }
 
     private:
-        uint64 FlagKeepers[2];                              // 0 - alliance, 1 - horde
-        bool FlagState[2];                                  // for checking in base/dropped state
+        uint64 m_FlagKeepers[2];                              // 0 - alliance, 1 - horde
+        bool m_FlagState[2];                                  // for checking in base/dropped state
         uint32 m_TeamScores[2];
 
         std::map<uint32, BattleGroundObjectInfo> m_bgobjects;

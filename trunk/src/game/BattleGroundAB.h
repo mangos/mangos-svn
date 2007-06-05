@@ -48,7 +48,7 @@ class BattleGroundAB : public BattleGround
         void RemovePoint(uint32 TeamID, uint32 Points = 1) { m_TeamScores[GetTeamIndexByTeamId(TeamID)] -= Points; }
 
     private:
-        uint32 Points[5];
+        uint32 m_Points[5];
         uint32 m_TeamScores[2];
 };
 #endif

@@ -3246,11 +3246,8 @@ void Player::KillPlayer()
             switch(bg->GetID())
             {
                 case BATTLEGROUND_AV:
-                {
                     break;
-                }
                 case BATTLEGROUND_WS:
-                {
                     if(GetTeam() == HORDE && ((BattleGroundWS*)bg)->IsAllianceFlagPickedup())
                     {
                         if(((BattleGroundWS*)bg)->GetAllianceFlagPickerGUID() == GetGUID())
@@ -3268,17 +3265,12 @@ void Player::KillPlayer()
                         }
                     }
                     break;
-                }
                 case BATTLEGROUND_AB:
-                {
                     break;
-                }
                 case BATTLEGROUND_EY:
-                {
                     break;
-                }
             }
-            bg->UpdatePlayerScore(this, 4, 1);              // add +1 deaths
+            bg->UpdatePlayerScore(this, SCODE_DEATHS, 1);   // add +1 deaths
         }
     }
 
@@ -3291,7 +3283,7 @@ void Player::KillPlayer()
     setDeathState(CORPSE);
     //SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_IN_PVP );
 
-    SetFlag( UNIT_DYNAMIC_FLAGS, 0x00 );
+    SetFlag(UNIT_DYNAMIC_FLAGS, 0x00);
 
     // 6 minutes until repop at graveyard
     m_deathTimer = 360000;
@@ -12902,7 +12894,7 @@ void Player::InitDataForForm()
     SetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS,       0 );
     SetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER,0.0f);
     SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER,     0 );
-    SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,0 ); 
+    SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,0 );
     SetFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER,0.0f);
 
     SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, 1.00);
