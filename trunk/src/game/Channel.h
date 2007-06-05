@@ -16,6 +16,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifndef _CHANNEL_H
+#define _CHANNEL_H
+
 #include "Common.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -70,9 +73,11 @@ class Channel
     PlayerList players;
     list<uint64> banned;
     std::string name;
-    bool announce, constant, moderate;
+    bool announce, moderate;
+    uint32 channel_id;
     uint64 m_ownerGUID;
     std::string password;
+
     private:
 
         WorldPacket *MakeNotifyPacket(WorldPacket *data, uint8 code)
@@ -83,8 +88,8 @@ class Channel
         }
         void MakeJoined(WorldPacket *data, uint64 joined) { *MakeNotifyPacket(data,JOINED) << joined; }
         void MakeLeft(WorldPacket *data, uint64 left) { *MakeNotifyPacket(data,LEFT) << left; }
-        void MakeYouJoined(WorldPacket *data, uint64 p, uint32 unk1) { *MakeNotifyPacket(data,YOUJOINED) << unk1 << (uint32)0; }
-        void MakeYouLeft(WorldPacket *data, uint32 unk1) { *MakeNotifyPacket(data,YOULEFT) << unk1 << (uint8)1; }
+        void MakeYouJoined(WorldPacket *data, uint64 p) { *MakeNotifyPacket(data,YOUJOINED) << (uint32)channel_id << (uint32)0; }
+        void MakeYouLeft(WorldPacket *data) { *MakeNotifyPacket(data,YOULEFT) << (uint32)channel_id << (uint8)1; }
         void MakeWrongPass(WorldPacket *data) { MakeNotifyPacket(data,WRONGPASS); }
         void MakeNotOn(WorldPacket *data) { MakeNotifyPacket(data,NOTON1); }
         void MakeNotModerator(WorldPacket *data) { MakeNotifyPacket(data,NOTMOD); }
@@ -199,18 +204,18 @@ class Channel
         }
 
     public:
-        explicit Channel(std::string _name);
+        explicit Channel(std::string _name, uint32 _channal_id);
         std::string GetName() { return name; }
-        bool IsConstant() { return constant; }
+        uint32 GetChannelId() const { return channel_id; }
+        bool IsConstant() { return channel_id!=0; }
         bool IsAnnounce() { return announce; }
         std::string GetPassword() { return password; }
-        void SetConstant(bool nconstant) { constant = nconstant; }
         void SetPassword(std::string npassword) { password = npassword; }
         void SetAnnounce(bool nannounce) { announce = nannounce; }
         uint32 GetNumPlayers() { return players.size(); }
 
-        void Join(uint64 p, const char *pass, uint32 unk1);
-        void Leave(uint64 p, bool send = true, uint32 unk1 = 0);
+        void Join(uint64 p, const char *pass);
+        void Leave(uint64 p, bool send = true);
         void KickOrBan(uint64 good, const char *badname, bool ban);
         void Kick(uint64 good, const char *badname) { KickOrBan(good,badname,false); }
         void Ban(uint64 good, const char *badname) { KickOrBan(good,badname,true); }
@@ -230,3 +235,4 @@ class Channel
         void Say(uint64 p, const char *what, uint32 lang);
         void Invite(uint64 p, const char *newp);
 };
+#endif

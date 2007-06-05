@@ -16,6 +16,9 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifndef DBCSTRUCTURE_H
+#define DBCSTRUCTURE_H
+
 // Structures using to access raw DBC data and required packing to portability
 
 // Only GCC 4.1.0 and later support #pragma pack(push,1) syntax
@@ -41,7 +44,7 @@ struct AreaTableEntry
     uint32    flags;                                        // 4, unknown value but 312 for all cities
                                                             // 5-9 unused
     int32     area_level;                                   //10
-    //char*     area_name[8];                               //11-18, unused
+    char*     area_name[8];                                 //11-18
                                                             //19, string flags, unused
     uint32    team;                                         //20,
 };
@@ -519,3 +522,5 @@ typedef std::vector<TaxiPathNodeList> TaxiPathNodesByPath;
 
 #define TaxiMaskSize 8
 typedef uint32 TaxiMask[TaxiMaskSize];
+
+#endif

@@ -20,24 +20,24 @@
 #include "ObjectMgr.h"
 #include "Chat.h"
 
-Channel::Channel(std::string _name)
-    : name(_name), announce(true), constant(false), moderate(false), m_ownerGUID(0), password("")
+Channel::Channel(std::string _name, uint32 _channal_id)
+    : name(_name), announce(true), channel_id(_channal_id), moderate(false), m_ownerGUID(0), password("")
 {
     // set special flags if built-in channel
-    ChatChannelsEntry const* ch = GetChannelEntryFor(name.c_str(), sWorld.GetDBClang());
+    ChatChannelsEntry const* ch = GetChannelEntryFor(_channal_id);
     if(ch)
     {
-        constant = true;                                    // built-in channel    
+        channel_id = ch->ChannelID;                         // built-in channel    
         announce = false;                                   // no join/leave announces
     }
 }
 
-void Channel::Join(uint64 p, const char *pass, uint32 unk1)
+void Channel::Join(uint64 p, const char *pass)
 {
     WorldPacket data;
     if(IsOn(p))
     {
-        if(!constant)                                       // non send error message for built-in channels
+        if(!IsConstant())                                   // non send error message for built-in channels
         {
             MakeAlreadyOn(&data,p);
             SendToOne(&data,p);
@@ -74,11 +74,11 @@ void Channel::Join(uint64 p, const char *pass, uint32 unk1)
         data.clear();
         players[p] = pinfo;
 
-        MakeYouJoined(&data,p,unk1);
+        MakeYouJoined(&data,p);
         SendToOne(&data,p);
 
         // if no owner first logged will become
-        if(!constant && m_ownerGUID)
+        if(!IsConstant() && m_ownerGUID)
         {
             SetOwner(p, (players.size()>1?true:false));
             players[p].moderator = true;
@@ -86,7 +86,7 @@ void Channel::Join(uint64 p, const char *pass, uint32 unk1)
     }
 }
 
-void Channel::Leave(uint64 p, bool send, uint32 unk1)
+void Channel::Leave(uint64 p, bool send)
 {
     if(!IsOn(p))
     {
@@ -102,7 +102,7 @@ void Channel::Leave(uint64 p, bool send, uint32 unk1)
         if(send)
         {
             WorldPacket data;
-            MakeYouLeft(&data, unk1);
+            MakeYouLeft(&data);
             SendToOne(&data,p);
             Player *plr = objmgr.GetPlayer(p);
             if(plr)
@@ -583,5 +583,5 @@ void Channel::MakeWhoOwner(WorldPacket *data)
         name = "PLAYER_NOT_FOUND";
 
     *MakeNotifyPacket(data,WHOOWNER);
-    *data << ((constant || !m_ownerGUID) ? "Nobody" : name);
+    *data << ((IsConstant() || !m_ownerGUID) ? "Nobody" : name);
 }
