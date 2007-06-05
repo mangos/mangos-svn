@@ -1176,6 +1176,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void JoinedChannel(Channel *c);
         void LeftChannel(Channel *c);
         void CleanupChannels();
+        void UpdateLocalChannels();
 
         void BroadcastPacketToFriendListers(WorldPacket *packet);
 
@@ -1511,7 +1512,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         WorldSession *m_session;
 
-        std::list<Channel*> m_channels;
+        typedef std::list<Channel*> JoinedChannelsList;
+        JoinedChannelsList m_channels;
 
         bool m_dontMove;
 

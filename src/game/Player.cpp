@@ -32,6 +32,7 @@
 #include "Spell.h"
 #include "UpdateData.h"
 #include "Channel.h"
+#include "ChannelMgr.h"
 #include "Chat.h"
 #include "MapManager.h"
 #include "MapInstanced.h"
@@ -3493,9 +3494,60 @@ void Player::LeftChannel(Channel *c)
 
 void Player::CleanupChannels()
 {
-    list<Channel *>::iterator i;
-    for(i = m_channels.begin(); i != m_channels.end(); i++)
-        (*i)->Leave(GetGUID(),false,0);
+    for(JoinedChannelsList::iterator i = m_channels.begin(), next; i != m_channels.end(); i = next)
+    {
+        next = i; ++next;
+        (*i)->Leave(GetGUID(),false);
+        if(ChannelMgr* cMgr = channelMgr(GetTeam()))
+            cMgr->LeftChannel((*i)->GetName());
+    }
+    sLog.outDebug("Player: channels cleaned up!");
+}
+
+void Player::UpdateLocalChannels()
+{
+    if(m_channels.empty())
+        return;
+
+    AreaTableEntry const* current_zone = GetAreaEntryByAreaID(GetZoneId());
+    if(!current_zone)
+        return;
+
+    ChannelMgr* cMgr = channelMgr(GetTeam());
+    if(!cMgr)
+        return;
+
+    std::string current_zone_name = current_zone->area_name[sWorld.GetDBClang()];
+
+    for(JoinedChannelsList::iterator i = m_channels.begin(), next; i != m_channels.end(); i = next)
+    {
+        next = i; ++next;
+
+        // skip non built-in channels
+        if(!(*i)->IsConstant())
+            continue;
+
+        ChatChannelsEntry const* ch = GetChannelEntryFor((*i)->GetChannelId());
+        if(!ch)
+            continue;
+
+        if((ch->flags & 4) == 4)                          // global channel without zone name in pattern
+            continue;
+
+        //  new channel
+        char new_channel_name_buf[100];
+        snprintf(new_channel_name_buf,100,ch->pattern[sWorld.GetDBClang()],current_zone_name.c_str());
+        Channel* new_channel = cMgr->GetJoinChannel(new_channel_name_buf,ch->ChannelID);
+
+        if((*i)!=new_channel)
+        {
+            new_channel->Join(GetGUID(),"");                // will output Changed Channel: N. Name
+
+            // leave old channel
+            (*i)->Leave(GetGUID(),false);                   // not send leave channel, it already replaced at client
+            cMgr->LeftChannel((*i)->GetName());
+        }
+    }
     sLog.outDebug("Player: channels cleaned up!");
 }
 
@@ -4923,6 +4975,9 @@ void Player::UpdateZone(uint32 newZone)
         else
             ++iter;
     }
+
+    // recent client version not send leave/join channel packets for built-in local channels 
+    UpdateLocalChannels();
 }
 
 //If players are too far way of duel flag... then player loose the duel
@@ -12653,7 +12708,10 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes)
         return false;
     }
 
-    if(m_ShapeShiftForm)
+    if( m_ShapeShiftForm && ( 
+        m_ShapeShiftForm != FORM_BATTLESTANCE &&
+        m_ShapeShiftForm != FORM_BERSERKERSTANCE &&
+        m_ShapeShiftForm != FORM_DEFENSIVESTANCE ) )
     {
         WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
         data << uint32(ERR_TAXIPLAYERSHAPESHIFTED);

@@ -640,27 +640,14 @@ bool CanUsedWhileStealthed(uint32 spellId)
     return false;
 }
 
-ChatChannelsEntry const* GetChannelEntryFor(char const* name, uint32 dbclang)
+ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id)
 {
     // not sorted, numbering index from 0
     for(uint32 i = 0; i < sChatChannelsStore.nCount; ++i)
     {
         ChatChannelsEntry const* ch = sChatChannelsStore.LookupEntry(i);
-        if(ch)
-        {
-            if((ch->flags & 4) == 4)                          // global channel without zone name in pattern
-            {
-                if(strcmp(name,ch->pattern[dbclang])==0)
-                    return ch;
-            }
-            else
-            {
-                // compare pattern (something - %s)
-                char zone_name_buf[50];
-                if(sscanf(name,ch->pattern[dbclang],zone_name_buf)>0)
-                    return ch;
-            }
-        }
+        if(ch && ch->ChannelID==channel_id)
+            return ch;
     }
     return NULL;
 }

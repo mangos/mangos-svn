@@ -30,11 +30,11 @@ class ChannelMgr
                 delete itr->second;
             channels.clear();
         }
-        Channel *GetJoinChannel(std::string name)
+        Channel *GetJoinChannel(std::string name, uint32 channal_id)
         {
             if(channels.count(name) == 0)
             {
-                Channel *nchan = new Channel(name);
+                Channel *nchan = new Channel(name,channal_id);
                 channels[name] = nchan;
             }
             return channels[name];

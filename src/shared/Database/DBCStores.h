@@ -72,7 +72,7 @@ AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id);
 AreaTableEntry const* GetAreaEntryByAreaFlag(uint32 area_flag);
 uint32 GetAreaFlagByMapId(uint32 mapid);
 bool CanUsedWhileStealthed(uint32 spellId);
-ChatChannelsEntry const* GetChannelEntryFor(char const* name, uint32 dbclang);
+ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id);
 
 template<class T>
 class DBCStorage
@@ -132,7 +132,7 @@ class DBCStorage
 //extern DBCStorage <AreaTableEntry>            sAreaStore; -- accessed using 2 functions
 extern DBCStorage <BankBagSlotPricesEntry>    sBankBagSlotPricesStore;
 extern DBCStorage <BattlemasterListEntry>     sBattlemasterListStore;
-//extern DBCStorage <ChatChannelsEntry>         sChatChannelsStore; -- accessed using function
+//extern DBCStorage <ChatChannelsEntry>         sChatChannelsStore; -- accessed using function, no usable index
 extern DBCStorage <ChrClassesEntry>           sChrClassesStore;
 extern DBCStorage <ChrRacesEntry>             sChrRacesStore;
 extern DBCStorage <CreatureFamilyEntry>       sCreatureFamilyStore;
