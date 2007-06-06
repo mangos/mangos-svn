@@ -97,7 +97,9 @@ void Totem::UnSummon()
 
         //remove aura all party members too
         Group *pGroup = NULL;
-        pGroup = ((Player*)owner)->groupInfo.group;
+        if (owner->GetTypeId() == TYPEID_PLAYER)
+            // Not only the player can summon the totem (scripted AI)
+            pGroup = ((Player*)owner)->groupInfo.group;
         if (pGroup)
         {
             Group::MemberList const& members = pGroup->GetMembers();
