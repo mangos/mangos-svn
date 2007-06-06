@@ -3408,11 +3408,13 @@ void Aura::HandleShapeshiftBoosts(bool apply)
 
     uint32 spellId = 0;
     uint32 spellId2 = 0;
+    uint32 HotWSpellId = 0;
 
     switch(GetModifier()->m_miscvalue)
     {
         case FORM_CAT:
             spellId = 3025;
+            HotWSpellId = 24900;
             break;
         case FORM_TREE:
             spellId = 5420;
@@ -3426,9 +3428,11 @@ void Aura::HandleShapeshiftBoosts(bool apply)
         case FORM_BEAR:
             spellId = 1178;
             spellId2 = 21178;
+            HotWSpellId = 24899;
             break;
         case FORM_DIREBEAR:
             spellId = 9635;
+            HotWSpellId = 24899;
             break;
         case FORM_CREATUREBEAR:
             spellId = 2882;
@@ -3491,6 +3495,22 @@ void Aura::HandleShapeshiftBoosts(bool apply)
                 SpellEntry const *spellInfo = sSpellStore.LookupEntry(24932);
                 if (spellInfo && spellInfo->Stances & (1<<form))
                     m_target->CastSpell(m_target, 24932, true);
+            }
+            // HotW
+            if (HotWSpellId)
+            {
+                int32 HotWMod = 0;
+                Unit::AuraList& mModTotalStatPct = m_target->GetAurasByType(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE);
+                for(Unit::AuraList::iterator i = mModTotalStatPct.begin(); i != mModTotalStatPct.end(); ++i)
+                    if ((*i)->GetSpellProto()->SpellIconID == 240 && (*i)->GetModifier()->m_miscvalue == 3)
+                        HotWMod = (*i)->GetModifier()->m_amount;
+                if (HotWMod)
+                {
+                    SpellEntry const *HotWTemplate = sSpellStore.LookupEntry(HotWSpellId);
+                    SpellEntry HotWCustom = *HotWTemplate;
+                    HotWCustom.EffectBasePoints[0] = HotWMod;
+                    m_target->CastSpell(m_target, &HotWCustom, true);
+                }
             }
         }
     }
