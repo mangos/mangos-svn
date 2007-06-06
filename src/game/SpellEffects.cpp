@@ -1102,6 +1102,7 @@ void Spell::DoCreateItem(uint32 i, uint32 itemtype)
 
     uint32 num_to_add;
 
+    // TODO: maybe all this can be replaced by using correct calculated `damage` value
     if(pProto->Class != ITEM_CLASS_CONSUMABLE || m_spellInfo->SpellFamilyName != SPELLFAMILY_MAGE)
     {
         int32 basePoints = m_spellInfo->EffectBasePoints[i];
@@ -1111,10 +1112,19 @@ void Spell::DoCreateItem(uint32 i, uint32 itemtype)
         else
             num_to_add = basePoints + 1;
     }
+    else if (pProto->MaxCount == 1)
+        num_to_add = 1;
     else if(player->getLevel() >= m_spellInfo->spellLevel)
-        num_to_add = ((player->getLevel() - (m_spellInfo->spellLevel-1))*2);
+    {
+        int32 basePoints = m_spellInfo->EffectBasePoints[i];
+        float pointPerLevel = m_spellInfo->EffectRealPointsPerLevel[i];
+        num_to_add = basePoints + 1 + uint32((player->getLevel() - m_spellInfo->spellLevel)*pointPerLevel);
+    }
     else
         num_to_add = 2;
+
+    if (num_to_add > pProto->Stackable)
+        num_to_add = pProto->Stackable;
 
     uint16 dest;
     uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, newitemid, num_to_add, false);
