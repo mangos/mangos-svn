@@ -268,6 +268,15 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 
             //big gun, its a spell/aura
         case GAMEOBJECT_TYPE_GOOBER:                        //10
+            //TODO : FIX ME! - this code is not tested, but it won't crash, only spell can crash
+            info = obj->GetGOInfo();
+            if(info && info->sound0 == 0)
+            {
+                spellId = info->sound10;
+                if (spellId)
+                    break;                                  //if spellid == 0, then try GAMEOBJECT_TYPE_SPELLCASTER
+            }
+            /* fall through */
             //chest locked
         case GAMEOBJECT_TYPE_SPELLCASTER:                   //22
 
