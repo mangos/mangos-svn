@@ -1764,13 +1764,16 @@ void Spell::TakeReagents()
             continue;
         uint32 itemid = m_spellInfo->Reagent[x];
         uint32 itemcount = m_spellInfo->ReagentCount[x];
+
+        if(m_CastItem && m_CastItem->GetProto()->ItemId == itemid)
+        {
+            itemcount += 1;
+            m_CastItem = NULL;
+        }
+
         if( p_caster->HasItemCount(itemid,itemcount) )
         {
-            if(m_CastItem && m_CastItem->GetProto()->ItemId == itemid)
-                m_CastItem = NULL;
-
             p_caster->DestroyItemCount(itemid, itemcount, true);
-
         }
         else
         {
