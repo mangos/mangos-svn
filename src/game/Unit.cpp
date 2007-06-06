@@ -2808,17 +2808,25 @@ void Unit::ApplyStats(bool apply)
         case CLASS_HUNTER:  val2 = uint32(getLevel()*2 + GetStat(STAT_STRENGTH) + GetStat(STAT_AGILITY) - 20); break;
         case CLASS_SHAMAN:  val2 = uint32(getLevel()*2 + GetStat(STAT_STRENGTH)*2 - 20); break;
         case CLASS_DRUID:
+        {
+            // Predatory Strikes
+            float mLevelMult = 0.0;
+            AuraList& mDummy = GetAurasByType(SPELL_AURA_DUMMY);
+            for(AuraList::iterator i = mDummy.begin(); i != mDummy.end(); ++i)
+                if ((*i)->GetSpellProto()->SpellIconID == 1563)
+                    mLevelMult = (*i)->GetModifier()->m_amount / 100.0f;   
             switch(m_form)
             {
                 case FORM_CAT:
-                    val2 = uint32(getLevel()*2 + GetStat(STAT_STRENGTH)*2 - 20 + GetStat(STAT_AGILITY)); break;
+                    val2 = uint32(getLevel()*(2+mLevelMult) + GetStat(STAT_STRENGTH)*2 - 20 + GetStat(STAT_AGILITY)); break;
                 case FORM_BEAR:
                 case FORM_DIREBEAR:
-                    val2 = uint32(getLevel()*3 + GetStat(STAT_STRENGTH)*2 - 20); break;
+                    val2 = uint32(getLevel()*(3+mLevelMult) + GetStat(STAT_STRENGTH)*2 - 20); break;
                 default:
                     val2 = uint32(GetStat(STAT_STRENGTH)*2 - 20); break;
             }
             break;
+        }
         case CLASS_MAGE:    val2 = uint32(GetStat(STAT_STRENGTH) - 10); break;
         case CLASS_PRIEST:  val2 = uint32(GetStat(STAT_STRENGTH) - 10); break;
         case CLASS_WARLOCK: val2 = uint32(GetStat(STAT_STRENGTH) - 10); break;
@@ -3662,7 +3670,7 @@ void Unit::HandleDummyTrigger(Unit *pVictim, uint32 damage, Aura* triggredByAura
             //Improved Leader of the Pack
             //Effect 34299
             //Cooldown: 6 secs
-            if (triggredByAura->GetModifier()->m_amount > 0)
+            if (triggredByAura->GetModifier()->m_amount == 0)
                 break;
             Unit::AuraList& mAddFlatModifier = GetAurasByType(SPELL_AURA_ADD_FLAT_MODIFIER);
             SpellEntry const *improvedLotPTemplate = sSpellStore.LookupEntry(34299);
@@ -4294,7 +4302,10 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
             if(spellProto->EffectAmplitude[x] != 0)
                 DotTicks = DotDuration / spellProto->EffectAmplitude[x];
             if(DotTicks)
+            {
                 DoneAdvertisedBenefit /= DotTicks;
+                TakenAdvertisedBenefit /= DotTicks;
+            }
         }
     }
 
@@ -4345,7 +4356,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     SpellModSpellDamage /= 100.0f;
 
     float DoneActualBenefit = DoneAdvertisedBenefit * (CastingTime / 3500.0f) * (100.0f - LvlPenalty) * LvlFactor * DotFactor * SpellModSpellDamage / 100.0f;
-    float TakenActualBenefit = TakenAdvertisedBenefit * (CastingTime / 3500.0f) * (100.0f - LvlPenalty) * LvlFactor / 100.0f;
+    float TakenActualBenefit = TakenAdvertisedBenefit * (CastingTime / 3500.0f) * (100.0f - LvlPenalty) * LvlFactor * DotFactor / 100.0f;
 
     float tmpDamage = (float(pdamage)+DoneActualBenefit)*DoneTotalMod;
     tmpDamage = (tmpDamage+TakenActualBenefit)*TakenTotalMod;
