@@ -202,10 +202,24 @@ namespace MaNGOS
             return uint32(( xp + 50 ) * 0.01) * 100;
         }
 
-        inline uint32 xp_to_money(uint32 xp)
+        inline uint32 xp_to_money(uint32 rewXP, uint32 qlevel)
         {
             // for max_level
-            return xp;
+            uint32 money = 0;
+            if (qlevel >= 15)
+                money = rewXP / 10;
+            if (qlevel == 14)
+                money = rewXP / 8;
+            if (qlevel == 13)
+                money = rewXP / 6;
+            if (qlevel == 12)
+                money = rewXP / 4;
+            if (qlevel == 11)
+                money = rewXP / 2;
+            if (qlevel > 0 && qlevel <= 10)
+                money = rewXP;
+
+            return money;
         }
     }
 }
