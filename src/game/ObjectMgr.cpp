@@ -1556,7 +1556,7 @@ void ObjectMgr::LoadQuests()
     //   81               82               83               84               85               86             87             88             89             90
         "`RewRepFaction1`,`RewRepFaction2`,`RewRepFaction3`,`RewRepFaction4`,`RewRepFaction5`,`RewRepValue1`,`RewRepValue2`,`RewRepValue3`,`RewRepValue4`,`RewRepValue5`,"
     //   91              92      93         94           95       96       97         98              99              100             101
-        "`RewOrReqMoney`,`RewXP`,`RewSpell`,`PointMapId`,`PointX`,`PointY`,`PointOpt`,`DetailsEmote1`,`DetailsEmote2`,`DetailsEmote3`,`DetailsEmote4`,"
+        "`RewOrReqMoney`,`RewXpOrMoney`,`RewSpell`,`PointMapId`,`PointX`,`PointY`,`PointOpt`,`DetailsEmote1`,`DetailsEmote2`,`DetailsEmote3`,`DetailsEmote4`,"
     //   102               103             104                 105                 106                 107                 108              109
         "`IncompleteEmote`,`CompleteEmote`,`OfferRewardEmote1`,`OfferRewardEmote2`,`OfferRewardEmote3`,`OfferRewardEmote4`,`CompleteScript`,`Repeatable`"
         " FROM `quest_template`");

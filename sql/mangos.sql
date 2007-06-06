@@ -7735,7 +7735,7 @@ CREATE TABLE `quest_template` (
   `RewRepValue4` int(11) NOT NULL default '0',
   `RewRepValue5` int(11) NOT NULL default '0',
   `RewOrReqMoney` int(11) NOT NULL default '0',
-  `RewXP` int(11) unsigned NOT NULL default '0',
+  `RewXpOrMoney` int(11) unsigned NOT NULL default '0',
   `RewSpell` int(11) unsigned NOT NULL default '0',
   `PointMapId` int(11) unsigned NOT NULL default '0',
   `PointX` float NOT NULL default '0',

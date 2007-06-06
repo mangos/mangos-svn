@@ -387,7 +387,7 @@ void PlayerMenu::SendQuestQueryResponse( Quest *pQuest )
 
     data << uint32(pQuest->GetNextQuestInChain());
     data << uint32(pQuest->GetRewOrReqMoney());
-    data << uint32(pQuest->GetRewXP());
+    data << uint32(pQuest->GetRewXpOrMoney());
 
     // check if RewSpell is teaching another spell
     if(pQuest->GetRewSpell())
