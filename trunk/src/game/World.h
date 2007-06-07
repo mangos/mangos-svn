@@ -267,6 +267,7 @@ class World
         typedef HM_NAMESPACE::hash_map<uint32, WorldSession*> SessionMap;
         SessionMap m_sessions;
         uint32 m_maxSessionsCount;
+        std::set<WorldSession*> m_kicked_sessions;
 
         multimap<uint64, ScriptAction> scriptSchedule;
 
