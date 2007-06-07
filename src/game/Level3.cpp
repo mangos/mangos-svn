@@ -3518,15 +3518,17 @@ bool ChatHandler::HandleBanListCommand(const char* args)
     else
         return false;
 
-    QueryResult* banresult;
     PSendSysMessage(LANG_BANLIST_MATCHINGACCOUNT);
     do
     {
         fields = result->Fetch();
         uint32 accountid = fields[0].GetUInt32();
-        banresult = loginDatabase.PQuery("SELECT * FROM `account_banned` WHERE `id`='%u'",accountid);
+        QueryResult* banresult = loginDatabase.PQuery("SELECT * FROM `account_banned` WHERE `id`='%u'",accountid);
         if(banresult)
+        {
             PSendSysMessage("%s",fields[1].GetString());
+            delete banresult;
+        }
     } while (result->NextRow());
 
     delete result;
