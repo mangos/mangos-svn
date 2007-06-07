@@ -328,6 +328,9 @@ pkgdata_DATA = \
 	3801_command.sql \
 	3802_arena_teams.sql \
 	3802_petitions.sql \
+	3805_spell_proc_event.sql \
+	3806_petitions.sql \
+	3833_quest_template.sql \
 	README
 
 ## Additional files to include when running 'make dist'
