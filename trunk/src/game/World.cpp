@@ -969,7 +969,7 @@ bool World::BanAccount(std::string type, std::string nameOrIP, std::string durat
     loginDatabase.escape_string(nameOrIP);
     loginDatabase.escape_string(reason);
     normalizePlayerName(nameOrIP);
-    uint32 duration_secs = TimeStringToSecs(duration.c_str());
+    uint32 duration_secs = TimeStringToSecs(duration);
     QueryResult *resultAccounts;//used for kicking
 
     ///- Update the database with ban information
@@ -978,17 +978,17 @@ bool World::BanAccount(std::string type, std::string nameOrIP, std::string durat
     {
         //No SQL injection as string is escaped
         resultAccounts = loginDatabase.PQuery("SELECT `id` FROM `account` WHERE `last_ip` = '%s'",nameOrIP.c_str());
-        if(atoi(duration.c_str())>0)
+        if(duration_secs>0)
             loginDatabase.PExecute("INSERT INTO `ip_banned` VALUES ('%s',UNIX_TIMESTAMP(),UNIX_TIMESTAMP()+%u,'%s','%s')",nameOrIP.c_str(),duration_secs,author.c_str(),reason.c_str());
         else
             loginDatabase.PExecute("INSERT INTO `ip_banned` VALUES ('%s',UNIX_TIMESTAMP(),UNIX_TIMESTAMP(),'%s','%s')",nameOrIP.c_str(),author.c_str(),reason.c_str());
     }
-    if(type=="account")
+    else if(type=="account")
     {
         //No SQL injection as string is escaped
         resultAccounts = loginDatabase.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s'",nameOrIP.c_str());
     }
-    if(type=="character")
+    else if(type=="character")
     {
         resultAccounts = sDatabase.PQuery("SELECT `account` FROM `character` WHERE `name` = '%s'",nameOrIP.c_str());
     }
@@ -1006,14 +1006,14 @@ bool World::BanAccount(std::string type, std::string nameOrIP, std::string durat
 
         if(type.c_str()!="ip")
         {
-            if(atoi(duration.c_str())>0)
+            if(duration_secs > 0)
                 loginDatabase.PExecute("INSERT INTO `account_banned` VALUES ('%u', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+%u, '%s', '%s', '1')",account,duration_secs,author.c_str(),reason.c_str());
             else
                 loginDatabase.PExecute("INSERT INTO `account_banned` VALUES ('%u', UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), '%s', '%s', '1')",account,author.c_str(),reason.c_str());
         }
         WorldSession* s = FindSession(account);
         if(s)
-            if(s->GetPlayerName() != author.c_str())
+            if(std::string(s->GetPlayerName()) != author)
                 s->KickPlayer();
     }
     while( resultAccounts->NextRow() );
@@ -1040,6 +1040,8 @@ bool World::RemoveBanAccount(std::string type, std::string nameOrIP)
             if(!resultAccounts)
                 return false;
             account=(*resultAccounts)[0].GetUInt32();
+
+            delete resultAccounts;
         }
         else if(type=="character")
         {
@@ -1048,6 +1050,8 @@ bool World::RemoveBanAccount(std::string type, std::string nameOrIP)
             if(!resultAccounts)
                 return false;
             account=(*resultAccounts)[0].GetUInt32();
+
+            delete resultAccounts;
         }
         if(!account)
             return false;

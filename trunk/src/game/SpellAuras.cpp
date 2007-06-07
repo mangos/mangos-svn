@@ -265,7 +265,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //210                                   unused
     &Aura::HandleNULL,                                      //211                                   unused
     &Aura::HandleNULL,                                      //212 SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_INTELLECT
-    &Aura::HandleNULL,                                      //213 SPELL_AURA_MOD_RANGE_FROM_DAMAGE_DEALT
+    &Aura::HandleNULL,                                      //213 SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT
     &Aura::HandleNULL,                                      //214
     &Aura::HandleNULL,                                      //215
     &Aura::HandleNULL,                                      //216 SPELL_AURA_HASTE_SPELLS
