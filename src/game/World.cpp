@@ -91,6 +91,12 @@ World::World()
 /// World desctructor
 World::~World()
 {
+    ///- Empty the kicket session set
+    for (std::set<WorldSession*>::iterator itr = m_kicked_sessions.begin(); itr != m_kicked_sessions.end(); ++itr)
+        delete *itr;
+
+    m_kicked_sessions.clear();
+
     ///- Empty the WeatherMap
     for (WeatherMap::iterator itr = m_weathers.begin(); itr != m_weathers.end(); ++itr)
         delete itr->second;
@@ -133,7 +139,7 @@ WorldSession* World::FindSession(uint32 id) const
 /// Remove a given session
 bool World::RemoveSession(uint32 id)
 {
-    ///- Find the session, kick the user and put the session in "Kicked sessions" list
+    ///- Find the session, kick the user, but we can't delete session at this moment to prevent iterator invalidation
     SessionMap::iterator itr = m_sessions.find(id);
 
     if(itr != m_sessions.end() && itr->second)
@@ -150,8 +156,14 @@ bool World::RemoveSession(uint32 id)
 void World::AddSession(WorldSession* s)
 {
     ASSERT(s);
+
+    WorldSession* old = m_sessions[s->GetAccountId()];
     m_sessions[s->GetAccountId()] = s;
     m_maxSessionsCount = max(m_maxSessionsCount,uint32(m_sessions.size()));
+
+    // if session already exist, prepere to it deleting at next world update
+    if(old)
+        m_kicked_sessions.insert(old);
 }
 
 /// Find a Weather object by the given zoneid
@@ -646,6 +658,11 @@ void World::Update(time_t diff)
     if (m_timers[WUPDATE_SESSIONS].Passed())
     {
         m_timers[WUPDATE_SESSIONS].Reset();
+
+        ///- Delete kicked sessions at add new session
+        for (std::set<WorldSession*>::iterator itr = m_kicked_sessions.begin(); itr != m_kicked_sessions.end(); ++itr)
+            delete *itr;
+        m_kicked_sessions.clear();
 
         ///- Then send an update signal to remaining ones
         for (SessionMap::iterator itr = m_sessions.begin(), next; itr != m_sessions.end(); itr = next)
