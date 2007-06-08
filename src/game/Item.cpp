@@ -204,11 +204,16 @@ void Item::SaveToDB()
     {
         case ITEM_NEW:
         {
+            uint32 Rows=0;
+            
             // it's better than rebuilding indexes multiple times
             QueryResult *result = sDatabase.PQuery("select count(*) as r from `item_instance` where `guid` = '%u'", guid);
-            Field *fields = result->Fetch();
-            uint32 Rows = fields[0].GetUInt32();
-            delete result;
+            if(result)
+            {
+                Rows = result->Fetch()[0].GetUInt32();
+                delete result;
+            }
+            
             // guess - instance exists ?
             if (!Rows)
             {
@@ -398,7 +403,7 @@ uint32 Item::GenerateItemRandomPropertyId(uint32 item_id)
         return 0;
 
     // only for specific item classes
-    if(itemProto->Class != ITEM_CLASS_WEAPON && itemProto->Class != ITEM_CLASS_JEWELRY && itemProto->Class != ITEM_CLASS_ARMOR)
+    if(itemProto->Class != ITEM_CLASS_WEAPON && itemProto->Class != ITEM_CLASS_GEM && itemProto->Class != ITEM_CLASS_ARMOR)
         return 0;
 
     // only if not other stats bonuses

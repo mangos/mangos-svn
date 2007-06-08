@@ -157,8 +157,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
 
     ByteBuffer buf(500);
     buf << updatetype;
-    //buf.append(GetPackGUID());    //client crashes when using this
-    buf << (uint8)0xFF << GetGUID();
+    buf.append(GetPackGUID());
     buf << m_objectTypeId;
 
     _BuildMovementUpdate(&buf, flags, flags2);
@@ -198,9 +197,7 @@ void Object::BuildValuesUpdateBlockForPlayer(UpdateData *data, Player *target) c
     ByteBuffer buf(500);
 
     buf << (uint8) UPDATETYPE_VALUES;
-    //buf.append(GetPackGUID());    client crashes when using this
-    buf << (uint8)0xFF;
-    buf << GetGUID();
+    buf.append(GetPackGUID());
 
     UpdateMask updateMask;
     updateMask.SetCount( m_valuesCount );

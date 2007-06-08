@@ -1058,7 +1058,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             break;
         }
 
-        int32 gain = ModifyHealth(pdamage * multiplier);
+        int32 gain = ModifyHealth(int32(pdamage * multiplier));
         ThreatAssist(this, float(gain) * 0.5f, spellProto->School, spellProto);
 
         if(GetTypeId() == TYPEID_PLAYER)
