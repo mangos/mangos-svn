@@ -211,7 +211,7 @@ enum INVENTORY_CLASS
     ITEM_CLASS_CONSUMABLE                       = 0,
     ITEM_CLASS_CONTAINER                        = 1,
     ITEM_CLASS_WEAPON                           = 2,
-    ITEM_CLASS_JEWELRY                          = 3,
+    ITEM_CLASS_GEM                              = 3,
     ITEM_CLASS_ARMOR                            = 4,
     ITEM_CLASS_REAGENT                          = 5,
     ITEM_CLASS_PROJECTILE                       = 6,
@@ -266,7 +266,7 @@ enum INVENTORY_SUBCLASS_WEAPON
     ITEM_SUBCLASS_WEAPON_STAFF                  = 10,
     ITEM_SUBCLASS_WEAPON_EXOTIC                 = 11,
     ITEM_SUBCLASS_WEAPON_EXOTIC2                = 12,
-    ITEM_SUBCLASS_WEAPON_FIRST                  = 13,
+    ITEM_SUBCLASS_WEAPON_FIST                   = 13,
     ITEM_SUBCLASS_WEAPON_MISC                   = 14,
     ITEM_SUBCLASS_WEAPON_DAGGER                 = 15,
     ITEM_SUBCLASS_WEAPON_THROWN                 = 16,
@@ -276,6 +276,19 @@ enum INVENTORY_SUBCLASS_WEAPON
     ITEM_SUBCLASS_WEAPON_FISHING_POLE           = 20
 };
 
+enum ITEM_SUBCLASS_GEM
+{
+    ITEM_SUBCLASS_GEM_RED                       = 0,
+    ITEM_SUBCLASS_GEM_BLUE                      = 1,
+    ITEM_SUBCLASS_GEM_YELLOW                    = 2,
+    ITEM_SUBCLASS_GEM_PURPLE                    = 3,
+    ITEM_SUBCLASS_GEM_GREEN                     = 4,
+    ITEM_SUBCLASS_GEM_ORANGE                    = 5,
+    ITEM_SUBCLASS_GEM_META                      = 6,
+    ITEM_SUBCLASS_GEM_SIMPLE                    = 7,
+    ITEM_SUBCLASS_GEM_PRISMATIC                 = 8
+};
+ 
 enum ITEM_SUBCLASS_ARMOR
 {
     ITEM_SUBCLASS_ARMOR_MISC                    = 0,

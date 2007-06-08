@@ -738,7 +738,7 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
     }
 
     sDatabase.escape_string(newname);
-    sDatabase.PQuery("UPDATE `character` set `name` = '%s', `rename` = '0' WHERE `guid` ='%u'", newname.c_str(), GUID_LOPART(guid));
+    sDatabase.PExecute("UPDATE `character` set `name` = '%s', `rename` = '0' WHERE `guid` ='%u'", newname.c_str(), GUID_LOPART(guid));
 
     WorldPacket data(SMSG_CHAR_RENAME,1+8+(newname.size()+1));
     data << (uint8)RESPONSE_SUCCESS;
