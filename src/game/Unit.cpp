@@ -5585,7 +5585,7 @@ int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_inde
     if(GetTypeId() == TYPEID_PLAYER)
         comboPoints = (uint8)((GetUInt32Value(PLAYER_FIELD_BYTES) & 0xFF00) >> 8);
 
-    value = basePoints + urand(spellProto->EffectBaseDice[effect_index], randomPoints);
+    value = basePoints + rand32(spellProto->EffectBaseDice[effect_index], randomPoints);
 
     if(comboDamage > 0)
     {

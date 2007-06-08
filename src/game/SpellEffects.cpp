@@ -1108,7 +1108,7 @@ void Spell::DoCreateItem(uint32 i, uint32 itemtype)
         int32 basePoints = m_spellInfo->EffectBasePoints[i];
         int32 randomPoints = m_spellInfo->EffectDieSides[i];
         if (randomPoints)
-            num_to_add = basePoints + irand(1, randomPoints);
+            num_to_add = basePoints + rand32(1, randomPoints);
         else
             num_to_add = basePoints + 1;
     }
@@ -3001,7 +3001,7 @@ void Spell::EffectKnockBack(uint32 i)
     float value = 0;
     int32 basePoints = m_spellInfo->EffectBasePoints[i];
     int32 randomPoints = m_spellInfo->EffectDieSides[i];
-    if (randomPoints) value = basePoints + irand(1, randomPoints);
+    if (randomPoints) value = basePoints + rand32(1, randomPoints);
     else value = basePoints +1;
 
     //Only allowed to knock ourselves straight up to prevent exploiting
