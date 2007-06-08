@@ -984,7 +984,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         SendSpellNonMeleeDamageLog(pVictim, spellProto->Id, pdamage, spellProto->School, absorb, resist, false, 0);
 
         DealDamage(pVictim, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), DOT, spellProto->School, spellProto, procFlag, true);
-        ProcDamageAndSpell(pVictim, PROC_FLAG_HIT_SPELL, PROC_FLAG_TAKE_DAMAGE, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), spellProto);
+        ProcDamageAndSpell(pVictim, 0, PROC_FLAG_TAKE_DAMAGE, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), spellProto);
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_DAMAGE_PERCENT)
     {
@@ -993,7 +993,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         SendSpellNonMeleeDamageLog(pVictim, spellProto->Id, pdamage, spellProto->School, absorb, resist, false, 0);
 
         DealDamage(pVictim, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), DOT, spellProto->School, spellProto, procFlag, true);
-        ProcDamageAndSpell(pVictim, PROC_FLAG_HIT_SPELL, PROC_FLAG_TAKE_DAMAGE, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), spellProto);
+        ProcDamageAndSpell(pVictim, 0, PROC_FLAG_TAKE_DAMAGE, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), spellProto);
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL || mod->m_auraname == SPELL_AURA_OBS_MOD_HEALTH)
     {
@@ -2333,8 +2333,16 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
         uint32 i_spellId = (*i).second->GetId();
         uint32 i_effIndex = (*i).second->GetEffIndex();
 
-        // prevent remove dummy triggered spells at next effect aura add
+        if(i_spellId == spellId) continue;
+
         bool is_triggered_by_spell = false;
+        // prevent triggered aura of removing aura that triggered it
+        for(int j = 0; j < 3; ++j)
+            if ((*i).second->GetSpellProto()->EffectTriggerSpell[j] == spellProto->Id)
+                is_triggered_by_spell = true;
+        if (is_triggered_by_spell) continue;
+
+        // prevent remove dummy triggered spells at next effect aura add
         for(int j = 0; j < 3; ++j)
         {
             switch(spellProto->Effect[j])
@@ -2345,7 +2353,6 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
                         case 5420: if(i_spellId==34123) is_triggered_by_spell = true; break;
                     }
                     break;
-
             }
             if(is_triggered_by_spell)
                 break;
@@ -2359,12 +2366,9 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
                     }
                     break;
             }
-
-            if(is_triggered_by_spell)
-                break;
         }
 
-        if(i_spellId != spellId && !is_triggered_by_spell)
+        if(!is_triggered_by_spell)
         {
             bool sec_match = false;
             bool is_i_sec = IsSpellSingleEffectPerCaster(i_spellId);
@@ -2475,19 +2479,15 @@ void Unit::RemoveAreaAurasByOthers(uint64 guid)
 
 void Unit::RemoveAura(uint32 spellId, uint32 effindex)
 {
-    AuraMap::iterator i = m_Auras.find( spellEffectPair(spellId, effindex) );
-    if(i != m_Auras.end())
-        RemoveAura(i);
+    AuraMap::iterator iter;
+    while((iter = m_Auras.find(spellEffectPair(spellId, effindex))) != m_Auras.end())
+        RemoveAura(iter);
 }
 
 void Unit::RemoveAurasDueToSpell(uint32 spellId)
 {
-    for (int i = 0; i < 3; i++)
-    {
-        AuraMap::iterator iter = m_Auras.find(spellEffectPair(spellId, i));
-        if (iter != m_Auras.end())
-            RemoveAura(iter);
-    }
+    for (int i = 0; i < 3; ++i)
+        RemoveAura(spellId,i);
 }
 
 void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
@@ -3370,7 +3370,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                     if (pVictim && pVictim->isAlive())
                     {
                         sLog.outDebug("ProcDamageAndSpell: casting spell id %u (triggered by an attacker dummy aura of spell %u)", i->spellInfo->Id,i->triggeredByAura->GetId());
-                        HandleDummyAuraProc(pVictim, i->spellInfo, i->spellParam, damage, i->triggeredByAura);
+                        HandleDummyAuraProc(pVictim, i->spellInfo, i->spellParam, damage, i->triggeredByAura, procAttacker);
                     }
                 }
             }
@@ -3486,7 +3486,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                 {
                     // TODO: write a DUMMY aura handle code
                     sLog.outDebug("ProcDamageAndSpell: casting spell %u (triggered by a victim's dummy aura of spell %u))",i->spellInfo->Id, i->triggeredByAura);
-                    pVictim->HandleDummyAuraProc(this, i->spellInfo, i->spellParam, damage, i->triggeredByAura);
+                    pVictim->HandleDummyAuraProc(this, i->spellInfo, i->spellParam, damage, i->triggeredByAura, procVictim);
                 }
             }
 
@@ -3577,7 +3577,7 @@ void Unit::CastMeleeProcDamageAndSpell(Unit* pVictim, uint32 damage, WeaponAttac
     ProcDamageAndSpell(pVictim, procAttacker, procVictim, damage, spellCasted, isTriggeredSpell, attType);
 }
 
-void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint32 effIndex, uint32 damage, Aura* triggredByAura)
+void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint32 effIndex, uint32 damage, Aura* triggredByAura, uint32 procFlag)
 {
     // Example. Ignite. Though it looks like hack, it isn't )
     if(dummySpell->Id == 11119 || dummySpell->Id == 11120 || dummySpell->Id == 12846 || dummySpell->Id == 12847 || dummySpell->Id == 12848)
@@ -3617,6 +3617,16 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
         SpellEntry VTEnergize = *VTEnergizeTemplate;
         VTEnergize.EffectBasePoints[0] = triggredByAura->GetModifier()->m_amount*damage/100 - 1;
         pVictim->CastSpell(pVictim,&VTEnergize,true,NULL, triggredByAura);
+    }
+
+    // Combustion
+    if (dummySpell->Id == 11129)
+    {
+        CastSpell(this, 28682, true, NULL, triggredByAura);
+        if (!(procFlag & PROC_FLAG_CRIT_SPELL))             //no crit
+            triggredByAura->m_procCharges += 1;             //-> reincrease procCharge count since it was decreased before
+        else if (triggredByAura->m_procCharges == 0)        //no more charges left and crit
+            RemoveAurasDueToSpell(28682);                   //-> remove Combustion auras
     }
 }
 
