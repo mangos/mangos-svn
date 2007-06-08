@@ -88,10 +88,10 @@ World::World()
     m_maxSessionsCount = 0;
 }
 
-/// World desctructor
+/// World destructor
 World::~World()
 {
-    ///- Empty the kicket session set
+    ///- Empty the kicked session set
     for (std::set<WorldSession*>::iterator itr = m_kicked_sessions.begin(); itr != m_kicked_sessions.end(); ++itr)
         delete *itr;
 

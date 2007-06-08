@@ -49,7 +49,7 @@ Object::Object( )
     m_objectUpdated     = false;
 
     m_PackGUID.clear();
-    _SetPackGUID(&m_PackGUID,0);
+    m_PackGUID.appendPackGUID(0);
 }
 
 Object::~Object( )
@@ -85,7 +85,7 @@ void Object::_Create( uint32 guidlow, uint32 guidhigh )
     SetUInt32Value( OBJECT_FIELD_GUID+1, guidhigh );
     SetUInt32Value( OBJECT_FIELD_TYPE, m_objectType );
     m_PackGUID.clear();
-    _SetPackGUID(&m_PackGUID,GetGUID());
+    m_PackGUID.appendPackGUID(GetGUID());
 }
 
 void Object::BuildMovementUpdateBlock(UpdateData * data, uint32 flags ) const
@@ -611,20 +611,6 @@ bool Object::PrintIndexError(uint32 index, bool set) const
 
     // assert must fail after function call
     return false;
-}
-
-void Object::_SetPackGUID(ByteBuffer *buffer, const uint64 &guid64) const
-{
-    size_t mask_position = buffer->wpos();
-    *buffer << uint8(0);
-    for(uint8 i = 0; i < 8; i++)
-    {
-        if(((uint8*)&guid64)[i])
-        {
-            const_cast<uint8*>(buffer->contents())[mask_position] |= (1<<i);
-            *buffer << ((uint8*)&guid64)[i];
-        }
-    }
 }
 
 WorldObject::WorldObject( WorldObject *instantiator )
