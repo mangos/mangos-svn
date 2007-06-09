@@ -890,6 +890,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 getTransForm() { return m_transform;}
         void AddDynObject(DynamicObject* dynObj);
         void RemoveDynObject(uint32 spellid);
+        void RemoveDynObjectWithGUID(uint64 guid) { m_dynObjGUIDs.remove(guid); }
         void RemoveAllDynObjects();
         void AddGameObject(GameObject* gameObj);
         void RemoveGameObject(GameObject* gameObj, bool del);
@@ -952,7 +953,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         AuraMap m_Auras;
 
         std::list<Aura *> m_scAuras;                        // casted singlecast auras
-        std::list<DynamicObject*> m_dynObj;
+
+        typedef std::list<uint64> DynObjectGUIDs;
+        DynObjectGUIDs m_dynObjGUIDs;
+
         std::list<GameObject*> m_gameObj;
         ThreatList m_threatList;
         HateOfflineList m_offlineList;

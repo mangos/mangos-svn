@@ -33,7 +33,6 @@ class DynamicObject : public WorldObject
         bool Create(uint32 guidlow, Unit *caster, uint32 spellId, uint32 effIndex, float x, float y, float z, int32 duration, float radius);
         void Update(uint32 p_time);
         void Delete();
-        bool isFinished() {return deleteThis;}
         uint32 GetSpellId() const { return m_spellId; }
         uint32 GetEffIndex() const { return m_effIndex; }
         uint32 GetDuration() const { return m_aliveDuration; }
@@ -51,7 +50,6 @@ class DynamicObject : public WorldObject
         uint32 m_effIndex;
         int32 m_aliveDuration;
         time_t m_nextThinkTime;
-        bool deleteThis;
         float m_radius;
         AffectedSet m_affected;
 };
