@@ -266,18 +266,12 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             }
             break;
 
-            //big gun, its a spell/aura
+        //big gun, its a spell/aura
         case GAMEOBJECT_TYPE_GOOBER:                        //10
-            //TODO : FIX ME! - this code is not tested, but it won't crash, only spell can crash
             info = obj->GetGOInfo();
-            if(info && info->sound0 == 0)
-            {
-                spellId = info->sound10;
-                if (spellId)
-                    break;                                  //if spellid == 0, then try GAMEOBJECT_TYPE_SPELLCASTER
-            }
-            /* fall through */
-            //chest locked
+            spellId = info ? info->sound10 : 0;
+            break;
+
         case GAMEOBJECT_TYPE_SPELLCASTER:                   //22
 
             obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
@@ -538,8 +532,9 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             break;
     }
 
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry( spellId );
+    if (!spellId) return;
 
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry( spellId );
     if(!spellInfo)
     {
         sLog.outError("WORLD: unknown spell id %i\n", spellId);
@@ -552,7 +547,6 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
     targets.setUnitTarget( spellTarget );
     targets.setGOTarget( obj );
     spell->prepare(&targets);
-
 }
 
 void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)

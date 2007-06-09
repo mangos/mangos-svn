@@ -74,6 +74,7 @@ struct ScriptAction
 #define SCRIPT_COMMAND_MOVE_TO      3
 #define SCRIPT_COMMAND_FLAG_SET     4
 #define SCRIPT_COMMAND_FLAG_REMOVE  5
+#define SCRIPT_COMMAND_TELEPORT_TO  6
 #define SCRIPT_COMMAND_TEMP_SUMMON 10
 
 /// World constructor
@@ -852,6 +853,23 @@ void World::ScriptsProcess()
 
                 step.source->RemoveFlag(step.script->datalong, step.script->datalong2);
                 break;
+
+            case SCRIPT_COMMAND_TELEPORT_TO:
+                if (!step.target)
+                {
+                    sLog.outError("SCRIPT_COMMAND_TELEPORT_TO call for NULL object.");
+                    break;
+                }
+
+                if (step.target->GetTypeId() != TYPEID_PLAYER)
+                {
+                    sLog.outError("SCRIPT_COMMAND_TELEPORT_TO call for non-creature (TypeId: %u), skipping.", step.target->GetTypeId());
+                    break;
+                }
+
+                ((Player*)step.target)->TeleportTo(step.script->datalong, step.script->x, step.script->y, step.script->z, step.script->o);
+                break;
+
             case SCRIPT_COMMAND_TEMP_SUMMON:
             {
                 if(!step.source)

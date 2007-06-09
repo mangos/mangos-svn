@@ -215,9 +215,29 @@ void GameObject::Update(uint32 p_time)
                 }
             }
             break;
+
         case GO_OPEN:
             break;
+
         case GO_LOOTED:
+            uint32 spellId = GetGOInfo()->sound10;
+            //if Gamebject should cast spell, then this, but some GOs (type = 10) should be destroyed
+            if (GetGoType() == GAMEOBJECT_TYPE_GOOBER && spellId)
+            {
+                std::set<uint32>::iterator it = m_unique_users.begin();
+                std::set<uint32>::iterator end = m_unique_users.end();
+                for (; it != end; it++)
+                {
+                    Unit* owner = Unit::GetUnit(*this, uint64(*it));
+                    if (owner) owner->CastSpell(owner, spellId, false);
+                }
+
+                m_unique_users.clear();
+                m_usetimes = 0;
+                SetLootState(GO_CLOSED);
+                break;
+            }
+
             if(GetOwnerGUID())
             {
                 m_respawnTime = 0;
