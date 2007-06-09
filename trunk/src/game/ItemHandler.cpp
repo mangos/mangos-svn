@@ -760,6 +760,12 @@ void WorldSession::HandleSetAmmoOpcode(WorldPacket & recv_data)
 {
     CHECK_PACKET_SIZE(recv_data,4);
 
+    if(!GetPlayer()->isAlive())
+    {
+        GetPlayer()->SendEquipError( EQUIP_ERR_YOU_ARE_DEAD, NULL, NULL );
+        return;
+    }
+
     sLog.outDebug("WORLD: CMSG_SET_AMMO");
     uint32 item;
 

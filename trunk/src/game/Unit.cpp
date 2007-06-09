@@ -125,10 +125,12 @@ Unit::~Unit()
 
 void Unit::RemoveAllDynObjects()
 {
-    for(std::list<DynamicObject*>::iterator i = m_dynObj.begin(); i != m_dynObj.end();)
+    while(!m_dynObjGUIDs.empty())
     {
-        (*i)->Delete();
-        i = m_dynObj.erase(i);
+        DynamicObject* dynObj = ObjectAccessor::Instance().GetDynamicObject(*this,*m_dynObjGUIDs.begin());
+        if(dynObj)
+            dynObj->Delete();
+        m_dynObjGUIDs.erase(m_dynObjGUIDs.begin());
     }
 }
 
@@ -2074,21 +2076,6 @@ void Unit::_UpdateSpells( uint32 time )
         }
     }
 
-    if(!m_dynObj.empty())
-    {
-        std::list<DynamicObject*>::iterator ite;
-        for (ite = m_dynObj.begin(); ite != m_dynObj.end();)
-        {
-            //(*i)->Update( difftime );
-            if( (*ite)->isFinished() )
-            {
-                (*ite)->Delete();
-                ite = m_dynObj.erase(ite);
-            }
-            else
-                ++ite;
-        }
-    }
     if(!m_gameObj.empty())
     {
         std::list<GameObject*>::iterator ite1, dnext1;
@@ -3072,19 +3059,24 @@ Aura* Unit::GetAura(uint32 spellId, uint32 effindex)
 
 void Unit::AddDynObject(DynamicObject* dynObj)
 {
-    m_dynObj.push_back(dynObj);
+    m_dynObjGUIDs.push_back(dynObj->GetGUID());
 }
 
 void Unit::RemoveDynObject(uint32 spellid)
 {
-    if(m_dynObj.empty())
+    if(m_dynObjGUIDs.empty())
         return;
-    for (std::list<DynamicObject*>::iterator i = m_dynObj.begin(); i != m_dynObj.end();)
+    for (DynObjectGUIDs::iterator i = m_dynObjGUIDs.begin(); i != m_dynObjGUIDs.end();)
     {
-        if(spellid == 0 || (*i)->GetSpellId() == spellid)
+        DynamicObject* dynObj = ObjectAccessor::Instance().GetDynamicObject(*this,*m_dynObjGUIDs.begin());
+        if(!dynObj)
         {
-            (*i)->Delete();
-            i = m_dynObj.erase(i);
+            i = m_dynObjGUIDs.erase(i);
+        }
+        else if(spellid == 0 || dynObj->GetSpellId() == spellid)
+        {
+            dynObj->Delete();
+            i = m_dynObjGUIDs.erase(i);
         }
         else
             ++i;
@@ -3093,10 +3085,19 @@ void Unit::RemoveDynObject(uint32 spellid)
 
 DynamicObject * Unit::GetDynObject(uint32 spellId, uint32 effIndex)
 {
-    std::list<DynamicObject*>::iterator i;
-    for (i = m_dynObj.begin(); i != m_dynObj.end(); ++i)
-        if ((*i)->GetSpellId() == spellId && (*i)->GetEffIndex() == effIndex)
-            return *i;
+    for (DynObjectGUIDs::iterator i = m_dynObjGUIDs.begin(); i != m_dynObjGUIDs.end();)
+    {
+        DynamicObject* dynObj = ObjectAccessor::Instance().GetDynamicObject(*this,*m_dynObjGUIDs.begin());
+        if(!dynObj)
+        {
+            i = m_dynObjGUIDs.erase(i);
+            continue;
+        }
+
+        if (dynObj->GetSpellId() == spellId && dynObj->GetEffIndex() == effIndex)
+            return dynObj;
+        ++i;
+    }
     return NULL;
 }
 

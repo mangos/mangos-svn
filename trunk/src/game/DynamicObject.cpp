@@ -60,7 +60,6 @@ bool DynamicObject::Create( uint32 guidlow, Unit *caster, uint32 spellId, uint32
 
     m_aliveDuration = duration;
     m_radius = radius;
-    deleteThis = false;
     m_effIndex = effIndex;
     m_spellId = spellId;
     m_casterGuid = caster->GetGUID();
@@ -79,9 +78,11 @@ void DynamicObject::Update(uint32 p_time)
     Unit* caster = GetCaster();
     if(!caster)
     {
-        deleteThis = true;
+        Delete();
         return;
     }
+
+    bool deleteThis = false;
 
     if(m_aliveDuration > int32(p_time))
         m_aliveDuration -= p_time;
@@ -102,6 +103,12 @@ void DynamicObject::Update(uint32 p_time)
     CellLock<GridReadGuard> cell_lock(cell, p);
     cell_lock->Visit(cell_lock, world_object_notifier, *MapManager::Instance().GetMap(GetMapId(), this));
     cell_lock->Visit(cell_lock, grid_object_notifier,  *MapManager::Instance().GetMap(GetMapId(), this));
+
+    if(deleteThis)
+    {
+        caster->RemoveDynObjectWithGUID(GetGUID());
+        Delete();
+    }
 }
 
 void DynamicObject::Delete()
