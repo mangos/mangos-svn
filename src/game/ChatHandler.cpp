@@ -56,11 +56,14 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
     // send in universal language infaction iteration allowed mode and if player in .gmon mode
     if (sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHAT) || _player->isGameMaster())
         lang = LANG_UNIVERSAL;
+
     if (!_player->CanSpeak())
     {
-        SendNotification(LANG_WAIT_BEFORE_SPEAKING);
+        std::string timeStr = secsToTimeString(m_muteTime - time(NULL));
+        SendNotification(LANG_WAIT_BEFORE_SPEAKING,timeStr.c_str());
         return;
     }
+
     switch(type)
     {
         case CHAT_MSG_SAY:  

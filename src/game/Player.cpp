@@ -79,7 +79,9 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_transY = 0.0f;
     m_transZ = 0.0f;
     m_transO = 0.0f;
+
     m_speakTime = 0;
+    m_speakCount = 0;
 
     m_objectType |= TYPE_PLAYER;
     m_objectTypeId = TYPEID_PLAYER;
@@ -11313,13 +11315,33 @@ void Player::LoadCorpse()
 
 void Player::UpdateSpeakTime()
 {
-    m_speakTime = time (NULL) + 1;                          // 1 sec. delay after each chat message
-}
+    time_t current = time (NULL);
+    if(m_speakTime > current)
+    {
+        uint32 max_count = sWorld.getConfig(CONFIG_CHATFLOOD_MESSAGE_COUNT);
+        if(!max_count)
+            return;
 
+        ++m_speakCount;
+        if(m_speakCount >= max_count)
+        {
+            // prevent overwrite mute time, if message send just before mutes set, for example.
+            time_t new_mute = current + sWorld.getConfig(CONFIG_CHATFLOOD_MUTE_TIME);
+            if(GetSession()->m_muteTime < new_mute)
+                GetSession()->m_muteTime = new_mute;
+
+            m_speakCount = 0;
+        }
+    }
+    else
+        m_speakCount = 0;
+
+    m_speakTime = current + sWorld.getConfig(CONFIG_CHATFLOOD_MESSAGE_DELAY);
+}
 
 bool Player::CanSpeak() const
 {
-    return  m_speakTime <= time (NULL);
+    return  GetSession()->m_muteTime <= time (NULL);
 }
 
 void Player::_LoadInventory(uint32 timediff)

@@ -36,6 +36,129 @@
 #include <iostream>
 #include <fstream>
 using namespace std;
+bool ChatHandler::HandleMuteCommand(const char* args)
+{
+    if (!*args)
+        return false;
+
+    char *charname = strtok((char*)args, " ");
+    if (!charname)
+        return false;
+
+    std::string cname = charname;
+
+    char *timetonotspeak = strtok(NULL, " ");
+    if(!timetonotspeak)
+        return false;
+
+    uint32 notspeaktime = (uint32) atoi(timetonotspeak);
+
+    normalizePlayerName(cname);
+    uint64 guid = objmgr.GetPlayerGUIDByName(cname.c_str());
+    if(!guid)
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        return true;
+    }
+
+    Player *chr = objmgr.GetPlayer(guid);
+
+    // check security
+    uint32 account_id = 0;
+    uint32 security = 0;
+
+    if (chr)
+    {
+        account_id = chr->GetSession()->GetAccountId();
+        security = chr->GetSession()->GetSecurity();
+    }
+    else
+    {
+        account_id = objmgr.GetPlayerAccountIdByGUID(guid);
+        security = objmgr.GetSecurityByAccount(account_id);
+    }
+
+    if(security >= m_session->GetSecurity())
+    {
+        SendSysMessage(LANG_YOURS_SECURITY_IS_LOW);
+        return true;
+    }
+
+    time_t mutetime = time(NULL) + notspeaktime*60;
+
+    if (chr)
+        chr->GetSession()->m_muteTime = mutetime;
+
+    loginDatabase.PExecute("UPDATE `account` SET `mutetime` = " I64FMTD " WHERE `id` = '%u'",uint64(mutetime), account_id );
+
+    if(chr)
+        PSendSysMessage(chr->GetSession(), LANG_YOUR_CHAT_DISABLED, notspeaktime);
+
+    PSendSysMessage(LANG_YOU_DISABLE_CHAT, cname.c_str(), notspeaktime);
+
+    return true;
+}
+bool ChatHandler::HandleUnmuteCommand(const char* args)
+{
+    if (!*args)
+        return false;
+
+    char *charname = strtok((char*)args, " ");
+    if (!charname)
+        return false;
+
+    std::string cname = charname;
+
+    normalizePlayerName(cname);
+    uint64 guid = objmgr.GetPlayerGUIDByName(cname.c_str());
+    if(!guid)
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        return true;
+    }
+
+    Player *chr = objmgr.GetPlayer(guid);
+
+    // check security
+    uint32 account_id = 0;
+    uint32 security = 0;
+
+    if (chr)
+    {
+        account_id = chr->GetSession()->GetAccountId();
+        security = chr->GetSession()->GetSecurity();
+    }
+    else
+    {
+        account_id = objmgr.GetPlayerAccountIdByGUID(guid);
+        security = objmgr.GetSecurityByAccount(account_id);
+    }
+
+    if(security >= m_session->GetSecurity())
+    {
+        SendSysMessage(LANG_YOURS_SECURITY_IS_LOW);
+        return true;
+    }
+
+    if (chr)
+    {
+        if(chr->CanSpeak())
+        {
+            SendSysMessage(LANG_CHAT_ALREADY_ENABLED);
+            return true;
+        }
+
+        chr->GetSession()->m_muteTime = 0;
+    }
+
+    loginDatabase.PExecute("UPDATE `account` SET `mutetime` = '0' WHERE `id` = '%u'", account_id );
+
+    if(chr)
+        PSendSysMessage(chr->GetSession(), LANG_YOUR_CHAT_ENABLED);
+
+    PSendSysMessage(LANG_YOU_ENABLE_CHAT, cname.c_str());
+    return true;
+}
 
 bool ChatHandler::HandleTargetObjectCommand(const char* args)
 {

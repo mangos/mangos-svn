@@ -250,7 +250,8 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     std::string safe_account=account;                       // Duplicate, else will screw the SHA hash verification below
     loginDatabase.escape_string(safe_account);
     //No SQL injection, username escaped.
-    QueryResult *result = loginDatabase.PQuery("SELECT `id`,`gmlevel`,`sessionkey`,`last_ip`,`locked`, `password`, `v`, `s`, `tbc` FROM `account` WHERE `username` = '%s'", safe_account.c_str());
+    //                                                 0    1         2            3         4         5           6    7    8     9
+    QueryResult *result = loginDatabase.PQuery("SELECT `id`,`gmlevel`,`sessionkey`,`last_ip`,`locked`, `password`, `v`, `s`, `tbc`,`mutetime` FROM `account` WHERE `username` = '%s'", safe_account.c_str());
 
     ///- Stop if the account is not found
     if ( !result )
@@ -262,14 +263,16 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         return;
     }
 
-    tbc = (*result)[8].GetUInt8() && sWorld.getConfig(CONFIG_EXPANSION);
+    Field* fields = result->Fetch();
+
+    tbc = fields[8].GetUInt8() && sWorld.getConfig(CONFIG_EXPANSION);
 
     N.SetHexStr("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7");
     g.SetDword(7);
-    password = (*result)[5].GetString();
+    password = fields[5].GetCppString();
     std::transform(password.begin(), password.end(), password.begin(), std::towupper);
 
-    s.SetHexStr((*result)[7].GetString());
+    s.SetHexStr(fields[7].GetString());
     std::string sI = account + ":" + password;
     I.UpdateData(sI);
     I.Finalize();
@@ -279,9 +282,9 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     x.SetBinary(sha1.GetDigest(), sha1.GetLength());
     v = g.ModExp(x, N);
 
-    sLog.outDebug("SOCKET: (s,v) check s: %s v_old: %s v_new: %s", s.AsHexStr(), (*result)[6].GetString(), v.AsHexStr() );
-    loginDatabase.PQuery("UPDATE `account` SET `v` = '0', `s` = '0' WHERE `username` = '%s'", safe_account.c_str());
-    if ( strcmp(v.AsHexStr(),(*result)[6].GetString() ) )
+    sLog.outDebug("SOCKET: (s,v) check s: %s v_old: %s v_new: %s", s.AsHexStr(), fields[6].GetString(), v.AsHexStr() );
+    loginDatabase.PExecute("UPDATE `account` SET `v` = '0', `s` = '0' WHERE `username` = '%s'", safe_account.c_str());
+    if ( strcmp(v.AsHexStr(),fields[6].GetString() ) )
     {
         packet.Initialize( SMSG_AUTH_RESPONSE, 1 );
         packet << uint8( AUTH_UNKNOWN_ACCOUNT );
@@ -292,9 +295,9 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     }
 
     ///- Re-check ip locking (same check as in realmd).
-    if((*result)[4].GetUInt8() == 1)                        // if ip is locked
+    if(fields[4].GetUInt8() == 1)                           // if ip is locked
     {
-        if ( strcmp((*result)[3].GetString(),GetRemoteAddress().c_str()) )
+        if ( strcmp(fields[3].GetString(),GetRemoteAddress().c_str()) )
         {
             packet.Initialize( SMSG_AUTH_RESPONSE, 1 );
             packet << uint8( AUTH_FAILED );
@@ -319,9 +322,10 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         return;
     }
 
-    id = (*result)[0].GetUInt32();
-    security = (*result)[1].GetUInt16();
-    K.SetHexStr((*result)[2].GetString());
+    id = fields[0].GetUInt32();
+    security = fields[1].GetUInt16();
+    K.SetHexStr(fields[2].GetString());
+    time_t mutetime = time_t(fields[9].GetUInt64());
 
     delete result;
 
@@ -380,7 +384,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     SendPacket(&packet);
 
     ///- Create a new WorldSession for the player and add it to the World
-    _session = new WorldSession(id, this,security);
+    _session = new WorldSession(id, this,security,mutetime);
     sWorld.AddSession(_session);
 
     sLog.outDebug( "SOCKET: Client '%s' authenticated successfully.", account.c_str() );
@@ -388,7 +392,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     
     ///- Update the last_ip in the database
     //No SQL injection, username escaped.
-    loginDatabase.PQuery("UPDATE `account` SET `last_ip` = '%s' WHERE `username` = '%s'",GetRemoteAddress().c_str(), safe_account.c_str());
+    loginDatabase.PExecute("UPDATE `account` SET `last_ip` = '%s' WHERE `username` = '%s'",GetRemoteAddress().c_str(), safe_account.c_str());
 
     // do small delay (10ms) at accepting successful authed connection to prevent droping packets by client
     // don't must harm anyone (let login ~100 accounts in 1 sec ;) )

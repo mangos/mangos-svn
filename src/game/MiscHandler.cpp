@@ -1174,8 +1174,14 @@ void WorldSession::SendNotification(const char *format,...)
 {
     if(format)
     {
-        WorldPacket data(SMSG_NOTIFICATION, (strlen(format)+1));
-        data << format;
+        va_list ap;
+        char szStr [1024];
+        va_start(ap, format);
+        int res = vsnprintf( szStr, 1024, format, ap );
+        va_end(ap);
+
+        WorldPacket data(SMSG_NOTIFICATION, (strlen(szStr)+1));
+        data << szStr;
         SendPacket(&data);
     }
 }

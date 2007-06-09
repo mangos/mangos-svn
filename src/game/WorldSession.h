@@ -40,7 +40,7 @@ class WorldSession;
 class MANGOS_DLL_SPEC WorldSession
 {
     public:
-        WorldSession(uint32 id, WorldSocket *sock, uint32 sec);
+        WorldSession(uint32 id, WorldSocket *sock, uint32 sec, time_t mute_time);
         ~WorldSession();
 
         bool PlayerLoading() { return m_playerLoading; }
@@ -142,6 +142,9 @@ class MANGOS_DLL_SPEC WorldSession
         // TRUE values set by client sending CMSG_LFG_SET_AUTOJOIN and CMSG_LFM_UNSET_AUTOADD before player login
         bool LookingForGroup_auto_join;
         bool LookingForGroup_auto_add;
+
+        // Account mute time
+        time_t m_muteTime;
     protected:
 
         void HandleCharEnumOpcode(WorldPacket& recvPacket);

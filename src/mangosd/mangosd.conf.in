@@ -156,9 +156,24 @@ AllowTwoSide.Interaction.Guild = 0
 AllowTwoSide.Interaction.Trade = 0
 
 # Allow or not show player from both team in who list.
-# Defaullt: 0 (Not allowed)
-#           1 (Allowed)
+# Default: 0 (Not allowed)
+#          1 (Allowed)
 AllowTwoSide.WhoList = 0
+
+
+# Chat anti-flood protection, haste message count to activate protection
+#          0 (disible anti-flood protection)
+# Default: 10
+ChatFlood.MessageCount = 10
+
+# Chat anti-flood protection, minimum message delay to count message
+# Default: 1 (in secs)
+ChatFlood.MessageDelay = 1
+
+# Chat anti-flood protection, mute time at activation flood protection (not saved)
+# Default: 10 (in secs)
+ChatFlood.MuteTime = 10
+
 
 # Is GM accept whispers from player by default.
 # Default: 0 (false)

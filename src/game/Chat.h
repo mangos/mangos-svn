@@ -209,6 +209,8 @@ class ChatHandler
         bool HandleTurnObjectCommand(const char* args);
         bool HandleMoveObjectCommand(const char* args);
         bool HandlePInfoCommand(const char* args);
+        bool HandleMuteCommand(const char* args);
+        bool HandleUnmuteCommand(const char* args);
 
         bool HandleBanCommand(const char* args);
         bool HandleUnBanCommand(const char* args);
