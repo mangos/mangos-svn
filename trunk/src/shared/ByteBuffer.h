@@ -283,17 +283,19 @@ class ByteBuffer
             if(buffer.size()) append(buffer.contents(),buffer.size());
         }
 
-        void appendPackGUID(uint64 const& guid)
+        void appendPackGUID(uint64 guid)
         {
             size_t mask_position = wpos();
             *this << uint8(0);
             for(uint8 i = 0; i < 8; i++)
             {
-                if(((uint8*)&guid)[i])
+                if(guid & 0xFF)
                 {
-                    const_cast<uint8*>(contents())[mask_position] |= (1<<i);
-                    *this << ((uint8*)&guid)[i];
+                    _storage[mask_position] |= (1<<i);
+                    *this << ((uint8)(guid & 0xFF));
                 }
+
+                guid >>= 8;
             }
         }
 

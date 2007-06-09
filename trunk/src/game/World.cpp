@@ -346,6 +346,10 @@ void World::SetInitialWorldSettings()
     m_configs[CONFIG_WEATHER] = sConfig.GetIntDefault("ActivateWeather",1);
     m_configs[CONFIG_EXPANSION] = sConfig.GetIntDefault("Expansion",1);
 
+    m_configs[CONFIG_CHATFLOOD_MESSAGE_COUNT] = sConfig.GetIntDefault("ChatFlood.MessageCount",10);
+    m_configs[CONFIG_CHATFLOOD_MESSAGE_DELAY] = sConfig.GetIntDefault("ChatFlood.MessageDelay",1);
+    m_configs[CONFIG_CHATFLOOD_MUTE_TIME]     = sConfig.GetIntDefault("ChatFlood.MuteTime",10);
+
     ///- Read the "Data" directory from the config file
     m_dataPath = sConfig.GetStringDefault("DataDir","./");
     if((m_dataPath.at(m_dataPath.length()-1)!='/') && (m_dataPath.at(m_dataPath.length()-1)!='\\'))
@@ -863,7 +867,7 @@ void World::ScriptsProcess()
 
                 if (step.target->GetTypeId() != TYPEID_PLAYER)
                 {
-                    sLog.outError("SCRIPT_COMMAND_TELEPORT_TO call for non-creature (TypeId: %u), skipping.", step.target->GetTypeId());
+                    sLog.outError("SCRIPT_COMMAND_TELEPORT_TO call for non-player (TypeId: %u), skipping.", step.target->GetTypeId());
                     break;
                 }
 

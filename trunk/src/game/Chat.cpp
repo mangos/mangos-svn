@@ -291,6 +291,8 @@ ChatCommand * ChatHandler::getCommandTable()
         { "nametele",    1, &ChatHandler::HandleNameTeleCommand,         "",   NULL },
         { "loadpdump",   3, &ChatHandler::HandleLoadPDumpCommand,        "",   NULL },
         { "writepdump",  3, &ChatHandler::HandleWritePDumpCommand,       "",   NULL },
+        { "mute",        2, &ChatHandler::HandleMuteCommand,             "",   NULL },
+        { "unmute",      2, &ChatHandler::HandleUnmuteCommand,           "",   NULL },
 
         //! Development Commands
         { "setvalue",    3, &ChatHandler::HandleSetValue,                "",   NULL },

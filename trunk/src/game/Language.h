@@ -282,10 +282,18 @@
 #define LANG_COMMAND_SPAWNDIST           "Spawn distance changed to: %i"
 #define LANG_COMMAND_SPAWNTIME           "Spawn time changed to: %i"
 
+#define LANG_YOUR_CHAT_DISABLED          "Your chat has been disabled for %u minutes."
+#define LANG_YOU_DISABLE_CHAT            "You have disabled %s's chat for %u minutes."
+#define LANG_CHAT_ALREADY_ENABLED        "Player's chat is already enabled."
+#define LANG_YOUR_CHAT_ENABLED           "Your chat has been enabled."
+#define LANG_YOU_ENABLE_CHAT             "You have enabled %s's chat."
+
+
 // level 3 chat
-#define LANG_SCRITPS_RELOADED            "|cffff0000[System Message]:|rScripts reloaded"
+#define LANG_SCRIPTS_RELOADED            "|cffff0000[System Message]:|rScripts reloaded"
 #define LANG_YOU_CHANGE_SECURITY         "You change security level of %s to %i."
 #define LANG_YOURS_SECURITY_CHANGED      "%s changed your security level to %i."
+#define LANG_YOURS_SECURITY_IS_LOW       "You have low security level for this."
 #define LANG_CREATURE_MOVE_DISABLED      "Creature Movement Disabled."
 #define LANG_CREATURE_MOVE_ENABLED       "Creature Movement Enabled."
 #define LANG_NO_WEATHER                  "Weather can't be changed for this zone."
@@ -487,4 +495,4 @@
 #define LANG_ARENA_FIFTEEN_SECONDS       "Fifteen seconds until the Arena battle begins!"
 #define LANG_ARENA_BEGUN                 "The Arena battle has begun!"
 
-#define LANG_WAIT_BEFORE_SPEAKING        "You must wait before speaking again."
+#define LANG_WAIT_BEFORE_SPEAKING        "You must wait %s before speaking again."
