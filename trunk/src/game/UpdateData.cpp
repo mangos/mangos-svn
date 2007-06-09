@@ -107,7 +107,9 @@ bool UpdateData::BuildPacket(WorldPacket *packet)
         for(std::set<uint64>::const_iterator i = m_outOfRangeGUIDs.begin();
             i != m_outOfRangeGUIDs.end(); i++)
         {
-            buf.appendPackGUID(*i);
+            //buf.appendPackGUID(*i);
+            buf << (uint8)0xFF;
+            buf << (uint64) *i;            
         }
     }
 
