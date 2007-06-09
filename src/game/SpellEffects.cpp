@@ -1197,6 +1197,39 @@ void Spell::EffectEnergize(uint32 i)
     m_caster->SendHealSpellOnPlayerPet(unitTarget, m_spellInfo->Id, damage, power);
 }
 
+void Spell::SendLoot(uint64 guid, LootType loottype)
+{
+    Player* player = (Player*)m_caster;
+    if (!player)
+        return;
+
+    if (gameObjTarget)
+    {
+        switch (gameObjTarget->GetGoType())
+        {
+        case GAMEOBJECT_TYPE_QUESTGIVER:
+            // start or end quest
+            player->PrepareQuestMenu(guid);
+            player->SendPreparedQuest(guid);
+            return;
+
+        case GAMEOBJECT_TYPE_GOOBER:
+            // cast goober spell
+            gameObjTarget->AddUse(player);
+            gameObjTarget->SetLootState(GO_LOOTED);
+            if (gameObjTarget->GetGOInfo()->sound1) ///Gameobject is required to be destroyed for quest entry = sound1 
+                if (player->GetQuestStatus(gameObjTarget->GetGOInfo()->sound1) != QUEST_STATUS_NONE) 
+                                        //this condition is useless, but it's used here only for optimalization
+                    player->CastedCreatureOrGO(gameObjTarget->GetEntry(), gameObjTarget->GetGUID(), 0);
+
+            return;
+        }
+    }
+
+    // Send loot
+    player->SendLoot(guid, loottype);
+}
+
 void Spell::EffectOpenLock(uint32 i)
 {
     if(!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
@@ -1230,7 +1263,7 @@ void Spell::EffectOpenLock(uint32 i)
 
     if(!lockId)                                             // possible case for GO and maybe for items.
     {
-        player->SendLoot(guid,loottype);
+        SendLoot(guid, loottype);
         return;
     }
 
@@ -1248,16 +1281,15 @@ void Spell::EffectOpenLock(uint32 i)
     // check key
     if(lockInfo->key && m_CastItem && m_CastItem->GetEntry()==lockInfo->key)
     {
-        player->SendLoot(guid,loottype);
+        SendLoot(guid, loottype);
         return;
     }
 
     uint32 SkillId = 0;
     // Check and skill-up skill
-    if(m_spellInfo->Effect[1]==SPELL_EFFECT_SKILL)
+    if( m_spellInfo->Effect[1] == SPELL_EFFECT_SKILL )
         SkillId = m_spellInfo->EffectMiscValue[1];
-    else
-    if(m_spellInfo->EffectMiscValue[0]==1)              // picklocking spells
+    else if( m_spellInfo->EffectMiscValue[0] == LOCKTYPE_PICKLOCK )            // picklocking spells
         SkillId = SKILL_LOCKPICKING;
 
     // skill bonus provided by casting spell (mostly item spells)
@@ -1310,17 +1342,7 @@ void Spell::EffectOpenLock(uint32 i)
         }
     }
 
-    // special GO questgiver case
-    if (gameObjTarget && gameObjTarget->GetGoType()==GAMEOBJECT_TYPE_QUESTGIVER)
-    {
-        // start or end quest
-        player->PrepareQuestMenu(guid);
-        player->SendPreparedQuest(guid);
-        return;
-    }
-
-    // Send loot
-    player->SendLoot(guid, loottype);
+    SendLoot(guid, loottype);
 }
 
 void Spell::EffectSummonChangeItem(uint32 i)
@@ -2381,6 +2403,9 @@ void Spell::EffectScriptEffect(uint32 i)
         }
         DoCreateItem( i, itemtype );
     }
+
+    sLog.outDebug("Spell ScriptStart spellid %u in EffectScriptEffect ", m_spellInfo->Id);
+    sWorld.ScriptsStart(sSpellScripts, m_spellInfo->Id, m_caster, m_targets.getUnitTarget());
 }
 
 void Spell::EffectSanctuary(uint32 i)

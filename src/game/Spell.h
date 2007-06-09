@@ -555,7 +555,10 @@ class Spell
         Unit* GetOriginalCaster() { return m_originalCaster; }
 
         void UpdatePointers();                              // must be used at call Spell code after time delay (non triggered spell cast/update spell call/etc)
+
     protected:
+
+        void SendLoot(uint64 guid, LootType loottype);
 
         Unit* m_caster;
 
