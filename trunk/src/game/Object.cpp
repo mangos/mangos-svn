@@ -393,7 +393,7 @@ void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask, Playe
                     (m_objectTypeId == TYPEID_UNIT || m_objectTypeId == TYPEID_PLAYER) )
                 {
                     // convert from float to uint32 and send
-                    *data << uint32(m_floatValues[ index ]);
+                    *data << uint32(m_floatValues[ index ] < 0 ? 0 : m_floatValues[ index ]);
                 }
                 else
                 {
