@@ -47,7 +47,7 @@ class MANGOS_DLL_DECL DestinationHolder
         inline uint32 GetTotalTravelTime(void) const { return i_totalTravelTime; }
         inline uint32 GetStartTravelTime(void) const { return i_timeStarted; }
         inline bool HasDestination(void) const { return i_destSet; }
-        inline float GetDestinationDiff(float x, float y, float z) const { return sqrt(((x-i_destX)*(x-i_destX)) + ((y-i_destY)*(y-i_destY)) + ((z-i_destZ)*(z-i_destZ))); }
+        inline float GetDestinationDiff(float x, float y, float z) const { return ::sqrt(((x-i_destX)*(x-i_destX)) + ((y-i_destY)*(y-i_destY)) + ((z-i_destZ)*(z-i_destZ))); }
         inline bool HasArrived(void) const { return (i_totalTravelTime == 0 || i_timeElapsed >= i_totalTravelTime); }
         bool UpdateTraveller(TRAVELLER &traveller, uint32 diff, bool force_update);
         uint32 StartTravel(TRAVELLER &traveller);
