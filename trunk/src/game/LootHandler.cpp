@@ -247,30 +247,35 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
                 if(go_min != 0 && go_max > go_min)
                 {
                     float amount_rate = sWorld.getRate(RATE_MINING_AMOUNT);
-                    float min = go_min*amount_rate;
-                    float max = go_max*amount_rate;
+                    float min_amount = go_min*amount_rate;
+                    float max_amount = go_max*amount_rate;
 
                     go->AddUse(player);
                     float uses = float(go->GetUseCount());
 
-                    if(uses < max && uses >= min)
+                    if(uses < max_amount)
                     {
-                        float chance_rate = sWorld.getRate(RATE_MINING_NEXT);
-
-                        int32 ReqValue = 175;
-                        LockEntry const *lockInfo = sLockStore.LookupEntry(go->GetGOInfo()->sound0);
-                        if(lockInfo)
-                            ReqValue = lockInfo->requiredskill;
-                        float skill = float(player->GetSkillValue(SKILL_MINING))/(ReqValue+25);
-                        double chance = pow(0.8*chance_rate,4*(1/double(max))*double(uses));
-                        if(roll_chance_f(100*chance+skill))
+                        if(uses >= min_amount)
                         {
-                            go->SetLootState(GO_CLOSED);
+                            float chance_rate = sWorld.getRate(RATE_MINING_NEXT);
+
+                            int32 ReqValue = 175;
+                            LockEntry const *lockInfo = sLockStore.LookupEntry(go->GetGOInfo()->sound0);
+                            if(lockInfo)
+                                ReqValue = lockInfo->requiredskill;    
+                            float skill = float(player->GetSkillValue(SKILL_MINING))/(ReqValue+25);
+                            double chance = pow(0.8*chance_rate,4*(1/double(max_amount))*double(uses));
+                            if(roll_chance_f(100*chance+skill))
+                            {
+                                go->SetLootState(GO_CLOSED);
+                            }
+                            else                            // not have more uses
+                                go->SetLootState(GO_LOOTED);
                         }
-                        else                                // not have more uses
-                            go->SetLootState(GO_LOOTED);
+                        else                                // 100% chance until min uses
+                            go->SetLootState(GO_CLOSED);
                     }
-                    else                                    // max uses already or 100% chance until min uses
+                    else                                    // max uses already
                         go->SetLootState(GO_LOOTED);
                 }
                 else                                        // not vein
