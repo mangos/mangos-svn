@@ -1009,7 +1009,7 @@ bool World::BanAccount(std::string type, std::string nameOrIP, std::string durat
     loginDatabase.escape_string(reason);
     normalizePlayerName(nameOrIP);
     uint32 duration_secs = TimeStringToSecs(duration);
-    QueryResult *resultAccounts;//used for kicking
+    QueryResult *resultAccounts = NULL;                     //used for kicking
 
     ///- Update the database with ban information
 
