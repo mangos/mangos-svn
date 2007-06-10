@@ -2006,7 +2006,7 @@ uint8 Spell::CanCast()
             case SPELL_EFFECT_DUMMY:
             {
                 if (!m_targets.getUnitTarget()&&!m_targets.getGOTarget())
-                     return SPELL_FAILED_BAD_IMPLICIT_TARGETS;  
+                    return SPELL_FAILED_BAD_IMPLICIT_TARGETS;  
 
                 // Execute
                 if(m_spellInfo->SpellIconID == 1648)
