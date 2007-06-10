@@ -312,19 +312,6 @@ Ra.Secure = 1
 # Default: 2
 MaxOverspeedPings = 2
 
-# Filter SMSG_MONSTER_MOVE
-#  Normal Condition 10% Packet Filter, Fight Condition 99% Filter.
-#  Higher number filter more move packet. Will filter all direction change that get less then 4.6 in range by default
-#  Putting more then 66.6 will disable Filter on Direction change.
-ConsecutiveMovePacket.MaxRange = 4.6
-
-# Max consecutive filtered packet
-#  Normal and Fighting condition, size will be 2-3 in 75% of the time.
-#  Higher number, more time will be required so send packet into 10% of the time,
-#  that mean this will change nothing in 90% of the time.
-#  Putting 1 will disable Filter on consecutive packet.
-ConsecutiveMovePacket.MaxCount = 9
-
 # Unload grids (if you have lot memory you can disbale it to speed up player move to new grids second time)
 #          0 (not unload grids)
 # Default: 1 (unload grids)

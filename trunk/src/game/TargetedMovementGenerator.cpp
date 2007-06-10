@@ -64,6 +64,10 @@ TargetedMovementGenerator::_setTargetLocation(Creature &owner)
         i_target.GetClosePoint(NULL,x,y,z,owner.GetObjectSize() + i_offset,i_angle);
     }
 
+    //We don't update Mob Movement, if the difference between New destination and last destination is < BothObjectSize
+    float  bothObjectSize = i_target.GetObjectSize() + owner.GetObjectSize() + OBJECT_CONTACT_DISTANCE;
+    if( i_destinationHolder.HasDestination() && i_destinationHolder.GetDestinationDiff(x,y,z) < bothObjectSize )
+        return;
     Traveller<Creature> traveller(owner);
     i_destinationHolder.SetDestination(traveller, x, y, z);
     owner.addUnitState(UNIT_STAT_CHASE);
@@ -109,6 +113,7 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
     {
         owner.addUnitState(UNIT_STAT_CHASE);
         i_destinationHolder.StartTravel(traveller);
+        return true;
     }
 
     if (i_destinationHolder.UpdateTraveller(traveller, time_diff, false))
@@ -120,25 +125,13 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
         float  dist = i_target.GetObjectSize() + owner.GetObjectSize() + OBJECT_CONTACT_DISTANCE;
 
         // try to counter precision differences
-        if( i_destinationHolder.GetDistanceFromDestSq(i_target) > dist * dist + 0.1)
+        if( i_destinationHolder.GetDistanceFromDestSq(i_target) > dist * dist + 0.8)
             _setTargetLocation(owner);
-        // set facing if this is non angle-used target movement (not following)
-        else if ( !i_angle && !owner.HasInArc( 0.1f, &i_target ))
-        {
-            owner.SetInFront(&i_target);
-            if( i_target.GetTypeId() == TYPEID_PLAYER )
-                owner.SendUpdateToPlayer( (Player*)&i_target );
-        }
 
         if( !owner.IsStopped() && i_destinationHolder.HasArrived())
         {
             if( i_angle )                                   // for followers set orientation only at stop
-            {
-                // +0.01 is hack to pressure server send update orientation field.
-                owner.SetOrientation(owner.GetOrientation()+0.01);
-                if( i_target.GetTypeId() == TYPEID_PLAYER )
-                    owner.SendUpdateToPlayer( (Player*)&i_target );
-            }
+                owner.SetInFront(&i_target);
 
             owner.StopMoving();
             if(owner.canReachWithAttack(&i_target) && !owner.hasUnitState(UNIT_STAT_FOLLOW))

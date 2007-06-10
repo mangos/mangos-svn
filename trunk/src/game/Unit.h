@@ -468,30 +468,6 @@ struct Hostil
     }
 };
 
-struct MovementData
-{
-    MovementData() : x(0.0f), y(0.0f), z(0.0f), time(0), run(false), type(0), holdTime(0), packetCount(0) {}
-    uint8 type;
-    uint32 time, holdTime, packetCount;
-    bool run;
-    float x, y, z;
-    bool Empty() { return x == 0.0f && y == 0.0f && z == 0.0f;}   
-    //If the targetPointDistance - lastTargetPointDistance > 4.6, will not count as a consecutive packet,
-    //so i continue to hold the packet, that will occur at 99% of the time when running around the target.
-    void Update(float _x, float _y, float _z, uint32 _time, bool _run, uint8 _type)
-    {
-        x = _x; y = _y; z = _z; time = _time; _run = run; type = _type;
-
-        if( !Empty() && ((x-_x)*(x-_x)) + ((y-_y)*(y-_y)) + ((z-_z)*(z-_z)) > sWorld.getRate(RATE_MOVE_FILTER_RANGE) )
-            ++packetCount;
-    }
-    void Clear()
-    {
-        x = y = z = 0.0f;
-        time = 0, run = 0, type = 0, holdTime = 0, packetCount = 0;
-    }
-};
-
 typedef std::list<Hostil> ThreatList;
 typedef std::list<Hostil> HateOfflineList;
 
@@ -960,7 +936,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         std::list<GameObject*> m_gameObj;
         ThreatList m_threatList;
         HateOfflineList m_offlineList;
-        MovementData m_movementData;
         InHateListOf m_inhateList;
         bool m_isSorted;
         float m_victimThreat;

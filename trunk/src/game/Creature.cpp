@@ -887,8 +887,7 @@ void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool 
 
         m_startMove = getMSTime();
         m_moveTime = time;*/
-    //Will be: Checked, maybe Buffered, will be send on Unit::Update()
-    m_movementData.Update(x,y,z,time,run,type);
+    SendMonsterMove(x,y,z,type,run,time);
 }
 
 Player *Creature::GetLootRecipient() const

@@ -136,14 +136,6 @@ void Unit::RemoveAllDynObjects()
 
 void Unit::Update( uint32 p_time )
 {
-    if( !m_movementData.Empty() )
-    {
-        //  If !consecutive packet or passed 9 packet SendMonsterMove(). 1 packetCount = 50-100ms
-        if( m_movementData.holdTime/100 > m_movementData.packetCount || m_movementData.packetCount > sWorld.getConfig(CONFIG_MOVE_FILTER_COUNT) )
-            SendMonsterMove(m_movementData.x,m_movementData.y, m_movementData.z, m_movementData.type, m_movementData.run, m_movementData.time);
-        else
-            m_movementData.holdTime += p_time;              //Update the holdTime to help with consecutive packet check
-    }
     /*if(p_time > m_AurasCheck)
     {
     m_AurasCheck = 2000;
@@ -207,8 +199,8 @@ void Unit::SendMoveToPacket(float x, float y, float z, bool run, uint32 transitT
         speed *= 0.001f;
         transitTime = static_cast<uint32>(dist / speed + 0.5);
     }
-    //Will be: Checked, maybe Buffered, will be send on Unit::Update()
-    m_movementData.Update(x,y,z,transitTime,run,0);
+    //float orientation = (float)atan2((double)dy, (double)dx);
+    SendMonsterMove(x,y,z,0,run,transitTime);
 }
 
 void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, bool Run, uint32 Time)
@@ -222,8 +214,9 @@ void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 ty
     // seems to increment about 1000 for every 1.7 seconds
     // for now, we'll just use mstime
     data << getMSTime();
-    data << m_movementData.type;
-    switch(m_movementData.type)
+
+    data << uint8(type);                                    // unknown
+    switch(type)
     {
         case 0:                                             // normal packet
             break;
@@ -247,7 +240,6 @@ void Unit::SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 ty
     data << NewPosX << NewPosY << NewPosZ;                  // the single waypoint Point B
 
     SendMessageToSet( &data, true );
-    m_movementData.Clear();                                 // reset move cache at explicit move
 }
 
 void Unit::resetAttackTimer(WeaponAttackType type)
