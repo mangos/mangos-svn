@@ -3428,21 +3428,51 @@ void Player::DurabilityRepair(uint16 pos, bool cost, bool discount)
 
     uint32 curDurability = item->GetUInt32Value(ITEM_FIELD_DURABILITY);
 
-    // some simple repair formula depending on durability lost
     if(cost)
     {
-        uint32 costs = maxDurability - curDurability;
-
-        if(discount)
-            costs = 9 * costs / 10;
-
-        if (GetMoney() < costs)
+      
+        uint32 LostDurability = maxDurability - curDurability;
+        if(LostDurability>0)
         {
-            DEBUG_LOG("You do not have enough money");
-            return;
-        }
+          
+            ItemPrototype const *ditemProto = sItemStorage.LookupEntry<ItemPrototype>(item->GetEntry());
+            if(!ditemProto)
+            {
+                sLog.outError("ERROR: RepairDurability: Unknown item id %u", ditemProto);
+                return;
+            }
+            
+            DurabilityCostsEntry const *dcost = sDurabilityCostsStore.LookupEntry(ditemProto->ItemLevel);
+            if(!dcost)
+            {
+                sLog.outError("ERROR: RepairDurability: Wrong item lvl %u", dcost);
+                return;
+            }
+            
+            DurabilityQualityEntry const *dQualitymodEntry = sDurabilityQualityStore.LookupEntry((ditemProto->Quality+1)*2);                
+            if(!dQualitymodEntry)
+            {
+                sLog.outError("ERROR: RepairDurability: Wrong dQualityModEntry %u", dQualitymodEntry);
+                return;
+            }
+            
+            uint32 dmultiplier = dcost->multiplier[ItemSubClassToDurabilityMultiplierId(ditemProto->Class,ditemProto->SubClass)];            
+            uint32 costs = uint32(LostDurability*dmultiplier*double(dQualitymodEntry->quality_mod));
 
-        ModifyMoney( -int32(costs) );
+            if(discount)
+                costs = 9 * costs / 10;
+
+            if (costs==0) //fix for ITEM_QUALITY_ARTIFACT
+                costs=1;
+
+            if (GetMoney() < costs)
+            {
+                DEBUG_LOG("You do not have enough money");
+                return;
+            }
+
+            ModifyMoney( -int32(costs) );
+        }
     }
 
     item->SetUInt32Value(ITEM_FIELD_DURABILITY, maxDurability);

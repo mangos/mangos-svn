@@ -117,6 +117,18 @@ struct CreatureFamilyEntry
                                                             // 16 string flags, unused
 };
 
+struct DurabilityCostsEntry
+{
+    uint32    Itemlvl;                                       // 0
+    uint32    multiplier[29];                                // 1-29
+};
+
+struct DurabilityQualityEntry
+{
+    uint32    Id;                                            // 0
+    float     quality_mod;                                   // 1
+};
+
 struct EmotesTextEntry
 {
     uint32    Id;

@@ -136,6 +136,8 @@ extern DBCStorage <BattlemasterListEntry>     sBattlemasterListStore;
 extern DBCStorage <ChrClassesEntry>           sChrClassesStore;
 extern DBCStorage <ChrRacesEntry>             sChrRacesStore;
 extern DBCStorage <CreatureFamilyEntry>       sCreatureFamilyStore;
+extern DBCStorage <DurabilityCostsEntry>      sDurabilityCostsStore; 
+extern DBCStorage <DurabilityQualityEntry>    sDurabilityQualityStore;
 extern DBCStorage <SpellCastTimesEntry>       sCastTimesStore;
 extern DBCStorage <EmotesTextEntry>           sEmotesTextStore;
 extern DBCStorage <FactionEntry>              sFactionStore;
