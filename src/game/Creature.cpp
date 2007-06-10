@@ -53,6 +53,7 @@ uint32 CreatureInfo::randomDisplayID() const
 Creature::Creature( WorldObject *instantiator ) :
 Unit( instantiator ), i_AI(NULL), i_motionMaster(this), lootForPickPocketed(false), lootForBody(false), m_lootMoney(0), m_lootRecipient(0),
 m_deathTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_respawnradius(0.0),
+m_gossipOptionLoaded(false),m_NPCTextId(0),
 m_moveRun(false), m_emoteState(0), m_isPet(false), m_isTotem(false),
 m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE), m_groupLootTimer(0), lootingGroupLeaderGUID(0),
 m_itemsLoaded(false),m_trainerSpellsLoaded(false),m_trainer_type(0)
@@ -489,8 +490,9 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
     PlayerMenu* pm=pPlayer->PlayerTalkClass;
     pm->ClearMenus();
 
-    if(!m_goptions.size())
-        LoadGossipOptions();
+    // lazy loading single time at use
+    LoadGossipOptions();
+
     GossipOption* gso;
     GossipOption* ingso;
 
@@ -604,7 +606,7 @@ void Creature::sendPreparedGossip(Player* player)
     GossipMenu* gossipmenu = player->PlayerTalkClass->GetGossipMenu();
 
     // in case empty gossip menu open quest menu if any
-    if (gossipmenu->MenuItemCount() == 0)
+    if (gossipmenu->MenuItemCount() == 0 && GetNpcTextId() == 0)
     {
         player->SendPreparedQuest(GetGUID());
         return;
@@ -782,15 +784,21 @@ uint32 Creature::GetGossipCount( uint32 gossipid )
 
 uint32 Creature::GetNpcTextId()
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `textid` FROM `npc_gossip` WHERE `npc_guid`= '%u'", m_DBTableGuid);
+    // already loaded and cached
+    if(m_NPCTextId)
+        return m_NPCTextId;
+
+    QueryResult* result = sDatabase.PQuery("SELECT `textid` FROM `npc_gossip` WHERE `npc_guid`= '%u'", m_DBTableGuid);
     if(result)
     {
         Field *fields = result->Fetch();
-        uint32 id = fields[0].GetUInt32();
+        m_NPCTextId = fields[0].GetUInt32();
         delete result;
-        return id;
     }
-    return DEFAULT_GOSSIP_MESSAGE;
+    else
+        m_NPCTextId = DEFAULT_GOSSIP_MESSAGE;
+
+    return m_NPCTextId;
 }
 
 std::string Creature::GetGossipTitle(uint8 type,uint32 id)
@@ -815,6 +823,9 @@ GossipOption const* Creature::GetGossipOption( uint32 id ) const
 
 void Creature::LoadGossipOptions()
 {
+    if(m_gossipOptionLoaded)
+        return;
+
     uint32 npcflags=GetUInt32Value(UNIT_NPC_FLAGS);
 
     QueryResult *result = sDatabase.PQuery( "SELECT `id`,`gossip_id`,`npcflag`,`icon`,`action`,`option` FROM `npc_option` WHERE (npcflag & %u)!=0", npcflags );
@@ -835,6 +846,8 @@ void Creature::LoadGossipOptions()
         addGossipOption(go);
     }while( result->NextRow() );
     delete result;
+
+    m_gossipOptionLoaded = true;
 }
 
 void Creature::generateMoneyLoot()

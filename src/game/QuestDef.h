@@ -168,7 +168,7 @@ class Quest
         uint32 GetCompleteEmote() { return CompleteEmote; }
         uint32 GetQuestCompleteScript() { return QuestCompleteScript; }
         bool   IsRepeatable() { return bool(Repeatable); }
-        bool   IsAutoComplete() { return strlen(GetObjectives()) == 0; }
+        bool   IsAutoComplete() { return Objectives.size() == 0; }
         uint32 GetSpecialFlags() { return SpecialFlags; }
 
         // multiple values
