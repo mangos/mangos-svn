@@ -237,8 +237,7 @@ void Spell::EffectSchoolDMG(uint32 i)
 
 void Spell::EffectDummy(uint32 i)
 {
-    if(!unitTarget)
-        return;
+    if(!unitTarget && !gameObjTarget) return;
 
     // More spell specific code in beginning
     if(m_spellInfo->Id == 5420)                             // Tree of Life passive
@@ -281,6 +280,9 @@ void Spell::EffectDummy(uint32 i)
         if( !m_caster || !m_caster->getVictim() )
             return;
 
+        if(!unitTarget)
+            return;
+            
         // only creature to creature
         if( unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_UNIT )
             return;
@@ -477,6 +479,9 @@ void Spell::EffectDummy(uint32 i)
     // net-o-matic
     if (m_spellInfo->Id == 13120)
     {
+        if(!unitTarget)
+            return;
+
         uint32 spell_id = 0;
 
         uint32 roll = urand(0, 99);
@@ -501,6 +506,8 @@ void Spell::EffectDummy(uint32 i)
     // starshards/curse of agony hack .. this applies to 1.10 only
     if (m_triggeredByAura)
     {
+        if(!unitTarget)
+            return;      
         SpellEntry const *trig_info = m_triggeredByAura->GetSpellProto();
         if ((trig_info->SpellIconID == 1485 && trig_info->SpellFamilyName == SPELLFAMILY_PRIEST) ||
             (trig_info->SpellIconID == 544 && trig_info->SpellFamilyName == SPELLFAMILY_WARLOCK))
@@ -535,6 +542,9 @@ void Spell::EffectDummy(uint32 i)
     //Holy Shock For Paladins
     if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellIconID == 156)
     {
+        if(!unitTarget)
+            return;
+            
         int hurt = 0;
         int heal = 0;
 
@@ -572,6 +582,9 @@ void Spell::EffectDummy(uint32 i)
 
     if(m_spellInfo->SpellIconID == 1648)
     {
+        if(!unitTarget)
+            return;
+                  
         int32 dmg = damage;
         dmg += int32(m_caster->GetPower(POWER_RAGE) * m_spellInfo->DmgMultiplier[i]);
         SpellEntry const *tspellInfo = sSpellStore.LookupEntry(20647);
@@ -609,6 +622,9 @@ void Spell::EffectDummy(uint32 i)
     // Judgement of command
     if (m_spellInfo->Attributes == 0x50800 && m_spellInfo->AttributesEx == 128)
     {
+        if(!unitTarget)
+            return;
+                        
         uint32 spell_id = m_spellInfo->EffectBasePoints[i]+1;
         SpellEntry const* spell_proto = sSpellStore.LookupEntry(spell_id);
         if(!spell_proto)
@@ -675,8 +691,10 @@ void Spell::EffectDummy(uint32 i)
 
     if(m_spellInfo->Id == 17251)                            // Spirit Healer Res
     {
+        if(!unitTarget)
+            return;                  
                                                             // probably useless check
-        if(m_targets.getUnitTarget()->GetTypeId() == TYPEID_PLAYER)
+        if(unitTarget->GetTypeId() == TYPEID_PLAYER)
         {
             WorldPacket data(SMSG_SPIRIT_HEALER_CONFIRM, 8);
             data << m_caster->GetGUID();

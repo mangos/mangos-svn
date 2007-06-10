@@ -10174,7 +10174,7 @@ bool Player::SatisfyQuestSkill( uint32 quest_id, bool msg )
 
         int32 questSort = -zoneOrSort;
 
-        uint8 reqskill = SkillByQuestSort(questSort);
+        uint32 reqskill = SkillByQuestSort(questSort);
 
         if( reqskill != 0 && GetSkillValue( reqskill ) < qInfo->GetRequiredSkillValue() )
         {
