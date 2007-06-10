@@ -490,7 +490,9 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 m_corpseDelay;                               // (secs) delay between death and corpse disappearance
         float m_respawnradius;
 
+        bool m_gossipOptionLoaded;
         GossipOptionList m_goptions;
+        uint32 m_NPCTextId;                                 // cached value
 
         float respawn_cord[3];
         bool m_moveRun;
