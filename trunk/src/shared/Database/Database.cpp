@@ -76,18 +76,19 @@ bool Database::PExecuteLog(const char * format,...)
         char fName[128];
         sprintf( fName, "%04d-%02d-%02d_logSQL.sql", local.tm_year+1900, local.tm_mon+1, local.tm_mday );
 
-        std::fstream log_file ( fName, std::ios::app );
-
-        if ( !log_file.is_open() )
+        FILE* log_file;
+        log_file = fopen(fName, "a");
+        if (log_file)
         {
-            // The file could not be opened
-            sLog.outError("SQL-Logging is disabled - Log file for the SQL commands could not be openend: %s",fName);
+            fprintf(log_file, szQuery );
+            fprintf(log_file, "\n" );
+            fflush(log_file);
+            fclose(log_file);
         }
         else
         {
-            // Safely use the file stream
-            log_file << szQuery << "\n";
-            log_file.close();
+            // The file could not be opened
+            sLog.outError("SQL-Logging is disabled - Log file for the SQL commands could not be openend: %s",fName);
         }
     }
 
