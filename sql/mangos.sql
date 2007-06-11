@@ -276,6 +276,7 @@ CREATE TABLE `character` (
   `transguid` bigint(20) unsigned NOT NULL default '0',
   `gmstate` tinyint(3) unsigned NOT NULL default '0',
   `stable_slots` tinyint(1) unsigned NOT NULL default '0',
+  `rename` tinyint (3) unsigned NOT NULL default '0',  
   PRIMARY KEY  (`guid`),
   KEY `idx_account` (`account`),
   KEY `idx_online` (`online`)
