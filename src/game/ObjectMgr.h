@@ -150,7 +150,7 @@ struct SpellAffection
     uint16 Category;
     uint16 SkillId;
     uint8 SpellFamily;
-    uint32 SpellFamilyMask;
+    uint64 SpellFamilyMask;
     uint16 Charges;
 };
 

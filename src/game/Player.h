@@ -69,7 +69,7 @@ struct SpellModifier
     uint8 op;
     uint8 type;
     int32 value;
-    uint32 mask;
+    uint64 mask;
     int16 charges;
     uint32 spellId;
     uint32 effectId;
@@ -1507,6 +1507,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         ActionButtonList m_actionButtons;
 
         SpellModList m_spellMods[32];                       // 32 = SPELLMOD_COUNT
+        int32 m_totalSpellMod[32][64];                      // 32 = SPELLMOD_COUNT; 64 = size of SpellFamilyFlags
         int32 m_SpellModRemoveCount;
         EnchantDurationList m_enchantDuration;
 
