@@ -354,47 +354,8 @@ inline uint8 ItemSubClassToDurabilityMultiplierId(uint32 ItemClass, uint32 ItemS
 {
     switch(ItemClass)
     {
-        case ITEM_CLASS_WEAPON:
-        {
-            switch(ItemSubClass)
-            {
-                case ITEM_SUBCLASS_WEAPON_AXE:          return  0;
-                case ITEM_SUBCLASS_WEAPON_AXE2:         return  1;
-                case ITEM_SUBCLASS_WEAPON_BOW:          return  2;
-                case ITEM_SUBCLASS_WEAPON_GUN:          return  3;
-                case ITEM_SUBCLASS_WEAPON_MACE:         return  4;
-                case ITEM_SUBCLASS_WEAPON_MACE2:        return  5;
-                case ITEM_SUBCLASS_WEAPON_POLEARM:      return  6;
-                case ITEM_SUBCLASS_WEAPON_SWORD:        return  7;
-                case ITEM_SUBCLASS_WEAPON_SWORD2:       return  8;   
-                case ITEM_SUBCLASS_WEAPON_obsolete:     return  9; //null in dbc
-                case ITEM_SUBCLASS_WEAPON_STAFF:        return  10;
-                case ITEM_SUBCLASS_WEAPON_EXOTIC:       return  11;
-                case ITEM_SUBCLASS_WEAPON_EXOTIC2:      return  12;
-                case ITEM_SUBCLASS_WEAPON_FIST:         return  13;
-                case ITEM_SUBCLASS_WEAPON_MISC:         return  14;
-                case ITEM_SUBCLASS_WEAPON_DAGGER:       return  15;
-                case ITEM_SUBCLASS_WEAPON_THROWN:       return  16;
-                case ITEM_SUBCLASS_WEAPON_SPEAR:        return  17;
-                case ITEM_SUBCLASS_WEAPON_CROSSBOW:     return  18;
-                case ITEM_SUBCLASS_WEAPON_WAND:         return  19;
-                case ITEM_SUBCLASS_WEAPON_FISHING_POLE: return  20;   
-            }
-        }
-        case ITEM_CLASS_ARMOR:
-        {
-            switch(ItemSubClass)
-            {
-                case ITEM_SUBCLASS_ARMOR_MISC:          return  21;//null in dbc
-                case ITEM_SUBCLASS_ARMOR_CLOTH:         return  22;
-                case ITEM_SUBCLASS_ARMOR_LEATHER:       return  23;
-                case ITEM_SUBCLASS_ARMOR_MAIL:          return  24;
-                case ITEM_SUBCLASS_ARMOR_PLATE:         return  25;
-                case ITEM_SUBCLASS_ARMOR_BUCKLER:       return  26;//null in dbc
-                case ITEM_SUBCLASS_ARMOR_SHIELD:        return  27;   
-                case ITEM_SUBCLASS_ARMOR_LIBRAM:        return  28;//null in dbc
-            }
-        }
+        case ITEM_CLASS_WEAPON: return ItemSubClass;
+        case ITEM_CLASS_ARMOR:  return ItemSubClass + 21;
     }
     return 0;
 }
