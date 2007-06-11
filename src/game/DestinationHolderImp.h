@@ -152,4 +152,12 @@ DestinationHolder<TRAVELLER>::GetDistanceFromDestSq(const WorldObject &obj) cons
     obj.GetPosition(x,y,z);
     return (i_destX-x)*(i_destX-x)+(i_destY-y)*(i_destY-y)+(i_destZ-z)*(i_destZ-z);
 }
+
+template<typename TRAVELLER>
+float
+DestinationHolder<TRAVELLER>::GetDestinationDiff(float x, float y, float z) const
+{ 
+    return sqrt(((x-i_destX)*(x-i_destX)) + ((y-i_destY)*(y-i_destY)) + ((z-i_destZ)*(z-i_destZ)));
+}
+
 #endif
