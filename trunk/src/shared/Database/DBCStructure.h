@@ -361,9 +361,8 @@ struct SpellEntry
     uint32    StartRecoveryTime;                            //161
     uint32    AffectedTargetLevel;                          //162
     uint32    SpellFamilyName;                              //163
-    uint32    SpellFamilyFlags;                             //164
-    uint32    MaxAffectedTargets;                           //165
-                                                            //166 not used
+    uint64    SpellFamilyFlags;                             //164+165
+    uint32    MaxAffectedTargets;                           //166
     uint32    DmgClass;                                     //167
                                                             //168-169 not used (DmgClass2, DmgClass3 ?)
     float     DmgMultiplier[3];                             //170-172

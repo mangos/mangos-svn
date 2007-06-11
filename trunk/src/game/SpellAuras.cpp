@@ -856,21 +856,26 @@ void Aura::HandleAddModifier(bool apply, bool Real)
     SpellEntry const *spellInfo = GetSpellProto();
     if(!spellInfo) return;
 
-    if(spellInfo->EffectMiscValue[m_effIndex] >= SPELLMOD_COUNT)
+    if(m_modifier.m_miscvalue >= SPELLMOD_COUNT)
         return;
 
     if (apply)
     {
         SpellModifier *mod = new SpellModifier;
-        mod->op = spellInfo->EffectMiscValue[m_effIndex];
-        mod->value = spellInfo->EffectBasePoints[m_effIndex]+1;
-        mod->type = spellInfo->EffectApplyAuraName[m_effIndex];
-        mod->mask = spellInfo->EffectItemType[m_effIndex];
+        mod->op = m_modifier.m_miscvalue;
+        mod->value = m_modifier.m_amount;
+        mod->type = m_modifier.m_auraname;
         mod->spellId = m_spellId;
         mod->effectId = m_effIndex;
         mod->lastAffected = 0;
 
         SpellAffection const *spellAffect = objmgr.GetSpellAffection(m_spellId, m_effIndex);
+
+        if (spellAffect && spellAffect->SpellFamilyMask)
+            mod->mask = spellAffect->SpellFamilyMask;
+        else
+            mod->mask = spellInfo->EffectItemType[m_effIndex];
+
         if(spellAffect && spellAffect->Charges)
             mod->charges = spellAffect->Charges;
         else

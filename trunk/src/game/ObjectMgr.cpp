@@ -2701,7 +2701,7 @@ void ObjectMgr::LoadSpellAffects()
         sa.Category = fields[4].GetUInt16();
         sa.SkillId = fields[5].GetUInt16();
         sa.SpellFamily = fields[6].GetUInt8();
-        sa.SpellFamilyMask = fields[7].GetUInt32();
+        sa.SpellFamilyMask = fields[7].GetUInt64();
         sa.Charges = fields[8].GetUInt16();
 
         SpellAffect.insert(SpellAffectMap::value_type(entry,sa));

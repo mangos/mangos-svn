@@ -203,6 +203,8 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_Loaded = false;
     m_HomebindTimer = 0;
     m_InstanceValid = true;
+
+    memset(m_totalSpellMod, 0, sizeof(m_totalSpellMod));
 }
 
 Player::~Player ()
@@ -12661,30 +12663,32 @@ bool Player::IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mo
 
 void Player::AddSpellMod(SpellModifier* mod, bool apply)
 {
-    if (apply)
+    uint64 shiftdata=0x01, Opcode=SMSG_SET_FLAT_SPELL_MODIFIER;
+
+    if (mod->type == SPELLMOD_FLAT) 
+        Opcode = SMSG_SET_FLAT_SPELL_MODIFIER;
+    else if (mod->type == SPELLMOD_PCT) 
+        Opcode = SMSG_SET_PCT_SPELL_MODIFIER;
+
+    for(int eff=0;eff<64;++eff)
     {
-        m_spellMods[mod->op].push_back(mod);
-        uint32 shiftdata=0x01, Opcode=SMSG_SET_FLAT_SPELL_MODIFIER;
-
-        if (mod->type == SPELLMOD_FLAT) Opcode = SMSG_SET_FLAT_SPELL_MODIFIER;
-        else if (mod->type == SPELLMOD_PCT) Opcode = SMSG_SET_PCT_SPELL_MODIFIER;
-
-        for(int eff=0;eff<32;eff++)
+        if ( mod->mask & shiftdata )
         {
-            if ( mod->mask & shiftdata )
-            {
-                WorldPacket data(Opcode, (1+1+4));
-                data << uint8(eff);
-                data << uint8(mod->op);
-                data << uint32(mod->value);
-                SendDirectMessage(&data);
-            }
-            shiftdata=shiftdata<<1;
+            m_totalSpellMod[mod->op][eff] += apply ? mod->value : -(mod->value);
+            WorldPacket data(Opcode, (1+1+4));
+            data << uint8(eff);
+            data << uint8(mod->op);
+            data << int32(m_totalSpellMod[mod->op][eff]);
+            SendDirectMessage(&data);
         }
+        shiftdata=shiftdata<<1;
     }
+
+    if (apply)
+        m_spellMods[mod->op].push_back(mod);
     else
     {
-        if (mod->charges = -1)
+        if (mod->charges == -1)
             m_SpellModRemoveCount--;
         m_spellMods[mod->op].remove(mod);
         delete mod;
