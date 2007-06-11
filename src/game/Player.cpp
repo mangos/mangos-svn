@@ -4799,7 +4799,8 @@ void Player::UpdateHonorFields()
 
         if(honor != 0)
         {
-            float honor=0.0, honor_yesterday=0.0;
+            //float honor=0.0, honor_yesterday=0.0;
+            float honor_yesterday=0.0;
             uint32 kills_yesterday=0;
 
             result = sDatabase.PQuery("SELECT sum(`honor`),count(`honor`) FROM `character_kill` WHERE `guid`='%u' AND `date`<'%u' AND `date`>='%u'", GUID_LOPART(GetGUID()), today, yesterday);
