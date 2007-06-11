@@ -362,7 +362,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             auction->bid = price;
 
             // after this update we should save player's money ...
-            sDatabase.PExecute("UPDATE `auctionhouse` SET `buyguid` = '%u',`lastbid` = '%u' WHERE `id` = '%u';", auction->bidder, auction->bid, auction->Id);
+            sDatabase.PExecute("UPDATE `auctionhouse` SET `buyguid` = '%u',`lastbid` = '%u' WHERE `id` = '%u'", auction->bidder, auction->bid, auction->Id);
 
             SendAuctionCommandResult(auction->Id, AUCTION_PLACE_BID, AUCTION_OK, 0 );
         }

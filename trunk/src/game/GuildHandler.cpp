@@ -866,7 +866,7 @@ void WorldSession::HandleGuildSaveEmblemOpcode(WorldPacket& recvPacket)
 
     recvPacket >> vendorGuid;
 
-    Creature *pCreature = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, vendorGuid,UNIT_NPC_FLAG_TABARDVENDOR);
+    Creature *pCreature = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, vendorGuid,UNIT_NPC_FLAG_TABARDDESIGNER);
     if (!pCreature)
     {
         sLog.outDebug("WORLD: HandleGuildSaveEmblemOpcode - Unit (GUID: %u) not found or you can't interact with him.", GUID_LOPART(vendorGuid));

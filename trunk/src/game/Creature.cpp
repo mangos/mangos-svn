@@ -556,7 +556,7 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                     case GOSSIP_OPTION_BANKER:
                     case GOSSIP_OPTION_PETITIONER:
                     case GOSSIP_OPTION_STABLEPET:
-                    case GOSSIP_OPTION_TABARDVENDOR:
+                    case GOSSIP_OPTION_TABARDDESIGNER:
                     case GOSSIP_OPTION_BATTLEFIELD:
                     case GOSSIP_OPTION_AUCTIONEER:
                         break;                              // no checks
@@ -639,6 +639,7 @@ void Creature::OnGossipSelect(Player* player, uint32 option)
     switch (gossip->Action)
     {
         case GOSSIP_OPTION_GOSSIP:
+            player->PlayerTalkClass->CloseGossip();
             player->PlayerTalkClass->SendTalking( textid );
             break;
         case GOSSIP_OPTION_SPIRITHEALER:
@@ -674,7 +675,11 @@ void Creature::OnGossipSelect(Player* player, uint32 option)
             player->GetSession()->SendShowBank( guid );
             break;
         case GOSSIP_OPTION_PETITIONER:
-        case GOSSIP_OPTION_TABARDVENDOR:
+            player->PlayerTalkClass->CloseGossip();
+            player->GetSession()->SendPetitionShowList( guid );
+            break;            
+        case GOSSIP_OPTION_TABARDDESIGNER:
+            player->PlayerTalkClass->CloseGossip();
             player->GetSession()->SendTabardVendorActivate( guid );
             break;
         case GOSSIP_OPTION_AUCTIONEER:

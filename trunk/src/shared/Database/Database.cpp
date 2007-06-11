@@ -81,6 +81,7 @@ bool Database::PExecuteLog(const char * format,...)
         if (log_file)
         {
             fprintf(log_file, szQuery );
+            fprintf(log_file, ";" );            
             fprintf(log_file, "\n" );
             fflush(log_file);
             fclose(log_file);

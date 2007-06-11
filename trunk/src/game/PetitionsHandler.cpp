@@ -93,7 +93,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
     uint32 charterid = 0;
     uint32 cost = 0;
     uint32 type = 0;
-    if(pCreature->isTabardVendor())
+    if(pCreature->isTabardDesigner())
     {
         charterid = GUILD_CHARTER;
         cost = GUILD_CHARTER_COST;
@@ -782,6 +782,11 @@ void WorldSession::HandlePetitionShowListOpcode(WorldPacket & recv_data)
     uint64 guid;
     recv_data >> guid;
 
+    SendPetitionShowList(guid);
+}
+
+void WorldSession::SendPetitionShowList(uint64 guid)
+{
     Creature *pCreature = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid, UNIT_NPC_FLAG_PETITIONER);
     if (!pCreature)
     {
@@ -790,7 +795,7 @@ void WorldSession::HandlePetitionShowListOpcode(WorldPacket & recv_data)
     }
 
     uint8 count = 0;
-    if(pCreature->isTabardVendor())
+    if(pCreature->isTabardDesigner())
         count = 1;
     else
         count = 3;

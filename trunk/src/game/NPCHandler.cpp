@@ -42,7 +42,7 @@ void WorldSession::HandleTabardVendorActivateOpcode( WorldPacket & recv_data )
     uint64 guid;
     recv_data >> guid;
 
-    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid,UNIT_NPC_FLAG_TABARDVENDOR);
+    Creature *unit = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid,UNIT_NPC_FLAG_TABARDDESIGNER);
     if (!unit)
     {
         sLog.outDebug( "WORLD: HandleTabardVendorActivateOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
