@@ -691,15 +691,15 @@ void Spell::EffectDummy(uint32 i)
 
     if(m_spellInfo->Id == 17251)                            // Spirit Healer Res
     {
-        if(!unitTarget)
+        if(!unitTarget || !m_originalCaster)
             return;                  
-                                                            // probably useless check
-        if(unitTarget->GetTypeId() == TYPEID_PLAYER)
+
+        if(m_originalCaster->GetTypeId() == TYPEID_PLAYER)
         {
             WorldPacket data(SMSG_SPIRIT_HEALER_CONFIRM, 8);
-            data << m_caster->GetGUID();
+            data << unitTarget->GetGUID();
                                                             // for this spell we have wrong unitTarget, but correct m_targets.getUnitTarget()...
-            ((Player*)m_targets.getUnitTarget())->GetSession()->SendPacket( &data );
+            ((Player*)m_originalCaster)->GetSession()->SendPacket( &data );
         }
     }
 

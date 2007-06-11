@@ -643,7 +643,7 @@ void Creature::OnGossipSelect(Player* player, uint32 option)
             break;
         case GOSSIP_OPTION_SPIRITHEALER:
             if( player->isDead() )
-                CastSpell(player,17251,true);               // effect implemented in void Spell::EffectDummy(uint32 i)
+                CastSpell(this,17251,true,NULL,NULL,player->GetGUID());
             break;
         case GOSSIP_OPTION_QUESTGIVER:
             player->PrepareQuestMenu( guid );
