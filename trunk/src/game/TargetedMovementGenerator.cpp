@@ -126,12 +126,18 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
 
         // try to counter precision differences
         if( i_destinationHolder.GetDistanceFromDestSq(i_target) > dist * dist + 0.8)
-            _setTargetLocation(owner);
+        {
+            owner.SetInFront(&i_target); // Set new Angle For Map::
+            _setTargetLocation(owner);  //Calculate New Dest and Send data To Player
+        }
+        // Update the Angle of the target only for Map::, no need to send packet for player
+        else if ( !i_angle && !owner.HasInArc( 0.01f, &i_target ) )
+            owner.SetInFront(&i_target);
 
         if( !owner.IsStopped() && i_destinationHolder.HasArrived())
         {
-            if( i_angle )                                   // for followers set orientation only at stop
-                owner.SetInFront(&i_target);
+            //Angle update will take place into owner.StopMoving()
+            owner.SetInFront(&i_target);
 
             owner.StopMoving();
             if(owner.canReachWithAttack(&i_target) && !owner.hasUnitState(UNIT_STAT_FOLLOW))
