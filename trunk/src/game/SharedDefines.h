@@ -338,7 +338,7 @@ enum SpellEffects
     SPELL_EFFECT_124                       = 124,
     SPELL_EFFECT_125                       = 125,
     SPELL_EFFECT_126                       = 126,
-    SPELL_EFFECT_127                       = 127,
+    SPELL_EFFECT_PROSPECTING               = 127,
     SPELL_EFFECT_128                       = 128,
     SPELL_EFFECT_129                       = 129,
     SPELL_EFFECT_130                       = 130,

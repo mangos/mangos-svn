@@ -41,6 +41,7 @@ LootStore LootTemplates_Item;
 LootStore LootTemplates_Pickpocketing;
 LootStore LootTemplates_Skinning;
 LootStore LootTemplates_Disenchant;
+LootStore LootTemplates_Prospecting;
 
 void UnloadLoot()
 {
@@ -51,6 +52,7 @@ void UnloadLoot()
     LootTemplates_Pickpocketing.clear();
     LootTemplates_Skinning.clear();
     LootTemplates_Disenchant.clear();
+    LootTemplates_Prospecting.clear();
 }
 
 void LoadLootTable(LootStore& lootstore,char const* tablename)
@@ -132,6 +134,7 @@ void LoadLootTables()
     LoadLootTable(LootTemplates_Item,         "item_loot_template");
     LoadLootTable(LootTemplates_Pickpocketing,"pickpocketing_loot_template");
     LoadLootTable(LootTemplates_Skinning,     "skinning_loot_template");
+    LoadLootTable(LootTemplates_Prospecting,  "prospecting_loot_template");
 }
 
 #define MaxLootGroups 8

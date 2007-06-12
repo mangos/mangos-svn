@@ -153,8 +153,8 @@ struct Loot
     void NotifyItemRemoved(uint8 lootIndex);
     void NotifyQuestItemRemoved(uint8 questIndex);
     void NotifyMoneyRemoved();
-    inline void AddLooter(uint64 GUID) { PlayersLooting.insert(GUID); }
-    inline void RemoveLooter(uint64 GUID) { PlayersLooting.erase(GUID); }
+    void AddLooter(uint64 GUID) { PlayersLooting.insert(GUID); }
+    void RemoveLooter(uint64 GUID) { PlayersLooting.erase(GUID); }
 };
 
 struct LootView
@@ -173,6 +173,7 @@ extern LootStore LootTemplates_Item;
 extern LootStore LootTemplates_Pickpocketing;
 extern LootStore LootTemplates_Skinning;
 extern LootStore LootTemplates_Disenchant;
+extern LootStore LootTemplates_Prospecting;
 
 QuestItemList* FillQuestLoot(Player* player, Loot *loot);
 void FillLoot(Loot *loot, uint32 loot_id, LootStore& store);
