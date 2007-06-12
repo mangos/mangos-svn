@@ -293,7 +293,21 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
     else if (IS_ITEM_GUID(lguid))
     {
         uint16 pos = player->GetPosByGuid( lguid );
-        player->DestroyItem( (pos >> 8),(pos & 255), true);
+        Item *pItem = player->GetItemByPos(pos);
+        if(!pItem)
+            return;
+        if( pItem->GetProto()->BagFamily == BAG_FAMILY_MINING_SUPP &&
+            pItem->GetProto()->Class == ITEM_CLASS_TRADE_GOODS &&
+            pItem->GetCount() >= 5)
+        {
+            pItem->m_lootGenerated = false;
+            pItem->loot.clear();
+
+            uint32 count = 5;
+            player->DestroyItemCount(pItem, count, true);
+        }
+        else
+            player->DestroyItem( (pos >> 8),(pos & 255), true);
         return;                                             // item can be looted only single player
     }
     else

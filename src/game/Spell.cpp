@@ -42,6 +42,7 @@
 #include "Policies/SingletonImp.h"
 #include "SharedDefines.h"
 #include "Tools.h"
+#include "LootMgr.h"
 
 #define SPELL_CHANNEL_UPDATE_INTERVAL 1000
 
@@ -331,6 +332,7 @@ void Spell::FillTargetMap()
                         tmpUnitMap.push_back(pet);
                     break;
                 case SPELL_EFFECT_FEED_PET:
+                case SPELL_EFFECT_PROSPECTING:
                 case SPELL_EFFECT_DISENCHANT:
                 case SPELL_EFFECT_ENCHANT_ITEM:
                 case SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY:
@@ -2611,6 +2613,29 @@ uint8 Spell::CheckItems()
                     return SPELL_FAILED_CANT_BE_DISENCHANTED;
                 if (!m_targets.m_itemTarget->GetProto()->DisenchantID)
                     return SPELL_FAILED_CANT_BE_DISENCHANTED;
+                break;
+            }
+            case SPELL_EFFECT_PROSPECTING:
+            {
+                if(!m_targets.m_itemTarget)
+                    return SPELL_FAILED_CANT_BE_PROSPECTED;
+                //ensure item is a prospectable ore
+                if(m_targets.m_itemTarget->GetProto()->BagFamily != BAG_FAMILY_MINING_SUPP || m_targets.m_itemTarget->GetProto()->Class != ITEM_CLASS_TRADE_GOODS)
+                    return SPELL_FAILED_CANT_BE_PROSPECTED;
+                //prevent prospecting in trade slot
+                if( m_targets.m_itemTarget->GetOwnerGUID() != m_caster->GetGUID() )
+                    return SPELL_FAILED_CANT_BE_PROSPECTED;
+                //Check for enough skill in jewelcrafting
+                uint32 item_prospectingskilllevel = m_targets.m_itemTarget->GetProto()->RequiredSkillRank;
+                if(item_prospectingskilllevel >p_caster->GetSkillValue(SKILL_JEWELCRAFTING))
+                    return SPELL_FAILED_LOW_CASTLEVEL;
+                //make sure the player has the required ores in inventory
+                if(m_targets.m_itemTarget->GetCount() < 5)
+                    return SPELL_FAILED_PROSPECT_NEED_MORE;
+
+                if(LootTemplates_Prospecting.find(m_targets.m_itemTarget->GetEntry())==LootTemplates_Prospecting.end())
+                    return SPELL_FAILED_CANT_BE_PROSPECTED;
+
                 break;
             }
             case SPELL_EFFECT_WEAPON_DAMAGE:

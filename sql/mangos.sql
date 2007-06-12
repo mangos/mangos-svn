@@ -7641,6 +7641,32 @@ INSERT INTO `playercreateinfo_spell` VALUES
 UNLOCK TABLES;
 
 --
+-- Table structure for table `prospecting_loot_template`
+--
+
+DROP TABLE IF EXISTS `prospecting_loot_template`;
+CREATE TABLE `prospecting_loot_template` (
+  `entry` int(11) unsigned NOT NULL default '0',
+  `item` int(11) unsigned NOT NULL default '0',
+  `ChanceOrRef` float NOT NULL default '100',
+  `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
+  `mincount` tinyint(3) unsigned NOT NULL default '1',
+  `maxcount` tinyint(3) unsigned NOT NULL default '1',
+  `quest_freeforall` tinyint(3) unsigned NOT NULL default '1',
+  PRIMARY KEY  (`entry`,`item`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
+
+--
+-- Dumping data for table `prospecting_loot_template`
+--
+
+LOCK TABLES `prospecting_loot_template` WRITE;
+/*!40000 ALTER TABLE `prospecting_loot_template` DISABLE KEYS */;
+/*!40000 ALTER TABLE `prospecting_loot_template` ENABLE KEYS */;
+UNLOCK TABLES;
+
+
+--
 -- Table structure for table `quest_template`
 --
 

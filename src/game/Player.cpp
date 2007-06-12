@@ -3869,6 +3869,7 @@ bool Player::UpdateGatherSkill(uint32 SkillId, uint32 SkillValue, uint32 RedLeve
     {
         case SKILL_HERBALISM:
         case SKILL_LOCKPICKING:
+        case SKILL_JEWELCRAFTING:
             return UpdateSkillPro(SkillId, SkillGainChance(SkillValue, RedLevel+100, RedLevel+50, RedLevel+25)*Multiplicator);
         case SKILL_SKINNING:
         case SKILL_MINING:
@@ -3893,6 +3894,12 @@ bool Player::UpdateSkillPro(uint16 SkillId, int32 Chance)
     sLog.outDebug("UpdateSkillPro(SkillId %d, Chance %3.1f%%)", SkillId, Chance/10.0);
     if ( !SkillId )
         return false;
+
+    if(Chance <= 0)                                         // speedup in 0 chance case
+    {
+        sLog.outDebug("Player::UpdateSkillPro Chance=%3.1f%% missed", Chance/10.0);
+        return false;
+    }
 
     uint16 i=0;
     for (; i < PLAYER_MAX_SKILLS; i++)
@@ -5855,6 +5862,16 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 FillLoot(loot, item->GetProto()->DisenchantID, LootTemplates_Disenchant);
             }
         }
+        else if(loot_type == LOOT_PROSPECTING)
+        {
+            loot = &item->loot;
+
+            if(!item->m_lootGenerated)
+            {
+                item->m_lootGenerated = true;
+                FillLoot(loot, item->GetEntry(), LootTemplates_Prospecting);
+            }
+        }
         else
         {
             loot = &item->loot;
@@ -5987,8 +6004,8 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             q_list = itr->second;
     }
 
-    // LOOT_PICKPOCKETING and LOOT_DISENCHANTING unsupported by client, sending LOOT_SKINNING instead
-    if(loot_type == LOOT_PICKPOCKETING || loot_type == LOOT_DISENCHANTING)
+    // LOOT_PICKPOCKETING, LOOT_PROSPECTING, and LOOT_DISENCHANTING unsupported by client, sending LOOT_SKINNING instead
+    if(loot_type == LOOT_PICKPOCKETING || loot_type == LOOT_DISENCHANTING || loot_type == LOOT_PROSPECTING)
         loot_type = LOOT_SKINNING;
 
     WorldPacket data(SMSG_LOOT_RESPONSE, (9+50));           // we guess size
@@ -8668,6 +8685,12 @@ void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
         if(pSrcItem->GetCount() < count)
         {
             SendEquipError( EQUIP_ERR_TRIED_TO_SPLIT_MORE_THAN_COUNT, pSrcItem, NULL );
+            return;
+        }
+
+        if(pSrcItem->m_lootGenerated)                       // prevent split looting item (item
+        {
+            SendEquipError( EQUIP_ERR_COULDNT_SPLIT_ITEMS, pSrcItem, NULL ); //best error message found for attempting to split while looting
             return;
         }
 

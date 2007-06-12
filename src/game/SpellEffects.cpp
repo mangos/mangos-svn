@@ -181,7 +181,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //124 SPELL_EFFECT_124                      aggro redirect?
     &Spell::EffectNULL,                                     //125 SPELL_EFFECT_125                      invis?
     &Spell::EffectNULL,                                     //126 SPELL_EFFECT_126                      spell steal effect?
-    &Spell::EffectNULL,                                     //127 SPELL_EFFECT_127                      Prospecting spell
+    &Spell::EffectProspecting,                              //127 SPELL_EFFECT_PROSPECTING              Prospecting spell
     &Spell::EffectNULL,                                     //128 SPELL_EFFECT_128 probably apply aura again
     &Spell::EffectNULL,                                     //129 SPELL_EFFECT_129 probably apply aura again
     &Spell::EffectNULL,                                     //130 SPELL_EFFECT_130                      threat redirect
@@ -3229,6 +3229,25 @@ void Spell::EffectTransmitted(uint32 i)
     WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM, 8);
     data << uint64(pGameObj->GetGUID());
     m_caster->SendMessageToSet(&data,true);
+}
+
+void Spell::EffectProspecting(uint32 i)
+{
+    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    Player* p_caster = (Player*)m_caster;
+    if(!itemTarget || (itemTarget->GetProto()->BagFamily != BAG_FAMILY_MINING_SUPP))
+        return;
+
+    if(itemTarget->GetCount() < 5)
+        return;
+
+    uint32 SkillValue = p_caster->GetPureSkillValue(SKILL_JEWELCRAFTING);
+    uint32 reqSkillValue = itemTarget->GetProto()->RequiredSkillRank;
+    p_caster->UpdateGatherSkill(SKILL_JEWELCRAFTING, SkillValue, reqSkillValue);
+
+    ((Player*)m_caster)->SendLoot(itemTarget->GetGUID(), LOOT_PROSPECTING);
 }
 
 void Spell::EffectSkill(uint32 i)
