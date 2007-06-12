@@ -334,6 +334,7 @@ pkgdata_DATA = \
 	3845_account.sql \
 	3845_command.sql \
 	3859_spell_affect.sql \
+	3862_prospecting_loot_template.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -646,4 +647,5 @@ EXTRA_DIST = \
 	3845_account.sql \
 	3845_command.sql \
 	3859_spell_affect.sql \
+	3862_prospecting_loot_template.sql \
 	README

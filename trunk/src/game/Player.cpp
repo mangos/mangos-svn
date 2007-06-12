@@ -6348,11 +6348,27 @@ int32 Player::FishingMinSkillForCurrentZone() const
         case 297:
             return 205;
 
+        case 3655:
+        case 3659:
+            return 305;
+
         case 1112:
         case 1222:
         case 1227:
         case 3140:
             return 330;
+
+        case 3653:
+        case 3656:
+        case 3658:
+        case 3859:
+            return 355;
+
+        case 3621:
+        case 3690:
+        case 3691:
+        case 3692:
+            return 430;
     }
 
     // zones
@@ -6364,6 +6380,8 @@ int32 Player::FishingMinSkillForCurrentZone() const
         case 85:
         case 141:
         case 215:
+        case 3524:
+        case 3430:
             return -70;
 
         case 17:
@@ -6379,6 +6397,8 @@ int32 Player::FishingMinSkillForCurrentZone() const
         case 1637:
         case 1638:
         case 1657:
+        case 3525:
+        case 3433:
             return -20;
 
         case 10:
@@ -6402,6 +6422,7 @@ int32 Player::FishingMinSkillForCurrentZone() const
         case 16:
         case 28:
         case 47:
+        case 268:
         case 357:
         case 361:
         case 440:
@@ -6420,6 +6441,13 @@ int32 Player::FishingMinSkillForCurrentZone() const
         case 2017:
         case 2057:
             return 330;
+
+        case 3519:
+            return 355;
+
+        case 3518:
+        case 3523:
+            return 380;
     }
 
     // impossable or unknown
