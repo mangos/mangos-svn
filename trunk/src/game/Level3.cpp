@@ -3696,12 +3696,12 @@ bool ChatHandler::HandleLoadPDumpCommand(const char *args)
     if(!args)
         return false;
 
-    char* file = strtok((char*)args, " ");
-    char* acc = strtok(NULL, " ");
+    char * file = strtok((char*)args, " "); if(!file) return false;
+    char * acc = strtok(NULL, " "); if(!acc) return false;
+    char * name = strtok(NULL, " ");
+    char * guid = name ? strtok(NULL, " ") : NULL;
 
-    if(!file || !acc) return false;
-
-    if (objmgr.LoadPlayerDump(file, atoi(acc)))
+    if(objmgr.LoadPlayerDump(file, atoi(acc), name ? name : "", guid ? atoi(guid) : 0))    
         PSendSysMessage(LANG_COMMAND_IMPORT_SUCCESS);
     else
         PSendSysMessage(LANG_COMMAND_IMPORT_FAILED);
@@ -3714,12 +3714,12 @@ bool ChatHandler::HandleWritePDumpCommand(const char *args)
     if(!args)
         return false;
 
-    char * file = strtok((char*)args, " "); if(!file) return false;
-    char * acc = strtok(NULL, " "); if(!acc) return false;
-    char * name = strtok(NULL, " ");
-    char * guid = name ? strtok(NULL, " ") : NULL;
+    char* file = strtok((char*)args, " ");
+    char* guid = strtok(NULL, " ");
 
-    if(objmgr.LoadPlayerDump(file, atoi(acc), name ? name : "", guid ? atoi(guid) : 0))
+    if(!file || !guid) return false;
+
+    if (objmgr.WritePlayerDump(file, atoi(guid)))
         PSendSysMessage(LANG_COMMAND_EXPORT_SUCCESS);
     else
         PSendSysMessage(LANG_COMMAND_EXPORT_FAILED);

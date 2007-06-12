@@ -194,11 +194,12 @@ void Log::Initialize()
     m_logFileLevel = sConfig.GetIntDefault("LogFileLevel", 0);
     InitColors(sConfig.GetStringDefault("LogColors", ""));
 
+    m_logFilter = 0;
+
     if(sConfig.GetIntDefault("LogFilter_TransportMoves", 0)!=0)
         m_logFilter |= LOG_FILTER_TRANSPORT_MOVES;
     if(sConfig.GetIntDefault("LogFilter_CreatureMoves", 0)!=0)
         m_logFilter |= LOG_FILTER_CREATURE_MOVES;
-
 }
 
 void Log::outTimestamp(FILE* file)
