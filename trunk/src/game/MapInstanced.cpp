@@ -100,11 +100,11 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
 
     if (obj->GetTypeId() != TYPEID_PLAYER)
     {
-        sLog.outDebug("MAPINSTANCED: WorldObject '%u' is requesting instance '%u' of map '%u', instantiating", obj->GetGUIDLow(), InstanceId, GetId());
+        sLog.outDebug("MAPINSTANCED: WorldObject '%u' (Entry: %u Type: %u) is requesting instance '%u' of map '%u', instantiating", obj->GetGUIDLow(), obj->GetEntry(), obj->GetTypeId(), InstanceId, GetId());
 
         if (InstanceId == 0)
         {
-            sLog.outError("MAPINSTANCED: WorldObject '%u' requested base map instance of map '%u', this must not happen", obj->GetGUIDLow(), GetId());
+            sLog.outError("MAPINSTANCED: WorldObject '%u' (Entry: %u Type: %u) requested base map instance of map '%u', this must not happen", obj->GetGUIDLow(), obj->GetEntry(), obj->GetTypeId(), GetId());
             return(this);
         }
 
