@@ -2864,7 +2864,7 @@ void Aura::HandleAuraModTotalHealthPercentRegen(bool apply, bool Real)
     Need additional checking for auras who reduce or increase healing, magic effect like Dumpen Magic,
     so this aura not fully working.
     */
-    if ((GetSpellProto()->AuraInterruptFlags & (1 << 18)) != 0)
+    if( GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED )
     {
         m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
     }
@@ -2884,7 +2884,7 @@ void Aura::HandleAuraModTotalHealthPercentRegen(bool apply, bool Real)
 
 void Aura::HandleAuraModTotalManaPercentRegen(bool apply, bool Real)
 {
-    if ((GetSpellProto()->AuraInterruptFlags & (1 << 18)) != 0)
+    if( GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED )
         m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
 
     if(apply && m_periodicTimer <= 0 && m_target->getPowerType() == POWER_MANA)
@@ -2906,8 +2906,7 @@ void Aura::HandleAuraModTotalManaPercentRegen(bool apply, bool Real)
 
 void Aura::HandleModRegen(bool apply, bool Real)            // eating
 {
-    if ((GetSpellProto()->AuraInterruptFlags & (1 << 18)) != 0 && apply)
-        //m_target->ApplyModFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT,apply);
+    if( (GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) != 0 && apply )
                                                             // do not stand up after aura remove...
         m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);
 
@@ -2929,7 +2928,7 @@ void Aura::HandleModRegen(bool apply, bool Real)            // eating
 
 void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
 {
-    if ((GetSpellProto()->AuraInterruptFlags & (1 << 18)) != 0)
+    if( GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED )
         m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
 
     if(apply && m_periodicTimer <= 0)

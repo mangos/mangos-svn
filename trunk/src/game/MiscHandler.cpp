@@ -503,7 +503,7 @@ void WorldSession::HandleStandStateChangeOpcode( WorldPacket & recv_data )
             Unit::AuraMap& p_auras = _player->GetAuras();
             for (Unit::AuraMap::iterator itr = p_auras.begin(); itr != p_auras.end();)
             {
-                if (itr->second && (itr->second->GetSpellProto()->AuraInterruptFlags & (1<<18)) != 0)
+                if (itr->second && (itr->second->GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) != 0)
                     _player->RemoveAura(itr);
                 else
                     ++itr;

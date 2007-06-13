@@ -586,7 +586,7 @@ SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
         {
             const SpellEntry *se = i->second->GetSpellProto();
             next = i; next++;
-            if (se->AuraInterruptFlags & (1<<1))
+            if( se->AuraInterruptFlags & AURA_INTERRUPT_FLAG_DAMAGE )
             {
                 bool remove = true;
                 if (se->procFlags & (1<<3))
