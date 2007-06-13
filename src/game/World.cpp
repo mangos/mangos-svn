@@ -1041,7 +1041,7 @@ bool World::BanAccount(std::string type, std::string nameOrIP, std::string durat
         Field* fieldsAccount = resultAccounts->Fetch();
         uint32 account = fieldsAccount->GetUInt32();
 
-        if(type.c_str()!="ip")
+        if(type!="ip")
         {
             if(duration_secs > 0)
                 loginDatabase.PExecute("INSERT INTO `account_banned` VALUES ('%u', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+%u, '%s', '%s', '1')",account,duration_secs,author.c_str(),reason.c_str());

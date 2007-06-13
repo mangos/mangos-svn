@@ -166,7 +166,6 @@ class Aura
         void HandleAuraModRangedHaste(bool Apply, bool Real);
         void HandleRangedAmmoHaste(bool Apply, bool Real);
         void HandleModHealingDone(bool Apply, bool Real);
-        void HandleModHealingDonePercent(bool Apply, bool Real);
         void HandleModTotalPercentStat(bool Apply, bool Real);
         void HandleAuraModTotalThreat(bool Apply, bool Real);
         void HandleInterruptRegen(bool Apply, bool Real);

@@ -4281,6 +4281,22 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         if(((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0)
             DoneAdvertisedBenefit += (*i)->GetModifier()->m_amount;
 
+    if(GetTypeId() == TYPEID_PLAYER)
+    {
+        AuraList& mDamageDonebySpi = this->GetAurasByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_SPIRIT);
+        for(AuraList::iterator i = mDamageDonebySpi.begin();i != mDamageDonebySpi.end(); ++i)
+        {
+            float bonus = GetStat(STAT_SPIRIT) * ((*i)->GetModifier()->m_amount) / 100;
+            DoneAdvertisedBenefit += bonus ;
+        }
+        AuraList& mDamageDonebyInt = this->GetAurasByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_INTELLECT);
+        for(AuraList::iterator i = mDamageDonebyInt.begin();i != mDamageDonebyInt.end(); ++i)
+        {
+            float bonus = GetStat(STAT_INTELLECT) * ((*i)->GetModifier()->m_amount) / 100;
+            DoneAdvertisedBenefit += bonus ;
+        }
+    }
+
     // ..taken
     AuraList& mDamageTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
     for(AuraList::iterator i = mDamageTaken.begin();i != mDamageTaken.end(); ++i)
@@ -4420,24 +4436,48 @@ bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect, Unit
     };
     float crit_chance;
 
-    // only players use intelligence for critical chance computations
+    // base value
     if (GetTypeId() == TYPEID_PLAYER)
     {
         crit_chance = GetFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + spellProto->School);
-        ((Player*)this)->ApplySpellMod(spellProto->Id, SPELLMOD_CRITICAL_CHANCE, crit_chance);
     }
     else
         crit_chance = m_baseSpellCritChance;
 
+    // flat done
     // TODO: can creatures have critical chance auras?
     AuraList& mSpellCritSchool = GetAurasByType(SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL);
     for(AuraList::iterator i = mSpellCritSchool.begin(); i != mSpellCritSchool.end(); ++i)
         if((*i)->GetModifier()->m_miscvalue == -2 || ((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0)
             crit_chance += (*i)->GetModifier()->m_amount;
 
-    // Resilience - reduce crit chance by x%
+    // percent done
+    // only players use intelligence for critical chance computations
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        ((Player*)this)->ApplySpellMod(spellProto->Id, SPELLMOD_CRITICAL_CHANCE, crit_chance);
+    }
+
+
+    // taken
     if (pVictim)
+    {
+        // flat
+        AuraList& mAttackerSpellCrit = pVictim->GetAurasByType(SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE);
+        for(AuraList::iterator i = mAttackerSpellCrit.begin(); i != mAttackerSpellCrit.end(); ++i)
+            if((*i)->GetModifier()->m_miscvalue == -2 || ((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0)
+                crit_chance += (*i)->GetModifier()->m_amount;
+
+        // flat: Resilience - reduce crit chance by x%
         crit_chance -= pVictim->m_modResilience;
+
+        // percent
+        AuraList& mAttackerSpellCritPCT = pVictim->GetAurasByType(SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE_PCT);
+        for(AuraList::iterator i = mAttackerSpellCritPCT.begin(); i != mAttackerSpellCritPCT.end(); ++i)
+            if((*i)->GetModifier()->m_miscvalue == -2 || ((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0)
+                crit_chance += crit_chance * (*i)->GetModifier()->m_amount/1000;
+
+    }
 
     crit_chance = crit_chance > 0.0 ? crit_chance : 0.0;
     if (roll_chance_f(crit_chance))
@@ -4475,8 +4515,25 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
         if(((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0)
             AdvertisedBenefit += (*i)->GetModifier()->m_amount;
 
-    //put m_AuraModifiers here
+    if(GetTypeId() == TYPEID_PLAYER)
+    {
+        // flat
+        AuraList& mHealingDonebySpi = GetAurasByType(SPELL_AURA_MOD_SPELL_HEALING_OF_SPIRIT);
+        for(AuraList::iterator i = mHealingDonebySpi.begin();i != mHealingDonebySpi.end(); ++i)
+        {
+            float bonus = GetStat(STAT_SPIRIT) * ((*i)->GetModifier()->m_amount) / 100;
+            AdvertisedBenefit += bonus ;
+        }
+        // flat
+        AuraList& mHealingDonebyInt = GetAurasByType(SPELL_AURA_MOD_SPELL_HEALING_OF_INTELLECT);
+        for(AuraList::iterator i = mHealingDonebyInt.begin();i != mHealingDonebyInt.end(); ++i)
+        {
+            float bonus = GetStat(STAT_INTELLECT) * ((*i)->GetModifier()->m_amount) / 100;
+            AdvertisedBenefit += bonus ;
+        }
+    }
 
+    //flat
     AdvertisedBenefit += m_AuraModifiers[SPELL_AURA_MOD_HEALING];
 
     // Healing over Time spells
@@ -4518,8 +4575,6 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
     AuraList& mHealingDonePct = GetAurasByType(SPELL_AURA_MOD_HEALING_DONE_PERCENT);
     for(AuraList::iterator i = mHealingDonePct.begin();i != mHealingDonePct.end(); ++i)
         heal *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
-
-    //heal += float(m_AuraModifiers[SPELL_AURA_MOD_HEALING]);
 
     if (heal < 0) heal = 0;
 
@@ -4574,6 +4629,14 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo) const
     for(SpellImmuneList::const_iterator itr = mechanicList.begin(); itr != mechanicList.end(); ++itr)
         if(itr->type == spellInfo->Mechanic)
             return true;
+
+    int32 chance = 0;
+    AuraList const& mModMechanicRes = GetAurasByType(SPELL_AURA_MOD_MECHANIC_RESISTANCE);
+    for(AuraList::const_iterator i = mModMechanicRes.begin();i != mModMechanicRes.end(); ++i)
+        if((*i)->GetModifier()->m_miscvalue == spellInfo->Mechanic)
+            chance+= (*i)->GetModifier()->m_amount;
+    if(roll_chance_i(chance))
+        return true;
 
     return false;
 }

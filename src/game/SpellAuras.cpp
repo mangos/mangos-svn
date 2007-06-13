@@ -169,7 +169,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNoImmediateEffect,                         //114 SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN_PCT
     &Aura::HandleNoImmediateEffect,                         //115 SPELL_AURA_MOD_HEALING
     &Aura::HandleNULL,                                      //116 SPELL_AURA_IGNORE_REGEN_INTERRUPT
-    &Aura::HandleNULL,                                      //117 SPELL_AURA_MOD_MECHANIC_RESISTANCE
+    &Aura::HandleNoImmediateEffect,                         //117 SPELL_AURA_MOD_MECHANIC_RESISTANCE
     &Aura::HandleNoImmediateEffect,                         //118 SPELL_AURA_MOD_HEALING_PCT
     &Aura::HandleNULL,                                      //119 SPELL_AURA_SHARE_PET_TRACKING useless
     &Aura::HandleAuraUntrackable,                           //120 SPELL_AURA_UNTRACKABLE
@@ -188,7 +188,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAuraModIncreaseHealthPercent,              //133 SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT
     &Aura::HandleNULL,                                      //134 SPELL_AURA_MOD_MANA_REGEN_INTERRUPT
     &Aura::HandleModHealingDone,                            //135 SPELL_AURA_MOD_HEALING_DONE
-    &Aura::HandleModHealingDonePercent,                     //136 SPELL_AURA_MOD_HEALING_DONE_PERCENT
+    &Aura::HandleNoImmediateEffect,                         //136 SPELL_AURA_MOD_HEALING_DONE_PERCENT   implemented in Unit::SpellHealingBonus
     &Aura::HandleModTotalPercentStat,                       //137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE
     &Aura::HandleHaste,                                     //138 SPELL_AURA_MOD_HASTE
     &Aura::HandleForceReaction,                             //139 SPELL_AURA_FORCE_REACTION
@@ -226,12 +226,12 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //171 SPELL_AURA_MOD_PARTY_SPEED    unused
     &Aura::HandleNULL,                                      //172 SPELL_AURA_MOD_PARTY_SPEED_MOUNTED
     &Aura::HandleNULL,                                      //173 SPELL_AURA_ALLOW_CHAMPION_SPELLS  only for Proclaim Champion spell
-    &Aura::HandleNULL,                                      //174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_SPIRIT
-    &Aura::HandleNULL,                                      //175 SPELL_AURA_MOD_SPELL_HEALING_OF_SPIRIT
+    &Aura::HandleNoImmediateEffect,                         //174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_SPIRIT     implemented in Unit::SpellDamageBonus
+    &Aura::HandleNoImmediateEffect,                         //175 SPELL_AURA_MOD_SPELL_HEALING_OF_SPIRIT    implemented in Unit::SpellHealingBonus
     &Aura::HandleNULL,                                      //176 SPELL_AURA_SPIRIT_OF_REDEMPTION   only for Spirit of Redemption spell
     &Aura::HandleNULL,                                      //177 SPELL_AURA_AOE_CHARM
     &Aura::HandleNULL,                                      //178 SPELL_AURA_MOD_DEBUFF_RESISTANCE
-    &Aura::HandleNULL,                                      //179 SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE
+    &Aura::HandleNoImmediateEffect,                         //179 SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE implemented in Unit::SpellCriticalBonus
     &Aura::HandleNULL,                                      //180 SPELL_AURA_MOD_SPELL_DAMAGE_VS_UNDEAD,
     &Aura::HandleNULL,                                      //181
     &Aura::HandleNULL,                                      //182 SPELL_AURA_MOD_ARMOR_OF_INTELLECT
@@ -246,10 +246,10 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //191
     &Aura::HandleNULL,                                      //192 SPELL_AURA_HASTE_MELEE
     &Aura::HandleNULL,                                      //193 SPELL_AURA_MELEE_SLOW
-    &Aura::HandleNULL,                                      //194 SPELL_AURA_MOD_SPELL_DAMAGE_OF_INTELLECT
-    &Aura::HandleNULL,                                      //195 SPELL_AURA_MOD_SPELL_HEALING_OF_INTELLECT
+    &Aura::HandleNoImmediateEffect,                         //194 SPELL_AURA_MOD_SPELL_DAMAGE_OF_INTELLECT  implemented in Unit::SpellDamageBonus
+    &Aura::HandleNoImmediateEffect,                         //195 SPELL_AURA_MOD_SPELL_HEALING_OF_INTELLECT implemented in Unit::SpellHealingBonus
     &Aura::HandleNULL,                                      //196                                   unused
-    &Aura::HandleNULL,                                      //197 SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE_PCT
+    &Aura::HandleNoImmediateEffect,                         //197 SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE_PCT implemented in Unit::SpellCriticalBonus
     &Aura::HandleNULL,                                      //198 SPELL_AURA_MOD_ALL_WEAPON_SKILLS
     &Aura::HandleNULL,                                      //199 SPELL_AURA_MOD_INCREASES_SPELL_PCT_TO_HIT
     &Aura::HandleNULL,                                      //200
@@ -2830,11 +2830,6 @@ void Aura::HandleModHealingDone(bool apply, bool Real)
     // this information is for client side only
     if(m_target->GetTypeId() == TYPEID_PLAYER)
         m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_HEALING_DONE_POS,m_modifier.m_amount,apply);
-}
-
-void Aura::HandleModHealingDonePercent(bool apply, bool Real)
-{
-    // implemented in Unit::SpellHealingBonus
 }
 
 void Aura::HandleModTotalPercentStat(bool apply, bool Real)

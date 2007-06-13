@@ -454,6 +454,17 @@ void Spell::EffectDummy(uint32 i)
         m_caster->CastSpell(m_caster,spell_proto,true,NULL);
     }
 
+    // Gnomish Battle Chicken
+    if (m_spellInfo->Id == 23133 )
+    {
+        // TODO: why dummy effect required? some animation or other...
+        SpellEntry const *spell_proto = sSpellStore.LookupEntry(13166);
+        if(!spell_proto)
+            return;
+
+        m_caster->CastSpell(m_caster,spell_proto,true,NULL);
+    }
+
     if (m_spellInfo->Id == 16589)
     {
         if(m_caster->GetTypeId()!=TYPEID_PLAYER)
