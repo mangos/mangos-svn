@@ -1923,8 +1923,8 @@ uint8 Spell::CanCast()
         }
 
         // TODO: this check can be applied and for player to prevent cheating when IsPositiveSpell will return always correct result.
-        // check target for pet/charmed casts
-        if(m_caster->GetTypeId()==TYPEID_UNIT && m_caster->GetCharmerOrOwnerGUID())
+        // check target for pet/charmed casts (not self targeted), self targeted cast used for area effects and etc
+        if(m_caster != target && m_caster->GetTypeId()==TYPEID_UNIT && m_caster->GetCharmerOrOwnerGUID())
         {
             // check correctness positive/negative cast target (pet cast real check and cheating check)
             if(IsPositiveSpell(m_spellInfo->Id))
