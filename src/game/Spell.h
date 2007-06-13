@@ -110,6 +110,12 @@ enum SpellChannelInterruptFlags
     CHANNEL_FLAG_DELAY       = 0x4000
 };
 
+enum SpellAuraInterruptFlags
+{
+    AURA_INTERRUPT_FLAG_DAMAGE      = 0x00000002,
+    AURA_INTERRUPT_FLAG_NOT_SEATED  = 0x00040000
+};
+
 enum SpellNotifyPushType
 {
     PUSH_IN_FRONT   = 0,

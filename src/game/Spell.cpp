@@ -1397,7 +1397,7 @@ void Spell::SendCastResult(uint8 result)
 
 void Spell::SendSpellStart()
 {
-    sLog.outDebug("Sending SMSG_SPELL_START");
+    sLog.outDebug("Sending SMSG_SPELL_START id=%u",m_spellInfo->Id);
 
     m_castFlags = CAST_FLAG_UNKNOWN1;
     if(m_rangedShoot)
@@ -1431,7 +1431,7 @@ void Spell::SendSpellStart()
 
 void Spell::SendSpellGo()
 {
-    sLog.outDebug("Sending SMSG_SPELL_GO");
+    sLog.outDebug("Sending SMSG_SPELL_GO id=%u",m_spellInfo->Id);
 
     Unit * target;
     if(!m_targets.getUnitTarget())
@@ -1860,7 +1860,8 @@ uint8 Spell::CanCast()
 
     // cancel autorepeat spells if cast start when moving
     // (not wand currently autorepeat cast delayed to moving stop anyway in spell update code)
-    if(m_caster->GetTypeId()==TYPEID_PLAYER && ((Player*)m_caster)->GetMovementFlags() &&  (IsAutoRepeat() || m_rangedShoot) )
+    if( m_caster->GetTypeId()==TYPEID_PLAYER && ((Player*)m_caster)->GetMovementFlags() &&
+        (IsAutoRepeat() || m_rangedShoot || (m_spellInfo->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) != 0) )
         return SPELL_FAILED_MOVING;
 
     Unit *target = m_targets.getUnitTarget();
