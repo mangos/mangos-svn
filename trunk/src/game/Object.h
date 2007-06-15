@@ -99,14 +99,7 @@ class MANGOS_DLL_SPEC Object
         uint32 GetEntry() const { return GetUInt32Value(OBJECT_FIELD_ENTRY); }
 
         const uint8& GetTypeId() const { return m_objectTypeId; }
-        bool isType(uint8 mask) const
-        {
-
-            if (mask & m_objectType)
-                return true;
-
-            return false;
-        }
+        bool isType(uint8 mask) const { return (mask & m_objectType); }
 
         virtual void BuildCreateUpdateBlockForPlayer( UpdateData *data, Player *target ) const;
         void SendUpdateToPlayer(Player* player);
