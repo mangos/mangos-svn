@@ -379,18 +379,14 @@ void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask, Playe
             if( updateMask->GetBit( index ) )
             {
                 // remove custom flag before send
-                if(index == UNIT_NPC_FLAGS)
-                    if((m_uint32Values[index] & UNIT_NPC_FLAG_GUARD) != 0)
-                        m_uint32Values[index] &= ~UNIT_NPC_FLAG_GUARD;
-
+                if( index == UNIT_NPC_FLAGS )
+                    *data << uint32(m_uint32Values[ index ] & ~UNIT_NPC_FLAG_GUARD);
                 // Some values at server stored in float format but must be sended to client in uint32 format
-                if( // unit fields
-                    (index >= UNIT_FIELD_POWER1         && index <= UNIT_FIELD_MAXPOWER5 ||
-                    index >= UNIT_FIELD_BASEATTACKTIME  && index <= UNIT_FIELD_RANGEDATTACKTIME ||
-                    index >= UNIT_FIELD_STAT0           && index <= (UNIT_FIELD_RESISTANCES + 6) ||
-                    index >= UNIT_FIELD_POSSTAT0        && index <= (UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE + 6) ) &&
-                    //player fields (2 comparison preferred instead redundant isType(TYPE_PLAYER) check
-                    (m_objectTypeId == TYPEID_UNIT || m_objectTypeId == TYPEID_PLAYER) )
+                else if(
+                    index >= UNIT_FIELD_POWER1         && index <= UNIT_FIELD_MAXPOWER5 ||
+                    index >= UNIT_FIELD_BASEATTACKTIME && index <= UNIT_FIELD_RANGEDATTACKTIME ||
+                    index >= UNIT_FIELD_STAT0          && index <= (UNIT_FIELD_RESISTANCES + 6) ||
+                    index >= UNIT_FIELD_POSSTAT0       && index <= (UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE + 6) )
                 {
                     // convert from float to uint32 and send
                     *data << uint32(m_floatValues[ index ] < 0 ? 0 : m_floatValues[ index ]);

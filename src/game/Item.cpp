@@ -291,6 +291,10 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid)
         SetOwnerGUID(owner_guid);
     }
 
+    // set random property enchantings base at randomPropertyId for 
+    // synchronization bonuses with random property description in case desynchronization.
+    SetItemRandomProperties(GetItemRandomPropertyId());
+
     delete result;
 
     return true;
@@ -529,7 +533,12 @@ void Item::SetItemRandomProperties(uint32 randomPropId)
     ItemRandomPropertiesEntry const *item_rand = sItemRandomPropertiesStore.LookupEntry(randomPropId);
     if(item_rand)
     {
-        SetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID,item_rand->ID);
+        if(GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID)!=item_rand->ID)
+        {
+            SetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID,item_rand->ID);
+            SetState(ITEM_CHANGED);
+        }
+
         for(uint32 i = PROP_ENCHANTMENT_SLOT; i < PROP_ENCHANTMENT_SLOT + 3; ++i)
             SetEnchantment(EnchantmentSlot(i),item_rand->enchant_id[i-PROP_ENCHANTMENT_SLOT],0,0);
     }
@@ -948,6 +957,12 @@ bool Item::IsFitToSpellRequirements(SpellEntry const* spellInfo) const
 
 void Item::SetEnchantment(EnchantmentSlot slot, uint32 id, uint32 duration, uint32 charges)
 {
+    // Better lost small time at check in comparison lost time at item save to DB.
+    if( GetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+ENCHANTMENT_ID_OFFSET)==id &&
+        GetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+ENCHANTMENT_DURATION_OFFSET)==duration &&
+        GetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+ENCHANTMENT_CHARGES_OFFSET)==charges )
+        return;
+
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+ENCHANTMENT_ID_OFFSET,id);
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+ENCHANTMENT_DURATION_OFFSET,duration);
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+ENCHANTMENT_CHARGES_OFFSET,charges);

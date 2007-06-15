@@ -116,7 +116,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectOpenSecretSafe,                           // 59 SPELL_EFFECT_OPEN_LOCK_ITEM
     &Spell::EffectProficiency,                              // 60 SPELL_EFFECT_PROFICIENCY
     &Spell::EffectSendEvent,                                // 61 SPELL_EFFECT_SEND_EVENT
-    &Spell::EffectPowerDrain,                               // 62 SPELL_EFFECT_POWER_BURN
+    &Spell::EffectPowerBurn,                                // 62 SPELL_EFFECT_POWER_BURN
     &Spell::EffectThreat,                                   // 63 SPELL_EFFECT_THREAT
     &Spell::EffectTriggerSpell,                             // 64 SPELL_EFFECT_TRIGGER_SPELL
     &Spell::EffectNULL,                                     // 65 SPELL_EFFECT_HEALTH_FUNNEL            unused
@@ -1009,7 +1009,7 @@ void Spell::EffectSendEvent(uint32 i)
     sWorld.ScriptsStart(sSpellScripts, m_spellInfo->Id, m_caster, focusObject);
 }
 
-void Spell::EffectPowerDrain(uint32 i)
+void Spell::EffectPowerBurn(uint32 i)
 {
     if(!unitTarget)
         return;
