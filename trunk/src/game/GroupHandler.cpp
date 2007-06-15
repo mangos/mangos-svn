@@ -565,26 +565,26 @@ void WorldSession::SendPartyMemberStatsChanged( uint64 Guid )
     /*we have to create update mask, not this way*/
     uint32 mask = 7;                            //only sends info that member's HP changed
     data << (uint32) mask;
-    if (mask && 1)
+    if (mask & 1)
         data << (uint8) MEMBER_STATUS_ONLINE;   //there should be member's online status
-    if (mask && 2)
+    if (mask & 2)
         data << (uint16) player->GetHealth();
-    if (mask && 4)
+    if (mask & 4)
         data << (uint16) player->GetMaxHealth();
     Powers powerType = player->getPowerType();
-    if (mask && 8)                          //this mask bit is always 0
+    if (mask & 8)                          //this mask bit is always 0
         data << (uint8)  powerType;
-    if (mask && 16)
+    if (mask & 16)
         data << (uint16) player->GetMaxPower(powerType);
-    if (mask && 32)
+    if (mask & 32)
         data << (uint16) player->GetPower(powerType);
-    if (mask && 64)
+    if (mask & 64)
         data << (uint16) player->getLevel();
-    if (mask && 128)
+    if (mask & 128)
         data << (uint16) player->GetZoneId();
-    if (mask && 256)
+    if (mask & 256)
         data << (uint16) player->GetPositionX();
-    if (mask && 512)
+    if (mask & 512)
         data << (uint16) player->GetPositionY();
     ///and some other things, like spells, pet name, pet HP, pet HP max should be send
 
