@@ -11192,6 +11192,13 @@ bool Player::LoadFromDB( uint32 guid )
     SetUInt64Value(UNIT_FIELD_SUMMONEDBY,0);
     SetUInt64Value(UNIT_FIELD_CREATEDBY,0);
 
+    //clear mana draining field
+    if (GetUInt32Value(UNIT_FIELD_POWER_COST_MODIFIER) != 0)
+    {
+        sLog.outError("Removing power cost draining/increasing for player : %u name : %s", GetGUIDLow(), m_name);
+        SetUInt32Value(UNIT_FIELD_POWER_COST_MODIFIER,0);
+    }
+
     // reset skill modifiers and set correct unlearn flags
     for (uint32 i = 0; i < PLAYER_MAX_SKILLS; i++)
     {
