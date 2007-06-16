@@ -309,8 +309,15 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         }
     }
 
-    ///- Re-check account ban (same check as in realmd).
-    QueryResult *banresult = loginDatabase.PQuery("SELECT `bandate`,`unbandate` FROM `account_banned` WHERE `id` = '%d' AND `active` = 1     AND (`bandate`=`unbandate` OR `unbandate`>UNIX_TIMESTAMP())", (*result)[0].GetUInt32());
+    id = fields[0].GetUInt32();
+    security = fields[1].GetUInt16();
+    K.SetHexStr(fields[2].GetString());
+    time_t mutetime = time_t(fields[9].GetUInt64());
+
+    delete result;
+
+    ///- Re-check account ban (same check as in realmd) /// TO DO: why on earth do 2 checks for same thing?
+    QueryResult *banresult = loginDatabase.PQuery("SELECT `bandate`,`unbandate` FROM `account_banned` WHERE `id` = '%u' AND `active` = 1", id);
     if(banresult)                        // if account banned
     {
         packet.Initialize( SMSG_AUTH_RESPONSE, 1 );
@@ -318,16 +325,9 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         SendPacket( &packet );
 
         sLog.outDetail( "SOCKET: Sent Auth Response (Account banned)." );
-        delete result;
+        delete banresult;
         return;
     }
-
-    id = fields[0].GetUInt32();
-    security = fields[1].GetUInt16();
-    K.SetHexStr(fields[2].GetString());
-    time_t mutetime = time_t(fields[9].GetUInt64());
-
-    delete result;
 
     ///- Check that we do not exceed the maximum number of online players in the realm
     uint32 num = sWorld.GetSessionCount();

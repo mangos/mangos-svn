@@ -1029,10 +1029,12 @@ bool World::BanAccount(std::string type, std::string nameOrIP, std::string durat
     {
         resultAccounts = sDatabase.PQuery("SELECT `account` FROM `character` WHERE `name` = '%s'",nameOrIP.c_str());
     }
+    else
+        return false;
 
     if(!resultAccounts)
     {
-        return (type=="ip");
+        return false;
     }
 
     ///- Disconnect all affected players (for IP it can be several)
@@ -1041,17 +1043,17 @@ bool World::BanAccount(std::string type, std::string nameOrIP, std::string durat
         Field* fieldsAccount = resultAccounts->Fetch();
         uint32 account = fieldsAccount->GetUInt32();
 
-        if(type!="ip")
+        if(type != "ip")
         {
             if(duration_secs > 0)
                 loginDatabase.PExecute("INSERT INTO `account_banned` VALUES ('%u', UNIX_TIMESTAMP(), UNIX_TIMESTAMP()+%u, '%s', '%s', '1')",account,duration_secs,author.c_str(),reason.c_str());
             else
                 loginDatabase.PExecute("INSERT INTO `account_banned` VALUES ('%u', UNIX_TIMESTAMP(), UNIX_TIMESTAMP(), '%s', '%s', '1')",account,author.c_str(),reason.c_str());
         }
-        WorldSession* s = FindSession(account);
-        if(s)
-            if(std::string(s->GetPlayerName()) != author)
-                s->KickPlayer();
+        WorldSession* sess = FindSession(account);
+        if( sess )
+            if(std::string(sess->GetPlayerName()) != author)
+                sess->KickPlayer();
     }
     while( resultAccounts->NextRow() );
 
@@ -1064,14 +1066,14 @@ bool World::RemoveBanAccount(std::string type, std::string nameOrIP)
 {
     loginDatabase.escape_string(nameOrIP);
 
-    if(type=="ip")
+    if(type == "ip")
     {
         loginDatabase.PExecute("DELETE FROM `ip_banned` WHERE `ip` = '%s'",nameOrIP.c_str());
     }
     else
     {
         uint32 account=0;
-        if(type=="account")
+        if(type == "account")
         {
             QueryResult *resultAccounts = loginDatabase.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s'",nameOrIP.c_str());
             if(!resultAccounts)
@@ -1080,7 +1082,7 @@ bool World::RemoveBanAccount(std::string type, std::string nameOrIP)
 
             delete resultAccounts;
         }
-        else if(type=="character")
+        else if(type == "character")
         {
             normalizePlayerName(nameOrIP);
             QueryResult *resultAccounts = sDatabase.PQuery("SELECT `account` FROM `character` WHERE `name` = '%s'",nameOrIP.c_str());
