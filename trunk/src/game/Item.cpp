@@ -398,32 +398,8 @@ uint32 Item::GenerateItemRandomPropertyId(uint32 item_id)
     if(!itemProto)
         return 0;
 
-    // only for bounded item
-    if(itemProto->Bonding != BIND_WHEN_PICKED_UP && itemProto->Bonding != BIND_WHEN_EQUIPED)
-        return 0;
-
-    // only white or green item
-    if(itemProto->Quality != ITEM_QUALITY_NORMAL && itemProto->Quality != ITEM_QUALITY_UNCOMMON)
-        return 0;
-
-    // only for specific item classes
-    if(itemProto->Class != ITEM_CLASS_WEAPON && itemProto->Class != ITEM_CLASS_GEM && itemProto->Class != ITEM_CLASS_ARMOR)
-        return 0;
-
-    // only if not other stats bonuses
-    for(uint8 i = 0; i < 10; i++)
-    {
-        if(itemProto->ItemStat[i].ItemStatValue != 0)
-            return 0;
-    }
-
-    for(uint8 i = 0; i < 5; i++)
-    {
-        if(itemProto->Spells[i].SpellId > 0)
-            return 0;
-    }
-
-    if(itemProto->HolyRes > 0 || itemProto->FireRes > 0 || itemProto->NatureRes > 0 || itemProto->FrostRes > 0 || itemProto->ShadowRes > 0 || itemProto->ArcaneRes > 0)
+    // item can have random property (this value store set of allowed random properties but format unknown)
+    if(!itemProto->RandomProperty)
         return 0;
 
     // maybe just hack here,we should find out the correct random_id in DBC
