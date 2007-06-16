@@ -2434,7 +2434,7 @@ void Spell::EffectScriptEffect(uint32 i)
     }
 
     sLog.outDebug("Spell ScriptStart spellid %u in EffectScriptEffect ", m_spellInfo->Id);
-    sWorld.ScriptsStart(sSpellScripts, m_spellInfo->Id, m_caster, m_targets.getUnitTarget());
+    sWorld.ScriptsStart(sSpellScripts, m_spellInfo->Id, m_caster, unitTarget);
 }
 
 void Spell::EffectSanctuary(uint32 i)
