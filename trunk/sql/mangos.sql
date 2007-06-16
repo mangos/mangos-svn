@@ -620,7 +620,7 @@ DROP TABLE IF EXISTS `character_ticket`;
 CREATE TABLE `character_ticket` (
   `ticket_id` int(11) NOT NULL auto_increment,
   `guid` int(11) unsigned NOT NULL default '0',
-  `ticket_text` varchar(255) NOT NULL default '',
+  `ticket_text` text,
   `ticket_category` int(1) NOT NULL default '0',
   PRIMARY KEY  (`ticket_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
@@ -1837,7 +1837,7 @@ CREATE TABLE `item_template` (
   `Material` int(30) NOT NULL default '0',
   `sheath` int(30) unsigned NOT NULL default '0',
   `RandomProperty_1` int(30) unsigned NOT NULL default '0',
-  `RandomProperty_1` int(30) unsigned NOT NULL default '0',
+  `RandomProperty_2` int(30) unsigned NOT NULL default '0',
   `block` int(30) unsigned NOT NULL default '0',
   `itemset` int(30) unsigned NOT NULL default '0',
   `MaxDurability` int(30) unsigned NOT NULL default '0',
