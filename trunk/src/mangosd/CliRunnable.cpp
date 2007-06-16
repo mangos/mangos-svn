@@ -143,7 +143,7 @@ void CliDelete(char*command,pPrintf zprintf)
     if(!account_name)
     {
         // \r\n is used because this function can also be called from RA
-        zprintf("Syntax is: delete <account>\r\n");
+        zprintf("Syntax is: delete $account\r\n");
         return;
     }
 
@@ -240,7 +240,7 @@ void CliIdleShutdown(char* command,pPrintf zprintf)
 
     if(!args)
     {
-        zprintf("Syntax is: idleshutdown <seconds|cancel>\r\n");
+        zprintf("Syntax is: idleshutdown $seconds|cancel\r\n");
         return;
     }
 
@@ -256,7 +256,7 @@ void CliIdleShutdown(char* command,pPrintf zprintf)
         ///- Prevent interpret wrong arg value as 0 secs shutdown time
         if(time==0 && (args[0]!='0' || args[1]!='\0') || time < 0)
         {
-            zprintf("Syntax is: idleshutdown <seconds|cancel>\r\n");
+            zprintf("Syntax is: idleshutdown $seconds|cancel\r\n");
             return;
         }
 
@@ -271,7 +271,7 @@ void CliShutdown(char* command,pPrintf zprintf)
 
     if(!args)
     {
-        zprintf("Syntax is: shutdown <seconds|cancel>\r\n");
+        zprintf("Syntax is: shutdown $seconds|cancel\r\n");
         return;
     }
 
@@ -286,7 +286,7 @@ void CliShutdown(char* command,pPrintf zprintf)
         ///- Prevent interpret wrong arg value as 0 secs shutdown time
         if(time==0 && (args[0]!='0' || args[1]!='\0') || time < 0)
         {
-            zprintf("Syntax is: shutdown <seconds|cancel>\r\n");
+            zprintf("Syntax is: shutdown $seconds|cancel\r\n");
             return;
         }
 
@@ -358,33 +358,78 @@ void CliBanList(char*,pPrintf zprintf)
 {
     ///- Get the list of banned accounts and display them
     Field *fields;
-    QueryResult *result2 = loginDatabase.Query("SELECT `username` FROM `account` WHERE `id` in (SELECT `id` FROM `account_banned` WHERE `active` = 1 AND (`bandate`=`unbandate` OR `unbandate`>UNIX_TIMESTAMP()))");
-
-    if(result2)
+    QueryResult *result = loginDatabase.Query("SELECT `id`,`username` FROM `account` WHERE `id` IN (SELECT `id` FROM `account_banned` WHERE `active` = 1");
+    if(result)
     {
-        zprintf("Banned Accounts:\r\n");
+        zprintf("Actual Banned Accounts:\r\n");
+        zprintf("===============================================================================\r\n");
+        zprintf("|    Account    |   BanDate    |   UnbanDate  |  Banned By    | Banned reason |\r\n");
+        Field *fields2;
         do
         {
-            fields = result2->Fetch();
-            zprintf("|%15s|\r\n", fields[0].GetString());
-        }while( result2->NextRow() );
-        delete result2;
+            zprintf("-------------------------------------------------------------------------------\r\n");
+            fields = result->Fetch();
+            QueryResult *banInfo = loginDatabase.PQuery("SELECT `bandate`,`unbandate`,`bannedby`,`banreason` FROM `account_banned` WHERE `id` = %d AND `active` = 1 ORDER BY `unbandate`", fields[0].GetUInt32());
+            if (banInfo)
+            {
+                fields2 = banInfo->Fetch();
+                do
+                {   
+                    time_t t_ban = fields2[0].GetUInt64();
+                    tm* aTm_ban = localtime(&t_ban);
+                    zprintf("|%-15.15s|", fields[1].GetString());
+                    zprintf("%02d-%02d-%02d %02d:%02d|", aTm_ban->tm_year%100, aTm_ban->tm_mon+1, aTm_ban->tm_mday, aTm_ban->tm_hour, aTm_ban->tm_min);
+                    if ( fields2[0].GetUInt64() == fields2[1].GetUInt64() )
+                        zprintf("   permanent  |");
+                    else
+                    {
+                        time_t t_unban = fields2[1].GetUInt64();
+                        tm* aTm_unban = localtime(&t_unban);
+                        zprintf("%02d-%02d-%02d %02d:%02d|",aTm_unban->tm_year%100, aTm_unban->tm_mon+1, aTm_unban->tm_mday, aTm_unban->tm_hour, aTm_unban->tm_min);
+                        delete aTm_unban;
+                    }
+                    zprintf("%-15.15s|%-15.15s|\r\n",fields2[2].GetString(),fields2[3].GetString());
+                    delete aTm_ban;
+                }while ( banInfo->NextRow() );
+                delete banInfo;
+            }
+        }while( result->NextRow() );
+        zprintf("===============================================================================\r\n");
+        delete result;
     }
 
     ///- Get the list of banned IP addresses and display them
-    QueryResult *result3 = loginDatabase.Query( "SELECT `ip` FROM `ip_banned`" );
-    if(result3)
+    result = loginDatabase.Query( "SELECT `ip`,`bandate`,`unbandate`,`bannedby`,`banreason` FROM `ip_banned` WHERE (`bandate`=`unbandate` OR `unbandate`>UNIX_TIMESTAMP()) ORDER BY `unbandate`" );
+    if(result)
     {
-        zprintf("Banned IPs:\r\n");
+        zprintf("Actual Banned IPs:\r\n");
+        zprintf("===============================================================================\r\n");
+        zprintf("|      IP       |   BanDate    |   UnbanDate  |  Banned By    | Banned reason |\r\n");
         do
         {
-            fields = result3->Fetch();
-            zprintf("|%15s|\r\n", fields[0].GetString());
-        }while( result3->NextRow() );
-        delete result3;
+            zprintf("-------------------------------------------------------------------------------\r\n");
+            fields = result->Fetch();
+            time_t t_ban = fields[1].GetUInt64();
+            tm* aTm_ban = localtime(&t_ban);
+            zprintf("|%-15.15s|", fields[0].GetString());
+            zprintf("%02d-%02d-%02d %02d:%02d|", aTm_ban->tm_year%100, aTm_ban->tm_mon+1, aTm_ban->tm_mday, aTm_ban->tm_hour, aTm_ban->tm_min);
+            if ( fields[1].GetUInt64() == fields[2].GetUInt64() )
+                zprintf("   permanent  |");
+            else
+            {
+                time_t t_unban = fields[2].GetUInt64();
+                tm* aTm_unban = localtime(&t_unban);
+                zprintf("%02d-%02d-%02d %02d:%02d|", aTm_unban->tm_year%100, aTm_unban->tm_mon+1, aTm_unban->tm_mday, aTm_unban->tm_hour, aTm_unban->tm_min);
+                delete aTm_unban;
+            }
+            zprintf("%-15.15s|%-15.15s|\r\n", fields[3].GetString(), fields[4].GetString());
+            delete aTm_ban;
+        }while( result->NextRow() );
+        zprintf("===============================================================================\r\n");
+        delete result;
     }
-
-    if(!result2 && !result3) zprintf("We do not have banned users\r\n");
+    //there is result already deleted pointer! , do not use it
+    if(!result) zprintf("We do not have banned users\r\n");
 }
 
 /// Ban an IP address or a user account
@@ -395,22 +440,22 @@ void CliBan(char*command,pPrintf zprintf)
 
     if(!type)
     {
-        zprintf("Syntax: ban <account|ip|character> <$AccountOrIpOrCharacter> <duration> <reason>\n");
+        zprintf("Syntax: ban account|ip|character $AccountOrIpOrCharacter (duration[s|m|h|d])*> reason\n");
         return;
     }
     char* nameOrIP = strtok(NULL, " ");
 
     if(!nameOrIP)
     {
-        zprintf("Syntax: ban <account|ip|character> <$AccountOrIpOrCharacter> <duration> <reason>\n");
+        zprintf("Syntax: ban account|ip|character $AccountOrIpOrCharacter (duration[s|m|h|d])* reason\n");
         return;
     }
 
     char* duration = strtok(NULL," ");
 
-    if(!duration || !atoi(duration))
+    if(!duration)  // ?!? input of single char "0"-"9" wouldn't detect when with: || !atoi(duration)
     {
-        zprintf("Syntax: ban <account|ip|character> <$AccountOrIpOrCharacter> <duration> <reason>\n");
+        zprintf("Syntax: ban account|ip|character $AccountOrIpOrCharacter (duration[s|m|h|d])* reason\n");
         return;
     }
 
@@ -418,15 +463,15 @@ void CliBan(char*command,pPrintf zprintf)
 
     if(!reason)
     {
-        zprintf("Syntax: ban <account|ip|character> <$AccountOrIpOrCharacter> <duration> <reason>\n");
+        zprintf("Syntax: ban account|ip|character $AccountOrIpOrCharacter (duration[s|m|h|d])* reason\n");
         return;
     }
     //debug
-    if(sWorld.BanAccount(type, nameOrIP, duration, reason, "Set from the console."))
+    if(sWorld.BanAccount(type, nameOrIP, duration, reason, "Set by console."))
     {
         zprintf("survived banaccount call\n");
         if(atoi(duration)>0)
-            zprintf("%s is banned for %s for %s.\n",nameOrIP,secsToTimeString(TimeStringToSecs(duration),true,false).c_str(),reason);
+            zprintf("%s is banned for %s. Reason: %s.\n",nameOrIP,secsToTimeString(TimeStringToSecs(duration),true,false).c_str(),reason);
         else
             zprintf("%s is banned permanently for %s.\n",nameOrIP,reason);
     }
@@ -449,7 +494,7 @@ void CliRemoveBan(char *command,pPrintf zprintf)
     char *nameorip = strtok(NULL," ");
     if(!nameorip||!type)
     {
-        zprintf("Syntax is: unban <account|ip|character> $nameorip\r\n");
+        zprintf("Syntax is: unban account|ip|character $nameorip\r\n");
         return;
     }
 
@@ -499,7 +544,7 @@ void CliSetGM(char *command,pPrintf zprintf)
 
     if(!szAcc)                                              //wrong syntax 'setgm' without name
     {
-        zprintf("Syntax is: setgm <character> <number (0 - normal, 3 - gamemaster)>\r\n");
+        zprintf("Syntax is: setgm $character $number (0 - normal, 3 - gamemaster)>\r\n");
         return;
     }
 
@@ -507,7 +552,7 @@ void CliSetGM(char *command,pPrintf zprintf)
 
     if(!szLevel)                                            //wrong syntax 'setgm' without plevel
     {
-        zprintf("Syntax is: setgm <character> <number (0 - normal, 3 - gamemaster)>\r\n");
+        zprintf("Syntax is: setgm $character $number (0 - normal, 3 - gamemaster)>\r\n");
         return;
     }
 
@@ -547,7 +592,7 @@ void CliCreate(char *command,pPrintf zprintf)
     char *szAcc = strtok(command, " ");
     if(!szAcc)
     {
-        zprintf("Syntax is: create <username> <password>\r\n");
+        zprintf("Syntax is: create $username $password\r\n");
         return;
     }
 
@@ -561,7 +606,7 @@ void CliCreate(char *command,pPrintf zprintf)
 
     if(!szPassword)
     {
-        zprintf("Syntax is: create <username> <password>\r\n");
+        zprintf("Syntax is: create $username $password\r\n");
         return;
     }
 
@@ -635,7 +680,7 @@ void CliKick(char*command,pPrintf zprintf)
 
     if (!kickName)
     {
-        zprintf("Syntax is: kick <charactername>\r\n");
+        zprintf("Syntax is: kick $charactername\r\n");
         return;
     }
 
@@ -674,7 +719,7 @@ void CliSetLogLevel(char*command,pPrintf zprintf)
     char *NewLevel = strtok(command, " ");
     if (!NewLevel)
     {
-        zprintf("Syntax is: setloglevel <loglevel>\r\n");
+        zprintf("Syntax is: setloglevel $loglevel\r\n");
         return;
     }
     sLog.SetLogLevel(NewLevel);
@@ -684,7 +729,7 @@ void CliUpTime(char*,pPrintf zprintf)
 {    
     uint32 uptime = sWorld.GetUptime();
     std::string suptime = secsToTimeString(uptime,true,(uptime > 86400));
-    zprintf("Server has been up for: %s", suptime.c_str());
+    zprintf("Server has been up for: %s\r\n", suptime.c_str());
 }
 
 void CliSetTBC(char *command,pPrintf zprintf)
@@ -694,7 +739,7 @@ void CliSetTBC(char *command,pPrintf zprintf)
 
     if(!szAcc)                                              
     {
-        zprintf("Syntax is: setbc <account> <number (0 - normal, 1 - tbc)>\r\n");
+        zprintf("Syntax is: setbc $account $number (0 - normal, 1 - tbc)>\r\n");
         return;
     }
 
@@ -702,7 +747,7 @@ void CliSetTBC(char *command,pPrintf zprintf)
 
     if(!szTBC)                                            
     {
-        zprintf("Syntax is: setbc <account> <number (0 - normal, 1 - tbc)>\r\n");
+        zprintf("Syntax is: setbc $account $number (0 - normal, 1 - tbc)>\r\n");
         return;
     }
 
@@ -710,7 +755,7 @@ void CliSetTBC(char *command,pPrintf zprintf)
 
     if((lev > 1)|| (lev < 0))
     {
-        zprintf("Syntax is: setbc <account> <number (0 - normal, 1 - tbc)>\r\n");
+        zprintf("Syntax is: setbc $account $number (0 - normal, 1 - tbc)>\r\n");
         return;    
     }
 

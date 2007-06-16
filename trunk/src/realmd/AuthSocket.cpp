@@ -393,11 +393,13 @@ bool AuthSocket::_HandleLogonChallenge()
 
                 if (!locked)
                 {
+                    //set expired bans to inactive
+                    dbRealmServer.Execute("UPDATE `account_banned` SET `active` = 0 WHERE `unbandate`<=UNIX_TIMESTAMP() AND `unbandate`<>`bandate`");
                     ///- If the account is banned, reject the logon attempt
-                    QueryResult *banresult = dbRealmServer.PQuery("SELECT `bandate`,`unbandate` FROM `account_banned` WHERE `id` = %u AND `active` = 1 AND (`bandate`=`unbandate` OR `unbandate`>UNIX_TIMESTAMP())", (*result)[1].GetUInt32());
+                    QueryResult *banresult = dbRealmServer.PQuery("SELECT `bandate`,`unbandate` FROM `account_banned` WHERE `id` = %u AND `active` = 1", (*result)[1].GetUInt32());
                     if(banresult)
                     {
-                        if((*banresult)[0].GetUInt32()==(*banresult)[1].GetUInt32())
+                        if((*banresult)[0].GetUInt64() == (*banresult)[1].GetUInt64())
                         {
                             pkt << (uint8) REALM_AUTH_ACCOUNT_BANNED;
                             sLog.outBasic("[AuthChallenge] Banned account %s tries to login!",_login.c_str ());

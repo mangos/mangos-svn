@@ -3365,7 +3365,7 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
         //look the accountid up
         uint32 accountid;
         std::string accountname;
-        if(type=="account")
+        if(type == "account")
         {
             QueryResult *result = loginDatabase.PQuery("SELECT `id`, `username` FROM `account` WHERE `username` = '%s' ",nameOrIP.c_str());
             if (!result)
@@ -3378,10 +3378,10 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
             accountname = fields[1].GetCppString();
             delete result;
         }
-        else if(type=="character")
+        else if(type == "character")
         {
             normalizePlayerName(nameOrIP);
-            QueryResult *result = sDatabase.PQuery("SELECT `id`,`username` FROM realmd.account WHERE id in (SELECT account FROM mangos.`character` WHERE name='%s')",nameOrIP.c_str()); 
+            QueryResult *result = sDatabase.PQuery("SELECT account FROM `character` WHERE name = '%s')", nameOrIP.c_str());
             if (!result)
             {
                 PSendSysMessage(LANG_BANINFO_NOCHARACTER);
@@ -3389,12 +3389,19 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
             }
             fields = result->Fetch();
             accountid = fields[0].GetUInt32();
-            accountname = fields[1].GetCppString();
+            delete result;
+            result = loginDatabase.PQuery("SELECT `username` FROM `account` WHERE `id` = '%u'", accountid);
+            if (!result)
+            {
+                PSendSysMessage(LANG_BANINFO_NOCHARACTER);
+                return true;
+            }
+            fields = result->Fetch();
+            accountname = fields[0].GetCppString();
             delete result;
         }
         else
             return false;
-
 
         QueryResult *result = loginDatabase.PQuery("SELECT FROM_UNIXTIME(`bandate`), `unbandate`-`bandate`, `active`, `unbandate`-UNIX_TIMESTAMP(),`banreason`,`bannedby` FROM `account_banned` WHERE `id` = '%u' ORDER BY `bandate` ASC",accountid);
         if(!result)
@@ -3406,12 +3413,12 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
         do{
             fields = result->Fetch();
             bool active = false;
-            if(fields[2].GetBool() && (fields[1].GetInt32()==(int32)0 ||fields[3].GetInt32()>=(int32)0) )
-                active=true;
-            bool permanent = (fields[1].GetInt32()==(int32)0);
-            std::string bantime = permanent?LANG_BANINFO_INFINITE:secsToTimeString(fields[1].GetUInt32(), true);
+            if(fields[2].GetBool() && (fields[1].GetUInt64() == (uint64)0 ||fields[3].GetUInt64() >= (uint64)0) )
+                active = true;
+            bool permanent = (fields[1].GetUInt64() == (uint64)0);
+            std::string bantime = permanent?LANG_BANINFO_INFINITE:secsToTimeString(fields[1].GetUInt64(), true);
             PSendSysMessage(LANG_BANINFO_HISTORYENTRY,
-                    fields[0].GetString(),bantime.c_str(),active?LANG_BANINFO_YES:LANG_BANINFO_NO,fields[4].GetString(),fields[5].GetString());
+                    fields[0].GetString(), bantime.c_str(), active ? LANG_BANINFO_YES:LANG_BANINFO_NO, fields[4].GetString(), fields[5].GetString());
         }while (result->NextRow());
 
         delete result;
@@ -3419,7 +3426,6 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
     }
     else
     {
-        loginDatabase.Execute("DELETE FROM `ip_banned` WHERE `unbandate`<=UNIX_TIMESTAMP() AND `unbandate`<>`bandate`");
         QueryResult *result = loginDatabase.PQuery("SELECT `ip`, FROM_UNIXTIME(`bandate`), FROM_UNIXTIME(`unbandate`), `unbandate`-UNIX_TIMESTAMP(), `banreason`,`bannedby`,`unbandate`-`bandate` FROM `ip_banned` WHERE `ip` = '%s'",nameOrIP.c_str());
         if(!result)
         {
@@ -3427,10 +3433,10 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
             return true;
         }
         fields = result->Fetch();
-        bool permanent = (fields[6].GetInt32()==(int32)0);
+        bool permanent = (fields[6].GetUInt64()==(uint64)0);
         PSendSysMessage(LANG_BANINFO_IPENTRY,
-                fields[0].GetString(),fields[1].GetString(),permanent?LANG_BANINFO_NEVER:fields[2].GetString(),
-                                permanent?LANG_BANINFO_INFINITE:secsToTimeString(fields[3].GetUInt32(), true).c_str(),fields[4].GetString(),fields[5].GetString());
+                fields[0].GetString(), fields[1].GetString(), permanent ? LANG_BANINFO_NEVER:fields[2].GetString(),
+                permanent ? LANG_BANINFO_INFINITE:secsToTimeString(fields[3].GetUInt64(), true).c_str(), fields[4].GetString(), fields[5].GetString());
         delete result;
         return true;
     }
@@ -3448,12 +3454,12 @@ bool ChatHandler::HandleBanListCommand(const char* args)
        return false;
     std::string Filter = cFilter;
     std::string Type = cType;
-    sDatabase.escape_string(Filter);
+    loginDatabase.escape_string(Filter);
 
 
-    QueryResult* result = NULL;
+    QueryResult* result  = NULL;
     Field *fields = NULL;
-    if(Type=="ip")
+    if(Type == "ip")
     {
         result = loginDatabase.PQuery("SELECT `ip` FROM `ip_banned` WHERE `ip` LIKE \"%%%s%%\"",Filter.c_str());
         if(!result)
@@ -3472,18 +3478,19 @@ bool ChatHandler::HandleBanListCommand(const char* args)
         return true;
     }
     //lookup accountid
-    if(Type=="account")
+    if(Type == "account")
     {
-        result = loginDatabase.PQuery("SELECT `id`, `username` FROM `account` WHERE `username` LIKE \"%%%s%%\" ",Filter.c_str());
+        result = loginDatabase.PQuery("SELECT `id` FROM `account` WHERE `username` LIKE \"%%%s%%\" ",Filter.c_str());
         if (!result)
         {
             PSendSysMessage(LANG_BANLIST_NOACCOUNT);
             return true;
         }
+        //do not delete result
     }
-    else if(Type=="character")
+    else if(Type == "character")
     {
-        result = sDatabase.PQuery("SELECT `id`,`username` FROM realmd.account WHERE id in (SELECT account FROM mangos.`character` WHERE name LIKE \"%%%s%%\")",Filter.c_str()); 
+        result = sDatabase.PQuery("SELECT account FROM `character` WHERE name LIKE \"%%%s%%\" ",Filter.c_str()); 
         if (!result)
         {
             PSendSysMessage(LANG_BANLIST_NOCHARACTER);
@@ -3498,7 +3505,7 @@ bool ChatHandler::HandleBanListCommand(const char* args)
     {
         fields = result->Fetch();
         uint32 accountid = fields[0].GetUInt32();
-        QueryResult* banresult = loginDatabase.PQuery("SELECT * FROM `account_banned` WHERE `id`='%u'",accountid);
+        QueryResult* banresult = loginDatabase.PQuery("SELECT * FROM `account_banned` WHERE `id`='%u' AND active = '1'",accountid);
         if(banresult)
         {
             PSendSysMessage("%s",fields[1].GetString());

@@ -299,7 +299,7 @@
 #define LANG_NO_WEATHER                  "Weather can't be changed for this zone."
 #define LANG_WEATHER_DISABLED            "Weather system disabled at server."
 
-#define LANG_BAN_YOUBANNED               "%s is banned for %s for %s."
+#define LANG_BAN_YOUBANNED               "%s is banned for %s. Reason: %s."
 #define LANG_BAN_YOUPERMBANNED           "%s is banned permanently for %s."
 #define LANG_BAN_NOTFOUND                "%s %s not found"
 
