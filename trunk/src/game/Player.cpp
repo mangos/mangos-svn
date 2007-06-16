@@ -11195,7 +11195,7 @@ bool Player::LoadFromDB( uint32 guid )
     //clear mana draining field
     if (GetUInt32Value(UNIT_FIELD_POWER_COST_MODIFIER) != 0)
     {
-        sLog.outError("Removing power cost draining/increasing for player : %u name : %s", GetGUIDLow(), m_name);
+        sLog.outError("Removing power cost draining/increasing for player : %u name : %s", GetGUIDLow(), m_name.c_str());
         SetUInt32Value(UNIT_FIELD_POWER_COST_MODIFIER,0);
     }
 
