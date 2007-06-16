@@ -2068,6 +2068,13 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
     SetMaxPower(POWER_FOCUS, 0 );
     SetMaxPower(POWER_HAPPINESS, 0 );
 
+    //clear power draining field
+    if (GetUInt32Value(UNIT_FIELD_POWER_COST_MODIFIER) != 0)
+    {
+        sLog.outError("Removing power cost draining/increasing for player : %u name : %s", GetGUIDLow(), m_name.c_str());
+        SetUInt32Value(UNIT_FIELD_POWER_COST_MODIFIER,0);
+    }
+
     SetMaxHealth(info.health);
 
     // cleanup mounted state (it will set correctly at aura loading if player saved at mount.
@@ -11191,13 +11198,6 @@ bool Player::LoadFromDB( uint32 guid )
     SetUInt64Value(UNIT_FIELD_CHARMEDBY,0);
     SetUInt64Value(UNIT_FIELD_SUMMONEDBY,0);
     SetUInt64Value(UNIT_FIELD_CREATEDBY,0);
-
-    //clear mana draining field
-    if (GetUInt32Value(UNIT_FIELD_POWER_COST_MODIFIER) != 0)
-    {
-        sLog.outError("Removing power cost draining/increasing for player : %u name : %s", GetGUIDLow(), m_name.c_str());
-        SetUInt32Value(UNIT_FIELD_POWER_COST_MODIFIER,0);
-    }
 
     // reset skill modifiers and set correct unlearn flags
     for (uint32 i = 0; i < PLAYER_MAX_SKILLS; i++)
