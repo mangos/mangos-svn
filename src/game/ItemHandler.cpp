@@ -316,8 +316,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         data << pProto->LockID;
         data << pProto->Material;
         data << pProto->Sheath;
-        data << pProto->Extra;
-        data << pProto->Unk4; // new 2.0.3
+        data << pProto->RandomProperty;
         data << pProto->Block;
         data << pProto->ItemSet;
         data << pProto->MaxDurability;

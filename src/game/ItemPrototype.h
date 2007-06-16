@@ -452,8 +452,7 @@ struct ItemPrototype
     uint32 LockID;
     uint32 Material;
     uint32 Sheath;
-    uint32 Extra;
-    uint32 Unk4; // was added in 2.0.3...
+    uint64 RandomProperty;
     uint32 Block;
     uint32 ItemSet;
     uint32 MaxDurability;

@@ -3191,31 +3191,6 @@ bool ChatHandler::HandleIdleShutDownCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleOutOfRange(const char* args)
-{
-    if(!*args)
-        return false;
-
-    char* plowguid = strtok((char*)args, " ");
-
-    if(!plowguid)
-        return false;
-
-    uint32 lowguid = (uint32)atoi(plowguid);
-
-    GameObject* obj = ObjectAccessor::Instance().GetGameObject(*m_session->GetPlayer(), MAKE_GUID(lowguid, HIGHGUID_GAMEOBJECT));
-
-    if(!obj)
-    {
-        PSendSysMessage(LANG_GAMEOBJECT_NOT_EXIST, lowguid);
-        return true;
-    }
-
-    m_session->GetPlayer()->SendOutOfRange(obj);
-
-    return true;
-}
-
 bool ChatHandler::HandleAddQuest(const char* args)
 {
     Player* player = getSelectedPlayer();

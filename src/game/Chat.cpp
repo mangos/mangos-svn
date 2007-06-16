@@ -298,7 +298,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "setvalue",    3, &ChatHandler::HandleSetValue,                "",   NULL },
         { "getvalue",    3, &ChatHandler::HandleGetValue,                "",   NULL },
         { "Mod32Value",  3, &ChatHandler::HandleMod32Value,              "",   NULL },
-        { "oor",         3, &ChatHandler::HandleOutOfRange,              "",   NULL },
 
         { NULL,          0, NULL,                                        "",   NULL }
     };

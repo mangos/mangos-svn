@@ -709,7 +709,6 @@ void Spell::EffectDummy(uint32 i)
         {
             WorldPacket data(SMSG_SPIRIT_HEALER_CONFIRM, 8);
             data << unitTarget->GetGUID();
-                                                            // for this spell we have wrong unitTarget, but correct m_targets.getUnitTarget()...
             ((Player*)m_originalCaster)->GetSession()->SendPacket( &data );
         }
     }
@@ -1163,8 +1162,7 @@ void Spell::DoCreateItem(uint32 i, uint32 itemtype)
         return;
     }
 
-    // TODO: Maybe pProto->Extra store filter for possible random properties
-    uint32 randomPropId = pProto->Extra ? Item::GenerateItemRandomPropertyId(newitemid) : 0;
+    uint32 randomPropId = pProto->RandomProperty ? Item::GenerateItemRandomPropertyId(newitemid) : 0;
 
     Item *pItem = player->StoreNewItem( dest, newitemid, num_to_add, true,randomPropId);
 
@@ -2432,6 +2430,9 @@ void Spell::EffectScriptEffect(uint32 i)
         }
         DoCreateItem( i, itemtype );
     }
+
+    if(!unitTarget)
+        return;
 
     sLog.outDebug("Spell ScriptStart spellid %u in EffectScriptEffect ", m_spellInfo->Id);
     sWorld.ScriptsStart(sSpellScripts, m_spellInfo->Id, m_caster, unitTarget);
