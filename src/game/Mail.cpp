@@ -357,8 +357,11 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
         pl->m_mailsUpdated = true;
         pl->RemoveMItem(it->GetGUIDLow());
         Item* it2 = pl->StoreItem( dest, it, true);
+        it->SetOwnerGUID(pl->GetGUID());
         if(it2 == it)                                       // only set if not merged to existed stack (*it can be deleted already but we can compare pointers any way)
             it->SetState(ITEM_NEW, pl);
+        else
+            it->SetState(ITEM_CHANGED, pl);
         pl->ItemAddedQuestCheck(it2->GetEntry(),it2->GetCount());
 
         sDatabase.BeginTransaction();
@@ -366,9 +369,9 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
         pl->_SaveMail();
         sDatabase.CommitTransaction();
 
-        pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, 0);
+        pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_OK);
     }
-    else                                                    //works great
+    else
         pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_ERR_BAG_FULL, msg);
 }
 

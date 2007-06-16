@@ -576,7 +576,7 @@ enum BuyBackSlots
     BUYBACK_SLOT_END            = 86
 };
 
-enum KeyRingSLots
+enum KeyRingSlots
 {
     KEYRING_SLOT_START          = 86,
     KEYRING_SLOT_END            = 118
