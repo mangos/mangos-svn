@@ -285,17 +285,13 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid)
         return false;
     }
 
+    delete result;
+
     if(owner_guid != 0 && GetOwnerGUID()!=owner_guid)
     {
         sLog.outError("Item::LoadFromDB: item: %u have in DB owner guid: %u. Updated to correct: %u",GetGUIDLow(),GUID_LOPART(GetOwnerGUID()), GUID_LOPART(owner_guid));
         SetOwnerGUID(owner_guid);
     }
-
-    // set random property enchantings base at randomPropertyId for 
-    // synchronization bonuses with random property description in case desynchronization.
-    SetItemRandomProperties(GetItemRandomPropertyId());
-
-    delete result;
 
     return true;
 }
