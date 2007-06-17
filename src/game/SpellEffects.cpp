@@ -309,16 +309,8 @@ void Spell::EffectDummy(uint32 i)
     // Gift of Life (warrior bwl trinket)
     if(m_spellInfo->Id == 23725)
     {
-        int32 health_mod = int32(m_caster->GetMaxHealth()*0.15);
-
-        SpellEntry const *OriginalHealthModSpell = sSpellStore.LookupEntry(23782);
-        SpellEntry CustomHealthModSpell = *OriginalHealthModSpell;
-        SpellEntry const *OriginalHealingSpell = sSpellStore.LookupEntry(23783);
-        SpellEntry CustomHealingSpell = *OriginalHealingSpell;
-        CustomHealthModSpell.EffectBasePoints[0] = health_mod-1;
-        CustomHealingSpell.EffectBasePoints[0] = health_mod-1;
-        m_caster->CastSpell(m_caster,&CustomHealthModSpell,true,NULL);
-        m_caster->CastSpell(m_caster,&CustomHealingSpell,true,NULL);
+        m_caster->CastSpell(m_caster,23782,true);
+        m_caster->CastSpell(m_caster,23783,true);
         return;
     }
 
