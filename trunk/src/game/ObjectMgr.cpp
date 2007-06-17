@@ -3525,13 +3525,8 @@ bool ObjectMgr::WritePlayerDump(std::string file, uint32 guid)
     if (!fout) { sLog.outError("Failed to open file!\r\n"); return false; }
 
     for(int i = 0; i < NUM_TBLS; i++)
-    {
-        if(!DumpPlayerTable(fout, guid, tbls[i].name, tbls[i].name, tbls[i].type))
-        {
-            fclose(fout);
-            return false;
-        }
-    }
+        DumpPlayerTable(fout, guid, tbls[i].name, tbls[i].name, tbls[i].type);
+
     // TODO: Add pets/instance/group/gifts..
     // TODO: Add a dump level option to skip some non-important tables
     
