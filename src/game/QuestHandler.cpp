@@ -128,7 +128,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 
         if( _player->CanAddQuest( qInfo, true ) )
         {
-            _player->AddQuest( qInfo );
+	    _player->AddQuest( qInfo, pObject );
 
             if ( _player->CanCompleteQuest( quest ) )
                 _player->CompleteQuest( quest );

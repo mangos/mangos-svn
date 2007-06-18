@@ -629,7 +629,9 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
     data << (uint16) 0x00FF;
     //ending packets
     data << (uint32) 0;
-    data << (uint32) 4278190080;                //0xFF000000
+    // it should not be decimal constant ?!
+    //data << (uint32) 4278190080;                //0xFF000000
+    data << (uint32) 0xFF000000;                //0xFF000000
     SendPacket(&data);
 }
 

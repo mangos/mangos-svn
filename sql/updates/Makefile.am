@@ -338,6 +338,7 @@ pkgdata_DATA = \
 	3874_spell_scripts.sql \
 	3875_item_template.sql \
 	3876_character_ticket.sql \
+	3884_quest_scripts.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -654,4 +655,5 @@ EXTRA_DIST = \
 	3874_spell_scripts.sql \
 	3875_item_template.sql \
 	3876_character_ticket.sql \
+	3884_quest_scripts.sql \
 	README
