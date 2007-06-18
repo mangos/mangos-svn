@@ -132,7 +132,7 @@ class MANGOS_DLL_DECL FlightPathMovementGenerator : public PathMovementGenerator
             {
                 float x, y, z;
                 i_destinationHolder.GetLocationNow(x, y, z);
-                i_player.SetPosition(x, y, z, true);
+                i_player.SetPosition(x, y, z, i_player.GetOrientation());
                 i_player.FlightComplete();
                 return true;
             }

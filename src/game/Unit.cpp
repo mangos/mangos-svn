@@ -448,9 +448,12 @@ SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
         // self or owner of pet
         if(player)
         {
-            player->CalculateHonor(pVictim);
+            if(player!=pVictim)
+            {
+                player->CalculateHonor(pVictim);
 
-            player->CalculateReputation(pVictim);
+                player->CalculateReputation(pVictim);
+            }
 
             if(!PvP)
             {
@@ -2124,7 +2127,7 @@ void Unit::InterruptSpell()
     }
 }
 
-bool Unit::isInFront(Unit const* target, float radius)
+bool Unit::isInFront(Unit const* target, float radius) const
 {
     return IsWithinDistInMap(target, radius) && HasInArc( M_PI, target );
 }
@@ -4931,17 +4934,17 @@ int32 Unit::ModifyPower(Powers power, int32 dVal)
     return gain;
 }
 
-bool Unit::isVisibleFor(Unit* u, bool detect)
+bool Unit::isVisibleFor(Unit const* u, bool detect) const
 {
     if(!u)
         return false;
 
-    // Visible units, always are visible for all pjs
-    if (m_Visibility == VISIBILITY_ON)
-        return true;
-
     // Always can see self
     if (u==this)
+        return true;
+
+    // Visible units, always are visible for all pjs
+    if (m_Visibility == VISIBILITY_ON)
         return true;
 
     // GMs are visible for higher gms (or players are visible for gms)
@@ -4959,7 +4962,7 @@ bool Unit::isVisibleFor(Unit* u, bool detect)
     // Stealth not hostile units, not visibles (except Player-with-Player case)
     if (!u->IsHostileTo(this))
     {
-        // player autodetect other player with stealth only if he in same group or raid or same team (raid/team case dependent from conf setting)
+        // player auto-detect other player with stealth only if he in same group or raid or same team (raid/team case dependent from conf setting)
         if(GetTypeId()==TYPEID_PLAYER && u->GetTypeId()==TYPEID_PLAYER)
         {
             if(((Player*)this)->IsGroupVisibleFor(((Player*)u)))

@@ -810,15 +810,15 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         float m_threatModifier[MAX_SPELL_SCHOOL];
         float m_modAttackSpeedPct[3];
 
-        bool isInFront(Unit const* target,float distance);
+        bool isInFront(Unit const* target,float distance) const;
         void SetInFront(Unit const* target);
 
         // Invisibility and detection system
-        UnitVisibility GetVisibility() {return m_Visibility;}
-        UnitVisibilityUpdate GetUpdateVisibility() { return m_UpdateVisibility; }
+        UnitVisibility GetVisibility() const { return m_Visibility; }
+        UnitVisibilityUpdate GetUpdateVisibility() const { return m_UpdateVisibility; }
         void SetVisibility(UnitVisibility x);
         void SetUpdateVisibility(UnitVisibilityUpdate x) { m_UpdateVisibility = x; }
-        bool isVisibleFor(Unit* u, bool detect);
+        bool isVisibleFor(Unit const* u, bool detect) const;
 
         bool m_silenced;
         bool waterbreath;

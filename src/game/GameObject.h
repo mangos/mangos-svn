@@ -136,20 +136,20 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
             m_respawnDelayTime = respawn > 0 ? respawn : 0;
         }
         void Respawn() { if(m_respawnTime > 0) m_respawnTime = time(NULL); }
-        bool isSpawned() { return m_respawnDelayTime == 0 || m_respawnTime > 0 && GetOwnerGUID() || m_respawnTime == 0 && !GetOwnerGUID(); }
+        bool isSpawned() const { return m_respawnDelayTime == 0 || m_respawnTime > 0 && GetOwnerGUID() || m_respawnTime == 0 && !GetOwnerGUID(); }
         void Refresh();
         void Delete();
         void SetSpellId(uint32 id) { m_spellId = id;}
-        uint32 GetSpellId() { return m_spellId;}
+        uint32 GetSpellId() const { return m_spellId;}
         void getFishLoot(Loot *loot);
-        uint32 GetGoType() { return GetUInt32Value(GAMEOBJECT_TYPE_ID); }
+        uint32 GetGoType() const { return GetUInt32Value(GAMEOBJECT_TYPE_ID); }
 
-        LootState getLootState() { return m_lootState; }
+        LootState getLootState() const { return m_lootState; }
 
         void AddToSkillupList(uint32 PlayerGuidLow) { m_SkillupList.push_back(PlayerGuidLow); }
-        bool IsInSkillupList(uint32 PlayerGuidLow)
+        bool IsInSkillupList(uint32 PlayerGuidLow) const
         {
-            for (std::list<uint32>::iterator i = m_SkillupList.begin(); i != m_SkillupList.end(); ++i)
+            for (std::list<uint32>::const_iterator i = m_SkillupList.begin(); i != m_SkillupList.end(); ++i)
                 if (*i == PlayerGuidLow) return true;
             return false;
         }

@@ -29,6 +29,11 @@ UpdateData::UpdateData() : m_blockCount(0)
 {
 }
 
+void UpdateData::AddOutOfRangeGUID(std::set<uint64>& guids)
+{
+    m_outOfRangeGUIDs.insert(guids.begin(),guids.end());
+}
+
 void UpdateData::AddOutOfRangeGUID(const uint64 &guid)
 {
     m_outOfRangeGUIDs.insert(guid);
