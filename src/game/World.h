@@ -201,7 +201,11 @@ class World
         uint32 GetUptime() const { return uint32(m_gameTime - m_startTime); }
 
         /// Get the maximum skill level a player can reach
-        uint16 GetConfigMaxSkillValue() const { return getConfig(CONFIG_MAX_PLAYER_LEVEL)*5; }
+        uint16 GetConfigMaxSkillValue() const
+        {
+            uint32 lvl = getConfig(CONFIG_MAX_PLAYER_LEVEL);
+            return lvl > 60 ? 300 + ((lvl - 60) * 75) / 10 : lvl*5;
+        }
 
         void SetInitialWorldSettings();
 
