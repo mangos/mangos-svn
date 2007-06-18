@@ -662,27 +662,7 @@ void World::Update(time_t diff)
     {
         m_timers[WUPDATE_SESSIONS].Reset();
 
-        ///- Delete kicked sessions at add new session
-        for (std::set<WorldSession*>::iterator itr = m_kicked_sessions.begin(); itr != m_kicked_sessions.end(); ++itr)
-            delete *itr;
-        m_kicked_sessions.clear();
-
-        ///- Then send an update signal to remaining ones
-        for (SessionMap::iterator itr = m_sessions.begin(), next; itr != m_sessions.end(); itr = next)
-        {
-            next = itr;
-            next++;
-
-            if(!itr->second)
-                continue;
-
-            ///- and remove not active sessions from the list
-            if(!itr->second->Update(diff))  // As interval = 0
-            {
-                delete itr->second;
-                m_sessions.erase(itr);
-            }
-        }
+        UpdateSessions(diff);
     }
 
     /// <li> Handle weather updates when the timer has passed
@@ -1202,4 +1182,29 @@ void World::SendServerMessage(uint32 type, const char *text, Player* player)
         player->GetSession()->SendPacket(&data);
     else
         SendGlobalMessage( &data );
+}
+
+void World::UpdateSessions( time_t diff )
+{
+    ///- Delete kicked sessions at add new session
+    for (std::set<WorldSession*>::iterator itr = m_kicked_sessions.begin(); itr != m_kicked_sessions.end(); ++itr)
+        delete *itr;
+    m_kicked_sessions.clear();
+
+    ///- Then send an update signal to remaining ones
+    for (SessionMap::iterator itr = m_sessions.begin(), next; itr != m_sessions.end(); itr = next)
+    {
+        next = itr;
+        next++;
+
+        if(!itr->second)
+            continue;
+
+        ///- and remove not active sessions from the list
+        if(!itr->second->Update(diff))  // As interval = 0
+        {
+            delete itr->second;
+            m_sessions.erase(itr);
+        }
+    }
 }

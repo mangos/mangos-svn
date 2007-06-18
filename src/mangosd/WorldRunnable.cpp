@@ -61,6 +61,7 @@ void WorldRunnable::run()
     }
 
     sWorld.KickAll();                                       // save and kick all players
+    sWorld.UpdateSessions( 1 );                             // real players unload required UpdateSessions call
 
     MapManager::Instance().UnloadAll();                     // unload all grids (including locked in memory)
 
