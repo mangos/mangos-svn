@@ -109,8 +109,9 @@ Quest::Quest(Field * questRecord)
     for (int i = 0; i < QUEST_EMOTE_COUNT; ++i)
         OfferRewardEmote[i] = questRecord[104+i].GetInt32();
 
-    QuestCompleteScript = questRecord[108].GetUInt32();
-    Repeatable = questRecord[109].GetUInt32();
+    QuestStartScript = questRecord[108].GetUInt32();
+    QuestCompleteScript = questRecord[109].GetUInt32();
+    Repeatable = questRecord[110].GetUInt32();
 
     m_reqitemscount = 0;
     m_reqCreatureOrGOcount = 0;

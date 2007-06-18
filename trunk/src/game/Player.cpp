@@ -9737,6 +9737,73 @@ bool Player::CanAddQuest( Quest *pQuest, bool msg )
     return false;
 }
 
+void Player::AddQuest( Quest *pQuest, Object *questGiver )
+{
+    if( pQuest )
+    {
+	uint16 log_slot = GetQuestSlot( 0 );
+	assert(log_slot);        
+
+	uint32 quest_id = pQuest->GetQuestId();
+
+	// check for repeatable quests status
+	QuestUpdateState uState;
+	if (mQuestStatus.find(quest_id)==mQuestStatus.end())
+	{
+	    uState = QUEST_NEW;
+	    mQuestStatus[quest_id].m_rewarded = false;
+	}
+	else
+	{
+	    if (mQuestStatus[quest_id].uState != QUEST_NEW)
+		uState = QUEST_CHANGED;
+	    else
+		uState = QUEST_NEW;
+	}
+
+	mQuestStatus[quest_id].m_quest = pQuest;
+	mQuestStatus[quest_id].m_status = QUEST_STATUS_INCOMPLETE;
+	mQuestStatus[quest_id].m_explored = false;
+
+	mQuestStatus[quest_id].uState = uState;             // mark quest as new or changed
+
+	if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
+	{
+	    for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
+		mQuestStatus[quest_id].m_itemcount[i] = 0;
+	}
+	if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL_OR_CAST ) )
+	{
+	    for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
+		mQuestStatus[quest_id].m_creatureOrGOcount[i] = 0;
+	}
+
+	GiveQuestSourceItem( quest_id );
+	AdjustQuestReqItemCount( quest_id );
+
+	SetUInt32Value(log_slot + 0, quest_id);
+	SetUInt32Value(log_slot + 1, 0);
+
+	if( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) )
+	{
+	    uint32 limittime = pQuest->GetLimitTime();
+	    AddTimedQuest( quest_id );
+	    mQuestStatus[quest_id].m_timer = limittime * 1000;
+	    uint32 qtime = static_cast<uint32>(time(NULL)) + limittime;
+	    SetUInt32Value( log_slot + 2, qtime );
+	}
+	else
+	{
+	    mQuestStatus[quest_id].m_timer = 0;
+	    SetUInt32Value( log_slot + 2, 0 );
+	}
+
+	//starting initial quest script
+	if(pQuest->GetQuestStartScript()!=0)                    
+	    sWorld.ScriptsStart(sIScripts, pQuest->GetQuestStartScript(), questGiver, this);
+	}
+}
+
 bool Player::CanCompleteQuest( uint32 quest_id )
 {
     if( quest_id )

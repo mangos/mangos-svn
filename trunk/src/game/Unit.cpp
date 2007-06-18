@@ -192,7 +192,7 @@ void Unit::SendMoveToPacket(float x, float y, float z, bool run, uint32 transitT
         if(dist<0)
             dist = 0;
         else
-            dist = ::sqrt(dist);
+            dist = sqrt(dist);
         double speed = GetSpeed(run ? MOVE_RUN : MOVE_WALK);
         if(speed<=0)
             speed = 2.5f;
@@ -4290,13 +4290,13 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         for(AuraList::iterator i = mDamageDonebySpi.begin();i != mDamageDonebySpi.end(); ++i)
         {
             float bonus = GetStat(STAT_SPIRIT) * ((*i)->GetModifier()->m_amount) / 100;
-            DoneAdvertisedBenefit += bonus ;
+            DoneAdvertisedBenefit += uint32(bonus);
         }
         AuraList& mDamageDonebyInt = this->GetAurasByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_INTELLECT);
         for(AuraList::iterator i = mDamageDonebyInt.begin();i != mDamageDonebyInt.end(); ++i)
         {
             float bonus = GetStat(STAT_INTELLECT) * ((*i)->GetModifier()->m_amount) / 100;
-            DoneAdvertisedBenefit += bonus ;
+            DoneAdvertisedBenefit += uint32(bonus);
         }
     }
 
@@ -4525,14 +4525,14 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
         for(AuraList::iterator i = mHealingDonebySpi.begin();i != mHealingDonebySpi.end(); ++i)
         {
             float bonus = GetStat(STAT_SPIRIT) * ((*i)->GetModifier()->m_amount) / 100;
-            AdvertisedBenefit += bonus ;
+            AdvertisedBenefit += uint32(bonus);
         }
         // flat
         AuraList& mHealingDonebyInt = GetAurasByType(SPELL_AURA_MOD_SPELL_HEALING_OF_INTELLECT);
         for(AuraList::iterator i = mHealingDonebyInt.begin();i != mHealingDonebyInt.end(); ++i)
         {
             float bonus = GetStat(STAT_INTELLECT) * ((*i)->GetModifier()->m_amount) / 100;
-            AdvertisedBenefit += bonus ;
+            AdvertisedBenefit += uint32(bonus);
         }
     }
 

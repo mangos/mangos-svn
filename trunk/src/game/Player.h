@@ -838,6 +838,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool CanRewardQuest( Quest *pQuest, bool msg );
         bool CanRewardQuest( Quest *pQuest, uint32 reward, bool msg );
         void AddQuest( Quest *pQuest );
+	void AddQuest( Quest *pQuest, Object *questGiver );
         void CompleteQuest( uint32 quest_id );
         void IncompleteQuest( uint32 quest_id );
         void RewardQuest( Quest *pQuest, uint32 reward, Object* questGiver );
