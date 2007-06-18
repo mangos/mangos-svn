@@ -358,7 +358,7 @@ void CliBanList(char*,pPrintf zprintf)
 {
     ///- Get the list of banned accounts and display them
     Field *fields;
-    QueryResult *result = loginDatabase.Query("SELECT `id`,`username` FROM `account` WHERE `id` IN (SELECT `id` FROM `account_banned` WHERE `active` = 1");
+    QueryResult *result = loginDatabase.Query("SELECT `id`,`username` FROM `account` WHERE `id` IN (SELECT `id` FROM `account_banned` WHERE `active` = 1)");
     if(result)
     {
         zprintf("Actual Banned Accounts:\r\n");
