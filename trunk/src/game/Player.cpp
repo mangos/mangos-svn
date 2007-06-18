@@ -1288,18 +1288,10 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     if(!InBattleGround() && mEntry->map_type == MAP_BATTLEGROUND && !GetSession()->GetSecurity())
         return;
 
-    QueryResult *result = loginDatabase.PQuery("SELECT `tbc` FROM `account` WHERE `id`='%u'", GetSession()->GetAccountId());
-
-    if(!result)
-        return;                                             // unknown client or error
-
-    Field *fields = result->Fetch();
-
     uint32 not_tbc_map = 0x10;                              // if any problems, then check 0x80000 also...
     // with 0x80000 we can teleport to Kharazan with normal client
     // with 0x10 we can't teleport to Kharazan with normal client
-    bool tbc = (fields[0].GetUInt8()) && sWorld.getConfig(CONFIG_EXPANSION);
-    delete result;
+    bool tbc = GetSession()->IsTBC() && sWorld.getConfig(CONFIG_EXPANSION);
 
     if(!tbc && (mEntry->map_flag & not_tbc_map) == 0)   // normal client and TBC map
     {
@@ -2059,6 +2051,13 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
         SetResistanceBuffMods(SpellSchools(i), false, 0);
     }
 
+    //clear mana draining field
+    if (GetUInt32Value(UNIT_FIELD_POWER_COST_MODIFIER) != 0)
+    {
+        sLog.outError("Removing power cost draining/increasing for player : %u name : %s", GetGUIDLow(), m_name.c_str());
+        SetUInt32Value(UNIT_FIELD_POWER_COST_MODIFIER,0);
+    }
+
     InitDataForForm();
 
     // save new stats
@@ -2067,13 +2066,6 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
     SetMaxPower(POWER_ENERGY,100 );
     SetMaxPower(POWER_FOCUS, 0 );
     SetMaxPower(POWER_HAPPINESS, 0 );
-
-    //clear power draining field
-    if (GetUInt32Value(UNIT_FIELD_POWER_COST_MODIFIER) != 0)
-    {
-        sLog.outError("Removing power cost draining/increasing for player : %u name : %s", GetGUIDLow(), m_name.c_str());
-        SetUInt32Value(UNIT_FIELD_POWER_COST_MODIFIER,0);
-    }
 
     SetMaxHealth(info.health);
 
@@ -4840,7 +4832,7 @@ void Player::UpdateHonorFields()
 //How much honor Player gains from uVictim
 void Player::CalculateHonor(Unit *uVictim)
 {
-    if(!uVictim || uVictim->GetTypeId() == TYPEID_UNIT)
+    if(!uVictim || uVictim == this || uVictim->GetTypeId() == TYPEID_UNIT)
         return;
     if(uVictim->GetAura(2479, 0))
         return;

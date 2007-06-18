@@ -384,7 +384,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     SendPacket(&packet);
 
     ///- Create a new WorldSession for the player and add it to the World
-    _session = new WorldSession(id, this,security,mutetime);
+    _session = new WorldSession(id, this,security,tbc,mutetime);
     sWorld.AddSession(_session);
 
     sLog.outDebug( "SOCKET: Client '%s' authenticated successfully.", account.c_str() );

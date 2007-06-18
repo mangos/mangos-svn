@@ -40,7 +40,7 @@ class WorldSession;
 class MANGOS_DLL_SPEC WorldSession
 {
     public:
-        WorldSession(uint32 id, WorldSocket *sock, uint32 sec, time_t mute_time);
+        WorldSession(uint32 id, WorldSocket *sock, uint32 sec, bool tbc, time_t mute_time);
         ~WorldSession();
 
         bool PlayerLoading() { return m_playerLoading; }
@@ -60,6 +60,7 @@ class MANGOS_DLL_SPEC WorldSession
         void SetSecurity(uint32 security) { _security = security; }
         void SetSocket(WorldSocket *sock);
         void SetPlayer(Player *plr) { _player = plr; }
+        bool IsTBC() const { return m_isTBC; }
 
         /// Is the user engaged in a log out process?
         bool isLogingOut() const
@@ -520,6 +521,7 @@ class MANGOS_DLL_SPEC WorldSession
 
         uint32 _security;
         uint32 _accountId;
+        bool m_isTBC;
 
         time_t _logoutTime;
         bool m_playerLoading;

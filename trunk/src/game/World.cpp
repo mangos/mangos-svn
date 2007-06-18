@@ -119,7 +119,7 @@ Player* World::FindPlayerInZone(uint32 zone)
             continue;
         if( player->IsInWorld() && player->GetZoneId() == zone )
         {
-            // Used by the weather system. We return the player to brodcast the change weather message to him and all players in the zone.
+            // Used by the weather system. We return the player to broadcast the change weather message to him and all players in the zone.
             return player;
         }
     }
@@ -162,7 +162,7 @@ void World::AddSession(WorldSession* s)
     m_sessions[s->GetAccountId()] = s;
     m_maxSessionsCount = max(m_maxSessionsCount,uint32(m_sessions.size()));
 
-    // if session already exist, prepere to it deleting at next world update
+    // if session already exist, prepare to it deleting at next world update
     if(old)
         m_kicked_sessions.insert(old);
 }
@@ -916,7 +916,7 @@ void World::ScriptsProcess()
     return;
 }
 
-/// Send a packet to all players (except self if mentionned)
+/// Send a packet to all players (except self if mentioned)
 void World::SendGlobalMessage(WorldPacket *packet, WorldSession *self, uint32 team)
 {
     SessionMap::iterator itr;
@@ -959,7 +959,7 @@ void World::SendZoneMessage(uint32 zone, WorldPacket *packet, WorldSession *self
     }
 }
 
-/// Send a System Message to all players in the zone (except self if mentionned)
+/// Send a System Message to all players in the zone (except self if mentioned)
 void World::SendZoneText(uint32 zone, const char* text, WorldSession *self, uint32 team) 
 {
     WorldPacket data;

@@ -39,8 +39,8 @@
 #include "Language.h"                                       // for CMSG_DISMOUNT handler
 
 /// WorldSession constructor
-WorldSession::WorldSession(uint32 id, WorldSocket *sock, uint32 sec, time_t mute_time) : _player(NULL), _socket(sock),
-_security(sec), _accountId(id), _logoutTime(0), m_playerLoading(false), m_playerRecentlyLogout(false),
+WorldSession::WorldSession(uint32 id, WorldSocket *sock, uint32 sec, bool tbc, time_t mute_time) : _player(NULL), _socket(sock),
+_security(sec), _accountId(id), m_isTBC(tbc), _logoutTime(0), m_playerLoading(false), m_playerRecentlyLogout(false),
 LookingForGroup_auto_join(false), LookingForGroup_auto_add(false), m_muteTime(mute_time)
 {
     FillOpcodeHandlerHashTable();
@@ -540,7 +540,12 @@ void WorldSession::LogoutPlayer(bool Save)
     {
         ///- If the player just died before logging out, make him appear as a ghost
         //FIXME: logout must be delayed in case lost connection with client in time of combat
-        if (_player->GetDeathTimer() || _player->isAttacked())
+        if (_player->GetDeathTimer())
+        {
+            _player->DeleteInHateListOf();
+            _player->BuildPlayerRepop();
+        }
+        else if (_player->isAttacked())
         {
             _player->CombatStop(true);
             _player->DeleteInHateListOf();
