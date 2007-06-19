@@ -307,6 +307,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
             player->DestroyItemCount(pItem, count, true);
         }
         else
+            // FIXME: item don't must be deleted in case not fully looted state. But this pre-request implement loot saving in DB at item save. Or checting possible.
             player->DestroyItem( (pos >> 8),(pos & 255), true);
         return;                                             // item can be looted only single player
     }
