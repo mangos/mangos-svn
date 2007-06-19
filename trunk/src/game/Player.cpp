@@ -10515,19 +10515,22 @@ QuestStatus Player::GetQuestStatus( uint32 quest_id )
 
 uint32 Player::GetReqKillOrCastCurrentCount(uint32 quest_id, uint32 entry)
 {
-    Quest * qInfo = objmgr.QuestTemplates[questid];
+    Quest * qInfo = objmgr.QuestTemplates[quest_id];
 
     if( !qInfo )
-        return;
+        return 0;
+
+    uint32 curkillcount;
+    uint32 reqkill;
 
     for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
     {
 
-        reqkill = qInfo->ReqCreatureOrGOId[j];
+    reqkill = qInfo->ReqCreatureOrGOId[j];
 
         if ( reqkill == entry )
         {
-            curkillcount = mQuestStatus[questid].m_creatureOrGOcount[j];
+            curkillcount = mQuestStatus[quest_id].m_creatureOrGOcount[j];
             return curkillcount;
         }
     }
