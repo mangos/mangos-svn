@@ -1244,9 +1244,7 @@ void Spell::update(uint32 difftime)
                         cancel();
 
                     // check for incapacitating player states
-                    if( m_caster->hasUnitState(UNIT_STAT_STUNDED) ||
-                        m_caster->hasUnitState(UNIT_STAT_ROOT) ||
-                        m_caster->hasUnitState(UNIT_STAT_CONFUSED) )
+                    if( m_caster->hasUnitState(UNIT_STAT_STUNDED | UNIT_STAT_ROOT | UNIT_STAT_CONFUSED) )
                         cancel();
 
                     // check if player has turned if flag is set
