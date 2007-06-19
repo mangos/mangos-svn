@@ -31,6 +31,9 @@
 #include "SystemConfig.h"
 #include "Config/ConfigEnv.h"
 #include "Util.h"
+#include "ObjectAccessor.h"
+
+
 
 #include "CliRunnable.h"
 
@@ -70,6 +73,8 @@ void CliUpTime(char*,pPrintf);
 void CliSetTBC(char*,pPrintf);
 void CliWritePlayerDump(char*,pPrintf);
 void CliLoadPlayerDump(char*,pPrintf);
+void CliSave(char*,pPrintf zprintf);
+void CliSetTime(char*,pPrintf zprintf);
 
 /// Table of known commands
 const CliCommand Commands[]=
@@ -96,7 +101,9 @@ const CliCommand Commands[]=
     {"shutdown", & CliShutdown,"Shutdown server with some delay"},
     {"exit", & CliExit,"Shutdown server NOW"},
     {"writepdump", &CliWritePlayerDump,"Write a player dump to a file"},
-    {"loadpdump", &CliLoadPlayerDump,"Load a player dump from a file"}
+    {"loadpdump", &CliLoadPlayerDump,"Load a player dump from a file"},
+	{"save", &CliSave,"Save all players"},
+	{"settime", &CliSetTime,"Updates the in-game time ~ requires client relog"}
 };
 /// \todo Need some pragma pack? Else explain why in a comment.
 #define CliTotalCmds sizeof(Commands)/sizeof(CliCommand)
@@ -826,3 +833,19 @@ void CliRunnable::run()
     ///- End the database thread
     sDatabase.ThreadEnd();                                  // free mySQL thread resources
 }
+
+void CliSave(char*,pPrintf zprintf)
+	{
+                                                            //<--Saves players & send message
+	ObjectAccessor::Instance().SaveAllPlayers();
+	zprintf( "All Players Saved \n" );
+	sWorld.SendWorldText("Players saved!", NULL);
+	}
+
+void CliSetTime(char*,pPrintf zprintf)
+	{
+                                                            //<--Saves players & send message
+	sWorld._UpdateGameTime();
+	zprintf( "Game time updated. \n" );
+	sWorld.SendWorldText("Game time updated.", NULL);
+	}
