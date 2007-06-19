@@ -457,6 +457,31 @@ void Spell::EffectDummy(uint32 i)
         m_caster->CastSpell(m_caster,spell_proto,true,NULL);
     }
 
+    // make a wish
+    if (m_spellInfo->Id == 33060)
+    {
+        if(m_caster->GetTypeId()!=TYPEID_PLAYER)
+            return;
+
+        uint32 spell_id = 0;
+
+        switch(urand(1,5))
+        {
+            case 1: spell_id = 33053; break;
+            case 2: spell_id = 33057; break;
+            case 3: spell_id = 33059; break;
+            case 4: spell_id = 33062; break;
+            case 5: spell_id = 33064; break;
+        }
+
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id);
+        if(!spellInfo)
+            return;
+
+        m_caster->CastSpell(m_caster,spellInfo,true,NULL);
+        return;
+    }
+
     if (m_spellInfo->Id == 16589)
     {
         if(m_caster->GetTypeId()!=TYPEID_PLAYER)
