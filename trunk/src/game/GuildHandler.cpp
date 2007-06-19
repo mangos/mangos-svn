@@ -263,11 +263,9 @@ void WorldSession::HandleGuildInfoOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildRosterOpcode(WorldPacket& recvPacket)
 {
-    Guild *guild;
-
     //sLog.outDebug("WORLD: Received CMSG_GUILD_ROSTER");
 
-    guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
+    Guild* guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
     if(!guild) return;
 
     guild->Roster(this);

@@ -5156,10 +5156,9 @@ bool Unit::CanHaveThreatList() const
 float Unit::GetThreat(uint64 guid) const
 {
     //use to get total threat of certain target in ThreatList
-    ThreatList::const_iterator i;
     float threat = 0.0f;
 
-    for ( i = m_threatList.begin(); i!= m_threatList.end(); i++)
+    for(ThreatList::const_iterator i = m_threatList.begin(); i!= m_threatList.end(); ++i)
     {
         if(i->UnitGuid==guid)
         {
@@ -5169,6 +5168,35 @@ float Unit::GetThreat(uint64 guid) const
     }
 
     return threat;
+}
+
+void Unit::ModifyThreatPercent(uint64 guid, int32 percent)
+{
+    bool isinlist = false;
+    float new_threat;
+
+    for(ThreatList::iterator i = m_threatList.begin(); i!= m_threatList.end(); ++i)
+    {
+        if(i->UnitGuid==guid)
+        {
+            new_threat = i->Threat * (percent+100)/100;
+            i->Threat = new_threat;
+            isinlist = true;
+            break;
+        }
+    }
+
+    if(!isinlist)
+        return;
+
+    if(getVictim() && (guid == getVictim()->GetGUID()))
+    {
+        SetCurrentVictimThreat(new_threat);
+        if(percent<0)
+            SortList(true);
+    }
+    else
+        SortList(true);
 }
 
 void Unit::AddThreat(Unit* pVictim, float threat, uint8 school, SpellEntry const *threatSpell)
