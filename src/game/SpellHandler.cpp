@@ -568,14 +568,14 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if ( !_player->HasSpell (spellId) )
+    // not have spell or spell passive and not casted by client
+    if ( !_player->HasSpell (spellId) || IsPassiveSpell(spellId) )
     {
         //cheater? kick? ban?
         return;
     }
 
-    Spell *spell ;
-    spell = new Spell(_player, spellInfo, false, 0);
+    Spell *spell = new Spell(_player, spellInfo, false, 0);
 
     SpellCastTargets targets;
     targets.read(&recvPacket,_player);
