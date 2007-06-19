@@ -838,7 +838,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool CanRewardQuest( Quest *pQuest, bool msg );
         bool CanRewardQuest( Quest *pQuest, uint32 reward, bool msg );
         void AddQuest( Quest *pQuest );
-	void AddQuest( Quest *pQuest, Object *questGiver );
+        void AddQuest( Quest *pQuest, Object *questGiver );
         void CompleteQuest( uint32 quest_id );
         void IncompleteQuest( uint32 quest_id );
         void RewardQuest( Quest *pQuest, uint32 reward, Object* questGiver );
@@ -860,6 +860,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool TakeQuestSourceItem( uint32 quest_id, bool msg );
         bool GetQuestRewardStatus( uint32 quest_id );
         QuestStatus GetQuestStatus( uint32 quest_id );
+        uint32 GetReqKillOrCastCurrentCount(uint32 quest_id, uint32 entry);
         void SetQuestStatus( uint32 quest_id, QuestStatus status );
         void AdjustQuestReqItemCount( uint32 questId );
         uint16 GetQuestSlot( uint32 quest_id );

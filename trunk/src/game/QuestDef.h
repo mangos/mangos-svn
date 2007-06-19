@@ -166,7 +166,7 @@ class Quest
         uint32 GetPointOpt() { return PointOpt; }
         uint32 GetIncompleteEmote() { return IncompleteEmote; }
         uint32 GetCompleteEmote() { return CompleteEmote; }
-	uint32 GetQuestStartScript() { return QuestStartScript; }
+        uint32 GetQuestStartScript() { return QuestStartScript; }
         uint32 GetQuestCompleteScript() { return QuestCompleteScript; }
         bool   IsRepeatable() { return bool(Repeatable); }
         bool   IsAutoComplete() { return Objectives.size() == 0; }
@@ -242,7 +242,7 @@ class Quest
         uint32 PointOpt;
         uint32 IncompleteEmote;
         uint32 CompleteEmote;
-	uint32 QuestStartScript;
+        uint32 QuestStartScript;
         uint32 QuestCompleteScript;
         uint32 Repeatable;
 };

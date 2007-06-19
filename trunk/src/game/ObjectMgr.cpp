@@ -1558,7 +1558,7 @@ void ObjectMgr::LoadQuests()
         "`RewRepFaction1`,`RewRepFaction2`,`RewRepFaction3`,`RewRepFaction4`,`RewRepFaction5`,`RewRepValue1`,`RewRepValue2`,`RewRepValue3`,`RewRepValue4`,`RewRepValue5`,"
     //   91              92      93         94           95       96       97         98              99              100             101
         "`RewOrReqMoney`,`RewXpOrMoney`,`RewSpell`,`PointMapId`,`PointX`,`PointY`,`PointOpt`,`DetailsEmote1`,`DetailsEmote2`,`DetailsEmote3`,`DetailsEmote4`,"
-    //   102               103             104                 105                 106                 107                 108           109		  110     
+    //   102               103             104                 105                 106                 107                 108           109          110     
         "`IncompleteEmote`,`CompleteEmote`,`OfferRewardEmote1`,`OfferRewardEmote2`,`OfferRewardEmote3`,`OfferRewardEmote4`,`StartScript`,`CompleteScript`,`Repeatable`"
         " FROM `quest_template`");
     if(result == NULL)
@@ -2150,61 +2150,61 @@ void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename, int st
 
     if( !result )
     {
-	barGoLink bar( 1 );
-	bar.step();
+        barGoLink bar( 1 );
+        bar.step();
 
-	sLog.outString( "" );
-	if(start==1)
-	{
-	    sLog.outString( ">> Loaded %u start script definitions", count );
-	}
-	else
-	{
-	    sLog.outString( ">> Loaded %u finish script definitions", count );
-	}
-	return;
-	}
+        sLog.outString( "" );
+        if(start==1)
+        {
+            sLog.outString( ">> Loaded %u start script definitions", count );
+        }
+        else
+        {
+            sLog.outString( ">> Loaded %u finish script definitions", count );
+        }
+        return;
+    }
 
-	barGoLink bar( result->GetRowCount() );
+    barGoLink bar( result->GetRowCount() );
 
-	do
-	{
-	    bar.step();
+    do
+    {
+        bar.step();
 
-	    Field *fields = result->Fetch();
-	    ScriptInfo tmp;
-	    tmp.id = fields[0].GetUInt32();
-	    tmp.delay = fields[1].GetUInt32();
-	    tmp.command = fields[2].GetUInt32();
-	    tmp.datalong = fields[3].GetUInt32();
-	    tmp.datalong2 = fields[4].GetUInt32();
-	    tmp.datatext = fields[5].GetString();
-	    tmp.x = fields[6].GetFloat();
-	    tmp.y = fields[7].GetFloat();
-	    tmp.z = fields[8].GetFloat();
-	    tmp.o = fields[9].GetFloat();
+        Field *fields = result->Fetch();
+        ScriptInfo tmp;
+        tmp.id = fields[0].GetUInt32();
+        tmp.delay = fields[1].GetUInt32();
+        tmp.command = fields[2].GetUInt32();
+        tmp.datalong = fields[3].GetUInt32();
+        tmp.datalong2 = fields[4].GetUInt32();
+        tmp.datatext = fields[5].GetString();
+        tmp.x = fields[6].GetFloat();
+        tmp.y = fields[7].GetFloat();
+        tmp.z = fields[8].GetFloat();
+        tmp.o = fields[9].GetFloat();
 
-	    if (scripts.find(tmp.id) == scripts.end())
-	    {
-		multimap<uint32, ScriptInfo> emptyMap;
-		scripts[tmp.id] = emptyMap;
-	    }
-	    scripts[tmp.id].insert(pair<uint32, ScriptInfo>(tmp.delay, tmp));
+        if (scripts.find(tmp.id) == scripts.end())
+        {
+            multimap<uint32, ScriptInfo> emptyMap;
+            scripts[tmp.id] = emptyMap;
+        }
+        scripts[tmp.id].insert(pair<uint32, ScriptInfo>(tmp.delay, tmp));
 
-	    count++;
-	} while( result->NextRow() );
+        ++count;
+    } while( result->NextRow() );
 
-	delete result;
+    delete result;
 
-	sLog.outString( "" );
-	if(start==1)
-	{
-	    sLog.outString( ">> Loaded %u start script definitions", count );
-	}
-	else
-	{
-	    sLog.outString( ">> Loaded %u finish script definitions", count );
-	}
+    sLog.outString( "" );
+    if(start==1)
+    {
+        sLog.outString( ">> Loaded %u start script definitions", count );
+    }
+    else
+    {
+        sLog.outString( ">> Loaded %u finish script definitions", count );
+    }
 }
 
 void ObjectMgr::LoadItemTexts()

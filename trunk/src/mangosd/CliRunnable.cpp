@@ -102,8 +102,8 @@ const CliCommand Commands[]=
     {"exit", & CliExit,"Shutdown server NOW"},
     {"writepdump", &CliWritePlayerDump,"Write a player dump to a file"},
     {"loadpdump", &CliLoadPlayerDump,"Load a player dump from a file"},
-	{"save", &CliSave,"Save all players"},
-	{"settime", &CliSetTime,"Updates the in-game time ~ requires client relog"}
+    {"save", &CliSave,"Save all players"},
+    {"settime", &CliSetTime,"Updates the in-game time ~ requires client relog"}
 };
 /// \todo Need some pragma pack? Else explain why in a comment.
 #define CliTotalCmds sizeof(Commands)/sizeof(CliCommand)
@@ -835,17 +835,17 @@ void CliRunnable::run()
 }
 
 void CliSave(char*,pPrintf zprintf)
-	{
-                                                            //<--Saves players & send message
-	ObjectAccessor::Instance().SaveAllPlayers();
-	zprintf( "All Players Saved \n" );
-	sWorld.SendWorldText("Players saved!", NULL);
-	}
+{
+    ///- Saves players & send message
+    ObjectAccessor::Instance().SaveAllPlayers();
+    zprintf( "All Players Saved \n" );
+    sWorld.SendWorldText("Players saved!", NULL);
+}
 
 void CliSetTime(char*,pPrintf zprintf)
-	{
-                                                            //<--Saves players & send message
-	sWorld._UpdateGameTime();
-	zprintf( "Game time updated. \n" );
-	sWorld.SendWorldText("Game time updated.", NULL);
-	}
+{
+    ///- Saves players & send message
+    sWorld._UpdateGameTime();
+    zprintf( "Game time updated. \n" );
+    sWorld.SendWorldText("Game time updated.", NULL);
+}
