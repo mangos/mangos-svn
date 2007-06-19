@@ -827,6 +827,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         SpellImmuneList m_spellImmune[6];
 
         float GetThreat(uint64 guid) const;
+        void ModifyThreatPercent(uint64 guid, int32 percent);
         ThreatList& GetThreatList() { return m_threatList; }
         HateOfflineList& GetHateOfflineList() { return m_offlineList; }
         InHateListOf& GetInHateListOf() { return m_inhateList; }

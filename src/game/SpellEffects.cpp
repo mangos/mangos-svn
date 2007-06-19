@@ -179,7 +179,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //122 SPELL_EFFECT_122                      silithist cap reward spell
     &Spell::EffectNULL,                                     //123 SPELL_EFFECT_123                      taxi/flight related
     &Spell::EffectNULL,                                     //124 SPELL_EFFECT_124                      aggro redirect?
-    &Spell::EffectNULL,                                     //125 SPELL_EFFECT_125                      invis?
+    &Spell::EffectReduceThreatPercent,                      //125 SPELL_EFFECT_REDUCE_THREAT_PERCENT
     &Spell::EffectNULL,                                     //126 SPELL_EFFECT_126                      spell steal effect?
     &Spell::EffectProspecting,                              //127 SPELL_EFFECT_PROSPECTING              Prospecting spell
     &Spell::EffectNULL,                                     //128 SPELL_EFFECT_128 probably apply aura again
@@ -3181,6 +3181,18 @@ void Spell::EffectDurabilityDamagePCT(uint32 i)
         return;
 
     ((Player*)unitTarget)->DurabilityLoss(slot,double(damage)/100);
+}
+
+void Spell::EffectReduceThreatPercent(uint32 i)
+{
+    if(!unitTarget)
+        return;
+
+    Unit::InHateListOf& inHateList = unitTarget->GetInHateListOf();
+    for(Unit::InHateListOf::iterator iter = inHateList.begin(); iter != inHateList.end(); ++iter)
+    {
+        (*iter)->ModifyThreatPercent(unitTarget->GetGUID(),-damage);
+    }
 }
 
 void Spell::EffectTransmitted(uint32 i)

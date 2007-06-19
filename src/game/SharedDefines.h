@@ -336,7 +336,7 @@ enum SpellEffects
     SPELL_EFFECT_122                       = 122,
     SPELL_EFFECT_123                       = 123,
     SPELL_EFFECT_124                       = 124,
-    SPELL_EFFECT_125                       = 125,
+    SPELL_EFFECT_REDUCE_THREAT_PERCENT     = 125,
     SPELL_EFFECT_126                       = 126,
     SPELL_EFFECT_PROSPECTING               = 127,
     SPELL_EFFECT_128                       = 128,
