@@ -3232,7 +3232,7 @@ bool ChatHandler::HandleAddQuest(const char* args)
     Quest* pQuest = qIter->second;
     if( player->CanAddQuest( pQuest, true ) )
     {
-        player->AddQuest( pQuest );
+        player->AddQuest( pQuest, NULL );
 
         if ( player->CanCompleteQuest( entry ) )
             player->CompleteQuest( entry );
@@ -3490,7 +3490,7 @@ bool ChatHandler::HandleBanListCommand(const char* args)
     }
     else if(Type == "character")
     {
-        result = sDatabase.PQuery("SELECT account FROM `character` WHERE name LIKE \"%%%s%%\" ",Filter.c_str()); 
+        result = sDatabase.PQuery("SELECT `account` FROM `character`, WHERE name LIKE \"%%%s%%\" ",Filter.c_str()); 
         if (!result)
         {
             PSendSysMessage(LANG_BANLIST_NOCHARACTER);
@@ -3505,10 +3505,11 @@ bool ChatHandler::HandleBanListCommand(const char* args)
     {
         fields = result->Fetch();
         uint32 accountid = fields[0].GetUInt32();
-        QueryResult* banresult = loginDatabase.PQuery("SELECT * FROM `account_banned` WHERE `id`='%u' AND active = '1'",accountid);
+        QueryResult* banresult = loginDatabase.PQuery("SELECT `account`.`username` FROM `account`,`account_banned` WHERE `account_banned`.`id`='%u' AND `account_banned`.`active` = '1' AND `account_banned`.`id`=`account`.`id`",accountid);
         if(banresult)
         {
-            PSendSysMessage("%s",fields[1].GetString());
+            Field* fields2 = banresult->Fetch();
+            PSendSysMessage("%s",fields2[0].GetString());
             delete banresult;
         }
     } while (result->NextRow());

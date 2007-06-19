@@ -7667,6 +7667,60 @@ UNLOCK TABLES;
 
 
 --
+-- Table structure for table `quest_end_scripts`
+--
+
+DROP TABLE IF EXISTS `quest_end_scripts`;
+CREATE TABLE `quest_end_scripts` (
+  `id` int(11) unsigned NOT NULL default '0',
+  `delay` int(11) unsigned NOT NULL default '0',
+  `command` int(11) unsigned NOT NULL default '0',
+  `datalong` int(11) unsigned NOT NULL default '0',
+  `datalong2` int(11) unsigned NOT NULL default '0',
+  `datatext` text NOT NULL,
+  `x` float NOT NULL default '0',
+  `y` float NOT NULL default '0',
+  `z` float NOT NULL default '0',
+  `o` float NOT NULL default '0'
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `scripts`
+--
+
+LOCK TABLES `quest_end_scripts` WRITE;
+/*!40000 ALTER TABLE `quest_end_scripts` DISABLE KEYS */;
+/*!40000 ALTER TABLE `quest_end_scripts` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `quest_start_scripts`
+--
+
+DROP TABLE IF EXISTS `quest_start_scripts`;
+CREATE TABLE `quest_start_scripts` (
+  `id` int(11) unsigned NOT NULL default '0',
+  `delay` int(11) unsigned NOT NULL default '0',
+  `command` int(11) unsigned NOT NULL default '0',
+  `datalong` int(11) unsigned NOT NULL default '0',
+  `datalong2` int(11) unsigned NOT NULL default '0',
+  `datatext` text NOT NULL,
+  `x` float NOT NULL default '0',
+  `y` float NOT NULL default '0',
+  `z` float NOT NULL default '0',
+  `o` float NOT NULL default '0'
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `scripts`
+--
+
+LOCK TABLES `quest_start_scripts` WRITE;
+/*!40000 ALTER TABLE `quest_start_scripts` DISABLE KEYS */;
+/*!40000 ALTER TABLE `quest_start_scripts` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `quest_template`
 --
 
@@ -7792,33 +7846,6 @@ CREATE TABLE `quest_template` (
 LOCK TABLES `quest_template` WRITE;
 /*!40000 ALTER TABLE `quest_template` DISABLE KEYS */;
 /*!40000 ALTER TABLE `quest_template` ENABLE KEYS */;
-UNLOCK TABLES;
-
---
--- Table structure for table `scripts`
---
-
-DROP TABLE IF EXISTS `scripts`;
-CREATE TABLE `scripts` (
-  `id` int(11) unsigned NOT NULL default '0',
-  `delay` int(11) unsigned NOT NULL default '0',
-  `command` int(11) unsigned NOT NULL default '0',
-  `datalong` int(11) unsigned NOT NULL default '0',
-  `datalong2` int(11) unsigned NOT NULL default '0',
-  `datatext` text NOT NULL,
-  `x` float NOT NULL default '0',
-  `y` float NOT NULL default '0',
-  `z` float NOT NULL default '0',
-  `o` float NOT NULL default '0'
-) ENGINE=MyISAM DEFAULT CHARSET=utf8;
-
---
--- Dumping data for table `scripts`
---
-
-LOCK TABLES `scripts` WRITE;
-/*!40000 ALTER TABLE `scripts` DISABLE KEYS */;
-/*!40000 ALTER TABLE `scripts` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
