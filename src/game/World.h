@@ -254,10 +254,9 @@ class World
         bool RemoveBanAccount(std::string type, std::string nameOrIP);
 
         void ScriptsStart(map<uint32, multimap<uint32, ScriptInfo> > const& scripts, uint32 id, Object* source, Object* target);
-
+		void _UpdateGameTime();
     protected:
 
-        void _UpdateGameTime();
         void ScriptsProcess();
 
     private:

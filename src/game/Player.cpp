@@ -10513,6 +10513,26 @@ QuestStatus Player::GetQuestStatus( uint32 quest_id )
     return QUEST_STATUS_NONE;
 }
 
+uint32 Player::GetReqKillOrCastCurrentCount(uint32 quest_id, uint32 entry)
+{
+    Quest * qInfo = objmgr.QuestTemplates[questid];
+
+    if( !qInfo )
+        return;
+
+    for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
+    {
+
+        reqkill = qInfo->ReqCreatureOrGOId[j];
+
+        if ( reqkill == entry )
+        {
+            curkillcount = mQuestStatus[questid].m_creatureOrGOcount[j];
+            return curkillcount;
+        }
+    }
+    return 0;
+}
 bool Player::CanShareQuest(uint32 quest_id)
 {
     if( quest_id )
