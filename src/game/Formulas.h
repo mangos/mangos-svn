@@ -209,8 +209,8 @@ namespace MaNGOS
             }else{
                 xp = (155 + mxp(lvl) * (1344 - ((69-lvl) * (7 + (69 - lvl) * 8 - 1)/2)));
             }
-            // The XP to Level is always rounded to the nearest 100 points.
-            return uint32(( xp + 50 ) * 0.01) * 100;
+            // The XP to Level is always rounded to the nearest 100 points (50 rounded to low).
+            return (xp + 49) / 100 * 100;
         }
 
         inline uint32 xp_to_money(uint32 rewXP, uint32 qlevel)
