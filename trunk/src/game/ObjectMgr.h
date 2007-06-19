@@ -71,8 +71,8 @@ struct ScriptInfo
 
 typedef multimap<uint32, ScriptInfo> ScriptMap;
 typedef map<uint32, ScriptMap > ScriptMapMap;
-extern ScriptMapMap sScripts;
-extern ScriptMapMap sIScripts;
+extern ScriptMapMap sQuestEndScripts;
+extern ScriptMapMap sQuestStartScripts;
 extern ScriptMapMap sSpellScripts;
 
 struct AreaTrigger
@@ -384,7 +384,6 @@ class ObjectMgr
         void LoadSpellLearnSkills();
         void LoadSpellLearnSpells();
         void LoadScripts(ScriptMapMap& scripts, char const* tablename);
-	void LoadScripts(ScriptMapMap& scripts, char const* tablename, int start);
         void LoadCreatureTemplates();
         void LoadCreatures();
         void LoadCreatureRespawnTimes();

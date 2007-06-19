@@ -499,9 +499,9 @@ void World::SetInitialWorldSettings()
 
     ///- Load and initialize scripts
     sLog.outString( "Loading Scripts..." );
-    objmgr.LoadScripts(sIScripts,      "scripts", 1);           // quest start scripts
-    objmgr.LoadScripts(sScripts,      "scripts", 0);           // quest finish scripts
-    objmgr.LoadScripts(sSpellScripts, "spell_scripts");     // spell casting scripts
+    objmgr.LoadScripts(sQuestStartScripts,"quest_start_scripts");
+    objmgr.LoadScripts(sQuestEndScripts,  "quest_end_scripts");
+    objmgr.LoadScripts(sSpellScripts,     "spell_scripts");
 
     sLog.outString( "Initializing Scripts..." );
     if(!LoadScriptingModule())

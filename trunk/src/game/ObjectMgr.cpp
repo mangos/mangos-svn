@@ -35,8 +35,8 @@
 
 INSTANTIATE_SINGLETON_1(ObjectMgr);
 
-ScriptMapMap sScripts;
-ScriptMapMap sIScripts;
+ScriptMapMap sQuestEndScripts;
+ScriptMapMap sQuestStartScripts;
 ScriptMapMap sSpellScripts;
 
 ObjectMgr::ObjectMgr()
@@ -2137,74 +2137,6 @@ void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
 
     sLog.outString( "" );
     sLog.outString( ">> Loaded %u script definitions", count );
-}
-
-
-void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename, int start)
-{
-    sLog.outString( "%s :", tablename);
-
-    QueryResult *result = sDatabase.PQuery( "SELECT `id`,`delay`,`command`,`datalong`,`datalong2`,`datatext`, `x`, `y`, `z`, `o` FROM `%s` WHERE `StartOrFinish`='%d'", tablename, start );
-    
-    uint32 count = 0;
-
-    if( !result )
-    {
-        barGoLink bar( 1 );
-        bar.step();
-
-        sLog.outString( "" );
-        if(start==1)
-        {
-            sLog.outString( ">> Loaded %u start script definitions", count );
-        }
-        else
-        {
-            sLog.outString( ">> Loaded %u finish script definitions", count );
-        }
-        return;
-    }
-
-    barGoLink bar( result->GetRowCount() );
-
-    do
-    {
-        bar.step();
-
-        Field *fields = result->Fetch();
-        ScriptInfo tmp;
-        tmp.id = fields[0].GetUInt32();
-        tmp.delay = fields[1].GetUInt32();
-        tmp.command = fields[2].GetUInt32();
-        tmp.datalong = fields[3].GetUInt32();
-        tmp.datalong2 = fields[4].GetUInt32();
-        tmp.datatext = fields[5].GetString();
-        tmp.x = fields[6].GetFloat();
-        tmp.y = fields[7].GetFloat();
-        tmp.z = fields[8].GetFloat();
-        tmp.o = fields[9].GetFloat();
-
-        if (scripts.find(tmp.id) == scripts.end())
-        {
-            multimap<uint32, ScriptInfo> emptyMap;
-            scripts[tmp.id] = emptyMap;
-        }
-        scripts[tmp.id].insert(pair<uint32, ScriptInfo>(tmp.delay, tmp));
-
-        ++count;
-    } while( result->NextRow() );
-
-    delete result;
-
-    sLog.outString( "" );
-    if(start==1)
-    {
-        sLog.outString( ">> Loaded %u start script definitions", count );
-    }
-    else
-    {
-        sLog.outString( ">> Loaded %u finish script definitions", count );
-    }
 }
 
 void ObjectMgr::LoadItemTexts()
