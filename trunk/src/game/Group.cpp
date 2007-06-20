@@ -204,12 +204,15 @@ void Group::Disband(bool hideDestroy)
     for(member_citerator citr = m_members.begin(); citr != m_members.end(); ++citr)
     {
         player = objmgr.GetPlayer(citr->guid);
-        if(!player || !player->GetSession())
+        if(!player)
             continue;
 
         player->RemoveAreaAurasByOthers();
         player->RemoveAreaAurasFromGroup();
         player->groupInfo.group = NULL;
+
+        if(!player->GetSession())
+            continue;
 
         WorldPacket data;
         if(!hideDestroy)
