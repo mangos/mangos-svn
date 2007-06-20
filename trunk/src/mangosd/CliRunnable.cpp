@@ -308,7 +308,7 @@ void CliInfo(char*,pPrintf zprintf)
         return;
     }
 
-    int linesize = 1+15+2+20+3+15+2+6+3;                    // see format string
+    int linesize = 1+15+2+20+3+15+2+4+1+5+3;                    // see format string
     char* buf = new char[resultDB->GetRowCount()*linesize+1];
     char* bufPos = buf;
 
@@ -321,19 +321,19 @@ void CliInfo(char*,pPrintf zprintf)
 
         ///- Get the username, last IP and GM level of each account
         // No SQL injection. account is uint32.
-        QueryResult *resultLogin = loginDatabase.PQuery(
-            "SELECT `username`,`last_ip`,`gmlevel` FROM `account` WHERE `id` = '%u'",account);
+        //                                                      0          1         2         3
+        QueryResult *resultLogin = loginDatabase.PQuery("SELECT `username`,`last_ip`,`gmlevel`,`tbc` FROM `account` WHERE `id` = '%u'",account);
 
         if(resultLogin)
         {
             Field *fieldsLogin = resultLogin->Fetch();
-            bufPos+=sprintf(bufPos,"|%15s| %20s | %15s |%6d|\r\n",
-                fieldsLogin[0].GetString(),name.c_str(),fieldsLogin[1].GetString(),fieldsLogin[2].GetUInt32());
+            bufPos+=sprintf(bufPos,"|%15s| %20s | %15s |%4d|%5d|\r\n",
+                fieldsLogin[0].GetString(),name.c_str(),fieldsLogin[1].GetString(),fieldsLogin[2].GetUInt32(),fieldsLogin[3].GetUInt32());
 
             delete resultLogin;
         }
         else
-            bufPos += sprintf(bufPos,"|<Error>        | %20s |<Error>          |<Err> |\r\n",name.c_str());
+            bufPos += sprintf(bufPos,"|<Error>        | %20s |<Error>          |<Er>|<Err>|\r\n",name.c_str());
 
     }while(resultDB->NextRow());
 
@@ -343,11 +343,11 @@ void CliInfo(char*,pPrintf zprintf)
     std::string timeStr = secsToTimeString(sWorld.GetUptime(),true);
     uint32 maxUsers = sWorld.GetMaxSessionCount();
     zprintf("Online users: %u (max: %u) Uptime: %s\r\n",uint32(resultDB->GetRowCount()),maxUsers,timeStr.c_str());
-    zprintf("=================================================================\r\n");
-    zprintf("|    Account    |       Character      |       IP        |  GM  |\r\n");
-    zprintf("=================================================================\r\n");
+    zprintf("=====================================================================\r\n");
+    zprintf("|    Account    |       Character      |       IP        | GM | TBC |\r\n");
+    zprintf("=====================================================================\r\n");
     zprintf("%s",buf);
-    zprintf("=================================================================\r\n");
+    zprintf("=====================================================================\r\n");
 
     delete resultDB;
     delete[] buf;
