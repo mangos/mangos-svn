@@ -2438,8 +2438,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
     }
     // second arg: GUID (optional, if a creature is selected)
     char* guid_str = strtok((char*)NULL, " ");
-    sLog.outDebug("DEBUG: HandleWpShowCommand: show_str: %s", show_str);
-    sLog.outDebug("DEBUG: HandleWpShowCommand: guid_str: %s", guid_str);
+    sLog.outDebug("DEBUG: HandleWpShowCommand: show_str: %s guid_str: %s", show_str, guid_str);
     //if (!guid_str) {
     //    return false;
     //}

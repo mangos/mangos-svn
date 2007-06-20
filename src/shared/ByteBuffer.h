@@ -21,6 +21,7 @@
 
 #include "Common.h"
 #include "Errors.h"
+#include "Log.h"
 
 class ByteBuffer
 {
@@ -306,36 +307,44 @@ class ByteBuffer
         }
         void print_storage()
         {
-            printf("STORAGE_SIZE: %u\n", size() );
+            if(!sLog.IsOutDebug())                           // optimize disabled debug output
+                return;
+
+            sLog.outDebug("STORAGE_SIZE: %u\n", size() );
             for(uint32 i = 0; i < size(); i++)
-                printf("%u - ", read<uint8>(i) );
-            printf("\n");
+                sLog.outDebug("%u - ", read<uint8>(i) );
+            sLog.outDebug("\n");
         }
 
         void textlike()
         {
-            printf("STORAGE_SIZE: %u\n", size() );
+            if(!sLog.IsOutDebug())                           // optimize disabled debug output
+                return;
+
+            sLog.outDebug("STORAGE_SIZE: %u\n", size() );
             for(uint32 i = 0; i < size(); i++)
-                printf("%c", read<uint8>(i) );
-            printf("\n");
+                sLog.outDebug("%c", read<uint8>(i) );
+            sLog.outDebug("\n");
         }
 
         void hexlike()
         {
+            if(!sLog.IsOutDebug())                           // optimize disabled debug output
+                return;
 
             uint32 j = 1, k = 1;
-            printf("STORAGE_SIZE: %u\n", size() );
+            sLog.outDebug("STORAGE_SIZE: %u\n", size() );
             for(uint32 i = 0; i < size(); i++)
             {
                 if ((i == (j*8)) && ((i != (k*16))))
                 {
                     if (read<uint8>(i) < 0x0F)
                     {
-                        printf("| 0%X ", read<uint8>(i) );
+                        sLog.outDebug("| 0%X ", read<uint8>(i) );
                     }
                     else
                     {
-                        printf("| %X ", read<uint8>(i) );
+                        sLog.outDebug("| %X ", read<uint8>(i) );
                     }
                     j++;
                 }
@@ -343,11 +352,11 @@ class ByteBuffer
                 {
                     if (read<uint8>(i) < 0x0F)
                     {
-                        printf("\n0%X ", read<uint8>(i) );
+                        sLog.outDebug("\n0%X ", read<uint8>(i) );
                     }
                     else
                     {
-                        printf("\n%X ", read<uint8>(i) );
+                        sLog.outDebug("\n%X ", read<uint8>(i) );
                     }
 
                     k++;
@@ -357,21 +366,21 @@ class ByteBuffer
                 {
                     if (read<uint8>(i) < 0x0F)
                     {
-                        printf("0%X ", read<uint8>(i) );
+                        sLog.outDebug("0%X ", read<uint8>(i) );
                     }
                     else
                     {
-                        printf("%X ", read<uint8>(i) );
+                        sLog.outDebug("%X ", read<uint8>(i) );
                     }
                 }
             }
-            printf("\n");
+            sLog.outDebug("\n");
         }
 
     protected:
         bool PrintPosError(bool add, size_t pos, size_t esize) const
         {
-            printf("ERROR: Attempt %s in ByteBuffer (pos: %u size: %u) value with size: %u",(add ? "put" : "get"),pos, size(), esize);
+            sLog.outError("ERROR: Attempt %s in ByteBuffer (pos: %u size: %u) value with size: %u",(add ? "put" : "get"),pos, size(), esize);
 
             // assert must fail after function call
             return false;

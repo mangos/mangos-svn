@@ -106,7 +106,7 @@ GridMap * Map::LoadMAP(uint32 mapid, uint32 instanceid, int x,int y)
     int len = sWorld.GetDataPath().length()+strlen("maps/%03u%02u%02u.map")+1;
     tmp = new char[len];
     snprintf(tmp, len, (char *)(sWorld.GetDataPath()+"maps/%03u%02u%02u.map").c_str(),mapid,x,y);
-    sLog.outBasic("Loading map %s",tmp);
+    sLog.outDetail("Loading map %s",tmp);
 
     // loading data
     FILE *pf=fopen(tmp,"rb");
