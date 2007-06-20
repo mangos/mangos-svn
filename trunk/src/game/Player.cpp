@@ -9296,119 +9296,17 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
     if(!ignore_condition && pEnchant->EnchantmentCondition && !((Player*)this)->EnchantmentFitsRequirements(pEnchant->EnchantmentCondition, -1))
         return;
 
+    bool HasStatEnchant = false;
+
     for (int s=0; s<3; s++)
     {
         uint32 enchant_display_type = pEnchant->display_type[s];
         uint32 enchant_amount = pEnchant->amount[s];
         uint32 enchant_spell_id = pEnchant->spellid[s];
 
-        if (enchant_display_type == 0)
+        switch(enchant_display_type)
         {
-            // Nothing
-        }
-        else if(enchant_display_type ==4)
-        {
-            ApplyArmorMod(enchant_amount,apply);
-        }
-        else if(enchant_display_type == 6) // Shaman Rockbiter Weapon
-        {
-            // enchant_amount is then containing the number of damage per second to add to the weapon
-            if(getClass() == CLASS_SHAMAN)
-            {
-                ApplyModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,enchant_amount,apply);
-                //ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,enchant_amount,apply);
-            }
-        }
-        else if(enchant_display_type == 5) // 
-        {
-            sLog.outDebug("Adding %u to stat nb %u",enchant_amount,enchant_spell_id);
-            switch (enchant_spell_id)
-            {
-            case ITEM_MOD_AGILITY:
-                sLog.outDebug("+ %u AGILITY",enchant_amount);
-                ApplyPosStatMod(STAT_AGILITY, enchant_amount, apply);
-                ApplyStatMod(STAT_AGILITY, enchant_amount, apply);
-                break;
-            case ITEM_MOD_STRENGTH:
-                sLog.outDebug("+ %u STRENGTH",enchant_amount);
-                ApplyPosStatMod(STAT_STRENGTH, enchant_amount, apply);
-                ApplyStatMod(STAT_STRENGTH, enchant_amount, apply);
-                break;
-            case ITEM_MOD_INTELLECT:
-                sLog.outDebug("+ %u INTELLECT",enchant_amount);
-                ApplyPosStatMod(STAT_INTELLECT, enchant_amount, apply);
-                ApplyStatMod(STAT_INTELLECT, enchant_amount, apply);
-                break;
-            case ITEM_MOD_SPIRIT:
-                sLog.outDebug("+ %u SPIRIT",enchant_amount);
-                ApplyPosStatMod(STAT_SPIRIT, enchant_amount, apply);
-                ApplyStatMod(STAT_SPIRIT, enchant_amount, apply);
-                break;
-            case ITEM_MOD_STAMINA:
-                sLog.outDebug("+ %u STAMINA",enchant_amount);
-                ApplyPosStatMod(STAT_STAMINA, enchant_amount, apply);
-                ApplyStatMod(STAT_STAMINA, enchant_amount, apply);
-                break;
-            case ITEM_MOD_DEFENSE_SKILL_RATING:
-                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_DEFENCE_RATING, enchant_amount, apply);
-                sLog.outDebug("+ %u DEFENCE", enchant_amount);
-                break;
-            case  ITEM_MOD_DODGE_RATING:
-                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_DODGE_RATING, enchant_amount, apply);
-                sLog.outDebug("+ %u DODGE", enchant_amount);
-                break;
-            case ITEM_MOD_PARRY_RATING:
-                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_PARRY_RATING, enchant_amount, apply);
-                sLog.outDebug("+ %u PARRY", enchant_amount);
-                break;
-            case ITEM_MOD_BLOCK_RATING:
-                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_BLOCK_RATING, enchant_amount, apply);
-                sLog.outDebug("+ %u SHIELD_BLOCK", enchant_amount);
-                break;
-            case ITEM_MOD_HIT_MELEE_RATING:
-                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_HIT_RATING, enchant_amount, apply);
-                sLog.outDebug("+ %u MELEE_HIT", enchant_amount);
-                break;
-            case ITEM_MOD_HIT_RANGED_RATING:
-                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_HIT_RATING, enchant_amount, apply);
-                sLog.outDebug("+ %u RANGED_HIT", enchant_amount);
-                break;
-            case ITEM_MOD_HIT_SPELL_RATING:
-                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_HIT_RATING, enchant_amount, apply);
-                sLog.outDebug("+ %u SPELL_HIT", enchant_amount);
-                break;
-            case ITEM_MOD_CRIT_MELEE_RATING: // CS = Critical Strike
-                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_CRIT_RATING, enchant_amount, apply);
-                sLog.outDebug("+ %u MELEE_CRIT", enchant_amount);
-                break;
-            case ITEM_MOD_CRIT_RANGED_RATING:
-                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_CRIT_RATING, enchant_amount, apply);
-                sLog.outDebug("+ %u RANGED_CRIT", enchant_amount);
-                break;
-            case ITEM_MOD_CRIT_SPELL_RATING:
-                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_CRIT_RATING, enchant_amount, apply);
-                sLog.outDebug("+ %u SPELL_CRIT", enchant_amount);
-                break;
-                // Values from ITEM_STAT_MELEE_HA_RATING to ITEM_STAT_SPELL_HASTE_RATING are never used
-                // in Enchantments
-            case ITEM_MOD_HIT_RATING:
-                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_HIT_RATING, enchant_amount, apply);
-                sLog.outDebug("+ %u HIT", enchant_amount);
-                break;
-            case ITEM_MOD_CRIT_RATING:
-                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_CRIT_RATING, enchant_amount, apply);
-                sLog.outDebug("+ %u CRITICAL", enchant_amount);
-                break;
-                // Values ITEM_STAT_HA_RATING and ITEM_STAT_CA_RATING are never used in Enchantment
-            case ITEM_MOD_RESILIENCE_RATING:
-                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RESILIENCE_RATING, enchant_amount, apply);
-                sLog.outDebug("+ %u RESILIENCE", enchant_amount);
-                break;
-                // Value ITEM_STAT_HASTE_RATING is never used in Enchantment
-            }
-        }
-        else if(enchant_display_type ==2)
-        {
+        case 2:
             if(getClass() == CLASS_HUNTER)
             {
                 ApplyModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE,enchant_amount,apply);
@@ -9419,19 +9317,137 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
                 ApplyModFloatValue(UNIT_FIELD_MINDAMAGE,enchant_amount,apply);
                 ApplyModFloatValue(UNIT_FIELD_MAXDAMAGE,enchant_amount,apply);
             }
-        }
+            break;
 
-        if(enchant_spell_id)
-        {
-            if(apply)
+        case 3: 
+            if(enchant_spell_id)
             {
-                if(enchant_display_type == 3)
+                if(apply)
                     CastSpell(this,enchant_spell_id,true, NULL);
+                else
+                    RemoveAurasDueToSpell(enchant_spell_id);
             }
-            else
-                RemoveAurasDueToSpell(enchant_spell_id);
-        }
+            break;
 
+        case 4:
+            ApplyArmorMod(enchant_amount,apply);
+            break;
+
+        case 6:                                             // Shaman Rockbiter Weapon
+            // enchant_amount is then containing the number of damage per second to add to the weapon
+            if(getClass() == CLASS_SHAMAN)
+                ApplyModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,enchant_amount,apply);
+            break;
+
+        case 5:
+            HasStatEnchant = true;
+            break;
+
+        default:
+            break;
+        }
+    }
+
+    // speed up calculation in case if there are no case 5 enchantments
+    if(HasStatEnchant)
+    {
+        _RemoveStatsMods();                                 //remove/apply stat mods for gems etc at-once and not for each enchantment separately
+        for(int s=0; s<3; s++)
+        {
+            uint32 enchant_display_type = pEnchant->display_type[s];
+            uint32 enchant_amount = pEnchant->amount[s];
+            uint32 enchant_spell_id = pEnchant->spellid[s];
+
+            if(enchant_display_type == 5) // 
+            {
+                sLog.outDebug("Adding %u to stat nb %u",enchant_amount,enchant_spell_id);
+                switch (enchant_spell_id)
+                {
+                case ITEM_MOD_AGILITY:
+                    sLog.outDebug("+ %u AGILITY",enchant_amount);
+                    ApplyPosStatMod(STAT_AGILITY, enchant_amount, apply);
+                    ApplyStatMod(STAT_AGILITY, enchant_amount, apply);
+                    break;
+                case ITEM_MOD_STRENGTH:
+                    sLog.outDebug("+ %u STRENGTH",enchant_amount);
+                    ApplyPosStatMod(STAT_STRENGTH, enchant_amount, apply);
+                    ApplyStatMod(STAT_STRENGTH, enchant_amount, apply);
+                    break;
+                case ITEM_MOD_INTELLECT:
+                    sLog.outDebug("+ %u INTELLECT",enchant_amount);
+                    ApplyPosStatMod(STAT_INTELLECT, enchant_amount, apply);
+                    ApplyStatMod(STAT_INTELLECT, enchant_amount, apply);
+                    break;
+                case ITEM_MOD_SPIRIT:
+                    sLog.outDebug("+ %u SPIRIT",enchant_amount);
+                    ApplyPosStatMod(STAT_SPIRIT, enchant_amount, apply);
+                    ApplyStatMod(STAT_SPIRIT, enchant_amount, apply);
+                    break;
+                case ITEM_MOD_STAMINA:
+                    sLog.outDebug("+ %u STAMINA",enchant_amount);
+                    ApplyPosStatMod(STAT_STAMINA, enchant_amount, apply);
+                    ApplyStatMod(STAT_STAMINA, enchant_amount, apply);
+                    break;
+                case ITEM_MOD_DEFENSE_SKILL_RATING:
+                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_DEFENCE_RATING, enchant_amount, apply);
+                    sLog.outDebug("+ %u DEFENCE", enchant_amount);
+                    break;
+                case  ITEM_MOD_DODGE_RATING:
+                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_DODGE_RATING, enchant_amount, apply);
+                    sLog.outDebug("+ %u DODGE", enchant_amount);
+                    break;
+                case ITEM_MOD_PARRY_RATING:
+                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_PARRY_RATING, enchant_amount, apply);
+                    sLog.outDebug("+ %u PARRY", enchant_amount);
+                    break;
+                case ITEM_MOD_BLOCK_RATING:
+                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_BLOCK_RATING, enchant_amount, apply);
+                    sLog.outDebug("+ %u SHIELD_BLOCK", enchant_amount);
+                    break;
+                case ITEM_MOD_HIT_MELEE_RATING:
+                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_HIT_RATING, enchant_amount, apply);
+                    sLog.outDebug("+ %u MELEE_HIT", enchant_amount);
+                    break;
+                case ITEM_MOD_HIT_RANGED_RATING:
+                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_HIT_RATING, enchant_amount, apply);
+                    sLog.outDebug("+ %u RANGED_HIT", enchant_amount);
+                    break;
+                case ITEM_MOD_HIT_SPELL_RATING:
+                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_HIT_RATING, enchant_amount, apply);
+                    sLog.outDebug("+ %u SPELL_HIT", enchant_amount);
+                    break;
+                case ITEM_MOD_CRIT_MELEE_RATING: // CS = Critical Strike
+                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_CRIT_RATING, enchant_amount, apply);
+                    sLog.outDebug("+ %u MELEE_CRIT", enchant_amount);
+                    break;
+                case ITEM_MOD_CRIT_RANGED_RATING:
+                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_CRIT_RATING, enchant_amount, apply);
+                    sLog.outDebug("+ %u RANGED_CRIT", enchant_amount);
+                    break;
+                case ITEM_MOD_CRIT_SPELL_RATING:
+                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_CRIT_RATING, enchant_amount, apply);
+                    sLog.outDebug("+ %u SPELL_CRIT", enchant_amount);
+                    break;
+                    // Values from ITEM_STAT_MELEE_HA_RATING to ITEM_STAT_SPELL_HASTE_RATING are never used
+                    // in Enchantments
+                case ITEM_MOD_HIT_RATING:
+                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_HIT_RATING, enchant_amount, apply);
+                    sLog.outDebug("+ %u HIT", enchant_amount);
+                    break;
+                case ITEM_MOD_CRIT_RATING:
+                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_CRIT_RATING, enchant_amount, apply);
+                    sLog.outDebug("+ %u CRITICAL", enchant_amount);
+                    break;
+                    // Values ITEM_STAT_HA_RATING and ITEM_STAT_CA_RATING are never used in Enchantment
+                case ITEM_MOD_RESILIENCE_RATING:
+                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RESILIENCE_RATING, enchant_amount, apply);
+                    sLog.outDebug("+ %u RESILIENCE", enchant_amount);
+                    break;
+                    // Value ITEM_STAT_HASTE_RATING is never used in Enchantment
+                }
+            }
+        }
+        _ApplyStatsMods();
     }
 
     // visualize enchantment at player and equipped items

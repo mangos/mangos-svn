@@ -1742,23 +1742,23 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
 
             if (name.find(namepart) != std::string::npos)
             {
-                std::string rank = spellInfo->Rank[sWorld.GetDBClang()];
-
+                uint32 rank = objmgr.GetSpellRank(id);      // unit32 used to prevent interpreting uint8 as char at output
                 bool known = m_session->GetPlayer()->HasSpell(id);
+                bool learn = (spellInfo->Effect[0] == SPELL_EFFECT_LEARN_SPELL);
 
-                // if spell has rank then send it to client
-                if (!rank.empty())
-                {
-                    // send spell in "id - name - rank" format
-                    PSendSysMessage("%d - %s - %s%s",id,spellInfo->SpellName[sWorld.GetDBClang()],rank.c_str(),(known ? LANG_KNOWN : ""));
-                    counter++;
-                }
-                else
-                {
-                    // send spell in "id - name" format
-                    PSendSysMessage("%d - %s%s",id,spellInfo->SpellName[sWorld.GetDBClang()],(known ? LANG_KNOWN : ""));
-                    counter++;
-                }
+                // send spell in "id - name [rank N] [learn] [known]" format
+                std::ostringstream ss;
+                ss << id << " - " << spellInfo->SpellName[sWorld.GetDBClang()];
+
+                if(rank)
+                    ss << LANG_SPELL_RANK_START << rank << LANG_SPELL_RANK_END;
+
+                if(learn)
+                    ss << LANG_LEARN;
+                if(known)
+                    ss << LANG_KNOWN;
+
+                SendSysMessage(ss.str().c_str());
             }
         }
     }
