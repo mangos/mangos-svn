@@ -1491,6 +1491,11 @@ bool Map::CheckGridIntegrity(Creature* c, bool moved) const
     return true;
 }
 
+const char* Map::GetMapName() const
+{
+    return i_mapEntry ? i_mapEntry->name[sWorld.GetDBClang()] : "UNNAMEDMAP\x0";
+}
+
 template void Map::Add(CorpsePtr&);
 template void Map::Add(Creature *);
 template void Map::Add(GameObject *);

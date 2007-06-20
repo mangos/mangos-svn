@@ -64,6 +64,7 @@ CREATE TABLE `areatrigger_template` (
   `id` int(11) unsigned NOT NULL default '0' COMMENT 'Identifier',
   `name` text,
   `required_level` tinyint(3) unsigned NOT NULL default '0',
+  `required_item` int(11) unsigned NOT NULL default '0',
   `trigger_map` int(11) unsigned NOT NULL default '0',
   `trigger_position_x` float NOT NULL default '0',
   `trigger_position_y` float NOT NULL default '0',

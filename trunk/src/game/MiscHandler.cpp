@@ -886,17 +886,31 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     }
     else if(at && at->IsTeleport())
     {
-        if(GetPlayer()->getLevel() >= at->requiredLevel || sWorld.getConfig(CONFIG_IGNORE_AT_LEVEL_REQUIREMENT) || GetPlayer()->isGameMaster())
+        if(at->requiredItem)
         {
-            GetPlayer()->TeleportTo(at->target_mapId,at->target_X,at->target_Y,at->target_Z,at->target_Orientation,true,false);
-        }
-        else
-        {
-            std::stringstream msgstr;
-            msgstr <<  LANG_LEVEL_MINREQUIRED << (uint32)at->requiredLevel << LANG_LEVEL_MINREQUIRED_END;
-            std::string msg = msgstr.str();
+            uint32 ReqItem = at->requiredItem;
+            ItemPrototype const *pProto = objmgr.GetItemPrototype(ReqItem);
+            // pProto != NULL checked and fixed (if need with error output) at server load and don't must be happens here
 
-            SendAreaTriggerMessage(msg.c_str());
+            // item and level or GM
+            if( (!pProto || GetPlayer()->HasItemCount(ReqItem, 1)) && 
+                (GetPlayer()->getLevel() >= at->requiredLevel || sWorld.getConfig(CONFIG_IGNORE_AT_LEVEL_REQUIREMENT)) 
+                || GetPlayer()->isGameMaster() )
+                GetPlayer()->TeleportTo(at->target_mapId,at->target_X,at->target_Y,at->target_Z,at->target_Orientation,true,false);
+            else
+            {
+                std::stringstream msgstr;
+                SendAreaTriggerMessage(LANG_LEVEL_MINREQUIRED "%u and have item %s" LANG_LEVEL_MINREQUIRED_END,(uint32)at->requiredLevel,pProto->Name1);
+            }
+        }
+        else 
+        {
+            if(GetPlayer()->getLevel() >= at->requiredLevel || sWorld.getConfig(CONFIG_IGNORE_AT_LEVEL_REQUIREMENT) || GetPlayer()->isGameMaster())
+                    GetPlayer()->TeleportTo(at->target_mapId,at->target_X,at->target_Y,at->target_Z,at->target_Orientation,true,false);
+            else
+            {    
+                SendAreaTriggerMessage(LANG_LEVEL_MINREQUIRED "%u" LANG_LEVEL_MINREQUIRED_END,(uint32)at->requiredLevel );
+            }
         }
     }
 }
@@ -1176,8 +1190,9 @@ void WorldSession::SendNotification(const char *format,...)
     {
         va_list ap;
         char szStr [1024];
+        szStr[0] = '\0';
         va_start(ap, format);
-        int res = vsnprintf( szStr, 1024, format, ap );
+        vsnprintf( szStr, 1024, format, ap );
         va_end(ap);
 
         WorldPacket data(SMSG_NOTIFICATION, (strlen(szStr)+1));

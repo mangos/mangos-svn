@@ -339,6 +339,8 @@ pkgdata_DATA = \
 	3875_item_template.sql \
 	3876_character_ticket.sql \
 	3884_quest_scripts.sql \
+	3891_quest_scripts.sql \
+	3906_areatrigger_template.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -656,4 +658,6 @@ EXTRA_DIST = \
 	3875_item_template.sql \
 	3876_character_ticket.sql \
 	3884_quest_scripts.sql \
+	3891_quest_scripts.sql \
+	3906_areatrigger_template.sql \
 	README
