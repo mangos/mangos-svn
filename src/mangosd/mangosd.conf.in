@@ -1,5 +1,5 @@
 # MaNGOS Configuration file
-ConfVersion=2006082301
+ConfVersion=2007062001
 
 # RealmID must match the realmlist
 RealmID = 1
@@ -16,6 +16,11 @@ Expansion = 1
 # Important: DataDir needs to be quoted, as it is a string which may
 # contain space characters.
 DataDir = "@MANGOSD_DATA@"
+
+# Logs directory setting.
+# Important: Logs dir must exists, or all logs be disable
+# Default: "" - no log directory prefix, if used log names isn't absolute path then logs will be stored in current directory for run program.
+LogsDir = ""
 
 # Database connection settings for the world server.
 # Default: hostname;port;username;password;database
@@ -60,6 +65,11 @@ LogLevel = 3
 # Default: ""
 LogFile = "Server.log"
 
+# Logfile with timestamp of server start in name
+# Default: 0 - no timestamp in name
+#          1 - add timestamp in name in form Logname_YYYY-MM-DD_HH-MM-SS.Ext for Logname.Ext
+LogTimestamp = 0
+
 # Server file level of logging
 # 0 = Minimum; 1 = Error; 2 = Detail; 3 = Full/Debug
 # Default: 0
@@ -89,6 +99,10 @@ DBErrorLogFile = "DBErrors.log"
 # Log file of gm commands
 # Default: "" (Disable)
 GmLogFile = ""
+
+# Log file of RA commands, "" for disable
+# Default: "Ra.log"
+RaLogFile = ""
 
 # Used processors mask for multi-processors system (Used only at Windows)
 # Default: 0 (selected by OS)
@@ -298,9 +312,6 @@ Ra.IP = 0.0.0.0
 
 # Default remote console port
 Ra.Port = 3443
-
-# Log remote console connections
-Ra.Log = 1
 
 # Minimum level that's required to login,3 by default
 Ra.MinLevel = 3
