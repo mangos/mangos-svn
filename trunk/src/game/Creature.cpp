@@ -169,6 +169,7 @@ void Creature::Update(uint32 diff)
                 SelectLevel(cinfo);
                 SetUInt32Value(UNIT_DYNAMIC_FLAGS, 0);
                 RemoveFlag (UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+                setMoveRunFlag(false);
 
                 SetUInt32Value(UNIT_NPC_FLAGS, cinfo->npcflag);
                 SetHealth(GetMaxHealth());
@@ -1467,10 +1468,10 @@ SpellEntry const *Creature::reachWithSpellCure(Unit *pVictim)
 
 bool Creature::IsVisibleInGridForPlayer(Player* pl) const
 {
-    // Live player see live creatures or death creatures with corpse dissappiring time > 0
-    if(pl->isAlive())
+    // Live player (or with not release body see live creatures or death creatures with corpse disappearing time > 0
+    if(pl->isAlive() || pl->GetDeathTimer() > 0)
     {
-        if( (this->GetEntry() == VISUAL_WAYPOINT) && !pl->isGameMaster() )
+        if( GetEntry() == VISUAL_WAYPOINT && !pl->isGameMaster() )
         {
             return false;
         }
@@ -1478,22 +1479,19 @@ bool Creature::IsVisibleInGridForPlayer(Player* pl) const
     }
 
     // Dead player see live creatures near own corpse
-    if(pl->getDeathState() == CORPSE)
+    if(isAlive())
     {
-        if(isAlive())
+        CorpsePtr &corpse = pl->GetCorpse();
+        if(corpse)
         {
-            CorpsePtr &corpse = pl->GetCorpse();
-            if(corpse)
-            {
-                // 20 - aggro distance for same level, 25 - max additional distance if player level less that creature level
-                if(corpse->IsWithinDistInMap(this,(20+25)*sWorld.getRate(RATE_CREATURE_AGGRO)))
-                    return true;
-            }
+            // 20 - aggro distance for same level, 25 - max additional distance if player level less that creature level
+            if(corpse->IsWithinDistInMap(this,(20+25)*sWorld.getRate(RATE_CREATURE_AGGRO)))
+                return true;
         }
     }
 
     // Dead player see Spirit Healer or Spirit Guide
-    if(pl->isDead() && isSpiritService())
+    if(isSpiritService())
         return true;
 
     // and not see any other
