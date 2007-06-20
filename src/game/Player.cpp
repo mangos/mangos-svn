@@ -12545,7 +12545,7 @@ void Player::TextEmote(const std::string text)
 
 void Player::Whisper(const uint64 receiver, const std::string text, const uint32 language)
 {
-    Player *player = objmgr.GetPlayer(receiver);
+    Player *rPlayer = objmgr.GetPlayer(receiver);
 
     WorldPacket data(SMSG_MESSAGECHAT, 200);
     data << (uint8)CHAT_MSG_WHISPER;
@@ -12554,23 +12554,16 @@ void Player::Whisper(const uint64 receiver, const std::string text, const uint32
     data << (uint32)(text.length()+1);
     data << text;
     data << (uint8)chatTag();
-    player->GetSession()->SendPacket(&data);
+    rPlayer->GetSession()->SendPacket(&data);
 
     data.Initialize(SMSG_MESSAGECHAT, 200);
     data << (uint8)CHAT_MSG_WHISPER_INFORM;
     data << (uint32)language;
-    data << (uint64)player->GetGUID();
+    data << (uint64)rPlayer->GetGUID();
     data << (uint32)(text.length()+1);
     data << text;
-    data << (uint8)chatTag();
+    data << (uint8)rPlayer->chatTag();
     GetSession()->SendPacket(&data);
-
-    if(player->isAFK())
-    {
-    }
-    if(player->isDND())
-    {
-    }
 
     if(!isAcceptWhispers())
     {
