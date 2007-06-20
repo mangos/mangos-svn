@@ -248,10 +248,12 @@ struct LockEntry
 
 struct MapEntry
 {
-    uint32      MapID;
-    char*       name;
-    uint32      map_type;
-    uint32      map_flag;
+    uint32      MapID;                                      //0
+    //char*       internalname;                             //1 unused
+    uint32      map_type;                                   //2
+    char*       name[8];                                    //4-11
+    uint32      map_flag;                                   //12 FIXME:name flags, used in hack way to detect expansion maps
+                                                            //13-74 not used
 };
 
 struct SkillLineEntry

@@ -2611,8 +2611,8 @@ void ObjectMgr::LoadAreaTriggers()
 {
     uint32 count = 0;
 
-    //                                            0    1                2             3                    4                    5                    6            7                   8                   9                   10
-    QueryResult *result = sDatabase.Query("SELECT `id`,`required_level`,`trigger_map`,`trigger_position_x`,`trigger_position_y`,`trigger_position_z`,`target_map`,`target_position_x`,`target_position_y`,`target_position_z`,`target_orientation` FROM `areatrigger_template`");
+    //                                            0    1                2               3             4                    5                    6                    7            8                   9                   10                  11
+    QueryResult *result = sDatabase.Query("SELECT `id`,`required_level`,`required_item`,`trigger_map`,`trigger_position_x`,`trigger_position_y`,`trigger_position_z`,`target_map`,`target_position_x`,`target_position_y`,`target_position_z`,`target_orientation` FROM `areatrigger_template`");
     if( !result )
     {
 
@@ -2640,15 +2640,26 @@ void ObjectMgr::LoadAreaTriggers()
         AreaTrigger *at = new AreaTrigger;
 
         at->requiredLevel      = fields[1].GetUInt8();
-        at->trigger_mapId      = fields[2].GetUInt32();
-        at->trigger_X          = fields[3].GetFloat();
-        at->trigger_Y          = fields[4].GetFloat();
-        at->trigger_Z          = fields[5].GetFloat();
-        at->target_mapId       = fields[6].GetUInt32();
-        at->target_X           = fields[7].GetFloat();
-        at->target_Y           = fields[8].GetFloat();
-        at->target_Z           = fields[9].GetFloat();
-        at->target_Orientation = fields[10].GetFloat();
+        at->requiredItem       = fields[2].GetUInt32();
+        at->trigger_mapId      = fields[3].GetUInt32();
+        at->trigger_X          = fields[4].GetFloat();
+        at->trigger_Y          = fields[5].GetFloat();
+        at->trigger_Z          = fields[6].GetFloat();
+        at->target_mapId       = fields[7].GetUInt32();
+        at->target_X           = fields[8].GetFloat();
+        at->target_Y           = fields[9].GetFloat();
+        at->target_Z           = fields[10].GetFloat();
+        at->target_Orientation = fields[11].GetFloat();
+
+        if(at->requiredItem)
+        {
+            ItemPrototype const *pProto = objmgr.GetItemPrototype(at->requiredItem);
+            if(!pProto)
+            {
+                sLog.outError("Key item %u not exist for trigger %u, remove key requirement.", at->requiredItem, Trigger_ID);
+                at->requiredItem = 0;
+            }
+        }
 
         mAreaTriggers[Trigger_ID] = at;
 

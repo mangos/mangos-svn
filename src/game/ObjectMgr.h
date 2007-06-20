@@ -78,6 +78,7 @@ extern ScriptMapMap sSpellScripts;
 struct AreaTrigger
 {
     uint8  requiredLevel;
+    uint32 requiredItem;
     uint32 trigger_mapId;
     float  trigger_X;
     float  trigger_Y;

@@ -193,7 +193,7 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         uint32 GetPlayersCount() {return(i_Players.size()); }
         void Reset();
         bool CanEnter(Player* player);
-        const char* GetMapName() { return(i_mapEntry ? i_mapEntry->name : "UNNAMEDMAP\x0"); }
+        const char* GetMapName() const;
         bool Instanceable() { return(i_mapEntry && ((i_mapEntry->map_type == MAP_INSTANCE) || (i_mapEntry->map_type == MAP_RAID))); }
         bool IsRaid() { return(i_mapEntry && (i_mapEntry->map_type == MAP_RAID)); }
         virtual bool RemoveBones(uint64 guid, float x, float y);
