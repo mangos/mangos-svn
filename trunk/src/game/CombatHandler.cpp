@@ -37,13 +37,34 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
 
     Unit *pEnemy = ObjectAccessor::Instance().GetUnit(*_player, guid);
 
-    if(pEnemy && !_player->IsFriendlyTo(pEnemy))
+    if(!pEnemy)
     {
-        _player->Attack(pEnemy,true);
+        if(GUID_HIPART(guid)!=HIGHGUID_PLAYER && GUID_HIPART(guid)!=HIGHGUID_UNIT)
+            sLog.outError("WORLD: Object %u (TypeID: %u) isn't player or creature",GUID_LOPART(guid),GUID_HIPART(guid));
+        else
+            sLog.outError( "WORLD: Enemy %s %u not found",(GUID_HIPART(guid)==HIGHGUID_PLAYER ? "player" : "creature"),GUID_LOPART(guid));
+
+        // stop attack state at client
+        WorldPacket data( SMSG_ATTACKSTOP, (4+16) );            // we guess size
+        data.append(GetPlayer()->GetPackGUID());
+        data.append(guid);
+        SendPacket(&data);
         return;
     }
 
-    sLog.outError( "WORLD: Enemy %u %.8X not found, or not a player or a creature or friendly",GUID_LOPART(guid), GUID_HIPART(guid));
+    if(_player->IsFriendlyTo(pEnemy))
+    {
+        sLog.outError( "WORLD: Enemy %s %u is friendly",(GUID_HIPART(guid)==HIGHGUID_PLAYER ? "player" : "creature"),GUID_LOPART(guid));
+
+        // stop attack state at client
+        WorldPacket data( SMSG_ATTACKSTOP, (4+16) );            // we guess size
+        data.append(GetPlayer()->GetPackGUID());
+        data.append(guid);
+        SendPacket(&data);
+        return;
+    }
+
+    _player->Attack(pEnemy,true);
 }
 
 void WorldSession::HandleAttackStopOpcode( WorldPacket & recv_data )
