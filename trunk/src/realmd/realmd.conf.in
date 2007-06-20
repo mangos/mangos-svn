@@ -1,5 +1,5 @@
 # MaNGOS realmd configuration file
-ConfVersion=2006060401
+ConfVersion=2007062001
 
 # Database connection settings for the realm server.
 # Default: hostname;port;username;password;database
@@ -8,6 +8,11 @@ ConfVersion=2006060401
 #          .;/path/to/unix_socket;username;password;database - use Unix sockets at Unix/Linux
 #                Unix sockets: experimental, not tested
 LoginDatabaseInfo = "127.0.0.1;3306;mangos;mangos;realmd"
+
+# Logs directory setting.
+# Important: Logs dir must exists, or all logs be disable
+# Default: "" - no log directory prefix, if used log names isn't absolute path then logs will be stored in current directory for run program.
+LogsDir = ""
 
 # Settings for maximum database-ping interval (minutes between pings)
 MaxPingTime = 30
@@ -24,6 +29,11 @@ LogLevel = 0
 #    empty name disable creating log file: LogFile = 
 # Default: "Server.log" - not recommended.
 LogFile = "Realmd.log"
+
+# Logfile with timestamp of server start in name
+# Default: 0 - no timestamp in name
+#          1 - add timestamp in name in form Logname_YYYY-MM-DD_HH-MM-SS.Ext for Logname.Ext
+LogTimestamp = 0
 
 # Server file level of logging
 # 0 = Minimum; 1 = Error; 2 = Detail; 3 = Full/Debug

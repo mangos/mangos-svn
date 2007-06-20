@@ -172,24 +172,47 @@ void Log::SetLogFileLevel(char *Level)
 
 void Log::Initialize()
 {
+    std::string logsDir = sConfig.GetStringDefault("LogsDir","");
+
+    if(!logsDir.empty())
+    {
+        if((logsDir.at(logsDir.length()-1)!='/') && (logsDir.at(logsDir.length()-1)!='\\'))
+            logsDir.append("/");
+    }
+
     std::string logfn=sConfig.GetStringDefault("LogFile", "");
     if(logfn!="")
     {
-        logfile = fopen(logfn.c_str(), "w");
+        if(sConfig.GetIntDefault("LogTimestamp",0))
+        {
+            std::string logTimestamp = sConfig.GetIntDefault("LogTimestamp",0) ? GetTimestampStr() : "";
+            logTimestamp.insert(0,"_");
+            size_t dot_pos = logfn.find_last_of(".");
+            if(dot_pos!=logfn.npos)
+                logfn.insert(dot_pos,logTimestamp);
+            else
+                logfn += logTimestamp;
+        }
+
+        logfile = fopen((logsDir+logfn).c_str(), "w");
     }
 
     std::string gmlogname = sConfig.GetStringDefault("GMLogFile", "");
     if(gmlogname!="")
     {
-        gmlogfile = fopen(gmlogname.c_str(), "a");
+        gmLogfile = fopen((logsDir+gmlogname).c_str(), "a");
     }
 
     std::string dberlogname = sConfig.GetStringDefault("DBErrorLogFile", "");
     if(dberlogname!="")
     {
-        dberlogfile = fopen(dberlogname.c_str(), "a");
+        dberLogfile = fopen((logsDir+dberlogname).c_str(), "a");
     }
-
+    std::string ralogname = sConfig.GetStringDefault("RaLogFile", "");
+    if(ralogname!="")
+    {
+        raLogfile = fopen((logsDir+ralogname).c_str(), "a");
+    }
     m_logLevel     = sConfig.GetIntDefault("LogLevel", 0);
     m_logFileLevel = sConfig.GetIntDefault("LogFileLevel", 0);
     InitColors(sConfig.GetStringDefault("LogColors", ""));
@@ -213,6 +236,21 @@ void Log::outTimestamp(FILE* file)
     //       MM     minutes (2 digits 00-59)
     //       SS     seconds (2 digits 00-59)
     fprintf(file,"%-4d-%02d-%02d %02d:%02d:%02d ",aTm->tm_year+1900,aTm->tm_mon+1,aTm->tm_mday,aTm->tm_hour,aTm->tm_min,aTm->tm_sec);
+}
+
+std::string Log::GetTimestampStr() const
+{
+    time_t t = time(NULL);
+    tm* aTm = localtime(&t);
+    //       YYYY   year
+    //       MM     month (2 digits 01-12)
+    //       DD     day (2 digits 01-31)
+    //       HH     hour (2 digits 00-23)
+    //       MM     minutes (2 digits 00-59)
+    //       SS     seconds (2 digits 00-59)
+    char buf[20];
+    snprintf(buf,20,"%04d-%02d-%02d_%02d-%02d-%02d",aTm->tm_year+1900,aTm->tm_mon+1,aTm->tm_mday,aTm->tm_hour,aTm->tm_min,aTm->tm_sec);
+    return std::string(buf);
 }
 
 void Log::outTitle( const char * str)
@@ -323,14 +361,14 @@ void Log::outErrorDb( const char * err, ... )
         fflush(logfile);
     }
 
-    if(dberlogfile)
+    if(dberLogfile)
     {
-        outTimestamp(dberlogfile);
+        outTimestamp(dberLogfile);
         va_start(ap, err);
-        vfprintf(dberlogfile, err, ap);
-        fprintf(dberlogfile, "\n" );
+        vfprintf(dberLogfile, err, ap);
+        fprintf(dberLogfile, "\n" );
         va_end(ap);
-        fflush(dberlogfile);
+        fflush(dberLogfile);
     }
     fflush(stderr);
 }
@@ -456,14 +494,14 @@ void Log::outCommand( const char * str, ... )
         va_end(ap);
         fflush(logfile);
     }
-    if(gmlogfile)
+    if(gmLogfile)
     {
-        outTimestamp(gmlogfile);
+        outTimestamp(gmLogfile);
         va_start(ap, str);
-        vfprintf(gmlogfile, str, ap);
-        fprintf(gmlogfile, "\n" );
+        vfprintf(gmLogfile, str, ap);
+        fprintf(gmLogfile, "\n" );
         va_end(ap);
-        fflush(gmlogfile);
+        fflush(gmLogfile);
     }
     fflush(stdout);
 }
@@ -517,4 +555,20 @@ void error_log(const char * str, ...)
     va_end(ap);
 
     MaNGOS::Singleton<Log>::Instance().outError(buf);
+}
+
+void Log::outRALog(    const char * str, ... )
+{
+    if( !str ) return;
+    va_list ap;
+    if (raLogfile)
+    {
+        outTimestamp(raLogfile);
+        va_start(ap, str);
+        vfprintf(raLogfile, str, ap);
+        fprintf(raLogfile, "\n" );
+        va_end(ap);
+        fflush(raLogfile);
+    }
+     fflush(stdout);
 }

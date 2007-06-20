@@ -50,7 +50,6 @@ RASocket::RASocket(ISocketHandler &h): TcpSocket(h)
     iSess =iSession++ ;
 
     ///- Get the config parameters
-    bLog = sConfig.GetBoolDefault( "RA.Log", 1 );
     bSecure = sConfig.GetBoolDefault( "RA.Secure", 1 );
     iMinLevel = sConfig.GetIntDefault( "RA.MinLevel", 3 );
 
@@ -66,10 +65,8 @@ RASocket::~RASocket()
     ///- Delete buffer and decrease active admins count
     delete [] buff;
 
-    if(bLog)
-    {
-        Log("Connection was closed.\n");
-    }
+   sLog.outRALog("Connection was closed.\n");
+
     if(stage==OK)
         iUsers--;
 }
@@ -77,12 +74,10 @@ RASocket::~RASocket()
 /// Accept an incoming connection
 void RASocket::OnAccept()
 {
-    if(bLog)
-    {
+    
         std::string ss=GetRemoteAddress();
-        Log("Incoming connection from %s.\n",ss.c_str());
-    }
-    ///- If there is already an active admin, drop the connection
+       sLog.outRALog("Incoming connection from %s.\n",ss.c_str());
+       ///- If there is already an active admin, drop the connection
     if(iUsers)
         dropclient
 
@@ -99,8 +94,7 @@ void RASocket::OnRead()
     unsigned int sz=ibuf.GetLength();
     if(iInputLength+sz>=RA_BUFF_SIZE)
     {
-        if (bLog)
-            Log("Input buffer overflow, possible DOS attack.\n");
+      sLog.outRALog("Input buffer overflow, possible DOS attack.\n");
         SetCloseAndDelete();
         return;
     }
@@ -158,7 +152,7 @@ void RASocket::OnRead()
                     if(!result)
                     {
                         Sendf("-No such user.\r\n");
-                        if(bLog)Log("User %s does not exist.\n",szLogin.c_str());
+                        sLog.outRALog("User %s does not exist.\n",szLogin.c_str());
                         if(bSecure)SetCloseAndDelete();
                     }
                     else
@@ -171,7 +165,7 @@ void RASocket::OnRead()
                         if(fields[1].GetUInt32()<iMinLevel)
                         {
                             Sendf("-Not enough privileges.\r\n");
-                            if(bLog)Log("User %s has no privilege.\n",szLogin.c_str());
+                            sLog.outRALog("User %s has no privilege.\n",szLogin.c_str());
                             if(bSecure)SetCloseAndDelete();
                         }   else
                         {
@@ -193,13 +187,13 @@ void RASocket::OnRead()
                         iUsers++;
 
                         Sendf("+Logged in.\r\n");
-                        if(bLog)Log("User %s has logged in.\n",szLogin.c_str());
+                        sLog.outRALog("User %s has logged in.\n",szLogin.c_str());
                     }
                     else
                     {
                         ///- Else deny access
                         Sendf("-Wrong pass.\r\n");
-                        if(bLog)Log("User %s has failed to log in.\n",szLogin.c_str());
+                        sLog.outRALog("User %s has failed to log in.\n",szLogin.c_str());
                         if(bSecure)SetCloseAndDelete();
                     }
                 }
@@ -208,7 +202,7 @@ void RASocket::OnRead()
             case OK:
                 if(strlen(buff))
                 {
-                    if(bLog)Log("Got '%s' cmd.\n",buff);
+                    sLog.outRALog("Got '%s' cmd.\n",buff);
                     ParseCommand(&RASocket::zprintf , buff);
                 }
                 break;
@@ -235,26 +229,4 @@ int RASocket::zprintf( const char * szText, ... )
     delete [] megabuffer;
     va_end(ap);
     return 0;
-}
-
-/// Loging function
-void RASocket:: Log( const char * szText, ... )
-{
-    if( !szText ) return;
-    va_list ap;
-    va_start(ap, szText);
-    time_t t = time(NULL);
-    struct tm *tp = localtime(&t);
-    FILE *pFile=fopen("RA.log","at");
-    if (pFile)
-    {
-        fprintf(pFile,"[%d-%02d-%02d %02d:%02d:%02d] [%d] ",
-            tp -> tm_year + 1900,
-            tp -> tm_mon + 1,
-            tp -> tm_mday,
-            tp -> tm_hour,tp -> tm_min,tp -> tm_sec,iSess);
-        vfprintf( pFile, szText, ap );
-        fclose(pFile);
-    }
-    va_end(ap);
 }

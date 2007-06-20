@@ -55,20 +55,24 @@ const int Color_count = int(WHITE)+1;
 class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThread::FastMutex> >
 {
     friend class MaNGOS::OperatorNew<Log>;
-    Log() : logfile(NULL), gmlogfile(NULL), dberlogfile(NULL), m_colored(false) { Initialize(); }
+    Log() : logfile(NULL), gmLogfile(NULL), dberLogfile(NULL), raLogfile(NULL), m_colored(false) { Initialize(); }
     ~Log()
     {
         if( logfile != NULL )
             fclose(logfile);
         logfile = NULL;
 
-        if( gmlogfile != NULL )
-            fclose(gmlogfile);
-        gmlogfile = NULL;
+        if( gmLogfile != NULL )
+            fclose(gmLogfile);
+        gmLogfile = NULL;
 
-        if( dberlogfile != NULL )
-            fclose(dberlogfile);
-        dberlogfile = NULL;
+        if( dberLogfile != NULL )
+            fclose(dberLogfile);
+        dberLogfile = NULL;
+        
+        if (raLogfile != NULL)
+            fclose(raLogfile);
+        raLogfile = NULL;
     }
     public:
         void Initialize();
@@ -82,17 +86,21 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
         void outDebug( const char * str, ... );             // log level >= 3
         void outMenu( const char * str, ... );              // any log level
         void outErrorDb( const char * str, ... );           // any log level
+        void outRALog( const char * str, ... );             // any log level
         void SetLogLevel(char * Level);
         void SetLogFileLevel(char * Level);
         void SetColor(bool stdout_stream, Color color);
         void ResetColor(bool stdout_stream);
         void outTimestamp(FILE* file);
+        std::string GetTimestampStr() const;
         uint32 getLogFilter() const { return m_logFilter; }
         bool IsOutDebug() const { return m_logLevel > 2 || m_logFileLevel > 2 && logfile; }
     private:
+        FILE* raLogfile;
         FILE* logfile;
-        FILE* gmlogfile;
-        FILE* dberlogfile;
+        FILE* gmLogfile;
+        FILE* dberLogfile;
+
         uint32 m_logLevel;
         uint32 m_logFileLevel;
         bool m_colored;
