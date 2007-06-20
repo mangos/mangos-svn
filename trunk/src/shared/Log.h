@@ -75,19 +75,20 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
         void InitColors(std::string init_str);
         void outTitle( const char * str);
         void outCommand( const char * str, ...);
-        void outString( const char * str, ... );
-        void outError( const char * err, ... );
-        void outBasic( const char * str, ... );
-        void outDetail( const char * str, ... );
-        void outDebug( const char * str, ... );
-        void outMenu( const char * str, ... );
-        void outErrorDb( const char * str, ... );
+        void outString( const char * str, ... );            // any log level
+        void outError( const char * err, ... );             // any log level
+        void outBasic( const char * str, ... );             // log level >= 1
+        void outDetail( const char * str, ... );            // log level >= 2
+        void outDebug( const char * str, ... );             // log level >= 3
+        void outMenu( const char * str, ... );              // any log level
+        void outErrorDb( const char * str, ... );           // any log level
         void SetLogLevel(char * Level);
         void SetLogFileLevel(char * Level);
         void SetColor(bool stdout_stream, Color color);
         void ResetColor(bool stdout_stream);
         void outTimestamp(FILE* file);
         uint32 getLogFilter() const { return m_logFilter; }
+        bool IsOutDebug() const { return m_logLevel > 2 || m_logFileLevel > 2 && logfile; }
     private:
         FILE* logfile;
         FILE* gmlogfile;

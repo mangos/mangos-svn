@@ -387,9 +387,12 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     _session = new WorldSession(id, this,security,tbc,mutetime);
     sWorld.AddSession(_session);
 
-    sLog.outDebug( "SOCKET: Client '%s' authenticated successfully.", account.c_str() );
-    sLog.outDebug( "Account: '%s' Logged in from IP %s.", account.c_str(), GetRemoteAddress().c_str());
-    
+    if(sLog.IsOutDebug())                                   // optimize disabled debug output
+    {
+        sLog.outDebug( "SOCKET: Client '%s' authenticated successfully.", account.c_str() );
+        sLog.outDebug( "Account: '%s' Logged in from IP %s.", account.c_str(), GetRemoteAddress().c_str());
+    }
+
     ///- Update the last_ip in the database
     //No SQL injection, username escaped.
     loginDatabase.PExecute("UPDATE `account` SET `last_ip` = '%s' WHERE `username` = '%s'",GetRemoteAddress().c_str(), safe_account.c_str());
