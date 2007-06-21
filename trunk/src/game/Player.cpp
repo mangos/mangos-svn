@@ -6528,8 +6528,10 @@ void Player::SetSheath( uint32 sheathed )
     SetUInt32Value(UNIT_FIELD_BYTES_2, 0x2800+sheathed);    // this must visualize Sheath changing for other players...
 }
 
-uint8 Player::FindEquipSlot( uint32 type, uint32 slot, bool swap ) const
-{
+uint8 Player::FindEquipSlot( uint32 type, uint32 slot, bool swap, Item *pItem ) const
+ {
+	ItemPrototype const *pProto = pItem->GetProto();
+	uint8 pClass = getClass();
     uint8 slots[4];
     slots[0] = NULL_SLOT;
     slots[1] = NULL_SLOT;
@@ -6624,8 +6626,23 @@ uint8 Player::FindEquipSlot( uint32 type, uint32 slot, bool swap ) const
             slots[3] = INVENTORY_SLOT_BAG_4;
             break;
         case INVTYPE_RELIC:
-            slots[0] = EQUIPMENT_SLOT_RANGED;
-            break;
+			{
+				switch(pProto->SubClass)
+				{
+					case ITEM_SUBCLASS_ARMOR_LIBRAM:
+						if (pClass == CLASS_PALADIN)
+							slots[0] = EQUIPMENT_SLOT_RANGED;
+					break;
+					case ITEM_SUBCLASS_ARMOR_IDOL:
+						if (pClass == CLASS_DRUID)
+							slots[0] = EQUIPMENT_SLOT_RANGED;
+					break;
+					case ITEM_SUBCLASS_ARMOR_TOTEM:
+					if (pClass == CLASS_SHAMAN)
+							slots[0] = EQUIPMENT_SLOT_RANGED;
+					break;
+				}
+			};break;
         default :
             return NULL_SLOT;
     }
@@ -7605,7 +7622,7 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
                 return EQUIP_ERR_CANT_DO_RIGHT_NOW;         // maybe exist better err
 
             uint32 type = pProto->InventoryType;
-            uint8 eslot = FindEquipSlot( type, slot, swap );
+            uint8 eslot = FindEquipSlot( type, slot, swap, pItem );
             if( eslot == NULL_SLOT )
                 return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
 
