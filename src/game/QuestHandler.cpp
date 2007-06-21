@@ -374,7 +374,12 @@ void WorldSession::HandleQuestComplete(WorldPacket& recv_data)
     if( pQuest )
     {
         if( _player->GetQuestStatus( quest ) != QUEST_STATUS_COMPLETE )
-            _player->PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, false, false);
+        {
+            if( pQuest->IsRepeatable() )
+                _player->PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, _player->CanCompleteRepeatableQuest(pQuest), false);
+            else
+                _player->PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, false, false);
+        }
         else
             _player->PlayerTalkClass->SendQuestGiverRequestItems(pQuest, guid, true, false);
     }

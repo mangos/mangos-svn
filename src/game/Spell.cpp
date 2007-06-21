@@ -77,10 +77,6 @@ SpellCastTargets::~SpellCastTargets()
 
 void SpellCastTargets::setUnitTarget(Unit *target)
 {
-
-    if (!target)
-        return;
-
     m_destX = target->GetPositionX();
     m_destY = target->GetPositionY();
     m_destZ = target->GetPositionZ();
@@ -971,12 +967,15 @@ void Spell::cast(bool skipCheck)
                 
                 if ( ApplyDamageMultiplier )
                     DamageMultiplier *= m_spellInfo->DmgMultiplier[j];
-
-                //Call scripted function for AI if this spell is casted upon a creature
-                if (unit->GetTypeId() == TYPEID_UNIT && ((Creature*)unit)->AI())
-                    ((Creature*)unit)->AI()->SpellHit(m_caster,m_spellInfo);
             }
         }
+
+        //Call scripted function for AI if this spell is casted upon a creature
+        // Some Script Spell Destroy the target or something and the target is allways the player
+        // so here i overwrite that, Spell 8593, is a good example of this.
+        Unit * _target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player *)m_caster)->GetSelection());
+        if( _target && _target->GetTypeId() == TYPEID_UNIT && ((Creature*)_target)->AI())
+            ((Creature*)_target)->AI()->SpellHit(m_caster,m_spellInfo);
 
         for(std::list<Item*>::iterator iitem = m_targetItems[j].begin();iitem != m_targetItems[j].end();iitem++)
             HandleEffects(NULL,(*iitem),NULL,j);
@@ -1341,8 +1340,13 @@ void Spell::finish(bool ok)
     if( m_caster->GetTypeId() == TYPEID_PLAYER && !IsAutoRepeat() && !IsMeleeSpell() && !IsChannelActive() )
     {
         if( m_targets.getUnitTarget() && m_targets.getUnitTarget()->GetTypeId() == TYPEID_UNIT )
-        {
             ((Player*)m_caster)->CastedCreatureOrGO(m_targets.getUnitTarget()->GetEntry(),m_targets.getUnitTarget()->GetGUID(),m_spellInfo->Id);
+        else 
+        {    
+            //Some Spell like 8593, Overwrite Spell Target don't know why, so i overwrite here.
+            Unit * _target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player *)m_caster)->GetSelection());
+            if( _target && _target->GetTypeId() == TYPEID_UNIT)
+                ((Player*)m_caster)->CastedCreatureOrGO(_target->GetEntry(),_target->GetGUID(),m_spellInfo->Id);
         }
 
         if( m_targets.getGOTarget() )

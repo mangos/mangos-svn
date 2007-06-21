@@ -98,7 +98,7 @@ bool ChatHandler::HandleSetPoiCommand(const char* args)
 bool ChatHandler::HandleSendItemErrorMsg(const char* args)
 {
     uint8 error_msg = atol((char*)args);
-    if(error_msg >= 0)
+    if(error_msg > 0)
         m_session->GetPlayer()->SendEquipError(error_msg, 0, 0);
     return true;
 }
