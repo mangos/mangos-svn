@@ -318,28 +318,30 @@ Player* Item::GetOwner()const
 
 uint32 Item::GetSkill()
 {
-    const static uint32 item_weapon_skills[]=
+    const static uint32 item_weapon_skills[MAX_ITEM__SUBCLASS_WEAPON] =
     {
-        SKILL_AXES, SKILL_2H_AXES,SKILL_BOWS, SKILL_GUNS,SKILL_MACES, SKILL_2H_MACES,
-        SKILL_POLEARMS, SKILL_SWORDS,SKILL_2H_SWORDS,0, SKILL_STAVES,0,0,0,0, SKILL_DAGGERS,
-        SKILL_THROWN, SKILL_ASSASSINATION, SKILL_CROSSBOWS, SKILL_WANDS, SKILL_FISHING
+        SKILL_AXES,     SKILL_2H_AXES,  SKILL_BOWS,          SKILL_GUNS,      SKILL_MACES,  
+        SKILL_2H_MACES, SKILL_POLEARMS, SKILL_SWORDS,        SKILL_2H_SWORDS, 0,
+        SKILL_STAVES,   0,              0,                   SKILL_UNARMED,   0,
+        SKILL_DAGGERS,  SKILL_THROWN,   SKILL_ASSASSINATION, SKILL_CROSSBOWS, SKILL_WANDS,
+        SKILL_FISHING
     };
 
-    const static uint32 item_armor_skills[]=
+    const static uint32 item_armor_skills[MAX_ITEM_SUBCLASS_ARMOR] =
     {
-        0,SKILL_CLOTH,SKILL_LEATHER,SKILL_MAIL,SKILL_PLATE_MAIL,0,SKILL_SHIELD
+        0,SKILL_CLOTH,SKILL_LEATHER,SKILL_MAIL,SKILL_PLATE_MAIL,0,SKILL_SHIELD,0,0,0
     };
 
     switch (GetProto()->Class)
     {
         case ITEM_CLASS_WEAPON:
-            if( GetProto()->SubClass >= sizeof(item_weapon_skills)/4 )
+            if( GetProto()->SubClass >= MAX_ITEM__SUBCLASS_WEAPON )
                 return 0;
             else
                 return item_weapon_skills[GetProto()->SubClass];
 
         case ITEM_CLASS_ARMOR:
-            if( GetProto()->SubClass >= sizeof(item_armor_skills)/4 )
+            if( GetProto()->SubClass >= MAX_ITEM_SUBCLASS_ARMOR )
                 return 0;
             else
                 return item_armor_skills[GetProto()->SubClass];

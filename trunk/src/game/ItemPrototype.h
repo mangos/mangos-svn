@@ -276,6 +276,8 @@ enum INVENTORY_SUBCLASS_WEAPON
     ITEM_SUBCLASS_WEAPON_FISHING_POLE           = 20
 };
 
+#define MAX_ITEM__SUBCLASS_WEAPON                 21
+
 enum ITEM_SUBCLASS_GEM
 {
     ITEM_SUBCLASS_GEM_RED                       = 0,
@@ -302,6 +304,7 @@ enum ITEM_SUBCLASS_ARMOR
     ITEM_SUBCLASS_ARMOR_IDOL                    = 8,
     ITEM_SUBCLASS_ARMOR_TOTEM                   = 9
 };
+#define MAX_ITEM_SUBCLASS_ARMOR                  10
 
 enum ITEM_SUBCLASS_PROJECTILE
 {
