@@ -310,10 +310,10 @@ class ByteBuffer
             if(!sLog.IsOutDebug())                           // optimize disabled debug output
                 return;
 
-            sLog.outDebug("STORAGE_SIZE: %u\n", size() );
+            sLog.outDebug("STORAGE_SIZE: %u", size() );
             for(uint32 i = 0; i < size(); i++)
-                sLog.outDebug("%u - ", read<uint8>(i) );
-            sLog.outDebug("\n");
+                sLog.outDebugInLine("%u - ", read<uint8>(i) );
+            sLog.outDebug("");
         }
 
         void textlike()
@@ -321,10 +321,10 @@ class ByteBuffer
             if(!sLog.IsOutDebug())                           // optimize disabled debug output
                 return;
 
-            sLog.outDebug("STORAGE_SIZE: %u\n", size() );
+            sLog.outDebug("STORAGE_SIZE: %u", size() );
             for(uint32 i = 0; i < size(); i++)
-                sLog.outDebug("%c", read<uint8>(i) );
-            sLog.outDebug("\n");
+                sLog.outDebugInLine("%c", read<uint8>(i) );
+            sLog.outDebug("");
         }
 
         void hexlike()
@@ -333,18 +333,18 @@ class ByteBuffer
                 return;
 
             uint32 j = 1, k = 1;
-            sLog.outDebug("STORAGE_SIZE: %u\n", size() );
+            sLog.outDebug("STORAGE_SIZE: %u", size() );
             for(uint32 i = 0; i < size(); i++)
             {
                 if ((i == (j*8)) && ((i != (k*16))))
                 {
                     if (read<uint8>(i) < 0x0F)
                     {
-                        sLog.outDebug("| 0%X ", read<uint8>(i) );
+                        sLog.outDebugInLine("| 0%X ", read<uint8>(i) );
                     }
                     else
                     {
-                        sLog.outDebug("| %X ", read<uint8>(i) );
+                        sLog.outDebugInLine("| %X ", read<uint8>(i) );
                     }
                     j++;
                 }
@@ -352,11 +352,11 @@ class ByteBuffer
                 {
                     if (read<uint8>(i) < 0x0F)
                     {
-                        sLog.outDebug("\n0%X ", read<uint8>(i) );
+                        sLog.outDebugInLine("\n0%X ", read<uint8>(i) );
                     }
                     else
                     {
-                        sLog.outDebug("\n%X ", read<uint8>(i) );
+                        sLog.outDebugInLine("\n%X ", read<uint8>(i) );
                     }
 
                     k++;
@@ -366,15 +366,15 @@ class ByteBuffer
                 {
                     if (read<uint8>(i) < 0x0F)
                     {
-                        sLog.outDebug("0%X ", read<uint8>(i) );
+                        sLog.outDebugInLine("0%X ", read<uint8>(i) );
                     }
                     else
                     {
-                        sLog.outDebug("%X ", read<uint8>(i) );
+                        sLog.outDebugInLine("%X ", read<uint8>(i) );
                     }
                 }
             }
-            sLog.outDebug("\n");
+            sLog.outDebug("");
         }
 
     protected:
