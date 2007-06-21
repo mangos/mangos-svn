@@ -83,6 +83,7 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
         void outError( const char * err, ... );             // any log level
         void outBasic( const char * str, ... );             // log level >= 1
         void outDetail( const char * str, ... );            // log level >= 2
+        void outDebugInLine( const char * str, ... );       // log level >= 3
         void outDebug( const char * str, ... );             // log level >= 3
         void outMenu( const char * str, ... );              // any log level
         void outErrorDb( const char * str, ... );           // any log level

@@ -106,7 +106,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
         // new inspect stats
     objmgr.opcodeTable[ MSG_INSPECT_HONOR_STATS ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleInspectHonorStatsOpcode       );
 
-        // charater view
+        // character view
     objmgr.opcodeTable[ CMSG_TOGGLE_HELM ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleToggleHelmOpcode              );
     objmgr.opcodeTable[ CMSG_TOGGLE_CLOAK ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleToggleCloakOpcode             );
 
@@ -462,8 +462,45 @@ void WorldSession::SetSocket(WorldSocket *sock)
 /// Send a packet to the client
 void WorldSession::SendPacket(WorldPacket* packet)
 {
-    if (_socket)
-        _socket->SendPacket(packet);
+    if (!_socket)
+        return;
+#ifdef MANGOS_DEBUG
+    // Code for network use statistic
+    static uint64 sendPacketCount = 0;
+    static uint64 sendPacketBytes = 0;
+
+    static time_t firstTime = time(NULL);
+    static time_t lastTime = firstTime;                     // next 60 secs start time
+
+    static uint64 sendLastPacketCount = 0;
+    static uint64 sendLastPacketBytes = 0;
+
+    time_t cur_time = time(NULL);
+
+    if((cur_time - lastTime) < 60)
+    {
+        sendPacketCount+=1;
+        sendPacketBytes+=packet->size();
+
+        sendLastPacketCount+=1;
+        sendLastPacketBytes+=packet->size();
+    }
+    else
+    {
+        uint64 minTime = uint64(cur_time - lastTime);
+        uint64 fullTime = uint64(lastTime - firstTime);
+        sLog.outDetail("Send all time packets count: " I64FMTD " bytes: " I64FMTD " avr.count/sec: %f avr.bytes/sec: %f",sendPacketCount,sendPacketBytes,float(sendPacketCount)/fullTime,float(sendPacketBytes)/fullTime);
+        sLog.outDetail("Send last min packets count: " I64FMTD " bytes: " I64FMTD " avr.count/sec: %f avr.bytes/sec: %f",sendLastPacketCount,sendLastPacketBytes,float(sendLastPacketCount)/minTime,float(sendLastPacketBytes)/minTime);
+
+        lastTime = cur_time;
+        sendLastPacketCount = 1;
+        sendLastPacketBytes = packet->wpos();                // wpos is real written size
+    }
+
+
+#endif // !MANGOS_DEBUG
+
+    _socket->SendPacket(packet);
 }
 
 /// Add an incoming packet to the queue
@@ -480,7 +517,7 @@ bool WorldSession::Update(uint32 diff)
 
     ///- Retrieve packets from the receive queue and call the appropriate handlers
     /// \todo Is there a way to consolidate the OpcondeHandlerTable and the g_worldOpcodeNames to only maintain 1 list?
-    /// answer : there is a way, but this is better, because it would use redundand RAM
+    /// answer : there is a way, but this is better, because it would use redundant RAM
     while (!_recvQueue.empty())
     {
         packet = _recvQueue.next();
@@ -607,7 +644,6 @@ void WorldSession::LogoutPlayer(bool Save)
         ///- Release charmed creatures and unsummon totems
         _player->Uncharm();
         _player->UnsummonAllTotems();
-        _player->InvisiblePjsNear.clear();
 
         ///- empty buyback items and save the player in the database
         // some save parts only correctly work in case player present in map/player_lists (pets, etc)
@@ -719,7 +755,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         // new inspect stats
         { MSG_INSPECT_HONOR_STATS,          STATUS_LOGGEDIN, &WorldSession::HandleInspectHonorStatsOpcode       },
 
-        // charater view
+        // character view
         { CMSG_TOGGLE_HELM,                 STATUS_LOGGEDIN, &WorldSession::HandleToggleHelmOpcode              },
         { CMSG_TOGGLE_CLOAK,                STATUS_LOGGEDIN, &WorldSession::HandleToggleCloakOpcode             },
 
@@ -869,7 +905,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
         { CMSG_ACCEPT_TRADE,                STATUS_LOGGEDIN, &WorldSession::HandleAcceptTradeOpcode             },
         { CMSG_BEGIN_TRADE,                 STATUS_LOGGEDIN, &WorldSession::HandleBeginTradeOpcode              },
         { CMSG_BUSY_TRADE,                  STATUS_LOGGEDIN, &WorldSession::HandleBusyTradeOpcode               },
-                                                            // sended after loguot complete
+                                                            // sended after logout complete
         { CMSG_CANCEL_TRADE,                STATUS_AUTHED,   &WorldSession::HandleCancelTradeOpcode             },
         { CMSG_CLEAR_TRADE_ITEM,            STATUS_LOGGEDIN, &WorldSession::HandleClearTradeItemOpcode          },
         { CMSG_IGNORE_TRADE,                STATUS_LOGGEDIN, &WorldSession::HandleIgnoreTradeOpcode             },
@@ -1396,7 +1432,7 @@ void WorldSession::HandleMoveFlyStateChangeOpcode( WorldPacket & recv_data )
     // recheck
     CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4);
 
-    recv_data >> f_speed; // this is difference from standart movement opcodes...
+    recv_data >> f_speed; // this is difference from standard movement opcodes...
     sLog.outDebug("f_speed %f", f_speed);
     /*----------------*/
 }

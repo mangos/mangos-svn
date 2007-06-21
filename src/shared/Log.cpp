@@ -437,6 +437,30 @@ void Log::outDetail( const char * str, ... )
     fflush(stdout);
 }
 
+void Log::outDebugInLine( const char * str, ... )
+{
+    if( !str ) return;
+    va_list ap;
+    if( m_logLevel > 2 )
+    {
+        if(m_colored)
+            SetColor(true,m_colors[LogDebug]);
+
+        va_start(ap, str);
+        vprintf( str, ap );
+        va_end(ap);
+
+        if(m_colored)
+            ResetColor(true);
+    }
+    if(logfile && m_logFileLevel > 2)
+    {
+        va_start(ap, str);
+        vfprintf(logfile, str, ap);
+        va_end(ap);
+    }
+}
+
 void Log::outDebug( const char * str, ... )
 {
     if( !str ) return;
@@ -466,7 +490,6 @@ void Log::outDebug( const char * str, ... )
     }
     fflush(stdout);
 }
-
 void Log::outCommand( const char * str, ... )
 {
     if( !str ) return;
