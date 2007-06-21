@@ -190,8 +190,8 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
 
     sDatabase.escape_string(name);
     sDatabase.BeginTransaction();
-    sDatabase.PExecute("DELETE FROM `petition` WHERE `ownerguid` = '%u' OR `petitionguid` = '%u'", _player->GetGUIDLow(), charter->GetGUIDLow());
-    sDatabase.PExecute("DELETE FROM `petition_sign` WHERE `ownerguid` = '%u' or `petitionguid` = '%u'", _player->GetGUIDLow(), charter->GetGUIDLow());
+    sDatabase.PExecute("DELETE FROM `petition` WHERE `ownerguid` = '%u' OR `petitionguid` = '%u' and `type` = '%u'", _player->GetGUIDLow(), charter->GetGUIDLow(),type);
+    sDatabase.PExecute("DELETE FROM `petition_sign` WHERE `ownerguid` = '%u' or `petitionguid` = '%u' and `type` = '%u'", _player->GetGUIDLow(), charter->GetGUIDLow(),type);
     sDatabase.PExecute("INSERT INTO `petition` (`ownerguid`, `petitionguid`, `name`, `type`) VALUES ('%u', '%u', '%s', '%u')",
         _player->GetGUIDLow(), charter->GetGUIDLow(), name.c_str(), type);
     sDatabase.CommitTransaction();
