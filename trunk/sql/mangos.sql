@@ -7835,6 +7835,7 @@ CREATE TABLE `quest_template` (
   `OfferRewardEmote2` int(11) NOT NULL default '0',
   `OfferRewardEmote3` int(11) NOT NULL default '0',
   `OfferRewardEmote4` int(11) NOT NULL default '0',
+  `StartScript` int(11) unsigned NOT NULL default '0',
   `CompleteScript` int(11) unsigned NOT NULL default '0',
   `Repeatable` tinyint(1) unsigned NOT NULL default '0',
   PRIMARY KEY  (`entry`)
