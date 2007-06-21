@@ -9619,6 +9619,9 @@ void Player::SendPreparedQuest( uint64 guid )
                 PlayerTalkClass->SendQuestGiverRequestItems( pQuest, guid, CanRewardQuest(pQuest,false), true );
             else if( status == DIALOG_STATUS_INCOMPLETE )
                 PlayerTalkClass->SendQuestGiverRequestItems( pQuest, guid, false, true );
+            // Send completable on repetable quest if player don't have quest
+            else if( pQuest->IsRepeatable() ) 
+                PlayerTalkClass->SendQuestGiverRequestItems( pQuest, guid, CanCompleteRepeatableQuest(pQuest), true );
             else
                 PlayerTalkClass->SendQuestGiverQuestDetails( pQuest, guid, true );
         }
@@ -9812,6 +9815,24 @@ bool Player::CanCompleteQuest( uint32 quest_id )
     return false;
 }
 
+bool Player::CanCompleteRepeatableQuest( Quest *pQuest )
+{
+    // Solve probleme that player don't have the quest and try complete it.
+    // if repetable she must be able to complete event if player don't have it.
+    // Seem that all repetable quest are DELIVER Flag so, no need to add more.
+    if( !CanTakeQuest(pQuest, false) )
+        return false;
+
+    if (pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER) )
+        for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
+            if( pQuest->ReqItemId[i] && pQuest->ReqItemCount[i] && !HasItemCount(pQuest->ReqItemId[i],pQuest->ReqItemCount[i]) )
+                return false;
+
+    if( !CanRewardQuest(pQuest, false) )
+        return false;
+        
+    return true;
+}
 bool Player::CanRewardQuest( Quest *pQuest, bool msg )
 {
     if( pQuest )
