@@ -1596,7 +1596,7 @@ void Aura::HandleAuraTrackStealthed(bool apply, bool Real)
     if(apply)
         m_target->RemoveNoStackAurasDueToAura(this);
 
-    //TODO: add stealthed tracking effect
+    m_target->ApplyModFlag(PLAYER_FIELD_BYTES,0x02,apply);
 }
 
 void Aura::HandleAuraModScale(bool apply, bool Real)
