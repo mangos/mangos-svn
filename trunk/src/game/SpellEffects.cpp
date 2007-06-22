@@ -1036,19 +1036,11 @@ void Spell::EffectPowerBurn(uint32 i)
     if(damage < 0)
         return;
 
-    uint32 curPower = unitTarget->GetPower(POWER_MANA);
+    int32 curPower = int32(unitTarget->GetPower(POWER_MANA));
 
-    int32 new_damage;
-    if(curPower < uint32(damage))
-        new_damage = curPower;
-    else
-        new_damage = damage;
-
-    int32 tmpvalue = int32(new_damage*m_spellInfo->EffectMultipleValue[i]);
+    int32 new_damage = (curPower < damage) ? curPower : damage;
 
     unitTarget->ModifyPower(POWER_MANA,-new_damage);
-
-    m_caster->ModifyPower(POWER_MANA,tmpvalue);
     m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage/2, m_IsTriggeredSpell, true);
 }
 
