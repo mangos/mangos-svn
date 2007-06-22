@@ -1090,7 +1090,8 @@ void Spell::EffectHeal( uint32 i )
         if(unitTarget->GetTypeId() == TYPEID_PLAYER)
             m_caster->SendHealSpellOnPlayer(unitTarget, m_spellInfo->Id, addhealth, crit);
 
-        unitTarget->ModifyHealth( addhealth );
+        int32 gain = unitTarget->ModifyHealth( addhealth );
+        m_caster->ThreatAssist(unitTarget, float(gain) * 0.5f, m_spellInfo->School, m_spellInfo);
 
         uint32 procHealer = PROC_FLAG_HEAL;
         if (crit)
@@ -2318,7 +2319,8 @@ void Spell::EffectHealMaxHealth(uint32 i)
     if(m_spellInfo->SpellVisual == 132)                     // drain all caster's mana
         m_caster->SetPower(POWER_MANA, 0);
 
-    unitTarget->ModifyHealth(heal);
+    int32 gain = unitTarget->ModifyHealth(heal);
+    m_caster->ThreatAssist(unitTarget, float(gain) * 0.5f, m_spellInfo->School, m_spellInfo);
 
     if(unitTarget->GetTypeId() == TYPEID_PLAYER)
         m_caster->SendHealSpellOnPlayer(unitTarget, m_spellInfo->Id, heal);
