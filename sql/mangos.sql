@@ -209,7 +209,7 @@ CREATE TABLE `battleground_template` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table `auctionhouse`
+-- Dumping data for table `battleground_template`
 --
 
 LOCK TABLES `battleground_template` WRITE;
