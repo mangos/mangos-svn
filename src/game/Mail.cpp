@@ -431,7 +431,9 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
     uint8 mails_count = 0;
     time_t cur_time = time(NULL);
     std::deque<Mail*>::iterator itr;
-    for (itr = pl->GetmailBegin(); itr != pl->GetmailEnd();itr++)
+
+    // client have limitation (~217) mail to show in mail box and can crash i receive more
+    for (itr = pl->GetmailBegin(); itr != pl->GetmailEnd() && mails_count < 217; itr++)
     {
         // skip deleted or not delivered (deliver delay not expired) mails
         if ((*itr)->state == MAIL_STATE_DELETED || (*itr)->item_guid != 0 && cur_time < (*itr)->deliver_time)
