@@ -2562,7 +2562,7 @@ void Spell::EffectStuck(uint32 i)
         return;
 
     sLog.outDebug("Spell Effect: Stuck");
-    sLog.outCommand("Player %s (guid %u) used auto-unstuck future at map %u (%f, %f, %f)", m_caster->GetName(), m_caster->GetGUIDLow(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ());
+    sLog.outDetail("Player %s (guid %u) used auto-unstuck future at map %u (%f, %f, %f)", m_caster->GetName(), m_caster->GetGUIDLow(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ());
     HandleTeleport(m_spellInfo->Id, m_caster);
 
     // from patch 2.0.12 Stuck spell trigger Hearthstone cooldown
