@@ -324,7 +324,7 @@ bool Creature::Create (uint32 guidlow, uint32 mapid, float x, float y, float z, 
 
 uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
 {
-    uint32 result = DIALOG_STATUS_NONE;
+    uint32 result = defstatus;
     QuestStatus status;
     uint32 quest_id;
     Quest *pQuest;
@@ -332,6 +332,7 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
     QuestRelations const& qir = objmgr.mCreatureQuestInvolvedRelations;
     for(QuestRelations::const_iterator i = qir.lower_bound(GetEntry()); i != qir.upper_bound(GetEntry()); ++i )
     {
+        uint32 result2 = 0;
         quest_id = i->second;
         pQuest = objmgr.QuestTemplates[quest_id];
         if ( !pQuest ) continue;
@@ -340,30 +341,26 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
         if ((status == QUEST_STATUS_COMPLETE && !pPlayer->GetQuestRewardStatus(quest_id)) ||
             (pQuest->IsAutoComplete() && pPlayer->CanTakeQuest(pQuest, false)))
         {
-            SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TRACK_UNIT);
-
             if ( pQuest->IsAutoComplete() && pQuest->IsRepeatable() )
-                return DIALOG_STATUS_REWARD_REP;
+                result2 = DIALOG_STATUS_REWARD_REP;
             else
-                return DIALOG_STATUS_REWARD;
+                result2 = DIALOG_STATUS_REWARD;
         }
         else if ( status == QUEST_STATUS_INCOMPLETE )
-            result = DIALOG_STATUS_INCOMPLETE;
+            result2 = DIALOG_STATUS_INCOMPLETE;
+
+        if (result2 > result)
+            result = result2;
     }
-
-    RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TRACK_UNIT);
-
-    if ( result == DIALOG_STATUS_INCOMPLETE )
-        return result;
 
     QuestRelations const& qr = objmgr.mCreatureQuestRelations;
     for(QuestRelations::const_iterator i = qr.lower_bound(GetEntry()); i != qr.upper_bound(GetEntry()); ++i )
     {
+        uint32 result2 = 0;
         pQuest = objmgr.QuestTemplates[quest_id = i->second];
         if ( !pQuest )
             continue;
 
-        quest_id = pQuest->GetQuestId();
         status = pPlayer->GetQuestStatus( quest_id );
         if ( status == QUEST_STATUS_NONE )
         {
@@ -371,27 +368,33 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
             {
                 if ( pPlayer->SatisfyQuestLevel(quest_id, false) )
                 {
-                    if ( pQuest->IsAutoComplete() )
-                        return DIALOG_STATUS_REWARD_REP;
+                    if ( pQuest->IsAutoComplete() || (pQuest->IsRepeatable() && pPlayer->getQuestStatusMap()[quest_id].m_rewarded))
+                        result2 = DIALOG_STATUS_REWARD_REP;
+                    else if (pPlayer->getLevel() <= pQuest->GetQuestLevel() + 4)
+                        result2 = DIALOG_STATUS_AVAILABLE;
                     else
-                        return DIALOG_STATUS_AVAILABLE;
+                        result2 = DIALOG_STATUS_CHAT;
                 }
-                result = DIALOG_STATUS_UNAVAILABLE;
+                else
+                    result2 = DIALOG_STATUS_UNAVAILABLE;
             }
         }
+
+        if (result2 > result)
+            result = result2;
     }
 
-    // can train and help unlearn talentes (2 action -> chat menu)
-    if( isCanTrainingAndResetTalentsOf(pPlayer) )
-        return DIALOG_STATUS_CHAT;
-
-    if ( result == DIALOG_STATUS_UNAVAILABLE )
-        return result;
-
-    if ( defstatus == DIALOG_STATUS_NONE )
-        return DIALOG_STATUS_NONE;
+    /* Not needed?
+    if (result >= DIALOG_STATUS_REWARD_OLD)
+        SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TRACK_UNIT);
     else
-        return DIALOG_STATUS_CHAT;
+        RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TRACK_UNIT);*/
+
+    // can train and help unlearn talentes (2 action -> chat menu)
+    if( isCanTrainingAndResetTalentsOf(pPlayer) && result < DIALOG_STATUS_CHAT)
+        result = DIALOG_STATUS_CHAT;
+
+    return result;
 }
 
 bool Creature::isCanTrainingOf(Player* pPlayer, bool msg) const
