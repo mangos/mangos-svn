@@ -77,6 +77,9 @@ SpellCastTargets::~SpellCastTargets()
 
 void SpellCastTargets::setUnitTarget(Unit *target)
 {
+    if (!target)
+        return;
+
     m_destX = target->GetPositionX();
     m_destY = target->GetPositionY();
     m_destZ = target->GetPositionZ();
@@ -967,15 +970,18 @@ void Spell::cast(bool skipCheck)
                 
                 if ( ApplyDamageMultiplier )
                     DamageMultiplier *= m_spellInfo->DmgMultiplier[j];
+
+                //Call scripted function for AI if this spell is casted upon a creature
+                // Some Script Spell Destroy the target or something and the target is always the player
+                // then re-find it in grids if this creature
+                if(GUID_HIPART(*iunit)==HIGHGUID_UNIT)
+                {
+                    Creature* creature = m_caster->GetGUID()==*iunit ? (Creature*)m_caster : ObjectAccessor::Instance().GetCreature(*m_caster,*iunit);
+                    if( creature && creature->AI() )
+                        creature->AI()->SpellHit(m_caster,m_spellInfo);
+                }
             }
         }
-
-        //Call scripted function for AI if this spell is casted upon a creature
-        // Some Script Spell Destroy the target or something and the target is allways the player
-        // so here i overwrite that, Spell 8593, is a good example of this.
-        Unit * _target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player *)m_caster)->GetSelection());
-        if( _target && _target->GetTypeId() == TYPEID_UNIT && ((Creature*)_target)->AI())
-            ((Creature*)_target)->AI()->SpellHit(m_caster,m_spellInfo);
 
         for(std::list<Item*>::iterator iitem = m_targetItems[j].begin();iitem != m_targetItems[j].end();iitem++)
             HandleEffects(NULL,(*iitem),NULL,j);
@@ -1339,14 +1345,13 @@ void Spell::finish(bool ok)
     // ignore autorepeat/melee casts for speed (not exist quest for spells (hm... )
     if( m_caster->GetTypeId() == TYPEID_PLAYER && !IsAutoRepeat() && !IsMeleeSpell() && !IsChannelActive() )
     {
-        if( m_targets.getUnitTarget() && m_targets.getUnitTarget()->GetTypeId() == TYPEID_UNIT )
-            ((Player*)m_caster)->CastedCreatureOrGO(m_targets.getUnitTarget()->GetEntry(),m_targets.getUnitTarget()->GetGUID(),m_spellInfo->Id);
-        else 
-        {    
-            //Some Spell like 8593, Overwrite Spell Target don't know why, so i overwrite here.
-            Unit * _target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player *)m_caster)->GetSelection());
-            if( _target && _target->GetTypeId() == TYPEID_UNIT)
-                ((Player*)m_caster)->CastedCreatureOrGO(_target->GetEntry(),_target->GetGUID(),m_spellInfo->Id);
+        if( m_targets.getUnitTargetGUID() && GUID_HIPART(m_targets.getUnitTargetGUID())==HIGHGUID_UNIT )
+        {
+            // Some Script Spell Destroy the target or something and the target is always the player
+            // then re-find it in grids if this creature
+            Creature* creature = m_caster->GetGUID()==m_targets.getUnitTargetGUID() ? (Creature*)m_caster : ObjectAccessor::Instance().GetCreature(*m_caster,m_targets.getUnitTargetGUID());
+            if( creature )
+                ((Player*)m_caster)->CastedCreatureOrGO(creature->GetEntry(),creature->GetGUID(),m_spellInfo->Id);
         }
 
         if( m_targets.getGOTarget() )
