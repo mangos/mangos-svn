@@ -116,7 +116,7 @@ class DBCStorage
         {
             if (!indexTable) return;
             delete[] ((char*)indexTable); indexTable = NULL;
-            delete data;
+            delete[] data;
         }
 
         T** indexTable;
