@@ -147,7 +147,6 @@ struct WeatherZoneChances
 struct SpellAffection
 {
     uint16 SpellId;
-    uint8 EffectId;
     uint8 SchoolMask;
     uint16 Category;
     uint16 SkillId;
@@ -339,21 +338,13 @@ class ObjectMgr
             return NULL;
         }
 
-        typedef std::multimap<uint32, SpellAffection> SpellAffectMap;
+        typedef HM_NAMESPACE::hash_map<uint32, SpellAffection> SpellAffectMap;
         SpellAffectMap SpellAffect;
-        SpellAffection const* GetSpellAffection(uint32 spellId, uint32 effectId) const
+        SpellAffection const* GetSpellAffection(uint16 spellId, uint8 effectId) const
         {
-            if(SpellAffect.count(spellId))
-            {
-                SpellAffectMap::const_iterator node_begin = SpellAffect.lower_bound(spellId);
-                SpellAffectMap::const_iterator node_end = SpellAffect.upper_bound(spellId);
-                for(SpellAffectMap::const_iterator itr = node_begin;itr != node_end;++itr)
-                {
-                    if(itr->second.EffectId == effectId)
-                        return &itr->second;
-                }
-            }
-
+            SpellAffectMap::const_iterator itr = SpellAffect.find((spellId<<8) + effectId);
+            if( itr != SpellAffect.end( ) )
+                return &itr->second;
             return NULL;
         }
 

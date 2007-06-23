@@ -563,7 +563,7 @@ class Spell
         Unit* GetOriginalCaster() { return m_originalCaster; }
 
         void UpdatePointers();                              // must be used at call Spell code after time delay (non triggered spell cast/update spell call/etc)
-
+        bool IsAffectedBy(SpellEntry const *spellInfo, uint32 effectId);
     protected:
 
         void SendLoot(uint64 guid, LootType loottype);
