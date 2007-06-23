@@ -3053,6 +3053,20 @@ bool ObjectMgr::IsProfessionSpell(uint32 spellId)
     return IsProfessionSkill(skill);
 }
 
+bool ObjectMgr::IsPrimaryProfessionSpell(uint32 spellId)
+{
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
+    if(!spellInfo)
+        return false;
+
+    if(spellInfo->Effect[1] != SPELL_EFFECT_SKILL)
+        return false;
+
+    uint32 skill = spellInfo->EffectMiscValue[1];
+
+    return IsPrimaryProfessionSkill(skill);
+}
+
 void ObjectMgr::LoadReputationOnKill()
 {
     uint32 count = 0; 
