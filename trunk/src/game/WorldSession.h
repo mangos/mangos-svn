@@ -515,6 +515,8 @@ class MANGOS_DLL_SPEC WorldSession
         // Socket gem
         void HandleSocketOpcode(WorldPacket& recv_data);
 
+        void HandleCancelTempItemEnchantmentOpcode(WorldPacket& recv_data);
+
     private:
         Player *_player;
         WorldSocket *_socket;

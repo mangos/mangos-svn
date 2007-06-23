@@ -439,6 +439,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_DISMOUNT ]                         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleDismountOpcode                );
     objmgr.opcodeTable[ CMSG_SELF_RES ]                         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSelfResOpcode                 );
     objmgr.opcodeTable[ CMSG_SOCKET_ITEM ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSocketOpcode                  );
+    objmgr.opcodeTable[ CMSG_CANCEL_TEMP_ITEM_ENCHANTMENT]      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleCancelTempItemEnchantmentOpcode);
 }
 
 void WorldSession::SizeError(WorldPacket const& packet, uint32 size) const
