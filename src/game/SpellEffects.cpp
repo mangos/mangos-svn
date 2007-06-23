@@ -1316,10 +1316,14 @@ void Spell::EffectOpenLock(uint32 i)
     }
 
     // check key
-    if(lockInfo->key && m_CastItem && m_CastItem->GetEntry()==lockInfo->key)
+    for(int i = 0; i < 5; ++i)
     {
-        SendLoot(guid, loottype);
-        return;
+        // type==1 This means lockInfo->key[i] is an item 
+        if(lockInfo->type[i]==1 && lockInfo->key[i] && m_CastItem && m_CastItem->GetEntry()==lockInfo->key[i])
+        {
+            SendLoot(guid, loottype);
+            return;
+        }
     }
 
     uint32 SkillId = 0;
@@ -1332,7 +1336,7 @@ void Spell::EffectOpenLock(uint32 i)
     // skill bonus provided by casting spell (mostly item spells)
     uint32 spellSkillBonus = uint32(m_spellInfo->EffectBasePoints[0]+1);
 
-    uint32 reqSkillValue = lockInfo->requiredskill;
+    uint32 reqSkillValue = lockInfo->requiredminingskill;
 
     if(lockInfo->requiredlockskill)                         // required pick lock skill applying
     {

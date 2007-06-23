@@ -1423,11 +1423,11 @@ void Spell::SendSpellStart()
         data.append(m_caster->GetPackGUID());
 
     data.append(m_caster->GetPackGUID());
-    data << m_spellInfo->Id;
-    data << m_castFlags;
+    data << uint32(m_spellInfo->Id);
+    data << uint16(m_castFlags);
     data << uint32(m_timer);
 
-    data << m_targets.m_targetMask;
+    data << uint16(m_targets.m_targetMask);
     m_targets.write( &data );
     if( m_castFlags & CAST_FLAG_AMMO )
     {
@@ -2156,7 +2156,7 @@ uint8 Spell::CanCast()
                         if (m_spellInfo->EffectMiscValue[i] == LOCKTYPE_PICKLOCK)
                             ReqValue = lockInfo->requiredlockskill;
                         else
-                            ReqValue = lockInfo->requiredskill;
+                            ReqValue = lockInfo->requiredminingskill;
                     }
                     else
                         break;
