@@ -255,6 +255,14 @@ class World
 
         void ScriptsStart(map<uint32, multimap<uint32, ScriptInfo> > const& scripts, uint32 id, Object* source, Object* target);
 
+        // for max speed access
+        static uint32 GetMaxVisibleDistanceForCreature() { return m_MaxVisibleDistanceForCreature; }
+        static uint32 GetMaxVisibleDistanceForPlayer()   { return m_MaxVisibleDistanceForPlayer;   }
+        static uint32 GetMaxVisibleDistanceForObject()   { return m_MaxVisibleDistanceForObject;   }
+        static uint32 GetMaxVisibleDistanceInFlight()    { return m_MaxVisibleDistanceInFlight;    }
+        static uint32 GetVisibleUnitGreyDistance()       { return m_VisibleUnitGreyDistance;       }
+        static uint32 GetVisibleObjectGreyDistance()     { return m_VisibleObjectGreyDistance;     }
+
     protected:
         void _UpdateGameTime();
         void ScriptsProcess();
@@ -286,6 +294,14 @@ class World
 
         uint32 m_ShutdownIdleMode;
         uint32 m_ShutdownTimer;
+
+        // for max speed access
+        static uint32 m_MaxVisibleDistanceForCreature;
+        static uint32 m_MaxVisibleDistanceForPlayer;
+        static uint32 m_MaxVisibleDistanceForObject;
+        static uint32 m_MaxVisibleDistanceInFlight;
+        static uint32 m_VisibleUnitGreyDistance;
+        static uint32 m_VisibleObjectGreyDistance;
 };
 
 extern uint32 realmID;

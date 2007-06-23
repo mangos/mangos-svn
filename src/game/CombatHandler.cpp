@@ -40,7 +40,7 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
     if(!pEnemy)
     {
         if(GUID_HIPART(guid)!=HIGHGUID_PLAYER && GUID_HIPART(guid)!=HIGHGUID_UNIT)
-            sLog.outError("WORLD: Object %u (TypeID: %u) isn't player or creature",GUID_LOPART(guid),GUID_HIPART(guid));
+            sLog.outError("WORLD: Object %u (TypeID: %u) isn't player or creature",GUID_LOPART(guid),GuidHigh2TypeId(GUID_HIPART(guid)));
         else
             sLog.outError( "WORLD: Enemy %s %u not found",(GUID_HIPART(guid)==HIGHGUID_PLAYER ? "player" : "creature"),GUID_LOPART(guid));
 

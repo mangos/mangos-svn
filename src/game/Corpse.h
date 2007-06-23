@@ -57,6 +57,8 @@ class Corpse : public WorldObject
 
         GridPair const& GetGrid() const { return m_grid; }
 
+        bool isVisibleForInState(Player const* u, bool inVisibleList) const;
+
         void _ConvertCorpseToBones();                       // only call from ObjectAccessor::ConvertCorpseForPlayer
     private:
         CorpseType m_type;

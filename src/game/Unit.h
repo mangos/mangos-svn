@@ -125,12 +125,6 @@ enum InventorySlot
     NULL_SLOT                  = 255
 };
 
-enum Dist
-{
-    MAX_DIST_INVISIBLE_UNIT    = 20,                        // Max distance to be able to detect an invisible unit
-    ATTACK_DIST                = 5
-};
-
 struct FactionTemplateEntry;
 struct Modifier;
 struct SpellEntry;
@@ -221,19 +215,13 @@ enum DamageEffectType
     SELF_DAMAGE             = 5
 };
 
-enum UnitVisibilityUpdate
-{
-    VISIBLE_NOCHANGES                 = 0,
-    VISIBLE_SET_VISIBLE               = 1,
-    VISIBLE_SET_INVISIBLE             = 2,
-    VISIBLE_SET_INVISIBLE_FOR_GROUP   = 3
-};
-
 enum UnitVisibility
 {
-    VISIBILITY_OFF         = 0,
-    VISIBILITY_ON          = 1,
-    VISIBILITY_GROUP       = 2
+    VISIBILITY_OFF                = 0,                         // absolute, not detectable, GM-like, can see all other
+    VISIBILITY_ON                 = 1,
+    VISIBILITY_GROUP_STEALTH      = 2,                         // detect chance, seen and can see group members
+    VISIBILITY_GROUP_INVISIBILITY = 3,                         // invisibility, can see and can be seen only another invisible unit or invisible detection unit
+    VISIBILITY_GROUP_NO_DETECT    = 4                          // state just at stealth apply for update Grid state
 };
 
 // Value masks for UNIT_FIELD_FLAGS
@@ -799,7 +787,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint64 m_ObjectSlot[4];
         uint32 m_canMove;
         uint32 m_detectStealth;
+        uint32 m_detectInvisibility;
         uint32 m_stealthvalue;
+        uint32 m_invisibilityvalue;
         uint32 m_ShapeShiftForm;
         uint32 m_form;
         int32 m_modHitChance;
@@ -813,12 +803,17 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool isInFront(Unit const* target,float distance) const;
         void SetInFront(Unit const* target);
 
-        // Invisibility and detection system
+        // Visibility system
         UnitVisibility GetVisibility() const { return m_Visibility; }
-        UnitVisibilityUpdate GetUpdateVisibility() const { return m_UpdateVisibility; }
         void SetVisibility(UnitVisibility x);
-        void SetUpdateVisibility(UnitVisibilityUpdate x) { m_UpdateVisibility = x; }
-        bool isVisibleFor(Unit const* u, bool detect) const;
+
+        // common function for visibility checks for player/creatures with detection code
+        bool isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList = false) const;
+        
+        // virtual functions for all world objects types
+        bool isVisibleForInState(Player const* u, bool inVisibleList) const;
+        // function for low level grid visibility checks in player/creature cases
+        virtual bool IsVisibleInGridForPlayer(Player* pl) const = 0;
 
         bool m_silenced;
         bool waterbreath;
@@ -955,7 +950,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 m_state;                                     // Even derived shouldn't modify
         uint32 m_CombatTimer;
 
-        UnitVisibilityUpdate m_UpdateVisibility;
         UnitVisibility m_Visibility;
 
         Diminishing m_Diminishing;

@@ -166,6 +166,8 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         bool hasQuest(uint32 quest_id) const;
         bool hasInvolvedQuest(uint32 quest_id) const;
+
+        bool isVisibleForInState(Player const* u, bool inVisibleList) const;
     protected:
         uint32      m_spellId;
         time_t      m_respawnTime;                          // (secs) time of next respawn (or despawn if GO have owner()),

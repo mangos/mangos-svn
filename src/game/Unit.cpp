@@ -82,10 +82,11 @@ Unit::Unit( WorldObject *instantiator ) : WorldObject( instantiator )
     waterbreath = false;
 
     m_Visibility = VISIBILITY_ON;
-    m_UpdateVisibility = VISIBLE_NOCHANGES;
 
     m_detectStealth = 0;
+    m_detectInvisibility = 0;
     m_stealthvalue = 0;
+    m_invisibilityvalue = 0;
     m_transform = 0;
     m_ShapeShiftForm = 0;
 
@@ -882,8 +883,8 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, 
         }
 
         // Send damage log
-        sLog.outDetail("SpellNonMeleeDamageLog: %u %X attacked %u %X for %u dmg inflicted by %u,absorb is %u,resist is %u",
-            GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage, spellID, absorb,resist);
+        sLog.outDetail("SpellNonMeleeDamageLog: %u (TypeId: %u) attacked %u (TypeId: %u) for %u dmg inflicted by %u,absorb is %u,resist is %u",
+            GetGUIDLow(), GetTypeId(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), damage, spellID, absorb,resist);
         SendSpellNonMeleeDamageLog(pVictim, spellID, damage, spellInfo->School, absorb, resist, false, 0, crit);
 
         // Deal damage done
@@ -924,14 +925,14 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         CalcAbsorbResist(pVictim, spellProto->School, pdamage, &absorb, &resist);
     }
 
-    sLog.outDetail("PeriodicAuraLog: %u %X attacked %u %X for %u dmg inflicted by %u abs is %u",
-        GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), pdamage, spellProto->Id,absorb);
+    sLog.outDetail("PeriodicAuraLog: %u (TypeId: %u) attacked %u (TypeId: %u) for %u dmg inflicted by %u abs is %u",
+        GetGUIDLow(), GetTypeId(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), pdamage, spellProto->Id,absorb);
 
     // this packet has random structure, probably based on auraid...
     WorldPacket data(SMSG_PERIODICAURALOG, (21+16));        // we guess size
     data.append(pVictim->GetPackGUID());
     data.append(GetPackGUID());
-    data << spellProto->Id;
+    data << uint32(spellProto->Id);
     data << uint32(1);
 
     data << mod->m_auraname;
@@ -1537,11 +1538,11 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool is
     }
 
     if (GetTypeId() == TYPEID_PLAYER)
-        DEBUG_LOG("AttackerStateUpdate: (Player) %u %X attacked %u %X for %u dmg, absorbed %u, blocked %u, resisted %u.",
-            GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage, absorbed_dmg, blocked_dmg, resisted_dmg);
+        DEBUG_LOG("AttackerStateUpdate: (Player) %u attacked %u (TypeId: %u) for %u dmg, absorbed %u, blocked %u, resisted %u.",
+            GetGUIDLow(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), damage, absorbed_dmg, blocked_dmg, resisted_dmg);
     else
-        DEBUG_LOG("AttackerStateUpdate: (NPC)    %u %X attacked %u %X for %u dmg, absorbed %u, blocked %u, resisted %u.",
-            GetGUIDLow(), GetGUIDHigh(), pVictim->GetGUIDLow(), pVictim->GetGUIDHigh(), damage, absorbed_dmg, blocked_dmg, resisted_dmg);
+        DEBUG_LOG("AttackerStateUpdate: (NPC)    %u attacked %u (TypeId: %u) for %u dmg, absorbed %u, blocked %u, resisted %u.",
+            GetGUIDLow(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), damage, absorbed_dmg, blocked_dmg, resisted_dmg);
 }
 
 MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType, SpellEntry const *spellInfo)
@@ -3148,14 +3149,14 @@ void Unit::SendSpellNonMeleeDamageLog(Unit *target,uint32 SpellID,uint32 Damage,
     WorldPacket data(SMSG_SPELLNONMELEEDAMAGELOG, (16+31)); // we guess size
     data.append(target->GetPackGUID());
     data.append(GetPackGUID());
-    data << SpellID;
-    data << (Damage-AbsorbedDamage-Resist-Blocked);
-    data << DamageType;                                     //damagetype
-    data << AbsorbedDamage;                                 //AbsorbedDamage
-    data << Resist;                                         //resist
+    data << uint32(SpellID);
+    data << uint32(Damage-AbsorbedDamage-Resist-Blocked);
+    data << uint8(DamageType);                              //damagetype
+    data << uint32(AbsorbedDamage);                         //AbsorbedDamage
+    data << uint32(Resist);                                 //resist
     data << (uint8)PhysicalDamage;
     data << uint8(0);
-    data << Blocked;                                        //blocked
+    data << uint32(Blocked);                                        //blocked
     data << uint8(CriticalHit ? 2 : 0);                     //seen 0x05 also...
     data << uint32(0);
     SendMessageToSet( &data, true );
@@ -4926,7 +4927,7 @@ int32 Unit::ModifyPower(Powers power, int32 dVal)
     return gain;
 }
 
-bool Unit::isVisibleFor(Unit const* u, bool detect) const
+bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList) const
 {
     if(!u)
         return false;
@@ -4935,26 +4936,93 @@ bool Unit::isVisibleFor(Unit const* u, bool detect) const
     if (u==this)
         return true;
 
-    // Visible units, always are visible for all pjs
-    if (m_Visibility == VISIBILITY_ON)
+    // not in world
+    if(!IsInWorld() || !u->IsInWorld())
+        return false;
+
+    // Grid dead/alive checks
+    if( u->GetTypeId()==TYPEID_PLAYER)
+    {
+        // non visible at grid for any stealth state
+        if(!IsVisibleInGridForPlayer((Player *)u))
+            return false;
+
+        // if player is dead then he can't detect anyone in anycases
+        if(!u->isAlive())
+            detect = false;
+    }
+    else
+    {
+        // all dead creatures/players not visible for any creatures
+        if(!u->isAlive() || !isAlive())
+            return false;
+    }
+
+    // different visible distance checks
+    if(u->isInFlight())                                     // what see player in flight
+    {
+        // use object grey distance for all (only see objects any way)
+        if (!IsWithinDistInMap(u,World::GetMaxVisibleDistanceInFlight()+(inVisibleList ? World::GetVisibleObjectGreyDistance() : 0)))
+            return false;
+    }
+    else if(!isAlive())                                     // distance for show body
+    {
+        if (!IsWithinDistInMap(u,World::GetMaxVisibleDistanceForObject()+(inVisibleList ? World::GetVisibleObjectGreyDistance() : 0)))
+            return false;
+    }
+    else if(GetTypeId()==TYPEID_PLAYER)                     // distance for show player
+    {
+        // in case two player at same transport ignore distance checks
+        if(!((Player*)this)->GetTransport() || u->GetTypeId()!=TYPEID_PLAYER || ((Player*)this)->GetTransport() != ((Player*)u)->GetTransport())
+        {
+            // Players far than max visible distance for player or not in our map are not visible too
+            if (!IsWithinDistInMap(u,World::GetMaxVisibleDistanceForPlayer()+(inVisibleList ? World::GetVisibleUnitGreyDistance() : 0)))
+                return false;
+        }
+    }
+    else if(GetCharmerOrOwnerGUID())                        // distance for show pet/charmed
+    {
+        // Pet/charmed far than max visible distance for player or not in our map are not visible too
+        if (!IsWithinDistInMap(u,World::GetMaxVisibleDistanceForPlayer()+(inVisibleList ? World::GetVisibleUnitGreyDistance() : 0)))
+            return false;
+    }
+    else                                                    // distance for show creature
+    {
+        // Units far than max visible distance for creature or not in our map are not visible too
+        if (!IsWithinDistInMap(u,World::GetMaxVisibleDistanceForCreature()+(inVisibleList ? World::GetVisibleUnitGreyDistance() : 0)))
+            return false;
+    }
+
+    // Visible units, always are visible for all units, except for units under invisibility
+    if (m_Visibility == VISIBILITY_ON && u->GetVisibility()!= VISIBILITY_GROUP_INVISIBILITY)
         return true;
 
     // GMs are visible for higher gms (or players are visible for gms)
     if (u->GetTypeId() == TYPEID_PLAYER && ((Player *)u)->isGameMaster())
         return (GetTypeId() == TYPEID_PLAYER && ((Player *)this)->GetSession()->GetSecurity() <= ((Player *)u)->GetSession()->GetSecurity());
 
-    // non faction visibility non-breakable for non-GMs
+    // non faction visibility non-breakable for non-GMs 
     if (m_Visibility == VISIBILITY_OFF)
         return false;
 
-    // Units far than MAX_DIST_INVISIBLE or not in our map, that are not gms and are stealth, are not visibles too
-    if (!this->IsWithinDistInMap(u,MAX_DIST_INVISIBLE_UNIT))
-        return false;
+    // Invisible units, always are visible for units under invisibility or unit that can detect this invisibility
+    if (m_Visibility == VISIBILITY_GROUP_INVISIBILITY)
+    {
+        if(u->GetVisibility()== VISIBILITY_GROUP_INVISIBILITY || m_invisibilityvalue <= u->m_detectInvisibility)
+            return true;
+    }
 
-    // Stealth not hostile units, not visibles (except Player-with-Player case)
+    // Units that can detect invisibility always are visible for units that can be detected
+    if (u->GetVisibility()== VISIBILITY_GROUP_INVISIBILITY)
+    {
+        if(m_detectInvisibility >= u->m_invisibilityvalue)
+            return true;
+    }
+
+    // Stealth/invisible not hostile units, not visible (except Player-with-Player case)
     if (!u->IsHostileTo(this))
     {
-        // player auto-detect other player with stealth only if he in same group or raid or same team (raid/team case dependent from conf setting)
+        // player see other player with stealth/invisibility only if he in same group or raid or same team (raid/team case dependent from conf setting)
         if(GetTypeId()==TYPEID_PLAYER && u->GetTypeId()==TYPEID_PLAYER)
         {
             if(((Player*)this)->IsGroupVisibleFor(((Player*)u)))
@@ -4962,16 +5030,34 @@ bool Unit::isVisibleFor(Unit const* u, bool detect) const
 
             // else apply same rules as for hostile case (detecting check)
         }
-        else
-            return true;
+    }
+    else
+    {
+        // Hunter mark functionality
+        AuraList const& auras = GetAurasByType(SPELL_AURA_MOD_STALKED);
+        for(AuraList::const_iterator iter = auras.begin(); iter != auras.end(); ++iter)
+            if((*iter)->GetCasterGUID()==u->GetGUID())
+                return true;
     }
 
-    // if in non-detect mode then invisible for unit
+    // unit got in stealth in this moment and must ignore old detected state
+    // invisibility not have chance for detection
+    if (m_Visibility == VISIBILITY_ON || m_Visibility == VISIBILITY_GROUP_NO_DETECT || m_Visibility == VISIBILITY_GROUP_INVISIBILITY)
+        return false;
+
+    // NOW ONLY STEALTH CASE
+
+    // stealth and detected
+    if (u->GetTypeId() == TYPEID_PLAYER && ((Player*)u)->HaveAtClient(this) )
+        return true;
+
+    // if in non-detect mode then stealthed for unit
     if(!detect)
         return false;
 
+    // STEALTH DETECTION CODE
     bool IsVisible = true;
-    bool notInFront = u->isInFront(this, MAX_DIST_INVISIBLE_UNIT * MAX_DIST_INVISIBLE_UNIT) ? 0 : 1;
+    bool notInFront = u->isInFront(this, DETECT_DISTANCE * DETECT_DISTANCE) ? 0 : 1;
     float Distance = sqrt(GetDistanceSq(u));
     float prob = 0;
 
@@ -4994,33 +5080,22 @@ bool Unit::isVisibleFor(Unit const* u, bool detect) const
 
     IsVisible = roll_chance_f(prob);
 
-    return IsVisible && ( Distance <= MAX_DIST_INVISIBLE_UNIT * MAX_DIST_INVISIBLE_UNIT) ;
+    return IsVisible && ( Distance <= DETECT_DISTANCE * DETECT_DISTANCE) ;
 }
 
 void Unit::SetVisibility(UnitVisibility x)
 {
     m_Visibility = x;
 
-    switch (x)
-    {
-        case VISIBILITY_ON:
-            m_UpdateVisibility = VISIBLE_SET_VISIBLE;
-            break;
-        case VISIBILITY_OFF:
-            m_UpdateVisibility = VISIBLE_SET_INVISIBLE;
-            break;
-        case VISIBILITY_GROUP:
-            m_UpdateVisibility = VISIBLE_SET_INVISIBLE_FOR_GROUP;
-            break;
-    }
-    if(GetTypeId() == TYPEID_PLAYER && IsInWorld())
+    if(IsInWorld())
     {
         Map *m = MapManager::Instance().GetMap(GetMapId(), this);
-        m->PlayerRelocation((Player *)this,GetPositionX(),GetPositionY(),
-            GetPositionZ(),GetOrientation(), true);
-    }
 
-    m_UpdateVisibility = VISIBLE_NOCHANGES;
+        if(GetTypeId()==TYPEID_PLAYER)
+            m->PlayerRelocation((Player*)this,GetPositionX(),GetPositionY(),GetPositionZ(),GetOrientation());
+        else
+            m->CreatureRelocation((Creature*)this,GetPositionX(),GetPositionY(),GetPositionZ(),GetOrientation());
+    }
 }
 
 float Unit::GetSpeed( UnitMoveType mtype ) const
@@ -5466,7 +5541,7 @@ Unit* Unit::SelectNextVictim()
             Map* map = MapManager::Instance().GetMap(GetMapId(), this);
             if((map->Instanceable() || (!((Creature*)this)->IsOutOfThreatArea(target))) && target->isInAccessablePlaceFor( ((Creature*)this) ))
             {
-                if((IsWithinDistInMap(target, ATTACK_DIST) && (iter->Threat > 1.1f * threat)) || (iter->Threat > 1.3f * threat))
+                if((IsWithinDistInMap(target, ATTACK_DISTANCE) && (iter->Threat > 1.1f * threat)) || (iter->Threat > 1.3f * threat))
                 {                                           //implement 110% threat rule for targets in melee range
                     SetCurrentVictimThreat(iter->Threat);   //and 130% rule for targets in ranged distances
                     return target;                          //for selecting alive targets
@@ -5831,4 +5906,9 @@ Creature* Unit::SummonCreature(uint32 id, uint32 mapid, float x, float y, float 
 Unit* Unit::GetUnit(WorldObject& object, uint64 guid)
 {
     return ObjectAccessor::Instance().GetUnit(object,guid);
+}
+
+bool Unit::isVisibleForInState( Player const* u, bool inVisibleList ) const
+{
+    return isVisibleForOrDetect(u,false,inVisibleList);
 }

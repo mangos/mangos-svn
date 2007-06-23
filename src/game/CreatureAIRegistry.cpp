@@ -28,7 +28,6 @@
 #include "MovementGeneratorImpl.h"
 #include "MapManager.h"
 #include "WaypointMovementGenerator.h"
-#include "RedZoneDistrict.h"
 #include "CreatureAIRegistry.h"
 #include "WaypointMovementGenerator.h"
 

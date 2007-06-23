@@ -179,7 +179,7 @@ void PetAI::UpdateAI(const uint32 diff)
             _stopAttack();                                  // i_victimGuid == 0 && i_pet.getVictim() == NULL now
             return;
         }
-        else if( i_pet.IsStopped() || i_pet.IsWithinDistInMap(i_pet.getVictim(), ATTACK_DIST))
+        else if( i_pet.IsStopped() || i_pet.IsWithinDistInMap(i_pet.getVictim(), ATTACK_DISTANCE))
         {
             SpellEntry const* spellInfo;
             // required to be stopped cases

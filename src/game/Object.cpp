@@ -36,6 +36,22 @@
 
 using namespace std;
 
+uint32 GuidHigh2TypeId(uint32 guid_hi)
+{
+    switch(guid_hi)
+    {
+        case HIGHGUID_ITEM:         return TYPEID_ITEM;
+        case HIGHGUID_UNIT:         return TYPEID_UNIT;
+        case HIGHGUID_PLAYER:       return TYPEID_PLAYER;
+        case HIGHGUID_GAMEOBJECT:   return TYPEID_GAMEOBJECT;
+        case HIGHGUID_DYNAMICOBJECT:return TYPEID_DYNAMICOBJECT;
+        case HIGHGUID_CORPSE:       return TYPEID_CORPSE;
+        case HIGHGUID_PLAYER_CORPSE:return 10;              // unknown
+        case HIGHGUID_TRANSPORT:    return TYPEID_GAMEOBJECT;
+    }
+    return 10;                                              // unknown
+}
+
 Object::Object( )
 {
     m_objectTypeId      = TYPEID_OBJECT;

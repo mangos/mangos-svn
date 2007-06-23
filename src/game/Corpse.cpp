@@ -27,7 +27,6 @@
 #include "WorldSession.h"
 #include "WorldPacket.h"
 #include "GossipDef.h"
-#include "RedZoneDistrict.h"
 
 Corpse::Corpse( WorldObject *instantiator, CorpseType type ) : WorldObject( instantiator )
 {
@@ -102,10 +101,7 @@ void Corpse::DeleteBonesFromWorld()
         sLog.outError("Bones %u not found in world.", GetGUIDLow());
     }
     else
-    {
-        ObjectAccessor::Instance().RemoveBonesFromPlayerView(corpse);
         ObjectAccessor::Instance().AddObjectToRemoveList(this);
-    }
 
     RemoveFromWorld();
 }
@@ -264,4 +260,9 @@ void Corpse::_ConvertCorpseToBones()
     // or prepare to delete at next tick if grid not loaded
     else
         bones->DeleteBonesFromWorld();
+}
+
+bool Corpse::isVisibleForInState(Player const* u, bool inVisibleList) const
+{
+    return IsInWorld() && u->IsInWorld() && IsWithinDistInMap(u,World::GetMaxVisibleDistanceForObject()+(inVisibleList ? World::GetVisibleObjectGreyDistance() : 0));
 }
