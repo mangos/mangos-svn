@@ -139,8 +139,8 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
         data << uint32(itr->spell->Id);
         data << uint8(_player->GetTrainerSpellState(&*itr));
         data << uint32(itr->spellcost);
-        data << uint32(0);
-        data << uint32(0);
+        data << uint32(objmgr.IsPrimaryProfessionSpell(itr->spell->EffectTriggerSpell[0]) && objmgr.GetSpellRank(itr->spell->EffectTriggerSpell[0])==1 ? 1 : 0);
+        data << uint32(0);                                  // if 1 then disable learn button even if green state?
         data << uint8(itr->reqlevel ? itr->reqlevel : itr->spell->spellLevel);
         data << uint32(itr->reqskill);
         data << uint32(itr->reqskillvalue);
