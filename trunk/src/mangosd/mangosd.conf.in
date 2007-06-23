@@ -84,6 +84,7 @@ LogWorld = 1
 # 0 (default) - include in log if log level permit, 1 - not include with any log level
 LogFilter_TransportMoves = 0
 LogFilter_CreatureMoves = 0
+LogFilter_VisibilityChanges = 0
 
 # Color for messages (format "normal_color details_color debug_color error_color)
 # Colors: 0 - BLACK, 1 - RED, 2 - GREEN,  3 - BROWN, 4 - BLUE, 5 - MAGENTA, 6 -  CYAN, 7 - GREY, 
@@ -219,7 +220,36 @@ GM.LogTrade = 1
 # Default: 0 (standard setting: only members from same group can 100% auto detect invisible player)
 #          1 (raid members 100% auto detect invisible player from same raid)
 #          2 (players from same team can 100% auto detect invisible player)
-GroupVisibility = 0
+Visibility.GroupMode = 0
+
+
+# Visibility distance for different in game object 
+# Max limited by active player zone: ~ 166
+# Min limit dependent from objects
+# Default: 66 (cell size)
+#
+# Min limit is max aggro radius (45) * Rate.Creature.Aggro
+Visibility.Distance.Creature      = 66
+Visibility.Distance.Player        = 66
+#
+# gameobject, dynobject, bodies, corpses, bones
+# Min limit is iteraction distance (5)
+Visibility.Distance.Object        = 66
+#
+# visible distance for player in flight
+# Min limit is 0 (not show any objects)
+Visibility.Distance.InFlight      = 66
+
+# Visibility grey distance for creatures/players (fast changing obects)
+#    addition to appropriate object type Visibility.Distance.* use in case visibility removing to object (except corpse around distences)
+#    If ‚ is distance and G is grey distance then object make visible if distance to it <= D but make non visible if distance > D+G
+# Default: 1 yard
+Visibility.Distance.Grey.Unit   = 1
+#
+# Visibility grey distance for dynobjects/gameobjects/corpses/creature bodies
+# 
+# Default: 10 yards
+Visibility.Distance.Grey.Object = 10
 
 # Mail delivery delay time in case sending item
 # Default: 3600 sec (1 hour)

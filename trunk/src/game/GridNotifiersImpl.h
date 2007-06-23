@@ -27,56 +27,25 @@
 #include "CreatureAI.h"
 #include "SpellAuras.h"
 
-template<>
+template<class T>
 inline void
-MaNGOS::NotVisibleNotifier::Visit(CreatureMapType &m)
+MaNGOS::VisibleNotifier::Visit(std::map<OBJECT_HANDLE, T *> &m)
 {
-    for(CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-        if( ( i_player.isAlive() && iter->second->isAlive()) ||
-        (i_player.isDead() && iter->second->isDead()) )
-            iter->second->BuildOutOfRangeUpdateBlock(&i_data);
-}
-
-template<>
-inline void
-MaNGOS::VisibleNotifier::Visit(CreatureMapType &m)
-{
-    for(CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
+    for(typename std::map<OBJECT_HANDLE, T *>::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-        if( iter->second->IsVisibleInGridForPlayer(&i_player) )
-        {
-            iter->second->BuildUpdate(i_updateDatas);
-            iter->second->BuildCreateUpdateBlockForPlayer(&i_data, &i_player);
-        }
-        else
-        {
-            iter->second->DestroyForPlayer(&i_player);
-        }
+        i_player.UpdateVisibilityOf(iter->second,i_data,i_data_updates);
+        i_clientGUIDs.erase(iter->second->GetGUID());
     }
 }
 
-template<>
+template<class T>
 inline void
-MaNGOS::VisibleNotifier::Visit(PlayerMapType &m)
+MaNGOS::VisibleNotifier::Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m)
 {
-    for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
+    for(typename std::map<OBJECT_HANDLE, CountedPtr<T> >::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-        if( iter->second == &i_player )
-            continue;
-
-        if( (i_player.isAlive() && iter->second->isAlive()) ||
-            (i_player.isDead() && iter->second->isDead()) )
-        {
-            if (iter->second->isVisibleFor(&i_player,false))
-                iter->second->SendUpdateToPlayer(&i_player);
-            if (i_player.isVisibleFor(iter->second,false))
-                i_player.SendUpdateToPlayer(iter->second);
-        }
-        else
-        {
-            i_player.DestroyForPlayer(iter->second);
-            iter->second->DestroyForPlayer(&i_player);
-        }
+        i_player.UpdateVisibilityOf(&*iter->second,i_data,i_data_updates);
+        i_clientGUIDs.erase(iter->second->GetGUID());
     }
 }
 
@@ -88,41 +57,27 @@ MaNGOS::ObjectUpdater::Visit(CreatureMapType &m)
             iter->second->Update(i_timeDiff);
 }
 
-template<>
 inline void
 MaNGOS::PlayerRelocationNotifier::Visit(PlayerMapType &m)
 {
-    if(!i_player.isAlive() || i_player.isInFlight())
-        return;
-
     for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-        // Remove selection
-        if(i_player.GetSelection()==iter->second->GetGUID())
-                                                            // visibility distance
-            if(!i_player.IsWithinDistInMap(iter->second, 160))
-                                                            // valor under 160 can generate a bug of visibility, as a player
-                i_player.SendOutOfRange(iter->second);      // can reach 158 yards until it disapears, without been selected
+        if(&i_player==iter->second)
+            continue;
 
-        if(iter->second->GetSelection()==i_player.GetGUID())
-                                                            // visibility distance
-            if(!i_player.IsWithinDistInMap(iter->second, 160))
-                iter->second->SendOutOfRange(&i_player);
+        // visibility for players updated by ObjectAccessor::UpdateVisibilityFor calls in appropriate places
 
         // Cancel Trade
         if(i_player.GetTrader()==iter->second)
             if(!i_player.IsWithinDistInMap(iter->second, 5))     // iteraction distance
                 i_player.GetSession()->SendCancelTrade();   // will clode both side trade windows
-
     }
 }
 
 inline void PlayerCreatureRelocationWorker(Player* pl, Creature* c)
 {
-    // Remove selection
-    if(pl->GetSelection()==c->GetGUID())
-        if(!pl->IsWithinDistInMap(c, 160))                       // visibility distance
-            pl->SendOutOfRange(c);
+    // update creature visibility at player/creature move
+    pl->UpdateVisibilityOf(c);
 
     // Creature AI reaction
     if( c->AI() && c->AI()->IsVisible(pl) )
@@ -138,7 +93,6 @@ inline void CreatureCreatureRelocationWorker(Creature* c1, Creature* c2)
         c2->AI()->MoveInLineOfSight(c1);
 }
 
-template<>
 inline void
 MaNGOS::PlayerRelocationNotifier::Visit(CreatureMapType &m)
 {
@@ -146,7 +100,7 @@ MaNGOS::PlayerRelocationNotifier::Visit(CreatureMapType &m)
         return;
 
     for(CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-        if( iter->second->isAlive() && !iter->second->isInFlight())
+        if( iter->second->isAlive())
             PlayerCreatureRelocationWorker(&i_player,iter->second);
 }
 
@@ -154,7 +108,7 @@ template<>
 inline void
 MaNGOS::CreatureRelocationNotifier::Visit(PlayerMapType &m)
 {
-    if(!i_creature.isAlive() || i_creature.isInFlight())
+    if(!i_creature.isAlive())
         return;
 
     for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
@@ -166,11 +120,11 @@ template<>
 inline void
 MaNGOS::CreatureRelocationNotifier::Visit(CreatureMapType &m)
 {
-    if(!i_creature.isAlive() || i_creature.isInFlight())
+    if(!i_creature.isAlive())
         return;
 
     for(CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-        if( iter->second->isAlive() && !iter->second->isInFlight())
+        if( iter->second->isAlive())
             CreatureCreatureRelocationWorker(iter->second, &i_creature);
 }
 

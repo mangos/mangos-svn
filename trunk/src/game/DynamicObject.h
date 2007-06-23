@@ -43,7 +43,7 @@ class DynamicObject : public WorldObject
         void AddAffected(Unit *unit) { m_affected.insert(unit); }
         void RemoveAffected(Unit *unit) { m_affected.erase(unit); }
         void Delay(int32 delaytime);
-
+        bool isVisibleForInState(Player const* u, bool inVisibleList) const;
     protected:
         uint64 m_casterGuid;
         uint32 m_spellId;

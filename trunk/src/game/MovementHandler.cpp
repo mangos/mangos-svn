@@ -32,7 +32,7 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug( "WORLD: got MSG_MOVE_WORLDPORT_ACK." );
 
-    GetPlayer()->RemoveFromWorld();
+    MapManager::Instance().GetMap(GetPlayer()->GetMapId(), GetPlayer())->Remove(GetPlayer(),false);
     MapManager::Instance().GetMap(GetPlayer()->GetMapId(), GetPlayer())->Add(GetPlayer());
     WorldPacket data(SMSG_SET_REST_START, 4);
     data << uint32(time(NULL));//getMSTime();

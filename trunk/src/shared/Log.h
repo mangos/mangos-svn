@@ -27,8 +27,9 @@ class Config;
 // bitmask
 enum LogFilters
 {
-    LOG_FILTER_TRANSPORT_MOVES = 1,
-    LOG_FILTER_CREATURE_MOVES  = 2
+    LOG_FILTER_TRANSPORT_MOVES    = 1,
+    LOG_FILTER_CREATURE_MOVES     = 2,
+    LOG_FILTER_VISIBILITY_CHANGES = 4
 };
 
 enum Color

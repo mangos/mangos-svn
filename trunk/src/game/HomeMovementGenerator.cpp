@@ -20,9 +20,7 @@
 #include "Creature.h"
 #include "Traveller.h"
 #include "MapManager.h"
-#include "RedZoneDistrict.h"
-#include "CellImpl.h"
-#include "GridNotifiersImpl.h"
+#include "ObjectAccessor.h"
 #include "DestinationHolderImp.h"
 
 void
@@ -63,15 +61,8 @@ HomeMovementGenerator::_reLocate(Creature &owner)           // resend clients th
 
     if (owner.GetTypeId() == TYPEID_UNIT)
     {
-
         sLog.outDebug("HomeMovementGenerator::_reLocate() called, where Unit.GetGUIDLow()=%d", owner.GetGUIDLow());
-        CellPair p = MaNGOS::ComputeCellPair(owner.GetPositionX(), owner.GetPositionY());
-        Cell cell = RedZone::GetZone(p);
-        cell.data.Part.reserved = ALL_DISTRICT;
-        MaNGOS::CreatureVisibleMovementNotifier notifier(owner);
-        TypeContainerVisitor<MaNGOS::CreatureVisibleMovementNotifier, WorldTypeMapContainer > player_notifier(notifier);
-        CellLock<GridReadGuard> cell_lock(cell, p);
-        cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(owner.GetMapId(), &owner));
+        ObjectAccessor::UpdateObjectVisibility(&owner);
     }
 }
 

@@ -65,7 +65,7 @@ TargetedMovementGenerator::_setTargetLocation(Creature &owner)
     }
 
     //We don't update Mob Movement, if the difference between New destination and last destination is < BothObjectSize
-    float  bothObjectSize = i_target.GetObjectSize() + owner.GetObjectSize() + OBJECT_CONTACT_DISTANCE;
+    float  bothObjectSize = i_target.GetObjectSize() + owner.GetObjectSize() + CONTACT_DISTANCE;
     if( i_destinationHolder.HasDestination() && i_destinationHolder.GetDestinationDiff(x,y,z) < bothObjectSize )
         return;
     Traveller<Creature> traveller(owner);
@@ -122,7 +122,7 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
         if (owner.GetObjectSize())
             i_destinationHolder.ResetUpdate(50);
 
-        float  dist = i_target.GetObjectSize() + owner.GetObjectSize() + OBJECT_CONTACT_DISTANCE;
+        float  dist = i_target.GetObjectSize() + owner.GetObjectSize() + CONTACT_DISTANCE;
 
         // try to counter precision differences
         if( i_destinationHolder.GetDistanceFromDestSq(i_target) > dist * dist + 0.8)

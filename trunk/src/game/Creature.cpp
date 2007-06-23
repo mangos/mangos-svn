@@ -186,7 +186,7 @@ void Creature::Update(uint32 diff)
             {
                 m_deathTimer = 0;
                 DEBUG_LOG("Removing corpse... %u ", GetUInt32Value(OBJECT_FIELD_ENTRY));
-                ObjectAccessor::Instance().RemoveCreatureCorpseFromPlayerView(this);
+                ObjectAccessor::UpdateObjectVisibility(this);
                 lootForPickPocketed = false;
                 lootForBody         = false;
                 loot.clear();

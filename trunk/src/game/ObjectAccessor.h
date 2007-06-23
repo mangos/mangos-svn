@@ -81,9 +81,6 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
 
         void DoDelayedMovesAndRemoves();
 
-        void RemoveCreatureCorpseFromPlayerView(Creature *);
-        void RemoveBonesFromPlayerView(CorpsePtr&);
-
         void Update(const uint32 &diff);
 
         CorpsePtr& GetCorpseForPlayerGUID(uint64 guid);
@@ -100,21 +97,24 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         bool PlayersNearGrid(const uint32 &x, const uint32 &y, const uint32 &m_id, const uint32 &i_id) const;
 
         static void UpdateObject(Object* obj, Player* exceptPlayer);
-        static void _buildUpdateObject(Object *, UpdateDataMapType &);
+        static void _buildUpdateObject(Object* obj, UpdateDataMapType &);
+
+        static void UpdateObjectVisibility(WorldObject* obj);
+        static void UpdateVisibilityForPlayer(Player* player);
     private:
         void RemoveAllObjectsInRemoveList();
 
-        struct ObjectChangeAccumulator
+        struct WorldObjectChangeAccumulator
         {
             UpdateDataMapType &i_updateDatas;
-            Object &i_object;
-            ObjectChangeAccumulator(Object &obj, UpdateDataMapType &d) : i_updateDatas(d), i_object(obj) {}
+            WorldObject &i_object;
+            WorldObjectChangeAccumulator(WorldObject &obj, UpdateDataMapType &d) : i_updateDatas(d), i_object(obj) {}
             void Visit(PlayerMapType &);
             template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
             template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &) {}
         };
 
-        friend struct ObjectChangeAccumulator;
+        friend struct WorldObjectChangeAccumulator;
         PlayersMapType        i_players;
         PetsMapType           i_pets;
         Player2CorpsesMapType i_player2corpse;

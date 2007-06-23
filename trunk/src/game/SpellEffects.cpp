@@ -1954,8 +1954,8 @@ void Spell::EffectTameCreature(uint32 i)
         pet->AddToWorld();
         MapManager::Instance().GetMap(pet->GetMapId(), pet)->Add((Creature*)pet);
 
-        ObjectAccessor::Instance().RemoveCreatureCorpseFromPlayerView(creatureTarget);
         creatureTarget->setDeathState(JUST_DIED);
+        ObjectAccessor::UpdateObjectVisibility(creatureTarget);
 
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
         {

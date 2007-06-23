@@ -166,7 +166,7 @@ AggressorAI::UpdateAI(const uint32 diff)
 
         assert((i_victimGuid != 0) == (i_creature.getVictim() != NULL) && "i_victimGuid and i_creature.getVictim() not synchronized.");
 
-        if( i_creature.IsWithinDistInMap(i_creature.getVictim(), ATTACK_DIST))
+        if( i_creature.IsWithinDistInMap(i_creature.getVictim(), ATTACK_DISTANCE))
         {
             if( i_creature.isAttackReady() )
             {
@@ -181,7 +181,7 @@ bool
 AggressorAI::IsVisible(Unit *pl) const
 {
     return i_creature.GetDistanceSq(pl) < sWorld.getConfig(CONFIG_SIGHT_MONSTER)
-        && pl->isVisibleFor(&i_creature,true);
+        && pl->isVisibleForOrDetect(&i_creature,true);
 }
 
 void

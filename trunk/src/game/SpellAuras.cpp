@@ -35,8 +35,6 @@
 #include "UpdateData.h"
 #include "MapManager.h"
 #include "ObjectAccessor.h"
-#include "RedZoneDistrict.h"
-#include "CellImpl.h"
 #include "Policies/SingletonImp.h"
 #include "Totem.h"
 #include "Creature.h"
@@ -69,7 +67,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNoImmediateEffect,                         // 14 SPELL_AURA_MOD_DAMAGE_TAKEN
     &Aura::HandleAuraDamageShield,                          // 15 SPELL_AURA_DAMAGE_SHIELD
     &Aura::HandleModStealth,                                // 16 SPELL_AURA_MOD_STEALTH
-    &Aura::HandleModDetect,                                 // 17 SPELL_AURA_MOD_DETECT
+    &Aura::HandleModStealthDetect,                          // 17 SPELL_AURA_MOD_STEALTH_DETECT
     &Aura::HandleInvisibility,                              // 18 SPELL_AURA_MOD_INVISIBILITY
     &Aura::HandleInvisibilityDetect,                        // 19 SPELL_AURA_MOD_INVISIBILITY_DETECTION
     &Aura::HandleAuraModTotalHealthPercentRegen,            // 20 SPELL_AURA_OBS_MOD_HEALTH
@@ -2017,9 +2015,10 @@ void Aura::HandleModStealth(bool apply, bool Real)
         // only at real aura add
         if(Real)
         {
-            m_target->SetVisibility(VISIBILITY_GROUP);
+            m_target->SetVisibility(VISIBILITY_GROUP_NO_DETECT);
             if(m_target->GetTypeId() == TYPEID_PLAYER)
                 m_target->SendUpdateToPlayer((Player*)m_target);
+            m_target->SetVisibility(VISIBILITY_GROUP_STEALTH);
 
             // for RACE_NIGHTELF stealth
             if(m_target->GetTypeId()==TYPEID_PLAYER && GetId()==20580)
@@ -2053,7 +2052,7 @@ void Aura::HandleModStealth(bool apply, bool Real)
     }
 }
 
-void Aura::HandleModDetect(bool apply, bool Real)
+void Aura::HandleModStealthDetect(bool apply, bool Real)
 {
     if(apply)
     {
@@ -2069,20 +2068,21 @@ void Aura::HandleInvisibility(bool Apply, bool Real)
 {
     if(Apply)
     {
-        m_target->m_stealthvalue = CalculateDamage();
+        m_target->m_invisibilityvalue = CalculateDamage();
         m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_STEALTH );
 
         // only at real aura add
         if(Real)
         {
-            m_target->SetVisibility(VISIBILITY_GROUP);
+            m_target->SetVisibility(VISIBILITY_GROUP_NO_DETECT);
             if(m_target->GetTypeId() == TYPEID_PLAYER)
                 m_target->SendUpdateToPlayer((Player*)m_target);
+            m_target->SetVisibility(VISIBILITY_GROUP_INVISIBILITY);
         }
     }
     else
     {
-        m_target->m_stealthvalue = 0;
+        m_target->m_invisibilityvalue = 0;
         m_target->RemoveFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_STEALTH );
 
         // only at real aura remove
@@ -2099,12 +2099,15 @@ void Aura::HandleInvisibilityDetect(bool Apply, bool Real)
 {
     if(Apply)
     {
-        m_target->m_detectStealth = CalculateDamage();
+        m_target->m_detectInvisibility = CalculateDamage();
     }
     else
     {
-        m_target->m_detectStealth = 0;
+        m_target->m_detectInvisibility = 0;
     }
+
+    if(Real && m_target->GetTypeId()==TYPEID_PLAYER)
+        ObjectAccessor::UpdateVisibilityForPlayer((Player*)m_target);
 }
 
 void Aura::HandleAuraModRoot(bool apply, bool Real)

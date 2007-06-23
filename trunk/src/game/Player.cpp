@@ -36,6 +36,10 @@
 #include "Chat.h"
 #include "MapManager.h"
 #include "MapInstanced.h"
+#include "RedZoneDistrict.h"
+#include "GridNotifiers.h"
+#include "GridNotifiersImpl.h"
+#include "CellImpl.h"
 #include "ObjectMgr.h"
 #include "ObjectAccessor.h"
 #include "CreatureAI.h"
@@ -160,8 +164,6 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_resurrectingSicknessExpire = 0;
 
     m_DetectInvTimer = 1000;
-    m_DiscoveredPj = 0;
-    m_enableDetect = true;
 
     m_bgBattleGroundID = 0;
     m_bgBattleGroundQueueID = 0;
@@ -755,7 +757,7 @@ void Player::Update( uint32 p_time )
             // default combat reach 10
             // TODO add weapon,skill check
 
-            float pldistance = ATTACK_DIST;
+            float pldistance = ATTACK_DISTANCE;
 
             if (isAttackReady(BASE_ATTACK))
             {
@@ -902,13 +904,13 @@ void Player::Update( uint32 p_time )
     //Handle lava
     HandleLava();
 
-    //Handle detect invisible players
+    //Handle detect stealth players
     if (m_DetectInvTimer > 0)
     {
         if (p_time >= m_DetectInvTimer)
         {
             m_DetectInvTimer = 3000;
-            HandleInvisiblePjs();
+            HandleStealthedUnitsDetection();
         }
         else
             m_DetectInvTimer -= p_time;
@@ -1174,7 +1176,7 @@ void Player::SendFriendlist()
             if( pObj && pObj->GetName() &&
                 ( security > 0 ||
                 ( pObj->GetTeam() == team || allowTwoSideWhoList ) &&
-                (pObj->GetSession()->GetSecurity() == 0 || gmInWhoList && pObj->isVisibleFor(this,false) )))
+                (pObj->GetSession()->GetSecurity() == 0 || gmInWhoList && pObj->isVisibleFor(this) )))
             {
                 if(pObj->isAFK())
                     friendstr[i].Status = 2;
@@ -1352,7 +1354,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         WorldPacket data;
         BuildTeleportAckMsg(&data, x, y, z, orientation);
         GetSession()->SendPacket(&data);
-        SetPosition( x, y, z, orientation );
+        SetPosition( x, y, z, orientation, true);
         BuildHeartBeatMsg(&data);
         SendMessageToSet(&data, true);
     }
@@ -1403,19 +1405,26 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             data << uint32(0);
             GetSession()->SendPacket( &data );
 
-            SetMapId(mapid);
+            // new final coordinates
+            float final_x = x;
+            float final_y = y;
+            float final_z = z;
+            float final_o = orientation;
 
-            // orientation+0.1 used to pressure SetPosition send notifiers at teleportaion like in normal move case
             if(m_transport)
             {
-                Relocate(x + m_transX, y + m_transY, z + m_transZ, orientation + m_transO+0.1);
-                SetPosition(x + m_transX, y + m_transY, z + m_transZ, orientation + m_transO);
+                final_x += m_transX;
+                final_y += m_transY;
+                final_z += m_transZ;
+                final_o += m_transO;
             }
-            else
-            {
-                Relocate(x, y, z, orientation+0.1);
-                SetPosition(x, y, z, orientation);
-            }
+
+            // set position
+            SetMapId(mapid);
+            Relocate(final_x, final_y, final_z,final_o);
+
+            // move packet sent by client always after far teleport
+            // SetPosition(final_x, final_y, final_z, final_o, true);
 
             // resurrect character at enter into instance where his corpse exist
             CorpsePtr corpse = GetCorpse();
@@ -1449,14 +1458,6 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     if (outofrange)
     {
         CombatStop();
-
-        // remove selection
-        if(GetSelection())
-        {
-            Unit* unit = ObjectAccessor::Instance().GetUnit(*this, GetSelection());
-            if(unit)
-                SendOutOfRange(unit);
-        }
 
         // unsummon pet if lost
         if(pet && !IsWithinDistInMap(pet, OWNER_MAX_DISTANCE))
@@ -3294,6 +3295,9 @@ void Player::KillPlayer()
 
     // dead player body showed at this moment, corpse will be show at Player ghost repop
     CreateCorpse();
+
+    // update visibility
+    ObjectAccessor::UpdateObjectVisibility(this);
 }
 
 void Player::CreateCorpse()
@@ -3606,7 +3610,7 @@ void Player::BroadcastPacketToFriendListers(WorldPacket *packet)
         if( pfriend && pfriend->IsInWorld() &&
             ( pfriend->GetSession()->GetSecurity() > 0 ||
             ( pfriend->GetTeam() == team || allowTwoSideWhoList ) &&
-            (security == 0 || gmInWhoList && isVisibleFor(pfriend,false) )))
+            (security == 0 || gmInWhoList && isVisibleFor(pfriend) )))
         {
             pfriend->GetSession()->SendPacket(packet);
         }
@@ -4258,7 +4262,7 @@ void Player::SetDontMove(bool dontMove)
     m_dontMove = dontMove;
 }
 
-bool Player::SetPosition(float x, float y, float z, float orientation)
+bool Player::SetPosition(float x, float y, float z, float orientation, bool teleport)
 {
     Map *m = MapManager::Instance().GetMap(GetMapId(), this);
 
@@ -4266,10 +4270,8 @@ bool Player::SetPosition(float x, float y, float z, float orientation)
     const float old_y = GetPositionY();
     const float old_r = GetOrientation();
 
-    if( old_x != x || old_y != y || old_r != orientation)
+    if( teleport || old_x != x || old_y != y || old_r != orientation )
     {
-        m->PlayerRelocation(this, x, y, z, orientation);
-
         // remove at movement non-move stealth aura
         if(HasFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_FLAG_STEALTH))
             RemoveAurasDueToSpell(20580);
@@ -4277,13 +4279,16 @@ bool Player::SetPosition(float x, float y, float z, float orientation)
         // remove death simulation at move
         if(hasUnitState(UNIT_STAT_DIED))
             RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
-    }
 
-    // reread after Map::Relocation
-    m = MapManager::Instance().GetMap(GetMapId(), this);
-    x = GetPositionX();
-    y = GetPositionY();
-    z = GetPositionZ();
+        // move and update visible state if need
+        m->PlayerRelocation(this, x, y, z, orientation);
+
+        // reread after Map::Relocation
+        m = MapManager::Instance().GetMap(GetMapId(), this);
+        x = GetPositionX();
+        y = GetPositionY();
+        z = GetPositionZ();
+    }
 
     float water_z = m->GetWaterLevel(x,y);
     uint8 flag1 = m->GetTerrainType(x,y);
@@ -5824,7 +5829,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             ObjectAccessor::Instance().GetGameObject(*this, guid);
 
         // not check distance for GO in case owned GO (fishing bobber case, for example)
-        if (!go || (loot_type != LOOT_FISHING || go->GetOwnerGUID() != GetGUID()) && !go->IsWithinDistInMap(this,OBJECT_ITERACTION_DISTANCE))
+        if (!go || (loot_type != LOOT_FISHING || go->GetOwnerGUID() != GetGUID()) && !go->IsWithinDistInMap(this,INTERACTION_DISTANCE))
             return;
 
         loot = &go->loot;
@@ -5889,7 +5894,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             ObjectAccessor::Instance().GetCreature(*this, guid);
 
         // must be in range and creature must be alive for pickpocket and must be dead for another loot
-        if (!creature || creature->isAlive()!=(loot_type == LOOT_PICKPOCKETING) || !creature->IsWithinDistInMap(this,OBJECT_ITERACTION_DISTANCE))
+        if (!creature || creature->isAlive()!=(loot_type == LOOT_PICKPOCKETING) || !creature->IsWithinDistInMap(this,INTERACTION_DISTANCE))
             return;
 
         if(loot_type == LOOT_PICKPOCKETING && IsFriendlyTo(creature))
@@ -12331,15 +12336,6 @@ void Player::outDebugValues() const
 /***              LOW LEVEL FUNCTIONS:Notifiers        ***/
 /*********************************************************/
 
-void Player::SendOutOfRange(Object* obj)
-{
-    UpdateData his_data;
-    WorldPacket his_pk;
-    obj->BuildOutOfRangeUpdateBlock(&his_data);
-    his_data.BuildPacket(&his_pk);
-    GetSession()->SendPacket(&his_pk);
-}
-
 inline void Player::SendAttackSwingNotInRange()
 {
     WorldPacket data(SMSG_ATTACKSWING_NOTINRANGE, 0);
@@ -12939,27 +12935,52 @@ void Player::SetRestBonus (float rest_bonus_new)
     SetUInt32Value(PLAYER_REST_STATE_EXPERIENCE, uint32(m_rest_bonus));
 }
 
-void Player::HandleInvisiblePjs()
+void Player::HandleStealthedUnitsDetection()
 {
-    Map *m = MapManager::Instance().GetMap(GetMapId(), this);
+    std::list<Unit*> stealthedUnits;
 
-    //this is to be sure that InvisiblePjsNear vector has active pjs only.
-    m->PlayerRelocation(this, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation(), true);
+    CellPair p(MaNGOS::ComputeCellPair(GetPositionX(),GetPositionY()));
+    Cell cell = RedZone::GetZone(p);
+    cell.data.Part.reserved = ALL_DISTRICT;
+    cell.SetNoCreate();
 
-    for (std::vector<Player *>::iterator i = InvisiblePjsNear.begin(); i != InvisiblePjsNear.end(); i++)
+    MaNGOS::AnyStealthedCheck u_check;
+    MaNGOS::UnitListSearcher<MaNGOS::AnyStealthedCheck > searcher(stealthedUnits, u_check);
+
+    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyStealthedCheck >, WorldTypeMapContainer > world_unit_searcher(searcher);
+    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyStealthedCheck >, GridTypeMapContainer >  grid_unit_searcher(searcher);
+
+    CellLock<GridReadGuard> cell_lock(cell, p);
+    cell_lock->Visit(cell_lock, world_unit_searcher, *MapManager::Instance().GetMap(GetMapId(), this));
+    cell_lock->Visit(cell_lock, grid_unit_searcher, *MapManager::Instance().GetMap(GetMapId(), this));
+
+    for (std::list<Unit*>::iterator i = stealthedUnits.begin(); i != stealthedUnits.end();)
     {
-        if ((*i)->isVisibleFor(this,true))
+        if((*i)==this)
         {
-            m_DiscoveredPj = *i;
-            m_enableDetect = false;
-            m->PlayerRelocation(this, GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation(), true);
-            m_enableDetect = true;
-            m_DiscoveredPj = 0;
+            i = stealthedUnits.erase(i);
+            continue;
         }
+
+        if ((*i)->isVisibleForOrDetect(this,true))
+        {
+
+            (*i)->SendUpdateToPlayer(this);
+            m_clientGUIDs.insert((*i)->GetGUID());
+
+            #ifdef MANGOS_DEBUG
+                if((sLog.getLogFilter() & LOG_FILTER_VISIBILITY_CHANGES)==0)
+                    sLog.outDebug("Object %u (Type: %u) is detected in stealth by player %u. Distance = %f",(*i)->GetGUIDLow(),(*i)->GetTypeId(),GetGUIDLow(),sqrt(GetDistanceSq(*i)));
+            #endif
+            i = stealthedUnits.erase(i);
+            continue;
+        }
+
+        ++i;
     }
-    if (!InvisiblePjsNear.size())
+
+    if(stealthedUnits.empty())
         m_DetectInvTimer = 0;
-    InvisiblePjsNear.clear();
 }
 
 bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes)
@@ -13712,3 +13733,131 @@ bool Player::DropBattleGroundFlag()
     }
     return false;
 }
+
+bool Player::IsVisibleInGridForPlayer( Player* pl ) const
+{
+    // Live player see live player or dead player with not realised corpse
+    if(pl->isAlive() || pl->m_deathTimer > 0)
+    {
+        return isAlive() || m_deathTimer > 0;
+    }
+
+    // Dead player see live players near own corpse
+    if(isAlive())
+    {
+        CorpsePtr &corpse = pl->GetCorpse();
+        if(corpse)
+        {
+            // 20 - aggro distance for same level, 25 - max additional distance if player level less that creature level
+            if(corpse->IsWithinDistInMap(this,(20+25)*sWorld.getRate(RATE_CREATURE_AGGRO)))
+                return true;
+        }
+    }
+
+    // and not see any other
+    return false;
+}
+
+void Player::UpdateVisibilityOf(WorldObject* target)
+{
+    if(HaveAtClient(target))
+    {
+        if(!target->isVisibleForInState(this,true))
+        {
+            target->DestroyForPlayer(this);
+            m_clientGUIDs.erase(target->GetGUID());
+
+            #ifdef MANGOS_DEBUG
+                if((sLog.getLogFilter() & LOG_FILTER_VISIBILITY_CHANGES)==0)
+                    sLog.outDebug("Object %u (Type: %u) out of range for player %u. Distance = %f",target->GetGUIDLow(),target->GetTypeId(),GetGUIDLow(),sqrt(GetDistanceSq(target)));
+            #endif
+
+            // activate stealth detection system
+            if(m_DetectInvTimer==0 && target->isType(TYPE_UNIT) && (
+                ((Unit*)target)->GetVisibility()==VISIBILITY_GROUP_STEALTH || 
+                ((Unit*)target)->GetVisibility()==VISIBILITY_GROUP_NO_DETECT ) &&
+                IsWithinDistInMap(target,DETECT_DISTANCE) )
+                m_DetectInvTimer = 1;
+        }
+    }
+    else
+    {
+        if(target->isVisibleForInState(this,false))
+        {
+            target->SendUpdateToPlayer(this);
+            if(target->GetTypeId()!=TYPEID_GAMEOBJECT||!((GameObject*)target)->IsTransport())
+                m_clientGUIDs.insert(target->GetGUID());
+
+            #ifdef MANGOS_DEBUG
+                if((sLog.getLogFilter() & LOG_FILTER_VISIBILITY_CHANGES)==0)
+                    sLog.outDebug("Object %u (Type: %u) is visible now for player %u. Distance = %f",target->GetGUIDLow(),target->GetTypeId(),GetGUIDLow(),sqrt(GetDistanceSq(target)));
+            #endif
+        }
+        else
+        {
+            // activate stealth detection system
+            if(m_DetectInvTimer==0 && target->isType(TYPE_UNIT) && (
+                ((Unit*)target)->GetVisibility()==VISIBILITY_GROUP_STEALTH || 
+                ((Unit*)target)->GetVisibility()==VISIBILITY_GROUP_NO_DETECT ) &&
+                IsWithinDistInMap(target,DETECT_DISTANCE) )
+                m_DetectInvTimer = 1;
+        }
+    }
+}
+
+template<class T> 
+inline void UpdateVisibilityOf_helper(std::set<uint64>& s64, T* target)
+{
+    s64.insert(target->GetGUID());
+}
+
+template<> 
+inline void UpdateVisibilityOf_helper(std::set<uint64>& s64, GameObject* target)
+{
+    if(!target->IsTransport())
+        s64.insert(target->GetGUID());
+}
+
+template<class T>
+void Player::UpdateVisibilityOf(T* target, UpdateData& data, UpdateDataMapType& data_updates)
+{
+    if(HaveAtClient(target))
+    {
+        if(!target->isVisibleForInState(this,true))
+        {
+            target->BuildOutOfRangeUpdateBlock(&data);
+            m_clientGUIDs.erase(target->GetGUID());
+
+            #ifdef MANGOS_DEBUG
+                if((sLog.getLogFilter() & LOG_FILTER_VISIBILITY_CHANGES)==0)
+                    sLog.outDebug("Object %u (Type: %u) is out of range for player %u. Distance = %f",target->GetGUIDLow(),target->GetTypeId(),GetGUIDLow(),sqrt(GetDistanceSq(target)));
+            #endif
+
+            // activate invisibility detection system
+            if(m_DetectInvTimer==0 && target->isType(TYPE_UNIT) && (
+                ((Unit*)target)->GetVisibility()==VISIBILITY_GROUP_STEALTH || 
+                ((Unit*)target)->GetVisibility()==VISIBILITY_GROUP_NO_DETECT ) )
+                m_DetectInvTimer = 1;
+        }
+    }
+    else
+    {
+        if(target->isVisibleForInState(this,false))
+        {
+            target->BuildUpdate(data_updates);
+            target->BuildCreateUpdateBlockForPlayer(&data, this);
+            UpdateVisibilityOf_helper(m_clientGUIDs,target);
+
+            #ifdef MANGOS_DEBUG
+                if((sLog.getLogFilter() & LOG_FILTER_VISIBILITY_CHANGES)==0)
+                    sLog.outDebug("Object %u (Type: %u) is visible now for player %u. Distance = %f",target->GetGUIDLow(),target->GetTypeId(),GetGUIDLow(),sqrt(GetDistanceSq(target)));
+            #endif
+        }
+    }
+}
+
+template void Player::UpdateVisibilityOf(Player*        target, UpdateData& data, UpdateDataMapType& data_updates);
+template void Player::UpdateVisibilityOf(Creature*      target, UpdateData& data, UpdateDataMapType& data_updates);
+template void Player::UpdateVisibilityOf(Corpse*        target, UpdateData& data, UpdateDataMapType& data_updates);
+template void Player::UpdateVisibilityOf(GameObject*    target, UpdateData& data, UpdateDataMapType& data_updates);
+template void Player::UpdateVisibilityOf(DynamicObject* target, UpdateData& data, UpdateDataMapType& data_updates);

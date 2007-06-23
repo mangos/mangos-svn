@@ -76,37 +76,6 @@ namespace MaNGOS
         template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
         template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &) {}
     };
-
-    struct MANGOS_DLL_DECL CreatureCorpseViewRemover
-    {
-        Creature &i_creature;
-        CreatureCorpseViewRemover(Creature &c) : i_creature(c) {}
-
-        void Visit(PlayerMapType &m)
-        {
-            for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-                i_creature.DestroyForPlayer(iter->second);
-        }
-
-        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
-        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &) {}
-    };
-
-    struct MANGOS_DLL_DECL BonesViewRemover
-    {
-        CorpsePtr i_objects;
-
-        BonesViewRemover(CorpsePtr& corpse) : i_objects(corpse) {}
-        
-        void Visit(PlayerMapType  &m)
-        {
-            for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-                i_objects->DestroyForPlayer(iter->second);
-        }
-        
-        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
-        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &) {}
-    };
 }
 
 ObjectAccessor::ObjectAccessor() {}
@@ -141,7 +110,7 @@ ObjectAccessor::GetNPCIfCanInteractWith(Player const &player, uint64 guid, uint3
         return NULL;
 
     // not too far
-    if(!unit->IsWithinDistInMap(&player,OBJECT_ITERACTION_DISTANCE))
+    if(!unit->IsWithinDistInMap(&player,INTERACTION_DISTANCE))
         return NULL;
 
     return unit;
@@ -242,8 +211,6 @@ void
 ObjectAccessor::InsertPlayer(Player *pl)
 {
     i_players[pl->GetGUID()] = pl;
-    _update();
-
 }
 
 void
@@ -423,9 +390,6 @@ ObjectAccessor::_buildUpdateObject(Object *obj, UpdateDataMapType &update_player
 void
 ObjectAccessor::_buildPacket(Player *pl, Object *obj, UpdateDataMapType &update_players)
 {
-    if(obj->isType(TYPE_UNIT) && !((Unit*)obj)->isVisibleFor(pl,false))
-        return;
-
     UpdateDataMapType::iterator iter = update_players.find(pl);
 
     if( iter == update_players.end() )
@@ -445,8 +409,8 @@ ObjectAccessor::_buildChangeObjectForPlayer(WorldObject *obj, UpdateDataMapType 
     Cell cell = RedZone::GetZone(p);
     cell.data.Part.reserved = ALL_DISTRICT;
     cell.SetNoCreate();
-    ObjectChangeAccumulator notifier(*obj, update_players);
-    TypeContainerVisitor<ObjectChangeAccumulator, WorldTypeMapContainer > player_notifier(notifier);
+    WorldObjectChangeAccumulator notifier(*obj, update_players);
+    TypeContainerVisitor<WorldObjectChangeAccumulator, WorldTypeMapContainer > player_notifier(notifier);
     CellLock<GridReadGuard> cell_lock(cell, p);
     cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(obj->GetMapId(), obj));
 }
@@ -662,34 +626,28 @@ ObjectAccessor::PlayersNearGrid(const uint32 &x, const uint32 &y, const uint32 &
 }
 
 void
-ObjectAccessor::ObjectChangeAccumulator::Visit(PlayerMapType &m)
+ObjectAccessor::WorldObjectChangeAccumulator::Visit(PlayerMapType &m)
 {
     for(PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
-        ObjectAccessor::_buildPacket(iter->second, &i_object, i_updateDatas);
+        if(iter->second->HaveAtClient(&i_object))
+            ObjectAccessor::_buildPacket(iter->second, &i_object, i_updateDatas);
 }
 
 void
-ObjectAccessor::RemoveCreatureCorpseFromPlayerView(Creature *c)
+ObjectAccessor::UpdateObjectVisibility(WorldObject *obj)
 {
-    MaNGOS::CreatureCorpseViewRemover remover(*c);
-    TypeContainerVisitor<MaNGOS::CreatureCorpseViewRemover, WorldTypeMapContainer > player_notifier(remover);
-    CellPair p = MaNGOS::ComputeCellPair(c->GetPositionX(), c->GetPositionY());
+    CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
     Cell cell = RedZone::GetZone(p);
-    cell.SetNoCreate();
-    cell.data.Part.reserved = ALL_DISTRICT;
-    CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(c->GetMapId(), c));
+
+    MapManager::Instance().GetMap(obj->GetMapId(), obj)->UpdateObjectVisibility(obj,cell,p);
 }
 
-void
-ObjectAccessor::RemoveBonesFromPlayerView(CorpsePtr& corpse)
+void ObjectAccessor::UpdateVisibilityForPlayer( Player* player )
 {
-    MaNGOS::BonesViewRemover remover(corpse);
-    TypeContainerVisitor<MaNGOS::BonesViewRemover, WorldTypeMapContainer > player_notifier(remover);
-    CellPair p = MaNGOS::ComputeCellPair(corpse->GetPositionX(), corpse->GetPositionY());
+    CellPair p = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
     Cell cell = RedZone::GetZone(p);
-    cell.SetNoCreate();
-    cell.data.Part.reserved = ALL_DISTRICT;
-    CellLock<GridReadGuard> cell_lock(cell, p);
-    cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(corpse->GetMapId(), &(*corpse)));
+    Map* m = MapManager::Instance().GetMap(player->GetMapId(),player);
+
+    m->UpdatePlayerVisibility(player,cell,p);
+    m->UpdateObjectsVisibilityFor(player,cell,p);
 }

@@ -508,3 +508,9 @@ void GameObject::SaveRespawnTime()
     if(m_respawnTime > time(NULL) && !GetOwnerGUID())
         objmgr.SaveGORespawnTime(m_DBTableGuid,GetInstanceId(),m_respawnTime);
 }
+
+bool GameObject::isVisibleForInState(Player const* u, bool inVisibleList) const
+{
+    return IsInWorld() && u->IsInWorld() && ( IsTransport() && IsInMap(u) ||
+        isSpawned() && IsWithinDistInMap(u,World::GetMaxVisibleDistanceForObject()+(inVisibleList ? World::GetVisibleObjectGreyDistance() : 0)) );
+}

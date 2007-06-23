@@ -31,8 +31,12 @@
 #define M_PI            3.14159265358979323846
 #endif
 
-#define OBJECT_CONTACT_DISTANCE 0.5
-#define OBJECT_ITERACTION_DISTANCE 5
+#define CONTACT_DISTANCE            0.5
+#define INTERACTION_DISTANCE        5
+#define ATTACK_DISTANCE                 5
+#define DETECT_DISTANCE             20                      // max distance to successful detect stealthed unit
+#define MAX_VISIBILITY_DISTANCE     (5*SIZE_OF_GRID_CELL/2) // max distance for visible object show, limited by active zone for player based at cell size (active zone = 5x5 cells)
+#define DEFAULT_VISIBILITY_DISTANCE (SIZE_OF_GRID_CELL)     // default visible distance
 
 enum TYPE
 {
@@ -61,6 +65,8 @@ enum TYPEID
     TYPEID_AIGROUP       = 8,
     TYPEID_AREATRIGGER   = 9
 };
+
+uint32 GuidHigh2TypeId(uint32 guid_hi);
 
 class WorldPacket;
 class UpdateData;
@@ -250,7 +256,7 @@ class MANGOS_DLL_SPEC WorldObject : public Object
             { x = m_positionX; y = m_positionY; z = m_positionZ; }
         float GetOrientation( ) const { return m_orientation; }
         void GetClosePoint( const WorldObject* victim, float &x, float &y, float &z, float distance = 0, float angle = 0 ) const;
-        void GetContactPoint( const WorldObject* obj, float &x, float &y, float &z, float distance = OBJECT_CONTACT_DISTANCE) const;
+        void GetContactPoint( const WorldObject* obj, float &x, float &y, float &z, float distance = CONTACT_DISTANCE) const;
         const float GetObjectSize() const
         {
             return ( m_valuesCount > UNIT_FIELD_BOUNDINGRADIUS ) ? m_floatValues[UNIT_FIELD_BOUNDINGRADIUS] : 0.39f;
@@ -296,6 +302,11 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         uint32 GetInstanceId() const { return m_InstanceId; }
         void SetInstanceId(uint32 val) { m_InstanceId = val; }
 
+        // main visibility check function in normal case (ignore grey zone distance check)
+        bool isVisibleFor(Player const* u) const { return isVisibleForInState(u,false); }
+
+        // low level function for visibility change code, must be define in all main world object subclasses
+        virtual bool isVisibleForInState(Player const* u, bool inVisibleList) const = 0;
     protected:
         WorldObject( WorldObject *instantiator );
 

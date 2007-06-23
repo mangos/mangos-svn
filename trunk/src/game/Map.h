@@ -105,6 +105,7 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         template<class T> T* GetObjectNear(float x, float y, OBJECT_HANDLE hdl, T*);
 
         template<class T> void Add(CountedPtr<T>&);
+
         template<class T> void Remove(CountedPtr<T>&, bool);
         template<class T> bool Find(CountedPtr<T>&) const;
 
@@ -117,7 +118,7 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
 
         void MessageBoardcast(WorldObject *, WorldPacket *);
 
-        void PlayerRelocation(Player *, float x, float y, float z, float angl, bool visibilityChanges = false);
+        void PlayerRelocation(Player *, float x, float y, float z, float angl);
 
         void CreatureRelocation(Creature *creature, float x, float y, float, float);
 
@@ -203,19 +204,26 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
 
         std::bitset<TOTAL_NUMBER_OF_CELLS_PER_MAP*TOTAL_NUMBER_OF_CELLS_PER_MAP> marked_cells;
 
+        void UpdateObjectVisibility(WorldObject* obj, Cell cell, CellPair cellpair);
+        void UpdatePlayerVisibility(Player* player, Cell cell, CellPair cellpair);
+        void UpdateObjectsVisibilityFor(Player* player, Cell cell, CellPair cellpair);
     private:
         void SetTimer(uint32 t) { i_gridExpiry = t < MIN_GRID_DELAY ? MIN_GRID_DELAY : t; }
         uint64 CalculateGridMask(const uint32 &y) const;
 
+        void SendInitSelf( Player * player );
+        void SendInitTransports( Player * player );
+
+        void PlayerRelocationNotify(Player* player, Cell cell, CellPair cellpair);
+
         bool CreatureCellRelocation(Creature *creature, Cell new_cell);
-        void CreatureRelocationNotifying(Creature *creature, Cell newcell, CellPair newval);
+        void CreatureRelocationNotify(Creature *creature, Cell newcell, CellPair newval);
 
         void AddCreatureToMoveList(Creature *c, float x, float y, float z, float ang);
         CreatureMoveList i_creaturesToMove;
 
         bool loaded(const GridPair &) const;
         void EnsureGridLoadedForPlayer(const Cell&, Player*, bool add_player);
-        void NotifyPlayerVisibility(const Cell &, const CellPair &, Player *);
         uint64  EnsureGridCreated(const GridPair &);
 
         template<class T> void AddType(T *obj);

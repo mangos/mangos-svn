@@ -186,7 +186,7 @@ bool ChatHandler::HandleGMListCommand(const char* args)
     for(ObjectAccessor::PlayersMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         if( itr->second->GetSession()->GetSecurity() && (itr->second->isGameMaster() || sWorld.getConfig(CONFIG_GM_IN_GM_LIST) ) &&
-            itr->second->isVisibleFor(m_session->GetPlayer(),false) )
+            itr->second->isVisibleFor(m_session->GetPlayer()) )
         {
             if(first)
             {

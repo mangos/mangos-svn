@@ -43,7 +43,6 @@ namespace MaNGOS
         void Visit(PlayerMapType &);
         template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
         template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &m) {}
-        void BuildForMySelf(void);
         Player &i_player;
     };
 
@@ -51,61 +50,24 @@ namespace MaNGOS
     {
         Player &i_player;
         UpdateData i_data;
-        UpdateDataMapType i_updateDatas;
+        UpdateDataMapType i_data_updates;
+        Player::ClientGUIDs i_clientGUIDs;
 
-        explicit VisibleNotifier(Player &player) : i_player(player) {}
+        explicit VisibleNotifier(Player &player) : i_player(player),i_clientGUIDs(player.m_clientGUIDs) {}
         template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);
         template<class T> void Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m);
-        void Visit(GameObjectMapType &);
+        void Visit(PlayerMapType &);
         void Notify(void);
-
-        #ifdef WIN32
-        template<> void VisibleNotifier::Visit(CreatureMapType &);
-        template<> void VisibleNotifier::Visit(PlayerMapType &);
-        #endif
     };
 
     struct MANGOS_DLL_DECL VisibleChangesNotifier
     {
-        Player &i_player;
-        explicit VisibleChangesNotifier(Player &player) : i_player(player) {}
-        void Visit(PlayerMapType &);
-        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
-        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &m) {}
-    };
-
-    struct MANGOS_DLL_DECL NotVisibleNotifier
-    {
-        Player &i_player;
-        UpdateData i_data;
-        explicit NotVisibleNotifier(Player &player) : i_player(player) {}
-        void Notify(void);
-        template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);
-        template<class T> void Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m);
-        void Visit(GameObjectMapType &);
-        void Visit(PlayerMapType &);
-
-        #ifdef WIN32
-        template<> void NotVisibleNotifier::Visit(CreatureMapType &);
-        #endif
-    };
-
-    struct MANGOS_DLL_DECL ObjectVisibleNotifier
-    {
         WorldObject &i_object;
-        explicit ObjectVisibleNotifier(WorldObject &obj) : i_object(obj) {}
-        void Visit(PlayerMapType &);
-        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
-        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &m) {}
-    };
 
-    struct MANGOS_DLL_DECL ObjectNotVisibleNotifier
-    {
-        WorldObject &i_object;
-        explicit ObjectNotVisibleNotifier(WorldObject &obj) : i_object(obj) {}
+        explicit VisibleChangesNotifier(WorldObject &object) : i_object(object) {}
+        template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m) {}
+        template<class T> void Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m) {}
         void Visit(PlayerMapType &);
-        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
-        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &m) {}
     };
 
     struct MANGOS_DLL_DECL GridUpdater
@@ -149,24 +111,6 @@ namespace MaNGOS
         Object &i_object;
         WorldPacket *i_message;
         ObjectMessageDeliverer(Object &obj, WorldPacket *msg) : i_object(obj), i_message(msg) {}
-        void Visit(PlayerMapType &m);
-        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
-        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &m) {}
-    };
-
-    struct MANGOS_DLL_DECL CreatureVisibleMovementNotifier
-    {
-        Creature &i_creature;
-        explicit CreatureVisibleMovementNotifier(Creature &creature) : i_creature(creature) {}
-        void Visit(PlayerMapType &m);
-        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
-        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &m) {}
-    };
-
-    struct MANGOS_DLL_DECL CreatureNotVisibleMovementNotifier
-    {
-        Creature &i_creature;
-        explicit CreatureNotVisibleMovementNotifier(Creature &creature) : i_creature(creature) {}
         void Visit(PlayerMapType &m);
         template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
         template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &m) {}
@@ -236,10 +180,8 @@ namespace MaNGOS
         PlayerRelocationNotifier(Player &pl) : i_player(pl) {}
         template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m) {}
         template<class T> void Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m) {}
-        #ifdef WIN32
-        template<> void Visit(PlayerMapType &);
-        template<> void Visit(CreatureMapType &);
-        #endif
+        void Visit(PlayerMapType &);
+        void Visit(CreatureMapType &);
     };
 
     struct MANGOS_DLL_DECL CreatureRelocationNotifier
@@ -528,17 +470,14 @@ namespace MaNGOS
         float i_range;
     };
 
-    class AnyDeadUnitCheck
+    struct AnyDeadUnitCheck
     {
-        public:
-            AnyDeadUnitCheck() {}
-            bool operator()(Unit* u)
-            {
-                if(!u->isAlive())
-                    return true;
+        bool operator()(Unit* u) { return !u->isAlive(); }
+    };
 
-                return false;
-            }
+    struct AnyStealthedCheck
+    {
+        bool operator()(Unit* u) { return u->GetVisibility()==VISIBILITY_GROUP_STEALTH; }
     };
 
     class CannibalizeUnitCheck
@@ -590,9 +529,6 @@ namespace MaNGOS
     };
 
     #ifndef WIN32
-    template<> void VisibleNotifier::Visit<Creature>(CreatureMapType &);
-    template<> void VisibleNotifier::Visit<Player>(PlayerMapType &);
-    template<> void NotVisibleNotifier::Visit<Creature>(CreatureMapType &);
     template<> void PlayerRelocationNotifier::Visit<Creature>(CreatureMapType &);
     template<> void PlayerRelocationNotifier::Visit<Player>(PlayerMapType &);
     template<> void CreatureRelocationNotifier::Visit<Player>(PlayerMapType &);

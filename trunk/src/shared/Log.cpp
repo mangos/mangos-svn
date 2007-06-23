@@ -223,6 +223,8 @@ void Log::Initialize()
         m_logFilter |= LOG_FILTER_TRANSPORT_MOVES;
     if(sConfig.GetIntDefault("LogFilter_CreatureMoves", 0)!=0)
         m_logFilter |= LOG_FILTER_CREATURE_MOVES;
+    if(sConfig.GetIntDefault("LogFilter_VisibilityChanges", 0)!=0)
+        m_logFilter |= LOG_FILTER_VISIBILITY_CHANGES;
 }
 
 void Log::outTimestamp(FILE* file)

@@ -2428,8 +2428,6 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
     if(!*args)
         return false;
 
-    sLog.outCommand("DEBUG: HandleWpShowCommand - nach args");
-
     // first arg: on, off, first, last
     char* show_str = strtok((char*)args, " ");
     if (!show_str)

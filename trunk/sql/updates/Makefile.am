@@ -341,6 +341,7 @@ pkgdata_DATA = \
 	3884_quest_scripts.sql \
 	3891_quest_scripts.sql \
 	3906_areatrigger_template.sql \
+	3929_spell_affect.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -660,4 +661,5 @@ EXTRA_DIST = \
 	3884_quest_scripts.sql \
 	3891_quest_scripts.sql \
 	3906_areatrigger_template.sql \
+	3929_spell_affect.sql \
 	README

@@ -247,7 +247,7 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
 
         PSendSysMessage(LANG_SUMMONING, chr->GetName(),"");
 
-        if (m_session->GetPlayer()->isVisibleFor(chr,false))
+        if (m_session->GetPlayer()->isVisibleFor(chr))
         {
             char buf0[256];
             snprintf((char*)buf0,256,LANG_SUMMONED_BY, m_session->GetPlayer()->GetName());
@@ -342,7 +342,7 @@ bool ChatHandler::HandleGonameCommand(const char* args)
 
         PSendSysMessage(LANG_APPEARING_AT, chr->GetName());
 
-        if (_player->isVisibleFor(chr,false))
+        if (_player->isVisibleFor(chr))
         {
             char buf0[256];
             sprintf((char*)buf0,LANG_APPEARING_TO, _player->GetName());
@@ -1663,7 +1663,7 @@ bool ChatHandler::HandleNameTeleCommand(const char * args)
 
         PSendSysMessage(LANG_TELEPORTING_TO, chr->GetName(),"", location.c_str());
 
-        if (m_session->GetPlayer()->isVisibleFor(chr,false))
+        if (m_session->GetPlayer()->isVisibleFor(chr))
         {
             WorldPacket data;
             char buf0[256];

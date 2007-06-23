@@ -1140,7 +1140,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void DestroyForPlayer( Player *target ) const;
         void SendDelayResponse(const uint32);
         void SendLogXPGain(uint32 GivenXP,Unit* victim,uint32 RestXP);
-        void SendOutOfRange(Object* obj);
 
         //Low Level Packets
         void PlaySound(uint32 Sound, bool OnlySelf);
@@ -1156,7 +1155,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendDungeonDifficulty();
         void SendAllowMove();
 
-        bool SetPosition(float x, float y, float z, float orientation);
+        bool SetPosition(float x, float y, float z, float orientation, bool teleport = false);
         void SendMessageToSet(WorldPacket *data, bool self);// overwrite Object::SendMessageToSet
         void SendMessageToOwnTeamSet(WorldPacket *data, bool self);
 
@@ -1341,7 +1340,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool IsFlying() const { return HasMovementFlags(MOVEMENTFLAG_FLYING); }
 
         // Transports
-        Transport * GetTransport() { return m_transport; }
+        Transport * GetTransport() const { return m_transport; }
         void SetTransport(Transport * t) { m_transport = t; }
 
         void SetTransOffset(float x, float y, float z, float orientation)
@@ -1371,12 +1370,22 @@ class MANGOS_DLL_SPEC Player : public Unit
         float m_homebindY;
         float m_homebindZ;
 
-        // Invisibility and detection system
-        std::vector<Player *> InvisiblePjsNear;
-        Player* m_DiscoveredPj;
+        // currently visible objects at player client 
+        typedef std::set<uint64> ClientGUIDs;
+        ClientGUIDs m_clientGUIDs;
+
+        bool HaveAtClient(WorldObject const* u) { return u==this || m_clientGUIDs.find(u->GetGUID())!=m_clientGUIDs.end(); }
+
+        bool IsVisibleInGridForPlayer(Player* pl) const;
+
+        void UpdateVisibilityOf(WorldObject* target);
+
+        template<class T>
+        void UpdateVisibilityOf(T* target, UpdateData& data, UpdateDataMapType& data_updates);
+
+        // Stealth detection system
         uint32 m_DetectInvTimer;
-        void HandleInvisiblePjs();
-        bool m_enableDetect;
+        void HandleStealthedUnitsDetection();
 
         void ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply);
                                                             // overwrite Unit version
