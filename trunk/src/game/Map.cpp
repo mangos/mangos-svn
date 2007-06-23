@@ -531,7 +531,7 @@ bool Map::CanEnter(Player* player)
         if (!group || !group->isRaidGroup())
         {
             player->GetSession()->SendAreaTriggerMessage("You must be in a raid group to enter %s instance", GetMapName());
-            sLog.outDebug("MAP: Player '%s' must be in a raid group to enter instance of '%s'", GetMapName());
+            sLog.outDebug("MAP: Player '%s' must be in a raid group to enter instance of '%s'", player->GetName(), GetMapName());
             return(false);
         }
     }
