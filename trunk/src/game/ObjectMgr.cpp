@@ -2698,6 +2698,7 @@ void ObjectMgr::LoadSpellAffects()
         bar.step();
 
         uint16 entry = fields[0].GetUInt16();
+        uint8 effectId = fields[1].GetUInt8();
 
         if (!sSpellStore.LookupEntry(entry))
         {
@@ -2707,7 +2708,6 @@ void ObjectMgr::LoadSpellAffects()
 
         SpellAffection sa;
 
-        sa.EffectId = fields[1].GetUInt8();
         sa.SpellId = fields[2].GetUInt16();
         sa.SchoolMask = fields[3].GetUInt8();
         sa.Category = fields[4].GetUInt16();
@@ -2716,7 +2716,7 @@ void ObjectMgr::LoadSpellAffects()
         sa.SpellFamilyMask = fields[7].GetUInt64();
         sa.Charges = fields[8].GetUInt16();
 
-        SpellAffect.insert(SpellAffectMap::value_type(entry,sa));
+        SpellAffect.insert(SpellAffectMap::value_type((entry<<8) + effectId,sa));
 
         count++;
     } while( result->NextRow() );

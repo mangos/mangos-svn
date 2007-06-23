@@ -1364,6 +1364,18 @@ void Spell::finish(bool ok)
     if(m_TriggerSpell.size() > 0)
         TriggerSpell();
 
+    //handle SPELL_AURA_ADD_TARGET_TRIGGER auras
+    Unit::AuraList& targetTriggers = m_caster->GetAurasByType(SPELL_AURA_ADD_TARGET_TRIGGER);
+    for(Unit::AuraList::iterator i = targetTriggers.begin(); i != targetTriggers.end(); ++i)
+        if (IsAffectedBy((*i)->GetSpellProto(),(*i)->GetEffIndex()))
+            for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[(*i)->GetEffIndex()].begin();iunit != m_targetUnitGUIDs[(*i)->GetEffIndex()].end();++iunit)
+            {
+                // check m_caster->GetGUID() let load auras at login and speedup most often case
+                Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
+                if (unit && unit->isAlive() && roll_chance_f((*i)->GetModifier()->m_amount))
+                    m_caster->CastSpell(unit,(*i)->GetSpellProto()->EffectTriggerSpell[(*i)->GetEffIndex()],true,NULL,(*i));
+            }
+    
     if (IsMeleeAttackResetSpell())
     {
         m_caster->resetAttackTimer(BASE_ATTACK);
@@ -2869,4 +2881,38 @@ void Spell::UpdatePointers()
         m_originalCaster = ObjectAccessor::Instance().GetUnit(*m_caster,m_originalCasterGUID);
 
     m_targets.Update(m_caster);
+}
+
+bool Spell::IsAffectedBy(SpellEntry const *spellInfo, uint32 effectId)
+{
+    if (!spellInfo) 
+        return false;
+
+    SpellAffection const *spellAffect = objmgr.GetSpellAffection(spellInfo->Id, effectId);
+
+    if (spellAffect)
+    {
+        if (spellAffect->SpellId && (spellAffect->SpellId == m_spellInfo->Id))
+            return true;
+        if (spellAffect->SchoolMask && (spellAffect->SchoolMask & m_spellInfo->School))
+            return true;
+        if (spellAffect->Category && (spellAffect->Category == m_spellInfo->Category))
+            return true;
+        if (spellAffect->SkillId)
+        {
+            SkillLineAbilityEntry const *skillLineEntry = sSkillLineAbilityStore.LookupEntry(m_spellInfo->Id);
+            if(skillLineEntry && skillLineEntry->skillId == spellAffect->SkillId)
+                return true;
+        }
+        if (spellAffect->SpellFamily && spellAffect->SpellFamily == m_spellInfo->SpellFamilyName)
+            return true;
+
+        if (spellAffect->SpellFamilyMask && (spellAffect->SpellFamilyMask & m_spellInfo->SpellFamilyFlags))
+            return true;
+    }
+    else
+        if (spellInfo->EffectItemType[effectId] & m_spellInfo->SpellFamilyFlags)
+            return true;
+    
+    return false;
 }

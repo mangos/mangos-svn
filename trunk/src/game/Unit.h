@@ -320,7 +320,7 @@ enum ProcFlags
 
 enum AuraState
 {
-    AURA_STATE_DODGE          = 1,
+    AURA_STATE_DEFENSE        = 1,
     AURA_STATE_HEALTHLESS     = 2,
     AURA_STATE_RACE           = 3,
     AURA_STATE_UNKNOWN1       = 4,

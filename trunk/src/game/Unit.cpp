@@ -1223,7 +1223,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim,uint32 School, const uint32 damage, ui
 void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType, SpellEntry const *spellCasted, bool isTriggeredSpell)
 {
     pVictim->ModifyAuraState(AURA_STATE_PARRY, false);
-    pVictim->ModifyAuraState(AURA_STATE_DODGE, false);
+    pVictim->ModifyAuraState(AURA_STATE_DEFENSE, false);
     ModifyAuraState(AURA_STATE_CRIT, false);
 
     MeleeHitOutcome outcome;
@@ -1349,6 +1349,8 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
 
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
             pVictim->ModifyAuraState(AURA_STATE_PARRY,true);
+            if (pVictim->getClass() != CLASS_HUNTER) // Mongoose Bite
+                pVictim->ModifyAuraState(AURA_STATE_DEFENSE, true);
 
             CastMeleeProcDamageAndSpell(pVictim, 0, attType, outcome, spellCasted, isTriggeredSpell);
             return;
@@ -1363,7 +1365,9 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
                 ((Player*)pVictim)->UpdateDefense();
 
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
-            pVictim->ModifyAuraState(AURA_STATE_DODGE, true);
+
+            if (pVictim->getClass() != CLASS_ROGUE) // Riposte
+                pVictim->ModifyAuraState(AURA_STATE_DEFENSE, true);
 
             CastMeleeProcDamageAndSpell(pVictim, 0, attType, outcome, spellCasted, isTriggeredSpell);
             return;
@@ -1385,7 +1389,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
 
             if(pVictim->GetTypeId() == TYPEID_PLAYER)
                 ((Player*)pVictim)->UpdateDefense();
-            pVictim->ModifyAuraState(AURA_STATE_DODGE,true);
+            pVictim->ModifyAuraState(AURA_STATE_DEFENSE,true);
             break;
 
         case MELEE_HIT_GLANCING:
@@ -4284,20 +4288,19 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         if(((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0)
             DoneAdvertisedBenefit += (*i)->GetModifier()->m_amount;
 
-    if(GetTypeId() == TYPEID_PLAYER)
+    if (GetTypeId() == TYPEID_PLAYER)
     {
-        AuraList& mDamageDonebySpi = this->GetAurasByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_SPIRIT);
+        // Damage bonus of spirit
+        AuraList& mDamageDonebySpi = GetAurasByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_SPIRIT);
         for(AuraList::iterator i = mDamageDonebySpi.begin();i != mDamageDonebySpi.end(); ++i)
-        {
-            float bonus = GetStat(STAT_SPIRIT) * ((*i)->GetModifier()->m_amount) / 100;
-            DoneAdvertisedBenefit += int32(bonus);
-        }
-        AuraList& mDamageDonebyInt = this->GetAurasByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_INTELLECT);
+            if((*i)->GetModifier()->m_miscvalue & 1 << spellProto->School)
+                DoneAdvertisedBenefit += GetStat(STAT_SPIRIT) * ((*i)->GetModifier()->m_amount) / 100;
+    
+        // ... and intellect
+        AuraList& mDamageDonebyInt = GetAurasByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_INTELLECT);
         for(AuraList::iterator i = mDamageDonebyInt.begin();i != mDamageDonebyInt.end(); ++i)
-        {
-            float bonus = GetStat(STAT_INTELLECT) * ((*i)->GetModifier()->m_amount) / 100;
-            DoneAdvertisedBenefit += int32(bonus);
-        }
+            if ((*i)->GetModifier()->m_miscvalue & 1 << spellProto->School)
+                DoneAdvertisedBenefit += GetStat(STAT_INTELLECT) * ((*i)->GetModifier()->m_amount) / 100;
     }
 
     // ..taken
@@ -4518,22 +4521,11 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
         if(((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0)
             AdvertisedBenefit += (*i)->GetModifier()->m_amount;
 
-    if(GetTypeId() == TYPEID_PLAYER)
+    // Healing bonus of spirit and intellect
+    if (GetTypeId() == TYPEID_PLAYER)
     {
-        // flat
-        AuraList& mHealingDonebySpi = GetAurasByType(SPELL_AURA_MOD_SPELL_HEALING_OF_SPIRIT);
-        for(AuraList::iterator i = mHealingDonebySpi.begin();i != mHealingDonebySpi.end(); ++i)
-        {
-            float bonus = GetStat(STAT_SPIRIT) * ((*i)->GetModifier()->m_amount) / 100;
-            AdvertisedBenefit += int32(bonus);
-        }
-        // flat
-        AuraList& mHealingDonebyInt = GetAurasByType(SPELL_AURA_MOD_SPELL_HEALING_OF_INTELLECT);
-        for(AuraList::iterator i = mHealingDonebyInt.begin();i != mHealingDonebyInt.end(); ++i)
-        {
-            float bonus = GetStat(STAT_INTELLECT) * ((*i)->GetModifier()->m_amount) / 100;
-            AdvertisedBenefit += int32(bonus);
-        }
+        AdvertisedBenefit += GetStat(STAT_SPIRIT) * m_AuraModifiers[SPELL_AURA_MOD_SPELL_HEALING_OF_SPIRIT] / 100.0f;
+        AdvertisedBenefit += GetStat(STAT_INTELLECT) * m_AuraModifiers[SPELL_AURA_MOD_SPELL_HEALING_OF_INTELLECT] / 100.0f;
     }
 
     //flat
