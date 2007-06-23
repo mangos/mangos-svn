@@ -997,3 +997,29 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
 
     _player->ToggleMetaGemsActive(slot, true);    //turn on all metagems (except for target item)
 }
+
+void WorldSession::HandleCancelTempItemEnchantmentOpcode(WorldPacket& recv_data)
+{
+    sLog.outDebug("WORLD: CMSG_CANCEL_TEMP_ITEM_ENCHANTMENT");
+
+    CHECK_PACKET_SIZE(recv_data,4);
+
+    uint32 eslot;
+    
+    recv_data >> eslot;
+
+    // apply only to equipped item
+    if(!Player::IsEquipmentPos(INVENTORY_SLOT_BAG_0,eslot))
+        return;
+
+    Item* item = GetPlayer()->GetItemByPos(INVENTORY_SLOT_BAG_0, eslot);
+
+    if(!item)
+        return;
+
+    if(!item->GetEnchantmentId(TEMP_ENCHANTMENT_SLOT))
+        return;
+
+    GetPlayer()->ApplyEnchantment(item,TEMP_ENCHANTMENT_SLOT,false);
+    item->ClearEnchantment(TEMP_ENCHANTMENT_SLOT);
+}
