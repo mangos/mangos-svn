@@ -240,10 +240,14 @@ struct ItemSetEntry
 
 struct LockEntry
 {
-    uint32      ID;
-    uint32      key;
-    uint32      requiredskill;
-    uint32      requiredlockskill;
+    uint32      ID;                                         //0
+    uint32      type[5];                                    //1-5
+                                                            //6-8, not used
+    uint32      key[5];                                     //9-13
+                                                            //14-16, not used
+    uint32      requiredminingskill;                        //17
+    uint32      requiredlockskill;                          //18
+                                                            //19-32, not used
 };
 
 struct MapEntry
