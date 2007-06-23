@@ -175,7 +175,7 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
         }
 
         // required picklocking
-        if(lockInfo->requiredlockskill || lockInfo->requiredskill)
+        if(lockInfo->requiredlockskill || lockInfo->requiredminingskill)
         {
             pUser->SendEquipError(EQUIP_ERR_ITEM_LOCKED, pItem, NULL );
             return;
