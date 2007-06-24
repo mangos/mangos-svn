@@ -332,7 +332,7 @@ m_isAreaAura(false)
         m_caster_guid = caster->GetGUID();
         damage = CalculateDamage();
         
-        if (!damage && castItem->GetItemSuffixFactor())
+        if (!damage && castItem && castItem->GetItemSuffixFactor())
         {
             ItemRandomSuffixEntry const *item_rand_suffix = sItemRandomSuffixStore.LookupEntry(abs(castItem->GetItemRandomPropertyId()));
             if(item_rand_suffix)
