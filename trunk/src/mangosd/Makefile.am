@@ -22,6 +22,8 @@ AM_CPPFLAGS = $(MYSQL_INCLUDES) -I$(srcdir)/../../dep/include -I$(srcdir)/../fra
 ## Build world list daemon as standalone program
 bin_PROGRAMS = mangos-worldd
 mangos_worldd_SOURCES = \
+	../game/AccountMgr.cpp \
+	../game/AccountMgr.h \
 	CliRunnable.cpp \
 	CliRunnable.h \
 	Main.cpp \

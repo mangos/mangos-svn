@@ -280,23 +280,20 @@ void AuthSocket::OnRead()
 }
 
 /// Upper password, and make the SRP6 calculation
-void AuthSocket::_SetVSFields(std::string password)
+void AuthSocket::_SetVSFields(std::string rI)
 {
-    std::transform(password.begin(), password.end(), password.begin(), std::towupper);
-
-    Sha1Hash I;
-    std::string sI = _login + ":" + password;
-    I.UpdateData(sI);
-    I.Finalize();
+    BigNumber I;
+    I.SetHexStr(rI.c_str());
+    I.Reverse();
     Sha1Hash sha;
     sha.UpdateData(s.AsByteArray(), s.GetNumBytes());
-    sha.UpdateData(I.GetDigest(), 20);
+    sha.UpdateBigNumbers(&I, NULL);
     sha.Finalize();
     BigNumber x;
     x.SetBinary(sha.GetDigest(), sha.GetLength());
     v = g.ModExp(x, N);
     // No SQL injection (username escaped)
-    dbRealmServer.PExecute("UPDATE `account` SET `v` = '%s', `s` = '%s' WHERE `username` = '%s'",v.AsHexStr(),s.AsHexStr(), _safelogin.c_str() );
+    dbRealmServer.PExecute("UPDATE `account` SET `v` = '%s', `s` = '%s' WHERE UPPER(`username`)= UPPER('%s')",v.AsHexStr(),s.AsHexStr(), _safelogin.c_str() );
 }
 
 /// Logon Challenge command handler
@@ -366,7 +363,8 @@ bool AuthSocket::_HandleLogonChallenge()
         {
             ///- Get the account details from the account table
             // No SQL injection (escaped user name)
-            QueryResult *result = dbRealmServer.PQuery("SELECT `password`,`id`,`locked`,`last_ip`,`online` FROM `account` WHERE `username` = '%s'",_safelogin.c_str ());
+
+            QueryResult *result = dbRealmServer.PQuery("SELECT `I`,`id`,`locked`,`last_ip`,`online` FROM `account` WHERE `username` = '%s'",_safelogin.c_str ());
             if( result )
             {
                 ///- If the IP is 'locked', check that the player comes indeed from the correct IP address
@@ -415,8 +413,8 @@ bool AuthSocket::_HandleLogonChallenge()
                     else
                     {
                         ///- Get the password from the account table, upper it, and make the SRP6 calculation
-                        std::string password = (*result)[0].GetCppString();
-                        _SetVSFields(password);
+                        std::string rI = (*result)[0].GetCppString();
+                        _SetVSFields(rI);
 
                         b.SetRand(19 * 8);
                         BigNumber gmod=g.ModExp(b, N);
@@ -621,7 +619,8 @@ bool AuthSocket::_HandleRealmList()
 
     ///- Get the user id (else close the connection)
     // No SQL injection (escaped user name)
-    QueryResult *result = dbRealmServer.PQuery("SELECT `id`,`password` FROM `account` WHERE `username` = '%s'",_safelogin.c_str());
+
+    QueryResult *result = dbRealmServer.PQuery("SELECT `id`,`I` FROM `account` WHERE `username` = '%s'",_safelogin.c_str());
     if(!result)
     {
         sLog.outError("[ERROR] user %s tried to login and we cannot find him in the database.",_login.c_str());
@@ -630,7 +629,7 @@ bool AuthSocket::_HandleRealmList()
     }
 
     uint32 id = (*result)[0].GetUInt32();
-    std::string password = (*result)[1].GetCppString();
+    std::string rI = (*result)[1].GetCppString();
     delete result;
 
     ///- Circle through realms in the RealmList and construct the return packet (including # of user characters in each realm)
@@ -672,7 +671,7 @@ bool AuthSocket::_HandleRealmList()
     SendBuf((char *)hdr.contents(), hdr.size());
 
     // Set check field before possable relogin to realm
-    _SetVSFields(password);
+    _SetVSFields(rI);
     return true;
 }
 

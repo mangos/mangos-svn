@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -74,7 +74,7 @@ RASocket::~RASocket()
 /// Accept an incoming connection
 void RASocket::OnAccept()
 {
-    
+
         std::string ss=GetRemoteAddress();
        sLog.outRALog("Incoming connection from %s.\n",ss.c_str());
        ///- If there is already an active admin, drop the connection
@@ -146,7 +146,8 @@ void RASocket::OnRead()
                     std::string login = szLogin;
                     loginDatabase.escape_string(login);
                     // No SQL injection (escaped login)
-                    QueryResult* result = loginDatabase.PQuery("SELECT `password`,`gmlevel` FROM `account` WHERE `username` = '%s'",login.c_str());
+
+                    QueryResult* result = loginDatabase.PQuery("SELECT `I`,`gmlevel` FROM `account` WHERE UPPER(`username`) = UPPER('%s')",login.c_str());
 
                     ///- If the user is not found, deny access
                     if(!result)
@@ -159,7 +160,7 @@ void RASocket::OnRead()
                     {
                         Field *fields = result->Fetch();
 
-                        szPass=fields[0].GetString();
+                        //szPass=fields[0].GetString();
 
                         ///- if gmlevel is too low, deny access
                         if(fields[1].GetUInt32()<iMinLevel)
@@ -180,8 +181,14 @@ void RASocket::OnRead()
                 if(!memcmp(buff,"PASS ",5))                 //got "PASS" cmd
                 {                                           //login+pass ok
                     ///- If password is correct, increment the number of active administrators
-                    if(!strcmp(&buff[5],szPass.c_str()))
+                    std::string login = szLogin;
+                    std::string pw = &buff[5];
+                    loginDatabase.escape_string(login);
+                    loginDatabase.escape_string(pw);
+                    QueryResult *check = loginDatabase.PQuery("SELECT 1 FROM `account` WHERE UPPER(`username`)=LOWER('%s') AND `I`=SHA1(CONCAT(UPPER(`username`),':',UPPER('%s')))", login.c_str(), pw.c_str());
+                    if(check)
                     {
+                        delete check;
                         r=GetSocket();
                         stage=OK;
                         iUsers++;

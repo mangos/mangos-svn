@@ -28,6 +28,8 @@ noinst_LIBRARIES = libmangosgame.a
 
 #  libmangossgame library will later be reused by ...
 libmangosgame_a_SOURCES = \
+	AccountMgr.cpp \
+	AccountMgr.h \
 	AddonHandler.cpp \
 	AddonHandler.h \
 	AggressorAI.cpp \

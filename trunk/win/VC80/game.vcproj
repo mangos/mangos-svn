@@ -176,6 +176,14 @@
 			Name="World/Handlers"
 			>
 			<File
+				RelativePath="..\..\src\game\AccountMgr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\AccountMgr.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\AddonHandler.cpp"
 				>
 			</File>
