@@ -318,8 +318,6 @@ m_isAreaAura(false)
     m_positive = IsPositiveEffect(m_spellId, m_effIndex);
     m_applyTime = time(NULL);
 
-    sLog.outDebug("Aura: construct Spellid : %u, Aura : %u Duration : %d Target : %d.", spellproto->Id, spellproto->EffectApplyAuraName[eff], m_duration, spellproto->EffectImplicitTargetA[eff]);
-
     uint32 type = 0;
     if(!m_positive)
         type = 1;
@@ -333,7 +331,33 @@ m_isAreaAura(false)
     {
         m_caster_guid = caster->GetGUID();
         damage = CalculateDamage();
+        
+        if (!damage && castItem->GetItemSuffixFactor())
+        {
+            ItemRandomSuffixEntry const *item_rand_suffix = sItemRandomSuffixStore.LookupEntry(abs(castItem->GetItemRandomPropertyId()));
+            if(item_rand_suffix)
+            {
+                for (int k=0; k<3; k++)
+                {
+                    SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(item_rand_suffix->enchant_id[k]);
+                    if(pEnchant)
+                    {
+                        for (int t=0; t<3; t++)
+                            if(pEnchant->spellid[t] == spellproto->Id)
+                            {
+                                damage = uint32((item_rand_suffix->prefix[k]*castItem->GetItemSuffixFactor()) / 10000 );
+                                break;
+                            }
+                    }
+
+                    if(damage)
+                        break;
+                }
+            }
+        }
     }
+
+    sLog.outDebug("Aura: construct Spellid : %u, Aura : %u Duration : %d Target : %d Damage : %d", spellproto->Id, spellproto->EffectApplyAuraName[eff], m_duration, spellproto->EffectImplicitTargetA[eff],damage);
 
     m_effIndex = eff;
     SetModifier(spellproto->EffectApplyAuraName[eff], damage, spellproto->EffectAmplitude[eff], spellproto->EffectMiscValue[eff], type);

@@ -20,6 +20,7 @@
 #include "Item.h"
 #include "ObjectMgr.h"
 #include "Database/DatabaseEnv.h"
+#include "ItemEnchantmentMgr.h"
 
 SpellEntry const* Cast(Player*player,Item* item, uint32 spellId)
 {
@@ -389,360 +390,89 @@ uint32 Item::GetSpell()
     return 0;
 }
 
-uint32 Item::GenerateItemRandomPropertyId(uint32 item_id)
+int32 Item::GenerateItemRandomPropertyId(uint32 item_id)
 {
     ItemPrototype const *itemProto = sItemStorage.LookupEntry<ItemPrototype>(item_id);
 
     if(!itemProto)
         return 0;
 
-    // item can have random property (this value store set of allowed random properties but format unknown)
-    if(!itemProto->RandomProperty)
+    // item must have one from this field values not null if it can have random enchantments
+    if((!itemProto->RandomProperty) && (!itemProto->RandomSuffix))
         return 0;
 
-    // maybe just hack here,we should find out the correct random_id in DBC
-    uint32 random_id,enchant_id_1;
-    enchant_id_1 = random_id = 0;
-
-    std::vector<unsigned int> enchantlist;
-    ItemRandomPropertiesEntry const *cur;
-    float ItemValue = 0, tempItemValue = 0;
-    float ItemSlotMod = 0;
-    int32 wsc = -1;
-    switch(itemProto->InventoryType)
+    // item can have not null only one from field values
+    if((itemProto->RandomProperty) && (itemProto->RandomSuffix))
     {
-        case INVTYPE_HEAD:
-            ItemSlotMod = ITEM_SLOT_HEAD_MOD; break;
-        case INVTYPE_NECK:
-            ItemSlotMod = ITEM_SLOT_NECK_MOD; break;
-        case INVTYPE_SHOULDERS:
-            ItemSlotMod = ITEM_SLOT_SHOULDERS_MOD; break;
-        case INVTYPE_CHEST:
-        case INVTYPE_ROBE:
-            ItemSlotMod = ITEM_SLOT_CHEST_MOD; break;
-        case INVTYPE_WAIST:
-            ItemSlotMod = ITEM_SLOT_WAIST_MOD; break;
-        case INVTYPE_LEGS:
-            ItemSlotMod = ITEM_SLOT_LEGS_MOD; break;
-        case INVTYPE_FEET:
-            ItemSlotMod = ITEM_SLOT_FEET_MOD; break;
-        case INVTYPE_WRISTS:
-            ItemSlotMod = ITEM_SLOT_WRISTS_MOD; break;
-        case INVTYPE_HANDS:
-            ItemSlotMod = ITEM_SLOT_HANDS_MOD; break;
-        case INVTYPE_FINGER:
-            ItemSlotMod = ITEM_SLOT_FINGER_MOD; break;
-        case INVTYPE_TRINKET:
-            ItemSlotMod = ITEM_SLOT_TRINKET_MOD; break;
-        case INVTYPE_SHIELD:
-            ItemSlotMod = ITEM_SLOT_SHIELD_MOD; break;
-        case INVTYPE_RANGED:
-        case INVTYPE_RANGEDRIGHT:
-            ItemSlotMod = ITEM_SLOT_RANGED_MOD; break;
-        case INVTYPE_CLOAK:
-            ItemSlotMod = ITEM_SLOT_BACK_MOD; break;
-        case INVTYPE_2HWEAPON:
-            ItemSlotMod = ITEM_SLOT_2HAND_MOD; break;
-        case INVTYPE_WEAPONMAINHAND:
-        case INVTYPE_WEAPON:
-            ItemSlotMod = ITEM_SLOT_MAIN_HAND_MOD; break;
-        case INVTYPE_WEAPONOFFHAND:
-        case INVTYPE_HOLDABLE:
-            ItemSlotMod = ITEM_SLOT_OFF_HAND_MOD; break;
-        default:
-            ItemSlotMod = 0; break;
+        sLog.outErrorDb("Item template %u have `RandomProperty`==%u and `RandomSuffix`==%u, but must have one from field =0",itemProto->ItemId,itemProto->RandomProperty,itemProto->RandomSuffix);
+        return 0;
     }
 
-    if(!ItemSlotMod)
-        return 0;
-
-    for(unsigned int i = 1; i <= sItemRandomPropertiesStore.GetNumRows(); i++)
+    // RandomProperty case
+    if(itemProto->RandomProperty)
     {
-        if(cur = sItemRandomPropertiesStore.LookupEntry(i))
+        uint32 randomPropId = GetItemEnchantMod(itemProto->RandomProperty);
+        ItemRandomPropertiesEntry const *random_id = sItemRandomPropertiesStore.LookupEntry(randomPropId);
+        if(!random_id) 
         {
-            ItemValue = GetEnchantMod(cur->enchant_id[0], itemProto);
-            if(!ItemValue)
-                continue;
-            if(cur->enchant_id[1])
-            {
-                tempItemValue = GetEnchantMod(cur->enchant_id[1], itemProto);
-                if(!tempItemValue)
-                    continue;
-                ItemValue += tempItemValue;
-            }
-            if(cur->enchant_id[2])
-            {
-                tempItemValue = GetEnchantMod(cur->enchant_id[2], itemProto);
-                if(!tempItemValue)
-                    continue;
-                ItemValue += tempItemValue;
-            }
-            ItemValue = pow(ItemValue, 2.0f/3.0f )*ItemSlotMod;
-            switch(itemProto->Quality)
-            {
-                case ITEM_QUALITY_UNCOMMON:
-                    ItemValue = ItemValue*2.0 + 4.0; break;
-                case ITEM_QUALITY_RARE:
-                    ItemValue = ItemValue*1.6 + 1.84; break;
-                case ITEM_QUALITY_EPIC:
-                    ItemValue = ItemValue*1.3 + 1.3; break;
-            }
-            if((uint32)ItemValue > itemProto->RequiredLevel && (uint32)ItemValue <= (itemProto->RequiredLevel + 5))
-            {
-                enchantlist.insert(enchantlist.end(),i);
-            }
+            sLog.outErrorDb("Enchantment id #%u used but it doesn't have records in 'ItemRandomProperties.dbc'",randomPropId);
+            return 0;
         }
+
+        return random_id->ID;
     }
-    if(!enchantlist.size())
-        return 0;
-    random_id = enchantlist.at(irand(1,enchantlist.size())-1);
-    return random_id;
+    // RandomSuffix case
+    else
+    {
+        uint32 randomPropId = GetItemEnchantMod(itemProto->RandomSuffix);
+        ItemRandomSuffixEntry const *random_id = sItemRandomSuffixStore.LookupEntry(randomPropId);
+        if(!random_id)
+        {
+            sLog.outErrorDb("Enchantment id #%u used but it doesn't have records in sItemRandomSuffixStore.",randomPropId);
+            return 0;
+        }
+
+        return -int32(random_id->ID);
+    }
+    return 0;
 }
 
-void Item::SetItemRandomProperties(uint32 randomPropId)
+void Item::SetItemRandomProperties(int32 randomPropId)
 {
     if(!randomPropId)
         return;
 
-    ItemRandomPropertiesEntry const *item_rand = sItemRandomPropertiesStore.LookupEntry(randomPropId);
-    if(item_rand)
+    if(randomPropId > 0)
     {
-        if(GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID)!=item_rand->ID)
+        ItemRandomPropertiesEntry const *item_rand = sItemRandomPropertiesStore.LookupEntry(randomPropId);
+        if(item_rand)
         {
-            SetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID,item_rand->ID);
-            SetState(ITEM_CHANGED);
-        }
-
-        for(uint32 i = PROP_ENCHANTMENT_SLOT; i < PROP_ENCHANTMENT_SLOT + 3; ++i)
-            SetEnchantment(EnchantmentSlot(i),item_rand->enchant_id[i-PROP_ENCHANTMENT_SLOT],0,0);
-    }
-}
-
-float Item::GetEnchantMod(uint32 enchant_id, ItemPrototype const * itemProto)
-{
-    if(!enchant_id)
-        return 0;
-    if(!itemProto)
-        return 0;
-
-    SpellItemEnchantmentEntry const *entry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
-    if(!entry)
-        return 0;
-    int32 weapon_subclass;
-    if(itemProto->Class == ITEM_CLASS_WEAPON)
-        weapon_subclass = itemProto->SubClass;
-    else
-        weapon_subclass = -1;
-    int32 inv_type = itemProto->InventoryType;
-    float tempmod, mod = 0;
-    for (int s=0;s<3;s++)
-    {
-        uint32 en_display = entry->display_type[s];
-        uint32 en_value1 = entry->amount[s];
-        uint32 en_spellid = entry->spellid[s];
-        if(en_display == 4)
-        {
-            mod += pow((float)(en_value1 * ITEM_STAT_ARMOR_MOD), 1.50f);
-        }
-        else if(en_display == 2)
-        {
-            mod += pow((float)(en_value1 * ITEM_STAT_ATTACK_POWER_MOD * 3), 1.50f);
-        }
-        else if(en_display == 3 && en_spellid)
-        {
-            SpellEntry const *en_spellinfo = sSpellStore.LookupEntry(en_spellid);
-            if(!en_spellinfo)
-                return 0;
-            for(uint8 i = 0; i<3; i++)
+            if(GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID) != item_rand->ID)
             {
-                if(!en_spellinfo->EffectApplyAuraName[i])
-                    break;
-                int32 points = en_spellinfo->EffectBasePoints[i]+1;
-                int32 misc = en_spellinfo->EffectMiscValue[i];
-                switch(en_spellinfo->EffectApplyAuraName[i])
-                {
-                    case SPELL_AURA_MOD_CREATURE_ATTACK_POWER:
-                        switch(misc)
-                        {
-                            case (0x0001 << (CREATURE_TYPE_BEAST-1)):
-                            case (0x0001 << (CREATURE_TYPE_DEMON-1)):
-                            case (0x0001 << (CREATURE_TYPE_UNDEAD-1)):
-                                mod += pow((float)(points * ITEM_STAT_DBU_ATTACK_POWER_MOD), 1.50f); break;
-                        }
-                        break;
-                    case SPELL_AURA_MOD_DAMAGE_DONE_CREATURE:
-                        switch(misc)
-                        {
-                            case (0x0001 << (CREATURE_TYPE_BEAST-1)):
-                            case (0x0001 << (CREATURE_TYPE_DEMON-1)):
-                            case (0x0001 << (CREATURE_TYPE_UNDEAD-1)):
-                                mod += pow((float)(points * ITEM_STAT_DBU_SPELL_DAMAGE_MOD), 1.50f); break;
-                        }
-                        break;
-                    case SPELL_AURA_MOD_RANGED_ATTACK_POWER:
-                        mod += pow((float)(points * ITEM_STAT_RANGED_ATTACK_POWER_MOD), 1.50f); break;
-                    case SPELL_AURA_MOD_HEALING_DONE:
-                        mod += pow((float)(points * ITEM_STAT_HEALING_MOD), 1.50f); break;
-                    case SPELL_AURA_MOD_ATTACK_POWER:
-                        mod += pow((float)(points * ITEM_STAT_ATTACK_POWER_MOD), 1.50f); break;
-                    case SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT:
-                        if(inv_type == INVTYPE_2HWEAPON || inv_type == INVTYPE_HOLDABLE || inv_type == INVTYPE_WEAPONOFFHAND || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND)
-                            return 0;
-
-                        if(inv_type == INVTYPE_SHIELD)
-                            mod += pow((float)(points * ITEM_STAT_BLOCK_SHIELD_MOD), 1.50f);
-                        else
-                            mod += pow((float)(points * ITEM_STAT_BLOCK_MOD), 1.50f);
-                        break;
-                    case SPELL_AURA_MOD_DAMAGE_DONE:
-                        if(misc == 126)
-                        {
-                            mod += pow((float)(points * ITEM_STAT_ALL_SPELL_DAMAGE_MOD), 1.50f);
-                        }
-                        else
-                        {
-                            if(misc & (0x0001 << SPELL_SCHOOL_HOLY))
-                            {
-                                if(itemProto->Class == ITEM_CLASS_WEAPON)
-                                    if(itemProto->SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_POLEARM || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_BOW || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_GUN)
-                                        return 0;
-                                mod += pow((float)(points * ITEM_STAT_SCHOOL_SPELL_DAMAGE_MOD), 1.50f);
-                            }
-                            if(misc & (0x0001 << SPELL_SCHOOL_FIRE) && !(itemProto->Class == ITEM_CLASS_ARMOR && itemProto->SubClass == ITEM_SUBCLASS_ARMOR_PLATE)) mod += pow((float)(points * ITEM_STAT_SCHOOL_SPELL_DAMAGE_MOD), 1.50f);
-                            if(misc & (0x0001 << SPELL_SCHOOL_NATURE) && !(itemProto->Class == ITEM_CLASS_ARMOR && itemProto->SubClass == ITEM_SUBCLASS_ARMOR_PLATE)) mod += pow((float)(points * ITEM_STAT_SCHOOL_SPELL_DAMAGE_MOD), 1.50f);
-                            if(misc & (0x0001 << SPELL_SCHOOL_FROST) && !(itemProto->Class == ITEM_CLASS_ARMOR && itemProto->SubClass == ITEM_SUBCLASS_ARMOR_PLATE)) mod += pow((float)(points * ITEM_STAT_SCHOOL_SPELL_DAMAGE_MOD), 1.50f);
-                            if(misc & (0x0001 << SPELL_SCHOOL_SHADOW) && !(itemProto->Class == ITEM_CLASS_ARMOR && itemProto->SubClass == ITEM_SUBCLASS_ARMOR_PLATE))
-                            {
-                                if(itemProto->Class == ITEM_CLASS_WEAPON)
-                                    if(itemProto->SubClass == ITEM_SUBCLASS_WEAPON_SWORD2 || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_MACE2 || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_AXE2 || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_AXE || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_POLEARM || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_BOW || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_GUN)
-                                        return 0;
-                                if(inv_type == INVTYPE_SHIELD)
-                                    return 0;
-                                mod += pow((float)(points * ITEM_STAT_SCHOOL_SPELL_DAMAGE_MOD), 1.50f);
-                            }
-                            if(misc & (0x0001 << SPELL_SCHOOL_ARCANE) && !(itemProto->Class == ITEM_CLASS_ARMOR && itemProto->SubClass == ITEM_SUBCLASS_ARMOR_PLATE))
-                            {
-                                if(itemProto->Class == ITEM_CLASS_WEAPON)
-                                    if(itemProto->SubClass == ITEM_SUBCLASS_WEAPON_SWORD2 || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_MACE2 || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_AXE2 || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_AXE || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_CROSSBOW || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_POLEARM || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_BOW || itemProto->SubClass == ITEM_SUBCLASS_WEAPON_GUN)
-                                        return 0;
-                                if(inv_type == INVTYPE_SHIELD)
-                                    return 0;
-                                mod += pow((float)(points * ITEM_STAT_SCHOOL_SPELL_DAMAGE_MOD), 1.50f);
-                            }
-                        }
-                        break;
-                    case SPELL_AURA_MOD_RESISTANCE:
-                        if(misc == 126)
-                        {
-                            if(inv_type == INVTYPE_FINGER)
-                                mod += pow((float)(points * ITEM_STAT_ALL_SPELL_RESIST_RING_MOD), 1.50f);
-                            else
-                                mod += pow((float)(points * ITEM_STAT_ALL_SPELL_RESIST_MOD), 1.50f);
-                        }
-                        else
-                        {
-                            if(inv_type == INVTYPE_FINGER)
-                                tempmod = ITEM_STAT_SCHOOL_RESIST_RING_MOD;
-                            else
-                                tempmod = ITEM_STAT_SCHOOL_RESIST_MOD;
-                            if(misc & (0x0001 << SPELL_SCHOOL_FIRE))   mod += pow((float)(points * tempmod), 1.50f);
-                            if(misc & (0x0001 << SPELL_SCHOOL_NATURE)) mod += pow((float)(points * tempmod), 1.50f);
-                            if(misc & (0x0001 << SPELL_SCHOOL_FROST))  mod += pow((float)(points * tempmod), 1.50f);
-                            if(misc & (0x0001 << SPELL_SCHOOL_SHADOW)) mod += pow((float)(points * tempmod), 1.50f);
-                            if(misc & (0x0001 << SPELL_SCHOOL_ARCANE)) mod += pow((float)(points * tempmod), 1.50f);
-                        }
-                        break;
-                    case SPELL_AURA_MOD_STAT:
-                        mod += pow((float)(points * ITEM_STAT_ATTRIBUTE_MOD), 1.50f); break;
-                    case SPELL_AURA_MOD_SKILL:
-                        switch(misc)
-                        {
-                            case SKILL_DEFENSE:
-                                if(inv_type == INVTYPE_SHIELD)
-                                    mod += pow((float)(points * ITEM_STAT_DEFENSE_SHIELD_MOD), 1.50f);
-                                else
-                                    mod += pow((float)(points * ITEM_STAT_DEFENSE_MOD), 1.50f);
-                                break;
-                            case SKILL_DAGGERS:
-                                if(weapon_subclass != -1 && inv_type != INVTYPE_WEAPON && inv_type != INVTYPE_WEAPONOFFHAND && inv_type != INVTYPE_WEAPONMAINHAND && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT) return 0;
-                                mod += pow((float)(points * ITEM_STAT_DAGGER_WEAPON_SKILL_MOD), 1.50f); break;
-                            case SKILL_SWORDS:
-                                if(weapon_subclass != -1 && inv_type != INVTYPE_WEAPON && inv_type != INVTYPE_WEAPONOFFHAND && inv_type != INVTYPE_WEAPONMAINHAND && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT) return 0;
-                                mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
-                            case SKILL_AXES:
-                                if(weapon_subclass != -1 && inv_type != INVTYPE_WEAPON && inv_type != INVTYPE_WEAPONOFFHAND && inv_type != INVTYPE_WEAPONMAINHAND && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND) return 0;
-                                mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
-                            case SKILL_BOWS:
-                                if(weapon_subclass != -1 && weapon_subclass != ITEM_SUBCLASS_WEAPON_BOW && inv_type != INVTYPE_WEAPON && inv_type != INVTYPE_WEAPONMAINHAND && inv_type != INVTYPE_2HWEAPON) return 0;
-                                mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
-                            case SKILL_GUNS:
-                                if(weapon_subclass != -1 && weapon_subclass != ITEM_SUBCLASS_WEAPON_GUN && inv_type != INVTYPE_WEAPON && inv_type != INVTYPE_WEAPONMAINHAND && inv_type != INVTYPE_2HWEAPON) return 0;
-                                mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
-                            case SKILL_MACES:
-                                if(weapon_subclass != -1 && inv_type != INVTYPE_WEAPON && inv_type != INVTYPE_WEAPONOFFHAND && inv_type != INVTYPE_WEAPONMAINHAND && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT) return 0;
-                                mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
-                            case SKILL_2H_SWORDS:
-                                if((weapon_subclass != -1 || inv_type == INVTYPE_SHIELD || inv_type == INVTYPE_HOLDABLE) && weapon_subclass != ITEM_SUBCLASS_WEAPON_SWORD2 && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND) return 0;
-                                mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
-                            case SKILL_STAVES:
-                                if((weapon_subclass != -1 || inv_type == INVTYPE_SHIELD || inv_type == INVTYPE_HOLDABLE) && weapon_subclass != ITEM_SUBCLASS_WEAPON_STAFF && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT) return 0;
-                                mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
-                            case SKILL_2H_MACES:
-                                if((weapon_subclass != -1 || inv_type == INVTYPE_SHIELD || inv_type == INVTYPE_HOLDABLE) && weapon_subclass != ITEM_SUBCLASS_WEAPON_MACE2 && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND) return 0;
-                                mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
-                            case SKILL_2H_AXES:
-                                if((weapon_subclass != -1 || inv_type == INVTYPE_SHIELD || inv_type == INVTYPE_HOLDABLE) && weapon_subclass != ITEM_SUBCLASS_WEAPON_AXE2 && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND) return 0;
-                                mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
-                            case SKILL_CROSSBOWS:
-                                if(weapon_subclass != -1 && weapon_subclass != ITEM_SUBCLASS_WEAPON_CROSSBOW && inv_type != INVTYPE_WEAPON && inv_type != INVTYPE_WEAPONMAINHAND && inv_type != INVTYPE_2HWEAPON) return 0;
-                                mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
-                            case SKILL_SPEARS:
-                                if((weapon_subclass != -1 || inv_type == INVTYPE_SHIELD || inv_type == INVTYPE_HOLDABLE) && weapon_subclass != ITEM_SUBCLASS_WEAPON_SPEAR && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND) return 0;
-                                mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
-                            case SKILL_WANDS:
-                                if((weapon_subclass != -1 || inv_type == INVTYPE_SHIELD) && weapon_subclass != ITEM_SUBCLASS_WEAPON_WAND && inv_type != INVTYPE_WEAPON && inv_type != INVTYPE_WEAPONMAINHAND && inv_type != INVTYPE_2HWEAPON) return 0;
-                                mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
-                            case SKILL_POLEARMS:
-                                if((weapon_subclass != -1 || inv_type == INVTYPE_SHIELD || inv_type == INVTYPE_HOLDABLE) && weapon_subclass != ITEM_SUBCLASS_WEAPON_POLEARM && inv_type != INVTYPE_RANGED && inv_type != INVTYPE_RANGEDRIGHT || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND) return 0;
-                                mod += pow((float)(points * ITEM_STAT_OTHER_WEAPON_SKILL_MOD), 1.50f); break;
-                        }
-                        break;
-                    case SPELL_AURA_MOD_POWER_REGEN:
-                        mod += pow((float)(points * ITEM_STAT_REGEN_IN_5_SEC_MOD), 1.50f); break;
-                    case SPELL_AURA_MOD_REGEN:
-                    case SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT:
-                        if(inv_type == INVTYPE_FINGER)
-                            mod += pow((float)(points * ITEM_STAT_HP_REGEN_IN_5_SEC_RING_MOD), 1.50f);
-                        else if(inv_type == INVTYPE_NECK)
-                            mod += pow((float)(points * ITEM_STAT_HP_REGEN_IN_5_SEC_NECK_MOD), 1.50f);
-                        else
-                            mod += pow((float)(points * ITEM_STAT_REGEN_IN_5_SEC_MOD), 1.50f);
-                        break;
-                    case SPELL_AURA_PROC_TRIGGER_DAMAGE:
-                        mod += pow((float)(points * ITEM_STAT_MAGIC_PENETRATION_MOD), 1.50f); break;
-                    case SPELL_AURA_DAMAGE_SHIELD:
-                        if(inv_type == INVTYPE_2HWEAPON || inv_type == INVTYPE_HOLDABLE || inv_type == INVTYPE_WEAPONOFFHAND || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND) return 0;
-                        mod += pow((float)(points * ITEM_STAT_DAMAGE_SHIELD_MOD), 1.50f); break;
-                    case SPELL_AURA_MOD_BLOCK_PERCENT:
-                        if(inv_type == INVTYPE_2HWEAPON || inv_type == INVTYPE_HOLDABLE || inv_type == INVTYPE_WEAPONOFFHAND || weapon_subclass == ITEM_SUBCLASS_WEAPON_WAND) return 0;
-                        mod += pow((float)(points * ITEM_STAT_BLOCK_PCT_MOD), 1.50f); break;
-                    case SPELL_AURA_MOD_HIT_CHANCE:
-                        mod += pow((float)(points * ITEM_STAT_HIT_PCT_MOD), 1.50f); break;
-                    case SPELL_AURA_MOD_SPELL_HIT_CHANCE:
-                        mod += pow((float)(points * ITEM_STAT_SPELL_HIT_PCT_MOD), 1.50f); break;
-                    case SPELL_AURA_MOD_DODGE_PERCENT:
-                        mod += pow((float)(points * ITEM_STAT_DODGE_PCT_MOD), 1.50f); break;
-                    case SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL:
-                        mod += pow((float)(points * ITEM_STAT_SPELL_CRIT_PCT_MOD), 1.50f); break;
-                    case SPELL_AURA_MOD_CRIT_PERCENT:
-                        mod += pow((float)(points * ITEM_STAT_CRIT_PCT_MOD), 1.50f); break;
-                    case SPELL_AURA_MOD_PARRY_PERCENT:
-                        mod += pow((float)(points * ITEM_STAT_PARRY_PCT_MOD), 1.50f); break;
-                }
+                SetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID,item_rand->ID);
+                SetState(ITEM_CHANGED);
             }
+            for(uint32 i = PROP_ENCHANTMENT_SLOT_2; i < PROP_ENCHANTMENT_SLOT_2 + 3; ++i)
+                SetEnchantment(EnchantmentSlot(i),item_rand->enchant_id[i - PROP_ENCHANTMENT_SLOT_2],0,0);
         }
     }
-    return mod;
+    else
+    {
+        ItemRandomSuffixEntry const *item_rand = sItemRandomSuffixStore.LookupEntry(-randomPropId);
+        if(item_rand)
+        {
+            if( GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID)!=(uint32)(-int32(item_rand->ID)) ||
+                !GetUInt32Value(ITEM_FIELD_SUFFIX_FACTOR))
+            {
+                SetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID,(uint32)(-int32(item_rand->ID)));
+                SetUInt32Value(ITEM_FIELD_SUFFIX_FACTOR,GenerateEnchSuffixFactor(GetEntry()));
+                SetState(ITEM_CHANGED);
+            }
+
+            for(uint32 i = PROP_ENCHANTMENT_SLOT_0; i < PROP_ENCHANTMENT_SLOT_0 + 3; ++i)
+                SetEnchantment(EnchantmentSlot(i),item_rand->enchant_id[i - PROP_ENCHANTMENT_SLOT_0],0,0);
+        }
+    }
 }
 
 void Item::SetState(ItemUpdateState state, Player *forplayer)

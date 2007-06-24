@@ -144,11 +144,11 @@ enum EnchantmentSlot
     BONUS_ENCHANTMENT_SLOT      = 5,
     MAX_INSPECTED_ENCHANTMENT_SLOT = 6,
 
-    HELD_PERM_ENCHANTMENT_SLOT  = 6,
-    HELD_TEMP_ENCHANTMENT_SLOT  = 7,
-    PROP_ENCHANTMENT_SLOT       = 8,
-    PROP_ENCHANTMENT_SLOT_2     = 9,
-    PROP_ENCHANTMENT_SLOT_3     = 10,
+    PROP_ENCHANTMENT_SLOT_0     = 6,                        // used with RandomSuffix   (or have HELD enchantments)
+    PROP_ENCHANTMENT_SLOT_1     = 7,                        // used with RandomSuffix   (or have HELD enchantments)
+    PROP_ENCHANTMENT_SLOT_2     = 8,                        // used with RandomSuffix and RandomProperty
+    PROP_ENCHANTMENT_SLOT_3     = 9,                        // used with RandomProperty (or have HELD enchantments)
+    PROP_ENCHANTMENT_SLOT_4     = 10,                       // used with RandomProperty (or have HELD enchantments)
     MAX_ENCHANTMENT_SLOT        = 11
 };
 
@@ -218,10 +218,11 @@ class MANGOS_DLL_SPEC Item : public Object
         uint32 GetSkill();
         uint32 GetSpell();
 
-        uint32 GetItemRandomPropertyId() const { return GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID); }
-        void SetItemRandomProperties(uint32 randomPropId);
-        static uint32 GenerateItemRandomPropertyId(uint32 item_id);
-        static float GetEnchantMod(uint32 enchant_id, ItemPrototype const * itemProto);
+        // RandomPropertyId (signed but stored as unsigned)
+        int32 GetItemRandomPropertyId() const { return int32(GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID)); }
+        uint32 GetItemSuffixFactor() const { return GetUInt32Value(ITEM_FIELD_SUFFIX_FACTOR); }
+        void SetItemRandomProperties(int32 randomPropId);
+        static int32 GenerateItemRandomPropertyId(uint32 item_id);
         void SetEnchantment(EnchantmentSlot slot, uint32 id, uint32 duration, uint32 charges);
         void SetEnchantmentDuration(EnchantmentSlot slot, uint32 duration);
         void SetEnchantmentCharges(EnchantmentSlot slot, uint32 charges);

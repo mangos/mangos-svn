@@ -209,11 +209,11 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         data << pProto->Class;
         // client known only 0 subclass (and 1-2 obsolute subclasses)
         data << (pProto->Class==ITEM_CLASS_CONSUMABLE ? uint32(0) : pProto->SubClass); // probably wrong
-        data << uint32(-1);    // new 2.0.3, not exist in wdb cache?
+        data << uint32(-1);                                 // new 2.0.3, not exist in wdb cache?
         data << pProto->Name1;
-        data << pProto->Name2; // blizz not send name there, just uint8(0x00); <-- \0 = empty string = empty name...
-        data << pProto->Name3; // blizz not send name there, just uint8(0x00);
-        data << pProto->Name4; // blizz not send name there, just uint8(0x00);
+        data << uint8(0x00);                                //pProto->Name2; // blizz not send name there, just uint8(0x00); <-- \0 = empty string = empty name...
+        data << uint8(0x00);                                //pProto->Name3; // blizz not send name there, just uint8(0x00);
+        data << uint8(0x00);                                //pProto->Name4; // blizz not send name there, just uint8(0x00);
         data << pProto->DisplayInfoID;
         data << pProto->Quality;
         data << pProto->Flags;
@@ -317,6 +317,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         data << pProto->Material;
         data << pProto->Sheath;
         data << pProto->RandomProperty;
+        data << pProto->RandomSuffix;
         data << pProto->Block;
         data << pProto->ItemSet;
         data << pProto->MaxDurability;

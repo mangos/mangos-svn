@@ -1172,9 +1172,7 @@ void Spell::DoCreateItem(uint32 i, uint32 itemtype)
         return;
     }
 
-    uint32 randomPropId = pProto->RandomProperty ? Item::GenerateItemRandomPropertyId(newitemid) : 0;
-
-    Item *pItem = player->StoreNewItem( dest, newitemid, num_to_add, true,randomPropId);
+    Item *pItem = player->StoreNewItem( dest, newitemid, num_to_add, true,Item::GenerateItemRandomPropertyId(newitemid));
 
     if(!pItem)
     {
@@ -2674,8 +2672,13 @@ void Spell::EffectEnchantHeldItem(uint32 i)
         if(!pEnchant)
             return;
 
-        EnchantmentSlot slot = duration <= 0 ? HELD_PERM_ENCHANTMENT_SLOT : HELD_TEMP_ENCHANTMENT_SLOT;
-        
+        EnchantmentSlot slot;
+
+        if (item->GetItemSuffixFactor())
+            slot = (duration <= 0) ? PROP_ENCHANTMENT_SLOT_0 : PROP_ENCHANTMENT_SLOT_1;
+        else
+            slot = (duration <= 0) ? PROP_ENCHANTMENT_SLOT_3 : PROP_ENCHANTMENT_SLOT_4;
+
         // remove old enchanting before applying new
         item_owner->ApplyEnchantment(item,slot,false);
 

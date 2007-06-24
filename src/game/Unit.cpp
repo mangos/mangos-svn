@@ -2477,6 +2477,17 @@ void Unit::RemoveAurasDueToSpell(uint32 spellId)
         RemoveAura(spellId,i);
 }
 
+void Unit::RemoveAurasDueToItem(Item* castItem)
+{
+    for (AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end(); )
+    {
+        if (iter->second->GetCastItemGUID() == castItem->GetGUID())
+            RemoveAura(iter);
+        else
+            ++iter;
+    }
+}
+
 void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
 {
     if (IsSingleTarget((*i).second->GetId()))

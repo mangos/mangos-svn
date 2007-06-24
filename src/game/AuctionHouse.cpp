@@ -93,19 +93,14 @@ bool WorldSession::SendAuctionInfo(WorldPacket & data, AuctionEntry* auction)
     for (uint8 i = 0; i < MAX_INSPECTED_ENCHANTMENT_SLOT; i++)
     {
         data << (uint32) pItem->GetEnchantmentId(EnchantmentSlot(i));
-        // Unknown maybe duration, but not shown?
-        data << (uint32) 0;
-        data << (uint32) pItem->GetEnchantmentCharges(EnchantmentSlot(i));
-                                                            
+        data << (uint32) pItem->GetEnchantmentDuration(EnchantmentSlot(i));
+        data << (uint32) pItem->GetEnchantmentCharges(EnchantmentSlot(i));                                                  
     }
 
-    data << (uint32) pItem->GetItemRandomPropertyId();
-                                                            //random item property id
-    data << (uint32) 0;                                     //not pItem->GetCreator(), Unknown
-
+    data << (uint32) pItem->GetItemRandomPropertyId();      //random item property id
+    data << (uint32) pItem->GetItemSuffixFactor();          //SuffixFactor
     data << (uint32) pItem->GetCount();                     //item->count
-                                                            //item->charge FFFFFFF
-    data << (uint32) pItem->GetSpellCharges();
+    data << (uint32) pItem->GetSpellCharges();              //item->charge FFFFFFF
     data << (uint32) 0;                                     //Unknown
     data << (uint32) auction->owner;                        //Auction->owner
     data << (uint32) 0;                                     //player high_guid

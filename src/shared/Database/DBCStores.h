@@ -146,6 +146,7 @@ extern DBCStorage <GemPropertiesEntry>        sGemPropertiesStore;
 //extern DBCStorage <ItemDisplayInfoEntry>      sItemDisplayInfoStore; -- not used currently
 extern DBCStorage <ItemExtendedCostEntry>     sItemExtendedCostStore;
 extern DBCStorage <ItemRandomPropertiesEntry> sItemRandomPropertiesStore;
+extern DBCStorage <ItemRandomSuffixEntry>     sItemRandomSuffixStore;
 extern DBCStorage <ItemSetEntry>              sItemSetStore;
 extern DBCStorage <LockEntry>                 sLockStore;
 extern DBCStorage <MapEntry>                  sMapStore;

@@ -8120,12 +8120,11 @@ void Player::SetAmmo( uint32 item )
 }
 
 // Return stored item (if stored to stack, it can diff. from pItem). And pItem ca be deleted in this case.
-Item* Player::StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update ,uint32 randomPropertyId )
+Item* Player::StoreNewItem( uint16 pos, uint32 item, uint32 count, bool update ,int32 randomPropertyId )
 {
     Item *pItem = CreateItem( item, count );
     if( pItem )
     {
-        ItemPrototype const *pProto = pItem->GetProto();
         ItemAddedQuestCheck( item, count );
         if(randomPropertyId)
             pItem->SetItemRandomProperties(randomPropertyId);
@@ -8334,7 +8333,7 @@ void Player::VisualizeItem( uint16 pos, Item *pItem)
         for(int i = 0; i < MAX_ENCHANTMENT_SLOT; ++i)
             SetUInt32Value(VisibleBase + 1 + i, pItem->GetEnchantmentId(EnchantmentSlot(i)));
 
-        SetUInt32Value(VisibleBase + 8, pItem->GetItemRandomPropertyId());
+        SetUInt32Value(VisibleBase + 8, uint32(pItem->GetItemRandomPropertyId()));
     }
 
     pItem->SetState(ITEM_CHANGED, this);
@@ -8369,8 +8368,16 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
                 // and remove held enchantments
                 if ( slot == EQUIPMENT_SLOT_MAINHAND )
                 {
-                    pItem->ClearEnchantment(HELD_PERM_ENCHANTMENT_SLOT);
-                    pItem->ClearEnchantment(HELD_TEMP_ENCHANTMENT_SLOT);
+                    if (pItem->GetItemSuffixFactor())
+                    {
+                        pItem->ClearEnchantment(PROP_ENCHANTMENT_SLOT_3);
+                        pItem->ClearEnchantment(PROP_ENCHANTMENT_SLOT_4);
+                    }
+                    else
+                    {
+                        pItem->ClearEnchantment(PROP_ENCHANTMENT_SLOT_0);
+                        pItem->ClearEnchantment(PROP_ENCHANTMENT_SLOT_1);
+                    }
                 }
             }
 
@@ -9344,18 +9351,37 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
             }
             break;
 
-        case 3: 
+        case 3:
             if(enchant_spell_id)
             {
                 if(apply)
-                    CastSpell(this,enchant_spell_id,true, NULL);
+                    CastSpell(this,enchant_spell_id,true,item);
                 else
-                    RemoveAurasDueToSpell(enchant_spell_id);
+                    RemoveAurasDueToItem(item);
             }
             break;
 
         case 4:
-            ApplyArmorMod(enchant_amount,apply);
+            if (!enchant_amount)
+            {
+                ItemRandomSuffixEntry const *item_rand = sItemRandomSuffixStore.LookupEntry(abs(item->GetItemRandomPropertyId()));
+                if(item_rand)
+                {
+                    for (int k=0; k<3; k++)
+                    {
+                        if(item_rand->enchant_id[k] == enchant_id)
+                        {
+                            enchant_amount = uint32((item_rand->prefix[k]*item->GetItemSuffixFactor()) / 10000 );
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if(enchant_spell_id)
+                ApplyResistanceMod(SpellSchools(enchant_spell_id), enchant_amount, apply);
+            else
+                ApplyArmorMod(enchant_amount,apply);
             break;
 
         case 6:                                             // Shaman Rockbiter Weapon
@@ -9383,8 +9409,24 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
             uint32 enchant_amount = pEnchant->amount[s];
             uint32 enchant_spell_id = pEnchant->spellid[s];
 
-            if(enchant_display_type == 5) // 
+            if(enchant_display_type == 5)
             {
+                if (!enchant_amount)
+                {
+                    ItemRandomSuffixEntry const *item_rand_suffix = sItemRandomSuffixStore.LookupEntry(abs(item->GetItemRandomPropertyId()));
+                    if(item_rand_suffix)
+                    {
+                        for (int k=0; k<3; k++)
+                        {
+                            if(item_rand_suffix->enchant_id[k] == enchant_id) 
+                            {
+                                enchant_amount = uint32((item_rand_suffix->prefix[k]*item->GetItemSuffixFactor()) / 10000 );
+                                break;
+                            }
+                        }
+                    }
+                }
+
                 sLog.outDebug("Adding %u to stat nb %u",enchant_amount,enchant_spell_id);
                 switch (enchant_spell_id)
                 {
@@ -9556,8 +9598,8 @@ void Player::SendNewItem(Item *item, uint32 count, bool received, bool created, 
                                                             // item slot, but when added to stack: 0xFFFFFFFF
     data << (uint32) ((item->GetCount()==count) ? item->GetSlot() : -1);
     data << uint32(item->GetEntry());                       // item id
-    data << (uint32)urand(0, 255);                          // 0 when bought from npc otherwise ???
-    data << uint32(item->GetItemRandomPropertyId());
+    data << uint32(item->GetItemSuffixFactor());            // SuffixFactor
+    data << uint32(item->GetItemRandomPropertyId());        // random item property id
     data << uint32(count);                                  // count of items
     data << GetItemCount(item->GetEntry());                 // count of items in inventory
 

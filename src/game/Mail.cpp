@@ -492,27 +492,24 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         else
             data << (uint32) 0;                             // Any item attached
 
-        // ?? strange code: maybe start from this 6 * (enchant_id,duration,charges) and GetItemRandomPropertyId finally
-        data << (uint32) 0;                                 // items count?
-
-        for(uint8 i = 0; i < 6; i++)                        // new 2.0.1
+        // ?? strange code: maybe 6 * (enchant_id,duration,charges) from BONUS_ENCHANTMENT_SLOT to PERM_ENCHANTMENT_SLOT
+        // in reversed order and reversed field order in enchantment
+        for(uint8 i = 0; i < 5; i++)                        // new 2.0.1
         {
-            data << getMSTime();                            // probably time
-            if(i == 5)
-            {
-                data << (uint32) (it ? it->GetEnchantmentId(PERM_ENCHANTMENT_SLOT) : 0);
-                data << (uint32) (it ? it->GetItemRandomPropertyId() : 0);
-            }
-            else
-            {
-                data << (uint32) 0;
-                data << (uint32) 0;
-            }
+            data << (uint32) 0;                             
+            data << getMSTime();                            //enchantment apply time?
+            data << (uint32) 0;
         }
 
-        data << (uint32) 0;                                 // not item->creator, it is enchating?
+        // last (5) currently know only iteration 
+        data << (uint32) 0;
+        data << getMSTime();                                //enchantment apply time?
+        data << (uint32) (it ? it->GetEnchantmentId(PERM_ENCHANTMENT_SLOT) : 0);
+
+        data << (uint32) (it ? it->GetItemRandomPropertyId() : 0);
+        data << (uint32) (it ? it->GetItemSuffixFactor() : 0);
+
         data << (uint8)  icount;                            // Attached item stack count
-                                                            // sometimes more than zero, not sure when
         int32  charges = (it) ? it->GetSpellCharges() : 0;
         uint32 maxDurability = (it) ? it->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) : 0;
         uint32 curDurability = (it) ? it->GetUInt32Value(ITEM_FIELD_DURABILITY) : 0;
