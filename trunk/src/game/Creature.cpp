@@ -1049,7 +1049,7 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
         return false;
     }
     uint32 rank = isPet()? 0 : cinfo->rank;
-    float damagemod = _GetDamageMod(rank);;
+    float damagemod = _GetDamageMod(rank);
 
     uint32 display_id = cinfo->randomDisplayID();
 
@@ -1160,7 +1160,15 @@ bool Creature::LoadFromDB(uint32 guid, uint32 InstanceId)
     if(GetCreatureInfo()->rank > 0)
         this->m_corpseDelay *= 3;                           //if creature is elite, then remove corpse later
 
-    SetHealth(data->curhealth);
+    uint32 curhealth = data->curhealth;
+    if(curhealth)
+    {
+        curhealth = uint32(curhealth*_GetHealthMod(GetCreatureInfo()->rank));
+        if(curhealth < 1) 
+            curhealth = 1;
+    }
+
+    SetHealth(curhealth);
     SetPower(POWER_MANA,data->curmana);
 
     m_respawnradius = data->spawndist;
