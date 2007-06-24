@@ -1,4 +1,4 @@
-/*
+/* 
  * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -23,19 +23,35 @@
 #include "Log.h"
 #include "ObjectMgr.h"
 #include "ProgressBar.h"
+#include <list>
+#include <vector>
+#include "Util.h"
 
-EnchantmentStore RandomItemEnch;
+struct EnchStoreItem
+{
+    uint32  ench;
+    float   chance;
 
-void LoadRandomEnchantmentsTable(EnchantmentStore& enchstore,char const* tablename)
+    EnchStoreItem()
+        : ench(0), chance(0) {}
+
+    EnchStoreItem(uint32 _ench, float _chance)
+        : ench(_ench), chance(_chance) {}
+};
+
+typedef std::vector<EnchStoreItem> EnchStoreList;
+typedef HM_NAMESPACE::hash_map<uint32, EnchStoreList> EnchantmentStore;
+
+static EnchantmentStore RandomItemEnch;
+
+void LoadRandomEnchantmentsTable()
 {
     EnchantmentStore::iterator tab;
     uint32 entry, ench;
     float chance;
     uint32 count = 0;
 
-    sLog.outString( "%s :", tablename);
-
-    QueryResult *result = sDatabase.PQuery("SELECT `entry`, `ench`, `chance` FROM `%s`",tablename);
+    QueryResult *result = sDatabase.Query("SELECT `entry`, `ench`, `chance` FROM `item_enchantment_template`");
 
     if (result)
     {
@@ -51,7 +67,7 @@ void LoadRandomEnchantmentsTable(EnchantmentStore& enchstore,char const* tablena
             chance = fields[2].GetFloat();
 
             if (chance > 0.000001 && chance <= 100)
-                enchstore[entry].push_back( EnchStoreItem(ench, chance) );
+                RandomItemEnch[entry].push_back( EnchStoreItem(ench, chance) );
 
             count++;
         } while (result->NextRow());
@@ -59,22 +75,22 @@ void LoadRandomEnchantmentsTable(EnchantmentStore& enchstore,char const* tablena
         delete result;
 
         sLog.outString( "" );
-        sLog.outString( ">> Loaded %u Enchantment definitions", count );
+        sLog.outString( ">> Loaded %u Item Enchantment definitions", count );
     }
     else
     {
         sLog.outString( "" );
-        sLog.outErrorDb( ">> Loaded 0 Enchantment definitions. DB table `%s` is empty.",tablename );
+        sLog.outErrorDb( ">> Loaded 0 Item Enchantment definitions. DB table `item_enchantment_template` is empty.");
     }
 }
 
-uint32 GetItemEnchantMod(uint32 entry, EnchantmentStore& ench_store)
+uint32 GetItemEnchantMod(uint32 entry)
 {
     if (!entry) return 0;
 
-    EnchantmentStore::iterator tab = ench_store.find(entry);
+    EnchantmentStore::iterator tab = RandomItemEnch.find(entry);
 
-    if (tab == ench_store.end())
+    if (tab == RandomItemEnch.end())
     {
         sLog.outErrorDb("Item RandomProperty / RandomSuffix id #%u used in `item_template` but it doesn't have records in appropriate enchantment_template table.",entry);
         return 0;
