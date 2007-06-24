@@ -117,6 +117,8 @@ libmangosgame_a_SOURCES = \
 	IdleMovementGenerator.h \
 	Item.cpp \
 	Item.h \
+	ItemEnchantmentMgr.cpp \
+	ItemEnchantmentMgr.h \
 	ItemHandler.cpp \
 	ItemPrototype.h \
 	Language.h \

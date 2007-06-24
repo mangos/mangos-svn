@@ -688,6 +688,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\ItemEnchantmentMgr.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\ItemEnchantmentMgr.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\ItemPrototype.h"
 				>
 			</File>

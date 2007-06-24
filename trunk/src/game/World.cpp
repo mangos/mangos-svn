@@ -35,6 +35,7 @@
 #include "Chat.h"
 #include "Database/DBCStores.h"
 #include "LootMgr.h"
+#include "ItemEnchantmentMgr.h"
 #include "MapManager.h"
 #include "ScriptCalls.h"
 #include "CreatureAIRegistry.h"
@@ -536,6 +537,9 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "Loading Loot Tables..." );
     LoadLootTables();
+
+    sLog.outString( "Loading Item Random Enchantments Table..." );
+    LoadRandomEnchantmentsTable();
 
     ///- Load dynamic data tables from the database
     sLog.outString( "Loading Auctions..." );

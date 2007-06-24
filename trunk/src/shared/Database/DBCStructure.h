@@ -222,8 +222,22 @@ struct ItemExtendedCostEntry
 
 struct ItemRandomPropertiesEntry
 {
-    uint32    ID;
-    uint32    enchant_id[3];
+    uint32    ID;                                           //0
+    //char*     internalName                                //1   unused
+    uint32    enchant_id[3];                                //2-4
+                                                            //5-6 unused, 0 only values, reserved for additional enchantments?
+    //char*     nameSuffix[8]                               //7-14, unused
+                                                            //15 nameSufix flags, unused
+};
+
+struct ItemRandomSuffixEntry
+{
+    uint32    ID;                                           //0
+    //char*     name[8]                                     //1-8 unused
+                                                            //9, name flags, unused
+                                                            //10  unused
+    uint32    enchant_id[3];                                //11-13
+    uint32    prefix[3];                                    //14-16
 };
 
 struct ItemSetEntry

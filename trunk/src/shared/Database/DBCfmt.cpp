@@ -32,6 +32,7 @@ const char GemPropertiesEntryfmt[]="nixxi";
 const char ItemDisplayTemplateEntryfmt[]="nxxxxxxxxxxixxxxxxxxxxx";
 const char ItemExtendedCostEntryfmt[]="niiiiixxiiixx";
 const char ItemRandomPropertiesfmt[]="nxiiixxxxxxxxxxx";
+const char ItemRandomSuffixfmt[]="nxxxxxxxxxxiiiiii";
 const char ItemSetEntryfmt[]="dssssssssxxxxxxxxxxxxxxxxxxiiiiiiiiiiiiiiiiii";
 const char LockEntryfmt[]="niiiiixxxiiiiixxxiixxxxxxxxxxxxxx";
 const char MapEntryfmt[]="nxixssssssssixxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx";

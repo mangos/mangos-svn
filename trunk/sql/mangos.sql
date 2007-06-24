@@ -1672,6 +1672,28 @@ INSERT INTO `instance_template` VALUES
 /*!40000 ALTER TABLE `instance_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
+
+--
+-- Table structure for table `item_enchantment_template`
+--
+
+DROP TABLE IF EXISTS `item_enchantment_template`;
+CREATE TABLE `item_enchantment_template` (
+  `entry` int(11) unsigned NOT NULL DEFAULT '0',
+  `ench` int(10) unsigned NOT NULL DEFAULT '0',
+  `chance` float unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`entry`,`ench`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Item Random Enchantment System';
+
+--
+-- Dumping data for table `item_enchantment_template`
+--
+
+LOCK TABLES `item_enchantment_template` WRITE;
+/*!40000 ALTER TABLE `item_enchantment_template` DISABLE KEYS */;
+/*!40000 ALTER TABLE `item_enchantment_template` ENABLE KEYS */;
+UNLOCK TABLES;
+
 --
 -- Table structure for table `item_instance`
 --
@@ -1837,8 +1859,8 @@ CREATE TABLE `item_template` (
   `lockid` int(30) unsigned NOT NULL default '0',
   `Material` int(30) NOT NULL default '0',
   `sheath` int(30) unsigned NOT NULL default '0',
-  `RandomProperty_1` int(30) unsigned NOT NULL default '0',
-  `RandomProperty_2` int(30) unsigned NOT NULL default '0',
+  `RandomProperty` int(30) unsigned NOT NULL default '0',
+  `RandomSuffix` int(30) unsigned NOT NULL default '0',
   `block` int(30) unsigned NOT NULL default '0',
   `itemset` int(30) unsigned NOT NULL default '0',
   `MaxDurability` int(30) unsigned NOT NULL default '0',

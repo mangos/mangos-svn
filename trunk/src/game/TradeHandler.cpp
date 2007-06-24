@@ -50,8 +50,8 @@ enum TradeStatus
     TRADE_STATUS_TARGET_DEAD    = 18,
     TRADE_STATUS_YOU_LOGOUT     = 19,
     TRADE_STATUS_TARGET_LOGOUT  = 20,
-    TRADE_STATUS_TRIAL_ACCOUNT  = 21,   // Trial accounts can not perform that action
-    TRADE_STATUS_ONLY_CONJURED  = 22    // You can only trade conjured items... (cross realm BG related).
+    TRADE_STATUS_TRIAL_ACCOUNT  = 21,                       // Trial accounts can not perform that action
+    TRADE_STATUS_ONLY_CONJURED  = 22                        // You can only trade conjured items... (cross realm BG related).
 };
 
 void WorldSession::SendTradeStatus(uint32 status)
@@ -94,9 +94,9 @@ void WorldSession::SendUpdateTrade()
 
     WorldPacket data(SMSG_TRADE_STATUS_EXTENDED, (100));                            // guess size
     data << (uint8 ) 1;                                                             // can be different (only seen 0 and 1)
-    data << (uint32) 7;                                                             // trade slots count/number?, = next field in most cases
-    data << (uint32) 7;                                                             // trade slots count/number?, = prev field in most cases
-    data << (uint32) _player->pTrader->tradeGold;                                     // trader gold
+    data << (uint32) TRADE_SLOT_COUNT;                                              // trade slots count/number?, = next field in most cases
+    data << (uint32) TRADE_SLOT_COUNT;                                              // trade slots count/number?, = prev field in most cases
+    data << (uint32) _player->pTrader->tradeGold;                                   // trader gold
     data << (uint32) 0;                                                             // unknown
 
     for(uint8 i = 0; i < TRADE_SLOT_COUNT; i++)
@@ -112,16 +112,16 @@ void WorldSession::SendUpdateTrade()
             data << (uint32) item->GetUInt32Value(ITEM_FIELD_STACK_COUNT);          // stack count
             data << (uint32) 0;                                                     // probably gift=1, created_by=0?
             data << (uint32) item->GetUInt32Value(ITEM_FIELD_GIFTCREATOR);          // gift creator
-            data << (uint32) 0;                                                     // unknown (maybe enchantment ids (temp, perm, 3 sockets) ?
+            data << (uint32) 0;                                                     // ITEM_FIELD_GIFTCREATOR high_guid
             data << (uint32) item->GetEnchantmentId(PERM_ENCHANTMENT_SLOT);
-            data << (uint32) 0;//item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+1);        // enchantment id (permanent?)
-            data << (uint32) 0;//item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+2);        // enchantment id (permanent?)
-            data << (uint32) 0;//item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+3);        // enchantment id (permanent?)
+            data << (uint32) 0;//item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+1);    // enchantment id (permanent/gems?)
+            data << (uint32) 0;//item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+2);    // enchantment id (permanent/gems?)
+            data << (uint32) 0;//item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+3);    // enchantment id (permanent/gems?)
             data << (uint32) item->GetUInt32Value(ITEM_FIELD_CREATOR);              // creator
-            data << (uint32) 0;                                                     // unknown
+            data << (uint32) 0;                                                     // ITEM_FIELD_CREATOR high_guid
             data << (uint32) item->GetSpellCharges();                               // charges
-            data << (uint32) 0;                                                     // strange big value (timestamp?)
-            data << (uint32) item->GetUInt32Value(ITEM_FIELD_RANDOM_PROPERTIES_ID); // random properties id
+            data << (uint32) item->GetItemSuffixFactor();                           // SuffixFactor
+            data << (uint32) item->GetItemRandomPropertyId();                       // random properties id
             data << (uint32) item->GetProto()->LockID;                              // lock id
             data << (uint32) item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);        // max durability
             data << (uint32) item->GetUInt32Value(ITEM_FIELD_DURABILITY);           // durability

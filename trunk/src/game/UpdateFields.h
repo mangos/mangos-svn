@@ -45,8 +45,20 @@ enum EItemFields
     ITEM_FIELD_SPELL_CHARGES_03                = OBJECT_END + 0x0D,
     ITEM_FIELD_SPELL_CHARGES_04                = OBJECT_END + 0x0E,
     ITEM_FIELD_FLAGS                           = OBJECT_END + 0x0F, // Size:1
+    /*
+    There is two types of enchantments: property based and suffix based.
+    Item can have only one of the two.
+    Suffix based linked to item.randomproperty_2 field and property based
+    to item.randomproperty_1 field (item prototype).
+    Suffix based enchantments sent to the client as negative value, in
+    addition they require ITEM_FIELD_SUFFIX_FACTOR field to be send in
+    order to calculate the bonus value. Property based enchantments are send
+    as positive values and do not require any aditional values since the bonuses
+    are already stored inside spellitemenchantment. Suffix based enchantments uses 
+    6-8 fields in EnchantmentSlot while property based uses 8-10 in EnchantmentSlot.
+    */
     ITEM_FIELD_ENCHANTMENT                     = OBJECT_END + 0x10, // Size: 33 = (temp+perm+sockets*3+bonus+temp2*2+property*3)*3
-    ITEM_FIELD_PROPERTY_SEED                   = OBJECT_END + 0x31, // Size:1
+    ITEM_FIELD_SUFFIX_FACTOR                   = OBJECT_END + 0x31, // Size:1
     ITEM_FIELD_RANDOM_PROPERTIES_ID            = OBJECT_END + 0x32, // Size:1
     ITEM_FIELD_ITEM_TEXT_ID                    = OBJECT_END + 0x33, // Size:1
     ITEM_FIELD_DURABILITY                      = OBJECT_END + 0x34, // Size:1

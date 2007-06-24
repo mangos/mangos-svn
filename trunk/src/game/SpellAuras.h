@@ -187,6 +187,7 @@ class Aura
 
         SpellEntry const* GetSpellProto() const { return m_spellProto; }
         uint32 GetId() const{ return m_spellId; }
+        uint64 GetCastItemGUID() const { return m_castItem ? m_castItem->GetGUID() : 0; }
         uint32 GetEffIndex() const{ return m_effIndex; }
         void SetEffIndex(uint32 eff) { m_effIndex = eff; }
         int32 GetAuraDuration() const { return m_duration; }
