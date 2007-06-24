@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -31,6 +31,7 @@
 #include "SystemConfig.h"
 #include "Config/ConfigEnv.h"
 #include "Util.h"
+#include "../game/AccountMgr.h"
 
 #include "CliRunnable.h"
 
@@ -147,66 +148,12 @@ void CliDelete(char*command,pPrintf zprintf)
         return;
     }
 
-    ///- Escape account name to allow quotes in names
-    std::string safe_account_name=account_name;
-    loginDatabase.escape_string(safe_account_name);
-
-    ///- Get the account ID from the database
-    Field *fields;
-    // No SQL injection (account_name escaped)
-    QueryResult *result = loginDatabase.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s'",safe_account_name.c_str());
-
-    if (!result)
-    {
+    int result = accmgr.DeleteAccount(accmgr.GetId(account_name));
+    if(result == -1)
+        zprintf("User %s NOT deleted (probably sql file format was updated)\r\n",account_name);
+    if(result == 1)
         zprintf("User %s does not exist\r\n",account_name);
-        return;
-    }
-
-    fields = result->Fetch();
-    uint32 account_id = fields[0].GetUInt32();
-    delete result;
-
-    ///- Circle through characters belonging to this account ID and remove all characters related data (items, quests, ...) from the database
-    // No SQL injection (account_id is db internal)
-    result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%d'",account_id);
-
-    if (result)
-    {
-        do
-        {
-            Field *fields = result->Fetch();
-
-            uint32 guidlo = fields[0].GetUInt32();
-
-            // kick if player currently
-            if(Player* p = objmgr.GetPlayer(MAKE_GUID(guidlo,HIGHGUID_PLAYER)))
-                p->GetSession()->KickPlayer();
-
-            WorldSession acc_s(account_id,NULL,0,true,0);        // some invalid session
-            Player acc_player(&acc_s);
-
-            acc_player.LoadFromDB(guidlo);
-
-            acc_player.DeleteFromDB();
-
-            zprintf("We deleted character: %s from account %s\r\n",acc_player.GetName(),account_name);
-
-        } while (result->NextRow());
-
-        delete result;
-    }
-
-    ///- Remove characters and account from the databases
-    sDatabase.BeginTransaction();
-
-    bool done = sDatabase.PExecute("DELETE FROM `character` WHERE `account` = '%d'",account_id) &&
-        sDatabase.PExecute("DELETE FROM `petition_sign` WHERE `player_account` = '%d'",account_id) &&
-        loginDatabase.PExecute("DELETE FROM `account` WHERE `username` = '%s'",safe_account_name.c_str()) &&
-        loginDatabase.PExecute("DELETE FROM `realmcharacters` WHERE `acctid` = '%d'",account_id);
-
-    sDatabase.CommitTransaction();
-
-    if (done)
+    else if(result == 0)
         zprintf("We deleted account: %s\r\n",account_name);
 }
 
@@ -374,7 +321,7 @@ void CliBanList(char*,pPrintf zprintf)
             {
                 fields2 = banInfo->Fetch();
                 do
-                {   
+                {
                     time_t t_ban = fields2[0].GetUInt64();
                     tm* aTm_ban = localtime(&t_ban);
                     zprintf("|%-15.15s|", fields[1].GetString());
@@ -610,36 +557,13 @@ void CliCreate(char *command,pPrintf zprintf)
         return;
     }
 
-    ///- Escape the account name to allow quotes in names
-    std::string safe_account_name=szAcc;
-    loginDatabase.escape_string(safe_account_name);
-
-    ///- Check that the account does not exist yet
-    QueryResult *result1 = loginDatabase.PQuery("SELECT 1 FROM `account` WHERE `username` = '%s'",safe_account_name.c_str());
-
-    if (result1)
-    {
-        zprintf("User %s already exists\r\n",szAcc);
-        delete result1;
-        return;
-    }
-
-    ///- Also escape the password
-    std::string safe_password=szPassword;
-    loginDatabase.escape_string(safe_password);
-
-    ///- Insert the account in the database (account table)
-    // No SQL injection (escaped account name and password)
-    sDatabase.BeginTransaction();
-    if(loginDatabase.PExecute("INSERT INTO `account` (`username`,`password`,`gmlevel`,`sessionkey`,`email`,`joindate`,`last_ip`,`failed_logins`,`locked`) VALUES ('%s','%s','0','','',NOW(),'0','0','0')",safe_account_name.c_str(),safe_password.c_str()))
-    {
-        ///- Make sure that the realmcharacters table is up-to-date
-        loginDatabase.Execute("INSERT INTO `realmcharacters` (`realmid`, `acctid`, `numchars`) SELECT `realmlist`.`id`, `account`.`id`, 0 FROM `account`, `realmlist` WHERE `account`.`id` NOT IN (SELECT `acctid` FROM `realmcharacters`)");
-        zprintf("User %s with password %s created successfully\r\n",szAcc,szPassword);
-    }
-    else
+    int result = accmgr.CreateAccount(szAcc, szPassword);
+    if(result == -1)
         zprintf("User %s with password %s NOT created (probably sql file format was updated)\r\n",szAcc,szPassword);
-    sDatabase.CommitTransaction();
+    else if(result == 1)
+        zprintf("User %s already exists\r\n",szAcc);
+    else if(result == 0)
+        zprintf("User %s with password %s created successfully\r\n",szAcc,szPassword);
 }
 
 /// Command parser and dispatcher
@@ -726,7 +650,7 @@ void CliSetLogLevel(char*command,pPrintf zprintf)
 }
 
 void CliUpTime(char*,pPrintf zprintf)
-{    
+{
     uint32 uptime = sWorld.GetUptime();
     std::string suptime = secsToTimeString(uptime,true,(uptime > 86400));
     zprintf("Server has been up for: %s\r\n", suptime.c_str());
@@ -737,7 +661,7 @@ void CliSetTBC(char *command,pPrintf zprintf)
     ///- Get the command line arguments
     char *szAcc = strtok(command," ");
 
-    if(!szAcc)                                              
+    if(!szAcc)
     {
         zprintf("Syntax is: setbc $account $number (0 - normal, 1 - tbc)>\r\n");
         return;
@@ -745,7 +669,7 @@ void CliSetTBC(char *command,pPrintf zprintf)
 
     char *szTBC =  strtok(NULL," ");
 
-    if(!szTBC)                                            
+    if(!szTBC)
     {
         zprintf("Syntax is: setbc $account $number (0 - normal, 1 - tbc)>\r\n");
         return;
@@ -756,7 +680,7 @@ void CliSetTBC(char *command,pPrintf zprintf)
     if((lev > 1)|| (lev < 0))
     {
         zprintf("Syntax is: setbc $account $number (0 - normal, 1 - tbc)>\r\n");
-        return;    
+        return;
     }
 
     ///- Escape the account name to allow quotes in names

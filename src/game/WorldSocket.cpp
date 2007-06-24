@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -223,10 +223,8 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     uint32 id, security;
     bool tbc = false;
     std::string account;
-    Sha1Hash I;
     Sha1Hash sha1;
-    BigNumber v, s, g, N, x;
-    std::string password;
+    BigNumber v, s, g, N, x, I;
     WorldPacket packet, SendAddonPacked;
 
     BigNumber K;
@@ -251,7 +249,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     loginDatabase.escape_string(safe_account);
     //No SQL injection, username escaped.
     //                                                 0    1         2            3         4         5           6    7    8     9
-    QueryResult *result = loginDatabase.PQuery("SELECT `id`,`gmlevel`,`sessionkey`,`last_ip`,`locked`, `password`, `v`, `s`, `tbc`,`mutetime` FROM `account` WHERE `username` = '%s'", safe_account.c_str());
+    QueryResult *result = loginDatabase.PQuery("SELECT `id`,`gmlevel`,`sessionkey`,`last_ip`,`locked`, `I`, `v`, `s`, `tbc`,`mutetime` FROM `account` WHERE `username` = '%s'", safe_account.c_str());
 
     ///- Stop if the account is not found
     if ( !result )
@@ -269,15 +267,12 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     N.SetHexStr("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7");
     g.SetDword(7);
-    password = fields[5].GetCppString();
-    std::transform(password.begin(), password.end(), password.begin(), std::towupper);
+    I.SetHexStr(fields[5].GetString());
+    I.Reverse();
 
     s.SetHexStr(fields[7].GetString());
-    std::string sI = account + ":" + password;
-    I.UpdateData(sI);
-    I.Finalize();
     sha1.UpdateData(s.AsByteArray(), s.GetNumBytes());
-    sha1.UpdateData(I.GetDigest(), 20);
+    sha1.UpdateBigNumbers(&I, NULL);
     sha1.Finalize();
     x.SetBinary(sha1.GetDigest(), sha1.GetLength());
     v = g.ModExp(x, N);
@@ -568,7 +563,7 @@ void WorldSocket::Update(time_t diff)
 
         // send merged packets
         if (bufferSize) TcpSocket::SendBuf((char*)sendBuffer, bufferSize);
-        // send too big non-merged packet 
+        // send too big non-merged packet
         if (haveBigPacket) SendSinglePacket();
     }
 }

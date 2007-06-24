@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -45,7 +45,6 @@ class RASocket: public TcpSocket
 
         char * buff;
         std::string szLogin;
-        std::string szPass;
         uint32 iSess;
         unsigned int iInputLength;
         bool bLog;

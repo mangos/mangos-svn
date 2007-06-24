@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -229,7 +229,7 @@ uint32 Bag::GetItemCount( uint32 item, Item* eItem ) const
                 count += pItem->GetGemCountWithID(item);
         }
     }
-    
+
     return count;
 }
 

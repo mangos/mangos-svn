@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -29,6 +29,7 @@
 #include "ObjectAccessor.h"
 #include "Language.h"
 #include "SpellAuras.h"
+#include "AccountMgr.h"
 
 bool ChatHandler::ShowHelpForCommand(ChatCommand *table, const char* cmd)
 {
@@ -312,28 +313,23 @@ bool ChatHandler::HandlePasswordCommand(const char* args)
         return true;
     }
 
-    QueryResult *result = loginDatabase.PQuery("SELECT `password` FROM `account` WHERE `id` = '%d'",m_session->GetAccountId());
-    if(result)
+    loginDatabase.escape_string(password_old);
+    loginDatabase.escape_string(password_new);
+    loginDatabase.escape_string(password_new_c);
+    QueryResult *result = loginDatabase.PQuery("SELECT 1 FROM `account` WHERE `id`='%d' AND `I`=SHA1(CONCAT(UPPER(`username`),':',UPPER('%s')))", m_session->GetAccountId(), password_old.c_str());
+    if(!result || password_new != password_new_c)
     {
-        // in result already encoded password
-        loginDatabase.escape_string(password_old);
-
-        if( (*result)[0].GetCppString()==password_old && password_new == password_new_c)
-        {
-            loginDatabase.escape_string(password_new);
-
-            if(loginDatabase.PExecute( "UPDATE `account` SET `password` = '%s' WHERE `id` = '%d'",password_new.c_str(), m_session->GetAccountId()))
-            {
-                SendSysMessage(LANG_COMMAND_PASSWORD);
-                return true;
-            }
-        }
-        else
-        {
-            SendSysMessage(LANG_COMMAND_WRONGOLDPASSWORD);
-        }
-
+        SendSysMessage(LANG_COMMAND_WRONGOLDPASSWORD);
+    }
+    else
+    {
         delete result;
+
+        if(accmgr.ChangePassword(m_session->GetAccountId(), password_new) == 0)
+        {
+            SendSysMessage(LANG_COMMAND_PASSWORD);
+            return true;
+        }
     }
 
     return true;

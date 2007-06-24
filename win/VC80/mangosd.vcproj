@@ -240,6 +240,14 @@
 			</File>
 		</Filter>
 		<File
+			RelativePath="..\..\src\game\AccountMgr.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\game\AccountMgr.h"
+			>
+		</File>
+		<File
 			RelativePath="..\..\src\mangosd\CliRunnable.cpp"
 			>
 		</File>

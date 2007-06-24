@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -72,6 +72,13 @@ void BigNumber::SetHexStr(const char *str)
 void BigNumber::SetRand(int numbits)
 {
     BN_rand(_bn, numbits, 0, 1);
+}
+
+void BigNumber::Reverse()
+{
+    uint8 *val = AsByteArray();
+    std::reverse(val, val+GetNumBytes());
+    SetBinary(val, GetNumBytes());
 }
 
 BigNumber BigNumber::operator=(const BigNumber &bn)
