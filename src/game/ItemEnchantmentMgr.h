@@ -41,7 +41,8 @@ struct EnchStoreItem
 
 	extern EnchantmentStore RandomItemEnch;
 
-	void LoadRandomEnchantmentsTable(EnchantmentStore& enchstore,char const* tablename);
+//	void LoadRandomEnchantmentsTable(EnchantmentStore& enchstore,char const* tablename);
+	void LoadRandomEnchantmentsTable();
 	uint32 GetItemEnchantMod(uint32 entry);
 	uint32 GenerateEnchSuffixFactor(uint32 item_id);
 #endif
