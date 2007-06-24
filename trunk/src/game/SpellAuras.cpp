@@ -125,7 +125,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleModPowerCost,                              // 72 SPELL_AURA_MOD_POWER_COST
     &Aura::HandleNoImmediateEffect,                         // 73 SPELL_AURA_MOD_POWER_COST_SCHOOL
     &Aura::HandleNoImmediateEffect,                         // 74 SPELL_AURA_REFLECT_SPELLS_SCHOOL
-    &Aura::HandleNULL,                                      // 75 SPELL_AURA_MOD_LANGUAGE
+    &Aura::HandleNoImmediateEffect,                         // 75 SPELL_AURA_MOD_LANGUAGE
     &Aura::HandleFarSight,                                  // 76 SPELL_AURA_FAR_SIGHT
     &Aura::HandleModMechanicImmunity,                       // 77 SPELL_AURA_MECHANIC_IMMUNITY
     &Aura::HandleAuraMounted,                               // 78 SPELL_AURA_MOUNTED
@@ -160,7 +160,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAddModifier,                               //107 SPELL_AURA_ADD_FLAT_MODIFIER
     &Aura::HandleAddModifier,                               //108 SPELL_AURA_ADD_PCT_MODIFIER
     &Aura::HandleNoImmediateEffect,                         //109 SPELL_AURA_ADD_TARGET_TRIGGER
-    &Aura::HandleNULL,                                      //110 SPELL_AURA_MOD_POWER_REGEN_PERCENT
+    &Aura::HandleNoImmediateEffect,                         //110 SPELL_AURA_MOD_POWER_REGEN_PERCENT
     &Aura::HandleNULL,                                      //111 SPELL_AURA_ADD_CASTER_HIT_TRIGGER
     &Aura::HandleNoImmediateEffect,                         //112 SPELL_AURA_OVERRIDE_CLASS_SCRIPTS
     &Aura::HandleNoImmediateEffect,                         //113 SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN
@@ -184,7 +184,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //131 SPELL_AURA_MOD_CREATURE_RANGED_ATTACK_POWER
     &Aura::HandleAuraModIncreaseEnergyPercent,              //132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT
     &Aura::HandleAuraModIncreaseHealthPercent,              //133 SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT
-    &Aura::HandleNULL,                                      //134 SPELL_AURA_MOD_MANA_REGEN_INTERRUPT
+    &Aura::HandleNoImmediateEffect,                         //134 SPELL_AURA_MOD_MANA_REGEN_INTERRUPT
     &Aura::HandleModHealingDone,                            //135 SPELL_AURA_MOD_HEALING_DONE
     &Aura::HandleNoImmediateEffect,                         //136 SPELL_AURA_MOD_HEALING_DONE_PERCENT   implemented in Unit::SpellHealingBonus
     &Aura::HandleModTotalPercentStat,                       //137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE
@@ -205,7 +205,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //152 SPELL_AURA_MOD_DETECTED_RANGE
     &Aura::HandleNULL,                                      //153 SPELL_AURA_SPLIT_DAMAGE_FLAT
     &Aura::HandleNULL,                                      //154 SPELL_AURA_MOD_STEALTH_LEVEL
-    &Aura::HandleNULL,                                      //155 SPELL_AURA_MOD_WATER_BREATHING
+    &Aura::HandleNoImmediateEffect,                         //155 SPELL_AURA_MOD_WATER_BREATHING
     &Aura::HandleNoImmediateEffect,                         //156 SPELL_AURA_MOD_REPUTATION_GAIN
     &Aura::HandleNULL,                                      //157 SPELL_AURA_PET_DAMAGE_MULTI
     &Aura::HandleNoImmediateEffect,                         //158 SPELL_AURA_MOD_SHIELD_BLOCKVALUE
@@ -241,7 +241,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //188 SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_CHANCE
     &Aura::HandleModRating,                                 //189 SPELL_AURA_MOD_RATING
     &Aura::HandleNULL,                                      //190 SPELL_AURA_MOD_FACTION_REPUTATION_GAIN
-    &Aura::HandleNULL,                                      //191
+    &Aura::HandleNULL,                                      //191 SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED
     &Aura::HandleNULL,                                      //192 SPELL_AURA_HASTE_MELEE
     &Aura::HandleNULL,                                      //193 SPELL_AURA_MELEE_SLOW
     &Aura::HandleNoImmediateEffect,                         //194 SPELL_AURA_MOD_SPELL_DAMAGE_OF_INTELLECT  implemented in Unit::SpellDamageBonus
@@ -250,7 +250,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNoImmediateEffect,                         //197 SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE_PCT implemented in Unit::SpellCriticalBonus
     &Aura::HandleNULL,                                      //198 SPELL_AURA_MOD_ALL_WEAPON_SKILLS
     &Aura::HandleNULL,                                      //199 SPELL_AURA_MOD_INCREASES_SPELL_PCT_TO_HIT
-    &Aura::HandleNULL,                                      //200
+    &Aura::HandleNoImmediateEffect,                         //200 SPELL_AURA_MOD_XP_PCT
     &Aura::HandleAuraAllowFlight,                           //201 SPELL_AURA_FLY                        this aura probably must enable flight mode...
     &Aura::HandleNULL,                                      //202 SPELL_AURA_CANNOT_BE_DODGED
     &Aura::HandleNULL,                                      //203 SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_DAMAGE
@@ -263,14 +263,14 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //210                                   unused
     &Aura::HandleNULL,                                      //211                                   unused
     &Aura::HandleNULL,                                      //212 SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_INTELLECT
-    &Aura::HandleNULL,                                      //213 SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT
+    &Aura::HandleNoImmediateEffect,                         //213 SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT
     &Aura::HandleNULL,                                      //214
     &Aura::HandleNULL,                                      //215
     &Aura::HandleNULL,                                      //216 SPELL_AURA_HASTE_SPELLS
-    &Aura::HandleNULL,                                      //217
-    &Aura::HandleNULL,                                      //218
-    &Aura::HandleNULL,                                      //219 SPELL_AURA_MOD_MANA_REGEN
-    &Aura::HandleNULL,                                      //220
+    &Aura::HandleNULL,                                      //217                                   unused
+    &Aura::HandleNULL,                                      //218                                   unused
+    &Aura::HandleModManaRegen,                              //219 SPELL_AURA_MOD_MANA_REGEN
+    &Aura::HandleNoImmediateEffect,                         //220 SPELL_AURA_MOD_SPELL_HEALING_OF_STRENGTH
 };
 
 Aura::Aura(SpellEntry const* spellproto, uint32 eff, Unit *target, Unit *caster, Item* castItem) :
@@ -499,7 +499,8 @@ void Aura::Update(uint32 diff)
                                                             // Cannibalize, eating items and other spells
                 m_modifier.m_auraname == SPELL_AURA_OBS_MOD_HEALTH ||
                                                             // Eating items and other spells
-                m_modifier.m_auraname == SPELL_AURA_OBS_MOD_MANA )
+                m_modifier.m_auraname == SPELL_AURA_OBS_MOD_MANA ||
+                m_modifier.m_auraname == SPELL_AURA_MOD_MANA_REGEN )
             {
                 ApplyModifier(true);
                 return;
@@ -699,7 +700,9 @@ void Aura::_AddAura()
     if( m_modifier.m_auraname==SPELL_AURA_OBS_MOD_HEALTH || m_modifier.m_auraname==SPELL_AURA_OBS_MOD_MANA )
         m_periodicTimer = m_modifier.periodictime;
     else
-    if( m_modifier.m_auraname==SPELL_AURA_MOD_REGEN || m_modifier.m_auraname==SPELL_AURA_MOD_POWER_REGEN )
+    if( m_modifier.m_auraname==SPELL_AURA_MOD_REGEN       ||
+        m_modifier.m_auraname==SPELL_AURA_MOD_POWER_REGEN ||
+        m_modifier.m_auraname == SPELL_AURA_MOD_MANA_REGEN )
         m_periodicTimer = 5000;
 
     m_target->ApplyStats(false);
@@ -2977,6 +2980,30 @@ void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
                 if (spellProto)
                     caster->ThreatAssist(m_target, float(gain) * 0.5f, spellProto->School, spellProto);
             }
+        }
+    }
+
+    m_isPeriodic = apply;
+}
+
+void Aura::HandleModManaRegen(bool apply, bool Real)
+{
+    if(apply && m_periodicTimer <= 0)
+    {
+        m_periodicTimer += 5000;
+
+        Powers pt = m_target->getPowerType();
+        if(int32(pt) != POWER_MANA)
+            return;
+
+        int32 gain = m_target->ModifyPower(POWER_MANA, m_modifier.m_amount * m_target->GetStat(Stats(m_modifier.m_miscvalue)) / 100.0f);
+
+        Unit *caster = GetCaster();
+        if (caster)
+        {
+            SpellEntry const *spellProto = GetSpellProto();
+            if (spellProto)
+                caster->ThreatAssist(m_target, float(gain) * 0.5f, spellProto->School, spellProto);
         }
     }
 

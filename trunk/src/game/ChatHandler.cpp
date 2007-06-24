@@ -32,6 +32,7 @@
 #include "ObjectAccessor.h"
 #include "ScriptCalls.h"
 #include "Player.h"
+#include "SpellAuras.h"
 #include "Language.h"
 
 void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
@@ -56,6 +57,11 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
     // send in universal language infaction iteration allowed mode and if player in .gmon mode
     if (sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHAT) || _player->isGameMaster())
         lang = LANG_UNIVERSAL;
+    
+    // handle SPELL_AURA_MOD_LANGUAGE auras
+    Unit::AuraList& ModLangAuras = _player->GetAurasByType(SPELL_AURA_MOD_LANGUAGE);
+    for(Unit::AuraList::iterator i = ModLangAuras.begin();i != ModLangAuras.end(); ++i)
+        lang = (*i)->GetModifier()->m_miscvalue;
 
     if (!_player->CanSpeak())
     {
