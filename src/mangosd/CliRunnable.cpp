@@ -31,7 +31,7 @@
 #include "SystemConfig.h"
 #include "Config/ConfigEnv.h"
 #include "Util.h"
-#include "../game/AccountMgr.h"
+#include "AccountMgr.h"
 
 #include "CliRunnable.h"
 
