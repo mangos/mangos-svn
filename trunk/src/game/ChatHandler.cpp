@@ -54,14 +54,20 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
         return;
     }
 
-    // send in universal language infaction iteration allowed mode and if player in .gmon mode
-    if (sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHAT) || _player->isGameMaster())
+    // send in universal language if player in .gmon mode (ignore spell effects)
+    if (_player->isGameMaster())
         lang = LANG_UNIVERSAL;
+    else
+    {
+        // send in universal language in two side iteration allowed mode
+        if (sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHAT) || _player->isGameMaster())
+            lang = LANG_UNIVERSAL;
     
-    // handle SPELL_AURA_MOD_LANGUAGE auras
-    Unit::AuraList& ModLangAuras = _player->GetAurasByType(SPELL_AURA_MOD_LANGUAGE);
-    for(Unit::AuraList::iterator i = ModLangAuras.begin();i != ModLangAuras.end(); ++i)
-        lang = (*i)->GetModifier()->m_miscvalue;
+        // but overwrite it by SPELL_AURA_MOD_LANGUAGE auras (only single case used)
+        Unit::AuraList& ModLangAuras = _player->GetAurasByType(SPELL_AURA_MOD_LANGUAGE);
+        if(!ModLangAuras.empty())
+            lang = ModLangAuras.front()->GetModifier()->m_miscvalue;
+    }
 
     if (!_player->CanSpeak())
     {
