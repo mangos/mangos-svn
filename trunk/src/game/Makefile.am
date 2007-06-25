@@ -66,7 +66,6 @@ libmangosgame_a_SOURCES = \
 	Chat.h \
 	ChatHandler.cpp \
 	CombatHandler.cpp \
-	CompositeAI.h \
 	ConfusedMovementGenerator.cpp \
 	ConfusedMovementGenerator.h \
 	Container.cpp \

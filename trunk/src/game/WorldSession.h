@@ -36,6 +36,14 @@ class WorldSession;
 
 #define CHECK_PACKET_SIZE(P,S) if((P).size() < (S)) return SizeError((P),(S));
 
+enum AccountTypes
+{
+    SEC_PLAYER         = 0,
+    SEC_MODERATOR      = 1,
+    SEC_GAMEMASTER     = 2,
+    SEC_ADMINISTRATOR  = 3
+};
+
 /// Player session in the World
 class MANGOS_DLL_SPEC WorldSession
 {

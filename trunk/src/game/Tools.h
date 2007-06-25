@@ -15,9 +15,13 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+#ifndef MANGOS_TOOLS_H
+#define MANGOS_TOOLS_H
 
 #include "Common.h"
 #include "WorldPacket.h"
 
 uint64  readGUID(WorldPacket & data);
 void    writeGUID(WorldPacket & data, uint64 & guid);
+
+#endif

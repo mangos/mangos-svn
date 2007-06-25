@@ -141,7 +141,7 @@ void Channel::KickOrBan(uint64 good, const char *badname, bool ban)
         MakeNotOn(&data);
         SendToOne(&data,good);
     }
-    else if(!players[good].moderator && sec < 2)
+    else if(!players[good].moderator && sec < SEC_GAMEMASTER)
     {
         WorldPacket data;
         MakeNotModerator(&data);
@@ -156,7 +156,7 @@ void Channel::KickOrBan(uint64 good, const char *badname, bool ban)
             MakeNotOn(&data,badname);
             SendToOne(&data,good);
         }
-        else if(sec < 2 && bad->GetGUID() == m_ownerGUID && good != m_ownerGUID)
+        else if(sec < SEC_GAMEMASTER && bad->GetGUID() == m_ownerGUID && good != m_ownerGUID)
         {
             WorldPacket data;
             MakeNotOwner(&data);
@@ -201,7 +201,7 @@ void Channel::UnBan(uint64 good, const char *badname)
         MakeNotOn(&data);
         SendToOne(&data,good);
     }
-    else if(!players[good].moderator && sec < 2)
+    else if(!players[good].moderator && sec < SEC_GAMEMASTER)
     {
         WorldPacket data;
         MakeNotModerator(&data);
@@ -240,7 +240,7 @@ void Channel::Password(uint64 p, const char *pass)
         MakeNotOn(&data);
         SendToOne(&data,p);
     }
-    else if(!players[p].moderator && sec < 2)
+    else if(!players[p].moderator && sec < SEC_GAMEMASTER)
     {
         WorldPacket data;
         MakeNotModerator(&data);
@@ -269,7 +269,7 @@ void Channel::SetMode(uint64 p, const char *p2n, bool mod, bool set)
         MakeNotOn(&data);
         SendToOne(&data,p);
     }
-    else if(!players[p].moderator && sec < 2)
+    else if(!players[p].moderator && sec < SEC_GAMEMASTER)
     {
         WorldPacket data;
         MakeNotModerator(&data);
@@ -319,7 +319,7 @@ void Channel::SetOwner(uint64 p, const char *newname)
         MakeNotOn(&data);
         SendToOne(&data,p);
     }
-    else if(sec < 2 && p != m_ownerGUID)
+    else if(sec < SEC_GAMEMASTER && p != m_ownerGUID)
     {
         WorldPacket data;
         MakeNotOwner(&data);
@@ -400,7 +400,7 @@ void Channel::Announce(uint64 p)
         MakeNotOn(&data);
         SendToOne(&data,p);
     }
-    else if(!players[p].moderator && sec < 2)
+    else if(!players[p].moderator && sec < SEC_GAMEMASTER)
     {
         WorldPacket data;
         MakeNotModerator(&data);
@@ -429,7 +429,7 @@ void Channel::Moderate(uint64 p)
         MakeNotOn(&data);
         SendToOne(&data,p);
     }
-    else if(!players[p].moderator && sec < 2)
+    else if(!players[p].moderator && sec < SEC_GAMEMASTER)
     {
         WorldPacket data;
         MakeNotModerator(&data);
@@ -469,7 +469,7 @@ void Channel::Say(uint64 p, const char *what, uint32 lang)
         MakeYouCantSpeak(&data);
         SendToOne(&data,p);
     }
-    else if(moderate && !players[p].moderator && sec < 2)
+    else if(moderate && !players[p].moderator && sec < SEC_GAMEMASTER)
     {
         WorldPacket data;
         MakeNotModerator(&data);

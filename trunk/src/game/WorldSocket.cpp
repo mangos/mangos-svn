@@ -326,7 +326,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     ///- Check that we do not exceed the maximum number of online players in the realm
     uint32 num = sWorld.GetSessionCount();
-    if (sWorld.GetPlayerLimit() > 0 && num >= sWorld.GetPlayerLimit() && security == 0)
+    if (sWorld.GetPlayerLimit() > 0 && num >= sWorld.GetPlayerLimit() && security == SEC_PLAYER )
     {
         /// \todo Handle the waiting queue when the server is full
         SendAuthWaitQue(1);
@@ -416,7 +416,7 @@ void WorldSocket::_HandlePing(WorldPacket& recvPacket)
     recvPacket >> ping;
 
     ///- check ping speed for players
-    if(_session && _session->GetSecurity() == 0)
+    if(_session && _session->GetSecurity() == SEC_PLAYER)
     {
         uint32 cur_mstime = getMSTime();
         uint32 diff_mstime = cur_mstime - m_LastPingMSTime;

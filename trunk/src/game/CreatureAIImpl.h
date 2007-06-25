@@ -15,6 +15,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+#ifndef CREATUREAIIMPL_H
+#define CREATUREAIIMPL_H
 
 #include "CreatureAI.h"
 
@@ -25,3 +27,4 @@ CreatureAIFactory<REAL_AI>::Create(void *data) const
     Creature* creature = reinterpret_cast<Creature *>(data);
     return (new REAL_AI(*creature));
 }
+#endif

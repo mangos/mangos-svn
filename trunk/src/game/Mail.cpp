@@ -141,7 +141,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
     if (pItem)
     {
-        if( GetSecurity() > 0 && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
+        if( GetSecurity() > SEC_PLAYER && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
         {
             uint32 accId = 0;
             if(receive)
@@ -333,7 +333,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
 
             pl->ModifyMoney( -int32(m->COD) );
 
-            if( GetSecurity() > 0 && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
+            if( GetSecurity() > SEC_PLAYER && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
             {
                 uint32 sender_accId = 0;
                 std::string sender_name;

@@ -1229,7 +1229,7 @@ void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
     std::string charname, acc, email, lastip, msg;
     recv_data >> charname;
 
-    if (GetSecurity() < 3)
+    if (GetSecurity() < SEC_ADMINISTRATOR)
     {
         SendNotification("You do not have permission to perform that function");
         return;
