@@ -278,7 +278,7 @@ bool DatabaseMysql::BeginTransaction()
     if (tranThread==ZThread::ThreadImpl::current())
         return false;                                       // huh? this thread already started transaction
     mMutex.acquire();
-    if (!_TransactionCmd("BEGIN"))
+    if (!_TransactionCmd("START TRANSACTION"))
     {
         mMutex.release();                                   // can't start transaction
         return false;
