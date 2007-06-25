@@ -261,11 +261,11 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
             gm_accid = GetPlayerAccountIdByGUID(bidder_guid);
             gm_security = GetSecurityByAccount(gm_accid);
             
-            if(gm_security > 0)                                // not do redundant DB requests
+            if(gm_security > SEC_PLAYER )                                // not do redundant DB requests
                 GetPlayerNameByGUID(bidder_guid,gm_name);
         }
 
-        if( gm_security > 0 )
+        if( gm_security > SEC_PLAYER )
         {
             std::string owner_name;
             GetPlayerNameByGUID(auction->owner,owner_name);

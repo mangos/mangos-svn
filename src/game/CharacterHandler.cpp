@@ -86,23 +86,43 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     CHECK_PACKET_SIZE(recv_data,1+1+1+1+1+1+1+1+1+1);
 
     std::string name;
-    uint8 race_;
-
+    uint8 race_,class_;
+    bool pTbc = this->IsTBC() && sWorld.getConfig(CONFIG_EXPANSION);
     recv_data >> name;
 
     // recheck with known string size
     CHECK_PACKET_SIZE(recv_data,(name.size()+1)+1+1+1+1+1+1+1+1+1);
 
     recv_data >> race_;
-    recv_data.rpos(0);
+    recv_data >> class_;
+
 
     WorldPacket data(SMSG_CHAR_CREATE, 1);                  // returned with diff.values in all cases
+
+    if (!sChrClassesStore.LookupEntry(class_)||
+        !sChrRacesStore.LookupEntry(race_))
+    {
+        data << (uint8)CHAR_CREATE_FAILED;
+        SendPacket( &data );
+        sLog.outError("Class: %u or Race %u not found in DBC (Wrong DBC files?) or Cheater?", class_, race_);
+        return;
+    }
+
+    // prevent character creating Expancion race without Expancion account
+    if (!pTbc&&(race_>RACE_TROLL))
+    {
+        data << (uint8)CHAR_CREATE_FAILED;
+        sLog.outError("No Expaniton Account:[%d] but tried to Create TBC character",GetAccountId());
+        SendPacket( &data );
+        return;
+    }
 
     // prevent character creating with invalid name
     if(name.size() == 0)
     {
         data << (uint8)CHAR_NAME_INVALID_CHARACTER;
         SendPacket( &data );
+        sLog.outError("Account:[%d] but tried to Create character with empty [name] ",GetAccountId());
         return;
     }
 
@@ -110,8 +130,9 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 
     if(name.find_first_of(notAllowedChars)!=name.npos)
     {
-        data << (uint8)CHAR_NAME_INVALID_CHARACTER;;
+        data << (uint8)CHAR_NAME_INVALID_CHARACTER;
         SendPacket( &data );
+        sLog.outError("Account:[%d] tried to Create character whit empty name ",GetAccountId());
         return;
     }
 
@@ -122,11 +143,13 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         return;
     }
 
-    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%u'", GetAccountId());
-
+    QueryResult *result = sDatabase.PQuery("SELECT COUNT(guid) FROM `character` WHERE `account` = '%d'", GetAccountId());
+    uint8 charcount = 0;
     if ( result )
     {
-        if (result->GetRowCount() >= 10)
+        Field *fields=result->Fetch();
+        charcount = fields[0].GetUInt8();
+        if (charcount >= 10)
         {
             data << (uint8)CHAR_CREATE_ACCOUNT_LIMIT;
             SendPacket( &data );
@@ -137,7 +160,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     }
 
     bool AllowTwoSideAccounts = sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_ACCOUNTS);
-    if(sWorld.IsPvPRealm())
+    if(sWorld.IsPvPRealm()&&!AllowTwoSideAccounts)
     {
         QueryResult *result2 = sDatabase.PQuery("SELECT `race` FROM `character` WHERE `account` = '%u' LIMIT 1", GetAccountId());
         if(result2)
@@ -150,10 +173,10 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
                 team = Player::TeamForRace(race);
 
             uint32 team_=0;
-            if(race_ > 0)
-                team_ = Player::TeamForRace(race_);
+            //if(race_ > 0)
+            team_ = Player::TeamForRace(race_);
 
-            if(team != team_ && GetSecurity() < 2 && !AllowTwoSideAccounts)
+            if(team != team_ && GetSecurity() < SEC_GAMEMASTER)
             {
                 data << (uint8)CHAR_CREATE_PVP_TEAMS_VIOLATION;
                 SendPacket( &data );
@@ -163,22 +186,15 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     }
 
     Player * pNewChar = new Player(this);
+    recv_data.rpos(0);
 
     if(pNewChar->Create( objmgr.GenerateLowGuid(HIGHGUID_PLAYER), recv_data ))
     {
         // Player create
         pNewChar->SaveToDB();
+        charcount+=1;
 
-        QueryResult *resultCount = sDatabase.PQuery("SELECT COUNT(guid) FROM `character` WHERE `account` = '%d'", GetAccountId());
-        uint32 charCount = 0;
-        if (resultCount)
-        {
-            Field *fields = resultCount->Fetch();
-            charCount = fields[0].GetUInt32();
-            delete resultCount;
-            loginDatabase.PExecute("INSERT INTO `realmcharacters` (`numchars`, `acctid`, `realmid`) VALUES (%d, %d, %d) ON DUPLICATE KEY UPDATE `numchars` = '%d'", charCount, GetAccountId(), realmID, charCount);
-        }
-
+        loginDatabase.PExecute("INSERT INTO `realmcharacters` (`numchars`, `acctid`, `realmid`) VALUES (%d, %d, %d) ON DUPLICATE KEY UPDATE `numchars` = '%d'", charcount, GetAccountId(), realmID, charcount);
         delete pNewChar;
     }
     else
@@ -192,7 +208,11 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         return;
     }
 
-    data << (uint8)CHAR_CREATE_SUCCESS;
+    if (pTbc)
+        data << (uint8)CHAR_CREATE_EXPANSION;
+    else  
+        data << (uint8)CHAR_CREATE_SUCCESS;
+
     SendPacket( &data );
 
     sLog.outBasic("Account: %d Create New Character:[%s]",GetAccountId(),name.c_str());

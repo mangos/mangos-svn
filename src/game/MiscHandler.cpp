@@ -159,14 +159,14 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
         // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
         // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
         if( pname &&
-            ( security > 0 ||
+            ( security > SEC_PLAYER ||
             ( itr->second->GetTeam() == team || allowTwoSideWhoList ) &&
             (classmask & (1 << class_) ) && (racemask & (1 << race) ) &&
             (lvl >= level_min && lvl <= level_max) &&
             (guild_name.length()?strstr(gname.c_str(), guild_name.c_str())!=0 : true) &&
             (player_name.length()?strstr(pname, player_name.c_str())!=0 : true) &&
             z_show && s_show &&
-            (itr->second->GetSession()->GetSecurity() == 0 || gmInWhoList && itr->second->isVisibleFor(_player) )))
+            (itr->second->GetSession()->GetSecurity() == SEC_PLAYER || gmInWhoList && itr->second->isVisibleFor(_player) )))
         {
             clientcount++;
 
@@ -195,7 +195,7 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
     sLog.outDebug( "WORLD: Recvd CMSG_LOGOUT_REQUEST Message, security - %u", security );
 
     //instant logout for admins, gm's, mod's
-    if (security > 0)
+    if (security > SEC_PLAYER)
     {
         LogoutPlayer(true);
         return;
@@ -400,7 +400,7 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
             ObjectAccessor::PlayersMapType &m = ObjectAccessor::Instance().GetPlayers();
             for(ObjectAccessor::PlayersMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
             {
-                if(itr->second->GetSession()->GetSecurity() >= 2 && itr->second->isAcceptTickets())
+                if(itr->second->GetSession()->GetSecurity() >= SEC_GAMEMASTER && itr->second->isAcceptTickets())
                     ChatHandler::PSendSysMessage(itr->second->GetSession(), LANG_COMMAND_TICKETNEW,GetPlayer()->GetName());
             }
         }
@@ -1177,7 +1177,7 @@ void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
     recv_data >> Orientation;                               // o (3.141593 = 180 degrees)
     DEBUG_LOG("Time %u sec, map=%u, x=%f, y=%f, z=%f, orient=%f", time/1000, mapid, PositionX, PositionY, PositionZ, Orientation);
 
-    if (GetSecurity() >= 3)
+    if (GetSecurity() >= SEC_ADMINISTRATOR)
         GetPlayer()->TeleportTo(mapid,PositionX,PositionY,PositionZ,Orientation);
     else
         SendNotification("You do not have permission to perform that function");

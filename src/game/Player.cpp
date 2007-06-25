@@ -97,11 +97,11 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_divider = 0;
 
     m_GMFlags = 0;
-    if(GetSession()->GetSecurity() >=2)
+    if(GetSession()->GetSecurity() >= SEC_GAMEMASTER)
         SetAcceptTicket(true);
 
     // players always and GM if set in config accept whispers by default
-    if(GetSession()->GetSecurity() == 0 || sWorld.getConfig(CONFIG_GM_WISPERING_TO))
+    if(GetSession()->GetSecurity() == SEC_PLAYER || sWorld.getConfig(CONFIG_GM_WISPERING_TO))
         SetAcceptWhispers(true);
 
     m_curTarget = 0;
@@ -255,8 +255,8 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
     data >> m_name;
 
-    if(m_name.size() == 0)
-        return false;
+    //if(m_name.size() == 0) //not need double check 
+    //    return false;
 
     normalizePlayerName(m_name);
 
@@ -331,16 +331,19 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     uint8 powertype = cEntry->powerType;
 
     uint32 unitfield;
-    if(powertype == POWER_RAGE)
-        unitfield = 0x00110000;
-    else if(powertype == POWER_ENERGY)
-        unitfield = 0x00000000;
-    else if(powertype == POWER_MANA)
-        unitfield = 0x00000000;
-    else
+
+    switch(powertype)
     {
-        sLog.outError("Invalid default powertype %u for player (class %u)",powertype,class_);
-        return false;
+        case POWER_ENERGY:
+        case POWER_MANA:
+            unitfield = 0x00000000;
+    	    break;
+        case POWER_RAGE:
+            unitfield = 0x00110000;
+            break;
+        default:
+            sLog.outError("Invalid default powertype %u for player (class %u)",powertype,class_);
+            return false;
     }
 
     SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 0.388999998569489f );
@@ -357,6 +360,8 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
             SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, info->displayId_m );
             break;
         default:
+            sLog.outError("Invalid gender %u for player",gender);
+            return false;
             break;
     }
 
@@ -992,7 +997,8 @@ void Player::BuildEnumData( WorldPacket * p_data )
     *p_data << m_name;
 
     *p_data << getRace();
-    *p_data << getClass();
+    uint8 pClass =getClass();
+    *p_data << pClass;
     *p_data << getGender();
 
     uint32 bytes = GetUInt32Value(PLAYER_BYTES);
@@ -1057,7 +1063,7 @@ void Player::BuildEnumData( WorldPacket * p_data )
         uint32 petFamily  = 0;
 
         // show pet at selection character in character list  only for non-ghost character
-        if(isAlive())
+        if(isAlive()&&(pClass==CLASS_WARLOCK||pClass==CLASS_HUNTER))
         {
             QueryResult *result = sDatabase.PQuery("SELECT `entry`,`modelid`,`level` FROM `character_pet` WHERE `owner` = '%u' AND `slot` = '0'", GetGUIDLow() );
             if(result)
@@ -1174,9 +1180,9 @@ void Player::SendFriendlist()
             // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
             // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
             if( pObj && pObj->GetName() &&
-                ( security > 0 ||
+                ( security > SEC_PLAYER ||
                 ( pObj->GetTeam() == team || allowTwoSideWhoList ) &&
-                (pObj->GetSession()->GetSecurity() == 0 || gmInWhoList && pObj->isVisibleFor(this) )))
+                (pObj->GetSession()->GetSecurity() == SEC_PLAYER || gmInWhoList && pObj->isVisibleFor(this) )))
             {
                 if(pObj->isAFK())
                     friendstr[i].Status = 2;
@@ -1701,7 +1707,7 @@ void Player::RegenerateHealth()
 
 bool Player::isAcceptTickets() const
 {
-    return GetSession()->GetSecurity() >=2 && (m_GMFlags & GM_ACCEPT_TICKETS);
+    return GetSession()->GetSecurity() >= SEC_GAMEMASTER && (m_GMFlags & GM_ACCEPT_TICKETS);
 }
 
 bool Player::CanInteractWithNPCs(bool alive) const
@@ -3029,38 +3035,20 @@ void Player::DeleteFromDB()
 
 void Player::SetMovement(uint8 pType)
 {
+    WorldPacket data;
     switch(pType)
     {
-        case MOVE_ROOT:
-        {
-            WorldPacket data(SMSG_FORCE_MOVE_ROOT, GetPackGUID().size()+4);
-            data.append(GetPackGUID());
-            data << uint32(0);
-            GetSession()->SendPacket( &data );
-        }break;
-        case MOVE_UNROOT:
-        {
-            WorldPacket data(SMSG_FORCE_MOVE_UNROOT, GetPackGUID().size()+4);
-            data.append(GetPackGUID());
-            data << uint32(0);
-            GetSession()->SendPacket( &data );
-        }break;
-        case MOVE_WATER_WALK:
-        {
-            WorldPacket data(SMSG_MOVE_WATER_WALK, GetPackGUID().size()+4);
-            data.append(GetPackGUID());
-            data << uint32(0);
-            GetSession()->SendPacket( &data );
-        }break;
-        case MOVE_LAND_WALK:
-        {
-            WorldPacket data(SMSG_MOVE_LAND_WALK, GetPackGUID().size()+4);
-            data.append(GetPackGUID());
-            data << uint32(0);
-            GetSession()->SendPacket( &data );
-        }break;
-        default:break;
+        case MOVE_ROOT:       data.Initialize(SMSG_FORCE_MOVE_ROOT,   GetPackGUID().size()+4); break;
+        case MOVE_UNROOT:     data.Initialize(SMSG_FORCE_MOVE_UNROOT, GetPackGUID().size()+4); break;
+        case MOVE_WATER_WALK: data.Initialize(SMSG_MOVE_WATER_WALK,   GetPackGUID().size()+4); break;
+        case MOVE_LAND_WALK:  data.Initialize(SMSG_MOVE_LAND_WALK,    GetPackGUID().size()+4); break;
+        default:
+            sLog.outError("Player::SetMovement: Unsupported move type (%d), data not sent to client.",pType);
+            return; 
     }
+    data.append(GetPackGUID());
+    data << uint32(0);
+    GetSession()->SendPacket( &data );
 }
 
 void Player::BuildPlayerRepop()
@@ -3616,9 +3604,9 @@ void Player::BroadcastPacketToFriendListers(WorldPacket *packet)
         // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
         // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
         if( pfriend && pfriend->IsInWorld() &&
-            ( pfriend->GetSession()->GetSecurity() > 0 ||
+            ( pfriend->GetSession()->GetSecurity() > SEC_PLAYER ||
             ( pfriend->GetTeam() == team || allowTwoSideWhoList ) &&
-            (security == 0 || gmInWhoList && isVisibleFor(pfriend) )))
+            (security == SEC_PLAYER || gmInWhoList && isVisibleFor(pfriend) )))
         {
             pfriend->GetSession()->SendPacket(packet);
         }
@@ -11405,7 +11393,7 @@ bool Player::LoadFromDB( uint32 guid )
     outDebugValues();
 
     // GM state
-    if(GetSession()->GetSecurity() > 0)
+    if(GetSession()->GetSecurity() > SEC_PLAYER)
     {
         switch(sWorld.getConfig(CONFIG_GM_LOGIN_STATE))
         {

@@ -15,6 +15,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
+#ifndef MANGOS_MAIL_H
+#define MANGOS_MAIL_H
 
 #define MAIL_BODY_ITEM_TEMPLATE 8383                        // - plain letter, A Dusty Unsent Letter: 889
 
@@ -92,3 +94,4 @@ struct Mail
     uint32 checked;
     Mail_state state;
 };
+#endif
