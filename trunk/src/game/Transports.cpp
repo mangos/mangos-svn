@@ -61,6 +61,13 @@ void MapManager::LoadTransports()
 
         const GameObjectInfo *goinfo = objmgr.GetGameObjectInfo(entry);
 
+        if(!goinfo)
+        {
+            sLog.outError("Transport ID:%u, Name: %s, will not be loaded gameobject_template Missing", entry, name);
+            delete t;
+            continue;
+        }
+
         //sLog.outString("Loading transport between %s, %s", name.c_str(), goinfo->name);
 
         vector<uint32> mapsUsed;
