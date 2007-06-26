@@ -140,7 +140,7 @@ void Map::DeleteStateMachine()
     delete si_GridStates[GRID_STATE_REMOVAL];
 }
 
-Map::Map(uint32 id, time_t expiry, uint32 ainstanceId) : i_id(id), i_gridExpiry(expiry), i_mapEntry (sMapStore.LookupEntry(id)), i_InstanceId(ainstanceId)
+Map::Map(uint32 id, time_t expiry, uint32 ainstanceId) : i_id(id), i_gridExpiry(expiry), i_mapEntry (sMapStore.LookupEntry(id)), i_resetTime(0), i_InstanceId(ainstanceId)
 {
     //    char tmp[32];
     for(unsigned int idx=0; idx < MAX_NUMBER_OF_GRIDS; ++idx)
@@ -482,14 +482,17 @@ void Map::RemoveInstanced(Player *player)
 
 void Map::InitResetTime()
 {
-    i_resetTime = time(NULL) + i_resetDelayTime;
-
-    if (Instanceable() && GetInstanceId())
+    if (Instanceable())
     {
-        sDatabase.BeginTransaction();
-        sDatabase.PExecute("DELETE FROM `instance` WHERE `id` = '%u'", GetInstanceId());
-        sDatabase.PExecute("INSERT INTO `instance` VALUES ('%u', '%u', '" I64FMTD "')", GetInstanceId(), i_id, (uint64)this->i_resetTime);
-        sDatabase.CommitTransaction();
+        i_resetTime = time(NULL) + i_resetDelayTime;        // only used for Instanceable() case
+
+        if(GetInstanceId())
+        {
+            sDatabase.BeginTransaction();
+            sDatabase.PExecute("DELETE FROM `instance` WHERE `id` = '%u'", GetInstanceId());
+            sDatabase.PExecute("INSERT INTO `instance` VALUES ('%u', '%u', '" I64FMTD "')", GetInstanceId(), i_id, (uint64)this->i_resetTime);
+            sDatabase.CommitTransaction();
+        }
     }
 }
 

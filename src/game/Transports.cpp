@@ -476,7 +476,7 @@ void Transport::Update(uint32 p_time)
         else
         {
             //MapManager::Instance().GetMap(m_curr->second.mapid)->GameobjectRelocation((GameObject *)this, m_curr->second.x, m_curr->second.y, m_curr->second.z, this->m_orientation);
-            this->Relocate(m_curr->second.x, m_curr->second.y, m_curr->second.z, m_curr->second.o);
+            this->Relocate(m_curr->second.x, m_curr->second.y, m_curr->second.z);
         }
 
         m_curMap = m_curr->second.mapid;
