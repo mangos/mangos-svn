@@ -35,14 +35,14 @@ AccountMgr::~AccountMgr()
 int AccountMgr::CreateAccount(std::string username, std::string password)
 {
     if(username.length() > 16)
-        return false;
+        return 1;   // username's too long
 
     loginDatabase.escape_string(username);
     QueryResult *result = loginDatabase.PQuery("SELECT 1 FROM `account` WHERE `username`='%s'", username.c_str());
     if(result)
     {
         delete result;
-        return 1;   // username does already exist
+        return 2;   // username does already exist
     }
 
     loginDatabase.escape_string(password);
@@ -69,7 +69,8 @@ int AccountMgr::DeleteAccount(uint32 accid)
     {
         do
         {
-            uint32 guidlo = (*result)[0].GetUInt32();
+            Field *fields = result->Fetch();
+            uint32 guidlo = fields[0].GetUInt32();
 
             // kick if player currently
             if(Player* p = objmgr.GetPlayer(MAKE_GUID(guidlo,HIGHGUID_PLAYER)))

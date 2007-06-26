@@ -561,6 +561,8 @@ void CliCreate(char *command,pPrintf zprintf)
     if(result == -1)
         zprintf("User %s with password %s NOT created (probably sql file format was updated)\r\n",szAcc,szPassword);
     else if(result == 1)
+        zprintf("Username %s is too long\r\n", szAcc);
+    else if(result == 2)
         zprintf("User %s already exists\r\n",szAcc);
     else if(result == 0)
         zprintf("User %s with password %s created successfully\r\n",szAcc,szPassword);
