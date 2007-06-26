@@ -70,7 +70,8 @@ class MANGOS_DLL_SPEC Group
 
             uint64 itemGUID;
             uint32 itemid;
-            uint32 itemRandomPropId;
+            uint32 itemRandomSuffix;
+            int32  itemRandomPropId;
             map<uint64, RollVote> playerVote;               //vote position correspond with player position (in group)
             uint8 totalPlayersRolling;
             uint8 totalNeed;
