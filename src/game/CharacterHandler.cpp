@@ -111,7 +111,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     // prevent character creating Expancion race without Expancion account
     if (!pTbc&&(race_>RACE_TROLL))
     {
-        data << (uint8)CHAR_CREATE_FAILED;
+        data << (uint8)CHAR_CREATE_EXPANSION;
         sLog.outError("No Expaniton Account:[%d] but tried to Create TBC character",GetAccountId());
         SendPacket( &data );
         return;
@@ -208,11 +208,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         return;
     }
 
-    if (pTbc)
-        data << (uint8)CHAR_CREATE_EXPANSION;
-    else  
-        data << (uint8)CHAR_CREATE_SUCCESS;
-
+    data << (uint8)CHAR_CREATE_SUCCESS;
     SendPacket( &data );
 
     sLog.outBasic("Account: %d Create New Character:[%s]",GetAccountId(),name.c_str());
