@@ -577,7 +577,6 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
     // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
     pCreature->LoadFromDB(pCreature->GetGUIDLow(), chr->GetInstanceId());
 
-    pCreature->AddToWorld();
     MapManager::Instance().GetMap(pCreature->GetMapId(), pCreature)->Add(pCreature);
 
     sLog.outDebug(LANG_ADD_OBJ);
@@ -2059,7 +2058,6 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
         wpCreature->SaveToDB();
         // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
         wpCreature->LoadFromDB(wpCreature->GetGUIDLow(), chr->GetInstanceId());
-        wpCreature->AddToWorld();
         MapManager::Instance().GetMap(wpCreature->GetMapId(), wpCreature)->Add(wpCreature);
 
         PSendSysMessage(LANG_WAYPOINT_ADDED_NO, point+1);
@@ -2152,7 +2150,6 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
                 wpCreature2->SaveToDB();
                 // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
                 wpCreature2->LoadFromDB(wpCreature2->GetGUIDLow(), chr->GetInstanceId());
-                wpCreature2->AddToWorld();
                 MapManager::Instance().GetMap(npcCreature->GetMapId(), npcCreature)->Add(wpCreature2);
                 //MapManager::Instance().GetMap(npcCreature->GetMapId())->Add(wpCreature2);
             }
@@ -2649,7 +2646,6 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
             wpCreature->SaveToDB();
             // To call _LoadGoods(); _LoadQuests(); CreateTrainerSpells();
             wpCreature->LoadFromDB(wpCreature->GetGUIDLow(), chr->GetInstanceId());
-            wpCreature->AddToWorld();
             MapManager::Instance().GetMap(wpCreature->GetMapId(), wpCreature)->Add(wpCreature);
             //MapManager::Instance().GetMap(wpCreature->GetMapId())->Add(wpCreature);
         }while( result->NextRow() );
@@ -2689,7 +2685,6 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
 
         pCreature->SaveToDB();
         pCreature->LoadFromDB(pCreature->GetGUIDLow(), chr->GetInstanceId());
-        pCreature->AddToWorld();
         MapManager::Instance().GetMap(pCreature->GetMapId(), pCreature)->Add(pCreature);
         //player->PlayerTalkClass->SendPointOfInterest(x, y, 6, 6, 0, "First Waypoint");
 
@@ -2737,7 +2732,6 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
 
         pCreature->SaveToDB();
         pCreature->LoadFromDB(pCreature->GetGUIDLow(), chr->GetInstanceId());
-        pCreature->AddToWorld();
         MapManager::Instance().GetMap(pCreature->GetMapId(), pCreature)->Add(pCreature);
         //player->PlayerTalkClass->SendPointOfInterest(x, y, 6, 6, 0, "Last Waypoint");
         // Cleanup memory

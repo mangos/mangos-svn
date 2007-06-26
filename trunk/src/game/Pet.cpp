@@ -106,7 +106,6 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     if(cinfo->type == CREATURE_TYPE_CRITTER)
     {
         AIM_Initialize();
-        AddToWorld();
         MapManager::Instance().GetMap(owner->GetMapId(), owner)->Add((Creature*)this);
         return true;
     }
@@ -196,7 +195,6 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     ObjectAccessor::Instance().AddPet(this);
 
     AIM_Initialize();
-    AddToWorld();
     MapManager::Instance().GetMap(owner->GetMapId(), owner)->Add((Creature*)this);
     owner->SetPet(this);                                    // in DB stored only full controlled creature
     sLog.outDebug("New Pet has guid %u", GetGUIDLow());
