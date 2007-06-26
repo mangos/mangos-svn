@@ -75,11 +75,6 @@ LogTimestamp = 0
 # Default: 0
 LogFileLevel = 0
 
-# Packet logging for the worldserver
-# Default: 0 (false)
-#          1 (true)
-LogWorld = 1
-
 # Log filters
 # 0 (default) - include in log if log level permit, 1 - not include with any log level
 LogFilter_TransportMoves = 0
@@ -92,6 +87,10 @@ LogFilter_VisibilityChanges = 0
 # Default: "" - none colors
 #          "13 7 11 9" - for example :)
 LogColors = ""
+
+# Packet logging file for the worldserver.
+# Default: ""
+WorldLogFile = "world.log"
 
 # Log file of DB errors detected at server run.
 # Default: ""

@@ -33,9 +33,18 @@ INSTANTIATE_CLASS_MUTEX(WorldLog, ZThread::FastMutex);
 /// Open the log file (if specified so in the configuration file)
 void WorldLog::Initialize()
 {
-    if( sConfig.GetBoolDefault("LogWorld", false) )
+    std::string logsDir = sConfig.GetStringDefault("LogsDir","");
+
+    if(!logsDir.empty())
     {
-        i_file = fopen(WORLD_LOG_FILE_STRING, "w");
+        if((logsDir.at(logsDir.length()-1)!='/') && (logsDir.at(logsDir.length()-1)!='\\'))
+            logsDir.append("/");
+    }
+
+    std::string logname = sConfig.GetStringDefault("WorldLogFile", "");
+    if(logname!="")
+    {
+        i_file = fopen((logsDir+logname).c_str(), "w");
     }
 }
 
