@@ -83,7 +83,6 @@ class Transport : public GameObject
             float x;
             float y;
             float z;
-            float o;
             bool teleport;
         };
 

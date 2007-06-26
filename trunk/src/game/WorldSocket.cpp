@@ -396,8 +396,9 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     // don't must harm anyone (let login ~100 accounts in 1 sec ;) )
     #ifdef WIN32
     Sleep(10);
-    #endif
+    #else
     ZThread::Thread::sleep(10);
+    #endif
 
     ///- Create and send the Addon packet
     if(sAddOnHandler.BuildAddonPacket(&recvPacket, &SendAddonPacked, recvPacket.rpos()))
