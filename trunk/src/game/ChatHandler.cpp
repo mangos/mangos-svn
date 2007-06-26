@@ -123,7 +123,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             normalizePlayerName(to);
             Player *player = objmgr.GetPlayer(to.c_str());
             uint32 tSecurity = GetSecurity();
-            uint32 pSecurity = player->GetSession()->GetSecurity();
+            uint32 pSecurity = player ? player->GetSession()->GetSecurity() : 0;
             if(!player || tSecurity == SEC_PLAYER && pSecurity > SEC_PLAYER && !player->isAcceptWhispers())
             {
                 WorldPacket data(SMSG_CHAT_PLAYER_NOT_FOUND, (to.size()+1));
