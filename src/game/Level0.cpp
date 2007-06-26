@@ -318,19 +318,12 @@ bool ChatHandler::HandlePasswordCommand(const char* args)
     loginDatabase.escape_string(password_new_c);
     QueryResult *result = loginDatabase.PQuery("SELECT 1 FROM `account` WHERE `id`='%d' AND `I`=SHA1(CONCAT(UPPER(`username`),':',UPPER('%s')))", m_session->GetAccountId(), password_old.c_str());
     if(!result || password_new != password_new_c)
-    {
         SendSysMessage(LANG_COMMAND_WRONGOLDPASSWORD);
-    }
-    else
-    {
-        delete result;
+    else if(accmgr.ChangePassword(m_session->GetAccountId(), password_new) == 0)
+        SendSysMessage(LANG_COMMAND_PASSWORD);
 
-        if(accmgr.ChangePassword(m_session->GetAccountId(), password_new) == 0)
-        {
-            SendSysMessage(LANG_COMMAND_PASSWORD);
-            return true;
-        }
-    }
+    if(result)
+        delete result;
 
     return true;
 }

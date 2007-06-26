@@ -147,7 +147,7 @@ void RASocket::OnRead()
                     loginDatabase.escape_string(login);
                     // No SQL injection (escaped login)
 
-                    QueryResult* result = loginDatabase.PQuery("SELECT `I`,`gmlevel` FROM `account` WHERE UPPER(`username`) = UPPER('%s')",login.c_str());
+                    QueryResult* result = loginDatabase.PQuery("SELECT `gmlevel` FROM `account` WHERE UPPER(`username`) = UPPER('%s')",login.c_str());
 
                     ///- If the user is not found, deny access
                     if(!result)
@@ -163,7 +163,7 @@ void RASocket::OnRead()
                         //szPass=fields[0].GetString();
 
                         ///- if gmlevel is too low, deny access
-                        if(fields[1].GetUInt32()<iMinLevel)
+                        if(fields[0].GetUInt32()<iMinLevel)
                         {
                             Sendf("-Not enough privileges.\r\n");
                             sLog.outRALog("User %s has no privilege.\n",szLogin.c_str());
@@ -185,7 +185,7 @@ void RASocket::OnRead()
                     std::string pw = &buff[5];
                     loginDatabase.escape_string(login);
                     loginDatabase.escape_string(pw);
-                    QueryResult *check = loginDatabase.PQuery("SELECT 1 FROM `account` WHERE UPPER(`username`)=LOWER('%s') AND `I`=SHA1(CONCAT(UPPER(`username`),':',UPPER('%s')))", login.c_str(), pw.c_str());
+                    QueryResult *check = loginDatabase.PQuery("SELECT 1 FROM `account` WHERE UPPER(`username`)=UPPER'%s') AND `I`=SHA1(CONCAT(UPPER(`username`),':',UPPER('%s')))", login.c_str(), pw.c_str());
                     if(check)
                     {
                         delete check;
