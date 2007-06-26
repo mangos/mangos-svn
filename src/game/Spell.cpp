@@ -2541,7 +2541,7 @@ uint8 Spell::CheckItems()
 
         focusObject = ok;
 
-        if(!m_targets.getGOTarget())
+        if(m_targets.IsEmpty())
             m_targets.setGOTarget(ok);
 
         // game object found in range

@@ -1206,7 +1206,6 @@ void Spell::EffectPersistentAA(uint32 i)
     dynObj->SetUInt32Value(GAMEOBJECT_DISPLAYID, 368003);
     dynObj->SetUInt32Value(DYNAMICOBJECT_BYTES, 0x01eeeeee);
     m_caster->AddDynObject(dynObj);
-    dynObj->AddToWorld();
     MapManager::Instance().GetMap(dynObj->GetMapId(), dynObj)->Add(dynObj);
 }
 
@@ -1532,7 +1531,6 @@ void Spell::EffectSummon(uint32 i)
     spawnCreature->SetName( name );
 
     ObjectAccessor::Instance().AddPet(spawnCreature);
-    spawnCreature->AddToWorld();
     MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster)->Add((Creature*)spawnCreature);
 
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -1643,7 +1641,6 @@ void Spell::EffectAddFarsight(uint32 i)
     dynObj->SetUInt32Value(OBJECT_FIELD_TYPE, 65);
     dynObj->SetUInt32Value(DYNAMICOBJECT_BYTES, 0x80000002);
     m_caster->AddDynObject(dynObj);
-    dynObj->AddToWorld();
     MapManager::Instance().GetMap(dynObj->GetMapId(), dynObj)->Add(dynObj);
     m_caster->SetUInt64Value(PLAYER_FARSIGHT, dynObj->GetGUID());
 }
@@ -1742,7 +1739,6 @@ void Spell::EffectSummonWild(uint32 i)
         */
 
         ObjectAccessor::Instance().AddPet(spawnCreature);
-        spawnCreature->AddToWorld();
         MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster)->Add((Creature*)spawnCreature);
         /*
                 guardians and wilds can't be controlled
@@ -1949,7 +1945,6 @@ void Spell::EffectTameCreature(uint32 i)
         pet->AIM_Initialize();
 
         ObjectAccessor::Instance().AddPet(pet);
-        pet->AddToWorld();
         MapManager::Instance().GetMap(pet->GetMapId(), pet)->Add((Creature*)pet);
 
         creatureTarget->setDeathState(JUST_DIED);
@@ -2095,7 +2090,6 @@ void Spell::EffectSummonPet(uint32 i)
         NewSummon->AIM_Initialize();
 
         ObjectAccessor::Instance().AddPet(NewSummon);
-        NewSummon->AddToWorld();
         MapManager::Instance().GetMap(NewSummon->GetMapId(), NewSummon)->Add((Creature*)NewSummon);
 
         m_caster->SetPet(NewSummon);
@@ -2362,7 +2356,6 @@ void Spell::EffectSummonObjectWild(uint32 i)
 
     if(pGameObj->GetGoType() != GAMEOBJECT_TYPE_FLAGDROP)   // make dropped flag clickable for other players (not set owner guid (created by) for this)...
         m_caster->AddGameObject(pGameObj);
-    pGameObj->AddToWorld();
     MapManager::Instance().GetMap(pGameObj->GetMapId(), pGameObj)->Add(pGameObj);
 }
 
@@ -2522,7 +2515,6 @@ void Spell::EffectDuel(uint32 i)
     pGameObj->SetSpellId(m_spellInfo->Id);
 
     m_caster->AddGameObject(pGameObj);
-    pGameObj->AddToWorld();
     MapManager::Instance().GetMap(pGameObj->GetMapId(), pGameObj)->Add(pGameObj);
     //END
 
@@ -2808,7 +2800,6 @@ void Spell::EffectSummonObject(uint32 i)
     pGameObj->SetLootState(GO_CLOSED);
     m_caster->AddGameObject(pGameObj);
 
-    pGameObj->AddToWorld();
     MapManager::Instance().GetMap(pGameObj->GetMapId(), pGameObj)->Add(pGameObj);
     WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM, 8);
     data << pGameObj->GetGUID();
@@ -3057,7 +3048,6 @@ void Spell::EffectSummonCritter(uint32 i)
         //m_caster->SetPet(critter);
 
         ObjectAccessor::Instance().AddPet(critter);
-        critter->AddToWorld();
         MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster)->Add((Creature*)critter);
     }
 }
@@ -3267,7 +3257,6 @@ void Spell::EffectTransmitted(uint32 i)
     //m_caster->AddGameObject(pGameObj);
     //m_ObjToDel.push_back(pGameObj);
 
-    pGameObj->AddToWorld();
     MapManager::Instance().GetMap(cMap, pGameObj)->Add(pGameObj);
 
     WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM, 8);

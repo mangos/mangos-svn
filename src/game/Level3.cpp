@@ -1952,7 +1952,6 @@ bool ChatHandler::HandleObjectCommand(const char* args)
     if(strcmp(safe,"true") == 0)
         pGameObj->SaveToDB();
 
-    pGameObj->AddToWorld();
     MapManager::Instance().GetMap(pGameObj->GetMapId(), pGameObj)->Add(pGameObj);
 
     return true;
@@ -2088,7 +2087,6 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
     }
 
     pGameObj->SaveToDB();
-    pGameObj->AddToWorld();
     MapManager::Instance().GetMap(pGameObj->GetMapId(), pGameObj)->Add(pGameObj);
 
     PSendSysMessage(LANG_GAMEOBJECT_ADD,id,goI->name,x,y,z);

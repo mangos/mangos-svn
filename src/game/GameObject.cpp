@@ -343,7 +343,6 @@ void GameObject::Delete()
 
     SendDestroyObject(GetGUID());
     //TODO: set timestamp
-    RemoveFromWorld();
     ObjectAccessor::Instance().AddObjectToRemoveList(this);
 }
 

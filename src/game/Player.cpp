@@ -3076,7 +3076,6 @@ void Player::BuildPlayerRepop()
     if(corpse)
     {
         corpse->SetInstanceId(this->GetInstanceId());
-        corpse->AddToWorld();
         MapManager::Instance().GetMap(corpse->GetMapId(), this)->Add(corpse);
     }
 

@@ -116,7 +116,6 @@ void DynamicObject::Delete()
     SendObjectDeSpawnAnim(GetGUID());
     SendDestroyObject(GetGUID());
 
-    RemoveFromWorld();
     ObjectAccessor::Instance().AddObjectToRemoveList(this);
 }
 

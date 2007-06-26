@@ -198,6 +198,8 @@ class SpellCastTargets
         GameObject *getGOTarget() const { return m_GOTarget; }
         void setGOTarget(GameObject *target);
 
+        bool IsEmpty() const { return m_GOTargetGUID==0 && m_unitTargetGUID==0 && m_itemTarget==0; }
+
         void Update(Unit* caster);
 
         Item *m_itemTarget;

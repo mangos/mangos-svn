@@ -99,11 +99,10 @@ void Corpse::DeleteBonesFromWorld()
     if (!corpse)
     {
         sLog.outError("Bones %u not found in world.", GetGUIDLow());
+        return;
     }
-    else
-        ObjectAccessor::Instance().AddObjectToRemoveList(this);
 
-    RemoveFromWorld();
+    ObjectAccessor::Instance().AddObjectToRemoveList(this);
 }
 
 void Corpse::DeleteFromDB(bool inner_transaction)
