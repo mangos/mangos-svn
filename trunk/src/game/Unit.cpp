@@ -958,7 +958,6 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             data << (uint32)0;                  // ?
             break;
         case SPELL_AURA_PERIODIC_MANA_LEECH:    //0x40
-            data << spellProto->powerType;
             data << (uint32)mod->m_amount;
             data << (float)0.0;                 // ?
             break;
