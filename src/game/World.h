@@ -43,7 +43,8 @@ enum WorldTimers
     WUPDATE_SESSIONS = 1,
     WUPDATE_AUCTIONS = 2,
     WUPDATE_WEATHERS = 3,
-    WUPDATE_COUNT = 4
+    WUPDATE_UPTIME = 4,
+    WUPDATE_COUNT = 5
 };
 
 /// Configuration elements
