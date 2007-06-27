@@ -258,6 +258,8 @@
 #define LANG_COMMAND_GOCREATNOTFOUND     "Creature not found!"
 #define LANG_COMMAND_GOCREATMULTIPLE     "Warning: Mob found more than 1 time - you will be ported to the first one found inside DB."
 #define LANG_COMMAND_DELCREATMESSAGE     "Creature Removed"
+#define LANG_COMMAND_CREATUREMOVED       "Creature moved."
+#define LANG_COMMAND_CREATUREATSAMEMAP   "Creature (GUID:%u) must be at same map with player!"
 #define LANG_COMMAND_OBJNOTFOUND         "Game Object (GUID: %u) not found"
 #define LANG_COMMAND_DELOBJREFERCREATURE "Game Object (GUID: %u) has references in not found creature %u GO list, can't be deleted."
 #define LANG_COMMAND_DELOBJMESSAGE       "Game Object (GUID: %u) removed"

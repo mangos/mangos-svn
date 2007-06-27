@@ -772,6 +772,7 @@ INSERT INTO `command` VALUES
 ('modify swim',1,'Syntax: .modify swim #rate\r\n\r\nModify the swim speed of the selected player to \"normal swim speed\"*rate. If no player is selected, modify your speed.\r\n\r\n #rate may range from 0.1 to 10.'),
 ('money',1,'Syntax:\r\n.modify money #money\r\n.money #money\r\n\r\nAdd or remove money to the selected player. If no player is selected, modify your money.\r\n\r\n #gold can be negative to remove money.'),
 ('morph',3,'Syntax: .morph #displayid\r\n\r\nChange your current model id to #displayid.'),
+('movecreature',2,'Syntax: .movecreature [#creature_guid]\r\n\r\nMove the targeted creature spawn point to your coordinates.'),
 ('moveobject',2,'Syntax: .moveobject #goguid [#x #y #z]\r\n\r\nMove gameobject #goguid to character coordinates (or to (#x,#y,#z) coordinates if its provide).'),
 ('mute',1,'Syntax: .mute $playerName $timeInMinutes\r\n\r\nDisible chat messaging for any character from account of character $playerName at $timeInMinutes minutes.'),
 ('unmute',1,'Syntax: .unmute $playerName\r\n\r\nRestore chat messaging for any character from account of character $playerName.'),
