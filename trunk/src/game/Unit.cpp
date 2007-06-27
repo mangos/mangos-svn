@@ -74,6 +74,7 @@ Unit::Unit( WorldObject *instantiator ) : WorldObject( instantiator )
     m_currentMeleeSpell = NULL;
     m_addDmgOnce = 0;
     m_TotemSlot[0] = m_TotemSlot[1] = m_TotemSlot[2] = m_TotemSlot[3]  = 0;
+    m_ObjectSlot[0] = m_ObjectSlot[1] = m_ObjectSlot[2] = m_ObjectSlot[3] = 0;
     //m_Aura = NULL;
     //m_AurasCheck = 2000;
     //m_removeAuraTimer = 4;
@@ -108,6 +109,8 @@ Unit::Unit( WorldObject *instantiator ) : WorldObject( instantiator )
     m_isSorted = true;
     for (int i = 0; i < MAX_MOVE_TYPE; ++i)
         m_speed_rate[i] = 1.0f;
+
+    m_removedAuras = 0;
 }
 
 Unit::~Unit()
