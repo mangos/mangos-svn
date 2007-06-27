@@ -55,6 +55,21 @@ class MANGOS_DLL_DECL FlightMaster : public MaNGOS::Singleton<FlightMaster, MaNG
             i_flights[pl] = gen;
         }
 
+        /** RemoveFromFlight removes a certain player from the flight map.
+         * Should be called when the player is logging out  
+         */
+        inline bool RemoveFromFlight(Player *pl)
+        {
+            Guard guard(*this);
+            if(!pl) return false;
+            DEBUG_LOG("Removing player %s flight from flight master.", pl->GetName());
+            FlightMapType::iterator iter = i_flights.find(pl);
+            if (iter == i_flights.end()) return false;
+            delete iter->second;
+            i_flights.erase(iter);
+            return true;
+        }
+
         /** FlightReportUpdate updates each flight and if the flight has arrived
          * to its destination, it will report to its player that the flight has
          * finish and the flight path will be remove.
@@ -64,15 +79,7 @@ class MANGOS_DLL_DECL FlightMaster : public MaNGOS::Singleton<FlightMaster, MaNG
             Guard guard(*this);
             for(FlightMapType::iterator iter=i_flights.begin(); iter != i_flights.end();)
             {
-                //DEBUG_LOG("id=%d IsInWorld=%d", iter->first,iter->first->IsInWorld());
-                if( iter->first->IsInWorld() != 1 )
-                {
-                    // do not use any func like "getname()" if player is offline, or it crash server
-                    DEBUG_LOG("Removing player id=%d flight from flight master. (player offline)", iter->first);
-                    delete iter->second;
-                    i_flights.erase(iter++);
-                }
-                else if( iter->second->CheckFlight(diff) )
+                if( iter->second->CheckFlight(diff) )
                 {
                     DEBUG_LOG("Removing player %s flight from flight master.", iter->first->GetName());
                     delete iter->second;
