@@ -428,7 +428,7 @@
 #define LANG_GAMEOBJECT_DETAIL           "Selected object:\n%s\nGUID: %u ID: %u\nX: %f Y: %f Z: %f MapId: %u\nOrientation: %f"
 #define LANG_GAMEOBJECT_ADD              ">> Add Game Object '%i' (%s) added at '%f %f %f'."
 
-#define LANG_NPCINFO_CHAR                "Player selected NPC\nGUID: %u.\nFaction: %u.\nnpcFlags: %u.\nEntry: %u.\nSkinID: %u..\nSkinID: %u."
+#define LANG_NPCINFO_CHAR                "Player selected NPC\nGUID: %u.\nFaction: %u.\nnpcFlags: %u.\nEntry: %u.\nModel ID: %u..\nSkinID: %u."
 #define LANG_NPCINFO_LEVEL               "Level: %u."
 #define LANG_NPCINFO_HEALTH              "Health (base): %u. (max): %u. (current): %u."
 #define LANG_NPCINFO_FLAGS               "Field Flags: %u.\nDynamic Flags: %u.\nFaction Template: %u."
