@@ -640,10 +640,14 @@ void PersistentAreaAura::Update(uint32 diff)
     else
         remove = true;
 
+    Unit *tmp_target = m_target;
+
+    // WARNING: the aura may get deleted during the update
+    // DO NOT access its members after update!
     Aura::Update(diff);
 
     if(remove)
-        m_target->RemoveAura(GetId(), GetEffIndex());
+        tmp_target->RemoveAura(GetId(), GetEffIndex());
 }
 
 void Aura::ApplyModifier(bool apply, bool Real)
