@@ -11321,6 +11321,16 @@ CREATE TABLE `transports` (
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Transports';
 
+
+DROP TABLE IF EXISTS `uptime`;
+CREATE TABLE `uptime` (
+  `starttime` bigint(11) unsigned NOT NULL default '0',
+  `startstring` varchar(64) NOT NULL default '',
+  `uptime` bigint(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`starttime`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Uptime system';
+
+
 --
 -- Dumping data for table `transports`
 --
@@ -11339,4 +11349,6 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
+
 -- Dump completed on 2007-05-15  6:46:42
+

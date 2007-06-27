@@ -425,7 +425,7 @@ void World::SetInitialWorldSettings()
         ||!MapManager::ExistMAP(1, 10311.3, 832.463)
         ||!MapManager::ExistMAP(1,-2917.58,-257.98)
         ||m_configs[CONFIG_EXPANSION] && (
-            !MapManager::ExistMAP(530,10349.6,-6357.29) || !MapManager::ExistMAP(530,-3961.64,-13931.2) ) )
+        !MapManager::ExistMAP(530,10349.6,-6357.29) || !MapManager::ExistMAP(530,-3961.64,-13931.2) ) )
     {
         sLog.outError("Correct *.map files not found in path '%smaps'. Please place *.map files in the directory pointed by this path or correct the DataDir value in the mangosd.conf file.",m_dataPath.c_str());
         exit(1);
@@ -575,13 +575,25 @@ void World::SetInitialWorldSettings()
         exit(1);
 
     ///- Initialize game time and timers
+    sLog.outString( "DEBUG:: Initialize game time and timers" );
     m_gameTime = time(NULL);
     m_startTime=m_gameTime;
+
+    tm local;
+    time_t curr;
+    time(&curr);
+    local=*(localtime(&curr));                              // dereference and assign
+    char isoDate[128];
+    sprintf( isoDate, "%04d-%02d-%02d %02d:%02d:%02d",
+        local.tm_year+1900, local.tm_mon+1, local.tm_mday, local.tm_hour, local.tm_min, local.tm_sec);
+
+    sDatabase.PExecute("insert into `uptime` (`startstring`, `starttime`, `uptime`) VALUES('%s', %ld, 0)", isoDate, m_startTime );
 
     m_timers[WUPDATE_OBJECTS].SetInterval(0);
     m_timers[WUPDATE_SESSIONS].SetInterval(0);
     m_timers[WUPDATE_WEATHERS].SetInterval(1000);
     m_timers[WUPDATE_AUCTIONS].SetInterval(60000);          //set auction update interval to 1 minute
+    m_timers[WUPDATE_UPTIME].SetInterval(10*60000);         //Update "uptime" table every 10 minutes
 
     //to set mailtimer to return mails every day between 4 and 5 am
     //mailtimer is increased when updating auctions
@@ -626,7 +638,7 @@ void World::DetectDBCLang()
     m_langid = sConfig.GetIntDefault("DBC.Locale", 8);
 
     ChrRacesEntry const* race = sChrRacesStore.LookupEntry(1);
-    
+
     if (m_langid < 8)
     {
         if ( strlen(race->name[m_langid]) > 0)
@@ -746,12 +758,21 @@ void World::Update(time_t diff)
             next++;
 
             ///- and remove Weather objects for zones with no player
-            if(!itr->second->Update(m_timers[WUPDATE_WEATHERS].GetInterval())) //As interval > WorldTick
+                                                            //As interval > WorldTick
+            if(!itr->second->Update(m_timers[WUPDATE_WEATHERS].GetInterval()))
             {
                 delete itr->second;
                 m_weathers.erase(itr);
             }
         }
+    }
+    /// <li> Update uptime table
+    if (m_timers[WUPDATE_UPTIME].Passed())
+    {
+        uint32 tmpDiff = (m_gameTime - m_startTime);
+
+        m_timers[WUPDATE_UPTIME].Reset();
+        sDatabase.PExecute("update `uptime` set `uptime` = %d where `starttime` = %ld", tmpDiff, m_startTime);
     }
 
     /// <li> Handle all other objects
@@ -759,7 +780,7 @@ void World::Update(time_t diff)
     {
         m_timers[WUPDATE_OBJECTS].Reset();
         ///- Update objects when the timer has passed (maps, transport, creatures,...)
-        MapManager::Instance().Update(diff); // As interval = 0
+        MapManager::Instance().Update(diff);                // As interval = 0
 
         ///- Process necessary scripts
         if (!scriptSchedule.empty())
@@ -1008,7 +1029,7 @@ void World::SendZoneMessage(uint32 zone, WorldPacket *packet, WorldSession *self
 }
 
 /// Send a System Message to all players in the zone (except self if mentioned)
-void World::SendZoneText(uint32 zone, const char* text, WorldSession *self, uint32 team) 
+void World::SendZoneText(uint32 zone, const char* text, WorldSession *self, uint32 team)
 {
     WorldPacket data;
     sChatHandler.FillSystemMessageData(&data, 0, text);
@@ -1269,7 +1290,7 @@ void World::UpdateSessions( time_t diff )
             continue;
 
         ///- and remove not active sessions from the list
-        if(!itr->second->Update(diff))  // As interval = 0
+        if(!itr->second->Update(diff))                      // As interval = 0
         {
             delete itr->second;
             m_sessions.erase(itr);
