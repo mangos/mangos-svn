@@ -33,7 +33,9 @@ enum SpellSpecific
     SPELL_STING = 4,
     SPELL_CURSE = 5,
     SPELL_ASPECT = 6,
-    SPELL_TRACKER = 7
+    SPELL_TRACKER = 7,
+    SPELL_WARLOCK_ARMOR = 8,
+    SPELL_MAGE_ARMOR = 9
 };
 
 enum SpellFamilyNames

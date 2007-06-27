@@ -422,24 +422,34 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
         if (IsSealSpell(spellId))
             return SPELL_SEAL;
 
+        if (spellInfo->SpellFamilyFlags & 268435456)
+            return SPELL_BLESSING;
+
         for (int i = 0; i < 3; i++)
         {
             // only paladin auras have this
             if (spellInfo->Effect[i] == 35)                 //SPELL_EFFECT_APPLY_AREA_AURA
                 return SPELL_AURA;
-            // only paladin blessings / greater blessings have this
-            /*if (spellInfo->EffectImplicitTargetA[i] == 21   //TARGET_S_F
-                ||spellInfo->EffectImplicitTargetA[i] == 57 //TARGET_S_F_2
-                ||spellInfo->EffectImplicitTargetA[i] == 61)//TARGET_AF_PC*/
-            if (spellInfo->SpellFamilyFlags & 268435456)
-                return SPELL_BLESSING;
         }
     }
 
-    // only warlock curses have this
     if(spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK)
+    {
+        // only warlock curses have this
         if (spellInfo->Dispel == 2)                         //IMMUNE_DISPEL_CURSE
             return SPELL_CURSE;
+
+        // family flag 37
+        if (spellInfo->SpellFamilyFlags & 137438953472)
+            return SPELL_WARLOCK_ARMOR;
+    }
+
+    if(spellInfo->SpellFamilyName == SPELLFAMILY_MAGE)
+    {
+        // family flags 18(Molten), 25(Frost/Ice), 28(Mage)
+        if (spellInfo->SpellFamilyFlags & 302252032)
+            return SPELL_MAGE_ARMOR;
+    }
 
     if(spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER)
     {
@@ -472,6 +482,8 @@ bool IsSpellSingleEffectPerCaster(uint32 spellId)
         case SPELL_CURSE:
         case SPELL_ASPECT:
         case SPELL_TRACKER:
+        case SPELL_WARLOCK_ARMOR:
+        case SPELL_MAGE_ARMOR:
             return true;
         default:
             return false;
