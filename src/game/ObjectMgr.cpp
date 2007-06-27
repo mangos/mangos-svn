@@ -2855,6 +2855,47 @@ void ObjectMgr::LoadGameobjectInfo()
     sLog.outString( "" );
 }
 
+void ObjectMgr::LoadExplorationBaseXP()
+{
+    uint32 count = 0;
+    QueryResult *result = sDatabase.Query("SELECT `level`,`basexp` FROM `exploration_basexp`");
+
+    if( !result )
+    {
+        barGoLink bar( 1 );
+
+        bar.step();
+
+        sLog.outString( "" );
+        sLog.outString( ">> Loaded %u BaseXP definitions", count );
+        return;
+    }
+
+    barGoLink bar( result->GetRowCount() );
+
+    do
+    {
+        bar.step();
+
+        Field *fields = result->Fetch();
+        uint32 level  = fields[0].GetUInt32();
+        uint32 basexp = fields[1].GetUInt32();
+        mBaseXPTable[level] = basexp;
+        ++count;
+    }
+    while (result->NextRow());
+
+    delete result;
+
+    sLog.outString( "" );
+    sLog.outString( ">> Loaded %u BaseXP definitions", count );
+}
+
+uint32 ObjectMgr::GetBaseXP(uint32 level)
+{
+    return mBaseXPTable[level] ? mBaseXPTable[level] : 0;
+}
+
 void ObjectMgr::LoadPetNames()
 {
     uint32 count = 0;

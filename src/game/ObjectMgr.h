@@ -405,6 +405,7 @@ class ObjectMgr
         void LoadAuctions();
         void LoadPlayerInfo();
         void LoadPetLevelInfo();
+        void LoadExplorationBaseXP();
         void LoadPetNames();
         void LoadCorpses();
 
@@ -413,6 +414,7 @@ class ObjectMgr
         void LoadWeatherZoneChances();
 
         std::string GeneratePetName(uint32 entry);
+        uint32 GetBaseXP(uint32 level);
 
         void ReturnOrDeleteOldMails(bool serverUp);
 
@@ -615,6 +617,9 @@ class ObjectMgr
 
         void BuildPlayerLevelInfo(uint8 race, uint8 class_, uint8 level, PlayerLevelInfo* plinfo) const;
         PlayerInfo **playerInfo;                            // [race][class]
+
+        typedef std::map<uint32,uint32> BaseXPMap;          // [area level][base xp]
+        BaseXPMap mBaseXPTable;
 
         typedef std::map<uint32,std::vector<std::string> > HalfNameMap;
         HalfNameMap PetHalfName0;

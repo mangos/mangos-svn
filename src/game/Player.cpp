@@ -4366,7 +4366,27 @@ void Player::CheckExploreSystem()
             }
             else
             {
-                uint32 XP = uint32(p->area_level*10*sWorld.getRate(RATE_XP_EXPLORE));
+                int32 diff = getLevel() - p->area_level;
+                uint32 XP = 0;
+                if (diff < -5)
+                {
+                    XP = uint32(objmgr.GetBaseXP(getLevel()+5)*sWorld.getRate(RATE_XP_EXPLORE));
+                }
+                else if (diff > 5)
+                {
+                    int32 exploration_percent = (100-((diff-5)*5));
+                    if (exploration_percent > 100)
+                        exploration_percent = 100;
+                    else if (exploration_percent < 0)
+                        exploration_percent = 0;
+
+                    XP = uint32(objmgr.GetBaseXP(p->area_level)*exploration_percent/100*sWorld.getRate(RATE_XP_EXPLORE));
+                }
+                else
+                {
+                    XP = uint32(objmgr.GetBaseXP(p->area_level)*sWorld.getRate(RATE_XP_EXPLORE));
+                }
+
                 GiveXP( XP, NULL );
                 SendExplorationExperience(area,XP);
             }
