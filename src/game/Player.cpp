@@ -9233,7 +9233,9 @@ void Player::TradeCancel(bool sendback)
 
         WorldSession* ws = pTrader->GetSession();
         pTrader = NULL;
-        ws->SendCancelTrade();
+
+        if(ws)
+            ws->SendCancelTrade();
     }
     ClearTrade();
 }
