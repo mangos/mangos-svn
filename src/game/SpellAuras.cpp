@@ -605,18 +605,22 @@ void AreaAura::Update(uint32 diff)
         }
     }
 
-    Aura::Update(diff);
-
     if(m_caster_guid != m_target->GetGUID())                // aura at non-caster
     {
+        Unit * tmp_target = m_target;
         Unit* caster = GetCaster();
-
         float radius =  GetRadius(sSpellRadiusStore.LookupEntry(GetSpellProto()->EffectRadiusIndex[m_effIndex]));
+        uint32 tmp_spellId = m_spellId, tmp_effIndex = m_effIndex;
+
+        // WARNING: the aura may get deleted during the update
+        // DO NOT access its members after update!
+        Aura::Update(diff);
 
         // remove aura if out-of-range from caster (after teleport for example)
-        if(!caster || !caster->IsWithinDistInMap(m_target, radius) )
-            m_target->RemoveAura(m_spellId, m_effIndex);
+        if(!caster || !caster->IsWithinDistInMap(tmp_target, radius) )
+            tmp_target->RemoveAura(tmp_spellId, tmp_effIndex);
     }
+    else Aura::Update(diff);
 }
 
 void PersistentAreaAura::Update(uint32 diff)
