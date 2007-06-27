@@ -308,6 +308,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void GetRespawnDist(float &d) const { d = m_respawnradius; }
 
         bool isPet() const { return m_isPet; }
+        void SetRespawnCoord(float x, float y, float z) { respawn_cord[0] = x; respawn_cord[1] = y; respawn_cord[2] = z; }
         bool isTotem() const { return m_isTotem; }
         bool isCivilian() const { return GetCreatureInfo()->civilian != 0; }
         bool isCanSwimOrFly() const { return GetCreatureInfo()->InhabitType & INHAVIT_WATER; }

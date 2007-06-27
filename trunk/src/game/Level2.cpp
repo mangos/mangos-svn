@@ -694,6 +694,76 @@ bool ChatHandler::HandleTurnObjectCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleMoveCreatureCommand(const char* args)
+{
+    uint32 lowguid = 0;
+    Creature* pCreature = NULL;
+
+    char* plowguid = strtok((char*)args, " ");
+
+    pCreature = getSelectedCreature();
+    if(!pCreature)
+    {
+        if(!plowguid)
+            return false;
+
+        uint32 lowguid = (uint32)atoi(plowguid);
+        if(lowguid)
+            pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(),MAKE_GUID(lowguid,HIGHGUID_UNIT));
+
+        // Attempting creature load from DB
+        if(!pCreature)
+        {
+            QueryResult *result = sDatabase.PQuery( "SELECT `guid`,`map` FROM `creature`,`map` WHERE `guid` = '%u'",lowguid);
+            if(!result)
+            {
+                PSendSysMessage(LANG_COMMAND_CREATGUIDNOTFOUND, lowguid);
+                return true;
+            }
+
+            Field* fields = result->Fetch();
+            lowguid = fields[0].GetUInt32();
+
+            uint32 map_id = fields[1].GetUInt32();
+            delete result;
+
+            if(m_session->GetPlayer()->GetMapId()!=map_id)
+            {
+                PSendSysMessage(LANG_COMMAND_CREATUREATSAMEMAP, lowguid);
+                return true;
+            }
+        }
+        else
+        {
+            lowguid = pCreature->GetDBTableGUIDLow();
+        }
+    }
+    else
+    {
+        lowguid = pCreature->GetDBTableGUIDLow();
+    }
+    float x, y, z, o;
+    x = m_session->GetPlayer()->GetPositionX();
+    y = m_session->GetPlayer()->GetPositionY();
+    z = m_session->GetPlayer()->GetPositionZ();
+    o = m_session->GetPlayer()->GetOrientation();
+    if (pCreature)
+    {
+        pCreature->SetRespawnCoord(x, y, z);
+        MapManager::Instance().GetMap(pCreature->GetMapId(),pCreature)->CreatureRelocation(pCreature,x, y, z,o);
+        (*pCreature)->Initialize();
+        if(pCreature->isAlive())                            // dead creature will reset movement generator at respawn
+        {
+            pCreature->setDeathState(JUST_DIED);
+            pCreature->Respawn();
+        }
+    }
+
+    sDatabase.PExecuteLog("UPDATE `creature` SET `spawn_position_x` = '%f', `spawn_position_y` = '%f', `spawn_position_z` = '%f', `spawn_orientation` = '%f',`position_x` = '%f', `position_y` = '%f', `position_z` = '%f', `orientation` = '%f' WHERE `guid` = '%u'", x, y, z, o, x, y, z, o, lowguid);
+    PSendSysMessage(LANG_COMMAND_CREATUREMOVED);
+    return true;
+}
+
 bool ChatHandler::HandleMoveObjectCommand(const char* args)
 {
     if(!*args)
@@ -722,11 +792,15 @@ bool ChatHandler::HandleMoveObjectCommand(const char* args)
     {
         Player *chr = m_session->GetPlayer();
 
-        obj->Relocate(chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(), obj->GetOrientation());
+        Map* map = MapManager::Instance().GetMap(obj->GetMapId(),obj);
+        map->Remove(obj,false);
 
+        obj->Relocate(chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(), obj->GetOrientation());
         obj->SetFloatValue(GAMEOBJECT_POS_X, chr->GetPositionX());
         obj->SetFloatValue(GAMEOBJECT_POS_Y, chr->GetPositionY());
         obj->SetFloatValue(GAMEOBJECT_POS_Z, chr->GetPositionZ());
+
+        map->Add(obj);
     }
     else
     {
@@ -743,11 +817,15 @@ bool ChatHandler::HandleMoveObjectCommand(const char* args)
             return true;
         }
 
-        obj->Relocate(x, y, z, obj->GetOrientation());
+        Map* map = MapManager::Instance().GetMap(obj->GetMapId(),obj);
+        map->Remove(obj,false);
 
+        obj->Relocate(x, y, z, obj->GetOrientation());
         obj->SetFloatValue(GAMEOBJECT_POS_X, x);
         obj->SetFloatValue(GAMEOBJECT_POS_Y, y);
         obj->SetFloatValue(GAMEOBJECT_POS_Z, z);
+
+        map->Add(obj);
     }
 
     obj->SaveToDB();

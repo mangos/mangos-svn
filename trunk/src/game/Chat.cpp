@@ -253,6 +253,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "targetobject",SEC_GAMEMASTER,    &ChatHandler::HandleTargetObjectCommand,     "",   NULL },
         { "delobject",   SEC_GAMEMASTER,    &ChatHandler::HandleDelObjectCommand,        "",   NULL },
         { "turnobject",  SEC_GAMEMASTER,    &ChatHandler::HandleTurnObjectCommand,       "",   NULL },
+        { "movecreature",SEC_GAMEMASTER,    &ChatHandler::HandleMoveCreatureCommand,     "",   NULL },
         { "moveobject",  SEC_GAMEMASTER,    &ChatHandler::HandleMoveObjectCommand,       "",   NULL },
         { "idleshutdown",SEC_ADMINISTRATOR, &ChatHandler::HandleIdleShutDownCommand,     "",   NULL },
         { "shutdown",    SEC_ADMINISTRATOR, &ChatHandler::HandleShutDownCommand,         "",   NULL },

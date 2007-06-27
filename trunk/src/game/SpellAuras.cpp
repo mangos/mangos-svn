@@ -483,7 +483,7 @@ void Aura::Update(uint32 diff)
                 {
                     m_target->SendMonsterMove(x,y,z,0,true,diff);
                     if(m_target->GetTypeId() != TYPEID_PLAYER)
-                        m_target->Relocate(x,y,z,m_target->GetOrientation());
+                        MapManager::Instance().GetMap(m_target->GetMapId(), m_target)->CreatureRelocation((Creature*)m_target,x,y,z,m_target->GetOrientation());
                 }
             }
         }
