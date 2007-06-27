@@ -526,6 +526,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading player Create Info & Level Stats..." );
     objmgr.LoadPlayerInfo();
 
+    sLog.outString( "Loading Exploration BaseXP Data..." );
+    objmgr.LoadExplorationBaseXP();
+
     sLog.outString( "Loading Pet Name Parts..." );
     objmgr.LoadPetNames();
 

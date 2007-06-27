@@ -342,6 +342,11 @@ pkgdata_DATA = \
 	3891_quest_scripts.sql \
 	3906_areatrigger_template.sql \
 	3929_spell_affect.sql \
+	3932_item_enchantment_template.sql \
+	3932_item_template.sql \
+	3939_realmd_account.sql \
+	3948_realmd_account.sql \
+	3951_exploration_basexp.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -662,4 +667,9 @@ EXTRA_DIST = \
 	3891_quest_scripts.sql \
 	3906_areatrigger_template.sql \
 	3929_spell_affect.sql \
+	3932_item_enchantment_template.sql \
+	3932_item_template.sql \
+	3939_realmd_account.sql \
+	3948_realmd_account.sql \
+	3951_exploration_basexp.sql \
 	README
