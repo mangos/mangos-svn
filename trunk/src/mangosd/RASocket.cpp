@@ -185,7 +185,7 @@ void RASocket::OnRead()
                     std::string pw = &buff[5];
                     loginDatabase.escape_string(login);
                     loginDatabase.escape_string(pw);
-                    QueryResult *check = loginDatabase.PQuery("SELECT 1 FROM `account` WHERE UPPER(`username`)=UPPER'%s') AND `I`=SHA1(CONCAT(UPPER(`username`),':',UPPER('%s')))", login.c_str(), pw.c_str());
+                    QueryResult *check = loginDatabase.PQuery("SELECT 1 FROM `account` WHERE UPPER(`username`)=UPPER('%s') AND `I`=SHA1(CONCAT(UPPER(`username`),':',UPPER('%s')))", login.c_str(), pw.c_str());
                     if(check)
                     {
                         delete check;
