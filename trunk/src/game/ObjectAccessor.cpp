@@ -140,6 +140,12 @@ ObjectAccessor::GetUnit(WorldObject const &u, uint64 guid)
     return GetCreature(u, guid);
 }
 
+CorpsePtr&
+ObjectAccessor::GetCorpse(WorldObject const &u, uint64 guid)
+{
+    return MapManager::Instance().GetMap(u.GetMapId(), &u)->GetObjectNear<Corpse>(u, guid);
+}
+
 Object* ObjectAccessor::GetObjectByTypeMask(Player const &p, uint64 guid, uint32 typemask)
 {
     Object *obj = NULL;

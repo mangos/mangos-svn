@@ -544,8 +544,13 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
     Spell *spell = new Spell(spellCaster, spellInfo, false, 0);
 
     SpellCastTargets targets;
+
+
     targets.setUnitTarget( spellTarget );
-    targets.setGOTarget( obj );
+
+    if(obj)
+        targets.setGOTarget( obj );
+
     spell->prepare(&targets);
 }
 

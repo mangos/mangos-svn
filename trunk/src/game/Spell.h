@@ -53,7 +53,8 @@ enum SpellCastTargetFlags
     TARGET_FLAG_DEST_LOCATION    = 0x0040,
     TARGET_FLAG_OBJECT           = 0x0800,
     TARGET_FLAG_TRADE_ITEM       = 0x1000,
-    TARGET_FLAG_STRING           = 0x2000
+    TARGET_FLAG_STRING           = 0x2000,
+    TARGET_FLAG_CORPSE           = 0x8000
 };
 
 enum Targets
@@ -172,8 +173,9 @@ class SpellCastTargets
             m_itemTarget = target.m_itemTarget;
             m_GOTarget   = target.m_GOTarget;
 
-            m_unitTargetGUID = target.m_unitTargetGUID;
-            m_GOTargetGUID   = target.m_GOTargetGUID;
+            m_unitTargetGUID   = target.m_unitTargetGUID;
+            m_GOTargetGUID     = target.m_GOTargetGUID;
+            m_CorpseTargetGUID = target.m_CorpseTargetGUID;
 
             m_srcX = target.m_srcX;
             m_srcY = target.m_srcY;
@@ -198,7 +200,9 @@ class SpellCastTargets
         GameObject *getGOTarget() const { return m_GOTarget; }
         void setGOTarget(GameObject *target);
 
-        bool IsEmpty() const { return m_GOTargetGUID==0 && m_unitTargetGUID==0 && m_itemTarget==0; }
+        uint64 getCorpseTargetGUID() const { return m_CorpseTargetGUID; }
+
+        bool IsEmpty() const { return m_GOTargetGUID==0 && m_unitTargetGUID==0 && m_itemTarget==0 && m_CorpseTargetGUID==0; }
 
         void Update(Unit* caster);
 
@@ -216,6 +220,7 @@ class SpellCastTargets
         // object GUID, can be used always
         uint64 m_unitTargetGUID;
         uint64 m_GOTargetGUID;
+        uint64 m_CorpseTargetGUID;
 };
 
 enum SpellState
@@ -532,7 +537,7 @@ class Spell
         void writeSpellGoTargets( WorldPacket * data );
         void writeAmmoToPacket( WorldPacket * data );
         void FillTargetMap();
-        void SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::list<Item*> &TagItemMap,std::list<GameObject*> &TagGOMap);
+        void SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap);
 
         void SendCastResult(uint8 result);
         void SendSpellStart();

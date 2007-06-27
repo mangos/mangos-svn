@@ -65,6 +65,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         Player* GetPlayer(Unit const &, uint64 guid) { return FindPlayer(guid); }
         GameObject* GetGameObject(Unit const &, uint64);
         DynamicObject* GetDynamicObject(Unit const &, uint64);
+        CorpsePtr& GetCorpse(WorldObject const &u, uint64 guid);
 
         Player* FindPlayer(uint64);
         Player* FindPlayerByName(const char *name) ;
