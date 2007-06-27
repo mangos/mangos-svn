@@ -63,8 +63,9 @@ SpellCastTargets::SpellCastTargets()
     m_itemTarget = NULL;
     m_GOTarget   = NULL;
 
-    m_unitTargetGUID = 0;
-    m_GOTargetGUID   = 0;
+    m_unitTargetGUID   = 0;
+    m_GOTargetGUID     = 0;
+    m_CorpseTargetGUID = 0;
 
     m_srcX = m_srcY = m_srcZ = m_destX = m_destY = m_destZ = 0;
     m_strTarget = "";
@@ -145,10 +146,9 @@ void SpellCastTargets::read ( WorldPacket * data,Unit *caster )
 
     if(m_targetMask & TARGET_FLAG_STRING)
         *data >> m_strTarget;
-    if(m_targetMask & 0x8000)
-    {
-        //0x8000 TARGET_CORPSE NEED TO ADD
-    }
+
+    if(m_targetMask & TARGET_FLAG_CORPSE)
+        m_CorpseTargetGUID = readGUID(*data);
 
     // find real units/GOs
     Update(caster);
@@ -188,10 +188,9 @@ void SpellCastTargets::write ( WorldPacket * data, bool forceAppend)
 
     if(m_targetMask & TARGET_FLAG_STRING)
         *data << m_strTarget;
-    if(m_targetMask & 0x8000)
-    {
-        //0x8000 TARGET_CORPSE NEED TO ADD
-    }
+
+    if(m_targetMask & TARGET_FLAG_CORPSE)
+        data->appendPackGUID(m_CorpseTargetGUID);
 
     if(forceAppend && data->size() == len)
         *data << (uint8)0;
@@ -288,14 +287,16 @@ void Spell::FillTargetMap()
 {
     // TODO: ADD the correct target FILLS!!!!!!
 
-    std::list<Unit*> tmpUnitMap;
-    std::list<Item*> tmpItemMap;
-    std::list<GameObject*> tmpGOMap;
-
     for(uint32 i=0;i<3;i++)
     {
-        SetTargetMap(i,m_spellInfo->EffectImplicitTargetA[i],tmpUnitMap,tmpItemMap,tmpGOMap);
-        SetTargetMap(i,m_spellInfo->EffectImplicitTargetB[i],tmpUnitMap,tmpItemMap,tmpGOMap);
+        m_targetGameobjectGUIDs[i].clear();
+        m_targetUnitGUIDs[i].clear();
+        m_targetItems[i].clear();
+
+        std::list<Unit*> tmpUnitMap;
+
+        SetTargetMap(i,m_spellInfo->EffectImplicitTargetA[i],tmpUnitMap);
+        SetTargetMap(i,m_spellInfo->EffectImplicitTargetB[i],tmpUnitMap);
 
         if( (m_spellInfo->EffectImplicitTargetA[i]==0 || m_spellInfo->EffectImplicitTargetA[i]==18) && 
             (m_spellInfo->EffectImplicitTargetB[i]==0 || m_spellInfo->EffectImplicitTargetB[i]==18) )
@@ -309,7 +310,6 @@ void Spell::FillTargetMap()
                 case SPELL_EFFECT_LEARN_SPELL:
                 case SPELL_EFFECT_SKILL_STEP:
                 case SPELL_EFFECT_SELF_RESURRECT:
-                case SPELL_EFFECT_RESURRECT_NEW:
                 case SPELL_EFFECT_PROFICIENCY:
                 case SPELL_EFFECT_PARRY:
                 case SPELL_EFFECT_DUMMY:
@@ -317,6 +317,20 @@ void Spell::FillTargetMap()
                 case SPELL_EFFECT_SUMMON_PLAYER:
                     if(m_targets.getUnitTarget())
                         tmpUnitMap.push_back(m_targets.getUnitTarget());
+                    break;
+                case SPELL_EFFECT_RESURRECT_NEW:
+                    if(m_targets.getUnitTarget())
+                        tmpUnitMap.push_back(m_targets.getUnitTarget());
+                    if(m_targets.getCorpseTargetGUID())
+                    {
+                        CorpsePtr& corpse = ObjectAccessor::Instance().GetCorpse(*m_caster,m_targets.getCorpseTargetGUID());
+                        if(corpse)
+                        {
+                            Player* owner = ObjectAccessor::Instance().FindPlayer(corpse->GetOwnerGUID());
+                            if(owner)
+                                tmpUnitMap.push_back(owner);
+                        }
+                    }
                     break;
                 case SPELL_EFFECT_SKILL:
                 case SPELL_EFFECT_SUMMON_CHANGE_ITEM:
@@ -337,11 +351,11 @@ void Spell::FillTargetMap()
                 case SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY:
                 case SPELL_EFFECT_ENCHANT_HELD_ITEM:
                     if(m_targets.m_itemTarget)
-                        tmpItemMap.push_back(m_targets.m_itemTarget);
+                        m_targetItems[i].push_back(m_targets.m_itemTarget);
                     break;
                 case SPELL_EFFECT_APPLY_AREA_AURA:
                     if(m_spellInfo->Attributes == 0x9050000)// AreaAura
-                        SetTargetMap(i,TARGET_AREAEFFECT_PARTY,tmpUnitMap,tmpItemMap,tmpGOMap);
+                        SetTargetMap(i,TARGET_AREAEFFECT_PARTY,tmpUnitMap);
                     break;
                 default:
                     break;
@@ -375,19 +389,8 @@ void Spell::FillTargetMap()
                 ++itr;
         }
 
-        m_targetUnitGUIDs[i].clear();
         for(std::list<Unit*>::iterator iunit= tmpUnitMap.begin();iunit != tmpUnitMap.end();++iunit)
             m_targetUnitGUIDs[i].push_back((*iunit)->GetGUID());
-
-        m_targetItems[i] = tmpItemMap;
-
-        m_targetGameobjectGUIDs[i].clear();
-        for(std::list<GameObject*>::iterator igo= tmpGOMap.begin();igo != tmpGOMap.end();++igo)
-            m_targetGameobjectGUIDs[i].push_back((*igo)->GetGUID());
-
-        tmpUnitMap.clear();
-        tmpItemMap.clear();
-        tmpGOMap.clear();
     }
 }
 
@@ -446,7 +449,7 @@ struct TargetDistanceOrder : public binary_function<const Unit, const Unit, bool
     }
 };
 
-void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::list<Item*> &TagItemMap,std::list<GameObject*> &TagGOMap)
+void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
 {
     float radius;
     if (m_spellInfo->EffectRadiusIndex[i])
@@ -593,7 +596,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         case TARGET_GAMEOBJECT:
         {
             if(m_targets.getGOTarget())
-                TagGOMap.push_back(m_targets.getGOTarget());
+                m_targetGameobjectGUIDs[i].push_back(m_targets.getGOTargetGUID());
         }break;
         case TARGET_IN_FRONT_OF_CASTER:
         {
@@ -618,10 +621,10 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap,std::l
         }break;
         case TARGET_GAMEOBJECT_ITEM:
         {
-            if(m_targets.getGOTarget())
-                TagGOMap.push_back(m_targets.getGOTarget());
+            if(m_targets.getGOTargetGUID())
+                m_targetGameobjectGUIDs[i].push_back(m_targets.getGOTargetGUID());
             else if(m_targets.m_itemTarget)
-                TagItemMap.push_back(m_targets.m_itemTarget);
+                m_targetItems[i].push_back(m_targets.m_itemTarget);
         }break;
         case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
         {
