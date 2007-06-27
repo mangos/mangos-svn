@@ -938,13 +938,13 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
     data << uint32(spellProto->Id);
     data << uint32(1);
 
-    data << mod->m_auraname;
+    data << uint32(mod->m_auraname);
     switch(mod->m_auraname)
     {
         case SPELL_AURA_PERIODIC_DAMAGE:        //0x3
         case SPELL_AURA_PERIODIC_DAMAGE_PERCENT://0x59
             data << (uint32)mod->m_amount;
-            data << spellProto->School;
+            data << (uint32)spellProto->School;
             data << (uint32)0;                  // ?
             data << (uint32)0;                  // ?
             break;
@@ -958,6 +958,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             data << (uint32)0;                  // ?
             break;
         case SPELL_AURA_PERIODIC_MANA_LEECH:    //0x40
+            data << (uint32)spellProto->powerType;
             data << (uint32)mod->m_amount;
             data << (float)0.0;                 // ?
             break;
