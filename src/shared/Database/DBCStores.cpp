@@ -422,7 +422,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
         if (IsSealSpell(spellId))
             return SPELL_SEAL;
 
-        if (spellInfo->SpellFamilyFlags & 268435456)
+        if (spellInfo->SpellFamilyFlags & 0x10000000)
             return SPELL_BLESSING;
 
         for (int i = 0; i < 3; i++)
@@ -440,15 +440,23 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             return SPELL_CURSE;
 
         // family flag 37
-        if (spellInfo->SpellFamilyFlags & 137438953472LL)
+        if (spellInfo->SpellFamilyFlags & 0x2000000000LL)
             return SPELL_WARLOCK_ARMOR;
     }
 
     if(spellInfo->SpellFamilyName == SPELLFAMILY_MAGE)
     {
         // family flags 18(Molten), 25(Frost/Ice), 28(Mage)
-        if (spellInfo->SpellFamilyFlags & 302252032)
+        if (spellInfo->SpellFamilyFlags & 0x12040000)
             return SPELL_MAGE_ARMOR;
+    }
+
+    if(spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN)
+    {
+        // family flags 10 (Lightning), 42 (Earth)
+        // todo: add Water (has no SpellFamilyName/SpellFamilyFlag)
+        if (spellInfo->SpellFamilyFlags & 0x40000000400LL)
+            return SPELL_ELEMENTAL_SHIELD;
     }
 
     if(spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER)
@@ -484,6 +492,7 @@ bool IsSpellSingleEffectPerCaster(uint32 spellId)
         case SPELL_TRACKER:
         case SPELL_WARLOCK_ARMOR:
         case SPELL_MAGE_ARMOR:
+        case SPELL_ELEMENTAL_SHIELD:
             return true;
         default:
             return false;

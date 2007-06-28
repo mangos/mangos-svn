@@ -780,6 +780,40 @@ void Spell::EffectDummy(uint32 i)
 
         m_caster->CastSpell(unitTarget, spell, true, NULL);
     }
+
+    // Deep wound
+    if(m_spellInfo->Id == 12162 || m_spellInfo->Id == 12850 || m_spellInfo->Id == 12868)
+    {
+        uint8 slot;
+        if (m_caster->haveOffhandWeapon() && m_caster->getAttackTimer(BASE_ATTACK) > m_caster->getAttackTimer(OFF_ATTACK))
+            slot = EQUIPMENT_SLOT_OFFHAND;
+        else
+            slot = EQUIPMENT_SLOT_MAINHAND;
+
+        Item* weapon;
+        weapon = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+        if (!weapon)
+            return;
+        
+        SpellEntry const *deepWoundsDotTemplate = sSpellStore.LookupEntry(12721);
+        SpellEntry deepWoundsDot = *deepWoundsDotTemplate;
+        
+        float damage;
+        damage = (weapon->GetProto()->Damage[0].DamageMax + weapon->GetProto()->Damage[0].DamageMin)/2;
+        
+        switch (m_spellInfo->Id)
+        {
+            case 12850:
+                damage *= 0.2f;break;
+            case 12162:
+                damage *= 0.4f;break;
+            case 12868:
+                damage *= 0.6f;break;
+        };
+
+        deepWoundsDot.EffectBasePoints[0] = int32(damage / 4) - 1;
+        m_caster->CastSpell(unitTarget, &deepWoundsDot, true, NULL);
+    }
 }
 
 void Spell::EffectTriggerSpell(uint32 i)

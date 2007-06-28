@@ -2779,9 +2779,9 @@ void Unit::ApplyStats(bool apply)
     //Ranged
     switch(getClass())
     {
-        case CLASS_HUNTER: val2 = uint32(getLevel() * 2 + GetStat(STAT_AGILITY) * 2 - 20); break;
-        case CLASS_ROGUE:  val2 = uint32(getLevel()     + GetStat(STAT_AGILITY) * 2 - 20); break;
-        case CLASS_WARRIOR:val2 = uint32(getLevel()     + GetStat(STAT_AGILITY) * 2 - 20); break;
+        case CLASS_HUNTER: val2 = uint32(getLevel() * 2 + GetStat(STAT_AGILITY) - 20); break;
+        case CLASS_ROGUE:  val2 = uint32(getLevel()     + GetStat(STAT_AGILITY) - 20); break;
+        case CLASS_WARRIOR:val2 = uint32(getLevel()     + GetStat(STAT_AGILITY) - 20); break;
         default:           val2 = 0;                                                      break;
     }
 
