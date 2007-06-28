@@ -2032,8 +2032,9 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
                 if(!spellInfo)
                     return;
 
-                // (not modify stats and then not required ApplyStats call
+                m_target->ApplyStats(true);
                 caster->CastSpell(m_target,spellInfo,true,NULL,this);
+                m_target->ApplyStats(false);
                 return;
             }
         }
@@ -2402,16 +2403,16 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool Real)
                         case BATTLEGROUND_WS:
                         {
                             if(((BattleGroundWS*)bg)->IsHordeFlagPickedup())
-                                                            // Warsong Flag, horde
-                                    if(GetSpellProto()->Id == 23333)
-                                                            // Horde Flag Drop
-                                                            // (not modify stats and then not required ApplyStats call)
+                                // Warsong Flag, horde
+                                if(GetSpellProto()->Id == 23333)
+                                    // Horde Flag Drop
+                                    // (not modify stats and then not required ApplyStats call)
                                     m_target->CastSpell(m_target, 23334, true, NULL, this);
                             if(((BattleGroundWS*)bg)->IsAllianceFlagPickedup())
-                                                            // Silverwing Flag, alliance
-                                    if(GetSpellProto()->Id == 23335)
-                                                            // Alliance Flag Drop
-                                                            // (not modify stats and then not required ApplyStats call)
+                                // Silverwing Flag, alliance
+                                if(GetSpellProto()->Id == 23335)
+                                    // Alliance Flag Drop
+                                    // (not modify stats and then not required ApplyStats call)
                                     m_target->CastSpell(m_target, 23336, true, NULL, this);
                             break;
                         }
@@ -2914,7 +2915,12 @@ void Aura::HandleAuraModTotalHealthPercentRegen(bool apply, bool Real)
         m_modifier.m_amount = uint32(m_target->GetMaxHealth() * modifier/100);
 
         if(m_target->GetHealth() < m_target->GetMaxHealth())
+        {
+            // PeriodicAuraLog can cast triggered spells with stats changes
+            m_target->ApplyStats(true);
             m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier);
+            m_target->ApplyStats(false);
+        }
     }
 
     m_isPeriodic = apply;
@@ -2936,7 +2942,12 @@ void Aura::HandleAuraModTotalManaPercentRegen(bool apply, bool Real)
         }
 
         if(m_target->GetPower(POWER_MANA) < m_target->GetMaxPower(POWER_MANA))
+        {
+            // PeriodicAuraLog can cast triggered spells with stats changes
+            m_target->ApplyStats(true);
             m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier);
+            m_target->ApplyStats(false);
+        }
     }
 
     m_isPeriodic = apply;
@@ -3411,55 +3422,6 @@ void Aura::SendCoolDownEvent()
         //data << uint32(0); // removed
         caster->SendMessageToSet(&data,true);               // WTF? why we send cooldown message to set?
     }
-}
-
-// FIX-ME!!
-void HandleTriggerSpellEvent(void *obj)
-{
-    Aura *Aur = ((Aura*)obj);
-    if(!Aur)
-        return;
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry(Aur->GetSpellProto()->EffectTriggerSpell[Aur->GetEffIndex()]);
-
-    if(!spellInfo)
-    {
-        sLog.outError("WORLD: unknown spell id %i\n", Aur->GetSpellProto()->EffectTriggerSpell[Aur->GetEffIndex()]);
-        return;
-    }
-
-    Unit* caster = Aur->GetCaster();
-
-    if(!caster)
-        return;
-
-    Spell spell(caster, spellInfo, true, Aur);
-    SpellCastTargets targets;
-    targets.setUnitTarget(Aur->GetTarget());
-    //WorldPacket dump;
-    //dump.Initialize(0);
-    //dump << uint16(2) << GetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT) << GetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT+1);
-    //targets.read(&dump,this);
-    spell.prepare(&targets);
-
-    /*else if(m_spellProto->EffectApplyAuraName[i] == 23)
-    {
-        unitTarget->tmpAura->SetPeriodicTriggerSpell(m_spellProto->EffectTriggerSpell[i],m_spellProto->EffectAmplitude[i]);
-    }*/
-}
-
-void HandleDOTEvent(void *obj)
-{
-    Aura *Aur = ((Aura*)obj);
-    //Aur->GetCaster()->AddPeriodicAura(Aur);
-    if(Unit* caster = Aur->GetCaster())
-        caster->PeriodicAuraLog(Aur->GetTarget(), Aur->GetSpellProto(), Aur->GetModifier());
-}
-
-void HandleHealEvent(void *obj)
-{
-    Aura *Aur = ((Aura*)obj);
-    if(Unit* caster = Aur->GetCaster())
-        Aur->GetTarget()->PeriodicAuraLog(caster, Aur->GetSpellProto(), Aur->GetModifier());
 }
 
 void Aura::HandleShapeshiftBoosts(bool apply)
