@@ -1941,12 +1941,13 @@ void Player::InitTalentForLevel()
     }
     else
     {
+        uint32 talentPointsForLevel = uint32((level-9)*sWorld.getRate(RATE_TALENT));
         // if used more that have then reset
-        if(m_usedTalentCount > level-9)
+        if(m_usedTalentCount > talentPointsForLevel)
             resetTalents(true);
         // else update amount of free points
         else
-            SetUInt32Value(PLAYER_CHARACTER_POINTS1,level-9-m_usedTalentCount);
+            SetUInt32Value(PLAYER_CHARACTER_POINTS1,talentPointsForLevel-m_usedTalentCount);
     }
 }
 
@@ -2619,9 +2620,11 @@ uint32 Player::resetTalentsCost() const
 bool Player::resetTalents(bool no_cost)
 {
     uint32 level = getLevel();
+    uint32 talentPointsForLevel = level < 10 ? 0 : uint32((level-9)*sWorld.getRate(RATE_TALENT));
+
     if (m_usedTalentCount == 0)
     {
-        SetUInt32Value(PLAYER_CHARACTER_POINTS1,(level < 10 ? 0 : level-9));
+        SetUInt32Value(PLAYER_CHARACTER_POINTS1,talentPointsForLevel);
         return false;
     }
 
@@ -2667,7 +2670,7 @@ bool Player::resetTalents(bool no_cost)
         }
     }
 
-    SetUInt32Value(PLAYER_CHARACTER_POINTS1,(level < 10 ? 0 : level-9));
+    SetUInt32Value(PLAYER_CHARACTER_POINTS1,talentPointsForLevel);
 
     if(!no_cost)
     {

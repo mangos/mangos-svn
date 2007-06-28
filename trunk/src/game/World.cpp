@@ -280,6 +280,12 @@ void World::SetInitialWorldSettings()
     rate_values[RATE_AUCTION_CUT] = sConfig.GetFloatDefault("Rate.Auction.Cut", 1);
     rate_values[RATE_MINING_AMOUNT] = sConfig.GetFloatDefault("Rate.Mining.Amount",1);
     rate_values[RATE_MINING_NEXT]   = sConfig.GetFloatDefault("Rate.Mining.Next",1);
+    rate_values[RATE_TALENT] = sConfig.GetFloatDefault("Rate.Talent",1);        
+    if(rate_values[RATE_TALENT] < 0)
+    {
+        sLog.outError("Rate.Talent (%f) mustbe > 0. Using 1 instead.",rate_values[RATE_TALENT]);
+        rate_values[RATE_TALENT] = 1;
+    }
 
     ///- Read other configuration items from the config file
 
