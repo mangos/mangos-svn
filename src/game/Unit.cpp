@@ -953,12 +953,15 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             data << (uint32)mod->m_amount;
             break;
         case SPELL_AURA_OBS_MOD_MANA:           //0x15
-        case SPELL_AURA_PERIODIC_ENERGIZE:      //0x18
             data << (uint32)mod->m_amount;
             data << (uint32)0;                  // ?
             break;
+        case SPELL_AURA_PERIODIC_ENERGIZE:      //0x18
+            data << (uint32)mod->m_miscvalue;   // power type
+            data << (uint32)mod->m_amount;
+            break;
         case SPELL_AURA_PERIODIC_MANA_LEECH:    //0x40
-            data << (uint32)spellProto->powerType;
+            data << (uint32)mod->m_miscvalue;   // power type
             data << (uint32)mod->m_amount;
             data << (float)0.0;                 // ?
             break;
@@ -1063,10 +1066,10 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_MANA_LEECH)
     {
-        if(pVictim->getPowerType() != POWER_MANA)
+        if(mod->m_miscvalue < 0 || mod->m_miscvalue > 4)
             return;
-        if(getPowerType() != POWER_MANA)
-            return;
+
+        Powers power = Powers(mod->m_miscvalue);
 
         uint32 tmpvalue = 0;
         for(int x=0;x<3;x++)
@@ -1075,22 +1078,25 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
                 continue;
 
             int32 amount;
-            if(int32(pVictim->GetPower(POWER_MANA)) > mod->m_amount)
+            if(int32(pVictim->GetPower(power)) > mod->m_amount)
                 amount = mod->m_amount;
             else
-                amount = pVictim->GetPower(POWER_MANA);
+                amount = pVictim->GetPower(power);
 
-            pVictim->ModifyPower(POWER_MANA, - amount);
+            pVictim->ModifyPower(power, - amount);
 
             tmpvalue = uint32(amount*spellProto->EffectMultipleValue[x]);
             break;
         }
 
-        int32 gain = ModifyPower(POWER_MANA,tmpvalue);
-        pVictim->AddThreat(this, float(gain) * 0.5f, spellProto->School, spellProto);
+        if(getPowerType()==power)
+        {
+            int32 gain = ModifyPower(power,tmpvalue);
+            pVictim->AddThreat(this, float(gain) * 0.5f, spellProto->School, spellProto);
 
-        if(pVictim->GetTypeId() == TYPEID_PLAYER || GetTypeId() == TYPEID_PLAYER)
-            SendHealSpellOnPlayerPet(this, spellProto->Id, tmpvalue, POWER_MANA);
+            if(pVictim->GetTypeId() == TYPEID_PLAYER || GetTypeId() == TYPEID_PLAYER)
+                SendHealSpellOnPlayerPet(this, spellProto->Id, tmpvalue, power);
+        }
     }
     else if(mod->m_auraname == SPELL_AURA_PERIODIC_ENERGIZE)
     {

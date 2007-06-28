@@ -463,9 +463,9 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
 
     for(int i = 0; i < 3; i++)
         if(spellInfo->Effect[i] == 6                        //SPELL_EFFECT_APPLY_AURA
-        && (spellInfo->EffectApplyAuraName[i] == 44     //SPELL_AURA_TRACK_CREATURES
-        || spellInfo->EffectApplyAuraName[i] == 45      //SPELL_AURA_TRACK_RESOURCES
-        || spellInfo->EffectApplyAuraName[i] == 151))   //SPELL_AURA_TRACK_STEALTHED
+        && (spellInfo->EffectApplyAuraName[i] == 44         //SPELL_AURA_TRACK_CREATURES
+        || spellInfo->EffectApplyAuraName[i] == 45          //SPELL_AURA_TRACK_RESOURCES
+        || spellInfo->EffectApplyAuraName[i] == 151))       //SPELL_AURA_TRACK_STEALTHED
             return SPELL_TRACKER;
 
     return SPELL_NORMAL;
