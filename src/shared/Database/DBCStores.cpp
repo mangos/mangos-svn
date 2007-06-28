@@ -440,7 +440,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             return SPELL_CURSE;
 
         // family flag 37
-        if (spellInfo->SpellFamilyFlags & 137438953472)
+        if (spellInfo->SpellFamilyFlags & 137438953472LL)
             return SPELL_WARLOCK_ARMOR;
     }
 
