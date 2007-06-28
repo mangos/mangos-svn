@@ -714,7 +714,7 @@ bool ChatHandler::HandleMoveCreatureCommand(const char* args)
         // Attempting creature load from DB
         if(!pCreature)
         {
-            QueryResult *result = sDatabase.PQuery( "SELECT `guid`,`map` FROM `creature`,`map` WHERE `guid` = '%u'",lowguid);
+            QueryResult *result = sDatabase.PQuery( "SELECT `guid`,`map` FROM `creature` WHERE `guid` = '%u'",lowguid);
             if(!result)
             {
                 PSendSysMessage(LANG_COMMAND_CREATGUIDNOTFOUND, lowguid);
