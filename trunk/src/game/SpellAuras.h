@@ -188,7 +188,7 @@ class Aura
 
         SpellEntry const* GetSpellProto() const { return m_spellProto; }
         uint32 GetId() const{ return m_spellId; }
-        uint64 GetCastItemGUID() const { return m_castItem ? m_castItem->GetGUID() : 0; }
+        uint64 GetCastItemGUID() const { return m_castItemGuid; }
         uint32 GetEffIndex() const{ return m_effIndex; }
         void SetEffIndex(uint32 eff) { m_effIndex = eff; }
         int32 GetAuraDuration() const { return m_duration; }
@@ -243,7 +243,8 @@ class Aura
         Unit* m_target;
         int32 m_duration;
         int32 m_timeCla;
-        Item* m_castItem;
+        // it is NOT safe to keep a pointer to the item because it may get deleted
+        uint64 m_castItemGuid;
         time_t m_applyTime;
 
         uint8 m_auraSlot;
