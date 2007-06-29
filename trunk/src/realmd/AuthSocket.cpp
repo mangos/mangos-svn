@@ -285,9 +285,16 @@ void AuthSocket::_SetVSFields(std::string rI)
     BigNumber I;
     I.SetHexStr(rI.c_str());
     I.Reverse();
+
+    //In case of leading zeroes in the rI hash, restore them
+    uint8 mDigest[SHA_DIGEST_LENGTH];
+    memset(mDigest,0,SHA_DIGEST_LENGTH);
+    if (I.GetNumBytes() <= SHA_DIGEST_LENGTH)
+        memcpy(mDigest+SHA_DIGEST_LENGTH-I.GetNumBytes(),I.AsByteArray(),I.GetNumBytes());
+
     Sha1Hash sha;
     sha.UpdateData(s.AsByteArray(), s.GetNumBytes());
-    sha.UpdateBigNumbers(&I, NULL);
+    sha.UpdateData(mDigest, SHA_DIGEST_LENGTH);
     sha.Finalize();
     BigNumber x;
     x.SetBinary(sha.GetDigest(), sha.GetLength());
