@@ -4957,6 +4957,10 @@ bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList) 
     if(!IsInWorld() || !u->IsInWorld())
         return false;
 
+    // always seen by owner
+    if(GetCharmerOrOwnerGUID()==u->GetGUID())
+        return true;
+
     // Grid dead/alive checks
     if( u->GetTypeId()==TYPEID_PLAYER)
     {

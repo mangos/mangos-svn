@@ -128,13 +128,16 @@ void SpellCastTargets::read ( WorldPacket * data,Unit *caster )
     if((m_targetMask & (TARGET_FLAG_ITEM | TARGET_FLAG_TRADE_ITEM)) && caster->GetTypeId() == TYPEID_PLAYER)
     {
         uint64 _guid = readGUID(*data);
-        if(m_targetMask & TARGET_FLAG_ITEM)
-            m_itemTarget = ((Player*)caster)->GetItemByPos( ((Player*)caster)->GetPosByGuid(_guid));
-        else
+        if(caster->GetTypeId()==TYPEID_PLAYER)
         {
-            Player* pTrader = ((Player*)caster)->GetTrader();
-            if(pTrader && _guid < TRADE_SLOT_COUNT)
-                m_itemTarget = pTrader->GetItemByPos(pTrader->GetItemPosByTradeSlot(_guid));
+            if(m_targetMask & TARGET_FLAG_ITEM)
+                m_itemTarget = ((Player*)caster)->GetItemByGuid(_guid);
+            else
+            {
+                Player* pTrader = ((Player*)caster)->GetTrader();
+                if(pTrader && _guid < TRADE_SLOT_COUNT)
+                    m_itemTarget = pTrader->GetItemByPos(pTrader->GetItemPosByTradeSlot(_guid));
+            }
         }
     }
 
@@ -922,12 +925,11 @@ void Spell::cast(bool skipCheck)
     SendSpellCooldown();
 
     TakePower(mana);
-    //TakeCastItem();
-    TakeReagents();
+    TakeReagents();                                         // we must remove reagents before HandleEffects to allow place crafted item in same slot
     FillTargetMap();
     SendCastResult(castResult);
-    SendSpellGo(); // we must send smsg_spell_go packet before m_castItem delete in TakeCastItem()...
-    TakeCastItem();
+    SendSpellGo();                                          // we must send smsg_spell_go packet before m_castItem delete in TakeCastItem()...
+    TakeCastItem();                                         // we must remove consumed cast item before HandleEffects to allow place crafted item in same slot
 
     if(IsChanneledSpell())
     {

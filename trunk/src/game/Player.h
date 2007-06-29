@@ -751,6 +751,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint16 GetPosByGuid( uint64 guid ) const;
         Item* GetItemByPos( uint16 pos ) const;
         Item* GetItemByPos( uint8 bag, uint8 slot ) const;
+        Item* GetItemByGuid( uint64 guid ) const { return GetItemByPos(GetPosByGuid(guid)); }
         std::vector<Item *> &GetItemUpdateQueue() { return m_itemUpdateQueue; }
         static bool IsInventoryPos( uint16 pos ) { return IsInventoryPos(pos >> 8,pos & 255); }
         static bool IsInventoryPos( uint8 bag, uint8 slot );

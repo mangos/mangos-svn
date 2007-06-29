@@ -190,25 +190,26 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     CHECK_PACKET_SIZE(recv_data,4+4+4);
 
     //sLog.outDebug("WORLD: CMSG_ITEM_QUERY_SINGLE");
-                                                            // guess size
-    WorldPacket data( SMSG_ITEM_QUERY_SINGLE_RESPONSE, 600 );
-
-    uint32 item, guidLow, guidHigh;
-    recv_data >> item >> guidLow >> guidHigh;
+    uint32 item;
+    uint64 guid;
+    recv_data >> item >> guid;
 
     sLog.outDetail("STORAGE: Item Query = %u", item);
 
     ItemPrototype const *pProto = objmgr.GetItemPrototype( item );
 
-    uint16 itempos = _player->GetPosByGuid(guidLow);
-    Item *pItem = _player->GetItemByPos( itempos );
+    Item *pItem = _player->GetItemByGuid( guid );
+  
+    WorldPacket data( SMSG_ITEM_QUERY_SINGLE_RESPONSE, 600);// guess size
 
     if( pProto )
     {
         data << pProto->ItemId;
         data << pProto->Class;
-        // client known only 0 subclass (and 1-2 obsolute subclasses)
-        data << (pProto->Class==ITEM_CLASS_CONSUMABLE ? uint32(0) : pProto->SubClass); // probably wrong
+        
+        // client known only 0 subclass (and 1-2 obsolete subclasses)
+        data << uint32(pProto->Class==ITEM_CLASS_CONSUMABLE ? 0 : pProto->SubClass);
+
         data << uint32(-1);                                 // new 2.0.3, not exist in wdb cache?
         data << pProto->Name1;
         data << uint8(0x00);                                //pProto->Name2; // blizz not send name there, just uint8(0x00); <-- \0 = empty string = empty name...

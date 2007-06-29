@@ -495,8 +495,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     // or ammo not equipped in special bag
     for(int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
     {
-        int16 pos = ( (INVENTORY_SLOT_BAG_0 << 8) | i );
-        pItem = GetItemByPos( pos );
+        pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
 
         if(pItem)
         {
@@ -5870,7 +5869,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     }
     else if (IS_ITEM_GUID(guid))
     {
-        Item *item = this->GetItemByPos( this->GetPosByGuid( guid ));
+        Item *item = GetItemByGuid( guid );
 
         if (!item)
             return;
@@ -9574,13 +9573,10 @@ void Player::ReducePoisonCharges(uint32 enchantId)
     uint32 pEnchantId = 0;
     uint32 charges = 0;
     Item *pItem;
-    uint16 pos;
 
     for(int i = EQUIPMENT_SLOT_MAINHAND; i < EQUIPMENT_SLOT_RANGED; i++)
     {
-        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
-
-        pItem = GetItemByPos( pos );
+        pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
         if(!pItem)
             continue;
         for(int x=0;x<MAX_ENCHANTMENT_SLOT;x++)
@@ -13619,8 +13615,7 @@ bool Player::EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot)
     {
         if(i == slot)
                 continue;
-        uint16 pos = ((INVENTORY_SLOT_BAG_0 << 8) | i );
-        Item *pItem2 = GetItemByPos( pos );
+        Item *pItem2 = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
         if(pItem2 && pItem2->GetProto()->Socket[0].Color)
         {
             for(uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+3; ++enchant_slot)
@@ -13696,8 +13691,7 @@ void Player::CorrectMetaGemEnchants(uint8 exceptslot, bool apply)
         if(slot == exceptslot)
             continue;
 
-        uint16 pos = ( (INVENTORY_SLOT_BAG_0 << 8) | slot );
-        Item* pItem = GetItemByPos( pos );
+        Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, slot );
 
         if(!pItem || !pItem->GetProto()->Socket[0].Color)
             continue;
@@ -13733,8 +13727,7 @@ void Player::ToggleMetaGemsActive(uint16 exceptslot, bool apply)        //if fal
         //enchants for the slot being socketed are handeled by WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
         if(slot == exceptslot) continue;
 
-        uint16 pos = ( (INVENTORY_SLOT_BAG_0 << 8) | slot );
-        Item *pItem = GetItemByPos( pos );
+        Item *pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, slot );
 
         if(!pItem || !pItem->GetProto()->Socket[0].Color)    //if item has no sockets or no item is equipped go to next item
             continue;
