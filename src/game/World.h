@@ -35,6 +35,7 @@ class Player;
 class Weather;
 struct ScriptAction;
 struct ScriptInfo;
+class CliCommandHolder;
 
 /// Timers for different object refresh rates
 enum WorldTimers
@@ -265,6 +266,9 @@ class World
         static uint32 GetVisibleUnitGreyDistance()       { return m_VisibleUnitGreyDistance;       }
         static uint32 GetVisibleObjectGreyDistance()     { return m_VisibleObjectGreyDistance;     }
 
+        void ProcessCliCommands();
+        void QueueCliCommand(CliCommandHolder* command) { cliCmdQueue.add(command); }
+
     protected:
         void _UpdateGameTime();
         void ScriptsProcess();
@@ -304,6 +308,9 @@ class World
         static uint32 m_MaxVisibleDistanceInFlight;
         static uint32 m_VisibleUnitGreyDistance;
         static uint32 m_VisibleObjectGreyDistance;
+
+        // CLI command holder to be thread safe
+        ZThread::LockedQueue<CliCommandHolder*, ZThread::FastMutex> cliCmdQueue;
 };
 
 extern uint32 realmID;

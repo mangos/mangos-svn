@@ -47,6 +47,7 @@
 #include "TargetedMovementGenerator.h"
 #include "RedZoneDistrict.h"
 #include "WaypointMovementGenerator.h"
+#include "../mangosd/CliRunnable.h"
 
 INSTANTIATE_SINGLETON_1( World );
 
@@ -798,6 +799,9 @@ void World::Update(time_t diff)
     /// </ul>
     ///- Move all creatures with "delayed move" and remove and delete all objects with "delayed remove"
     ObjectAccessor::Instance().DoDelayedMovesAndRemoves();
+
+    // And last, but not least handle the issued cli commands
+    ProcessCliCommands();
 }
 
 /// Put scripts in the execution queue
@@ -1302,4 +1306,21 @@ void World::UpdateSessions( time_t diff )
             m_sessions.erase(itr);
         }
     }
+}
+
+// This handles the issued and queued CLI commands
+void World::ProcessCliCommands()
+{
+    if (cliCmdQueue.empty()) return;
+
+    CliCommandHolder *command;
+    while (!cliCmdQueue.empty())
+    {
+        sLog.outDebug("CLI command under processing...");
+        command = cliCmdQueue.next();
+        command->Execute();
+        delete command;
+    }
+    // print the console message here so it looks right
+    printf("mangos>");
 }
