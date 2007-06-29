@@ -32,19 +32,7 @@
 #include "Config/ConfigEnv.h"
 #include "Util.h"
 #include "AccountMgr.h"
-
 #include "CliRunnable.h"
-
-typedef int(* pPrintf)(const char*,...);
-typedef void(* pCliFunc)(char *,pPrintf);
-
-/// Storage structure for commands
-typedef struct
-{
-    char const * cmd;
-    pCliFunc Func;
-    char const * description;
-}CliCommand;
 
 //func prototypes must be defined
 
@@ -590,7 +578,7 @@ void ParseCommand( pPrintf zprintf, char* input)
     for ( x=0;x<CliTotalCmds;x++)
         if(!strcmp(Commands[x].cmd,supposedCommand))
     {
-        Commands[x].Func(arguments,zprintf);
+        sWorld.QueueCliCommand(new CliCommandHolder(&Commands[x], arguments, zprintf));
         break;
     }
 
@@ -726,10 +714,13 @@ void CliRunnable::run()
         printf("\a");                                       // \a = Alert
     }
 
+    // print this here the first time
+    // later it will be printed after command queue updates
+    printf("mangos>");
+
     ///- As long as the World is running (no World::m_stopEvent), get the command line and handle it
     while (!World::m_stopEvent)
     {
-        printf("mangos>");
         fflush(stdout);
         char *command = fgets(commandbuf,sizeof(commandbuf),stdin);
         if (command != NULL)

@@ -23,6 +23,35 @@
 #ifndef __CLIRUNNABLE_H
 #define __CLIRUNNABLE_H
 
+typedef int(* pPrintf)(const char*,...);
+typedef void(* pCliFunc)(char *,pPrintf);
+
+/// Command Template class
+struct CliCommand
+{
+    char const * cmd;
+    pCliFunc Func;
+    char const * description;
+};
+
+/// Storage class for commands issued for delayed execution
+class CliCommandHolder
+{
+    private:
+        const CliCommand *cmd;
+        char *args;
+        pPrintf zprintf;
+    public:
+        CliCommandHolder(const CliCommand *command, const char *arguments, pPrintf zprintf) 
+            : cmd(command), zprintf(zprintf)
+        {
+            args = new char[strlen(arguments)+1];
+            strcpy(args, arguments);
+        }
+        ~CliCommandHolder() { delete args; }
+        void Execute() const { cmd->Func(args, zprintf); }
+};
+
 /// Command Line Interface handling thread
 class CliRunnable : public ZThread::Runnable
 {
