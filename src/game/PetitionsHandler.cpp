@@ -353,8 +353,7 @@ void WorldSession::HandlePetitionRenameOpcode(WorldPacket & recv_data)
     recv_data >> petitionguid;                              // guid
     recv_data >> newname;                                   // new name
 
-    uint16 pos = _player->GetPosByGuid(petitionguid);
-    Item *item = _player->GetItemByPos(pos);
+    Item *item = _player->GetItemByGuid(petitionguid);
     if(!item)
         return;
 
@@ -495,7 +494,7 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket & recv_data)
     SendPacket(&data);
 
     // update signs count on charter, required testing...
-    //Item *item = _player->GetItemByPos(_player->GetPosByGuid(petitionguid));
+    //Item *item = _player->GetItemByGuid(petitionguid));
     //if(item)
     //    item->SetUInt32Value(ITEM_FIELD_ENCHANTMENT+1, signs);
 

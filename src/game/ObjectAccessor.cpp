@@ -176,7 +176,7 @@ Object* ObjectAccessor::GetObjectByTypeMask(Player const &p, uint64 guid, uint32
 
     if(typemask & TYPE_ITEM)
     {
-        obj = p.GetItemByPos( p.GetPosByGuid( guid ));
+        obj = p.GetItemByGuid( guid );
         if(obj) return obj;
     }
 
