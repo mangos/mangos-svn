@@ -270,9 +270,15 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     I.SetHexStr(fields[5].GetString());
     I.Reverse();
 
+    //In case of leading zeroes in the I hash, restore them
+    uint8 mDigest[SHA_DIGEST_LENGTH];
+    memset(mDigest,0,SHA_DIGEST_LENGTH);
+    if (I.GetNumBytes() <= SHA_DIGEST_LENGTH)
+        memcpy(mDigest+SHA_DIGEST_LENGTH-I.GetNumBytes(),I.AsByteArray(),I.GetNumBytes());
+
     s.SetHexStr(fields[7].GetString());
     sha1.UpdateData(s.AsByteArray(), s.GetNumBytes());
-    sha1.UpdateBigNumbers(&I, NULL);
+    sha1.UpdateData(mDigest, SHA_DIGEST_LENGTH);
     sha1.Finalize();
     x.SetBinary(sha1.GetDigest(), sha1.GetLength());
     v = g.ModExp(x, N);
