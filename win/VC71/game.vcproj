@@ -474,6 +474,15 @@
 				RelativePath="..\..\src\game\FlightMaster.h">
 			</File>
 			<File
+				RelativePath="..\..\src\game\FollowerReference.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\FollowerReference.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\FollowerRefManager.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\Formulas.h">
 			</File>
 			<File
@@ -523,6 +532,9 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\ItemPrototype.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\LinkedList.h">
 			</File>
 			<File
 				RelativePath="..\..\src\game\LootMgr.cpp">
@@ -604,6 +616,12 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\RedZoneDistrict.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\Reference.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\RefManager.h">
 			</File>
 			<File
 				RelativePath="..\..\src\game\TargetedMovementGenerator.cpp">

@@ -27,6 +27,8 @@
 #include "Util.h"
 #include "UpdateFields.h"
 #include "SharedDefines.h"
+#include "FollowerReference.h"
+#include "FollowerRefManager.h"
 
 #include <list>
 
@@ -904,8 +906,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         int32 CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_index);
         Creature* SummonCreature(uint32 id, uint32 mapid, float x, float y, float z, float ang,TempSummonType spwtype,uint32 despwtime);
 
-        static Unit* GetUnit(WorldObject& object, uint64 guid);
+        void addFollower(FollowerReference* pRef) { m_FollowingRefManager.insertFirst(pRef); }
+        void removeFollower(FollowerReference* pRef) {  } // nothing to do yet
 
+        static Unit* GetUnit(WorldObject& object, uint64 guid);
     protected:
         Unit ( WorldObject *instantiator );
 
@@ -954,5 +958,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         UnitVisibility m_Visibility;
 
         Diminishing m_Diminishing;
+
+        FollowerRefManager m_FollowingRefManager;
 };
 #endif

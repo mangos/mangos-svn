@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="game"
 	ProjectGUID="{1DC6C4DA-A028-41F3-877D-D5400C594F88}"
 	RootNamespace="game"
@@ -640,6 +640,18 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\FollowerReference.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\FollowerReference.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\FollowerRefManager.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\Formulas.h"
 				>
 			</File>
@@ -705,6 +717,10 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\ItemPrototype.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\LinkedList.h"
 				>
 			</File>
 			<File
@@ -813,6 +829,14 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\RedZoneDistrict.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\Reference.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\RefManager.h"
 				>
 			</File>
 			<File
