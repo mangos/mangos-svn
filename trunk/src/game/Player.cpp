@@ -1943,7 +1943,10 @@ void Player::InitTalentForLevel()
         uint32 talentPointsForLevel = uint32((level-9)*sWorld.getRate(RATE_TALENT));
         // if used more that have then reset
         if(m_usedTalentCount > talentPointsForLevel)
-            resetTalents(true);
+        {
+            if (GetSession()->GetSecurity() < SEC_ADMINISTRATOR)
+                resetTalents(true);
+        }
         // else update amount of free points
         else
             SetUInt32Value(PLAYER_CHARACTER_POINTS1,talentPointsForLevel-m_usedTalentCount);
