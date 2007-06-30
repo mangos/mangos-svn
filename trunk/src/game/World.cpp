@@ -47,7 +47,6 @@
 #include "TargetedMovementGenerator.h"
 #include "RedZoneDistrict.h"
 #include "WaypointMovementGenerator.h"
-#include "../mangosd/CliRunnable.h"
 
 INSTANTIATE_SINGLETON_1( World );
 

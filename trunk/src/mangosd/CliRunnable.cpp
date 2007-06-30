@@ -34,6 +34,8 @@
 #include "AccountMgr.h"
 #include "CliRunnable.h"
 
+//CliCommand and CliCommandHolder are defined in World.h to avoid cyclic deps
+
 //func prototypes must be defined
 
 void CliHelp(char*,pPrintf);
@@ -59,6 +61,8 @@ void CliUpTime(char*,pPrintf);
 void CliSetTBC(char*,pPrintf);
 void CliWritePlayerDump(char*,pPrintf);
 void CliLoadPlayerDump(char*,pPrintf);
+void CliSave(char*,pPrintf);
+void CliSend(char*,pPrintf);
 
 /// Table of known commands
 const CliCommand Commands[]=
@@ -85,7 +89,9 @@ const CliCommand Commands[]=
     {"shutdown", & CliShutdown,"Shutdown server with some delay"},
     {"exit", & CliExit,"Shutdown server NOW"},
     {"writepdump", &CliWritePlayerDump,"Write a player dump to a file"},
-    {"loadpdump", &CliLoadPlayerDump,"Load a player dump from a file"}
+    {"loadpdump", &CliLoadPlayerDump,"Load a player dump from a file"},
+	{"saveall", &CliSave,"Save all players"},
+	{"send", &CliSend,"Send message to a player"}
 };
 /// \todo Need some pragma pack? Else explain why in a comment.
 #define CliTotalCmds sizeof(Commands)/sizeof(CliCommand)
@@ -692,6 +698,46 @@ void CliSetTBC(char *command,pPrintf zprintf)
     {
         zprintf("No account %s found\r\n",szAcc);
     }
+}
+
+void CliSave(char*,pPrintf zprintf)
+{
+    //Saves players & send message
+	ObjectAccessor::Instance().SaveAllPlayers();
+	zprintf( "All Players Saved \n" );
+	sWorld.SendWorldText("Players saved!", NULL);
+}
+
+void CliSend(char *playerN,pPrintf zprintf)
+{
+	char* plr = strtok((char*)playerN, " ");
+	char* msg = strtok(NULL, "");
+
+    if(!plr || !msg)
+    {
+        zprintf("Syntax: [send <Player> <Message>] Player names case sensitive.\r\n");
+        return;
+    }
+
+    Player *rPlayer = objmgr.GetPlayer(plr);
+    if(!rPlayer)
+    {
+        zprintf("%s not found!\r\n", plr);
+        return;
+    }
+    
+    if (rPlayer->GetSession()->isLogingOut())
+    {
+        zprintf("Cant send message while %s is logging out!\r\n",plr);
+        return;
+    }
+
+    //Use SendAreaTriggerMessage for fastest delivery.
+	rPlayer->GetSession()->SendAreaTriggerMessage("%s", msg);
+	rPlayer->GetSession()->SendAreaTriggerMessage("|cffff0000[Message from administrator]:|r");
+	
+    //Confirmation message
+	zprintf("I said '%s' to %s\r\n",msg , plr);
 }
 
 /// @}
