@@ -533,7 +533,7 @@ void AreaAura::Update(uint32 diff)
         Group *pGroup = NULL;
         if (caster->GetTypeId() == TYPEID_PLAYER)
             pGroup = ((Player*)caster)->groupInfo.group;
-        else if(((Creature*)caster)->isTotem() || ((Creature*)caster)->isPet() || caster->isCharmed())
+        else if(caster->GetCharmerOrOwnerGUID() != 0)
         {
             Unit *owner = caster->GetCharmerOrOwner();
             if (owner && owner->GetTypeId() == TYPEID_PLAYER)
@@ -553,7 +553,7 @@ void AreaAura::Update(uint32 diff)
                     if(!Target || Target->GetGUID() == m_caster_guid || !Target->isAlive() || !pGroup->SameSubGroup(m_caster_guid, &*itr))
                         continue;
                 }
-                else if(((Creature*)caster)->isTotem() || ((Creature*)caster)->isPet() || caster->isCharmed())
+                else if(caster->GetCharmerOrOwnerGUID() != 0)
                 {
                     Unit *owner = caster->GetCharmerOrOwner();
                     if(!Target || !Target->isAlive() || !pGroup->SameSubGroup(owner->GetGUID(), &*itr))
@@ -580,7 +580,7 @@ void AreaAura::Update(uint32 diff)
                 }
             }
         }
-        else if (caster->GetTypeId() != TYPEID_PLAYER && ((Creature*)caster)->isTotem() || ((Creature*)caster)->isPet() || caster->isCharmed())
+        else if (caster->GetCharmerOrOwnerGUID() != 0)
         {
             // add / remove auras from the totem's owner
             Unit *owner = caster->GetCharmerOrOwner();
