@@ -907,7 +907,7 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, 
     }
 }
 
-void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier *mod)
+void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier *mod, uint8 effect_idx)
 {
     uint32 procFlag = 0;
     if(!this || !pVictim || !isAlive() || !pVictim->isAlive())
@@ -931,116 +931,80 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
     sLog.outDetail("PeriodicAuraLog: %u (TypeId: %u) attacked %u (TypeId: %u) for %u dmg inflicted by %u abs is %u",
         GetGUIDLow(), GetTypeId(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), pdamage, spellProto->Id,absorb);
 
-    // this packet has random structure, probably based on auraid...
-    WorldPacket data(SMSG_PERIODICAURALOG, (21+16));        // we guess size
-    data.append(pVictim->GetPackGUID());
-    data.append(GetPackGUID());
-    data << uint32(spellProto->Id);
-    data << uint32(1);
-
-    data << uint32(mod->m_auraname);
     switch(mod->m_auraname)
     {
-        case SPELL_AURA_PERIODIC_DAMAGE:        //0x3
-        case SPELL_AURA_PERIODIC_DAMAGE_PERCENT://0x59
-            data << (uint32)mod->m_amount;
+        case SPELL_AURA_PERIODIC_DAMAGE:
+        case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
+        {
+            pdamage = SpellDamageBonus(pVictim,spellProto,pdamage,DOT);
+
+            if(mod->m_auraname == SPELL_AURA_PERIODIC_DAMAGE_PERCENT)
+                pdamage = GetHealth()*(100+mod->m_amount)/100;
+
+            WorldPacket data(SMSG_PERIODICAURALOG, (21+16));        // we guess size
+            data.append(pVictim->GetPackGUID());
+            data.append(GetPackGUID());
+            data << uint32(spellProto->Id);
+            data << uint32(1);
+            data << uint32(mod->m_auraname);
+            data << (uint32)pdamage;
             data << (uint32)spellProto->School;
             data << (uint32)0;                  // ?
             data << (uint32)0;                  // ?
-            break;
-        case SPELL_AURA_PERIODIC_HEAL:          //0x8
-        case SPELL_AURA_OBS_MOD_HEALTH:         //0x14
-            data << (uint32)mod->m_amount;
-            break;
-        case SPELL_AURA_OBS_MOD_MANA:           //0x15
-            data << (uint32)mod->m_amount;
-            data << (uint32)0;                  // ?
-            break;
-        case SPELL_AURA_PERIODIC_ENERGIZE:      //0x18
-            data << (uint32)mod->m_miscvalue;   // power type
-            data << (uint32)mod->m_amount;
-            break;
-        case SPELL_AURA_PERIODIC_MANA_LEECH:    //0x40
-            data << (uint32)mod->m_miscvalue;   // power type
-            data << (uint32)mod->m_amount;
-            data << (float)0.0;                 // ?
-            break;
-        case SPELL_AURA_PERIODIC_LEECH:
-        case SPELL_AURA_PERIODIC_HEALTH_FUNNEL:
-        case SPELL_AURA_PERIODIC_TRIGGER_SPELL:
-        case SPELL_AURA_PERIODIC_MANA_FUNNEL:
-            break;
-        default:
-            sLog.outError("PeriodicAuraLog: unhandled aura %u", mod->m_auraname);
-            break;
-    }
-    SendMessageToSet(&data,true);
+            SendMessageToSet(&data,true);
 
-    if(mod->m_auraname == SPELL_AURA_PERIODIC_DAMAGE)
-    {
-        pdamage = SpellDamageBonus(pVictim,spellProto,pdamage,DOT);
+            SendSpellNonMeleeDamageLog(pVictim, spellProto->Id, pdamage, spellProto->School, absorb, resist, false, 0);
 
-        //pdamage = SpellDamageBonus(pVictim, spellProto, pdamage);
-        SendSpellNonMeleeDamageLog(pVictim, spellProto->Id, pdamage, spellProto->School, absorb, resist, false, 0);
-
-        DealDamage(pVictim, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), DOT, spellProto->School, spellProto, procFlag, true);
-        ProcDamageAndSpell(pVictim, 0, PROC_FLAG_TAKE_DAMAGE, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), spellProto);
-    }
-    else if(mod->m_auraname == SPELL_AURA_PERIODIC_DAMAGE_PERCENT)
-    {
-        pdamage = SpellDamageBonus(pVictim, spellProto, pdamage, DOT);
-        int32 pdamage = GetHealth()*(100+mod->m_amount)/100;
-        SendSpellNonMeleeDamageLog(pVictim, spellProto->Id, pdamage, spellProto->School, absorb, resist, false, 0);
-
-        DealDamage(pVictim, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), DOT, spellProto->School, spellProto, procFlag, true);
-        ProcDamageAndSpell(pVictim, 0, PROC_FLAG_TAKE_DAMAGE, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), spellProto);
-    }
-    else if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL || mod->m_auraname == SPELL_AURA_OBS_MOD_HEALTH)
-    {
-        pdamage = SpellHealingBonus(spellProto, pdamage, DOT);
-
-        int32 gain = pVictim->ModifyHealth(pdamage);
-        ThreatAssist(pVictim, float(gain) * 0.5f, spellProto->School, spellProto);
-
-        if(pVictim->GetTypeId() == TYPEID_PLAYER || GetTypeId() == TYPEID_PLAYER)
-            SendHealSpellOnPlayer(pVictim, spellProto->Id, gain);
-
-        // heal for caster damage
-        if(pVictim!=this && spellProto->SpellVisual==163)
+            DealDamage(pVictim, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), DOT, spellProto->School, spellProto, procFlag, true);
+            ProcDamageAndSpell(pVictim, 0, PROC_FLAG_TAKE_DAMAGE, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), spellProto);
+            break;
+        }
+        case SPELL_AURA_PERIODIC_HEAL:
+        case SPELL_AURA_OBS_MOD_HEALTH:
         {
-            // FIXME: must be calculated base at spell data
-            int32 dmg = gain;
-            if(GetHealth() <= dmg && GetTypeId()==TYPEID_PLAYER)
+            pdamage = SpellHealingBonus(spellProto, pdamage, DOT);
+
+            WorldPacket data(SMSG_PERIODICAURALOG, (21+16));        // we guess size
+            data.append(pVictim->GetPackGUID());
+            data.append(GetPackGUID());
+            data << uint32(spellProto->Id);
+            data << uint32(1);
+            data << uint32(mod->m_auraname);
+            data << (uint32)pdamage;
+            SendMessageToSet(&data,true);
+
+            int32 gain = pVictim->ModifyHealth(pdamage);
+            ThreatAssist(pVictim, float(gain) * 0.5f, spellProto->School, spellProto);
+
+            // heal for caster damage
+            if(pVictim!=this && spellProto->SpellVisual==163)
             {
-                RemoveAurasDueToSpell(spellProto->Id);
-                if(m_currentSpell)
+                int32 dmg = spellProto->manaPerSecond;
+                if(GetHealth() <= dmg && GetTypeId()==TYPEID_PLAYER)
                 {
-                    if(m_currentSpell->IsChanneledSpell())
-                        m_currentSpell->SendChannelUpdate(0);
-                    m_currentSpell->finish();
+                    RemoveAurasDueToSpell(spellProto->Id);
+                    if(m_currentSpell)
+                    {
+                        if(m_currentSpell->IsChanneledSpell())
+                            m_currentSpell->SendChannelUpdate(0);
+                        m_currentSpell->finish();
+                    }
+                }
+                else
+                {
+                    SendSpellNonMeleeDamageLog(this, spellProto->Id, gain, spellProto->School, 0, 0, false, 0, false);
+                    DealDamage(this, gain, NODAMAGE, spellProto->School, spellProto, PROC_FLAG_HEAL, true);
                 }
             }
-            else
-            {
-                SendSpellNonMeleeDamageLog(this, spellProto->Id, gain, spellProto->School, 0, 0, false, 0, false);
-                DealDamage(this, gain, NODAMAGE, spellProto->School, spellProto, PROC_FLAG_HEAL, true);
-            }
-        }
 
-        if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL && pVictim != this)
-            ProcDamageAndSpell(pVictim, PROC_FLAG_HEAL, PROC_FLAG_NONE, pdamage, spellProto);
-    }
-    else if(mod->m_auraname == SPELL_AURA_PERIODIC_LEECH)
-    {
-        float multiplier = 0;
-        uint32 pdamage = 0;
-        for(int x=0;x<3;x++)
+            if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL && pVictim != this)
+                ProcDamageAndSpell(pVictim, PROC_FLAG_HEAL, PROC_FLAG_NONE, pdamage, spellProto);
+            break;
+        }
+        case SPELL_AURA_PERIODIC_LEECH:
         {
-            if(mod->m_auraname != spellProto->EffectApplyAuraName[x])
-                continue;
-            multiplier = spellProto->EffectMultipleValue[x] > 0 ? spellProto->EffectMultipleValue[x] : 1;
-            
-            pdamage = mod->m_amount;
+            float multiplier = spellProto->EffectMultipleValue[effect_idx] > 0 ? spellProto->EffectMultipleValue[effect_idx] : 1;
+            uint32 pdamage = mod->m_amount;
 
             pdamage = SpellDamageBonus(pVictim,spellProto,pdamage,DOT);
 
@@ -1055,72 +1019,89 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
                     if (m_currentSpell->m_spellInfo->Id == spellProto->Id)
                         m_currentSpell->cancel();
 
+            int32 gain = ModifyHealth(int32(pdamage * multiplier));
+            ThreatAssist(this, float(gain) * 0.5f, spellProto->School, spellProto);
+
+            if(GetTypeId() == TYPEID_PLAYER)
+                SendHealSpellOnPlayer(this, spellProto->Id, uint32(pdamage * multiplier));
             break;
         }
-
-        int32 gain = ModifyHealth(int32(pdamage * multiplier));
-        ThreatAssist(this, float(gain) * 0.5f, spellProto->School, spellProto);
-
-        if(GetTypeId() == TYPEID_PLAYER)
-            SendHealSpellOnPlayer(this, spellProto->Id, uint32(pdamage * multiplier));
-    }
-    else if(mod->m_auraname == SPELL_AURA_PERIODIC_MANA_LEECH)
-    {
-        if(mod->m_miscvalue < 0 || mod->m_miscvalue > 4)
-            return;
-
-        Powers power = Powers(mod->m_miscvalue);
-
-        uint32 tmpvalue = 0;
-        for(int x=0;x<3;x++)
+        case SPELL_AURA_PERIODIC_MANA_LEECH:
         {
-            if(mod->m_auraname != spellProto->EffectApplyAuraName[x])
-                continue;
+            if(mod->m_miscvalue < 0 || mod->m_miscvalue > 4)
+                break;
 
-            int32 amount;
-            if(int32(pVictim->GetPower(power)) > mod->m_amount)
-                amount = mod->m_amount;
-            else
-                amount = pVictim->GetPower(power);
+            Powers power = Powers(mod->m_miscvalue);
 
-            pVictim->ModifyPower(power, - amount);
+            int32 drain_amount = pVictim->GetPower(power) > pdamage ? pdamage : pVictim->GetPower(power);
 
-            tmpvalue = uint32(amount*spellProto->EffectMultipleValue[x]);
+            pVictim->ModifyPower(power, -drain_amount);
+
+            float gain_multiplier = getPowerType()==power ? spellProto->EffectMultipleValue[effect_idx] : 0;
+
+            WorldPacket data(SMSG_PERIODICAURALOG, (21+16));    // we guess size
+            data.append(pVictim->GetPackGUID());
+            data.append(GetPackGUID());
+            data << uint32(spellProto->Id);
+            data << uint32(1);
+            data << uint32(mod->m_auraname);
+            data << (uint32)power;                              // power type
+            data << (uint32)drain_amount;
+            data << (float)gain_multiplier;
+            SendMessageToSet(&data,true);
+
+            int32 gain_amount = int32(drain_amount*gain_multiplier);
+
+            if(gain_amount)
+            {
+                int32 gain = ModifyPower(power,gain_amount);
+                pVictim->AddThreat(this, float(gain) * 0.5f, spellProto->School, spellProto);
+            }
             break;
         }
-
-        if(getPowerType()==power)
+        case SPELL_AURA_PERIODIC_ENERGIZE:
         {
-            int32 gain = ModifyPower(power,tmpvalue);
-            pVictim->AddThreat(this, float(gain) * 0.5f, spellProto->School, spellProto);
+            if(mod->m_miscvalue < 0 || mod->m_miscvalue > 4)
+                break;
 
-            if(pVictim->GetTypeId() == TYPEID_PLAYER || GetTypeId() == TYPEID_PLAYER)
-                SendHealSpellOnPlayerPet(this, spellProto->Id, tmpvalue, power);
+            Powers power = Powers(mod->m_miscvalue);
+
+            if(pVictim->getPowerType() != power)
+                break;
+
+            WorldPacket data(SMSG_PERIODICAURALOG, (21+16));    // we guess size
+            data.append(pVictim->GetPackGUID());
+            data.append(GetPackGUID());
+            data << uint32(spellProto->Id);
+            data << uint32(1);
+            data << uint32(mod->m_auraname);
+            data << (uint32)power;                              // power type
+            data << (uint32)mod->m_amount;
+            SendMessageToSet(&data,true);
+
+            int32 gain = pVictim->ModifyPower(power,mod->m_amount);
+            ThreatAssist(pVictim, float(gain) * 0.5f, spellProto->School, spellProto);
+            break;
         }
-    }
-    else if(mod->m_auraname == SPELL_AURA_PERIODIC_ENERGIZE)
-    {
-        if(mod->m_miscvalue < 0 || mod->m_miscvalue > 4)
-            return;
+        case SPELL_AURA_OBS_MOD_MANA:
+        {
+            if(getPowerType() != POWER_MANA)
+                break;
 
-        Powers power = Powers(mod->m_miscvalue);
+            WorldPacket data(SMSG_PERIODICAURALOG, (21+16));        // we guess size
+            data.append(pVictim->GetPackGUID());
+            data.append(GetPackGUID());
+            data << uint32(spellProto->Id);
+            data << uint32(1);
+            data << uint32(mod->m_auraname);
+            data << (uint32)mod->m_amount;
+            data << (uint32)0;                  // ?
+            SendMessageToSet(&data,true);
 
-        if(pVictim->getPowerType() != power)
-            return;
-
-        int32 gain = pVictim->ModifyPower(power,mod->m_amount);
-        ThreatAssist(pVictim, float(gain) * 0.5f, spellProto->School, spellProto);
-
-        if(pVictim->GetTypeId() == TYPEID_PLAYER || GetTypeId() == TYPEID_PLAYER)
-            SendHealSpellOnPlayerPet(pVictim, spellProto->Id, mod->m_amount, power);
-    }
-    else if(mod->m_auraname == SPELL_AURA_OBS_MOD_MANA)
-    {
-        if(getPowerType() != POWER_MANA)
-            return;
-
-        int32 gain = ModifyPower(POWER_MANA, mod->m_amount);
-        ThreatAssist(this, float(gain) * 0.5f, spellProto->School, spellProto);
+            int32 gain = ModifyPower(POWER_MANA, mod->m_amount);
+            ThreatAssist(this, float(gain) * 0.5f, spellProto->School, spellProto);
+            break;
+        }
     }
 }
 
