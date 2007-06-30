@@ -766,6 +766,7 @@ bool Group::_addMember(const uint64 &guid, const char* name, bool isAssistant)
     vector<uint8> temp(MAXRAIDSIZE/MAXGROUPSIZE);
     for(member_citerator itr = m_members.begin(); itr != m_members.end(); ++itr)
     {
+        if (itr->group >= temp.size()) continue;
         temp[itr->group]++;
         if(temp[groupid] >= MAXGROUPSIZE)
             groupid++;

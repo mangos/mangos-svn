@@ -3128,7 +3128,7 @@ bool ChatHandler::HandleResetCommand (const char * args)
     if (argstr == "spells")
     {
         PlayerSpellMap::iterator itr;
-        PlayerSpellMap smap = player->GetSpellMap();
+        PlayerSpellMap &smap = player->GetSpellMap();
         while(!smap.empty())
             player->removeSpell(smap.begin()->first);
 
