@@ -607,7 +607,7 @@ void WorldSession::LogoutPlayer(bool Save)
             }
             // give honor to all attackers from set
             for(std::set<Player*>::const_iterator itr = aset.begin(); itr != aset.end(); ++itr)
-                (*itr)->CalculateHonor(_player);
+                (*itr)->RewardHonor(_player);
         }
 
         ///- Remove player from battleground (teleport to entrance)

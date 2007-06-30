@@ -240,7 +240,6 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
             switch(pObject->GetTypeId())
             {
                 case TYPEID_UNIT:
-                    _player->CalculateReputation( pQuest, guid );
                     if( !(Script->ChooseReward( _player, ((Creature*)pObject), pQuest, reward )) )
                     {
                         // Send next quest

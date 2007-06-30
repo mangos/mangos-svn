@@ -454,9 +454,9 @@ SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
         {
             if(player!=pVictim)
             {
-                player->CalculateHonor(pVictim);
+                player->RewardHonor(pVictim);
 
-                player->CalculateReputation(pVictim);
+                player->RewardReputation(pVictim);
             }
 
             if(!PvP)
