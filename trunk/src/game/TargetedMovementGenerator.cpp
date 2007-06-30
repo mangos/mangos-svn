@@ -49,23 +49,23 @@ TargetedMovementGenerator::_setTargetLocation(Creature &owner)
         return;
 
     // prevent redundant micro-movement for pets, other followers.
-    if(i_offset && i_target.IsWithinDistInMap(&owner,2*i_offset))
+    if(i_offset && i_target->IsWithinDistInMap(&owner,2*i_offset))
         return;
 
     float x, y, z;
     if(!i_offset)
     {
         // to nearest contact position
-        i_target.GetContactPoint( &owner, x, y, z );
+        i_target->GetContactPoint( &owner, x, y, z );
     }
     else
     {
         // to at i_offset distance from target and i_angle from target facing
-        i_target.GetClosePoint(NULL,x,y,z,owner.GetObjectSize() + i_offset,i_angle);
+        i_target->GetClosePoint(NULL,x,y,z,owner.GetObjectSize() + i_offset,i_angle);
     }
 
     //We don't update Mob Movement, if the difference between New destination and last destination is < BothObjectSize
-    float  bothObjectSize = i_target.GetObjectSize() + owner.GetObjectSize() + CONTACT_DISTANCE;
+    float  bothObjectSize = i_target->GetObjectSize() + owner.GetObjectSize() + CONTACT_DISTANCE;
     if( i_destinationHolder.HasDestination() && i_destinationHolder.GetDestinationDiff(x,y,z) < bothObjectSize )
         return;
     Traveller<Creature> traveller(owner);
@@ -91,6 +91,9 @@ TargetedMovementGenerator::Reset(Creature &owner)
 bool
 TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
 {
+    if(!i_target.isValid()) {
+        return false;
+    }
     if( !&owner || !owner.isAlive() || !&i_target )
         return true;
     if( owner.hasUnitState(UNIT_STAT_ROOT) || owner.hasUnitState(UNIT_STAT_STUNDED) || owner.hasUnitState(UNIT_STAT_FLEEING))
@@ -102,7 +105,7 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
     }
 
     // prevent crash after creature killed pet
-    if (!owner.hasUnitState(UNIT_STAT_FOLLOW) && owner.getVictim() != &i_target)
+    if (!owner.hasUnitState(UNIT_STAT_FOLLOW) && owner.getVictim() != i_target.getTarget())
         return true;
 
     Traveller<Creature> traveller(owner);
@@ -122,26 +125,26 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
         if (owner.GetObjectSize())
             i_destinationHolder.ResetUpdate(50);
 
-        float  dist = i_target.GetObjectSize() + owner.GetObjectSize() + CONTACT_DISTANCE;
+        float  dist = i_target->GetObjectSize() + owner.GetObjectSize() + CONTACT_DISTANCE;
 
         // try to counter precision differences
-        if( i_destinationHolder.GetDistanceFromDestSq(i_target) > dist * dist + 0.8)
+        if( i_destinationHolder.GetDistanceFromDestSq(*i_target.getTarget()) > dist * dist + 0.8)
         {
-            owner.SetInFront(&i_target); // Set new Angle For Map::
+            owner.SetInFront(i_target.getTarget()); // Set new Angle For Map::
             _setTargetLocation(owner);  //Calculate New Dest and Send data To Player
         }
         // Update the Angle of the target only for Map::, no need to send packet for player
-        else if ( !i_angle && !owner.HasInArc( 0.01f, &i_target ) )
-            owner.SetInFront(&i_target);
+        else if ( !i_angle && !owner.HasInArc( 0.01f, i_target.getTarget() ) )
+            owner.SetInFront(i_target.getTarget());
 
         if( !owner.IsStopped() && i_destinationHolder.HasArrived())
         {
             //Angle update will take place into owner.StopMoving()
-            owner.SetInFront(&i_target);
+            owner.SetInFront(i_target.getTarget());
 
             owner.StopMoving();
-            if(owner.canReachWithAttack(&i_target) && !owner.hasUnitState(UNIT_STAT_FOLLOW))
-                owner.Attack(&i_target);
+            if(owner.canReachWithAttack(i_target.getTarget()) && !owner.hasUnitState(UNIT_STAT_FOLLOW))
+                owner.Attack(i_target.getTarget());
         }
     }
     return true;
@@ -168,7 +171,7 @@ void TargetedMovementGenerator::_spellAtack(Creature &owner, SpellEntry* spellIn
     owner.Attack(&owner);                                   //??
     owner.clearUnitState(UNIT_STAT_CHASE);
     SpellCastTargets targets;
-    targets.setUnitTarget( &i_target );
+    targets.setUnitTarget( i_target.getTarget() );
     spell->prepare(&targets);
     owner.m_canMove = false;
     DEBUG_LOG("Spell Attack.");

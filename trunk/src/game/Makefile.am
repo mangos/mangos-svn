@@ -228,7 +228,13 @@ libmangosgame_a_SOURCES = \
 	WorldSocket.cpp \
 	WorldSocket.h \
 	WorldSocketMgr.cpp \
-	WorldSocketMgr.h
+	WorldSocketMgr.h \
+	FollowerReference.cpp \
+	FollowerReference.h \
+	FollowerRefManager.h \
+	LinkedList.h \
+	Reference.h \
+	RefManager.h
 
 ## Link against shared library
 libmangosgame_a_LIBADD = ../shared/libmangosshared.a
