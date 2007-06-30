@@ -1221,8 +1221,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool ModifyFactionReputation(uint32 FactionTemplateId, int32 DeltaReputation);
         bool ModifyFactionReputation(FactionEntry const* factionEntry, int32 standing);
         int32 CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep) const;
-        void CalculateReputation(Unit *pVictim);
-        void CalculateReputation(Quest *pQuest, uint64 guid);
+        void RewardReputation(Unit *pVictim);
+        void RewardReputation(Quest *pQuest);
         void SetInitialFactions();
         void UpdateReputation() const;
         void SendSetFactionStanding(const Faction* faction) const;
@@ -1239,7 +1239,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         void UpdateArenaFields();
         void UpdateHonorFields();
-        void CalculateHonor(Unit *pVictim);
+        void RewardHonor(Unit *pVictim);
         uint32 GetHonorPoints() { return GetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY); }
         uint32 GetArenaPoints() { return GetUInt32Value(PLAYER_FIELD_ARENA_CURRENCY); }
         void SetHonorPoints(uint32 val) { SetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY, val); }

@@ -4748,7 +4748,7 @@ int32 Player::CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep) co
 }
 
 //Calculates how many reputation points player gains in wich victim's enemy factions
-void Player::CalculateReputation(Unit *pVictim)
+void Player::RewardReputation(Unit *pVictim)
 {
     if(!pVictim || pVictim->GetTypeId() == TYPEID_PLAYER)
         return;
@@ -4794,12 +4794,8 @@ void Player::CalculateReputation(Unit *pVictim)
 }
 
 //Calculate how many reputation points player gain with the quest
-void Player::CalculateReputation(Quest *pQuest, uint64 guid)
+void Player::RewardReputation(Quest *pQuest)
 {
-    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*this, guid);
-    if( !pCreature )
-        return;
-
     // quest reputation reward/losts
     for(int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)
     {
@@ -4856,7 +4852,7 @@ void Player::UpdateHonorFields()
 }
 
 //How much honor Player gains from uVictim
-void Player::CalculateHonor(Unit *uVictim)
+void Player::RewardHonor(Unit *uVictim)
 {
     if(!uVictim || uVictim == this || uVictim->GetTypeId() == TYPEID_UNIT)
         return;
@@ -10141,6 +10137,8 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward, Object* questGiver )
                 }
             }
         }
+
+        RewardReputation( pQuest );
 
         if( pQuest->GetRewSpell() > 0 )
             CastSpell( this, pQuest->GetRewSpell(), true);
