@@ -4290,13 +4290,13 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         AuraList& mDamageDonebySpi = GetAurasByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_SPIRIT);
         for(AuraList::iterator i = mDamageDonebySpi.begin();i != mDamageDonebySpi.end(); ++i)
             if((*i)->GetModifier()->m_miscvalue & 1 << spellProto->School)
-                DoneAdvertisedBenefit += GetStat(STAT_SPIRIT) * ((*i)->GetModifier()->m_amount) / 100;
+                DoneAdvertisedBenefit += uint32(GetStat(STAT_SPIRIT) * ((*i)->GetModifier()->m_amount) / 100);
     
         // ... and intellect
         AuraList& mDamageDonebyInt = GetAurasByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_INTELLECT);
         for(AuraList::iterator i = mDamageDonebyInt.begin();i != mDamageDonebyInt.end(); ++i)
             if ((*i)->GetModifier()->m_miscvalue & 1 << spellProto->School)
-                DoneAdvertisedBenefit += GetStat(STAT_INTELLECT) * ((*i)->GetModifier()->m_amount) / 100;
+                DoneAdvertisedBenefit += uint32(GetStat(STAT_INTELLECT) * ((*i)->GetModifier()->m_amount) / 100);
     }
 
     // ..taken
@@ -4520,9 +4520,9 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
     // Healing bonus of spirit, intellect and strength
     if (GetTypeId() == TYPEID_PLAYER)
     {
-        AdvertisedBenefit += GetStat(STAT_SPIRIT) * m_AuraModifiers[SPELL_AURA_MOD_SPELL_HEALING_OF_SPIRIT] / 100.0f;
-        AdvertisedBenefit += GetStat(STAT_INTELLECT) * m_AuraModifiers[SPELL_AURA_MOD_SPELL_HEALING_OF_INTELLECT] / 100.0f;
-        AdvertisedBenefit += GetStat(STAT_STRENGTH) * m_AuraModifiers[SPELL_AURA_MOD_SPELL_HEALING_OF_STRENGTH] / 100.0f;
+        AdvertisedBenefit += uint32(GetStat(STAT_SPIRIT) * m_AuraModifiers[SPELL_AURA_MOD_SPELL_HEALING_OF_SPIRIT] / 100.0f);
+        AdvertisedBenefit += uint32(GetStat(STAT_INTELLECT) * m_AuraModifiers[SPELL_AURA_MOD_SPELL_HEALING_OF_INTELLECT] / 100.0f);
+        AdvertisedBenefit += uint32(GetStat(STAT_STRENGTH) * m_AuraModifiers[SPELL_AURA_MOD_SPELL_HEALING_OF_STRENGTH] / 100.0f);
     }
 
     //flat

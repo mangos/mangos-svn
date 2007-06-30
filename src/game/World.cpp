@@ -52,10 +52,10 @@ INSTANTIATE_SINGLETON_1( World );
 
 volatile bool World::m_stopEvent = false;
 
-uint32 World::m_MaxVisibleDistanceForCreature  = DEFAULT_VISIBILITY_DISTANCE;
-uint32 World::m_MaxVisibleDistanceForPlayer    = DEFAULT_VISIBILITY_DISTANCE;
-uint32 World::m_MaxVisibleDistanceForObject    = DEFAULT_VISIBILITY_DISTANCE;
-uint32 World::m_MaxVisibleDistanceInFlight     = DEFAULT_VISIBILITY_DISTANCE;
+uint32 World::m_MaxVisibleDistanceForCreature  = uint32(DEFAULT_VISIBILITY_DISTANCE);
+uint32 World::m_MaxVisibleDistanceForPlayer    = uint32(DEFAULT_VISIBILITY_DISTANCE);
+uint32 World::m_MaxVisibleDistanceForObject    = uint32(DEFAULT_VISIBILITY_DISTANCE);
+uint32 World::m_MaxVisibleDistanceInFlight     = uint32(DEFAULT_VISIBILITY_DISTANCE);
 uint32 World::m_VisibleUnitGreyDistance        = 0;
 uint32 World::m_VisibleObjectGreyDistance      = 0;
 
@@ -366,16 +366,16 @@ void World::SetInitialWorldSettings()
     if(m_VisibleUnitGreyDistance >  MAX_VISIBILITY_DISTANCE)
     {
         sLog.outError("Visibility.Distance.Grey.Unit can't be greater %u",MAX_VISIBILITY_DISTANCE);
-        m_VisibleUnitGreyDistance = MAX_VISIBILITY_DISTANCE;
+        m_VisibleUnitGreyDistance = uint32(MAX_VISIBILITY_DISTANCE);
     }
     m_VisibleObjectGreyDistance = sConfig.GetIntDefault("Visibility.Distance.Grey.Object", 10);
     if(m_VisibleObjectGreyDistance >  MAX_VISIBILITY_DISTANCE)
     {
         sLog.outError("Visibility.Distance.Grey.Object can't be greater %u",MAX_VISIBILITY_DISTANCE);
-        m_VisibleObjectGreyDistance = MAX_VISIBILITY_DISTANCE;
+        m_VisibleObjectGreyDistance = uint32(MAX_VISIBILITY_DISTANCE);
     }
 
-    m_MaxVisibleDistanceForCreature      = sConfig.GetIntDefault("Visibility.Distance.Creature",     DEFAULT_VISIBILITY_DISTANCE);
+    m_MaxVisibleDistanceForCreature      = sConfig.GetIntDefault("Visibility.Distance.Creature",     uint32(DEFAULT_VISIBILITY_DISTANCE));
     if(m_MaxVisibleDistanceForCreature < uint32(45*sWorld.getRate(RATE_CREATURE_AGGRO)))
     {
         sLog.outError("Visibility.Distance.Creature can't be less max aggro radius %u",uint32(45*sWorld.getRate(RATE_CREATURE_AGGRO)));
@@ -384,9 +384,9 @@ void World::SetInitialWorldSettings()
     else if(m_MaxVisibleDistanceForCreature + m_VisibleUnitGreyDistance >  MAX_VISIBILITY_DISTANCE)
     {
         sLog.outError("Visibility. Distance .Creature can't be greater %u",MAX_VISIBILITY_DISTANCE - m_VisibleUnitGreyDistance);
-        m_MaxVisibleDistanceForCreature = MAX_VISIBILITY_DISTANCE-m_VisibleUnitGreyDistance;
+        m_MaxVisibleDistanceForCreature = uint32(MAX_VISIBILITY_DISTANCE-m_VisibleUnitGreyDistance);
     }
-    m_MaxVisibleDistanceForPlayer        = sConfig.GetIntDefault("Visibility.Distance.Player",       DEFAULT_VISIBILITY_DISTANCE);
+    m_MaxVisibleDistanceForPlayer        = sConfig.GetIntDefault("Visibility.Distance.Player",       uint32(DEFAULT_VISIBILITY_DISTANCE));
     if(m_MaxVisibleDistanceForPlayer < uint32(45*sWorld.getRate(RATE_CREATURE_AGGRO)))
     {
         sLog.outError("Visibility.Distance.Player can't be less max aggro radius %u",uint32(45*sWorld.getRate(RATE_CREATURE_AGGRO)));
@@ -395,9 +395,9 @@ void World::SetInitialWorldSettings()
     else if(m_MaxVisibleDistanceForPlayer + m_VisibleUnitGreyDistance >  MAX_VISIBILITY_DISTANCE)
     {
         sLog.outError("Visibility.Distance.Player can't be greater %u",MAX_VISIBILITY_DISTANCE - m_VisibleUnitGreyDistance);
-        m_MaxVisibleDistanceForPlayer = MAX_VISIBILITY_DISTANCE - m_VisibleUnitGreyDistance;
+        m_MaxVisibleDistanceForPlayer = uint32(MAX_VISIBILITY_DISTANCE - m_VisibleUnitGreyDistance);
     }
-    m_MaxVisibleDistanceForObject    = sConfig.GetIntDefault("Visibility.Distance.Gameobject",   DEFAULT_VISIBILITY_DISTANCE);
+    m_MaxVisibleDistanceForObject    = sConfig.GetIntDefault("Visibility.Distance.Gameobject",   uint32(DEFAULT_VISIBILITY_DISTANCE));
     if(m_MaxVisibleDistanceForObject < INTERACTION_DISTANCE)
     {
         sLog.outError("Visibility.Distance.Object can't be less max aggro radius %u",INTERACTION_DISTANCE);
@@ -406,13 +406,13 @@ void World::SetInitialWorldSettings()
     else if(m_MaxVisibleDistanceForObject + m_VisibleObjectGreyDistance >  MAX_VISIBILITY_DISTANCE)
     {
         sLog.outError("Visibility.Distance.Object can't be greater %u",MAX_VISIBILITY_DISTANCE-m_VisibleObjectGreyDistance);
-        m_MaxVisibleDistanceForObject = MAX_VISIBILITY_DISTANCE - m_VisibleObjectGreyDistance;
+        m_MaxVisibleDistanceForObject = uint32(MAX_VISIBILITY_DISTANCE - m_VisibleObjectGreyDistance);
     }
-    m_MaxVisibleDistanceInFlight    = sConfig.GetIntDefault("Visibility.Distance.InFlight",      DEFAULT_VISIBILITY_DISTANCE);
+    m_MaxVisibleDistanceInFlight    = sConfig.GetIntDefault("Visibility.Distance.InFlight",      uint32(DEFAULT_VISIBILITY_DISTANCE));
     if(m_MaxVisibleDistanceInFlight + m_VisibleObjectGreyDistance>  MAX_VISIBILITY_DISTANCE)
     {
         sLog.outError("Visibility.Distance.InFlight can't be greater %u",MAX_VISIBILITY_DISTANCE-m_VisibleObjectGreyDistance);
-        m_MaxVisibleDistanceInFlight = MAX_VISIBILITY_DISTANCE - m_VisibleObjectGreyDistance;
+        m_MaxVisibleDistanceInFlight = uint32(MAX_VISIBILITY_DISTANCE - m_VisibleObjectGreyDistance);
     }
 
     ///- Read the "Data" directory from the config file

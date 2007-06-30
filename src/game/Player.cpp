@@ -1881,7 +1881,7 @@ void Player::GiveXP(uint32 xp, Unit* victim)
     // handle SPELL_AURA_MOD_XP_PCT auras
     Unit::AuraList& ModXPPctAuras = GetAurasByType(SPELL_AURA_MOD_XP_PCT);
     for(Unit::AuraList::iterator i = ModXPPctAuras.begin();i != ModXPPctAuras.end(); ++i)
-        xp *= 1.0f + (*i)->GetModifier()->m_amount / 100.0f;
+        xp *= uint32(1.0f + (*i)->GetModifier()->m_amount / 100.0f);
 
     // XP resting bonus for kill
     uint32 rested_bonus_xp = victim ? GetXPRestBonus(xp) : 0;
@@ -6667,6 +6667,10 @@ uint8 Player::FindEquipSlot( ItemPrototype const* proto, uint32 slot, bool swap 
                     if (pClass == CLASS_SHAMAN)
                         slots[0] = EQUIPMENT_SLOT_RANGED;
                     break;
+		case ITEM_SUBCLASS_ARMOR_MISC:
+		    if (pClass == CLASS_WARLOCK)
+			slots[0] = EQUIPMENT_SLOT_RANGED;
+		    break;
             }
             break;
         }
