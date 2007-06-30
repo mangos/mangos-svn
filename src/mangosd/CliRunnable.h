@@ -48,7 +48,7 @@ class CliCommandHolder
             args = new char[strlen(arguments)+1];
             strcpy(args, arguments);
         }
-        ~CliCommandHolder() { delete args; }
+        ~CliCommandHolder() { delete[] args; }
         void Execute() const { cmd->Func(args, zprintf); }
 };
 
