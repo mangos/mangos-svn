@@ -49,6 +49,8 @@
 #define LANG_SPELL_RANK_END              "]"
 #define LANG_KNOWN                       " [known]"
 #define LANG_LEARN                       " [learn]"
+#define LANG_PASSIVE                     " [passive]"
+#define LANG_TALENT                      " [talent]"
 #define LANG_ACTIVE                      " [active]"
 #define LANG_COMPLETE                    " [complete]"
 #define LANG_OFFLINE                     " (offline)"

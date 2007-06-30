@@ -1745,14 +1745,19 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
                 uint32 rank = objmgr.GetSpellRank(id);      // unit32 used to prevent interpreting uint8 as char at output
                 bool known = m_session->GetPlayer()->HasSpell(id);
                 bool learn = (spellInfo->Effect[0] == SPELL_EFFECT_LEARN_SPELL);
+                bool talent = (GetTalentSpellCost(id) > 0);
+                bool passive = IsPassiveSpell(id);
 
-                // send spell in "id - name [rank N] [learn] [known]" format
+                // send spell in "id - name [talent] [rank N] [passive] [learn] [known]" format
                 std::ostringstream ss;
                 ss << id << " - " << spellInfo->SpellName[sWorld.GetDBClang()];
 
+                if(talent)
+                    ss << LANG_TALENT;
                 if(rank)
                     ss << LANG_SPELL_RANK_START << rank << LANG_SPELL_RANK_END;
-
+                if(passive)
+                    ss << LANG_PASSIVE;
                 if(learn)
                     ss << LANG_LEARN;
                 if(known)
