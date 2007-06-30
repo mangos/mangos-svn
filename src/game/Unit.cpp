@@ -949,11 +949,9 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             data << uint32(mod->m_auraname);
             data << (uint32)pdamage;
             data << (uint32)spellProto->School;
-            data << (uint32)0;                  // ?
-            data << (uint32)0;                  // ?
+            data << (uint32)absorb;
+            data << (uint32)resist;
             SendMessageToSet(&data,true);
-
-            SendSpellNonMeleeDamageLog(pVictim, spellProto->Id, pdamage, spellProto->School, absorb, resist, false, 0);
 
             DealDamage(pVictim, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), DOT, spellProto->School, spellProto, procFlag, true);
             ProcDamageAndSpell(pVictim, 0, PROC_FLAG_TAKE_DAMAGE, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), spellProto);
