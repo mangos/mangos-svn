@@ -4101,7 +4101,11 @@ void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)
                 if(itr->second->state == PLAYERSPELL_REMOVED) continue;
                 SkillLineAbilityEntry const *ability = sSkillLineAbilityStore.LookupEntry(itr->first);
                 if (ability && ability->skillId == id)
+                {
+                    // this may remove more than one spell (dependants)
                     removeSpell(itr->first);
+                    next = m_spells.begin();
+                }
             }
         }
     }else if(currVal)                                       //add
