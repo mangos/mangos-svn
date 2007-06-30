@@ -3129,10 +3129,8 @@ bool ChatHandler::HandleResetCommand (const char * args)
     {
         PlayerSpellMap::iterator itr;
         PlayerSpellMap smap = player->GetSpellMap();
-        for(itr = smap.begin(); itr != smap.end(); itr++)
-        {
-            player->removeSpell(itr->first);
-        }
+        while(!smap.empty())
+            player->removeSpell(smap.begin()->first);
 
         PlayerInfo const *info = objmgr.GetPlayerInfo(player->getRace(),player->getClass());
         std::list<CreateSpellPair>::const_iterator spell_itr;
