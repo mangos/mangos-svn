@@ -600,6 +600,11 @@ void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
 
     uint32 spellId;
     recvPacket >> spellId;
+
+    // not allow remove non positive spells
+    if(!IsPositiveSpell(spellId))
+        return;
+
     _player->RemoveAurasDueToSpell(spellId);
 }
 
