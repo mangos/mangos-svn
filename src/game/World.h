@@ -153,6 +153,38 @@ enum RealmType
     REALM_RPPVP = 8
 };
 
+/// CLI related stuff, define here to prevent cyclic dependancies
+
+typedef int(* pPrintf)(const char*,...);
+typedef void(* pCliFunc)(char *,pPrintf);
+
+/// Command Template class
+struct CliCommand
+{
+    char const * cmd;
+    pCliFunc Func;
+    char const * description;
+};
+
+/// Storage class for commands issued for delayed execution
+class CliCommandHolder
+{
+    private:
+        const CliCommand *cmd;
+        char *args;
+        pPrintf zprintf;
+    public:
+        CliCommandHolder(const CliCommand *command, const char *arguments, pPrintf zprintf) 
+            : cmd(command), zprintf(zprintf)
+        {
+            size_t len = strlen(arguments);
+            args = new char[len+1];
+            strncpy(args, arguments, len);
+        }
+        ~CliCommandHolder() { delete[] args; }
+        void Execute() const { cmd->Func(args, zprintf); }
+};
+
 /// The World
 class World
 {
