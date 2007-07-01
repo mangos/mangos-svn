@@ -257,12 +257,12 @@ MailDeliveryDelay = 3600
 # Message of the Day. Displayed at worldlogin for every user ('@' for a newline).
 Motd = "Welcome to the Massive Network Game Object Server."
 
-# Health and power regeneration.
-# Power1 - Mana; Power2 - Rage; Power3 - Focus (?).
+# Health and power regeneration and rage income from damage.
 Rate.Health = 1;
-Rate.Power1 = 1;
-Rate.Power2 = 1;
-Rate.Power3 = 1;
+Rate.Mana = 1;
+Rate.Rage.Income = 1;
+Rate.Rage.Loss = 1;
+Rate.Focus = 1;
 
 # Drop rates
 # Default: 1
