@@ -65,8 +65,12 @@ void Totem::Summon()
 
     AIM_Initialize();
 
-    if (m_type == TOTEM_PASSIVE)
-        this->CastSpell(this, m_spell, true);
+    switch(m_type)
+    {
+        case TOTEM_PASSIVE: CastSpell(this, m_spell, true); break;
+        case TOTEM_STATUE:  CastSpell(GetOwner(), m_spell, true); break;
+        default: break;
+    }
 }
 
 void Totem::UnSummon()
@@ -146,7 +150,12 @@ void Totem::SetSpell(uint32 spellId)
     if(spellId)
     {
         SpellEntry const *spellinfo = sSpellStore.LookupEntry(spellId);
-        if ( spellinfo && spellinfo->SpellFamilyFlags == 0x28000000 )
-            m_type = TOTEM_LAST_BURST;                      //For Fire Nova Totem and Corrupted Fire Nova Totem
+        if ( spellinfo)
+        {
+            if(spellinfo->SpellIconID==2056)
+                m_type = TOTEM_STATUE;                      //Jewelery statue
+            else if(spellinfo->SpellFamilyFlags == 0x28000000 )
+                m_type = TOTEM_LAST_BURST;                  //For Fire Nova Totem and Corrupted Fire Nova Totem
+        }
     }
 }

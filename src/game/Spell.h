@@ -71,6 +71,7 @@ enum Targets
     TARGET_IN_FRONT_OF_CASTER          = 24,
     TARGET_DUELVSPLAYER                = 25,
     TARGET_GAMEOBJECT_ITEM             = 26,
+    TARGET_MASTER                      = 27,
     TARGET_ALL_ENEMY_IN_AREA_CHANNELED = 28,
     TARGET_MINION                      = 32,
     TARGET_SINGLE_PARTY                = 35,
