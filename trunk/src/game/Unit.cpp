@@ -1035,7 +1035,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
 
             pVictim->ModifyPower(power, -drain_amount);
 
-            float gain_multiplier = getPowerType()==power ? spellProto->EffectMultipleValue[effect_idx] : 0;
+            float gain_multiplier = GetMaxPower(power) > 0 ? spellProto->EffectMultipleValue[effect_idx] : 0;
 
             WorldPacket data(SMSG_PERIODICAURALOG, (21+16));    // we guess size
             data.append(pVictim->GetPackGUID());
@@ -1064,7 +1064,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
 
             Powers power = Powers(mod->m_miscvalue);
 
-            if(pVictim->getPowerType() != power)
+            if(pVictim->GetMaxPower(power) == 0)
                 break;
 
             WorldPacket data(SMSG_PERIODICAURALOG, (21+16));    // we guess size
@@ -1083,7 +1083,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         }
         case SPELL_AURA_OBS_MOD_MANA:
         {
-            if(getPowerType() != POWER_MANA)
+            if(GetMaxPower(POWER_MANA) == 0)
                 break;
 
             WorldPacket data(SMSG_PERIODICAURALOG, (21+16));        // we guess size

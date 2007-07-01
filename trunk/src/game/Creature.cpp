@@ -149,6 +149,24 @@ void Creature::LoadTrainerSpells()
     m_trainerSpellsLoaded = true;
 }
 
+void Creature::RemoveCorpse()
+{
+    if(getDeathState()!=CORPSE)
+        return;
+
+    m_deathTimer = 0;
+    ObjectAccessor::UpdateObjectVisibility(this);
+    lootForPickPocketed = false;
+    lootForBody         = false;
+    loot.clear();
+    setDeathState(DEAD);
+    m_respawnTime = time(NULL) + m_respawnDelay;
+
+    float x,y,z;
+    GetRespawnCoord(x, y, z);
+    MapManager::Instance().GetMap(GetMapId(), this)->CreatureRelocation(this,x,y,z,GetOrientation());
+}
+
 void Creature::Update(uint32 diff)
 {
     switch( m_deathState )
@@ -184,18 +202,8 @@ void Creature::Update(uint32 diff)
         {
             if( m_deathTimer <= diff )
             {
-                m_deathTimer = 0;
+                RemoveCorpse();
                 DEBUG_LOG("Removing corpse... %u ", GetUInt32Value(OBJECT_FIELD_ENTRY));
-                ObjectAccessor::UpdateObjectVisibility(this);
-                lootForPickPocketed = false;
-                lootForBody         = false;
-                loot.clear();
-                setDeathState(DEAD);
-                m_respawnTime = time(NULL) + m_respawnDelay;
-
-                float x,y,z;
-                GetRespawnCoord(x, y, z);
-                MapManager::Instance().GetMap(GetMapId(), this)->CreatureRelocation(this,x,y,z,GetOrientation());
             }
             else
             {

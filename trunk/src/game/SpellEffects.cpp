@@ -1944,8 +1944,8 @@ void Spell::EffectTameCreature(uint32 i)
         if(m_caster->getVictim()==creatureTarget)
             m_caster->AttackStop();
 
-        creatureTarget->CombatStop(true);
-        creatureTarget->StopMoving();
+        creatureTarget->setDeathState(JUST_DIED);
+        creatureTarget->RemoveCorpse();
 
         // cast finish successfully
         SendChannelUpdate(0);
@@ -1987,9 +1987,6 @@ void Spell::EffectTameCreature(uint32 i)
 
         ObjectAccessor::Instance().AddPet(pet);
         MapManager::Instance().GetMap(pet->GetMapId(), pet)->Add((Creature*)pet);
-
-        creatureTarget->setDeathState(JUST_DIED);
-        ObjectAccessor::UpdateObjectVisibility(creatureTarget);
 
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
         {
