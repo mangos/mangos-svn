@@ -90,8 +90,8 @@ const CliCommand Commands[]=
     {"exit", & CliExit,"Shutdown server NOW"},
     {"writepdump", &CliWritePlayerDump,"Write a player dump to a file"},
     {"loadpdump", &CliLoadPlayerDump,"Load a player dump from a file"},
-	{"saveall", &CliSave,"Save all players"},
-	{"send", &CliSend,"Send message to a player"}
+    {"saveall", &CliSave,"Save all players"},
+    {"send", &CliSend,"Send message to a player"}
 };
 /// \todo Need some pragma pack? Else explain why in a comment.
 #define CliTotalCmds sizeof(Commands)/sizeof(CliCommand)
@@ -703,15 +703,15 @@ void CliSetTBC(char *command,pPrintf zprintf)
 void CliSave(char*,pPrintf zprintf)
 {
     //Saves players & send message
-	ObjectAccessor::Instance().SaveAllPlayers();
-	zprintf( "All Players Saved \n" );
-	sWorld.SendWorldText("Players saved!", NULL);
+    ObjectAccessor::Instance().SaveAllPlayers();
+    zprintf( "All Players Saved \n" );
+    sWorld.SendWorldText("Players saved!", NULL);
 }
 
 void CliSend(char *playerN,pPrintf zprintf)
 {
-	char* plr = strtok((char*)playerN, " ");
-	char* msg = strtok(NULL, "");
+    char* plr = strtok((char*)playerN, " ");
+    char* msg = strtok(NULL, "");
 
     if(!plr || !msg)
     {
@@ -733,14 +733,29 @@ void CliSend(char *playerN,pPrintf zprintf)
     }
 
     //Use SendAreaTriggerMessage for fastest delivery.
-	rPlayer->GetSession()->SendAreaTriggerMessage("%s", msg);
-	rPlayer->GetSession()->SendAreaTriggerMessage("|cffff0000[Message from administrator]:|r");
-	
+    rPlayer->GetSession()->SendAreaTriggerMessage("%s", msg);
+    rPlayer->GetSession()->SendAreaTriggerMessage("|cffff0000[Message from administrator]:|r");
+    
     //Confirmation message
-	zprintf("I said '%s' to %s\r\n",msg , plr);
+    zprintf("I said '%s' to %s\r\n",msg , plr);
 }
 
 /// @}
+
+#ifdef linux
+// Non-blocking keypress detector, when return pressed, return 1, else always return 0
+int kb_hit_return()
+{
+    struct timeval tv;
+    fd_set fds;
+    tv.tv_sec = 0;
+    tv.tv_usec = 0;
+    FD_ZERO(&fds);
+    FD_SET(STDIN_FILENO, &fds);
+    select(STDIN_FILENO+1, &fds, NULL, NULL, &tv);
+    return FD_ISSET(STDIN_FILENO, &fds);
+}
+#endif
 
 /// %Thread start
 void CliRunnable::run()
@@ -768,6 +783,13 @@ void CliRunnable::run()
     while (!World::m_stopEvent)
     {
         fflush(stdout);
+        #ifdef linux
+        while (!kb_hit_return() && !World::m_stopEvent)
+            // With this, we limit CLI to 10commands/second
+            usleep(100);
+        if (World::m_stopEvent)
+            break;
+        #endif
         char *command = fgets(commandbuf,sizeof(commandbuf),stdin);
         if (command != NULL)
         {
