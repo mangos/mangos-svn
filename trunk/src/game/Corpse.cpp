@@ -263,5 +263,5 @@ void Corpse::_ConvertCorpseToBones()
 
 bool Corpse::isVisibleForInState(Player const* u, bool inVisibleList) const
 {
-    return IsInWorld() && u->IsInWorld() && IsWithinDistInMap(u,World::GetMaxVisibleDistanceForObject()+(inVisibleList ? World::GetVisibleObjectGreyDistance() : 0));
+    return IsInWorld() && u->IsInWorld() && IsWithinDistInMap(u,World::GetMaxVisibleDistanceForObject()+(inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f));
 }

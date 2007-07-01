@@ -511,5 +511,5 @@ void GameObject::SaveRespawnTime()
 bool GameObject::isVisibleForInState(Player const* u, bool inVisibleList) const
 {
     return IsInWorld() && u->IsInWorld() && ( IsTransport() && IsInMap(u) ||
-        isSpawned() && IsWithinDistInMap(u,World::GetMaxVisibleDistanceForObject()+(inVisibleList ? World::GetVisibleObjectGreyDistance() : 0)) );
+        isSpawned() && IsWithinDistInMap(u,World::GetMaxVisibleDistanceForObject()+(inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f)) );
 }

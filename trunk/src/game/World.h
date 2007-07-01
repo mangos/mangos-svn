@@ -291,12 +291,12 @@ class World
         void ScriptsStart(map<uint32, multimap<uint32, ScriptInfo> > const& scripts, uint32 id, Object* source, Object* target);
 
         // for max speed access
-        static uint32 GetMaxVisibleDistanceForCreature() { return m_MaxVisibleDistanceForCreature; }
-        static uint32 GetMaxVisibleDistanceForPlayer()   { return m_MaxVisibleDistanceForPlayer;   }
-        static uint32 GetMaxVisibleDistanceForObject()   { return m_MaxVisibleDistanceForObject;   }
-        static uint32 GetMaxVisibleDistanceInFlight()    { return m_MaxVisibleDistanceInFlight;    }
-        static uint32 GetVisibleUnitGreyDistance()       { return m_VisibleUnitGreyDistance;       }
-        static uint32 GetVisibleObjectGreyDistance()     { return m_VisibleObjectGreyDistance;     }
+        static float GetMaxVisibleDistanceForCreature() { return m_MaxVisibleDistanceForCreature; }
+        static float GetMaxVisibleDistanceForPlayer()   { return m_MaxVisibleDistanceForPlayer;   }
+        static float GetMaxVisibleDistanceForObject()   { return m_MaxVisibleDistanceForObject;   }
+        static float GetMaxVisibleDistanceInFlight()    { return m_MaxVisibleDistanceInFlight;    }
+        static float GetVisibleUnitGreyDistance()       { return m_VisibleUnitGreyDistance;       }
+        static float GetVisibleObjectGreyDistance()     { return m_VisibleObjectGreyDistance;     }
 
         void ProcessCliCommands();
         void QueueCliCommand(CliCommandHolder* command) { cliCmdQueue.add(command); }
@@ -334,12 +334,12 @@ class World
         uint32 m_ShutdownTimer;
 
         // for max speed access
-        static uint32 m_MaxVisibleDistanceForCreature;
-        static uint32 m_MaxVisibleDistanceForPlayer;
-        static uint32 m_MaxVisibleDistanceForObject;
-        static uint32 m_MaxVisibleDistanceInFlight;
-        static uint32 m_VisibleUnitGreyDistance;
-        static uint32 m_VisibleObjectGreyDistance;
+        static float m_MaxVisibleDistanceForCreature;
+        static float m_MaxVisibleDistanceForPlayer;
+        static float m_MaxVisibleDistanceForObject;
+        static float m_MaxVisibleDistanceInFlight;
+        static float m_VisibleUnitGreyDistance;
+        static float m_VisibleObjectGreyDistance;
 
         // CLI command holder to be thread safe
         ZThread::LockedQueue<CliCommandHolder*, ZThread::FastMutex> cliCmdQueue;

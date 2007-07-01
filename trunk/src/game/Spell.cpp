@@ -628,7 +628,15 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                 m_targetGameobjectGUIDs[i].push_back(m_targets.getGOTargetGUID());
             else if(m_targets.m_itemTarget)
                 m_targetItems[i].push_back(m_targets.m_itemTarget);
-        }break;
+            break;
+        }
+        case TARGET_MASTER:
+        {
+            Unit* owner = m_caster->GetCharmerOrOwner();
+            if(owner)
+                TagUnitMap.push_back(owner);
+            break;
+        }
         case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
         {
             // targets the ground, not the units in the area

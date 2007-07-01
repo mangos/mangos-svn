@@ -1687,6 +1687,13 @@ void Spell::EffectSummonWild(uint32 i)
     if(!pet_entry)
         return;
 
+    // Jewelery statue case (totem like)
+    if(m_spellInfo->SpellIconID==2056)
+    {
+        EffectSummonTotem(i);
+        return;
+    }
+
     Pet* old_wild = NULL;
 
     {
@@ -2627,10 +2634,12 @@ void Spell::EffectSummonTotem(uint32 i)
         case SPELL_EFFECT_SUMMON_TOTEM_SLOT2: slot = 1; break;
         case SPELL_EFFECT_SUMMON_TOTEM_SLOT3: slot = 2; break;
         case SPELL_EFFECT_SUMMON_TOTEM_SLOT4: slot = 3; break;
+        // jewelery statue case, like totem without slot
+        case SPELL_EFFECT_SUMMON_GUARDIAN:    slot = 255; break;
         default: return;
     }
 
-    float angle = m_caster->GetOrientation() + M_PI/4 - (slot*M_PI/2);
+    float angle = slot < 4 ? m_caster->GetOrientation() + M_PI/4 - (slot*M_PI/2) : m_caster->GetOrientation();
     float x = m_caster->GetPositionX() + 2 * cos(angle);
     float y = m_caster->GetPositionY() + 2 * sin(angle);
     float z = m_caster->GetPositionZ();
@@ -2640,12 +2649,15 @@ void Spell::EffectSummonTotem(uint32 i)
     if( abs( z2 - z ) < 5 )
         z = z2;
 
-    uint64 guid = m_caster->m_TotemSlot[slot];
-    if(guid != 0)
+    if(slot <4 )
     {
-        Creature *OldTotem = ObjectAccessor::Instance().GetCreature(*m_caster, guid);
-        if(OldTotem && OldTotem->isTotem())
-            ((Totem*)OldTotem)->UnSummon();
+        uint64 guid = m_caster->m_TotemSlot[slot];
+        if(guid != 0)
+        {
+            Creature *OldTotem = ObjectAccessor::Instance().GetCreature(*m_caster, guid);
+            if(OldTotem && OldTotem->isTotem())
+                ((Totem*)OldTotem)->UnSummon();
+        }
     }
 
     Totem* pTotem = new Totem(m_caster);
@@ -2658,7 +2670,9 @@ void Spell::EffectSummonTotem(uint32 i)
         return;
     }
 
-    m_caster->m_TotemSlot[slot] = pTotem->GetGUID();
+    if(slot < 4)
+        m_caster->m_TotemSlot[slot] = pTotem->GetGUID();
+
     pTotem->SetOwner(m_caster->GetGUID());
     //pTotem->SetSpell(pTotem->GetCreatureInfo()->spell1);
     pTotem->SetSpell(m_spellInfo->Id);                      //use SummonTotem spellid
