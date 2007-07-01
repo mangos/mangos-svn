@@ -1534,7 +1534,7 @@ void Player::CalcRage( uint32 damage,bool attacker )
     }
     else
         addRage = damage/rageconversion*2.5;
-
+    addRage *= sWorld.getRate(RATE_POWER_RAGE_INCOME);
     ModifyPower(POWER_RAGE, uint32(addRage*10));
 }
 
@@ -1615,9 +1615,9 @@ void Player::Regenerate(Powers power)
         }   break;
         case POWER_RAGE:                                    // Regenerate rage
         {
-            float RageIncreaseRate = sWorld.getRate(RATE_POWER_RAGE);
-            if( RageIncreaseRate <= 0 ) RageIncreaseRate = 1;
-            addvalue = 30 * RageIncreaseRate;               // 3 rage by tick
+            float RageDecreaseRate = sWorld.getRate(RATE_POWER_RAGE_LOSS);
+            if( RageDecreaseRate <= 0 ) RageDecreaseRate = 1;
+            addvalue = 30 * RageDecreaseRate;               // 3 rage by tick
         }   break;
         case POWER_ENERGY:                                  // Regenerate energy (rogue)
             addvalue = 20;
