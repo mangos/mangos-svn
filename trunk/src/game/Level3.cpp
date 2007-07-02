@@ -2174,7 +2174,11 @@ bool ChatHandler::HandleMorphCommand(const char* args)
 
     uint16 display_id = (uint16)atoi((char*)args);
 
-    m_session->GetPlayer()->SetUInt32Value(UNIT_FIELD_DISPLAYID, display_id);
+    Unit *target = getSelectedUnit();
+    if(!target)
+        target = m_session->GetPlayer();
+
+    target->SetUInt32Value(UNIT_FIELD_DISPLAYID, display_id);
 
     return true;
 }
