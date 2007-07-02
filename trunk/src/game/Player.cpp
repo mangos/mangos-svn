@@ -577,7 +577,7 @@ void Player::EnvironmentalDamage(uint64 Guid, uint8 Type, uint32 Amount)
     //m_session->SendPacket(&data);
     //Let other players see that you get damage
     SendMessageToSet(&data, true);
-    DealDamage((Unit*)this, Amount, SELF_DAMAGE, 0, NULL, 0, true);
+    DealDamage((Unit*)this, Amount, NULL, SELF_DAMAGE, 0, NULL, 0, true);
 }
 
 void Player::HandleDrowning(uint32 UnderWaterTime)
@@ -1521,7 +1521,7 @@ void Player::RemoveFromWorld()
     Object::RemoveFromWorld();
 }
 
-void Player::CalcRage( uint32 damage,bool attacker )
+void Player::RewardRage( uint32 damage, uint32 weaponSpeedHitFactor, bool attacker )
 {
     float addRage;
 
@@ -1529,12 +1529,16 @@ void Player::CalcRage( uint32 damage,bool attacker )
 
     if(attacker)
     {
-        addRage = damage/rageconversion*7.5;
+        addRage = ((damage/rageconversion*7.5 + weaponSpeedHitFactor)/2);
+
+        // talent who gave more rage on attack
         addRage *= 1.0f + GetTotalAuraModifier(SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT) / 100.0f;
     }
     else
         addRage = damage/rageconversion*2.5;
+
     addRage *= sWorld.getRate(RATE_POWER_RAGE_INCOME);
+
     ModifyPower(POWER_RAGE, uint32(addRage*10));
 }
 

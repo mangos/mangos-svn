@@ -301,12 +301,18 @@ void Unit::RemoveSpellbyDamageTaken(uint32 auraType, uint32 damage)
         RemoveSpellsCausingAura(auraType);
 }
 
-void Unit::DealDamage(Unit *pVictim, uint32 damage, DamageEffectType damagetype, uint8 damageSchool,
-SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
+void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, uint8 damageSchool, SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
 {
     if (!pVictim->isAlive() || pVictim->isInFlight()) return;
 
-    if(!damage) return;
+    if(!damage) 
+    {
+        // Rage from damage received.
+        if(cleanDamage && cleanDamage->damage && pVictim->GetTypeId() == TYPEID_PLAYER && (pVictim->getPowerType() == POWER_RAGE))
+            ((Player*)pVictim)->RewardRage(cleanDamage->damage, 0, false);
+
+        return;
+    }
 
     if(HasStealthAura())
         RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
@@ -357,6 +363,38 @@ SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
     {
         SetInCombat();
         pVictim->SetInCombat();
+    }
+
+    // Rage from Damage made
+    if( cleanDamage && this != pVictim && GetTypeId() == TYPEID_PLAYER && (getPowerType() == POWER_RAGE))
+    {
+        uint32 weaponSpeedHitFactor;
+
+        switch(cleanDamage->attackType)
+        {
+            case BASE_ATTACK:
+            {
+                if(cleanDamage->hitOutCome == MELEE_HIT_CRIT)
+                    weaponSpeedHitFactor = uint32(GetAttackTime(cleanDamage->attackType)/1000.0f * 7);
+                else 
+                    weaponSpeedHitFactor = uint32(GetAttackTime(cleanDamage->attackType)/1000.0f * 3.5f);
+
+               ((Player*)this)->RewardRage(damage, weaponSpeedHitFactor, true);
+
+               break;
+            }
+            case OFF_ATTACK:
+            {
+                if(cleanDamage->hitOutCome == MELEE_HIT_CRIT)
+                    weaponSpeedHitFactor = uint32(GetAttackTime(cleanDamage->attackType)/1000.0f * 3.5f);
+                else
+                    weaponSpeedHitFactor = uint32(GetAttackTime(cleanDamage->attackType)/1000.0f * 1.75f);
+
+                ((Player*)this)->RewardRage(damage, weaponSpeedHitFactor, true);
+
+                break;
+            }
+        }
     }
 
     if (health <= damage)
@@ -573,11 +611,12 @@ SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
         }
         else                                                // victim is a player
         {
-            // rage from received damage (from creatures and players)
-            if( pVictim != this                             // not generate rage for self damage (falls, ...)
-                // warrior and some druid forms
-                && (((Player*)pVictim)->getPowerType() == POWER_RAGE))
-                ((Player*)pVictim)->CalcRage(damage,false);
+            // Rage from damage received
+            if(this != pVictim && pVictim->GetTypeId() == TYPEID_PLAYER && pVictim->getPowerType() == POWER_RAGE)
+            {
+                uint32 rage_damage = damage + (cleanDamage ? cleanDamage->damage : 0);
+                ((Player*)pVictim)->RewardRage(rage_damage, 0, false);
+            }
 
             // random durability for items (HIT)
             if (urand(0,300) == 10)
@@ -685,7 +724,7 @@ void Unit::CastSpell(Unit* Victim,SpellEntry const *spellInfo, bool triggered, I
     if (triggered) delete spell;                            // triggered spell not self deleted
 }
 
-void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32 *damage, bool *crit, bool isTriggeredSpell)
+void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32 *damage, CleanDamage *cleanDamage, bool *crit, bool isTriggeredSpell)
 {
 
     // TODO this in only generic way, check for exceptions
@@ -700,6 +739,9 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
             // Calculate physical outcome
             MeleeHitOutcome outcome;
             outcome = RollPhysicalOutcomeAgainst(pVictim, BASE_ATTACK, spellInfo);
+            
+            //Used to store the Hit Outcome
+            cleanDamage->hitOutCome = outcome;
 
             // Return miss first (sends miss message)
             if(outcome == MELEE_HIT_MISS)
@@ -716,7 +758,10 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
             hitInfo = HITINFO_NORMALSWING;
 
             //Calculate armor mitigation
-            *damage = CalcArmorReducedDamage(pVictim, *damage);
+            uint32 damageAfterArmor;
+            damageAfterArmor = CalcArmorReducedDamage(pVictim, *damage);
+            cleanDamage->damage += *damage - damageAfterArmor;
+            *damage = damageAfterArmor;
 
             // Classify outcome
             switch (outcome)
@@ -725,13 +770,16 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
                 {
                     *damage *= 2;
                     // Resilience - reduce crit damage by 2x%
-                    *damage -= uint32(pVictim->m_modResilience * 2/100 * (*damage));
+                    uint32 resilienceReduction = uint32(pVictim->m_modResilience * 2/100 * (*damage));
+                    cleanDamage->damage += resilienceReduction;
+                    *damage -=  resilienceReduction;
                     *crit = true;
                     hitInfo |= HITINFO_CRITICALHIT;
                     break;
                 }
                 case MELEE_HIT_PARRY:
                 {
+                    cleanDamage->damage += *damage; // To Help Calculate Rage
                     *damage = 0;
                     victimState = VICTIMSTATE_PARRY;
 
@@ -786,6 +834,7 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
                     if(pVictim->GetTypeId() == TYPEID_PLAYER)
                         ((Player*)pVictim)->UpdateDefense();
 
+                    cleanDamage->damage += *damage; // To Help Calculate Rage
                     *damage = 0;
                     hitInfo |= HITINFO_SWINGNOHITSOUND;
                     victimState = VICTIMSTATE_DODGE;
@@ -799,10 +848,14 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
                     {
                         hitInfo |= HITINFO_SWINGNOHITSOUND;
                         victimState = VICTIMSTATE_BLOCKS;
+                        cleanDamage->damage += *damage; // To Help Calculate Rage
                         *damage = 0;
                     }
                     else
+                    {
+                        cleanDamage->damage += blocked_amount; // To Help Calculate Rage
                         *damage = *damage - blocked_amount;
+                    }
                     break;
 
                 }
@@ -824,6 +877,7 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
             //Spell miss (sends resist message)
             if(SpellMissChanceCalc(pVictim) > urand(0,10000))
             {
+                cleanDamage->damage = 0;
                 *damage = 0;
                 ProcDamageAndSpell(pVictim, PROC_FLAG_TARGET_RESISTS, PROC_FLAG_RESIST_SPELL, 0, spellInfo,isTriggeredSpell);
                 SendAttackStateUpdate(HITINFO_RESIST|HITINFO_SWINGNOHITSOUND, pVictim, 1, spellInfo->School, 0, 0,0,1,0);
@@ -835,6 +889,7 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
 
             // Calculate critical bonus
             *crit = SpellCriticalBonus(spellInfo, (int32*)damage, pVictim);
+            cleanDamage->hitOutCome = MELEE_HIT_CRIT;
             break;
     }
 
@@ -854,10 +909,11 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, 
     if(!spellInfo)
         return;
 
+    CleanDamage cleanDamage = CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL);
     bool crit = false;
 
     if (useSpellDamage)
-        DealDamageBySchool(pVictim, spellInfo, &damage, &crit, isTriggeredSpell);
+        DealDamageBySchool(pVictim, spellInfo, &damage, &cleanDamage, &crit, isTriggeredSpell);
 
     // If we actually dealt some damage
     if(damage > 0)
@@ -866,7 +922,7 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, 
         uint32 absorb = 0;
         uint32 resist = 0;
 
-        CalcAbsorbResist(pVictim,spellInfo->School,damage, &absorb, &resist);
+        CalcAbsorbResist(pVictim,spellInfo->School, damage, &absorb, &resist);
 
         // Only send absorbed message if we actually absorbed some damage
         if(damage > 0)
@@ -891,7 +947,7 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, 
         SendSpellNonMeleeDamageLog(pVictim, spellID, damage, spellInfo->School, absorb, resist, false, 0, crit);
 
         // Deal damage done
-        DealDamage(pVictim, (damage-absorb-resist), SPELL_DIRECT_DAMAGE, spellInfo->School, spellInfo, 0, true);
+        DealDamage(pVictim, (damage-absorb-resist), &cleanDamage, SPELL_DIRECT_DAMAGE, spellInfo->School, spellInfo, 0, true);
 
         // Procflags
         uint32 procAttacker = PROC_FLAG_HIT_SPELL;
@@ -905,6 +961,11 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, 
 
         ProcDamageAndSpell(pVictim, procAttacker, procVictim, (damage-absorb-resist), spellInfo, isTriggeredSpell);
     }
+    //Check for rage
+    else if(cleanDamage.damage) 
+        // Rage from damage received.
+        if(pVictim->GetTypeId() == TYPEID_PLAYER && (pVictim->getPowerType() == POWER_RAGE))
+            ((Player*)pVictim)->RewardRage(cleanDamage.damage, 0, false);
 }
 
 void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier *mod, uint8 effect_idx)
@@ -916,14 +977,18 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
     }
     uint32 absorb=0;
     uint32 resist=0;
-
+    CleanDamage cleanDamage =  CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL );
     uint32 pdamage = mod->m_amount;
 
     if(mod->m_auraname != SPELL_AURA_PERIODIC_HEAL && mod->m_auraname != SPELL_AURA_OBS_MOD_HEALTH)
     {
         //Calculate armor mitigation if it is a physical spell
         if (spellProto->School == 0)
-            pdamage = CalcArmorReducedDamage(pVictim, pdamage);
+        {
+            uint32 pdamageReductedArmor = CalcArmorReducedDamage(pVictim, pdamage);
+            cleanDamage.damage += pdamage - pdamageReductedArmor;
+            pdamage = pdamageReductedArmor;
+        }
 
         CalcAbsorbResist(pVictim, spellProto->School, pdamage, &absorb, &resist);
     }
@@ -953,7 +1018,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             data << (uint32)resist;
             SendMessageToSet(&data,true);
 
-            DealDamage(pVictim, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), DOT, spellProto->School, spellProto, procFlag, true);
+            DealDamage(pVictim, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), &cleanDamage, DOT, spellProto->School, spellProto, procFlag, true);
             ProcDamageAndSpell(pVictim, 0, PROC_FLAG_TAKE_DAMAGE, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), spellProto);
             break;
         }
@@ -991,7 +1056,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
                 else
                 {
                     SendSpellNonMeleeDamageLog(this, spellProto->Id, gain, spellProto->School, 0, 0, false, 0, false);
-                    DealDamage(this, gain, NODAMAGE, spellProto->School, spellProto, PROC_FLAG_HEAL, true);
+                    DealDamage(this, gain, &cleanDamage, NODAMAGE, spellProto->School, spellProto, PROC_FLAG_HEAL, true);
                 }
             }
 
@@ -1010,7 +1075,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
                 pdamage = uint32(pVictim->GetHealth());
 
             SendSpellNonMeleeDamageLog(pVictim, spellProto->Id, pdamage, spellProto->School, absorb, resist, false, 0);
-            DealDamage(pVictim, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), DOT, spellProto->School, spellProto, procFlag, false);
+            DealDamage(pVictim, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), &cleanDamage, DOT, spellProto->School, spellProto, procFlag, false);
             ProcDamageAndSpell(pVictim, PROC_FLAG_HIT_SPELL, PROC_FLAG_TAKE_DAMAGE, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), spellProto);
             if (!pVictim->isAlive() && m_currentSpell)
                 if (m_currentSpell->m_spellInfo)
@@ -1205,7 +1270,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim,uint32 School, const uint32 damage, ui
     *absorb = damage - RemainingDamage - *resist;
 }
 
-void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType, SpellEntry const *spellCasted, bool isTriggeredSpell)
+void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDamage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType, SpellEntry const *spellCasted, bool isTriggeredSpell)
 {
     pVictim->ModifyAuraState(AURA_STATE_PARRY, false);
     pVictim->ModifyAuraState(AURA_STATE_DEFENSE, false);
@@ -1223,6 +1288,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
     {
         *hitInfo |= HITINFO_MISS;
         *damage = 0;
+        cleanDamage->damage = 0;
         if(GetTypeId()== TYPEID_PLAYER)
             ((Player*)this)->UpdateWeaponSkill(attType);
         return;
@@ -1232,8 +1298,11 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
 
     //Calculate the damage after armor mitigation if SPELL_SCHOOL_NORMAL
     if (*damageType == SPELL_SCHOOL_NORMAL)
-        *damage = CalcArmorReducedDamage(pVictim, *damage);
-
+    {
+        uint32 damageAfterArmor = CalcArmorReducedDamage(pVictim, *damage);
+        cleanDamage->damage += *damage - damageAfterArmor;
+        *damage = damageAfterArmor;
+    }
     // Instant Attacks (Spellmods) 
     // TODO: AP bonus related to mainhand weapon 
     if(spellCasted) 
@@ -1266,7 +1335,10 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
             *damage += crit_bonus;
             
             // Resilience - reduce crit damage by 2x%
-            *damage -= uint32(pVictim->m_modResilience * 2/100 * (*damage));
+            uint32 resilienceReduction; 
+            resilienceReduction = uint32(pVictim->m_modResilience * 2/100 * (*damage));
+            *damage -= resilienceReduction;
+            cleanDamage->damage += resilienceReduction;
 
             if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && ((Creature*)pVictim)->GetCreatureInfo()->type != CREATURE_TYPE_CRITTER )
                 ((Player*)this)->UpdateWeaponSkill(attType);
@@ -1279,10 +1351,8 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
         case MELEE_HIT_PARRY:
             if(attType == RANGED_ATTACK)                    //range attack - no parry
                 break;
-            // at parry warrior also receive rage like from hit to enemy
-            if(GetTypeId() == TYPEID_PLAYER && getPowerType() == POWER_RAGE)
-                ((Player*)this)->CalcRage(*damage,true);
 
+            cleanDamage->damage += *damage;
             *damage = 0;
             *victimState = VICTIMSTATE_PARRY;
 
@@ -1343,6 +1413,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
         case MELEE_HIT_DODGE:
             if(attType == RANGED_ATTACK)                    //range attack - no dodge
                 break;
+            cleanDamage->damage += *damage;
             *damage = 0;
             *victimState = VICTIMSTATE_DODGE;
 
@@ -1383,7 +1454,8 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
             int32 reducePerc = 100 - (pVictim->GetDefenceSkillValue() - GetWeaponSkillValue(attType) - 5) * 3;
             if (reducePerc < 70)
                 reducePerc = 70;
-            *damage = *damage * reducePerc / 100;
+            cleanDamage->damage += (100-reducePerc)/100 * *damage;
+            *damage *= reducePerc / 100;
             *hitInfo |= HITINFO_GLANCING;
             break;
         }
@@ -1391,6 +1463,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
         {
             // 150% normal damage
             *damage += (*damage / 2);
+            cleanDamage->damage = *damage;
             *hitInfo |= HITINFO_CRUSHING;
             // TODO: victimState, victim animation?
             break;
@@ -1408,6 +1481,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, uint32 *blocked_amount
 
     if (*absorbDamage) *hitInfo |= HITINFO_ABSORB;
     if (*resistDamage) *hitInfo |= HITINFO_RESIST;
+    cleanDamage += *blocked_amount;
 
     if (*damage <= *absorbDamage + *resistDamage + *blocked_amount)
     {
@@ -1483,6 +1557,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool is
     uint32   victimState = VICTIMSTATE_NORMAL;
 
     uint32   damage = 0;
+    CleanDamage cleanDamage = CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL );
     uint32   blocked_dmg = 0;
     uint32   absorbed_dmg = 0;
     uint32   resisted_dmg = 0;
@@ -1493,7 +1568,9 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool is
         return;
     }
 
-    DoAttackDamage (pVictim, &damage, &blocked_dmg, &damageType, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType);
+    DoAttackDamage (pVictim, &damage, &cleanDamage, &blocked_dmg, &damageType, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType);
+
+    cleanDamage.damage += blocked_dmg;
 
     if (hitInfo & HITINFO_MISS)
         //send miss
@@ -1508,11 +1585,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool is
         else
             damage = 0;
 
-        DealDamage (pVictim, damage, DIRECT_DAMAGE, SPELL_SCHOOL_NORMAL, NULL, 0, true);
-
-        // rage from maked damage TO creatures and players (target dead case)
-        if(GetTypeId() == TYPEID_PLAYER && (getPowerType() == POWER_RAGE))
-            ((Player*)this)->CalcRage(damage,true);
+        DealDamage (pVictim, damage, &cleanDamage, DIRECT_DAMAGE, SPELL_SCHOOL_NORMAL, NULL, 0, true);
 
         if(GetTypeId() == TYPEID_PLAYER && pVictim->isAlive())
         {
