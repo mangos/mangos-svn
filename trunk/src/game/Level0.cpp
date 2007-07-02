@@ -183,11 +183,11 @@ bool ChatHandler::HandleGMListCommand(const char* args)
 {
     bool first = true;
 
-    ObjectAccessor::PlayersMapType &m(ObjectAccessor::Instance().GetPlayers());
+    ObjectAccessor::PlayersMapType &m = ObjectAccessor::Instance().GetPlayers();
     for(ObjectAccessor::PlayersMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         if( itr->second->GetSession()->GetSecurity() && (itr->second->isGameMaster() || sWorld.getConfig(CONFIG_GM_IN_GM_LIST) ) &&
-            itr->second->isVisibleFor(m_session->GetPlayer()) )
+            itr->second->IsVisibleGloballyFor(m_session->GetPlayer()) )
         {
             if(first)
             {

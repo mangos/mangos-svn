@@ -314,7 +314,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         //case 10: m_taximask[0]= 1 << (1-1); break;        // Blood Elf
         case 11: m_taximask[0+94/32]= 1 << (94%32-1); break;// Draenei
     }
-    // new continent starting masks (It will be accessable only at new map
+    // new continent starting masks (It will be accessible only at new map
     switch(TeamForRace(race))
     {
         case ALLIANCE: m_taximask[3]= 1 << (4-1); break;
@@ -1181,7 +1181,7 @@ void Player::SendFriendlist()
             if( pObj && pObj->GetName() &&
                 ( security > SEC_PLAYER ||
                 ( pObj->GetTeam() == team || allowTwoSideWhoList ) &&
-                (pObj->GetSession()->GetSecurity() == SEC_PLAYER || gmInWhoList && pObj->isVisibleFor(this) )))
+                (pObj->GetSession()->GetSecurity() == SEC_PLAYER || gmInWhoList && pObj->IsVisibleGloballyFor(this) )))
             {
                 if(pObj->isAFK())
                     friendstr[i].Status = 2;
@@ -1587,7 +1587,7 @@ void Player::Regenerate(Powers power)
             float ManaIncreaseRate = sWorld.getRate(RATE_POWER_MANA);
             if( ManaIncreaseRate <= 0 ) ManaIncreaseRate = 1;
             // If < 5s after previous cast which used mana, no regeneration unless
-            // we happen to have a modifer that adds it back
+            // we happen to have a modifier that adds it back
             // If > 5s, get portion between the 5s and now, up to a maximum of 2s worth
             uint32 msecSinceLastCast;
             msecSinceLastCast = ((uint32)getMSTime() - m_lastManaUse);
@@ -1832,10 +1832,10 @@ bool Player::IsInSameGroupWith(Player const* p) const
 }
 
 ///- If the player is invited, remove him. If the group if then only 1 person, disband the group.
-/// \todo Should'nt we also check if there is no other invitees before disbanding the group?
+/// \todo Shouldn't we also check if there is no other invitees before disbanding the group?
 void Player::UninviteFromGroup()
 {
-    if(groupInfo.invite)                                    // uninvite invitee
+    if(groupInfo.invite)                                    // uninvited invitee
     {
         Group* group = groupInfo.invite;
         group->RemoveInvite(this);
@@ -2114,7 +2114,7 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
     // must called with applied AuraMods (removed in call code)
     UpdateBlockPercentage();
 
-    // set current level health and mana/energy to maximum after appling all mods.
+    // set current level health and mana/energy to maximum after applying all mods.
     SetHealth(GetMaxHealth());
     SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
     SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
@@ -3006,7 +3006,7 @@ void Player::DeleteFromDB()
 
     // unsummon and delete pet not required: player deleted from CLI or character list with not loaded pet.
 
-    // NOW we can finally clear other DB data releted to character
+    // NOW we can finally clear other DB data related to character
     sDatabase.BeginTransaction();
 
     for(int i = 0; i < BANK_SLOT_ITEM_END; i++)
@@ -3620,7 +3620,7 @@ void Player::BroadcastPacketToFriendListers(WorldPacket *packet)
         if( pfriend && pfriend->IsInWorld() &&
             ( pfriend->GetSession()->GetSecurity() > SEC_PLAYER ||
             ( pfriend->GetTeam() == team || allowTwoSideWhoList ) &&
-            (security == SEC_PLAYER || gmInWhoList && isVisibleFor(pfriend) )))
+            (security == SEC_PLAYER || gmInWhoList && IsVisibleGloballyFor(pfriend) )))
         {
             pfriend->GetSession()->SendPacket(packet);
         }
@@ -3994,7 +3994,7 @@ void Player::UpdateCombatSkills(Unit *pVictim, WeaponAttackType attType, MeleeHi
             break;
     }
 
-    uint32 plevel = getLevel();                             // if defence than pVictim == attacker
+    uint32 plevel = getLevel();                             // if defense than pVictim == attacker
     uint32 greylevel = MaNGOS::XP::GetGrayLevel(plevel);
     uint32 moblevel = pVictim->getLevel();
     if(moblevel < greylevel)
@@ -5589,7 +5589,7 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
     }
 }
 
-// only some item spell/auras effects can be executed when item is equiped.
+// only some item spell/auras effects can be executed when item is equipped.
 // If not you can have unexpected beaviur. like item giving damage to player when equip.
 bool Player::IsItemSpellToEquip(SpellEntry const *spellInfo)
 {
@@ -6485,7 +6485,7 @@ int32 Player::FishingMinSkillForCurrentZone() const
             return 380;
     }
 
-    // impossable or unknown
+    // impossible or unknown
     return 9999;
 }
 
@@ -6624,7 +6624,7 @@ uint8 Player::FindEquipSlot( ItemPrototype const* proto, uint32 slot, bool swap 
             slots[0] = EQUIPMENT_SLOT_MAINHAND;
 
             // suggest offhand slot only if know dual wielding
-            // (this will be replace mainhand weapon at auto equip instead unwonted "you don't known dual weilding" ...
+            // (this will be replace mainhand weapon at auto equip instead unwonted "you don't known dual wielding" ...
             if(CanDualWield())
                 slots[1] = EQUIPMENT_SLOT_OFFHAND;
         };break;
@@ -8381,7 +8381,7 @@ Item* Player::BankItem( uint16 pos, Item *pItem, bool update )
 
 void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
 {
-    // note: removeitem does not actualy change the item
+    // note: removeitem does not actually change the item
     // it only takes the item out of storage temporarily
     // note2: if removeitem is to be used for delinking
     // the item must be removed from the player's updatequeue
@@ -8907,7 +8907,7 @@ void Player::SwapItem( uint16 src, uint16 dst )
             return;
         }
 
-        // check unequip posability for equipped items and bank bags
+        // check unequip potability for equipped items and bank bags
         if(IsEquipmentPos ( src ) || IsBagPos ( src ))
         {
             // bags can be swapped with empty bag slots
@@ -9626,7 +9626,7 @@ void Player::SendNewItem(Item *item, uint32 count, bool received, bool created, 
     data << GetGUID();                                      // player GUID
     data << uint32(received);                               // 0=looted, 1=from npc
     data << uint32(created);                                // 0=received, 1=created
-    data << uint32(1);                                      // always 0x01 (propably meant to be count of listed items)
+    data << uint32(1);                                      // always 0x01 (probably meant to be count of listed items)
     data << (uint8)item->GetBagSlot();                      // bagslot
                                                             // item slot, but when added to stack: 0xFFFFFFFF
     data << (uint32) ((item->GetCount()==count) ? item->GetSlot() : -1);
@@ -9719,7 +9719,7 @@ void Player::SendPreparedQuest( uint64 guid )
                 PlayerTalkClass->SendQuestGiverRequestItems( pQuest, guid, CanRewardQuest(pQuest,false), true );
             else if( status == DIALOG_STATUS_INCOMPLETE )
                 PlayerTalkClass->SendQuestGiverRequestItems( pQuest, guid, false, true );
-            // Send completable on repetable quest if player don't have quest
+            // Send completable on repeatable quest if player don't have quest
             else if( pQuest->IsRepeatable() ) 
                 PlayerTalkClass->SendQuestGiverRequestItems( pQuest, guid, CanCompleteRepeatableQuest(pQuest), true );
             else
@@ -9917,9 +9917,9 @@ bool Player::CanCompleteQuest( uint32 quest_id )
 
 bool Player::CanCompleteRepeatableQuest( Quest *pQuest )
 {
-    // Solve probleme that player don't have the quest and try complete it.
-    // if repetable she must be able to complete event if player don't have it.
-    // Seem that all repetable quest are DELIVER Flag so, no need to add more.
+    // Solve problem that player don't have the quest and try complete it.
+    // if repeatable she must be able to complete event if player don't have it.
+    // Seem that all repeatable quest are DELIVER Flag so, no need to add more.
     if( !CanTakeQuest(pQuest, false) )
         return false;
 
@@ -10852,13 +10852,13 @@ void Player::CastedCreatureOrGO( uint32 entry, uint64 guid, uint32 spell_id )
                         // checked at quest_template loading
                         reqTarget = - qInfo->ReqCreatureOrGOId[j];
                     }
-                    // creature acivate objectives
+                    // creature activate objectives
                     else if(qInfo->ReqCreatureOrGOId[j] > 0)
                     {
                         // checked at quest_template loading
                         reqTarget = qInfo->ReqCreatureOrGOId[j];
                     }
-                    // other not creature/GO related obejctives
+                    // other not creature/GO related objectives
                     else
                         continue;
 
@@ -12232,7 +12232,7 @@ void Player::_SaveInventory()
 
     if (error)
     {
-        sLog.outError("Player::_SaveInventory - one or more errors occured save aborted!");
+        sLog.outError("Player::_SaveInventory - one or more errors occurred save aborted!");
         sChatHandler.SendSysMessage(GetSession(), LANG_ITEM_SAVE_FAILED);
         return;
     }
@@ -13706,7 +13706,7 @@ void Player::CorrectMetaGemEnchants(uint8 exceptslot, bool apply)
 
     for(uint32 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)    //cycle all equipped items
     {
-        //enchants for the slot being socketed are handeled by Player::ApplyItemMods
+        //enchants for the slot being socketed are handled by Player::ApplyItemMods
         if(slot == exceptslot)
             continue;
 
@@ -13743,7 +13743,7 @@ void Player::ToggleMetaGemsActive(uint16 exceptslot, bool apply)        //if fal
 {
     for(int slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; slot++)    //cycle all equipped items
     {
-        //enchants for the slot being socketed are handeled by WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
+        //enchants for the slot being socketed are handled by WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
         if(slot == exceptslot) continue;
 
         Item *pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, slot );
@@ -13810,7 +13810,7 @@ bool Player::DropBattleGroundFlag()
 
 bool Player::IsVisibleInGridForPlayer( Player* pl ) const
 {
-    // Live player see live player or dead player with not realised corpse
+    // Live player see live player or dead player with not realized corpse
     if(pl->isAlive() || pl->m_deathTimer > 0)
     {
         return isAlive() || m_deathTimer > 0;
@@ -13830,6 +13830,31 @@ bool Player::IsVisibleInGridForPlayer( Player* pl ) const
 
     // and not see any other
     return false;
+}
+
+bool Player::IsVisibleGloballyFor( Player* u ) const
+{
+    if(!u)
+        return false;
+    
+    // Always can see self
+    if (u==this)
+        return true;
+
+    // Visible units, always are visible for all players
+    if (GetVisibility() == VISIBILITY_ON)
+        return true;
+
+    // GMs are visible for higher gms (or players are visible for gms)
+    if (u->GetSession()->GetSecurity() > SEC_PLAYER)
+        return GetSession()->GetSecurity() <= u->GetSession()->GetSecurity();
+
+    // non faction visibility non-breakable for non-GMs
+    if (GetVisibility() == VISIBILITY_OFF)
+        return false;
+
+    // non-gm stealth/invisibility not hide from global player lists
+    return true;
 }
 
 void Player::UpdateVisibilityOf(WorldObject* target)
