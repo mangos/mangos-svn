@@ -79,16 +79,19 @@ struct MANGOS_DLL_DECL ScriptedAI : public CreatureAI
     // Called at each attack of m_creature by any victim
     void AttackStart(Unit *) {}
 
-    // Called at stoping attack by any attacker
+    // Called at stopping attack by any attacker
     void EnterEvadeMode();
 
-    // Called at any heal cast/item used (call non implemented in mangos)
+    // Called at any heal cast/item used (call non implemented)
     void HealBy(Unit *healer, uint32 amount_healed) {}
 
-    // Called at any Damage from any attacker
-    void DamageInflict(Unit *healer, uint32 amount_healed) {}
+    // Called at any Damage to any victim (before damage apply)
+    void DamageDeal(Unit *done_to, uint32 &damage) {}
+    
+    // Called at any Damage from any attacker (before damage apply)
+    void DamageTaken(Unit *done_by, uint32 &damage) {}
 
-    // Is unit visibale for MoveInLineOfSight
+    // Is unit visible for MoveInLineOfSight
     bool IsVisible(Unit *who) const
     {
         return !who->HasStealthAura() && m_creature->GetDistanceSq(who) <= VISIBLE_RANGE;

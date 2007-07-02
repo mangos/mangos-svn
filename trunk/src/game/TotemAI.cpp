@@ -62,16 +62,6 @@ TotemAI::MoveInLineOfSight(Unit *u)
     }
 }
 
-void
-TotemAI::HealBy(Unit *healer, uint32 amount_healed)
-{
-}
-
-void
-TotemAI::DamageInflict(Unit *healer, uint32 amount_healed)
-{
-}
-
 void TotemAI::EnterEvadeMode()
 {
 }

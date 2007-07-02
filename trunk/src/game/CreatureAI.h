@@ -38,27 +38,40 @@ class MANGOS_DLL_SPEC CreatureAI
 
         virtual ~CreatureAI();
 
+        // Called if IsVisible(Unit *who) is true at each *who move
         virtual void MoveInLineOfSight(Unit *) = 0;
 
+        // Called at each attack of m_creature by any victim
         virtual void AttackStart(Unit *) = 0;
 
+        // Called at stopping attack by any attacker
         virtual void EnterEvadeMode() = 0;
 
-        virtual void HealBy(Unit *healer, uint32 amount_healed) = 0;
+        // Called at any heal cast/item used (call non implemented)
+        virtual void HealBy(Unit *healer, uint32 amount_healed) {}
 
-        virtual void DamageInflict(Unit *done_by, uint32 amount_damage) = 0;
+        // Called at any Damage to any victim (before damage apply)
+        virtual void DamageDeal(Unit *done_to, uint32 &damage) {}
 
+        // Called at any Damage from any attacker (before damage apply)
+        virtual void DamageTaken(Unit *done_by, uint32 &damage) {}
+
+        // Is unit visible for MoveInLineOfSight
         virtual bool IsVisible(Unit *) const = 0;
 
+        // Called at World update tick
         virtual void UpdateAI(const uint32 diff) = 0;
 
-        virtual void JustDied(Unit *) {};
+        // Called when the creature is killed
+        virtual void JustDied(Unit *) {}
 
-        virtual void KilledUnit(Unit *) {};
+        // Called when the creature kills a unit
+        virtual void KilledUnit(Unit *) {}
 
-        virtual void SummonedCreatureDespawn(Creature* unit) {};
+        virtual void SummonedCreatureDespawn(Creature* unit) {}
 
-        virtual void SpellHit(Unit*, const SpellEntry*) {};
+        // Called when hit by a spell
+        virtual void SpellHit(Unit*, const SpellEntry*) {}
 };
 
 struct SelectableAI : public FactoryHolder<CreatureAI>, public Permissible<Creature>

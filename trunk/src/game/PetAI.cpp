@@ -71,15 +71,6 @@ void PetAI::AttackStart(Unit *u)
 
 void PetAI::EnterEvadeMode()
 {
-
-}
-
-void PetAI::HealBy(Unit *healer, uint32 amount_healed)
-{
-}
-
-void PetAI::DamageInflict(Unit *healer, uint32 amount_healed)
-{
 }
 
 bool PetAI::IsVisible(Unit *pl) const

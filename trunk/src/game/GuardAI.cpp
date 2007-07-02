@@ -53,14 +53,6 @@ void GuardAI::MoveInLineOfSight(Unit *u)
     }
 }
 
-void GuardAI::HealBy(Unit *healer, uint32 amount_healed)
-{
-}
-
-void GuardAI::DamageInflict(Unit *healer, uint32 amount_healed)
-{
-}
-
 bool GuardAI::_needToStop() const
 {
     if( !i_creature.isAlive() || !i_creature.getVictim())
