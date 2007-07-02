@@ -617,5 +617,5 @@ void WorldSession::HandleCancelAutoRepeatSpellOpcode( WorldPacket& recvPacket)
 {
     // may be better send SMSG_CANCEL_AUTO_REPEAT?
     // cancel and prepare for deleting
-    _player->castSpell(NULL);
+    _player->SetCurrentCastedSpell(NULL);
 }

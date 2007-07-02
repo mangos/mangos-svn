@@ -1790,8 +1790,14 @@ void Player::SetGMVisible(bool on)
     if(on)
     {
         m_GMFlags &= ~GM_INVISIBLE;                         //remove flag
-
-        SetVisibility(VISIBILITY_ON);
+        
+        // Reapply stealth/invisibility if active or show if not any
+        if(HasAuraType(SPELL_AURA_MOD_STEALTH))
+            SetVisibility(VISIBILITY_GROUP_STEALTH);
+        else if(HasAuraType(SPELL_AURA_MOD_INVISIBILITY))
+            SetVisibility(VISIBILITY_GROUP_INVISIBILITY);
+        else
+            SetVisibility(VISIBILITY_ON);
     }
     else
     {
@@ -4277,7 +4283,7 @@ bool Player::SetPosition(float x, float y, float z, float orientation, bool tele
     if( teleport || old_x != x || old_y != y || old_r != orientation )
     {
         // remove at movement non-move stealth aura
-        if(HasFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_FLAG_STEALTH))
+        if(GetVisibility()==VISIBILITY_GROUP_STEALTH)
             RemoveAurasDueToSpell(20580);
 
         // remove death simulation at move
@@ -11972,7 +11978,7 @@ void Player::SaveToDB()
     uint32 tmp_displayid = GetUInt32Value(UNIT_FIELD_DISPLAYID);
 
     // Set player sit state to standing on save, also stealth and shifted form
-    RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT | PLAYER_STATE_FORM_ALL | PLAYER_STATE_FLAG_STEALTH);
+    RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT | PLAYER_STATE_FORM_ALL | PLAYER_STATE_FLAG_CREEP);
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
     SetUInt32Value(UNIT_FIELD_DISPLAYID,GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
 

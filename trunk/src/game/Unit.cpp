@@ -1975,7 +1975,7 @@ void Unit::_UpdateSpells( uint32 time )
                     {
                         WorldPacket data(SMSG_CANCEL_AUTO_REPEAT, 0);
                         ((Player*)this)->GetSession()->SendPacket(&data);
-                        castSpell(NULL);
+                        SetCurrentCastedSpell(NULL);
                     }
                     // ELSE delay auto-repeat ranged weapon until player movement stop
                 }
@@ -1993,7 +1993,7 @@ void Unit::_UpdateSpells( uint32 time )
                         WorldPacket data(SMSG_CANCEL_AUTO_REPEAT, 0);
                         ((Player*)this)->GetSession()->SendPacket(&data);
                     }
-                    castSpell(NULL);
+                    SetCurrentCastedSpell(NULL);
                 }
             }
         }
@@ -2080,7 +2080,7 @@ void Unit::_UpdateSpells( uint32 time )
     }
 }
 
-void Unit::castSpell( Spell * pSpell )
+void Unit::SetCurrentCastedSpell( Spell * pSpell )
 {
 
     if(pSpell && pSpell->IsMeleeSpell())

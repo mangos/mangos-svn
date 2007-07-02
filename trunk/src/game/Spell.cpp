@@ -836,7 +836,7 @@ void Spell::prepare(SpellCastTargets * targets)
         cast(true);
     else
     {
-        m_caster->castSpell( this );
+        m_caster->SetCurrentCastedSpell( this );
         SendSpellStart();
     }
 }
