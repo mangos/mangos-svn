@@ -779,7 +779,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         float GetNegStat(Stats stat) const { return GetFloatValue(UNIT_FIELD_NEGSTAT0+stat); }
         float GetCreateStat(Stats stat) const { return m_createStats[stat]; }
 
-        void castSpell(Spell * pSpell);
+        void SetCurrentCastedSpell(Spell * pSpell);
         virtual void ProhibitSpellScholl(uint32 idSchool /* from SpellSchools */, uint32 unTimeMs ) { }
         void InterruptSpell();
         Spell * m_currentSpell;

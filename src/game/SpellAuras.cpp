@@ -2046,15 +2046,22 @@ void Aura::HandleModStealth(bool apply, bool Real)
     if(apply)
     {
         m_target->m_stealthvalue = CalculateDamage();
-        m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_STEALTH);
+
+        // not apply flag for RACE_NIGHTELF stealth
+        if(GetId()!=20580)
+            m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_CREEP);
 
         // only at real aura add
         if(Real)
         {
-            m_target->SetVisibility(VISIBILITY_GROUP_NO_DETECT);
-            if(m_target->GetTypeId() == TYPEID_PLAYER)
-                m_target->SendUpdateToPlayer((Player*)m_target);
-            m_target->SetVisibility(VISIBILITY_GROUP_STEALTH);
+            // apply only if not in GM invisibility
+            if(m_target->GetVisibility()!=VISIBILITY_OFF)
+            {
+                m_target->SetVisibility(VISIBILITY_GROUP_NO_DETECT);
+                if(m_target->GetTypeId() == TYPEID_PLAYER)
+                    m_target->SendUpdateToPlayer((Player*)m_target);
+                m_target->SetVisibility(VISIBILITY_GROUP_STEALTH);
+            }
 
             // for RACE_NIGHTELF stealth
             if(m_target->GetTypeId()==TYPEID_PLAYER && GetId()==20580)
@@ -2068,14 +2075,18 @@ void Aura::HandleModStealth(bool apply, bool Real)
     else
     {
         m_target->m_stealthvalue = 0;
-        m_target->RemoveFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_STEALTH);
+        m_target->RemoveFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_CREEP);
 
         // only at real aura remove
         if(Real)
         {
-            m_target->SetVisibility(VISIBILITY_ON);
-            if(m_target->GetTypeId() == TYPEID_PLAYER)
-                m_target->SendUpdateToPlayer((Player*)m_target);
+            // apply only if not in GM invisibility
+            if(m_target->GetVisibility()!=VISIBILITY_OFF)
+            {
+                m_target->SetVisibility(VISIBILITY_ON);
+                if(m_target->GetTypeId() == TYPEID_PLAYER)
+                    m_target->SendUpdateToPlayer((Player*)m_target);
+            }
 
             // for RACE_NIGHTELF stealth
             if(m_target->GetTypeId()==TYPEID_PLAYER && GetId()==20580)
@@ -2105,28 +2116,34 @@ void Aura::HandleInvisibility(bool Apply, bool Real)
     if(Apply)
     {
         m_target->m_invisibilityvalue = CalculateDamage();
-        m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_STEALTH );
 
         // only at real aura add
         if(Real)
         {
-            m_target->SetVisibility(VISIBILITY_GROUP_NO_DETECT);
-            if(m_target->GetTypeId() == TYPEID_PLAYER)
-                m_target->SendUpdateToPlayer((Player*)m_target);
-            m_target->SetVisibility(VISIBILITY_GROUP_INVISIBILITY);
+            // apply only if not in GM invisibility
+            if(m_target->GetVisibility()!=VISIBILITY_OFF)
+            {
+                m_target->SetVisibility(VISIBILITY_GROUP_NO_DETECT);
+                if(m_target->GetTypeId() == TYPEID_PLAYER)
+                    m_target->SendUpdateToPlayer((Player*)m_target);
+                m_target->SetVisibility(VISIBILITY_GROUP_INVISIBILITY);
+            }
         }
     }
     else
     {
         m_target->m_invisibilityvalue = 0;
-        m_target->RemoveFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_STEALTH );
 
         // only at real aura remove
         if(Real)
         {
-            m_target->SetVisibility(VISIBILITY_ON);
-            if(m_target->GetTypeId() == TYPEID_PLAYER)
-                m_target->SendUpdateToPlayer((Player*)m_target);
+            // apply only if not in GM invisibility
+            if(m_target->GetVisibility()!=VISIBILITY_OFF)
+            {
+                m_target->SetVisibility(VISIBILITY_ON);
+                if(m_target->GetTypeId() == TYPEID_PLAYER)
+                    m_target->SendUpdateToPlayer((Player*)m_target);
+            }
         }
     }
 }
