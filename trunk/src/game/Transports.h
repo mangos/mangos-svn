@@ -67,7 +67,7 @@ class Transport : public GameObject
         Transport( WorldObject *instantiator );
 
         bool Create(uint32 guidlow, uint32 displayId, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress, uint32 dynflags);
-        bool GenerateWaypoints(uint32 pathid, vector <uint32> &mapids);
+        bool GenerateWaypoints(uint32 pathid, std::set<uint32> &mapids);
         void Update(uint32 p_time);
         bool AddPassenger(Player* passenger);
         bool RemovePassenger(Player* passenger);

@@ -837,6 +837,8 @@ void Map::Remove(Player *player, bool remove)
     RemoveFromGrid(player,grid,cell);
     player->RemoveFromWorld();
 
+    SendRemoveTransports(player);
+
     UpdateObjectsVisibilityFor(player,cell,p);
 
     if( remove )
@@ -1492,21 +1494,45 @@ void Map::SendInitSelf( Player * player )
 void Map::SendInitTransports( Player * player )
 {
     // Hack to send out transports
-    if (MapManager::Instance().m_TransportsByMap.find(player->GetMapId()) == MapManager::Instance().m_TransportsByMap.end())
+    MapManager::TransportMap& tmap = MapManager::Instance().m_TransportsByMap;
+
+    // no transports at map
+    if (tmap.find(player->GetMapId()) == tmap.end())
         return;
 
     UpdateData transData;
 
-    for (size_t i = 0; i < MapManager::Instance().m_TransportsByMap[player->GetMapId()].size(); ++i)
-    {
-        Transport *t = MapManager::Instance().m_TransportsByMap[player->GetMapId()][i];
-        t->BuildCreateUpdateBlockForPlayer(&transData, player);
-    }
+    MapManager::TransportSet& tset = tmap[player->GetMapId()];
+
+    for (MapManager::TransportSet::iterator i = tset.begin(); i != tset.end(); ++i)
+        (*i)->BuildCreateUpdateBlockForPlayer(&transData, player);
 
     WorldPacket packet;
     transData.BuildPacket(&packet);
     player->GetSession()->SendPacket(&packet);
 }
+
+void Map::SendRemoveTransports( Player * player )
+{
+    // Hack to send out transports
+    MapManager::TransportMap& tmap = MapManager::Instance().m_TransportsByMap;
+
+    // no transports at map
+    if (tmap.find(player->GetMapId()) == tmap.end())
+        return;
+
+    UpdateData transData;
+
+    MapManager::TransportSet& tset = tmap[player->GetMapId()];
+
+    for (MapManager::TransportSet::iterator i = tset.begin(); i != tset.end(); ++i)
+        (*i)->BuildOutOfRangeUpdateBlock(&transData);
+
+    WorldPacket packet;
+    transData.BuildPacket(&packet);
+    player->GetSession()->SendPacket(&packet);
+}
+
 
 template void Map::Add(CorpsePtr&);
 template void Map::Add(Creature *);
