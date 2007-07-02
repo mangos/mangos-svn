@@ -215,7 +215,7 @@ void Spell::EffectInstaKill(uint32 i)
     if( unitTarget && unitTarget->isAlive() )
     {
         uint32 health = unitTarget->GetHealth();
-        m_caster->DealDamage(unitTarget, health, DIRECT_DAMAGE, 0, NULL, 0, false);
+        m_caster->DealDamage(unitTarget, health, NULL, DIRECT_DAMAGE, 0, NULL, 0, false);
     }
 }
 
@@ -2246,6 +2246,7 @@ void Spell::EffectWeaponDmg(uint32 i)
     uint32 blocked_dmg = 0;
     uint32 absorbed_dmg = 0;
     uint32 resisted_dmg = 0;
+    CleanDamage cleanDamage =  CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL );
     bool criticalhit = false;
 
     if( unitTarget->IsImmunedToPhysicalDamage() )
@@ -2259,7 +2260,7 @@ void Spell::EffectWeaponDmg(uint32 i)
     //if crit eff = (bonus + weapon) * 2
     //In a word, bonus + weapon will be calculated together in cases of miss, armor reduce, crit, etc.
     uint32 eff_damage = bonus;
-    m_caster->DoAttackDamage(unitTarget, &eff_damage, &blocked_dmg, &damageType, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType, m_spellInfo, m_IsTriggeredSpell);
+    m_caster->DoAttackDamage(unitTarget, &eff_damage, &cleanDamage, &blocked_dmg, &damageType, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType, m_spellInfo, m_IsTriggeredSpell);
 
     for (j = 0; j < 3; j++)
         if (m_spellInfo->Effect[j] == SPELL_EFFECT_WEAPON_PERCENT_DAMAGE)
@@ -2278,11 +2279,17 @@ void Spell::EffectWeaponDmg(uint32 i)
         m_caster->CastSpell(m_caster,BTAura,true);
 
     if (eff_damage > (absorbed_dmg + resisted_dmg + blocked_dmg))
+    {
+        cleanDamage.damage += (blocked_dmg);
         eff_damage -= (absorbed_dmg + resisted_dmg + blocked_dmg);
+    }
     else
+    {
+        cleanDamage.damage += eff_damage;
         eff_damage = 0;
+    }
 
-    m_caster->DealDamage(unitTarget, eff_damage, SPELL_DIRECT_DAMAGE, 0, NULL, 0, true);
+    m_caster->DealDamage(unitTarget, eff_damage, &cleanDamage, SPELL_DIRECT_DAMAGE, 0, NULL, 0, true);
 
     // take ammo
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
