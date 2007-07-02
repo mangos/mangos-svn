@@ -212,7 +212,9 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         uint64 CalculateGridMask(const uint32 &y) const;
 
         void SendInitSelf( Player * player );
+
         void SendInitTransports( Player * player );
+        void SendRemoveTransports( Player * player );
 
         void PlayerRelocationNotify(Player* player, Cell cell, CellPair cellpair);
 

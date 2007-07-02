@@ -77,8 +77,11 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
 
         void LoadTransports();
 
-        vector<Transport *> m_Transports;
-        map<uint32, vector< Transport * > > m_TransportsByMap;
+        typedef std::set<Transport *> TransportSet;
+        TransportSet m_Transports;
+
+        typedef std::map<uint32, TransportSet> TransportMap;
+        TransportMap m_TransportsByMap;
 
         bool CanPlayerEnter(uint32 mapid, Player* player);
         void RemoveBonesFromMap(uint32 mapid, uint64 guid, float x, float y);

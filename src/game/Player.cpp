@@ -11282,11 +11282,11 @@ bool Player::LoadFromDB( uint32 guid )
         m_transZ = fields[22].GetFloat();
         m_transO = fields[23].GetFloat();
 
-        for (int i = 0; i < MapManager::Instance().m_Transports.size(); i++)
+        for (MapManager::TransportSet::iterator iter = MapManager::Instance().m_Transports.begin(); iter != MapManager::Instance().m_Transports.end(); ++iter)
         {
-            if ((MapManager::Instance().m_Transports[i])->GetGUIDLow() == transGUID)
+            if( (*iter)->GetGUIDLow() == transGUID)
             {
-                m_transport = MapManager::Instance().m_Transports[i];
+                m_transport = *iter;
                 m_transport->AddPassenger(this);
                 SetMapId(m_transport->GetMapId());
             }
