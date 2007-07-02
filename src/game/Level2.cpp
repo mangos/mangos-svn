@@ -838,8 +838,12 @@ bool ChatHandler::HandleMoveObjectCommand(const char* args)
 
 bool ChatHandler::HandleDeMorphCommand(const char* args)
 {
-    sLog.outError(LANG_DEMORPHED,m_session->GetPlayer()->GetName());
-    m_session->GetPlayer()->DeMorph();
+    Unit *target = getSelectedUnit();
+    if(!target)
+        target = m_session->GetPlayer();
+
+    target->DeMorph();
+
     return true;
 }
 
