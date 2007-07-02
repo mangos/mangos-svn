@@ -2277,7 +2277,7 @@ void Player::UpdateNextMailTimeAndUnreads()
             if(!m_nextMailDelivereTime || m_nextMailDelivereTime > (*itr)->deliver_time)
                 m_nextMailDelivereTime = (*itr)->deliver_time;
         }
-        if(((*itr)->state | READ) == 0)
+        if(((*itr)->state & READ) == 0)
             ++unReadMails;
     }
 }
