@@ -42,7 +42,7 @@ MapManager::~MapManager()
     for(MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
         delete iter->second;
 
-    for(TransportSet::iterator i = 0; i != m_Transports.end(); ++i)
+    for(TransportSet::iterator i = m_Transports.begin(); i != m_Transports.end(); ++i)
         delete *i;
 
     Map::DeleteStateMachine();
