@@ -73,9 +73,11 @@ HomeMovementGenerator::Update(Creature &owner, const uint32& time_diff)
     if (time_diff > i_travel_timer)
     {
         _reLocate(owner);
+        owner.setMoveRunFlag(false);
         return false;
     }
-    else i_travel_timer -= time_diff;
+
+    i_travel_timer -= time_diff;
 
     return true;
 
