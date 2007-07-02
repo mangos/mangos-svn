@@ -56,16 +56,6 @@ AggressorAI::MoveInLineOfSight(Unit *u)
     }
 }
 
-void
-AggressorAI::HealBy(Unit *healer, uint32 amount_healed)
-{
-}
-
-void
-AggressorAI::DamageInflict(Unit *healer, uint32 amount_healed)
-{
-}
-
 bool
 AggressorAI::_needToStop() const
 {

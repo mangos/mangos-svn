@@ -61,17 +61,6 @@ ReactorAI::AttackStart(Unit *p)
 void
 ReactorAI::stopAttack()
 {
-
-}
-
-void
-ReactorAI::HealBy(Unit *healer, uint32 amount_healed)
-{
-}
-
-void
-ReactorAI::DamageInflict(Unit *healer, uint32 amount_healed)
-{
 }
 
 bool

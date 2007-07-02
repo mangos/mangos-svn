@@ -305,6 +305,13 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
 {
     if (!pVictim->isAlive() || pVictim->isInFlight()) return;
 
+    //Script Event damage Deal
+    if( GetTypeId()== TYPEID_UNIT && ((Creature *)this)->AI())
+        ((Creature *)this)->AI()->DamageDeal(pVictim, damage);
+    //Script Event damage taken
+    if( pVictim->GetTypeId()== TYPEID_UNIT && ((Creature *)pVictim)->AI() )
+        ((Creature *)pVictim)->AI()->DamageTaken(this, damage);
+
     if(!damage) 
     {
         // Rage from damage received.
@@ -602,9 +609,6 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
 
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
         {
-            if (((Creature *)pVictim)->AI())
-                ((Creature *)pVictim)->AI()->DamageInflict(this, damage);
-
             if(spellProto && IsDamageToThreatSpell(spellProto))
                 damage *= 2;
             pVictim->AddThreat(this, damage, damageSchool, spellProto);

@@ -39,8 +39,6 @@ class MANGOS_DLL_DECL GuardAI : public CreatureAI
         void MoveInLineOfSight(Unit *);
         void AttackStart(Unit *);
         void EnterEvadeMode();
-        void HealBy(Unit *healer, uint32 amount_healed);
-        void DamageInflict(Unit *healer, uint32 amount_healed);
         bool IsVisible(Unit *) const;
 
         void UpdateAI(const uint32);
