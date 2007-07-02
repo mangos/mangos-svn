@@ -237,56 +237,19 @@ void Spell::EffectSchoolDMG(uint32 i)
 
 void Spell::EffectDummy(uint32 i)
 {
-    if(!unitTarget && !gameObjTarget) return;
-
-    // More spell specific code in beginning
-    if(m_spellInfo->Id == 5420)                             // Tree of Life passive
-    {
-
-        // Tree of Life area effect
-        SpellEntry const* spellInfo = sSpellStore.LookupEntry( 34123 );
-
-        if(!spellInfo)
-            return;
-
-        int32 health_mod = int32(m_caster->GetStat(STAT_SPIRIT)/4);
-        SpellEntry customSpellInfo = *spellInfo;
-        customSpellInfo.EffectBasePoints[0] = health_mod-1;
-        m_caster->CastSpell(m_caster,&customSpellInfo,true,NULL);
+    if(!unitTarget && !gameObjTarget) 
         return;
-    }
 
-    if(m_spellInfo->Id == 13535)
-    {
-        SpellEntry const* spellInfo = sSpellStore.LookupEntry( 13481 );
-
-        if(m_caster->GetTypeId() != TYPEID_PLAYER || !spellInfo)
-            return;
-
-        Spell spell(m_caster, spellInfo, true, m_triggeredByAura);
-        SpellCastTargets targets;
-
-        Unit* target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
-        if(!target)
-            return;
-
-        targets.setUnitTarget(target);
-        spell.prepare(&targets);
-        return;
-    }
-
+    // Keep in top, because core use it for npc aggro other npc
     if( m_spellInfo->Id == SPELL_ID_AGGRO )
     {
-        if( !m_caster || !m_caster->getVictim() )
+        if( !m_caster || !m_caster->getVictim() || !unitTarget )
             return;
-
-        if(!unitTarget)
-            return;
-            
+        
         // only creature to creature
         if( unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_UNIT )
             return;
-
+        
         // if creature not fighting currently
         if( unitTarget->isInCombat() )
             return;
@@ -303,337 +266,8 @@ void Spell::EffectDummy(uint32 i)
         ((Creature*)unitTarget)->SetNoCallAssistence(true);
         if (((Creature*)unitTarget)->AI())
             ((Creature*)unitTarget)->AI()->AttackStart(m_caster->getVictim());
+
         return;
-    }
-
-    // Gift of Life (warrior bwl trinket)
-    if(m_spellInfo->Id == 23725)
-    {
-        m_caster->CastSpell(m_caster,23782,true);
-        m_caster->CastSpell(m_caster,23783,true);
-        return;
-    }
-
-    // Last Stand
-    if(m_spellInfo->Id == 12975)
-    {
-        uint32 health_mod = uint32(m_caster->GetMaxHealth()*0.3);
-        SpellEntry const* OriginalHealthModSpell = sSpellStore.LookupEntry(12976);
-        SpellEntry CustomHealthModSpell = *OriginalHealthModSpell;
-        CustomHealthModSpell.EffectBasePoints[0] = health_mod; //12976 has a base dice of 0, so no decrement needed
-        m_caster->CastSpell(m_caster,&CustomHealthModSpell,true,NULL);
-        return;
-    }
-
-    // Preparation Rogue - immediately finishes the cooldown on other Rogue abilities
-    if(m_spellInfo->Id == 14185)
-    {
-        if(m_caster->GetTypeId()!=TYPEID_PLAYER)
-            return;
-
-        const PlayerSpellMap& sp_list = ((Player *)m_caster)->GetSpellMap();
-        for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
-        {
-            uint32 classspell = itr->first;
-            SpellEntry const *spellInfo = sSpellStore.LookupEntry(classspell);
-
-            if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && spellInfo->Id != 14185 &&
-                (spellInfo->RecoveryTime > 0 || spellInfo->CategoryRecoveryTime > 0))
-            {
-                ((Player*)m_caster)->RemoveSpellCooldown(classspell);
-
-                WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8+4));
-                data << classspell;
-                data << m_caster->GetGUID();
-                ((Player*)m_caster)->GetSession()->SendPacket(&data);
-            }
-        }
-        return;
-    }
-
-    // Cold Snap - immediately finishes the cooldown on Frost spells
-    if(m_spellInfo->Id == 12472)
-    {
-        if(m_caster->GetTypeId()!=TYPEID_PLAYER)
-            return;
-
-        const PlayerSpellMap& sp_list = ((Player *)m_caster)->GetSpellMap();
-        for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
-        {
-            if (itr->second->state == PLAYERSPELL_REMOVED) continue;
-            uint32 classspell = itr->first;
-            SpellEntry const *spellInfo = sSpellStore.LookupEntry(classspell);
-
-            if (spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && spellInfo->School == SPELL_SCHOOL_FROST && spellInfo->Id != 12472 &&
-                (spellInfo->RecoveryTime > 0 || spellInfo->CategoryRecoveryTime > 0))
-            {
-                ((Player*)m_caster)->RemoveSpellCooldown(classspell);
-
-                WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8+4));
-                data << classspell;
-                data << m_caster->GetGUID();
-                ((Player*)m_caster)->GetSession()->SendPacket(&data);
-            }
-        }
-        return;
-    }
-
-    // If spell cannibalize and his casted, check special requirements and cast aura Cannibalize is all ok
-    if(m_spellInfo->Id == 20577)
-    {
-        // non-standard cast requirement check
-        SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
-        float max_range = GetMaxRange(srange);
-
-        CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-        Cell cell = RedZone::GetZone(p);
-        cell.data.Part.reserved = ALL_DISTRICT;
-        cell.SetNoCreate();
-
-        Unit* result = NULL;
-
-        MaNGOS::CannibalizeUnitCheck u_check(m_caster, max_range);
-        MaNGOS::UnitSearcher<MaNGOS::CannibalizeUnitCheck> searcher(result, u_check);
-
-        TypeContainerVisitor<MaNGOS::UnitSearcher<MaNGOS::CannibalizeUnitCheck>, GridTypeMapContainer > unit_searcher(searcher);
-        CellLock<GridReadGuard> cell_lock(cell, p);
-        cell_lock->Visit(cell_lock, unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
-
-        if (!result)
-        {
-            // clear cooldown at fail
-            if(m_caster->GetTypeId()==TYPEID_PLAYER)
-            {
-                ((Player*)m_caster)->RemoveSpellCooldown(20577);
-
-                WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8+4));
-                data << uint32(20577);                      // spell id
-                data << m_caster->GetGUID();
-                ((Player*)m_caster)->GetSession()->SendPacket(&data);
-            }
-
-            SendCastResult(SPELL_FAILED_NO_EDIBLE_CORPSES);
-            return;
-        }
-
-        // ok, main function spell can be casted
-
-        finish();                                           // prepare to replacing this spell cast to main function spell
-
-        // casting
-        SpellEntry const *spellInfo = sSpellStore.LookupEntry( 20578 );
-        Spell *spell = new Spell(m_caster, spellInfo, false, 0);
-        if(!spellInfo)
-        {
-            sLog.outError("WORLD: unknown spell id %i\n", 20578);
-            return;
-        }
-
-        SpellCastTargets targets;
-        targets.setUnitTarget(m_caster);
-        spell->prepare(&targets);
-        return;
-    }
-
-    // Mechanical Dragonling
-    if (m_spellInfo->Id == 23076 )
-    {
-        // TODO: why dummy effect required? some animation or other...
-        SpellEntry const *spell_proto = sSpellStore.LookupEntry(4073);
-        if(!spell_proto)
-            return;
-
-        m_caster->CastSpell(m_caster,spell_proto,true,NULL);
-    }
-
-    // Gnomish Battle Chicken
-    if (m_spellInfo->Id == 23133 )
-    {
-        // TODO: why dummy effect required? some animation or other...
-        SpellEntry const *spell_proto = sSpellStore.LookupEntry(13166);
-        if(!spell_proto)
-            return;
-
-        m_caster->CastSpell(m_caster,spell_proto,true,NULL);
-    }
-
-    // make a wish
-    if (m_spellInfo->Id == 33060)
-    {
-        if(m_caster->GetTypeId()!=TYPEID_PLAYER)
-            return;
-
-        uint32 spell_id = 0;
-
-        switch(urand(1,5))
-        {
-            case 1: spell_id = 33053; break;
-            case 2: spell_id = 33057; break;
-            case 3: spell_id = 33059; break;
-            case 4: spell_id = 33062; break;
-            case 5: spell_id = 33064; break;
-        }
-
-        SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id);
-        if(!spellInfo)
-            return;
-
-        m_caster->CastSpell(m_caster,spellInfo,true,NULL);
-        return;
-    }
-
-    if (m_spellInfo->Id == 16589)
-    {
-        if(m_caster->GetTypeId()!=TYPEID_PLAYER)
-            return;
-
-        uint32 spell_id = 0;
-
-        switch(urand(1,3))
-        {
-            case 1: spell_id = 16595; break;
-            case 2: spell_id = 16593; break;
-            case 3: spell_id = 16591; break;
-        }
-
-        SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id);
-        if(!spellInfo)
-            return;
-
-        m_caster->CastSpell(m_caster,spellInfo,true,NULL);
-        return;
-    }
-
-    // net-o-matic
-    if (m_spellInfo->Id == 13120)
-    {
-        if(!unitTarget)
-            return;
-
-        uint32 spell_id = 0;
-
-        uint32 roll = urand(0, 99);
-
-        if(roll < 2)                                        // 2% for 30 sec self root (off-like chance unknown)
-            spell_id = 16566;
-        else if(roll < 4)                                   // 2% for 20 sec root, charge to target (off-like chance unknown)
-            spell_id = 13119;
-        else                                                // normal root
-            spell_id = 13099;
-
-        SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id);
-        if(!spellInfo)
-            return;
-
-        m_caster->CastSpell(unitTarget,spellInfo,true,NULL);
-        return;
-    }
-
-    // More generic code later
-
-    // starshards/curse of agony hack .. this applies to 1.10 only
-    if (m_triggeredByAura)
-    {
-        if(!unitTarget)
-            return;      
-        SpellEntry const *trig_info = m_triggeredByAura->GetSpellProto();
-        if ((trig_info->SpellIconID == 1485 && trig_info->SpellFamilyName == SPELLFAMILY_PRIEST) ||
-            (trig_info->SpellIconID == 544 && trig_info->SpellFamilyName == SPELLFAMILY_WARLOCK))
-        {
-            Unit *tmpTarget = unitTarget;
-            unitTarget = m_triggeredByAura->GetTarget();
-            damage = trig_info->EffectBasePoints[i]+1;
-            EffectSchoolDMG(i);
-            unitTarget = tmpTarget;
-        }
-    }
-
-    // Berserking (troll racial traits)
-    if (m_spellInfo->SpellIconID == 1661)
-    {
-        uint32 healthPerc = uint32((float(m_caster->GetHealth())/m_caster->GetMaxHealth())*100);
-        int32 melee_mod = 10;
-        if (healthPerc <= 40)
-            melee_mod = 30;
-        if (healthPerc < 100 && healthPerc > 40)
-            melee_mod = 10+(100-healthPerc)/3;
-        SpellEntry const *OriginalHasteModSpell = sSpellStore.LookupEntry(26635);
-        SpellEntry CustomHasteModSpell = *OriginalHasteModSpell;
-        CustomHasteModSpell.EffectBasePoints[0] = melee_mod-1;
-                                                            // (EffectBasePoints[0]+1)-1+(5-melee_mod) = (melee_mod-1+1)-1+5-melee_mod = 5-1
-        CustomHasteModSpell.EffectBasePoints[1] = (5-melee_mod)-1;
-        CustomHasteModSpell.EffectBasePoints[2] = 5-1;
-        m_caster->CastSpell(m_caster,&CustomHasteModSpell,true,NULL);
-        return;
-    }
-
-    //Holy Shock For Paladins
-    if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellIconID == 156)
-    {
-        if(!unitTarget)
-            return;
-            
-        int hurt = 0;
-        int heal = 0;
-
-        switch(m_spellInfo->Id)
-        {
-            case 20473:
-                hurt = 25912;
-                heal = 25914;
-                break;
-            case 20929:
-                hurt = 25911;
-                heal = 25913;
-                break;
-            case 20930:
-                hurt = 25902;
-                heal = 25903;
-                break;
-            case 27174:
-                hurt = 27176;
-                heal = 27175;
-                break;
-            case 33072:
-                hurt = 33073;
-                heal = 33074;
-                break;
-            default:
-                break;
-        }
-
-        if(m_caster->IsFriendlyTo(unitTarget))
-            m_caster->CastSpell(unitTarget, heal, true, 0);
-        else
-            m_caster->CastSpell(unitTarget, hurt, true, 0);
-    }
-
-    if(m_spellInfo->SpellIconID == 1648)
-    {
-        if(!unitTarget)
-            return;
-                  
-        int32 dmg = damage;
-        dmg += int32(m_caster->GetPower(POWER_RAGE) * m_spellInfo->DmgMultiplier[i]);
-        SpellEntry const *tspellInfo = sSpellStore.LookupEntry(20647);
-        SpellEntry sInfo = *tspellInfo;
-        sInfo.EffectBasePoints[0] = dmg-1;
-        m_caster->CastSpell(unitTarget, &sInfo, true, 0);
-        m_caster->SetPower(POWER_RAGE,0);
-    }
-
-    //Life Tap
-    if(m_spellInfo->SpellVisual == 1225 && m_spellInfo->SpellIconID == 208)
-    {
-        int32 mod = m_spellInfo->EffectBasePoints[0]+1;
-        if(m_caster)
-        {
-            if(m_caster->GetHealth()>mod)
-            {
-                m_caster->ModifyHealth(-mod);
-                m_caster->ModifyPower(POWER_MANA,mod);
-            }
-        }
     }
 
     // Charge
@@ -644,6 +278,7 @@ void Spell::EffectDummy(uint32 i)
         SpellEntry CustomCharge = *OriginalCharge;
         CustomCharge.EffectBasePoints[0] = rage;
         m_caster->CastSpell(m_caster,&CustomCharge,true);
+
         return;
     }
 
@@ -652,7 +287,7 @@ void Spell::EffectDummy(uint32 i)
     {
         if(!unitTarget)
             return;
-                        
+
         uint32 spell_id = m_spellInfo->EffectBasePoints[i]+1;
         SpellEntry const* spell_proto = sSpellStore.LookupEntry(spell_id);
         if(!spell_proto)
@@ -669,9 +304,48 @@ void Spell::EffectDummy(uint32 i)
             m_caster->CastSpell(unitTarget,&spell_proto_copy,true,NULL);
         }
         else
-        {
             m_caster->CastSpell(unitTarget,spell_proto,true,NULL);
+    }
+
+    //Holy Shock For Paladins
+    if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellIconID == 156)
+    {
+        if(!unitTarget)
+            return;
+
+        int hurt = 0;
+        int heal = 0;
+
+        switch(m_spellInfo->Id)
+        {
+            case 20473: hurt = 25912; heal = 25914; break;
+            case 20929: hurt = 25911; heal = 25913; break;
+            case 20930: hurt = 25902; heal = 25903; break;
+            case 27174: hurt = 27176; heal = 27175; break;
+            case 33072: hurt = 33073; heal = 33074; break;
+            default: 
+                sLog.outError("Spell::EffectDummy: Spell %u not handled in HS",m_spellInfo->Id);
+                return;
         }
+
+        if(m_caster->IsFriendlyTo(unitTarget))
+            m_caster->CastSpell(unitTarget, heal, true, 0);
+        else
+            m_caster->CastSpell(unitTarget, hurt, true, 0);
+
+        return;
+    }
+
+    //Life Tap
+    if(m_spellInfo->SpellVisual == 1225 && m_spellInfo->SpellIconID == 208)
+    {
+        int32 mod = m_spellInfo->EffectBasePoints[0]+1;
+        if(m_caster->GetHealth() > mod)
+        {
+            m_caster->ModifyHealth(-mod);
+            m_caster->ModifyPower(POWER_MANA,mod);
+        }
+        return;
     }
 
     /*//BattleGround spells
@@ -717,105 +391,406 @@ void Spell::EffectDummy(uint32 i)
         }
     }*/
 
-    if(m_spellInfo->Id == 17251)                            // Spirit Healer Res
+    // starshards/curse of agony hack .. this applies to 1.10 only
+    if (m_triggeredByAura)
     {
-        if(!unitTarget || !m_originalCaster)
-            return;                  
-
-        if(m_originalCaster->GetTypeId() == TYPEID_PLAYER)
-        {
-            WorldPacket data(SMSG_SPIRIT_HEALER_CONFIRM, 8);
-            data << unitTarget->GetGUID();
-            ((Player*)m_originalCaster)->GetSession()->SendPacket( &data );
-        }
-    }
-
-    // Shaman's "Lightning Shield"
-    if(m_spellInfo->Id == 26545)
-    {
-        if(!m_caster) return;
-        if(!unitTarget) return;
-        if(!m_triggeredByAura) return;
-        uint32 spell = 0;
-
-        switch(m_triggeredByAura->GetId())
-        {
-            case   324: spell = 26364; break;               // Rank 1 
-            case   325: spell = 26365; break;               // Rank 2
-            case   905: spell = 26366; break;               // Rank 3
-            case   945: spell = 26367; break;               // Rank 4
-            case  8134: spell = 26369; break;               // Rank 5
-            case 10431: spell = 26370; break;               // Rank 6
-            case 10432: spell = 26363; break;               // Rank 7
-            case 25469: spell = 26371; break;               // Rank 8
-            case 25472: spell = 26372; break;               // Rank 9
-            default:
-                sLog.outError("Spell::EffectDummy: Spell 26545 triggered by unhandled spell %u",m_triggeredByAura->GetId());
-                break;
-        }
-        m_caster->CastSpell(unitTarget, spell, true, NULL);
-    }
-
-    // Priest's "Shadowguard"
-    if(m_spellInfo->Id == 28376)
-    {
-        if(!m_caster) return;
-        if(!unitTarget) return;
-        if(!m_triggeredByAura) return;
-
-        uint32 spell = 0;
-        switch(m_triggeredByAura->GetId())
-        {
-            case 18137: spell = 28377; break;               // Rank 1
-            case 19308: spell = 28378; break;               // Rank 2
-            case 19309: spell = 28379; break;               // Rank 3
-            case 19310: spell = 28380; break;               // Rank 4
-            case 19311: spell = 28381; break;               // Rank 5
-            case 19312: spell = 28382; break;               // Rank 6
-            case 25477: spell = 28385; break;               // Rank 7
-            default:
-                sLog.outError("Spell::EffectDummy: Spell 28376 triggered by unhandled spell %u",m_triggeredByAura->GetId());
-                break;
-        }
-
-        m_caster->CastSpell(unitTarget, spell, true, NULL);
-    }
-
-    // Deep wound
-    if(m_spellInfo->Id == 12162 || m_spellInfo->Id == 12850 || m_spellInfo->Id == 12868)
-    {
-        uint8 slot;
-        if (m_caster->haveOffhandWeapon() && m_caster->getAttackTimer(BASE_ATTACK) > m_caster->getAttackTimer(OFF_ATTACK))
-            slot = EQUIPMENT_SLOT_OFFHAND;
-        else
-            slot = EQUIPMENT_SLOT_MAINHAND;
-
-        Item* weapon;
-        weapon = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
-        if (!weapon)
+        if(!unitTarget)
             return;
-        
-        SpellEntry const *deepWoundsDotTemplate = sSpellStore.LookupEntry(12721);
-        SpellEntry deepWoundsDot = *deepWoundsDotTemplate;
-        
-        float damage;
-        damage = (weapon->GetProto()->Damage[0].DamageMax + weapon->GetProto()->Damage[0].DamageMin)/2;
-        
-        switch (m_spellInfo->Id)
-        {
-            case 12850:
-                damage *= 0.2f;break;
-            case 12162:
-                damage *= 0.4f;break;
-            case 12868:
-                damage *= 0.6f;break;
-        };
 
-        deepWoundsDot.EffectBasePoints[0] = int32(damage / 4) - 1;
-        m_caster->CastSpell(unitTarget, &deepWoundsDot, true, NULL);
+        SpellEntry const *trig_info = m_triggeredByAura->GetSpellProto();
+        if ((trig_info->SpellIconID == 1485 && trig_info->SpellFamilyName == SPELLFAMILY_PRIEST) ||
+            (trig_info->SpellIconID == 544 && trig_info->SpellFamilyName == SPELLFAMILY_WARLOCK))
+        {
+            Unit *tmpTarget = unitTarget;
+            unitTarget = m_triggeredByAura->GetTarget();
+            damage = trig_info->EffectBasePoints[i]+1;
+            EffectSchoolDMG(i);
+            unitTarget = tmpTarget;
+        }
+        return;
+    }
+
+    //All IconID Check in there
+    switch(m_spellInfo->SpellIconID)
+    {
+        // Berserking (troll racial traits)
+        case 1661:
+        {
+            uint32 healthPerc = uint32((float(m_caster->GetHealth())/m_caster->GetMaxHealth())*100);
+            int32 melee_mod = 10;
+            if (healthPerc <= 40)
+                melee_mod = 30;
+            if (healthPerc < 100 && healthPerc > 40)
+                melee_mod = 10+(100-healthPerc)/3;
+            SpellEntry const *OriginalHasteModSpell = sSpellStore.LookupEntry(26635);
+            SpellEntry CustomHasteModSpell = *OriginalHasteModSpell;
+            CustomHasteModSpell.EffectBasePoints[0] = melee_mod-1;
+                                                            // (EffectBasePoints[0]+1)-1+(5-melee_mod) = (melee_mod-1+1)-1+5-melee_mod = 5-1
+            CustomHasteModSpell.EffectBasePoints[1] = (5-melee_mod)-1;
+            CustomHasteModSpell.EffectBasePoints[2] = 5-1;
+            m_caster->CastSpell(m_caster,&CustomHasteModSpell,true,NULL);
+            return;
+        }
+        
+        case 1648:
+        {
+            if(!unitTarget)
+                return;
+
+            int32 dmg = damage;
+            dmg += int32(m_caster->GetPower(POWER_RAGE) * m_spellInfo->DmgMultiplier[i]);
+            SpellEntry const *tspellInfo = sSpellStore.LookupEntry(20647);
+            SpellEntry sInfo = *tspellInfo;
+            sInfo.EffectBasePoints[0] = dmg-1;
+            m_caster->CastSpell(unitTarget, &sInfo, true, 0);
+            m_caster->SetPower(POWER_RAGE,0);
+            return;
+        }
+    }
+
+    //All SpellID Check in there
+    switch( m_spellInfo->Id )
+    {
+        // Tree of Life passive
+        case 5420:
+        {
+            // Tree of Life area effect
+            SpellEntry const* spellInfo = sSpellStore.LookupEntry( 34123 );
+            if(!spellInfo)
+                return;
+
+            int32 health_mod = int32(m_caster->GetStat(STAT_SPIRIT)/4);
+            SpellEntry customSpellInfo = *spellInfo;
+            customSpellInfo.EffectBasePoints[0] = health_mod-1;
+            m_caster->CastSpell(m_caster,&customSpellInfo,true,NULL);
+            return;
+        }
+
+        // Spirit Healer Res
+        case 17251:
+        {
+            if(!unitTarget || !m_originalCaster)
+                return;                  
+
+            if(m_originalCaster->GetTypeId() == TYPEID_PLAYER)
+            {
+                WorldPacket data(SMSG_SPIRIT_HEALER_CONFIRM, 8);
+                data << unitTarget->GetGUID();
+                ((Player*)m_originalCaster)->GetSession()->SendPacket( &data );
+            }
+            return;
+        }
+
+        case 13535:
+        {
+            if(m_caster->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            Unit* target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
+            if(!target)
+                return;
+
+            m_caster->CastSpell(target, 13481, true, NULL, m_triggeredByAura);
+            return;
+        }
+        
+        // Gift of Life (warrior bwl trinket)
+        case 23725:
+        {
+            m_caster->CastSpell(m_caster,23782,true);
+            m_caster->CastSpell(m_caster,23783,true);
+            return;   
+        }
+
+        //Last Stand
+        case 12975:
+        {
+            uint32 health_mod = uint32(m_caster->GetMaxHealth()*0.3);
+            SpellEntry const* OriginalHealthModSpell = sSpellStore.LookupEntry(12976);
+            SpellEntry CustomHealthModSpell = *OriginalHealthModSpell;
+            CustomHealthModSpell.EffectBasePoints[0] = health_mod; //12976 has a base dice of 0, so no decrement needed
+            m_caster->CastSpell(m_caster,&CustomHealthModSpell,true,NULL);
+            return;
+        }
+        
+        //Preparation Rogue - immediately finishes the cooldown on other Rogue abilities
+        case 14185:
+        {
+            if(m_caster->GetTypeId()!=TYPEID_PLAYER)
+                return;
+
+            const PlayerSpellMap& sp_list = ((Player *)m_caster)->GetSpellMap();
+            for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
+            {
+                uint32 classspell = itr->first;
+                SpellEntry const *spellInfo = sSpellStore.LookupEntry(classspell);
+
+                if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && spellInfo->Id != 14185 &&
+                    (spellInfo->RecoveryTime > 0 || spellInfo->CategoryRecoveryTime > 0))
+                {
+                    ((Player*)m_caster)->RemoveSpellCooldown(classspell);
+
+                    WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8+4));
+                    data << classspell;
+                    data << m_caster->GetGUID();
+                    ((Player*)m_caster)->GetSession()->SendPacket(&data);
+                }
+            }
+            return;
+        }
+        
+        // Cold Snap - immediately finishes the cooldown on Frost spells
+        case 12472:
+        {
+            if(m_caster->GetTypeId()!=TYPEID_PLAYER)
+                return;
+
+            const PlayerSpellMap& sp_list = ((Player *)m_caster)->GetSpellMap();
+            for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
+            {
+                if (itr->second->state == PLAYERSPELL_REMOVED)
+                    continue;
+
+                uint32 classspell = itr->first;
+                SpellEntry const *spellInfo = sSpellStore.LookupEntry(classspell);
+
+                if (spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && spellInfo->School == SPELL_SCHOOL_FROST && spellInfo->Id != 12472 &&
+                    (spellInfo->RecoveryTime > 0 || spellInfo->CategoryRecoveryTime > 0))
+                {
+                    ((Player*)m_caster)->RemoveSpellCooldown(classspell);
+
+                    WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8+4));
+                    data << classspell;
+                    data << m_caster->GetGUID();
+                    ((Player*)m_caster)->GetSession()->SendPacket(&data);
+                }
+            }
+            return;
+        }
+
+        // If spell cannibalize and his casted, check special requirements and cast aura Cannibalize is all ok
+        case 20577:
+        {
+            // non-standard cast requirement check
+            SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
+            float max_range = GetMaxRange(srange);
+
+            CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+            Cell cell = RedZone::GetZone(p);
+            cell.data.Part.reserved = ALL_DISTRICT;
+            cell.SetNoCreate();
+
+            Unit* result = NULL;
+
+            MaNGOS::CannibalizeUnitCheck u_check(m_caster, max_range);
+            MaNGOS::UnitSearcher<MaNGOS::CannibalizeUnitCheck> searcher(result, u_check);
+
+            TypeContainerVisitor<MaNGOS::UnitSearcher<MaNGOS::CannibalizeUnitCheck>, GridTypeMapContainer > unit_searcher(searcher);
+            CellLock<GridReadGuard> cell_lock(cell, p);
+            cell_lock->Visit(cell_lock, unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+
+            if (!result)
+            {
+                // clear cooldown at fail
+                if(m_caster->GetTypeId()==TYPEID_PLAYER)
+                {
+                    ((Player*)m_caster)->RemoveSpellCooldown(20577);
+
+                    WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8+4));
+                    data << uint32(20577);                      // spell id
+                    data << m_caster->GetGUID();
+                    ((Player*)m_caster)->GetSession()->SendPacket(&data);
+                }
+
+                SendCastResult(SPELL_FAILED_NO_EDIBLE_CORPSES);
+                return;
+            }
+
+            // ok, main function spell can be casted
+
+            finish();                                           // prepare to replacing this spell cast to main function spell
+
+            // casting
+            m_caster->CastSpell(m_caster,20578,false,NULL);
+            return;
+        }
+
+        // Deep wound
+        case 12162: 
+        case 12850:
+        case 12868:
+        {
+            uint8 slot;
+            if (m_caster->haveOffhandWeapon() && m_caster->getAttackTimer(BASE_ATTACK) > m_caster->getAttackTimer(OFF_ATTACK))
+                slot = EQUIPMENT_SLOT_OFFHAND;
+            else
+                slot = EQUIPMENT_SLOT_MAINHAND;
+
+            Item* weapon;
+            weapon = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
+            if (!weapon)
+                return;
+            
+            SpellEntry const *deepWoundsDotTemplate = sSpellStore.LookupEntry(12721);
+            SpellEntry deepWoundsDot = *deepWoundsDotTemplate;
+
+            float damage;
+            damage = (weapon->GetProto()->Damage[0].DamageMax + weapon->GetProto()->Damage[0].DamageMin)/2;
+            
+            switch (m_spellInfo->Id)
+            {
+                case 12850: damage *= 0.2f; break;
+                case 12162: damage *= 0.4f; break;
+                case 12868: damage *= 0.6f; break;
+                default: 
+                    sLog.outError("Spell::EffectDummy: Spell %u not handled in DW",m_spellInfo->Id);
+                    return;
+            };
+
+            deepWoundsDot.EffectBasePoints[0] = int32(damage / 4) - 1;
+            m_caster->CastSpell(unitTarget, &deepWoundsDot, true, NULL);
+        }
+
+        // Mechanical Dragonling
+        case 23076:
+        {
+            // TODO: why dummy effect required? some animation or other...
+            m_caster->CastSpell(m_caster,4073,true,NULL);
+            return;
+        }
+
+        // Gnomish Battle Chicken
+        case 23133: 
+        {
+            // TODO: why dummy effect required? some animation or other...
+            m_caster->CastSpell(m_caster,13166,true,NULL);
+            return;
+        }
+
+        // make a wish
+        case 33060:
+        {
+            if(m_caster->GetTypeId()!=TYPEID_PLAYER)
+                return;
+
+            uint32 spell_id = 0;
+
+            switch(urand(1,5))
+            {
+                case 1: spell_id = 33053; break;
+                case 2: spell_id = 33057; break;
+                case 3: spell_id = 33059; break;
+                case 4: spell_id = 33062; break;
+                case 5: spell_id = 33064; break;
+            }
+
+            m_caster->CastSpell(m_caster,spell_id,true,NULL);
+            return;
+        }
+
+        case 16589:
+        {
+            if(m_caster->GetTypeId()!=TYPEID_PLAYER)
+                return;
+
+            uint32 spell_id = 0;
+            switch(urand(1,3))
+            {
+                case 1: spell_id = 16595; break;
+                case 2: spell_id = 16593; break;
+                case 3: spell_id = 16591; break;
+            }
+
+            m_caster->CastSpell(m_caster,spell_id,true,NULL);
+            return;
+        }
+        
+        // net-o-matic
+        case 13120:
+        {
+            if(!unitTarget)
+                return;
+
+            uint32 spell_id = 0;
+
+            uint32 roll = urand(0, 99);
+
+            if(roll < 2)                                        // 2% for 30 sec self root (off-like chance unknown)
+                spell_id = 16566;
+            else if(roll < 4)                                   // 2% for 20 sec root, charge to target (off-like chance unknown)
+                spell_id = 13119;
+            else                                                // normal root
+                spell_id = 13099;
+
+            m_caster->CastSpell(unitTarget,spell_id,true,NULL);
+            return;
+        }
+
+        // Priest's "Shadowguard"
+        case 28376:
+        {
+            if(!m_caster || !unitTarget || !m_triggeredByAura)
+                return;
+
+            uint32 spell = 0;
+            switch(m_triggeredByAura->GetId())
+            {
+                case 18137: spell = 28377; break;           // Rank 1
+                case 19308: spell = 28378; break;           // Rank 2
+                case 19309: spell = 28379; break;           // Rank 3
+                case 19310: spell = 28380; break;           // Rank 4
+                case 19311: spell = 28381; break;           // Rank 5
+                case 19312: spell = 28382; break;           // Rank 6
+                case 25477: spell = 28385; break;           // Rank 7        
+                default:
+                    sLog.outError("Spell::EffectDummy: Spell 28376 triggered by unhandled spell %u",m_triggeredByAura->GetId());
+                    return;
+            }
+
+            m_caster->CastSpell(unitTarget, spell, true, NULL);
+            return;
+        }
+
+        // Shaman's "Lightning Shield"
+        case 26545:
+        {
+            if(!m_caster || !unitTarget || !m_triggeredByAura)
+                return;
+
+            uint32 spell = 0;
+            switch(m_triggeredByAura->GetId())
+            {
+                case   324: spell = 26364; break;           // Rank 1 
+                case   325: spell = 26365; break;           // Rank 2
+                case   905: spell = 26366; break;           // Rank 3 
+                case   945: spell = 26367; break;           // Rank 4
+                case  8134: spell = 26369; break;           // Rank 5
+                case 10431: spell = 26370; break;           // Rank 6
+                case 10432: spell = 26363; break;           // Rank 7
+                case 25469: spell = 26371; break;           // Rank 8
+                case 25472: spell = 26372; break;           // Rank 9
+                default:
+                    sLog.outError("Spell::EffectDummy: Spell 26545 triggered by unhandled spell %u",m_triggeredByAura->GetId());
+                    return;
+            }
+            m_caster->CastSpell(unitTarget, spell, true, NULL);
+            return;
+        }
+
+        //Training Lesson
+        case 23357:
+        {
+            if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                return;
+            
+            Player* _player = (Player*)unitTarget;
+            _player->learnSpell(1515);                      // Tame Pet
+            _player->learnSpell(883);                       // Call Pet
+            _player->learnSpell(6991);                      // Feed Pet
+            return;
+        }
     }
 }
-
 void Spell::EffectTriggerSpell(uint32 i)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry( m_spellInfo->EffectTriggerSpell[i] );
