@@ -2080,12 +2080,7 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
         SetResistanceBuffMods(SpellSchools(i), false, 0);
     }
 
-    //clear mana draining field
-    if (GetUInt32Value(UNIT_FIELD_POWER_COST_MODIFIER) != 0)
-    {
-        sLog.outError("Removing power cost draining/increasing for player : %u name : %s", GetGUIDLow(), m_name.c_str());
-        SetUInt32Value(UNIT_FIELD_POWER_COST_MODIFIER,0);
-    }
+    SetFloatValue(UNIT_FIELD_POWER_COST_MODIFIER,0);
 
     InitDataForForm();
 
