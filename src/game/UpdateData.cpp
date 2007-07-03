@@ -54,9 +54,10 @@ void UpdateData::Compress(void* dst, uint32 *dst_size, void* src, int src_size)
     c_stream.opaque = (voidpf)0;
 
     // default Z_BEST_SPEED (1)
-    if (Z_OK != deflateInit(&c_stream, sWorld.getConfig(CONFIG_COMPRESSION)))
+    int z_res = deflateInit(&c_stream, sWorld.getConfig(CONFIG_COMPRESSION));
+    if (z_res != Z_OK)
     {
-        sLog.outError("Can't compress update packet (zlib: deflateInit).");
+        sLog.outError("Can't compress update packet (zlib: deflateInit) Error code: %i (%s)",z_res,zError(z_res));
         *dst_size = 0;
         return;
     }
@@ -66,9 +67,10 @@ void UpdateData::Compress(void* dst, uint32 *dst_size, void* src, int src_size)
     c_stream.next_in = (Bytef*)src;
     c_stream.avail_in = (uInt)src_size;
 
-    if (Z_OK != deflate(&c_stream, Z_NO_FLUSH))
+    z_res = deflate(&c_stream, Z_NO_FLUSH);
+    if (z_res != Z_OK)
     {
-        sLog.outError("Can't compress update packet (zlib: deflate)");
+        sLog.outError("Can't compress update packet (zlib: deflate) Error code: %i (%s)",z_res,zError(z_res));
         *dst_size = 0;
         return;
     }
@@ -80,16 +82,18 @@ void UpdateData::Compress(void* dst, uint32 *dst_size, void* src, int src_size)
         return;
     }
 
-    if (Z_STREAM_END != deflate(&c_stream, Z_FINISH))
+    z_res = deflate(&c_stream, Z_FINISH);
+    if (z_res != Z_STREAM_END)
     {
-        sLog.outError("Can't compress update packet (zlib: deflate should report Z_STREAM_END)");
+        sLog.outError("Can't compress update packet (zlib: deflate should report Z_STREAM_END instead %i (%s)",z_res,zError(z_res));
         *dst_size = 0;
         return;
     }
 
-    if (Z_OK != deflateEnd(&c_stream))
+    z_res = deflateEnd(&c_stream);
+    if (z_res != Z_OK)
     {
-        sLog.outError("Can't compress update packet (zlib: deflateEnd)");
+        sLog.outError("Can't compress update packet (zlib: deflateEnd) Error code: %i (%s)",z_res,zError(z_res));
         *dst_size = 0;
         return;
     }
