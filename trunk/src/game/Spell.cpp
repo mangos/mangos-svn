@@ -379,17 +379,33 @@ void Spell::FillTargetMap()
             }
         }
 
-        //Check targets for immune and remove immuned targets
+        // filter targets by immunity and creature type
+        uint32 SpellCreatureType = GetTargetCreatureTypeMask();
+
         for (std::list<Unit*>::iterator itr = tmpUnitMap.begin() ; itr != tmpUnitMap.end();)
         {
+            // Check targets for creature type mask and remove not appropriate
+            if (SpellCreatureType)
+            {
+                uint32 TargetCreatureType = (*itr)->GetCreatureTypeMask();
+                if(TargetCreatureType && !(SpellCreatureType & TargetCreatureType))
+                {
+                    itr = tmpUnitMap.erase(itr);
+                    continue;
+                }
+            }
+
+            //Check targets for immune and remove immunes targets
             if ((*itr)->IsImmunedToSpell(m_spellInfo))
             {
                 // FIXME: this must be spell immune message instead melee attack message
                 m_caster->SendAttackStateUpdate(HITINFO_NOACTION, *itr, 1, NORMAL_DAMAGE, 0, 0, 0, VICTIMSTATE_IS_IMMUNE, 0);
                 itr = tmpUnitMap.erase(itr);
+                continue;
             }
-            else
-                ++itr;
+
+            // ok
+            ++itr;
         }
 
         for(std::list<Unit*>::iterator iunit= tmpUnitMap.begin();iunit != tmpUnitMap.end();++iunit)
@@ -1916,47 +1932,36 @@ uint8 Spell::CanCast()
             }
         }
 
-        //check creaturetype
-        uint32 SpellCreatureType = m_spellInfo->TargetCreatureType;
-
-        // not find another way to fix spell target check :/
-        if(m_spellInfo->Id == 603)
-            SpellCreatureType = 0x7FF - 0x40;               //Curse of Doom
-        else
-        if(m_spellInfo->Id == 2641)                     // Dismiss Pet
-            SpellCreatureType = 0;
-
-        if(SpellCreatureType)
+        // check pet presents
+        for(int j=0;j<3;j++)
         {
-            for(int j=0;j<3;j++)
+            if(m_spellInfo->EffectImplicitTargetA[j] == TARGET_PET)
             {
-                if(m_spellInfo->EffectImplicitTargetA[j] == TARGET_PET)
+                target = m_caster->GetPet();
+                if(!target)
+                    return SPELL_FAILED_NO_PET;
+
+                break;
+            }
+        }
+
+        //check creature type
+        //ignore self casts (including area casts when caster selected as target)
+        if(target != m_caster)
+        {
+            uint32 SpellCreatureType = GetTargetCreatureTypeMask();
+
+            if(SpellCreatureType)
+            {
+                uint32 TargetCreatureType = target->GetCreatureTypeMask();
+
+                if(TargetCreatureType && !(SpellCreatureType & TargetCreatureType))
                 {
-                    target = m_caster->GetPet();
-                    if(!target)
-                        return SPELL_FAILED_NO_PET;
-
-                    break;
+                    if(TargetCreatureType == 0x40)
+                        return SPELL_FAILED_TARGET_IS_PLAYER;
+                    else
+                        return SPELL_FAILED_BAD_TARGETS;
                 }
-            }
-            uint32 TargetCreatureType = 0;
-            if(target->GetTypeId() == TYPEID_PLAYER)
-                TargetCreatureType = 0x40;                  //1<<(7-1)
-            else if ( target->GetTypeId() == TYPEID_UNIT )
-            {
-                uint32 CType = ((Creature*)target)->GetCreatureInfo()->type;
-                if(CType>=1)
-                    TargetCreatureType = 1 << ( ((Creature*)target)->GetCreatureInfo()->type - 1);
-                else
-                    TargetCreatureType = 0;
-            }
-
-            if(TargetCreatureType && !(SpellCreatureType & TargetCreatureType))
-            {
-                if(TargetCreatureType == 0x40)
-                    return SPELL_FAILED_TARGET_IS_PLAYER;
-                else
-                    return SPELL_FAILED_BAD_TARGETS;
             }
         }
 
@@ -2936,4 +2941,17 @@ bool Spell::IsAffectedBy(SpellEntry const *spellInfo, uint32 effectId)
             return true;
     
     return false;
+}
+
+uint32 Spell::GetTargetCreatureTypeMask() const
+{
+    uint32 SpellCreatureType = m_spellInfo->TargetCreatureType;
+
+    // not find another way to fix spell target check :/
+    if(m_spellInfo->Id == 603)
+        SpellCreatureType = 0x7FF - 0x40;                   //Curse of Doom
+    else
+        if(m_spellInfo->Id == 2641)                         // Dismiss Pet
+            SpellCreatureType = 0;
+    return SpellCreatureType;
 }

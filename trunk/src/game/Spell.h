@@ -522,6 +522,7 @@ class Spell
         void TakeCastItem();
         void TriggerSpell();
         uint8 CanCast();
+
         uint8 CheckItems();
         uint8 CheckRange();
         uint8 CheckMana(uint32 *mana);
@@ -572,6 +573,8 @@ class Spell
 
         void UpdatePointers();                              // must be used at call Spell code after time delay (non triggered spell cast/update spell call/etc)
         bool IsAffectedBy(SpellEntry const *spellInfo, uint32 effectId);
+
+        uint32 GetTargetCreatureTypeMask() const;
     protected:
 
         void SendLoot(uint64 guid, LootType loottype);
