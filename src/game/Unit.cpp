@@ -1065,7 +1065,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             }
 
             if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL && pVictim != this)
-                ProcDamageAndSpell(pVictim, PROC_FLAG_HEAL, PROC_FLAG_NONE, pdamage, spellProto);
+                ProcDamageAndSpell(pVictim, PROC_FLAG_HEAL, PROC_FLAG_HEALED, pdamage, spellProto);
             break;
         }
         case SPELL_AURA_PERIODIC_LEECH:
@@ -3278,6 +3278,33 @@ struct ProcTriggeredData
 
 typedef std::list< ProcTriggeredData > ProcTriggeredList;
 
+// auraTypes contains auras capable of proc'ing for attacker
+static std::list<uint32> GenerateAttakerAuraTypes()
+{
+    static std::list<uint32> auraTypes;
+    auraTypes.push_back(SPELL_AURA_PROC_TRIGGER_SPELL);
+    auraTypes.push_back(SPELL_AURA_PROC_TRIGGER_DAMAGE);
+    auraTypes.push_back(SPELL_AURA_DUMMY);
+    return auraTypes;
+}
+
+// auraTypes contains auras capable of proc'ing for attacker
+static std::list<uint32> GenerateVictimAuraTypes()
+{
+    static std::list<uint32> auraTypes;
+    auraTypes.push_back(SPELL_AURA_PROC_TRIGGER_SPELL);
+    auraTypes.push_back(SPELL_AURA_PROC_TRIGGER_DAMAGE);
+    auraTypes.push_back(SPELL_AURA_DUMMY);
+    auraTypes.push_back(SPELL_AURA_MOD_PARRY_PERCENT);
+    return auraTypes;
+}
+
+static std::list<uint32> attackerAuraTypes = GenerateAttakerAuraTypes();
+static std::list<uint32> victimAuraTypes   = GenerateVictimAuraTypes();
+
+// used to prevent spam in log about same non-handled spells
+static std::set<uint32> nonHandledSpellProcSet;
+
 void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVictim, uint32 damage, SpellEntry const *procSpell, bool isTriggeredSpell, WeaponAttackType attType)
 {
     sLog.outDebug("ProcDamageAndSpell: attacker flags are 0x%x, victim flags 0x%x", procAttacker, procVictim);
@@ -3308,16 +3335,10 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
     if(damage && (procVictim & (PROC_FLAG_STRUCK_MELEE|PROC_FLAG_STRUCK_RANGED|PROC_FLAG_STRUCK_SPELL)))
         procVictim |= (PROC_FLAG_TAKE_DAMAGE|PROC_FLAG_TOUCH);
 
-    // auraTypes contains auras capable of proc'ing
-    std::list<uint32> auraTypes;
-    auraTypes.push_back(SPELL_AURA_PROC_TRIGGER_SPELL);
-    auraTypes.push_back(SPELL_AURA_PROC_TRIGGER_DAMAGE);
-    auraTypes.push_back(SPELL_AURA_DUMMY);
-
     // Not much to do if no flags are set. Check also if we called by a effect that is self in turn triggered
     if (procAttacker &&  !(procSpell && isTriggeredSpell))
     {
-        for(std::list<uint32>::iterator aur = auraTypes.begin(); aur != auraTypes.end(); ++aur)
+        for(std::list<uint32>::iterator aur = attackerAuraTypes.begin(); aur != attackerAuraTypes.end(); ++aur)
         {
             // List of spells (effects) that proced. Spell prototype and aura-specific value (damage for TRIGGER_DAMAGE)
             ProcTriggeredList procTriggered;
@@ -3331,6 +3352,12 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                 SpellEntry const *spellProto = (*i)->GetSpellProto();
                 if(!spellProto) continue;
                 SpellProcEventEntry const *spellProcEvent = sSpellProcEventStore.LookupEntry<SpellProcEventEntry>(spellProto->Id);
+
+                if(!spellProcEvent && spellProto->procFlags != 0 && nonHandledSpellProcSet.find(spellProto->Id)==nonHandledSpellProcSet.end())
+                {
+                    sLog.outError("ProcDamageAndSpell: spell %u (attacker's aura source) not have record in `spell_proc_event`)",spellProto->Id);
+                    nonHandledSpellProcSet.insert(spellProto->Id);
+                }
 
                 uint32 procFlags = spellProcEvent ? spellProcEvent->procFlags : spellProto->procFlags;
                 // Check if current equipment allows aura to proc
@@ -3465,10 +3492,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
     // Not much to do if no flags are set or there is no victim
     if(pVictim && pVictim->isAlive() && procVictim)
     {
-        // additional auraTypes contains auras capable of proc'ing for victim
-        auraTypes.push_back(SPELL_AURA_MOD_PARRY_PERCENT);
-
-        for(std::list<uint32>::iterator aur = auraTypes.begin(); aur != auraTypes.end(); aur++)
+        for(std::list<uint32>::iterator aur = victimAuraTypes.begin(); aur != victimAuraTypes.end(); aur++)
         {
             // List of spells (effects) that proceed. Spell prototype and aura-specific value (damage for TRIGGER_DAMAGE)
             ProcTriggeredList procTriggered;
@@ -3482,6 +3506,12 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                 SpellEntry const *spellProto = (*i)->GetSpellProto();
                 if(!spellProto) continue;
                 SpellProcEventEntry const *spellProcEvent = sSpellProcEventStore.LookupEntry<SpellProcEventEntry>(spellProto->Id);
+
+                if(!spellProcEvent && spellProto->procFlags != 0 && nonHandledSpellProcSet.find(spellProto->Id)==nonHandledSpellProcSet.end())
+                {
+                    sLog.outError("ProcDamageAndSpell: spell %u (victim's aura source) not have record in `spell_proc_event`)",spellProto->Id);
+                    nonHandledSpellProcSet.insert(spellProto->Id);
+                }
 
                 uint32 procFlags = spellProcEvent ? spellProcEvent->procFlags : spellProto->procFlags;
                 if((procFlag & procFlags) == 0)
@@ -3652,36 +3682,75 @@ void Unit::CastMeleeProcDamageAndSpell(Unit* pVictim, uint32 damage, WeaponAttac
 
 void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint32 effIndex, uint32 damage, Aura* triggredByAura, uint32 procFlag)
 {
-    // Example. Ignite. Though it looks like hack, it isn't )
-    if(dummySpell->Id == 11119 || dummySpell->Id == 11120 || dummySpell->Id == 12846 || dummySpell->Id == 12847 || dummySpell->Id == 12848)
+    switch(dummySpell->Id )
     {
-        SpellEntry const *igniteDotTemplate = sSpellStore.LookupEntry(12654);
-        SpellEntry igniteDot = *igniteDotTemplate;
-
-        switch (dummySpell->Id)
+        // Example. Ignite. Though it looks like hack, it isn't )
+        case 11119:
+        case 11120:
+        case 12846:
+        case 12847:
+        case 12848:
         {
-            case 11119:
-                igniteDot.EffectBasePoints[0]=int32(0.04f*damage)-1;break;
-            case 11120:
-                igniteDot.EffectBasePoints[0]=int32(0.08f*damage)-1;break;
-            case 12846:
-                igniteDot.EffectBasePoints[0]=int32(0.12f*damage)-1;break;
-            case 12847:
-                igniteDot.EffectBasePoints[0]=int32(0.16f*damage)-1;break;
-            case 12848:
-                igniteDot.EffectBasePoints[0]=int32(0.20f*damage)-1;break;
-        };
-        CastSpell(pVictim, &igniteDot, true, NULL, triggredByAura);
+            SpellEntry const *igniteDotTemplate = sSpellStore.LookupEntry(12654);
+            SpellEntry igniteDot = *igniteDotTemplate;
+
+            switch (dummySpell->Id)
+            {
+                case 11119: igniteDot.EffectBasePoints[0]=int32(0.04f*damage)-1; break;
+                case 11120: igniteDot.EffectBasePoints[0]=int32(0.08f*damage)-1; break;
+                case 12846: igniteDot.EffectBasePoints[0]=int32(0.12f*damage)-1; break;
+                case 12847: igniteDot.EffectBasePoints[0]=int32(0.16f*damage)-1; break;
+                case 12848: igniteDot.EffectBasePoints[0]=int32(0.20f*damage)-1; break;
+                default:
+                    sLog.outError("Unit::HandleDummyAuraProc: non handled spell id: %u (IG)",dummySpell->Id);
+                    return;
+            };
+            CastSpell(pVictim, &igniteDot, true, NULL, triggredByAura);
+            return;
+        }
+
+        // VE
+        case 15286:
+            if(triggredByAura->GetCasterGUID() == pVictim->GetGUID())
+            {
+                SpellEntry const *VEHealTemplate = sSpellStore.LookupEntry(15290);
+                SpellEntry VEHeal = *VEHealTemplate;
+                VEHeal.EffectBasePoints[0] = triggredByAura->GetModifier()->m_amount*damage/100; //VEHeal has a BaseDice of 0, so no decrement needed
+                pVictim->CastSpell(pVictim, &VEHeal, true, NULL, triggredByAura);
+            }
+            return;
+
+        // Combustion
+        case 11129:
+        {
+            CastSpell(this, 28682, true, NULL, triggredByAura);
+            if (!(procFlag & PROC_FLAG_CRIT_SPELL))         //no crit
+                triggredByAura->m_procCharges += 1;         //-> reincrease procCharge count since it was decreased before
+            else if (triggredByAura->m_procCharges == 0)    //no more charges left and crit
+                RemoveAurasDueToSpell(28682);               //-> remove Combustion auras
+            return;
+        }
+
+        // Spiritual Att.
+        case 33776:
+        case 31785:
+        {
+            // if healed by another unit (pVictim)
+            if(this != pVictim)
+            {
+                SpellEntry const *SAHealTemplate = sSpellStore.LookupEntry(31786);
+                SpellEntry SAHeal = *SAHealTemplate;
+                SAHeal.EffectBasePoints[0] = triggredByAura->GetModifier()->m_amount*damage/100-1;
+                CastSpell(this, &SAHeal, true, NULL, triggredByAura);
+            }
+
+            return;
+        }
+
+        default: break;
     }
 
-    // VE
-    if (dummySpell->Id == 15286 && triggredByAura->GetCasterGUID() == pVictim->GetGUID())
-    {
-        SpellEntry const *VEHealTemplate = sSpellStore.LookupEntry(15290);
-        SpellEntry VEHeal = *VEHealTemplate;
-        VEHeal.EffectBasePoints[0] = triggredByAura->GetModifier()->m_amount*damage/100; //VEHeal has a BaseDice of 0, so no decrement needed
-        pVictim->CastSpell(pVictim, &VEHeal, true, NULL, triggredByAura);
-    }
+    // Non SpellID checks
 
     // VT
     if (dummySpell->SpellIconID == 2213 && triggredByAura->GetCasterGUID() == pVictim->GetGUID())
@@ -3692,15 +3761,6 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
         pVictim->CastSpell(pVictim,&VTEnergize,true,NULL, triggredByAura);
     }
 
-    // Combustion
-    if (dummySpell->Id == 11129)
-    {
-        CastSpell(this, 28682, true, NULL, triggredByAura);
-        if (!(procFlag & PROC_FLAG_CRIT_SPELL))             //no crit
-            triggredByAura->m_procCharges += 1;             //-> reincrease procCharge count since it was decreased before
-        else if (triggredByAura->m_procCharges == 0)        //no more charges left and crit
-            RemoveAurasDueToSpell(28682);                   //-> remove Combustion auras
-    }
 }
 
 void Unit::HandleDummyTrigger(Unit *pVictim, uint32 damage, Aura* triggredByAura, SpellEntry const *procSpell)
