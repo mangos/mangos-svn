@@ -74,13 +74,6 @@ void BigNumber::SetRand(int numbits)
     BN_rand(_bn, numbits, 0, 1);
 }
 
-void BigNumber::Reverse()
-{
-    uint8 *val = AsByteArray();
-    std::reverse(val, val+GetNumBytes());
-    SetBinary(val, GetNumBytes());
-}
-
 BigNumber BigNumber::operator=(const BigNumber &bn)
 {
     BN_copy(_bn, bn._bn);

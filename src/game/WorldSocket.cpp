@@ -268,13 +268,14 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     N.SetHexStr("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7");
     g.SetDword(7);
     I.SetHexStr(fields[5].GetString());
-    I.Reverse();
 
     //In case of leading zeroes in the I hash, restore them
     uint8 mDigest[SHA_DIGEST_LENGTH];
     memset(mDigest,0,SHA_DIGEST_LENGTH);
     if (I.GetNumBytes() <= SHA_DIGEST_LENGTH)
-        memcpy(mDigest+SHA_DIGEST_LENGTH-I.GetNumBytes(),I.AsByteArray(),I.GetNumBytes());
+        memcpy(mDigest,I.AsByteArray(),I.GetNumBytes());
+
+    std::reverse(mDigest,mDigest+SHA_DIGEST_LENGTH);
 
     s.SetHexStr(fields[7].GetString());
     sha1.UpdateData(s.AsByteArray(), s.GetNumBytes());
