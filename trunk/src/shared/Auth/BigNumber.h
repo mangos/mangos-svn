@@ -39,8 +39,6 @@ class BigNumber
 
         void SetRand(int numbits);
 
-        void Reverse();
-
         BigNumber operator=(const BigNumber &bn);
 
         BigNumber operator+=(const BigNumber &bn);

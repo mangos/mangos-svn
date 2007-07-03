@@ -279,18 +279,19 @@ void AuthSocket::OnRead()
     }
 }
 
-/// Upper password, and make the SRP6 calculation
+/// Make the SRP6 calculation from hash in dB
 void AuthSocket::_SetVSFields(std::string rI)
 {
     BigNumber I;
     I.SetHexStr(rI.c_str());
-    I.Reverse();
 
     //In case of leading zeroes in the rI hash, restore them
     uint8 mDigest[SHA_DIGEST_LENGTH];
     memset(mDigest,0,SHA_DIGEST_LENGTH);
     if (I.GetNumBytes() <= SHA_DIGEST_LENGTH)
-        memcpy(mDigest+SHA_DIGEST_LENGTH-I.GetNumBytes(),I.AsByteArray(),I.GetNumBytes());
+        memcpy(mDigest,I.AsByteArray(),I.GetNumBytes());
+
+    std::reverse(mDigest,mDigest+SHA_DIGEST_LENGTH);
 
     Sha1Hash sha;
     sha.UpdateData(s.AsByteArray(), s.GetNumBytes());
