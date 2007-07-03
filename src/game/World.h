@@ -178,9 +178,9 @@ class CliCommandHolder
         CliCommandHolder(const CliCommand *command, const char *arguments, pPrintf zprintf) 
             : cmd(command), zprintf(zprintf)
         {
-            size_t len = strlen(arguments);
-            args = new char[len+1];
-            strncpy(args, arguments, len);
+            size_t len = strlen(arguments)+1;
+            args = new char[len];
+            memcpy(args, arguments, len);
         }
         ~CliCommandHolder() { delete[] args; }
         void Execute() const { cmd->Func(args, zprintf); }
