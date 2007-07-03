@@ -651,21 +651,29 @@ void Spell::EffectDummy(uint32 i)
             m_caster->CastSpell(unitTarget, &deepWoundsDot, true, NULL);
         }
 
-        // Mechanical Dragonling
-        case 23076:
+        // Different item engineering summons 
+        case 23074:                                         // Arc. Dragonling
+        case 23075:                                         // Mithril Mechanical Dragonling
+        case 23076:                                         // Mechanical Dragonling
+        case 23133:                                         // Gnomish Battle Chicken
         {
             // TODO: why dummy effect required? some animation or other...
-            m_caster->CastSpell(m_caster,4073,true,NULL);
+            uint32 spell_id = 0;
+            switch(m_spellInfo->Id)
+            {
+                case 23074: spell_id = 19804; break;
+                case 23075: spell_id = 12749; break;
+                case 23076: spell_id =  4073; break;
+                case 23133: spell_id = 13166; break;
+                default:
+                    sLog.outError("Spell::EffectDummy: Spell %u not handled in ES",m_spellInfo->Id);
+                    return;
+            }
+
+            m_caster->CastSpell(m_caster,spell_id,true,NULL);
             return;
         }
 
-        // Gnomish Battle Chicken
-        case 23133: 
-        {
-            // TODO: why dummy effect required? some animation or other...
-            m_caster->CastSpell(m_caster,13166,true,NULL);
-            return;
-        }
 
         // make a wish
         case 33060:
