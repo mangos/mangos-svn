@@ -3422,7 +3422,10 @@ void Aura::HandleModOffhandDamagePercent(bool apply, bool Real)
 
 void Aura::HandleModPowerCost(bool apply, bool Real)
 {
-    m_target->ApplyModUInt32Value(UNIT_FIELD_POWER_COST_MODIFIER, m_modifier.m_amount, apply);
+    //UNIT_FIELD_ATTACK_POWER_MULTIPLIER = multiplier - 1
+    float val = m_target->GetFloatValue(UNIT_FIELD_POWER_COST_MODIFIER) + 1.0f;
+    ApplyPercentModFloatVar(val,m_modifier.m_amount,apply);
+    m_target->SetFloatValue(UNIT_FIELD_POWER_COST_MODIFIER,val - 1.0f);
 }
 
 /*********************************************************/

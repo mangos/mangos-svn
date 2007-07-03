@@ -2465,7 +2465,7 @@ uint8 Spell::CheckMana(uint32 *mana)
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
         ((Player *)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, manaCost);
 
-    manaCost += m_caster->GetUInt32Value(UNIT_FIELD_POWER_COST_MODIFIER);
+    manaCost *= 1.0f + m_caster->GetFloatValue(UNIT_FIELD_POWER_COST_MODIFIER);
 
     if (manaCost < 0)
         manaCost = 0;
