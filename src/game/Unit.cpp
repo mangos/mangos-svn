@@ -3731,6 +3731,23 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             return;
         }
 
+        // Eye of Eye
+        case 9799:
+        case 25988:
+        {
+            // return damage % to attacker but < 50% own total health
+            uint32 backDamage = triggredByAura->GetModifier()->m_amount*damage/100;
+            if(backDamage > GetMaxHealth()/2)
+                backDamage = GetMaxHealth()/2;
+
+            SpellEntry const *YYDamageTemplate = sSpellStore.LookupEntry(25997);
+            SpellEntry YYDamage = *YYDamageTemplate;
+            YYDamage.EffectBasePoints[0] = backDamage-1;
+            CastSpell(pVictim, &YYDamage, true, NULL, triggredByAura);
+
+            return;
+        }
+
         // Spiritual Att.
         case 33776:
         case 31785:
