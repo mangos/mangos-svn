@@ -5989,3 +5989,19 @@ bool Unit::isVisibleForInState( Player const* u, bool inVisibleList ) const
 {
     return isVisibleForOrDetect(u,false,inVisibleList);
 }
+
+uint32 Unit::GetCreatureTypeMask() const
+{
+    uint32 creatureType = 0;
+    if(GetTypeId() == TYPEID_PLAYER)
+        creatureType = 0x40;                  //1<<(7-1)
+    else
+    {
+        uint32 CType = ((Creature*)this)->GetCreatureInfo()->type;
+        if(CType>=1)
+            creatureType = 1 << (CType - 1);
+        else
+            creatureType = 0;
+    }
+    return creatureType;
+}
