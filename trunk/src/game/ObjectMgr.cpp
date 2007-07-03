@@ -91,6 +91,12 @@ ObjectMgr::~ObjectMgr()
         }
         delete[] playerInfo;
     }
+
+    // free group and guild objects
+    for (GroupSet::iterator itr = mGroupSet.begin(); itr != mGroupSet.end(); ++itr)
+        delete (*itr);
+    for (GuildSet::iterator itr = mGuildSet.begin(); itr != mGuildSet.end(); ++itr)
+        delete (*itr);
 }
 
 Group * ObjectMgr::GetGroupByLeader(const uint64 &guid) const
