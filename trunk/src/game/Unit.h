@@ -305,7 +305,8 @@ enum ProcFlags
     PROC_FLAG_TARGET_RESISTS     = 0x02000000,              // On enemy resisted spell
     PROC_FLAG_TARGET_AVOID_ATTACK= 0x04000000,              // On enemy blocks/dodges/parries
     PROC_FLAG_HEAL               = 0x08000000,              // On heal
-    PROC_FLAG_CRIT_HEAL          = 0x10000000               // On critical healing effect
+    PROC_FLAG_CRIT_HEAL          = 0x10000000,              // On critical healing effect
+    PROC_FLAG_HEALED             = 0x20000000               // On healing
 };
 
 enum AuraState
