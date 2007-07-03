@@ -159,14 +159,14 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
         // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
         // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
         if( pname &&
-            ( security > SEC_PLAYER ||
-            ( itr->second->GetTeam() == team || allowTwoSideWhoList ) &&
+            ( security > SEC_PLAYER || itr->second->GetTeam() == team || allowTwoSideWhoList ) &&
             (classmask & (1 << class_) ) && (racemask & (1 << race) ) &&
             (lvl >= level_min && lvl <= level_max) &&
             (guild_name.length()?strstr(gname.c_str(), guild_name.c_str())!=0 : true) &&
             (player_name.length()?strstr(pname, player_name.c_str())!=0 : true) &&
             z_show && s_show &&
-            (itr->second->GetSession()->GetSecurity() == SEC_PLAYER || gmInWhoList && itr->second->IsVisibleGloballyFor(_player) )))
+            (itr->second->GetSession()->GetSecurity() == SEC_PLAYER || gmInWhoList && itr->second->IsVisibleGloballyFor(_player) ) &&
+            clientcount < 49)
         {
             clientcount++;
 
