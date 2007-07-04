@@ -404,6 +404,13 @@ void Spell::FillTargetMap()
                 continue;
             }
 
+            //Check targets for not_selectable unit flag and remove
+            if ((*itr)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+            {
+                itr = tmpUnitMap.erase(itr);
+                continue;
+            }
+
             // ok
             ++itr;
         }
