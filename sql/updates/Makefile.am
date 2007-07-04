@@ -347,6 +347,10 @@ pkgdata_DATA = \
 	3939_realmd_account.sql \
 	3948_realmd_account.sql \
 	3951_exploration_basexp.sql \
+	3961_uptime.sql \
+	3964_command.sql \
+	4010_spell_proc_event.sql \
+	4012_spell_proc_event.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -672,4 +676,8 @@ EXTRA_DIST = \
 	3939_realmd_account.sql \
 	3948_realmd_account.sql \
 	3951_exploration_basexp.sql \
+	3961_uptime.sql \
+	3964_command.sql \
+	4010_spell_proc_event.sql \
+	4012_spell_proc_event.sql \
 	README

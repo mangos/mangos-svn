@@ -305,6 +305,8 @@ void Spell::EffectDummy(uint32 i)
         }
         else
             m_caster->CastSpell(unitTarget,spell_proto,true,NULL);
+
+        return;
     }
 
     //Holy Shock For Paladins
@@ -394,20 +396,21 @@ void Spell::EffectDummy(uint32 i)
     // starshards/curse of agony hack .. this applies to 1.10 only
     if (m_triggeredByAura)
     {
-        if(!unitTarget)
-            return;
-
         SpellEntry const *trig_info = m_triggeredByAura->GetSpellProto();
         if ((trig_info->SpellIconID == 1485 && trig_info->SpellFamilyName == SPELLFAMILY_PRIEST) ||
             (trig_info->SpellIconID == 544 && trig_info->SpellFamilyName == SPELLFAMILY_WARLOCK))
         {
+            if(!unitTarget)
+                return;
+
             Unit *tmpTarget = unitTarget;
             unitTarget = m_triggeredByAura->GetTarget();
             damage = trig_info->EffectBasePoints[i]+1;
             EffectSchoolDMG(i);
             unitTarget = tmpTarget;
+            return;
         }
-        return;
+        // return incorrect in this case
     }
 
     //All IconID Check in there
@@ -620,6 +623,9 @@ void Spell::EffectDummy(uint32 i)
         case 12850:
         case 12868:
         {
+            if(!unitTarget)
+                return;
+
             uint8 slot;
             if (m_caster->haveOffhandWeapon() && m_caster->getAttackTimer(BASE_ATTACK) > m_caster->getAttackTimer(OFF_ATTACK))
                 slot = EQUIPMENT_SLOT_OFFHAND;
@@ -674,6 +680,79 @@ void Spell::EffectDummy(uint32 i)
             return;
         }
 
+        // Righteous Defense (step 1)
+        case 31789:
+        {
+            // 31989 -> dummy effect (step 1)
+            //     L -> triggered spell effect -> 31980 -> dummy effect (step 2) -> 31709 (taunt like spell for each target)
+
+            // non-standard cast requirement check
+            if (!unitTarget || !unitTarget->hasUnitState(UNIT_STAT_ATTACK_BY))
+            {
+                // clear cooldown at fail
+                if(m_caster->GetTypeId()==TYPEID_PLAYER)
+                {
+                    ((Player*)m_caster)->RemoveSpellCooldown(31989);
+
+                    WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8+4));
+                    data << uint32(31789);                      // spell id
+                    data << m_caster->GetGUID();
+                    ((Player*)m_caster)->GetSession()->SendPacket(&data);
+                }
+
+                SendCastResult(SPELL_FAILED_TARGET_AFFECTING_COMBAT);
+                return;
+            }
+
+            // ok, next effect in spell can be casted
+            return;
+        }
+
+        // Righteous Defense (step 2)
+        case 31980:
+        {
+            // Note: this spell save selected targets in not used m_targetUnitGUIDs[2]
+
+            // unitTarget is one from around enemies
+            if(!unitTarget)
+                return;
+
+            // something changed in spell system
+            if(m_spellInfo->Effect[2] != 0)
+                return;
+
+            std::list<uint64>& selectedTargets = m_targetUnitGUIDs[2];
+
+            // already all selected
+            if(selectedTargets.size() >= 3)
+                return;
+
+            // this is triggered spell
+            // find original spell original target
+            if(!m_caster->m_currentSpell)
+                return;
+            Unit* originalTarget = m_caster->m_currentSpell->m_targets.getUnitTarget();
+            if(!originalTarget)
+                return;
+
+            Unit::AttackerSet const& attackers = originalTarget->getAttackers();
+
+            // not attacker or list empty
+            if(attackers.find(unitTarget)==attackers.end())
+                return;
+
+            // chance to be selected from list
+            float chance = 100.0f/(attackers.size());
+
+
+            if(!roll_chance_f(chance))
+                return;
+
+            selectedTargets.push_back(unitTarget->GetGUID());
+
+            m_caster->CastSpell(unitTarget,31790,true);
+            return;
+        }
 
         // make a wish
         case 33060:
@@ -809,7 +888,7 @@ void Spell::EffectTriggerSpell(uint32 i)
         return;
     }
 
-    m_TriggerSpell.push_back(spellInfo);
+    m_TriggerSpells.push_back(spellInfo);
 }
 
 void Spell::EffectTeleportUnits(uint32 i)
@@ -2163,11 +2242,15 @@ void Spell::EffectLearnPetSpell(uint32 i)
 
 void Spell::EffectAttackMe(uint32 i)
 {
-    if(unitTarget->GetTypeId() != TYPEID_PLAYER)
+    // this effect use before EffectTaunt for prevent taunt already attacking target
+    // for spell as marked "non effective at already attacking target"
+    // Real attack will triggered next EffectTaunt
+    if(unitTarget && unitTarget->GetTypeId() != TYPEID_PLAYER)
     {
-        unitTarget->SetInFront(m_caster);
-        if (((Creature*)unitTarget)->AI())
-            ((Creature*)unitTarget)->AI()->AttackStart(m_caster);
+        if(unitTarget->getVictim()==m_caster)
+        {
+            SendCastResult(SPELL_FAILED_DONT_REPORT);
+        }
     }
 }
 

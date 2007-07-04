@@ -2289,8 +2289,7 @@ void Aura::HandleModTaunt(bool apply, bool Real)
 
     if(apply)
     {
-        if (m_target->getVictim() != caster)
-            m_target->TauntApply(caster);
+         m_target->TauntApply(caster);
     }
     else
     {

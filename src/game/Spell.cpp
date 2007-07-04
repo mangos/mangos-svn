@@ -233,7 +233,7 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur, u
     m_spellState = SPELL_STATE_NULL;
 
     m_castPositionX = m_castPositionY = m_castPositionZ = 0;
-    m_TriggerSpell.clear();
+    m_TriggerSpells.clear();
     m_IsTriggeredSpell = triggered;
     //m_AreaAura = false;
     m_CastItem = NULL;
@@ -292,6 +292,11 @@ void Spell::FillTargetMap()
 
     for(uint32 i=0;i<3;i++)
     {
+        // not call for empty effect.
+        // Also some spells use not used effect targets for store targets for dummy effect in triggred spells
+        if(m_spellInfo->Effect[i]==0)
+            continue;
+
         m_targetGameobjectGUIDs[i].clear();
         m_targetUnitGUIDs[i].clear();
         m_targetItems[i].clear();
@@ -395,18 +400,18 @@ void Spell::FillTargetMap()
                 }
             }
 
+            //Check targets for not_selectable unit flag and remove
+            if ((*itr)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+            {
+                itr = tmpUnitMap.erase(itr);
+                continue;
+            }
+
             //Check targets for immune and remove immunes targets
             if ((*itr)->IsImmunedToSpell(m_spellInfo))
             {
                 // FIXME: this must be spell immune message instead melee attack message
                 m_caster->SendAttackStateUpdate(HITINFO_NOACTION, *itr, 1, NORMAL_DAMAGE, 0, 0, 0, VICTIMSTATE_IS_IMMUNE, 0);
-                itr = tmpUnitMap.erase(itr);
-                continue;
-            }
-
-            //Check targets for not_selectable unit flag and remove
-            if ((*itr)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
-            {
                 itr = tmpUnitMap.erase(itr);
                 continue;
             }
@@ -977,6 +982,9 @@ void Spell::cast(bool skipCheck)
     bool needspelllog = true;
     for(uint32 j = 0;j<3;j++)
     {
+        if(m_spellInfo->Effect[j]==0)
+            continue;
+
         if(m_spellInfo->Effect[j] == SPELL_EFFECT_SEND_EVENT)
         {
             HandleEffects(NULL,NULL,NULL, j);
@@ -1044,6 +1052,9 @@ void Spell::cast(bool skipCheck)
     bool canreflect = false;
     for(int j=0;j<3;j++)
     {
+        if(m_spellInfo->Effect[j]==0)
+            continue;
+
         switch(m_spellInfo->EffectImplicitTargetA[j])
         {
             case TARGET_CHAIN_DAMAGE:
@@ -1074,6 +1085,9 @@ void Spell::cast(bool skipCheck)
 
         for(int k=0;k<3;k++)
         {
+            if(m_spellInfo->Effect[k]==0)
+                continue;
+
             for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[k].begin();iunit != m_targetUnitGUIDs[k].end();++iunit)
             {
                 if(SkipTargets.count(*iunit) > 0)
@@ -1398,7 +1412,7 @@ void Spell::finish(bool ok)
     }
 
     // call triggered spell only at successful cast
-    if(m_TriggerSpell.size() > 0)
+    if(m_TriggerSpells.size() > 0)
         TriggerSpell();
 
     //handle SPELL_AURA_ADD_TARGET_TRIGGER auras
@@ -1896,14 +1910,12 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
 
 void Spell::TriggerSpell()
 {
-    if(m_TriggerSpell.size() < 1) return;
+    if(m_TriggerSpells.size() < 1) return;
 
-    for(std::list<SpellEntry const*>::iterator si=m_TriggerSpell.begin(); si!=m_TriggerSpell.end(); ++si)
+    for(std::list<SpellEntry const*>::iterator si=m_TriggerSpells.begin(); si!=m_TriggerSpells.end(); ++si)
     {
         Spell spell(m_caster, (*si), true, 0);
-        SpellCastTargets targets;
-        targets.setUnitTarget(m_targets.getUnitTarget());
-        spell.prepare(&targets);
+        spell.prepare(&m_targets);                          // use original spell original targets
     }
 
 }
