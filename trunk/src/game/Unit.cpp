@@ -3692,6 +3692,9 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
         case 12847:
         case 12848:
         {
+            if(!pVictim)
+                return;
+
             SpellEntry const *igniteDotTemplate = sSpellStore.LookupEntry(12654);
             SpellEntry igniteDot = *igniteDotTemplate;
 
@@ -3712,6 +3715,9 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
 
         // VE
         case 15286:
+            if(!pVictim)
+                return;
+
             if(triggredByAura->GetCasterGUID() == pVictim->GetGUID())
             {
                 SpellEntry const *VEHealTemplate = sSpellStore.LookupEntry(15290);
@@ -3736,6 +3742,9 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
         case 9799:
         case 25988:
         {
+            if(!pVictim)
+                return;
+
             // return damage % to attacker but < 50% own total health
             uint32 backDamage = triggredByAura->GetModifier()->m_amount*damage/100;
             if(backDamage > GetMaxHealth()/2)
@@ -3753,6 +3762,9 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
         case 33776:
         case 31785:
         {
+            if(!pVictim)
+                return;
+
             // if healed by another unit (pVictim)
             if(this != pVictim)
             {
@@ -3771,14 +3783,20 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
     // Non SpellID checks
 
     // VT
-    if (dummySpell->SpellIconID == 2213 && triggredByAura->GetCasterGUID() == pVictim->GetGUID())
+    if (dummySpell->SpellIconID == 2213)
     {
-        SpellEntry const *VTEnergizeTemplate = sSpellStore.LookupEntry(34919);
-        SpellEntry VTEnergize = *VTEnergizeTemplate;
-        VTEnergize.EffectBasePoints[0] = triggredByAura->GetModifier()->m_amount*damage/100 - 1;
-        pVictim->CastSpell(pVictim,&VTEnergize,true,NULL, triggredByAura);
-    }
+        if(!pVictim)
+            return;
 
+        if(triggredByAura->GetCasterGUID() == pVictim->GetGUID())
+        {
+            SpellEntry const *VTEnergizeTemplate = sSpellStore.LookupEntry(34919);
+            SpellEntry VTEnergize = *VTEnergizeTemplate;
+            VTEnergize.EffectBasePoints[0] = triggredByAura->GetModifier()->m_amount*damage/100 - 1;
+            pVictim->CastSpell(pVictim,&VTEnergize,true,NULL, triggredByAura);
+        }
+        return;
+    }
 }
 
 void Unit::HandleDummyTrigger(Unit *pVictim, uint32 damage, Aura* triggredByAura, SpellEntry const *procSpell)

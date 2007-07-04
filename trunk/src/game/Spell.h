@@ -606,7 +606,8 @@ class Spell
         // -------------------------------------------
 
         //List For Triggered Spells
-        std::list<SpellEntry const*> m_TriggerSpell;
+        typedef std::list<SpellEntry const*> TriggerSpells;
+        TriggerSpells m_TriggerSpells;
 
         uint32 m_spellState;
         uint32 m_timer;
