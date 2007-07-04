@@ -232,6 +232,9 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
     // default spell target is player that use GO
     Unit* spellTarget = GetPlayer();
 
+    if (Script->GOHello(_player, obj))
+        return;
+
     uint32 t = obj->GetUInt32Value(GAMEOBJECT_TYPE_ID);
     switch(t)
     {
