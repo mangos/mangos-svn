@@ -1320,7 +1320,7 @@ void Spell::EffectEnergize(uint32 i)
 
     Powers power = Powers(m_spellInfo->EffectMiscValue[i]);
 
-    if(unitTarget->getPowerType() != power)
+    if(unitTarget->GetMaxPower(power) == 0)
         return;
 
     unitTarget->ModifyPower(power,damage);
