@@ -10364,7 +10364,7 @@ CREATE TABLE `spell_proc_event` (
   `Category` smallint(6) NOT NULL default '0',
   `SkillID` smallint(6) NOT NULL default '0',
   `SpellFamilyMask` int(11) NOT NULL default '0',
-  `procFlags` int(11) NOT NULL default '0',
+  `procFlags` int(11) unsigned NOT NULL default '0',
   `ppmRate` float NOT NULL default '0',
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
@@ -11103,7 +11103,7 @@ INSERT INTO `spell_proc_event` VALUES
 (25988,0,0,0,0,262144,0),
 (26016,0,0,0,0,1,2),
 (26021,0,0,0,0,1,2),
-(26107,0,0,0,4063232,67108864,0),
+(26107,0,0,0,4063232,3288334336,0),
 (26119,0,0,0,-1877999613,131072,0),
 (26128,0,0,0,0,33554432,0),
 (26135,0,0,0,8388608,16384,0),
@@ -11225,7 +11225,8 @@ INSERT INTO `spell_proc_event` VALUES
 (34303,0,0,0,0,128,0),
 (34914,16,0,0,0,32768,0),
 (34916,16,0,0,0,32768,0),
-(34917,16,0,0,0,32768,0);
+(34917,16,0,0,0,32768,0),
+(37519,0,0,0,0,67108864,0);
 
 /*!40000 ALTER TABLE `spell_proc_event` ENABLE KEYS */;
 UNLOCK TABLES;

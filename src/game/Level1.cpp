@@ -182,12 +182,12 @@ bool ChatHandler::HandleGPSCommand(const char* args)
 
     PSendSysMultilineMessage(LANG_MAP_POSITION,
         obj->GetMapId(), obj->GetZoneId(), obj->GetAreaId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
-        obj->GetOrientation(),cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY());
+        obj->GetOrientation(),cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY(),obj->GetInstanceId());
 
     sLog.outDebug("Player %s GPS call %s %u " LANG_MAP_POSITION, m_session->GetPlayer()->GetName(),
         (obj->GetTypeId() == TYPEID_PLAYER ? "player" : "creature"), obj->GetGUIDLow(),
         obj->GetMapId(), obj->GetZoneId(), obj->GetAreaId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
-        obj->GetOrientation(), cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY());
+        obj->GetOrientation(), cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY(),obj->GetInstanceId());
 
     return true;
 }
