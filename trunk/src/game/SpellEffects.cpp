@@ -626,23 +626,17 @@ void Spell::EffectDummy(uint32 i)
             if(!unitTarget)
                 return;
 
-            uint8 slot;
+            float damage;
+            // DW should benefit of attack power, damage percent mods etc.
+            // TODO: check if using offhand damage is correct and if it should be divided by 2
             if (m_caster->haveOffhandWeapon() && m_caster->getAttackTimer(BASE_ATTACK) > m_caster->getAttackTimer(OFF_ATTACK))
-                slot = EQUIPMENT_SLOT_OFFHAND;
+                damage = (m_caster->GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE) + m_caster->GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE))/2;
             else
-                slot = EQUIPMENT_SLOT_MAINHAND;
-
-            Item* weapon;
-            weapon = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, slot);
-            if (!weapon)
-                return;
+                damage = (m_caster->GetFloatValue(UNIT_FIELD_MINDAMAGE) + m_caster->GetFloatValue(UNIT_FIELD_MAXDAMAGE))/2;
             
             SpellEntry const *deepWoundsDotTemplate = sSpellStore.LookupEntry(12721);
             SpellEntry deepWoundsDot = *deepWoundsDotTemplate;
 
-            float damage;
-            damage = (weapon->GetProto()->Damage[0].DamageMax + weapon->GetProto()->Damage[0].DamageMin)/2;
-            
             switch (m_spellInfo->Id)
             {
                 case 12850: damage *= 0.2f; break;
