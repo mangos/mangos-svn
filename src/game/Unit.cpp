@@ -53,6 +53,58 @@ float baseMoveSpeed[MAX_MOVE_TYPE] =
     4.5f                                                    // MOVE_FLYBACK
 };
 
+// auraTypes contains auras capable of proc'ing for attacker
+static std::set<uint32> GenerateAttakerProcAuraTypes()
+{
+    static std::set<uint32> auraTypes;
+    auraTypes.insert(SPELL_AURA_DUMMY);
+    auraTypes.insert(SPELL_AURA_PROC_TRIGGER_SPELL);
+    auraTypes.insert(SPELL_AURA_PROC_TRIGGER_DAMAGE);
+    return auraTypes;
+}
+
+// auraTypes contains auras capable of proc'ing for attacker
+static std::set<uint32> GenerateVictimProcAuraTypes()
+{
+    static std::set<uint32> auraTypes;
+    auraTypes.insert(SPELL_AURA_PROC_TRIGGER_SPELL);
+    auraTypes.insert(SPELL_AURA_PROC_TRIGGER_DAMAGE);
+    auraTypes.insert(SPELL_AURA_DUMMY);
+    auraTypes.insert(SPELL_AURA_MOD_PARRY_PERCENT);
+    return auraTypes;
+}
+
+static std::set<uint32> attackerProcAuraTypes = GenerateAttakerProcAuraTypes();
+static std::set<uint32> victimProcAuraTypes   = GenerateVictimProcAuraTypes();
+
+// auraTypes contains auras capable of proc'ing for attacker and victim
+static std::set<uint32> GenerateProcAuraTypes()
+{
+    static std::set<uint32> auraTypes = victimProcAuraTypes;
+    auraTypes.insert(attackerProcAuraTypes.begin(),attackerProcAuraTypes.end());
+    return auraTypes;
+}
+
+static std::set<uint32> procAuraTypes         = GenerateProcAuraTypes();
+
+bool IsPassiveStackableSpell( uint32 spellId )
+{
+    if(!IsPassiveSpell(spellId))
+        return false;
+
+    SpellEntry const* spellProto = sSpellStore.LookupEntry(spellId);
+    if(spellProto)
+        return false;
+
+    for(int j = 0; j < 3; ++j)
+    {
+        if(std::find(procAuraTypes.begin(),procAuraTypes.end(),spellProto->EffectApplyAuraName[j])!=procAuraTypes.end())
+            return false;
+    }
+
+    return true;
+}
+
 Unit::Unit( WorldObject *instantiator ) : WorldObject( instantiator )
 {
     m_objectType |= TYPE_UNIT;
@@ -2278,8 +2330,9 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
             RemoveAura(i);
     }
 
-    // passive auras stack with all
-    if (!Aur->IsPassive() && !(Aur->GetSpellProto()->Id == 20584 || Aur->GetSpellProto()->Id == 8326)) // ghost spell check
+    // passive auras stack with all (except passive spell proc auras)
+    if ((!Aur->IsPassive() || !IsPassiveStackableSpell(Aur->GetId())) &&          
+        !(Aur->GetSpellProto()->Id == 20584 || Aur->GetSpellProto()->Id == 8326)) 
     {
         if (!RemoveNoStackAurasDueToAura(Aur))
         {
@@ -2376,10 +2429,15 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
         next = i;
         next++;
         if (!(*i).second) continue;
-        if (!(*i).second->GetSpellProto()) continue;
-        if (IsPassiveSpell((*i).second->GetId())) continue;
+
+        if (!(*i).second->GetSpellProto())
+            continue;
 
         uint32 i_spellId = (*i).second->GetId();
+
+        if(IsPassiveStackableSpell(i_spellId))
+            continue;
+
         uint32 i_effIndex = (*i).second->GetEffIndex();
 
         if(i_spellId == spellId) continue;
@@ -3279,30 +3337,6 @@ struct ProcTriggeredData
 
 typedef std::list< ProcTriggeredData > ProcTriggeredList;
 
-// auraTypes contains auras capable of proc'ing for attacker
-static std::list<uint32> GenerateAttakerAuraTypes()
-{
-    static std::list<uint32> auraTypes;
-    auraTypes.push_back(SPELL_AURA_PROC_TRIGGER_SPELL);
-    auraTypes.push_back(SPELL_AURA_PROC_TRIGGER_DAMAGE);
-    auraTypes.push_back(SPELL_AURA_DUMMY);
-    return auraTypes;
-}
-
-// auraTypes contains auras capable of proc'ing for attacker
-static std::list<uint32> GenerateVictimAuraTypes()
-{
-    static std::list<uint32> auraTypes;
-    auraTypes.push_back(SPELL_AURA_PROC_TRIGGER_SPELL);
-    auraTypes.push_back(SPELL_AURA_PROC_TRIGGER_DAMAGE);
-    auraTypes.push_back(SPELL_AURA_DUMMY);
-    auraTypes.push_back(SPELL_AURA_MOD_PARRY_PERCENT);
-    return auraTypes;
-}
-
-static std::list<uint32> attackerAuraTypes = GenerateAttakerAuraTypes();
-static std::list<uint32> victimAuraTypes   = GenerateVictimAuraTypes();
-
 // used to prevent spam in log about same non-handled spells
 static std::set<uint32> nonHandledSpellProcSet;
 
@@ -3339,7 +3373,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
     // Not much to do if no flags are set. 
     if (procAttacker)
     {
-        for(std::list<uint32>::iterator aur = attackerAuraTypes.begin(); aur != attackerAuraTypes.end(); ++aur)
+        for(std::set<uint32>::iterator aur = attackerProcAuraTypes.begin(); aur != attackerProcAuraTypes.end(); ++aur)
         {
             // List of spells (effects) that proced. Spell prototype and aura-specific value (damage for TRIGGER_DAMAGE)
             ProcTriggeredList procTriggered;
@@ -3493,7 +3527,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
     // Not much to do if no flags are set or there is no victim
     if(pVictim && pVictim->isAlive() && procVictim)
     {
-        for(std::list<uint32>::iterator aur = victimAuraTypes.begin(); aur != victimAuraTypes.end(); aur++)
+        for(std::set<uint32>::iterator aur = victimProcAuraTypes.begin(); aur != victimProcAuraTypes.end(); aur++)
         {
             // List of spells (effects) that proceed. Spell prototype and aura-specific value (damage for TRIGGER_DAMAGE)
             ProcTriggeredList procTriggered;
