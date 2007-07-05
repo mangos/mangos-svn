@@ -2273,7 +2273,9 @@ void Spell::EffectWeaponDmg(uint32 i)
             case 23894: BTAura = 23888; break;
             case 25251: BTAura = 25252; break;
             case 30335: BTAura = 30339; break;
-            default: break;
+            default: 
+                sLog.outError("Spell::EffectWeaponDmg: Spell %u not handled in BTAura",m_spellInfo->Id);
+                break;
         }
         // FIX_ME: Where this value used???
         damage = uint32(0.45 * (m_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + m_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS)));
