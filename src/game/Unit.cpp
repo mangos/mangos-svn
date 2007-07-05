@@ -3336,8 +3336,8 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
     if(damage && (procVictim & (PROC_FLAG_STRUCK_MELEE|PROC_FLAG_STRUCK_RANGED|PROC_FLAG_STRUCK_SPELL)))
         procVictim |= (PROC_FLAG_TAKE_DAMAGE|PROC_FLAG_TOUCH);
 
-    // Not much to do if no flags are set. Check also if we called by a effect that is self in turn triggered
-    if (procAttacker &&  !(procSpell && isTriggeredSpell))
+    // Not much to do if no flags are set. 
+    if (procAttacker)
     {
         for(std::list<uint32>::iterator aur = attackerAuraTypes.begin(); aur != attackerAuraTypes.end(); ++aur)
         {
@@ -3713,6 +3713,17 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             return;
         }
 
+        // Combustion
+        case 11129:
+            {
+                CastSpell(this, 28682, true, NULL, triggredByAura);
+                if (!(procFlag & PROC_FLAG_CRIT_SPELL))         //no crit
+                    triggredByAura->m_procCharges += 1;         //-> reincrease procCharge count since it was decreased before
+                else if (triggredByAura->m_procCharges == 0)    //no more charges left and crit
+                    RemoveAurasDueToSpell(28682);               //-> remove Combustion auras
+                return;
+            }
+
         // VE
         case 15286:
             if(!pVictim)
@@ -3726,17 +3737,6 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 pVictim->CastSpell(pVictim, &VEHeal, true, NULL, triggredByAura);
             }
             return;
-
-        // Combustion
-        case 11129:
-        {
-            CastSpell(this, 28682, true, NULL, triggredByAura);
-            if (!(procFlag & PROC_FLAG_CRIT_SPELL))         //no crit
-                triggredByAura->m_procCharges += 1;         //-> reincrease procCharge count since it was decreased before
-            else if (triggredByAura->m_procCharges == 0)    //no more charges left and crit
-                RemoveAurasDueToSpell(28682);               //-> remove Combustion auras
-            return;
-        }
 
         // Eye of Eye
         case 9799:
@@ -3808,7 +3808,7 @@ void Unit::HandleDummyTrigger(Unit *pVictim, uint32 damage, Aura* triggredByAura
             //Effect: 23552
             /*if (pVictim && pVictim->isAlive())
                 CastSpell(pVictim, 23552, true, NULL, triggredByAura);*/
-            break;
+            return;
         case 87:
         {
             //Mana Surge (Shaman T1 bonus)
@@ -3817,7 +3817,7 @@ void Unit::HandleDummyTrigger(Unit *pVictim, uint32 damage, Aura* triggredByAura
             SpellEntry ManaSurgeSpell = *ManaSurgeTemplate;
             ManaSurgeSpell.EffectBasePoints[0] = procSpell->manaCost * 35/100;
             CastSpell(this, &ManaSurgeSpell, true, NULL, triggredByAura);
-            break;
+            return;
         }    
         case 113:
         {
@@ -3825,6 +3825,7 @@ void Unit::HandleDummyTrigger(Unit *pVictim, uint32 damage, Aura* triggredByAura
             //Effect: 18371
             Unit::AuraList& mAddFlatModifier = GetAurasByType(SPELL_AURA_ADD_FLAT_MODIFIER);
             for(Unit::AuraList::iterator i = mAddFlatModifier.begin(); i != mAddFlatModifier.end(); ++i)
+            {
                 if ((*i)->GetModifier()->m_miscvalue == SPELLMOD_CHANCE_OF_SUCCESS && (*i)->GetSpellProto()->SpellIconID == 113)
                 {
                     SpellEntry const *impDrainSoulTemplate = sSpellStore.LookupEntry(18371);
@@ -3832,17 +3833,56 @@ void Unit::HandleDummyTrigger(Unit *pVictim, uint32 damage, Aura* triggredByAura
                     impDrainSoul.EffectBasePoints[0] = (*i)->GetSpellProto()->EffectBasePoints[2] * GetMaxPower(POWER_MANA) / 100;
                     CastSpell(this, &impDrainSoul, true, NULL, triggredByAura);
                 }
-            break;
+            }
+            return;
         }
         case 241:
         {
-            //Illumination
-            //Effect: 20272
-            /*SpellEntry const *IlluminationTemplate = sSpellStore.LookupEntry(20272);
-            SpellEntry IlluminationSpell = *IlluminationTemplate;
-            IlluminationSpell.EffectBasePoints[0] = procSpell->manaCost;
-            CastSpell(this, &IlluminationSpell, true, NULL, triggredByAura);*/
-            break;    
+            switch(triggredByAura->GetSpellProto()->EffectTriggerSpell[0])
+            {
+                //Illumination
+                case 18350:
+                {
+                    // must be HLight || HShock (triggered) || FlashOL
+                    if( (procSpell->SpellVisual != 2936 || procSpell->SpellIconID != 70 ) && 
+                        (procSpell->SpellVisual != 135  || procSpell->SpellIconID != 156) &&
+                        procSpell->SpellVisual != 6623 )
+                        return;
+
+                    SpellEntry const *originalSpell = procSpell;
+
+                    // in case HShock procspell is triggered spell but we need mana cost of original casted spell
+                    if(procSpell->SpellVisual == 135 && procSpell->SpellIconID == 156)
+                    {
+                        uint32 originalSpellId = 0;
+                        switch(procSpell->Id)
+                        {
+                            case 25914: originalSpellId = 20473; break;
+                            case 25913: originalSpellId = 20929; break;
+                            case 25903: originalSpellId = 20930; break;
+                            case 27175: originalSpellId = 27174; break;
+                            case 33074: originalSpellId = 33072; break;
+                            default: 
+                                sLog.outError("Unit::HandleDummyTrigger: Spell %u not handled in HShock",procSpell->Id);
+                                return;
+                        }
+                        SpellEntry const *HSSpell= sSpellStore.LookupEntry(originalSpellId);
+                        if(!HSSpell)
+                        {
+                            sLog.outError("Unit::HandleDummyTrigger: Spell %u unknown but used in HShock",originalSpellId);
+                            return;
+                        }
+                        originalSpell = HSSpell;
+                    }
+
+                    SpellEntry const *ILManaTemplate = sSpellStore.LookupEntry(20272);
+                    SpellEntry ILManaSpell = *ILManaTemplate;
+                    ILManaSpell.EffectBasePoints[0] = originalSpell->manaCost;
+                    // BasePoints = val -1 not required (EffectBaseDice==0)
+                    CastSpell(this, &ILManaSpell, true, NULL, triggredByAura);
+                    return;
+                }
+            }
         }
         case 312:
         {
@@ -3858,7 +3898,7 @@ void Unit::HandleDummyTrigger(Unit *pVictim, uint32 damage, Aura* triggredByAura
             CastSpell(this, &improvedLotP, true, NULL, triggredByAura);
             if (GetTypeId() == TYPEID_PLAYER)
                 ((Player*)this)->AddSpellCooldown(34299,0,time(NULL) + 6);
-            break;
+            return;
         }
         case 1137:
         {
@@ -3876,7 +3916,7 @@ void Unit::HandleDummyTrigger(Unit *pVictim, uint32 damage, Aura* triggredByAura
             }
             if (pVictim && pVictim->isAlive() && roll_chance_f(chance))
                 CastSpell(pVictim, 18093, true, NULL, triggredByAura);
-            break;
+            return;
         }
         case 1875:
         {
@@ -3901,14 +3941,14 @@ void Unit::HandleDummyTrigger(Unit *pVictim, uint32 damage, Aura* triggredByAura
             SpellEntry BRHeal = *BRHealTemplate;
             BRHeal.EffectBasePoints[0] = (damage * triggredByAura->GetModifier()->m_amount / 100 - 1) / 3;
             CastSpell(this, &BRHeal, true, NULL, triggredByAura);
-            break;
+            return;
         }
         case 2006:
             //Rampage
             //Effects: 30029(Rank 1), 30031(Rank 2), 30032(Rank 3)
             //Check EffectTriggerSpell[1] to determine correct effect id
             //CastSpell(this, triggredByAura->GetSpellProto()->EffectTriggerSpell[1], true, NULL, triggredByAura);
-            break;
+            return;
         case 2013:
         {
             //Nature's Guardian
@@ -3930,13 +3970,13 @@ void Unit::HandleDummyTrigger(Unit *pVictim, uint32 damage, Aura* triggredByAura
                     ((Player*)this)->AddSpellCooldown(39301,0,time(NULL) + 5);
                 }
             }*/
-            break;
+            return;
         }
         case 2127:
             //Blazing Speed
             //Effect: 31643
             CastSpell(this, 31643, true, NULL, triggredByAura);
-            break;
+            return;
     }
 }
 
