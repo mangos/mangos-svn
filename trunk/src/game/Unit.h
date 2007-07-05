@@ -303,10 +303,12 @@ enum ProcFlags
     PROC_FLAG_STRUCK_CRIT_RANGED = 0x00800000,              // On being critically struck by a ranged attack
     PROC_FLAG_RESIST_SPELL       = 0x01000000,              // On resist enemy spell
     PROC_FLAG_TARGET_RESISTS     = 0x02000000,              // On enemy resisted spell
-    PROC_FLAG_TARGET_AVOID_ATTACK= 0x04000000,              // On enemy blocks/dodges/parries
+    PROC_FLAG_TARGET_DODGE_OR_PARRY= 0x04000000,            // On enemy dodges/parries
     PROC_FLAG_HEAL               = 0x08000000,              // On heal
     PROC_FLAG_CRIT_HEAL          = 0x10000000,              // On critical healing effect
-    PROC_FLAG_HEALED             = 0x20000000               // On healing
+    PROC_FLAG_HEALED             = 0x20000000,              // On healing
+    PROC_FLAG_TARGET_BLOCK       = 0x40000000,              // On enemy blocks
+    PROC_FLAG_MISS               = 0x80000000               // On miss melee attack
 };
 
 enum AuraState

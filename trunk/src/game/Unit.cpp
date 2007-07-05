@@ -3653,7 +3653,11 @@ void Unit::CastMeleeProcDamageAndSpell(Unit* pVictim, uint32 damage, WeaponAttac
     switch(outcome)
     {
         case MELEE_HIT_MISS:
-            return;
+            if(attType == BASE_ATTACK || attType == OFF_ATTACK)
+            {
+                procAttacker = PROC_FLAG_MISS;
+            }
+            break;
         case MELEE_HIT_CRIT:
             if(spellCasted && attType == BASE_ATTACK)
             {
@@ -3672,15 +3676,15 @@ void Unit::CastMeleeProcDamageAndSpell(Unit* pVictim, uint32 damage, WeaponAttac
             }
             break;
         case MELEE_HIT_PARRY:
-            procAttacker = PROC_FLAG_TARGET_AVOID_ATTACK;
+            procAttacker = PROC_FLAG_TARGET_DODGE_OR_PARRY;
             procVictim = PROC_FLAG_PARRY;
             break;
         case MELEE_HIT_BLOCK:
-            procAttacker = PROC_FLAG_TARGET_AVOID_ATTACK;
+            procAttacker = PROC_FLAG_TARGET_BLOCK;
             procVictim = PROC_FLAG_BLOCK;
             break;
         case MELEE_HIT_DODGE:
-            procAttacker = PROC_FLAG_TARGET_AVOID_ATTACK;
+            procAttacker = PROC_FLAG_TARGET_DODGE_OR_PARRY;
             procVictim = PROC_FLAG_DODGE;
             break;
         case MELEE_HIT_CRUSHING:
@@ -3712,7 +3716,8 @@ void Unit::CastMeleeProcDamageAndSpell(Unit* pVictim, uint32 damage, WeaponAttac
     if(damage > 0)
         procVictim |= PROC_FLAG_TAKE_DAMAGE;
 
-    ProcDamageAndSpell(pVictim, procAttacker, procVictim, damage, spellCasted, isTriggeredSpell, attType);
+    if(procAttacker != PROC_FLAG_NONE || procVictim != PROC_FLAG_NONE)
+        ProcDamageAndSpell(pVictim, procAttacker, procVictim, damage, spellCasted, isTriggeredSpell, attType);
 }
 
 void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint32 effIndex, uint32 damage, Aura* triggredByAura, uint32 procFlag)
