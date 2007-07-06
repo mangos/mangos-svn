@@ -46,7 +46,6 @@ extern SQLStorage sCreatureDataAddonStorage;
 extern SQLStorage sGOStorage;
 extern SQLStorage sPageTextStore;
 extern SQLStorage sItemStorage;
-extern SQLStorage sSpellProcEventStore;
 extern SQLStorage sSpellThreatStore;
 
 class Group;
@@ -338,12 +337,18 @@ class ObjectMgr
             return NULL;
         }
 
-        typedef HM_NAMESPACE::hash_map<uint32, SpellAffection> SpellAffectMap;
-        SpellAffectMap SpellAffect;
         SpellAffection const* GetSpellAffection(uint16 spellId, uint8 effectId) const
         {
-            SpellAffectMap::const_iterator itr = SpellAffect.find((spellId<<8) + effectId);
-            if( itr != SpellAffect.end( ) )
+            SpellAffectMap::const_iterator itr = mSpellAffectMap.find((spellId<<8) + effectId);
+            if( itr != mSpellAffectMap.end( ) )
+                return &itr->second;
+            return NULL;
+        }
+
+        SpellProcEventEntry const* GetSpellProcEvent(uint32 spellId) const
+        {
+            SpellProcEventMap::const_iterator itr = mSpellProcEventMap.find(spellId);
+            if( itr != mSpellProcEventMap.end( ) )
                 return &itr->second;
             return NULL;
         }
@@ -630,6 +635,12 @@ class ObjectMgr
         GameObjectDataMap mGameObjectDataMap;
         RespawnTimes mCreatureRespawnTimes;
         RespawnTimes mGORespawnTimes;
+
+        typedef HM_NAMESPACE::hash_map<uint32, SpellAffection> SpellAffectMap;
+        SpellAffectMap mSpellAffectMap;
+
+        typedef HM_NAMESPACE::hash_map<uint32, SpellProcEventEntry> SpellProcEventMap;
+        SpellProcEventMap mSpellProcEventMap;
 };
 
 #define objmgr MaNGOS::Singleton<ObjectMgr>::Instance()

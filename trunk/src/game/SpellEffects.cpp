@@ -996,8 +996,8 @@ void Spell::EffectApplyAura(uint32 i)
             if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST && m_spellInfo->SpellFamilyFlags & 1) //Power Word: Shield
                 spellId = 6788; // Weakened Soul
             else if ((m_spellInfo->SpellVisual == 154 && m_spellInfo->SpellIconID == 73)                         || //DP
-                (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellFamilyFlags & 4194304) || //DS
-                (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellFamilyFlags & 128)     || //BoP
+                (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellFamilyFlags & 0x400000)|| //DS
+                (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellFamilyFlags & 0x000080)|| //BoP
                 (m_spellInfo->SpellVisual == 7880 && m_spellInfo->SpellIconID == 2168))                             //AV
                 spellId = 25771; // Forbearance
             else if (m_spellInfo->Mechanic == MECHANIC_HEAL) // Bandages
