@@ -606,14 +606,6 @@ void ObjectMgr::LoadGameobjectRespawnTimes()
     sLog.outString( "" );
 }
 
-void ObjectMgr::LoadSpellProcEvents()
-{
-    sSpellProcEventStore.Load();
-
-    sLog.outString( ">> Loaded %u spell proc event conditions", sSpellProcEventStore.RecordCount );
-    sLog.outString( "" );
-}
-
 void ObjectMgr::LoadSpellThreats()
 {
     sSpellThreatStore.Load();
@@ -2722,7 +2714,7 @@ void ObjectMgr::LoadSpellAffects()
         sa.SpellFamilyMask = fields[7].GetUInt64();
         sa.Charges = fields[8].GetUInt16();
 
-        SpellAffect.insert(SpellAffectMap::value_type((entry<<8) + effectId,sa));
+        mSpellAffectMap.insert(SpellAffectMap::value_type((entry<<8) + effectId,sa));
 
         count++;
     } while( result->NextRow() );
@@ -2731,6 +2723,61 @@ void ObjectMgr::LoadSpellAffects()
 
     sLog.outString( "" );
     sLog.outString( ">> Loaded %u spell affect definitions", count );
+}
+
+void ObjectMgr::LoadSpellProcEvents()
+{
+    uint32 count = 0;
+
+    //                                            0       1            2          3         4          5      6                 7           8
+    QueryResult *result = sDatabase.Query("SELECT `entry`,`SchoolMask`,`Category`,`SkillID`,`SpellFamilyName`,`SpellFamilyMask`,`procFlags`,`ppmRate` FROM `spell_proc_event`");
+    if( !result )
+    {
+
+        barGoLink bar( 1 );
+
+        bar.step();
+
+        sLog.outString( "" );
+        sLog.outString( ">> Loaded %u spell proc event conditions", count  );
+        return;
+    }
+
+    barGoLink bar( result->GetRowCount() );
+
+    do
+    {
+        Field *fields = result->Fetch();
+
+        bar.step();
+
+        uint16 entry = fields[0].GetUInt16();
+
+        if (!sSpellStore.LookupEntry(entry))
+        {
+            sLog.outErrorDb("Spell %u listed in `spell_proc_event` not exist", entry);
+            continue;
+        }
+
+        SpellProcEventEntry spe;
+
+        spe.schoolMask      = fields[1].GetUInt32();
+        spe.category        = fields[2].GetUInt32();
+        spe.skillId         = fields[3].GetUInt32();
+        spe.spellFamilyName = fields[4].GetUInt32();
+        spe.spellFamilyMask = fields[5].GetUInt64();
+        spe.procFlags       = fields[6].GetUInt32();
+        spe.ppmRate         = fields[7].GetFloat();
+
+        mSpellProcEventMap[entry] = spe;
+
+        count++;
+    } while( result->NextRow() );
+
+    delete result;
+
+    sLog.outString( "" );
+    sLog.outString( ">> Loaded %u spell proc event conditions", count  );
 }
 
 void ObjectMgr::SetHighestGuids()

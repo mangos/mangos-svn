@@ -1328,7 +1328,7 @@ float Creature::GetAttackDistance(Unit *pl) const
     if(RetDistance < 5)
         RetDistance = 5;
 
-    return (RetDistance*sWorld.getRate(RATE_CREATURE_AGGRO));
+    return (RetDistance*aggroRate);
 }
 
 CreatureInfo const *Creature::GetCreatureInfo() const
