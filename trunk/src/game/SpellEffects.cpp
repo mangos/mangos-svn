@@ -3350,7 +3350,7 @@ void Spell::EffectTransmitted(uint32 i)
     switch(pGameObj->GetGOInfo()->type)
     {
         case GAMEOBJECT_TYPE_FISHINGNODE:
-            {
+        {
             m_caster->SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT,pGameObj->GetGUID());
                                                             //Orientation3
             pGameObj->SetFloatValue(GAMEOBJECT_ROTATION + 2, 0.88431775569915771 );
@@ -3363,17 +3363,25 @@ void Spell::EffectTransmitted(uint32 i)
             // start time == fish-FISHING_BOBBER_READY_TIME (0..GetDuration(m_spellInfo)-FISHING_BOBBER_READY_TIME)
             uint32 fish = urand(FISHING_BOBBER_READY_TIME,GetDuration(m_spellInfo)/1000);
             pGameObj->SetRespawnTime(fish);
-            }break;
-        case GAMEOBJECT_TYPE_SUMMONING_RITUAL:  //if gameobject is summoning object, it should be spawned right on caster's position
-            pGameObj->Relocate(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ());
             break;
-        default: break;
+        }
+        case GAMEOBJECT_TYPE_SUMMONING_RITUAL:  //if gameobject is summoning object, it should be spawned right on caster's position
+        {
+            pGameObj->Relocate(m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ());
+
+            int32 duration = GetDuration(m_spellInfo);
+            pGameObj->SetRespawnTime(duration > 0 ? duration/1000 : 0);
+            break;
+        }
+        default: 
+        {
+            int32 duration = GetDuration(m_spellInfo);
+            pGameObj->SetRespawnTime(duration > 0 ? duration/1000 : 0);
+            break;
+        }
     }
 
     pGameObj->SetOwnerGUID(m_caster->GetGUID() );
-    int32 duration = GetDuration(m_spellInfo);
-    pGameObj->SetRespawnTime(duration > 0 ? duration/1000 : 0);
-
 
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel() );
     pGameObj->SetSpellId(m_spellInfo->Id);
