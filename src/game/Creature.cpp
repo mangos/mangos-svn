@@ -1296,6 +1296,10 @@ void Creature::DeleteFromDB()
 
 float Creature::GetAttackDistance(Unit *pl) const
 {
+    float aggroRate = sWorld.getRate(RATE_CREATURE_AGGRO);
+    if(aggroRate==0)
+        return 0.0f;
+
     int32 playerlevel   = pl->getLevel();
     int32 creaturelevel = getLevel();
 
@@ -1312,7 +1316,7 @@ float Creature::GetAttackDistance(Unit *pl) const
     // radius grow if playlevel < creaturelevel
     RetDistance -= (float)leveldif;
 
-    if(getLevel() <= 55)
+    if(getLevel()+5 <= sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
     {
         // decrease aggro range auras
         AuraList const& modDectectRangeList = GetAurasByType(SPELL_AURA_MOD_DETECT_RANGE);
@@ -1321,7 +1325,7 @@ float Creature::GetAttackDistance(Unit *pl) const
     }
 
     // "Minimum Aggro Radius for a mob seems to be combat range (5 yards)"
-    if(RetDistance < 5 && sWorld.getRate(RATE_CREATURE_AGGRO) != 0)
+    if(RetDistance < 5)
         RetDistance = 5;
 
     return (RetDistance*sWorld.getRate(RATE_CREATURE_AGGRO));
