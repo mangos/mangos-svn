@@ -93,7 +93,7 @@ bool IsPassiveStackableSpell( uint32 spellId )
         return false;
 
     SpellEntry const* spellProto = sSpellStore.LookupEntry(spellId);
-    if(spellProto)
+    if(!spellProto)
         return false;
 
     for(int j = 0; j < 3; ++j)
@@ -2435,8 +2435,15 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
 
         uint32 i_spellId = (*i).second->GetId();
 
-        if(IsPassiveStackableSpell(i_spellId))
-            continue;
+        if(IsPassiveSpell(i_spellId))
+        {
+            if(IsPassiveStackableSpell(i_spellId))
+                continue;
+
+            // passive non-stackable spells not stackable only with another rank of same spell
+            if (!objmgr.IsRankSpellDueToSpell(Aur->GetSpellProto(), i_spellId))
+                continue;
+        }
 
         uint32 i_effIndex = (*i).second->GetEffIndex();
 
@@ -2485,7 +2492,7 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
                         sec_match = true;
             if( sec_match || objmgr.IsNoStackSpellDueToSpell(spellId, i_spellId) && !is_sec && !is_i_sec )
             {
-                // if sec_match this isnt always true, needs to be rechecked
+                // if sec_match this isn't always true, needs to be rechecked
                 if (objmgr.IsRankSpellDueToSpell(Aur->GetSpellProto(), i_spellId))
                     if(CompareAuraRanks(spellId, effIndex, i_spellId, i_effIndex) < 0)
                         return false;                       // cannot remove higher rank
