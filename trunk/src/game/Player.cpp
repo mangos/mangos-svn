@@ -176,6 +176,7 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_ArmorProficiency = 0;
     m_canParry = false;
     m_canDualWield = false;
+    m_extraAttacks = 0;
 
     ////////////////////Rest System/////////////////////
     time_inn_enter=0;
@@ -762,6 +763,12 @@ void Player::Update( uint32 p_time )
             // TODO add weapon,skill check
 
             float pldistance = ATTACK_DISTANCE;
+
+            if (m_extraAttacks)
+            {
+                AttackerStateUpdate(pVictim, BASE_ATTACK);
+                --m_extraAttacks;
+            }
 
             if (isAttackReady(BASE_ATTACK))
             {

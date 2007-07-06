@@ -508,6 +508,7 @@ class Spell
         void EffectDurabilityDamagePCT(uint32 i);
         void EffectReduceThreatPercent(uint32 i);
         void EffectResurrectNew(uint32 i);
+        void EffectAddExtraAttacks(uint32 i);
 
         Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur = NULL, uint64 originalCasterGUID = 0 );
         ~Spell();

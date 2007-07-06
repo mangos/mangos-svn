@@ -73,7 +73,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectQuestComplete,                            // 16 SPELL_EFFECT_QUEST_COMPLETE
     &Spell::EffectWeaponDmg,                                // 17 SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL
     &Spell::EffectResurrect,                                // 18 SPELL_EFFECT_RESURRECT
-    &Spell::EffectNULL,                                     // 19 SPELL_EFFECT_ADD_EXTRA_ATTACKS
+    &Spell::EffectAddExtraAttacks,                          // 19 SPELL_EFFECT_ADD_EXTRA_ATTACKS
     &Spell::EffectNULL,                                     // 20 SPELL_EFFECT_DODGE                    one spell: Dodge
     &Spell::EffectNULL,                                     // 21 SPELL_EFFECT_EVADE                    one spell: Evade (DND)
     &Spell::EffectParry,                                    // 22 SPELL_EFFECT_PARRY
@@ -2942,6 +2942,17 @@ void Spell::EffectResurrect(uint32 i)
 
     ((Player*)unitTarget)->setResurrect(m_caster->GetGUID(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ(), health, mana);
     SendResurrectRequest(pTarget);
+}
+
+void Spell::EffectAddExtraAttacks(uint32 i)
+{
+    if(!unitTarget || !unitTarget->isAlive() || unitTarget->GetTypeId()!= TYPEID_PLAYER)
+        return;
+
+    if(((Player*)unitTarget)->m_extraAttacks )
+        return;
+
+    ((Player*)unitTarget)->m_extraAttacks = damage;
 }
 
 void Spell::EffectParry(uint32 i)
