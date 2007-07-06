@@ -649,6 +649,7 @@ void Spell::EffectDummy(uint32 i)
 
             deepWoundsDot.EffectBasePoints[0] = int32(damage / 4) - 1;
             m_caster->CastSpell(unitTarget, &deepWoundsDot, true, NULL);
+            return;
         }
 
         // Different item engineering summons 

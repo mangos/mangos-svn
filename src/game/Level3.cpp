@@ -2075,7 +2075,7 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
     //pGameObj->SetZoneId(chr->GetZoneId());
     pGameObj->SetMapId(chr->GetMapId());
     //pGameObj->SetNameId(id);
-    sLog.outError(LANG_GAMEOBJECT_CURRENT, goI->name, lowGUID, x, y, z, o);
+    sLog.outDebug(LANG_GAMEOBJECT_CURRENT, goI->name, lowGUID, x, y, z, o);
 
     if( lootID )
     {
@@ -2393,11 +2393,12 @@ bool ChatHandler::HandleNpcInfoCommand(const char* args)
 
     uint32 faction = target->getFaction();
     uint32 npcflags = target->GetUInt32Value(UNIT_NPC_FLAGS);
-    uint32 skinid = target->GetUInt32Value(UNIT_FIELD_DISPLAYID);
+    uint32 displayid = target->GetUInt32Value(UNIT_FIELD_DISPLAYID);
+    uint32 nativeid = target->GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID);
     uint32 Entry = target->GetUInt32Value(OBJECT_FIELD_ENTRY);
     CreatureInfo const* cInfo = target->GetCreatureInfo();
 
-    PSendSysMessage(LANG_NPCINFO_CHAR,  target->GetGUIDLow(), faction, npcflags, Entry, skinid);
+    PSendSysMessage(LANG_NPCINFO_CHAR,  target->GetDBTableGUIDLow(), faction, npcflags, Entry, displayid, nativeid);
     PSendSysMessage(LANG_NPCINFO_LEVEL, target->getLevel());
     PSendSysMessage(LANG_NPCINFO_HEALTH,target->GetUInt32Value(UNIT_FIELD_BASE_HEALTH), target->GetMaxHealth(), target->GetHealth());
     PSendSysMessage(LANG_NPCINFO_FLAGS, target->GetUInt32Value(UNIT_FIELD_FLAGS), target->GetUInt32Value(UNIT_DYNAMIC_FLAGS), target->getFaction());
