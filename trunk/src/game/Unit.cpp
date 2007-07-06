@@ -1552,9 +1552,24 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
     CastMeleeProcDamageAndSpell(pVictim, (*damage - *absorbDamage - *resistDamage - *blocked_amount), attType, outcome, spellCasted, isTriggeredSpell);
 
     // victim's damage shield
+    // yet another hack to fix crashes related to the aura getting removed during iteration
+    std::set<Aura*> alreadyDone;
+    uint32 removedAuras = pVictim->m_removedAuras;
     AuraList& vDamageShields = pVictim->GetAurasByType(SPELL_AURA_DAMAGE_SHIELD);
-    for(AuraList::iterator i = vDamageShields.begin(); i != vDamageShields.end(); ++i)
-        pVictim->SpellNonMeleeDamageLog(this, (*i)->GetId(), (*i)->GetModifier()->m_amount, false, false);
+    for(AuraList::iterator i = vDamageShields.begin(), next = vDamageShields.begin(); i != vDamageShields.end(); i = next)
+    {
+        next++;
+        if (alreadyDone.find(*i) == alreadyDone.end())
+        {
+            alreadyDone.insert(*i);
+            pVictim->SpellNonMeleeDamageLog(this, (*i)->GetId(), (*i)->GetModifier()->m_amount, false, false);
+            if (pVictim->m_removedAuras > removedAuras)
+            {
+                removedAuras = pVictim->m_removedAuras;
+                next = vDamageShields.begin();
+            }
+        }
+    }
 
     if(pVictim->m_currentSpell && pVictim->GetTypeId() == TYPEID_PLAYER && *damage)
     {
