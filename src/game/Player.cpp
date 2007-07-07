@@ -402,6 +402,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     // base stats and related field values
     InitStatsForLevel(1,false,false);
     InitTalentForLevel();
+    InitPrimaryProffesions();                               // to max set before any spell added
 
     // apply original stats mods before spell loading or item equipment that call before equip _RemoveStatsMods()
     _ApplyStatsMods();
@@ -1952,7 +1953,8 @@ void Player::InitTalentForLevel()
         if(m_usedTalentCount > 0)                           // Free any used talents
         {
             resetTalents(true);
-            SetUInt32Value(PLAYER_CHARACTER_POINTS1,0);
+            SetFreeTalentPoints(0);
+
         }
     }
     else
@@ -1966,7 +1968,7 @@ void Player::InitTalentForLevel()
         }
         // else update amount of free points
         else
-            SetUInt32Value(PLAYER_CHARACTER_POINTS1,talentPointsForLevel-m_usedTalentCount);
+            SetFreeTalentPoints(talentPointsForLevel-m_usedTalentCount);
     }
 }
 
@@ -2397,6 +2399,13 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
     // update used talent points count
     m_usedTalentCount += GetTalentSpellCost(spell_id);
 
+    // update free primary prof.points (if any, can be none in case GM .learn prof. learning)
+    if(uint32 freeProfs = GetFreePrimaryProffesionPoints())
+    {
+        if(objmgr.IsPrimaryProfessionFirstRankSpell(spell_id))
+            SetFreePrimaryProffesions(freeProfs-1);
+    }
+
     // add dependent skills
     uint16 maxskill     = GetMaxSkillValueForLevel();
 
@@ -2476,6 +2485,14 @@ void Player::removeSpell(uint16 spell_id)
             m_usedTalentCount -= talentCosts;
         else
             m_usedTalentCount = 0;
+    }
+
+    // update free primary prof.points (if not overflow setting, can be in case GM use before .learn prof. learning)
+    if(objmgr.IsPrimaryProfessionFirstRankSpell(spell_id))
+    {
+        uint32 freeProfs = GetFreePrimaryProffesionPoints()+1;
+        if(freeProfs <= sWorld.getConfig(CONFIG_MAX_PRIMARY_TRADE_SKILL))
+            SetFreePrimaryProffesions(freeProfs);
     }
 
     // remove dependent skill
@@ -2638,7 +2655,7 @@ bool Player::resetTalents(bool no_cost)
 
     if (m_usedTalentCount == 0)
     {
-        SetUInt32Value(PLAYER_CHARACTER_POINTS1,talentPointsForLevel);
+        SetFreeTalentPoints(talentPointsForLevel);
         return false;
     }
 
@@ -2684,7 +2701,7 @@ bool Player::resetTalents(bool no_cost)
         }
     }
 
-    SetUInt32Value(PLAYER_CHARACTER_POINTS1,talentPointsForLevel);
+    SetFreeTalentPoints(talentPointsForLevel);
 
     if(!no_cost)
     {
@@ -2953,31 +2970,7 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
         return TRAINER_SPELL_GREEN;
 
     // check primary prof. limit
-    uint32 value = 0;
-
-    for (PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
-    {
-        if (itr->second->state == PLAYERSPELL_REMOVED) continue;
-        SpellEntry const *pSpellInfo = sSpellStore.LookupEntry(itr->first);
-        if(!pSpellInfo) continue;
-
-        if(pSpellInfo->Effect[1] == SPELL_EFFECT_SKILL)
-        {
-            uint32 pskill = pSpellInfo->EffectMiscValue[1];
-            if( !IsPrimaryProfessionSkill(pskill))
-                continue;
-
-            // not check prof count for not first prof. spells (when skill already known)
-            if(pskill == skill)
-                return TRAINER_SPELL_GREEN;
-
-            // count only first rank prof. spells
-            if(objmgr.GetSpellRank(pSpellInfo->Id)==1)
-                value += 1;
-        }
-    }
-
-    if(value >= sWorld.getConfig(CONFIG_MAX_PRIMARY_TRADE_SKILL))
+    if(objmgr.IsPrimaryProfessionFirstRankSpell(learned_spell_id) && GetFreePrimaryProffesionPoints() == 0)
         return TRAINER_SPELL_RED;
 
     return TRAINER_SPELL_GREEN;
@@ -11267,6 +11260,8 @@ bool Player::LoadFromDB( uint32 guid )
         return false;
     }
 
+    InitPrimaryProffesions();                               // to max set before any spell loaded
+
     uint32 transGUID = fields[24].GetUInt32();
     Relocate(fields[6].GetFloat(),fields[7].GetFloat(),fields[8].GetFloat(),fields[10].GetFloat());
     SetMapId(fields[9].GetUInt32());
@@ -13955,6 +13950,11 @@ void Player::UpdateVisibilityOf(T* target, UpdateData& data, UpdateDataMapType& 
             #endif
         }
     }
+}
+
+void Player::InitPrimaryProffesions()
+{
+    SetFreePrimaryProffesions(sWorld.getConfig(CONFIG_MAX_PRIMARY_TRADE_SKILL));
 }
 
 template void Player::UpdateVisibilityOf(Player*        target, UpdateData& data, UpdateDataMapType& data_updates);

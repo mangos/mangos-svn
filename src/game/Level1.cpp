@@ -765,7 +765,7 @@ bool ChatHandler::HandleModifyTalentCommand (const char* args)
             SendSysMessage(LANG_NO_CHAR_SELECTED);
             return true;
         }
-        player->SetUInt32Value(PLAYER_CHARACTER_POINTS1, tp);
+        player->SetFreeTalentPoints(tp);
         return true;
     }
     return false;

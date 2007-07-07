@@ -484,6 +484,7 @@ class ObjectMgr
         bool IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2);
         static bool IsProfessionSpell(uint32 spellId);
         static bool IsPrimaryProfessionSpell(uint32 spellId);
+        bool IsPrimaryProfessionFirstRankSpell(uint32 spellId);
 
         struct SpellLearnSkillNode
         {
