@@ -1,3 +1,21 @@
+/* 
+ * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
+
 #ifndef _REFERENCE_H
 #define _REFERENCE_H
 
@@ -5,20 +23,11 @@
 
 //=====================================================
 
-class BaseReference : public LinkedListElement {
-public:
-    virtual void invalidate() = 0;
-};
-
-//=====================================================
-
-template <class TO, class FROM> class Reference : public BaseReference
+template <class TO, class FROM> class Reference : public LinkedListElement
 {
 private:
      TO* iRefTo;
      FROM* iRefFrom;
-private:
-    void clear() { delink(); iRefTo = NULL; iRefFrom = NULL; }
 protected:
     // Tell our refTo (target) object that we have a link
     virtual void targetObjectBuildLink() = 0;
@@ -30,9 +39,11 @@ protected:
     virtual void sourceObjectDestroyLink() = 0;
 public:
     Reference() { iRefTo = NULL; iRefFrom = NULL; }
+    virtual ~Reference() {}
 
     // Create new link
-    inline void link(TO* toObj, FROM* fromObj) { 
+    inline void link(TO* toObj, FROM* fromObj) {
+    	assert(fromObj); // fromObj MUST not be NULL
         if(isValid())
             unlink();
         if(toObj != NULL) {
@@ -44,13 +55,13 @@ public:
 
     // We don't need the reference anymore. Call comes from the refFrom object
     // Tell our refTo object, that the link is cut
-    inline void unlink() { targetObjectDestroyLink(); clear(); }
+    inline void unlink() { targetObjectDestroyLink(); delink(); iRefTo = NULL; iRefFrom = NULL; }
 
     // Link is invalid due to destruction of referenced traget object. Call comes from the refTo object
     // Tell our refFrom object, that the link is cut
-    inline void invalidate() { sourceObjectDestroyLink(); clear(); }
+    inline void invalidate() { sourceObjectDestroyLink(); delink(); iRefTo = NULL; } // the iRefFrom MUST remain!!
 
-    inline bool isValid() const { return iRefTo != NULL; }
+    inline bool isValid() const { return iRefTo != NULL; } // Only check the iRefTo
 
 
     Reference<TO,FROM>* next() { return((Reference<TO,FROM>*)LinkedListElement::next()); }
