@@ -142,7 +142,7 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
 
         // FIXME: sending 1 for first rank primary prof. work fine at some clients and have problems (gray learn button) at another
         // for same packet data, not dependent from client language or other. Can be related to value of some from update fields (???) like count allowed to learn primary profs.
-        data << uint32(0); // uint32(objmgr.IsPrimaryProfessionSpell(itr->spell->EffectTriggerSpell[0]) && objmgr.GetSpellRank(itr->spell->EffectTriggerSpell[0])==1 ? 1 : 0);
+        data << uint32(objmgr.IsPrimaryProfessionFirstRankSpell(itr->spell->EffectTriggerSpell[0]) ? 1 : 0);
         data << uint32(0);                                  // if 1 then disable learn button even if green state?
         data << uint8(itr->reqlevel ? itr->reqlevel : itr->spell->spellLevel);
         data << uint32(itr->reqskill);

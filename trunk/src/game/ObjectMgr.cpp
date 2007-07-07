@@ -3161,6 +3161,11 @@ bool ObjectMgr::IsPrimaryProfessionSpell(uint32 spellId)
     return IsPrimaryProfessionSkill(skill);
 }
 
+bool ObjectMgr::IsPrimaryProfessionFirstRankSpell(uint32 spellId)
+{
+    return IsPrimaryProfessionSpell(spellId) && GetSpellRank(spellId)==1;
+}
+
 void ObjectMgr::LoadReputationOnKill()
 {
     uint32 count = 0; 

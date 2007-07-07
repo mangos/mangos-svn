@@ -78,7 +78,7 @@ void Channel::Join(uint64 p, const char *pass)
         SendToOne(&data,p);
 
         // if no owner first logged will become
-        if(!IsConstant() && m_ownerGUID)
+        if(!IsConstant() && !m_ownerGUID)
         {
             SetOwner(p, (players.size()>1?true:false));
             players[p].moderator = true;

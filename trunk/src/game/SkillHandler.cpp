@@ -35,7 +35,8 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
     uint32 talent_id, requested_rank;
     recv_data >> talent_id >> requested_rank;
 
-    uint32 CurTalentPoints =  GetPlayer()->GetUInt32Value(PLAYER_CHARACTER_POINTS1);
+    uint32 CurTalentPoints =  GetPlayer()->GetFreeTalentPoints();
+;
     if(CurTalentPoints == 0)
         return;
 
@@ -132,7 +133,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
                 GetPlayer( )->removeSpell((uint16)respellid);
                 GetPlayer()->RemoveAurasDueToSpell(respellid);
             }
-            GetPlayer()->SetUInt32Value(PLAYER_CHARACTER_POINTS1, CurTalentPoints - 1);
+            GetPlayer()->SetFreeTalentPoints(CurTalentPoints - 1);
         }
     }
 }
