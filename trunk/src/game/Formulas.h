@@ -210,7 +210,7 @@ namespace MaNGOS
                 xp = (155 + mxp(lvl) * (1344 - ((69-lvl) * (7 + (69 - lvl) * 8 - 1)/2)));
             }
             // The XP to Level is always rounded to the nearest 100 points (50 rounded to low).
-            return (xp + 49) / 100 * 100;
+            return ((xp + 49) / 100) * 100;                 // use additional () for prevent free association operations in C++
         }
 
         inline uint32 xp_to_money(uint32 rewXP, uint32 qlevel)
