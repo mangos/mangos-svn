@@ -351,6 +351,21 @@ pkgdata_DATA = \
 	3964_command.sql \
 	4010_spell_proc_event.sql \
 	4012_spell_proc_event.sql \
+	4018_spell_proc_event.sql \
+	4019_spell_chain.sql \
+	4019_spell_proc_event.sql \
+	4020_spell_chain.sql \
+	4020_spell_proc_event.sql \
+	4021_spell_chain.sql \
+	4021_spell_proc_event.sql \
+	4023_spell_proc_event.sql \
+	4026_spell_proc_event.sql \
+	4028_spell_chain.sql \
+	4028_spell_proc_event.sql \
+	4031_spell_chain.sql \
+	4031_spell_proc_event.sql \
+	4035_spell_proc_event.sql \
+	4036_spell_proc_event.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -680,4 +695,19 @@ EXTRA_DIST = \
 	3964_command.sql \
 	4010_spell_proc_event.sql \
 	4012_spell_proc_event.sql \
+	4018_spell_proc_event.sql \
+	4019_spell_chain.sql \
+	4019_spell_proc_event.sql \
+	4020_spell_chain.sql \
+	4020_spell_proc_event.sql \
+	4021_spell_chain.sql \
+	4021_spell_proc_event.sql \
+	4023_spell_proc_event.sql \
+	4026_spell_proc_event.sql \
+	4028_spell_chain.sql \
+	4028_spell_proc_event.sql \
+	4031_spell_chain.sql \
+	4031_spell_proc_event.sql \
+	4035_spell_proc_event.sql \
+	4036_spell_proc_event.sql \
 	README
