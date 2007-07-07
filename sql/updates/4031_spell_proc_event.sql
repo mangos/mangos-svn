@@ -1,4 +1,4 @@
-/*ALTER TABLE `spell_proc_event`
+ALTER TABLE `spell_proc_event`
   ADD COLUMN `SpellFamilyName` smallint(6) unsigned NOT NULL default '0' AFTER `SkillID`,
   ADD COLUMN `SpellFamilyMaskNew` bigint(11) unsigned NOT NULL default '0' AFTER `SpellFamilyMask`;
 
@@ -11,7 +11,7 @@ UPDATE `spell_proc_event`
 ALTER TABLE `spell_proc_event`
   DROP COLUMN `SpellFamilyMask`,
   CHANGE COLUMN `SpellFamilyMaskNew` `SpellFamilyMask` bigint(40) unsigned NOT NULL default '0';
-  */
+
 
 DELETE FROM `spell_proc_event` WHERE `entry` IN ( 31833, 31835, 31836 );
 INSERT INTO `spell_proc_event` VALUES 
