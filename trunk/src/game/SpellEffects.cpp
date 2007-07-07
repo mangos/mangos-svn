@@ -3016,7 +3016,10 @@ void Spell::EffectQuestComplete(uint32 i)
     uint32 quest_id = m_spellInfo->EffectMiscValue[i];
 
     if(_player->CanCompleteQuest( quest_id ) )
+    {
         _player->CompleteQuest( quest_id );
+        _player->SetQuestSpellComplete( quest_id );
+    }
     else
         return;
 

@@ -873,6 +873,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void MoneyChanged( uint32 value );
         bool HasQuestForItem( uint32 itemid );
         bool CanShareQuest(uint32 quest_id);
+        void SetQuestSpellComplete( uint32 quest_id, bool state = true );
+        bool IsQuestSpellComplete( uint32 quest_id ) const;
 
         void SendQuestComplete( uint32 quest_id );
         void SendQuestReward( Quest *pQuest, uint32 XP, Object* questGiver );

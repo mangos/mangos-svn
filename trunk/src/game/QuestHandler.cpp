@@ -226,9 +226,21 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
 
     sLog.outDetail( "WORLD: Received CMSG_QUESTGIVER_CHOOSE_REWARD npc = %u, quest = %u, reward = %u",uint32(GUID_LOPART(guid)),quest,reward );
 
-    Object* pObject = ObjectAccessor::Instance().GetObjectByTypeMask(*_player, guid,TYPE_UNIT|TYPE_GAMEOBJECT);
-    if(!pObject||!pObject->hasInvolvedQuest(quest))
+    Object* pObject = ObjectAccessor::Instance().GetObjectByTypeMask(*_player, guid,TYPE_UNIT|TYPE_GAMEOBJECT|TYPE_PLAYER);
+    if(!pObject)
         return;
+    
+    switch(pObject->GetTypeId())
+    {
+        case TYPEID_PLAYER:                                 // spell completed quest
+            if(((Player*)pObject)==_player && !_player->IsQuestSpellComplete(quest))
+                return;
+             break;
+        default:                                            // creature/GO completed quest
+            if(!pObject->hasInvolvedQuest(quest))
+                return;
+            break;
+    }
 
     Quest *pQuest = objmgr.QuestTemplates[quest];
     if( pQuest )
@@ -254,6 +266,11 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
                         if(Quest* nextquest = _player->GetNextQuest( guid ,pQuest ) )
                             _player->PlayerTalkClass->SendQuestGiverQuestDetails(nextquest,guid,true);
                     }
+                    break;
+                case TYPEID_PLAYER:
+                    // Send next quest
+                    if(Quest* nextquest = _player->GetNextQuest( guid ,pQuest ) )
+                        _player->PlayerTalkClass->SendQuestGiverQuestDetails(nextquest,guid,true);
                     break;
             }
         }
