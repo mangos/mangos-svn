@@ -2039,6 +2039,10 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
     for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
         SetNegStat(Stats(i), 0);
 
+    //reset rating fields values
+    for(uint16 index = PLAYER_FIELD_COMBAT_RATING_1; index < PLAYER_FIELD_ARENA_TEAM_INFO_1_1; ++index)
+        SetUInt32Value(index, 0);
+
     // Base crit values
     switch(getClass())
     {
