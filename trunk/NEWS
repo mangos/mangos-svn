@@ -13,6 +13,9 @@ http://www.mangosproject.org/community/
 Please submit bug reports at:
 https://svn.mangosproject.org/trac/MaNGOS/
 
+Version 0.8
+ * Under discussion.  
+
 Version 0.7, Codename "Eye of the Storm"
  * Full rewrite of the GNU autotools based build system, in order to
    smooth and clean up the build process.
