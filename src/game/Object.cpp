@@ -709,7 +709,7 @@ float WorldObject::GetDistanceZ(const WorldObject* obj) const
 
 bool WorldObject::IsWithinDistInMap(const WorldObject* obj, const float dist2compare) const
 {
-    if (!IsInMap(obj)) return false;
+    if (!obj || !IsInMap(obj)) return false;
 
     float dx = GetPositionX() - obj->GetPositionX();
     float dy = GetPositionY() - obj->GetPositionY();
