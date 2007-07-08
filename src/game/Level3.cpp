@@ -3124,18 +3124,17 @@ bool ChatHandler::HandleResetCommand (const char * args)
             player->InitStatsForLevel(player->getLevel(),false);
             player->InitTalentForLevel();
         }
-
-        return true;
     }
-    if (argstr == "talents"||argstr == "level")
+    else if (argstr == "talents")
         player->resetTalents(true);
-
-    if (argstr == "spells")
+    else if (argstr == "spells")
     {
-        PlayerSpellMap::iterator itr;
-        PlayerSpellMap &smap = player->GetSpellMap();
-        while(!smap.empty())
-            player->removeSpell(smap.begin()->first);
+        // make full copy of map (spells removed and marked as deleted at another spell remove
+        // and we can't use original map for safe iterative with visit each spell at loop end
+        PlayerSpellMap smap = player->GetSpellMap();
+
+        for(PlayerSpellMap::const_iterator iter = smap.begin();iter != smap.end(); ++iter)
+            player->removeSpell(iter->first);               // only iter->first can be accessed, object by iter->second can be deleted already
 
         PlayerInfo const *info = objmgr.GetPlayerInfo(player->getRace(),player->getClass());
         std::list<CreateSpellPair>::const_iterator spell_itr;
@@ -3149,8 +3148,10 @@ bool ChatHandler::HandleResetCommand (const char * args)
             }
         }
     }
+    else
+        return false;
 
-    return false;
+    return true;
 }
 
 bool ChatHandler::HandleShutDownCommand(const char* args)
