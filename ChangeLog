@@ -1,6 +1,6 @@
-MaNGOS 0.7    (??? ??, 2006) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.7
+MaNGOS 0.8    (??? ??, 2006) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.8
 
- MaNGOS 0.7 - Codename "Eye of the Storm" -adds further improvements to the
+ MaNGOS 0.8  -adds further improvements to the
  server core as well as to the majority of game classes and the game content
  database.
 
@@ -8,10 +8,69 @@ MaNGOS 0.7    (??? ??, 2006) https://svn.mangosproject.org/trac/MaNGOS/milestone
  *
 
  ==== Server Features ====
- *
+ * 
 
  * Fixed Bugs: ???
  * Total number of changes: ???
+
+ The complete list of closed tickets can be found here:
+   https://svn.mangosproject.org/trac/MaNGOS/query?status=closed&milestone=0.8
+
+
+MaNGOS 0.7    (Jul 9, 2006) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.7
+
+ MaNGOS 0.7 - Codename "Eye of the Storm" -adds further improvements to the
+ server core as well as to the majority of game classes and the game content
+ database.
+
+==== Game Features ====
+ * Fixed: random item enchantment display in the auction/mail/group loot dialogs. The item properties are also properly applied to the items at creation.
+ * Added: support for opening gameobjects/items using their specific keys. Implemented key requirements for entering instances.
+ * Added: a threat based aggro system along with threat bonuses from spells.
+ * Implemented many additional spell effects and auras. The spell system is one step closer to completeness.
+ * Improved: creature/player hostility checks using more accurate faction hostility data. Hostility is checked when casting spells including area-of-effect spells.
+ * Fixed: parry/dodge related code.
+ * Improved rage generation formula on blocked attacks/armor reduction etc.
+ * Fixed: creature movement problems after creature stun/roots and creature orientation in some cases.
+ * Fixed: some small problems in the player inventory system.
+ * Added: support for all resurrection methods for various classes. Resurrection from corpse is also implemented.
+ * Fixed: showing cooldown for items and spells, server side check and saving to the database is also implemented.
+ * Added: support for gift creation.
+ * Improved: the pet system and more improvements will follow in next release.
+ * Added: keyring support.
+ * Improved: many features related to raids/groups.
+ * Added: support for in game guild creation. Guild system can be considered finished. Arena team creation  is also partly implemented.
+ * Added: target immunity. The targetable flag and the creature type limitation for spell targeting, which is now check when creating the target list, allows area spells against specific creature types like undeads/demons to work.
+ * Added: support for diminishing duration of stun/fear/etc effects.
+ * Rewrote: pet stable code along with improvements and bug fixes.
+ * Added: support for who list filters.
+ * Added: the instance system.
+ * Fixed: the weather system, now common weather is shown for all players in the same zone.
+ * Improved: the mail system and implemented the delay for mails containing items.
+ * Added: an initial version of the battleground system. One type of battleground is mostly done, still needs more work.
+ * Added: the jewelry profession, prospecting and support for inserting gems in sockets including meta gems bonuses.
+ * Added: support for multi-mining veins. 
+ * Added: support for auto-renaming of characters on login at the request of GMs.
+ * Added: a new, more correct visibility system, invisibility is also implemented correctly now.
+ * Improved: durability cost calculation.
+
+ ==== Server Features ====
+ * Added: full support for 2.0.x client branch.
+ * Added/improved: many GM-commands.
+ * Added: many checks for DB data at server load to simplify detecting problems and DB development.
+ * Moved: many data stored in code to the DB and cached most static DB data at server load to speed up runtime access to it.
+ * Added: support for saving next spawn time for creatures/GOs which is now used it at grid/server load.
+ * Improved: the script system allowing more item/creature/GO scripts with more features to be written easily.
+ * Added: size checking for all packets received from the to prevent crashes at wrong data. Many other received data check were also added to prevent cheating.
+ * Improved: the compatibility with 64-bit platforms.
+ * Added: support for account password encryption in the DB to increase secure security.
+ * Added: support for a log directory and the date info is now added to log name.
+ * Updated: the network library to a recent version.
+ * Fixed: many memory leaks and crases sources.
+ * Added: DBC locale support that can be set from mangosd.conf.
+
+ * Fixed Bugs: 390
+ * Total number of changes: 923
 
  The complete list of closed tickets can be found here:
    https://svn.mangosproject.org/trac/MaNGOS/query?status=closed&milestone=0.7
