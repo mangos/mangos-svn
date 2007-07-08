@@ -1867,7 +1867,7 @@ void Player::RemoveFromGroup(Group* group, uint64 guid)
             // group->Disband(); already disbanded in RemoveMember
             objmgr.RemoveGroup(group);
             delete group;
-            groupInfo.group = NULL;
+            // removemember sets the player's group pointer to NULL
         }
     }
 }
