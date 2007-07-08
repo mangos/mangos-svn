@@ -223,10 +223,12 @@ bool ChatHandler::HandleGoObjectCommand(const char* args)
         return true;
     }
 
-    if(!*args)
+    // number or [name] Shift-click form |color|Hgameobject:go_guid|h[name]|h|r
+    char* cId = extractKeyFromLink((char*)args,"Hgameobject");
+    if(!cId)
         return false;
 
-    int32 guid = atoi((char*)args);
+    int32 guid = atoi(cId);
     if(!guid)
         return false;
 
@@ -280,13 +282,12 @@ bool ChatHandler::HandleGoCreatureCommand(const char* args)
     if(!*args)
         return false;
 
-    const char *tmp = args;
-
-    char* pParam1 = strtok((char*)args, " ");
+    // "id" or number or [name] Shift-click form |color|Hcreature_entry:creature_id|h[name]|h|r
+    char* pParam1 = extractKeyFromLink((char*)args,"Hcreature");
     if (!pParam1)
         return false;
 
-    string whereClause;
+    std::ostringstream whereClause;
 
     // User wants to teleport to the NPC's template entry
     if( strcmp(pParam1, "id") == 0 )
@@ -294,43 +295,39 @@ bool ChatHandler::HandleGoCreatureCommand(const char* args)
         //sLog.outError("DEBUG: ID found");
 
         // Get the "creature_template.entry"
-        char* pParam2 = strtok(NULL, " ");
-        if (!pParam2)
+        // number or [name] Shift-click form |color|Hcreature_entry:creature_id|h[name]|h|r
+        char* cId = extractKeyFromLink(NULL,"Hcreature_entry");
+        if(!cId)
             return false;
-        int32 tEntry = atoi((char*)pParam2);
+
+        int32 tEntry = atoi(cId);
         //sLog.outError("DEBUG: ID value: %d", tEntry);
         if(!tEntry)
             return false;
 
-        whereClause = "WHERE `id` = '";
-        whereClause.append( pParam2 );
-        whereClause.append( "'" );
+        whereClause << "WHERE `id` = '" << tEntry << "'";
     }
     else
     {
         //sLog.outError("DEBUG: ID *not found*");
-        int32 guid = atoi((char*)pParam1);
+
+        int32 guid = atoi(pParam1);
 
         // Number is invalid - maybe the user specified the mob's name
         if(!guid)
         {
-            // Maybe the name of the NPC?
-            whereClause = ", creature_template ";
-            whereClause.append(  "where creature.id = creature_template.entry ");
-            whereClause.append( "and creature_template.name like '");
-            whereClause.append( tmp );
-            whereClause.append( "'" );
+            std::string name = pParam1;
+            sDatabase.escape_string(name);
+            whereClause << ", creature_template WHERE creature.id = creature_template.entry AND creature_template.name like '" << name << "'";
         }
         else
         {
-            whereClause = "WHERE `guid` = '";
-            whereClause.append( pParam1 );
-            whereClause.append( "'" );
+            whereClause <<  "WHERE `guid` = '" << guid << "'";
         }
     }
     //sLog.outError("DEBUG: %s", whereClause.c_str());
 
-    QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `creature` %s", whereClause.c_str() );
+    QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `creature` %s", whereClause.str().c_str() );
     if (!result)
     {
         SendSysMessage(LANG_COMMAND_GOCREATNOTFOUND);
@@ -607,10 +604,12 @@ bool ChatHandler::HandleDeleteCommand(const char* args)
 
 bool ChatHandler::HandleDelObjectCommand(const char* args)
 {
-    if(!*args)
+    // number or [name] Shift-click form |color|Hgameobject:go_guid|h[name]|h|r
+    char* cId = extractKeyFromLink((char*)args,"Hgameobject");
+    if(!cId)
         return false;
 
-    uint32 lowguid = atoi((char*)args);
+    uint32 lowguid = atoi(cId);
     if(!lowguid)
         return false;
 
@@ -646,15 +645,12 @@ bool ChatHandler::HandleDelObjectCommand(const char* args)
 
 bool ChatHandler::HandleTurnObjectCommand(const char* args)
 {
-    if(!*args)
+    // number or [name] Shift-click form |color|Hgameobject:go_id|h[name]|h|r
+    char* cId = extractKeyFromLink((char*)args,"Hgameobject");
+    if(!cId)
         return false;
 
-    char* plowguid = strtok((char*)args, " ");
-
-    if(!plowguid)
-        return false;
-
-    uint32 lowguid = (uint32)atoi(plowguid);
+    uint32 lowguid = atoi(cId);
 
     GameObject* obj = ObjectAccessor::Instance().GetGameObject(*m_session->GetPlayer(), MAKE_GUID(lowguid, HIGHGUID_GAMEOBJECT));
 
@@ -697,17 +693,18 @@ bool ChatHandler::HandleTurnObjectCommand(const char* args)
 bool ChatHandler::HandleMoveCreatureCommand(const char* args)
 {
     uint32 lowguid = 0;
-    Creature* pCreature = NULL;
 
-    char* plowguid = strtok((char*)args, " ");
+    Creature* pCreature = getSelectedCreature();
 
-    pCreature = getSelectedCreature();
     if(!pCreature)
     {
-        if(!plowguid)
+        // number or [name] Shift-click form |color|Hcreature:creature_guid|h[name]|h|r
+        char* cId = extractKeyFromLink((char*)args,"Hcreature");
+        if(!cId)
             return false;
 
-        uint32 lowguid = (uint32)atoi(plowguid);
+        uint32 lowguid = atoi(cId);
+
         if(lowguid)
             pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(),MAKE_GUID(lowguid,HIGHGUID_UNIT));
 
@@ -766,15 +763,12 @@ bool ChatHandler::HandleMoveCreatureCommand(const char* args)
 
 bool ChatHandler::HandleMoveObjectCommand(const char* args)
 {
-    if(!*args)
+    // number or [name] Shift-click form |color|Hgameobject:go_guid|h[name]|h|r
+    char* cId = extractKeyFromLink((char*)args,"Hgameobject");
+    if(!cId)
         return false;
 
-    char* plowguid = strtok((char*)args, " ");
-
-    if(!plowguid)
-        return false;
-
-    uint32 lowguid = (uint32)atoi(plowguid);
+    uint32 lowguid = atoi(cId);
 
     GameObject* obj = ObjectAccessor::Instance().GetGameObject(*m_session->GetPlayer(), MAKE_GUID(lowguid, HIGHGUID_GAMEOBJECT));
 

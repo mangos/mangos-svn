@@ -45,8 +45,7 @@
 #define LANG_COMMAND_ACCLOCKPARAMETER    "You must send parameter"
 #define LANG_COMMAND_ACCLOCKLOCKED       "Your account is now locked."
 #define LANG_COMMAND_ACCLOCKUNLOCKED     "Your account is now unlocked."
-#define LANG_SPELL_RANK_START            " [rank "
-#define LANG_SPELL_RANK_END              "]"
+#define LANG_SPELL_RANK                  ", rank "
 #define LANG_KNOWN                       " [known]"
 #define LANG_LEARN                       " [learn]"
 #define LANG_PASSIVE                     " [passive]"
@@ -422,7 +421,18 @@
 #define LANG_ITEMLIST_SLOT               "%d - owner: %s (guid: %u account: %u ) %s"
 #define LANG_ITEMLIST_MAIL               "%d - sender: %s (guid: %u account: %u ) receiver: %s (guid: %u account: %u ) %s"
 #define LANG_ITEMLIST_AUCTION            "%d - owner: %s (guid: %u account: %u ) %s"
+
+#define LANG_WRONG_LINK_TYPE             "Wrong link type!"
 #define LANG_ITEM_LIST                   "%d - |cffffffff|Hitem:%d:0:0:0|h[%s]|h|r "
+#define LANG_QUEST_LIST                  "%d - |cffffffff|Hquest:%d|h[%s]|h|r "
+#define LANG_CREATURE_ENTRY_LIST         "%d - |cffffffff|Hcreature_entry:%d|h[%s]|h|r "
+#define LANG_CREATURE_LIST               "%d - |cffffffff|Hcreature:%d|h[%s X:%f Y:%f Z:%f MapId:%d]|h|r "
+#define LANG_GO_ENTRY_LIST               "%d - |cffffffff|Hgameobject_entry:%d|h[%s]|h|r "
+#define LANG_GO_LIST                     "%d - |cffffffff|Hgameobject:%d|h[%s X:%f Y:%f Z:%f MapId:%d]|h|r "
+#define LANG_ITEMSET_LIST                "%d - |cffffffff|Hitemset:%d|h[%s]|h|r "
+#define LANG_TELE_LIST                   "|cffffffff|Htele:%s|h[%s]|h|r "
+#define LANG_SPELL_LIST                  "%d - |cffffffff|Hspell:%d|h[%s]|h|r "
+#define LANG_SKILL_LIST                  "%d - |cffffffff|Hskill:%d|h[%s]|h|r "
 
 #define LANG_GAMEOBJECT_NOT_EXIST        "Game Object (GUID: %u) not found"
                                                             //log

@@ -1430,10 +1430,11 @@ bool ChatHandler::HandleTeleCommand(const char * args)
         return true;
     }
 
-    if(!args)
+    char* cId = extractKeyFromLink((char*)args,"Htele");           // string or [name] Shift-click form |color|Htele:name|h[name]|h|r
+    if(!cId)
         return false;
 
-    std::string name = args;
+    std::string name = cId;
     sDatabase.escape_string(name);
 
     QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `game_tele` WHERE `name` = '%s'",name.c_str());
@@ -1486,9 +1487,11 @@ bool ChatHandler::HandleLookupTeleCommand(const char * args)
     for (uint64 i=0; i < result->GetRowCount(); i++)
     {
         Field *fields = result->Fetch();
-        reply += "  ";
+        reply += "  |cffffffff|Htele:";
         reply += fields[0].GetCppString();
-        reply += '\n';
+        reply += "|h[";
+        reply += fields[0].GetCppString();
+        reply += "]|h|r\n";
         result->NextRow();
     }
     delete result;
