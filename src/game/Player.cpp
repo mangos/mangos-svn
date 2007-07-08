@@ -4755,12 +4755,10 @@ int32 Player::CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep) co
     if(percent <=0)
         return 0;
 
-    // Uncomment the next line to be 2.01_like or maybe not (see Wiki)
-    // percent = 100 + m_AuraModifiers[SPELL_AURA_MOD_REPUTATION_GAIN];
     return rep*percent/100;
 }
 
-//Calculates how many reputation points player gains in wich victim's enemy factions
+//Calculates how many reputation points player gains in victim's enemy factions
 void Player::RewardReputation(Unit *pVictim)
 {
     if(!pVictim || pVictim->GetTypeId() == TYPEID_PLAYER)
