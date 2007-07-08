@@ -273,15 +273,17 @@ bool ChatHandler::HandleMaxSkillCommand(const char* args)
 
 bool ChatHandler::HandleSetSkillCommand(const char* args)
 {
-    if (!*args)
+    // number or [name] Shift-click form |color|Hskill:skill_id|h[name]|h|r
+    char* skill_p = extractKeyFromLink((char*)args,"Hskill");
+    if(!skill_p)
         return false;
 
-    char *skill_p = strtok ((char*)args, " ");
     char *level_p = strtok (NULL, " ");
-    char *max_p   = strtok (NULL, " ");
 
-    if( !skill_p || !level_p)
+    if( !level_p)
         return false;
+
+    char *max_p   = strtok (NULL, " ");
 
     int32 skill = atoi(skill_p);
 
@@ -1006,7 +1008,12 @@ bool ChatHandler::HandleLearnCommand(const char* args)
         return true;
     }
 
-    uint32 spell = atol((char*)args);
+    // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
+    char* cId = extractKeyFromLink((char*)args,"Hspell");
+    if(!cId)
+        return false;
+
+    uint32 spell = atol(cId);
 
     if (target->HasSpell(spell))
     {
@@ -1035,7 +1042,13 @@ bool ChatHandler::HandleCooldownCommand(const char* args)
     }
     else
     {
-        uint32 spell_id = atol((char*)args);
+        // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
+        char* cId = extractKeyFromLink((char*)args,"Hspell");
+        if(!cId)
+            return false;
+
+        uint32 spell_id = atol(cId);
+
         if(!sSpellStore.LookupEntry(spell_id))
         {
             PSendSysMessage(LANG_UNKNOWN_SPELL, target==m_session->GetPlayer() ? LANG_YOU : target->GetName());
@@ -1060,13 +1073,15 @@ bool ChatHandler::HandleUnLearnCommand(const char* args)
 
     uint32 minS;
     uint32 maxS;
-    uint32 tmp;
 
-    char* startS = strtok((char*)args, " ");
-    char* endS = strtok(NULL, " ");
+    // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
+    char* startS = extractKeyFromLink((char*)args,"Hspell");
+    // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
+    char* endS = extractKeyFromLink(NULL,"Hspell");
 
     if (!endS)
     {
+        // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
         minS = (uint32)atol(startS);
         maxS =  minS+1;
     }
@@ -1080,9 +1095,8 @@ bool ChatHandler::HandleUnLearnCommand(const char* args)
         }
         else
         {
-            tmp=maxS;
+            std::swap(minS,maxS);
             maxS=minS+1;
-            tmp=maxS;
         }
     }
 
@@ -1274,8 +1288,11 @@ bool ChatHandler::HandleAddItemSetCommand(const char* args)
     if (!*args)
         return false;
 
-    char* citemsetId = strtok((char*)args, " ");
-    uint32 itemsetId = atol(citemsetId);
+    char* cId = extractKeyFromLink((char*)args,"Hitemset");  // number or [name] Shift-click form |color|Hitemset:itemset_id|h[name]|h|r
+    if (!cId)
+        return false;
+
+    uint32 itemsetId = atol(cId);
 
     // prevent generation all items with itemset field value '0'
     if (itemsetId == 0)
@@ -1511,10 +1528,15 @@ bool ChatHandler::HandleListObjectCommand(const char* args)
     if(!*args)
         return false;
 
-    char* c_go_id = strtok((char*)args, " ");
-    uint32 go_id = atol(c_go_id);
+    char* cId = extractKeyFromLink((char*)args,"Hgameobject_entry");  // number or [name] Shift-click form |color|Hgameobject_entry:go_id|h[name]|h|r
+    if(!cId)
+        return false;
 
-    if(!go_id || !objmgr.GetGameObjectInfo(go_id))
+    uint32 go_id = atol(cId);
+
+    GameObjectInfo const * gInfo = objmgr.GetGameObjectInfo(go_id);
+
+    if(!go_id || !gInfo)
     {
         PSendSysMessage(LANG_COMMAND_LISTOBJINVALIDID, go_id);
         return true;
@@ -1553,7 +1575,7 @@ bool ChatHandler::HandleListObjectCommand(const char* args)
             float o = fields[5].GetFloat();
             int mapid = fields[6].GetUInt16();
 
-            PSendSysMessage("%d - X: %f Y: %f Z: %f MapId: %u", guid, x, y, z, mapid);
+            PSendSysMessage(LANG_GO_LIST, guid, guid, gInfo->name, x, y, z, mapid);
         } while (result->NextRow());
 
         delete result;
@@ -1568,10 +1590,15 @@ bool ChatHandler::HandleListCreatureCommand(const char* args)
     if(!*args)
         return false;
 
-    char* c_cr_id = strtok((char*)args, " ");
-    uint32 cr_id = atol(c_cr_id);
+    char* cId = extractKeyFromLink((char*)args,"Hcreature_entry");  // number or [name] Shift-click form |color|Hcreature_entry:creature_id|h[name]|h|r
+    if(!cId)
+        return false;
 
-    if(!cr_id || !objmgr.GetCreatureTemplate(cr_id))
+    uint32 cr_id = atol(cId);
+
+    CreatureInfo const* cInfo = objmgr.GetCreatureTemplate(cr_id);
+
+    if(!cr_id || !cInfo)
     {
         PSendSysMessage(LANG_COMMAND_INVALIDCREATUREID, cr_id);
         return true;
@@ -1610,7 +1637,7 @@ bool ChatHandler::HandleListCreatureCommand(const char* args)
             float o = fields[5].GetFloat();
             int mapid = fields[6].GetUInt16();
 
-            PSendSysMessage("%d - X: %f Y: %f Z: %f MapId: %u", guid, x, y, z, mapid);
+            PSendSysMessage(LANG_CREATURE_LIST, guid, guid, cInfo->Name, x, y, z, mapid);
         } while (result->NextRow());
 
         delete result;
@@ -1670,8 +1697,8 @@ bool ChatHandler::HandleLookupItemSetCommand(const char* args)
 
             if (name.find(namepart) != std::string::npos)
             {
-                // send item set in "id - name" format
-                PSendSysMessage("%d - %s",id,set->name[sWorld.GetDBClang()]);
+                // send item set in "id - [namedlink]" format
+                PSendSysMessage(LANG_ITEMSET_LIST,id,id,set->name[sWorld.GetDBClang()]);
                 counter++;
             }
         }
@@ -1706,8 +1733,8 @@ bool ChatHandler::HandleLookupSkillCommand(const char* args)
             if (name.find(namepart) != std::string::npos)
             {
                 uint16 skill = m_session->GetPlayer()->GetPureSkillValue(id);
-                // send skill in "id - name" format
-                PSendSysMessage("%d - %s%s",id,skillInfo->name[sWorld.GetDBClang()],(skill == 0 ? "" : LANG_KNOWN));
+                // send skill in "id - [namedlink]" format
+                PSendSysMessage(LANG_SKILL_LIST "%s",id,id,skillInfo->name[sWorld.GetDBClang()],(skill == 0 ? "" : LANG_KNOWN));
 
                 counter++;
             }
@@ -1748,14 +1775,18 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
                 bool talent = (GetTalentSpellCost(id) > 0);
                 bool passive = IsPassiveSpell(id);
 
-                // send spell in "id - name [talent] [rank N] [passive] [learn] [known]" format
+                // send spell in "id - [name, rank N] [talent] [passive] [learn] [known]" format
                 std::ostringstream ss;
-                ss << id << " - " << spellInfo->SpellName[sWorld.GetDBClang()];
+                ss << id << " - |cffffffff|Hspell:" << id << "|h[" << spellInfo->SpellName[sWorld.GetDBClang()];
+
+                // include rank in link name
+                if(rank)
+                    ss << LANG_SPELL_RANK << rank;
+
+                ss << "]|h|r";
 
                 if(talent)
                     ss << LANG_TALENT;
-                if(rank)
-                    ss << LANG_SPELL_RANK_START << rank << LANG_SPELL_RANK_END;
                 if(passive)
                     ss << LANG_PASSIVE;
                 if(learn)
@@ -1764,6 +1795,8 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
                     ss << LANG_KNOWN;
 
                 SendSysMessage(ss.str().c_str());
+
+                ++counter;
             }
         }
     }
@@ -1805,7 +1838,7 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
         else if(status == QUEST_STATUS_INCOMPLETE)
             statusStr = LANG_COMMAND_QUEST_ACTIVE;
 
-        PSendSysMessage("%d - %s%s",id,name.c_str(),(status == QUEST_STATUS_COMPLETE ? LANG_COMPLETE : (status == QUEST_STATUS_INCOMPLETE ? LANG_ACTIVE : "") ));
+        PSendSysMessage(LANG_QUEST_LIST "%s",id,id,name.c_str(),(status == QUEST_STATUS_COMPLETE ? LANG_COMPLETE : (status == QUEST_STATUS_INCOMPLETE ? LANG_ACTIVE : "") ));
     } while (result->NextRow());
 
     delete result;
@@ -1832,7 +1865,7 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
         Field *fields = result->Fetch();
         uint16 id = fields[0].GetUInt16();
         std::string name = fields[1].GetCppString();
-        PSendSysMessage("%d - %s",id,name.c_str());
+        PSendSysMessage(LANG_CREATURE_ENTRY_LIST,id,id,name.c_str());
     } while (result->NextRow());
 
     delete result;
@@ -1859,7 +1892,7 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
         Field *fields = result->Fetch();
         uint32 id = fields[0].GetUInt32();
         std::string name = fields[1].GetCppString();
-        PSendSysMessage("%u - %s",id,name.c_str());
+        PSendSysMessage(LANG_GO_ENTRY_LIST,id,id,name.c_str());
     } while (result->NextRow());
 
     delete result;
@@ -3208,12 +3241,12 @@ bool ChatHandler::HandleAddQuest(const char* args)
     }
 
     // .addquest #entry'
-    char* pentry = strtok((char*)args, " ");
-
-    if(!pentry)
+    // number or [name] Shift-click form |color|Hquest:quest_id|h[name]|h|r
+    char* cId = extractKeyFromLink((char*)args,"Hquest");
+    if(!cId)
         return false;
 
-    uint32 entry = (uint32)atoi(pentry);
+    uint32 entry = atol(cId);
 
     ObjectMgr::QuestMap::iterator qIter = objmgr.QuestTemplates.find(entry);
 
@@ -3258,12 +3291,12 @@ bool ChatHandler::HandleRemoveQuest(const char* args)
     }
 
     // .removequest #entry'
-    char* pentry = strtok((char*)args, " ");
-
-    if(!pentry)
+    // number or [name] Shift-click form |color|Hquest:quest_id|h[name]|h|r
+    char* cId = extractKeyFromLink((char*)args,"Hquest");
+    if(!cId)
         return false;
 
-    uint32 entry = (uint32)atoi(pentry);
+    uint32 entry = atol(cId);
 
     ObjectMgr::QuestMap::iterator qIter = objmgr.QuestTemplates.find(entry);
 

@@ -309,6 +309,7 @@ class ChatHandler
         Player*   getSelectedPlayer();
         Creature* getSelectedCreature();
         Unit*     getSelectedUnit();
+        char*     extractKeyFromLink(char* text, char const* linkType);
 
         WorldSession *m_session;
 

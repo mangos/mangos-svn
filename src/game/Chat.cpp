@@ -665,6 +665,40 @@ Creature* ChatHandler::getSelectedCreature()
     return ObjectAccessor::Instance().GetCreatureOrPet(*m_session->GetPlayer(),m_session->GetPlayer()->GetSelection());
 }
 
+char*     ChatHandler::extractKeyFromLink(char* text, char const* linkType)
+{
+    // skip empty (NULL is valid result if strtok(NULL, .. ) must be used
+    if(text && !*text)
+        return NULL;
+
+    // return non link case 
+    if(text && text[0]!='|')
+        return strtok(text, " ");
+
+    // [name] Shift-click form |color|linkType:key|h[name]|h|r
+    // or
+    // [name] Shift-click form |color|linkType:key:something1:...:somethingN|h[name]|h|r
+
+    char* check = strtok(text, "|");                        // skip color
+    if(!check)
+        return NULL;                                        // end of data
+
+    char* cLinkType = strtok(NULL, ":");                    // linktype
+
+    if(strcmp(cLinkType,linkType) != 0)
+    {
+        strtok(NULL, " ");                                  // skip link tail (to allow continue strtok(NULL,s) use after retturn from function
+        SendSysMessage(LANG_WRONG_LINK_TYPE);
+        return NULL;
+    }
+
+    char* cKey = strtok(NULL, ":|");                        // extract key
+    strtok(NULL, "]");                                      // skip name with possible spalces
+    strtok(NULL, " ");                                      // skip link tail (to allow continue strtok(NULL,s) use after retturn from function
+    return cKey;
+}
+
+
 char const *fmtstring( char const *format, ... )
 {
     va_list        argptr;
