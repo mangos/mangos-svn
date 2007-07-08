@@ -1853,7 +1853,7 @@ void Player::UninviteFromGroup()
             group->Disband(true);
             objmgr.RemoveGroup(group);
             delete group;
-            group = NULL;
+            groupInfo.group = NULL;
         }
     }
 }
@@ -1867,6 +1867,7 @@ void Player::RemoveFromGroup(Group* group, uint64 guid)
             // group->Disband(); already disbanded in RemoveMember
             objmgr.RemoveGroup(group);
             delete group;
+            groupInfo.group = NULL;
         }
     }
 }

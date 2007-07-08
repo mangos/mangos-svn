@@ -112,7 +112,7 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
             group->Disband(true);
             objmgr.RemoveGroup(group);
             delete group;
-            group = NULL;
+            player->groupInfo.group = NULL;
         }
 
         if(player->groupInfo.group || player->groupInfo.invite)
@@ -177,7 +177,7 @@ void WorldSession::HandleGroupDeclineOpcode( WorldPacket & recv_data )
         group->Disband(true);
         objmgr.RemoveGroup(group);
         delete group;
-        group = NULL;
+        GetPlayer()->groupInfo.group = NULL;
     }
 
     GetPlayer()->groupInfo.invite = NULL;
