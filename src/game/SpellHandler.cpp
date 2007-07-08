@@ -91,41 +91,45 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         }
     }
 
-    SpellCastTargets targets;
-    targets.read(&recvPacket, pUser);
-
-    // use trigerred flag only for items with many spell casts and for not first cast
-    int count = 0;
-
-    for(int i = 0; i <5; ++i)
+    //Note: If script stop casting it must send appropriate data to client to prevent stuck item in gray state.
+    if(!Script->ItemUse(pUser,pItem))
     {
-        if( proto->Spells[i].SpellTrigger != USE )
-            continue;
+        // no script or script not procces request by self
 
-        uint32 spellId = proto->Spells[i].SpellId;
+        SpellCastTargets targets;
+        targets.read(&recvPacket, pUser);
 
-        if(!spellId)
-            continue;
+        // use triggered flag only for items with many spell casts and for not first cast
+        int count = 0;
 
-        SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
-        if(!spellInfo)
+        for(int i = 0; i <5; ++i)
         {
-            sLog.outError("Item (Entry: %u) in have wrong spell id %u, ignoring ",proto->ItemId, spellId);
-            continue;
+            if( proto->Spells[i].SpellTrigger != USE )
+                continue;
+
+            uint32 spellId = proto->Spells[i].SpellId;
+
+            if(!spellId)
+                continue;
+
+            SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
+            if(!spellInfo)
+            {
+                sLog.outError("Item (Entry: %u) in have wrong spell id %u, ignoring ",proto->ItemId, spellId);
+                continue;
+            }
+
+            Spell *spell = new Spell(pUser, spellInfo, (count > 0) , 0);
+            spell->m_CastItem = pItem;
+            spell->prepare(&targets);
+
+            // delete triggered spell
+            if(count > 0)
+                delete spell;
+
+            ++count;
         }
-
-        Spell *spell = new Spell(pUser, spellInfo, (count > 0) , 0);
-        spell->m_CastItem = pItem;
-        spell->prepare(&targets);
-
-        // delete triggered spell
-        if(count > 0)
-            delete spell;
-
-        ++count;
     }
-
-    Script->ItemUse(pUser,pItem);
 }
 
 #define OPEN_CHEST 11437
