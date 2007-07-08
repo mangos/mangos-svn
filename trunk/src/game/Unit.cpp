@@ -1238,9 +1238,16 @@ uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage)
 {
     uint32 newdamage = 0;
     float armor = pVictim->GetArmor();
-    float tmpvalue = armor / (getLevel() * 85.0 + 400.0 +armor);
 
-    if(tmpvalue < 0)
+    float tmpvalue = 0.0;
+    if(getLevel() <= 59)                                    //Level 1-59
+        tmpvalue = armor / (armor + 400.0 + 85.0 * getLevel());
+    else if(getLevel() < 70)                                //Level 60-69
+        tmpvalue = armor / (armor - 22167.5 + 467.5 * getLevel());
+    else                                                    //Level 70+
+        tmpvalue = armor / (armor + 10557.5);
+
+    if(tmpvalue < 0.0)
         tmpvalue = 0.0;
     if(tmpvalue > 0.75)
         tmpvalue = 0.75;
