@@ -357,6 +357,15 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
 {
     if (!pVictim->isAlive() || pVictim->isInFlight()) return;
 
+    // remove affects at any damage (including 0 damage)
+    if(HasStealthAura())
+        RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+    if(HasInvisibilityAura())
+        RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
+    // remove death simulation at damage
+    if(hasUnitState(UNIT_STAT_DIED))
+        RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+
     //Script Event damage Deal
     if( GetTypeId()== TYPEID_UNIT && ((Creature *)this)->AI())
         ((Creature *)this)->AI()->DamageDeal(pVictim, damage);
@@ -372,14 +381,6 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
 
         return;
     }
-
-    if(HasStealthAura())
-        RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-    if(HasInvisibilityAura())
-        RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
-    // remove death simulation at damage
-    if(hasUnitState(UNIT_STAT_DIED))
-        RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 
     pVictim->RemoveSpellbyDamageTaken(SPELL_AURA_MOD_FEAR, damage);
     // root type spells do not dispell the root effect
@@ -1518,6 +1519,9 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
             int32 reducePerc = 100 - (pVictim->GetDefenceSkillValue() - GetWeaponSkillValue(attType) - 5) * 3;
             if (reducePerc < 70)
                 reducePerc = 70;
+            else if(reducePerc > 100)
+                reducePerc = 100;
+                
             cleanDamage->damage += (100-reducePerc)/100 * *damage;
             *damage *= reducePerc / 100;
             *hitInfo |= HITINFO_GLANCING;
