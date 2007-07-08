@@ -683,14 +683,14 @@ void Player::HandleSobering()
     {
         m_drunk -= (0xFFFF / 30);
     }
-    SetUInt32Value(PLAYER_BYTES_3, (GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF0001) | m_drunk);
+    SetUInt32Value(PLAYER_BYTES_3, (GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF0001) | (m_drunk & 0xFFFE));
 }
 
 void Player::SetDrunkValue(uint16 newDrunkValue)
 {
     m_drunk = newDrunkValue;
     SetUInt32Value(PLAYER_BYTES_3,
-        (GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF0001) | m_drunk);
+        (GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF0001) | (m_drunk & 0xFFFE));
 }
 
 void Player::Update( uint32 p_time )
