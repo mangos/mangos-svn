@@ -388,8 +388,8 @@ BeepAtStart = 1
 # Enable/Disable VMmap support for line of sight and height calculation
 # Default: 1 (true)
 #        : 0 (false)
-vmap.enableLOS = 1
-vmap.enableHeight = 1
+vmap.enableLOS = 0
+vmap.enableHeight = 0
 # Map id that will be ignored by VMap
 # List of ids with delimiter ','
 # If more then one id is defined and spaces are included, the string has to be enclosed by "
