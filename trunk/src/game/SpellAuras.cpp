@@ -466,7 +466,7 @@ void Aura::Update(uint32 diff)
             pos_x = m_target->GetPositionX();
             pos_y = m_target->GetPositionY();
             uint32 mapid = m_target->GetMapId();
-            pos_z = MapManager::Instance().GetMap(mapid, m_target)->GetHeight(pos_x,pos_y);
+            pos_z = MapManager::Instance().GetMap(mapid, m_target)->GetHeight(pos_x,pos_y, m_target->GetPositionZ());
             // Control the max Distance; 20 for temp.
             if(m_target->IsWithinDistInMap(caster, 20))
             {
@@ -476,7 +476,7 @@ void Aura::Update(uint32 diff)
                     x = m_target->GetPositionX() - speed*diff * sin(angle)/1000;
                 y = m_target->GetPositionY() - speed*diff * cos(angle)/1000;
                 mapid = m_target->GetMapId();
-                z = MapManager::Instance().GetMap(mapid, m_target)->GetHeight(x,y);
+                z = MapManager::Instance().GetMap(mapid, m_target)->GetHeight(x,y, m_target->GetPositionZ());
                 // Control the target to not climb or drop when dz > |x|,x = 1.3 for temp.
                 // fixed me if it needs checking when the position will be in water?
                 if(z<=pos_z+1.3 && z>=pos_z-1.3)

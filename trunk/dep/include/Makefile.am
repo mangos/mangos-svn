@@ -169,3 +169,38 @@ EXTRA_DIST += \
 	zthread/Time.h \
 	zthread/Waitable.h \
 	zthread/ZThread.h
+
+EXTRA_DIST += \
+	g3dlite/AABox.h \
+	g3dlite/AABSPTree.h \
+	g3dlite/Array.h \
+	g3dlite/Box.h \
+	g3dlite/CollisionDetection.h \
+	g3dlite/CoordinateFrame.h \
+	g3dlite/Crypto.h \
+	g3dlite/debug.h \
+	g3dlite/format.h \
+	g3dlite/g3dmath.h \
+	g3dlite/g3dmath.inl \
+	g3dlite/GCamera.h \
+	g3dlite/Line.h \
+	g3dlite/Matrix3.h \
+	g3dlite/Plane.h \
+	g3dlite/platform.h \
+	g3dlite/Quat.h \
+	g3dlite/Quat.inl \
+	g3dlite/Ray.h \
+	g3dlite/RegistryUtil.h \
+	g3dlite/Sphere.h \
+	g3dlite/stringutils.h \
+	g3dlite/System.h \
+	g3dlite/Table.h \
+	g3dlite/Triangle.h \
+	g3dlite/Vector2.h \
+	g3dlite/Vector2.inl \
+	g3dlite/Vector2int16.h \
+	g3dlite/Vector3.h \
+	g3dlite/Vector3.inl \
+	g3dlite/Vector3int16.h \
+	g3dlite/Vector4.h \
+	g3dlite/Vector4.inl

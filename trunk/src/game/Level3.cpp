@@ -159,8 +159,7 @@ bool ChatHandler::HandleGoXYCommand(const char* args)
     }
 
     Map *map = MapManager::Instance().GetMap(mapid, _player);
-    float z = max(map->GetHeight(x, y), map->GetWaterLevel(x, y));
-
+    float z = max(map->GetHeight(x, y, 0), map->GetWaterLevel(x, y));
     _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
     _player->TeleportTo(mapid, x, y, z, _player->GetOrientation());
 

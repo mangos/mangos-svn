@@ -31,7 +31,9 @@
 #include "Language.h"
 #include "RedZoneDistrict.h"
 #include "Transports.h"
-
+#ifdef _DEBUG_VMAPS
+#include "VMapFactory.h"
+#endif
 bool ChatHandler::HandleSayCommand(const char* args)
 {
     uint64 guid = m_session->GetPlayer()->GetSelection();    
@@ -108,7 +110,15 @@ bool ChatHandler::HandleAnnounceCommand(const char* args)
     str += args;
     sWorld.SendWorldText(str.c_str(), NULL);
 
-    return true;
+#ifdef _DEBUG_VMAPS
+	VMAP::IVMapManager *vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
+    float x,y,z;
+    m_session->GetPlayer()->GetPosition(x,y,z);
+    char buffer[100];
+    sprintf(buffer, "pos %f,%f,%f",x,y,z);
+    vMapManager->processCommand(buffer);
+#endif
+	return true;
 }
 
 bool ChatHandler::HandleNotifyCommand(const char* args)
@@ -130,16 +140,22 @@ bool ChatHandler::HandleGMOnCommand(const char* args)
 {
     m_session->GetPlayer()->SetGameMaster(true);
     m_session->SendNotification("GM mode is ON");
-
-    return true;
+#ifdef _DEBUG_VMAPS
+	VMAP::IVMapManager *vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
+    vMapManager->processCommand("stoplog");
+#endif
+	return true;
 }
 
 bool ChatHandler::HandleGMOffCommand(const char* args)
 {
     m_session->GetPlayer()->SetGameMaster(false);
     m_session->SendNotification("GM mode is OFF");
-
-    return true;
+#ifdef _DEBUG_VMAPS
+    VMAP::IVMapManager *vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
+    vMapManager->processCommand("startlog");
+#endif
+	return true;
 }
 
 bool ChatHandler::HandleVisibleCommand(const char* args)

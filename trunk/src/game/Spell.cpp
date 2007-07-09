@@ -43,6 +43,7 @@
 #include "SharedDefines.h"
 #include "Tools.h"
 #include "LootMgr.h"
+#include "VMapFactory.h"
 
 #define SPELL_CHANNEL_UPDATE_INTERVAL 1000
 
@@ -1940,6 +1941,7 @@ uint8 Spell::CanCast()
 
     if(target)
     {
+		if(VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_caster->IsWithinLOSInMap(target)) return SPELL_FAILED_LINE_OF_SIGHT;
         //TODO: after switch in Cast::preper (?) need implement auto-selecting appropriate cast level.
         if(m_caster->GetTypeId() == TYPEID_PLAYER && !IsPassiveSpell(m_spellInfo->Id) && !m_CastItem)
         {
@@ -2271,8 +2273,7 @@ uint8 Spell::CanCast()
                 float fx = m_caster->GetPositionX() + dis * cos(m_caster->GetOrientation());
                 float fy = m_caster->GetPositionY() + dis * sin(m_caster->GetOrientation());
                 // teleport a bit above terrainlevel to avoid falling below it
-                float fz = MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster)->GetHeight(fx,fy) + 1.5;
-
+                float fz = MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster)->GetHeight(fx,fy,m_caster->GetPositionZ()) + 1.5;
                 float caster_pos_z = m_caster->GetPositionZ();
                 // Control the caster to not climb or drop when +-fz > 8
                 if(!(fz<=caster_pos_z+8 && fz>=caster_pos_z-8))

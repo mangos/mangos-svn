@@ -173,6 +173,7 @@ AC_CONFIG_FILES([
    dep/include/Makefile
    dep/lib/Makefile
    dep/src/Makefile
+   dep/src/g3dlite/Makefile
    dep/src/zlib/Makefile
    dep/src/zthread/Makefile
    dep/Makefile

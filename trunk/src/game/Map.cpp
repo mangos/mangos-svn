@@ -32,6 +32,7 @@
 
 #include "MapManager.h"
 #include "MapInstanced.h"
+#include "VMapFactory.h"
 
 #define DEFAULT_GRID_EXPIRY     300
 #define MAX_GRID_LOAD_TIME      50
@@ -72,7 +73,25 @@ bool Map::ExistMAP(uint32 mapid,int x,int y, bool output)
 
     return true;
 }
+//=========================================
 
+void Map::loadVMap(int x,int y)
+{
+    int vmapLoadResult = VMAP::VMapFactory::createOrGetVMapManager()->loadMap((sWorld.GetDataPath()+ "vmaps").c_str(),  GetId(), y,x); // x and y are swaped !!
+    switch(vmapLoadResult)
+    {
+        case VMAP::VMAP_LOAD_RESULT_OK:
+            sLog.outDetail("VMAP loaded name:%s, id:%d, x:%d, y:%d (vmap rep.: x:%d, y:%d)", GetMapName(), GetId(), x,y, y,x);
+            break;
+        case VMAP::VMAP_LOAD_RESULT_ERROR:
+            sLog.outDetail("Could not load VMAP name:%s, id:%d, x:%d, y:%d (vmap rep.: x:%d, y:%d)", GetMapName(), GetId(), x,y, y,x);
+            break;
+        case VMAP::VMAP_LOAD_RESULT_IGNORED:
+            DEBUG_LOG("Ignored VMAP name:%s, id:%d, x:%d, y:%d (vmap rep.: x:%d, y:%d)", GetMapName(), GetId(), x,y, y,x);
+            break;
+    }
+}
+//=========================================
 GridMap * Map::LoadMAP(uint32 mapid, uint32 instanceid, int x,int y)
 {
     //check map file existance (but not output error)
@@ -107,7 +126,6 @@ GridMap * Map::LoadMAP(uint32 mapid, uint32 instanceid, int x,int y)
     tmp = new char[len];
     snprintf(tmp, len, (char *)(sWorld.GetDataPath()+"maps/%03u%02u%02u.map").c_str(),mapid,x,y);
     sLog.outDetail("Loading map %s",tmp);
-
     // loading data
     FILE *pf=fopen(tmp,"rb");
     char magic[8];
@@ -121,6 +139,7 @@ GridMap * Map::LoadMAP(uint32 mapid, uint32 instanceid, int x,int y)
     }
     fread(buf,1,sizeof(GridMap),pf);
     fclose(pf);
+    loadVMap(x, y);
     return buf;
 }
 
@@ -389,7 +408,7 @@ Map::EnsureGridLoadedForPlayer(const Cell &cell, Player *player, bool add_player
             if( add_player && player != NULL )
                 (*grid)(cell.CellX(), cell.CellY()).AddWorldObject(player, player->GetGUID());
             i_gridStatus[cell.GridX()] |= mask;
-
+            loadVMap(63-cell.GridX(),63-cell.GridY());
         }
     }
     else if( player && add_player )
@@ -420,6 +439,7 @@ Map::LoadGrid(const Cell& cell, bool no_unload)
 
         }
     }
+    loadVMap(63-cell.GridX(),63-cell.GridY());
 }
 
 bool Map::AddInstanced(Player *player)
@@ -1174,6 +1194,7 @@ bool Map::UnloadGrid(const uint32 &x, const uint32 &y)
         if (i_InstanceId == 0) delete (GridMaps[gx][gy]);
         GridMaps[gx][gy]=NULL;
     }
+    VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(GetId(), gy, gx); // x and y are swaped
 
     //z coordinate
     DEBUG_LOG("Unloading grid[%u,%u] for map %u finished", x,y, i_id);
@@ -1195,7 +1216,7 @@ void Map::UnloadAll()
     }
 }
 
-float Map::GetHeight(float x, float y )
+float Map::GetHeight(float x, float y, float z, bool pUseVmaps)
 {
     //local x,y coords
     float lx,ly;
@@ -1223,11 +1244,33 @@ float Map::GetHeight(float x, float y )
 
     if(!GridMaps[gx][gy])                                   //this map is not loaded
         GridMaps[gx][gy]=Map::LoadMAP(i_id,i_InstanceId,gx,gy);
+#ifdef MANGOS_USE_VMAP_HEIGHT
+        float height = 0;
+        bool mapHeightFound = false;
+        if(GridMaps[gx][gy]) {
+            height = GridMaps[gx][gy]->Z[(int)(lx)][(int)(ly)];
+            mapHeightFound = true;
+        }
+        if(pUseVmaps) {
+            float vmapheight = VMAP::VMapFactory::createOrGetVMapManager()->getHeight(GetId(), x, y, z + 4); // look from a bit higher pos to find the floor
+            // if the land map did not find the height or if we are already under the surface and vmap found a height
+            // or if the distance of the vmap height is less the land height distance
+            if(!mapHeightFound || (z<height && vmapheight > -100000) || abs(height-z) > abs(vmapheight-z)) {
+                height = vmapheight;
+                mapHeightFound = true;
+            }
+        }
+        if(!mapHeightFound || height < -100000) {
+            height = 0; // fallback (should not happen)
+        }
+    return height;
+#else
 
     if(GridMaps[gx][gy])
         return GridMaps[gx][gy]->Z[(int)(lx)][(int)(ly)];
     else
         return 0;
+        #endif
 }
 
 uint16 Map::GetAreaFlag(float x, float y )
@@ -1355,10 +1398,11 @@ uint32 Map::GetZoneId(uint16 areaflag)
     else
         return 0;
 }
-
-bool Map::IsInWater(float x, float y)
+bool Map::IsInWater(float x, float y, float pZ)
 {
-    float z = GetHeight(x,y);
+    // This method is called too often to use vamps for that (4. parameter = false).
+    // The z pos is taken anyway for future use
+    float z = GetHeight(x,y,pZ,false);
     float water_z = GetWaterLevel(x,y);
     uint8 flag = GetTerrainType(x,y);
     return (z < (water_z-2)) && (flag & 0x01);
