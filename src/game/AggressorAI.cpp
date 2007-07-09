@@ -24,6 +24,7 @@
 #include "Database/DBCStores.h"
 #include "ObjectAccessor.h"
 #include <list>
+#include "VMapFactory.h"
 
 int
 AggressorAI::Permissible(const Creature *creature)
@@ -49,6 +50,7 @@ AggressorAI::MoveInLineOfSight(Unit *u)
         float attackRadius = i_creature.GetAttackDistance(u);
         if(i_creature.IsWithinDistInMap(u, attackRadius) && i_creature.GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE)
         {
+            if(!i_creature.IsWithinLOSInMap(u)) return;
             AttackStart(u);
             if(u->HasStealthAura())
                 u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);

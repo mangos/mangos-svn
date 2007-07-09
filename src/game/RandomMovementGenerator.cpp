@@ -41,7 +41,8 @@ RandomMovementGenerator::Initialize(Creature &creature)
     uint32 mapid=creature.GetMapId();
 
     Map* map = MapManager::Instance().GetMap(mapid, &creature);
-    z2 = map->GetHeight(x,y);
+    // Initialization is done in bulk. Don’t use vamps for that (4. parameter = false). It is too costly when entering a new map grid
+    z2 = map->GetHeight(x,y,z, false);
     if( abs( z2 - z ) < 5 )
         z = z2;
 
@@ -65,8 +66,7 @@ RandomMovementGenerator::Initialize(Creature &creature)
         MaNGOS::NormalizeMapCoord(i_waypoints[idx][0]);
         MaNGOS::NormalizeMapCoord(i_waypoints[idx][1]);
 
-        bool is_water = map->IsInWater(i_waypoints[idx][0],i_waypoints[idx][1]);
-
+        bool is_water = map->IsInWater(i_waypoints[idx][0],i_waypoints[idx][1],z);
         // if generated wrong path just ignore
         if( is_water && !is_water_ok || !is_water && !is_land_ok )
         {
@@ -76,7 +76,8 @@ RandomMovementGenerator::Initialize(Creature &creature)
             continue;
         }
 
-        z2 = map->GetHeight(i_waypoints[idx][0],i_waypoints[idx][1]);
+        // Initialization is done in bulk. Don’t use vamps for that (4. parameter = false). It is too costly when entering a new map grid
+        z2 = map->GetHeight(i_waypoints[idx][0],i_waypoints[idx][1],z, false);
         if( abs( z2 - z ) < 5 )
             z = z2;
         i_waypoints[idx][2] =  z;

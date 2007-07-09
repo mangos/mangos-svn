@@ -51,6 +51,7 @@
 #include "BattleGroundAB.h"
 #include "BattleGroundEY.h"
 #include "BattleGroundWS.h"
+#include "VMapFactory.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
@@ -262,7 +263,10 @@ void Spell::EffectDummy(uint32 i)
         if(unitTarget->getFaction() != m_caster->getFaction() )
             return;
 
-        ((Creature*)m_caster)->SetNoCallAssistence(true);
+       if(!unitTarget->IsWithinLOSInMap(m_caster->getVictim()) )
+            return;
+
+       ((Creature*)m_caster)->SetNoCallAssistence(true);
         ((Creature*)unitTarget)->SetNoCallAssistence(true);
         if (((Creature*)unitTarget)->AI())
             ((Creature*)unitTarget)->AI()->AttackStart(m_caster->getVictim());
@@ -1865,8 +1869,7 @@ void Spell::EffectTeleUnitsFaceCaster(uint32 i)
     m_caster->GetClosePoint(NULL,fx,fy,fz,unitTarget->GetObjectSize() + dis);
 
     // teleport a bit above terrain level to avoid falling below it
-    fz = MapManager::Instance ().GetMap(mapid, m_caster)->GetHeight(fx,fy) + 1.5;
-
+    fz = MapManager::Instance ().GetMap(mapid, m_caster)->GetHeight(fx,fy,fz) + 1.5;
     if(unitTarget->GetTypeId() == TYPEID_PLAYER)
         ((Player*)unitTarget)->TeleportTo(mapid, fx, fy, fz, -m_caster->GetOrientation(), false);
     else
@@ -2712,7 +2715,7 @@ void Spell::EffectSummonTotem(uint32 i)
     float z = m_caster->GetPositionZ();
 
     Map* map = MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster);
-    float z2 = map->GetHeight(x,y);
+    float z2 = map->GetHeight(x,y,z);
     if( abs( z2 - z ) < 5 )
         z = z2;
 
@@ -2976,11 +2979,12 @@ void Spell::EffectMomentMove(uint32 i)
         // before caster
         float fx,fy,fz;
         m_caster->GetClosePoint(NULL,fx,fy,fz,dis);
-
+        float ox,oy,oz;
+        m_caster->GetPosition(ox,oy,oz);
+        VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(mapid, ox,oy,oz+0.5, fx,fy,oz+0.5,fx,fy,fz, -0.5);
         // teleport a bit above terrain level to avoid falling below it
-        fz = MapManager::Instance ().GetMap(mapid, m_caster)->GetHeight(fx,fy) + 1.5;
-
-        if(unitTarget->GetTypeId() == TYPEID_PLAYER)
+       fz = MapManager::Instance ().GetMap(mapid, m_caster)->GetHeight(fx,fy,fz) + 0.5;
+	   if(unitTarget->GetTypeId() == TYPEID_PLAYER)
             ((Player*)unitTarget)->TeleportTo(mapid, fx, fy, fz, m_caster->GetOrientation(), false);
         else
             MapManager::Instance().GetMap(mapid, m_caster)->CreatureRelocation((Creature*)m_caster, fx, fy, fz, m_caster->GetOrientation());
@@ -3331,9 +3335,9 @@ void Spell::EffectTransmitted(uint32 i)
     if(name_id==35591)
     {
         Map* map = MapManager::Instance().GetMap(cMap, m_caster);
-
-        if ( !map->IsInWater(fx,fy) )
+        if ( !map->IsInWater(fx,fy,fz) )
         {
+        
             SendCastResult(SPELL_FAILED_NOT_HERE);
             SendChannelUpdate(0);
             return;

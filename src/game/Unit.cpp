@@ -2292,7 +2292,7 @@ bool Unit::isInAccessablePlaceFor(Creature* c) const
 
 bool Unit::IsInWater() const
 {
-    return MapManager::Instance().GetMap(GetMapId(), this)->IsInWater(GetPositionX(),GetPositionY());
+    return MapManager::Instance().GetMap(GetMapId(), this)->IsInWater(GetPositionX(),GetPositionY(), GetPositionZ());
 }
 
 bool Unit::IsUnderWater() const

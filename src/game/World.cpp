@@ -47,6 +47,7 @@
 #include "TargetedMovementGenerator.h"
 #include "RedZoneDistrict.h"
 #include "WaypointMovementGenerator.h"
+#include "VMapFactory.h"
 
 INSTANTIATE_SINGLETON_1( World );
 
@@ -423,6 +424,18 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Using DataDir %s",m_dataPath.c_str());
 
+	bool enableLOS = sConfig.GetBoolDefault("vmap.enableLOS", true);
+    bool enableHeight = sConfig.GetBoolDefault("vmap.enableHeight", true);
+    std::string ignoreMapIds = sConfig.GetStringDefault("vmap.ignoreMapIds", "");
+    std::string ignoreSpellIds = sConfig.GetStringDefault("vmap.ignoreSpellIds", "");
+    VMAP::VMapFactory::createOrGetVMapManager()->setEnableLineOfSightCalc(enableLOS);
+    VMAP::VMapFactory::createOrGetVMapManager()->setEnableHeightCalc(enableHeight);
+    VMAP::VMapFactory::createOrGetVMapManager()->preventMapsFromBeingUsed(ignoreMapIds.c_str());
+    VMAP::VMapFactory::preventSpellsFromBeingTestedForLoS(ignoreSpellIds.c_str());
+    sLog.outString( "WORLD: VMap support included. LineOfSight:%i, getHeight:%i",enableLOS, enableHeight);
+    sLog.outString( "WORLD: VMap data directory is: %svmaps",m_dataPath.c_str());
+    sLog.outString( "WORLD: VMap config keys are: vmap.enableLOS, vmap.enableHeight, vmap.ignoreMapIds, vmap.ignoreSpellIds");
+
     ///- Check the existence of the map files for all races' startup areas.
     if(   !MapManager::ExistMAP(0,-6240.32, 331.033)
         ||!MapManager::ExistMAP(0,-8949.95,-132.493)
@@ -636,7 +649,6 @@ void World::SetInitialWorldSettings()
     // deleting expired bones time > 20 minutes and corpses > 3 days
     // it is run each 20 minutes
     AddEvent(&HandleCorpsesErase,NULL,20*MINUTE*1000,false,true);
-
     sLog.outString( "WORLD: World initialized" );
 }
 

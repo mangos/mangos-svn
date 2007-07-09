@@ -33,7 +33,7 @@ ConfusedMovementGenerator::Initialize(Creature &creature)
     uint32 mapid=creature.GetMapId();
 
     Map* map = MapManager::Instance().GetMap(mapid, &creature);
-    z2 = map->GetHeight(x,y);
+    z2 = map->GetHeight(x,y,z);
     if( abs( z2 - z ) < 5 )
         z = z2;
 
@@ -54,16 +54,14 @@ ConfusedMovementGenerator::Initialize(Creature &creature)
         MaNGOS::NormalizeMapCoord(i_waypoints[idx][0]);
         MaNGOS::NormalizeMapCoord(i_waypoints[idx][1]);
 
-        bool is_water = map->IsInWater(i_waypoints[idx][0],i_waypoints[idx][1]);
-
+        bool is_water = map->IsInWater(i_waypoints[idx][0],i_waypoints[idx][1],z);
         // if generated wrong path just ignore
         if( is_water && !is_water_ok || !is_water && !is_land_ok )
         {
             i_waypoints[idx][0] = idx > 0 ? i_waypoints[idx-1][0] : x;
             i_waypoints[idx][1] = idx > 0 ? i_waypoints[idx-1][1] : y;
         }
-
-        z2 = map->GetHeight(i_waypoints[idx][0],i_waypoints[idx][1]);
+        z2 = map->GetHeight(i_waypoints[idx][0],i_waypoints[idx][1],z);
         if( abs( z2 - z ) < 5 )
             z = z2;
         i_waypoints[idx][2] =  z;

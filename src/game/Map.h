@@ -162,11 +162,13 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         static void InitStateMachine();
         static void DeleteStateMachine();
 
-        float GetHeight(float x, float y);
+        float GetHeight(float x, float y, float z, bool pCheckVMap=true); // some calls like isInWater should not use vmaps due to processor power
+        bool IsInWater(float x, float y, float z); // does not use z pos. This is for future use
+        void loadVMap(int pX, int pY);
+
         uint16 GetAreaFlag(float x, float y );
         uint8 GetTerrainType(float x, float y );
         float GetWaterLevel(float x, float y );
-        bool IsInWater(float x, float y);
         bool IsUnderWater(float x, float y, float z);
 
         static uint32 GetAreaId(uint16 areaflag);

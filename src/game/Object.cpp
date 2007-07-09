@@ -33,6 +33,7 @@
 #include "Log.h"
 #include "Transports.h"
 #include "Chat.h"
+#include "VMapFactory.h"
 
 using namespace std;
 
@@ -719,6 +720,21 @@ bool WorldObject::IsWithinDistInMap(const WorldObject* obj, const float dist2com
     float maxdist = dist2compare + sizefactor;
 
     return distsq < maxdist * maxdist;
+}
+bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
+{
+    if (!IsInMap(obj)) return false;
+    float ox,oy,oz;
+    obj->GetPosition(ox,oy,oz);
+    return(IsWithinLOS(ox, oy, oz ));
+}
+
+bool WorldObject::IsWithinLOS(const float ox, const float oy, const float oz ) const
+{
+    float x,y,z;
+    GetPosition(x,y,z);
+    VMAP::IVMapManager *vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
+    return vMapManager->isInLineOfSight(GetMapId(), x, y, z+2.0f, ox, oy, oz+2.0f);
 }
 
 float WorldObject::GetAngle(const WorldObject* obj) const

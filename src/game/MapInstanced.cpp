@@ -20,6 +20,7 @@
 #include "ObjectMgr.h"
 #include "MapManager.h"
 #include "BattleGround.h"
+#include "VMapFactory.h"
 
 MapInstanced::MapInstanced(uint32 id, time_t expiry, uint32 aInstanceId) : Map(id, expiry, 0)
 {
@@ -41,6 +42,7 @@ void MapInstanced::Update(const uint32& t)
                 // avoid doing ++ on invalid data
                 HM_NAMESPACE::hash_map< uint32, Map* >::iterator i_old = i;
                 ++i;
+                VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(i_old->second->GetId());
                 // erase map
                 delete i_old->second;
                 InstancedMaps.erase(i_old);
@@ -290,8 +292,8 @@ void MapInstanced::CreateInstance(uint32 InstanceId, Map* &map)
 
             map->Reset();
             InstancedMaps.erase(InstanceId);
+            VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(GetId());
             delete map;
-
             map = NULL;
         }
     }

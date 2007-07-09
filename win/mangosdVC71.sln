@@ -17,6 +17,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mangosd", "VC71\mangosd.vcp
 		{8F1DEA42-6A5B-4B62-839D-C141A7BFACF2} = {8F1DEA42-6A5B-4B62-839D-C141A7BFACF2}
 		{1DC6C4DA-A028-41F3-877D-D5400C594F88} = {1DC6C4DA-A028-41F3-877D-D5400C594F88}
 		{262199E8-EEDF-4700-A1D1-E9CC901CF480} = {262199E8-EEDF-4700-A1D1-E9CC901CF480}
+		{DE0380F9-C910-4E99-A841-93550D0E61D7} = {DE0380F9-C910-4E99-A841-93550D0E61D7}
 	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zthread", "VC71\zthread.vcproj", "{262199E8-EEDF-4700-A1D1-E9CC901CF480}"
@@ -44,10 +45,16 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "script", "VC71\script.vcpro
 		{A3A04E47-43A2-4C08-90B3-029CEF558594} = {A3A04E47-43A2-4C08-90B3-029CEF558594}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "g3dlite", "VC71\g3dlite.vcproj", "{DE0380F9-C910-4E99-A841-93550D0E61D7}"
+	ProjectSection(ProjectDependencies) = postProject
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfiguration) = preSolution
 		Debug = Debug
 		Release = Release
+	EndGlobalSection
+	GlobalSection(ProjectDependencies) = postSolution
 	EndGlobalSection
 	GlobalSection(ProjectConfiguration) = postSolution
 		{1DC6C4DA-A028-41F3-877D-D5400C594F88}.Debug.ActiveCfg = Debug|Win32
@@ -82,6 +89,10 @@ Global
 		{4205C8A9-79B7-4354-8064-F05FB9CA0C96}.Debug.Build.0 = Debug|Win32
 		{4205C8A9-79B7-4354-8064-F05FB9CA0C96}.Release.ActiveCfg = Release|Win32
 		{4205C8A9-79B7-4354-8064-F05FB9CA0C96}.Release.Build.0 = Release|Win32
+		{DE0380F9-C910-4E99-A841-93550D0E61D7}.Debug.ActiveCfg = Debug|Win32
+		{DE0380F9-C910-4E99-A841-93550D0E61D7}.Debug.Build.0 = Debug|Win32
+		{DE0380F9-C910-4E99-A841-93550D0E61D7}.Release.ActiveCfg = Release|Win32
+		{DE0380F9-C910-4E99-A841-93550D0E61D7}.Release.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 	EndGlobalSection
