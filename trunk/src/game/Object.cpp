@@ -795,6 +795,7 @@ void WorldObject::Say(const char* text, const uint32 language, const uint64 Targ
     data << (uint8)CHAT_MSG_MONSTER_SAY;
     data << (uint32)language;
     data << (uint64)GetGUID();
+    data << (uint32)0;                      //2.1.0
     data << (uint32)(strlen(GetName())+1);
     data << GetName();
     data << (uint64)TargetGuid;             //Unit Target
@@ -811,6 +812,7 @@ void WorldObject::Yell(const char* text, const uint32 language, const uint64 Tar
     data << (uint8)CHAT_MSG_MONSTER_YELL;
     data << (uint32)language;
     data << (uint64)GetGUID();
+    data << (uint32)0;                      //2.1.0
     data << (uint32)(strlen(GetName())+1);
     data << GetName();
     data << (uint64)TargetGuid;             //Unit Target
@@ -829,6 +831,8 @@ void WorldObject::TextEmote(const char* text, const uint64 TargetGuid)
     WorldPacket data(SMSG_MESSAGECHAT, 200);    
     data << (uint8)CHAT_MSG_MONSTER_EMOTE;
     data << (uint32)LANG_UNIVERSAL;
+    data << (uint64)GetGUID();              // 2.1.0
+    data << (uint32)0;                      // 2.1.0
     data << (uint32)(strlen(GetName())+1);
     data << GetName();
     data << (uint64)TargetGuid;             //Unit Target

@@ -3612,12 +3612,33 @@ bool ChatHandler::HandleSendOpcodeCommand(const char* args)
         unit = m_session->GetPlayer();
 
     uint16 opcode = atoi(args);
-    WorldPacket data(opcode, 20);
+    /*WorldPacket data(opcode, 20);
     data.append(unit->GetPackGUID());
     data << urand(0, 1024);
     data << urand(0, 1024);
-    data << urand(0, 1024);
-    unit->SendMessageToSet(&data, true);
+    data << urand(0, 1024);*/
+    uint32 random = urand(1, 3);
+    uint8 temp = 3;
+    if(temp == 1)
+    {
+        WorldPacket data(SMSG_AI_REACTION, 8+4);
+        data << unit->GetGUID();
+        data << random;
+        unit->SendMessageToSet(&data, true);
+    }
+    if(temp == 2)
+    {
+        WorldPacket data(SMSG_AI_UNKNOWN, 8+4);
+        data << unit->GetGUID();
+        data << random;
+        unit->SendMessageToSet(&data, true);
+    }
+    if(temp == 3)
+    {
+        WorldPacket data;
+        ((Player*)unit)->GetSession()->BuildArenaTeamEventPacket(&data, opcode, random, "str1", "str2", "str3");
+        ((Player*)unit)->GetSession()->SendPacket(&data);
+    }
     PSendSysMessage(LANG_COMMAND_OPCODESENT, opcode, unit->GetName());
     return true;
 }
@@ -3706,6 +3727,8 @@ bool ChatHandler::HandleSendChatMsgCommand(const char* args)
     data << type;                                           // message type
     data << uint32(0);                                      // lang
     data << m_session->GetPlayer()->GetGUID();              // guid
+    data << uint32(0);
+    data << uint64(0);
     data << uint32(9);                                      // msg len
     data << msg;                                            // msg
     data << uint8(0);                                       // chat tag

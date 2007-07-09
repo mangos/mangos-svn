@@ -120,7 +120,7 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
     if(Source->GetTeam() == ALLIANCE)
     {
         SetHordeFlagPicker(0);                              // must be before aura remove to prevent 2 events (drop+capture) at the same time
-        m_FlagState[1] = false;                             // horde flag in base (but not respawned yet)
+        m_FlagState[1] = FLAG_STATE_ON_BASE;                // horde flag in base (but not respawned yet)
         Source->RemoveAurasDueToSpell(23333);               // Drop Horde Flag from Player
         message = LANG_BG_CAPTURED_HF;
         type = CHAT_MSG_BATTLEGROUND_HORDE;
@@ -131,7 +131,7 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
     if(Source->GetTeam() == HORDE)
     {
         SetAllianceFlagPicker(0);                           // must be before aura remove to prevent 2 events (drop+capture) at the same time
-        m_FlagState[0] = false;                             // alliance flag in base (but not respawned yet)
+        m_FlagState[0] = FLAG_STATE_ON_BASE;                // alliance flag in base (but not respawned yet)
         Source->RemoveAurasDueToSpell(23335);               // Drop Alliance Flag from Player
         message = LANG_BG_CAPTURED_AF;
         type = CHAT_MSG_BATTLEGROUND_ALLIANCE;
@@ -186,14 +186,14 @@ void BattleGroundWS::EventPlayerDroppedFlag(Player *Source)
     if(Source->GetTeam() == ALLIANCE)
     {
         SetHordeFlagPicker(0);
-        m_FlagState[1] = true;                      // horde flag dropped
+        m_FlagState[1] = FLAG_STATE_ON_GROUND;              // horde flag dropped
         message = LANG_BG_DROPPED_HF;
         type = CHAT_MSG_BATTLEGROUND_ALLIANCE;
     }
     if(Source->GetTeam() == HORDE)
     {
         SetAllianceFlagPicker(0);
-        m_FlagState[0] = true;                      // alliance flag dropped
+        m_FlagState[0] = FLAG_STATE_ON_GROUND;              // alliance flag dropped
         message = LANG_BG_DROPPED_AF;
         type = CHAT_MSG_BATTLEGROUND_HORDE;
     }
@@ -220,7 +220,7 @@ void BattleGroundWS::EventPlayerReturnedFlag(Player *Source)
 
     if(Source->GetTeam() == ALLIANCE)
     {
-        m_FlagState[0] = false;                             // alliance flag in base
+        m_FlagState[0] = FLAG_STATE_ON_BASE;                // alliance flag in base
         message = LANG_BG_RETURNED_AF;
         type = CHAT_MSG_BATTLEGROUND_HORDE;
         UpdateFlagState(HORDE, 1);
@@ -228,7 +228,7 @@ void BattleGroundWS::EventPlayerReturnedFlag(Player *Source)
     }
     if(Source->GetTeam() == HORDE)
     {
-        m_FlagState[1] = false;                             // horde flag in base
+        m_FlagState[1] = FLAG_STATE_ON_BASE;                // horde flag in base
         message = LANG_BG_RETURNED_HF;
         type = CHAT_MSG_BATTLEGROUND_ALLIANCE;
         UpdateFlagState(ALLIANCE, 1);
@@ -258,7 +258,7 @@ void BattleGroundWS::EventPlayerPickedUpFlag(Player *Source)
         PlaySoundToAll(8212);
         MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_H_FLAG].object->GetMapId(), m_bgobjects[BG_OBJECT_H_FLAG].object)->Remove(m_bgobjects[BG_OBJECT_H_FLAG].object, false);
         SetHordeFlagPicker(Source->GetGUID());              // pick up Horde Flag
-        m_FlagState[1] = true;                              // horde flag pickedup
+        m_FlagState[1] = FLAG_STATE_ON_PLAYER;              // horde flag pickedup
     }
     if(Source->GetTeam() == HORDE)
     {
@@ -267,7 +267,7 @@ void BattleGroundWS::EventPlayerPickedUpFlag(Player *Source)
         PlaySoundToAll(8174);
         MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_A_FLAG].object->GetMapId(), m_bgobjects[BG_OBJECT_A_FLAG].object)->Remove(m_bgobjects[BG_OBJECT_A_FLAG].object, false);
         SetAllianceFlagPicker(Source->GetGUID());           // pick up Alliance Flag
-        m_FlagState[0] = true;                              // alliance flag pickedup
+        m_FlagState[0] = FLAG_STATE_ON_PLAYER;              // alliance flag pickedup
     }
 
     WorldPacket data;
@@ -296,7 +296,7 @@ void BattleGroundWS::RemovePlayer(Player *plr, uint64 guid)
                 //AllianceFlagSpawn[1] = 1;
                 SetAllianceFlagPicker(0);
                 RespawnFlag(ALLIANCE, false);
-                m_FlagState[0] = false;
+                m_FlagState[0] = FLAG_STATE_ON_BASE;
             }
         }
         if(m_FlagKeepers[1] == guid)
@@ -309,7 +309,7 @@ void BattleGroundWS::RemovePlayer(Player *plr, uint64 guid)
                 //HordeFlagSpawn[1] = 1;
                 SetHordeFlagPicker(0);
                 RespawnFlag(HORDE, false);
-                m_FlagState[1] = false;
+                m_FlagState[1] = FLAG_STATE_ON_BASE;
             }
         }
     }
@@ -478,8 +478,8 @@ void BattleGroundWS::Reset()
 {
     m_FlagKeepers[0]    = 0;
     m_FlagKeepers[1]    = 0;
-    m_FlagState[0]      = false;
-    m_FlagState[1]      = false;
+    m_FlagState[0]      = FLAG_STATE_ON_BASE;
+    m_FlagState[1]      = FLAG_STATE_ON_BASE;
     m_TeamScores[0]     = 0;
     m_TeamScores[1]     = 0;
 

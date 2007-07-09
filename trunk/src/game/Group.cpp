@@ -161,8 +161,8 @@ uint32 Group::RemoveMember(const uint64 &guid, const uint8 &method)
                 player->GetSession()->SendPacket( &data );
             }
 
-            data.Initialize(SMSG_GROUP_LIST, 14);
-            data<<(uint16)0<<(uint8)0<<(uint32)0<<(uint64)0;
+            data.Initialize(SMSG_GROUP_LIST, 24);
+            data << uint64(0) << uint64(0) << uint64(0);
             player->GetSession()->SendPacket(&data);
         }
 
@@ -221,8 +221,8 @@ void Group::Disband(bool hideDestroy)
             player->GetSession()->SendPacket(&data);
         }
 
-        data.Initialize(SMSG_GROUP_LIST, 14);
-        data<<(uint16)0<<(uint8)0<<(uint32)0<<(uint64)0;
+        data.Initialize(SMSG_GROUP_LIST, 24);
+        data << uint64(0) << uint64(0) << uint64(0);
         player->GetSession()->SendPacket(&data);
     }
     RollId.clear();
@@ -716,11 +716,11 @@ void Group::SendUpdate()
 
                                                             // guess size
         WorldPacket data(SMSG_GROUP_LIST, (6+8+8+1+2+m_members.size()*20));
-        data << (uint8)m_groupType;
-        data << (uint8)((m_bgGroup==true) ? 1 : 0);//2.0.x
-                                                            // own flags (groupid | (assistant?0x80:0))
-        data << (uint8)(citr->group | (citr->assistant?0x80:0));
-
+        data << (uint8)m_groupType;                         // group type
+        data << (uint8)((m_bgGroup==true) ? 1 : 0);         // 2.0.x, isBattleGroundGroup?
+        data << (uint8)(citr->group);                       // groupid
+        data << (uint8)(citr->assistant?0x80:0);            // 2.1.0 unk, member flags?
+        data << uint64(0x50000000FFFFFFFELL);                 // 2.1.0 unk const. guid?
         data << uint32(m_members.size()-1);
         for(member_citerator citr2 = m_members.begin(); citr2 != m_members.end(); ++citr2)
         {
@@ -731,16 +731,15 @@ void Group::SendUpdate()
             data << citr2->guid;
                                                             // online-state
             data << (uint8)(objmgr.GetPlayer(citr2->guid) ? 1 : 0);
-                                                            // member flags
-            data << (uint8)(citr2->group | (citr2->assistant?0x80:0));
+            data << (uint8)(citr2->group);                  // groupid
+            data << (uint8)(citr2->assistant?0x80:0);       // 2.1.0 unk, member flags?
         }
 
-        data << m_leaderGuid;
-        data << (uint8)m_lootMethod;
-        data << m_looterGuid;
-        data << (uint16)m_lootThreshold; // loot threshold
-        data << m_mainTank;//2.0.x
-        data << m_mainAssistant;//2.0.x
+        data << m_leaderGuid;                               // leader guid
+        data << (uint8)m_lootMethod;                        // loot method
+        data << m_looterGuid;                               // looter guid
+        data << (uint8)m_lootThreshold;                     // loot threshold
+        data << (uint8)0;                                   // 2.1.0 unk
 
         player->GetSession()->SendPacket( &data );
     }

@@ -260,7 +260,7 @@ enum ITEM_SUBCLASS_GEM
     ITEM_SUBCLASS_GEM_SIMPLE                    = 7,
     ITEM_SUBCLASS_GEM_PRISMATIC                 = 8
 };
- 
+
 enum ITEM_SUBCLASS_ARMOR
 {
     ITEM_SUBCLASS_ARMOR_MISC                    = 0,
@@ -378,9 +378,6 @@ struct ItemPrototype
     uint32 SubClass;
     uint32 Unk0;
     char* Name1;
-    char* Name2;
-    char* Name3;
-    char* Name4;
     uint32 DisplayInfoID;
     uint32 Quality;
     uint32 Flags;
@@ -439,6 +436,7 @@ struct ItemPrototype
     uint32 GemProperties;
     uint32 ExtendedCost;
     uint32 RequiredDisenchantSkill;
+    float  ArmorDamageModifier;
     char* ScriptName;
     uint32 DisenchantID;
 };

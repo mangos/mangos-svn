@@ -160,7 +160,7 @@ Item::Item( )
 {
     m_objectType |= TYPE_ITEM;
     m_objectTypeId = TYPEID_ITEM;
-    m_updateFlag = (UPDATEFLAG_HIGHGUID | UPDATEFLAG_ALL);
+    m_updateFlag = (UPDATEFLAG_HIGHGUID | UPDATEFLAG_ALL);  // 2.1.2 - 0x18
 
     m_valuesCount = ITEM_END;
     m_slot = 0;
@@ -206,7 +206,7 @@ void Item::SaveToDB()
         case ITEM_NEW:
         {
             uint32 Rows=0;
-            
+
             // it's better than rebuilding indexes multiple times
             QueryResult *result = sDatabase.PQuery("select count(*) as r from `item_instance` where `guid` = '%u'", guid);
             if(result)
@@ -214,7 +214,7 @@ void Item::SaveToDB()
                 Rows = result->Fetch()[0].GetUInt32();
                 delete result;
             }
-            
+
             // guess - instance exists ?
             if (!Rows)
             {

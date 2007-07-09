@@ -76,7 +76,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         if (consumable || trade_goods ||
             proto->Class == ITEM_CLASS_KEY || proto->Class == ITEM_CLASS_MISC)
         {
-            pUser->SendEquipError(EQUIP_ERR_CANT_DO_IN_COMBAT,pItem,NULL);
+            pUser->SendEquipError(EQUIP_ERR_NOT_IN_COMBAT,pItem,NULL);
             return;
         }
     }
@@ -457,6 +457,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                 BattleGround *bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundId());
                 if(!bg)
                     return;
+                // BG flag click
                 // AB:
                 // 15001
                 // 15002
@@ -468,19 +469,33 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                 // 179831 - Warsong Flag
                 // EotS:
                 // 184141 - Netherstorm Flag
-                //BG flag click
                 info = obj->GetGOInfo();
                 if(info)
                 {
                     switch(info->id)
                     {
                         case 179830:
+                            // check if it's correct bg
+                            if(bg->GetID() != BATTLEGROUND_WS)
+                                return;
+                            // check if flag dropped
+                            if(((BattleGroundWS*)bg)->GetFlagState(ALLIANCE) != FLAG_STATE_ON_BASE)
+                                return;
                             spellId = 23335;    // Silverwing Flag
                             break;
                         case 179831:
+                            // check if it's correct bg
+                            if(bg->GetID() != BATTLEGROUND_WS)
+                                return;
+                            // check if flag dropped
+                            if(((BattleGroundWS*)bg)->GetFlagState(HORDE) != FLAG_STATE_ON_BASE)
+                                return;
                             spellId = 23333;    // Warsong Flag
                             break;
                         case 184141:
+                            // check if it's correct bg
+                            if(bg->GetID() != BATTLEGROUND_EY)
+                                return;
                             spellId = 34976;    // Netherstorm Flag
                             break;
                     }
@@ -496,7 +511,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                 BattleGround *bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundId());
                 if(!bg)
                     return;
-                //BG flag dropped
+                // BG flag dropped
                 // WSG:
                 // 179785 - Silverwing Flag
                 // 179786 - Warsong Flag
@@ -508,10 +523,15 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                     switch(info->id)
                     {
                         case 179785:                        // Silverwing Flag
+                            // check if it's correct bg
+                            if(bg->GetID() != BATTLEGROUND_WS)
+                                return;
+                            // check if flag dropped
+                            if(((BattleGroundWS*)bg)->GetFlagState(ALLIANCE) != FLAG_STATE_ON_GROUND)
+                                return;
                             if(_player->GetTeam() == ALLIANCE)
                             {
-                                if(bg->GetID() == BATTLEGROUND_WS)
-                                    ((BattleGroundWS*)bg)->EventPlayerReturnedFlag(_player);
+                                ((BattleGroundWS*)bg)->EventPlayerReturnedFlag(_player);
                                 obj->Delete();
                                 return;
                             }
@@ -519,10 +539,15 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                                 spellId = 23335;            // Silverwing Flag
                             break;
                         case 179786:                        // Warsong Flag
+                            // check if it's correct bg
+                            if(bg->GetID() != BATTLEGROUND_WS)
+                                return;
+                            // check if flag dropped
+                            if(((BattleGroundWS*)bg)->GetFlagState(HORDE) != FLAG_STATE_ON_GROUND)
+                                return;
                             if(_player->GetTeam() == HORDE)
                             {
-                                if(bg->GetID() == BATTLEGROUND_WS)
-                                    ((BattleGroundWS*)bg)->EventPlayerReturnedFlag(_player);
+                                ((BattleGroundWS*)bg)->EventPlayerReturnedFlag(_player);
                                 obj->Delete();
                                 return;
                             }
@@ -544,15 +569,13 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
     SpellEntry const *spellInfo = sSpellStore.LookupEntry( spellId );
     if(!spellInfo)
     {
-        sLog.outError("WORLD: unknown spell id %i\n", spellId);
+        sLog.outError("WORLD: unknown spell id %u\n", spellId);
         return;
     }
 
     Spell *spell = new Spell(spellCaster, spellInfo, false, 0);
 
     SpellCastTargets targets;
-
-
     targets.setUnitTarget( spellTarget );
 
     if(obj)

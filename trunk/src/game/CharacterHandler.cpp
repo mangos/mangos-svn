@@ -305,6 +305,10 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     pCurrChar->SendFriendlist();
     pCurrChar->SendIgnorelist();
 
+    // Activate Spam Reporting Future
+    data.Initialize(SMSG_ACTIVATE_SPAM_REPORTING, 1);
+    data << uint8(2);                                   // unknown thing
+    SendPacket(&data);
 
     // Send MOTD
     {
@@ -635,6 +639,10 @@ void WorldSession::HandleSetFactionCheat( WorldPacket & recv_data )
 void WorldSession::HandleMeetingStoneInfo( WorldPacket & recv_data )
 {
     DEBUG_LOG( "WORLD: Received CMSG_MEETING_STONE_INFO" );
+
+    WorldPacket data(SMSG_MEETINGSTONE_SETQUEUE, 5);
+    data << uint32(0) << uint8(6);
+    SendPacket(&data);
 }
 
 void WorldSession::HandleTutorialFlag( WorldPacket & recv_data )

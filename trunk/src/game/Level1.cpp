@@ -459,7 +459,7 @@ bool ChatHandler::HandleModifyKnownTitlesCommand(const char* args)
         return true;
     }
 
-    chr->SetUInt32Value(PLAYER_FIELD_KNOWN_TITLES, titles);
+    chr->SetUInt32Value(PLAYER__FIELD_KNOWN_TITLES, titles);
     SendSysMessage(LANG_DONE);
 
     return true;
@@ -1311,6 +1311,7 @@ bool ChatHandler::HandleModifyMountCommand(const char* args)
     data.Initialize( SMSG_FORCE_RUN_SPEED_CHANGE, (8+4+4) );
     data.append(chr->GetPackGUID());
     data << (uint32)0;
+    data << (uint8)0; //new 2.1.0
     data << float(speed);
     chr->SendMessageToSet( &data, true );
 

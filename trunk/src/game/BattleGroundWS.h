@@ -49,6 +49,13 @@ enum BattleGroundObjectTypes
     BG_OBJECT_MAX           = 8
 };
 
+enum FlagState
+{
+    FLAG_STATE_ON_BASE      = 0,
+    FLAG_STATE_ON_PLAYER    = 1,
+    FLAG_STATE_ON_GROUND    = 2
+};
+
 struct BattleGroundObjectInfo
 {
     GameObject  *object;
@@ -75,6 +82,7 @@ class BattleGroundWS : public BattleGround
         bool IsAllianceFlagPickedup() const { return m_FlagKeepers[0] != 0; }
         bool IsHordeFlagPickedup() const { return m_FlagKeepers[1] != 0; }
         void RespawnFlag(uint32 Team, bool captured);
+        uint8 GetFlagState(uint32 team) { return m_FlagState[GetTeamIndexByTeamId(team)]; }
 
         /* Battleground Events */
         void EventPlayerCapturedFlag(Player *Source);
@@ -98,7 +106,7 @@ class BattleGroundWS : public BattleGround
 
     private:
         uint64 m_FlagKeepers[2];                              // 0 - alliance, 1 - horde
-        bool m_FlagState[2];                                  // for checking in base/dropped state
+        uint8 m_FlagState[2];                                 // for checking flag state
         uint32 m_TeamScores[2];
 
         std::map<uint32, BattleGroundObjectInfo> m_bgobjects;

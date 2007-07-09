@@ -949,7 +949,42 @@ const char* g_worldOpcodeNames[] =
     "UNKNOWN917",                                          // 917
     "SMSG_UNKNOWN_918",                                    // 918
     "SMSG_UNKNOWN_919",                                    // 919
-    "SMSG_UNKNOWN_920",                                    // 920 
-    //there would be declared new opcode, id 921
+    "SMSG_UNKNOWN_920",                                    // 920
+    "UNKNOWN921",                                          // 921
+    "UNKNOWN922",                                          // 922
+    "UNKNOWN923",                                          // 923
+    "UNKNOWN924",                                          // 924
+    "SMSG_SET_COMBO_POINTS",                               // 925
+    "UNKNOWN926",                                          // 926
+    "UNKNOWN927",                                          // 927
+    "UNKNOWN928",                                          // 928
+    "UNKNOWN929",                                          // 929
+    "UNKNOWN930",                                          // 930
+    "SMSG_SET_AURA_MULTIPLY",                              // 931
+    "SMSG_SET_AURA_SINGLE",                                // 932
+    "UNKNOWN933",                                          // 933
+    "SMSG_CAST_SUCCESS",                                   // 934
+    "SMSG_UNKNOWN_935",                                    // 935
+    "UNKNOWN936",                                          // 936
+    "UNKNOWN937",                                          // 937
+    "UNKNOWN938",                                          // 938
+    "UNKNOWN939",                                          // 939
+    "UNKNOWN940",                                          // 940
+    "SMSG_UNKNOWN_941",                                    // 941
+    "SMSG_UNKNOWN_942",                                    // 942
+    "UNKNOWN943",                                          // 943
+    "UNKNOWN944",                                          // 944
+    "UNKNOWN945",                                          // 945
+    "UNKNOWN946",                                          // 946
+    "UNKNOWN947",                                          // 947
+    "UNKNOWN948",                                          // 948
+    "UNKNOWN949",                                          // 949
+    "UNKNOWN950",                                          // 950
+    "UNKNOWN951",                                          // 951
+    "CMSG_UNKNOWN_952",                                    // 952
+    "UNKNOWN953",                                          // 953
+    "SMSG_UNKNOWN_954",                                    // 954
+    "SMSG_UNKNOWN_955",                                    // 955
+    //there would be declared new opcode, id 956
     //do not forget to change MAX_OPCODE_ID, if you add a line here!
 };

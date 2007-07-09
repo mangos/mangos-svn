@@ -122,7 +122,6 @@ void WorldSession::SendTaxiMenu( uint64 guid )
     {
         WorldPacket data(SMSG_CAST_RESULT, (4+1+1));
         data << uint32(0);
-        data << uint8(2);
         data << uint8(SPELL_FAILED_NOT_MOUNTED);
         SendPacket(&data);
         return;

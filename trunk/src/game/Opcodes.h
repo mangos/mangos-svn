@@ -963,10 +963,60 @@ enum OpCodes
     SMSG_UNKNOWN_918                                = 918, // chat message: The party leader has attempted to reset the instance you are in. Please zone out to allow the instance to reset.
     SMSG_UNKNOWN_919                                = 919, // uint8(0)+uint32(0/1)+uint64(unk/guid)
     SMSG_UNKNOWN_920                                = 920, // notify message: This system is currently disabled.
+    // 921
+    // 922
+    // 923
+    // 924
+    SMSG_SET_COMBO_POINTS                           = 925, // set combo points
+    // 926
+    // 927
+    // 928
+    // 929
+    // 930
+    SMSG_SET_AURA_MULTIPLY                          = 931,
+    /*
+    packed_guid
+    block (can repeat):
+    uint8 index may be it's aura slot? (increments)
+    uint32 spellid
+    uint32 duration1 (full?)
+    uint32 duration2 (remaining?)
+    */
+    SMSG_SET_AURA_SINGLE                            = 932,
+    /*
+    packed_guid
+    uint8 index may be it's aura slot? (increments)
+    uint32 spellid
+    uint32 duration1 (full?)
+    uint32 duration2 (remaining?)
+    */
+    // 933
+    SMSG_CAST_SUCCESS                               = 934,
+    SMSG_UNKNOWN_935                                = 935, // teleport/movement opcode
+    // 936
+    // 937
+    // 938
+    // 939
+    // 940
+    SMSG_UNKNOWN_941                                = 941, // teleport/movement opcode
+    SMSG_UNKNOWN_942                                = 942, // Everyone is Ready! (message)
+    // 943
+    // 944
+    // 945
+    // 946
+    // 947
+    // 948
+    // 949
+    // 950
+    // 951
+    CMSG_UNKNOWN_952                                = 952, // response to 942 opcode
+    CMSG_REPORT_SPAM                                = 953, // Report Spam chat button
+    SMSG_REPORT_SPAM_RESPONSE                       = 954, // Complaint Registered. (message)
+    SMSG_ACTIVATE_SPAM_REPORTING                    = 955, // unk uint8
 };
 
 //if you add new opcode .. Do NOT forget to change the following define MAX_OPCODE_ID and also add new opcode to table in opcodes.cpp
-#define MAX_OPCODE_ID 920
+#define MAX_OPCODE_ID 955
 
 /// Results of friend related commands
 enum FriendsResult

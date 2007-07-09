@@ -47,11 +47,9 @@ int AccountMgr::CreateAccount(std::string username, std::string password)
 
     loginDatabase.escape_string(password);
 
-
     if(!loginDatabase.PExecute("INSERT INTO `account`(`username`,`I`,`joindate`) VALUES('%s',SHA1(CONCAT(UPPER('%s'),':',UPPER('%s'))),NOW())", username.c_str(), username.c_str(), password.c_str()))
         return -1;  // unexpected error
     loginDatabase.Execute("INSERT INTO `realmcharacters` (`realmid`, `acctid`, `numchars`) SELECT `realmlist`.`id`, `account`.`id`, 0 FROM `account`, `realmlist` WHERE `account`.`id` NOT IN (SELECT `acctid` FROM `realmcharacters`)");
-
 
     return 0;   // everything's fine
 }
@@ -62,7 +60,6 @@ int AccountMgr::DeleteAccount(uint32 accid)
     if(!result)
         return 1;   // account doesn't exist
     delete result;
-
 
     result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account`='%d'",accid);
     if (result)
@@ -102,7 +99,6 @@ int AccountMgr::ChangeUsername(uint32 accid, std::string new_uname, std::string 
     if(!result)
         return 1;   // account doesn't exist
     delete result;
-
 
     loginDatabase.escape_string(new_uname);
     loginDatabase.escape_string(new_passwd);

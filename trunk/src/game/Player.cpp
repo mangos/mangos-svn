@@ -108,6 +108,9 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_curSelection = 0;
     m_lootGuid = 0;
 
+    m_comboTarget = 0;
+    m_comboPoints = 0;
+
     m_usedTalentCount = 0;
 
     m_regenTimer = 0;
@@ -386,12 +389,12 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value( PLAYER_GUILDRANK, 0 );
     SetUInt32Value( PLAYER_GUILD_TIMESTAMP, 0 );
 
-    SetUInt32Value( PLAYER_FIELD_KNOWN_TITLES, 0 );         // 0=disabled
+    SetUInt32Value( PLAYER__FIELD_KNOWN_TITLES, 0 );         // 0=disabled
     SetUInt32Value( PLAYER_CHOSEN_TITLE, 0 );
     SetUInt32Value( PLAYER_FIELD_KILLS, 0 );
-    SetUInt32Value( PLAYER_FIELD_KILLS_LIFETIME, 0 );
-    SetUInt32Value( PLAYER_FIELD_HONOR_TODAY, 0 );
-    SetUInt32Value( PLAYER_FIELD_HONOR_YESTERDAY, 0 );
+    SetUInt32Value( PLAYER_FIELD_LIFETIME_HONORBALE_KILLS, 0 );
+    SetUInt32Value( PLAYER_FIELD_TODAY_CONTRIBUTION, 0 );
+    SetUInt32Value( PLAYER_FIELD_YESTERDAY_CONTRIBUTION, 0 );
     SetUInt32Value( PLAYER_FIELD_MAX_LEVEL, 70 );
 
     // Played time
@@ -1153,9 +1156,9 @@ bool Player::ToggleDND()
 uint8 Player::chatTag()
 {
     if(isGameMaster())
-        return 3;
+        return 4;
     else if(isDND())
-        return 2;
+        return 3;
     if(isAFK())
         return 1;
     else
@@ -1368,8 +1371,8 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         BuildTeleportAckMsg(&data, x, y, z, orientation);
         GetSession()->SendPacket(&data);
         SetPosition( x, y, z, orientation, true);
-        BuildHeartBeatMsg(&data);
-        SendMessageToSet(&data, true);
+        //BuildHeartBeatMsg(&data);
+        //SendMessageToSet(&data, true);
     }
     else
     {
@@ -2806,7 +2809,7 @@ void Player::InitVisibleBits()
     for(uint16 i = UNIT_FIELD_AURA; i < UNIT_FIELD_AURASTATE; i ++)
         updateVisualBits.SetBit(i);
     updateVisualBits.SetBit(UNIT_FIELD_BASEATTACKTIME);
-    updateVisualBits.SetBit(UNIT_FIELD_OFFHANDATTACKTIME);
+    updateVisualBits.SetBit(UNIT_FIELD_BASEATTACKTIME + 1);
     updateVisualBits.SetBit(UNIT_FIELD_RANGEDATTACKTIME);
     updateVisualBits.SetBit(UNIT_FIELD_BOUNDINGRADIUS);
     updateVisualBits.SetBit(UNIT_FIELD_COMBATREACH);
@@ -2833,7 +2836,7 @@ void Player::InitVisibleBits()
     updateVisualBits.SetBit(PLAYER_DUEL_ARBITER+1);
 
     // PLAYER_QUEST_LOG_x also visible bit on official...
-    for(uint16 i = PLAYER_QUEST_LOG_1_1; i < PLAYER_QUEST_LOG_LAST_2; i+=3)
+    for(uint16 i = PLAYER_QUEST_LOG_1_1; i < PLAYER_QUEST_LOG_25_2; i+=3)
         updateVisualBits.SetBit(i);
 
     for(uint16 i = 0; i < INVENTORY_SLOT_BAG_END; i++)
@@ -4854,9 +4857,9 @@ void Player::UpdateHonorFields()
             }
 
             SetHonorPoints(GetHonorPoints()+uint32(honor));
-            SetUInt32Value(PLAYER_FIELD_HONOR_TODAY, 0);
-            SetUInt32Value(PLAYER_FIELD_HONOR_YESTERDAY, (uint32)(honor_yesterday*10));
-            SetUInt32Value(PLAYER_FIELD_KILLS, (kills_yesterday<<16));
+            SetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, 0);
+            SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, (uint32)(honor_yesterday*10));
+            SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS, (kills_yesterday<<16));
 
             sDatabase.PExecute("DELETE FROM `character_kill` WHERE `date`<'%u' AND `guid`='%u'", today,GUID_LOPART(GetGUID()));
         }
@@ -4879,8 +4882,8 @@ void Player::RewardHonor(Unit *uVictim)
 
     ApplyModUInt32Value(PLAYER_FIELD_KILLS, 1, true);       // add 1 today_kill
                                                             // add 1 lifetime_kill
-    ApplyModUInt32Value(PLAYER_FIELD_KILLS_LIFETIME, 1, true);
-    ApplyModUInt32Value(PLAYER_FIELD_HONOR_TODAY, (uint32)(approx_honor*10), true);
+    ApplyModUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS, 1, true);
+    ApplyModUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, (uint32)(approx_honor*10), true);
 }
 
 uint32 Player::GetGuildIdFromDB(uint64 guid)
@@ -6082,6 +6085,7 @@ void Player::SendInitWorldStates()
     uint16 NumberOfFields = 0;
     uint32 mapid = GetMapId();
     uint32 zoneid = GetZoneId();
+    uint32 areaid = GetAreaId();
     sLog.outDebug("Sending SMSG_INIT_WORLD_STATES to Map:%u, Zone: %u", mapid, zoneid);
     // may be exist better way to do this...
     switch(zoneid)
@@ -6134,6 +6138,7 @@ void Player::SendInitWorldStates()
     WorldPacket data(SMSG_INIT_WORLD_STATES, (4+4+2+(NumberOfFields*8)));
     data << mapid;                                          // mapid
     data << zoneid;                                         // zone id
+    data << areaid;                                         // area id, new 2.1.0
     data << NumberOfFields;                                 // count of uint64 blocks
     data << uint32(0x8d8) << uint32(0x0);                   // 1
     data << uint32(0x8d7) << uint32(0x0);                   // 2
@@ -7655,7 +7660,7 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
 
             if( isInCombat()&& pProto->Class != ITEM_CLASS_WEAPON && pProto->Class != ITEM_CLASS_PROJECTILE &&
                 pProto->SubClass != ITEM_SUBCLASS_ARMOR_SHIELD && pProto->InventoryType != INVTYPE_RELIC)
-                return EQUIP_ERR_CANT_DO_IN_COMBAT;
+                return EQUIP_ERR_NOT_IN_COMBAT;
 
             if(isInCombat()&& pProto->Class == ITEM_CLASS_WEAPON && m_weaponChangeTimer != 0)
                 return EQUIP_ERR_CANT_DO_RIGHT_NOW;         // maybe exist better err
@@ -7730,7 +7735,7 @@ uint8 Player::CanUnequipItem( uint16 pos, bool swap ) const
 
     if( isInCombat()&& pProto->Class != ITEM_CLASS_WEAPON && pProto->Class != ITEM_CLASS_PROJECTILE &&
         pProto->SubClass != ITEM_SUBCLASS_ARMOR_SHIELD && pProto->InventoryType != INVTYPE_RELIC )
-        return EQUIP_ERR_CANT_DO_IN_COMBAT;
+        return EQUIP_ERR_NOT_IN_COMBAT;
 
     if(!swap && pItem->IsBag() && !((Bag*)pItem)->IsEmpty())
         return EQUIP_ERR_CAN_ONLY_DO_WITH_EMPTY_BAGS;
@@ -8058,14 +8063,14 @@ uint8 Player::CanUseItem( Item *pItem, bool not_loading ) const
                 if( GetSkillValue( pProto->RequiredSkill ) == 0 )
                     return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
                 else if( GetSkillValue( pProto->RequiredSkill ) < pProto->RequiredSkillRank )
-                    return EQUIP_ERR_SKILL_ISNT_HIGH_ENOUGH;
+                    return EQUIP_ERR_ERR_CANT_EQUIP_SKILL;
             }
             if( pProto->RequiredSpell != 0 && !HasSpell( pProto->RequiredSpell ) )
                 return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
             if( pProto->RequiredReputationFaction && GetReputationRank(pProto->RequiredReputationFaction) < pProto->RequiredReputationRank )
-                return EQUIP_ITEM_REPUTATION_NOT_ENOUGH;
+                return EQUIP_ERR_CANT_EQUIP_REPUTATION;
             if( getLevel() < pProto->RequiredLevel )
-                return EQUIP_ERR_YOU_MUST_REACH_LEVEL_N;
+                return EQUIP_ERR_CANT_EQUIP_LEVEL_I;
             return EQUIP_ERR_OK;
         }
     }
@@ -8115,15 +8120,15 @@ uint8 Player::CanUseAmmo( uint32 item ) const
             if( GetSkillValue( pProto->RequiredSkill ) == 0 )
                 return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
             else if( GetSkillValue( pProto->RequiredSkill ) < pProto->RequiredSkillRank )
-                return EQUIP_ERR_SKILL_ISNT_HIGH_ENOUGH;
+                return EQUIP_ERR_ERR_CANT_EQUIP_SKILL;
         }
         if( pProto->RequiredSpell != 0 && !HasSpell( pProto->RequiredSpell ) )
             return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
         /*if( GetReputation() < pProto->RequiredReputation )
-        return EQUIP_ITEM_REPUTATION_NOT_ENOUGH;
+        return EQUIP_ERR_CANT_EQUIP_REPUTATION;
         */
         if( getLevel() < pProto->RequiredLevel )
-            return EQUIP_ERR_YOU_MUST_REACH_LEVEL_N;
+            return EQUIP_ERR_CANT_EQUIP_LEVEL_I;
         return EQUIP_ERR_OK;
     }
     return EQUIP_ERR_ITEM_NOT_FOUND;
@@ -9198,9 +9203,9 @@ void Player::RemoveItemFromBuyBackSlot( uint32 slot, bool del )
 void Player::SendEquipError( uint8 msg, Item* pItem, Item *pItem2 )
 {
     sLog.outDetail( "WORLD: Sent SMSG_INVENTORY_CHANGE_FAILURE" );
-    WorldPacket data( SMSG_INVENTORY_CHANGE_FAILURE, ((msg == EQUIP_ERR_YOU_MUST_REACH_LEVEL_N)?22:18) );
+    WorldPacket data( SMSG_INVENTORY_CHANGE_FAILURE, ((msg == EQUIP_ERR_CANT_EQUIP_LEVEL_I)?22:18) );
     data << msg;
-    if( msg == EQUIP_ERR_YOU_MUST_REACH_LEVEL_N )
+    if( msg == EQUIP_ERR_CANT_EQUIP_LEVEL_I )
         data << (pItem && pItem->GetProto() ? pItem->GetProto()->RequiredLevel : uint32(0));
     data << (pItem ? pItem->GetGUID() : uint64(0));
     data << (pItem2 ? pItem2->GetGUID() : uint64(0));
@@ -9931,6 +9936,7 @@ bool Player::CanCompleteRepeatableQuest( Quest *pQuest )
         
     return true;
 }
+
 bool Player::CanRewardQuest( Quest *pQuest, bool msg )
 {
     if( pQuest )
@@ -10012,7 +10018,7 @@ void Player::AddQuest( Quest *pQuest, Object *questGiver )
     if( pQuest )
     {
         uint16 log_slot = GetQuestSlot( 0 );
-        assert(log_slot);        
+        assert(log_slot);
 
         uint32 quest_id = pQuest->GetQuestId();
 
@@ -12635,6 +12641,7 @@ void Player::Say(const std::string text, const uint32 language)
     data << (uint8)CHAT_MSG_SAY;
     data << (uint32)language;
     data << (uint64)GetGUID();
+    data << (uint32)language; //language 2.1.0 ?
     data << (uint64)GetGUID();
     data << (uint32)(text.length()+1);
     data << text;
@@ -12649,6 +12656,7 @@ void Player::Yell(const std::string text, const uint32 language)
     data << (uint8)CHAT_MSG_YELL;
     data << (uint32)language;
     data << (uint64)GetGUID();
+    data << (uint32)language; //language 2.1.0 ?
     data << (uint64)GetGUID();
     data << (uint32)(text.length()+1);
     data << text;
@@ -12662,6 +12670,8 @@ void Player::TextEmote(const std::string text)
     WorldPacket data(SMSG_MESSAGECHAT, 200);
     data << (uint8)CHAT_MSG_EMOTE;
     data << (uint32)LANG_UNIVERSAL;
+    data << (uint64)GetGUID();
+    data << (uint32)0;
     data << (uint64)GetGUID();
     data << (uint32)(text.length()+1);
     data << text;
@@ -12681,6 +12691,8 @@ void Player::Whisper(const uint64 receiver, const std::string text, const uint32
     data << (uint8)CHAT_MSG_WHISPER;
     data << (uint32)LANG_UNIVERSAL;
     data << (uint64)GetGUID();
+    data << (uint32)0;
+    data << (uint64)GetGUID();
     data << (uint32)(text.length()+1);
     data << text;
     data << (uint8)chatTag();
@@ -12689,6 +12701,8 @@ void Player::Whisper(const uint64 receiver, const std::string text, const uint32
     data.Initialize(SMSG_MESSAGECHAT, 200);
     data << (uint8)CHAT_MSG_WHISPER_INFORM;
     data << (uint32)language;
+    data << (uint64)rPlayer->GetGUID();
+    data << (uint32)0;
     data << (uint64)rPlayer->GetGUID();
     data << (uint32)(text.length()+1);
     data << text;
@@ -13339,12 +13353,12 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
         }
         if( getLevel() < pProto->RequiredLevel )
         {
-            SendBuyError( BUY_ERR_LEVEL_REQUIRED, pCreature, item, 0);
+            SendBuyError( BUY_ERR_LEVEL_REQUIRE, pCreature, item, 0);
             return;
         }
         if( this->GetReputationRank(pProto->RequiredReputationFaction) < pProto->RequiredReputationRank)
         {
-            SendBuyError( BUY_ERR_REPUTATION_REQUIRED, pCreature, item, 0);
+            SendBuyError( BUY_ERR_REPUTATION_REQUIRE, pCreature, item, 0);
             return;
         }
         if(pProto->ExtendedCost)
@@ -13354,19 +13368,19 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
             {
                 if(GetHonorPoints() < iece->reqhonorpoints)
                 {
-                    SendEquipError(EQUIP_DONT_HAVE_ENOUGHT_HONOR_POINTS, NULL, NULL);
+                    SendEquipError(EQUIP_ERR_NOT_ENOUGH_HONOR_POINTS, NULL, NULL);
                     return;
                 }
                 if(GetArenaPoints() < iece->reqarenapoints)
                 {
-                    SendEquipError(EQUIP_DONT_HAVE_ENOUGHT_ARENA_POINTS, NULL, NULL);
+                    SendEquipError(EQUIP_ERR_NOT_ENOUGH_ARENA_POINTS, NULL, NULL);
                     return;
                 }
                 if( (iece->reqitem1 && !HasItemCount(iece->reqitem1, iece->reqitemcount1)) ||
                     (iece->reqitem2 && !HasItemCount(iece->reqitem2, iece->reqitemcount2)) ||
                     (iece->reqitem3 && !HasItemCount(iece->reqitem3, iece->reqitemcount3)) )
                 {
-                    SendEquipError(EQUIP_DONT_HAVE_REQITEMS_FOR_THAT_PURCHASE, NULL, NULL);
+                    SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
                     return;
                 }
             }
@@ -13719,7 +13733,6 @@ bool Player::EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot)
 
 void Player::CorrectMetaGemEnchants(uint8 exceptslot, bool apply)
 {
-
     for(uint32 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)    //cycle all equipped items
     {
         //enchants for the slot being socketed are handled by Player::ApplyItemMods
@@ -13981,3 +13994,28 @@ template void Player::UpdateVisibilityOf(Creature*      target, UpdateData& data
 template void Player::UpdateVisibilityOf(Corpse*        target, UpdateData& data, UpdateDataMapType& data_updates);
 template void Player::UpdateVisibilityOf(GameObject*    target, UpdateData& data, UpdateDataMapType& data_updates);
 template void Player::UpdateVisibilityOf(DynamicObject* target, UpdateData& data, UpdateDataMapType& data_updates);
+
+void Player::SetComboPoints(uint64 target, int8 count)
+{
+    Unit *combotarget = ObjectAccessor::Instance().GetUnit(*this, target);
+    if(!combotarget)
+        return;
+
+    if(count > 5)
+        count = 5;
+
+    if(count < 0)
+        count = 0;
+
+    WorldPacket data(SMSG_SET_COMBO_POINTS, combotarget->GetPackGUID().size()+1);
+    data.append(combotarget->GetPackGUID());
+    data << uint8(count);
+    GetSession()->SendPacket(&data);
+}
+
+void Player::SetStandState(uint8 state)
+{
+    WorldPacket data(SMSG_STANDSTATE_CHANGE_ACK, 1);
+    data << state;
+    GetSession()->SendPacket(&data);
+}

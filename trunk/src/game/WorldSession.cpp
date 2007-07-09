@@ -371,6 +371,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
 
     objmgr.opcodeTable[ CMSG_PET_ACTION ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetAction                     );
     objmgr.opcodeTable[ CMSG_PET_NAME_QUERY ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetNameQuery                  );
+    objmgr.opcodeTable[ CMSG_REQUEST_PET_INFO ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleRequestPetInfoOpcode          );
 
     objmgr.opcodeTable[ CMSG_PET_ABANDON ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetAbandon                    );
     objmgr.opcodeTable[ CMSG_PET_SET_ACTION ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetSetAction                  );
@@ -441,6 +442,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_SELF_RES ]                         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSelfResOpcode                 );
     objmgr.opcodeTable[ CMSG_SOCKET_ITEM ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSocketOpcode                  );
     objmgr.opcodeTable[ CMSG_CANCEL_TEMP_ITEM_ENCHANTMENT]      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleCancelTempItemEnchantmentOpcode);
+    objmgr.opcodeTable[ CMSG_REPORT_SPAM ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleReportSpamOpcode              );
 }
 
 void WorldSession::SizeError(WorldPacket const& packet, uint32 size) const
@@ -1171,7 +1173,7 @@ void WorldSession::HandleChooseTitleOpcode( WorldPacket & recv_data )
     uint32 title;
     recv_data >> title;    
 
-    uint32 available = GetPlayer()->GetUInt32Value(PLAYER_FIELD_KNOWN_TITLES);
+    uint32 available = GetPlayer()->GetUInt32Value(PLAYER__FIELD_KNOWN_TITLES);
     if(!(available & (1<<title)))
         return;
 
@@ -1458,4 +1460,46 @@ void WorldSession::HandleSelfResOpcode( WorldPacket & recv_data )
 
         _player->SetUInt32Value(PLAYER_SELF_RES_SPELL, 0);
     }
+}
+
+void WorldSession::HandleReportSpamOpcode( WorldPacket & recv_data )
+{
+    sLog.outDebug("WORLD: CMSG_REPORT_SPAM");
+    recv_data.hexlike();
+    /*
+    WORLD: CMSG_REPORT_SPAM
+    STORAGE_SIZE: 113
+    01 08 00 00 00 00 00 00 00 00 00 00 00 0E 00 00
+    00 01 00 00 00 A1 00 00 00 54 79 70 65 3A 20 5B
+    31 34 5D 2C 20 43 68 61 6E 6E 65 6C 3A 20 5B 47
+    65 6E 65 72 61 6C 20 2D 20 44 61 72 6E 61 73 73
+    75 73 5D 2C 20 50 6C 61 79 65 72 20 4E 61 6D 65
+    3A 20 5B 4E 73 66 67 5D 2C 20 54 65 78 74 3A 20
+    5B 69 20 61 6D 20 61 20 73 70 61 6D 6D 65 72 5D
+    00
+    */
+    uint8 unk1;
+    uint64 guid;
+    uint32 unk2, unk3, unk4, unk5;
+    std::string description;
+    recv_data >> unk1;          // unk 0x01 const
+    recv_data >> guid;          // player guid
+    recv_data >> unk2;          // probably language
+    recv_data >> unk3;          // message type?
+    recv_data >> unk4;          // probably channel id
+    recv_data >> unk5;          // unk random value
+    recv_data >> description;   // spam description string (messagetype, channel name, player name, message)
+
+    // Complaint Received message
+    WorldPacket data(SMSG_REPORT_SPAM_RESPONSE, 0);
+    data << uint8(0);
+    SendPacket(&data);
+
+    sLog.outDebug("unk1 %u, guid %u, unk2 %u, unk3, %u, unk4 %u, unk5 %u, message %s", unk1, GUID_LOPART(guid), unk2, unk3, unk4, unk5, description.c_str());
+}
+
+void WorldSession::HandleRequestPetInfoOpcode( WorldPacket & recv_data )
+{
+    sLog.outDebug("WORLD: CMSG_REQUEST_PET_INFO");
+    recv_data.hexlike();
 }
