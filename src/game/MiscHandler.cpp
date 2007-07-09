@@ -468,12 +468,6 @@ void WorldSession::HandleSetSelectionOpcode( WorldPacket & recv_data )
 
     if( _player != 0 )
         _player->SetSelection(guid);
-
-    if(_player->GetUInt64Value(PLAYER_FIELD_COMBO_TARGET) != guid)
-    {
-        _player->SetUInt64Value(PLAYER_FIELD_COMBO_TARGET,0);
-        _player->SetUInt32Value(PLAYER_FIELD_BYTES,((_player->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (0x00 << 8)));
-    }
 }
 
 void WorldSession::HandleStandStateChangeOpcode( WorldPacket & recv_data )
@@ -486,9 +480,7 @@ void WorldSession::HandleStandStateChangeOpcode( WorldPacket & recv_data )
         uint8 animstate;
         recv_data >> animstate;
 
-        WorldPacket data(SMSG_STANDSTATE_CHANGE_ACK, 1);
-        data << animstate;
-        SendPacket(&data);
+        _player->SetStandState(animstate);
 
         uint32 bytes1 = _player->GetUInt32Value( UNIT_FIELD_BYTES_1 );
         bytes1 &=0xFFFFFF00;
@@ -1106,15 +1098,7 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     DEBUG_LOG("Inspected guid is " I64FMTD,guid);
 
     if( _player != 0 )
-    {
         _player->SetSelection(guid);
-    }
-
-    if(_player->GetUInt64Value(PLAYER_FIELD_COMBO_TARGET) != guid)
-    {
-        _player->SetUInt64Value(PLAYER_FIELD_COMBO_TARGET,0);
-        _player->SetUInt32Value(PLAYER_FIELD_BYTES,((_player->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (0x00 << 8)));
-    }
 
     WorldPacket data( SMSG_INSPECT, 8 );
     data << guid;
@@ -1140,9 +1124,9 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
     data << player->GetGUID();
     data << (uint8)player->GetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY);
     data << player->GetUInt32Value(PLAYER_FIELD_KILLS);
-    data << player->GetUInt32Value(PLAYER_FIELD_HONOR_TODAY);
-    data << player->GetUInt32Value(PLAYER_FIELD_HONOR_YESTERDAY);
-    data << player->GetUInt32Value(PLAYER_FIELD_KILLS_LIFETIME);
+    data << player->GetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION);
+    data << player->GetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION);
+    data << player->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS);
     SendPacket(&data);
 }
 

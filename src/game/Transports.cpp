@@ -105,7 +105,7 @@ void MapManager::LoadTransports()
 
 Transport::Transport( WorldObject *instantiator ) : GameObject( instantiator )
 {
-    m_updateFlag = (UPDATEFLAG_TRANSPORT | UPDATEFLAG_HIGHGUID | UPDATEFLAG_ALL | UPDATEFLAG_HASPOSITION);
+    m_updateFlag = (UPDATEFLAG_TRANSPORT | UPDATEFLAG_HIGHGUID | UPDATEFLAG_ALL | UPDATEFLAG_HASPOSITION);  // 2.1.2 - 0x5A
 }
 
 bool Transport::Create(uint32 guidlow, uint32 displayId, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress, uint32 dynflags)

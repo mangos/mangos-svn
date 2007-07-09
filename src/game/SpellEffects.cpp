@@ -171,8 +171,8 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectResurrectNew,                             //113 SPELL_EFFECT_RESURRECT_NEW
     &Spell::EffectAttackMe,                                 //114 SPELL_EFFECT_ATTACK_ME
     &Spell::EffectDurabilityDamagePCT,                      //115 SPELL_EFFECT_DURABILITY_DAMAGE_PCT
-    &Spell::EffectNULL,                                     //116 SPELL_EFFECT_SKIN_PLAYER_CORPSE       one spell: Remove Insignia, bg usage, required special corpse flags...
-    &Spell::EffectNULL,                                     //117 SPELL_EFFECT_SPIRIT_HEAL              one spell: Spirit Heal
+    &Spell::EffectSkinPlayerCorpse,                         //116 SPELL_EFFECT_SKIN_PLAYER_CORPSE       one spell: Remove Insignia, bg usage, required special corpse flags...
+    &Spell::EffectSpiritHeal,                               //117 SPELL_EFFECT_SPIRIT_HEAL              one spell: Spirit Heal
     &Spell::EffectSkill,                                    //118 SPELL_EFFECT_SKILL                    professions and more
     &Spell::EffectNULL,                                     //119 SPELL_EFFECT_APPLY_AURA_PET
     &Spell::EffectNULL,                                     //120 SPELL_EFFECT_TELEPORT_GRAVEYARD       two spells: Graveyard Teleport and Graveyard Teleport Test
@@ -191,6 +191,14 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //133 SPELL_EFFECT_133                      one spell: Forget
     &Spell::EffectNULL,                                     //134 SPELL_EFFECT_134
     &Spell::EffectNULL,                                     //135 SPELL_EFFECT_135                      pet related
+    &Spell::EffectNULL,                                     //136 SPELL_EFFECT_136
+    &Spell::EffectNULL,                                     //137 SPELL_EFFECT_137
+    &Spell::EffectNULL,                                     //138 SPELL_EFFECT_138
+    &Spell::EffectNULL,                                     //139 SPELL_EFFECT_139 unused
+    &Spell::EffectNULL,                                     //140 SPELL_EFFECT_140
+    &Spell::EffectNULL,                                     //141 SPELL_EFFECT_141
+    &Spell::EffectNULL,                                     //142 SPELL_EFFECT_142
+    &Spell::EffectNULL,                                     //143 SPELL_EFFECT_143 probably apply aura again :)
 };
 
 void Spell::EffectNULL(uint32 i)
@@ -270,6 +278,7 @@ void Spell::EffectDummy(uint32 i)
         ((Creature*)unitTarget)->SetNoCallAssistence(true);
         if (((Creature*)unitTarget)->AI())
             ((Creature*)unitTarget)->AI()->AttackStart(m_caster->getVictim());
+
 
         return;
     }
@@ -905,12 +914,13 @@ void Spell::EffectApplyAura(uint32 i)
     if(!unitTarget->isAlive() && !(m_spellInfo->Id == 20584 || m_spellInfo->Id == 8326))
         return;
 
+    /* WTF: ?
     //If m_immuneToState type contain this aura type, IMMUNE aura.
     if(unitTarget->IsImmunedToSpellEffect(m_spellInfo->EffectApplyAuraName[i]))
     {
         SendCastResult(SPELL_FAILED_IMMUNE);
         return;
-    }
+    }*/
 
     sLog.outDebug("Spell: Aura is: %u", m_spellInfo->EffectApplyAuraName[i]);
 
@@ -2573,20 +2583,7 @@ void Spell::EffectAddComboPoints(uint32 i)
     if(damage < 0)
         return;
 
-    uint8 comboPoints = ((m_caster->GetUInt32Value(PLAYER_FIELD_BYTES) & 0xFF00) >> 8);
-    if(m_caster->GetUInt64Value(PLAYER_FIELD_COMBO_TARGET) != unitTarget->GetGUID())
-    {
-        comboPoints = damage;
-        m_caster->SetUInt64Value(PLAYER_FIELD_COMBO_TARGET,unitTarget->GetGUID());
-        m_caster->SetUInt32Value(PLAYER_FIELD_BYTES,((m_caster->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (comboPoints << 8)));
-    }
-    else if(comboPoints < 5)
-    {
-        comboPoints += damage;
-        if(comboPoints > 5)
-            comboPoints = 5;
-        m_caster->SetUInt32Value(PLAYER_FIELD_BYTES,((m_caster->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (comboPoints << 8)));
-    }
+    ((Player*)m_caster)->AddComboPoints(unitTarget->GetGUID(), damage);
 }
 
 void Spell::EffectDuel(uint32 i)
@@ -3427,4 +3424,22 @@ void Spell::EffectProspecting(uint32 i)
 void Spell::EffectSkill(uint32 i)
 {
     sLog.outDebug("WORLD: SkillEFFECT");
+}
+
+void Spell::EffectSpiritHeal(uint32 i)
+{
+    if(!unitTarget) return;
+    if(unitTarget->GetTypeId() != TYPEID_PLAYER) return;
+    if(unitTarget->isAlive()) return;
+    if(!unitTarget->IsInWorld()) return;
+
+    //m_spellInfo->EffectBasePoints[i]; == 99 (percent?)
+    //((Player*)unitTarget)->setResurrect(m_caster->GetGUID(), unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), unitTarget->GetMaxHealth(), unitTarget->GetMaxPower(POWER_MANA));
+    ((Player*)unitTarget)->ResurrectPlayer(1.0f);
+    ((Player*)unitTarget)->SpawnCorpseBones();
+}
+
+void Spell::EffectSkinPlayerCorpse(uint32 i)
+{
+    sLog.outDebug("Effect: SkinPlayerCorpse");
 }

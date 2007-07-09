@@ -3835,7 +3835,7 @@ bool ObjectMgr::LoadPlayerDump(std::string file, uint32 account, std::string nam
             if(!changenth(line, 2, chraccount)) ROLLBACK;
             std::string vals = getnth(line, 3);
             if(!changetoknth(vals, OBJECT_FIELD_GUID+1, newguid)) ROLLBACK;
-            for(uint16 field = PLAYER_FIELD_INV_SLOT_HEAD; field <= PLAYER_FIELD_KEYRING_SLOT_LAST; field++)
+            for(uint16 field = PLAYER_FIELD_INV_SLOT_HEAD; field < PLAYER_FARSIGHT; field++)
                 if(!changetokItem(vals, field+1, items, m_hiItemGuid, true)) ROLLBACK;
             if(!changenth(line, 3, vals.c_str())) ROLLBACK;
             if (name == "")

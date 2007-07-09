@@ -418,7 +418,7 @@ bool ConvertADT(char * filename,char * filename2)
     {
         for(unsigned int y=0;y<16;y++)
         {
-            if(mcells->ch[y][x].area_id && mcells->ch[y][x].area_id < 0xf77)
+            if(mcells->ch[y][x].area_id && mcells->ch[y][x].area_id < 0xFAA)
             {
                 if(areas[mcells->ch[y][x].area_id]==0xffff)
                     printf("\nCan't find area flag for areaid %u.\n",mcells->ch[y][x].area_id);

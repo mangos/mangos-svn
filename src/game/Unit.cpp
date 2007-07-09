@@ -109,7 +109,7 @@ Unit::Unit( WorldObject *instantiator ) : WorldObject( instantiator )
 {
     m_objectType |= TYPE_UNIT;
     m_objectTypeId = TYPEID_UNIT;
-    m_updateFlag = (UPDATEFLAG_HIGHGUID | UPDATEFLAG_ALL | UPDATEFLAG_LIVING | UPDATEFLAG_HASPOSITION);
+    m_updateFlag = (UPDATEFLAG_ALL | UPDATEFLAG_LIVING | UPDATEFLAG_HASPOSITION);   // 2.1.2 - 0x70
 
     m_attackTimer[BASE_ATTACK]   = 0;
     m_attackTimer[OFF_ATTACK]    = 0;
@@ -5446,6 +5446,7 @@ void Unit::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply
 
     data.append(GetPackGUID());
     data << (uint32)0;
+    if (mtype == MOVE_RUN) data << uint8(0);// new 2.1.0
     data << float(GetSpeed(mtype));
     SendMessageToSet( &data, true );
 

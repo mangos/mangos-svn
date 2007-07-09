@@ -198,7 +198,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //145 SPELL_AURA_CHARISMA
     &Aura::HandleNULL,                                      //146 SPELL_AURA_PERSUADED
     &Aura::HandleNULL,                                      //147 SPELL_AURA_ADD_CREATURE_IMMUNITY
-    &Aura::HandleNULL,                                      //148 SPELL_AURA_RETAIN_COMBO_POINTS
+    &Aura::HandleAuraRetainComboPoints,                     //148 SPELL_AURA_RETAIN_COMBO_POINTS
     &Aura::HandleNoImmediateEffect,                         //149 SPELL_AURA_RESIST_PUSHBACK
     &Aura::HandleNoImmediateEffect,                         //150 SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT
     &Aura::HandleAuraTrackStealthed,                        //151 SPELL_AURA_TRACK_STEALTHED
@@ -271,6 +271,18 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //218                                   unused
     &Aura::HandleModManaRegen,                              //219 SPELL_AURA_MOD_MANA_REGEN
     &Aura::HandleNoImmediateEffect,                         //220 SPELL_AURA_MOD_SPELL_HEALING_OF_STRENGTH
+    &Aura::HandleNULL,                                      //221 ignored
+    &Aura::HandleNULL,                                      //222 unused
+    &Aura::HandleNULL,                                      //223 unused
+    &Aura::HandleNULL,                                      //224 unused
+    &Aura::HandleNULL,                                      //225
+    &Aura::HandleNULL,                                      //226
+    &Aura::HandleNULL,                                      //227
+    &Aura::HandleNULL,                                      //228 detection
+    &Aura::HandleNULL,                                      //228 avoidance
+    &Aura::HandleNULL,                                      //230
+    &Aura::HandleNULL,                                      //231
+    &Aura::HandleNULL,                                      //232
 };
 
 Aura::Aura(SpellEntry const* spellproto, uint32 eff, Unit *target, Unit *caster, Item* castItem) :
@@ -331,7 +343,7 @@ m_isAreaAura(false), m_castItemGuid(castItem?castItem->GetGUID():0)
     {
         m_caster_guid = caster->GetGUID();
         damage = CalculateDamage();
-        
+
         if (!damage && castItem && castItem->GetItemSuffixFactor())
         {
             ItemRandomSuffixEntry const *item_rand_suffix = sItemRandomSuffixStore.LookupEntry(abs(castItem->GetItemRandomPropertyId()));
@@ -1102,11 +1114,12 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
     if(!apply)
     {
-        if( IsQuestTameSpell(GetId()) && caster && caster->isAlive() && m_target && m_target->isAlive())
+        if( (IsQuestTameSpell(GetId()) || GetId()== 1515) && caster && caster->isAlive() && m_target && m_target->isAlive())
         {
             uint32 finalSpelId = 0;
             switch(GetId())
             {
+                case  1515: finalSpelId = 13481; break;              
                 case 19548: finalSpelId = 19597; break;
                 case 19674: finalSpelId = 19677; break;
                 case 19687: finalSpelId = 19676; break;
@@ -1291,6 +1304,12 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             else if(unit_target->getRace() == RACE_TAUREN)
                 modelid = 15375;
             break;
+	case FORM_SWIFT_FLIGHT:
+            if(unit_target->getRace() == RACE_NIGHTELF)
+                modelid = 21243;
+            else if(unit_target->getRace() == RACE_TAUREN)
+                modelid = 21244;
+	    break;
         case FORM_AMBIENT:
         case FORM_SHADOW:
         case FORM_STEALTH:
@@ -2134,6 +2153,7 @@ void Aura::HandleInvisibility(bool Apply, bool Real)
     else
     {
         m_target->m_invisibilityvalue = 0;
+        //m_target->RemoveFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_CREEP );
 
         // only at real aura remove
         if(Real)
@@ -2972,9 +2992,10 @@ void Aura::HandleAuraModTotalManaPercentRegen(bool apply, bool Real)
 
 void Aura::HandleModRegen(bool apply, bool Real)            // eating
 {
-    if( (GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) != 0 && apply )
-                                                            // do not stand up after aura remove...
-        m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);
+    if ((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) != 0 && apply)
+        if(m_target->GetTypeId() == TYPEID_PLAYER)
+            ((Player*)m_target)->SetStandState(1);  // sit?
+        //m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);
 
     if(apply && m_periodicTimer <= 0)
     {
@@ -2994,8 +3015,10 @@ void Aura::HandleModRegen(bool apply, bool Real)            // eating
 
 void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
 {
-    if( GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED )
-        m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
+    if (GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED)
+        if(m_target->GetTypeId() == TYPEID_PLAYER)
+            ((Player*)m_target)->SetStandState(1);  // sit?
+        //m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);
 
     if(apply && m_periodicTimer <= 0)
     {
@@ -3497,6 +3520,10 @@ void Aura::HandleShapeshiftBoosts(bool apply)
         case FORM_FLIGHT:
             spellId = 33948;
             break;
+        case FORM_SWIFT_FLIGHT:
+            m_target->SetSpeed(MOVE_FLY,3.8f,true);
+            spellId = 40122;
+            break;
         case FORM_GHOSTWOLF:
         case FORM_AMBIENT:
         case FORM_GHOUL:
@@ -3799,4 +3826,15 @@ void Aura::HandleModTargetResistance(bool apply, bool Real)
 {
     if (m_target->GetTypeId() == TYPEID_PLAYER)
         m_target->ApplyModInt32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE,m_modifier.m_amount, apply);
+}
+
+void Aura::HandleAuraRetainComboPoints(bool apply, bool Real)
+{
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    Player *target = (Player*)m_target;
+
+    if(!apply)                              // combo points was added in SPELL_EFFECT_ADD_COMBO_POINTS handler
+        target->AddComboPoints(target->GetSelection(), -m_modifier.m_amount);
 }

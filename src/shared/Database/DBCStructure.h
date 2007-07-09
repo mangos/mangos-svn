@@ -44,9 +44,9 @@ struct AreaTableEntry
     uint32    flags;                                        // 4, unknown value but 312 for all cities
                                                             // 5-9 unused
     int32     area_level;                                   //10
-    char*     area_name[8];                                 //11-18
-                                                            //19, string flags, unused
-    uint32    team;                                         //20,
+    char*     area_name[16];                                //11-26
+                                                            //27, string flags, unused    
+    uint32    team;                                         //28
 };
 
 struct BankBagSlotPricesEntry
@@ -66,19 +66,18 @@ struct BattlemasterListEntry
     uint32      maxlvl;                                     //11
     uint32      maxplayersperteam;                          //12
                                                             //13-14 unused
-    char*       name[8];                                    //15-22
-                                                            //23 string flag, unused
+    char*       name[16];                                   //15-30
+                                                            //31 string flag, unused
 };
 
 struct ChatChannelsEntry
 {
     uint32      ChannelID;                                  // 0
     uint32      flags;                                      // 1
-                                                            // 2 unused
-    char*       pattern[8];                                 // 3-10
-                                                            // 11 string flags, unused
-    //char*       name[8];                                  // 12-19, unused
-                                                            // 13 string flags, unused
+    char*       pattern[16];                                // 3-18
+                                                            //19 string flags, unused
+   //char*       name[16];                                  //20-35 unused
+                                                            //36 string flag, unused
 };
 
 struct ChrClassesEntry
@@ -87,8 +86,8 @@ struct ChrClassesEntry
                                                             // 1-2, unused
     uint32      powerType;                                  // 3
                                                             // 4, unused
-    //char*       name[8];                                  // 5-12, unused
-                                                            // 13 string flags, unused
+    //char*       name[16];                                 // 5-20 unused
+                                                            //21 string flag, unused
 };
 
 struct ChrRacesEntry
@@ -103,8 +102,8 @@ struct ChrRacesEntry
     uint32      TeamID;                                     // 8 (7-Alliance 1-Horde)
                                                             // 9-12 unused
     uint32      startmovie;                                 // 13
-    char*       name[8];                                    // 14-21 used for DBC language detection/selection
-                                                            // 22 string flags, unused
+    char*       name[16];                                   // 14-29 used for DBC language detection/selection 
+                                                            // 30 string flags, unused
 };
 
 struct CreatureFamilyEntry
@@ -113,8 +112,8 @@ struct CreatureFamilyEntry
                                                             // 1-5 unused
     uint32    tamable;                                      // 6 if this = 270 then "is tamable Creature" (or 0 is non-tamable)
     uint32    petFoodMask;                                  // 7
-    char*     Name[8];                                      // 8-15
-                                                            // 16 string flags, unused
+    char*     Name[16];                                     // 8-23
+                                                            // 24 string flags, unused 
 };
 
 struct DurabilityCostsEntry
@@ -144,8 +143,8 @@ struct FactionEntry
     int32       BaseRepValue[4];                            //10-13 Base reputation values
                                                             //14-17 unused
     uint32      team;                                       //18
-    char*       name[8];                                    //19-26
-                                                            //27 string flags
+    char*       name[16];                                   //19-34
+                                                            //35 string flags, unused 
 };
 
 enum FactionMasks
@@ -226,30 +225,30 @@ struct ItemRandomPropertiesEntry
     //char*     internalName                                //1   unused
     uint32    enchant_id[3];                                //2-4
                                                             //5-6 unused, 0 only values, reserved for additional enchantments?
-    //char*     nameSuffix[8]                               //7-14, unused
-                                                            //15 nameSufix flags, unused
+    //char*     nameSuffix[16]                              //7-22, unused
+                                                            //23 nameSufix flags, unused
 };
 
 struct ItemRandomSuffixEntry
 {
     uint32    ID;                                           //0
-    //char*     name[8]                                     //1-8 unused
-                                                            //9, name flags, unused
-                                                            //10  unused
-    uint32    enchant_id[3];                                //11-13
-    uint32    prefix[3];                                    //14-16
+    //char*     name[16]                                    //1-16 unused
+                                                            //17, name flags, unused
+                                                            //18  unused
+    uint32    enchant_id[3];                                //19-21
+    uint32    prefix[3];                                    //22-24
 };
 
 struct ItemSetEntry
 {
                                                             // 0 unused
-    char*     name[8];                                      // 1-8
-                                                            // 9 string flags, unused
-                                                            //10-26 unused
-    uint32    spells[8];                                    //27-34
-    uint32    items_to_triggerspell[8];                     //35-42
-    uint32    required_skill_id;                            //43
-    uint32    required_skill_value;                         //44
+    char*     name[16];                                     // 1-16
+                                                            //17 string flags, unused
+                                                            //18-43 unused
+    uint32    spells[8];                                    //44-52
+    uint32    items_to_triggerspell[8];                     //53-61
+    uint32    required_skill_id;                            //62
+    uint32    required_skill_value;                         //63
 };
 
 struct LockEntry
@@ -368,27 +367,27 @@ struct SpellEntry
     uint32    SpellIconID;                                  //120
     uint32    activeIconID;                                 //121
     uint32    spellPriority;                                //122
-    char*     SpellName[8];                                 //123-130
-    //uint32    SpellNameFlag;                              //131     string flags, not used
-    char*     Rank[8];                                      //132-139
-    //uint32    RankFlags;                                  //140     string flags, not used
-    //char*   Description[8];                               //141-148 not used
-    //uint32  DescriptionFlags;                             //149     string flags, not used
-    //char*   ToolTip[8];                                   //150-157 not used
-    //uint32  ToolTipFlags;                                 //158     string flags, not used
-    uint32    ManaCostPercentage;                           //159
-    uint32    StartRecoveryCategory;                        //160
-    uint32    StartRecoveryTime;                            //161
-    uint32    AffectedTargetLevel;                          //162
-    uint32    SpellFamilyName;                              //163
-    uint64    SpellFamilyFlags;                             //164+165
-    uint32    MaxAffectedTargets;                           //166
-    uint32    DmgClass;                                     //167
-                                                            //168-169 not used (DmgClass2, DmgClass3 ?)
-    float     DmgMultiplier[3];                             //170-172
-                                                            //173-175 not used
-    uint32    TotemCategory[2];                             //176-177
-    uint32    AreaId;                                       //178
+    char*     SpellName[16];                                //123-138
+    //uint32    SpellNameFlag;                              //139
+    char*     Rank[16];                                     //140-155
+    //uint32    RankFlags;                                  //156
+    //char*     Description[16];                            //157-172 not used
+    //uint32    DescriptionFlags;                           //173     not used
+    //char*     ToolTip[16];                                //174-189 not used
+    //uint32    ToolTipFlags;                               //190     not used
+    uint32    ManaCostPercentage;                           //191
+    uint32    StartRecoveryCategory;                        //192
+    uint32    StartRecoveryTime;                            //193
+    uint32    AffectedTargetLevel;                          //194
+    uint32    SpellFamilyName;                              //195
+    uint64    SpellFamilyFlags;                             //196+197
+    uint32    MaxAffectedTargets;                           //198
+    uint32    DmgClass;                                     //199
+    //uint32    unk2[2];                                    //200-201 not used
+    float     DmgMultiplier[3];                             //202-204
+    //uint32    unk3[3];                                    //205-207 not used null
+    uint32    TotemCategory[2];                             //208-209
+    uint32    AreaId;                                       //210
 };
 
 typedef std::set<uint32> SpellCategorySet;
@@ -404,8 +403,8 @@ struct SpellCastTimesEntry
 struct SpellFocusObjectEntry
 {
     uint32    ID;                                           // 0
-    char*     Name[8];                                      // 1-8 unused
-                                                            // 9 string flags, unused
+    char*     Name[16];                                     // 1-15 unused
+                                                            // 16 string flags, unused     
 };
 */
 
@@ -455,12 +454,12 @@ struct SpellItemEnchantmentEntry
     uint32      amount[3];                                  // 4-6
     //uint32    amount2[3]                                  // 7-9 always same as similar `amount` value
     uint32      spellid[3];                                 // 10-12
-    char*       description[8];                             // 13-20
-                                                            // 21 description flags, unused
-    uint32      aura_id;                                    // 22
-    uint32      slot;                                       // 23
-    uint32      GemID;                                      // 24
-    uint32      EnchantmentCondition;                       // 25
+    char*       description[16];                            // 13-29
+                                                            // 30 description flags
+    uint32      aura_id;                                    // 31
+    uint32      slot;                                       // 32
+    uint32      GemID;                                      // 33
+    uint32      EnchantmentCondition;                       // 34
 };
 
 struct SpellItemEnchantmentConditionEntry
@@ -502,10 +501,10 @@ struct TaxiNodesEntry
     float     x;                                            // 2
     float     y;                                            // 3
     float     z;                                            // 4
-    //char*     name[8];                                    // 5-12, unused
-                                                            //13 string flags, unused
-    uint32    horde_mount_type;                             //14 
-    uint32    alliance_mount_type;                          //15
+    //char*     name[16];                                   // 5-21
+                                                            //22 string flags, unused    
+    uint32    horde_mount_type;                             //23
+    uint32    alliance_mount_type;                          //24
 };
 
 struct WorldSafeLocsEntry

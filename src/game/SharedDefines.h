@@ -347,7 +347,15 @@ enum SpellEffects
     SPELL_EFFECT_133                       = 133,
     SPELL_EFFECT_134                       = 134,
     SPELL_EFFECT_135                       = 135,
-    TOTAL_SPELL_EFFECTS                    = 136
+    SPELL_EFFECT_136                       = 136,
+    SPELL_EFFECT_137                       = 137,
+    SPELL_EFFECT_138                       = 138,
+    SPELL_EFFECT_139                       = 139,
+    SPELL_EFFECT_140                       = 140,
+    SPELL_EFFECT_141                       = 141,
+    SPELL_EFFECT_142                       = 142,
+    SPELL_EFFECT_143                       = 143,
+    TOTAL_SPELL_EFFECTS                    = 144
 };
 
 enum CharacterStates
@@ -901,7 +909,7 @@ enum LockType
 enum TrainerType                                            // this is important type for npcs!
 {
     TRAINER_TYPE_CLASS             = 0,
-    TRAINER_TYPE_MOUNTS            = 1,
+    TRAINER_TYPE_MOUNTS            = 1, // on blizz it's 2
     TRAINER_TYPE_TRADESKILLS       = 2,
     TRAINER_TYPE_PETS              = 3
 };
@@ -974,7 +982,8 @@ enum QuestTypes
     QUEST_TYPE_WORLD_EVENT         = 82,
     QUEST_TYPE_LEGENDARY           = 83,
     QUEST_TYPE_ESCORT              = 84,
-    QUEST_TYPE_HEROIC              = 85
+    QUEST_TYPE_HEROIC              = 85,
+    QUEST_TYPE_DAILY               = 87
 };
 
 enum QuestSort
@@ -1257,7 +1266,8 @@ enum UnitFlags1
     UNIT_FLAG_WAR_PLAYER           = 0x1000
 };
 
-#define SPELL_ID_AGGRO                    22764
+//#define SPELL_ID_AGGRO                    22764 not in 2.1.0 dbc
+#define SPELL_ID_AGGRO                    38192 //Tap Mob and Aggro Summoner
 
 enum WeatherTypes
 {

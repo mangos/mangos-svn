@@ -32,7 +32,7 @@ Corpse::Corpse( WorldObject *instantiator, CorpseType type ) : WorldObject( inst
 {
     m_objectType |= TYPE_CORPSE;
     m_objectTypeId = TYPEID_CORPSE;
-    m_updateFlag = (UPDATEFLAG_HIGHGUID | UPDATEFLAG_ALL | UPDATEFLAG_HASPOSITION); // 2.0.10 - 0x58
+    m_updateFlag = (UPDATEFLAG_HIGHGUID | UPDATEFLAG_ALL | UPDATEFLAG_HASPOSITION); // 2.1.2 - 0x58
 
     m_valuesCount = CORPSE_END;
 

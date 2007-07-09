@@ -335,6 +335,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         data << pProto->GemProperties;
         data << pProto->ExtendedCost;
         data << pProto->RequiredDisenchantSkill;
+        data << pProto->ArmorDamageModifier;
     }
     else
     {

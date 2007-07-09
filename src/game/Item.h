@@ -37,8 +37,8 @@ typedef struct
 enum InventoryChangeFailure
 {
     EQUIP_ERR_OK                                 = 0,
-    EQUIP_ERR_YOU_MUST_REACH_LEVEL_N             = 1,
-    EQUIP_ERR_SKILL_ISNT_HIGH_ENOUGH             = 2,
+    EQUIP_ERR_CANT_EQUIP_LEVEL_I                 = 1,
+    EQUIP_ERR_ERR_CANT_EQUIP_SKILL               = 2,
     EQUIP_ERR_ITEM_DOESNT_GO_TO_SLOT             = 3,
     EQUIP_ERR_BAG_FULL                           = 4,
     EQUIP_ERR_NONEMPTY_BAG_OVER_OTHER_BAG        = 5,
@@ -95,20 +95,24 @@ enum InventoryChangeFailure
     EQUIP_ERR_BAG_FULL4                          = 56,
     EQUIP_ERR_ITEM_SOLD_OUT                      = 57,
     EQUIP_ERR_OBJECT_IS_BUSY                     = 58,
-    EQUIP_ERR_NONE                               = 59,
-    EQUIP_ERR_CANT_DO_IN_COMBAT                  = 60,
-    EQUIP_CANT_DO_WHILE_DISARMED                 = 61,
+    EQUIP_ERR_NONE                               = 59,   
+    EQUIP_ERR_NOT_IN_COMBAT                      = 60,
+    EQUIP_ERR_NOT_WHILE_DISARMED                 = 61,
     EQUIP_ERR_BAG_FULL6                          = 62,
-    EQUIP_ITEM_RANK_NOT_ENOUGH                   = 63,
-    EQUIP_ITEM_REPUTATION_NOT_ENOUGH             = 64,
-    EQUIP_MORE_THAN1_SPECIAL_BAG                 = 65,
-    EQUIP_CANT_LOOT_NOW                          = 66,
-    EQUIP_CANT_EQUIP_MORE_THAN_ONE_OF_THAT       = 67,
-    EQUIP_DONT_HAVE_REQITEMS_FOR_THAT_PURCHASE   = 68,
-    EQUIP_DONT_HAVE_ENOUGHT_HONOR_POINTS         = 69,
-    EQUIP_DONT_HAVE_ENOUGHT_ARENA_POINTS         = 70,
-    EQUIP_MAX_GEMS_IN_INVENTORY                  = 71,
-    EQUIP_CANT_MAIL_SOULBOUND                    = 72
+    EQUIP_ERR_CANT_EQUIP_RANK                    = 63,
+    EQUIP_ERR_CANT_EQUIP_REPUTATION              = 64,
+    EQUIP_ERR_TOO_MANY_SPECIAL_BAGS              = 65,
+    EQUIP_ERR_LOOT_CANT_LOOT_THAT_NOW            = 66,
+    EQUIP_ERR_ITEM_UNIQUE_EQUIPABLE              = 67,
+    EQUIP_ERR_VENDOR_MISSING_TURNINS             = 68,
+    EQUIP_ERR_NOT_ENOUGH_HONOR_POINTS            = 69,
+    EQUIP_ERR_NOT_ENOUGH_ARENA_POINTS            = 70,
+    EQUIP_ERR_ITEM_MAX_COUNT_SOCKETED            = 71,
+    EQUIP_ERR_MAIL_BOUND_ITEM                    = 72,
+    EQUIP_ERR_NO_SPLIT_WHILE_PROSPECTING         = 73,
+    EQUIP_ERR_ITEM_MAX_COUNT_EQUIPPED_SOCKETED   = 75,
+    EQUIP_ERR_ITEM_UNIQUE_EQUIPPABLE_SOCKETED    = 76 
+     
 };
 
 enum BuyFailure
@@ -119,8 +123,8 @@ enum BuyFailure
     BUY_ERR_SELLER_DONT_LIKE_YOU                 = 4,
     BUY_ERR_DISTANCE_TOO_FAR                     = 5,
     BUY_ERR_CANT_CARRY_MORE                      = 8,
-    BUY_ERR_LEVEL_REQUIRED                       = 11, // 2.0.1 - rank
-    BUY_ERR_REPUTATION_REQUIRED                  = 12
+    BUY_ERR_LEVEL_REQUIRE                        = 11, // 2.0.1 - rank
+    BUY_ERR_REPUTATION_REQUIRE                   = 12
 };
 
 enum SellFailure

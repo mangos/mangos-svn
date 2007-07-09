@@ -359,7 +359,6 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
         _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot + 0, 0);
         _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot + 1, 0);
         _player->SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot + 2, 0);
-
     }
 }
 

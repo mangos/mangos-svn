@@ -655,6 +655,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool IsInWater() const { return m_isInWater; }
         bool IsUnderWater() const;
 
+        void SetStandState(uint8 state);
+
         bool CanInteractWithNPCs(bool alive = true) const;
 
         bool ToggleAFK();
@@ -960,8 +962,23 @@ class MANGOS_DLL_SPEC Player : public Unit
         const uint64& GetSelection( ) const { return m_curSelection; }
         const uint64& GetTarget( ) const { return m_curTarget; }
 
-        void SetSelection(const uint64 &guid) { m_curSelection = guid; }
-        void SetTarget(const uint64 &guid) { m_curTarget = guid; }
+        void SetSelection(const uint64 &guid) { m_curSelection = guid; SetUInt64Value(UNIT_FIELD_TARGET, guid); }
+        void SetTarget(const uint64 &guid) { m_curTarget = guid; SetUInt64Value(UNIT_FIELD_TARGET, guid); }
+
+        uint8 GetComboPoints() { return m_comboPoints; }
+        uint64 GetComboTarget() { return m_comboTarget; }
+        void AddComboPoints(uint64 target, int8 count)
+        {
+            if(target == m_comboTarget)
+                m_comboPoints += count;
+            else
+            {
+                m_comboTarget = target;
+                m_comboPoints = count;
+            }
+            SetComboPoints(m_comboTarget, m_comboPoints);
+        }
+        void SetComboPoints(uint64 target, int8 count);
 
         void CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::string subject, uint32 itemTextId, uint32 itemGuid, uint32 item_template, time_t expire_time,time_t delivery_time, uint32 money, uint32 COD, uint32 checked, Item* pItem);
         void SendMailResult(uint32 mailId, uint32 mailAction, uint32 mailError, uint32 equipError = 0);
@@ -1518,6 +1535,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_GMFlags;
         uint64 m_curTarget;
         uint64 m_curSelection;
+
+        uint64 m_comboTarget;
+        int8 m_comboPoints;
 
         QuestStatusMap mQuestStatus;
 

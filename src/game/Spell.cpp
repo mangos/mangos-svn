@@ -107,7 +107,6 @@ void SpellCastTargets::Update(Unit* caster)
 
 void SpellCastTargets::read ( WorldPacket * data,Unit *caster )
 {
-
     *data >> m_targetMask;
 
     if(m_targetMask == TARGET_FLAG_SELF)
@@ -690,7 +689,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
         {
             if(m_spellInfo->Effect[i] != SPELL_EFFECT_DUEL) TagUnitMap.push_back(m_caster);
         }break;
-        case TARGET_SINGLE_PARTY:
+        case TARGET_SINGLE_ENEMY:
         {
             if(m_targets.getUnitTarget())
                 TagUnitMap.push_back(m_targets.getUnitTarget());
@@ -1427,7 +1426,7 @@ void Spell::finish(bool ok)
                 if (unit && unit->isAlive() && roll_chance_f((*i)->GetModifier()->m_amount))
                     m_caster->CastSpell(unit,(*i)->GetSpellProto()->EffectTriggerSpell[(*i)->GetEffIndex()],true,NULL,(*i));
             }
-    
+
     if (IsMeleeAttackResetSpell())
     {
         m_caster->resetAttackTimer(BASE_ATTACK);
@@ -1444,11 +1443,10 @@ void Spell::SendCastResult(uint8 result)
     if(((Player*)m_caster)->GetSession()->PlayerLoading()) // don't send cast results at loading time
         return;
 
-    WorldPacket data(SMSG_CAST_RESULT, (4+2));
-    data << m_spellInfo->Id;
     if(result != 0)
     {
-        data << uint8(2);                                   // status = fail
+        WorldPacket data(SMSG_CAST_RESULT, (4+2));
+        data << m_spellInfo->Id;
         data << uint8(result);                              // problem
         switch (result)
         {
@@ -1459,11 +1457,15 @@ void Spell::SendCastResult(uint8 result)
                 data << uint32(m_spellInfo->AreaId);
                 break;
         }
+        ((Player*)m_caster)->GetSession()->SendPacket(&data);
     }
     else
-        data << uint8(0);                                   // status = ok
-
-    ((Player*)m_caster)->GetSession()->SendPacket(&data);
+    {
+        WorldPacket data(SMSG_CAST_SUCCESS, (8+4));
+        data.append(m_caster->GetPackGUID());
+        data << m_spellInfo->Id;
+        ((Player*)m_caster)->GetSession()->SendPacket(&data);
+    }
 }
 
 void Spell::SendSpellStart()
@@ -1715,11 +1717,8 @@ void Spell::SendChannelStart(uint32 duration)
 
     m_timer = duration;
     if(target)
-    {
-        m_caster->SetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT,target->GetGUIDLow());
-        m_caster->SetUInt32Value(UNIT_FIELD_CHANNEL_OBJECT+1,target->GetGUIDHigh());
-    }
-    m_caster->SetUInt32Value(UNIT_CHANNEL_SPELL,m_spellInfo->Id);
+        m_caster->SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT, target->GetGUID());
+    m_caster->SetUInt32Value(UNIT_CHANNEL_SPELL, m_spellInfo->Id);
 }
 
 void Spell::SendResurrectRequest(Player* target)
@@ -2072,7 +2071,7 @@ uint8 Spell::CanCast()
             case SPELL_EFFECT_DUMMY:
             {
                 if (!m_targets.getUnitTarget()&&!m_targets.getGOTarget())
-                    return SPELL_FAILED_BAD_IMPLICIT_TARGETS;  
+                    return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
 
                 // Execute
                 if(m_spellInfo->SpellIconID == 1648)
@@ -2356,7 +2355,7 @@ uint8 Spell::CanCast()
 
                 uint32 form = m_caster->m_form;
                 if( form == FORM_CAT || form == FORM_TREE || form == FORM_TRAVEL || form == FORM_AQUA || form == FORM_BEAR || 
-                    form == FORM_DIREBEAR || form == FORM_CREATUREBEAR || form == FORM_GHOSTWOLF || form == FORM_FLIGHT )
+                    form == FORM_DIREBEAR || form == FORM_CREATUREBEAR || form == FORM_GHOSTWOLF || form == FORM_FLIGHT || form == FORM_SWIFT_FLIGHT)
                     return SPELL_FAILED_NOT_SHAPESHIFT;
 
                 break;
