@@ -6135,7 +6135,7 @@ void Player::SendInitWorldStates()
             break;
     }
 
-    WorldPacket data(SMSG_INIT_WORLD_STATES, (4+4+2+(NumberOfFields*8)));
+    WorldPacket data(SMSG_INIT_WORLD_STATES, (4+4+4+2+(NumberOfFields*8)));
     data << mapid;                                          // mapid
     data << zoneid;                                         // zone id
     data << areaid;                                         // area id, new 2.1.0

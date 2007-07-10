@@ -57,7 +57,7 @@ bool ChatHandler::HandleDebugSpellFailCommand(const char* args)
 
     uint8 failnum = (uint8)atoi(px);
 
-    WorldPacket data(SMSG_CAST_RESULT, 6);
+    WorldPacket data(SMSG_CAST_RESULT, 5);
     data << (uint32)133;
     data << failnum;
     m_session->SendPacket(&data);

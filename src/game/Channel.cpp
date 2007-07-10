@@ -479,7 +479,7 @@ void Channel::Say(uint64 p, const char *what, uint32 lang)
     {
         uint32 messageLength = strlen(what) + 1;
 
-        WorldPacket data(SMSG_MESSAGECHAT,1+4+name.size()+1+8+4+messageLength+1);
+        WorldPacket data(SMSG_MESSAGECHAT,1+4+8+4+name.size()+1+8+4+messageLength+1);
         data << (uint8)CHAT_MSG_CHANNEL;
         data << (uint32)lang;
         data << p;                      //2.1.0
