@@ -554,52 +554,62 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
             {
                 player->RewardHonor(pVictim);
 
-                player->RewardReputation(pVictim);
-            }
-
-            if(!PvP)
-            {
-                DEBUG_LOG("DealDamageIsPvE");
-                uint32 xp = MaNGOS::XP::Gain(player, pVictim);
-
-                Group *pGroup = player->groupInfo.group;
-                if(pGroup)
+                if(!PvP)
                 {
-                    DEBUG_LOG("Kill Enemy In Group");
-                    uint32 count = pGroup->GetMemberCountForXPAtKill(pVictim);
-                    if(count)
-                    {
-                        xp /= count;
-                        Group::MemberList const& members = pGroup->GetMembers();
-                        for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
-                        {
-                            Player *pGroupGuy = pGroup->GetMemberForXPAtKill(itr->guid,pVictim);
-                            if(!pGroupGuy)
-                                continue;
+                    DEBUG_LOG("DealDamageIsPvE");
+                    uint32 xp = MaNGOS::XP::Gain(player, pVictim);
 
-                            pGroupGuy->GiveXP(xp, pVictim);
-                            if(Pet* pet = player->GetPet())
+                    Group *pGroup = player->groupInfo.group;
+                    if(pGroup)
+                    {
+                        DEBUG_LOG("Kill Enemy In Group");
+
+                        uint32 count = pGroup->GetMemberCountForXPAtKill(pVictim);
+
+                        if(count)
+                        {
+                            bool is_raid = MapManager::Instance().GetBaseMap(player->GetMapId())->IsRaid() && pGroup->isRaidGroup();
+
+                            Group::MemberList const& members = pGroup->GetMembers();
+                            for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
                             {
-                                pet->GivePetXP(xp/2);
+                                Player *pGroupGuy = pGroup->GetMemberForXPAtKill(itr->guid,pVictim);
+                                if(!pGroupGuy)
+                                    continue;
+
+                                // FIXME: xp/count for all in group at this moment, must be level dependent
+                                float rate = 1.0f/count;
+
+                                // if with raid in raid dungeon then all receive full reputation at kill
+                                pGroupGuy->RewardReputation(pVictim,is_raid ? 1.0f : rate);
+
+                                uint32 itr_xp = uint32(xp*rate);
+
+                                pGroupGuy->GiveXP(itr_xp, pVictim);
+                                if(Pet* pet = player->GetPet())
+                                {
+                                    pet->GivePetXP(itr_xp/2);
+                                }
+                                pGroupGuy->KilledMonster(pVictim->GetEntry(), pVictim->GetGUID());
                             }
-                            pGroupGuy->KilledMonster(pVictim->GetEntry(), pVictim->GetGUID());
                         }
                     }
-                }
-                else                                        // if (pGroup)
-                {
-                    DEBUG_LOG("Player kill enemy alone");
-                    player->GiveXP(xp, pVictim);
-                    if(Pet* pet = player->GetPet())
+                    else                                        // if (pGroup)
                     {
-                        pet->GivePetXP(xp);
-                    }
-                    player->KilledMonster(pVictim->GetEntry(),pVictim->GetGUID());
-                }                                           // if-else (pGroup)
+                        DEBUG_LOG("Player kill enemy alone");
+                        player->RewardReputation(pVictim,1);
+                        player->GiveXP(xp, pVictim);
+                        if(Pet* pet = player->GetPet())
+                        {
+                            pet->GivePetXP(xp);
+                        }
+                        player->KilledMonster(pVictim->GetEntry(),pVictim->GetGUID());
+                    }                                           // if-else (pGroup)
 
-                if(xp) //  || honordiff < 0)
-                    ProcDamageAndSpell(pVictim,PROC_FLAG_KILL_XP_GIVER,PROC_FLAG_NONE);
-            }                                               // if (!PvP)
+                    if(xp) //  || honordiff < 0)
+                        ProcDamageAndSpell(pVictim,PROC_FLAG_KILL_XP_GIVER,PROC_FLAG_NONE);
+                }                                               // if (!PvP)
+            }
         }
         else                                                // if (player)
         {
