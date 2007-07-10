@@ -497,19 +497,6 @@ void Spell::EffectDummy(uint32 i)
             return;
         }
 
-        case 13535:
-        {
-            if(m_caster->GetTypeId() != TYPEID_PLAYER)
-                return;
-
-            Unit* target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
-            if(!target)
-                return;
-
-            m_caster->CastSpell(target, 13481, true, NULL, m_triggeredByAura);
-            return;
-        }
-        
         // Gift of Life (warrior bwl trinket)
         case 23725:
         {
