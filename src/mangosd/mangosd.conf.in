@@ -1,5 +1,5 @@
 # MaNGOS Configuration file
-ConfVersion=2007062001
+ConfVersion=2007071001
 
 # RealmID must match the realmlist
 RealmID = 1
@@ -43,8 +43,16 @@ MaxPingTime = 30
 # 5 = Taiwanese
 # 6 = Spanish
 # 7 = Russian
-# 8 = Auto Detect (Default)
-DBC.Locale = 8
+# 8 = Unknown
+# 9 = Unknown
+# 10 = Unknown
+# 11 = Unknown
+# 12 = Unknown
+# 13 = Unknown
+# 14 = Unknown
+# 15 = Unknown
+# 255 = Auto Detect (Default)
+DBC.Locale = 255
 
 # Enable logging of GM commands - all SQL code will be written to a log file
 # All commands are written to a file: YYYY-MM-DD_logSQL.sql

@@ -654,11 +654,11 @@ void World::SetInitialWorldSettings()
 
 void World::DetectDBCLang()
 {
-    m_langid = sConfig.GetIntDefault("DBC.Locale", 8);
+    m_langid = sConfig.GetIntDefault("DBC.Locale", 255);
 
     ChrRacesEntry const* race = sChrRacesStore.LookupEntry(1);
 
-    if (m_langid < 8)
+    if (m_langid < 16)
     {
         if ( strlen(race->name[m_langid]) > 0)
         {
@@ -668,7 +668,7 @@ void World::DetectDBCLang()
         else
             sLog.outString("DBC Locale Does Not Match Config Locale (%d)!!!", m_langid);
     }
-    for (int i = 0; i < 8; i++)
+    for (int i = 0; i < 16; i++)
     {
         if ( strlen(race->name[i]) > 0)
         {
