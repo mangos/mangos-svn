@@ -1308,7 +1308,7 @@ bool ChatHandler::HandleModifyMountCommand(const char* args)
     chr->SetUInt32Value( UNIT_FIELD_FLAGS , 0x001000 );
     chr->Mount(mId);
 
-    data.Initialize( SMSG_FORCE_RUN_SPEED_CHANGE, (8+4+4) );
+    data.Initialize( SMSG_FORCE_RUN_SPEED_CHANGE, (8+4+1+4) );
     data.append(chr->GetPackGUID());
     data << (uint32)0;
     data << (uint8)0; //new 2.1.0
