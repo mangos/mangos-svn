@@ -424,8 +424,8 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Using DataDir %s",m_dataPath.c_str());
 
-	bool enableLOS = sConfig.GetBoolDefault("vmap.enableLOS", true);
-    bool enableHeight = sConfig.GetBoolDefault("vmap.enableHeight", true);
+	bool enableLOS = sConfig.GetBoolDefault("vmap.enableLOS", false);
+    bool enableHeight = sConfig.GetBoolDefault("vmap.enableHeight", false);
     std::string ignoreMapIds = sConfig.GetStringDefault("vmap.ignoreMapIds", "");
     std::string ignoreSpellIds = sConfig.GetStringDefault("vmap.ignoreSpellIds", "");
     VMAP::VMapFactory::createOrGetVMapManager()->setEnableLineOfSightCalc(enableLOS);
@@ -447,7 +447,7 @@ void World::SetInitialWorldSettings()
         ||m_configs[CONFIG_EXPANSION] && (
         !MapManager::ExistMAP(530,10349.6,-6357.29) || !MapManager::ExistMAP(530,-3961.64,-13931.2) ) )
     {
-        sLog.outError("Correct *.map files not found in path '%smaps'. Please place *.map files in the directory pointed by this path or correct the DataDir value in the mangosd.conf file.",m_dataPath.c_str());
+        sLog.outError("Correct *.map files not found in path '%smaps' or *.vmap/*vmdir files in '%svmaps'. Please place *.map/*.vmap/*.vmdir files in appropriate directories or correct the DataDir value in the mangosd.conf file.",m_dataPath.c_str(),m_dataPath.c_str());
         exit(1);
     }
 
