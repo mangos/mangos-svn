@@ -10804,7 +10804,7 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
 
         Quest * qInfo = objmgr.QuestTemplates[questid];
         // just if !ingroup || !noraidgroup || raidgroup
-        if ( qInfo && mQuestStatus[questid].m_status == QUEST_STATUS_INCOMPLETE && (!groupInfo.group || !groupInfo.group->isRaidGroup() || qInfo->GetType() == 62))
+        if ( qInfo && mQuestStatus[questid].m_status == QUEST_STATUS_INCOMPLETE && (!groupInfo.group || !groupInfo.group->isRaidGroup() || qInfo->GetType() == QUEST_TYPE_RAID))
         {
             if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL_OR_CAST ) )
             {
@@ -10944,7 +10944,7 @@ bool Player::HasQuestForItem( uint32 itemid )
             Quest * qinfo = qs.m_quest;
 
             // hide quest if player is in raid-group and quest is no raid quest
-            if(groupInfo.group && groupInfo.group->isRaidGroup() && qinfo->GetType() != 62)
+            if(groupInfo.group && groupInfo.group->isRaidGroup() && qinfo->GetType() != QUEST_TYPE_RAID)
                 continue;
 
             // There should be no mixed ReqItem/ReqSource drop

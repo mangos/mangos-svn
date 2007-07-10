@@ -26,10 +26,16 @@ MapInstanced::MapInstanced(uint32 id, time_t expiry, uint32 aInstanceId) : Map(i
 {
     // initialize instanced maps list
     InstancedMaps.clear();
+    // fill with zero
+    memset(&GridMapReference, 0, MAX_NUMBER_OF_GRIDS*MAX_NUMBER_OF_GRIDS*sizeof(uint16));
 }
 
 void MapInstanced::Update(const uint32& t)
 {
+    // take care of loaded GridMaps (when unused, unload it!)
+    Map::Update(t);
+
+    // update the instanced maps
     HM_NAMESPACE::hash_map< uint32, Map* >::iterator i = InstancedMaps.begin();
 
     while (i != InstancedMaps.end())
@@ -85,10 +91,16 @@ bool MapInstanced::RemoveBones(uint64 guid, float x, float y)
 
 void MapInstanced::UnloadAll()
 {
+    // Unload instanced maps
     for (HM_NAMESPACE::hash_map< uint32, Map* >::iterator i = InstancedMaps.begin(); i != InstancedMaps.end(); i++)
     {
         i->second->UnloadAll();
+        delete i->second;
     }
+    InstancedMaps.clear();
+
+    // Unload own grids (just dummy(placeholder) grids, neccesary to unload GridMaps!)
+    Map::UnloadAll();
 }
 
 Map* MapInstanced::GetInstance(const WorldObject* obj)

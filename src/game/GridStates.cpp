@@ -30,11 +30,20 @@ InvalidState::Update(Map &, NGridType &, GridInfo &, const uint32 &x, const uint
 void
 ActiveState::Update(Map &m, NGridType &grid, GridInfo & info, const uint32 &x, const uint32 &y, const uint32 &t_diff) const
 {
-    if( grid.ActiveObjectsInGrid() == 0 && !ObjectAccessor::Instance().PlayersNearGrid(x, y, m.GetId(), m.GetInstanceId()) )
+    // Only check grid activity every (grid_expiry/10) ms, because it's really useless to do it every cycle
+    info.i_timer.Update(t_diff);
+    if( info.i_timer.Passed() )
     {
-        ObjectGridStoper stoper(grid);
-        stoper.StopN();
-        grid.SetGridState(GRID_STATE_IDLE);
+        if( grid.ActiveObjectsInGrid() == 0 && !ObjectAccessor::Instance().PlayersNearGrid(x, y, m.GetId(), m.GetInstanceId()) )
+        {
+            ObjectGridStoper stoper(grid);
+            stoper.StopN();
+            grid.SetGridState(GRID_STATE_IDLE);
+        }
+        else
+        {
+            m.ResetGridExpiry(info, 0.1f);
+        }
     }
 }
 

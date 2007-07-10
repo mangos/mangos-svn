@@ -26,6 +26,7 @@ class MANGOS_DLL_DECL MapInstanced : public Map
     public:
 
         MapInstanced(uint32 id, time_t, uint32 aInstanceId);
+        ~MapInstanced() {}    // Important! Else memleak at class destruction
 
         virtual void Update(const uint32&);
         virtual void MoveAllCreaturesInMoveList();
@@ -34,6 +35,13 @@ class MANGOS_DLL_DECL MapInstanced : public Map
 
         Map* GetInstance(const WorldObject* obj);
         bool IsValidInstance(uint32 InstanceId);
+
+        void AddGridMapReference(const GridPair &p) { GridMapReference[p.x_coord][p.y_coord]++; }
+        void RemoveGridMapReference(const GridPair &p)
+        {
+            GridMapReference[p.x_coord][p.y_coord]--;
+            if (!GridMapReference[p.x_coord][p.y_coord]) { SetUnloadFlag(GridPair(63-p.x_coord,63-p.y_coord), true); }
+        }
 
     private:
 
@@ -47,6 +55,8 @@ class MANGOS_DLL_DECL MapInstanced : public Map
 
             return(i == InstancedMaps.end() ? NULL : i->second);
         }
+
+        uint16 GridMapReference[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
 };
 
 #endif

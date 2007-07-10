@@ -89,7 +89,6 @@ bool Map::ExistMAP(uint32 mapid,int x,int y, bool output)
 
     return true;
 }
-//=========================================
 
 void Map::loadVMap(int x,int y)
 {
@@ -107,28 +106,35 @@ void Map::loadVMap(int x,int y)
             break;
     }
 }
-//=========================================
-GridMap * Map::LoadMAP(uint32 mapid, uint32 instanceid, int x,int y)
+
+void Map::LoadMAP(uint32 mapid, uint32 instanceid, int x,int y)
 {
     //check map file existance (but not output error)
-    if(!Map::ExistMAP(mapid,x,y,false))
-        return NULL;
+    if( !Map::ExistMAP(mapid,x,y,false) )
+        return;
 
-    if (instanceid != 0)
+    if( instanceid != 0 )
     {
-        // load from base map
-        if (GridMaps[x][y]) GridMaps[x][y]=NULL;
+        if (GridMaps[x][y])
+            return;
 
-        if (!MapManager::Instance().GetBaseMap(mapid)->GridMaps[x][y])
-        {
-            // load grids for base map
-            MapManager::Instance().GetBaseMap(mapid)->GridMaps[x][y] = Map::LoadMAP(mapid, 0, x, y);
-        }
+        Map* baseMap = MapManager::Instance().GetBaseMap(mapid);
 
-        return(MapManager::Instance().GetBaseMap(mapid)->GridMaps[x][y]);
+        // load gridmap for base map
+        if (!baseMap->GridMaps[x][y])
+            baseMap->EnsureGridCreated(GridPair(63-x,63-y));
+
+        if (!baseMap->GridMaps[x][y])
+            return;
+
+        ((MapInstanced*)(baseMap))->AddGridMapReference(GridPair(x,y));
+        baseMap->SetUnloadFlag(GridPair(63-x,63-y), false);
+        GridMaps[x][y] = baseMap->GridMaps[x][y];
+        return;
     }
 
-    if(GridMaps[x][y])                                      //map already load, delete it before reloading
+    //map already load, delete it before reloading (Is it neccessary? Do we really need the abilty the reload maps during runtime?)
+    if(GridMaps[x][y])
     {
         sLog.outDetail("Unloading already loaded map %u before reloading.",mapid);
         delete (GridMaps[x][y]);
@@ -151,12 +157,13 @@ GridMap * Map::LoadMAP(uint32 mapid, uint32 instanceid, int x,int y)
     if(!buf)                                                //unexpected error
     {
         fclose(pf);
-        return NULL;
+        return;
     }
     fread(buf,1,sizeof(GridMap),pf);
     fclose(pf);
+
     loadVMap(x, y);
-    return buf;
+    GridMaps[x][y] = buf;
 }
 
 void Map::InitStateMachine()
@@ -177,7 +184,6 @@ void Map::DeleteStateMachine()
 
 Map::Map(uint32 id, time_t expiry, uint32 ainstanceId) : i_id(id), i_gridExpiry(expiry), i_mapEntry (sMapStore.LookupEntry(id)), i_resetTime(0), i_InstanceId(ainstanceId)
 {
-    //    char tmp[32];
     for(unsigned int idx=0; idx < MAX_NUMBER_OF_GRIDS; ++idx)
     {
         i_gridMask[idx] = 0;
@@ -186,8 +192,6 @@ Map::Map(uint32 id, time_t expiry, uint32 ainstanceId) : i_id(id), i_gridExpiry(
         {
             //z code
             GridMaps[idx][j] =NULL;
-
-            //z code
 
             i_grids[idx][j] = NULL;
             i_info[idx][j] = NULL;
@@ -377,14 +381,15 @@ Map::EnsureGridCreated(const GridPair &p)
             i_grids[p.x_coord][p.y_coord] = new NGridType(p.x_coord*MAX_NUMBER_OF_GRIDS + p.y_coord);
             i_info[p.x_coord][p.y_coord] = new GridInfo(i_gridExpiry,sWorld.getConfig(CONFIG_GRID_UNLOAD));
             i_gridMask[p.x_coord] |= mask;
+            
+            i_grids[p.x_coord][p.y_coord]->SetGridState(GRID_STATE_IDLE);
+            
             //z coord
-
             int gx=63-p.x_coord;
             int gy=63-p.y_coord;
 
             if(!GridMaps[gx][gy])
-                GridMaps[gx][gy]=Map::LoadMAP(i_id,i_InstanceId,gx,gy);
-
+                Map::LoadMAP(i_id,i_InstanceId,gx,gy);
         }
     }
 
@@ -419,6 +424,7 @@ Map::EnsureGridLoadedForPlayer(const Cell &cell, Player *player, bool add_player
             // Add resurrectable corpses to world object list in grid
             ObjectAccessor::Instance().AddCorpsesToGrid(GridPair(cell.GridX(),cell.GridY()),(*grid)(cell.CellX(), cell.CellY()), this);
 
+            ResetGridExpiry(*i_info[cell.GridX()][cell.GridY()], 0.1f);
             grid->SetGridState(GRID_STATE_ACTIVE);
 
             if( add_player && player != NULL )
@@ -1002,8 +1008,11 @@ Map::PlayerRelocation(Player *player, float x, float y, float z, float orientati
     UpdateObjectsVisibilityFor(player,new_cell,new_val);
     PlayerRelocationNotify(player,new_cell,new_val);
 
-    if( !same_cell )
+    if( !same_cell && i_grids[new_cell.GridX()][new_cell.GridY()]->GetGridState()!=GRID_STATE_ACTIVE )
+    {
+        ResetGridExpiry(*i_info[new_cell.GridX()][new_cell.GridY()], 0.1f);
         i_grids[new_cell.GridX()][new_cell.GridY()]->SetGridState(GRID_STATE_ACTIVE);
+    }
 }
 
 void
@@ -1203,16 +1212,17 @@ bool Map::UnloadGrid(const uint32 &x, const uint32 &y)
     int gx=63-x;
     int gy=63-y;
 
-    // delete grid map, but don't delete grid map if it is from parent map
-    // FIXME: we must delete also in case single loaded instance or none loaded instances
-    if(GridMaps[gx][gy])
+    // delete grid map, but don't delete if it is from parent map (and thus only reference)
+    if (GridMaps[gx][gy])
     {
-        if (i_InstanceId == 0) delete (GridMaps[gx][gy]);
-        GridMaps[gx][gy]=NULL;
+        if (i_InstanceId == 0)
+            delete (GridMaps[gx][gy]);
+        else
+            ((MapInstanced*)(MapManager::Instance().GetBaseMap(i_id)))->RemoveGridMapReference(GridPair(gx, gy));
+        GridMaps[gx][gy] = NULL;
     }
     VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(GetId(), gy, gx); // x and y are swaped
 
-    //z coordinate
     DEBUG_LOG("Unloading grid[%u,%u] for map %u finished", x,y, i_id);
     return true;
 }
@@ -1226,7 +1236,6 @@ void Map::UnloadAll()
         {
             if( i_gridMask[i] & mask )
                 UnloadGrid(i, j);
-
             mask <<= 1;
         }
     }
@@ -1258,8 +1267,7 @@ float Map::GetHeight(float x, float y, float z, bool pUseVmaps)
     ly=MAP_RESOLUTION*(32 -y/SIZE_OF_GRIDS - gy);
     //DEBUG_LOG("my %d %d si %d %d",gx,gy,p.x_coord,p.y_coord);
 
-    if(!GridMaps[gx][gy])                                   //this map is not loaded
-        GridMaps[gx][gy]=Map::LoadMAP(i_id,i_InstanceId,gx,gy);
+    EnsureGridCreated(GridPair(63-gx,63-gy));               // ensure GridMap is loaded
 
     VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
     if(vmgr->isHeightCalcEnabled())
@@ -1323,8 +1331,7 @@ uint16 Map::GetAreaFlag(float x, float y )
     ly=16*(32 -y/SIZE_OF_GRIDS - gy);
     //DEBUG_LOG("my %d %d si %d %d",gx,gy,p.x_coord,p.y_coord);
 
-    if(!GridMaps[gx][gy])                                   //this map is not loaded
-        GridMaps[gx][gy]=Map::LoadMAP(i_id,i_InstanceId,gx,gy);
+    EnsureGridCreated(GridPair(63-gx,63-gy));               // ensure GridMap is loaded
 
     if(GridMaps[gx][gy])
         return GridMaps[gx][gy]->area_flag[(int)(lx)][(int)(ly)];
@@ -1358,8 +1365,7 @@ uint8 Map::GetTerrainType(float x, float y )
     lx=16*(32 -x/SIZE_OF_GRIDS - gx);
     ly=16*(32 -y/SIZE_OF_GRIDS - gy);
 
-    if(!GridMaps[gx][gy])                                   //this map is not loaded
-        GridMaps[gx][gy]=Map::LoadMAP(i_id,i_InstanceId,gx,gy);
+    EnsureGridCreated(GridPair(63-gx,63-gy));               // ensure GridMap is loaded
 
     if(GridMaps[gx][gy])
         return GridMaps[gx][gy]->terrain_type[(int)(lx)][(int)(ly)];
@@ -1393,8 +1399,7 @@ float Map::GetWaterLevel(float x, float y )
     lx=128*(32 -x/SIZE_OF_GRIDS - gx);
     ly=128*(32 -y/SIZE_OF_GRIDS - gy);
 
-    if(!GridMaps[gx][gy])                                   //this map is not loaded
-        GridMaps[gx][gy]=Map::LoadMAP(i_id,i_InstanceId,gx,gy);
+    EnsureGridCreated(GridPair(63-gx,63-gy));               // ensure GridMap is loaded
 
     if(GridMaps[gx][gy])
         return GridMaps[gx][gy]->liquid_level[(int)(lx)][(int)(ly)];
