@@ -71,6 +71,22 @@ bool Map::ExistMAP(uint32 mapid,int x,int y, bool output)
     delete [] tmp;
     fclose(pf);
 
+    if(VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager())
+    {
+        if(vmgr->isMapLoadingEnabled())
+        {
+            int vmapLoadResult = vmgr->loadMap((sWorld.GetDataPath()+ "vmaps").c_str(),  mapid, y,x); // x and y are swaped !!
+            if(vmapLoadResult != VMAP::VMAP_LOAD_RESULT_OK)
+            {
+                std::string name = vmgr->getDirFileName(mapid,x,y);
+                sLog.outError("Could not load vmap file '%s'", (sWorld.GetDataPath()+"vmaps/"+name).c_str());
+                return false;
+            }
+
+            vmgr->unloadMap(mapid, y, x); // x and y are swaped
+        }
+    }
+
     return true;
 }
 //=========================================
@@ -1244,33 +1260,41 @@ float Map::GetHeight(float x, float y, float z, bool pUseVmaps)
 
     if(!GridMaps[gx][gy])                                   //this map is not loaded
         GridMaps[gx][gy]=Map::LoadMAP(i_id,i_InstanceId,gx,gy);
-#ifdef MANGOS_USE_VMAP_HEIGHT
+
+    VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
+    if(vmgr->isHeightCalcEnabled())
+    {
         float height = 0;
         bool mapHeightFound = false;
-        if(GridMaps[gx][gy]) {
+        if(GridMaps[gx][gy])
+        {
             height = GridMaps[gx][gy]->Z[(int)(lx)][(int)(ly)];
             mapHeightFound = true;
         }
-        if(pUseVmaps) {
-            float vmapheight = VMAP::VMapFactory::createOrGetVMapManager()->getHeight(GetId(), x, y, z + 4); // look from a bit higher pos to find the floor
+        if(pUseVmaps)
+        {
+            float vmapheight = vmgr->getHeight(GetId(), x, y, z + 4); // look from a bit higher pos to find the floor
             // if the land map did not find the height or if we are already under the surface and vmap found a height
             // or if the distance of the vmap height is less the land height distance
-            if(!mapHeightFound || (z<height && vmapheight > -100000) || abs(height-z) > abs(vmapheight-z)) {
+            if(!mapHeightFound || (z<height && vmapheight > -100000) || abs(height-z) > abs(vmapheight-z))
+            {
                 height = vmapheight;
                 mapHeightFound = true;
             }
         }
-        if(!mapHeightFound || height < -100000) {
+        if(!mapHeightFound || height < -100000)
+        {
             height = 0; // fallback (should not happen)
         }
-    return height;
-#else
-
-    if(GridMaps[gx][gy])
-        return GridMaps[gx][gy]->Z[(int)(lx)][(int)(ly)];
+        return height;
+    }
     else
-        return 0;
-        #endif
+    {
+        if(GridMaps[gx][gy])
+            return GridMaps[gx][gy]->Z[(int)(lx)][(int)(ly)];
+        else
+            return 0;
+    }
 }
 
 uint16 Map::GetAreaFlag(float x, float y )

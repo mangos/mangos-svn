@@ -19,6 +19,8 @@
 #ifndef _IVMAPMANAGER_H
 #define _IVMAPMANAGER_H
 
+#include<string>
+
 //===========================================================
 
 /**
@@ -70,6 +72,9 @@ namespace VMAP {
         It is enabled by default. If it is enabled in mid game the maps have to loaded manualy
         */
         virtual void setEnableHeightCalc(bool pVal) =0;
+        virtual bool isHeightCalcEnabled() const =0;
+        virtual bool isMapLoadingEnabled() const =0;
+        virtual std::string getDirFileName(unsigned int pMapId, int x, int y) const =0;
         /**
         Block maps from being used.
         parameter: String of map ids. Delimiter = ","
