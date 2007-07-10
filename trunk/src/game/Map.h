@@ -92,6 +92,7 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
     public:
 
         Map(uint32 id, time_t, uint32 aInstanceId);
+        virtual ~Map() {};    // Important! Else memleak at MapInstanced class destruction
 
         void Add(Player *);
         bool AddInstanced(Player *);
@@ -148,16 +149,16 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         bool UnloadGrid(const uint32 &x, const uint32 &y);
         virtual void UnloadAll();
 
-        void ResetGridExpiry(GridInfo &info) const
+        void ResetGridExpiry(GridInfo &info, float factor = 1) const
         {
-            info.i_timer.Reset(i_gridExpiry);
+            info.i_timer.Reset((time_t)((float)i_gridExpiry*factor));
         }
 
         time_t GetGridExpiry(void) const { return i_gridExpiry; }
         uint32 GetId(void) const { return i_id; }
 
         static bool ExistMAP(uint32 mapid, int x, int y, bool output = true);
-        GridMap * LoadMAP(uint32 mapid, uint32 instanceid, int x, int y);
+        void LoadMAP(uint32 mapid, uint32 instanceid, int x, int y);
 
         static void InitStateMachine();
         static void DeleteStateMachine();
