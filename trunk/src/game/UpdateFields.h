@@ -444,6 +444,6 @@ enum ECorpseFields
     CORPSE_FIELD_FLAGS                        = 0x0023, // 1 1 1
     CORPSE_FIELD_DYNAMIC_FLAGS                = 0x0024, // 1 1 256
     CORPSE_FIELD_PAD                          = 0x0025, // 1 1 0
-    CORPSE_END                                = 0x0025,
+    CORPSE_END                                = 0x0026,
 };
 #endif
