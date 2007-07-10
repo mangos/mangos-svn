@@ -4763,7 +4763,7 @@ int32 Player::CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep) co
 }
 
 //Calculates how many reputation points player gains in victim's enemy factions
-void Player::RewardReputation(Unit *pVictim)
+void Player::RewardReputation(Unit *pVictim, float rate)
 {
     if(!pVictim || pVictim->GetTypeId() == TYPEID_PLAYER)
         return;
@@ -4776,6 +4776,7 @@ void Player::RewardReputation(Unit *pVictim)
     if(Rep->repfaction1 && (!Rep->team_dependent || GetTeam()==ALLIANCE))
     {
         int32 donerep1 = CalculateReputationGain(pVictim->getLevel(),Rep->repvalue1);
+        donerep1 = int32(donerep1*rate);
         FactionEntry const *factionEntry1 = sFactionStore.LookupEntry(Rep->repfaction1);
         uint32 current_reputation_rank1 = GetReputationRank(factionEntry1);
         if(factionEntry1 && current_reputation_rank1 <= Rep->reputration_max_cap1)
@@ -4793,6 +4794,7 @@ void Player::RewardReputation(Unit *pVictim)
     if(Rep->repfaction2 && (!Rep->team_dependent || GetTeam()==HORDE))
     {
         int32 donerep2 = CalculateReputationGain(pVictim->getLevel(),Rep->repvalue2);
+        donerep2 = int32(donerep2*rate);
         FactionEntry const *factionEntry2 = sFactionStore.LookupEntry(Rep->repfaction2);
         uint32 current_reputation_rank2 = GetReputationRank(factionEntry2);
         if(factionEntry2 && current_reputation_rank2 <= Rep->reputration_max_cap2)
