@@ -310,7 +310,7 @@ void CliBanList(char*,pPrintf zprintf)
         {
             zprintf("-------------------------------------------------------------------------------\r\n");
             fields = result->Fetch();
-            QueryResult *banInfo = loginDatabase.PQuery("SELECT `bandate`,`unbandate`,`bannedby`,`banreason` FROM `account_banned` WHERE `id` = %d AND `active` = 1 ORDER BY `unbandate`", fields[0].GetUInt32());
+            QueryResult *banInfo = loginDatabase.PQuery("SELECT `bandate`,`unbandate`,`bannedby`,`banreason` FROM `account_banned` WHERE `id` = %u AND `active` = 1 ORDER BY `unbandate`", fields[0].GetUInt32());
             if (banInfo)
             {
                 fields2 = banInfo->Fetch();
