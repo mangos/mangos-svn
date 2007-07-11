@@ -282,8 +282,8 @@ void LoadDBCStores(std::string dataPath)
         exit(1);
     }
 
-    // check at up-to-date DBC files (33392 is last added spell in 1.12.1), same for graveyard 849 , same for skill 762
-    if( !sSpellStore.LookupEntry(33392) || !sWorldSafeLocsStore.LookupEntry(849) || !sSkillLineStore.LookupEntry(762) )
+    // check at up-to-date DBC files (42781 is last added spell in 2.1.3)
+    if( !sSpellStore.LookupEntry(42781))
     {
         sLog.outError("\nYou have _outdated_ DBC files. Please exstact correct versions from current using client.");
         exit(1);
