@@ -56,10 +56,11 @@ class MANGOS_DLL_DECL PathMovementGenerator
 {
     public:
         PathMovementGenerator() : i_currentNode(0) {}
+        virtual ~PathMovementGenerator() {};
 
         inline bool MovementInProgress(void) const { return i_currentNode < i_path.Size(); }
 
-        // template patern.. overrride required
+        // template pattern.. override required
         virtual void LoadPath(T &) = 0;
         virtual void ReloadPath(T &) = 0;
 
@@ -81,7 +82,7 @@ class MANGOS_DLL_DECL WaypointMovementGenerator : public MovementGenerator, publ
     std::vector<WaypointBehavior *> i_wpBehaviour;
     public:
         WaypointMovementGenerator(Creature &c) : i_creature(c), i_nextMoveTime(0) {}
-        ~WaypointMovementGenerator() {}
+        ~WaypointMovementGenerator() { _unload(); }
         void WPAIScript(Creature &pCreature, std::string pAiscript);
         void Initialize(Creature &c)
         {
@@ -96,13 +97,14 @@ class MANGOS_DLL_DECL WaypointMovementGenerator : public MovementGenerator, publ
 
         // now path movement implmementation
         void LoadPath(Creature &c) { _load(c); }
-        void ReloadPath(Creature &c) { _load(c); }
+        void ReloadPath(Creature &c) { _unload(); _load(c); }
 
         // statics
         static void Initialize(void);
         static int Permissible(const Creature *);
     private:
         void _load(Creature &);
+        void _unload(void);
         static std::set<uint32> si_waypointHolders;
 };
 

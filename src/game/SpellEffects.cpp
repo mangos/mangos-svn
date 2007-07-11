@@ -2835,6 +2835,7 @@ void Spell::EffectFeedPet(uint32 i)
 
     uint32 count = 1;
     _player->DestroyItemCount(itemTarget,count,true);
+    // TODO: fix crash when a spell has two effects, both pointed at the same item target
 
     SpellEntry const *spellinfo = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
     Spell _spell(m_caster, spellinfo, true, 0);

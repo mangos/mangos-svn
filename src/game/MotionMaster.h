@@ -27,6 +27,7 @@ class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator *>
     public:
 
         explicit MotionMaster(Creature *creature) : i_owner(creature) {}
+        ~MotionMaster();
 
         void Initialize();
 

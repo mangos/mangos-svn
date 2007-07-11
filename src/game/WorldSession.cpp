@@ -1464,6 +1464,7 @@ void WorldSession::HandleSelfResOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleReportSpamOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data,4+8+4+4+4+4+1);
     sLog.outDebug("WORLD: CMSG_REPORT_SPAM");
     recv_data.hexlike();
     /*

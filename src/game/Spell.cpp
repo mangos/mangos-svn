@@ -67,6 +67,7 @@ SpellCastTargets::SpellCastTargets()
     m_unitTargetGUID   = 0;
     m_GOTargetGUID     = 0;
     m_CorpseTargetGUID = 0;
+    m_itemTargetGUID   = 0;
 
     m_srcX = m_srcY = m_srcZ = m_destX = m_destY = m_destZ = 0;
     m_strTarget = "";
@@ -103,6 +104,19 @@ void SpellCastTargets::Update(Unit* caster)
     m_unitTarget = m_unitTargetGUID ? 
         ( m_unitTargetGUID==caster->GetGUID() ? caster : ObjectAccessor::Instance().GetUnit(*caster, m_unitTargetGUID) ) : 
         NULL;
+
+    m_itemTarget = NULL;
+    if(caster->GetTypeId()==TYPEID_PLAYER)
+    {
+        if(m_targetMask & TARGET_FLAG_ITEM)
+            m_itemTarget = ((Player*)caster)->GetItemByGuid(m_itemTargetGUID);
+        else
+        {
+            Player* pTrader = ((Player*)caster)->GetTrader();
+            if(pTrader && m_itemTargetGUID < TRADE_SLOT_COUNT)
+                m_itemTarget = pTrader->GetItemByPos(pTrader->GetItemPosByTradeSlot(m_itemTargetGUID));
+        }
+    }
 }
 
 void SpellCastTargets::read ( WorldPacket * data,Unit *caster )
@@ -126,20 +140,7 @@ void SpellCastTargets::read ( WorldPacket * data,Unit *caster )
         m_GOTargetGUID = readGUID(*data);
 
     if((m_targetMask & (TARGET_FLAG_ITEM | TARGET_FLAG_TRADE_ITEM)) && caster->GetTypeId() == TYPEID_PLAYER)
-    {
-        uint64 _guid = readGUID(*data);
-        if(caster->GetTypeId()==TYPEID_PLAYER)
-        {
-            if(m_targetMask & TARGET_FLAG_ITEM)
-                m_itemTarget = ((Player*)caster)->GetItemByGuid(_guid);
-            else
-            {
-                Player* pTrader = ((Player*)caster)->GetTrader();
-                if(pTrader && _guid < TRADE_SLOT_COUNT)
-                    m_itemTarget = pTrader->GetItemByPos(pTrader->GetItemPosByTradeSlot(_guid));
-            }
-        }
-    }
+        m_itemTargetGUID = readGUID(*data);
 
     if(m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
         *data >> m_srcX >> m_srcY >> m_srcZ;
@@ -957,6 +958,11 @@ void Spell::cast(bool skipCheck)
         }
     }
 
+    // traded items have trade slot instead of guid in m_itemTargetGUID
+    // set to real guid to be sent later to the client
+    if(m_targets.m_itemTarget && (m_targets.m_targetMask & TARGET_FLAG_TRADE_ITEM))
+        m_targets.setItemTargetGUID(m_targets.m_itemTarget->GetGUID());
+
     // CAST SPELL
     SendSpellCooldown();
 
@@ -1659,7 +1665,7 @@ void Spell::SendLogExecute()
     if(m_targets.getUnitTarget())
         data << m_targets.getUnitTargetGUID();
     else if(m_targets.m_itemTarget)
-        data << m_targets.m_itemTarget->GetGUID();
+        data << m_targets.getItemTargetGUID();
     else if(m_targets.getGOTarget())
         data << m_targets.getGOTargetGUID();
 

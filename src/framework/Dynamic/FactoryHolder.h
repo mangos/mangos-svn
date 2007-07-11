@@ -34,6 +34,7 @@ class MANGOS_DLL_DECL FactoryHolder
         typedef MaNGOS::Singleton<FactoryHolderRegistry > FactoryHolderRepository;
 
         FactoryHolder(Key k) : i_key(k) {}
+        virtual ~FactoryHolder() {}
         inline Key key() const { return i_key; }
 
         void RegisterSelf(void) { FactoryHolderRepository::Instance().InsertItem(this, i_key); }
