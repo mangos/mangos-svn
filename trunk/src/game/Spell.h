@@ -178,6 +178,7 @@ class SpellCastTargets
             m_unitTargetGUID   = target.m_unitTargetGUID;
             m_GOTargetGUID     = target.m_GOTargetGUID;
             m_CorpseTargetGUID = target.m_CorpseTargetGUID;
+            m_itemTargetGUID   = target.m_itemTargetGUID;
 
             m_srcX = target.m_srcX;
             m_srcY = target.m_srcY;
@@ -203,6 +204,9 @@ class SpellCastTargets
         void setGOTarget(GameObject *target);
 
         uint64 getCorpseTargetGUID() const { return m_CorpseTargetGUID; }
+        uint64 getItemTargetGUID() const { return m_itemTargetGUID; }
+
+        void setItemTargetGUID(uint64 guid) { m_itemTargetGUID = guid; }
 
         bool IsEmpty() const { return m_GOTargetGUID==0 && m_unitTargetGUID==0 && m_itemTarget==0 && m_CorpseTargetGUID==0; }
 
@@ -223,6 +227,7 @@ class SpellCastTargets
         uint64 m_unitTargetGUID;
         uint64 m_GOTargetGUID;
         uint64 m_CorpseTargetGUID;
+        uint64 m_itemTargetGUID;
 };
 
 enum SpellState

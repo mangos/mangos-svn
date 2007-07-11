@@ -5650,6 +5650,8 @@ int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_inde
     int32 value = 0;
     uint32 level = 0;
 
+    Player* unitPlayer = (GetTypeId() == TYPEID_PLAYER) ? (Player*)this : NULL;
+
     level = getLevel() - spellProto->spellLevel;
     if (level > spellProto->maxLevel && spellProto->maxLevel > 0)
         level = spellProto->maxLevel;
@@ -5660,8 +5662,11 @@ int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_inde
     int32 randomPoints = int32(spellProto->EffectDieSides[effect_index] + level * randomPointsPerLevel);
     float comboDamage = spellProto->EffectPointsPerComboPoint[effect_index];
     uint8 comboPoints=0;
-    if(GetTypeId() == TYPEID_PLAYER)
-        comboPoints = (uint8)((GetUInt32Value(PLAYER_FIELD_BYTES) & 0xFF00) >> 8);
+    if(unitPlayer)
+    {
+        if (m_attacking && (m_attacking->GetGUID() == unitPlayer->GetComboTarget()))
+            comboPoints = unitPlayer->GetComboPoints();
+    }
 
     value = basePoints + rand32(spellProto->EffectBaseDice[effect_index], randomPoints);
 
@@ -5671,8 +5676,8 @@ int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_inde
         // Eviscerate
         if( spellProto->SpellIconID == 514 && spellProto->SpellFamilyName == SPELLFAMILY_ROGUE)
             value += (int32)(GetUInt32Value(UNIT_FIELD_ATTACK_POWER) * comboPoints * 0.03);
-        if(GetTypeId() == TYPEID_PLAYER)
-            SetUInt32Value(PLAYER_FIELD_BYTES,((GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (0x00 << 8)));
+        if(unitPlayer)
+            unitPlayer->SetComboPoints(unitPlayer->GetComboTarget(), 0);
     }
 
     return value;

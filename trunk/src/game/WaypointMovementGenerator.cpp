@@ -45,9 +45,6 @@ alter table creature_movement add `wpguid` int(11) default '0';
 void
 WaypointMovementGenerator::_load(Creature &c)
 {
-    i_path.Clear();
-    i_wpBehaviour.clear();
-
     QueryResult *result = NULL;
     sLog.outDebug("DEBUG: WaypointMovementGenerator::_load: GUID - %d", c.GetGUIDLow());
     // Identify by GUID
@@ -148,6 +145,16 @@ WaypointMovementGenerator::_load(Creature &c)
 
         assert( sz == count );
     }
+}
+
+void
+WaypointMovementGenerator::_unload(void)
+{
+    i_path.Clear();
+    i_delays.clear();
+    for (std::vector<WaypointBehavior*>::iterator itr = i_wpBehaviour.begin(); itr != i_wpBehaviour.end(); ++itr)
+        delete (*itr);
+    i_wpBehaviour.clear();
 }
 
 void

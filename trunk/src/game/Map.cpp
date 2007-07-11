@@ -567,14 +567,21 @@ bool Map::CanEnter(Player* player)
     
     if (!player->isAlive())
     {
-        player->GetCorpse()->GetMapId();
-        if (player->GetCorpse()->GetMapId() != GetId())
+        if(player->GetCorpse())
         {
-            player->GetSession()->SendAreaTriggerMessage("You cannot enter %s while in a ghost mode", GetMapName());
-            sLog.outDebug("MAP: Player '%s' doesn't has a corpse in instance '%s' and can't enter", player->GetName(), GetMapName());
-            return(false);
+            player->GetCorpse()->GetMapId();
+            if (player->GetCorpse()->GetMapId() != GetId())
+            {
+                player->GetSession()->SendAreaTriggerMessage("You cannot enter %s while in a ghost mode", GetMapName());
+                sLog.outDebug("MAP: Player '%s' doesn't has a corpse in instance '%s' and can't enter", player->GetName(), GetMapName());
+                return(false);
+            }
+            sLog.outDebug("MAP: Player '%s' has corpse in instance '%s' and can enter", player->GetName(), GetMapName());
         }
-        sLog.outDebug("MAP: Player '%s' has corpse in instance '%s' and can enter", player->GetName(), GetMapName());
+        else
+        {
+            sLog.outDebug("Map::CanEnter - player '%s' is dead but doesn't have a corpse!", player->GetName());
+        }
     }
 
     return(true);

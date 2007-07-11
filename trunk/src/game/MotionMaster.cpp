@@ -47,6 +47,18 @@ MotionMaster::Initialize()
     top()->Initialize(*i_owner);
 }
 
+MotionMaster::~MotionMaster()
+{
+    // clear ALL movement generators (including default)
+    while(!empty())
+    {
+        MovementGenerator *curr = top();
+        pop();
+        if( !isStatic( curr ) )
+            delete curr;
+    }
+}
+
 void
 MotionMaster::UpdateMotion(const uint32 &diff)
 {
