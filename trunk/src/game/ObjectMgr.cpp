@@ -1143,7 +1143,7 @@ void ObjectMgr::LoadPlayerInfo()
         }
     }
 
-    // Load playercreate skills
+    // Load playercreate actions
     {
         //                                                    0      1       2        3        4      5
         QueryResult *result = sDatabase.Query("SELECT `race`,`class`,`button`,`action`,`type`,`misc` FROM `playercreateinfo_action`");
@@ -1289,11 +1289,15 @@ void ObjectMgr::LoadPlayerInfo()
             // skip non loaded combinations
             if(!pInfo->displayId_m || !pInfo->displayId_f)
                 continue;
+            
+            // skip expansion races if not playing with expansion
+            if (!sWorld.getConfig(CONFIG_EXPANSION) && (race == RACE_BLOODELF || race == RACE_DRAENEI))
+                continue;
 
             // fatal error if no level 1 data
             if(!pInfo->levelInfo || pInfo->levelInfo[0].health == 0 )
             {
-                sLog.outErrorDb("Race %i Class %i Level 1 not have stats data!",race,class_);
+                sLog.outErrorDb("Race %i Class %i Level 1 does not have stats data!",race,class_);
                 exit(1);
             }
 
@@ -1302,7 +1306,7 @@ void ObjectMgr::LoadPlayerInfo()
             {
                 if(pInfo->levelInfo[level].health == 0)
                 {
-                    sLog.outErrorDb("Race %i Class %i Level %i not have stats data, using data for %i.",race,class_,level+1, level);
+                    sLog.outErrorDb("Race %i Class %i Level %i does not have stats data. Using stats data of level %i.",race,class_,level+1, level);
                     pInfo->levelInfo[level] = pInfo->levelInfo[level-1];
                 }
             }
