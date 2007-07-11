@@ -2,8 +2,7 @@
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
+   the Free Software Foundation; version 2 of the License.
 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -21,6 +20,7 @@
 extern "C" {
 #endif
 void	init_client_errs(void);
+void	finish_client_errs(void);
 extern const char *client_errors[];	/* Error messages */
 #ifdef	__cplusplus
 }
@@ -35,6 +35,9 @@ extern const char *client_errors[];	/* Error messages */
 #endif
 #define CLIENT_ERRMAP		2	/* Errormap used by my_error() */
 
+/* Do not add error numbers before CR_ERROR_FIRST. */
+/* If necessary to add lower numbers, change CR_ERROR_FIRST accordingly. */
+#define CR_ERROR_FIRST  	2000 /*Copy first error nr.*/
 #define CR_UNKNOWN_ERROR	2000
 #define CR_SOCKET_CREATE_ERROR	2001
 #define CR_CONNECTION_ERROR	2002
@@ -91,3 +94,9 @@ extern const char *client_errors[];	/* Error messages */
 #define CR_FETCH_CANCELED                       2050
 #define CR_NO_DATA                              2051
 #define CR_NO_STMT_METADATA                     2052
+#define CR_NO_RESULT_SET                        2053
+#define CR_NOT_IMPLEMENTED                      2054
+#define CR_SERVER_LOST_EXTENDED			2055
+#define CR_ERROR_LAST  /*Copy last error nr:*/  2055
+/* Add error numbers before CR_ERROR_LAST and change it accordingly. */
+

@@ -2,8 +2,7 @@
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
+   the Free Software Foundation; version 2 of the License.
 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -45,7 +44,9 @@ extern "C" {
 #undef HAVE_SCHED_H
 #undef HAVE_SYS_MMAN_H
 #undef HAVE_SYNCH_H
+#undef HAVE_MMAP
 #undef HAVE_RINT
+
 #define HAVE_PTHREAD_ATTR_SETSTACKSIZE 1
 #define HAVE_PTHREAD_SIGMASK 1
 #define HAVE_PTHREAD_YIELD_ZERO_ARG 1
@@ -70,9 +71,10 @@ extern "C" {
   #undef HAVE_CRYPT
 #endif /* HAVE_OPENSSL */
 
-/* Configure can't detect this because it uses AC_TRY_RUN */
+/* Netware has an ancient zlib */
 #undef HAVE_COMPRESS
 #define HAVE_COMPRESS
+#undef HAVE_ARCHIVE_DB
 
 /* include the old function apis */
 #define USE_OLD_FUNCTIONS 1
@@ -97,6 +99,10 @@ extern "C" {
 
 /* On NetWare, to fix the problem with the deletion of open files */
 #define CANT_DELETE_OPEN_FILES 1
+
+#define FN_LIBCHAR '\\'
+#define FN_ROOTDIR "\\"
+#define FN_DEVCHAR ':'
 
 /* default directory information */
 #define	DEFAULT_MYSQL_HOME    "sys:/mysql"
