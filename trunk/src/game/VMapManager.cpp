@@ -25,11 +25,10 @@ namespace VMAP {
 
     //=========================================================
 
-    VMapManager::VMapManager() {
+    VMapManager::VMapManager()
+    {
         iCommandLogger.setFileName("vmapcmd.log");
         iCommandLogger.setResetFile();
-        iEnableLineOfSightCalc = true;
-        iEnableHeightCalc = true;
     }
 
     //=========================================================
@@ -46,7 +45,8 @@ namespace VMAP {
 
     //=========================================================
 
-    Vector3 VMapManager::convertPositionToInternalRep(float x, float y, float z) const {
+    Vector3 VMapManager::convertPositionToInternalRep(float x, float y, float z) const
+    {
         float pos[3];
         pos[0] = y;
         pos[1] = z;
