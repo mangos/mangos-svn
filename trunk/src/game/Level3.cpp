@@ -2615,7 +2615,7 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
 
     if(chr)
     {
-        chr->InitStatsForLevel(newlevel);
+        chr->GiveLevel(newlevel);
         chr->InitTalentForLevel();
         chr->SetUInt32Value(PLAYER_XP,0);
 
@@ -3142,7 +3142,8 @@ bool ChatHandler::HandleResetCommand (const char * args)
 
         if(argstr == "level")
         {
-            player->InitStatsForLevel(1,false);
+            player->SetLevel(1);
+            player->InitStatsForLevel(true);
             player->InitTalentForLevel();
             player->SetUInt32Value(PLAYER_XP,0);
 
@@ -3153,7 +3154,7 @@ bool ChatHandler::HandleResetCommand (const char * args)
         }
         else
         {
-            player->InitStatsForLevel(player->getLevel(),false);
+            player->InitStatsForLevel(true);
             player->InitTalentForLevel();
         }
     }

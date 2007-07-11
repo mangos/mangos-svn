@@ -799,7 +799,6 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
 
     GetPlayer()->ResurrectPlayer(0.0f,false);
 
-    GetPlayer()->ApplyStats(false);
     if(GetPlayer()->GetMaxHealth() > GetPlayer()->m_resurrectHealth)
         GetPlayer()->SetHealth( GetPlayer()->m_resurrectHealth );
     else
@@ -813,7 +812,6 @@ void WorldSession::HandleResurrectResponseOpcode(WorldPacket & recv_data)
     GetPlayer()->SetPower(POWER_RAGE, 0 );
 
     GetPlayer()->SetPower(POWER_ENERGY, GetPlayer()->GetMaxPower(POWER_ENERGY) );
-    GetPlayer()->ApplyStats(true);
 
     GetPlayer()->SpawnCorpseBones();
 

@@ -46,7 +46,7 @@ namespace VMAP
             Vector3&                normal) {
 
                 // Integer representation of a floating-point value.
-#define IR(x)	((uint32&)x)
+#define IR(x)   ((uint32&)x)
 
                 Inside = true;
                 const Vector3& MinB = box.low();
@@ -56,7 +56,7 @@ namespace VMAP
                 // Find candidate planes.
                 for (int i = 0; i < 3; ++i) {
                     if (origin[i] < MinB[i]) {
-                        location[i]	= MinB[i];
+                        location[i] = MinB[i];
                         Inside      = false;
 
                         // Calculate T distances to candidate planes
@@ -64,8 +64,8 @@ namespace VMAP
                             MaxT[i] = (MinB[i] - origin[i]) / dir[i];
                         }
                     } else if (origin[i] > MaxB[i]) {
-                        location[i]	= MaxB[i];
-                        Inside	    = false;
+                        location[i] = MaxB[i];
+                        Inside      = false;
 
                         // Calculate T distances to candidate planes
                         if (IR(dir[i])) {
@@ -82,11 +82,11 @@ namespace VMAP
 
                 // Get largest of the maxT's for final choice of intersection
                 int WhichPlane = 0;
-                if (MaxT[1] > MaxT[WhichPlane])	{
+                if (MaxT[1] > MaxT[WhichPlane]) {
                     WhichPlane = 1;
                 }
 
-                if (MaxT[2] > MaxT[WhichPlane])	{
+                if (MaxT[2] > MaxT[WhichPlane]) {
                     WhichPlane = 2;
                 }
 
@@ -282,8 +282,8 @@ namespace VMAP
         int                 breakFrameIndex;
         bool                skipAABoxTests;
         NodeValueAccess<TNode, TValue> iNodeValueAccess;
-        double				boxMaxDist2;
-        double				boxMaxDist;
+        double              boxMaxDist2;
+        double              boxMaxDist;
 
     public:
         RayIntersectionIterator(const NodeValueAccess<TNode, TValue> pNodeValueAccess, const Ray& r, const TNode* root,  double pMaxTime, bool skip)
@@ -491,8 +491,8 @@ namespace VMAP
         to a member */
         const TValue& operator*() const {
             alwaysAssertM(! isEnd, "Can't dereference the end element of an iterator");
-            //			return stack[stackIndex].node->valueArray[stack[stackIndex].valIndex].value;
-            //			return stack[stackIndex].node->getTriangleBox(iModelContainer,stack[stackIndex].valIndex);
+            // return stack[stackIndex].node->valueArray[stack[stackIndex].valIndex].value;
+            // return stack[stackIndex].node->getTriangleBox(iModelContainer,stack[stackIndex].valIndex);
             return(iNodeValueAccess.getValue(stack[stackIndex].valIndex+ stack[stackIndex].node->getStartPosition()));
         }
 
@@ -500,8 +500,8 @@ namespace VMAP
         to a member */
         TValue const * operator->() const {
             alwaysAssertM(! isEnd, "Can't dereference the end element of an iterator");
-            //			return &(stack[stackIndex].node->valueArray[stack[stackIndex].valIndex].value);
-            //			return &stack[stackIndex].node->getTriangleBox(iModelContainer,stack[stackIndex].valIndex);
+            // return &(stack[stackIndex].node->valueArray[stack[stackIndex].valIndex].value);
+            // return &stack[stackIndex].node->getTriangleBox(iModelContainer,stack[stackIndex].valIndex);
             return(&iNodeValueAccess.getValue(stack[stackIndex].valIndex+stack[stackIndex].node->getStartPosition()));
 
         }
@@ -616,11 +616,11 @@ namespace VMAP
     //    @cite Implementation by Pete Hopkins
     //   */
     //RayIntersectionIterator beginRayIntersection(const Ray& ray, bool skipAABoxTests = false) const {
-    //	return RayIntersectionIterator(ray, root, skipAABoxTests);
+    //    return RayIntersectionIterator(ray, root, skipAABoxTests);
     //}
     //
     //RayIntersectionIterator endRayIntersection() const {
-    //	return RayIntersectionIterator();
+    //    return RayIntersectionIterator();
     //}
 
 

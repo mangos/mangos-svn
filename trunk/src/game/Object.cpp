@@ -498,6 +498,7 @@ void Object::_SetCreateBits(UpdateMask *updateMask, Player *target) const
 void Object::SetUInt32Value( uint16 index, uint32 value )
 {
     ASSERT( index < m_valuesCount || PrintIndexError( index , true ) );
+
     if(m_uint32Values[ index ] != value)
     {
         m_uint32Values[ index ] = value;
@@ -535,6 +536,7 @@ void Object::SetUInt64Value( uint16 index, const uint64 &value )
 void Object::SetFloatValue( uint16 index, float value )
 {
     ASSERT( index + 1 < m_valuesCount || PrintIndexError( index , true ) );
+
     if(m_floatValues[ index ] != value)
     {
         m_floatValues[ index ] = value;
@@ -548,6 +550,14 @@ void Object::SetFloatValue( uint16 index, float value )
             }
         }
     }
+}
+
+void Object::SetStatFloatValue( uint16 index, float value)
+{
+    if(value < 0)   
+        value = 0.0f;
+
+    SetFloatValue(index, value);
 }
 
 void Object::ApplyModUInt32Value(uint16 index, int32 val, bool apply)

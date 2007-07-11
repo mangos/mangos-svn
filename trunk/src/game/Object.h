@@ -138,6 +138,7 @@ class MANGOS_DLL_SPEC Object
         void SetUInt32Value( uint16 index,       uint32  value );
         void SetUInt64Value( uint16 index, const uint64 &value );
         void SetFloatValue(  uint16 index,       float   value );
+        void SetStatFloatValue( uint16 index, float value);
 
         void ApplyModUInt32Value(uint16 index, int32 val, bool apply);
         void ApplyModInt32Value(uint16 index, int32 val, bool apply);

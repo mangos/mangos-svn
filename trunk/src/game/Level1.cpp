@@ -111,14 +111,14 @@ bool ChatHandler::HandleAnnounceCommand(const char* args)
     sWorld.SendWorldText(str.c_str(), NULL);
 
 #ifdef _DEBUG_VMAPS
-	VMAP::IVMapManager *vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
+    VMAP::IVMapManager *vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
     float x,y,z;
     m_session->GetPlayer()->GetPosition(x,y,z);
     char buffer[100];
     sprintf(buffer, "pos %f,%f,%f",x,y,z);
     vMapManager->processCommand(buffer);
 #endif
-	return true;
+    return true;
 }
 
 bool ChatHandler::HandleNotifyCommand(const char* args)
@@ -141,10 +141,10 @@ bool ChatHandler::HandleGMOnCommand(const char* args)
     m_session->GetPlayer()->SetGameMaster(true);
     m_session->SendNotification("GM mode is ON");
 #ifdef _DEBUG_VMAPS
-	VMAP::IVMapManager *vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
+    VMAP::IVMapManager *vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
     vMapManager->processCommand("stoplog");
 #endif
-	return true;
+    return true;
 }
 
 bool ChatHandler::HandleGMOffCommand(const char* args)
@@ -155,7 +155,7 @@ bool ChatHandler::HandleGMOffCommand(const char* args)
     VMAP::IVMapManager *vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
     vMapManager->processCommand("startlog");
 #endif
-	return true;
+    return true;
 }
 
 bool ChatHandler::HandleVisibleCommand(const char* args)

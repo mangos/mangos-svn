@@ -697,8 +697,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetGMVisible(bool on);
 
         void GiveXP(uint32 xp, Unit* victim);
-        void GiveLevel();
-        void InitStatsForLevel(uint32 level, bool sendgain = true, bool remove_mods = true);
+        void GiveLevel(uint32 level);
+        void InitStatsForLevel(bool reapplyMods = false);
 
         void setDismountCost(uint32 money) { m_dismountCost = money; };
 
@@ -782,6 +782,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         Item* EquipNewItem( uint16 pos, uint32 item, uint32 count, bool update );
         Item* EquipItem( uint16 pos, Item *pItem, bool update );
         void SetAmmo( uint32 item );
+        void RemoveAmmo();
+        float GetAmmoDPS() const { return m_ammoDPS; }
+        bool CheckAmmoCompatibility(const ItemPrototype *ammo_proto) const;
         void QuickEquipItem( uint16 pos, Item *pItem);
         void VisualizeItem( uint16 pos, Item *pItem);
         Item* BankItem( uint16 pos, Item *pItem, bool update );
@@ -1153,9 +1156,19 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 GetSpellByProto(ItemPrototype *proto);
 
-        void ApplyDefenseBonusesMod(float value, bool apply);
+        uint16 GetDefenseSkillBonusValue() const;
+        void UpdateDefenseBonusesMod();
         void ApplyRatingMod(uint16 index, int32 value, bool apply);
+        float GetRatingCoefficient(uint16 index) const;
+        float GetRatingBonusValue(uint16 index) const;
         void UpdateBlockPercentage();
+        void UpdateCritPercentage(WeaponAttackType attType);
+        void UpdateAllCritPercentages();
+        void UpdateParryPercentage();
+        void UpdateDodgePercentage();
+        void UpdateAllSpellCritChances();
+        void UpdateSpellCritChance(uint32 school);
+        uint32 GetSpellSchoolByBaseGroup(BaseModGroup baseGroup) const;
 
         const uint64& GetLootGUID() const { return m_lootGuid; }
         void SetLootGUID(const uint64 &guid) { m_lootGuid = guid; }
@@ -1220,6 +1233,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint16 GetMaxSkillValue(uint32 skill) const;
         uint16 GetSkillValue(uint32 skill) const;
         uint16 GetPureSkillValue(uint32 skill) const;
+        uint16 GetSkillBonusValue(uint32 skill) const;
         bool HasSkill(uint32 skill) const;
 
         void SetDontMove(bool dontMove);
@@ -1247,7 +1261,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         const static int32 Reputation_Bottom = -42000;
         bool ModifyFactionReputation(uint32 FactionTemplateId, int32 DeltaReputation);
         bool ModifyFactionReputation(FactionEntry const* factionEntry, int32 standing);
-        int32 CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep) const;
+        int32 CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep);
         void RewardReputation(Unit *pVictim, float rate);
         void RewardReputation(Quest *pQuest);
         void SetInitialFactions();
@@ -1276,17 +1290,26 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetDrunkValue(uint16 newDrunkValue);
         uint16 GetDrunkValue() const { return m_drunk; }
         uint32 GetDeathTimer() const { return m_deathTimer; }
-        uint32 GetBlockValue() const;                       // overwrite Unit version (virtual)
+        uint32 GetShieldBlockValue() const;                       // overwrite Unit version (virtual)
         bool CanParry() const { return m_canParry; }
         void SetCanParry(bool value) { m_canParry = value; }
         bool CanDualWield() const { return m_canDualWield; }
         void SetCanDualWield(bool value) { m_canDualWield = value; }
 
+        void SetRegularAttackTime();
+        void SetBaseModValue(BaseModGroup modGroup, BaseModType modType, float value) { m_auraBaseMod[modGroup][modType] = value; }
+        void HandleBaseModValue(BaseModGroup modGroup, BaseModType modType, float amount, bool apply, bool affectStats = true);
+        float GetBaseModValue(BaseModGroup modGroup, BaseModType modType) const;
+        float GetTotalBaseModValue(BaseModGroup modGroup) const;
+        float GetTotalPercentageModValue(BaseModGroup modGroup) const { return m_auraBaseMod[modGroup][FLAT_MOD] + m_auraBaseMod[modGroup][PCT_MOD]; }
+        void _ApplyAllStatBonuses();
+        void _RemoveAllStatBonuses();
+
         void _ApplyItemMods(Item *item,uint8 slot,bool apply);
         void _RemoveAllItemMods();
         void _ApplyAllItemMods();
         void _ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply);
-        void _ApplyAmmoBonuses(bool apply);
+        void _ApplyAmmoBonuses();
         bool EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot);
         void ToggleMetaGemsActive(uint16 exceptslot, bool apply);
         void CorrectMetaGemEnchants(uint8 slot, bool apply);
@@ -1550,6 +1573,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         ActionButtonList m_actionButtons;
 
+        float m_auraBaseMod[BASEMOD_END][MOD_END];
+        
         SpellModList m_spellMods[32];                       // 32 = SPELLMOD_COUNT
         int32 m_totalSpellMod[32][64];                      // 32 = SPELLMOD_COUNT; 64 = size of SpellFamilyFlags
         int32 m_SpellModRemoveCount;
@@ -1594,6 +1619,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_ArmorProficiency;
         bool m_canParry;
         bool m_canDualWield;
+        float m_ammoDPS;
         ////////////////////Rest System/////////////////////
         int time_inn_enter;
         float inn_pos_x;

@@ -107,6 +107,7 @@ enum EUnitFields
     UNIT_FIELD_AURAAPPLICATIONS               = 0x007D, // 14 5 1
     UNIT_FIELD_AURASTATE                      = 0x008B, // 1 1 1
     UNIT_FIELD_BASEATTACKTIME                 = 0x008C, // 2 1 1
+    UNIT_FIELD_OFFHANDATTACKTIME              = UNIT_FIELD_BASEATTACKTIME + 1, // custom
     UNIT_FIELD_RANGEDATTACKTIME               = 0x008E, // 1 1 2
     UNIT_FIELD_BOUNDINGRADIUS                 = 0x008F, // 1 3 1
     UNIT_FIELD_COMBATREACH                    = 0x0090, // 1 3 1

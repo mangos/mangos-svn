@@ -43,7 +43,7 @@ public:
 
     // Create new link
     inline void link(TO* toObj, FROM* fromObj) {
-    	assert(fromObj); // fromObj MUST not be NULL
+        assert(fromObj); // fromObj MUST not be NULL
         if(isValid())
             unlink();
         if(toObj != NULL) {

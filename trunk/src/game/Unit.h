@@ -53,6 +53,10 @@
 // Horde Racial Passives
 #define SPELL_HORDE_PASSIVE_NATURE_RESISTANCE 20551*/
 
+#define BASE_MINDAMAGE 1.0f
+#define BASE_MAXDAMAGE 2.0f
+#define BASE_ATTACK_TIME 2000
+
 enum ShapeshiftForm
 {
     FORM_CAT                = 1,
@@ -155,6 +159,83 @@ struct SpellImmune
 };
 
 typedef std::list<SpellImmune> SpellImmuneList;
+
+enum UnitModifierType
+{
+    BASE_VALUE = 0,
+    BASE_PCT = 1,
+    TOTAL_VALUE = 2,
+    TOTAL_PCT = 3,
+    MODIFIER_TYPE_END = 4
+};
+
+enum WeaponDamageRange
+{
+    MINDAMAGE,
+    MAXDAMAGE
+};
+
+enum DamageTypeToSchool
+{
+    RESISTANCE,
+    DAMAGE_DEALT,
+    DAMAGE_TAKEN
+};
+
+enum UnitMods
+{
+    UNIT_MOD_STAT_STRENGTH,
+    UNIT_MOD_STAT_AGILITY,
+    UNIT_MOD_STAT_STAMINA,
+    UNIT_MOD_STAT_INTELLECT,
+    UNIT_MOD_STAT_SPIRIT,
+    UNIT_MOD_HEALTH,
+    UNIT_MOD_MANA,
+    UNIT_MOD_ARMOR,
+    UNIT_MOD_RESISTANCE_HOLY,
+    UNIT_MOD_RESISTANCE_FIRE,
+    UNIT_MOD_RESISTANCE_NATURE,
+    UNIT_MOD_RESISTANCE_FROST,
+    UNIT_MOD_RESISTANCE_SHADOW,
+    UNIT_MOD_RESISTANCE_ARCANE,
+    UNIT_MOD_ATTACK_POWER,
+    UNIT_MOD_ATTACK_POWER_RANGED,
+    UNIT_MOD_DAMAGE_MAINHAND,
+    UNIT_MOD_DAMAGE_OFFHAND,
+    UNIT_MOD_DAMAGE_RANGED,
+    UNIT_MOD_END,
+    // synonims
+    UNIT_MOD_STAT_START = UNIT_MOD_STAT_STRENGTH,
+    UNIT_MOD_STAT_END = UNIT_MOD_STAT_SPIRIT + 1,
+    UNIT_MOD_RESISTANCE_START = UNIT_MOD_ARMOR,
+    UNIT_MOD_RESISTANCE_END = UNIT_MOD_RESISTANCE_ARCANE + 1
+};
+
+enum BaseModGroup
+{
+    CRIT_PERCENTAGE,
+    BLOCK_PERCENTAGE,
+    DODGE_PERCENTAGE,
+    PARRY_PERCENTAGE,
+    RANGED_CRIT_PERCENTAGE,
+    OFFHAND_CRIT_PERCENTAGE,
+    SPELL_CRIT_PERCENTAGE,
+    HOLY_SPELL_CRIT_PERCENTAGE,
+    FIRE_SPELL_CRIT_PERCENTAGE,
+    NATURE_SPELL_CRIT_PERCENTAGE,
+    FROST_SPELL_CRIT_PERCENTAGE,
+    SHADOW_SPELL_CRIT_PERCENTAGE,
+    ARCANE_SPELL_CRIT_PERCENTAGE,
+    SHIELD_BLOCK_VALUE,
+    BASEMOD_END
+};
+
+enum BaseModType
+{
+    FLAT_MOD,
+    PCT_MOD,
+    MOD_END
+};
 
 enum DeathState
 {
@@ -568,37 +649,28 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint8 getGender() const { return (uint8)((GetUInt32Value(UNIT_FIELD_BYTES_0) >> 16) & 0xFF); };
 
         float GetStat(Stats stat) const { return GetFloatValue(UNIT_FIELD_STAT0+stat); }
-        void SetStat(Stats stat, float val) { SetFloatValue(UNIT_FIELD_STAT0+stat, val); }
-        void ApplyStatMod(Stats stat, float val, bool apply) { ApplyModFloatValue(UNIT_FIELD_STAT0+stat, val, apply); }
-        void ApplyStatPercentMod(Stats stat, float val, bool apply) { ApplyPercentModFloatValue(UNIT_FIELD_STAT0+stat, val, apply); }
+        void SetStat(Stats stat, float val) { SetStatFloatValue(UNIT_FIELD_STAT0+stat, val); }
 
         float GetArmor() const { return GetResistance(SPELL_SCHOOL_NORMAL) ; }
         void SetArmor(float val) { SetResistance(SPELL_SCHOOL_NORMAL, val); }
-        void ApplyArmorMod(float val, bool apply) { ApplyResistanceMod(SPELL_SCHOOL_NORMAL, val, apply); }
-        void ApplyArmorPercentMod(float val, bool apply) { ApplyResistancePercentMod(SPELL_SCHOOL_NORMAL, val, apply); }
 
         float GetResistance(SpellSchools school) const { return GetFloatValue(UNIT_FIELD_RESISTANCES+school); }
-        void SetResistance(SpellSchools school, float val) { SetFloatValue(UNIT_FIELD_RESISTANCES+school,val); }
-        void ApplyResistanceMod(SpellSchools school, float val, bool apply) { ApplyModFloatValue(UNIT_FIELD_RESISTANCES+school, val, apply); }
-        void ApplyResistancePercentMod(SpellSchools school, float val, bool apply) { ApplyPercentModFloatValue(UNIT_FIELD_RESISTANCES+school, val, apply); }
+        void SetResistance(SpellSchools school, float val) { SetStatFloatValue(UNIT_FIELD_RESISTANCES+school,val); }
 
         uint32 GetHealth()    const { return GetUInt32Value(UNIT_FIELD_HEALTH); }
         uint32 GetMaxHealth() const { return (uint32)GetFloatValue(UNIT_FIELD_MAXHEALTH); }
-        void SetHealth(   uint32 val) { SetUInt32Value(UNIT_FIELD_HEALTH,val); }
-        void SetMaxHealth(uint32 val) { SetFloatValue(UNIT_FIELD_MAXHEALTH,val); }
+        void SetHealth(   uint32 val);
+        void SetMaxHealth(uint32 val);
         int32 ModifyHealth(int32 val);
-        void ApplyMaxHealthMod(uint32 val, bool apply) { ApplyModFloatValue(UNIT_FIELD_MAXHEALTH, val, apply); }
-        void ApplyMaxHealthPercentMod(float val, bool apply) { ApplyPercentModFloatValue(UNIT_FIELD_MAXHEALTH, val, apply); }
 
         Powers getPowerType() const { return Powers((GetUInt32Value(UNIT_FIELD_BYTES_0) >> 24) & 0xFF); };
         void setPowerType(Powers power);
         uint32 GetPower(   Powers power) const { return (uint32)GetFloatValue(UNIT_FIELD_POWER1   +power); }
         uint32 GetMaxPower(Powers power) const { return (uint32)GetFloatValue(UNIT_FIELD_MAXPOWER1+power); }
-        void SetPower(   Powers power, uint32 val) { SetFloatValue(UNIT_FIELD_POWER1   +power,val); }
-        void SetMaxPower(Powers power, uint32 val) { SetFloatValue(UNIT_FIELD_MAXPOWER1+power,val); }
+        void SetPower(   Powers power, uint32 val);
+        void SetMaxPower(Powers power, uint32 val);
         int32 ModifyPower(Powers power, int32 val);
         void ApplyPowerMod(Powers power, uint32 val, bool apply) { ApplyModFloatValue(UNIT_FIELD_POWER1+power, val, apply); }
-        void ApplyPowerPercentMod(Powers power, float val, bool apply) { ApplyPercentModFloatValue(UNIT_FIELD_POWER1+power, val, apply); }
         void ApplyMaxPowerMod(Powers power, uint32 val, bool apply) { ApplyModFloatValue(UNIT_FIELD_MAXPOWER1+power, val, apply); }
         void ApplyMaxPowerPercentMod(Powers power, float val, bool apply) { ApplyPercentModFloatValue(UNIT_FIELD_MAXPOWER1+power, val, apply); }
 
@@ -643,10 +715,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         float GetUnitBlockChance()    const;
         float GetUnitCriticalChance() const { return GetTypeId() == TYPEID_PLAYER ? GetFloatValue( PLAYER_CRIT_PERCENTAGE ) : 5; }
 
-        virtual uint32 GetBlockValue() const =0;
+        virtual uint32 GetShieldBlockValue() const =0;
         uint32 GetUnitMeleeSkill() const { return getLevel() * 5; }
-        uint16 GetDefenceSkillValue() const;
-        uint16 GetPureDefenceSkillValue() const;
+        uint16 GetDefenseSkillValue() const;
+        uint16 GetPureDefenseSkillValue() const;
         uint16 GetWeaponSkillValue(WeaponAttackType attType) const;
         uint16 GetPureWeaponSkillValue(WeaponAttackType attType) const;
         float GetWeaponProcChance() const;
@@ -788,6 +860,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void ApplyNegStatMod(Stats stat, float val, bool apply) { ApplyModFloatValue(UNIT_FIELD_NEGSTAT0+stat, val, apply); }
         void ApplyNegStatPercentMod(Stats stat, float val, bool apply) { ApplyPercentModFloatValue(UNIT_FIELD_NEGSTAT0+stat, val, apply); }
         void SetCreateStat(Stats stat, float val) { m_createStats[stat] = val; }
+        void SetCreateHealth(float val) { m_createHealth = val; }
+        float GetCreateHealth() const { return m_createHealth; }
+        void SetCreatePowers(Powers power, float val) { m_createPowers[power] = val; }
+        float GetCreatePowers(Powers power) const { return m_createPowers[power]; }
         void ApplyCreateStatMod(Stats stat, float val, bool apply) { m_createStats[stat] += (apply ? val : -val); }
         void ApplyCreateStatPercentMod(Stats stat, float val, bool apply) { m_createStats[stat] *= (apply?(100.0f+val)/100.0f : 100.0f / (100.0f+val)); }
         float GetPosStat(Stats stat) const { return GetFloatValue(UNIT_FIELD_POSSTAT0+stat); }
@@ -817,6 +893,28 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         float m_modResilience;
         float m_threatModifier[MAX_SPELL_SCHOOL];
         float m_modAttackSpeedPct[3];
+
+        // stat system
+        bool HandleStatModifier(UnitMods unitMod, UnitModifierType modifierType, float amount, bool apply);
+        void SetModifierValue(UnitMods unitMod, UnitModifierType modifierType, float value) { m_auraModifiersGroup[unitMod][modifierType] = value; }
+        float GetModifierValue(UnitMods unitMod, UnitModifierType modifierType) const;
+        float GetTotalStatValue(Stats stat) const;
+        float GetTotalAuraModValue(UnitMods unitMod) const;
+        SpellSchools GetSpellSchoolByAuraGroup(UnitMods unitMod) const;
+        Stats GetStatByAuraGroup(UnitMods unitMod) const;
+        bool CanModifyStats() const { return m_canModifyStats; }
+        void SetCanModifyStats(bool modifyStats) { m_canModifyStats = modifyStats; }
+        bool UpdateStats(Stats stat);
+        bool UpdateAllStats();
+        void UpdateResistances(uint32 school);
+        void UpdateArmor();
+        void UpdateMaxHealth();
+        void UpdateMaxMana();
+        void UpdateAttackPowerAndDamage(bool ranged = false);
+        void UpdateDamagePhysical(WeaponAttackType attType);
+        float GetWeaponDamageRange(WeaponAttackType attType ,WeaponDamageRange type) const;
+        void SetBaseWeaponDamage(WeaponAttackType attType ,WeaponDamageRange damageRange, float value) { m_weaponDamage[attType][damageRange] = value; }
+        //
 
         bool isInFront(Unit const* target,float distance) const;
         void SetInFront(Unit const* target);
@@ -888,7 +986,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         DynamicObject *GetDynObject(uint32 spellId, uint32 effIndex);
         uint32 CalculateDamage(WeaponAttackType attType);
         void ModifyAuraState(uint32 flag, bool apply);
-        void ApplyStats(bool apply);
         void UnsummonAllTotems();
         uint32 SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint32 damage, DamageEffectType damagetype);
         uint32 SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, DamageEffectType damagetype);
@@ -912,9 +1009,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SetHover(bool on);
         bool isHover() const { return HasAuraType(SPELL_AURA_HOVER); }
 
-        void _RemoveStatsMods();
-        void _ApplyStatsMods();
-
         void _RemoveAllAuraMods();
         void _ApplyAllAuraMods();
 
@@ -937,6 +1031,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 m_attackTimer[3];
 
         float m_createStats[5];
+        float m_createHealth;
+        float m_createPowers[MAX_POWERS];
+
         AttackerSet m_attackers;
         Unit* m_attacking;
 
@@ -960,6 +1057,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         AuraList m_modAuras[TOTAL_AURAS];
         long m_AuraModifiers[TOTAL_AURAS];
+        float m_auraModifiersGroup[UNIT_MOD_END][MODIFIER_TYPE_END];
+        float m_weaponDamage[3][2];
+        bool m_canModifyStats;
         //std::list< spellEffectPair > AuraSpells[TOTAL_AURAS];  // TODO: use this if ok for mem
 
         float m_speed_rate[MAX_MOVE_TYPE];
