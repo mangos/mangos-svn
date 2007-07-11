@@ -2733,8 +2733,8 @@ void Spell::EffectSummonTotem(uint32 i)
     pTotem->SetDuration(GetDuration(m_spellInfo));
     pTotem->SetMaxHealth(m_spellInfo->EffectBasePoints[i]+1);
     pTotem->SetHealth(m_spellInfo->EffectBasePoints[i]+1);
-    pTotem->Summon();
     pTotem->SetUInt32Value(UNIT_CREATED_BY_SPELL,m_spellInfo->Id);
+    pTotem->Summon(m_caster);
 }
 
 void Spell::EffectEnchantHeldItem(uint32 i)

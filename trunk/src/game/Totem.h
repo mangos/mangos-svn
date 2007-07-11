@@ -35,7 +35,7 @@ class Totem : public Creature
         Totem( WorldObject *instantiator );
         virtual ~Totem(){};
         void Update( uint32 time );
-        void Summon();
+        void Summon(Unit* owner);
         void UnSummon();
         uint32 GetSpell() const { return m_spell; }
         uint32 GetTotemDuration() const { return m_duration; }

@@ -53,11 +53,22 @@ void Totem::Update( uint32 time )
     Creature::Update( time );
 }
 
-void Totem::Summon()
+void Totem::Summon(Unit* owner)
 {
     sLog.outDebug("AddObject at Totem.cpp line 49");
-    SetInstanceId(GetOwner()->GetInstanceId());
-    MapManager::Instance().GetMap(GetMapId(), GetOwner())->Add((Creature*)this);
+    
+    SetInstanceId(owner->GetInstanceId());
+    MapManager::Instance().GetMap(GetMapId(), owner)->Add((Creature*)this);
+
+    // select totem model in dependent from owner team
+    CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(GetEntry());
+    if(owner->GetTypeId()==TYPEID_PLAYER && cinfo)
+    {
+        if(((Player*)owner)->GetTeam()==HORDE)
+            SetUInt32Value(UNIT_FIELD_DISPLAYID,cinfo->DisplayID_m);
+        else
+            SetUInt32Value(UNIT_FIELD_DISPLAYID,cinfo->DisplayID_f? cinfo->DisplayID_f : cinfo->DisplayID_m);
+    }
 
     WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM, 8);
     data << GetGUID();
