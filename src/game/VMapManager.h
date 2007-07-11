@@ -121,13 +121,9 @@ namespace VMAP {
         Table<unsigned int , bool> iIgnoreMapIds;
         
         CommandFileRW iCommandLogger;
-        bool iEnableLineOfSightCalc;
-        bool iEnableHeightCalc;
-
     private:
         bool _loadMap(const char* pBasePath, unsigned int pMapId, int x, int y, bool pForceTileLoad=false);
         void _unloadMap(unsigned int  pMapId, int x, int y);
-        bool isLineOfSightCalcEnabled() const { return(iEnableLineOfSightCalc); }
     public:
         // public for debug
         Vector3 convertPositionToInternalRep(float x, float y, float z) const;
@@ -154,10 +150,6 @@ namespace VMAP {
 
         bool processCommand(char *pCommand); // for debug and extensions
 
-        void setEnableLineOfSightCalc(bool pVal) { iEnableLineOfSightCalc = pVal; }
-        void setEnableHeightCalc(bool pVal) { iEnableHeightCalc = pVal; }
-        bool isHeightCalcEnabled() const { return(iEnableHeightCalc); }
-        bool isMapLoadingEnabled() const { return(iEnableLineOfSightCalc || iEnableHeightCalc  ); }
         void preventMapsFromBeingUsed(const char* pMapIdString);
     };
 }
