@@ -367,6 +367,11 @@ pkgdata_DATA = \
 	4035_spell_proc_event.sql \
 	4036_spell_proc_event.sql \
 	4037_spell_proc_event.sql \
+	4058.sql \
+	4059_spell_learn_skill.sql \
+	4059_spell_learn_spell.sql \
+	4076_playercreateinfo_spell.sql \
+	4076_character_spell.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -712,4 +717,9 @@ EXTRA_DIST = \
 	4035_spell_proc_event.sql \
 	4036_spell_proc_event.sql \
 	4037_spell_proc_event.sql \
+	4058.sql \
+	4059_spell_learn_skill.sql \
+	4059_spell_learn_spell.sql \
+	4076_playercreateinfo_spell.sql \
+	4076_character_spell.sql \	
 	README
