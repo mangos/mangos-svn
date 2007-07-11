@@ -2,8 +2,7 @@
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
+   the Free Software Foundation; version 2 of the License.
 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -25,8 +24,30 @@
 #endif
 
 #ifdef  __cplusplus
+#define EXTERNC extern "C"
 extern "C" {
+#else
+#define EXTERNC
 #endif /* __cplusplus */ 
+
+/*
+  BUG#24507: Race conditions inside current NPTL pthread_exit() implementation.
+  
+  If macro NPTL_PTHREAD_EXIT_HACK is defined then a hack described in the bug
+  report will be implemented inside my_thread_global_init() in my_thr_init.c.
+   
+  This amounts to spawning a dummy thread which does nothing but executes 
+  pthread_exit(0). 
+  
+  This bug is fixed in version 2.5 of glibc library.
+  
+  TODO: Remove this code when fixed versions of glibc6 are in common use. 
+ */
+
+#if defined(TARGET_OS_LINUX) && defined(HAVE_NPTL) && \
+    defined(__GLIBC__) && ( __GLIBC__ < 2 || __GLIBC__ == 2 && __GLIBC_MINOR__ < 5 )
+#define NPTL_PTHREAD_EXIT_BUG	1
+#endif 
 
 #if defined(__WIN__) || defined(OS2)
 
@@ -59,30 +80,58 @@ typedef struct st_pthread_link {
 
 typedef struct {
   uint32 waiting;
-#ifdef OS2
-  HEV    semaphore;
-#else
-  HANDLE semaphore;
-#endif
+  CRITICAL_SECTION lock_waiting;
+ 
+  enum {
+    SIGNAL= 0,
+    BROADCAST= 1,
+    MAX_EVENTS= 2
+  } EVENTS;
+
+  HANDLE events[MAX_EVENTS];
+  HANDLE broadcast_block_event;
+
 } pthread_cond_t;
-
-
-#ifndef OS2
-struct timespec {		/* For pthread_cond_timedwait() */
-    time_t tv_sec;
-    long tv_nsec;
-};
-#endif
 
 typedef int pthread_mutexattr_t;
 #define win_pthread_self my_thread_var->pthread_self
 #ifdef OS2
-#define pthread_handler_decl(A,B) void * _Optlink A(void *B)
+#define pthread_handler_t EXTERNC void * _Optlink
 typedef void * (_Optlink *pthread_handler)(void *);
 #else
-#define pthread_handler_decl(A,B) void * __cdecl A(void *B)
+#define pthread_handler_t EXTERNC void * __cdecl
 typedef void * (__cdecl *pthread_handler)(void *);
 #endif
+
+/*
+  Struct and macros to be used in combination with the
+  windows implementation of pthread_cond_timedwait
+*/
+
+/*
+   Declare a union to make sure FILETIME is properly aligned
+   so it can be used directly as a 64 bit value. The value
+   stored is in 100ns units.
+ */
+ union ft64 {
+  FILETIME ft;
+  __int64 i64;
+ };
+struct timespec {
+  union ft64 tv;
+  /* The max timeout value in millisecond for pthread_cond_timedwait */
+  long max_timeout_msec;
+};
+#define set_timespec(ABSTIME,SEC) { \
+  GetSystemTimeAsFileTime(&((ABSTIME).tv.ft)); \
+  (ABSTIME).tv.i64+= (__int64)(SEC)*10000000; \
+  (ABSTIME).max_timeout_msec= (long)((SEC)*1000); \
+}
+#define set_timespec_nsec(ABSTIME,NSEC) { \
+  GetSystemTimeAsFileTime(&((ABSTIME).tv.ft)); \
+  (ABSTIME).tv.i64+= (__int64)(NSEC)/100; \
+  (ABSTIME).max_timeout_msec= (long)((NSEC)/1000000); \
+}
 
 void win_pthread_init(void);
 int win_pthread_setspecific(void *A,void *B,uint length);
@@ -144,7 +193,7 @@ extern int pthread_mutex_destroy (pthread_mutex_t *);
 #define pthread_kill(A,B) raise(B)
 #define pthread_exit(A) pthread_dummy()
 #else
-#define pthread_mutex_init(A,B)  InitializeCriticalSection(A)
+#define pthread_mutex_init(A,B)  (InitializeCriticalSection(A),0)
 #define pthread_mutex_lock(A)	 (EnterCriticalSection(A),0)
 #define pthread_mutex_trylock(A) (WaitForSingleObject((A), 0) == WAIT_TIMEOUT)
 #define pthread_mutex_unlock(A)  LeaveCriticalSection(A)
@@ -161,8 +210,6 @@ extern int pthread_mutex_destroy (pthread_mutex_t *);
 #define pthread_condattr_init(A)
 #define pthread_condattr_destroy(A)
 
-/*Irena: compiler does not like this: */
-/*#define my_pthread_getprio(pthread_t thread_id) pthread_dummy(0) */
 #define my_pthread_getprio(thread_id) pthread_dummy(0)
 
 #elif defined(HAVE_UNIXWARE7_THREADS)
@@ -184,7 +231,7 @@ typedef int pthread_attr_t;			/* Needed by Unixware 7.0.0 */
 #define pthread_key_create(A,B) thr_keycreate((A),(B))
 #define pthread_key_delete(A) thr_keydelete(A)
 
-#define pthread_handler_decl(A,B) void *A(void *B)
+#define pthread_handler_t EXTERNC void *
 #define pthread_key(T,V) pthread_key_t V
 
 void *	my_pthread_getspecific_imp(pthread_key_t key);
@@ -262,7 +309,7 @@ extern int my_pthread_getprio(pthread_t thread_id);
 #define my_pthread_getspecific_ptr(T,V) my_pthread_getspecific(T,(V))
 #define my_pthread_setspecific_ptr(T,V) pthread_setspecific(T,(void*) (V))
 #define pthread_detach_this_thread()
-#define pthread_handler_decl(A,B) void *A(void *B)
+#define pthread_handler_t EXTERNC void *
 typedef void *(* pthread_handler)(void *);
 
 /* Test first for RTS or FSU threads */
@@ -329,12 +376,14 @@ int sigwait(sigset_t *setp, int *sigp);		/* Use our implemention */
   we want to make sure that no such flags are set.
 */
 #if defined(HAVE_SIGACTION) && !defined(my_sigset)
-#define my_sigset(A,B) do { struct sigaction s; sigset_t set;              \
-                            sigemptyset(&set);                             \
-                            s.sa_handler = (B);                            \
-                            s.sa_mask    = set;                            \
-                            s.sa_flags   = 0;                              \
-                            sigaction((A), &s, (struct sigaction *) NULL); \
+#define my_sigset(A,B) do { struct sigaction l_s; sigset_t l_set; int l_rc; \
+                            DBUG_ASSERT((A) != 0);                          \
+                            sigemptyset(&l_set);                            \
+                            l_s.sa_handler = (B);                           \
+                            l_s.sa_mask   = l_set;                          \
+                            l_s.sa_flags   = 0;                             \
+                            l_rc= sigaction((A), &l_s, (struct sigaction *) NULL);\
+                            DBUG_ASSERT(l_rc == 0);                         \
                           } while (0)
 #elif defined(HAVE_SIGSET) && !defined(my_sigset)
 #define my_sigset(A,B) sigset((A),(B))
@@ -468,6 +517,47 @@ void my_pthread_attr_getstacksize(pthread_attr_t *attrib, size_t *size);
 int my_pthread_mutex_trylock(pthread_mutex_t *mutex);
 #endif
 
+/*
+  The defines set_timespec and set_timespec_nsec should be used
+  for calculating an absolute time at which
+  pthread_cond_timedwait should timeout
+*/
+#ifdef HAVE_TIMESPEC_TS_SEC
+#ifndef set_timespec
+#define set_timespec(ABSTIME,SEC) \
+{ \
+  (ABSTIME).ts_sec=time(0) + (time_t) (SEC); \
+  (ABSTIME).ts_nsec=0; \
+}
+#endif /* !set_timespec */
+#ifndef set_timespec_nsec
+#define set_timespec_nsec(ABSTIME,NSEC) \
+{ \
+  ulonglong now= my_getsystime() + (NSEC/100); \
+  (ABSTIME).ts_sec=  (now / ULL(10000000)); \
+  (ABSTIME).ts_nsec= (now % ULL(10000000) * 100 + ((NSEC) % 100)); \
+}
+#endif /* !set_timespec_nsec */
+#else
+#ifndef set_timespec
+#define set_timespec(ABSTIME,SEC) \
+{\
+  struct timeval tv;\
+  gettimeofday(&tv,0);\
+  (ABSTIME).tv_sec=tv.tv_sec+(time_t) (SEC);\
+  (ABSTIME).tv_nsec=tv.tv_usec*1000;\
+}
+#endif /* !set_timespec */
+#ifndef set_timespec_nsec
+#define set_timespec_nsec(ABSTIME,NSEC) \
+{\
+  ulonglong now= my_getsystime() + (NSEC/100); \
+  (ABSTIME).tv_sec=  (time_t) (now / ULL(10000000));                  \
+  (ABSTIME).tv_nsec= (long) (now % ULL(10000000) * 100 + ((NSEC) % 100)); \
+}
+#endif /* !set_timespec_nsec */
+#endif /* HAVE_TIMESPEC_TS_SEC */
+
 	/* safe_mutex adds checking to mutex for easier debugging */
 
 #if defined(__NETWARE__) && !defined(SAFE_MUTEX_DETECT_DESTROY)
@@ -533,9 +623,15 @@ void safe_mutex_end(FILE *file);
 #define pthread_cond_timedwait(A,B,C) safe_cond_timedwait((A),(B),(C),__FILE__,__LINE__)
 #define pthread_mutex_trylock(A) pthread_mutex_lock(A)
 #define pthread_mutex_t safe_mutex_t
-#define safe_mutex_assert_owner(mp) DBUG_ASSERT((mp)->count > 0 && pthread_equal(pthread_self(),(mp)->thread))
+#define safe_mutex_assert_owner(mp) \
+          DBUG_ASSERT((mp)->count > 0 && \
+                      pthread_equal(pthread_self(), (mp)->thread))
+#define safe_mutex_assert_not_owner(mp) \
+          DBUG_ASSERT(! (mp)->count || \
+                      ! pthread_equal(pthread_self(), (mp)->thread))
 #else
 #define safe_mutex_assert_owner(mp)
+#define safe_mutex_assert_not_owner(mp)
 #endif /* SAFE_MUTEX */
 
 	/* READ-WRITE thread locking */
@@ -634,10 +730,10 @@ extern int pthread_dummy(int);
 
 #define THREAD_NAME_SIZE 10
 #ifndef DEFAULT_THREAD_STACK
-#if defined(__ia64__)
+#if SIZEOF_CHARP > 4
 /*
   MySQL can survive with 32K, but some glibc libraries require > 128K stack
-  To resolve hostnames
+  To resolve hostnames. Also recursive stored procedures needs stack.
 */
 #define DEFAULT_THREAD_STACK	(256*1024L)
 #else
@@ -666,33 +762,45 @@ struct st_my_thread_var
 };
 
 extern struct st_my_thread_var *_my_thread_var(void) __attribute__ ((const));
+extern uint my_thread_end_wait_time;
 #define my_thread_var (_my_thread_var())
 #define my_errno my_thread_var->thr_errno
 /*
   Keep track of shutdown,signal, and main threads so that my_end() will not
   report errors with them
 */
-extern pthread_t shutdown_th, main_th, signal_th;
+
+/* Which kind of thread library is in use */
+
+#define THD_LIB_OTHER 1
+#define THD_LIB_NPTL  2
+#define THD_LIB_LT    4
+
+extern uint thd_lib_detected;
 
 	/* statistics_xxx functions are for not essential statistic */
 
 #ifndef thread_safe_increment
 #ifdef HAVE_ATOMIC_ADD
-#define thread_safe_increment(V,L) atomic_add(1,(atomic_t*) &V);
-#define thread_safe_add(V,C,L)     atomic_add((C),(atomic_t*) &V);
-#define thread_safe_sub(V,C,L)     atomic_sub((C),(atomic_t*) &V);
+#define thread_safe_increment(V,L) atomic_inc((atomic_t*) &V)
+#define thread_safe_decrement(V,L) atomic_dec((atomic_t*) &V)
+#define thread_safe_add(V,C,L)     atomic_add((C),(atomic_t*) &V)
+#define thread_safe_sub(V,C,L)     atomic_sub((C),(atomic_t*) &V)
 #else
 #define thread_safe_increment(V,L) \
-	pthread_mutex_lock((L)); (V)++; pthread_mutex_unlock((L));
-#define thread_safe_add(V,C,L) \
-	pthread_mutex_lock((L)); (V)+=(C); pthread_mutex_unlock((L));
+        (pthread_mutex_lock((L)), (V)++, pthread_mutex_unlock((L)))
+#define thread_safe_decrement(V,L) \
+        (pthread_mutex_lock((L)), (V)--, pthread_mutex_unlock((L)))
+#define thread_safe_add(V,C,L) (pthread_mutex_lock((L)), (V)+=(C), pthread_mutex_unlock((L)))
 #define thread_safe_sub(V,C,L) \
-	pthread_mutex_lock((L)); (V)-=(C); pthread_mutex_unlock((L));
+        (pthread_mutex_lock((L)), (V)-=(C), pthread_mutex_unlock((L)))
 #endif /* HAVE_ATOMIC_ADD */
 #ifdef SAFE_STATISTICS
 #define statistic_increment(V,L)   thread_safe_increment((V),(L))
+#define statistic_decrement(V,L)   thread_safe_decrement((V),(L))
 #define statistic_add(V,C,L)       thread_safe_add((V),(C),(L))
 #else
+#define statistic_decrement(V,L) (V)--
 #define statistic_increment(V,L) (V)++
 #define statistic_add(V,C,L)     (V)+=(C)
 #endif /* SAFE_STATISTICS */

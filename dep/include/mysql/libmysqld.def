@@ -1,6 +1,6 @@
 LIBRARY		LIBMYSQLD
-DESCRIPTION	'MySQL 4.1 Embedded Server Library'
-VERSION		4.1
+DESCRIPTION	'MySQL 5.0 Embedded Server Library'
+VERSION		5.0
 EXPORTS
 	_dig_vec_upper
 	_dig_vec_lower
@@ -58,6 +58,7 @@ EXPORTS
 	mysql_get_host_info
 	mysql_get_proto_info
 	mysql_get_server_info
+	mysql_get_ssl_cipher
 	mysql_info
 	mysql_init
 	mysql_insert_id
@@ -113,6 +114,7 @@ EXPORTS
 	my_charset_latin1
 	init_alloc_root
 	my_progname
+	get_charset_name
 	get_charset_by_csname
 	print_defaults
 	find_type
@@ -157,4 +159,8 @@ EXPORTS
 	mysql_stmt_attr_get
 	mysql_stmt_attr_set
 	mysql_stmt_field_count
-	get_defaults_files
+	get_defaults_options
+	my_charset_bin
+	my_charset_same
+	modify_defaults_file
+        mysql_set_server_option

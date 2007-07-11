@@ -2,8 +2,7 @@
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
+   the Free Software Foundation; version 2 of the License.
 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -87,6 +86,13 @@
 #if defined(__cplusplus) && !defined(OS2)
 extern "C" {
 #endif
+
+/*
+  my_str_malloc() and my_str_free() are assigned to implementations in
+  strings/alloc.c, but can be overridden in the calling program.
+ */
+extern void *(*my_str_malloc)(size_t);
+extern void (*my_str_free)(void *);
 
 #if defined(HAVE_STPCPY) && !defined(HAVE_mit_thread)
 #define strmov(A,B) stpcpy((A),(B))
@@ -247,7 +253,8 @@ extern ulonglong strtoull(const char *str, char **ptr, int base);
 
 extern int my_vsnprintf( char *str, size_t n,
                                 const char *format, va_list ap );
-extern int my_snprintf(char* to, size_t n, const char* fmt, ...);
+extern int my_snprintf(char *to, size_t n, const char *fmt, ...)
+  ATTRIBUTE_FORMAT(printf, 3, 4);
 
 #if defined(__cplusplus) && !defined(OS2)
 }

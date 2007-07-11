@@ -2,8 +2,7 @@
 
    This program is free software; you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
-   the Free Software Foundation; either version 2 of the License, or
-   (at your option) any later version.
+   the Free Software Foundation; version 2 of the License.
 
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -42,6 +41,15 @@
 #undef __WIN32__
 #define HAVE_ERRNO_AS_DEFINE
 #endif /* __CYGWIN__ */
+
+#if defined(__QNXNTO__) && !defined(FD_SETSIZE)
+#define FD_SETSIZE 1024         /* Max number of file descriptor bits in
+                                   fd_set, used when calling 'select'
+                                   Must be defined before including
+                                   "sys/select.h" and "sys/time.h"
+                                 */
+#endif
+
 
 /* to make command line shorter we'll define USE_PRAGMA_INTERFACE here */
 #ifdef USE_PRAGMA_IMPLEMENTATION
@@ -85,6 +93,42 @@
 #endif
 
 /*
+  The macros below are used to allow build of Universal/fat binaries of
+  MySQL and MySQL applications under darwin. 
+*/
+#ifdef TARGET_FAT_BINARY
+# undef SIZEOF_CHARP 
+# undef SIZEOF_INT 
+# undef SIZEOF_LONG 
+# undef SIZEOF_LONG_LONG 
+# undef SIZEOF_OFF_T 
+# undef SIZEOF_SHORT 
+
+#if defined(__i386__)
+# undef WORDS_BIGENDIAN
+# define SIZEOF_CHARP 4
+# define SIZEOF_INT 4
+# define SIZEOF_LONG 4
+# define SIZEOF_LONG_LONG 8
+# define SIZEOF_OFF_T 8
+# define SIZEOF_SHORT 2
+
+#elif defined(__ppc__)
+# define WORDS_BIGENDIAN
+# define SIZEOF_CHARP 4
+# define SIZEOF_INT 4
+# define SIZEOF_LONG 4
+# define SIZEOF_LONG_LONG 8
+# define SIZEOF_OFF_T 8
+# define SIZEOF_SHORT 2
+
+#else
+# error Building FAT binary for an unknown architecture.
+#endif
+#endif /* TARGET_FAT_BINARY */
+
+
+/*
   The macros below are borrowed from include/linux/compiler.h in the
   Linux kernel. Use them to indicate the likelyhood of the truthfulness
   of a condition. This serves two purposes - newer versions of gcc will be
@@ -102,9 +146,17 @@
 
 
 /* Fix problem with S_ISLNK() on Linux */
-#if defined(TARGET_OS_LINUX)
+#if defined(TARGET_OS_LINUX) || defined(__GLIBC__)
 #undef  _GNU_SOURCE
 #define _GNU_SOURCE 1
+#endif
+
+/*
+  Temporary solution to solve bug#7156. Include "sys/types.h" before
+  the thread headers, else the function madvise() will not be defined
+*/
+#if defined(HAVE_SYS_TYPES_H) && ( defined(sun) || defined(__sun) )
+#include <sys/types.h>
 #endif
 
 /* The client defines this to avoid all thread code */
@@ -124,6 +176,38 @@
 #define __EXTENSIONS__ 1	/* We want some extension */
 #ifndef __STDC_EXT__
 #define __STDC_EXT__ 1          /* To get large file support on hpux */
+#endif
+
+/*
+  Solaris 9 include file <sys/feature_tests.h> refers to X/Open document
+
+    System Interfaces and Headers, Issue 5
+
+  saying we should define _XOPEN_SOURCE=500 to get POSIX.1c prototypes,
+  but apparently other systems (namely FreeBSD) don't agree.
+
+  On a newer Solaris 10, the above file recognizes also _XOPEN_SOURCE=600.
+  Furthermore, it tests that if a program requires older standard
+  (_XOPEN_SOURCE<600 or _POSIX_C_SOURCE<200112L) it cannot be
+  run on a new compiler (that defines _STDC_C99) and issues an #error.
+  It's also an #error if a program requires new standard (_XOPEN_SOURCE=600
+  or _POSIX_C_SOURCE=200112L) and a compiler does not define _STDC_C99.
+
+  To add more to this mess, Sun Studio C compiler defines _STDC_C99 while
+  C++ compiler does not!
+
+  So, in a desperate attempt to get correct prototypes for both
+  C and C++ code, we define either _XOPEN_SOURCE=600 or _XOPEN_SOURCE=500
+  depending on the compiler's announced C standard support.
+
+  Cleaner solutions are welcome.
+*/
+#ifdef __sun
+#if __STDC_VERSION__ - 0 >= 199901L
+#define _XOPEN_SOURCE 600
+#else
+#define _XOPEN_SOURCE 500
+#endif
 #endif
 
 #if defined(THREAD) && !defined(__WIN__) && !defined(OS2)
@@ -198,20 +282,9 @@ C_MODE_END
 
 
 /* Fix a bug in gcc 2.8.0 on IRIX 6.2 */
-#if SIZEOF_LONG == 4 && defined(__LONG_MAX__)
+#if SIZEOF_LONG == 4 && defined(__LONG_MAX__) && (__GNUC__ == 2 && __GNUC_MINOR__ == 8)
 #undef __LONG_MAX__             /* Is a longlong value in gcc 2.8.0 ??? */
 #define __LONG_MAX__ 2147483647
-#endif
-
-/* Fix problem when linking c++ programs with gcc 3.x */
-#ifdef DEFINE_CXA_PURE_VIRTUAL
-#define FIX_GCC_LINKING_PROBLEM \
-C_MODE_START int __cxa_pure_virtual() {\
-  DBUG_ASSERT("Pure virtual method called." == "Aborted");\
-  return 0;\
-} C_MODE_END
-#else
-#define FIX_GCC_LINKING_PROBLEM
 #endif
 
 /* egcs 1.1.2 has a problem with memcpy on Alpha */
@@ -323,7 +396,9 @@ extern "C" int madvise(void *addr, size_t len, int behav);
 #undef  LONGLONG_MIN            /* These get wrongly defined in QNX 6.2 */
 #undef  LONGLONG_MAX            /* standard system library 'limits.h' */
 #ifdef __cplusplus
-#define HAVE_RINT               /* rint() and isnan() functions are not */
+#ifndef HAVE_RINT
+#define HAVE_RINT
+#endif                          /* rint() and isnan() functions are not */
 #define rint(a) std::rint(a)    /* visible in C++ scope due to an error */
 #define isnan(a) std::isnan(a)  /* in the usr/include/math.h on QNX     */
 #endif
@@ -414,12 +489,61 @@ typedef unsigned short ushort;
 #define function_volatile	volatile
 #define my_reinterpret_cast(A) reinterpret_cast<A>
 #define my_const_cast(A) const_cast<A>
+# ifndef GCC_VERSION
+#  define GCC_VERSION (__GNUC__ * 1000 + __GNUC_MINOR__)
+# endif
 #elif !defined(my_reinterpret_cast)
 #define my_reinterpret_cast(A) (A)
 #define my_const_cast(A) (A)
 #endif
-#if !defined(__attribute__) && (defined(__cplusplus) || !defined(__GNUC__)  || __GNUC__ == 2 && __GNUC_MINOR__ < 8)
-#define __attribute__(A)
+
+/*
+  Disable __attribute__() on gcc < 2.7, g++ < 3.4, and non-gcc compilers.
+  Some forms of __attribute__ are actually supported in earlier versions of
+  g++, but we just disable them all because we only use them to generate
+  compilation warnings.
+*/
+#ifndef __attribute__
+# if !defined(__GNUC__)
+#  define __attribute__(A)
+# elif GCC_VERSION < 2008
+#  define __attribute__(A)
+# elif defined(__cplusplus) && GCC_VERSION < 3004
+#  define __attribute__(A)
+# endif
+#endif
+
+/*
+  __attribute__((format(...))) is only supported in gcc >= 2.8 and g++ >= 3.4
+  But that's already covered by the __attribute__ tests above, so this is
+  just a convenience macro.
+*/
+#ifndef ATTRIBUTE_FORMAT
+# define ATTRIBUTE_FORMAT(style, m, n) __attribute__((format(style, m, n)))
+#endif
+
+/*
+
+   __attribute__((format(...))) on a function pointer is not supported
+   until  gcc 3.1
+*/
+#ifndef ATTRIBUTE_FORMAT_FPTR
+# if (GCC_VERSION >= 3001)
+#  define ATTRIBUTE_FORMAT_FPTR(style, m, n) ATTRIBUTE_FORMAT(style, m, n)
+# else
+#  define ATTRIBUTE_FORMAT_FPTR(style, m, n)
+# endif /* GNUC >= 3.1 */
+#endif
+
+/*
+  Wen using the embedded library, users might run into link problems,
+  duplicate declaration of __cxa_pure_virtual, solved by declaring it a
+  weak symbol.
+*/
+#if defined(USE_MYSYS_NEW) && ! defined(DONT_DECLARE_CXA_PURE_VIRTUAL)
+C_MODE_START
+int __cxa_pure_virtual () __attribute__ ((weak));
+C_MODE_END
 #endif
 
 /* From old s-system.h */
@@ -522,6 +646,15 @@ typedef SOCKET_SIZE_TYPE size_socket;
 #define O_NOFOLLOW      0
 #endif
 
+/* additional file share flags for win32 */
+#ifdef __WIN__
+#define _SH_DENYRWD     0x110    /* deny read/write mode & delete */
+#define _SH_DENYWRD     0x120    /* deny write mode & delete      */
+#define _SH_DENYRDD     0x130    /* deny read mode & delete       */
+#define _SH_DENYDEL     0x140    /* deny delete only              */
+#endif /* __WIN__ */
+
+
 /* #define USE_RECORD_LOCK	*/
 
 	/* Unsigned types supported by the compiler */
@@ -534,16 +667,11 @@ typedef SOCKET_SIZE_TYPE size_socket;
 #define FN_LEN		256	/* Max file name len */
 #define FN_HEADLEN	253	/* Max length of filepart of file name */
 #define FN_EXTLEN	20	/* Max length of extension (part of FN_LEN) */
-#ifdef PATH_MAX
-#define FN_REFLEN       PATH_MAX/* Max length of full path-name */
-#else
 #define FN_REFLEN	512	/* Max length of full path-name */
-#endif
 #define FN_EXTCHAR	'.'
 #define FN_HOMELIB	'~'	/* ~/ is used as abbrev for home dir */
 #define FN_CURLIB	'.'	/* ./ is used as abbrev for current dir */
 #define FN_PARENTDIR	".."	/* Parent directory; Must be a string */
-#define FN_DEVCHAR	':'
 
 #ifndef FN_LIBCHAR
 #ifdef __EMX__
@@ -669,6 +797,7 @@ typedef SOCKET_SIZE_TYPE size_socket;
 #define UINT_MAX16      0xFFFF
 #define INT_MIN8        (~0x7F)
 #define INT_MAX8        0x7F
+#define UINT_MAX8       0xFF
 
 /* From limits.h instead */
 #ifndef DBL_MIN
@@ -679,9 +808,23 @@ typedef SOCKET_SIZE_TYPE size_socket;
 #define DBL_MAX		1.79769313486231470e+308
 #define FLT_MAX		((float)3.40282346638528860e+38)
 #endif
+#ifndef SSIZE_MAX
+#define SSIZE_MAX ((~((size_t) 0)) / 2)
+#endif
 
 #if !defined(HAVE_ISINF) && !defined(isinf)
 #define isinf(X)    0
+#endif
+
+/* Define missing math constants. */
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
+#ifndef M_E
+#define M_E 2.7182818284590452354
+#endif
+#ifndef M_LN2
+#define M_LN2 0.69314718055994530942
 #endif
 
 /*
@@ -702,6 +845,21 @@ typedef long long	my_ptrdiff_t;
 #define OFFSET(t, f)	((size_t)(char *)&((t *)0)->f)
 #define ADD_TO_PTR(ptr,size,type) (type) ((byte*) (ptr)+size)
 #define PTR_BYTE_DIFF(A,B) (my_ptrdiff_t) ((byte*) (A) - (byte*) (B))
+
+/*
+  Custom version of standard offsetof() macro which can be used to get
+  offsets of members in class for non-POD types (according to the current
+  version of C++ standard offsetof() macro can't be used in such cases and
+  attempt to do so causes warnings to be emitted, OTOH in many cases it is
+  still OK to assume that all instances of the class has the same offsets
+  for the same members).
+
+  This is temporary solution which should be removed once File_parser class
+  and related routines are refactored.
+*/
+
+#define my_offsetof(TYPE, MEMBER) \
+        ((size_t)((char *)&(((TYPE *)0x10)->MEMBER) - (char*)0x10))
 
 #define NullS		(char *) 0
 /* Nowdays we do not support MessyDos */
@@ -747,7 +905,7 @@ typedef long		int32;
 #endif
 typedef unsigned long	uint32; /* Short for unsigned integer >= 32 bits */
 #else
-error "Neither int or long is of 4 bytes width"
+#error "Neither int or long is of 4 bytes width"
 #endif
 
 #if !defined(HAVE_ULONG) && !defined(TARGET_OS_LINUX) && !defined(__USE_MISC)
@@ -803,6 +961,7 @@ typedef off_t os_off_t;
 #define SOCKET_EAGAIN	WSAEINPROGRESS
 #define SOCKET_ETIMEDOUT WSAETIMEDOUT
 #define SOCKET_EWOULDBLOCK WSAEWOULDBLOCK
+#define SOCKET_EADDRINUSE WSAEADDRINUSE
 #define SOCKET_ENFILE	ENFILE
 #define SOCKET_EMFILE	EMFILE
 #elif defined(OS2)
@@ -811,6 +970,7 @@ typedef off_t os_off_t;
 #define SOCKET_EAGAIN	SOCEINPROGRESS
 #define SOCKET_ETIMEDOUT SOCKET_EINTR
 #define SOCKET_EWOULDBLOCK SOCEWOULDBLOCK
+#define SOCKET_EADDRINUSE SOCEADDRINUSE
 #define SOCKET_ENFILE	SOCENFILE
 #define SOCKET_EMFILE	SOCEMFILE
 #define closesocket(A)	soclose(A)
@@ -821,6 +981,7 @@ typedef off_t os_off_t;
 #define SOCKET_EAGAIN	EAGAIN
 #define SOCKET_ETIMEDOUT SOCKET_EINTR
 #define SOCKET_EWOULDBLOCK EWOULDBLOCK
+#define SOCKET_EADDRINUSE EADDRINUSE
 #define SOCKET_ENFILE	ENFILE
 #define SOCKET_EMFILE	EMFILE
 #endif
@@ -899,19 +1060,7 @@ typedef char		bool;	/* Ordinary boolean values 0 1 */
 #define MY_HOW_OFTEN_TO_ALARM	2	/* How often we want info on screen */
 #define MY_HOW_OFTEN_TO_WRITE	1000	/* How often we want info on screen */
 
-#ifndef set_timespec
-#ifdef HAVE_TIMESPEC_TS_SEC
-#define set_timespec(ABSTIME,SEC) { (ABSTIME).ts_sec=time(0) + (time_t) (SEC); (ABSTIME).ts_nsec=0; }
-#else
-#define set_timespec(ABSTIME,SEC) \
-{\
-  struct timeval tv;\
-  gettimeofday(&tv,0);\
-  (ABSTIME).tv_sec=tv.tv_sec+(time_t) (SEC);\
-  (ABSTIME).tv_nsec=tv.tv_usec*1000;\
-}
-#endif /* HAVE_TIMESPEC_TS_SEC */
-#endif /* set_timespec */
+
 
 /*
   Define-funktions for reading and storing in machine independent format
@@ -944,7 +1093,7 @@ typedef char		bool;	/* Ordinary boolean values 0 1 */
 */
 #define uint3korr(A)	(long) (*((unsigned int *) (A)) & 0xFFFFFF)
 #endif
-#define uint4korr(A)	(*((unsigned long *) (A)))
+#define uint4korr(A)	(*((uint32 *) (A)))
 #define uint5korr(A)	((ulonglong)(((uint32) ((uchar) (A)[0])) +\
 				    (((uint32) ((uchar) (A)[1])) << 8) +\
 				    (((uint32) ((uchar) (A)[2])) << 16) +\
@@ -976,8 +1125,8 @@ do { doubleget_union _tmp; \
 #define doublestore(T,V) do { *((long *) T) = ((doubleget_union *)&V)->m[0]; \
 			     *(((long *) T)+1) = ((doubleget_union *)&V)->m[1]; \
                          } while (0)
-#define float4get(V,M) do { *((long *) &(V)) = *((long*) (M)); } while(0)
-#define float8get(V,M) doubleget((V),(M))
+#define float4get(V,M)   do { *((float *) &(V)) = *((float*) (M)); } while(0)
+#define float8get(V,M)   doubleget((V),(M))
 #define float4store(V,M) memcpy((byte*) V,(byte*) (&M),sizeof(float))
 #define floatstore(T,V)  memcpy((byte*)(T), (byte*)(&V),sizeof(float))
 #define floatget(V,M)    memcpy((byte*) &V,(byte*) (M),sizeof(float))
@@ -1207,5 +1356,14 @@ do { doubleget_union _tmp; \
 #if defined(EMBEDDED_LIBRARY) && !defined(HAVE_EMBEDDED_PRIVILEGE_CONTROL)
 #define NO_EMBEDDED_ACCESS_CHECKS
 #endif
+
+
+/* Length of decimal number represented by INT32. */
+
+#define MY_INT32_NUM_DECIMAL_DIGITS 11
+
+/* Length of decimal number represented by INT64. */
+
+#define MY_INT64_NUM_DECIMAL_DIGITS 21
 
 #endif /* my_global_h */
