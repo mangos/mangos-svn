@@ -62,9 +62,9 @@ namespace VMAP
             return fv;
         }
 
-        inline float getFX() const { return(short2Float(iX));		}
-        inline float getFY() const { return(short2Float(iY)); 		}
-        inline float getFZ() const { return(short2Float(iZ)); 		}
+        inline float getFX() const { return(short2Float(iX)); }
+        inline float getFY() const { return(short2Float(iY)); }
+        inline float getFZ() const { return(short2Float(iZ)); }
     public:
         inline ShortVector() {}
         inline ShortVector(const Vector3& pVector)  {
@@ -89,9 +89,9 @@ namespace VMAP
             iZ = pShortVector.iZ;
         }
 
-        inline float getX() const { return(iX);		}
-        inline float getY() const { return(iY);		}
-        inline float getZ() const { return(iZ);		}
+        inline float getX() const { return(iX);        }
+        inline float getY() const { return(iY);        }
+        inline float getZ() const { return(iZ);        }
 
         inline Vector3 getVector3() const  { return(Vector3(getFX(), getFY(), getFZ())); }
 

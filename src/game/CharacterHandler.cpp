@@ -261,7 +261,6 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         m_playerLoading = false;
         return;
     }
-    //plr->_RemoveAllItemMods();
 
     //set a count of unread mails
     time_t cTime = time(NULL);

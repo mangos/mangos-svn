@@ -86,7 +86,7 @@ namespace VMAP
 
         inline const AABox& getAABoxBounds() const { return(iBox); }
 
-        inline 	void setBounds(const Vector3& lo, const Vector3& hi) { iBox.set(lo,hi); }
+        inline void setBounds(const Vector3& lo, const Vector3& hi) { iBox.set(lo,hi); }
 
         bool writeFile(const char *filename);
 

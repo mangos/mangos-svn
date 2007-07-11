@@ -211,7 +211,7 @@ namespace VMAP {
             if(instanceTree->size() == 0) {
                 iInstanceMapTrees.remove(pMapId);
                 delete instanceTree;
-            }			
+            }
         }
         return(result);
     }
@@ -415,7 +415,7 @@ namespace VMAP {
             float t = model->getIntersectionTime(pRay, pStopAtFirstHit, pMaxDist);
 
             // just for visual debugging with an external debug class
-#ifdef _DEBUG_VMAPS		
+#ifdef _DEBUG_VMAPS        
             if(gCount3 == gCount1) {
                 AABox testBox;
                 testBox = model->getAABoxBounds();
@@ -430,7 +430,7 @@ namespace VMAP {
                     if(pStopAtFirstHit) break;
                 }
             }
-        }	
+        }    
         return firstDistance;
     }
     //=========================================================

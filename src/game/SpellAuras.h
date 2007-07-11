@@ -178,7 +178,11 @@ class Aura
         void HandleModTargetResistance(bool apply, bool Real);
         void HandleAuraModAttackPowerPercent(bool apply, bool Real);
         void HandleAuraModRangedAttackPowerPercent(bool apply, bool Real);
+        void HandleAuraHealingPct(bool apply, bool Real);
         void HandleModManaRegen(bool apply, bool Real);
+        void HandleAuraHealing(bool apply, bool Real);
+        void HandleShieldBlockValue(bool apply, bool Real);
+        void HandleModSpellCritChanceShool(bool apply, bool Real);
         void HandleAuraRetainComboPoints(bool apply, bool Real);
 
         Aura(SpellEntry const* spellproto, uint32 eff, Unit *target, Unit *caster = NULL, Item* castItem = NULL);

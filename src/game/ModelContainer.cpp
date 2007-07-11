@@ -263,7 +263,7 @@ namespace VMAP
                     if(pExitAtFirst) { break; }
                 }
             }
-        }	
+        }
         return(firstDistance);
     }
 

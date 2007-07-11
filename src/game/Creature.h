@@ -351,9 +351,9 @@ class MANGOS_DLL_SPEC Creature : public Unit
             SendMonsterMove(GetPositionX(), GetPositionY(), GetPositionZ(),0,true,0);
         }
 
-        uint32 GetBlockValue() const                        //dunno mob block value
+        uint32 GetShieldBlockValue() const                        //dunno mob block value
         {
-            return getLevel()/2 + 1;
+            return (getLevel()/2 + GetStat(STAT_STRENGTH)/20);
         }
 
         /*********************************************************/

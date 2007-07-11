@@ -2273,7 +2273,7 @@ void Spell::EffectWeaponDmg(uint32 i)
                 break;
         }
         // FIX_ME: Where this value used???
-        damage = uint32(0.45 * (m_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + m_caster->GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS)));
+        damage = uint32(0.45 * (m_caster->GetTotalAuraModValue(UNIT_MOD_ATTACK_POWER)));
     }
 
     uint32 wp[4] = { SPELL_EFFECT_WEAPON_DAMAGE, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE, SPELL_EFFECT_NORMALIZED_WEAPON_DMG, SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL };
@@ -2968,7 +2968,7 @@ void Spell::EffectMomentMove(uint32 i)
         VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(mapid, ox,oy,oz+0.5, fx,fy,oz+0.5,fx,fy,fz, -0.5);
         // teleport a bit above terrain level to avoid falling below it
        fz = MapManager::Instance ().GetMap(mapid, m_caster)->GetHeight(fx,fy,fz) + 0.5;
-	   if(unitTarget->GetTypeId() == TYPEID_PLAYER)
+       if(unitTarget->GetTypeId() == TYPEID_PLAYER)
             ((Player*)unitTarget)->TeleportTo(mapid, fx, fy, fz, m_caster->GetOrientation(), false);
         else
             MapManager::Instance().GetMap(mapid, m_caster)->CreatureRelocation((Creature*)m_caster, fx, fy, fz, m_caster->GetOrientation());
@@ -3050,7 +3050,6 @@ void Spell::EffectSelfResurrect(uint32 i)
     Player *plr = ((Player*)unitTarget);
     plr->ResurrectPlayer(0.0f);
 
-    plr->ApplyStats(false);
     if(plr->GetMaxHealth() > health)
         plr->SetHealth( health );
     else
@@ -3064,7 +3063,6 @@ void Spell::EffectSelfResurrect(uint32 i)
     plr->SetPower(POWER_RAGE, 0 );
 
     plr->SetPower(POWER_ENERGY, plr->GetMaxPower(POWER_ENERGY) );
-    plr->ApplyStats(true);
 
     plr->SpawnCorpseBones();
 

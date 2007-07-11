@@ -37,9 +37,9 @@ namespace VMAP
     Vector3 ModelPosition::transform(const Vector3& pIn) const { 
         //return(pIn);
         Vector3 out = pIn * iScale;
-        out = izMatrix * out;		
+        out = izMatrix * out;        
         out = ixMatrix * out;
-        out = iyMatrix * out;		
+        out = iyMatrix * out;        
         return(out);
 
     }
@@ -290,7 +290,7 @@ namespace VMAP
                 result = false;
                 break;
             }
-            ++pos;	
+            ++pos;    
         }
         if(result && mainTree->size() > 0) {
             mainTree->balance();
@@ -381,7 +381,7 @@ namespace VMAP
                     if(fread(&indexes, sizeof(uint32), 1, rf) != 1) { fclose(rf); return(false); }
                 }
 
-                // ---- indexes			
+                // ---- indexes            
                 if(fread(&blockId, 4, 1, rf) != 1) { fclose(rf); return(false); }
                 if(strcmp(blockId, "INDX") != 0) { fclose(rf); return(false); }
                 if(fread(&blocksize, sizeof(int), 1, rf) != 1) { fclose(rf); return(false); }

@@ -424,7 +424,7 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Using DataDir %s",m_dataPath.c_str());
 
-	bool enableLOS = sConfig.GetBoolDefault("vmap.enableLOS", false);
+    bool enableLOS = sConfig.GetBoolDefault("vmap.enableLOS", false);
     bool enableHeight = sConfig.GetBoolDefault("vmap.enableHeight", false);
     std::string ignoreMapIds = sConfig.GetStringDefault("vmap.ignoreMapIds", "");
     std::string ignoreSpellIds = sConfig.GetStringDefault("vmap.ignoreSpellIds", "");

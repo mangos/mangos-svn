@@ -179,6 +179,7 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_ArmorProficiency = 0;
     m_canParry = false;
     m_canDualWield = false;
+    m_ammoDPS = 0.0f;
     m_extraAttacks = 0;
 
     ////////////////////Rest System/////////////////////
@@ -211,6 +212,12 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_InstanceValid = true;
 
     memset(m_totalSpellMod, 0, sizeof(m_totalSpellMod));
+
+    for (int i = 0; i < BASEMOD_END; i++)
+    {
+        m_auraBaseMod[i][FLAT_MOD] = 0.0f;
+        m_auraBaseMod[i][PCT_MOD] = 1.0f;
+    }
 }
 
 Player::~Player ()
@@ -341,7 +348,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         case POWER_ENERGY:
         case POWER_MANA:
             unitfield = 0x00000000;
-    	    break;
+            break;
         case POWER_RAGE:
             unitfield = 0x00110000;
             break;
@@ -397,18 +404,19 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value( PLAYER_FIELD_YESTERDAY_CONTRIBUTION, 0 );
     SetUInt32Value( PLAYER_FIELD_MAX_LEVEL, 70 );
 
+    SetUInt32Value( UNIT_FIELD_LEVEL, 1 ); //set level = 1 for created characters 
+
     // Played time
     m_Last_tick = time(NULL);
     m_Played_time[0] = 0;
     m_Played_time[1] = 0;
 
     // base stats and related field values
-    InitStatsForLevel(1,false,false);
+    InitStatsForLevel();
     InitTalentForLevel();
     InitPrimaryProffesions();                               // to max set before any spell added
 
     // apply original stats mods before spell loading or item equipment that call before equip _RemoveStatsMods()
-    _ApplyStatsMods();
 
     uint32 titem_id;
     uint32 titem_amount;
@@ -976,7 +984,6 @@ void Player::setDeathState(DeathState s)
         // remove form before other mods to prevent incorrect stats calculation
         RemoveAurasDueToSpell(m_ShapeShiftForm);
 
-        _RemoveAllItemMods();
         RemovePet(NULL,PET_SAVE_AS_CURRENT);
 
         // save value before aura remove in Unit::setDeathState
@@ -992,8 +999,6 @@ void Player::setDeathState(DeathState s)
     {
         //clear aura case after resurrection by another way (reincarnation passive will re-applied at death)
         SetUInt32Value(PLAYER_SELF_RES_SPELL, 0);
-
-        _ApplyAllItemMods();
 
         // restore default warrior stance
         if(getClass()== CLASS_WARRIOR)
@@ -1918,7 +1923,7 @@ void Player::GiveXP(uint32 xp, Unit* victim)
     {
         newXP -= nextLvlXP;
 
-        GiveLevel();
+        GiveLevel(getLevel() + 1);
 
         level = getLevel();
         nextLvlXP = GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
@@ -1929,17 +1934,56 @@ void Player::GiveXP(uint32 xp, Unit* victim)
 
 // Update player to next level
 // Current player experience not update (must be update by caller)
-void Player::GiveLevel()
+void Player::GiveLevel(uint32 level)
 {
-    uint32 level = getLevel();
-
-    if ( level >= sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) )
+    if ( level == getLevel() || level > sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) )
         return;
 
-    level += 1;
+    PlayerLevelInfo info;
+    objmgr.GetPlayerLevelInfo(getRace(),getClass(),level,&info);
 
-    InitStatsForLevel(level);
+    // send levelup info to client
+    WorldPacket data(SMSG_LEVELUP_INFO, (7*4+(MAX_STATS-STAT_STRENGTH)+4));
+    data << uint32(level);
+    data << uint32(int32(info.health) - GetCreateHealth());
+    data << uint32(int32(info.mana)   - GetCreatePowers(POWER_MANA));
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+    data << uint32(0);
+
+    for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
+        data << uint32(int32(info.stats[i]) - GetCreateStat(Stats(i)));
+
+    GetSession()->SendPacket(&data);
+
+    SetUInt32Value(PLAYER_NEXT_LEVEL_XP, MaNGOS::XP::xp_to_level(level));
+
+    //update level, max level of skills
+    if(getLevel()!= level)
+        m_Played_time[1] = 0;                               // Level Played Time reset
+    SetLevel( level);
+    UpdateMaxSkills ();
+
+    // save base values (bonuses already included in stored stats
+    for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
+        SetCreateStat(Stats(i), info.stats[i]);
+    
+    SetCreateHealth(float(info.health));
+    SetCreatePowers(POWER_MANA, float(info.mana));
+
     InitTalentForLevel();
+
+    UpdateAllStats();
+
+    // set current level health and mana/energy to maximum after applying all mods.
+    SetHealth(GetMaxHealth());
+    SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
+    SetPower(POWER_ENERGY, GetMaxPower(POWER_ENERGY));
+    if(GetPower(POWER_RAGE) > GetMaxPower(POWER_RAGE))
+        SetPower(POWER_RAGE, GetMaxPower(POWER_RAGE));
+    SetPower(POWER_FOCUS, 0);
+    SetPower(POWER_HAPPINESS, 0);
 
     // give level to summoned pet
     Pet* pet = GetPet();
@@ -1976,44 +2020,17 @@ void Player::InitTalentForLevel()
     }
 }
 
-void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
+void Player::InitStatsForLevel(bool reapplyMods)
 {
-    // Remove item, aura, stats bonuses
-    if(remove_mods)
-    {
-        _RemoveAllItemMods();
-        _RemoveAllAuraMods();
-        _RemoveStatsMods();
-    }
+    if(reapplyMods) //reapply stats values only on .reset stats (level) command
+        _RemoveAllStatBonuses();
 
     PlayerLevelInfo info;
 
-    objmgr.GetPlayerLevelInfo(getRace(),getClass(),level,&info);
+    objmgr.GetPlayerLevelInfo(getRace(),getClass(),getLevel(),&info);
 
-    if(sendgain)
-    {
-        // send levelup info to client
-        WorldPacket data(SMSG_LEVELUP_INFO, (7*4+(MAX_STATS-STAT_STRENGTH)+4));
-        data << uint32(level);
-        data << uint32(int32(info.health) - GetMaxHealth());
-        data << uint32(int32(info.mana)   - GetMaxPower(POWER_MANA));
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
-        data << uint32(0);
+    SetUInt32Value(PLAYER_NEXT_LEVEL_XP, MaNGOS::XP::xp_to_level(getLevel()));
 
-        for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
-            data << uint32(int32(info.stats[i]) - GetStat(Stats(i)));
-
-        GetSession()->SendPacket(&data);
-    }
-
-    SetUInt32Value(PLAYER_NEXT_LEVEL_XP, MaNGOS::XP::xp_to_level(level));
-
-    // update level, max level of skills
-    if(getLevel()!=level)
-        m_Played_time[1] = 0;                               // Level Played Time reset
-    SetLevel( level);
     UpdateMaxSkills ();
 
     // set default cast time multiplier
@@ -2047,6 +2064,29 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
     for(uint16 index = PLAYER_FIELD_COMBAT_RATING_1; index < PLAYER_FIELD_ARENA_TEAM_INFO_1_1; ++index)
         SetUInt32Value(index, 0);
 
+    //reset attack power, damage and attack speed fields
+    SetFloatValue(UNIT_FIELD_BASEATTACKTIME, 2000.0f );
+    SetFloatValue(UNIT_FIELD_OFFHANDATTACKTIME, 2000.0f );
+    SetFloatValue(UNIT_FIELD_RANGEDATTACKTIME, 2000.0f );
+
+    SetFloatValue(UNIT_FIELD_MINDAMAGE, 0.0f );
+    SetFloatValue(UNIT_FIELD_MAXDAMAGE, 0.0f );
+    SetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, 0.0f );
+    SetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, 0.0f );
+    SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, 0.0f );
+    SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, 0.0f );
+
+    SetUInt32Value(UNIT_FIELD_ATTACK_POWER,            0 );
+    SetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS,       0 );
+    SetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER,0.0f);
+    SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER,     0 );
+    SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,0 );
+    SetFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER,0.0f);
+
+    SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, 1.00);
+    SetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG, 0);
+    SetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS, 0);
+
     // Base crit values
     switch(getClass())
     {
@@ -2069,6 +2109,9 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
 
     // Base parry percents
     SetFloatValue(PLAYER_PARRY_PERCENTAGE, 5);
+
+    //Base block percentage
+    SetFloatValue(PLAYER_BLOCK_PERCENTAGE, 5);
 
     // Base dodge values
     switch(getClass())
@@ -2109,22 +2152,15 @@ void Player::InitStatsForLevel(uint32 level, bool sendgain, bool remove_mods)
     SetMaxPower(POWER_HAPPINESS, 0 );
 
     SetMaxHealth(info.health);
+    SetCreateHealth(float(info.health));
+    SetCreatePowers(POWER_MANA, float(info.mana));
 
     // cleanup mounted state (it will set correctly at aura loading if player saved at mount.
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
     RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT );
 
-    // apply stats, aura, items mods
-    if(remove_mods)
-    {
-        _ApplyStatsMods();
-        _ApplyAllAuraMods();
-        _ApplyAllItemMods();
-    }
-
-    // update dependent from level part BlockChanceWithoutMods = 5 + (GetDefenceSkillValue() - getLevel()*5)*0.04);
-    // must called with applied AuraMods (removed in call code)
-    UpdateBlockPercentage();
+    if(reapplyMods) //reapply stats values only on .reset stats (level) command
+        _ApplyAllStatBonuses();
 
     // set current level health and mana/energy to maximum after applying all mods.
     SetHealth(GetMaxHealth());
@@ -3205,12 +3241,10 @@ void Player::ResurrectPlayer(float restore_percent, bool updateToWorld)
     // set health/powers (0- will be set in caller)
     if(restore_percent>0.0f)
     {
-        ApplyStats(false);
         SetHealth(uint32(GetMaxHealth()*restore_percent));
         SetPower(POWER_MANA, uint32(GetMaxPower(POWER_MANA)*restore_percent));
         SetPower(POWER_RAGE, 0);
         SetPower(POWER_ENERGY, uint32(GetMaxPower(POWER_ENERGY)*restore_percent));
-        ApplyStats(true);
     }
 
     // update world right away
@@ -3636,34 +3670,361 @@ void Player::UpdateDefense()
 {
     if(UpdateSkill(SKILL_DEFENSE))
     {
-        // update dependent from defense skill part BlockChanceWithoutMods = 5 + (GetDefenceSkillValue() - getLevel()*5)*0.04);
+        // update dependent from defense skill part BlockChanceWithoutMods = 5 + (GetDefenseSkillValue() - getLevel()*5)*0.04);
         UpdateBlockPercentage();
     }
 }
 
-void Player::ApplyDefenseBonusesMod(float value, bool apply)
+uint16 Player::GetDefenseSkillBonusValue() const
 {
-    ApplyModFloatValue(PLAYER_BLOCK_PERCENTAGE, value * 0.04, apply);
-    ApplyModFloatValue(PLAYER_PARRY_PERCENTAGE, value * 0.04, apply);
-    ApplyModFloatValue(PLAYER_DODGE_PERCENTAGE, value * 0.04, apply);
+     return GetSkillBonusValue(SKILL_DEFENSE);
+}
+
+void Player::HandleBaseModValue(BaseModGroup modGroup, BaseModType modType, float amount, bool apply, bool affectStats)
+{
+    if(modGroup >= BASEMOD_END || modType >= MOD_END)
+    {
+        sLog.outError("ERROR in HandleBaseModValue(): nonexisted BaseModGroup of wrong BaseModType!");
+        return;
+    }
+
+    float val = 1.0f;
+
+    switch(modType)
+    {
+    case FLAT_MOD: 
+        m_auraBaseMod[modGroup][modType] += apply ? amount : -amount;
+        break;
+    case PCT_MOD:
+        if(amount <= -100.0f)
+            amount = -200.0f;
+
+        val = (100.0f + amount) / 100.0f;
+        m_auraBaseMod[modGroup][modType] *= apply ? val : (1.0f/val);
+        break;
+    }
+
+    if(!CanModifyStats())
+        return;
+
+    switch(modGroup)
+    {
+    case CRIT_PERCENTAGE:              UpdateCritPercentage(BASE_ATTACK);                          break;
+    case BLOCK_PERCENTAGE:             UpdateBlockPercentage();                                    break;
+    case DODGE_PERCENTAGE:             UpdateDodgePercentage();                                    break;
+    case PARRY_PERCENTAGE:             UpdateParryPercentage();                                    break;
+    case RANGED_CRIT_PERCENTAGE:       UpdateCritPercentage(RANGED_ATTACK);                        break;
+    case OFFHAND_CRIT_PERCENTAGE:      UpdateCritPercentage(OFF_ATTACK);                           break;                                                            break;
+    case SPELL_CRIT_PERCENTAGE:        UpdateAllSpellCritChances();                                break;
+    case HOLY_SPELL_CRIT_PERCENTAGE:
+    case FIRE_SPELL_CRIT_PERCENTAGE:
+    case NATURE_SPELL_CRIT_PERCENTAGE:
+    case FROST_SPELL_CRIT_PERCENTAGE:
+    case SHADOW_SPELL_CRIT_PERCENTAGE:
+    case ARCANE_SPELL_CRIT_PERCENTAGE: UpdateSpellCritChance(GetSpellSchoolByBaseGroup(modGroup)); break;
+    case SHIELD_BLOCK_VALUE:           
+        
+    default:
+        break; 
+    }
+}
+
+float Player::GetBaseModValue(BaseModGroup modGroup, BaseModType modType) const
+{ 
+    if(modGroup >= BASEMOD_END || modType > MOD_END)
+    {
+        sLog.outError("ERROR: trial to access nonexisted BaseModGroup or wrong BaseModType!");
+        return 0.0f;
+    }
+
+    if(modType == PCT_MOD && m_auraBaseMod[modGroup][PCT_MOD] <= 0.0f)
+        return 0.0f;
+
+    return m_auraBaseMod[modGroup][modType]; 
+}
+
+float Player::GetTotalBaseModValue(BaseModGroup modGroup) const
+{
+    if(modGroup >= BASEMOD_END)
+    {
+        sLog.outError("ERROR: wrong BaseModGroup in GetTotalBaseModValue()!");
+        return 0.0f;
+    }
+
+    if(m_auraBaseMod[modGroup][PCT_MOD] <= 0.0f)
+        return 0.0f;
+
+    return m_auraBaseMod[modGroup][FLAT_MOD] * m_auraBaseMod[modGroup][PCT_MOD];
+}
+
+uint32 Player::GetShieldBlockValue() const
+{
+    BaseModGroup modGroup = SHIELD_BLOCK_VALUE;
+
+    float value = GetTotalBaseModValue(modGroup) + GetStat(STAT_STRENGTH)/20 - 1;
+
+    value = (value < 0) ? 0 : value;
+
+    return uint32(value);
+}
+
+void Player::UpdateDefenseBonusesMod()
+{
+    UpdateBlockPercentage();
+    UpdateParryPercentage();
+    UpdateDodgePercentage();
+}
+
+void Player::UpdateBlockPercentage()
+{
+    BaseModGroup modGroup = BLOCK_PERCENTAGE;
+
+    float chance = 5 - (getLevel()*5 - GetPureDefenseSkillValue()) * 0.04;
+    chance = chance < 0 ? 0 : chance;
+
+    SetBaseModValue(BLOCK_PERCENTAGE, PCT_MOD, chance);
+
+    float value  = GetBaseModValue(modGroup, FLAT_MOD) + chance;
+    value += float((GetDefenseSkillBonusValue())*0.04) + GetRatingBonusValue(PLAYER_FIELD_BLOCK_RATING);
+
+    SetStatFloatValue(PLAYER_BLOCK_PERCENTAGE, value);
+}
+
+void Player::UpdateCritPercentage(WeaponAttackType attType)
+{
+    BaseModGroup modGroup = CRIT_PERCENTAGE;
+    uint16 index = PLAYER_CRIT_PERCENTAGE;
+    uint16 ratingIndex = PLAYER_FIELD_MELEE_CRIT_RATING;
+
+    switch(attType)
+    {
+    case OFF_ATTACK:
+        modGroup = OFFHAND_CRIT_PERCENTAGE;
+        index = PLAYER_OFFHAND_CRIT_PERCENTAGE; 
+        break;
+    case RANGED_ATTACK: 
+        modGroup = RANGED_CRIT_PERCENTAGE; 
+        index = PLAYER_RANGED_CRIT_PERCENTAGE;
+        ratingIndex = PLAYER_FIELD_RANGED_CRIT_RATING;
+        break;
+    case BASE_ATTACK:
+    default:
+        break;
+    }
+
+    float value = GetTotalPercentageModValue(modGroup) + GetRatingBonusValue(ratingIndex);
+
+    SetStatFloatValue(index, value);
+}
+
+void Player::UpdateAllCritPercentages()
+{
+    float classrate = 20.0f;
+    float base_crit = 0.0f;
+
+    switch(getClass())
+    {
+    case CLASS_DRUID:   base_crit = 0.92f; classrate = getLevel() > 60 ? 24.46f : 20; break;
+    case CLASS_PALADIN: base_crit = 0.7f;  classrate = getLevel() > 60 ? 25 : 20; break;
+    case CLASS_SHAMAN:  base_crit = 1.7f;  classrate = getLevel() > 60 ? 25 : 20; break;
+    case CLASS_MAGE:    base_crit = 3.2f;  classrate = getLevel() > 60 ? 25 : 20; break;
+    case CLASS_PRIEST:  base_crit = 3.0f;  classrate = getLevel() > 60 ? 25 : 20; break;
+    case CLASS_WARLOCK: base_crit = 2.0f;  classrate = getLevel() > 60 ? 25 : 20; break;
+    case CLASS_HUNTER:  classrate = getLevel() > 60 ? 40 : 33; break;
+    case CLASS_ROGUE:   classrate = getLevel() > 60 ? 40 : 29; break;
+    case CLASS_WARRIOR: 
+    default:            classrate = getLevel() > 60 ? 25 : 20; break;
+    }
+
+    float value = base_crit + GetStat(STAT_AGILITY)/classrate;
+
+    SetBaseModValue(CRIT_PERCENTAGE, PCT_MOD, value);
+    SetBaseModValue(OFFHAND_CRIT_PERCENTAGE, PCT_MOD, value);
+    SetBaseModValue(RANGED_CRIT_PERCENTAGE, PCT_MOD, value);
+
+    UpdateCritPercentage(BASE_ATTACK);
+    UpdateCritPercentage(OFF_ATTACK);
+    UpdateCritPercentage(RANGED_ATTACK);
+}
+
+void Player::UpdateParryPercentage()
+{
+    BaseModGroup modGroup = PARRY_PERCENTAGE;
+
+    //pct mods for pct fields act like flat mods
+    float value  = 5.0f + GetBaseModValue(modGroup, FLAT_MOD);
+    value += float(GetDefenseSkillBonusValue()*0.04) + GetRatingBonusValue(PLAYER_FIELD_PARRY_RATING);
+
+    SetStatFloatValue(PLAYER_PARRY_PERCENTAGE, value);
+}
+
+void Player::UpdateDodgePercentage()
+{
+    BaseModGroup modGroup = DODGE_PERCENTAGE;
+    float classrate = 20.0f;
+    float base_dodge = 0.0f;
+
+    switch(getClass())
+    {
+    case CLASS_DRUID:   base_dodge = 0.75f; classrate = getLevel() > 60 ? 14.7 : 10.0f; break; //
+    case CLASS_HUNTER:  base_dodge = 0.64f; classrate = getLevel() > 60 ? 40 : 26.5f; break;   // dunno exact values for case lvl > 60 :/
+    case CLASS_ROGUE:   classrate = getLevel() > 60 ? 25 : 14.5f; break;                        //
+    case CLASS_PALADIN: base_dodge = 0.75f; classrate = getLevel() > 60 ? 30 : 20; break;
+    case CLASS_SHAMAN:  base_dodge = 1.75f; classrate = getLevel() > 60 ? 30 : 20; break;
+    case CLASS_MAGE:    base_dodge = 3.25f; classrate = getLevel() > 60 ? 30 : 20; break;
+    case CLASS_PRIEST:  base_dodge = 3.0f;  classrate = getLevel() > 60 ? 30 : 20; break;
+    case CLASS_WARLOCK: base_dodge = 2.0f;  classrate = getLevel() > 60 ? 30 : 20; break;
+    case CLASS_WARRIOR: 
+    default:            classrate = getLevel() > 60 ? 30 : 20; break;
+    }
+
+    //pct mods for pct fields act like flat mods
+    float value  = base_dodge + GetStat(STAT_AGILITY)/classrate; 
+    value += float(GetDefenseSkillBonusValue()*0.04)+ GetBaseModValue(modGroup, FLAT_MOD);
+    value += GetRatingBonusValue(PLAYER_FIELD_DODGE_RATING);
+
+    SetStatFloatValue(PLAYER_DODGE_PERCENTAGE, value);
+}
+
+void Player::UpdateSpellCritChance(uint32 school)
+{
+    if(school == 0)
+        return;
+
+    BaseModGroup modGroup = BaseModGroup(SPELL_CRIT_PERCENTAGE + school);
+
+    //Spell crit
+    float base_value = GetBaseModValue(SPELL_CRIT_PERCENTAGE, PCT_MOD); //here we store basic % crit chance 
+    base_value += GetRatingBonusValue(PLAYER_FIELD_SPELL_CRIT_RATING);  //for ALL spell schools
+
+    float total_value = base_value + GetBaseModValue(modGroup, FLAT_MOD); 
+
+    SetStatFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + school, total_value);
+}
+
+void Player::UpdateAllSpellCritChances()
+{
+    uint32 playerClass = getClass();
+
+    static const struct
+    {
+        float base;
+        float rate0, rate1;
+    }
+    crit_data[MAX_CLASSES] =
+    {
+        {0,0,10},                       //  0: unused
+        {0,0,10},                       //  1: warrior
+        {3.70,14.77,0.65},              //  2: paladin
+        {0,0,10},                       //  3: hunter
+        {0,0,10},                       //  4: rogue
+        {2.97,10.03,0.82},              //  5: priest
+        {0,0,10},                       //  6: unused
+        {3.54,11.51,0.80},              //  7: shaman
+        {3.70,14.77,0.65},              //  8: mage
+        {3.18,11.30,0.82},              //  9: warlock
+        {0,0,10},                       // 10: unused
+        {3.33,12.41,0.79}               // 11: druid
+    };
+
+    float crit_ratio = crit_data[playerClass].rate0 + crit_data[playerClass].rate1 * getLevel();
+    float base_value = 5 + GetStat(STAT_INTELLECT) / crit_ratio;
+
+    SetBaseModValue(SPELL_CRIT_PERCENTAGE, PCT_MOD, base_value);
+
+    SetStatFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1, base_value);
+
+    for (int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; i++)
+        UpdateSpellCritChance(i);
+}
+
+uint32 Player::GetSpellSchoolByBaseGroup(BaseModGroup baseGroup) const
+{
+    if(baseGroup >= BASEMOD_END)
+        return MAX_SPELL_SCHOOL;
+
+    uint32 school = MAX_SPELL_SCHOOL;
+
+    switch(baseGroup)
+    {
+    case SPELL_CRIT_PERCENTAGE:         school = SPELL_SCHOOL_NORMAL;          break;
+    case HOLY_SPELL_CRIT_PERCENTAGE:    school = SPELL_SCHOOL_HOLY;            break;
+    case FIRE_SPELL_CRIT_PERCENTAGE:    school = SPELL_SCHOOL_FIRE;               break;
+    case NATURE_SPELL_CRIT_PERCENTAGE:  school = SPELL_SCHOOL_NATURE;          break;
+    case FROST_SPELL_CRIT_PERCENTAGE:   school = SPELL_SCHOOL_FROST;           break;
+    case SHADOW_SPELL_CRIT_PERCENTAGE:  school = SPELL_SCHOOL_SHADOW;          break;
+    case ARCANE_SPELL_CRIT_PERCENTAGE:  school = SPELL_SCHOOL_ARCANE;          break;
+
+    default:
+        break;
+    }
+
+    return school;
+}
+
+float Player::GetRatingCoefficient(uint16 index) const
+{
+     float modValue = 0.0f;
+     float RatingCoefficient = 1.0f;
+
+     //Global formulas for all skills based on player level
+     uint32 level = getLevel();
+     if (level < 10)
+         modValue = 2.0 / 52.0;
+     else if (level < 60)
+         modValue = (level - 8.0) / 52.0;
+     else if (level < 70)
+         modValue = 82.0 / (262.0 - 3.0 * level);
+     else modValue = (level + 12.0) / 52.0;
+
+     switch(index)
+     {
+        case PLAYER_FIELD_MELEE_WEAPON_SKILL_RATING:
+        case PLAYER_FIELD_OFFHAND_WEAPON_SKILL_RATING:
+        case PLAYER_FIELD_RANGED_WEAPON_SKILL_RATING:  RatingCoefficient = 2.5 * modValue;      break;   //Weapon skill: 2.5
+        case PLAYER_FIELD_DEFENCE_RATING:              RatingCoefficient = 1.5 * modValue;      break;   //Defense: 1.5
+        case PLAYER_FIELD_DODGE_RATING:                RatingCoefficient = 12.0 * modValue;     break;   //Dodge: 12
+        case PLAYER_FIELD_PARRY_RATING:                RatingCoefficient = 20.0 * modValue;     break;   //Dodge: 12
+        case PLAYER_FIELD_BLOCK_RATING:                RatingCoefficient = 5.0 * modValue;      break;   //Block: 5
+        case PLAYER_FIELD_MELEE_HIT_RATING:            RatingCoefficient = 10.0 * modValue;     break;   //Hit (melee): 10
+        case PLAYER_FIELD_RANGED_HIT_RATING:           RatingCoefficient = 10.0 * modValue;     break;   //Hit (melee): 10
+        case PLAYER_FIELD_SPELL_HIT_RATING:            RatingCoefficient = 8.0 * modValue;      break;   //Hit (spells): 8
+        case PLAYER_FIELD_MELEE_CRIT_RATING:           RatingCoefficient = 14.0 * modValue;     break;   //Crit (melee and spells): 14
+        case PLAYER_FIELD_RANGED_CRIT_RATING:          RatingCoefficient = 14.0 * modValue;     break;   //Crit (melee and spells): 14
+        case PLAYER_FIELD_SPELL_CRIT_RATING:           RatingCoefficient = 14.0 * modValue;     break;   //Crit (melee and spells): 14
+        case PLAYER_FIELD_MELEE_HASTE_RATING:          RatingCoefficient = 6.66667f * modValue; break;   //Haste: 6.67
+        case PLAYER_FIELD_RANGED_HASTE_RATING:         RatingCoefficient = 6.66667f * modValue; break;   //Haste: 6.67
+        case PLAYER_FIELD_SPELL_HASTE_RATING:          RatingCoefficient = 6.66667f * modValue; break;   //Haste: 6.67
+        case PLAYER_FIELD_HIT_RATING:                  RatingCoefficient = 10.0 * modValue;     break;   //Hit (melee): 10
+        case PLAYER_FIELD_CRIT_RATING:                 RatingCoefficient = 14.0 * modValue;     break;   //Crit (melee and spells): 14
+        /*
+        case PLAYER_FIELD_HIT_AVOIDANCE_RATING:                                                 break;
+        case PLAYER_FIELD_CRIT_AVOIDANCE_RATING:                                                break;
+        */
+        case PLAYER_FIELD_RESILIENCE_RATING:           RatingCoefficient = 25.0 * modValue;     break;   //Resilience: 25
+
+        default:
+            break;
+     }
+
+     return RatingCoefficient;
+}
+
+float Player::GetRatingBonusValue(uint16 index) const
+{
+     float value = float(GetUInt32Value(index)) / GetRatingCoefficient(index);
+     
+     return value;
 }
 
 void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
 {
     ApplyModUInt32Value(index, value, apply);
 
-    float RatingCoeffecient = 0;
+    float RatingCoeffecient = GetRatingCoefficient(index);
     float RatingChange = 0.0;
 
-    //Global formulas for all skills based on player level
-    uint32 level = getLevel();
-    if (level < 10)
-        RatingCoeffecient = 2.0 / 52.0;
-    else if (level < 60)
-        RatingCoeffecient = (level - 8.0) / 52.0;
-    else if (level < 70)
-        RatingCoeffecient = 82.0 / (262.0 - 3.0 * level);
-    else RatingCoeffecient = (level + 12.0) / 52.0;
+    bool affectStats = CanModifyStats();
 
     switch (index)
     {
@@ -3672,7 +4033,7 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
         case PLAYER_FIELD_RANGED_WEAPON_SKILL_RATING:
         {
             //Weapon skill: 2.5
-            RatingChange = value/(2.5 * RatingCoeffecient);
+            //RatingChange = value/(2.5 * RatingCoeffecient);
             /*uint16  slot;
             switch (index)
             {
@@ -3688,64 +4049,42 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
         break;
         case PLAYER_FIELD_DEFENCE_RATING:
             //Defense: 1.5
-            RatingChange = value/(1.5 * RatingCoeffecient);
+            RatingChange = value/ RatingCoeffecient;
             ModifySkillBonus(SKILL_DEFENSE,(apply ? (int32)RatingChange: -(int32)RatingChange));
-            ApplyDefenseBonusesMod(RatingChange, apply);
+            if(affectStats)
+                UpdateDefenseBonusesMod();
             break;
-        case PLAYER_FIELD_DODGE_RATING:
-            //Dodge: 12
-            RatingChange = value/(12.0 * RatingCoeffecient);
-            ApplyModFloatValue(PLAYER_DODGE_PERCENTAGE,RatingChange,apply);
-            break;
-        case PLAYER_FIELD_PARRY_RATING:
-            //Dodge: 12
-            RatingChange = value/(20.0 * RatingCoeffecient);
-            ApplyModFloatValue(PLAYER_PARRY_PERCENTAGE,RatingChange,apply);
-            break;
-        case PLAYER_FIELD_BLOCK_RATING:
-            //Block: 5
-            RatingChange = value/(5.0 * RatingCoeffecient);
-            ApplyModFloatValue(PLAYER_BLOCK_PERCENTAGE,RatingChange,apply);
-            break;
+        case PLAYER_FIELD_DODGE_RATING:                  UpdateDodgePercentage();                        break;
+        case PLAYER_FIELD_PARRY_RATING:                  UpdateParryPercentage();                        break;
+        case PLAYER_FIELD_BLOCK_RATING:                  UpdateBlockPercentage();                        break;
         case PLAYER_FIELD_MELEE_HIT_RATING:
             //Hit (melee): 10
-            RatingChange = value/(10.0 * RatingCoeffecient);
+            RatingChange = value/ RatingCoeffecient;
             m_modHitChance += apply?int32(RatingChange):-int32(RatingChange);
             break;
         case PLAYER_FIELD_RANGED_HIT_RATING:
             //Hit (melee): 10
-            RatingChange = value/(10.0 * RatingCoeffecient);
+            RatingChange = value/ RatingCoeffecient;
             m_modHitChance += apply?int32(RatingChange):-int32(RatingChange);
             break;
         case PLAYER_FIELD_SPELL_HIT_RATING:
             //Hit (spells): 8
-            RatingChange = value/(8.0 * RatingCoeffecient);
+            RatingChange = value/ RatingCoeffecient;
             m_modSpellHitChance += apply?int32(RatingChange):-int32(RatingChange);
             break;
-        case PLAYER_FIELD_MELEE_CRIT_RATING:
-            //Crit (melee and spells): 14
-            RatingChange = value/(14.0 * RatingCoeffecient);
-            ApplyModFloatValue(PLAYER_CRIT_PERCENTAGE,RatingChange,apply);
-            break;
-        case PLAYER_FIELD_RANGED_CRIT_RATING:
-            //Crit (melee and spells): 14
-            RatingChange = value/(14.0 * RatingCoeffecient);
-            ApplyModFloatValue(PLAYER_RANGED_CRIT_PERCENTAGE,RatingChange,apply);
-            break;
-        case PLAYER_FIELD_SPELL_CRIT_RATING:
-            //Crit (melee and spells): 14
-            RatingChange = value/(14.0 * RatingCoeffecient);
-            ApplyModFloatValue(PLAYER_HOLY_SPELL_CRIT_PERCENTAGE,RatingChange,apply);
-            ApplyModFloatValue(PLAYER_FIRE_SPELL_CRIT_PERCENTAGE,RatingChange,apply);
-            ApplyModFloatValue(PLAYER_NATURE_SPELL_CRIT_PERCENTAGE,RatingChange,apply);
-            ApplyModFloatValue(PLAYER_FROST_SPELL_CRIT_PERCENTAGE,RatingChange,apply);
-            ApplyModFloatValue(PLAYER_SHADOW_SPELL_CRIT_PERCENTAGE,RatingChange,apply);
-            ApplyModFloatValue(PLAYER_ARCANE_SPELL_CRIT_PERCENTAGE,RatingChange,apply);
-            break;
+        case PLAYER_FIELD_MELEE_CRIT_RATING: 
+            if(affectStats)
+                UpdateCritPercentage(BASE_ATTACK);                                                        break;
+        case PLAYER_FIELD_RANGED_CRIT_RATING:           
+             if(affectStats)
+                UpdateCritPercentage(RANGED_ATTACK);                                                      break;
+        case PLAYER_FIELD_SPELL_CRIT_RATING:            
+             if(affectStats)
+                UpdateAllSpellCritChances();                                                              break;
         case PLAYER_FIELD_MELEE_HASTE_RATING:
             //Haste: 6.67
-            RatingChange = value/(6.66667f * RatingCoeffecient);
-            if(RatingChange >= 0)
+            RatingChange = value/ RatingCoeffecient;
+            if(RatingChange > 0)
             {
                 ApplyAttackTimePercentMod(BASE_ATTACK,RatingChange,apply);
                 ApplyAttackTimePercentMod(OFF_ATTACK,RatingChange,apply);
@@ -3758,7 +4097,7 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
             break;
         case PLAYER_FIELD_RANGED_HASTE_RATING:
             //Haste: 6.67
-            RatingChange = value/(6.66667f * RatingCoeffecient);
+            RatingChange = value/ RatingCoeffecient;
             if(RatingChange >= 0)
                 ApplyAttackTimePercentMod(RANGED_ATTACK, RatingChange, apply);
             else
@@ -3766,23 +4105,22 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
             break;
         case PLAYER_FIELD_SPELL_HASTE_RATING:
             //Haste: 6.67
-            RatingChange = value/(6.66667f * RatingCoeffecient);
+            RatingChange = value/ RatingCoeffecient;
             ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED,RatingChange,!apply);
-            m_modCastSpeedPct += apply?int32(RatingChange):-int32(RatingChange);
+            m_modCastSpeedPct += apply ? int32(RatingChange) : -int32(RatingChange);
             break;
         case PLAYER_FIELD_HIT_RATING:
             //Hit (melee): 10
-            RatingChange = value/(10.0 * RatingCoeffecient);
+            RatingChange = value/ RatingCoeffecient;
             ApplyModUInt32Value(PLAYER_FIELD_MELEE_HIT_RATING, value, apply);
             ApplyModUInt32Value(PLAYER_FIELD_RANGED_HIT_RATING, value, apply);
-            m_modHitChance += apply?int32(RatingChange):-int32(RatingChange);
+            m_modHitChance += apply ? int32(RatingChange) : -int32(RatingChange);
             break;
         case PLAYER_FIELD_CRIT_RATING:
-            //Crit (melee and spells): 14
-            RatingChange = value/(14.0 * RatingCoeffecient);
             ApplyModUInt32Value(PLAYER_FIELD_MELEE_CRIT_RATING, value, apply);
             ApplyModUInt32Value(PLAYER_FIELD_RANGED_CRIT_RATING, value, apply);
-            ApplyModFloatValue(PLAYER_CRIT_PERCENTAGE,RatingChange,apply);
+            if(affectStats)
+               UpdateAllCritPercentages();
             break;
         /*
         case PLAYER_FIELD_HIT_AVOIDANCE_RATING:
@@ -3792,34 +4130,78 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
         */
         case PLAYER_FIELD_RESILIENCE_RATING:
             //Resilience: 25
-            RatingChange = value/(25.0 * RatingCoeffecient);
+            RatingChange = value/ RatingCoeffecient;
             ApplyModUInt32Value(PLAYER_FIELD_UNK4_RATING, value, apply);
             ApplyModUInt32Value(PLAYER_FIELD_UNK5_RATING, value, apply);
-            m_modResilience += apply?RatingChange:-RatingChange;
+            m_modResilience += apply ? RatingChange :-RatingChange;
             break;
     }
 }
 
-void Player::UpdateBlockPercentage()
+void Player::SetRegularAttackTime()
 {
-    AuraList& mModBlockPercent = GetAurasByType(SPELL_AURA_MOD_BLOCK_PERCENT);
+    ItemPrototype const *proto = 0;
+    uint32 InvType = 0;
 
-    if (HasAuraType(SPELL_AURA_MOD_BLOCK_PERCENT))
+    //check for mainhand weapon
+    Item *tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+    if(tmpitem && !tmpitem->IsBroken())
     {
-        for(AuraList::iterator i = mModBlockPercent.begin(); i != mModBlockPercent.end(); ++i)
-            (*i)->ApplyModifier(false);
+        proto = tmpitem->GetProto(); 
+        InvType = proto->InventoryType;
+        if((InvType == INVTYPE_WEAPON || InvType == INVTYPE_2HWEAPON || InvType == INVTYPE_WEAPONMAINHAND )&& proto->Delay)
+            SetAttackTime(BASE_ATTACK, proto->Delay);
+        else
+            SetAttackTime(BASE_ATTACK, BASE_ATTACK_TIME);
     }
 
-    float chance = 5 - (getLevel()*5 - GetPureDefenceSkillValue()) * 0.04;
-    chance = chance < 0 ? 0 : chance;
-
-    SetFloatValue(PLAYER_BLOCK_PERCENTAGE, chance);
-
-    if (HasAuraType(SPELL_AURA_MOD_BLOCK_PERCENT))
+    //check for offhand weapon
+    tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+    if(tmpitem && !tmpitem->IsBroken())
     {
-        for(AuraList::iterator i = mModBlockPercent.begin(); i != mModBlockPercent.end(); ++i)
-            (*i)->ApplyModifier(true);
+        proto = tmpitem->GetProto();
+        InvType = proto->InventoryType;
+        if((InvType == INVTYPE_WEAPON || InvType == INVTYPE_WEAPONOFFHAND) && proto->Delay)
+            SetAttackTime(OFF_ATTACK, proto->Delay); 
+        else
+            SetAttackTime(OFF_ATTACK, BASE_ATTACK_TIME);
     }
+
+    //check for ranged weapons
+    tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+    if(tmpitem && !tmpitem->IsBroken())
+    {
+        proto = tmpitem->GetProto();
+        InvType = proto->InventoryType;
+        if((InvType == INVTYPE_THROWN || InvType == INVTYPE_RANGED) && proto->Delay )
+            SetAttackTime(RANGED_ATTACK, proto->Delay); 
+        else
+            SetAttackTime(RANGED_ATTACK, BASE_ATTACK_TIME);
+    }
+}
+
+void Player::_ApplyAllStatBonuses()
+{
+    SetCanModifyStats(false);
+
+    _ApplyAllAuraMods();
+    _ApplyAllItemMods();
+
+    SetCanModifyStats(true);
+
+    UpdateAllStats();
+}
+
+void Player::_RemoveAllStatBonuses()
+{
+    SetCanModifyStats(false);
+
+    _RemoveAllItemMods();
+    _RemoveAllAuraMods();
+
+    SetCanModifyStats(true);
+
+    UpdateAllStats();
 }
 
 //skill+1, checking for max value
@@ -4010,7 +4392,7 @@ void Player::UpdateCombatSkills(Unit *pVictim, WeaponAttackType attType, MeleeHi
     if(lvldif < 3)
         lvldif = 3;
 
-    uint32 skilldif = 5 * plevel - (defence ? GetPureDefenceSkillValue() : GetPureWeaponSkillValue(attType));
+    uint32 skilldif = 5 * plevel - (defence ? GetPureDefenseSkillValue() : GetPureWeaponSkillValue(attType));
     if(skilldif <= 0)
         return;
 
@@ -4204,6 +4586,23 @@ uint16 Player::GetPureSkillValue(uint32 skill) const
             return SKILL_VALUE(GetUInt32Value(PLAYER_SKILL(i)+1));
         }
     }
+    return 0;
+}
+
+uint16 Player::GetSkillBonusValue(uint32 skill) const
+{
+    if(!skill)
+        return 0;
+
+    for (int i = 0; i < PLAYER_MAX_SKILLS; i++)
+    {
+        if ((GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF) == skill)
+        {
+            int16 result = SKILL_VALUE(GetUInt32Value(PLAYER_SKILL(i)+2));
+            return result < 0 ? 0 : result;
+        }
+    }
+
     return 0;
 }
 
@@ -4736,7 +5135,7 @@ bool Player::ModifyFactionReputation(FactionEntry const* factionEntry, int32 sta
 }
 
 //Calculate total reputation percent player gain with quest/creature level
-int32 Player::CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep) const
+int32 Player::CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep)
 {
     int32 Factor;
     int32 dif = int32(getLevel()) - creatureOrQuestLevel;
@@ -4750,11 +5149,15 @@ int32 Player::CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep) co
         Factor = (10-dif);                                  // 20%...100% with step 20%
 
     int32 percent = Factor*20;
+    int32 repMod = 0;
 
-    if(rep > 0)
-        percent += m_AuraModifiers[SPELL_AURA_MOD_REPUTATION_GAIN];
-    else
-        percent -= m_AuraModifiers[SPELL_AURA_MOD_REPUTATION_GAIN];
+    AuraList& mReputationGain = GetAurasByType(SPELL_AURA_MOD_REPUTATION_GAIN);
+    for(AuraList::iterator i = mReputationGain.begin();i != mReputationGain.end(); ++i)
+    {
+        repMod = ((*i)->GetModifier()->m_amount) / 100;
+    }
+
+    percent += rep > 0 ? repMod : -repMod;
 
     if(percent <=0)
         return 0;
@@ -5198,43 +5601,12 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
             AddItemsSetItem(this,item);
         else
             RemoveItemsSetItem(this,proto);
-    }
-
-    _RemoveStatsMods();
-
-    // remove ammo bonuses at un-apply
-    if( !apply && slot==EQUIPMENT_SLOT_RANGED )
-        _ApplyAmmoBonuses(apply);
-
-    AuraList& mModBaseResistancePct = GetAurasByType(SPELL_AURA_MOD_BASE_RESISTANCE_PCT);
-    AuraList& mModHaste             = GetAurasByType(SPELL_AURA_MOD_HASTE);
-    AuraList& mModRangedHaste       = GetAurasByType(SPELL_AURA_MOD_RANGED_HASTE);
-    AuraList& mModRangedAmmoHaste   = GetAurasByType(SPELL_AURA_MOD_RANGED_AMMO_HASTE);
-    for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
-        (*i)->ApplyModifier(false);
-    for(AuraList::iterator i = mModHaste.begin(); i != mModHaste.end(); ++i)
-        (*i)->ApplyModifier(false);
-    for(AuraList::iterator i = mModRangedHaste.begin(); i != mModRangedHaste.end(); ++i)
-        (*i)->ApplyModifier(false);
-    for(AuraList::iterator i = mModRangedAmmoHaste.begin(); i != mModRangedAmmoHaste.end(); ++i)
-        (*i)->ApplyModifier(false);
+    }   
 
     _ApplyItemBonuses(proto,slot,apply);
 
-    for(AuraList::iterator i = mModRangedAmmoHaste.begin(); i != mModRangedAmmoHaste.end(); ++i)
-        (*i)->ApplyModifier(true);
-    for(AuraList::iterator i = mModRangedHaste.begin(); i != mModRangedHaste.end(); ++i)
-        (*i)->ApplyModifier(true);
-    for(AuraList::iterator i = mModHaste.begin(); i != mModHaste.end(); ++i)
-        (*i)->ApplyModifier(true);
-    for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
-        (*i)->ApplyModifier(true);
-
-    // add ammo bonuses at apply
-    if( apply && slot==EQUIPMENT_SLOT_RANGED )
-        _ApplyAmmoBonuses(apply);
-
-    _ApplyStatsMods();
+    if( slot==EQUIPMENT_SLOT_RANGED )
+        _ApplyAmmoBonuses();
 
     if(apply)
         CastItemEquipSpell(item);
@@ -5255,12 +5627,12 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
 {
     if(slot >= INVENTORY_SLOT_BAG_END || !proto) return;
 
-    int32 val;
+    float val;
     std::string typestr;
     std::string applystr = apply ? "Add" : "Remove";
     for (int i = 0; i < 10; i++)
     {
-        val = proto->ItemStat[i].ItemStatValue;
+        val = float (proto->ItemStat[i].ItemStatValue);
 
         if(val==0)
             continue;
@@ -5268,15 +5640,15 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
         switch (proto->ItemStat[i].ItemStatType)
         {
             case ITEM_MOD_MANA:
-                ApplyMaxPowerMod(POWER_MANA, val, apply);
+                HandleStatModifier(UNIT_MOD_MANA, BASE_VALUE, float(val), apply);
                 //typestr = "Mana";
                 break;
             case ITEM_MOD_HEALTH:                          // modify HP
-                ApplyMaxHealthMod(val, apply);
+                HandleStatModifier(UNIT_MOD_HEALTH, BASE_VALUE, float(val), apply);
                 //typestr = "Health";
                 break;
             case ITEM_MOD_AGILITY:                         // modify agility
-                ApplyStatMod(STAT_AGILITY,                val, apply);
+                HandleStatModifier(UNIT_MOD_STAT_AGILITY, BASE_VALUE, float(val), apply);
                 if(val > 0)
                     ApplyPosStatMod(STAT_AGILITY,         val, apply);
                 else
@@ -5284,7 +5656,7 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
                 //typestr = "AGILITY";
                 break;
             case ITEM_MOD_STRENGTH:                        //modify strength
-                ApplyStatMod(STAT_STRENGTH,               val, apply);
+                HandleStatModifier(UNIT_MOD_STAT_STRENGTH, BASE_VALUE, float(val), apply);
                 if(val > 0)
                     ApplyPosStatMod(STAT_STRENGTH,        val, apply);
                 else
@@ -5292,7 +5664,7 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
                 //typestr = "STRENGHT";
                 break;
             case ITEM_MOD_INTELLECT:                       //modify intellect
-                ApplyStatMod(STAT_INTELLECT,              val, apply);
+                HandleStatModifier(UNIT_MOD_STAT_INTELLECT, BASE_VALUE, float(val), apply);
                 if(val > 0)
                     ApplyPosStatMod(STAT_INTELLECT,       val, apply);
                 else
@@ -5301,7 +5673,7 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
                 //typestr = "INTELLECT";
                 break;
             case ITEM_MOD_SPIRIT:                          //modify spirit
-                ApplyStatMod(STAT_SPIRIT,                 val, apply);
+                HandleStatModifier(UNIT_MOD_STAT_SPIRIT, BASE_VALUE, float(val), apply);
                 if(val > 0)
                     ApplyPosStatMod(STAT_SPIRIT,          val, apply);
                 else
@@ -5309,12 +5681,11 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
                 //typestr = "SPIRIT";
                 break;
             case ITEM_MOD_STAMINA:                         //modify stamina
-                ApplyStatMod(STAT_STAMINA,                val, apply);
+                HandleStatModifier(UNIT_MOD_STAT_STAMINA, BASE_VALUE, float(val), apply);
                 if(val > 0)
                     ApplyPosStatMod(STAT_STAMINA,         val, apply);
                 else
                     ApplyNegStatMod(STAT_STAMINA,        -val, apply);
-                //ApplyMaxHealthMod(                        val*10,apply);
                 //typestr = "STAMINA";
                 break;
 
@@ -5401,112 +5772,113 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
 
     if (proto->Armor)
     {
-        ApplyArmorMod( proto->Armor, apply);
+        HandleStatModifier(UNIT_MOD_ARMOR, BASE_VALUE, float(proto->Armor), apply);
         //sLog.outDebug("%s Armor: \t\t%u", applystr.c_str(),  proto->Armor);
     }
 
     if (proto->Block)
     {
-        m_AuraModifiers[SPELL_AURA_MOD_SHIELD_BLOCKVALUE]+= (apply ? long(proto->Block) : -long(proto->Block) );
+        HandleBaseModValue(SHIELD_BLOCK_VALUE, FLAT_MOD, float(proto->Block), apply);
         //sLog.outDebug("%s Block: \t\t%u", applystr.c_str(),  proto->Block);
     }
 
     if (proto->HolyRes)
     {
-        ApplyResistanceMod(SPELL_SCHOOL_HOLY, proto->HolyRes, apply);
+        HandleStatModifier(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(proto->HolyRes), apply);
         //sLog.outDebug("%s HolyRes: \t\t%u", applystr.c_str(),  proto->HolyRes);
     }
 
     if (proto->FireRes)
     {
-        ApplyResistanceMod(SPELL_SCHOOL_FIRE, proto->FireRes, apply);
+        HandleStatModifier(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(proto->FireRes), apply);
         //sLog.outDebug("%s FireRes: \t\t%u", applystr.c_str(),  proto->FireRes);
     }
 
     if (proto->NatureRes)
     {
-        ApplyResistanceMod(SPELL_SCHOOL_NATURE, proto->NatureRes, apply);
+        HandleStatModifier(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(proto->NatureRes), apply);
         //sLog.outDebug("%s NatureRes: \t\t%u", applystr.c_str(),  proto->NatureRes);
     }
 
     if (proto->FrostRes)
     {
-        ApplyResistanceMod(SPELL_SCHOOL_FROST, proto->FrostRes, apply);
+        HandleStatModifier(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(proto->FrostRes), apply);
         //sLog.outDebug("%s FrostRes: \t\t%u", applystr.c_str(),  proto->FrostRes);
     }
 
     if (proto->ShadowRes)
     {
-        ApplyResistanceMod(SPELL_SCHOOL_SHADOW, proto->ShadowRes, apply);
+        HandleStatModifier(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(proto->ShadowRes), apply);
         //sLog.outDebug("%s ShadowRes: \t\t%u", applystr.c_str(),  proto->ShadowRes);
     }
 
     if (proto->ArcaneRes)
     {
-        ApplyResistanceMod(SPELL_SCHOOL_ARCANE, proto->ArcaneRes, apply);
+        HandleStatModifier(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(proto->ArcaneRes), apply);
         //sLog.outDebug("%s ArcaneRes: \t\t%u", applystr.c_str(),  proto->ArcaneRes);
     }
 
-    if(!IsUseEquipedWeapon())
-        return;
-
-    uint8 MINDAMAGEFIELD = 0;
-    uint8 MAXDAMAGEFIELD = 0;
+    WeaponAttackType attType = BASE_ATTACK;
+    float damage = 0.0f;
 
     if( slot == EQUIPMENT_SLOT_RANGED && (
         proto->InventoryType == INVTYPE_RANGED || proto->InventoryType == INVTYPE_THROWN ||
         proto->InventoryType == INVTYPE_RANGEDRIGHT ))
     {
-        MINDAMAGEFIELD = UNIT_FIELD_MINRANGEDDAMAGE;
-        MAXDAMAGEFIELD = UNIT_FIELD_MAXRANGEDDAMAGE;
+        attType = RANGED_ATTACK;
         //typestr = "Ranged";
     }
     else if(slot==EQUIPMENT_SLOT_MAINHAND)
     {
-        MINDAMAGEFIELD = UNIT_FIELD_MINDAMAGE;
-        MAXDAMAGEFIELD = UNIT_FIELD_MAXDAMAGE;
         //typestr = "Mainhand";
     }
     else if(slot==EQUIPMENT_SLOT_OFFHAND)
     {
-        MINDAMAGEFIELD = UNIT_FIELD_MINOFFHANDDAMAGE;
-        MAXDAMAGEFIELD = UNIT_FIELD_MAXOFFHANDDAMAGE;
+        attType = OFF_ATTACK;
         //typestr = "Offhand";
     }
 
-    if (proto->Damage[0].DamageMin > 0 && MINDAMAGEFIELD)
+    if (proto->Damage[0].DamageMin > 0 )
     {
-        ApplyModFloatValue(MINDAMAGEFIELD, proto->Damage[0].DamageMin, apply);
-        //sLog.outDetail("%s %s mindam: %f, now is: %f", applystr.c_str(), typestr.c_str(), proto->Damage[0].DamageMin, GetFloatValue(MINDAMAGEFIELD));
+        damage = apply ? proto->Damage[0].DamageMin : BASE_MINDAMAGE; 
+        SetBaseWeaponDamage(attType, MINDAMAGE, damage);
+        //sLog.outError("applying mindam: assigning %f to weapon mindamage, now is: %f", damage, GetWeaponDamageRange(attType, MINDAMAGE));
     }
 
-    if (proto->Damage[0].DamageMax  > 0 && MAXDAMAGEFIELD)
+    if (proto->Damage[0].DamageMax  > 0 )
     {
-        ApplyModFloatValue(MAXDAMAGEFIELD, proto->Damage[0].DamageMax, apply);
-        //sLog.outDetail("%s %s mindam: %f, now is: %f", applystr.c_str(), typestr.c_str(), proto->Damage[0].DamageMax, GetFloatValue(MAXDAMAGEFIELD));
+        damage = apply ? proto->Damage[0].DamageMax : BASE_MAXDAMAGE; 
+        SetBaseWeaponDamage(attType, MAXDAMAGE, damage);
+        //sLog.outError("applying maxdam: assigning %f to weapon maxdamage, now is: %f", damage, GetWeaponDamageRange(attType, MAXDAMAGE));
     }
+
+    if(!IsUseEquipedWeapon())
+        return;
 
     if (proto->Delay)
     {
         if(slot == EQUIPMENT_SLOT_RANGED)
         {
-            SetAttackTime(RANGED_ATTACK, apply ? proto->Delay: 2000);
+            SetAttackTime(RANGED_ATTACK, apply ? proto->Delay: BASE_ATTACK_TIME);
             //typestr = "Range";
             //sLog.outDebug("%s %s Delay: \t\t%u", applystr.c_str(), typestr.c_str(), proto->Delay);
         }
         else if(slot==EQUIPMENT_SLOT_MAINHAND)
         {
-            SetAttackTime(BASE_ATTACK, apply ? proto->Delay: 2000);
+            SetAttackTime(BASE_ATTACK, apply ? proto->Delay: BASE_ATTACK_TIME);
             //typestr = "Mainhand";
             //sLog.outDebug("%s %s Delay: \t\t%u", applystr.c_str(), typestr.c_str(), proto->Delay);
         }
         else if(slot==EQUIPMENT_SLOT_OFFHAND)
         {
-            SetAttackTime(OFF_ATTACK, apply ? proto->Delay: 2000);
+            SetAttackTime(OFF_ATTACK, apply ? proto->Delay: BASE_ATTACK_TIME);
             //typestr = "Offhand";
             //sLog.outDebug("%s %s Delay: \t\t%u", applystr.c_str(), typestr.c_str(), proto->Delay);
         }
     }
+
+    if(CanModifyStats() && (damage || proto->Delay))
+        UpdateDamagePhysical(attType);
 }
 
 void Player::CastItemEquipSpell(Item *item)
@@ -5677,25 +6049,6 @@ void Player::_RemoveAllItemMods()
         }
     }
 
-    _RemoveStatsMods();
-
-    // additional bonuses from ammo
-    if(GetItemByPos(INVENTORY_SLOT_BAG_0,EQUIPMENT_SLOT_RANGED))
-        _ApplyAmmoBonuses(false);
-
-    AuraList& mModBaseResistancePct = GetAurasByType(SPELL_AURA_MOD_BASE_RESISTANCE_PCT);
-    AuraList& mModHaste             = GetAurasByType(SPELL_AURA_MOD_HASTE);
-    AuraList& mModRangedHaste       = GetAurasByType(SPELL_AURA_MOD_RANGED_HASTE);
-    AuraList& mModRangedAmmoHaste   = GetAurasByType(SPELL_AURA_MOD_RANGED_AMMO_HASTE);
-    for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
-        (*i)->ApplyModifier(false);
-    for(AuraList::iterator i = mModHaste.begin(); i != mModHaste.end(); ++i)
-        (*i)->ApplyModifier(false);
-    for(AuraList::iterator i = mModRangedHaste.begin(); i != mModRangedHaste.end(); ++i)
-        (*i)->ApplyModifier(false);
-    for(AuraList::iterator i = mModRangedAmmoHaste.begin(); i != mModRangedAmmoHaste.end(); ++i)
-        (*i)->ApplyModifier(false);
-
     for (int i = 0; i < INVENTORY_SLOT_BAG_END; i++)
     {
         if(m_items[i])
@@ -5706,19 +6059,11 @@ void Player::_RemoveAllItemMods()
             if(!proto)
                 continue;
             _ApplyItemBonuses(proto,i, false);
+
+            if( i == EQUIPMENT_SLOT_RANGED )
+                _ApplyAmmoBonuses();
         }
     }
-
-    for(AuraList::iterator i = mModRangedAmmoHaste.begin(); i != mModRangedAmmoHaste.end(); ++i)
-        (*i)->ApplyModifier(true);
-    for(AuraList::iterator i = mModRangedHaste.begin(); i != mModRangedHaste.end(); ++i)
-        (*i)->ApplyModifier(true);
-    for(AuraList::iterator i = mModHaste.begin(); i != mModHaste.end(); ++i)
-        (*i)->ApplyModifier(true);
-    for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
-        (*i)->ApplyModifier(true);
-
-    _ApplyStatsMods();
 
     sLog.outDebug("_RemoveAllItemMods complete.");
 }
@@ -5726,21 +6071,6 @@ void Player::_RemoveAllItemMods()
 void Player::_ApplyAllItemMods()
 {
     sLog.outDebug("_ApplyAllItemMods start.");
-
-    _RemoveStatsMods();
-
-    AuraList& mModBaseResistancePct = GetAurasByType(SPELL_AURA_MOD_BASE_RESISTANCE_PCT);
-    AuraList& mModHaste             = GetAurasByType(SPELL_AURA_MOD_HASTE);
-    AuraList& mModRangedHaste       = GetAurasByType(SPELL_AURA_MOD_RANGED_HASTE);
-    AuraList& mModRangedAmmoHaste   = GetAurasByType(SPELL_AURA_MOD_RANGED_AMMO_HASTE);
-    for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
-        (*i)->ApplyModifier(false);
-    for(AuraList::iterator i = mModHaste.begin(); i != mModHaste.end(); ++i)
-        (*i)->ApplyModifier(false);
-    for(AuraList::iterator i = mModRangedHaste.begin(); i != mModRangedHaste.end(); ++i)
-        (*i)->ApplyModifier(false);
-    for(AuraList::iterator i = mModRangedAmmoHaste.begin(); i != mModRangedAmmoHaste.end(); ++i)
-        (*i)->ApplyModifier(false);
 
     for (int i = 0; i < INVENTORY_SLOT_BAG_END; i++)
     {
@@ -5754,23 +6084,11 @@ void Player::_ApplyAllItemMods()
                 continue;
 
             _ApplyItemBonuses(proto,i, true);
+
+            if( i == EQUIPMENT_SLOT_RANGED )
+                _ApplyAmmoBonuses();
         }
     }
-
-    for(AuraList::iterator i = mModRangedAmmoHaste.begin(); i != mModRangedAmmoHaste.end(); ++i)
-        (*i)->ApplyModifier(true);
-    for(AuraList::iterator i = mModRangedHaste.begin(); i != mModRangedHaste.end(); ++i)
-        (*i)->ApplyModifier(true);
-    for(AuraList::iterator i = mModHaste.begin(); i != mModHaste.end(); ++i)
-        (*i)->ApplyModifier(true);
-    for(AuraList::iterator i = mModBaseResistancePct.begin(); i != mModBaseResistancePct.end(); ++i)
-        (*i)->ApplyModifier(true);
-
-    // additional bonuses from ammo
-    if(GetItemByPos(INVENTORY_SLOT_BAG_0,EQUIPMENT_SLOT_RANGED))
-        _ApplyAmmoBonuses(true);
-
-    _ApplyStatsMods();
 
     for (int i = 0; i < INVENTORY_SLOT_BAG_END; i++)
     {
@@ -5795,25 +6113,43 @@ void Player::_ApplyAllItemMods()
     sLog.outDebug("_ApplyAllItemMods complete.");
 }
 
-void Player::_ApplyAmmoBonuses(bool apply)
+void Player::_ApplyAmmoBonuses()
 {
     // check ammo 
     uint32 ammo_id = GetUInt32Value(PLAYER_AMMO_ID);
     if(!ammo_id)
         return;
 
+    float currentAmmoDPS;
+
     ItemPrototype const *ammo_proto = objmgr.GetItemPrototype( ammo_id );
-    if( !ammo_proto || ammo_proto->Class!=ITEM_CLASS_PROJECTILE )
+    if( !ammo_proto || ammo_proto->Class!=ITEM_CLASS_PROJECTILE || !CheckAmmoCompatibility(ammo_proto))
+        currentAmmoDPS = 0.0f;
+    else
+        currentAmmoDPS = ammo_proto->Damage[0].DamageMin;
+
+    if(currentAmmoDPS == GetAmmoDPS())
         return;
 
-    // check ranged weapon
+    m_ammoDPS = currentAmmoDPS;
+
+    if(CanModifyStats())
+        UpdateDamagePhysical(RANGED_ATTACK);
+}
+
+bool Player::CheckAmmoCompatibility(const ItemPrototype *ammo_proto) const
+{
+    if(!ammo_proto)
+        return false;
+
+     // check ranged weapon
     Item *weapon = GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED );
     if(!weapon  || weapon->IsBroken() )
-        return;
+        return false;
 
     ItemPrototype const* weapon_proto = weapon->GetProto();
     if(!weapon_proto || weapon_proto->Class!=ITEM_CLASS_WEAPON )
-        return;
+        return false;
 
     // check ammo ws. weapon compatibility
     switch(weapon_proto->SubClass)
@@ -5821,26 +6157,17 @@ void Player::_ApplyAmmoBonuses(bool apply)
         case ITEM_SUBCLASS_WEAPON_BOW:
         case ITEM_SUBCLASS_WEAPON_CROSSBOW:
             if(ammo_proto->SubClass!=ITEM_SUBCLASS_ARROW)
-                return;
+                return false;
             break;
         case ITEM_SUBCLASS_WEAPON_GUN:
             if(ammo_proto->SubClass!=ITEM_SUBCLASS_BULLET)
-                return;
+                return false;
             break;
         default:
-            return;
+            return false;
     }
 
-    // all ok
-    std::string applystr = apply ? "Add" : "Remove";
-
-    float minDamage = ammo_proto->Damage[0].DamageMin*GetAttackTime(RANGED_ATTACK)/1000;
-    float maxDamage = ammo_proto->Damage[0].DamageMax*GetAttackTime(RANGED_ATTACK)/1000;
-
-    ApplyModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, minDamage, apply);
-    sLog.outDetail("%s Ranged mindam: %f, now is: %f", applystr.c_str(), minDamage, GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE));
-    ApplyModFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, maxDamage, apply);
-    sLog.outDetail("%s Ranged mindam: %f, now is: %f", applystr.c_str(), maxDamage, GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
+    return true;
 }
 
 /*Loot type MUST be
@@ -8138,6 +8465,9 @@ uint8 Player::CanUseAmmo( uint32 item ) const
 
 void Player::SetAmmo( uint32 item )
 {
+    if(!item)
+        return;
+
     // already set
     if( GetUInt32Value(PLAYER_AMMO_ID) == item )
         return;
@@ -8153,9 +8483,19 @@ void Player::SetAmmo( uint32 item )
         }
     }
 
-    _RemoveAllItemMods();
     SetUInt32Value(PLAYER_AMMO_ID, item);
-    _ApplyAllItemMods();
+
+    _ApplyAmmoBonuses();
+}
+
+void Player::RemoveAmmo()
+{
+    SetUInt32Value(PLAYER_AMMO_ID, 0);
+
+    m_ammoDPS = 0.0f;
+
+    if(CanModifyStats())
+        UpdateDamagePhysical(RANGED_ATTACK);
 }
 
 // Return stored item (if stored to stack, it can diff. from pItem). And pItem ca be deleted in this case.
@@ -9369,8 +9709,6 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
     if(!ignore_condition && pEnchant->EnchantmentCondition && !((Player*)this)->EnchantmentFitsRequirements(pEnchant->EnchantmentCondition, -1))
         return;
 
-    bool HasStatEnchant = false;
-
     for (int s=0; s<3; s++)
     {
         uint32 enchant_display_type = pEnchant->display_type[s];
@@ -9382,13 +9720,11 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
         case 2:
             if(getClass() == CLASS_HUNTER)
             {
-                ApplyModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE,enchant_amount,apply);
-                ApplyModFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE,enchant_amount,apply);
+                HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_VALUE, float(enchant_amount), apply);
             }
             else
             {
-                ApplyModFloatValue(UNIT_FIELD_MINDAMAGE,enchant_amount,apply);
-                ApplyModFloatValue(UNIT_FIELD_MAXDAMAGE,enchant_amount,apply);
+                HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND, TOTAL_VALUE, float(enchant_amount), apply);
             }
             break;
 
@@ -9419,10 +9755,7 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
                 }
             }
 
-            if(enchant_spell_id)
-                ApplyResistanceMod(SpellSchools(enchant_spell_id), enchant_amount, apply);
-            else
-                ApplyArmorMod(enchant_amount,apply);
+            HandleStatModifier(UnitMods(UNIT_MOD_ARMOR + enchant_spell_id), TOTAL_VALUE, float(enchant_amount), apply);
             break;
 
         case 6:                                             // Shaman Rockbiter Weapon
@@ -9432,136 +9765,116 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
             break;
 
         case 5:
-            HasStatEnchant = true;
-            break;
-
-        default:
-            break;
-        }
-    }
-
-    // speed up calculation in case if there are no case 5 enchantments
-    if(HasStatEnchant)
-    {
-        _RemoveStatsMods();                                 //remove/apply stat mods for gems etc at-once and not for each enchantment separately
-        for(int s=0; s<3; s++)
-        {
-            uint32 enchant_display_type = pEnchant->display_type[s];
-            uint32 enchant_amount = pEnchant->amount[s];
-            uint32 enchant_spell_id = pEnchant->spellid[s];
-
-            if(enchant_display_type == 5)
+            if (!enchant_amount)
             {
-                if (!enchant_amount)
+                ItemRandomSuffixEntry const *item_rand_suffix = sItemRandomSuffixStore.LookupEntry(abs(item->GetItemRandomPropertyId()));
+                if(item_rand_suffix)
                 {
-                    ItemRandomSuffixEntry const *item_rand_suffix = sItemRandomSuffixStore.LookupEntry(abs(item->GetItemRandomPropertyId()));
-                    if(item_rand_suffix)
+                    for (int k=0; k<3; k++)
                     {
-                        for (int k=0; k<3; k++)
+                        if(item_rand_suffix->enchant_id[k] == enchant_id) 
                         {
-                            if(item_rand_suffix->enchant_id[k] == enchant_id) 
-                            {
-                                enchant_amount = uint32((item_rand_suffix->prefix[k]*item->GetItemSuffixFactor()) / 10000 );
-                                break;
-                            }
+                            enchant_amount = uint32((item_rand_suffix->prefix[k]*item->GetItemSuffixFactor()) / 10000 );
+                            break;
                         }
                     }
                 }
-
-                sLog.outDebug("Adding %u to stat nb %u",enchant_amount,enchant_spell_id);
-                switch (enchant_spell_id)
-                {
-                case ITEM_MOD_AGILITY:
-                    sLog.outDebug("+ %u AGILITY",enchant_amount);
-                    ApplyPosStatMod(STAT_AGILITY, enchant_amount, apply);
-                    ApplyStatMod(STAT_AGILITY, enchant_amount, apply);
-                    break;
-                case ITEM_MOD_STRENGTH:
-                    sLog.outDebug("+ %u STRENGTH",enchant_amount);
-                    ApplyPosStatMod(STAT_STRENGTH, enchant_amount, apply);
-                    ApplyStatMod(STAT_STRENGTH, enchant_amount, apply);
-                    break;
-                case ITEM_MOD_INTELLECT:
-                    sLog.outDebug("+ %u INTELLECT",enchant_amount);
-                    ApplyPosStatMod(STAT_INTELLECT, enchant_amount, apply);
-                    ApplyStatMod(STAT_INTELLECT, enchant_amount, apply);
-                    break;
-                case ITEM_MOD_SPIRIT:
-                    sLog.outDebug("+ %u SPIRIT",enchant_amount);
-                    ApplyPosStatMod(STAT_SPIRIT, enchant_amount, apply);
-                    ApplyStatMod(STAT_SPIRIT, enchant_amount, apply);
-                    break;
-                case ITEM_MOD_STAMINA:
-                    sLog.outDebug("+ %u STAMINA",enchant_amount);
-                    ApplyPosStatMod(STAT_STAMINA, enchant_amount, apply);
-                    ApplyStatMod(STAT_STAMINA, enchant_amount, apply);
-                    break;
-                case ITEM_MOD_DEFENSE_SKILL_RATING:
-                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_DEFENCE_RATING, enchant_amount, apply);
-                    sLog.outDebug("+ %u DEFENCE", enchant_amount);
-                    break;
-                case  ITEM_MOD_DODGE_RATING:
-                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_DODGE_RATING, enchant_amount, apply);
-                    sLog.outDebug("+ %u DODGE", enchant_amount);
-                    break;
-                case ITEM_MOD_PARRY_RATING:
-                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_PARRY_RATING, enchant_amount, apply);
-                    sLog.outDebug("+ %u PARRY", enchant_amount);
-                    break;
-                case ITEM_MOD_BLOCK_RATING:
-                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_BLOCK_RATING, enchant_amount, apply);
-                    sLog.outDebug("+ %u SHIELD_BLOCK", enchant_amount);
-                    break;
-                case ITEM_MOD_HIT_MELEE_RATING:
-                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_HIT_RATING, enchant_amount, apply);
-                    sLog.outDebug("+ %u MELEE_HIT", enchant_amount);
-                    break;
-                case ITEM_MOD_HIT_RANGED_RATING:
-                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_HIT_RATING, enchant_amount, apply);
-                    sLog.outDebug("+ %u RANGED_HIT", enchant_amount);
-                    break;
-                case ITEM_MOD_HIT_SPELL_RATING:
-                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_HIT_RATING, enchant_amount, apply);
-                    sLog.outDebug("+ %u SPELL_HIT", enchant_amount);
-                    break;
-                case ITEM_MOD_CRIT_MELEE_RATING: // CS = Critical Strike
-                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_CRIT_RATING, enchant_amount, apply);
-                    sLog.outDebug("+ %u MELEE_CRIT", enchant_amount);
-                    break;
-                case ITEM_MOD_CRIT_RANGED_RATING:
-                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_CRIT_RATING, enchant_amount, apply);
-                    sLog.outDebug("+ %u RANGED_CRIT", enchant_amount);
-                    break;
-                case ITEM_MOD_CRIT_SPELL_RATING:
-                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_CRIT_RATING, enchant_amount, apply);
-                    sLog.outDebug("+ %u SPELL_CRIT", enchant_amount);
-                    break;
-                    // Values from ITEM_STAT_MELEE_HA_RATING to ITEM_STAT_SPELL_HASTE_RATING are never used
-                    // in Enchantments
-                case ITEM_MOD_HIT_RATING:
-                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_HIT_RATING, enchant_amount, apply);
-                    sLog.outDebug("+ %u HIT", enchant_amount);
-                    break;
-                case ITEM_MOD_CRIT_RATING:
-                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_CRIT_RATING, enchant_amount, apply);
-                    sLog.outDebug("+ %u CRITICAL", enchant_amount);
-                    break;
-                    // Values ITEM_STAT_HA_RATING and ITEM_STAT_CA_RATING are never used in Enchantment
-                case ITEM_MOD_RESILIENCE_RATING:
-                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RESILIENCE_RATING, enchant_amount, apply);
-                    sLog.outDebug("+ %u RESILIENCE", enchant_amount);
-                    break;
-                    // Value ITEM_STAT_HASTE_RATING is never used in Enchantment
-                }
             }
+
+            sLog.outDebug("Adding %u to stat nb %u",enchant_amount,enchant_spell_id);
+            switch (enchant_spell_id)
+            {
+            case ITEM_MOD_AGILITY:
+                sLog.outDebug("+ %u AGILITY",enchant_amount);
+                HandleStatModifier(UNIT_MOD_STAT_AGILITY, TOTAL_VALUE, float(enchant_amount), apply);
+                ApplyPosStatMod(STAT_AGILITY, enchant_amount, apply);
+                break;
+            case ITEM_MOD_STRENGTH:
+                sLog.outDebug("+ %u STRENGTH",enchant_amount);
+                HandleStatModifier(UNIT_MOD_STAT_STRENGTH, TOTAL_VALUE, float(enchant_amount), apply);
+                ApplyPosStatMod(STAT_STRENGTH, enchant_amount, apply);
+                break;
+            case ITEM_MOD_INTELLECT:
+                sLog.outDebug("+ %u INTELLECT",enchant_amount);
+                HandleStatModifier(UNIT_MOD_STAT_INTELLECT, TOTAL_VALUE, float(enchant_amount), apply);
+                ApplyPosStatMod(STAT_INTELLECT, enchant_amount, apply);
+                break;
+            case ITEM_MOD_SPIRIT:
+                sLog.outDebug("+ %u SPIRIT",enchant_amount);
+                HandleStatModifier(UNIT_MOD_STAT_SPIRIT, TOTAL_VALUE, float(enchant_amount), apply);
+                ApplyPosStatMod(STAT_SPIRIT, enchant_amount, apply);
+                break;
+            case ITEM_MOD_STAMINA:
+                sLog.outDebug("+ %u STAMINA",enchant_amount);
+                HandleStatModifier(UNIT_MOD_STAT_STAMINA, TOTAL_VALUE, float(enchant_amount), apply);
+                ApplyPosStatMod(STAT_STAMINA, enchant_amount, apply);
+                break;
+            case ITEM_MOD_DEFENSE_SKILL_RATING:
+                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_DEFENCE_RATING, enchant_amount, apply);
+                sLog.outDebug("+ %u DEFENCE", enchant_amount);
+                break;
+            case  ITEM_MOD_DODGE_RATING:
+                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_DODGE_RATING, enchant_amount, apply);
+                sLog.outDebug("+ %u DODGE", enchant_amount);
+                break;
+            case ITEM_MOD_PARRY_RATING:
+                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_PARRY_RATING, enchant_amount, apply);
+                sLog.outDebug("+ %u PARRY", enchant_amount);
+                break;
+            case ITEM_MOD_BLOCK_RATING:
+                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_BLOCK_RATING, enchant_amount, apply);
+                sLog.outDebug("+ %u SHIELD_BLOCK", enchant_amount);
+                break;
+            case ITEM_MOD_HIT_MELEE_RATING:
+                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_HIT_RATING, enchant_amount, apply);
+                sLog.outDebug("+ %u MELEE_HIT", enchant_amount);
+                break;
+            case ITEM_MOD_HIT_RANGED_RATING:
+                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_HIT_RATING, enchant_amount, apply);
+                sLog.outDebug("+ %u RANGED_HIT", enchant_amount);
+                break;
+            case ITEM_MOD_HIT_SPELL_RATING:
+                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_HIT_RATING, enchant_amount, apply);
+                sLog.outDebug("+ %u SPELL_HIT", enchant_amount);
+                break;
+            case ITEM_MOD_CRIT_MELEE_RATING: // CS = Critical Strike
+                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_CRIT_RATING, enchant_amount, apply);
+                sLog.outDebug("+ %u MELEE_CRIT", enchant_amount);
+                break;
+            case ITEM_MOD_CRIT_RANGED_RATING:
+                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_CRIT_RATING, enchant_amount, apply);
+                sLog.outDebug("+ %u RANGED_CRIT", enchant_amount);
+                break;
+            case ITEM_MOD_CRIT_SPELL_RATING:
+                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_CRIT_RATING, enchant_amount, apply);
+                sLog.outDebug("+ %u SPELL_CRIT", enchant_amount);
+                break;
+                // Values from ITEM_STAT_MELEE_HA_RATING to ITEM_STAT_SPELL_HASTE_RATING are never used
+                // in Enchantments
+            case ITEM_MOD_HIT_RATING:
+                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_HIT_RATING, enchant_amount, apply);
+                sLog.outDebug("+ %u HIT", enchant_amount);
+                break;
+            case ITEM_MOD_CRIT_RATING:
+                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_CRIT_RATING, enchant_amount, apply);
+                sLog.outDebug("+ %u CRITICAL", enchant_amount);
+                break;
+                // Values ITEM_STAT_HA_RATING and ITEM_STAT_CA_RATING are never used in Enchantment
+            case ITEM_MOD_RESILIENCE_RATING:
+                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RESILIENCE_RATING, enchant_amount, apply);
+                sLog.outDebug("+ %u RESILIENCE", enchant_amount);
+                break;
+                // Value ITEM_STAT_HASTE_RATING is never used in Enchantment
+
+            default:
+                break;
+            }     
         }
-        _ApplyStatsMods();
     }
 
     // visualize enchantment at player and equipped items
     int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (item->GetSlot() * 16);
     SetUInt32Value(VisibleBase+1 + slot +1, apply? item->GetEnchantmentId(slot) : 0);
-
 
     if(apply_dur)
     {
@@ -11415,10 +11728,9 @@ bool Player::LoadFromDB( uint32 guid )
         savedPower[i] = GetPower(Powers(i));
 
     // reset stats before loading any modifiers
-    InitStatsForLevel(getLevel(),false,false);
+    InitStatsForLevel();
 
     // apply original stats mods before spell loading or item equipment that call before equip _RemoveStatsMods()
-    _ApplyStatsMods();
 
     //mails are loaded only when needed ;-) - when player in game click on mailbox.
     //_LoadMail();
@@ -11444,8 +11756,9 @@ bool Player::LoadFromDB( uint32 guid )
 
     _LoadActions();
 
-    // Skip _ApplyAllAuraMods(); -- applied in _LoadAuras by AddAura calls at aura load
-    // Skip _ApplyAllItemMods(); -- already applied in _LoadInventory()
+    //apply all stat bonuses from items and auras
+    SetCanModifyStats(true);
+    UpdateAllStats();
 
     // restore remembered power/health values (but not more max values)
     SetHealth(savedHealth > GetMaxHealth() ? GetMaxHealth() : savedHealth);
@@ -11693,7 +12006,7 @@ void Player::_LoadInventory(uint32 timediff)
         delete result;
         m_itemUpdateQueueBlocked = false;
     }
-    if(isAlive())
+    //if(isAlive())
         _ApplyAllItemMods();
 }
 
@@ -11992,8 +12305,7 @@ void Player::SaveToDB()
 
     if(isAlive())
     {
-        _RemoveAllItemMods();
-        _RemoveAllAuraMods();
+        _RemoveAllStatBonuses();
     }
 
     // not required: all stats mods recalculated at load
@@ -12123,11 +12435,6 @@ void Player::SaveToDB()
 
     sDatabase.CommitTransaction();
 
-    // restore base power/health values before restore mods
-    SetUInt32Value(UNIT_FIELD_HEALTH,baseHealth);
-    for(uint32 i = 0; i < MAX_POWERS; ++i)
-        SetFloatValue(UNIT_FIELD_POWER1+i,basePower[i]);
-
     sLog.outDebug("Save Basic value of player %s is: ", m_name.c_str());
     outDebugValues();
 
@@ -12142,13 +12449,17 @@ void Player::SaveToDB()
 
     if(isAlive())
     {
-        _ApplyAllAuraMods();
-        _ApplyAllItemMods();
+        _ApplyAllStatBonuses();
     }
 
     // save pet (hunter pet level and experience and all type pets health/mana).
     if(Pet* pet = GetPet())
         pet->SavePetToDB(PET_SAVE_AS_CURRENT);
+
+    // restore base power/health values after restoring mods
+    SetHealth(currentHealth);
+    for(uint32 i = 0; i < MAX_POWERS; ++i)
+        SetPower(Powers(i), currentPower[i]);
 }
 
 // fast save function for item/money cheating preventing - save only inventory and money state
@@ -13254,14 +13565,10 @@ void Player::InitDataForForm()
         {
             SetAttackTime(BASE_ATTACK,1000);                //Speed 1
             SetAttackTime(OFF_ATTACK,1000);                 //Speed 1
-            uint32 tem_att_power = GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS);
-            float val = tem_att_power/14.0f + getLevel();
-                                                            // Damage in cat form (Correct ???)
-            SetFloatValue(UNIT_FIELD_MINDAMAGE, val*0.9);
-            SetFloatValue(UNIT_FIELD_MAXDAMAGE, val*1.1);
-            SetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, val*0.9);
-            SetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, val*1.1);
-            if(getPowerType()!=POWER_ENERGY) setPowerType(POWER_ENERGY);
+            SetAttackTime(RANGED_ATTACK, BASE_ATTACK_TIME);
+
+            if(getPowerType()!=POWER_ENERGY) 
+                setPowerType(POWER_ENERGY);
             break;
         }
         case FORM_BEAR:
@@ -13269,25 +13576,15 @@ void Player::InitDataForForm()
         {
             SetAttackTime(BASE_ATTACK,2500);                //Speed 2.5
             SetAttackTime(OFF_ATTACK,2500);                 //Speed 2.5
-            uint32 tem_att_power = GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS);
-            float val = tem_att_power/14.0f + getLevel();
-                                                            // Damage in Bear forms (Correct ???)
-            SetFloatValue(UNIT_FIELD_MINDAMAGE, val*0.9);
-            SetFloatValue(UNIT_FIELD_MAXDAMAGE, val*1.1);
-            SetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, val*0.9);
-            SetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, val*1.1);
-            if(getPowerType()!=POWER_RAGE) setPowerType(POWER_RAGE);
+            SetAttackTime(RANGED_ATTACK, BASE_ATTACK_TIME);
+
+            if(getPowerType()!=POWER_RAGE) 
+                setPowerType(POWER_RAGE);
             break;
         }
         default:                                            // 0, for example
         {
-            SetAttackTime(BASE_ATTACK,   2000 );
-            SetAttackTime(OFF_ATTACK,    2000 );
-
-            SetFloatValue(UNIT_FIELD_MINDAMAGE, 0 );
-            SetFloatValue(UNIT_FIELD_MAXDAMAGE, 0 );
-            SetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE, 0 );
-            SetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE, 0 );
+            SetRegularAttackTime();
 
             ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(getClass());
             if(cEntry && cEntry->powerType < MAX_POWERS && uint32(getPowerType()) != cEntry->powerType)
@@ -13296,20 +13593,8 @@ void Player::InitDataForForm()
         }
     }
 
-    SetAttackTime(RANGED_ATTACK, 2000 );
-    SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE, 0 );
-    SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE, 0 );
-
-    SetUInt32Value(UNIT_FIELD_ATTACK_POWER,            0 );
-    SetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS,       0 );
-    SetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER,0.0f);
-    SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER,     0 );
-    SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,0 );
-    SetFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER,0.0f);
-
-    SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, 1.00);
-    SetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG, 0);
-    SetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS, 0);
+    UpdateAttackPowerAndDamage();
+    UpdateAttackPowerAndDamage(true);
 }
 
 void Player::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply)
@@ -13638,16 +13923,6 @@ void Player::AddSpellCooldown(uint32 spellid, uint32 itemid, time_t end_time)
     m_spellCooldowns[spellid] = sc;
 }
 
-uint32 Player::GetBlockValue() const
-{
-    if(m_AuraModifiers[SPELL_AURA_MOD_SHIELD_BLOCKVALUE] <= 0)
-        return 0;
-
-    if(m_AuraModifiers[SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT] <= -100)
-        return 0;
-
-    return m_AuraModifiers[SPELL_AURA_MOD_SHIELD_BLOCKVALUE]*(m_AuraModifiers[SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT]+100)/100;
-}
 
 bool Player::EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot)    //slot to be excluded while counting
 {

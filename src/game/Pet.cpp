@@ -526,7 +526,7 @@ void Pet::InitStatsForLevel(uint32 petlevel)
     SetLevel( petlevel);
 
     SetArmor(petlevel*50);
-    SetAttackTime(BASE_ATTACK, 2000);
+    SetAttackTime(BASE_ATTACK, BASE_ATTACK_TIME);
     SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0);
 
     // Hunter pets' size does depend on level

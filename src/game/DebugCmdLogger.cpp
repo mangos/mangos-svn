@@ -73,7 +73,7 @@ namespace VMAP {
     bool CommandFileRW::getNewCommands(Array<Command>& pCmdArray) {
         bool result = false;
         FILE* f = fopen(iFileName.c_str(), "rb");
-        if(f) {	
+        if(f) {    
             Command cmd;
             if(fseek(f, iLastPos, SEEK_SET) == 0) { result = true; }
             while(result) {
