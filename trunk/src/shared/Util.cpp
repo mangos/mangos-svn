@@ -86,10 +86,10 @@ uint32 TimeStringToSecs(std::string timestring)
         {
             switch(*itr)
             {
-                case 'd': multiplier = 60*60*24; break;
-                case 'h': multiplier = 60*60;    break;
-                case 'm': multiplier = 60;       break;
-                case 's': multiplier = 1;        break;
+                case 'd': multiplier = DAY;     break;
+                case 'h': multiplier = HOUR;    break;
+                case 'm': multiplier = MINUTE;  break;
+                case 's': multiplier = 1;       break;
                 default : return 0;       //bad format
             }
             buffer*=multiplier;
