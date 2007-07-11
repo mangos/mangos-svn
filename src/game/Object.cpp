@@ -784,7 +784,11 @@ void WorldObject::GetContactPoint( const WorldObject* obj, float &x, float &y, f
     float angle = GetAngle( obj );
     x = GetPositionX() + (GetObjectSize() + obj->GetObjectSize() + distance ) * cos(angle);
     y = GetPositionY() + (GetObjectSize() + obj->GetObjectSize() + distance ) * sin(angle);
-    z = MapManager::Instance().GetMap(GetMapId(), this)->GetHeight(x,y,GetPositionZ());
+
+    if(VMAP::VMapFactory::createOrGetVMapManager()->isHeightCalcEnabled())
+        z = MapManager::Instance().GetMap(GetMapId(), this)->GetHeight(x,y,GetPositionZ());
+    else
+        z = GetPositionZ();                                 // hack required in case LOS height disabled
 }
 
 void WorldObject::Say(const char* text, const uint32 language, const uint64 TargetGuid)
@@ -864,7 +868,11 @@ void WorldObject::GetClosePoint( const WorldObject* victim, float &x, float &y, 
 
     x = GetPositionX() + (GetObjectSize() + distance) * cos(angle);
     y = GetPositionY() + (GetObjectSize() + distance) * sin(angle);
-    z = MapManager::Instance().GetMap(GetMapId(), this)->GetHeight(x,y,GetPositionZ());
+
+    if(VMAP::VMapFactory::createOrGetVMapManager()->isHeightCalcEnabled())
+        z = MapManager::Instance().GetMap(GetMapId(), this)->GetHeight(x,y,GetPositionZ());
+    else
+        z = GetPositionZ();                                 // hack required in case LOS height disabled
 }
 
 bool WorldObject::IsPositionValid() const
