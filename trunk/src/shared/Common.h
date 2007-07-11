@@ -43,9 +43,9 @@
 
 // we need to stick to 1 version or half of the stuff will work for someone
 // others will not and opposite
-// will only support WoW and WoW:TBC 2.1.2 client build 6803...
+// will only support WoW and WoW:TBC 2.1.3 client build 6898...
 
-#define EXPECTED_MANGOS_CLIENT_BUILD        {6803, 0}
+#define EXPECTED_MANGOS_CLIENT_BUILD        {6898, 0}
 
 // must be the first thing to include for it to work
 #include "MemoryLeaks.h"
