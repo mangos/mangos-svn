@@ -283,6 +283,8 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //230
     &Aura::HandleNULL,                                      //231
     &Aura::HandleNULL,                                      //232
+    &Aura::HandleNULL,                                      //233
+    &Aura::HandleNULL                                       //234
 };
 
 Aura::Aura(SpellEntry const* spellproto, uint32 eff, Unit *target, Unit *caster, Item* castItem) :
