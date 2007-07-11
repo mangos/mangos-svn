@@ -3354,13 +3354,20 @@ bool ChatHandler::HandleBanCommand(const char* args)
     if(!reason)
         return false;
 
-    if(sWorld.BanAccount(type, nameOrIP, duration, reason,m_session->GetPlayerName()))
+    switch(sWorld.BanAccount(type, nameOrIP, duration, reason,m_session->GetPlayerName()))
+    {
+    case BAN_SUCCESS:
         if(atoi(duration)>0)
             PSendSysMessage(LANG_BAN_YOUBANNED,nameOrIP,secsToTimeString(TimeStringToSecs(duration),true).c_str(),reason);
         else
             PSendSysMessage(LANG_BAN_YOUPERMBANNED,nameOrIP,reason);
-    else
+        break;
+    case BAN_SYNTAX_ERROR:
+        return false;
+    case BAN_NOTFOUND:
         PSendSysMessage(LANG_BAN_NOTFOUND,type,nameOrIP);
+        break;
+    }
 
     return true;
 }

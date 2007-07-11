@@ -154,6 +154,14 @@ enum RealmType
     REALM_RPPVP = 8
 };
 
+/// Ban function return codes
+enum BanReturn
+{
+    BAN_SUCCESS,
+    BAN_SYNTAX_ERROR,
+    BAN_NOTFOUND
+};
+
 /// CLI related stuff, define here to prevent cyclic dependancies
 
 typedef int(* pPrintf)(const char*,...);
@@ -184,6 +192,7 @@ class CliCommandHolder
         }
         ~CliCommandHolder() { delete[] args; }
         void Execute() const { cmd->Func(args, zprintf); }
+        pPrintf GetOutputMethod() const {return (zprintf);}
 };
 
 /// The World
@@ -286,7 +295,7 @@ class World
 
         bool KickPlayer(std::string playerName);
         void KickAll();
-        bool BanAccount(std::string type, std::string nameOrIP, std::string duration, std::string reason, std::string author);
+        uint8 BanAccount(std::string type, std::string nameOrIP, std::string duration, std::string reason, std::string author);
         bool RemoveBanAccount(std::string type, std::string nameOrIP);
 
         void ScriptsStart(map<uint32, multimap<uint32, ScriptInfo> > const& scripts, uint32 id, Object* source, Object* target);

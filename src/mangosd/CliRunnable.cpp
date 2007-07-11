@@ -96,22 +96,29 @@ const CliCommand Commands[]=
 /// \todo Need some pragma pack? Else explain why in a comment.
 #define CliTotalCmds sizeof(Commands)/sizeof(CliCommand)
 
-// Create a character dump file
+/// Create a character dump file
 void CliWritePlayerDump(char*command,pPrintf zprintf)
 {
-    if(!command || !*command) return;
     char * file = strtok(command, " ");
     char * p2 = strtok(NULL, " ");
-    if(!file || !p2) return;
+    if(!file || !p2) 
+    {
+        zprintf("Syntax is: writepdump $filename $playerGUID\r\n");
+        return;
+    }
     objmgr.WritePlayerDump(file, atoi(p2));
 }
 
-// Load a character from a dump file
+/// Load a character from a dump file
 void CliLoadPlayerDump(char*command,pPrintf zprintf)
 {
-    if(!command || !*command) return;
-    char * file = strtok(command, " "); if(!file) return;
-    char * acc = strtok(NULL, " "); if(!acc) return;
+    char * file = strtok(command, " ");
+    char * acc = strtok(NULL, " ");
+    if (!file ||!acc)
+    {
+        zprintf("Syntax is: loadpdump $filename $account ($newname) ($newguid)\r\n");
+        return;
+    }
     char * name = strtok(NULL, " ");
     char * guid = name ? strtok(NULL, " ") : NULL;
     objmgr.LoadPlayerDump(file, atoi(acc), name ? name : "", guid ? atoi(guid) : 0);
@@ -310,6 +317,7 @@ void CliBanList(char*,pPrintf zprintf)
         {
             zprintf("-------------------------------------------------------------------------------\r\n");
             fields = result->Fetch();
+            // No SQL injection. id is uint32.
             QueryResult *banInfo = loginDatabase.PQuery("SELECT `bandate`,`unbandate`,`bannedby`,`banreason` FROM `account_banned` WHERE `id` = %u AND `active` = 1 ORDER BY `unbandate`", fields[0].GetUInt32());
             if (banInfo)
             {
@@ -327,10 +335,8 @@ void CliBanList(char*,pPrintf zprintf)
                         time_t t_unban = fields2[1].GetUInt64();
                         tm* aTm_unban = localtime(&t_unban);
                         zprintf("%02d-%02d-%02d %02d:%02d|",aTm_unban->tm_year%100, aTm_unban->tm_mon+1, aTm_unban->tm_mday, aTm_unban->tm_hour, aTm_unban->tm_min);
-                        delete aTm_unban;
                     }
                     zprintf("%-15.15s|%-15.15s|\r\n",fields2[2].GetString(),fields2[3].GetString());
-                    delete aTm_ban;
                 }while ( banInfo->NextRow() );
                 delete banInfo;
             }
@@ -361,10 +367,8 @@ void CliBanList(char*,pPrintf zprintf)
                 time_t t_unban = fields[2].GetUInt64();
                 tm* aTm_unban = localtime(&t_unban);
                 zprintf("%02d-%02d-%02d %02d:%02d|", aTm_unban->tm_year%100, aTm_unban->tm_mon+1, aTm_unban->tm_mday, aTm_unban->tm_hour, aTm_unban->tm_min);
-                delete aTm_unban;
             }
             zprintf("%-15.15s|%-15.15s|\r\n", fields[3].GetString(), fields[4].GetString());
-            delete aTm_ban;
         }while( result->NextRow() );
         zprintf("===============================================================================\r\n");
         delete result;
@@ -378,46 +382,35 @@ void CliBan(char*command,pPrintf zprintf)
 {
     ///- Get the command parameter
     char* type = strtok((char*)command, " ");
-
-    if(!type)
-    {
-        zprintf("Syntax: ban account|ip|character $AccountOrIpOrCharacter (duration[s|m|h|d])*> reason\n");
-        return;
-    }
     char* nameOrIP = strtok(NULL, " ");
-
-    if(!nameOrIP)
-    {
-        zprintf("Syntax: ban account|ip|character $AccountOrIpOrCharacter (duration[s|m|h|d])* reason\n");
-        return;
-    }
-
+    char* reason = strtok(NULL," ");
     char* duration = strtok(NULL," ");
 
-    if(!duration)  // ?!? input of single char "0"-"9" wouldn't detect when with: || !atoi(duration)
+
+    if(!type||!nameOrIP||!reason) // ?!? input of single char "0"-"9" wouldn't detect when with: || !atoi(duration)
     {
-        zprintf("Syntax: ban account|ip|character $AccountOrIpOrCharacter (duration[s|m|h|d])* reason\n");
+        zprintf("Syntax: ban account|ip|character $AccountOrIpOrCharacter $reason ($duration[s|m|h|d]) \r\n");
         return;
     }
 
-    char* reason = strtok(NULL,"");
+    if(!duration)
+        duration="0";
 
-    if(!reason)
+    switch (sWorld.BanAccount(type, nameOrIP, duration, reason, "Set by console."))
     {
-        zprintf("Syntax: ban account|ip|character $AccountOrIpOrCharacter (duration[s|m|h|d])* reason\n");
-        return;
-    }
-    //debug
-    if(sWorld.BanAccount(type, nameOrIP, duration, reason, "Set by console."))
-    {
-        zprintf("survived banaccount call\n");
+    case BAN_SUCCESS:
         if(atoi(duration)>0)
-            zprintf("%s is banned for %s. Reason: %s.\n",nameOrIP,secsToTimeString(TimeStringToSecs(duration),true,false).c_str(),reason);
+            zprintf("%s is banned for %s. Reason: %s.\r\n",nameOrIP,secsToTimeString(TimeStringToSecs(duration),true,false).c_str(),reason);
         else
-            zprintf("%s is banned permanently for %s.\n",nameOrIP,reason);
+            zprintf("%s is banned permanently. Reason: %s.\r\n",nameOrIP,reason);
+        break;
+    case BAN_NOTFOUND:
+        zprintf("%s %s not found\r\n", type, nameOrIP);
+        break;
+    case BAN_SYNTAX_ERROR:
+        zprintf("Syntax: ban account|ip|character $AccountOrIpOrCharacter $reason ($duration[s|m|h|d]) \r\n");
+        break;
     }
-    else
-        zprintf("%s %s not found\n", type, nameOrIP);
 }
 
 /// Display %MaNGOS version
@@ -439,9 +432,10 @@ void CliRemoveBan(char *command,pPrintf zprintf)
         return;
     }
 
-    sWorld.RemoveBanAccount(type, nameorip);
-
-    zprintf("We removed ban from %s: %s\r\n",type,nameorip);
+    if (!sWorld.RemoveBanAccount(type, nameorip))
+        zprintf("%s %s not found\r\n", type, nameorip);
+    else
+        zprintf("We removed ban from %s: %s\r\n",type,nameorip);
 }
 
 /// Display the list of GMs
@@ -482,16 +476,9 @@ void CliSetGM(char *command,pPrintf zprintf)
 {
     ///- Get the command line arguments
     char *szAcc = strtok(command," ");
-
-    if(!szAcc)                                              //wrong syntax 'setgm' without name
-    {
-        zprintf("Syntax is: setgm $character $number (0 - normal, 3 - gamemaster)>\r\n");
-        return;
-    }
-
     char *szLevel =  strtok(NULL," ");
 
-    if(!szLevel)                                            //wrong syntax 'setgm' without plevel
+    if(!szAcc||!szLevel)                                              //wrong syntax 'setgm' without name
     {
         zprintf("Syntax is: setgm $character $number (0 - normal, 3 - gamemaster)>\r\n");
         return;
@@ -566,31 +553,37 @@ void CliCreate(char *command,pPrintf zprintf)
 void ParseCommand( pPrintf zprintf, char* input)
 {
     unsigned int x;
+    bool bSuccess=false;
     if (!input)
         return;
 
     unsigned int l=strlen(input);
     char *supposedCommand=NULL,* arguments=(char*)("");
-    if(!l)
-        return;
-
-    ///- Get the command and the arguments
-    supposedCommand = strtok(input," ");
-    if (!supposedCommand) return;
-    if (l>strlen(supposedCommand))
-        arguments=&input[strlen(supposedCommand)+1];
-
-    ///- Circle through the command table and invoke the appropriate handler
-    for ( x=0;x<CliTotalCmds;x++)
-        if(!strcmp(Commands[x].cmd,supposedCommand))
+    if(l)
     {
-        sWorld.QueueCliCommand(new CliCommandHolder(&Commands[x], arguments, zprintf));
-        break;
-    }
+        ///- Get the command and the arguments
+        supposedCommand = strtok(input," ");
+        if (supposedCommand)
+        {
+            if (l>strlen(supposedCommand))
+                arguments=&input[strlen(supposedCommand)+1];
 
-    ///- Display an error message if the command is unknown
-    if(x==CliTotalCmds)
-        zprintf("Unknown command: %s\r\n", input);
+            ///- Circle through the command table and, if found, put the command in the queue
+            for ( x=0;x<CliTotalCmds;x++)
+                if(!strcmp(Commands[x].cmd,supposedCommand))
+                {
+                    sWorld.QueueCliCommand(new CliCommandHolder(&Commands[x], arguments, zprintf));
+                    bSuccess=true;
+                    break;
+                }
+
+                ///- Display an error message if the command is unknown
+                if(x==CliTotalCmds)
+                    zprintf("Unknown command: %s\r\n", input);
+        }
+    }
+    if (!bSuccess)
+        zprintf("mangos>");
 }
 
 /// Kick a character out of the realm
@@ -645,6 +638,7 @@ void CliSetLogLevel(char*command,pPrintf zprintf)
     sLog.SetLogLevel(NewLevel);
 }
 
+/// Display the server uptime
 void CliUpTime(char*,pPrintf zprintf)
 {
     uint32 uptime = sWorld.GetUptime();
@@ -652,20 +646,14 @@ void CliUpTime(char*,pPrintf zprintf)
     zprintf("Server has been up for: %s\r\n", suptime.c_str());
 }
 
+/// Set/Unset the TBC flag for an account
 void CliSetTBC(char *command,pPrintf zprintf)
 {
     ///- Get the command line arguments
     char *szAcc = strtok(command," ");
-
-    if(!szAcc)
-    {
-        zprintf("Syntax is: setbc $account $number (0 - normal, 1 - tbc)>\r\n");
-        return;
-    }
-
     char *szTBC =  strtok(NULL," ");
 
-    if(!szTBC)
+    if(!szAcc||!szTBC)
     {
         zprintf("Syntax is: setbc $account $number (0 - normal, 1 - tbc)>\r\n");
         return;
@@ -700,44 +688,51 @@ void CliSetTBC(char *command,pPrintf zprintf)
     }
 }
 
+/// Save all players
 void CliSave(char*,pPrintf zprintf)
 {
-    //Saves players & send message
+    ///- Save players
     ObjectAccessor::Instance().SaveAllPlayers();
-    zprintf( "All Players Saved \n" );
+    zprintf( "All Players Saved \r\n" );
+
+    ///- Send a message
     sWorld.SendWorldText("Players saved!", NULL);
 }
 
+/// Send a message to a player in game
 void CliSend(char *playerN,pPrintf zprintf)
 {
+    ///- Get the command line arguments
     char* plr = strtok((char*)playerN, " ");
     char* msg = strtok(NULL, "");
 
     if(!plr || !msg)
     {
-        zprintf("Syntax: [send <Player> <Message>] Player names case sensitive.\r\n");
+        zprintf("Syntax: send $player $message (Player names case sensitive)\r\n");
         return;
     }
 
+    ///- Find the player and check that he is not logging out.
     Player *rPlayer = objmgr.GetPlayer(plr);
     if(!rPlayer)
     {
-        zprintf("%s not found!\r\n", plr);
+        zprintf("Player %s not found!\r\n", plr);
         return;
     }
     
     if (rPlayer->GetSession()->isLogingOut())
     {
-        zprintf("Cant send message while %s is logging out!\r\n",plr);
+        zprintf("Cannot send message while player %s is logging out!\r\n",plr);
         return;
     }
 
+    ///- Send the message
     //Use SendAreaTriggerMessage for fastest delivery.
     rPlayer->GetSession()->SendAreaTriggerMessage("%s", msg);
     rPlayer->GetSession()->SendAreaTriggerMessage("|cffff0000[Message from administrator]:|r");
     
     //Confirmation message
-    zprintf("I said '%s' to %s\r\n",msg , plr);
+    zprintf("Message '%s' sent to %s\r\n",msg , plr);
 }
 
 /// @}
