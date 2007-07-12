@@ -1422,8 +1422,8 @@ void Spell::finish(bool ok)
         TriggerSpell();
 
     //handle SPELL_AURA_ADD_TARGET_TRIGGER auras
-    Unit::AuraList& targetTriggers = m_caster->GetAurasByType(SPELL_AURA_ADD_TARGET_TRIGGER);
-    for(Unit::AuraList::iterator i = targetTriggers.begin(); i != targetTriggers.end(); ++i)
+    Unit::AuraList const& targetTriggers = m_caster->GetAurasByType(SPELL_AURA_ADD_TARGET_TRIGGER);
+    for(Unit::AuraList::const_iterator i = targetTriggers.begin(); i != targetTriggers.end(); ++i)
         if (IsAffectedBy((*i)->GetSpellProto(),(*i)->GetEffIndex()))
             for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[(*i)->GetEffIndex()].begin();iunit != m_targetUnitGUIDs[(*i)->GetEffIndex()].end();++iunit)
             {
@@ -2482,8 +2482,8 @@ uint8 Spell::CheckMana(uint32 *mana)
             manaCost += int32(float(m_spellInfo->ManaCostPercentage)/100.0*m_caster->GetMaxPower(powerType));
     }
 
-    Unit::AuraList& mPowerCostSchool = m_caster->GetAurasByType(SPELL_AURA_MOD_POWER_COST_SCHOOL);
-    for(Unit::AuraList::iterator i = mPowerCostSchool.begin(); i != mPowerCostSchool.end(); ++i)
+    Unit::AuraList const& mPowerCostSchool = m_caster->GetAurasByType(SPELL_AURA_MOD_POWER_COST_SCHOOL);
+    for(Unit::AuraList::const_iterator i = mPowerCostSchool.begin(); i != mPowerCostSchool.end(); ++i)
         if((*i)->GetModifier()->m_miscvalue & int32(1 << m_spellInfo->School))
             manaCost += (*i)->GetModifier()->m_amount;
 
@@ -2905,12 +2905,12 @@ void Spell::reflect(Unit *refunit)
 
     int32 reflectchance = 0;                                // proper base reflect chance is ?
 
-    Unit::AuraList& mReflectSpells = refunit->GetAurasByType(SPELL_AURA_REFLECT_SPELLS);
-    for(Unit::AuraList::iterator i = mReflectSpells.begin(); i != mReflectSpells.end(); ++i)
+    Unit::AuraList const& mReflectSpells = refunit->GetAurasByType(SPELL_AURA_REFLECT_SPELLS);
+    for(Unit::AuraList::const_iterator i = mReflectSpells.begin(); i != mReflectSpells.end(); ++i)
         reflectchance += (*i)->GetModifier()->m_amount;
 
-    Unit::AuraList& mReflectSpellsSchool = refunit->GetAurasByType(SPELL_AURA_REFLECT_SPELLS_SCHOOL);
-    for(Unit::AuraList::iterator i = mReflectSpellsSchool.begin(); i != mReflectSpellsSchool.end(); ++i)
+    Unit::AuraList const& mReflectSpellsSchool = refunit->GetAurasByType(SPELL_AURA_REFLECT_SPELLS_SCHOOL);
+    for(Unit::AuraList::const_iterator i = mReflectSpellsSchool.begin(); i != mReflectSpellsSchool.end(); ++i)
         if((*i)->GetModifier()->m_miscvalue & int32(1 << m_spellInfo->School))
             reflectchance += (*i)->GetModifier()->m_amount;
 

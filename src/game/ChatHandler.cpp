@@ -64,7 +64,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             lang = LANG_UNIVERSAL;
     
         // but overwrite it by SPELL_AURA_MOD_LANGUAGE auras (only single case used)
-        Unit::AuraList& ModLangAuras = _player->GetAurasByType(SPELL_AURA_MOD_LANGUAGE);
+        Unit::AuraList const& ModLangAuras = _player->GetAurasByType(SPELL_AURA_MOD_LANGUAGE);
         if(!ModLangAuras.empty())
             lang = ModLangAuras.front()->GetModifier()->m_miscvalue;
     }

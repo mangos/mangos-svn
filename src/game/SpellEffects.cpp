@@ -1144,8 +1144,8 @@ void Spell::EffectHeal( uint32 i )
     if (m_spellInfo->Id == 22845)
     {
         float LifePerRage = 0;
-        Unit::AuraList& mPeriodicTriggerSpell = m_caster->GetAurasByType(SPELL_AURA_PERIODIC_TRIGGER_SPELL);
-        for(Unit::AuraList::iterator i = mPeriodicTriggerSpell.begin(); i != mPeriodicTriggerSpell.end(); ++i)
+        Unit::AuraList const& mPeriodicTriggerSpell = m_caster->GetAurasByType(SPELL_AURA_PERIODIC_TRIGGER_SPELL);
+        for(Unit::AuraList::const_iterator i = mPeriodicTriggerSpell.begin(); i != mPeriodicTriggerSpell.end(); ++i)
             if ((*i)->GetSpellProto()->Category == 1011)
         {
             LifePerRage = (*i)->GetModifier()->m_amount / 10.0;
@@ -2486,9 +2486,9 @@ void Spell::EffectScriptEffect(uint32 i)
             uint32 spellId2 = 0;
 
             // all seals have aura dummy
-            Unit::AuraList& m_dummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+            Unit::AuraList const& m_dummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
 
-            for(Unit::AuraList::iterator itr = m_dummyAuras.begin(); itr != m_dummyAuras.end(); ++itr)
+            for(Unit::AuraList::const_iterator itr = m_dummyAuras.begin(); itr != m_dummyAuras.end(); ++itr)
             {
                 SpellEntry const *spellInfo = (*itr)->GetSpellProto();
 

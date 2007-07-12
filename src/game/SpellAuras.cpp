@@ -867,8 +867,8 @@ void Aura::UpdateSlotCounter(uint8 slot, bool add)
     // calculate amount of similar auras by same effect index (similar different spells)
     int8 count = 0;
 
-    Unit::AuraList& aura_list = m_target->GetAurasByType(GetModifier()->m_auraname);
-    for(Unit::AuraList::iterator i = aura_list.begin();i != aura_list.end(); ++i)
+    Unit::AuraList const& aura_list = m_target->GetAurasByType(GetModifier()->m_auraname);
+    for(Unit::AuraList::const_iterator i = aura_list.begin();i != aura_list.end(); ++i)
         if((*i)->m_spellId==m_spellId && (*i)->m_effIndex==m_effIndex)
             ++count;
 
@@ -1059,25 +1059,13 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
     if(GetSpellProto()->SpellVisual == 7986 && caster && caster->GetTypeId() == TYPEID_PLAYER)
     {
         if(GetEffIndex() == 0)
-        {
-            Unit::AuraList& tAuraProcTriggerDamage = m_target->GetAurasByType(SPELL_AURA_PROC_TRIGGER_DAMAGE);
-            if(apply)
-                tAuraProcTriggerDamage.push_back(this);
-            else
-                tAuraProcTriggerDamage.remove(this);
-        }
+            m_target->ApplyAuraProcTriggerDamage(this,apply);
     }
 
     if(GetSpellProto()->SpellVisual == 7395 && GetSpellProto()->SpellIconID == 278 && caster->GetTypeId() == TYPEID_PLAYER)
-    {
-        Unit::AuraList& tAuraProcTriggerDamage = m_target->GetAurasByType(SPELL_AURA_PROC_TRIGGER_DAMAGE);
-        if(apply)
-            tAuraProcTriggerDamage.push_back(this);
-        else
-            tAuraProcTriggerDamage.remove(this);
-    }
+        m_target->ApplyAuraProcTriggerDamage(this,apply);
 
-    // soulestone resurrection (only at real add/remove and can overwrite reincarnation spell setting)
+    // soulstone resurrection (only at real add/remove and can overwrite reincarnation spell setting)
     if(GetSpellProto()->SpellVisual == 99 && GetSpellProto()->SpellIconID == 92 &&
         caster && caster->GetTypeId() == TYPEID_PLAYER && m_target && m_target->GetTypeId() == TYPEID_PLAYER)
     {
@@ -1333,8 +1321,8 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                 {
                     // get furor proc chance
                     uint32 FurorChance = 0;
-                    Unit::AuraList& mDummy = m_target->GetAurasByType(SPELL_AURA_DUMMY);
-                    for(Unit::AuraList::iterator i = mDummy.begin(); i != mDummy.end(); ++i)
+                    Unit::AuraList const& mDummy = m_target->GetAurasByType(SPELL_AURA_DUMMY);
+                    for(Unit::AuraList::const_iterator i = mDummy.begin(); i != mDummy.end(); ++i)
                         if ((*i)->GetSpellProto()->SpellIconID == 238)
                             FurorChance = (*i)->GetModifier()->m_amount;
 
@@ -1362,8 +1350,8 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
                 {
                     uint32 Rage_val = 0;
                     // Stance mastery + Tactical mastery
-                    Unit::AuraList& xDummy = m_target->GetAurasByType(SPELL_AURA_DUMMY);
-                    for(Unit::AuraList::iterator i = xDummy.begin(); i != xDummy.end(); ++i)
+                    Unit::AuraList const& xDummy = m_target->GetAurasByType(SPELL_AURA_DUMMY);
+                    for(Unit::AuraList::const_iterator i = xDummy.begin(); i != xDummy.end(); ++i)
                         if((*i)->GetSpellProto()->SpellIconID == 139)
                             Rage_val += ( (*i)->GetModifier()->m_amount * 10 );
 
@@ -3516,8 +3504,8 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             if (HotWSpellId)
             {
                 int32 HotWMod = 0;
-                Unit::AuraList& mModTotalStatPct = m_target->GetAurasByType(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE);
-                for(Unit::AuraList::iterator i = mModTotalStatPct.begin(); i != mModTotalStatPct.end(); ++i)
+                Unit::AuraList const& mModTotalStatPct = m_target->GetAurasByType(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE);
+                for(Unit::AuraList::const_iterator i = mModTotalStatPct.begin(); i != mModTotalStatPct.end(); ++i)
                     if ((*i)->GetSpellProto()->SpellIconID == 240 && (*i)->GetModifier()->m_miscvalue == 3)
                         HotWMod = (*i)->GetModifier()->m_amount;
                 if (HotWMod)

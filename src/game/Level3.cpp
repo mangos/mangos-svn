@@ -3143,10 +3143,10 @@ bool ChatHandler::HandleListAurasCommand (const char * args)
     }
     for (int i = 0; i < TOTAL_AURAS; i++)
     {
-        Unit::AuraList& uAuraList = unit->GetAurasByType(i);
+        Unit::AuraList const& uAuraList = unit->GetAurasByType(i);
         if (!uAuraList.size()) continue;
         PSendSysMessage(LANG_COMMAND_TARGET_LISTAURATYPE, uAuraList.size(), i);
-        for (Unit::AuraList::iterator itr = uAuraList.begin(); itr != uAuraList.end(); ++itr)
+        for (Unit::AuraList::const_iterator itr = uAuraList.begin(); itr != uAuraList.end(); ++itr)
         {
             PSendSysMessage(LANG_COMMAND_TARGET_AURASIMPLE, (*itr)->GetId(), (*itr)->GetEffIndex(), (*itr)->GetSpellProto()->SpellName[0]);
         }
