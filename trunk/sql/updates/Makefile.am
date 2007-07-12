@@ -721,5 +721,5 @@ EXTRA_DIST = \
 	4059_spell_learn_skill.sql \
 	4059_spell_learn_spell.sql \
 	4076_playercreateinfo_spell.sql \
-	4076_character_spell.sql \	
+	4076_character_spell.sql \
 	README

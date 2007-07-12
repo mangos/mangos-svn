@@ -75,7 +75,7 @@ int main(int argc, char * arg[])
     char tmp1[512];
     //char tmp2[512];
     char tmp3[512];
-    //char tmp4[512];
+    char tmp4[512];
     for(int c=1;c<argc;c++)
     {
         //i - input path
@@ -148,15 +148,15 @@ int main(int argc, char * arg[])
     sprintf(tmp1,"%s/locale-%s.MPQ",LANG,LANG);
     //sprintf(tmp2,"%s/expansion-locale-%s.MPQ",LANG,LANG);
     sprintf(tmp3,"%s/patch-%s.MPQ",LANG,LANG);
-    //sprintf(tmp4,"%s/patch-%s-2.MPQ",LANG,LANG);
+    sprintf(tmp4,"%s/patch-%s-2.MPQ",LANG,LANG);
 
     //char* archiveNames[]={"expansion.MPQ", "common.MPQ", "patch-2.MPQ", "patch.MPQ", tmp4, tmp3, tmp2, tmp1};
-    //char* archiveNames[]={"patch-2.MPQ", "patch.MPQ", "common.MPQ", "expansion.MPQ", tmp4, tmp3, tmp1};
-    char* archiveNames[]={"patch.MPQ", "common.MPQ", "expansion.MPQ", tmp3, tmp1};
+    char* archiveNames[]={"patch-2.MPQ", "patch.MPQ", "common.MPQ", "expansion.MPQ", tmp4, tmp3, tmp1};
+    //char* archiveNames[]={"patch.MPQ", "common.MPQ", "expansion.MPQ", tmp3, tmp1};
 
     //for (size_t i=0; i<8; i++)
-    //for (size_t i=0; i<7; i++)
-    for (size_t i=0; i<5; i++)
+    for (size_t i=0; i<7; i++)
+    //for (size_t i=0; i<5; i++)
     {
         sprintf(tmp,"%s/Data/%s",input_path,archiveNames[i]);
         archives.push_back(new MPQArchive(tmp));
