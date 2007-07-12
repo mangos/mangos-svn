@@ -14267,6 +14267,35 @@ void Player::InitPrimaryProffesions()
     SetFreePrimaryProffesions(sWorld.getConfig(CONFIG_MAX_PRIMARY_TRADE_SKILL));
 }
 
+void Player::SendComboPoints()
+{
+    Unit *combotarget = ObjectAccessor::Instance().GetUnit(*this, m_comboTarget);
+    if (combotarget)
+    {
+        WorldPacket data(SMSG_SET_COMBO_POINTS, combotarget->GetPackGUID().size()+1);
+        data.append(combotarget->GetPackGUID());
+        data << uint8(m_comboPoints);
+        GetSession()->SendPacket(&data);
+    }
+}
+
+void Player::AddComboPoints(uint64 target, int8 count)
+{
+    if(target == m_comboTarget)
+    {
+        m_comboPoints += count;
+        if (m_comboPoints > 5) m_comboPoints = 5;
+        if (m_comboPoints < 0) m_comboPoints = 0;
+    }
+    else
+    {
+        m_comboTarget = target;
+        m_comboPoints = count;
+    }
+    
+    SendComboPoints();
+}
+
 void Player::SetComboPoints(uint64 target, int8 count)
 {
     Unit *combotarget = ObjectAccessor::Instance().GetUnit(*this, target);
@@ -14279,10 +14308,10 @@ void Player::SetComboPoints(uint64 target, int8 count)
     if(count < 0)
         count = 0;
 
-    WorldPacket data(SMSG_SET_COMBO_POINTS, combotarget->GetPackGUID().size()+1);
-    data.append(combotarget->GetPackGUID());
-    data << uint8(count);
-    GetSession()->SendPacket(&data);
+    m_comboTarget = target;
+    m_comboPoints = count;
+
+    SendComboPoints();
 }
 
 void Player::SetStandState(uint8 state)

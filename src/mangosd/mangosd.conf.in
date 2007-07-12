@@ -164,12 +164,12 @@ MaxGroupXPDistance = 74
 MaxGroupXPLevelDiff = 10
 
 # Allow or not accounts to create characters in the 2 teams in any game type.
-# Defaullt: 0 (Not allowed)
+# Default: 0 (Not allowed)
 #           1 (Allowed)
 AllowTwoSide.Accounts = 0
 
 # Allow or not common :chat(say,yell);channel(chat)group(join)guild(join);trade for players from different teams.
-# Defaullt: 0 (Not allowed)
+# Default: 0 (Not allowed)
 #           1 (Allowed)
 AllowTwoSide.Interaction.Chat = 0
 AllowTwoSide.Interaction.Channel = 0

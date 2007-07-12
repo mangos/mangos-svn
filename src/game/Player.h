@@ -970,18 +970,10 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint8 GetComboPoints() { return m_comboPoints; }
         uint64 GetComboTarget() { return m_comboTarget; }
-        void AddComboPoints(uint64 target, int8 count)
-        {
-            if(target == m_comboTarget)
-                m_comboPoints += count;
-            else
-            {
-                m_comboTarget = target;
-                m_comboPoints = count;
-            }
-            SetComboPoints(m_comboTarget, m_comboPoints);
-        }
+        
+        void AddComboPoints(uint64 target, int8 count);
         void SetComboPoints(uint64 target, int8 count);
+        void SendComboPoints();
 
         void CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::string subject, uint32 itemTextId, uint32 itemGuid, uint32 item_template, time_t expire_time,time_t delivery_time, uint32 money, uint32 COD, uint32 checked, Item* pItem);
         void SendMailResult(uint32 mailId, uint32 mailAction, uint32 mailError, uint32 equipError = 0);
