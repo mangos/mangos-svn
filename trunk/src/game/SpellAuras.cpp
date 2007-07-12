@@ -3025,15 +3025,7 @@ void Aura::HandleAuraModIncreaseEnergy(bool apply, bool Real)
     if(int32(powerType) != m_modifier.m_miscvalue)
         return;
 
-    if(powerType == POWER_MANA)
-    {
-            m_target->HandleStatModifier(UNIT_MOD_MANA, TOTAL_VALUE, float(m_modifier.m_amount), apply);
-            return;
-    }
-    else
-    {
-        m_target->ApplyMaxPowerMod(powerType, m_modifier.m_amount,apply);
-    }
+    m_target->HandleStatModifier(UnitMods(UNIT_MOD_POWER_START + powerType), TOTAL_VALUE, float(m_modifier.m_amount), apply);
 }
 
 void Aura::HandleAuraModIncreaseEnergyPercent(bool apply, bool Real)
@@ -3042,16 +3034,7 @@ void Aura::HandleAuraModIncreaseEnergyPercent(bool apply, bool Real)
     if(int32(powerType) != m_modifier.m_miscvalue)
         return;
 
-    if(powerType == POWER_MANA)
-    {
-            m_target->HandleStatModifier(UNIT_MOD_MANA, TOTAL_PCT, float(m_modifier.m_amount), apply);
-            return;
-    }
-    else
-    {
-        m_target->ApplyMaxPowerPercentMod(powerType,m_modifier.m_amount,apply);
-    }
-    sLog.outDetail("MaxPowerPercentMod %s %d",(apply ? "+" : "-"), m_modifier.m_amount);
+    m_target->HandleStatModifier(UnitMods(UNIT_MOD_POWER_START + powerType), TOTAL_PCT, float(m_modifier.m_amount), apply);
 }
 
 void Aura::HandleAuraModIncreaseHealthPercent(bool apply, bool Real)

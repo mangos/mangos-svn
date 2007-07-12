@@ -544,11 +544,11 @@ void Pet::InitStatsForLevel(uint32 petlevel)
             SetFloatValue(UNIT_FIELD_MINDAMAGE, (cinfo->mindmg / (1 + 2 * cinfo->rank)) + float(petlevel-cinfo->minlevel)*1.5f);
             SetFloatValue(UNIT_FIELD_MAXDAMAGE, (cinfo->maxdmg / (1 + 2 * cinfo->rank)) + float(petlevel-cinfo->minlevel)*1.5f);
 
-            SetStat(STAT_STRENGTH,uint32(20+petlevel*1.55));
-            SetStat(STAT_AGILITY,uint32(20+petlevel*0.64));
-            SetStat(STAT_STAMINA,uint32(20+petlevel*1.27));
-            SetStat(STAT_INTELLECT,uint32(20+petlevel*0.18));
-            SetStat(STAT_SPIRIT,uint32(20+petlevel*0.36));
+            SetStat(STAT_STRENGTH,int32(20+petlevel*1.55));
+            SetStat(STAT_AGILITY,int32(20+petlevel*0.64));
+            SetStat(STAT_STAMINA,int32(20+petlevel*1.27));
+            SetStat(STAT_INTELLECT,int32(20+petlevel*0.18));
+            SetStat(STAT_SPIRIT,int32(20+petlevel*0.36));
             break;
         case SUMMON_PET:
         {
