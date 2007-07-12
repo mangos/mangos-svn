@@ -398,11 +398,15 @@ void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask, Playe
                 // remove custom flag before send
                 if( index == UNIT_NPC_FLAGS )
                     *data << uint32(m_uint32Values[ index ] & ~UNIT_NPC_FLAG_GUARD);
-                // Some values at server stored in float format but must be sended to client in uint32 format
+                // FIXME: Some values at server stored in float format but must be sent to client in uint32 format
                 else if(
-                    index >= UNIT_FIELD_POWER1         && index <= UNIT_FIELD_MAXPOWER5 ||
                     index >= UNIT_FIELD_BASEATTACKTIME && index <= UNIT_FIELD_RANGEDATTACKTIME ||
-                    index >= UNIT_FIELD_STAT0          && index <= (UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE + 6))
+
+                    index >= UNIT_FIELD_POSSTAT0   && index <= UNIT_FIELD_POSSTAT4 ||
+                    index >= UNIT_FIELD_NEGSTAT0   && index <= UNIT_FIELD_NEGSTAT4 ||
+
+                    index >= UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE  && index <= (UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE + 6) ||
+                    index >= UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE  && index <= (UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE + 6) )
                 {
                     // convert from float to uint32 and send
                     *data << uint32(m_floatValues[ index ] < 0 ? 0 : m_floatValues[ index ]);
@@ -558,6 +562,14 @@ void Object::SetStatFloatValue( uint16 index, float value)
         value = 0.0f;
 
     SetFloatValue(index, value);
+}
+
+void Object::SetStatInt32Value( uint16 index, int32 value)
+{
+    if(value < 0)   
+        value = 0;
+
+    SetUInt32Value(index, uint32(value));
 }
 
 void Object::ApplyModUInt32Value(uint16 index, int32 val, bool apply)

@@ -1295,7 +1295,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim,uint32 School, const uint32 damage, ui
     // Magic damage, check for resists
     if (School != SPELL_SCHOOL_NORMAL)
     {
-        float tmpvalue2 = pVictim->GetResistance(SpellSchools(School));
+        int32 tmpvalue2 = pVictim->GetResistance(SpellSchools(School));
         AuraList const& mModTargetRes = GetAurasByType(SPELL_AURA_MOD_TARGET_RESISTANCE);
         for(AuraList::const_iterator i = mModTargetRes.begin(); i != mModTargetRes.end(); ++i)
             if ((*i)->GetModifier()->m_miscvalue & (1 << School))
@@ -1304,7 +1304,9 @@ void Unit::CalcAbsorbResist(Unit *pVictim,uint32 School, const uint32 damage, ui
         *resist += uint32(damage*tmpvalue2*0.0025*pVictim->getLevel()/getLevel());
         if(*resist > damage)
             *resist = damage;
-    }else *resist = 0;
+    }
+    else 
+        *resist = 0;
 
     int32 RemainingDamage = damage - *resist;
     int32 currentAbsorb, manaReduction, maxAbsorb;
@@ -1524,7 +1526,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
             return;
 
         case MELEE_HIT_BLOCK:
-            *blocked_amount = uint32(pVictim->GetShieldBlockValue() + (pVictim->GetStat(STAT_STRENGTH) / 20) -1);
+            *blocked_amount = uint32(pVictim->GetShieldBlockValue() + (pVictim->GetStat(STAT_STRENGTH) / 20.0f) -1);
 
             if (pVictim->GetUnitBlockChance())
                 pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYSHIELD);
@@ -4245,13 +4247,13 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         AuraList const& mDamageDonebySpi = GetAurasByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_SPIRIT);
         for(AuraList::const_iterator i = mDamageDonebySpi.begin();i != mDamageDonebySpi.end(); ++i)
             if((*i)->GetModifier()->m_miscvalue & 1 << spellProto->School)
-                DoneAdvertisedBenefit += int32(GetStat(STAT_SPIRIT) * ((*i)->GetModifier()->m_amount) / 100);
+                DoneAdvertisedBenefit += int32(GetStat(STAT_SPIRIT) * (*i)->GetModifier()->m_amount / 100.0f);
     
         // ... and intellect
         AuraList const& mDamageDonebyInt = GetAurasByType(SPELL_AURA_MOD_SPELL_DAMAGE_OF_INTELLECT);
         for(AuraList::const_iterator i = mDamageDonebyInt.begin();i != mDamageDonebyInt.end(); ++i)
             if ((*i)->GetModifier()->m_miscvalue & 1 << spellProto->School)
-                DoneAdvertisedBenefit += int32(GetStat(STAT_INTELLECT) * ((*i)->GetModifier()->m_amount) / 100);
+                DoneAdvertisedBenefit += int32(GetStat(STAT_INTELLECT) * (*i)->GetModifier()->m_amount / 100.0f);
     }
 
     // ..taken
@@ -5897,9 +5899,14 @@ bool Unit::HandleStatModifier(UnitMods unitMod, UnitModifierType modifierType, f
     case UNIT_MOD_STAT_INTELLECT:
     case UNIT_MOD_STAT_SPIRIT:         UpdateStats(GetStatByAuraGroup(unitMod));  break;
 
-    case UNIT_MOD_ARMOR:          UpdateArmor();           break;
-    case UNIT_MOD_HEALTH:         UpdateMaxHealth();       break;
-    case UNIT_MOD_MANA:           UpdateMaxMana();         break;
+    case UNIT_MOD_ARMOR:               UpdateArmor();           break;
+    case UNIT_MOD_HEALTH:              UpdateMaxHealth();       break;
+
+    case UNIT_MOD_MANA:
+    case UNIT_MOD_RAGE:       
+    case UNIT_MOD_FOCUS:      
+    case UNIT_MOD_ENERGY:     
+    case UNIT_MOD_HAPPINESS:           UpdateMaxPower(GetPowerTypeByAuraGroup(unitMod));         break;
 
     case UNIT_MOD_RESISTANCE_HOLY:
     case UNIT_MOD_RESISTANCE_FIRE:
@@ -5938,7 +5945,7 @@ float Unit::GetModifierValue(UnitMods unitMod, UnitModifierType modifierType) co
 
 float Unit::GetTotalStatValue(Stats stat) const
 {
-    UnitMods unitMod = UnitMods(UNIT_MOD_STAT_STRENGTH + stat);
+    UnitMods unitMod = UnitMods(UNIT_MOD_STAT_START + stat);
 
     if(m_auraModifiersGroup[unitMod][TOTAL_PCT] <= 0.0f)
         return 0.0f;
@@ -6010,6 +6017,25 @@ Stats Unit::GetStatByAuraGroup(UnitMods unitMod) const
     return stat;
 }
 
+Powers Unit::GetPowerTypeByAuraGroup(UnitMods unitMod) const
+{
+    Powers power = POWER_MANA;
+
+    switch(unitMod)
+    {
+    case UNIT_MOD_MANA:       power = POWER_MANA;       break;
+    case UNIT_MOD_RAGE:       power = POWER_RAGE;       break;
+    case UNIT_MOD_FOCUS:      power = POWER_FOCUS;      break;
+    case UNIT_MOD_ENERGY:     power = POWER_ENERGY;     break;
+    case UNIT_MOD_HAPPINESS:  power = POWER_HAPPINESS;  break;
+
+    default:
+        break;
+    }
+
+    return power;
+}
+
 bool Unit::UpdateStats(Stats stat)
 {
     if(stat > STAT_SPIRIT)
@@ -6018,7 +6044,7 @@ bool Unit::UpdateStats(Stats stat)
     // value = ((base_value * base_pct) + total_value) * total_pct
     float value  = GetTotalStatValue(stat);
 
-    SetStat(stat, value);
+    SetStat(stat, int32(value));
 
     switch(stat)
     {
@@ -6039,7 +6065,7 @@ bool Unit::UpdateStats(Stats stat)
 
     case STAT_STAMINA:   UpdateMaxHealth(); break;
     case STAT_INTELLECT: 
-        UpdateMaxMana();
+        UpdateMaxPower(POWER_MANA);
         if(GetTypeId() == TYPEID_PLAYER)
             ((Player*)this)->UpdateAllSpellCritChances();
         break;
@@ -6068,7 +6094,9 @@ bool Unit::UpdateAllStats()
     UpdateAttackPowerAndDamage(true);
     UpdateArmor();
     UpdateMaxHealth();
-    UpdateMaxMana();
+
+    for(int i = POWER_MANA; i < MAX_POWERS; i++)
+        UpdateMaxPower(Powers(i));
 
     if(GetTypeId() == TYPEID_PLAYER)
     {
@@ -6103,13 +6131,13 @@ void Unit::UpdateResistances(uint32 school)
 
     float value  = GetTotalAuraModValue(unitMod);
 
-    SetResistance(SpellSchools(school), value);
+    SetResistance(SpellSchools(school), int32(value));
 }
 
 void Unit::UpdateMaxHealth()
 {
     UnitMods unitMod = UNIT_MOD_HEALTH;
-    float stamina = (GetStat(STAT_STAMINA) - GetCreateStat(STAT_STAMINA));
+    float stamina = GetStat(STAT_STAMINA) - GetCreateStat(STAT_STAMINA);
 
     float value   = GetModifierValue(unitMod, BASE_VALUE) + GetCreateHealth();
     value  *= GetModifierValue(unitMod, BASE_PCT);
@@ -6119,17 +6147,17 @@ void Unit::UpdateMaxHealth()
     SetMaxHealth(value);
 }
 
-void Unit::UpdateMaxMana()
+void Unit::UpdateMaxPower(Powers power)
 {
-    UnitMods unitMod = UNIT_MOD_MANA;
-    float intellect = GetStat(STAT_INTELLECT) - GetCreateStat(STAT_INTELLECT);
+    UnitMods unitMod = UnitMods(UNIT_MOD_POWER_START + power);
+    float addValue = (power == POWER_MANA) ? GetStat(STAT_INTELLECT) - GetCreateStat(STAT_INTELLECT) : 0.0f;
 
-    float value  = GetModifierValue(unitMod, BASE_VALUE) + GetCreatePowers(POWER_MANA);
+    float value  = GetModifierValue(unitMod, BASE_VALUE) + GetCreatePowers(power);
     value *= GetModifierValue(unitMod, BASE_PCT);
-    value += GetModifierValue(unitMod, TOTAL_VALUE) +  intellect * 15.0f;
+    value += GetModifierValue(unitMod, TOTAL_VALUE) +  addValue * 15.0f;
     value *= GetModifierValue(unitMod, TOTAL_PCT);
 
-    SetMaxPower(POWER_MANA, uint32(value));
+    SetMaxPower(power, uint32(value));
 }
 
 void Unit::UpdateArmor()
@@ -6142,7 +6170,7 @@ void Unit::UpdateArmor()
     value += GetModifierValue(unitMod, TOTAL_VALUE);
     value *= GetModifierValue(unitMod, TOTAL_PCT);
 
-    SetArmor(value);
+    SetArmor(int32(value));
 }
 
 void Unit::UpdateAttackPowerAndDamage(bool ranged)
@@ -6296,7 +6324,7 @@ void Unit::SetHealth(   uint32 val)
 void Unit::SetMaxHealth(uint32 val) 
 {
     uint32 health = GetHealth();
-    SetFloatValue(UNIT_FIELD_MAXHEALTH,val); 
+    SetUInt32Value(UNIT_FIELD_MAXHEALTH,val); 
 
     if(val < health)
         SetHealth(val);
@@ -6308,13 +6336,13 @@ void Unit::SetPower(Powers power, uint32 val)
     if(maxPower < val)
         val = maxPower;
 
-    SetStatFloatValue(UNIT_FIELD_POWER1   +power,val); 
+    SetStatInt32Value(UNIT_FIELD_POWER1   +power,val); 
 }
 
 void Unit::SetMaxPower(Powers power, uint32 val) 
 {
     uint32 cur_power = GetPower(power);
-    SetStatFloatValue(UNIT_FIELD_MAXPOWER1+power,val); 
+    SetStatInt32Value(UNIT_FIELD_MAXPOWER1+power,val); 
 
     if(val < cur_power)
         SetPower(power, val);

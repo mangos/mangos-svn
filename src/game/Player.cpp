@@ -2050,6 +2050,15 @@ void Player::InitStatsForLevel(bool reapplyMods)
     for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
         SetStat(Stats(i), info.stats[i]);
 
+    SetCreateHealth(float(info.health));
+
+    //set create powers
+    SetCreatePowers(POWER_MANA, float(info.mana));
+    SetCreatePowers(POWER_RAGE, 1000);
+    SetCreatePowers(POWER_FOCUS, 0);
+    SetCreatePowers(POWER_ENERGY, 10);
+    SetCreatePowers(POWER_HAPPINESS, 0);
+
     // restore if need some important flags
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 );
 
@@ -2146,15 +2155,10 @@ void Player::InitStatsForLevel(bool reapplyMods)
     InitDataForForm();
 
     // save new stats
-    SetMaxPower(POWER_MANA,  info.mana);
-    SetMaxPower(POWER_RAGE,  1000 );
-    SetMaxPower(POWER_ENERGY,100 );
-    SetMaxPower(POWER_FOCUS, 0 );
-    SetMaxPower(POWER_HAPPINESS, 0 );
-
+    for (int i = POWER_MANA; i < MAX_POWERS; i++)
+        SetMaxPower(Powers(i),  GetCreatePowers(Powers(i)));
+    
     SetMaxHealth(info.health);
-    SetCreateHealth(float(info.health));
-    SetCreatePowers(POWER_MANA, float(info.mana));
 
     // cleanup mounted state (it will set correctly at aura loading if player saved at mount.
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
@@ -5792,31 +5796,31 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
 
     if (proto->FireRes)
     {
-        HandleStatModifier(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(proto->FireRes), apply);
+        HandleStatModifier(UNIT_MOD_RESISTANCE_FIRE, BASE_VALUE, float(proto->FireRes), apply);
         //sLog.outDebug("%s FireRes: \t\t%u", applystr.c_str(),  proto->FireRes);
     }
 
     if (proto->NatureRes)
     {
-        HandleStatModifier(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(proto->NatureRes), apply);
+        HandleStatModifier(UNIT_MOD_RESISTANCE_NATURE, BASE_VALUE, float(proto->NatureRes), apply);
         //sLog.outDebug("%s NatureRes: \t\t%u", applystr.c_str(),  proto->NatureRes);
     }
 
     if (proto->FrostRes)
     {
-        HandleStatModifier(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(proto->FrostRes), apply);
+        HandleStatModifier(UNIT_MOD_RESISTANCE_FROST, BASE_VALUE, float(proto->FrostRes), apply);
         //sLog.outDebug("%s FrostRes: \t\t%u", applystr.c_str(),  proto->FrostRes);
     }
 
     if (proto->ShadowRes)
     {
-        HandleStatModifier(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(proto->ShadowRes), apply);
+        HandleStatModifier(UNIT_MOD_RESISTANCE_SHADOW, BASE_VALUE, float(proto->ShadowRes), apply);
         //sLog.outDebug("%s ShadowRes: \t\t%u", applystr.c_str(),  proto->ShadowRes);
     }
 
     if (proto->ArcaneRes)
     {
-        HandleStatModifier(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(proto->ArcaneRes), apply);
+        HandleStatModifier(UNIT_MOD_RESISTANCE_ARCANE, BASE_VALUE, float(proto->ArcaneRes), apply);
         //sLog.outDebug("%s ArcaneRes: \t\t%u", applystr.c_str(),  proto->ArcaneRes);
     }
 
@@ -9757,7 +9761,7 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
                 }
             }
 
-            HandleStatModifier(UnitMods(UNIT_MOD_ARMOR + enchant_spell_id), TOTAL_VALUE, float(enchant_amount), apply);
+            HandleStatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + enchant_spell_id), TOTAL_VALUE, float(enchant_amount), apply);
             break;
 
         case 6:                                             // Shaman Rockbiter Weapon
@@ -12332,14 +12336,14 @@ void Player::SaveToDB()
 
     // remember base (exactly) power/health values before temporary set to saved currentPower/currentHealth data
     uint32 baseHealth = GetUInt32Value(UNIT_FIELD_HEALTH);
-    float basePower[MAX_POWERS];
+    uint32 basePower[MAX_POWERS];
     for(uint32 i = 0; i < MAX_POWERS; ++i)
-        basePower[i] = GetFloatValue(UNIT_FIELD_POWER1+i);
+        basePower[i] = GetUInt32Value(UNIT_FIELD_POWER1+i);
 
     // temporary set current power/health values to save
     SetUInt32Value(UNIT_FIELD_HEALTH,currentHealth);
     for(uint32 i = 0; i < MAX_POWERS; ++i)
-        SetFloatValue(UNIT_FIELD_POWER1+i,float(currentPower[i]));
+        SetUInt32Value(UNIT_FIELD_POWER1+i,currentPower[i]);
 
     sDatabase.BeginTransaction();
 
@@ -12736,10 +12740,10 @@ void Player::outDebugValues() const
     sLog.outDebug("AGILITY is: \t\t%f\t\tSTRENGTH is: \t\t%f",GetStat(STAT_AGILITY), GetStat(STAT_STRENGTH));
     sLog.outDebug("INTELLECT is: \t\t%f\t\tSPIRIT is: \t\t%f",GetStat(STAT_INTELLECT), GetStat(STAT_SPIRIT));
     sLog.outDebug("STAMINA is: \t\t%f\t\tSPIRIT is: \t\t%f",GetStat(STAT_STAMINA), GetStat(STAT_SPIRIT));
-    sLog.outDebug("Armor is: \t\t%f\t\tBlock is: \t\t%f",GetArmor(), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
-    sLog.outDebug("HolyRes is: \t\t%f\t\tFireRes is: \t\t%f",GetResistance(SPELL_SCHOOL_HOLY), GetResistance(SPELL_SCHOOL_FIRE));
-    sLog.outDebug("NatureRes is: \t\t%f\t\tFrostRes is: \t\t%f",GetResistance(SPELL_SCHOOL_NATURE), GetResistance(SPELL_SCHOOL_FROST));
-    sLog.outDebug("ShadowRes is: \t\t%f\t\tArcaneRes is: \t\t%f",GetResistance(SPELL_SCHOOL_SHADOW), GetResistance(SPELL_SCHOOL_ARCANE));
+    sLog.outDebug("Armor is: \t\t%u\t\tBlock is: \t\t%f",GetArmor(), GetFloatValue(PLAYER_BLOCK_PERCENTAGE));
+    sLog.outDebug("HolyRes is: \t\t%u\t\tFireRes is: \t\t%u",GetResistance(SPELL_SCHOOL_HOLY), GetResistance(SPELL_SCHOOL_FIRE));
+    sLog.outDebug("NatureRes is: \t\t%u\t\tFrostRes is: \t\t%u",GetResistance(SPELL_SCHOOL_NATURE), GetResistance(SPELL_SCHOOL_FROST));
+    sLog.outDebug("ShadowRes is: \t\t%u\t\tArcaneRes is: \t\t%u",GetResistance(SPELL_SCHOOL_SHADOW), GetResistance(SPELL_SCHOOL_ARCANE));
     sLog.outDebug("MIN_DAMAGE is: \t\t%f\tMAX_DAMAGE is: \t\t%f",GetFloatValue(UNIT_FIELD_MINDAMAGE), GetFloatValue(UNIT_FIELD_MAXDAMAGE));
     sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
     sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
