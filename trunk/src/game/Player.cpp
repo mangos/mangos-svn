@@ -1923,7 +1923,8 @@ void Player::GiveXP(uint32 xp, Unit* victim)
     {
         newXP -= nextLvlXP;
 
-        GiveLevel(getLevel() + 1);
+        if ( level < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) )
+            GiveLevel(level + 1);
 
         level = getLevel();
         nextLvlXP = GetUInt32Value(PLAYER_NEXT_LEVEL_XP);
@@ -1936,7 +1937,7 @@ void Player::GiveXP(uint32 xp, Unit* victim)
 // Current player experience not update (must be update by caller)
 void Player::GiveLevel(uint32 level)
 {
-    if ( level == getLevel() || level > sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) )
+    if ( level == getLevel() )
         return;
 
     PlayerLevelInfo info;

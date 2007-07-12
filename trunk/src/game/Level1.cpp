@@ -412,7 +412,7 @@ bool ChatHandler::HandleRecallCommand(const char* args)
 
             if(chr->isInFlight())
             {
-                SendSysMessage(LANG_YOU_IN_FLIGHT);
+                SendSysMessage(LANG_TARGET_IN_FLIGHT);
                 return true;
             }
         }
