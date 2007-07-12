@@ -2056,7 +2056,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
     SetCreatePowers(POWER_MANA, float(info.mana));
     SetCreatePowers(POWER_RAGE, 1000);
     SetCreatePowers(POWER_FOCUS, 0);
-    SetCreatePowers(POWER_ENERGY, 10);
+    SetCreatePowers(POWER_ENERGY, 100);
     SetCreatePowers(POWER_HAPPINESS, 0);
 
     // restore if need some important flags
@@ -11701,6 +11701,12 @@ bool Player::LoadFromDB( uint32 guid )
     SetUInt64Value(UNIT_FIELD_SUMMONEDBY,0);
     SetUInt64Value(UNIT_FIELD_CREATEDBY,0);
 
+    // reset some aura modifiers before aura apply
+    SetUInt64Value(PLAYER_FARSIGHT, 0);
+    SetUInt32Value(PLAYER_TRACK_CREATURES, 0 );
+    SetUInt32Value(PLAYER_TRACK_RESOURCES, 0 );
+
+
     // reset skill modifiers and set correct unlearn flags
     for (uint32 i = 0; i < PLAYER_MAX_SKILLS; i++)
     {
@@ -12300,22 +12306,8 @@ void Player::SaveToDB()
     int is_save_resting = HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) ? 1 : 0;
                                                             //save, far from tavern/city
                                                             //save, but in tavern/city
-    sLog.outDebug("The value of player %s before unload item and aura is: ", m_name.c_str());
+    sLog.outDebug("The value of player %s at save: ", m_name.c_str());
     outDebugValues();
-
-    // remember current power/health values with all auras/item/stats mods to save and restore at load
-    uint32 currentHealth = GetHealth();
-    uint32 currentPower[MAX_POWERS];
-    for(uint32 i = 0; i < MAX_POWERS; ++i)
-        currentPower[i] = GetPower(Powers(i));
-
-    if(isAlive())
-    {
-        _RemoveAllStatBonuses();
-    }
-
-    // not required: all stats mods recalculated at load
-    //_RemoveStatsMods();
 
     // save state (after auras removing), if aura remove some flags then it must set it back by self)
     uint32 tmp_bytes = GetUInt32Value(UNIT_FIELD_BYTES_1);
@@ -12328,22 +12320,7 @@ void Player::SaveToDB()
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
     SetUInt32Value(UNIT_FIELD_DISPLAYID,GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
 
-    // remove restflag when save
-    //this is because of the rename char stuff
-    //RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
-
     bool inworld = IsInWorld();
-
-    // remember base (exactly) power/health values before temporary set to saved currentPower/currentHealth data
-    uint32 baseHealth = GetUInt32Value(UNIT_FIELD_HEALTH);
-    uint32 basePower[MAX_POWERS];
-    for(uint32 i = 0; i < MAX_POWERS; ++i)
-        basePower[i] = GetUInt32Value(UNIT_FIELD_POWER1+i);
-
-    // temporary set current power/health values to save
-    SetUInt32Value(UNIT_FIELD_HEALTH,currentHealth);
-    for(uint32 i = 0; i < MAX_POWERS; ++i)
-        SetUInt32Value(UNIT_FIELD_POWER1+i,currentPower[i]);
 
     sDatabase.BeginTransaction();
 
@@ -12378,7 +12355,7 @@ void Player::SaveToDB()
         ss << m_taximask[i] << " ";
 
     ss << "', ";
-    inworld ? ss << 1: ss << 0;
+    ss << (inworld ? 1 : 0);
 
     ss << ", ";
     ss << m_cinematic;
@@ -12441,31 +12418,15 @@ void Player::SaveToDB()
 
     sDatabase.CommitTransaction();
 
-    sLog.outDebug("Save Basic value of player %s is: ", m_name.c_str());
-    outDebugValues();
-
     // restore state (before aura apply, if aura remove flag then aura must set it ack by self)
     SetUInt32Value(UNIT_FIELD_DISPLAYID, tmp_displayid);
     SetUInt32Value(UNIT_FIELD_BYTES_1, tmp_bytes);
     SetUInt32Value(UNIT_FIELD_FLAGS, tmp_flags);
     SetUInt32Value(PLAYER_FLAGS, tmp_pflags);
 
-    // not required: all stats mods recalculated at load and _RemoveStatsMods not called early in code
-    // _ApplyStatsMods();
-
-    if(isAlive())
-    {
-        _ApplyAllStatBonuses();
-    }
-
     // save pet (hunter pet level and experience and all type pets health/mana).
     if(Pet* pet = GetPet())
         pet->SavePetToDB(PET_SAVE_AS_CURRENT);
-
-    // restore base power/health values after restoring mods
-    SetHealth(currentHealth);
-    for(uint32 i = 0; i < MAX_POWERS; ++i)
-        SetPower(Powers(i), currentPower[i]);
 }
 
 // fast save function for item/money cheating preventing - save only inventory and money state

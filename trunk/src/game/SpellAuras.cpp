@@ -2189,7 +2189,7 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
 
 void Aura::HandleAuraModSilence(bool apply, bool Real)
 {
-    apply ? m_target->m_silenced = true : m_target->m_silenced = false;
+    m_target->m_silenced = apply;
 }
 
 void Aura::HandleModThreat(bool apply, bool Real)
