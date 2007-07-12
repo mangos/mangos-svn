@@ -520,7 +520,6 @@ class MANGOS_DLL_SPEC WorldSession
 
         // testing...
         void HandleMoveShipOpcode(WorldPacket& recv_data);
-        void HandleMoveFlyStateChangeOpcode(WorldPacket& recv_data);
 
         // Socket gem
         void HandleSocketOpcode(WorldPacket& recv_data);

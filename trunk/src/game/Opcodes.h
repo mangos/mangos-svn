@@ -880,7 +880,7 @@ enum OpCodes
     SMSG_FLY_MODE_START                             = 835, // packed guid + uint32, start fly
     SMSG_FLY_MODE_STOP                              = 836, // packed guid + uint32, stop fly
     CMSG_MOVE_FLY_MODE_CHANGE_ACK                   = 837, // movement related, fly on/off ack
-    CMSG_MOVE_FLY_STATE_CHANGE                      = 838, // movement related, fly start/stop(land) ack, may be MSG
+    MSG_MOVE_FLY_STATE_CHANGE                       = 838, // movement related, fly start/stop(land) ack, may be MSG
     CMSG_SOCKET_ITEM                                = 839, // click on "Socket Gems" button in Jewelcrafting UI, contains uint64 item guid + 3 x uint64 gems guid's
     // 840, CMSG?
     SMSG_ARENA_TEAM_COMMAND_RESULT                  = 841, // uint32 command, name1, name2, uint32 errorcode
