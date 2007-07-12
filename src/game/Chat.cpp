@@ -146,6 +146,17 @@ ChatCommand * ChatHandler::getCommandTable()
         { NULL,          0, NULL,                                          "",   NULL }
     };
 
+    static ChatCommand learnCommandTable[] =
+    {
+        { "all",         SEC_ADMINISTRATOR, &ChatHandler::HandleLearnAllCommand,         "",   NULL },
+        { "all_gm",      SEC_GAMEMASTER,    &ChatHandler::HandleLearnAllGMCommand,       "",   NULL },
+        { "all_craft",   SEC_GAMEMASTER,    &ChatHandler::HandleLearnAllCraftCommand,    "",   NULL },
+        { "all_lang",    SEC_MODERATOR,     &ChatHandler::HandleLearnAllLangCommand,     "",   NULL },
+        { "all_myclass", SEC_ADMINISTRATOR, &ChatHandler::HandleLearnAllMyClassCommand,  "",   NULL },
+        { "",            SEC_ADMINISTRATOR, &ChatHandler::HandleLearnCommand,            "",   NULL },
+        { NULL,          0, NULL,                                                        "",   NULL }
+    };
+
     static ChatCommand commandTable[] =
     {
         { "acct",        SEC_PLAYER,        &ChatHandler::HandleAcctCommand,             "",   NULL },
@@ -181,7 +192,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "delvendoritem",SEC_GAMEMASTER,   &ChatHandler::HandleDelVendorItemCommand,    "",   NULL },
         { "itemmove",    SEC_GAMEMASTER,    &ChatHandler::HandleItemMoveCommand,         "",   NULL },
         { "kick",        SEC_GAMEMASTER,    &ChatHandler::HandleKickPlayerCommand,       "",   NULL },
-        { "learn",       SEC_ADMINISTRATOR, &ChatHandler::HandleLearnCommand,            "",   NULL },
+        { "learn",       SEC_MODERATOR,     NULL,                                        "",   learnCommandTable },
         { "cooldown",    SEC_ADMINISTRATOR, &ChatHandler::HandleCooldownCommand,         "",   NULL },
         { "unlearn",     SEC_ADMINISTRATOR, &ChatHandler::HandleUnLearnCommand,          "",   NULL },
         { "modify",      SEC_MODERATOR,     NULL,                                        "",   modifyCommandTable },
@@ -674,12 +685,12 @@ Creature* ChatHandler::getSelectedCreature()
 
 char*     ChatHandler::extractKeyFromLink(char* text, char const* linkType)
 {
-    // skip empty (NULL is valid result if strtok(NULL, .. ) must be used
-    if(text && !*text)
+    // skip empty
+    if(!text && !*text)
         return NULL;
 
     // return non link case 
-    if(text && text[0]!='|')
+    if(text[0]!='|')
         return strtok(text, " ");
 
     // [name] Shift-click form |color|linkType:key|h[name]|h|r
@@ -691,6 +702,8 @@ char*     ChatHandler::extractKeyFromLink(char* text, char const* linkType)
         return NULL;                                        // end of data
 
     char* cLinkType = strtok(NULL, ":");                    // linktype
+    if(!cLinkType)
+        return NULL;                                        // end of data
 
     if(strcmp(cLinkType,linkType) != 0)
     {

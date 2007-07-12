@@ -35,6 +35,7 @@
 #define LANG_GMS_ON_SRV                  "There are the following active GMs on this server:"
 #define LANG_GMS_NOT_LOGGED              "There are no GMs currently logged in on this server."
 #define LANG_YOU_IN_FLIGHT               "You are flying and can't do that."
+#define LANG_TARGET_IN_FLIGHT            "Target is flying you can't do that."
 #define LANG_CHAR_IN_FLIGHT              "%s are flying and your command failed."
 #define LANG_CHAR_NON_MOUNTED            "You are not mounted and can't dismount."
 #define LANG_YOU_IN_COMBAT               "You are fighting and can't do that."
@@ -329,8 +330,10 @@
 #define LANG_BANLIST_MATCHINGIP          "The following IPs match your pattern:"
 #define LANG_BANLIST_MATCHINGACCOUNT     "The following accounts match your query:"
 
-#define LANG_COMMAND_LEARNINGSPSK        "%s - Learning all spells/skills for its class."
-#define LANG_COMMAND_LEARNINGALLLANG     "%s - Learning all languages."
+#define LANG_COMMAND_LEARN_MANY_SPELLS   "You learned many spells/skills."
+#define LANG_COMMAND_LEARN_CLASS_SPELLS  "You learned all spells/skills for class."
+#define LANG_COMMAND_LEARN_ALL_LANG      "You learned all languages."
+#define LANG_COMMAND_LEARN_ALL_CRAFT     "You learned all craft skills and recipes."
 #define LANG_COMMAND_ADDITEMCOULDNOTFIND "Could not find '%s'"
 #define LANG_COMMAND_ITEMIDINVALID       "Invalid item id: %u"
 #define LANG_COMMAND_NOITEMFOUND         "No items found!"
@@ -388,13 +391,13 @@
 #define LANG_SPAWNING_SPIRIT_HEAL        "Spawning spirit healers\n"
 #define LANG_NO_SPIRIT_HEAL_DB           "No spirit healers in database, exiting."
 
-// SetSkill-Kommando von WarHead
 #define LANG_SET_SKILL                   "Skill %u (%s) for player %s set to %u and current maximum set to %u."
 #define LANG_SET_SKILL_ERROR             "Player %s must have skill %u (%s) before using this command."
 
 #define LANG_INVALID_SKILL_ID            "Invalid skill id (%u)"
-#define LANG_LEARNING_GM_SKILLS          "%s - Learning default GM spells/skills."
-#define LANG_KNOWN_SPELL                 "You already know that spell."
+#define LANG_LEARNING_GM_SKILLS          "You learned default GM spells/skills."
+#define LANG_YOU_KNOWN_SPELL             "You already know that spell."
+#define LANG_TARGET_KNOWN_SPELL          "Target(%s) already know that spell."
 #define LANG_UNKNOWN_SPELL               "%s doesn't know that spell."
 #define LANG_FORGET_SPELL                "You already forgot that spell."
 #define LANG_REMOVEALL_COOLDOWN          "All spell cooldowns removed for %s."

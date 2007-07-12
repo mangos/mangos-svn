@@ -296,7 +296,10 @@ bool ChatHandler::HandleGoCreatureCommand(const char* args)
 
         // Get the "creature_template.entry"
         // number or [name] Shift-click form |color|Hcreature_entry:creature_id|h[name]|h|r
-        char* cId = extractKeyFromLink(NULL,"Hcreature_entry");
+        char* tail = strtok(NULL,"");
+        if(!tail)
+            return false;
+        char* cId = extractKeyFromLink(tail,"Hcreature_entry");
         if(!cId)
             return false;
 

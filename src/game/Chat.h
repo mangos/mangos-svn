@@ -226,6 +226,11 @@ class ChatHandler
         bool HandleAllowMovementCommand(const char* args);
         bool HandleGoCommand(const char* args);
         bool HandleLearnCommand(const char* args);
+        bool HandleLearnAllCommand(const char* args);
+        bool HandleLearnAllGMCommand(const char* args);
+        bool HandleLearnAllCraftCommand(const char* args);
+        bool HandleLearnAllLangCommand(const char* args);
+        bool HandleLearnAllMyClassCommand(const char* args);
         bool HandleCooldownCommand(const char* args);
         bool HandleUnLearnCommand(const char* args);
         bool HandleObjectCommand(const char* args);

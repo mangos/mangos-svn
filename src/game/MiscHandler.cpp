@@ -972,7 +972,7 @@ void WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleFeatherFallAck(WorldPacket &recv_data)
 {
-    sLog.outString("WORLD: CMSG_MOVE_FEATHER_FALL_ACK");
+    DEBUG_LOG("WORLD: CMSG_MOVE_FEATHER_FALL_ACK");
 }
 
 void WorldSession::HandleMoveUnRootAck(WorldPacket& recv_data)
