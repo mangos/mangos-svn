@@ -867,7 +867,7 @@ const char* g_worldOpcodeNames[] =
     "SMSG_FLY_MODE_START",                                 // 835
     "SMSG_FLY_MODE_STOP",                                  // 836
     "CMSG_MOVE_FLY_MODE_CHANGE_ACK",                       // 837
-    "CMSG_MOVE_FLY_STATE_CHANGE",                          // 838
+    "MSG_MOVE_FLY_STATE_CHANGE",                           // 838
     "CMSG_SOCKET_ITEM",                                    //CMSG_SOCKET_ITEM 839
     "UNKNOWN840",                                          // 840
     "SMSG_ARENA_TEAM_COMMAND_RESULT",                      // 841

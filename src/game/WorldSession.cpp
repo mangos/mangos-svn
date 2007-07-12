@@ -437,7 +437,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_AREA_SPIRIT_HEALER_QUERY ]         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAreaSpiritHealerQueryOpcode   );
     objmgr.opcodeTable[ CMSG_AREA_SPIRIT_HEALER_QUEUE ]         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAreaSpiritHealerQueueOpcode   );
     objmgr.opcodeTable[ CMSG_MOVE_SHIP_909 ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMoveShipOpcode                );
-    objmgr.opcodeTable[ CMSG_MOVE_FLY_STATE_CHANGE ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMoveFlyStateChangeOpcode      );
+    objmgr.opcodeTable[ MSG_MOVE_FLY_STATE_CHANGE ]             = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
     objmgr.opcodeTable[ CMSG_DISMOUNT ]                         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleDismountOpcode                );
     objmgr.opcodeTable[ CMSG_SELF_RES ]                         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSelfResOpcode                 );
     objmgr.opcodeTable[ CMSG_SOCKET_ITEM ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSocketOpcode                  );
@@ -1375,77 +1375,6 @@ off:
 10 FD A9 01 19 BA 7A C3 | 42 0D 70 44 44 B0 A8 42
 78 15 94 40 39 03 00 00 | 00 00 00 00
 */
-}
-
-void WorldSession::HandleMoveFlyStateChangeOpcode( WorldPacket & recv_data )
-{
-    /*
-    00 08 A0 01 4C AE DC 01 | F8 18 56 45 03 97 BD 44
-    A2 8D 33 43 1C B3 29 40 | 00 00 00 00 45 00 00 00
-    00 00 80 3F
-
-    01 20 80 00 5F D3 DC 01 | 8B B3 55 45 4C 77 BD 44
-    F 65 33 43 DC AB 53 40 | 00 00 00 00 00 00 00 00
-    96 7D 7C BF 54 F9 28 BE | 00 00 60 41 00 00 00 00
-    */
-
-    // fly state: start flying/landing
-    sLog.outDebug("WORLD: CMSG_MOVE_FLY_STATE_CHANGE");
-    //recv_data.hexlike();
-    CHECK_PACKET_SIZE(recv_data,4+4+4+4+4+4);
-
-    /* extract packet */
-    uint32 flags, time, fallTime;
-    float x, y, z, orientation;
-
-    uint32 t_GUIDl, t_GUIDh;
-    float  t_x, t_y, t_z, t_o;
-    float  s_angle;
-    float  j_unk1, j_sinAngle, j_cosAngle, j_xyspeed;
-    float f_speed;
-
-    recv_data >> flags >> time;
-    recv_data >> x >> y >> z >> orientation;
-
-    _player->SetMovementFlags(flags);
-
-    if (flags & MOVEMENTFLAG_ONTRANSPORT) // and if opcode 909?
-    {
-        // recheck
-        CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4+4+4+4+4+4);
-
-        recv_data >> t_GUIDl >> t_GUIDh;
-        recv_data >> t_x >> t_y >> t_z >> t_o;
-    }
-    if (flags & MOVEMENTFLAG_SWIMMING)
-    {
-        // recheck
-        CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4);
-
-        recv_data >> s_angle;                               // kind of angle, -1.55=looking down, 0=looking straight forward, +1.55=looking up
-    }
-
-    // recheck
-    CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4);
-
-    recv_data >> fallTime;                                  // duration of last jump (when in jump duration from jump begin to now)
-
-    if ( (flags & MOVEMENTFLAG_JUMPING) || (flags & MOVEMENTFLAG_FALLING) )
-    {
-        // recheck
-        CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4+4+4+4);
-
-        recv_data >> j_unk1;                                // constant, but different when jumping in water and on land?
-        recv_data >> j_sinAngle >> j_cosAngle;              // sin + cos of angle between orientation0 and players orientation
-        recv_data >> j_xyspeed;                             // speed of xy movement
-    }
-
-    // recheck
-    CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4);
-
-    recv_data >> f_speed; // this is difference from standard movement opcodes...
-    sLog.outDebug("f_speed %f", f_speed);
-    /*----------------*/
 }
 
 void WorldSession::HandleSelfResOpcode( WorldPacket & recv_data )
