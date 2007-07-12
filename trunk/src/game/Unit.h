@@ -970,8 +970,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         Aura* GetAura(uint32 spellId, uint32 effindex);
         AuraMap& GetAuras( ) {return m_Auras;}
-        AuraList&       GetAurasByType(uint8 type)       { return m_modAuras[type]; }
         AuraList const& GetAurasByType(uint8 type) const { return m_modAuras[type]; }
+        void ApplyAuraProcTriggerDamage(Aura* aura, bool apply);
         long GetTotalAuraModifier(uint32 ModifierID);
         void SendMoveToPacket(float x, float y, float z, bool run, uint32 transitTime = 0);
         void setTransForm(uint32 spellid) { m_transform = spellid;}

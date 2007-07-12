@@ -598,8 +598,8 @@ void Player::HandleDrowning(uint32 UnderWaterTime)
     if(!m_isunderwater)
         return;
 
-    AuraList& mModWaterBreathing = GetAurasByType(SPELL_AURA_MOD_WATER_BREATHING);
-    for(AuraList::iterator i = mModWaterBreathing.begin(); i != mModWaterBreathing.end(); ++i)
+    AuraList const& mModWaterBreathing = GetAurasByType(SPELL_AURA_MOD_WATER_BREATHING);
+    for(AuraList::const_iterator i = mModWaterBreathing.begin(); i != mModWaterBreathing.end(); ++i)
         UnderWaterTime = uint32(UnderWaterTime * (100.0f + (*i)->GetModifier()->m_amount) / 100.0f);
 
     //if have water breath , then remove bar
@@ -1647,8 +1647,8 @@ void Player::Regenerate(Powers power)
             break;
     }
 
-    AuraList& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
-    for(AuraList::iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
+    AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
+    for(AuraList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
         if ((*i)->GetModifier()->m_miscvalue == power)
             addvalue *= ((*i)->GetModifier()->m_amount + 100) / 100.0;
 
@@ -1699,8 +1699,8 @@ void Player::RegenerateHealth()
 
     if (!isInCombat())
     {
-        AuraList& mModHealthRegenPct = GetAurasByType(SPELL_AURA_MOD_HEALTH_REGEN_PERCENT);
-        for(AuraList::iterator i = mModHealthRegenPct.begin(); i != mModHealthRegenPct.end(); ++i)
+        AuraList const& mModHealthRegenPct = GetAurasByType(SPELL_AURA_MOD_HEALTH_REGEN_PERCENT);
+        for(AuraList::const_iterator i = mModHealthRegenPct.begin(); i != mModHealthRegenPct.end(); ++i)
             addvalue *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
     }
     else if(HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT))
@@ -1906,8 +1906,8 @@ void Player::GiveXP(uint32 xp, Unit* victim)
         return;
 
     // handle SPELL_AURA_MOD_XP_PCT auras
-    Unit::AuraList& ModXPPctAuras = GetAurasByType(SPELL_AURA_MOD_XP_PCT);
-    for(Unit::AuraList::iterator i = ModXPPctAuras.begin();i != ModXPPctAuras.end(); ++i)
+    Unit::AuraList const& ModXPPctAuras = GetAurasByType(SPELL_AURA_MOD_XP_PCT);
+    for(Unit::AuraList::const_iterator i = ModXPPctAuras.begin();i != ModXPPctAuras.end(); ++i)
         xp *= uint32(1.0f + (*i)->GetModifier()->m_amount / 100.0f);
 
     // XP resting bonus for kill
@@ -4525,12 +4525,12 @@ void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)
             SetUInt32Value(PLAYER_SKILL(i)+1,maxVal*0x10000+currVal);
             // apply skill bonuses
             SetUInt32Value(PLAYER_SKILL(i)+2,0);
-            AuraList& mModSkill = GetAurasByType(SPELL_AURA_MOD_SKILL);
-            for(AuraList::iterator i = mModSkill.begin(); i != mModSkill.end(); ++i)
+            AuraList const& mModSkill = GetAurasByType(SPELL_AURA_MOD_SKILL);
+            for(AuraList::const_iterator i = mModSkill.begin(); i != mModSkill.end(); ++i)
                 if ((*i)->GetModifier()->m_miscvalue == id)
                     (*i)->ApplyModifier(true);
-            AuraList& mModSkillTalent = GetAurasByType(SPELL_AURA_MOD_SKILL_TALENT);
-            for(AuraList::iterator i = mModSkillTalent.begin(); i != mModSkillTalent.end(); ++i)
+            AuraList const& mModSkillTalent = GetAurasByType(SPELL_AURA_MOD_SKILL_TALENT);
+            for(AuraList::const_iterator i = mModSkillTalent.begin(); i != mModSkillTalent.end(); ++i)
                 if ((*i)->GetModifier()->m_miscvalue == id)
                     (*i)->ApplyModifier(true);
             return;
@@ -5153,8 +5153,8 @@ int32 Player::CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep)
     int32 percent = Factor*20;
     int32 repMod = 0;
 
-    AuraList& mReputationGain = GetAurasByType(SPELL_AURA_MOD_REPUTATION_GAIN);
-    for(AuraList::iterator i = mReputationGain.begin();i != mReputationGain.end(); ++i)
+    AuraList const& mReputationGain = GetAurasByType(SPELL_AURA_MOD_REPUTATION_GAIN);
+    for(AuraList::const_iterator i = mReputationGain.begin();i != mReputationGain.end(); ++i)
     {
         repMod = ((*i)->GetModifier()->m_amount) / 100;
     }
