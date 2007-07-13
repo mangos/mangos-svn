@@ -26,9 +26,6 @@
 Database::~Database()
 {
     /*Delete objects*/
-
-    //This also deletes m_threadBody
-    delete m_delayThread;
 }
 
 bool Database::Initialize(const char *)

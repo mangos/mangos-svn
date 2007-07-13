@@ -56,8 +56,8 @@ DatabaseMysql::DatabaseMysql() : Database(), mMysql(0)
 
 DatabaseMysql::~DatabaseMysql()
 {
-    m_threadBody->Stop();   //Stop event
-    m_delayThread->wait();  //Wait for flush to DB
+    if (m_delayThread)
+        HaltDelayThread();
 
     if (mMysql)
         mysql_close(mMysql);
@@ -81,10 +81,7 @@ bool DatabaseMysql::Initialize(const char *infoString)
         return false;
     }
 
-    assert(!m_delayThread);
-
-    //New delay thread for delay execute
-    m_delayThread = new ZThread::Thread(m_threadBody = new MySQLDelayThread(this));
+    InitDelayThread();
 
     vector<string> tokens = StrSplit(infoString, ";");
 
@@ -239,6 +236,9 @@ bool DatabaseMysql::Execute(const char *sql)
 {
     if (!mMysql)
         return false;
+
+    // don't use queued execution if it has not been initialized
+    if (!m_threadBody) return DirectExecute(sql);
     
     tranThread = ZThread::ThreadImpl::current();            // owner of this transaction
     TransactionQueues::iterator i = m_tranQueues.find(tranThread);
@@ -367,4 +367,20 @@ unsigned long DatabaseMysql::escape_string(char *to, const char *from, unsigned 
         return 0;
 
     return(mysql_real_escape_string(mMysql, to, from, length));
+}
+
+void DatabaseMysql::InitDelayThread()
+{
+    assert(!m_delayThread);
+
+    //New delay thread for delay execute
+    m_delayThread = new ZThread::Thread(m_threadBody = new MySQLDelayThread(this));
+}
+
+void DatabaseMysql::HaltDelayThread()
+{
+    m_threadBody->Stop();                                   //Stop event
+    m_delayThread->wait();                                  //Wait for flush to DB
+    delete m_delayThread;                                   //This also deletes m_threadBody
+    m_delayThread = NULL;
 }

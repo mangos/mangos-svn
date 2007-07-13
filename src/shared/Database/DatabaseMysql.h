@@ -41,6 +41,8 @@ class DatabaseMysql : public Database
         //! Initializes Mysql and connects to a server.
         /*! infoString should be formated like hostname;username;password;database. */
         bool Initialize(const char *infoString);
+        void InitDelayThread();
+        void HaltDelayThread();
         QueryResult* PQuery(const char *format,...);
         QueryResult* Query(const char *sql);
         bool Execute(const char *sql);

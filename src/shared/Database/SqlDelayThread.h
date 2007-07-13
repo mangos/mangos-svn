@@ -24,12 +24,8 @@
 #include "zthread/FastMutex.h"
 #include "zthread/LockedQueue.h"
 
-#include <queue>
-
 class Database;
 class SqlStatement;
-
-using namespace std;
 
 class SqlDelayThread : public ZThread::Runnable
 {
