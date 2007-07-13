@@ -22,7 +22,6 @@
 #include "zthread/LockedQueue.h"
 #include "zthread/FastMutex.h"
 #include <queue>
-using namespace std;
 
 /// ---- BASE ---
 
@@ -32,6 +31,7 @@ class SqlOperation
 {
     public:
         virtual void Execute(Database *db) = 0;
+        virtual ~SqlOperation() {}
 };
 
 /// ---- ASYNC STATEMENTS / TRANSACTIONS ----
@@ -42,14 +42,14 @@ class SqlStatement : public SqlOperation
         const char *m_sql;
     public:
         SqlStatement(const char *sql) : m_sql(strdup(sql)){}
-        ~SqlStatement() { free((void*)m_sql); }
+        ~SqlStatement() { delete[] m_sql; }
         void Execute(Database *db);
 };
 
 class SqlTransaction : public SqlOperation
 {
     private:
-        queue<const char *> m_queue;
+        std::queue<const char *> m_queue;
     public:
         SqlTransaction() {}
         void DelayExecute(const char *sql) { m_queue.push(strdup(sql)); }
