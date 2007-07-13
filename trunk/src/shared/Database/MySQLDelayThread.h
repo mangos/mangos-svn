@@ -24,8 +24,8 @@
 class MySQLDelayThread : public SqlDelayThread
 {
     public:
-        MySQLDelayThread(Database* db) : SqlDelayThread(db) { mysql_thread_init(); }
-        void Stop() { SqlDelayThread::Stop(); mysql_thread_end(); }
+        MySQLDelayThread(Database* db) : SqlDelayThread(db) {}
+        void Stop() { SqlDelayThread::Stop(); }
 };
 
 #endif                                                      //__MYSQLDELAYTHREAD_H

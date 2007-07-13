@@ -27,6 +27,9 @@ SqlDelayThread::SqlDelayThread(Database* db) : m_dbEngine(db), m_running(true)
 void SqlDelayThread::run()
 {
     SqlStatement* s;
+
+    mysql_thread_init();
+
     while (m_running)
     {
         while (!m_sqlQueue.empty())
@@ -37,6 +40,8 @@ void SqlDelayThread::run()
         }
         ZThread::Thread::sleep(10);
     }
+
+    mysql_thread_end();
 }
 
 void SqlDelayThread::Stop()
