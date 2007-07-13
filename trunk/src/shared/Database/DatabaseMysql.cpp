@@ -38,7 +38,7 @@ void DatabaseMysql::ThreadEnd()
 
 size_t DatabaseMysql::db_count = 0;
 
-DatabaseMysql::DatabaseMysql() : Database(), mMysql(0)
+DatabaseMysql::DatabaseMysql() : Database(), mMysql(0), m_delayThread(NULL)
 {
     // before first connection
     if( db_count++ == 0 )
@@ -52,8 +52,6 @@ DatabaseMysql::DatabaseMysql() : Database(), mMysql(0)
             exit(1);
         }
     }
-    //New delay thread for delay execute
-    m_delayThread = new ZThread::Thread(m_threadBody = new MySQLDelayThread(this));
 }
 
 DatabaseMysql::~DatabaseMysql()
@@ -82,6 +80,11 @@ bool DatabaseMysql::Initialize(const char *infoString)
         sLog.outError( "Could not initialize Mysql connection" );
         return false;
     }
+
+    assert(!m_delayThread);
+
+    //New delay thread for delay execute
+    m_delayThread = new ZThread::Thread(m_threadBody = new MySQLDelayThread(this));
 
     vector<string> tokens = StrSplit(infoString, ";");
 
