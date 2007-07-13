@@ -34,7 +34,7 @@ typedef HM_NAMESPACE::hash_map<ZThread::ThreadImpl*, SqlTransaction*> Transactio
 class Database
 {
     protected:
-        Database() {};
+        Database() : m_threadBody(NULL), m_delayThread(NULL) {};
         
         TransactionQueues m_tranQueues;                     ///< Transaction queue from diff. threads
         SqlDelayThread* m_threadBody;                       ///< Pointer to delay sql executer
