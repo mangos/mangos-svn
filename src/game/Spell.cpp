@@ -385,19 +385,22 @@ void Spell::FillTargetMap()
             }
         }
 
-        // filter targets by immunity and creature type
+        // filter targets by immunity and creature type 
         uint32 SpellCreatureType = GetTargetCreatureTypeMask();
 
         for (std::list<Unit*>::iterator itr = tmpUnitMap.begin() ; itr != tmpUnitMap.end();)
         {
-            // Check targets for creature type mask and remove not appropriate
-            if (SpellCreatureType)
+            // Check targets for creature type mask and remove not appropriate (skip explicit self target case, maybe need other explicit targets)
+            if(m_spellInfo->EffectImplicitTargetA[i]!=TARGET_SELF )
             {
-                uint32 TargetCreatureType = (*itr)->GetCreatureTypeMask();
-                if(TargetCreatureType && !(SpellCreatureType & TargetCreatureType))
+                if (SpellCreatureType)
                 {
-                    itr = tmpUnitMap.erase(itr);
-                    continue;
+                    uint32 TargetCreatureType = (*itr)->GetCreatureTypeMask();
+                    if(TargetCreatureType && !(SpellCreatureType & TargetCreatureType))
+                    {
+                        itr = tmpUnitMap.erase(itr);
+                        continue;
+                    }
                 }
             }
 
