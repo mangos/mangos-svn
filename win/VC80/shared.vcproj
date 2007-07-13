@@ -209,6 +209,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\shared\Database\MySQLDelayThread.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\shared\Database\QueryResult.h"
 				>
 			</File>
@@ -226,6 +230,22 @@
 			</File>
 			<File
 				RelativePath="..\..\src\shared\Database\QueryResultSqlite.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Database\SqlDelayThread.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Database\SqlDelayThread.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Database\SqlOperations.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\Database\SqlOperations.h"
 				>
 			</File>
 			<File

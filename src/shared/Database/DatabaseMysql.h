@@ -45,6 +45,7 @@ class DatabaseMysql : public Database
         QueryResult* Query(const char *sql);
         bool Execute(const char *sql);
         bool PExecute(const char *format,...);
+        bool DirectExecute(const char* sql);
         bool BeginTransaction();
         bool CommitTransaction();
         bool RollbackTransaction();
@@ -60,7 +61,6 @@ class DatabaseMysql : public Database
         void ThreadEnd();
     private:
         ZThread::FastMutex mMutex;
-        ZThread::FastMutex tranMutex;
 
         ZThread::ThreadImpl* tranThread;
 
