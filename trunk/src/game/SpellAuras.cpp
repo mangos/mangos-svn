@@ -961,9 +961,13 @@ void Aura::TriggerSpell()
 
     Spell spell(caster, spellInfo, true, this);
     Unit* target = m_target;
-    if(!target && caster && caster->GetTypeId() == TYPEID_PLAYER)
+
+    // TODO: currently this used as hack for Tame beast triggered spell, 
+    // BUT this can be correct way to provide target for ALL this function calls 
+    // in case m_target==caster (or GetSpellProto()->EffectImplicitTargetA[m_effIndex]==TARGET_SELF )
+    if(GetId()==1515)
     {
-        target = ObjectAccessor::Instance().GetUnit(*caster, ((Player*)caster)->GetSelection());
+        target = ObjectAccessor::Instance().GetUnit(*m_target, m_target->GetUInt64Value(UNIT_FIELD_TARGET));
     }
     if(!target)
         return;
@@ -1024,6 +1028,13 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
     // Other spells required only Real aura add/remove
     if(!Real)
         return;
+
+    // Tame beast
+    if( apply && caster && m_target->CanHaveThreatList())
+    {
+        // FIX_ME: this is 2.0.12 threat effect relaced in 2.1.x by dummy aura, must be checked for correctness
+        m_target->AddThreat(caster, 10.0f);
+    }
 
     if( m_target->GetTypeId() == TYPEID_PLAYER && !apply &&
         ( GetSpellProto()->Effect[0]==72 || GetSpellProto()->Effect[0]==6 &&
@@ -1098,12 +1109,11 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
 
     if(!apply)
     {
-        if( (IsQuestTameSpell(GetId()) || GetId()== 1515) && caster && caster->isAlive() && m_target && m_target->isAlive())
+        if( (IsQuestTameSpell(GetId())) && caster && caster->isAlive() && m_target && m_target->isAlive())
         {
             uint32 finalSpelId = 0;
             switch(GetId())
             {
-                case  1515: finalSpelId = 13481; break;              
                 case 19548: finalSpelId = 19597; break;
                 case 19674: finalSpelId = 19677; break;
                 case 19687: finalSpelId = 19676; break;
