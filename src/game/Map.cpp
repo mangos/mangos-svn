@@ -76,7 +76,7 @@ bool Map::ExistMAP(uint32 mapid,int x,int y, bool output)
         if(vmgr->isMapLoadingEnabled())
         {
             int vmapLoadResult = vmgr->loadMap((sWorld.GetDataPath()+ "vmaps").c_str(),  mapid, y,x); // x and y are swaped !!
-            if(vmapLoadResult != VMAP::VMAP_LOAD_RESULT_OK)
+            if(vmapLoadResult == VMAP::VMAP_LOAD_RESULT_ERROR)
             {
                 std::string name = vmgr->getDirFileName(mapid,x,y);
                 sLog.outError("Could not load vmap file '%s'", (sWorld.GetDataPath()+"vmaps/"+name).c_str());
