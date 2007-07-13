@@ -36,6 +36,12 @@ bool Database::Initialize(const char *)
     // Enable logging of SQL commands (usally only GM commands)
     // (See method: PExecuteLog)
     m_logSQL = sConfig.GetIntDefault("LogSQL", 0);
+    m_logsDir = sConfig.GetStringDefault("LogsDir","");
+    if(!m_logsDir.empty()) {
+        if((m_logsDir.at(m_logsDir.length()-1)!='/') && (m_logsDir.at(m_logsDir.length()-1)!='\\'))
+            m_logsDir.append("/");
+    }
+
     return true;
 }
 
@@ -85,15 +91,11 @@ bool Database::PExecuteLog(const char * format,...)
         sprintf( fName, "%04d-%02d-%02d_logSQL.sql", local.tm_year+1900, local.tm_mon+1, local.tm_mday );
 
         FILE* log_file;
-        log_file = fopen(fName, "a");
+        std::string logsDir_fname = m_logsDir+fName;
+        log_file = fopen(logsDir_fname.c_str(), "a"); 
         if (log_file)
         {
-            fprintf(log_file, szQuery );
-            fprintf(log_file, ";" );            
-            fprintf(log_file, "\n" );
-            fflush(log_file);
-            fclose(log_file);
-        }
+            fprintf(log_file, "%s;\n", szQuery);        }
         else
         {
             // The file could not be opened

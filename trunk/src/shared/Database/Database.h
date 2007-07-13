@@ -81,6 +81,7 @@ class Database
     private:
         // 0 - do not log, 1 - log sql commands        
         uint32 m_logSQL;
+        std::string m_logsDir;
 };
 
 #endif
