@@ -3159,17 +3159,16 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                         (*i)->m_procCharges -= 1;
 
                     uint32 i_spell_eff = (*i)->GetEffIndex();
-                    int32 i_spell_param = (*i)->GetModifier()->m_amount;
-                    if(*aur == SPELL_AURA_PROC_TRIGGER_SPELL)
-                    {
-                        spellProto = sSpellStore.LookupEntry(spellProto->EffectTriggerSpell[i_spell_eff]);
-                        i_spell_param = procFlag;
-                    }
-                    if(*aur == SPELL_AURA_DUMMY)
-                        i_spell_param = i_spell_eff;
 
-                    if(spellProto)
-                        procTriggered.push_back( ProcTriggeredData(spellProto,i_spell_param,*i) );
+                    int32 i_spell_param;
+                    switch(*aur)
+                    {
+                        case SPELL_AURA_PROC_TRIGGER_SPELL: i_spell_param = procFlag;    break;
+                        case SPELL_AURA_DUMMY:              i_spell_param = i_spell_eff; break;
+                        default: i_spell_param = (*i)->GetModifier()->m_amount;          break;
+                    }
+
+                    procTriggered.push_back( ProcTriggeredData(spellProto,i_spell_param,*i) );
                 }
             }
 
@@ -3178,20 +3177,8 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
             {
                 if(*aur == SPELL_AURA_PROC_TRIGGER_SPELL)
                 {
-                    if (i->spellInfo->Id != 18350)
-                    {
-                        sLog.outDebug("ProcDamageAndSpell: casting spell %u (triggered by an attacker's aura of spell %u)", i->spellInfo->Id,i->triggeredByAura->GetId());
-                        if(IsPositiveSpell(i->spellInfo->Id) && !(i->spellParam & PROC_FLAG_HEAL))
-                            CastSpell(this,i->spellInfo->Id,true,NULL,i->triggeredByAura);
-                        else if(pVictim && pVictim->isAlive())
-                            CastSpell(pVictim,i->spellInfo->Id,true,NULL,i->triggeredByAura);
-                    }
-                    else
-                    {
-                        //spell 18350 needs special handling
-                        sLog.outDebug("ProcDamageAndSpell: dummy trigger %u (triggered by an attacker's aura of spell %u)", i->spellInfo->Id,i->triggeredByAura->GetId());
-                        HandleDummyTrigger(pVictim, damage, i->triggeredByAura, procSpell);
-                    }
+                    sLog.outDebug("ProcDamageAndSpell: casting spell %u (triggered by an attacker's aura of spell %u)", i->spellInfo->Id,i->triggeredByAura->GetId());
+                    HandleProcTriggerSpell(pVictim, damage, i->triggeredByAura, procSpell,i->spellParam);
                 }
                 else if(*aur == SPELL_AURA_PROC_TRIGGER_DAMAGE)
                 {
@@ -3287,17 +3274,15 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                         (*i)->m_procCharges -= 1;
 
                     uint32 i_spell_eff = (*i)->GetEffIndex();
-                    int32 i_spell_param = (*i)->GetModifier()->m_amount;
-                    if(*aur == SPELL_AURA_PROC_TRIGGER_SPELL)
+                    int32 i_spell_param;
+                    switch(*aur)
                     {
-                        spellProto = sSpellStore.LookupEntry(spellProto->EffectTriggerSpell[i_spell_eff]);
-                        i_spell_param = procFlag;
+                        case SPELL_AURA_PROC_TRIGGER_SPELL: i_spell_param = procFlag;    break;
+                        case SPELL_AURA_DUMMY:              i_spell_param = i_spell_eff; break;
+                        default: i_spell_param = (*i)->GetModifier()->m_amount;          break;
                     }
-                    if(*aur == SPELL_AURA_DUMMY)
-                        i_spell_param = i_spell_eff;
 
-                    if(spellProto)
-                        procTriggered.push_back( ProcTriggeredData(spellProto,i_spell_param,*i) );
+                    procTriggered.push_back( ProcTriggeredData(spellProto,i_spell_param,*i) );
                 }
             }
 
@@ -3306,20 +3291,8 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
             {
                 if(*aur == SPELL_AURA_PROC_TRIGGER_SPELL)
                 {
-                    if (i->spellInfo->Id != 18350)
-                    {
-                        sLog.outDebug("ProcDamageAndSpell: casting spell %u (triggered by a victim's aura of spell %u))",i->spellInfo->Id, i->triggeredByAura);
-                        if(IsPositiveSpell(i->spellInfo->Id) && !(i->spellParam&PROC_FLAG_HEAL))
-                            pVictim->CastSpell(pVictim,i->spellInfo->Id,true,NULL,i->triggeredByAura);
-                        else
-                            pVictim->CastSpell(this,i->spellInfo->Id,true,NULL,i->triggeredByAura);
-                    }
-                    else
-                    {
-                        //spell 18350 needs special handling
-                        sLog.outDebug("ProcDamageAndSpell: dummy trigger %u (triggered by an attacker's aura of spell %u)", i->spellInfo->Id,i->triggeredByAura->GetId());
-                        pVictim->HandleDummyTrigger(this, damage, i->triggeredByAura, procSpell);
-                    }
+                    sLog.outDebug("ProcDamageAndSpell: casting spell %u (triggered by a victim's aura of spell %u))",i->spellInfo->Id, i->triggeredByAura);
+                    pVictim->HandleProcTriggerSpell(this, damage, i->triggeredByAura, procSpell,i->spellParam);
                 }
                 else if(*aur == SPELL_AURA_PROC_TRIGGER_DAMAGE)
                 {
@@ -3544,9 +3517,11 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
     }
 }
 
-void Unit::HandleDummyTrigger(Unit *pVictim, uint32 damage, Aura* triggredByAura, SpellEntry const *procSpell)
+void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredByAura, SpellEntry const *procSpell, uint32 procFlags)
 {
-    switch(triggredByAura->GetSpellProto()->SpellIconID)
+    SpellEntry const* auraSpellInfo = triggredByAura->GetSpellProto();
+
+    switch(auraSpellInfo->SpellIconID)
     {
         case 19:
             //Lightning Shield (Shaman T2 bonus)
@@ -3583,7 +3558,7 @@ void Unit::HandleDummyTrigger(Unit *pVictim, uint32 damage, Aura* triggredByAura
         }
         case 241:
         {
-            switch(triggredByAura->GetSpellProto()->EffectTriggerSpell[0])
+            switch(auraSpellInfo->EffectTriggerSpell[0])
             {
                 //Illumination
                 case 18350:
@@ -3608,13 +3583,13 @@ void Unit::HandleDummyTrigger(Unit *pVictim, uint32 damage, Aura* triggredByAura
                             case 27175: originalSpellId = 27174; break;
                             case 33074: originalSpellId = 33072; break;
                             default: 
-                                sLog.outError("Unit::HandleDummyTrigger: Spell %u not handled in HShock",procSpell->Id);
+                                sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in HShock",procSpell->Id);
                                 return;
                         }
                         SpellEntry const *HSSpell= sSpellStore.LookupEntry(originalSpellId);
                         if(!HSSpell)
                         {
-                            sLog.outError("Unit::HandleDummyTrigger: Spell %u unknown but used in HShock",originalSpellId);
+                            sLog.outError("Unit::HandleProcTriggerSpell: Spell %u unknown but used in HShock",originalSpellId);
                             return;
                         }
                         originalSpell = HSSpell;
@@ -3665,25 +3640,22 @@ void Unit::HandleDummyTrigger(Unit *pVictim, uint32 damage, Aura* triggredByAura
         case 1875:
         {
             //Blessed Recovery
-            //Effects: 27813(Rank 1), 27817(Rank 2), 27818(Rank 3)
             uint32 EffectId = 0;
             switch (triggredByAura->GetSpellProto()->Id)
             {
-                case 27811:
-                    EffectId = 27813;
-                    break;
-                case 27815:
-                    EffectId = 27817;
-                    break;
-                case 27816:
-                    EffectId = 27818;
-                    break;
+                case 27811: EffectId = 27813; break;
+                case 27815: EffectId = 27817; break;
+                case 27816: EffectId = 27818; break;
+                default: 
+                    sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in BR",procSpell->Id);
+                    return;
             }
-            if (EffectId == 0)
-                break;
+
             SpellEntry const *BRHealTemplate = sSpellStore.LookupEntry(EffectId);
             SpellEntry BRHeal = *BRHealTemplate;
-            BRHeal.EffectBasePoints[0] = (damage * triggredByAura->GetModifier()->m_amount / 100 - 1) / 3;
+
+            int32 heal_amount = damage * triggredByAura->GetModifier()->m_amount / 100;
+            BRHeal.EffectBasePoints[0] = heal_amount/3-1;
             CastSpell(this, &BRHeal, true, NULL, triggredByAura);
             return;
         }
@@ -3722,6 +3694,19 @@ void Unit::HandleDummyTrigger(Unit *pVictim, uint32 damage, Aura* triggredByAura
             CastSpell(this, 31643, true, NULL, triggredByAura);
             return;
     }
+
+    // standard non-dummy case
+    uint32 trigger_spell_id = auraSpellInfo->EffectTriggerSpell[triggredByAura->GetEffIndex()];
+    if(!trigger_spell_id)
+    {
+        sLog.outError("Unit::HandleProcTriggerSpell: Spell %u have 0 in EffectTriggered[%d], not handled custom case?",auraSpellInfo->Id,triggredByAura->GetEffIndex());
+        return;
+    }
+
+    if(IsPositiveSpell(trigger_spell_id) && !(procFlags & PROC_FLAG_HEAL))
+        CastSpell(this,trigger_spell_id,true,NULL,triggredByAura);
+    else if(pVictim && pVictim->isAlive())
+        CastSpell(pVictim,trigger_spell_id,true,NULL,triggredByAura);
 }
 
 void Unit::setPowerType(Powers new_powertype)
