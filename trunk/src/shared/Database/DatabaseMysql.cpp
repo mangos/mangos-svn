@@ -16,11 +16,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#include "DatabaseEnv.h"
 #include "Util.h"
 #include "Policies/SingletonImp.h"
 #include "Platform/Define.h"
 #include "../src/zthread/ThreadImpl.h"
+#include "DatabaseEnv.h"
+#include "Database/MySQLDelayThread.h"
+#include "Database/SqlOperations.h"
 
 using namespace std;
 
@@ -50,10 +52,15 @@ DatabaseMysql::DatabaseMysql() : Database(), mMysql(0)
             exit(1);
         }
     }
+    //New delay thread for delay execute
+    m_delayThread = new ZThread::Thread(m_threadBody = new MySQLDelayThread(this));
 }
 
 DatabaseMysql::~DatabaseMysql()
 {
+    m_threadBody->Stop();   //Stop event
+    m_delayThread->wait();  //Wait for flush to DB
+
     if (mMysql)
         mysql_close(mMysql);
 
@@ -134,6 +141,20 @@ bool DatabaseMysql::Initialize(const char *infoString)
     {
         sLog.outDetail( "Connected to MySQL database at %s\n",
             host.c_str());
+        
+        /*----------SET AUTOCOMMIT OFF---------*/
+        // It seems mysql 5.0.x have enabled this feature 
+        // by default. In crash case you can lose data!!!
+        // So better to turn this off
+        if (!mysql_autocommit(mMysql, 0))
+        {
+            sLog.outDetail("AUTOCOMMIT SUCCESSFULY SET TO 0");
+        }
+        else
+        {
+            sLog.outDetail("AUTOCOMMIT NOT SET TO 0");
+        }
+        /*-------------------------------------*/
         return true;
     }
     else
@@ -150,9 +171,9 @@ QueryResult* DatabaseMysql::PQuery(const char *format,...)
     if(!format) return NULL;
 
     va_list ap;
-    char szQuery [1024];
+    char szQuery [MAX_QUERY_LEN];
     va_start(ap, format);
-    int res = vsnprintf( szQuery, 1024, format, ap );
+    int res = vsnprintf( szQuery, MAX_QUERY_LEN, format, ap );
     va_end(ap);
 
     if(res==-1)
@@ -175,7 +196,7 @@ QueryResult* DatabaseMysql::Query(const char *sql)
 
     {
         // guarded block for thread-safe mySQL request
-        ZThread::Guard<ZThread::FastMutex> query_connection_guard((ZThread::ThreadImpl::current()==tranThread?tranMutex:mMutex));
+        ZThread::Guard<ZThread::FastMutex> query_connection_guard(mMutex);
 
         if(mysql_query(mMysql, sql))
         {
@@ -215,10 +236,50 @@ bool DatabaseMysql::Execute(const char *sql)
 {
     if (!mMysql)
         return false;
+    
+    tranThread = ZThread::ThreadImpl::current();            // owner of this transaction
+    TransactionQueues::iterator i = m_tranQueues.find(tranThread);
+    if (i != m_tranQueues.end() && i->second != NULL)
+    {   // Statement for transaction
+        i->second->DelayExecute(sql);
+    }
+    else
+    {
+        // Simple sql statement
+        m_threadBody->Delay(new SqlStatement(sql));
+    }
+
+    return true;
+}
+
+bool DatabaseMysql::PExecute(const char * format,...)
+{
+    if (!format)
+        return false;
+
+    va_list ap;
+    char szQuery [MAX_QUERY_LEN];
+    va_start(ap, format);
+    int res = vsnprintf( szQuery, MAX_QUERY_LEN, format, ap );
+    va_end(ap);
+
+    if(res==-1)
+    {
+        sLog.outError("SQL Query truncated (and not execute) for format: %s",format);
+        return false;
+    }
+
+    return Execute(szQuery);
+}
+
+bool DatabaseMysql::DirectExecute(const char* sql)
+{
+    if (!mMysql)
+        return false;
 
     {
         // guarded block for thread-safe mySQL request
-        ZThread::Guard<ZThread::FastMutex> query_connection_guard((ZThread::ThreadImpl::current()==tranThread?tranMutex:mMutex));
+        ZThread::Guard<ZThread::FastMutex> query_connection_guard(mMutex);
 
         if(mysql_query(mMysql, sql))
         {
@@ -234,26 +295,6 @@ bool DatabaseMysql::Execute(const char *sql)
     }
 
     return true;
-}
-
-bool DatabaseMysql::PExecute(const char * format,...)
-{
-    if (!format)
-        return false;
-
-    va_list ap;
-    char szQuery [1024];
-    va_start(ap, format);
-    int res = vsnprintf( szQuery, 1024, format, ap );
-    va_end(ap);
-
-    if(res==-1)
-    {
-        sLog.outError("SQL Query truncated (and not execute) for format: %s",format);
-        return false;
-    }
-
-    return Execute(szQuery);
 }
 
 bool DatabaseMysql::_TransactionCmd(const char *sql)
@@ -275,16 +316,15 @@ bool DatabaseMysql::BeginTransaction()
 {
     if (!mMysql)
         return false;
-    if (tranThread==ZThread::ThreadImpl::current())
-        return false;                                       // huh? this thread already started transaction
-    mMutex.acquire();
-    if (!_TransactionCmd("START TRANSACTION"))
-    {
-        mMutex.release();                                   // can't start transaction
-        return false;
-    }
-    // transaction started
     tranThread = ZThread::ThreadImpl::current();            // owner of this transaction
+    TransactionQueues::iterator i = m_tranQueues.find(tranThread);
+    if (i != m_tranQueues.end() && i->second != NULL)
+        // If for thread exists queue and also contains transaction
+        // delete that transaction (not allow trans in trans)
+        delete i->second;
+
+    m_tranQueues[tranThread] = new SqlTransaction();
+    
     return true;
 }
 
@@ -292,24 +332,30 @@ bool DatabaseMysql::CommitTransaction()
 {
     if (!mMysql)
         return false;
-    if (tranThread!=ZThread::ThreadImpl::current())
+    tranThread = ZThread::ThreadImpl::current();
+    TransactionQueues::iterator i = m_tranQueues.find(tranThread);
+    if (i != m_tranQueues.end() && i->second != NULL)
+    {
+        m_threadBody->Delay((SqlStatement*)i->second);
+        i->second = NULL;
+        return true;
+    }
+    else
         return false;
-    bool _res = _TransactionCmd("COMMIT");
-    tranThread = NULL;
-    mMutex.release();
-    return _res;
 }
 
 bool DatabaseMysql::RollbackTransaction()
 {
     if (!mMysql)
         return false;
-    if (tranThread!=ZThread::ThreadImpl::current())
-        return false;
-    bool _res = _TransactionCmd("ROLLBACK");
-    tranThread = NULL;
-    mMutex.release();
-    return _res;
+    tranThread = ZThread::ThreadImpl::current();
+    TransactionQueues::iterator i = m_tranQueues.find(tranThread);
+    if (i != m_tranQueues.end() && i->second != NULL)
+    {
+        delete i->second;
+        i->second = NULL;
+    }
+    return true;
 }
 
 unsigned long DatabaseMysql::escape_string(char *to, const char *from, unsigned long length)

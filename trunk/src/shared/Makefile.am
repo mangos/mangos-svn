@@ -90,8 +90,13 @@ libmangosdatabase_a_SOURCES = \
 	Database/SQLStorage.cpp \
 	Database/SQLStorage.h \
 	Database/dbcfile.cpp \
-	Database/dbcfile.h
-
+	Database/dbcfile.h \
+	Database/SqlDelayThread.cpp \
+	Database/SqlDelayThread.h \
+	Database/MySQLDelayThread.h \
+	Database/SqlOperations.cpp \
+	Database/SqlOperations.h
+	
 libmangosnetwork_a_SOURCES = \
         Network/Base64.cpp \
         Network/CircularBuffer.cpp \

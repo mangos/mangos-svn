@@ -19,14 +19,30 @@
 #if !defined(DATABASE_H)
 #define DATABASE_H
 
+#include "zthread/Thread.h"
+#include "Utilities/HashMap.h"
+#include "Database/SqlDelayThread.h"
+
+#include <queue>
+
+class SqlTransaction;
+
+typedef HM_NAMESPACE::hash_map<ZThread::ThreadImpl*, SqlTransaction*> TransactionQueues;
+
+#define MAX_QUERY_LEN   1024
+
 class Database
 {
     protected:
-        Database() {}
+        Database() {};
+        
+        TransactionQueues m_tranQueues;                     ///< Transaction queue from diff. threads
+        SqlDelayThread* m_threadBody;                       ///< Pointer to delay sql executer
+        ZThread::Thread* m_delayThread;                     ///< Pointer to executer thread
 
     public:
 
-        virtual ~Database() {}
+        virtual ~Database();
 
         virtual bool Initialize(const char *infoString);
 
@@ -35,6 +51,7 @@ class Database
 
         virtual bool Execute(const char *sql) = 0;
         virtual bool PExecute(const char *format,...) = 0;
+        virtual bool DirectExecute(const char* sql) = 0;
 
         // Writes SQL commands to a LOG file (see mangosd.conf "LogSQL")
         bool PExecuteLog(const char *format,...);
@@ -65,4 +82,5 @@ class Database
         // 0 - do not log, 1 - log sql commands        
         uint32 m_logSQL;
 };
+
 #endif
