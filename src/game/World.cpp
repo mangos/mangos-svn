@@ -112,6 +112,8 @@ World::~World()
         delete itr->second;
 
     m_weathers.clear();
+
+    VMAP::VMapFactory::clear();
 }
 
 /// Find a player in a specified zone
