@@ -178,7 +178,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
             }
 
             SetTP(fields[11].GetInt32());
-            SetMaxPower(POWER_HAPPINESS,1000000);
+            SetMaxPower(POWER_HAPPINESS,1050000);
             SetPower(   POWER_HAPPINESS,fields[17].GetUInt32());
             setPowerType(POWER_FOCUS);
             break;
@@ -858,7 +858,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     }
     SetUInt64Value(UNIT_FIELD_DISPLAYID,       creature->GetUInt64Value(UNIT_FIELD_DISPLAYID));
     SetUInt64Value(UNIT_FIELD_NATIVEDISPLAYID, creature->GetUInt64Value(UNIT_FIELD_NATIVEDISPLAYID));
-    SetMaxPower(POWER_HAPPINESS,1000000);
+    SetMaxPower(POWER_HAPPINESS,1050000);
     SetPower(   POWER_HAPPINESS,166500);
     setPowerType(POWER_FOCUS);
     SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,0);
@@ -1017,7 +1017,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
             }
 
             SetCreatePowers(POWER_FOCUS, 100);
-            SetCreatePowers(POWER_HAPPINESS,100000);
+            SetCreatePowers(POWER_HAPPINESS,1050000);
         };
         break;
 
