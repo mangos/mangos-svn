@@ -184,6 +184,9 @@ int main(int argc, char **argv)
         }
     }
 
+    ///- Wait for the delay thread to exit
+    dbRealmServer.HaltDelayThread();
+
     ///- Remove signal handling before leaving
     UnhookSignals();
 

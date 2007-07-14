@@ -339,7 +339,7 @@ bool DatabaseMysql::CommitTransaction()
     TransactionQueues::iterator i = m_tranQueues.find(tranThread);
     if (i != m_tranQueues.end() && i->second != NULL)
     {
-        m_threadBody->Delay((SqlStatement*)i->second);
+        m_threadBody->Delay(i->second);
         i->second = NULL;
         return true;
     }
