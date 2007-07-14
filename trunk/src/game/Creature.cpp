@@ -66,6 +66,10 @@ m_itemsLoaded(false),m_trainerSpellsLoaded(false),m_trainer_type(0)
     m_spells[1] = 0;
     m_spells[2] = 0;
     m_spells[3] = 0;
+    
+    m_CreatureSpellCooldowns.clear();
+	m_CreatureCategoryCooldowns.clear();
+	m_GlobalCooldown = 0;
 
     m_AlreadyCallAssistence = false;
 }
@@ -169,6 +173,11 @@ void Creature::RemoveCorpse()
 
 void Creature::Update(uint32 diff)
 {
+	if(m_GlobalCooldown <= diff)
+   	    m_GlobalCooldown = 0;
+	else
+		m_GlobalCooldown -= diff;
+
     switch( m_deathState )
     {
         case JUST_DIED:
@@ -560,6 +569,10 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                         if(!isCanTrainingAndResetTalentsOf(pPlayer))
                             cantalking=false;
                         break;
+                    case GOSSIP_OPTION_UNLEARNPETSKILLS:
+                    	if(!pPlayer->GetPet() || pPlayer->GetPet()->getPetType() != HUNTER_PET || pPlayer->GetPet()->m_spells.size() <= 1 || GetCreatureInfo()->trainer_type != TRAINER_TYPE_PETS || GetCreatureInfo()->classNum != TRAINER_TYPE_PETS)
+                    		cantalking=false;
+                        break;
                     case GOSSIP_OPTION_TAXIVENDOR:
                         if ( pPlayer->GetSession()->SendLearnNewTaxiNode(GetGUID()) )
                             return;
@@ -676,6 +689,10 @@ void Creature::OnGossipSelect(Player* player, uint32 option)
             player->PlayerTalkClass->CloseGossip();
             player->SendTalentWipeConfirm(guid);
             break;
+        case GOSSIP_OPTION_UNLEARNPETSKILLS:
+        	player->PlayerTalkClass->CloseGossip();
+        	player->SendPetSkillWipeConfirm(guid);
+        	break;
         case GOSSIP_OPTION_TAXIVENDOR:
             player->GetSession()->SendTaxiMenu(guid);
             break;
@@ -1602,4 +1619,83 @@ void Creature::SendZoneUnderAttackMessage(Player* attacker)
     WorldPacket data(SMSG_ZONE_UNDER_ATTACK,4);
     data << (uint32)GetZoneId();
     sWorld.SendGlobalMessage(&data,NULL,(enemy_team==ALLIANCE ? HORDE : ALLIANCE));
+}
+
+void Creature::_AddCreatureSpellCooldown(uint32 spell_id, time_t end_time)
+{
+	m_CreatureSpellCooldowns[spell_id] = end_time;
+}
+
+void Creature::_AddCreatureCategoryCooldown(uint32 category, time_t apply_time)
+{
+	m_CreatureCategoryCooldowns[category] = apply_time;
+}
+
+void Creature::AddCreatureSpellCooldown(uint32 spellid)
+{
+	SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellid);
+    if(!spellInfo)
+        return;
+
+	time_t cooldown = spellInfo->CategoryRecoveryTime > spellInfo->RecoveryTime ? spellInfo->CategoryRecoveryTime : spellInfo->RecoveryTime;
+	if(cooldown)
+		_AddCreatureSpellCooldown(spellid, time(NULL) + cooldown/1000);
+
+	if(spellInfo->Category)
+		_AddCreatureCategoryCooldown(spellInfo->Category, time(NULL));
+
+	m_GlobalCooldown = 1500;
+}
+
+bool Creature::HasCategoryCooldown(uint32 spell_id) const
+{
+	SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
+    if(!spellInfo)
+        return false;
+
+    CreatureSpellCooldowns::const_iterator itr = m_CreatureCategoryCooldowns.find(spellInfo->Category);
+    return(itr != m_CreatureCategoryCooldowns.end() && (itr->second + (spellInfo->CategoryRecoveryTime / 1000)) > time(NULL));
+}
+
+bool Creature::HasSpellCooldown(uint32 spell_id) const
+{
+	CreatureSpellCooldowns::const_iterator itr = m_CreatureSpellCooldowns.find(spell_id);
+	return (itr != m_CreatureSpellCooldowns.end() && itr->second > time(NULL)) || m_GlobalCooldown > 0 || HasCategoryCooldown(spell_id);
+}
+
+void Creature::InitCharmCreateSpells()
+{
+	for(uint32 x = 1; x < 10; ++x)	//charm action bar
+	{
+		PetActionBar[x].Type = ACT_CAST;
+		PetActionBar[x].SpellOrAction = 0;
+	}
+	PetActionBar[0].Type = ACT_COMMAND;
+	PetActionBar[0].SpellOrAction = COMMAND_ATTACK;
+
+	if(GetTypeId() == TYPEID_PLAYER)	//MCed players don't have spells
+		return;
+
+	for(uint32 x = 0; x < CREATURE_MAX_SPELLS; ++x)
+	{
+		if (IsPassiveSpell(((Creature*)this)->m_spells[x]))
+    		CastSpell(this, ((Creature*)this)->m_spells[x], true);
+		else
+			AddSpellToAB(0, ((Creature*)this)->m_spells[x]);
+	}
+}
+
+bool Creature::AddSpellToAB(uint32 oldid, uint32 newid)
+{
+	for(uint8 i = 0; i < 10; i++)
+	{
+		if((PetActionBar[i].Type == ACT_DISABLED || PetActionBar[i].Type == ACT_ENABLED || PetActionBar[i].Type == ACT_CAST) && PetActionBar[i].SpellOrAction == oldid)
+		{
+			PetActionBar[i].SpellOrAction = newid;
+			if(!oldid && !isCharmed())
+				PetActionBar[i].Type = ACT_DISABLED;
+			return true;
+		}
+	}
+	return false;
 }

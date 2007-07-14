@@ -638,6 +638,49 @@ void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
     _player->RemoveAurasDueToSpell(spellId);
 }
 
+void WorldSession::HandlePetCancelAuraOpcode( WorldPacket& recvPacket)
+{
+    CHECK_PACKET_SIZE(recvPacket, 8+2+2);
+
+    uint64 guid;
+    uint16 spellId;
+//    uint16 unknown; what's this for? always 0 during tests
+
+	recvPacket >> guid;
+	recvPacket >> spellId;
+	
+	SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId );
+    if(!spellInfo)
+    {
+        sLog.outError("WORLD: unknown PET spell id %i\n", spellId);
+    	return;
+    }
+
+	Creature* pet=ObjectAccessor::Instance().GetCreatureOrPet(*_player,guid);
+
+    if(!pet)
+    {
+        sLog.outError( "Pet %u not exist.\n", uint32(GUID_LOPART(guid)) );
+        return;
+    }
+
+    if(pet != GetPlayer()->GetPet() && pet != GetPlayer()->GetCharm())
+    {
+        sLog.outError( "HandlePetCancelAura.Pet %u isn't pet of player %s .\n", uint32(GUID_LOPART(guid)),GetPlayer()->GetName() );
+        return;
+    }
+
+    if(!pet->isAlive())
+    {
+		((Pet*)pet)->SendActionFeedback(FEEDBACK_PET_DEAD);
+        return;
+    }
+
+	pet->RemoveAurasDueToSpell(spellId);
+
+	pet->AddCreatureSpellCooldown(spellId);
+}
+
 void WorldSession::HandleCancelGrowthAuraOpcode( WorldPacket& recvPacket)
 {
     // nothing do

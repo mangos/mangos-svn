@@ -1143,8 +1143,8 @@ bool ChatHandler::HandleChangeLevelCommand(const char* args)
         return true;
     }
 
-    pCreature->SetHealth( 100 + 30*lvl);
     pCreature->SetMaxHealth( 100 + 30*lvl);
+    pCreature->SetHealth( 100 + 30*lvl);
     pCreature->SetLevel( lvl);
 
     pCreature->SaveToDB();

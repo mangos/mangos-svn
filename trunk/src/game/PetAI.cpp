@@ -24,6 +24,8 @@
 #include "Database/DBCStores.h"
 #include "Spell.h"
 #include "ObjectAccessor.h"
+#include "ObjectMgr.h"
+#include "Creature.h"
 
 int PetAI::Permissible(const Creature *creature)
 {
@@ -35,12 +37,14 @@ int PetAI::Permissible(const Creature *creature)
 
 PetAI::PetAI(Creature &c) : i_pet(c), i_victimGuid(0), i_tracker(TIME_INTERVAL_LOOK)
 {
-
+    m_AllySet.clear();
+	UpdateAllies();
+	m_updateAlliesTimer = 10000;	//update friendly targets every 10 seconds, lesser checks increase performance
 }
 
 void PetAI::MoveInLineOfSight(Unit *u)
 {
-    if( !i_pet.getVictim() && (i_pet.isPet() && ((Pet&)i_pet).HasActState(STATE_RA_PROACTIVE) || i_pet.isCharmed()) &&
+    if( !i_pet.getVictim() && (i_pet.isPet() && ((Pet&)i_pet).HasReactState(REACT_AGGRESSIVE) || i_pet.isCharmed()) &&
         u->isTargetableForAttack() && i_pet.IsHostileTo( u )  &&
         u->isInAccessablePlaceFor(&i_pet))
     {
@@ -136,7 +140,7 @@ void PetAI::_stopAttack()
 
     Unit* owner = i_pet.GetCharmerOrOwner();
 
-    if(((Pet*)&i_pet)->HasActState(STATE_RA_FOLLOW) && owner)
+    if(owner && (i_pet.isCharmed() || ((Pet*)&i_pet)->HasCommandState(COMMAND_FOLLOW)))	//charms always follow, pets can be set
     {
         i_pet.addUnitState(UNIT_STAT_FOLLOW);
         i_pet->Clear();
@@ -160,6 +164,14 @@ void PetAI::UpdateAI(const uint32 diff)
         i_victimGuid = i_pet.getVictim()->GetGUID();
 
     Unit* owner = i_pet.GetCharmerOrOwner();
+    
+    if(m_updateAlliesTimer <= diff)
+    {
+		UpdateAllies();
+       	m_updateAlliesTimer = 10000;
+    }
+ 	else
+   		m_updateAlliesTimer -= diff;
 
     // i_pet.getVictim() can't be used for check in case stop fighting, i_pet.getVictim() clearóâ at Unit death etc.
     if( i_victimGuid )
@@ -172,7 +184,6 @@ void PetAI::UpdateAI(const uint32 diff)
         }
         else if( i_pet.IsStopped() || i_pet.IsWithinDistInMap(i_pet.getVictim(), ATTACK_DISTANCE))
         {
-            SpellEntry const* spellInfo;
             // required to be stopped cases
             if ( i_pet.IsStopped() && i_pet.m_currentSpell )
             {
@@ -180,17 +191,6 @@ void PetAI::UpdateAI(const uint32 diff)
                     i_pet.m_currentSpell->cancel();
                 else
                     return;
-            }
-            else if( i_pet.IsStopped() && !i_pet.hasUnitState(UNIT_STAT_FOLLOW) &&
-                ((Pet*)&i_pet)->HasActState(STATE_RA_AUTOSPELL) && (spellInfo = i_pet.reachWithSpellAttack(i_pet.getVictim())))
-            {
-                Spell *spell = new Spell(&i_pet, spellInfo, false, 0);
-                spell->SetAutoRepeat(true);
-                SpellCastTargets targets;
-                targets.setUnitTarget( i_pet.getVictim() );
-                spell->prepare(&targets);
-                i_pet.m_canMove = false;
-                DEBUG_LOG("Spell Attack.");
             }
             // not required to be stopped case
             else if( i_pet.isAttackReady() && i_pet.canReachWithAttack(i_pet.getVictim()) )
@@ -212,11 +212,11 @@ void PetAI::UpdateAI(const uint32 diff)
     }
     else if(owner)
     {
-        if(owner->isInCombat() && (!((Pet*)&i_pet)->HasActState(STATE_RA_PASSIVE)))
+        if(owner->isInCombat() && (i_pet.isCharmed() || !((Pet*)&i_pet)->HasReactState(REACT_PASSIVE)))	//charms always help automatically?
         {
             AttackStart(owner->getAttackerForHelper());
         }
-        else if(((Pet*)&i_pet)->HasActState(STATE_RA_FOLLOW))
+        else if(i_pet.isCharmed() || ((Pet*)&i_pet)->HasCommandState(COMMAND_FOLLOW))
         {
             if (!i_pet.hasUnitState(UNIT_STAT_FOLLOW) )
             {
@@ -226,9 +226,147 @@ void PetAI::UpdateAI(const uint32 diff)
             }
         }
     }
+    
+    //Autocast
+	HM_NAMESPACE::hash_map<uint32, Unit*> targetMap;
+	targetMap.clear();
+	SpellCastTargets NULLtargets;
+
+	if(i_pet.isPet())	//it's a pet, so it has an autospellmap and an allyset
+	{
+	    for(AutoSpellList::iterator itr = ((Pet*)&i_pet)->m_autospells.begin(); itr != ((Pet*)&i_pet)->m_autospells.end(); ++itr)
+		{
+			SpellEntry const *spellInfo = sSpellStore.LookupEntry(*itr);
+			if(!spellInfo)
+				continue;
+			
+			Spell *spell = new Spell(&i_pet, spellInfo, false, 0);
+		    WPAssert(spell);
+
+			if(!IsPositiveSpell(spellInfo->Id) && i_pet.getVictim() && !_needToStop() && !i_pet.hasUnitState(UNIT_STAT_FOLLOW) && spell->CanAutoCast(i_pet.getVictim()))
+				targetMap[*itr] = i_pet.getVictim();
+			else
+			{
+				spell->m_targets = NULLtargets;
+				for(std::set<uint64>::iterator tar = m_AllySet.begin(); tar != m_AllySet.end(); ++tar)
+				{
+					Unit* Target = ObjectAccessor::Instance().GetUnit(i_pet,*tar);
+
+					if(!Target || (!Target->isInCombat() && !IsNonCombatSpell(*itr)))	//only buff targets that are in combat, unless the spell can only be cast while out of combat
+						continue;
+					if(spell->CanAutoCast(Target))
+						targetMap[*itr] = Target;
+				}
+			}
+		}
+	}
+	else if(i_pet.isCharmed()) //charmed creature; all (active) spells autocast, because not controllable; for now no allyset, simply itself (selfcast spells allowed) and target
+	{
+		for(uint8 i = 0; i < CREATURE_MAX_SPELLS; ++i)
+		{
+			uint32 spell_id = i_pet.m_spells[i];
+			SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
+			if(!spellInfo || IsPassiveSpell(spell_id))
+				continue;
+
+			Spell *spell = new Spell(&i_pet, spellInfo, false, 0);
+			    WPAssert(spell);
+
+			if(!IsPositiveSpell(spellInfo->Id) && i_pet.getVictim() && !_needToStop() && !i_pet.hasUnitState(UNIT_STAT_FOLLOW) && spell->CanAutoCast(i_pet.getVictim()))
+				targetMap[spell_id] = i_pet.getVictim();
+			else
+			{
+				spell->m_targets = NULLtargets;
+				for(std::set<uint64>::iterator tar = m_AllySet.begin(); tar != m_AllySet.end(); ++tar)
+				{
+					Unit* Target = ObjectAccessor::Instance().GetUnit(i_pet,*tar);
+
+					if(!Target || (!Target->isInCombat() && !IsNonCombatSpell(spell_id)))	//only buff targets that are in combat, unless the spell can only be cast while out of combat
+						continue;
+					if(spell->CanAutoCast(Target))
+						targetMap[spell_id] = Target;
+				}
+			}
+			/*else if(!i_pet.isInCombat() && !IsNonCombatSpell(spell_id))
+			{
+				spell->m_targets = NULLtargets;
+				if(spell->CanAutoCast(&i_pet))	//only buff targets that are in combat, unless the spell can only be cast while out of combat
+					targetMap[spell_id] = &i_pet;
+			}*/
+		}
+	}
+
+	if(targetMap.size() > 0)//found units to cast on to
+	{
+		uint32 index = urand(1, targetMap.size());
+		HM_NAMESPACE::hash_map<uint32, Unit*>::iterator itr;
+		uint32 i;
+		for(itr = targetMap.begin(), i = 1; i < index; ++itr, ++i);
+
+		SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
+
+        Spell *spell = new Spell(&i_pet, spellInfo, false, 0);
+        WPAssert(spell);
+
+   	    SpellCastTargets targets;
+       	targets.setUnitTarget( itr->second );
+       	if(!i_pet.HasInArc(M_PI, itr->second))
+       	{
+       		i_pet.SetInFront(itr->second);
+			if( itr->second->GetTypeId() == TYPEID_PLAYER )
+                i_pet.SendUpdateToPlayer( (Player*)itr->second );
+   	        if(owner && owner->GetTypeId() == TYPEID_PLAYER)
+       	    	i_pet.SendUpdateToPlayer( (Player*)owner );
+        }
+
+		i_pet.AddCreatureSpellCooldown(itr->first);
+		((Pet*)&i_pet)->CheckLearning(itr->first);
+
+        spell->prepare(&targets);
+	}
+	targetMap.clear();
 }
 
 bool PetAI::_isVisible(Unit *u) const
 {
     return false;                                           //( ((Creature*)&i_pet)->GetDistanceSq(u) * 1.0<= sWorld.getConfig(CONFIG_SIGHT_GUARDER) && !u->m_stealth && u->isAlive());
+}
+
+void PetAI::UpdateAllies()
+{
+	Unit* owner = i_pet.GetCharmerOrOwner();
+	Group *pGroup = NULL;
+
+	if(!owner)
+		return;
+	else if(owner->GetTypeId() == TYPEID_PLAYER)
+		pGroup = ((Player*)owner)->groupInfo.group;
+
+   	if(m_AllySet.size() == 2 && !pGroup) //only pet and owner/not in group->ok
+   		return;
+   	else if(pGroup && !pGroup->isRaidGroup() && m_AllySet.size() == (pGroup->GetMembersCount() + 2)) //owner is in group; group members filled in already (no raid -> subgroupcount = whole count)
+   		return;
+   	else
+   	{
+		m_AllySet.clear();
+		m_AllySet.insert(i_pet.GetGUID());
+		if(pGroup)	//add group
+		{
+			Group::MemberList const& members = pGroup->GetMembers();
+            for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
+            {
+                if(!pGroup->SameSubGroup(owner->GetGUID(), &*itr))
+                    continue;
+
+                Unit* Target = objmgr.GetPlayer(itr->guid);
+                if(!Target || Target->GetGUID() == owner->GetGUID())
+                    continue;
+                    
+                m_AllySet.insert(Target->GetGUID());
+            }
+		}
+		else	//remove group
+			m_AllySet.insert(owner->GetGUID());
+	}
+
 }

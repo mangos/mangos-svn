@@ -36,6 +36,7 @@ class MANGOS_DLL_DECL PetAI : public CreatureAI
         bool IsVisible(Unit *) const;
 
         void UpdateAI(const uint32);
+        void UpdateAllies();
         static int Permissible(const Creature *);
 
     private:
@@ -47,5 +48,7 @@ class MANGOS_DLL_DECL PetAI : public CreatureAI
         uint64 i_victimGuid;
         TimeTracker i_tracker;
         //uint32 i_RepeatAction;
+        std::set<uint64> m_AllySet;
+        uint32	m_updateAlliesTimer;
 };
 #endif

@@ -116,6 +116,7 @@ struct PetLevelInfo
     uint16 stats[MAX_STATS];
     uint16 health;
     uint16 mana;
+    uint16 armor;
 };
 
 struct ReputationOnKillEntry 
@@ -129,6 +130,12 @@ struct ReputationOnKillEntry
     uint32 reputration_max_cap2;
     int32 repvalue2;
     bool team_dependent;
+};
+
+struct PetCreateSpellEntry
+{
+	uint32 spellid[4];
+	uint32 familypassive;
 };
 
 #define WEATHER_SEASONS 4
@@ -189,6 +196,8 @@ class ObjectMgr
         typedef HM_NAMESPACE::hash_map<uint32, ReputationOnKillEntry> RepOnKillMap;
 
         typedef HM_NAMESPACE::hash_map<uint32, WeatherZoneChances> WeatherZoneMap;
+        
+        typedef HM_NAMESPACE::hash_map<uint32, PetCreateSpellEntry> PetCreateSpellMap;
 
         template <class T>
             typename HM_NAMESPACE::hash_map<uint32, T*>::iterator
@@ -360,17 +369,25 @@ class ObjectMgr
                 return &itr->second;
             return NULL;
         }
+        
+        PetCreateSpellEntry const* GetPetCreateSpellEntry(uint32 id) const
+        {
+            PetCreateSpellMap::const_iterator itr = mPetCreateSpell.find(id);
+            if(itr != mPetCreateSpell.end())
+                return &itr->second;
+            return NULL;
+        }
         void LoadGuilds();
         void LoadArenaTeams();
         void LoadGroups();
         void LoadQuests();
         void LoadQuestRelations()
-        { 
+        {
             LoadQuestRelationsHelper(mGOQuestRelations,"gameobject_questrelation");
             LoadQuestRelationsHelper(mGOQuestInvolvedRelations,"gameobject_involvedrelation");
             LoadQuestRelationsHelper(mCreatureQuestRelations,"creature_questrelation");
             LoadQuestRelationsHelper(mCreatureQuestInvolvedRelations,"creature_involvedrelation");
-        } 
+        }
         void LoadQuestRelationsHelper(QuestRelations& map,char const* table);
         QuestRelations mGOQuestRelations;
         QuestRelations mGOQuestInvolvedRelations;
@@ -380,6 +397,7 @@ class ObjectMgr
         void LoadSpellChains();
         void LoadSpellLearnSkills();
         void LoadSpellLearnSpells();
+        void LoadPetCreateSpells();
         void LoadScripts(ScriptMapMap& scripts, char const* tablename);
         void LoadCreatureTemplates();
         void LoadCreatures();
@@ -615,6 +633,8 @@ class ObjectMgr
         RepOnKillMap        mRepOnKill;
 
         WeatherZoneMap      mWeatherZoneMap;
+        
+        PetCreateSpellMap	mPetCreateSpell;
 
     private:
         typedef std::map<uint32,PetLevelInfo*> PetLevelInfoMap;

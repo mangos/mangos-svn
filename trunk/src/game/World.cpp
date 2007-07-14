@@ -257,6 +257,7 @@ void World::SetInitialWorldSettings()
     rate_values[RATE_POWER_RAGE_INCOME] = sConfig.GetFloatDefault("Rate.Rage.Income", 1);
     rate_values[RATE_POWER_RAGE_LOSS]   = sConfig.GetFloatDefault("Rate.Rage.Loss", 1);
     rate_values[RATE_POWER_FOCUS] = sConfig.GetFloatDefault("Rate.Focus", 1);
+    rate_values[RATE_LOYALTY]	  = sConfig.GetFloatDefault("Rate.Loyalty", 1);
     rate_values[RATE_DROP_ITEMS]  = sConfig.GetFloatDefault("Rate.Drop.Items", 1);
     rate_values[RATE_DROP_MONEY]  = sConfig.GetFloatDefault("Rate.Drop.Money", 1);
     rate_values[RATE_XP_KILL]     = sConfig.GetFloatDefault("Rate.XP.Kill", 1);
@@ -506,6 +507,9 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "Loading Creature Reputation OnKill Data..." );
     objmgr.LoadReputationOnKill();
+    
+    sLog.outString( "Loading Pet Create Spells..." );
+    objmgr.LoadPetCreateSpells();
 
     sLog.outString( "Loading Creature Data..." );
     objmgr.LoadCreatures();

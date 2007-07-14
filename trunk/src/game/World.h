@@ -130,6 +130,7 @@ enum Rates
     RATE_MINING_AMOUNT,
     RATE_MINING_NEXT,
     RATE_TALENT,
+    RATE_LOYALTY,
     MAX_RATES
 };
 

@@ -381,6 +381,10 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_BUY_STABLE_SLOT ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBuyStableSlot                 );
     objmgr.opcodeTable[ CMSG_STABLE_REVIVE_PET ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleStableRevivePet               );
     objmgr.opcodeTable[ CMSG_STABLE_SWAP_PET ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleStableSwapPet                 );
+    objmgr.opcodeTable[ CMSG_PET_CANCEL_AURA ]					= OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetCancelAuraOpcode           );
+    objmgr.opcodeTable[ CMSG_PET_UNLEARN ]						= OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetUnlearnOpcode				 );
+    objmgr.opcodeTable[ CMSG_PET_SPELL_AUTOCAST ]				= OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetSpellAutocastOpcode		 );
+    objmgr.opcodeTable[ MSG_ADD_DYNAMIC_TARGET_OBSOLETE ]		= OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAddDynamicTargetObsoleteOpcode);
 
     objmgr.opcodeTable[ CMSG_CANCEL_CHANNELLING  ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleCancelChanneling              );
 
@@ -648,6 +652,7 @@ void WorldSession::LogoutPlayer(bool Save)
         ///- Release charmed creatures and unsummon totems
         _player->Uncharm();
         _player->UnsummonAllTotems();
+        _player->RemovePet(NULL,PET_SAVE_AS_CURRENT);
 
         ///- empty buyback items and save the player in the database
         // some save parts only correctly work in case player present in map/player_lists (pets, etc)
@@ -666,9 +671,6 @@ void WorldSession::LogoutPlayer(bool Save)
 
         ///- Leave all channels before player delete...
         _player->CleanupChannels();
-
-        ///- Remove the player's pet from the world
-        _player->RemovePet(NULL,PET_SAVE_AS_CURRENT);
 
         ///- If the player is in a group (or invited), remove him. If the group if then only 1 person, disband the group.
         _player->UninviteFromGroup();

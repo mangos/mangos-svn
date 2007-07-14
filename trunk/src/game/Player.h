@@ -932,6 +932,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetBindPoint(uint64 guid);
         void SendTalentWipeConfirm(uint64 guid);
         void RewardRage( uint32 damage, uint32 weaponSpeedHitFactor, bool attacker );
+        void SendPetSkillWipeConfirm(uint64 guid);
+        void CalcRage( uint32 damage,bool attacker );
         void RegenerateAll();
         void Regenerate(Powers power);
         void RegenerateHealth();
@@ -1027,6 +1029,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         }
 
         void PetSpellInitialize();
+        void CharmSpellInitialize();
         bool HasSpell(uint32 spell) const;
         TrainerSpellState GetTrainerSpellState(TrainerSpell const* trainer_spell);
         void SendProficiency(uint8 pr1, uint32 pr2);

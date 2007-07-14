@@ -803,8 +803,8 @@ void ObjectMgr::LoadPetLevelInfo()
 {
     // Loading levels data
     {
-        //                                              0               1       2    3      4     5     6     7     8
-        QueryResult *result  = sDatabase.Query("SELECT `creature_entry`,`level`,`hp`,`mana`,`str`,`agi`,`sta`,`int`,`spi` FROM `pet_levelstats`");
+        //                                              0               1       2    3      4     5     6     7     8     9
+        QueryResult *result  = sDatabase.Query("SELECT `creature_entry`,`level`,`hp`,`mana`,`str`,`agi`,`sta`,`int`,`spi`,`armor` FROM `pet_levelstats`");
 
         uint32 count = 0;
 
@@ -856,6 +856,7 @@ void ObjectMgr::LoadPetLevelInfo()
 
             pLevelInfo->health = fields[2].GetUInt16();
             pLevelInfo->mana   = fields[3].GetUInt16();
+            pLevelInfo->armor  = fields[9].GetUInt16();
 
             for (int i = 0; i < MAX_STATS; i++)
             {
@@ -2086,6 +2087,60 @@ void ObjectMgr::LoadSpellLearnSpells()
 
     sLog.outString( "" );
     sLog.outString( ">> Loaded %u spell learn spells + found in DBC %u", count, dbc_count );
+}
+
+void ObjectMgr::LoadPetCreateSpells()
+{
+    QueryResult *result = sDatabase.PQuery("SELECT `entry`, `Spell1`, `Spell2`, `Spell3`, `Spell4`,`FamilyPassive` FROM `petcreateinfo_spell`");
+    if(!result)
+    {
+        barGoLink bar( 1 );
+        bar.step();
+
+        sLog.outString( "" );
+        sLog.outString( ">> Loaded 0 pet create spells" );
+        sLog.outErrorDb("`petcreateinfo_spell` table is empty!");
+        return;
+    }
+
+    uint32 count = 0;
+
+    barGoLink bar( result->GetRowCount() );
+
+	mPetCreateSpell.clear();
+
+	do
+    {
+    	Field *fields = result->Fetch();
+        bar.step();
+
+        uint32 creature_id = fields[0].GetUInt32();
+        
+        if(!creature_id || !sCreatureStorage.LookupEntry<CreatureInfo>(creature_id))
+        	continue;
+
+        PetCreateSpellEntry PetCreateSpell;
+        for(int i = 0; i < 4; i++) {
+        	PetCreateSpell.spellid[i] = fields[i + 1].GetUInt32();
+
+            if(PetCreateSpell.spellid[i] && !sSpellStore.LookupEntry(PetCreateSpell.spellid[i]))
+	            sLog.outErrorDb("Spell %u listed in `petcreateinfo_spell` not exist",PetCreateSpell.spellid[i]);
+        }
+        
+        PetCreateSpell.familypassive = fields[5].GetUInt32();
+        
+        if(PetCreateSpell.familypassive && !sSpellStore.LookupEntry(PetCreateSpell.familypassive))
+	            sLog.outErrorDb("Spell %u listed in `petcreateinfo_spell` not exist",PetCreateSpell.familypassive);
+
+        mPetCreateSpell[creature_id] = PetCreateSpell;
+
+        count++;
+    } while (result->NextRow());
+
+    delete result;
+
+    sLog.outString( "" );
+    sLog.outString( ">> Loaded %u pet create spells", count );
 }
 
 void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)

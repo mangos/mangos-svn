@@ -266,11 +266,12 @@ MailDeliveryDelay = 3600
 Motd = "Welcome to the Massive Network Game Object Server."
 
 # Health and power regeneration and rage income from damage.
-Rate.Health = 1;
-Rate.Mana = 1;
-Rate.Rage.Income = 1;
-Rate.Rage.Loss = 1;
-Rate.Focus = 1;
+Rate.Health = 1
+Rate.Mana = 1
+Rate.Rage.Income = 1
+Rate.Rage.Loss = 1
+Rate.Focus = 1
+Rate.Loyalty = 1
 
 # Drop rates
 # Default: 1

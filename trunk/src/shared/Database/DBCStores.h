@@ -67,6 +67,7 @@ int32 CompareAuraRanks(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, ui
 SpellSpecific GetSpellSpecific(uint32 spellId);
 bool IsSpellSingleEffectPerCaster(uint32 spellId);
 bool IsPassiveSpell(uint32 spellId);
+bool IsNonCombatSpell(uint32 spellId);
 uint32 GetTalentSpellCost(uint32 spellId);
 bool IsPositiveSpell(uint32 spellId);
 bool IsPositiveEffect(uint32 spellId, uint32 effIndex);
