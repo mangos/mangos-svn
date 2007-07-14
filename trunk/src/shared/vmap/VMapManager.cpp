@@ -268,7 +268,7 @@ namespace VMAP {
                 MapTree* mapTree = iInstanceMapTrees.get(pMapId);
                 result = mapTree->isInLineOfSight(pos1, pos2);
                 Command c = Command();
-                c.fillTestVisCmd(pMapId,Vector3(x1,y1,z2),Vector3(x2,y2,z2),result); // save the orig vectors
+                c.fillTestVisCmd(pMapId,Vector3(x1,y1,z1),Vector3(x2,y2,z2),result); // save the orig vectors
                 iCommandLogger.appendCmd(c);
             }
         }

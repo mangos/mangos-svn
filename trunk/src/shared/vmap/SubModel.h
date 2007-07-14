@@ -20,7 +20,7 @@
 #define _SUBMODEL_H
 
 // load our modified version first !!
-#include "G3D/AABSPTree.h"
+#include "AABSPTree.h"
 
 #include "ShortVector.h"
 #include "ShortBox.h"

@@ -19,13 +19,13 @@
 ## Sub-directories to parse
 
 ## CPP flags for includes, defines, etc.
-AM_CPPFLAGS = $(MYSQL_INCLUDES) -I$(srcdir) -I$(srcdir)/../../dep/include -I$(srcdir)/../framework -I$(srcdir)/../shared
+AM_CPPFLAGS = $(MYSQL_INCLUDES) -I$(srcdir) -I$(srcdir)/../../dep/include -I$(srcdir)/../framework -I$(srcdir)/../shared -I$(srcdir)/../../dep/include/g3dlite
 ## AM_CPPFLAGS += -I$(srcdir)/../game -I$(srcdir)/../realmd
 
 ## Build MaNGOS shared library and its parts as convenience library.
 #  All libraries will be convenience libraries. Might be changed to shared
 #  later.
-noinst_LIBRARIES = libmangosshared.a libmangosauth.a libmangosconfig.a libmangosdatabase.a libmangosnetwork.a
+noinst_LIBRARIES = libmangosshared.a libmangosauth.a libmangosconfig.a libmangosdatabase.a libmangosnetwork.a libmangosvmaps.a
 
 #  libmangosshared library will later be reused by ...
 libmangosshared_a_SOURCES = \
@@ -96,7 +96,7 @@ libmangosdatabase_a_SOURCES = \
 	Database/MySQLDelayThread.h \
 	Database/SqlOperations.cpp \
 	Database/SqlOperations.h
-	
+
 libmangosnetwork_a_SOURCES = \
         Network/Base64.cpp \
         Network/CircularBuffer.cpp \
@@ -116,6 +116,18 @@ libmangosnetwork_a_SOURCES = \
         Network/Thread.cpp \
         Network/UdpSocket.cpp \
         Network/Utility.cpp
+
+libmangosvmaps_a_SOURCES = \
+        vmap/BaseModel.cpp \
+        vmap/CoordModelMapping.cpp \
+        vmap/DebugCmdLogger.cpp \
+        vmap/ManagedModelContainer.cpp \
+        vmap/ModelContainer.cpp \
+        vmap/SubModel.cpp \
+        vmap/TileAssembler.cpp \
+        vmap/TreeNode.cpp \
+        vmap/VMapFactory.cpp \
+        vmap/VMapManager.cpp
 
 ## Additional files to include when running 'make dist'
 #  Disabled packet logger

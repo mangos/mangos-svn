@@ -20,7 +20,7 @@
 #define _TILEASSEMBLER_H_
 
 // load our modified version first !!
-#include <G3D/AABSPTree.h>
+#include "AABSPTree.h"
 
 #include <G3D/Vector3.h>
 

@@ -16,8 +16,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\vmap___Win32_Debug"
-			IntermediateDirectory=".\vmap___Win32_Debug"
+			OutputDirectory=".\g3dlite___Win32_Debug"
+			IntermediateDirectory=".\g3dlite___Win32_Debug"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
@@ -47,9 +47,9 @@
 				RuntimeLibrary="1"
 				BufferSecurityCheck="true"
 				UsePrecompiledHeader="0"
-				AssemblerListingLocation=".\vmap___Win32_Debug\"
-				ObjectFile=".\vmap___Win32_Debug\"
-				ProgramDataBaseFileName=".\vmap___Win32_Debug\"
+				AssemblerListingLocation=".\g3dlite___Win32_Debug\"
+				ObjectFile=".\g3dlite___Win32_Debug\"
+				ProgramDataBaseFileName=".\g3dlite___Win32_Debug\"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="4"
@@ -65,7 +65,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/vmap.lib"
+				OutputFile="$(OutDir)/g3dlite.lib"
 				IgnoreAllDefaultLibraries="true"
 			/>
 			<Tool
@@ -86,8 +86,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\vmap___Win32_Release"
-			IntermediateDirectory=".\vmap___Win32_Release"
+			OutputDirectory=".\g3dlite___Win32_Release"
+			IntermediateDirectory=".\g3dlite___Win32_Release"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
@@ -113,9 +113,9 @@
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
-				AssemblerListingLocation=".\vmap___Win32_Release\"
-				ObjectFile=".\vmap___Win32_Release\"
-				ProgramDataBaseFileName=".\vmap___Win32_Release\"
+				AssemblerListingLocation=".\g3dlite___Win32_Release\"
+				ObjectFile=".\g3dlite___Win32_Release\"
+				ProgramDataBaseFileName=".\g3dlite___Win32_Release\"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
@@ -131,7 +131,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="$(OutDir)/vmap.lib"
+				OutputFile="$(OutDir)/g3dlite.lib"
 				IgnoreAllDefaultLibraries="true"
 			/>
 			<Tool
@@ -159,10 +159,6 @@
 			>
 			<File
 				RelativePath="..\..\dep\include\g3dlite\G3D\AABox.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\dep\include\g3dlite\G3D\AABSPTree.h"
 				>
 			</File>
 			<File

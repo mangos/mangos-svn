@@ -21,7 +21,7 @@
 
 
 // load our modified version first !!
-#include <G3D/AABSPTree.h>
+#include "AABSPTree.h"
 
 #include <G3D/AABox.h>
 #include <G3D/Vector3.h>

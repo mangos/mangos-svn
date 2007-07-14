@@ -29,7 +29,8 @@ EXTRA_DIST = \
 	win/VC71/realmd.vcproj \
 	win/VC71/shared.vcproj \
 	win/VC71/zlib.vcproj \
-	win/VC71/G3D.vcproj \
+	win/VC71/g3dlite.vcproj \
+	win/VC71/vmap.vcproj \
 	win/VC71/zthread.vcproj
 
 # Win32 project workspace for Visual Studio .NET 2005
@@ -41,5 +42,6 @@ EXTRA_DIST += \
 	win/VC80/realmd.vcproj \
 	win/VC80/shared.vcproj \
 	win/VC80/zlib.vcproj \
-	win/VC80/G3D.vcproj \
+	win/VC80/g3dlite.vcproj \
+	win/VC80/vmap.vcproj \
 	win/VC80/zthread.vcproj

@@ -42,7 +42,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include\g3dlite;..\..\src\framework;..\..\src\shared"
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\shared\vmap"
 				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_LIB;"
 				StringPooling="false"
 				MinimalRebuild="false"
@@ -120,7 +120,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include\g3dlite;..\..\src\framework;..\..\src\shared"
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\shared\vmap"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -197,14 +197,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\AuctionHouse.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BaseModel.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\BaseModel.h"
 				>
 			</File>
 			<File
@@ -304,22 +296,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\CoordModelMapping.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\CoordModelMapping.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\DebugCmdLogger.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\DebugCmdLogger.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\DuelHandler.cpp"
 				>
 			</File>
@@ -396,14 +372,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\ManagedModelContainer.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\ManagedModelContainer.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\Map.cpp"
 				>
 			</File>
@@ -432,19 +400,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\ModelContainer.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\ModelContainer.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\MovementHandler.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\NodeValueAccess.h"
 				>
 			</File>
 			<File
@@ -492,23 +448,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\RayIntersectionIterator.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\ScriptCalls.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\game\ScriptCalls.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\ShortBox.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\ShortVector.h"
 				>
 			</File>
 			<File
@@ -544,23 +488,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\SubModel.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\SubModel.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\TaxiHandler.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\TileAssembler.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\TileAssembler.h"
 				>
 			</File>
 			<File
@@ -576,39 +504,11 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\TreeNode.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\TreeNode.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\UpdateData.cpp"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\game\UpdateData.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\VMapDefinitions.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\VMapFactory.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\VMapFactory.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\VMapManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\VMapManager.h"
 				>
 			</File>
 			<File

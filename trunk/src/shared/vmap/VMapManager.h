@@ -20,7 +20,7 @@
 #define _VMAPMANAGER_H
 
 // load our modified version first !!
-#include <G3D/AABSPTree.h>
+#include "AABSPTree.h"
 #include "ManagedModelContainer.h"
 #include "IVMapManager.h"
 #include "DebugCmdLogger.h"

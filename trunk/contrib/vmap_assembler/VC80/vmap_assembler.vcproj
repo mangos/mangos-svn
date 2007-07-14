@@ -40,7 +40,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\..\dep\include\g3dlite; ..\..\..\src\game"
+				AdditionalIncludeDirectories="..\..\..\dep\include\g3dlite;..\..\..\src\shared\vmap;"
 				PreprocessorDefinitions="WIN32;_DEBUG;_CONSOLE"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -118,7 +118,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalIncludeDirectories="..\..\..\dep\include\g3dlite; ..\..\..\src\game"
+				AdditionalIncludeDirectories="..\..\..\dep\include\g3dlite;..\..\..\src\shared\vmap;"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
@@ -188,59 +188,87 @@
 			Name="vmaplib"
 			>
 			<File
-				RelativePath="..\..\..\src\game\BaseModel.cpp"
+				RelativePath="..\..\..\src\shared\vmap\AABSPTree.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\game\BaseModel.h"
+				RelativePath="..\..\..\src\shared\vmap\BaseModel.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\game\CoordModelMapping.cpp"
+				RelativePath="..\..\..\src\shared\vmap\BaseModel.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\game\CoordModelMapping.h"
+				RelativePath="..\..\..\src\shared\vmap\CoordModelMapping.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\game\ModelContainer.cpp"
+				RelativePath="..\..\..\src\shared\vmap\CoordModelMapping.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\game\ModelContainer.h"
+				RelativePath="..\..\..\src\shared\vmap\DebugCmdLogger.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\game\ShortBox.h"
+				RelativePath="..\..\..\src\shared\vmap\DebugCmdLogger.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\game\ShortVector.h"
+				RelativePath="..\..\..\src\shared\vmap\ManagedModelContainer.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\game\SubModel.cpp"
+				RelativePath="..\..\..\src\shared\vmap\ManagedModelContainer.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\game\SubModel.h"
+				RelativePath="..\..\..\src\shared\vmap\ModelContainer.cpp"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\game\TileAssembler.cpp"
+				RelativePath="..\..\..\src\shared\vmap\ModelContainer.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\game\TileAssembler.h"
+				RelativePath="..\..\..\src\shared\vmap\NodeValueAccess.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\game\TreeNode.cpp"
+				RelativePath="..\..\..\src\shared\vmap\RayIntersectionIterator.h"
 				>
 			</File>
 			<File
-				RelativePath="..\..\..\src\game\TreeNode.h"
+				RelativePath="..\..\..\src\shared\vmap\ShortBox.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\shared\vmap\ShortVector.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\shared\vmap\SubModel.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\shared\vmap\SubModel.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\shared\vmap\TileAssembler.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\shared\vmap\TileAssembler.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\shared\vmap\TreeNode.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\..\src\shared\vmap\TreeNode.h"
 				>
 			</File>
 		</Filter>
