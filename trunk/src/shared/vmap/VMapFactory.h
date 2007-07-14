@@ -29,13 +29,9 @@ namespace VMAP {
     //===========================================================
 
     class VMapFactory {
-    private:
-        IVMapManager* _createVMapManager();
-        void _preventSpellsFromBeingTestedForLoS(const char* pSpellIdString);
-        bool _checkSpellForLoS(unsigned int pSpellId);
-
     public:
-        static IVMapManager* createOrGetVMapManager() { return(VMapFactory()._createVMapManager()); }
+        static IVMapManager* createOrGetVMapManager();
+        static void clear();
 
         static void preventSpellsFromBeingTestedForLoS(const char* pSpellIdString);
         static bool checkSpellForLoS(unsigned int pSpellId);
