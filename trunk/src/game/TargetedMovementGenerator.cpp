@@ -27,7 +27,7 @@
 #define SMALL_ALPHA 0.05
 
 #include <cmath>
-
+/*
 struct StackCleaner
 {
     Creature &i_creature;
@@ -38,7 +38,7 @@ struct StackCleaner
         i_creature->Clear();
     }
 };
-
+*/
 void
 TargetedMovementGenerator::_setTargetLocation(Creature &owner)
 {

@@ -1918,7 +1918,7 @@ void Aura::HandleFeignDeath(bool Apply, bool Real)
 
         m_target->addUnitState(UNIT_STAT_DIED);
         m_target->CombatStop();
-        m_target->DeleteInHateListOf();
+        m_target->getHostilRefManager().deleteReferences();
     }
     else
     {
@@ -2275,7 +2275,7 @@ void Aura::HandleAuraModTotalThreat(bool Apply, bool Real)
     else
         threatMod =  float(-m_modifier.m_amount);
 
-    caster->ThreatAssist(m_target, threatMod, true);
+    m_target->getHostilRefManager().threatAssist(caster, threatMod, true);
 }
 
 void Aura::HandleModTaunt(bool apply, bool Real)
@@ -2980,7 +2980,7 @@ void Aura::HandleModRegen(bool apply, bool Real)            // eating
         {
             SpellEntry const *spellProto = GetSpellProto();
             if (spellProto)
-                caster->ThreatAssist(m_target, float(gain) * 0.5f, spellProto->School, spellProto);
+                m_target->getHostilRefManager().threatAssist(caster, float(gain) * 0.5f, spellProto->School, spellProto);
         }
     }
 
@@ -3011,7 +3011,7 @@ void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
             {
                 SpellEntry const *spellProto = GetSpellProto();
                 if (spellProto)
-                    caster->ThreatAssist(m_target, float(gain) * 0.5f, spellProto->School, spellProto);
+                    m_target->getHostilRefManager().threatAssist(caster, float(gain) * 0.5f, spellProto->School, spellProto);
             }
         }
     }
@@ -3036,7 +3036,7 @@ void Aura::HandleModManaRegen(bool apply, bool Real)
         {
             SpellEntry const *spellProto = GetSpellProto();
             if (spellProto)
-                caster->ThreatAssist(m_target, float(gain) * 0.5f, spellProto->School, spellProto);
+                m_target->getHostilRefManager().threatAssist(caster, float(gain) * 0.5f, spellProto->School, spellProto);
         }
     }
 

@@ -80,7 +80,7 @@ void Creature::CleanupCrossRefsBeforeDelete()
     {
         CombatStop(true);
         DeleteThreatList();
-        DeleteInHateListOf();
+        getHostilRefManager().setOnlineOfflineState(false);
         RemoveAllAuras();
     }
 }

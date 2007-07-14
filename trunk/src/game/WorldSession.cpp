@@ -587,13 +587,13 @@ void WorldSession::LogoutPlayer(bool Save)
         //FIXME: logout must be delayed in case lost connection with client in time of combat
         if (_player->GetDeathTimer())
         {
-            _player->DeleteInHateListOf();
+            _player->getHostilRefManager().deleteReferences();
             _player->BuildPlayerRepop();
         }
         else if (_player->isAttacked())
         {
             _player->CombatStop(true);
-            _player->DeleteInHateListOf();
+            _player->getHostilRefManager().setOnlineOfflineState(false);
             _player->KillPlayer();
             _player->BuildPlayerRepop();
 

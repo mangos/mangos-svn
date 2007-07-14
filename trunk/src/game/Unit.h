@@ -27,9 +27,10 @@
 #include "Util.h"
 #include "UpdateFields.h"
 #include "SharedDefines.h"
+#include "ThreatManager.h"
+#include "HostilRefManager.h"
 #include "FollowerReference.h"
 #include "FollowerRefManager.h"
-
 #include <list>
 
 // Passive Spell codes explicit used in code
@@ -538,21 +539,6 @@ inline SpellSchools immuneToSchool(ImmuneToSchool immune)
     return SPELL_SCHOOL_NORMAL;
 }
 
-struct Hostil
-{
-    Hostil(uint64 _UnitGuid, float _Threat) : UnitGuid(_UnitGuid), Threat(_Threat) {}
-
-    uint64 UnitGuid;
-    float Threat;
-    bool operator < (Hostil const& item) const
-    {
-        return (Threat < item.Threat);
-    }
-};
-
-typedef std::list<Hostil> ThreatList;
-typedef std::list<Hostil> HateOfflineList;
-
 enum MeleeHitOutcome
 {
     MELEE_HIT_MISS, MELEE_HIT_DODGE, MELEE_HIT_BLOCK, MELEE_HIT_PARRY, MELEE_HIT_GLANCING,
@@ -584,7 +570,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         typedef std::pair<uint32, uint32> spellEffectPair;
         typedef std::multimap< spellEffectPair, Aura*> AuraMap;
         typedef std::list<Aura *> AuraList;
-        typedef std::set<Creature *> InHateListOf;
         typedef std::list<DiminishingReturn> Diminishing;
         virtual ~Unit ( );
 
@@ -948,36 +933,18 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         AuraList const& GetSingleCastAuras() const { return m_scAuras; }
         SpellImmuneList m_spellImmune[6];
 
-        float GetThreat(uint64 guid) const;
-        void ModifyThreatPercent(uint64 guid, int32 percent);
-        ThreatList& GetThreatList() { return m_threatList; }
-        HateOfflineList& GetHateOfflineList() { return m_offlineList; }
-        InHateListOf& GetInHateListOf() { return m_inhateList; }
+        // Threat related methodes
         bool CanHaveThreatList() const;
-        void ThreatAssist(Unit* target, float threat, uint8 school = 0, SpellEntry const *threatSpell = NULL, bool singletarget = false);
         void AddThreat(Unit* pVictim, float threat, uint8 school = 0, SpellEntry const *threatSpell = NULL);
-        void AddToInHateList(Creature* attacker);
-        void RemoveFromInHateListOf(Creature* attacker);
-        void RemoveFromThreatList(uint64 guid);
-        void DeleteThreatList();
-        void DeleteInHateListOf();
-        bool SelectHostilTarget();
-        Unit* SelectNextVictim();
-        void MoveToHateOfflineList();
-        void MoveToThreatList();
-        bool MoveGuidToThreatList(uint64 guid);
-        bool MoveGuidToOfflineList(uint64 guid);
-        bool IsThreatListEmpty() const { return m_threatList.empty(); };
-        bool IsInHateListEmpty() const { return m_inhateList.empty(); };
-        bool IsHateOfflineListEmpty() const { return m_offlineList.empty(); };
         float ApplyTotalThreatModifier(float threat, uint8 school = 0);
-        void SortList(bool sorted) { m_isSorted = sorted; };
-        bool IsThreatListNeedsSorting() const { return m_isSorted; };
-        void UpdateCurrentVictimThreat(float threat) { m_victimThreat += threat; };
-        void SetCurrentVictimThreat(float threat) { m_victimThreat = threat; };
-        float GetCurrentVictimThreat() const { return m_victimThreat; };
+        void DeleteThreatList();
+        bool SelectHostilTarget();
         void TauntApply(Unit* pVictim);
         void TauntFadeOut(Unit *taunter);
+        ThreatManager& getThreatManager() { return m_ThreatManager; }
+        void addHatedBy(HostilReference* pHostilReference) { m_HostilRefManager.insertFirst(pHostilReference); };
+        void removeHatedBy(HostilReference* pHostilReference) {};  // nothing to do yet
+        HostilRefManager& getHostilRefManager() { return m_HostilRefManager; }
 
         Aura* GetAura(uint32 spellId, uint32 effindex);
         AuraMap& GetAuras( ) {return m_Auras;}
@@ -1028,7 +995,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         void addFollower(FollowerReference* pRef) { m_FollowingRefManager.insertFirst(pRef); }
         void removeFollower(FollowerReference* pRef) {  } // nothing to do yet
-
         static Unit* GetUnit(WorldObject& object, uint64 guid);
     protected:
         Unit ( WorldObject *instantiator );
@@ -1058,11 +1024,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         DynObjectGUIDs m_dynObjGUIDs;
 
         std::list<GameObject*> m_gameObj;
-        ThreatList m_threatList;
-        HateOfflineList m_offlineList;
-        InHateListOf m_inhateList;
         bool m_isSorted;
-        float m_victimThreat;
         uint32 m_transform;
         uint32 m_removedAuras;
 
@@ -1084,6 +1046,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         UnitVisibility m_Visibility;
 
         Diminishing m_Diminishing;
+        // Manage all Units threatening us
+        ThreatManager m_ThreatManager;
+        // Manage all Units that are threatened by us
+        HostilRefManager m_HostilRefManager;
 
         FollowerRefManager m_FollowingRefManager;
 };

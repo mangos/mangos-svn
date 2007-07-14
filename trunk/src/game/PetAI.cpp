@@ -114,7 +114,8 @@ void PetAI::_stopAttack()
         i_pet->Idle();
         i_victimGuid = 0;
         i_pet.CombatStop(true);
-        i_pet.DeleteInHateListOf();
+        i_pet.getHostilRefManager().deleteReferences();
+
         return;
     }
     else if( !victim  )
