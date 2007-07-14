@@ -175,7 +175,7 @@ Unit::Unit( WorldObject *instantiator ) : WorldObject( instantiator )
     m_modResilience = 0.0;
     m_modCastSpeedPct = 0;
     m_CombatTimer = 0;
-    m_victimThreat = 0.0f;
+    //m_victimThreat = 0.0f;
     for (int i = 0; i < MAX_SPELL_SCHOOL; ++i)
         m_threatModifier[i] = 1.0f;
     m_isSorted = true;
@@ -183,6 +183,7 @@ Unit::Unit( WorldObject *instantiator ) : WorldObject( instantiator )
         m_speed_rate[i] = 1.0f;
 
     m_removedAuras = 0;
+    getThreatManager().setOwner(this);
 }
 
 Unit::~Unit()
@@ -223,7 +224,7 @@ void Unit::Update( uint32 p_time )
 
     if (isInCombat() && GetTypeId() == TYPEID_PLAYER )      //update combat timer only for players
     {
-        if(IsInHateListEmpty())
+        if(m_HostilRefManager.isEmpty())
         {
             // m_CombatTimer set at aura start and it will be freeze until aura removing
             if(!HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
@@ -508,7 +509,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
                 WorldPacket data(SMSG_DURABILITY_DAMAGE_DEATH, 0);
                 ((Player*)pVictim)->GetSession()->SendPacket(&data);
             }
-            pVictim->DeleteInHateListOf();
+            pVictim->getHostilRefManager().deleteReferences();
 
             Pet *pet = pVictim->GetPet();
             if(pet)
@@ -517,7 +518,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
                 pet->CombatStop(true);
                 pet->SetHealth(0);
                 pet->addUnitState(UNIT_STAT_DIED);
-                pet->DeleteInHateListOf();
+                pet->getHostilRefManager().deleteReferences();
             }
         }
         else                                                // creature died
@@ -525,7 +526,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
             DEBUG_LOG("DealDamageNotPlayer");
 
             if(((Creature*)pVictim)->isPet())
-                pVictim->DeleteInHateListOf();
+                pVictim->getHostilRefManager().deleteReferences();
             else
             {
                 pVictim->DeleteThreatList();
@@ -1125,7 +1126,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             SendMessageToSet(&data,true);
 
             int32 gain = pVictim->ModifyHealth(pdamage);
-            ThreatAssist(pVictim, float(gain) * 0.5f, localSpellProto.School, &localSpellProto);
+            pVictim->getHostilRefManager().threatAssist(this, float(gain) * 0.5f, localSpellProto.School, &localSpellProto);
 
             // heal for caster damage
             if(pVictim!=this && localSpellProto.SpellVisual==163)
@@ -1171,7 +1172,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
                         m_currentSpell->cancel();
 
             int32 gain = ModifyHealth(int32(pdamage * multiplier));
-            ThreatAssist(this, float(gain) * 0.5f, localSpellProto.School, &localSpellProto);
+            getHostilRefManager().threatAssist(this, float(gain) * 0.5f, localSpellProto.School, &localSpellProto);
 
             if(GetTypeId() == TYPEID_PLAYER)
                 SendHealSpellOnPlayer(this, localSpellProto.Id, uint32(pdamage * multiplier));
@@ -1231,7 +1232,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             SendMessageToSet(&data,true);
 
             int32 gain = pVictim->ModifyPower(power,mod->m_amount);
-            ThreatAssist(pVictim, float(gain) * 0.5f, localSpellProto.School, &localSpellProto);
+            pVictim->getHostilRefManager().threatAssist(this, float(gain) * 0.5f, localSpellProto.School, &localSpellProto);
             break;
         }
         case SPELL_AURA_OBS_MOD_MANA:
@@ -1250,7 +1251,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             SendMessageToSet(&data,true);
 
             int32 gain = ModifyPower(POWER_MANA, mod->m_amount);
-            ThreatAssist(this, float(gain) * 0.5f, localSpellProto.School, &localSpellProto);
+            getHostilRefManager().threatAssist(this, float(gain) * 0.5f, localSpellProto.School, &localSpellProto);
             break;
         }
     }
@@ -5119,7 +5120,6 @@ void Unit::setDeathState(DeathState s)
 ########       AGGRO SYSTEM       ########
 ########                          ########
 ########################################*/
-
 bool Unit::CanHaveThreatList() const
 {
     if(GetTypeId() == TYPEID_UNIT && !((Creature*)this)->isPet() && !((Creature*)this)->isTotem() )
@@ -5128,416 +5128,7 @@ bool Unit::CanHaveThreatList() const
         return false;
 }
 
-float Unit::GetThreat(uint64 guid) const
-{
-    //use to get total threat of certain target in ThreatList
-    float threat = 0.0f;
-
-    for(ThreatList::const_iterator i = m_threatList.begin(); i!= m_threatList.end(); ++i)
-    {
-        if(i->UnitGuid==guid)
-        {
-            threat=i->Threat;
-            break;
-        }
-    }
-
-    return threat;
-}
-
-void Unit::ModifyThreatPercent(uint64 guid, int32 percent)
-{
-    bool isinlist = false;
-    float new_threat;
-
-    for(ThreatList::iterator i = m_threatList.begin(); i!= m_threatList.end(); ++i)
-    {
-        if(i->UnitGuid==guid)
-        {
-            new_threat = i->Threat * (percent+100)/100;
-            i->Threat = new_threat;
-            isinlist = true;
-            break;
-        }
-    }
-
-    if(!isinlist)
-        return;
-
-    if(getVictim() && (guid == getVictim()->GetGUID()))
-    {
-        SetCurrentVictimThreat(new_threat);
-        if(percent<0)
-            SortList(true);
-    }
-    else
-        SortList(true);
-}
-
-void Unit::AddThreat(Unit* pVictim, float threat, uint8 school, SpellEntry const *threatSpell)
-{
-    //function deals with adding threat and adding players and pets into ThreatList
-    //mobs, NPCs, guards have ThreatList and HateOfflineList
-    //players and pets have only InHateListOf
-    //HateOfflineList is used co contain unattackable victims (in-flight, in-water, GM etc.)
-                                                            //pVictim = player or pet
-
-    if (pVictim == this)                                    // only for sane creatures :)
-        return;
-
-    if(!pVictim || (pVictim->GetTypeId() == TYPEID_PLAYER && ((Player*)pVictim)->isGameMaster()) )
-        return;
-
-    if(!CanHaveThreatList())
-        return;
-
-    assert(GetTypeId()== TYPEID_UNIT);
-    bool isinlist = false;
-
-    pVictim->AddToInHateList((Creature*)this);
-    uint64 guid = pVictim->GetGUID();
-
-    if (pVictim->GetTypeId() == TYPEID_PLAYER && threatSpell)
-        ((Player*)pVictim)->ApplySpellMod(threatSpell->Id, SPELLMOD_THREAT, threat);
-
-    threat = pVictim->ApplyTotalThreatModifier(threat, school);
-
-    //add attacker into ThreatList of a creature
-    for(ThreatList::iterator i = m_threatList.begin(); i != m_threatList.end(); i++)
-    {
-        if(i->UnitGuid==guid)
-        {
-            i->Threat += threat;
-            isinlist = true;
-            break;
-        }
-    }
-
-    if(!isinlist)
-        m_threatList.push_back(Hostil(guid,threat));
-
-    if(getVictim() && (guid == getVictim()->GetGUID()))
-    {
-        UpdateCurrentVictimThreat(threat);
-        if(threat<0.0f)
-            SortList(true);
-    }
-    else
-        SortList(true);
-
-    //threat link to owner
-    Unit* victim_owner = pVictim->GetOwner();
-    if(victim_owner && victim_owner->isAlive())
-        AddThreat(victim_owner, 0.0f);
-}
-
-void Unit::AddToInHateList(Creature* attacker)
-{
-    //adds attacker into InHateListOf list of players and pets
-    //only players and pets can have InHateListOf list!
-    if(!attacker)
-        return;
-
-    if(!attacker->CanHaveThreatList())
-        return;
-
-                                                            //add creature into InHateListOf
-    InHateListOf::iterator iter = m_inhateList.find(attacker);
-    if(iter == m_inhateList.end())
-    {
-        m_inhateList.insert(attacker);
-        SetInCombat();                                      //when player is in threatlist he is in combat
-    }
-}
-
-void Unit::ThreatAssist(Unit* target, float threat, uint8 school, SpellEntry const *threatSpell, bool singletarget)
-{
-    if(!target)
-        return;
-
-    //used to add player/pet into several ThreatLists
-    //of those mobs which have target in it
-    //use for buffs and healing threat functionality
-    InHateListOf& InHateList = target->GetInHateListOf();
-    uint32 count_enemies = singletarget ? 1 : InHateList.size();
-
-    for(InHateListOf::iterator iter = InHateList.begin(); iter != InHateList.end(); ++iter)
-    {
-        (*iter)->AddThreat(this, float (threat) / count_enemies, school, threatSpell);
-    }
-}
-
-void Unit::RemoveFromInHateListOf(Creature* attacker)
-{
-    //used to delete mobs from InHateListOf lists
-    //of players and pets and leaving combat when list becomes empty
-    if(!attacker)
-        return;
-
-    if(IsInHateListEmpty())
-        return;
-
-    //used to delete mobs from InHateList of players
-    InHateListOf::iterator iter = m_inhateList.find(attacker);
-    if(iter != m_inhateList.end())
-        m_inhateList.erase(iter);
-
-    if(IsInHateListEmpty())
-        ClearInCombat();
-}
-
-void Unit::RemoveFromThreatList(uint64 guid)
-{
-    //function is used to delete guids from threat lists of mobs
-    // and call for EnterEvadeMode() if it became empty
-    if(!guid)
-        return;
-
-    if(IsThreatListEmpty())
-        return;
-
-    for(ThreatList::iterator i = m_threatList.begin(); i != m_threatList.end(); i++)
-    {
-        if(i->UnitGuid==guid)
-        {
-            if(getVictim() && getVictim()->GetGUID() == guid)
-                SetCurrentVictimThreat(0.0f);
-            m_threatList.erase(i);
-            break;
-        }
-    }
-
-    if(IsThreatListEmpty() && GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
-        ((Creature*)this)->AI()->EnterEvadeMode();
-}
-
-void Unit::DeleteThreatList()
-{
-    //function is used for erasing ThreatList and HateOffline lists
-    //on mob deathe with removing it from players and pets
-    //who have them in their InHateListOf lists
-    if(!CanHaveThreatList())
-        return;
-
-    if(GetTypeId()==TYPEID_UNIT)                            // only creatures can be in inHateListOf
-    {
-        //used to clear mob's threat list
-        while(!m_threatList.empty())
-        {
-            ThreatList::iterator i = m_threatList.begin();
-            uint64 guid = i->UnitGuid;
-            m_threatList.erase(i);
-
-            Unit* unit = ObjectAccessor::Instance().GetUnit(*this, guid);
-            if(unit)
-                unit->RemoveFromInHateListOf((Creature*)this);
-        }
-
-        while(!m_offlineList.empty())
-        {
-            HateOfflineList::iterator iter = m_offlineList.begin();
-            uint64 guid = iter->UnitGuid;
-            m_offlineList.erase(iter);
-
-            Unit* unit = ObjectAccessor::Instance().GetUnit(*this, guid);
-            if(unit)
-                unit->RemoveFromInHateListOf((Creature*)this);
-        }
-    }
-
-    SetCurrentVictimThreat(0.0f);
-}
-
-void Unit::DeleteInHateListOf()
-{
-    //function is used for erasing InHateListOf list
-    //on player's or pet's deathes with removing them from mobs
-    //who have them in their threat lists
-    if(CanHaveThreatList())
-        return;
-
-    if(IsInHateListEmpty())
-        return;
-
-    uint64 guid = GetGUID();
-    DEBUG_LOG("InHateList list deletion started");
-    //use for players to delete InHateListOf
-    while(!m_inhateList.empty())
-    {
-        InHateListOf::iterator iter = m_inhateList.begin();
-        Creature* unit = *iter;
-        m_inhateList.erase(iter);
-
-        unit->RemoveFromThreatList(guid);
-    }
-
-    DEBUG_LOG("InHateList list deleted");
-}
-
-bool Unit::SelectHostilTarget()
-{
-    //function provides main threat functionality
-    //next-victim-selection algorithm and evade mode are called
-    //threat list sorting etc.
-    assert(GetTypeId()== TYPEID_UNIT);
-
-    if(IsThreatListEmpty())
-    {
-        if(!IsHateOfflineListEmpty() && ((Creature*)this)->AI())
-            ((Creature*)this)->AI()->EnterEvadeMode();
-        return false;
-    }
-
-    if(HasAuraType(SPELL_AURA_MOD_TAUNT))
-        return true;
-
-    if(IsThreatListNeedsSorting())                          //sort ThreatList if it is not sorted after AddThreat()
-    {
-        m_threatList.sort();
-        m_threatList.reverse();
-        SortList(false);                                    //set not to sort ThreatList until next AddThreat() call
-    }
-
-    Unit* target = NULL;
-    float threat = m_threatList.front().Threat;
-    if(!getVictim() || threat > 1.1f * GetCurrentVictimThreat())
-        target = SelectNextVictim();
-    else
-        return true;
-
-    if(target)
-    {
-        SetInFront(target);
-        if (((Creature*)this)->AI())
-            ((Creature*)this)->AI()->AttackStart(target);
-        return true;
-    }
-    else if (((Creature*)this)->AI())
-        ((Creature*)this)->AI()->EnterEvadeMode();
-
-    return false;
-}
-
-Unit* Unit::SelectNextVictim()
-{
-    //function used to find first nearest attackable target
-    //with max threat in threat list
-    //ALL mobs threat behavior bugs are connected to this function!!!
-    bool hasVictim = false;
-    uint64 guid = 0;
-    float threat = 0;
-    Unit* target = NULL;
-
-    if(getVictim())
-    {
-        hasVictim = true;
-        threat = GetCurrentVictimThreat();
-        guid = getVictim()->GetGUID();
-    }
-
-    for(ThreatList::iterator iter = m_threatList.begin(); iter != m_threatList.end(); ++iter)
-    {
-        target = ObjectAccessor::Instance().GetUnit(*this, iter->UnitGuid);
-        if(!target)
-            continue;
-
-        if(hasVictim)
-        {
-            if(iter->UnitGuid == guid)
-                return target;
-
-            Map* map = MapManager::Instance().GetMap(GetMapId(), this);
-            if((map->Instanceable() || (!((Creature*)this)->IsOutOfThreatArea(target))) && target->isInAccessablePlaceFor( ((Creature*)this) ))
-            {
-                if((IsWithinDistInMap(target, ATTACK_DISTANCE) && (iter->Threat > 1.1f * threat)) || (iter->Threat > 1.3f * threat))
-                {                                           //implement 110% threat rule for targets in melee range
-                    SetCurrentVictimThreat(iter->Threat);   //and 130% rule for targets in ranged distances
-                    return target;                          //for selecting alive targets
-                }
-            }
-        }
-        else if(!((Creature*)this)->IsOutOfThreatArea(target) && target->isInAccessablePlaceFor( ((Creature*)this) ) )
-        {
-            SetCurrentVictimThreat(iter->Threat);
-            return target;
-        }
-
-    }
-
-    return NULL;
-}
-
-void Unit::MoveToHateOfflineList()
-{
-    //use to move players and pets guids into HateOfflineLists of those mobs
-    //which have them in threat lists. Cause: unattackable, in-flight, in-water etc.
-    //InHateListOf list is not gets deleted!
-    if(IsInHateListEmpty())
-        return;
-
-    uint64 guid = this->GetGUID();
-
-    for(InHateListOf::iterator iter = m_inhateList.begin(); iter != m_inhateList.end(); iter++)
-    {
-        (*iter)->MoveGuidToOfflineList(guid);
-    }
-}
-
-void Unit::MoveToThreatList()
-{
-    //move guid from HateOfflineList into ThreatList when player/pet became attackable, got on surface etc.
-    if(IsInHateListEmpty())
-        return;
-
-    uint64 guid = this->GetGUID();
-
-    for(InHateListOf::iterator iter = m_inhateList.begin(); iter != m_inhateList.end(); iter++)
-    {
-        (*iter)->MoveGuidToThreatList(guid);
-    }
-}
-
-bool Unit::MoveGuidToThreatList(uint64 guid)
-{
-    //auxiliary function, part of MoveToThreatList() func, but could be used as standalone func
-    //example in Player::SetInWater()
-    if(!guid)
-        return false;
-
-    for(HateOfflineList::iterator itr = m_offlineList.begin(); itr != m_offlineList.end(); itr++)
-    {
-        if(itr->UnitGuid == guid)
-        {
-            m_threatList.push_back(Hostil(itr->UnitGuid, itr->Threat));
-            m_offlineList.erase(itr);
-            if(getVictim() && getVictim()->GetGUID() == guid)
-                SetCurrentVictimThreat(0.0f);
-            return true;
-        }
-    }
-
-    return false;
-}
-
-bool Unit::MoveGuidToOfflineList(uint64 guid)
-{
-    //auxiliary func, part of MoveToHateOfflineList(), but could be used as standalone func
-    //example in Player::SetInWater()
-    if(!guid)
-        return false;
-
-    for(ThreatList::iterator itr = m_threatList.begin(); itr != m_threatList.end(); itr++)
-    {
-        if(itr->UnitGuid == guid)
-        {
-            m_offlineList.push_back(Hostil(itr->UnitGuid, itr->Threat));
-            m_threatList.erase(itr);
-            return true;
-        }
-    }
-
-    return false;
-}
+//======================================================================
 
 float Unit::ApplyTotalThreatModifier(float threat, uint8 school)
 {
@@ -5549,6 +5140,24 @@ float Unit::ApplyTotalThreatModifier(float threat, uint8 school)
 
     return threat * m_threatModifier[school];
 }
+
+//======================================================================
+
+void Unit::AddThreat(Unit* pVictim, float threat, uint8 school, SpellEntry const *threatSpell)
+{
+    // Only mobs can manage threat lists
+    if(CanHaveThreatList())
+        m_ThreatManager.addThreat(pVictim, threat, school, threatSpell);
+}
+
+//======================================================================
+
+void Unit::DeleteThreatList()
+{
+    m_ThreatManager.clearReferences();
+}
+
+//======================================================================
 
 void Unit::TauntApply(Unit* taunter)
 {
@@ -5568,22 +5177,10 @@ void Unit::TauntApply(Unit* taunter)
     if (((Creature*)this)->AI())
         ((Creature*)this)->AI()->AttackStart(taunter);
 
-    uint64 guid = taunter->GetGUID();
-    float threat = GetCurrentVictimThreat();
-
-    bool isinlist = false;
-    for(ThreatList::iterator i = m_threatList.begin(); i != m_threatList.end(); i++)
-    {
-        if(i->UnitGuid==guid)
-        {
-            i->Threat = threat;
-            isinlist = true;
-            break;
-        }
-    }
-
-    SortList(true);
+    m_ThreatManager.tauntApply(taunter);
 }
+
+//======================================================================
 
 void Unit::TauntFadeOut(Unit *taunter)
 {
@@ -5599,37 +5196,15 @@ void Unit::TauntFadeOut(Unit *taunter)
     if(!target || target != taunter)
         return;
 
-    if(IsThreatListEmpty())
+    if(m_ThreatManager.isThreatListEmpty())
     {
-        if(!IsHateOfflineListEmpty() && ((Creature*)this)->AI())
+        if(((Creature*)this)->AI())
             ((Creature*)this)->AI()->EnterEvadeMode();
         return;
     }
 
-    if(IsThreatListNeedsSorting())                          //sort ThreatList if it is not sorted after AddThreat()
-    {
-        m_threatList.sort();
-        m_threatList.reverse();
-        SortList(false);                                    //set not to sort ThreatList until next AddThreat() call
-    }
-
-    float taunterThreat = GetCurrentVictimThreat();
-    Hostil topgun  = m_threatList.front();
-    if(topgun.UnitGuid != taunter->GetGUID())
-    {
-        target = ObjectAccessor::Instance().GetUnit(*this, topgun.UnitGuid);
-    }
-    else
-    {
-        m_threatList.pop_front();
-        if(!IsThreatListEmpty())
-        {
-            Hostil secondgun = m_threatList.front();
-            if(taunterThreat < 1.1f * m_threatList.front().Threat)
-                target = ObjectAccessor::Instance().GetUnit(*this, secondgun.UnitGuid);
-        }
-        m_threatList.push_front(topgun);
-    }
+    m_ThreatManager.tauntFadeOut(taunter);
+    target = m_ThreatManager.getHostilTarget();
 
     if (target && target != taunter)
     {
@@ -5638,6 +5213,40 @@ void Unit::TauntFadeOut(Unit *taunter)
             ((Creature*)this)->AI()->AttackStart(target);
     }
 }
+
+//======================================================================
+
+bool Unit::SelectHostilTarget()
+{
+    //function provides main threat functionality
+    //next-victim-selection algorithm and evade mode are called
+    //threat list sorting etc.
+
+    assert(GetTypeId()== TYPEID_UNIT);
+    bool result = false;
+    Unit* target = NULL;
+
+    if(!m_ThreatManager.isThreatListEmpty())
+    {
+        if(!HasAuraType(SPELL_AURA_MOD_TAUNT))
+        {
+            target = m_ThreatManager.getHostilTarget();
+        }
+    }
+
+    if(target)
+    {
+        SetInFront(target);
+        if (((Creature*)this)->AI())
+            ((Creature*)this)->AI()->AttackStart(target);
+        result = true;
+    }
+    return result;
+}
+
+//======================================================================
+//======================================================================
+//======================================================================
 
 int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_index)
 {

@@ -1774,16 +1774,7 @@ void Player::SetInWater(bool apply)
             RemoveAurasDueToSpell(m_ShapeShiftForm);
     }
 
-    // update threat tables
-    uint64 guid = GetGUID();
-    InHateListOf& InHateList = GetInHateListOf();
-    for(InHateListOf::iterator iter = InHateList.begin(); iter != InHateList.end(); iter++)
-    {
-        if(!isInAccessablePlaceFor(*iter) )
-            (*iter)->MoveGuidToOfflineList(guid);
-        else
-            (*iter)->MoveGuidToThreatList(guid);
-    }
+    getHostilRefManager().updateThreatTables();
 }
 
 void Player::SetGameMaster(bool on)
@@ -1793,7 +1784,7 @@ void Player::SetGameMaster(bool on)
         m_GMFlags |= GM_ON;
         setFaction(35);
         SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
-        MoveToHateOfflineList();
+        getHostilRefManager().setOnlineOfflineState(false);
         CombatStop(true);
     }
     else
@@ -1801,7 +1792,7 @@ void Player::SetGameMaster(bool on)
         m_GMFlags &= ~GM_ON;
         setFactionForRace(getRace());
         RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
-        MoveToThreatList();
+        getHostilRefManager().setOnlineOfflineState(true);
     }
 }
 
@@ -5583,7 +5574,7 @@ void Player::FlightComplete()
     clearUnitState(UNIT_STAT_IN_FLIGHT);
     SetMoney( m_dismountCost);
     Unmount();
-    MoveToThreatList();
+    getHostilRefManager().setOnlineOfflineState(true);
     if(pvpInfo.inHostileArea)
         CastSpell(this, 2479, true);
 }

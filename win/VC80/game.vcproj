@@ -696,6 +696,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\HostilRefManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\HostilRefManager.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\IdleMovementGenerator.cpp"
 				>
 			</File>
@@ -868,6 +876,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\ThreatManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\ThreatManager.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\Totem.cpp"
 				>
 			</File>
@@ -893,6 +909,10 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\Unit.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\UnitEvents.h"
 				>
 			</File>
 			<File

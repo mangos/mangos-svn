@@ -114,6 +114,8 @@ libmangosgame_a_SOURCES = \
 	HateMatrix.h \
 	HomeMovementGenerator.cpp \
 	HomeMovementGenerator.h \
+	HostilRefManager.cpp \
+	HostilRefManager.h \
 	IdleMovementGenerator.cpp \
 	IdleMovementGenerator.h \
 	Item.cpp \
@@ -208,9 +210,12 @@ libmangosgame_a_SOURCES = \
 	TradeHandler.cpp \
 	Transports.cpp \
 	Transports.h \
+	ThreatManager.cpp \
+	ThreatManager.h \
 	Traveller.h \
 	Unit.cpp \
 	Unit.h \
+	UnitEvents.h \
 	UpdateData.cpp \
 	UpdateData.h \
 	UpdateFields.h \
