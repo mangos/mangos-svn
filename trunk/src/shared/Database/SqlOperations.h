@@ -42,7 +42,7 @@ class SqlStatement : public SqlOperation
         const char *m_sql;
     public:
         SqlStatement(const char *sql) : m_sql(strdup(sql)){}
-        ~SqlStatement() { delete[] m_sql; }
+        ~SqlStatement() { free((void*)m_sql); }
         void Execute(Database *db);
 };
 

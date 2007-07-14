@@ -210,6 +210,10 @@ void Master::Run()
 
     ///- Clean database before leaving
     clearOnlineAccounts();
+ 
+    ///- Wait for delay threads to end
+    sDatabase.HaltDelayThread();
+    loginDatabase.HaltDelayThread();
 
     sLog.outString( "Halting process..." );
 

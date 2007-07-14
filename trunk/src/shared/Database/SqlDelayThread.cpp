@@ -26,7 +26,7 @@ SqlDelayThread::SqlDelayThread(Database* db) : m_dbEngine(db), m_running(true)
 
 void SqlDelayThread::run()
 {
-    SqlStatement* s;
+    SqlOperation* s;
 
     mysql_thread_init();
 

@@ -25,11 +25,11 @@
 #include "zthread/LockedQueue.h"
 
 class Database;
-class SqlStatement;
+class SqlOperation;
 
 class SqlDelayThread : public ZThread::Runnable
 {
-    typedef ZThread::LockedQueue<SqlStatement*, ZThread::FastMutex> SqlQueue;
+    typedef ZThread::LockedQueue<SqlOperation*, ZThread::FastMutex> SqlQueue;
     private:
         SqlQueue m_sqlQueue;                                ///< Queue of SQL statements  
         Database* m_dbEngine;                               ///< Pointer to used Database engine
@@ -40,7 +40,7 @@ class SqlDelayThread : public ZThread::Runnable
         SqlDelayThread(Database* db);
         
         ///< Put sql statement to delay queue
-        inline void Delay(SqlStatement* sql) { m_sqlQueue.add(sql); }
+        inline void Delay(SqlOperation* sql) { m_sqlQueue.add(sql); }
 
         virtual void Stop();                                ///< Stop event
         virtual void run();                                 ///< Main Thread loop
