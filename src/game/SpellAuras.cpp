@@ -1156,7 +1156,6 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
         }
 
         // drop flag at mount in bg
-        // (have casts but not modify stats and not requires ApplyStats calls wrapping)
         if(Real && m_target->GetTypeId()==TYPEID_PLAYER)
             ((Player*)m_target)->DropBattleGroundFlag();
 
@@ -1654,7 +1653,7 @@ void Aura::HandleModPossess(bool apply, bool Real)
             caster->SetCharm(m_target);
             if(caster->GetTypeId() == TYPEID_PLAYER)
             {
-                ((Player*)caster)->PetSpellInitialize();
+                ((Player*)caster)->CharmSpellInitialize();
             }
             if(caster->getVictim()==m_target)
                 caster->AttackStop();
@@ -1665,10 +1664,21 @@ void Aura::HandleModPossess(bool apply, bool Real)
                 ((Creature*)m_target)->StopMoving();
                 (*(Creature*)m_target)->Clear();
                 (*(Creature*)m_target)->Idle();
+                ((Creature*)m_target)->InitCharmCreateSpells();
             }
         }
         else
         {
+            //remove area auras from charms
+			Unit::AuraMap& tAuras = m_target->GetAuras();
+      		for (Unit::AuraMap::iterator itr = tAuras.begin(); itr != tAuras.end();)
+		    {
+        		if (itr->second && itr->second->IsAreaAura())
+                    m_target->RemoveAura(itr);
+                else
+                    ++itr;
+      		}
+
             m_target->SetCharmerGUID(0);
 
             if(m_target->GetTypeId() == TYPEID_PLAYER)
@@ -1749,13 +1759,24 @@ void Aura::HandleModCharm(bool apply, bool Real)
             m_target->CombatStop();
             m_target->DeleteThreatList();
 
-            if(caster->GetTypeId() == TYPEID_PLAYER)
+            if(m_target->GetTypeId() == TYPEID_UNIT)
             {
-                ((Player*)caster)->PetSpellInitialize();
-            }
+				((Creature*)m_target)->AIM_Initialize();
+				((Creature*)m_target)->InitCharmCreateSpells();
+			}
         }
         else
         {
+            //remove area auras from charms
+            Unit::AuraMap& tAuras = m_target->GetAuras();
+            for (Unit::AuraMap::iterator itr = tAuras.begin(); itr != tAuras.end();)
+            {
+                if (itr->second && itr->second->IsAreaAura())
+                    m_target->RemoveAura(itr);
+                else
+                    ++itr;
+            }
+
             m_target->SetCharmerGUID(0);
 
             if(m_target->GetTypeId() == TYPEID_PLAYER)
@@ -2407,13 +2428,11 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool Real)
                                 // Warsong Flag, horde
                                 if(GetSpellProto()->Id == 23333)
                                     // Horde Flag Drop
-                                    // (not modify stats and then not required ApplyStats call)
                                     m_target->CastSpell(m_target, 23334, true, NULL, this);
                             if(((BattleGroundWS*)bg)->IsAllianceFlagPickedup())
                                 // Silverwing Flag, alliance
                                 if(GetSpellProto()->Id == 23335)
                                     // Alliance Flag Drop
-                                    // (not modify stats and then not required ApplyStats call)
                                     m_target->CastSpell(m_target, 23336, true, NULL, this);
                             break;
                         }
@@ -2752,7 +2771,20 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply, bool Real)
 
     // only players have base stats
     if(m_target->GetTypeId() != TYPEID_PLAYER)
+    {
+		if(((Creature*)m_target)->isPet())
+		{
+			Pet* pet = (Pet*)m_target;
+			if(m_modifier.m_miscvalue & IMMUNE_SCHOOL_PHYSICAL) //pets only have base armor
+			{
+				float curRes = pet->GetResistance(SPELL_SCHOOL_NORMAL);
+	            float baseRes = curRes + pet->GetResistanceBuffMods(SPELL_SCHOOL_NORMAL, false) - pet->GetResistanceBuffMods(SPELL_SCHOOL_NORMAL, true);
+    	        float baseRes_new = baseRes * (apply?(100.0f+m_modifier.m_amount)/100.0f : 100.0f / (100.0f+m_modifier.m_amount));
+        	    pet->SetArmor(curRes + baseRes_new - baseRes);
+			}
+		}
         return;
+    }
     Player *p_target = (Player*)m_target;
 
     for(int8 x = SPELL_SCHOOL_NORMAL; x < MAX_SPELL_SCHOOL;x++)

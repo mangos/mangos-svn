@@ -459,29 +459,32 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `character_pet`;
 CREATE TABLE `character_pet` (
-  `id` int(11) unsigned NOT NULL default '0',
+  `id` int(11) unsigned NOT NULL  default '0',
   `entry` int(11) unsigned NOT NULL default '0',
   `owner` int(11) unsigned NOT NULL default '0',
   `modelid` int(11) unsigned default '0',
   `level` int(11) unsigned NOT NULL default '1',
   `exp` int(11) unsigned NOT NULL default '0',
   `nextlvlexp` int(11) unsigned NOT NULL default '100',
-  `spell1` int(11) unsigned NOT NULL default '0',
-  `spell2` int(11) unsigned NOT NULL default '0',
-  `spell3` int(11) unsigned NOT NULL default '0',
-  `spell4` int(11) unsigned NOT NULL default '0',
-  `action` int(11) unsigned NOT NULL default '0',
-  `fealty` int(11) unsigned NOT NULL default '0',
-  `loyalty` int(11) unsigned NOT NULL default '1',
-  `trainpoint` int(11) unsigned NOT NULL default '0',
+  `Reactstate` tinyint(1) unsigned NOT NULL default '0',
+  `Commandstate` tinyint(1) unsigned NOT NULL default '1',
+  `loyaltypoints` int(11) NOT NULL default '0',
+  `loyalty` int(11) unsigned NOT NULL default '0',
+  `trainpoint` int(11) NOT NULL default '0',
   `name` varchar(100) default 'Pet',
   `renamed` tinyint(1) unsigned NOT NULL default '0',
   `slot` int(11) unsigned NOT NULL default '0',
   `curhealth` int(11) unsigned NOT NULL default '1',
   `curmana` int(11) unsigned NOT NULL default '0',
+  `curhappiness` int(11) unsigned NOT NULL default '0',
+  `savetime` bigint(20) unsigned NOT NULL default '0',
+  `resettalents_cost` int(11) unsigned NOT NULL default '0',
+  `resettalents_time` bigint(20) unsigned NOT NULL default '0',
+  `ABData` longtext,
+  `TeachSpelldata` longtext,
   PRIMARY KEY  (`id`),
   KEY `owner` (`owner`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Pet System';
 
 --
 -- Dumping data for table `character_pet`
@@ -2341,6 +2344,28 @@ LOCK TABLES `page_text` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `pet_aura`
+--
+
+DROP TABLE IF EXISTS `pet_aura`;
+CREATE TABLE `pet_aura` (
+  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `spell` int(11) unsigned NOT NULL default '0',
+  `effect_index` int(11) unsigned NOT NULL default '0',
+  `remaintime` int(11) NOT NULL default '0',
+  PRIMARY KEY  (`guid`,`spell`,`effect_index`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Pet System';
+
+--
+-- Dumping data for table `pet_aura`
+--
+
+LOCK TABLES `pet_aura` WRITE;
+/*!40000 ALTER TABLE `pet_aura` DISABLE KEYS */;
+/*!40000 ALTER TABLE `pet_aura` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `pet_levelstats`
 --
 
@@ -2350,6 +2375,7 @@ CREATE TABLE `pet_levelstats` (
   `level` tinyint(3) unsigned NOT NULL,
   `hp` smallint(5) unsigned NOT NULL,
   `mana` smallint(5) unsigned NOT NULL,
+  `armor` int(10) unsigned NOT NULL default '0',
   `str` smallint(5) unsigned NOT NULL,
   `agi` smallint(5) unsigned NOT NULL,
   `sta` smallint(5) unsigned NOT NULL,
@@ -2586,6 +2612,73 @@ INSERT INTO `pet_name_generation` VALUES
 (197,'zhum',417,1),
 (198,'zun',417,1);
 /*!40000 ALTER TABLE `pet_name_generation` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `pet_spell`
+--
+
+DROP TABLE IF EXISTS `pet_spell`;
+CREATE TABLE `pet_spell` (
+  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `spell` int(11) unsigned NOT NULL default '0' COMMENT 'Spell Identifier',
+  `slot` int(11) unsigned NOT NULL default '0',
+  `active` int(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`guid`,`spell`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Pet System';
+
+--
+-- Dumping data for table `pet_spell`
+--
+
+LOCK TABLES `pet_spell` WRITE;
+/*!40000 ALTER TABLE `pet_spell` DISABLE KEYS */;
+/*!40000 ALTER TABLE `pet_spell` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `pet_spell`
+--
+
+DROP TABLE IF EXISTS `pet_spell_cooldown`;
+CREATE TABLE `pet_spell_cooldown` (
+  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier, Low part',
+  `spell` int(11) unsigned NOT NULL default '0' COMMENT 'Spell Identifier',
+  `time` bigint(20) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`guid`,`spell`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `pet_spell_cooldown`
+--
+
+LOCK TABLES `pet_spell_cooldown` WRITE;
+/*!40000 ALTER TABLE `pet_spell_cooldown` DISABLE KEYS */;
+/*!40000 ALTER TABLE `pet_spell_cooldown` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `petcreateinfo_spell`
+--
+
+DROP TABLE IF EXISTS `petcreateinfo_spell`;
+CREATE TABLE `petcreateinfo_spell` (
+  `entry` int(11) unsigned NOT NULL DEFAULT '0',
+  `Spell1` int(11) unsigned NOT NULL DEFAULT '0',
+  `Spell2` int(11) unsigned NOT NULL DEFAULT '0',
+  `Spell3` int(11) unsigned NOT NULL DEFAULT '0',
+  `Spell4` int(11) unsigned NOT NULL DEFAULT '0',
+  `FamilyPassive` int(11) unsigned NOT NULL DEFAULT '0',
+  PRIMARY KEY (`entry`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Pet Create Spells';
+
+--
+-- Dumping data for table `petcreateinfo_spell`
+--
+
+LOCK TABLES `petcreateinfo_spell` WRITE;
+/*!40000 ALTER TABLE `petcreateinfo_spell` DISABLE KEYS */;
+/*!40000 ALTER TABLE `petcreateinfo_spell` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -9499,7 +9592,12 @@ INSERT INTO `spell_chain` VALUES
 (1714,0,1714,1),
 (1715,0,1715,1),
 (1735,99,99,2),
+(1742,0,1742,1),
 (1752,0,1752,1),
+(1753,1742,1742,2),
+(1754,1753,1742,3),
+(1755,1754,1742,4),
+(1756,1755,1742,5),
 (1757,1752,1752,2),
 (1758,1757,1752,3),
 (1759,1758,1752,4),
@@ -9561,6 +9659,7 @@ INSERT INTO `spell_chain` VALUES
 (2591,2590,53,4),
 (2637,0,2637,1),
 (2643,0,2643,1),
+(2649,0,2649,1),
 (2651,0,2651,1),
 (2652,0,2652,1),
 (2767,992,589,5),
@@ -9577,10 +9676,13 @@ INSERT INTO `spell_chain` VALUES
 (2912,0,2912,1),
 (2941,1094,348,4),
 (2944,0,2944,1),
+(2947,0,2947,1),
 (2948,0,2948,1),
 (2973,0,2973,1),
 (2974,0,2974,1),
 (2983,0,2983,1),
+(3009,3010,16827,8),
+(3010,16832,16827,7),
 (3029,1082,1082,2),
 (3034,0,3034,1),
 (3044,0,3044,1),
@@ -9588,6 +9690,7 @@ INSERT INTO `spell_chain` VALUES
 (3101,2259,2259,2),
 (3102,2550,2550,2),
 (3104,2108,2108,2),
+(3110,0,3110,1),
 (3111,136,136,2),
 (3140,145,133,4),
 (3273,0,3273,1),
@@ -9607,6 +9710,7 @@ INSERT INTO `spell_chain` VALUES
 (3698,755,755,2),
 (3699,3698,755,3),
 (3700,3699,755,4),
+(3716,0,3716,1),
 (3738,0,3738,1),
 (3747,600,17,4),
 (3811,3104,2108,3),
@@ -9616,6 +9720,16 @@ INSERT INTO `spell_chain` VALUES
 (4036,0,4036,1),
 (4037,4036,4036,2),
 (4038,4037,4036,3),
+(4187,0,4187,1),
+(4188,4187,4187,2),
+(4189,4188,4187,3),
+(4190,4189,4187,4),
+(4191,4190,4187,5),
+(4192,4191,4187,6),
+(4193,4192,4187,7),
+(4194,4193,4187,8),
+(5041,4194,4187,9),
+(5042,5041,4187,10),
 (5138,0,5138,1),
 (5143,0,5143,1),
 (5144,5143,5143,2),
@@ -9695,8 +9809,10 @@ INSERT INTO `spell_chain` VALUES
 (6223,6222,172,3),
 (6226,5138,5138,2),
 (6229,0,6229,1),
+(6307,0,6307,1),
 (6343,0,6343,1),
 (6353,0,6353,1),
+(6360,0,6360,1),
 (6363,3599,3599,2),
 (6364,6363,3599,3),
 (6365,6364,3599,4),
@@ -9746,6 +9862,7 @@ INSERT INTO `spell_chain` VALUES
 (7322,837,116,4),
 (7328,0,7328,1),
 (7369,845,845,2),
+(7371,0,7371,1),
 (7372,1715,1715,2),
 (7373,7372,1715,3),
 (7379,6574,6572,3),
@@ -9766,6 +9883,20 @@ INSERT INTO `spell_chain` VALUES
 (7659,7658,704,3),
 (7731,7620,7620,2),
 (7732,7731,7620,3),
+(7799,3110,3110,2),
+(7800,7799,3110,3),
+(7801,7800,3110,4),
+(7802,7801,3110,5),
+(7804,6307,6307,2),
+(7805,7804,6307,3),
+(7809,3716,3716,2),
+(7810,7809,3716,3),
+(7811,7810,3716,4),
+(7812,0,7812,1),
+(7813,6360,6360,2),
+(7814,0,7814,1),
+(7815,7814,7814,2),
+(7816,7815,7814,3),
 (7887,7384,7384,2),
 (7924,3274,3273,3),
 (8004,0,8004,1),
@@ -9820,6 +9951,8 @@ INSERT INTO `spell_chain` VALUES
 (8249,8227,8227,2),
 (8288,1120,1120,2),
 (8289,8288,1120,3),
+(8316,2947,2947,2),
+(8317,8316,2947,3),
 (8380,7405,7386,3),
 (8400,3140,133,5),
 (8401,8400,133,6),
@@ -10240,6 +10373,19 @@ INSERT INTO `spell_chain` VALUES
 (11735,11734,706,5),
 (11739,6229,6229,2),
 (11740,11739,6229,3),
+(11762,7802,3110,6),
+(11763,11762,3110,7),
+(11766,7805,6307,4),
+(11767,11766,6307,5),
+(11770,8317,2947,4),
+(11771,11770,2947,5),
+(11774,7811,3716,5),
+(11775,11774,3716,6),
+(11778,7816,7814,4),
+(11779,11778,7814,5),
+(11780,11779,7814,6),
+(11784,7813,6360,3),
+(11785,11784,6360,4),
 (11993,3570,2366,4),
 (12180,3910,3908,4),
 (12656,4038,4036,4),
@@ -10331,6 +10477,12 @@ INSERT INTO `spell_chain` VALUES
 (14818,14752,14752,2),
 (14819,14818,14752,3),
 (14914,0,14914,1),
+(14916,2649,2649,2),
+(14917,14916,2649,3),
+(14918,14917,2649,4),
+(14919,14918,2649,5),
+(14920,14919,2649,6),
+(14921,14920,2649,7),
 (15107,0,15107,1),
 (15111,15107,15107,2),
 (15112,15111,15107,3),
@@ -10363,12 +10515,27 @@ INSERT INTO `spell_chain` VALUES
 (16387,10526,8227,4),
 (16511,0,16511,1),
 (16689,0,16689,1),
+(16697,1756,1742,6),
 (16810,16689,16689,2),
 (16811,16810,16689,3),
 (16812,16811,16689,4),
 (16813,16812,16689,5),
+(16827,0,16827,1),
+(16828,16827,16827,2),
+(16829,16828,16827,3),
+(16830,16829,16827,4),
+(16831,16830,16827,5),
+(16832,16831,16827,6),
 (16857,0,16857,1),
 (16914,0,16914,1),
+(17253,0,17253,1),
+(17255,17253,17253,2),
+(17256,17255,17253,3),
+(17257,17256,17253,4),
+(17258,17257,17253,5),
+(17259,17258,17253,6),
+(17260,17259,17253,7),
+(17261,17260,17253,8),
 (17311,15407,15407,2),
 (17312,17311,15407,3),
 (17313,17312,15407,4),
@@ -10383,6 +10550,16 @@ INSERT INTO `spell_chain` VALUES
 (17402,17401,16914,3),
 (17727,2362,2362,2),
 (17728,17727,2362,3),
+(17735,0,17735,1),
+(17750,17735,17735,2),
+(17751,17750,17735,3),
+(17752,17751,17735,4),
+(17767,0,17767,1),
+(17850,17767,17767,2),
+(17851,17850,17767,3),
+(17852,17851,17767,4),
+(17853,17852,17767,5),
+(17854,17853,17767,6),
 (17862,0,17862,1),
 (17877,0,17877,1),
 (17919,5676,5676,2),
@@ -10465,7 +10642,22 @@ INSERT INTO `spell_chain` VALUES
 (19312,19311,18137,6),
 (19386,0,19386,1),
 (19434,0,19434,1),
+(19438,7812,7812,2),
+(19440,19438,7812,3),
+(19441,19440,7812,4),
+(19442,19441,7812,5),
+(19443,19442,7812,6),
+(19244,0,19244,1),
+(19478,0,19478,1),
+(19505,0,19505,1),
 (19506,0,19506,1),
+(19647,19244,19244,2),
+(19655,19478,19478,2),
+(19656,19655,19478,3),
+(19660,19656,19478,4),
+(19731,19505,19505,2),
+(19734,19731,19505,3),
+(19736,19734,19505,4),
 (19740,0,19740,1),
 (19742,0,19742,1),
 (19750,0,19750,1),
@@ -10593,6 +10785,12 @@ INSERT INTO `spell_chain` VALUES
 (22895,22842,22842,2),
 (22896,22895,22842,3),
 (23028,0,23028,1),
+(23099,0,23099,1),
+(23109,23099,23099,2),
+(23110,23109,23099,3),
+(23145,0,23145,1),
+(23147,23145,23145,2),
+(23148,23147,23145,3),
 (23881,0,23881,1),
 (23892,23881,23881,2),
 (23893,23892,23881,3),
@@ -10601,6 +10799,7 @@ INSERT INTO `spell_chain` VALUES
 (23923,23922,23922,2),
 (23924,23923,23922,3),
 (23925,23924,23922,4),
+(23992,0,23992,1),
 (24132,19386,19386,2),
 (24133,24132,19386,3),
 (24224,0,24224,1),
@@ -10609,10 +10808,61 @@ INSERT INTO `spell_chain` VALUES
 (24274,24275,24275,2),
 (24275,0,24275,1),
 (24398,0,24398,1),
+(24423,0,24423,1),
+(24439,23992,23992,2),
+(24444,24439,23992,3),
+(24445,24444,23992,4),
+(24446,0,24446,1),
+(24447,24446,24446,2),
+(24448,24447,24446,3),
+(24449,24448,24446,4),
+(24450,0,24450,1),
+(24452,24450,24450,2),
+(24453,24452,24450,3),
+(24488,0,24488,1),
+(24492,0,24492,1),
+(24493,0,24493,1),
+(24497,24493,24493,2),
+(24500,24497,24493,3),
+(24501,24500,24493,4),
+(24502,24492,24492,2),
+(24503,24502,24492,3),
+(24504,24503,24492,4),
+(24505,24488,24488,2),
+(24506,24505,24488,3),
+(24507,24506,24488,4),
+(24545,0,24545,1),
+(24549,24545,24545,2),
+(24550,24549,24545,3),
+(24551,24550,24545,4),
+(24552,24551,24545,5),
+(24553,24552,24545,6),
+(24554,24553,24545,7),
+(24555,24554,24545,8),
+(24577,24423,24423,2),
+(24578,24577,24423,3),
+(24579,24578,24423,4),
+(24583,24640,24640,2),
+(24586,24583,24640,3),
+(24587,24586,24640,4),
+(24597,24603,24604,4),
+(24604,0,24604,1),
+(24605,24604,24604,2),
+(24603,24605,24604,3),
+(24629,24555,24545,9),
+(24630,24629,24545,10),
+(24640,0,24640,1),
+(24844,0,24844,1),
 (24974,5570,5570,2),
 (24975,24974,5570,3),
 (24976,24975,5570,4),
 (24977,24976,5570,5),
+(25008,24844,24844,2),
+(25009,25008,24844,3),
+(25010,25009,24844,4),
+(25011,25010,24844,5),
+(25012,25011,24844,6),
+(25076,0,25076,1),
 (25229,0,25229,1),
 (25230,25229,25229,2),
 (25251,23894,23881,5),
@@ -10651,11 +10901,46 @@ INSERT INTO `spell_chain` VALUES
 (25899,0,25899,1),
 (25916,25782,25782,2),
 (25918,25894,25894,2),
+(26064,0,26064,1),
+(26090,0,26090,1),
+(26177,7371,7371,2),
+(26178,26177,7371,3),
+(26179,26178,7371,4),
+(26187,26090,26090,2),
+(26188,26187,26090,3),
+(26201,26179,7371,5),
 (26573,0,26573,1),
+(27047,14921,2649,8),
+(27048,16697,1742,7),
+(27049,3009,16827,9),
+(27050,17261,17253,9),
+(27051,24579,24423,5),
+(27052,24501,24493,5),
+(27053,24445,23992,5),
+(27054,24449,24446,5),
+(27055,24504,24492,5),
+(27056,24507,24488,5),
+(27060,24587,24640,5),
+(27061,24630,24545,11),
+(27062,5042,4187,11),
+(27063,26188,26090,4),
 (27170,20920,20375,6),
 (27179,20928,20925,4),
+(27267,11763,3110,8),
+(27268,11767,6307,6),
+(27269,11771,2947,6),
+(27270,11775,3716,7),
+(27271,17752,17735,5),
+(27272,17854,17767,7),
+(27273,19443,7812,7),
+(27274,11780,7814,7),
+(27275,11785,6360,5),
+(27276,19736,19505,5),
+(27277,27276,19505,6),
+(27280,19660,19478,5),
 (27681,0,27681,1),
 (27683,0,27683,1),
+(27685,26201,7371,6),
 (27799,15431,15237,4),
 (27800,27799,15237,5),
 (27801,27800,15237,6),
@@ -10669,6 +10954,12 @@ INSERT INTO `spell_chain` VALUES
 (28895,28894,25229,4),
 (28897,28895,25229,5),
 (29228,10448,8050,6),
+(30151,0,30151,1),
+(30194,30151,30151,2),
+(30198,30194,30151,3),
+(30213,0,30213,1),
+(30219,30213,30213,2),
+(30223,30219,30213,3),
 (30335,25251,23881,6),
 (31016,11300,2098,9),
 (31018,22829,22568,5),
@@ -10677,14 +10968,35 @@ INSERT INTO `spell_chain` VALUES
 (33146,33145,33142,3),
 (33388,0,33388,1),
 (33391,33388,33388,2),
+(33698,0,33698,1),
+(33699,33698,33698,2),
+(33700,33699,33698,3),
+(33701,27271,17735,6),
 (33736,24398,24398,2),
 (34506,0,34506,1),
 (34507,34506,34506,2),
 (34508,34507,34506,3),
+(34838,34508,34506,4),
+(34839,34838,34506,5),
+(34889,0,34889,1),
 (34950,0,34950,1),
 (34954,34950,34950,2),
-(34838,34508,34506,4),
-(34839,34838,34506,5); 
+(35323,34889,34889,2),
+(35290,0,35290,1),
+(35291,35290,35290,2),
+(35292,35291,35290,3),
+(35293,35292,35290,4),
+(35294,35293,35290,5),
+(35295,35294,35290,6),
+(35296,35295,35290,7),
+(35297,35296,35290,8),
+(35298,35297,35290,9),
+(35387,0,35387,1),
+(35389,35387,35387,2),
+(35392,35389,35387,3),
+(35346,0,35346,1),
+(35694,0,35694,1),
+(35698,35694,35694,2);
 
 
 /*!40000 ALTER TABLE `spell_chain` ENABLE KEYS */;

@@ -364,6 +364,14 @@ bool IsPassiveSpell(uint32 spellId)
     return (spellInfo->Attributes & (1<<6)) != 0;
 }
 
+bool IsNonCombatSpell(uint32 spellId)
+{
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
+    if (!spellInfo)
+        return false;
+    return (spellInfo->Attributes & (1<<28)) != 0;
+}
+
 uint32 GetTalentSpellCost(uint32 spellId)
 {
     TalentSpellCosts::const_iterator itr = sTalentSpellCosts.find(spellId);

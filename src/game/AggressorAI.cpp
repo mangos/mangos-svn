@@ -127,14 +127,19 @@ void AggressorAI::EnterEvadeMode()
         //i_tracker.Reset(TIME_INTERVAL_LOOK);
     }
 
-    i_creature.RemoveAllAuras();
+    if(!i_creature.isCharmed())
+	{
+	    i_creature.RemoveAllAuras();
+	    
+	    // Remove TargetedMovementGenerator from MotionMaster stack list, and add HomeMovementGenerator instead
+	    if( i_creature->top()->GetMovementGeneratorType() == TARGETED_MOTION_TYPE )
+    	    i_creature->TargetedHome();
+	}
+
     i_creature.DeleteThreatList();
     i_victimGuid = 0;
     i_creature.CombatStop(true);
 
-    // Remove TargetedMovementGenerator from MotionMaster stack list, and add HomeMovementGenerator instead
-    if( i_creature->top()->GetMovementGeneratorType() == TARGETED_MOTION_TYPE )
-        i_creature->TargetedHome();
 }
 
 void

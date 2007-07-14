@@ -515,9 +515,11 @@ class Spell
         void EffectDurabilityDamagePCT(uint32 i);
         void EffectReduceThreatPercent(uint32 i);
         void EffectResurrectNew(uint32 i);
+        void EffectAddExtraAttacks(uint32 i);
         void EffectSpiritHeal(uint32 i);
         void EffectSkinPlayerCorpse(uint32 i);
-        void EffectAddExtraAttacks(uint32 i);
+        void EffectApplyPetAura(uint32 i);
+        void EffectSummonDemon(uint32 i);
 
         Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur = NULL, uint64 originalCasterGUID = 0 );
         ~Spell();
@@ -532,6 +534,8 @@ class Spell
         void TakeCastItem();
         void TriggerSpell();
         uint8 CanCast();
+        int16 PetCanCast(Unit* target);
+        bool CanAutoCast(Unit* target);
 
         uint8 CheckItems();
         uint8 CheckRange();

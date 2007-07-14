@@ -167,14 +167,14 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectSummonDeadPet,                            //109 SPELL_EFFECT_SUMMON_DEAD_PET
     &Spell::EffectDestroyAllTotems,                         //110 SPELL_EFFECT_DESTROY_ALL_TOTEMS
     &Spell::EffectDurabilityDamage,                         //111 SPELL_EFFECT_DURABILITY_DAMAGE
-    &Spell::EffectNULL,                                     //112 SPELL_EFFECT_SUMMON_DEMON
+    &Spell::EffectSummonDemon,                              //112 SPELL_EFFECT_SUMMON_DEMON
     &Spell::EffectResurrectNew,                             //113 SPELL_EFFECT_RESURRECT_NEW
     &Spell::EffectAttackMe,                                 //114 SPELL_EFFECT_ATTACK_ME
     &Spell::EffectDurabilityDamagePCT,                      //115 SPELL_EFFECT_DURABILITY_DAMAGE_PCT
     &Spell::EffectSkinPlayerCorpse,                         //116 SPELL_EFFECT_SKIN_PLAYER_CORPSE       one spell: Remove Insignia, bg usage, required special corpse flags...
     &Spell::EffectSpiritHeal,                               //117 SPELL_EFFECT_SPIRIT_HEAL              one spell: Spirit Heal
     &Spell::EffectSkill,                                    //118 SPELL_EFFECT_SKILL                    professions and more
-    &Spell::EffectNULL,                                     //119 SPELL_EFFECT_APPLY_AURA_PET
+    &Spell::EffectApplyPetAura,                             //119 SPELL_EFFECT_APPLY_AURA_NEW
     &Spell::EffectNULL,                                     //120 SPELL_EFFECT_TELEPORT_GRAVEYARD       two spells: Graveyard Teleport and Graveyard Teleport Test
     &Spell::EffectWeaponDmg,                                //121 SPELL_EFFECT_NORMALIZED_WEAPON_DMG
     &Spell::EffectNULL,                                     //122 SPELL_EFFECT_122                      silithist cap reward spell
@@ -1613,6 +1613,9 @@ void Spell::EffectSummon(uint32 i)
     spawnCreature->InitStatsForLevel(level);
 
     spawnCreature->AIM_Initialize();
+    spawnCreature->InitPetCreateSpells();
+    spawnCreature->SetHealth(spawnCreature->GetMaxHealth());
+    spawnCreature->SetPower(POWER_MANA, spawnCreature->GetMaxPower(POWER_MANA));
 
     std::string name;
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -1810,11 +1813,11 @@ void Spell::EffectSummonWild(uint32 i)
 
         spawnCreature->SetUInt64Value(UNIT_FIELD_SUMMONEDBY,m_caster->GetGUID());
         spawnCreature->setPowerType(POWER_MANA);
-        spawnCreature->SetPower(   POWER_MANA,28 + 10 * level);
         spawnCreature->SetMaxPower(POWER_MANA,28 + 10 * level);
+        spawnCreature->SetPower(   POWER_MANA,28 + 10 * level);
         spawnCreature->SetUInt32Value(UNIT_NPC_FLAGS , 0);
-        spawnCreature->SetHealth(    28 + 30*level);
         spawnCreature->SetMaxHealth( 28 + 30*level);
+        spawnCreature->SetHealth(    28 + 30*level);
         spawnCreature->SetLevel(level);
         spawnCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
         spawnCreature->SetUInt32Value(UNIT_FIELD_FLAGS,0);
@@ -2018,16 +2021,14 @@ void Spell::EffectTameCreature(uint32 i)
 
         pet->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_caster->GetGUID());
         pet->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
-        pet->SetMaxPower(POWER_HAPPINESS,1000000);
-        pet->SetPower(   POWER_HAPPINESS,600000);
-        pet->setPowerType(POWER_FOCUS);
         pet->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
-        pet->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,time(NULL));
-        pet->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
-        pet->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
-                                                            // + UNIT_FLAG_RENAME + UNIT_FLAG_RESTING);
-        pet->SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1);
-                                                            // this enables popup window (pet details, abandon, rename)
+
+        if(!pet->InitStatsForLevel( creatureTarget->getLevel() ) )
+        {
+            sLog.outError("ERROR: InitStatsForLevel() in EffectTameCreature failed! Pet deleted.");
+            delete pet;
+            return;
+        }
 
         uint32 new_id = 1;
         QueryResult* result = sDatabase.Query("SELECT MAX(`id`) FROM `character_pet`");
@@ -2041,7 +2042,9 @@ void Spell::EffectTameCreature(uint32 i)
         pet->SetUInt32Value(UNIT_FIELD_PETNUMBER,new_id);
                                                             // this enables pet details window (Shift+P)
         pet->AIM_Initialize();
-
+        pet->InitPetCreateSpells();
+        pet->SetHealth(pet->GetMaxHealth());
+        
         ObjectAccessor::Instance().AddPet(pet);
         MapManager::Instance().GetMap(pet->GetMapId(), pet)->Add((Creature*)pet);
 
@@ -2142,30 +2145,7 @@ void Spell::EffectSummonPet(uint32 i)
         NewSummon->SetUInt32Value(UNIT_FIELD_FLAGS,UNIT_FLAG_UNKNOWN1);
 
         NewSummon->InitStatsForLevel( petlevel);
-
-        for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
-            NewSummon->m_spells[i] = 0;
-
-        // starting spells
-        switch(petentry)
-        {
-            case 416:
-                NewSummon->m_spells[0] = 3110;
-                NewSummon->AddActState(STATE_RA_SPELL1);
-                break;
-            case 417:
-                NewSummon->m_spells[0] = 19505;
-                NewSummon->AddActState(STATE_RA_SPELL1);
-                break;
-            case 1860:
-                NewSummon->m_spells[0] = 3716;
-                NewSummon->AddActState(STATE_RA_SPELL1);
-                break;
-            case 1863:
-                NewSummon->m_spells[0] = 7814;
-                NewSummon->AddActState(STATE_RA_SPELL1);
-                break;
-        }
+        NewSummon->InitPetCreateSpells();
 
         // generate new name for summon pet
         if(NewSummon->getPetType()==SUMMON_PET)
@@ -2183,6 +2163,8 @@ void Spell::EffectSummonPet(uint32 i)
         }
 
         NewSummon->AIM_Initialize();
+        NewSummon->SetHealth(NewSummon->GetMaxHealth());
+        NewSummon->SetPower(POWER_MANA, NewSummon->GetMaxPower(POWER_MANA));
 
         ObjectAccessor::Instance().AddPet(NewSummon);
         MapManager::Instance().GetMap(NewSummon->GetMapId(), NewSummon)->Add((Creature*)NewSummon);
@@ -2217,20 +2199,9 @@ void Spell::EffectLearnPetSpell(uint32 i)
     if(!learn_spellproto)
         return;
 
-    for(int8 x=0;x<4;x++)
-    {
-        SpellEntry const *has_spellproto = sSpellStore.LookupEntry(pet->m_spells[x]);
-        if(!has_spellproto)
-        {
-            pet->m_spells[x] = learn_spellproto->Id;
-            break;
-        }
-        else if(has_spellproto->SpellIconID == learn_spellproto->SpellIconID)
-        {
-            pet->m_spells[x] = learn_spellproto->Id;
-            break;
-        }
-    }
+    pet->SetTP(pet->m_TrainingPoints - pet->GetTPForSpell(learn_spellproto->Id));
+	pet->learnSpell(learn_spellproto->Id);
+	
     pet->SavePetToDB(PET_SAVE_AS_CURRENT);
     _player->PetSpellInitialize();
 }
@@ -2824,21 +2795,23 @@ void Spell::EffectFeedPet(uint32 i)
     if(!itemTarget)
         return;
 
-    Creature *pet = _player->GetPet();
+    Pet *pet = _player->GetPet();
     if(!pet)
         return;
 
     if(!pet->isAlive())
         return;
 
-    pet->ModifyPower(POWER_HAPPINESS,damage);
-
     uint32 count = 1;
     _player->DestroyItemCount(itemTarget,count,true);
     // TODO: fix crash when a spell has two effects, both pointed at the same item target
 
-    SpellEntry const *spellinfo = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
-    Spell _spell(m_caster, spellinfo, true, 0);
+    SpellEntry const *feedTemplate = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
+    SpellEntry feedCustom = *feedTemplate;
+
+    feedCustom.EffectBasePoints[0] = pet->GetCurrentFoodBenefit() -1;
+
+    Spell _spell(m_caster, &feedCustom, true, 0);
     SpellCastTargets targets;
     targets.setUnitTarget(m_caster);
     _spell.prepare(&targets);
@@ -3153,6 +3126,10 @@ void Spell::EffectSummonCritter(uint32 i)
         critter->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
 
         critter->AIM_Initialize();
+        critter->InitPetCreateSpells(); //e.g. disgusting oozeling has a create spell as critter...
+        critter->SetMaxHealth(1);
+        critter->SetHealth(1);
+        critter->SetLevel(1);
 
         std::string name;
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -3410,6 +3387,48 @@ void Spell::EffectProspecting(uint32 i)
 void Spell::EffectSkill(uint32 i)
 {
     sLog.outDebug("WORLD: SkillEFFECT");
+}
+
+void Spell::EffectApplyPetAura(uint32 i)
+{
+	//spell aura for both pet and owner, think the pet has the aura and applies it to owner
+	EffectApplyAura(i);
+
+	Unit* owner = unitTarget->GetCharmerOrOwner();
+	if(owner)
+	{
+		unitTarget = owner;
+		EffectApplyAura(i);
+	}
+}
+
+void Spell::EffectSummonDemon(uint32 i)
+{
+    if(!unitTarget)
+        return;
+
+    float px, py, pz;
+
+    px = m_targets.m_destX;
+    py = m_targets.m_destY;
+    pz = m_targets.m_destZ;
+
+    if (px == 0 || py == 0 || pz == 0)
+        m_caster->GetClosePoint(NULL, px, py, pz);
+
+    Creature* Charmed = m_caster->SummonCreature(m_spellInfo->EffectMiscValue[i], m_caster->GetMapId(), px, py, pz, m_caster->GetOrientation(),TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,3600000);
+    Charmed->SetLevel(m_caster->getLevel());	//might not always work correctly, maybe the creature that dies from CoD casts the effect on itself and is therefore the caster?
+
+    //TODO: Add damage/mana/hp according to level
+
+    if (m_spellInfo->EffectMiscValue[i] == 89) //Inferno summon
+    {
+        //Enslave demon effect, without mana cost and cooldown
+        m_caster->CastSpell(Charmed, 20882, true);	//FIXME: enslave does not scale with level, level 62+ minions cannot be enslaved
+
+        //Inferno effect
+        Charmed->CastSpell(Charmed, 22703, true, 0);
+    }
 }
 
 void Spell::EffectSpiritHeal(uint32 i)

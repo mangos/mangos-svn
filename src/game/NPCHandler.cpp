@@ -500,7 +500,7 @@ void WorldSession::SendStablePet(uint64 guid )
         data << uint32(pet->GetEntry());
         data << uint32(pet->getLevel());
         data << pet->GetName();                             // petname
-        data << uint32(pet->getloyalty());                  // loyalty
+        data << uint32(pet->GetLoyaltyLevel());                  // loyalty
         data << uint8(0x01);                                // client slot 1 == current pet (0)
         ++num;
     }

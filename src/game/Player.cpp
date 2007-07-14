@@ -2057,7 +2057,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
     SetCreatePowers(POWER_RAGE, 1000);
     SetCreatePowers(POWER_FOCUS, 0);
     SetCreatePowers(POWER_ENERGY, 100);
-    SetCreatePowers(POWER_HAPPINESS, 0);
+    SetCreatePowers(POWER_HAPPINESS,0);
 
     // restore if need some important flags
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 );
@@ -6839,6 +6839,16 @@ void Player::SendTalentWipeConfirm(uint64 guid)
     WorldPacket data(MSG_TALENT_WIPE_CONFIRM, (8+4));
     data << guid;
     data << (uint32)resetTalentsCost();
+    GetSession()->SendPacket( &data );
+}
+
+void Player::SendPetSkillWipeConfirm(uint64 guid)
+{
+    if(!GetPet())
+    	return;
+    WorldPacket data(SMSG_PET_UNLEARN_CONFIRM, (8+4));
+    data << GetPet()->GetGUID();
+    data << uint32(GetPet()->resetTalentsCost());
     GetSession()->SendPacket( &data );
 }
 
@@ -12868,6 +12878,16 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode)
         SetPet(0);
 
     pet->CombatStop(true);
+    
+    switch(pet->GetEntry())
+	{	//warlock pets except imp are removed(?) when logging out
+		case 1860:
+		case 1863:
+		case 417:
+		case 17252:
+			mode = PET_SAVE_NOT_IN_SLOT;
+			break;
+	}
 
     pet->SavePetToDB(mode);
 
@@ -12890,29 +12910,9 @@ void Player::Uncharm()
     Unit* charm = GetCharm();
     if(!charm) return;
 
-    SetCharm(0);
-    charm->SetUInt64Value(UNIT_FIELD_CHARMEDBY,0);
+	charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_CHARM);
+	charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS);
 
-    uint32 faction = 0;
-    if(charm->GetTypeId()==TYPEID_PLAYER)
-        faction = Player::getFactionForRace(((Player*)charm)->getRace());
-    else if(Unit* owner = GetOwner())
-        faction = owner->getFaction();
-    else
-    {
-        CreatureInfo const *cinfo = ((Creature*)charm)->GetCreatureInfo();
-        faction = cinfo->faction;
-    }
-
-    charm->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,faction);
-
-    if(charm->GetTypeId()==TYPEID_UNIT && !((Creature*)charm)->isPet())
-    {
-        ((Creature*)charm)->AIM_Initialize();
-        WorldPacket data(SMSG_PET_SPELLS, 8);
-        data << uint64(0);
-        GetSession()->SendPacket(&data);
-    }
 }
 
 void Player::Say(const std::string text, const uint32 language)
@@ -13000,106 +13000,87 @@ void Player::PetSpellInitialize()
 {
     Pet* pet = GetPet();
 
-    // FIXME: charmed case
-    //if(!pet)
-    // pet = GetCharm();
-
     if(pet)
     {
-        uint16 Command = 7;
-        uint16 State = 6;
         uint8 addlist = 0;
-        uint8 act_state = 0;
 
-        sLog.outDebug("Pet Spells Groups");
+		sLog.outDebug("Pet Spells Groups");
 
-        if (pet->HasActState(STATE_RA_PASSIVE))
-            act_state = 0;
-        if (pet->HasActState(STATE_RA_REACTIVE))
-            act_state = 1;
-        if (pet->HasActState(STATE_RA_PROACTIVE))
-            act_state = 2;
-
-        WorldPacket data(SMSG_PET_SPELLS, 100);             // we guess size
-
-        data << (uint64)pet->GetGUID() << uint32(0x00000000) << uint8(act_state) << uint8(1) << uint16(0);
-
-        data << uint16 (2) << uint16(Command << 8);         // 2 command from 0x700 group place to 1 slot
-        data << uint16 (1) << uint16(Command << 8);         // 1 command from 0x700 group place to 2 slot
-        data << uint16 (0) << uint16(Command << 8);         // 0 command from 0x700 group place to 3 slot
-
-        for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
+		if(pet->isControlled())
         {
-            if(!pet->m_spells[i])
+            for(PetSpellMap::iterator itr = pet->m_spells.begin();itr != pet->m_spells.end();itr++)
             {
-                data << uint16(pet->m_spells[i]) << uint16((i+2) << 8);
-            }
-            else
-            {
-                if (pet->HasActState(STATE_RA_SPELL1 << i))
-                                                            // Spell enabled
-                    data << uint16 (pet->m_spells[i]) << uint16 (0xC100);
-                else
-                                                            // Spell disabled
-                    data << uint16 (pet->m_spells[i]) << uint16 (0x8100);
+                if(itr->second->state == PETSPELL_REMOVED)
+					continue;
+                addlist++;
             }
         }
 
-        data << uint16 (2) << uint16(State << 8);           // 2 command from 0x600 group place to 8 slot
-        data << uint16 (1) << uint16(State << 8);           // 1 command from 0x600 group place to 9 slot
-        data << uint16 (0) << uint16(State << 8);           // 0 command from 0x600 group place to 10 slot
+        WorldPacket data(SMSG_PET_SPELLS, 16+40+1+4*addlist+25);             // first line + actionbar + spellcount + spells + last adds
+
+        data << (uint64)pet->GetGUID() << uint32(0x00000000) << uint8(pet->GetReactState()) << uint8(pet->GetCommandState()) << uint16(0); //16
+
+        for(uint32 i = 0; i < 10; i++)	//40
+        {
+			data << uint16((pet->PetActionBar)[i].SpellOrAction) << uint16(pet->PetActionBar[i].Type);
+		}
+
+        data << uint8(addlist);			//1
 
         if(pet->isControlled())
         {
-            for(PlayerSpellMap::iterator itr = m_spells.begin();itr != m_spells.end();itr++)
-            {
-                if(itr->second->active == 4)
-                    addlist++;
-            }
+			for (PetSpellMap::iterator itr = pet->m_spells.begin(); itr != pet->m_spells.end(); ++itr)
+ 		   	{
+   				if(itr->second->state == PETSPELL_REMOVED)
+            		continue;
+
+        		data << uint16(itr->first);
+        		data << uint16(itr->second->active);
+    		}
         }
 
-        data << uint8(addlist);
+        //data << uint8(0x01) << uint32(0x6010) << uint32(0x01) << uint32(0x05) << uint16(0x00);	//15
+        uint8 count = 3;	//1+8+8+8=25
 
-        if(pet->isControlled())
-        {
-            for(PlayerSpellMap::iterator itr = m_spells.begin();itr != m_spells.end();itr++)
-            {
-                if(itr->second->active == 4)
-                {
-                    bool hasthisspell = false;
-
-                    SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
-                    data << uint16(spellInfo->EffectTriggerSpell[0]);
-                    for(uint32 i=0; i < CREATURE_MAX_SPELLS; i++)
-                    {
-                        if(pet->m_spells[i] == spellInfo->EffectTriggerSpell[0])
-                        {
-                            if (pet->HasActState(STATE_RA_SPELL1 << i))
-                                data << uint16(0xC100);     // Spell enabled
-                            else
-                                data << uint16(0x8100);     // Spell disabled
-                            hasthisspell = true;
-                            break;
-                        }
-                    }
-                    if(!hasthisspell)
-                        data << uint16(0x0100);
-                }
-            }
-        }
-
-        uint8 count = 3;
         // if count = 0, then end of packet...
         data << count;
         // uint32 value is spell id...
         // uint64 value is constant 0, unknown...
-        data << uint32(0x6010) << uint64(0);                // if count = 1, 2 or 3
-        //data << uint32(0x5fd1) << uint64(0);              // if count = 2
-        data << uint32(0x8e8c) << uint64(0);                // if count = 3
-        data << uint32(0x8e8b) << uint64(0);                // if count = 3
+        data << uint32(0x6010) << uint64(0);    // if count = 1, 2 or 3
+        //data << uint32(0x5fd1) << uint64(0);  // if count = 2
+        data << uint32(0x8e8c) << uint64(0);    // if count = 3
+        data << uint32(0x8e8b) << uint64(0);    // if count = 3
 
         GetSession()->SendPacket(&data);
     }
+}
+
+void Player::CharmSpellInitialize()
+{
+    Unit* charm = GetCharm();
+
+    if(!charm)
+    	return;
+
+	uint8 addlist = 0;
+	WorldPacket data(SMSG_PET_SPELLS, 16+40+1+4*addlist+25);             // first line + actionbar + spellcount + spells + last adds
+
+    data << (uint64)charm->GetGUID() << uint32(0x00000000) << uint8(0) << uint8(0) << uint16(0); //16
+
+    for(uint32 i = 0; i < 10; i++)	//40
+    {
+		data << uint16((charm->PetActionBar)[i].SpellOrAction) << uint16(charm->PetActionBar[i].Type);
+	}
+
+    data << uint8(addlist);			//1
+
+	uint8 count = 3;
+    data << count;
+    data << uint32(0x6010) << uint64(0);    // if count = 1, 2 or 3
+    data << uint32(0x8e8c) << uint64(0);    // if count = 3
+    data << uint32(0x8e8b) << uint64(0);    // if count = 3
+
+    GetSession()->SendPacket(&data);
 }
 
 int32 Player::GetTotalFlatMods(uint32 spellId, uint8 op)

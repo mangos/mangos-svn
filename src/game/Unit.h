@@ -568,6 +568,12 @@ struct CleanDamage
     MeleeHitOutcome hitOutCome; 
 };
 
+struct UnitActionBarEntry
+{
+	uint32 Type;
+	uint32 SpellOrAction;
+};
+
 // delay time next attack to privent client attack animanation problems
 #define ATTACK_DISPLAY_DELAY 200
 
@@ -869,8 +875,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         float GetCreateHealth() const { return m_createHealth; }
         void SetCreatePowers(Powers power, float val) { m_createPowers[power] = val; }
         float GetCreatePowers(Powers power) const { return m_createPowers[power]; }
-        void ApplyCreateStatMod(Stats stat, float val, bool apply) { m_createStats[stat] += (apply ? val : -val); }
-        void ApplyCreateStatPercentMod(Stats stat, float val, bool apply) { m_createStats[stat] *= (apply?(100.0f+val)/100.0f : 100.0f / (100.0f+val)); }
         float GetPosStat(Stats stat) const { return GetFloatValue(UNIT_FIELD_POSSTAT0+stat); }
         float GetNegStat(Stats stat) const { return GetFloatValue(UNIT_FIELD_NEGSTAT0+stat); }
         float GetCreateStat(Stats stat) const { return m_createStats[stat]; }
@@ -881,6 +885,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         Spell * m_currentSpell;
         Spell * m_oldSpell;
         Spell * m_currentMeleeSpell;
+        UnitActionBarEntry PetActionBar[10];
         uint32 m_addDmgOnce;
         uint64 m_TotemSlot[4];
         uint64 m_ObjectSlot[4];

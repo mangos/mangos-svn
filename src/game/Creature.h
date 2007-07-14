@@ -54,7 +54,8 @@ enum Gossip_Option
     GOSSIP_OPTION_AUCTIONEER        = 13,                   //UNIT_NPC_FLAG_AUCTIONEER        = 4096,
     GOSSIP_OPTION_STABLEPET         = 14,                   //UNIT_NPC_FLAG_STABLE            = 8192,
     GOSSIP_OPTION_ARMORER           = 15,                   //UNIT_NPC_FLAG_ARMORER           = 16384,
-    GOSSIP_OPTION_UNLEARNTALENTS    = 16                    //UNIT_NPC_FLAG_TRAINER (bonus option for GOSSIP_OPTION_TRAINER)
+    GOSSIP_OPTION_UNLEARNTALENTS    = 16,                   //UNIT_NPC_FLAG_TRAINER (bonus option for GOSSIP_OPTION_TRAINER)
+    GOSSIP_OPTION_UNLEARNPETSKILLS	= 17                    //UNIT_NPC_FLAG_TRAINER (bonus option for GOSSIP_OPTION_TRAINER)
 };
 
 enum Gossip_Guard
@@ -277,6 +278,8 @@ enum InhabitTypeValues
 
 typedef std::list<GossipOption> GossipOptionList;
 
+typedef std::map<uint32,time_t> CreatureSpellCooldowns;
+
 // max different by z coordinate for creature aggro reaction
 #define CREATURE_Z_ATTACK_RANGE 3
 #define CREATURE_THREAT_RADIUS 10000.0f
@@ -355,6 +358,15 @@ class MANGOS_DLL_SPEC Creature : public Unit
         {
             return (getLevel()/2 + GetStat(STAT_STRENGTH)/20);
         }
+        
+        void _AddCreatureSpellCooldown(uint32 spell_id, time_t end_time);
+        void _AddCreatureCategoryCooldown(uint32 category, time_t apply_time);
+        void AddCreatureSpellCooldown(uint32 spellid);
+        bool HasSpellCooldown(uint32 spell_id) const;
+        bool HasCategoryCooldown(uint32 spell_id) const;
+
+        void InitCharmCreateSpells();
+        bool AddSpellToAB(uint32 oldid, uint32 newid);	//return true if successful
 
         /*********************************************************/
         /***                    VENDOR SYSTEM                  ***/
@@ -437,10 +449,11 @@ class MANGOS_DLL_SPEC Creature : public Unit
         SpellEntry const *reachWithSpellCure(Unit *pVictim);
 
         uint32 m_spells[CREATURE_MAX_SPELLS];
+        CreatureSpellCooldowns m_CreatureSpellCooldowns;
+        CreatureSpellCooldowns m_CreatureCategoryCooldowns;
+        time_t m_GlobalCooldown;
 
         float GetAttackDistance(Unit *pl) const;
-        uint32 getloyalty(){ return ((GetUInt32Value(UNIT_FIELD_BYTES_1) >> 8) & 0xFF);};
-        uint32 getUsedTrainPoint(){ return (GetUInt32Value(UNIT_TRAINING_POINTS) & 0xFFFF);};
 
         void CallAssistence();
         void SetNoCallAssistence(bool val) { m_AlreadyCallAssistence = val; }

@@ -33,20 +33,6 @@ enum PetType
 
 extern char const* petTypeSuffix[MAX_PET_TYPE];
 
-enum PetState
-{
-    STATE_RA_STAY           = 1,
-    STATE_RA_FOLLOW         = 2,
-    STATE_RA_REACTIVE       = 4,
-    STATE_RA_PROACTIVE      = 8,
-    STATE_RA_PASSIVE        = 16,
-    STATE_RA_SPELL1         = 32,
-    STATE_RA_SPELL2         = 64,
-    STATE_RA_SPELL3         = 128,
-    STATE_RA_SPELL4         = 256,
-    STATE_RA_AUTOSPELL      = STATE_RA_SPELL1 | STATE_RA_SPELL2 | STATE_RA_SPELL3 | STATE_RA_SPELL4
-};
-
 enum PetSaveMode
 {
     PET_SAVE_AS_DELETED       =-1,
@@ -97,6 +83,46 @@ enum ActiveStates
     ACT_DECIDE   = 0x0001
 };
 
+enum PetSpellState
+{
+    PETSPELL_UNCHANGED = 0,
+    PETSPELL_CHANGED   = 1,
+    PETSPELL_NEW       = 2,
+    PETSPELL_REMOVED   = 3
+};
+
+struct PetSpell
+{
+    uint16 slotId;
+    uint16 active;
+    PetSpellState state;
+};
+
+enum ActionFeedback
+{
+	FEEDBACK_NONE	         = 0,
+	FEEDBACK_PET_DEAD        = 1,
+	FEEDBACK_NOTHING_TO_ATT  = 2,
+	FEEDBACK_CANT_ATT_TARGET = 3,
+};
+
+enum PetTalk
+{
+	PET_TALK_SPECIAL_SPELL	= 0,
+	PET_TALK_ATTACK			= 1
+};
+
+typedef HM_NAMESPACE::hash_map<uint16, PetSpell*> PetSpellMap;
+typedef std::map<uint32,uint32> TeachSpellMap;
+typedef std::set<uint32> AutoSpellList;
+
+#define HAPPINESS_LEVEL_SIZE		333000
+
+extern const uint32 LevelUpLoyalty[6];
+extern const uint32 LevelStartLoyalty[6];
+
+#define ACTIVE_SPELLS_MAX			4
+
 #define OWNER_MAX_DISTANCE 100
 
 #define PET_FOLLOW_DIST  1
@@ -108,17 +134,18 @@ class Pet : public Creature
         explicit Pet(WorldObject *instantiator, PetType type);
         virtual ~Pet();
 
-        uint32 GetActState() { return m_actState; }
-        void SetActState(uint32 st) { m_actState=st; }
-        void AddActState(uint32 st) { m_actState |= st; }
-        void ClearActState(uint32 st) { m_actState &= ~st; };
-        bool HasActState(uint32 st) { return m_actState & st;};
-        uint32 GetFealty() { return m_fealty; }
-        void SetFealty(uint32 fealty) { m_fealty=fealty; }
         PetType getPetType() const { return m_petType; }
         bool isControlled() const { return getPetType()==SUMMON_PET || getPetType()==HUNTER_PET; }
         uint32 GetPetNumber() const { return GetUInt32Value(UNIT_FIELD_PETNUMBER); }
+        
+        void SetCommandState(uint8 st) { m_CommandState = st; } //only for pets, charms can't be set on special modes
+        uint8 GetCommandState() { return m_CommandState; }
+        bool HasCommandState(CommandStates state) { return (m_CommandState == state); }
+        void SetReactState(uint8 st) { m_ReactSate = st; }
+        uint8 GetReactState() { return m_ReactSate; }
+        bool HasReactState(ReactStates state) { return (m_ReactSate == state); }
 
+        bool Create (uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 Entry);
         bool CreateBaseAtCreature( Creature* creature );
         bool LoadPetFromDB( Unit* owner,uint32 petentry = 0,uint32 petnumber = 0, bool current = false );
         void SavePetToDB(PetSaveMode mode);
@@ -128,19 +155,80 @@ class Pet : public Creature
         void Update(uint32 diff);                           // overwrite virtual Creature::Update and Unit::Update
 
         void RegenerateFocus();
+        void LooseHappiness();
+        void TickLoyaltyChange();
+        void ModifyLoyalty(int32 addvalue);
+        HappinessState GetHappinessState();
+        uint32 GetMaxLoyaltyPoints(uint32 level);
+        uint32 GetStartLoyaltyPoints(uint32 level);
+        void KillLoyaltyBonus(uint32 level);
+        uint32 GetLoyaltyLevel(){ return ((GetUInt32Value(UNIT_FIELD_BYTES_1) >> 8) & 0xFF);};
+        void SetLoyaltyLevel(LoyaltyLevel level);
         void GivePetXP(uint32 xp);
         void GivePetLevel(uint32 level);
-        void InitStatsForLevel(uint32 level);
+        bool InitStatsForLevel(uint32 level);
         bool HaveInDiet(ItemPrototype const* item) const;
+        bool SetCurrentFoodBenefitLevel(uint32 itemlevel);
+        uint32 GetCurrentFoodBenefit() { return m_food_benefit; }
         void SetDuration(uint32 dur) { m_duration = dur; }
+
+        int32 GetBonusDamage() { return m_bonusdamage; }
+        
+        void   ApplyStats(bool apply);
+
+        bool   CanTakeMoreActiveSpells(uint32 SpellIconID);
+        void   ToggleAutocast(uint32 spellid, bool apply);
+        bool   HasTPForSpell(uint32 spellid);
+        int32  GetTPForSpell(uint32 spellid);
+        void   SendActionFeedback(uint8 msg);
+        void   SendPetTalk(PetTalk pettalk);
+        void   SendCastFail(uint32 spellid, uint8 msg);
+
+        bool HasSpell(uint32 spell);
+        void SendSpellCooldown(uint32 spell_id, time_t cooltime);
+        void AddTeachSpell(uint32 learned_id, uint32 source_id) { m_teachspells[learned_id] = source_id; }
+
+        void _LoadSpellCooldowns();
+        void _SaveSpellCooldowns();
+        void _LoadAuras(uint32 timediff);
+        void _SaveAuras();
+        void _LoadSpells(uint32 timediff);
+        void _SaveSpells();
+
+        bool addSpell(uint16 spell_id,uint16 active = ACT_DECIDE, PetSpellState state = PETSPELL_NEW, uint16 slot_id=0xffff);
+        bool learnSpell(uint16 spell_id);
+        void removeSpell(uint16 spell_id);
+        bool _removeSpell(uint16 spell_id);
+
+        PetSpellMap		  m_spells;
+        TeachSpellMap	  m_teachspells;
+        AutoSpellList 	  m_autospells;
+
+        void InitPetCreateSpells();
+        void CheckLearning(uint32 spellid);
+        uint32 resetTalentsCost() const;
+
+        void  SetTP(int32 TP);
+        int32 GetDispTP();
+
+        int32 	m_TrainingPoints;
+        uint32  m_resetTalentsCost;
+        time_t  m_resetTalentsTime;
+
+        UnitActionBarEntry* GetActionBarEntry(uint32 index) { return &(PetActionBar[index]); }
 
         bool    m_removed;                                  // prevent overwrite pet state in DB at next Pet::Update if pet already removed(saved)
     protected:
         uint32  m_regenTimer;
-        uint32  m_actState;
-        uint32  m_fealty;
+        uint32  m_happinessTimer;
+        uint32  m_loyaltyTimer;
         PetType m_petType;
         uint32  m_duration;                                 // time until unsummon (used mostly for summoned guardians and not used for controlled pets)
+        int32   m_loyaltyPoints;
+        uint32  m_food_benefit;
+        int32   m_bonusdamage;
+        uint8   m_CommandState;
+        uint8   m_ReactSate;
     private:
         void SaveToDB()                                     // overwrited of Creature::SaveToDB     - don't must be called
         {
