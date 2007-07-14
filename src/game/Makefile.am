@@ -19,7 +19,7 @@
 ## Sub-directories to parse
 
 ## CPP flags for includes, defines, etc.
-AM_CPPFLAGS = $(MYSQL_INCLUDES) -I$(srcdir) -I$(srcdir)/../../dep/include -I$(srcdir)/../../dep/include/g3dlite -I$(srcdir)/../framework -I$(srcdir)/../shared -I$(srcdir)/../realmd
+AM_CPPFLAGS = $(MYSQL_INCLUDES) -I$(srcdir) -I$(srcdir)/../../dep/include -I$(srcdir)/../framework -I$(srcdir)/../shared -I$(srcdir)/../shared/vmap -I$(srcdir)/../realmd
 
 ## Build MaNGOS game library as convenience library.
 #  All libraries will be convenience libraries. Might be changed to shared
@@ -42,8 +42,6 @@ libmangosgame_a_SOURCES = \
 	AuctionHouseObject.h \
 	Bag.cpp \
 	Bag.h \
-	BaseModel.cpp \
-	BaseModel.h \
 	BattleGround.cpp \
 	BattleGroundAB.cpp \
 	BattleGroundAV.cpp \
@@ -72,8 +70,6 @@ libmangosgame_a_SOURCES = \
 	ConfusedMovementGenerator.h \
 	Container.cpp \
 	Container.h \
-	CoordModelMapping.cpp \
-	CoordModelMapping.h \
 	Corpse.cpp \
 	Corpse.h \
 	CreatureAI.cpp \
@@ -86,8 +82,6 @@ libmangosgame_a_SOURCES = \
 	Creature.cpp \
 	Creature.h \
 	debugcmds.cpp \
-	DebugCmdLogger.cpp \
-	DebugCmdLogger.h \
 	DestinationHolder.cpp \
 	DestinationHolder.h \
 	DestinationHolderImp.h \
@@ -128,7 +122,6 @@ libmangosgame_a_SOURCES = \
 	ItemEnchantmentMgr.h \
 	ItemHandler.cpp \
 	ItemPrototype.h \
-	IVMapManager.h \
 	Language.h \
 	Level0.cpp \
 	Level1.cpp \
@@ -140,8 +133,6 @@ libmangosgame_a_SOURCES = \
 	LootMgr.h \
 	Mail.cpp \
 	Mail.h \
-	ManagedModelContainer.cpp \
-	ManagedModelContainer.h \
 	Map.cpp \
 	Map.h \
 	MapInstanced.cpp \
@@ -149,8 +140,6 @@ libmangosgame_a_SOURCES = \
 	MapManager.cpp \
 	MapManager.h \
 	MiscHandler.cpp \
-	ModelContainer.cpp \
-	ModelContainer.h \
 	MotionMaster.cpp \
 	MotionMaster.h \
 	MovementGenerator.cpp \
@@ -158,7 +147,6 @@ libmangosgame_a_SOURCES = \
 	MovementGeneratorImpl.h \
 	MovementHandler.cpp \
 	NameTables.h \
-	NodeValueAccess.h \
 	NPCHandler.cpp \
 	NPCHandler.h \
 	NullCreatureAI.cpp \
@@ -189,7 +177,6 @@ libmangosgame_a_SOURCES = \
 	QuestHandler.cpp \
 	RandomMovementGenerator.cpp \
 	RandomMovementGenerator.h \
-	RayIntersectionIterator.h \
 	ReactorAI.cpp \
 	ReactorAI.h \
 	RedZoneDistrict.cpp \
@@ -197,8 +184,6 @@ libmangosgame_a_SOURCES = \
 	ScriptCalls.cpp \
 	ScriptCalls.h \
 	SharedDefines.h \
-	ShortBox.h \
-	ShortVector.h \
 	SkillHandler.cpp \
 	SpellAuraDefines.h \
 	SpellAuras.cpp \
@@ -207,8 +192,6 @@ libmangosgame_a_SOURCES = \
 	SpellEffects.cpp \
 	Spell.h \
 	SpellHandler.cpp \
-	SubModel.cpp \
-	SubModel.h \
 	TargetedMovementGenerator.cpp \
 	TargetedMovementGenerator.h \
 	TaxiHandler.cpp \
@@ -216,8 +199,6 @@ libmangosgame_a_SOURCES = \
 	TaxiMovementGenerator.h \
 	TemporarySummon.cpp \
 	TemporarySummon.h \
-	TileAssembler.cpp \
-	TileAssembler.h \
 	tools.cpp \
 	Tools.h \
 	TotemAI.cpp \
@@ -228,19 +209,12 @@ libmangosgame_a_SOURCES = \
 	Transports.cpp \
 	Transports.h \
 	Traveller.h \
-	TreeNode.cpp \
-	TreeNode.h \
 	Unit.cpp \
 	Unit.h \
 	UpdateData.cpp \
 	UpdateData.h \
 	UpdateFields.h \
 	UpdateMask.h \
-	VMapDefinitions.h \
-	VMapFactory.cpp \
-	VMapFactory.h \
-	VMapManager.cpp \
-	VMapManager.h \
 	WaypointMovementGenerator.cpp \
 	WaypointMovementGenerator.h \
 	Weather.cpp \

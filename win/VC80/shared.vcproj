@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="Windows-1252"?>
 <VisualStudioProject
 	ProjectType="Visual C++"
-	Version="8.00"
+	Version="8,00"
 	Name="shared"
 	ProjectGUID="{90297C34-F231-4DF4-848E-A74BCC0E40ED}"
 	>
@@ -41,7 +41,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared"
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include\g3dlite;..\..\src\framework;..\..\src\shared"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE"
 				StringPooling="true"
 				RuntimeLibrary="0"
@@ -117,7 +117,7 @@
 			<Tool
 				Name="VCCLCompilerTool"
 				Optimization="0"
-				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared"
+				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include\g3dlite;..\..\src\framework;..\..\src\shared"
 				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
@@ -614,6 +614,118 @@
 			</File>
 			<File
 				RelativePath="..\..\src\shared\Network\Utility.h"
+				>
+			</File>
+		</Filter>
+		<Filter
+			Name="vmaps"
+			>
+			<File
+				RelativePath="..\..\src\shared\vmap\AABSPTree.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\BaseModel.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\BaseModel.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\CoordModelMapping.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\CoordModelMapping.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\DebugCmdLogger.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\DebugCmdLogger.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\IVMapManager.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\ManagedModelContainer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\ManagedModelContainer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\ModelContainer.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\ModelContainer.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\NodeValueAccess.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\RayIntersectionIterator.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\ShortBox.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\ShortVector.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\SubModel.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\SubModel.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\TileAssembler.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\TileAssembler.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\TreeNode.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\TreeNode.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\VMapDefinitions.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\VMapFactory.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\VMapFactory.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\VMapManager.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\shared\vmap\VMapManager.h"
 				>
 			</File>
 		</Filter>
