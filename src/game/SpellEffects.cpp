@@ -1952,7 +1952,7 @@ void Spell::EffectEnchantItemTmp(uint32 i)
         uint32 enchant_id = m_spellInfo->EffectMiscValue[i];
         int32 duration = GetDuration(m_spellInfo);
         if(duration == 0)
-            duration = m_spellInfo->EffectBasePoints[i]+1;
+            duration = (m_spellInfo->SpellFamilyName==SPELLFAMILY_ROGUE) ? 1800 : m_spellInfo->EffectBasePoints[i]+1;
         if(duration <= 1)
             duration = 300;
         SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
@@ -1973,9 +1973,7 @@ void Spell::EffectEnchantItemTmp(uint32 i)
         // remove old enchanting before applying new if equipped
         item_owner->ApplyEnchantment(itemTarget,TEMP_ENCHANTMENT_SLOT,false);
 
-        uint32 charges = m_spellInfo->SpellFamilyName == 8 ? 45+objmgr.GetSpellRank(m_spellInfo->Id)*15 : 0;
-
-        itemTarget->SetEnchantment(TEMP_ENCHANTMENT_SLOT, enchant_id, duration*1000, charges);
+        itemTarget->SetEnchantment(TEMP_ENCHANTMENT_SLOT, enchant_id, duration*1000, 0);
 
         // add new enchanting if equipped
         item_owner->ApplyEnchantment(itemTarget,TEMP_ENCHANTMENT_SLOT,true);

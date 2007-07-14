@@ -158,6 +158,7 @@ uint32 GenerateEnchSuffixFactor(uint32 item_id)
             case INVTYPE_SHIELD:
                 { suffixFactor = ITEM_SUFFIXFACTOR_SHIELD_MOD; }  break;
             case INVTYPE_RANGED:
+            case INVTYPE_RANGEDRIGHT:
                 { suffixFactor = ITEM_SUFFIXFACTOR_RANGED_MOD; }  break;
             case INVTYPE_CLOAK:
                 { suffixFactor = ITEM_SUFFIXFACTOR_BACK_MOD; }  break;
