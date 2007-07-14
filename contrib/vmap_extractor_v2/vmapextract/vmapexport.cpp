@@ -55,8 +55,9 @@ uint16 *areamax;
 uint32 map_count;
 char output_path[128]=".";
 char input_path[1024]=".";
+bool hasInputPathParam = false;
 char tmp[512];
-bool preciseVectorData = true;
+bool preciseVectorData = false;
 //char gamepath[1024];	
 
 //Convert function
@@ -352,7 +353,8 @@ bool scan_patches(char* scanmatch, std::vector<std::string>& pArchiveNames)
 bool fillArchiveNameVector(std::vector<std::string>& pArchiveNames) {
     //srand((unsigned int)time(0));
 
-    getGamePath();
+    if(!hasInputPathParam)
+        getGamePath();
 
     printf("\nGame path: %s\n", input_path);
 
@@ -438,8 +440,47 @@ bool fillArchiveNameVector(std::vector<std::string>& pArchiveNames) {
     }
     return true;
 }
+//xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+// return false it normal processing can not proceed
 
+bool processArgv(int argc, char ** argv, char*versionString)
+{
+    bool result = true;
+    hasInputPathParam = false;
+    bool preciseVectorData = false;
 
+    for(int i=1; i< argc; ++i) {
+		if(strcmp("-s",argv[i]) == 0) {
+			preciseVectorData = false;
+		} else if(strcmp("-d",argv[i]) == 0) {
+            if((i+1)<argc) {
+                hasInputPathParam = true;
+                strcpy(input_path, argv[i+1]);
+                if (input_path[strlen(input_path) - 1] != '\\' || input_path[strlen(input_path) - 1] != '/')
+                    strcat(input_path, "\\");
+                ++i;
+            } else {
+                result = false;
+            }
+		} else if(strcmp("-?",argv[1]) == 0) {
+            result = false;
+		} else if(strcmp("-l",argv[i]) == 0) {
+			preciseVectorData = true;
+        } else {
+            result = false;
+            break;
+        }
+    }
+    if(!result)     {
+        printf("Extract %s.\n",versionString);
+        printf("%s [-?][-s][-l][-d <path>]\n", argv[0]);
+        printf("   -s : (default) small size (data size optimization), ~500MB less vmap data.\n");
+        printf("   -l : large size, ~500MB more vmap data. (might contain more details)\n");
+        printf("   -d <path>: Path to the vector data source folder.\n");
+        printf("   -? : This message.\n");
+    }
+    return result;
+}
 
 //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 // Main
@@ -459,23 +500,16 @@ int main(int argc, char ** argv)
     //char tmp2[512];
 //    char tmp3[512];
 //    char tmp4[512];
-    char szMpqName[MAX_PATH] = "";
-    char szListFile[MAX_PATH] = "";
+//    char szMpqName[MAX_PATH] = "";
+//    char szListFile[MAX_PATH] = "";
     int nError = ERROR_SUCCESS;
-    char *versionString = "V2.3 2007_07_08";
+    char *versionString = "V2.4 2007_07_12";
 
     // Use command line arguments, when some
-	if(argc >= 2) {
-		if(strcmp("-s",argv[1]) == 0) {
-			preciseVectorData = false;
-		} else if(strcmp("-?",argv[1]) == 0) {
-			printf("Extract %s.\n",versionString);
-			printf("%s [-s]\n   -s : small size (data size optimization, less precise), Will create about 500MB less vmap data.\n", argv[0]);
-            return 0;
-		}
-	}
+    if(!processArgv(argc, argv, versionString)) 
+        return 1;
+ 
     printf("Extract %s. Beginning work ....\n",versionString);
-    printf("Flags:\n    -s : small size (data size optimization, less precise), Will create about 500MB less vmap data.\n");
     // Set the lowest priority to allow running in the background
     SetThreadPriority(GetCurrentThread(), THREAD_PRIORITY_BELOW_NORMAL);
     //xxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
@@ -528,5 +562,5 @@ int main(int argc, char ** argv)
         printf("ERROR: Extract %s. Work NOT complete.\n   Precise vector data=%d.\nPress any key.\n",versionString, preciseVectorData);
         _getch();
     }
-    printf("Extract %s. Work complete.\n   Precise vector data=%d.\nNo errors.",versionString, preciseVectorData);
+    printf("Extract %s. Work complete. No errors.",versionString);
 }
