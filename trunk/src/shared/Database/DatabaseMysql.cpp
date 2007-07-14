@@ -319,6 +319,21 @@ bool DatabaseMysql::BeginTransaction()
 {
     if (!mMysql)
         return false;
+
+    // don't use queued execution if it has not been initialized
+    if (!m_threadBody)
+    {
+        if (tranThread==ZThread::ThreadImpl::current())
+	 	    return false;                                       // huh? this thread already started transaction
+	 	mMutex.acquire();
+	 	if (!_TransactionCmd("START TRANSACTION"))
+	 	{
+	 	    mMutex.release();                                   // can't start transaction
+	 	    return false;
+	 	}
+        return true;                                            // transaction started
+    }
+
     tranThread = ZThread::ThreadImpl::current();            // owner of this transaction
     TransactionQueues::iterator i = m_tranQueues.find(tranThread);
     if (i != m_tranQueues.end() && i->second != NULL)
@@ -335,6 +350,18 @@ bool DatabaseMysql::CommitTransaction()
 {
     if (!mMysql)
         return false;
+
+    // don't use queued execution if it has not been initialized
+    if (!m_threadBody)
+    {
+        if (tranThread!=ZThread::ThreadImpl::current())
+	 	    return false;
+	 	bool _res = _TransactionCmd("COMMIT");
+	 	tranThread = NULL;
+	 	mMutex.release();
+	 	return _res;
+    }
+
     tranThread = ZThread::ThreadImpl::current();
     TransactionQueues::iterator i = m_tranQueues.find(tranThread);
     if (i != m_tranQueues.end() && i->second != NULL)
@@ -351,6 +378,18 @@ bool DatabaseMysql::RollbackTransaction()
 {
     if (!mMysql)
         return false;
+
+    // don't use queued execution if it has not been initialized
+    if (!m_threadBody)
+    {
+        if (tranThread!=ZThread::ThreadImpl::current())
+	 	    return false;
+	 	bool _res = _TransactionCmd("ROLLBACK");
+	 	tranThread = NULL;
+	 	mMutex.release();
+	 	return _res;
+    }
+
     tranThread = ZThread::ThreadImpl::current();
     TransactionQueues::iterator i = m_tranQueues.find(tranThread);
     if (i != m_tranQueues.end() && i->second != NULL)
@@ -379,8 +418,11 @@ void DatabaseMysql::InitDelayThread()
 
 void DatabaseMysql::HaltDelayThread()
 {
+    if (!m_threadBody || !m_delayThread) return;
+
     m_threadBody->Stop();                                   //Stop event
     m_delayThread->wait();                                  //Wait for flush to DB
     delete m_delayThread;                                   //This also deletes m_threadBody
     m_delayThread = NULL;
+    m_threadBody = NULL;
 }
