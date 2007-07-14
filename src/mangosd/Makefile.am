@@ -33,7 +33,7 @@ mangos_worldd_SOURCES = \
 	WorldRunnable.h
 
 ## Link world daemon against the shared library
-mangos_worldd_LDADD = ../bindings/universal/libmangosscript.la ../game/libmangosgame.a ../shared/libmangosdatabase.a ../shared/libmangosconfig.a ../shared/libmangosauth.a ../shared/libmangosshared.a ../shared/libmangosvmap.a ../shared/libmangosnetwork.a ../framework/libmangosframework.a ../../dep/src/zthread/libZThread.la ../../dep/src/g3dlite/libg3dlite.a
+mangos_worldd_LDADD = ../bindings/universal/libmangosscript.la ../game/libmangosgame.a ../shared/libmangosdatabase.a ../shared/libmangosconfig.a ../shared/libmangosauth.a ../shared/libmangosshared.a ../shared/libmangosvmaps.a ../shared/libmangosnetwork.a ../framework/libmangosframework.a ../../dep/src/zthread/libZThread.la ../../dep/src/g3dlite/libg3dlite.a
 mangos_worldd_LDFLAGS = -L../../dep/src/zthread  -L../../dep/src/g3dlite -L../bindings/universal/ $(MYSQL_LIBS) -L$(libdir) $(ZLIB) $(COMPATLIB) $(SSLLIB) -export-dynamic
 
 ## Additional files to include when running 'make dist'
