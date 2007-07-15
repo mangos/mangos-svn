@@ -5284,7 +5284,7 @@ int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_inde
         value += (int32)(comboDamage * comboPoints);
         // Eviscerate
         if( spellProto->SpellIconID == 514 && spellProto->SpellFamilyName == SPELLFAMILY_ROGUE)
-            value += (int32)(GetUInt32Value(UNIT_FIELD_ATTACK_POWER) * comboPoints * 0.03);
+            value += (int32)(GetTotalAttackPowerValue(BASE_ATTACK) * comboPoints * 0.03);
         if(unitPlayer)
             unitPlayer->SetComboPoints(unitPlayer->GetComboTarget(), 0);
     }
@@ -5832,9 +5832,7 @@ void Unit::UpdateAttackPowerAndDamage(bool ranged)
 
     SetModifierValue(unitMod, BASE_VALUE, val2);
 
-    float base_attPower  = GetModifierValue(unitMod, BASE_VALUE);
-    base_attPower *= GetModifierValue(unitMod, BASE_PCT);
-
+    float base_attPower  = GetModifierValue(unitMod, BASE_VALUE) * GetModifierValue(unitMod, BASE_PCT);
     float attPowerMod = GetModifierValue(unitMod, TOTAL_VALUE);
     float attPowerMultiplier = GetModifierValue(unitMod, TOTAL_PCT) - 1.0f;
 
@@ -5880,7 +5878,7 @@ void Unit::UpdateDamagePhysical(WeaponAttackType attType)
 
     float att_speed = float(GetAttackTime(attType))/1000.0f;
 
-    float base_value  = GetModifierValue(unitMod, BASE_VALUE) + GetTotalAuraModValue(attPower)/ 14.0f * att_speed;
+    float base_value  = GetModifierValue(unitMod, BASE_VALUE) + GetTotalAttackPowerValue(attType)/ 14.0f * att_speed;
     float base_pct    = GetModifierValue(unitMod, BASE_PCT);
     float total_value = GetModifierValue(unitMod, TOTAL_VALUE);
     float total_pct   = GetModifierValue(unitMod, TOTAL_PCT);
@@ -5907,6 +5905,17 @@ void Unit::UpdateDamagePhysical(WeaponAttackType attType)
 
     SetStatFloatValue(index1, mindamage);
     SetStatFloatValue(index2, maxdamage);
+}
+
+float Unit::GetTotalAttackPowerValue(WeaponAttackType attType) const
+{
+    UnitMods unitMod = (attType == RANGED_ATTACK) ? UNIT_MOD_ATTACK_POWER_RANGED : UNIT_MOD_ATTACK_POWER;
+
+    float val = GetTotalAuraModValue(unitMod);
+    if(val < 0.0f)
+        val = 0.0f;
+
+    return val;
 }
 
 float Unit::GetWeaponDamageRange(WeaponAttackType attType ,WeaponDamageRange type) const

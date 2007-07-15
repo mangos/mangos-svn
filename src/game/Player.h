@@ -1106,7 +1106,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         bool IsGroupVisibleFor(Player* p) const;
         bool IsInSameGroupWith(Player const* p) const;
-        bool IsInSameRaidWith(Player * p) const { return GetGroup() != NULL && GetGroup() == p->GetGroup(); }
+        bool IsInSameRaidWith(Player const* p) const { return GetGroup() != NULL && GetGroup() == p->GetGroup(); }
         void UninviteFromGroup();
         static void RemoveFromGroup(Group* group, uint64 guid);
         void RemoveFromGroup() { RemoveFromGroup(GetGroup(),GetGUID()); }
