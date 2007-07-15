@@ -448,7 +448,7 @@ struct ChainHealingOrder : public binary_function<const Unit*, const Unit*, bool
         if (Target == MainTarget)
             return 0;
         else if (Target->GetTypeId() == TYPEID_PLAYER && MainTarget->GetTypeId() == TYPEID_PLAYER &&             
-            ((Player*)Target)->IsInSameRaidWith((Player*)MainTarget))
+            ((Player const*)Target)->IsInSameRaidWith((Player const*)MainTarget))
         {
             if (Target->GetHealth() == Target->GetMaxHealth())
                 return 40000;

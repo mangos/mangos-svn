@@ -2242,7 +2242,7 @@ void Spell::EffectWeaponDmg(uint32 i)
                 break;
         }
         // FIX_ME: Where this value used???
-        damage = uint32(0.45 * (m_caster->GetTotalAuraModValue(UNIT_MOD_ATTACK_POWER)));
+        damage = uint32(0.45 * (m_caster->GetTotalAttackPowerValue(BASE_ATTACK)));
     }
 
     uint32 wp[4] = { SPELL_EFFECT_WEAPON_DAMAGE, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE, SPELL_EFFECT_NORMALIZED_WEAPON_DMG, SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL };

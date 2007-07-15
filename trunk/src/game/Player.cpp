@@ -2066,6 +2066,14 @@ void Player::InitStatsForLevel(bool reapplyMods)
     for(uint16 index = PLAYER_FIELD_COMBAT_RATING_1; index < PLAYER_FIELD_ARENA_TEAM_INFO_1_1; ++index)
         SetUInt32Value(index, 0);
 
+    SetUInt32Value(PLAYER_FIELD_MOD_HEALING_DONE_POS,0);
+    for (int i = 0; i < 7; i++)
+    {
+        SetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG+i, 0);
+        SetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+i, 0);
+        SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT+i, 1.00);
+    }
+
     //reset attack power, damage and attack speed fields
     SetFloatValue(UNIT_FIELD_BASEATTACKTIME, 2000.0f );
     SetFloatValue(UNIT_FIELD_OFFHANDATTACKTIME, 2000.0f );
@@ -2084,10 +2092,6 @@ void Player::InitStatsForLevel(bool reapplyMods)
     SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER,     0 );
     SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,0 );
     SetFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER,0.0f);
-
-    SetFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_PCT, 1.00);
-    SetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG, 0);
-    SetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS, 0);
 
     // Base crit values
     switch(getClass())
