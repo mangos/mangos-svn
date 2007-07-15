@@ -28,7 +28,7 @@
 
 void MapManager::LoadTransports()
 {
-    QueryResult *result = sDatabase.Query("SELECT `entry`, `name`, `period` FROM transports");
+    QueryResult *result = sDatabase.Query("SELECT `entry`, `name`, `period` FROM `transports`");
 
     uint32 count = 0;
 
@@ -44,9 +44,6 @@ void MapManager::LoadTransports()
 
     barGoLink bar( result->GetRowCount() );
 
-    uint32 entry;
-    string name;
-
     do
     {
         bar.step();
@@ -55,15 +52,15 @@ void MapManager::LoadTransports()
 
         Field *fields = result->Fetch();
 
-        entry = fields[0].GetUInt32();
-        name = fields[1].GetString();
+        uint32 entry = fields[0].GetUInt32();
+        std::string name = fields[1].GetCppString();
         t->m_period = fields[2].GetUInt32();
 
         const GameObjectInfo *goinfo = objmgr.GetGameObjectInfo(entry);
 
         if(!goinfo)
         {
-            sLog.outError("Transport ID:%u, Name: %s, will not be loaded gameobject_template Missing", entry, name.c_str());
+            sLog.outErrorDb("Transport ID:%u, Name: %s, will not be loaded gameobject_template Missing", entry, name.c_str());
             delete t;
             continue;
         }
@@ -75,7 +72,7 @@ void MapManager::LoadTransports()
         if(!t->GenerateWaypoints(goinfo->sound0, mapsUsed))
             // skip transports with empty waypoints list
         {
-            sLog.outErrorDb("ERROR: Transport (path id %u) path size = 0. Transport ignored, check DBC files or transport GO sound0 field.",goinfo->sound0);
+            sLog.outErrorDb("Transport (path id %u) path size = 0. Transport ignored, check DBC files or transport GO sound0 field.",goinfo->sound0);
             delete t;
             continue;
         }
@@ -101,6 +98,24 @@ void MapManager::LoadTransports()
 
     sLog.outString( "" );
     sLog.outString( ">> Loaded %u transports", count );
+
+    // check transport data DB integrity
+    result = sDatabase.PQuery("SELECT `gameobject`.`guid`,`gameobject`.`id`,`transports`.`name` FROM `gameobject`,`transports` WHERE `gameobject`.`id` = `transports`.`entry`");
+    if(result)                                              // wrong data found
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+
+            uint32 guid  = fields[0].GetUInt32();
+            uint32 entry = fields[1].GetUInt32();
+            std::string name = fields[2].GetCppString();
+            sLog.outErrorDb("Transport %u '%s' have record (GUID: %u) in `gameobject`. Transports DON'T must have any records in `gameobject` or its behavior will be unpredictable/bugged.",entry,name.c_str(),guid);
+        }
+        while(result->NextRow());
+
+        delete result;
+    }
 }
 
 Transport::Transport( WorldObject *instantiator ) : GameObject( instantiator )
