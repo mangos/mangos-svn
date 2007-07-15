@@ -19,7 +19,7 @@
 #ifndef _GROUPREFMANAGER
 #define _GROUPREFMANAGER
 
-#include "RefManager.h"
+#include "Utilities/LinkedReference/RefManager.h"
 
 class Group;
 class Player;
