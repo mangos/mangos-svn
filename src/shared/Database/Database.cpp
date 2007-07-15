@@ -92,7 +92,9 @@ bool Database::PExecuteLog(const char * format,...)
         log_file = fopen(logsDir_fname.c_str(), "a"); 
         if (log_file)
         {
-            fprintf(log_file, "%s;\n", szQuery);        }
+            fprintf(log_file, "%s;\n", szQuery);
+            fclose(log_file);
+        }
         else
         {
             // The file could not be opened
