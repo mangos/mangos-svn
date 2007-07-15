@@ -677,7 +677,7 @@ void WorldSession::LogoutPlayer(bool Save)
 
         // remove player from the group if he is:
         // a) in group; b) not in raid group; c) logging out normally (not being kicked or disconnected)
-        if(_player->groupInfo.group && !_player->groupInfo.group->isRaidGroup() && _socket)
+        if(_player->GetGroup() && !_player->GetGroup()->isRaidGroup() && _socket)
             _player->RemoveFromGroup();
 
         // remove player from the FlightMaster if it's currently in flight
@@ -692,8 +692,8 @@ void WorldSession::LogoutPlayer(bool Save)
         MapManager::Instance().GetMap(_player->GetMapId(), _player)->Remove(_player, false);
 
         ///- Send update to group
-        if(_player->groupInfo.group)
-            _player->groupInfo.group->SendUpdate();
+        if(_player->GetGroup())
+            _player->GetGroup()->SendUpdate();
 
         ///- Broadcast a logout message to the player's friends
         WorldPacket data(SMSG_FRIEND_STATUS, 9);

@@ -498,10 +498,13 @@ void BattleGround::RemovePlayer(uint64 guid, bool Transport, bool SendPacket)
             return;
 
         // remove from raid group if exist
-        if(plr->groupInfo.group && plr->groupInfo.group == GetBgRaid(plr->GetTeam()))
+        if(plr->GetGroup() && plr->GetGroup() == GetBgRaid(plr->GetTeam()))
                                                             // group was disbanded
-            if(!plr->groupInfo.group->RemoveMember(guid, 0))
+            if(!plr->GetGroup()->RemoveMember(guid, 0))
+            {
+                delete GetBgRaid(plr->GetTeam());
                 SetBgRaid(plr->GetTeam(), NULL);
+            }
 
         //plr->RemoveFromGroup();
 

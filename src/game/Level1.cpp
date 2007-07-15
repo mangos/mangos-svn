@@ -251,9 +251,9 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
             }
 
             // we are in instance, and can summon only player in our group with us as lead
-            if ( !m_session->GetPlayer()->groupInfo.group || !chr->groupInfo.group || 
-                (chr->groupInfo.group->GetLeaderGUID() != m_session->GetPlayer()->GetGUID()) ||
-                (m_session->GetPlayer()->groupInfo.group->GetLeaderGUID() != m_session->GetPlayer()->GetGUID()) )
+            if ( !m_session->GetPlayer()->GetGroup() || !chr->GetGroup() || 
+                (chr->GetGroup()->GetLeaderGUID() != m_session->GetPlayer()->GetGUID()) ||
+                (m_session->GetPlayer()->GetGroup()->GetLeaderGUID() != m_session->GetPlayer()->GetGUID()) )
                 // the last check is a bit excessive, but let it be, just in case
             {
                 PSendSysMessage(LANG_CANNOT_SUMMON_TO_INST,chr->GetName());
@@ -330,10 +330,10 @@ bool ChatHandler::HandleGonameCommand(const char* args)
             // we have to go to instance, and can go to player only if:
             //   1) we are in his group (either as leader or as member)
             //   2) we are not bound to any group and have GM mode on
-            if (_player->groupInfo.group)
+            if (_player->GetGroup())
             {
                 // we are in group, we can go only if we are in the player group
-                if (_player->groupInfo.group != chr->groupInfo.group)
+                if (_player->GetGroup() != chr->GetGroup())
                 {
                     PSendSysMessage(LANG_CANNOT_GO_TO_INST_PARTY,chr->GetName());
                     return true;

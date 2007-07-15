@@ -172,12 +172,6 @@ struct PvPInfo
     time_t endTimer;
 };
 
-struct GroupInfo
-{
-    Group *group;
-    Group *invite;
-};
-
 struct DuelInfo
 {
     DuelInfo() : initiator(NULL), opponent(NULL), startTimer(0), startTime(0), outOfBound(0) {}
@@ -1110,13 +1104,12 @@ class MANGOS_DLL_SPEC Player : public Unit
         void CheckDuelDistance(time_t currTime);
         void DuelComplete(uint8 type);
 
-        GroupInfo groupInfo;
         bool IsGroupVisibleFor(Player* p) const;
         bool IsInSameGroupWith(Player const* p) const;
-        bool IsInSameRaidWith(Player const* p) const { return groupInfo.group != NULL && groupInfo.group == p->groupInfo.group; }
+        bool IsInSameRaidWith(Player * p) const { return GetGroup() != NULL && GetGroup() == p->GetGroup(); }
         void UninviteFromGroup();
         static void RemoveFromGroup(Group* group, uint64 guid);
-        void RemoveFromGroup() { RemoveFromGroup(groupInfo.group,GetGUID()); }
+        void RemoveFromGroup() { RemoveFromGroup(GetGroup(),GetGUID()); }
 
         void SetInGuild(uint32 GuildId) { SetUInt32Value(PLAYER_GUILDID, GuildId); Player::SetUInt32ValueInDB(PLAYER_GUILDID, GuildId, this->GetGUID()); }
         void SetRank(uint32 rankId){ SetUInt32Value(PLAYER_GUILDRANK, rankId); Player::SetUInt32ValueInDB(PLAYER_GUILDRANK, rankId, this->GetGUID()); }
@@ -1454,6 +1447,18 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool m_InstanceValid;
         BoundInstancesMap m_BoundInstances;
 
+        /*********************************************************/
+        /***                   GROUP SYSTEM                    ***/
+        /*********************************************************/
+
+        Group * GetGroupInvite() { return m_groupInvite; }
+        void SetGroupInvite(Group *group) { m_groupInvite = group; }
+        Group * GetGroup() { return m_group.getTarget(); }
+        const Group * GetGroup() const { return (const Group*)m_group.getTarget(); }
+        GroupReference& GetGroupRef() { return m_group; }
+        void SetGroup(Group *group, int8 subgroup = -1);
+        uint8 GetSubGroup() { return m_group.getSubGroup(); }
+
     protected:
 
         /*********************************************************/
@@ -1637,6 +1642,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_usedTalentCount;
 
         IgnoreList m_ignorelist;
+
+        // Groups
+        GroupReference m_group;
+        Group *m_groupInvite;
 };
 
 void AddItemsSetItem(Player*player,Item *item);

@@ -156,7 +156,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
                 break;
 
-            Group *group = GetPlayer()->groupInfo.group;
+            Group *group = GetPlayer()->GetGroup();
             if(!group)
                 return;
 
@@ -213,7 +213,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
                 break;
 
-            Group *group = GetPlayer()->groupInfo.group;
+            Group *group = GetPlayer()->GetGroup();
             if(!group || !group->isRaidGroup())
                 return;
 
@@ -230,7 +230,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
                 break;
 
-            Group *group = GetPlayer()->groupInfo.group;
+            Group *group = GetPlayer()->GetGroup();
             if(!group || !group->isRaidGroup() || !group->IsLeader(GetPlayer()->GetGUID()))
                 return;
 
@@ -244,7 +244,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             std::string msg="";
             recv_data >> msg;
 
-            Group *group = GetPlayer()->groupInfo.group;
+            Group *group = GetPlayer()->GetGroup();
             if(!group || !group->isRaidGroup() || !group->IsLeader(GetPlayer()->GetGUID()))
                 return;
 
@@ -259,7 +259,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             std::string msg="";
             recv_data >> msg;
 
-            Group *group = GetPlayer()->groupInfo.group;
+            Group *group = GetPlayer()->GetGroup();
             if(!group || !group->isRaidGroup())
                 return;
 
@@ -274,7 +274,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             std::string msg="";
             recv_data >> msg;
 
-            Group *group = GetPlayer()->groupInfo.group;
+            Group *group = GetPlayer()->GetGroup();
             if(!group || !group->isRaidGroup() || !group->IsLeader(GetPlayer()->GetGUID()))
                 return;
 

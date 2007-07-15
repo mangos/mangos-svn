@@ -556,7 +556,7 @@ bool Map::CanEnter(Player* player)
     // GMs can avoid raid limitations
     if (IsRaid() && (!player->isGameMaster()))
     {
-        Group* group = player->groupInfo.group;
+        Group* group = player->GetGroup();
         if (!group || !group->isRaidGroup())
         {
             player->GetSession()->SendAreaTriggerMessage("You must be in a raid group to enter %s instance", GetMapName());
