@@ -591,10 +591,9 @@ void Map::Add(Player *player)
     if (player->GetPet()) player->GetPet()->SetInstanceId(this->GetInstanceId());
     player->SetInstanceId(this->GetInstanceId());
 
-    SendInitSelf(player);
-
     player->AddToWorld();
 
+    SendInitSelf(player);
     SendInitTransports(player);
 
     // update player state for other player and visa-versa
@@ -1562,6 +1561,10 @@ void Map::SendInitSelf( Player * player )
     sLog.outDetail("Creating player data for himself %u", player->GetGUIDLow());
     player->BuildCreateUpdateBlockForPlayer(&data, player);
 
+    // attach to player data also current transport data
+    if(Transport* tr = player->GetTransport())
+        tr->BuildCreateUpdateBlockForPlayer(&data, player);
+
     WorldPacket packet;
     data.BuildPacket(&packet);
     player->GetSession()->SendPacket(&packet);
@@ -1581,7 +1584,8 @@ void Map::SendInitTransports( Player * player )
     MapManager::TransportSet& tset = tmap[player->GetMapId()];
 
     for (MapManager::TransportSet::iterator i = tset.begin(); i != tset.end(); ++i)
-        (*i)->BuildCreateUpdateBlockForPlayer(&transData, player);
+        if((*i)!=player->GetTransport())                    // send data for current transport in other place
+            (*i)->BuildCreateUpdateBlockForPlayer(&transData, player);
 
     WorldPacket packet;
     transData.BuildPacket(&packet);
