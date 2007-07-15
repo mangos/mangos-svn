@@ -116,27 +116,25 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
     if(!bg)
         return;
 
-    if(asgroup && _player->groupInfo.group)
+    if(asgroup && _player->GetGroup())
     {
-        Group *grp = _player->groupInfo.group;
-        Group::MemberList const& members = grp->GetMembers();
-        for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
+        Group *grp = _player->GetGroup();
+        for(GroupReference *itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
         {
-            Player *member = objmgr.GetPlayer(itr->guid);
-            if(member)
-            {
-                member->SetBattleGroundQueueId(bgid);       // add to queue
+            Player *member = itr->getSource();
+            if(!member) continue;
 
-                // store entry point coords (same as leader entry point)
-                member->SetBattleGroundEntryPoint(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
+            member->SetBattleGroundQueueId(bgid);       // add to queue
 
-                WorldPacket data;
-                sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, member->GetTeam(), STATUS_WAIT_QUEUE, 0, 0); // send status packet (in queue)
-                member->GetSession()->SendPacket(&data);
-                sBattleGroundMgr.BuildGroupJoinedBattlegroundPacket(&data, bgid);
-                member->GetSession()->SendPacket(&data);
-                bg->AddPlayerToQueue(member->GetGUID(), member->getLevel());
-            }
+            // store entry point coords (same as leader entry point)
+            member->SetBattleGroundEntryPoint(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
+
+            WorldPacket data;
+            sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, member->GetTeam(), STATUS_WAIT_QUEUE, 0, 0); // send status packet (in queue)
+            member->GetSession()->SendPacket(&data);
+            sBattleGroundMgr.BuildGroupJoinedBattlegroundPacket(&data, bgid);
+            member->GetSession()->SendPacket(&data);
+            bg->AddPlayerToQueue(member->GetGUID(), member->getLevel());
         }
     }
     else

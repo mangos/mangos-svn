@@ -127,8 +127,8 @@ Player::Player (WorldSession *session): Unit( 0 )
 
     memset(m_items, 0, sizeof(Item*)*PLAYER_SLOTS_COUNT);
 
-    groupInfo.group  = 0;
-    groupInfo.invite = 0;
+    // group is initialized in the reference constructor
+    SetGroupInvite(NULL);
 
     duel = 0;
 
@@ -1832,18 +1832,18 @@ bool Player::IsGroupVisibleFor(Player* p) const
 
 bool Player::IsInSameGroupWith(Player const* p) const
 {
-    return  groupInfo.group != NULL &&
-        groupInfo.group == p->groupInfo.group &&
-        groupInfo.group->SameSubGroup(GetGUID(), p->GetGUID());
+    return  GetGroup() != NULL &&
+        GetGroup() == p->GetGroup() &&
+        GetGroup()->SameSubGroup((Player*)this, (Player*)p);
 }
 
 ///- If the player is invited, remove him. If the group if then only 1 person, disband the group.
 /// \todo Shouldn't we also check if there is no other invitees before disbanding the group?
 void Player::UninviteFromGroup()
 {
-    if(groupInfo.invite)                                    // uninvited invitee
+    if(GetGroupInvite())                                    // uninvited invitee
     {
-        Group* group = groupInfo.invite;
+        Group* group = GetGroupInvite();
         group->RemoveInvite(this);
 
         if(group->GetMembersCount() <= 1)                   // group has just 1 member => disband
@@ -1851,7 +1851,6 @@ void Player::UninviteFromGroup()
             group->Disband(true);
             objmgr.RemoveGroup(group);
             delete group;
-            groupInfo.group = NULL;
         }
     }
 }
@@ -6303,17 +6302,17 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
                 creature->generateMoneyLoot();
 
-                if (recipient->groupInfo.group)
+                if (recipient->GetGroup())
                 {
                     // round robin style looting applies for all low
                     // quality items in each loot method except free for all
-                    Group *group = recipient->groupInfo.group;
+                    GroupReference &group = recipient->GetGroupRef();
 
                     // next by circle
-                    uint64 next_guid = group->GetNextGuidAfter(group->GetLooterGuid());
-                    if(next_guid==0)
-                        next_guid = group->GetMembers().front().guid;
-
+                    uint64 next_guid = 0;
+                    if (group.next()) next_guid = group.next()->getSource()->GetGUID();
+                    else if(group->GetFirstMember() && group->GetFirstMember()->isValid())
+                        next_guid = group->GetFirstMember()->getSource()->GetGUID();
                     group->SetLooterGuid(next_guid);
 
                     switch (group->GetLootMethod())
@@ -6334,17 +6333,17 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             if (loot_type == LOOT_SKINNING)
                 FillLoot(loot, creature->GetCreatureInfo()->SkinLootId, LootTemplates_Skinning);
 
-            if (!groupInfo.group && recipient == this)
+            if (!GetGroup() && recipient == this)
                 permission = ALL_PERMISSION;
             else
             {
-                if (groupInfo.group)
+                if (GetGroup())
                 {
-                    Group *group = groupInfo.group;
-                    if ((group == recipient->groupInfo.group) && (group->GetLooterGuid() == GetGUID() || loot->released || group->GetLootMethod() == FREE_FOR_ALL))
+                    Group *group = GetGroup();
+                    if ((group == recipient->GetGroup()) && (group->GetLooterGuid() == GetGUID() || loot->released || group->GetLootMethod() == FREE_FOR_ALL))
                         permission = ALL_PERMISSION;
                     else
-                    if (group == recipient->groupInfo.group)
+                    if (group == recipient->GetGroup())
                         permission = GROUP_PERMISSION;
                     else
                         permission = NONE_PERMISSION;
@@ -9962,8 +9961,8 @@ void Player::SendNewItem(Item *item, uint32 count, bool received, bool created, 
     data << uint32(count);                                  // count of items
     data << GetItemCount(item->GetEntry());                 // count of items in inventory
 
-    if (broadcast && groupInfo.group)
-        groupInfo.group->BroadcastPacket(&data);
+    if (broadcast && GetGroup())
+        GetGroup()->BroadcastPacket(&data);
     else
         GetSession()->SendPacket(&data);
 }
@@ -11127,7 +11126,7 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
 
         Quest * qInfo = objmgr.QuestTemplates[questid];
         // just if !ingroup || !noraidgroup || raidgroup
-        if ( qInfo && mQuestStatus[questid].m_status == QUEST_STATUS_INCOMPLETE && (!groupInfo.group || !groupInfo.group->isRaidGroup() || qInfo->GetType() == QUEST_TYPE_RAID))
+        if ( qInfo && mQuestStatus[questid].m_status == QUEST_STATUS_INCOMPLETE && (!GetGroup() || !GetGroup()->isRaidGroup() || qInfo->GetType() == QUEST_TYPE_RAID))
         {
             if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL_OR_CAST ) )
             {
@@ -11267,7 +11266,7 @@ bool Player::HasQuestForItem( uint32 itemid )
             Quest * qinfo = qs.m_quest;
 
             // hide quest if player is in raid-group and quest is no raid quest
-            if(groupInfo.group && groupInfo.group->isRaidGroup() && qinfo->GetType() != QUEST_TYPE_RAID)
+            if(GetGroup() && GetGroup()->isRaidGroup() && qinfo->GetType() != QUEST_TYPE_RAID)
                 continue;
 
             // There should be no mixed ReqItem/ReqSource drop
@@ -13206,18 +13205,14 @@ void Player::RemoveSpellMods(uint32 spellId)
 
 void Player::RemoveAreaAurasFromGroup()
 {
-    Group* pGroup = groupInfo.group;
+    Group* pGroup = GetGroup();
     if(!pGroup)
         return;
 
-    Group::MemberList const& members = pGroup->GetMembers();
-    for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
+    for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
     {
-        if(!pGroup->SameSubGroup(GetGUID(), &*itr))
-            continue;
-
-        Unit* Member = objmgr.GetPlayer(itr->guid);
-        if(!Member)
+        Player* Member = itr->getSource();
+        if(!Member || !pGroup->SameSubGroup(this, Member))
             continue;
 
         Member->RemoveAreaAurasByOthers(GetGUID());
@@ -13745,7 +13740,12 @@ void Player::_LoadGroup()
     {
         uint64 leaderGuid = MAKE_GUID((*result)[0].GetUInt32(),HIGHGUID_PLAYER);
         delete result;
-        groupInfo.group = objmgr.GetGroupByLeader(leaderGuid);
+        Group* group = objmgr.GetGroupByLeader(leaderGuid);
+        if(group)
+        {
+            uint8 subgroup = group->GetMemberGroup(GetGUID());
+            SetGroup(group, subgroup);
+        }
     }
 }
 
@@ -14258,6 +14258,18 @@ void Player::SetStandState(uint8 state)
     WorldPacket data(SMSG_STANDSTATE_CHANGE_ACK, 1);
     data << state;
     GetSession()->SendPacket(&data);
+}
+
+void Player::SetGroup(Group *group, int8 subgroup)
+{
+    if(group == NULL) m_group.unlink();
+    else
+    {
+        // never use SetGroup without a subgroup unless you specify NULL for group
+        assert(subgroup >= 0);
+        m_group.link(group, this);
+        m_group.setSubGroup((uint8)subgroup);
+    }
 }
 
 template void Player::UpdateVisibilityOf(Player*        target, UpdateData& data, UpdateDataMapType& data_updates);

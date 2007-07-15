@@ -19,6 +19,9 @@
 #ifndef MANGOSSERVER_GROUP_H
 #define MANGOSSERVER_GROUP_H
 
+#include "GroupReference.h"
+#include "GroupRefManager.h"
+
 #define MAXGROUPSIZE 5
 #define MAXRAIDSIZE 40
 #define TARGETICONCOUNT 8
@@ -58,10 +61,10 @@ class MANGOS_DLL_SPEC Group
             uint8       group;
             bool        assistant;
         };
-        typedef std::list<MemberSlot> MemberList;
-        typedef MemberList::const_iterator member_citerator;
+        typedef std::list<MemberSlot> MemberSlotList;
+        typedef MemberSlotList::const_iterator member_citerator;
     protected:
-        typedef MemberList::iterator member_witerator;
+        typedef MemberSlotList::iterator member_witerator;
         typedef std::set<uint64> InvitesList;
 
         struct Roll
@@ -112,7 +115,7 @@ class MANGOS_DLL_SPEC Group
         void   Disband(bool hideDestroy=false);
 
         // properties accessories
-        bool IsFull() const { return (m_groupType==GROUPTYPE_NORMAL) ? (m_members.size()>=MAXGROUPSIZE) : (m_members.size()>=MAXRAIDSIZE); }
+        bool IsFull() const { return (m_groupType==GROUPTYPE_NORMAL) ? (m_memberSlots.size()>=MAXGROUPSIZE) : (m_memberSlots.size()>=MAXRAIDSIZE); }
         bool isRaidGroup() { return (m_groupType==GROUPTYPE_RAID); }
         bool isBGGroup() { return m_bgGroup; }
         const uint64& GetLeaderGUID() const { return m_leaderGuid; }
@@ -121,30 +124,21 @@ class MANGOS_DLL_SPEC Group
         LootThreshold GetLootThreshold() const { return m_lootThreshold; }
 
         // member manipulation methods
-        bool IsMember(uint64 guid) const { return _getMemberCSlot(guid) != m_members.end(); }
+        bool IsMember(uint64 guid) const { return _getMemberCSlot(guid) != m_memberSlots.end(); }
         bool IsLeader(uint64 guid) const { return (GetLeaderGUID() == guid); }
         bool IsAssistant(uint64 guid) const
         {
             member_citerator mslot = _getMemberCSlot(guid);
-            if(mslot==m_members.end())
+            if(mslot==m_memberSlots.end())
                 return false;
 
             return mslot->assistant;
         }
-        uint64 GetNextGuidAfter(uint64 guid) const
-        {
-            member_citerator mslot = _getMemberCSlot(guid);
-            if(mslot==m_members.end())
-                return 0;
-            ++mslot;
-            if(mslot==m_members.end())
-                return 0;
-            return mslot->guid;
-        }
+
         bool SameSubGroup(uint64 guid1, uint64 guid2) const
         {
             member_citerator mslot2 = _getMemberCSlot(guid2);
-            if(mslot2==m_members.end())
+            if(mslot2==m_memberSlots.end())
                 return false;
 
             return SameSubGroup(guid1,&*mslot2);
@@ -153,21 +147,24 @@ class MANGOS_DLL_SPEC Group
         bool SameSubGroup(uint64 guid1, MemberSlot const* slot2) const
         {
             member_citerator mslot1 = _getMemberCSlot(guid1);
-            if(mslot1==m_members.end() || !slot2)
+            if(mslot1==m_memberSlots.end() || !slot2)
                 return false;
 
             return (mslot1->group==slot2->group);
         }
 
+        bool SameSubGroup(Player *member1, Player *member2) const;
 
-        MemberList const& GetMembers() const { return m_members; }
-        uint32 GetMembersCount() const { return m_members.size(); }
+        MemberSlotList const& GetMemberSlots() const { return m_memberSlots; }
+        GroupReference* GetFirstMember() { return m_memberMgr.getFirst(); }
+        uint32 GetMembersCount() const { return m_memberSlots.size(); }
         uint32 GetMemberCountForXPAtKill(Unit const* victim);
         Player* GetMemberForXPAtKill(uint64 guid, Unit const* victim);
+        Player* GetMemberForXPAtKill(Player *member, Unit const* victim);
         uint8  GetMemberGroup(uint64 guid) const
         {
             member_citerator mslot = _getMemberCSlot(guid);
-            if(mslot==m_members.end())
+            if(mslot==m_memberSlots.end())
                 return (MAXRAIDSIZE/MAXGROUPSIZE+1);
 
             return mslot->group;
@@ -180,13 +177,10 @@ class MANGOS_DLL_SPEC Group
             SendUpdate();
         }
         void SetBattlegroundGroup(const bool &state) { m_bgGroup = state; }
-        void ChangeMembersGroup(const uint64 &guid, const uint8 &group)
-        {
-            if(!isRaidGroup())
-                return;
-            if(_setMembersGroup(guid, group))
-                SendUpdate();
-        }
+
+        void ChangeMembersGroup(const uint64 &guid, const uint8 &group);
+        void ChangeMembersGroup(Player *player, const uint8 &group);
+
         void SetAssistant(const uint64 &guid, const bool &state)
         {
             if(!isRaidGroup())
@@ -246,6 +240,9 @@ class MANGOS_DLL_SPEC Group
         void CountRollVote(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers, uint8 Choise);
         void EndRoll();
 
+        void LinkMember(GroupReference *pRef) { m_memberMgr.insertFirst(pRef); }
+        void DelinkMember(GroupReference *pRef) { }
+
     protected:
         bool _addMember(const uint64 &guid, const char* name, bool isAssistant=false);
         bool _addMember(const uint64 &guid, const char* name, bool isAssistant, uint8 group);
@@ -262,25 +259,26 @@ class MANGOS_DLL_SPEC Group
 
         member_citerator _getMemberCSlot(uint64 Guid) const
         {
-            for(member_citerator itr = m_members.begin(); itr != m_members.end(); ++itr)
+            for(member_citerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
             {
                 if (itr->guid == Guid)
                     return itr;
             }
-            return m_members.end();
+            return m_memberSlots.end();
         }
 
         member_witerator _getMemberWSlot(uint64 Guid)
         {
-            for(member_witerator itr = m_members.begin(); itr != m_members.end(); ++itr)
+            for(member_witerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
             {
                 if (itr->guid == Guid)
                     return itr;
             }
-            return m_members.end();
+            return m_memberSlots.end();
         }
 
-        MemberList   m_members;
+        MemberSlotList  m_memberSlots;
+        GroupRefManager m_memberMgr;
         InvitesList  m_invitees;
         uint64       m_leaderGuid;
         std::string  m_leaderName;

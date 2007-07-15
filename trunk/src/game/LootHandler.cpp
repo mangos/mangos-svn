@@ -156,15 +156,14 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
 
     if( pLoot )
     {
-        if (player->groupInfo.group)
+        if (player->GetGroup())
         {
-            Group *group = player->groupInfo.group;
+            Group *group = player->GetGroup();
 
             std::vector<Player*> playersNear;
-            Group::MemberList const& members = group->GetMembers();
-            for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
+            for(GroupReference *itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
             {
-                Player* playerGroup = objmgr.GetPlayer(itr->guid);
+                Player* playerGroup = itr->getSource();
                 if(!playerGroup)
                     continue;
                 if (player->GetDistance2dSq(playerGroup) < sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
@@ -323,9 +322,9 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
         loot = &pCreature->loot;
 
         Player *recipient = pCreature->GetLootRecipient();
-        if (recipient && recipient->groupInfo.group)
+        if (recipient && recipient->GetGroup())
         {
-            if (recipient->groupInfo.group->GetLooterGuid() == player->GetGUID())
+            if (recipient->GetGroup()->GetLooterGuid() == player->GetGUID())
                 loot->released = true;
         }
 

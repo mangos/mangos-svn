@@ -546,31 +546,32 @@ void AreaAura::Update(uint32 diff)
 
         Group *pGroup = NULL;
         if (caster->GetTypeId() == TYPEID_PLAYER)
-            pGroup = ((Player*)caster)->groupInfo.group;
+            pGroup = ((Player*)caster)->GetGroup();
         else if(caster->GetCharmerOrOwnerGUID() != 0)
         {
             Unit *owner = caster->GetCharmerOrOwner();
             if (owner && owner->GetTypeId() == TYPEID_PLAYER)
-                pGroup = ((Player*)owner)->groupInfo.group;
+                pGroup = ((Player*)owner)->GetGroup();
         }
 
         float radius =  GetRadius(sSpellRadiusStore.LookupEntry(GetSpellProto()->EffectRadiusIndex[m_effIndex]));
         if(pGroup)
         {
-            Group::MemberList const& members = pGroup->GetMembers();
-            for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
+            for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
             {
-                Unit* Target = objmgr.GetPlayer(itr->guid);
+                Player* Target = itr->getSource();
+                if(!Target)
+                    continue;
 
                 if (caster->GetTypeId() == TYPEID_PLAYER)
                 {
-                    if(!Target || Target->GetGUID() == m_caster_guid || !Target->isAlive() || !pGroup->SameSubGroup(m_caster_guid, &*itr))
+                    if(Target->GetGUID() == m_caster_guid || !Target->isAlive() || !pGroup->SameSubGroup((Player*)caster, Target))
                         continue;
                 }
                 else if(caster->GetCharmerOrOwnerGUID() != 0)
                 {
                     Unit *owner = caster->GetCharmerOrOwner();
-                    if(!Target || !Target->isAlive() || !pGroup->SameSubGroup(owner->GetGUID(), &*itr))
+                    if(!Target->isAlive() || (owner->GetTypeId() == TYPEID_PLAYER && !pGroup->SameSubGroup((Player*)owner, Target)))
                         continue;
                 }
 

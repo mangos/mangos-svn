@@ -139,8 +139,8 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
     {
         // well, we have an instance bound, really, verify self or group leader
         if (!((player->GetGUIDLow() == i->second.second) || 
-            (player->groupInfo.group && 
-             (GUID_LOPART(player->groupInfo.group->GetLeaderGUID()) == i->second.second))))
+            (player->GetGroup() && 
+             (GUID_LOPART(player->GetGroup()->GetLeaderGUID()) == i->second.second))))
         {
             // well, we are bound to instance, but are not a leader and are not in the correct group
             // we must not rebind us or the instantiator (which can surely be the same)
@@ -170,11 +170,11 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
         InstanceId = 0;
     
         // determine the instantiator which designates the instance id
-        if (player->groupInfo.group)
+        if (player->GetGroup())
         {
             // instantiate map for group leader (possibly got from the database)
             sLog.outDebug("MAPINSTANCED: Player '%s' is in group, instantiating map for group leader", player->GetName());
-            instantiator = objmgr.GetPlayer(player->groupInfo.group->GetLeaderGUID());
+            instantiator = objmgr.GetPlayer(player->GetGroup()->GetLeaderGUID());
             if (!instantiator)
             {
                 // the very special case: leader is not online, read instance map from DB
@@ -213,7 +213,7 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
         {
             // the aforementioned "very special" case of leader being not online
             sLog.outDebug("MAPINSTANCED: Instantiating map for player '%s' (group leader is not online, querying DB)", player->GetName());
-            instantiator_id = GUID_LOPART(player->groupInfo.group->GetLeaderGUID());
+            instantiator_id = GUID_LOPART(player->GetGroup()->GetLeaderGUID());
             QueryResult* result = sDatabase.PQuery("SELECT `instance` FROM `character_instance` WHERE (`guid` = '%u') AND (`map` = '%u') AND (`leader` = '%u')", instantiator_id, GetId(), instantiator_id);
             if (result)
             {
@@ -258,8 +258,8 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
             {
                 // the aforementioned "very special" case of leader being not online
                 sDatabase.BeginTransaction();
-                sDatabase.PExecute("DELETE FROM `character_instance` WHERE (`guid` = '%u') AND (`map` = '%u')", GUID_LOPART(player->groupInfo.group->GetLeaderGUID()), GetId());
-                sDatabase.PExecute("INSERT INTO `character_instance` VALUES ('%u', '%u', '%u', '%u')", GUID_LOPART(player->groupInfo.group->GetLeaderGUID()), GetId(), InstanceId, GUID_LOPART(player->groupInfo.group->GetLeaderGUID()));
+                sDatabase.PExecute("DELETE FROM `character_instance` WHERE (`guid` = '%u') AND (`map` = '%u')", GUID_LOPART(player->GetGroup()->GetLeaderGUID()), GetId());
+                sDatabase.PExecute("INSERT INTO `character_instance` VALUES ('%u', '%u', '%u', '%u')", GUID_LOPART(player->GetGroup()->GetLeaderGUID()), GetId(), InstanceId, GUID_LOPART(player->GetGroup()->GetLeaderGUID()));
             }
             sDatabase.CommitTransaction();
         }
@@ -277,9 +277,9 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
             else
             {
                 // the aforementioned "very special" case of leader being not online
-                player->m_BoundInstances[GetId()] = std::pair< uint32, uint32 >(InstanceId, GUID_LOPART(player->groupInfo.group->GetLeaderGUID()));
+                player->m_BoundInstances[GetId()] = std::pair< uint32, uint32 >(InstanceId, GUID_LOPART(player->GetGroup()->GetLeaderGUID()));
                 sDatabase.PExecute("DELETE FROM `character_instance` WHERE (`guid` = '%u') AND (`map` = '%u')", player->GetGUIDLow(), GetId());
-                sDatabase.PExecute("INSERT INTO `character_instance` VALUES ('%u', '%u', '%u', '%u')", player->GetGUIDLow(), GetId(), InstanceId, GUID_LOPART(player->groupInfo.group->GetLeaderGUID()));
+                sDatabase.PExecute("INSERT INTO `character_instance` VALUES ('%u', '%u', '%u', '%u')", player->GetGUIDLow(), GetId(), InstanceId, GUID_LOPART(player->GetGroup()->GetLeaderGUID()));
             }
             sDatabase.CommitTransaction();
         }

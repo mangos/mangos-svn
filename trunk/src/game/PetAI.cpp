@@ -341,7 +341,7 @@ void PetAI::UpdateAllies()
 	if(!owner)
 		return;
 	else if(owner->GetTypeId() == TYPEID_PLAYER)
-		pGroup = ((Player*)owner)->groupInfo.group;
+		pGroup = ((Player*)owner)->GetGroup();
 
    	if(m_AllySet.size() == 2 && !pGroup) //only pet and owner/not in group->ok
    		return;
@@ -353,16 +353,15 @@ void PetAI::UpdateAllies()
 		m_AllySet.insert(i_pet.GetGUID());
 		if(pGroup)	//add group
 		{
-			Group::MemberList const& members = pGroup->GetMembers();
-            for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
+            for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
             {
-                if(!pGroup->SameSubGroup(owner->GetGUID(), &*itr))
+                Player* Target = itr->getSource();
+                if(!Target || !pGroup->SameSubGroup((Player*)owner, Target))
                     continue;
 
-                Unit* Target = objmgr.GetPlayer(itr->guid);
-                if(!Target || Target->GetGUID() == owner->GetGUID())
+                if(Target->GetGUID() == owner->GetGUID())
                     continue;
-                    
+
                 m_AllySet.insert(Target->GetGUID());
             }
 		}

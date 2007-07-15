@@ -580,7 +580,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
                     DEBUG_LOG("DealDamageIsPvE");
                     uint32 xp = MaNGOS::XP::Gain(player, pVictim);
 
-                    Group *pGroup = player->groupInfo.group;
+                    Group *pGroup = player->GetGroup();
                     if(pGroup)
                     {
                         DEBUG_LOG("Kill Enemy In Group");
@@ -591,10 +591,9 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
                         {
                             bool is_raid = MapManager::Instance().GetBaseMap(player->GetMapId())->IsRaid() && pGroup->isRaidGroup();
 
-                            Group::MemberList const& members = pGroup->GetMembers();
-                            for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
+                            for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
                             {
-                                Player *pGroupGuy = pGroup->GetMemberForXPAtKill(itr->guid,pVictim);
+                                Player *pGroupGuy = pGroup->GetMemberForXPAtKill(itr->getSource(),pVictim);
                                 if(!pGroupGuy)
                                     continue;
 
@@ -2693,26 +2692,32 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
 
 			Unit* owner = NULL;
             Group *pGroup = NULL;
+            Player *pGroupOf = NULL;
             if (i_caster->GetTypeId() == TYPEID_PLAYER)
-                pGroup = ((Player*)i_caster)->groupInfo.group;
+            {
+                pGroupOf = (Player*)i_caster;
+                pGroup = pGroupOf->GetGroup();
+            }
             else if(((Creature*)i_caster)->isTotem() || ((Creature*)i_caster)->isPet() || i_caster->isCharmed())
             {
                 owner = i_caster->GetCharmerOrOwner();
                 if (owner && owner->GetTypeId() == TYPEID_PLAYER)
-                    pGroup = ((Player*)owner)->groupInfo.group;
+                {
+                    pGroupOf = (Player*)owner;
+                    pGroup = pGroupOf->GetGroup();
+                }
             }
 
             //float radius =  GetRadius(sSpellRadiusStore.LookupEntry((*i).second->GetSpellProto()->EffectRadiusIndex[(*i).second->GetEffIndex()]));
-            if(pGroup)
+            if(pGroup && pGroupOf)
             {
-                Group::MemberList const& members = pGroup->GetMembers();
-                for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
+                for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
                 {
-                    if(!pGroup->SameSubGroup(i_caster->GetGUID(), &*itr))
+                    Player* Target = itr->getSource();
+                    if(!Target || !pGroup->SameSubGroup(pGroupOf, Target))
                         continue;
-
-                    Unit* Target = objmgr.GetPlayer(itr->guid);
-                    if(!Target || Target->GetGUID() == i_caster->GetGUID())
+                    
+                    if(Target->GetGUID() == i_caster->GetGUID())
                         continue;
                     Aura *t_aura = Target->GetAura((*i).second->GetId(), (*i).second->GetEffIndex());
                     if (t_aura)

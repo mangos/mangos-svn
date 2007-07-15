@@ -448,7 +448,7 @@ struct ChainHealingOrder : public binary_function<const Unit*, const Unit*, bool
         if (Target == MainTarget)
             return 0;
         else if (Target->GetTypeId() == TYPEID_PLAYER && MainTarget->GetTypeId() == TYPEID_PLAYER &&             
-            ((Player const*)Target)->IsInSameRaidWith((Player const*)MainTarget))
+            ((Player*)Target)->IsInSameRaidWith((Player*)MainTarget))
         {
             if (Target->GetHealth() == Target->GetMaxHealth())
                 return 40000;
@@ -580,21 +580,20 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                 if(owner->GetTypeId() == TYPEID_PLAYER)
                 {
                     groupMember = (Player*)owner;
-                    pGroup = ((Player*)owner)->groupInfo.group;
+                    pGroup = ((Player*)owner)->GetGroup();
                 }
             }
             else if (m_caster->GetTypeId() == TYPEID_PLAYER)
             {
                 groupMember = (Player*)m_caster;
-                pGroup = groupMember->groupInfo.group;
+                pGroup = groupMember->GetGroup();
             }
 
             if(pGroup)
             {
-                Group::MemberList const& members = pGroup->GetMembers();
-                for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
+                for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
                 {
-                    Unit* Target = objmgr.GetPlayer(itr->guid);
+                    Player* Target = itr->getSource();
                     if(Target && m_caster->IsWithinDistInMap(Target, radius))
                         TagUnitMap.push_back(Target);
                 }
@@ -702,31 +701,25 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
         case TARGET_AREAEFFECT_PARTY:
         {
 			Unit* owner = m_caster->GetCharmerOrOwner();
-            Group  *pGroup = NULL;
             Player *groupMember = NULL;
+            Group  *pGroup = NULL;
 
             if(owner)
             {
 				TagUnitMap.push_back(m_caster);
                 if(owner->GetTypeId() == TYPEID_PLAYER)
-                {
                     groupMember = (Player*)owner;
-                    pGroup = ((Player*)owner)->groupInfo.group;
-                }
             }
-
             else if (m_caster->GetTypeId() == TYPEID_PLAYER)
-            {
                 groupMember = (Player*)m_caster;
-                pGroup = groupMember->groupInfo.group;
-            }
+
+            if (groupMember) pGroup = groupMember->GetGroup();
             
             if(pGroup)
             {
-                Group::MemberList const& members = pGroup->GetMembers();
-                for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
+                for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
                 {
-                    Unit* Target = objmgr.GetPlayer(itr->guid);
+                    Player* Target = itr->getSource();
                     if(Target && m_caster->IsWithinDistInMap(Target, radius))
                         TagUnitMap.push_back(Target);
                 }
@@ -794,13 +787,12 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             Player* targetPlayer = m_targets.getUnitTarget() && m_targets.getUnitTarget()->GetTypeId() == TYPEID_PLAYER
                 ? (Player*)m_targets.getUnitTarget() : NULL;
 
-            Group* pGroup = targetPlayer ? targetPlayer->groupInfo.group : NULL;
+            Group* pGroup = targetPlayer ? targetPlayer->GetGroup() : NULL;
             if(pGroup)
             {
-                Group::MemberList const& members = pGroup->GetMembers();
-                for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
+                for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
                 {
-                    Unit* Target = objmgr.GetPlayer(itr->guid);
+                    Player* Target = itr->getSource();
                     if(Target && targetPlayer->IsWithinDistInMap(Target, radius) && targetPlayer->getClass() == Target->getClass())
                         TagUnitMap.push_back(Target);
                 }

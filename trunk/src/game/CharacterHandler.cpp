@@ -525,10 +525,10 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     }
 
     // announce group about member online (must be after add to player list to receive announce to self)
-    if(pCurrChar->groupInfo.group)
+    if(pCurrChar->GetGroup())
     {
         //pCurrChar->groupInfo.group->SendInit(this); // useless
-        pCurrChar->groupInfo.group->SendUpdate();
+        pCurrChar->GetGroup()->SendUpdate();
     }
 
     // friend status

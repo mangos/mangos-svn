@@ -112,18 +112,17 @@ void Totem::UnSummon()
         //remove aura all party members too
         Group *pGroup = NULL;
         if (owner->GetTypeId() == TYPEID_PLAYER)
-            // Not only the player can summon the totem (scripted AI)
-            pGroup = ((Player*)owner)->groupInfo.group;
-        if (pGroup)
         {
-            Group::MemberList const& members = pGroup->GetMembers();
-            for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
+            // Not only the player can summon the totem (scripted AI)
+            pGroup = ((Player*)owner)->GetGroup();
+            if (pGroup)
             {
-                if(!pGroup->SameSubGroup(owner->GetGUID(), &*itr))
-                    continue;
-
-                Unit* Target = objmgr.GetPlayer(itr->guid);
-                if (Target) Target->RemoveAurasDueToSpell(m_spell);
+                for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+                {
+                    Player* Target = itr->getSource();
+                    if(Target && pGroup->SameSubGroup((Player*)owner, Target))
+                        Target->RemoveAurasDueToSpell(m_spell);
+                }
             }
         }
     }
