@@ -19,7 +19,7 @@
 #ifndef _FOLLOWERREFMANAGER
 #define _FOLLOWERREFMANAGER
 
-#include "RefManager.h"
+#include "Utilities/LinkedReference/RefManager.h"
 
 class Unit;
 class TargetedMovementGenerator;

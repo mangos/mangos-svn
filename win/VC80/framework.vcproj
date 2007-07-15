@@ -251,21 +251,41 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\framework\Utilities\Reference.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\framework\Utilities\ReferenceHolder.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\framework\Utilities\ReferenceImpl.h"
+				RelativePath="..\..\src\game\LinkedList.h"
 				>
 			</File>
 			<File
 				RelativePath="..\..\src\framework\Utilities\TypeList.h"
 				>
 			</File>
+			<Filter
+				Name="CountedReference"
+				>
+				<File
+					RelativePath="..\..\src\framework\Utilities\CountedReference\Reference.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\framework\Utilities\CountedReference\ReferenceHolder.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\framework\Utilities\CountedReference\ReferenceImpl.h"
+					>
+				</File>
+			</Filter>
+			<Filter
+				Name="LinkedReference"
+				>
+				<File
+					RelativePath="..\..\src\framework\Utilities\LinkedReference\Reference.h"
+					>
+				</File>
+				<File
+					RelativePath="..\..\src\framework\Utilities\LinkedReference\RefManager.h"
+					>
+				</File>
+			</Filter>
 		</Filter>
 		<Filter
 			Name="Dynamic"

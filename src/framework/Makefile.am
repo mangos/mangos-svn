@@ -49,7 +49,10 @@ EXTRA_DIST = \
 	Policies/ThreadingModel.h \
 	Utilities/ByteConverter.h \
 	Utilities/HashMap.h \
-	Utilities/Reference.h \
-	Utilities/ReferenceHolder.h \
-	Utilities/ReferenceImpl.h \
-	Utilities/TypeList.h
+	Utilities/TypeList.h \
+	Utilities/LinkedList.h \
+	Utilities/CountedReference/Reference.h \
+	Utilities/CountedReference/ReferenceHolder.h \
+	Utilities/CountedReference/ReferenceImpl.h \
+	Utilities/LinkedReference/Reference.h \
+	Utilities/LinkedReference/RefManager.h

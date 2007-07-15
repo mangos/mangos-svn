@@ -644,18 +644,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\FollowerReference.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\FollowerReference.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\FollowerRefManager.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\Formulas.h"
 				>
 			</File>
@@ -696,14 +684,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\HostilRefManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\HostilRefManager.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\IdleMovementGenerator.cpp"
 				>
 			</File>
@@ -729,10 +709,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\ItemPrototype.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\LinkedList.h"
 				>
 			</File>
 			<File
@@ -844,14 +820,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\Reference.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\RefManager.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\TargetedMovementGenerator.cpp"
 				>
 			</File>
@@ -873,14 +841,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\TemporarySummon.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\ThreatManager.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\ThreatManager.h"
 				>
 			</File>
 			<File
@@ -1030,6 +990,40 @@
 			<File
 				RelativePath="..\..\src\game\Tools.h"
 				>
+			</File>
+		</Filter>
+		<Filter
+			Name="References"
+			Filter="">
+			<File
+				RelativePath="..\..\src\game\FollowerReference.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\FollowerReference.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\FollowerRefManager.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\GroupReference.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\GroupReference.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\GroupRefManager.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\HostilRefManager.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\HostilRefManager.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\ThreatManager.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\ThreatManager.h">
 			</File>
 		</Filter>
 	</Files>

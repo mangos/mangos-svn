@@ -16,20 +16,24 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef _FOLLOWERREFERENCE_H
-#define _FOLLOWERREFERENCE_H
+#ifndef MANGOS_REFERENCEHOLDER_H
+#define MANGOS_REFERENCEHOLDER_H
 
-#include "Utilities/LinkedReference/Reference.h"
+/** ReferenceHolder holds the actualy referenced obejct as well the refence
+    count.  The ReferenecHolder implements as a policy base object and
+    will decided by the Reference class to be consnsitent.
+ */
 
-class TargetedMovementGenerator;
-class Unit;
-
-class MANGOS_DLL_SPEC FollowerReference : public Reference<Unit, TargetedMovementGenerator>
+template
+<
+typename T,
+class THREADING_MODEL
+>
+struct ReferenceHolder : public THREADING_MODEL
 {
-protected:
-    void targetObjectBuildLink();
-    void targetObjectDestroyLink();
-    void sourceObjectDestroyLink();
+    explicit ReferenceHolder(T *ref) : i_referencee(ref), i_referenceCount(0) {}
+    T *i_referencee;
+    unsigned int i_referenceCount;
+    typedef typename THREADING_MODEL::Lock Lock;
 };
-
 #endif
