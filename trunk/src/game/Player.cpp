@@ -402,7 +402,6 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value( PLAYER_FIELD_LIFETIME_HONORBALE_KILLS, 0 );
     SetUInt32Value( PLAYER_FIELD_TODAY_CONTRIBUTION, 0 );
     SetUInt32Value( PLAYER_FIELD_YESTERDAY_CONTRIBUTION, 0 );
-    SetUInt32Value( PLAYER_FIELD_MAX_LEVEL, 70 );
 
     SetUInt32Value( UNIT_FIELD_LEVEL, 1 ); //set level = 1 for created characters 
 
@@ -2005,6 +2004,8 @@ void Player::InitTalentForLevel()
         {
             if (GetSession()->GetSecurity() < SEC_ADMINISTRATOR)
                 resetTalents(true);
+            else
+                SetFreeTalentPoints(0);
         }
         // else update amount of free points
         else
@@ -2021,6 +2022,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
     objmgr.GetPlayerLevelInfo(getRace(),getClass(),getLevel(),&info);
 
+    SetUInt32Value(PLAYER_FIELD_MAX_LEVEL, sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) );
     SetUInt32Value(PLAYER_NEXT_LEVEL_XP, MaNGOS::XP::xp_to_level(getLevel()));
 
     UpdateMaxSkills ();
@@ -2482,16 +2484,15 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
     return newspell->active && !superceded_old;
 }
 
-bool Player::learnSpell(uint16 spell_id)
+void Player::learnSpell(uint16 spell_id)
 {
     // prevent duplicated entires in spell book
     if (!addSpell(spell_id,1))
-        return false;
+        return;
 
     WorldPacket data(SMSG_LEARNED_SPELL, 4);
     data <<uint32(spell_id);
     GetSession()->SendPacket(&data);
-    return true;
 }
 
 void Player::removeSpell(uint16 spell_id)
