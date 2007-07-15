@@ -968,6 +968,18 @@ void Spell::cast(bool skipCheck)
         }
     }
 
+    // Conflagrate - consumes immolate
+    if ((m_spellInfo->TargetAuraState == AURA_STATE_IMMOLATE) && m_targets.getUnitTarget())
+    {
+        Unit::AuraList const &mPeriodic = m_targets.getUnitTarget()->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
+        for(Unit::AuraList::const_iterator i = mPeriodic.begin(); i != mPeriodic.end(); ++i)
+            if ((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && ((*i)->GetSpellProto()->SpellFamilyFlags & 4))
+            {
+                m_targets.getUnitTarget()->RemoveAura((*i)->GetId(), (*i)->GetEffIndex());
+                break;
+            }
+    }
+
     // traded items have trade slot instead of guid in m_itemTargetGUID
     // set to real guid to be sent later to the client
     if(m_targets.m_itemTarget && (m_targets.m_targetMask & TARGET_FLAG_TRADE_ITEM))
@@ -2324,28 +2336,6 @@ uint8 Spell::CanCast()
             }
             default:break;
         }
-    }
-
-    // Conflagrate - do only when preparing
-    if (m_caster->m_currentSpell != this && m_spellInfo->SpellIconID == 12 &&
-        m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && m_targets.getUnitTarget())
-    {
-        Unit::AuraMap& t_auras = m_targets.getUnitTarget()->GetAuras();
-        bool hasImmolate = false;
-        for(Unit::AuraMap::iterator itr = t_auras.begin(); itr != t_auras.end(); ++itr)
-        {
-            if (itr->second && !IsPassiveSpell(itr->second->GetId()))
-            {
-                SpellEntry const *spellInfo = itr->second->GetSpellProto();
-                if (!spellInfo) continue;
-                if (spellInfo->SpellIconID != 31 || spellInfo->SpellFamilyName != SPELLFAMILY_WARLOCK) continue;
-                hasImmolate = true;
-                m_targets.getUnitTarget()->RemoveAurasDueToSpell(spellInfo->Id);
-                break;
-            }
-        }
-        if(!hasImmolate)
-            return SPELL_FAILED_CASTER_AURASTATE;
     }
 
     for (int i = 0; i < 3; i++)

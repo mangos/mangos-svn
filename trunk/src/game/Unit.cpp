@@ -5392,23 +5392,20 @@ DiminishingMechanics Unit::Mechanic2DiminishingMechanics(uint32 mech)
 
 void Unit::ApplyDiminishingToDuration(DiminishingMechanics  mech, int32& duration)
 {
-    if(duration == -1)
+    if(duration == -1 || mech == DIMINISHING_NONE)
         return;
 
-    if(mech != DIMINISHING_NONE)
+    // Stun diminishing is applies to mobs too
+    if(mech == DIMINISHING_MECHANIC_STUN || GetTypeId() == TYPEID_PLAYER)
     {
-        // Stun diminishing is applies to mobs too
-        if(mech == DIMINISHING_MECHANIC_STUN || GetTypeId() == TYPEID_PLAYER)
+        DiminishingLevels diminish = GetDiminishing(mech);
+        switch(diminish)
         {
-            DiminishingLevels diminish = GetDiminishing(mech);
-            switch(diminish)
-            {
-                case DIMINISHING_LEVEL_1: IncrDiminishing(mech, duration); break;
-                case DIMINISHING_LEVEL_2: IncrDiminishing(mech, duration); duration = int32(duration*0.5f); break;
-                case DIMINISHING_LEVEL_3: IncrDiminishing(mech, duration); duration = int32(duration*0.25f); break;
-                case DIMINISHING_LEVEL_IMMUNE: duration = 0; break;
-                default: break;
-            }
+            case DIMINISHING_LEVEL_1: IncrDiminishing(mech, duration); break;
+            case DIMINISHING_LEVEL_2: IncrDiminishing(mech, duration); duration = int32(duration*0.5f); break;
+            case DIMINISHING_LEVEL_3: IncrDiminishing(mech, duration); duration = int32(duration*0.25f); break;
+            case DIMINISHING_LEVEL_IMMUNE: duration = 0; break;
+            default: break;
         }
     }
 }

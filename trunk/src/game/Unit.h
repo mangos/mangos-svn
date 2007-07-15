@@ -412,7 +412,10 @@ enum AuraState
     AURA_STATE_UNKNOWN3       = 8,
     AURA_STATE_UNKNOWN4       = 9,
     AURA_STATE_UNKNOWN5       = 10,
-    AURA_STATE_CRIT           = 11
+    AURA_STATE_CRIT           = 11,
+    AURA_STATE_UNKNOWN6       = 12,
+    AURA_STATE_UNKNOWN7       = 13,
+    AURA_STATE_IMMOLATE       = 14
 };
 
 enum Mechanics

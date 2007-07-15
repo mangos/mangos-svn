@@ -284,7 +284,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //231
     &Aura::HandleNULL,                                      //232
     &Aura::HandleNULL,                                      //233
-    &Aura::HandleNULL                                       //234
+    &Aura::HandleNULL                                       //234 SPELL_AURA_SILENCE_RESISTANCE
 };
 
 Aura::Aura(SpellEntry const* spellproto, uint32 eff, Unit *target, Unit *caster, Item* castItem) :
@@ -784,6 +784,10 @@ void Aura::_AddAura()
         if( IsSealSpell(GetId()) )
             m_target->ModifyAuraState(AURA_STATE_JUDGEMENT,true);
 
+        // Conflagrate aura state
+        if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && (GetSpellProto()->SpellFamilyFlags & 4))
+            m_target->ModifyAuraState(AURA_STATE_IMMOLATE,true);
+
         SetAuraSlot( slot );
         if( m_target->GetTypeId() == TYPEID_PLAYER )
             UpdateAuraDuration();
@@ -850,6 +854,10 @@ void Aura::_RemoveAura()
         m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot), value);
         if( IsSealSpell(GetId()) )
             m_target->ModifyAuraState(AURA_STATE_JUDGEMENT,false);
+
+        // Conflagrate aura state
+        if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && (GetSpellProto()->SpellFamilyFlags & 4))
+            m_target->ModifyAuraState(AURA_STATE_IMMOLATE, false);
 
         // reset cooldown state for spells infinity/long aura (it's all self applied (?))
         int32 duration = GetDuration(GetSpellProto());
