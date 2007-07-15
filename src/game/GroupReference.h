@@ -19,7 +19,7 @@
 #ifndef _GROUPREFERENCE_H
 #define _GROUPREFERENCE_H
 
-#include "Reference.h"
+#include "Utilities/LinkedReference/Reference.h"
 
 class Group;
 class Player;
