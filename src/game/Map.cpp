@@ -1536,9 +1536,6 @@ void Map::PlayerRelocationNotify( Player* player, Cell cell, CellPair cellpair )
 
 void Map::CreatureRelocationNotify(Creature *creature, Cell cell, CellPair cellpair)
 {
-    if(creature->hasUnitState(UNIT_STAT_CHASE | UNIT_STAT_SEARCHING | UNIT_STAT_FLEEING))
-        return;
-
     CellLock<ReadGuard> cell_lock(cell, cellpair);
     MaNGOS::CreatureRelocationNotifier relocationNotifier(*creature);
     cell.data.Part.reserved = ALL_DISTRICT;

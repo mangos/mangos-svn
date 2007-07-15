@@ -108,34 +108,36 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
         }
     }
 
+    // not have required min points spent in talent tree
+    if(spentPoints < (talentInfo->Row * 5))
+        return;
+
+    // spell not set in talent.dbc
     uint32 spellid = talentInfo->RankID[requested_rank];
     if( spellid == 0 )
     {
-        sLog.outDetail("Talent: %u Rank: %u = 0", talent_id, requested_rank);
+        sLog.outError("Talent.dbc have for talent: %u Rank: %u spell id = 0", talent_id, requested_rank);
+        return;
     }
-    else
+
+    // already known
+    if(GetPlayer( )->HasSpell(spellid))
+        return;
+
+    // must unlearn old rank before (including decrease used talent points counter)
+    if(requested_rank > 0 )
     {
-        if(spentPoints < (talentInfo->Row * 5))             // Min points spent
-        {
-            return;
-        }
-
-        if(!(GetPlayer( )->HasSpell(spellid)))
-        {
-            if(!GetPlayer( )->learnSpell(spellid))
-                return;
-
-            sLog.outDetail("TalentID: %u Rank: %u Spell: %u\n", talent_id, requested_rank, spellid);
-
-            if(requested_rank > 0 )
-            {
-                uint32 respellid = talentInfo->RankID[requested_rank-1];
-                GetPlayer( )->removeSpell((uint16)respellid);
-                GetPlayer()->RemoveAurasDueToSpell(respellid);
-            }
-            GetPlayer()->SetFreeTalentPoints(CurTalentPoints - 1);
-        }
+        uint32 respellid = talentInfo->RankID[requested_rank-1];
+        GetPlayer()->RemoveAurasDueToSpell(respellid);
+        GetPlayer( )->removeSpell((uint16)respellid);
     }
+
+    // learn!
+    GetPlayer( )->learnSpell(spellid);
+    sLog.outDetail("TalentID: %u Rank: %u Spell: %u\n", talent_id, requested_rank, spellid);
+
+    // update free talent points
+    GetPlayer()->SetFreeTalentPoints(CurTalentPoints - 1);
 }
 
 void WorldSession::HandleTalentWipeOpcode( WorldPacket & recv_data )

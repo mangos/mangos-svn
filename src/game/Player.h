@@ -1035,7 +1035,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendProficiency(uint8 pr1, uint32 pr2);
         void SendInitialSpells();
         bool addSpell(uint16 spell_id,uint8 active, PlayerSpellState state = PLAYERSPELL_NEW, uint16 slot_id=0xffff);
-        bool learnSpell(uint16 spell_id);
+        void learnSpell(uint16 spell_id);
         void removeSpell(uint16 spell_id);
 
         uint32 GetFreeTalentPoints() const { return GetUInt32Value(PLAYER_CHARACTER_POINTS1); }
