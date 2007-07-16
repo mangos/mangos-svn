@@ -1164,7 +1164,7 @@ CREATE TABLE `creature_template` (
   `AIName` varchar(128) NOT NULL default '',
   `MovementType` tinyint(3) unsigned NOT NULL default '0',
   `InhabitType` tinyint(1) unsigned NOT NULL default '3',
-  `RacialLeader tinyint(1) unsigned NOT NULL default '0',
+  `RacialLeader` tinyint(1) unsigned NOT NULL default '0',
   `ScriptName` varchar(128) NOT NULL default '',
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System';
@@ -1176,7 +1176,7 @@ CREATE TABLE `creature_template` (
 LOCK TABLES `creature_template` WRITE;
 /*!40000 ALTER TABLE `creature_template` DISABLE KEYS */;
 INSERT INTO `creature_template` VALUES 
-(1,10045,0,'Waypoint (Only GM can see it)','Visual',1,1,64,64,0,0,0,35,0,0.91,0,14,15,100,2000,2200,4096,0,0.5,8,2,0,0,0,0,1.76,2.42,100,2.56,8,1,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,3,'');
+(1,10045,0,'Waypoint (Only GM can see it)','Visual',1,1,64,64,0,0,0,35,0,0.91,0,14,15,100,2000,2200,4096,0,0.5,8,2,0,0,0,0,1.76,2.42,100,2.56,8,1,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,3,0,'');
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
 UNLOCK TABLES;
 

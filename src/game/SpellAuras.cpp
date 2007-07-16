@@ -1011,30 +1011,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             m_procCharges = -1;
     }
 
-    // Dummy auras that must be applied at each apply/unapply
-
-    // Reincarnation (passive)
-    if (GetId() == 20608 && m_target && m_target->GetTypeId()==TYPEID_PLAYER)
-    {
-        // applied at any apply and not real unapply to catch unapply death case 
-        // when cooldown pass and required item exist to set PLAYER_SELF_RES_SPELL
-        if( (!Real || apply) && !((Player*)m_target)->HasSpellCooldown(21169) && ((Player*)m_target)->HasItemCount(17030,1) )
-        {
-            // not replace another aura spell
-            if(m_target->GetUInt32Value(PLAYER_SELF_RES_SPELL)==0)
-                m_target->SetUInt32Value(PLAYER_SELF_RES_SPELL,21169);
-        }
-        else
-        {
-            // remove only at real aura remove or apply check fail
-            // ... and only own spell_id
-            if( m_target->GetUInt32Value(PLAYER_SELF_RES_SPELL)==21169)
-                m_target->SetUInt32Value(PLAYER_SELF_RES_SPELL,0);
-        }
-        return;
-    }
-
-    // Other spells required only Real aura add/remove
+    // spells required only Real aura add/remove
     if(!Real)
         return;
 

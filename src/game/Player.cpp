@@ -987,6 +987,13 @@ void Player::setDeathState(DeathState s)
 
         // save value before aura remove in Unit::setDeathState
         ressSpellId = GetUInt32Value(PLAYER_SELF_RES_SPELL);
+
+        // passive spell
+        if(!ressSpellId)
+        {
+            if(HasSpell(20608) && !HasSpellCooldown(21169) && HasItemCount(17030,1))
+                ressSpellId = 21169;
+        }
     }
     Unit::setDeathState(s);
 
