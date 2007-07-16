@@ -111,6 +111,14 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
     if(_player->InBattleGround() || _player->InBattleGroundQueue())
         return;
 
+    // check Deserter debuff
+    if( !_player->CanJoinToBattleground() )
+    {
+        // TODO: this can be special status packet, text also not standard currently
+        SendNotification("You left a battleground and must wait before entering another one.");
+        return;
+    }
+
     // check existence
     BattleGround *bg = sBattleGroundMgr.GetBattleGround(bgid);
     if(!bg)
@@ -285,15 +293,13 @@ void WorldSession::HandleBattleGroundLeaveOpcode( WorldPacket &recv_data )
 
     sLog.outDebug( "WORLD: Recvd CMSG_LEAVE_BATTLEFIELD Message");
 
-    uint8 unk1, unk2;
-    uint32 bgid;                                            // id from DBC
-    uint16 unk3;
+    //uint8 unk1, unk2;
+    //uint32 bgid;                                            // id from DBC
+    //uint16 unk3;
 
-    recv_data >> unk1 >> unk2 >> bgid >> unk3;
+    //recv_data >> unk1 >> unk2 >> bgid >> unk3; - no used currently
 
-    BattleGround *bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundId());
-    if(bg)
-        bg->RemovePlayer(_player->GetGUID(), true, true);
+    _player->LeaveBattleground();
 }
 
 void WorldSession::HandleBattlefieldStatusOpcode( WorldPacket & recv_data )

@@ -1345,6 +1345,9 @@ class MANGOS_DLL_SPEC Player : public Unit
             m_bgEntryPointO = PosO;
         }
 
+        void LeaveBattleground();
+        bool CanJoinToBattleground() const;
+
         bool DropBattleGroundFlag();
 
         /*********************************************************/

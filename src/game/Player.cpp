@@ -1147,7 +1147,13 @@ bool Player::ToggleAFK()
 {
     ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK);
 
-    return HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK);
+    bool state = HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK);
+
+    // afk player not allowed in battleground
+    if(state && InBattleGround())
+        LeaveBattleground();
+
+    return state;
 }
 
 bool Player::ToggleDND()
@@ -14070,6 +14076,30 @@ void Player::ToggleMetaGemsActive(uint16 exceptslot, bool apply)        //if fal
                 ApplyEnchantment(pItem,EnchantmentSlot(enchant_slot), apply);
         }
     }
+}
+
+void Player::LeaveBattleground()
+{
+    if(!InBattleGround())
+        return;
+
+    BattleGround *bg = sBattleGroundMgr.GetBattleGround(GetBattleGroundId());
+    if(bg)
+        bg->RemovePlayer(GetGUID(), true, true);
+
+    // Deserter
+    CastSpell(this,26013,true);
+}
+
+bool Player::CanJoinToBattleground() const
+{
+    // check Deserter debuff
+    AuraList const& mDummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
+    for(AuraList::const_iterator i = mDummyAuras.begin();i != mDummyAuras.end(); ++i)
+        if((*i)->GetId()==26013)
+            return false;
+
+    return true;
 }
 
 bool Player::DropBattleGroundFlag()
