@@ -1169,7 +1169,7 @@ void Spell::EffectHeal( uint32 i )
 
     if( unitTarget && unitTarget->isAlive() && damage >= 0)
     {
-        int32 addhealth = m_caster->SpellHealingBonus(m_spellInfo, uint32(damage),HEAL);
+        int32 addhealth = m_caster->SpellHealingBonus(m_spellInfo, uint32(damage),HEAL, unitTarget);
         bool crit = m_caster->SpellCriticalBonus(m_spellInfo, &addhealth, NULL);
         if(unitTarget->GetTypeId() == TYPEID_PLAYER)
             m_caster->SendHealSpellOnPlayer(unitTarget, m_spellInfo->Id, addhealth, crit);
