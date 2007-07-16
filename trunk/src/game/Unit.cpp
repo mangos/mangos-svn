@@ -1130,7 +1130,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         case SPELL_AURA_PERIODIC_HEAL:
         case SPELL_AURA_OBS_MOD_HEALTH:
         {
-            pdamage = SpellHealingBonus(&localSpellProto, pdamage, DOT);
+            pdamage = SpellHealingBonus(&localSpellProto, pdamage, DOT, pVictim);
 
             WorldPacket data(SMSG_PERIODICAURALOG, (21+16));        // we guess size
             data.append(pVictim->GetPackGUID());
@@ -2356,17 +2356,10 @@ void Unit::DeMorph()
 long Unit::GetTotalAuraModifier(uint32 ModifierID)
 {
     uint32 modifier = 0;
-    bool auraFound = false;
 
-    AuraMap::const_iterator i;
-    for (i = m_Auras.begin(); i != m_Auras.end(); i++)
-    {
-        if ((*i).second && (*i).second->GetModifier()->m_auraname == ModifierID)
-        {
-            auraFound = true;
-            modifier += (*i).second->GetModifier()->m_amount;
-        }
-    }
+    AuraList const& mTotalAuraList = GetAurasByType(ModifierID);
+    for(AuraList::const_iterator i = mTotalAuraList.begin();i != mTotalAuraList.end(); ++i)
+        modifier += (*i)->GetModifier()->m_amount;
 
     return modifier;
 }
@@ -4427,7 +4420,7 @@ bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect, Unit
     return false;
 }
 
-uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, DamageEffectType damagetype)
+uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, DamageEffectType damagetype, Unit *pVictim)
 {
     // Healing Done
 
@@ -4449,13 +4442,25 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
     // Healing bonus of spirit, intellect and strength
     if (GetTypeId() == TYPEID_PLAYER)
     {
-        AdvertisedBenefit += int32(GetStat(STAT_SPIRIT) * m_AuraModifiers[SPELL_AURA_MOD_SPELL_HEALING_OF_SPIRIT] / 100.0f);
-        AdvertisedBenefit += int32(GetStat(STAT_INTELLECT) * m_AuraModifiers[SPELL_AURA_MOD_SPELL_HEALING_OF_INTELLECT] / 100.0f);
-        AdvertisedBenefit += int32(GetStat(STAT_STRENGTH) * m_AuraModifiers[SPELL_AURA_MOD_SPELL_HEALING_OF_STRENGTH] / 100.0f);
+        AdvertisedBenefit += int32(GetStat(STAT_SPIRIT) * GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HEALING_OF_SPIRIT) / 100.0f);
+        AdvertisedBenefit += int32(GetStat(STAT_INTELLECT) * GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HEALING_OF_INTELLECT) / 100.0f);
+        AdvertisedBenefit += int32(GetStat(STAT_STRENGTH) * GetTotalAuraModifier(SPELL_AURA_MOD_SPELL_HEALING_OF_STRENGTH) / 100.0f);
     }
 
-    //flat
-    AdvertisedBenefit += m_AuraModifiers[SPELL_AURA_MOD_HEALING];
+    // Healing Taken
+    AdvertisedBenefit += pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_HEALING);
+
+    //BoL dummy effects
+    if (spellProto->SpellFamilyName == SPELLFAMILY_PALADIN && (spellProto->SpellFamilyFlags & 0xC0000000))
+    {
+        AuraList const& mDummyAuras = pVictim->GetAurasByType(SPELL_AURA_DUMMY);
+        for(AuraList::const_iterator i = mDummyAuras.begin();i != mDummyAuras.end(); ++i)
+            if((*i)->GetSpellProto()->SpellVisual == 9180)
+                if (spellProto->SpellFamilyFlags & 0x40000000 && (*i)->GetEffIndex() == 1) //FoL
+                    AdvertisedBenefit += (*i)->GetModifier()->m_amount;
+                else if (spellProto->SpellFamilyFlags & 0x80000000 && (*i)->GetEffIndex() == 0) //HL
+                    AdvertisedBenefit += (*i)->GetModifier()->m_amount;
+    }
 
     // Healing over Time spells
     float DotFactor = 1.0f;
@@ -4490,12 +4495,14 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
     float heal = healamount + ActualBenefit;
 
     // TODO: check for ALL/SPELLS type
-    AuraList const& mHealingPct = GetAurasByType(SPELL_AURA_MOD_HEALING_PCT);
-    for(AuraList::const_iterator i = mHealingPct.begin();i != mHealingPct.end(); ++i)
-        heal *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
-    
+    // Healing done percent
     AuraList const& mHealingDonePct = GetAurasByType(SPELL_AURA_MOD_HEALING_DONE_PERCENT);
     for(AuraList::const_iterator i = mHealingDonePct.begin();i != mHealingDonePct.end(); ++i)
+        heal *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
+
+    // Healing taken percent
+    AuraList const& mHealingPct = pVictim->GetAurasByType(SPELL_AURA_MOD_HEALING_PCT);
+    for(AuraList::const_iterator i = mHealingPct.begin();i != mHealingPct.end(); ++i)
         heal *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
 
     if (heal < 0) heal = 0;
