@@ -218,6 +218,7 @@ struct CreatureInfo
     char const* AIName;
     uint32  MovementType;
     uint32 InhabitType;
+    uint32 RacialLeader;
     char const* ScriptName;
 
     uint32 randomDisplayID() const;
@@ -313,6 +314,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool isPet() const { return m_isPet; }
         void SetRespawnCoord(float x, float y, float z) { respawn_cord[0] = x; respawn_cord[1] = y; respawn_cord[2] = z; }
         bool isTotem() const { return m_isTotem; }
+        bool isRacialLeader() const { return GetCreatureInfo()->RacialLeader != 0; }
         bool isCivilian() const { return GetCreatureInfo()->civilian != 0; }
         bool isCanSwimOrFly() const { return GetCreatureInfo()->InhabitType & INHAVIT_WATER; }
         bool isCanWalkOrFly() const { return GetCreatureInfo()->InhabitType & INHAVIT_GROUND; }

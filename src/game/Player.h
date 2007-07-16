@@ -1268,7 +1268,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         void UpdateArenaFields();
         void UpdateHonorFields();
-        void RewardHonor(Unit *pVictim);
+        void RewardHonor(Unit *pVictim, uint32 count);
         uint32 GetHonorPoints() { return GetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY); }
         uint32 GetArenaPoints() { return GetUInt32Value(PLAYER_FIELD_ARENA_CURRENCY); }
         void SetHonorPoints(uint32 val) { SetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY, val); }

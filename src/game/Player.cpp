@@ -5273,17 +5273,69 @@ void Player::UpdateHonorFields()
 }
 
 //How much honor Player gains from uVictim
-void Player::RewardHonor(Unit *uVictim)
+void Player::RewardHonor(Unit *uVictim, uint32 count )
 {
-    if(!uVictim || uVictim == this || uVictim->GetTypeId() == TYPEID_UNIT)
+    if(!uVictim || uVictim == this || uVictim->GetAura(2479, 0))
         return;
-    if(uVictim->GetAura(2479, 0))
-        return;
+
+    if(count < 1)
+        count = 1;
+
+    float honor = 0;
+    float approx_honor =0;
+   
+    if( uVictim->GetTypeId() == TYPEID_PLAYER )
+    {
+        Player *pVictim = (Player *)uVictim;
+
+        if( GetTeam() == pVictim->GetTeam() )
+            return;
+
+        float f = 1;                                        //need for total kills (?? need more info)
+        uint32 k_grey = 0;
+        uint32 k_level = getLevel();
+        uint32 v_level = pVictim->getLevel();
+        if(k_level <= 5)
+            k_grey = 0;
+        else if( k_level <= 39 )
+            k_grey = k_level - 5 - k_level/10;
+        else
+            k_grey = k_level - 1 - k_level/5; 
+
+        if(v_level<=k_grey)
+            return;
+
+        float diff_level = (k_level == k_grey) ? 1 : ((float)(v_level - k_grey)) / ((float)(k_level - k_grey));
+
+        int32 v_rank =1;                                    //need more info
+
+        honor = ((f * diff_level * (190 + v_rank*10))/6)*sWorld.getRate(RATE_HONOR); 
+        honor *= ((float)k_level) / 70.0; //factor of dependence on levels of the killer
+
+        approx_honor = honor * (((float)urand(8,12))/10);   // approx honor: 80% - 120% of real honor
+
+        WorldPacket data(SMSG_PVP_CREDIT,4+8);
+        data << (uint32) approx_honor*10;
+        data << (uint64) pVictim->GetGUID(); 
+        GetSession()->SendPacket(&data);
+    }
+    else
+    {
+        Creature *cVictim = (Creature *)uVictim;
+
+        if (!cVictim->isRacialLeader())
+            return;
+
+        honor = 100*sWorld.getRate(RATE_HONOR);            // ??? need more info
+        approx_honor = honor * (((float)urand(8,12))/10);  // approx honor: 80% - 120% of real honor
+        
+        WorldPacket data(SMSG_PVP_CREDIT,4+8);
+        data << (uint32) approx_honor*10;
+        data << (uint64) cVictim->GetGUID(); 
+        GetSession()->SendPacket(&data);
+    }
 
     UpdateHonorFields();                                    // to prevent CalcluateHonor() on a new day before old honor was UpdateHonorFields()
-
-    float honor = ((float)urand(1,80))/10;                  // honor between: 0.1 - 8.0
-    float approx_honor = honor * (((float)urand(8,12))/10); // approx honor: 80% - 120% of real honor
     sDatabase.PExecute("INSERT INTO `character_kill` (`guid`,`creature_template`,`honor`,`date`) VALUES (%u, %u, %f, %u)", GUID_LOPART(GetGUID()), uVictim->GetEntry(), honor, time(0));
 
     ApplyModUInt32Value(PLAYER_FIELD_KILLS, 1, true);       // add 1 today_kill

@@ -611,9 +611,9 @@ void WorldSession::LogoutPlayer(bool Save)
                 if((*itr)->GetTypeId()==TYPEID_PLAYER)
                     aset.insert((Player*)(*itr));
             }
-            // give honor to all attackers from set
+            // give honor to all attackers from set like group case
             for(std::set<Player*>::const_iterator itr = aset.begin(); itr != aset.end(); ++itr)
-                (*itr)->RewardHonor(_player);
+                (*itr)->RewardHonor(_player,aset.size());
         }
 
         ///- Remove player from battleground (teleport to entrance)
