@@ -573,30 +573,30 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
         {
             if(player!=pVictim)
             {
-                player->RewardHonor(pVictim);
+                // prepare data for near group iteration (PvP and !PvP cases
+                uint32 xp = PvP ? 0 : MaNGOS::XP::Gain(player, pVictim);
 
-                if(!PvP)
+                Group *pGroup = player->GetGroup();
+                if(pGroup)
                 {
-                    DEBUG_LOG("DealDamageIsPvE");
-                    uint32 xp = MaNGOS::XP::Gain(player, pVictim);
-
-                    Group *pGroup = player->GetGroup();
-                    if(pGroup)
+                    uint32 count = pGroup->GetMemberCountForXPAtKill(pVictim);
+                    if(count)
                     {
-                        DEBUG_LOG("Kill Enemy In Group");
+                        // skip in check PvP case (for speed, not used)
+                        bool is_raid = PvP ? false : MapManager::Instance().GetBaseMap(player->GetMapId())->IsRaid() && pGroup->isRaidGroup();
 
-                        uint32 count = pGroup->GetMemberCountForXPAtKill(pVictim);
-
-                        if(count)
+                        for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
                         {
-                            bool is_raid = MapManager::Instance().GetBaseMap(player->GetMapId())->IsRaid() && pGroup->isRaidGroup();
+                            Player *pGroupGuy = pGroup->GetMemberForXPAtKill(itr->getSource(),pVictim);
+                            if(!pGroupGuy)
+                                continue;
 
-                            for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+                            // honor can be in PvP and !PvP (racial leader) cases
+                            pGroupGuy->RewardHonor(pVictim,count);
+
+                            // xp and reputation only in !PvP case
+                            if(!PvP)
                             {
-                                Player *pGroupGuy = pGroup->GetMemberForXPAtKill(itr->getSource(),pVictim);
-                                if(!pGroupGuy)
-                                    continue;
-
                                 // FIXME: xp/count for all in group at this moment, must be level dependent
                                 float rate = 1.0f/count;
 
@@ -610,25 +610,37 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
                                 {
                                     pet->GivePetXP(itr_xp/2);
                                 }
-                                pGroupGuy->KilledMonster(pVictim->GetEntry(), pVictim->GetGUID());
+
+                                // normal creature (not pet/etc) can be only in !PvP case
+                                if(pVictim->GetTypeId()==TYPEID_UNIT)
+                                    pGroupGuy->KilledMonster(pVictim->GetEntry(), pVictim->GetGUID());
                             }
                         }
                     }
-                    else                                        // if (pGroup)
+                }
+                else // if (!pGroup)
+                {
+                    // honor can be in PvP and !PvP (racial leader) cases
+                    player->RewardHonor(pVictim,1);
+
+                    // xp and reputation only in !PvP case
+                    if(!PvP)
                     {
-                        DEBUG_LOG("Player kill enemy alone");
                         player->RewardReputation(pVictim,1);
                         player->GiveXP(xp, pVictim);
                         if(Pet* pet = player->GetPet())
                         {
                             pet->GivePetXP(xp);
                         }
-                        player->KilledMonster(pVictim->GetEntry(),pVictim->GetGUID());
-                    }                                           // if-else (pGroup)
 
-                    if(xp) //  || honordiff < 0)
-                        ProcDamageAndSpell(pVictim,PROC_FLAG_KILL_XP_GIVER,PROC_FLAG_NONE);
-                }                                               // if (!PvP)
+                        // normal creature (not pet/etc) can be only in !PvP case
+                        if(pVictim->GetTypeId()==TYPEID_UNIT)
+                            player->KilledMonster(pVictim->GetEntry(),pVictim->GetGUID());
+                    }
+                }
+
+                if(xp)
+                    ProcDamageAndSpell(pVictim,PROC_FLAG_KILL_XP_GIVER,PROC_FLAG_NONE);
             }
         }
         else                                                // if (player)
