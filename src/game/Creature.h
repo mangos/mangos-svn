@@ -358,7 +358,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         uint32 GetShieldBlockValue() const                        //dunno mob block value
         {
-            return (getLevel()/2 + GetStat(STAT_STRENGTH)/20);
+            return (getLevel()/2 + uint32(GetStat(STAT_STRENGTH)/20));
         }
         
         void _AddCreatureSpellCooldown(uint32 spell_id, time_t end_time);
