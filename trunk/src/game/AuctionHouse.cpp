@@ -52,21 +52,16 @@ static uint8 AuctioneerFactionToLocation(uint32 faction)
     if(sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_TRADE))
         return 7;                                           // neutral
 
-    switch (faction)
-    {
-        case 29:                                            //orc
-        case 68:                                            //undead
-        case 104:                                           //tauren
-            return 6;
-            break;
-        case 12:                                            //human
-        case 55:                                            //dwarf
-        case 79:                                            //Nightelf
-            return 2;
-            break;
-        default:                                            // 85 and so on ... neutral
-            return 7;
-    }
+    FactionTemplateEntry const* u_entry = sFactionTemplateStore.LookupEntry(faction);
+    if(!u_entry)
+        return 7;                                           // neutral
+
+    if(u_entry->ourMask & FACTION_MASK_ALLIANCE)
+        return 2;
+    else if(u_entry->ourMask & FACTION_MASK_HORDE)
+        return 6;
+    else
+        return 7;
 }
 
 //this void causes that auction window is opened

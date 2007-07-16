@@ -618,11 +618,8 @@ void WorldSession::LogoutPlayer(bool Save)
 
         ///- Remove player from battleground (teleport to entrance)
         if(_player->InBattleGround())
-        {
-            BattleGround* bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundId());
-            if(bg)
-                bg->RemovePlayer(_player->GetGUID(), true, true);
-        }
+            _player->LeaveBattleground();
+
         if(_player->InBattleGroundQueue())
         {
             BattleGround* bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundQueueId());

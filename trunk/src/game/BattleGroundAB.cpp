@@ -89,13 +89,13 @@ void BattleGroundAB::HandleAreaTrigger(Player *Source, uint32 Trigger)
             if(Source->GetTeam() != ALLIANCE)
                 Source->GetSession()->SendAreaTriggerMessage("Only The Alliance can use that portal");
             else
-                ((BattleGround*)this)->RemovePlayer(Source->GetGUID(), true, true);
+                Source->LeaveBattleground();
             break;
         case 3949:                                          // Arathi Basin Horde Exit.
             if(Source->GetTeam() != HORDE)
                 Source->GetSession()->SendAreaTriggerMessage("Only The Horde can use that portal");
             else
-                ((BattleGround*)this)->RemovePlayer(Source->GetGUID(), true, true);
+                Source->LeaveBattleground();
             break;
         default:
             sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);
