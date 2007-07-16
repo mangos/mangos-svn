@@ -188,6 +188,11 @@ Unit::Unit( WorldObject *instantiator ) : WorldObject( instantiator )
 
 Unit::~Unit()
 {
+    // destroy not finished spells
+    delete m_oldSpell;
+    delete m_currentSpell;
+    delete m_currentMeleeSpell;
+
     // remove references to unit
     for(std::list<GameObject*>::iterator i = m_gameObj.begin(); i != m_gameObj.end();)
     {
