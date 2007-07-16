@@ -1381,6 +1381,16 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
     SetSemaphoreTeleport(true);
 
+    // The player was ported to another map and looses the duel immediatly.
+    // We have to perform this check before the teleport, otherwise the
+    // ObjectAccessor won't find the flag.
+    if (duel && this->GetMapId()!=mapid)
+    {
+        GameObject* obj = ObjectAccessor::Instance().GetGameObject(*this, GetUInt64Value(PLAYER_DUEL_ARBITER));
+        if (obj)
+            DuelComplete(2);
+    }
+
     if ((this->GetMapId() == mapid) && (!m_transport))
     {
         // near teleport
