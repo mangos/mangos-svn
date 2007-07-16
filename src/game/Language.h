@@ -496,6 +496,8 @@
 #define LANG_INVISIBLE_INVISIBLE         "You are now invisible."
 #define LANG_INVISIBLE_VISIBLE           "You are now visible."
 
+#define LANG_DUEL_NOTALLOWED             "Dueling isn't allowed here"
+
 #define LANG_BG_CAPTURED_HF              "$n captured the Horde flag!"
 #define LANG_BG_CAPTURED_AF              "$n captured the Alliance flag!"
 #define LANG_BG_A_WINS                   "The Alliance wins!"

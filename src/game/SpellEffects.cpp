@@ -52,6 +52,7 @@
 #include "BattleGroundEY.h"
 #include "BattleGroundWS.h"
 #include "VMapFactory.h"
+#include "Language.h"
 
 pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 {
@@ -2553,6 +2554,16 @@ void Spell::EffectDuel(uint32 i)
     // caster or target already have requested duel
     if( caster->duel || target->duel || target->HasInIgnoreList(caster->GetGUID()) )
         return;
+
+    // Players can only fight a duel with each other outside (=not inside dungeons and not in capital cities)
+    // Don't have to check the target's map since you cannot challenge someone across maps
+    if ((caster->GetMapId() != 0 && caster->GetMapId() != 1 && caster->GetMapId() != 530) ||
+            (GetAreaEntryByAreaID(caster->GetZoneId())->flags & 0x100) != 0 ||    // capital city flag, for a list of all zone flags have a look at Player.cpp
+            (GetAreaEntryByAreaID(target->GetZoneId())->flags & 0x100) != 0)
+    {
+        caster->GetSession()->SendNotification(LANG_DUEL_NOTALLOWED);    //is there something like CMSG_DUEL_NOTHERE to avoid plain text?
+        return;
+    }
 
     //CREATE DUEL FLAG OBJECT
     GameObject* pGameObj = new GameObject(m_caster);
