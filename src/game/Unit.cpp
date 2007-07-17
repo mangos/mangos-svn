@@ -5255,6 +5255,10 @@ bool Unit::SelectHostilTarget()
     bool result = false;
     Unit* target = NULL;
 
+    //This function only useful once AI has been initilazied
+    if (!((Creature*)this)->AI())
+        return false;
+
     if(!m_ThreatManager.isThreatListEmpty())
     {
         if(!HasAuraType(SPELL_AURA_MOD_TAUNT))
@@ -5266,10 +5270,12 @@ bool Unit::SelectHostilTarget()
     if(target)
     {
         SetInFront(target);
-        if (((Creature*)this)->AI())
-            ((Creature*)this)->AI()->AttackStart(target);
+        ((Creature*)this)->AI()->AttackStart(target);
         result = true;
-    }
+    }else 
+        if(!HasAuraType(SPELL_AURA_MOD_TAUNT))
+        ((Creature*)this)->AI()->EnterEvadeMode();
+
     return result;
 }
 
