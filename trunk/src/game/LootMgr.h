@@ -49,13 +49,6 @@ enum LootMethod
     NEED_BEFORE_GREED = 4
 };
 
-enum LootThreshold
-{
-    UNCOMMON          = 2,
-    RARE              = 3,
-    EPIC              = 4
-};
-
 enum PermissionTypes
 {
     ALL_PERMISSION    = 0,

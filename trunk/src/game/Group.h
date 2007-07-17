@@ -94,7 +94,7 @@ class MANGOS_DLL_SPEC Group
             m_bgGroup    = false;
             m_lootMethod = (LootMethod)0;
             m_looterGuid = 0;
-            m_lootThreshold = (LootThreshold)2;
+            m_lootThreshold = ITEM_QUALITY_UNCOMMON;
             for(int i=0; i<TARGETICONCOUNT; i++)
                 m_targetIcons[i] = 0;
         }
@@ -111,7 +111,7 @@ class MANGOS_DLL_SPEC Group
         void   ChangeLeader(const uint64 &guid);
         void   SetLootMethod(LootMethod method) { m_lootMethod = method; }
         void   SetLooterGuid(const uint64 &guid) { m_looterGuid = guid; }
-        void   SetLootThreshold(LootThreshold threshold) { m_lootThreshold = threshold; }
+        void   SetLootThreshold(ItemQuelities threshold) { m_lootThreshold = threshold; }
         void   Disband(bool hideDestroy=false);
 
         // properties accessories
@@ -121,7 +121,7 @@ class MANGOS_DLL_SPEC Group
         const uint64& GetLeaderGUID() const { return m_leaderGuid; }
         LootMethod    GetLootMethod() const { return m_lootMethod; }
         const uint64& GetLooterGuid() const { return m_looterGuid; }
-        LootThreshold GetLootThreshold() const { return m_lootThreshold; }
+        ItemQuelities GetLootThreshold() const { return m_lootThreshold; }
 
         // member manipulation methods
         bool IsMember(uint64 guid) const { return _getMemberCSlot(guid) != m_memberSlots.end(); }
@@ -288,7 +288,7 @@ class MANGOS_DLL_SPEC Group
         bool         m_bgGroup;
         uint64       m_targetIcons[TARGETICONCOUNT];
         LootMethod   m_lootMethod;
-        LootThreshold m_lootThreshold;
+        ItemQuelities m_lootThreshold;
         uint64       m_looterGuid;
         vector<Roll> RollId;
 };

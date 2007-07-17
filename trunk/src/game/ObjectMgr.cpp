@@ -2107,35 +2107,37 @@ void ObjectMgr::LoadPetCreateSpells()
 
     barGoLink bar( result->GetRowCount() );
 
-	mPetCreateSpell.clear();
+    mPetCreateSpell.clear();
 
-	do
+    do
     {
-    	Field *fields = result->Fetch();
+        Field *fields = result->Fetch();
         bar.step();
 
         uint32 creature_id = fields[0].GetUInt32();
         
         if(!creature_id || !sCreatureStorage.LookupEntry<CreatureInfo>(creature_id))
-        	continue;
+            continue;
 
         PetCreateSpellEntry PetCreateSpell;
-        for(int i = 0; i < 4; i++) {
-        	PetCreateSpell.spellid[i] = fields[i + 1].GetUInt32();
+        for(int i = 0; i < 4; i++)
+        {
+            PetCreateSpell.spellid[i] = fields[i + 1].GetUInt32();
 
             if(PetCreateSpell.spellid[i] && !sSpellStore.LookupEntry(PetCreateSpell.spellid[i]))
-	            sLog.outErrorDb("Spell %u listed in `petcreateinfo_spell` not exist",PetCreateSpell.spellid[i]);
+                sLog.outErrorDb("Spell %u listed in `petcreateinfo_spell` not exist",PetCreateSpell.spellid[i]);
         }
         
         PetCreateSpell.familypassive = fields[5].GetUInt32();
         
         if(PetCreateSpell.familypassive && !sSpellStore.LookupEntry(PetCreateSpell.familypassive))
-	            sLog.outErrorDb("Spell %u listed in `petcreateinfo_spell` not exist",PetCreateSpell.familypassive);
+            sLog.outErrorDb("Spell %u listed in `petcreateinfo_spell` not exist",PetCreateSpell.familypassive);
 
         mPetCreateSpell[creature_id] = PetCreateSpell;
 
         count++;
-    } while (result->NextRow());
+    }
+    while (result->NextRow());
 
     delete result;
 

@@ -38,8 +38,8 @@ int PetAI::Permissible(const Creature *creature)
 PetAI::PetAI(Creature &c) : i_pet(c), i_victimGuid(0), i_tracker(TIME_INTERVAL_LOOK)
 {
     m_AllySet.clear();
-	UpdateAllies();
-	m_updateAlliesTimer = 10000;	//update friendly targets every 10 seconds, lesser checks increase performance
+    UpdateAllies();
+    m_updateAlliesTimer = 10000;                            //update friendly targets every 10 seconds, lesser checks increase performance
 }
 
 void PetAI::MoveInLineOfSight(Unit *u)
@@ -141,7 +141,8 @@ void PetAI::_stopAttack()
 
     Unit* owner = i_pet.GetCharmerOrOwner();
 
-    if(owner && (i_pet.isCharmed() || ((Pet*)&i_pet)->HasCommandState(COMMAND_FOLLOW)))	//charms always follow, pets can be set
+    //charms always follow, pets can be set
+    if(owner && (i_pet.isCharmed() || ((Pet*)&i_pet)->HasCommandState(COMMAND_FOLLOW)))
     {
         i_pet.addUnitState(UNIT_STAT_FOLLOW);
         i_pet->Clear();
@@ -168,11 +169,11 @@ void PetAI::UpdateAI(const uint32 diff)
     
     if(m_updateAlliesTimer <= diff)
     {
-		UpdateAllies();
-       	m_updateAlliesTimer = 10000;
+        UpdateAllies();
+        m_updateAlliesTimer = 10000;
     }
- 	else
-   		m_updateAlliesTimer -= diff;
+    else
+        m_updateAlliesTimer -= diff;
 
     // i_pet.getVictim() can't be used for check in case stop fighting, i_pet.getVictim() clearóâ at Unit death etc.
     if( i_victimGuid )
@@ -213,7 +214,8 @@ void PetAI::UpdateAI(const uint32 diff)
     }
     else if(owner)
     {
-        if(owner->isInCombat() && (i_pet.isCharmed() || !((Pet*)&i_pet)->HasReactState(REACT_PASSIVE)))	//charms always help automatically?
+        //charms always help automatically?
+        if(owner->isInCombat() && (i_pet.isCharmed() || !((Pet*)&i_pet)->HasReactState(REACT_PASSIVE)))
         {
             AttackStart(owner->getAttackerForHelper());
         }
@@ -229,103 +231,110 @@ void PetAI::UpdateAI(const uint32 diff)
     }
     
     //Autocast
-	HM_NAMESPACE::hash_map<uint32, Unit*> targetMap;
-	targetMap.clear();
-	SpellCastTargets NULLtargets;
+    HM_NAMESPACE::hash_map<uint32, Unit*> targetMap;
+    targetMap.clear();
+    SpellCastTargets NULLtargets;
 
-	if(i_pet.isPet())	//it's a pet, so it has an autospellmap and an allyset
-	{
-	    for(AutoSpellList::iterator itr = ((Pet*)&i_pet)->m_autospells.begin(); itr != ((Pet*)&i_pet)->m_autospells.end(); ++itr)
-		{
-			SpellEntry const *spellInfo = sSpellStore.LookupEntry(*itr);
-			if(!spellInfo)
-				continue;
-			
-			Spell *spell = new Spell(&i_pet, spellInfo, false, 0);
-		    WPAssert(spell);
+    if(i_pet.isPet())                                       //it's a pet, so it has an autospellmap and an ally set
+    {
+        for(AutoSpellList::iterator itr = ((Pet*)&i_pet)->m_autospells.begin(); itr != ((Pet*)&i_pet)->m_autospells.end(); ++itr)
+        {
+            SpellEntry const *spellInfo = sSpellStore.LookupEntry(*itr);
+            if(!spellInfo)
+                continue;
 
-			if(!IsPositiveSpell(spellInfo->Id) && i_pet.getVictim() && !_needToStop() && !i_pet.hasUnitState(UNIT_STAT_FOLLOW) && spell->CanAutoCast(i_pet.getVictim()))
-				targetMap[*itr] = i_pet.getVictim();
-			else
-			{
-				spell->m_targets = NULLtargets;
-				for(std::set<uint64>::iterator tar = m_AllySet.begin(); tar != m_AllySet.end(); ++tar)
-				{
-					Unit* Target = ObjectAccessor::Instance().GetUnit(i_pet,*tar);
+            Spell *spell = new Spell(&i_pet, spellInfo, false, 0);
+            WPAssert(spell);
 
-					if(!Target || (!Target->isInCombat() && !IsNonCombatSpell(*itr)))	//only buff targets that are in combat, unless the spell can only be cast while out of combat
-						continue;
-					if(spell->CanAutoCast(Target))
-						targetMap[*itr] = Target;
-				}
-			}
-		}
-	}
-	else if(i_pet.isCharmed()) //charmed creature; all (active) spells autocast, because not controllable; for now no allyset, simply itself (selfcast spells allowed) and target
-	{
-		for(uint8 i = 0; i < CREATURE_MAX_SPELLS; ++i)
-		{
-			uint32 spell_id = i_pet.m_spells[i];
-			SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
-			if(!spellInfo || IsPassiveSpell(spell_id))
-				continue;
+            if(!IsPositiveSpell(spellInfo->Id) && i_pet.getVictim() && !_needToStop() && !i_pet.hasUnitState(UNIT_STAT_FOLLOW) && spell->CanAutoCast(i_pet.getVictim()))
+                targetMap[*itr] = i_pet.getVictim();
+            else
+            {
+                spell->m_targets = NULLtargets;
+                for(std::set<uint64>::iterator tar = m_AllySet.begin(); tar != m_AllySet.end(); ++tar)
+                {
+                    Unit* Target = ObjectAccessor::Instance().GetUnit(i_pet,*tar);
 
-			Spell *spell = new Spell(&i_pet, spellInfo, false, 0);
-			    WPAssert(spell);
+                    //only buff targets that are in combat, unless the spell can only be cast while out of combat
+                    if(!Target || (!Target->isInCombat() && !IsNonCombatSpell(*itr)))
+                        continue;
+                    if(spell->CanAutoCast(Target))
+                        targetMap[*itr] = Target;
+                }
+            }
+        }
+    }
+    //charmed creature; all (active) spells autocast, because not controllable; for now no allyset, simply itself (selfcast spells allowed) and target
+    else if(i_pet.isCharmed())
+    {
+        for(uint8 i = 0; i < CREATURE_MAX_SPELLS; ++i)
+        {
+            uint32 spell_id = i_pet.m_spells[i];
+            SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
+            if(!spellInfo || IsPassiveSpell(spell_id))
+                continue;
 
-			if(!IsPositiveSpell(spellInfo->Id) && i_pet.getVictim() && !_needToStop() && !i_pet.hasUnitState(UNIT_STAT_FOLLOW) && spell->CanAutoCast(i_pet.getVictim()))
-				targetMap[spell_id] = i_pet.getVictim();
-			else
-			{
-				spell->m_targets = NULLtargets;
-				for(std::set<uint64>::iterator tar = m_AllySet.begin(); tar != m_AllySet.end(); ++tar)
-				{
-					Unit* Target = ObjectAccessor::Instance().GetUnit(i_pet,*tar);
+            Spell *spell = new Spell(&i_pet, spellInfo, false, 0);
 
-					if(!Target || (!Target->isInCombat() && !IsNonCombatSpell(spell_id)))	//only buff targets that are in combat, unless the spell can only be cast while out of combat
-						continue;
-					if(spell->CanAutoCast(Target))
-						targetMap[spell_id] = Target;
-				}
-			}
-			/*else if(!i_pet.isInCombat() && !IsNonCombatSpell(spell_id))
-			{
-				spell->m_targets = NULLtargets;
-				if(spell->CanAutoCast(&i_pet))	//only buff targets that are in combat, unless the spell can only be cast while out of combat
-					targetMap[spell_id] = &i_pet;
-			}*/
-		}
-	}
+            if(!IsPositiveSpell(spellInfo->Id) && i_pet.getVictim() && !_needToStop() && !i_pet.hasUnitState(UNIT_STAT_FOLLOW) && spell->CanAutoCast(i_pet.getVictim()))
+                targetMap[spell_id] = i_pet.getVictim();
+            else
+            {
+                spell->m_targets = NULLtargets;
+                for(std::set<uint64>::iterator tar = m_AllySet.begin(); tar != m_AllySet.end(); ++tar)
+                {
+                    Unit* Target = ObjectAccessor::Instance().GetUnit(i_pet,*tar);
 
-	if(targetMap.size() > 0)//found units to cast on to
-	{
-		uint32 index = urand(1, targetMap.size());
-		HM_NAMESPACE::hash_map<uint32, Unit*>::iterator itr;
-		uint32 i;
-		for(itr = targetMap.begin(), i = 1; i < index; ++itr, ++i);
+                    //only buff targets that are in combat, unless the spell can only be cast while out of combat
+                    if(!Target || (!Target->isInCombat() && !IsNonCombatSpell(spell_id)))
+                        continue;
 
-		SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
+                    if(spell->CanAutoCast(Target))
+                        targetMap[spell_id] = Target;
+                }
+            }
+            /*else if(!i_pet.isInCombat() && !IsNonCombatSpell(spell_id))
+            {
+                spell->m_targets = NULLtargets;
+
+                //only buff targets that are in combat, unless the spell can only be cast while out of combat
+                if(spell->CanAutoCast(&i_pet))
+                    targetMap[spell_id] = &i_pet;
+            }*/
+        }
+    }
+
+    //found units to cast on to
+    if(targetMap.size() > 0)
+    {
+        uint32 index = urand(1, targetMap.size());
+        HM_NAMESPACE::hash_map<uint32, Unit*>::iterator itr;
+        uint32 i;
+        for(itr = targetMap.begin(), i = 1; i < index; ++itr, ++i);
+
+        SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
 
         Spell *spell = new Spell(&i_pet, spellInfo, false, 0);
-        WPAssert(spell);
 
-   	    SpellCastTargets targets;
-       	targets.setUnitTarget( itr->second );
-       	if(!i_pet.HasInArc(M_PI, itr->second))
-       	{
-       		i_pet.SetInFront(itr->second);
-			if( itr->second->GetTypeId() == TYPEID_PLAYER )
+        SpellCastTargets targets;
+        targets.setUnitTarget( itr->second );
+
+        if(!i_pet.HasInArc(M_PI, itr->second))
+        {
+            i_pet.SetInFront(itr->second);
+            if( itr->second->GetTypeId() == TYPEID_PLAYER )
                 i_pet.SendUpdateToPlayer( (Player*)itr->second );
-   	        if(owner && owner->GetTypeId() == TYPEID_PLAYER)
-       	    	i_pet.SendUpdateToPlayer( (Player*)owner );
+
+            if(owner && owner->GetTypeId() == TYPEID_PLAYER)
+                i_pet.SendUpdateToPlayer( (Player*)owner );
         }
 
-		i_pet.AddCreatureSpellCooldown(itr->first);
-		((Pet*)&i_pet)->CheckLearning(itr->first);
+        i_pet.AddCreatureSpellCooldown(itr->first);
+        ((Pet*)&i_pet)->CheckLearning(itr->first);
 
         spell->prepare(&targets);
-	}
-	targetMap.clear();
+    }
+    targetMap.clear();
 }
 
 bool PetAI::_isVisible(Unit *u) const
@@ -335,38 +344,37 @@ bool PetAI::_isVisible(Unit *u) const
 
 void PetAI::UpdateAllies()
 {
-	Unit* owner = i_pet.GetCharmerOrOwner();
-	Group *pGroup = NULL;
+    Unit* owner = i_pet.GetCharmerOrOwner();
+    Group *pGroup = NULL;
 
-	if(!owner)
-		return;
-	else if(owner->GetTypeId() == TYPEID_PLAYER)
-		pGroup = ((Player*)owner)->GetGroup();
+    if(!owner)
+        return;
+    else if(owner->GetTypeId() == TYPEID_PLAYER)
+        pGroup = ((Player*)owner)->GetGroup();
 
-   	if(m_AllySet.size() == 2 && !pGroup) //only pet and owner/not in group->ok
-   		return;
-   	else if(pGroup && !pGroup->isRaidGroup() && m_AllySet.size() == (pGroup->GetMembersCount() + 2)) //owner is in group; group members filled in already (no raid -> subgroupcount = whole count)
-   		return;
-   	else
-   	{
-		m_AllySet.clear();
-		m_AllySet.insert(i_pet.GetGUID());
-		if(pGroup)	//add group
-		{
-            for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
-            {
-                Player* Target = itr->getSource();
-                if(!Target || !pGroup->SameSubGroup((Player*)owner, Target))
-                    continue;
+    //only pet and owner/not in group->ok
+    if(m_AllySet.size() == 2 && !pGroup)
+        return;
+    //owner is in group; group members filled in already (no raid -> subgroupcount = whole count)
+    if(pGroup && !pGroup->isRaidGroup() && m_AllySet.size() == (pGroup->GetMembersCount() + 2))
+           return;
 
-                if(Target->GetGUID() == owner->GetGUID())
-                    continue;
+    m_AllySet.clear();
+    m_AllySet.insert(i_pet.GetGUID());
+    if(pGroup)                                              //add group
+    {
+        for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+        {
+            Player* Target = itr->getSource();
+            if(!Target || !pGroup->SameSubGroup((Player*)owner, Target))
+                continue;
 
-                m_AllySet.insert(Target->GetGUID());
-            }
-		}
-		else	//remove group
-			m_AllySet.insert(owner->GetGUID());
-	}
+            if(Target->GetGUID() == owner->GetGUID())
+                continue;
 
+            m_AllySet.insert(Target->GetGUID());
+        }
+    }
+    else                                                    //remove group
+        m_AllySet.insert(owner->GetGUID());
 }

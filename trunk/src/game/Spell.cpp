@@ -700,13 +700,13 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
         }break;
         case TARGET_AREAEFFECT_PARTY:
         {
-			Unit* owner = m_caster->GetCharmerOrOwner();
+            Unit* owner = m_caster->GetCharmerOrOwner();
             Player *groupMember = NULL;
             Group  *pGroup = NULL;
 
             if(owner)
             {
-				TagUnitMap.push_back(m_caster);
+                TagUnitMap.push_back(m_caster);
                 if(owner->GetTypeId() == TYPEID_PLAYER)
                     groupMember = (Player*)owner;
             }
@@ -2145,30 +2145,30 @@ uint8 Spell::CanCast()
             }
             case SPELL_EFFECT_LEARN_SPELL:
             {
-				if(m_spellInfo->EffectImplicitTargetA[i] != TARGET_PET)
-					break;
+                if(m_spellInfo->EffectImplicitTargetA[i] != TARGET_PET)
+                    break;
 
-				Pet* pet = m_caster->GetPet();
-				
+                Pet* pet = m_caster->GetPet();
+                
                 if(!pet)
                     return SPELL_FAILED_NO_PET;
 
-				SpellEntry const *learn_spellproto = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
+                SpellEntry const *learn_spellproto = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
 
                 if(!learn_spellproto)
-					return SPELL_FAILED_NOT_KNOWN;
+                    return SPELL_FAILED_NOT_KNOWN;
 
                 if(!pet->CanTakeMoreActiveSpells(learn_spellproto->Id))
-					return SPELL_FAILED_TOO_MANY_SKILLS;
+                    return SPELL_FAILED_TOO_MANY_SKILLS;
 
-				if(m_spellInfo->spellLevel > pet->getLevel())
-					return SPELL_FAILED_LOWLEVEL;
+                if(m_spellInfo->spellLevel > pet->getLevel())
+                    return SPELL_FAILED_LOWLEVEL;
 
-				if(!pet->HasTPForSpell(learn_spellproto->Id))
-					return SPELL_FAILED_TRAINING_POINTS;
-					
-				break;
-	        }
+                if(!pet->HasTPForSpell(learn_spellproto->Id))
+                    return SPELL_FAILED_TRAINING_POINTS;
+                    
+                break;
+            }
             case SPELL_EFFECT_LEARN_PET_SPELL:
             {
                 Pet* pet = m_caster->GetPet();
@@ -2182,13 +2182,13 @@ uint8 Spell::CanCast()
                     return SPELL_FAILED_NOT_KNOWN;
 
                 if(!pet->CanTakeMoreActiveSpells(learn_spellproto->Id))
-					return SPELL_FAILED_TOO_MANY_SKILLS;
+                    return SPELL_FAILED_TOO_MANY_SKILLS;
 
                 if(m_spellInfo->spellLevel > pet->getLevel())
-					return SPELL_FAILED_LOWLEVEL;
+                    return SPELL_FAILED_LOWLEVEL;
 
-				if(!pet->HasTPForSpell(learn_spellproto->Id))
-					return SPELL_FAILED_TRAINING_POINTS;
+                if(!pet->HasTPForSpell(learn_spellproto->Id))
+                    return SPELL_FAILED_TRAINING_POINTS;
 
                 break;
             }
@@ -2206,10 +2206,10 @@ uint8 Spell::CanCast()
                     return SPELL_FAILED_WRONG_PET_FOOD;
 
                 if(!pet->SetCurrentFoodBenefitLevel(m_targets.m_itemTarget->GetProto()->ItemLevel))
-                	return SPELL_FAILED_FOOD_LOWLEVEL;
+                    return SPELL_FAILED_FOOD_LOWLEVEL;
 
-            	if(m_caster->isInCombat() || pet->isInCombat())
-					return SPELL_FAILED_AFFECTING_COMBAT;
+                if(m_caster->isInCombat() || pet->isInCombat())
+                    return SPELL_FAILED_AFFECTING_COMBAT;
 
                 break;
             }
@@ -2420,101 +2420,97 @@ uint8 Spell::CanCast()
 
 int16 Spell::PetCanCast(Unit* target)
 {
-	if(!m_caster->isAlive())
-		return SPELL_FAILED_CASTER_DEAD;
+    if(!m_caster->isAlive())
+        return SPELL_FAILED_CASTER_DEAD;
 
-	if(m_caster->m_currentSpell) //prevent spellcast interuption by another spellcast
-		return SPELL_FAILED_SPELL_IN_PROGRESS;
-	if(m_caster->isInCombat() && IsNonCombatSpell(m_spellInfo->Id))
-		return SPELL_FAILED_AFFECTING_COMBAT;
+    if(m_caster->m_currentSpell) //prevent spellcast interuption by another spellcast
+        return SPELL_FAILED_SPELL_IN_PROGRESS;
+    if(m_caster->isInCombat() && IsNonCombatSpell(m_spellInfo->Id))
+        return SPELL_FAILED_AFFECTING_COMBAT;
 
-	if(m_caster->GetTypeId()==TYPEID_UNIT && (((Creature*)m_caster)->isPet() || m_caster->isCharmed()))
-	{
-    	{
-			if(m_caster->GetCharmerOrOwner() && !m_caster->GetCharmerOrOwner()->isAlive()) //dead owner (pets still alive when owners ressed?)
-				return SPELL_FAILED_CASTER_DEAD;
+    if(m_caster->GetTypeId()==TYPEID_UNIT && (((Creature*)m_caster)->isPet() || m_caster->isCharmed()))
+    {
+        if(m_caster->GetCharmerOrOwner() && !m_caster->GetCharmerOrOwner()->isAlive()) //dead owner (pets still alive when owners ressed?)
+            return SPELL_FAILED_CASTER_DEAD;
 
-			if(!target && m_targets.getUnitTarget())
-				target = m_targets.getUnitTarget();
+        if(!target && m_targets.getUnitTarget())
+            target = m_targets.getUnitTarget();
 
-			bool need = false;
-			for(uint32 i = 0;i<3;i++)
-    		{
-				if(m_spellInfo->EffectImplicitTargetA[i] == TARGET_CHAIN_DAMAGE || m_spellInfo->EffectImplicitTargetA[i] == TARGET_SINGLE_FRIEND || m_spellInfo->EffectImplicitTargetA[i] == TARGET_DUELVSPLAYER || m_spellInfo->EffectImplicitTargetA[i] == TARGET_SINGLE_PARTY || m_spellInfo->EffectImplicitTargetA[i] == TARGET_CURRENT_SELECTED_ENEMY)
-				{
-        			need = true;
-        			if(!target)
-        			{
-						return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
-	   				}
-	   				break;
-				}
-			}
-		    if(need)
-            	m_targets.setUnitTarget(target);
+        bool need = false;
+        for(uint32 i = 0;i<3;i++)
+        {
+            if(m_spellInfo->EffectImplicitTargetA[i] == TARGET_CHAIN_DAMAGE || m_spellInfo->EffectImplicitTargetA[i] == TARGET_SINGLE_FRIEND || m_spellInfo->EffectImplicitTargetA[i] == TARGET_DUELVSPLAYER || m_spellInfo->EffectImplicitTargetA[i] == TARGET_SINGLE_PARTY || m_spellInfo->EffectImplicitTargetA[i] == TARGET_CURRENT_SELECTED_ENEMY)
+            {
+                need = true;
+                if(!target)
+                    return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
+                break;
+            }
+        }
+        if(need)
+            m_targets.setUnitTarget(target);
 
-            Unit* _target = m_targets.getUnitTarget();
+        Unit* _target = m_targets.getUnitTarget();
 
-	        if(_target) //for target dead/target not valid
-    	    {
-				if(!_target->isAlive())
-					return SPELL_FAILED_BAD_TARGETS;
+        if(_target) //for target dead/target not valid
+        {
+            if(!_target->isAlive())
+                return SPELL_FAILED_BAD_TARGETS;
 
-	            if(IsPositiveSpell(m_spellInfo->Id))
-    	        {
-        	        if(m_caster->IsHostileTo(_target))
-            	        return SPELL_FAILED_BAD_TARGETS;
-	            }
-    	        else
-        	    {
-					bool duelvsplayertar = false;
-					for(int j=0;j<3;j++)
-					{
-						duelvsplayertar |= (m_spellInfo->EffectImplicitTargetA[j] == TARGET_DUELVSPLAYER); //TARGET_DUELVSPLAYER is positive AND negative
-					}
-            	    if(m_caster->IsFriendlyTo(target) && !duelvsplayertar)
-                	{
-                    	return SPELL_FAILED_BAD_TARGETS;
-	                }
-    	        }
-			}
-			if(((Pet*)m_caster)->HasSpellCooldown(m_spellInfo->Id)) //cooldown
-				return SPELL_FAILED_NOT_READY;
-	    }
-	}
+            if(IsPositiveSpell(m_spellInfo->Id))
+            {
+                if(m_caster->IsHostileTo(_target))
+                    return SPELL_FAILED_BAD_TARGETS;
+            }
+            else
+            {
+                bool duelvsplayertar = false;
+                for(int j=0;j<3;j++)
+                {
+                    duelvsplayertar |= (m_spellInfo->EffectImplicitTargetA[j] == TARGET_DUELVSPLAYER); //TARGET_DUELVSPLAYER is positive AND negative
+                }
+                if(m_caster->IsFriendlyTo(target) && !duelvsplayertar)
+                {
+                    return SPELL_FAILED_BAD_TARGETS;
+                }
+            }
+        }
+        if(((Pet*)m_caster)->HasSpellCooldown(m_spellInfo->Id)) //cooldown
+            return SPELL_FAILED_NOT_READY;
+    }
 
-	uint16 result = CanCast();
-	if(result != 0)
-		return result;
-	else
-		return -1; //this allows to check spell fail 0, in combat
+    uint16 result = CanCast();
+    if(result != 0)
+        return result;
+    else
+        return -1;                                          //this allows to check spell fail 0, in combat
 }
 
 bool Spell::CanAutoCast(Unit* target)
 {
-	uint64 targetguid = target->GetGUID();
+    uint64 targetguid = target->GetGUID();
 
-	for(uint32 j = 0;j<3;j++)
+    for(uint32 j = 0;j<3;j++)
     {
-		if((m_spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AURA || m_spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AREA_AURA) && target->HasAura(m_spellInfo->Id, j))
-        		return false;	//don't buff an already buffed unit
+        if((m_spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AURA || m_spellInfo->Effect[j] == SPELL_EFFECT_APPLY_AREA_AURA) && target->HasAura(m_spellInfo->Id, j))
+            return false;                                   //don't buff an already buffed unit
     }
 
     int16 result = PetCanCast(target);
 
     if(result == -1 || result == SPELL_FAILED_UNIT_NOT_INFRONT)
     {
-		FillTargetMap();
-		for(uint32 j = 0;j<3;j++) //check if among target units, our WANTED target is as well (->only self cast spells return false)
-    	{
-	        for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[j].begin();iunit != m_targetUnitGUIDs[j].end();++iunit)
-    	    {
-	            if(*iunit == targetguid)
-	            	return true;
-        	}
-     	}
+        FillTargetMap();
+        for(uint32 j = 0;j<3;j++)                           //check if among target units, our WANTED target is as well (->only self cast spells return false)
+        {
+            for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[j].begin();iunit != m_targetUnitGUIDs[j].end();++iunit)
+            {
+                if(*iunit == targetguid)
+                    return true;
+            }
+         }
     }
-    return false;	//target invalid
+    return false;    //target invalid
 }
 
 uint8 Spell::CheckRange()

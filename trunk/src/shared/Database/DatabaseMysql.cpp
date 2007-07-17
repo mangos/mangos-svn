@@ -324,13 +324,13 @@ bool DatabaseMysql::BeginTransaction()
     if (!m_threadBody)
     {
         if (tranThread==ZThread::ThreadImpl::current())
-	 	    return false;                                       // huh? this thread already started transaction
-	 	mMutex.acquire();
-	 	if (!_TransactionCmd("START TRANSACTION"))
-	 	{
-	 	    mMutex.release();                                   // can't start transaction
-	 	    return false;
-	 	}
+            return false;                                       // huh? this thread already started transaction
+        mMutex.acquire();
+        if (!_TransactionCmd("START TRANSACTION"))
+        {
+            mMutex.release();                                   // can't start transaction
+            return false;
+        }
         return true;                                            // transaction started
     }
 
@@ -355,11 +355,11 @@ bool DatabaseMysql::CommitTransaction()
     if (!m_threadBody)
     {
         if (tranThread!=ZThread::ThreadImpl::current())
-	 	    return false;
-	 	bool _res = _TransactionCmd("COMMIT");
-	 	tranThread = NULL;
-	 	mMutex.release();
-	 	return _res;
+            return false;
+        bool _res = _TransactionCmd("COMMIT");
+        tranThread = NULL;
+        mMutex.release();
+        return _res;
     }
 
     tranThread = ZThread::ThreadImpl::current();
@@ -383,11 +383,11 @@ bool DatabaseMysql::RollbackTransaction()
     if (!m_threadBody)
     {
         if (tranThread!=ZThread::ThreadImpl::current())
-	 	    return false;
-	 	bool _res = _TransactionCmd("ROLLBACK");
-	 	tranThread = NULL;
-	 	mMutex.release();
-	 	return _res;
+            return false;
+        bool _res = _TransactionCmd("ROLLBACK");
+        tranThread = NULL;
+        mMutex.release();
+        return _res;
     }
 
     tranThread = ZThread::ThreadImpl::current();

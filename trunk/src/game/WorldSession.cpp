@@ -381,10 +381,10 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_BUY_STABLE_SLOT ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBuyStableSlot                 );
     objmgr.opcodeTable[ CMSG_STABLE_REVIVE_PET ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleStableRevivePet               );
     objmgr.opcodeTable[ CMSG_STABLE_SWAP_PET ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleStableSwapPet                 );
-    objmgr.opcodeTable[ CMSG_PET_CANCEL_AURA ]					= OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetCancelAuraOpcode           );
-    objmgr.opcodeTable[ CMSG_PET_UNLEARN ]						= OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetUnlearnOpcode				 );
-    objmgr.opcodeTable[ CMSG_PET_SPELL_AUTOCAST ]				= OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetSpellAutocastOpcode		 );
-    objmgr.opcodeTable[ MSG_ADD_DYNAMIC_TARGET_OBSOLETE ]		= OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAddDynamicTargetObsoleteOpcode);
+    objmgr.opcodeTable[ CMSG_PET_CANCEL_AURA ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetCancelAuraOpcode           );
+    objmgr.opcodeTable[ CMSG_PET_UNLEARN ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetUnlearnOpcode              );
+    objmgr.opcodeTable[ CMSG_PET_SPELL_AUTOCAST ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandlePetSpellAutocastOpcode        );
+    objmgr.opcodeTable[ MSG_ADD_DYNAMIC_TARGET_OBSOLETE ]       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAddDynamicTargetObsoleteOpcode);
 
     objmgr.opcodeTable[ CMSG_CANCEL_CHANNELLING  ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleCancelChanneling              );
 

@@ -55,7 +55,7 @@ enum Gossip_Option
     GOSSIP_OPTION_STABLEPET         = 14,                   //UNIT_NPC_FLAG_STABLE            = 8192,
     GOSSIP_OPTION_ARMORER           = 15,                   //UNIT_NPC_FLAG_ARMORER           = 16384,
     GOSSIP_OPTION_UNLEARNTALENTS    = 16,                   //UNIT_NPC_FLAG_TRAINER (bonus option for GOSSIP_OPTION_TRAINER)
-    GOSSIP_OPTION_UNLEARNPETSKILLS	= 17                    //UNIT_NPC_FLAG_TRAINER (bonus option for GOSSIP_OPTION_TRAINER)
+    GOSSIP_OPTION_UNLEARNPETSKILLS  = 17                    //UNIT_NPC_FLAG_TRAINER (bonus option for GOSSIP_OPTION_TRAINER)
 };
 
 enum Gossip_Guard
@@ -368,7 +368,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool HasCategoryCooldown(uint32 spell_id) const;
 
         void InitCharmCreateSpells();
-        bool AddSpellToAB(uint32 oldid, uint32 newid);	//return true if successful
+        bool AddSpellToAB(uint32 oldid, uint32 newid);      //return true if successful
 
         /*********************************************************/
         /***                    VENDOR SYSTEM                  ***/
@@ -453,7 +453,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 m_spells[CREATURE_MAX_SPELLS];
         CreatureSpellCooldowns m_CreatureSpellCooldowns;
         CreatureSpellCooldowns m_CreatureCategoryCooldowns;
-        time_t m_GlobalCooldown;
+        uint32 m_GlobalCooldown;
 
         float GetAttackDistance(Unit *pl) const;
 

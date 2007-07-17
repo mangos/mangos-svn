@@ -134,8 +134,8 @@ struct ReputationOnKillEntry
 
 struct PetCreateSpellEntry
 {
-	uint32 spellid[4];
-	uint32 familypassive;
+    uint32 spellid[4];
+    uint32 familypassive;
 };
 
 #define WEATHER_SEASONS 4
@@ -634,7 +634,7 @@ class ObjectMgr
 
         WeatherZoneMap      mWeatherZoneMap;
         
-        PetCreateSpellMap	mPetCreateSpell;
+        PetCreateSpellMap   mPetCreateSpell;
 
     private:
         typedef std::map<uint32,PetLevelInfo*> PetLevelInfoMap;

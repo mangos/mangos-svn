@@ -283,14 +283,14 @@ void WorldSession::HandleGroupDisbandOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleLootMethodOpcode( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data,4+8);
+    CHECK_PACKET_SIZE(recv_data,4+8+4);
 
     Group *group = GetPlayer()->GetGroup();
     if(!group) return;
 
     uint32 lootMethod;
-    uint32 lootThreshold;
     uint64 lootMaster;
+    uint32 lootThreshold;
     recv_data >> lootMethod >> lootMaster >> lootThreshold;
 
     /** error handling **/
@@ -301,7 +301,7 @@ void WorldSession::HandleLootMethodOpcode( WorldPacket & recv_data )
     // everything's fine, do it
     group->SetLootMethod((LootMethod)lootMethod);
     group->SetLooterGuid(lootMaster);
-    group->SetLootThreshold((LootThreshold)lootThreshold);
+    group->SetLootThreshold((ItemQuelities)lootThreshold);
     group->SendUpdate();
 }
 

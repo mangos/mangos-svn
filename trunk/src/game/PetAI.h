@@ -49,6 +49,6 @@ class MANGOS_DLL_DECL PetAI : public CreatureAI
         TimeTracker i_tracker;
         //uint32 i_RepeatAction;
         std::set<uint64> m_AllySet;
-        uint32	m_updateAlliesTimer;
+        uint32 m_updateAlliesTimer;
 };
 #endif
