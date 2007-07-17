@@ -97,8 +97,6 @@ template<> void addUnitState(Creature *obj, CellPair const& cell_pair)
 template <class T>
 void LoadHelper(CellGuidSet const& guid_set, CellPair &cell, std::map<OBJECT_HANDLE, T*> &m, uint32 &count, Map* map)
 {
-    bool generateGuid = map->Instanceable();
-
     for(CellGuidSet::const_iterator i_guid = guid_set.begin(); i_guid != guid_set.end(); ++i_guid)
     {
         T* obj = new T(NULL);
@@ -125,7 +123,6 @@ void LoadHelper(CellCorpseSet const& cell_corpses, CellPair &cell, std::map<OBJE
     if(cell_corpses.empty())
         return;
 
-    bool generateGuid = map->Instanceable();
     CountedPtr<Corpse> obj;
 
     for(CellCorpseSet::const_iterator itr = cell_corpses.begin(); itr != cell_corpses.end(); ++itr)

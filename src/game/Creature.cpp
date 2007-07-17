@@ -51,12 +51,13 @@ uint32 CreatureInfo::randomDisplayID() const
 }
 
 Creature::Creature( WorldObject *instantiator ) :
-Unit( instantiator ), i_AI(NULL), i_motionMaster(this), lootForPickPocketed(false), lootForBody(false), m_lootMoney(0), m_lootRecipient(0),
+Unit( instantiator ), i_AI(NULL), i_motionMaster(this), 
+lootForPickPocketed(false), lootForBody(false), m_groupLootTimer(0), lootingGroupLeaderGUID(0), 
+m_itemsLoaded(false), m_trainerSpellsLoaded(false), m_trainer_type(0), m_lootMoney(0), m_lootRecipient(0),
 m_deathTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_respawnradius(0.0),
 m_gossipOptionLoaded(false),m_NPCTextId(0),
 m_moveRun(false), m_emoteState(0), m_isPet(false), m_isTotem(false),
-m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE), m_groupLootTimer(0), lootingGroupLeaderGUID(0),
-m_itemsLoaded(false),m_trainerSpellsLoaded(false),m_trainer_type(0)
+m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE)
 {
     m_valuesCount = UNIT_END;
 
@@ -66,7 +67,7 @@ m_itemsLoaded(false),m_trainerSpellsLoaded(false),m_trainer_type(0)
     m_spells[1] = 0;
     m_spells[2] = 0;
     m_spells[3] = 0;
-    
+
     m_CreatureSpellCooldowns.clear();
     m_CreatureCategoryCooldowns.clear();
     m_GlobalCooldown = 0;
@@ -1654,7 +1655,7 @@ bool Creature::HasCategoryCooldown(uint32 spell_id) const
         return false;
 
     CreatureSpellCooldowns::const_iterator itr = m_CreatureCategoryCooldowns.find(spellInfo->Category);
-    return(itr != m_CreatureCategoryCooldowns.end() && (itr->second + (spellInfo->CategoryRecoveryTime / 1000)) > time(NULL));
+    return(itr != m_CreatureCategoryCooldowns.end() && time_t(itr->second + (spellInfo->CategoryRecoveryTime / 1000)) > time(NULL));
 }
 
 bool Creature::HasSpellCooldown(uint32 spell_id) const

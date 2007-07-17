@@ -31,7 +31,6 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,8+1+1+1+4+4+8+4+4);
 
-    time_t base = time(NULL);
     uint64 mailbox,itemId;
     std::string receiver,subject,body;
     uint32 unk1,unk2,money,COD,mailId;
@@ -539,8 +538,6 @@ void WorldSession::HandleItemTextQuery(WorldPacket & recv_data )
     uint32 unk;                                             //maybe something like state - 0x70000000
 
     recv_data >> itemTextId >> mailId >> unk;
-
-    Player* pl = _player;
 
     //some check needed, if player has item with guid mailId, or has mail with id mailId
 

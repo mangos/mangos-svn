@@ -32,7 +32,7 @@ class MANGOS_DLL_SPEC GroupReference : public Reference<Group, Player>
         void targetObjectDestroyLink();
         void sourceObjectDestroyLink();
     public:
-        GroupReference() : iSubGroup(0), Reference<Group, Player>() {}
+        GroupReference() : Reference<Group, Player>(), iSubGroup(0) {}
         ~GroupReference() { unlink(); }
         GroupReference *next() { return (GroupReference*)Reference<Group, Player>::next(); }
         uint8 getSubGroup() { return iSubGroup; }

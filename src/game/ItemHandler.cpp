@@ -625,7 +625,7 @@ void WorldSession::SendListInventory( uint64 vendorguid )
         }
     }
 
-    if ( count == 0 || data.size() != 8 + 1 + count * 7 * 4 )
+    if ( count == 0 || data.size() != 8 + 1 + size_t(count) * 7 * 4 )
         return;
 
     data.put<uint8>(8, count);

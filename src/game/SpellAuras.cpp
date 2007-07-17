@@ -288,11 +288,10 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
 };
 
 Aura::Aura(SpellEntry const* spellproto, uint32 eff, Unit *target, Unit *caster, Item* castItem) :
-m_spellId(spellproto->Id), m_effIndex(eff), m_caster_guid(0), m_target(target),
-m_timeCla(1000), m_auraSlot(MAX_AURAS),m_positive(false), m_permanent(false),
-m_isPeriodic(false), m_isTrigger(false), m_periodicTimer(0), m_PeriodicEventId(0),
-m_procCharges(0), m_absorbDmg(0), m_isPersistent(false), m_removeOnDeath(false),
-m_isAreaAura(false), m_castItemGuid(castItem?castItem->GetGUID():0) 
+m_procCharges(0), m_absorbDmg(0), m_spellmod(NULL), m_spellId(spellproto->Id), m_effIndex(eff), m_caster_guid(0), m_target(target),
+m_timeCla(1000), m_castItemGuid(castItem?castItem->GetGUID():0), m_auraSlot(MAX_AURAS),
+m_positive(false), m_permanent(false), m_isPeriodic(false), m_isTrigger(false), m_isAreaAura(false), m_isPersistent(false),
+m_periodicTimer(0), m_PeriodicEventId(0), m_removeOnDeath(false)
 {
     assert(target);
 
@@ -843,7 +842,7 @@ void Aura::_RemoveAura()
 
         // reset cooldown state for spells infinity/long aura (it's all self applied (?))
         int32 duration = GetDuration(GetSpellProto());
-        if(caster==m_target && (duration < 0 || duration > GetSpellProto()->RecoveryTime))
+        if(caster==m_target && (duration < 0 || uint32(duration) > GetSpellProto()->RecoveryTime))
             SendCoolDownEvent();
     }
     else                                                    // decrease count for spell
@@ -2750,7 +2749,7 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply, bool Real)
                 float curRes = pet->GetResistance(SPELL_SCHOOL_NORMAL);
                 float baseRes = curRes + pet->GetResistanceBuffMods(SPELL_SCHOOL_NORMAL, false) - pet->GetResistanceBuffMods(SPELL_SCHOOL_NORMAL, true);
                 float baseRes_new = baseRes * (apply?(100.0f+m_modifier.m_amount)/100.0f : 100.0f / (100.0f+m_modifier.m_amount));
-                pet->SetArmor(curRes + baseRes_new - baseRes);
+                pet->SetArmor(int32(curRes + baseRes_new - baseRes));
             }
         }
         return;
@@ -2838,9 +2837,8 @@ void Aura::HandleModPercentStat(bool apply, bool Real)
     // only players have base stats
     if (m_target->GetTypeId() != TYPEID_PLAYER)
         return;
-    Player *p_target = (Player*)m_target;
 
-    for (int32 i = STAT_STRENGTH; i < MAX_STATS; i++)
+    for (int32 i = STAT_STRENGTH; i < MAX_STATS; ++i)
     {
         if(m_modifier.m_miscvalue == i || m_modifier.m_miscvalue == -1)
         {
@@ -2999,7 +2997,7 @@ void Aura::HandleModManaRegen(bool apply, bool Real)
         if(int32(pt) != POWER_MANA)
             return;
 
-        int32 gain = m_target->ModifyPower(POWER_MANA, m_modifier.m_amount * m_target->GetStat(Stats(m_modifier.m_miscvalue)) / 100.0f);
+        int32 gain = m_target->ModifyPower(POWER_MANA, int32(m_modifier.m_amount * m_target->GetStat(Stats(m_modifier.m_miscvalue)) / 100.0f));
 
         Unit *caster = GetCaster();
         if (caster)

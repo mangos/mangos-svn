@@ -480,6 +480,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
 
                 break;
             }
+            case RANGED_ATTACK:
+                break;
         }
     }
 
@@ -963,6 +965,11 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
                     break;
 
                 }
+                case MELEE_HIT_MISS:
+                case MELEE_HIT_GLANCING:
+                case MELEE_HIT_CRUSHING:
+                case MELEE_HIT_NORMAL:
+                    break;
             }
 
             // Update attack state
@@ -1123,8 +1130,8 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             data << (uint32)resist;
             SendMessageToSet(&data,true);
 
-            DealDamage(pVictim, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), &cleanDamage, DOT, localSpellProto.School, &localSpellProto, procFlag, true);
-            ProcDamageAndSpell(pVictim, 0, PROC_FLAG_TAKE_DAMAGE, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), &localSpellProto);
+            DealDamage(pVictim, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), &cleanDamage, DOT, localSpellProto.School, &localSpellProto, procFlag, true);
+            ProcDamageAndSpell(pVictim, 0, PROC_FLAG_TAKE_DAMAGE, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), &localSpellProto);
             break;
         }
         case SPELL_AURA_PERIODIC_HEAL:
@@ -1147,7 +1154,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             // heal for caster damage
             if(pVictim!=this && localSpellProto.SpellVisual==163)
             {
-                int32 dmg = localSpellProto.manaPerSecond;
+                uint32 dmg = localSpellProto.manaPerSecond;
                 if(GetHealth() <= dmg && GetTypeId()==TYPEID_PLAYER)
                 {
                     RemoveAurasDueToSpell(localSpellProto.Id);
@@ -1180,8 +1187,8 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
                 pdamage = uint32(pVictim->GetHealth());
 
             SendSpellNonMeleeDamageLog(pVictim, localSpellProto.Id, pdamage, localSpellProto.School, absorb, resist, false, 0);
-            DealDamage(pVictim, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), &cleanDamage, DOT, localSpellProto.School, &localSpellProto, procFlag, false);
-            ProcDamageAndSpell(pVictim, PROC_FLAG_HIT_SPELL, PROC_FLAG_TAKE_DAMAGE, pdamage <= int32(absorb+resist) ? 0 : (pdamage-absorb-resist), &localSpellProto);
+            DealDamage(pVictim, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), &cleanDamage, DOT, localSpellProto.School, &localSpellProto, procFlag, false);
+            ProcDamageAndSpell(pVictim, PROC_FLAG_HIT_SPELL, PROC_FLAG_TAKE_DAMAGE, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), &localSpellProto);
             if (!pVictim->isAlive() && m_currentSpell)
                 if (m_currentSpell->m_spellInfo)
                     if (m_currentSpell->m_spellInfo->Id == localSpellProto.Id)
@@ -1887,7 +1894,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     // mobs can score crushing blows if they're 3 or more levels above victim
     // or when their weapon skill is 15 or more above victim's defense skill
     tmp = pVictim->GetDefenseSkillValue();
-    uint32 tmpmax = pVictim->GetMaxSkillValueForLevel();
+    int32 tmpmax = pVictim->GetMaxSkillValueForLevel();
     // having defense above your maximum (from items, talents etc.) has no effect
     tmp = tmp > tmpmax ? tmpmax : tmp;
     // tmp = mob's level * 5 - player's current defense skill
@@ -4229,7 +4236,6 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         cinfo = ((Creature*)pVictim)->GetCreatureInfo();
 
     // Damage Done
-    uint32 PenaltyFactor = 0;
     uint32 CastingTime = GetCastTime(sCastTimesStore.LookupEntry(spellProto->CastingTimeIndex));
     if (CastingTime > 7000) CastingTime = 7000;             // Plus Damage efficient maximum 200% ( 7.0 seconds )
     if (CastingTime < 1500) CastingTime = 1500;
@@ -4428,7 +4434,6 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
     if(spellProto->Id == 15290 || spellProto->Id == 39373) return healamount;
 
     int32 AdvertisedBenefit = 0;
-    uint32 PenaltyFactor = 0;
     uint32 CastingTime = GetCastTime(sCastTimesStore.LookupEntry(spellProto->CastingTimeIndex));
     if (CastingTime > 7000) CastingTime = 7000;
     if (CastingTime < 1500) CastingTime = 1500;
@@ -4562,7 +4567,7 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo) const
     int32 chance = 0;
     AuraList const& mModMechanicRes = GetAurasByType(SPELL_AURA_MOD_MECHANIC_RESISTANCE);
     for(AuraList::const_iterator i = mModMechanicRes.begin();i != mModMechanicRes.end(); ++i)
-        if((*i)->GetModifier()->m_miscvalue == spellInfo->Mechanic)
+        if((*i)->GetModifier()->m_miscvalue == int32(spellInfo->Mechanic))
             chance+= (*i)->GetModifier()->m_amount;
     if(roll_chance_i(chance))
         return true;
@@ -4814,7 +4819,7 @@ int32 Unit::ModifyHealth(int32 dVal)
 
     int32 maxHealth = (int32)GetMaxHealth();
 
-    if(uint32(val) < maxHealth)
+    if(val < maxHealth)
     {
         SetHealth(val);
         gain = val - curHealth;
@@ -5308,7 +5313,7 @@ int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_inde
 
     value = basePoints + rand32(spellProto->EffectBaseDice[effect_index], randomPoints);
     //random damage
-    if(spellProto->EffectBaseDice[effect_index] != randomPoints && GetTypeId() == TYPEID_UNIT && ((Creature*)this)->isPet())
+    if(int32(spellProto->EffectBaseDice[effect_index]) != randomPoints && GetTypeId() == TYPEID_UNIT && ((Creature*)this)->isPet())
         value += ((Pet*)this)->GetBonusDamage();                //bonus damage only on spells without fixed basePoints?)
     if(comboDamage > 0)
     {
@@ -5740,7 +5745,7 @@ bool Unit::UpdateAllStats()
     for (int i = STAT_STRENGTH; i < MAX_STATS; i++)
     {
         float value = GetTotalStatValue(Stats(i));
-        SetStat(Stats(i), value);
+        SetStat(Stats(i), int32(value));
     }
 
     UpdateAttackPowerAndDamage();
@@ -5797,7 +5802,7 @@ void Unit::UpdateMaxHealth()
     value  += GetModifierValue(unitMod, TOTAL_VALUE) + stamina * 10.0f;
     value  *= GetModifierValue(unitMod, TOTAL_PCT);
 
-    SetMaxHealth(value);
+    SetMaxHealth(uint32(value));
 }
 
 void Unit::UpdateMaxPower(Powers power)
@@ -5884,9 +5889,9 @@ void Unit::UpdateAttackPowerAndDamage(bool ranged)
     float attPowerMod = GetModifierValue(unitMod, TOTAL_VALUE);
     float attPowerMultiplier = GetModifierValue(unitMod, TOTAL_PCT) - 1.0f;
 
-    SetUInt32Value(index, base_attPower);            //UNIT_FIELD_(RANGED)_ATTACK_POWER field
-    SetUInt32Value(index_mod, attPowerMod);          //UNIT_FIELD_(RANGED)_ATTACK_POWER_MODS field
-    SetFloatValue(index_mult, attPowerMultiplier);   //UNIT_FIELD_(RANGED)_ATTACK_POWER_MULTIPLIER field
+    SetUInt32Value(index, uint32(base_attPower));           //UNIT_FIELD_(RANGED)_ATTACK_POWER field
+    SetUInt32Value(index_mod, uint32(attPowerMod));         //UNIT_FIELD_(RANGED)_ATTACK_POWER_MODS field
+    SetFloatValue(index_mult, attPowerMultiplier);          //UNIT_FIELD_(RANGED)_ATTACK_POWER_MULTIPLIER field
 
     //automatically update weapon damage after attack power modification
     if(ranged)

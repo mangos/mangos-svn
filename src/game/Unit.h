@@ -240,9 +240,10 @@ enum BaseModGroup
 enum BaseModType
 {
     FLAT_MOD,
-    PCT_MOD,
-    MOD_END
+    PCT_MOD
 };
+
+#define MOD_END (PCT_MOD+1)
 
 enum DeathState
 {

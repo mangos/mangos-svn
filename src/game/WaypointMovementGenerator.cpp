@@ -246,8 +246,7 @@ WaypointMovementGenerator::Update(Creature &creature, const uint32 &diff)
                     else
                     {
                         // Select one from max 5 texts
-                        int maxText = 4;
-                        for( int i=0; i<4; i++ )
+                        for( int i = 0; i < 4; ++i )
                         {
                             if( tmpBehavior->text[i] == "" )
                             {

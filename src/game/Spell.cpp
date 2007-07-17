@@ -1204,7 +1204,7 @@ void Spell::SendSpellCooldown()
     if (rec > 0)
     {
         // only send if different from client known cooldown
-        if(m_spellInfo->RecoveryTime != rec)
+        if(m_spellInfo->RecoveryTime != uint32(rec))
         {
             /*WorldPacket data(SMSG_SPELL_COOLDOWN, (8+1+4+4));
             data << m_caster->GetGUID();
@@ -1221,7 +1221,7 @@ void Spell::SendSpellCooldown()
     else
     {
         // only send if different from client known cooldown
-        if(m_spellInfo->RecoveryTime && m_spellInfo->RecoveryTime != catrec || m_spellInfo->CategoryRecoveryTime != catrec)
+        if(m_spellInfo->RecoveryTime && m_spellInfo->RecoveryTime != uint32(catrec) || m_spellInfo->CategoryRecoveryTime != uint32(catrec))
         {
             /*WorldPacket data(SMSG_SPELL_COOLDOWN, (8+1+4+4));
             data << m_caster->GetGUID();
@@ -1247,7 +1247,7 @@ void Spell::SendSpellCooldown()
                     continue;
 
                 // only send if different from client known cooldown
-                if(cat != m_spellInfo->Category || m_spellInfo->CategoryRecoveryTime != catrec)
+                if(cat != m_spellInfo->Category || m_spellInfo->CategoryRecoveryTime != uint32(catrec))
                 {
                     /*WorldPacket data(SMSG_SPELL_COOLDOWN, (8+1+4+4));
                     data << m_caster->GetGUID();
@@ -1779,8 +1779,6 @@ void Spell::TakeCastItem()
         return;
 
     ItemPrototype const *proto = m_CastItem->GetProto();
-    uint32 ItemClass = proto->Class;
-    uint32 ItemSubClass = proto->SubClass;
 
     bool expendable = false;
     bool withoutCharges = false;
@@ -2588,20 +2586,20 @@ uint8 Spell::CheckMana(uint32 *mana)
 
     Powers powerType = Powers(m_spellInfo->powerType);
 
-    int32 currentPower = m_caster->GetPower(powerType);
-    int32 manaCost = m_spellInfo->manaCost;
+    uint32 currentPower = m_caster->GetPower(powerType);
+    float manaCost = m_spellInfo->manaCost;
     if(m_spellInfo->manaCostPerlevel)
-        manaCost += int32(m_spellInfo->manaCostPerlevel*m_caster->getLevel());
+        manaCost += m_spellInfo->manaCostPerlevel*m_caster->getLevel();
     if(m_spellInfo->ManaCostPercentage)
     {
         if(m_caster->GetTypeId() == TYPEID_PLAYER && powerType==POWER_MANA)
         {
             PlayerLevelInfo info;
             objmgr.GetPlayerLevelInfo(m_caster->getRace(),m_caster->getClass(),m_caster->getLevel(),&info);
-            manaCost += int32(float(m_spellInfo->ManaCostPercentage)/100.0 * info.mana);
+            manaCost += float(m_spellInfo->ManaCostPercentage)/100.0 * info.mana;
         }
         else
-            manaCost += int32(float(m_spellInfo->ManaCostPercentage)/100.0*m_caster->GetMaxPower(powerType));
+            manaCost += float(m_spellInfo->ManaCostPercentage)/100.0*m_caster->GetMaxPower(powerType);
     }
 
     Unit::AuraList const& mPowerCostSchool = m_caster->GetAurasByType(SPELL_AURA_MOD_POWER_COST_SCHOOL);
@@ -2612,16 +2610,17 @@ uint8 Spell::CheckMana(uint32 *mana)
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
         ((Player *)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, manaCost);
 
-    manaCost *= 1.0f + m_caster->GetFloatValue(UNIT_FIELD_POWER_COST_MODIFIER);
+    manaCost *= manaCost* (1.0f + m_caster->GetFloatValue(UNIT_FIELD_POWER_COST_MODIFIER));
 
     if (manaCost < 0)
         manaCost = 0;
 
-    *mana = manaCost;
+    *mana = uint32(manaCost);
 
-    if(currentPower < manaCost)
+    if(currentPower < *mana)
         return SPELL_FAILED_NO_POWER;
-    else return 0;
+    else 
+        return 0;
 }
 
 uint8 Spell::CheckItems()
@@ -2962,7 +2961,7 @@ void Spell::Delayed(int32 delaytime)
     
     m_timer += delaytime;
 
-    if(m_timer > casttime)
+    if(int32(m_timer) > casttime)
         m_timer = (casttime > 0 ? casttime : 0);
 
     WorldPacket data(SMSG_SPELL_DELAYED, 8+4);

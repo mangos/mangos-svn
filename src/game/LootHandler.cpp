@@ -73,7 +73,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 
     LootItem *item = NULL;
     QuestItem *qitem = NULL;
-    bool is_looted = true, is_qitem = false;
+    bool is_looted = true;
     if (lootSlot >= loot->items.size())
     {
         lootSlot -= loot->items.size();

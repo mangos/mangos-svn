@@ -554,7 +554,7 @@ ObjectAccessor::Update(const uint32  &diff)
         }
 
         Map *map;
-        uint32 instance_id = 0;
+
         MaNGOS::ObjectUpdater updater(diff);
         // for creature
         TypeContainerVisitor<MaNGOS::ObjectUpdater, GridTypeMapContainer  > grid_object_update(updater);

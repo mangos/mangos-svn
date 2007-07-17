@@ -283,7 +283,7 @@ void PlayerMenu::SendQuestGiverQuestList( QEmote eEmote, std::string Title, uint
         data << objmgr.QuestTemplates[questID]->GetTitle();
     }
     pSession->SendPacket( &data );
-    uint32 fqid=pQuestMenu->GetItem(0).m_qId;
+    //uint32 fqid=pQuestMenu->GetItem(0).m_qId;
     //sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_QUEST_LIST NPC Guid=%u, questid-0=%u",npcGUID,fqid);
 }
 
@@ -543,7 +543,7 @@ void PlayerMenu::SendQuestGiverOfferReward( uint32 quest_id, uint64 npcGUID, boo
     else
         data << uint32(0);
 
-    uint32(0x00);                                           // new 2.0.3
+    data << uint32(0x00);                                   // new 2.0.3
 
     pSession->SendPacket( &data );
     //sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_OFFER_REWARD NPCGuid=%u, questid=%u",GUID_LOPART(npcGUID),quest_id );
@@ -600,8 +600,6 @@ void PlayerMenu::SendQuestGiverRequestItems( Quest *pQuest, uint64 npcGUID, bool
         else
             data << uint32(0);
     }
-    else
-        uint32(0x0);
 
     if ( !Completable )
         data << uint32(0x00);

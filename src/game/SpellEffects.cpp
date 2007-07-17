@@ -356,7 +356,7 @@ void Spell::EffectDummy(uint32 i)
     if(m_spellInfo->SpellVisual == 1225 && m_spellInfo->SpellIconID == 208)
     {
         int32 mod = m_spellInfo->EffectBasePoints[0]+1;
-        if(m_caster->GetHealth() > mod)
+        if(int32(m_caster->GetHealth()) > mod)
         {
             m_caster->ModifyHealth(-mod);
             m_caster->ModifyPower(POWER_MANA,mod);
