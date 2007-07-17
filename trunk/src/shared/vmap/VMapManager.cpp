@@ -238,6 +238,10 @@ namespace VMAP {
                 dirFileName = getDirFileName(pMapId);
             }
             instanceTree->unloadMap(dirFileName);
+            if(instanceTree->size() == 0) {
+                iInstanceMapTrees.remove(pMapId);
+                delete instanceTree;
+            }
         }
     }
 
