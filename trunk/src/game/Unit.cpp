@@ -5313,6 +5313,23 @@ int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_inde
             unitPlayer->SetComboPoints(unitPlayer->GetComboTarget(), 0);
     }
 
+    if (GetTypeId() == TYPEID_PLAYER)
+    {
+        ((Player *)this)->ApplySpellMod(spellProto->Id,SPELLMOD_ALL_EFFECTS, value);
+        switch(effect_index)
+        {
+        case 0:
+            ((Player*)this)->ApplySpellMod(spellProto->Id,SPELLMOD_EFFECT1, value);
+            break;
+        case 1:
+            ((Player*)this)->ApplySpellMod(spellProto->Id,SPELLMOD_EFFECT2, value);
+            break;
+        case 2:
+            ((Player*)this)->ApplySpellMod(spellProto->Id,SPELLMOD_EFFECT3, value);
+            break;
+        }
+    }
+
     return value;
 }
 

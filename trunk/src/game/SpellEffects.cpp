@@ -3010,41 +3010,26 @@ void Spell::EffectSelfResurrect(uint32 i)
     uint32 health = 0;
     uint32 mana = 0;
 
-    if(m_spellInfo->SpellVisual == 99 && m_spellInfo->SpellIconID ==1)
+    // flat case
+    if(damage < 0)
     {
-        health = m_spellInfo->EffectBasePoints[i]+1 > 0 ? m_spellInfo->EffectBasePoints[i]+1 :(-(m_spellInfo->EffectBasePoints[i]+1));
-        if(unitTarget->getPowerType() == POWER_MANA)
-            mana = m_spellInfo->EffectMiscValue[i];
+        health = uint32(-damage);
+        mana   = mana = m_spellInfo->EffectMiscValue[i];
     }
-    else if(m_spellInfo->SpellVisual == 344 && m_spellInfo->SpellIconID == 24)
-    {
-        health = uint32((m_spellInfo->EffectBasePoints[i]+1)*unitTarget->GetMaxHealth()/100);
-        if(unitTarget->getPowerType() == POWER_MANA)
-            mana = uint32((m_spellInfo->EffectBasePoints[i]+1)*unitTarget->GetMaxPower(unitTarget->getPowerType())/100);
-    }
+    // percent case
     else
     {
-        if(damage < 0) return;
-        health = uint32(damage/100*unitTarget->GetMaxHealth());
-        if(unitTarget->getPowerType() == POWER_MANA)
-            mana = uint32(damage/100*unitTarget->GetMaxPower(unitTarget->getPowerType()));
+        health = uint32(damage/100.0f*unitTarget->GetMaxHealth());
+        if(unitTarget->GetMaxPower(POWER_MANA) > 0)
+            mana = uint32(damage/100.0f*unitTarget->GetMaxPower(POWER_MANA));
     }
 
     Player *plr = ((Player*)unitTarget);
     plr->ResurrectPlayer(0.0f);
 
-    if(plr->GetMaxHealth() > health)
-        plr->SetHealth( health );
-    else
-        plr->SetHealth( plr->GetMaxHealth() );
-
-    if(plr->GetMaxPower(POWER_MANA) > mana)
-        plr->SetPower(POWER_MANA, mana );
-    else
-        plr->SetPower(POWER_MANA, plr->GetMaxPower(POWER_MANA) );
-
+    plr->SetHealth( health );
+    plr->SetPower(POWER_MANA, mana );
     plr->SetPower(POWER_RAGE, 0 );
-
     plr->SetPower(POWER_ENERGY, plr->GetMaxPower(POWER_ENERGY) );
 
     plr->SpawnCorpseBones();
