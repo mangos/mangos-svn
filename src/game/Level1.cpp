@@ -226,7 +226,6 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
     Player *chr = objmgr.GetPlayer(name.c_str());
     if (chr)
     {
-
         if(chr->IsBeingTeleported()==true)
         {
             PSendSysMessage(LANG_IS_TELEPORTED, chr->GetName());

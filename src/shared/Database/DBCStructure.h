@@ -291,7 +291,7 @@ struct SkillLineAbilityEntry
     uint32    forward_spellid;
     uint32    max_value;
     uint32    min_value;
-    uint32	  reqtrainpoints;
+    uint32    reqtrainpoints;
 };
 
 struct SpellEntry

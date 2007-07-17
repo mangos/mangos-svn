@@ -1638,14 +1638,14 @@ void Aura::HandleModPossess(bool apply, bool Real)
         else
         {
             //remove area auras from charms
-			Unit::AuraMap& tAuras = m_target->GetAuras();
-      		for (Unit::AuraMap::iterator itr = tAuras.begin(); itr != tAuras.end();)
-		    {
-        		if (itr->second && itr->second->IsAreaAura())
+            Unit::AuraMap& tAuras = m_target->GetAuras();
+            for (Unit::AuraMap::iterator itr = tAuras.begin(); itr != tAuras.end();)
+            {
+                if (itr->second && itr->second->IsAreaAura())
                     m_target->RemoveAura(itr);
                 else
                     ++itr;
-      		}
+              }
 
             m_target->SetCharmerGUID(0);
 
@@ -1729,9 +1729,9 @@ void Aura::HandleModCharm(bool apply, bool Real)
 
             if(m_target->GetTypeId() == TYPEID_UNIT)
             {
-				((Creature*)m_target)->AIM_Initialize();
-				((Creature*)m_target)->InitCharmCreateSpells();
-			}
+                ((Creature*)m_target)->AIM_Initialize();
+                ((Creature*)m_target)->InitCharmCreateSpells();
+            }
         }
         else
         {
@@ -2740,17 +2740,19 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply, bool Real)
     // only players have base stats
     if(m_target->GetTypeId() != TYPEID_PLAYER)
     {
-		if(((Creature*)m_target)->isPet())
-		{
-			Pet* pet = (Pet*)m_target;
-			if(m_modifier.m_miscvalue & IMMUNE_SCHOOL_PHYSICAL) //pets only have base armor
-			{
-				float curRes = pet->GetResistance(SPELL_SCHOOL_NORMAL);
-	            float baseRes = curRes + pet->GetResistanceBuffMods(SPELL_SCHOOL_NORMAL, false) - pet->GetResistanceBuffMods(SPELL_SCHOOL_NORMAL, true);
-    	        float baseRes_new = baseRes * (apply?(100.0f+m_modifier.m_amount)/100.0f : 100.0f / (100.0f+m_modifier.m_amount));
-        	    pet->SetArmor(curRes + baseRes_new - baseRes);
-			}
-		}
+        if(((Creature*)m_target)->isPet())
+        {
+            Pet* pet = (Pet*)m_target;
+
+            //pets only have base armor
+            if(m_modifier.m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
+            {
+                float curRes = pet->GetResistance(SPELL_SCHOOL_NORMAL);
+                float baseRes = curRes + pet->GetResistanceBuffMods(SPELL_SCHOOL_NORMAL, false) - pet->GetResistanceBuffMods(SPELL_SCHOOL_NORMAL, true);
+                float baseRes_new = baseRes * (apply?(100.0f+m_modifier.m_amount)/100.0f : 100.0f / (100.0f+m_modifier.m_amount));
+                pet->SetArmor(curRes + baseRes_new - baseRes);
+            }
+        }
         return;
     }
     Player *p_target = (Player*)m_target;

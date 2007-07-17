@@ -6915,7 +6915,7 @@ void Player::SendTalentWipeConfirm(uint64 guid)
 void Player::SendPetSkillWipeConfirm(uint64 guid)
 {
     if(!GetPet())
-    	return;
+        return;
     WorldPacket data(SMSG_PET_UNLEARN_CONFIRM, (8+4));
     data << GetPet()->GetGUID();
     data << uint32(GetPet()->resetTalentsCost());
@@ -12950,14 +12950,15 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode)
     pet->CombatStop(true);
     
     switch(pet->GetEntry())
-	{	//warlock pets except imp are removed(?) when logging out
-		case 1860:
-		case 1863:
-		case 417:
-		case 17252:
-			mode = PET_SAVE_NOT_IN_SLOT;
-			break;
-	}
+    {
+        //warlock pets except imp are removed(?) when logging out
+        case 1860:
+        case 1863:
+        case 417:
+        case 17252:
+            mode = PET_SAVE_NOT_IN_SLOT;
+            break;
+    }
 
     pet->SavePetToDB(mode);
 
@@ -12980,8 +12981,8 @@ void Player::Uncharm()
     Unit* charm = GetCharm();
     if(!charm) return;
 
-	charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_CHARM);
-	charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS);
+    charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_CHARM);
+    charm->RemoveSpellsCausingAura(SPELL_AURA_MOD_POSSESS);
 
 }
 
@@ -13074,43 +13075,44 @@ void Player::PetSpellInitialize()
     {
         uint8 addlist = 0;
 
-		sLog.outDebug("Pet Spells Groups");
+        sLog.outDebug("Pet Spells Groups");
 
-		if(pet->isControlled())
+        if(pet->isControlled())
         {
             for(PetSpellMap::iterator itr = pet->m_spells.begin();itr != pet->m_spells.end();itr++)
             {
                 if(itr->second->state == PETSPELL_REMOVED)
-					continue;
+                    continue;
                 addlist++;
             }
         }
 
-        WorldPacket data(SMSG_PET_SPELLS, 16+40+1+4*addlist+25);             // first line + actionbar + spellcount + spells + last adds
+        // first line + actionbar + spellcount + spells + last adds
+        WorldPacket data(SMSG_PET_SPELLS, 16+40+1+4*addlist+25);
 
         data << (uint64)pet->GetGUID() << uint32(0x00000000) << uint8(pet->GetReactState()) << uint8(pet->GetCommandState()) << uint16(0); //16
 
-        for(uint32 i = 0; i < 10; i++)	//40
+        for(uint32 i = 0; i < 10; i++)                      //40
         {
-			data << uint16((pet->PetActionBar)[i].SpellOrAction) << uint16(pet->PetActionBar[i].Type);
-		}
+            data << uint16((pet->PetActionBar)[i].SpellOrAction) << uint16(pet->PetActionBar[i].Type);
+        }
 
-        data << uint8(addlist);			//1
+        data << uint8(addlist);                             //1
 
         if(pet->isControlled())
         {
-			for (PetSpellMap::iterator itr = pet->m_spells.begin(); itr != pet->m_spells.end(); ++itr)
- 		   	{
-   				if(itr->second->state == PETSPELL_REMOVED)
-            		continue;
+            for (PetSpellMap::iterator itr = pet->m_spells.begin(); itr != pet->m_spells.end(); ++itr)
+            {
+                if(itr->second->state == PETSPELL_REMOVED)
+                    continue;
 
-        		data << uint16(itr->first);
-        		data << uint16(itr->second->active);
-    		}
+                data << uint16(itr->first);
+                data << uint16(itr->second->active);
+            }
         }
 
-        //data << uint8(0x01) << uint32(0x6010) << uint32(0x01) << uint32(0x05) << uint16(0x00);	//15
-        uint8 count = 3;	//1+8+8+8=25
+        //data << uint8(0x01) << uint32(0x6010) << uint32(0x01) << uint32(0x05) << uint16(0x00);    //15
+        uint8 count = 3;                                    //1+8+8+8=25
 
         // if count = 0, then end of packet...
         data << count;
@@ -13130,21 +13132,21 @@ void Player::CharmSpellInitialize()
     Unit* charm = GetCharm();
 
     if(!charm)
-    	return;
+        return;
 
-	uint8 addlist = 0;
-	WorldPacket data(SMSG_PET_SPELLS, 16+40+1+4*addlist+25);             // first line + actionbar + spellcount + spells + last adds
+    uint8 addlist = 0;
+    WorldPacket data(SMSG_PET_SPELLS, 16+40+1+4*addlist+25);             // first line + actionbar + spellcount + spells + last adds
 
     data << (uint64)charm->GetGUID() << uint32(0x00000000) << uint8(0) << uint8(0) << uint16(0); //16
 
-    for(uint32 i = 0; i < 10; i++)	//40
+    for(uint32 i = 0; i < 10; i++)                          //40
     {
-		data << uint16((charm->PetActionBar)[i].SpellOrAction) << uint16(charm->PetActionBar[i].Type);
-	}
+        data << uint16((charm->PetActionBar)[i].SpellOrAction) << uint16(charm->PetActionBar[i].Type);
+    }
 
-    data << uint8(addlist);			//1
+    data << uint8(addlist);                                 //1
 
-	uint8 count = 3;
+    uint8 count = 3;
     data << count;
     data << uint32(0x6010) << uint64(0);    // if count = 1, 2 or 3
     data << uint32(0x8e8c) << uint64(0);    // if count = 3

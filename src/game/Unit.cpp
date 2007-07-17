@@ -2700,7 +2700,7 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
         {
             Unit* i_caster = i_target;
 
-			Unit* owner = NULL;
+            Unit* owner = NULL;
             Group *pGroup = NULL;
             Player *pGroupOf = NULL;
             if (i_caster->GetTypeId() == TYPEID_PLAYER)
@@ -2737,12 +2737,12 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
             }
             else if(owner)
             {
-				Aura *t_aura = owner->GetAura((*i).second->GetId(), (*i).second->GetEffIndex());
+                Aura *t_aura = owner->GetAura((*i).second->GetId(), (*i).second->GetEffIndex());
                 if (t_aura)
                     if (t_aura->GetCasterGUID() == i_caster->GetGUID())
                         owner->RemoveAura((*i).second->GetId(), (*i).second->GetEffIndex());
-	        }
-		}
+            }
+        }
     }
     if ((*i).second->GetModifier()->m_auraname < TOTAL_AURAS)
     {
@@ -5301,8 +5301,9 @@ int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_inde
     }
 
     value = basePoints + rand32(spellProto->EffectBaseDice[effect_index], randomPoints);
-    if(spellProto->EffectBaseDice[effect_index] != randomPoints && GetTypeId() == TYPEID_UNIT && ((Creature*)this)->isPet()) 	//random damage
-    	value += ((Pet*)this)->GetBonusDamage();//bonus damage only on spells without fixed basePoints?)
+    //random damage
+    if(spellProto->EffectBaseDice[effect_index] != randomPoints && GetTypeId() == TYPEID_UNIT && ((Creature*)this)->isPet())
+        value += ((Pet*)this)->GetBonusDamage();                //bonus damage only on spells without fixed basePoints?)
     if(comboDamage > 0)
     {
         value += (int32)(comboDamage * comboPoints);

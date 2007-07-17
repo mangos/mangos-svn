@@ -559,8 +559,8 @@ struct CleanDamage
 
 struct UnitActionBarEntry
 {
-	uint32 Type;
-	uint32 SpellOrAction;
+    uint32 Type;
+    uint32 SpellOrAction;
 };
 
 // delay time next attack to privent client attack animanation problems

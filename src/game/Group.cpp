@@ -34,7 +34,7 @@ bool Group::Create(const uint64 &guid, const char * name)
 
     m_groupType  = GROUPTYPE_NORMAL;
     m_lootMethod = GROUP_LOOT;
-    m_lootThreshold = UNCOMMON;
+    m_lootThreshold = ITEM_QUALITY_UNCOMMON;
 
     if(!AddMember(guid, name))
         return false;
@@ -73,7 +73,7 @@ bool Group::LoadGroupFromDB(const uint64 &leaderGuid)
     m_mainAssistant = (*result)[1].GetUInt64();
     m_lootMethod = (LootMethod)(*result)[2].GetUInt8();
     m_looterGuid = MAKE_GUID((*result)[3].GetUInt32(),HIGHGUID_PLAYER);
-    m_lootThreshold = (LootThreshold)(*result)[4].GetUInt16();
+    m_lootThreshold = (ItemQuelities)(*result)[4].GetUInt16();
 
     for(int i=0; i<TARGETICONCOUNT; i++)
         m_targetIcons[i] = (*result)[5+i].GetUInt8();

@@ -2199,8 +2199,8 @@ void Spell::EffectLearnPetSpell(uint32 i)
         return;
 
     pet->SetTP(pet->m_TrainingPoints - pet->GetTPForSpell(learn_spellproto->Id));
-	pet->learnSpell(learn_spellproto->Id);
-	
+    pet->learnSpell(learn_spellproto->Id);
+    
     pet->SavePetToDB(PET_SAVE_AS_CURRENT);
     _player->PetSpellInitialize();
 }
@@ -3381,15 +3381,15 @@ void Spell::EffectSkill(uint32 i)
 
 void Spell::EffectApplyPetAura(uint32 i)
 {
-	//spell aura for both pet and owner, think the pet has the aura and applies it to owner
-	EffectApplyAura(i);
+    //spell aura for both pet and owner, think the pet has the aura and applies it to owner
+    EffectApplyAura(i);
 
-	Unit* owner = unitTarget->GetCharmerOrOwner();
-	if(owner)
-	{
-		unitTarget = owner;
-		EffectApplyAura(i);
-	}
+    Unit* owner = unitTarget->GetCharmerOrOwner();
+    if(owner)
+    {
+        unitTarget = owner;
+        EffectApplyAura(i);
+    }
 }
 
 void Spell::EffectSummonDemon(uint32 i)
@@ -3407,14 +3407,16 @@ void Spell::EffectSummonDemon(uint32 i)
         m_caster->GetClosePoint(NULL, px, py, pz);
 
     Creature* Charmed = m_caster->SummonCreature(m_spellInfo->EffectMiscValue[i], m_caster->GetMapId(), px, py, pz, m_caster->GetOrientation(),TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,3600000);
-    Charmed->SetLevel(m_caster->getLevel());	//might not always work correctly, maybe the creature that dies from CoD casts the effect on itself and is therefore the caster?
+
+    //might not always work correctly, maybe the creature that dies from CoD casts the effect on itself and is therefore the caster?
+    Charmed->SetLevel(m_caster->getLevel());
 
     //TODO: Add damage/mana/hp according to level
 
-    if (m_spellInfo->EffectMiscValue[i] == 89) //Inferno summon
+    if (m_spellInfo->EffectMiscValue[i] == 89)              //Inferno summon
     {
         //Enslave demon effect, without mana cost and cooldown
-        m_caster->CastSpell(Charmed, 20882, true);	//FIXME: enslave does not scale with level, level 62+ minions cannot be enslaved
+        m_caster->CastSpell(Charmed, 20882, true);          //FIXME: enslave does not scale with level, level 62+ minions cannot be enslaved
 
         //Inferno effect
         Charmed->CastSpell(Charmed, 22703, true, 0);

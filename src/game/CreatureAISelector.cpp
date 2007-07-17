@@ -38,8 +38,8 @@ namespace FactorySelector
         //the commented condition is too db dependant to get into the core, but is an example to create the possibilty to have scripts for untamed pets and scripts for their tamed/owned equivalents
         //e.g. if there are scripts for warlock pets but not for hunter's the activation of the check will allow warlock pets to be scripted while hunter pets would retain standart pet AI
         CreatureAI* scriptedAI = Script->GetAI(creature);
-		if(scriptedAI && !((creature->isPet() || creature->isCharmed())/* && creature->GetCreatureInfo()->ScriptName == "generic_creature"*/))
-			return scriptedAI;
+        if(scriptedAI && !((creature->isPet() || creature->isCharmed())/* && creature->GetCreatureInfo()->ScriptName == "generic_creature"*/))
+            return scriptedAI;
 
         CreatureAIRegistry &ai_registry(CreatureAIRepository::Instance());
         assert( creature->GetCreatureInfo() != NULL );

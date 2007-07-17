@@ -180,7 +180,7 @@ void HostilReference::removeReference()
 
 Unit* HostilReference::getSourceUnit()
 {
-    return (getSource()->getOwner());		
+    return (getSource()->getOwner());
 }
 
 //============================================================

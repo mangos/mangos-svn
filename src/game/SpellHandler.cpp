@@ -646,17 +646,17 @@ void WorldSession::HandlePetCancelAuraOpcode( WorldPacket& recvPacket)
     uint16 spellId;
 //    uint16 unknown; what's this for? always 0 during tests
 
-	recvPacket >> guid;
-	recvPacket >> spellId;
-	
-	SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId );
+    recvPacket >> guid;
+    recvPacket >> spellId;
+    
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId );
     if(!spellInfo)
     {
         sLog.outError("WORLD: unknown PET spell id %i\n", spellId);
-    	return;
+        return;
     }
 
-	Creature* pet=ObjectAccessor::Instance().GetCreatureOrPet(*_player,guid);
+    Creature* pet=ObjectAccessor::Instance().GetCreatureOrPet(*_player,guid);
 
     if(!pet)
     {
@@ -672,13 +672,13 @@ void WorldSession::HandlePetCancelAuraOpcode( WorldPacket& recvPacket)
 
     if(!pet->isAlive())
     {
-		((Pet*)pet)->SendActionFeedback(FEEDBACK_PET_DEAD);
+        ((Pet*)pet)->SendActionFeedback(FEEDBACK_PET_DEAD);
         return;
     }
 
-	pet->RemoveAurasDueToSpell(spellId);
+    pet->RemoveAurasDueToSpell(spellId);
 
-	pet->AddCreatureSpellCooldown(spellId);
+    pet->AddCreatureSpellCooldown(spellId);
 }
 
 void WorldSession::HandleCancelGrowthAuraOpcode( WorldPacket& recvPacket)

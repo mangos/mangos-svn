@@ -100,28 +100,28 @@ struct PetSpell
 
 enum ActionFeedback
 {
-	FEEDBACK_NONE	         = 0,
-	FEEDBACK_PET_DEAD        = 1,
-	FEEDBACK_NOTHING_TO_ATT  = 2,
-	FEEDBACK_CANT_ATT_TARGET = 3,
+    FEEDBACK_NONE            = 0,
+    FEEDBACK_PET_DEAD        = 1,
+    FEEDBACK_NOTHING_TO_ATT  = 2,
+    FEEDBACK_CANT_ATT_TARGET = 3
 };
 
 enum PetTalk
 {
-	PET_TALK_SPECIAL_SPELL	= 0,
-	PET_TALK_ATTACK			= 1
+    PET_TALK_SPECIAL_SPELL  = 0,
+    PET_TALK_ATTACK         = 1
 };
 
 typedef HM_NAMESPACE::hash_map<uint16, PetSpell*> PetSpellMap;
 typedef std::map<uint32,uint32> TeachSpellMap;
 typedef std::set<uint32> AutoSpellList;
 
-#define HAPPINESS_LEVEL_SIZE		333000
+#define HAPPINESS_LEVEL_SIZE        333000
 
 extern const uint32 LevelUpLoyalty[6];
 extern const uint32 LevelStartLoyalty[6];
 
-#define ACTIVE_SPELLS_MAX			4
+#define ACTIVE_SPELLS_MAX           4
 
 #define OWNER_MAX_DISTANCE 100
 
@@ -200,9 +200,9 @@ class Pet : public Creature
         void removeSpell(uint16 spell_id);
         bool _removeSpell(uint16 spell_id);
 
-        PetSpellMap		  m_spells;
-        TeachSpellMap	  m_teachspells;
-        AutoSpellList 	  m_autospells;
+        PetSpellMap     m_spells;
+        TeachSpellMap   m_teachspells;
+        AutoSpellList   m_autospells;
 
         void InitPetCreateSpells();
         void CheckLearning(uint32 spellid);
@@ -211,7 +211,7 @@ class Pet : public Creature
         void  SetTP(int32 TP);
         int32 GetDispTP();
 
-        int32 	m_TrainingPoints;
+        int32   m_TrainingPoints;
         uint32  m_resetTalentsCost;
         time_t  m_resetTalentsTime;
 
