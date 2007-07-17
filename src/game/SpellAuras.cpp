@@ -432,24 +432,6 @@ void Aura::SetModifier(uint8 t, int32 a, uint32 pt, int32 miscValue, uint32 misc
     m_modifier.m_miscvalue = miscValue;
     m_modifier.m_miscvalue2 = miscValue2;
     m_modifier.periodictime = pt;
-
-    Unit* caster = GetCaster();
-    if (caster && caster->GetTypeId() == TYPEID_PLAYER)
-    {
-        ((Player *)caster)->ApplySpellMod(m_spellId,SPELLMOD_ALL_EFFECTS, m_modifier.m_amount);
-        switch(m_effIndex)
-        {
-            case 0:
-                ((Player*)caster)->ApplySpellMod(m_spellId,SPELLMOD_EFFECT1, m_modifier.m_amount);
-                break;
-            case 1:
-                ((Player*)caster)->ApplySpellMod(m_spellId,SPELLMOD_EFFECT2, m_modifier.m_amount);
-                break;
-            case 2:
-                ((Player*)caster)->ApplySpellMod(m_spellId,SPELLMOD_EFFECT3, m_modifier.m_amount);
-                break;
-        }
-    }
 }
 
 void Aura::Update(uint32 diff)
