@@ -13034,13 +13034,16 @@ void Player::TextEmote(const std::string text)
         SendMessageToOwnTeamSet(&data,true);
 }
 
-void Player::Whisper(const uint64 receiver, const std::string text, const uint32 language)
+void Player::Whisper(const uint64 receiver, const std::string text, uint32 language)
 {
+    if (language != LANG_ADDON)     // if not addon data
+        language = LANG_UNIVERSAL;  // whispers should always be readable
+   
     Player *rPlayer = objmgr.GetPlayer(receiver);
 
     WorldPacket data(SMSG_MESSAGECHAT, 200);
     data << (uint8)CHAT_MSG_WHISPER;
-    data << (uint32)LANG_UNIVERSAL;
+    data << (uint32)language;
     data << (uint64)GetGUID();
     data << (uint32)0;
     data << (uint64)GetGUID();

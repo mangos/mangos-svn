@@ -54,27 +54,35 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
         return;
     }
 
-    // send in universal language if player in .gmon mode (ignore spell effects)
-    if (_player->isGameMaster())
-        lang = LANG_UNIVERSAL;
-    else
+    // LANG_ADDON should not be changed nor be affected by flood control
+    if (lang != LANG_ADDON)
     {
-        // send in universal language in two side iteration allowed mode
-        if (sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHAT) || _player->isGameMaster())
+        // send in universal language if player in .gmon mode (ignore spell effects)
+        if (_player->isGameMaster())
             lang = LANG_UNIVERSAL;
-    
-        // but overwrite it by SPELL_AURA_MOD_LANGUAGE auras (only single case used)
-        Unit::AuraList const& ModLangAuras = _player->GetAurasByType(SPELL_AURA_MOD_LANGUAGE);
-        if(!ModLangAuras.empty())
-            lang = ModLangAuras.front()->GetModifier()->m_miscvalue;
+        else
+        {
+            // send in universal language in two side iteration allowed mode
+            if (sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHAT) || _player->isGameMaster())
+                lang = LANG_UNIVERSAL;
+        
+            // but overwrite it by SPELL_AURA_MOD_LANGUAGE auras (only single case used)
+            Unit::AuraList const& ModLangAuras = _player->GetAurasByType(SPELL_AURA_MOD_LANGUAGE);
+            if(!ModLangAuras.empty())
+                lang = ModLangAuras.front()->GetModifier()->m_miscvalue;
+        }
+
+        if (!_player->CanSpeak())
+        {
+            std::string timeStr = secsToTimeString(m_muteTime - time(NULL));
+            SendNotification(LANG_WAIT_BEFORE_SPEAKING,timeStr.c_str());
+            return;
+        }
+
+        if (type != CHAT_MSG_AFK && type != CHAT_MSG_DND)
+            GetPlayer()->UpdateSpeakTime();
     }
 
-    if (!_player->CanSpeak())
-    {
-        std::string timeStr = secsToTimeString(m_muteTime - time(NULL));
-        SendNotification(LANG_WAIT_BEFORE_SPEAKING,timeStr.c_str());
-        return;
-    }
 
     switch(type)
     {
@@ -89,20 +97,11 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 break;
 
             if(type == CHAT_MSG_SAY)
-            {
                 GetPlayer()->Say(msg, lang);
-                GetPlayer()->UpdateSpeakTime();
-            }
             else if(type == CHAT_MSG_EMOTE)
-            {
                 GetPlayer()->TextEmote(msg);
-                GetPlayer()->UpdateSpeakTime();
-            }
             else if(type == CHAT_MSG_YELL)
-            {
                 GetPlayer()->Yell(msg, lang);
-                GetPlayer()->UpdateSpeakTime();
-            }
         } break;        
 
         case CHAT_MSG_WHISPER:
@@ -145,7 +144,6 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             }
 
             GetPlayer()->Whisper(player->GetGUID(), msg, lang);
-            GetPlayer()->UpdateSpeakTime();
         } break;
 
         case CHAT_MSG_PARTY:
@@ -163,7 +161,6 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             WorldPacket data;
             sChatHandler.FillMessageData(&data, this, CHAT_MSG_PARTY, lang, NULL, 0, msg.c_str());
             group->BroadcastPacket(&data, group->GetMemberGroup(GetPlayer()->GetGUID()));
-            GetPlayer()->UpdateSpeakTime();
         }
         break;
         case CHAT_MSG_GUILD:
@@ -178,10 +175,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             {
                 Guild *guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
                 if (guild)
-                {
-                    guild->BroadcastToGuild(this, msg);
-                    GetPlayer()->UpdateSpeakTime();
-                }
+                    guild->BroadcastToGuild(this, msg, lang == LANG_ADDON ? LANG_ADDON : LANG_UNIVERSAL);
             }
 
             break;
@@ -198,10 +192,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             {
                 Guild *guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
                 if (guild)
-                {
-                    guild->BroadcastToOfficers(this, msg);
-                    GetPlayer()->UpdateSpeakTime();
-                }
+                    guild->BroadcastToOfficers(this, msg, lang == LANG_ADDON ? LANG_ADDON : LANG_UNIVERSAL);
             }
             break;
         }
@@ -220,7 +211,6 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             WorldPacket data;
             sChatHandler.FillMessageData(&data, this, CHAT_MSG_RAID, lang, "", 0, msg.c_str());
             group->BroadcastPacket(&data);
-            GetPlayer()->UpdateSpeakTime();
         } break;
         case CHAT_MSG_RAID_LEADER:
         {
@@ -237,7 +227,6 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             WorldPacket data;
             sChatHandler.FillMessageData(&data, this, CHAT_MSG_RAID_LEADER, lang, "", 0, msg.c_str());
             group->BroadcastPacket(&data);
-            GetPlayer()->UpdateSpeakTime();
         } break;
         case CHAT_MSG_RAID_WARN:
         {
@@ -251,7 +240,6 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             WorldPacket data;
             sChatHandler.FillMessageData(&data, this, CHAT_MSG_RAID_WARN, lang, "", 0, msg.c_str());
             group->BroadcastPacket(&data);
-            GetPlayer()->UpdateSpeakTime();
         } break;
 
         case CHAT_MSG_BATTLEGROUND_CHAT:
@@ -266,7 +254,6 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             WorldPacket data;
             sChatHandler.FillMessageData(&data, this, CHAT_MSG_BATTLEGROUND_CHAT, lang, "", 0, msg.c_str());
             group->BroadcastPacket(&data);
-            GetPlayer()->UpdateSpeakTime();
         } break;
 
         case CHAT_MSG_BATTLEGROUND_LEADER:
@@ -281,7 +268,6 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             WorldPacket data;
             sChatHandler.FillMessageData(&data, this, CHAT_MSG_BATTLEGROUND_LEADER, lang, "", 0, msg.c_str());
             group->BroadcastPacket(&data);
-            GetPlayer()->UpdateSpeakTime();
         } break;
 
         case CHAT_MSG_CHANNEL:
@@ -297,10 +283,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
             {
                 if(Channel *chn = cMgr->GetChannel(channel,_player))
-                {
                     chn->Say(_player->GetGUID(),msg.c_str(),lang);
-                    GetPlayer()->UpdateSpeakTime();
-                }
             }
         } break;
 

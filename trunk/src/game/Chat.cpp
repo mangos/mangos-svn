@@ -33,7 +33,7 @@
 
 LanguageDesc lang_description[LANGUAGES_COUNT] =
 {
-    { LANG_UNIVERSAL2,      0, 0                       },
+    { LANG_ADDON,           0, 0                       },
     { LANG_GLOBAL,          0, 0                       },
     { LANG_UNIVERSAL,       0, 0                       },
     { LANG_ORCISH,        669, SKILL_LANG_ORCISH       },
@@ -540,7 +540,10 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
 
     data->Initialize(SMSG_MESSAGECHAT, 100);                // guess size
     *data << (uint8)type;
-    *data << uint32((type != CHAT_MSG_CHANNEL) && (type != CHAT_MSG_WHISPER) ? language : 0);
+    if ((type != CHAT_MSG_CHANNEL && type != CHAT_MSG_WHISPER) || language == LANG_ADDON)
+        *data << (uint32)language;
+    else
+        *data << (uint32)LANG_UNIVERSAL;
 
     switch(type)
     {
