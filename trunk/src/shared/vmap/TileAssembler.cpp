@@ -191,17 +191,20 @@ namespace VMAP
 
     //=================================================================
 
-    bool TileAssembler::fillModelContainerArray(const std::string& pDirFileName, unsigned int pMapId, int pXPos, int pYPos, Array<ModelContainer*>& pMC) {
+    bool TileAssembler::fillModelContainerArray(const std::string& pDirFileName, unsigned int pMapId, int pXPos, int pYPos, Array<ModelContainer*>& pMC)
+    {
         bool result = true;
         ModelContainer* modelContainer;
 
         NameCollection nameCollection = iCoordModelMapping->getFilenamesForCoordinate(pMapId, pXPos, pYPos);
-        if(nameCollection.size() > 0) {
+        if(nameCollection.size() > 0)
+        {
             result = false;
             char dirfilename[500];
             sprintf(dirfilename,"%s/%s.vmdir",iDestDir.c_str(),pDirFileName.c_str());
             FILE *dirfile = fopen(dirfilename, "ab");
-            if(dirfile) {
+            if(dirfile)
+            {
                 result = true;
                 char destnamebuffer[500];
                 char fullnamedestnamebuffer[500];
@@ -211,7 +214,8 @@ namespace VMAP
                     checkDoubleStr.append("##");
                     checkDoubleStr.append(std::string(destnamebuffer));
                     // Check, if same file already is in the same dir file
-                    if(!iCoordModelMapping->isAlreadyProcessedSingleFile(checkDoubleStr)) {
+                    if(!iCoordModelMapping->isAlreadyProcessedSingleFile(checkDoubleStr))
+                    {
                         iCoordModelMapping->addAlreadyProcessedSingleFile(checkDoubleStr);
                         fprintf(dirfile, "%s\n",destnamebuffer);
                         sprintf(fullnamedestnamebuffer,"%s/%s",iDestDir.c_str(),destnamebuffer);
@@ -225,7 +229,8 @@ namespace VMAP
                 }
                 // process the large singe files
                 int pos = 0;
-                while(result && (pos < nameCollection.iSingeFiles.size())) {
+                while(result && (pos < nameCollection.iSingeFiles.size()))
+                {
                     std::string destFileName = iDestDir;
                     destFileName.append("/");
                     std::string dirEntryName = getDirEntryNameFromModName(pMapId,nameCollection.iSingeFiles[pos]);
@@ -233,7 +238,8 @@ namespace VMAP
                     checkDoubleStr.append("##");
                     checkDoubleStr.append(nameCollection.iSingeFiles[pos]);
                     // Check, if same file already is in the same dir file
-                    if(!iCoordModelMapping->isAlreadyProcessedSingleFile(checkDoubleStr)) {
+                    if(!iCoordModelMapping->isAlreadyProcessedSingleFile(checkDoubleStr))
+                    {
                         iCoordModelMapping->addAlreadyProcessedSingleFile(checkDoubleStr);
                         fprintf(dirfile, "%s\n",dirEntryName.c_str());
                         destFileName.append(dirEntryName);
@@ -273,7 +279,8 @@ namespace VMAP
 
     //=================================================================
 
-    ModelContainer* TileAssembler::processNames(const Array<std::string>& pPositions, const char* pDestFileName) {
+    ModelContainer* TileAssembler::processNames(const Array<std::string>& pPositions, const char* pDestFileName)
+    {
         ModelContainer *modelContainer = 0;
 
         Vector3 basepos = Vector3(0,0,0);
@@ -305,7 +312,8 @@ namespace VMAP
     }
 
     //=================================================================
-    bool TileAssembler::readRawFile(std::string& pModelFilename,  ModelPosition& pModelPosition, AABSPTree<SubModel *> *pMainTree) {
+    bool TileAssembler::readRawFile(std::string& pModelFilename,  ModelPosition& pModelPosition, AABSPTree<SubModel *> *pMainTree)
+    {
         bool result = false;
 
         std::string filename = iSrcDir;
@@ -356,11 +364,11 @@ namespace VMAP
             char blockId[5];
             blockId[4] = 0;
             int blocksize;
+
             if(fread(&groups, sizeof(uint32), 1, rf) != 1) { fclose(rf); return(false); }
-            for(int g=0;g<(int)groups;g++) {
-                if(groups > 1) {
-                    int xxx =0;
-                }
+
+            for(int g=0;g<(int)groups;g++)
+            {
                 // group MUST NOT have more then 65536 indexes !! Array will have a problem with that !! (strange ...)
                 Array<int> tempIndexArray;
                 Array<Vector3> tempVertexArray;
@@ -375,7 +383,8 @@ namespace VMAP
                 if(strcmp(blockId, "GRP ") != 0) { fclose(rf); return(false); }
                 if(fread(&blocksize, sizeof(int), 1, rf) != 1) { fclose(rf); return(false); }
                 if(fread(&branches, sizeof(uint32), 1, rf) != 1) { fclose(rf); return(false); }
-                for(int b=0;b<(int)branches; b++) {
+                for(int b=0;b<(int)branches; b++)
+                {
                     uint32 indexes;
                     // indexes for each branch (not used jet)
                     if(fread(&indexes, sizeof(uint32), 1, rf) != 1) { fclose(rf); return(false); }
@@ -387,7 +396,8 @@ namespace VMAP
                 if(fread(&blocksize, sizeof(int), 1, rf) != 1) { fclose(rf); return(false); }
                 unsigned int nindexes;
                 if(fread(&nindexes, sizeof(uint32), 1, rf) != 1) { fclose(rf); return(false); }
-                if(nindexes >0) {
+                if(nindexes >0)
+                {
                     unsigned short *indexarray = new unsigned short[nindexes*sizeof(unsigned short)];
                     if(fread(indexarray, sizeof(unsigned short), nindexes, rf) != nindexes) { fclose(rf); return(false); }
                     for(int i=0;i<(int)nindexes; i++) {
@@ -404,12 +414,14 @@ namespace VMAP
                 unsigned int nvectors;
                 if(fread(&nvectors, sizeof(int), 1, rf) != 1) { fclose(rf); return(false); }
                 float *vectorarray = 0;
-                if(nvectors >0) {
+                if(nvectors >0)
+                {
                     vectorarray = new float[nvectors*sizeof(float)*3];
                     if(fread(vectorarray, sizeof(float)*3, nvectors, rf) != nvectors) { fclose(rf); return(false); }
                 }
                 // ----- liquit
-                if(flags & 1) {
+                if(flags & 1)
+                {
                     // we have liquit -> not handled yet ... skip
                     if(fread(&blockId, 4, 1, rf) != 1) { fclose(rf); return(false); }
                     if(strcmp(blockId, "LIQU") != 0) { fclose(rf); return(false); }
@@ -417,7 +429,8 @@ namespace VMAP
                     fseek(rf, blocksize, SEEK_CUR);
                 }
 
-                for(unsigned int i=0, indexNo=0; indexNo<nvectors; indexNo++) {
+                for(unsigned int i=0, indexNo=0; indexNo<nvectors; indexNo++)
+                {
                     Vector3 v = Vector3(vectorarray[i+2], vectorarray[i+1], vectorarray[i+0]);
                     i+=3;
                     v = pModelPosition.transform(v);
@@ -431,10 +444,13 @@ namespace VMAP
 
                 // ---- calculate triangles
                 int rest = nindexes%3;
-                if(rest != 0) {
+                if(rest != 0)
+                {
                     nindexes -= rest;
                 }
-                for(unsigned int i=0;i<(nindexes);) {
+
+                for(unsigned int i=0;i<(nindexes);)
+                {
                     Triangle t = Triangle(tempVertexArray[tempIndexArray[i+2]], tempVertexArray[tempIndexArray[i+1]], tempVertexArray[tempIndexArray[i+0]] );
                     i+=3;
                     trianglecount++;
@@ -442,10 +458,14 @@ namespace VMAP
                         gtree->insert(t);
                     }
                 }
-                if(vectorarray != 0) {
+
+                if(vectorarray != 0)
+                {
                     delete vectorarray;
                 }
-                if(gtree->size() >0) {
+
+                if(gtree->size() >0)
+                {
                     gtree->balance();
                     SubModel *sm = new SubModel(gtree);
 #ifdef _ASSEMBLER_DEBUG
@@ -467,7 +487,8 @@ namespace VMAP
 
     //=================================================================
 
-    bool TileAssembler::fillModelIntoTree(AABSPTree<SubModel *> *pMainTree, const Vector3& pBasePos, std::string& pPos, std::string& pModelFilename) {
+    bool TileAssembler::fillModelIntoTree(AABSPTree<SubModel *> *pMainTree, const Vector3& pBasePos, std::string& pPos, std::string& pModelFilename)
+    {
         bool result = false;
         ModelPosition modelPosition;
         getModelPosition(pPos, modelPosition);

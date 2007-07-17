@@ -229,7 +229,7 @@ void LoadDBCStores(std::string dataPath)
     memset(sTaxiNodesMask,0,sizeof(sTaxiNodesMask));
     for(uint32 i = 1; i < sTaxiNodesStore.nCount; ++i)
     {
-        if(TaxiNodesEntry const* entry = sTaxiNodesStore.LookupEntry(i))
+        if(sTaxiNodesStore.LookupEntry(i))
         {
             uint8  field   = (uint8)((i - 1) / 32);
             uint32 submask = 1<<((i-1)%32);

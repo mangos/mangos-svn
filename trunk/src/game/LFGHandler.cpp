@@ -33,7 +33,6 @@ static void AttemptJoin(Player* _player)
 
     for(ObjectAccessor::PlayersMapType::const_iterator iter = players.begin(); iter != players.end(); ++iter)
     {
-        uint64 guid = iter->first;
         Player *plr = iter->second;
 
         // skip enemies and self
@@ -80,7 +79,6 @@ static void AttemptAddMore(Player* _player)
 
     for(ObjectAccessor::PlayersMapType::const_iterator iter = players.begin(); iter != players.end(); ++iter)
     {
-        uint64 guid = iter->first;
         Player *plr = iter->second;
 
         // skip enemies and self
@@ -233,7 +231,6 @@ void WorldSession::SendLfgResult(uint32 type, uint32 entry, uint8 lfg_type)
     
     for(ObjectAccessor::PlayersMapType::const_iterator iter = players.begin(); iter != players.end(); ++iter)
     {
-        uint64 guid = iter->first;
         Player *plr = iter->second;
 
         if(!plr || plr->GetTeam() != _player->GetTeam())

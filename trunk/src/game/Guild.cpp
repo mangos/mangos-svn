@@ -695,7 +695,7 @@ void Guild::Query(WorldSession *session)
     data << Id;
     data << name;
     RankList::iterator itr;
-    for (int i = 0 ; i < 10; ++i)                           // show always 10 ranks
+    for (size_t i = 0 ; i < 10; ++i)                           // show always 10 ranks
     {
         if(i < m_ranks.size())
             data << m_ranks[i].name;

@@ -1104,8 +1104,6 @@ void ObjectMgr::LoadPlayerInfo()
         }
         else
         {
-            uint16 maxconfskill = sWorld.GetConfigMaxSkillValue();
-
             barGoLink bar( result->GetRowCount() );
 
             do
@@ -1611,7 +1609,7 @@ void ObjectMgr::LoadQuests()
             // no changes, quest can't be done for this requirement
         }
 
-        if(qinfo->RequiredRepValue && qinfo->RequiredRepValue > Player::Reputation_Cap)
+        if(qinfo->RequiredRepValue && int32(qinfo->RequiredRepValue) > Player::Reputation_Cap)
         {
             sLog.outErrorDb("Quest %u has `RequiredRepValue` = %u but max reputation is %u, quest can't be done.",
                 qinfo->GetQuestId(),qinfo->RequiredRepValue,Player::Reputation_Cap);
@@ -3654,19 +3652,19 @@ struct tbl
 };
 
 tbl tbls[NUM_TBLS] = {
-    "character", 1,
-    "character_action", 0,
-    "character_aura", 0,
-    "character_homebind", 0,
-    "character_inventory", 2,
-    "character_kill", 0, 
-    "character_queststatus", 0, 
-    "character_reputation", 0, 
-    "character_spell", 0, 
-    "character_spell_cooldown", 0, 
-    "item_instance", 3, 
-    "character_ticket", 0, 
-    "character_tutorial", 0
+    { "character", 1 },
+    { "character_action", 0 },
+    { "character_aura", 0 },
+    { "character_homebind", 0 },
+    { "character_inventory", 2 },
+    { "character_kill", 0 },
+    { "character_queststatus", 0 },
+    { "character_reputation", 0 },
+    { "character_spell", 0 },
+    { "character_spell_cooldown", 0 },
+    { "item_instance", 3 },
+    { "character_ticket", 0 },
+    { "character_tutorial", 0 }
 };
 
 std::string CreateDumpString(char *table, QueryResult *result)
@@ -3675,7 +3673,7 @@ std::string CreateDumpString(char *table, QueryResult *result)
     ostringstream ss;
     ss << "INSERT INTO `" << table << "` VALUES (";
     Field *fields = result->Fetch();
-    for(int i = 0; i < result->GetFieldCount(); i++)
+    for(uint32 i = 0; i < result->GetFieldCount(); i++)
     {
         if (i == 0) ss << "'";
         else ss << ", '";

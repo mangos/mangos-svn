@@ -2077,7 +2077,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
     // restore if need some important flags
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 );
 
-    SetArmor(m_createStats[STAT_AGILITY]*2);
+    SetArmor(int32(m_createStats[STAT_AGILITY]*2));
 
     for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
         SetPosStat(Stats(i), 0);
@@ -2158,7 +2158,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
     }
 
     // set armor (resistance 0) to original value (create_agility*2)
-    SetArmor(m_createStats[STAT_AGILITY]*2);
+    SetArmor(int32(m_createStats[STAT_AGILITY]*2));
     SetResistanceBuffMods(SpellSchools(0), true, 0);
     SetResistanceBuffMods(SpellSchools(0), false, 0);
     // set other resistance to original value (0)
@@ -2175,7 +2175,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
     // save new stats
     for (int i = POWER_MANA; i < MAX_POWERS; i++)
-        SetMaxPower(Powers(i),  GetCreatePowers(Powers(i)));
+        SetMaxPower(Powers(i),  uint32(GetCreatePowers(Powers(i))));
     
     SetMaxHealth(info.health);
 
@@ -2740,7 +2740,7 @@ bool Player::resetTalents(bool no_cost)
         }
     }
 
-    for (int i = 0; i < sTalentStore.GetNumRows(); i++)
+    for (unsigned int i = 0; i < sTalentStore.GetNumRows(); i++)
     {
         TalentEntry const *talentInfo = sTalentStore.LookupEntry(i);
         if (!talentInfo) continue;
@@ -4547,14 +4547,17 @@ void Player::SetSkill(uint32 id, uint16 currVal, uint16 maxVal)
             SetUInt32Value(PLAYER_SKILL(i)+1,maxVal*0x10000+currVal);
             // apply skill bonuses
             SetUInt32Value(PLAYER_SKILL(i)+2,0);
+
             AuraList const& mModSkill = GetAurasByType(SPELL_AURA_MOD_SKILL);
             for(AuraList::const_iterator i = mModSkill.begin(); i != mModSkill.end(); ++i)
-                if ((*i)->GetModifier()->m_miscvalue == id)
+                if ((*i)->GetModifier()->m_miscvalue == int32(id))
                     (*i)->ApplyModifier(true);
+
             AuraList const& mModSkillTalent = GetAurasByType(SPELL_AURA_MOD_SKILL_TALENT);
             for(AuraList::const_iterator i = mModSkillTalent.begin(); i != mModSkillTalent.end(); ++i)
-                if ((*i)->GetModifier()->m_miscvalue == id)
+                if ((*i)->GetModifier()->m_miscvalue == int32(id))
                     (*i)->ApplyModifier(true);
+
             return;
         }
     }
@@ -5621,7 +5624,8 @@ void Player::DuelComplete(uint8 type)
         if (!i->second->IsPositive() && i->second->GetCasterGUID() == GetGUID() && i->second->GetAuraApplyTime() >= duel->startTime)
             auras2remove.push_back(i->second->GetId());
     }
-    for(int i=0; i<auras2remove.size(); i++)
+
+    for(size_t i=0; i<auras2remove.size(); i++)
         duel->opponent->RemoveAurasDueToSpell(auras2remove[i]);
 
     auras2remove.clear();
@@ -5631,7 +5635,7 @@ void Player::DuelComplete(uint8 type)
         if (!i->second->IsPositive() && i->second->GetCasterGUID() == duel->opponent->GetGUID() && i->second->GetAuraApplyTime() >= duel->startTime)
             auras2remove.push_back(i->second->GetId());
     }
-    for(int i=0; i<auras2remove.size(); i++)
+    for(size_t i=0; i<auras2remove.size(); i++)
         RemoveAurasDueToSpell(auras2remove[i]);
 
     //cleanups
@@ -5766,81 +5770,81 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
                 break;
 
             case ITEM_MOD_DEFENSE_SKILL_RATING:
-                ApplyRatingMod(PLAYER_FIELD_DEFENCE_RATING, val, apply);
+                ApplyRatingMod(PLAYER_FIELD_DEFENCE_RATING, int32(val), apply);
                 break;
             case ITEM_MOD_DODGE_RATING:
-                ApplyRatingMod(PLAYER_FIELD_DODGE_RATING, val, apply);
+                ApplyRatingMod(PLAYER_FIELD_DODGE_RATING, int32(val), apply);
                 break;
             case ITEM_MOD_PARRY_RATING:
-                ApplyRatingMod(PLAYER_FIELD_PARRY_RATING, val, apply);
+                ApplyRatingMod(PLAYER_FIELD_PARRY_RATING, int32(val), apply);
                 break;
             case ITEM_MOD_BLOCK_RATING:
-                ApplyRatingMod(PLAYER_FIELD_BLOCK_RATING, val, apply);
+                ApplyRatingMod(PLAYER_FIELD_BLOCK_RATING, int32(val), apply);
                 break;
             case ITEM_MOD_HIT_MELEE_RATING:
-                ApplyRatingMod(PLAYER_FIELD_MELEE_HIT_RATING, val, apply);
+                ApplyRatingMod(PLAYER_FIELD_MELEE_HIT_RATING, int32(val), apply);
                 break;
             case ITEM_MOD_HIT_RANGED_RATING:
-                ApplyRatingMod(PLAYER_FIELD_RANGED_HIT_RATING, val, apply);
+                ApplyRatingMod(PLAYER_FIELD_RANGED_HIT_RATING, int32(val), apply);
                 break;
             case ITEM_MOD_HIT_SPELL_RATING:
-                ApplyRatingMod(PLAYER_FIELD_SPELL_HIT_RATING, val, apply);
+                ApplyRatingMod(PLAYER_FIELD_SPELL_HIT_RATING, int32(val), apply);
                 break;
             case ITEM_MOD_CRIT_MELEE_RATING:
-                ApplyRatingMod(PLAYER_FIELD_MELEE_CRIT_RATING, val, apply);
+                ApplyRatingMod(PLAYER_FIELD_MELEE_CRIT_RATING, int32(val), apply);
                 break;
             case ITEM_MOD_CRIT_RANGED_RATING:
-                ApplyRatingMod(PLAYER_FIELD_RANGED_CRIT_RATING, val, apply);
+                ApplyRatingMod(PLAYER_FIELD_RANGED_CRIT_RATING, int32(val), apply);
                 break;
             case ITEM_MOD_CRIT_SPELL_RATING:
-                ApplyRatingMod(PLAYER_FIELD_SPELL_CRIT_RATING, val, apply);
+                ApplyRatingMod(PLAYER_FIELD_SPELL_CRIT_RATING, int32(val), apply);
                 break;
             case ITEM_MOD_HIT_TAKEN_MELEE_RATING:
-                //ApplyRatingMod(PLAYER_FIELD_MELEE_HA_RATING, val, apply);
+                //ApplyRatingMod(PLAYER_FIELD_MELEE_HA_RATING, int32(val), apply);
                 break;
             case ITEM_MOD_HIT_TAKEN_RANGED_RATING:
-                //ApplyRatingMod(PLAYER_FIELD_RANGED_HA_RATING, val, apply);
+                //ApplyRatingMod(PLAYER_FIELD_RANGED_HA_RATING, int32(val), apply);
                 break;
             case ITEM_MOD_HIT_TAKEN_SPELL_RATING:
-                //ApplyRatingMod(PLAYER_FIELD_SPELL_HA_RATING, val, apply);
+                //ApplyRatingMod(PLAYER_FIELD_SPELL_HA_RATING, int32(val), apply);
                 break;
             case ITEM_MOD_CRIT_TAKEN_MELEE_RATING:
-                //ApplyRatingMod(PLAYER_FIELD_MELEE_CA_RATING, val, apply);
+                //ApplyRatingMod(PLAYER_FIELD_MELEE_CA_RATING, int32(val), apply);
                 break;
             case ITEM_MOD_CRIT_TAKEN_RANGED_RATING:
-                //ApplyRatingMod(PLAYER_FIELD_RANGED_CA_RATING, val, apply);
+                //ApplyRatingMod(PLAYER_FIELD_RANGED_CA_RATING, int32(val), apply);
                 break;
             case ITEM_MOD_CRIT_TAKEN_SPELL_RATING:
-                //ApplyRatingMod(PLAYER_FIELD_SPELL_CA_RATING, val, apply);
+                //ApplyRatingMod(PLAYER_FIELD_SPELL_CA_RATING, int32(val), apply);
                 break;
             case ITEM_MOD_HASTE_MELEE_RATING:
-                ApplyRatingMod(PLAYER_FIELD_MELEE_HASTE_RATING, val, apply);
+                ApplyRatingMod(PLAYER_FIELD_MELEE_HASTE_RATING, int32(val), apply);
                 break;
             case ITEM_MOD_HASTE_RANGED_RATING:
-                ApplyRatingMod(PLAYER_FIELD_RANGED_HASTE_RATING, val, apply);
+                ApplyRatingMod(PLAYER_FIELD_RANGED_HASTE_RATING, int32(val), apply);
                 break;
             case ITEM_MOD_HASTE_SPELL_RATING:
-                ApplyRatingMod(PLAYER_FIELD_SPELL_HASTE_RATING, val, apply);
+                ApplyRatingMod(PLAYER_FIELD_SPELL_HASTE_RATING, int32(val), apply);
                 break;
             case ITEM_MOD_HIT_RATING:
-                ApplyRatingMod(PLAYER_FIELD_HIT_RATING, val, apply);
+                ApplyRatingMod(PLAYER_FIELD_HIT_RATING, int32(val), apply);
                 break;
             case ITEM_MOD_CRIT_RATING:
-                ApplyRatingMod(PLAYER_FIELD_CRIT_RATING, val, apply);
+                ApplyRatingMod(PLAYER_FIELD_CRIT_RATING, int32(val), apply);
                 break;
             case ITEM_MOD_HIT_TAKEN_RATING:
-                //ApplyRatingMod(PLAYER_FIELD_HA_RATING, val, apply);
+                //ApplyRatingMod(PLAYER_FIELD_HA_RATING, int32(val), apply);
                 break;
             case ITEM_MOD_CRIT_TAKEN_RATING:
-                //ApplyRatingMod(PLAYER_FIELD_CA_RATING, val, apply);
+                //ApplyRatingMod(PLAYER_FIELD_CA_RATING, int32(val), apply);
                 break;
             case ITEM_MOD_RESILIENCE_RATING:
-                ApplyRatingMod(PLAYER_FIELD_RESILIENCE_RATING, val, apply);
+                ApplyRatingMod(PLAYER_FIELD_RESILIENCE_RATING, int32(val), apply);
                 break;
             case ITEM_MOD_HASTE_RATING:
-                ApplyRatingMod(PLAYER_FIELD_MELEE_HASTE_RATING, val, apply);
-                ApplyRatingMod(PLAYER_FIELD_RANGED_HASTE_RATING, val, apply);
-                ApplyRatingMod(PLAYER_FIELD_SPELL_HASTE_RATING, val, apply);
+                ApplyRatingMod(PLAYER_FIELD_MELEE_HASTE_RATING, int32(val), apply);
+                ApplyRatingMod(PLAYER_FIELD_RANGED_HASTE_RATING, int32(val), apply);
+                ApplyRatingMod(PLAYER_FIELD_SPELL_HASTE_RATING, int32(val), apply);
                 break;
         }
         //sLog.outDebug("%s %s: \t\t%u", applystr.c_str(), typestr.c_str(), val);
@@ -8249,7 +8253,7 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
                             if( pBagProto && (pBagProto->Class != ITEM_CLASS_CONTAINER || pBagProto->SubClass != ITEM_SUBCLASS_CONTAINER) &&
                                 pItem->CanGoIntoBag(pBagProto) )
                             {
-                                for(int j = 0; j < pBagProto->ContainerSlots; j++)
+                                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                                 {
                                     pos = ( (INVENTORY_SLOT_BAG_0 << 8) | i );
                                     pItem2 = GetItemByPos( i, j );
@@ -8482,7 +8486,7 @@ uint8 Player::CanUseItem( Item *pItem, bool not_loading ) const
             }
             if( pProto->RequiredSpell != 0 && !HasSpell( pProto->RequiredSpell ) )
                 return EQUIP_ERR_NO_REQUIRED_PROFICIENCY;
-            if( pProto->RequiredReputationFaction && GetReputationRank(pProto->RequiredReputationFaction) < pProto->RequiredReputationRank )
+            if( pProto->RequiredReputationFaction && uint32(GetReputationRank(pProto->RequiredReputationFaction)) < pProto->RequiredReputationRank )
                 return EQUIP_ERR_CANT_EQUIP_REPUTATION;
             if( getLevel() < pProto->RequiredLevel )
                 return EQUIP_ERR_CANT_EQUIP_LEVEL_I;
@@ -8685,7 +8689,6 @@ Item* Player::EquipNewItem( uint16 pos, uint32 item, uint32 count, bool update )
     Item *pItem = CreateItem( item, count );
     if( pItem )
     {
-        ItemPrototype const *pProto = pItem->GetProto();
         ItemAddedQuestCheck( item, count );
         Item * retItem = EquipItem( pos, pItem, update );
 
@@ -9177,7 +9180,6 @@ void Player::DestroyItemCount( Item* pItem, uint32 &count, bool update )
     }
     else
     {
-        ItemPrototype const* pProto  = pItem->GetProto();
         ItemRemovedQuestCheck( pItem->GetEntry(), count);
         pItem->SetCount( pItem->GetCount() - count );
         count = 0;
@@ -9991,7 +9993,6 @@ void Player::ReducePoisonCharges(uint32 enchantId)
 {
     if(!enchantId)
         return;
-    uint32 pEnchantId = 0;
     uint32 charges = 0;
     Item *pItem;
 
@@ -10396,7 +10397,7 @@ bool Player::CanRewardQuest( Quest *pQuest, uint32 reward, bool msg )
 
         if ( pQuest->GetRewItemsCount() > 0 )
         {
-            for (int i = 0; i < pQuest->GetRewItemsCount(); i++)
+            for (uint32 i = 0; i < pQuest->GetRewItemsCount(); ++i)
             {
                 if( pQuest->RewItemId[i] )
                 {
@@ -10549,7 +10550,7 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward, Object* questGiver )
 
         if ( pQuest->GetRewItemsCount() > 0 )
         {
-            for (int i=0; i < pQuest->GetRewItemsCount(); i++)
+            for (uint32 i=0; i < pQuest->GetRewItemsCount(); ++i)
             {
                 if( pQuest->RewItemId[i] )
                 {
@@ -10762,7 +10763,7 @@ bool Player::SatisfyQuestReputation( uint32 quest_id, bool msg )
         if(!faction_id)
             return true;
 
-        return GetReputation(faction_id) >= qInfo->GetRequiredRepValue();
+        return GetReputation(faction_id) >= int32(qInfo->GetRequiredRepValue());
     }
     return false;
 }
@@ -11411,7 +11412,7 @@ void Player::SendQuestReward( Quest *pQuest, uint32 XP, Object * questGiver )
         }
         data << uint32( pQuest->GetRewItemsCount() );
 
-        for (int i = 0; i < pQuest->GetRewItemsCount(); i++)
+        for (uint32 i = 0; i < pQuest->GetRewItemsCount(); ++i)
         {
             if ( pQuest->RewItemId[i] > 0 )
                 data << pQuest->RewItemId[i] << pQuest->RewItemCount[i];
@@ -12140,8 +12141,6 @@ void Player::_LoadMailedItems()
 
 void Player::_LoadMail()
 {
-    time_t base = time(NULL);
-
     _LoadMailedItems();
 
     m_mail.clear();
@@ -12187,6 +12186,7 @@ void Player::_LoadQuestStatus()
 
     uint32 slot = 0;
 
+    //                                             0       1        2          3          4       5           6           7           8           9            10           11           12
     QueryResult *result = sDatabase.PQuery("SELECT `quest`,`status`,`rewarded`,`explored`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4` FROM `character_queststatus` WHERE `guid` = '%u'", GetGUIDLow());
 
     if(result)
@@ -12213,7 +12213,7 @@ void Player::_LoadQuestStatus()
                 mQuestStatus[quest_id].m_rewarded = ( fields[2].GetUInt8() > 0 );
                 mQuestStatus[quest_id].m_explored = ( fields[3].GetUInt8() > 0 );
 
-                uint32 quest_time = fields[4].GetUInt32();
+                time_t quest_time = time_t(fields[4].GetUInt64());
 
                 if( objmgr.QuestTemplates[quest_id]->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) && !GetQuestRewardStatus(quest_id) )
                 {
@@ -12594,7 +12594,7 @@ void Player::_SaveInventory()
 
     // do not save if the update queue is corrupt
     bool error = false;
-    for(int i = 0; i < m_itemUpdateQueue.size(); i++)
+    for(size_t i = 0; i < m_itemUpdateQueue.size(); i++)
     {
         Item *item = m_itemUpdateQueue[i];
         if(!item || item->GetState() == ITEM_REMOVED) continue;
@@ -12619,7 +12619,7 @@ void Player::_SaveInventory()
         return;
     }
 
-    for(int i = 0; i < m_itemUpdateQueue.size(); i++)
+    for(size_t i = 0; i < m_itemUpdateQueue.size(); i++)
     {
         Item *item = m_itemUpdateQueue[i];
         if(!item) continue;
@@ -12637,6 +12637,9 @@ void Player::_SaveInventory()
                 break;
             case ITEM_REMOVED:
                 sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `item` = '%u'", item->GetGUIDLow());
+                break;
+            case ITEM_UNCHANGED:
+                break;
         }
 
         item->SaveToDB();
@@ -12697,12 +12700,15 @@ void Player::_SaveQuestStatus()
         switch (i->second.uState)
         {
             case QUEST_NEW :
-                sDatabase.PExecute("INSERT INTO `character_queststatus` (`guid`,`quest`,`status`,`rewarded`,`explored`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4`) VALUES ('%u', '%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')",
+                sDatabase.PExecute("INSERT INTO `character_queststatus` (`guid`,`quest`,`status`,`rewarded`,`explored`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4`) "
+                    "VALUES ('%u', '%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')",
                     GetGUIDLow(), i->first, i->second.m_status, i->second.m_rewarded, i->second.m_explored, uint64(i->second.m_timer / 1000 + sWorld.GetGameTime()), i->second.m_creatureOrGOcount[0], i->second.m_creatureOrGOcount[1], i->second.m_creatureOrGOcount[2], i->second.m_creatureOrGOcount[3], i->second.m_itemcount[0], i->second.m_itemcount[1], i->second.m_itemcount[2], i->second.m_itemcount[3]);
                 break;
             case QUEST_CHANGED :
                 sDatabase.PExecute("UPDATE `character_queststatus` SET `status` = '%u',`rewarded` = '%u',`explored` = '%u',`timer` = '" I64FMTD "',`mobcount1` = '%u',`mobcount2` = '%u',`mobcount3` = '%u',`mobcount4` = '%u',`itemcount1` = '%u',`itemcount2` = '%u',`itemcount3` = '%u',`itemcount4` = '%u'  WHERE `guid` = '%u' AND `quest` = '%u' ",
                     i->second.m_status, i->second.m_rewarded, i->second.m_explored, uint64(i->second.m_timer / 1000 + sWorld.GetGameTime()), i->second.m_creatureOrGOcount[0], i->second.m_creatureOrGOcount[1], i->second.m_creatureOrGOcount[2], i->second.m_creatureOrGOcount[3], i->second.m_itemcount[0], i->second.m_itemcount[1], i->second.m_itemcount[2], i->second.m_itemcount[3], GetGUIDLow(), i->first );
+                break;
+            case QUEST_UNCHANGED:
                 break;
         };
         i->second.uState = QUEST_UNCHANGED;
@@ -13662,7 +13668,7 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
             SendBuyError( BUY_ERR_LEVEL_REQUIRE, pCreature, item, 0);
             return;
         }
-        if( this->GetReputationRank(pProto->RequiredReputationFaction) < pProto->RequiredReputationRank)
+        if( uint32(GetReputationRank(pProto->RequiredReputationFaction)) < pProto->RequiredReputationRank)
         {
             SendBuyError( BUY_ERR_REPUTATION_REQUIRE, pCreature, item, 0);
             return;
@@ -13886,10 +13892,7 @@ void Player::UpdateHomebindTime(uint32 time)
             TeleportTo(m_homebindMapId, m_homebindX, m_homebindY, m_homebindZ, GetOrientation());
         }
         else
-        {
-            uint32 oldTimer = m_HomebindTimer;
             m_HomebindTimer -= time;
-        }
     }
     else
     {

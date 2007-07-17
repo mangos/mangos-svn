@@ -294,7 +294,7 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32> &mapids)
     m_WayPoints[0] = pos;
     t += keyFrames[0].delay * 1000;
 
-    int cM = keyFrames[0].mapid;
+    uint32 cM = keyFrames[0].mapid;
     for (size_t i = 0; i < keyFrames.size() - 1; i++)
     {
         float d = 0;

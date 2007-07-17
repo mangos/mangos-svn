@@ -38,8 +38,8 @@ class MANGOS_DLL_DECL DestinationHolder
     float i_destX, i_destY, i_destZ;
 
     public:
-        DestinationHolder() : i_tracker(TRAVELLER_UPDATE_INTERVAL), i_totalTravelTime(0), i_timeStarted(0),
-            i_fromX(0), i_fromY(0), i_fromZ(0), i_destX(0), i_destY(0), i_destZ(0), i_timeElapsed(0), i_destSet(false) {}
+        DestinationHolder() : i_tracker(TRAVELLER_UPDATE_INTERVAL), i_totalTravelTime(0), i_timeStarted(0), i_timeElapsed(0), 
+            i_destSet(false), i_fromX(0), i_fromY(0), i_fromZ(0), i_destX(0), i_destY(0), i_destZ(0) {}
 
         uint32 SetDestination(TRAVELLER &traveller, float dest_x, float dest_y, float dest_z);
         bool UpdateExpired(void) const { return i_tracker.Passed(); }

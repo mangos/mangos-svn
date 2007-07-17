@@ -356,7 +356,7 @@ void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
             //sLog.outDebug("Group::GroupLoot: missing item prototype for item with id: %d", i->itemid);
             continue;
         }
-        if (item->Quality >= m_lootThreshold)
+        if (item->Quality >= uint32(m_lootThreshold))
         {
             Roll r;
             uint32 newitemGUID = objmgr.GenerateLowGuid(HIGHGUID_ITEM);
@@ -404,7 +404,7 @@ void Group::NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature)
     for (i=loot->items.begin(); i != loot->items.end(); i++)
     {
         item = objmgr.GetItemPrototype(i->itemid);
-        if (item->Quality >= m_lootThreshold)
+        if (item->Quality >= uint32(m_lootThreshold))
         {
             Roll r;
             uint32 newitemGUID = objmgr.GenerateLowGuid(HIGHGUID_ITEM);

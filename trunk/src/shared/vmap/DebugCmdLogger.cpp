@@ -21,8 +21,8 @@
 namespace VMAP {
 
     bool CommandFileRW::appendCmd(const Command& pCommand) {
-        bool result = false;
 #ifdef _DEBUG
+        bool result = false;
         if(iWritingEnabled || pCommand.isCoreCmd()) {
             FILE* f = fopen(iFileName.c_str(), "ab");
             if(f) {
@@ -42,8 +42,8 @@ namespace VMAP {
     //=========================================================
 
     bool CommandFileRW::appendCmds(const Array<Command>& pCmdArray) {
-        bool result = false;
 #ifdef _DEBUG
+        bool result = false;
         if(iWritingEnabled) {
             FILE* f;
             if(resetfile)

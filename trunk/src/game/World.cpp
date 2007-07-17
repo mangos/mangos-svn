@@ -840,7 +840,7 @@ void World::ScriptsStart(ScriptMapMap const& scripts, uint32 id, Object* source,
         sa.source = source;
         sa.script = &iter->second;
         sa.target = target;
-        scriptSchedule.insert(pair<uint64, ScriptAction>(m_gameTime + iter->first, sa));
+        scriptSchedule.insert(pair<time_t, ScriptAction>(m_gameTime + iter->first, sa));
         if (iter->first == 0)
             immedScript = true;
     }
@@ -856,7 +856,7 @@ void World::ScriptsProcess()
         return;
 
     ///- Process overdue queued scripts
-    multimap<uint64, ScriptAction>::iterator iter = scriptSchedule.begin();
+    multimap<time_t, ScriptAction>::iterator iter = scriptSchedule.begin();
                                                             // ok as multimap is a *sorted* associative container
     while (!scriptSchedule.empty() && (iter->first <= m_gameTime))
     {

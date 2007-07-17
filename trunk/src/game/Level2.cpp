@@ -1876,8 +1876,6 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
 
         // The visual waypoint
         Creature* wpCreature = NULL;
-        // The NPC
-        Creature* npcCreature = NULL;
 
         wpGuid = target->GetGUIDLow();
 
@@ -2104,10 +2102,9 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
             maxPoint = (*result)[0].GetUInt32();
             delete result;
         }
-        for( int i=maxPoint; i>point; i-- )
+        for( uint32 i=maxPoint; i>point; i-- )
         {
-            sDatabase.PExecuteLog("UPDATE `creature_movement` SET point=point+1 WHERE id='%u' AND point='%u'",
-                lowguid, i);
+            sDatabase.PExecuteLog("UPDATE `creature_movement` SET point=point+1 WHERE id='%u' AND point='%u'", lowguid, i);
         }
 
         Player* chr = m_session->GetPlayer();
@@ -2439,8 +2436,6 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
     }
 
     const char *text = arg_str;
-
-    Player* player = m_session->GetPlayer();
 
     if( text == 0 )
     {

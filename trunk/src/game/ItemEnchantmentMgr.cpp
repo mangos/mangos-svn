@@ -183,5 +183,5 @@ uint32 GenerateEnchSuffixFactor(uint32 item_id)
         }
     }
 
-    return floor((suffixFactor*itemProto->ItemLevel) + 0.5 );
+    return uint32(floor((suffixFactor*itemProto->ItemLevel) + 0.5 ));
 }

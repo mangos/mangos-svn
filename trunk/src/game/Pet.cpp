@@ -320,6 +320,8 @@ void Pet::SavePetToDB(PetSaveMode mode)
                 }
             }
         }
+        default:
+            break;
     }
 
     _SaveSpells();
@@ -574,7 +576,7 @@ void Pet::ModifyLoyalty(int32 addvalue)
     if(addvalue > 0)                                        //only gain influenced, not loss
         addvalue = int32((float)addvalue * sWorld.getRate(RATE_LOYALTY));
 
-    if(loyaltylevel >= BEST_FRIEND && (addvalue + m_loyaltyPoints) > GetMaxLoyaltyPoints(loyaltylevel))
+    if(loyaltylevel >= BEST_FRIEND && (addvalue + m_loyaltyPoints) > int32(GetMaxLoyaltyPoints(loyaltylevel)))
         return;
 
     m_loyaltyPoints += addvalue;
@@ -598,11 +600,14 @@ void Pet::ModifyLoyalty(int32 addvalue)
                 WorldPacket data(SMSG_PET_BROKEN, 8);
                 data << GetGUID();
                 ((Player*)owner)->GetSession()->SendPacket(&data);
-                ((Player*)owner)->RemovePet(this,PET_SAVE_AS_DELETED);//run away
+
+                //run away
+                ((Player*)owner)->RemovePet(this,PET_SAVE_AS_DELETED);
             }
         }
     }
-    else if(m_loyaltyPoints > GetMaxLoyaltyPoints(loyaltylevel)) //level up
+    //level up
+    else if(m_loyaltyPoints > int32(GetMaxLoyaltyPoints(loyaltylevel)))
     {
         ++loyaltylevel;
         SetLoyaltyLevel(LoyaltyLevel(loyaltylevel));
@@ -614,8 +619,7 @@ void Pet::ModifyLoyalty(int32 addvalue)
 void Pet::TickLoyaltyChange()
 {
     int32 addvalue;
-    uint32 loyaltylevel = GetLoyaltyLevel();
-
+ 
     switch(GetHappinessState())
     {
         case HAPPY:   addvalue =  20; break;
@@ -704,8 +708,8 @@ int32 Pet::GetTPForSpell(uint32 spellid)
     if(!newAbility || !newAbility->reqtrainpoints)
         return 0;
 
-    int32 basetrainp = newAbility->reqtrainpoints;
-    int32 spenttrainp = 0;
+    uint32 basetrainp = newAbility->reqtrainpoints;
+    uint32 spenttrainp = 0;
     uint32 chainstart = objmgr.GetFirstSpellInChain(spellid);
 
     for (PetSpellMap::iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
@@ -720,7 +724,7 @@ int32 Pet::GetTPForSpell(uint32 spellid)
         }
     }
 
-    return basetrainp - spenttrainp;
+    return int32(basetrainp) - int32(spenttrainp);
 }
 
 uint32 Pet::GetMaxLoyaltyPoints(uint32 level)
@@ -862,7 +866,6 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
     SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, uint32((MaNGOS::XP::xp_to_level(creature->getLevel()+1))/4));
     SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1);
-    uint32 petlevel=creature->getLevel();
     SetUInt32Value(UNIT_NPC_FLAGS , 0);
     SetName(creature->GetName());
     m_loyaltyPoints = 1000;
@@ -936,8 +939,8 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
             for (int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
                 bonusResistance[i] = owner->GetResistance(SpellSchools(i)) * 0.4;
 
-            m_bonusdamage = bonusAP * 0.13;   // 13% of ranged attack power to bonus damage
-            bonusAP *= 0.22;                  // 22% of ranged attack power to melee attack power
+            m_bonusdamage = int32(bonusAP * 0.13);          // 13% of ranged attack power to bonus damage
+            bonusAP *= 0.22;                                // 22% of ranged attack power to melee attack power
             break;
         case SUMMON_PET:
             switch(owner->getClass())
@@ -1063,7 +1066,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
     for (int i = STAT_STRENGTH; i < MAX_STATS; i++)
     {
         float value = GetTotalStatValue(Stats(i));
-        SetStat(Stats(i), value);
+        SetStat(Stats(i), int32(value));
     }
 
     for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; i++)

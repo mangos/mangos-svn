@@ -331,7 +331,7 @@ class World
         uint32 m_maxSessionsCount;
         std::set<WorldSession*> m_kicked_sessions;
 
-        multimap<uint64, ScriptAction> scriptSchedule;
+        multimap<time_t, ScriptAction> scriptSchedule;
 
         float rate_values[MAX_RATES];
         uint32 m_configs[CONFIG_VALUE_COUNT];

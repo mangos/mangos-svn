@@ -131,7 +131,7 @@ bool ChatHandler::HandleSecurityCommand(const char* args)
     }
 
     // can set security level only for target with less security and to less security that we have
-    if(targetSecurity >= m_session->GetSecurity() || gm >= m_session->GetSecurity() )
+    if(targetSecurity >= m_session->GetSecurity() || uint32(gm) >= m_session->GetSecurity() )
     {
         SendSysMessage(LANG_YOURS_SECURITY_IS_LOW);
         return true;
@@ -1352,7 +1352,7 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
             break;
     }
 
-    if(count > countForStore && item)
+    if(uint32(count) > countForStore && item)
     {
         pl->SendNewItem(item,count - countForStore,false,true);
         if(pl!=plTarget)
@@ -1496,7 +1496,7 @@ bool ChatHandler::HandleListItemCommand(const char* args)
                 item_guid,owner_name.c_str(),owner_guid,owner_acc,item_pos);
         } while (result->NextRow());
 
-        uint64 res_count = result->GetRowCount();
+        int64 res_count = result->GetRowCount();
 
         delete result;
 
@@ -1546,7 +1546,7 @@ bool ChatHandler::HandleListItemCommand(const char* args)
                 item_guid,item_s_name.c_str(),item_s,item_s_acc,item_r_name.c_str(),item_r,item_r_acc,item_pos);
         } while (result->NextRow());
 
-        uint64 res_count = result->GetRowCount();
+        int64 res_count = result->GetRowCount();
 
         delete result;
 
@@ -1641,7 +1641,7 @@ bool ChatHandler::HandleListObjectCommand(const char* args)
         delete result;
     }
 
-    result = sDatabase.PQuery("SELECT `guid`, `id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, (POW(`position_x` - '%f', 2) + POW(`position_y` - '%f', 2) + POW(`position_z` - '%f', 2)) as `order` FROM `gameobject` WHERE `id` = '%u' ORDER BY `order` ASC LIMIT %u",
+    result = sDatabase.PQuery("SELECT `guid`, `position_x`, `position_y`, `position_z`, `map`, (POW(`position_x` - '%f', 2) + POW(`position_y` - '%f', 2) + POW(`position_z` - '%f', 2)) as `order` FROM `gameobject` WHERE `id` = '%u' ORDER BY `order` ASC LIMIT %u",
         pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(),go_id,uint32(count));
 
     if (result)
@@ -1650,12 +1650,10 @@ bool ChatHandler::HandleListObjectCommand(const char* args)
         {
             Field *fields = result->Fetch();
             uint32 guid = fields[0].GetUInt32();
-            uint32 id = fields[1].GetUInt32();
-            float x = fields[2].GetFloat();
-            float y = fields[3].GetFloat();
-            float z = fields[4].GetFloat();
-            float o = fields[5].GetFloat();
-            int mapid = fields[6].GetUInt16();
+            float x = fields[1].GetFloat();
+            float y = fields[2].GetFloat();
+            float z = fields[3].GetFloat();
+            int mapid = fields[4].GetUInt16();
 
             PSendSysMessage(LANG_GO_LIST, guid, guid, gInfo->name, x, y, z, mapid);
         } while (result->NextRow());
@@ -1703,7 +1701,7 @@ bool ChatHandler::HandleListCreatureCommand(const char* args)
         delete result;
     }
 
-    result = sDatabase.PQuery("SELECT `guid`, `id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, (POW(`position_x` - '%f', 2) + POW(`position_y` - '%f', 2) + POW(`position_z` - '%f', 2)) as `order` FROM `creature` WHERE `id` = '%u' ORDER BY `order` ASC LIMIT %u",
+    result = sDatabase.PQuery("SELECT `guid`, `position_x`, `position_y`, `position_z`, `map`, (POW(`position_x` - '%f', 2) + POW(`position_y` - '%f', 2) + POW(`position_z` - '%f', 2)) as `order` FROM `creature` WHERE `id` = '%u' ORDER BY `order` ASC LIMIT %u",
         pl->GetPositionX(), pl->GetPositionY(), pl->GetPositionZ(), cr_id,uint32(count));
 
     if (result)
@@ -1712,12 +1710,10 @@ bool ChatHandler::HandleListCreatureCommand(const char* args)
         {
             Field *fields = result->Fetch();
             uint32 guid = fields[0].GetUInt32();
-            uint32 id = fields[1].GetUInt32();
-            float x = fields[2].GetFloat();
-            float y = fields[3].GetFloat();
-            float z = fields[4].GetFloat();
-            float o = fields[5].GetFloat();
-            int mapid = fields[6].GetUInt16();
+            float x = fields[1].GetFloat();
+            float y = fields[2].GetFloat();
+            float z = fields[3].GetFloat();
+            int mapid = fields[4].GetUInt16();
 
             PSendSysMessage(LANG_CREATURE_LIST, guid, guid, cInfo->Name, x, y, z, mapid);
         } while (result->NextRow());

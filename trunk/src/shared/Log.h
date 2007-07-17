@@ -56,7 +56,7 @@ const int Color_count = int(WHITE)+1;
 class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThread::FastMutex> >
 {
     friend class MaNGOS::OperatorNew<Log>;
-    Log() : logfile(NULL), gmLogfile(NULL), dberLogfile(NULL), raLogfile(NULL), m_colored(false) { Initialize(); }
+    Log() : raLogfile(NULL), logfile(NULL), gmLogfile(NULL), dberLogfile(NULL), m_colored(false) { Initialize(); }
     ~Log()
     {
         if( logfile != NULL )
