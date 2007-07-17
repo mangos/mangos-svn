@@ -173,8 +173,8 @@ class Guild
         void LoadPlayerStats(MemberSlot* memslot);
         void LoadPlayerStatsByGuid(uint64 guid);
 
-        void BroadcastToGuild(WorldSession *session, std::string msg);
-        void BroadcastToOfficers(WorldSession *session, std::string msg);
+        void BroadcastToGuild(WorldSession *session, std::string msg, uint32 language = LANG_UNIVERSAL);
+        void BroadcastToOfficers(WorldSession *session, std::string msg, uint32 language = LANG_UNIVERSAL);
         void BroadcastPacket(WorldPacket *packet);
 
         void CreateRank(std::string name,uint32 rights);

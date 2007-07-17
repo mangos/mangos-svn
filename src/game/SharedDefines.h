@@ -179,7 +179,6 @@ enum CharacterSlot
 
 enum Language
 {
-    LANG_UNIVERSAL2     = -1,   // used by addons?, may be LANG_ADDON?
     LANG_GLOBAL         = 0,
     LANG_UNIVERSAL      = 0,
     LANG_ORCISH         = 1,
@@ -195,7 +194,8 @@ enum Language
     LANG_GNOMISH        = 13,
     LANG_TROLL          = 14,
     LANG_GUTTERSPEAK    = 33,
-    LANG_DRAENEI        = 35
+    LANG_DRAENEI        = 35,
+    LANG_ADDON          = 0xFFFFFFFF   // used by addons
 };
 
 #define LANGUAGES_COUNT 17
