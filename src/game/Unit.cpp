@@ -5257,7 +5257,6 @@ bool Unit::SelectHostilTarget()
     //threat list sorting etc.
 
     assert(GetTypeId()== TYPEID_UNIT);
-    bool result = false;
     Unit* target = NULL;
 
     //This function only useful once AI has been initilazied
@@ -5276,12 +5275,13 @@ bool Unit::SelectHostilTarget()
     {
         SetInFront(target);
         ((Creature*)this)->AI()->AttackStart(target);
-        result = true;
-    }else 
-        if(!HasAuraType(SPELL_AURA_MOD_TAUNT))
+        return true;
+    }
+
+    if(isInCombat() && !HasAuraType(SPELL_AURA_MOD_TAUNT) && CanFreeMove())
         ((Creature*)this)->AI()->EnterEvadeMode();
 
-    return result;
+    return false;
 }
 
 //======================================================================
