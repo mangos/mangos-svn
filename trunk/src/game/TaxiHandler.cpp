@@ -27,7 +27,6 @@
 #include "Player.h"
 #include "UpdateMask.h"
 #include "Path.h"
-#include "Chat.h"
 #include "WaypointMovementGenerator.h"
 #include "DestinationHolderImp.h"
 

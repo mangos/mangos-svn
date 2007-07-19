@@ -17,6 +17,7 @@
  */
 
 #include "Common.h"
+#include "SharedDefines.h"
 #include "WorldPacket.h"
 #include "Opcodes.h"
 #include "Log.h"
@@ -32,10 +33,7 @@
 #include "ObjectAccessor.h"
 #include "Log.h"
 #include "Transports.h"
-#include "Chat.h"
 #include "VMapFactory.h"
-
-using namespace std;
 
 uint32 GuidHigh2TypeId(uint32 guid_hi)
 {
@@ -465,14 +463,13 @@ bool Object::LoadValues(const char* data)
 {
     if(!m_uint32Values) _InitValues();
 
-    vector<string> tokens = StrSplit(data, " ");
+    Tokens tokens = StrSplit(data, " ");
 
     if(tokens.size() != m_valuesCount)
         return false;
 
-    vector<string>::iterator iter;
+    Tokens::iterator iter;
     int index;
-
     for (iter = tokens.begin(), index = 0; index < m_valuesCount; ++iter, ++index)
     {
         m_uint32Values[index] = atol((*iter).c_str());

@@ -21,11 +21,11 @@
 
 #include "Common.h"
 #include "ByteBuffer.h"
-#include "World.h"
-#include "QuestDef.h"
 #include "UpdateFields.h"
 #include "UpdateData.h"
+
 #include <set>
+#include <string>
 
 #ifndef M_PI
 #define M_PI            3.14159265358979323846

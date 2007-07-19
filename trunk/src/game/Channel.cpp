@@ -18,7 +18,7 @@
 
 #include "Channel.h"
 #include "ObjectMgr.h"
-#include "Chat.h"
+#include "World.h"
 
 Channel::Channel(std::string _name, uint32 _channal_id)
     : name(_name), announce(true), moderate(false), channel_id(_channal_id), m_ownerGUID(0), password("")
@@ -342,7 +342,7 @@ void Channel::SetOwner(uint64 p, const char *newname)
     }
 }
 
-void Channel::GetOwner(uint64 p)
+void Channel::SendWhoOwner(uint64 p)
 {
     if(!IsOn(p))
     {

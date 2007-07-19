@@ -25,6 +25,10 @@
 #include "Opcodes.h"
 #include "Player.h"
 
+#include <list>
+#include <map>
+#include <string>
+
 class Channel
 {
     enum NotifyTypes
@@ -69,9 +73,10 @@ class Channel
         uint64 player;
         bool owner, moderator, muted;
     };
-    typedef map<uint64,PlayerInfo> PlayerList;
+    typedef std::map<uint64,PlayerInfo> PlayerList;
     PlayerList players;
-    list<uint64> banned;
+    typedef std::list<uint64> BannedList;
+    BannedList banned;
     std::string name;
     bool announce, moderate;
     uint32 channel_id;
@@ -120,34 +125,31 @@ class Channel
         void SendToAllButOne(WorldPacket *data, uint64 who);
         void SendToOne(WorldPacket *data, uint64 who);
 
-        bool IsOn(uint64 who)
-        {
-            return players.count(who) > 0;
-        }
+        bool IsOn(uint64 who) const { return players.count(who) > 0; }
 
-        bool IsBanned(const uint64 guid)
+        bool IsBanned(const uint64 guid) const
         {
-            list<uint64>::iterator i;
-            for(i = banned.begin(); i!=banned.end(); i++)
+            for(BannedList::const_iterator i = banned.begin(); i!=banned.end(); ++i)
                 if(*i == guid)
                     return true;
             return false;
         }
 
-        bool IsFirst()
-        {
-            return !(players.size() > 1);
-        }
+        bool IsFirst() const { return !(players.size() > 1); }
 
-        uint8 GetFlag(uint64 p) 
+        uint8 GetFlag(uint64 p) const
         {
+            PlayerList::const_iterator p_itr = players.find(p);
+            if(p_itr == players.end())
+                return 0;
+
             uint8 flag=0;
 
-            if(players[p].owner)
+            if(p_itr->second.owner)
                 flag |= 1;
-            if(players[p].moderator)
+            if(p_itr->second.moderator)
                 flag |= 2;
-            if(!players[p].muted)
+            if(!p_itr->second.muted)
                 flag |= 4;
 
             return flag;
@@ -204,15 +206,15 @@ class Channel
         }
 
     public:
-        explicit Channel(std::string _name, uint32 _channal_id);
-        std::string GetName() { return name; }
+        Channel(std::string _name, uint32 _channal_id);
+        std::string GetName() const { return name; }
         uint32 GetChannelId() const { return channel_id; }
-        bool IsConstant() { return channel_id!=0; }
-        bool IsAnnounce() { return announce; }
-        std::string GetPassword() { return password; }
+        bool IsConstant() const { return channel_id!=0; }
+        bool IsAnnounce() const { return announce; }
+        std::string GetPassword() const { return password; }
         void SetPassword(std::string npassword) { password = npassword; }
         void SetAnnounce(bool nannounce) { announce = nannounce; }
-        uint32 GetNumPlayers() { return players.size(); }
+        uint32 GetNumPlayers() const { return players.size(); }
 
         void Join(uint64 p, const char *pass);
         void Leave(uint64 p, bool send = true);
@@ -224,7 +226,7 @@ class Channel
         void SetMode(uint64 p, const char *p2n, bool mod, bool set);
         void SetOwner(uint64 p, bool exclaim = true) { _SetOwner(p, exclaim); };
         void SetOwner(uint64 p, const char *newname);
-        void GetOwner(uint64 p);
+        void SendWhoOwner(uint64 p);
         void SetModerator(uint64 p, const char *newname) { SetMode(p,newname,true,true); }
         void UnsetModerator(uint64 p, const char *newname) { SetMode(p,newname,true,false); }
         void SetMute(uint64 p, const char *newname) { SetMode(p,newname,false,true); }

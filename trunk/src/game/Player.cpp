@@ -33,7 +33,6 @@
 #include "UpdateData.h"
 #include "Channel.h"
 #include "ChannelMgr.h"
-#include "Chat.h"
 #include "MapManager.h"
 #include "MapInstanced.h"
 #include "RedZoneDistrict.h"
@@ -57,6 +56,7 @@
 #include "BattleGroundEY.h"
 #include "BattleGroundWS.h"
 #include "ArenaTeam.h"
+#include "Chat.h"
 
 #include <cmath>
 
@@ -5618,7 +5618,7 @@ void Player::DuelComplete(uint8 type)
         duel->initiator->RemoveGameObject(obj,true);
 
     /* remove auras */
-    vector<uint32> auras2remove;
+    std::vector<uint32> auras2remove;
     AuraMap& vAuras = duel->opponent->GetAuras();
     for (AuraMap::iterator i = vAuras.begin(); i != vAuras.end(); i++)
     {
@@ -10095,7 +10095,7 @@ void Player::PrepareQuestMenu( uint64 guid )
     for(QuestRelations::const_iterator i = pObjectQR->lower_bound(pObject->GetEntry()); i != pObjectQR->upper_bound(pObject->GetEntry()); ++i)
     {
         uint32 quest_id = i->second;
-        Quest* pQuest = objmgr.QuestTemplates[quest_id];
+        Quest* pQuest = objmgr.mQuestTemplates[quest_id];
         if(!pQuest) continue;
 
         QuestStatus status = GetQuestStatus( quest_id );
@@ -10118,7 +10118,7 @@ void Player::SendPreparedQuest( uint64 guid )
     {
         // Auto open -- maybe also should verify there is no greeting
         uint32 quest_id = pQuestMenu->GetItem(0).m_qId;
-        Quest *pQuest = objmgr.QuestTemplates[quest_id];
+        Quest *pQuest = objmgr.mQuestTemplates[quest_id];
         if ( pQuest )
         {
             if( status == DIALOG_STATUS_REWARD_REP && !GetQuestRewardStatus( quest_id ) )
@@ -10200,7 +10200,7 @@ Quest* Player::GetNextQuest( uint64 guid, Quest *pQuest )
         for(QuestRelations::const_iterator itr = pObjectQR->lower_bound(pObject->GetEntry()); itr != pObjectQR->upper_bound(pObject->GetEntry()); ++itr)
         {
             if (itr->second == nextQuestID)
-                return objmgr.QuestTemplates[nextQuestID];
+                return objmgr.mQuestTemplates[nextQuestID];
         }
     }
     return NULL;
@@ -10213,7 +10213,7 @@ bool Player::CanSeeStartQuest( uint32 quest_id )
         if( SatisfyQuestRace( quest_id, false ) && SatisfyQuestClass( quest_id, false ) && SatisfyQuestExclusiveGroup( quest_id, false )
             && SatisfyQuestSkill( quest_id, false ) && SatisfyQuestReputation( quest_id, false )
             && SatisfyQuestPreviousQuest( quest_id, false ) && SatisfyQuestNextChain( quest_id, false ) && SatisfyQuestPrevChain( quest_id, false ) )
-            return ( getLevel() + 7 >= objmgr.QuestTemplates[quest_id]->GetMinLevel() );
+            return ( getLevel() + 7 >= objmgr.mQuestTemplates[quest_id]->GetMinLevel() );
     }
     return false;
 }
@@ -10270,7 +10270,7 @@ bool Player::CanCompleteQuest( uint32 quest_id )
         if( qStatus == QUEST_STATUS_COMPLETE )
             return true;
 
-        Quest* qInfo = objmgr.QuestTemplates[quest_id];
+        Quest* qInfo = objmgr.mQuestTemplates[quest_id];
 
         if(!qInfo)
             return false;
@@ -10644,7 +10644,7 @@ void Player::FailTimedQuest( uint32 quest_id )
 
 bool Player::SatisfyQuestClass( uint32 quest_id, bool msg )
 {
-    Quest * qInfo = objmgr.QuestTemplates[quest_id];
+    Quest * qInfo = objmgr.mQuestTemplates[quest_id];
     if( qInfo )
     {
         int32 zoneOrSort = qInfo->GetZoneOrSort();
@@ -10671,7 +10671,7 @@ bool Player::SatisfyQuestClass( uint32 quest_id, bool msg )
 
 bool Player::SatisfyQuestLevel( uint32 quest_id, bool msg )
 {
-    Quest * qInfo = objmgr.QuestTemplates[quest_id];
+    Quest * qInfo = objmgr.mQuestTemplates[quest_id];
     if( qInfo )
     {
         if( getLevel() < qInfo->GetMinLevel() )
@@ -10703,14 +10703,14 @@ bool Player::SatisfyQuestLog( bool msg )
 
 bool Player::SatisfyQuestPreviousQuest( uint32 quest_id, bool msg )
 {
-    Quest * qInfo = objmgr.QuestTemplates[quest_id];
+    Quest * qInfo = objmgr.mQuestTemplates[quest_id];
     if( qInfo )
     {
         // No previous quest (might be first quest in a series)
         if( qInfo->prevQuests.size() == 0 )
             return true;
 
-        for(vector<int32>::iterator iter = qInfo->prevQuests.begin(); iter != qInfo->prevQuests.end(); ++iter )
+        for(Quest::PrevQuests::iterator iter = qInfo->prevQuests.begin(); iter != qInfo->prevQuests.end(); ++iter )
         {
             uint32 prevId = abs(*iter);
 
@@ -10738,7 +10738,7 @@ bool Player::SatisfyQuestPreviousQuest( uint32 quest_id, bool msg )
 
 bool Player::SatisfyQuestRace( uint32 quest_id, bool msg )
 {
-    Quest * qInfo = objmgr.QuestTemplates[quest_id];
+    Quest * qInfo = objmgr.mQuestTemplates[quest_id];
     if( qInfo )
     {
         uint32 reqraces = qInfo->GetRequiredRaces();
@@ -10757,7 +10757,7 @@ bool Player::SatisfyQuestRace( uint32 quest_id, bool msg )
 
 bool Player::SatisfyQuestReputation( uint32 quest_id, bool msg )
 {
-    Quest * qInfo = objmgr.QuestTemplates[quest_id];
+    Quest * qInfo = objmgr.mQuestTemplates[quest_id];
     if( qInfo )
     {
         uint32 faction_id = qInfo->GetRequiredRepFaction();
@@ -10771,7 +10771,7 @@ bool Player::SatisfyQuestReputation( uint32 quest_id, bool msg )
 
 bool Player::SatisfyQuestSkill( uint32 quest_id, bool msg )
 {
-    Quest * qInfo = objmgr.QuestTemplates[quest_id];
+    Quest * qInfo = objmgr.mQuestTemplates[quest_id];
     if( qInfo )
     {
         int32 zoneOrSort = qInfo->GetZoneOrSort();
@@ -10813,7 +10813,7 @@ bool Player::SatisfyQuestStatus( uint32 quest_id, bool msg )
 
 bool Player::SatisfyQuestTimed( uint32 quest_id, bool msg )
 {
-    Quest * qInfo = objmgr.QuestTemplates[quest_id];
+    Quest * qInfo = objmgr.mQuestTemplates[quest_id];
     if( qInfo )
     {
         if ( (find(m_timedquests.begin(), m_timedquests.end(), quest_id) != m_timedquests.end()) && qInfo->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED) )
@@ -10829,14 +10829,14 @@ bool Player::SatisfyQuestTimed( uint32 quest_id, bool msg )
 
 bool Player::SatisfyQuestExclusiveGroup( uint32 quest_id, bool msg )
 {
-    Quest * qInfo = objmgr.QuestTemplates[quest_id];
+    Quest * qInfo = objmgr.mQuestTemplates[quest_id];
     if( qInfo )
     {
         if(!qInfo->GetExclusiveGroup())
             return true;
 
-        multimap<uint32, uint32>::iterator iter = objmgr.ExclusiveQuestGroups.lower_bound(qInfo->GetExclusiveGroup());
-        multimap<uint32, uint32>::iterator end  = objmgr.ExclusiveQuestGroups.upper_bound(qInfo->GetExclusiveGroup());
+        ObjectMgr::ExclusiveQuestGroups::iterator iter = objmgr.mExclusiveQuestGroups.lower_bound(qInfo->GetExclusiveGroup());
+        ObjectMgr::ExclusiveQuestGroups::iterator end  = objmgr.mExclusiveQuestGroups.upper_bound(qInfo->GetExclusiveGroup());
 
         assert(iter!=end);                                  // always must be found if qInfo->ExclusiveGroup != 0
 
@@ -10862,7 +10862,7 @@ bool Player::SatisfyQuestExclusiveGroup( uint32 quest_id, bool msg )
 
 bool Player::SatisfyQuestNextChain( uint32 quest_id, bool msg )
 {
-    Quest * qInfo = objmgr.QuestTemplates[quest_id];
+    Quest * qInfo = objmgr.mQuestTemplates[quest_id];
     if( qInfo )
     {
         if(!qInfo->GetNextQuestInChain())
@@ -10884,14 +10884,14 @@ bool Player::SatisfyQuestNextChain( uint32 quest_id, bool msg )
 
 bool Player::SatisfyQuestPrevChain( uint32 quest_id, bool msg )
 {
-    Quest * qInfo = objmgr.QuestTemplates[quest_id];
+    Quest * qInfo = objmgr.mQuestTemplates[quest_id];
     if( qInfo )
     {
         // No previous quest in chain
         if( qInfo->prevChainQuests.size() == 0 )
             return true;
 
-        for(vector<uint32>::iterator iter = qInfo->prevChainQuests.begin(); iter != qInfo->prevChainQuests.end(); ++iter )
+        for(Quest::PrevChainQuests::iterator iter = qInfo->prevChainQuests.begin(); iter != qInfo->prevChainQuests.end(); ++iter )
         {
             uint32 prevId = *iter;
 
@@ -10919,7 +10919,7 @@ bool Player::SatisfyQuestPrevChain( uint32 quest_id, bool msg )
 
 bool Player::GiveQuestSourceItem( uint32 quest_id )
 {
-    Quest * qInfo = objmgr.QuestTemplates[quest_id];
+    Quest * qInfo = objmgr.mQuestTemplates[quest_id];
     if( qInfo )
     {
         uint32 srcitem = qInfo->GetSrcItemId();
@@ -10949,7 +10949,7 @@ bool Player::GiveQuestSourceItem( uint32 quest_id )
 
 bool Player::TakeQuestSourceItem( uint32 quest_id, bool msg )
 {
-    Quest * qInfo = objmgr.QuestTemplates[quest_id];
+    Quest * qInfo = objmgr.mQuestTemplates[quest_id];
     if( qInfo )
     {
         uint32 srcitem = qInfo->GetSrcItemId();
@@ -10977,7 +10977,7 @@ bool Player::TakeQuestSourceItem( uint32 quest_id, bool msg )
 
 bool Player::GetQuestRewardStatus( uint32 quest_id )
 {
-    Quest* qInfo = objmgr.QuestTemplates[quest_id];
+    Quest* qInfo = objmgr.mQuestTemplates[quest_id];
     if( qInfo )
     {
         // for repeatable quests: rewarded field is set after first reward only to prevent getting XP more than once
@@ -11003,7 +11003,7 @@ QuestStatus Player::GetQuestStatus( uint32 quest_id )
 
 uint32 Player::GetReqKillOrCastCurrentCount(uint32 quest_id, uint32 entry)
 {
-    Quest * qInfo = objmgr.QuestTemplates[quest_id];
+    Quest * qInfo = objmgr.mQuestTemplates[quest_id];
 
     if( !qInfo )
         return 0;
@@ -11038,7 +11038,7 @@ bool Player::CanShareQuest(uint32 quest_id)
 
 void Player::SetQuestStatus( uint32 quest_id, QuestStatus status )
 {
-    Quest * qInfo = objmgr.QuestTemplates[quest_id];
+    Quest * qInfo = objmgr.mQuestTemplates[quest_id];
     if( qInfo )
     {
         if( status == QUEST_STATUS_NONE || status == QUEST_STATUS_INCOMPLETE || status == QUEST_STATUS_COMPLETE )
@@ -11066,7 +11066,7 @@ bool Player::IsQuestSpellComplete(uint32 quest_id) const
 
 void Player::AdjustQuestReqItemCount( uint32 quest_id )
 {
-    Quest * qInfo = objmgr.QuestTemplates[quest_id];
+    Quest * qInfo = objmgr.mQuestTemplates[quest_id];
     if( qInfo )
     {
         if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
@@ -11122,7 +11122,7 @@ void Player::ItemAddedQuestCheck( uint32 entry, uint32 count )
         questid = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i);
         if ( questid != 0 && mQuestStatus[questid].m_status == QUEST_STATUS_INCOMPLETE )
         {
-            Quest * qInfo = objmgr.QuestTemplates[questid];
+            Quest * qInfo = objmgr.mQuestTemplates[questid];
             if( qInfo && qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
             {
                 for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
@@ -11160,7 +11160,7 @@ void Player::ItemRemovedQuestCheck( uint32 entry, uint32 count )
     for( int i = 0; i < MAX_QUEST_LOG_SIZE; i++ )
     {
         questid = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i);
-        Quest * qInfo = objmgr.QuestTemplates[questid];
+        Quest * qInfo = objmgr.mQuestTemplates[questid];
         if ( qInfo )
         {
             if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
@@ -11205,7 +11205,7 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
         if(!questid)
             continue;
 
-        Quest * qInfo = objmgr.QuestTemplates[questid];
+        Quest * qInfo = objmgr.mQuestTemplates[questid];
         // just if !ingroup || !noraidgroup || raidgroup
         if ( qInfo && mQuestStatus[questid].m_status == QUEST_STATUS_INCOMPLETE && (!GetGroup() || !GetGroup()->isRaidGroup() || qInfo->GetType() == QUEST_TYPE_RAID))
         {
@@ -11257,7 +11257,7 @@ void Player::CastedCreatureOrGO( uint32 entry, uint64 guid, uint32 spell_id )
         if(!questid)
             continue;
 
-        Quest * qInfo = objmgr.QuestTemplates[questid];
+        Quest * qInfo = objmgr.mQuestTemplates[questid];
         if ( qInfo && mQuestStatus[questid].m_status == QUEST_STATUS_INCOMPLETE )
         {
             if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL_OR_CAST ) )
@@ -11314,7 +11314,7 @@ void Player::MoneyChanged( uint32 count )
         questid = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i);
         if ( questid != 0 )
         {
-            Quest * qInfo = objmgr.QuestTemplates[questid];
+            Quest * qInfo = objmgr.mQuestTemplates[questid];
             if( qInfo && qInfo->GetRewOrReqMoney() < 0 )
             {
                 if( mQuestStatus[questid].m_status == QUEST_STATUS_INCOMPLETE )
@@ -11475,7 +11475,7 @@ void Player::SendQuestUpdateAddItem( uint32 quest_id, uint32 item_idx, uint32 co
     {
         WorldPacket data( SMSG_QUESTUPDATE_ADD_ITEM, (4+4) );
         sLog.outDebug( "WORLD: Sent SMSG_QUESTUPDATE_ADD_ITEM" );
-        data << objmgr.QuestTemplates[quest_id]->ReqItemId[item_idx];
+        data << objmgr.mQuestTemplates[quest_id]->ReqItemId[item_idx];
         data << count;
         GetSession()->SendPacket( &data );
     }
@@ -11485,7 +11485,7 @@ void Player::SendQuestUpdateAddCreature( uint32 quest_id, uint64 guid, uint32 cr
 {
     assert(old_count + add_count < 64 && "mob/GO count store in 6 bits 2^6 = 64 (0..63)");
 
-    Quest * qInfo = objmgr.QuestTemplates[quest_id];
+    Quest * qInfo = objmgr.mQuestTemplates[quest_id];
     if( qInfo )
     {
         WorldPacket data( SMSG_QUESTUPDATE_ADD_KILL, (24) );
@@ -11567,7 +11567,7 @@ bool Player::LoadPositionFromDB(uint32& mapid, float& x,float& y,float& z,float&
     return true;
 }
 
-bool Player::LoadValuesArrayFromDB(vector<string> & data, uint64 guid)
+bool Player::LoadValuesArrayFromDB(Tokens& data, uint64 guid)
 {
     std::ostringstream ss;
     ss<<"SELECT `data` FROM `character` WHERE `guid`='"<<GUID_LOPART(guid)<<"'";
@@ -11584,12 +11584,12 @@ bool Player::LoadValuesArrayFromDB(vector<string> & data, uint64 guid)
     return true;
 }
 
-uint32 Player::GetUInt32ValueFromArray(vector<string> const& data, uint16 index)
+uint32 Player::GetUInt32ValueFromArray(Tokens const& data, uint16 index)
 {
     return (uint32)atoi(data[index].c_str());
 }
 
-float Player::GetFloatValueFromArray(vector<string> const& data, uint16 index)
+float Player::GetFloatValueFromArray(Tokens const& data, uint16 index)
 {
     float result;
     uint32 temp = Player::GetUInt32ValueFromArray(data,index);
@@ -11600,7 +11600,7 @@ float Player::GetFloatValueFromArray(vector<string> const& data, uint16 index)
 
 uint32 Player::GetUInt32ValueFromDB(uint16 index, uint64 guid)
 {
-    vector<string> data;
+    Tokens data;
     if(!LoadValuesArrayFromDB(data,guid))
         return 0;
 
@@ -12197,7 +12197,7 @@ void Player::_LoadQuestStatus()
             Field *fields = result->Fetch();
 
             uint32 quest_id = fields[0].GetUInt32();
-            Quest* pQuest = objmgr.QuestTemplates[quest_id];// used to be new, no delete?
+            Quest* pQuest = objmgr.mQuestTemplates[quest_id];// used to be new, no delete?
             if( pQuest )
             {
                 mQuestStatus[quest_id].m_quest = pQuest;
@@ -12216,7 +12216,7 @@ void Player::_LoadQuestStatus()
 
                 time_t quest_time = time_t(fields[4].GetUInt64());
 
-                if( objmgr.QuestTemplates[quest_id]->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) && !GetQuestRewardStatus(quest_id) )
+                if( objmgr.mQuestTemplates[quest_id]->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) && !GetQuestRewardStatus(quest_id) )
                 {
                     AddTimedQuest( quest_id );
 
@@ -12335,11 +12335,10 @@ void Player::_LoadSpells(uint32 timediff)
 
 void Player::_LoadTaxiMask(const char* data)
 {
-    vector<string> tokens = StrSplit(data, " ");
+    Tokens tokens = StrSplit(data, " ");
 
     int index;
-    vector<string>::iterator iter;
-
+    Tokens::iterator iter;
     for (iter = tokens.begin(), index = 0;
         (index < TaxiMaskSize) && (iter != tokens.end()); ++iter, ++index)
     {
@@ -12817,13 +12816,12 @@ void Player::SavePositionInDB(uint32 mapid, float x,float y,float z,float o,uint
     sDatabase.Execute(ss2.str().c_str());
 }
 
-bool Player::SaveValuesArrayInDB(vector<string> const& tokens, uint64 guid)
+bool Player::SaveValuesArrayInDB(Tokens const& tokens, uint64 guid)
 {
     std::ostringstream ss2;
     ss2<<"UPDATE `character` SET `data`='";
-    vector<string>::const_iterator iter;
     int i=0;
-    for (iter = tokens.begin(); iter != tokens.end(); ++iter, ++i)
+    for (Tokens::const_iterator iter = tokens.begin(); iter != tokens.end(); ++iter, ++i)
     {
         ss2<<tokens[i]<<" ";
     }
@@ -12832,7 +12830,7 @@ bool Player::SaveValuesArrayInDB(vector<string> const& tokens, uint64 guid)
     return sDatabase.Execute(ss2.str().c_str());
 }
 
-void Player::SetUInt32ValueInArray(vector<string>& tokens,uint16 index, uint32 value)
+void Player::SetUInt32ValueInArray(Tokens& tokens,uint16 index, uint32 value)
 {
     char buf[11];
     snprintf(buf,11,"%u",value);
@@ -12841,7 +12839,7 @@ void Player::SetUInt32ValueInArray(vector<string>& tokens,uint16 index, uint32 v
 
 void Player::SetUInt32ValueInDB(uint16 index, uint32 value, uint64 guid)
 {
-    vector<string> tokens;
+    Tokens tokens;
     if(!LoadValuesArrayFromDB(tokens,guid))
         return;
 

@@ -41,6 +41,9 @@
 #include "Policies/Singleton.h"
 #include "Database/SQLStorage.h"
 
+#include <string>
+#include <map>
+
 extern SQLStorage sCreatureStorage;
 extern SQLStorage sCreatureDataAddonStorage;
 extern SQLStorage sGOStorage;
@@ -61,15 +64,15 @@ struct ScriptInfo
     uint32 command;
     uint32 datalong;
     uint32 datalong2;
-    string datatext;
+    std::string datatext;
     float x;
     float y;
     float z;
     float o;
 };
 
-typedef multimap<uint32, ScriptInfo> ScriptMap;
-typedef map<uint32, ScriptMap > ScriptMapMap;
+typedef std::multimap<uint32, ScriptInfo> ScriptMap;
+typedef std::map<uint32, ScriptMap > ScriptMapMap;
 extern ScriptMapMap sQuestEndScripts;
 extern ScriptMapMap sQuestStartScripts;
 extern ScriptMapMap sSpellScripts;
@@ -191,7 +194,7 @@ class ObjectMgr
         typedef std::set< Guild * > GuildSet;
         typedef std::set< ArenaTeam * > ArenaTeamSet;
 
-        typedef HM_NAMESPACE::hash_map<uint32, AreaTrigger*> AreaTriggerMap;
+        typedef HM_NAMESPACE::hash_map<uint32, AreaTrigger> AreaTriggerMap;
 
         typedef HM_NAMESPACE::hash_map<uint32, ReputationOnKillEntry> RepOnKillMap;
 
@@ -342,7 +345,7 @@ class ObjectMgr
         {
             AreaTriggerMap::const_iterator itr = mAreaTriggers.find( trigger );
             if( itr != mAreaTriggers.end( ) )
-                return itr->second;
+                return &itr->second;
             return NULL;
         }
 
@@ -459,8 +462,9 @@ class ObjectMgr
         }
 
         typedef HM_NAMESPACE::hash_map<uint32, Quest*> QuestMap;
-        QuestMap QuestTemplates;
-        multimap<uint32, uint32> ExclusiveQuestGroups;
+        QuestMap mQuestTemplates;
+        typedef std::multimap<uint32, uint32> ExclusiveQuestGroups;
+        ExclusiveQuestGroups mExclusiveQuestGroups;
 
         struct SpellChainNode
         {

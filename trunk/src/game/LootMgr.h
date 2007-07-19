@@ -19,14 +19,15 @@
 #ifndef MANGOS_LOOTMGR_H
 #define MANGOS_LOOTMGR_H
 
-#include <list>
-#include <vector>
 #include "Common.h"
 #include "Policies/Singleton.h"
 #include "ItemPrototype.h"
 #include "ItemEnchantmentMgr.h"
 #include "ByteBuffer.h"
 #include "Util.h"
+
+#include <map>
+#include <vector>
 
 enum RollType
 {
@@ -55,9 +56,6 @@ enum PermissionTypes
     GROUP_PERMISSION  = 1,
     NONE_PERMISSION   = 3
 };
-
-using std::vector;
-using std::list;
 
 class Player;
 
@@ -118,7 +116,7 @@ struct QuestItem
 
 typedef std::vector<QuestItem> QuestItemList;
 typedef std::map<Player *, QuestItemList *> QuestItemMap;
-typedef vector<LootStoreItem> LootStoreItemList;
+typedef std::vector<LootStoreItem> LootStoreItemList;
 typedef HM_NAMESPACE::hash_map<uint32, LootStoreItemList > LootStore;
 
 struct Loot
@@ -173,6 +171,7 @@ extern LootStore LootTemplates_Prospecting;
 QuestItemList* FillQuestLoot(Player* player, Loot *loot);
 void FillLoot(Loot *loot, uint32 loot_id, LootStore& store);
 void LoadLootTables();
+void LoadLootTable(LootStore& lootstore,char const* tablename);
 
 ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li);
 ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv);

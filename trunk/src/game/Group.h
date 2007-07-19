@@ -22,6 +22,9 @@
 #include "GroupReference.h"
 #include "GroupRefManager.h"
 
+#include <map>
+#include <vector>
+
 #define MAXGROUPSIZE 5
 #define MAXRAIDSIZE 40
 #define TARGETICONCOUNT 8
@@ -75,7 +78,8 @@ class MANGOS_DLL_SPEC Group
             uint32 itemid;
             uint32 itemRandomSuffix;
             int32  itemRandomPropId;
-            map<uint64, RollVote> playerVote;               //vote position correspond with player position (in group)
+            typedef std::map<uint64, RollVote> PlayerVote;
+            PlayerVote playerVote;               //vote position correspond with player position (in group)
             uint8 totalPlayersRolling;
             uint8 totalNeed;
             uint8 totalGreed;
@@ -83,6 +87,8 @@ class MANGOS_DLL_SPEC Group
             Loot *loot;
             uint8 itemSlot;
         };
+
+        typedef std::vector<Roll> Rolls;
 
     public:
         Group()
@@ -224,9 +230,9 @@ class MANGOS_DLL_SPEC Group
         void SendLootAllPassed(uint64 Guid, uint32 NumberOfPlayers, const Roll &r);
         void GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature);
         void NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature);
-        vector<Roll>::iterator GetRoll(uint64 Guid)
+        Rolls::iterator GetRoll(uint64 Guid)
         {
-            vector<Roll>::iterator iter;
+            Rolls::iterator iter;
             for (iter=RollId.begin(); iter != RollId.end(); ++iter)
             {
                 if (iter->itemGUID == Guid)
@@ -236,7 +242,7 @@ class MANGOS_DLL_SPEC Group
             }
             return RollId.end();
         }
-        void CountTheRoll(vector<Roll>::iterator roll, uint32 NumberOfPlayers);
+        void CountTheRoll(Rolls::iterator roll, uint32 NumberOfPlayers);
         void CountRollVote(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers, uint8 Choise);
         void EndRoll();
 
@@ -290,6 +296,6 @@ class MANGOS_DLL_SPEC Group
         LootMethod   m_lootMethod;
         ItemQuelities m_lootThreshold;
         uint64       m_looterGuid;
-        vector<Roll> RollId;
+        Rolls        RollId;
 };
 #endif

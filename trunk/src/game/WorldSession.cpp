@@ -38,6 +38,7 @@
 #include "BattleGroundMgr.h"
 #include "Language.h"                                       // for CMSG_DISMOUNT handler
 #include "FlightMaster.h"
+#include "Chat.h"
 
 /// WorldSession constructor
 WorldSession::WorldSession(uint32 id, WorldSocket *sock, uint32 sec, bool tbc, time_t mute_time) :

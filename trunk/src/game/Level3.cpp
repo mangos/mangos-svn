@@ -38,17 +38,190 @@
 #include "CellImpl.h"
 #include "Weather.h"
 
+bool ChatHandler::HandleReloadCommand(const char* arg)
+{
+    // this is error catcher for wrong table name in .reload commands 
+    PSendSysMessage("Db table with name starting from '%s' not found and can't be reloaded.",arg);
+    return true;
+}
+
 bool ChatHandler::HandleReloadAllCommand(const char*)
 {
-    HandleReloadAllSpellCommand("");
+    HandleReloadAreaTriggerTemplateCommand("");
+    //HandleReloadAreaTriggerTavernCommand(""); -- reloaded in HandleReloadAreaTriggerTavernCommand
+    HandleReloadCommandCommand("");
+    //HandleReloadQuestAreaTriggersCommand(""); -- reloaded in HandleReloadAllQuestCommand
+
+    HandleReloadAllLootCommand("");
+
+    HandleReloadAllQuestCommand("");
+
+    HandleReloadSpellAffectCommand("");
+    HandleReloadSpellChainCommand("");
+    HandleReloadSpellProcEventCommand("");
+    return true;
+}
+
+bool ChatHandler::HandleReloadAllAreaCommand(const char*)
+{
+    HandleReloadAreaTriggerTemplateCommand("");
+    //HandleReloadAreaTriggerTavernCommand(""); -- reloaded in HandleReloadAreaTriggerTavernCommand
+    return true;
+}
+
+bool ChatHandler::HandleReloadAllQuestCommand(const char* args)
+{
+    HandleReloadQuestAreaTriggersCommand("a");
+
+    sLog.outString( "Re-Loading Quests Relations..." );
+    objmgr.LoadQuestRelations();
+    SendGlobalSysMessage("DB tables `*_questrelation` and `*_involvedrelation` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadAllLootCommand(const char*)
+{
+    sLog.outString( "Re-Loading Loot Tables..." );
+    LoadLootTables();
+    SendGlobalSysMessage("DB tables `*_loot_template` reloaded.");
     return true;
 }
 
 bool ChatHandler::HandleReloadAllSpellCommand(const char*)
 {
-    HandleReloadSpellAffectCommand("");
-    HandleReloadSpellChainCommand("");
-    HandleReloadSpellProcEventCommand("");
+    HandleReloadSpellAffectCommand("a");
+    HandleReloadSpellChainCommand("a");
+    HandleReloadSpellProcEventCommand("a");
+    return true;
+}
+
+bool ChatHandler::HandleReloadAreaTriggerTavernCommand(const char*)
+{
+    sLog.outString( "Re-Loading Tavern Area Triggers..." );
+    objmgr.LoadTavernAreaTriggers();
+    SendGlobalSysMessage("DB table `areatrigger_tavern` (quest area triggers) reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadAreaTriggerTemplateCommand(const char*)
+{
+    sLog.outString( "Re-Loading AreaTrigger definitions..." );
+    objmgr.LoadAreaTriggers();
+    SendGlobalSysMessage("DB table `areatrigger_template` (area triggers definitions) reloaded.");
+
+    // must be reloaded after `areatrigger_template` reload
+    HandleReloadAreaTriggerTavernCommand("");
+    return true;
+}
+
+bool ChatHandler::HandleReloadCommandCommand(const char*)
+{
+    load_command_table = true;
+    SendGlobalSysMessage("DB table `command` will be reloaded at next chat command use.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadCreatureQuestRelationsCommand(const char*)
+{
+    sLog.outString( "Loading Quests Relations... (`creature_questrelation`)" );
+    objmgr.LoadQuestRelationsHelper(objmgr.mCreatureQuestRelations,"creature_questrelation");
+    SendGlobalSysMessage("DB table `creature_questrelation` (creature quest givers) reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadCreatureQuestInvRelationsCommand(const char*)
+{
+    sLog.outString( "Loading Quests Relations... (`creature_involvedrelation`)" );
+    objmgr.LoadQuestRelationsHelper(objmgr.mCreatureQuestInvolvedRelations,"creature_involvedrelation");
+    SendGlobalSysMessage("DB table `creature_involvedrelation` (creature quest takers) reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadGOQuestRelationsCommand(const char*)
+{
+    sLog.outString( "Loading Quests Relations... (`gameobject_questrelation`)" );
+    objmgr.LoadQuestRelationsHelper(objmgr.mGOQuestRelations,"gameobject_questrelation");
+    SendGlobalSysMessage("DB table `gameobject_questrelation` (gameobject quest givers) reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadGOQuestInvRelationsCommand(const char*)
+{
+    sLog.outString( "Loading Quests Relations... (`gameobject_involvedrelation`)" );
+    objmgr.LoadQuestRelationsHelper(objmgr.mGOQuestInvolvedRelations,"gameobject_involvedrelation");
+    SendGlobalSysMessage("DB table `gameobject_involvedrelation` (gameobject quest takers) reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadQuestAreaTriggersCommand(const char*)
+{
+    sLog.outString( "Re-Loading Quest Area Triggers..." );
+    objmgr.LoadQuestAreaTriggers();
+    SendGlobalSysMessage("DB table `areatrigger_involvedrelation` (quest area triggers) reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadLootTemplatesCreatureCommand(const char*)
+{
+    sLog.outString( "Re-Loading Loot Tables... (`creature_loot_template`)" );
+    LoadLootTable(LootTemplates_Creature,     "creature_loot_template");
+    SendGlobalSysMessage("DB table `creature_loot_template` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadLootTemplatesDisenchantCommand(const char*)
+{
+    sLog.outString( "Re-Loading Loot Tables... (`disenchant_loot_template`)" );
+    LoadLootTable(LootTemplates_Disenchant,   "disenchant_loot_template");
+    SendGlobalSysMessage("DB table `disenchant_loot_template` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadLootTemplatesFishingCommand(const char*)
+{
+    sLog.outString( "Re-Loading Loot Tables... (`fishing_loot_template`)" );
+    LoadLootTable(LootTemplates_Fishing,      "fishing_loot_template");
+    SendGlobalSysMessage("DB table `fishing_loot_template` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadLootTemplatesGameobjectCommand(const char*)
+{
+    sLog.outString( "Re-Loading Loot Tables... (`gameobject_loot_template`)" );
+    LoadLootTable(LootTemplates_Gameobject,   "gameobject_loot_template");
+    SendGlobalSysMessage("DB table `gameobject_loot_template` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadLootTemplatesItemCommand(const char*)
+{
+    sLog.outString( "Re-Loading Loot Tables... (`item_loot_template`)" );
+    LoadLootTable(LootTemplates_Item,         "item_loot_template");
+    SendGlobalSysMessage("DB table `item_loot_template` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadLootTemplatesPickpocketingCommand(const char*)
+{
+    sLog.outString( "Re-Loading Loot Tables... (`pickpocketing_loot_template`)" );
+    LoadLootTable(LootTemplates_Pickpocketing,"pickpocketing_loot_template");
+    SendGlobalSysMessage("DB table `pickpocketing_loot_template` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadLootTemplatesProspectingCommand(const char*)
+{
+    sLog.outString( "Re-Loading Loot Tables... (`prospecting_loot_template`)" );
+    LoadLootTable(LootTemplates_Prospecting,  "prospecting_loot_template");
+    SendGlobalSysMessage("DB table `prospecting_loot_template` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadLootTemplatesSkinningCommand(const char*)
+{
+    sLog.outString( "Re-Loading Loot Tables... (`skinning_loot_template`)" );
+    LoadLootTable(LootTemplates_Skinning,     "skinning_loot_template");
+    SendGlobalSysMessage("DB table `skinning_loot_template` reloaded.");
     return true;
 }
 
@@ -2758,7 +2931,7 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
     else
     {
         // update levle and XP at level, all other will be updated at loading
-        std::vector<std::string> values;
+        Tokens values;
         Player::LoadValuesArrayFromDB(values,chr_guid);
         Player::SetUInt32ValueInArray(values,UNIT_FIELD_LEVEL,newlevel);
         Player::SetUInt32ValueInArray(values,PLAYER_XP,0);
@@ -3366,9 +3539,9 @@ bool ChatHandler::HandleAddQuest(const char* args)
 
     uint32 entry = atol(cId);
 
-    ObjectMgr::QuestMap::iterator qIter = objmgr.QuestTemplates.find(entry);
+    ObjectMgr::QuestMap::iterator qIter = objmgr.mQuestTemplates.find(entry);
 
-    if(qIter == objmgr.QuestTemplates.end())
+    if(qIter == objmgr.mQuestTemplates.end())
     {
         PSendSysMessage(LANG_COMMAND_QUEST_NOTFOUND,entry);
         return true;
@@ -3416,9 +3589,9 @@ bool ChatHandler::HandleRemoveQuest(const char* args)
 
     uint32 entry = atol(cId);
 
-    ObjectMgr::QuestMap::iterator qIter = objmgr.QuestTemplates.find(entry);
+    ObjectMgr::QuestMap::iterator qIter = objmgr.mQuestTemplates.find(entry);
 
-    if(qIter == objmgr.QuestTemplates.end())
+    if(qIter == objmgr.mQuestTemplates.end())
     {
         PSendSysMessage(LANG_COMMAND_QUEST_NOTFOUND, entry);
         return true;

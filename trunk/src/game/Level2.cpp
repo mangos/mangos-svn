@@ -35,7 +35,7 @@
 
 #include <iostream>
 #include <fstream>
-using namespace std;
+
 bool ChatHandler::HandleMuteCommand(const char* args)
 {
     if (!*args)
@@ -1847,7 +1847,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
         return false;
     }
 
-    string show = show_str;
+    std::string show = show_str;
     // Check
     // Remember: "show" must also be the name of a column!
     if( (show != "emote") && (show != "spell") && (show != "aiscript")
@@ -1945,7 +1945,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
             delete result;
             // We have the waypoint number and the GUID of the "master npc"
             // Text is enclosed in "<>", all other arguments not
-            if( show.find("text") != string::npos )
+            if( show.find("text") != std::string::npos )
             {
                 arg_str = strtok((char*)NULL, "<>");
             }
@@ -1962,7 +1962,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
         char* point_str = strtok((char*)NULL, " ");
 
         // Text is enclosed in "<>", all other arguments not
-        if( show.find("text") != string::npos )
+        if( show.find("text") != std::string::npos )
         {
             arg_str = strtok((char*)NULL, "<>");
         }
@@ -2055,7 +2055,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
     sLog.outDebug("DEBUG: HandleWpModifyCommand - Parameters parsed - now execute the command");
 
     // Check for argument
-    if( (show.find("text") == string::npos ) && (show != "del") && (show != "move") && (show != "add") && (show != "aiscript"))
+    if( (show.find("text") == std::string::npos ) && (show != "del") && (show != "move") && (show != "add") && (show != "aiscript"))
     {
         if( arg_str == NULL )
         {
@@ -2251,7 +2251,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
     {
         PSendSysMessage("DEBUG: wp export, GUID: %u", lowguid);
 
-        ofstream outfile;
+        std::ofstream outfile;
         outfile.open (arg_str);
 
         QueryResult *result = sDatabase.PQuery(
@@ -2399,8 +2399,8 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
     {
         PSendSysMessage("DEBUG: wp import, GUID: %u", lowguid);
 
-        string line;
-        ifstream infile (arg_str);
+        std::string line;
+        std::ifstream infile (arg_str);
         if (infile.is_open())
         {
             while (! infile.eof() )
@@ -2546,7 +2546,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
 
     sLog.outDebug("DEBUG: HandleWpShowCommand: danach");
 
-    string show = show_str;
+    std::string show = show_str;
     uint32 Maxpoint;
 
     Creature* pCreature = NULL;

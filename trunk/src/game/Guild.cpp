@@ -305,7 +305,7 @@ void Guild::LoadPlayerStats(MemberSlot* memslot)
     memslot->name  = fields[0].GetCppString();
     memslot->Class = fields[1].GetUInt8();
 
-    vector<string> tokens = StrSplit(fields[5].GetCppString(), " ");
+    Tokens tokens = StrSplit(fields[5].GetCppString(), " ");
     memslot->level = Player::GetUInt32ValueFromArray(tokens,UNIT_FIELD_LEVEL);
 
     AreaTableEntry const* area = GetAreaEntryByAreaFlag(MapManager::Instance().GetAreaFlag(fields[2].GetUInt32(), fields[3].GetFloat(),fields[4].GetFloat()));
@@ -355,7 +355,7 @@ void Guild::DelMember(uint64 guid, bool isDisbanding)
         {
             uint64 newLeaderGUID;
             Player *newLeader;
-            string newLeaderName, oldLeaderName;
+            std::string newLeaderName, oldLeaderName;
 
             newLeaderGUID = (*result)[0].GetUInt64();
             delete result;

@@ -28,6 +28,7 @@
 #include "MapManager.h"
 #include "ObjectMgr.h"
 #include "ProgressBar.h"
+#include "World.h"
 
 INSTANTIATE_SINGLETON_1( BattleGroundMgr );
 

@@ -20,11 +20,15 @@
 
 #include "Channel.h"
 #include "Policies/Singleton.h"
+#include "World.h"
+
+#include <map>
+#include <string>
 
 class ChannelMgr
 {
     public:
-        typedef map<string,Channel *> ChannelMap;
+        typedef std::map<std::string,Channel *> ChannelMap;
         ChannelMgr() {}
         ~ChannelMgr()
         {

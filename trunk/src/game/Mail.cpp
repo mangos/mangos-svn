@@ -20,7 +20,6 @@
 #include "WorldSession.h"
 #include "Opcodes.h"
 #include "Log.h"
-#include "Chat.h"
 #include "World.h"
 #include "ObjectMgr.h"
 #include "Player.h"

@@ -27,6 +27,7 @@
 #include "ProgressBar.h"
 #include "Policies/SingletonImp.h"
 #include "ObjectAccessor.h"
+#include "World.h"
 
 #ifndef min
 #define min(a,b)            (((a) < (b)) ? (a) : (b))
@@ -65,6 +66,8 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
     int32 questchance;
     uint32 count = 0;
     bool is_ffa = true;
+
+    lootstore.clear();                                      // need for reload
 
     sLog.outString( "%s :", tablename);
 
