@@ -1290,7 +1290,7 @@ float Map::GetHeight(float x, float y, float z, bool pUseVmaps)
             float vmapheight = vmgr->getHeight(GetId(), x, y, z + 4); // look from a bit higher pos to find the floor
             // if the land map did not find the height or if we are already under the surface and vmap found a height
             // or if the distance of the vmap height is less the land height distance
-            if(!mapHeightFound || (z<height && vmapheight > -100000) || abs(height-z) > abs(vmapheight-z))
+            if(!mapHeightFound || (z<height && vmapheight > -100000) || fabs(height-z) > fabs(vmapheight-z))
             {
                 height = vmapheight;
                 mapHeightFound = true;

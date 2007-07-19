@@ -34,7 +34,7 @@ ConfusedMovementGenerator::Initialize(Creature &creature)
 
     Map* map = MapManager::Instance().GetMap(mapid, &creature);
     z2 = map->GetHeight(x,y,z);
-    if( abs( z2 - z ) < 5 )
+    if( fabs( z2 - z ) < 5 )
         z = z2;
 
     i_nextMove = 1;
@@ -62,7 +62,7 @@ ConfusedMovementGenerator::Initialize(Creature &creature)
             i_waypoints[idx][1] = idx > 0 ? i_waypoints[idx-1][1] : y;
         }
         z2 = map->GetHeight(i_waypoints[idx][0],i_waypoints[idx][1],z);
-        if( abs( z2 - z ) < 5 )
+        if( fabs( z2 - z ) < 5 )
             z = z2;
         i_waypoints[idx][2] =  z;
     }

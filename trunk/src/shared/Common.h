@@ -141,3 +141,13 @@ enum TimeConstants
 #  define MANGOS_DLL_SPEC
 #endif
 #endif
+
+// we always use stdlibc++ std::max/std::min, undefine some not C++ standart defines (Win API and some pother platforms)
+#ifdef max
+#undef max
+#endif
+
+#ifdef min
+#undef min
+#endif
+

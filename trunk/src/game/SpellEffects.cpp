@@ -1810,7 +1810,7 @@ void Spell::EffectSummonWild(uint32 i)
 
         int32 amount = damage > 0 ? damage : 1;
 
-        for(uint32 count = 0; count < amount; ++count)
+        for(int32 count = 0; count < amount; ++count)
         {
             float px, py, pz;
             m_caster->GetRandomPoint(center_x,center_y,center_z,radius,px,py,pz);
@@ -2702,7 +2702,7 @@ void Spell::EffectSummonTotem(uint32 i)
 
     Map* map = MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster);
     float z2 = map->GetHeight(x,y,z);
-    if( abs( z2 - z ) < 5 )
+    if( fabs( z2 - z ) < 5 )
         z = z2;
 
     if(slot <4 )

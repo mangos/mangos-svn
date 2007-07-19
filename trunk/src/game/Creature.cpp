@@ -998,23 +998,23 @@ void Creature::SaveToDB()
 
 void Creature::SelectLevel(const CreatureInfo *cinfo)
 {
-    uint32 minlevel = min(cinfo->maxlevel, cinfo->minlevel);
-    uint32 maxlevel = max(cinfo->maxlevel, cinfo->minlevel);
+    uint32 minlevel = std::min(cinfo->maxlevel, cinfo->minlevel);
+    uint32 maxlevel = std::max(cinfo->maxlevel, cinfo->minlevel);
     uint32 level = minlevel == maxlevel ? minlevel : urand(minlevel, maxlevel);
     SetLevel(level);
 
     float rellevel = maxlevel == minlevel ? 0 : (float(level - minlevel))/(maxlevel - minlevel);
 
-    uint32 minhealth = min(cinfo->maxhealth, cinfo->minhealth);
-    uint32 maxhealth = max(cinfo->maxhealth, cinfo->minhealth);
+    uint32 minhealth = std::min(cinfo->maxhealth, cinfo->minhealth);
+    uint32 maxhealth = std::max(cinfo->maxhealth, cinfo->minhealth);
     uint32 health = uint32(_GetHealthMod(isPet() ? 0 : cinfo->rank) * (minhealth + uint32(rellevel*(maxhealth - minhealth))));
 
     SetMaxHealth(health);
     SetUInt32Value(UNIT_FIELD_BASE_HEALTH,health);
     SetHealth(health);
 
-    uint32 minmana = min(cinfo->maxmana, cinfo->minmana);
-    uint32 maxmana = max(cinfo->maxmana, cinfo->minmana);
+    uint32 minmana = std::min(cinfo->maxmana, cinfo->minmana);
+    uint32 maxmana = std::max(cinfo->maxmana, cinfo->minmana);
     uint32 mana = minmana + uint32(rellevel*(maxmana - minmana));
 
     SetMaxPower(POWER_MANA, mana);                          //MAX Mana
