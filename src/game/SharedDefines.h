@@ -1279,4 +1279,47 @@ enum WeatherTypes
 
 #define MAX_WEATHER_TYPE 4
 
+enum ChatMsg
+{
+    CHAT_MSG_SAY                                  = 0x00,
+    CHAT_MSG_PARTY                                = 0x01,
+    CHAT_MSG_RAID                                 = 0x02,
+    CHAT_MSG_GUILD                                = 0x03,
+    CHAT_MSG_OFFICER                              = 0x04,
+    CHAT_MSG_YELL                                 = 0x05,
+    CHAT_MSG_WHISPER                              = 0x06,   // whisper received
+    CHAT_MSG_WHISPER_INFORM                       = 0x07,   // whisper sent
+    CHAT_MSG_EMOTE                                = 0x08,
+    CHAT_MSG_TEXT_EMOTE                           = 0x09,
+    CHAT_MSG_SYSTEM                               = 0x0A,
+    CHAT_MSG_MONSTER_SAY                          = 0x0B,
+    CHAT_MSG_MONSTER_YELL                         = 0x0C,
+    CHAT_MSG_MONSTER_EMOTE                        = 0x0D,
+    CHAT_MSG_CHANNEL                              = 0x0E,
+    CHAT_MSG_CHANNEL_JOIN                         = 0x0F,
+    CHAT_MSG_CHANNEL_LEAVE                        = 0x10,
+    CHAT_MSG_CHANNEL_LIST                         = 0x11,
+    CHAT_MSG_CHANNEL_NOTICE                       = 0x12,
+    CHAT_MSG_CHANNEL_NOTICE_USER                  = 0x13,
+    CHAT_MSG_AFK                                  = 0x14,
+    CHAT_MSG_DND                                  = 0x15,
+    CHAT_MSG_IGNORED                              = 0x16,
+    CHAT_MSG_SKILL                                = 0x17,
+    CHAT_MSG_LOOT                                 = 0x18,
+    CHAT_MSG_UNK1                                 = 0x19,   // unk
+    CHAT_MSG_MONSTER_WHISPER                      = 0x1A,
+    CHAT_MSG_BATTLEGROUND                         = 0x52,
+    CHAT_MSG_BATTLEGROUND_HORDE                   = 0x53,
+    CHAT_MSG_BATTLEGROUND_ALLIANCE                = 0x54,
+    CHAT_MSG_UNK2                                 = 0x55,   // unk, blue
+    CHAT_MSG_UNK3                                 = 0x56,   // unk, yellow
+    CHAT_MSG_RAID_LEADER                          = 0x57,
+    CHAT_MSG_RAID_WARN                            = 0x58,
+    CHAT_MSG_UNK4                                 = 0x59,
+    CHAT_MSG_UNK5                                 = 0x5A,   // unk
+    CHAT_MSG_UNK6                                 = 0x5B,   // unk
+    CHAT_MSG_BATTLEGROUND_CHAT                    = 0x5C,
+    CHAT_MSG_BATTLEGROUND_LEADER                  = 0x5D,
+};
+
 #endif

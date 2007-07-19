@@ -24,7 +24,6 @@
 #include "Log.h"
 #include "ObjectMgr.h"
 #include "Player.h"
-#include "Chat.h"
 #include "Item.h"
 #include "UpdateData.h"
 #include "ObjectAccessor.h"

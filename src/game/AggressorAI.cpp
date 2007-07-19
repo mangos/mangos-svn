@@ -23,8 +23,10 @@
 #include "TargetedMovementGenerator.h"
 #include "Database/DBCStores.h"
 #include "ObjectAccessor.h"
-#include <list>
 #include "VMapFactory.h"
+#include "World.h"
+
+#include <list>
 
 int
 AggressorAI::Permissible(const Creature *creature)

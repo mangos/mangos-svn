@@ -54,11 +54,11 @@ ObjectMgr::ObjectMgr()
 ObjectMgr::~ObjectMgr()
 {
 
-    for( QuestMap::iterator i = QuestTemplates.begin( ); i != QuestTemplates.end( ); ++ i )
+    for( QuestMap::iterator i = mQuestTemplates.begin( ); i != mQuestTemplates.end( ); ++ i )
     {
         delete i->second;
     }
-    QuestTemplates.clear( );
+    mQuestTemplates.clear( );
 
     for( GossipTextMap::iterator i = mGossipText.begin( ); i != mGossipText.end( ); ++ i )
     {
@@ -66,10 +66,6 @@ ObjectMgr::~ObjectMgr()
     }
     mGossipText.clear( );
 
-    for( AreaTriggerMap::iterator i = mAreaTriggers.begin( ); i != mAreaTriggers.end( ); ++ i )
-    {
-        delete i->second;
-    }
     mAreaTriggers.clear();
 
     for(PetLevelInfoMap::iterator i = petInfo.begin( ); i != petInfo.end( ); ++ i )
@@ -237,8 +233,8 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
 
     std::ostringstream msgAuctionWonBody;
     msgAuctionWonBody.width(16);
-    msgAuctionWonBody << right << hex << auction->owner;
-    msgAuctionWonBody << dec << ":" << auction->bid << ":" << auction->buyout;
+    msgAuctionWonBody << std::right << std::hex << auction->owner;
+    msgAuctionWonBody << std::dec << ":" << auction->bid << ":" << auction->buyout;
     sLog.outDebug( "AuctionWon body string : %s", msgAuctionWonBody.str().c_str() );
 
     //prepare mail data... :
@@ -310,8 +306,8 @@ void ObjectMgr::SendAuctionSuccessfulMail( AuctionEntry * auction )
     uint32 auctionCut = this->GetAuctionCut(auction->location, auction->bid);
 
     auctionSuccessfulBody.width(16);
-    auctionSuccessfulBody << right << hex << auction->bidder;
-    auctionSuccessfulBody << dec << ":" << auction->bid << ":0:";
+    auctionSuccessfulBody << std::right << std::hex << auction->bidder;
+    auctionSuccessfulBody << std::dec << ":" << auction->bid << ":0:";
     auctionSuccessfulBody << auction->deposit << ":" << auctionCut;
     sLog.outDebug("AuctionSuccessful body string : %s", auctionSuccessfulBody.str().c_str());
 
@@ -1583,13 +1579,13 @@ void ObjectMgr::LoadQuests()
         Field *fields = result->Fetch();
 
         Quest * newQuest = new Quest(fields);
-        QuestTemplates[newQuest->GetQuestId()] = newQuest;
+        mQuestTemplates[newQuest->GetQuestId()] = newQuest;
     } while( result->NextRow() );
 
     delete result;
 
     // Post processing
-    for (QuestMap::iterator iter = QuestTemplates.begin(); iter != QuestTemplates.end(); iter++)
+    for (QuestMap::iterator iter = mQuestTemplates.begin(); iter != mQuestTemplates.end(); iter++)
     {
         Quest * qinfo = iter->second;
 
@@ -1769,14 +1765,14 @@ void ObjectMgr::LoadQuests()
 
         if(qinfo->NextQuestInChain)
         {
-            if(QuestTemplates.find(qinfo->NextQuestInChain) == QuestTemplates.end())
+            if(mQuestTemplates.find(qinfo->NextQuestInChain) == mQuestTemplates.end())
             {
                 sLog.outErrorDb("Quest %u has `NextQuestInChain` = %u but quest %u doesn't exist, quest chain will not work.",
                     qinfo->GetQuestId(),qinfo->NextQuestInChain ,qinfo->NextQuestInChain );
                 qinfo->NextQuestInChain = 0;
             }
             else
-                QuestTemplates[qinfo->NextQuestInChain]->prevChainQuests.push_back(qinfo->GetQuestId());
+                mQuestTemplates[qinfo->NextQuestInChain]->prevChainQuests.push_back(qinfo->GetQuestId());
         }
 
         // fill additional data stores
@@ -1785,23 +1781,23 @@ void ObjectMgr::LoadQuests()
 
         if(qinfo->NextQuestId)
         {
-            if (QuestTemplates.find(abs(qinfo->GetNextQuestId())) == QuestTemplates.end())
+            if (mQuestTemplates.find(abs(qinfo->GetNextQuestId())) == mQuestTemplates.end())
             {
                 sLog.outErrorDb("Quest %d has NextQuestId %i, but no such quest", qinfo->GetQuestId(), qinfo->GetNextQuestId());
             }
             else
             {
                 int32 signedQuestId = qinfo->NextQuestId < 0 ? -int32(qinfo->GetQuestId()) : int32(qinfo->GetQuestId());
-                QuestTemplates[abs(qinfo->GetNextQuestId())]->prevQuests.push_back(signedQuestId);
+                mQuestTemplates[abs(qinfo->GetNextQuestId())]->prevQuests.push_back(signedQuestId);
             }
         }
 
         if(qinfo->ExclusiveGroup)
-            ExclusiveQuestGroups.insert(pair<uint32, uint32>(qinfo->ExclusiveGroup, qinfo->GetQuestId()));
+            mExclusiveQuestGroups.insert(std::pair<uint32, uint32>(qinfo->ExclusiveGroup, qinfo->GetQuestId()));
     }
 
     sLog.outString( "" );
-    sLog.outString( ">> Loaded %u quests definitions", QuestTemplates.size() );
+    sLog.outString( ">> Loaded %u quests definitions", mQuestTemplates.size() );
 }
 
 void ObjectMgr::LoadSpellChains()
@@ -2184,10 +2180,10 @@ void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
 
         if (scripts.find(tmp.id) == scripts.end())
         {
-            multimap<uint32, ScriptInfo> emptyMap;
+            ScriptMap emptyMap;
             scripts[tmp.id] = emptyMap;
         }
-        scripts[tmp.id].insert(pair<uint32, ScriptInfo>(tmp.delay, tmp));
+        scripts[tmp.id].insert(std::pair<uint32, ScriptInfo>(tmp.delay, tmp));
 
         count++;
     } while( result->NextRow() );
@@ -2390,6 +2386,8 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
 
 void ObjectMgr::LoadQuestAreaTriggers()
 {
+    mQuestAreaTriggerMap.clear();                           // need for reload case
+
     QueryResult *result = sDatabase.Query( "SELECT `id`,`quest` FROM `areatrigger_involvedrelation`" );
 
     uint32 count = 0;
@@ -2416,7 +2414,7 @@ void ObjectMgr::LoadQuestAreaTriggers()
         uint32 Trigger_ID = fields[0].GetUInt32();
         uint32 Quest_ID   = fields[1].GetUInt32();
 
-        if(!QuestTemplates[Quest_ID])
+        if(!mQuestTemplates[Quest_ID])
         {
             sLog.outErrorDb("Table `areatrigger_involvedrelation` have record (id: %u) for non-existed quest %u",Trigger_ID,Quest_ID);
             continue;
@@ -2434,6 +2432,8 @@ void ObjectMgr::LoadQuestAreaTriggers()
 
 void ObjectMgr::LoadTavernAreaTriggers()
 {
+    mTavernAreaTriggerSet.clear();                          // need for reload case
+
     QueryResult *result = sDatabase.Query("SELECT `id` FROM `areatrigger_tavern`");
 
     uint32 count = 0;
@@ -2668,6 +2668,8 @@ WorldSafeLocsEntry const *ObjectMgr::GetClosestGraveYard(float x, float y, float
 
 void ObjectMgr::LoadAreaTriggers()
 {
+    mAreaTriggers.clear();                                  // need for reload case
+
     uint32 count = 0;
 
     //                                            0    1                2               3             4                    5                    6                    7            8                   9                   10                  11
@@ -2696,27 +2698,27 @@ void ObjectMgr::LoadAreaTriggers()
 
         uint32 Trigger_ID = fields[0].GetUInt32();
 
-        AreaTrigger *at = new AreaTrigger;
+        AreaTrigger at;
 
-        at->requiredLevel      = fields[1].GetUInt8();
-        at->requiredItem       = fields[2].GetUInt32();
-        at->trigger_mapId      = fields[3].GetUInt32();
-        at->trigger_X          = fields[4].GetFloat();
-        at->trigger_Y          = fields[5].GetFloat();
-        at->trigger_Z          = fields[6].GetFloat();
-        at->target_mapId       = fields[7].GetUInt32();
-        at->target_X           = fields[8].GetFloat();
-        at->target_Y           = fields[9].GetFloat();
-        at->target_Z           = fields[10].GetFloat();
-        at->target_Orientation = fields[11].GetFloat();
+        at.requiredLevel      = fields[1].GetUInt8();
+        at.requiredItem       = fields[2].GetUInt32();
+        at.trigger_mapId      = fields[3].GetUInt32();
+        at.trigger_X          = fields[4].GetFloat();
+        at.trigger_Y          = fields[5].GetFloat();
+        at.trigger_Z          = fields[6].GetFloat();
+        at.target_mapId       = fields[7].GetUInt32();
+        at.target_X           = fields[8].GetFloat();
+        at.target_Y           = fields[9].GetFloat();
+        at.target_Z           = fields[10].GetFloat();
+        at.target_Orientation = fields[11].GetFloat();
 
-        if(at->requiredItem)
+        if(at.requiredItem)
         {
-            ItemPrototype const *pProto = objmgr.GetItemPrototype(at->requiredItem);
+            ItemPrototype const *pProto = objmgr.GetItemPrototype(at.requiredItem);
             if(!pProto)
             {
-                sLog.outError("Key item %u not exist for trigger %u, remove key requirement.", at->requiredItem, Trigger_ID);
-                at->requiredItem = 0;
+                sLog.outError("Key item %u not exist for trigger %u, remove key requirement.", at.requiredItem, Trigger_ID);
+                at.requiredItem = 0;
             }
         }
 
@@ -3636,6 +3638,8 @@ void ObjectMgr::DeleteCorpseCellData(uint32 mapid, uint32 cellid, uint32 player_
 
 void ObjectMgr::LoadQuestRelationsHelper(QuestRelations& map,char const* table)
 {
+    map.clear();                                            // need for reload case
+
     uint32 count = 0; 
 
     QueryResult *result = sDatabase.PQuery("SELECT `id`,`quest` FROM `%s`",table);
@@ -3661,7 +3665,7 @@ void ObjectMgr::LoadQuestRelationsHelper(QuestRelations& map,char const* table)
         uint32 id    = fields[0].GetUInt32();
         uint32 quest = fields[1].GetUInt32();
 
-        if ( !objmgr.QuestTemplates[quest] )
+        if ( !mQuestTemplates[quest] )
         {
             sLog.outErrorDb("Table %s: Quest %u listed for entry %u not exist.",table,quest,id);
             continue;
@@ -3707,7 +3711,7 @@ tbl tbls[NUM_TBLS] = {
 std::string CreateDumpString(char *table, QueryResult *result)
 {
     if(!table || !result) return "";
-    ostringstream ss;
+    std::ostringstream ss;
     ss << "INSERT INTO `" << table << "` VALUES (";
     Field *fields = result->Fetch();
     for(uint32 i = 0; i < result->GetFieldCount(); i++)
@@ -3755,14 +3759,14 @@ bool ObjectMgr::WritePlayerDump(std::string file, uint32 guid)
     return true;
 }
 
-bool findnth(std::string &str, int n, string::size_type &s, string::size_type &e)
+bool findnth(std::string &str, int n, std::string::size_type &s, std::string::size_type &e)
 {
     s = str.find("VALUES ('")+9;
-    if (s == string::npos) return false;
+    if (s == std::string::npos) return false;
 
     do {
         e = str.find("'",s);
-        if (e == string::npos) return false;
+        if (e == std::string::npos) return false;
     } while(str[e-1] == '\\');
 
     for(int i = 1; i < n; i++)
@@ -3770,7 +3774,7 @@ bool findnth(std::string &str, int n, string::size_type &s, string::size_type &e
         do {
             s = e+4;
             e = str.find("'",s);
-            if (e == string::npos) return false;
+            if (e == std::string::npos) return false;
         } while (str[e-1] == '\\');
     }
     return true;
@@ -3778,14 +3782,14 @@ bool findnth(std::string &str, int n, string::size_type &s, string::size_type &e
 
 std::string gettablename(std::string &str)
 {
-    string::size_type s = 13, e = str.find('`', s);
-    if (e == string::npos) return "";
+    std::string::size_type s = 13, e = str.find('`', s);
+    if (e == std::string::npos) return "";
     return str.substr(s, e-s);
 }
 
 bool changenth(std::string &str, int n, const char *with, bool insert = false, bool nonzero = false)
 {
-    string::size_type s, e;
+    std::string::size_type s, e;
     if(!findnth(str,n,s,e)) return false;
     if(nonzero && str.substr(s,e-s) == "0") return true;    // not an error
     if(!insert) str.replace(s,e-s, with);
@@ -3795,31 +3799,31 @@ bool changenth(std::string &str, int n, const char *with, bool insert = false, b
 
 std::string getnth(std::string &str, int n)
 {
-    string::size_type s, e;
+    std::string::size_type s, e;
     if(!findnth(str,n,s,e)) return "";
     return str.substr(s, e-s);
 }
 
-bool findtoknth(std::string &str, int n, string::size_type &s, string::size_type &e)
+bool findtoknth(std::string &str, int n, std::string::size_type &s, std::string::size_type &e)
 {
     int i; s = e = 0;
-    string::size_type size = str.size();
+    std::string::size_type size = str.size();
     for(i = 1; s < size && i < n; s++) if(str[s] == ' ') i++;
     if (i < n) return false;
     e = str.find(' ', s);
-    return e != string::npos;
+    return e != std::string::npos;
 }
 
 std::string gettoknth(std::string &str, int n)
 {
-    string::size_type s = 0, e = 0;
+    std::string::size_type s = 0, e = 0;
     if(!findtoknth(str, n, s, e)) return "";
     return str.substr(s, e-s);
 }
 
 bool changetoknth(std::string &str, int n, const char *with, bool insert = false, bool nonzero = false)
 {
-    string::size_type s = 0, e = 0;
+    std::string::size_type s = 0, e = 0;
     if(!findtoknth(str, n, s, e)) return false;
     if(nonzero && str.substr(s,e-s) == "0") return true;    // not an error
     if(!insert) str.replace(s, e-s, with);

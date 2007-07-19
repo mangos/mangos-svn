@@ -21,7 +21,12 @@
 
 #include "Common.h"
 
-std::vector<std::string> StrSplit(const std::string &src, const std::string &sep);
+#include <string>
+#include <vector>
+
+typedef std::vector<std::string> Tokens;
+
+Tokens StrSplit(const std::string &src, const std::string &sep);
 
 std::string secsToTimeString(uint32 timeInSecs, bool shortText = false, bool hoursOnly = false);
 uint32 TimeStringToSecs(std::string timestring);

@@ -25,7 +25,6 @@
 #include "Opcodes.h"
 #include "Spell.h"
 #include "UpdateData.h"
-#include "Chat.h"
 #include "MapManager.h"
 #include "EventSystem.h"
 

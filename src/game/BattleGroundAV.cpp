@@ -21,7 +21,6 @@
 #include "BattleGround.h"
 #include "BattleGroundAV.h"
 #include "Creature.h"
-#include "Chat.h"
 #include "Spell.h"
 #include "ObjectMgr.h"
 #include "MapManager.h"

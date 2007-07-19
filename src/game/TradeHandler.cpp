@@ -25,7 +25,6 @@
 #include "Opcodes.h"
 #include "Player.h"
 #include "Item.h"
-#include "Chat.h"
 
 enum TradeStatus
 {

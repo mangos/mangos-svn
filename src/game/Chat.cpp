@@ -31,6 +31,8 @@
 #include "MapManager.h"
 #include "Policies/SingletonImp.h"
 
+bool ChatHandler::load_command_table = true;
+
 LanguageDesc lang_description[LANGUAGES_COUNT] =
 {
     { LANG_ADDON,           0, 0                       },
@@ -99,9 +101,6 @@ ChatHandler::~ChatHandler()
 
 ChatCommand * ChatHandler::getCommandTable()
 {
-
-    static bool first_call = true;
-
     static ChatCommand modifyCommandTable[] =
     {
         { "hp",          SEC_MODERATOR,     &ChatHandler::HandleModifyHPCommand,         "",   NULL },
@@ -159,12 +158,33 @@ ChatCommand * ChatHandler::getCommandTable()
 
     static ChatCommand reloadCommandTable[] =
     {
-        { "all",              SEC_ADMINISTRATOR, &ChatHandler::HandleReloadAllCommand,            "",   NULL },
-        { "all_spell",        SEC_ADMINISTRATOR, &ChatHandler::HandleReloadAllSpellCommand,       "",   NULL },
-        { "spell_affect",     SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellAffectCommand,    "",   NULL },
-        { "spell_chain",      SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellChainCommand,     "",   NULL },
-        { "spell_proc_event", SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellProcEventCommand, "",   NULL },
-        { NULL,               0,                 NULL,                                            "",   NULL }
+        { "all",                SEC_ADMINISTRATOR, &ChatHandler::HandleReloadAllCommand,                 "", NULL },
+        { "all_quest",          SEC_ADMINISTRATOR, &ChatHandler::HandleReloadAllQuestCommand,            "", NULL },
+        { "all_loot",           SEC_ADMINISTRATOR, &ChatHandler::HandleReloadAllLootCommand,             "", NULL },
+        { "all_spell",          SEC_ADMINISTRATOR, &ChatHandler::HandleReloadAllSpellCommand,            "", NULL },
+
+        { "areatrigger_tavern",          SEC_ADMINISTRATOR, &ChatHandler::HandleReloadAreaTriggerTavernCommand,       "", NULL },
+        { "areatrigger_template",        SEC_ADMINISTRATOR, &ChatHandler::HandleReloadAreaTriggerTemplateCommand,     "", NULL },
+        { "areatrigger_involvedrelation",SEC_ADMINISTRATOR, &ChatHandler::HandleReloadQuestAreaTriggersCommand,       "", NULL },
+        { "command",                     SEC_ADMINISTRATOR, &ChatHandler::HandleReloadCommandCommand,                 "", NULL },
+        { "creature_involvedrelation",   SEC_ADMINISTRATOR, &ChatHandler::HandleReloadCreatureQuestInvRelationsCommand,"",NULL },
+        { "creature_questrelation",      SEC_ADMINISTRATOR, &ChatHandler::HandleReloadCreatureQuestRelationsCommand,  "", NULL },
+        { "gameobject_involvedrelation", SEC_ADMINISTRATOR, &ChatHandler::HandleReloadGOQuestInvRelationsCommand,     "", NULL },
+        { "gameobject_questrelation",    SEC_ADMINISTRATOR, &ChatHandler::HandleReloadGOQuestRelationsCommand,        "", NULL },
+        { "creature_loot_template",      SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesCreatureCommand,   "", NULL },
+        { "disenchant_loot_template",    SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesDisenchantCommand, "", NULL },
+        { "fishing_loot_template",       SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesFishingCommand,    "", NULL },
+        { "gameobject_loot_template",    SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesGameobjectCommand, "", NULL },
+        { "item_loot_template",          SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesItemCommand,       "", NULL },
+        { "pickpocketing_loot_template", SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesPickpocketingCommand,"",NULL},
+        { "skinning_loot_template",      SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesSkinningCommand,   "", NULL },
+        { "prospecting_loot_template",   SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesProspectingCommand,"", NULL },
+
+        { "spell_affect",                SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellAffectCommand,             "", NULL },
+        { "spell_chain",                 SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellChainCommand,              "", NULL },
+        { "spell_proc_event",            SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellProcEventCommand,          "", NULL },
+        { "",                            SEC_ADMINISTRATOR, &ChatHandler::HandleReloadCommand,                        "", NULL },
+        { NULL,                          0,                 NULL,                                                     "", NULL }
     };
 
     static ChatCommand commandTable[] =
@@ -324,8 +344,10 @@ ChatCommand * ChatHandler::getCommandTable()
         { NULL,          0, NULL,                                        "",   NULL }
     };
 
-    if(first_call)
+    if(load_command_table)
     {
+        load_command_table = false;
+
         QueryResult *result = sDatabase.Query("SELECT `name`,`security`,`help` FROM `command`");
         if (result)
         {
@@ -356,7 +378,6 @@ ChatCommand * ChatHandler::getCommandTable()
             } while(result->NextRow());
             delete result;
         }
-        first_call = false;
     }
 
     return commandTable;

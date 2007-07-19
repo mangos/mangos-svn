@@ -105,7 +105,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
         return;
     }
 
-    Quest * qInfo = objmgr.QuestTemplates[quest];
+    Quest * qInfo = objmgr.mQuestTemplates[quest];
     if ( qInfo )
     {
         // prevent cheating
@@ -191,7 +191,7 @@ void WorldSession::HandleQuestgiverQuestQueryOpcode( WorldPacket & recv_data )
         return;
     }
 
-    Quest *pQuest = objmgr.QuestTemplates[quest];
+    Quest *pQuest = objmgr.mQuestTemplates[quest];
     if ( pQuest )
     {
         _player->PlayerTalkClass->SendQuestGiverQuestDetails(pQuest, pObject->GetGUID(), true);
@@ -206,7 +206,7 @@ void WorldSession::HandleQuestQueryOpcode( WorldPacket & recv_data )
     recv_data >> quest;
     sLog.outDebug( "WORLD: Received CMSG_QUEST_QUERY quest = %u",quest );
 
-    Quest *pQuest = objmgr.QuestTemplates[quest];
+    Quest *pQuest = objmgr.mQuestTemplates[quest];
     if ( pQuest )
     {
         _player->PlayerTalkClass->SendQuestQueryResponse( pQuest );
@@ -242,7 +242,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
             break;
     }
 
-    Quest *pQuest = objmgr.QuestTemplates[quest];
+    Quest *pQuest = objmgr.mQuestTemplates[quest];
     if( pQuest )
     {
         if( _player->CanRewardQuest( pQuest, reward, true ) )
@@ -296,7 +296,7 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
     if(!pObject||!pObject->hasInvolvedQuest(quest))
         return;
 
-    Quest *pQuest = objmgr.QuestTemplates[quest];
+    Quest *pQuest = objmgr.mQuestTemplates[quest];
     if( pQuest )
     {
         if ( _player->CanCompleteQuest( quest ) )
@@ -385,7 +385,7 @@ void WorldSession::HandleQuestComplete(WorldPacket& recv_data)
 
     sLog.outDetail( "WORLD: Received CMSG_QUESTGIVER_COMPLETE_QUEST npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest );
 
-    Quest *pQuest = objmgr.QuestTemplates[quest];
+    Quest *pQuest = objmgr.mQuestTemplates[quest];
     if( pQuest )
     {
         if( _player->GetQuestStatus( quest ) != QUEST_STATUS_COMPLETE )
@@ -415,7 +415,7 @@ void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
 
     sLog.outDetail( "WORLD: Received CMSG_PUSHQUESTTOPARTY quest = %u", quest );
 
-    Quest *pQuest = objmgr.QuestTemplates[quest];
+    Quest *pQuest = objmgr.mQuestTemplates[quest];
     if( pQuest )
     {
         if( _player->GetGroup() )

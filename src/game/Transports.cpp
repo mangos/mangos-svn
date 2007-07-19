@@ -192,7 +192,7 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32> &mapids)
     if (!path.Size())
         return false;
 
-    vector<keyFrame> keyFrames;
+    std::vector<keyFrame> keyFrames;
     int mapChange = 0;
     mapids.clear();
     for (size_t i = 1; i < path.Size() - 1; i++)
@@ -398,9 +398,9 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32> &mapids)
     return true;
 }
 
-map<uint32, Transport::WayPoint>::iterator Transport::GetNextWayPoint()
+Transport::WayPointMap::iterator Transport::GetNextWayPoint()
 {
-    map <uint32, WayPoint>::iterator iter = m_curr;
+    WayPointMap::iterator iter = m_curr;
     iter++;
     if (iter == m_WayPoints.end())
         iter = m_WayPoints.begin();
@@ -415,9 +415,9 @@ void Transport::TeleportTransport(uint32 oldMapid, uint32 newMapid, float x, flo
     this->Relocate(x, y, z, GetOrientation());              //2.594172f);
     //MapManager::Instance().GetMap(newMapid)->Add<GameObject>((GameObject *)this);
 
-    for(set<Player *>::iterator itr = m_passengers.begin(); itr != m_passengers.end();)
+    for(PlayerSet::iterator itr = m_passengers.begin(); itr != m_passengers.end();)
     {
-        set<Player *>::iterator it2 = itr;
+        PlayerSet::iterator it2 = itr;
         ++itr;
 
         Player *plr = *it2;
@@ -472,7 +472,7 @@ void Transport::Update(uint32 p_time)
 
         if (m_curr->second.teleport == true)
         {
-            map <uint32, WayPoint>::iterator iterPrev = m_curr;
+            WayPointMap::iterator iterPrev = m_curr;
             TeleportTransport(GetMapId(), m_curr->second.mapid, m_curr->second.x, m_curr->second.y, m_curr->second.z);
         }
         else
@@ -483,9 +483,9 @@ void Transport::Update(uint32 p_time)
 
         m_curMap = m_curr->second.mapid;
 
-        for(set<Player *>::iterator itr = m_passengers.begin(); itr != m_passengers.end();)
+        for(PlayerSet::iterator itr = m_passengers.begin(); itr != m_passengers.end();)
         {
-            set<Player *>::iterator it2 = itr;
+            PlayerSet::iterator it2 = itr;
             ++itr;
             //(*it2)->SetPosition( m_curr->second.x + (*it2)->GetTransOffsetX(), m_curr->second.y + (*it2)->GetTransOffsetY(), m_curr->second.z + (*it2)->GetTransOffsetZ(), (*it2)->GetTransOffsetO() );
         }

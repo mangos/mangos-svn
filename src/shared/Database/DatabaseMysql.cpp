@@ -24,8 +24,6 @@
 #include "Database/MySQLDelayThread.h"
 #include "Database/SqlOperations.h"
 
-using namespace std;
-
 void DatabaseMysql::ThreadStart()
 {
     mysql_thread_init();
@@ -83,9 +81,9 @@ bool DatabaseMysql::Initialize(const char *infoString)
 
     InitDelayThread();
 
-    vector<string> tokens = StrSplit(infoString, ";");
+    Tokens tokens = StrSplit(infoString, ";");
 
-    vector<string>::iterator iter;
+    Tokens::iterator iter;
 
     std::string host, port_or_socket, user, password, database;
     int port;

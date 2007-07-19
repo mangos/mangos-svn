@@ -23,7 +23,6 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "Opcodes.h"
-#include "Chat.h"
 #include "BattleGroundMgr.h"
 #include "SharedDefines.h"
 

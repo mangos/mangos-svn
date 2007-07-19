@@ -23,6 +23,7 @@
 #include "Player.h"
 #include "ObjectMgr.h"
 #include "ArenaTeam.h"
+#include "World.h"
 
 void WorldSession::HandleInspectArenaStatsOpcode(WorldPacket & recv_data)
 {

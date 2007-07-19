@@ -112,7 +112,7 @@ void WorldSession::HandleChannelOwner(WorldPacket& recvPacket)
     recvPacket >> channelname;
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if(Channel *chn = cMgr->GetChannel(channelname,_player))
-            chn->GetOwner(_player->GetGUID());
+            chn->SendWhoOwner(_player->GetGUID());
 }
 
 void WorldSession::HandleChannelModerator(WorldPacket& recvPacket)

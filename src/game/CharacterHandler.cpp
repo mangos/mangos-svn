@@ -28,7 +28,6 @@
 #include "Player.h"
 #include "Guild.h"
 #include "UpdateMask.h"
-#include "Chat.h"
 #include "Auth/md5.h"
 #include "MapManager.h"
 #include "ObjectAccessor.h"
@@ -315,11 +314,11 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         data << (uint32)0;
 
         uint32 linecount=0;
-        string str_motd = sWorld.GetMotd();
-        string::size_type pos, nextpos;
+        std::string str_motd = sWorld.GetMotd();
+        std::string::size_type pos, nextpos;
 
         pos = 0;
-        while ( (nextpos= str_motd.find('@',pos)) != string::npos )
+        while ( (nextpos= str_motd.find('@',pos)) != std::string::npos )
         {
             if (nextpos != pos)
             {

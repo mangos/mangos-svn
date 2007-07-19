@@ -26,7 +26,9 @@
 #include "Common.h"
 #include "Timer.h"
 #include "Policies/Singleton.h"
-using namespace std;
+
+#include <map>
+#include <set>
 
 class Object;
 class WorldPacket;
@@ -300,7 +302,7 @@ class World
         uint8 BanAccount(std::string type, std::string nameOrIP, std::string duration, std::string reason, std::string author);
         bool RemoveBanAccount(std::string type, std::string nameOrIP);
 
-        void ScriptsStart(map<uint32, multimap<uint32, ScriptInfo> > const& scripts, uint32 id, Object* source, Object* target);
+        void ScriptsStart(std::map<uint32, std::multimap<uint32, ScriptInfo> > const& scripts, uint32 id, Object* source, Object* target);
 
         // for max speed access
         static float GetMaxVisibleDistanceForCreature() { return m_MaxVisibleDistanceForCreature; }
@@ -331,7 +333,7 @@ class World
         uint32 m_maxSessionsCount;
         std::set<WorldSession*> m_kicked_sessions;
 
-        multimap<time_t, ScriptAction> scriptSchedule;
+        std::multimap<time_t, ScriptAction> scriptSchedule;
 
         float rate_values[MAX_RATES];
         uint32 m_configs[CONFIG_VALUE_COUNT];

@@ -24,7 +24,6 @@
 #include "World.h"
 #include "ObjectMgr.h"
 #include "Group.h"
-#include "Chat.h"
 #include "ObjectAccessor.h"
 
 bool Group::Create(const uint64 &guid, const char * name)
@@ -259,8 +258,7 @@ void Group::SendLootStartRoll(uint64 Guid, uint32 CountDown, const Roll &r)
     data << uint32(r.itemRandomPropId);                     // item random property ID
     data << uint32(CountDown);                              // the countdown time to choose "need" or "greed"
 
-    map<uint64, RollVote>::const_iterator itr;
-    for (itr=r.playerVote.begin(); itr!=r.playerVote.end(); itr++)
+    for (Roll::PlayerVote::const_iterator itr=r.playerVote.begin(); itr!=r.playerVote.end(); ++itr)
     {
         Player *p = objmgr.GetPlayer(itr->first);
         if(!p || !p->GetSession())
@@ -283,8 +281,7 @@ void Group::SendLootRoll(uint64 SourceGuid, uint64 TargetGuid, uint8 RollNumber,
     data << uint8(RollNumber);                              // 0: "Need for: [item name]" > 127: "you passed on: [item name]"      Roll number
     data << uint8(RollType);                                // 0: "Need for: [item name]" 0: "You have selected need for [item name] 1: need roll 2: greed roll
 
-    map<uint64, RollVote>::const_iterator itr;
-    for (itr=r.playerVote.begin(); itr!=r.playerVote.end(); itr++)
+    for( Roll::PlayerVote::const_iterator itr=r.playerVote.begin(); itr!=r.playerVote.end(); ++itr)
     {
         Player *p = objmgr.GetPlayer(itr->first);
         if(!p || !p->GetSession())
@@ -307,8 +304,7 @@ void Group::SendLootRollWon(uint64 SourceGuid, uint64 TargetGuid, uint8 RollNumb
     data << uint8(RollNumber);                              // rollnumber realted to SMSG_LOOT_ROLL
     data << uint8(RollType);                                // Rolltype related to SMSG_LOOT_ROLL
 
-    map<uint64, RollVote>::const_iterator itr;
-    for (itr=r.playerVote.begin(); itr!=r.playerVote.end(); itr++)
+    for( Roll::PlayerVote::const_iterator itr=r.playerVote.begin(); itr!=r.playerVote.end(); ++itr)
     {
         Player *p = objmgr.GetPlayer(itr->first);
         if(!p || !p->GetSession())
@@ -328,8 +324,7 @@ void Group::SendLootAllPassed(uint64 Guid, uint32 NumberOfPlayers, const Roll &r
     data << uint32(r.itemRandomPropId);                     // Item random property ID
     data << uint32(r.itemRandomSuffix);                     // Item random suffix ID 
 
-    map<uint64, RollVote>::const_iterator itr;
-    for (itr=r.playerVote.begin(); itr!=r.playerVote.end(); itr++)
+    for( Roll::PlayerVote::const_iterator itr=r.playerVote.begin(); itr!=r.playerVote.end(); ++itr)
     {
         Player *p = objmgr.GetPlayer(itr->first);
         if(!p || !p->GetSession())
@@ -342,7 +337,7 @@ void Group::SendLootAllPassed(uint64 Guid, uint32 NumberOfPlayers, const Roll &r
 
 void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
 {
-    vector<LootItem>::iterator i;
+    std::vector<LootItem>::iterator i;
     ItemPrototype const *item;
     uint8 itemSlot = 0;
     Player *player = objmgr.GetPlayer(playerGUID);
@@ -395,7 +390,7 @@ void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
 
 void Group::NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature)
 {
-    vector<LootItem>::iterator i;
+    std::vector<LootItem>::iterator i;
     ItemPrototype const *item;
     uint8 itemSlot = 0;
     Player *player = objmgr.GetPlayer(playerGUID);
@@ -448,11 +443,11 @@ void Group::NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature)
 
 void Group::CountRollVote(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers, uint8 Choise)
 {
-    vector<Roll>::iterator roll = GetRoll(Guid);
+    Rolls::iterator roll = GetRoll(Guid);
     if (roll == RollId.end())
         return;
 
-    map<uint64, RollVote>::iterator itr = roll->playerVote.find(playerGUID);
+    Roll::PlayerVote::iterator itr = roll->playerVote.find(playerGUID);
     // this condition means that player joins to the party after roll begins
     if (itr == roll->playerVote.end())
         return;
@@ -494,7 +489,7 @@ void Group::CountRollVote(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers
 //called when roll timer expires
 void Group::EndRoll()
 {
-    vector<Roll>::iterator itr;
+    Rolls::iterator itr;
     while(!RollId.empty())
     {
         //need more testing here, if rolls disappear
@@ -503,7 +498,7 @@ void Group::EndRoll()
     }
 }
 
-void Group::CountTheRoll(vector<Roll>::iterator roll, uint32 NumberOfPlayers)
+void Group::CountTheRoll(Rolls::iterator roll, uint32 NumberOfPlayers)
 {
     //end of the roll
     if (roll->totalNeed > 0)
@@ -512,8 +507,7 @@ void Group::CountTheRoll(vector<Roll>::iterator roll, uint32 NumberOfPlayers)
         uint64 maxguid  = (*roll->playerVote.begin()).first;
         Player *player;
 
-        map<uint64, RollVote>::iterator itr;
-        for (itr=roll->playerVote.begin(); itr!=roll->playerVote.end(); ++itr)
+        for( Roll::PlayerVote::const_iterator itr=roll->playerVote.begin(); itr!=roll->playerVote.end(); ++itr)
         {
             if (itr->second != NEED)
                 continue;
@@ -553,7 +547,7 @@ void Group::CountTheRoll(vector<Roll>::iterator roll, uint32 NumberOfPlayers)
         uint64 maxguid = (*roll->playerVote.begin()).first;
         Player *player;
 
-        map<uint64, RollVote>::iterator itr;
+        Roll::PlayerVote::iterator itr;
         for (itr=roll->playerVote.begin(); itr!=roll->playerVote.end(); ++itr)
         {
             if (itr->second != GREED)
@@ -765,7 +759,7 @@ bool Group::_addMember(const uint64 &guid, const char* name, bool isAssistant)
 {
     // get first not-full group
     uint8 groupid = 0;
-    vector<uint8> temp(MAXRAIDSIZE/MAXGROUPSIZE);
+    std::vector<uint8> temp(MAXRAIDSIZE/MAXGROUPSIZE);
     for(member_citerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
     {
         if (itr->group >= temp.size()) continue;
@@ -937,10 +931,9 @@ void Group::_setLeader(const uint64 &guid)
 
 void Group::_removeRolls(const uint64 &guid)
 {
-    vector<Roll>::iterator it;
-    for (it = RollId.begin(); it < RollId.end(); it++)
+    for (Rolls::iterator it = RollId.begin(); it < RollId.end(); it++)
     {
-        map<uint64, RollVote>::iterator itr2 = it->playerVote.find(guid);
+        Roll::PlayerVote::iterator itr2 = it->playerVote.find(guid);
         if(itr2 == it->playerVote.end())
             continue;
 

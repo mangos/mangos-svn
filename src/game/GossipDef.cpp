@@ -133,8 +133,8 @@ void PlayerMenu::SendGossipMenu( uint32 TitleTextId, uint64 npcGUID )
         uint32 questID = pQuestMenu->GetItem(iI).m_qId;
         data << questID;
         data << uint32( pQuestMenu->GetItem(iI).m_qIcon );
-        data << uint32( objmgr.QuestTemplates[questID]->GetQuestLevel() );
-        data << objmgr.QuestTemplates[questID]->GetTitle();
+        data << uint32( objmgr.mQuestTemplates[questID]->GetQuestLevel() );
+        data << objmgr.mQuestTemplates[questID]->GetTitle();
     }
 
     pSession->SendPacket( &data );
@@ -234,7 +234,7 @@ QuestMenu::~QuestMenu()
 
 void QuestMenu::AddMenuItem( uint32 QuestId, uint8 Icon)
 {
-    Quest * qinfo = objmgr.QuestTemplates[QuestId];
+    Quest * qinfo = objmgr.mQuestTemplates[QuestId];
     if (!qinfo) return;
 
     ASSERT( m_qItems.size() <= GOSSIP_MAX_MENU_ITEMS  );
@@ -279,8 +279,8 @@ void PlayerMenu::SendQuestGiverQuestList( QEmote eEmote, std::string Title, uint
         uint32 questID = qmi.m_qId;
         data << questID;
         data << uint32( qmi.m_qIcon );
-        data << uint32( objmgr.QuestTemplates[questID]->GetQuestLevel() );
-        data << objmgr.QuestTemplates[questID]->GetTitle();
+        data << uint32( objmgr.mQuestTemplates[questID]->GetQuestLevel() );
+        data << objmgr.mQuestTemplates[questID]->GetTitle();
     }
     pSession->SendPacket( &data );
     //uint32 fqid=pQuestMenu->GetItem(0).m_qId;
@@ -461,7 +461,7 @@ void PlayerMenu::SendQuestQueryResponse( Quest *pQuest )
 
 void PlayerMenu::SendQuestGiverOfferReward( uint32 quest_id, uint64 npcGUID, bool EnbleNext, QEmote Emotes[], unsigned int EmoteCnt )
 {
-    Quest * qInfo = objmgr.QuestTemplates[quest_id];
+    Quest * qInfo = objmgr.mQuestTemplates[quest_id];
     if(!qInfo)
         return;
 

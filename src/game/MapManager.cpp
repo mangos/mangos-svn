@@ -27,6 +27,7 @@
 #include "GridDefines.h"
 #include "MapInstanced.h"
 #include "DestinationHolderImp.h"
+#include "World.h"
 
 #define CLASS_LOCK MaNGOS::ClassLevelLockable<MapManager, ZThread::Mutex>
 INSTANTIATE_SINGLETON_2(MapManager, CLASS_LOCK);

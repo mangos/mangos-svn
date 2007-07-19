@@ -19,6 +19,10 @@
 #ifndef DBCSTRUCTURE_H
 #define DBCSTRUCTURE_H
 
+#include <map>
+#include <set>
+#include <vector>
+
 // Structures using to access raw DBC data and required packing to portability
 
 // Only GCC 4.1.0 and later support #pragma pack(push,1) syntax
@@ -179,7 +183,7 @@ struct FactionTemplateEntry
             return false;
         if(friendFaction1 == entry.faction || friendFaction2 == entry.faction || friendFaction3 == entry.faction || friendFaction4 == entry.faction )
             return true;
-        return friendlyMask & entry.ourMask;
+        return (friendlyMask & entry.ourMask) != 0;
     }
     bool IsHostileTo(FactionTemplateEntry const& entry) const
     {
@@ -187,7 +191,7 @@ struct FactionTemplateEntry
             return true;
         if(friendFaction1 == entry.faction || friendFaction2 == entry.faction || friendFaction3 == entry.faction || friendFaction4 == entry.faction )
             return false;
-        return hostileMask & entry.ourMask;
+        return (hostileMask & entry.ourMask) != 0;
     }
     bool IsHostileToPlayer() const { return hostileMask & FACTION_MASK_PLAYER; }
     bool IsNeutralToAll() const { return hostileMask == 0 && friendlyMask == 0 && enemyFaction1==0 && enemyFaction2==0; }

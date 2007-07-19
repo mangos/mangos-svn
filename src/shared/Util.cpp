@@ -20,15 +20,13 @@
 
 #include "Network/socket_include.h"
 
-using namespace std;
-
-vector<string> StrSplit(const string &src, const string &sep)
+Tokens StrSplit(const std::string &src, const std::string &sep)
 {
-    vector<string> r;
-    string s;
-    for (string::const_iterator i = src.begin(); i != src.end(); i++)
+    Tokens r;
+    std::string s;
+    for (std::string::const_iterator i = src.begin(); i != src.end(); i++)
     {
-        if (sep.find(*i) != string::npos)
+        if (sep.find(*i) != std::string::npos)
         {
             if (s.length()) r.push_back(s);
             s = "";

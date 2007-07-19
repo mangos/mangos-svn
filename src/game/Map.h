@@ -24,6 +24,7 @@
 #include "zthread/Lockable.h"
 #include "zthread/Mutex.h"
 #include "zthread/FairReadWriteLock.h"
+#include "Database/DBCStructure.h"
 #include "GridDefines.h"
 #include "Cell.h"
 #include "Object.h"
@@ -31,6 +32,7 @@
 #include "SharedDefines.h"
 
 #include <bitset>
+#include <list>
 
 class Unit;
 class WorldPacket;
@@ -256,7 +258,9 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         uint32 i_resetDelayTime;
         uint32 i_InstanceId;
         uint32 i_maxPlayers;
-        list< Player * > i_Players;
+
+        typedef std::list<Player*> PlayerList;
+        PlayerList i_Players;
 
         // Type specific code for add/remove to/from grid
         template<class T>

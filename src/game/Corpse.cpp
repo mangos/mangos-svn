@@ -27,6 +27,7 @@
 #include "WorldSession.h"
 #include "WorldPacket.h"
 #include "GossipDef.h"
+#include "World.h"
 
 Corpse::Corpse( WorldObject *instantiator, CorpseType type ) : WorldObject( instantiator )
 {

@@ -209,15 +209,14 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     }
     
     //init AB
-    vector<string> tokens = StrSplit(fields[18].GetString(), " ");
+    Tokens tokens = StrSplit(fields[18].GetString(), " ");
 
     if(tokens.size() != 20)
         return false;
 
-    vector<string>::iterator iter;
     int index;
-
-    for (iter = tokens.begin(), index = 0; index < 10; ++iter, ++index)
+    Tokens::iterator iter;
+    for(iter = tokens.begin(), index = 0; index < 10; ++iter, ++index )
     {
         PetActionBar[index].Type = atol((*iter).c_str());
         ++iter;

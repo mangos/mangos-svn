@@ -21,6 +21,11 @@
 
 #include "GameObject.h"
 
+#include <map>
+#include <set>
+#include <string>
+
+
 class TransportPath
 {
     public:
@@ -71,7 +76,7 @@ class Transport : public GameObject
         void Update(uint32 p_time);
         bool AddPassenger(Player* passenger);
         bool RemovePassenger(Player* passenger);
-        string m_name;
+        std::string m_name;
 
     private:
         struct WayPoint
@@ -86,8 +91,10 @@ class Transport : public GameObject
             bool teleport;
         };
 
-        map<uint32, WayPoint>::iterator m_curr;
-        map<uint32, WayPoint>::iterator m_next;
+        typedef std::map<uint32, WayPoint> WayPointMap;
+
+        WayPointMap::iterator m_curr;
+        WayPointMap::iterator m_next;
         uint32 m_pathTime;
         uint32 m_timer;
 
@@ -95,15 +102,16 @@ class Transport : public GameObject
 
         void TeleportTransport(uint32 oldMapid, uint32 newMapid, float x, float y, float z);
 
-        set< Player * > m_passengers;
+        typedef std::set<Player*> PlayerSet;
+        PlayerSet m_passengers;
 
     public:
-        map< uint32, WayPoint> m_WayPoints;
+        WayPointMap m_WayPoints;
         uint32 m_lastMovement;
         uint32 m_nextNodeTime;
         uint32 m_period;
 
     private:
-        map<uint32, WayPoint>::iterator GetNextWayPoint();
+        WayPointMap::iterator GetNextWayPoint();
 };
 #endif

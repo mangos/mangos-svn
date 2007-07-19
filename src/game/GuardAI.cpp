@@ -23,6 +23,7 @@
 #include "TargetedMovementGenerator.h"
 #include "Database/DBCStores.h"
 #include "ObjectAccessor.h"
+#include "World.h"
 
 int GuardAI::Permissible(const Creature *creature)
 {

@@ -21,6 +21,7 @@
 
 #include "Platform/Define.h"
 #include "Database/DatabaseEnv.h"
+
 #include <string>
 #include <vector>
 
@@ -200,8 +201,10 @@ class Quest
         uint32 GetRewChoiceItemsCount() { return m_rewchoiceitemscount; }
         uint32 GetRewItemsCount() { return m_rewitemscount; }
 
-        std::vector<int32> prevQuests;
-        std::vector<uint32> prevChainQuests;
+        typedef std::vector<int32> PrevQuests;
+        PrevQuests prevQuests;
+        typedef std::vector<uint32> PrevChainQuests;
+        PrevChainQuests prevChainQuests;
 
         // cached data
     private:

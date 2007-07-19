@@ -29,6 +29,7 @@
 #include "Transports.h"
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
+#include "World.h"
 
 #include "MapManager.h"
 #include "MapInstanced.h"
@@ -474,7 +475,7 @@ bool Map::AddInstanced(Player *player)
         return(true);
     }
 
-    for (list< Player* >::iterator i = i_Players.begin(); i != i_Players.end(); i++)
+    for (PlayerList::iterator i = i_Players.begin(); i != i_Players.end(); i++)
     {
         if (*i == player)
         {

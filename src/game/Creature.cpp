@@ -29,7 +29,6 @@
 #include "Opcodes.h"
 #include "Log.h"
 #include "LootMgr.h"
-#include "Chat.h"
 #include "MapManager.h"
 #include "CreatureAI.h"
 #include "CreatureAISelector.h"
@@ -352,7 +351,7 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
     {
         uint32 result2 = 0;
         quest_id = i->second;
-        pQuest = objmgr.QuestTemplates[quest_id];
+        pQuest = objmgr.mQuestTemplates[quest_id];
         if ( !pQuest ) continue;
 
         status = pPlayer->GetQuestStatus( quest_id );
@@ -375,7 +374,7 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
     for(QuestRelations::const_iterator i = qr.lower_bound(GetEntry()); i != qr.upper_bound(GetEntry()); ++i )
     {
         uint32 result2 = 0;
-        pQuest = objmgr.QuestTemplates[quest_id = i->second];
+        pQuest = objmgr.mQuestTemplates[quest_id = i->second];
         if ( !pQuest )
             continue;
 
