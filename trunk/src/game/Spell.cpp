@@ -502,15 +502,18 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
         case TARGET_TOTEM_FIRE:
         case TARGET_SELF:
         case TARGET_DYNAMIC_OBJECT:
+        case TARGET_AREAEFFECT_CUSTOM:
         {
             TagUnitMap.push_back(m_caster);
-        }break;
+            break;
+        }
         case TARGET_PET:
         {
             Pet* tmpUnit = m_caster->GetPet();
             if (!tmpUnit) break;
             TagUnitMap.push_back(tmpUnit);
-        }break;
+            break;
+        }
         case TARGET_CHAIN_DAMAGE:
         {
             Unit* pUnitTarget = m_targets.getUnitTarget();
@@ -3057,36 +3060,7 @@ void Spell::UpdatePointers()
 
 bool Spell::IsAffectedBy(SpellEntry const *spellInfo, uint32 effectId)
 {
-    if (!spellInfo) 
-        return false;
-
-    SpellAffection const *spellAffect = objmgr.GetSpellAffection(spellInfo->Id, effectId);
-
-    if (spellAffect)
-    {
-        if (spellAffect->SpellId && (spellAffect->SpellId == m_spellInfo->Id))
-            return true;
-        if (spellAffect->SchoolMask && (spellAffect->SchoolMask & m_spellInfo->School))
-            return true;
-        if (spellAffect->Category && (spellAffect->Category == m_spellInfo->Category))
-            return true;
-        if (spellAffect->SkillId)
-        {
-            SkillLineAbilityEntry const *skillLineEntry = sSkillLineAbilityStore.LookupEntry(m_spellInfo->Id);
-            if(skillLineEntry && skillLineEntry->skillId == spellAffect->SkillId)
-                return true;
-        }
-        if (spellAffect->SpellFamily && spellAffect->SpellFamily == m_spellInfo->SpellFamilyName)
-            return true;
-
-        if (spellAffect->SpellFamilyMask && (spellAffect->SpellFamilyMask & m_spellInfo->SpellFamilyFlags))
-            return true;
-    }
-    else
-        if (spellInfo->EffectItemType[effectId] & m_spellInfo->SpellFamilyFlags)
-            return true;
-    
-    return false;
+    return objmgr.IsAffectedBySpell(m_spellInfo,spellInfo->Id,effectId,spellInfo->EffectItemType[effectId]);
 }
 
 uint32 Spell::GetTargetCreatureTypeMask() const

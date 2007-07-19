@@ -1806,6 +1806,8 @@ void ObjectMgr::LoadQuests()
 
 void ObjectMgr::LoadSpellChains()
 {
+    mSpellChains.clear();                                   // need for reload case
+
     QueryResult *result = sDatabase.PQuery("SELECT `spell_id`, `prev_spell`, `first_spell`, `rank` FROM `spell_chain`");
     if(result == NULL)
     {
@@ -1860,18 +1862,18 @@ void ObjectMgr::LoadSpellChains()
             continue;
         }
 
-        SpellChains[spell_id] = node;
+        mSpellChains[spell_id] = node;
 
         ++count;
     } while( result->NextRow() );
 
     // additional integrity checks
-    for(SpellChainMap::iterator i = SpellChains.begin(); i != SpellChains.end(); ++i)
+    for(SpellChainMap::iterator i = mSpellChains.begin(); i != mSpellChains.end(); ++i)
     {
         if(i->second.prev)
         {
-            SpellChainMap::iterator i_prev = SpellChains.find(i->second.prev);
-            if(i_prev == SpellChains.end())
+            SpellChainMap::iterator i_prev = mSpellChains.find(i->second.prev);
+            if(i_prev == mSpellChains.end())
             {
                 sLog.outErrorDb("Spell %u (prev: %u, first: %u, rank: %d) listed in `spell_chain` have not found in table previous rank spell.",
                     i->first,i->second.prev,i->second.first,i->second.rank);
@@ -2730,6 +2732,8 @@ void ObjectMgr::LoadAreaTriggers()
 
 void ObjectMgr::LoadSpellAffects()
 {
+    mSpellAffectMap.clear();                                // need for reload case
+
     uint32 count = 0;
 
     //                                            0        1          2         3            4          5         6             7                 8
@@ -2784,8 +2788,44 @@ void ObjectMgr::LoadSpellAffects()
     sLog.outString( ">> Loaded %u spell affect definitions", count );
 }
 
+bool ObjectMgr::IsAffectedBySpell(SpellEntry const *spellInfo, uint32 spellId, uint8 effectId, uint64 const& familyFlags)
+{
+    if (!spellInfo) 
+        return false;
+
+    SpellAffection const *spellAffect = GetSpellAffection(spellId,effectId);
+
+    if (spellAffect )
+    {
+        if (spellAffect->SpellId && (spellAffect->SpellId == spellInfo->Id))
+            return true;
+        if (spellAffect->SchoolMask && (spellAffect->SchoolMask & spellInfo->School))
+            return true;
+        if (spellAffect->Category && (spellAffect->Category == spellInfo->Category))
+            return true;
+        if (spellAffect->SkillId)
+        {
+            SkillLineAbilityEntry const *skillLineEntry = sSkillLineAbilityStore.LookupEntry(spellInfo->Id);
+            if(skillLineEntry && skillLineEntry->skillId == spellAffect->SkillId)
+                return true;
+        }
+        if (spellAffect->SpellFamily && spellAffect->SpellFamily == spellInfo->SpellFamilyName)
+            return true;
+
+        if (spellAffect->SpellFamilyMask && (spellAffect->SpellFamilyMask & spellInfo->SpellFamilyFlags))
+            return true;
+    }
+    else if (familyFlags & spellInfo->SpellFamilyFlags)
+        return true;
+
+    return false;
+}
+
+
 void ObjectMgr::LoadSpellProcEvents()
 {
+    mSpellProcEventMap.clear();                             // need for reload case
+
     uint32 count = 0;
 
     //                                            0       1            2          3         4          5      6                 7           8
@@ -3073,22 +3113,19 @@ bool ObjectMgr::IsRankSpellDueToSpell(SpellEntry const *spellInfo_1,uint32 spell
     return GetFirstSpellInChain(spellInfo_1->Id)==GetFirstSpellInChain(spellId_2);
 }
 
-bool ObjectMgr::canStackSpellRank(SpellEntry const *spellInfo)
+bool ObjectMgr::canStackSpellRanks(SpellEntry const *spellInfo,SpellEntry const *spellInfo2)
 {
-    if(GetSpellRank(spellInfo->Id) == 0)
-        return true;
-
     if(spellInfo->powerType == 0)
     {
-        if(spellInfo->manaCost > 0)
+        if(spellInfo->manaCost > 0 && spellInfo->manaCost != spellInfo2->manaCost)
             return true;
-        if(spellInfo->ManaCostPercentage > 0)
+        if(spellInfo->ManaCostPercentage > 0 && spellInfo->ManaCostPercentage != spellInfo2->ManaCostPercentage)
             return true;
-        if(spellInfo->manaCostPerlevel > 0)
+        if(spellInfo->manaCostPerlevel > 0 && spellInfo->manaCostPerlevel != spellInfo2->manaCostPerlevel)
             return true;
-        if(spellInfo->manaPerSecond > 0)
+        if(spellInfo->manaPerSecond > 0 && spellInfo->manaPerSecond != spellInfo2->manaPerSecond)
             return true;
-        if(spellInfo->manaPerSecondPerLevel > 0)
+        if(spellInfo->manaPerSecondPerLevel > 0 && spellInfo->manaPerSecondPerLevel != spellInfo2->manaPerSecondPerLevel)
             return true;
     }
     return false;

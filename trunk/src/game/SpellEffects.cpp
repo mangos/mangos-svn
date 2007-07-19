@@ -236,6 +236,12 @@ void Spell::EffectSchoolDMG(uint32 i)
         // Bloodthirst
         if(m_spellInfo->Category == 971 && m_spellInfo->SpellVisual == 372)
             return EffectWeaponDmg(i);
+        else if(m_spellInfo->SpellFamilyName==SPELLFAMILY_DRUID && (m_spellInfo->SpellFamilyFlags & 0x800000) && m_spellInfo->SpellVisual==6587)
+        {
+            damage += m_caster->GetPower(POWER_ENERGY);
+            m_caster->SetPower(POWER_ENERGY,0);
+        }
+
 
         if(damage >= 0)
             m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell, true);
@@ -1743,8 +1749,6 @@ void Spell::EffectAddFarsight(uint32 i)
 
 void Spell::EffectSummonWild(uint32 i)
 {
-    if(!unitTarget)
-        return;
     uint32 pet_entry = m_spellInfo->EffectMiscValue[i];
     if(!pet_entry)
         return;
@@ -1794,64 +1798,80 @@ void Spell::EffectSummonWild(uint32 i)
             }
         }
 
-        Pet* spawnCreature = new Pet(m_caster, GUARDIAN_PET);
+        // select center of summon position
+        float center_x = m_targets.m_destX;
+        float center_y = m_targets.m_destY;
+        float center_z = m_targets.m_destZ;
 
-        if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),
-            m_caster->GetMapId(),
-            m_caster->GetPositionX(),m_caster->GetPositionY(),
-            m_caster->GetPositionZ(),m_caster->GetOrientation(),
-            m_spellInfo->EffectMiscValue[i]))
+        if (center_x == 0 || center_y == 0 || center_z == 0)
+            m_caster->GetClosePoint(NULL, center_x, center_y, center_z);
+
+        float radius = GetRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+
+        int32 amount = damage > 0 ? damage : 1;
+
+        for(uint32 count = 0; count < amount; ++count)
         {
-            sLog.outError("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
-            delete spawnCreature;
-            return;
-        }
+            float px, py, pz;
+            m_caster->GetRandomPoint(center_x,center_y,center_z,radius,px,py,pz);
 
-        // set timer for unsummon
-        int32 duration = GetDuration(m_spellInfo);
-        if(duration > 0)
-            spawnCreature->SetDuration(duration);
+            Pet* spawnCreature = new Pet(m_caster, GUARDIAN_PET);
 
-        spawnCreature->SetUInt64Value(UNIT_FIELD_SUMMONEDBY,m_caster->GetGUID());
-        spawnCreature->setPowerType(POWER_MANA);
-        spawnCreature->SetMaxPower(POWER_MANA,28 + 10 * level);
-        spawnCreature->SetPower(   POWER_MANA,28 + 10 * level);
-        spawnCreature->SetUInt32Value(UNIT_NPC_FLAGS , 0);
-        spawnCreature->SetMaxHealth( 28 + 30*level);
-        spawnCreature->SetHealth(    28 + 30*level);
-        spawnCreature->SetLevel(level);
-        spawnCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
-        spawnCreature->SetUInt32Value(UNIT_FIELD_FLAGS,0);
-        spawnCreature->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
-        spawnCreature->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,0);
-        spawnCreature->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
-        spawnCreature->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
-        spawnCreature->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
+            if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),
+                m_caster->GetMapId(),px,py,pz,m_caster->GetOrientation(),
+                m_spellInfo->EffectMiscValue[i]))
+            {
+                sLog.outError("no such creature entry %u",m_spellInfo->EffectMiscValue[i]);
+                delete spawnCreature;
+                return;
+            }
 
-        spawnCreature->SetArmor(level*50);
-        spawnCreature->AIM_Initialize();
+            // set timer for unsummon
+            int32 duration = GetDuration(m_spellInfo);
+            if(duration > 0)
+                spawnCreature->SetDuration(duration);
 
-        /* not set name for guardians/minpets
-        std::string name;
-        if(m_caster->GetTypeId() == TYPEID_PLAYER)
+            spawnCreature->SetUInt64Value(UNIT_FIELD_SUMMONEDBY,m_caster->GetGUID());
+            spawnCreature->setPowerType(POWER_MANA);
+            spawnCreature->SetMaxPower(POWER_MANA,28 + 10 * level);
+            spawnCreature->SetPower(   POWER_MANA,28 + 10 * level);
+            spawnCreature->SetUInt32Value(UNIT_NPC_FLAGS , 0);
+            spawnCreature->SetMaxHealth( 28 + 30*level);
+            spawnCreature->SetHealth(    28 + 30*level);
+            spawnCreature->SetLevel(level);
+            spawnCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
+            spawnCreature->SetUInt32Value(UNIT_FIELD_FLAGS,0);
+            spawnCreature->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
+            spawnCreature->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,0);
+            spawnCreature->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
+            spawnCreature->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
+            spawnCreature->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
+
+            spawnCreature->SetArmor(level*50);
+            spawnCreature->AIM_Initialize();
+
+            /* not set name for guardians/minpets
+            std::string name;
+            if(m_caster->GetTypeId() == TYPEID_PLAYER)
             name = ((Player*)m_caster)->GetName();
-        else
+            else
             name = ((Creature*)m_caster)->GetCreatureInfo()->Name;
-        name.append(petTypeSuffix[spawnCreature->getPetType()]);
-        spawnCreature->SetName( name );
-        */
+            name.append(petTypeSuffix[spawnCreature->getPetType()]);
+            spawnCreature->SetName( name );
+            */
 
-        ObjectAccessor::Instance().AddPet(spawnCreature);
-        MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster)->Add((Creature*)spawnCreature);
-        /*
-                guardians and wilds can't be controlled
-                if(m_caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    m_caster->SetPet(spawnCreature);
-                    ((Player*)m_caster)->PetSpellInitialize();
-                    ((Player*)m_caster)->SavePet();
-                }
-        */
+            ObjectAccessor::Instance().AddPet(spawnCreature);
+            MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster)->Add((Creature*)spawnCreature);
+            /*
+            guardians and wilds can't be controlled
+            if(m_caster->GetTypeId() == TYPEID_PLAYER)
+            {
+            m_caster->SetPet(spawnCreature);
+            ((Player*)m_caster)->PetSpellInitialize();
+            ((Player*)m_caster)->SavePet();
+            }
+            */
+        }
     }
 }
 
@@ -2242,8 +2262,10 @@ void Spell::EffectWeaponDmg(uint32 i)
                 sLog.outError("Spell::EffectWeaponDmg: Spell %u not handled in BTAura",m_spellInfo->Id);
                 break;
         }
-        // FIX_ME: Where this value used???
-        damage = uint32(0.45 * (m_caster->GetTotalAttackPowerValue(BASE_ATTACK)));
+
+        // FIX ME: This is value _can_ be used in EffectSchoolDMG where EffectWeaponDmg called for this spell
+        // BUT return in EffectSchoolDMG without using
+        //damage = uint32(0.45 * (m_caster->GetTotalAttackPowerValue(BASE_ATTACK)));
     }
 
     uint32 wp[4] = { SPELL_EFFECT_WEAPON_DAMAGE, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE, SPELL_EFFECT_NORMALIZED_WEAPON_DMG, SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL };
@@ -3394,14 +3416,9 @@ void Spell::EffectApplyPetAura(uint32 i)
 
 void Spell::EffectSummonDemon(uint32 i)
 {
-    if(!unitTarget)
-        return;
-
-    float px, py, pz;
-
-    px = m_targets.m_destX;
-    py = m_targets.m_destY;
-    pz = m_targets.m_destZ;
+    float px = m_targets.m_destX;
+    float py = m_targets.m_destY;
+    float pz = m_targets.m_destZ;
 
     if (px == 0 || py == 0 || pz == 0)
         m_caster->GetClosePoint(NULL, px, py, pz);

@@ -797,7 +797,9 @@ INSERT INTO `command` VALUES
 ('playsound',1,'Syntax: .playsound #soundid\r\n\r\nPlay sound with #soundid.\r\nSound will be play only for you. Other players do not hear this.\r\nWarning: client may have more 5000 sounds...'),
 ('prog',2,'Syntax: .prog\r\n\r\nTeleport you to Programmers Island.'),
 ('recall',1,'Syntax: .recall [$playername]\r\n\r\nTeleport $playername or selected player to the place where he has been before last use of a teleportation command. If no $playername is entered and no player is selected, it will teleport you.'),
-('reload',3,'Not yet implemented.'),
+('reload',3,'Syntax: .reload table_name\r\n\r\nReload table `table_name` if reload support added for this table and this table can be _safe_ reloaded.'),
+('reload all',3,'Syntax: .reload all\r\n\r\nReload all tables with reload support added and that can be _safe_ reloaded.'),
+('reload all_spell',3,'Syntax: .reload all\r\n\r\nReload all `spell_*` tables with reload support added and that can be _safe_ reloaded.'),
 ('removequest',3,'Syntax: .removequest #quest_id\r\n\r\nSet quest #quest_id state to not completed and not active (and remove from active quest list) for selected player.'),
 ('reset',3,'Syntax:\r\n.reset level [Playername]\r\n  Reset level to 1 including reset stats and talents.  Equipped items with greater level requirement can be lost.\r\n.reset spells [Playername]\r\n  Removes all non-original spells from spellbook.\r\n.reset stats [Playername]\r\n  Resets(recalculate) all stats of the targeted player to their original values at current level.\r\n.reset talents [Playername]\r\n  Removes all talents of the targeted player.'),
 ('respawn',3,'Syntax: .respawn\r\n\r\nRespawn all nearest creatures and GO without waiting respawn time expiration.'),
@@ -9760,6 +9762,7 @@ INSERT INTO `spell_chain` VALUES
 (5308,0,5308,1),
 (5394,0,5394,1),
 (5484,0,5484,1),
+(5487,0,5487,1),
 (5504,0,5504,1),
 (5505,5504,5504,2),
 (5506,5505,5504,3),
@@ -10055,6 +10058,7 @@ INSERT INTO `spell_chain` VALUES
 (9578,586,586,2),
 (9579,9578,586,3),
 (9592,9579,586,4),
+(9634,5487,5487,2),
 (9745,8972,6807,5),
 (9747,9490,99,4),
 (9749,778,770,3),
@@ -10974,6 +10978,7 @@ INSERT INTO `spell_chain` VALUES
 (33700,33699,33698,3),
 (33701,27271,17735,6),
 (33736,24398,24398,2),
+(33943,0,33943,1),
 (34506,0,34506,1),
 (34507,34506,34506,2),
 (34508,34507,34506,3),
@@ -10997,7 +11002,8 @@ INSERT INTO `spell_chain` VALUES
 (35392,35389,35387,3),
 (35346,0,35346,1),
 (35694,0,35694,1),
-(35698,35694,35694,2);
+(35698,35694,35694,2),
+(40120,33943,33943,2);
 
 
 /*!40000 ALTER TABLE `spell_chain` ENABLE KEYS */;

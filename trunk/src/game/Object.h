@@ -265,6 +265,8 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         }
         bool IsPositionValid() const;
 
+        void GetRandomPoint( float x, float y, float z, float distance, float &rand_x, float &rand_y, float &rand_z ) const;
+
         void SetMapId(uint32 newMap) { m_mapId = newMap; }
 
         uint32 GetMapId() const { return m_mapId; }

@@ -2391,16 +2391,17 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
     bool superceded_old = false;
 
     // replace spells in action bars and spellbook to bigger rank if only one spell rank must be accessible
-    if(newspell->active && !objmgr.canStackSpellRank(spellInfo))
+    if(newspell->active && objmgr.GetSpellRank(spellInfo->Id) != 0)
     {
         PlayerSpellMap::iterator itr;
-        for (itr = m_spells.begin(); itr != m_spells.end(); itr++)
+        for( PlayerSpellMap::iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr )
         {
             if(itr->second->state == PLAYERSPELL_REMOVED) continue;
             SpellEntry const *i_spellInfo = sSpellStore.LookupEntry(itr->first);
             if(!i_spellInfo) continue;
-
-            if(objmgr.IsRankSpellDueToSpell(spellInfo,itr->first))
+            
+            if( objmgr.IsRankSpellDueToSpell(spellInfo,itr->first) && 
+                !objmgr.canStackSpellRanks(spellInfo,i_spellInfo) )
             {
                 if(itr->second->active)
                 {
@@ -13208,33 +13209,7 @@ bool Player::IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mo
     if ((mod->charges == -1) && (mod->lastAffected != spellInfo->Id))
         return false;
 
-    SpellAffection const *spellAffect = objmgr.GetSpellAffection(mod->spellId, mod->effectId);
-
-    if (spellAffect)
-    {
-        if (spellAffect->SpellId && (spellAffect->SpellId == spellInfo->Id))
-            return true;
-        if (spellAffect->SchoolMask && (spellAffect->SchoolMask & spellInfo->School))
-            return true;
-        if (spellAffect->Category && (spellAffect->Category == spellInfo->Category))
-            return true;
-        if (spellAffect->SkillId)
-        {
-            SkillLineAbilityEntry const *skillLineEntry = sSkillLineAbilityStore.LookupEntry(spellInfo->Id);
-            if(skillLineEntry && skillLineEntry->skillId == spellAffect->SkillId)
-                return true;
-        }
-        if (spellAffect->SpellFamily && spellAffect->SpellFamily == spellInfo->SpellFamilyName)
-            return true;
-
-        if (spellAffect->SpellFamilyMask && (spellAffect->SpellFamilyMask & spellInfo->SpellFamilyFlags))
-            return true;
-    }
-    else
-        if (mod->mask & spellInfo->SpellFamilyFlags)
-            return true;
-    
-    return false;
+    return objmgr.IsAffectedBySpell(spellInfo,mod->spellId,mod->effectId,mod->mask);
 }
 
 void Player::AddSpellMod(SpellModifier* mod, bool apply)
@@ -14362,6 +14337,18 @@ void Player::SetComboPoints(uint64 target, int8 count)
     m_comboPoints = count;
 
     SendComboPoints();
+}
+
+void Player::ClearComboPoints()
+{
+    if(!m_comboTarget)
+        return;
+
+    m_comboPoints = 0;
+
+    SendComboPoints();
+
+    m_comboTarget = 0;
 }
 
 void Player::SetStandState(uint8 state)
