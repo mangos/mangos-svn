@@ -11077,7 +11077,7 @@ void Player::AdjustQuestReqItemCount( uint32 quest_id )
                 if( reqitemcount != 0 )
                 {
                     uint32 curitemcount = GetItemCount(qInfo->ReqItemId[i]) + GetBankItemCount(qInfo->ReqItemId[i]);
-                    mQuestStatus[quest_id].m_itemcount[i] = min(curitemcount, reqitemcount);
+                    mQuestStatus[quest_id].m_itemcount[i] = std::min(curitemcount, reqitemcount);
                     if (mQuestStatus[quest_id].uState != QUEST_NEW) mQuestStatus[quest_id].uState = QUEST_CHANGED;
                 }
             }

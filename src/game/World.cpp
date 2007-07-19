@@ -171,7 +171,7 @@ void World::AddSession(WorldSession* s)
 
     WorldSession* old = m_sessions[s->GetAccountId()];
     m_sessions[s->GetAccountId()] = s;
-    m_maxSessionsCount = max(m_maxSessionsCount,uint32(m_sessions.size()));
+    m_maxSessionsCount = std::max(m_maxSessionsCount,uint32(m_sessions.size()));
 
     // if session already exist, prepare to it deleting at next world update
     if(old)
