@@ -121,6 +121,7 @@ class ChatHandler
         void SendSysMultilineMessage(const char *str) { SendSysMultilineMessage(m_session,str); }
         void PSendSysMessage(const char *format, ...);
         void PSendSysMultilineMessage(const char *format, ...);
+        void SendGlobalSysMessage(const char *str);
 
         bool ExecuteCommandInTable(ChatCommand *table, const char* text);
         bool ShowHelpForCommand(ChatCommand *table, const char* cmd);
@@ -172,7 +173,11 @@ class ChatHandler
         bool HandleModifyFactionCommand(const char* args);
         bool HandleModifySpellCommand(const char* args);
         bool HandleModifyTalentCommand (const char* args);
-        bool HandleReloadCommand(const char* args);
+        bool HandleReloadAllCommand(const char* args);
+        bool HandleReloadAllSpellCommand(const char* args);
+        bool HandleReloadSpellAffectCommand(const char* args);
+        bool HandleReloadSpellChainCommand(const char* args);
+        bool HandleReloadSpellProcEventCommand(const char* args);
         bool HandleLoadScriptsCommand(const char* args);
         bool HandleSendQuestPartyMsgCommand(const char* args);
         bool HandleSendQuestInvalidMsgCommand(const char* args);

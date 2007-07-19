@@ -38,25 +38,41 @@
 #include "CellImpl.h"
 #include "Weather.h"
 
-bool ChatHandler::HandleReloadCommand(const char* args)
+bool ChatHandler::HandleReloadAllCommand(const char*)
 {
-    char* updatefield = strtok((char*)args, " ");
+    HandleReloadAllSpellCommand("");
+    return true;
+}
 
-    char* value = strtok(NULL, " ");
+bool ChatHandler::HandleReloadAllSpellCommand(const char*)
+{
+    HandleReloadSpellAffectCommand("");
+    HandleReloadSpellChainCommand("");
+    HandleReloadSpellProcEventCommand("");
+    return true;
+}
 
-    if (!updatefield || !value)
-        return false;
+bool ChatHandler::HandleReloadSpellAffectCommand(const char*)
+{
+    sLog.outString( "Re-Loading SpellAffect definitions..." );
+    objmgr.LoadSpellAffects();
+    SendGlobalSysMessage("DB table `spell_affect` (spell mods apply requirements) reloaded.");
+    return true;
+}
 
-    uint32 tupdatefield = (uint32)atoi(updatefield);
-    uint32 tvalue = (uint32)atoi(value);
+bool ChatHandler::HandleReloadSpellChainCommand(const char*)
+{
+    sLog.outString( "Re-Loading Spell Chain Data... " );
+    objmgr.LoadSpellChains();
+    SendGlobalSysMessage("DB table `spell_chain` (spell ranks) reloaded.");
+    return true;
+}
 
-    Player *chr = m_session->GetPlayer();
-    if (chr == NULL)
-    {
-        SendSysMessage(LANG_NO_CHAR_SELECTED);
-        return true;
-    }
-    chr->SetUInt32Value(tupdatefield, tvalue);
+bool ChatHandler::HandleReloadSpellProcEventCommand(const char*)
+{
+    sLog.outString( "Re-Loading Spell Proc Event conditions..." );
+    objmgr.LoadSpellProcEvents();
+    SendGlobalSysMessage("DB table `spell_proc_event` (spell proc trigger requirements) reloaded.");
     return true;
 }
 

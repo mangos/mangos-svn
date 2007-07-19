@@ -4026,6 +4026,7 @@ bool Unit::AttackStop()
 
     if( GetTypeId()==TYPEID_UNIT )
     {
+        // reset call assistance
         ((Creature*)this)->SetNoCallAssistence(false);
     }
 
@@ -4792,6 +4793,10 @@ void Unit::ClearInCombat(bool force)
 
     m_CombatTimer = 0;
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+
+    // remove combo points
+    if(GetTypeId()==TYPEID_PLAYER)
+        ((Player*)this)->ClearComboPoints();
 }
 
 bool Unit::isTargetableForAttack()

@@ -157,6 +157,16 @@ ChatCommand * ChatHandler::getCommandTable()
         { NULL,          0, NULL,                                                        "",   NULL }
     };
 
+    static ChatCommand reloadCommandTable[] =
+    {
+        { "all",              SEC_ADMINISTRATOR, &ChatHandler::HandleReloadAllCommand,            "",   NULL },
+        { "all_spell",        SEC_ADMINISTRATOR, &ChatHandler::HandleReloadAllSpellCommand,       "",   NULL },
+        { "spell_affect",     SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellAffectCommand,    "",   NULL },
+        { "spell_chain",      SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellChainCommand,     "",   NULL },
+        { "spell_proc_event", SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellProcEventCommand, "",   NULL },
+        { NULL,               0,                 NULL,                                            "",   NULL }
+    };
+
     static ChatCommand commandTable[] =
     {
         { "acct",        SEC_PLAYER,        &ChatHandler::HandleAcctCommand,             "",   NULL },
@@ -242,7 +252,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "update",      SEC_ADMINISTRATOR, &ChatHandler::HandleUpdate,                  "",   NULL },
         { "bank",        SEC_ADMINISTRATOR, &ChatHandler::HandleBankCommand,             "",   NULL },
         { "wchange",     SEC_ADMINISTRATOR, &ChatHandler::HandleChangeWeather,           "",   NULL },
-        { "reload",      SEC_ADMINISTRATOR, &ChatHandler::HandleReloadCommand,           "",   NULL },
+        { "reload",      SEC_ADMINISTRATOR, NULL,                                        "",   reloadCommandTable },
         { "loadscripts", SEC_ADMINISTRATOR, &ChatHandler::HandleLoadScriptsCommand,      "",   NULL },
         { "tele",        SEC_MODERATOR,     &ChatHandler::HandleTeleCommand,             "",   NULL },
         { "lookuptele",  SEC_MODERATOR,     &ChatHandler::HandleLookupTeleCommand,       "",   NULL },
@@ -289,7 +299,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "password",    SEC_PLAYER,        &ChatHandler::HandlePasswordCommand,         "",   NULL },
         { "lockaccount", SEC_PLAYER,        &ChatHandler::HandleLockAccountCommand,      "",   NULL },
         { "respawn",     SEC_ADMINISTRATOR, &ChatHandler::HandleRespawnCommand,          "",   NULL },
-        { "wp",          SEC_GAMEMASTER,   NULL,                                        "",   wpCommandTable },
+        { "wp",          SEC_GAMEMASTER,    NULL,                                        "",   wpCommandTable },
         { "flymode",     SEC_ADMINISTRATOR, &ChatHandler::HandleFlyModeCommand,          "",   NULL },
         { "sendopcode",  SEC_ADMINISTRATOR, &ChatHandler::HandleSendOpcodeCommand,       "",   NULL },
         { "sellerr",     SEC_ADMINISTRATOR, &ChatHandler::HandleSellErrorCommand,        "",   NULL },
@@ -386,6 +396,13 @@ void ChatHandler::SendSysMultilineMessage(WorldSession* session, const char *str
 
     FillSystemMessageData(&data, session, line);
     session->SendPacket(&data);
+}
+
+void ChatHandler::SendGlobalSysMessage(const char *str)
+{
+    WorldPacket data;
+    FillSystemMessageData(&data, m_session, str);
+    sWorld.SendGlobalMessage(&data);
 }
 
 void ChatHandler::SendSysMessage(WorldSession* session, const char *str)

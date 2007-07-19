@@ -62,6 +62,7 @@ enum Targets
     TARGET_SELF                        = 1,
     TARGET_PET                         = 5,
     TARGET_CHAIN_DAMAGE                = 6,
+    TARGET_AREAEFFECT_CUSTOM           = 8,
     TARGET_ALL_ENEMY_IN_AREA           = 15,
     TARGET_ALL_ENEMY_IN_AREA_INSTANT   = 16,
     TARGET_ALL_PARTY_AROUND_CASTER     = 20,
@@ -586,6 +587,7 @@ class Spell
         Unit* GetOriginalCaster() { return m_originalCaster; }
 
         void UpdatePointers();                              // must be used at call Spell code after time delay (non triggered spell cast/update spell call/etc)
+
         bool IsAffectedBy(SpellEntry const *spellInfo, uint32 effectId);
 
         uint32 GetTargetCreatureTypeMask() const;

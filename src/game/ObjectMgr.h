@@ -353,6 +353,7 @@ class ObjectMgr
                 return &itr->second;
             return NULL;
         }
+        bool IsAffectedBySpell(SpellEntry const *spellInfo, uint32 spellId, uint8 effectId, uint64 const& familyFlags);
 
         SpellProcEventEntry const* GetSpellProcEvent(uint32 spellId) const
         {
@@ -469,12 +470,12 @@ class ObjectMgr
         };
 
         typedef HM_NAMESPACE::hash_map<uint32, SpellChainNode> SpellChainMap;
-        SpellChainMap SpellChains;
+        SpellChainMap mSpellChains;
 
         uint32 GetFirstSpellInChain(uint32 spell_id)
         {
-            SpellChainMap::iterator itr = SpellChains.find(spell_id);
-            if(itr == SpellChains.end())
+            SpellChainMap::iterator itr = mSpellChains.find(spell_id);
+            if(itr == mSpellChains.end())
                 return spell_id;
 
             return itr->second.first;
@@ -482,8 +483,8 @@ class ObjectMgr
 
         uint32 GetPrevSpellInChain(uint32 spell_id)
         {
-            SpellChainMap::iterator itr = SpellChains.find(spell_id);
-            if(itr == SpellChains.end())
+            SpellChainMap::iterator itr = mSpellChains.find(spell_id);
+            if(itr == mSpellChains.end())
                 return 0;
 
             return itr->second.prev;
@@ -491,14 +492,14 @@ class ObjectMgr
 
         uint8 GetSpellRank(uint32 spell_id)
         {
-            SpellChainMap::iterator itr = SpellChains.find(spell_id);
-            if(itr == SpellChains.end())
+            SpellChainMap::iterator itr = mSpellChains.find(spell_id);
+            if(itr == mSpellChains.end())
                 return 0;
 
             return itr->second.rank;
         }
         bool IsRankSpellDueToSpell(SpellEntry const *spellInfo_1,uint32 spellId_2);
-        bool canStackSpellRank(SpellEntry const *spellInfo);
+        bool canStackSpellRanks(SpellEntry const *spellInfo,SpellEntry const *spellInfo2);
         bool IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2);
         static bool IsProfessionSpell(uint32 spellId);
         static bool IsPrimaryProfessionSpell(uint32 spellId);

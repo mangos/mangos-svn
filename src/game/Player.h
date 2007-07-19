@@ -969,6 +969,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         
         void AddComboPoints(uint64 target, int8 count);
         void SetComboPoints(uint64 target, int8 count);
+        void ClearComboPoints();
         void SendComboPoints();
 
         void CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::string subject, uint32 itemTextId, uint32 itemGuid, uint32 item_template, time_t expire_time,time_t delivery_time, uint32 money, uint32 COD, uint32 checked, Item* pItem);

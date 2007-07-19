@@ -813,6 +813,29 @@ void WorldObject::GetContactPoint( const WorldObject* obj, float &x, float &y, f
         z = GetPositionZ();                                 // hack required in case LOS height disabled
 }
 
+void WorldObject::GetRandomPoint( float x, float y, float z, float distance, float &rand_x, float &rand_y, float &rand_z) const
+{
+    if(distance==0)
+    {
+        rand_x = x;
+        rand_y = y;
+        rand_z = z;
+        return;
+    }
+
+    // angle to face `obj` to `this`
+    float angle = rand_norm()*2*M_PI;
+    float new_dist = rand_norm()*distance;
+
+    rand_x = x + new_dist * cos(angle);
+    rand_y = y + new_dist * sin(angle);
+
+    if(VMAP::VMapFactory::createOrGetVMapManager()->isHeightCalcEnabled())
+        rand_z = MapManager::Instance().GetMap(GetMapId(), this)->GetHeight(x,y,z);
+    else
+        rand_z = z;                                         // hack required in case LOS height disabled
+}
+
 void WorldObject::Say(const char* text, const uint32 language, const uint64 TargetGuid)
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);    
