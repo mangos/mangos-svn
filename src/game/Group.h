@@ -52,6 +52,25 @@ enum GroupType
     GROUPTYPE_RAID   = 1
 };
 
+enum GroupUpdateFlags
+{
+    GROUP_UPDATE_FLAG_NONE          = 0x00000000,
+    GROUP_UPDATE_FLAG_ONLINE        = 0x00000001, // uint8
+    GROUP_UPDATE_FLAG_HP            = 0x00000002, // uint16
+    GROUP_UPDATE_FLAG_MAX_HP        = 0x00000004, // uint16
+    GROUP_UPDATE_FLAG_POWER_TYPE    = 0x00000008, // uint8
+    GROUP_UPDATE_FLAG_POWER         = 0x00000010, // uint16
+    GROUP_UPDATE_FLAG_MAX_POWER     = 0x00000020, // uint16
+    GROUP_UPDATE_FLAG_LEVEL         = 0x00000040, // uint16
+    GROUP_UPDATE_FLAG_ZONE          = 0x00000080, // uint16
+    GROUP_UPDATE_FLAG_POSITION      = 0x00000100, // uint16, uint16
+    GROUP_UPDATE_FULL               = 0x000001FF,
+    GROUP_UPDATE_FLAGS_COUNT        = 10
+};
+
+                                                                 //0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+static const uint8 GroupUpdateLength[GROUP_UPDATE_FLAGS_COUNT] = { 0, 1, 2, 2, 1, 2, 2, 2, 2, 4};
+
 /** request member stats checken **/
 /** todo: uninvite people that not accepted invite **/
 class MANGOS_DLL_SPEC Group
@@ -217,6 +236,7 @@ class MANGOS_DLL_SPEC Group
         //void SendInit(WorldSession *session);
         void SendTargetIconList(WorldSession *session);
         void SendUpdate();
+        void UpdatePlayerOutOfRange(Player* pPlayer, uint32 mask);
                                                             // ignore: GUID of player that will be ignored
         void BroadcastPacket(WorldPacket *packet, int group=-1, uint64 ignore=0);
 

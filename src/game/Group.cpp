@@ -139,6 +139,10 @@ bool Group::AddMember(const uint64 &guid, const char* name)
         return false;
     SendUpdate();
 
+    Player *player = objmgr.GetPlayer(guid);
+    if(player)
+        UpdatePlayerOutOfRange(player, GROUP_UPDATE_FULL);
+
     return true;
 }
 
@@ -739,6 +743,18 @@ void Group::SendUpdate()
         data << (uint8)0;                                   // 2.1.0 unk
 
         player->GetSession()->SendPacket( &data );
+    }
+}
+
+void Group::UpdatePlayerOutOfRange(Player* pPlayer, uint32 mask)
+{
+    Player *player;
+
+    for(GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next())
+    {
+        player = itr->getSource();
+        if (player && player != pPlayer && !pPlayer->isVisibleFor(player))
+            player->GetSession()->SendPartyMemberStatsChanged(pPlayer->GetGUID(), mask);
     }
 }
 

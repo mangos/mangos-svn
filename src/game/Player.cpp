@@ -129,6 +129,7 @@ Player::Player (WorldSession *session): Unit( 0 )
 
     // group is initialized in the reference constructor
     SetGroupInvite(NULL);
+    m_groupUpdateMask = 0;
 
     duel = 0;
 
@@ -968,6 +969,13 @@ void Player::Update( uint32 p_time )
     }
     UpdateEnchantTime(p_time);
     UpdateHomebindTime(p_time);
+
+    // group update
+    if (m_groupUpdateMask != GROUP_UPDATE_FLAG_NONE && GetGroup())
+    {
+        GetGroup()->UpdatePlayerOutOfRange(this, m_groupUpdateMask);
+        m_groupUpdateMask = GROUP_UPDATE_FLAG_NONE;
+    }
 }
 
 void Player::setDeathState(DeathState s)
@@ -4749,6 +4757,9 @@ bool Player::SetPosition(float x, float y, float z, float orientation, bool tele
 
     CheckExploreSystem();
 
+    // group update
+    SetGroupUpdateFlag(GROUP_UPDATE_FLAG_POSITION);
+
     return true;
 }
 
@@ -5537,6 +5548,9 @@ void Player::UpdateZone(uint32 newZone)
 
     // recent client version not send leave/join channel packets for built-in local channels 
     UpdateLocalChannels();
+
+    // group update
+    SetGroupUpdateFlag(GROUP_UPDATE_FLAG_ZONE);
 }
 
 //If players are too far way of duel flag... then player loose the duel

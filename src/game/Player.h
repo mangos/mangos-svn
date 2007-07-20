@@ -1466,6 +1466,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         GroupReference& GetGroupRef() { return m_group; }
         void SetGroup(Group *group, int8 subgroup = -1);
         uint8 GetSubGroup() { return m_group.getSubGroup(); }
+        void SetGroupUpdateFlag(uint32 flag) { m_groupUpdateMask |= flag;}
 
     protected:
 
@@ -1654,6 +1655,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         // Groups
         GroupReference m_group;
         Group *m_groupInvite;
+        uint32 m_groupUpdateMask;
 };
 
 void AddItemsSetItem(Player*player,Item *item);
