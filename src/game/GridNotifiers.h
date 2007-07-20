@@ -528,6 +528,51 @@ namespace MaNGOS
             Unit* const i_funit;
     };
 
+    class AnyAssistCreatureInRangeCheck
+    {
+    public:
+        AnyAssistCreatureInRangeCheck(Unit* funit, Unit* enemy, float range)
+            : i_funit(funit), i_enemy(enemy), i_range(range)
+        {
+        }
+        bool operator()(Creature* u)
+        {
+            if(u == i_funit)
+                return false;
+
+            // only free creature
+            if( u->GetCharmerOrOwnerGUID() )
+                return false;
+
+            // skip fighting creature
+            if( u->isInCombat() )
+                return false;
+
+            // too far
+            if( !i_funit->IsWithinDistInMap(u, i_range) )
+                return false;
+
+            // skip non hostile to caster enemy creatures
+            if( !u->IsHostileTo(i_enemy) )
+                return false;
+
+            // only from same creature faction
+            if(u->getFaction() != i_funit->getFaction() )
+                return false;
+
+            if(!u->IsWithinLOSInMap(i_enemy) )
+                return false;
+
+            return true;
+        }
+    private:
+        Unit* const i_funit;
+        Unit* const i_enemy;
+        float i_range;
+    };
+
+
+
     #ifndef WIN32
     template<> void PlayerRelocationNotifier::Visit<Creature>(CreatureMapType &);
     template<> void PlayerRelocationNotifier::Visit<Player>(PlayerMapType &);

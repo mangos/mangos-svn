@@ -256,40 +256,6 @@ void Spell::EffectDummy(uint32 i)
     if(!unitTarget && !gameObjTarget) 
         return;
 
-    // Keep in top, because core use it for npc aggro other npc
-    if( m_spellInfo->Id == SPELL_ID_AGGRO )
-    {
-        if( !m_caster || !m_caster->getVictim() || !unitTarget )
-            return;
-        
-        // only creature to creature
-        if( unitTarget->GetTypeId() != TYPEID_UNIT || m_caster->GetTypeId() != TYPEID_UNIT )
-            return;
-        
-        // if creature not fighting currently
-        if( unitTarget->isInCombat() )
-            return;
-
-        // skip non hostile to caster enemy creatures
-        if( !((Creature*)unitTarget)->IsHostileTo(m_caster->getVictim()) )
-            return;
-
-        // only from same creature faction
-        if(unitTarget->getFaction() != m_caster->getFaction() )
-            return;
-
-       if(!unitTarget->IsWithinLOSInMap(m_caster->getVictim()) )
-            return;
-
-       ((Creature*)m_caster)->SetNoCallAssistence(true);
-        ((Creature*)unitTarget)->SetNoCallAssistence(true);
-        if (((Creature*)unitTarget)->AI())
-            ((Creature*)unitTarget)->AI()->AttackStart(m_caster->getVictim());
-
-
-        return;
-    }
-
     // Charge
     if(m_spellInfo->SpellVisual == 867 && m_spellInfo->SpellIconID == 457)
     {
@@ -2463,7 +2429,42 @@ void Spell::EffectScriptEffect(uint32 i)
 {
     // we must implement hunter pet summon at login there (spell 6962)
 
-    if(!m_spellInfo->Reagent[0])
+    // Keep in top, because core use it for npc aggro other npc
+    if( m_spellInfo->Id == SPELL_ID_AGGRO )
+    {
+        if( !m_caster || m_caster->GetTypeId() != TYPEID_UNIT || !m_caster->getVictim() )
+            return;
+
+        float radius = sWorld.getConfig(CONFIG_CREATURE_FAMILY_ASSISTEMCE_RADIUS);
+        if(radius > 0)
+        {
+            std::list<Creature*> assistList;
+
+            {
+                CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+                Cell cell = RedZone::GetZone(p);
+                cell.data.Part.reserved = ALL_DISTRICT;
+                cell.SetNoCreate();
+
+                MaNGOS::AnyAssistCreatureInRangeCheck u_check(m_caster, m_caster->getVictim(), radius);
+                MaNGOS::CreatureListSearcher<MaNGOS::AnyAssistCreatureInRangeCheck> searcher(assistList, u_check);
+
+                TypeContainerVisitor<MaNGOS::CreatureListSearcher<MaNGOS::AnyAssistCreatureInRangeCheck>, GridTypeMapContainer >  grid_creature_searcher(searcher);
+
+                CellLock<GridReadGuard> cell_lock(cell, p);
+                cell_lock->Visit(cell_lock, grid_creature_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+            }
+
+            for(std::list<Creature*>::iterator iter = assistList.begin(); iter != assistList.end(); ++iter)
+            {
+                ((Creature*)m_caster)->SetNoCallAssistence(true);
+                (*iter)->SetNoCallAssistence(true);
+                if((*iter)->AI())
+                    (*iter)->AI()->AttackStart(m_caster->getVictim());
+            }
+        }
+    }
+    else if(!m_spellInfo->Reagent[0])
     {
         // paladin's holy light / flash of light
         if ((m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN) &&
