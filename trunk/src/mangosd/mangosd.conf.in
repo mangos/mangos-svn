@@ -342,6 +342,11 @@ SkillChance.Grey   = 0
 #          1.5 - 150%
 Rate.Creature.Aggro = 1
 
+#Creature family assistence radius
+#          0   - off
+# Default: 10
+CreatureFamilyAssistenceRadius = 10
+
 # Enable console
 #          0 - off
 # Default: 1 - on
