@@ -3744,6 +3744,10 @@ void Unit::setPowerType(Powers new_powertype)
 {
     uint32 tem_bytes_0 = GetUInt32Value(UNIT_FIELD_BYTES_0);
     SetUInt32Value(UNIT_FIELD_BYTES_0,((tem_bytes_0<<8)>>8) + (uint32(new_powertype)<<24));
+
+    if (GetTypeId() == TYPEID_PLAYER)
+        ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_POWER_TYPE);
+
     switch(new_powertype)
     {
         default:
@@ -5984,19 +5988,36 @@ float Unit::GetWeaponDamageRange(WeaponAttackType attType ,WeaponDamageRange typ
     return m_weaponDamage[attType][type];
 }
 
-void Unit::SetHealth(   uint32 val)
+void Unit::SetLevel(uint32 lvl)
+{
+    SetUInt32Value(UNIT_FIELD_LEVEL,lvl);
+    
+    // group update
+    if (GetTypeId() == TYPEID_PLAYER)
+        ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_LEVEL);
+}
+
+void Unit::SetHealth(uint32 val)
 {
     uint32 maxHealth = GetMaxHealth();
     if(maxHealth < val)
         val = maxHealth;
 
-    SetUInt32Value(UNIT_FIELD_HEALTH,val); 
+    SetUInt32Value(UNIT_FIELD_HEALTH,val);
+
+    // group update
+    if (GetTypeId() == TYPEID_PLAYER)
+        ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_HP);
 }
 
 void Unit::SetMaxHealth(uint32 val) 
 {
     uint32 health = GetHealth();
     SetUInt32Value(UNIT_FIELD_MAXHEALTH,val); 
+
+    // group update
+    if (GetTypeId() == TYPEID_PLAYER)
+        ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_MAX_HP);
 
     if(val < health)
         SetHealth(val);
@@ -6008,16 +6029,42 @@ void Unit::SetPower(Powers power, uint32 val)
     if(maxPower < val)
         val = maxPower;
 
-    SetStatInt32Value(UNIT_FIELD_POWER1   +power,val); 
+    SetStatInt32Value(UNIT_FIELD_POWER1 + power,val);
+
+    // group update
+    if (GetTypeId() == TYPEID_PLAYER)
+        ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_POWER);
 }
 
 void Unit::SetMaxPower(Powers power, uint32 val) 
 {
     uint32 cur_power = GetPower(power);
-    SetStatInt32Value(UNIT_FIELD_MAXPOWER1+power,val); 
+    SetStatInt32Value(UNIT_FIELD_MAXPOWER1 + power,val);
+
+    // group update
+    if (GetTypeId() == TYPEID_PLAYER)
+        ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_MAX_POWER);
 
     if(val < cur_power)
         SetPower(power, val);
+}
+
+void Unit::ApplyPowerMod(Powers power, uint32 val, bool apply)
+{
+    ApplyModUInt32Value(UNIT_FIELD_POWER1+power, val, apply);
+    
+    // group update
+    if (GetTypeId() == TYPEID_PLAYER)
+        ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_POWER);
+}
+
+void Unit::ApplyMaxPowerMod(Powers power, uint32 val, bool apply)
+{
+    ApplyModUInt32Value(UNIT_FIELD_MAXPOWER1+power, val, apply);
+    
+    // group update
+    if (GetTypeId() == TYPEID_PLAYER)
+        ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_MAX_POWER);
 }
 
 void Unit::ApplyAuraProcTriggerDamage( Aura* aura, bool apply )

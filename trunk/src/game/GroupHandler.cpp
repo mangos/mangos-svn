@@ -536,45 +536,72 @@ void WorldSession::HandleRaidReadyCheckOpcode( WorldPacket & recv_data )
     }
 }
 
-/*not called : this should server send when some member bits are changed:*/
-void WorldSession::SendPartyMemberStatsChanged( uint64 Guid )
-{                                               //todo FIX ME
-    //do nothing
-    return;
-
-    Player *player = objmgr.GetPlayer(Guid);
-    if(!player)
-        //if player is offline - then send nothing --- not fixed, we should send some info that player is offline!
+void WorldSession::SendPartyMemberStatsChanged(uint64 Guid, uint32 mask)
+{
+    if (mask == GROUP_UPDATE_FLAG_NONE)
         return;
+    
+    Player *player = objmgr.GetPlayer(Guid);
+    if(!player) //currently do not send update if player is offline
+        return;
+    /*if(!player && mask != GROUP_UPDATE_FLAG_ONLINE) //if player is offline - then send nothing, but OFFLINE status
+        return;*/
 
-    WorldPacket data(SMSG_PARTY_MEMBER_STATS, 30);
+    if(mask & GROUP_UPDATE_FLAG_POWER_TYPE) // if update power type, update current/max power also
+        mask |= (GROUP_UPDATE_FLAG_POWER | GROUP_UPDATE_FLAG_MAX_POWER);
 
-    data.append(player->GetPackGUID());
-    /*we have to create update mask, not this way*/
-    uint32 mask = 7;                            //only sends info that member's HP changed
+    uint32 byteCount = 0;
+    for (int i=1;i<GROUP_UPDATE_FLAGS_COUNT;++i)
+        if (mask & 1<<i)
+            byteCount += GroupUpdateLength[i];
+    
+    WorldPacket data(SMSG_PARTY_MEMBER_STATS, 8+4+byteCount);
+    if (player)
+        data.append(player->GetPackGUID());
+    else
+        data.appendPackGUID(Guid);
+
     data << (uint32) mask;
-    if (mask & 1)
-        data << (uint8) MEMBER_STATUS_ONLINE;   //there should be member's online status
-    if (mask & 2)
+
+    if (mask & GROUP_UPDATE_FLAG_ONLINE)
+    {
+        if (player)
+        {
+            if (player->IsPvP())
+                data << (uint8) MEMBER_STATUS_ONLINE_PVP;
+            else
+                data << (uint8) MEMBER_STATUS_ONLINE;
+        }
+        else
+            data << (uint8) MEMBER_STATUS_OFFLINE;
+    }
+
+    if (mask & GROUP_UPDATE_FLAG_HP)
         data << (uint16) player->GetHealth();
-    if (mask & 4)
+
+    if (mask & GROUP_UPDATE_FLAG_MAX_HP)
         data << (uint16) player->GetMaxHealth();
+
     Powers powerType = player->getPowerType();
-    if (mask & 8)                          //this mask bit is always 0
-        data << (uint8)  powerType;
-    if (mask & 16)
-        data << (uint16) player->GetMaxPower(powerType);
-    if (mask & 32)
+    if (mask & GROUP_UPDATE_FLAG_POWER_TYPE)
+        data << (uint8) powerType;
+
+    if (mask & GROUP_UPDATE_FLAG_POWER)
         data << (uint16) player->GetPower(powerType);
-    if (mask & 64)
+
+    if (mask & GROUP_UPDATE_FLAG_MAX_POWER)
+        data << (uint16) player->GetMaxPower(powerType);
+
+    if (mask & GROUP_UPDATE_FLAG_LEVEL)
         data << (uint16) player->getLevel();
-    if (mask & 128)
+
+    if (mask & GROUP_UPDATE_FLAG_ZONE)
         data << (uint16) player->GetZoneId();
-    if (mask & 256)
-        data << (uint16) player->GetPositionX();
-    if (mask & 512)
-        data << (uint16) player->GetPositionY();
-    ///and some other things, like spells, pet name, pet HP, pet HP max should be send
+
+    if (mask & GROUP_UPDATE_FLAG_POSITION)
+        data << (uint16) player->GetPositionX() << (uint16) player->GetPositionY();
+
+    //TODO: add missing group update flags (pets?)
 
     SendPacket(&data);
 }
