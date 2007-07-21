@@ -11943,8 +11943,8 @@ void Player::_LoadAuras(uint32 timediff)
             }
 
             // FIXME: real caster not stored in DB currently
-
-            Aura* aura = new Aura(spellproto, effindex, this, this/*caster*/);
+            // FIXME: real base points not stored in DB currently
+            Aura* aura = new Aura(spellproto, effindex, NULL, this, this/*caster*/);
             aura->SetAuraDuration(remaintime);
             AddAura(aura);
         }

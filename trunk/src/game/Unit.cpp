@@ -830,6 +830,49 @@ void Unit::CastSpell(Unit* Victim,SpellEntry const *spellInfo, bool triggered, I
     if (triggered) delete spell;                            // triggered spell not self deleted
 }
 
+void Unit::CastCustomSpell(Unit* Victim,uint32 spellId, int32 const* bp0, int32 const* bp1, int32 const* bp2, bool triggered, Item *castItem, Aura* triggredByAura, uint64 originalCaster)
+{
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId );
+
+    if(!spellInfo)
+    {
+        sLog.outError("WORLD: unknown spell id %i\n", spellId);
+        return;
+    }
+
+    CastCustomSpell(Victim,spellInfo,bp0,bp1,bp2,triggered,castItem,triggredByAura, originalCaster);
+}
+
+void Unit::CastCustomSpell(Unit* Victim,SpellEntry const *spellInfo, int32 const* bp0, int32 const* bp1, int32 const* bp2, bool triggered, Item *castItem, Aura* triggredByAura, uint64 originalCaster)
+{
+    if(!spellInfo)
+    {
+        sLog.outError("WORLD: unknown spell ");
+        return;
+    }
+
+    if (castItem)
+        DEBUG_LOG("WORLD: cast Item spellId - %i", spellInfo->Id);
+
+    Spell *spell = new Spell(this, spellInfo, triggered, triggredByAura,originalCaster);
+
+    if(bp0)
+        spell->m_currentBasePoints[0] = *bp0;
+
+    if(bp1)
+        spell->m_currentBasePoints[1] = *bp1;
+
+    if(bp2)
+        spell->m_currentBasePoints[2] = *bp2;
+
+    SpellCastTargets targets;
+    targets.setUnitTarget( Victim );
+    spell->m_CastItem = castItem;
+    spell->prepare(&targets);
+    m_canMove = false;
+    if (triggered) delete spell;                            // triggered spell not self deleted
+}
+
 void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32 *damage, CleanDamage *cleanDamage, bool *crit, bool isTriggeredSpell)
 {
 
@@ -1082,7 +1125,6 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, 
 void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier *mod, uint8 effect_idx)
 {
     uint32 procFlag = 0;
-    SpellEntry localSpellProto = *spellProto;
     if(!this || !pVictim || !isAlive() || !pVictim->isAlive())
     {
         return;
@@ -1095,25 +1137,25 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
     if(mod->m_auraname != SPELL_AURA_PERIODIC_HEAL && mod->m_auraname != SPELL_AURA_OBS_MOD_HEALTH)
     {
         //Calculate armor mitigation if it is a physical spell
-        if (localSpellProto.School == 0)
+        if (spellProto->School == 0)
         {
             uint32 pdamageReductedArmor = CalcArmorReducedDamage(pVictim, pdamage);
             cleanDamage.damage += pdamage - pdamageReductedArmor;
             pdamage = pdamageReductedArmor;
         }
 
-        CalcAbsorbResist(pVictim, localSpellProto.School, pdamage, &absorb, &resist);
+        CalcAbsorbResist(pVictim, spellProto->School, pdamage, &absorb, &resist);
     }
 
     sLog.outDetail("PeriodicAuraLog: %u (TypeId: %u) attacked %u (TypeId: %u) for %u dmg inflicted by %u abs is %u",
-        GetGUIDLow(), GetTypeId(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), pdamage, localSpellProto.Id,absorb);
+        GetGUIDLow(), GetTypeId(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), pdamage, spellProto->Id,absorb);
 
     switch(mod->m_auraname)
     {
         case SPELL_AURA_PERIODIC_DAMAGE:
         case SPELL_AURA_PERIODIC_DAMAGE_PERCENT:
         {
-            pdamage = SpellDamageBonus(pVictim,&localSpellProto,pdamage,DOT);
+            pdamage = SpellDamageBonus(pVictim,spellProto,pdamage,DOT);
 
             if(mod->m_auraname == SPELL_AURA_PERIODIC_DAMAGE_PERCENT)
                 pdamage = GetHealth()*(100+mod->m_amount)/100;
@@ -1121,43 +1163,43 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             WorldPacket data(SMSG_PERIODICAURALOG, (21+16));        // we guess size
             data.append(pVictim->GetPackGUID());
             data.append(GetPackGUID());
-            data << uint32(localSpellProto.Id);
+            data << uint32(spellProto->Id);
             data << uint32(1);
             data << uint32(mod->m_auraname);
             data << (uint32)pdamage;
-            data << (uint32)localSpellProto.School;
+            data << (uint32)spellProto->School;
             data << (uint32)absorb;
             data << (uint32)resist;
             SendMessageToSet(&data,true);
 
-            DealDamage(pVictim, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), &cleanDamage, DOT, localSpellProto.School, &localSpellProto, procFlag, true);
-            ProcDamageAndSpell(pVictim, 0, PROC_FLAG_TAKE_DAMAGE, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), &localSpellProto);
+            DealDamage(pVictim, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), &cleanDamage, DOT, spellProto->School, spellProto, procFlag, true);
+            ProcDamageAndSpell(pVictim, 0, PROC_FLAG_TAKE_DAMAGE, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), spellProto);
             break;
         }
         case SPELL_AURA_PERIODIC_HEAL:
         case SPELL_AURA_OBS_MOD_HEALTH:
         {
-            pdamage = SpellHealingBonus(&localSpellProto, pdamage, DOT, pVictim);
+            pdamage = SpellHealingBonus(spellProto, pdamage, DOT, pVictim);
 
             WorldPacket data(SMSG_PERIODICAURALOG, (21+16));        // we guess size
             data.append(pVictim->GetPackGUID());
             data.append(GetPackGUID());
-            data << uint32(localSpellProto.Id);
+            data << uint32(spellProto->Id);
             data << uint32(1);
             data << uint32(mod->m_auraname);
             data << (uint32)pdamage;
             SendMessageToSet(&data,true);
 
             int32 gain = pVictim->ModifyHealth(pdamage);
-            pVictim->getHostilRefManager().threatAssist(this, float(gain) * 0.5f, localSpellProto.School, &localSpellProto);
+            pVictim->getHostilRefManager().threatAssist(this, float(gain) * 0.5f, spellProto->School, spellProto);
 
             // heal for caster damage
-            if(pVictim!=this && localSpellProto.SpellVisual==163)
+            if(pVictim!=this && spellProto->SpellVisual==163)
             {
-                uint32 dmg = localSpellProto.manaPerSecond;
+                uint32 dmg = spellProto->manaPerSecond;
                 if(GetHealth() <= dmg && GetTypeId()==TYPEID_PLAYER)
                 {
-                    RemoveAurasDueToSpell(localSpellProto.Id);
+                    RemoveAurasDueToSpell(spellProto->Id);
                     if(m_currentSpell)
                     {
                         if(m_currentSpell->IsChanneledSpell())
@@ -1167,38 +1209,38 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
                 }
                 else
                 {
-                    SendSpellNonMeleeDamageLog(this, localSpellProto.Id, gain, localSpellProto.School, 0, 0, false, 0, false);
-                    DealDamage(this, gain, &cleanDamage, NODAMAGE, localSpellProto.School, &localSpellProto, PROC_FLAG_HEAL, true);
+                    SendSpellNonMeleeDamageLog(this, spellProto->Id, gain, spellProto->School, 0, 0, false, 0, false);
+                    DealDamage(this, gain, &cleanDamage, NODAMAGE, spellProto->School, spellProto, PROC_FLAG_HEAL, true);
                 }
             }
 
             if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL && pVictim != this)
-                ProcDamageAndSpell(pVictim, PROC_FLAG_HEAL, PROC_FLAG_HEALED, pdamage, &localSpellProto);
+                ProcDamageAndSpell(pVictim, PROC_FLAG_HEAL, PROC_FLAG_HEALED, pdamage, spellProto);
             break;
         }
         case SPELL_AURA_PERIODIC_LEECH:
         {
-            float multiplier = localSpellProto.EffectMultipleValue[effect_idx] > 0 ? localSpellProto.EffectMultipleValue[effect_idx] : 1;
+            float multiplier = spellProto->EffectMultipleValue[effect_idx] > 0 ? spellProto->EffectMultipleValue[effect_idx] : 1;
             uint32 pdamage = mod->m_amount;
 
-            pdamage = SpellDamageBonus(pVictim,&localSpellProto,pdamage,DOT);
+            pdamage = SpellDamageBonus(pVictim,spellProto,pdamage,DOT);
 
             if(pVictim->GetHealth() < pdamage)
                 pdamage = uint32(pVictim->GetHealth());
 
-            SendSpellNonMeleeDamageLog(pVictim, localSpellProto.Id, pdamage, localSpellProto.School, absorb, resist, false, 0);
-            DealDamage(pVictim, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), &cleanDamage, DOT, localSpellProto.School, &localSpellProto, procFlag, false);
-            ProcDamageAndSpell(pVictim, PROC_FLAG_HIT_SPELL, PROC_FLAG_TAKE_DAMAGE, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), &localSpellProto);
+            SendSpellNonMeleeDamageLog(pVictim, spellProto->Id, pdamage, spellProto->School, absorb, resist, false, 0);
+            DealDamage(pVictim, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), &cleanDamage, DOT, spellProto->School, spellProto, procFlag, false);
+            ProcDamageAndSpell(pVictim, PROC_FLAG_HIT_SPELL, PROC_FLAG_TAKE_DAMAGE, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), spellProto);
             if (!pVictim->isAlive() && m_currentSpell)
                 if (m_currentSpell->m_spellInfo)
-                    if (m_currentSpell->m_spellInfo->Id == localSpellProto.Id)
+                    if (m_currentSpell->m_spellInfo->Id == spellProto->Id)
                         m_currentSpell->cancel();
 
             int32 gain = ModifyHealth(int32(pdamage * multiplier));
-            getHostilRefManager().threatAssist(this, float(gain) * 0.5f, localSpellProto.School, &localSpellProto);
+            getHostilRefManager().threatAssist(this, float(gain) * 0.5f, spellProto->School, spellProto);
 
             if(GetTypeId() == TYPEID_PLAYER)
-                SendHealSpellOnPlayer(this, localSpellProto.Id, uint32(pdamage * multiplier));
+                SendHealSpellOnPlayer(this, spellProto->Id, uint32(pdamage * multiplier));
             break;
         }
         case SPELL_AURA_PERIODIC_MANA_LEECH:
@@ -1212,12 +1254,12 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
 
             pVictim->ModifyPower(power, -drain_amount);
 
-            float gain_multiplier = GetMaxPower(power) > 0 ? localSpellProto.EffectMultipleValue[effect_idx] : 0;
+            float gain_multiplier = GetMaxPower(power) > 0 ? spellProto->EffectMultipleValue[effect_idx] : 0;
 
             WorldPacket data(SMSG_PERIODICAURALOG, (21+16));    // we guess size
             data.append(pVictim->GetPackGUID());
             data.append(GetPackGUID());
-            data << uint32(localSpellProto.Id);
+            data << uint32(spellProto->Id);
             data << uint32(1);
             data << uint32(mod->m_auraname);
             data << (uint32)power;                              // power type
@@ -1230,7 +1272,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             if(gain_amount)
             {
                 int32 gain = ModifyPower(power,gain_amount);
-                pVictim->AddThreat(this, float(gain) * 0.5f, localSpellProto.School, &localSpellProto);
+                pVictim->AddThreat(this, float(gain) * 0.5f, spellProto->School, spellProto);
             }
             break;
         }
@@ -1247,7 +1289,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             WorldPacket data(SMSG_PERIODICAURALOG, (21+16));    // we guess size
             data.append(pVictim->GetPackGUID());
             data.append(GetPackGUID());
-            data << uint32(localSpellProto.Id);
+            data << uint32(spellProto->Id);
             data << uint32(1);
             data << uint32(mod->m_auraname);
             data << (uint32)power;                              // power type
@@ -1255,7 +1297,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             SendMessageToSet(&data,true);
 
             int32 gain = pVictim->ModifyPower(power,mod->m_amount);
-            pVictim->getHostilRefManager().threatAssist(this, float(gain) * 0.5f, localSpellProto.School, &localSpellProto);
+            pVictim->getHostilRefManager().threatAssist(this, float(gain) * 0.5f, spellProto->School, spellProto);
             break;
         }
         case SPELL_AURA_OBS_MOD_MANA:
@@ -1266,7 +1308,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             WorldPacket data(SMSG_PERIODICAURALOG, (21+16));        // we guess size
             data.append(pVictim->GetPackGUID());
             data.append(GetPackGUID());
-            data << uint32(localSpellProto.Id);
+            data << uint32(spellProto->Id);
             data << uint32(1);
             data << uint32(mod->m_auraname);
             data << (uint32)mod->m_amount;
@@ -1274,7 +1316,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             SendMessageToSet(&data,true);
 
             int32 gain = ModifyPower(POWER_MANA, mod->m_amount);
-            getHostilRefManager().threatAssist(this, float(gain) * 0.5f, localSpellProto.School, &localSpellProto);
+            getHostilRefManager().threatAssist(this, float(gain) * 0.5f, spellProto->School, spellProto);
             break;
         }
     }
@@ -3444,21 +3486,20 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             if(!pVictim)
                 return;
 
-            SpellEntry const *igniteDotTemplate = sSpellStore.LookupEntry(12654);
-            SpellEntry igniteDot = *igniteDotTemplate;
+            int32 igniteDotBasePoints0;
 
             switch (dummySpell->Id)
             {
-                case 11119: igniteDot.EffectBasePoints[0]=int32(0.04f*damage)-1; break;
-                case 11120: igniteDot.EffectBasePoints[0]=int32(0.08f*damage)-1; break;
-                case 12846: igniteDot.EffectBasePoints[0]=int32(0.12f*damage)-1; break;
-                case 12847: igniteDot.EffectBasePoints[0]=int32(0.16f*damage)-1; break;
-                case 12848: igniteDot.EffectBasePoints[0]=int32(0.20f*damage)-1; break;
+                case 11119: igniteDotBasePoints0=int32(0.04f*damage)-1; break;
+                case 11120: igniteDotBasePoints0=int32(0.08f*damage)-1; break;
+                case 12846: igniteDotBasePoints0=int32(0.12f*damage)-1; break;
+                case 12847: igniteDotBasePoints0=int32(0.16f*damage)-1; break;
+                case 12848: igniteDotBasePoints0=int32(0.20f*damage)-1; break;
                 default:
                     sLog.outError("Unit::HandleDummyAuraProc: non handled spell id: %u (IG)",dummySpell->Id);
                     return;
             };
-            CastSpell(pVictim, &igniteDot, true, NULL, triggredByAura);
+            CastCustomSpell(pVictim, 12654, &igniteDotBasePoints0, NULL, NULL, true, NULL, triggredByAura);
             return;
         }
 
@@ -3480,10 +3521,8 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
 
             if(triggredByAura->GetCasterGUID() == pVictim->GetGUID())
             {
-                SpellEntry const *VEHealTemplate = sSpellStore.LookupEntry(15290);
-                SpellEntry VEHeal = *VEHealTemplate;
-                VEHeal.EffectBasePoints[0] = triggredByAura->GetModifier()->m_amount*damage/100; //VEHeal has a BaseDice of 0, so no decrement needed
-                pVictim->CastSpell(pVictim, &VEHeal, true, NULL, triggredByAura);
+                int32 VEHealBasePoints0 = triggredByAura->GetModifier()->m_amount*damage/100; //VEHeal has a BaseDice of 0, so no decrement needed
+                pVictim->CastCustomSpell(pVictim, 15290, &VEHealBasePoints0, NULL, NULL, true, NULL, triggredByAura);
             }
             return;
 
@@ -3499,10 +3538,8 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             if(backDamage > GetMaxHealth()/2)
                 backDamage = GetMaxHealth()/2;
 
-            SpellEntry const *YYDamageTemplate = sSpellStore.LookupEntry(25997);
-            SpellEntry YYDamage = *YYDamageTemplate;
-            YYDamage.EffectBasePoints[0] = backDamage-1;
-            CastSpell(pVictim, &YYDamage, true, NULL, triggredByAura);
+            int32 YYDamageBasePoints0 = backDamage-1;
+            CastCustomSpell(pVictim, 25997, &YYDamageBasePoints0, NULL, NULL, true, NULL, triggredByAura);
 
             return;
         }
@@ -3517,10 +3554,8 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             // if healed by another unit (pVictim)
             if(this != pVictim)
             {
-                SpellEntry const *SAHealTemplate = sSpellStore.LookupEntry(31786);
-                SpellEntry SAHeal = *SAHealTemplate;
-                SAHeal.EffectBasePoints[0] = triggredByAura->GetModifier()->m_amount*damage/100-1;
-                CastSpell(this, &SAHeal, true, NULL, triggredByAura);
+                int32 SAHealBasePoints0 = triggredByAura->GetModifier()->m_amount*damage/100-1;
+                CastCustomSpell(this, 31786, &SAHealBasePoints0, NULL, NULL, true, NULL, triggredByAura);
             }
 
             return;
@@ -3539,10 +3574,8 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
 
         if(triggredByAura->GetCasterGUID() == pVictim->GetGUID())
         {
-            SpellEntry const *VTEnergizeTemplate = sSpellStore.LookupEntry(34919);
-            SpellEntry VTEnergize = *VTEnergizeTemplate;
-            VTEnergize.EffectBasePoints[0] = triggredByAura->GetModifier()->m_amount*damage/100 - 1;
-            pVictim->CastSpell(pVictim,&VTEnergize,true,NULL, triggredByAura);
+            int32 VTEnergizeBasePoints0 = triggredByAura->GetModifier()->m_amount*damage/100 - 1;
+            pVictim->CastCustomSpell(pVictim,34919,&VTEnergizeBasePoints0,NULL,NULL,true,NULL, triggredByAura);
         }
         return;
     }
@@ -3564,10 +3597,8 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
         {
             //Mana Surge (Shaman T1 bonus)
             //Effect: 23571
-            SpellEntry const *ManaSurgeTemplate = sSpellStore.LookupEntry(23571);
-            SpellEntry ManaSurgeSpell = *ManaSurgeTemplate;
-            ManaSurgeSpell.EffectBasePoints[0] = procSpell->manaCost * 35/100;
-            CastSpell(this, &ManaSurgeSpell, true, NULL, triggredByAura);
+            int32 manaSurgeSpellBasePoints0 = procSpell->manaCost * 35/100;
+            CastCustomSpell(this, 23571, &manaSurgeSpellBasePoints0, NULL, NULL, true, NULL, triggredByAura);
             return;
         }    
         case 113:
@@ -3579,10 +3610,8 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
             {
                 if ((*i)->GetModifier()->m_miscvalue == SPELLMOD_CHANCE_OF_SUCCESS && (*i)->GetSpellProto()->SpellIconID == 113)
                 {
-                    SpellEntry const *impDrainSoulTemplate = sSpellStore.LookupEntry(18371);
-                    SpellEntry impDrainSoul = *impDrainSoulTemplate;
-                    impDrainSoul.EffectBasePoints[0] = (*i)->GetSpellProto()->EffectBasePoints[2] * GetMaxPower(POWER_MANA) / 100;
-                    CastSpell(this, &impDrainSoul, true, NULL, triggredByAura);
+                    int32 impDrainSoulBasePoints0 = (*i)->GetSpellProto()->EffectBasePoints[2] * GetMaxPower(POWER_MANA) / 100;
+                    CastCustomSpell(this, 18371, &impDrainSoulBasePoints0, NULL, NULL, true, NULL, triggredByAura);
                 }
             }
             return;
@@ -3626,11 +3655,9 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
                         originalSpell = HSSpell;
                     }
 
-                    SpellEntry const *ILManaTemplate = sSpellStore.LookupEntry(20272);
-                    SpellEntry ILManaSpell = *ILManaTemplate;
-                    ILManaSpell.EffectBasePoints[0] = originalSpell->manaCost;
                     // BasePoints = val -1 not required (EffectBaseDice==0)
-                    CastSpell(this, &ILManaSpell, true, NULL, triggredByAura);
+                    int32 ILManaSpellBasePoints0 = originalSpell->manaCost;
+                    CastCustomSpell(this, 20272, &ILManaSpellBasePoints0, NULL, NULL, true, NULL, triggredByAura);
                     return;
                 }
             }
@@ -3642,10 +3669,8 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
             //Cooldown: 6 secs
             if (triggredByAura->GetModifier()->m_amount == 0)
                 break;
-            SpellEntry const *improvedLotPTemplate = sSpellStore.LookupEntry(34299);
-            SpellEntry improvedLotP = *improvedLotPTemplate;
-            improvedLotP.EffectBasePoints[0] = triggredByAura->GetModifier()->m_amount * GetMaxHealth() / 100 - 1;
-            CastSpell(this, &improvedLotP, true, NULL, triggredByAura);
+            int32 improvedLotPBasePoints0 = triggredByAura->GetModifier()->m_amount * GetMaxHealth() / 100 - 1;
+            CastCustomSpell(this, 34299, &improvedLotPBasePoints0, NULL, NULL, true, NULL, triggredByAura);
             if (GetTypeId() == TYPEID_PLAYER)
                 ((Player*)this)->AddSpellCooldown(34299,0,time(NULL) + 6);
             return;
@@ -3682,12 +3707,9 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
                     return;
             }
 
-            SpellEntry const *BRHealTemplate = sSpellStore.LookupEntry(EffectId);
-            SpellEntry BRHeal = *BRHealTemplate;
-
             int32 heal_amount = damage * triggredByAura->GetModifier()->m_amount / 100;
-            BRHeal.EffectBasePoints[0] = heal_amount/3-1;
-            CastSpell(this, &BRHeal, true, NULL, triggredByAura);
+            int32 BRHealBasePoints0 = heal_amount/3-1;
+            CastCustomSpell(this, EffectId, &BRHealBasePoints0, NULL, NULL, true, NULL, triggredByAura);
             return;
         }
         case 2006:
@@ -5309,7 +5331,7 @@ bool Unit::SelectHostilTarget()
 //======================================================================
 //======================================================================
 
-int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_index)
+int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_index, int32 effBasePoints)
 {
     int32 value = 0;
     uint32 level = 0;
@@ -5322,7 +5344,7 @@ int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_inde
 
     float basePointsPerLevel = spellProto->EffectRealPointsPerLevel[effect_index];
     float randomPointsPerLevel = spellProto->EffectDicePerLevel[effect_index];
-    int32 basePoints = int32(spellProto->EffectBasePoints[effect_index] + level * basePointsPerLevel);
+    int32 basePoints = int32(effBasePoints + level * basePointsPerLevel);
     int32 randomPoints = int32(spellProto->EffectDieSides[effect_index] + level * randomPointsPerLevel);
     float comboDamage = spellProto->EffectPointsPerComboPoint[effect_index];
     uint8 comboPoints=0;
@@ -5484,13 +5506,13 @@ void Unit::ApplyDiminishingToDuration(DiminishingMechanics  mech, int32& duratio
     }
 }
 
-Creature* Unit::SummonCreature(uint32 id, uint32 mapid, float x, float y, float z, float ang,TempSummonType spwtype,uint32 despwtime)
+Creature* Unit::SummonCreature(uint32 id, float x, float y, float z, float ang,TempSummonType spwtype,uint32 despwtime)
 {
     TemporarySummon* pCreature = new TemporarySummon(this,this);
 
     pCreature->SetInstanceId(GetInstanceId());
 
-    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), mapid, x, y, z, ang, id))
+    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), GetMapId(), x, y, z, ang, id))
     {
         delete pCreature;
         return NULL;

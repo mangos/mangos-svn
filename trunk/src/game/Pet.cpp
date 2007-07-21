@@ -1309,13 +1309,13 @@ void Pet::_LoadAuras(uint32 timediff)
 
             if(spellproto->Effect[effindex] == SPELL_EFFECT_APPLY_AREA_AURA) //this might give problems if the pet was not the caster; possible: store bool if caster was self or not
             {
-                AreaAura* aura = new AreaAura(spellproto, effindex, this, this);
+                AreaAura* aura = new AreaAura(spellproto, effindex, NULL, this, this);
                 aura->SetAuraDuration(remaintime);
                 AddAura(aura);
             }
             else
             {
-                Aura* aura = new Aura(spellproto, effindex, this, this/*caster*/);
+                Aura* aura = new Aura(spellproto, effindex, NULL, this, this/*caster*/);
                 aura->SetAuraDuration(remaintime);
                 AddAura(aura);
             }

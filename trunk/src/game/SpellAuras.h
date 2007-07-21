@@ -185,7 +185,7 @@ class Aura
         void HandleModSpellCritChanceShool(bool apply, bool Real);
         void HandleAuraRetainComboPoints(bool apply, bool Real);
 
-        Aura(SpellEntry const* spellproto, uint32 eff, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
+        Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
         virtual ~Aura();
 
         void SetModifier(uint8 t, int32 a, uint32 pt, int32 miscValue, uint32 miscValue2);
@@ -196,6 +196,7 @@ class Aura
         uint64 GetCastItemGUID() const { return m_castItemGuid; }
         uint32 GetEffIndex() const{ return m_effIndex; }
         void SetEffIndex(uint32 eff) { m_effIndex = eff; }
+        int32 GetBasePoints() const { return m_currentBasePoints; }
         int32 GetAuraDuration() const { return m_duration; }
         void SetAuraDuration(int32 duration) { m_duration = duration; }
         time_t GetAuraApplyTime() { return m_applyTime; }
@@ -244,6 +245,7 @@ class Aura
         uint32 m_spellId;
         uint32 m_effIndex;
         SpellEntry const *m_spellProto;
+        int32 m_currentBasePoints;                          // cache SpellEntry::EffectBasePoints and use for set custom base points
         uint64 m_caster_guid;
         Unit* m_target;
         int32 m_duration;
@@ -273,7 +275,7 @@ class Aura
 class AreaAura : public Aura
 {
     public:
-        AreaAura(SpellEntry const* spellproto, uint32 eff, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
+        AreaAura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
         ~AreaAura();
         void Update(uint32 diff);
 };
@@ -281,7 +283,7 @@ class AreaAura : public Aura
 class PersistentAreaAura : public Aura
 {
     public:
-        PersistentAreaAura(SpellEntry const* spellproto, uint32 eff, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
+        PersistentAreaAura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
         ~PersistentAreaAura();
         void Update(uint32 diff);
 };

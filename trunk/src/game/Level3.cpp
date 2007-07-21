@@ -2530,7 +2530,7 @@ bool ChatHandler::HandleAuraCommand(const char* args)
                 continue;
             if (eff == SPELL_EFFECT_APPLY_AURA || eff == SPELL_EFFECT_APPLY_AREA_AURA || eff == SPELL_EFFECT_PERSISTENT_AREA_AURA)
             {
-                Aura *Aur = new Aura(spellInfo, i, target);
+                Aura *Aur = new Aura(spellInfo, i, NULL, target);
                 target->AddAura(Aur);
             }
         }
