@@ -393,8 +393,6 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32> &mapids)
     m_lastMovement = getMSTime();
     m_nextNodeTime = m_curr->first;
 
-    m_curMap = m_curr->second.mapid;
-
     return true;
 }
 
@@ -412,7 +410,7 @@ void Transport::TeleportTransport(uint32 oldMapid, uint32 newMapid, float x, flo
     //MapManager::Instance().GetMap(oldMapid)->Remove((GameObject *)this, false);
     SetMapId(newMapid);
     //MapManager::Instance().LoadGrid(newMapid,x,y,true);
-    this->Relocate(x, y, z, GetOrientation());              //2.594172f);
+    Relocate(x, y, z);
     //MapManager::Instance().GetMap(newMapid)->Add<GameObject>((GameObject *)this);
 
     for(PlayerSet::iterator itr = m_passengers.begin(); itr != m_passengers.end();)
@@ -433,8 +431,6 @@ void Transport::TeleportTransport(uint32 oldMapid, uint32 newMapid, float x, flo
         //data << uint32(0);
         //plr->GetSession()->SendPacket(&data);
     }
-
-    return;
 }
 
 bool Transport::AddPassenger(Player* passenger)
@@ -470,25 +466,25 @@ void Transport::Update(uint32 p_time)
         m_curr = GetNextWayPoint();
         m_next = GetNextWayPoint();
 
-        if (m_curr->second.teleport == true)
+        // first check help in case client-server transport coordinates de-synchronization
+        if (m_curr->second.mapid != GetMapId() || m_curr->second.teleport)
         {
-            WayPointMap::iterator iterPrev = m_curr;
             TeleportTransport(GetMapId(), m_curr->second.mapid, m_curr->second.x, m_curr->second.y, m_curr->second.z);
         }
         else
         {
             //MapManager::Instance().GetMap(m_curr->second.mapid)->GameobjectRelocation((GameObject *)this, m_curr->second.x, m_curr->second.y, m_curr->second.z, this->m_orientation);
-            this->Relocate(m_curr->second.x, m_curr->second.y, m_curr->second.z);
+            Relocate(m_curr->second.x, m_curr->second.y, m_curr->second.z);
         }
 
-        m_curMap = m_curr->second.mapid;
-
+        /*
         for(PlayerSet::iterator itr = m_passengers.begin(); itr != m_passengers.end();)
         {
             PlayerSet::iterator it2 = itr;
             ++itr;
             //(*it2)->SetPosition( m_curr->second.x + (*it2)->GetTransOffsetX(), m_curr->second.y + (*it2)->GetTransOffsetY(), m_curr->second.z + (*it2)->GetTransOffsetZ(), (*it2)->GetTransOffsetO() );
         }
+        */
 
         m_nextNodeTime = m_curr->first;
 

@@ -92,6 +92,8 @@ class BattleGroundWS : public BattleGround
 
         void RemovePlayer(Player *plr, uint64 guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
+        void HandleKillPlayer(Player* player);
+        void HandleDropFlag(Player* player);
         void SetupBattleGround();
         void Reset();
 

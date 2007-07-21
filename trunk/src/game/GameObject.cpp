@@ -31,7 +31,6 @@
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
-#include "Transports.h"
 
 GameObject::GameObject( WorldObject *instantiator ) : WorldObject( instantiator )
 {

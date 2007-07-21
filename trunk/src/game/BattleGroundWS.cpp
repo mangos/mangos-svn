@@ -493,3 +493,51 @@ void BattleGroundWS::Reset()
     //m_ReviveQueue.clear();
     //m_RemovedPlayers.clear();
 }
+
+void BattleGroundWS::HandleKillPlayer(Player* player)
+{
+    if(player->GetTeam() == HORDE && IsAllianceFlagPickedup())
+    {
+        if(GetAllianceFlagPickerGUID() == player->GetGUID())
+        {
+            SetAllianceFlagPicker(0);
+            player->CastSpell(player, 23336, true);   // Alliance Flag Drop
+        }
+    }
+    if(player->GetTeam() == ALLIANCE && IsHordeFlagPickedup())
+    {
+        if(GetHordeFlagPickerGUID() == player->GetGUID())
+        {
+            SetHordeFlagPicker(0);
+            player->CastSpell(player, 23334, true);   // Horde Flag Drop
+        }
+    }
+}
+
+void BattleGroundWS::HandleDropFlag( Player* player )
+{
+    if(player->GetTeam() == HORDE)
+    {
+        if(IsAllianceFlagPickedup())
+        {
+            if(GetAllianceFlagPickerGUID() == player->GetGUID())
+            {
+                SetAllianceFlagPicker(0);
+                player->RemoveAurasDueToSpell(23335);
+                player->CastSpell(player,23336,true,NULL);
+            }
+        }
+    }
+    else                                                    // ALLIANCE
+    {
+        if(IsHordeFlagPickedup())
+        {
+            if(GetHordeFlagPickerGUID() == player->GetGUID())
+            {
+                SetHordeFlagPicker(0);
+                player->RemoveAurasDueToSpell(23333);
+                player->CastSpell(player,23334,true,NULL);
+            }
+        }
+    }
+}

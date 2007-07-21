@@ -105,7 +105,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                 {
                     GetPlayer()->m_transport = (*iter);
                     (*iter)->AddPassenger(GetPlayer());
-                    continue;
+                    break;
                 }
             }
         }
