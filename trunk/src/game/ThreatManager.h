@@ -86,13 +86,6 @@ public:
     float getTempThreatModifyer() { return iTempThreatModifyer; }
 
     //=================================================
-    // If the ref target is not online the ref should be sorted to the end of the list
-
-    bool operator < (HostilReference const& pItem) const { return (iThreat < pItem.iThreat); }
-
-    bool operator < (HostilReference* const pItem) const { return (iThreat < pItem->iThreat); }
-
-    //=================================================
     // check, if source can reach target and set the status
     void updateOnlineStatus();  
 

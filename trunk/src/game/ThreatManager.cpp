@@ -237,13 +237,19 @@ HostilReference* ThreatContainer::modifyThreatPercent(Unit *pVictim, int32 pPerc
 }
 
 //============================================================
+
+bool HostilReferenceSortPredicate(const HostilReference* lhs, const HostilReference* rhs)
+{
+    return lhs->getThreat() >= rhs->getThreat(); // reverese sorting
+}
+
+//============================================================
 // Check if the list is dirty and sort if necessary
 
 void ThreatContainer::update()
 {
     if(iDirty && iThreatList.size() >1) {
-        iThreatList.sort();
-        iThreatList.reverse();
+        iThreatList.sort(HostilReferenceSortPredicate);
     }
     iDirty = false;
 }
@@ -337,8 +343,9 @@ void ThreatManager::addThreat(Unit* pVictim, float pThreat, uint8 pSchool, Spell
 
     if(!ref) // there was no ref => create a new one
     {
-        HostilReference* hostilReference = new HostilReference(pVictim, this, threat);
+        HostilReference* hostilReference = new HostilReference(pVictim, this, 0); // threat has to be 0 here
         iThreatContainer.addReference(hostilReference);
+        hostilReference->addThreat(threat); // now we add the real threat
         if(pVictim->GetTypeId() == TYPEID_PLAYER && ((Player*)pVictim)->isGameMaster())
             hostilReference->setOnlineOfflineState(false); // GM is always offline
     }
@@ -355,8 +362,8 @@ void ThreatManager::modifyThreatPercent(Unit *pVictim, int32 pPercent)
 Unit* ThreatManager::getHostilTarget()
 {
     iThreatContainer.update();
-    HostilReference* nextVirtim = iThreatContainer.selectNextVictim((Creature*) getOwner(), getCurrentVictim());
-    setCurrentVictim(nextVirtim);
+    HostilReference* nextVictim = iThreatContainer.selectNextVictim((Creature*) getOwner(), getCurrentVictim());
+    setCurrentVictim(nextVictim);
     return getCurrentVictim() != NULL ? getCurrentVictim()->getTarget() : NULL;
 }
 
