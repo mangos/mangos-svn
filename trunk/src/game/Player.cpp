@@ -13314,7 +13314,7 @@ void Player::SetRestBonus (float rest_bonus_new)
     if(rest_bonus_new < 0)
         rest_bonus_new = 0;
 
-    float rest_bonus_max = (float)GetUInt32Value(PLAYER_NEXT_LEVEL_XP)/2;
+    float rest_bonus_max = (float)GetUInt32Value(PLAYER_NEXT_LEVEL_XP)*1.5/2;
 
     if(rest_bonus_new > rest_bonus_max)
         m_rest_bonus = rest_bonus_max;
