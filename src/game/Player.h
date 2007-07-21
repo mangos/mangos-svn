@@ -1353,8 +1353,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void LeaveBattleground();
         bool CanJoinToBattleground() const;
 
-        bool DropBattleGroundFlag();
-
         /*********************************************************/
         /***                    REST SYSTEM                    ***/
         /*********************************************************/

@@ -1123,8 +1123,9 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
         }
 
         // drop flag at mount in bg
-        if(Real && m_target->GetTypeId()==TYPEID_PLAYER)
-            ((Player*)m_target)->DropBattleGroundFlag();
+        if(Real && m_target->GetTypeId()==TYPEID_PLAYER && ((Player*)m_target)->InBattleGround())
+            if(BattleGround *bg = sBattleGroundMgr.GetBattleGround(((Player*)m_target)->GetBattleGroundId()))
+                bg->HandleDropFlag((Player*)m_target);
 
         uint32 displayId = ci->randomDisplayID();
         if(displayId != 0)

@@ -51,10 +51,6 @@
 #include "Transports.h"
 #include "Weather.h"
 #include "BattleGround.h"
-#include "BattleGroundAV.h"
-#include "BattleGroundAB.h"
-#include "BattleGroundEY.h"
-#include "BattleGroundWS.h"
 #include "ArenaTeam.h"
 #include "Chat.h"
 
@@ -3328,33 +3324,7 @@ void Player::KillPlayer()
         BattleGround* bg = sBattleGroundMgr.GetBattleGround(GetBattleGroundId());
         if(bg)
         {
-            switch(bg->GetID())
-            {
-                case BATTLEGROUND_AV:
-                    break;
-                case BATTLEGROUND_WS:
-                    if(GetTeam() == HORDE && ((BattleGroundWS*)bg)->IsAllianceFlagPickedup())
-                    {
-                        if(((BattleGroundWS*)bg)->GetAllianceFlagPickerGUID() == GetGUID())
-                        {
-                            ((BattleGroundWS*)bg)->SetAllianceFlagPicker(0);
-                            CastSpell(this, 23336, true);   // Alliance Flag Drop
-                        }
-                    }
-                    if(GetTeam() == ALLIANCE && ((BattleGroundWS*)bg)->IsHordeFlagPickedup())
-                    {
-                        if(((BattleGroundWS*)bg)->GetHordeFlagPickerGUID() == GetGUID())
-                        {
-                            ((BattleGroundWS*)bg)->SetHordeFlagPicker(0);
-                            CastSpell(this, 23334, true);   // Horde Flag Drop
-                        }
-                    }
-                    break;
-                case BATTLEGROUND_AB:
-                    break;
-                case BATTLEGROUND_EY:
-                    break;
-            }
+            bg->HandleKillPlayer(this);                     // drop flags and etc
             bg->UpdatePlayerScore(this, SCODE_DEATHS, 1);   // add +1 deaths
         }
     }
@@ -14112,44 +14082,6 @@ bool Player::CanJoinToBattleground() const
             return false;
 
     return true;
-}
-
-bool Player::DropBattleGroundFlag()
-{
-    if(InBattleGround())
-        return false;
-
-    BattleGround *bg = sBattleGroundMgr.GetBattleGround(GetBattleGroundId());
-    if(!bg)
-        return false;
-
-    if(GetTeam() == HORDE)
-    {
-        if(bg->GetID()==BATTLEGROUND_WS && ((BattleGroundWS*)bg)->IsAllianceFlagPickedup())
-        {
-            if(((BattleGroundWS*)bg)->GetAllianceFlagPickerGUID() == GetGUID())
-            {
-                ((BattleGroundWS*)bg)->SetAllianceFlagPicker(0);
-                RemoveAurasDueToSpell(23335);
-                CastSpell(this,23336,true,NULL);
-                return true;
-            }
-        }
-    }
-    else                                                    // ALLIANCE
-    {
-        if(bg->GetID()==BATTLEGROUND_WS && ((BattleGroundWS*)bg)->IsHordeFlagPickedup())
-        {
-            if(((BattleGroundWS*)bg)->GetHordeFlagPickerGUID() == GetGUID())
-            {
-                ((BattleGroundWS*)bg)->SetHordeFlagPicker(0);
-                RemoveAurasDueToSpell(23333);
-                CastSpell(this,23334,true,NULL);
-                return true;
-            }
-        }
-    }
-    return false;
 }
 
 bool Player::IsVisibleInGridForPlayer( Player* pl ) const

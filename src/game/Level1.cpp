@@ -30,7 +30,6 @@
 #include "ObjectAccessor.h"
 #include "Language.h"
 #include "RedZoneDistrict.h"
-#include "Transports.h"
 #ifdef _DEBUG_VMAPS
 #include "VMapFactory.h"
 #endif

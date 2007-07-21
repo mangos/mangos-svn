@@ -501,11 +501,13 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     ObjectAccessor::Instance().InsertPlayer(pCurrChar);
     //sLog.outDebug("Player %s added to Map.",pCurrChar->GetName());
 
+    /* done in Map::Add(Player*)
     if (pCurrChar->m_transport)
     {
         Transport* curTrans = pCurrChar->m_transport;
         pCurrChar->TeleportTo(curTrans->GetMapId(), curTrans->GetPositionX(), curTrans->GetPositionY(), curTrans->GetPositionZ(), curTrans->GetOrientation(), true, false);
     }
+    */
 
     sDatabase.PExecute("UPDATE `character` SET `online` = 1 WHERE `guid` = '%u'", pCurrChar->GetGUIDLow());
     loginDatabase.PExecute("UPDATE `account` SET `online` = 1 WHERE `id` = '%u'", GetAccountId());

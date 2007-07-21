@@ -81,7 +81,7 @@ class Transport : public GameObject
     private:
         struct WayPoint
         {
-            WayPoint() : mapid(0), x(0), y(0), z(0), teleport(0) {}
+            WayPoint() : mapid(0), x(0), y(0), z(0), teleport(false) {}
             WayPoint(uint32 _mapid, float _x, float _y, float _z, bool _teleport) :
             mapid(_mapid), x(_x), y(_y), z(_z), teleport(_teleport) {}
             uint32 mapid;
@@ -97,8 +97,6 @@ class Transport : public GameObject
         WayPointMap::iterator m_next;
         uint32 m_pathTime;
         uint32 m_timer;
-
-        uint32 m_curMap;
 
         void TeleportTransport(uint32 oldMapid, uint32 newMapid, float x, float y, float z);
 
