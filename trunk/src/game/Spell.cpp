@@ -1006,7 +1006,12 @@ void Spell::cast(bool skipCheck)
 
     // Pass cast spell event to handler (not send triggered by aura spells)
     if (m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_MELEE && m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_RANGED && !m_triggeredByAura)
-        m_caster->ProcDamageAndSpell(m_caster->getVictim(), PROC_FLAG_CAST_SPELL, PROC_FLAG_NONE, 0, m_spellInfo, m_IsTriggeredSpell);
+    {
+        m_caster->ProcDamageAndSpell(m_targets.getUnitTarget(), PROC_FLAG_CAST_SPELL, PROC_FLAG_NONE, 0, m_spellInfo, m_IsTriggeredSpell);
+
+        // update pointers base at GUIDs to prevent access to non-existed already object
+        UpdatePointers();                                   // pointers can be invalidate at triggered spell casting
+    }
 
     HandleThreatSpells(m_spellInfo->Id);
 

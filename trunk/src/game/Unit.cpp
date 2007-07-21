@@ -3726,6 +3726,18 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
             return;
     }
 
+    // custom check for proc spell
+    switch(auraSpellInfo->Id)
+    {
+    // Impr. Countercasting
+    case 11255:
+    case 12598:
+        // if Countercasting spell casted and target also cating in this moment.
+        if(procSpell->SpellVisual==239 && pVictim && pVictim->m_currentSpell)
+            break;                                          // fall through to std. handler
+        return;
+    }
+
     // standard non-dummy case
     uint32 trigger_spell_id = auraSpellInfo->EffectTriggerSpell[triggredByAura->GetEffIndex()];
     if(!trigger_spell_id)
