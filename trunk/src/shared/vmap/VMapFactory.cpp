@@ -53,14 +53,14 @@ namespace VMAP {
     */
 
     void VMapFactory::preventSpellsFromBeingTestedForLoS(const char* pSpellIdString) {
+        if(!iIgnoreSpellIds)
+            iIgnoreSpellIds = new Table<unsigned int , bool>();
         if(pSpellIdString != NULL) {
             unsigned int pos =0;
             unsigned int id;
             std::string confString(pSpellIdString);
             chompAndTrim(confString);
             while(getNextId(confString, pos, id)){
-                if(!iIgnoreSpellIds)
-                    iIgnoreSpellIds = new Table<unsigned int , bool>();
                 iIgnoreSpellIds->set(id, true);
             }
         }
