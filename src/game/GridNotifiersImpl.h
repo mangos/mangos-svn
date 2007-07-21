@@ -160,7 +160,7 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
         return;
 
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(i_dynobject.GetSpellId());
-    PersistentAreaAura* Aur = new PersistentAreaAura(spellInfo, i_dynobject.GetEffIndex(), target, i_dynobject.GetCaster());
+    PersistentAreaAura* Aur = new PersistentAreaAura(spellInfo, i_dynobject.GetEffIndex(), NULL, target, i_dynobject.GetCaster());
     target->AddAura(Aur);
     i_dynobject.AddAffected(target);
 }

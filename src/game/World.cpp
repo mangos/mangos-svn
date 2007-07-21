@@ -991,7 +991,7 @@ void World::ScriptsProcess()
                 float z = step.script->z;
                 float o = step.script->o;
 
-                Creature* pCreature = ((Unit*)step.source)->SummonCreature(step.script->datalong,((Unit*)step.source)->GetMapId(), x, y, z, o,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,step.script->datalong2);
+                Creature* pCreature = ((Unit*)step.source)->SummonCreature(step.script->datalong, x, y, z, o,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,step.script->datalong2);
                 if (!pCreature)
                 {
                     sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON failed for creature (entry: %u).",step.script->datalong);

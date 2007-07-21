@@ -203,19 +203,11 @@ void SpellCastTargets::write ( WorldPacket * data, bool forceAppend)
 Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur, uint64 originalCasterGUID )
 {
     ASSERT( Caster != NULL && info != NULL );
+    ASSERT( info == sSpellStore.LookupEntry( info->Id ) && "`info` must be pointer to sSpellStore element");
 
     Player* p_caster;
 
-    // make own copy of custom `info` (`info` can be created at stack) for non-triggered spell
-    // copy custom SpellEntry in m_spellInfo will be delete at Spell delete
-    if(info != sSpellStore.LookupEntry( info->Id ) && !triggered)
-    {
-        SpellEntry* sInfo = new SpellEntry;
-        *sInfo = *info;
-        m_spellInfo = sInfo;
-    }
-    else
-        m_spellInfo = info;
+    m_spellInfo = info;
 
     m_caster = Caster;
 
@@ -230,6 +222,9 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur, u
         m_originalCaster = m_caster;
     else
         m_originalCaster = ObjectAccessor::Instance().GetUnit(*m_caster,m_originalCasterGUID);
+
+    for(int i=0; i <3; ++i)
+        m_currentBasePoints[i] = m_spellInfo->EffectBasePoints[i];
 
     m_spellState = SPELL_STATE_NULL;
 
@@ -282,9 +277,6 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur, u
 
 Spell::~Spell()
 {
-    // free custom m_spellInfo for non-triggered spell
-    if(m_spellInfo != sSpellStore.LookupEntry(m_spellInfo->Id) && !m_IsTriggeredSpell)
-        delete m_spellInfo;
 }
 
 void Spell::FillTargetMap()
@@ -2905,7 +2897,7 @@ uint8 Spell::CheckItems()
 
 int32 Spell::CalculateDamage(uint8 i)
 {
-    int32 value = m_caster->CalculateSpellDamage(m_spellInfo,i);
+    int32 value = m_caster->CalculateSpellDamage(m_spellInfo,i,m_currentBasePoints[i]);
 
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
         ((Player*)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DAMAGE, value);

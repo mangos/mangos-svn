@@ -470,6 +470,7 @@ class Spell
         void EffectPickPocket(uint32 i);
         void EffectAddFarsight(uint32 i);
         void EffectSummonWild(uint32 i);
+        void EffectSummonGuardian(uint32 i);
         void EffectTeleUnitsFaceCaster(uint32 i);
         void EffectLearnSkill(uint32 i);
         void EffectTradeSkill(uint32 i);
@@ -572,6 +573,7 @@ class Spell
         //void HandleAddAura(Unit* Target);
 
         SpellEntry const* m_spellInfo;
+        int32 m_currentBasePoints[3];                       // cache SpellEntry::EffectBasePoints and use for set custom base points
         Item* m_CastItem;
         SpellCastTargets m_targets;
 
@@ -594,7 +596,6 @@ class Spell
     protected:
 
         void SendLoot(uint64 guid, LootType loottype);
-
         Unit* m_caster;
 
         uint64 m_originalCasterGUID;                        // real source of cast (aura caster/etc), used for spell targets selection

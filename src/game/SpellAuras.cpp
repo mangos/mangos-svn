@@ -287,7 +287,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL                                       //234 SPELL_AURA_SILENCE_RESISTANCE
 };
 
-Aura::Aura(SpellEntry const* spellproto, uint32 eff, Unit *target, Unit *caster, Item* castItem) :
+Aura::Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster, Item* castItem) :
 m_procCharges(0), m_absorbDmg(0), m_spellmod(NULL), m_spellId(spellproto->Id), m_effIndex(eff), m_caster_guid(0), m_target(target),
 m_timeCla(1000), m_castItemGuid(castItem?castItem->GetGUID():0), m_auraSlot(MAX_AURAS),
 m_positive(false), m_permanent(false), m_isPeriodic(false), m_isTrigger(false), m_isAreaAura(false), m_isPersistent(false),
@@ -295,16 +295,11 @@ m_periodicTimer(0), m_PeriodicEventId(0), m_removeOnDeath(false)
 {
     assert(target);
 
-    // make own copy of custom `spellproto` (`spellproto` will be deleted at spell cast finished)
-    // copy custom SpellEntry in m_spellProto will be delete at Aura delete
-    if(spellproto != sSpellStore.LookupEntry( spellproto->Id ))
-    {
-        SpellEntry* sInfo = new SpellEntry;
-        *sInfo = *spellproto;
-        m_spellProto = sInfo;
-    }
-    else
-        m_spellProto = spellproto;
+    assert(spellproto == sSpellStore.LookupEntry( spellproto->Id ) && "`info` must be pointer to sSpellStore element");
+
+    m_spellProto = spellproto;
+
+    m_currentBasePoints = currentBasePoints ? *currentBasePoints : m_spellProto->EffectBasePoints[eff];
 
     m_isPassive = IsPassiveSpell(m_spellId);
 
@@ -338,7 +333,7 @@ m_periodicTimer(0), m_PeriodicEventId(0), m_removeOnDeath(false)
     if(!caster)
     {
         m_caster_guid = target->GetGUID();
-        damage = spellproto->EffectBasePoints[eff]+1;       // stored value-1
+        damage = m_currentBasePoints+1;                     // stored value-1
     }
     else
     {
@@ -383,8 +378,8 @@ Aura::~Aura()
         delete m_spellProto;
 }
 
-AreaAura::AreaAura(SpellEntry const* spellproto, uint32 eff, Unit *target,
-Unit *caster, Item* castItem) : Aura(spellproto, eff, target, caster, castItem)
+AreaAura::AreaAura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target,
+Unit *caster, Item* castItem) : Aura(spellproto, eff, currentBasePoints, target, caster, castItem)
 {
     m_isAreaAura = true;
 }
@@ -393,8 +388,8 @@ AreaAura::~AreaAura()
 {
 }
 
-PersistentAreaAura::PersistentAreaAura(SpellEntry const* spellproto, uint32 eff, Unit *target,
-Unit *caster, Item* castItem) : Aura(spellproto, eff, target, caster, castItem)
+PersistentAreaAura::PersistentAreaAura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target,
+Unit *caster, Item* castItem) : Aura(spellproto, eff, currentBasePoints, target, caster, castItem)
 {
     m_isPersistent = true;
 }
@@ -421,7 +416,7 @@ int32 Aura::CalculateDamage()
     if(!caster)
         caster = m_target;
 
-    return caster->CalculateSpellDamage(spellproto,m_effIndex);
+    return caster->CalculateSpellDamage(spellproto,m_effIndex,m_currentBasePoints);
 }
 
 void Aura::SetModifier(uint8 t, int32 a, uint32 pt, int32 miscValue, uint32 miscValue2)
@@ -563,7 +558,7 @@ void AreaAura::Update(uint32 diff)
                     // apply aura to players in range that dont have it yet
                     if (!t_aura)
                     {
-                        AreaAura *aur = new AreaAura(GetSpellProto(), m_effIndex, Target, caster);
+                        AreaAura *aur = new AreaAura(GetSpellProto(), m_effIndex, &m_currentBasePoints, Target, caster);
                         Target->AddAura(aur);
                     }
                 }
@@ -587,7 +582,7 @@ void AreaAura::Update(uint32 diff)
                 {
                     if (!o_aura)
                     {
-                        AreaAura *aur = new AreaAura(GetSpellProto(), m_effIndex, owner, caster);
+                        AreaAura *aur = new AreaAura(GetSpellProto(), m_effIndex, &m_currentBasePoints, owner, caster);
                         owner->AddAura(aur);
                     }
                 }
@@ -1482,7 +1477,7 @@ void Aura::HandleAuraModSkill(bool apply, bool Real)
         return;
 
     uint32 prot=GetSpellProto()->EffectMiscValue[m_effIndex];
-    int32 points = GetSpellProto()->EffectBasePoints[m_effIndex]+1;
+    int32 points = m_currentBasePoints+1;
 
     ((Player*)m_target)->ModifySkillBonus(prot,(apply ? points: -points));
     if(prot == SKILL_DEFENSE)
@@ -2895,7 +2890,7 @@ void Aura::HandleAuraModTotalHealthPercentRegen(bool apply, bool Real)
     if(apply && m_periodicTimer <= 0)
     {
         m_periodicTimer += m_modifier.periodictime;
-        float modifier = GetSpellProto()->EffectBasePoints[m_effIndex]+1;
+        float modifier = m_currentBasePoints+1;
         m_modifier.m_amount = uint32(m_target->GetMaxHealth() * modifier/100);
 
         if(m_target->GetHealth() < m_target->GetMaxHealth())
@@ -2918,7 +2913,7 @@ void Aura::HandleAuraModTotalManaPercentRegen(bool apply, bool Real)
         m_periodicTimer += m_modifier.periodictime;
         if (m_modifier.m_amount)
         {
-            float modifier = GetSpellProto()->EffectBasePoints[m_effIndex]+1;
+            float modifier = m_currentBasePoints+1;
                                                             // take percent (m_modifier.m_amount) max mana
             m_modifier.m_amount = uint32((m_target->GetMaxPower(POWER_MANA) * modifier)/100);
         }
@@ -3503,12 +3498,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
                     if ((*i)->GetSpellProto()->SpellIconID == 240 && (*i)->GetModifier()->m_miscvalue == 3)
                         HotWMod = (*i)->GetModifier()->m_amount;
                 if (HotWMod)
-                {
-                    SpellEntry const *HotWTemplate = sSpellStore.LookupEntry(HotWSpellId);
-                    SpellEntry HotWCustom = *HotWTemplate;
-                    HotWCustom.EffectBasePoints[0] = HotWMod;
-                    m_target->CastSpell(m_target, &HotWCustom, true);
-                }
+                    m_target->CastSpell(m_target, HotWSpellId, &HotWMod, NULL, NULL, true);
             }
         }
     }
