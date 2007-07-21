@@ -65,7 +65,7 @@ RASocket::~RASocket()
     ///- Delete buffer and decrease active admins count
     delete [] buff;
 
-   sLog.outRALog("Connection was closed.\n");
+    sLog.outRALog("Connection was closed.\n");
 
     if(stage==OK)
         iUsers--;
@@ -74,15 +74,14 @@ RASocket::~RASocket()
 /// Accept an incoming connection
 void RASocket::OnAccept()
 {
-
-        std::string ss=GetRemoteAddress();
-       sLog.outRALog("Incoming connection from %s.\n",ss.c_str());
-       ///- If there is already an active admin, drop the connection
+    std::string ss=GetRemoteAddress();
+    sLog.outRALog("Incoming connection from %s.\n",ss.c_str());
+    ///- If there is already an active admin, drop the connection
     if(iUsers)
         dropclient
 
-        ///- Else print Motd
-            Sendf("%s\r\n",(char*)sWorld.GetMotd());
+    ///- Else print Motd
+    Sendf("%s\r\n",(char*)sWorld.GetMotd());
 }
 
 /// Read data from the network
@@ -94,7 +93,7 @@ void RASocket::OnRead()
     unsigned int sz=ibuf.GetLength();
     if(iInputLength+sz>=RA_BUFF_SIZE)
     {
-      sLog.outRALog("Input buffer overflow, possible DOS attack.\n");
+        sLog.outRALog("Input buffer overflow, possible DOS attack.\n");
         SetCloseAndDelete();
         return;
     }

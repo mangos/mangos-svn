@@ -115,8 +115,3 @@ void BattleGroundAB::HandleAreaTrigger(Player *Source, uint32 Trigger)
         Source->CastSpell(Source, Entry, true, 0);
     }
 }
-
-void BattleGroundAB::SetupBattleGround()
-{
-
-}

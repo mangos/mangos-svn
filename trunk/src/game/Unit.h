@@ -339,7 +339,7 @@ enum UnitFlags
     UNIT_FLAG_PACIFIED       = 0x00020000,
     UNIT_FLAG_DISABLE_ROTATE = 0x00040000,                  // stunned, 2.1.1
     UNIT_FLAG_IN_COMBAT      = 0x00080000,
-    UNIT_FLAG_UNKNOWN15      = 0x00100000,
+    UNIT_FLAG_UNKNOWN15      = 0x00100000,                  // mounted? 2.1.3, probably used with 0x4 flag
     UNIT_FLAG_DISARMED       = 0x00200000,                  // disable melee spells casting..., "Required melee weapon" added to melee spells tooltip.
     UNIT_FLAG_CONFUSED       = 0x00400000,
     UNIT_FLAG_FLEEING        = 0x00800000,

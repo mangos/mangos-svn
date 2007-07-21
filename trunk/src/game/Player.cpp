@@ -1022,7 +1022,7 @@ void Player::BuildEnumData( WorldPacket * p_data )
     *p_data << m_name;
 
     *p_data << getRace();
-    uint8 pClass =getClass();
+    uint8 pClass = getClass();
     *p_data << pClass;
     *p_data << getGender();
 
@@ -14067,10 +14067,12 @@ void Player::LeaveBattleground()
 
     BattleGround *bg = sBattleGroundMgr.GetBattleGround(GetBattleGroundId());
     if(bg)
+    {
         bg->RemovePlayer(GetGUID(), true, true);
 
-    // Deserter
-    CastSpell(this,26013,true);
+        if(bg->GetStatus() == STATUS_IN_PROGRESS)
+            CastSpell(this, 26013, true);    // Deserter
+    }
 }
 
 bool Player::CanJoinToBattleground() const

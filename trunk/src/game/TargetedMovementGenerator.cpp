@@ -125,7 +125,7 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
         if (owner.GetObjectSize())
             i_destinationHolder.ResetUpdate(50);
 
-        float  dist = i_target->GetObjectSize() + owner.GetObjectSize() + CONTACT_DISTANCE;
+        float dist = i_target->GetObjectSize() + owner.GetObjectSize() + CONTACT_DISTANCE;
 
         // try to counter precision differences
         if( i_destinationHolder.GetDistanceFromDestSq(*i_target.getTarget()) > dist * dist + 0.8)

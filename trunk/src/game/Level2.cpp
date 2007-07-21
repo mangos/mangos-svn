@@ -36,6 +36,7 @@
 #include <iostream>
 #include <fstream>
 
+
 bool ChatHandler::HandleMuteCommand(const char* args)
 {
     if (!*args)
