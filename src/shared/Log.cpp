@@ -492,6 +492,7 @@ void Log::outDebug( const char * str, ... )
     }
     fflush(stdout);
 }
+
 void Log::outCommand( const char * str, ... )
 {
     if( !str ) return;

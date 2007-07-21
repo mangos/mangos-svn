@@ -223,7 +223,11 @@ uint32 BattleGroundMgr::CreateBattleGround(uint32 bg_ID, uint32 MaxPlayersPerTea
     }
 
     bg->SetMapId(MapID);
-    bg->SetupBattleGround();
+    if(!bg->SetupBattleGround())
+    {
+        delete bg;
+        return 0;
+    }
 
     bg->SetID(bg_ID);
     bg->SetInstanceID(bg_ID);                               // temporary
@@ -325,7 +329,8 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
 
 
         //sLog.outDetail("Creating battleground %s, %u-%u", bl->name[sWorld.GetDBClang()], MinLvl, MaxLvl);
-        CreateBattleGround(bg_ID, MaxPlayersPerTeam, MinLvl, MaxLvl, bl->name[sWorld.GetDBClang()], bl->mapid1, AStartLoc[0], AStartLoc[1], AStartLoc[2], AStartLoc[3], HStartLoc[0], HStartLoc[1], HStartLoc[2], HStartLoc[3]);
+        if(!CreateBattleGround(bg_ID, MaxPlayersPerTeam, MinLvl, MaxLvl, bl->name[sWorld.GetDBClang()], bl->mapid1, AStartLoc[0], AStartLoc[1], AStartLoc[2], AStartLoc[3], HStartLoc[0], HStartLoc[1], HStartLoc[2], HStartLoc[3]))
+            continue;
 
         count++;
     } while (result->NextRow());

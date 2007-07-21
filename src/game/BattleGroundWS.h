@@ -25,6 +25,13 @@
 #define FLAG_RESPAWN_TIME   60000
 #define BUFF_RESPAWN_TIME   180000
 
+#define SOUND_FLAG_CAPTURED_ALLIANCE 8173
+#define SOUND_FLAG_CAPTURED_HORDE    8213
+#define SOUND_FLAG_PLACED            8232
+
+#define SPELL_WARSONG_FLAG      23333
+#define SPELL_SILVERWING_FLAG   23335
+
 // WorldStates
 #define FLAG_UNK_ALLIANCE       1545
 #define FLAG_UNK_HORDE          1546
@@ -94,7 +101,7 @@ class BattleGroundWS : public BattleGround
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         void HandleKillPlayer(Player* player);
         void HandleDropFlag(Player* player);
-        void SetupBattleGround();
+        bool SetupBattleGround();
         void Reset();
 
         void UpdateFlagState(uint32 team, uint32 value);

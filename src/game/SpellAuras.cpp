@@ -698,8 +698,8 @@ void Aura::_AddAura()
         }
     }
 
-    if(m_spellId == 23333 || m_spellId == 23335)            // for BG
-        m_positive = true;
+    //if(m_spellId == 23333 || m_spellId == 23335)            // for BG
+    //    m_positive = true;
 
     // not call total regen auras at adding
     if( m_modifier.m_auraname==SPELL_AURA_OBS_MOD_HEALTH || m_modifier.m_auraname==SPELL_AURA_OBS_MOD_MANA )

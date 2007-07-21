@@ -117,7 +117,7 @@ class BattleGround
         BattleGround();
         virtual ~BattleGround();
         virtual void Update(time_t diff);                   // must be implemented in BG subclass of BG specific update code, but must in begginning call parent version
-        virtual void SetupBattleGround() {}                 // must be implemented in BG subclass
+        virtual bool SetupBattleGround() { return true; }   // must be implemented in BG subclass
 
         /* Battleground */
         void SetName(char const* Name) { m_Name = Name; }

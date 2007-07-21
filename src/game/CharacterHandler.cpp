@@ -95,7 +95,6 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     recv_data >> race_;
     recv_data >> class_;
 
-
     WorldPacket data(SMSG_CHAR_CREATE, 1);                  // returned with diff.values in all cases
 
     if (!sChrClassesStore.LookupEntry(class_)||

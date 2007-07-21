@@ -445,10 +445,10 @@ int libmpq_file_extract(mpq_archive *mpq_a, const int number, const char *filena
 
 int libmpq_listfile_open(mpq_archive *mpq_a, char file[PATH_MAX]) {
 	FILE *fp;
-	char **filelist;
+	//char **filelist;
 	int i = 0;
-	int fl_count;
-	int fl_size;
+	//int fl_count;
+	//int fl_size;
 	int fl_count_fb;
 	int fl_size_fb;
 	int result = LIBMPQ_TOOLS_SUCCESS;

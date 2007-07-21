@@ -354,6 +354,7 @@ void BattleGround::EndBattleGround(uint32 winner)
     WorldPacket data;
     Player *Source = NULL;
     const char *winmsg = "";
+
     if(winner == ALLIANCE)
     {
         winmsg = LANG_BG_A_WINS;

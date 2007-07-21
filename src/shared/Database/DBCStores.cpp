@@ -532,6 +532,13 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
     SpellEntry const *spellproto = sSpellStore.LookupEntry(spellId);
     if (!spellproto) return false;
 
+    switch(spellId)
+    {
+        case 23333: // BG spell
+        case 23335: // BG spell
+            return true;
+    }
+
     // non-positive targets
     if(!IsPositiveTarget(spellproto->EffectImplicitTargetA[effIndex]))
         return false;

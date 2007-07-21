@@ -116,16 +116,6 @@ void WorldSession::SendTaxiMenu( uint64 guid )
 
     sLog.outDebug( "WORLD: CMSG_TAXINODE_STATUS_QUERY %u ",curloc);
 
-    /*// check additinal requirements
-    if(_player->IsMounted())
-    {
-        WorldPacket data(SMSG_CAST_RESULT, (4+1+1));
-        data << uint32(0);
-        data << uint8(SPELL_FAILED_NOT_MOUNTED);
-        SendPacket(&data);
-        return;
-    }*/
-
     WorldPacket data( SMSG_SHOWTAXINODES, (4+8+4+8*4) );
     data << uint32( 1 ) << guid;
     data << uint32( curloc );

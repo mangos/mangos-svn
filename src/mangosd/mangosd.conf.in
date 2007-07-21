@@ -153,7 +153,7 @@ MaxPrimaryTradeSkill = 2
 
 # Min signatures count to creating guild (0..9).
 # Default: 9
-MinPetitionSigns = 9 
+MinPetitionSigns = 9
 
 # Max distance to creature for group memeber to get XP at creature death.
 # Default: 74
@@ -182,7 +182,6 @@ AllowTwoSide.Interaction.Trade = 0
 #          1 (Allowed)
 AllowTwoSide.WhoList = 0
 
-
 # Chat anti-flood protection, haste message count to activate protection
 #          0 (disible anti-flood protection)
 # Default: 10
@@ -195,7 +194,6 @@ ChatFlood.MessageDelay = 1
 # Chat anti-flood protection, mute time at activation flood protection (not saved)
 # Default: 10 (in secs)
 ChatFlood.MuteTime = 10
-
 
 # Is GM accept whispers from player by default.
 # Default: 0 (false)
@@ -229,7 +227,6 @@ GM.LogTrade = 1
 #          2 (players from same team can 100% auto detect invisible player)
 Visibility.GroupMode = 0
 
-
 # Visibility distance for different in game object 
 # Max limited by active player zone: ~ 166
 # Min limit dependent from objects
@@ -247,7 +244,7 @@ Visibility.Distance.Object        = 66
 # Min limit is 0 (not show any objects)
 Visibility.Distance.InFlight      = 66
 
-# Visibility grey distance for creatures/players (fast changing obects)
+# Visibility grey distance for creatures/players (fast changing objects)
 #    addition to appropriate object type Visibility.Distance.* use in case visibility removing to object (except corpse around distences)
 #    If ‚ is distance and G is grey distance then object make visible if distance to it <= D but make non visible if distance > D+G
 # Default: 1 yard

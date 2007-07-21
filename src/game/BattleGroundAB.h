@@ -39,7 +39,7 @@ class BattleGroundAB : public BattleGround
         void Update(time_t diff);
         void RemovePlayer(Player *plr,uint64 guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
-        void SetupBattleGround();
+        //bool SetupBattleGround();
 
         /* Scorekeeping */
         uint32 GetTeamScore(uint32 TeamID) const { return m_TeamScores[GetTeamIndexByTeamId(TeamID)]; }
