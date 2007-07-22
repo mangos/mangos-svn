@@ -100,3 +100,39 @@ void HostilRefManager::deleteReferences()
 }
 
 //=================================================
+// delete one reference, defined by Unit
+
+void HostilRefManager::deleteReference(Unit *pCreature)
+{
+    HostilReference* ref = getFirst();
+    while(ref) 
+    {
+        HostilReference* nextRef = ref->next();
+        if(ref->getSource()->getOwner() == pCreature)
+        {
+            ref->removeReference();
+            delete ref;
+            break;
+        }
+        ref = nextRef;
+    }
+}
+
+//=================================================
+// set state for one reference, defined by Unit
+
+void HostilRefManager::setOnlineOfflineState(Unit *pCreature,bool pIsOnline)
+{
+    HostilReference* ref = getFirst();
+    while(ref) 
+    {
+        HostilReference* nextRef = ref->next();
+        if(ref->getSource()->getOwner() == pCreature)
+        {
+            ref->setOnlineOfflineState(pIsOnline);
+            break;
+        }
+        ref = nextRef;
+    }
+}
+//=================================================

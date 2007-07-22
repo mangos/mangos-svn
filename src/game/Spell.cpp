@@ -1328,7 +1328,11 @@ void Spell::update(uint32 difftime)
                         cancel();
 
                     // check for incapacitating player states
-                    if( m_caster->hasUnitState(UNIT_STAT_STUNDED | UNIT_STAT_ROOT | UNIT_STAT_CONFUSED) )
+                    //Player can use vanish even if he is incapacitated
+                    if( ( m_caster->hasUnitState(UNIT_STAT_STUNDED) ||
+                        m_caster->hasUnitState(UNIT_STAT_ROOT) ||
+                        m_caster->hasUnitState(UNIT_STAT_CONFUSED)) &&
+                        !(m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && m_spellInfo->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE_VANISH))
                         cancel();
 
                     // check if player has turned if flag is set
@@ -1986,7 +1990,6 @@ uint8 Spell::CanCast()
                 target = m_caster->GetPet();
                 if(!target)
                     return SPELL_FAILED_NO_PET;
-
                 break;
             }
         }
@@ -2358,11 +2361,14 @@ uint8 Spell::CanCast()
             case SPELL_AURA_MOD_STEALTH:
             case SPELL_AURA_MOD_INVISIBILITY:
             {
-
+/*
+Using stealth does not depend on the distance to mobs (as far as I know: ralf)
+If this this code is in place, it is not possible to use stealth while in Vanish mode
                 //detect if any mod is in x range.if true,can't steath.FIX ME!
                 if(m_spellInfo->Attributes == 169148432 || m_caster->GetTypeId() != TYPEID_PLAYER)
                     break;
 
+                // Find nearby creatures
                 CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
                 Cell cell = RedZone::GetZone(p);
                 cell.data.Part.reserved = ALL_DISTRICT;
@@ -2374,10 +2380,7 @@ uint8 Spell::CanCast()
                 TypeContainerVisitor<MaNGOS::CreatureSearcher<MaNGOS::InAttackDistanceFromAnyHostileCreatureCheck>, GridTypeMapContainer > object_checker(checker);
                 CellLock<GridReadGuard> cell_lock(cell, p);
                 cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
-
-                if(found_creature)
-                    return SPELL_FAILED_CANT_STEALTH;
-
+*/
             };break;
             case SPELL_AURA_MOUNTED:
             {
