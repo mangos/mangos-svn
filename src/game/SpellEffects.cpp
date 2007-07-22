@@ -505,6 +505,32 @@ void Spell::EffectDummy(uint32 i)
             }
             return;
         }
+
+        //Hunter - Readiness talent - immediately finishes the cooldown for hunter abilities
+        case 23989:
+        {
+            if(m_caster->GetTypeId()!=TYPEID_PLAYER)
+                return;
+
+            const PlayerSpellMap& sp_list = ((Player *)m_caster)->GetSpellMap();
+            for (PlayerSpellMap::const_iterator itr = sp_list.begin(); itr != sp_list.end(); ++itr)
+            {
+                uint32 classspell = itr->first;
+                SpellEntry const *spellInfo = sSpellStore.LookupEntry(classspell);
+
+                if (spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && spellInfo->Id != 23989 &&
+                    (spellInfo->RecoveryTime > 0 || spellInfo->CategoryRecoveryTime > 0))
+                {
+                    ((Player*)m_caster)->RemoveSpellCooldown(classspell);
+
+                    WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8+4));
+                    data << classspell;
+                    data << m_caster->GetGUID();
+                    ((Player*)m_caster)->GetSession()->SendPacket(&data);
+                }
+            }
+            return;
+        }
         
         // Cold Snap - immediately finishes the cooldown on Frost spells
         case 12472:
