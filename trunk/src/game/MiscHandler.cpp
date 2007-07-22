@@ -453,10 +453,17 @@ void WorldSession::HandleSetTargetOpcode( WorldPacket & recv_data )
     uint64 guid ;
     recv_data >> guid;
 
-    if( _player != 0 )
-    {
-        _player->SetTarget(guid);
-    }
+    if( !_player  )
+        return;
+
+    _player->SetTarget(guid);
+
+    // update reputation list if need
+    Unit* unit = ObjectAccessor::Instance().GetUnit(*_player, guid );
+    if(!unit)
+        return;
+
+    _player->SetFactionVisibleForFactionTemplateId(unit->getFaction());
 }
 
 void WorldSession::HandleSetSelectionOpcode( WorldPacket & recv_data )
@@ -466,8 +473,17 @@ void WorldSession::HandleSetSelectionOpcode( WorldPacket & recv_data )
     uint64 guid;
     recv_data >> guid;
 
-    if( _player != 0 )
-        _player->SetSelection(guid);
+    if( !_player )
+        return;
+
+    _player->SetSelection(guid);
+
+    // update reputation list if need
+    Unit* unit = ObjectAccessor::Instance().GetUnit(*_player, guid );
+    if(!unit)
+        return;
+
+    _player->SetFactionVisibleForFactionTemplateId(unit->getFaction());
 }
 
 void WorldSession::HandleStandStateChangeOpcode( WorldPacket & recv_data )
