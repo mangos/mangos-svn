@@ -852,9 +852,9 @@ void Player::Update( uint32 p_time )
             int time_inn = time(NULL)-GetTimeInnEter();
             if (time_inn >= 10)                             //freeze update
             {
-                float bubble = sWorld.getRate(RATE_REST_INGAME);
+                float bubble = 0.125*sWorld.getRate(RATE_REST_INGAME);
                                                             //speed collect rest bonus (section/in hour)
-                SetRestBonus( GetRestBonus()+ time_inn*((float)GetUInt32Value(PLAYER_NEXT_LEVEL_XP)/144000)*bubble );
+                SetRestBonus( GetRestBonus()+ time_inn*((float)GetUInt32Value(PLAYER_NEXT_LEVEL_XP)/72000)*bubble );
                 UpdateInnerTime(time(NULL));
             }
         }
@@ -4686,6 +4686,13 @@ void Player::SetDontMove(bool dontMove)
 
 bool Player::SetPosition(float x, float y, float z, float orientation, bool teleport)
 {
+    // prevent crash when a bad coord is sent by the client
+    if(!MaNGOS::IsValidMapCoord(x,y))
+    {
+        sLog.outDebug("Player::SetPosition(%f, %f, %f, %f, %d) .. bad coordinates for player %d!",x,y,z,orientation,teleport,GetGUIDLow());
+        return false;
+    }
+
     Map *m = MapManager::Instance().GetMap(GetMapId(), this);
 
     const float old_x = GetPositionX();
@@ -11731,9 +11738,9 @@ bool Player::LoadFromDB( uint32 guid )
 
     m_rest_bonus = fields[15].GetFloat();
     //speed collect rest bonus in offline, in logout, far from tavern, city (section/in hour)
-    float bubble0 = 0.0416;
+    float bubble0 = 0.031;
     //speed collect rest bonus in offline, in logout, in tavern, city (section/in hour)
-    float bubble1 = 0.083;
+    float bubble1 = 0.125;
 
     if((int32)fields[16].GetUInt32() > 0)
     {
@@ -11741,7 +11748,7 @@ bool Player::LoadFromDB( uint32 guid )
             ? bubble1*sWorld.getRate(RATE_REST_OFFLINE_IN_TAVERN_OR_CITY)
             : bubble0*sWorld.getRate(RATE_REST_OFFLINE_IN_WILDERNESS);
 
-        SetRestBonus(GetRestBonus()+ time_diff*((float)GetUInt32Value(PLAYER_NEXT_LEVEL_XP)/144000)*bubble);
+        SetRestBonus(GetRestBonus()+ time_diff*((float)GetUInt32Value(PLAYER_NEXT_LEVEL_XP)/72000)*bubble);
     }
 
     if(!IsPositionValid())
