@@ -3876,7 +3876,7 @@ bool Unit::IsHostileTo(Unit const* unit) const
     if(!tester_faction || !target_faction)
         return false;
 
-    // PvC forced reaction case
+    // PvC forced reaction and reputation case
     if(tester->GetTypeId()==TYPEID_PLAYER)
     {
         // apply forced faction only in target with identical faction in other case provided original faction
@@ -3886,8 +3886,16 @@ bool Unit::IsHostileTo(Unit const* unit) const
             if(entry)
                 tester_faction = entry;
         }
+
+        // apply reputation state
+        FactionEntry const* raw_target_faction = sFactionStore.LookupEntry(target_faction->faction);
+        if(raw_target_faction && raw_target_faction->reputationListID >=0 )
+        {
+            if(((Player*)tester)->IsFactionAtWar(raw_target_faction))
+                return true;
+        }
     }
-    // CvP forced reaction case
+    // CvP forced reaction and reputation case
     else if(target->GetTypeId()==TYPEID_PLAYER)
     {
         // apply forced faction only in target with identical faction in other case provided original faction
@@ -3896,6 +3904,13 @@ bool Unit::IsHostileTo(Unit const* unit) const
             FactionTemplateEntry const* entry = sFactionTemplateStore.LookupEntry(Player::getFactionForRace(target->getRace()));
             if(entry)
                 target_faction = entry;
+        }
+
+        // apply reputation state
+        FactionEntry const* raw_tester_faction = sFactionStore.LookupEntry(tester_faction->faction);
+        if(raw_tester_faction && raw_tester_faction->reputationListID >=0 )
+        {
+            return ((Player*)target)->GetReputationRank(raw_tester_faction) <= REP_HOSTILE;
         }
     }     
 
@@ -3954,7 +3969,7 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
     if(!tester_faction || !target_faction)
         return false;
 
-    // PvC forced reaction case
+    // PvC forced reaction and reputation case
     if(tester->GetTypeId()==TYPEID_PLAYER)
     {
         // apply forced faction only in target with identical faction in other case provided original faction
@@ -3964,8 +3979,16 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
             if(entry)
                 tester_faction = entry;
         }
+
+        // apply reputation state
+        FactionEntry const* raw_target_faction = sFactionStore.LookupEntry(target_faction->faction);
+        if(raw_target_faction && raw_target_faction->reputationListID >=0 )
+        {
+            if(((Player*)tester)->IsFactionAtWar(raw_target_faction))
+                return false;
+        }
     }
-    // CvP forced reaction case
+    // CvP forced reaction and reputation case
     else if(target->GetTypeId()==TYPEID_PLAYER)
     {
         // apply forced faction only in target with identical faction in other case provided original faction
@@ -3974,6 +3997,13 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
             FactionTemplateEntry const* entry = sFactionTemplateStore.LookupEntry(Player::getFactionForRace(target->getRace()));
             if(entry)
                 target_faction = entry;
+        }
+
+        // apply reputation state
+        FactionEntry const* raw_tester_faction = sFactionStore.LookupEntry(tester_faction->faction);
+        if(raw_tester_faction && raw_tester_faction->reputationListID >=0 )
+        {
+            return ((Player*)target)->GetReputationRank(raw_tester_faction) >= REP_FRIENDLY;
         }
     }     
 

@@ -1255,7 +1255,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateReputation() const;
         void SendSetFactionStanding(const Faction* faction) const;
         void SendInitialReputations();
+        bool IsFactionAtWar(const FactionEntry *factionEntry) const;
         void SetFactionAtWar(uint32 repListID, bool atWar);
+        void SetFactionAtWar(Faction* faction, bool atWar);
         void SetFactionInactive(uint32 repListID, bool inactive);
         void SetFactionVisible(uint32 repListID);
         void SetFactionVisibleForFactionTemplateId(uint32 FactionTemplateId);
