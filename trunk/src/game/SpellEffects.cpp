@@ -125,8 +125,8 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     // 66 SPELL_EFFECT_POWER_FUNNEL             unused
     &Spell::EffectHealMaxHealth,                            // 67 SPELL_EFFECT_HEAL_MAX_HEALTH
     &Spell::EffectInterruptCast,                            // 68 SPELL_EFFECT_INTERRUPT_CAST
-    &Spell::EffectNULL,                                     // 69 SPELL_EFFECT_DISTRACT
-    &Spell::EffectNULL,                                     // 70 SPELL_EFFECT_PULL                     one spell: Distract Move
+    &Spell::EffectDistract,                                 // 69 SPELL_EFFECT_DISTRACT
+    &Spell::EffectPull,                                     // 70 SPELL_EFFECT_PULL                     one spell: Distract Move
     &Spell::EffectPickPocket,                               // 71 SPELL_EFFECT_PICKPOCKET
     &Spell::EffectAddFarsight,                              // 72 SPELL_EFFECT_ADD_FARSIGHT
     &Spell::EffectSummonGuardian,                           // 73 SPELL_EFFECT_SUMMON_POSSESSED
@@ -1678,6 +1678,40 @@ void Spell::EffectDualWield(uint32 i)
         ((Player*)unitTarget)->SetCanDualWield(true);
 }
 
+void Spell::EffectPull(uint32 i)
+{
+    //Todo create a proper pull towards distract spell center for distract
+    sLog.outDebug("WORLD: Spell Effect DUMMY");
+}
+
+void Spell::EffectDistract(uint32 i)
+{
+    //Check for possible target
+    if (!unitTarget)
+        return;
+#if 0
+    ToDo
+    Dont use Relocate here !!!
+    int32 levelDiff = m_caster->getLevel() - unitTarget->getLevel();
+
+    //If there is a victim to distract
+    if ((levelDiff > -5) && unitTarget->IsHostileTo(m_caster))
+    {
+        // Gets angle of distract epicenter / target
+        float angle = unitTarget->GetAngle(m_targets.m_destX, m_targets.m_destY);
+
+        //Set proper orientation
+        unitTarget->SetOrientation(angle);
+        Creature& pUnit = *((Creature *)unitTarget);
+        // Update animation if target is creature and player removed previous check
+
+        ((Creature *)unitTarget)->StopMoving() ;
+        unitTarget->Relocate(unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), unitTarget->GetOrientation());
+        ((Creature *)unitTarget)->StopMoving() ;
+    }
+#endif
+}
+
 void Spell::EffectPickPocket(uint32 i)
 {
     if( m_caster->GetTypeId() != TYPEID_PLAYER )
@@ -2587,12 +2621,22 @@ void Spell::EffectScriptEffect(uint32 i)
     sWorld.ScriptsStart(sSpellScripts, m_spellInfo->Id, m_caster, unitTarget);
 }
 
+
 void Spell::EffectSanctuary(uint32 i)
 {
     if(!unitTarget)
         return;
+    //unitTarget->CombatStop();
+
     unitTarget->CombatStop();
+    unitTarget->getHostilRefManager().deleteReferences(); // stop all fighting
+    //Vanish allows to remove all threat and cast regular stealth so other spells can be used
+    if(m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && (m_spellInfo->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE_VANISH))
+    {
+        ((Player *)m_caster)->RemoveSpellsCausingAura(SPELL_AURA_MOD_ROOT);
+    }
 }
+
 
 void Spell::EffectAddComboPoints(uint32 i)
 {

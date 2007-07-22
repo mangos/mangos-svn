@@ -54,6 +54,13 @@ enum SpellFamilyNames
     SPELLFAMILY_POTION = 13
 };
 
+//SpellFamilyFlags
+#define SPELLFAMILYFLAG_ROGUE_VANISH   0x00000800
+#define SPELLFAMILYFLAG_ROGUE_STEALTH  0x00400000
+#define SPELLFAMILYFLAG_ROGUE_BACKSTAB 0x00800004
+#define SPELLFAMILYFLAG_ROGUE_STAB     0x00000080
+#define SPELLFAMILYFLAG_ROGUE_FEINT    0x08000000
+
 float GetRadius(SpellRadiusEntry const *radius);
 uint32 GetCastTime(SpellCastTimesEntry const*time);
 float GetMinRange(SpellRangeEntry const *range);

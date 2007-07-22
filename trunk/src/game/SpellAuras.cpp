@@ -204,7 +204,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAuraTrackStealthed,                        //151 SPELL_AURA_TRACK_STEALTHED
     &Aura::HandleNULL,                                      //152 SPELL_AURA_MOD_DETECTED_RANGE
     &Aura::HandleNULL,                                      //153 SPELL_AURA_SPLIT_DAMAGE_FLAT
-    &Aura::HandleNULL,                                      //154 SPELL_AURA_MOD_STEALTH_LEVEL
+    &Aura::HandleNoImmediateEffect,                         //154 SPELL_AURA_MOD_STEALTH_LEVEL
     &Aura::HandleNoImmediateEffect,                         //155 SPELL_AURA_MOD_WATER_BREATHING
     &Aura::HandleNoImmediateEffect,                         //156 SPELL_AURA_MOD_REPUTATION_GAIN
     &Aura::HandleNULL,                                      //157 SPELL_AURA_PET_DAMAGE_MULTI
@@ -1583,7 +1583,6 @@ void Aura::HandleAuraTrackStealthed(bool apply, bool Real)
 
     m_target->ApplyModFlag(PLAYER_FIELD_BYTES,0x02,apply);
 }
-
 void Aura::HandleAuraModScale(bool apply, bool Real)
 {
     m_target->ApplyPercentModFloatValue(OBJECT_FIELD_SCALE_X,m_modifier.m_amount,apply);
@@ -1772,14 +1771,18 @@ void Aura::HandleModCharm(bool apply, bool Real)
 void Aura::HandleModConfuse(bool apply, bool Real)
 {
     Unit* caster = GetCaster();
-
     uint32 apply_stat = UNIT_STAT_CONFUSED;
+
     if( apply )
     {
         m_target->addUnitState(UNIT_STAT_CONFUSED);
                                                             // probably wrong
         m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
 
+        // Rogue/Blind ability stops attack
+        // TODO: does all confuses ?
+        if ( caster && (GetSpellProto()->Mechanic == MECHANIC_CONFUSED) && (GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE))
+             caster->AttackStop();
         // only at real add aura
         if(Real)
         {
@@ -1924,6 +1927,10 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
         m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
 
+        // Stop attack if spell has knockout effect
+        if (caster && (GetSpellProto()->Mechanic == MECHANIC_KNOCKOUT))
+            caster->AttackStop();
+
         // only at real add aura
         if(Real)
         {
@@ -1940,20 +1947,20 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
                 m_target->SetOrientation(m_target->GetAngle(caster));
             }
 
+            // Creature specific
             if(m_target->GetTypeId() != TYPEID_PLAYER)
             {
                 ((Creature *)m_target)->StopMoving();
-
-                //Removes threat and stops combat state so from player so he can re-stealth
-                if( GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE && (GetSpellProto()->SpellIconID == 249) )
+                //Removes threat and stops combat state so player can re-stealth
+                if(GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE && GetSpellProto()->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE_STAB)
                 {
-                    //Unit will not attack player if out of range
-                   ((Creature *)m_target)->CombatStop();
-                   ((Creature *)m_target)->DeleteThreatList();
+                    m_target->CombatStop();
+                    m_target->DeleteThreatList();
                 }
             }
 
             WorldPacket data(SMSG_FORCE_MOVE_ROOT, 8);
+
             data.append(m_target->GetPackGUID());
             data << uint32(0);
             m_target->SendMessageToSet(&data,true);
@@ -1974,16 +1981,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
             data.append(m_target->GetPackGUID());
             data << uint32(0);
             m_target->SendMessageToSet(&data,true);
-
-            //If sap is used then threat is removed and mob goes back to normal waypoint
-            if( m_target->GetTypeId() != TYPEID_PLAYER && GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE && (GetSpellProto()->SpellIconID == 249))
-            {  
-                //Units no longer brain dead after they come back from sap ;p
-                if (((Creature *)m_target)->AI())
-                    ((Creature *)m_target)->AI()->EnterEvadeMode();
-            }
-                        
-            if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_HUNTER && GetSpellProto()->SpellIconID == 1721)
+           if ((GetSpellProto()->SpellFamilyName == SPELLFAMILY_HUNTER && GetSpellProto()->SpellIconID == 1721))
             {
                 if( !caster || caster->GetTypeId()!=TYPEID_PLAYER )
                     return;
@@ -2015,7 +2013,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
 
 void Aura::HandleModStealth(bool apply, bool Real)
 {
-    if(apply)
+   if(apply)
     {
         m_target->m_stealthvalue = CalculateDamage();
 
@@ -2041,30 +2039,39 @@ void Aura::HandleModStealth(bool apply, bool Real)
                 m_target->CastSpell(m_target, 21009, true, NULL, this);
             }
         }
-    }
-    else
-    {
-        m_target->m_stealthvalue = 0;
-        m_target->RemoveFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_CREEP);
+   }
+   else
+   {
+       // only at real aura remove
+       if(Real)
+       {
+           bool reallyRemove =true;
+           SpellEntry const *spellInfo = GetSpellProto();
+           if(spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && 
+               (spellInfo->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE_VANISH) &&
+               (m_target->HasStealthAura() ||
+               m_target->HasInvisibilityAura()))
+               reallyRemove = false; // vanish it timed out, but we have stealth active as well
+           if(reallyRemove) 
+           {
+               m_target->m_stealthvalue = 0;
+               m_target->RemoveFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_CREEP);
 
-        // only at real aura remove
-        if(Real)
-        {
-            // apply only if not in GM invisibility
-            if(m_target->GetVisibility()!=VISIBILITY_OFF)
-            {
-                m_target->SetVisibility(VISIBILITY_ON);
-                if(m_target->GetTypeId() == TYPEID_PLAYER)
-                    m_target->SendUpdateToPlayer((Player*)m_target);
-            }
-
-            // for RACE_NIGHTELF stealth
-            if(m_target->GetTypeId()==TYPEID_PLAYER && GetId()==20580)
-            {
-                m_target->RemoveAurasDueToSpell(21009);
-            }
-        }
-    }
+               // apply only if not in GM invisibility
+               if(m_target->GetVisibility()!=VISIBILITY_OFF)
+               {
+                   m_target->SetVisibility(VISIBILITY_ON);
+                   if(m_target->GetTypeId() == TYPEID_PLAYER)
+                       m_target->SendUpdateToPlayer((Player*)m_target);
+               }
+               // for RACE_NIGHTELF stealth
+               if(m_target->GetTypeId()==TYPEID_PLAYER && GetId()==20580)
+               {
+                   m_target->RemoveAurasDueToSpell(21009);
+               }
+           }
+       }
+   }
 }
 
 void Aura::HandleModStealthDetect(bool apply, bool Real)
