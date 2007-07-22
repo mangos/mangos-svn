@@ -1378,14 +1378,14 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
         char* FactionName;
         for(FactionsList::const_iterator itr = target->m_factions.begin(); itr != target->m_factions.end(); ++itr)
         {
-            FactionEntry const *factionEntry = sFactionStore.LookupEntry(itr->ID);
+            FactionEntry const *factionEntry = sFactionStore.LookupEntry(itr->second.ID);
             if (factionEntry)
                 FactionName = factionEntry->name[sWorld.GetDBClang()];
             else
                 FactionName = "#Not found#";
             ReputationRank Rank = target->GetReputationRank(factionEntry);
 
-            PSendSysMessage("Id:%4d %s %s %5d %1x", itr->ID, FactionName, ReputationRankStr[Rank], target->GetReputation(factionEntry), itr->Flags);
+            PSendSysMessage("Id:%4d %s %s %5d %1x", itr->second.ID, FactionName, ReputationRankStr[Rank], target->GetReputation(factionEntry), itr->second.Flags);
         }
     }
     return true;

@@ -286,7 +286,7 @@ void Spell::EffectDummy(uint32 i)
             mod->spellId = 0;
             mod->effectId = 0;
             mod->lastAffected = 0;
-            mod->mask = 2233382993920;
+            mod->mask = 0x20800000000LL;
             mod->charges = 0;
 
             ((Player*)m_caster)->AddSpellMod(mod, true);
