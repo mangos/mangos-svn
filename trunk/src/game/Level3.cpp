@@ -2922,11 +2922,6 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
             FillSystemMessageData(&data, chr->GetSession(), fmtstring(LANG_YOURS_LEVEL_DOWN,newlevel-oldlevel));
 
         chr->GetSession()->SendPacket( &data );
-
-        // give level to summoned pet
-        Pet* pet = chr->GetPet();
-        if(pet && pet->getPetType()==SUMMON_PET)
-            pet->GivePetLevel(newlevel);
     }
     else
     {

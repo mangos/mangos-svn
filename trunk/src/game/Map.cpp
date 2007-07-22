@@ -1235,6 +1235,9 @@ bool Map::UnloadGrid(const uint32 &x, const uint32 &y)
 
 void Map::UnloadAll()
 {
+    // clear all delayed moves, useless anyway do this moves before map unload.
+    i_creaturesToMove.clear();
+    
     for(unsigned int i=0; i < MAX_NUMBER_OF_GRIDS; ++i)
     {
         uint64 mask = 1;
