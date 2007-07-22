@@ -301,7 +301,7 @@ void WorldSession::HandleLootMethodOpcode( WorldPacket & recv_data )
     // everything's fine, do it
     group->SetLootMethod((LootMethod)lootMethod);
     group->SetLooterGuid(lootMaster);
-    group->SetLootThreshold((ItemQuelities)lootThreshold);
+    group->SetLootThreshold((ItemQualities)lootThreshold);
     group->SendUpdate();
 }
 
