@@ -25,6 +25,33 @@
 #include "ObjectMgr.h"
 #include "Group.h"
 #include "ObjectAccessor.h"
+#include "BattleGround.h"
+
+Group::Group()
+{
+    m_leaderGuid        = 0;
+    m_mainTank          = 0;
+    m_mainAssistant     = 0;
+    m_groupType         = (GroupType)0;
+    m_bgGroup           = NULL;
+    m_lootMethod        = (LootMethod)0;
+    m_looterGuid        = 0;
+    m_lootThreshold     = ITEM_QUALITY_UNCOMMON;
+
+    for(int i=0; i<TARGETICONCOUNT; i++)
+        m_targetIcons[i] = 0;
+}
+
+Group::~Group()
+{
+    if(m_bgGroup)
+    {
+        sLog.outDebug("Group::~Group: battleground group being deleted.");
+        if(m_bgGroup->GetBgRaid(ALLIANCE) == this) m_bgGroup->SetBgRaid(ALLIANCE, NULL);
+        else if(m_bgGroup->GetBgRaid(HORDE) == this) m_bgGroup->SetBgRaid(HORDE, NULL);
+        else sLog.outError("Group::~Group: battleground group is not linked to the correct battleground.");
+    }
+}
 
 bool Group::Create(const uint64 &guid, const char * name)
 {
@@ -72,7 +99,7 @@ bool Group::LoadGroupFromDB(const uint64 &leaderGuid)
     m_mainAssistant = (*result)[1].GetUInt64();
     m_lootMethod = (LootMethod)(*result)[2].GetUInt8();
     m_looterGuid = MAKE_GUID((*result)[3].GetUInt32(),HIGHGUID_PLAYER);
-    m_lootThreshold = (ItemQuelities)(*result)[4].GetUInt16();
+    m_lootThreshold = (ItemQualities)(*result)[4].GetUInt16();
 
     for(int i=0; i<TARGETICONCOUNT; i++)
         m_targetIcons[i] = (*result)[5+i].GetUInt8();
@@ -718,7 +745,7 @@ void Group::SendUpdate()
                                                             // guess size
         WorldPacket data(SMSG_GROUP_LIST, (6+8+8+1+2+GetMembersCount()*20));
         data << (uint8)m_groupType;                         // group type
-        data << (uint8)((m_bgGroup==true) ? 1 : 0);         // 2.0.x, isBattleGroundGroup?
+        data << (uint8)(isBGGroup() ? 1 : 0);               // 2.0.x, isBattleGroundGroup?
         data << (uint8)(citr->group);                       // groupid
         data << (uint8)(citr->assistant?0x80:0);            // 2.1.0 unk, member flags?
         data << uint64(0x50000000FFFFFFFELL);                 // 2.1.0 unk const. guid?

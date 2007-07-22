@@ -130,7 +130,7 @@ enum SpellSchools
 
 #define MAX_SPELL_SCHOOL                 7
 
-enum ItemQuelities
+enum ItemQualities
 {
     ITEM_QUALITY_POOR                  = 0,                 //GREY
     ITEM_QUALITY_NORMAL                = 1,                 //WHITE

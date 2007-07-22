@@ -198,7 +198,13 @@ class BattleGround
 
         /* Raid Group */
         Group *GetBgRaid(uint32 TeamID) { return TeamID == ALLIANCE ? m_raids[0] : m_raids[1]; }
-        void SetBgRaid(uint32 TeamID, Group *bg_raid) { TeamID == ALLIANCE ? m_raids[0] = bg_raid : m_raids[1] = bg_raid; }
+        void SetBgRaid(uint32 TeamID, Group *bg_raid)
+        {
+            Group* &old_raid = TeamID == ALLIANCE ? m_raids[0] : m_raids[1];
+            if(old_raid) old_raid->SetBattlegroundGroup(NULL);
+            if(bg_raid) bg_raid->SetBattlegroundGroup(this);
+            old_raid = bg_raid;
+        }
 
         void UpdatePlayerScore(Player *Source, uint32 type, uint32 value);
 
