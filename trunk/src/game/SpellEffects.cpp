@@ -1000,12 +1000,12 @@ void Spell::EffectApplyAura(uint32 i)
             }
         }
 
-        if(Aur->IsTrigger())
+        // arcane missiles, do not affect tame beast
+        if(Aur->IsTrigger() && m_spellInfo->Id != 1515)
         {
-            // arcane missiles
             SpellEntry const *spellInfo = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
             if (!spellInfo) return;
-            if (spellInfo->EffectImplicitTargetA[0] == TARGET_CHAIN_DAMAGE && m_caster->GetTypeId() == TYPEID_PLAYER)
+            if (m_caster->GetTypeId() == TYPEID_PLAYER && spellInfo->EffectImplicitTargetA[0] == TARGET_SINGLE_ENEMY)
             {
                 Unit *target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
                 if (target)

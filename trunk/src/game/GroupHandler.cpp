@@ -446,15 +446,13 @@ void WorldSession::HandleGroupChangeSubGroupOpcode( WorldPacket & recv_data )
 
     recv_data >> groupNr;
 
-    //uint64 guid = objmgr.GetPlayerGUIDByName(name);
-
     /** error handling **/
     if(!group->IsLeader(GetPlayer()->GetGUID()) && !group->IsAssistant(GetPlayer()->GetGUID()))
         return;
     /********************/
 
     // everything's fine, do it
-    group->ChangeMembersGroup(GetPlayer(), groupNr);
+    group->ChangeMembersGroup(objmgr.GetPlayer(name.c_str()), groupNr);
 }
 
 void WorldSession::HandleGroupAssistantOpcode( WorldPacket & recv_data )
