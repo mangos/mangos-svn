@@ -5067,9 +5067,8 @@ bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList) 
         return true;
 
     //if in non-detect mode then invisible for unit
-     if ((!detect) && (!u->IsHostileTo(this)))
+     if (!detect)
          return false;
-
 
     // Special cases
     bool IsVisible = true;
