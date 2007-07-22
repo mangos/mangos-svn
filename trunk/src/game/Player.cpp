@@ -4931,21 +4931,40 @@ void Player::SendInitialReputations()
     GetSession()->SendPacket(&data);
 }
 
+bool Player::IsFactionAtWar(const FactionEntry *factionEntry) const
+{
+    FactionsList::const_iterator itr = m_factions.find(factionEntry->reputationListID);
+    if (itr != m_factions.end())
+    {
+        if((itr->second.Flags & FACTION_FLAG_AT_WAR) != 0)
+            return true;
+    }
+    return false;
+}
+
 void Player::SetFactionAtWar(uint32 repListID, bool atWar)
 {
     FactionsList::iterator itr = m_factions.find(repListID);
     if (itr != m_factions.end())
-    {
-        if(((itr->second.Flags & FACTION_FLAG_AT_WAR) != 0) == atWar)               // already set
-            return;
+        SetFactionAtWar(&itr->second,atWar);
+}
 
-        if( atWar )
-            itr->second.Flags |= FACTION_FLAG_AT_WAR;
-        else
-            itr->second.Flags &= ~FACTION_FLAG_AT_WAR;
+void Player::SetFactionAtWar(Faction* faction, bool atWar)
+{
+    // not allow declare war to own faction
+    if(atWar && ((faction->Flags & FACTION_FLAG_OWN_TEAM) != 0))
+         return;
 
-        itr->second.Changed = true;
-    }
+     // already set
+    if(((faction->Flags & FACTION_FLAG_AT_WAR) != 0) == atWar)
+        return;
+
+    if( atWar )
+        faction->Flags |= FACTION_FLAG_AT_WAR;
+    else
+        faction->Flags &= ~FACTION_FLAG_AT_WAR;
+
+    faction->Changed = true;
 }
 
 void Player::SetFactionInactive(uint32 repListID, bool inactive)
@@ -5134,6 +5153,9 @@ bool Player::ModifyFactionReputation(FactionEntry const* factionEntry, int32 sta
         else
         if (new_rep < Reputation_Bottom)
             new_rep = Reputation_Bottom;
+
+        if(ReputationToRank(new_rep) <= REP_HOSTILE)
+            SetFactionAtWar(&itr->second,true);
 
         itr->second.Standing = new_rep - BaseRep;
         itr->second.Flags |= FACTION_FLAG_VISIBLE;
@@ -12282,6 +12304,9 @@ void Player::_LoadReputation()
             FactionEntry const *factionEntry = sFactionStore.LookupEntry(fields[0].GetUInt32());
             if( factionEntry && (factionEntry->reputationListID >= 0))
             {
+                Faction* oldFaction = &m_factions[factionEntry->reputationListID];
+                uint32 oldFlags = oldFaction ? oldFaction->Flags : 0;
+
                 Faction newFaction;
                 newFaction.ID               = factionEntry->ID;
                 newFaction.ReputationListID = factionEntry->reputationListID;
@@ -12289,7 +12314,18 @@ void Player::_LoadReputation()
                 newFaction.Flags            = fields[2].GetUInt32();
                 newFaction.Changed          = false;
 
+                // fix flags base at initial values
+                if((oldFlags & FACTION_FLAG_OWN_TEAM) != 0)
+                {
+                    newFaction.Flags |= (FACTION_FLAG_OWN_TEAM | FACTION_FLAG_VISIBLE);
+                    newFaction.Flags &= ~FACTION_FLAG_AT_WAR;
+                }
+
                 m_factions[newFaction.ReputationListID] = newFaction;
+
+                // set atWar for hostile
+                if(GetReputationRank(factionEntry) <= REP_HOSTILE)
+                    SetFactionAtWar(factionEntry->reputationListID,true);
             }
         }
         while( result->NextRow() );
