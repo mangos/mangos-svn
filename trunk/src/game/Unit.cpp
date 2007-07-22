@@ -2402,7 +2402,7 @@ void Unit::DeMorph()
     SetUInt32Value(UNIT_FIELD_DISPLAYID, GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
 }
 
-long Unit::GetTotalAuraModifier(uint32 ModifierID)
+long Unit::GetTotalAuraModifier(uint32 ModifierID) const
 {
     uint32 modifier = 0;
 
@@ -5115,10 +5115,7 @@ bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList) 
     float distanceFormula = 0;
     int32 rank = 0;
     //This allows to check talent tree and will add addition stealth dependant on used points)
-    uint32 stealthMod = 0; 
-    AuraList mStealthMod = GetAurasByType(SPELL_AURA_MOD_STEALTH_LEVEL) ; 
-    for(AuraList::iterator i = mStealthMod.begin();i != mStealthMod.end(); ++i) 
-        stealthMod += (*i)->GetModifier()->m_amount; 
+    uint32 stealthMod = GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH_LEVEL);
     //****************************************************************************************
     int32 x = (((u->m_detectStealth+1) / 5) - (((m_stealthvalue+1) / 5) + (stealthMod/5) + 59)); // Stealth detection calculation
 

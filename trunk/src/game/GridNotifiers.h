@@ -540,6 +540,10 @@ namespace MaNGOS
             if(u == i_funit)
                 return false;
 
+            // we don't need help from zombies :)
+            if( !u->isAlive() )
+                return false;
+
             // only free creature
             if( u->GetCharmerOrOwnerGUID() )
                 return false;

@@ -52,6 +52,7 @@ enum GroupType
     GROUPTYPE_RAID   = 1
 };
 
+class BattleGround;
 enum GroupUpdateFlags
 {
     GROUP_UPDATE_FLAG_NONE          = 0x00000000,
@@ -110,20 +111,8 @@ class MANGOS_DLL_SPEC Group
         typedef std::vector<Roll> Rolls;
 
     public:
-        Group()
-        {
-            m_leaderGuid = 0;
-            m_mainTank   = 0;
-            m_mainAssistant =0;
-            m_groupType  = (GroupType)0;
-            m_bgGroup    = false;
-            m_lootMethod = (LootMethod)0;
-            m_looterGuid = 0;
-            m_lootThreshold = ITEM_QUALITY_UNCOMMON;
-            for(int i=0; i<TARGETICONCOUNT; i++)
-                m_targetIcons[i] = 0;
-        }
-        ~Group() {}
+        Group();
+        ~Group();
 
         // group manipulation methods
         bool   Create(const uint64 &guid, const char * name);
@@ -136,17 +125,17 @@ class MANGOS_DLL_SPEC Group
         void   ChangeLeader(const uint64 &guid);
         void   SetLootMethod(LootMethod method) { m_lootMethod = method; }
         void   SetLooterGuid(const uint64 &guid) { m_looterGuid = guid; }
-        void   SetLootThreshold(ItemQuelities threshold) { m_lootThreshold = threshold; }
+        void   SetLootThreshold(ItemQualities threshold) { m_lootThreshold = threshold; }
         void   Disband(bool hideDestroy=false);
 
         // properties accessories
         bool IsFull() const { return (m_groupType==GROUPTYPE_NORMAL) ? (m_memberSlots.size()>=MAXGROUPSIZE) : (m_memberSlots.size()>=MAXRAIDSIZE); }
         bool isRaidGroup() { return (m_groupType==GROUPTYPE_RAID); }
-        bool isBGGroup() { return m_bgGroup; }
+        bool isBGGroup() { return m_bgGroup != NULL; }
         const uint64& GetLeaderGUID() const { return m_leaderGuid; }
         LootMethod    GetLootMethod() const { return m_lootMethod; }
         const uint64& GetLooterGuid() const { return m_looterGuid; }
-        ItemQuelities GetLootThreshold() const { return m_lootThreshold; }
+        ItemQualities GetLootThreshold() const { return m_lootThreshold; }
 
         // member manipulation methods
         bool IsMember(uint64 guid) const { return _getMemberCSlot(guid) != m_memberSlots.end(); }
@@ -201,7 +190,7 @@ class MANGOS_DLL_SPEC Group
             _convertToRaid();
             SendUpdate();
         }
-        void SetBattlegroundGroup(const bool &state) { m_bgGroup = state; }
+        void SetBattlegroundGroup(BattleGround *bg) { m_bgGroup = bg; }
 
         void ChangeMembersGroup(const uint64 &guid, const uint8 &group);
         void ChangeMembersGroup(Player *player, const uint8 &group);
@@ -303,19 +292,19 @@ class MANGOS_DLL_SPEC Group
             return m_memberSlots.end();
         }
 
-        MemberSlotList  m_memberSlots;
-        GroupRefManager m_memberMgr;
-        InvitesList  m_invitees;
-        uint64       m_leaderGuid;
-        std::string  m_leaderName;
-        uint64       m_mainTank;
-        uint64       m_mainAssistant;
-        GroupType    m_groupType;
-        bool         m_bgGroup;
-        uint64       m_targetIcons[TARGETICONCOUNT];
-        LootMethod   m_lootMethod;
-        ItemQuelities m_lootThreshold;
-        uint64       m_looterGuid;
-        Rolls        RollId;
+        MemberSlotList      m_memberSlots;
+        GroupRefManager     m_memberMgr;
+        InvitesList         m_invitees;
+        uint64              m_leaderGuid;
+        std::string         m_leaderName;
+        uint64              m_mainTank;
+        uint64              m_mainAssistant;
+        GroupType           m_groupType;
+        BattleGround*       m_bgGroup;
+        uint64              m_targetIcons[TARGETICONCOUNT];
+        LootMethod          m_lootMethod;
+        ItemQualities       m_lootThreshold;
+        uint64              m_looterGuid;
+        Rolls               RollId;
 };
 #endif

@@ -1981,7 +1981,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
             data.append(m_target->GetPackGUID());
             data << uint32(0);
             m_target->SendMessageToSet(&data,true);
-           if ((GetSpellProto()->SpellFamilyName == SPELLFAMILY_HUNTER && GetSpellProto()->SpellIconID == 1721))
+            if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_HUNTER && GetSpellProto()->SpellIconID == 1721)
             {
                 if( !caster || caster->GetTypeId()!=TYPEID_PLAYER )
                     return;

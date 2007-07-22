@@ -498,14 +498,17 @@ void BattleGround::RemovePlayer(uint64 guid, bool Transport, bool SendPacket)
         if(!plr->GetBattleGroundId())
             return;
 
+        Group * group = plr->GetGroup();
+
         // remove from raid group if exist
-        if(plr->GetGroup() && plr->GetGroup() == GetBgRaid(plr->GetTeam()))
-                                                            // group was disbanded
-            if(!plr->GetGroup()->RemoveMember(guid, 0))
+        if(group && group == GetBgRaid(plr->GetTeam()))
+        {
+            if(!group->RemoveMember(guid, 0))               // group was disbanded
             {
-                delete GetBgRaid(plr->GetTeam());
                 SetBgRaid(plr->GetTeam(), NULL);
+                delete group;
             }
+        }
 
         //plr->RemoveFromGroup();
 
@@ -694,11 +697,10 @@ void BattleGround::AddPlayer(Player *plr)
     if(!GetBgRaid(plr->GetTeam()))                          // first player joined
     {
         Group *group = new Group;
-        group->SetBattlegroundGroup(true);
+        SetBgRaid(plr->GetTeam(), group);
         group->ConvertToRaid();
         group->AddMember(guid, plr->GetName());
         group->ChangeLeader(plr->GetGUID());
-        SetBgRaid(plr->GetTeam(), group);
     }
     else                                                    // raid already exist
     {
