@@ -217,21 +217,13 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
         return;
     }
 
-    Spell *spell;
-    if(trainer_spell->spell->SpellVisual == 222)
-        spell = new Spell(_player, trainer_spell->spell, false, NULL);
-    else
-        spell = new Spell(unit, trainer_spell->spell, false, NULL);
-
-    SpellCastTargets targets;
-    targets.setUnitTarget( _player );
-
-    float u_oprientation = unit->GetOrientation();
+    Unit* caster = (trainer_spell->spell->SpellVisual == 222) ? (Unit*)_player : (Unit*)unit;
 
     // trainer always see at customer in time of training (part of client functionality)
+    float u_oprientation = unit->GetOrientation();
     unit->SetInFront(_player);
 
-    spell->prepare(&targets);
+    caster->CastSpell(_player,trainer_spell->spell,false);
 
     // trainer always return to original orientation
     unit->Relocate(unit->GetPositionX(),unit->GetPositionY(),unit->GetPositionZ(),u_oprientation);

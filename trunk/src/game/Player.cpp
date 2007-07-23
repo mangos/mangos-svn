@@ -764,7 +764,7 @@ void Player::Update( uint32 p_time )
     if (isAttacking())
     {
         Unit *pVictim = getVictim();
-        if( m_currentSpell == 0 && pVictim)
+        if( m_currentSpells[CURRENT_GENERIC_SPELL] == 0 && pVictim)
         {
 
             // default combat reach 10
@@ -3295,24 +3295,15 @@ void Player::ResurrectPlayer(float restore_percent, bool updateToWorld)
     // set resurrection sickness!
     uint32 delta = m_resurrectingSicknessExpire-time(NULL);
 
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry( SPELL_PASSIVE_RESURRECTION_SICKNESS );
-    if(spellInfo)
+    CastSpell(this,SPELL_PASSIVE_RESURRECTION_SICKNESS,true);
+
+    for(int i =0; i < 3; ++i)
     {
-        Spell spell(this, spellInfo, true, NULL);
-
-        SpellCastTargets targets;
-        targets.setUnitTarget( this );
-
-        spell.prepare(&targets);
-
-        for(int i =0; i < 3; ++i)
+        Aura* Aur = GetAura(SPELL_PASSIVE_RESURRECTION_SICKNESS,i);
+        if(Aur)
         {
-            Aura* Aur = GetAura(SPELL_PASSIVE_RESURRECTION_SICKNESS,i);
-            if(Aur)
-            {
-                Aur->SetAuraDuration(delta*1000);
-                Aur->UpdateAuraDuration();
-            }
+            Aur->SetAuraDuration(delta*1000);
+            Aur->UpdateAuraDuration();
         }
     }
 }
@@ -5990,21 +5981,9 @@ void Player::CastItemEquipSpell(Item *item)
         if(!proto->Spells[i].SpellId ) continue;
         if(proto->Spells[i].SpellTrigger != ON_EQUIP) continue;
 
-        SpellEntry const *spellInfo = sSpellStore.LookupEntry(proto->Spells[i].SpellId);
-        if(!spellInfo)
-        {
-            sLog.outError("WORLD: unknown Item spellid %i", proto->Spells[i].SpellId);
-            continue;
-        }
-
         DEBUG_LOG("WORLD: cast Item spellId - %i", proto->Spells[i].SpellId);
 
-        Spell spell(this, spellInfo, true, 0);
-
-        SpellCastTargets targets;
-        targets.setUnitTarget( this );
-        spell.m_CastItem = item;
-        spell.prepare(&targets);
+        CastSpell(this,proto->Spells[i].SpellId,true,item);
     }
 }
 
@@ -13455,7 +13434,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes)
         return false;
 
     // not let flight if casting not finished
-    if(m_currentSpell)
+    if(m_currentSpells[CURRENT_GENERIC_SPELL])
     {
         WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
         data << uint32(ERR_TAXIPLAYERBUSY);

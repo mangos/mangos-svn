@@ -22,24 +22,6 @@
 #include "Database/DatabaseEnv.h"
 #include "ItemEnchantmentMgr.h"
 
-SpellEntry const* Cast(Player*player,Item* item, uint32 spellId)
-{
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
-    if(!spellInfo)
-    {
-        sLog.outError("WORLD: unknown spell id %i", spellId);
-        return NULL;
-    }
-    Spell spell(player, spellInfo, true, 0);
-
-    SpellCastTargets targets;
-    targets.setUnitTarget( player );
-    spell.m_CastItem = item;
-    spell.prepare(&targets);
-    return spellInfo;
-
-}
-
 void AddItemsSetItem(Player*player,Item *item)
 {
     ItemPrototype const *proto = item->GetProto();
@@ -96,7 +78,15 @@ void AddItemsSetItem(Player*player,Item *item)
                     for(uint32 y=0;y<8;y++)
                         if(!eff->spells[y])
                         {
-                            eff->spells[y]=Cast(player,item,set->spells[x]);
+                            SpellEntry const *spellInfo = sSpellStore.LookupEntry(set->spells[x]);
+                            if(!spellInfo)
+                            {
+                                sLog.outError("WORLD: unknown spell id %u in items set %u effects", set->spells[x],setid);
+                                break;
+                            }
+
+                            player->CastSpell(player,set->spells[x],true,item);
+                            eff->spells[y] = spellInfo;
                             break;
                         }
             }

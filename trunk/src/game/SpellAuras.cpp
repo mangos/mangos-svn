@@ -944,7 +944,7 @@ void Aura::TriggerSpell()
     if(!caster)
         return;
 
-    Spell spell(caster, spellInfo, true, this);
+    Spell* spell = new Spell(caster, spellInfo, true, this);
     Unit* target = m_target;
 
     // TODO: currently this used as hack for Tame beast triggered spell, 
@@ -955,10 +955,13 @@ void Aura::TriggerSpell()
         target = ObjectAccessor::Instance().GetUnit(*m_target, m_target->GetUInt64Value(UNIT_FIELD_TARGET));
     }
     if(!target)
+    {
+        delete spell;
         return;
+    }
     SpellCastTargets targets;
     targets.setUnitTarget(target);
-    spell.prepare(&targets);
+    spell->prepare(&targets);
 }
 
 /*********************************************************/
@@ -1014,17 +1017,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         if(apply)
         {
             // root to self part of (root_target->charge->root_self sequence
-            {
-                SpellEntry const *spell_proto = sSpellStore.LookupEntry(13138);
-                if(!spell_proto)
-                    return;
-
-                Spell spell(caster, spell_proto, true, 0);
-                SpellCastTargets targets;
-                targets.setUnitTarget(caster);
-                // prevent double stat apply for triggered auras
-                spell.prepare(&targets);
-            }
+            caster->CastSpell(caster,13138,true);
         }
     }
 
@@ -1091,17 +1084,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             }
 
             if(finalSpelId)
-            {
-                SpellEntry const *spell_proto = sSpellStore.LookupEntry(finalSpelId);
-                if(!spell_proto)
-                    return;
-
-                Spell spell(caster, spell_proto, true, 0);
-                SpellCastTargets targets;
-                targets.setUnitTarget(m_target);
-                // prevent double stat apply for triggered auras
-                spell.prepare(&targets);
-            }
+                caster->CastSpell(m_target,finalSpelId,true);
         }
     }
 }
@@ -2635,17 +2618,7 @@ void Aura::HandlePeriodicHeal(bool apply, bool Real)
     // only at real apply
     if (Real && apply && GetSpellProto()->Mechanic == 16)
     {
-        Unit* caster = GetTarget();
-
-        SpellEntry const *spell_proto = sSpellStore.LookupEntry(11196);
-        if(!spell_proto)
-            return;
-
-        Spell spell(caster, spell_proto, true, 0);
-        SpellCastTargets targets;
-        targets.setUnitTarget(m_target);
-        // prevent double stat apply for triggered auras
-        spell.prepare(&targets);
+        m_target->CastSpell(m_target,11196,true);
     }
 }
 

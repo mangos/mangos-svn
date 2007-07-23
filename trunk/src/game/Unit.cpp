@@ -121,9 +121,9 @@ Unit::Unit( WorldObject *instantiator ) : WorldObject( instantiator )
     m_state = 0;
     m_form = 0;
     m_deathState = ALIVE;
-    m_currentSpell = NULL;
-    m_oldSpell = NULL;
-    m_currentMeleeSpell = NULL;
+
+    for (uint32 i = 0; i < CURRENT_MAX_SPELL; i++)
+        m_currentSpells[i] = NULL;
     m_addDmgOnce = 0;
     m_TotemSlot[0] = m_TotemSlot[1] = m_TotemSlot[2] = m_TotemSlot[3]  = 0;
     m_ObjectSlot[0] = m_ObjectSlot[1] = m_ObjectSlot[2] = m_ObjectSlot[3] = 0;
@@ -188,10 +188,12 @@ Unit::Unit( WorldObject *instantiator ) : WorldObject( instantiator )
 
 Unit::~Unit()
 {
-    // destroy not finished spells
-    delete m_oldSpell;
-    delete m_currentSpell;
-    delete m_currentMeleeSpell;
+    // set current spells as deletable
+    for (uint32 i = 0; i < CURRENT_MAX_SPELL; i++)
+    {
+        if (m_currentSpells[i]) m_currentSpells[i]->SetDeletable(true); // spell may be safely deleted now
+        m_currentSpells[i] = NULL;
+    }
 
     // remove references to unit
     for(std::list<GameObject*>::iterator i = m_gameObj.begin(); i != m_gameObj.end();)
@@ -224,6 +226,8 @@ void Unit::Update( uint32 p_time )
     _UpdateAura();
     }else
     m_AurasCheck -= p_time;*/
+
+    m_Events.Update( p_time );
 
     _UpdateSpells( p_time );
 
@@ -664,17 +668,17 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
             assert(he->duel);
 
             CombatStop();                                   // for case killed by pet
-            if(m_currentSpell)
-                m_currentSpell->cancel();
+            if(m_currentSpells[CURRENT_GENERIC_SPELL])
+                m_currentSpells[CURRENT_GENERIC_SPELL]->cancel();
             if(he->duel->opponent!=this)
             {
                 he->duel->opponent->CombatStop();
-                if(he->duel->opponent->m_currentSpell)
-                    he->duel->opponent->m_currentSpell->cancel();
+                if(he->duel->opponent->m_currentSpells[CURRENT_GENERIC_SPELL])
+                    he->duel->opponent->m_currentSpells[CURRENT_GENERIC_SPELL]->cancel();
             }
             he->CombatStop();
-            if(he->m_currentSpell)
-                he->m_currentSpell->cancel();
+            if(he->m_currentSpells[CURRENT_GENERIC_SPELL])
+                he->m_currentSpells[CURRENT_GENERIC_SPELL]->cancel();
 
             he->DuelComplete(0);
         }
@@ -755,21 +759,21 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
             }
         }
 
-        if(pVictim->m_currentSpell && pVictim->GetTypeId() == TYPEID_PLAYER && damage
-            && pVictim->m_currentSpell->getState() == SPELL_STATE_CASTING)
+        if(pVictim->m_currentSpells[CURRENT_GENERIC_SPELL] && pVictim->GetTypeId() == TYPEID_PLAYER && damage
+            && pVictim->m_currentSpells[CURRENT_GENERIC_SPELL]->getState() == SPELL_STATE_CASTING)
         {
             if (damagetype != NODAMAGE)
             {
-                uint32 channelInterruptFlags = pVictim->m_currentSpell->m_spellInfo->ChannelInterruptFlags;
+                uint32 channelInterruptFlags = pVictim->m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->ChannelInterruptFlags;
                 if( channelInterruptFlags & CHANNEL_FLAG_DELAY )
                 {
-                    sLog.outDetail("Spell %u delayed (%d) at damage!",pVictim->m_currentSpell->m_spellInfo->Id,(int32)(0.25f * GetDuration(pVictim->m_currentSpell->m_spellInfo)));
-                    pVictim->m_currentSpell->DelayedChannel((int32)(0.25f * GetDuration(pVictim->m_currentSpell->m_spellInfo)));
+                    sLog.outDetail("Spell %u delayed (%d) at damage!",pVictim->m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->Id,(int32)(0.25f * GetDuration(pVictim->m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo)));
+                    pVictim->m_currentSpells[CURRENT_GENERIC_SPELL]->DelayedChannel((int32)(0.25f * GetDuration(pVictim->m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo)));
                 }
                 else if( (channelInterruptFlags & (CHANNEL_FLAG_DAMAGE | CHANNEL_FLAG_DAMAGE2)) )
                 {
-                    sLog.outDetail("Spell %u canceled at damage!",pVictim->m_currentSpell->m_spellInfo->Id);
-                    pVictim->m_currentSpell->cancel();
+                    sLog.outDetail("Spell %u canceled at damage!",pVictim->m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->Id);
+                    pVictim->m_currentSpells[CURRENT_GENERIC_SPELL]->cancel();
                 }
             }
         }
@@ -826,8 +830,6 @@ void Unit::CastSpell(Unit* Victim,SpellEntry const *spellInfo, bool triggered, I
     targets.setUnitTarget( Victim );
     spell->m_CastItem = castItem;
     spell->prepare(&targets);
-    m_canMove = false;
-    if (triggered) delete spell;                            // triggered spell not self deleted
 }
 
 void Unit::CastCustomSpell(Unit* Victim,uint32 spellId, int32 const* bp0, int32 const* bp1, int32 const* bp2, bool triggered, Item *castItem, Aura* triggredByAura, uint64 originalCaster)
@@ -869,8 +871,6 @@ void Unit::CastCustomSpell(Unit* Victim,SpellEntry const *spellInfo, int32 const
     targets.setUnitTarget( Victim );
     spell->m_CastItem = castItem;
     spell->prepare(&targets);
-    m_canMove = false;
-    if (triggered) delete spell;                            // triggered spell not self deleted
 }
 
 void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32 *damage, CleanDamage *cleanDamage, bool *crit, bool isTriggeredSpell)
@@ -1200,11 +1200,11 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
                 if(GetHealth() <= dmg && GetTypeId()==TYPEID_PLAYER)
                 {
                     RemoveAurasDueToSpell(spellProto->Id);
-                    if(m_currentSpell)
+                    if(m_currentSpells[CURRENT_GENERIC_SPELL])
                     {
-                        if(m_currentSpell->IsChanneledSpell())
-                            m_currentSpell->SendChannelUpdate(0);
-                        m_currentSpell->finish();
+                        if(m_currentSpells[CURRENT_GENERIC_SPELL]->IsChanneledSpell())
+                            m_currentSpells[CURRENT_GENERIC_SPELL]->SendChannelUpdate(0);
+                        m_currentSpells[CURRENT_GENERIC_SPELL]->finish();
                     }
                 }
                 else
@@ -1231,10 +1231,10 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             SendSpellNonMeleeDamageLog(pVictim, spellProto->Id, pdamage, spellProto->School, absorb, resist, false, 0);
             DealDamage(pVictim, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), &cleanDamage, DOT, spellProto->School, spellProto, procFlag, false);
             ProcDamageAndSpell(pVictim, PROC_FLAG_HIT_SPELL, PROC_FLAG_TAKE_DAMAGE, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), spellProto);
-            if (!pVictim->isAlive() && m_currentSpell)
-                if (m_currentSpell->m_spellInfo)
-                    if (m_currentSpell->m_spellInfo->Id == spellProto->Id)
-                        m_currentSpell->cancel();
+            if (!pVictim->isAlive() && m_currentSpells[CURRENT_GENERIC_SPELL])
+                if (m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo)
+                    if (m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->Id == spellProto->Id)
+                        m_currentSpells[CURRENT_GENERIC_SPELL]->cancel();
 
             int32 gain = ModifyHealth(int32(pdamage * multiplier));
             getHostilRefManager().threatAssist(this, float(gain) * 0.5f, spellProto->School, spellProto);
@@ -1680,27 +1680,27 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
         }
     }
 
-    if(pVictim->m_currentSpell && pVictim->GetTypeId() == TYPEID_PLAYER && *damage)
+    if(pVictim->m_currentSpells[CURRENT_GENERIC_SPELL] && pVictim->GetTypeId() == TYPEID_PLAYER && *damage)
     {
-        if (pVictim->m_currentSpell->getState() != SPELL_STATE_CASTING)
+        if (pVictim->m_currentSpells[CURRENT_GENERIC_SPELL]->getState() != SPELL_STATE_CASTING)
         {
-            sLog.outDetail("Spell Delayed!%d",(int32)(0.25f * pVictim->m_currentSpell->casttime));
-            pVictim->m_currentSpell->Delayed((int32)(0.25f * pVictim->m_currentSpell->casttime));
+            sLog.outDetail("Spell Delayed!%d",(int32)(0.25f * pVictim->m_currentSpells[CURRENT_GENERIC_SPELL]->casttime));
+            pVictim->m_currentSpells[CURRENT_GENERIC_SPELL]->Delayed((int32)(0.25f * pVictim->m_currentSpells[CURRENT_GENERIC_SPELL]->casttime));
         }
         else
         {
-            uint32 channelInterruptFlags = pVictim->m_currentSpell->m_spellInfo->ChannelInterruptFlags;
+            uint32 channelInterruptFlags = pVictim->m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->ChannelInterruptFlags;
             if( channelInterruptFlags & CHANNEL_FLAG_DELAY )
             {
-                sLog.outDetail("Spell Delayed!%d",(int32)(0.25f * GetDuration(pVictim->m_currentSpell->m_spellInfo)));
-                pVictim->m_currentSpell->DelayedChannel((int32)(0.25f * GetDuration(pVictim->m_currentSpell->m_spellInfo)));
+                sLog.outDetail("Spell Delayed!%d",(int32)(0.25f * GetDuration(pVictim->m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo)));
+                pVictim->m_currentSpells[CURRENT_GENERIC_SPELL]->DelayedChannel((int32)(0.25f * GetDuration(pVictim->m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo)));
                 return;
             }
             else if( !(channelInterruptFlags & (CHANNEL_FLAG_DAMAGE | CHANNEL_FLAG_DAMAGE2)) )
                 return;
 
             sLog.outDetail("Spell Canceled!");
-            pVictim->m_currentSpell->cancel();
+            pVictim->m_currentSpells[CURRENT_GENERIC_SPELL]->cancel();
         }
     }
 }
@@ -1715,13 +1715,13 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool is
 
     if(!isTriggered)
     {
-        if(m_currentSpell)
+        if(m_currentSpells[CURRENT_GENERIC_SPELL])
             return;
 
         // melee attack spell casted at main hand attack only
-        if (m_currentMeleeSpell && attType == BASE_ATTACK)
+        if (m_currentSpells[CURRENT_MELEE_SPELL] && attType == BASE_ATTACK)
         {
-            m_currentMeleeSpell->cast();
+            m_currentSpells[CURRENT_MELEE_SPELL]->cast();
             return;
         }
     }
@@ -2050,11 +2050,16 @@ int32 Unit::MeleeMissChanceCalc(const Unit *pVictim) const
     // DualWield - Melee spells and physical dmg spells - 5% , white damage 24%
     if (haveOffhandWeapon())
     {
-        if ((m_currentMeleeSpell) ||
-           (m_currentSpell && m_currentSpell->m_spellInfo->School == SPELL_SCHOOL_NORMAL))
+        if ((m_currentSpells[CURRENT_MELEE_SPELL]) ||
+           (m_currentSpells[CURRENT_GENERIC_SPELL] && 
+            m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->School == SPELL_SCHOOL_NORMAL))
+        {
             misschance = 500;
+        }
         else
+        {
             misschance = 2400;
+        }
     }
 
     // PvP : PvE melee misschances per leveldif > 2
@@ -2197,34 +2202,27 @@ uint16 Unit::GetPureWeaponSkillValue (WeaponAttackType attType) const
 
 void Unit::_UpdateSpells( uint32 time )
 {
-    if(m_oldSpell != NULL)
+    if(m_currentSpells[CURRENT_GENERIC_SPELL] != NULL)
     {
-        delete m_oldSpell;
-        m_oldSpell = NULL;
-    }
-
-    if(m_currentSpell != NULL)
-    {
-        m_currentSpell->update(time);
-        if(m_currentSpell->IsAutoRepeat())
+        if (m_currentSpells[CURRENT_GENERIC_SPELL]->IsAutoRepeat())
         {
-            if(m_currentSpell->getState() == SPELL_STATE_FINISHED)
+            if(m_currentSpells[CURRENT_GENERIC_SPELL]->getState() == SPELL_STATE_FINISHED)
             {
                 //Auto Shot & Shoot
-                if( m_currentSpell->m_spellInfo->AttributesEx2 == 0x000020 && GetTypeId() == TYPEID_PLAYER )
+                if( m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->AttributesEx2 == 0x000020 && GetTypeId() == TYPEID_PLAYER )
                     resetAttackTimer( RANGED_ATTACK );
                 else
-                    setAttackTimer( RANGED_ATTACK, m_currentSpell->m_spellInfo->RecoveryTime);
+                    setAttackTimer( RANGED_ATTACK, m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->RecoveryTime);
 
-                m_currentSpell->setState(SPELL_STATE_IDLE);
+                m_currentSpells[CURRENT_GENERIC_SPELL]->setState(SPELL_STATE_IDLE);
             }
-            else if(m_currentSpell->getState() == SPELL_STATE_IDLE && isAttackReady(RANGED_ATTACK) )
+            else if(m_currentSpells[CURRENT_GENERIC_SPELL]->getState() == SPELL_STATE_IDLE && isAttackReady(RANGED_ATTACK) )
             {
                 // check movement in player case
                 if(GetTypeId() == TYPEID_PLAYER && ((Player*)this)->GetMovementFlags())
                 {
                     // cancel wand shooting
-                    if(m_currentSpell->m_spellInfo->Category == 351)
+                    if(m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->Category == 351)
                     {
                         WorldPacket data(SMSG_CANCEL_AUTO_REPEAT, 0);
                         ((Player*)this)->GetSession()->SendPacket(&data);
@@ -2234,10 +2232,10 @@ void Unit::_UpdateSpells( uint32 time )
                 }
                 else
                     // recheck range and req. items (ammo and gun, etc)
-                if(m_currentSpell->CheckRange() == 0 && m_currentSpell->CheckItems() == 0 )
+                if(m_currentSpells[CURRENT_GENERIC_SPELL]->CheckRange() == 0 && m_currentSpells[CURRENT_GENERIC_SPELL]->CheckItems() == 0 )
                 {
-                    m_currentSpell->setState(SPELL_STATE_PREPARING);
-                    m_currentSpell->ReSetTimer();
+                    m_currentSpells[CURRENT_GENERIC_SPELL]->setState(SPELL_STATE_PREPARING);
+                    m_currentSpells[CURRENT_GENERIC_SPELL]->ReSetTimer();
                 }
                 else
                 {
@@ -2250,20 +2248,18 @@ void Unit::_UpdateSpells( uint32 time )
                 }
             }
         }
-        else if(m_currentSpell->getState() == SPELL_STATE_FINISHED)
+        else if(m_currentSpells[CURRENT_GENERIC_SPELL]->getState() == SPELL_STATE_FINISHED)
         {
-            delete m_currentSpell;
-            m_currentSpell = NULL;
+            SetCurrentCastedSpell(NULL);
         }
     }
 
-    if(m_currentMeleeSpell != NULL)
+    if(m_currentSpells[CURRENT_MELEE_SPELL] != NULL)
     {
-        m_currentMeleeSpell ->update(time);
-        if(m_currentMeleeSpell ->getState() == SPELL_STATE_FINISHED)
+        if (m_currentSpells[CURRENT_MELEE_SPELL]->getState() == SPELL_STATE_FINISHED)
         {
-            delete m_currentMeleeSpell ;
-            m_currentMeleeSpell  = NULL;
+            m_currentSpells[CURRENT_MELEE_SPELL]->SetDeletable(true); // spell may be safely deleted now
+            m_currentSpells[CURRENT_MELEE_SPELL]  = NULL;
         }
     }
 
@@ -2335,37 +2331,54 @@ void Unit::_UpdateSpells( uint32 time )
 
 void Unit::SetCurrentCastedSpell( Spell * pSpell )
 {
+    uint32 CSpellType; // for unification of melee and normal spells
 
-    if(pSpell && pSpell->IsMeleeSpell())
+    if (pSpell) pSpell->SetDeletable(false); // spell will not be deleted until gone from current pointers
+
+    if(pSpell && pSpell->IsMeleeSpell()) 
     {
-        if(m_currentMeleeSpell)
-        {
-            m_currentMeleeSpell->cancel();
-            delete m_currentMeleeSpell;
-            m_currentMeleeSpell = NULL;
-        }
-        m_currentMeleeSpell = pSpell;
+        CSpellType = CURRENT_MELEE_SPELL;
     }
     else
     {
-        if(m_currentSpell)
-        {
-            m_currentSpell->cancel();
-            // let call spell from spell (single level recursion) and not crash at returning to procesiing old spell
-            if(m_oldSpell)
-                delete m_oldSpell;
-            m_oldSpell = m_currentSpell;
-        }
-        m_currentSpell = pSpell;
+        CSpellType = CURRENT_GENERIC_SPELL;
     }
+
+    if (pSpell == m_currentSpells[CSpellType]) return; // avoid breaking self
+
+    if (m_currentSpells[CSpellType])
+    {
+        if (!pSpell)
+        {
+            // NULL passed, cancel current spell
+            m_currentSpells[CSpellType]->cancel();
+            m_currentSpells[CSpellType]->SetDeletable(true); // current spell may be safely deleted now
+        }
+        else
+        {
+            // replace spell by spell
+            // if the spell is not finished and not delayed, or is channeled, cancel it
+            // otherwise it will be silently replaced (delayed+not_channeled and finished spells are safe to)
+            if ( m_currentSpells[CSpellType]->getState() != SPELL_STATE_FINISHED &&
+                 ( (m_currentSpells[CSpellType]->getState() != SPELL_STATE_DELAYED) || 
+                   m_currentSpells[CSpellType]->IsChanneledSpell() ) )
+            {
+                m_currentSpells[CSpellType]->cancel();
+            }
+            m_currentSpells[CSpellType]->SetDeletable(true); // current spell may be safely deleted now
+        }
+    }
+
+    // set new current spell
+    m_currentSpells[CSpellType] = pSpell;
 }
 
-void Unit::InterruptSpell()
+void Unit::InterruptSpell(CurrentSpellTypes spellType)
 {
-    if(m_currentSpell)
+    if(m_currentSpells[spellType])
     {
-        //m_currentSpell->SendInterrupted(0x20);
-        m_currentSpell->cancel();
+        //m_currentSpells[spellType]->SendInterrupted(0x20);
+        m_currentSpells[spellType]->cancel();
     }
 }
 
@@ -3552,14 +3565,14 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
         case 30680:
         case 30681:
         {
-            if(!pVictim || !m_currentSpell)
+            if(!pVictim || !m_currentSpells[CURRENT_GENERIC_SPELL])
                 return;
 
             // remove cooldown from first cast
             if(GetTypeId()==TYPEID_PLAYER)
                 ((Player*)this)->RemoveSpellCooldown(procSpell->Id);
             // prepare cast as triggered spell (this need for correct targets selection after not finished currently cast)
-            m_currentSpell->AddTriggeredSpell(procSpell);
+            m_currentSpells[CURRENT_GENERIC_SPELL]->AddTriggeredSpell(procSpell);
         }
 
         // Spiritual Att.
@@ -3773,7 +3786,7 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
     case 11255:
     case 12598:
         // if Countercasting spell casted and target also cating in this moment.
-        if(procSpell->SpellVisual==239 && pVictim && pVictim->m_currentSpell)
+        if(procSpell->SpellVisual==239 && pVictim && pVictim->m_currentSpells[CURRENT_GENERIC_SPELL])
             break;                                          // fall through to std. handler
         return;
     }
@@ -4107,8 +4120,8 @@ bool Unit::AttackStop()
 
     clearUnitState(UNIT_STAT_ATTACKING);
 
-    if(m_currentMeleeSpell)
-        m_currentMeleeSpell->cancel();
+    if(m_currentSpells[CURRENT_MELEE_SPELL])
+        m_currentSpells[CURRENT_MELEE_SPELL]->cancel();
 
     if( GetTypeId()==TYPEID_UNIT )
     {
@@ -5329,21 +5342,9 @@ void Unit::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply
 void Unit::SetHover(bool on)
 {
     if(on)
-    {
-        SpellEntry const *sInfo = sSpellStore.LookupEntry(11010);
-        if(!sInfo)
-            return;
-
-        Spell spell(this, sInfo, true,0);
-        SpellCastTargets targets;
-        targets.setUnitTarget(this);
-        targets.m_targetMask = TARGET_FLAG_SELF;
-        spell.prepare(&targets);
-    }
+        CastSpell(this,11010,true);
     else
-    {
         RemoveAurasDueToSpell(11010);
-    }
 }
 
 void Unit::setDeathState(DeathState s)
@@ -5352,8 +5353,8 @@ void Unit::setDeathState(DeathState s)
     {
         CombatStop(true);
 
-        if(m_currentSpell)
-            m_currentSpell->cancel();
+        if(m_currentSpells[CURRENT_GENERIC_SPELL])
+            m_currentSpells[CURRENT_GENERIC_SPELL]->cancel();
     }
 
     if (s == JUST_DIED)
