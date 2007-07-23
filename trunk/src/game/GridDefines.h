@@ -19,6 +19,8 @@
 #ifndef MANGOS_GRIDDEFINES_H
 #define MANGOS_GRIDDEFINES_H
 
+#include "Common.h"
+
 #include "GameSystem/NGrid.h"
 
 #include "zthread/CountedPtr.h"
@@ -54,7 +56,7 @@ class Player;
 #define MAP_SIZE                (SIZE_OF_GRIDS*MAX_NUMBER_OF_GRIDS)
 #define MAP_HALFSIZE            (MAP_SIZE/2)
 
-// Creature used instead pet to simplify *::Visit templates (not requared duplicate code for Creature->Pet case)
+// Creature used instead pet to simplify *::Visit templates (not required duplicate code for Creature->Pet case)
 typedef TYPELIST_3(Player, Creature/*pets*/, Corpse/*resurrectable*/)                   AllWorldObjectTypes;
 typedef TYPELIST_4(GameObject, Creature/*except pets*/, DynamicObject, Corpse/*Bones*/) AllGridObjectTypes;
 
@@ -153,7 +155,7 @@ namespace MaNGOS
 
     inline bool IsValidMapCoord(float c)
     {
-        return (std::abs(c) < MAP_HALFSIZE - 0.5);
+        return !isnan(c) && (std::fabs(c) < MAP_HALFSIZE - 0.5);
     }
 
     inline bool IsValidMapCoord(float x, float y)

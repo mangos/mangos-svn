@@ -100,6 +100,8 @@
 
 #if COMPILER == COMPILER_MICROSOFT
 
+#include <float.h>
+
 #define I64FMT "%016I64X"
 #define I64FMTD "%I64u"
 #define SI64FMTD "%I64d"
@@ -107,6 +109,7 @@
 #define atoll __atoi64
 #define vsnprintf _vsnprintf
 #define strdup _strdup
+#define isnan(X) _isnan(X)
 
 #else
 
@@ -115,6 +118,7 @@
 #define I64FMT "%016llX"
 #define I64FMTD "%llu"
 #define SI64FMTD "%lld"
+
 #endif
 
 #define GUID_HIPART(x)   (uint32)((x) >> 32)

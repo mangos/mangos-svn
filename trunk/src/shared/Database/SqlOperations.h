@@ -19,6 +19,8 @@
 #ifndef __SQLOPERATIONS_H
 #define __SQLOPERATIONS_H
 
+#include "Common.h"
+
 #include "zthread/LockedQueue.h"
 #include "zthread/FastMutex.h"
 #include <queue>
