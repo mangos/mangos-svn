@@ -93,10 +93,12 @@ void MapInstanced::UnloadAll()
 {
     // Unload instanced maps
     for (HM_NAMESPACE::hash_map< uint32, Map* >::iterator i = InstancedMaps.begin(); i != InstancedMaps.end(); i++)
-    {
         i->second->UnloadAll();
+
+    // Delete the maps only after everything is unloaded to prevent crashes
+    for (HM_NAMESPACE::hash_map< uint32, Map* >::iterator i = InstancedMaps.begin(); i != InstancedMaps.end(); i++)
         delete i->second;
-    }
+
     InstancedMaps.clear();
 
     // Unload own grids (just dummy(placeholder) grids, neccesary to unload GridMaps!)
