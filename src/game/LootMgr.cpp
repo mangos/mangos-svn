@@ -62,7 +62,7 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
     uint32 item, displayid, entry;
     uint32 mincount = 0;
     uint32 maxcount = 0;
-    float chance;
+    float chanceOrRef;
     int32 questchance;
     uint32 count = 0;
     bool is_ffa = true;
@@ -71,6 +71,7 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
 
     sLog.outString( "%s :", tablename);
 
+    //                                             0        1       2              3                     4           5           6
     QueryResult *result = sDatabase.PQuery("SELECT `entry`, `item`, `ChanceOrRef`, `QuestChanceOrGroup`, `mincount`, `maxcount`, `quest_freeforall` FROM `%s`",tablename);
 
     if (result)
@@ -86,7 +87,7 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
 
             entry = fields[0].GetUInt32();
             item = fields[1].GetUInt32();;
-            chance = fields[2].GetFloat();
+            chanceOrRef = fields[2].GetFloat();
             questchance = int32(fields[3].GetUInt32());
             mincount = fields[4].GetUInt32();
             maxcount = fields[5].GetUInt32();
@@ -103,13 +104,13 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
             displayid = proto->DisplayInfoID;
 
             // non-quest (maybe group) loot with low chance
-            if( chance >= 0 && chance < 0.000001 && questchance <= 0 )
+            if( chanceOrRef >= 0 && chanceOrRef < 0.000001 && questchance <= 0 )
             {
                 ssNonLootableItems << "loot entry = " << entry << " item = " << item << " mincount = " << mincount << " maxcount = " << maxcount << " (no chance)\n";
                 continue;
             }
 
-            lootstore[entry].push_back( LootStoreItem(item, displayid, chance, questchance,is_ffa,mincount,maxcount) );
+            lootstore[entry].push_back( LootStoreItem(item, displayid, chanceOrRef, questchance,is_ffa,mincount,maxcount) );
 
             count++;
         } while (result->NextRow());
@@ -163,7 +164,7 @@ struct HasChance
         // Non-grouped loot
         if (itm.questChanceOrGroup == 0)
         {
-            if ( itm.chance > 0 && roll_chance_f(itm.chance * sWorld.getRate(RATE_DROP_ITEMS)) )
+            if ( itm.chanceOrRef > 0 && roll_chance_f(itm.chanceOrRef * sWorld.getRate(RATE_DROP_ITEMS)) )
                 return &itm;
             return NULL;
         }
@@ -176,7 +177,7 @@ struct HasChance
             sLog.outErrorDb("HasChance: wrong loot group in DB (%i) for item %u", itm.questChanceOrGroup,itm.itemid);
             return NULL;
         }
-        if (itm.chance >= 0)
+        if (itm.chanceOrRef >= 0)
         {
             // Group of current loot - check for item chance in the group
             if (CumulativeChance[GroupId] == 0.0)
@@ -185,23 +186,23 @@ struct HasChance
                 // An item from the group already accepted
                 return NULL;
 
-            CumulativeChance[GroupId] += itm.chance;
+            CumulativeChance[GroupId] += itm.chanceOrRef;
             if (CumulativeChance[GroupId] >= RolledChance[GroupId])
                 return &itm;
             return NULL;
         }
 
         // Reference to a group of another loot
-        int LootId = -int(itm.chance);
+        int LootId = -int(itm.chanceOrRef);
         float Chance = rand_chance();
         float CumulChance = 0.0;
 
         LootStore::iterator tab = m_store->find(LootId);
         for(LootStoreItemList::iterator item_iter = tab->second.begin(); item_iter != tab->second.end(); ++item_iter)
         {
-            if ( item_iter->GetGroupId() == GroupId &&  item_iter->chance > 0 )
+            if ( item_iter->GetGroupId() == GroupId &&  item_iter->chanceOrRef > 0 )
             {
-                CumulChance += item_iter->chance;
+                CumulChance += item_iter->chanceOrRef;
                 if ( CumulChance >= Chance )
                     return &*item_iter;
             }
