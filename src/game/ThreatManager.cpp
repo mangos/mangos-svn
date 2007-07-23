@@ -240,7 +240,8 @@ HostilReference* ThreatContainer::modifyThreatPercent(Unit *pVictim, int32 pPerc
 
 bool HostilReferenceSortPredicate(const HostilReference* lhs, const HostilReference* rhs)
 {
-    return lhs->getThreat() >= rhs->getThreat(); // reverese sorting
+    // std::list::sort ordering predicate must be: (Pred(x,y)&&Pred(y,x))==false 
+    return lhs->getThreat() > rhs->getThreat(); // reverse sorting
 }
 
 //============================================================
