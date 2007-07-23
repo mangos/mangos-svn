@@ -3122,8 +3122,9 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
         sLog.outDebug("ProcDamageAndSpell: invoked due to spell id %u %s", procSpell->Id, (isTriggeredSpell?"(triggered)":""));
 
     // Assign melee/ranged proc flags for magic attacks, that are actually melee/ranged abilities
+    // not assign for spell proc triggered spell to prevent infinity (or unexpacted 2-3 times) melee damage spell proc call with melee damage effect
     // That is the question though if it's fully correct
-    if(procSpell)
+    if(procSpell && !isTriggeredSpell)
     {
         if(procSpell->DmgClass == SPELL_DAMAGE_CLASS_MELEE)
         {
@@ -3269,7 +3270,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                     if (pVictim && pVictim->isAlive())
                     {
                         sLog.outDebug("ProcDamageAndSpell: casting spell id %u (triggered by an attacker dummy aura of spell %u)", i->spellInfo->Id,i->triggeredByAura->GetId());
-                        HandleDummyAuraProc(pVictim, i->spellInfo, i->spellParam, damage, i->triggeredByAura, procAttacker);
+                        HandleDummyAuraProc(pVictim, i->spellInfo, i->spellParam, damage, i->triggeredByAura, procSpell, procAttacker);
                     }
                 }
             }
@@ -3376,7 +3377,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                 {
                     // TODO: write a DUMMY aura handle code
                     sLog.outDebug("ProcDamageAndSpell: casting spell %u (triggered by a victim's dummy aura of spell %u))",i->spellInfo->Id, i->triggeredByAura);
-                    pVictim->HandleDummyAuraProc(this, i->spellInfo, i->spellParam, damage, i->triggeredByAura, procVictim);
+                    pVictim->HandleDummyAuraProc(this, i->spellInfo, i->spellParam, damage, i->triggeredByAura, procSpell, procVictim);
                 }
             }
 
@@ -3472,11 +3473,11 @@ void Unit::CastMeleeProcDamageAndSpell(Unit* pVictim, uint32 damage, WeaponAttac
         ProcDamageAndSpell(pVictim, procAttacker, procVictim, damage, spellCasted, isTriggeredSpell, attType);
 }
 
-void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint32 effIndex, uint32 damage, Aura* triggredByAura, uint32 procFlag)
+void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint32 effIndex, uint32 damage, Aura* triggredByAura, SpellEntry const * procSpell, uint32 procFlag)
 {
     switch(dummySpell->Id )
     {
-        // Example. Ignite. Though it looks like hack, it isn't )
+        // Ignite
         case 11119:
         case 11120:
         case 12846:
@@ -3542,6 +3543,23 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             CastCustomSpell(pVictim, 25997, &YYDamageBasePoints0, NULL, NULL, true, NULL, triggredByAura);
 
             return;
+        }
+
+        // L.Overload
+        case 30675:
+        case 30678:
+        case 30679:
+        case 30680:
+        case 30681:
+        {
+            if(!pVictim || !m_currentSpell)
+                return;
+
+            // remove cooldown from first cast
+            if(GetTypeId()==TYPEID_PLAYER)
+                ((Player*)this)->RemoveSpellCooldown(procSpell->Id);
+            // prepare cast as triggered spell (this need for correct targets selection after not finished currently cast)
+            m_currentSpell->AddTriggeredSpell(procSpell);
         }
 
         // Spiritual Att.

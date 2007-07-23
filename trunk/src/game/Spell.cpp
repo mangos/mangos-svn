@@ -1825,7 +1825,7 @@ void Spell::TakeCastItem()
 
 void Spell::TakePower(uint32 mana)
 {
-    if(m_CastItem)
+    if(m_CastItem || m_triggeredByAura)
         return;
 
     // health as power used

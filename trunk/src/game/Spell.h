@@ -595,6 +595,8 @@ class Spell
         bool IsAffectedBy(SpellEntry const *spellInfo, uint32 effectId);
 
         uint32 GetTargetCreatureTypeMask() const;
+
+        void AddTriggeredSpell(SpellEntry const* spell) { m_TriggerSpells.push_back(spell); }
     protected:
 
         void SendLoot(uint64 guid, LootType loottype);
