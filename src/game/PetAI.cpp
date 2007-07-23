@@ -187,10 +187,10 @@ void PetAI::UpdateAI(const uint32 diff)
         else if( i_pet.IsStopped() || i_pet.IsWithinDistInMap(i_pet.getVictim(), ATTACK_DISTANCE))
         {
             // required to be stopped cases
-            if ( i_pet.IsStopped() && i_pet.m_currentSpell )
+            if ( i_pet.IsStopped() && i_pet.m_currentSpells[CURRENT_GENERIC_SPELL] )
             {
                 if( i_pet.hasUnitState(UNIT_STAT_FOLLOW) )
-                    i_pet.m_currentSpell->cancel();
+                    i_pet.m_currentSpells[CURRENT_GENERIC_SPELL]->cancel();
                 else
                     return;
             }
@@ -244,7 +244,6 @@ void PetAI::UpdateAI(const uint32 diff)
                 continue;
 
             Spell *spell = new Spell(&i_pet, spellInfo, false, 0);
-            WPAssert(spell);
 
             if(!IsPositiveSpell(spellInfo->Id) && i_pet.getVictim() && !_needToStop() && !i_pet.hasUnitState(UNIT_STAT_FOLLOW) && spell->CanAutoCast(i_pet.getVictim()))
                 targetMap[*itr] = i_pet.getVictim();
@@ -262,6 +261,8 @@ void PetAI::UpdateAI(const uint32 diff)
                         targetMap[*itr] = Target;
                 }
             }
+
+            delete spell;
         }
     }
     //charmed creature; all (active) spells autocast, because not controllable; for now no allyset, simply itself (selfcast spells allowed) and target
@@ -301,6 +302,8 @@ void PetAI::UpdateAI(const uint32 diff)
                 if(spell->CanAutoCast(&i_pet))
                     targetMap[spell_id] = &i_pet;
             }*/
+
+            delete spell;
         }
     }
 

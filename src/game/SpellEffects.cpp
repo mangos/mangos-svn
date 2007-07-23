@@ -711,9 +711,9 @@ void Spell::EffectDummy(uint32 i)
 
             // this is triggered spell
             // find original spell original target
-            if(!m_caster->m_currentSpell)
+            if(!m_caster->m_currentSpells[CURRENT_GENERIC_SPELL])
                 return;
-            Unit* originalTarget = m_caster->m_currentSpell->m_targets.getUnitTarget();
+            Unit* originalTarget = m_caster->m_currentSpells[CURRENT_GENERIC_SPELL]->m_targets.getUnitTarget();
             if(!originalTarget)
                 return;
 
@@ -2465,10 +2465,10 @@ void Spell::EffectInterruptCast(uint32 i)
 
     // TODO: not all spells that used this effect apply cooldown at school spells
     // also exist case: apply cooldown to interrupted cast only and to all spells
-    if (unitTarget->m_currentSpell && unitTarget->m_currentSpell->m_spellInfo)
+    if (unitTarget->m_currentSpells[CURRENT_GENERIC_SPELL] && unitTarget->m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo)
     {
-        unitTarget->ProhibitSpellScholl(unitTarget->m_currentSpell->m_spellInfo->School, GetDuration(m_spellInfo));
-        unitTarget->InterruptSpell();
+        unitTarget->ProhibitSpellScholl(unitTarget->m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->School, GetDuration(m_spellInfo));
+        unitTarget->InterruptSpell(CURRENT_GENERIC_SPELL);
     }
 }
 
@@ -2575,14 +2575,7 @@ void Spell::EffectScriptEffect(uint32 i)
                 break;
             }
 
-            SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId2);
-            if(!spellInfo)
-                return;
-            Spell spell(m_caster,spellInfo,true,0);
-
-            SpellCastTargets targets;
-            targets.setUnitTarget(unitTarget);
-            spell.prepare(&targets);
+            m_caster->CastSpell(unitTarget,spellId2,true);
         }
     }
     else

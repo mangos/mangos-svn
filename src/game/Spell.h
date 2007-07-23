@@ -237,7 +237,8 @@ enum SpellState
     SPELL_STATE_PREPARING = 1,
     SPELL_STATE_CASTING   = 2,
     SPELL_STATE_FINISHED  = 3,
-    SPELL_STATE_IDLE      = 4
+    SPELL_STATE_IDLE      = 4,
+    SPELL_STATE_DELAYED   = 5
 };
 
 enum SpellModOp
@@ -437,6 +438,8 @@ enum SpellFailedReason
 
 #define SPELL_SPELL_CHANNEL_UPDATE_INTERVAL 1000
 
+typedef std::multimap<uint64, uint64> SpellTargetTimeMap;
+
 class Spell
 {
     friend struct MaNGOS::SpellNotifierPlayer;
@@ -541,6 +544,16 @@ class Spell
         int16 PetCanCast(Unit* target);
         bool CanAutoCast(Unit* target);
 
+        // handlers
+        void handle_immediate();
+        uint64 handle_delayed(uint64 t_offset);
+        // handler helpers
+        void _handle_immediate_phase();
+        void _handle_unit_phase(const uint64 targetGUID, const uint32 effectNumber, std::set<uint64>* reflectTargets);
+        void _handle_go_phase(const uint64 targetGUID, const uint32 effectNumber);
+        void _handle_reflection_phase(std::set<uint64>* reflectTargets);
+        void _handle_finish_phase();
+
         uint8 CheckItems();
         uint8 CheckRange();
         uint8 CheckMana(uint32 *mana);
@@ -588,6 +601,13 @@ class Spell
         bool IsChannelActive() const { return m_caster->GetUInt32Value(UNIT_CHANNEL_SPELL) != 0; }
         bool IsMeleeAttackResetSpell() const { return !m_IsTriggeredSpell && (m_spellInfo->School != 0) && !(m_spellInfo->Attributes == 327680 && m_spellInfo->AttributesEx2 ==0); }
 
+        bool IsDeletable() const { return m_deletable; }
+        void SetDeletable(bool deletable) { m_deletable = deletable; }
+        uint64 GetDelayStart() const { return m_delayStart; }
+        void SetDelayStart(uint64 m_time) { m_delayStart = m_time; }
+        uint64 GetDelayMoment() const { return m_delayMoment; }
+
+        Unit* GetCaster() { return m_caster; }
         Unit* GetOriginalCaster() { return m_originalCaster; }
 
         void UpdatePointers();                              // must be used at call Spell code after time delay (non triggered spell cast/update spell call/etc)
@@ -610,6 +630,20 @@ class Spell
         bool m_meleeSpell;
         bool m_rangedShoot;
         bool m_needAliveTarget[3];
+
+        // Delayed spells system
+        uint64 m_delayStart;                                // time of spell delay start, filled by event handler, zero = just started
+        uint64 m_delayMoment;                               // moment of next delay call, used internally
+        SpellTargetTimeMap m_unitsHitList[3];               // time of units to hit by effect (used by delayed spells only)
+        SpellTargetTimeMap m_objectsHitList[3];             // time of GOs to hit by effect (used by delayed spells only)
+        bool m_immediateHandled;                            // were immediate actions handled? (used by delayed spells only)
+
+        // These vars are used in both delayed spell system and modified immediate spell system
+        bool m_deletable;                                   // is the spell pending deletion or must be updated till permitted to delete?
+        bool m_needSpellLog;                                // need to send spell log?
+        bool m_canReflect;                                  // can reflect this spell?
+        bool m_applyMultiplier[3];                          // by effect: damage multiplier needed?
+        float m_damageMultipliers[3];                       // by effect: damage multiplier
 
         // Current targets, to be used in SpellEffects (MUST BE USED ONLY IN SPELL EFFECTS)
         Unit* unitTarget;
@@ -882,4 +916,17 @@ namespace MaNGOS
 }
 
 typedef void(Spell::*pEffect)(uint32 i);
+
+class SpellEvent : public BasicEvent
+{
+    public:
+        SpellEvent(Spell* spell);
+        virtual ~SpellEvent();
+
+        virtual bool Execute(uint64 e_time, uint32 p_time);
+        virtual void Abort(uint64 e_time);
+    protected:
+        Spell* m_Spell;
+};
+
 #endif

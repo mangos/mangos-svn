@@ -99,6 +99,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     break;
                 case COMMAND_ATTACK:                        //spellid=1792  //ATTACK
                 {
+                    // only place where pet can be player
                     pet->clearUnitState(UNIT_STAT_FOLLOW);
                     uint64 selguid = _player->GetSelection();
                     Unit *TargetUnit = ObjectAccessor::Instance().GetUnit(*_player, selguid);
@@ -116,20 +117,20 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                         (*((Creature*)pet))->Clear();
                         if (((Creature*)pet)->AI())
                             ((Creature*)pet)->AI()->AttackStart(TargetUnit);
-                    }
-                    else
-                    {
+
                         //10% chance to play special pet attack talk, else growl
-                        if(((Pet*)pet)->getPetType() == SUMMON_PET && pet != TargetUnit && urand(0, 100) < 10)
+                        if(((Creature*)pet)->isPet() && ((Pet*)pet)->getPetType() == SUMMON_PET && pet != TargetUnit && urand(0, 100) < 10)
                             ((Pet*)pet)->SendPetTalk(PET_TALK_ATTACK);
                         else
                         {
+                            // 90% chance for pet and 100% chance for charmed creature
                             WorldPacket data(SMSG_AI_REACTION, 12);
                             data << guid1 << uint32(00000002);
                             SendPacket(&data);
                         }
-                        pet->Attack(TargetUnit);
                     }
+                    else                                    // charmed player
+                        pet->Attack(TargetUnit);
 
                     WorldPacket data(SMSG_AI_REACTION, 12);
                     data << guid1 << uint32(00000002);
@@ -204,10 +205,11 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                 return;
 
             pet->clearUnitState(UNIT_STAT_FOLLOW);
+
             Spell *spell = new Spell(pet, spellInfo, false, 0);
-            WPAssert(spell);
 
             int16 result = spell->PetCanCast(unit_target);
+
             if(result == SPELL_FAILED_UNIT_NOT_INFRONT && !pet->HasAuraType(SPELL_AURA_MOD_POSSESS)) //auto turn to target unless possessed
             {
                 pet->SetInFront(unit_target);
@@ -217,6 +219,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     pet->SendUpdateToPlayer((Player*)pet->GetCharmerOrOwner());
                 result = -1;
             }
+
             if(result == -1)
             {
                 ((Creature*)pet)->AddCreatureSpellCooldown(spellid);
@@ -267,16 +270,17 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                 else
                     ((Pet*)pet)->SendCastFail(spellid, result);
                     
-                if(!((Pet*)pet)->HasSpellCooldown(spellid))
+                if(!((Creature*)pet)->HasSpellCooldown(spellid))
                 {
                     WorldPacket data2(SMSG_CLEAR_COOLDOWN, (4+8+4));
                     data2 << uint32(spellid);
                     data2 << pet->GetGUID();
                     data2 << uint32(0);
                     GetPlayer()->GetSession()->SendPacket(&data2);
-                   }
+                }
 
                 spell->finish(false);
+                delete spell;
             }
             break;
         }
@@ -545,8 +549,8 @@ void WorldSession::HandleAddDynamicTargetObsoleteOpcode( WorldPacket& recvPacket
         return;
 
     pet->clearUnitState(UNIT_STAT_FOLLOW);
+
     Spell *spell = new Spell(pet, spellInfo, false, 0);
-    WPAssert(spell);
 
     SpellCastTargets targets;
     targets.read(&recvPacket,pet);
@@ -576,7 +580,7 @@ void WorldSession::HandleAddDynamicTargetObsoleteOpcode( WorldPacket& recvPacket
     else
     {
         ((Pet*)pet)->SendCastFail(spellid, result);
-        if(!((Pet*)pet)->HasSpellCooldown(spellid))
+        if(!pet->HasSpellCooldown(spellid))
         {
             WorldPacket data2(SMSG_CLEAR_COOLDOWN, (4+8+4));
             data2 << uint32(spellid);
@@ -586,5 +590,6 @@ void WorldSession::HandleAddDynamicTargetObsoleteOpcode( WorldPacket& recvPacket
            }
 
         spell->finish(false);
+        delete spell;
     }
 }

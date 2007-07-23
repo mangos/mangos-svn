@@ -31,6 +31,7 @@
 #include "HostilRefManager.h"
 #include "FollowerReference.h"
 #include "FollowerRefManager.h"
+#include "Utilities/EventProcessor.h"
 #include <list>
 
 // Passive Spell codes explicit used in code
@@ -564,7 +565,19 @@ struct UnitActionBarEntry
     uint32 SpellOrAction;
 };
 
-// delay time next attack to privent client attack animanation problems
+enum CurrentSpellTypes
+{
+    CURRENT_MELEE_SPELL = 0,
+    CURRENT_GENERIC_SPELL = 1,
+    CURRENT_MAX_SPELL = 2                                   // just counter
+/*  TODO: this is for future implementation, now unused
+    CURRENT_AUTOREPEAT_SPELL = 2,
+    CURRENT_CHANNELED_SPELL = 3,
+    CURRENT_MAX_SPELL = 4                                   // just counter
+*/
+};
+
+// delay time next attack to prevent client attack animation problems
 #define ATTACK_DISPLAY_DELAY 200
 
 class MANGOS_DLL_SPEC Unit : public WorldObject
@@ -872,15 +885,12 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         void SetCurrentCastedSpell(Spell * pSpell);
         virtual void ProhibitSpellScholl(uint32 idSchool /* from SpellSchools */, uint32 unTimeMs ) { }
-        void InterruptSpell();
-        Spell * m_currentSpell;
-        Spell * m_oldSpell;
-        Spell * m_currentMeleeSpell;
+        void InterruptSpell(CurrentSpellTypes spellType);
+        Spell* m_currentSpells[CURRENT_MAX_SPELL];
         UnitActionBarEntry PetActionBar[10];
         uint32 m_addDmgOnce;
         uint64 m_TotemSlot[4];
         uint64 m_ObjectSlot[4];
-        uint32 m_canMove;
         uint32 m_detectStealth;
         uint32 m_detectInvisibility;
         uint32 m_stealthvalue;
@@ -894,6 +904,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         float m_modResilience;
         float m_threatModifier[MAX_SPELL_SCHOOL];
         float m_modAttackSpeedPct[3];
+
+        // Event handler
+        EventProcessor m_Events;
 
         // stat system
         bool HandleStatModifier(UnitMods unitMod, UnitModifierType modifierType, float amount, bool apply);

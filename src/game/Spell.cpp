@@ -208,8 +208,8 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur, u
     Player* p_caster;
 
     m_spellInfo = info;
-
     m_caster = Caster;
+    m_deletable = true;
 
     if(originalCasterGUID)
         m_originalCasterGUID = originalCasterGUID;
@@ -844,6 +844,10 @@ void Spell::prepare(SpellCastTargets * targets)
     m_castPositionZ = m_caster->GetPositionZ();
     m_castOrientation = m_caster->GetOrientation();
 
+    // create and add update event for this spell
+    SpellEvent* Event = new SpellEvent(this);
+    m_caster->m_Events.AddEvent(Event, m_caster->m_Events.CalculateTime(1));
+
     uint8 result = CanCast();
     if(result != 0)
     {
@@ -881,28 +885,37 @@ void Spell::cancel()
         return;
 
     m_autoRepeat = false;
-    if(m_spellState == SPELL_STATE_PREPARING)
+    switch (m_spellState)
     {
-        SendInterrupted(0);
-        SendCastResult(SPELL_FAILED_INTERRUPTED);
-    }
-    else if(m_spellState == SPELL_STATE_CASTING)
-    {
-        for (int j = 0; j < 3; j++)
+        case SPELL_STATE_PREPARING:
+        case SPELL_STATE_DELAYED:
         {
-            for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[j].begin();iunit != m_targetUnitGUIDs[j].end();++iunit)
-            {
-                // check m_caster->GetGUID() let load auras at login and speedup most often case
-                Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
-                if (unit && unit->isAlive())
-                    unit->RemoveAurasDueToSpell(m_spellInfo->Id);
-            }
-        }
+           SendInterrupted(0);
+           SendCastResult(SPELL_FAILED_INTERRUPTED);
+        } break;
 
-        m_caster->RemoveAurasDueToSpell(m_spellInfo->Id);
-        SendChannelUpdate(0);
-        SendInterrupted(0);
-        SendCastResult(SPELL_FAILED_INTERRUPTED);
+        case SPELL_STATE_CASTING:
+        {
+            for (int j = 0; j < 3; j++)
+            {
+                for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[j].begin();iunit != m_targetUnitGUIDs[j].end();++iunit)
+                {
+                    // check m_caster->GetGUID() let load auras at login and speedup most often case
+                    Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
+                    if (unit && unit->isAlive())
+                        unit->RemoveAurasDueToSpell(m_spellInfo->Id);
+                }
+            }
+
+            m_caster->RemoveAurasDueToSpell(m_spellInfo->Id);
+            SendChannelUpdate(0);
+            SendInterrupted(0);
+            SendCastResult(SPELL_FAILED_INTERRUPTED);
+        } break;
+
+        default:
+        {
+        } break;
     }
 
     finish(false);
@@ -990,12 +1003,6 @@ void Spell::cast(bool skipCheck)
     SendSpellGo();                                          // we must send smsg_spell_go packet before m_castItem delete in TakeCastItem()...
     TakeCastItem();                                         // we must remove consumed cast item before HandleEffects to allow place crafted item in same slot
 
-    if(IsChanneledSpell())
-    {
-        m_spellState = SPELL_STATE_CASTING;
-        SendChannelStart(GetDuration(m_spellInfo));
-    }
-
     // Pass cast spell event to handler (not send triggered by aura spells)
     if (m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_MELEE && m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_RANGED && !m_triggeredByAura)
     {
@@ -1005,9 +1012,236 @@ void Spell::cast(bool skipCheck)
         UpdatePointers();                                   // pointers can be invalidate at triggered spell casting
     }
 
+    // Okay, everything is prepared. Now we need to distinguish between immediate and evented delayed spells
+    if (m_spellInfo->speed > 0.0f)
+    {
+        // This is delayed spell, we do need to calculate distances and create distance maps
+
+        // Check, if we do have fixed distance for all
+        bool fixed = (m_targets.m_destX != 0) || (m_targets.m_destY != 0) || (m_targets.m_destY != 0);
+        float dist;
+        uint64 interval;
+        uint64 min_interval = 0;
+
+        if (fixed)
+        {
+            dist = sqrt(m_caster->GetDistanceSq(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ));
+            if (dist < 5.0f) dist = 5.0f;
+            interval = (uint64) floor(dist / m_spellInfo->speed * 1000.0f);
+            min_interval = interval;
+        }
+
+        // Create maps of units and GOs for delayed processor
+        std::map<uint64, uint64> GUIDToIntMap;
+        std::map<uint64, uint64>::iterator gtim_itr;
+        uint64 targetGUID;
+
+        // Now create unit maps (with possible distance calculation)
+        for(uint32 j = 0;j<3;j++)
+        {
+            for (std::list<uint64>::iterator itr = m_targetUnitGUIDs[j].begin(); itr != m_targetUnitGUIDs[j].end(); ++itr)
+            {
+                targetGUID = *itr;
+
+                if (fixed)
+                {
+                    // fixed interval
+                    m_unitsHitList[j].insert(std::pair<uint64, uint64> (interval, targetGUID));
+                }
+                else
+                {
+                    gtim_itr = GUIDToIntMap.find(targetGUID);
+                    if (gtim_itr != GUIDToIntMap.end())
+                    {
+                        // cached interval
+                        m_unitsHitList[j].insert(std::pair<uint64, uint64> (gtim_itr->second, targetGUID));
+                    }
+                    else
+                    {
+                        Unit* unit = m_caster->GetGUID()==targetGUID ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,targetGUID);
+                        if(unit)
+                        {
+                            // cool, unit is present, calculate interval
+                            dist = sqrt(m_caster->GetDistanceSq(unit->GetPositionX(), unit->GetPositionY(), unit->GetPositionZ()));
+                            if (dist < 5.0f) dist = 5.0f;
+                            interval = (uint64) floor(dist / m_spellInfo->speed * 1000.0f);
+                            m_unitsHitList[j].insert(std::pair<uint64, uint64> (interval, targetGUID));
+                            GUIDToIntMap[targetGUID] = interval;
+                            if ((min_interval == 0) || (interval < min_interval))
+                                min_interval = interval;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Now create GO maps (with possible distance calculation)
+        GUIDToIntMap.clear();
+        for(uint32 j = 0;j<3;j++)
+        {
+            for (std::list<uint64>::iterator itr = m_targetGameobjectGUIDs[j].begin(); itr != m_targetGameobjectGUIDs[j].end(); ++itr)
+            {
+                targetGUID = *itr;
+
+                if (fixed)
+                {
+                    // fixed interval
+                    m_objectsHitList[j].insert(std::pair<uint64, uint64> (interval, targetGUID));
+                }
+                else
+                {
+                    gtim_itr = GUIDToIntMap.find(targetGUID);
+                    if (gtim_itr != GUIDToIntMap.end())
+                    {
+                        // cached interval
+                        m_objectsHitList[j].insert(std::pair<uint64, uint64> (gtim_itr->second, targetGUID));
+                    }
+                    else
+                    {
+                        GameObject* go = ObjectAccessor::Instance().GetGameObject(*m_caster,targetGUID);
+                        if(go)
+                        {
+                            // cool, unit is present, calculate interval
+                            dist = sqrt(m_caster->GetDistanceSq(go->GetPositionX(), go->GetPositionY(), go->GetPositionZ()));
+                            if (dist < 5.0f) dist = 5.0f;
+                            interval = (uint64) floor(dist / m_spellInfo->speed * 1000.0f);
+                            m_objectsHitList[j].insert(std::pair<uint64, uint64> (interval, targetGUID));
+                            GUIDToIntMap[targetGUID] = interval;
+                            if ((min_interval == 0) || (interval < min_interval))
+                                min_interval = interval;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Okay, maps created, now prepare flags
+        m_immediateHandled = false;
+        m_spellState = SPELL_STATE_DELAYED;
+        SetDelayStart(0);
+        m_delayMoment = min_interval;
+    }
+    else
+    {
+        // Immediate spell, no big deal
+        handle_immediate();
+    }
+}
+
+void Spell::handle_immediate()
+{
+    // start channeling if applicable
+    if(IsChanneledSpell())
+    {
+        m_spellState = SPELL_STATE_CASTING;
+        SendChannelStart(GetDuration(m_spellInfo));
+    }
+
+    // process immediate effects (items, ground, etc.) also initialize some variables
+    _handle_immediate_phase();
+
+    std::set<uint64> reflectTargets;
+
+    // now process units and gameobjects, executing them one by one (also create list for reflection if needed)
+    for(uint32 j = 0;j<3;j++)
+    {
+        if ((m_spellInfo->Effect[j]==0) || (m_spellInfo->Effect[j] == SPELL_EFFECT_SEND_EVENT))
+            continue;
+
+        for (std::list<uint64>::iterator itr = m_targetUnitGUIDs[j].begin(); itr != m_targetUnitGUIDs[j].end(); ++itr)
+            _handle_unit_phase(*itr, j, &reflectTargets);
+
+        for (std::list<uint64>::iterator itr = m_targetGameobjectGUIDs[j].begin(); itr != m_targetGameobjectGUIDs[j].end(); ++itr)
+            _handle_go_phase(*itr, j);
+    }
+
+    // process reflections
+    _handle_reflection_phase(&reflectTargets);
+    
+    // spell is finished, perform some last features of the spell here
+    _handle_finish_phase();
+
+    if(m_spellState != SPELL_STATE_CASTING)
+        finish(true);                                       // successfully finish spell cast (not last in case autorepeat or channel spell)
+}
+
+uint64 Spell::handle_delayed(uint64 t_offset)
+{
+    bool finished = true;
+    uint64 next_time = 0;
+
+    if (!m_immediateHandled)
+    {
+        _handle_immediate_phase();
+        m_immediateHandled = true;
+    }
+
+    std::set<uint64> reflectTargets;
+    SpellTargetTimeMap::iterator itr;
+
+    // now process units and gameobjects, executing them one by one (also create list for reflection if needed)
+    for(uint32 j = 0;j<3;j++)
+    {
+        if ((m_spellInfo->Effect[j]==0) || (m_spellInfo->Effect[j] == SPELL_EFFECT_SEND_EVENT))
+            continue;
+
+        while (((itr = m_unitsHitList[j].begin()) != m_unitsHitList[j].end()) && (itr->first <= t_offset))
+        {
+            _handle_unit_phase(itr->second, j, &reflectTargets);
+            m_unitsHitList[j].erase(itr);
+        }
+
+        while (((itr = m_objectsHitList[j].begin()) != m_objectsHitList[j].end()) && (itr->first <= t_offset))
+        {
+            _handle_go_phase(itr->second, j);
+            m_objectsHitList[j].erase(itr);
+        }
+
+        // are some units pending
+        if (m_unitsHitList[j].size() != 0)
+        {
+            finished = false;
+            uint64 min_time = m_unitsHitList[j].begin()->first;
+            if ((next_time == 0) || (min_time < next_time))
+                next_time = min_time;
+        }
+
+        // are some gameobjects pending?
+        if (m_objectsHitList[j].size() != 0)
+        {
+            finished = false;
+            uint64 min_time = m_objectsHitList[j].begin()->first;
+            if ((next_time == 0) || (min_time < next_time))
+                next_time = min_time;
+        }
+    }
+
+    // process reflections
+    _handle_reflection_phase(&reflectTargets);
+
+    if (finished)
+    {
+        // spell is finished, perform some last features of the spell here
+        _handle_finish_phase();
+
+        finish(true); // successfully finish spell cast
+
+        // return zero, spell is finished now
+        return(0);
+    }
+    else
+    {
+        // spell is unfinished, return next execution time
+        return(next_time);
+    }
+}
+
+void Spell::_handle_immediate_phase()
+{
+    // handle some immediate features of the spell here
     HandleThreatSpells(m_spellInfo->Id);
 
-    bool needspelllog = true;
+    m_needSpellLog = true;
     for(uint32 j = 0;j<3;j++)
     {
         if(m_spellInfo->Effect[j]==0)
@@ -1018,69 +1252,27 @@ void Spell::cast(bool skipCheck)
             HandleEffects(NULL,NULL,NULL, j);
             continue;
         }
-                                                            // Dont do spell log, if is school damage spell
+
+        // Dont do spell log, if is school damage spell
         if(m_spellInfo->Effect[j] == SPELL_EFFECT_SCHOOL_DAMAGE || m_spellInfo->Effect[j] == 0)
-            needspelllog = false;
-        float DamageMultiplier = 1.0;
-        bool ApplyDamageMultiplier = 
+            m_needSpellLog = false;
+
+        // initialize multipliers
+        m_damageMultipliers[j] = 1.0;
+        m_applyMultiplier[j] = 
             (m_spellInfo->EffectImplicitTargetA[j] == TARGET_CHAIN_DAMAGE || m_spellInfo->EffectImplicitTargetA[j] == TARGET_CHAIN_HEAL)
             && (m_spellInfo->EffectChainTarget[j] > 1);
-        for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[j].begin();iunit != m_targetUnitGUIDs[j].end();++iunit)
-        {
-            // let the client worry about this
-            /*if((*iunit)->GetTypeId() != TYPEID_PLAYER && m_spellInfo->TargetCreatureType)
-            {
-                CreatureInfo const *cinfo = ((Creature*)(*iunit))->GetCreatureInfo();
-                if((m_spellInfo->TargetCreatureType & cinfo->type) == 0)
-                    continue;
-            }*/
-            // check m_caster->GetGUID() let load auras at login and speedup most often case
-            Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
-            if(unit)
-            {
-                HandleEffects(unit,NULL,NULL,j, DamageMultiplier);
-                
-                if ( ApplyDamageMultiplier )
-                    DamageMultiplier *= m_spellInfo->DmgMultiplier[j];
 
-                //Call scripted function for AI if this spell is casted upon a creature
-                // Some Script Spell Destroy the target or something and the target is always the player
-                // then re-find it in grids if this creature
-                if(GUID_HIPART(*iunit)==HIGHGUID_UNIT)
-                {
-                    Creature* creature = m_caster->GetGUID()==*iunit ? (Creature*)m_caster : ObjectAccessor::Instance().GetCreature(*m_caster,*iunit);
-                    if( creature && creature->AI() )
-                        creature->AI()->SpellHit(m_caster,m_spellInfo);
-                }
-            }
-        }
-
+        // process items
         for(std::list<Item*>::iterator iitem = m_targetItems[j].begin();iitem != m_targetItems[j].end();iitem++)
             HandleEffects(NULL,(*iitem),NULL,j);
-
-        for(std::list<uint64>::iterator igo= m_targetGameobjectGUIDs[j].begin();igo != m_targetGameobjectGUIDs[j].end();++igo)
-        {
-            GameObject* go = ObjectAccessor::Instance().GetGameObject(*m_caster,*igo);
-            if(go)
-                HandleEffects(NULL,NULL,go,j);
-        }
-
-        // persistent area auras target only the ground
-        if(m_spellInfo->Effect[j] == SPELL_EFFECT_PERSISTENT_AREA_AURA)
-            HandleEffects(NULL,NULL,NULL, j);
     }
 
-    if(needspelllog)
-        SendLogExecute();
-
-    //remove spell mods
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        ((Player*)m_caster)->RemoveSpellMods(m_spellInfo->Id);
-
-    bool canreflect = false;
+    // determine reflection
+    bool m_canReflect = false;
     for(int j=0;j<3;j++)
     {
-        if(m_spellInfo->Effect[j]==0)
+        if (m_spellInfo->Effect[j]==0)
             continue;
 
         switch(m_spellInfo->EffectImplicitTargetA[j])
@@ -1093,46 +1285,86 @@ void Spell::cast(bool skipCheck)
             case TARGET_DUELVSPLAYER:
             case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
                 //case TARGET_AE_SELECTED:
-                canreflect = true;
+                m_canReflect = true;
                 break;
 
             default:
-                canreflect = (m_spellInfo->AttributesEx & (1<<7)) ? true : false;
+                m_canReflect = (m_spellInfo->AttributesEx & (1<<7)) ? true : false;
         }
 
-        if(canreflect)
+        if(m_canReflect)
             continue;
         else
             break;
     }
 
-    if(canreflect)
+    // process ground
+    for(uint32 j = 0;j<3;j++)
     {
-        // store already processed targets to skip repeated targets
-        std::set<uint64> SkipTargets;
+        if ((m_spellInfo->Effect[j]==0) || (m_spellInfo->Effect[j] == SPELL_EFFECT_SEND_EVENT))
+            continue;
 
-        for(int k=0;k<3;k++)
+        // persistent area auras target only the ground
+        if(m_spellInfo->Effect[j] == SPELL_EFFECT_PERSISTENT_AREA_AURA)
+            HandleEffects(NULL,NULL,NULL, j);
+    }
+}
+
+void Spell::_handle_unit_phase(const uint64 targetGUID, const uint32 effectNumber, std::set<uint64>* reflectTargets)
+{
+    // check m_caster->GetGUID() let load auras at login and speedup most often case
+    Unit* unit = m_caster->GetGUID()==targetGUID ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,targetGUID);
+    if(unit)
+    {
+        HandleEffects(unit,NULL,NULL,effectNumber,m_damageMultipliers[effectNumber]);
+        
+        if ( m_applyMultiplier[effectNumber] )
+            m_damageMultipliers[effectNumber] *= m_spellInfo->DmgMultiplier[effectNumber];
+
+        //Call scripted function for AI if this spell is casted upon a creature
+        // Some Script Spell Destroy the target or something and the target is always the player
+        // then re-find it in grids if this creature
+        if(GUID_HIPART(targetGUID)==HIGHGUID_UNIT)
         {
-            if(m_spellInfo->Effect[k]==0)
-                continue;
-
-            for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[k].begin();iunit != m_targetUnitGUIDs[k].end();++iunit)
-            {
-                if(SkipTargets.count(*iunit) > 0)
-                    continue;
-
-                // check m_caster->GetGUID() let load auras at login and speedup most often case
-                Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
-                if(unit)
-                    reflect(unit);
-
-                SkipTargets.insert(*iunit);
-            }
+            Creature* creature = m_caster->GetGUID()==targetGUID ? (Creature*)m_caster : ObjectAccessor::Instance().GetCreature(*m_caster,targetGUID);
+            if( creature && creature->AI() )
+                creature->AI()->SpellHit(m_caster,m_spellInfo);
         }
     }
 
-    if(m_spellState != SPELL_STATE_CASTING)
-        finish(true);                                       // successfully finish spell cast (not last in case autorepeat or channel spell)
+    // if reflection is pending and unit is new, add it
+    if (m_canReflect && (reflectTargets->count(targetGUID) == 0))
+        reflectTargets->insert(targetGUID);
+}
+
+void Spell::_handle_go_phase(const uint64 targetGUID, const uint32 effectNumber)
+{
+    GameObject* go = ObjectAccessor::Instance().GetGameObject(*m_caster,targetGUID);
+    if(go)
+        HandleEffects(NULL,NULL,go,effectNumber);
+}
+
+void Spell::_handle_reflection_phase(std::set<uint64> *reflectTargets)
+{
+    // process units reflections if applicable
+    for (std::set<uint64>::iterator ritr = reflectTargets->begin(); ritr != reflectTargets->end(); ++ritr)
+    {
+        // check m_caster->GetGUID() let load auras at login and speedup most often case
+        Unit* unit = m_caster->GetGUID()==*ritr ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,*ritr);
+        if(unit)
+            reflect(unit);
+    }
+}
+
+void Spell::_handle_finish_phase()
+{
+    // spell log
+    if(m_needSpellLog)
+        SendLogExecute();
+
+    //remove spell mods
+    if (m_caster->GetTypeId() == TYPEID_PLAYER)
+        ((Player*)m_caster)->RemoveSpellMods(m_spellInfo->Id);
 }
 
 void Spell::SendSpellCooldown()
@@ -1388,7 +1620,6 @@ void Spell::finish(bool ok)
         return;
 
     m_spellState = SPELL_STATE_FINISHED;
-    m_caster->m_canMove = true;
 
     /*std::vector<DynamicObject*>::iterator i;
     for(i = m_dynObjToDel.begin() ; i != m_dynObjToDel.end() ; i++)
@@ -1944,10 +2175,9 @@ void Spell::TriggerSpell()
 
     for(std::list<SpellEntry const*>::iterator si=m_TriggerSpells.begin(); si!=m_TriggerSpells.end(); ++si)
     {
-        Spell spell(m_caster, (*si), true, 0);
-        spell.prepare(&m_targets);                          // use original spell original targets
+        Spell* spell = new Spell(m_caster, (*si), true, 0);
+        spell->prepare(&m_targets); // use original spell original targets
     }
-
 }
 
 uint8 Spell::CanCast()
@@ -2235,7 +2465,7 @@ uint8 Spell::CanCast()
                     return SPELL_FAILED_LOW_CASTLEVEL;
 
                 // chance for fail at orange skinning attempt
-                if (m_caster->m_currentSpell == this && (ReqValue < 0 ? 0 : ReqValue) > irand(SkinningValue-25, SkinningValue+37) )
+                if (m_caster->m_currentSpells[CURRENT_GENERIC_SPELL] == this && (ReqValue < 0 ? 0 : ReqValue) > irand(SkinningValue-25, SkinningValue+37) )
                     return SPELL_FAILED_TRY_AGAIN;
 
                 break;
@@ -2248,7 +2478,7 @@ uint8 Spell::CanCast()
                     return SPELL_FAILED_BAD_TARGETS;
 
                 // chance for fail at orange mining/herb/LockPicking gathering attempt
-                if (m_targets.getGOTarget()->GetGoType() == GAMEOBJECT_TYPE_CHEST && m_caster->m_currentSpell == this)
+                if (m_targets.getGOTarget()->GetGoType() == GAMEOBJECT_TYPE_CHEST && m_caster->m_currentSpells[CURRENT_GENERIC_SPELL] == this)
                 {
                     int32 SkillValue;
                     if (m_spellInfo->EffectMiscValue[i] == LOCKTYPE_HERBALISM)
@@ -2424,7 +2654,7 @@ int16 Spell::PetCanCast(Unit* target)
     if(!m_caster->isAlive())
         return SPELL_FAILED_CASTER_DEAD;
 
-    if(m_caster->m_currentSpell) //prevent spellcast interuption by another spellcast
+    if(m_caster->m_currentSpells[CURRENT_GENERIC_SPELL]) //prevent spellcast interuption by another spellcast
         return SPELL_FAILED_SPELL_IN_PROGRESS;
     if(m_caster->isInCombat() && IsNonCombatSpell(m_spellInfo->Id))
         return SPELL_FAILED_AFFECTING_COMBAT;
@@ -2476,7 +2706,7 @@ int16 Spell::PetCanCast(Unit* target)
                 }
             }
         }
-        if(((Pet*)m_caster)->HasSpellCooldown(m_spellInfo->Id)) //cooldown
+        if(((Creature*)m_caster)->HasSpellCooldown(m_spellInfo->Id)) //cooldown
             return SPELL_FAILED_NOT_READY;
     }
 
@@ -3040,11 +3270,7 @@ void Spell::reflect(Unit *refunit)
 
     if (reflectchance > 0 && roll_chance_i(reflectchance))
     {
-        Spell spell(refunit, m_spellInfo, true, 0);
-
-        SpellCastTargets targets;
-        targets.setUnitTarget( m_caster );
-        spell.prepare(&targets);
+        refunit->CastSpell(m_caster,m_spellInfo,true);
     }
 }
 
@@ -3074,4 +3300,104 @@ uint32 Spell::GetTargetCreatureTypeMask() const
         if(m_spellInfo->Id == 2641)                         // Dismiss Pet
             SpellCreatureType = 0;
     return SpellCreatureType;
+}
+
+SpellEvent::SpellEvent(Spell* spell) : BasicEvent()
+{
+    m_Spell = spell;
+}
+
+SpellEvent::~SpellEvent()
+{
+    if (m_Spell->getState() != SPELL_STATE_FINISHED)
+        m_Spell->cancel();
+    if (m_Spell->IsDeletable())
+    {
+        delete m_Spell;
+    }
+    else
+    {
+        sLog.outError("~SpellEvent: Unit %u tried to delete non-deletable spell. Was not deleted, causes memory leak.", m_Spell->GetCaster()->GetGUIDLow());
+    }
+}
+
+bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
+{
+    // update spell if it is not finished
+    if (m_Spell->getState() != SPELL_STATE_FINISHED)
+        m_Spell->update(p_time);
+
+    // check spell state to process
+    switch (m_Spell->getState())
+    {
+        case SPELL_STATE_FINISHED:
+        {
+            // spell was finished, check deletable state
+            if (m_Spell->IsDeletable())
+                return(true); // spell is deletable, finish event
+            // event will be re-added automatically at the end of routine)
+        } break;
+
+        case SPELL_STATE_CASTING:
+        {
+            // this spell is in channeled state, process it on the next update
+            // event will be re-added automatically at the end of routine)
+        } break;
+
+        case SPELL_STATE_DELAYED:
+        {
+            // first, check, if we have just started
+            if (m_Spell->GetDelayStart() != 0)
+            {
+                // no, we aren't, do the typical update
+                // check, if we have channeled spell on our hands
+                if (m_Spell->IsChanneledSpell())
+                {
+                    // evented channeled spell is processed separately, casted once after delay, and not destroyed till finish
+                    // event will be re-added automatically at the end of routine)
+                    m_Spell->handle_immediate();
+                }
+                else
+                {
+                    // run the spell handler and think about what we can do next
+                    uint64 t_offset = e_time - m_Spell->GetDelayStart();
+                    uint64 n_offset = m_Spell->handle_delayed(t_offset);
+                    if (n_offset)
+                    {
+                        // re-add us to the queue
+                        m_Spell->GetCaster()->m_Events.AddEvent(this, m_Spell->GetDelayStart() + n_offset, false);
+                        return(false); // event not complete
+                    }
+                    // event complete
+                    if (m_Spell->IsDeletable())
+                        return(true); // spell is deletable, finish event
+                    // update event will be re-added automatically at the end of routine)
+                }
+            }
+            else
+            {
+                // delaying had just started, record the moment
+                m_Spell->SetDelayStart(e_time);
+                // re-plan the event for the delay moment
+                m_Spell->GetCaster()->m_Events.AddEvent(this, e_time + m_Spell->GetDelayMoment(), false);
+                return(false); // event not complete
+            }
+        } break;
+
+        default:
+        {
+            // all other states
+            // event will be re-added automatically at the end of routine)
+        } break;
+    }
+
+    // spell processing not complete, plan event on the next update interval
+    m_Spell->GetCaster()->m_Events.AddEvent(this, e_time + 1, false);
+    return(false); // event not complete
+}
+
+void SpellEvent::Abort(uint64 e_time)
+{
+    // oops, the spell we try to do is aborted
+    m_Spell->cancel();
 }

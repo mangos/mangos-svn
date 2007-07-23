@@ -123,10 +123,6 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
             spell->m_CastItem = pItem;
             spell->prepare(&targets);
 
-            // delete triggered spell
-            if(count > 0)
-                delete spell;
-
             ++count;
         }
     }
@@ -361,10 +357,10 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                 }
             }
 
-            if(_player->m_currentSpell)
+            if(_player->m_currentSpells[CURRENT_GENERIC_SPELL])
             {
-                _player->m_currentSpell->SendChannelUpdate(0);
-                _player->m_currentSpell->finish();
+                _player->m_currentSpells[CURRENT_GENERIC_SPELL]->SendChannelUpdate(0);
+                _player->m_currentSpells[CURRENT_GENERIC_SPELL]->finish();
             }
             return;
         }
@@ -391,7 +387,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             // in case summoning ritual caster is GO creator
             spellCaster = caster;
 
-            if(!caster->m_currentSpell)
+            if(!caster->m_currentSpells[CURRENT_GENERIC_SPELL])
                 return;
 
             // update target pointer by guid
@@ -404,7 +400,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             if( !targetPlayer || !targetPlayer->IsInSameGroupWith((Player*)caster) ||
                 !MapManager::Instance().GetMap(obj->GetMapId(),obj)->CanEnter(targetPlayer) )
             {
-                caster->m_currentSpell->cancel();
+                caster->m_currentSpells[CURRENT_GENERIC_SPELL]->cancel();
                 return;
             }
 
@@ -416,8 +412,8 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             spellId = info->sound1;
 
             // finish spell
-            caster->m_currentSpell->SendChannelUpdate(0);
-            caster->m_currentSpell->finish();
+            caster->m_currentSpells[CURRENT_GENERIC_SPELL]->SendChannelUpdate(0);
+            caster->m_currentSpells[CURRENT_GENERIC_SPELL]->finish();
 
             // can be deleted now
             obj->SetLootState(GO_LOOTED);
@@ -620,8 +616,8 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
 {
-    if(_player->m_currentSpell)
-        _player->m_currentSpell->cancel();
+    if(_player->m_currentSpells[CURRENT_GENERIC_SPELL])
+        _player->m_currentSpells[CURRENT_GENERIC_SPELL]->cancel();
 }
 
 void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
