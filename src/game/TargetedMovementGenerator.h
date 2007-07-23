@@ -24,8 +24,6 @@
 #include "Traveller.h"
 #include "FollowerReference.h"
 
-class Unit;
-
 class MANGOS_DLL_SPEC TargetedMovementGenerator : public MovementGenerator
 {
     public:
@@ -39,12 +37,10 @@ class MANGOS_DLL_SPEC TargetedMovementGenerator : public MovementGenerator
         bool Update(Creature &, const uint32 &);
         MovementGeneratorType GetMovementGeneratorType() { return TARGETED_MOTION_TYPE; }
 
-        void spellAtack(Creature &,Unit &,uint32 spellId);
         void stopFollowing() { };
 
     private:
 
-        void _spellAtack(Creature &owner, SpellEntry* spellInfo);
         void _setTargetLocation(Creature &);
 
         FollowerReference i_target;

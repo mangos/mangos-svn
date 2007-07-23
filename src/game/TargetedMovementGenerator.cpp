@@ -21,7 +21,6 @@
 #include "Errors.h"
 #include "Creature.h"
 #include "MapManager.h"
-#include "Spell.h"
 #include "DestinationHolderImp.h"
 
 #define SMALL_ALPHA 0.05
@@ -148,63 +147,4 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
         }
     }
     return true;
-}
-
-void TargetedMovementGenerator::_spellAtack(Creature &owner, SpellEntry* spellInfo)
-{
-    if(!spellInfo)
-        return;
-    owner.StopMoving();
-    owner->Idle();
-    if(owner.m_currentSpell)
-    {
-        if(owner.m_currentSpell->m_spellInfo->Id == spellInfo->Id )
-            return;
-        else
-        {
-            owner.m_currentSpell->cancel();
-        }
-    }
-    Spell *spell = new Spell(&owner, spellInfo, false, 0);
-    spell->SetAutoRepeat(true);
-    //owner.addUnitState(UNIT_STAT_ATTACKING);
-    owner.Attack(&owner);                                   //??
-    owner.clearUnitState(UNIT_STAT_CHASE);
-    SpellCastTargets targets;
-    targets.setUnitTarget( i_target.getTarget() );
-    spell->prepare(&targets);
-    owner.m_canMove = false;
-    DEBUG_LOG("Spell Attack.");
-}
-
-void TargetedMovementGenerator::spellAtack(Creature &owner,Unit &who,uint32 spellId)
-{
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId );
-
-    if(!spellInfo)
-    {
-        sLog.outError("WORLD: unknown spell id %i\n", spellId);
-        return;
-    }
-
-    owner.StopMoving();
-    owner->Idle();
-    if(owner.m_currentSpell)
-    {
-        if(owner.m_currentSpell->m_spellInfo->Id == spellInfo->Id )
-            return;
-        else
-        {
-            owner.m_currentSpell->cancel();
-        }
-    }
-    Spell *spell = new Spell(&owner, spellInfo, false, 0);
-    spell->SetAutoRepeat(false);
-    //owner.addUnitState(UNIT_STAT_ATTACKING);
-    //owner.clearUnitState(UNIT_STAT_CHASE);
-    SpellCastTargets targets;
-    targets.setUnitTarget( &who );
-    spell->prepare(&targets);
-    owner.m_canMove = false;
-    DEBUG_LOG("Spell Attack.");
 }

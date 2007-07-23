@@ -1,1 +1,1 @@
-ALTER TABLE `character_reputation` DROP `reputation`
+ALTER TABLE `character_reputation` DROP `reputation`;
