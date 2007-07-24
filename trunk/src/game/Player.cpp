@@ -5313,7 +5313,6 @@ void Player::RewardHonor(Unit *uVictim, uint32 count )
         count = 1;
 
     float honor = 0;
-    float approx_honor =0;
    
     if( uVictim->GetTypeId() == TYPEID_PLAYER )
     {
@@ -5340,15 +5339,9 @@ void Player::RewardHonor(Unit *uVictim, uint32 count )
 
         int32 v_rank =1;                                    //need more info
 
-        honor = ((f * diff_level * (190 + v_rank*10))/6)*sWorld.getRate(RATE_HONOR); 
+        honor = ((f * diff_level * (190 + v_rank*10))/6); 
         honor *= ((float)k_level) / 70.0; //factor of dependence on levels of the killer
 
-        approx_honor = honor * (((float)urand(8,12))/10);   // approx honor: 80% - 120% of real honor
-
-        WorldPacket data(SMSG_PVP_CREDIT,4+8);
-        data << (uint32) approx_honor*10;
-        data << (uint64) pVictim->GetGUID(); 
-        GetSession()->SendPacket(&data);
     }
     else
     {
@@ -5357,14 +5350,19 @@ void Player::RewardHonor(Unit *uVictim, uint32 count )
         if (!cVictim->isRacialLeader())
             return;
 
-        honor = 100*sWorld.getRate(RATE_HONOR);            // ??? need more info
-        approx_honor = honor * (((float)urand(8,12))/10);  // approx honor: 80% - 120% of real honor
+        honor = 100;                                        // ??? need more info
         
-        WorldPacket data(SMSG_PVP_CREDIT,4+8);
-        data << (uint32) approx_honor*10;
-        data << (uint64) cVictim->GetGUID(); 
-        GetSession()->SendPacket(&data);
     }
+
+    honor *= sWorld.getRate(RATE_HONOR);
+    honor /= count;
+
+    float approx_honor = honor * (((float)urand(8,12))/10); // approx honor: 80% - 120% of real honor
+
+    WorldPacket data(SMSG_PVP_CREDIT,4+8);
+    data << (uint32) approx_honor*10;
+    data << (uint64) uVictim->GetGUID(); 
+    GetSession()->SendPacket(&data);
 
     UpdateHonorFields();                                    // to prevent CalcluateHonor() on a new day before old honor was UpdateHonorFields()
     sDatabase.PExecute("INSERT INTO `character_kill` (`guid`,`creature_template`,`honor`,`date`) VALUES (%u, %u, %f, %u)", GUID_LOPART(GetGUID()), uVictim->GetEntry(), honor, time(0));
