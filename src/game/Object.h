@@ -83,7 +83,7 @@ class MANGOS_DLL_SPEC Object
     public:
         virtual ~Object ( );
 
-        virtual void Update ( float time ) { }
+        virtual void Update ( float /*time*/ ) { }
 
         const bool& IsInWorld() const { return m_inWorld; }
         virtual void AddToWorld()
@@ -184,8 +184,8 @@ class MANGOS_DLL_SPEC Object
 
         void InitValues() { _InitValues(); }
 
-        virtual bool hasQuest(uint32 quest_id) const { return false; }
-        virtual bool hasInvolvedQuest(uint32 quest_id) const { return false; }
+        virtual bool hasQuest(uint32 /* quest_id */) const { return false; }
+        virtual bool hasInvolvedQuest(uint32 /* quest_id */) const { return false; }
     protected:
 
         Object ( );

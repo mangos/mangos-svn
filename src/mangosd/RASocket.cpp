@@ -81,7 +81,7 @@ void RASocket::OnAccept()
         dropclient
 
     ///- Else print Motd
-    Sendf("%s\r\n",(char*)sWorld.GetMotd());
+    Sendf("%s\r\n",sWorld.GetMotd());
 }
 
 /// Read data from the network

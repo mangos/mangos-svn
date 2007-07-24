@@ -235,7 +235,7 @@ class ByteBuffer
         template <typename T> T read(size_t pos) const
         {
             ASSERT(pos + sizeof(T) <= size() || PrintPosError(false,pos,sizeof(T)));
-            return *((T*)&_storage[pos]);
+            return *((T const*)&_storage[pos]);
         }
 
         void read(uint8 *dest, size_t len)

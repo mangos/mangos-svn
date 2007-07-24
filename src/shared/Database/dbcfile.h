@@ -69,7 +69,7 @@ class DBCFile
                 }
 
             private:
-                Record(DBCFile &file, unsigned char *offset): offset(offset), file(file) {}
+                Record(DBCFile &file_, unsigned char *offset_): offset(offset_), file(file_) {}
                 unsigned char *offset;
                 DBCFile &file;
 
