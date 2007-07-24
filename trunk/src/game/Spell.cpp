@@ -1018,7 +1018,7 @@ void Spell::cast(bool skipCheck)
         // This is delayed spell, we do need to calculate distances and create distance maps
 
         // Check, if we do have fixed distance for all
-        bool fixed = (m_targets.m_destX != 0) || (m_targets.m_destY != 0) || (m_targets.m_destY != 0);
+        bool fixed = (m_targets.m_destX != 0) || (m_targets.m_destY != 0) || (m_targets.m_destZ != 0);
         float dist;
         uint64 interval;
         uint64 min_interval = 0;
@@ -2770,7 +2770,7 @@ uint8 Spell::CheckRange()
                 return SPELL_FAILED_UNIT_NOT_INFRONT;
     }
 
-    if(m_targets.m_targetMask == TARGET_FLAG_DEST_LOCATION && m_targets.m_destX != 0 && m_targets.m_destY != 0 && m_targets.m_destY != 0)
+    if(m_targets.m_targetMask == TARGET_FLAG_DEST_LOCATION && m_targets.m_destX != 0 && m_targets.m_destY != 0 && m_targets.m_destZ != 0)
     {
         float dist = m_caster->GetDistanceSq(m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ);
         if(dist > max_range * max_range)
