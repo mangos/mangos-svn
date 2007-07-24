@@ -168,8 +168,7 @@ class Pet : public Creature
         void GivePetLevel(uint32 level);
         bool InitStatsForLevel(uint32 level);
         bool HaveInDiet(ItemPrototype const* item) const;
-        bool SetCurrentFoodBenefitLevel(uint32 itemlevel);
-        uint32 GetCurrentFoodBenefit() { return m_food_benefit; }
+        uint32 GetCurrentFoodBenefitLevel(uint32 itemlevel);
         void SetDuration(uint32 dur) { m_duration = dur; }
 
         int32 GetBonusDamage() { return m_bonusdamage; }
@@ -225,7 +224,6 @@ class Pet : public Creature
         PetType m_petType;
         uint32  m_duration;                                 // time until unsummon (used mostly for summoned guardians and not used for controlled pets)
         int32   m_loyaltyPoints;
-        uint32  m_food_benefit;
         int32   m_bonusdamage;
         uint8   m_CommandState;
         uint8   m_ReactSate;

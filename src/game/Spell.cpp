@@ -2436,7 +2436,7 @@ uint8 Spell::CanCast()
                 if(!pet->HaveInDiet(m_targets.m_itemTarget->GetProto()))
                     return SPELL_FAILED_WRONG_PET_FOOD;
 
-                if(!pet->SetCurrentFoodBenefitLevel(m_targets.m_itemTarget->GetProto()->ItemLevel))
+                if(!pet->GetCurrentFoodBenefitLevel(m_targets.m_itemTarget->GetProto()->ItemLevel))
                     return SPELL_FAILED_FOOD_LOWLEVEL;
 
                 if(m_caster->isInCombat() || pet->isInCombat())
