@@ -367,7 +367,9 @@ ChatCommand * ChatHandler::getCommandTable()
                         ChatCommand *ptable = commandTable[i].ChildCommands;
                         for(uint32 j = 0; ptable[j].Name != NULL; j++)
                         {
-                            if (name == fmtstring("%s %s", commandTable[i].Name, ptable[j].Name))
+                            // first case for "" named subcommand
+                            if (ptable[j].Name == "" && name == commandTable[i].Name ||
+                                name == fmtstring("%s %s", commandTable[i].Name, ptable[j].Name) )
                             {
                                 ptable[j].SecurityLevel = (uint16)fields[1].GetUInt16();
                                 ptable[j].Help = fields[2].GetCppString();
