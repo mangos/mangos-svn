@@ -237,20 +237,25 @@ void Spell::EffectSchoolDMG(uint32 i)
         if(m_spellInfo->Category == 971 && m_spellInfo->SpellVisual == 372)
             return EffectWeaponDmg(i);
         // Ferocious Bite
-        else if(m_spellInfo->SpellFamilyName==SPELLFAMILY_DRUID && (m_spellInfo->SpellFamilyFlags & 0x800000) && m_spellInfo->SpellVisual==6587)
+        else if(m_spellInfo->SpellFamilyName==SPELLFAMILY_DRUID  && (m_spellInfo->SpellFamilyFlags & 0x000800000) && m_spellInfo->SpellVisual==6587)
         {
             damage += m_caster->GetPower(POWER_ENERGY);
             m_caster->SetPower(POWER_ENERGY,0);
         }
         // Mongoose Bite
-        else if(m_spellInfo->SpellFamilyName==SPELLFAMILY_HUNTER && (m_spellInfo->SpellFamilyFlags & 0x0002) && m_spellInfo->SpellVisual==342)
+        else if(m_spellInfo->SpellFamilyName==SPELLFAMILY_HUNTER && (m_spellInfo->SpellFamilyFlags & 0x000000002) && m_spellInfo->SpellVisual==342)
         {
             damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.2);
         }
         // Arcane Shoot
-        else if(m_spellInfo->SpellFamilyName==SPELLFAMILY_HUNTER && (m_spellInfo->SpellFamilyFlags & 0x0800) && m_spellInfo->maxLevel > 0)
+        else if(m_spellInfo->SpellFamilyName==SPELLFAMILY_HUNTER && (m_spellInfo->SpellFamilyFlags & 0x000000800) && m_spellInfo->maxLevel > 0)
         {
             damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.15);
+        }
+        // Steady Shot
+        else if(m_spellInfo->SpellFamilyName==SPELLFAMILY_HUNTER && (m_spellInfo->SpellFamilyFlags & 0x100000000))
+        {
+            damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.2);
         }
 
         if(damage >= 0)
@@ -335,6 +340,30 @@ void Spell::EffectDummy(uint32 i)
         else
             m_caster->CastSpell(unitTarget, hurt, true, 0);
 
+        return;
+    }
+
+    // Steady Shot
+    if(m_spellInfo->SpellFamilyName==SPELLFAMILY_HUNTER && (m_spellInfo->SpellFamilyFlags & 0x100000000))
+    {
+        if( !unitTarget || !unitTarget->isAlive())
+            return;
+
+        bool found = false;
+
+        // check dazed affect
+        Unit::AuraList const& decSpeedList = unitTarget->GetAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
+        for(Unit::AuraList::const_iterator iter = decSpeedList.begin(); iter != decSpeedList.end(); ++iter)
+        {
+            if((*iter)->GetSpellProto()->SpellIconID==15 && (*iter)->GetSpellProto()->Dispel==0)
+            {
+                found = true;
+                break;
+            }
+        }
+
+        if(found)
+            m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell, true);
         return;
     }
 
