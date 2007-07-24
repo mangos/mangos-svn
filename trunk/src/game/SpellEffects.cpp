@@ -236,12 +236,17 @@ void Spell::EffectSchoolDMG(uint32 i)
         // Bloodthirst
         if(m_spellInfo->Category == 971 && m_spellInfo->SpellVisual == 372)
             return EffectWeaponDmg(i);
+        // Ferocious Bite
         else if(m_spellInfo->SpellFamilyName==SPELLFAMILY_DRUID && (m_spellInfo->SpellFamilyFlags & 0x800000) && m_spellInfo->SpellVisual==6587)
         {
             damage += m_caster->GetPower(POWER_ENERGY);
             m_caster->SetPower(POWER_ENERGY,0);
         }
-
+        // Arcane Shoot
+        else if(m_spellInfo->SpellFamilyName==SPELLFAMILY_HUNTER && (m_spellInfo->SpellFamilyFlags & 0x0800) && m_spellInfo->maxLevel > 0)
+        {
+            damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.15);
+        }
 
         if(damage >= 0)
             m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell, true);
