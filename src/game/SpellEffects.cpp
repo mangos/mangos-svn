@@ -248,12 +248,12 @@ void Spell::EffectSchoolDMG(uint32 i)
             damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.2);
         }
         // Arcane Shoot
-        else if(m_spellInfo->SpellFamilyName==SPELLFAMILY_HUNTER && (m_spellInfo->SpellFamilyFlags & 0x000000800) && m_spellInfo->maxLevel > 0)
+        else if(m_spellInfo->SpellFamilyName==SPELLFAMILY_HUNTER && (m_spellInfo->SpellFamilyFlags & 0x00000800) && m_spellInfo->maxLevel > 0)
         {
             damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.15);
         }
         // Steady Shot
-        else if(m_spellInfo->SpellFamilyName==SPELLFAMILY_HUNTER && (m_spellInfo->SpellFamilyFlags & 0x100000000))
+        else if(m_spellInfo->SpellFamilyName==SPELLFAMILY_HUNTER && (m_spellInfo->SpellFamilyFlags & 0x100000000LL))
         {
             damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.2);
         }
@@ -344,7 +344,7 @@ void Spell::EffectDummy(uint32 i)
     }
 
     // Steady Shot
-    if(m_spellInfo->SpellFamilyName==SPELLFAMILY_HUNTER && (m_spellInfo->SpellFamilyFlags & 0x100000000))
+    if(m_spellInfo->SpellFamilyName==SPELLFAMILY_HUNTER && (m_spellInfo->SpellFamilyFlags & 0x100000000LL))
     {
         if( !unitTarget || !unitTarget->isAlive())
             return;
