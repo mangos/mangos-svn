@@ -242,6 +242,11 @@ void Spell::EffectSchoolDMG(uint32 i)
             damage += m_caster->GetPower(POWER_ENERGY);
             m_caster->SetPower(POWER_ENERGY,0);
         }
+        // Mongoose Bite
+        else if(m_spellInfo->SpellFamilyName==SPELLFAMILY_HUNTER && (m_spellInfo->SpellFamilyFlags & 0x0002) && m_spellInfo->SpellVisual==342)
+        {
+            damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.2);
+        }
         // Arcane Shoot
         else if(m_spellInfo->SpellFamilyName==SPELLFAMILY_HUNTER && (m_spellInfo->SpellFamilyFlags & 0x0800) && m_spellInfo->maxLevel > 0)
         {
