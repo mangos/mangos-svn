@@ -2952,11 +2952,16 @@ void Spell::EffectFeedPet(uint32 i)
     if(!pet->isAlive())
         return;
 
+    int32 benefit = pet->GetCurrentFoodBenefitLevel(itemTarget->GetProto()->ItemLevel);
+    if(benefit <= 0)
+        return;
+
+
     uint32 count = 1;
     _player->DestroyItemCount(itemTarget,count,true);
     // TODO: fix crash when a spell has two effects, both pointed at the same item target
 
-    int32 feedCustomBasePoints0 = pet->GetCurrentFoodBenefit() -1;
+    int32 feedCustomBasePoints0 = benefit-1;
     m_caster->CastCustomSpell(m_caster,m_spellInfo->EffectTriggerSpell[i],&feedCustomBasePoints0,NULL,NULL,true);
 }
 
