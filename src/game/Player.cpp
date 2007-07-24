@@ -5056,7 +5056,8 @@ int32 Player::GetBaseReputation(const FactionEntry *factionEntry) const
         if ( factionEntry->BaseRepMask[i] & (1 << (Race-1)))
             return factionEntry->BaseRepValue[i];
     }
-    sLog.outError("Player::GetBaseReputation: can't get base reputation of %s for faction id %d", GetName(), factionEntry->ID);
+
+    // in faction.dbc exist factions with (RepListId >=0, listed in character reputation list) with all BaseRepMask[i]==0
     return 0;
 }
 
