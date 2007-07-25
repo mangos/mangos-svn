@@ -166,6 +166,8 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         static void DeleteStateMachine();
 
         float GetHeight(float x, float y, float z, bool pCheckVMap=true); // some calls like isInWater should not use vmaps due to processor power
+        // return height of VMAP_INVALID_HEIGHT
+        float GetVMapHeight(float x, float y, float z);
         bool IsInWater(float x, float y, float z); // does not use z pos. This is for future use
         void loadVMap(int pX, int pY);
 
