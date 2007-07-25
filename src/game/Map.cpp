@@ -76,15 +76,14 @@ bool Map::ExistMAP(uint32 mapid,int x,int y, bool output)
     {
         if(vmgr->isMapLoadingEnabled())
         {
-            int vmapLoadResult = vmgr->loadMap((sWorld.GetDataPath()+ "vmaps").c_str(),  mapid, y,x); // x and y are swaped !!
-            if(vmapLoadResult == VMAP::VMAP_LOAD_RESULT_ERROR)
+            bool exists = vmgr->existsMap((sWorld.GetDataPath()+ "vmaps").c_str(),  mapid, y,x); // x and y are swaped !!
+            if(!exists)
             {
                 std::string name = vmgr->getDirFileName(mapid,x,y);
-                sLog.outError("Could not load vmap file '%s'", (sWorld.GetDataPath()+"vmaps/"+name).c_str());
-                return false;
+                sLog.outString("Could not find vmap file '%s'", (sWorld.GetDataPath()+"vmaps/"+name).c_str()); 
+                // just print the warning, but don't return false
+                // some maps do not have a corespondig vmap
             }
-
-            vmgr->unloadMap(mapid, y, x); // x and y are swaped
         }
     }
 
@@ -1250,6 +1249,19 @@ void Map::UnloadAll()
     }
 }
 
+float Map::GetVMapHeight(float x, float y, float z)
+{
+    VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
+
+    float height=VMAP_INVALID_HEIGHT;
+    if(vmgr->isHeightCalcEnabled())
+    {
+        height = vmgr->getHeight(GetId(), x, y, z + 2); // look from a bit higher pos to find the floor
+    }
+    return height;
+
+}
+
 float Map::GetHeight(float x, float y, float z, bool pUseVmaps)
 {
     //local x,y coords
@@ -1290,18 +1302,14 @@ float Map::GetHeight(float x, float y, float z, bool pUseVmaps)
         }
         if(pUseVmaps)
         {
-            float vmapheight = vmgr->getHeight(GetId(), x, y, z + 4); // look from a bit higher pos to find the floor
+            float vmapheight = vmgr->getHeight(GetId(), x, y, z + 2); // look from a bit higher pos to find the floor
             // if the land map did not find the height or if we are already under the surface and vmap found a height
             // or if the distance of the vmap height is less the land height distance
-            if(!mapHeightFound || (z<height && vmapheight > -100000) || fabs(height-z) > fabs(vmapheight-z))
+            if(!mapHeightFound || (z<height && vmapheight != VMAP_INVALID_HEIGHT) || fabs(height-z) > fabs(vmapheight-z))
             {
                 height = vmapheight;
                 mapHeightFound = true;
             }
-        }
-        if(!mapHeightFound || height < -100000)
-        {
-            height = 0; // fallback (should not happen)
         }
         return height;
     }

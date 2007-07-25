@@ -206,7 +206,8 @@ namespace VMAP {
             iInstanceMapTrees.set(pMapId, instanceTree);
         }
         instanceTree = iInstanceMapTrees.get(pMapId);
-        result = instanceTree->loadMap(dirFileName);
+        unsigned int mapTileIdent = MAP_TILE_IDENT(x,y);
+        result = instanceTree->loadMap(dirFileName, mapTileIdent);
         if(!result) { // remove on fail
             if(instanceTree->size() == 0) {
                 iInstanceMapTrees.remove(pMapId);
@@ -214,6 +215,45 @@ namespace VMAP {
             }
         }
         return(result);
+    }
+
+    //=========================================================
+
+    bool VMapManager::_existsMap(const std::string& pBasePath, unsigned int pMapId, int x, int y, bool pForceTileLoad) {
+        bool result = false;
+        std::string dirFileName;
+        if(pForceTileLoad || iMapsSplitIntoTiles.containsKey(pMapId)) {
+            dirFileName = getDirFileName(pMapId,x,y);
+        } else {
+            dirFileName = getDirFileName(pMapId);
+        }
+        size_t len = pBasePath.length() + dirFileName.length();
+        char *filenameBuffer = new char[len+1];
+        sprintf(filenameBuffer, "%s%s", pBasePath.c_str(), dirFileName.c_str());
+        FILE* df = fopen(filenameBuffer, "rb");
+        if(df) {
+            fclose(df);
+            result = true;
+        }
+        return result;
+    }
+
+    //=========================================================
+
+    bool VMapManager::existsMap(const char* pBasePath, unsigned int pMapId, int x, int y) {
+        std::string basePath = std::string(pBasePath);
+        if(basePath.length() > 0 && (basePath[basePath.length()-1] != '/' || basePath[basePath.length()-1] != '\\')) {
+            basePath.append("/");
+        }
+        bool found = _existsMap(basePath, pMapId, x, y, false);
+        if(!found) {
+            // if we can't load the map it might be splitted into tiles. Try that one and store the result
+            found = _existsMap(basePath, pMapId, x, y, true);
+            if(found) {
+                iMapsSplitIntoTiles.set(pMapId, true);
+            }  
+        }
+        return found;
     }
 
     //=========================================================
@@ -237,7 +277,8 @@ namespace VMAP {
             } else {
                 dirFileName = getDirFileName(pMapId);
             }
-            instanceTree->unloadMap(dirFileName);
+            unsigned int mapTileIdent = MAP_TILE_IDENT(x,y);
+            instanceTree->unloadMap(dirFileName, mapTileIdent);
             if(instanceTree->size() == 0) {
                 iInstanceMapTrees.remove(pMapId);
                 delete instanceTree;
@@ -251,7 +292,7 @@ namespace VMAP {
         if(iInstanceMapTrees.containsKey(pMapId)) {
             MapTree* instanceTree = iInstanceMapTrees.get(pMapId);
             std::string dirFileName = getDirFileName(pMapId);
-            instanceTree->unloadMap(dirFileName);
+            instanceTree->unloadMap(dirFileName, 0, true);
             if(instanceTree->size() == 0) {
                 iInstanceMapTrees.remove(pMapId);
                 delete instanceTree;
@@ -309,24 +350,18 @@ namespace VMAP {
 
     //=========================================================
     /**
-    get height or -1000000 if to hight was calculated
+    get height or INVALID_HEIGHT if to hight was calculated
     */
 
     //int gGetHeightCounter = 0;
     float VMapManager::getHeight(unsigned int pMapId, float x, float y, float z) {
-        float height = -1000000;  //no height
+        float height = VMAP_INVALID_HEIGHT;  //no height
         if(isHeightCalcEnabled() && iInstanceMapTrees.containsKey(pMapId)) {
-#if 0
-            ++gGetHeightCounter;
-            if(gGetHeightCounter%1000 == 0) {
-                int xxx = 0; // just to be able to set a breakpoint
-            }
-#endif
             Vector3 pos = convertPositionToInternalRep(x,y,z);
             MapTree* mapTree = iInstanceMapTrees.get(pMapId);
             height = mapTree->getHeight(pos);
             if(!(height < inf())) {
-                height = -1000000;  //no height
+                height = VMAP_INVALID_HEIGHT;  //no height
             }
             Command c = Command();
             c.fillTestHeightCmd(pMapId,Vector3(x,y,z),height);
@@ -497,7 +532,7 @@ namespace VMAP {
 
     //=========================================================
 
-    bool MapTree::loadMap(const std::string& pDirFileName) {
+    bool MapTree::loadMap(const std::string& pDirFileName, unsigned int pMapTileIdent) {
         bool result = true;
         size_t len = iBasePath.length() + pDirFileName.length();
         char *filenameBuffer = new char[len+1];
@@ -538,19 +573,19 @@ namespace VMAP {
                     result = false;
                 }
                 fclose(df);
-                filesInDir.incRefCount();
-                addDirFile(pDirFileName, filesInDir);
+                if(result) {
+                    filesInDir.incRefCount();
+                    addDirFile(pDirFileName, filesInDir);
+                    setLoadedMapTile(pMapTileIdent);
+                }
             }
         } else {
-            // Already loaded, so just inc. the ref count
-#if 0
-
-            //Do NOT inc the refcount. The load map code is called multiple times from mangos core, but the 
-            //unload is only called once.
-            //This results in never unloading the maps
-            FilesInDir& filesInDir = getDirFiles(pDirFileName);
-            filesInDir.incRefCount();
-#endif
+            // Already loaded, so just inc. the ref count if mapTileIdent is new
+            if(!containsLoadedMapTile(pMapTileIdent)) {
+                setLoadedMapTile(pMapTileIdent);
+                FilesInDir& filesInDir = getDirFiles(pDirFileName);
+                filesInDir.incRefCount();
+            }
         }
         delete [] filenameBuffer;
         return (result);
@@ -558,8 +593,9 @@ namespace VMAP {
 
     //=========================================================
 
-    void MapTree::unloadMap(const std::string& dirFileName) {
-        if(hasDirFile(dirFileName)) {
+    void MapTree::unloadMap(const std::string& dirFileName, unsigned int pMapTileIdent, bool pForce) {
+        if(hasDirFile(dirFileName) && (pForce || containsLoadedMapTile(pMapTileIdent))) {
+            removeLoadedMapTile(pMapTileIdent);
             FilesInDir& filesInDir = getDirFiles(dirFileName);
             filesInDir.decRefCount();
             if(filesInDir.getRefCount() <= 0) {

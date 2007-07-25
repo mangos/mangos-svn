@@ -805,7 +805,13 @@ void WorldObject::GetContactPoint( const WorldObject* obj, float &x, float &y, f
     y = GetPositionY() + (GetObjectSize() + obj->GetObjectSize() + distance ) * sin(angle);
 
     if(VMAP::VMapFactory::createOrGetVMapManager()->isHeightCalcEnabled())
-        z = MapManager::Instance().GetMap(GetMapId(), this)->GetHeight(x,y,GetPositionZ());
+    {
+        z = MapManager::Instance().GetMap(GetMapId(), this)->GetVMapHeight(x,y,GetPositionZ());
+        if(z != VMAP_INVALID_HEIGHT)
+            z += 0.2f; // just to be sure that we are not a few pixel under the surface
+        else 
+            z = GetPositionZ();
+    }
     else
         z = GetPositionZ();                                 // hack required in case LOS height disabled
 }
@@ -828,7 +834,13 @@ void WorldObject::GetRandomPoint( float x, float y, float z, float distance, flo
     rand_y = y + new_dist * sin(angle);
 
     if(VMAP::VMapFactory::createOrGetVMapManager()->isHeightCalcEnabled())
+    {
         rand_z = MapManager::Instance().GetMap(GetMapId(), this)->GetHeight(x,y,z);
+        if(rand_z != VMAP_INVALID_HEIGHT)
+            rand_z += 0.2f; // just to be sure that we are not a few pixel under the surface
+        else 
+            rand_z = GetPositionZ();
+    }
     else
         rand_z = z;                                         // hack required in case LOS height disabled
 }
@@ -912,7 +924,13 @@ void WorldObject::GetClosePoint( const WorldObject* victim, float &x, float &y, 
     y = GetPositionY() + (GetObjectSize() + distance) * sin(angle);
 
     if(VMAP::VMapFactory::createOrGetVMapManager()->isHeightCalcEnabled())
+    {
         z = MapManager::Instance().GetMap(GetMapId(), this)->GetHeight(x,y,GetPositionZ());
+        if(z != VMAP_INVALID_HEIGHT)
+            z += 0.2f; // just to be sure that we are not a few pixel under the surface
+        else 
+            z = GetPositionZ();
+    }
     else
         z = GetPositionZ();                                 // hack required in case LOS height disabled
 }

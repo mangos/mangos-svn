@@ -35,6 +35,7 @@ namespace VMAP {
         VMAP_LOAD_RESULT_IGNORED,
     };
 
+#define VMAP_INVALID_HEIGHT -100000.0f
 
     //===========================================================
     class IVMapManager
@@ -49,6 +50,8 @@ namespace VMAP {
         virtual ~IVMapManager(void) {}
 
         virtual int loadMap(const char* pBasePath, unsigned int pMapId, int x, int y) = 0;
+
+        virtual bool existsMap(const char* pBasePath, unsigned int pMapId, int x, int y) = 0;
 
         virtual void unloadMap(unsigned int pMapId, int x, int y) = 0;
         virtual void unloadMap(unsigned int pMapId) = 0;
