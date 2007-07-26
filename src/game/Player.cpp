@@ -5445,8 +5445,9 @@ uint32 Player::GetZoneIdFromDB(uint64 guid)
     if (!zone)
     {
         // stored zone is zero, use generic and slow zone detection
+        ss.str("");
         ss<<"SELECT `map`,`position_x`,`position_y` FROM `character` WHERE `guid`='"<<GUID_LOPART(guid)<<"'";
-        result = sDatabase.Query( ss.str().c_str() );
+        result = sDatabase.Query(ss.str().c_str());
         if( !result )
             return 0;
         fields = result->Fetch();
@@ -5456,6 +5457,10 @@ uint32 Player::GetZoneIdFromDB(uint64 guid)
         delete result;
 
         zone = MapManager::Instance().GetZoneId(map,posx,posy);
+
+        ss.str("");
+        ss << "UPDATE `character` SET `zone`='"<<zone<<"' WHERE `guid`='"<<GUID_LOPART(guid)<<"'";
+        sDatabase.Execute(ss.str().c_str());
     }
  
     return zone;
@@ -12824,11 +12829,11 @@ inline void Player::SendAttackSwingNotInRange()
 
 void Player::SavePositionInDB(uint32 mapid, float x,float y,float z,float o,uint32 zone,uint64 guid)
 {
-    std::ostringstream ss2;
-    ss2 << "UPDATE `character` SET `position_x`='"<<x<<"',`position_y`='"<<y
-        << "',`position_z`='"<<z<<"',`orientation`='"<<o<<"',`map`='"<<mapid
-        << "',`zone`='"<<zone<<"' WHERE `guid`='"<< GUID_LOPART(guid) <<"'";
-    sDatabase.Execute(ss2.str().c_str());
+    std::ostringstream ss;
+    ss << "UPDATE `character` SET `position_x`='"<<x<<"',`position_y`='"<<y
+       << "',`position_z`='"<<z<<"',`orientation`='"<<o<<"',`map`='"<<mapid
+       << "',`zone`='"<<zone<<"' WHERE `guid`='"<< GUID_LOPART(guid) <<"'";
+    sDatabase.Execute(ss.str().c_str());
 }
 
 bool Player::SaveValuesArrayInDB(Tokens const& tokens, uint64 guid)
