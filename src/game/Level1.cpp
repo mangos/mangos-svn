@@ -286,7 +286,10 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
         Player::SavePositionInDB(m_session->GetPlayer()->GetMapId(),
             m_session->GetPlayer()->GetPositionX(),
             m_session->GetPlayer()->GetPositionY(),
-            m_session->GetPlayer()->GetPositionZ(),m_session->GetPlayer()->GetOrientation(),guid);
+            m_session->GetPlayer()->GetPositionZ(),
+            m_session->GetPlayer()->GetOrientation(),
+            m_session->GetPlayer()->GetZoneId(),
+            guid);
     }
     else
         PSendSysMessage(LANG_NO_PLAYER, args);
@@ -1697,7 +1700,7 @@ bool ChatHandler::HandleNameTeleCommand(const char * args)
     else if (uint64 guid = objmgr.GetPlayerGUIDByName(name.c_str()))
     {
         PSendSysMessage(LANG_TELEPORTING_TO, name.c_str(), LANG_OFFLINE, location.c_str());
-        Player::SavePositionInDB(mapid,x,y,z,ort,guid);
+        Player::SavePositionInDB(mapid,x,y,z,ort,MapManager::Instance().GetZoneId(mapid,x,y),guid);
     }
     else
         PSendSysMessage(LANG_NO_PLAYER, name.c_str());

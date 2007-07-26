@@ -916,7 +916,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         static void SetFloatValueInArray(Tokens& data,uint16 index, float value);
         static void SetUInt32ValueInDB(uint16 index, uint32 value, uint64 guid);
         static void SetFloatValueInDB(uint16 index, float value, uint64 guid);
-        static void SavePositionInDB(uint32 mapid, float x,float y,float z,float o, uint64 guid);
+        static void SavePositionInDB(uint32 mapid, float x,float y,float z,float o,uint32 zone,uint64 guid);
 
         bool m_mailsLoaded;
         bool m_mailsUpdated;

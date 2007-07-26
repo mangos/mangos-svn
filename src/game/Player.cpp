@@ -3085,17 +3085,20 @@ void Player::DeleteFromDB()
     }
 
     sDatabase.PExecute("DELETE FROM `character` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_action` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_aura` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_gifts` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_homebind` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_instance` WHERE `leader` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_kill` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_queststatus` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_reputation` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_spell` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_spell_cooldown` WHERE `guid` = '%u'",guid);
+    sDatabase.PExecute("DELETE FROM `character_ticket` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_tutorial` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `item_instance` WHERE `owner_guid` = '%u'",guid);
-    sDatabase.PExecute("DELETE FROM `character_gifts` WHERE `guid` = '%u'",guid);
-    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `guid` = '%u'",guid);
-    sDatabase.PExecute("DELETE FROM `character_queststatus` WHERE `guid` = '%u'",guid);
-    sDatabase.PExecute("DELETE FROM `character_action` WHERE `guid` = '%u'",guid);
-    sDatabase.PExecute("DELETE FROM `character_reputation` WHERE `guid` = '%u'",guid);
-    sDatabase.PExecute("DELETE FROM `character_homebind` WHERE `guid` = '%u'",guid);
-    sDatabase.PExecute("DELETE FROM `character_kill` WHERE `guid` = '%u'",guid);
 
     sDatabase.PExecute("DELETE FROM `character_social` WHERE `guid` = '%u' OR `friend`='%u'",guid,guid);
     m_ignorelist.clear();
@@ -5430,20 +5433,32 @@ uint32 Player::GetArenaTeamIdFromDB(uint64 guid, uint8 slot)
 uint32 Player::GetZoneIdFromDB(uint64 guid)
 {
     std::ostringstream ss;
-    ss<<"SELECT `map`,`position_x`,`position_y` FROM `character` WHERE `guid`='"<<GUID_LOPART(guid)<<"'";
+
+    ss<<"SELECT `zone` FROM `character` WHERE `guid`='"<<GUID_LOPART(guid)<<"'";
     QueryResult *result = sDatabase.Query( ss.str().c_str() );
-    if( !result )
+    if (!result)
         return 0;
-
     Field* fields = result->Fetch();
-
-    uint32 map  = fields[0].GetUInt32();
-    float posx = fields[1].GetFloat();
-    float posy = fields[2].GetFloat();
-
+    uint32 zone = fields[0].GetUInt32();
     delete result;
 
-    return MapManager::Instance().GetZoneId(map,posx,posy);
+    if (!zone)
+    {
+        // stored zone is zero, use generic and slow zone detection
+        ss<<"SELECT `map`,`position_x`,`position_y` FROM `character` WHERE `guid`='"<<GUID_LOPART(guid)<<"'";
+        result = sDatabase.Query( ss.str().c_str() );
+        if( !result )
+            return 0;
+        fields = result->Fetch();
+        uint32 map  = fields[0].GetUInt32();
+        float posx = fields[1].GetFloat();
+        float posy = fields[2].GetFloat();
+        delete result;
+
+        zone = MapManager::Instance().GetZoneId(map,posx,posy);
+    }
+ 
+    return zone;
 }
 
 void Player::UpdateZone(uint32 newZone)
@@ -12419,7 +12434,7 @@ void Player::SaveToDB()
         "`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,"
         "`taximask`,`online`,`cinematic`,"
         "`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,"
-        "`trans_x`, `trans_y`, `trans_z`, `trans_o`, `transguid`, `gmstate`, `stable_slots`,`rename`) VALUES ("
+        "`trans_x`, `trans_y`, `trans_z`, `trans_o`, `transguid`, `gmstate`, `stable_slots`,`rename`,`zone`) VALUES ("
         << GetGUIDLow() << ", "
         << GetSession()->GetAccountId() << ", '"
         << m_name << "', "
@@ -12486,6 +12501,9 @@ void Player::SaveToDB()
 
     ss << ", ";
     ss << (isNeedRename()? 1 : 0);
+
+    ss << ", ";
+    ss << GetZoneId();
 
     ss << " )";
 
@@ -12804,12 +12822,12 @@ inline void Player::SendAttackSwingNotInRange()
     GetSession()->SendPacket( &data );
 }
 
-void Player::SavePositionInDB(uint32 mapid, float x,float y,float z,float o,uint64 guid)
+void Player::SavePositionInDB(uint32 mapid, float x,float y,float z,float o,uint32 zone,uint64 guid)
 {
     std::ostringstream ss2;
     ss2 << "UPDATE `character` SET `position_x`='"<<x<<"',`position_y`='"<<y
         << "',`position_z`='"<<z<<"',`orientation`='"<<o<<"',`map`='"<<mapid
-        << "' WHERE `guid`='"<< GUID_LOPART(guid) <<"'";
+        << "',`zone`='"<<zone<<"' WHERE `guid`='"<< GUID_LOPART(guid) <<"'";
     sDatabase.Execute(ss2.str().c_str());
 }
 

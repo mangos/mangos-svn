@@ -25,6 +25,7 @@
 #include "Player.h"
 #include "UpdateMask.h"
 #include "Unit.h"
+#include "Language.h"
 
 void WorldSession::HandleSendMail(WorldPacket & recv_data )
 {
@@ -344,7 +345,9 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
                 {
                     uint64 sender_guid = MAKE_GUID(m->sender,HIGHGUID_PLAYER);
                     sender_accId = objmgr.GetPlayerAccountIdByGUID(sender_guid);
-                    objmgr.GetPlayerNameByGUID(sender_guid,sender_name);
+
+                    if(!objmgr.GetPlayerNameByGUID(sender_guid,sender_name))
+                        sender_name = LANG_UNKNOWN;
                 }
                 sLog.outCommand("GM %s (Account: %u) receive mail item: %s (Entry: %u Count: %u) and send COD money: %u to player: %s (Account: %u)",
                     GetPlayerName(),GetAccountId(),it->GetProto()->Name1,it->GetEntry(),it->GetCount(),m->COD,sender_name.c_str(),sender_accId);

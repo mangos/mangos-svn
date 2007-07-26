@@ -1394,9 +1394,8 @@ bool ChatHandler::HandlePInfoCommand(const char* args)
 void ChatHandler::ShowTicket(uint64 guid, uint32 category, char const* text)
 {
     std::string name;
-    objmgr.GetPlayerNameByGUID(guid,name);
-
-    if(name=="") name = LANG_UNKNOWN;
+    if(!objmgr.GetPlayerNameByGUID(guid,name))
+        name = LANG_UNKNOWN;
 
     PSendSysMessage(LANG_COMMAND_TICKETVIEW, name.c_str(),category,text);
 }

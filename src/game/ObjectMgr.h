@@ -237,8 +237,8 @@ class ObjectMgr
             return true;
         }
 
-        Player* GetPlayer(const char* name){ return ObjectAccessor::Instance().FindPlayerByName(name);}
-        Player* GetPlayer(uint64 guid){ return ObjectAccessor::Instance().FindPlayer(guid); }
+        Player* GetPlayer(const char* name) const { return ObjectAccessor::Instance().FindPlayerByName(name);}
+        Player* GetPlayer(uint64 guid) const { return ObjectAccessor::Instance().FindPlayer(guid); }
 
         static GameObjectInfo const *GetGameObjectInfo(uint32 id) { return sGOStorage.LookupEntry<GameObjectInfo>(id); }
 

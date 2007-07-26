@@ -384,6 +384,48 @@ bool ChatHandler::HandleGoXYCommand(const char* args)
     return true;
 }
 
+bool ChatHandler::HandleGoGridCommand(const char* args)
+{
+    Player* _player = m_session->GetPlayer();
+
+    if(_player->isInFlight())
+    {
+        SendSysMessage(LANG_YOU_IN_FLIGHT);
+        return true;
+    }
+
+    char* px = strtok((char*)args, " ");
+    char* py = strtok(NULL, " ");
+    char* pmapid = strtok(NULL, " ");
+
+    if (!px || !py)
+        return false;
+
+    float grid_x = (float)atof(px);
+    float grid_y = (float)atof(py);
+    uint32 mapid;
+    if (pmapid)
+        mapid = (uint32)atoi(pmapid);
+    else mapid = _player->GetMapId();
+
+    // center of grid
+    float x = (grid_x-CENTER_GRID_ID+0.5)*SIZE_OF_GRIDS;
+    float y = (grid_y-CENTER_GRID_ID+0.5)*SIZE_OF_GRIDS;
+
+    if(!MapManager::IsValidMapCoord(mapid,x,y))
+    {
+        PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
+        return true;
+    }
+
+    Map *map = MapManager::Instance().GetMap(mapid, _player);
+    float z = std::max(map->GetHeight(x, y, 0), map->GetWaterLevel(x, y));
+    _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
+    _player->TeleportTo(mapid, x, y, z, _player->GetOrientation());
+
+    return true;
+}
+
 bool ChatHandler::HandleWorldPortCommand(const char* args)
 {
     Player* _player = m_session->GetPlayer();
