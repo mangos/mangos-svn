@@ -64,6 +64,8 @@ enum Classes
     MAX_CLASSES     = 12
 };
 
+#define CLASSMASK_WAND_USERS ((1<<(CLASS_PRIEST-1))|(1<<(CLASS_MAGE-1))|(1<<(CLASS_WARLOCK-1)))
+
 enum ReputationRank
 {
     REP_HATED       = 0,
