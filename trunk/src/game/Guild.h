@@ -170,7 +170,7 @@ class Guild
         bool LoadGuildFromDB(uint32 GuildId);
         bool LoadRanksFromDB(uint32 GuildId);
         bool LoadMembersFromDB(uint32 GuildId);
-        void LoadPlayerStats(MemberSlot* memslot);
+        bool FillPlayerData(uint64 guid, MemberSlot* memslot);
         void LoadPlayerStatsByGuid(uint64 guid);
 
         void BroadcastToGuild(WorldSession *session, std::string msg, uint32 language = LANG_UNIVERSAL);

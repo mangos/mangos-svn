@@ -278,6 +278,7 @@ CREATE TABLE `character` (
   `gmstate` tinyint(3) unsigned NOT NULL default '0',
   `stable_slots` tinyint(1) unsigned NOT NULL default '0',
   `rename` tinyint (3) unsigned NOT NULL default '0',  
+  `zone` INT(11) UNSIGNED NOT NULL DEFAULT '0',
   PRIMARY KEY  (`guid`),
   KEY `idx_account` (`account`),
   KEY `idx_online` (`online`)
@@ -726,6 +727,7 @@ INSERT INTO `command` VALUES
 ('gmon',1,'Syntax: .gmon\r\n\r\nEnable the <GM> prefix for your character.'),
 ('go',3,'Syntax: .go #position_x #position_y #position_z #mapid\r\n\r\nTeleport to the given coordinates on the specified map.'),
 ('gocreature',2,'Syntax: .gocreature #creature_guid\r\nTeleport your character to creature with guid #creature_guid.\r\n.gocreature #creature_name\r\nTeleport your character to creature with this name.\r\n.gocreature id #creature_id\r\nTeleport your character to a creature that was spawned from the template with this entry.\r\n*If* more than one creature is found, then you are teleported to the first that is found inside the database.'),
+('gogrid', '3', 'Syntax: .gogrid #gridX #gridY [#mapId]\n\nTeleport the gm to center of grid with provided indexes at map #mapId (or current map if it not provided).'),
 ('goobject',1,'Syntax: .goobject #object_guid\r\nTeleport your character to gameobject with guid #object_guid'),
 ('goname',1,'Syntax: .goname $charactername\r\n\r\nTeleport to the given character. Either specify the character name or click on the character\'s portrait, e.g. when you are in a group.'),
 ('goxy',3,'Syntax: .goxy #x #y [#mapid]\r\n\r\nTeleport player to point with (#x,#y) coordinates at ground(water) level at map #mapid or same map if #mapid not provided.'),

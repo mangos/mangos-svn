@@ -32,6 +32,7 @@
 #include "Transports.h"
 #include "ProgressBar.h"
 #include "Policies/SingletonImp.h"
+#include "Language.h"
 
 INSTANTIATE_SINGLETON_1(ObjectMgr);
 
@@ -264,13 +265,18 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
             gm_security = GetSecurityByAccount(gm_accid);
             
             if(gm_security > SEC_PLAYER )                                // not do redundant DB requests
-                GetPlayerNameByGUID(bidder_guid,gm_name);
+            {
+                if(!GetPlayerNameByGUID(bidder_guid,gm_name))
+                    gm_name = LANG_UNKNOWN;
+            }
         }
 
         if( gm_security > SEC_PLAYER )
         {
             std::string owner_name;
-            GetPlayerNameByGUID(auction->owner,owner_name);
+            if(!GetPlayerNameByGUID(auction->owner,owner_name))
+                owner_name = LANG_UNKNOWN;
+
             uint32 owner_accid = GetPlayerAccountIdByGUID(auction->owner);
 
             sLog.outCommand("GM %s (Account: %u) won item in auction: %s (Entry: %u Count: %u) and pay money: %u. Original owner %s (Account: %u)",
@@ -631,6 +637,13 @@ uint64 ObjectMgr::GetPlayerGUIDByName(std::string name) const
 
 bool ObjectMgr::GetPlayerNameByGUID(const uint64 &guid, std::string &name) const
 {
+    // prevent DB access for online player
+    if(Player* player = GetPlayer(guid))
+    {
+        name  = player->GetName();
+        return true;
+    }
+
     QueryResult *result = sDatabase.PQuery("SELECT `name` FROM `character` WHERE `guid` = '%u'", GUID_LOPART(guid));
 
     if(result)

@@ -106,12 +106,6 @@ bool Guild::create(uint64 lGuid, std::string gname)
 
 bool Guild::AddMember(uint64 plGuid, uint32 plRank)
 {
-    std::string plName;
-    uint8 plLevel, plClass;
-    uint32 plZone;
-
-    if(!objmgr.GetPlayerNameByGUID(plGuid, plName))         // player doesnt exist
-        return false;
     if(Player::GetGuildIdFromDB(plGuid) != 0)               // player already in guild
         return false;
 
@@ -119,39 +113,15 @@ bool Guild::AddMember(uint64 plGuid, uint32 plRank)
     // this will be prevent attempt joining player to many guilds and corrupt guild data integrity
     Player::RemovePetitionsAndSigns(plGuid, 9);
 
-    Player* pl = objmgr.GetPlayer(plGuid);
-    if(pl)
-    {
-        plLevel = (uint8)pl->getLevel();
-        plClass = (uint8)pl->getClass();
-
-        AreaTableEntry const* area = GetAreaEntryByAreaFlag(MapManager::Instance().GetMap(pl->GetMapId(), pl)->GetAreaFlag(pl->GetPositionX(),pl->GetPositionY()));
-        if (area)                                           // For example: .worldport -2313 478 48 1    Zone will be 0(unkonown), even though it's a usual cave
-            plZone = area->zone;                            // would cause null pointer exception
-        else
-            plZone = 0;
-    }
-    else
-    {
-        plLevel = (uint8)Player::GetUInt32ValueFromDB(UNIT_FIELD_LEVEL, plGuid);
-        plZone = Player::GetZoneIdFromDB(plGuid);
-
-        QueryResult *result = sDatabase.PQuery("SELECT `class` FROM `character` WHERE `guid`='%u'", GUID_LOPART(plGuid));
-        if(!result)
-            return false;
-        plClass = (*result)[0].GetUInt8();
-        delete result;
-    }
-
+    // fill player data
     MemberSlot newmember;
-    newmember.name = plName;
-    newmember.guid = plGuid;
+
+    if(!FillPlayerData(plGuid, &newmember))                 // problems with player data collection
+        return false;
+
     newmember.RankId = plRank;
     newmember.OFFnote = (std::string)"";
     newmember.Pnote = (std::string)"";
-    newmember.level = plLevel;
-    newmember.Class = plClass;
-    newmember.zoneId = plZone;
     members.push_back(newmember);
 
     std::string dbPnote = newmember.Pnote;
@@ -162,6 +132,7 @@ bool Guild::AddMember(uint64 plGuid, uint32 plRank)
     sDatabase.PExecute("INSERT INTO `guild_member` (`guildid`,`guid`,`rank`,`Pnote`,`OFFnote`) VALUES ('%u', '%u', '%u','%s','%s')",
         Id, GUID_LOPART(newmember.guid), newmember.RankId, dbPnote.c_str(), dbOFFnote.c_str());
 
+    Player* pl = objmgr.GetPlayer(plGuid);
     if(pl)
     {
         pl->SetInGuild(Id);
@@ -273,14 +244,11 @@ bool Guild::LoadMembersFromDB(uint32 GuildId)
     {
         Field *fields = result->Fetch();
         MemberSlot newmember;
-        newmember.guid = MAKE_GUID(fields[0].GetUInt32(),HIGHGUID_PLAYER);
         newmember.RankId = fields[1].GetUInt32();
 
         // player not exist
-        if(!objmgr.GetPlayerAccountIdByGUID(newmember.guid))
+        if(!FillPlayerData(MAKE_GUID(fields[0].GetUInt32(),HIGHGUID_PLAYER), &newmember))
             continue;
-
-        LoadPlayerStats(&newmember);
 
         newmember.Pnote = fields[2].GetCppString();
         newmember.OFFnote = fields[3].GetCppString();
@@ -295,26 +263,42 @@ bool Guild::LoadMembersFromDB(uint32 GuildId)
     return true;
 }
 
-void Guild::LoadPlayerStats(MemberSlot* memslot)
+bool Guild::FillPlayerData(uint64 guid, MemberSlot* memslot)
 {
-    Field *fields;
+    std::string plName;
+    uint8 plLevel, plClass;
+    uint32 plZone;
 
-    QueryResult *result = sDatabase.PQuery("SELECT `name`,`class`,`map`,`position_x`,`position_y`,`data` FROM `character` WHERE `guid` = '%u'", GUID_LOPART(memslot->guid));
-    if(!result) return;
-    fields = result->Fetch();
-    memslot->name  = fields[0].GetCppString();
-    memslot->Class = fields[1].GetUInt8();
-
-    Tokens tokens = StrSplit(fields[5].GetCppString(), " ");
-    memslot->level = Player::GetUInt32ValueFromArray(tokens,UNIT_FIELD_LEVEL);
-
-    AreaTableEntry const* area = GetAreaEntryByAreaFlag(MapManager::Instance().GetAreaFlag(fields[2].GetUInt32(), fields[3].GetFloat(),fields[4].GetFloat()));
-    if (area)                                               // For example: .worldport -2313 478 48 1    Zone will be 0(unkonown), even though it's a usual cave
-        memslot->zoneId = area->zone;                       // would cause null pointer exception
+    Player* pl = objmgr.GetPlayer(guid);
+    if(pl)
+    {
+        plName = pl->GetName();
+        plLevel = (uint8)pl->getLevel();
+        plClass = (uint8)pl->getClass();
+        plZone = pl->GetZoneId();
+    }
     else
-        memslot->zoneId = 0;
+    {
+        if(!objmgr.GetPlayerNameByGUID(guid, plName))         // player doesn't exist
+            return false;
 
-    delete result;
+        plLevel = (uint8)Player::GetUInt32ValueFromDB(UNIT_FIELD_LEVEL, guid);
+        plZone = Player::GetZoneIdFromDB(guid);
+
+        QueryResult *result = sDatabase.PQuery("SELECT `class` FROM `character` WHERE `guid`='%u'", GUID_LOPART(guid));
+        if(!result)
+            return false;
+        plClass = (*result)[0].GetUInt8();
+        delete result;
+    }
+
+    memslot->name = plName;
+    memslot->guid = guid;
+    memslot->level = plLevel;
+    memslot->Class = plClass;
+    memslot->zoneId = plZone;
+
+    return(true);
 }
 
 void Guild::LoadPlayerStatsByGuid(uint64 guid)
@@ -333,7 +317,6 @@ void Guild::LoadPlayerStatsByGuid(uint64 guid)
             itr->Class = pl->getClass();
         }
     }
-
 }
 
 void Guild::SetLeader(uint64 guid)
