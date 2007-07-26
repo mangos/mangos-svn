@@ -3175,6 +3175,9 @@ void Aura::HandleAuraModAttackPower(bool apply, bool Real)
 
 void Aura::HandleAuraModRangedAttackPower(bool apply, bool Real)
 {
+    if((m_target->getClassMask() & CLASSMASK_WAND_USERS)!=0)
+        return;
+
     m_target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED, TOTAL_VALUE, float(m_modifier.m_amount), apply);
 }
 
@@ -3186,6 +3189,9 @@ void Aura::HandleAuraModAttackPowerPercent(bool apply, bool Real)
 
 void Aura::HandleAuraModRangedAttackPowerPercent(bool apply, bool Real)
 {
+    if((m_target->getClassMask() & CLASSMASK_WAND_USERS)!=0)
+        return;
+
     //UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER = multiplier - 1
     m_target->HandleStatModifier(UNIT_MOD_ATTACK_POWER_RANGED, TOTAL_PCT, float(m_modifier.m_amount), apply);
 }
@@ -3197,7 +3203,7 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
 {
     // m_modifier.m_miscvalue is bitmask of spell schools
     // 1 ( 0-bit ) - normal school damage (IMMUNE_SCHOOL_PHYSICAL)
-    // 126 - full bitmask all magic damages (IMMUNE_SCHOOL_PHYSICAL)
+    // 126 - full bitmask all magic damages (IMMUNE_SCHOOL_MAGIC) including wands
     // 127 - full bitmask any damages
     //
     // mods must be applied base at equipped weapon class and subclass comparison
@@ -3212,7 +3218,8 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
         {
             m_target->HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND, TOTAL_VALUE, float(m_modifier.m_amount), apply);
             m_target->HandleStatModifier(UNIT_MOD_DAMAGE_OFFHAND, TOTAL_VALUE, float(m_modifier.m_amount), apply);
-            m_target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_VALUE, float(m_modifier.m_amount), apply);
+            if((m_target->getClassMask() & CLASSMASK_WAND_USERS)==0)
+                m_target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_VALUE, float(m_modifier.m_amount), apply);
         }
         else
         {
@@ -3233,12 +3240,16 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
                     m_target->HandleStatModifier(UNIT_MOD_DAMAGE_OFFHAND, TOTAL_VALUE, float(m_modifier.m_amount),apply);                    
                 }
             }
-            pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
-            if (pItem)
+
+            if((m_target->getClassMask() & CLASSMASK_WAND_USERS)==0)
             {
-                if (pItem->IsFitToSpellRequirements(GetSpellProto()))
+                pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+                if (pItem)
                 {
-                    m_target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_VALUE, float(m_modifier.m_amount),apply);                    
+                    if (pItem->IsFitToSpellRequirements(GetSpellProto()))
+                    {
+                        m_target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_VALUE, float(m_modifier.m_amount),apply);                    
+                    }
                 }
             }
         }
@@ -3252,9 +3263,30 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
         }
     }    
 
+    // wand case
+    if((m_target->getClassMask() & CLASSMASK_WAND_USERS)!=0)
+    {
+        Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+        if (pItem)
+        {
+            if (pItem->IsFitToSpellRequirements(GetSpellProto()) && (m_modifier.m_miscvalue & (1 << (pItem->GetProto()->Damage->DamageType -1))))
+            {
+                m_target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_VALUE, float(m_modifier.m_amount),apply);                    
+            }
+        }
+    }
+
+    // Skip non magic case for speedup
+    if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_MAGIC) == 0)
+        return;
+
+    // Skip item specific requirements
+    if (GetSpellProto()->EquippedItemClass != -1 ||         // -1 == any item class
+        GetSpellProto()->EquippedItemInventoryTypeMask != 0)// 0 == any inventory type
+        return;
+
     // Magic damage modifiers implemented in Unit::SpellDamageBonus
     // This information for client side use only
-
     if(m_target->GetTypeId() == TYPEID_PLAYER)
     {
         if(m_modifier.m_miscvalue2)
@@ -3282,7 +3314,7 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
 
     // m_modifier.m_miscvalue is bitmask of spell schools
     // 1 ( 0-bit ) - normal school damage (IMMUNE_SCHOOL_PHYSICAL)
-    // 126 - full bitmask all magic damages (IMMUNE_SCHOOL_PHYSICAL)
+    // 126 - full bitmask all magic damages (IMMUNE_SCHOOL_MAGIC) including wand
     // 127 - full bitmask any damages
     //
     // mods must be applied base at equipped weapon class and subclass comparison
@@ -3297,7 +3329,10 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
         {
             m_target->HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND, TOTAL_PCT, float(m_modifier.m_amount), apply);
             m_target->HandleStatModifier(UNIT_MOD_DAMAGE_OFFHAND, TOTAL_PCT, float(m_modifier.m_amount), apply);
-            m_target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_PCT, float(m_modifier.m_amount), apply);
+
+            // except wands users
+            if((m_target->getClassMask() & CLASSMASK_WAND_USERS)==0)
+                m_target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_PCT, float(m_modifier.m_amount), apply);
         }
         else
         {
@@ -3317,16 +3352,44 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
                     m_target->HandleStatModifier(UNIT_MOD_DAMAGE_OFFHAND, TOTAL_PCT, float(m_modifier.m_amount), apply);
                 }
             }
-            pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
-            if (pItem)
+
+            if((m_target->getClassMask() & CLASSMASK_WAND_USERS)==0)
             {
-                if (pItem->IsFitToSpellRequirements(GetSpellProto()))
+                pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+                if (pItem)
                 {
-                    m_target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_PCT, float(m_modifier.m_amount), apply);
+                    if (pItem->IsFitToSpellRequirements(GetSpellProto()))
+                    {
+                        m_target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_PCT, float(m_modifier.m_amount), apply);
+                    }
                 }
             }
         }
     }
+
+    // wand case
+    if((m_target->getClassMask() & CLASSMASK_WAND_USERS)!=0)
+    {
+        Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+        if (pItem)
+        {
+            if (pItem->IsFitToSpellRequirements(GetSpellProto()) && (m_modifier.m_miscvalue & (1 << (pItem->GetProto()->Damage->DamageType -1))))
+            {
+                m_target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_PCT, float(m_modifier.m_amount),apply);                    
+            }
+        }
+    }
+
+    /*
+    // Skip non magic case for speedup
+    if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_MAGIC) == 0)
+        return;
+
+    // Skip item specific requirements
+    if (spellInfo->EquippedItemClass != -1 ||               // -1 == any item class
+        spellInfo->EquippedItemInventoryTypeMask != 0)      // 0 == any inventory type
+        return;
+    */
 
     // Magic damage percent modifiers implemented in Unit::SpellDamageBonus
     // Client does not update visual spell damages when percentage aura is applied

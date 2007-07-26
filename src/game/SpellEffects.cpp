@@ -2371,10 +2371,6 @@ void Spell::EffectWeaponDmg(uint32 i)
         }
     }
 
-    WeaponAttackType attType = BASE_ATTACK;
-    if(m_spellInfo->rangeIndex != 1 && m_spellInfo->rangeIndex != 2 && m_spellInfo->rangeIndex != 7)
-        attType = RANGED_ATTACK;
-
     uint32 hitInfo = 0;
     uint32 nohitMask = HITINFO_ABSORB | HITINFO_RESIST | HITINFO_MISS;
     uint32 damageType = NORMAL_DAMAGE;
@@ -2385,7 +2381,29 @@ void Spell::EffectWeaponDmg(uint32 i)
     CleanDamage cleanDamage =  CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL );
     bool criticalhit = false;
 
-    if( unitTarget->IsImmunedToPhysicalDamage() )
+    WeaponAttackType attType = BASE_ATTACK;
+    if(m_spellInfo->rangeIndex != 1 && m_spellInfo->rangeIndex != 2 && m_spellInfo->rangeIndex != 7)
+    {
+        attType = RANGED_ATTACK;
+
+        // wand case 
+        if((m_caster->getClassMask() & CLASSMASK_WAND_USERS) != 0)
+        {
+            if(m_caster->GetTypeId()!=TYPEID_PLAYER)
+                return;
+
+            Item* pItem = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+            if (!pItem)
+                return;
+
+            if( unitTarget->IsImmunedToSpellDamage(m_spellInfo) )
+                return;
+
+            damageType = pItem->GetProto()->Damage->DamageType;
+        }
+    }
+
+    if(damageType==NORMAL_DAMAGE && unitTarget->IsImmunedToPhysicalDamage() )
     {
         m_caster->SendAttackStateUpdate (HITINFO_MISS, unitTarget, 1, NORMAL_DAMAGE, 0, 0, 0, VICTIMSTATE_IS_IMMUNE, 0);
         return;
@@ -2408,7 +2426,7 @@ void Spell::EffectWeaponDmg(uint32 i)
     if(hitInfo & HITINFO_CRITICALHIT)
         criticalhit = true;
 
-    m_caster->SendSpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, eff_damage, m_spellInfo->School, absorbed_dmg, resisted_dmg, false, blocked_dmg, criticalhit);
+    m_caster->SendSpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, eff_damage, (damageType==NORMAL_DAMAGE ? m_spellInfo->School : damageType), absorbed_dmg, resisted_dmg, false, blocked_dmg, criticalhit);
 
     // Bloodthirst
     if (BTAura)

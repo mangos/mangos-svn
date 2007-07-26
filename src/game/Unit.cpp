@@ -4353,7 +4353,11 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     // ..done
     AuraList const& mDamageDone = this->GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
     for(AuraList::const_iterator i = mDamageDone.begin();i != mDamageDone.end(); ++i)
-        if(((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0)
+        if(((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0 &&
+            (*i)->GetSpellProto()->EquippedItemClass == -1 &&
+                                                            // -1 == any item class (not wand then)
+            (*i)->GetSpellProto()->EquippedItemInventoryTypeMask == 0 )
+                                                            // 0 == any inventory type (not wand then)
             DoneAdvertisedBenefit += (*i)->GetModifier()->m_amount;
 
     if (GetTypeId() == TYPEID_PLAYER)
@@ -4409,7 +4413,11 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     // ..done
     AuraList const& mModDamagePercentDone = this->GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
     for(AuraList::const_iterator i = mModDamagePercentDone.begin(); i != mModDamagePercentDone.end(); ++i)
-        if( spellProto->School != 0 && ((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0 )
+        if( spellProto->School != 0 && ((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0 &&
+            (*i)->GetSpellProto()->EquippedItemClass == -1 &&
+                                                            // -1 == any item class (not wand then)
+            (*i)->GetSpellProto()->EquippedItemInventoryTypeMask == 0 )
+                                                            // 0 == any inventory type (not wand then)
             DoneTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
 
     // ..taken
