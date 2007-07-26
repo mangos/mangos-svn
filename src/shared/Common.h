@@ -109,7 +109,7 @@
 #define atoll __atoi64
 #define vsnprintf _vsnprintf
 #define strdup _strdup
-#define isnan(X) _isnan(X)
+#define isfinite(X) _finite(X)
 
 #else
 

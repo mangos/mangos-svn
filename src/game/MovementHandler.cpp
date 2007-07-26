@@ -93,6 +93,10 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     }
     /*----------------*/
 
+
+    if (!MaNGOS::IsValidMapCoord(x, y))
+        return;
+
     /* handle special cases */
     if (flags & MOVEMENTFLAG_ONTRANSPORT)
     {
