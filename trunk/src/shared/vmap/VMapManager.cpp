@@ -595,7 +595,8 @@ namespace VMAP {
 
     void MapTree::unloadMap(const std::string& dirFileName, unsigned int pMapTileIdent, bool pForce) {
         if(hasDirFile(dirFileName) && (pForce || containsLoadedMapTile(pMapTileIdent))) {
-            removeLoadedMapTile(pMapTileIdent);
+	    if(containsLoadedMapTile(pMapTileIdent))
+                removeLoadedMapTile(pMapTileIdent);
             FilesInDir& filesInDir = getDirFiles(dirFileName);
             filesInDir.decRefCount();
             if(filesInDir.getRefCount() <= 0) {
