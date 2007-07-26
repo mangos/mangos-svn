@@ -3214,12 +3214,12 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
 
     if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_PHYSICAL) != 0)
     {
+        // apply generic physical damage bonuses including wand case
         if (GetSpellProto()->EquippedItemClass == -1 || m_target->GetTypeId() != TYPEID_PLAYER)
         {
             m_target->HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND, TOTAL_VALUE, float(m_modifier.m_amount), apply);
             m_target->HandleStatModifier(UNIT_MOD_DAMAGE_OFFHAND, TOTAL_VALUE, float(m_modifier.m_amount), apply);
-            if((m_target->getClassMask() & CLASSMASK_WAND_USERS)==0)
-                m_target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_VALUE, float(m_modifier.m_amount), apply);
+            m_target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_VALUE, float(m_modifier.m_amount), apply);
         }
         else
         {
@@ -3241,15 +3241,13 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
                 }
             }
 
-            if((m_target->getClassMask() & CLASSMASK_WAND_USERS)==0)
+            // apply any ranged weapon bonuses including wand if fit 
+            pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+            if (pItem)
             {
-                pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
-                if (pItem)
+                if (pItem->IsFitToSpellRequirements(GetSpellProto()))
                 {
-                    if (pItem->IsFitToSpellRequirements(GetSpellProto()))
-                    {
-                        m_target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_VALUE, float(m_modifier.m_amount),apply);                    
-                    }
+                    m_target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_VALUE, float(m_modifier.m_amount),apply);                    
                 }
             }
         }
@@ -3263,27 +3261,28 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
         }
     }    
 
-    // wand case
-    if((m_target->getClassMask() & CLASSMASK_WAND_USERS)!=0)
-    {
-        Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
-        if (pItem)
-        {
-            if (pItem->IsFitToSpellRequirements(GetSpellProto()) && (m_modifier.m_miscvalue & (1 << (pItem->GetProto()->Damage->DamageType -1))))
-            {
-                m_target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_VALUE, float(m_modifier.m_amount),apply);                    
-            }
-        }
-    }
-
     // Skip non magic case for speedup
     if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_MAGIC) == 0)
         return;
 
-    // Skip item specific requirements
-    if (GetSpellProto()->EquippedItemClass != -1 ||         // -1 == any item class
-        GetSpellProto()->EquippedItemInventoryTypeMask != 0)// 0 == any inventory type
+    if( GetSpellProto()->EquippedItemClass != -1 || GetSpellProto()->EquippedItemInventoryTypeMask != 0 )
+    {
+        // wand magic case (skip generic to all item spell bonuses)
+        if( (m_target->getClassMask() & CLASSMASK_WAND_USERS)!=0 )
+        {
+            Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+            if (pItem)
+            {
+                if (pItem->IsFitToSpellRequirements(GetSpellProto()) && (m_modifier.m_miscvalue & (1 << (pItem->GetProto()->Damage->DamageType -1))))
+                {
+                    m_target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_VALUE, float(m_modifier.m_amount),apply);                    
+                }
+            }
+        }
+
+        // Skip item specific requirements for not wand magic damage
         return;
+    }
 
     // Magic damage modifiers implemented in Unit::SpellDamageBonus
     // This information for client side use only
@@ -3325,14 +3324,12 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
 
     if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_PHYSICAL) != 0)
     {
+        // apply generic physical damage bonuses including wand case
         if (GetSpellProto()->EquippedItemClass == -1 || m_target->GetTypeId() != TYPEID_PLAYER)
         {
             m_target->HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND, TOTAL_PCT, float(m_modifier.m_amount), apply);
             m_target->HandleStatModifier(UNIT_MOD_DAMAGE_OFFHAND, TOTAL_PCT, float(m_modifier.m_amount), apply);
-
-            // except wands users
-            if((m_target->getClassMask() & CLASSMASK_WAND_USERS)==0)
-                m_target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_PCT, float(m_modifier.m_amount), apply);
+            m_target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_PCT, float(m_modifier.m_amount), apply);
         }
         else
         {
@@ -3353,43 +3350,40 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
                 }
             }
 
-            if((m_target->getClassMask() & CLASSMASK_WAND_USERS)==0)
+            // apply any ranged weapon bonuses including wand if fit 
+            pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+            if (pItem)
             {
-                pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
-                if (pItem)
+                if (pItem->IsFitToSpellRequirements(GetSpellProto()))
                 {
-                    if (pItem->IsFitToSpellRequirements(GetSpellProto()))
-                    {
-                        m_target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_PCT, float(m_modifier.m_amount), apply);
-                    }
+                    m_target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_PCT, float(m_modifier.m_amount), apply);
                 }
             }
         }
     }
 
-    // wand case
-    if((m_target->getClassMask() & CLASSMASK_WAND_USERS)!=0)
-    {
-        Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
-        if (pItem)
-        {
-            if (pItem->IsFitToSpellRequirements(GetSpellProto()) && (m_modifier.m_miscvalue & (1 << (pItem->GetProto()->Damage->DamageType -1))))
-            {
-                m_target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_PCT, float(m_modifier.m_amount),apply);                    
-            }
-        }
-    }
-
-    /*
     // Skip non magic case for speedup
     if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_MAGIC) == 0)
         return;
 
-    // Skip item specific requirements
-    if (spellInfo->EquippedItemClass != -1 ||               // -1 == any item class
-        spellInfo->EquippedItemInventoryTypeMask != 0)      // 0 == any inventory type
+    if( GetSpellProto()->EquippedItemClass != -1 || GetSpellProto()->EquippedItemInventoryTypeMask != 0 )
+    {
+        // wand magic case (skip generic to all item spell bonuses)
+        if( (m_target->getClassMask() & CLASSMASK_WAND_USERS)!=0 )
+        {
+            Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+            if (pItem)
+            {
+                if (pItem->IsFitToSpellRequirements(GetSpellProto()) && (m_modifier.m_miscvalue & (1 << (pItem->GetProto()->Damage->DamageType -1))))
+                {
+                    m_target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_PCT, float(m_modifier.m_amount),apply);                    
+                }
+            }
+        }
+
+        // Skip item specific requirements for not wand magic damage
         return;
-    */
+    }
 
     // Magic damage percent modifiers implemented in Unit::SpellDamageBonus
     // Client does not update visual spell damages when percentage aura is applied
