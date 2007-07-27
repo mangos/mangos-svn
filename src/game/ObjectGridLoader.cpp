@@ -271,7 +271,7 @@ ObjectGridUnloader::Visit(CreatureMapType &m)
 
     // remove all cross-reference before deleting
     for(CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-        iter->second->CleanupCrossRefsBeforeDelete();
+        iter->second->CleanupsBeforeDelete();
 
     for(CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {

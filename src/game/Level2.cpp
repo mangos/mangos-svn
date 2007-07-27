@@ -598,7 +598,7 @@ bool ChatHandler::HandleDeleteCommand(const char* args)
 
     unit->DeleteFromDB();
 
-    unit->CleanupCrossRefsBeforeDelete();
+    unit->CleanupsBeforeDelete();
     ObjectAccessor::Instance().AddObjectToRemoveList(unit);
 
     SendSysMessage(LANG_COMMAND_DELCREATMESSAGE);

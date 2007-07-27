@@ -769,7 +769,7 @@ void Pet::Remove(PetSaveMode mode)
             owner->SetPet(0);
     }
 
-    CleanupCrossRefsBeforeDelete();
+    CleanupsBeforeDelete();
     ObjectAccessor::Instance().AddObjectToRemoveList(this);
     m_removed = true;
 }

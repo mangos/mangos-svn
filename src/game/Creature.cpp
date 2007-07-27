@@ -74,10 +74,11 @@ m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE)
     m_AlreadyCallAssistence = false;
 }
 
-void Creature::CleanupCrossRefsBeforeDelete()
+void Creature::CleanupsBeforeDelete()
 {
     if(m_uint32Values)                                      // only for fully created object
     {
+        m_Events.KillAllEvents();
         CombatStop(true);
         DeleteThreatList();
         getHostilRefManager().setOnlineOfflineState(false);
@@ -87,7 +88,7 @@ void Creature::CleanupCrossRefsBeforeDelete()
 
 Creature::~Creature()
 {
-    CleanupCrossRefsBeforeDelete();
+    CleanupsBeforeDelete();
 
     m_trainer_spells.clear();
     m_vendor_items.clear();
