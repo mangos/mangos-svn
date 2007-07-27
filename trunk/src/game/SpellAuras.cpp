@@ -1906,6 +1906,29 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
 
     if (apply)
     {
+        if(Real)
+        {
+            // Kidney Shot (Dummy affect set used combo points for aura duration and then process dummy ñode here)
+            if(m_spellProto->SpellFamilyFlags & 0x200000)
+            {
+                if(caster && caster->GetTypeId() == TYPEID_PLAYER)
+                {
+                    Player* pCaster = (Player*)caster;
+
+                    if(pCaster->GetComboTarget()==m_target->GetGUID())
+                    {
+                        uint8 combo = pCaster->GetComboPoints();
+                        if(combo)
+                        {
+                            SetAuraDuration(GetAuraDuration()*combo*objmgr.GetSpellRank(m_spellProto->Id));
+                            // UpdateAuraDuration(); not required - called before aura data send to client;
+                            pCaster->ClearComboPoints();
+                        }
+                    }
+                }
+            }
+        }
+
         m_target->addUnitState(UNIT_STAT_STUNDED);
         m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
         m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
@@ -3130,6 +3153,28 @@ void Aura::HandleModAttackSpeed(bool apply, bool Real)
 
 void Aura::HandleHaste(bool apply, bool Real)
 {
+    if(Real && apply)
+    {
+        // Slice and Dice (Dummy affect set used combo points for aura duration and then process dummy ñode here)
+        if(m_spellProto->SpellFamilyFlags & 0x000040000)
+        {
+            if(m_target->GetTypeId() == TYPEID_PLAYER)
+            {
+                Player* pTarget = (Player*)m_target;
+
+                if(pTarget->getVictim() && pTarget->GetComboTarget()==pTarget->getVictim()->GetGUID())
+                {
+                    uint8 combo = pTarget->GetComboPoints();
+                    if(combo)
+                    {
+                        SetAuraDuration(GetAuraDuration() + 3*combo);
+                        // UpdateAuraDuration(); not required - called before aura data send to client;
+                        pTarget->ClearComboPoints();
+                    }
+                }
+            }
+        }
+    }
 
     if(m_modifier.m_amount >= 0)
     {

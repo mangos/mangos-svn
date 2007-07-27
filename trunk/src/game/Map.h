@@ -108,7 +108,6 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         template<class T> T* GetObjectNear(float x, float y, OBJECT_HANDLE hdl, T*);
 
         template<class T> void Add(CountedPtr<T>&);
-
         template<class T> void Remove(CountedPtr<T>&, bool);
         template<class T> bool Find(CountedPtr<T>&) const;
 

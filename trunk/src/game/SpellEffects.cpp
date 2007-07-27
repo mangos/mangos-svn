@@ -314,17 +314,54 @@ void Spell::EffectDummy(uint32 i)
         return;
     }
 
-    //Holy Shock For Paladins
-    if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellIconID == 156)
+    // selection by spell family
+    switch(m_spellInfo->SpellFamilyName)
     {
-        if(!unitTarget)
+    case SPELLFAMILY_ROGUE:
+        // Slice and Dice (Dummy set aura duration base at combo points in another effect, in result implemented in Aura::HandleHaste)
+        if(m_spellInfo->SpellFamilyFlags & 0x000040000)
             return;
-
-        int hurt = 0;
-        int heal = 0;
-
-        switch(m_spellInfo->Id)
+        // Kidney Shot (Dummy set aura duration  base at combo points in another effect, in result implemented in Aura::HandleAuraModStun)
+        if(m_spellInfo->SpellFamilyFlags & 0x200000)
+            return;
+        break;
+    case SPELLFAMILY_HUNTER:
+        // Steady Shot
+        if(m_spellInfo->SpellFamilyFlags & 0x100000000LL)
         {
+            if( !unitTarget || !unitTarget->isAlive())
+                return;
+
+            bool found = false;
+
+            // check dazed affect
+            Unit::AuraList const& decSpeedList = unitTarget->GetAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
+            for(Unit::AuraList::const_iterator iter = decSpeedList.begin(); iter != decSpeedList.end(); ++iter)
+            {
+                if((*iter)->GetSpellProto()->SpellIconID==15 && (*iter)->GetSpellProto()->Dispel==0)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            if(found)
+                m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell, true);
+            return;
+        }
+        break;
+    case SPELLFAMILY_PALADIN:
+        //Holy Shock
+        if (m_spellInfo->SpellIconID == 156)
+        {
+            if(!unitTarget)
+                return;
+
+            int hurt = 0;
+            int heal = 0;
+
+            switch(m_spellInfo->Id)
+            {
             case 20473: hurt = 25912; heal = 25914; break;
             case 20929: hurt = 25911; heal = 25913; break;
             case 20930: hurt = 25902; heal = 25903; break;
@@ -333,38 +370,16 @@ void Spell::EffectDummy(uint32 i)
             default: 
                 sLog.outError("Spell::EffectDummy: Spell %u not handled in HS",m_spellInfo->Id);
                 return;
-        }
-
-        if(m_caster->IsFriendlyTo(unitTarget))
-            m_caster->CastSpell(unitTarget, heal, true, 0);
-        else
-            m_caster->CastSpell(unitTarget, hurt, true, 0);
-
-        return;
-    }
-
-    // Steady Shot
-    if(m_spellInfo->SpellFamilyName==SPELLFAMILY_HUNTER && (m_spellInfo->SpellFamilyFlags & 0x100000000LL))
-    {
-        if( !unitTarget || !unitTarget->isAlive())
-            return;
-
-        bool found = false;
-
-        // check dazed affect
-        Unit::AuraList const& decSpeedList = unitTarget->GetAurasByType(SPELL_AURA_MOD_DECREASE_SPEED);
-        for(Unit::AuraList::const_iterator iter = decSpeedList.begin(); iter != decSpeedList.end(); ++iter)
-        {
-            if((*iter)->GetSpellProto()->SpellIconID==15 && (*iter)->GetSpellProto()->Dispel==0)
-            {
-                found = true;
-                break;
             }
-        }
 
-        if(found)
-            m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell, true);
-        return;
+            if(m_caster->IsFriendlyTo(unitTarget))
+                m_caster->CastSpell(unitTarget, heal, true, 0);
+            else
+                m_caster->CastSpell(unitTarget, hurt, true, 0);
+
+            return;
+        }
+        break;
     }
 
     //Life Tap
@@ -966,14 +981,29 @@ void Spell::EffectApplyAura(uint32 i)
         }
     }
 
-    // Diminishing
-    // Use Spell->Mechanic if possible
-    DiminishingMechanics mech = Unit::Mechanic2DiminishingMechanics(Aur->GetSpellProto()->Mechanic);
+    bool added = unitTarget->AddAura(Aur);
 
-    if(mech == DIMINISHING_NONE)
+    // Aura not added and deleted in AddAura call;
+    if (!added)
+        return;
+
+    // found crash at character loading, broken pointer to Aur...
+    // Aur was deleted in AddAura()...
+    if(!Aur)
+        return;
+
+    // Update aura duration based at diminishingMod
     {
-        switch(m_spellInfo->EffectApplyAuraName[i])
+        // Diminishing modifier calculation
+        float diminishingMod = 1.0f;
+
+        // Use Spell->Mechanic if possible
+        DiminishingMechanics mech = Unit::Mechanic2DiminishingMechanics(Aur->GetSpellProto()->Mechanic);
+
+        if(mech == DIMINISHING_NONE)
         {
+            switch(m_spellInfo->EffectApplyAuraName[i])
+            {
             case SPELL_AURA_MOD_CONFUSE:
                 mech = DIMINISHING_MECHANIC_CONFUSE; break;
             case SPELL_AURA_MOD_CHARM: case SPELL_AURA_MOD_FEAR:
@@ -985,78 +1015,75 @@ void Spell::EffectApplyAura(uint32 i)
             case SPELL_AURA_MOD_DECREASE_SPEED:
                 mech = DIMINISHING_MECHANIC_SPEED; break;
             default: break;
+            }
         }
-    }
 
-    // Death Coil and Curse of Exhaustion are not diminished.
-    if((m_spellInfo->SpellVisual == 64 && m_spellInfo->SpellIconID == 88) ||
-        (m_spellInfo->SpellVisual == 185 && m_spellInfo->SpellIconID == 228))
-        mech = DIMINISHING_NONE;
+        // Death Coil and Curse of Exhaustion are not diminished.
+        if((m_spellInfo->SpellVisual == 64 && m_spellInfo->SpellIconID == 88) ||
+            (m_spellInfo->SpellVisual == 185 && m_spellInfo->SpellIconID == 228))
+            mech = DIMINISHING_NONE;
 
-    int32 auraDuration = Aur->GetAuraDuration();
+        diminishingMod = unitTarget->ApplyDiminishingToDuration(mech,Aur->GetAuraDuration());
 
-    unitTarget->ApplyDiminishingToDuration(mech,auraDuration);
+        int32 duration = Aur->GetAuraDuration();
 
-    bool added = unitTarget->AddAura(Aur);
+        if(duration > 0)
+            duration = int32(duration *diminishingMod);
 
-    // found crash at character loading, broken pointer to Aur...
-    // Aur was deleted in AddAura()...
-    if(!Aur)
-        return;
-
-    if (added)
-    {
         // if Aura removed and deleted, do not continue.
-        if(auraDuration == 0 && !(Aur->IsPermanent()))
+        if(duration== 0 && !(Aur->IsPermanent()))
         {
             unitTarget->RemoveAura(m_spellInfo->Id,i);
             return;
         }
-        else
-        if(auraDuration != Aur->GetAuraDuration())
-            unitTarget->SetAurDuration(m_spellInfo->Id,i,auraDuration);
 
-        // TODO Make a way so it works for every related spell!
-        if(unitTarget->GetTypeId()==TYPEID_PLAYER)          // Negative buff should only be applied on players
+        if(duration != Aur->GetAuraDuration())
         {
-            uint32 spellId = 0;
-            if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST && m_spellInfo->SpellFamilyFlags & 1) //Power Word: Shield
-                spellId = 6788; // Weakened Soul
-            else if ((m_spellInfo->SpellVisual == 154 && m_spellInfo->SpellIconID == 73)                         || //DP
-                (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellFamilyFlags & 0x400000)|| //DS
-                (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellFamilyFlags & 0x000080)|| //BoP
-                (m_spellInfo->SpellVisual == 7880 && m_spellInfo->SpellIconID == 2168))                             //AV
-                spellId = 25771; // Forbearance
-            else if (m_spellInfo->Mechanic == MECHANIC_HEAL) // Bandages
-                spellId = 11196; // Recently Bandaged
-
-            SpellEntry const *AdditionalSpellInfo = sSpellStore.LookupEntry(spellId);
-            if (AdditionalSpellInfo)
-            {
-                Aura* AdditionalAura = new Aura(AdditionalSpellInfo, 0, &m_currentBasePoints[0], unitTarget,m_caster, 0);
-                unitTarget->AddAura(AdditionalAura, 0);
-                sLog.outDebug("Spell: Additional Aura is: %u", AdditionalSpellInfo->EffectApplyAuraName[0]);
-            }
+            Aur->SetAuraDuration(duration);
+            Aur->UpdateAuraDuration();
         }
+    }
 
-        // arcane missiles, do not affect tame beast
-        if(Aur->IsTrigger() && m_spellInfo->Id != 1515)
+    // TODO Make a way so it works for every related spell!
+    if(unitTarget->GetTypeId()==TYPEID_PLAYER)          // Negative buff should only be applied on players
+    {
+        uint32 spellId = 0;
+        if (m_spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST && m_spellInfo->SpellFamilyFlags & 1) //Power Word: Shield
+            spellId = 6788; // Weakened Soul
+        else if ((m_spellInfo->SpellVisual == 154 && m_spellInfo->SpellIconID == 73)                         || //DP
+            (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellFamilyFlags & 0x400000)|| //DS
+            (m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN && m_spellInfo->SpellFamilyFlags & 0x000080)|| //BoP
+            (m_spellInfo->SpellVisual == 7880 && m_spellInfo->SpellIconID == 2168))                             //AV
+            spellId = 25771; // Forbearance
+        else if (m_spellInfo->Mechanic == MECHANIC_HEAL) // Bandages
+            spellId = 11196; // Recently Bandaged
+
+        SpellEntry const *AdditionalSpellInfo = sSpellStore.LookupEntry(spellId);
+        if (AdditionalSpellInfo)
         {
-            SpellEntry const *spellInfo = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
-            if (!spellInfo) return;
-            if (m_caster->GetTypeId() == TYPEID_PLAYER && spellInfo->EffectImplicitTargetA[0] == TARGET_SINGLE_ENEMY)
+            Aura* AdditionalAura = new Aura(AdditionalSpellInfo, 0, &m_currentBasePoints[0], unitTarget,m_caster, 0);
+            unitTarget->AddAura(AdditionalAura, 0);
+            sLog.outDebug("Spell: Additional Aura is: %u", AdditionalSpellInfo->EffectApplyAuraName[0]);
+        }
+    }
+
+    // arcane missiles, do not affect tame beast
+    if(Aur->IsTrigger() && m_spellInfo->Id != 1515)
+    {
+        SpellEntry const *spellInfo = sSpellStore.LookupEntry(m_spellInfo->EffectTriggerSpell[i]);
+        if (!spellInfo) return;
+        if (m_caster->GetTypeId() == TYPEID_PLAYER && spellInfo->EffectImplicitTargetA[0] == TARGET_SINGLE_ENEMY)
+        {
+            Unit *target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
+            if (target)
             {
-                Unit *target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
-                if (target)
-                {
-                    if (!m_caster->IsFriendlyTo(target))
-                        Aur->SetTarget(target);
-                    else
-                        cancel();
-                }
+                if (!m_caster->IsFriendlyTo(target))
+                    Aur->SetTarget(target);
                 else
                     cancel();
             }
+            else
+                cancel();
         }
     }
 }
