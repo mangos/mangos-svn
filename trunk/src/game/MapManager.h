@@ -69,7 +69,7 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
         void LoadGrid(int mapid, float x, float y, const WorldObject* obj, bool no_unload = false);
         void UnloadAll();
 
-        static bool ExistMAP(uint32 mapid, float x, float y);
+        static bool ExistMapAndVMap(uint32 mapid, float x, float y);
         static bool IsValidMAP(uint32 mapid);
         static bool IsValidMapCoord(uint32 mapid, float x,float y);
 

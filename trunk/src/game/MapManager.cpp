@@ -131,14 +131,14 @@ void MapManager::MoveAllCreaturesInMoveList()
         iter->second->MoveAllCreaturesInMoveList();
 }
 
-bool MapManager::ExistMAP(uint32 mapid, float x,float y)
+bool MapManager::ExistMapAndVMap(uint32 mapid, float x,float y)
 {
     GridPair p = MaNGOS::ComputeGridPair(x,y);
 
     int gx=63-p.x_coord;
     int gy=63-p.y_coord;
 
-    return Map::ExistMAP(mapid,gx,gy);
+    return Map::ExistMap(mapid,gx,gy,true) && Map::ExistVMap(mapid,gx,gy,true);
 }
 
 bool MapManager::IsValidMAP(uint32 mapid)
