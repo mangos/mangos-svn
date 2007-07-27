@@ -270,6 +270,7 @@ class Aura
         bool m_removeOnDeath;
     private:
         void UpdateSlotCounter(uint8 slot,bool add);
+        float angle;
 };
 
 class AreaAura : public Aura

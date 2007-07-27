@@ -449,31 +449,48 @@ void Aura::Update(uint32 diff)
         }
         if(caster && m_target->isAlive() && m_target->HasFlag(UNIT_FIELD_FLAGS,(UNIT_STAT_FLEEING<<16)))
         {
-            float x,y,z,angle,speed,pos_x,pos_y,pos_z;
-            angle = m_target->GetAngle( caster->GetPositionX(), caster->GetPositionY() );
+            float x,y,z,speed,pos_x,pos_y,pos_z,mod;
+            int q;
+            q = rand() % 80;
+            if(q == 8) angle += (float)(urand(45, 90));
+            else if(q == 23) angle -= (float)(urand(45, 90));
             // If the m_target is player,and if the speed is too slow,change it :P
             speed = m_target->GetSpeed(MOVE_RUN);
+            // Speed modifier, may need to find correct one
+            mod = m_target->GetTypeId() != TYPEID_PLAYER ? 10 : 6;
             pos_x = m_target->GetPositionX();
             pos_y = m_target->GetPositionY();
             uint32 mapid = m_target->GetMapId();
             pos_z = MapManager::Instance().GetMap(mapid, m_target)->GetHeight(pos_x,pos_y, m_target->GetPositionZ());
-            // Control the max Distance; 20 for temp.
-            if(m_target->IsWithinDistInMap(caster, 20))
+            // Control the max Distance; 28 for temp.
+            if(m_target->IsWithinDistInMap(caster, 28))
             {
-                if( m_target->GetPositionX() < caster->GetPositionX() || m_target->GetPositionY() > caster->GetPositionY() )
-                    x = m_target->GetPositionX() + speed*diff * sin(angle)/1000;
-                else
-                    x = m_target->GetPositionX() - speed*diff * sin(angle)/1000;
-                y = m_target->GetPositionY() - speed*diff * cos(angle)/1000;
+                x = m_target->GetPositionX() - (speed*cosf(angle))/mod;
+                y = m_target->GetPositionY() - (speed*sinf(angle))/mod;
                 mapid = m_target->GetMapId();
                 z = MapManager::Instance().GetMap(mapid, m_target)->GetHeight(x,y, m_target->GetPositionZ());
                 // Control the target to not climb or drop when dz > |x|,x = 1.3 for temp.
                 // fixed me if it needs checking when the position will be in water?
                 if(z<=pos_z+1.3 && z>=pos_z-1.3)
                 {
-                    m_target->SendMonsterMove(x,y,z,0,true,diff);
+                    m_target->SendMonsterMove(x,y,z,0,true,(diff*2));
                     if(m_target->GetTypeId() != TYPEID_PLAYER)
                         MapManager::Instance().GetMap(m_target->GetMapId(), m_target)->CreatureRelocation((Creature*)m_target,x,y,z,m_target->GetOrientation());
+                }
+                else
+                {
+                    //Complete the move only if z coord is now correct
+                    angle += 120;
+                    x = m_target->GetPositionX() + (speed*sinf(angle))/mod;
+                    y = m_target->GetPositionY() + (speed*cosf(angle))/mod;    
+                    mapid = m_target->GetMapId();
+                    z = MapManager::Instance().GetMap(mapid, m_target)->GetHeight(x,y, m_target->GetPositionZ());
+                    if(z<=pos_z+1.3 && z>=pos_z-1.3)
+                    {
+                        m_target->SendMonsterMove(x,y,z,0,true,(diff*2));
+                        if(m_target->GetTypeId() != TYPEID_PLAYER)
+                            MapManager::Instance().GetMap(m_target->GetMapId(), m_target)->CreatureRelocation((Creature*)m_target,x,y,z,m_target->GetOrientation());
+                    }
                 }
             }
         }
@@ -1809,25 +1826,21 @@ void Aura::HandleModFear(bool Apply, bool Real)
     if( Apply )
     {
         m_target->addUnitState(UNIT_STAT_FLEEING);
-        // m_target->AttackStop();
-
-                                                            // probably wrong
-        m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+        m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE | UNIT_FLAG_FLEEING);
 
         // only at real add aura
         if(Real)
         {
             WorldPacket data(SMSG_DEATH_NOTIFY_OBSOLETE, 9);
             data<<m_target->GetGUID();
-            data<<uint8(0);
+            data<<uint8(0x00);
             m_target->SendMessageToSet(&data,true);
         }
     }
     else
     {
         m_target->clearUnitState(UNIT_STAT_FLEEING);
-                                                            // probably wrong
-        m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE | UNIT_FLAG_FLEEING);
 
         // only at real remove aura
         if(Real)
@@ -1837,7 +1850,7 @@ void Aura::HandleModFear(bool Apply, bool Real)
                 m_target->Attack(caster);
             WorldPacket data(SMSG_DEATH_NOTIFY_OBSOLETE, 9);
             data<<m_target->GetGUID();
-            data<<uint8(1);
+            data<<uint8(0x01);
             m_target->SendMessageToSet(&data,true);
         }
     }
