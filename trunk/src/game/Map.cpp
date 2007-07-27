@@ -1087,7 +1087,7 @@ void Map::MoveAllCreaturesInMoveList()
                 if((sLog.getLogFilter() & LOG_FILTER_CREATURE_MOVES)==0)
                     sLog.outDebug("Creature (GUID: %u Entry: %u ) can't be move to unloaded respawn grid.",c->GetGUIDLow(),c->GetEntry());
                 #endif
-                c->CleanupCrossRefsBeforeDelete();
+                c->CleanupsBeforeDelete();
                 ObjectAccessor::Instance().AddObjectToRemoveList(c);
             }
         }

@@ -168,7 +168,7 @@ void TemporarySummon::UnSummon()
 {
     CombatStop(true);
 
-    CleanupCrossRefsBeforeDelete();
+    CleanupsBeforeDelete();
     ObjectAccessor::Instance().AddObjectToRemoveList(this);
 
     if(m_summoner && m_summoner->GetTypeId()==TYPEID_UNIT && ((Creature*)m_summoner)->AI())
