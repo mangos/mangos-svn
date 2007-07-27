@@ -632,7 +632,7 @@ bool AuthSocket::_HandleRealmList()
     if(!result)
     {
         sLog.outError("[ERROR] user %s tried to login and we cannot find him in the database.",_login.c_str());
-        this->Close();
+        SetCloseAndDelete();
         return false;
     }
 
@@ -713,7 +713,6 @@ bool AuthSocket::_HandleXferCancel()
     ibuf.Remove(1);                                         //clear input buffer
 
     //ZThread::Thread::sleep(15);
-    /// \todo What is the difference between SetCloseAndDelete() and the this->Close() higher?
     SetCloseAndDelete();
 
     return true;
