@@ -3180,7 +3180,7 @@ void Aura::HandleHaste(bool apply, bool Real)
                     uint8 combo = pTarget->GetComboPoints();
                     if(combo)
                     {
-                        SetAuraDuration(GetAuraDuration() + 3*combo);
+                        SetAuraDuration(GetAuraDuration() + 3000*combo);
                         // UpdateAuraDuration(); not required - called before aura data send to client;
                         pTarget->ClearComboPoints();
                     }
