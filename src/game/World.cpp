@@ -443,15 +443,15 @@ void World::SetInitialWorldSettings()
     sLog.outString( "WORLD: VMap config keys are: vmap.enableLOS, vmap.enableHeight, vmap.ignoreMapIds, vmap.ignoreSpellIds");
 
     ///- Check the existence of the map files for all races' startup areas.
-    if(   !MapManager::ExistMAP(0,-6240.32, 331.033)
-        ||!MapManager::ExistMAP(0,-8949.95,-132.493)
-        ||!MapManager::ExistMAP(0,-8949.95,-132.493)
-        ||!MapManager::ExistMAP(1,-618.518,-4251.67)
-        ||!MapManager::ExistMAP(0, 1676.35, 1677.45)
-        ||!MapManager::ExistMAP(1, 10311.3, 832.463)
-        ||!MapManager::ExistMAP(1,-2917.58,-257.98)
+    if(   !MapManager::ExistMapAndVMap(0,-6240.32, 331.033)
+        ||!MapManager::ExistMapAndVMap(0,-8949.95,-132.493)
+        ||!MapManager::ExistMapAndVMap(0,-8949.95,-132.493)
+        ||!MapManager::ExistMapAndVMap(1,-618.518,-4251.67)
+        ||!MapManager::ExistMapAndVMap(0, 1676.35, 1677.45)
+        ||!MapManager::ExistMapAndVMap(1, 10311.3, 832.463)
+        ||!MapManager::ExistMapAndVMap(1,-2917.58,-257.98)
         ||m_configs[CONFIG_EXPANSION] && (
-        !MapManager::ExistMAP(530,10349.6,-6357.29) || !MapManager::ExistMAP(530,-3961.64,-13931.2) ) )
+        !MapManager::ExistMapAndVMap(530,10349.6,-6357.29) || !MapManager::ExistMapAndVMap(530,-3961.64,-13931.2) ) )
     {
         sLog.outError("Correct *.map files not found in path '%smaps' or *.vmap/*vmdir files in '%svmaps'. Please place *.map/*.vmap/*.vmdir files in appropriate directories or correct the DataDir value in the mangosd.conf file.",m_dataPath.c_str(),m_dataPath.c_str());
         exit(1);
