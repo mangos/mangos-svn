@@ -2848,6 +2848,7 @@ bool Unit::SetAurDuration(uint32 spellId, uint32 effindex,uint32 duration)
     if (iter != m_Auras.end())
     {
         (*iter).second->SetAuraDuration(duration);
+        (*iter).second->UpdateAuraDuration();
         return true;
     }
     return false;
@@ -5671,10 +5672,12 @@ DiminishingMechanics Unit::Mechanic2DiminishingMechanics(uint32 mech)
     return DIMINISHING_NONE;
 }
 
-void Unit::ApplyDiminishingToDuration(DiminishingMechanics  mech, int32& duration)
+float Unit::ApplyDiminishingToDuration(DiminishingMechanics  mech, int32 duration)
 {
     if(duration == -1 || mech == DIMINISHING_NONE)
-        return;
+        return 1.0f;
+
+    float mod = 1.0f;
 
     // Stun diminishing is applies to mobs too
     if(mech == DIMINISHING_MECHANIC_STUN || GetTypeId() == TYPEID_PLAYER)
@@ -5683,12 +5686,14 @@ void Unit::ApplyDiminishingToDuration(DiminishingMechanics  mech, int32& duratio
         switch(diminish)
         {
             case DIMINISHING_LEVEL_1: IncrDiminishing(mech, duration); break;
-            case DIMINISHING_LEVEL_2: IncrDiminishing(mech, duration); duration = int32(duration*0.5f); break;
-            case DIMINISHING_LEVEL_3: IncrDiminishing(mech, duration); duration = int32(duration*0.25f); break;
-            case DIMINISHING_LEVEL_IMMUNE: duration = 0; break;
+            case DIMINISHING_LEVEL_2: IncrDiminishing(mech, duration); mod = 0.5f; break;
+            case DIMINISHING_LEVEL_3: IncrDiminishing(mech, duration); mod = 0.25f; break;
+            case DIMINISHING_LEVEL_IMMUNE: mod = 0.0f; break;
             default: break;
         }
     }
+
+    return mod;
 }
 
 Creature* Unit::SummonCreature(uint32 id, float x, float y, float z, float ang,TempSummonType spwtype,uint32 despwtime)
