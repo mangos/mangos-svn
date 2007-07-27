@@ -155,7 +155,7 @@ namespace MaNGOS
 
     inline bool IsValidMapCoord(float c)
     {
-        return isfinite(c) && (std::fabs(c) < MAP_HALFSIZE - 0.5);
+        return finite(c) && (std::fabs(c) < MAP_HALFSIZE - 0.5);
     }
 
     inline bool IsValidMapCoord(float x, float y)
