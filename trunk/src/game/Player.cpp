@@ -2363,7 +2363,15 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
     if (!spellInfo)
     {
-        sLog.outError("Player::addSpell: Non-existed in SpellStore spell #%u request.",spell_id);
+        // do character spell book cleanup (all characters)
+        if(state == PLAYERSPELL_UNCHANGED)                  // spell load case
+        {
+            sLog.outError("Player::addSpell: Non-existed in SpellStore spell #%u request, deleting for all characters in `character_spell`.",spell_id);
+            sDatabase.PExecute("DELETE FROM `character_spell` WHERE `spell` = '%u'",spell_id);
+        }
+        else
+            sLog.outError("Player::addSpell: Non-existed in SpellStore spell #%u request.",spell_id);
+
         return false;
     }
 
