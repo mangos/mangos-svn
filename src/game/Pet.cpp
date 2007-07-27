@@ -1352,7 +1352,15 @@ bool Pet::addSpell(uint16 spell_id, uint16 active, PetSpellState state, uint16 s
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
     if (!spellInfo)
     {
-        sLog.outError("Pet::addSpell: Non-existed in SpellStore spell #%u request.",spell_id);
+        // do pet spell book cleanup
+        if(state == PLAYERSPELL_UNCHANGED)                  // spell load case
+        {
+            sLog.outError("Pet::addSpell: Non-existed in SpellStore spell #%u request, deleting for all pets in `pet_spell`.",spell_id);
+            sDatabase.PExecute("DELETE FROM `pet_spell` WHERE `spell` = '%u'",spell_id);
+        }
+        else
+            sLog.outError("Pet::addSpell: Non-existed in SpellStore spell #%u request.",spell_id);
+
         return false;
     }
     
