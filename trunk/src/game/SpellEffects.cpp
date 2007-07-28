@@ -317,14 +317,6 @@ void Spell::EffectDummy(uint32 i)
     // selection by spell family
     switch(m_spellInfo->SpellFamilyName)
     {
-    case SPELLFAMILY_ROGUE:
-        // Slice and Dice (Dummy set aura duration base at combo points in another effect, in result implemented in Aura::HandleHaste)
-        if(m_spellInfo->SpellFamilyFlags & 0x000040000)
-            return;
-        // Kidney Shot (Dummy set aura duration  base at combo points in another effect, in result implemented in Aura::HandleAuraModStun)
-        if(m_spellInfo->SpellFamilyFlags & 0x200000)
-            return;
-        break;
     case SPELLFAMILY_HUNTER:
         // Steady Shot
         if(m_spellInfo->SpellFamilyFlags & 0x100000000LL)

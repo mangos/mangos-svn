@@ -302,44 +302,26 @@ m_periodicTimer(0), m_PeriodicEventId(0), m_removeOnDeath(false)
     m_currentBasePoints = currentBasePoints ? *currentBasePoints : m_spellProto->EffectBasePoints[eff];
 
     m_isPassive = IsPassiveSpell(m_spellId);
-
-    m_duration = GetDuration(spellproto);
-    int32 maxduration = GetMaxDuration(spellproto);
-    if(m_duration == -1 || m_isPassive && spellproto->DurationIndex == 0)
-        m_permanent = true;
-
-    if( m_duration != maxduration )
-    {
-        //FIXME: is this code dead after change way of combo points storing and work
-        uint8 comboPoints=0;
-        if (caster && caster->GetTypeId() == TYPEID_PLAYER)
-        {
-            comboPoints = (uint8)((caster->GetUInt32Value(PLAYER_FIELD_BYTES) & 0xFF00) >> 8);
-            caster->SetUInt32Value(PLAYER_FIELD_BYTES,((caster->GetUInt32Value(PLAYER_FIELD_BYTES) & ~(0xFF << 8)) | (0x00 << 8)));
-        }
-        comboPoints = comboPoints < 5 ? comboPoints : 5;
-        m_duration += int32((maxduration - m_duration) * comboPoints / 5);
-    }
-
-    if(!m_permanent && caster && caster->GetTypeId() == TYPEID_PLAYER)
-        ((Player *)caster)->ApplySpellMod(m_spellId, SPELLMOD_DURATION, m_duration);
-
     m_positive = IsPositiveEffect(m_spellId, m_effIndex);
+
     m_applyTime = time(NULL);
 
     uint32 type = 0;
     if(!m_positive)
         type = 1;
+
     int32 damage;
     if(!caster)
     {
         m_caster_guid = target->GetGUID();
         damage = m_currentBasePoints+1;                     // stored value-1
+        caster->CalculateSpellDamageAndDuration(NULL,&m_duration,m_spellProto,m_effIndex,m_currentBasePoints);
     }
     else
     {
         m_caster_guid = caster->GetGUID();
-        damage = CalculateDamage();
+
+        caster->CalculateSpellDamageAndDuration(&damage,&m_duration,m_spellProto,m_effIndex,m_currentBasePoints);
 
         if (!damage && castItem && castItem->GetItemSuffixFactor())
         {
@@ -365,6 +347,12 @@ m_periodicTimer(0), m_PeriodicEventId(0), m_removeOnDeath(false)
             }
         }
     }
+
+    if(m_duration == -1 || m_isPassive && spellproto->DurationIndex == 0)
+        m_permanent = true;
+
+    if(!m_permanent && caster && caster->GetTypeId() == TYPEID_PLAYER)
+        ((Player *)caster)->ApplySpellMod(m_spellId, SPELLMOD_DURATION, m_duration);
 
     sLog.outDebug("Aura: construct Spellid : %u, Aura : %u Duration : %d Target : %d Damage : %d", spellproto->Id, spellproto->EffectApplyAuraName[eff], m_duration, spellproto->EffectImplicitTargetA[eff],damage);
 
@@ -405,19 +393,6 @@ Unit* Aura::GetCaster() const
         return m_target;
 
     return ObjectAccessor::Instance().GetUnit(*m_target,m_caster_guid);
-}
-
-int32 Aura::CalculateDamage()
-{
-    SpellEntry const* spellproto = GetSpellProto();
-
-    if(!m_target)
-        return 0;
-    Unit* caster = GetCaster();
-    if(!caster)
-        caster = m_target;
-
-    return caster->CalculateSpellDamage(spellproto,m_effIndex,m_currentBasePoints);
 }
 
 void Aura::SetModifier(uint8 t, int32 a, uint32 pt, int32 miscValue, uint32 miscValue2)
@@ -1920,29 +1895,6 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
 
     if (apply)
     {
-        if(Real)
-        {
-            // Kidney Shot (Dummy affect set used combo points for aura duration and then process dummy ñode here)
-            if(m_spellProto->SpellFamilyFlags & 0x200000)
-            {
-                if(caster && caster->GetTypeId() == TYPEID_PLAYER)
-                {
-                    Player* pCaster = (Player*)caster;
-
-                    if(pCaster->GetComboTarget()==m_target->GetGUID())
-                    {
-                        uint8 combo = pCaster->GetComboPoints();
-                        if(combo)
-                        {
-                            SetAuraDuration(GetAuraDuration()*combo*objmgr.GetSpellRank(m_spellProto->Id));
-                            // UpdateAuraDuration(); not required - called before aura data send to client;
-                            pCaster->ClearComboPoints();
-                        }
-                    }
-                }
-            }
-        }
-
         m_target->addUnitState(UNIT_STAT_STUNDED);
         m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
         m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
@@ -3161,29 +3113,6 @@ void Aura::HandleModAttackSpeed(bool apply, bool Real)
 
 void Aura::HandleHaste(bool apply, bool Real)
 {
-    if(Real && apply)
-    {
-        // Slice and Dice (Dummy affect set used combo points for aura duration and then process dummy ñode here)
-        if(m_spellProto->SpellFamilyFlags & 0x000040000)
-        {
-            if(m_target->GetTypeId() == TYPEID_PLAYER)
-            {
-                Player* pTarget = (Player*)m_target;
-
-                if(pTarget->getVictim() && pTarget->GetComboTarget()==pTarget->getVictim()->GetGUID())
-                {
-                    uint8 combo = pTarget->GetComboPoints();
-                    if(combo)
-                    {
-                        SetAuraDuration(GetAuraDuration() + 3000*combo);
-                        // UpdateAuraDuration(); not required - called before aura data send to client;
-                        pTarget->ClearComboPoints();
-                    }
-                }
-            }
-        }
-    }
-
     if(m_modifier.m_amount >= 0)
     {
         // v*(1+percent/100)
