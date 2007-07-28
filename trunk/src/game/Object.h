@@ -315,7 +315,7 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         // low level function for visibility change code, must be define in all main world object subclasses
         virtual bool isVisibleForInState(Player const* u, bool inVisibleList) const = 0;
     protected:
-        WorldObject( WorldObject *instantiator );
+        explicit WorldObject( WorldObject *instantiator );
 
         std::string m_name;
 

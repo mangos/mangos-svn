@@ -331,7 +331,8 @@
 #define LANG_BANLIST_MATCHINGACCOUNT     "The following accounts match your query:"
 
 #define LANG_COMMAND_LEARN_MANY_SPELLS   "You learned many spells/skills."
-#define LANG_COMMAND_LEARN_CLASS_SPELLS  "You learned all spells/skills for class."
+#define LANG_COMMAND_LEARN_CLASS_SPELLS  "You learned all spells for class."
+#define LANG_COMMAND_LEARN_CLASS_TALENTS "You learned all talents for class."
 #define LANG_COMMAND_LEARN_ALL_LANG      "You learned all languages."
 #define LANG_COMMAND_LEARN_ALL_CRAFT     "You learned all craft skills and recipes."
 #define LANG_COMMAND_ADDITEMCOULDNOTFIND "Could not find '%s'"

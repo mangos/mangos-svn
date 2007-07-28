@@ -111,7 +111,7 @@ class Unit;
 class MANGOS_DLL_SPEC GameObject : public WorldObject
 {
     public:
-        GameObject( WorldObject *instantiator );
+        explicit GameObject( WorldObject *instantiator );
         ~GameObject();
 
         bool Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, uint32 dynflags);
