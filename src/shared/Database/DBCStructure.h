@@ -499,8 +499,14 @@ struct TalentEntry
 
 struct TalentTabEntry
 {
-    uint32    TalentTabID;
-    uint32    ClassMask;
+    uint32    TalentTabID;                                  //0
+    //char*   name[16];                                     //1-16, unused
+    //uint32  nameFlags;                                    //17, unused
+    //unit32  spellicon;                                    //18
+                                                            //19 not used
+    uint32    ClassMask;                                    //20
+    //uint32  tabpage                                       //21
+    //char*   internalname;                                 //22
 };
 
 struct TaxiNodesEntry

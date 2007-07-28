@@ -28,7 +28,7 @@ class DynamicObject : public WorldObject
 {
     public:
         typedef std::set<Unit*> AffectedSet;
-        DynamicObject( WorldObject *instantiator );
+        explicit DynamicObject( WorldObject *instantiator );
 
         bool Create(uint32 guidlow, Unit *caster, uint32 spellId, uint32 effIndex, float x, float y, float z, int32 duration, float radius);
         void Update(uint32 p_time);

@@ -294,7 +294,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
     public:
 
-        Creature( WorldObject *instantiator );
+        explicit Creature( WorldObject *instantiator );
         virtual ~Creature();
 
         void CleanupsBeforeDelete();                        // used in ~Creature (or before mass creature delete to remove cross-references to already deleted creature)

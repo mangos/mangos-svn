@@ -502,6 +502,23 @@ class ObjectMgr
 
             return itr->second.rank;
         }
+
+        uint32 GetLastSpellInChain(uint32 spell_id)
+        {
+            // fast check non ranked spell
+            SpellChainMap::iterator spell_itr = mSpellChains.find(spell_id);
+            if(spell_itr == mSpellChains.end())
+                return 0;
+
+            for(SpellChainMap::iterator itr = mSpellChains.begin(); itr != mSpellChains.end(); ++itr)
+            {
+                if(itr->second.first==spell_itr->second.first && itr->second.rank > spell_itr->second.rank)
+                    spell_itr = itr;
+            }
+
+            return spell_itr->first;
+        }
+
         bool IsRankSpellDueToSpell(SpellEntry const *spellInfo_1,uint32 spellId_2);
         bool canStackSpellRanks(SpellEntry const *spellInfo,SpellEntry const *spellInfo2);
         bool IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2);

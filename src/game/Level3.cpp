@@ -1340,18 +1340,25 @@ bool ChatHandler::HandleLearnAllGMCommand(const char* args)
 
 bool ChatHandler::HandleLearnAllMyClassCommand(const char* args)
 {
+    HandleLearnAllMySpellsCommand("");
+    HandleLearnAllMyTalentsCommand("");
+    return true;
+}
+
+bool ChatHandler::HandleLearnAllMySpellsCommand(const char* args)
+{
     uint32 family = 0;
     switch(m_session->GetPlayer()->getClass())
     {
     case CLASS_WARRIOR: family = SPELLFAMILY_WARRIOR; break;
     case CLASS_PALADIN: family = SPELLFAMILY_PALADIN; break;
-    case CLASS_HUNTER: family = SPELLFAMILY_HUNTER; break;
-    case CLASS_ROGUE: family = SPELLFAMILY_ROGUE; break;
-    case CLASS_PRIEST: family = SPELLFAMILY_PRIEST; break;
-    case CLASS_SHAMAN: family = SPELLFAMILY_SHAMAN; break;
-    case CLASS_MAGE: family = SPELLFAMILY_MAGE; break;
+    case CLASS_HUNTER:  family = SPELLFAMILY_HUNTER;  break;
+    case CLASS_ROGUE:   family = SPELLFAMILY_ROGUE;   break;
+    case CLASS_PRIEST:  family = SPELLFAMILY_PRIEST;  break;
+    case CLASS_SHAMAN:  family = SPELLFAMILY_SHAMAN;  break;
+    case CLASS_MAGE:    family = SPELLFAMILY_MAGE;    break;
     case CLASS_WARLOCK: family = SPELLFAMILY_WARLOCK; break;
-    case CLASS_DRUID: family = SPELLFAMILY_DRUID; break;
+    case CLASS_DRUID:   family = SPELLFAMILY_DRUID;   break;
     default: 
         return true;
     }
@@ -1359,12 +1366,90 @@ bool ChatHandler::HandleLearnAllMyClassCommand(const char* args)
     for (uint32 i = 0; i < sSpellStore.GetNumRows(); i++)
     {
         SpellEntry const *spellInfo = sSpellStore.LookupEntry(i);
-        SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(i);
-        if (skillLine && spellInfo && spellInfo->SpellFamilyName == family )
-            m_session->GetPlayer()->learnSpell((uint16)i);
+        if(!spellInfo)
+            continue;
+
+        SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(spellInfo->Id);
+        if(!skillLine)
+            continue;
+
+        // skip other spell families
+        if( spellInfo->SpellFamilyName != family)
+            continue;
+
+        //TODO: skip triggered spells
+
+        // skip spells with first rank learned as talent (and all talents then also)
+        uint32 first_rank = objmgr.GetFirstSpellInChain(spellInfo->Id);
+        if(GetTalentSpellCost(first_rank) > 0 )
+            continue;
+
+        m_session->GetPlayer()->learnSpell(i);
     }
 
-    PSendSysMessage(LANG_COMMAND_LEARN_CLASS_SPELLS, m_session->GetPlayer()->GetName());
+    SendSysMessage(LANG_COMMAND_LEARN_CLASS_SPELLS);
+    return true;
+}
+
+bool ChatHandler::HandleLearnAllMyTalentsCommand(const char* args)
+{
+    Player* player = m_session->GetPlayer();
+    uint32 classMask = player->getClassMask();
+
+    for (uint32 i = 0; i < sTalentStore.GetNumRows(); i++)
+    {
+        TalentEntry const *talentInfo = sTalentStore.LookupEntry(i);
+        if(!talentInfo)
+            continue;
+
+        TalentTabEntry const *talentTabInfo = sTalentTabStore.LookupEntry( talentInfo->TalentTab );
+        if(!talentTabInfo)
+            continue;
+
+        if( (classMask & talentTabInfo->ClassMask) == 0 )
+            continue;
+
+        // search highest talent rank
+        uint32 spellid = 0;
+        int rank = 4;
+        for(; rank >= 0; --rank)
+        {
+            if(talentInfo->RankID[rank]!=0)
+            {
+                spellid = talentInfo->RankID[rank];
+                break;
+            }
+        }
+
+        if(!spellid)                                        // ??? none spells in telent
+            continue;
+
+        // get possible non talent last spell in chain
+        uint32 last_spell_id = objmgr.GetLastSpellInChain(spellid);
+
+        // already known high rank;
+        if(player->HasSpell(last_spell_id))
+            continue;
+
+        // unlearn lower ranks of talent
+        for(int j = 0; j < rank; ++j)
+        {
+            uint32 lowspellid = talentInfo->RankID[j];
+            player->RemoveAurasDueToSpell(lowspellid);
+            player->removeSpell(lowspellid);
+        }
+
+        // learn highest rank of talent
+        player->learnSpell(spellid);
+
+        // and learn all non-talent spell ranks
+        for(uint32 cur_id = last_spell_id; cur_id != spellid && cur_id != 0; cur_id = objmgr.GetPrevSpellInChain(cur_id))
+        {
+            player->learnSpell(cur_id);
+        }
+    }
+
+    SendSysMessage(LANG_COMMAND_LEARN_CLASS_TALENTS);
     return true;
 }
 
