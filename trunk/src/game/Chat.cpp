@@ -523,11 +523,11 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text)
             if(table[i].SecurityLevel > 0)
             {
                 Player* p = m_session->GetPlayer();
-                Creature* c = ObjectAccessor::Instance().GetCreature(*p,p->GetSelection());
-                sLog.outCommand("Command: %s [Player: %s (Account: %u) X: %f Y: %f Z: %f Map: %u Selected: %s %u)]",
+                uint64 sel_guid = p->GetSelection();
+                sLog.outCommand("Command: %s [Player: %s (Account: %u) X: %f Y: %f Z: %f Map: %u Selected: %s (GUID: %u)]",
                     fullcmd.c_str(),p->GetName(),m_session->GetAccountId(),p->GetPositionX(),p->GetPositionY(),p->GetPositionZ(),p->GetMapId(),
-                    (c ? "creature (Entry: " : (GUID_HIPART(p->GetSelection())==HIGHGUID_PLAYER ? "player (GUID: " : "none (")),GUID_LOPART(p->GetSelection()),
-                    (c ? c->GetEntry() : (GUID_HIPART(p->GetSelection())==HIGHGUID_PLAYER ? GUID_LOPART(p->GetSelection()) : 0)));
+                    (GUID_HIPART(sel_guid)==HIGHGUID_UNIT ? "creature" : (sel_guid !=0 ? "player" : "none")),
+                    GUID_LOPART(sel_guid));
             }
         }
         else

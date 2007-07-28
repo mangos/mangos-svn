@@ -795,10 +795,14 @@ namespace MaNGOS
                         break;
                     case SPELL_TARGETS_AOE_DAMAGE:
                         {
+                            if(itr->second->GetTypeId()==TYPEID_UNIT && ((Creature*)itr->second)->isTotem())
+                                continue;
+
                             Unit* check = i_originalCaster;
                             Unit* owner = i_originalCaster->GetCharmerOrOwner();
                             if(owner)
                                 check = owner;
+
                             if( check->GetTypeId()==TYPEID_PLAYER )
                             {
                                 if (check->IsFriendlyTo( itr->second ))
@@ -864,6 +868,9 @@ namespace MaNGOS
                         break;
                     case SPELL_TARGETS_AOE_DAMAGE:
                         {
+                            if(itr->second->GetTypeId()==TYPEID_UNIT && ((Creature*)itr->second)->isTotem())
+                                continue;
+
                             Unit* check = i_originalCaster;
                             Unit* owner = i_originalCaster->GetCharmerOrOwner();
                             if(owner)
