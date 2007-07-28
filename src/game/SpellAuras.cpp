@@ -310,6 +310,7 @@ m_periodicTimer(0), m_PeriodicEventId(0), m_removeOnDeath(false)
 
     if( m_duration != maxduration )
     {
+        //FIXME: is this code dead after change way of combo points storing and work
         uint8 comboPoints=0;
         if (caster && caster->GetTypeId() == TYPEID_PLAYER)
         {
@@ -2028,7 +2029,7 @@ void Aura::HandleModStealth(bool apply, bool Real)
 {
    if(apply)
     {
-        m_target->m_stealthvalue = CalculateDamage();
+        m_target->m_stealthvalue = m_modifier.m_amount;
 
         // not apply flag for RACE_NIGHTELF stealth
         if(GetId()!=20580)
@@ -2091,7 +2092,7 @@ void Aura::HandleModStealthDetect(bool apply, bool Real)
 {
     if(apply)
     {
-        m_target->m_detectStealth = CalculateDamage();
+        m_target->m_detectStealth = m_modifier.m_amount;
     }
     else
     {
@@ -2103,7 +2104,7 @@ void Aura::HandleInvisibility(bool Apply, bool Real)
 {
     if(Apply)
     {
-        m_target->m_invisibilityvalue = CalculateDamage();
+        m_target->m_invisibilityvalue = m_modifier.m_amount;
 
         // only at real aura add
         if(Real)
@@ -2141,7 +2142,7 @@ void Aura::HandleInvisibilityDetect(bool Apply, bool Real)
 {
     if(Apply)
     {
-        m_target->m_detectInvisibility = CalculateDamage();
+        m_target->m_detectInvisibility = m_modifier.m_amount;
     }
     else
     {

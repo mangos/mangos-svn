@@ -2151,8 +2151,21 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
     itemTarget = pItemTarget;
     gameObjTarget = pGOTarget;
 
-    damage = uint32(CalculateDamage((uint8)i)*DamageMultiplier);
     uint8 eff = m_spellInfo->Effect[i];
+
+    // not call damage calculation for aura case aura calculate it by self
+    // this will prevent to prevent reset combo points before aura damage calculation
+    switch(eff)
+    {
+    case SPELL_EFFECT_APPLY_AURA:
+    case SPELL_EFFECT_APPLY_AURA_NEW:
+    case SPELL_EFFECT_PERSISTENT_AREA_AURA:
+        damage = 0;
+        break;
+    default:
+        damage = uint32(CalculateDamage((uint8)i)*DamageMultiplier);
+        break;
+    }
 
     sLog.outDebug( "Spell: Effect : %u", eff);
     if(unitTarget && unitTarget->IsImmunedToSpellEffect(eff))
