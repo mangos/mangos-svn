@@ -3155,7 +3155,9 @@ uint8 Spell::CheckItems()
 
 int32 Spell::CalculateDamage(uint8 i)
 {
-    int32 value = m_caster->CalculateSpellDamage(m_spellInfo,i,m_currentBasePoints[i]);
+    int32 value;
+    
+    m_caster->CalculateSpellDamageAndDuration(&value,NULL,m_spellInfo,i,m_currentBasePoints[i]);
 
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
         ((Player*)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DAMAGE, value);
@@ -3342,7 +3344,8 @@ SpellEvent::~SpellEvent()
     }
     else
     {
-        sLog.outError("~SpellEvent: Unit %u tried to delete non-deletable spell. Was not deleted, causes memory leak.", m_Spell->GetCaster()->GetGUIDLow());
+        sLog.outError("~SpellEvent: %s %u tried to delete non-deletable spell. Was not deleted, causes memory leak.", 
+            (m_Spell->GetCaster()->GetTypeId()==TYPEID_PLAYER?"Player":"Creature"), m_Spell->GetCaster()->GetGUIDLow());
     }
 }
 

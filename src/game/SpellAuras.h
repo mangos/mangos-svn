@@ -226,7 +226,6 @@ class Aura
 
         void _AddAura();
         void _RemoveAura();
-        int32 CalculateDamage();
 
         void TriggerSpell();
         void SendCoolDownEvent();

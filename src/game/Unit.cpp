@@ -5517,61 +5517,80 @@ bool Unit::SelectHostilTarget()
 //======================================================================
 //======================================================================
 
-int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_index, int32 effBasePoints)
+void Unit::CalculateSpellDamageAndDuration(int32* damage, int32* duration, SpellEntry const* spellProto, uint8 effect_index, int32 effBasePoints)
 {
-    int32 value = 0;
-    uint32 level = 0;
-
     Player* unitPlayer = (GetTypeId() == TYPEID_PLAYER) ? (Player*)this : NULL;
 
-    level = getLevel() - spellProto->spellLevel;
-    if (level > spellProto->maxLevel && spellProto->maxLevel > 0)
-        level = spellProto->maxLevel;
+    uint8 comboPoints = unitPlayer ? unitPlayer->GetComboPoints() : 0;
+    bool needClearCombo = false;
 
-    float basePointsPerLevel = spellProto->EffectRealPointsPerLevel[effect_index];
-    float randomPointsPerLevel = spellProto->EffectDicePerLevel[effect_index];
-    int32 basePoints = int32(effBasePoints + level * basePointsPerLevel);
-    int32 randomPoints = int32(spellProto->EffectDieSides[effect_index] + level * randomPointsPerLevel);
-    float comboDamage = spellProto->EffectPointsPerComboPoint[effect_index];
-    uint8 comboPoints=0;
-    if(unitPlayer)
+    if(damage)
     {
-        if (m_attacking && (m_attacking->GetGUID() == unitPlayer->GetComboTarget()))
-            comboPoints = unitPlayer->GetComboPoints();
-    }
+        int32 value = 0;
+        uint32 level = 0;
 
-    value = basePoints + rand32(spellProto->EffectBaseDice[effect_index], randomPoints);
-    //random damage
-    if(int32(spellProto->EffectBaseDice[effect_index]) != randomPoints && GetTypeId() == TYPEID_UNIT && ((Creature*)this)->isPet())
-        value += ((Pet*)this)->GetBonusDamage();                //bonus damage only on spells without fixed basePoints?)
-    if(comboDamage > 0)
-    {
-        value += (int32)(comboDamage * comboPoints);
-        // Eviscerate
-        if( spellProto->SpellIconID == 514 && spellProto->SpellFamilyName == SPELLFAMILY_ROGUE)
-            value += (int32)(GetTotalAttackPowerValue(BASE_ATTACK) * comboPoints * 0.03);
-        if(unitPlayer)
-            unitPlayer->SetComboPoints(unitPlayer->GetComboTarget(), 0);
-    }
+        level = getLevel() - spellProto->spellLevel;
+        if (level > spellProto->maxLevel && spellProto->maxLevel > 0)
+            level = spellProto->maxLevel;
 
-    if (GetTypeId() == TYPEID_PLAYER)
-    {
-        ((Player *)this)->ApplySpellMod(spellProto->Id,SPELLMOD_ALL_EFFECTS, value);
-        switch(effect_index)
+        float basePointsPerLevel = spellProto->EffectRealPointsPerLevel[effect_index];
+        float randomPointsPerLevel = spellProto->EffectDicePerLevel[effect_index];
+        int32 basePoints = int32(effBasePoints + level * basePointsPerLevel);
+        int32 randomPoints = int32(spellProto->EffectDieSides[effect_index] + level * randomPointsPerLevel);
+        float comboDamage = spellProto->EffectPointsPerComboPoint[effect_index];
+
+        value = basePoints + rand32(spellProto->EffectBaseDice[effect_index], randomPoints);
+        //random damage
+        if(int32(spellProto->EffectBaseDice[effect_index]) != randomPoints && GetTypeId() == TYPEID_UNIT && ((Creature*)this)->isPet())
+            value += ((Pet*)this)->GetBonusDamage();                //bonus damage only on spells without fixed basePoints?)
+
+        if(comboDamage != 0 && unitPlayer && m_attacking && (m_attacking->GetGUID() == unitPlayer->GetComboTarget()))
         {
-        case 0:
-            ((Player*)this)->ApplySpellMod(spellProto->Id,SPELLMOD_EFFECT1, value);
-            break;
-        case 1:
-            ((Player*)this)->ApplySpellMod(spellProto->Id,SPELLMOD_EFFECT2, value);
-            break;
-        case 2:
-            ((Player*)this)->ApplySpellMod(spellProto->Id,SPELLMOD_EFFECT3, value);
-            break;
+            value += (int32)(comboDamage * comboPoints);
+
+            // Eviscerate
+            if( spellProto->SpellIconID == 514 && spellProto->SpellFamilyName == SPELLFAMILY_ROGUE)
+                value += (int32)(GetTotalAttackPowerValue(BASE_ATTACK) * comboPoints * 0.03);
+
+            needClearCombo = true;
         }
+
+        if (GetTypeId() == TYPEID_PLAYER)
+        {
+            ((Player *)this)->ApplySpellMod(spellProto->Id,SPELLMOD_ALL_EFFECTS, value);
+            switch(effect_index)
+            {
+            case 0:
+                ((Player*)this)->ApplySpellMod(spellProto->Id,SPELLMOD_EFFECT1, value);
+                break;
+            case 1:
+                ((Player*)this)->ApplySpellMod(spellProto->Id,SPELLMOD_EFFECT2, value);
+                break;
+            case 2:
+                ((Player*)this)->ApplySpellMod(spellProto->Id,SPELLMOD_EFFECT3, value);
+                break;
+            }
+        }
+
+        *damage = value;
     }
 
-    return value;
+    if(duration)
+    {
+        int32 minduration = GetDuration(spellProto);
+        int32 maxduration = GetMaxDuration(spellProto);
+
+        if( minduration != -1 && minduration != maxduration )
+        {
+            *duration = minduration + int32((maxduration - minduration) * comboPoints / 5);
+            needClearCombo = true;
+        }
+        else
+            *duration = minduration;
+    }
+
+    if(unitPlayer && needClearCombo)
+        unitPlayer->SetComboPoints(unitPlayer->GetComboTarget(), 0);
 }
 
 void Unit::AddDiminishing(DiminishingMechanics mech, uint32 hitTime, uint32 hitCount)
