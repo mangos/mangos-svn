@@ -1957,7 +1957,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
             {
                 //If this is a knockout spell for rogues attacker stops
                 if( caster->GetTypeId() == TYPEID_PLAYER && 
-                    GetSpellProto()->Mechanic == MECHANIC_KNOCKOUT && GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE )
+                    (GetSpellProto()->Mechanic == MECHANIC_KNOCKOUT || GetSpellProto()->Mechanic == MECHANIC_STUNDED) && GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE )
                 {
                     caster->AttackStop();
                 }
@@ -1970,12 +1970,6 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
             if(m_target->GetTypeId() != TYPEID_PLAYER)
             {
                 ((Creature *)m_target)->StopMoving();
-                //Removes threat and stops combat state so player can re-stealth
-                if(GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE && GetSpellProto()->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE_STAB)
-                {
-                    m_target->CombatStop();
-                    m_target->DeleteThreatList();
-                }
             }
 
             WorldPacket data(SMSG_FORCE_MOVE_ROOT, 8);

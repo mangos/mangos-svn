@@ -959,6 +959,8 @@ void Spell::EffectApplyAura(uint32 i)
 
     if (!Aur->IsPositive() && Aur->GetCasterGUID() != Aur->GetTarget()->GetGUID())
     {
+        bool attack = false;
+        const SpellEntry* spellEntry = Aur->GetSpellProto();
         switch (Aur->GetModifier()->m_auraname)
         {
             case SPELL_AURA_BIND_SIGHT:
@@ -972,12 +974,20 @@ void Spell::EffectApplyAura(uint32 i)
             case SPELL_AURA_EMPATHY:
             case SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS:
                 break;
-
+            case SPELL_AURA_MOD_STUN:
+                //I'm not sure, if all STUN-Auras prevent attack, therefore the query
+                if(!(spellEntry->SpellFamilyName == SPELLFAMILY_ROGUE && spellEntry->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE_SAP))
+                    attack=true;
+                break;
             default:
                 //If Aura is applied to monster then attack caster
-                if( Aur->GetTarget()->GetTypeId() == TYPEID_UNIT && !Aur->GetTarget()->isInCombat() && 
-                    ((Creature*)Aur->GetTarget())->AI() )
-                    ((Creature*)Aur->GetTarget())->AI()->AttackStart(m_caster);
+                attack = true;
+        }
+        if(attack)
+        {
+            if( Aur->GetTarget()->GetTypeId() == TYPEID_UNIT && !Aur->GetTarget()->isInCombat() && 
+                ((Creature*)Aur->GetTarget())->AI() )
+                ((Creature*)Aur->GetTarget())->AI()->AttackStart(m_caster);
         }
     }
 
