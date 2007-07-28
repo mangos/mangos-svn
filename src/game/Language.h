@@ -413,7 +413,7 @@
 #define LANG_GUILD_NOT_CREATED           "Guild not created! (already exists?)"
 #define LANG_NO_ITEMS_FROM_ITEMSET_FOUND "No items from itemset '%u' found."
 
-#define LANG_DISTANCE                    "The distance(sqr) is: %f."
+#define LANG_DISTANCE                    "The distance is: (3D) %f (2D) %f yards."
                                                             //log
 #define LANG_ADD_OBJ_LV3                 "AddObject at Level3.cpp line 1176"
 

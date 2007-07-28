@@ -537,6 +537,17 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
 
                     // sort TagUnitMap  and then cut down to size
                     TagUnitMap.sort(TargetDistanceOrder(pUnitTarget));
+
+                    // special test to exclude all totems except one selected
+                    Unit* selectedTotem = (pUnitTarget && pUnitTarget->GetTypeId()==TYPEID_UNIT && ((Creature*)pUnitTarget)->isTotem()) ? pUnitTarget : NULL;
+                    for(std::list<Unit*>::iterator itr = TagUnitMap.begin(); itr != TagUnitMap.end();)
+                    {
+                        if((*itr)!=selectedTotem && (*itr)->GetTypeId()==TYPEID_UNIT && ((Creature*)(*itr))->isTotem())
+                            itr = TagUnitMap.erase(itr);
+                        else
+                            ++itr;
+                    }
+
                     if (TagUnitMap.size() > unMaxTargets)
                         TagUnitMap.resize(unMaxTargets);
                 }

@@ -2376,7 +2376,7 @@ bool ChatHandler::HandleGetDistanceCommand(const char* args)
         return true;
     }
 
-    PSendSysMessage(LANG_DISTANCE, m_session->GetPlayer()->GetDistanceSq(pUnit));
+    PSendSysMessage(LANG_DISTANCE, sqrt(m_session->GetPlayer()->GetDistanceSq(pUnit)),sqrt(m_session->GetPlayer()->GetDistance2dSq(pUnit)));
 
     return true;
 }

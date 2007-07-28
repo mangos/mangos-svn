@@ -142,6 +142,9 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
     if(!target->isAlive() || target->isInFlight() )
         return;
 
+    if(target->GetTypeId()==TYPEID_UNIT && ((Creature*)target)->isTotem())
+        return;
+
     if (!i_dynobject.IsWithinDistInMap(target, i_dynobject.GetRadius()))
         return;
 
