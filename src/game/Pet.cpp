@@ -179,7 +179,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
             }
 
             SetTP(fields[11].GetInt32());
-            SetMaxPower(POWER_HAPPINESS,1050000);
+            SetMaxPower(POWER_HAPPINESS,GetCreatePowers(POWER_HAPPINESS));
             SetPower(   POWER_HAPPINESS,fields[17].GetUInt32());
             setPowerType(POWER_FOCUS);
             break;
@@ -858,7 +858,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     }
     SetUInt64Value(UNIT_FIELD_DISPLAYID,       creature->GetUInt64Value(UNIT_FIELD_DISPLAYID));
     SetUInt64Value(UNIT_FIELD_NATIVEDISPLAYID, creature->GetUInt64Value(UNIT_FIELD_NATIVEDISPLAYID));
-    SetMaxPower(POWER_HAPPINESS,1050000);
+    SetMaxPower(POWER_HAPPINESS,GetCreatePowers(POWER_HAPPINESS));
     SetPower(   POWER_HAPPINESS,166500);
     setPowerType(POWER_FOCUS);
     SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,0);
@@ -1014,9 +1014,6 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
                 SetCreateStat(STAT_INTELLECT,28);
                 SetCreateStat(STAT_SPIRIT,27);
             }
-
-            SetCreatePowers(POWER_FOCUS, 100);
-            SetCreatePowers(POWER_HAPPINESS,1050000);
         };
         break;
 
@@ -1032,7 +1029,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
             if(pInfo)                                       // exist in DB
             {
                 SetCreateHealth(pInfo->health);
-                SetCreatePowers(POWER_MANA, pInfo->mana);
+                SetCreateMana(pInfo->mana);
 
                 for(int stat = 0; stat < MAX_STATS; ++stat)
                 {
@@ -1045,7 +1042,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
 
                 // remove elite bonuses included in DB values
                 SetCreateHealth(((cinfo->maxhealth / cinfo->maxlevel) / (1 + 2 * cinfo->rank)) * petlevel);
-                SetCreatePowers(POWER_MANA, ((cinfo->maxmana / cinfo->maxlevel) / (1 + 2 * cinfo->rank)) * petlevel);
+                SetCreateMana( ((cinfo->maxmana / cinfo->maxlevel) / (1 + 2 * cinfo->rank)) * petlevel);
 
                 SetCreateStat(STAT_STRENGTH,22);
                 SetCreateStat(STAT_AGILITY,22);

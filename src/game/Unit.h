@@ -875,10 +875,11 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void ApplyNegStatMod(Stats stat, float val, bool apply) { ApplyModFloatValue(UNIT_FIELD_NEGSTAT0+stat, val, apply); }
         void ApplyNegStatPercentMod(Stats stat, float val, bool apply) { ApplyPercentModFloatValue(UNIT_FIELD_NEGSTAT0+stat, val, apply); }
         void SetCreateStat(Stats stat, float val) { m_createStats[stat] = val; }
-        void SetCreateHealth(float val) { m_createHealth = val; }
-        float GetCreateHealth() const { return m_createHealth; }
-        void SetCreatePowers(Powers power, float val) { m_createPowers[power] = val; }
-        float GetCreatePowers(Powers power) const { return m_createPowers[power]; }
+        void SetCreateHealth(uint32 val) { SetUInt32Value(UNIT_FIELD_BASE_HEALTH, val); }
+        uint32 GetCreateHealth() const { return GetUInt32Value(UNIT_FIELD_BASE_HEALTH); }
+        void SetCreateMana(uint32 val) { SetUInt32Value(UNIT_FIELD_BASE_MANA, val); }
+        uint32 GetCreateMana() const { return GetUInt32Value(UNIT_FIELD_BASE_MANA); }
+        float GetCreatePowers(Powers power) const;
         float GetPosStat(Stats stat) const { return GetFloatValue(UNIT_FIELD_POSSTAT0+stat); }
         float GetNegStat(Stats stat) const { return GetFloatValue(UNIT_FIELD_NEGSTAT0+stat); }
         float GetCreateStat(Stats stat) const { return m_createStats[stat]; }
@@ -1028,8 +1029,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 m_attackTimer[3];
 
         float m_createStats[5];
-        float m_createHealth;
-        float m_createPowers[MAX_POWERS];
 
         AttackerSet m_attackers;
         Unit* m_attacking;

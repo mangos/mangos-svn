@@ -2820,14 +2820,7 @@ uint8 Spell::CheckMana(uint32 *mana)
 
         uint32 healthCost;
 
-        if(m_caster->GetTypeId() == TYPEID_PLAYER)
-        {
-            PlayerLevelInfo info;
-            objmgr.GetPlayerLevelInfo(m_caster->getRace(),m_caster->getClass(),m_caster->getLevel(),&info);
-            healthCost = m_spellInfo->manaCost + int32(float(m_spellInfo->ManaCostPercentage)/100.0 * info.health);
-        }
-        else
-            healthCost = m_spellInfo->manaCost + int32(float(m_spellInfo->ManaCostPercentage)/100.0 * m_caster->GetMaxHealth());
+        healthCost = m_spellInfo->manaCost + int32(float(m_spellInfo->ManaCostPercentage)/100.0 * m_caster->GetCreateHealth());
 
         *mana = healthCost;
         if(currentHealth <= healthCost)
@@ -2850,12 +2843,8 @@ uint8 Spell::CheckMana(uint32 *mana)
         manaCost += m_spellInfo->manaCostPerlevel*m_caster->getLevel();
     if(m_spellInfo->ManaCostPercentage)
     {
-        if(m_caster->GetTypeId() == TYPEID_PLAYER && powerType==POWER_MANA)
-        {
-            PlayerLevelInfo info;
-            objmgr.GetPlayerLevelInfo(m_caster->getRace(),m_caster->getClass(),m_caster->getLevel(),&info);
-            manaCost += float(m_spellInfo->ManaCostPercentage)/100.0 * info.mana;
-        }
+        if(powerType==POWER_MANA)
+            manaCost += float(m_spellInfo->ManaCostPercentage)/100.0 * m_caster->GetCreateMana();
         else
             manaCost += float(m_spellInfo->ManaCostPercentage)/100.0*m_caster->GetMaxPower(powerType);
     }
