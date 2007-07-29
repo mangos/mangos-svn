@@ -1418,30 +1418,28 @@ void Aura::HandleForceReaction(bool Apply, bool Real)
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    //FIXME: correct solution must send SMSG_SET_FORCED_REACTIONS instead setting faction
+    if(!Real)
+        return;
+
+    Player* player = (Player*)m_target;
+
+    uint32 faction_id = m_modifier.m_miscvalue;
+    uint32 faction_rank = m_modifier.m_amount;
+
     if(Apply)
-    {
-        uint32 faction_id = m_modifier.m_miscvalue;
-
-        FactionTemplateEntry const *factionTemplateEntry = NULL;
-
-        for(uint32 i = 0; i <  sFactionTemplateStore.GetNumRows(); ++i)
-        {
-            factionTemplateEntry = sFactionTemplateStore.LookupEntry(i);
-            if(!factionTemplateEntry)
-                continue;
-
-            if(factionTemplateEntry->faction == faction_id)
-                break;
-        }
-
-        if(!factionTemplateEntry)
-            return;
-
-        m_target->setFaction(factionTemplateEntry->ID);
-    }
+        player->m_forcedReactions[m_modifier.m_miscvalue] = ReputationRank(faction_rank);
     else
-        ((Player*)m_target)->setFactionForRace(((Player*)m_target)->getRace());
+        player->m_forcedReactions.erase(m_modifier.m_miscvalue);
+
+    WorldPacket data;
+    data.Initialize(SMSG_SET_FORCED_REACTIONS, 4+player->m_forcedReactions.size()*(4+4));
+    data << uint32(player->m_forcedReactions.size());
+    for(ForcedReactions::const_iterator itr = player->m_forcedReactions.begin(); itr != player->m_forcedReactions.end(); ++itr)
+    {
+        data << uint32(itr->first);                         // faction_id (Faction.dbc)
+        data << uint32(itr->second);                        // reputation rank
+    }
+    player->SendDirectMessage(&data);
 }
 
 void Aura::HandleAuraModSkill(bool apply, bool Real)
