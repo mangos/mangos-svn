@@ -19,7 +19,7 @@
 ## Sub-directories to parse
 
 ## CPP flags for includes, defines, etc.
-AM_CPPFLAGS = $(MYSQL_INCLUDES) -I$(top_builddir)/src/shared -I$(srcdir) -I$(srcdir)/../../dep/include -I$(srcdir)/../framework -I$(srcdir)/../shared -I$(srcdir)/../../dep/include/g3dlite
+AM_CPPFLAGS = $(MYSQL_INCLUDES) $(POSTGRE_INCLUDES) -I$(top_builddir)/src/shared -I$(srcdir) -I$(srcdir)/../../dep/include -I$(srcdir)/../framework -I$(srcdir)/../shared -I$(srcdir)/../../dep/include/g3dlite
 ## AM_CPPFLAGS += -I$(srcdir)/../game -I$(srcdir)/../realmd
 
 ## Build MaNGOS shared library and its parts as convenience library.
@@ -77,14 +77,18 @@ libmangosdatabase_a_SOURCES = \
 	Database/Database.h \
 	Database/DatabaseEnv.h \
 	Database/DatabaseMysql.cpp \
+	Database/DatabasePostgre.cpp \
 	Database/DatabaseMysql.h \
+	Database/DatabasePostgre.h \
 	Database/DatabaseSqlite.cpp \
 	Database/DatabaseSqlite.h \
 	Database/Field.cpp \
 	Database/Field.h \
 	Database/QueryResult.h \
 	Database/QueryResultMysql.cpp \
+	Database/QueryResultPostgre.cpp \
 	Database/QueryResultMysql.h \
+	Database/QueryResultPostgre.h \
 	Database/QueryResultSqlite.cpp \
 	Database/QueryResultSqlite.h \
 	Database/SQLStorage.cpp \

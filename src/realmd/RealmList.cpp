@@ -27,7 +27,11 @@
 
 INSTANTIATE_SINGLETON_1( RealmList );
 
+#ifdef DO_POSTGRESQL
+extern DatabasePostgre dbRealmServer;
+#else
 extern DatabaseMysql dbRealmServer;
+#endif
 
 RealmList::RealmList( )
 {

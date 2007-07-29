@@ -16,6 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifndef DO_POSTGRESQL
+
 #include "DatabaseEnv.h"
 
 DatabaseSqlite::DatabaseSqlite() : Database(), mSqlite(0)
@@ -96,3 +98,5 @@ bool DatabaseSqlite::Execute(const char *sql)
 
     return true;
 }
+
+#endif

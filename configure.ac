@@ -52,23 +52,53 @@ AC_CHECK_LIB( z, compress, [ZLIB=-lz],[AC_MSG_ERROR([Missing zlib])] )
 AC_CHECK_LIB( compat, ftime, [COMPATLIB=-lcompat] )
 AC_CHECK_LIB( crypto, SHA1_Init, [SSLLIB=-lssl], [AC_MSG_ERROR([Missing openssl])])
 
-#AC_CHECK_LIB( mysqlclient, mysql_init, [],[AC_CHECK_LIB(mysql, mysql_init,[],[AC_MSG_ERROR([Missing mysql])])])
-AC_ARG_WITH(mysql-libs,
-[  --with-mysql-libs=DIR     Look for mysql libs in this dir ],
-    MYSQL_LIBS="-L$withval -lmysqlclient"
-)
-AC_ARG_WITH(mysql-includes,
-[  --with-mysql-includes=DIR Look for mysql includes in this dir ],
-    MYSQL_INCLUDES="-I$withval"
-)
+AC_ARG_WITH(postgresql,
+[  --with-postgresql       Use PostgreSQL as a backend (default: no)],
+[case "${withval}" in
+	yes) DO_POSTGRESQL=yes ;;
+	no)  DO_POSTGRESQL=no ;;
+	maybe) DO_POSTGRESQL=maybe ;;
+	*)   AC_MSG_ERROR(Bad value ${withval} for --with-postgresql) ;;
+    esac],
+[DO_POSTGRESQL=no])
+ORIGINAL_DO_POSTGRESQL=$DO_POSTGRESQL
+				 
+AC_ARG_WITH(mysql,
+[  --with-mysql            Use MySQL as a backend (default: yes)],
+[case "${withval}" in
+	yes) DO_MYSQL=yes ;;
+	no)  DO_MYSQL=no ;;
+	maybe) DO_MYSQL=maybe ;;
+	*)   AC_MSG_ERROR(Bad value ${withval} for --with-mysql) ;;
+    esac],
+[DO_MYSQL=yes])
+ORIGINAL_DO_MYSQL=$DO_MYSQL
 
+# here Postgre
+AC_MSG_CHECKING(whether to build/link POSTGRESQL)
+if test "x$DO_POSTGRESQL" == "xyes"; then
+DO_MYSQL=no
+POSTGRE_INCLUDES="-I/usr/include/postgresql $POSTGRE_INCLUDES"
+POSTGRE_LIBS="-L/usr/lib/postresql -lpq -lz -lpthread -lcrypt -lnsl -lm -lpthread -L/usr/lib -lssl -lcrypto $POSTGRE_LIBS "
+CXXFLAGS="-DDO_POSTGRESQL $CXXFLAGS"
+fi
+AC_MSG_RESULT($DO_POSTGRESQL)
+	
+# here mysql
+AC_MSG_CHECKING(whether to build/link MYSQL)
+if test "x$DO_MYSQL" == "xyes"; then
+AC_MSG_RESULT($DO_MYSQL)
 AC_PATH_PROGS(MYSQL_CONFIG, mysql_config, mysql_config, $PATH)
-if test -x "$MYSQL_CONFIG"
-then
+    if test -x "$MYSQL_CONFIG"
+        then
     # MySQL v4 uses --include while v3 uses --cflags
-    MYSQL_INCLUDES="`$MYSQL_CONFIG --include`" || \
-        MYSQL_INCLUDES="`$MYSQL_CONFIG --cflags`"
-    MYSQL_LIBS="`$MYSQL_CONFIG --libs_r`"
+        MYSQL_INCLUDES="`$MYSQL_CONFIG --include`" || \
+	    MYSQL_INCLUDES="`$MYSQL_CONFIG --cflags`"
+        MYSQL_LIBS="`$MYSQL_CONFIG --libs_r`"
+	CXXFLAGS="-DDO_MYSQL $CXXFLAGS"
+    fi
+else
+AC_MSG_RESULT($DO_MYSQL)
 fi
 
 ## Check for options
@@ -132,6 +162,7 @@ AC_CHECK_HEADERS([ arpa/inet.h fcntl.h limits.h locale.h malloc.h netdb.h netine
 AC_CHECK_HEADERS([pthread.h])
 AC_CHECK_HEADERS([openssl/md5.h openssl/rand.h openssl/ssl.h openssl/sha.h openssl/bn.h])
 AC_CHECK_HEADERS([mysql.h mysql/mysql.h])
+AC_CHECK_HEADERS([libpq-fe.h])
 AC_CHECK_HEADERS([zlib.h])
 
 ## Check for typedefs, structures, and compiler characteristics.
@@ -162,6 +193,8 @@ AC_SUBST(COMPATLIB)
 AC_SUBST(SSLLIB)
 AC_SUBST(MYSQL_INCLUDES)
 AC_SUBST(MYSQL_LIBS)
+AC_SUBST(POSTGRE_INCLUDES)
+AC_SUBST(POSTGRE_LIBS)
 AC_SUBST(DOXYGENPATH)
 AC_SUBST(MANGOSD_DEBUG_INFO)
 AC_SUBST(MANGOSD_ENABLE_CLI)
