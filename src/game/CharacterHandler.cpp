@@ -33,6 +33,7 @@
 #include "ObjectAccessor.h"
 #include "Transports.h"
 #include "Group.h"
+#include "SpellAuras.h"
 
 // check used symbols in player name at creating and rename
 std::string notAllowedChars = "\t\v\b\f\a\n\r\\\"\'\? <>[](){}_=+-|/!@#$%^&*~`.,0123456789\0";
@@ -512,10 +513,24 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     loginDatabase.PExecute("UPDATE `account` SET `online` = 1 WHERE `id` = '%u'", GetAccountId());
     plr->SetInGameTime( getMSTime() );
 
-    // set some aura effects after add player to map
+    // set some aura effects that send packet to player client after add player to map
+    // SendMessageToSet not send it to player not it map, only for aura that not changed anything at re-apply
+    static const uint32 auratypes[] = {
+        SPELL_AURA_WATER_WALK, SPELL_AURA_FEATHER_FALL, SPELL_AURA_HOVER,
+        SPELL_AURA_SAFE_FALL,  SPELL_AURA_MOD_FEAR,     SPELL_AURA_FLY,
+        0
+    };
+    for(uint32 const* itr = &auratypes[0]; itr && itr[0] !=0; ++itr)
+    {
+        Unit::AuraList const& auraList = pCurrChar->GetAurasByType(*itr);
+        if(!auraList.empty())
+            auraList.front()->ApplyModifier(true,true);
+    }
+
     if(pCurrChar->HasAuraType(SPELL_AURA_MOD_STUN))
         pCurrChar->SetMovement(MOVE_ROOT);
 
+    // manual send package (have code in ApplyModifier(true,true); that don't must be re-applied.
     if(pCurrChar->HasAuraType(SPELL_AURA_MOD_ROOT))
     {
         WorldPacket data(SMSG_FORCE_MOVE_ROOT, 10);
