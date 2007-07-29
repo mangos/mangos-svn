@@ -866,32 +866,6 @@ void Spell::EffectDummy(uint32 i)
             return;
         }
 
-        // Shaman's "Lightning Shield"
-        case 26545:
-        {
-            if(!m_caster || !unitTarget || !m_triggeredByAura)
-                return;
-
-            uint32 spell = 0;
-            switch(m_triggeredByAura->GetId())
-            {
-                case   324: spell = 26364; break;           // Rank 1 
-                case   325: spell = 26365; break;           // Rank 2
-                case   905: spell = 26366; break;           // Rank 3 
-                case   945: spell = 26367; break;           // Rank 4
-                case  8134: spell = 26369; break;           // Rank 5
-                case 10431: spell = 26370; break;           // Rank 6
-                case 10432: spell = 26363; break;           // Rank 7
-                case 25469: spell = 26371; break;           // Rank 8
-                case 25472: spell = 26372; break;           // Rank 9
-                default:
-                    sLog.outError("Spell::EffectDummy: Spell 26545 triggered by unhandled spell %u",m_triggeredByAura->GetId());
-                    return;
-            }
-            m_caster->CastSpell(unitTarget, spell, true, NULL);
-            return;
-        }
-
         //Training Lesson
         case 23357:
         {

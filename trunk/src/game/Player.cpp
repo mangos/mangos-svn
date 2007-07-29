@@ -220,11 +220,9 @@ Player::Player (WorldSession *session): Unit( 0 )
 Player::~Player ()
 {
     if(m_uint32Values)                                      // only for fully created Object
-    {
-        CombatStop(true);
         DuelComplete(0);
-        RemoveAllAuras();
-    }
+
+    CleanupsBeforeDelete();
 
     TradeCancel(false);
 
@@ -11635,8 +11633,9 @@ float Player::GetFloatValueFromDB(uint16 index, uint64 guid)
 
 bool Player::LoadFromDB( uint32 guid )
 {
-    //                                                0        1       2      3      4      5         6            7            8         9        10            11         12          13         14            15          16               17                  18                 19               20        21        22       23         24          25      26            27
-    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`rename` FROM `character` WHERE `guid` = '%u'", guid);
+    // NOTE: all fields in `character` must be read to prevent lost character data at next save in case wrong DB structure.
+    //                                             0      1         2      3      4      5       6            7            8            9     10            11         12          13          14          15           16            17                  18                  19                  20        21        22        23         24          25        26             27       [28]   [29]
+    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`rename`,`zone`,`online` FROM `character` WHERE `guid` = '%u'", guid);
 
     if(!result)
     {
