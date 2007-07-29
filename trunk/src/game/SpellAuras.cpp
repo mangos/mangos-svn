@@ -291,7 +291,7 @@ Aura::Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, U
 m_procCharges(0), m_absorbDmg(0), m_spellmod(NULL), m_spellId(spellproto->Id), m_effIndex(eff), m_caster_guid(0), m_target(target),
 m_timeCla(1000), m_castItemGuid(castItem?castItem->GetGUID():0), m_auraSlot(MAX_AURAS),
 m_positive(false), m_permanent(false), m_isPeriodic(false), m_isTrigger(false), m_isAreaAura(false), m_isPersistent(false),
-m_periodicTimer(0), m_PeriodicEventId(0), m_removeOnDeath(false)
+m_periodicTimer(0), m_PeriodicEventId(0), m_removeOnDeath(false),m_fearMoveAngle(0)
 {
     assert(target);
 
@@ -425,26 +425,24 @@ void Aura::Update(uint32 diff)
         }
         if(caster && m_target->isAlive() && m_target->HasFlag(UNIT_FIELD_FLAGS,(UNIT_STAT_FLEEING<<16)))
         {
-            float x,y,z,speed,pos_x,pos_y,pos_z,mod;
-            int q;
-            q = rand() % 80;
-            if(q == 8) angle += (float)(urand(45, 90));
-            else if(q == 23) angle -= (float)(urand(45, 90));
+            int q = rand() % 80;
+            if(q == 8) m_fearMoveAngle += (float)(urand(45, 90));
+            else if(q == 23) m_fearMoveAngle -= (float)(urand(45, 90));
+
             // If the m_target is player,and if the speed is too slow,change it :P
-            speed = m_target->GetSpeed(MOVE_RUN);
+            float speed = m_target->GetSpeed(MOVE_RUN);
             // Speed modifier, may need to find correct one
-            mod = m_target->GetTypeId() != TYPEID_PLAYER ? 10 : 6;
-            pos_x = m_target->GetPositionX();
-            pos_y = m_target->GetPositionY();
+            float mod = m_target->GetTypeId() != TYPEID_PLAYER ? 10 : 6;
+            float pos_x = m_target->GetPositionX();
+            float pos_y = m_target->GetPositionY();
             uint32 mapid = m_target->GetMapId();
-            pos_z = MapManager::Instance().GetMap(mapid, m_target)->GetHeight(pos_x,pos_y, m_target->GetPositionZ());
+            float pos_z = MapManager::Instance().GetMap(mapid, m_target)->GetHeight(pos_x,pos_y, m_target->GetPositionZ());
             // Control the max Distance; 28 for temp.
             if(m_target->IsWithinDistInMap(caster, 28))
             {
-                x = m_target->GetPositionX() - (speed*cosf(angle))/mod;
-                y = m_target->GetPositionY() - (speed*sinf(angle))/mod;
-                mapid = m_target->GetMapId();
-                z = MapManager::Instance().GetMap(mapid, m_target)->GetHeight(x,y, m_target->GetPositionZ());
+                float x = m_target->GetPositionX() - (speed*cosf(m_fearMoveAngle))/mod;
+                float y = m_target->GetPositionY() - (speed*sinf(m_fearMoveAngle))/mod;
+                float z = MapManager::Instance().GetMap(mapid, m_target)->GetHeight(x,y, m_target->GetPositionZ());
                 // Control the target to not climb or drop when dz > |x|,x = 1.3 for temp.
                 // fixed me if it needs checking when the position will be in water?
                 if(z<=pos_z+1.3 && z>=pos_z-1.3)
@@ -456,10 +454,9 @@ void Aura::Update(uint32 diff)
                 else
                 {
                     //Complete the move only if z coord is now correct
-                    angle += 120;
-                    x = m_target->GetPositionX() + (speed*sinf(angle))/mod;
-                    y = m_target->GetPositionY() + (speed*cosf(angle))/mod;    
-                    mapid = m_target->GetMapId();
+                    m_fearMoveAngle += 120;
+                    x = m_target->GetPositionX() + (speed*sinf(m_fearMoveAngle))/mod;
+                    y = m_target->GetPositionY() + (speed*cosf(m_fearMoveAngle))/mod;    
                     z = MapManager::Instance().GetMap(mapid, m_target)->GetHeight(x,y, m_target->GetPositionZ());
                     if(z<=pos_z+1.3 && z>=pos_z-1.3)
                     {
