@@ -391,14 +391,11 @@ void Spell::FillTargetMap()
 
         //Check targets for LOS visibility (except spells without range limitations )
         bool skipLOS = false;
-        for(int j= 0; j <3 && !skipLOS; ++j)
+        switch(m_spellInfo->Effect[i])
         {
-            switch(m_spellInfo->Effect[j])
-            {
             case SPELL_EFFECT_SUMMON_PLAYER:
                 skipLOS = true;
                 break;
-            }
         }
 
         for (std::list<Unit*>::iterator itr = tmpUnitMap.begin() ; itr != tmpUnitMap.end();)
