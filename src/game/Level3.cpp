@@ -1463,7 +1463,7 @@ bool ChatHandler::HandleLearnAllLangCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleLearnAllCraftCommand(const char* args)
+bool ChatHandler::HandleLearnAllCraftsCommand(const char* args)
 {
     for (uint32 i = 0; i < sSkillLineStore.GetNumRows(); ++i)
     {

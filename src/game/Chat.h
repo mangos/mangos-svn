@@ -214,7 +214,7 @@ class ChatHandler
         bool HandleLearnCommand(const char* args);
         bool HandleLearnAllCommand(const char* args);
         bool HandleLearnAllGMCommand(const char* args);
-        bool HandleLearnAllCraftCommand(const char* args);
+        bool HandleLearnAllCraftsCommand(const char* args);
         bool HandleLearnAllLangCommand(const char* args);
         bool HandleLearnAllMyClassCommand(const char* args);
         bool HandleLearnAllMySpellsCommand(const char* args);
