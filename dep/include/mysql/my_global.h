@@ -86,6 +86,14 @@
 #endif
 #endif /* _WIN32... */
 
+/* Make it easier to add conditionl code for windows */
+#ifdef __WIN__
+#define IF_WIN(A,B) (A)
+#else
+#define IF_WIN(A,B) (B)
+#endif
+
+
 /* Some defines to avoid ifdefs in the code */
 #ifndef NETWARE_YIELD
 #define NETWARE_YIELD
@@ -497,43 +505,7 @@ typedef unsigned short ushort;
 #define my_const_cast(A) (A)
 #endif
 
-/*
-  Disable __attribute__() on gcc < 2.7, g++ < 3.4, and non-gcc compilers.
-  Some forms of __attribute__ are actually supported in earlier versions of
-  g++, but we just disable them all because we only use them to generate
-  compilation warnings.
-*/
-#ifndef __attribute__
-# if !defined(__GNUC__)
-#  define __attribute__(A)
-# elif GCC_VERSION < 2008
-#  define __attribute__(A)
-# elif defined(__cplusplus) && GCC_VERSION < 3004
-#  define __attribute__(A)
-# endif
-#endif
-
-/*
-  __attribute__((format(...))) is only supported in gcc >= 2.8 and g++ >= 3.4
-  But that's already covered by the __attribute__ tests above, so this is
-  just a convenience macro.
-*/
-#ifndef ATTRIBUTE_FORMAT
-# define ATTRIBUTE_FORMAT(style, m, n) __attribute__((format(style, m, n)))
-#endif
-
-/*
-
-   __attribute__((format(...))) on a function pointer is not supported
-   until  gcc 3.1
-*/
-#ifndef ATTRIBUTE_FORMAT_FPTR
-# if (GCC_VERSION >= 3001)
-#  define ATTRIBUTE_FORMAT_FPTR(style, m, n) ATTRIBUTE_FORMAT(style, m, n)
-# else
-#  define ATTRIBUTE_FORMAT_FPTR(style, m, n)
-# endif /* GNUC >= 3.1 */
-#endif
+#include <my_attribute.h>
 
 /*
   Wen using the embedded library, users might run into link problems,
@@ -812,8 +784,19 @@ typedef SOCKET_SIZE_TYPE size_socket;
 #define SSIZE_MAX ((~((size_t) 0)) / 2)
 #endif
 
-#if !defined(HAVE_ISINF) && !defined(isinf)
-#define isinf(X)    0
+#ifndef HAVE_FINITE
+#define finite(x) (1.0 / fabs(x) > 0.0)
+#endif
+
+#ifndef HAVE_ISNAN
+#define isnan(x) ((x) != (x))
+#endif
+
+#ifdef HAVE_ISINF
+/* isinf() can be used in both C and C++ code */
+#define my_isinf(X) isinf(X)
+#else
+#define my_isinf(X) (!finite(X) && !isnan(X))
 #endif
 
 /* Define missing math constants. */
