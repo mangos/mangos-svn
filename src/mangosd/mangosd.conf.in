@@ -321,6 +321,10 @@ Rate.Mining.Next   = 1
 # Default: 1
 Rate.Talent = 1
 
+# Reputation Gain rate
+# Default: 1
+Rate.Reputation.Gain = 1
+
 # Save respawn time for creatures at death, for gameobjects at use/open
 #          0 (save creature/gameobject respawn time at grid unload)
 # Default: 1 (save creature/gameobject respawn time without waiting grid unload)

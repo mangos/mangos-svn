@@ -5199,7 +5199,7 @@ int32 Player::CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep)
     if(percent <=0)
         return 0;
 
-    return rep*percent/100;
+    return int32(sWorld.getRate(RATE_REPUTATION_GAIN)*rep*percent/100);
 }
 
 //Calculates how many reputation points player gains in victim's enemy factions
