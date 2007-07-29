@@ -26,12 +26,21 @@
 #include "Database/DBCStores.h"
 #include "Database/Field.h"
 #include "Database/QueryResult.h"
+
+#ifdef DO_POSTGRESQL
+#include "Database/QueryResultPostgre.h"
+#include "Database/Database.h"
+#include "Database/DatabasePostgre.h"
+extern DatabasePostgre sDatabase;
+extern DatabasePostgre loginDatabase;
+#else
 #include "Database/QueryResultMysql.h"
 #include "Database/QueryResultSqlite.h"
 #include "Database/Database.h"
 #include "Database/DatabaseMysql.h"
 #include "Database/DatabaseSqlite.h"
-
 extern DatabaseMysql sDatabase;
 extern DatabaseMysql loginDatabase;
+#endif
+
 #endif

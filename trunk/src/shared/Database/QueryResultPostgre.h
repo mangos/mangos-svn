@@ -16,39 +16,31 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef DO_POSTGRESQL
+#if !defined(QUERYRESULTPOSTGRE_H)
+#define QUERYRESULTPOSTGRE_H
 
-#include "Database/SqlDelayThread.h"
-#include "Database/SqlOperations.h"
-#include "DatabaseEnv.h"
+#ifdef WIN32
+#define FD_SETSIZE 1024
+#include <winsock2.h>
+#include <postgre/libpq/libpq-fe.h>
+#else
+#include <libpq-fe.h>
+#endif
 
-SqlDelayThread::SqlDelayThread(Database* db) : m_dbEngine(db), m_running(true)
+class QueryResultPostgre : public QueryResult
 {
-}
+    public:
+        QueryResultPostgre(PGresult *result, uint64 rowCount, uint32 fieldCount);
 
-void SqlDelayThread::run()
-{
-    SqlOperation* s;
+        ~QueryResultPostgre();
 
-    mysql_thread_init();
+        bool NextRow();
 
-    while (m_running)
-    {
-        while (!m_sqlQueue.empty())
-        {
-            s = m_sqlQueue.next();
-            s->Execute(m_dbEngine);
-            delete s;
-        }
-        ZThread::Thread::sleep(10);
-    }
+    private:
+        enum Field::DataTypes ConvertNativeType(Oid pOid) const;
+        void EndQuery();
 
-    mysql_thread_end();
-}
-
-void SqlDelayThread::Stop()
-{
-    m_running = false;
-}
-
+        PGresult *mResult;
+        uint32 mTableIndex;
+};
 #endif

@@ -36,7 +36,12 @@ void HookSignals();
 
 bool stopEvent = false;                                     ///< Setting it to true stops the server
 RealmList m_realmList;                                      ///< Holds the list of realms for this server
+
+#ifdef DO_POSTGRESQL
+DatabasePostgre dbRealmServer;                                ///< Accessor to the realm server database
+#else
 DatabaseMysql dbRealmServer;                                ///< Accessor to the realm server database
+#endif
 
 /// Print out the usage string for this program on the console.
 void usage(const char *prog)

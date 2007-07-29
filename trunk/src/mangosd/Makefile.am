@@ -17,7 +17,7 @@
 ## Process this file with automake to produce Makefile.in
 
 ## CPP flags for includes, defines, etc.
-AM_CPPFLAGS = $(MYSQL_INCLUDES) -I$(top_builddir)/src/shared -I$(srcdir)/../../dep/include -I$(srcdir)/../framework -I$(srcdir)/../shared  -I$(srcdir)/../game -I$(srcdir)
+AM_CPPFLAGS = $(MYSQL_INCLUDES) $(POSTGRE_INCLUDES) -I$(top_builddir)/src/shared -I$(srcdir)/../../dep/include -I$(srcdir)/../framework -I$(srcdir)/../shared  -I$(srcdir)/../game -I$(srcdir)
 
 ## Build world list daemon as standalone program
 bin_PROGRAMS = mangos-worldd
@@ -34,7 +34,7 @@ mangos_worldd_SOURCES = \
 
 ## Link world daemon against the shared library
 mangos_worldd_LDADD = ../bindings/universal/libmangosscript.la ../game/libmangosgame.a ../shared/libmangosdatabase.a ../shared/libmangosconfig.a ../shared/libmangosauth.a ../shared/libmangosshared.a ../shared/libmangosvmaps.a ../shared/libmangosnetwork.a ../framework/libmangosframework.a ../../dep/src/zthread/libZThread.la ../../dep/src/g3dlite/libg3dlite.a
-mangos_worldd_LDFLAGS = -L../../dep/src/zthread  -L../../dep/src/g3dlite -L../bindings/universal/ $(MYSQL_LIBS) -L$(libdir) $(ZLIB) $(COMPATLIB) $(SSLLIB) -export-dynamic
+mangos_worldd_LDFLAGS = -L../../dep/src/zthread  -L../../dep/src/g3dlite -L../bindings/universal/ $(MYSQL_LIBS) $(POSTGRE_LIBS) -L$(libdir) $(ZLIB) $(COMPATLIB) $(SSLLIB) -export-dynamic
 
 ## Additional files to include when running 'make dist'
 #  Include world daemon configuration

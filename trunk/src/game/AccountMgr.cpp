@@ -22,7 +22,11 @@
 #include "Player.h"
 #include "Policies/SingletonImp.h"
 
+#ifdef DO_POSTGRESQL
+extern DatabasePostgre loginDatabase;
+#else
 extern DatabaseMysql loginDatabase;
+#endif
 
 INSTANTIATE_SINGLETON_1(AccountMgr);
 

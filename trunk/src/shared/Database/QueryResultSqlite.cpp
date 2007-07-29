@@ -16,6 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifndef DO_POSTGRESQL
+
 #include "DatabaseEnv.h"
 
 QueryResultSqlite::QueryResultSqlite(char **tableData, uint32 rowCount, uint32 fieldCount) :
@@ -92,3 +94,5 @@ enum Field::DataTypes QueryResultSqlite::ConvertNativeType(const char* sqliteTyp
     }
     return Field::DB_TYPE_UNKNOWN;
 }
+
+#endif

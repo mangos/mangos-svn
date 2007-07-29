@@ -27,8 +27,14 @@
 #include "Master.h"
 #include "SystemConfig.h"
 
+#ifdef DO_POSTGRESQL
+DatabasePostgre sDatabase;                                    ///< Accessor to the mangos server database
+DatabasePostgre loginDatabase;                                ///< Accessor to the realm/login database
+#else
 DatabaseMysql sDatabase;                                    ///< Accessor to the mangos server database
 DatabaseMysql loginDatabase;                                ///< Accessor to the realm/login database
+#endif
+
 uint32 realmID;                                             ///< Id of the realm
 
 /// Print out the usage string for this program on the console.

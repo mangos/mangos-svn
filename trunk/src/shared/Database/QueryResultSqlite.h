@@ -16,6 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifndef DO_POSTGRESQL
+
 #if !defined(QUERYRESULTSQLITE_H)
 #define QUERYRESULTSQLITE_H
 
@@ -37,4 +39,6 @@ class QueryResultSqlite : public QueryResult
         char **mTableData;
         uint32 mTableIndex;
 };
+#endif
+
 #endif

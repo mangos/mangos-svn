@@ -21,7 +21,11 @@
 #include "EventSystem.h"
 #include "Log.h"
 
+#ifdef DO_POSTGRESQL
+extern DatabasePostgre  sDatabase;
+#else
 extern DatabaseMysql  sDatabase;
+#endif
 
 const char CreatureInfofmt[]="iiissiiiiiiiiififfiiiiififiiiiffifiiiiiiiiiiiiiiiiiiiiiiiiiiisiiis";
 const char CreatureDataAddonInfofmt[]="iiiiiiiiiiii";

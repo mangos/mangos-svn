@@ -16,45 +16,46 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#ifndef DO_POSTGRESQL
-
-#ifndef _DATABASEMYSQL_H
-#define _DATABASEMYSQL_H
+#ifndef _DatabasePostgre_H
+#define _DatabasePostgre_H
 
 #include "Policies/Singleton.h"
 #include "zthread/FastMutex.h"
+#include <stdarg.h>
 
 #ifdef WIN32
 #define FD_SETSIZE 1024
 #include <winsock2.h>
-#include <mysql/mysql.h>
+#include <postgre/libpq/libpq-fe.h>
 #else
-#include <mysql.h>
+#include <libpq-fe.h>
 #endif
 
-class DatabaseMysql : public Database
+
+
+class DatabasePostgre : public Database
 {
-    friend class MaNGOS::OperatorNew<DatabaseMysql>;
+    friend class MaNGOS::OperatorNew<DatabasePostgre>;
 
     public:
-        DatabaseMysql();
-        ~DatabaseMysql();
+        DatabasePostgre();
+        ~DatabasePostgre();
 
-        //! Initializes Mysql and connects to a server.
+        //! Initializes Postgres and connects to a server.
         /*! infoString should be formated like hostname;username;password;database. */
         bool Initialize(const char *infoString);
-        void InitDelayThread();
-        void HaltDelayThread();
+	void InitDelayThread();
+	void HaltDelayThread();
         QueryResult* PQuery(const char *format,...);
         QueryResult* Query(const char *sql);
         bool Execute(const char *sql);
         bool PExecute(const char *format,...);
-        bool DirectExecute(const char* sql);
+	bool DirectExecute(const char* sql);
         bool BeginTransaction();
         bool CommitTransaction();
         bool RollbackTransaction();
 
-        operator bool () const { return mMysql != NULL; }
+        operator bool () const { return mPGconn != NULL; }
 
         unsigned long escape_string(char *to, const char *from, unsigned long length);
         using Database::escape_string;
@@ -65,15 +66,14 @@ class DatabaseMysql : public Database
         void ThreadEnd();
     private:
         ZThread::FastMutex mMutex;
+        ZThread::FastMutex tranMutex;
 
         ZThread::ThreadImpl* tranThread;
 
-        MYSQL *mMysql;
+        PGconn *mPGconn;
 
         static size_t db_count;
 
         bool _TransactionCmd(const char *sql);
 };
-#endif
-
 #endif

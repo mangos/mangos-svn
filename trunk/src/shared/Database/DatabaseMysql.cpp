@@ -16,6 +16,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#ifndef DO_POSTGRESQL
+
 #include "Util.h"
 #include "Policies/SingletonImp.h"
 #include "Platform/Define.h"
@@ -424,3 +426,5 @@ void DatabaseMysql::HaltDelayThread()
     m_delayThread = NULL;
     m_threadBody = NULL;
 }
+
+#endif

@@ -32,7 +32,13 @@
 #include "Auth/Sha1.h"
 
 extern RealmList m_realmList;
+
+#ifdef DO_POSTGRESQL
+extern DatabasePostgre dbRealmServer;
+#else
 extern DatabaseMysql dbRealmServer;
+#endif
+
 #define ChunkSize 2048
 
 enum eAuthCmd
