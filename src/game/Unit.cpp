@@ -6312,7 +6312,7 @@ void Unit::ApplyAuraProcTriggerDamage( Aura* aura, bool apply )
         tAuraProcTriggerDamage.remove(aura);
 }
 
-float Unit::GetCreatePowers( Powers power ) const
+uint32 Unit::GetCreatePowers( Powers power ) const
 {
     // POWER_FOCUS and POWER_HAPPINESS only have hunter pet
     switch(power)
