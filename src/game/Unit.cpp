@@ -3908,12 +3908,11 @@ bool Unit::IsHostileTo(Unit const* unit) const
     // PvC forced reaction and reputation case
     if(tester->GetTypeId()==TYPEID_PLAYER)
     {
-        // apply forced faction only in target with identical faction in other case provided original faction
-        if(tester->HasAuraType(SPELL_AURA_FORCE_REACTION) && tester->getFaction()!= target_faction->ID)
+        // forced reaction
+        ForcedReactions::const_iterator forceItr = ((Player*)tester)->m_forcedReactions.find(target_faction->faction);
+        if(forceItr!=((Player*)tester)->m_forcedReactions.end())
         {
-            FactionTemplateEntry const* entry = sFactionTemplateStore.LookupEntry(Player::getFactionForRace(tester->getRace()));
-            if(entry)
-                tester_faction = entry;
+            return forceItr->second <= REP_HOSTILE;
         }
 
         // apply reputation state
@@ -3927,12 +3926,11 @@ bool Unit::IsHostileTo(Unit const* unit) const
     // CvP forced reaction and reputation case
     else if(target->GetTypeId()==TYPEID_PLAYER)
     {
-        // apply forced faction only in target with identical faction in other case provided original faction
-        if(target->HasAuraType(SPELL_AURA_FORCE_REACTION) && target->getFaction()!= tester_faction->ID)
+        // forced reaction
+        ForcedReactions::const_iterator forceItr = ((Player*)target)->m_forcedReactions.find(tester_faction->faction);
+        if(forceItr!=((Player*)target)->m_forcedReactions.end())
         {
-            FactionTemplateEntry const* entry = sFactionTemplateStore.LookupEntry(Player::getFactionForRace(target->getRace()));
-            if(entry)
-                target_faction = entry;
+            return forceItr->second <= REP_HOSTILE;
         }
 
         // apply reputation state
@@ -4001,12 +3999,11 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
     // PvC forced reaction and reputation case
     if(tester->GetTypeId()==TYPEID_PLAYER)
     {
-        // apply forced faction only in target with identical faction in other case provided original faction
-        if(tester->HasAuraType(SPELL_AURA_FORCE_REACTION) && tester->getFaction()!= target_faction->ID)
+        // forced reaction
+        ForcedReactions::const_iterator forceItr = ((Player*)tester)->m_forcedReactions.find(target_faction->faction);
+        if(forceItr!=((Player*)tester)->m_forcedReactions.end())
         {
-            FactionTemplateEntry const* entry = sFactionTemplateStore.LookupEntry(Player::getFactionForRace(tester->getRace()));
-            if(entry)
-                tester_faction = entry;
+            return forceItr->second >= REP_FRIENDLY;
         }
 
         // apply reputation state
@@ -4020,12 +4017,11 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
     // CvP forced reaction and reputation case
     else if(target->GetTypeId()==TYPEID_PLAYER)
     {
-        // apply forced faction only in target with identical faction in other case provided original faction
-        if(target->HasAuraType(SPELL_AURA_FORCE_REACTION) && target->getFaction()!= tester_faction->ID)
+        // forced reaction
+        ForcedReactions::const_iterator forceItr = ((Player*)target)->m_forcedReactions.find(tester_faction->faction);
+        if(forceItr!=((Player*)target)->m_forcedReactions.end())
         {
-            FactionTemplateEntry const* entry = sFactionTemplateStore.LookupEntry(Player::getFactionForRace(target->getRace()));
-            if(entry)
-                target_faction = entry;
+            return forceItr->second >= REP_FRIENDLY;
         }
 
         // apply reputation state

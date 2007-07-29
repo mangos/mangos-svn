@@ -219,6 +219,8 @@ struct Faction
 
 typedef std::map<RepListID,Faction> FactionsList;
 
+typedef std::map<uint32,ReputationRank> ForcedReactions;
+
 struct EnchantDuration
 {
     EnchantDuration() : item(NULL), slot(MAX_ENCHANTMENT_SLOT), leftduration(0) {};
@@ -1236,6 +1238,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetLastManaUse(time_t spellCastTime) { m_lastManaUse = spellCastTime; }
 
         FactionsList m_factions;
+        ForcedReactions m_forcedReactions;
         int32 GetBaseReputation(const FactionEntry *factionEntry) const;
         int32 GetReputation(uint32 faction_id) const;
         int32 GetReputation(const FactionEntry *factionEntry) const;

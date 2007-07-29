@@ -537,6 +537,8 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
         case 23333: // BG spell
         case 23335: // BG spell
             return true;
+        case 28441: // not possitive dummy spell
+            return false;
     }
 
     // non-positive targets
@@ -563,15 +565,7 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                         break;
                 }
             }   break;
-            case 26 /*SPELL_AURA_MOD_ROOT          */:
-            case 27 /*SPELL_AURA_MOD_SILENCE       */:
-            case 95 /*SPELL_AURA_GHOST*/:
-                return false;
-            case 33 /*SPELL_AURA_MOD_DECREASE_SPEED*/:      // used in positive spells also
-                // part of positive spell if casted at self
-                if(spellproto->EffectImplicitTargetA[effIndex] != 1/*TARGET_SELF*/)
-                    return false;
-                break;
+            case 23 /*SPELL_AURA_PERIODIC_TRIGGER_SPELL*/:
             case 42 /*SPELL_AURA_PROC_TRIGGER_SPELL*/:
                 if(spellId != spellproto->EffectTriggerSpell[effIndex])
                 {
@@ -590,6 +584,15 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                         }
                     }
                 }
+                break;
+            case 26 /*SPELL_AURA_MOD_ROOT          */:
+            case 27 /*SPELL_AURA_MOD_SILENCE       */:
+            case 95 /*SPELL_AURA_GHOST*/:
+                return false;
+            case 33 /*SPELL_AURA_MOD_DECREASE_SPEED*/:      // used in positive spells also
+                // part of positive spell if casted at self
+                if(spellproto->EffectImplicitTargetA[effIndex] != 1/*TARGET_SELF*/)
+                    return false;
                 break;
             case 77 /*SPELL_AURA_MECHANIC_IMMUNITY*/:
             {
