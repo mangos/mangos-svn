@@ -315,7 +315,7 @@ m_periodicTimer(0), m_PeriodicEventId(0), m_removeOnDeath(false),m_fearMoveAngle
     {
         m_caster_guid = target->GetGUID();
         damage = m_currentBasePoints+1;                     // stored value-1
-        caster->CalculateSpellDamageAndDuration(NULL,&m_duration,m_spellProto,m_effIndex,m_currentBasePoints);
+        target->CalculateSpellDamageAndDuration(NULL,&m_duration,m_spellProto,m_effIndex,m_currentBasePoints);
     }
     else
     {
