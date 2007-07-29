@@ -315,9 +315,16 @@ void Spell::FillTargetMap()
                 case SPELL_EFFECT_PARRY:
                 case SPELL_EFFECT_DUMMY:
                 case SPELL_EFFECT_CREATE_ITEM:
-                case SPELL_EFFECT_SUMMON_PLAYER:
                     if(m_targets.getUnitTarget())
                         tmpUnitMap.push_back(m_targets.getUnitTarget());
+                    break;
+                case SPELL_EFFECT_SUMMON_PLAYER:
+                    if(m_caster->GetTypeId()==TYPEID_PLAYER && ((Player*)m_caster)->GetSelection())
+                    {
+                        Player* target = objmgr.GetPlayer(((Player*)m_caster)->GetSelection());
+                        if(target)
+                            tmpUnitMap.push_back(target);
+                    }
                     break;
                 case SPELL_EFFECT_RESURRECT_NEW:
                     if(m_targets.getUnitTarget())
@@ -382,6 +389,18 @@ void Spell::FillTargetMap()
         // filter targets by immunity and creature type 
         uint32 SpellCreatureType = GetTargetCreatureTypeMask();
 
+        //Check targets for LOS visibility (except spells without range limitations )
+        bool skipLOS = false;
+        for(int j= 0; j <3 && !skipLOS; ++j)
+        {
+            switch(m_spellInfo->Effect[j])
+            {
+            case SPELL_EFFECT_SUMMON_PLAYER:
+                skipLOS = true;
+                break;
+            }
+        }
+
         for (std::list<Unit*>::iterator itr = tmpUnitMap.begin() ; itr != tmpUnitMap.end();)
         {
             // Check targets for creature type mask and remove not appropriate (skip explicit self target case, maybe need other explicit targets)
@@ -400,6 +419,13 @@ void Spell::FillTargetMap()
 
             //Check targets for not_selectable unit flag and remove
             if ((*itr)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+            {
+                itr = tmpUnitMap.erase(itr);
+                continue;
+            }
+
+            //Check targets for LOS visibility (except spells without range limitations )
+            if(!skipLOS && !(*itr)->IsWithinLOSInMap(m_caster))
             {
                 itr = tmpUnitMap.erase(itr);
                 continue;
@@ -2563,19 +2589,23 @@ uint8 Spell::CanCast()
 
                 break;
             }
-           case SPELL_EFFECT_SUMMON_PLAYER:
-           {
-               if(!m_targets.getUnitTarget())
-                   return SPELL_FAILED_BAD_TARGETS;
+            case SPELL_EFFECT_SUMMON_PLAYER:
+            {
+                if(m_caster->GetTypeId()!=TYPEID_PLAYER)
+                    return SPELL_FAILED_BAD_TARGETS;
+                if(!((Player*)m_caster)->GetSelection())
+                    return SPELL_FAILED_BAD_TARGETS;
 
-               // check if our map is instanceable
-               if( MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster)->Instanceable() &&
-                   !m_caster->IsInMap(m_targets.getUnitTarget()) )
-               {
-                   return SPELL_FAILED_TARGET_NOT_IN_INSTANCE;
-               }
-               break;
-           }
+                Player* target = objmgr.GetPlayer(((Player*)m_caster)->GetSelection());
+                if( !target || !target->IsInSameGroupWith((Player*)m_caster) )
+                    return SPELL_FAILED_BAD_TARGETS;
+
+                // check if our map is instanceable
+                if( MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster)->Instanceable() && !m_caster->IsInMap(target) )
+                    return SPELL_FAILED_TARGET_NOT_IN_INSTANCE;
+
+                break;
+            }
             case SPELL_EFFECT_LEAP:
             case SPELL_EFFECT_TELEPORT_UNITS_FACE_CASTER:
             {

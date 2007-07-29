@@ -390,25 +390,6 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             if(!caster->m_currentSpells[CURRENT_GENERIC_SPELL])
                 return;
 
-            // update target pointer by guid
-
-            // in case summoning ritual target is caster current selection
-            //TODO: maybe GO creating spell must set target different from caster
-            Player* targetPlayer = ObjectAccessor::Instance().FindPlayer(((Player*)caster)->GetSelection());
-
-            // recheck that target is group member and can enter to GO map
-            if( !targetPlayer || !targetPlayer->IsInSameGroupWith((Player*)caster) ||
-                !MapManager::Instance().GetMap(obj->GetMapId(),obj)->CanEnter(targetPlayer) )
-            {
-                caster->m_currentSpells[CURRENT_GENERIC_SPELL]->cancel();
-                return;
-            }
-
-            // target is correct
-            spellTarget = targetPlayer;
-
-            // prepare data for final summoning (before current spell finish to prevent access to deleted GO)
-            //info = obj->GetGOInfo();
             spellId = info->sound1;
 
             // finish spell
