@@ -142,7 +142,6 @@ Unit::Unit( WorldObject *instantiator ) : WorldObject( instantiator )
     m_invisibilityvalue = 0;
     m_transform = 0;
     m_ShapeShiftForm = 0;
-    m_createHealth =  0.0f;
     m_canModifyStats = false;
 
     for (int i = 0; i < TOTAL_AURAS; i++)
@@ -165,8 +164,6 @@ Unit::Unit( WorldObject *instantiator ) : WorldObject( instantiator )
     }
     for (int i = 0; i < MAX_STATS; i++)
         m_createStats[i] = 0.0f;
-    for (int i = 0; i < MAX_POWERS; i++)
-        m_createPowers[i] = 0.0f;
     
     m_attacking = NULL;
     m_modHitChance = 0;
@@ -3820,20 +3817,20 @@ void Unit::setPowerType(Powers new_powertype)
         case POWER_MANA:
             break;
         case POWER_RAGE:
-            SetMaxPower(POWER_RAGE,1000);
+            SetMaxPower(POWER_RAGE,GetCreatePowers(POWER_RAGE));
             SetPower(   POWER_RAGE,0);
             break;
         case POWER_FOCUS:
-            SetMaxPower(POWER_FOCUS,100);
-            SetPower(   POWER_FOCUS,100);
+            SetMaxPower(POWER_FOCUS,GetCreatePowers(POWER_FOCUS));
+            SetPower(   POWER_FOCUS,GetCreatePowers(POWER_FOCUS));
             break;
         case POWER_ENERGY:
-            SetMaxPower(POWER_ENERGY,100);
+            SetMaxPower(POWER_ENERGY,GetCreatePowers(POWER_ENERGY));
             SetPower(   POWER_ENERGY,0);
             break;
         case POWER_HAPPINESS:
-            SetMaxPower(POWER_HAPPINESS,1000000);
-            SetPower(POWER_HAPPINESS,1000000);
+            SetMaxPower(POWER_HAPPINESS,GetCreatePowers(POWER_HAPPINESS));
+            SetPower(POWER_HAPPINESS,GetCreatePowers(POWER_HAPPINESS));
             break;
     }
 }
@@ -6317,4 +6314,19 @@ void Unit::ApplyAuraProcTriggerDamage( Aura* aura, bool apply )
         tAuraProcTriggerDamage.push_back(aura);
     else
         tAuraProcTriggerDamage.remove(aura);
+}
+
+float Unit::GetCreatePowers( Powers power ) const
+{
+    // POWER_FOCUS and POWER_HAPPINESS only have hunter pet
+    switch(power)
+    {
+        case POWER_MANA:      return GetCreateMana();
+        case POWER_RAGE:      return 1000;
+        case POWER_FOCUS:     return (GetTypeId()==TYPEID_PLAYER || !((Creature const*)this)->isPet() || ((Pet const*)this)->getPetType()!=HUNTER_PET ? 0 : 100);
+        case POWER_ENERGY:    return 100;
+        case POWER_HAPPINESS: return (GetTypeId()==TYPEID_PLAYER || !((Creature const*)this)->isPet() || ((Pet const*)this)->getPetType()!=HUNTER_PET ? 0 : 1050000);
+    }
+
+    return 0;
 }

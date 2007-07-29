@@ -1962,8 +1962,8 @@ void Player::GiveLevel(uint32 level)
     // send levelup info to client
     WorldPacket data(SMSG_LEVELUP_INFO, (7*4+(MAX_STATS-STAT_STRENGTH)+4));
     data << uint32(level);
-    data << uint32(int32(info.health) - GetCreateHealth());
-    data << uint32(int32(info.mana)   - GetCreatePowers(POWER_MANA));
+    data << uint32(int32(info.health) - int32(GetCreateHealth()));
+    data << uint32(int32(info.mana)   - int32(GetCreateMana()));
     data << uint32(0);
     data << uint32(0);
     data << uint32(0);
@@ -1986,8 +1986,8 @@ void Player::GiveLevel(uint32 level)
     for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
         SetCreateStat(Stats(i), info.stats[i]);
     
-    SetCreateHealth(float(info.health));
-    SetCreatePowers(POWER_MANA, float(info.mana));
+    SetCreateHealth(info.health);
+    SetCreateMana(info.mana);
 
     InitTalentForLevel();
 
@@ -2069,14 +2069,10 @@ void Player::InitStatsForLevel(bool reapplyMods)
     for(int i = STAT_STRENGTH; i < MAX_STATS; ++i)
         SetStat(Stats(i), info.stats[i]);
 
-    SetCreateHealth(float(info.health));
+    SetCreateHealth(info.health);
 
     //set create powers
-    SetCreatePowers(POWER_MANA, float(info.mana));
-    SetCreatePowers(POWER_RAGE, 1000);
-    SetCreatePowers(POWER_FOCUS, 0);
-    SetCreatePowers(POWER_ENERGY, 100);
-    SetCreatePowers(POWER_HAPPINESS,0);
+    SetCreateMana(info.mana);
 
     // restore if need some important flags
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1 );

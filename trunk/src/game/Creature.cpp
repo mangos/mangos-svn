@@ -1010,16 +1010,16 @@ void Creature::SelectLevel(const CreatureInfo *cinfo)
     uint32 maxhealth = std::max(cinfo->maxhealth, cinfo->minhealth);
     uint32 health = uint32(_GetHealthMod(isPet() ? 0 : cinfo->rank) * (minhealth + uint32(rellevel*(maxhealth - minhealth))));
 
+    SetCreateHealth(health);
     SetMaxHealth(health);
-    SetUInt32Value(UNIT_FIELD_BASE_HEALTH,health);
     SetHealth(health);
 
     uint32 minmana = std::min(cinfo->maxmana, cinfo->minmana);
     uint32 maxmana = std::max(cinfo->maxmana, cinfo->minmana);
     uint32 mana = minmana + uint32(rellevel*(maxmana - minmana));
 
+    SetCreateMana(mana);
     SetMaxPower(POWER_MANA, mana);                          //MAX Mana
-    SetUInt32Value(UNIT_FIELD_BASE_MANA, mana);
     SetPower(POWER_MANA, mana);
 }
 
