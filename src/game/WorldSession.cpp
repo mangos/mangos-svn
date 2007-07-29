@@ -701,6 +701,7 @@ void WorldSession::LogoutPlayer(bool Save)
         _player->BroadcastPacketToFriendListers(&data);
 
         ///- Delete the player object
+        _player->CleanupsBeforeDelete();                    // do some cleanup before deleting to prevent crash at crossreferences to already deleted data
         delete _player;
         _player = 0;
 

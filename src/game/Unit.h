@@ -590,6 +590,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         typedef std::list<DiminishingReturn> Diminishing;
         virtual ~Unit ( );
 
+        void CleanupsBeforeDelete();                        // used in ~Creature/~Player (or before mass creature delete to remove cross-references to already deleted units)
+
         static DiminishingMechanics Mechanic2DiminishingMechanics(uint32 mech);
         void AddDiminishing(DiminishingMechanics mech, uint32 hitTime, uint32 hitCount);
         DiminishingLevels GetDiminishing(DiminishingMechanics  mech);

@@ -3617,10 +3617,31 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
     switch(auraSpellInfo->SpellIconID)
     {
         case 19:
-            //Lightning Shield (Shaman T2 bonus)
-            //Effect: 23552
-            /*if (pVictim && pVictim->isAlive())
-                CastSpell(pVictim, 23552, true, NULL, triggredByAura);*/
+            //Lightning Shield (overwrite non existing triggered spell call in spell.dbc
+            if(auraSpellInfo->SpellFamilyName==SPELLFAMILY_SHAMAN && auraSpellInfo->SpellFamilyFlags==0x00000400)
+            {
+                if(!pVictim)
+                    return;
+
+                uint32 spell = 0;
+                switch(triggredByAura->GetSpellProto()->Id)
+                {
+                    case   324: spell = 26364; break;       // Rank 1 
+                    case   325: spell = 26365; break;       // Rank 2
+                    case   905: spell = 26366; break;       // Rank 3 
+                    case   945: spell = 26367; break;       // Rank 4
+                    case  8134: spell = 26369; break;       // Rank 5
+                    case 10431: spell = 26370; break;       // Rank 6
+                    case 10432: spell = 26363; break;       // Rank 7
+                    case 25469: spell = 26371; break;       // Rank 8
+                    case 25472: spell = 26372; break;       // Rank 9
+                    default:
+                        sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in LShield",triggredByAura->GetSpellProto()->Id);
+                        return;
+                }
+                CastSpell(pVictim, spell, true, NULL);
+                return;
+            }
             return;
         case 87:
         {
@@ -3732,7 +3753,7 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
                 case 27815: EffectId = 27817; break;
                 case 27816: EffectId = 27818; break;
                 default: 
-                    sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in BR",procSpell->Id);
+                    sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in BR",triggredByAura->GetSpellProto()->Id);
                     return;
             }
 
@@ -6325,4 +6346,16 @@ uint32 Unit::GetCreatePowers( Powers power ) const
     }
 
     return 0;
+}
+
+void Unit::CleanupsBeforeDelete()
+{
+    if(m_uint32Values)                                      // only for fully created object
+    {
+        m_Events.KillAllEvents();
+        CombatStop(true);
+        DeleteThreatList();
+        getHostilRefManager().setOnlineOfflineState(false);
+        RemoveAllAuras();
+    }
 }
