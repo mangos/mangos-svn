@@ -27,6 +27,7 @@
 #include "Formulas.h"
 #include "SpellAuras.h"
 #include "CreatureAI.h"
+#include "Unit.h"
 
 char const* petTypeSuffix[MAX_PET_TYPE] =
 {
@@ -243,8 +244,9 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     delete result;
 
     //load spells/cooldowns/auras
-    InitStatsForLevel(getLevel());
+    SetCanModifyStats(true);
     _LoadAuras(timediff);
+    //InitStatsForLevel(getLevel());
     _LoadSpells(timediff);
     _LoadSpellCooldowns();
 
@@ -908,13 +910,6 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
         SetFloatValue(OBJECT_FIELD_SCALE_X, 0.4 + float(petlevel) / 100);
     m_bonusdamage = 0;
 
-    float bonusAP = owner->GetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER);
-    float bonusArmor = owner->GetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE) * 0.35;
-
-    float bonusStats[MAX_STATS] = {0,0,0,0,0};
-    bonusStats[STAT_STAMINA] = owner->GetCreateStat(STAT_STAMINA) * 0.3; //same for all types of owners and pets
-
-    float bonusResistance[MAX_SPELL_SCHOOL] = {0,0,0,0,0,0,0};
     uint32 createResistance[MAX_SPELL_SCHOOL] = {0,0,0,0,0,0,0};
 
     if(cinfo)
@@ -934,38 +929,25 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
 
         switch(getPetType())
         {
-        case HUNTER_PET:
-            for (int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
-                bonusResistance[i] = owner->GetResistance(SpellSchools(i)) * 0.4;
-
-            m_bonusdamage = int32(bonusAP * 0.13);          // 13% of ranged attack power to bonus damage
-            bonusAP *= 0.22;                                // 22% of ranged attack power to melee attack power
-            break;
         case SUMMON_PET:
             switch(owner->getClass())
             {
             case CLASS_WARLOCK:
-                bonusStats[STAT_INTELLECT] = owner->GetCreateStat(STAT_INTELLECT) * 0.3;
-
-                for (int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
-                    bonusResistance[i] = owner->GetResistance(SpellSchools(i)) * 0.4;
-
+                
                 //the damage bonus used for pets is either fire or shadow damage, whatever is higher
                 val  = owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE);
                 val2 = owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW);
                 val  = (val > val2) ? val : val2;           //now val is warlock's damage bonus
 
-                m_bonusdamage = int32 (val * 0.15);
-                bonusAP += val * 0.57;
+                SetBonusDamage(int32 (val * 0.15f));
+                //bonusAP += val * 0.57;
                 break;
 
             case CLASS_MAGE:
-                bonusStats[STAT_INTELLECT] = owner->GetCreateStat(STAT_INTELLECT) * 0.3;
-
                 val = owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FROST) * 0.4; //40% damage bonus of mage's frost damage
                 if(val < 0)
                     val = 0;
-                m_bonusdamage = int32(val);
+                SetBonusDamage( int32(val));
                 break;
 
             default:
@@ -990,15 +972,13 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
             PetLevelInfo const* pInfo = objmgr.GetPetLevelInfo(creature_ID, petlevel); //stored standart pet stats are entry 1 in pet_levelinfo
             if(pInfo)                                       // exist in DB
             {
-                SetCreateHealth(pInfo->health);
-                SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(pInfo->armor + bonusArmor));
-
-                SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, float(cinfo->attackpower + bonusAP));
-                SetUInt32Value(UNIT_FIELD_ATTACK_POWER, uint32(cinfo->attackpower + bonusAP));
+                SetCreateHealth(float(pInfo->health));
+                SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(pInfo->armor));
+                //SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, float(cinfo->attackpower));
 
                 for( int i = STAT_STRENGTH; i < MAX_STATS; i++)
                 {
-                    SetCreateStat(Stats(i),  pInfo->stats[i]  + bonusStats[i]);
+                    SetCreateStat(Stats(i),  float(pInfo->stats[i]));
                 }
             }
             else                                            // not exist in DB, use some default fake data
@@ -1006,7 +986,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
                 sLog.outErrorDb("Hunter pet levelstats missing in DB");
 
                 // remove elite bonuses included in DB values
-                SetCreateHealth(((cinfo->maxhealth / cinfo->maxlevel) / (1 + 2 * cinfo->rank)) * petlevel);
+                SetCreateHealth( float (((cinfo->maxhealth / cinfo->maxlevel) / (1 + 2 * cinfo->rank)) * petlevel) );
 
                 SetCreateStat(STAT_STRENGTH,22);
                 SetCreateStat(STAT_AGILITY,22);
@@ -1022,8 +1002,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
             SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, float(petlevel - (petlevel / 4)) );
             SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, float(petlevel - (petlevel / 4)) );
 
-            SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, float(cinfo->attackpower));
-            SetUInt32Value(UNIT_FIELD_ATTACK_POWER, cinfo->attackpower);
+            //SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, float(cinfo->attackpower));
 
             PetLevelInfo const* pInfo = objmgr.GetPetLevelInfo(creature_ID, petlevel);
             if(pInfo)                                       // exist in DB
@@ -1033,7 +1012,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
 
                 for(int stat = 0; stat < MAX_STATS; ++stat)
                 {
-                    SetCreateStat(Stats(stat),pInfo->stats[stat]);
+                    SetCreateStat(Stats(stat),float(pInfo->stats[stat]));
                 }
             }
             else                                            // not exist in DB, use some default fake data
@@ -1057,23 +1036,9 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
     }
 
     for (int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
-        SetModifierValue(UnitMods(UNIT_MOD_RESISTANCE_START + i), BASE_VALUE, float(createResistance[i] + bonusResistance[i]) );
+        SetModifierValue(UnitMods(UNIT_MOD_RESISTANCE_START + i), BASE_VALUE, float(createResistance[i]) );
 
-    for (int i = STAT_STRENGTH; i < MAX_STATS; i++)
-    {
-        float value = GetTotalStatValue(Stats(i));
-        SetStat(Stats(i), int32(value));
-    }
-
-    for (int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; i++)
-        UpdateResistances(i);
-
-    UpdateDamagePhysical(BASE_ATTACK);
-
-    UpdateMaxHealth();
-
-    for (int i = POWER_MANA; i < MAX_POWERS; i++)
-        UpdateMaxPower(Powers(i));
+    UpdateAllStats();
 
     SetHealth(GetMaxHealth());
     SetPower(POWER_MANA, GetMaxPower(POWER_MANA));
@@ -1649,141 +1614,6 @@ uint32 Pet::resetTalentsCost() const
                 new_cost = 50*GOLD;
             return new_cost;
         }
-    }
-}
-
-void Pet::ApplyStats(bool apply)
-{
-    float val;
-    int32 val2,tem_att_power;
-    float totalstatmods[5] = {1,1,1,1,1};
-    float totalresmods[7] = {1,1,1,1,1,1,1};
-    float totaldamgemod = 1;
-    
-    AuraList const& mModTotalStatPct = GetAurasByType(SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE);
-    for(AuraList::const_iterator i = mModTotalStatPct.begin(); i != mModTotalStatPct.end(); ++i)
-    {
-        if((*i)->GetModifier()->m_miscvalue != -1)
-            totalstatmods[(*i)->GetModifier()->m_miscvalue] *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
-        else
-            for (uint8 j = 0; j < MAX_STATS; j++)
-                totalstatmods[j] *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
-    }
-    AuraList const& mModResistancePct = GetAurasByType(SPELL_AURA_MOD_RESISTANCE_PCT);
-    for(AuraList::const_iterator i = mModResistancePct.begin(); i != mModResistancePct.end(); ++i)
-        for(uint8 j = 0; j < MAX_SPELL_SCHOOL; j++)
-            if((*i)->GetModifier()->m_miscvalue & (1<<j))
-                totalresmods[j] *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
-
-    AuraList const& mModDamagePct = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
-    for(AuraList::const_iterator i = mModDamagePct.begin(); i != mModDamagePct.end(); ++i)
-    {
-        if(((*i)->GetModifier()->m_miscvalue & 1) == 0)
-            continue;
-
-        float mod = (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
-        totaldamgemod *= mod;
-    }
-
-    for (uint8 i = 0; i < MAX_STATS; i++)
-        totalstatmods[i] = totalstatmods[i] * 100.0f - 100.0f;
-    for (uint8 i = 0; i < MAX_SPELL_SCHOOL; i++)
-        totalresmods[i] = totalresmods[i] * 100.0f - 100.0f;
-    totaldamgemod = totaldamgemod * 100.0f - 100.0f;
-
-    // restore percent mods
-    if (apply)
-    {
-        for (uint8 i = 0; i < MAX_STATS; i++)
-        {
-            if (totalstatmods[i] != 0)
-            {
-                //ApplyStatPercentMod(Stats(i),totalstatmods[i], apply );        <<< here conflict with Ambal stat system 
-                /*((Player*)this)->ApplyPosStatPercentMod(Stats(i),totalstatmods[i], apply ); use later when pos/neg stats are shown on pets
-                ((Player*)this)->ApplyNegStatPercentMod(Stats(i),totalstatmods[i], apply );*/
-            }
-        }
-        for (uint8 i = 0; i < MAX_SPELL_SCHOOL; i++)
-        {
-            if (totalresmods[i] != 0)
-            {
-                //ApplyResistancePercentMod(SpellSchools(i), totalresmods[i], apply );        <<< here conflict with Ambal stat system 
-                /*((Player*)this)->ApplyResistanceBuffModsPercentMod(SpellSchools(i),true, totalresmods[i], apply);
-                ((Player*)this)->ApplyResistanceBuffModsPercentMod(SpellSchools(i),false, totalresmods[i], apply);*/
-            }
-        }
-
-        ApplyPercentModFloatValue(UNIT_FIELD_MINDAMAGE, totaldamgemod, apply );
-        ApplyPercentModFloatValue(UNIT_FIELD_MAXDAMAGE, totaldamgemod, apply );
-    }
-
-    // Armor
-    val = 2*(GetStat(STAT_AGILITY) - GetCreateStat(STAT_AGILITY));
-
-    //ApplyArmorMod( val, apply);        <<< here conflict with Ambal stat system 
-
-    // HP
-    val2 = uint32((GetStat(STAT_STAMINA) - GetCreateStat(STAT_STAMINA))*10);
-
-    //ApplyMaxHealthMod( val2, apply);        <<< here conflict with Ambal stat system 
-
-    // MP
-    if(getPetType() != HUNTER_PET)
-    {
-        val2 = uint32((GetStat(STAT_INTELLECT) - GetCreateStat(STAT_INTELLECT))*15);
-
-        ApplyMaxPowerMod(POWER_MANA, val2, apply);
-
-    }
-
-    // Melee Attack Power
-    // && Melee DPS - (Damage Per Second)
-
-    if(GetEntry() == 416)                                   //imp has different attack power
-        val2 = uint32(GetStat(STAT_STRENGTH) - 10);
-    else
-        val2 = uint32(GetStat(STAT_STRENGTH) * 2 - 20);
-
-    tem_att_power = GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS);
-
-    ApplyModUInt32Value(UNIT_FIELD_ATTACK_POWER, val2, apply);
-
-    if(apply)
-        tem_att_power = GetUInt32Value(UNIT_FIELD_ATTACK_POWER) + GetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS);
-
-    val = GetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER);
-    if(val>0)
-        tem_att_power = uint32(val*tem_att_power);
-
-    val = tem_att_power/14.0f * GetAttackTime(BASE_ATTACK)/1000;
-
-    ApplyModFloatValue(UNIT_FIELD_MINDAMAGE, val, apply);
-    ApplyModFloatValue(UNIT_FIELD_MAXDAMAGE, val, apply);
-
-    // remove percent mods to see original stats when adding buffs/items
-    if (!apply)
-    {
-        for (uint8 i = 0; i < MAX_STATS; i++)
-        {
-            if (totalstatmods[i])
-            {
-                //ApplyStatPercentMod(Stats(i),totalstatmods[i], apply );        <<< here conflict with Ambal stat system 
-                /*((Player*)this)->ApplyPosStatPercentMod(Stats(i),totalstatmods[i], apply );
-                ((Player*)this)->ApplyNegStatPercentMod(Stats(i),totalstatmods[i], apply );*/
-            }
-        }
-        for (uint8 i = 0; i < MAX_SPELL_SCHOOL; i++)
-        {
-            if (totalresmods[i])
-            {
-                //ApplyResistancePercentMod(SpellSchools(i), totalresmods[i], apply );        <<< here conflict with Ambal stat system 
-                /*((Player*)this)->ApplyResistanceBuffModsPercentMod(SpellSchools(i),true, totalresmods[i], apply);
-                ((Player*)this)->ApplyResistanceBuffModsPercentMod(SpellSchools(i),false, totalresmods[i], apply);*/
-            }
-        }
-
-        ApplyPercentModFloatValue(UNIT_FIELD_MINDAMAGE, totaldamgemod, apply );
-        ApplyPercentModFloatValue(UNIT_FIELD_MAXDAMAGE, totaldamgemod, apply );
     }
 }
 

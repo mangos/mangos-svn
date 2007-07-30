@@ -46,7 +46,6 @@ ReactorAI::AttackStart(Unit *p)
     if(!p)
         return;
 
-    DEBUG_LOG("Start to attack");
     if(i_creature.Attack(p))
     {
         DEBUG_LOG("Tag unit GUID: %u (TypeId: %u) as a victim", p->GetGUIDLow(), p->GetTypeId());

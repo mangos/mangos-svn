@@ -63,7 +63,6 @@ void PetAI::AttackStart(Unit *u)
     if( i_pet.getVictim() || !u || i_pet.isPet() && ((Pet&)i_pet).getPetType()==MINI_PET )
         return;
 
-    DEBUG_LOG("Start to attack");
     if(i_pet.Attack(u))
     {
         i_pet.clearUnitState(UNIT_STAT_FOLLOW);

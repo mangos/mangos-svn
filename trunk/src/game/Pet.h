@@ -21,6 +21,7 @@
 
 #include "ObjectDefines.h"
 #include "Creature.h"
+#include "Unit.h"
 
 enum PetType
 {
@@ -172,8 +173,16 @@ class Pet : public Creature
         void SetDuration(uint32 dur) { m_duration = dur; }
 
         int32 GetBonusDamage() { return m_bonusdamage; }
-        
-        void   ApplyStats(bool apply);
+        void SetBonusDamage(int32 damage) { m_bonusdamage = damage; }
+
+        bool UpdateStats(Stats stat);
+        bool UpdateAllStats();
+        void UpdateResistances(uint32 school);
+        void UpdateArmor();
+        void UpdateMaxHealth();
+        void UpdateMaxPower(Powers power);
+        void UpdateAttackPowerAndDamage(bool ranged = false);
+        void UpdateDamagePhysical(WeaponAttackType attType);
 
         bool   CanTakeMoreActiveSpells(uint32 SpellIconID);
         void   ToggleAutocast(uint32 spellid, bool apply);

@@ -3713,7 +3713,7 @@ void Player::HandleBaseModValue(BaseModGroup modGroup, BaseModType modType, floa
     case DODGE_PERCENTAGE:             UpdateDodgePercentage();                                    break;
     case PARRY_PERCENTAGE:             UpdateParryPercentage();                                    break;
     case RANGED_CRIT_PERCENTAGE:       UpdateCritPercentage(RANGED_ATTACK);                        break;
-    case OFFHAND_CRIT_PERCENTAGE:      UpdateCritPercentage(OFF_ATTACK);                           break;                                                            break;
+    case OFFHAND_CRIT_PERCENTAGE:      UpdateCritPercentage(OFF_ATTACK);                           break;
     case SPELL_CRIT_PERCENTAGE:        UpdateAllSpellCritChances();                                break;
     case HOLY_SPELL_CRIT_PERCENTAGE:
     case FIRE_SPELL_CRIT_PERCENTAGE:
@@ -3765,176 +3765,6 @@ uint32 Player::GetShieldBlockValue() const
     value = (value < 0) ? 0 : value;
 
     return uint32(value);
-}
-
-void Player::UpdateDefenseBonusesMod()
-{
-    UpdateBlockPercentage();
-    UpdateParryPercentage();
-    UpdateDodgePercentage();
-}
-
-void Player::UpdateBlockPercentage()
-{
-    BaseModGroup modGroup = BLOCK_PERCENTAGE;
-
-    float chance = 5 - (getLevel()*5 - GetPureDefenseSkillValue()) * 0.04;
-    chance = chance < 0 ? 0 : chance;
-
-    SetBaseModValue(BLOCK_PERCENTAGE, PCT_MOD, chance);
-
-    float value  = GetBaseModValue(modGroup, FLAT_MOD) + chance;
-    value += float((GetDefenseSkillBonusValue())*0.04) + GetRatingBonusValue(PLAYER_FIELD_BLOCK_RATING);
-
-    SetStatFloatValue(PLAYER_BLOCK_PERCENTAGE, value);
-}
-
-void Player::UpdateCritPercentage(WeaponAttackType attType)
-{
-    BaseModGroup modGroup = CRIT_PERCENTAGE;
-    uint16 index = PLAYER_CRIT_PERCENTAGE;
-    uint16 ratingIndex = PLAYER_FIELD_MELEE_CRIT_RATING;
-
-    switch(attType)
-    {
-    case OFF_ATTACK:
-        modGroup = OFFHAND_CRIT_PERCENTAGE;
-        index = PLAYER_OFFHAND_CRIT_PERCENTAGE; 
-        break;
-    case RANGED_ATTACK: 
-        modGroup = RANGED_CRIT_PERCENTAGE; 
-        index = PLAYER_RANGED_CRIT_PERCENTAGE;
-        ratingIndex = PLAYER_FIELD_RANGED_CRIT_RATING;
-        break;
-    case BASE_ATTACK:
-    default:
-        break;
-    }
-
-    float value = GetTotalPercentageModValue(modGroup) + GetRatingBonusValue(ratingIndex);
-
-    SetStatFloatValue(index, value);
-}
-
-void Player::UpdateAllCritPercentages()
-{
-    float classrate = 20.0f;
-    float base_crit = 0.0f;
-
-    switch(getClass())
-    {
-    case CLASS_DRUID:   base_crit = 0.92f; classrate = getLevel() > 60 ? 24.46f : 20; break;
-    case CLASS_PALADIN: base_crit = 0.7f;  classrate = getLevel() > 60 ? 25 : 20; break;
-    case CLASS_SHAMAN:  base_crit = 1.7f;  classrate = getLevel() > 60 ? 25 : 20; break;
-    case CLASS_MAGE:    base_crit = 3.2f;  classrate = getLevel() > 60 ? 25 : 20; break;
-    case CLASS_PRIEST:  base_crit = 3.0f;  classrate = getLevel() > 60 ? 25 : 20; break;
-    case CLASS_WARLOCK: base_crit = 2.0f;  classrate = getLevel() > 60 ? 25 : 20; break;
-    case CLASS_HUNTER:  classrate = getLevel() > 60 ? 40 : 33; break;
-    case CLASS_ROGUE:   classrate = getLevel() > 60 ? 40 : 29; break;
-    case CLASS_WARRIOR: 
-    default:            classrate = getLevel() > 60 ? 25 : 20; break;
-    }
-
-    float value = base_crit + GetStat(STAT_AGILITY)/classrate;
-
-    SetBaseModValue(CRIT_PERCENTAGE, PCT_MOD, value);
-    SetBaseModValue(OFFHAND_CRIT_PERCENTAGE, PCT_MOD, value);
-    SetBaseModValue(RANGED_CRIT_PERCENTAGE, PCT_MOD, value);
-
-    UpdateCritPercentage(BASE_ATTACK);
-    UpdateCritPercentage(OFF_ATTACK);
-    UpdateCritPercentage(RANGED_ATTACK);
-}
-
-void Player::UpdateParryPercentage()
-{
-    BaseModGroup modGroup = PARRY_PERCENTAGE;
-
-    //pct mods for pct fields act like flat mods
-    float value  = 5.0f + GetBaseModValue(modGroup, FLAT_MOD);
-    value += float(GetDefenseSkillBonusValue()*0.04) + GetRatingBonusValue(PLAYER_FIELD_PARRY_RATING);
-
-    SetStatFloatValue(PLAYER_PARRY_PERCENTAGE, value);
-}
-
-void Player::UpdateDodgePercentage()
-{
-    BaseModGroup modGroup = DODGE_PERCENTAGE;
-    float classrate = 20.0f;
-    float base_dodge = 0.0f;
-
-    switch(getClass())
-    {
-    case CLASS_DRUID:   base_dodge = 0.75f; classrate = getLevel() > 60 ? 14.7 : 10.0f; break; //
-    case CLASS_HUNTER:  base_dodge = 0.64f; classrate = getLevel() > 60 ? 40 : 26.5f; break;   // dunno exact values for case lvl > 60 :/
-    case CLASS_ROGUE:   classrate = getLevel() > 60 ? 25 : 14.5f; break;                        //
-    case CLASS_PALADIN: base_dodge = 0.75f; classrate = getLevel() > 60 ? 30 : 20; break;
-    case CLASS_SHAMAN:  base_dodge = 1.75f; classrate = getLevel() > 60 ? 30 : 20; break;
-    case CLASS_MAGE:    base_dodge = 3.25f; classrate = getLevel() > 60 ? 30 : 20; break;
-    case CLASS_PRIEST:  base_dodge = 3.0f;  classrate = getLevel() > 60 ? 30 : 20; break;
-    case CLASS_WARLOCK: base_dodge = 2.0f;  classrate = getLevel() > 60 ? 30 : 20; break;
-    case CLASS_WARRIOR: 
-    default:            classrate = getLevel() > 60 ? 30 : 20; break;
-    }
-
-    //pct mods for pct fields act like flat mods
-    float value  = base_dodge + GetStat(STAT_AGILITY)/classrate; 
-    value += float(GetDefenseSkillBonusValue()*0.04)+ GetBaseModValue(modGroup, FLAT_MOD);
-    value += GetRatingBonusValue(PLAYER_FIELD_DODGE_RATING);
-
-    SetStatFloatValue(PLAYER_DODGE_PERCENTAGE, value);
-}
-
-void Player::UpdateSpellCritChance(uint32 school)
-{
-    if(school == 0)
-        return;
-
-    BaseModGroup modGroup = BaseModGroup(SPELL_CRIT_PERCENTAGE + school);
-
-    //Spell crit
-    float base_value = GetBaseModValue(SPELL_CRIT_PERCENTAGE, PCT_MOD); //here we store basic % crit chance 
-    base_value += GetRatingBonusValue(PLAYER_FIELD_SPELL_CRIT_RATING);  //for ALL spell schools
-
-    float total_value = base_value + GetBaseModValue(modGroup, FLAT_MOD); 
-
-    SetStatFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1 + school, total_value);
-}
-
-void Player::UpdateAllSpellCritChances()
-{
-    uint32 playerClass = getClass();
-
-    static const struct
-    {
-        float base;
-        float rate0, rate1;
-    }
-    crit_data[MAX_CLASSES] =
-    {
-        {0,0,10},                       //  0: unused
-        {0,0,10},                       //  1: warrior
-        {3.70,14.77,0.65},              //  2: paladin
-        {0,0,10},                       //  3: hunter
-        {0,0,10},                       //  4: rogue
-        {2.97,10.03,0.82},              //  5: priest
-        {0,0,10},                       //  6: unused
-        {3.54,11.51,0.80},              //  7: shaman
-        {3.70,14.77,0.65},              //  8: mage
-        {3.18,11.30,0.82},              //  9: warlock
-        {0,0,10},                       // 10: unused
-        {3.33,12.41,0.79}               // 11: druid
-    };
-
-    float crit_ratio = crit_data[playerClass].rate0 + crit_data[playerClass].rate1 * getLevel();
-    float base_value = 5 + GetStat(STAT_INTELLECT) / crit_ratio;
-
-    SetBaseModValue(SPELL_CRIT_PERCENTAGE, PCT_MOD, base_value);
-
-    SetStatFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1, base_value);
-
-    for (int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; i++)
-        UpdateSpellCritChance(i);
 }
 
 uint32 Player::GetSpellSchoolByBaseGroup(BaseModGroup baseGroup) const
@@ -4177,30 +4007,6 @@ void Player::SetRegularAttackTime()
         else
             SetAttackTime(RANGED_ATTACK, BASE_ATTACK_TIME);
     }
-}
-
-void Player::_ApplyAllStatBonuses()
-{
-    SetCanModifyStats(false);
-
-    _ApplyAllAuraMods();
-    _ApplyAllItemMods();
-
-    SetCanModifyStats(true);
-
-    UpdateAllStats();
-}
-
-void Player::_RemoveAllStatBonuses()
-{
-    SetCanModifyStats(false);
-
-    _RemoveAllItemMods();
-    _RemoveAllAuraMods();
-
-    SetCanModifyStats(true);
-
-    UpdateAllStats();
 }
 
 //skill+1, checking for max value
@@ -4716,15 +4522,16 @@ bool Player::SetPosition(float x, float y, float z, float orientation, bool tele
     }
 
     float water_z = m->GetWaterLevel(x,y);
+    float height_z =  m->GetHeight(x,y,z, false);
     uint8 flag1 = m->GetTerrainType(x,y);
 
-    //!Underwater check
-    if ((z < (water_z - 2)) && (flag1 & 0x01))
-        m_isunderwater|= 0x01;
-    else if (z > (water_z - 2))
+    //!Underwater check, not in water if underground or above water level
+    if ((z < (height_z-2)) || (z > (water_z - 2)))    
         m_isunderwater&= 0x7A;
+    else if ((z < (water_z - 2)) && (flag1 & 0x01))
+        m_isunderwater|= 0x01;
 
-    //!in lava check
+    //!in lava check, anywhere under lava level 
     if ((z < (water_z - 0)) && (flag1 & 0x02))
         m_isunderwater|= 0x80;
 

@@ -2693,28 +2693,20 @@ void Aura::HandleAuraModBaseResistancePCT(bool apply, bool Real)
     // only players have base stats
     if(m_target->GetTypeId() != TYPEID_PLAYER)
     {
-        if(((Creature*)m_target)->isPet())
+        //pets only have base armor
+        if(((Creature*)m_target)->isPet() && m_modifier.m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
         {
-            Pet* pet = (Pet*)m_target;
-
-            //pets only have base armor
-            if(m_modifier.m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
-            {
-                float curRes = pet->GetResistance(SPELL_SCHOOL_NORMAL);
-                float baseRes = curRes + pet->GetResistanceBuffMods(SPELL_SCHOOL_NORMAL, false) - pet->GetResistanceBuffMods(SPELL_SCHOOL_NORMAL, true);
-                float baseRes_new = baseRes * (apply?(100.0f+m_modifier.m_amount)/100.0f : 100.0f / (100.0f+m_modifier.m_amount));
-                pet->SetArmor(int32(curRes + baseRes_new - baseRes));
-            }
+            m_target->HandleStatModifier(UNIT_MOD_ARMOR, BASE_PCT, float(m_modifier.m_amount), apply);
         }
-        return;
     }
-    Player *p_target = (Player*)m_target;
-
-    for(int8 x = SPELL_SCHOOL_NORMAL; x < MAX_SPELL_SCHOOL;x++)
+    else
     {
-        if(m_modifier.m_miscvalue & int32(1<<x))
+        for(int8 x = SPELL_SCHOOL_NORMAL; x < MAX_SPELL_SCHOOL;x++)
         {
-            p_target->HandleStatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + x), BASE_PCT, float(m_modifier.m_amount), apply);
+            if(m_modifier.m_miscvalue & int32(1<<x))
+            {
+                m_target->HandleStatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + x), BASE_PCT, float(m_modifier.m_amount), apply);
+            }
         }
     }
 }
@@ -2740,15 +2732,16 @@ void Aura::HandleModBaseResistance(bool apply, bool Real)
     // only players have base stats
     if(m_target->GetTypeId() != TYPEID_PLAYER)
     {
+        //only pets have base stats
         if(((Creature*)m_target)->isPet() && m_modifier.m_miscvalue & IMMUNE_SCHOOL_PHYSICAL)
             m_target->HandleStatModifier(UNIT_MOD_ARMOR, TOTAL_VALUE, float(m_modifier.m_amount), apply);
-        return;
     }
-    Player *p_target = (Player*)m_target;
-
-    for(int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; i++)
-        if(m_modifier.m_miscvalue & (1<<i))
-            p_target->HandleStatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + i), TOTAL_VALUE, float(m_modifier.m_amount), apply);
+    else
+    {
+        for(int i = SPELL_SCHOOL_NORMAL; i < MAX_SPELL_SCHOOL; i++)
+            if(m_modifier.m_miscvalue & (1<<i))
+                m_target->HandleStatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + i), TOTAL_VALUE, float(m_modifier.m_amount), apply);
+    }
 }
 
 /********************************/

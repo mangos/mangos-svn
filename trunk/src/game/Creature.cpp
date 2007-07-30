@@ -1079,8 +1079,10 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
 
     SetUInt32Value(UNIT_NPC_FLAGS,cinfo->npcflag);
 
-    SetFloatValue(UNIT_FIELD_MINDAMAGE,cinfo->mindmg * damagemod);
-    SetFloatValue(UNIT_FIELD_MAXDAMAGE,cinfo->maxdmg * damagemod);
+    SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, cinfo->attackpower);
+
+    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, cinfo->mindmg * damagemod);
+    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, cinfo->maxdmg * damagemod);
 
     SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE,cinfo->minrangedmg * damagemod);
     SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE,cinfo->maxrangedmg * damagemod);
@@ -1091,13 +1093,16 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     SetUInt32Value(UNIT_FIELD_FLAGS,cinfo->Flags);
     SetUInt32Value(UNIT_DYNAMIC_FLAGS,cinfo->dynamicflags);
 
-    SetArmor(cinfo->armor);
-    SetResistance(SPELL_SCHOOL_HOLY,cinfo->resistance1);
-    SetResistance(SPELL_SCHOOL_FIRE,cinfo->resistance2);
-    SetResistance(SPELL_SCHOOL_NATURE,cinfo->resistance3);
-    SetResistance(SPELL_SCHOOL_FROST,cinfo->resistance4);
-    SetResistance(SPELL_SCHOOL_SHADOW,cinfo->resistance5);
-    SetResistance(SPELL_SCHOOL_ARCANE,cinfo->resistance6);
+    SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(cinfo->armor));
+    SetModifierValue(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(cinfo->resistance1));
+    SetModifierValue(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(cinfo->resistance2));
+    SetModifierValue(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(cinfo->resistance3));
+    SetModifierValue(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(cinfo->resistance4));
+    SetModifierValue(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(cinfo->resistance5));
+    SetModifierValue(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(cinfo->resistance6));
+
+    SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, float(cinfo->maxhealth));
+    SetModifierValue(UNIT_MOD_MANA, BASE_VALUE, float(cinfo->maxmana));
 
     //this is probably wrong
     SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, cinfo->equipmodel[0]);
@@ -1111,6 +1116,9 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY+2, cinfo->equipmodel[2]);
     SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 4, cinfo->equipinfo[2]);
     SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 4 + 1, cinfo->equipslot[2]);
+
+    SetCanModifyStats(true);
+    UpdateAllStats();
 
     LoadCreaturesAddon();
 

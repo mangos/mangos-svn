@@ -922,14 +922,14 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         Powers GetPowerTypeByAuraGroup(UnitMods unitMod) const;
         bool CanModifyStats() const { return m_canModifyStats; }
         void SetCanModifyStats(bool modifyStats) { m_canModifyStats = modifyStats; }
-        bool UpdateStats(Stats stat);
-        bool UpdateAllStats();
-        void UpdateResistances(uint32 school);
-        void UpdateArmor();
-        void UpdateMaxHealth();
-        void UpdateMaxPower(Powers power);
-        void UpdateAttackPowerAndDamage(bool ranged = false);
-        void UpdateDamagePhysical(WeaponAttackType attType);
+        virtual bool UpdateStats(Stats stat) = 0;
+        virtual bool UpdateAllStats() = 0;
+        virtual void UpdateResistances(uint32 school) = 0;
+        virtual void UpdateArmor() = 0;
+        virtual void UpdateMaxHealth() = 0;
+        virtual void UpdateMaxPower(Powers power) = 0;
+        virtual void UpdateAttackPowerAndDamage(bool ranged = false) = 0;
+        virtual void UpdateDamagePhysical(WeaponAttackType attType) = 0;
         float GetTotalAttackPowerValue(WeaponAttackType attType) const;
         float GetWeaponDamageRange(WeaponAttackType attType ,WeaponDamageRange type) const;
         void SetBaseWeaponDamage(WeaponAttackType attType ,WeaponDamageRange damageRange, float value) { m_weaponDamage[attType][damageRange] = value; }
