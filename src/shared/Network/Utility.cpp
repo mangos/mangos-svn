@@ -900,7 +900,7 @@ unsigned long Utility::ThreadID()
 {
 #ifdef _WIN32
 	return GetCurrentThreadId();
-#elif defined(__FreeBSD__)
+#elif defined(__FreeBSD__) || defined(__APPLE_CC__)
     return reinterpret_cast<unsigned long>(pthread_self());
 #else
 	return pthread_self();
