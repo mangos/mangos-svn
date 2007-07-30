@@ -194,6 +194,7 @@ libmangosgame_a_SOURCES = \
 	SpellEffects.cpp \
 	Spell.h \
 	SpellHandler.cpp \
+	StatSystem.cpp \
 	TargetedMovementGenerator.cpp \
 	TargetedMovementGenerator.h \
 	TaxiHandler.cpp \

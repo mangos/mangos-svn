@@ -1093,13 +1093,13 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     SetUInt32Value(UNIT_FIELD_FLAGS,cinfo->Flags);
     SetUInt32Value(UNIT_DYNAMIC_FLAGS,cinfo->dynamicflags);
 
-    SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(cinfo->armor));
-    SetModifierValue(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(cinfo->resistance1));
-    SetModifierValue(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(cinfo->resistance2));
-    SetModifierValue(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(cinfo->resistance3));
-    SetModifierValue(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(cinfo->resistance4));
-    SetModifierValue(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(cinfo->resistance5));
-    SetModifierValue(UNIT_MOD_RESISTANCE_HOLY, BASE_VALUE, float(cinfo->resistance6));
+    SetModifierValue(UNIT_MOD_ARMOR,             BASE_VALUE, float(cinfo->armor));
+    SetModifierValue(UNIT_MOD_RESISTANCE_HOLY,   BASE_VALUE, float(cinfo->resistance1));
+    SetModifierValue(UNIT_MOD_RESISTANCE_FIRE,   BASE_VALUE, float(cinfo->resistance2));
+    SetModifierValue(UNIT_MOD_RESISTANCE_NATURE, BASE_VALUE, float(cinfo->resistance3));
+    SetModifierValue(UNIT_MOD_RESISTANCE_FROST,  BASE_VALUE, float(cinfo->resistance4));
+    SetModifierValue(UNIT_MOD_RESISTANCE_SHADOW, BASE_VALUE, float(cinfo->resistance5));
+    SetModifierValue(UNIT_MOD_RESISTANCE_ARCANE, BASE_VALUE, float(cinfo->resistance6));
 
     SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, float(cinfo->maxhealth));
     SetModifierValue(UNIT_MOD_MANA, BASE_VALUE, float(cinfo->maxmana));
