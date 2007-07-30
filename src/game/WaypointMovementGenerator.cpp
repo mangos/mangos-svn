@@ -192,6 +192,13 @@ WaypointMovementGenerator::Update(Creature &creature, const uint32 &diff)
 {
     if(!&creature)
         return true;
+
+	// Waypoint movement can be switched on/off
+	// This is quite handy for escort quests and other stuff
+
+
+
+
     if(i_creature.hasUnitState(UNIT_STAT_ROOT) || i_creature.hasUnitState(UNIT_STAT_STUNDED))
         return true;
 
@@ -330,9 +337,11 @@ WaypointMovementGenerator::WPAIScript(Creature &pCreature, std::string pAiscript
 
     if( pAiscript == "guard-sw")                            //demo script for WP-AI System
     {
-        if(pCreature.GetEntry() == 68 || 1423)
+		// 1423 - SW guard
+		// 68   - SW city guard
+        if((pCreature.GetEntry() == 68) || (pCreature.GetEntry() == 1423) )
         {
-            if(!( (cT < 1800) && (cT > 800) ))              //If time not smaler than 1800 and not bigger than 800 (24 hour format)
+            if(!( (cT < 1800) && (cT > 800) ))              //If time not smaller than 1800 and not bigger than 800 (24 hour format)
             {                                               //try to set model of Off-hand (shield) to 0 (imo it doesn't work...)
                 pCreature.SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY+1, 0);
                 pCreature.SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 2, 234948100);
@@ -355,8 +364,8 @@ WaypointMovementGenerator::WPAIScript(Creature &pCreature, std::string pAiscript
             }
         }
         sLog.outDebug("guard-sw");
-    }
-}
+    }// guard-sw
+}// WPAIScript
 
 std::set<uint32> WaypointMovementGenerator::si_waypointHolders;
 

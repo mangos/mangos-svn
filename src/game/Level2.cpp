@@ -36,7 +36,6 @@
 #include <iostream>
 #include <fstream>
 
-
 bool ChatHandler::HandleMuteCommand(const char* args)
 {
     if (!*args)
@@ -99,6 +98,7 @@ bool ChatHandler::HandleMuteCommand(const char* args)
 
     return true;
 }
+
 bool ChatHandler::HandleUnmuteCommand(const char* args)
 {
     if (!*args)
@@ -1012,19 +1012,70 @@ bool ChatHandler::HandleAddMoveCommand(const char* args)
     return true;
 }
 
+/**
+ * Set the movement type for an NPC.<br/>
+ * <br/>
+ * Valid movement types are:
+ * <ul>
+ * <li> stay - NPC wont move </li>
+ * <li> random - NPC will move randomly according to the spawndist </li>
+ * <li> way - NPC will move with given waypoints set </li>
+ * </ul>
+ * additional parameter: NODEL - so no waypoints are deleted, if you
+ *                       change the movement type
+ */
 bool ChatHandler::HandleSetMoveTypeCommand(const char* args)
 {
     if(!*args)
         return false;
 
+    // 3 arguments:
+    // GUID (optional - you can also select the creature)
+    // stay|random|way (determines the kind of movement)
+    // NODEL (optional - tells the system NOT to delete any waypoints)
+    //        this is very handy if you want to do waypoints, that are
+    //        later switched on/off according to special events (like escort
+    //        quests, etc)
     char* guid_str = strtok((char*)args, " ");
     char* type_str = strtok((char*)NULL, " ");
+    char* dontdel_str = strtok((char*)NULL, " ");
+
+    bool doNotDelete = false;
 
     if(!guid_str)
         return false;
 
     uint32 lowguid = 0;
     Creature* pCreature = NULL;
+
+    if( dontdel_str )
+    {
+        //sLog.outError("DEBUG: All 3 params are set");
+
+        // All 3 params are set
+        // GUID
+        // type
+        // doNotDEL
+        if( strcmpi( dontdel_str, "NODEL" ) == 0 )
+        {
+            //sLog.outError("DEBUG: doNotDelete = true;");
+            doNotDelete = true;
+        }
+    }
+    else
+    {
+        // Only 2 params - but maybe NODEL is set
+        if( type_str )
+        {
+            sLog.outError("DEBUG: Only 2 params ");
+            if( strcmpi( type_str, "NODEL" ) == 0 )
+            {
+                //sLog.outError("DEBUG: type_str, NODEL ");
+                doNotDelete = true;
+            }
+            type_str = NULL;
+        }
+    }
 
     if(!type_str)                                           // case .setmovetype $move_type (with selected creature)
     {
@@ -1076,7 +1127,11 @@ bool ChatHandler::HandleSetMoveTypeCommand(const char* args)
     // update movement type
     sDatabase.BeginTransaction();
     sDatabase.PExecuteLog("UPDATE `creature` SET `MovementType` = '%u' WHERE `guid` = '%u'", move_type,lowguid);
-    sDatabase.PExecuteLog("DELETE FROM `creature_movement` WHERE `id` = '%u'",lowguid);
+    if( doNotDelete == false )
+    {
+        //sLog.outError("DEBUG: doNotDelete == false");
+        sDatabase.PExecuteLog("DELETE FROM `creature_movement` WHERE `id` = '%u'",lowguid);
+    }
     sDatabase.CommitTransaction();
     if(pCreature)
     {
@@ -1088,11 +1143,17 @@ bool ChatHandler::HandleSetMoveTypeCommand(const char* args)
             pCreature->Respawn();
         }
     }
-
-    PSendSysMessage(LANG_MOVE_TYPE_SET,type_str);
+    if( doNotDelete == false )
+    {
+        PSendSysMessage(LANG_MOVE_TYPE_SET,type_str);
+    }
+    else
+    {
+        PSendSysMessage(LANG_MOVE_TYPE_SET_NODEL,type_str);
+    }
 
     return true;
-}
+}                                                           // HandleSetMoveTypeCommand
 
 bool ChatHandler::HandleRunCommand(const char* args)
 {
