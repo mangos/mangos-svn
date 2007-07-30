@@ -606,6 +606,9 @@
 				RelativePath="..\..\src\game\RedZoneDistrict.h">
 			</File>
 			<File
+				RelativePath="..\..\src\game\StatSystem.cpp">
+			</File>
+			<File
 				RelativePath="..\..\src\game\TargetedMovementGenerator.cpp">
 			</File>
 			<File

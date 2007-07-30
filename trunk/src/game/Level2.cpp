@@ -1056,7 +1056,7 @@ bool ChatHandler::HandleSetMoveTypeCommand(const char* args)
         // GUID
         // type
         // doNotDEL
-        if( strcmpi( dontdel_str, "NODEL" ) == 0 )
+        if( stricmp( dontdel_str, "NODEL" ) == 0 )
         {
             //sLog.outError("DEBUG: doNotDelete = true;");
             doNotDelete = true;
@@ -1068,7 +1068,7 @@ bool ChatHandler::HandleSetMoveTypeCommand(const char* args)
         if( type_str )
         {
             sLog.outError("DEBUG: Only 2 params ");
-            if( strcmpi( type_str, "NODEL" ) == 0 )
+            if( stricmp( type_str, "NODEL" ) == 0 )
             {
                 //sLog.outError("DEBUG: type_str, NODEL ");
                 doNotDelete = true;
