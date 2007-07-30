@@ -76,7 +76,7 @@ ORIGINAL_DO_MYSQL=$DO_MYSQL
 
 # here Postgre
 AC_MSG_CHECKING(whether to build/link POSTGRESQL)
-if test "x$DO_POSTGRESQL" == "xyes"; then
+if test "x$DO_POSTGRESQL" = "xyes"; then
 DO_MYSQL=no
 POSTGRE_INCLUDES="-I/usr/include/postgresql $POSTGRE_INCLUDES"
 POSTGRE_LIBS="-L/usr/lib/postresql -lpq -lz -lpthread -lcrypt -lnsl -lm -lpthread -L/usr/lib -lssl -lcrypto $POSTGRE_LIBS "
@@ -86,7 +86,7 @@ AC_MSG_RESULT($DO_POSTGRESQL)
 	
 # here mysql
 AC_MSG_CHECKING(whether to build/link MYSQL)
-if test "x$DO_MYSQL" == "xyes"; then
+if test "x$DO_MYSQL" = "xyes"; then
 AC_MSG_RESULT($DO_MYSQL)
 AC_PATH_PROGS(MYSQL_CONFIG, mysql_config, mysql_config, $PATH)
     if test -x "$MYSQL_CONFIG"
