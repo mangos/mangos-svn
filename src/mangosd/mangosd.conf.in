@@ -15,7 +15,7 @@ Expansion = 1
 # Data directory setting.
 # Important: DataDir needs to be quoted, as it is a string which may
 # contain space characters.
-DataDir = "@MANGOSD_DATA@"
+DataDir = "@prefix@/share/mangos"
 
 # Logs directory setting.
 # Important: Logs dir must exists, or all logs be disable

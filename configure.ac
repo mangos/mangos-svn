@@ -61,7 +61,6 @@ AC_ARG_WITH(postgresql,
 	*)   AC_MSG_ERROR(Bad value ${withval} for --with-postgresql) ;;
     esac],
 [DO_POSTGRESQL=no])
-ORIGINAL_DO_POSTGRESQL=$DO_POSTGRESQL
 				 
 AC_ARG_WITH(mysql,
 [  --with-mysql            Use MySQL as a backend (default: yes)],
@@ -72,7 +71,6 @@ AC_ARG_WITH(mysql,
 	*)   AC_MSG_ERROR(Bad value ${withval} for --with-mysql) ;;
     esac],
 [DO_MYSQL=yes])
-ORIGINAL_DO_MYSQL=$DO_MYSQL
 
 # here Postgre
 AC_MSG_CHECKING(whether to build/link POSTGRESQL)
