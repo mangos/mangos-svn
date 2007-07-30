@@ -2221,10 +2221,18 @@ void Spell::EffectSummonPet(uint32 i)
     {
         uint32 petlevel = m_caster->getLevel();
 
+        uint32 faction = m_caster->getFaction();
+        if(m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->isTotem())
+        {
+            Unit* owner = ((Totem*)m_caster)->GetOwner();
+            if(owner) faction = owner->getFaction();
+            NewSummon->SetReactState(REACT_AGGRESSIVE);
+        }
+
         NewSummon->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_caster->GetGUID());
         NewSummon->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
         NewSummon->SetUInt32Value(UNIT_NPC_FLAGS , 0);
-        NewSummon->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
+        NewSummon->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, faction);
         NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
         NewSummon->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
         NewSummon->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,time(NULL));

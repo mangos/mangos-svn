@@ -189,7 +189,6 @@ AggressorAI::AttackStart(Unit *u)
     if( !u )
         return;
 
-    sLog.outDetail("Start to attack");
     if(i_creature.Attack(u))
     {
         i_creature.AddThreat(u, 0.0f);

@@ -45,6 +45,16 @@ class Totem : public Creature
         void SetDuration(uint32 dur) { m_duration = dur; }
         void SetOwner(uint64 guid);
 
+        bool UpdateStats(Stats stat) { return true; }
+        bool UpdateAllStats() { return true; }
+        void UpdateResistances(uint32 school) {}
+        void UpdateArmor() {}
+        void UpdateMaxHealth() {}
+        void UpdateMaxPower(Powers power) {}
+        void UpdateAttackPowerAndDamage(bool ranged ) {}
+        void UpdateDamagePhysical(WeaponAttackType attType) {}
+
+
     protected:
         TotemType m_type;
         uint32 m_duration;

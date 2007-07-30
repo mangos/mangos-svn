@@ -368,6 +368,16 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void InitCharmCreateSpells();
         bool AddSpellToAB(uint32 oldid, uint32 newid);      //return true if successful
 
+        bool UpdateStats(Stats stat);
+        bool UpdateAllStats();
+        void UpdateResistances(uint32 school);
+        void UpdateArmor();
+        void UpdateMaxHealth();
+        void UpdateMaxPower(Powers power);
+        void UpdateAttackPowerAndDamage(bool ranged = false);
+        void UpdateDamagePhysical(WeaponAttackType attType);
+
+
         /*********************************************************/
         /***                    VENDOR SYSTEM                  ***/
         /*********************************************************/

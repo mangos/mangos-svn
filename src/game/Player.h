@@ -1145,6 +1145,15 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 GetSpellByProto(ItemPrototype *proto);
 
+        bool UpdateStats(Stats stat);
+        bool UpdateAllStats();
+        void UpdateResistances(uint32 school);
+        void UpdateArmor();
+        void UpdateMaxHealth();
+        void UpdateMaxPower(Powers power);
+        void UpdateAttackPowerAndDamage(bool ranged = false);
+        void UpdateDamagePhysical(WeaponAttackType attType);
+
         uint16 GetDefenseSkillBonusValue() const;
         void UpdateDefenseBonusesMod();
         void ApplyRatingMod(uint16 index, int32 value, bool apply);
