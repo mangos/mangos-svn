@@ -816,6 +816,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\StatSystem.cpp"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\RedZoneDistrict.h"
 				>
 			</File>
