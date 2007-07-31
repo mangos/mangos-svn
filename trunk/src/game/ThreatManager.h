@@ -173,13 +173,11 @@ private:
     ThreatContainer iThreatContainer;
     ThreatContainer iThreatOfflineContainer;
 public:
-    ThreatManager();
+    explicit ThreatManager(Unit *pOwner);
 
     ~ThreatManager() { clearReferences(); }
 
     void clearReferences();
-
-    void setOwner(Unit *pOwner) { iOwner = pOwner; }
 
     void addThreat(Unit* pVictim, float threat, uint8 school = 0, SpellEntry const *threatSpell = NULL);
     void modifyThreatPercent(Unit *pVictim, int32 pPercent);

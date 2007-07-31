@@ -273,6 +273,36 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur, u
             }
         }
     }
+
+    // determine reflection
+    bool m_canReflect = false;
+    for(int j=0;j<3;j++)
+    {
+        if (m_spellInfo->Effect[j]==0)
+            continue;
+
+        switch(m_spellInfo->EffectImplicitTargetA[j])
+        {
+        case TARGET_CHAIN_DAMAGE:
+        case TARGET_ALL_ENEMY_IN_AREA:
+        case TARGET_ALL_ENEMY_IN_AREA_INSTANT:
+        case TARGET_ALL_ENEMIES_AROUND_CASTER:
+        case TARGET_IN_FRONT_OF_CASTER:
+        case TARGET_DUELVSPLAYER:
+        case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
+            //case TARGET_AE_SELECTED:
+            m_canReflect = true;
+            break;
+
+        default:
+            m_canReflect = (m_spellInfo->AttributesEx & (1<<7)) ? true : false;
+        }
+
+        if(m_canReflect)
+            continue;
+        else
+            break;
+    }
 }
 
 Spell::~Spell()
@@ -1301,36 +1331,6 @@ void Spell::_handle_immediate_phase()
         // process items
         for(std::list<Item*>::iterator iitem = m_targetItems[j].begin();iitem != m_targetItems[j].end();iitem++)
             HandleEffects(NULL,(*iitem),NULL,j);
-    }
-
-    // determine reflection
-    bool m_canReflect = false;
-    for(int j=0;j<3;j++)
-    {
-        if (m_spellInfo->Effect[j]==0)
-            continue;
-
-        switch(m_spellInfo->EffectImplicitTargetA[j])
-        {
-            case TARGET_CHAIN_DAMAGE:
-            case TARGET_ALL_ENEMY_IN_AREA:
-            case TARGET_ALL_ENEMY_IN_AREA_INSTANT:
-            case TARGET_ALL_ENEMIES_AROUND_CASTER:
-            case TARGET_IN_FRONT_OF_CASTER:
-            case TARGET_DUELVSPLAYER:
-            case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
-                //case TARGET_AE_SELECTED:
-                m_canReflect = true;
-                break;
-
-            default:
-                m_canReflect = (m_spellInfo->AttributesEx & (1<<7)) ? true : false;
-        }
-
-        if(m_canReflect)
-            continue;
-        else
-            break;
     }
 
     // process ground

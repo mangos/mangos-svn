@@ -77,6 +77,28 @@ ObjectGridRespawnMover::Visit(CreatureMapType &m)
     }
 }
 
+// for loading world object at grid loading (Corpses)
+class ObjectWorldLoader
+{
+public:
+    explicit ObjectWorldLoader(ObjectGridLoader& gloader)
+        : i_cell(gloader.i_cell), i_grid(gloader.i_grid), i_map(gloader.i_map), i_corpses (0)
+    {}
+
+    void Visit(CorpseMapType &m);
+
+    template<class T>
+    void Visit(std::map<OBJECT_HANDLE, T* >&) { }
+
+private:
+    Cell i_cell;
+    NGridType &i_grid;
+    Map* i_map;
+public:
+    uint32 i_corpses;
+};
+
+
 template<class T> void addUnitState(T *obj, CellPair const& cell_pair)
 {
 }
@@ -167,7 +189,7 @@ ObjectGridLoader::Visit(CreatureMapType &m)
 }
 
 void
-ObjectGridLoader::Visit(CorpseMapType &m)
+ObjectWorldLoader::Visit(CorpseMapType &m)
 {
     uint32 x = (i_cell.GridX()*MAX_NUMBER_OF_CELLS) + i_cell.CellX();
     uint32 y = (i_cell.GridY()*MAX_NUMBER_OF_CELLS) + i_cell.CellY();
@@ -181,8 +203,17 @@ ObjectGridLoader::Visit(CorpseMapType &m)
 void
 ObjectGridLoader::Load(GridType &grid)
 {
-    TypeContainerVisitor<ObjectGridLoader, GridTypeMapContainer > loader(*this);
-    grid.Visit(loader);
+    {
+        TypeContainerVisitor<ObjectGridLoader, GridTypeMapContainer > loader(*this);
+        grid.Visit(loader);
+    }
+
+    {
+        ObjectWorldLoader wloader(*this);
+        TypeContainerVisitor<ObjectWorldLoader, WorldTypeMapContainer > loader(wloader);
+        grid.Visit(loader);
+        i_corpses = wloader.i_corpses;
+    }
 }
 
 void ObjectGridLoader::LoadN(void)

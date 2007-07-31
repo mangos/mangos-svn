@@ -105,7 +105,8 @@ bool IsPassiveStackableSpell( uint32 spellId )
     return true;
 }
 
-Unit::Unit( WorldObject *instantiator ) : WorldObject( instantiator )
+Unit::Unit( WorldObject *instantiator ) 
+: WorldObject( instantiator ), m_ThreatManager(this), m_HostilRefManager(this)
 {
     m_objectType |= TYPE_UNIT;
     m_objectTypeId = TYPEID_UNIT;
@@ -180,7 +181,6 @@ Unit::Unit( WorldObject *instantiator ) : WorldObject( instantiator )
         m_speed_rate[i] = 1.0f;
 
     m_removedAuras = 0;
-    getThreatManager().setOwner(this);
 }
 
 Unit::~Unit()

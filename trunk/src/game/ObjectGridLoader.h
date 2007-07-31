@@ -25,8 +25,12 @@
 #include "GridDefines.h"
 #include "Cell.h"
 
+class ObjectWorldLoader;
+
 class MANGOS_DLL_DECL ObjectGridLoader
 {
+    friend class ObjectWorldLoader;
+
     public:
         ObjectGridLoader(NGridType &grid, Map* map, const Cell &cell)
             : i_cell(cell), i_grid(grid), i_map(map), i_gameObjects(0), i_creatures(0), i_corpses (0)
@@ -35,12 +39,9 @@ class MANGOS_DLL_DECL ObjectGridLoader
         void Load(GridType &grid);
         void Visit(GameObjectMapType &m);
         void Visit(CreatureMapType &m);
-        void Visit(CorpseMapType &m);
+        void Visit(CorpseMapType &m) {}
 
-        void Visit(DynamicObjectMapType &m)
-        {
-
-        }
+        void Visit(DynamicObjectMapType&) { }
 
         void LoadN(void);
 
