@@ -53,31 +53,68 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
     std::string membername;
     recv_data >> membername;
 
-    Player *player = NULL;
-
     // attempt add selected player
-    if(membername.size()!=0)
+
+    // cheating
+    if(membername.empty())
     {
-        normalizePlayerName(membername);
-        player = objmgr.GetPlayer(membername.c_str());
+        SendPartyResult(0, membername, 1);
+        return;
     }
 
-    Group  *group = GetPlayer()->GetGroup();
-    bool newGroup=false;
+    normalizePlayerName(membername);
+    Player *player = objmgr.GetPlayer(membername.c_str());
 
-    /** error handling **/
+    // no player
     if(!player)
     {
         SendPartyResult(0, membername, 1);
         return;
     }
 
+    // can't group with
     if(!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP) && GetPlayer()->GetTeam() != player->GetTeam())
     {
         SendPartyResult(0, membername, 7);
         return;
     }
 
+    // just ignore us
+    if(player->HasInIgnoreList(GetPlayer()->GetGUID()))
+    {
+        SendPartyResult(0, membername, 0);
+        SendPartyResult(0, membername, 8);
+        return;
+    }
+
+    // player already in another group or invited
+    if(player->GetGroup() || player->GetGroupInvite() )
+    {
+        SendPartyResult(0, membername, 4);
+        return;
+    }
+
+
+    Group *group = GetPlayer()->GetGroup();
+
+    if(group)
+    {
+        // not have permissions for invite
+        if(!group->IsLeader(GetPlayer()->GetGUID()) && !group->IsAssistant(GetPlayer()->GetGUID()))
+        {
+            SendPartyResult(0, "", 6);
+            return;
+        }
+
+        // not have place
+        if(group->IsFull())
+        {
+            SendPartyResult(0, "", 3);
+            return;
+        }
+    }
+
+    // ok, but group not exist, creating new
     if(!group)
     {
         group = new Group;
@@ -88,50 +125,24 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
         }
 
         objmgr.AddGroup(group);
-        newGroup = true;
-    }
-    else
-    {
-        if(!group->IsLeader(GetPlayer()->GetGUID()) && !group->IsAssistant(GetPlayer()->GetGUID()))
-        {
-            SendPartyResult(0, "", 6);
-            return;
-        }
 
-        if(group->IsFull())
-        {
-            SendPartyResult(0, "", 3);
-            return;
-        }
-    }
-
-    if(player->GetGroup() || player->GetGroupInvite() || player->HasInIgnoreList(GetPlayer()->GetGUID()))
-    {
-        if(newGroup)
+        // new group: if can't add then delete
+        if(!group->AddInvite(player))
         {
             group->Disband(true);
             objmgr.RemoveGroup(group);
             delete group;
+            return;
         }
-
-        if(player->GetGroup() || player->GetGroupInvite())
-        {
-            SendPartyResult(0, membername, 4);
-        }
-        else
-        {
-            SendPartyResult(0, membername, 0);
-            SendPartyResult(0, membername, 8);
-        }
-
-        return;
     }
-    /********************/
+    else
+    {
+        // already existed group: if can't add then just leave 
+        if(!group->AddInvite(player))
+            return;
+    }
 
-    // everything's fine, do it
-    if(!group->AddInvite(player))
-        return;
-
+    // ok, we do it
     WorldPacket data(SMSG_GROUP_INVITE, 10);                // guess size
     data << GetPlayer()->GetName();
     player->GetSession()->SendPacket(&data);
