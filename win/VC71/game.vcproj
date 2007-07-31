@@ -43,6 +43,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies=".\shared___Win32_Debug\shared.lib"
 				OutputFile=".\game___Win32_Debug\game.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
@@ -97,6 +98,7 @@
 			<Tool
 				Name="VCLibrarianTool"
 				OutputFile=".\game___Win32_Release\game.lib"
+				AdditionalDependencies=".\shared___Win32_Release\shared.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>

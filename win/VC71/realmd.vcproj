@@ -111,7 +111,8 @@
 				AdditionalLibraryDirectories="..\..\dep\lib\debug;.\zthread___Win32_Debug"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile=".\..\..\bin\Debug/realmd.pdb"
-				SubSystem="1"/>
+				SubSystem="1"
+				FixedBaseAddress="1"/>
 			<Tool
 				Name="VCMIDLTool"
 				TypeLibraryName=".\..\..\bin\Debug/realmd.tlb"/>

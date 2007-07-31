@@ -40,6 +40,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies=".\g3dlite___Win32_Release\g3dlite.lib"
 				OutputFile=".\shared___Win32_Release\shared.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
@@ -93,6 +94,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies=".\g3dlite___Win32_Debug\g3dlite.lib"
 				OutputFile=".\shared___Win32_Debug\shared.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
@@ -241,12 +243,6 @@
 			</File>
 			<File
 				RelativePath="..\..\src\shared\Errors.h">
-			</File>
-			<File
-				RelativePath="..\..\src\shared\EventSystem.cpp">
-			</File>
-			<File
-				RelativePath="..\..\src\shared\EventSystem.h">
 			</File>
 			<File
 				RelativePath="..\..\src\shared\MemoryLeaks.cpp">

@@ -172,6 +172,7 @@
 				GenerateDebugInformation="true"
 				ProgramDatabaseFile=".\..\..\bin\Debug/realmd.pdb"
 				SubSystem="1"
+				FixedBaseAddress="1"
 			/>
 			<Tool
 				Name="VCALinkTool"

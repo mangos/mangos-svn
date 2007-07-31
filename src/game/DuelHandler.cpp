@@ -26,7 +26,6 @@
 #include "Spell.h"
 #include "UpdateData.h"
 #include "MapManager.h"
-#include "EventSystem.h"
 
 void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
 {

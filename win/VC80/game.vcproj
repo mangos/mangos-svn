@@ -73,6 +73,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies=".\shared___Win32_Debug\shared.lib"
 				OutputFile=".\game___Win32_Debug\game.lib"
 				SuppressStartupBanner="true"
 			/>
@@ -149,6 +150,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
+				AdditionalDependencies=".\shared___Win32_Release\shared.lib"
 				OutputFile=".\game___Win32_Release\game.lib"
 				SuppressStartupBanner="true"
 			/>
@@ -998,36 +1000,46 @@
 		</Filter>
 		<Filter
 			Name="References"
-			Filter="">
+			>
 			<File
-				RelativePath="..\..\src\game\FollowerReference.cpp">
+				RelativePath="..\..\src\game\FollowerReference.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\FollowerReference.h">
+				RelativePath="..\..\src\game\FollowerReference.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\FollowerRefManager.h">
+				RelativePath="..\..\src\game\FollowerRefManager.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\GroupReference.cpp">
+				RelativePath="..\..\src\game\GroupReference.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\GroupReference.h">
+				RelativePath="..\..\src\game\GroupReference.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\GroupRefManager.h">
+				RelativePath="..\..\src\game\GroupRefManager.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\HostilRefManager.cpp">
+				RelativePath="..\..\src\game\HostilRefManager.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\HostilRefManager.h">
+				RelativePath="..\..\src\game\HostilRefManager.h"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\ThreatManager.cpp">
+				RelativePath="..\..\src\game\ThreatManager.cpp"
+				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\ThreatManager.h">
+				RelativePath="..\..\src\game\ThreatManager.h"
+				>
 			</File>
 		</Filter>
 	</Files>
