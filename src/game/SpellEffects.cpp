@@ -3325,17 +3325,15 @@ void Spell::EffectKnockBack(uint32 i)
     //Only allowed to knock ourselves straight up to prevent exploiting
     if (unitTarget == m_caster)value = 0;
 
-    WorldPacket data(SMSG_MOVE_KNOCK_BACK, (8+4+4+4+4+4));
-    data.append(unitTarget->GetPackGUID());
-    // We need the explicit conversion to float here. Otherwise the type might be propagated to double on Linux and
-    // package size will be wrong.
-    // This is a general problem and has to be checked for other world packets as well.
     float vsin = sin(m_caster->GetAngle(unitTarget));
     float vcos = cos(m_caster->GetAngle(unitTarget));
+
+    WorldPacket data(SMSG_MOVE_KNOCK_BACK, (8+4+4+4+4+4));
+    data.append(unitTarget->GetPackGUID());
     data << uint32(0);                                      //Sequence
-    data << vcos;                                           //xdirection
-    data << vsin;                                           //ydirection
-    data << value/10;                                       //Horizontal speed
+    data << float(vcos);                                    //xdirection
+    data << float(vsin);                                    //ydirection
+    data << float(value/10);                                //Horizontal speed
     data << float(m_spellInfo->EffectMiscValue[i])/-10;     //Z Movement speed
 
     ((Player*)unitTarget)->SendMessageToSet(&data,true);

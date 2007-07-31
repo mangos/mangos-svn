@@ -2544,7 +2544,7 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
     pGameObj->SaveToDB();
     MapManager::Instance().GetMap(pGameObj->GetMapId(), pGameObj)->Add(pGameObj);
 
-    PSendSysMessage(LANG_GAMEOBJECT_ADD,id,goI->name,x,y,z);
+    PSendSysMessage(LANG_GAMEOBJECT_ADD,id,goI->name,lowGUID,x,y,z);
 
     return true;
 }
