@@ -304,9 +304,8 @@ HostilReference* ThreatContainer::selectNextVictim(Creature* pAttacker, HostilRe
 //=================== ThreatManager ==========================
 //============================================================
 
-ThreatManager::ThreatManager()
+ThreatManager::ThreatManager(Unit* owner) : iCurrentVictim(NULL), iOwner(owner)
 {
-    iCurrentVictim = NULL;
 }
 
 //============================================================
