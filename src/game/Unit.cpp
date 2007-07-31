@@ -2216,7 +2216,7 @@ void Unit::_UpdateSpells( uint32 time )
             else if(m_currentSpells[CURRENT_GENERIC_SPELL]->getState() == SPELL_STATE_IDLE && isAttackReady(RANGED_ATTACK) )
             {
                 // check movement in player case
-                if(GetTypeId() == TYPEID_PLAYER && ((Player*)this)->GetMovementFlags())
+                if(GetTypeId() == TYPEID_PLAYER && ((Player*)this)->isMoving())
                 {
                     // cancel wand shooting
                     if(m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->Category == 351)
