@@ -191,10 +191,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\framework\GameSystem\TypeContainerFunctionsPtr.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\framework\GameSystem\TypeContainerVisitor.h"
 				>
 			</File>
