@@ -615,9 +615,17 @@ enum MovementFlags
     MOVEMENTFLAG_SPLINE         = 0x4000000,
     // 0x8000000
     MOVEMENTFLAG_WATERWALKING   = 0x10000000,
-    MOVEMENTFLAG_UNK2           = 0x20000000,
+    MOVEMENTFLAG_SAFE_FALL      = 0x20000000, // active rogue safe fall spell (passive)
     MOVEMENTFLAG_UNK3           = 0x40000000
 };
+
+// flags that use in movement check for example at spell casting
+MovementFlags const movementFlagsMask = MovementFlags(
+    MOVEMENTFLAG_FORWARD |MOVEMENTFLAG_BACKWARD|MOVEMENTFLAG_STRAFE_LEFT|MOVEMENTFLAG_STRAFE_RIGHT|
+    MOVEMENTFLAG_LEFT    |MOVEMENTFLAG_RIGHT   |MOVEMENTFLAG_PITCH_UP   |MOVEMENTFLAG_PITCH_DOWN|
+    MOVEMENTFLAG_WALK    |MOVEMENTFLAG_FLY_UNK1|MOVEMENTFLAG_JUMPING    |MOVEMENTFLAG_FALLING|
+    MOVEMENTFLAG_SWIMMING|MOVEMENTFLAG_FLY_UP  |MOVEMENTFLAG_FLYING     |MOVEMENTFLAG_SPLINE
+);
 
 typedef HM_NAMESPACE::hash_map< uint32, std::pair < uint32, uint32 > > BoundInstancesMap;
 
@@ -1386,6 +1394,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         /***                 VARIOUS SYSTEMS                   ***/
         /*********************************************************/
+        bool isMoving() const { return (m_movement_flags & movementFlagsMask) != 0; }
         uint32 GetMovementFlags() const { return m_movement_flags; }
         bool HasMovementFlags(uint32 flags) const { return m_movement_flags & flags; }
         void SetMovementFlags(uint32 Flags) { m_movement_flags = Flags;}
