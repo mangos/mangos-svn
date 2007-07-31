@@ -576,6 +576,7 @@ MThread *tm = NULL, *ts = NULL, *tms = NULL, *tmp = NULL, *tsp = NULL, *tmsp = N
 
 void StartEventSystem()
 {
+    return;
     tm = MThread::Start(( void (*)(void*))&mThread,NULL);
     ts = MThread::Start(( void (*)(void*))&sThread,NULL);
     tms = MThread::Start(( void (*)(void*))&msThread,NULL);
@@ -586,6 +587,7 @@ void StartEventSystem()
 
 void StopEventSystem()
 {
+    return;
     stopEvent = true;
 
 #ifdef WIN32

@@ -38,17 +38,6 @@ MaNGOS::VisibleNotifier::Visit(std::map<OBJECT_HANDLE, T *> &m)
     }
 }
 
-template<class T>
-inline void
-MaNGOS::VisibleNotifier::Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m)
-{
-    for(typename std::map<OBJECT_HANDLE, CountedPtr<T> >::iterator iter=m.begin(); iter != m.end(); ++iter)
-    {
-        i_player.UpdateVisibilityOf(&*iter->second,i_data,i_data_updates);
-        i_clientGUIDs.erase(iter->second->GetGUID());
-    }
-}
-
 inline void
 MaNGOS::ObjectUpdater::Visit(CreatureMapType &m)
 {

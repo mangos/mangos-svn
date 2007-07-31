@@ -81,13 +81,3 @@ void CorpsesErase()
     CorpsesErase(CORPSE_BONES, 20*MINUTE);
     CorpsesErase(CORPSE_RESURRECTABLE,3*DAY);
 }
-
-/// thread guarded variant for call from event system
-void HandleCorpsesErase(void*)
-{
-    sDatabase.ThreadStart();                                // let thread do safe mySQL requests
-
-    CorpsesErase();
-
-    sDatabase.ThreadEnd();                                  // free mySQL thread resources
-}

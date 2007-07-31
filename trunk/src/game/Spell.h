@@ -728,13 +728,11 @@ namespace MaNGOS
             }
         }
         template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
-        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &) {}
     };
 
     struct MANGOS_DLL_DECL SpellNotifierCreatureAndPlayer
     {
         std::list<Unit*> *i_data;
-        std::list<CountedPtr<Unit> > *i_dataptr;
         Spell &i_spell;
         const uint32& i_push_type;
         float i_radius;
@@ -743,18 +741,7 @@ namespace MaNGOS
 
         SpellNotifierCreatureAndPlayer(Spell &spell, std::list<Unit*> &data, const uint32 &i, const uint32 &type,
             SpellTargets TargetType = SPELL_TARGETS_NOT_FRIENDLY)
-            : i_data(&data), i_dataptr(NULL), i_spell(spell), i_push_type(type), i_TargetType(TargetType)
-        {
-            if (i_spell.m_spellInfo->EffectRadiusIndex[i])
-                i_radius = GetRadius(sSpellRadiusStore.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i]));
-            else
-                i_radius = GetMaxRange(sSpellRangeStore.LookupEntry(i_spell.m_spellInfo->rangeIndex));
-            i_originalCaster = spell.GetOriginalCaster();
-        }
-
-        SpellNotifierCreatureAndPlayer(Spell &spell, std::list<CountedPtr<Unit> > &data, const uint32 &i, const uint32 &type,
-            SpellTargets TargetType = SPELL_TARGETS_NOT_FRIENDLY)
-            : i_data(NULL), i_dataptr(&data), i_spell(spell), i_push_type(type), i_TargetType(TargetType)
+            : i_data(&data), i_spell(spell), i_push_type(type), i_TargetType(TargetType)
         {
             if (i_spell.m_spellInfo->EffectRadiusIndex[i])
                 i_radius = GetRadius(sSpellRadiusStore.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i]));
@@ -831,78 +818,6 @@ namespace MaNGOS
                     case PUSH_DEST_CENTER:
                         if((itr->second->GetDistanceSq(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < i_radius * i_radius ))
                             i_data->push_back(itr->second);
-                        break;
-                }
-            }
-        }
-
-        template<class T> inline void Visit(std::map<OBJECT_HANDLE, CountedPtr<T> >  &m)
-        {
-            assert(i_dataptr);
-
-            if(!i_originalCaster)
-                return;
-
-            for(typename std::map<OBJECT_HANDLE, CountedPtr<T> >::iterator itr=m.begin(); itr != m.end(); ++itr)
-            {
-                if( !itr->second->isAlive() )
-                    continue;
-
-                switch (i_TargetType)
-                {
-                    case SPELL_TARGETS_HOSTILE:
-                        if (!i_originalCaster->IsHostileTo( itr->second ))
-                            continue;
-                        break;
-                    case SPELL_TARGETS_NOT_FRIENDLY:
-                        if (i_originalCaster->IsFriendlyTo( itr->second ))
-                            continue;
-                        break;
-                    case SPELL_TARGETS_NOT_HOSTILE:
-                        if (i_originalCaster->IsHostileTo( itr->second ))
-                            continue;
-                        break;
-                    case SPELL_TARGETS_FRIENDLY:
-                        if (!i_originalCaster->IsFriendlyTo( itr->second ))
-                            continue;
-                        break;
-                    case SPELL_TARGETS_AOE_DAMAGE:
-                        {
-                            if(itr->second->GetTypeId()==TYPEID_UNIT && ((Creature*)itr->second)->isTotem())
-                                continue;
-
-                            Unit* check = i_originalCaster;
-                            Unit* owner = i_originalCaster->GetCharmerOrOwner();
-                            if(owner)
-                                check = owner;
-                            if( check->GetTypeId()==TYPEID_PLAYER )
-                            {
-                                if (check->IsFriendlyTo( itr->second ))
-                                    continue;
-                            }
-                            else
-                            {
-                                if (!check->IsHostileTo( itr->second ))
-                                    continue;
-                            }
-                        }
-                        break;
-                    default: continue;
-                }
-
-                switch(i_push_type)
-                {
-                    case PUSH_IN_FRONT:
-                        if((i_spell.m_caster->isInFront((Unit*)(&*itr->second), i_radius )))
-                            i_dataptr->push_back(itr->second);
-                        break;
-                    case PUSH_SELF_CENTER:
-                        if(i_spell.m_caster->IsWithinDistInMap((Unit*)(&*itr->second), i_radius))
-                            i_dataptr->push_back(itr->second);
-                        break;
-                    case PUSH_DEST_CENTER:
-                        if((itr->second->GetDistanceSq(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < i_radius * i_radius ))
-                            i_dataptr->push_back(itr->second);
                         break;
                 }
             }

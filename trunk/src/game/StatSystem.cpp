@@ -81,7 +81,7 @@ bool Player::UpdateAllStats()
     for (int i = STAT_STRENGTH; i < MAX_STATS; i++)
     {
         float value = GetTotalStatValue(Stats(i));
-        SetStat(Stats(i), value);
+        SetStat(Stats(i), (int32)value);
     }
 
     UpdateAttackPowerAndDamage();
@@ -144,7 +144,7 @@ void Player::UpdateMaxHealth()
     value  += GetModifierValue(unitMod, TOTAL_VALUE) + stamina * 10.0f;
     value  *= GetModifierValue(unitMod, TOTAL_PCT);
 
-    SetMaxHealth(value);
+    SetMaxHealth((uint32)value);
 }
 
 void Player::UpdateMaxPower(Powers power)
@@ -218,8 +218,8 @@ void Player::UpdateAttackPowerAndDamage(bool ranged )
     float attPowerMod = GetModifierValue(unitMod, TOTAL_VALUE);
     float attPowerMultiplier = GetModifierValue(unitMod, TOTAL_PCT) - 1.0f;
 
-    SetUInt32Value(index, base_attPower);            //UNIT_FIELD_(RANGED)_ATTACK_POWER field
-    SetUInt32Value(index_mod, attPowerMod);          //UNIT_FIELD_(RANGED)_ATTACK_POWER_MODS field
+    SetUInt32Value(index, (uint32)base_attPower);            //UNIT_FIELD_(RANGED)_ATTACK_POWER field
+    SetUInt32Value(index_mod, (uint32)attPowerMod);          //UNIT_FIELD_(RANGED)_ATTACK_POWER_MODS field
     SetFloatValue(index_mult, attPowerMultiplier);   //UNIT_FIELD_(RANGED)_ATTACK_POWER_MULTIPLIER field
 
     //automatically update weapon damage after attack power modification
@@ -530,7 +530,7 @@ void Creature::UpdateArmor()
 void Creature::UpdateMaxHealth()
 {
     float value = GetTotalAuraModValue(UNIT_MOD_HEALTH);
-    SetMaxHealth(value);
+    SetMaxHealth((uint32)value);
 }
 
 void Creature::UpdateMaxPower(Powers power)
@@ -680,7 +680,7 @@ void Pet::UpdateMaxHealth()
     value  += GetModifierValue(unitMod, TOTAL_VALUE) + stamina * 10.0f;
     value  *= GetModifierValue(unitMod, TOTAL_PCT);
 
-    SetMaxHealth(value);
+    SetMaxHealth((uint32)value);
 }
 
 void Pet::UpdateMaxPower(Powers power)
@@ -723,9 +723,9 @@ void Pet::UpdateAttackPowerAndDamage(bool ranged)
     float attPowerMod = GetModifierValue(unitMod, TOTAL_VALUE);
     float attPowerMultiplier = GetModifierValue(unitMod, TOTAL_PCT) - 1.0f;
 
-    SetUInt32Value(UNIT_FIELD_ATTACK_POWER, base_attPower);            //UNIT_FIELD_(RANGED)_ATTACK_POWER field
-    SetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS, attPowerMod);          //UNIT_FIELD_(RANGED)_ATTACK_POWER_MODS field
-    SetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER, attPowerMultiplier);   //UNIT_FIELD_(RANGED)_ATTACK_POWER_MULTIPLIER field
+    SetUInt32Value(UNIT_FIELD_ATTACK_POWER, (uint32)base_attPower);         //UNIT_FIELD_(RANGED)_ATTACK_POWER field
+    SetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS, (uint32)attPowerMod);      //UNIT_FIELD_(RANGED)_ATTACK_POWER_MODS field
+    SetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER, attPowerMultiplier);  //UNIT_FIELD_(RANGED)_ATTACK_POWER_MULTIPLIER field
 
     //automatically update weapon damage after attack power modification
     UpdateDamagePhysical(BASE_ATTACK); 

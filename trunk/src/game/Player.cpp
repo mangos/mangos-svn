@@ -1472,7 +1472,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             // SetPosition(final_x, final_y, final_z, final_o, true);
 
             // resurrect character at enter into instance where his corpse exist
-            CorpsePtr corpse = GetCorpse();
+            Corpse *corpse = GetCorpse();
             if (corpse && corpse->GetType() == CORPSE_RESURRECTABLE && corpse->GetMapId() == mapid)
             {
                 if( mEntry && (mEntry->map_type == MAP_INSTANCE || mEntry->map_type == MAP_RAID) )
@@ -3153,7 +3153,7 @@ void Player::BuildPlayerRepop()
     if(!GetCorpse())
         CreateCorpse();
 
-    CorpsePtr corpse = GetCorpse();
+    Corpse *corpse = GetCorpse();
     if (!corpse)
     {
         sLog.outError("Error creating corpse for Player %s [%u]", GetName(), GetGUIDLow());
@@ -3353,7 +3353,7 @@ void Player::CreateCorpse()
 
     uint32 _uf, _pb, _pb2, _cfb1, _cfb2;
 
-    CorpsePtr corpse(new Corpse(this, CORPSE_RESURRECTABLE));
+    Corpse *corpse = new Corpse(this, CORPSE_RESURRECTABLE);
 
     if(!corpse->Create(objmgr.GenerateLowGuid(HIGHGUID_CORPSE), this, GetMapId(), GetPositionX(),
         GetPositionY(), GetPositionZ(), GetOrientation()))
@@ -3412,7 +3412,7 @@ void Player::SpawnCorpseBones()
         SaveToDB();                                         // prevent loading as ghost without corpse
 }
 
-CorpsePtr& Player::GetCorpse() const
+Corpse* Player::GetCorpse() const
 {
     return ObjectAccessor::Instance().GetCorpseForPlayerGUID(GetGUID());
 }
@@ -11804,7 +11804,7 @@ void Player::LoadCorpse()
     }
     else
     {
-        if(CorpsePtr corpse = GetCorpse())
+        if(Corpse *corpse = GetCorpse())
         {
             if( corpse->GetType() == CORPSE_RESURRECTABLE && IsWithinDistInMap(&*corpse,0.0))
                 RepopAtGraveyard();
@@ -13943,7 +13943,7 @@ bool Player::IsVisibleInGridForPlayer( Player* pl ) const
     // Dead player see live players near own corpse
     if(isAlive())
     {
-        CorpsePtr &corpse = pl->GetCorpse();
+        Corpse *corpse = pl->GetCorpse();
         if(corpse)
         {
             // 20 - aggro distance for same level, 25 - max additional distance if player level less that creature level

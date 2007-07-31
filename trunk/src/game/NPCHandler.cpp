@@ -324,7 +324,7 @@ void WorldSession::SendSpiritResurrect()
 
     // get corpse nearest graveyard
     WorldSafeLocsEntry const *corpseGrave = NULL;
-    CorpsePtr corpse = _player->GetCorpse();
+    Corpse *corpse = _player->GetCorpse();
     if((bool)corpse)
         corpseGrave = objmgr.GetClosestGraveYard(
             corpse->GetPositionX(), corpse->GetPositionY(), corpse->GetPositionZ(), corpse->GetMapId(), _player->GetTeam() );

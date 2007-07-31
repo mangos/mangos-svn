@@ -63,11 +63,6 @@ class MANGOS_DLL_DECL Grid
             return i_objects.template insert<SPECIFIC_OBJECT>(hdl, obj);
         }
 
-        bool AddWorldObject(CountedPtr<Corpse> &obj, OBJECT_HANDLE hdl)
-        {
-            return i_objects.template insert<Corpse>(hdl, obj);
-        }
-
         /** an object of interested exits the grid
          */
         template<class SPECIFIC_OBJECT> bool RemoveWorldObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl)
@@ -75,18 +70,10 @@ class MANGOS_DLL_DECL Grid
             return i_objects.template remove<SPECIFIC_OBJECT>(obj, hdl);
         }
 
-        template<class SPECIFIC_OBJECT> bool RemoveWorldObject(CountedPtr<SPECIFIC_OBJECT> &obj, OBJECT_HANDLE hdl)
-        {
-            return i_objects.template remove<SPECIFIC_OBJECT>(obj, hdl);
-        }
-
         /** Accessors: Returns a specific type of object in the WORDL_OBJECT_TYPES
          */
         template<class SPECIFIC_OBJECT> const SPECIFIC_OBJECT* GetWorldObject(OBJECT_HANDLE hdl, SPECIFIC_OBJECT* fake) const { return i_objects.template find<SPECIFIC_OBJECT>(hdl); }
-        template<class SPECIFIC_OBJECT> const CountedPtr<SPECIFIC_OBJECT>& GetWorldObject(OBJECT_HANDLE hdl) const { return i_objects.template find<SPECIFIC_OBJECT>(hdl); }
-
         template<class SPECIFIC_OBJECT>       SPECIFIC_OBJECT* GetWorldObject(OBJECT_HANDLE hdl, SPECIFIC_OBJECT *fake)       { return i_objects.template find<SPECIFIC_OBJECT>(hdl, fake); }
-        template<class SPECIFIC_OBJECT>       CountedPtr<SPECIFIC_OBJECT>& GetWorldObject(OBJECT_HANDLE hdl)       { return i_objects.template find<SPECIFIC_OBJECT>(hdl); }
 
         /** Refreshes/update the grid. This required for remote grids.
          */
@@ -122,18 +109,14 @@ class MANGOS_DLL_DECL Grid
          */
         template<class SPECIFIC_OBJECT> const SPECIFIC_OBJECT* GetGridObject(OBJECT_HANDLE hdl, SPECIFIC_OBJECT *fake) const { return i_container.template find<SPECIFIC_OBJECT>(hdl, fake); }
         template<class SPECIFIC_OBJECT>       SPECIFIC_OBJECT* GetGridObject(OBJECT_HANDLE hdl, SPECIFIC_OBJECT *fake)       { return i_container.template find<SPECIFIC_OBJECT>(hdl, fake); }
-        template<class SPECIFIC_OBJECT> const CountedPtr<SPECIFIC_OBJECT>& GetGridObject(OBJECT_HANDLE hdl) const { return i_container.template find<SPECIFIC_OBJECT>(hdl); }
-        template<class SPECIFIC_OBJECT>       CountedPtr<SPECIFIC_OBJECT> GetGridObject(OBJECT_HANDLE hdl)       { return i_container.template find<SPECIFIC_OBJECT>(hdl); }
 
         /** Inserts a container type object into the grid.
          */
         template<class SPECIFIC_OBJECT> bool AddGridObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl) { return i_container.template insert<SPECIFIC_OBJECT>(hdl, obj); }
-        template<class SPECIFIC_OBJECT> bool AddGridObject(CountedPtr<SPECIFIC_OBJECT> &obj, OBJECT_HANDLE hdl) { return i_container.template insert<SPECIFIC_OBJECT>(hdl, obj); }
 
         /** Removes a containter type object from the grid
          */
         template<class SPECIFIC_OBJECT> bool RemoveGridObject(SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl) { return i_container.template remove<SPECIFIC_OBJECT>(obj, hdl); }
-        template<class SPECIFIC_OBJECT> bool RemoveGridObject(CountedPtr<SPECIFIC_OBJECT> &obj, OBJECT_HANDLE hdl) { return i_container.template remove<SPECIFIC_OBJECT>(obj, hdl); }
 
     private:
 

@@ -73,7 +73,6 @@ class MANGOS_DLL_DECL ObjectGridUnloader
 
         void Unload(GridType &grid);
         template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);
-        template<class T> void Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m);
     private:
         NGridType &i_grid;
 };
@@ -101,7 +100,6 @@ class MANGOS_DLL_DECL ObjectGridStoper
 
         template<class NONACTIVE>
             void Visit(std::map<OBJECT_HANDLE, NONACTIVE *> &m) {}
-        template<class NONACTIVE> void Visit(std::map<OBJECT_HANDLE, CountedPtr<NONACTIVE> > &m) {}
     private:
         NGridType &i_grid;
 };

@@ -331,7 +331,7 @@ void Spell::FillTargetMap()
                         tmpUnitMap.push_back(m_targets.getUnitTarget());
                     if(m_targets.getCorpseTargetGUID())
                     {
-                        CorpsePtr& corpse = ObjectAccessor::Instance().GetCorpse(*m_caster,m_targets.getCorpseTargetGUID());
+                        Corpse *corpse = ObjectAccessor::Instance().GetCorpse(*m_caster,m_targets.getCorpseTargetGUID());
                         if(corpse)
                         {
                             Player* owner = ObjectAccessor::Instance().FindPlayer(corpse->GetOwnerGUID());

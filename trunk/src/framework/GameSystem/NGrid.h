@@ -92,20 +92,10 @@ class MANGOS_DLL_DECL NGrid
             return i_cells[x][y].template GetGridObject<SPECIFIC_OBJECT>(hdl);
         }
 
-//        const CountedPtr<Corpse>& GetGridObject(const uint32 x, const uint32 y, OBJECT_HANDLE hdl) const
-//        {
-//            return i_cells[x][y].template GetGridObject<Corpse>(hdl);
-//        }
-
         template<class SPECIFIC_OBJECT> SPECIFIC_OBJECT* GetGridObject(const uint32 x, const uint32 y, OBJECT_HANDLE hdl)
         {
             return i_cells[x][y].template GetGridObject<SPECIFIC_OBJECT>(hdl);
         }
-
-//        CountedPtr<Corpse>& GetGridObject(const uint32 x, const uint32 y, OBJECT_HANDLE hdl)
-//        {
-//            return i_cells[x][y].template GetGridObject<Corpse>(hdl);
-//        }
 
         template<class SPECIFIC_OBJECT> bool AddGridObject(const uint32 x, const uint32 y, SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl)
         {

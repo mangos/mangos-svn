@@ -118,83 +118,60 @@
 	</References>
 	<Files>
 		<Filter
-			Name="GameSystem"
-			>
+			Name="GameSystem">
 			<File
-				RelativePath="..\..\src\framework\GameSystem\Grid.h"
-				>
+				RelativePath="..\..\src\framework\GameSystem\Grid.h">
 			</File>
 			<File
-				RelativePath="..\..\src\framework\GameSystem\GridLoader.h"
-				>
+				RelativePath="..\..\src\framework\GameSystem\GridLoader.h">
 			</File>
 			<File
-				RelativePath="..\..\src\framework\GameSystem\NGrid.h"
-				>
+				RelativePath="..\..\src\framework\GameSystem\NGrid.h">
 			</File>
 			<File
-				RelativePath="..\..\src\framework\GameSystem\TypeContainer.h"
-				>
+				RelativePath="..\..\src\framework\GameSystem\TypeContainer.h">
 			</File>
 			<File
-				RelativePath="..\..\src\framework\GameSystem\TypeContainerFunctions.h"
-				>
+				RelativePath="..\..\src\framework\GameSystem\TypeContainerFunctions.h">
 			</File>
 			<File
-				RelativePath="..\..\src\framework\GameSystem\TypeContainerFunctionsPtr.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\framework\GameSystem\TypeContainerVisitor.h"
-				>
+				RelativePath="..\..\src\framework\GameSystem\TypeContainerVisitor.h">
 			</File>
 		</Filter>
 		<Filter
-			Name="Platform"
-			>
+			Name="Platform">
 			<File
-				RelativePath="..\..\src\framework\Platform\CompilerDefs.h"
-				>
+				RelativePath="..\..\src\framework\Platform\CompilerDefs.h">
 			</File>
 			<File
-				RelativePath="..\..\src\framework\Platform\Define.h"
-				>
+				RelativePath="..\..\src\framework\Platform\Define.h">
 			</File>
 		</Filter>
 		<Filter
-			Name="Policies"
-			>
+			Name="Policies">
 			<File
-				RelativePath="..\..\src\framework\Policies\CreationPolicy.h"
-				>
+				RelativePath="..\..\src\framework\Policies\CreationPolicy.h">
 			</File>
 			<File
-				RelativePath="..\..\src\framework\Policies\ObjectLifeTime.cpp"
-				>
+				RelativePath="..\..\src\framework\Policies\ObjectLifeTime.cpp">
 			</File>
 			<File
-				RelativePath="..\..\src\framework\Policies\ObjectLifeTime.h"
-				>
+				RelativePath="..\..\src\framework\Policies\ObjectLifeTime.h">
 			</File>
 			<File
-				RelativePath="..\..\src\framework\Policies\Singleton.h"
-				>
+				RelativePath="..\..\src\framework\Policies\Singleton.h">
 			</File>
 			<File
-				RelativePath="..\..\src\framework\Policies\SingletonImp.h"
-				>
+				RelativePath="..\..\src\framework\Policies\SingletonImp.h">
 			</File>
 			<File
-				RelativePath="..\..\src\framework\Policies\ThreadingModel.h"
-				>
+				RelativePath="..\..\src\framework\Policies\ThreadingModel.h">
 			</File>
 		</Filter>
 		<Filter
-			Name="Utilities"
-			>
+			Name="Utilities">
 			<File
-				RelativePath="..\..\src\framework\Utilities\ByteConverter.h"
-				>
+				RelativePath="..\..\src\framework\Utilities\ByteConverter.h">
 			</File>
 			<File
 				RelativePath="..\..\src\framework\Utilities\EventProcessor.cpp">
@@ -203,8 +180,7 @@
 				RelativePath="..\..\src\framework\Utilities\EventProcessor.h">
 			</File>
 			<File
-				RelativePath="..\..\src\framework\Utilities\HashMap.h"
-				>
+				RelativePath="..\..\src\framework\Utilities\HashMap.h">
 			</File>
 			<File
 				RelativePath="..\..\src\game\LinkedList.h">
@@ -237,23 +213,18 @@
 			</Filter>
 		</Filter>
 		<Filter
-			Name="Dynamic"
-			>
+			Name="Dynamic">
 			<File
-				RelativePath="..\..\src\framework\Dynamic\FactoryHolder.h"
-				>
+				RelativePath="..\..\src\framework\Dynamic\FactoryHolder.h">
 			</File>
 			<File
-				RelativePath="..\..\src\framework\Dynamic\ObjectRegistry.h"
-				>
+				RelativePath="..\..\src\framework\Dynamic\ObjectRegistry.h">
 			</File>
 		</Filter>
 		<Filter
-			Name="Network"
-			>
+			Name="Network">
 			<File
-				RelativePath="..\..\src\framework\Network\SocketDefines.h"
-				>
+				RelativePath="..\..\src\framework\Network\SocketDefines.h">
 			</File>
 		</Filter>
 	</Files>
