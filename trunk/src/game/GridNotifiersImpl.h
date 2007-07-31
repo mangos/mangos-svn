@@ -229,13 +229,13 @@ template<class Check>
 void MaNGOS::WorldObjectSearcher<Check>::Visit(CorpseMapType &m)
 {
     // already found
-    if(i_objectptr) return;
+    if(i_object) return;
 
     for(CorpseMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
     {
         if(i_check(itr->second))
         {
-            i_objectptr = itr->second;
+            i_object = itr->second;
             return;
         }
     }
@@ -278,7 +278,7 @@ void MaNGOS::WorldObjectListSearcher<Check>::Visit(CorpseMapType &m)
 {
     for(CorpseMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
         if(i_check(itr->second))
-            i_objects.push_back(&*itr->second);
+            i_objects.push_back(itr->second);
 }
 
 template<class Check>

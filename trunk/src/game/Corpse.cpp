@@ -198,7 +198,7 @@ void Corpse::_ConvertCorpseToBones()
         return;
     }
 
-    if ((&*corpse) != this)
+    if (corpse != this)
     {
         sLog.outError("ERROR: Found another corpse while deleting corpse for GUID %ul", GetOwnerGUID());
         return;
@@ -251,9 +251,9 @@ void Corpse::_ConvertCorpseToBones()
     bones->SaveToDB();
 
     // add bones in grid store if grid loaded where corpse placed
-    if(!MapManager::Instance().GetMap(bones->GetMapId(), &*bones)->IsRemovalGrid(bones->GetPositionX(),bones->GetPositionY()))
+    if(!MapManager::Instance().GetMap(bones->GetMapId(), bones)->IsRemovalGrid(bones->GetPositionX(),bones->GetPositionY()))
     {
-        MapManager::Instance().GetMap(bones->GetMapId(), &*bones)->Add(bones); 
+        MapManager::Instance().GetMap(bones->GetMapId(), bones)->Add(bones); 
     }
     // or prepare to delete at next tick if grid not loaded
     else
