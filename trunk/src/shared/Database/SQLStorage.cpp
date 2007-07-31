@@ -18,7 +18,6 @@
 
 #include "SQLStorage.h"
 #include "ProgressBar.h"
-#include "EventSystem.h"
 #include "Log.h"
 
 #ifdef DO_POSTGRESQL
@@ -164,9 +163,6 @@ void SQLStorage::Load ()
     }while( result->NextRow() );
 
     delete result;
-
-    if(data)                                                //Reload table
-        AddEvent((EventHandler)(&FreeStorage),this,20000);
 
     pIndex =newIndex;
     MaxEntry=maxi;

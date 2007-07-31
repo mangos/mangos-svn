@@ -116,6 +116,7 @@
 				ProgramDatabaseFile=".\..\..\bin\Debug/mangosd.pdb"
 				SubSystem="1"
 				ImportLibrary="$(OutDir)/mangosd.lib"
+				FixedBaseAddress="1"
 			/>
 			<Tool
 				Name="VCMIDLTool"

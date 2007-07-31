@@ -34,8 +34,6 @@ libmangosshared_a_SOURCES = \
 	ByteBuffer.h \
 	Common.h \
 	Errors.h \
-	EventSystem.cpp \
-	EventSystem.h \
 	Log.cpp \
 	Log.h \
 	MemoryLeaks.cpp \

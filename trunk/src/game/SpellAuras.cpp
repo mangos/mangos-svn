@@ -29,7 +29,6 @@
 #include "Unit.h"
 #include "Spell.h"
 #include "SpellAuras.h"
-#include "EventSystem.h"
 #include "DynamicObject.h"
 #include "Group.h"
 #include "UpdateData.h"

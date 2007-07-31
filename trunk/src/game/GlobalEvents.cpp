@@ -25,7 +25,6 @@
 #include "Common.h"
 #include "MapManager.h"
 #include "ObjectAccessor.h"
-#include "EventSystem.h"
 #include "GlobalEvents.h"
 #include "ObjectDefines.h"
 #include "Corpse.h"
