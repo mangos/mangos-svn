@@ -95,7 +95,7 @@ void Corpse::SaveToDB()
 void Corpse::DeleteBonesFromWorld()
 {
     assert(GetType()==CORPSE_BONES);
-    CorpsePtr corpse = MapManager::Instance().GetMap(GetMapId(), this)->GetObjectNear<Corpse>(*this, GetGUID());
+    Corpse *corpse = MapManager::Instance().GetMap(GetMapId(), this)->GetObjectNear<Corpse>(*this, GetGUID(), (Corpse*)NULL);
 
     if (!corpse)
     {
@@ -191,7 +191,7 @@ void Corpse::_ConvertCorpseToBones()
     if(GetType()!=CORPSE_RESURRECTABLE)
         return;
 
-    CorpsePtr corpse = ObjectAccessor::Instance().GetCorpseForPlayerGUID(GetOwnerGUID());
+    Corpse *corpse = ObjectAccessor::Instance().GetCorpseForPlayerGUID(GetOwnerGUID());
     if(!corpse)
     {
         sLog.outError("ERROR: Try remove corpse that not in map for GUID %ul", GetOwnerGUID());
@@ -216,21 +216,19 @@ void Corpse::_ConvertCorpseToBones()
     DeleteFromDB();
 
     // Create bones, don't change Corpse
-    CorpsePtr bones = CorpsePtr(new Corpse(this));
+    Corpse *bones = new Corpse(this);
     bones->Create(GetGUIDLow());
 
-    for (int i = 0; i < CORPSE_END; i++)
+    for (int i = 3; i < CORPSE_END; i++)                    // don't overwrite guid and object type 
     {
         bones->SetUInt32Value(i, GetUInt32Value(i));
     }
     bones->m_grid = m_grid;
-    bones->m_time = m_time;
-    bones->m_inWorld = m_inWorld;
+    // bones->m_time = m_time;                              // don't overwrite time
+    // bones->m_inWorld = m_inWorld;                        // don't overwrite world state
+    // bones->m_type = m_type;                              // don't overwrite type 
     bones->Relocate(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
     bones->SetMapId(GetMapId());
-
-    // update data to bone state
-    bones->m_type = CORPSE_BONES;
 
     uint32 flags = 0x05;
     {
@@ -255,7 +253,7 @@ void Corpse::_ConvertCorpseToBones()
     // add bones in grid store if grid loaded where corpse placed
     if(!MapManager::Instance().GetMap(bones->GetMapId(), &*bones)->IsRemovalGrid(bones->GetPositionX(),bones->GetPositionY()))
     {
-        MapManager::Instance().GetMap(GetMapId(), &*bones)->Add(bones);
+        MapManager::Instance().GetMap(bones->GetMapId(), &*bones)->Add(bones); 
     }
     // or prepare to delete at next tick if grid not loaded
     else

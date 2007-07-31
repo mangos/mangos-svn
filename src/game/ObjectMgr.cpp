@@ -3165,7 +3165,7 @@ void ObjectMgr::LoadCorpses()
 
     barGoLink bar( result->GetRowCount() );
 
-    CorpsePtr corpse;
+    Corpse *corpse;
     do
     {
         bar.step();
@@ -3174,7 +3174,7 @@ void ObjectMgr::LoadCorpses()
 
         uint32 guid = fields[result->GetFieldCount()-1].GetUInt32();
 
-        corpse = CorpsePtr(new Corpse(NULL));
+        corpse = new Corpse(NULL);
         if(!corpse->LoadFromDB(guid,fields))
             continue;
 

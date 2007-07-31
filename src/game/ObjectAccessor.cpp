@@ -74,7 +74,6 @@ namespace MaNGOS
         }
 
         template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
-        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &) {}
     };
 }
 
@@ -149,10 +148,10 @@ ObjectAccessor::GetUnit(WorldObject const &u, uint64 guid)
     return GetCreature(u, guid);
 }
 
-CorpsePtr&
+Corpse *
 ObjectAccessor::GetCorpse(WorldObject const &u, uint64 guid)
 {
-    return MapManager::Instance().GetMap(u.GetMapId(), &u)->GetObjectNear<Corpse>(u, guid);
+    return MapManager::Instance().GetMap(u.GetMapId(), &u)->GetObjectNear<Corpse>(u, guid, (Corpse*)NULL);
 }
 
 Object* ObjectAccessor::GetObjectByTypeMask(Player const &p, uint64 guid, uint32 typemask)
@@ -338,7 +337,7 @@ void ObjectAccessor::RemoveAllObjectsInRemoveList()
         {
             case TYPEID_CORPSE:
             {
-                CorpsePtr corpse = MapManager::Instance().GetMap(obj->GetMapId(), obj)->GetObjectNear<Corpse>(*obj, obj->GetGUID());
+                Corpse *corpse = MapManager::Instance().GetMap(obj->GetMapId(), obj)->GetObjectNear<Corpse>(*obj, obj->GetGUID(), (Corpse*)NULL);
                 if (!corpse)
                 {
                     sLog.outError("ERROR: Try delete corpse/bones %u that not in map", obj->GetGUIDLow());
@@ -458,13 +457,13 @@ ObjectAccessor::AddPet(Pet *pet)
     i_pets[pet->GetGUID()] = pet;
 }
 
-CorpsePtr&
+Corpse *
 ObjectAccessor::GetCorpseForPlayerGUID(uint64 guid)
 {
     Guard guard(i_corpseGuard);
 
     Player2CorpsesMapType::iterator iter = i_player2corpse.find(guid);
-    if( iter == i_player2corpse.end() ) return NullPtr<Corpse>((Corpse*)NULL);
+    if( iter == i_player2corpse.end() ) return NULL;
 
     assert(iter->second->GetType() == CORPSE_RESURRECTABLE);
 
@@ -491,7 +490,7 @@ ObjectAccessor::RemoveCorpse(Corpse *corpse)
 }
 
 void
-ObjectAccessor::AddCorpse(CorpsePtr &corpse)
+ObjectAccessor::AddCorpse(Corpse *corpse)
 {
     assert(corpse && corpse->GetType() == CORPSE_RESURRECTABLE);
 
@@ -539,7 +538,7 @@ ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid)
     if( iter == i_player2corpse.end() )
         return false;
 
-    CorpsePtr corpse = iter->second;
+    Corpse *corpse = iter->second;
 
     // remove corpse from player_guid -> corpse map
     // i_player2corpse.erase(iter);

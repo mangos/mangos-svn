@@ -40,14 +40,13 @@
 #include "ScriptCalls.h"
 #include "CreatureAIRegistry.h"
 #include "Policies/SingletonImp.h"
-#include "EventSystem.h"
-#include "GlobalEvents.h"
 #include "BattleGroundMgr.h"
 #include "TemporarySummon.h"
 #include "TargetedMovementGenerator.h"
 #include "RedZoneDistrict.h"
 #include "WaypointMovementGenerator.h"
 #include "VMapFactory.h"
+#include "GlobalEvents.h"
 
 INSTANTIATE_SINGLETON_1( World );
 
@@ -624,6 +623,7 @@ void World::SetInitialWorldSettings()
     m_timers[WUPDATE_WEATHERS].SetInterval(1000);
     m_timers[WUPDATE_AUCTIONS].SetInterval(60000);          //set auction update interval to 1 minute
     m_timers[WUPDATE_UPTIME].SetInterval(10*60000);         //Update "uptime" table every 10 minutes
+    m_timers[WUPDATE_CORPSES].SetInterval(20*60000);        //erase corpses every 20 minutes
 
     //to set mailtimer to return mails every day between 4 and 5 am
     //mailtimer is increased when updating auctions
@@ -650,15 +650,7 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Deleting expired bans..." );
     loginDatabase.Execute("DELETE FROM `ip_banned` WHERE `unbandate`<=UNIX_TIMESTAMP() AND `unbandate`<>`bandate`");
-    ///- Start the event system and register the corpse handler event
-    sLog.outString( "WORLD: Starting Event System" );
-    StartEventSystem();
 
-    sLog.outString( "WORLD: Starting Corpse Handler" );
-    // global event to erase corpses/bones
-    // deleting expired bones time > 20 minutes and corpses > 3 days
-    // it is run each 20 minutes
-    AddEvent(&HandleCorpsesErase,NULL,20*MINUTE*1000,false,true);
     sLog.outString( "WORLD: World initialized" );
 }
 
@@ -816,6 +808,14 @@ void World::Update(time_t diff)
             ScriptsProcess();
 
         sBattleGroundMgr.Update(diff);
+    }
+
+    ///- Erase corpses once every 20 minutes
+    if (m_timers[WUPDATE_CORPSES].Passed())
+    {
+        m_timers[WUPDATE_CORPSES].Reset();
+
+        CorpsesErase();
     }
 
     /// </ul>

@@ -53,7 +53,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
 
         typedef HM_NAMESPACE::hash_map<uint64, Pet* >    PetsMapType;
         typedef HM_NAMESPACE::hash_map<uint64, Player* > PlayersMapType;
-        typedef HM_NAMESPACE::hash_map<uint64, CorpsePtr > Player2CorpsesMapType;
+        typedef HM_NAMESPACE::hash_map<uint64, Corpse* > Player2CorpsesMapType;
         typedef HM_NAMESPACE::hash_map<Player*, UpdateData>::value_type UpdateDataValueType;
 
         Object*   GetObjectByTypeMask(Player const &, uint64, uint32 typemask);
@@ -65,7 +65,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         Player* GetPlayer(Unit const &, uint64 guid) { return FindPlayer(guid); }
         GameObject* GetGameObject(Unit const &, uint64);
         DynamicObject* GetDynamicObject(Unit const &, uint64);
-        CorpsePtr& GetCorpse(WorldObject const &u, uint64 guid);
+        Corpse* GetCorpse(WorldObject const &u, uint64 guid);
 
         Player* FindPlayer(uint64);
         Player* FindPlayerByName(const char *name) ;
@@ -84,9 +84,9 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
 
         void Update(const uint32 &diff);
 
-        CorpsePtr& GetCorpseForPlayerGUID(uint64 guid);
+        Corpse* GetCorpseForPlayerGUID(uint64 guid);
         void RemoveCorpse(Corpse *corpse);
-        void AddCorpse(CorpsePtr& corpse);
+        void AddCorpse(Corpse* corpse);
         void AddCorpsesToGrid(GridPair const& gridpair,GridType& grid,Map* map);
         bool ConvertCorpseForPlayer(uint64 player_guid);
 
@@ -112,7 +112,6 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
             WorldObjectChangeAccumulator(WorldObject &obj, UpdateDataMapType &d) : i_updateDatas(d), i_object(obj) {}
             void Visit(PlayerMapType &);
             template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
-            template<class SKIP> void Visit(std::map<OBJECT_HANDLE, CountedPtr<SKIP> > &) {}
         };
 
         friend struct WorldObjectChangeAccumulator;

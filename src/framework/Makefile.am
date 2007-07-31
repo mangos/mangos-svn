@@ -38,7 +38,6 @@ EXTRA_DIST = \
 	GameSystem/NGrid.h \
 	GameSystem/TypeContainer.h \
 	GameSystem/TypeContainerFunctions.h \
-	GameSystem/TypeContainerFunctionsPtr.h \
 	GameSystem/TypeContainerVisitor.h \
 	Network/SocketDefines.h \
 	Platform/CompilerDefs.h \

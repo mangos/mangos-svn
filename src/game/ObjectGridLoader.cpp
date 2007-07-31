@@ -35,7 +35,6 @@ class MANGOS_DLL_DECL ObjectGridRespawnMover
         void Move(GridType &grid);
 
         template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m) {}
-        template<class T> void Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m) {}
         void Visit(CreatureMapType &m);
 };
 
@@ -78,10 +77,6 @@ ObjectGridRespawnMover::Visit(CreatureMapType &m)
     }
 }
 
-template<class T> void addUnitState(CountedPtr<T> &obj, CellPair const& cell_pair)
-{
-}
-
 template<class T> void addUnitState(T *obj, CellPair const& cell_pair)
 {
 }
@@ -119,12 +114,12 @@ void LoadHelper(CellGuidSet const& guid_set, CellPair &cell, std::map<OBJECT_HAN
     }
 }
 
-void LoadHelper(CellCorpseSet const& cell_corpses, CellPair &cell, std::map<OBJECT_HANDLE, CountedPtr<Corpse> > &m, uint32 &count, Map* map)
+void LoadHelper(CellCorpseSet const& cell_corpses, CellPair &cell, CorpseMapType &m, uint32 &count, Map* map)
 {
     if(cell_corpses.empty())
         return;
 
-    CountedPtr<Corpse> obj;
+    Corpse *obj;
 
     for(CellCorpseSet::const_iterator itr = cell_corpses.begin(); itr != cell_corpses.end(); ++itr)
     {
@@ -244,24 +239,6 @@ ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, T *> &m)
     m.clear();
 }
 
-template<class T>
-void
-ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m)
-{
-    if( m.size() == 0 )
-        return;
-
-    for(typename std::map<OBJECT_HANDLE, CountedPtr<T> >::iterator iter=m.begin(); iter != m.end(); ++iter)
-    {
-        // if option set then object already saved at this moment
-        if(!sWorld.getConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATLY))
-            iter->second->SaveRespawnTime();
-        //delete iter->second;
-    }
-
-    m.clear();
-}
-
 template<>
 void
 ObjectGridUnloader::Visit(CreatureMapType &m)
@@ -308,4 +285,3 @@ ObjectGridStoper::Visit(CreatureMapType &m)
 
 template void ObjectGridUnloader::Visit(GameObjectMapType &m);
 template void ObjectGridUnloader::Visit(DynamicObjectMapType &m);
-template void ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, CountedPtr<Corpse> > &m);

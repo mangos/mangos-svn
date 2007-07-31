@@ -26,20 +26,8 @@
 
 #include <map>
 #include <vector>
-#include <zthread/CountedPtr.h>
 #include "Platform/Define.h"
 #include "Utilities/TypeList.h"
-
-using ZThread::CountedPtr;
-class Corpse;
-
-template<typename T>
-CountedPtr<T>&  NullPtr(T *fake)
-{
-    static CountedPtr<T> _p;
-    _p.reset();
-    return _p;
-};
 
 /*
  * @class ContainerMapList is a mulit-type container for map elements
@@ -49,11 +37,6 @@ CountedPtr<T>&  NullPtr(T *fake)
 template<class OBJECT> struct ContainerMapList
 {
     std::map<OBJECT_HANDLE, OBJECT *> _element;
-};
-
-template<> struct ContainerMapList<Corpse>
-{
-    std::map<OBJECT_HANDLE, CountedPtr<Corpse> > _element;
 };
 
 template<> struct ContainerMapList<TypeNull>                /* nothing is in type null */
@@ -101,7 +84,6 @@ template<class H, class T> struct ContainerList<TypeList<H, T> >
 };
 
 #include "TypeContainerFunctions.h"
-#include "TypeContainerFunctionsPtr.h"
 
 /*
  * @class TypeMapContainer contains a fixed number of types and is
@@ -117,11 +99,9 @@ class MANGOS_DLL_DECL TypeMapContainer
         template<class SPECIFIC_TYPE> size_t Count() const { return MaNGOS::Count(i_elements, (SPECIFIC_TYPE*)NULL); }
 
         template<class SPECIFIC_TYPE> SPECIFIC_TYPE* find(OBJECT_HANDLE hdl, SPECIFIC_TYPE *fake) { return MaNGOS::Find(i_elements, hdl,fake); }
-        template<class SPECIFIC_TYPE> CountedPtr<SPECIFIC_TYPE>& find(OBJECT_HANDLE hdl) { return MaNGOS::Find(i_elements, hdl,(CountedPtr<SPECIFIC_TYPE>*)NULL); }
 
         /// find a specific type of object in the container
         template<class SPECIFIC_TYPE> const SPECIFIC_TYPE* find(OBJECT_HANDLE hdl, SPECIFIC_TYPE *fake) const { return MaNGOS::Find(i_elements, hdl,fake); }
-        template<class SPECIFIC_TYPE> const CountedPtr<SPECIFIC_TYPE>& find(OBJECT_HANDLE hdl) const { return MaNGOS::Find(i_elements, hdl,(CountedPtr<SPECIFIC_TYPE>*)NULL); }
 
         /// inserts a specific object into the container
         template<class SPECIFIC_TYPE> bool insert(OBJECT_HANDLE hdl, SPECIFIC_TYPE *obj)
@@ -130,21 +110,11 @@ class MANGOS_DLL_DECL TypeMapContainer
             return (t != NULL);
         }
 
-        template<class SPECIFIC_TYPE> bool insert(OBJECT_HANDLE hdl, CountedPtr<SPECIFIC_TYPE> &obj)
-        {
-            return  MaNGOS::Insert(i_elements, obj, hdl);
-        }
-
         ///  Removes the object from the container, and returns the removed object
         template<class SPECIFIC_TYPE> bool remove(SPECIFIC_TYPE* obj, OBJECT_HANDLE hdl)
         {
             SPECIFIC_TYPE* t = MaNGOS::Remove(i_elements, obj, hdl);
             return (t != NULL);
-        }
-
-        template<class SPECIFIC_TYPE> bool remove(CountedPtr<SPECIFIC_TYPE>& obj, OBJECT_HANDLE hdl)
-        {
-            return MaNGOS::Remove(i_elements, obj, hdl);
         }
 
         ContainerMapList<OBJECT_TYPES> & GetElements(void) { return i_elements; }

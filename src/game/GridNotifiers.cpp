@@ -147,14 +147,5 @@ ObjectUpdater::Visit(std::map<OBJECT_HANDLE, T *> &m)
     }
 }
 
-template<class T> void
-ObjectUpdater::Visit(std::map<OBJECT_HANDLE, CountedPtr<T> > &m)
-{
-    for(typename std::map<OBJECT_HANDLE, CountedPtr<T> >::iterator iter=m.begin(); iter != m.end(); ++iter)
-    {
-        iter->second->Update(i_timeDiff);
-    }
-}
-
 template void ObjectUpdater::Visit<GameObject>(GameObjectMapType &);
 template void ObjectUpdater::Visit<DynamicObject>(DynamicObjectMapType &);

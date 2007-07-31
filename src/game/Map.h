@@ -107,13 +107,6 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         template<class T> T* GetObjectNear(WorldObject const &obj, OBJECT_HANDLE hdl, T*);
         template<class T> T* GetObjectNear(float x, float y, OBJECT_HANDLE hdl, T*);
 
-        template<class T> void Add(CountedPtr<T>&);
-        template<class T> void Remove(CountedPtr<T>&, bool);
-        template<class T> bool Find(CountedPtr<T>&) const;
-
-        template<class T> CountedPtr<T>& GetObjectNear(WorldObject const &obj, OBJECT_HANDLE hdl);
-        template<class T> CountedPtr<T>& GetObjectNear(float x, float y, OBJECT_HANDLE hdl);
-
         virtual void Update(const uint32&);
 
         void MessageBoardcast(Player *, WorldPacket *, bool to_self, bool own_team_only = false);
@@ -276,18 +269,6 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
 
         template<class T>
             T* FindInGrid(uint64 guid, NGridType *, Cell const&, T*) const;
-
-        template<class T>
-            void AddToGrid(CountedPtr<T>&, NGridType *, Cell const&);
-
-        template<class T>
-            void RemoveFromGrid(CountedPtr<T>&, NGridType *, Cell const&);
-
-        template<class T>
-            void DeleteFromWorld(CountedPtr<T>&);
-
-        template<class T>
-            CountedPtr<T>& FindInGrid(uint64 guid, NGridType *, Cell const&) const;
 };
 
 inline
