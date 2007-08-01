@@ -323,8 +323,10 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `character_aura`;
 CREATE TABLE `character_aura` (
   `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `caster_guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Full Global Unique Identifier',
   `spell` int(11) unsigned NOT NULL default '0',
   `effect_index` int(11) unsigned NOT NULL default '0',
+  `amount`     int(11) NOT NULL default '0',
   `remaintime` int(11) NOT NULL default '0',
   PRIMARY KEY  (`guid`,`spell`,`effect_index`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
@@ -2359,8 +2361,10 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `pet_aura`;
 CREATE TABLE `pet_aura` (
   `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
+  `caster_guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Full Global Unique Identifier',
   `spell` int(11) unsigned NOT NULL default '0',
   `effect_index` int(11) unsigned NOT NULL default '0',
+  `amount`     int(11) NOT NULL default '0',
   `remaintime` int(11) NOT NULL default '0',
   PRIMARY KEY  (`guid`,`spell`,`effect_index`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Pet System';
