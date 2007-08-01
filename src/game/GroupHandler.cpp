@@ -38,6 +38,21 @@
     -quest sharing has to be corrected
     -FIX sending PartyMemberStats
 */
+
+enum PartyResult
+{
+    PARTY_RESULT_INVITE_TARGET        = 0,
+    PARTY_RESULT_CANT_FIND_TARGET     = 1,
+    PARTY_RESULT_NOT_IN_YOUR_PARTY    = 2,
+    PARTY_RESULT_NOT_IN_YOUR_INSTANCE = 3,
+    PARTY_RESULT_PARTY_FULL           = 4,
+    PARTY_RESULT_ALREADY_IN_GROUP     = 5,
+    PARTY_RESULT_YOU_NOT_IN_GROUP     = 6,
+    PARTY_RESULT_YOU_NOT_LEADER       = 7,
+    PARTY_RESULT_TARGET_UNFRIENDLY    = 8,
+    PARTY_RESULT_TARGET_IGNORE_YOU    = 9
+};
+
 void WorldSession::SendPartyResult(uint32 unk, std::string member, uint32 state)
 {
     WorldPacket data(SMSG_PARTY_COMMAND_RESULT, (8+member.size()+1));
@@ -58,7 +73,7 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
     // cheating
     if(membername.empty())
     {
-        SendPartyResult(0, membername, 1);
+        SendPartyResult(0, membername, PARTY_RESULT_CANT_FIND_TARGET);
         return;
     }
 
@@ -68,29 +83,28 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
     // no player
     if(!player)
     {
-        SendPartyResult(0, membername, 1);
+        SendPartyResult(0, membername, PARTY_RESULT_CANT_FIND_TARGET);
         return;
     }
 
     // can't group with
     if(!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GROUP) && GetPlayer()->GetTeam() != player->GetTeam())
     {
-        SendPartyResult(0, membername, 7);
+        SendPartyResult(0, membername, PARTY_RESULT_TARGET_UNFRIENDLY);
         return;
     }
 
     // just ignore us
     if(player->HasInIgnoreList(GetPlayer()->GetGUID()))
     {
-        SendPartyResult(0, membername, 0);
-        SendPartyResult(0, membername, 8);
+        SendPartyResult(0, membername, PARTY_RESULT_TARGET_IGNORE_YOU);
         return;
     }
 
     // player already in another group or invited
     if(player->GetGroup() || player->GetGroupInvite() )
     {
-        SendPartyResult(0, membername, 4);
+        SendPartyResult(0, membername, PARTY_RESULT_ALREADY_IN_GROUP);
         return;
     }
 
@@ -102,14 +116,14 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
         // not have permissions for invite
         if(!group->IsLeader(GetPlayer()->GetGUID()) && !group->IsAssistant(GetPlayer()->GetGUID()))
         {
-            SendPartyResult(0, "", 6);
+            SendPartyResult(0, "", PARTY_RESULT_YOU_NOT_LEADER);
             return;
         }
 
         // not have place
         if(group->IsFull())
         {
-            SendPartyResult(0, "", 3);
+            SendPartyResult(0, "", PARTY_RESULT_PARTY_FULL);
             return;
         }
     }
@@ -139,7 +153,9 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
     {
         // already existed group: if can't add then just leave 
         if(!group->AddInvite(player))
+        {
             return;
+        }
     }
 
     // ok, we do it
@@ -147,7 +163,7 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
     data << GetPlayer()->GetName();
     player->GetSession()->SendPacket(&data);
 
-    SendPartyResult(0, membername, 0);
+    SendPartyResult(0, membername, PARTY_RESULT_INVITE_TARGET);
 }
 
 void WorldSession::HandleGroupAcceptOpcode( WorldPacket & recv_data )
