@@ -756,6 +756,7 @@ bool ChatHandler::HandleMoveCreatureCommand(const char* args)
         if(pCreature->isAlive())                            // dead creature will reset movement generator at respawn
         {
             pCreature->setDeathState(JUST_DIED);
+            pCreature->RemoveCorpse();
             pCreature->Respawn();
         }
     }
@@ -1003,6 +1004,7 @@ bool ChatHandler::HandleAddMoveCommand(const char* args)
         if(pCreature->isAlive())                            // dead creature will reset movement generator at respawn
         {
             pCreature->setDeathState(JUST_DIED);
+            pCreature->RemoveCorpse();
             pCreature->Respawn();
         }
     }
@@ -1140,6 +1142,7 @@ bool ChatHandler::HandleSetMoveTypeCommand(const char* args)
         if(pCreature->isAlive())                            // dead creature will reset movement generator at respawn
         {
             pCreature->setDeathState(JUST_DIED);
+            pCreature->RemoveCorpse();
             pCreature->Respawn();
         }
     }
@@ -1872,6 +1875,7 @@ bool ChatHandler::HandleWpAddCommand(const char* args)
         if(pCreature->isAlive())                            // dead creature will reset movement generator at respawn
         {
             pCreature->setDeathState(JUST_DIED);
+            pCreature->RemoveCorpse();
             pCreature->Respawn();
         }
     }
@@ -2185,6 +2189,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
             if(npcCreature->isAlive())                      // dead creature will reset movement generator at respawn
             {
                 npcCreature->setDeathState(JUST_DIED);
+                npcCreature->RemoveCorpse();
                 npcCreature->Respawn();
             }
         }
@@ -2253,6 +2258,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
             if(npcCreature->isAlive())                      // dead creature will reset movement generator at respawn
             {
                 npcCreature->setDeathState(JUST_DIED);
+                npcCreature->RemoveCorpse();
                 npcCreature->Respawn();
             }
         }
@@ -2307,6 +2313,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
                 if(npcCreature->isAlive())                  // dead creature will reset movement generator at respawn
                 {
                     npcCreature->setDeathState(JUST_DIED);
+                    npcCreature->RemoveCorpse();
                     npcCreature->Respawn();
                 }
             }
@@ -2527,6 +2534,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
         if(npcCreature->isAlive())                          // dead creature will reset movement generator at respawn
         {
             npcCreature->setDeathState(JUST_DIED);
+            npcCreature->RemoveCorpse();
             npcCreature->Respawn();
         }
     }
