@@ -756,7 +756,18 @@ void Aura::_AddAura()
         SetAuraSlot( slot );
         if( m_target->GetTypeId() == TYPEID_PLAYER )
             UpdateAuraDuration();
-    }
+
+        if(!m_isPassive && !IsPositive() && caster && caster->GetTypeId() == TYPEID_PLAYER && caster != m_target && slot < MAX_AURAS)
+        {
+            WorldPacket data(SMSG_SET_AURA_SINGLE, (8+2+4+4+4));
+            data.append(m_target->GetPackGUID());
+            data << uint8(slot);
+            data << uint32(GetSpellProto()->Id);
+            data << uint32(GetAuraDuration());              // full
+            data << uint32(GetAuraDuration());              // remain
+            ((Player*)caster)->GetSession()->SendPacket(&data);
+        }
+    }  
 }
 
 void Aura::_RemoveAura()
