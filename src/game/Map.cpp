@@ -1129,6 +1129,25 @@ float Map::GetVMapHeight(float x, float y, float z)
     if(vmgr->isHeightCalcEnabled())
     {
         height = vmgr->getHeight(GetId(), x, y, z + 2); // look from a bit higher pos to find the floor
+        if(height != VMAP_INVALID_HEIGHT) 
+        {
+            // we have a vmap height for that place, but now we have to test
+            // if the normal map height has higher priority here
+            // If normal map height has priority, we return VMAP_INVALID_HEIGHT
+            int gx,gy;
+            GridPair p = MaNGOS::ComputeGridPair(x, y);
+            gx=(int)(32-x/SIZE_OF_GRIDS) ;                          //grid x
+            gy=(int)(32-y/SIZE_OF_GRIDS);                           //grid y
+            if(GridMaps[gx][gy])
+            {
+                float lx,ly;
+                lx=MAP_RESOLUTION*(32 -x/SIZE_OF_GRIDS - gx);
+                ly=MAP_RESOLUTION*(32 -y/SIZE_OF_GRIDS - gy);
+                float normheight = GridMaps[gx][gy]->Z[(int)(lx)][(int)(ly)];
+                if((z>=(normheight-0.2f)) && fabs(normheight-z) < fabs(height-z))
+                    height=VMAP_INVALID_HEIGHT; // normal map height has pri
+            }
+        }
     }
     return height;
 
