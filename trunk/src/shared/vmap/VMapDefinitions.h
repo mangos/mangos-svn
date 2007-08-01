@@ -22,7 +22,7 @@
 
 namespace VMAP {
     //=====================================
-#define MAX_CAN_FALL_DISTANCE 40.0
+#define MAX_CAN_FALL_DISTANCE 10.0
 
 
     class VMapDefinitions {
