@@ -1484,6 +1484,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint8 GetSubGroup() { return m_group.getSubGroup(); }
         void SetGroupUpdateFlag(uint32 flag) { m_groupUpdateMask |= flag;}
 
+        GridReference<Player> &GetGridRef() { return m_gridRef; }
     protected:
 
         /*********************************************************/
@@ -1669,6 +1670,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         GroupReference m_group;
         Group *m_groupInvite;
         uint32 m_groupUpdateMask;
+    private:
+        GridReference<Player> m_gridRef;
 };
 
 void AddItemsSetItem(Player*player,Item *item);

@@ -63,7 +63,11 @@ class Corpse : public WorldObject
         bool isVisibleForInState(Player const* u, bool inVisibleList) const;
 
         void _ConvertCorpseToBones();                       // only call from ObjectAccessor::ConvertCorpseForPlayer
+
+        GridReference<Corpse> &GetGridRef() { return m_gridRef; }
     private:
+        GridReference<Corpse> m_gridRef;
+
         CorpseType m_type;
         time_t m_time;
         GridPair m_grid;                                    // gride for corpse position for fast search

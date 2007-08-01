@@ -23,6 +23,7 @@
 #include "ByteBuffer.h"
 #include "UpdateFields.h"
 #include "UpdateData.h"
+#include "GameSystem/GridReference.h"
 
 #include <set>
 #include <string>

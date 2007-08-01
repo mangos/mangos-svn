@@ -35,6 +35,8 @@ EXTRA_DIST = \
 	Dynamic/ObjectRegistry.h \
 	GameSystem/Grid.h \
 	GameSystem/GridLoader.h \
+	GameSystem/GridReference.h \
+	GameSystem/GridRefManager.h \
 	GameSystem/NGrid.h \
 	GameSystem/TypeContainer.h \
 	GameSystem/TypeContainerFunctions.h \

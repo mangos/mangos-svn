@@ -28,6 +28,7 @@
 #include <vector>
 #include "Platform/Define.h"
 #include "Utilities/TypeList.h"
+#include "GameSystem/GridRefManager.h"
 
 /*
  * @class ContainerMapList is a mulit-type container for map elements
@@ -36,7 +37,8 @@
  */
 template<class OBJECT> struct ContainerMapList
 {
-    std::map<OBJECT_HANDLE, OBJECT *> _element;
+    //std::map<OBJECT_HANDLE, OBJECT *> _element;
+    GridRefManager<OBJECT> _element;
 };
 
 template<> struct ContainerMapList<TypeNull>                /* nothing is in type null */

@@ -717,17 +717,18 @@ namespace MaNGOS
 
             for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
             {
-                if( !itr->second->isAlive() )
+                Player * pPlayer = itr->getSource();
+                if( !pPlayer->isAlive() )
                     continue;
 
-                if( i_originalCaster->IsFriendlyTo(itr->second) )
+                if( i_originalCaster->IsFriendlyTo(pPlayer) )
                     continue;
 
-                if( itr->second->GetDistanceSq(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < radius * radius )
-                    i_data.push_back(itr->second);
+                if( pPlayer->GetDistanceSq(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < radius * radius )
+                    i_data.push_back(pPlayer);
             }
         }
-        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
+        template<class SKIP> void Visit(GridRefManager<SKIP> &) {}
     };
 
     struct MANGOS_DLL_DECL SpellNotifierCreatureAndPlayer
@@ -750,39 +751,39 @@ namespace MaNGOS
             i_originalCaster = spell.GetOriginalCaster();
         }
 
-        template<class T> inline void Visit(std::map<OBJECT_HANDLE, T *>  &m)
+        template<class T> inline void Visit(GridRefManager<T>  &m)
         {
             assert(i_data);
 
             if(!i_originalCaster)
                 return;
 
-            for(typename std::map<OBJECT_HANDLE, T*>::iterator itr=m.begin(); itr != m.end(); ++itr)
+            for(typename GridRefManager<T>::iterator itr = m.begin(); itr != m.end(); ++itr)
             {
-                if( !itr->second->isAlive() )
+                if( !itr->getSource()->isAlive() )
                     continue;
 
                 switch (i_TargetType)
                 {
                     case SPELL_TARGETS_HOSTILE:
-                        if (!i_originalCaster->IsHostileTo( itr->second ))
+                        if (!i_originalCaster->IsHostileTo( itr->getSource() ))
                             continue;
                         break;
                     case SPELL_TARGETS_NOT_FRIENDLY:
-                        if (i_originalCaster->IsFriendlyTo( itr->second ))
+                        if (i_originalCaster->IsFriendlyTo( itr->getSource() ))
                             continue;
                         break;
                     case SPELL_TARGETS_NOT_HOSTILE:
-                        if (i_originalCaster->IsHostileTo( itr->second ))
+                        if (i_originalCaster->IsHostileTo( itr->getSource() ))
                             continue;
                         break;
                     case SPELL_TARGETS_FRIENDLY:
-                        if (!i_originalCaster->IsFriendlyTo( itr->second ))
+                        if (!i_originalCaster->IsFriendlyTo( itr->getSource() ))
                             continue;
                         break;
                     case SPELL_TARGETS_AOE_DAMAGE:
                         {
-                            if(itr->second->GetTypeId()==TYPEID_UNIT && ((Creature*)itr->second)->isTotem())
+                            if(itr->getSource()->GetTypeId()==TYPEID_UNIT && ((Creature*)itr->getSource())->isTotem())
                                 continue;
 
                             Unit* check = i_originalCaster;
@@ -792,12 +793,12 @@ namespace MaNGOS
 
                             if( check->GetTypeId()==TYPEID_PLAYER )
                             {
-                                if (check->IsFriendlyTo( itr->second ))
+                                if (check->IsFriendlyTo( itr->getSource() ))
                                     continue;
                             }
                             else
                             {
-                                if (!check->IsHostileTo( itr->second ))
+                                if (!check->IsHostileTo( itr->getSource() ))
                                     continue;
                             }
                         }
@@ -808,16 +809,16 @@ namespace MaNGOS
                 switch(i_push_type)
                 {
                     case PUSH_IN_FRONT:
-                        if((i_spell.m_caster->isInFront((Unit*)(itr->second), i_radius )))
-                            i_data->push_back(itr->second);
+                        if((i_spell.m_caster->isInFront((Unit*)(itr->getSource()), i_radius )))
+                            i_data->push_back(itr->getSource());
                         break;
                     case PUSH_SELF_CENTER:
-                        if(i_spell.m_caster->IsWithinDistInMap((Unit*)(itr->second), i_radius))
-                            i_data->push_back(itr->second);
+                        if(i_spell.m_caster->IsWithinDistInMap((Unit*)(itr->getSource()), i_radius))
+                            i_data->push_back(itr->getSource());
                         break;
                     case PUSH_DEST_CENTER:
-                        if((itr->second->GetDistanceSq(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < i_radius * i_radius ))
-                            i_data->push_back(itr->second);
+                        if((itr->getSource()->GetDistanceSq(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < i_radius * i_radius ))
+                            i_data->push_back(itr->getSource());
                         break;
                 }
             }

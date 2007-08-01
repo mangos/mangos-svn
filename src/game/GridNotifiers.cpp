@@ -33,11 +33,11 @@ MaNGOS::PlayerNotifier::Visit(PlayerMapType &m)
 {
     for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-        if( iter->second == &i_player )
+        if( iter->getSource() == &i_player )
             continue;
 
-        iter->second->UpdateVisibilityOf(&i_player);
-        i_player.UpdateVisibilityOf(iter->second);
+        iter->getSource()->UpdateVisibilityOf(&i_player);
+        i_player.UpdateVisibilityOf(iter->getSource());
     }
 }
 
@@ -46,10 +46,10 @@ VisibleChangesNotifier::Visit(PlayerMapType &m)
 {
     for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-        if(iter->second == &i_object)
+        if(iter->getSource() == &i_object)
             continue;
 
-        iter->second->UpdateVisibilityOf(&i_object);
+        iter->getSource()->UpdateVisibilityOf(&i_object);
     }
 }
 
@@ -58,12 +58,12 @@ VisibleNotifier::Visit(PlayerMapType &m)
 {
     for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-        if( iter->second == &i_player )
+        if( iter->getSource() == &i_player )
             continue;
 
-        iter->second->UpdateVisibilityOf(&i_player);
-        i_player.UpdateVisibilityOf(iter->second,i_data,i_data_updates);
-        i_clientGUIDs.erase(iter->second->GetGUID());
+        iter->getSource()->UpdateVisibilityOf(&i_player);
+        i_player.UpdateVisibilityOf(iter->getSource(),i_data,i_data_updates);
+        i_clientGUIDs.erase(iter->getSource()->GetGUID());
     }
 }
 
@@ -119,10 +119,10 @@ MessageDeliverer::Visit(PlayerMapType &m)
 {
     for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-        if( (iter->second != &i_player || i_toSelf)
-            && (!i_ownTeamOnly || iter->second->GetTeam() == i_player.GetTeam()) )
+        if( (iter->getSource() != &i_player || i_toSelf)
+            && (!i_ownTeamOnly || iter->getSource()->GetTeam() == i_player.GetTeam()) )
         {
-            if(WorldSession* session = iter->second->GetSession())
+            if(WorldSession* session = iter->getSource()->GetSession())
                 session->SendPacket(i_message);
         }
     }
@@ -133,17 +133,17 @@ ObjectMessageDeliverer::Visit(PlayerMapType &m)
 {
     for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-        if(WorldSession* session = iter->second->GetSession())
+        if(WorldSession* session = iter->getSource()->GetSession())
             session->SendPacket(i_message);
     }
 }
 
 template<class T> void
-ObjectUpdater::Visit(std::map<OBJECT_HANDLE, T *> &m)
+ObjectUpdater::Visit(GridRefManager<T> &m)
 {
-    for(typename std::map<OBJECT_HANDLE, T*>::iterator iter=m.begin(); iter != m.end(); ++iter)
+    for(typename GridRefManager<T>::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
-        iter->second->Update(i_timeDiff);
+        iter->getSource()->Update(i_timeDiff);
     }
 }
 

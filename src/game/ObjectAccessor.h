@@ -195,7 +195,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
             WorldObject &i_object;
             WorldObjectChangeAccumulator(WorldObject &obj, UpdateDataMapType &d) : i_updateDatas(d), i_object(obj) {}
             void Visit(PlayerMapType &);
-            template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
+            template<class SKIP> void Visit(GridRefManager<SKIP> &) {}
         };
 
         friend struct WorldObjectChangeAccumulator;

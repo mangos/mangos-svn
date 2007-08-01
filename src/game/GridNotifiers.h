@@ -32,7 +32,7 @@
 #include "Unit.h"
 
 class Player;
-class Map;
+//class Map;
 
 namespace MaNGOS
 {
@@ -41,7 +41,7 @@ namespace MaNGOS
     {
         explicit PlayerNotifier(Player &pl) : i_player(pl) {}
         void Visit(PlayerMapType &);
-        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
+        template<class SKIP> void Visit(GridRefManager<SKIP> &) {}
         Player &i_player;
     };
 
@@ -53,7 +53,7 @@ namespace MaNGOS
         Player::ClientGUIDs i_clientGUIDs;
 
         explicit VisibleNotifier(Player &player) : i_player(player),i_clientGUIDs(player.m_clientGUIDs) {}
-        template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);
+        template<class T> void Visit(GridRefManager<T> &m);
         void Visit(PlayerMapType &);
         void Notify(void);
     };
@@ -63,7 +63,7 @@ namespace MaNGOS
         WorldObject &i_object;
 
         explicit VisibleChangesNotifier(WorldObject &object) : i_object(object) {}
-        template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m) {}
+        template<class T> void Visit(GridRefManager<T> &m) {}
         void Visit(PlayerMapType &);
     };
 
@@ -73,10 +73,10 @@ namespace MaNGOS
         uint32 i_timeDiff;
         GridUpdater(GridType &grid, uint32 diff) : i_grid(grid), i_timeDiff(diff) {}
 
-        template<class T> void updateObjects(std::map<OBJECT_HANDLE, T *> &m)
+        template<class T> void updateObjects(GridRefManager<T> &m)
         {
-            for(typename std::map<OBJECT_HANDLE, T*>::iterator iter=m.begin(); iter != m.end(); ++iter)
-                iter->second->Update(i_timeDiff);
+            for(typename GridRefManager<T>::iterator iter = m.begin(); iter != m.end(); ++iter)
+                iter->getSource()->Update(i_timeDiff);
         }
 
         void Visit(PlayerMapType &m) { updateObjects<Player>(m); }
@@ -94,7 +94,7 @@ namespace MaNGOS
         bool i_ownTeamOnly;
         MessageDeliverer(Player &pl, WorldPacket *msg, bool to_self, bool ownTeamOnly) : i_player(pl), i_message(msg), i_toSelf(to_self), i_ownTeamOnly(ownTeamOnly) {}
         void Visit(PlayerMapType &m);
-        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
+        template<class SKIP> void Visit(GridRefManager<SKIP> &) {}
     };
 
     struct MANGOS_DLL_DECL ObjectMessageDeliverer
@@ -103,14 +103,14 @@ namespace MaNGOS
         WorldPacket *i_message;
         ObjectMessageDeliverer(Object &obj, WorldPacket *msg) : i_object(obj), i_message(msg) {}
         void Visit(PlayerMapType &m);
-        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
+        template<class SKIP> void Visit(GridRefManager<SKIP> &) {}
     };
 
     struct MANGOS_DLL_DECL ObjectUpdater
     {
         uint32 i_timeDiff;
         explicit ObjectUpdater(const uint32 &diff) : i_timeDiff(diff) {}
-        template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m);
+        template<class T> void Visit(GridRefManager<T> &m);
         void Visit(PlayerMapType &) {}
         void Visit(CorpseMapType &) {}
         void Visit(CreatureMapType &);
@@ -127,11 +127,11 @@ namespace MaNGOS
             i_object = NULL;
         }
 
-        void Visit(std::map<OBJECT_HANDLE, T *> &m )
+        void Visit(GridRefManager<T> &m )
         {
             if( i_object == NULL )
             {
-                typename std::map<OBJECT_HANDLE, T *>::iterator iter = m.find(i_id);
+                GridRefManager<T> *iter = m.find(i_id);
                 if( iter != m.end() )
                 {
                     assert( iter->second != NULL );
@@ -140,14 +140,14 @@ namespace MaNGOS
             }
         }
 
-        template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &m) {}
     };
 
     struct MANGOS_DLL_DECL PlayerRelocationNotifier
     {
         Player &i_player;
         PlayerRelocationNotifier(Player &pl) : i_player(pl) {}
-        template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m) {}
+        template<class T> void Visit(GridRefManager<T> &m) {}
         void Visit(PlayerMapType &);
         void Visit(CreatureMapType &);
     };
@@ -156,7 +156,7 @@ namespace MaNGOS
     {
         Creature &i_creature;
         CreatureRelocationNotifier(Creature &c) : i_creature(c) {}
-        template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m) {}
+        template<class T> void Visit(GridRefManager<T> &m) {}
         #ifdef WIN32
         template<> void Visit(PlayerMapType &);
         #endif
@@ -174,7 +174,7 @@ namespace MaNGOS
                 i_check = owner;
         }
 
-        template<class T> inline void Visit(std::map<OBJECT_HANDLE, T *>  &m) {}
+        template<class T> inline void Visit(GridRefManager<T>  &m) {}
         #ifdef WIN32
         template<> inline void Visit<Player>(PlayerMapType &);
         template<> inline void Visit<Creature>(CreatureMapType &);
@@ -201,7 +201,7 @@ namespace MaNGOS
         void Visit(CorpseMapType &m);
         void Visit(DynamicObjectMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &m) {}
     };
 
     template<class Check>
@@ -218,7 +218,7 @@ namespace MaNGOS
         void Visit(GameObjectMapType &m);
         void Visit(DynamicObjectMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &m) {}
     };
 
     template<class Do>
@@ -231,33 +231,33 @@ namespace MaNGOS
         void Visit(GameObjectMapType &m)
         {
             for(GameObjectMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
-                i_do(itr->second);
+                i_do(itr->getSource());
         }
 
         void Visit(PlayerMapType &m)
         {
             for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
-                i_do(itr->second);
+                i_do(itr->getSource());
         }
         void Visit(CreatureMapType &m)
         {
             for(CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
-                i_do(itr->second);
+                i_do(itr->getSource());
         }
 
         void Visit(CorpseMapType &m)
         {
             for(CorpseMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
-                i_do(itr->second);
+                i_do(itr->getSource());
         }
 
         void Visit(DynamicObjectMapType &m)
         {
             for(DynamicObjectMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
-                i_do(itr->second);
+                i_do(itr->getSource());
         }
 
-        template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &m) {}
     };
 
     // Gameobject searchers
@@ -272,7 +272,7 @@ namespace MaNGOS
 
         void Visit(GameObjectMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &m) {}
     };
 
     template<class Check>
@@ -285,7 +285,7 @@ namespace MaNGOS
 
         void Visit(GameObjectMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &m) {}
     };
 
     // Unit searchers
@@ -301,7 +301,7 @@ namespace MaNGOS
         void Visit(CreatureMapType &m);
         void Visit(PlayerMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &m) {}
     };
 
     template<class Check>
@@ -315,7 +315,7 @@ namespace MaNGOS
         void Visit(PlayerMapType &m);
         void Visit(CreatureMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &m) {}
     };
 
     // Creature searchers
@@ -330,7 +330,7 @@ namespace MaNGOS
 
         void Visit(CreatureMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &m) {}
     };
 
     template<class Check>
@@ -343,7 +343,7 @@ namespace MaNGOS
 
         void Visit(CreatureMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(std::map<OBJECT_HANDLE, NOT_INTERESTED *> &m) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &m) {}
     };
 
     // CHECKS && DO classes
@@ -357,7 +357,7 @@ namespace MaNGOS
             void operator()(Creature* u) const { u->Respawn(); }
             void operator()(GameObject* u) const { u->Respawn(); }
             void operator()(WorldObject* u) const {}
-            void operator()(Corpse *u) const {}
+            void operator()(Corpse* u) const {}
     };
 
     // GameObject checks

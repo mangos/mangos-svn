@@ -35,7 +35,8 @@ namespace MaNGOS
     // count functions
     template<class SPECIFIC_TYPE> size_t Count(const ContainerMapList<SPECIFIC_TYPE> &elements, SPECIFIC_TYPE* /*fake*/)
     {
-        return elements._element.size();
+        //return elements._element.size();
+        return ((ContainerMapList<SPECIFIC_TYPE>*)&elements)->_element.getSize();
     };
 
     template<class SPECIFIC_TYPE> size_t Count(const ContainerMapList<TypeNull> &elements, SPECIFIC_TYPE* /*fake*/)
@@ -61,8 +62,9 @@ namespace MaNGOS
     // non-const find functions
     template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Find(ContainerMapList<SPECIFIC_TYPE> &elements, OBJECT_HANDLE hdl, SPECIFIC_TYPE* /*fake*/)
     {
-        typename std::map<OBJECT_HANDLE, SPECIFIC_TYPE *>::iterator iter = elements._element.find(hdl);
-        return (iter == elements._element.end() ? NULL : iter->second);
+        //typename std::map<OBJECT_HANDLE, SPECIFIC_TYPE *>::iterator iter = elements._element.find(hdl);
+        //return (iter == elements._element.end() ? NULL : iter->second);
+        return NULL;
     };
 
     template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Find(ContainerMapList<TypeNull> &elements, OBJECT_HANDLE hdl, SPECIFIC_TYPE* /*fake*/)
@@ -77,15 +79,17 @@ namespace MaNGOS
 
     template<class SPECIFIC_TYPE, class H, class T> SPECIFIC_TYPE* Find(ContainerMapList<TypeList<H, T> >&elements, OBJECT_HANDLE hdl, SPECIFIC_TYPE* fake)
     {
-        SPECIFIC_TYPE* t = Find(elements._elements, hdl,fake);
-        return (t != NULL ? t :Find(elements._TailElements, hdl,fake));
+        //SPECIFIC_TYPE* t = Find(elements._elements, hdl,fake);
+        //return (t != NULL ? t :Find(elements._TailElements, hdl,fake));
+        return NULL;
     }
 
     // const find functions
     template<class SPECIFIC_TYPE> const SPECIFIC_TYPE* Find(const ContainerMapList<SPECIFIC_TYPE> &elements, OBJECT_HANDLE hdl, SPECIFIC_TYPE* /*fake*/)
     {
-        typename SPECIFIC_TYPE::iterator iter = elements._element.find(hdl);
-        return (iter == elements._element.end() ? NULL : iter->second);
+        //typename SPECIFIC_TYPE::iterator iter = elements._element.find(hdl);
+        //return (iter == elements._element.end() ? NULL : iter->second);
+        return NULL;
     };
 
     template<class SPECIFIC_TYPE> const SPECIFIC_TYPE* Find(const ContainerMapList<TypeNull> &elements, OBJECT_HANDLE hdl, SPECIFIC_TYPE* /*fake*/)
@@ -110,7 +114,8 @@ namespace MaNGOS
     // non-const insert functions
     template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Insert(ContainerMapList<SPECIFIC_TYPE> &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
     {
-        elements._element[hdl] = obj;
+        //elements._element[hdl] = obj;
+        obj->GetGridRef().link(&elements._element, obj);
         return obj;
     };
 
@@ -135,15 +140,15 @@ namespace MaNGOS
     // non-const remove method
     template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Remove(ContainerMapList<SPECIFIC_TYPE> &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
     {
-        typename std::map<OBJECT_HANDLE, SPECIFIC_TYPE *>::iterator iter = elements._element.find(hdl);
+        /*typename std::map<OBJECT_HANDLE, SPECIFIC_TYPE *>::iterator iter = elements._element.find(hdl);
         if( iter != elements._element.end() )
         {
             SPECIFIC_TYPE* t = iter->second;
             elements._element.erase(iter);
             return t;
-        }
-
-        return NULL;                                        // found... terminate the search
+        }*/
+        obj->GetGridRef().unlink();
+        return obj;
     }
 
     template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Remove(ContainerMapList<TypeNull> &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)

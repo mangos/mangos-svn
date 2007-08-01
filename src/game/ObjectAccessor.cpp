@@ -58,13 +58,13 @@ namespace MaNGOS
         {
             for(PlayerMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
             {
-                if( iter->second == &i_player )
+                if( iter->getSource() == &i_player )
                     continue;
 
-                UpdateDataMapType::iterator iter2 = i_updatePlayers.find(iter->second);
+                UpdateDataMapType::iterator iter2 = i_updatePlayers.find(iter->getSource());
                 if( iter2 == i_updatePlayers.end() )
                 {
-                    std::pair<UpdateDataMapType::iterator, bool> p = i_updatePlayers.insert( ObjectAccessor::UpdateDataValueType(iter->second, UpdateData()) );
+                    std::pair<UpdateDataMapType::iterator, bool> p = i_updatePlayers.insert( ObjectAccessor::UpdateDataValueType(iter->getSource(), UpdateData()) );
                     assert(p.second);
                     iter2 = p.first;
                 }
@@ -73,7 +73,7 @@ namespace MaNGOS
             }
         }
 
-        template<class SKIP> void Visit(std::map<OBJECT_HANDLE, SKIP *> &) {}
+        template<class SKIP> void Visit(GridRefManager<SKIP> &) {}
     };
 }
 
@@ -147,7 +147,7 @@ ObjectAccessor::GetUnit(WorldObject const &u, uint64 guid)
     if(GUID_HIPART(guid)==HIGHGUID_PLAYER)
         return FindPlayer(guid);
 
-    return GetCreature(u, guid);
+    return GetCreatureOrPet(u, guid);
 }
 
 Corpse*
@@ -615,8 +615,8 @@ void
 ObjectAccessor::WorldObjectChangeAccumulator::Visit(PlayerMapType &m)
 {
     for(PlayerMapType::iterator iter = m.begin(); iter != m.end(); ++iter)
-        if(iter->second->HaveAtClient(&i_object))
-            ObjectAccessor::_buildPacket(iter->second, &i_object, i_updateDatas);
+        if(iter->getSource()->HaveAtClient(&i_object))
+            ObjectAccessor::_buildPacket(iter->getSource(), &i_object, i_updateDatas);
 }
 
 void

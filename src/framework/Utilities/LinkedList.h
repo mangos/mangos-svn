@@ -66,6 +66,7 @@ class LinkedListHead {
 private:
     LinkedListElement iFirst;
     LinkedListElement iLast;
+    uint32 iSize;
 public:
     LinkedListHead()
     {
@@ -73,6 +74,7 @@ public:
 
         iFirst.iNext = &iLast;
         iLast.iPrev = &iFirst;
+        iSize = 0;
     }
 
     bool isEmpty() { return(!iFirst.iNext->isInList()); }
@@ -93,14 +95,107 @@ public:
 
     uint32 getSize()
     {
-        uint32 result = 0;
-        LinkedListElement* e = getFirst();
-        while(e) {
-            ++result;
-            e = e->next();
+        if(!iSize)
+        {
+            uint32 result = 0;
+            LinkedListElement* e = getFirst();
+            while(e) {
+                ++result;
+                e = e->next();
+            }
+            return result;
         }
-        return result;
+        else
+            return iSize;
     }
+
+    void incSize() { iSize++; }
+    void decSize() { iSize--; }
+
+    template<class _Ty>
+    class Iterator {
+    public:
+        typedef std::bidirectional_iterator_tag     iterator_category;
+	    typedef _Ty                                 value_type;
+	    typedef ptrdiff_t                           difference_type;
+	    typedef ptrdiff_t                           distance_type;
+	    typedef _Ty*                                pointer;
+	    typedef _Ty&                                reference;
+
+        Iterator() : _Ptr(0)
+        {   // construct with null node pointer
+        }
+
+        Iterator(pointer _Pnode) : _Ptr(_Pnode)
+        {   // construct with node pointer _Pnode
+        }
+
+        reference operator*()
+        {   // return designated value
+            return *_Ptr;
+        }
+
+        pointer operator->()
+        {   // return pointer to class object
+            return _Ptr;
+        }
+
+        Iterator& operator++()
+        {   // preincrement
+            _Ptr = _Ptr->next();
+            return (*this);
+        }
+
+        Iterator operator++(int)
+        {   // postincrement
+            iterator _Tmp = *this;
+            ++*this;
+            return (_Tmp);
+        }
+
+        Iterator& operator--()
+        {   // predecrement
+            _Ptr = _Ptr->prev();
+            return (*this);
+        }
+
+        Iterator operator--(int)
+        {   // postdecrement
+            iterator _Tmp = *this;
+            --*this;
+            return (_Tmp);
+        }
+
+        bool operator==(Iterator const &_Right) const
+        {   // test for iterator equality
+            return (_Ptr == _Right._Ptr);
+        }
+
+        bool operator!=(Iterator const &_Right) const
+        {   // test for iterator inequality
+            return (!(*this == _Right));
+        }
+
+        bool operator==(pointer const &_Right) const
+        {   // test for pointer equality
+            return (_Ptr != _Right);
+        }
+
+        bool operator!=(pointer const &_Right) const
+        {   // test for pointer equality
+            return (!(*this == _Right));
+        }
+
+        pointer _Mynode()
+        {   // return node pointer
+            return (_Ptr);
+        }
+
+    protected:
+        pointer _Ptr;    // pointer to node
+    };
+
+    typedef Iterator<LinkedListElement> iterator;
 };
 
 //============================================

@@ -493,6 +493,9 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         bool hasQuest(uint32 quest_id) const;
         bool hasInvolvedQuest(uint32 quest_id)  const;
+
+        GridReference<Creature> &GetGridRef() { return m_gridRef; }
+
     protected:
         // vendor items
         typedef std::vector<CreatureItem> CreatureItems;
@@ -537,5 +540,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool m_AlreadyCallAssistence;
 
         uint32 m_DBTableGuid;
+    private:
+        GridReference<Creature> m_gridRef;
 };
 #endif

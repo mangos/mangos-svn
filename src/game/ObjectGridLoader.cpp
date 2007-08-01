@@ -34,7 +34,7 @@ class MANGOS_DLL_DECL ObjectGridRespawnMover
 
         void Move(GridType &grid);
 
-        template<class T> void Visit(std::map<OBJECT_HANDLE, T *> &m) {}
+        template<class T> void Visit(GridRefManager<T> &m) {}
         void Visit(CreatureMapType &m);
 };
 
@@ -48,9 +48,6 @@ ObjectGridRespawnMover::Move(GridType &grid)
 void
 ObjectGridRespawnMover::Visit(CreatureMapType &m)
 {
-    if( m.size() == 0 )
-        return;
-
     // creature in unloading grid can have respawn point in another grid
     // if it will be unloaded then it will not respawn in original grid until unload/load original grid
     // move to respwn point to prevent this case. For player view in respawn grid this wll be normal respawn.
@@ -58,7 +55,7 @@ ObjectGridRespawnMover::Visit(CreatureMapType &m)
     {
         next = iter; ++next;
 
-        Creature * c = iter->second;
+        Creature * c = iter->getSource();
 
         assert(!c->isPet() && "ObjectGridRespawnMover don't must be called for pets");
 
@@ -88,7 +85,7 @@ public:
     void Visit(CorpseMapType &m);
 
     template<class T>
-    void Visit(std::map<OBJECT_HANDLE, T* >&) { }
+    void Visit(GridRefManager<T>&) { }
 
 private:
     Cell i_cell;
@@ -113,7 +110,7 @@ template<> void addUnitState(Creature *obj, CellPair const& cell_pair)
 }
 
 template <class T>
-void LoadHelper(CellGuidSet const& guid_set, CellPair &cell, std::map<OBJECT_HANDLE, T*> &m, uint32 &count, Map* map)
+void LoadHelper(CellGuidSet const& guid_set, CellPair &cell, GridRefManager<T> &m, uint32 &count, Map* map)
 {
     for(CellGuidSet::const_iterator i_guid = guid_set.begin(); i_guid != guid_set.end(); ++i_guid)
     {
@@ -127,7 +124,7 @@ void LoadHelper(CellGuidSet const& guid_set, CellPair &cell, std::map<OBJECT_HAN
         }
 
         obj->SetInstanceId(map->GetInstanceId());
-        m[obj->GetGUID()] = obj;
+        obj->GetGridRef().link(&m, obj);
 
         addUnitState(obj,cell);
         obj->AddToWorld();
@@ -154,7 +151,7 @@ void LoadHelper(CellCorpseSet const& cell_corpses, CellPair &cell, CorpseMapType
         if(!obj)
             continue;
 
-        m[obj->GetGUID()] = obj;
+        obj->GetGridRef().link(&m, obj);
 
         addUnitState(obj,cell);
         obj->AddToWorld();
@@ -254,44 +251,38 @@ ObjectGridUnloader::Unload(GridType &grid)
 
 template<class T>
 void
-ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, T *> &m)
+ObjectGridUnloader::Visit(GridRefManager<T> &m)
 {
-    if( m.size() == 0 )
-        return;
-
-    for(typename std::map<OBJECT_HANDLE, T* >::iterator iter=m.begin(); iter != m.end(); ++iter)
+    while(!m.isEmpty())
     {
+        T *obj = m.getFirst()->getSource();
         // if option set then object already saved at this moment
         if(!sWorld.getConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATLY))
-            iter->second->SaveRespawnTime();
+            obj->SaveRespawnTime();
         ///- object must be out of world before delete
-        iter->second->RemoveFromWorld();
-        delete iter->second;
+        obj->RemoveFromWorld();
+        ///- object will get delinked from the manager when deleted
+        delete obj;
     }
-
-    m.clear();
 }
 
 template<>
 void
 ObjectGridUnloader::Visit(CreatureMapType &m)
 {
-    if( m.size() == 0 )
-        return;
-
     // remove all cross-reference before deleting
     for(CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-        iter->second->CleanupsBeforeDelete();
+        iter->getSource()->CleanupsBeforeDelete();
 
-    for(CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
+    while(!m.isEmpty())
     {
+        Creature *obj = m.getFirst()->getSource();
         // if option set then object already saved at this moment
         if(!sWorld.getConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATLY))
-            iter->second->SaveRespawnTime();
-        delete iter->second;
+            obj->SaveRespawnTime();
+        ///- object will get delinked from the manager when deleted
+        delete obj;
     }
-
-    m.clear();
 }
 
 void
@@ -304,15 +295,12 @@ ObjectGridStoper::Stop(GridType &grid)
 void
 ObjectGridStoper::Visit(CreatureMapType &m)
 {
-    if( m.size() == 0 )
-        return;
-
     // stop any fights at grid de-activation and remove dynobjects created at cast by creatures
     for(CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
     {
-        iter->second->CombatStop(true);
-        iter->second->DeleteThreatList();
-        iter->second->RemoveAllDynObjects();
+        iter->getSource()->CombatStop(true);
+        iter->getSource()->DeleteThreatList();
+        iter->getSource()->RemoveAllDynObjects();
     }
 }
 
