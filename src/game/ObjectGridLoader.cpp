@@ -264,6 +264,8 @@ ObjectGridUnloader::Visit(std::map<OBJECT_HANDLE, T *> &m)
         // if option set then object already saved at this moment
         if(!sWorld.getConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATLY))
             iter->second->SaveRespawnTime();
+        ///- object must be out of world before delete
+        iter->second->RemoveFromWorld();
         delete iter->second;
     }
 

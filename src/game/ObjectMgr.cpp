@@ -3176,7 +3176,10 @@ void ObjectMgr::LoadCorpses()
 
         corpse = new Corpse(NULL);
         if(!corpse->LoadFromDB(guid,fields))
+        {
+            delete corpse;
             continue;
+        }
 
         ObjectAccessor::Instance().AddCorpse(corpse);
 

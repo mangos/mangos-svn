@@ -45,6 +45,20 @@ Corpse::~Corpse()
 {
 }
 
+void Corpse::AddToWorld()
+{
+    ///- Register the corpse for guid lookup
+    if(!IsInWorld()) ObjectAccessor::Instance().AddObject(this);
+    Object::AddToWorld();
+}
+
+void Corpse::RemoveFromWorld()
+{
+    ///- Remove the corpse from the accessor
+    if(IsInWorld()) ObjectAccessor::Instance().RemoveObject(this);
+    Object::RemoveFromWorld();
+}
+
 bool Corpse::Create( uint32 guidlow )
 {
     Object::_Create(guidlow, HIGHGUID_CORPSE);
@@ -95,7 +109,7 @@ void Corpse::SaveToDB()
 void Corpse::DeleteBonesFromWorld()
 {
     assert(GetType()==CORPSE_BONES);
-    Corpse *corpse = MapManager::Instance().GetMap(GetMapId(), this)->GetObjectNear<Corpse>(*this, GetGUID(), (Corpse*)NULL);
+    Corpse* corpse = ObjectAccessor::Instance().GetCorpse(*this, GetGUID());
 
     if (!corpse)
     {

@@ -6088,5 +6088,6 @@ void Unit::CleanupsBeforeDelete()
         DeleteThreatList();
         getHostilRefManager().setOnlineOfflineState(false);
         RemoveAllAuras();
+        RemoveFromWorld();
     }
 }

@@ -114,6 +114,9 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         explicit GameObject( WorldObject *instantiator );
         ~GameObject();
 
+        void AddToWorld();
+        void RemoveFromWorld();
+
         bool Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, uint32 dynflags);
         void Update(uint32 p_time);
         GameObjectInfo const* GetGOInfo() const;

@@ -30,6 +30,9 @@ class DynamicObject : public WorldObject
         typedef std::set<Unit*> AffectedSet;
         explicit DynamicObject( WorldObject *instantiator );
 
+        void AddToWorld();
+        void RemoveFromWorld();
+
         bool Create(uint32 guidlow, Unit *caster, uint32 spellId, uint32 effIndex, float x, float y, float z, int32 duration, float radius);
         void Update(uint32 p_time);
         void Delete();

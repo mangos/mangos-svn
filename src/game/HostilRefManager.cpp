@@ -33,7 +33,7 @@ void HostilRefManager::threatAssist(Unit *pVictim, float pThreat, uint8 pSchool,
     while(ref != NULL)
     {
         float threat = ThreatCalcHelper::calcThreat(pVictim, iOwner, pThreat, pSchool, pThreatSpell);
-        if(pVictim == getOwner()) 
+        if(pVictim == getOwner())
             ref->addThreat(float (threat) / size); // It is faster to modify the threat durectly if possible
         else 
             ref->getSource()->addThreat(pVictim, float (threat) / size);
