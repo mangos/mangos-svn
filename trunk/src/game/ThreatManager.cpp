@@ -53,6 +53,7 @@ HostilReference::HostilReference(Unit* pUnit, ThreatManager *pThreatManager, flo
     link(pUnit, pThreatManager);
     iUnitGuid = pUnit->GetGUID();
     iOnline = true;
+    iAccessible = true;
 }
 
 //============================================================

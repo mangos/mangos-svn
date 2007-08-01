@@ -1531,6 +1531,9 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
 void Player::AddToWorld()
 {
+    ///- Do not add/remove the player from the object storage
+    ///- It will crash when updating the ObjectAccessor
+    ///- The player should only be added when logging in
     Object::AddToWorld();
 
     for(int i = 0; i < BANK_SLOT_BAG_END; i++)
@@ -1558,6 +1561,9 @@ void Player::RemoveFromWorld()
             m_items[i]->RemoveFromWorld();
     }
 
+    ///- Do not add/remove the player from the object storage
+    ///- It will crash when updating the ObjectAccessor
+    ///- The player should only be removed when logging out
     Object::RemoveFromWorld();
 }
 
@@ -3358,7 +3364,8 @@ void Player::CreateCorpse()
     if(!corpse->Create(objmgr.GenerateLowGuid(HIGHGUID_CORPSE), this, GetMapId(), GetPositionX(),
         GetPositionY(), GetPositionZ(), GetOrientation()))
     {
-        return ;
+        delete corpse;
+        return;
     }
 
     _uf = GetUInt32Value(UNIT_FIELD_BYTES_0);

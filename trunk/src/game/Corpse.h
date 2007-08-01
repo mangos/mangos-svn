@@ -39,6 +39,9 @@ class Corpse : public WorldObject
         explicit Corpse( WorldObject *instantiator, CorpseType type = CORPSE_BONES );
         ~Corpse( );
 
+        void AddToWorld();
+        void RemoveFromWorld();
+
         bool Create( uint32 guidlow );
         bool Create( uint32 guidlow, Player *owner, uint32 mapid, float x, float y, float z, float ang );
 

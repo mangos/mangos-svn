@@ -70,6 +70,8 @@ Pet::Pet(WorldObject *instantiator, PetType type) : Creature( instantiator )
     m_happinessTimer = 7500;
     m_loyaltyTimer = 12000;
     m_GlobalCooldown = 0;
+    m_duration = 0;
+    m_bonusdamage = 0;
 
     m_loyaltyPoints = 0;
     m_TrainingPoints = 0;
@@ -93,8 +95,23 @@ Pet::~Pet()
 {
     if(m_uint32Values)                                      // only for fully created Object
     {
-        ObjectAccessor::Instance().RemovePet(this);
+        ObjectAccessor::Instance().RemoveObject(this);
     }
+}
+
+void Pet::AddToWorld()
+{
+    ///- Register the pet for guid lookup
+    if(!IsInWorld()) ObjectAccessor::Instance().AddObject(this);
+    Object::AddToWorld();
+}
+
+void Pet::RemoveFromWorld()
+{
+    ///- Remove the pet from the accessor
+    if(IsInWorld()) ObjectAccessor::Instance().RemoveObject(this);
+    ///- Don't call the function for Creature, normal mobs + totems go in a different storage
+    Object::RemoveFromWorld();
 }
 
 bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool current )
@@ -260,8 +277,6 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
         SetHealth(savedhealth > GetMaxHealth() ? GetMaxHealth() : savedhealth);
         SetPower(POWER_MANA, savedmana > GetMaxPower(POWER_MANA) ? GetMaxPower(POWER_MANA) : savedmana);
     }
-
-    ObjectAccessor::Instance().AddPet(this);
 
     AIM_Initialize();
     MapManager::Instance().GetMap(owner->GetMapId(), owner)->Add((Creature*)this);
@@ -1315,7 +1330,7 @@ bool Pet::addSpell(uint16 spell_id, uint16 active, PetSpellState state, uint16 s
     if (!spellInfo)
     {
         // do pet spell book cleanup
-        if(state == PLAYERSPELL_UNCHANGED)                  // spell load case
+        if(state == PETSPELL_UNCHANGED)                     // spell load case
         {
             sLog.outError("Pet::addSpell: Non-existed in SpellStore spell #%u request, deleting for all pets in `pet_spell`.",spell_id);
             sDatabase.PExecute("DELETE FROM `pet_spell` WHERE `spell` = '%u'",spell_id);

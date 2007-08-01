@@ -687,7 +687,7 @@ void WorldSession::LogoutPlayer(bool Save)
         }
 
         ///- Remove the player from the world
-        ObjectAccessor::Instance().RemovePlayer(_player);
+        ObjectAccessor::Instance().RemoveObject(_player);
         MapManager::Instance().GetMap(_player->GetMapId(), _player)->Remove(_player, false);
 
         ///- Send update to group

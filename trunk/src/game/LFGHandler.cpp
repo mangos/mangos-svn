@@ -29,9 +29,9 @@ static void AttemptJoin(Player* _player)
     if(!_player->m_lookingForGroup.canAutoJoin() || _player->GetGroup())
         return;
 
-    ObjectAccessor::PlayersMapType const& players = ObjectAccessor::Instance().GetPlayers();
-
-    for(ObjectAccessor::PlayersMapType::const_iterator iter = players.begin(); iter != players.end(); ++iter)
+    //TODO: Guard Player Map
+    HashMapHolder<Player>::MapType const& players = ObjectAccessor::Instance().GetPlayers();
+    for(HashMapHolder<Player>::MapType::const_iterator iter = players.begin(); iter != players.end(); ++iter)
     {
         Player *plr = iter->second;
 
@@ -75,9 +75,9 @@ static void AttemptAddMore(Player* _player)
     if(!_player->m_lookingForGroup.more.canAutoJoin())
         return;
 
-    ObjectAccessor::PlayersMapType const& players = ObjectAccessor::Instance().GetPlayers();
-
-    for(ObjectAccessor::PlayersMapType::const_iterator iter = players.begin(); iter != players.end(); ++iter)
+    //TODO: Guard Player map
+    HashMapHolder<Player>::MapType const& players = ObjectAccessor::Instance().GetPlayers();
+    for(HashMapHolder<Player>::MapType::const_iterator iter = players.begin(); iter != players.end(); ++iter)
     {
         Player *plr = iter->second;
 
@@ -227,9 +227,9 @@ void WorldSession::SendLfgResult(uint32 type, uint32 entry, uint8 lfg_type)
     data << uint32(0);                                      // count, placeholder
     data << uint32(0);                                      // count again, strange, placeholder
 
-    ObjectAccessor::PlayersMapType const& players = ObjectAccessor::Instance().GetPlayers();
-    
-    for(ObjectAccessor::PlayersMapType::const_iterator iter = players.begin(); iter != players.end(); ++iter)
+    //TODO: Guard Player map
+    HashMapHolder<Player>::MapType const& players = ObjectAccessor::Instance().GetPlayers();
+    for(HashMapHolder<Player>::MapType::const_iterator iter = players.begin(); iter != players.end(); ++iter)
     {
         Player *plr = iter->second;
 

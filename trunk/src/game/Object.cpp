@@ -74,6 +74,13 @@ Object::~Object( )
 
     if(m_uint32Values)
     {
+        if(IsInWorld())
+        {
+            ///- Do NOT call RemoveFromWorld here, if the object is a player it will crash
+            sLog.outError("Object::~Object - guid="I64FMTD", typeid=%d deleted but still in world!!", GetGUID(), GetTypeId());
+            //assert(0);
+        }
+
         //DEBUG_LOG("Object desctr 1 check (%p)",(void*)this);
         delete [] m_uint32Values;
         delete [] m_uint32Values_mirror;

@@ -64,6 +64,20 @@ GameObject::~GameObject()
     }
 }
 
+void GameObject::AddToWorld()
+{
+    ///- Register the gameobject for guid lookup
+    if(!IsInWorld()) ObjectAccessor::Instance().AddObject(this);
+    Object::AddToWorld();
+}
+
+void GameObject::RemoveFromWorld()
+{
+    ///- Remove the gameobject from the accessor
+    if(IsInWorld()) ObjectAccessor::Instance().RemoveObject(this);
+    Object::RemoveFromWorld();
+}
+
 bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, uint32 dynflags)
 {
     Relocate(x,y,z,ang);

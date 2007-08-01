@@ -1654,7 +1654,6 @@ void Spell::EffectSummon(uint32 i)
     name.append(petTypeSuffix[spawnCreature->getPetType()]);
     spawnCreature->SetName( name );
 
-    ObjectAccessor::Instance().AddPet(spawnCreature);
     MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster)->Add((Creature*)spawnCreature);
 
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -1953,7 +1952,6 @@ void Spell::EffectSummonGuardian(uint32 i)
             spawnCreature->SetArmor(level*50);
             spawnCreature->AIM_Initialize();
 
-            ObjectAccessor::Instance().AddPet(spawnCreature);
             MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster)->Add((Creature*)spawnCreature);
         }
     }
@@ -2148,7 +2146,6 @@ void Spell::EffectTameCreature(uint32 i)
         pet->InitPetCreateSpells();
         pet->SetHealth(pet->GetMaxHealth());
         
-        ObjectAccessor::Instance().AddPet(pet);
         MapManager::Instance().GetMap(pet->GetMapId(), pet)->Add((Creature*)pet);
 
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -2277,7 +2274,6 @@ void Spell::EffectSummonPet(uint32 i)
         NewSummon->SetHealth(NewSummon->GetMaxHealth());
         NewSummon->SetPower(POWER_MANA, NewSummon->GetMaxPower(POWER_MANA));
 
-        ObjectAccessor::Instance().AddPet(NewSummon);
         MapManager::Instance().GetMap(NewSummon->GetMapId(), NewSummon)->Add((Creature*)NewSummon);
 
         m_caster->SetPet(NewSummon);
@@ -3302,7 +3298,6 @@ void Spell::EffectSummonCritter(uint32 i)
         critter->SetName( name );
         //m_caster->SetPet(critter);
 
-        ObjectAccessor::Instance().AddPet(critter);
         MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster)->Add((Creature*)critter);
     }
 }

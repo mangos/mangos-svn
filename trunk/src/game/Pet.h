@@ -135,6 +135,9 @@ class Pet : public Creature
         explicit Pet(WorldObject *instantiator, PetType type);
         virtual ~Pet();
 
+        void AddToWorld();
+        void RemoveFromWorld();
+
         PetType getPetType() const { return m_petType; }
         bool isControlled() const { return getPetType()==SUMMON_PET || getPetType()==HUNTER_PET; }
         uint32 GetPetNumber() const { return GetUInt32Value(UNIT_FIELD_PETNUMBER); }

@@ -123,8 +123,9 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
     data << clientcount;                                    // clientcount place holder
     data << clientcount;                                    // clientcount place holder
 
-    ObjectAccessor::PlayersMapType& m = ObjectAccessor::Instance().GetPlayers();
-    for(ObjectAccessor::PlayersMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
+    //TODO: Guard Player map
+    HashMapHolder<Player>::MapType& m = ObjectAccessor::Instance().GetPlayers();
+    for(HashMapHolder<Player>::MapType::iterator itr = m.begin(); itr != m.end(); ++itr)
     {
         std::string gname = objmgr.GetGuildNameById(itr->second->GetGuildId());
         const char *pname = itr->second->GetName();
@@ -397,8 +398,9 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
             SendPacket( &data );
             DEBUG_LOG("update the ticket\n");
 
-            ObjectAccessor::PlayersMapType &m = ObjectAccessor::Instance().GetPlayers();
-            for(ObjectAccessor::PlayersMapType::iterator itr = m.begin(); itr != m.end(); ++itr)
+            //TODO: Guard player map
+            HashMapHolder<Player>::MapType &m = ObjectAccessor::Instance().GetPlayers();
+            for(HashMapHolder<Player>::MapType::iterator itr = m.begin(); itr != m.end(); ++itr)
             {
                 if(itr->second->GetSession()->GetSecurity() >= SEC_GAMEMASTER && itr->second->isAcceptTickets())
                     ChatHandler::PSendSysMessage(itr->second->GetSession(), LANG_COMMAND_TICKETNEW,GetPlayer()->GetName());
