@@ -171,6 +171,8 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         bool hasInvolvedQuest(uint32 quest_id) const;
 
         bool isVisibleForInState(Player const* u, bool inVisibleList) const;
+
+        GridReference<GameObject> &GetGridRef() { return m_gridRef; }
     protected:
         uint32      m_spellId;
         time_t      m_respawnTime;                          // (secs) time of next respawn (or despawn if GO have owner()),
@@ -183,5 +185,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         uint32 m_usetimes;
 
         uint32 m_DBTableGuid;
+    private:
+        GridReference<GameObject> m_gridRef;
 };
 #endif

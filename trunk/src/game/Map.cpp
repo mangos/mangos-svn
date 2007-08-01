@@ -331,36 +331,6 @@ void Map::DeleteFromWorld(T* obj)
     delete obj;
 }
 
-template<class T>
-T* Map::FindInGrid(uint64 guid, NGridType *grid, Cell const& cell, T* fake) const
-{
-    return ((*grid)(cell.CellX(),cell.CellY())).template GetGridObject<T>(guid, (T*)NULL);
-}
-
-template<>
-Player* Map::FindInGrid(uint64 guid, NGridType *grid, Cell const& cell, Player* fake) const
-{
-    return ((*grid)(cell.CellX(),cell.CellY())).GetWorldObject<Player>(guid, (Player*)NULL);
-}
-
-template<>
-Corpse* Map::FindInGrid(uint64 guid, NGridType *grid, Cell const& cell, Corpse* fake) const
-{
-    Corpse *obj = ((*grid)(cell.CellX(),cell.CellY())).GetWorldObject<Corpse>(guid, (Corpse*)NULL);
-    if(!obj)
-        obj = ((*grid)(cell.CellX(),cell.CellY())).GetGridObject<Corpse>(guid, (Corpse*)NULL);
-    return obj;
-}
-
-template<>
-Creature* Map::FindInGrid(uint64 guid, NGridType *grid, Cell const& cell, Creature *fake) const
-{
-    Creature* obj = ((*grid)(cell.CellX(),cell.CellY())).GetWorldObject<Creature>(guid, (Creature*)NULL);
-    if(obj)
-        return obj;
-    return ((*grid)(cell.CellX(),cell.CellY())).GetGridObject<Creature>(guid, (Creature*)NULL);
-}
-
 uint64
 Map::EnsureGridCreated(const GridPair &p)
 {
@@ -629,14 +599,14 @@ Map::Add(T *obj)
     UpdateObjectVisibility(obj,cell,p);
 }
 
-template<class T>
+/*template<class T>
 bool
 Map::Find(T *obj) const
 {
     CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
     if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
     {
-        sLog.outError("Map::Add: Object " I64FMTD " have invalid coordinates X:%f Y:%f grid cell [%u:%u]", obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
+        sLog.outError("Map::Find: Object " I64FMTD " have invalid coordinates X:%f Y:%f grid cell [%u:%u]", obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
         return false;
     }
 
@@ -647,12 +617,6 @@ Map::Find(T *obj) const
     NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
     assert( grid != NULL );
     return this->FindInGrid<T>(obj->GetGUID(),grid,cell, (T*)NULL)!=0;
-}
-
-template <class T>
-T* Map::GetObjectNear(WorldObject const &obj, OBJECT_HANDLE hdl, T *fake)
-{
-    return GetObjectNear<T>(obj.GetPositionX(), obj.GetPositionY(), hdl, fake);
 }
 
 template <class T>
@@ -690,7 +654,7 @@ T* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl, T *fake)
             break;
     }
     return NULL;
-}
+}*/
 
 void Map::MessageBoardcast(Player *player, WorldPacket *msg, bool to_self, bool own_team_only)
 {
@@ -1356,15 +1320,6 @@ bool Map::CheckGridIntegrity(Creature* c, bool moved) const
 {
     Cell const& cur_cell = c->GetCurrentCell();
 
-    if(!i_grids[cur_cell.GridX()][cur_cell.GridY()] ||
-        FindInGrid<Creature>(c->GetGUID(),i_grids[cur_cell.GridX()][cur_cell.GridY()],cur_cell, (Creature*)NULL)!=c)
-    {
-        sLog.outError("ERROR: %s (GUID: %u) not find in %s grid[%u,%u]cell[%u,%u]",
-            (c->GetTypeId()==TYPEID_PLAYER ? "Player" : "Creature"),c->GetGUIDLow(), (moved ? "final" : "original"),
-            cur_cell.GridX(), cur_cell.GridY(), cur_cell.CellX(), cur_cell.CellY());
-        return true;                                        // not crash at error, just output error in debug mode
-    }
-
     CellPair xy_val = MaNGOS::ComputeCellPair(c->GetPositionX(), c->GetPositionY());
     Cell xy_cell = RedZone::GetZone(xy_val);
     if(xy_cell != cur_cell)
@@ -1516,7 +1471,6 @@ void Map::SendRemoveTransports( Player * player )
     player->GetSession()->SendPacket(&packet);
 }
 
-
 template void Map::Add(Corpse *);
 template void Map::Add(Creature *);
 template void Map::Add(GameObject *);
@@ -1526,17 +1480,3 @@ template void Map::Remove(Corpse *,bool);
 template void Map::Remove(Creature *,bool);
 template void Map::Remove(GameObject *, bool);
 template void Map::Remove(DynamicObject *, bool);
-
-template bool Map::Find(Creature *) const;
-template bool Map::Find(GameObject *) const;
-template bool Map::Find(DynamicObject *) const;
-template bool Map::Find(Corpse *) const;
-
-template Creature* Map::GetObjectNear(WorldObject const &obj, OBJECT_HANDLE hdl, Creature*);
-template Creature* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl, Creature*);
-template GameObject* Map::GetObjectNear(WorldObject const &obj, OBJECT_HANDLE hdl, GameObject*);
-template GameObject* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl, GameObject*);
-template DynamicObject* Map::GetObjectNear(WorldObject const &obj, OBJECT_HANDLE hdl, DynamicObject*);
-template DynamicObject* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl, DynamicObject*);
-template Corpse* Map::GetObjectNear(WorldObject const &obj, OBJECT_HANDLE hdl, Corpse*);
-template Corpse* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl, Corpse*);

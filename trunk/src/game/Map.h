@@ -102,10 +102,6 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         void RemoveInstanced(Player *);
         template<class T> void Add(T *);
         template<class T> void Remove(T *, bool);
-        template<class T> bool Find(T *) const;
-
-        template<class T> T* GetObjectNear(WorldObject const &obj, OBJECT_HANDLE hdl, T*);
-        template<class T> T* GetObjectNear(float x, float y, OBJECT_HANDLE hdl, T*);
 
         virtual void Update(const uint32&);
 
@@ -266,9 +262,6 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
 
         template<class T>
             void DeleteFromWorld(T*);
-
-        template<class T>
-            T* FindInGrid(uint64 guid, NGridType *, Cell const&, T*) const;
 };
 
 inline

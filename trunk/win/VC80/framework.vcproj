@@ -179,6 +179,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\framework\GameSystem\GridReference.h"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\framework\GameSystem\GridRefManager.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\framework\GameSystem\NGrid.h"
 				>
 			</File>
