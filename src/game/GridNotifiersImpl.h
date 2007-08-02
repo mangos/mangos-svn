@@ -31,7 +31,7 @@ template<class T>
 inline void
 MaNGOS::VisibleNotifier::Visit(GridRefManager<T> &m)
 {
-    for(GridRefManager<T>::iterator iter = m.begin(); iter != m.end(); ++iter)
+    for(typename GridRefManager<T>::iterator iter = m.begin(); iter != m.end(); ++iter)
     {
         i_player.UpdateVisibilityOf(iter->getSource(),i_data,i_data_updates);
         i_clientGUIDs.erase(iter->getSource()->GetGUID());
