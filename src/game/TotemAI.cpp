@@ -43,7 +43,7 @@ TotemAI::MoveInLineOfSight(Unit *u)
     if (!i_totem.isTotem() || ((Totem*)&i_totem)->GetTotemType() != TOTEM_ACTIVE)
         return;
 
-    if(i_totem.getVictim() || i_totem.IsFriendlyTo(u) || i_totem.IsNeutralToAll() || u->IsNeutralToAll())
+    if(i_totem.getVictim() || !i_totem.IsHostileTo(u))
         return;
 
     if(!u->isTargetableForAttack()|| !IsVisible(u))

@@ -698,7 +698,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void setFaction(uint32 faction) { SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, faction ); }
         FactionTemplateEntry const* getFactionTemplateEntry() const;
         bool IsHostileTo(Unit const* unit) const;
-        bool IsHostileToPlayer() const;
+        bool IsHostileToPlayers() const;
         bool IsFriendlyTo(Unit const* unit) const;
         bool IsNeutralToAll() const;
         bool IsPvP() { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PVP); }
