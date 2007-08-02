@@ -472,9 +472,12 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
         // only hunter stings have this
         if (spellInfo->Dispel == 4)                         //IMMUNE_DISPEL_POISON
             return SPELL_STING;
-        // only hunter aspects have this
-        if (spellInfo->School == 3/*SPELL_SCHOOL_NATURE*/ && spellInfo->activeIconID == 122)
-            return SPELL_ASPECT;
+    }
+
+    // only hunter aspects have this (but not all aspects in hunter family)
+    if( spellInfo->activeIconID == 122 && spellInfo->School == 3/*SPELL_SCHOOL_NATURE*/ && spellInfo->Attributes == 0x50000)
+    {
+        return SPELL_ASPECT;
     }
 
     for(int i = 0; i < 3; i++)
