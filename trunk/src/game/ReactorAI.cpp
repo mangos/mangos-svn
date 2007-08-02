@@ -29,7 +29,7 @@
 int
 ReactorAI::Permissible(const Creature *creature)
 {
-    if( creature->IsNeutralToAll() || creature->isCivilian() )
+    if( creature->isCivilian() || creature->IsNeutralToAll() )
         return PERMIT_BASE_REACTIVE;
 
     return PERMIT_BASE_NO;

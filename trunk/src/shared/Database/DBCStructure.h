@@ -193,7 +193,7 @@ struct FactionTemplateEntry
             return false;
         return (hostileMask & entry.ourMask) != 0;
     }
-    bool IsHostileToPlayer() const { return hostileMask & FACTION_MASK_PLAYER; }
+    bool IsHostileToPlayers() const { return hostileMask & FACTION_MASK_PLAYER; }
     bool IsNeutralToAll() const { return hostileMask == 0 && friendlyMask == 0 && enemyFaction1==0 && enemyFaction2==0; }
 };
 

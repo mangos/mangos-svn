@@ -4057,13 +4057,17 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
     return tester_faction->IsFriendlyTo(*target_faction);
 }
 
-bool Unit::IsHostileToPlayer() const
+bool Unit::IsHostileToPlayers() const
 {
     FactionTemplateEntry const* my_faction = getFactionTemplateEntry();
     if(!my_faction)
         return false;
 
-    return my_faction->IsHostileToPlayer();
+    FactionEntry const* raw_faction = sFactionStore.LookupEntry(my_faction->faction);
+    if(raw_faction && raw_faction->reputationListID >=0 )
+        return false;
+
+    return my_faction->IsHostileToPlayers();
 }
 
 bool Unit::IsNeutralToAll() const
@@ -4071,6 +4075,10 @@ bool Unit::IsNeutralToAll() const
     FactionTemplateEntry const* my_faction = getFactionTemplateEntry();
     if(!my_faction)
         return true;
+
+    FactionEntry const* raw_faction = sFactionStore.LookupEntry(my_faction->faction);
+    if(raw_faction && raw_faction->reputationListID >=0 )
+        return false;
 
     return my_faction->IsNeutralToAll();
 }
