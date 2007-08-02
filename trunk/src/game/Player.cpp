@@ -13382,7 +13382,6 @@ void Player::ProhibitSpellScholl(uint32 idSchool /* from SpellSchools */, uint32
     time_t curTime = time(NULL);
     for(PlayerSpellMap::const_iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
-        // WTF, we can send multiple cooldowns in one packet? I don't think so...
         if (itr->second->state == PLAYERSPELL_REMOVED)
             continue;
         uint32 unSpellId = itr->first;

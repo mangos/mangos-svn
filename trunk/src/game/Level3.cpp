@@ -1543,18 +1543,12 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
         else
             return false;
     }
-    else if(args[0]=='|')                                   // [name] Shift-click form |color|Hitem:item_id:0:0:0|h[name]|h|r
+    else                                                    // item_id or [name] Shift-click form |color|Hitem:item_id:0:0:0|h[name]|h|r
     {
-        strtok((char*)args, ":");
-        char* citemId = strtok(NULL, ":");
-        itemId = atol(citemId);
-        strtok(NULL, "]");
-        strtok(NULL, " ");
-    }
-    else                                                    // item_id form
-    {
-        char* citemId = strtok((char*)args, " ");
-        itemId = atol(citemId);
+        char* cId = extractKeyFromLink((char*)args,"Hitem");
+        if(!cId)
+            return false;
+        itemId = atol(cId);
     }
 
     char* ccount = strtok(NULL, " ");
@@ -1753,10 +1747,14 @@ bool ChatHandler::HandleListItemCommand(const char* args)
     if(!*args)
         return false;
 
-    char* c_item_id = strtok((char*)args, " ");
-    uint32 item_id = atol(c_item_id);
+    char* cId = extractKeyFromLink((char*)args,"Hitem");
+    if(!cId)
+        return false;
+    uint32 item_id = atol(cId);
 
-    if(!item_id || !objmgr.GetItemPrototype(item_id))
+    ItemPrototype const* itemProto = NULL;
+
+    if(!item_id || !(itemProto = objmgr.GetItemPrototype(item_id)))
     {
         PSendSysMessage(LANG_COMMAND_ITEMIDINVALID, item_id);
         return true;
