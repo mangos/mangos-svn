@@ -2500,7 +2500,7 @@ uint8 Spell::CanCast()
                 if( !(m_targets.getUnitTarget()->GetUInt32Value(UNIT_FIELD_FLAGS) & UNIT_FLAG_SKINNABLE) )
                     return SPELL_FAILED_TARGET_UNSKINNABLE;
 
-                if ( ( ((Creature*)m_targets.getUnitTarget())->GetCreatureInfo()->type != CREATURE_TYPE_CRITTER )
+                if ( m_targets.getUnitTarget()->GetCreatureType() != CREATURE_TYPE_CRITTER 
                     && ( !((Creature*)m_targets.getUnitTarget())->lootForBody || !((Creature*)m_targets.getUnitTarget())->loot.empty() ) )
                 {
                     return SPELL_FAILED_TARGET_NOT_LOOTED;
