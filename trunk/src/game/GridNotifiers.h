@@ -453,8 +453,7 @@ namespace MaNGOS
             bool operator()(Creature* u)
             {
                 if( i_funit->IsFriendlyTo(u) || u->isAlive() || u->isInFlight() ||
-                    ((Creature*)u)->GetCreatureInfo()->type != CREATURE_TYPE_HUMANOID &&
-                    ((Creature*)u)->GetCreatureInfo()->type != CREATURE_TYPE_UNDEAD)
+                    (u->GetCreatureTypeMask() & CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD)==0)
                     return false;
 
                 if(i_funit->IsWithinDistInMap(u, i_range) )

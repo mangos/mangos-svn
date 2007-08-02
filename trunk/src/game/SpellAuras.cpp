@@ -1576,12 +1576,8 @@ void Aura::HandleModPossess(bool apply, bool Real)
     if(!Real)
         return;
 
-    if(m_target->GetTypeId() == TYPEID_UNIT)
-    {
-        CreatureInfo const *cinfo = ((Creature*)m_target)->GetCreatureInfo();
-        if(cinfo->type != CREATURE_TYPE_HUMANOID)
-            return;
-    }
+    if(m_target->GetCreatureType() != CREATURE_TYPE_HUMANOID)
+        return;
 
     Unit* caster = GetCaster();
     if(!caster)

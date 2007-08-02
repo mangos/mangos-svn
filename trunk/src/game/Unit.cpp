@@ -418,7 +418,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
     {
         //pVictim->SetInFront(this);
         // no loot,xp,health if type 8 /critters/
-        if ( ((Creature*)pVictim)->GetCreatureInfo()->type == CREATURE_TYPE_CRITTER)
+        if ( pVictim->GetCreatureType() == CREATURE_TYPE_CRITTER)
         {
             pVictim->setDeathState(JUST_DIED);
             pVictim->SetHealth(0);
@@ -1469,7 +1469,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
         if(GetTypeId()== TYPEID_PLAYER) 
             ((Player*)this)->ApplySpellMod(spellCasted->Id, SPELLMOD_DAMAGE, *damage); 
 
-    if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && ((Creature*)pVictim)->GetCreatureInfo()->type != CREATURE_TYPE_CRITTER )
+    if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && pVictim->GetCreatureType() != CREATURE_TYPE_CRITTER )
         ((Player*)this)->UpdateCombatSkills(pVictim, attType, outcome, false);
 
     if(GetTypeId() != TYPEID_PLAYER && pVictim->GetTypeId() == TYPEID_PLAYER)
@@ -1500,7 +1500,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
             *damage -= resilienceReduction;
             cleanDamage->damage += resilienceReduction;
 
-            if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && ((Creature*)pVictim)->GetCreatureInfo()->type != CREATURE_TYPE_CRITTER )
+            if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && pVictim->GetCreatureType() != CREATURE_TYPE_CRITTER )
                 ((Player*)this)->UpdateWeaponSkill(attType);
 
             ModifyAuraState(AURA_STATE_CRIT, true);
@@ -2119,7 +2119,7 @@ float Unit::GetUnitParryChance() const
     }
     else if(GetTypeId() == TYPEID_UNIT)
     {
-        if(((Creature const*)this)->GetCreatureInfo()->type == CREATURE_TYPE_HUMANOID)
+        if(GetCreatureType() == CREATURE_TYPE_HUMANOID)
             chance = 5;
     }
 
@@ -4346,9 +4346,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     if(pVictim->IsImmunedToSpellDamage(spellProto))
         return 0;
 
-    CreatureInfo const *cinfo = NULL;
-    if(pVictim->GetTypeId() != TYPEID_PLAYER)
-        cinfo = ((Creature*)pVictim)->GetCreatureInfo();
+    uint32 creatureTypeMask = GetCreatureTypeMask();
 
     // Damage Done
     uint32 CastingTime = GetCastTime(sCastTimesStore.LookupEntry(spellProto->CastingTimeIndex));
@@ -4362,7 +4360,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     // ..done (for creature type by mask) in taken
     AuraList const& mDamageDoneCreature = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE_CREATURE);
     for(AuraList::const_iterator i = mDamageDoneCreature.begin();i != mDamageDoneCreature.end(); ++i)
-        if(cinfo && cinfo->type && ((1 << (cinfo->type-1)) & uint32((*i)->GetModifier()->m_miscvalue)))
+        if(creatureTypeMask & uint32((*i)->GetModifier()->m_miscvalue))
             TakenAdvertisedBenefit += (*i)->GetModifier()->m_amount;
 
     // ..done
@@ -4732,9 +4730,7 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
     if(*pdamage == 0)
         return;
 
-    CreatureInfo const *cinfo = NULL;
-    if(pVictim->GetTypeId() != TYPEID_PLAYER)
-        cinfo = ((Creature*)pVictim)->GetCreatureInfo();
+    uint32 creatureTypeMask = GetCreatureTypeMask();
 
     if(GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->isPet())
     {
@@ -4756,7 +4752,7 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
     // ..done (for creature type by mask) in taken
     AuraList const& mDamageDoneCreature = this->GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE_CREATURE);
     for(AuraList::const_iterator i = mDamageDoneCreature.begin();i != mDamageDoneCreature.end(); ++i)
-        if(cinfo && cinfo->type && ((1 << (cinfo->type-1)) & uint32((*i)->GetModifier()->m_miscvalue)))
+        if(creatureTypeMask & uint32((*i)->GetModifier()->m_miscvalue))
             DoneFlatBenefit += (*i)->GetModifier()->m_amount;
 
     // ..done
@@ -4765,7 +4761,7 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
     // ..done (base at attack power and creature type)
     AuraList const& mCreatureAttackPower = GetAurasByType(SPELL_AURA_MOD_CREATURE_ATTACK_POWER);
     for(AuraList::const_iterator i = mCreatureAttackPower.begin();i != mCreatureAttackPower.end(); ++i)
-        if(cinfo && cinfo->type && ((1 << (cinfo->type-1)) & uint32((*i)->GetModifier()->m_miscvalue)))
+        if(creatureTypeMask & uint32((*i)->GetModifier()->m_miscvalue))
             DoneFlatBenefit += int32((*i)->GetModifier()->m_amount/14.0f * GetAttackTime(attType)/1000);
 
     // ..done (base at attack power for marked target)
@@ -5757,22 +5753,32 @@ bool Unit::isVisibleForInState( Player const* u, bool inVisibleList ) const
     return isVisibleForOrDetect(u,false,inVisibleList);
 }
 
-uint32 Unit::GetCreatureTypeMask() const
+uint32 Unit::GetCreatureType() const
 {
-    uint32 creatureType = 0;
     if(GetTypeId() == TYPEID_PLAYER)
-        creatureType = 0x40;                  //1<<(7-1)
-    else
     {
-        uint32 CType = ((Creature*)this)->GetCreatureInfo()->type;
-        if(CType>=1)
-            creatureType = 1 << (CType - 1);
-        else
-            creatureType = 0;
+        switch(((Player const*)this)->m_form)
+        {
+            case FORM_CAT:
+            case FORM_TRAVEL:
+            case FORM_AQUA:
+            case FORM_BEAR:
+            case FORM_DIREBEAR:
+            case FORM_GHOSTWOLF:
+            case FORM_SWIFT_FLIGHT:
+            case FORM_FLIGHT:
+                return CREATURE_TYPE_BEAST;
+            case FORM_TREE:
+            case FORM_SPIRITOFREDEMPTION:
+                return CREATURE_TYPE_ELEMENTAL;
+            case FORM_MOONKIN:
+            default:
+                return  CREATURE_TYPE_HUMANOID;
+        }
     }
-    return creatureType;
+    else
+        return ((Creature*)this)->GetCreatureInfo()->type;
 }
-
 
 /*#######################################
 ########                         ########

@@ -1763,9 +1763,7 @@ void Spell::EffectPickPocket(uint32 i)
         return;
 
     //victim have to be alive and humanoid or undead
-    if( unitTarget->isAlive() &&
-        (((Creature*)unitTarget)->GetCreatureInfo()->type == CREATURE_TYPE_HUMANOID ||
-        ((Creature*)unitTarget)->GetCreatureInfo()->type == CREATURE_TYPE_UNDEAD))
+    if( unitTarget->isAlive() && (unitTarget->GetCreatureTypeMask() &CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD) != 0)
     {
         int32 chance = 10 + m_caster->getLevel() - unitTarget->getLevel();
 

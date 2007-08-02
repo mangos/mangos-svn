@@ -931,6 +931,8 @@ enum CreatureType
     CREATURE_TYPE_TOTEM            = 11
 };
 
+uint32 const CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD = (1 << (CREATURE_TYPE_HUMANOID-1)) || (1 << (CREATURE_TYPE_UNDEAD-1));
+
 enum CreatureFamily
 {
     CREATURE_FAMILY_WOLF           = 1,
