@@ -1146,8 +1146,9 @@ void Pet::_LoadSpellCooldowns()
     {
         time_t curTime = time(NULL);
 
-        WorldPacket data(SMSG_SPELL_COOLDOWN, (8+result->GetRowCount()*8));
+        WorldPacket data(SMSG_SPELL_COOLDOWN, (8+1+result->GetRowCount()*8));
         data << GetGUID();
+        data << uint8(0x0);
 
         do
         {
