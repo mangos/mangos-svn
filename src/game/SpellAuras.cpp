@@ -995,7 +995,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         return;
 
     // Mangle (Cat) combo && damage
-    if( m_spellProto->SpellFamilyName==SPELLFAMILY_DRUID && m_spellProto->SpellFamilyFlags == 0x40000000000 &&
+    if( m_spellProto->SpellFamilyName==SPELLFAMILY_DRUID && m_spellProto->SpellFamilyFlags == 0x40000000000LL &&
         caster && caster->GetTypeId()==TYPEID_PLAYER )
     {
         if(apply)
