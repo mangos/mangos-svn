@@ -5588,6 +5588,9 @@ void Unit::CalculateSpellDamageAndDuration(int32* damage, int32* duration, Spell
                 ((Player*)this)->ApplySpellMod(spellProto->Id,SPELLMOD_EFFECT3, value);
                 break;
             }
+ 
+            ((Player*)this)->ApplySpellMod(spellProto->Id, SPELLMOD_DAMAGE, value);
+
         }
 
         *damage = value;
