@@ -1255,12 +1255,12 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
             else if(unit_target->getRace() == RACE_TAUREN)
                 modelid = 15375;
             break;
-    case FORM_SWIFT_FLIGHT:
+        case FORM_SWIFT_FLIGHT:
             if(unit_target->getRace() == RACE_NIGHTELF)
                 modelid = 21243;
             else if(unit_target->getRace() == RACE_TAUREN)
                 modelid = 21244;
-        break;
+            break;
         case FORM_AMBIENT:
         case FORM_SHADOW:
         case FORM_STEALTH:
