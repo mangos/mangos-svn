@@ -196,10 +196,10 @@ void GameObject::Update(uint32 p_time)
                             Unit* caster = GetOwner();
                             if(caster && caster->GetTypeId()==TYPEID_PLAYER)
                             {
-                                if(caster->m_currentSpells[CURRENT_GENERIC_SPELL])
+                                if(caster->m_currentSpells[CURRENT_CHANNELED_SPELL])
                                 {
-                                    caster->m_currentSpells[CURRENT_GENERIC_SPELL]->SendChannelUpdate(0);
-                                    caster->m_currentSpells[CURRENT_GENERIC_SPELL]->finish(false);
+                                    caster->m_currentSpells[CURRENT_CHANNELED_SPELL]->SendChannelUpdate(0);
+                                    caster->m_currentSpells[CURRENT_CHANNELED_SPELL]->finish(false);
                                 }
 
                                 WorldPacket data(SMSG_FISH_NOT_HOOKED,0);

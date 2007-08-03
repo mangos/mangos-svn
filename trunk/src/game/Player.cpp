@@ -762,7 +762,7 @@ void Player::Update( uint32 p_time )
     if (isAttacking())
     {
         Unit *pVictim = getVictim();
-        if( m_currentSpells[CURRENT_GENERIC_SPELL] == 0 && pVictim)
+        if( !IsNonMeleeSpellCasted(false) && pVictim)
         {
 
             // default combat reach 10
@@ -12734,6 +12734,12 @@ inline void Player::SendAttackSwingBadFacingAttack()
     GetSession()->SendPacket( &data );
 }
 
+inline void Player::SendAutoRepeatCancel()
+{
+    WorldPacket data(SMSG_CANCEL_AUTO_REPEAT, 0);
+    GetSession()->SendPacket( &data );
+}
+
 void Player::PlaySound(uint32 Sound, bool OnlySelf)
 {
     WorldPacket data(SMSG_PLAY_SOUND, 4);
@@ -13283,7 +13289,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes)
         return false;
 
     // not let flight if casting not finished
-    if(m_currentSpells[CURRENT_GENERIC_SPELL])
+    if(IsNonMeleeSpellCasted(false))
     {
         WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
         data << uint32(ERR_TAXIPLAYERBUSY);

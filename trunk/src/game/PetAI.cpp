@@ -186,10 +186,10 @@ void PetAI::UpdateAI(const uint32 diff)
         else if( i_pet.IsStopped() || i_pet.IsWithinDistInMap(i_pet.getVictim(), ATTACK_DISTANCE))
         {
             // required to be stopped cases
-            if ( i_pet.IsStopped() && i_pet.m_currentSpells[CURRENT_GENERIC_SPELL] )
+            if ( i_pet.IsStopped() && i_pet.IsNonMeleeSpellCasted(false) )
             {
                 if( i_pet.hasUnitState(UNIT_STAT_FOLLOW) )
-                    i_pet.m_currentSpells[CURRENT_GENERIC_SPELL]->cancel();
+                    i_pet.InterruptNonMeleeSpells(false);
                 else
                     return;
             }
