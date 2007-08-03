@@ -475,7 +475,8 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
     }
 
     // only hunter aspects have this (but not all aspects in hunter family)
-    if( spellInfo->activeIconID == 122 && spellInfo->School == 3/*SPELL_SCHOOL_NATURE*/ && spellInfo->Attributes == 0x50000)
+    if( spellInfo->activeIconID == 122 && spellInfo->School == 3/*SPELL_SCHOOL_NATURE*/ && 
+        (spellInfo->Attributes & 0x50000) != 0 && (spellInfo->Attributes & 0x9000010) == 0)
     {
         return SPELL_ASPECT;
     }
