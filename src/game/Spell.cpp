@@ -3182,9 +3182,6 @@ int32 Spell::CalculateDamage(uint8 i)
     
     m_caster->CalculateSpellDamageAndDuration(&value,NULL,m_spellInfo,i,m_currentBasePoints[i]);
 
-    if(m_caster->GetTypeId() == TYPEID_PLAYER)
-        ((Player*)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_DAMAGE, value);
-
     return value;
 }
 
