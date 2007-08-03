@@ -994,8 +994,34 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
     if(!Real)
         return;
 
+    // Mangle (Cat) combo && damage
+    if( m_spellProto->SpellFamilyName==SPELLFAMILY_DRUID && m_spellProto->SpellFamilyFlags == 0x40000000000 &&
+        caster && caster->GetTypeId()==TYPEID_PLAYER )
+    {
+        if(apply)
+        {
+            // 1 combo
+            ((Player*)caster)->AddComboPoints(m_target->GetGUID(),1);
+
+            // damage%
+            SpellModifier *mod = new SpellModifier;
+            mod->op = SPELLMOD_DAMAGE;
+            mod->value = m_modifier.m_amount;
+            mod->type = SPELL_AURA_ADD_PCT_MODIFIER;
+            mod->spellId = m_spellId;
+            mod->effectId = m_effIndex;
+            mod->lastAffected = 0;
+            mod->mask = 0x00000008000 | 0x00000001000;
+            mod->charges = 0;
+
+            m_spellmod = mod;
+        }
+
+        ((Player*)caster)->AddSpellMod(m_spellmod, apply);
+    }
+
     // Tame beast
-    if( apply && caster && m_target->CanHaveThreatList())
+    if( GetId()==1515 && apply && caster && m_target->CanHaveThreatList())
     {
         // FIX_ME: this is 2.0.12 threat effect relaced in 2.1.x by dummy aura, must be checked for correctness
         m_target->AddThreat(caster, 10.0f);
@@ -1012,13 +1038,10 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
     }
 
     // net-o-matic
-    if (GetId() == 13139 && caster)
+    if (GetId() == 13139 && apply && caster)
     {
-        if(apply)
-        {
-            // root to self part of (root_target->charge->root_self sequence
-            caster->CastSpell(caster,13138,true);
-        }
+        // root to self part of (root_target->charge->root_self sequence
+        caster->CastSpell(caster,13138,true);
     }
 
     // seal of righteousness
