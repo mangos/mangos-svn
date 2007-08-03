@@ -757,9 +757,11 @@ void Spell::EffectDummy(uint32 i)
 
             // this is triggered spell
             // find original spell original target
-            if(!m_caster->m_currentSpells[CURRENT_GENERIC_SPELL])
+            if(!m_triggeringContainer)
                 return;
-            Unit* originalTarget = m_caster->m_currentSpells[CURRENT_GENERIC_SPELL]->m_targets.getUnitTarget();
+            if (!(*m_triggeringContainer))
+                return;
+            Unit* originalTarget = (*m_triggeringContainer)->m_targets.getUnitTarget();
             if(!originalTarget)
                 return;
 
@@ -878,6 +880,17 @@ void Spell::EffectDummy(uint32 i)
             _player->learnSpell(6991);                      // Feed Pet
             return;
         }
+
+        // Scatter Shot
+        case 37506:
+        {
+            if (m_caster->GetTypeId()!=TYPEID_PLAYER)
+                return;
+
+            // break Auto Shot
+            m_caster->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
+            return;
+        }
     }
 }
 void Spell::EffectTriggerSpell(uint32 i)
@@ -944,6 +957,10 @@ void Spell::EffectApplyAura(uint32 i)
                 //I'm not sure, if all STUN-Auras prevent attack, therefore the query
                 if(!(spellEntry->SpellFamilyName == SPELLFAMILY_ROGUE && spellEntry->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE_SAP))
                     attack=true;
+                break;
+            case SPELL_AURA_FEIGN_DEATH:
+                // Feign death breaks Auto Shot at caster
+                m_caster->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
                 break;
             default:
                 //If Aura is applied to monster then attack caster
@@ -2527,10 +2544,13 @@ void Spell::EffectInterruptCast(uint32 i)
 
     // TODO: not all spells that used this effect apply cooldown at school spells
     // also exist case: apply cooldown to interrupted cast only and to all spells
-    if (unitTarget->m_currentSpells[CURRENT_GENERIC_SPELL] && unitTarget->m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo)
+    for (uint32 i = CURRENT_FIRST_NON_MELEE_SPELL; i < CURRENT_MAX_SPELL; i++)
     {
-        unitTarget->ProhibitSpellScholl(unitTarget->m_currentSpells[CURRENT_GENERIC_SPELL]->m_spellInfo->School, GetDuration(m_spellInfo));
-        unitTarget->InterruptSpell(CURRENT_GENERIC_SPELL);
+        if (unitTarget->m_currentSpells[i])
+        {
+            unitTarget->ProhibitSpellScholl(unitTarget->m_currentSpells[i]->m_spellInfo->School, GetDuration(m_spellInfo));
+            unitTarget->InterruptSpell(i);
+        }
     }
 }
 

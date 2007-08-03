@@ -357,10 +357,10 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                 }
             }
 
-            if(_player->m_currentSpells[CURRENT_GENERIC_SPELL])
+            if(_player->m_currentSpells[CURRENT_CHANNELED_SPELL])
             {
-                _player->m_currentSpells[CURRENT_GENERIC_SPELL]->SendChannelUpdate(0);
-                _player->m_currentSpells[CURRENT_GENERIC_SPELL]->finish();
+                _player->m_currentSpells[CURRENT_CHANNELED_SPELL]->SendChannelUpdate(0);
+                _player->m_currentSpells[CURRENT_CHANNELED_SPELL]->finish();
             }
             return;
         }
@@ -387,14 +387,14 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             // in case summoning ritual caster is GO creator
             spellCaster = caster;
 
-            if(!caster->m_currentSpells[CURRENT_GENERIC_SPELL])
+            if(!caster->m_currentSpells[CURRENT_CHANNELED_SPELL])
                 return;
 
             spellId = info->sound1;
 
             // finish spell
-            caster->m_currentSpells[CURRENT_GENERIC_SPELL]->SendChannelUpdate(0);
-            caster->m_currentSpells[CURRENT_GENERIC_SPELL]->finish();
+            caster->m_currentSpells[CURRENT_CHANNELED_SPELL]->SendChannelUpdate(0);
+            caster->m_currentSpells[CURRENT_CHANNELED_SPELL]->finish();
 
             // can be deleted now
             obj->SetLootState(GO_LOOTED);
@@ -597,8 +597,8 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
 {
-    if(_player->m_currentSpells[CURRENT_GENERIC_SPELL])
-        _player->m_currentSpells[CURRENT_GENERIC_SPELL]->cancel();
+    if(_player->IsNonMeleeSpellCasted(false))
+        _player->InterruptNonMeleeSpells(false);
 }
 
 void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
@@ -667,5 +667,5 @@ void WorldSession::HandleCancelAutoRepeatSpellOpcode( WorldPacket& recvPacket)
 {
     // may be better send SMSG_CANCEL_AUTO_REPEAT?
     // cancel and prepare for deleting
-    _player->SetCurrentCastedSpell(NULL);
+    _player->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
 }

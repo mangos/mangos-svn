@@ -69,7 +69,7 @@ void TotemAI::EnterEvadeMode()
 void
 TotemAI::UpdateAI(const uint32 diff)
 {
-    if (!i_totem.isTotem() || !i_totem.isAlive() || i_totem.m_currentSpells[CURRENT_GENERIC_SPELL])
+    if (!i_totem.isTotem() || !i_totem.isAlive() || i_totem.IsNonMeleeSpellCasted(false))
         return;
     if (((Totem*)&i_totem)->GetTotemType() != TOTEM_ACTIVE)
         return;
@@ -101,7 +101,7 @@ void
 TotemAI::AttackStart(Unit *u)
 {
     if (!i_totem.isTotem() || !i_totem.isAlive()) return;
-    if (i_totem.m_currentSpells[CURRENT_GENERIC_SPELL]) return;
+    if (i_totem.IsNonMeleeSpellCasted(false)) return;
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(((Totem*)&i_totem)->GetSpell());
     if (GetDuration(spellInfo) != -1)
         i_totem.CastSpell(u, ((Totem*)&i_totem)->GetSpell(), false);

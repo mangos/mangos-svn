@@ -568,13 +568,11 @@ struct UnitActionBarEntry
 enum CurrentSpellTypes
 {
     CURRENT_MELEE_SPELL = 0,
+    CURRENT_FIRST_NON_MELEE_SPELL = 1,                      // just counter
     CURRENT_GENERIC_SPELL = 1,
-    CURRENT_MAX_SPELL = 2                                   // just counter
-/*  TODO: this is for future implementation, now unused
     CURRENT_AUTOREPEAT_SPELL = 2,
     CURRENT_CHANNELED_SPELL = 3,
     CURRENT_MAX_SPELL = 4                                   // just counter
-*/
 };
 
 // delay time next attack to prevent client attack animation problems
@@ -893,7 +891,17 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         void SetCurrentCastedSpell(Spell * pSpell);
         virtual void ProhibitSpellScholl(uint32 idSchool /* from SpellSchools */, uint32 unTimeMs ) { }
-        void InterruptSpell(CurrentSpellTypes spellType);
+        void InterruptSpell(uint32 spellType);
+
+        // set withDelayed to true to account delayed spells as casted
+        // delayed+channeled spells are always accounted as casted
+        // we can skip channeled or delayed checks using flags
+        bool IsNonMeleeSpellCasted(bool withDelayed, bool skipChanneled = false, bool skipAutorepeat = false);
+
+         // set withDelayed to true to interrupt delayed spells too
+        // delayed+channeled spells are always interrupted
+        void InterruptNonMeleeSpells(bool withDelayed);
+
         Spell* m_currentSpells[CURRENT_MAX_SPELL];
         UnitActionBarEntry PetActionBar[10];
         uint32 m_addDmgOnce;
@@ -1028,6 +1036,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         explicit Unit ( WorldObject *instantiator );
 
         void _UpdateSpells(uint32 time);
+
+        void _UpdateAutoRepeatSpell(uint32 time);
+        bool m_AutoRepeatFirstCast;
         //void _UpdateAura();
 
         //Aura* m_aura;

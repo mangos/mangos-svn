@@ -1196,6 +1196,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendAttackSwingNotStanding();
         void SendAttackSwingNotInRange();
         void SendAttackSwingBadFacingAttack();
+        void SendAutoRepeatCancel();
         void SendExplorationExperience(uint32 Area, uint32 Experience);
 
         void SendDungeonDifficulty();

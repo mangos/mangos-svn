@@ -200,7 +200,7 @@ void SpellCastTargets::write ( WorldPacket * data, bool forceAppend)
         *data << (uint8)0;
 }
 
-Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur, uint64 originalCasterGUID )
+Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur, uint64 originalCasterGUID, Spell** triggeringContainer )
 {
     ASSERT( Caster != NULL && info != NULL );
     ASSERT( info == sSpellStore.LookupEntry( info->Id ) && "`info` must be pointer to sSpellStore element");
@@ -209,6 +209,8 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur, u
 
     m_spellInfo = info;
     m_caster = Caster;
+    m_selfContainer = NULL;
+    m_triggeringContainer = triggeringContainer;
     m_deletable = true;
 
     if(originalCasterGUID)
@@ -947,6 +949,7 @@ void Spell::prepare(SpellCastTargets * targets)
     else
     {
         m_caster->SetCurrentCastedSpell( this );
+        m_selfContainer = &(m_caster->m_currentSpells[GetCurrentContainer()]);
         SendSpellStart();
     }
 }
@@ -1571,8 +1574,8 @@ void Spell::update(uint32 difftime)
         // always cancel for channeled spells
         if( m_spellState == SPELL_STATE_CASTING )
             cancel();
-        // don't cancel for instant and melee spells
-        else if(!m_meleeSpell && casttime != 0)
+        // don't cancel for melee, autorepeat and instant spells
+        else if(!m_meleeSpell && !m_autoRepeat && casttime != 0)
             cancel();
     }
 
@@ -2230,7 +2233,7 @@ void Spell::TriggerSpell()
 
     for(std::list<SpellEntry const*>::iterator si=m_TriggerSpells.begin(); si!=m_TriggerSpells.end(); ++si)
     {
-        Spell* spell = new Spell(m_caster, (*si), true, 0);
+        Spell* spell = new Spell(m_caster, (*si), true, NULL, 0, this->m_selfContainer);
         spell->prepare(&m_targets); // use original spell original targets
     }
 }
@@ -2520,7 +2523,7 @@ uint8 Spell::CanCast()
                     return SPELL_FAILED_LOW_CASTLEVEL;
 
                 // chance for fail at orange skinning attempt
-                if (m_caster->m_currentSpells[CURRENT_GENERIC_SPELL] == this && (ReqValue < 0 ? 0 : ReqValue) > irand(SkinningValue-25, SkinningValue+37) )
+                if ((m_selfContainer && (*m_selfContainer) == this) && (ReqValue < 0 ? 0 : ReqValue) > irand(SkinningValue-25, SkinningValue+37) )
                     return SPELL_FAILED_TRY_AGAIN;
 
                 break;
@@ -2533,7 +2536,7 @@ uint8 Spell::CanCast()
                     return SPELL_FAILED_BAD_TARGETS;
 
                 // chance for fail at orange mining/herb/LockPicking gathering attempt
-                if (m_targets.getGOTarget()->GetGoType() == GAMEOBJECT_TYPE_CHEST && m_caster->m_currentSpells[CURRENT_GENERIC_SPELL] == this)
+                if (m_targets.getGOTarget()->GetGoType() == GAMEOBJECT_TYPE_CHEST && (m_selfContainer && (*m_selfContainer) == this))
                 {
                     int32 SkillValue;
                     if (m_spellInfo->EffectMiscValue[i] == LOCKTYPE_HERBALISM)
@@ -2713,7 +2716,7 @@ int16 Spell::PetCanCast(Unit* target)
     if(!m_caster->isAlive())
         return SPELL_FAILED_CASTER_DEAD;
 
-    if(m_caster->m_currentSpells[CURRENT_GENERIC_SPELL]) //prevent spellcast interuption by another spellcast
+    if(m_caster->IsNonMeleeSpellCasted(false)) //prevent spellcast interuption by another spellcast
         return SPELL_FAILED_SPELL_IN_PROGRESS;
     if(m_caster->isInCombat() && IsNonCombatSpell(m_spellInfo->Id))
         return SPELL_FAILED_AFFECTING_COMBAT;
@@ -3232,6 +3235,8 @@ void Spell::Delayed(int32 delaytime)
     if(!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
+    if (m_spellState == SPELL_STATE_DELAYED) return; // spell is active and can't be time-backed
+
     //check resist chance
     int32 resistChance = 100; //must be initialized to 100 for percent modifiers
     ((Player*)m_caster)->ApplySpellMod(m_spellInfo->Id,SPELLMOD_NOT_LOSE_CASTING_TIME,resistChance);
@@ -3349,6 +3354,18 @@ uint32 Spell::GetTargetCreatureTypeMask() const
     return SpellCreatureType;
 }
 
+CurrentSpellTypes Spell::GetCurrentContainer()
+{
+    if (IsMeleeSpell())
+        return(CURRENT_MELEE_SPELL);
+    else if (IsAutoRepeat())
+        return(CURRENT_AUTOREPEAT_SPELL);
+    else if (IsChanneledSpell())
+        return(CURRENT_CHANNELED_SPELL);
+    else
+        return(CURRENT_GENERIC_SPELL);
+}
+
 SpellEvent::SpellEvent(Spell* spell) : BasicEvent()
 {
     m_Spell = spell;
@@ -3358,6 +3375,7 @@ SpellEvent::~SpellEvent()
 {
     if (m_Spell->getState() != SPELL_STATE_FINISHED)
         m_Spell->cancel();
+
     if (m_Spell->IsDeletable())
     {
         delete m_Spell;
@@ -3382,7 +3400,11 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
         {
             // spell was finished, check deletable state
             if (m_Spell->IsDeletable())
+            {
+                // check, if we do have unfinished triggered spells
+
                 return(true); // spell is deletable, finish event
+            }
             // event will be re-added automatically at the end of routine)
         } break;
 
@@ -3402,8 +3424,18 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
                 if (m_Spell->IsChanneledSpell())
                 {
                     // evented channeled spell is processed separately, casted once after delay, and not destroyed till finish
+                    // check, if we have casting anything else except this channeled spell and autorepeat
+                    if (m_Spell->GetCaster()->IsNonMeleeSpellCasted(false, true, true))
+                    {
+                        // another non-melee non-delayed spell is casted now, abort
+                        m_Spell->cancel();
+                    }
+                    else
+                    {
+                        // do the action (pass spell to channeling state)
+                        m_Spell->handle_immediate();
+                    }
                     // event will be re-added automatically at the end of routine)
-                    m_Spell->handle_immediate();
                 }
                 else
                 {
@@ -3417,9 +3449,7 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
                         return(false); // event not complete
                     }
                     // event complete
-                    if (m_Spell->IsDeletable())
-                        return(true); // spell is deletable, finish event
-                    // update event will be re-added automatically at the end of routine)
+                    // finish update event will be re-added automatically at the end of routine)
                 }
             }
             else
@@ -3447,5 +3477,6 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
 void SpellEvent::Abort(uint64 e_time)
 {
     // oops, the spell we try to do is aborted
+    if (m_Spell->getState() != SPELL_STATE_FINISHED)
     m_Spell->cancel();
 }

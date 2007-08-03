@@ -528,7 +528,7 @@ class Spell
         void EffectApplyPetAura(uint32 i);
         void EffectSummonDemon(uint32 i);
 
-        Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur = NULL, uint64 originalCasterGUID = 0 );
+        Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur = NULL, uint64 originalCasterGUID = 0, Spell** triggeringContainer = NULL );
         ~Spell();
 
         void prepare(SpellCastTargets * targets);
@@ -595,7 +595,7 @@ class Spell
         int32 casttime;
         bool IsAutoRepeat() const { return m_autoRepeat; }
         void SetAutoRepeat(bool rep) { m_autoRepeat = rep; }
-        void ReSetTimer() { m_timer = casttime<0?0:casttime;}
+        void ReSetTimer() { m_timer = casttime<0?0:casttime; }
         bool IsMeleeSpell() const { return m_meleeSpell; }
         bool IsChanneledSpell() const { return m_spellInfo->ChannelInterruptFlags != 0; }
         bool IsChannelActive() const { return m_caster->GetUInt32Value(UNIT_CHANNEL_SPELL) != 0; }
@@ -606,6 +606,8 @@ class Spell
         uint64 GetDelayStart() const { return m_delayStart; }
         void SetDelayStart(uint64 m_time) { m_delayStart = m_time; }
         uint64 GetDelayMoment() const { return m_delayMoment; }
+
+        CurrentSpellTypes GetCurrentContainer();
 
         Unit* GetCaster() { return m_caster; }
         Unit* GetOriginalCaster() { return m_originalCaster; }
@@ -625,6 +627,9 @@ class Spell
         uint64 m_originalCasterGUID;                        // real source of cast (aura caster/etc), used for spell targets selection
                                                             // e.g. damage around area spell trigered by victim aura and da,age emeies of aura caster
         Unit* m_originalCaster;                             // cached pointer for m_originalCaster, updated at Spell::UpdatePointers()
+
+        Spell** m_selfContainer;                            // pointer to our spell container (if applicable)
+        Spell** m_triggeringContainer;                      // pointer to container with spell that has triggered us
 
         bool m_autoRepeat;
         bool m_meleeSpell;
@@ -663,7 +668,7 @@ class Spell
         //List For Triggered Spells
         typedef std::list<SpellEntry const*> TriggerSpells;
         TriggerSpells m_TriggerSpells;
-
+        
         uint32 m_spellState;
         uint32 m_timer;
         uint16 m_castFlags;
