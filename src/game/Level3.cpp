@@ -1502,6 +1502,8 @@ bool ChatHandler::HandleLearnCommand(const char* args)
         return false;
 
     uint32 spell = (uint32)atol((char*)cId);
+    if(!spell || !sSpellStore.LookupEntry(spell))
+        return false;
 
     if (targetPlayer->HasSpell(spell))
     {

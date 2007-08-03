@@ -3811,32 +3811,68 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
     switch(auraSpellInfo->SpellIconID)
     {
         case 19:
-            //Lightning Shield (overwrite non existing triggered spell call in spell.dbc
-            if(auraSpellInfo->SpellFamilyName==SPELLFAMILY_SHAMAN && auraSpellInfo->SpellFamilyFlags==0x00000400)
+        {
+            switch(auraSpellInfo->SpellFamilyName)
             {
-                if(!pVictim)
-                    return;
-
-                uint32 spell = 0;
-                switch(triggredByAura->GetSpellProto()->Id)
+                case SPELLFAMILY_SHAMAN:
                 {
-                    case   324: spell = 26364; break;       // Rank 1 
-                    case   325: spell = 26365; break;       // Rank 2
-                    case   905: spell = 26366; break;       // Rank 3 
-                    case   945: spell = 26367; break;       // Rank 4
-                    case  8134: spell = 26369; break;       // Rank 5
-                    case 10431: spell = 26370; break;       // Rank 6
-                    case 10432: spell = 26363; break;       // Rank 7
-                    case 25469: spell = 26371; break;       // Rank 8
-                    case 25472: spell = 26372; break;       // Rank 9
-                    default:
-                        sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in LShield",triggredByAura->GetSpellProto()->Id);
+                    //Lightning Shield (overwrite non existing triggered spell call in spell.dbc
+                    if(auraSpellInfo->SpellFamilyFlags==0x00000400)
+                    {
+                        if(!pVictim)
+                            return;
+
+                        uint32 spell = 0;
+                        switch(triggredByAura->GetSpellProto()->Id)
+                        {
+                        case   324: spell = 26364; break;       // Rank 1 
+                        case   325: spell = 26365; break;       // Rank 2
+                        case   905: spell = 26366; break;       // Rank 3 
+                        case   945: spell = 26367; break;       // Rank 4
+                        case  8134: spell = 26369; break;       // Rank 5
+                        case 10431: spell = 26370; break;       // Rank 6
+                        case 10432: spell = 26363; break;       // Rank 7
+                        case 25469: spell = 26371; break;       // Rank 8
+                        case 25472: spell = 26372; break;       // Rank 9
+                        default:
+                            sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in LShield",triggredByAura->GetSpellProto()->Id);
+                            return;
+                        }
+                        CastSpell(pVictim, spell, true, NULL);
                         return;
+                    }
+                    break;
                 }
-                CastSpell(pVictim, spell, true, NULL);
-                return;
+                case SPELLFAMILY_PRIEST:
+                {
+                    // Priest's "Shadowguard"
+                    if(auraSpellInfo->SpellFamilyFlags==0x100080000000LL)
+                    {
+                        if(!pVictim)
+                            return;
+
+                        uint32 spell = 0;
+                        switch(triggredByAura->GetSpellProto()->Id)
+                        {
+                        case 18137: spell = 28377; break;       // Rank 1
+                        case 19308: spell = 28378; break;       // Rank 2
+                        case 19309: spell = 28379; break;       // Rank 3
+                        case 19310: spell = 28380; break;       // Rank 4
+                        case 19311: spell = 28381; break;       // Rank 5
+                        case 19312: spell = 28382; break;       // Rank 6
+                        case 25477: spell = 28385; break;       // Rank 7        
+                        default:
+                            sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in SG",triggredByAura->GetSpellProto()->Id);
+                            return;
+                        }
+                        CastSpell(pVictim, spell, true, NULL);
+                        return;
+                    }
+                    break;
+                }
             }
-            return;
+            break;
+        }
         case 87:
         {
             //Mana Surge (Shaman T1 bonus)
@@ -3905,6 +3941,7 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
                     return;
                 }
             }
+            break;
         }
         case 312:
         {
