@@ -904,8 +904,11 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
             {
                 SendAttackStateUpdate(HITINFO_MISS, pVictim, 1, spellInfo->School, 0, 0,0,1,0);
                 *damage = 0;
+
                 if(GetTypeId()== TYPEID_PLAYER)
                     ((Player*)this)->UpdateWeaponSkill(BASE_ATTACK);
+
+                CastMeleeProcDamageAndSpell(pVictim,0,BASE_ATTACK,MELEE_HIT_MISS,spellInfo,isTriggeredSpell);
                 return;
             }
 
@@ -1025,6 +1028,10 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
             // Update attack state
             SendAttackStateUpdate(victimState ? hitInfo|victimState : hitInfo, pVictim, 1, spellInfo->School, 0, 0,0,1,0);
 
+            // do all damage=0 cases here
+            if(damage <= 0)
+                CastMeleeProcDamageAndSpell(pVictim,0,BASE_ATTACK,outcome,spellInfo,isTriggeredSpell);
+
             break;
 
         // Other schools
@@ -1051,12 +1058,22 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
             // Calculate critical bonus
             *crit = SpellCriticalBonus(spellInfo, (int32*)damage, pVictim);
             cleanDamage->hitOutCome = MELEE_HIT_CRIT;
+
+            // spell proc all magic damage==0 case in this function
+            if(damage <= 0)
+            {
+                // Procflags
+                uint32 procAttacker = PROC_FLAG_HIT_SPELL;
+                uint32 procVictim   = (PROC_FLAG_STRUCK_SPELL|PROC_FLAG_TAKE_DAMAGE);
+
+                ProcDamageAndSpell(pVictim, procAttacker, procVictim, 0, spellInfo, isTriggeredSpell);
+            }
+
             break;
     }
 
     // TODO this in only generic way, check for exceptions
     DEBUG_LOG("DealDamageBySchool (AFTER) SCHOOL %u >> DMG:%u", spellInfo->School, *damage);
-
 }
 
 void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, bool isTriggeredSpell, bool useSpellDamage)
@@ -1076,7 +1093,7 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, 
     if (useSpellDamage)
         DealDamageBySchool(pVictim, spellInfo, &damage, &cleanDamage, &crit, isTriggeredSpell);
 
-    // If we actually dealt some damage
+    // If we actually dealt some damage (spell proc's for 0 damage (normal and magic) called in DealDamageBySchool)
     if(damage > 0)
     {
         // Calculate absorb & resists
@@ -1122,11 +1139,16 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, 
 
         ProcDamageAndSpell(pVictim, procAttacker, procVictim, (damage-absorb-resist), spellInfo, isTriggeredSpell);
     }
-    //Check for rage
-    else if(cleanDamage.damage) 
-        // Rage from damage received.
-        if(pVictim->GetTypeId() == TYPEID_PLAYER && (pVictim->getPowerType() == POWER_RAGE))
-            ((Player*)pVictim)->RewardRage(cleanDamage.damage, 0, false);
+    else
+    {
+        // all spell proc for 0 normal and magic damage called in DealDamageBySchool
+
+        //Check for rage
+        if(cleanDamage.damage) 
+            // Rage from damage received.
+            if(pVictim->GetTypeId() == TYPEID_PLAYER && (pVictim->getPowerType() == POWER_RAGE))
+                ((Player*)pVictim)->RewardRage(cleanDamage.damage, 0, false);
+    }
 }
 
 void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier *mod, uint8 effect_idx)
@@ -3756,6 +3778,9 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
         case 30680:
         case 30681:
         {
+            if(!procSpell)
+                return;
+
             // we assume lightning bolt and chain lightning are generic (not channeled/autorepeat) spells
             if(!pVictim || !m_currentSpells[CURRENT_GENERIC_SPELL])
                 return;
@@ -3788,19 +3813,60 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
     }
 
     // Non SpellID checks
-
-    // VT
-    if (dummySpell->SpellIconID == 2213)
+    switch(dummySpell->SpellIconID)
     {
-        if(!pVictim)
-            return;
-
-        if(triggredByAura->GetCasterGUID() == pVictim->GetGUID())
+        // VT
+        case 2213:
         {
-            int32 VTEnergizeBasePoints0 = triggredByAura->GetModifier()->m_amount*damage/100 - 1;
-            pVictim->CastCustomSpell(pVictim,34919,&VTEnergizeBasePoints0,NULL,NULL,true,NULL, triggredByAura);
+            if(!pVictim)
+                return;
+
+            if(triggredByAura->GetCasterGUID() == pVictim->GetGUID())
+            {
+                int32 VTEnergizeBasePoints0 = triggredByAura->GetModifier()->m_amount*damage/100 - 1;
+                pVictim->CastCustomSpell(pVictim,34919,&VTEnergizeBasePoints0,NULL,NULL,true,NULL, triggredByAura);
+            }
+            return;
         }
-        return;
+        // Quick Recovery
+        case 2116:
+        {
+            if(!procSpell)
+                return;
+
+            if(dummySpell->SpellFamilyName!=SPELLFAMILY_ROGUE)
+                return;
+
+            // only rogue's finishing moves (maybe need additional checks)
+            if( procSpell->SpellFamilyName!=SPELLFAMILY_ROGUE || 
+                (procSpell->SpellFamilyFlags & (0x40000 | 0x80000 | 0x100000 | 0x200000 | 0x800000000LL | 0x20000)) == 0)
+                return;
+
+            int32 QREnegyCostSave = procSpell->manaCost * triggredByAura->GetModifier()->m_amount/100;
+            if(QREnegyCostSave <= 0)
+                return;
+            int32 QREnergizeBasePoints0 = QREnegyCostSave-1;
+            CastCustomSpell(this,31663,&QREnergizeBasePoints0,NULL,NULL,true,NULL, triggredByAura);
+
+            return;
+        }
+        // Thrill of the Hunt
+        case 2236:
+        {
+            if(!procSpell)
+                return;
+
+            if(dummySpell->SpellFamilyName!=SPELLFAMILY_HUNTER)
+                return;
+
+            int32 THManaCostSave = procSpell->manaCost * 40/100;
+            if(THManaCostSave <= 0)
+                return;
+            int32 THEnergizeBasePoints0 = THManaCostSave-1;
+            CastCustomSpell(this,34720,&THEnergizeBasePoints0,NULL,NULL,true,NULL, triggredByAura);
+
+            return;
+        }
     }
 }
 
@@ -3877,6 +3943,9 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
         {
             //Mana Surge (Shaman T1 bonus)
             //Effect: 23571
+            if(!procSpell)
+                return;
+
             int32 manaSurgeSpellBasePoints0 = procSpell->manaCost * 35/100;
             CastCustomSpell(this, 23571, &manaSurgeSpellBasePoints0, NULL, NULL, true, NULL, triggredByAura);
             return;
@@ -3903,6 +3972,9 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
                 //Illumination
                 case 18350:
                 {
+                    if(!procSpell)
+                        return;
+
                     // must be HLight || HShock (triggered) || FlashOL
                     if( (procSpell->SpellVisual != 2936 || procSpell->SpellIconID != 70 ) && 
                         (procSpell->SpellVisual != 135  || procSpell->SpellIconID != 156) &&
@@ -4035,7 +4107,10 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
     // Impr. Countercasting
     case 11255:
     case 12598:
-        // if Countercasting spell casted and target also cating in this moment.
+        if(!procSpell)
+            return;
+
+        // if Countercasting spell casted and target also casting in this moment.
         if(procSpell->SpellVisual==239 && pVictim && pVictim->IsNonMeleeSpellCasted(false))
             break;                                          // fall through to std. handler
         return;
@@ -4049,6 +4124,19 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
         return;
     }
 
+    // but with dummy basepoints
+    switch(trigger_spell_id)
+    {
+        // Shamanistic Rage
+        case 30824:
+        {
+            int32 SRBasePoints0 = GetTotalAttackPowerValue(BASE_ATTACK)*triggredByAura->GetModifier()->m_amount/100 -1;
+            CastCustomSpell(this, 30824, &SRBasePoints0, NULL, NULL, true, NULL, triggredByAura);
+            return;
+        }
+    }
+
+    // default case
     if(IsPositiveSpell(trigger_spell_id) && !(procFlags & PROC_FLAG_HEAL))
         CastSpell(this,trigger_spell_id,true,NULL,triggredByAura);
     else if(pVictim && pVictim->isAlive())
