@@ -646,19 +646,28 @@ void Aura::ApplyModifier(bool apply, bool Real)
 
 void Aura::UpdateAuraDuration()
 {
-    if(m_target->GetTypeId() != TYPEID_PLAYER)
+    if(m_auraSlot >= MAX_AURAS || m_isPassive)
         return;
 
-    if(m_isPassive)
-        return;
+    if( m_target->GetTypeId() == TYPEID_PLAYER)
+    {
+        WorldPacket data(SMSG_UPDATE_AURA_DURATION, 5);
+        data << (uint8)m_auraSlot << (uint32)m_duration;
+        ((Player*)m_target)->SendDirectMessage(&data);
+    }
 
-    if(m_auraSlot >= MAX_AURAS)
-        return;
+    Unit* caster = GetCaster();
 
-    WorldPacket data(SMSG_UPDATE_AURA_DURATION, 5);
-    data << (uint8)m_auraSlot << (uint32)m_duration;
-    //((Player*)m_target)->SendMessageToSet(&data, true); //GetSession()->SendPacket(&data);
-    ((Player*)m_target)->SendDirectMessage(&data);
+    if(caster && caster->GetTypeId() == TYPEID_PLAYER && caster != m_target)
+    {
+        WorldPacket data(SMSG_SET_AURA_SINGLE, (8+2+4+4+4));
+        data.append(m_target->GetPackGUID());
+        data << uint8(m_auraSlot);
+        data << uint32(GetSpellProto()->Id);
+        data << uint32(GetAuraDuration());              // full
+        data << uint32(GetAuraDuration());              // remain
+        ((Player*)caster)->GetSession()->SendPacket(&data);
+    }
 }
 
 void Aura::_AddAura()
@@ -754,19 +763,7 @@ void Aura::_AddAura()
             m_target->ModifyAuraState(AURA_STATE_IMMOLATE,true);
 
         SetAuraSlot( slot );
-        if( m_target->GetTypeId() == TYPEID_PLAYER )
-            UpdateAuraDuration();
-
-        if(!m_isPassive && !IsPositive() && caster && caster->GetTypeId() == TYPEID_PLAYER && caster != m_target && slot < MAX_AURAS)
-        {
-            WorldPacket data(SMSG_SET_AURA_SINGLE, (8+2+4+4+4));
-            data.append(m_target->GetPackGUID());
-            data << uint8(slot);
-            data << uint32(GetSpellProto()->Id);
-            data << uint32(GetAuraDuration());              // full
-            data << uint32(GetAuraDuration());              // remain
-            ((Player*)caster)->GetSession()->SendPacket(&data);
-        }
+        UpdateAuraDuration();
     }  
 }
 
