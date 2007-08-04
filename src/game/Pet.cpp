@@ -987,7 +987,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
             PetLevelInfo const* pInfo = objmgr.GetPetLevelInfo(creature_ID, petlevel); //stored standart pet stats are entry 1 in pet_levelinfo
             if(pInfo)                                       // exist in DB
             {
-                SetCreateHealth(float(pInfo->health));
+                SetCreateHealth(pInfo->health);
                 SetModifierValue(UNIT_MOD_ARMOR, BASE_VALUE, float(pInfo->armor));
                 //SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, float(cinfo->attackpower));
 
@@ -1001,7 +1001,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
                 sLog.outErrorDb("Hunter pet levelstats missing in DB");
 
                 // remove elite bonuses included in DB values
-                SetCreateHealth( float (((cinfo->maxhealth / cinfo->maxlevel) / (1 + 2 * cinfo->rank)) * petlevel) );
+                SetCreateHealth( uint32(((float(cinfo->maxhealth) / cinfo->maxlevel) / (1 + 2 * cinfo->rank)) * petlevel) );
 
                 SetCreateStat(STAT_STRENGTH,22);
                 SetCreateStat(STAT_AGILITY,22);
@@ -1035,8 +1035,8 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
                 sLog.outErrorDb("Summoned pet (Entry: %u) not have pet stats data in DB",cinfo->Entry);
 
                 // remove elite bonuses included in DB values
-                SetCreateHealth(((cinfo->maxhealth / cinfo->maxlevel) / (1 + 2 * cinfo->rank)) * petlevel);
-                SetCreateMana( ((cinfo->maxmana / cinfo->maxlevel) / (1 + 2 * cinfo->rank)) * petlevel);
+                SetCreateHealth(uint32(((float(cinfo->maxhealth) / cinfo->maxlevel) / (1 + 2 * cinfo->rank)) * petlevel) );
+                SetCreateMana(  uint32(((float(cinfo->maxmana)   / cinfo->maxlevel) / (1 + 2 * cinfo->rank)) * petlevel) );
 
                 SetCreateStat(STAT_STRENGTH,22);
                 SetCreateStat(STAT_AGILITY,22);
