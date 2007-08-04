@@ -916,7 +916,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         int32 m_modHitChance;
         int32 m_modSpellHitChance;
         int32 m_baseSpellCritChance;
-        int32 m_modCastSpeedPct;
         float m_modResilience;
         float m_threatModifier[MAX_SPELL_SCHOOL];
         float m_modAttackSpeedPct[3];

@@ -265,7 +265,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNoImmediateEffect,                         //213 SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT
     &Aura::HandleNULL,                                      //214
     &Aura::HandleNULL,                                      //215
-    &Aura::HandleNULL,                                      //216 SPELL_AURA_HASTE_SPELLS
+    &Aura::HandleModCastingSpeed,                           //216 SPELL_AURA_HASTE_SPELLS
     &Aura::HandleNULL,                                      //217                                   unused
     &Aura::HandleNULL,                                      //218                                   unused
     &Aura::HandleModManaRegen,                              //219 SPELL_AURA_MOD_MANA_REGEN
@@ -3114,7 +3114,7 @@ void Aura::HandleModSpellCritChanceShool(bool apply, bool Real)
 
 void Aura::HandleModCastingSpeed(bool apply, bool Real)
 {
-    m_target->m_modCastSpeedPct += apply ? m_modifier.m_amount : (-m_modifier.m_amount);
+    m_target->ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED,-m_modifier.m_amount,apply);
 }
 
 void Aura::HandleModAttackSpeed(bool apply, bool Real)

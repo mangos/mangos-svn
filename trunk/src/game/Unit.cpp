@@ -171,7 +171,6 @@ Unit::Unit( WorldObject *instantiator )
     m_modSpellHitChance = 0;
     m_baseSpellCritChance = 5;
     m_modResilience = 0.0;
-    m_modCastSpeedPct = 0;
     m_CombatTimer = 0;
     //m_victimThreat = 0.0f;
     for (int i = 0; i < MAX_SPELL_SCHOOL; ++i)

@@ -3942,8 +3942,7 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
         case PLAYER_FIELD_SPELL_HASTE_RATING:
             //Haste: 6.67
             RatingChange = value/ RatingCoeffecient;
-            ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED,RatingChange,!apply);
-            m_modCastSpeedPct += apply ? int32(RatingChange) : -int32(RatingChange);
+            ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED,-RatingChange,apply);
             break;
         case PLAYER_FIELD_HIT_RATING:
             //Hit (melee): 10

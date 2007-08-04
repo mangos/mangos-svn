@@ -252,7 +252,7 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur, u
     {
         p_caster = ((Player*)m_caster);
         ((Player*)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_CASTING_TIME, casttime);
-        casttime = int32(float(casttime)/(100+p_caster->m_modCastSpeedPct)*100);
+        casttime = int32(casttime*p_caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
     }
 
     m_timer = casttime<0?0:casttime;
