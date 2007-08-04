@@ -4104,16 +4104,18 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
     // custom check for proc spell
     switch(auraSpellInfo->Id)
     {
-    // Impr. Countercasting
-    case 11255:
-    case 12598:
-        if(!procSpell)
-            return;
+        // Impr. Countercasting
+        case 11255:
+        case 12598:
+        {
+            if(!procSpell)
+                return;
 
-        // if Countercasting spell casted and target also casting in this moment.
-        if(procSpell->SpellVisual==239 && pVictim && pVictim->IsNonMeleeSpellCasted(false))
-            break;                                          // fall through to std. handler
-        return;
+            // if Countercasting spell casted and target also casting in this moment.
+            if(procSpell->SpellVisual==239 && pVictim && pVictim->IsNonMeleeSpellCasted(false))
+                break;                                          // fall through to std. handler
+            return;
+        }
     }
 
     // standard non-dummy case
@@ -4124,14 +4126,25 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
         return;
     }
 
-    // but with dummy basepoints
+    // but with dummy basepoints or other customs
     switch(trigger_spell_id)
     {
-        // Shamanistic Rage
+        // Shamanistic Rage triggered spell
         case 30824:
         {
             int32 SRBasePoints0 = GetTotalAttackPowerValue(BASE_ATTACK)*triggredByAura->GetModifier()->m_amount/100 -1;
             CastCustomSpell(this, 30824, &SRBasePoints0, NULL, NULL, true, NULL, triggredByAura);
+            return;
+        }
+        // Backlash triggered spell
+        case 34936:
+        {
+            // need set custom cooldown 
+            if(isAlive() && GetTypeId()==TYPEID_PLAYER && !((Player*)this)->HasSpellCooldown(34936))
+            {
+                CastSpell(this,trigger_spell_id,true,NULL,triggredByAura);
+                ((Player*)this)->AddSpellCooldown(34936,0,time(NULL)+8);
+            }
             return;
         }
     }
