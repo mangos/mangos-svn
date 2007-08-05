@@ -4195,7 +4195,7 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
             // need set custom cooldown 
             if(isAlive() && GetTypeId()==TYPEID_PLAYER && !((Player*)this)->HasSpellCooldown(34936))
             {
-                CastSpell(this,trigger_spell_id,true,NULL,triggredByAura);
+                CastSpell(this,trigger_spell_id,true,NULL,triggeredByAura);
                 ((Player*)this)->AddSpellCooldown(34936,0,time(NULL)+8);
             }
             return;
