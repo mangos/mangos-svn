@@ -19,7 +19,7 @@
 
 #include "Mthread.h"
 
-#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__APPLE_CC__)
+#if defined(__FreeBSD__) || defined(__OpenBSD__) || defined(__NetBSD__) || defined(__APPLE_CC__)
 #  define MANGOS_PTHREAD_MUTEX_RECURSIVE PTHREAD_MUTEX_RECURSIVE
 #else
 #  define MANGOS_PTHREAD_MUTEX_RECURSIVE PTHREAD_MUTEX_RECURSIVE_NP

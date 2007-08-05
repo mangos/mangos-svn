@@ -41,6 +41,8 @@
     #define G3D_LINUX
 #elif __FreeBSD__ 
     #define G3D_LINUX
+#elif __NetBSD__
+    #define G3D_LINUX
 #elif __APPLE__ 
     #define G3D_OSX
 #else
