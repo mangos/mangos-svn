@@ -10041,10 +10041,14 @@ bool Player::CanSeeStartQuest( uint32 quest_id )
 {
     if( quest_id )
     {
-        if( SatisfyQuestRace( quest_id, false ) && SatisfyQuestClass( quest_id, false ) && SatisfyQuestExclusiveGroup( quest_id, false )
-            && SatisfyQuestSkill( quest_id, false ) && SatisfyQuestReputation( quest_id, false )
-            && SatisfyQuestPreviousQuest( quest_id, false ) && SatisfyQuestNextChain( quest_id, false ) && SatisfyQuestPrevChain( quest_id, false ) )
-            return ( getLevel() + 7 >= objmgr.mQuestTemplates[quest_id]->GetMinLevel() );
+        if( SatisfyQuestRace( quest_id, false ) && SatisfyQuestClass( quest_id, false ) &&
+            SatisfyQuestExclusiveGroup( quest_id, false ) &&
+            SatisfyQuestSkill( quest_id, false ) && SatisfyQuestReputation( quest_id, false ) &&
+            SatisfyQuestPreviousQuest( quest_id, false ) && SatisfyQuestNextChain( quest_id, false ) &&
+            SatisfyQuestPrevChain( quest_id, false ) )
+        {
+            return ( getLevel() + sWorld.getConfig(CONFIG_QUEST_HIGH_LEVEL_HIDE_DIFF) >= objmgr.mQuestTemplates[quest_id]->GetMinLevel() );
+        }
     }
     return false;
 }
