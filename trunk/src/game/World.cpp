@@ -370,6 +370,14 @@ void World::SetInitialWorldSettings()
 
     m_configs[CONFIG_CREATURE_FAMILY_ASSISTEMCE_RADIUS] = sConfig.GetIntDefault("CreatureFamilyAssistenceRadius",10);
 
+    // note: disable value (-1) will assigned as 0xFFFFFFF, to prevent overflow at calculations limit it to max possible player level (255)
+    m_configs[CONFIG_QUEST_LOW_LEVEL_HIDE_DIFF] = sConfig.GetIntDefault("Quests.LowLevelHideDiff",4);
+    if(m_configs[CONFIG_QUEST_LOW_LEVEL_HIDE_DIFF] > 255)
+        m_configs[CONFIG_QUEST_LOW_LEVEL_HIDE_DIFF] = 255;
+    m_configs[CONFIG_QUEST_HIGH_LEVEL_HIDE_DIFF] = sConfig.GetIntDefault("Quests.HighLevelHideDiff",7);
+    if(m_configs[CONFIG_QUEST_HIGH_LEVEL_HIDE_DIFF] > 255)
+        m_configs[CONFIG_QUEST_HIGH_LEVEL_HIDE_DIFF] = 255;
+
     m_VisibleUnitGreyDistance = sConfig.GetFloatDefault("Visibility.Distance.Grey.Unit", 1);
     if(m_VisibleUnitGreyDistance >  MAX_VISIBILITY_DISTANCE)
     {

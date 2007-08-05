@@ -391,7 +391,7 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
                 {
                     if ( pQuest->IsAutoComplete() || (pQuest->IsRepeatable() && pPlayer->getQuestStatusMap()[quest_id].m_rewarded))
                         result2 = DIALOG_STATUS_REWARD_REP;
-                    else if (pPlayer->getLevel() <= pQuest->GetQuestLevel() + 4)
+                    else if (pPlayer->getLevel() <= pQuest->GetQuestLevel() + sWorld.getConfig(CONFIG_QUEST_LOW_LEVEL_HIDE_DIFF) )
                         result2 = DIALOG_STATUS_AVAILABLE;
                     else
                         result2 = DIALOG_STATUS_CHAT;

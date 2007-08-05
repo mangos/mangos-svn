@@ -146,6 +146,16 @@ ActivateWeather = 1
 # Default: 0 (false)
 IgnoreATLevelRequirement = 0
 
+#  quest level difference to hide for player low level quests: if player_level > quest_level + LowLevelQuestsHideDiff then quest ! mark not show for quest giver
+#          -1 (show all available quests marks) 
+# Default: 4 
+Quests.LowLevelHideDiff = 4
+
+#  quest level difference to hide for player high level quests: if player_level < quest_min_level - HighLevelQuestsHideDiff then quest ! mark not show for quest giver
+#          -1 (show all available quests marks) 
+# Default: 7
+Quests.HighLevelHideDiff = 7
+
 # Max count that player can learn the primary trade skill.
 # Default: 2
 # Max : 9 
