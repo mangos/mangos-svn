@@ -1494,6 +1494,30 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
         return;
     }
 
+    /// If this is a creature and it attacks from behind it has a probability to daze it's victim
+    if( (outcome==MELEE_HIT_CRIT || outcome==MELEE_HIT_CRUSHING || outcome==MELEE_HIT_NORMAL || outcome==MELEE_HIT_GLANCING) &&
+        GetTypeId() != TYPEID_PLAYER && !((Creature*)this)->GetCharmerOrOwnerGUID() && !pVictim->HasInArc(M_PI, this) )
+    {
+        // -probability is between 0% and 40%
+        // 20% base chance
+        float Probability = 20;
+
+        //there is a newbie protection, at level 10 just 7% base chance; assuming linear function
+        if( pVictim->getLevel() < 30 )
+            Probability = 0.65f*pVictim->getLevel()+0.5;
+
+        uint32 VictimDefense=pVictim->GetDefenseSkillValue();
+        uint32 AttackerMeleeSkill=GetUnitMeleeSkill();
+
+        Probability *= AttackerMeleeSkill/(float)VictimDefense;
+
+        if(Probability > 40)
+            Probability = 40;
+
+        if(roll_chance_f(Probability))
+            CastSpell(pVictim, 1604, true);
+    }
+
     *damage += CalculateDamage (attType);
 
     //Calculate the damage after armor mitigation if SPELL_SCHOOL_NORMAL

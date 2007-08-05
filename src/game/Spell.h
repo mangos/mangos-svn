@@ -514,6 +514,7 @@ class Spell
         void EffectProspecting(uint32 i);
         void EffectSummonCritter(uint32 i);
         void EffectKnockBack(uint32 i);
+        void EffectDispelMechanic(uint32 i);
         void EffectSummonDeadPet(uint32 i);
         void EffectDestroyAllTotems(uint32 i);
         void EffectDurabilityDamage(uint32 i);

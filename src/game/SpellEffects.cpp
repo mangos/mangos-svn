@@ -164,7 +164,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectSummonObject,                             //105 SPELL_EFFECT_SUMMON_OBJECT_SLOT2
     &Spell::EffectSummonObject,                             //106 SPELL_EFFECT_SUMMON_OBJECT_SLOT3
     &Spell::EffectSummonObject,                             //107 SPELL_EFFECT_SUMMON_OBJECT_SLOT4
-    &Spell::EffectNULL,                                     //108 SPELL_EFFECT_DISPEL_MECHANIC
+    &Spell::EffectDispelMechanic,                           //108 SPELL_EFFECT_DISPEL_MECHANIC
     &Spell::EffectSummonDeadPet,                            //109 SPELL_EFFECT_SUMMON_DEAD_PET
     &Spell::EffectDestroyAllTotems,                         //110 SPELL_EFFECT_DESTROY_ALL_TOTEMS
     &Spell::EffectDurabilityDamage,                         //111 SPELL_EFFECT_DURABILITY_DAMAGE
@@ -3296,6 +3296,30 @@ void Spell::EffectKnockBack(uint32 i)
     data << float(m_spellInfo->EffectMiscValue[i])/-10;     //Z Movement speed
 
     ((Player*)unitTarget)->SendMessageToSet(&data,true);
+}
+
+void Spell::EffectDispelMechanic(uint32 i)
+{
+    if(!unitTarget) return;
+
+    uint32 mechanic = m_spellInfo->EffectMiscValue[i];
+
+    Unit::AuraMap& Auras = unitTarget->GetAuras();
+    for(Unit::AuraMap::iterator iter = Auras.begin(), next; iter != Auras.end(); iter = next)
+    {
+        next = iter;
+        next++;
+        SpellEntry const *spell = sSpellStore.LookupEntry(iter->second->GetSpellProto()->Id);
+        if(spell->Mechanic == mechanic)
+        {
+            unitTarget->RemoveAurasDueToSpell(spell->Id);
+            if(Auras.empty())
+                break;
+            else
+                next = Auras.begin();
+        }
+    }
+    return;
 }
 
 void Spell::EffectSummonDeadPet(uint32 i)
