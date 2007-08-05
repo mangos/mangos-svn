@@ -235,6 +235,7 @@ namespace VMAP {
             fclose(df);
             result = true;
         }
+        delete[] filenameBuffer;
         return result;
     }
 
