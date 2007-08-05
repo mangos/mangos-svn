@@ -409,7 +409,6 @@ void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
 {
     CHECK_PACKET_SIZE(recvPacket,4);
 
-    uint64 guid;
     uint32 quest;
     recvPacket >> quest;
 
@@ -423,13 +422,11 @@ void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
             Group *pGroup = _player->GetGroup();
             if( pGroup )
             {
-                uint32 pguid = _player->GetGUID();
                 for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
                 {
                     Player *pPlayer = itr->getSource();
-                    if (!pPlayer || pPlayer->GetGUID() != pguid)
+                    if (!pPlayer || pPlayer == _player)     // skip self
                         continue;
-                    guid = pPlayer->GetGUID();
 
                     _player->SendPushToPartyResponse(pPlayer, QUEST_PARTY_MSG_SHARING_QUEST);
 
@@ -469,8 +466,8 @@ void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
                         continue;
                     }
 
-                    pPlayer->PlayerTalkClass->SendQuestGiverQuestDetails( pQuest, guid, true );
-                    pPlayer->SetDivider( pguid );
+                    pPlayer->PlayerTalkClass->SendQuestGiverQuestDetails( pQuest, _player->GetGUID(), true );
+                    pPlayer->SetDivider( _player->GetGUID() );
                 }
             }
         }
