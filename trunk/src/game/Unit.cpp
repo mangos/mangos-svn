@@ -3923,9 +3923,9 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
     }
 }
 
-void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredByAura, SpellEntry const *procSpell, uint32 procFlags)
+void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredByAura, SpellEntry const *procSpell, uint32 procFlags)
 {
-    SpellEntry const* auraSpellInfo = triggredByAura->GetSpellProto();
+    SpellEntry const* auraSpellInfo = triggeredByAura->GetSpellProto();
 
     switch(auraSpellInfo->SpellIconID)
     {
@@ -3942,7 +3942,7 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
                             return;
 
                         uint32 spell = 0;
-                        switch(triggredByAura->GetSpellProto()->Id)
+                        switch(triggeredByAura->GetSpellProto()->Id)
                         {
                         case   324: spell = 26364; break;       // Rank 1 
                         case   325: spell = 26365; break;       // Rank 2
@@ -3954,10 +3954,10 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
                         case 25469: spell = 26371; break;       // Rank 8
                         case 25472: spell = 26372; break;       // Rank 9
                         default:
-                            sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in LShield",triggredByAura->GetSpellProto()->Id);
+                            sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in LShield",triggeredByAura->GetSpellProto()->Id);
                             return;
                         }
-                        CastSpell(pVictim, spell, true, NULL);
+                        CastSpell(pVictim, spell, true, NULL, triggeredByAura);
                         return;
                     }
                     break;
@@ -3971,7 +3971,7 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
                             return;
 
                         uint32 spell = 0;
-                        switch(triggredByAura->GetSpellProto()->Id)
+                        switch(triggeredByAura->GetSpellProto()->Id)
                         {
                         case 18137: spell = 28377; break;       // Rank 1
                         case 19308: spell = 28378; break;       // Rank 2
@@ -3981,10 +3981,10 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
                         case 19312: spell = 28382; break;       // Rank 6
                         case 25477: spell = 28385; break;       // Rank 7        
                         default:
-                            sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in SG",triggredByAura->GetSpellProto()->Id);
+                            sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in SG",triggeredByAura->GetSpellProto()->Id);
                             return;
                         }
-                        CastSpell(pVictim, spell, true, NULL);
+                        CastSpell(pVictim, spell, true, NULL, triggeredByAura);
                         return;
                     }
                     break;
@@ -4000,7 +4000,7 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
                 return;
 
             int32 manaSurgeSpellBasePoints0 = procSpell->manaCost * 35/100;
-            CastCustomSpell(this, 23571, &manaSurgeSpellBasePoints0, NULL, NULL, true, NULL, triggredByAura);
+            CastCustomSpell(this, 23571, &manaSurgeSpellBasePoints0, NULL, NULL, true, NULL, triggeredByAura);
             return;
         }    
         case 113:
@@ -4013,7 +4013,7 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
                 if ((*i)->GetModifier()->m_miscvalue == SPELLMOD_CHANCE_OF_SUCCESS && (*i)->GetSpellProto()->SpellIconID == 113)
                 {
                     int32 impDrainSoulBasePoints0 = (*i)->GetSpellProto()->EffectBasePoints[2] * GetMaxPower(POWER_MANA) / 100;
-                    CastCustomSpell(this, 18371, &impDrainSoulBasePoints0, NULL, NULL, true, NULL, triggredByAura);
+                    CastCustomSpell(this, 18371, &impDrainSoulBasePoints0, NULL, NULL, true, NULL, triggeredByAura);
                 }
             }
             return;
@@ -4062,7 +4062,7 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
 
                     // BasePoints = val -1 not required (EffectBaseDice==0)
                     int32 ILManaSpellBasePoints0 = originalSpell->manaCost;
-                    CastCustomSpell(this, 20272, &ILManaSpellBasePoints0, NULL, NULL, true, NULL, triggredByAura);
+                    CastCustomSpell(this, 20272, &ILManaSpellBasePoints0, NULL, NULL, true, NULL, triggeredByAura);
                     return;
                 }
             }
@@ -4073,10 +4073,10 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
             //Improved Leader of the Pack
             //Effect 34299
             //Cooldown: 6 secs
-            if (triggredByAura->GetModifier()->m_amount == 0)
+            if (triggeredByAura->GetModifier()->m_amount == 0)
                 break;
-            int32 improvedLotPBasePoints0 = triggredByAura->GetModifier()->m_amount * GetMaxHealth() / 100 - 1;
-            CastCustomSpell(this, 34299, &improvedLotPBasePoints0, NULL, NULL, true, NULL, triggredByAura);
+            int32 improvedLotPBasePoints0 = triggeredByAura->GetModifier()->m_amount * GetMaxHealth() / 100 - 1;
+            CastCustomSpell(this, 34299, &improvedLotPBasePoints0, NULL, NULL, true, NULL, triggeredByAura);
             if (GetTypeId() == TYPEID_PLAYER)
                 ((Player*)this)->AddSpellCooldown(34299,0,time(NULL) + 6);
             return;
@@ -4086,7 +4086,7 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
             //Pyroclasm
             //Effect: 18093
             float chance = 0;
-            switch (triggredByAura->GetSpellProto()->Id)
+            switch (triggeredByAura->GetSpellProto()->Id)
             {
                 case 18096:
                     chance = 13.0;
@@ -4096,26 +4096,26 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
                     break;
             }
             if (pVictim && pVictim->isAlive() && roll_chance_f(chance))
-                CastSpell(pVictim, 18093, true, NULL, triggredByAura);
+                CastSpell(pVictim, 18093, true, NULL, triggeredByAura);
             return;
         }
         case 1875:
         {
             //Blessed Recovery
             uint32 EffectId = 0;
-            switch (triggredByAura->GetSpellProto()->Id)
+            switch (triggeredByAura->GetSpellProto()->Id)
             {
                 case 27811: EffectId = 27813; break;
                 case 27815: EffectId = 27817; break;
                 case 27816: EffectId = 27818; break;
                 default: 
-                    sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in BR",triggredByAura->GetSpellProto()->Id);
+                    sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in BR",triggeredByAura->GetSpellProto()->Id);
                     return;
             }
 
-            int32 heal_amount = damage * triggredByAura->GetModifier()->m_amount / 100;
+            int32 heal_amount = damage * triggeredByAura->GetModifier()->m_amount / 100;
             int32 BRHealBasePoints0 = heal_amount/3-1;
-            CastCustomSpell(this, EffectId, &BRHealBasePoints0, NULL, NULL, true, NULL, triggredByAura);
+            CastCustomSpell(this, EffectId, &BRHealBasePoints0, NULL, NULL, true, NULL, triggeredByAura);
             return;
         }
         case 2006:
@@ -4150,7 +4150,7 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
         case 2127:
             //Blazing Speed
             //Effect: 31643
-            CastSpell(this, 31643, true, NULL, triggredByAura);
+            CastSpell(this, 31643, true, NULL, triggeredByAura);
             return;
     }
 
@@ -4172,10 +4172,10 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
     }
 
     // standard non-dummy case
-    uint32 trigger_spell_id = auraSpellInfo->EffectTriggerSpell[triggredByAura->GetEffIndex()];
+    uint32 trigger_spell_id = auraSpellInfo->EffectTriggerSpell[triggeredByAura->GetEffIndex()];
     if(!trigger_spell_id)
     {
-        sLog.outError("Unit::HandleProcTriggerSpell: Spell %u have 0 in EffectTriggered[%d], not handled custom case?",auraSpellInfo->Id,triggredByAura->GetEffIndex());
+        sLog.outError("Unit::HandleProcTriggerSpell: Spell %u have 0 in EffectTriggered[%d], not handled custom case?",auraSpellInfo->Id,triggeredByAura->GetEffIndex());
         return;
     }
 
@@ -4185,8 +4185,8 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
         // Shamanistic Rage triggered spell
         case 30824:
         {
-            int32 SRBasePoints0 = GetTotalAttackPowerValue(BASE_ATTACK)*triggredByAura->GetModifier()->m_amount/100 -1;
-            CastCustomSpell(this, 30824, &SRBasePoints0, NULL, NULL, true, NULL, triggredByAura);
+            int32 SRBasePoints0 = GetTotalAttackPowerValue(BASE_ATTACK)*triggeredByAura->GetModifier()->m_amount/100 -1;
+            CastCustomSpell(this, 30824, &SRBasePoints0, NULL, NULL, true, NULL, triggeredByAura);
             return;
         }
         // Backlash triggered spell
@@ -4204,9 +4204,9 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggredBy
 
     // default case
     if(IsPositiveSpell(trigger_spell_id) && !(procFlags & PROC_FLAG_HEAL))
-        CastSpell(this,trigger_spell_id,true,NULL,triggredByAura);
+        CastSpell(this,trigger_spell_id,true,NULL,triggeredByAura);
     else if(pVictim && pVictim->isAlive())
-        CastSpell(pVictim,trigger_spell_id,true,NULL,triggredByAura);
+        CastSpell(pVictim,trigger_spell_id,true,NULL,triggeredByAura);
 }
 
 void Unit::setPowerType(Powers new_powertype)

@@ -56,7 +56,8 @@ m_itemsLoaded(false), m_trainerSpellsLoaded(false), m_trainer_type(0), m_lootMon
 m_deathTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_respawnradius(0.0),
 m_gossipOptionLoaded(false),m_NPCTextId(0),
 m_moveRun(false), m_emoteState(0), m_isPet(false), m_isTotem(false),
-m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE)
+m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE),
+m_notifyTimer(0), m_notifyAgain(false)
 {
     m_valuesCount = UNIT_END;
 
@@ -244,6 +245,33 @@ void Creature::Update(uint32 diff)
             Unit::Update( diff );
             i_motionMaster.UpdateMotion(diff);
             i_AI->UpdateAI(diff);
+
+            if(m_notifyTimer)
+            {
+                if(m_notifyTimer <= diff)
+                {
+                    if(m_notifyAgain)
+                    {
+                        // save the original timer
+                        uint32 temp = m_notifyTimer;
+                        // the notifier needs the value 0 otherwise it won't trigger
+                        m_notifyTimer = 0;
+                        m_notifyAgain = false;
+                        CellPair val = MaNGOS::ComputeCellPair(GetPositionX(), GetPositionY());
+                        MapManager::Instance().GetMap(GetMapId(), this )->CreatureRelocationNotify(this, GetCurrentCell(), val);
+                        // wait another cycle for relocations
+                        m_notifyTimer = temp + 3000 - diff;
+                    }
+                    else
+                    {
+                        // if there was no change in the last cycle, stop the timer
+                        m_notifyTimer = 0;
+                    }
+                }
+                else
+                    m_notifyTimer -= diff;
+            }
+
             if(m_regenTimer > 0)
             {
                 if(diff >= m_regenTimer)
