@@ -2086,7 +2086,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
             PSendSysMessage(LANG_WAYPOINT_NOTFOUNDSEARCH, lowguid, point);
             // Select waypoint number from database
             QueryResult *result = sDatabase.PQuery( "SELECT `position_x`,`position_y`,`position_z` FROM `creature_movement` WHERE `point`='%d' AND `id` = '%u'", point, lowguid);
-            if(result)
+            if(!result)
             {
                 PSendSysMessage(LANG_WAYPOINT_NOTFOUND, lowguid);
                 return true;
@@ -2106,7 +2106,8 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
             // (0.001) - There is no other way to compare C++ floats with mySQL floats
             // See also: http://dev.mysql.com/doc/refman/5.0/en/problems-with-float.html
             const char* maxDIFF = "0.01";
-            QueryResult *result2 = sDatabase.PQuery( "SELECT `guid` FROM `creature` WHERE (abs(`position_x` - %f) <= %s ) and (abs(`position_y` - %f) <= %s ) and (abs(`position_z` - %f) <= %s ) and `id`=%d",
+
+            result = sDatabase.PQuery( "SELECT `guid` FROM `creature` WHERE (abs(`position_x` - %f) <= %s ) and (abs(`position_y` - %f) <= %s ) and (abs(`position_z` - %f) <= %s ) and `id`=%d",
                 x, maxDIFF, y, maxDIFF, z, maxDIFF, VISUAL_WAYPOINT);
             if(!result)
             {
@@ -2115,12 +2116,12 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
             }
             do
             {
-                Field *fields = result2->Fetch();
+                Field *fields = result->Fetch();
                 wpGuid  = fields[0].GetUInt32();
             }while( result->NextRow() );
 
             // Free memory
-            delete result2;
+            delete result;
         }
     }
 
@@ -2786,6 +2787,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
             {
                 PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, id);
                 delete wpCreature;
+                delete result;
                 return false;
             }
             wpCreature->SetVisibility(VISIBILITY_OFF);
@@ -2830,6 +2832,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
         {
             PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, id);
             delete pCreature;
+            delete result;
             return false;
         }
 
@@ -2857,13 +2860,13 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
         else
             Maxpoint = 0;
 
-        QueryResult *result1 = sDatabase.PQuery( "SELECT `position_x`,`position_y`,`position_z` FROM `creature_movement` WHERE `point` ='%u' AND `id` = '%u'",Maxpoint, lowguid);
-        if(!result1)
+        result = sDatabase.PQuery( "SELECT `position_x`,`position_y`,`position_z` FROM `creature_movement` WHERE `point` ='%u' AND `id` = '%u'",Maxpoint, lowguid);
+        if(!result)
         {
             PSendSysMessage(LANG_WAYPOINT_NOTFOUNDLAST, lowguid);
             return true;
         }
-        Field *fields = result1->Fetch();
+        Field *fields = result->Fetch();
         float x         = fields[0].GetFloat();
         float y         = fields[1].GetFloat();
         float z         = fields[2].GetFloat();
@@ -2877,6 +2880,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
         {
             PSendSysMessage(LANG_WAYPOINT_NOTCREATED, id);
             delete pCreature;
+            delete result;
             return false;
         }
 
@@ -2885,7 +2889,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
         MapManager::Instance().GetMap(pCreature->GetMapId(), pCreature)->Add(pCreature);
         //player->PlayerTalkClass->SendPointOfInterest(x, y, 6, 6, 0, "Last Waypoint");
         // Cleanup memory
-        delete result1;
+        delete result;
         return true;
     }
 

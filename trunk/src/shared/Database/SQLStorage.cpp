@@ -79,10 +79,14 @@ void SQLStorage::Load ()
     delete result;
 
     result = sDatabase.PQuery("SELECT COUNT(*) FROM `%s`",table);
-
-    fields = result->Fetch();
-    RecordCount=fields[0].GetUInt32();
-    delete result;
+    if(result)
+    {
+        fields = result->Fetch();
+        RecordCount=fields[0].GetUInt32();
+        delete result;
+    }
+    else 
+        RecordCount = 0;
 
     result = sDatabase.PQuery("SELECT * FROM `%s`",table);
 
