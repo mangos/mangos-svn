@@ -555,17 +555,27 @@ class ObjectMgr
         typedef std::multimap<uint32, SpellLearnSpellNode> SpellLearnSpellMap;
         SpellLearnSpellMap SpellLearnSpells;
 
-        bool IsSpellLearnSpell(uint32 spell_id)
+        bool IsSpellLearnSpell(uint32 spell_id) const
         {
             return SpellLearnSpells.count(spell_id)!=0;
         }
-        SpellLearnSpellMap::const_iterator GetBeginSpellLearnSpell(uint32 spell_id)
+        SpellLearnSpellMap::const_iterator GetBeginSpellLearnSpell(uint32 spell_id) const
         {
             return SpellLearnSpells.lower_bound(spell_id);
         }
-        SpellLearnSpellMap::const_iterator GetEndSpellLearnSpell(uint32 spell_id)
+        SpellLearnSpellMap::const_iterator GetEndSpellLearnSpell(uint32 spell_id) const
         {
             return SpellLearnSpells.upper_bound(spell_id);
+        }
+        
+        bool IsSpellLearnToSpell(uint32 spell_id1,uint32 spell_id2) const
+        {
+            SpellLearnSpellMap::const_iterator b = GetBeginSpellLearnSpell(spell_id1);
+            SpellLearnSpellMap::const_iterator e = GetEndSpellLearnSpell(spell_id1);
+            for(SpellLearnSpellMap::const_iterator i = b; i != e; ++i)
+                if(i->second.spell==spell_id2)
+                    return true;
+            return false;
         }
 
         WeatherZoneChances const* GetWeatherChances(uint32 zone_id) const

@@ -3427,7 +3427,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                 // Check (if set) school, category, skill line, spell talent mask
                 if(spellProcEvent)
                 {
-                    if(spellProcEvent->schoolMask && (!procSpell || !procSpell->School || ((1<<(procSpell->School-1)) & spellProcEvent->schoolMask) == 0))
+                    if(spellProcEvent->schoolMask && (!procSpell || !procSpell->School || ((1<<procSpell->School) & spellProcEvent->schoolMask) == 0))
                         continue;
                     if(spellProcEvent->category && (!procSpell || procSpell->Category != spellProcEvent->category))
                         continue;
@@ -3546,7 +3546,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
                 // Check (if set) school, category, skill line, spell talent mask
                 if(spellProcEvent)
                 {
-                    if(spellProcEvent->schoolMask && (!procSpell || !procSpell->School || ((1<<(procSpell->School-1)) & spellProcEvent->schoolMask) == 0))
+                    if(spellProcEvent->schoolMask && (!procSpell || !procSpell->School || ((1<<procSpell->School) & spellProcEvent->schoolMask) == 0))
                         continue;
                     if(spellProcEvent->category && (!procSpell || procSpell->Category != spellProcEvent->category))
                         continue;
@@ -3805,6 +3805,33 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 CastCustomSpell(this, 31786, &SAHealBasePoints0, NULL, NULL, true, NULL, triggredByAura);
             }
 
+            return;
+        }
+
+        // Shadowflame (item set effect)
+        case 37377:
+        {
+            if(GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            Item* castItem = ((Player*)this)->GetItemByGuid(triggredByAura->GetCastItemGUID());
+            if(!castItem)
+                return;
+
+            CastSpell(pVictim,37379,true,castItem,triggredByAura);
+            return;
+        }
+        // Shadowflame Hellfire (item set effect)
+        case 39437:
+        {
+            if(GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            Item* castItem = ((Player*)this)->GetItemByGuid(triggredByAura->GetCastItemGUID());
+            if(!castItem)
+                return;
+
+            CastSpell(pVictim,37378,true,castItem,triggredByAura);
             return;
         }
 

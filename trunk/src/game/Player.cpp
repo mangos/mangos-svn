@@ -2769,7 +2769,9 @@ bool Player::resetTalents(bool no_cost)
 
                 // remove learned spells (all ranks)
                 uint32 itrFirstId = objmgr.GetFirstSpellInChain(itr->first);
-                if (itrFirstId == talentInfo->RankID[j])
+
+                // unlearn if first rank is talent or learned by talent
+                if (itrFirstId == talentInfo->RankID[j] || objmgr.IsSpellLearnToSpell(talentInfo->RankID[j],itrFirstId))
                 {
                     RemoveAurasDueToSpell(itr->first);
                     removeSpell(itr->first);
