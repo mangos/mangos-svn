@@ -584,6 +584,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
             {
                 // prepare data for near group iteration (PvP and !PvP cases
                 uint32 xp = PvP ? 0 : MaNGOS::XP::Gain(player, pVictim);
+                bool honored_kill = false;
 
                 Group *pGroup = player->GetGroup();
                 if(pGroup)
@@ -601,7 +602,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
                                 continue;
 
                             // honor can be in PvP and !PvP (racial leader) cases
-                            pGroupGuy->RewardHonor(pVictim,count);
+                            if(pGroupGuy->RewardHonor(pVictim,count) && player==pGroupGuy)
+                                honored_kill = true;
 
                             // xp and reputation only in !PvP case
                             if(!PvP)
@@ -630,7 +632,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
                 else // if (!pGroup)
                 {
                     // honor can be in PvP and !PvP (racial leader) cases
-                    player->RewardHonor(pVictim,1);
+                    if(player->RewardHonor(pVictim,1))
+                        honored_kill = true;
 
                     // xp and reputation only in !PvP case
                     if(!PvP)
@@ -648,7 +651,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
                     }
                 }
 
-                if(xp)
+                if(xp || honored_kill)
                     ProcDamageAndSpell(pVictim,PROC_FLAG_KILL_XP_GIVER,PROC_FLAG_NONE);
             }
         }
