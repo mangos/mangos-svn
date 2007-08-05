@@ -5124,10 +5124,10 @@ void Player::UpdateHonorFields()
 }
 
 //How much honor Player gains from uVictim
-void Player::RewardHonor(Unit *uVictim, uint32 count )
+bool Player::RewardHonor(Unit *uVictim, uint32 count )
 {
     if(!uVictim || uVictim == this || uVictim->GetAura(2479, 0))
-        return;
+        return false;
 
     if(count < 1)
         count = 1;
@@ -5139,7 +5139,7 @@ void Player::RewardHonor(Unit *uVictim, uint32 count )
         Player *pVictim = (Player *)uVictim;
 
         if( GetTeam() == pVictim->GetTeam() )
-            return;
+            return false;
 
         float f = 1;                                        //need for total kills (?? need more info)
         uint32 k_grey = 0;
@@ -5153,7 +5153,7 @@ void Player::RewardHonor(Unit *uVictim, uint32 count )
             k_grey = k_level - 1 - k_level/5; 
 
         if(v_level<=k_grey)
-            return;
+            return false;
 
         float diff_level = (k_level == k_grey) ? 1 : ((float)(v_level - k_grey)) / ((float)(k_level - k_grey));
 
@@ -5168,7 +5168,7 @@ void Player::RewardHonor(Unit *uVictim, uint32 count )
         Creature *cVictim = (Creature *)uVictim;
 
         if (!cVictim->isRacialLeader())
-            return;
+            return false;
 
         honor = 100;                                        // ??? need more info
         
@@ -5191,6 +5191,7 @@ void Player::RewardHonor(Unit *uVictim, uint32 count )
                                                             // add 1 lifetime_kill
     ApplyModUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS, 1, true);
     ApplyModUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, (uint32)(approx_honor*10), true);
+    return true;
 }
 
 uint32 Player::GetGuildIdFromDB(uint64 guid)
