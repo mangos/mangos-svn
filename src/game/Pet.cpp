@@ -143,7 +143,10 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     // update for case of current pet "slot = 0"
     petentry = fields[1].GetUInt32();
     if(!petentry)
+    {
+        delete result;
         return false;
+    }
 
     float px, py, pz;
     owner->GetClosePoint(NULL, px, py, pz,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE);
@@ -161,6 +164,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     {
         AIM_Initialize();
         MapManager::Instance().GetMap(owner->GetMapId(), owner)->Add((Creature*)this);
+        delete result;
         return true;
     }
     SetUInt32Value(UNIT_FIELD_PETNUMBER, fields[0].GetUInt32() );
@@ -230,7 +234,10 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     Tokens tokens = StrSplit(fields[18].GetString(), " ");
 
     if(tokens.size() != 20)
+    {
+        delete result;
         return false;
+    }
 
     int index;
     Tokens::iterator iter;

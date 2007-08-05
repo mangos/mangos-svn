@@ -92,7 +92,10 @@ bool Group::LoadGroupFromDB(const uint64 &leaderGuid)
 
     // group leader not exist
     if(!objmgr.GetPlayerNameByGUID(m_leaderGuid, m_leaderName))
+    {
+        delete result;
         return false;
+    }
 
     m_groupType  = (*result)[13].GetBool() ? GROUPTYPE_RAID : GROUPTYPE_NORMAL;
     m_mainTank = (*result)[0].GetUInt64();

@@ -715,6 +715,7 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
         if(!guild->create(_player->GetGUID(), name))
         {
             delete guild;
+            delete result;
             return;
         }
 
@@ -735,6 +736,7 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
         if(!at->create(_player->GetGUID(), type, name))
         {
             delete at;
+            delete result;
             return;
         }
 
