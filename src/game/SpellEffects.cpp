@@ -1159,35 +1159,6 @@ void Spell::EffectPowerBurn(uint32 i)
 
 void Spell::EffectHeal( uint32 i )
 {
-    // Frenzied Regeneration
-    // Must be "hard coded" since 22845 is not set in spell
-    // EffectTriggerSpell[m_effIndex] field for affected spells
-    if (m_spellInfo->Id == 22845)
-    {
-        float LifePerRage = 0;
-        Unit::AuraList const& mPeriodicTriggerSpell = m_caster->GetAurasByType(SPELL_AURA_PERIODIC_TRIGGER_SPELL);
-        for(Unit::AuraList::const_iterator i = mPeriodicTriggerSpell.begin(); i != mPeriodicTriggerSpell.end(); ++i)
-            if ((*i)->GetSpellProto()->Category == 1011)
-        {
-            LifePerRage = (*i)->GetModifier()->m_amount / 10.0;
-            break;
-        }
-        if (LifePerRage)
-        {
-            int32 lRage = 0;
-            if (m_caster->GetPower(POWER_RAGE) > 100)
-            {
-                lRage = 100;
-            }
-            else
-            {
-                lRage = m_caster->GetPower(POWER_RAGE);
-            }
-            m_caster->SetPower(POWER_RAGE, m_caster->GetPower(POWER_RAGE) - lRage);
-            damage = uint32(lRage*LifePerRage);
-        }
-    }
-
     if( unitTarget && unitTarget->isAlive() && damage >= 0)
     {
         int32 addhealth = m_caster->SpellHealingBonus(m_spellInfo, uint32(damage),HEAL, unitTarget);

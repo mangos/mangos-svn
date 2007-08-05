@@ -915,50 +915,92 @@ void Aura::HandleAddModifier(bool apply, bool Real)
 
 void Aura::TriggerSpell()
 {
-    SpellEntry const *spellInfo;
+    // custom triggering code (triggered spell not set or not exist
 
-    // generic code
-    if (GetSpellProto()->EffectTriggerSpell[m_effIndex])
-        spellInfo = sSpellStore.LookupEntry(GetSpellProto()->EffectTriggerSpell[m_effIndex]);
-    // specific code for cases with no triger spell provided in field
-    else if (GetSpellProto()->Category == 1011)
-        spellInfo = sSpellStore.LookupEntry(22845);         // Frenzied Regeneration
-    else if (GetId()==29528)
-        spellInfo = sSpellStore.LookupEntry(28713);         // Inoculation
-    else if (GetId()==29917)
-        spellInfo = sSpellStore.LookupEntry(29916);         // Feed Captured Animal
-    else
-        spellInfo = NULL;
-
-    if(!spellInfo)
+    // Frenzied Regeneration
+    if (GetSpellProto()->Category == 1011)
     {
-        sLog.outError("Auras: unknown TriggerSpell:%i From spell: %i",  GetSpellProto()->EffectTriggerSpell[m_effIndex],GetSpellProto()->Id);
+        int32 LifePerRage = GetModifier()->m_amount;
+
+        int32 lRage = m_target->GetPower(POWER_RAGE);
+        if(lRage > 100)                                     // rage stored as rage*10
+            lRage = 100;
+
+        m_target->ModifyPower(POWER_RAGE, -lRage);
+        
+        int32 FRTriggerBasePoints = int32(lRage*LifePerRage/10)-1;
+        m_target->CastCustomSpell(m_target,22845,&FRTriggerBasePoints,NULL,NULL,true,NULL,this);
         return;
     }
 
+    // generic casting code with custom spells and target/caster customs
+    uint32 trigger_spell_id = GetSpellProto()->EffectTriggerSpell[m_effIndex];
     Unit* caster = GetCaster();
-
-    if(!caster)
-        return;
-
-    Spell* spell = new Spell(caster, spellInfo, true, this);
     Unit* target = m_target;
+    uint64 originalCasterGUID = 0;
 
-    // TODO: currently this used as hack for Tame beast triggered spell, 
-    // BUT this can be correct way to provide target for ALL this function calls 
-    // in case m_target==caster (or GetSpellProto()->EffectImplicitTargetA[m_effIndex]==TARGET_SELF )
-    if(GetId()==1515)
+    // specific code for cases with no trigger spell provided in field
+    switch(GetId())
     {
-        target = ObjectAccessor::Instance().GetUnit(*m_target, m_target->GetUInt64Value(UNIT_FIELD_TARGET));
+        case 29528: trigger_spell_id = 28713; break;        // Inoculation
+        case 29917: trigger_spell_id = 29916; break;        // Feed Captured Animal
+        case 1515:                                          // Tame Beast
+        {
+            // TODO: currently this used as hack for Tame beast triggered spell, 
+            // BUT this can be correct way to provide target for ALL this function calls 
+            // in case m_target==caster (or GetSpellProto()->EffectImplicitTargetA[m_effIndex]==TARGET_SELF )
+            target = ObjectAccessor::Instance().GetUnit(*m_target, m_target->GetUInt64Value(UNIT_FIELD_TARGET));
+            break;
+        }
+        case 1010:                                          // Curse of Idiocy
+        {
+            // TODO: spell casted by result in correct way mostly 
+            // BUT:
+            // 1) target show casting at each triggered cast: target don't must show casting animation for any triggered spell
+            //      but must show affect apply like item casting
+            // 2) maybe aura must be replace by new with accumulative stat mods insteed stacking
+
+            // prevent cast by triggered auras
+            if(m_caster_guid == m_target->GetGUID())
+                return;
+
+            // stop triggering after each affected stats lost > 90 
+            int32 intelectLoss = 0;
+            int32 spiritLoss = 0;
+
+            Unit::AuraList const& mModStat = m_target->GetAurasByType(SPELL_AURA_MOD_STAT);
+            for(Unit::AuraList::const_iterator i = mModStat.begin(); i != mModStat.end(); ++i)
+            {
+                if ((*i)->GetSpellProto()->Id == 1010)
+                {
+                    switch((*i)->GetModifier()->m_miscvalue)
+                    {
+                    case STAT_INTELLECT: intelectLoss += (*i)->GetModifier()->m_amount; break;
+                    case STAT_SPIRIT:    spiritLoss   += (*i)->GetModifier()->m_amount; break;
+                    default: break;
+                    }
+                }
+            }
+
+            if(intelectLoss <= -90 && spiritLoss <= -90)
+                return;
+
+            originalCasterGUID = GetCasterGUID();
+            caster = target;
+            break;
+        }
     }
-    if(!target)
+        
+    if(!trigger_spell_id)
     {
-        delete spell;
+        sLog.outError("Aura::TriggerSpell: Spell %u have 0 in EffectTriggered[%d], not handled custom case?",GetSpellProto()->Id,GetEffIndex());
         return;
     }
-    SpellCastTargets targets;
-    targets.setUnitTarget(target);
-    spell->prepare(&targets);
+
+    if(!caster || !target)
+        return;
+
+    caster->CastSpell(target,trigger_spell_id,true,NULL,this,originalCasterGUID);
 }
 
 /*********************************************************/
