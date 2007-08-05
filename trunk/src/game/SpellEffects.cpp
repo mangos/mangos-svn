@@ -2344,24 +2344,28 @@ void Spell::EffectWeaponDmg(uint32 i)
     {
         uint32 sp_bonus = 0;
         for(int x=1;x<=3;x++)
+        {
             if(m_spellInfo->Effect[x]==SPELL_EFFECT_NORMALIZED_WEAPON_DMG)
+            {
                 sp_bonus=m_spellInfo->EffectBasePoints[x]+1;
+                break;
+            }
+        }
+
         uint32 sunder_stacks = 0;
         Unit::AuraList list = unitTarget->GetAurasByType(SPELL_AURA_MOD_RESISTANCE);
-        Unit::AuraList::iterator itr;
-        const SpellEntry *proto;
-        uint32 duration;
-        for(itr=list.begin();itr!=list.end();itr++)
+        for(Unit::AuraList::iterator itr=list.begin();itr!=list.end();itr++)
         {
-            proto = (*itr)->GetSpellProto();
+            SpellEntry const *proto = (*itr)->GetSpellProto();
             if(proto->SpellVisual == 406 && proto->SpellIconID == 565)
             {
-                duration = GetDuration(proto);
+                uint32 duration = GetDuration(proto);
                 (*itr)->SetAuraDuration(duration);
                 (*itr)->UpdateAuraDuration();
                 sunder_stacks++;
             }
         }
+
         bonus+= sp_bonus*sunder_stacks;
     }
 
