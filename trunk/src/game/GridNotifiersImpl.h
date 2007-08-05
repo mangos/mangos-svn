@@ -121,14 +121,6 @@ MaNGOS::CreatureRelocationNotifier::Visit(CreatureMapType &m)
     if(!i_creature.isAlive())
         return;
 
-    if(i_creature.m_notifyTimer)
-    {
-        i_creature.m_notifyAgain = true;
-        return;
-    }
-
-    i_creature.m_notifyTimer = 3000;
-
     for(CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
         if( iter->getSource()->isAlive())
             CreatureCreatureRelocationWorker(iter->getSource(), &i_creature);
