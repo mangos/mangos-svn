@@ -495,10 +495,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool hasInvolvedQuest(uint32 quest_id)  const;
 
         GridReference<Creature> &GetGridRef() { return m_gridRef; }
-
-        uint32 m_notifyTimer;                               // for creature-creature notification
-        bool m_notifyAgain;                                 // resend notification after timeout 
-
     protected:
         // vendor items
         typedef std::vector<CreatureItem> CreatureItems;
