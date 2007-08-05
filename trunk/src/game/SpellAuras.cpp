@@ -2401,6 +2401,27 @@ void Aura::HandleAuraModIncreaseSwimSpeed(bool apply, bool Real)
 
 void Aura::HandleModMechanicImmunity(bool apply, bool Real)
 {
+    uint32 mechanic = m_modifier.m_miscvalue;
+
+    if(apply)
+    {
+        Unit::AuraMap& Auras = m_target->GetAuras();
+        for(Unit::AuraMap::iterator iter = Auras.begin(), next; iter != Auras.end(); iter = next)
+        {
+            next = iter;
+            next++;
+            SpellEntry const *spell = sSpellStore.LookupEntry(iter->second->GetId());
+            if(spell->Mechanic == mechanic && !iter->second->IsPositive() && spell->Id != GetId())
+            {
+                m_target->RemoveAurasDueToSpell(spell->Id);
+                if(Auras.empty())
+                    break;
+                else
+                    next = Auras.begin();
+            }
+        }
+    }
+
     m_target->ApplySpellImmune(GetId(),IMMUNITY_MECHANIC,m_modifier.m_miscvalue,apply);
 }
 

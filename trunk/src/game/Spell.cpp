@@ -2347,24 +2347,15 @@ uint8 Spell::CanCast()
         }
     }
 
-    if(m_caster->hasUnitState(UNIT_STAT_CONFUSED))
-        return SPELL_FAILED_CONFUSED;
-
     if((m_spellInfo->AttributesEx3 & 0x800) != 0) // need check...
         return SPELL_FAILED_ONLY_BATTLEGROUNDS;
 
     if(m_spellInfo->AreaId && m_spellInfo->AreaId != m_caster->GetZoneId())
         return SPELL_FAILED_REQUIRES_AREA;
 
-    if(m_caster->hasUnitState(UNIT_STAT_STUNDED))
-        return SPELL_FAILED_STUNNED;
-
     // not let players cast non-triggered spells at mount (and let do it to creatures)
     if(m_caster->IsMounted() && !m_IsTriggeredSpell && m_caster->GetTypeId()==TYPEID_PLAYER)
         return SPELL_FAILED_NOT_MOUNTED;
-
-    if(m_caster->m_silenced)
-        return SPELL_FAILED_SILENCED;
 
     // always (except passive spells) check items (focus object can be required for any type casts)
     if(!IsPassiveSpell(m_spellInfo->Id))
@@ -2379,6 +2370,39 @@ uint8 Spell::CanCast()
         if(uint8 castResult = CheckMana(&mana))
             return castResult;
     }
+
+    // check some states that must be ignored in case casing dispelling spell
+    //bool skip_charm   = false;
+    bool skip_silence = false;
+    bool skip_stun    = false;
+    //bool skip_fear    = false;
+    bool skip_confused= false;
+    for(int i=0;i<3;i++)
+    {
+        if(m_spellInfo->Effect[i] == SPELL_EFFECT_DISPEL_MECHANIC
+            || m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MECHANIC_IMMUNITY)
+        {
+            switch(m_spellInfo->EffectMiscValue[i])
+            {
+                //case MECHANIC_CHARM:     skip_charm   = true; break;
+                case MECHANIC_SILENCE:   skip_silence = true; break;
+                case MECHANIC_FREEZE:
+                case MECHANIC_KNOCKOUT:
+                case MECHANIC_SLEEP:
+                case MECHANIC_STUNDED:   skip_stun    = true; break;
+                //case MECHANIC_FEAR:      skip_fear    = true; break;
+                case MECHANIC_CONFUSED:
+                case MECHANIC_POLYMORPH: skip_confused = true; break;
+                default:break;
+            }
+        }
+    }
+    if(!skip_confused && m_caster->hasUnitState(UNIT_STAT_CONFUSED))
+        return SPELL_FAILED_CONFUSED;
+    if(!skip_stun && m_caster->hasUnitState(UNIT_STAT_STUNDED))
+        return SPELL_FAILED_STUNNED;
+    if(!skip_silence && m_caster->m_silenced)
+        return SPELL_FAILED_SILENCED;
 
     for (int i = 0; i < 3; i++)
     {
