@@ -6086,6 +6086,13 @@ bool Player::CheckAmmoCompatibility(const ItemPrototype *ammo_proto) const
 3-Fishing
 */
 
+void Player::SendLootRelease( uint64 guid )
+{
+    WorldPacket data( SMSG_LOOT_RELEASE_RESPONSE, (8+1) );
+    data << guid << uint8(1);
+    SendDirectMessage( &data );
+}
+
 void Player::SendLoot(uint64 guid, LootType loot_type)
 {
     Loot    *loot = 0;
@@ -6100,7 +6107,10 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
         // not check distance for GO in case owned GO (fishing bobber case, for example)
         if (!go || (loot_type != LOOT_FISHING || go->GetOwnerGUID() != GetGUID()) && !go->IsWithinDistInMap(this,INTERACTION_DISTANCE))
+        {
+            SendLootRelease(guid);
             return;
+        }
 
         loot = &go->loot;
 
@@ -6111,6 +6121,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             if(lootid)
             {
                 sLog.outDebug("       if(lootid)");
+                loot->clear();
                 FillLoot(loot, lootid, LootTemplates_Gameobject);
             }
 
@@ -6125,7 +6136,10 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
         Item *item = GetItemByGuid( guid );
 
         if (!item)
+        {
+            SendLootRelease(guid);
             return;
+        }
 
         if(loot_type == LOOT_DISENCHANTING)
         {
@@ -6134,6 +6148,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             if(!item->m_lootGenerated)
             {
                 item->m_lootGenerated = true;
+                loot->clear();
                 FillLoot(loot, item->GetProto()->DisenchantID, LootTemplates_Disenchant);
             }
         }
@@ -6144,6 +6159,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             if(!item->m_lootGenerated)
             {
                 item->m_lootGenerated = true;
+                loot->clear();
                 FillLoot(loot, item->GetEntry(), LootTemplates_Prospecting);
             }
         }
@@ -6154,6 +6170,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             if(!item->m_lootGenerated)
             {
                 item->m_lootGenerated = true;
+                loot->clear();
                 FillLoot(loot, item->GetEntry(), LootTemplates_Item);
             }
         }
@@ -6165,10 +6182,17 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
         // must be in range and creature must be alive for pickpocket and must be dead for another loot
         if (!creature || creature->isAlive()!=(loot_type == LOOT_PICKPOCKETING) || !creature->IsWithinDistInMap(this,INTERACTION_DISTANCE))
+        {
+            SendLootRelease(guid);
+
             return;
+        }
 
         if(loot_type == LOOT_PICKPOCKETING && IsFriendlyTo(creature))
+        {
+            SendLootRelease(guid);
             return;
+        }
 
         loot   = &creature->loot;
 
@@ -6182,7 +6206,10 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 loot->clear();
 
                 if (!creature->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR) && lootid)
+                {
+                    loot->clear();
                     FillLoot(loot, lootid, LootTemplates_Pickpocketing);
+                }
                 // Generate extra money for pick pocket loot
                 const uint32 a = urand(0, creature->getLevel()/2);
                 const uint32 b = urand(0, getLevel()/2);
@@ -6211,7 +6238,10 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             {
                 creature->lootForBody = true;
                 if (!creature->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR) && lootid)
+                {
+                    loot->clear();
                     FillLoot(loot, lootid, LootTemplates_Creature);
+                }
 
                 creature->generateMoneyLoot();
 
@@ -6244,7 +6274,10 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             }
 
             if (loot_type == LOOT_SKINNING)
+            {
+                loot->clear();
                 FillLoot(loot, creature->GetCreatureInfo()->SkinLootId, LootTemplates_Skinning);
+            }
 
             if (!GetGroup() && recipient == this)
                 permission = ALL_PERMISSION;

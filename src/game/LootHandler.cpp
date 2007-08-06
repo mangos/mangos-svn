@@ -46,7 +46,10 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 
         // not check distance for GO in case owned GO (fishing bobber case, for example)
         if (!go || go->GetOwnerGUID() != _player->GetGUID() && !go->IsWithinDistInMap(_player,INTERACTION_DISTANCE))
+        {
+            player->SendLootRelease(lguid);
             return;
+        }
 
         loot = &go->loot;
     }
@@ -55,7 +58,10 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         Item *pItem = player->GetItemByGuid( lguid );
 
         if (!pItem)
+        {
+            player->SendLootRelease(lguid);
             return;
+        }
 
         loot = &pItem->loot;
     }
@@ -67,7 +73,10 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         bool ok_loot = pCreature && pCreature->isAlive() == (player->getClass()==CLASS_ROGUE && pCreature->lootForPickPocketed);
 
         if( !ok_loot || !pCreature->IsWithinDistInMap(_player,INTERACTION_DISTANCE) )
+        {
+            player->SendLootRelease(lguid);
             return;
+        }
 
         loot = &pCreature->loot;
     }
@@ -100,7 +109,10 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 
     // questitems use the blocked field for other purposes
     if (!qitem && item->is_blocked)
+    {
+        player->SendLootRelease(lguid);
         return;
+    }
 
     uint16 dest;
     uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, item->itemid, item->count, false );
@@ -211,10 +223,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
     recv_data >> lguid;
 
     player->SetLootGUID(0);
-
-    WorldPacket data( SMSG_LOOT_RELEASE_RESPONSE, (8+1) );
-    data << lguid << uint8(1);
-    SendPacket( &data );
+    player->SendLootRelease(lguid);
 
     if (IS_GAMEOBJECT_GUID(lguid))
     {

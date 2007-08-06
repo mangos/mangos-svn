@@ -1338,7 +1338,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         PlayerMenu* PlayerTalkClass;
         ItemsSetEffect * ItemsSetEff[3];
         void FlightComplete(void);
+
         void SendLoot(uint64 guid, LootType loot_type);
+        void SendLootRelease( uint64 guid );
         void SendNotifyLootItemRemoved(uint8 lootSlot);
         void SendNotifyLootMoneyRemoved();
         int32 FishingMinSkillForCurrentZone() const;

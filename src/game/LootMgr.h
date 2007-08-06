@@ -84,10 +84,10 @@ struct LootItem
     uint32  displayid;
     uint32  randomSuffix;
     int32   randomPropertyId;
-    uint8   count;
-    bool    is_looted;
-    bool    is_blocked;
-    bool    is_ffa;                                         // free for all
+    uint8   count      : 8;                                 // allow compiler pack structure
+    bool    is_looted  : 1;
+    bool    is_blocked : 1;
+    bool    is_ffa     : 1;                                 // free for all
 
     LootItem()
         : itemid(0), displayid(0), randomSuffix(0), randomPropertyId(0), count(1), is_looted(true), is_blocked(false), is_ffa(true) {}

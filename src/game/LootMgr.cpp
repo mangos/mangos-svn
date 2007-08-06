@@ -112,6 +112,14 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
                     continue;
                 }
             }
+            else
+            {
+                if(item!=0)
+                {
+                    ssNonLootableItems << "loot entry = " << entry << " item = " << item << " chanceOrRef = " << chanceOrRef << " maxcount = " << maxcount << " (item must be =0 in case chanceOrRef < 0)\n";
+                    continue;
+                }
+            }
 
             lootstore[entry].push_back( LootStoreItem(item, displayid, chanceOrRef, questchance,is_ffa,mincount,maxcount) );
 
@@ -167,6 +175,7 @@ struct HasChance
         // Non-grouped loot
         if (itm.questChanceOrGroup == 0)
         {
+            // reference non group loot ( itm.chanceOrRef < 0) handled separatly
             if ( itm.chanceOrRef > 0 && roll_chance_f(itm.chanceOrRef * sWorld.getRate(RATE_DROP_ITEMS)) )
                 return &itm;
             return NULL;
@@ -180,6 +189,7 @@ struct HasChance
             sLog.outErrorDb("HasChance: wrong loot group in DB (%i) for item %u", itm.questChanceOrGroup,itm.itemid);
             return NULL;
         }
+
         if (itm.chanceOrRef >= 0)
         {
             // Group of current loot - check for item chance in the group
@@ -201,6 +211,12 @@ struct HasChance
         float CumulChance = 0.0;
 
         LootStore::iterator tab = m_store->find(LootId);
+        if(tab==m_store->end())
+        {
+            sLog.outErrorDb("HasChance: wrong loot reference in DB (%i) for item %u", itm.chanceOrRef,itm.itemid);
+            return NULL;
+        }
+
         for(LootStoreItemList::iterator item_iter = tab->second.begin(); item_iter != tab->second.end(); ++item_iter)
         {
             if ( item_iter->GetGroupId() == GroupId &&  item_iter->chanceOrRef > 0 )
@@ -222,8 +238,6 @@ struct HasQuestChance
 
 void FillLoot(Loot *loot, uint32 loot_id, LootStore& store)
 {
-    loot->clear();
-
     LootStore::iterator tab = store.find(loot_id);
 
     if (tab == store.end())
@@ -250,6 +264,16 @@ void FillLoot(Loot *loot, uint32 loot_id, LootStore& store)
                 );
         else if ( loot->items.size() < MAX_NR_LOOT_ITEMS )
         {
+            // non-group and non-quest loot reference 
+            if(item_iter->chanceOrRef < 0 && item_iter->questChanceOrGroup == 0)
+            {
+                // Reference to another loot
+                int LootId = -int(item_iter->chanceOrRef);
+
+                FillLoot(loot,LootId,store);
+                continue;
+            }
+
             LootStoreItem* LootedItem = hasChance(*item_iter);
             if ( LootedItem )
                 loot->items.push_back(
