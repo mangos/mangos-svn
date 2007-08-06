@@ -4045,16 +4045,10 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                     if(!procSpell)
                         return;
 
-                    // must be HLight || HShock (triggered) || FlashOL
-                    if( (procSpell->SpellVisual != 2936 || procSpell->SpellIconID != 70 ) && 
-                        (procSpell->SpellVisual != 135  || procSpell->SpellIconID != 156) &&
-                        procSpell->SpellVisual != 6623 )
-                        return;
-
                     SpellEntry const *originalSpell = procSpell;
 
                     // in case HShock procspell is triggered spell but we need mana cost of original casted spell
-                    if(procSpell->SpellVisual == 135 && procSpell->SpellIconID == 156)
+                    if(procSpell->SpellFamilyName == SPELLFAMILY_PALADIN && procSpell->SpellFamilyFlags == 0x00200000)
                     {
                         uint32 originalSpellId = 0;
                         switch(procSpell->Id)
@@ -4077,8 +4071,11 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                         originalSpell = HSSpell;
                     }
 
+                    // percent stored in effect 1 (class scripts) base points
+                    int32 percent = auraSpellInfo->EffectBasePoints[1]+1;
+
                     // BasePoints = val -1 not required (EffectBaseDice==0)
-                    int32 ILManaSpellBasePoints0 = originalSpell->manaCost;
+                    int32 ILManaSpellBasePoints0 = originalSpell->manaCost*percent/100;
                     CastCustomSpell(this, 20272, &ILManaSpellBasePoints0, NULL, NULL, true, NULL, triggeredByAura);
                     return;
                 }
