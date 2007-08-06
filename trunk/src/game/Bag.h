@@ -35,6 +35,9 @@ class Bag : public Item
         Bag();
         ~Bag();
 
+        void AddToWorld();
+        void RemoveFromWorld();
+
         bool Create(uint32 guidlow, uint32 itemid, Player* owner);
 
         void Clear();
