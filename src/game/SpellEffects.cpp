@@ -1172,8 +1172,8 @@ void Spell::EffectHeal( uint32 i )
         uint32 procHealer = PROC_FLAG_HEAL;
         if (crit)
             procHealer |= PROC_FLAG_CRIT_HEAL;
-        if (m_caster != unitTarget)
-            m_caster->ProcDamageAndSpell(unitTarget,procHealer,PROC_FLAG_HEALED,addhealth,m_spellInfo,m_IsTriggeredSpell);
+
+        m_caster->ProcDamageAndSpell(unitTarget,procHealer,PROC_FLAG_HEALED,addhealth,m_spellInfo,m_IsTriggeredSpell);
     }
 }
 
