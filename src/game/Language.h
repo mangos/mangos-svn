@@ -129,6 +129,7 @@
 
 #define LANG_BAD_VALUE                   "Incorrect values."
 #define LANG_NO_CHAR_SELECTED            "No character selected."
+#define LANG_NOT_IN_GROUP                "%s are not in a group."
 
 #define LANG_YOU_CHANGE_HP               "You change the HP to %i/%i of %s."
 #define LANG_YOURS_HP_CHANGED            "%s changed your HP to %i/%i."
