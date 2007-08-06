@@ -261,7 +261,7 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
 
         PSendSysMessage(LANG_SUMMONING, chr->GetName(),"");
 
-        if (m_session->GetPlayer()->isVisibleFor(chr))
+        if (m_session->GetPlayer()->IsVisibleGloballyFor(chr))
         {
             char buf0[256];
             snprintf((char*)buf0,256,LANG_SUMMONED_BY, m_session->GetPlayer()->GetName());
@@ -359,7 +359,7 @@ bool ChatHandler::HandleGonameCommand(const char* args)
 
         PSendSysMessage(LANG_APPEARING_AT, chr->GetName());
 
-        if (_player->isVisibleFor(chr))
+        if (_player->IsVisibleGloballyFor(chr))
         {
             char buf0[256];
             sprintf((char*)buf0,LANG_APPEARING_TO, _player->GetName());
@@ -1634,17 +1634,23 @@ bool ChatHandler::HandleSendMailCommand(const char* args)
 bool ChatHandler::HandleNameTeleCommand(const char * args)
 {
     char* pName = strtok((char*)args, " ");
-    char* loc = strtok(NULL, "");
 
-    if(!pName || !loc)
+    if(!pName)
         return false;
 
+    char* tail = strtok(NULL, "");
+
+    char* cId = extractKeyFromLink((char*)tail,"Htele");           // string or [name] Shift-click form |color|Htele:name|h[name]|h|r
+    if(!cId)
+        return false;
+
+    std::string location = cId;
+
     std::string name = pName;
-    std::string location = loc;
 
     normalizePlayerName(name);
-    sDatabase.escape_string(name);
 
+    sDatabase.escape_string(location);
     QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `game_tele` WHERE `name` = '%s'",location.c_str());
     if (!result)
     {
@@ -1684,7 +1690,7 @@ bool ChatHandler::HandleNameTeleCommand(const char * args)
 
         PSendSysMessage(LANG_TELEPORTING_TO, chr->GetName(),"", location.c_str());
 
-        if (m_session->GetPlayer()->isVisibleFor(chr))
+        if (m_session->GetPlayer()->IsVisibleGloballyFor(chr))
         {
             WorldPacket data;
             char buf0[256];
@@ -1704,6 +1710,87 @@ bool ChatHandler::HandleNameTeleCommand(const char * args)
     }
     else
         PSendSysMessage(LANG_NO_PLAYER, name.c_str());
+
+    return true;
+}
+
+bool ChatHandler::HandleGroupTeleCommand(const char * args)
+{    
+    Player *player = getSelectedPlayer();
+    if (!player)
+    {
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
+        return true;
+    }
+
+    char* cId = extractKeyFromLink((char*)args,"Htele");           // string or [name] Shift-click form |color|Htele:name|h[name]|h|r
+    if(!cId)
+        return false;
+
+    std::string location = cId;
+
+    sDatabase.escape_string(location);
+    QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `game_tele` WHERE `name` = '%s'",location.c_str());
+    if (!result)
+    {
+        SendSysMessage(LANG_COMMAND_TELE_NOTFOUND);
+        return true;
+    }
+    Field *fields = result->Fetch();
+    float x = fields[0].GetFloat();
+    float y = fields[1].GetFloat();
+    float z = fields[2].GetFloat();
+    float ort = fields[3].GetFloat();
+    int mapid = fields[4].GetUInt16();
+    delete result;
+
+    if(!MapManager::IsValidMapCoord(mapid,x,y))
+    {
+        PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
+        return true;
+    }
+    
+    Group *grp = player->GetGroup();
+
+    if(!grp)
+    {
+        PSendSysMessage(LANG_NOT_IN_GROUP,player->GetName());
+        return true;
+    }
+    
+    for(GroupReference *itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
+    {
+        Player *pl = itr->getSource();
+
+        if(!pl || !pl->GetSession() )
+            continue;
+
+        if(pl->IsBeingTeleported())
+        {
+            PSendSysMessage(LANG_IS_TELEPORTED, pl->GetName());
+            continue;
+        }
+
+        if(pl->isInFlight())
+        {
+            PSendSysMessage(LANG_CHAR_IN_FLIGHT,pl->GetName());
+            continue;
+        }
+
+        PSendSysMessage(LANG_TELEPORTING_TO, pl->GetName(),"", location.c_str());
+
+        if (m_session->GetPlayer() != pl && m_session->GetPlayer()->IsVisibleGloballyFor(pl))
+        {
+            WorldPacket data;
+            char buf0[256];
+            snprintf((char*)buf0,256,LANG_TELEPORTED_TO_BY, m_session->GetPlayer()->GetName());
+            FillSystemMessageData(&data, m_session, buf0);
+            pl->GetSession()->SendPacket( &data );
+        }
+
+        pl->SetRecallPosition(pl->GetMapId(),pl->GetPositionX(),pl->GetPositionY(),pl->GetPositionZ(),pl->GetOrientation());
+        pl->TeleportTo(mapid, x, y, z, ort);
+    }
 
     return true;
 }

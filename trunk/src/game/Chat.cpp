@@ -334,6 +334,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "sendmail",    SEC_MODERATOR,     &ChatHandler::HandleSendMailCommand,         "",   NULL },
         { "rename",      SEC_GAMEMASTER,    &ChatHandler::HandleRenameCommand,           "",   NULL },
         { "nametele",    SEC_MODERATOR,     &ChatHandler::HandleNameTeleCommand,         "",   NULL },
+        { "grouptele",   SEC_MODERATOR,     &ChatHandler::HandleGroupTeleCommand,        "",   NULL },
         { "loadpdump",   SEC_ADMINISTRATOR, &ChatHandler::HandleLoadPDumpCommand,        "",   NULL },
         { "writepdump",  SEC_ADMINISTRATOR, &ChatHandler::HandleWritePDumpCommand,       "",   NULL },
         { "mute",        SEC_GAMEMASTER,    &ChatHandler::HandleMuteCommand,             "",   NULL },
