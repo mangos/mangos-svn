@@ -1536,12 +1536,7 @@ void Player::AddToWorld()
     ///- The player should only be added when logging in
     Object::AddToWorld();
 
-    for(int i = 0; i < BANK_SLOT_BAG_END; i++)
-    {
-        if(m_items[i])
-            m_items[i]->AddToWorld();
-    }
-    for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
+    for(int i = PLAYER_SLOT_START; i < PLAYER_SLOT_END; i++)
     {
         if(m_items[i])
             m_items[i]->AddToWorld();
@@ -1550,12 +1545,7 @@ void Player::AddToWorld()
 
 void Player::RemoveFromWorld()
 {
-    for(int i = 0; i < BANK_SLOT_BAG_END; i++)
-    {
-        if(m_items[i])
-            m_items[i]->RemoveFromWorld();
-    }
-    for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
+    for(int i = PLAYER_SLOT_START; i < PLAYER_SLOT_END; i++)
     {
         if(m_items[i])
             m_items[i]->RemoveFromWorld();
@@ -3472,8 +3462,16 @@ void Player::DurabilityPointsLoss(uint8 equip_pos, uint32 points)
 
 void Player::DurabilityRepairAll(bool cost, bool discount)
 {
-    for (uint16 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
+    // equipped, backpack, bags itself
+    for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
         DurabilityRepair(( (INVENTORY_SLOT_BAG_0 << 8) | i ),cost,discount);
+
+    // bank, buyback and keys not repaired
+
+    // items in inventory bags
+    for(int j = INVENTORY_SLOT_BAG_START; j < INVENTORY_SLOT_BAG_END; j++)
+        for(int i = 0; i < MAX_BAG_SIZE; i++)
+            DurabilityRepair(( (j << 8) | i ),cost,discount);
 }
 
 void Player::DurabilityRepair(uint16 pos, bool cost, bool discount)

@@ -43,6 +43,28 @@ Bag::~Bag()
     }
 }
 
+void Bag::AddToWorld()
+{
+    Item::AddToWorld();
+
+    for(int i = 0; i<MAX_BAG_SIZE; i++)
+    {
+        if(m_bagslot[i])
+            m_bagslot[i]->AddToWorld();
+    }
+}
+
+void Bag::RemoveFromWorld()
+{
+    for(int i = 0; i<MAX_BAG_SIZE; i++)
+    {
+        if(m_bagslot[i])
+            m_bagslot[i]->RemoveFromWorld();
+    }
+
+    Item::RemoveFromWorld();
+}
+
 bool Bag::Create(uint32 guidlow, uint32 itemid, Player* owner)
 {
     ItemPrototype const * itemProto = objmgr.GetItemPrototype(itemid);
