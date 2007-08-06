@@ -3868,6 +3868,23 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
     // Non SpellID checks
     switch(dummySpell->SpellIconID)
     {
+        // Master of Elements
+        case 1920:
+        {
+            if(!procSpell)
+                return;
+
+            if(dummySpell->SpellFamilyName!=SPELLFAMILY_MAGE)
+                return;
+
+            int32 MEManaCostSave = procSpell->manaCost * triggredByAura->GetModifier()->m_amount/100;
+            if(MEManaCostSave <= 0)
+                return;
+            int32 MEManaRestoreBasePoints0 = MEManaCostSave-1;
+            CastCustomSpell(this,29077,&MEManaRestoreBasePoints0,NULL,NULL,true,NULL, triggredByAura);
+
+            return;
+        }
         // VT
         case 2213:
         {
