@@ -93,21 +93,24 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
             maxcount = fields[5].GetUInt32();
             is_ffa = fields[6].GetBool();
 
-            ItemPrototype const *proto = objmgr.GetItemPrototype(item);
-
-            if(!proto)
+            if( chanceOrRef >= 0 )                          // chance
             {
-                ssNonLootableItems << "loot entry = " << entry << " item = " << item << " mincount = " << mincount << " maxcount = " << maxcount << " (not exist)\n";
-                continue;
-            }
+                ItemPrototype const *proto = objmgr.GetItemPrototype(item);
 
-            displayid = proto->DisplayInfoID;
+                if(!proto)
+                {
+                    ssNonLootableItems << "loot entry = " << entry << " item = " << item << " mincount = " << mincount << " maxcount = " << maxcount << " (not exist)\n";
+                    continue;
+                }
 
-            // non-quest (maybe group) loot with low chance
-            if( chanceOrRef >= 0 && chanceOrRef < 0.000001 && questchance <= 0 )
-            {
-                ssNonLootableItems << "loot entry = " << entry << " item = " << item << " mincount = " << mincount << " maxcount = " << maxcount << " (no chance)\n";
-                continue;
+                displayid = proto->DisplayInfoID;
+
+                // non-quest (maybe group) loot with low chance
+                if( chanceOrRef < 0.000001 && questchance <= 0 )
+                {
+                    ssNonLootableItems << "loot entry = " << entry << " item = " << item << " mincount = " << mincount << " maxcount = " << maxcount << " (no chance)\n";
+                    continue;
+                }
             }
 
             lootstore[entry].push_back( LootStoreItem(item, displayid, chanceOrRef, questchance,is_ffa,mincount,maxcount) );

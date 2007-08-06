@@ -88,11 +88,14 @@ int AccountMgr::DeleteAccount(uint32 accid)
 
     sDatabase.BeginTransaction();
 
-    if(!loginDatabase.PExecute("DELETE FROM `account` WHERE `id`='%d'", accid) ||
-       !loginDatabase.PExecute("DELETE FROM `realmcharacters` WHERE `acctid`='%d'", accid))
-       return -1;   // unexpected error;
+    bool res =  loginDatabase.PExecute("DELETE FROM `account` WHERE `id`='%d'", accid) &&
+                loginDatabase.PExecute("DELETE FROM `realmcharacters` WHERE `acctid`='%d'", accid);
 
     sDatabase.CommitTransaction();
+
+    if(!res)
+        return -1;   // unexpected error;
+
 
     return 0;
 }

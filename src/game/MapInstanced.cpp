@@ -259,7 +259,6 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
             else
             {
                 // the aforementioned "very special" case of leader being not online
-                sDatabase.BeginTransaction();
                 sDatabase.PExecute("DELETE FROM `character_instance` WHERE (`guid` = '%u') AND (`map` = '%u')", GUID_LOPART(player->GetGroup()->GetLeaderGUID()), GetId());
                 sDatabase.PExecute("INSERT INTO `character_instance` VALUES ('%u', '%u', '%u', '%u')", GUID_LOPART(player->GetGroup()->GetLeaderGUID()), GetId(), InstanceId, GUID_LOPART(player->GetGroup()->GetLeaderGUID()));
             }
