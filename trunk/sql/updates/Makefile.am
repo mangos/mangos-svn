@@ -334,6 +334,7 @@ pkgdata_DATA = \
 	3845_account.sql \
 	3845_command.sql \
 	3859_spell_affect.sql \
+	3860_creature_template.sql \
 	3862_prospecting_loot_template.sql \
 	3874_spell_scripts.sql \
 	3875_item_template.sql \
@@ -370,8 +371,40 @@ pkgdata_DATA = \
 	4058.sql \
 	4059_spell_learn_skill.sql \
 	4059_spell_learn_spell.sql \
-	4076_playercreateinfo_spell.sql \
 	4076_character_spell.sql \
+	4076_playercreateinfo_spell.sql \
+	4081_command.sql \
+	4096_pet.sql \
+	4116_creature_template.sql \
+	4133_command.sql \
+	4133_spell_chain.sql \
+	4134_command.sql \
+	4139_spell_proc_event.sql \
+	4140_command.sql \
+	4145_character_reputation.sql \
+	4154_spell_proc_event.sql \
+	4176_character.sql \
+	4176_command.sql \
+	4187_command.sql \
+	4204_command.sql \
+	4205_creature_template.sql \
+	4224_character_aura.sql \
+	4224_pet_aura.sql \
+	4235_spell_proc_event.sql \
+	4239_spell_chain.sql \
+	4239_spell_proc_event.sql \
+	4242_spell_proc_event.sql \
+	4243_spell_affect.sql \
+	4248_spell_chain.sql \
+	4248_spell_proc_event.sql \
+	4252_spell_threat.sql \
+	4255_spell_chain.sql \
+	4258_command.sql \
+	4259_spell_chain.sql \
+	4259_spell_proc_event.sql \
+	4262_spell_proc_event.sql \
+	4266_spell_proc_event.sql \
+	4267_command.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -680,10 +713,13 @@ EXTRA_DIST = \
 	3801_command.sql \
 	3802_arena_teams.sql \
 	3802_petitions.sql \
+	3805_spell_proc_event.sql \
+	3806_petitions.sql \
 	3833_quest_template.sql \
 	3845_account.sql \
 	3845_command.sql \
 	3859_spell_affect.sql \
+	3860_creature_template.sql \
 	3862_prospecting_loot_template.sql \
 	3874_spell_scripts.sql \
 	3875_item_template.sql \
@@ -720,6 +756,38 @@ EXTRA_DIST = \
 	4058.sql \
 	4059_spell_learn_skill.sql \
 	4059_spell_learn_spell.sql \
-	4076_playercreateinfo_spell.sql \
 	4076_character_spell.sql \
+	4076_playercreateinfo_spell.sql \
+	4081_command.sql \
+	4096_pet.sql \
+	4116_creature_template.sql \
+	4133_command.sql \
+	4133_spell_chain.sql \
+	4134_command.sql \
+	4139_spell_proc_event.sql \
+	4140_command.sql \
+	4145_character_reputation.sql \
+	4154_spell_proc_event.sql \
+	4176_character.sql \
+	4176_command.sql \
+	4187_command.sql \
+	4204_command.sql \
+	4205_creature_template.sql \
+	4224_character_aura.sql \
+	4224_pet_aura.sql \
+	4235_spell_proc_event.sql \
+	4239_spell_chain.sql \
+	4239_spell_proc_event.sql \
+	4242_spell_proc_event.sql \
+	4243_spell_affect.sql \
+	4248_spell_chain.sql \
+	4248_spell_proc_event.sql \
+	4252_spell_threat.sql \
+	4255_spell_chain.sql \
+	4258_command.sql \
+	4259_spell_chain.sql \
+	4259_spell_proc_event.sql \
+	4262_spell_proc_event.sql \
+	4266_spell_proc_event.sql \
+	4267_command.sql \
 	README

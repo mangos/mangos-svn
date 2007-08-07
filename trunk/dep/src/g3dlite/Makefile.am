@@ -25,12 +25,17 @@ AM_CPPFLAGS = -I$(srcdir) -I$(srcdir)/../../include -I$(srcdir)/../../include/g3
 noinst_LIBRARIES = libg3dlite.a
 libg3dlite_a_SOURCES = \
 	AABox.cpp \
-	Crypto.cpp \
-	Plane.cpp \
-	Triangle.cpp \
-	Vector4.cpp \
 	Box.cpp \
+	Crypto.cpp \
+	format.cpp \
 	Matrix3.cpp \
+	Plane.cpp \
 	System.cpp \
+	Triangle.cpp \
 	Vector3.cpp \
-	format.cpp
+	Vector4.cpp
+
+EXTRA_DIST = \
+	license.html
+
+
