@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1871,7 +1871,7 @@ MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (const Unit *pVictim, WeaponAtt
     int32 miss_chance = (int32)(MeleeMissChanceCalc(pVictim));
 
     // Critical hit chance
-    float crit_chance = GetUnitCriticalChance();
+    float crit_chance = GetUnitCriticalChance(attType);
 
     // Only players can have Talent&Spell bonuses
     if (GetTypeId() == TYPEID_PLAYER)
@@ -1899,7 +1899,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     int32 miss_chance = (int32)(MeleeMissChanceCalc(pVictim));
 
     // Critical hit chance
-    int32 crit_chance = (int32)(GetUnitCriticalChance()*100);
+    int32 crit_chance = (int32)(GetUnitCriticalChance(attType)*100);
 
     // Useful if want to specify crit & miss chances for melee, else it could be removed
     DEBUG_LOG("MELEE OUTCOME: hit %u crit %u miss %u", m_modHitChance,crit_chance,miss_chance);

@@ -94,9 +94,12 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     {
         rc_team = objmgr.GetPlayerTeamByGUID(rc);
         QueryResult* result = sDatabase.PQuery("SELECT COUNT(*) FROM `mail` WHERE `receiver` = '%u'", GUID_LOPART(rc));
-        Field *fields = result->Fetch();
-        mails_count = fields[0].GetUInt32();
-        delete result;
+        if(result)
+        {
+            Field *fields = result->Fetch();
+            mails_count = fields[0].GetUInt32();
+            delete result;
+        }
     }
     //do not allow to have more than 100 mails in mailbox.. mails count is in opcode uint8!!! - so max can be 255..
     if (mails_count > 100)

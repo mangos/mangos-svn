@@ -731,7 +731,19 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         float GetUnitDodgeChance()    const;
         float GetUnitParryChance()    const;
         float GetUnitBlockChance()    const;
-        float GetUnitCriticalChance() const { return GetTypeId() == TYPEID_PLAYER ? GetFloatValue( PLAYER_CRIT_PERCENTAGE ) : 5; }
+        float GetUnitCriticalChance(WeaponAttackType attackType) const
+        {
+            if(GetTypeId() == TYPEID_PLAYER)
+            {
+                switch(attackType)
+                {
+                    case BASE_ATTACK:   return GetFloatValue( PLAYER_CRIT_PERCENTAGE );
+                    case OFF_ATTACK:    return GetFloatValue( PLAYER_OFFHAND_CRIT_PERCENTAGE );
+                    case RANGED_ATTACK: return GetFloatValue( PLAYER_RANGED_CRIT_PERCENTAGE );
+                }
+            }
+            return 5;
+        }
 
         virtual uint32 GetShieldBlockValue() const =0;
         uint32 GetUnitMeleeSkill() const { return getLevel() * 5; }
