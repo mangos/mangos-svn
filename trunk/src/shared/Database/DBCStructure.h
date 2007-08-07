@@ -204,6 +204,16 @@ struct GemPropertiesEntry
     uint32      color;
 };
 
+struct GtChanceToMeleeCritBaseEntry
+{
+    float    base;
+};
+
+struct GtChanceToMeleeCritEntry
+{
+    float    ratio;
+};
+
 struct ItemDisplayInfoEntry
 {
     uint32      ID;

@@ -155,6 +155,8 @@ extern DBCStorage <EmotesTextEntry>           sEmotesTextStore;
 extern DBCStorage <FactionEntry>              sFactionStore;
 extern DBCStorage <FactionTemplateEntry>      sFactionTemplateStore;
 extern DBCStorage <GemPropertiesEntry>        sGemPropertiesStore;
+extern DBCStorage <GtChanceToMeleeCritBaseEntry> sGtChanceToMeleeCritBaseStore;
+//extern DBCStorage <GtChanceToMeleeCritEntry>  sGtChanceToMeleeCritStore;
 //extern DBCStorage <ItemDisplayInfoEntry>      sItemDisplayInfoStore; -- not used currently
 extern DBCStorage <ItemExtendedCostEntry>     sItemExtendedCostStore;
 extern DBCStorage <ItemRandomPropertiesEntry> sItemRandomPropertiesStore;

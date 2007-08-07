@@ -49,6 +49,8 @@ DBCStorage <FactionEntry> sFactionStore(FactionEntryfmt);
 DBCStorage <FactionTemplateEntry> sFactionTemplateStore(FactionTemplateEntryfmt);
 
 DBCStorage <GemPropertiesEntry> sGemPropertiesStore(GemPropertiesEntryfmt);
+DBCStorage <GtChanceToMeleeCritBaseEntry> sGtChanceToMeleeCritBaseStore(GtChanceToMeleeCritBasefmt);
+//DBCStorage <GtChanceToMeleeCritEntry> sGtChanceToMeleeCritStore(GtChanceToMeleeCritfmt);
 DBCStorage <ItemSetEntry> sItemSetStore(ItemSetEntryfmt);
 //DBCStorage <ItemDisplayInfoEntry> sItemDisplayInfoStore(ItemDisplayTemplateEntryfmt); -- not used currently
 DBCStorage <ItemExtendedCostEntry> sItemExtendedCostStore(ItemExtendedCostEntryfmt);
@@ -145,7 +147,8 @@ void LoadDBCStores(std::string dataPath)
 {
     std::string tmpPath="";
 
-    const uint32 DBCFilesCount = 35;
+    const uint32 DBCFilesCount = 36;
+    //const uint32 DBCFilesCount = 37; -- gtChanceToMeleeCrit.dbc not loaded temporary
 
     barGoLink bar( DBCFilesCount );
 
@@ -164,7 +167,9 @@ void LoadDBCStores(std::string dataPath)
     LoadDBC(bar,bad_dbc_files,sFactionStore,             dataPath+"dbc/Faction.dbc");
     LoadDBC(bar,bad_dbc_files,sFactionTemplateStore,     dataPath+"dbc/FactionTemplate.dbc");
     LoadDBC(bar,bad_dbc_files,sGemPropertiesStore,       dataPath+"dbc/GemProperties.dbc");
-//    LoadDBC(bar,bad_dbc_files,sItemDisplayInfoStore,     dataPath+"dbc/ItemDisplayInfo.dbc"); -- not used currently
+    LoadDBC(bar,bad_dbc_files,sGtChanceToMeleeCritBaseStore,dataPath+"dbc/gtChanceToMeleeCritBase.dbc");
+//    LoadDBC(bar,bad_dbc_files,sGtChanceToMeleeCritStore, dataPath+"dbc/gtChanceToMeleeCrit.dbc"); -- not used currently
+//    LoadDBC(bar,bad_dbc_files,sItemDisplayInfoStore,     dataPath+"dbc/ItemDisplayInfo.dbc");     -- not used currently
     LoadDBC(bar,bad_dbc_files,sItemExtendedCostStore,    dataPath+"dbc/ItemExtendedCost.dbc");
     LoadDBC(bar,bad_dbc_files,sItemRandomPropertiesStore,dataPath+"dbc/ItemRandomProperties.dbc");
     LoadDBC(bar,bad_dbc_files,sItemRandomSuffixStore,    dataPath+"dbc/ItemRandomSuffix.dbc");
@@ -596,6 +601,9 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
             case 33 /*SPELL_AURA_MOD_DECREASE_SPEED*/:      // used in positive spells also
                 // part of positive spell if casted at self
                 if(spellproto->EffectImplicitTargetA[effIndex] != 1/*TARGET_SELF*/)
+                    return false;
+                // but not this if this first effect (don't found batter check)
+                if(spellproto->Attributes & 0x4000000 && effIndex==0)
                     return false;
                 break;
             case 77 /*SPELL_AURA_MECHANIC_IMMUNITY*/:
