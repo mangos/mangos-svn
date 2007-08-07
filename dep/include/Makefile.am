@@ -19,14 +19,49 @@
 ## Sub-directories to parse
 
 ## Additional files to include when running 'make dist'
-#  MySQL header files for Win32 builds
+#  G3DLite header files
 EXTRA_DIST = \
-	mysql/Libmysql.def \
+	g3dlite/G3D/AABox.h \
+	g3dlite/G3D/Array.h \
+	g3dlite/G3D/Box.h \
+	g3dlite/G3D/CollisionDetection.h \
+	g3dlite/G3D/CoordinateFrame.h \
+	g3dlite/G3D/Crypto.h \
+	g3dlite/G3D/debug.h \
+	g3dlite/G3D/format.h \
+	g3dlite/G3D/g3dmath.h \
+	g3dlite/G3D/g3dmath.inl \
+	g3dlite/G3D/GCamera.h \
+	g3dlite/G3D/Line.h \
+	g3dlite/G3D/Matrix3.h \
+	g3dlite/G3D/Plane.h \
+	g3dlite/G3D/platform.h \
+	g3dlite/G3D/Quat.h \
+	g3dlite/G3D/Quat.inl \
+	g3dlite/G3D/Ray.h \
+	g3dlite/G3D/RegistryUtil.h \
+	g3dlite/G3D/Sphere.h \
+	g3dlite/G3D/stringutils.h \
+	g3dlite/G3D/System.h \
+	g3dlite/G3D/Table.h \
+	g3dlite/G3D/Triangle.h \
+	g3dlite/G3D/Vector2.h \
+	g3dlite/G3D/Vector2.inl \
+	g3dlite/G3D/Vector2int16.h \
+	g3dlite/G3D/Vector3.h \
+	g3dlite/G3D/Vector3.inl \
+	g3dlite/G3D/Vector3int16.h \
+	g3dlite/G3D/Vector4.h \
+	g3dlite/G3D/Vector4.inl
+
+#  MySQL header files for Win32 builds
+EXTRA_DIST += \
 	mysql/config-netware.h \
 	mysql/config-os2.h \
 	mysql/config-win.h \
 	mysql/errmsg.h \
 	mysql/libmysqld.def \
+	mysql/Libmysql.def \
 	mysql/m_ctype.h \
 	mysql/m_string.h \
 	mysql/my_alloc.h \
@@ -35,13 +70,13 @@ EXTRA_DIST = \
 	mysql/my_global.h \
 	mysql/my_list.h \
 	mysql/my_pthread.h \
-	mysql/my_sys.h \
-	mysql/mysql.h \
 	mysql/mysql_com.h \
+	mysql/mysqld_error.h \
 	mysql/mysql_embed.h \
+	mysql/mysql.h \
 	mysql/mysql_time.h \
 	mysql/mysql_version.h \
-	mysql/mysqld_error.h \
+	mysql/my_sys.h \
 	mysql/raid.h \
 	mysql/typelib.h
 
@@ -57,18 +92,21 @@ EXTRA_DIST += \
 	openssl/buffer.h \
 	openssl/cast.h \
 	openssl/comp.h \
-	openssl/conf.h \
 	openssl/conf_api.h \
+	openssl/conf.h \
 	openssl/crypto.h \
 	openssl/des.h \
 	openssl/des_old.h \
 	openssl/dh.h \
 	openssl/dsa.h \
 	openssl/dso.h \
-	openssl/e_os2.h \
+	openssl/dtls1.h \
 	openssl/ebcdic.h \
+	openssl/ecdh.h \
+	openssl/ecdsa.h \
 	openssl/ec.h \
 	openssl/engine.h \
+	openssl/e_os2.h \
 	openssl/err.h \
 	openssl/evp.h \
 	openssl/hmac.h \
@@ -80,16 +118,18 @@ EXTRA_DIST += \
 	openssl/md4.h \
 	openssl/md5.h \
 	openssl/mdc2.h \
-	openssl/obj_mac.h \
 	openssl/objects.h \
+	openssl/obj_mac.h \
 	openssl/ocsp.h \
 	openssl/opensslconf.h \
 	openssl/opensslv.h \
 	openssl/ossl_typ.h \
-	openssl/pem.h \
 	openssl/pem2.h \
+	openssl/pem.h \
 	openssl/pkcs12.h \
 	openssl/pkcs7.h \
+	openssl/pq_compat.h \
+	openssl/pqueue.h \
 	openssl/rand.h \
 	openssl/rc2.h \
 	openssl/rc4.h \
@@ -98,24 +138,29 @@ EXTRA_DIST += \
 	openssl/rsa.h \
 	openssl/safestack.h \
 	openssl/sha.h \
-	openssl/ssl.h \
-	openssl/ssl2.h \
 	openssl/ssl23.h \
+	openssl/ssl2.h \
 	openssl/ssl3.h \
+	openssl/ssl.h \
 	openssl/stack.h \
+	openssl/store.h \
 	openssl/symhacks.h \
 	openssl/tls1.h \
 	openssl/tmdiff.h \
 	openssl/txt_db.h \
-	openssl/ui.h \
 	openssl/ui_compat.h \
+	openssl/ui.h \
 	openssl/x509.h \
-	openssl/x509_vfy.h \
-	openssl/x509v3.h
+	openssl/x509v3.h \
+	openssl/x509_vfy.h
 
 #  SQLite header files for Win32 builds
 EXTRA_DIST += \
 	sqlite/sqlite.h
+
+#  VLD header files for Win32 builds
+EXTRA_DIST += \
+	vld/vld.h
 
 #  Zlib header files for Win32 builds
 EXTRA_DIST += \
@@ -170,37 +215,3 @@ EXTRA_DIST += \
 	zthread/Waitable.h \
 	zthread/ZThread.h
 
-EXTRA_DIST += \
-	g3dlite/AABox.h \
-	g3dlite/AABSPTree.h \
-	g3dlite/Array.h \
-	g3dlite/Box.h \
-	g3dlite/CollisionDetection.h \
-	g3dlite/CoordinateFrame.h \
-	g3dlite/Crypto.h \
-	g3dlite/debug.h \
-	g3dlite/format.h \
-	g3dlite/g3dmath.h \
-	g3dlite/g3dmath.inl \
-	g3dlite/GCamera.h \
-	g3dlite/Line.h \
-	g3dlite/Matrix3.h \
-	g3dlite/Plane.h \
-	g3dlite/platform.h \
-	g3dlite/Quat.h \
-	g3dlite/Quat.inl \
-	g3dlite/Ray.h \
-	g3dlite/RegistryUtil.h \
-	g3dlite/Sphere.h \
-	g3dlite/stringutils.h \
-	g3dlite/System.h \
-	g3dlite/Table.h \
-	g3dlite/Triangle.h \
-	g3dlite/Vector2.h \
-	g3dlite/Vector2.inl \
-	g3dlite/Vector2int16.h \
-	g3dlite/Vector3.h \
-	g3dlite/Vector3.inl \
-	g3dlite/Vector3int16.h \
-	g3dlite/Vector4.h \
-	g3dlite/Vector4.inl
