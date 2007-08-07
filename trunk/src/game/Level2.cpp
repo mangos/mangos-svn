@@ -1074,8 +1074,8 @@ bool ChatHandler::HandleSetMoveTypeCommand(const char* args)
             {
                 //sLog.outError("DEBUG: type_str, NODEL ");
                 doNotDelete = true;
+                type_str = NULL;
             }
-            type_str = NULL;
         }
     }
 
