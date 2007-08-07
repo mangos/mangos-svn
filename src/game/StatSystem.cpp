@@ -342,24 +342,35 @@ void Player::UpdateCritPercentage(WeaponAttackType attType)
 
 void Player::UpdateAllCritPercentages()
 {
+    GtChanceToMeleeCritBaseEntry const * gtCritBase = sGtChanceToMeleeCritBaseStore.LookupEntry(getClass() - 1);
+    float base_crit = gtCritBase ? gtCritBase->base * 100 : 0;
+
+    /*
+    GtChanceToMeleeCritEntry     const * gtCritRate = sGtChanceToMeleeCritStore.LookupEntry((getClass() - 1) * 100 + getLevel() - 1);
+    
+    // values in sGtChanceToMeleeCritStore only until 100 level with 0 values - better use last level (70) at 2.1.3 for overflow level
+    float rate_value = gtCritRate ? gtCritRate->ratio * 100 : sGtChanceToMeleeCritStore.LookupEntry((getClass() - 1) * 100 + 70 - 1)->ratio * 100;
+
+    float value = base_crit + GetStat(STAT_AGILITY) * (0.04 + rate_value);
+    */
+
+    // temporary used old code until finding correct formula for GtChanceToMeleeCritEntry
     float classrate = 20.0f;
-    float base_crit = 0.0f;
 
     switch(getClass())
     {
-    case CLASS_DRUID:   base_crit = 0.92f; classrate = getLevel() > 60 ? 24.46f : 20; break;
-    case CLASS_PALADIN: base_crit = 0.7f;  classrate = getLevel() > 60 ? 25 : 20; break;
-    case CLASS_SHAMAN:  base_crit = 1.7f;  classrate = getLevel() > 60 ? 25 : 20; break;
-    case CLASS_MAGE:    base_crit = 3.2f;  classrate = getLevel() > 60 ? 25 : 20; break;
-    case CLASS_PRIEST:  base_crit = 3.0f;  classrate = getLevel() > 60 ? 25 : 20; break;
-    case CLASS_WARLOCK: base_crit = 2.0f;  classrate = getLevel() > 60 ? 25 : 20; break;
-    case CLASS_HUNTER:  classrate = getLevel() > 60 ? 40 : 33; break;
-    case CLASS_ROGUE:   classrate = getLevel() > 60 ? 40 : 29; break;
-    case CLASS_WARRIOR: 
-    default:            classrate = getLevel() > 60 ? 25 : 20; break;
+        case CLASS_WARRIOR: classrate = getLevel() > 60 ? 25 : 20; break;
+        case CLASS_PALADIN: classrate = getLevel() > 60 ? 25 : 20; break;
+        case CLASS_HUNTER:  classrate = getLevel() > 60 ? 40 : 33; break;
+        case CLASS_ROGUE:   classrate = getLevel() > 60 ? 40 : 29; break;
+        case CLASS_PRIEST:  classrate = getLevel() > 60 ? 25 : 20; break;
+        case CLASS_SHAMAN:  classrate = getLevel() > 60 ? 25 : 20; break;
+        case CLASS_MAGE:    classrate = getLevel() > 60 ? 25 : 20; break;
+        case CLASS_WARLOCK: classrate = getLevel() > 60 ? 25 : 20; break;
+        case CLASS_DRUID:   classrate = getLevel() > 60 ? 24.46f : 20; break;
     }
 
-    float value = base_crit + GetStat(STAT_AGILITY)/classrate;
+    float value = base_crit + GetStat(STAT_AGILITY) / classrate;
 
     SetBaseModValue(CRIT_PERCENTAGE, PCT_MOD, value);
     SetBaseModValue(OFFHAND_CRIT_PERCENTAGE, PCT_MOD, value);

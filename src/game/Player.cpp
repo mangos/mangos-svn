@@ -2110,20 +2110,10 @@ void Player::InitStatsForLevel(bool reapplyMods)
     SetUInt32Value(UNIT_FIELD_RANGED_ATTACK_POWER_MODS,0 );
     SetFloatValue(UNIT_FIELD_RANGED_ATTACK_POWER_MULTIPLIER,0.0f);
 
-    // Base crit values
-    switch(getClass())
-    {
-        case CLASS_PALADIN: SetFloatValue(PLAYER_CRIT_PERCENTAGE, 0.7 ); break;
-        case CLASS_PRIEST:  SetFloatValue(PLAYER_CRIT_PERCENTAGE, 3.0 ); break;
-        case CLASS_SHAMAN:  SetFloatValue(PLAYER_CRIT_PERCENTAGE, 1.7 ); break;
-        case CLASS_MAGE:    SetFloatValue(PLAYER_CRIT_PERCENTAGE, 3.2 ); break;
-        case CLASS_WARLOCK: SetFloatValue(PLAYER_CRIT_PERCENTAGE, 2.0 ); break;
-        case CLASS_DRUID:   SetFloatValue(PLAYER_CRIT_PERCENTAGE, 0.92); break;
-        case CLASS_ROGUE:
-        case CLASS_HUNTER:
-        case CLASS_WARRIOR:
-        default:            SetFloatValue(PLAYER_CRIT_PERCENTAGE, 0.0 ); break;
-    }
+    // Base crit values (will be recalculated in UpdateAllStats() at loading and in _ApplyAllStatBonuses() at reset
+    SetFloatValue(PLAYER_CRIT_PERCENTAGE,0);
+    SetFloatValue(PLAYER_OFFHAND_CRIT_PERCENTAGE,0);
+    SetFloatValue(PLAYER_RANGED_CRIT_PERCENTAGE,0);
 
     // Base spell crit values
     float base_spell_crit[MAX_CLASSES] = {0,0,3.70,0,0,2.97,0,3.54,3.70,3.18,0,3.33};
