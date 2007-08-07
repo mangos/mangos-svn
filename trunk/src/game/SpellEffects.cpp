@@ -2172,6 +2172,7 @@ void Spell::EffectSummonPet(uint32 i)
     if(!cInfo)
     {
         sLog.outError("EffectSummonPet: creature entry %u not found.",petentry);
+        delete NewSummon;
         return;
     }
 

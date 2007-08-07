@@ -200,6 +200,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "go",          SEC_ADMINISTRATOR, &ChatHandler::HandleGoCommand,               "",   NULL },
         { "goname",      SEC_MODERATOR,     &ChatHandler::HandleGonameCommand,           "",   NULL },
         { "namego",      SEC_MODERATOR,     &ChatHandler::HandleNamegoCommand,           "",   NULL },
+        { "groupgo",     SEC_MODERATOR,     &ChatHandler::HandleGroupgoCommand,          "",   NULL },
         { "aura",        SEC_ADMINISTRATOR, &ChatHandler::HandleAuraCommand,             "",   NULL },
         { "unaura",      SEC_ADMINISTRATOR, &ChatHandler::HandleUnAuraCommand,           "",   NULL },
         { "changelevel", SEC_GAMEMASTER,    &ChatHandler::HandleChangeLevelCommand,      "",   NULL },

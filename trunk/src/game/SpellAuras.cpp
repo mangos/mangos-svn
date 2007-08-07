@@ -3131,10 +3131,45 @@ void Aura::HandleAuraModCritPercent(bool apply, bool Real)
     if(m_target->GetTypeId()!=TYPEID_PLAYER)
         return;
 
-    //TODO: create a mask to handle melee and ranged +% crit separately
-    ((Player*)m_target)->HandleBaseModValue(CRIT_PERCENTAGE, FLAT_MOD, float (m_modifier.m_amount), apply);
-    ((Player*)m_target)->HandleBaseModValue(OFFHAND_CRIT_PERCENTAGE, FLAT_MOD, float (m_modifier.m_amount), apply);
-    //sLog.outError("BONUS CRIT CHANCE: + %f", float(m_modifier.m_amount));
+    // mods must be applied base at equipped weapon class and subclass comparison
+    // with spell->EquippedItemClass and  EquippedItemSubClassMask and EquippedItemInventoryTypeMask
+    // m_modifier.m_miscvalue comparison with item generated damage types
+
+    if (GetSpellProto()->EquippedItemClass == -1)
+    {
+        ((Player*)m_target)->HandleBaseModValue(CRIT_PERCENTAGE,         FLAT_MOD, float (m_modifier.m_amount), apply);
+        ((Player*)m_target)->HandleBaseModValue(OFFHAND_CRIT_PERCENTAGE, FLAT_MOD, float (m_modifier.m_amount), apply);
+        ((Player*)m_target)->HandleBaseModValue(RANGED_CRIT_PERCENTAGE,  FLAT_MOD, float (m_modifier.m_amount), apply);
+    }
+    else
+    {
+        Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+        if (pItem)
+        {
+            if (pItem->IsFitToSpellRequirements(GetSpellProto()))
+            {
+                ((Player*)m_target)->HandleBaseModValue(CRIT_PERCENTAGE, FLAT_MOD, float (m_modifier.m_amount), apply);
+            }
+        }
+        pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+        if (pItem)
+        {
+            if (pItem->IsFitToSpellRequirements(GetSpellProto()))
+            {
+                ((Player*)m_target)->HandleBaseModValue(OFFHAND_CRIT_PERCENTAGE, FLAT_MOD, float (m_modifier.m_amount), apply);
+            }
+        }
+
+        // apply any ranged weapon bonuses including wand if fit 
+        pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
+        if (pItem)
+        {
+            if (pItem->IsFitToSpellRequirements(GetSpellProto()))
+            {
+                ((Player*)m_target)->HandleBaseModValue(RANGED_CRIT_PERCENTAGE, FLAT_MOD, float (m_modifier.m_amount), apply);
+            }
+        }
+    }
 }
 
 void Aura::HandleModHitChance(bool Apply, bool Real)

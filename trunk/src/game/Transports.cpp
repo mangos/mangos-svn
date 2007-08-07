@@ -83,7 +83,12 @@ void MapManager::LoadTransports()
         uint32 mapid;
         x = t->m_WayPoints[0].x; y = t->m_WayPoints[0].y; z = t->m_WayPoints[0].z; mapid = t->m_WayPoints[0].mapid; o = 1;
 
-        t->Create(entry, goinfo->displayId, mapid, x, y, z, o, 100, 0);        // creates the Gameobject
+        if(!t->Create(entry, goinfo->displayId, mapid, x, y, z, o, 100, 0))     // creates the Gameobject
+        {
+            delete t;
+            continue;
+        }
+
         m_Transports.insert(t);
 
         for (std::set<uint32>::iterator i = mapsUsed.begin(); i != mapsUsed.end(); ++i)

@@ -209,12 +209,6 @@ bool ChatHandler::HandleGPSCommand(const char* args)
 
 bool ChatHandler::HandleNamegoCommand(const char* args)
 {
-    if(m_session->GetPlayer()->isInFlight())
-    {
-        SendSysMessage(LANG_YOU_IN_FLIGHT);
-        return true;
-    }
-
     if(!*args)
         return false;
 
@@ -244,7 +238,7 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
                   MapManager::Instance().GetMap(m_session->GetPlayer()->GetMapId(), m_session->GetPlayer())->GetInstanceId()) )
             {
                 // cannot summon from instance to instance
-                PSendSysMessage(LANG_CANNOT_INST_INST);
+                PSendSysMessage(LANG_CANNOT_SUMMON_TO_INST,chr->GetName());
                 return true;
             }
 
@@ -324,7 +318,7 @@ bool ChatHandler::HandleGonameCommand(const char* args)
                   MapManager::Instance().GetMap(_player->GetMapId(), _player)->GetInstanceId()) )
             {
                 // cannot go from instance to instance
-                PSendSysMessage(LANG_CANNOT_INST_INST);
+                PSendSysMessage(LANG_CANNOT_GO_INST_INST,chr->GetName());
                 return true;
             }
 
@@ -1790,6 +1784,98 @@ bool ChatHandler::HandleGroupTeleCommand(const char * args)
 
         pl->SetRecallPosition(pl->GetMapId(),pl->GetPositionX(),pl->GetPositionY(),pl->GetPositionZ(),pl->GetOrientation());
         pl->TeleportTo(mapid, x, y, z, ort);
+    }
+
+    return true;
+}
+
+bool ChatHandler::HandleGroupgoCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+    std::string name = args;
+    normalizePlayerName(name);
+    //sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
+
+    Player *player = objmgr.GetPlayer(name.c_str());
+    if (!player)
+    {
+        PSendSysMessage(LANG_NO_PLAYER, args);
+        return true;
+    }
+
+    Group *grp = player->GetGroup();
+
+    if(!grp)
+    {
+        PSendSysMessage(LANG_NOT_IN_GROUP,player->GetName());
+        return true;
+    }
+
+    Map* gmMap = MapManager::Instance().GetMap(m_session->GetPlayer()->GetMapId(), m_session->GetPlayer());
+    bool to_instance =  gmMap->Instanceable();
+
+    // we are in instance, and can summon only player in our group with us as lead
+    if ( to_instance && (
+        !m_session->GetPlayer()->GetGroup() || (grp->GetLeaderGUID() != m_session->GetPlayer()->GetGUID()) ||
+        (m_session->GetPlayer()->GetGroup()->GetLeaderGUID() != m_session->GetPlayer()->GetGUID()) ) )
+        // the last check is a bit excessive, but let it be, just in case
+    {
+        SendSysMessage(LANG_CANNOT_SUMMON_TO_INST);
+        return true;
+    }
+
+
+    for(GroupReference *itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
+    {
+        Player *pl = itr->getSource();
+
+        if(!pl || pl==m_session->GetPlayer() || !pl->GetSession() )
+            continue;
+
+        if(pl->IsBeingTeleported()==true)
+        {
+            PSendSysMessage(LANG_IS_TELEPORTED, pl->GetName());
+            return true;
+        }
+
+        if(pl->isInFlight())
+        {
+            PSendSysMessage(LANG_CHAR_IN_FLIGHT,pl->GetName());
+            return true;
+        }
+
+        if (to_instance)
+        {
+            Map* plMap = MapManager::Instance().GetMap(pl->GetMapId(), pl);
+
+            if ( plMap->Instanceable() && plMap->GetInstanceId() != gmMap->GetInstanceId() ) 
+            {
+                // cannot summon from instance to instance
+                PSendSysMessage(LANG_CANNOT_SUMMON_TO_INST,pl->GetName());
+                return true;
+            }
+        }
+
+        PSendSysMessage(LANG_SUMMONING, pl->GetName(),"");
+
+        if (m_session->GetPlayer()->IsVisibleGloballyFor(pl))
+        {
+            char buf0[256];
+            snprintf((char*)buf0,256,LANG_SUMMONED_BY, m_session->GetPlayer()->GetName());
+
+            WorldPacket data;
+            FillSystemMessageData(&data, m_session, buf0);
+            pl->GetSession()->SendPacket( &data );
+        }
+
+        pl->SetRecallPosition(pl->GetMapId(),pl->GetPositionX(),pl->GetPositionY(),pl->GetPositionZ(),pl->GetOrientation());
+
+        // before GM
+        float x,y,z;
+        m_session->GetPlayer()->GetClosePoint(NULL,x,y,z,pl->GetObjectSize());
+        pl->TeleportTo(m_session->GetPlayer()->GetMapId(),x,y,z,pl->GetOrientation());
     }
 
     return true;
