@@ -279,7 +279,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //227
     &Aura::HandleNULL,                                      //228 detection
     &Aura::HandleNULL,                                      //228 avoidance
-    &Aura::HandleNULL,                                      //230
+    &Aura::HandleAuraModIncreaseHealth,                     //230 Commanding Shout
     &Aura::HandleNULL,                                      //231
     &Aura::HandleNULL,                                      //232
     &Aura::HandleNULL,                                      //233
