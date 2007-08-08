@@ -734,7 +734,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         int GetTimeInnEter() const { return time_inn_enter; };
         void UpdateInnerTime (int time) { time_inn_enter = time; };
 
-        void RemovePet(Pet* pet, PetSaveMode mode);
+        void RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent = false);
         void Uncharm();
 
         void Say(const std::string text, const uint32 language);
@@ -1033,6 +1033,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void PetSpellInitialize();
         void CharmSpellInitialize();
+        void PossessSpellInitialize();
         bool HasSpell(uint32 spell) const;
         TrainerSpellState GetTrainerSpellState(TrainerSpell const* trainer_spell);
         void SendProficiency(uint8 pr1, uint32 pr2);
@@ -1462,6 +1463,12 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetNeedRename(bool rename) { m_needRename = rename; }
 
         LookingForGroup m_lookingForGroup;
+        
+        // Temporarily removed pet cache
+        uint32 GetOldPetNumber() const { return m_oldpetnumber; }
+        void SetOldPetNumber(uint32 petnumber) { m_oldpetnumber = petnumber; }
+        uint32 GetOldPetSpell() const { return m_oldpetspell; }
+        void SetOldPetSpell(uint32 petspell) { m_oldpetspell = petspell; }
 
         /*********************************************************/
         /***                 INSTANCE SYSTEM                   ***/
@@ -1673,6 +1680,11 @@ class MANGOS_DLL_SPEC Player : public Unit
         GroupReference m_group;
         Group *m_groupInvite;
         uint32 m_groupUpdateMask;
+
+        // Temporarily removed pet cache
+        uint32 m_oldpetnumber;
+        uint32 m_oldpetspell;
+
     private:
         GridReference<Player> m_gridRef;
 };

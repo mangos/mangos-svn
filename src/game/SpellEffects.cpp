@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1636,6 +1636,9 @@ void Spell::EffectSummon(uint32 i)
         return;
     uint32 level = m_caster->getLevel();
     Pet* spawnCreature = new Pet(m_caster, SUMMON_PET);
+    
+    if(spawnCreature->LoadPetFromDB(m_caster,pet_entry))
+        return;
 
     // before caster
     float x,y,z;
@@ -1655,13 +1658,17 @@ void Spell::EffectSummon(uint32 i)
     spawnCreature->setPowerType(POWER_MANA);
     spawnCreature->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
     spawnCreature->SetUInt32Value(UNIT_FIELD_FLAGS,0);
+    spawnCreature->SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
     spawnCreature->SetUInt32Value(UNIT_FIELD_BYTES_1,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
     spawnCreature->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
     spawnCreature->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
+    spawnCreature->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
     spawnCreature->InitStatsForLevel(level);
+
+    spawnCreature->GetCharmInfo()->SetPetNumber(objmgr.GeneratePetNumber(), false);
 
     spawnCreature->AIM_Initialize();
     spawnCreature->InitPetCreateSpells();
@@ -1681,6 +1688,8 @@ void Spell::EffectSummon(uint32 i)
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
     {
         m_caster->SetPet(spawnCreature);
+        spawnCreature->GetCharmInfo()->SetReactState( REACT_DEFENSIVE );
+        spawnCreature->GetCharmInfo()->SetCommandState( COMMAND_FOLLOW );
         spawnCreature->SavePetToDB(PET_SAVE_AS_CURRENT);
         ((Player*)m_caster)->PetSpellInitialize();
     }
@@ -1968,6 +1977,7 @@ void Spell::EffectSummonGuardian(uint32 i)
             spawnCreature->SetUInt32Value(UNIT_FIELD_PETEXPERIENCE,0);
             spawnCreature->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
             spawnCreature->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
+            spawnCreature->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
             spawnCreature->SetArmor(level*50);
             spawnCreature->AIM_Initialize();
@@ -2143,6 +2153,7 @@ void Spell::EffectTameCreature(uint32 i)
         pet->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_caster->GetGUID());
         pet->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
         pet->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
+        pet->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
         if(!pet->InitStatsForLevel( creatureTarget->getLevel() ) )
         {
@@ -2151,16 +2162,7 @@ void Spell::EffectTameCreature(uint32 i)
             return;
         }
 
-        uint32 new_id = 1;
-        QueryResult* result = sDatabase.Query("SELECT MAX(`id`) FROM `character_pet`");
-        if(result)
-        {
-            Field *fields = result->Fetch();
-            new_id = fields[0].GetUInt32()+1;
-            delete result;
-        }
-
-        pet->SetUInt32Value(UNIT_FIELD_PETNUMBER,new_id);
+        pet->GetCharmInfo()->SetPetNumber(objmgr.GeneratePetNumber(), true);
                                                             // this enables pet details window (Shift+P)
         pet->AIM_Initialize();
         pet->InitPetCreateSpells();
@@ -2213,7 +2215,7 @@ void Spell::EffectSummonPet(uint32 i)
             return;
     }
 
-    Pet* NewSummon = new Pet(m_caster, m_caster->getClass() == CLASS_HUNTER ? HUNTER_PET : SUMMON_PET);
+    Pet* NewSummon = new Pet(m_caster);
 
     // petentry==0 for hunter "call pet" (current pet summoned if any)
     if(NewSummon->LoadPetFromDB(m_caster,petentry))
@@ -2238,13 +2240,14 @@ void Spell::EffectSummonPet(uint32 i)
     if( NewSummon->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),  m_caster->GetMapId(), px, py, pz+1, m_caster->GetOrientation(), petentry))
     {
         uint32 petlevel = m_caster->getLevel();
+        NewSummon->setPetType(SUMMON_PET);
 
         uint32 faction = m_caster->getFaction();
         if(m_caster->GetTypeId() == TYPEID_UNIT && ((Creature*)m_caster)->isTotem())
         {
             Unit* owner = ((Totem*)m_caster)->GetOwner();
             if(owner) faction = owner->getFaction();
-            NewSummon->SetReactState(REACT_AGGRESSIVE);
+            NewSummon->GetCharmInfo()->SetReactState(REACT_AGGRESSIVE);
         }
 
         NewSummon->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_caster->GetGUID());
@@ -2258,16 +2261,7 @@ void Spell::EffectSummonPet(uint32 i)
         NewSummon->SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP,1000);
         NewSummon->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
-        uint32 new_id = 1;
-        QueryResult* result = sDatabase.Query("SELECT MAX(`id`) FROM `character_pet`");
-        if(result)
-        {
-            Field *fields = result->Fetch();
-            new_id = fields[0].GetUInt32()+1;
-            delete result;
-        }
-
-        NewSummon->SetUInt32Value(UNIT_FIELD_PETNUMBER,new_id);
+        NewSummon->GetCharmInfo()->SetPetNumber(objmgr.GeneratePetNumber(), true);
                                                             // this enables pet details window (Shift+P)
 
         // this enables popup window (pet dismiss, cancel), hunter pet additional flags set later
@@ -3336,6 +3330,7 @@ void Spell::EffectSummonCritter(uint32 i)
         critter->SetUInt64Value(UNIT_FIELD_SUMMONEDBY,m_caster->GetGUID());
         critter->SetUInt64Value(UNIT_FIELD_CREATEDBY,m_caster->GetGUID());
         critter->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
+        critter->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
         critter->AIM_Initialize();
         critter->InitPetCreateSpells(); //e.g. disgusting oozeling has a create spell as critter...

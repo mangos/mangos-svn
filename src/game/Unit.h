@@ -331,7 +331,7 @@ enum UnitFlags
     UNIT_FLAG_UNKNOWN2       = 0x00000100,                  // 2.0.8
     UNIT_FLAG_UNKNOWN11      = 0x00000200,
     UNIT_FLAG_UNKNOWN12      = 0x00000400,                  // loot animation
-    UNIT_FLAG_UNKNOWN3       = 0x00000800,                  // in combat?, 2.0.8
+    UNIT_FLAG_PET_IN_COMBAT  = 0x00000800,                  // in combat?, 2.0.8
     UNIT_FLAG_PVP            = 0x00001000,                  // ok
     UNIT_FLAG_MOUNT          = 0x00002000,                  // silenced, 2.1.1
     UNIT_FLAG_UNKNOWN4       = 0x00004000,                  // 2.0.8
@@ -573,6 +573,70 @@ enum CurrentSpellTypes
     CURRENT_AUTOREPEAT_SPELL = 2,
     CURRENT_CHANNELED_SPELL = 3,
     CURRENT_MAX_SPELL = 4                                   // just counter
+};
+
+enum ActiveStates
+{
+    ACT_ENABLED  = 0xC100,
+    ACT_DISABLED = 0x8100,
+    ACT_COMMAND  = 0x0700,
+    ACT_REACTION = 0x0600,
+    ACT_CAST     = 0x0100,
+    ACT_PASSIVE  = 0x0000,
+    ACT_DECIDE   = 0x0001
+};
+
+enum ReactStates
+{
+    REACT_PASSIVE    = 0,
+    REACT_DEFENSIVE  = 1,
+    REACT_AGGRESSIVE = 2
+};
+
+enum CommandStates
+{
+    COMMAND_STAY    = 0,
+    COMMAND_FOLLOW  = 1,
+    COMMAND_ATTACK  = 2,
+    COMMAND_ABANDON = 3
+};
+
+struct CharmSpellEntry
+{
+    uint16 spellId;
+    uint16 active;
+};
+
+struct CharmInfo
+{
+    public:
+        CharmInfo(Unit* unit);
+        uint32 GetPetNumber() const { return m_petnumber; }
+        void SetPetNumber(uint32 petnumber, bool statwindow);
+
+        void SetCommandState(uint8 st) { m_CommandState = st; }
+        uint8 GetCommandState() { return m_CommandState; }
+        bool HasCommandState(CommandStates state) { return (m_CommandState == state); }
+        void SetReactState(uint8 st) { m_ReactSate = st; }
+        uint8 GetReactState() { return m_ReactSate; }
+        bool HasReactState(ReactStates state) { return (m_ReactSate == state); }
+
+        void InitPossessCreateSpells();
+        void InitCharmCreateSpells();
+        void InitPetActionBar();
+        void InitEmptyActionBar();
+        bool AddSpellToAB(uint32 oldid, uint32 newid, ActiveStates newstate = ACT_DECIDE);      //return true if successful
+        void ToggleCreatureAutocast(uint32 spellid, bool apply);
+
+        UnitActionBarEntry* GetActionBarEntry(uint8 index) { return &(PetActionBar[index]); }
+        CharmSpellEntry* GetCharmSpell(uint8 index) { return &(m_charmspells[index]); }
+    private:
+        Unit* m_unit;
+        UnitActionBarEntry PetActionBar[10];
+        CharmSpellEntry m_charmspells[4];
+        uint8   m_CommandState;
+        uint8   m_ReactSate;
+        uint32  m_petnumber;
 };
 
 // delay time next attack to prevent client attack animation problems
@@ -862,6 +926,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SetCharm(Unit* pet);
         bool isCharmed() const { return GetCharmerGUID() != 0; }
 
+        CharmInfo* GetCharmInfo() { return m_charmInfo; }
+        CharmInfo* InitCharmInfo(Unit* charm);
+
         bool AddAura(Aura *aur, bool uniq = false);
 
         void RemoveFirstAuraByDispel(uint32 dispel_type, Unit *pCaster);
@@ -915,7 +982,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void InterruptNonMeleeSpells(bool withDelayed);
 
         Spell* m_currentSpells[CURRENT_MAX_SPELL];
-        UnitActionBarEntry PetActionBar[10];
         uint32 m_addDmgOnce;
         uint64 m_TotemSlot[4];
         uint64 m_ObjectSlot[4];
@@ -1084,6 +1150,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         //std::list< spellEffectPair > AuraSpells[TOTAL_AURAS];  // TODO: use this if ok for mem
 
         float m_speed_rate[MAX_MOVE_TYPE];
+
+        CharmInfo *m_charmInfo;
     private:
         void SendAttackStop(Unit* victim);                  // only from AttackStop(Unit*)
         void SendAttackStart(Unit* pVictim);                // only from Unit::AttackStart(Unit*)

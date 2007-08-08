@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -44,7 +44,7 @@ PetAI::PetAI(Creature &c) : i_pet(c), i_victimGuid(0), i_tracker(TIME_INTERVAL_L
 
 void PetAI::MoveInLineOfSight(Unit *u)
 {
-    if( !i_pet.getVictim() && (i_pet.isPet() && ((Pet&)i_pet).HasReactState(REACT_AGGRESSIVE) || i_pet.isCharmed()) &&
+    if( !i_pet.getVictim() && (i_pet.isPet() || i_pet.isCharmed()) && i_pet.GetCharmInfo()->HasReactState(REACT_AGGRESSIVE) &&
         u->isTargetableForAttack() && i_pet.IsHostileTo( u )  &&
         u->isInAccessablePlaceFor(&i_pet))
     {
@@ -140,8 +140,7 @@ void PetAI::_stopAttack()
 
     Unit* owner = i_pet.GetCharmerOrOwner();
 
-    //charms always follow, pets can be set
-    if(owner && (i_pet.isCharmed() || ((Pet*)&i_pet)->HasCommandState(COMMAND_FOLLOW)))
+    if(owner && i_pet.GetCharmInfo() && i_pet.GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
     {
         i_pet.addUnitState(UNIT_STAT_FOLLOW);
         i_pet->Clear();
@@ -211,14 +210,13 @@ void PetAI::UpdateAI(const uint32 diff)
             }
         }
     }
-    else if(owner)
+    else if(owner && i_pet.GetCharmInfo())
     {
-        //charms always help automatically?
-        if(owner->isInCombat() && (i_pet.isCharmed() || !((Pet*)&i_pet)->HasReactState(REACT_PASSIVE)))
+        if(owner->isInCombat() && i_pet.GetCharmInfo()->HasReactState(REACT_PASSIVE) || i_pet.GetCharmInfo()->HasCommandState(COMMAND_STAY))
         {
             AttackStart(owner->getAttackerForHelper());
         }
-        else if(i_pet.isCharmed() || ((Pet*)&i_pet)->HasCommandState(COMMAND_FOLLOW))
+        else if(i_pet.GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
         {
             if (!i_pet.hasUnitState(UNIT_STAT_FOLLOW) )
             {
@@ -264,12 +262,16 @@ void PetAI::UpdateAI(const uint32 diff)
             delete spell;
         }
     }
-    //charmed creature; all (active) spells autocast, because not controllable; for now no allyset, simply itself (selfcast spells allowed) and target
+    //charmed creature
     else if(i_pet.isCharmed())
     {
         for(uint8 i = 0; i < CREATURE_MAX_SPELLS; ++i)
         {
-            uint32 spell_id = i_pet.m_spells[i];
+            uint32 spell_id = i_pet.GetCharmInfo()->GetCharmSpell(i)->spellId;
+            uint16 active = i_pet.GetCharmInfo()->GetCharmSpell(i)->active;
+            if(spell_id == 0 || active != ACT_ENABLED)
+                continue;
+            
             SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
             if(!spellInfo || IsPassiveSpell(spell_id))
                 continue;

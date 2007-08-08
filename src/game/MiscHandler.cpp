@@ -38,6 +38,7 @@
 #include "Object.h"
 #include "BattleGround.h"
 #include "SpellAuras.h"
+#include "Pet.h"
 
 void WorldSession::HandleRepopRequestOpcode( WorldPacket & recv_data )
 {
@@ -46,6 +47,8 @@ void WorldSession::HandleRepopRequestOpcode( WorldPacket & recv_data )
     if(GetPlayer()->isAlive()||GetPlayer()->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
         return;
 
+    //this is spirit release confirm?
+    GetPlayer()->RemovePet(NULL,PET_SAVE_NOT_IN_SLOT, true);
     GetPlayer()->BuildPlayerRepop();
     GetPlayer()->RepopAtGraveyard();
 }

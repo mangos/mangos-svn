@@ -434,6 +434,7 @@ class ObjectMgr
         void LoadPetLevelInfo();
         void LoadExplorationBaseXP();
         void LoadPetNames();
+        void LoadPetNumber();
         void LoadCorpses();
 
         void LoadReputationOnKill();
@@ -450,6 +451,7 @@ class ObjectMgr
         uint32 GenerateAuctionID();
         uint32 GenerateMailID();
         uint32 GenerateItemTextID();
+        uint32 GeneratePetNumber();
 
         uint32 CreateItemText(std::string text);
         std::string GetItemText( uint32 id )
@@ -635,6 +637,8 @@ class ObjectMgr
         uint32 m_hiGoGuid;
         uint32 m_hiDoGuid;
         uint32 m_hiCorpseGuid;
+
+        uint32 m_hiPetNumber;
 
         template<class T> HM_NAMESPACE::hash_map<uint32,T*>& _GetContainer();
         template<class T> TYPEID _GetTypeId() const;

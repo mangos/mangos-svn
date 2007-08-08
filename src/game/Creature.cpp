@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -62,10 +62,8 @@ m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE)
 
     for(int i =0; i<3; ++i) respawn_cord[i] = 0.0;
 
-    m_spells[0] = 0;
-    m_spells[1] = 0;
-    m_spells[2] = 0;
-    m_spells[3] = 0;
+    for(int i =0; i<4; ++i)
+        m_spells[i] = 0;
 
     m_CreatureSpellCooldowns.clear();
     m_CreatureCategoryCooldowns.clear();
@@ -1674,41 +1672,4 @@ bool Creature::HasSpellCooldown(uint32 spell_id) const
 {
     CreatureSpellCooldowns::const_iterator itr = m_CreatureSpellCooldowns.find(spell_id);
     return (itr != m_CreatureSpellCooldowns.end() && itr->second > time(NULL)) || m_GlobalCooldown > 0 || HasCategoryCooldown(spell_id);
-}
-
-void Creature::InitCharmCreateSpells()
-{
-    for(uint32 x = 1; x < 10; ++x)                          //charm action bar
-    {
-        PetActionBar[x].Type = ACT_CAST;
-        PetActionBar[x].SpellOrAction = 0;
-    }
-    PetActionBar[0].Type = ACT_COMMAND;
-    PetActionBar[0].SpellOrAction = COMMAND_ATTACK;
-
-    if(GetTypeId() == TYPEID_PLAYER)                        //MCed players don't have spells
-        return;
-
-    for(uint32 x = 0; x < CREATURE_MAX_SPELLS; ++x)
-    {
-        if (IsPassiveSpell(((Creature*)this)->m_spells[x]))
-            CastSpell(this, ((Creature*)this)->m_spells[x], true);
-        else
-            AddSpellToAB(0, ((Creature*)this)->m_spells[x]);
-    }
-}
-
-bool Creature::AddSpellToAB(uint32 oldid, uint32 newid)
-{
-    for(uint8 i = 0; i < 10; i++)
-    {
-        if((PetActionBar[i].Type == ACT_DISABLED || PetActionBar[i].Type == ACT_ENABLED || PetActionBar[i].Type == ACT_CAST) && PetActionBar[i].SpellOrAction == oldid)
-        {
-            PetActionBar[i].SpellOrAction = newid;
-            if(!oldid && !isCharmed())
-                PetActionBar[i].Type = ACT_DISABLED;
-            return true;
-        }
-    }
-    return false;
 }

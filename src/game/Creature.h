@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -102,21 +102,6 @@ enum Gossip_Guard_Skill
     GOSSIP_GUARD_SKILL_SKINNING     = 89,
     GOSSIP_GUARD_SKILL_TAILORING    = 90,
     GOSSIP_GUARD_SKILL_ENGINERING   = 91
-};
-
-enum ReactStates
-{
-    REACT_PASSIVE    = 0,
-    REACT_DEFENSIVE  = 1,
-    REACT_AGGRESSIVE = 2
-};
-
-enum CommandStates
-{
-    COMMAND_STAY    = 0,
-    COMMAND_FOLLOW  = 1,
-    COMMAND_ATTACK  = 2,
-    COMMAND_ABANDON = 3
 };
 
 struct GossipOption
@@ -367,9 +352,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void AddCreatureSpellCooldown(uint32 spellid);
         bool HasSpellCooldown(uint32 spell_id) const;
         bool HasCategoryCooldown(uint32 spell_id) const;
-
-        void InitCharmCreateSpells();
-        bool AddSpellToAB(uint32 oldid, uint32 newid);      //return true if successful
 
         bool UpdateStats(Stats stat);
         bool UpdateAllStats();

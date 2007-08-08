@@ -713,6 +713,7 @@ void Pet::UpdateAttackPowerAndDamage(bool ranged)
         return;
 
     float val = 0.0f;
+    float bonusAP = 0.0f;
     UnitMods unitMod = UNIT_MOD_ATTACK_POWER;
     
     if(GetEntry() == 412) // imp's attack power
@@ -721,13 +722,34 @@ void Pet::UpdateAttackPowerAndDamage(bool ranged)
         val = 2 * GetStat(STAT_STRENGTH) - 20.0;
 
     Unit* owner = GetOwner();
-    if( owner && getPetType() == HUNTER_PET ) //hunter pets benefit from owner's attack power
+    if( owner )
     {
-        val += owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.22f;
-        SetBonusDamage( int32(owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.125f));
+        if(getPetType() == HUNTER_PET) //hunter pets benefit from owner's attack power
+        {
+            bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.22f;
+            SetBonusDamage( int32(owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.125f));
+        }
+        else if(getPetType() == SUMMON_PET && owner->getClass() == CLASS_WARLOCK)   //demons benefit from warlocks shadow or fire damage
+        {
+            uint32 fire, shadow, maximum;
+            fire  = owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FIRE);
+            shadow = owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_SHADOW);
+            maximum  = (fire > shadow) ? fire : shadow;
+            if(maximum < 0)
+                maximum = 0;
+            SetBonusDamage( int32(maximum * 0.15f));
+            bonusAP = maximum * 0.57f;
+        }
+        else if(getPetType() == SUMMON_PET && owner->getClass() == CLASS_MAGE)      //water elementals benefit from mage's frost damage
+        {
+            uint32 frost = owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FROST) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FROST);
+            if(frost < 0)
+                frost = 0;
+            SetBonusDamage( int32(frost * 0.4f));
+        }
     }
     
-    SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, val);
+    SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, val + bonusAP);
 
     //in BASE_VALUE of UNIT_MOD_ATTACK_POWER for creatures we store data of meleeattackpower field in DB
     float base_attPower  = GetModifierValue(unitMod, BASE_VALUE) * GetModifierValue(unitMod, BASE_PCT);
