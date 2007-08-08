@@ -91,6 +91,8 @@ libmangosgame_a_SOURCES = \
 	FlightMaster.cpp \
 	FlightMaster.h \
 	Formulas.h \
+	GameEvent.cpp \
+	GameEvent.h \
 	GameObject.cpp \
 	GameObject.h \
 	GlobalEvents.cpp \

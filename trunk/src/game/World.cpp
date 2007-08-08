@@ -539,6 +539,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Gameobject Respawn Data..." ); // must be after PackInstances()
     objmgr.LoadGameobjectRespawnTimes();
 
+    sLog.outString( "Loading Game Event Data...");
+    gameeventmgr.LoadFromDB();
+
     sLog.outString( "Loading Weather Data..." );
     objmgr.LoadWeatherZoneChances();
 
@@ -661,6 +664,10 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Deleting expired bans..." );
     loginDatabase.Execute("DELETE FROM `ip_banned` WHERE `unbandate`<=UNIX_TIMESTAMP() AND `unbandate`<>`bandate`");
+
+    sLog.outString("Starting Game Event system..." );
+    uint32 nextGameEvent = gameeventmgr.Initialize();
+    m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent); //depend on next event
 
     sLog.outString( "WORLD: World initialized" );
 }
@@ -827,6 +834,15 @@ void World::Update(time_t diff)
         m_timers[WUPDATE_CORPSES].Reset();
 
         CorpsesErase();
+    }
+
+    ///- Process Game events when necessary
+    if (m_timers[WUPDATE_EVENTS].Passed())
+    {
+        m_timers[WUPDATE_EVENTS].Reset(); // to give time for Update() to be processed
+        uint32 nextGameEvent = gameeventmgr.Update();
+        m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent);
+        m_timers[WUPDATE_EVENTS].Reset();
     }
 
     /// </ul>

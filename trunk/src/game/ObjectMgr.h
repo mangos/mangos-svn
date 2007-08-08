@@ -40,6 +40,7 @@
 #include "ObjectDefines.h"
 #include "Policies/Singleton.h"
 #include "Database/SQLStorage.h"
+#include "GameEvent.h"
 
 #include <string>
 #include <map>
@@ -626,6 +627,11 @@ class ObjectMgr
         // player Dumps
         bool WritePlayerDump(std::string file, uint32 guid);
         bool LoadPlayerDump(std::string file, uint32 account, std::string name = "", uint32 newGuid = 0);
+
+        void AddCreatureToGrid(uint32 guid, CreatureData const* data);
+        void RemoveCreatureFromGrid(uint32 guid, CreatureData const* data);
+        void AddGameobjectToGrid(uint32 guid, GameObjectData const* data);
+        void RemoveGameobjectFromGrid(uint32 guid, GameObjectData const* data);
     protected:
         uint32 m_auctionid;
         uint32 m_mailid;
