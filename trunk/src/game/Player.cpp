@@ -1339,12 +1339,10 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     if(!InBattleGround() && mEntry->map_type == MAP_BATTLEGROUND && !GetSession()->GetSecurity())
         return;
 
-    uint32 not_tbc_map = 0x10;                              // if any problems, then check 0x80000 also...
-    // with 0x80000 we can teleport to Kharazan with normal client
-    // with 0x10 we can't teleport to Kharazan with normal client
     bool tbc = GetSession()->IsTBC() && sWorld.getConfig(CONFIG_EXPANSION);
 
-    if(!tbc && (mEntry->map_flag & not_tbc_map) == 0)   // normal client and TBC map
+    // normal client and TBC map
+    if(!tbc && IsExpansionMap(mEntry))
     {
         sLog.outDebug("Player %s using Normal client and tried teleport to non existing map %u", GetName(), mapid);
 
@@ -1559,7 +1557,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     if(old_zone != GetZoneId())
     {
         // remove new continent flight forms
-        if(mEntry->map_flag & not_tbc_map)   // non TBC map
+        if(!IsExpansionMap(mEntry))                         // non TBC map
         {
             RemoveSpellsCausingAura(SPELL_AURA_MOD_SPEED_MOUNTED_FLIGHT);
             RemoveSpellsCausingAura(SPELL_AURA_FLY);

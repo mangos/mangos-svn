@@ -2735,7 +2735,7 @@ If this this code is in place, it is not possible to use stealth while in Vanish
             {
                 // not allow cast fly spells at old maps
                 MapEntry const* mEntry = sMapStore.LookupEntry(m_caster->GetMapId());
-                if(!mEntry || (mEntry->map_flag & 0x10))      // non TBC map
+                if(!IsExpansionMap(mEntry))
                     return SPELL_FAILED_NOT_HERE;
             };break;
             default:break;
