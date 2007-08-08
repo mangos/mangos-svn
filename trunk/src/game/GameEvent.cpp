@@ -63,19 +63,32 @@ uint32 GameEvent::NextCheck(uint16 entry)
 void GameEvent::LoadFromDB()
 {
     QueryResult *result = sDatabase.Query("SELECT MAX(`entry`) FROM `game_event`");
-    if( !result )
+    if( result )
     {
-		sLog.outString("");
-		sLog.outErrorDb(">> Table game_event is empty:");
-		return;
-	} else {
 		Field *fields = result->Fetch();
 		max_event_id = fields[0].GetUInt16();
+        delete result;
 	}
-	delete result;
+
+    if( !result || max_event_id == 0)
+    {
+        // NOTE:
+        // on some platforms for an empty table this query will return NULL
+        // on others the table will have a max entry of 0 and the query will never return NULL
+		sLog.outErrorDb(">> Table game_event is empty:");
+        sLog.outString("");
+		return;
+	}
+
 	mGameEvent.resize(max_event_id + 1);
 
 	result = sDatabase.Query("SELECT `entry`,UNIX_TIMESTAMP(`start`),UNIX_TIMESTAMP(`end`),`occurence`,`length`,`description` FROM `game_event`");
+    if( !result )
+    {
+		sLog.outErrorDb(">> Table game_event is empty:");
+        sLog.outString("");
+		return;
+    }
 
     uint32 count = 0; 
 
@@ -333,4 +346,5 @@ void GameEvent::GameEventUnspawn(int16 event_id)
 GameEvent::GameEvent()
 {
     isSystemInit = false;
+    max_event_id = 0;
 }
