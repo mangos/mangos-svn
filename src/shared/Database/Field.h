@@ -50,6 +50,7 @@ class Field
         int32 GetInt32() const { return mValue ? static_cast<int32>(atol(mValue)) : 0; }
         uint8 GetUInt8() const { return mValue ? static_cast<uint8>(atol(mValue)) : 0; }
         uint16 GetUInt16() const { return mValue ? static_cast<uint16>(atol(mValue)) : 0; }
+        int16 GetInt16() const { return mValue ? static_cast<int16>(atol(mValue)) : 0; }
         uint32 GetUInt32() const { return mValue ? static_cast<uint32>(atol(mValue)) : 0; }
         uint64 GetUInt64() const
         {

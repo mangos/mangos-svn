@@ -302,6 +302,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\GameEvent.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\GameEvent.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\GossipDef.cpp"
 				>
 			</File>

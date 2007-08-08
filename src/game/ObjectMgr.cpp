@@ -401,10 +401,10 @@ void ObjectMgr::LoadCreatures()
     uint32 count = 0; 
 
     //                                            0      1    2     3            4            5            6             7               8           9                 
-    QueryResult *result = sDatabase.Query("SELECT `guid`,`id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,"
+    QueryResult *result = sDatabase.Query("SELECT `creature`.`guid`,`id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,"
     //   10                 11                 12                 13                  14          15        16           17             18
-        "`spawn_position_x`,`spawn_position_y`,`spawn_position_z`,`spawn_orientation`,`curhealth`,`curmana`,`DeathState`,`MovementType`,`auras` "
-        "FROM `creature`");
+        "`spawn_position_x`,`spawn_position_y`,`spawn_position_z`,`spawn_orientation`,`curhealth`,`curmana`,`DeathState`,`MovementType`,`auras`,`event` "
+        "FROM `creature` LEFT OUTER JOIN `game_event_creature` ON `creature`.`guid`=`game_event_creature`.`guid`");
 
     if(!result)
     {
@@ -446,21 +446,36 @@ void ObjectMgr::LoadCreatures()
         data.deathState     = fields[16].GetUInt8();
         data.movementType   = fields[17].GetUInt8();
         data.auras          = fields[18].GetCppString();
+        int16 gameEvent     = fields[19].GetInt16();
 
-        // build mapid*cellid -> guid_set map
-        CellPair cell_pair = MaNGOS::ComputeCellPair(data.posX, data.posY);
-        uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
-
-        CellObjectGuids& cell_guids = mMapObjectGuids[data.mapid][cell_id];
-        cell_guids.creatures.insert(guid);
-
+        if (gameEvent==0) // if not this is to be managed by GameEvent System
+            AddCreatureToGrid(guid, &data);
         count++;
+
     } while (result->NextRow());
 
     delete result;
-
-    sLog.outString( ">> Loaded %u creatures", mCreatureDataMap.size() );
+    
     sLog.outString( "" );
+    sLog.outString( ">> Loaded %u creatures", mCreatureDataMap.size() );
+}
+
+void ObjectMgr::AddCreatureToGrid(uint32 guid, CreatureData const* data)
+{
+    CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
+    uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
+
+    CellObjectGuids& cell_guids = mMapObjectGuids[data->mapid][cell_id];
+    cell_guids.creatures.insert(guid);
+}
+
+void ObjectMgr::RemoveCreatureFromGrid(uint32 guid, CreatureData const* data)
+{
+    CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
+    uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
+
+    CellObjectGuids& cell_guids = mMapObjectGuids[data->mapid][cell_id];
+    cell_guids.creatures.erase(guid);
 }
 
 void ObjectMgr::LoadGameobjects()
@@ -468,10 +483,10 @@ void ObjectMgr::LoadGameobjects()
     uint32 count = 0; 
 
     //                                            0      1    2     3            4            5            6             
-    QueryResult *result = sDatabase.Query("SELECT `guid`,`id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,"
+    QueryResult *result = sDatabase.Query("SELECT `gameobject`.`guid`,`id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,"
     //   7           8           9           10          11     12              13             14
-        "`rotation0`,`rotation1`,`rotation2`,`rotation3`,`loot`,`spawntimesecs`,`animprogress`,`dynflags` "
-        "FROM `gameobject`");
+        "`rotation0`,`rotation1`,`rotation2`,`rotation3`,`loot`,`spawntimesecs`,`animprogress`,`dynflags`,`event` "
+        "FROM `gameobject` LEFT OUTER JOIN `game_event_gameobject` ON `gameobject`.`guid`=`game_event_gameobject`.`guid`");
 
     if(!result)
     {
@@ -509,21 +524,36 @@ void ObjectMgr::LoadGameobjects()
         data.spawntimesecs  = fields[12].GetUInt32();
         data.animprogress   = fields[13].GetUInt32();
         data.dynflags       = fields[14].GetUInt32();
+        int16 gameEvent     = fields[15].GetInt16();
 
-        // build mapid*cellid -> guid_set map
-        CellPair cell_pair = MaNGOS::ComputeCellPair(data.posX, data.posY);
-        uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
-
-        CellObjectGuids& cell_guids = mMapObjectGuids[data.mapid][cell_id];
-        cell_guids.gameobjects.insert(guid);
-
+        if (gameEvent==0) // if not this is to be managed by GameEvent System
+            AddGameobjectToGrid(guid, &data);
         count++;
+
     } while (result->NextRow());
 
     delete result;
 
-    sLog.outString( ">> Loaded %u gameobjects", mGameObjectDataMap.size());
     sLog.outString( "" );
+    sLog.outString( ">> Loaded %u gameobjects", mGameObjectDataMap.size());
+}
+
+void ObjectMgr::AddGameobjectToGrid(uint32 guid, GameObjectData const* data)
+{
+    CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
+    uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
+
+    CellObjectGuids& cell_guids = mMapObjectGuids[data->mapid][cell_id];
+    cell_guids.gameobjects.insert(guid);
+}
+
+void ObjectMgr::RemoveGameobjectFromGrid(uint32 guid, GameObjectData const* data)
+{
+    CellPair cell_pair = MaNGOS::ComputeCellPair(data->posX, data->posY);
+    uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
+
+    CellObjectGuids& cell_guids = mMapObjectGuids[data->mapid][cell_id];
+    cell_guids.gameobjects.erase(guid);
 }
 
 void ObjectMgr::LoadCreatureRespawnTimes()

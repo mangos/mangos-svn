@@ -165,7 +165,32 @@ bool ChatHandler::HandleTargetObjectCommand(const char* args)
 {
     Player* pl = m_session->GetPlayer();
     QueryResult *result;
-
+    char eventFilter[200];
+    char eventFilter2[200];
+    const GameEvent::ActiveEvents *ActiveEventsList = gameeventmgr.GetActiveEventList();
+    GameEvent::ActiveEvents::const_iterator itr;
+    bool initString = false;
+    strcpy(eventFilter, " AND (`event` IS NULL OR ");
+    strcpy(eventFilter2, " AND (`event` IS NULL OR (");
+    for (itr = ActiveEventsList->begin(); itr != ActiveEventsList->end(); ++itr)
+    {
+        if (initString)
+        {
+            strcat(eventFilter, " OR ");
+            strcat(eventFilter2, " AND ");
+        }
+        sprintf(eventFilter, "%s`event`=%u", eventFilter, *itr);
+        sprintf(eventFilter2, "%s`event`<>-%u", eventFilter2, *itr);
+        initString = true;
+    }
+    if (initString)
+    {
+        strcat(eventFilter,")");
+        strcat(eventFilter2,"))");
+    } else {
+        strcpy(eventFilter,"");
+        strcpy(eventFilter2,"");
+    }
     if(*args)
     {
         int32 id = atoi((char*)args);
@@ -183,7 +208,7 @@ bool ChatHandler::HandleTargetObjectCommand(const char* args)
         }
     }
     else
-        result = sDatabase.PQuery("SELECT `guid`, `id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, (POW(`position_x` - %f, 2) + POW(`position_y` - %f, 2) + POW(`position_z` - %f, 2)) as `order` FROM `gameobject` WHERE `map` = %i ORDER BY `order` ASC LIMIT 1", m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetMapId());
+        result = sDatabase.PQuery("SELECT `gameobject`.`guid`, `id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, (POW(`position_x` - %f, 2) + POW(`position_y` - %f, 2) + POW(`position_z` - %f, 2)) as `order` FROM `gameobject` LEFT OUTER JOIN `game_event_gameobject` on `gameobject`.`guid`=`game_event_gameobject`.`guid` WHERE `map` = %i%s%s ORDER BY `order` ASC LIMIT 1", m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetMapId(),eventFilter,eventFilter2);
 
     if (!result)
     {

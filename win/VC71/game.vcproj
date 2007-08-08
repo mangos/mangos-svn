@@ -97,8 +97,8 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile=".\game___Win32_Release\game.lib"
 				AdditionalDependencies=".\shared___Win32_Release\shared.lib"
+				OutputFile=".\game___Win32_Release\game.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -219,6 +219,12 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\DuelHandler.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\GameEvent.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\GameEvent.h">
 			</File>
 			<File
 				RelativePath="..\..\src\game\GossipDef.cpp">
