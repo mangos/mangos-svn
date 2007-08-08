@@ -55,7 +55,7 @@ class MANGOS_DLL_DECL GameEvent
         void GameEventUnspawn(int16 event_id);
         uint32 NextCheck(uint16 entry);
     protected:
-		typedef std::vector<GameEventData> GameEventDataMap;
+        typedef std::vector<GameEventData> GameEventDataMap;
         typedef std::list<uint32> GuidList;
         typedef std::vector<GuidList> GameEventGuidMap;
         GameEventGuidMap  mGameEventCreatureGuids;
