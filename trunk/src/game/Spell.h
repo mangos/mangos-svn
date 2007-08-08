@@ -206,14 +206,18 @@ class SpellCastTargets
 
         uint64 getCorpseTargetGUID() const { return m_CorpseTargetGUID; }
         uint64 getItemTargetGUID() const { return m_itemTargetGUID; }
-
-        void setItemTargetGUID(uint64 guid) { m_itemTargetGUID = guid; }
+        Item* getItemTarget() const { return m_itemTarget; }
+        void setItemTarget(Item* item);
+        void updateTradeSlotItem()
+        {
+            if(m_itemTarget && (m_targetMask & TARGET_FLAG_TRADE_ITEM))
+                m_itemTargetGUID = m_itemTarget->GetGUID();
+        }
 
         bool IsEmpty() const { return m_GOTargetGUID==0 && m_unitTargetGUID==0 && m_itemTarget==0 && m_CorpseTargetGUID==0; }
 
         void Update(Unit* caster);
 
-        Item *m_itemTarget;
         float m_srcX, m_srcY, m_srcZ;
         float m_destX, m_destY, m_destZ;
         std::string m_strTarget;
@@ -223,6 +227,7 @@ class SpellCastTargets
         // objects (can be used at spell creating and after Update at casting
         Unit *m_unitTarget;
         GameObject *m_GOTarget;
+        Item *m_itemTarget;
 
         // object GUID, can be used always
         uint64 m_unitTargetGUID;

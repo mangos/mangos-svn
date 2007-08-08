@@ -98,6 +98,16 @@ void SpellCastTargets::setGOTarget(GameObject *target)
 //    m_targetMask |= TARGET_FLAG_OBJECT;
 }
 
+void SpellCastTargets::setItemTarget(Item* item)
+{ 
+    if(!item)
+        return;
+
+    m_itemTarget = item; 
+    m_itemTargetGUID = item->GetGUID(); 
+    m_targetMask |= TARGET_FLAG_ITEM;
+}
+
 void SpellCastTargets::Update(Unit* caster)
 {
     m_GOTarget   = m_GOTargetGUID ? ObjectAccessor::Instance().GetGameObject(*caster,m_GOTargetGUID) : NULL;
@@ -391,9 +401,8 @@ void Spell::FillTargetMap()
                 case SPELL_EFFECT_DISENCHANT:
                 case SPELL_EFFECT_ENCHANT_ITEM:
                 case SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY:
-                case SPELL_EFFECT_ENCHANT_HELD_ITEM:
-                    if(m_targets.m_itemTarget)
-                        m_targetItems[i].push_back(m_targets.m_itemTarget);
+                    if(m_targets.getItemTarget())
+                        m_targetItems[i].push_back(m_targets.getItemTarget());
                     break;
                 case SPELL_EFFECT_APPLY_AREA_AURA:
                     if(m_spellInfo->Attributes == 0x9050000 || m_spellInfo->Attributes == 0x10000)// AreaAura
@@ -727,8 +736,8 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
         {
             if(m_targets.getGOTargetGUID())
                 m_targetGameobjectGUIDs[i].push_back(m_targets.getGOTargetGUID());
-            else if(m_targets.m_itemTarget)
-                m_targetItems[i].push_back(m_targets.m_itemTarget);
+            else if(m_targets.getItemTarget())
+                m_targetItems[i].push_back(m_targets.getItemTarget());
             break;
         }
         case TARGET_MASTER:
@@ -1065,8 +1074,7 @@ void Spell::cast(bool skipCheck)
 
     // traded items have trade slot instead of guid in m_itemTargetGUID
     // set to real guid to be sent later to the client
-    if(m_targets.m_itemTarget && (m_targets.m_targetMask & TARGET_FLAG_TRADE_ITEM))
-        m_targets.setItemTargetGUID(m_targets.m_itemTarget->GetGUID());
+    m_targets.updateTradeSlotItem();
 
     // CAST SPELL
     SendSpellCooldown();
@@ -1966,7 +1974,7 @@ void Spell::SendLogExecute()
 
     if(m_targets.getUnitTarget())
         data << m_targets.getUnitTargetGUID();
-    else if(m_targets.m_itemTarget)
+    else if(m_targets.getItemTargetGUID())
         data << m_targets.getItemTargetGUID();
     else if(m_targets.getGOTarget())
         data << m_targets.getGOTargetGUID();
@@ -2411,7 +2419,7 @@ uint8 Spell::CanCast()
         {
             case SPELL_EFFECT_DUMMY:
             {
-                if (!m_targets.getUnitTarget()&&!m_targets.getGOTarget())
+                if (!m_targets.getUnitTarget()&&!m_targets.getGOTarget()&&!m_targets.getItemTarget())
                     return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
 
                 // Execute
@@ -2507,7 +2515,7 @@ uint8 Spell::CanCast()
             }
             case SPELL_EFFECT_FEED_PET:
             {
-                if (m_caster->GetTypeId() != TYPEID_PLAYER || !m_targets.m_itemTarget )
+                if (m_caster->GetTypeId() != TYPEID_PLAYER || !m_targets.getItemTarget() )
                     return SPELL_FAILED_BAD_TARGETS;
 
                 Pet* pet = m_caster->GetPet();
@@ -2515,10 +2523,10 @@ uint8 Spell::CanCast()
                 if(!pet)
                     return SPELL_FAILED_NO_PET;
 
-                if(!pet->HaveInDiet(m_targets.m_itemTarget->GetProto()))
+                if(!pet->HaveInDiet(m_targets.getItemTarget()->GetProto()))
                     return SPELL_FAILED_WRONG_PET_FOOD;
 
-                if(!pet->GetCurrentFoodBenefitLevel(m_targets.m_itemTarget->GetProto()->ItemLevel))
+                if(!pet->GetCurrentFoodBenefitLevel(m_targets.getItemTarget()->GetProto()->ItemLevel))
                     return SPELL_FAILED_FOOD_LOWLEVEL;
 
                 if(m_caster->isInCombat() || pet->isInCombat())
@@ -2994,9 +3002,9 @@ uint8 Spell::CheckItems()
             }
         }
     }
-    if(m_targets.m_itemTarget)
+    if(m_targets.getItemTarget())
     {
-        if(m_caster->GetTypeId() == TYPEID_PLAYER && !m_targets.m_itemTarget->IsFitToSpellRequirements(m_spellInfo))
+        if(m_caster->GetTypeId() == TYPEID_PLAYER && !m_targets.getItemTarget()->IsFitToSpellRequirements(m_spellInfo))
             return SPELL_FAILED_BAD_TARGETS;
     }
 
@@ -3086,7 +3094,7 @@ uint8 Spell::CheckItems()
             }
             case SPELL_EFFECT_ENCHANT_ITEM:
             case SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY:
-                if(!m_targets.m_itemTarget)
+                if(!m_targets.getItemTarget())
                     return SPELL_FAILED_ITEM_NOT_FOUND;
                 break;
             case SPELL_EFFECT_ENCHANT_HELD_ITEM:
@@ -3094,46 +3102,51 @@ uint8 Spell::CheckItems()
                 break;
             case SPELL_EFFECT_DISENCHANT:
             {
-                if(!m_targets.m_itemTarget)
+                if(!m_targets.getItemTarget())
                     return SPELL_FAILED_CANT_BE_DISENCHANTED;
 
                 // prevent disenchanting in trade slot
-                if( m_targets.m_itemTarget->GetOwnerGUID() != m_caster->GetGUID() )
+                if( m_targets.getItemTarget()->GetOwnerGUID() != m_caster->GetGUID() )
                     return SPELL_FAILED_CANT_BE_DISENCHANTED;
-                uint32 item_quality = m_targets.m_itemTarget->GetProto()->Quality;
+
+                ItemPrototype const* itemProto = m_targets.getItemTarget()->GetProto();
+                if(!itemProto)
+                    return SPELL_FAILED_CANT_BE_DISENCHANTED;
+
+                uint32 item_quality = itemProto->Quality;
                 // 2.0.x addon: Check player enchanting level agains the item desenchanting requirements
-                uint32 item_disenchantskilllevel = m_targets.m_itemTarget->GetProto()->RequiredDisenchantSkill;
+                uint32 item_disenchantskilllevel = itemProto->RequiredDisenchantSkill;
                 if (item_disenchantskilllevel == uint32(-1))
                     return SPELL_FAILED_CANT_BE_DISENCHANTED;
                 if (item_disenchantskilllevel > p_caster->GetSkillValue(SKILL_ENCHANTING))
                     return SPELL_FAILED_LOW_CASTLEVEL;
                 if(item_quality > 4 || item_quality < 2)
                     return SPELL_FAILED_CANT_BE_DISENCHANTED;
-                if(m_targets.m_itemTarget->GetProto()->Class != ITEM_CLASS_WEAPON && m_targets.m_itemTarget->GetProto()->Class != ITEM_CLASS_ARMOR)
+                if(itemProto->Class != ITEM_CLASS_WEAPON && itemProto->Class != ITEM_CLASS_ARMOR)
                     return SPELL_FAILED_CANT_BE_DISENCHANTED;
-                if (!m_targets.m_itemTarget->GetProto()->DisenchantID)
+                if (!itemProto->DisenchantID)
                     return SPELL_FAILED_CANT_BE_DISENCHANTED;
                 break;
             }
             case SPELL_EFFECT_PROSPECTING:
             {
-                if(!m_targets.m_itemTarget)
+                if(!m_targets.getItemTarget())
                     return SPELL_FAILED_CANT_BE_PROSPECTED;
                 //ensure item is a prospectable ore
-                if(m_targets.m_itemTarget->GetProto()->BagFamily != BAG_FAMILY_MINING_SUPP || m_targets.m_itemTarget->GetProto()->Class != ITEM_CLASS_TRADE_GOODS)
+                if(m_targets.getItemTarget()->GetProto()->BagFamily != BAG_FAMILY_MINING_SUPP || m_targets.getItemTarget()->GetProto()->Class != ITEM_CLASS_TRADE_GOODS)
                     return SPELL_FAILED_CANT_BE_PROSPECTED;
                 //prevent prospecting in trade slot
-                if( m_targets.m_itemTarget->GetOwnerGUID() != m_caster->GetGUID() )
+                if( m_targets.getItemTarget()->GetOwnerGUID() != m_caster->GetGUID() )
                     return SPELL_FAILED_CANT_BE_PROSPECTED;
                 //Check for enough skill in jewelcrafting
-                uint32 item_prospectingskilllevel = m_targets.m_itemTarget->GetProto()->RequiredSkillRank;
+                uint32 item_prospectingskilllevel = m_targets.getItemTarget()->GetProto()->RequiredSkillRank;
                 if(item_prospectingskilllevel >p_caster->GetSkillValue(SKILL_JEWELCRAFTING))
                     return SPELL_FAILED_LOW_CASTLEVEL;
                 //make sure the player has the required ores in inventory
-                if(m_targets.m_itemTarget->GetCount() < 5)
+                if(m_targets.getItemTarget()->GetCount() < 5)
                     return SPELL_FAILED_PROSPECT_NEED_MORE;
 
-                if(LootTemplates_Prospecting.find(m_targets.m_itemTarget->GetEntry())==LootTemplates_Prospecting.end())
+                if(LootTemplates_Prospecting.find(m_targets.getItemTarget()->GetEntry())==LootTemplates_Prospecting.end())
                     return SPELL_FAILED_CANT_BE_PROSPECTED;
 
                 break;

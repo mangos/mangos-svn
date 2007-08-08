@@ -9702,7 +9702,18 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
         case 6:                                             // Shaman Rockbiter Weapon
             // enchant_amount is then containing the number of damage per second to add to the weapon
             if(getClass() == CLASS_SHAMAN)
-                ApplyModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,enchant_amount,apply);
+            {
+                if (item->GetSlot() == EQUIPMENT_SLOT_MAINHAND)
+                {
+                    ApplyModFloatValue(UNIT_FIELD_MINDAMAGE,enchant_amount,apply);
+                    ApplyModFloatValue(UNIT_FIELD_MAXDAMAGE,enchant_amount,apply);
+                }
+                if (item->GetSlot() == EQUIPMENT_SLOT_OFFHAND)
+                {
+                    ApplyModFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE,enchant_amount,apply);
+                    ApplyModFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE,enchant_amount,apply);
+                }
+            }
             break;
 
         case 5:

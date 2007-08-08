@@ -268,7 +268,7 @@ void Spell::EffectSchoolDMG(uint32 i)
 
 void Spell::EffectDummy(uint32 i)
 {
-    if(!unitTarget && !gameObjTarget) 
+    if(!unitTarget && !gameObjTarget && !itemTarget) 
         return;
 
     // Charge
@@ -368,6 +368,50 @@ void Spell::EffectDummy(uint32 i)
                 m_caster->CastSpell(unitTarget, heal, true, 0);
             else
                 m_caster->CastSpell(unitTarget, hurt, true, 0);
+
+            return;
+        }
+        break;
+    case SPELLFAMILY_SHAMAN:
+        //Shaman Rockbiter Weapon
+        if (m_spellInfo->SpellFamilyFlags == 0x400000)
+        {
+            uint32 spell_id = 0;
+            switch(m_spellInfo->Id)
+            {
+                case  8017: spell_id = 36494; break;        // Rank 1
+                case  8018: spell_id = 36750; break;        // Rank 2
+                case  8019: spell_id = 36755; break;        // Rank 3
+                case 10399: spell_id = 36759; break;        // Rank 4
+                case 16314: spell_id = 36763; break;        // Rank 5
+                case 16315: spell_id = 36766; break;        // Rank 6
+                case 16316: spell_id = 36771; break;        // Rank 7
+                case 25479: spell_id = 36775; break;        // Rank 8
+                case 25485: spell_id = 36499; break;        // Rank 9
+                default: 
+                    sLog.outError("Spell::EffectDummy: Spell %u not handled in RW",m_spellInfo->Id);
+                    return;
+            }
+
+            SpellEntry const *spellInfo = sSpellStore.LookupEntry( spell_id );
+
+            if(!spellInfo)
+            {
+                sLog.outError("WORLD: unknown spell id %i\n", spell_id);
+                return;
+            }
+
+            if(m_caster->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            if(Item* item = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
+            {
+                Spell *spell = new Spell(m_caster, spellInfo, true);
+
+                SpellCastTargets targets;
+                targets.setItemTarget( item );
+                spell->prepare(&targets);
+            }
 
             return;
         }
