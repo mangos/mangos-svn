@@ -282,10 +282,32 @@ struct MapEntry
     uint32      MapID;                                      //0
     //char*       internalname;                             //1 unused
     uint32      map_type;                                   //2
-    char*       name[8];                                    //4-11
-    uint32      map_flag;                                   //12 FIXME:name flags, used in hack way to detect expansion maps
-                                                            //13-74 not used
+                                                            //3 unused
+    char*       name[16];                                   //4-19
+                                                            //20 name flags, unused
+                                                            //21-23 unused (something PvPZone related - levels?)
+                                                            //24-27
+    //char*     hordeIntro                                  //28-43 text for PvP Zones
+                                                            //44 intro text flags, used in hack way to detect expansion maps
+    //char*     allianceIntro                               //45-60 text for PvP Zones
+                                                            //46 intro text flags
+                                                            //47-65 not used
+    //chat*     unknownText1                                //66-81 unknown empty text fields
+                                                            //82 text flags
+    //chat*     heroicIntroText                             //83-98 heroic mode requirement text
+                                                            //99 text flags
+    //chat*     unknownText2                                //100-115 unknown empty text fields
+                                                            //116 text flags
+    int32 parent_map;                                       //117 map_id of parent map
+    //float start_x                                         //118 enter x coordinate (if exist single entry)
+    //float start_y                                         //119 enter y coordinate (if exist single entry)
+                                                            //120-122
 };
+
+inline bool IsExpansionMap(MapEntry const* map)
+{
+    return map && (map->MapID==530 || map->parent_map==530);
+}
 
 struct SkillLineEntry
 {

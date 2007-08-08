@@ -63,31 +63,26 @@ uint32 GameEvent::NextCheck(uint16 entry)
 void GameEvent::LoadFromDB()
 {
     QueryResult *result = sDatabase.Query("SELECT MAX(`entry`) FROM `game_event`");
-    if( result )
-    {
-		Field *fields = result->Fetch();
-		max_event_id = fields[0].GetUInt16();
-        delete result;
-	}
-
-    if( !result || max_event_id == 0)
-    {
-        // NOTE:
-        // on some platforms for an empty table this query will return NULL
-        // on others the table will have a max entry of 0 and the query will never return NULL
-		sLog.outErrorDb(">> Table game_event is empty:");
-        sLog.outString("");
-		return;
-	}
-
-	mGameEvent.resize(max_event_id + 1);
-
-	result = sDatabase.Query("SELECT `entry`,UNIX_TIMESTAMP(`start`),UNIX_TIMESTAMP(`end`),`occurence`,`length`,`description` FROM `game_event`");
     if( !result )
     {
-		sLog.outErrorDb(">> Table game_event is empty:");
+        sLog.outErrorDb(">> Table game_event is empty:");
         sLog.outString("");
-		return;
+        return;
+    }
+
+    Field *fields = result->Fetch();
+    max_event_id = fields[0].GetUInt16();
+    delete result;
+
+    mGameEvent.resize(max_event_id + 1);
+
+    result = sDatabase.Query("SELECT `entry`,UNIX_TIMESTAMP(`start`),UNIX_TIMESTAMP(`end`),`occurence`,`length`,`description` FROM `game_event`");
+    if( !result )
+    {
+        mGameEvent.clear();
+        sLog.outErrorDb(">> Table game_event is empty:");
+        sLog.outString("");
+        return;
     }
 
     uint32 count = 0; 
@@ -203,7 +198,7 @@ uint32 GameEvent::Update() // return the next event delay in ms
 {   
     uint32 nextEventDelay = max_ge_check_delay; // 1 day
     uint32 calcDelay;
-    for (uint16 itr = 1; itr <=	max_event_id; itr++)
+    for (uint16 itr = 1; itr <= max_event_id; itr++)
     {
         //sLog.outErrorDb("Checking event %u",itr);
         if (CheckOneGameEvent(itr))
