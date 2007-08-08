@@ -2711,6 +2711,9 @@ If this this code is in place, it is not possible to use stealth while in Vanish
                 if (m_caster->IsInWater())
                     return SPELL_FAILED_ONLY_ABOVEWATER;
 
+                if (m_caster->GetTypeId()==TYPEID_PLAYER && ((Player*)m_caster)->GetTransport())
+                    return SPELL_FAILED_NO_MOUNTS_ALLOWED;
+
                 uint32 form = m_caster->m_form;
                 if( form == FORM_CAT || form == FORM_TREE || form == FORM_TRAVEL || form == FORM_AQUA || form == FORM_BEAR || 
                     form == FORM_DIREBEAR || form == FORM_CREATUREBEAR || form == FORM_GHOSTWOLF || form == FORM_FLIGHT || form == FORM_SWIFT_FLIGHT)

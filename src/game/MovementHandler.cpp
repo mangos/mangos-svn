@@ -103,6 +103,9 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         // if we boarded a transport, add us to it
         if (!GetPlayer()->m_transport)
         {
+            // unmount before boarding
+            _player->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+
             for (MapManager::TransportSet::iterator iter = MapManager::Instance().m_Transports.begin(); iter != MapManager::Instance().m_Transports.end(); ++iter)
             {
                 if ((*iter)->GetGUIDLow() == t_GUIDl)
