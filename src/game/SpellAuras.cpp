@@ -3873,6 +3873,8 @@ void Aura::HandleModRating(bool apply, bool Real)
 
 void Aura::HandleModTargetResistance(bool apply, bool Real)
 {
+    //FIXME: need also apply to resitences value?
+
     if (m_target->GetTypeId() == TYPEID_PLAYER)
         m_target->ApplyModInt32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE,m_modifier.m_amount, apply);
 }
