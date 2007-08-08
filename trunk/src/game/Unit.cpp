@@ -180,6 +180,7 @@ Unit::Unit( WorldObject *instantiator )
         m_speed_rate[i] = 1.0f;
 
     m_removedAuras = 0;
+    m_charmInfo = NULL;
 }
 
 Unit::~Unit()
@@ -201,6 +202,8 @@ Unit::~Unit()
     }
 
     RemoveAllDynObjects();
+    
+    if(m_charmInfo) delete m_charmInfo;
 }
 
 void Unit::RemoveAllDynObjects()
@@ -229,7 +232,7 @@ void Unit::Update( uint32 p_time )
     m_Events.Update( p_time );
     _UpdateSpells( p_time );
 
-    if (isInCombat() && GetTypeId() == TYPEID_PLAYER )      //update combat timer only for players
+    if (isInCombat() && (GetTypeId() == TYPEID_PLAYER || ((Creature*)this)->isPet() || ((Creature*)this)->isCharmed()))      //update combat timer only for players and pets
     {
         if(m_HostilRefManager.isEmpty())
         {
@@ -521,7 +524,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
             pVictim->getHostilRefManager().deleteReferences();
 
             Pet *pet = pVictim->GetPet();
-            if(pet)
+            if(pet && pVictim->GetTypeId() != TYPEID_PLAYER)
             {
                 pet->setDeathState(JUST_DIED);
                 pet->CombatStop(true);
@@ -555,6 +558,15 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
             player = (Player*)this;
             if(pVictim->GetTypeId() == TYPEID_PLAYER)
                 PvP = true;
+
+            Unit* pet = NULL;
+
+            if(player->GetPetGUID() && (pet = player->GetPet()))
+                pet->ClearInCombat();
+                
+            if(player->GetCharmGUID() && (pet = player->GetCharm()))
+                pet->ClearInCombat();
+                                
         }
         // FIXME: or charmed (can be player). Maybe must be check before GetTypeId() == TYPEID_PLAYER
         else if(GetCharmerOrOwnerGUID())                             // Pet or timed creature, etc
@@ -5292,6 +5304,24 @@ void Unit::Mount(uint32 mount, bool taxi)
         flag |= UNIT_FLAG_DISABLE_MOVE;
 
     SetFlag( UNIT_FIELD_FLAGS, flag );
+    
+    // unsummon pet
+    if(GetTypeId() == TYPEID_PLAYER)
+    {
+        Pet* pet = GetPet();
+        if(pet)
+        {
+            if(pet->getPetType() == SUMMON_PET || pet->getPetType() == HUNTER_PET)
+            {
+                ((Player*)this)->SetOldPetNumber(pet->GetCharmInfo()->GetPetNumber());
+                ((Player*)this)->SetOldPetSpell(pet->GetUInt32Value(UNIT_CREATED_BY_SPELL));
+            }
+
+            ((Player*)this)->RemovePet(NULL,PET_SAVE_NOT_IN_SLOT);
+        }
+        else
+            ((Player*)this)->SetOldPetNumber(0);
+    }
 }
 
 void Unit::Unmount()
@@ -5301,12 +5331,22 @@ void Unit::Unmount()
 
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
     RemoveFlag( UNIT_FIELD_FLAGS ,UNIT_FLAG_DISABLE_MOVE | UNIT_FLAG_MOUNT );
+    
+    if(GetTypeId() == TYPEID_PLAYER && ((Player*)this)->GetOldPetNumber() && isAlive())
+    {
+        Pet* NewPet = new Pet(this);
+        NewPet->LoadPetFromDB(this, 0, ((Player*)this)->GetOldPetNumber(), true);
+        ((Player*)this)->SetOldPetNumber(0);
+    }
 }
 
 void Unit::SetInCombat()
 {
     m_CombatTimer = 5000;
     SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+    
+    if(isCharmed() || (GetTypeId()!=TYPEID_PLAYER && ((Creature*)this)->isPet()))
+        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
 }
 
 void Unit::ClearInCombat(bool force)
@@ -5317,6 +5357,9 @@ void Unit::ClearInCombat(bool force)
 
     m_CombatTimer = 0;
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
+    
+    if(isCharmed() || (GetTypeId()!=TYPEID_PLAYER && ((Creature*)this)->isPet()))
+        RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
 
     // remove combo points
     if(GetTypeId()==TYPEID_PLAYER)
@@ -5923,7 +5966,7 @@ bool Unit::SelectHostilTarget()
         return true;
     }
 
-    if(isInCombat() && !HasAuraType(SPELL_AURA_MOD_TAUNT) && CanFreeMove())
+    if(isInCombat() && !HasAuraType(SPELL_AURA_MOD_TAUNT) && CanFreeMove() && m_attackers.empty())
         ((Creature*)this)->AI()->EnterEvadeMode();
 
     return false;
@@ -6505,4 +6548,156 @@ void Unit::CleanupsBeforeDelete()
         RemoveAllAuras();
         RemoveFromWorld();
     }
+}
+
+CharmInfo* Unit::InitCharmInfo(Unit *charm)
+{
+    if(!m_charmInfo)
+        m_charmInfo = new CharmInfo(charm);
+    return m_charmInfo;
+}
+
+CharmInfo::CharmInfo(Unit* unit)
+: m_unit(unit), m_CommandState(COMMAND_STAY), m_ReactSate(REACT_PASSIVE), m_petnumber(0)
+{
+    for(int i =0; i<4; ++i)
+    {
+        m_charmspells[i].spellId = 0;
+        m_charmspells[i].active = ACT_DISABLED;
+    }
+}
+
+void CharmInfo::InitPetActionBar()
+{
+    // the first 3 SpellOrActions are attack, follow and stay
+    for(uint32 i = 0; i < 3; i++)
+    {
+        PetActionBar[i].Type = ACT_COMMAND;
+        PetActionBar[i].SpellOrAction = COMMAND_ATTACK - i;
+
+        PetActionBar[i + 7].Type = ACT_REACTION;
+        PetActionBar[i + 7].SpellOrAction = COMMAND_ATTACK - i;
+    }
+    for(uint32 i=0; i < 4; i++)
+    {
+        PetActionBar[i + 3].Type = ACT_DISABLED;
+        PetActionBar[i + 3].SpellOrAction = 0;
+    }
+}
+
+void CharmInfo::InitEmptyActionBar()
+{
+    for(uint32 x = 1; x < 10; ++x)
+    {
+        PetActionBar[x].Type = ACT_CAST;
+        PetActionBar[x].SpellOrAction = 0;
+    }
+    PetActionBar[0].Type = ACT_COMMAND;
+    PetActionBar[0].SpellOrAction = COMMAND_ATTACK;
+}
+
+void CharmInfo::InitPossessCreateSpells()
+{
+    if(m_unit->GetTypeId() == TYPEID_PLAYER)
+        return;
+
+    InitEmptyActionBar();                                   //charm action bar
+
+    for(uint32 x = 0; x < CREATURE_MAX_SPELLS; ++x)
+    {
+        if (IsPassiveSpell(((Creature*)m_unit)->m_spells[x]))
+            m_unit->CastSpell(m_unit, ((Creature*)m_unit)->m_spells[x], true);
+        else
+            AddSpellToAB(0, ((Creature*)m_unit)->m_spells[x], ACT_CAST);
+    }
+}
+
+void CharmInfo::InitCharmCreateSpells()
+{
+    if(m_unit->GetTypeId() == TYPEID_PLAYER)                        //charmed players don't have spells
+    {
+        InitEmptyActionBar();
+        return;
+    }
+    
+    InitPetActionBar();
+
+    for(uint32 x = 0; x < CREATURE_MAX_SPELLS; ++x)
+    {
+        uint32 spellId = ((Creature*)m_unit)->m_spells[x];
+        m_charmspells[x].spellId = spellId;
+
+        if(!spellId)
+            continue;
+
+        if (IsPassiveSpell(spellId))
+        {
+            m_unit->CastSpell(m_unit, spellId, true);
+            m_charmspells[x].active = ACT_PASSIVE;
+        }
+        else
+        {
+            ActiveStates newstate;
+            bool onlyselfcast = true;
+            SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
+
+            if(!spellInfo) onlyselfcast = false;
+            for(uint32 i = 0;i<3 && onlyselfcast;++i) //non existent spell will not make any problems as onlyselfcast would be false -> break right away
+            {
+                if(spellInfo->EffectImplicitTargetA[i] != TARGET_SELF && spellInfo->EffectImplicitTargetA[i] != 0)
+                    onlyselfcast = false;
+            }
+
+            if(onlyselfcast || !IsPositiveSpell(spellId)) //only self cast and spells versus enemies are autocastable
+                newstate = ACT_DISABLED;
+            else
+                newstate = ACT_CAST;
+
+            AddSpellToAB(0, spellId, newstate);
+        }
+    }
+}
+
+bool CharmInfo::AddSpellToAB(uint32 oldid, uint32 newid, ActiveStates newstate)
+{
+    for(uint8 i = 0; i < 10; i++)
+    {
+        if((PetActionBar[i].Type == ACT_DISABLED || PetActionBar[i].Type == ACT_ENABLED || PetActionBar[i].Type == ACT_CAST) && PetActionBar[i].SpellOrAction == oldid)
+        {
+            PetActionBar[i].SpellOrAction = newid;
+            if(!oldid)
+            {
+                if(newstate == ACT_DECIDE)
+                    PetActionBar[i].Type = ACT_DISABLED;
+                else
+                    PetActionBar[i].Type = newstate;
+            }
+
+            return true;
+        }
+    }
+    return false;
+}
+
+void CharmInfo::ToggleCreatureAutocast(uint32 spellid, bool apply)
+{
+    if(IsPassiveSpell(spellid))
+        return;
+
+    for(uint32 x = 0; x < CREATURE_MAX_SPELLS; ++x)
+    {
+        if(spellid == m_charmspells[x].spellId)
+        {
+            m_charmspells[x].active = apply ? ACT_ENABLED : ACT_DISABLED;
+        }
+    }
+}
+
+void CharmInfo::SetPetNumber(uint32 petnumber, bool statwindow)
+{
+    m_petnumber = petnumber;
+    if(statwindow)
+        m_unit->SetUInt32Value(UNIT_FIELD_PETNUMBER, m_petnumber);
+    else
+        m_unit->SetUInt32Value(UNIT_FIELD_PETNUMBER, 0);
 }

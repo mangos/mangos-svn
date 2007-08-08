@@ -193,8 +193,8 @@ WaypointMovementGenerator::Update(Creature &creature, const uint32 &diff)
     if(!&creature)
         return true;
 
-	// Waypoint movement can be switched on/off
-	// This is quite handy for escort quests and other stuff
+    // Waypoint movement can be switched on/off
+    // This is quite handy for escort quests and other stuff
 
 
 
@@ -337,8 +337,8 @@ WaypointMovementGenerator::WPAIScript(Creature &pCreature, std::string pAiscript
 
     if( pAiscript == "guard-sw")                            //demo script for WP-AI System
     {
-		// 1423 - SW guard
-		// 68   - SW city guard
+        // 1423 - SW guard
+        // 68   - SW city guard
         if((pCreature.GetEntry() == 68) || (pCreature.GetEntry() == 1423) )
         {
             if(!( (cT < 1800) && (cT > 800) ))              //If time not smaller than 1800 and not bigger than 800 (24 hour format)

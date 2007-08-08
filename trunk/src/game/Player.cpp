@@ -179,6 +179,12 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_ammoDPS = 0.0f;
     m_extraAttacks = 0;
 
+    m_oldpetnumber = 0;
+    //cache for UNIT_CREATED_BY_SPELL to allow
+    //returning reagests for temporarily removed pets
+    //when dying/logging out
+    m_oldpetspell = 0;
+
     ////////////////////Rest System/////////////////////
     time_inn_enter=0;
     inn_pos_x=0;
@@ -970,6 +976,13 @@ void Player::Update( uint32 p_time )
         GetGroup()->UpdatePlayerOutOfRange(this, m_groupUpdateMask);
         m_groupUpdateMask = GROUP_UPDATE_FLAG_NONE;
     }
+
+    Pet* pet = GetPet();
+    if(pet && !IsWithinDistInMap(pet, OWNER_MAX_DISTANCE))
+    {
+        RemovePet(pet, PET_SAVE_NOT_IN_SLOT, true);
+        return;
+    }
 }
 
 void Player::setDeathState(DeathState s)
@@ -985,7 +998,8 @@ void Player::setDeathState(DeathState s)
         // remove form before other mods to prevent incorrect stats calculation
         RemoveAurasDueToSpell(m_ShapeShiftForm);
 
-        RemovePet(NULL,PET_SAVE_AS_CURRENT);
+        //FIXME: is pet dismissed at dying or releasing spirit? if second, add setDeathState(DEAD) to HandleRepopRequestOpcode and define pet unsummon here with (s == DEAD)
+        RemovePet(NULL, PET_SAVE_NOT_IN_SLOT, true);
 
         // save value before aura remove in Unit::setDeathState
         ressSpellId = GetUInt32Value(PLAYER_SELF_RES_SPELL);
@@ -1402,11 +1416,35 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         SetPosition( x, y, z, orientation, true);
         //BuildHeartBeatMsg(&data);
         //SendMessageToSet(&data, true);
+        if (outofrange)
+        {
+            //same map, only remove pet if out of range
+            if(pet && !IsWithinDistInMap(pet, OWNER_MAX_DISTANCE))
+            {
+                if(pet->isControlled())
+                    m_oldpetnumber = pet->GetCharmInfo()->GetPetNumber();
+                else
+                    m_oldpetnumber = 0;
+
+                RemovePet(pet, PET_SAVE_NOT_IN_SLOT);
+            }
+        }
     }
     else
     {
         // far teleport to another map
         Map* oldmap = MapManager::Instance().GetMap(GetMapId(), this);
+        
+        if(outofrange && pet)
+        {
+            //leaving map -> delete pet right away (doing this later will cause problems)
+            if(pet->isControlled())
+                m_oldpetnumber = pet->GetCharmInfo()->GetPetNumber();
+            else
+                m_oldpetnumber = 0;
+
+            RemovePet(pet, PET_SAVE_NOT_IN_SLOT);
+        }
 
         // now we must check if we are going to be homebind after teleport, if it is so,
         // we must re-instantiate again (entering instance to be homebind is not very good idea)
@@ -1504,9 +1542,13 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     {
         CombatStop();
 
-        // unsummon pet if lost
-        if(pet && !IsWithinDistInMap(pet, OWNER_MAX_DISTANCE))
-            RemovePet(pet, PET_SAVE_NOT_IN_SLOT);
+        // resummon pet
+        if(pet && m_oldpetnumber)
+        {
+            Pet* NewPet = new Pet(this);
+            NewPet->LoadPetFromDB(this, 0, m_oldpetnumber, true);
+            m_oldpetnumber = 0;
+        }
     }
 
     SetSemaphoreTeleport(false);
@@ -2773,6 +2815,10 @@ bool Player::resetTalents(bool no_cost)
         m_resetTalentsCost = cost;
         m_resetTalentsTime = time(NULL);
     }
+
+    //FIXME: remove pet before or after unlearn spells? for now after unlearn to allow removing of talent related, pet affecting auras
+    RemovePet(NULL,PET_SAVE_NOT_IN_SLOT, true);
+
     return true;
 }
 
@@ -12052,7 +12098,7 @@ void Player::_LoadMail()
 
 void Player::LoadPet()
 {
-    Pet *pet = new Pet(this, getClass()==CLASS_HUNTER?HUNTER_PET:SUMMON_PET);
+    Pet *pet = new Pet(this);
     if(!pet->LoadPetFromDB(this,0,0,true))
         delete pet;
 }
@@ -12831,10 +12877,36 @@ void Player::UpdateDuelFlag(time_t currTime)
     duel->opponent->duel->startTime  = currTime;
 }
 
-void Player::RemovePet(Pet* pet, PetSaveMode mode)
+void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
 {
     if(!pet)
         pet = GetPet();
+
+    if(returnreagent && (pet || m_oldpetnumber))
+    {
+        //returning of reagents only for players, so best done here
+        uint32 spellId = pet ? pet->GetUInt32Value(UNIT_CREATED_BY_SPELL) : m_oldpetspell;
+        SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
+
+        if(spellInfo)
+        {
+            for(uint32 i = 0; i < 7; ++i)
+            {
+                if(spellInfo->Reagent[i])
+                {
+                    uint16 dest; //for succubus, voidwalker, felhunter and felguard credit soulshard when despawn reason other than death (out of range, logout)
+                    uint8 msg = CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, spellInfo->Reagent[i], spellInfo->ReagentCount[i], false );
+                    if( msg == EQUIP_ERR_OK )
+                    {
+                        Item* item = StoreNewItem( dest, spellInfo->Reagent[i], spellInfo->ReagentCount[i], true);
+                        if(IsInWorld())
+                            SendNewItem(item,spellInfo->ReagentCount[i],true,false);
+                    }
+                }
+            }
+        }
+        m_oldpetnumber = 0;
+    }
 
     if(!pet || pet->GetOwnerGUID()!=GetGUID())
         return;
@@ -12844,16 +12916,19 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode)
         SetPet(0);
 
     pet->CombatStop(true);
-    
-    switch(pet->GetEntry())
+
+    if(returnreagent)
     {
-        //warlock pets except imp are removed(?) when logging out
-        case 1860:
-        case 1863:
-        case 417:
-        case 17252:
-            mode = PET_SAVE_NOT_IN_SLOT;
-            break;
+        switch(pet->GetEntry())
+        {
+            //warlock pets except imp are removed(?) when logging out
+            case 1860:
+            case 1863:
+            case 417:
+            case 17252:
+                mode = PET_SAVE_NOT_IN_SLOT;
+                break;
+        }
     }
 
     pet->SavePetToDB(mode);
@@ -12975,8 +13050,10 @@ void Player::PetSpellInitialize()
         uint8 addlist = 0;
 
         sLog.outDebug("Pet Spells Groups");
+        
+        CreatureInfo const *cinfo = pet->GetCreatureInfo();
 
-        if(pet->isControlled())
+        if(pet->isControlled() && (pet->getPetType() == HUNTER_PET || cinfo && cinfo->type == CREATURE_TYPE_DEMON && getClass() == CLASS_WARLOCK))
         {
             for(PetSpellMap::iterator itr = pet->m_spells.begin();itr != pet->m_spells.end();itr++)
             {
@@ -12989,16 +13066,18 @@ void Player::PetSpellInitialize()
         // first line + actionbar + spellcount + spells + last adds
         WorldPacket data(SMSG_PET_SPELLS, 16+40+1+4*addlist+25);
 
-        data << (uint64)pet->GetGUID() << uint32(0x00000000) << uint8(pet->GetReactState()) << uint8(pet->GetCommandState()) << uint16(0); //16
+        CharmInfo *charmInfo = pet->GetCharmInfo();
+
+        data << (uint64)pet->GetGUID() << uint32(0x00000000) << uint8(charmInfo->GetReactState()) << uint8(charmInfo->GetCommandState()) << uint16(0); //16
 
         for(uint32 i = 0; i < 10; i++)                      //40
         {
-            data << uint16((pet->PetActionBar)[i].SpellOrAction) << uint16(pet->PetActionBar[i].Type);
+            data << uint16(charmInfo->GetActionBarEntry(i)->SpellOrAction) << uint16(charmInfo->GetActionBarEntry(i)->Type);
         }
 
         data << uint8(addlist);                             //1
 
-        if(pet->isControlled())
+        if(addlist && pet->isControlled())
         {
             for (PetSpellMap::iterator itr = pet->m_spells.begin(); itr != pet->m_spells.end(); ++itr)
             {
@@ -13026,12 +13105,20 @@ void Player::PetSpellInitialize()
     }
 }
 
-void Player::CharmSpellInitialize()
+void Player::PossessSpellInitialize()
 {
     Unit* charm = GetCharm();
 
     if(!charm)
         return;
+
+    CharmInfo *charmInfo = charm->GetCharmInfo();
+
+    if(!charmInfo)
+    {
+        sLog.outError("Player::PossessSpellInitialize(): charm ("I64FMTD") has no charminfo!", charm->GetGUID());
+        return;
+    }
 
     uint8 addlist = 0;
     WorldPacket data(SMSG_PET_SPELLS, 16+40+1+4*addlist+25);             // first line + actionbar + spellcount + spells + last adds
@@ -13040,10 +13127,80 @@ void Player::CharmSpellInitialize()
 
     for(uint32 i = 0; i < 10; i++)                          //40
     {
-        data << uint16((charm->PetActionBar)[i].SpellOrAction) << uint16(charm->PetActionBar[i].Type);
+        data << uint16(charmInfo->GetActionBarEntry(i)->SpellOrAction) << uint16(charmInfo->GetActionBarEntry(i)->Type);
     }
 
     data << uint8(addlist);                                 //1
+
+    uint8 count = 3;
+    data << count;
+    data << uint32(0x6010) << uint64(0);    // if count = 1, 2 or 3
+    data << uint32(0x8e8c) << uint64(0);    // if count = 3
+    data << uint32(0x8e8b) << uint64(0);    // if count = 3
+
+    GetSession()->SendPacket(&data);
+}
+
+void Player::CharmSpellInitialize()
+{
+    Unit* charm = GetCharm();
+
+    if(!charm)
+        return;
+
+    CharmInfo *charmInfo = charm->GetCharmInfo();
+    if(!charmInfo)
+    {
+        sLog.outError("Player::CharmSpellInitialize(): the player's charm ("I64FMTD") has no charminfo!", charm->GetGUID());
+        return;
+    }
+
+    uint8 addlist = 0;
+
+    if(charm->GetTypeId() != TYPEID_PLAYER)
+    {
+        CreatureInfo const *cinfo = ((Creature*)charm)->GetCreatureInfo();
+
+        if(cinfo && cinfo->type == CREATURE_TYPE_DEMON && getClass() == CLASS_WARLOCK)
+        {
+            for(uint32 i = 0; i < CREATURE_MAX_SPELLS; ++i)
+            {
+                if(charmInfo->GetCharmSpell(i)->spellId)
+                    ++addlist;
+            }
+        }
+    }
+
+    WorldPacket data(SMSG_PET_SPELLS, 16+40+1+4*addlist+25);             // first line + actionbar + spellcount + spells + last adds
+
+    data << (uint64)charm->GetGUID() << uint32(0x00000000);
+
+    if(charm->GetTypeId() != TYPEID_PLAYER)
+        data << uint8(charmInfo->GetReactState()) << uint8(charmInfo->GetCommandState());
+    else
+        data << uint8(0) << uint8(0);
+        
+    data << uint16(0);
+
+    for(uint32 i = 0; i < 10; i++)                          //40
+    {
+        data << uint16(charmInfo->GetActionBarEntry(i)->SpellOrAction) << uint16(charmInfo->GetActionBarEntry(i)->Type);
+    }
+
+    data << uint8(addlist);                                 //1
+
+    if(addlist)
+    {
+        for(uint32 i = 0; i < CREATURE_MAX_SPELLS; ++i)
+        {
+            CharmSpellEntry *cspell = charmInfo->GetCharmSpell(i);
+            if(cspell->spellId)
+            {
+                data << uint16(cspell->spellId);
+                data << uint16(cspell->active);
+            }
+        }
+    }
 
     uint8 count = 3;
     data << count;
@@ -13399,9 +13556,6 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes)
 
     // Save before flight (player must loaded in start taxinode is disconnected at flight,etc)
     SaveToDB();
-
-    // unsummon pet, it will be lost anyway
-    RemovePet(NULL,PET_SAVE_NOT_IN_SLOT);
 
     //Checks and preparations done, DO FLIGHT
     setDismountCost(money - totalcost);

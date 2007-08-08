@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -488,7 +488,7 @@ void WorldSession::SendStablePet(uint64 guid )
     // not let move dead pet in slot
     if(pet && pet->isAlive() && pet->getPetType()==HUNTER_PET)
     {
-        data << uint32(pet->GetPetNumber());
+        data << uint32(pet->GetCharmInfo()->GetPetNumber());
         data << uint32(pet->GetEntry());
         data << uint32(pet->getLevel());
         data << pet->GetName();                             // petname
@@ -717,7 +717,7 @@ void WorldSession::HandleStableSwapPet( WorldPacket & recv_data )
     _player->RemovePet(pet,pet->isAlive() ? PetSaveMode(slot) : PET_SAVE_AS_DELETED);
 
     // summon unstabled pet
-    Pet *newpet = new Pet(_player, _player->getClass()==CLASS_HUNTER?HUNTER_PET:SUMMON_PET);
+    Pet *newpet = new Pet(_player);
     if(!newpet->LoadPetFromDB(_player,petentry,pet_number))
     {
         delete newpet;

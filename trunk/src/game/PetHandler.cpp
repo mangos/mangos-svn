@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -65,6 +65,13 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
     if(pet->GetTypeId() == TYPEID_PLAYER && !(flag == ACT_COMMAND && spellid == COMMAND_ATTACK))
         return;
 
+    CharmInfo *charmInfo = pet->GetCharmInfo();
+    if(!charmInfo)
+    {
+        sLog.outError("WorldSession::HandlePetAction: object "I64FMTD" is considered pet-like but doesn't have a charminfo!", pet->GetGUID());
+        return;
+    }
+
     switch(flag)
     {
         case ACT_COMMAND:                                   //0x0700
@@ -74,10 +81,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     ((Creature*)pet)->StopMoving();
                     (*((Creature*)pet))->Clear();
                     (*((Creature*)pet))->Idle();
-                    if(((Creature*)pet)->isPet())
-                    {
-                        ((Pet*)pet)->SetCommandState( COMMAND_STAY );
-                    }
+                    charmInfo->SetCommandState( COMMAND_STAY );
                     break;
                 case COMMAND_FOLLOW:                        //spellid=1792  //FOLLOW
                     DEBUG_LOG("Start shits 1");
@@ -90,12 +94,9 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     (*((Creature*)pet))->Mutate(new TargetedMovementGenerator(*_player,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE));
                     DEBUG_LOG("Start shits 5");
 
-                    if(((Creature*)pet)->isPet())
-                    {
-                        DEBUG_LOG("Start shits 6");
-                        DEBUG_LOG("Start shits 7");
-                       ((Pet*)pet)->SetCommandState( COMMAND_FOLLOW );
-                    }
+                    DEBUG_LOG("Start shits 6");
+                    DEBUG_LOG("Start shits 7");
+                    charmInfo->SetCommandState( COMMAND_FOLLOW );
                     break;
                 case COMMAND_ATTACK:                        //spellid=1792  //ATTACK
                 {
@@ -157,22 +158,13 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
             switch(spellid)
             {
                 case REACT_PASSIVE:                         //passive
-                    if(((Creature*)pet)->isPet())
-                    {
-                        ((Pet*)pet)->SetReactState( REACT_PASSIVE );
-                    }
+                    charmInfo->SetReactState( REACT_PASSIVE );
                     break;
                 case REACT_DEFENSIVE:                       //recovery
-                    if(((Creature*)pet)->isPet())
-                    {
-                        ((Pet*)pet)->SetReactState( REACT_DEFENSIVE );
-                    }
+                    charmInfo->SetReactState( REACT_DEFENSIVE );
                     break;
                 case REACT_AGGRESSIVE:                      //activete
-                    if(((Creature*)pet)->isPet())
-                    {
-                        ((Pet*)pet)->SetReactState( REACT_AGGRESSIVE );
-                    }
+                    charmInfo->SetReactState( REACT_AGGRESSIVE );
                     break;
             }
             break;
@@ -306,8 +298,8 @@ void WorldSession::HandlePetNameQuery( WorldPacket & recv_data )
 
 void WorldSession::SendPetNameQuery( uint64 petguid, uint32 petnumber)
 {
-    Pet* pet=ObjectAccessor::Instance().GetPet(petguid);
-    if(!pet || pet->GetPetNumber() != petnumber)
+    Creature* pet = ObjectAccessor::Instance().GetCreatureOrPet(*_player, petguid);
+    if(!pet || !pet->GetCharmInfo() || pet->GetCharmInfo()->GetPetNumber() != petnumber)
         return;
 
     std::string name = pet->GetName();
@@ -346,6 +338,13 @@ void WorldSession::HandlePetSetAction( WorldPacket & recv_data )
         return;
     }
 
+    CharmInfo *charmInfo = pet->GetCharmInfo();
+    if(!charmInfo)
+    {
+        sLog.outError("WorldSession::HandlePetSetAction: object "I64FMTD" is considered pet-like but doesn't have a charminfo!", pet->GetGUID());
+        return;
+    }
+
     count = (recv_data.size() == 24) ? 2 : 1;
     for(uint8 i = 0; i < count; i++)
     {
@@ -357,18 +356,25 @@ void WorldSession::HandlePetSetAction( WorldPacket & recv_data )
 
         if(!((act_state == ACT_ENABLED || act_state == ACT_DISABLED || act_state == ACT_CAST) && spell_id && !((Pet*)pet)->HasSpell(spell_id))) //if it's act for spell (en/disable/cast) and there is a spell given (0 = remove spell) which pet doesn't know, don't add
         {
-            if(!pet->isCharmed())
+            //sign for autocast
+            if(act_state == ACT_ENABLED && spell_id)
             {
-                //sign for autocast
-                if(act_state == ACT_ENABLED && spell_id)
+                if(pet->isCharmed())
+                    charmInfo->ToggleCreatureAutocast(spell_id, true);
+                else
                     ((Pet*)pet)->ToggleAutocast(spell_id, true);
-                //sign for no/turn off autocast
-                else if(act_state == ACT_DISABLED && spell_id)
+            }
+            //sign for no/turn off autocast
+            else if(act_state == ACT_DISABLED && spell_id)
+            {
+                if(pet->isCharmed())
+                    charmInfo->ToggleCreatureAutocast(spell_id, false);
+                else
                     ((Pet*)pet)->ToggleAutocast(spell_id, false);
             }
 
-            pet->PetActionBar[position].Type = act_state;
-            pet->PetActionBar[position].SpellOrAction = spell_id;
+            charmInfo->GetActionBarEntry(position)->Type = act_state;
+            charmInfo->GetActionBarEntry(position)->SpellOrAction = spell_id;
         }
     }
 }
@@ -387,7 +393,7 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
     recv_data >> name;
 
     Pet* pet = ObjectAccessor::Instance().GetPet(petguid);
-    if(!pet || !pet->isPet() || ((Pet*)pet)->getPetType()!= HUNTER_PET || (pet->GetUInt32Value(UNIT_FIELD_BYTES_2) >> 16) != 3 || pet->GetOwnerGUID() != _player->GetGUID() ) // check it!
+    if(!pet || !pet->isPet() || ((Pet*)pet)->getPetType()!= HUNTER_PET || (pet->GetUInt32Value(UNIT_FIELD_BYTES_2) >> 16) != 3 || pet->GetOwnerGUID() != _player->GetGUID() || !pet->GetCharmInfo()) // check it!
         return;
 
     pet->SetName(name);
@@ -395,7 +401,7 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
     pet->SetUInt32Value(UNIT_FIELD_BYTES_2, uint32(2 << 16)); // check it!
 
     sDatabase.escape_string(name);
-    sDatabase.PExecute("UPDATE `character_pet` SET `name` = '%s', `renamed` = '1' WHERE `owner` = '%u' AND `id` = '%u'", name.c_str(),_player->GetGUIDLow(),pet->GetPetNumber() );
+    sDatabase.PExecute("UPDATE `character_pet` SET `name` = '%s', `renamed` = '1' WHERE `owner` = '%u' AND `id` = '%u'", name.c_str(),_player->GetGUIDLow(),pet->GetCharmInfo()->GetPetNumber() );
 
     pet->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, time(NULL));
 }
@@ -447,6 +453,13 @@ void WorldSession::HandlePetUnlearnOpcode(WorldPacket& recvPacket)
     }
 
     Creature* pet = _player->GetPet();
+
+    CharmInfo *charmInfo = pet->GetCharmInfo();
+    if(!charmInfo)
+    {
+        sLog.outError("WorldSession::HandlePetUnlearnOpcode: object "I64FMTD" is considered pet-like but doesn't have a charminfo!", pet->GetGUID());
+        return;
+    }
     
     uint32 cost = ((Pet*)pet)->resetTalentsCost();
 
@@ -459,10 +472,11 @@ void WorldSession::HandlePetUnlearnOpcode(WorldPacket& recvPacket)
     for(PetSpellMap::iterator itr = ((Pet*)pet)->m_spells.begin(); itr != ((Pet*)pet)->m_spells.end(); ++itr)
         ((Pet*)pet)->removeSpell(itr->first);
     ((Pet*)pet)->SetTP(pet->getLevel() * (((Pet*)pet)->GetLoyaltyLevel() - 1));
+
     for(uint8 i = 0; i < 10; i++)
     {
-        if(((Pet*)pet)->PetActionBar[i].SpellOrAction && (((Pet*)pet)->PetActionBar[i].Type == ACT_ENABLED || ((Pet*)pet)->PetActionBar[i].Type == ACT_DISABLED))
-            ((Pet*)pet)->PetActionBar[i].SpellOrAction = 0;
+        if(charmInfo->GetActionBarEntry(i)->SpellOrAction && charmInfo->GetActionBarEntry(i)->Type == ACT_ENABLED || charmInfo->GetActionBarEntry(i)->Type == ACT_DISABLED)
+            charmInfo->GetActionBarEntry(i)->SpellOrAction = 0;
     }
 
     //still keep passive
@@ -489,26 +503,40 @@ void WorldSession::HandlePetSpellAutocastOpcode( WorldPacket& recvPacket )
     uint8  state;                                           //1 for on, 0 for off
     recvPacket >> guid >> spellid >> spellid2 >> state;
 
-    if(!_player->GetPet())
+    if(!_player->GetPet() && !_player->GetCharm())
         return;
 
-    if(guid != _player->GetPet()->GetGUID())
+    if(ObjectAccessor::Instance().FindPlayer(guid))
+        return;
+
+    Creature* pet=ObjectAccessor::Instance().GetCreatureOrPet(*_player,guid);
+
+    if(!pet || (pet != _player->GetPet() && pet!= _player->GetCharm()))
     {
         sLog.outError( "HandlePetSpellAutocastOpcode.Pet %u isn't pet of player %s .\n", uint32(GUID_LOPART(guid)),GetPlayer()->GetName() );
         return;
     }
 
-    Creature* pet = _player->GetPet();
-
     // do not add not learned spells/ passive spells
     if(!((Pet*)pet)->HasSpell(spellid) || IsPassiveSpell(spellid))
         return;
 
-    ((Pet*)pet)->ToggleAutocast(spellid, state); //state can be used as boolean
+    CharmInfo *charmInfo = pet->GetCharmInfo();
+    if(!charmInfo)
+    {
+        sLog.outError("WorldSession::HandlePetSpellAutocastOpcod: object "I64FMTD" is considered pet-like but doesn't have a charminfo!", pet->GetGUID());
+        return;
+    }
+
+    if(pet->isCharmed())
+        pet->GetCharmInfo()->ToggleCreatureAutocast(spellid, state); //state can be used as boolean
+    else
+        ((Pet*)pet)->ToggleAutocast(spellid, state);
+
     for(uint8 i = 0; i < 10; ++i)
     {
-        if((((Pet*)pet)->PetActionBar[i].Type == ACT_ENABLED || ((Pet*)pet)->PetActionBar[i].Type == ACT_DISABLED) && spellid == ((Pet*)pet)->PetActionBar[i].SpellOrAction)
-            ((Pet*)pet)->PetActionBar[i].Type = state ? ACT_ENABLED : ACT_DISABLED;
+        if((charmInfo->GetActionBarEntry(i)->Type == ACT_ENABLED || charmInfo->GetActionBarEntry(i)->Type == ACT_DISABLED) && spellid == charmInfo->GetActionBarEntry(i)->SpellOrAction)
+            charmInfo->GetActionBarEntry(i)->Type = state ? ACT_ENABLED : ACT_DISABLED;
     }
 }
 

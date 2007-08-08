@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -1080,7 +1080,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
     if (GetId() == 13139 && apply && caster)
     {
         // root to self part of (root_target->charge->root_self sequence
-        caster->CastSpell(caster,13138,true);
+        caster->CastSpell(caster,13138,true,NULL,this);
     }
 
     // seal of righteousness
@@ -1146,7 +1146,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             }
 
             if(finalSpelId)
-                caster->CastSpell(m_target,finalSpelId,true);
+                caster->CastSpell(m_target,finalSpelId,true,NULL,this);
         }
     }
 }
@@ -1652,10 +1652,7 @@ void Aura::HandleModPossess(bool apply, bool Real)
             m_target->SetCharmerGUID(GetCasterGUID());
             m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,caster->getFaction());
             caster->SetCharm(m_target);
-            if(caster->GetTypeId() == TYPEID_PLAYER)
-            {
-                ((Player*)caster)->CharmSpellInitialize();
-            }
+
             if(caster->getVictim()==m_target)
                 caster->AttackStop();
             m_target->CombatStop();
@@ -1665,7 +1662,13 @@ void Aura::HandleModPossess(bool apply, bool Real)
                 ((Creature*)m_target)->StopMoving();
                 (*(Creature*)m_target)->Clear();
                 (*(Creature*)m_target)->Idle();
-                ((Creature*)m_target)->InitCharmCreateSpells();
+                CharmInfo *charmInfo = ((Creature*)m_target)->InitCharmInfo(m_target);
+                charmInfo->InitPossessCreateSpells();
+            }
+            
+            if(caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                ((Player*)caster)->PossessSpellInitialize();
             }
         }
         else
@@ -1753,6 +1756,7 @@ void Aura::HandleModCharm(bool apply, bool Real)
         {
             m_target->SetCharmerGUID(GetCasterGUID());
             m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,caster->getFaction());
+            m_target->SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
             caster->SetCharm(m_target);
 
             if(caster->getVictim()==m_target)
@@ -1763,7 +1767,27 @@ void Aura::HandleModCharm(bool apply, bool Real)
             if(m_target->GetTypeId() == TYPEID_UNIT)
             {
                 ((Creature*)m_target)->AIM_Initialize();
-                ((Creature*)m_target)->InitCharmCreateSpells();
+                CharmInfo *charmInfo = ((Creature*)m_target)->InitCharmInfo(m_target);
+                charmInfo->InitCharmCreateSpells();
+                charmInfo->SetReactState( REACT_DEFENSIVE );
+                charmInfo->SetCommandState( COMMAND_FOLLOW );
+                
+                if(caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_WARLOCK)
+                {
+                    CreatureInfo const *cinfo = ((Creature*)m_target)->GetCreatureInfo();
+                    if(cinfo && cinfo->type == CREATURE_TYPE_DEMON)
+                    {
+                         //just to enable stat window
+                        charmInfo->SetPetNumber(objmgr.GeneratePetNumber(), true);
+                        //if charmed two demons the same session, the 2nd gets the 1st one's name
+                        m_target->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, time(NULL));
+                    }
+                }
+            }
+
+            if(caster->GetTypeId() == TYPEID_PLAYER)
+            {
+                ((Player*)caster)->CharmSpellInitialize();
             }
         }
         else
@@ -1788,6 +1812,10 @@ void Aura::HandleModCharm(bool apply, bool Real)
             {
                 CreatureInfo const *cinfo = ((Creature*)m_target)->GetCreatureInfo();
                 m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
+                if(m_target->GetCharmInfo())
+                    m_target->GetCharmInfo()->SetPetNumber(0, true);
+                else
+                    sLog.outError("Aura::HandleModCharm: target="I64FMTD" with typeid=%d has a charm aura but no charm info!", m_target->GetGUID(), m_target->GetTypeId());
             }
 
             caster->SetCharm(0);
@@ -2685,7 +2713,7 @@ void Aura::HandlePeriodicHeal(bool apply, bool Real)
     // only at real apply
     if (Real && apply && GetSpellProto()->Mechanic == 16)
     {
-        m_target->CastSpell(m_target,11196,true);
+        m_target->CastSpell(m_target,11196,true,NULL,this);
     }
 }
 
@@ -3398,6 +3426,9 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
                     m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+i,m_modifier.m_amount,apply);
             }
         }
+        Pet* pet = m_target->GetPet();
+        if(pet)
+            pet->UpdateAttackPowerAndDamage();
     }
 }
 
@@ -3618,7 +3649,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             {
                 SpellEntry const *spellInfo = sSpellStore.LookupEntry(24932);
                 if (spellInfo && spellInfo->Stances & (1<<form))
-                    m_target->CastSpell(m_target, 24932, true);
+                    m_target->CastSpell(m_target, 24932, true, NULL, this);
             }
             // HotW
             if (HotWSpellId)
@@ -3629,7 +3660,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
                     if ((*i)->GetSpellProto()->SpellIconID == 240 && (*i)->GetModifier()->m_miscvalue == 3)
                         HotWMod = (*i)->GetModifier()->m_amount;
                 if (HotWMod)
-                    m_target->CastSpell(m_target, HotWSpellId, &HotWMod, NULL, NULL, true);
+                    m_target->CastSpell(m_target, HotWSpellId, &HotWMod, NULL, this, true);
             }
         }
     }

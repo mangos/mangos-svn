@@ -569,6 +569,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Pet Name Parts..." );
     objmgr.LoadPetNames();
 
+    sLog.outString( "Loading the max pet number..." );
+    objmgr.LoadPetNumber();
+
     sLog.outString( "Loading pet level stats..." );
     objmgr.LoadPetLevelInfo();
 

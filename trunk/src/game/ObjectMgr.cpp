@@ -42,14 +42,16 @@ ScriptMapMap sSpellScripts;
 
 ObjectMgr::ObjectMgr()
 {
-    m_hiCharGuid = 1;
-    m_hiCreatureGuid = 1;
-    m_hiItemGuid = 1;
-    m_hiGoGuid = 1;
-    m_hiDoGuid = 1;
-    m_hiCorpseGuid=1;
+    m_hiCharGuid        = 1;
+    m_hiCreatureGuid    = 1;
+    m_hiItemGuid        = 1;
+    m_hiGoGuid          = 1;
+    m_hiDoGuid          = 1;
+    m_hiCorpseGuid      = 1;
 
-    playerInfo = NULL;
+    m_hiPetNumber       = 1;
+
+    playerInfo          = NULL;
 }
 
 ObjectMgr::~ObjectMgr()
@@ -3102,6 +3104,23 @@ void ObjectMgr::LoadPetNames()
     sLog.outString( ">> Loaded %u pet name parts", count );
 }
 
+void ObjectMgr::LoadPetNumber()
+{
+    QueryResult* result = sDatabase.Query("SELECT MAX(`id`) FROM `character_pet`");
+    if(result)
+    {
+        Field *fields = result->Fetch();
+        m_hiPetNumber = fields[0].GetUInt32()+1;
+        delete result;
+    }
+    
+    barGoLink bar( 1 );
+    bar.step();
+
+    sLog.outString( "" );
+    sLog.outString( ">> Loaded the max pet number: %d", m_hiPetNumber-1);
+}
+
 std::string ObjectMgr::GeneratePetName(uint32 entry)
 {
     std::vector<std::string> & list0 = PetHalfName0[entry];
@@ -3117,6 +3136,11 @@ std::string ObjectMgr::GeneratePetName(uint32 entry)
     }
 
     return *(list0.begin()+urand(0, list0.size()-1)) + *(list1.begin()+urand(0, list1.size()-1));
+}
+
+uint32 ObjectMgr::GeneratePetNumber()
+{
+    return ++m_hiPetNumber;
 }
 
 bool ObjectMgr::IsRankSpellDueToSpell(SpellEntry const *spellInfo_1,uint32 spellId_2)

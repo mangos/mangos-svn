@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -73,17 +73,6 @@ enum LoyaltyLevel
     BEST_FRIEND = 6
 };
 
-enum ActiveStates
-{
-    ACT_ENABLED  = 0xC100,
-    ACT_DISABLED = 0x8100,
-    ACT_COMMAND  = 0x0700,
-    ACT_REACTION = 0x0600,
-    ACT_CAST     = 0x0100,
-    ACT_PASSIVE  = 0x0000,
-    ACT_DECIDE   = 0x0001
-};
-
 enum PetSpellState
 {
     PETSPELL_UNCHANGED = 0,
@@ -132,28 +121,21 @@ extern const uint32 LevelStartLoyalty[6];
 class Pet : public Creature
 {
     public:
-        explicit Pet(WorldObject *instantiator, PetType type);
+        explicit Pet(WorldObject *instantiator, PetType type = MAX_PET_TYPE);
         virtual ~Pet();
 
         void AddToWorld();
         void RemoveFromWorld();
 
         PetType getPetType() const { return m_petType; }
+        void setPetType(PetType type) { m_petType = type; }
         bool isControlled() const { return getPetType()==SUMMON_PET || getPetType()==HUNTER_PET; }
-        uint32 GetPetNumber() const { return GetUInt32Value(UNIT_FIELD_PETNUMBER); }
-        
-        void SetCommandState(uint8 st) { m_CommandState = st; } //only for pets, charms can't be set on special modes
-        uint8 GetCommandState() { return m_CommandState; }
-        bool HasCommandState(CommandStates state) { return (m_CommandState == state); }
-        void SetReactState(uint8 st) { m_ReactSate = st; }
-        uint8 GetReactState() { return m_ReactSate; }
-        bool HasReactState(ReactStates state) { return (m_ReactSate == state); }
 
         bool Create (uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 Entry);
         bool CreateBaseAtCreature( Creature* creature );
         bool LoadPetFromDB( Unit* owner,uint32 petentry = 0,uint32 petnumber = 0, bool current = false );
         void SavePetToDB(PetSaveMode mode);
-        void Remove(PetSaveMode mode);
+        void Remove(PetSaveMode mode, bool returnreagent = false);
 
         void setDeathState(DeathState s);                   // overwrite virtual Creature::setDeathState and Unit::setDeathState
         void Update(uint32 diff);                           // overwrite virtual Creature::Update and Unit::Update
@@ -226,8 +208,6 @@ class Pet : public Creature
         uint32  m_resetTalentsCost;
         time_t  m_resetTalentsTime;
 
-        UnitActionBarEntry* GetActionBarEntry(uint32 index) { return &(PetActionBar[index]); }
-
         bool    m_removed;                                  // prevent overwrite pet state in DB at next Pet::Update if pet already removed(saved)
     protected:
         uint32  m_regenTimer;
@@ -237,8 +217,6 @@ class Pet : public Creature
         uint32  m_duration;                                 // time until unsummon (used mostly for summoned guardians and not used for controlled pets)
         int32   m_loyaltyPoints;
         int32   m_bonusdamage;
-        uint8   m_CommandState;
-        uint8   m_ReactSate;
     private:
         void SaveToDB()                                     // overwrited of Creature::SaveToDB     - don't must be called
         {
