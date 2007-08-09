@@ -2776,7 +2776,20 @@ bool Player::resetTalents(bool no_cost)
     for (unsigned int i = 0; i < sTalentStore.GetNumRows(); i++)
     {
         TalentEntry const *talentInfo = sTalentStore.LookupEntry(i);
+
         if (!talentInfo) continue;
+
+        TalentTabEntry const *talentTabInfo = sTalentTabStore.LookupEntry( talentInfo->TalentTab );
+
+        if(!talentTabInfo)
+            continue;
+
+        // unlearn only talents for character class
+        // some spell learned by one class as normal spells or know at creation but another class learn it as talent, 
+        // to prevent unexpected lost normal learned spell skip another class talents
+        if( (getClassMask() & talentTabInfo->ClassMask) == 0 )
+            continue;
+
         for (int j = 0; j < 5; j++)
         {
             for(PlayerSpellMap::iterator itr = GetSpellMap().begin(); itr != GetSpellMap().end();)
