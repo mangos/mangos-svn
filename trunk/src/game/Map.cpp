@@ -149,6 +149,12 @@ void Map::LoadMap(uint32 mapid, uint32 instanceid, int x,int y)
     sLog.outDetail("Loading map %s",tmp);
     // loading data
     FILE *pf=fopen(tmp,"rb");
+    if(!pf)
+    {
+        delete [] tmp;
+        return;
+    }
+
     char magic[8];
     fread(magic,1,8,pf);
     if(strncmp(MAP_MAGIC,magic,8))
