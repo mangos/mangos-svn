@@ -212,7 +212,7 @@ void PetAI::UpdateAI(const uint32 diff)
     }
     else if(owner && i_pet.GetCharmInfo())
     {
-        if(owner->isInCombat() && i_pet.GetCharmInfo()->HasReactState(REACT_PASSIVE) || i_pet.GetCharmInfo()->HasCommandState(COMMAND_STAY))
+        if(owner->isInCombat() && !(i_pet.GetCharmInfo()->HasReactState(REACT_PASSIVE) || i_pet.GetCharmInfo()->HasCommandState(COMMAND_STAY)))
         {
             AttackStart(owner->getAttackerForHelper());
         }

@@ -40,7 +40,6 @@
 #include "ObjectDefines.h"
 #include "Policies/Singleton.h"
 #include "Database/SQLStorage.h"
-#include "GameEvent.h"
 
 #include <string>
 #include <map>
