@@ -117,6 +117,11 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
         sLog.outDebug("String %u: %s", i, str[i].c_str());
     }
 
+    // client send in case not set max level value 100 but mangos support 255 max level, 
+    // update it to show GMs with characters after 100 level
+    if(level_max >= 100)
+        level_max = 255;
+
     uint32 team = _player->GetTeam();
     uint32 security = GetSecurity();
     bool allowTwoSideWhoList = sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);

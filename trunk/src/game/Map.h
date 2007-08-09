@@ -147,8 +147,8 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         time_t GetGridExpiry(void) const { return i_gridExpiry; }
         uint32 GetId(void) const { return i_id; }
 
-        static bool ExistMap(uint32 mapid, int x, int y, bool output);
-        static bool ExistVMap(uint32 mapid, int x, int y, bool output);
+        static bool ExistMap(uint32 mapid, int x, int y);
+        static bool ExistVMap(uint32 mapid, int x, int y);
         void LoadMapAndVMap(uint32 mapid, uint32 instanceid, int x, int y);
 
         static void InitStateMachine();
@@ -158,7 +158,6 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         // return height of VMAP_INVALID_HEIGHT
         float GetVMapHeight(float x, float y, float z);
         bool IsInWater(float x, float y, float z); // does not use z pos. This is for future use
-        void loadVMap(int pX, int pY);
 
         uint16 GetAreaFlag(float x, float y );
         uint8 GetTerrainType(float x, float y );
@@ -204,6 +203,9 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         void UpdatePlayerVisibility(Player* player, Cell cell, CellPair cellpair);
         void UpdateObjectsVisibilityFor(Player* player, Cell cell, CellPair cellpair);
     private:
+        void LoadVMap(int pX, int pY);
+        void LoadMap(uint32 mapid, uint32 instanceid, int x,int y);
+
         void SetTimer(uint32 t) { i_gridExpiry = t < MIN_GRID_DELAY ? MIN_GRID_DELAY : t; }
         uint64 CalculateGridMask(const uint32 &y) const;
 
