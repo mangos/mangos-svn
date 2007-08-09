@@ -43,7 +43,7 @@ const char MAP_MAGIC[] = "MAP_1.02";
 
 static GridState* si_GridStates[MAX_GRID_STATE];
 
-bool Map::ExistMap(uint32 mapid,int x,int y, bool output)
+bool Map::ExistMap(uint32 mapid,int x,int y)
 {
     int len = sWorld.GetDataPath().length()+strlen("maps/%03u%02u%02u.map")+1;
     char* tmp = new char[len];
@@ -53,8 +53,7 @@ bool Map::ExistMap(uint32 mapid,int x,int y, bool output)
 
     if(!pf)
     {
-        if(output)
-            sLog.outError("Check existing of map file '%s': not exist!",tmp);
+        sLog.outError("Check existing of map file '%s': not exist!",tmp);
         delete[] tmp;
         return false;
     }
@@ -75,7 +74,7 @@ bool Map::ExistMap(uint32 mapid,int x,int y, bool output)
     return true;
 }
 
-bool Map::ExistVMap(uint32 mapid,int x,int y, bool output)
+bool Map::ExistVMap(uint32 mapid,int x,int y)
 {
     if(VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager())
     {
@@ -84,11 +83,8 @@ bool Map::ExistVMap(uint32 mapid,int x,int y, bool output)
             bool exists = vmgr->existsMap((sWorld.GetDataPath()+ "vmaps").c_str(),  mapid, y,x); // x and y are swaped !!
             if(!exists)
             {
-                if(output)
-                {
-                    std::string name = vmgr->getDirFileName(mapid,x,y);
-                    sLog.outError("Could not find vmap file '%s'", (sWorld.GetDataPath()+"vmaps/"+name).c_str()); 
-                }
+                std::string name = vmgr->getDirFileName(mapid,x,y);
+                sLog.outError("Could not find vmap file '%s'", (sWorld.GetDataPath()+"vmaps/"+name).c_str()); 
                 return false;
             }
         }
@@ -97,7 +93,7 @@ bool Map::ExistVMap(uint32 mapid,int x,int y, bool output)
     return true;
 }
 
-void Map::loadVMap(int x,int y)
+void Map::LoadVMap(int x,int y)
 {
     int vmapLoadResult = VMAP::VMapFactory::createOrGetVMapManager()->loadMap((sWorld.GetDataPath()+ "vmaps").c_str(),  GetId(), y,x); // x and y are swaped !!
     switch(vmapLoadResult)
@@ -114,65 +110,67 @@ void Map::loadVMap(int x,int y)
     }
 }
 
-void Map::LoadMapAndVMap(uint32 mapid, uint32 instanceid, int x,int y)
+void Map::LoadMap(uint32 mapid, uint32 instanceid, int x,int y)
 {
-    //check map file existance (but not output error)
-    if( Map::ExistMap(mapid,x,y,false) )
+    if( instanceid != 0 )
     {
-        if( instanceid != 0 )
-        {
-            if(GridMaps[x][y])
-                return;
-
-            Map* baseMap = MapManager::Instance().GetBaseMap(mapid);
-
-            // load gridmap for base map
-            if (!baseMap->GridMaps[x][y])
-                baseMap->EnsureGridCreated(GridPair(63-x,63-y));
-
-            if (!baseMap->GridMaps[x][y])
-                return;
-
-            ((MapInstanced*)(baseMap))->AddGridMapReference(GridPair(x,y));
-            baseMap->SetUnloadFlag(GridPair(63-x,63-y), false);
-            GridMaps[x][y] = baseMap->GridMaps[x][y];
-            return;
-        }
-
-        //map already load, delete it before reloading (Is it neccessary? Do we really need the abilty the reload maps during runtime?)
         if(GridMaps[x][y])
-        {
-            sLog.outDetail("Unloading already loaded map %u before reloading.",mapid);
-            delete (GridMaps[x][y]);
-            GridMaps[x][y]=NULL;
-        }
-
-        // map file name
-        char *tmp=NULL;
-        // Pihhan: dataPath length + "maps/" + 3+2+2+ ".map" length may be > 32 !
-        int len = sWorld.GetDataPath().length()+strlen("maps/%03u%02u%02u.map")+1;
-        tmp = new char[len];
-        snprintf(tmp, len, (char *)(sWorld.GetDataPath()+"maps/%03u%02u%02u.map").c_str(),mapid,x,y);
-        sLog.outDetail("Loading map %s",tmp);
-        // loading data
-        FILE *pf=fopen(tmp,"rb");
-        char magic[8];
-        fread(magic,1,8,pf);
-        delete []  tmp;
-        GridMap * buf= new GridMap;
-        if(!buf)                                                //unexpected error
-        {
-            fclose(pf);
             return;
-        }
-        fread(buf,1,sizeof(GridMap),pf);
-        fclose(pf);
 
-        GridMaps[x][y] = buf;
+        Map* baseMap = MapManager::Instance().GetBaseMap(mapid);
+
+        // load gridmap for base map
+        if (!baseMap->GridMaps[x][y])
+            baseMap->EnsureGridCreated(GridPair(63-x,63-y));
+
+        if (!baseMap->GridMaps[x][y])
+            return;
+
+        ((MapInstanced*)(baseMap))->AddGridMapReference(GridPair(x,y));
+        baseMap->SetUnloadFlag(GridPair(63-x,63-y), false);
+        GridMaps[x][y] = baseMap->GridMaps[x][y];
+        return;
     }
 
-    // vmap existence checked in function
-    loadVMap(x, y);
+    //map already load, delete it before reloading (Is it neccessary? Do we really need the abilty the reload maps during runtime?)
+    if(GridMaps[x][y])
+    {
+        sLog.outDetail("Unloading already loaded map %u before reloading.",mapid);
+        delete (GridMaps[x][y]);
+        GridMaps[x][y]=NULL;
+    }
+
+    // map file name
+    char *tmp=NULL;
+    // Pihhan: dataPath length + "maps/" + 3+2+2+ ".map" length may be > 32 !
+    int len = sWorld.GetDataPath().length()+strlen("maps/%03u%02u%02u.map")+1;
+    tmp = new char[len];
+    snprintf(tmp, len, (char *)(sWorld.GetDataPath()+"maps/%03u%02u%02u.map").c_str(),mapid,x,y);
+    sLog.outDetail("Loading map %s",tmp);
+    // loading data
+    FILE *pf=fopen(tmp,"rb");
+    char magic[8];
+    fread(magic,1,8,pf);
+    if(strncmp(MAP_MAGIC,magic,8))
+    {
+        sLog.outError("Map file '%s' is non-compatible version (outdated?). Please, create new using ad.exe program.",tmp);
+        delete [] tmp;
+        fclose(pf);                                         //close file before return
+        return;
+    }
+    delete []  tmp;
+
+    GridMap * buf= new GridMap;
+    fread(buf,1,sizeof(GridMap),pf);
+    fclose(pf);
+
+    GridMaps[x][y] = buf;
+}
+
+void Map::LoadMapAndVMap(uint32 mapid, uint32 instanceid, int x,int y)
+{
+    LoadMap(mapid,instanceid,x,y);
+    LoadVMap(x, y);
 }
 
 void Map::InitStateMachine()
@@ -394,7 +392,7 @@ Map::EnsureGridLoadedForPlayer(const Cell &cell, Player *player, bool add_player
             if( add_player && player != NULL )
                 (*grid)(cell.CellX(), cell.CellY()).AddWorldObject(player, player->GetGUID());
             i_gridStatus[cell.GridX()] |= mask;
-            loadVMap(63-cell.GridX(),63-cell.GridY());
+            LoadVMap(63-cell.GridX(),63-cell.GridY());
         }
     }
     else if( player && add_player )
@@ -425,7 +423,7 @@ Map::LoadGrid(const Cell& cell, bool no_unload)
 
         }
     }
-    loadVMap(63-cell.GridX(),63-cell.GridY());
+    LoadVMap(63-cell.GridX(),63-cell.GridY());
 }
 
 bool Map::AddInstanced(Player *player)
