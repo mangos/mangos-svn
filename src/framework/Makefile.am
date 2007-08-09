@@ -35,11 +35,12 @@ EXTRA_DIST = \
 	Dynamic/ObjectRegistry.h \
 	GameSystem/Grid.h \
 	GameSystem/GridLoader.h \
-	GameSystem/GridReference.h \
 	GameSystem/GridRefManager.h \
+	GameSystem/GridReference.h \
 	GameSystem/NGrid.h \
 	GameSystem/TypeContainer.h \
 	GameSystem/TypeContainerFunctions.h \
+	GameSystem/TypeContainerFunctionsPtr.h \
 	GameSystem/TypeContainerVisitor.h \
 	Network/SocketDefines.h \
 	Platform/CompilerDefs.h \
@@ -49,13 +50,14 @@ EXTRA_DIST = \
 	Policies/Singleton.h \
 	Policies/SingletonImp.h \
 	Policies/ThreadingModel.h \
+	Utilities/CountedReference/Reference.h \
+	Utilities/CountedReference/ReferenceHolder.h \
+	Utilities/CountedReference/ReferenceImpl.h \
+	Utilities/LinkedReference/RefManager.h \
+	Utilities/LinkedReference/Reference.h \
 	Utilities/ByteConverter.h \
 	Utilities/EventProcessor.h \
 	Utilities/HashMap.h \
 	Utilities/LinkedList.h \
-	Utilities/TypeList.h \
-	Utilities/CountedReference/Reference.h \
-	Utilities/CountedReference/ReferenceHolder.h \
-	Utilities/CountedReference/ReferenceImpl.h \
-	Utilities/LinkedReference/Reference.h \
-	Utilities/LinkedReference/RefManager.h
+	Utilities/TypeList.h
+

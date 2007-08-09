@@ -82,54 +82,96 @@ libmangosdatabase_a_SOURCES = \
 	Database/DatabaseSqlite.h \
 	Database/Field.cpp \
 	Database/Field.h \
+	Database/MySQLDelayThread.h \
 	Database/QueryResult.h \
 	Database/QueryResultMysql.cpp \
-	Database/QueryResultPostgre.cpp \
 	Database/QueryResultMysql.h \
+	Database/QueryResultPostgre.cpp \
 	Database/QueryResultPostgre.h \
 	Database/QueryResultSqlite.cpp \
 	Database/QueryResultSqlite.h \
 	Database/SQLStorage.cpp \
 	Database/SQLStorage.h \
-	Database/dbcfile.cpp \
-	Database/dbcfile.h \
 	Database/SqlDelayThread.cpp \
 	Database/SqlDelayThread.h \
-	Database/MySQLDelayThread.h \
 	Database/SqlOperations.cpp \
-	Database/SqlOperations.h
+	Database/SqlOperations.h \
+	Database/dbcfile.cpp \
+	Database/dbcfile.h
 
 libmangosnetwork_a_SOURCES = \
-        Network/Base64.cpp \
-        Network/CircularBuffer.cpp \
-        Network/Ipv4Address.cpp \
-        Network/Ipv6Address.cpp \
-        Network/ISocketHandler.cpp \
-        Network/Mutex.cpp \
-        Network/Parse.cpp \
-        Network/RandomNumber.cpp \
-        Network/ResolvServer.cpp \
-        Network/ResolvSocket.cpp \
-        Network/Socket.cpp \
-        Network/SocketHandler.cpp \
-        Network/socket_include.cpp \
-        Network/StdoutLog.cpp \
-        Network/TcpSocket.cpp \
-        Network/Thread.cpp \
-        Network/UdpSocket.cpp \
-        Network/Utility.cpp
+	Network/Base64.cpp \
+	Network/Base64.h \
+	Network/CircularBuffer.cpp \
+	Network/CircularBuffer.h \
+	Network/IFile.h \
+	Network/ISocketHandler.cpp \
+	Network/ISocketHandler.h \
+	Network/Ipv4Address.cpp \
+	Network/Ipv4Address.h \
+	Network/Ipv6Address.cpp \
+	Network/Ipv6Address.h \
+	Network/ListenSocket.h \
+	Network/Mutex.cpp \
+	Network/Mutex.h \
+	Network/Parse.cpp \
+	Network/Parse.h \
+	Network/RandomNumber.cpp \
+	Network/RandomNumber.h \
+	Network/ResolvServer.cpp \
+	Network/ResolvServer.h \
+	Network/ResolvSocket.cpp \
+	Network/ResolvSocket.h \
+	Network/SctpSocket.h \
+	Network/Socket.cpp \
+	Network/Socket.h \
+	Network/SocketAddress.h \
+	Network/SocketHandler.cpp \
+	Network/SocketHandler.h \
+	Network/StdLog.h \
+	Network/StdoutLog.cpp \
+	Network/StdoutLog.h \
+	Network/TcpSocket.cpp \
+	Network/TcpSocket.h \
+	Network/Thread.cpp \
+	Network/Thread.h \
+	Network/UdpSocket.cpp \
+	Network/UdpSocket.h \
+	Network/Uid.h \
+	Network/Utility.cpp \
+	Network/Utility.h \
+	Network/socket_include.cpp \
+	Network/socket_include.h \
+	Network/sockets-config.h
 
 libmangosvmaps_a_SOURCES = \
-        vmap/BaseModel.cpp \
-        vmap/CoordModelMapping.cpp \
-        vmap/DebugCmdLogger.cpp \
-        vmap/ManagedModelContainer.cpp \
-        vmap/ModelContainer.cpp \
-        vmap/SubModel.cpp \
-        vmap/TileAssembler.cpp \
-        vmap/TreeNode.cpp \
-        vmap/VMapFactory.cpp \
-        vmap/VMapManager.cpp
+	vmap/AABSPTree.h \
+	vmap/BaseModel.cpp \
+	vmap/BaseModel.h \
+	vmap/CoordModelMapping.cpp \
+	vmap/CoordModelMapping.h \
+	vmap/DebugCmdLogger.cpp \
+	vmap/DebugCmdLogger.h \
+	vmap/IVMapManager.h \
+	vmap/ManagedModelContainer.cpp \
+	vmap/ManagedModelContainer.h \
+	vmap/ModelContainer.cpp \
+	vmap/ModelContainer.h \
+	vmap/NodeValueAccess.h \
+	vmap/RayIntersectionIterator.h \
+	vmap/ShortBox.h \
+	vmap/ShortVector.h \
+	vmap/SubModel.cpp \
+	vmap/SubModel.h \
+	vmap/TileAssembler.cpp \
+	vmap/TileAssembler.h \
+	vmap/TreeNode.cpp \
+	vmap/TreeNode.h \
+	vmap/VMapDefinitions.h \
+	vmap/VMapFactory.cpp \
+	vmap/VMapFactory.h \
+	vmap/VMapManager.cpp \
+	vmap/VMapManager.h
 
 ## Additional files to include when running 'make dist'
 #  Disabled packet logger
