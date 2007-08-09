@@ -33,6 +33,7 @@
 #include "ProgressBar.h"
 #include "Policies/SingletonImp.h"
 #include "Language.h"
+#include "GameEvent.h"
 
 INSTANTIATE_SINGLETON_1(ObjectMgr);
 

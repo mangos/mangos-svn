@@ -47,6 +47,7 @@
 #include "WaypointMovementGenerator.h"
 #include "VMapFactory.h"
 #include "GlobalEvents.h"
+#include "GameEvent.h"
 
 INSTANTIATE_SINGLETON_1( World );
 
