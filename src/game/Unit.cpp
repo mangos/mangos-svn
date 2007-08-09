@@ -4211,7 +4211,7 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
         // Shamanistic Rage triggered spell
         case 30824:
         {
-            int32 SRBasePoints0 = GetTotalAttackPowerValue(BASE_ATTACK)*triggeredByAura->GetModifier()->m_amount/100 -1;
+            int32 SRBasePoints0 = int32(GetTotalAttackPowerValue(BASE_ATTACK)*triggeredByAura->GetModifier()->m_amount/100) -1;
             CastCustomSpell(this, 30824, &SRBasePoints0, NULL, NULL, true, NULL, triggeredByAura);
             return;
         }

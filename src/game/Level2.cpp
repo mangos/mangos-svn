@@ -2527,13 +2527,11 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
     // attempt check creature existance by DB
     if(!npcCreature)
     {
-        QueryResult *result = sDatabase.PQuery( "SELECT `guid` FROM `creature` WHERE `guid` = '%u'",lowguid);
-        if(!result)
+        if(!objmgr.GetCreatureData(lowguid))
         {
             PSendSysMessage(LANG_WAYPOINT_CREATNOTFOUND, lowguid);
             return true;
         }
-        delete result;
     }
 
     const char *text = arg_str;
@@ -2661,13 +2659,11 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
     // attempt check creature existance by DB
     if(!pCreature)
     {
-        QueryResult *result = sDatabase.PQuery( "SELECT `guid` FROM `creature` WHERE `guid` = '%u'",lowguid);
-        if(!result)
+        if(!objmgr.GetCreatureData(lowguid))
         {
             PSendSysMessage(LANG_WAYPOINT_CREATNOTFOUND, lowguid);
             return true;
         }
-        delete result;
     }
 
     sLog.outDebug("DEBUG: HandleWpShowCommand: wpshow - show: %s", show_str);
@@ -2727,11 +2723,9 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
             uint32 model2           = fields[11].GetUInt32();
             const char * aiscript   = fields[12].GetString();
             // Get the creature for which we read the waypoint
-            Creature* wpCreature = NULL;
+            Creature* wpCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(),MAKE_GUID(creGUID,HIGHGUID_UNIT));
 
-            wpCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(),MAKE_GUID(creGUID,HIGHGUID_UNIT));
-
-            PSendSysMessage(LANG_WAYPOINT_INFO_TITLE, point, wpCreature->GetName(), creGUID);
+            PSendSysMessage(LANG_WAYPOINT_INFO_TITLE, point, (wpCreature ? wpCreature->GetName() : "<not found>"), creGUID);
             PSendSysMessage(LANG_WAYPOINT_INFO_WAITTIME, waittime);
             PSendSysMessage(LANG_WAYPOINT_INFO_MODEL, 1, model1);
             PSendSysMessage(LANG_WAYPOINT_INFO_MODEL, 2, model2);

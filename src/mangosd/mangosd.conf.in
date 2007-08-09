@@ -341,11 +341,17 @@ Rate.Reputation.Gain = 1
 SaveRespawnTimeImmediately = 1
 
 # Skill chance values (0..100) 
-# default: 100-75-25-0
+# Default: 100-75-25-0
 SkillChance.Orange = 100
 SkillChance.Yellow = 75
 SkillChance.Green  = 25
 SkillChance.Grey   = 0
+
+#For skinning and Mining chance decrease with skill level. 
+#          0  - no decrease
+# Default: 75 - in 2 times each 75 skill points
+SkillChance.MiningSteps   = 75
+SkillChance.SkinningSteps = 75
 
 #Aggro radius percent or off.
 #          0   - off (0%)
