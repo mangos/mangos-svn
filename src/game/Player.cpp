@@ -5578,6 +5578,9 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
             RemoveItemsSetItem(this,proto);
     }   
 
+    if(IsWeaponSlot(slot))
+        _ApplyWeaponDependentAuraMods(item,slot,apply);
+
     _ApplyItemBonuses(proto,slot,apply);
 
     if( slot==EQUIPMENT_SLOT_RANGED )
@@ -5856,6 +5859,77 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
         UpdateDamagePhysical(attType);
 }
 
+void Player::_ApplyWeaponDependentAuraMods(Item *item,uint8 slot,bool apply)
+{
+    AuraList const& auraCritList = GetAurasByType(SPELL_AURA_MOD_CRIT_PERCENT);
+    for(AuraList::const_iterator itr = auraCritList.begin(); itr!=auraCritList.end();++itr)
+        _ApplyWeaponDependentAuraCritMod(item,slot,*itr,apply);
+
+    AuraList const& auraDamageFlatList = GetAurasByType(SPELL_AURA_MOD_DAMAGE_DONE);
+    for(AuraList::const_iterator itr = auraDamageFlatList.begin(); itr!=auraDamageFlatList.end();++itr)
+        _ApplyWeaponDependentAuraDamageMod(item,slot,*itr,apply);
+
+    AuraList const& auraDamagePCTList = GetAurasByType(SPELL_AURA_MOD_DAMAGE_PERCENT_DONE);
+    for(AuraList::const_iterator itr = auraDamagePCTList.begin(); itr!=auraDamagePCTList.end();++itr)
+        _ApplyWeaponDependentAuraDamageMod(item,slot,*itr,apply);
+}
+
+void Player::_ApplyWeaponDependentAuraCritMod(Item *item, uint8 slot, Aura* aura, bool apply)
+{
+    // generic not weapon specific case processes in aura code 
+    if(aura->GetSpellProto()->EquippedItemClass == -1)
+        return;
+
+    BaseModGroup mod = BASEMOD_END;
+    switch(slot)
+    {
+        case EQUIPMENT_SLOT_MAINHAND: mod = CRIT_PERCENTAGE;        break;
+        case EQUIPMENT_SLOT_OFFHAND:  mod = OFFHAND_CRIT_PERCENTAGE;break;
+        case EQUIPMENT_SLOT_RANGED:   mod = RANGED_CRIT_PERCENTAGE; break;
+        default: return;
+    }
+
+    if (item->IsFitToSpellRequirements(aura->GetSpellProto()))
+    {
+        HandleBaseModValue(mod, FLAT_MOD, float (aura->GetModifier()->m_amount), apply);
+    }
+}
+
+void Player::_ApplyWeaponDependentAuraDamageMod(Item *item, uint8 slot, Aura* aura, bool apply)
+{
+    // ignore spell mods
+    Modifier const* modifier = aura->GetModifier();
+    if((modifier->m_miscvalue & IMMUNE_SCHOOL_PHYSICAL) == 0 || (getClassMask() & CLASSMASK_WAND_USERS)!=0)
+        return;
+
+    // generic not weapon specific case processes in aura code 
+    if(aura->GetSpellProto()->EquippedItemClass == -1)
+        return;
+
+    UnitMods unitMod = UNIT_MOD_END;
+    switch(slot)
+    {
+        case EQUIPMENT_SLOT_MAINHAND: unitMod = UNIT_MOD_DAMAGE_MAINHAND; break;
+        case EQUIPMENT_SLOT_OFFHAND:  unitMod = UNIT_MOD_DAMAGE_OFFHAND;  break;
+        case EQUIPMENT_SLOT_RANGED:   unitMod = UNIT_MOD_DAMAGE_RANGED;   break;
+        default: return;
+    }
+
+    UnitModifierType unitModType = TOTAL_VALUE;
+    switch(modifier->m_auraname)
+    {
+        case SPELL_AURA_MOD_DAMAGE_DONE:         unitModType = TOTAL_VALUE; break;
+        case SPELL_AURA_MOD_DAMAGE_PERCENT_DONE: unitModType = TOTAL_PCT;   break;
+        default: return;
+    }
+
+    if (item->IsFitToSpellRequirements(aura->GetSpellProto()))
+    {
+        HandleStatModifier(unitMod, unitModType, float(modifier->m_amount),apply);                    
+    }
+}
+
+
 void Player::CastItemEquipSpell(Item *item)
 {
     if(!item) return;
@@ -6021,6 +6095,10 @@ void Player::_RemoveAllItemMods()
             ItemPrototype const *proto = m_items[i]->GetProto();
             if(!proto)
                 continue;
+
+            if(IsWeaponSlot(i))
+                _ApplyWeaponDependentAuraMods(m_items[i],i,false);
+
             _ApplyItemBonuses(proto,i, false);
 
             if( i == EQUIPMENT_SLOT_RANGED )
@@ -6045,6 +6123,9 @@ void Player::_ApplyAllItemMods()
             ItemPrototype const *proto = m_items[i]->GetProto();
             if(!proto)
                 continue;
+
+            if(IsWeaponSlot(i))
+                _ApplyWeaponDependentAuraMods(m_items[i],i,true);
 
             _ApplyItemBonuses(proto,i, true);
 
@@ -13392,6 +13473,10 @@ void Player::RemovePetitionsAndSigns(uint64 guid, uint32 type)
 
 void Player::SetRestBonus (float rest_bonus_new)
 {
+    // Prevent resting on max level
+    if(getLevel() >= sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL))
+        rest_bonus_new = 0;
+
     if(rest_bonus_new < 0)
         rest_bonus_new = 0;
 

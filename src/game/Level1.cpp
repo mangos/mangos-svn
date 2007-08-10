@@ -1633,6 +1633,8 @@ bool ChatHandler::HandleNameTeleCommand(const char * args)
         return false;
 
     char* tail = strtok(NULL, "");
+    if(!tail)
+        return false;
 
     char* cId = extractKeyFromLink((char*)tail,"Htele");           // string or [name] Shift-click form |color|Htele:name|h[name]|h|r
     if(!cId)
