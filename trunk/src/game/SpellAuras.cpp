@@ -1143,6 +1143,12 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
                 case 19697: finalSpelId = 19683; break;
                 case 19699: finalSpelId = 19685; break;
                 case 19700: finalSpelId = 19686; break;
+                case 30646: finalSpelId = 30647; break;
+                case 30653: finalSpelId = 30648; break;
+                case 30654: finalSpelId = 30652; break;
+                case 30099: finalSpelId = 30100; break;
+                case 30102: finalSpelId = 30103; break;
+                case 30105: finalSpelId = 30104; break;
             }
 
             if(finalSpelId)
@@ -1947,6 +1953,7 @@ void Aura::HandleFeignDeath(bool Apply, bool Real)
 
         m_target->addUnitState(UNIT_STAT_DIED);
         m_target->CombatStop();
+        m_target->InterruptNonMeleeSpells(true);
         m_target->getHostilRefManager().deleteReferences();
     }
     else
@@ -3159,6 +3166,19 @@ void Aura::HandleAuraModCritPercent(bool apply, bool Real)
     if(m_target->GetTypeId()!=TYPEID_PLAYER)
         return;
 
+    // apply item specific bonuses for already equipped weapon
+    if(Real)
+    {
+        if(Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
+            ((Player*)m_target)->_ApplyWeaponDependentAuraCritMod(pItem,EQUIPMENT_SLOT_MAINHAND,this,apply);
+
+        if(Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
+            ((Player*)m_target)->_ApplyWeaponDependentAuraCritMod(pItem,EQUIPMENT_SLOT_OFFHAND,this,apply);
+
+        if(Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
+            ((Player*)m_target)->_ApplyWeaponDependentAuraCritMod(pItem,EQUIPMENT_SLOT_RANGED,this,apply);
+    }
+
     // mods must be applied base at equipped weapon class and subclass comparison
     // with spell->EquippedItemClass and  EquippedItemSubClassMask and EquippedItemInventoryTypeMask
     // m_modifier.m_miscvalue comparison with item generated damage types
@@ -3171,32 +3191,7 @@ void Aura::HandleAuraModCritPercent(bool apply, bool Real)
     }
     else
     {
-        Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-        if (pItem)
-        {
-            if (pItem->IsFitToSpellRequirements(GetSpellProto()))
-            {
-                ((Player*)m_target)->HandleBaseModValue(CRIT_PERCENTAGE, FLAT_MOD, float (m_modifier.m_amount), apply);
-            }
-        }
-        pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-        if (pItem)
-        {
-            if (pItem->IsFitToSpellRequirements(GetSpellProto()))
-            {
-                ((Player*)m_target)->HandleBaseModValue(OFFHAND_CRIT_PERCENTAGE, FLAT_MOD, float (m_modifier.m_amount), apply);
-            }
-        }
-
-        // apply any ranged weapon bonuses including wand if fit 
-        pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
-        if (pItem)
-        {
-            if (pItem->IsFitToSpellRequirements(GetSpellProto()))
-            {
-                ((Player*)m_target)->HandleBaseModValue(RANGED_CRIT_PERCENTAGE, FLAT_MOD, float (m_modifier.m_amount), apply);
-            }
-        }
+        // done in Player::_ApplyWeaponDependentAuraMods
     }
 }
 
@@ -3323,6 +3318,19 @@ void Aura::HandleAuraModRangedAttackPowerPercent(bool apply, bool Real)
 /********************************/
 void Aura::HandleModDamageDone(bool apply, bool Real)
 {
+    // apply item specific bonuses for already equipped weapon
+    if(Real && m_target->GetTypeId()==TYPEID_PLAYER)
+    {
+        if(Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
+            ((Player*)m_target)->_ApplyWeaponDependentAuraDamageMod(pItem,EQUIPMENT_SLOT_MAINHAND,this,apply);
+
+        if(Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
+            ((Player*)m_target)->_ApplyWeaponDependentAuraDamageMod(pItem,EQUIPMENT_SLOT_OFFHAND,this,apply);
+
+        if(Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
+            ((Player*)m_target)->_ApplyWeaponDependentAuraDamageMod(pItem,EQUIPMENT_SLOT_RANGED,this,apply);
+    }
+
     // m_modifier.m_miscvalue is bitmask of spell schools
     // 1 ( 0-bit ) - normal school damage (IMMUNE_SCHOOL_PHYSICAL)
     // 126 - full bitmask all magic damages (IMMUNE_SCHOOL_MAGIC) including wands
@@ -3331,8 +3339,6 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
     // mods must be applied base at equipped weapon class and subclass comparison
     // with spell->EquippedItemClass and  EquippedItemSubClassMask and EquippedItemInventoryTypeMask
     // m_modifier.m_miscvalue comparison with item generated damage types
-    if (!m_target)
-        return;
 
     if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_PHYSICAL) != 0)
     {
@@ -3345,33 +3351,7 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
         }
         else
         {
-            Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-            if (pItem)
-            {
-                if (pItem->IsFitToSpellRequirements(GetSpellProto()))
-                {
-                    m_target->HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND, TOTAL_VALUE, float(m_modifier.m_amount),apply);                    
-                }
-            }
-
-            pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-            if (pItem)
-            {
-                if (pItem->IsFitToSpellRequirements(GetSpellProto()))
-                {
-                    m_target->HandleStatModifier(UNIT_MOD_DAMAGE_OFFHAND, TOTAL_VALUE, float(m_modifier.m_amount),apply);                    
-                }
-            }
-
-            // apply any ranged weapon bonuses including wand if fit 
-            pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
-            if (pItem)
-            {
-                if (pItem->IsFitToSpellRequirements(GetSpellProto()))
-                {
-                    m_target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_VALUE, float(m_modifier.m_amount),apply);                    
-                }
-            }
+            // done in Player::_ApplyWeaponDependentAuraMods
         }
 
         if(m_target->GetTypeId() == TYPEID_PLAYER)
@@ -3390,17 +3370,7 @@ void Aura::HandleModDamageDone(bool apply, bool Real)
     if( GetSpellProto()->EquippedItemClass != -1 || GetSpellProto()->EquippedItemInventoryTypeMask != 0 )
     {
         // wand magic case (skip generic to all item spell bonuses)
-        if( (m_target->getClassMask() & CLASSMASK_WAND_USERS)!=0 )
-        {
-            Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
-            if (pItem)
-            {
-                if (pItem->IsFitToSpellRequirements(GetSpellProto()) && (m_modifier.m_miscvalue & (1 << (pItem->GetProto()->Damage->DamageType -1))))
-                {
-                    m_target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_VALUE, float(m_modifier.m_amount),apply);                    
-                }
-            }
-        }
+        // done in Player::_ApplyWeaponDependentAuraMods
 
         // Skip item specific requirements for not wand magic damage
         return;
@@ -3436,6 +3406,19 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
 {
     sLog.outDebug("AURA MOD DAMAGE type:%u type2:%u", m_modifier.m_miscvalue, m_modifier.m_miscvalue2);
 
+    // apply item specific bonuses for already equipped weapon
+    if(Real && m_target->GetTypeId()==TYPEID_PLAYER)
+    {
+        if(Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND))
+            ((Player*)m_target)->_ApplyWeaponDependentAuraDamageMod(pItem,EQUIPMENT_SLOT_MAINHAND,this,apply);
+
+        if(Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND))
+            ((Player*)m_target)->_ApplyWeaponDependentAuraDamageMod(pItem,EQUIPMENT_SLOT_OFFHAND,this,apply);
+
+        if(Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED))
+            ((Player*)m_target)->_ApplyWeaponDependentAuraDamageMod(pItem,EQUIPMENT_SLOT_RANGED,this,apply);
+    }
+
     // m_modifier.m_miscvalue is bitmask of spell schools
     // 1 ( 0-bit ) - normal school damage (IMMUNE_SCHOOL_PHYSICAL)
     // 126 - full bitmask all magic damages (IMMUNE_SCHOOL_MAGIC) including wand
@@ -3444,8 +3427,6 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
     // mods must be applied base at equipped weapon class and subclass comparison
     // with spell->EquippedItemClass and  EquippedItemSubClassMask and EquippedItemInventoryTypeMask
     // m_modifier.m_miscvalue comparison with item generated damage types
-    if (!m_target)
-        return;
 
     if((m_modifier.m_miscvalue & IMMUNE_SCHOOL_PHYSICAL) != 0)
     {
@@ -3458,32 +3439,7 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
         }
         else
         {
-            Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-            if (pItem)
-            {
-                if (pItem->IsFitToSpellRequirements(GetSpellProto()))
-                {
-                    m_target->HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND, TOTAL_PCT, float(m_modifier.m_amount), apply);
-                }
-            }
-            pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-            if (pItem)
-            {
-                if (pItem->IsFitToSpellRequirements(GetSpellProto()))
-                {
-                    m_target->HandleStatModifier(UNIT_MOD_DAMAGE_OFFHAND, TOTAL_PCT, float(m_modifier.m_amount), apply);
-                }
-            }
-
-            // apply any ranged weapon bonuses including wand if fit 
-            pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
-            if (pItem)
-            {
-                if (pItem->IsFitToSpellRequirements(GetSpellProto()))
-                {
-                    m_target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_PCT, float(m_modifier.m_amount), apply);
-                }
-            }
+            // done in Player::_ApplyWeaponDependentAuraMods
         }
     }
 
@@ -3494,17 +3450,7 @@ void Aura::HandleModDamagePercentDone(bool apply, bool Real)
     if( GetSpellProto()->EquippedItemClass != -1 || GetSpellProto()->EquippedItemInventoryTypeMask != 0 )
     {
         // wand magic case (skip generic to all item spell bonuses)
-        if( (m_target->getClassMask() & CLASSMASK_WAND_USERS)!=0 )
-        {
-            Item* pItem = ((Player*)m_target)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
-            if (pItem)
-            {
-                if (pItem->IsFitToSpellRequirements(GetSpellProto()) && (m_modifier.m_miscvalue & (1 << (pItem->GetProto()->Damage->DamageType -1))))
-                {
-                    m_target->HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_PCT, float(m_modifier.m_amount),apply);                    
-                }
-            }
-        }
+        // done in Player::_ApplyWeaponDependentAuraMods
 
         // Skip item specific requirements for not wand magic damage
         return;

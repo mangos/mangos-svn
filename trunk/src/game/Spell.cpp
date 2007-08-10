@@ -2982,25 +2982,14 @@ uint8 Spell::CheckItems()
                     // Mana Potion, Rage Potion, Thistle Tea(Rogue), ...
                     if (m_spellInfo->Effect[i] == SPELL_EFFECT_ENERGIZE)
                     {
-                        //Check if the Caster Has Rage For Power
-                        if (m_caster->GetMaxPower(POWER_RAGE))
-                        {
-                            if (m_targets.getUnitTarget()->GetPower(POWER_RAGE) == m_targets.getUnitTarget()->GetMaxPower(POWER_RAGE))
-                                return (uint8)SPELL_FAILED_ALREADY_AT_FULL_POWER;
-                        }
-                        //Check if the Caster Has Energy For Power
-                        else if (m_caster->GetMaxPower(POWER_ENERGY))
-                        {
-                            if (m_targets.getUnitTarget()->GetPower(POWER_ENERGY) == m_targets.getUnitTarget()->GetMaxPower(POWER_ENERGY))
-                                return (uint8)SPELL_FAILED_ALREADY_AT_FULL_POWER;
-                        }
-                        //So The Player Has Mana
-                        else if (m_targets.getUnitTarget()->GetPower(POWER_MANA) == m_targets.getUnitTarget()->GetMaxPower(POWER_MANA))
-                        {
+                        if(m_spellInfo->EffectMiscValue[i] >= MAX_POWERS)
                             return (uint8)SPELL_FAILED_ALREADY_AT_FULL_POWER;
-                        }
-                    }
 
+                        Powers power = Powers(m_spellInfo->EffectMiscValue[i]);
+
+                        if (m_targets.getUnitTarget()->GetPower(power) == m_targets.getUnitTarget()->GetMaxPower(power))
+                            return (uint8)SPELL_FAILED_ALREADY_AT_FULL_POWER;
+                    }
                 }
             }
         }

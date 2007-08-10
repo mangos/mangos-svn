@@ -764,6 +764,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         static bool IsBagPos( uint16 pos );
         static bool IsBankPos( uint16 pos ) { return IsBankPos(pos >> 8,pos & 255); }
         static bool IsBankPos( uint8 bag, uint8 slot );
+        static bool IsWeaponSlot( uint8 slot ) { return slot==EQUIPMENT_SLOT_MAINHAND || slot==EQUIPMENT_SLOT_OFFHAND || slot==EQUIPMENT_SLOT_RANGED; }
         bool HasBankBagSlot( uint8 slot ) const;
         bool HasItemCount( uint32 item, uint32 count ) const;
         uint32 GetFreeSlots() const;
@@ -1316,6 +1317,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         float GetTotalPercentageModValue(BaseModGroup modGroup) const { return m_auraBaseMod[modGroup][FLAT_MOD] + m_auraBaseMod[modGroup][PCT_MOD]; }
         void _ApplyAllStatBonuses();
         void _RemoveAllStatBonuses();
+
+        void _ApplyWeaponDependentAuraMods(Item *item,uint8 slot,bool apply);
+        void _ApplyWeaponDependentAuraCritMod(Item *item, uint8 slot, Aura* aura, bool apply);
+        void _ApplyWeaponDependentAuraDamageMod(Item *item, uint8 slot, Aura* aura, bool apply);
 
         void _ApplyItemMods(Item *item,uint8 slot,bool apply);
         void _RemoveAllItemMods();
