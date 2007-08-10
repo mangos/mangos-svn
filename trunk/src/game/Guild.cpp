@@ -279,10 +279,15 @@ bool Guild::FillPlayerData(uint64 guid, MemberSlot* memslot)
     }
     else
     {
-        if(!objmgr.GetPlayerNameByGUID(guid, plName))         // player doesn't exist
+        if(!objmgr.GetPlayerNameByGUID(guid, plName))       // player doesn't exist
             return false;
 
         plLevel = (uint8)Player::GetUInt32ValueFromDB(UNIT_FIELD_LEVEL, guid);
+        if(plLevel<1||plLevel>255)                          // can be at broken `data` field
+        {
+            sLog.outError("Player (GUID: %u) have broken data in field `character`.`data`.",GUID_LOPART(guid));
+            return false;
+        }
         plZone = Player::GetZoneIdFromDB(guid);
 
         QueryResult *result = sDatabase.PQuery("SELECT `class` FROM `character` WHERE `guid`='%u'", GUID_LOPART(guid));
