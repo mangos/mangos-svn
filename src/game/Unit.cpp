@@ -4234,6 +4234,27 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                 break;                                          // fall through to std. handler
             return;
         }
+        // Lightning Capacitor
+        case 37657:
+        {
+            // stacking
+            CastSpell(this, 37658, true, NULL, triggeredByAura);
+
+            // counting
+            uint32 count = 0;
+            AuraList const& dummyAura = GetAurasByType(SPELL_AURA_DUMMY);
+            for(AuraList::const_iterator itr = dummyAura.begin(); itr != dummyAura.end(); ++itr)
+                if((*itr)->GetId()==37658)
+                    ++count;
+
+            // release at 3 aura in stack
+            if(count >2)
+            {
+                RemoveAurasDueToSpell(37658);
+                CastSpell(pVictim, 37661, true, NULL, triggeredByAura);
+            }
+            return;
+        }
     }
 
     // standard non-dummy case

@@ -409,6 +409,7 @@ pkgdata_DATA = \
 	4272_spell_proc_event.sql \
 	4274_character_pet.sql \
 	4275_game_event.sql \
+	4288_spell_proc_event.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -798,4 +799,5 @@ EXTRA_DIST = \
 	4272_spell_proc_event.sql \
 	4274_character_pet.sql \
 	4275_game_event.sql \
+	4288_spell_proc_event.sql \
 	README
