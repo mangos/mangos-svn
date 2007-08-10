@@ -11602,6 +11602,9 @@ bool Player::LoadValuesArrayFromDB(Tokens& data, uint64 guid)
 
 uint32 Player::GetUInt32ValueFromArray(Tokens const& data, uint16 index)
 {
+    if(index >= data.size())
+        return 0;
+
     return (uint32)atoi(data[index].c_str());
 }
 
@@ -12868,6 +12871,10 @@ void Player::SetUInt32ValueInArray(Tokens& tokens,uint16 index, uint32 value)
 {
     char buf[11];
     snprintf(buf,11,"%u",value);
+
+    if(index >= tokens.size())
+        return;
+
     tokens[index] = buf;
 }
 
@@ -12875,6 +12882,9 @@ void Player::SetUInt32ValueInDB(uint16 index, uint32 value, uint64 guid)
 {
     Tokens tokens;
     if(!LoadValuesArrayFromDB(tokens,guid))
+        return;
+
+    if(index >= tokens.size())
         return;
 
     char buf[11];
