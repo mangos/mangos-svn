@@ -14054,13 +14054,6 @@ void Player::UpdatePvP(bool state, bool ovrride)
     }
 }
 
-void Player::SendAllowMove()
-{
-    WorldPacket data(SMSG_ALLOW_MOVE, 4);                   // new 2.0.x, enable movement
-    data << uint32(0x00000000);                             // on blizz it increments periodically
-    GetSession()->SendPacket(&data);
-}
-
 void Player::AddSpellCooldown(uint32 spellid, uint32 itemid, time_t end_time)
 {
     SpellCooldown sc;
