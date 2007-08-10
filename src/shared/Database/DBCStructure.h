@@ -162,24 +162,26 @@ enum FactionMasks
 
 struct FactionTemplateEntry
 {
-    uint32      ID;
-    uint32      faction;
-    uint32      ourMask;                                    // if mask set (see FactionMasks) then faction included in masked team
-    uint32      friendlyMask;                               // if mask set (see FactionMasks) then faction friendly to masked team
-    uint32      hostileMask;                                // if mask set (see FactionMasks) then faction hostile to masked team
-    uint32      enemyFaction1;
-    uint32      enemyFaction2;
-    //uint32      enemyFaction3;                            // empty in current DBC and can be ignored while
-    //uint32      enemyFaction4;                            // empty in current DBC and can be ignored while
-    uint32      friendFaction1;
-    uint32      friendFaction2;
-    uint32      friendFaction3;
-    uint32      friendFaction4;
+    uint32      ID;                                         // 0
+    uint32      faction;                                    // 1
+                                                            // 2 not used
+    uint32      ourMask;                                    // 3 if mask set (see FactionMasks) then faction included in masked team
+    uint32      friendlyMask;                               // 4 if mask set (see FactionMasks) then faction friendly to masked team
+    uint32      hostileMask;                                // 5 if mask set (see FactionMasks) then faction hostile to masked team
+    uint32      enemyFaction1;                              // 6
+    uint32      enemyFaction2;                              // 7
+    uint32      enemyFaction3;                              // 8
+    uint32      enemyFaction4;                              // 9
+    uint32      friendFaction1;                             // 10
+    uint32      friendFaction2;                             // 11
+    uint32      friendFaction3;                             // 12
+    uint32      friendFaction4;                             // 13
+    //-------------------------------------------------------  end structure
 
     // helpers
     bool IsFriendlyTo(FactionTemplateEntry const& entry) const
     {
-        if(enemyFaction1  == entry.faction || enemyFaction2  == entry.faction /*|| enemyFaction3 == entry.faction || enemyFaction4 == entry.faction*/ )
+        if(enemyFaction1  == entry.faction || enemyFaction2  == entry.faction || enemyFaction3 == entry.faction || enemyFaction4 == entry.faction )
             return false;
         if(friendFaction1 == entry.faction || friendFaction2 == entry.faction || friendFaction3 == entry.faction || friendFaction4 == entry.faction )
             return true;
@@ -187,14 +189,14 @@ struct FactionTemplateEntry
     }
     bool IsHostileTo(FactionTemplateEntry const& entry) const
     {
-        if(enemyFaction1  == entry.faction || enemyFaction2  == entry.faction /*|| enemyFaction3 == entry.faction || enemyFaction4 == entry.faction*/ )
+        if(enemyFaction1  == entry.faction || enemyFaction2  == entry.faction || enemyFaction3 == entry.faction || enemyFaction4 == entry.faction )
             return true;
         if(friendFaction1 == entry.faction || friendFaction2 == entry.faction || friendFaction3 == entry.faction || friendFaction4 == entry.faction )
             return false;
         return (hostileMask & entry.ourMask) != 0;
     }
     bool IsHostileToPlayers() const { return hostileMask & FACTION_MASK_PLAYER; }
-    bool IsNeutralToAll() const { return hostileMask == 0 && friendlyMask == 0 && enemyFaction1==0 && enemyFaction2==0; }
+    bool IsNeutralToAll() const { return hostileMask == 0 && friendlyMask == 0 && enemyFaction1==0 && enemyFaction2==0 && enemyFaction3==0 && enemyFaction4==0; }
 };
 
 struct GemPropertiesEntry
