@@ -34,7 +34,7 @@ DELETE FROM `spell_proc_event` WHERE `entry` IN ( 38332 );
 INSERT INTO `spell_proc_event` VALUES 
 (38332,0,0,0,0,0,134217728,0); 
 
-DELETE FROM `spell_proc_event` WHERE `entry` IN ( 37658 );
+DELETE FROM `spell_proc_event` WHERE `entry` IN ( 37657 );
 INSERT INTO `spell_proc_event` VALUES 
 (37657,0,0,0,0,0,65536,0);
 
