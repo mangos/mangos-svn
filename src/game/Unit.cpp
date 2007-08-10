@@ -388,6 +388,15 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
 {
     if (!pVictim->isAlive() || pVictim->isInFlight()) return;
 
+    //You don't lose health from damage taken from another player while in a sanctuary
+    //You still see it in the combat log though
+    if(pVictim != this && GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() == TYPEID_PLAYER)
+    {
+        const AreaTableEntry *area = GetAreaEntryByAreaID(pVictim->GetAreaId());
+        if(area->flags & 0x800) //sanctuary
+            return;
+    }
+
     // remove affects at any damage (including 0 damage)
     if(HasStealthAura())
         RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
