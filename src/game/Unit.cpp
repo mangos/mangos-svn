@@ -1689,15 +1689,54 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
 
         case MELEE_HIT_GLANCING:
         {
-            // 30% reduction at 15 skill diff, no reduction at 5 skill diff
-            int32 reducePerc = 100 - (pVictim->GetDefenseSkillValue() - GetWeaponSkillValue(attType) - 5) * 3;
-            if (reducePerc < 70)
-                reducePerc = 70;
-            else if(reducePerc > 100)
-                reducePerc = 100;
+            float reducePercent = 1.0f; //damage factor
+
+            // calculate base values and mods
+            float baseLowEnd = 1.3;
+            float baseHighEnd = 1.2;
+            switch(getClass())                          // lowering base values for casters
+            {
+            case CLASS_SHAMAN:
+            case CLASS_PRIEST:
+            case CLASS_MAGE:
+            case CLASS_WARLOCK:
+            case CLASS_DRUID:
+                baseLowEnd  -= 0.7;
+                baseHighEnd -= 0.3;
+                break;
+            }
+
+            float maxLowEnd = 0.6;
+            switch(getClass())                          // upper for melee classes
+            {
+            case CLASS_WARRIOR:
+            case CLASS_ROGUE:
+                maxLowEnd = 0.91;                   //If the attacker is a melee class then instead the lower value of 0.91 
+            }
+
+            // calculate values
+            int32 diff = pVictim->GetDefenseSkillValue() - GetWeaponSkillValue(attType);
+            float lowEnd  = baseLowEnd - ( 0.05f * diff );
+            float highEnd = baseHighEnd - ( 0.03f * diff );
+
+            // apply max/min bounds
+            if ( lowEnd < 0.01f )                       //the low end must not go bellow 0.01f
+                lowEnd = 0.01f;
+            else if ( lowEnd > maxLowEnd )              //the smaller value of this and 0.6 is kept as the low end
+                lowEnd = maxLowEnd;
+
+            if ( highEnd < 0.2f )                       //high end limits
+                highEnd = 0.2f;
+            if ( highEnd > 0.99f )
+                highEnd = 0.99f;
+
+            if(lowEnd > highEnd)                        // prevent negative range size
+                lowEnd = highEnd;
+
+            reducePercent = lowEnd + rand_norm() * ( highEnd - lowEnd );
                 
-            cleanDamage->damage += (100-reducePerc)/100 * *damage;
-            *damage *= reducePerc / 100;
+            *damage = uint32(reducePercent * *damage);
+            cleanDamage->damage += *damage;
             *hitInfo |= HITINFO_GLANCING;
             break;
         }
@@ -2011,19 +2050,19 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     }
 
     // Max 40% chance to score a glancing blow against mobs that are higher level
-    if (   (GetTypeId() == TYPEID_PLAYER)
-        && (pVictim->GetTypeId() != TYPEID_PLAYER)
-        && ((getLevel() < pVictim->getLevel())))
+    if( GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && getLevel() < pVictim->getLevel() )
     {
-        tmp = GetWeaponSkillValue(attType);
-        int32   maxskill = GetMaxSkillValueForLevel();
-        tmp = (tmp > maxskill) ? maxskill : tmp;
-        tmp = ((pVictim->GetMaxSkillValueForLevel() - tmp - 5) * 300 + 1000 );
-        tmp = tmp > 4000 ? 4000 : tmp;
+        // cap possible value (with bonuses > max skill)
+        int32 skill = GetWeaponSkillValue(attType);
+        int32 maxskill = GetMaxSkillValueForLevel();
+        skill = (skill > maxskill) ? maxskill : skill;
+
+		tmp = (10 + (pVictim->GetDefenseSkillValue() - skill)) * 100;
+        tmp = tmp > 4000 ? 4000 : tmp; 
         if (roll < (sum += tmp))
         {
-            DEBUG_LOG ("RollMeleeOutcomeAgainst: GLANCING <%d, %d)", sum-4000, sum);
-            return MELEE_HIT_GLANCING;
+            DEBUG_LOG ("RollMeleeOutcomeAgainst: GLANCING <%d, %d)", sum-4000, sum);          
+			return MELEE_HIT_GLANCING;
         }
     }
 

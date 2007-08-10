@@ -1202,7 +1202,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendExplorationExperience(uint32 Area, uint32 Experience);
 
         void SendDungeonDifficulty();
-        void SendAllowMove();
 
         bool SetPosition(float x, float y, float z, float orientation, bool teleport = false);
         void SendMessageToSet(WorldPacket *data, bool self);// overwrite Object::SendMessageToSet

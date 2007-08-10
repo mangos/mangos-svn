@@ -600,7 +600,6 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     if(pCurrChar->isGameMaster())
         SendNotification("GM mode is ON");
     m_playerLoading = false;
-    pCurrChar->SendAllowMove();
 
     data.Initialize(SMSG_UNKNOWN_811, 4);
     data << uint32(0);

@@ -39,8 +39,6 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
     SendPacket(&data);
 
     GetPlayer()->SetDontMove(false);
-
-    _player->SendAllowMove();   // resend after worldport complete
 }
 
 void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
@@ -289,6 +287,10 @@ void WorldSession::HandleSetActiveMoverOpcode(WorldPacket &recv_data)
 
     uint64 guid;
     recv_data >> guid;
+
+    WorldPacket data(SMSG_ALLOW_MOVE, 4);                   // new 2.0.x, enable movement
+    data << uint32(0x00000000);                             // on blizz it increments periodically
+    SendPacket(&data);
 }
 
 void WorldSession::HandleMountSpecialAnimOpcode(WorldPacket &recvdata)
