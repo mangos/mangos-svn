@@ -393,7 +393,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
     if(pVictim != this && GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() == TYPEID_PLAYER)
     {
         const AreaTableEntry *area = GetAreaEntryByAreaID(pVictim->GetAreaId());
-        if(area->flags & 0x800) //sanctuary
+        if(area && area->flags & 0x800) //sanctuary
             return;
     }
 
@@ -4234,6 +4234,9 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
         // Lightning Capacitor
         case 37657:
         {
+            if(!pVictim)
+                return;
+
             // stacking
             CastSpell(this, 37658, true, NULL, triggeredByAura);
 
