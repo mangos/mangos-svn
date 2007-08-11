@@ -12073,9 +12073,11 @@ bool Player::CanSpeak() const
 
 void Player::_LoadInventory(uint32 timediff)
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `slot`,`item`,`item_template` FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '0' ORDER BY `slot`",GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `data`,`bag`,`slot`,`item`,`item_template` FROM `character_inventory` JOIN `item_instance` ON `character_inventory`.`item` = `item_instance`.`guid` WHERE `character_inventory`.`guid` = '%u' ORDER BY `bag`", GetGUIDLow());
+    std::map<uint64, Bag*> bagMap;                          // fast guid lookup for bags
+    //NOTE: the "order by `bag`" is important because it makes sure
+    //the bagMap is filled before items in the bags are loaded
 
-    uint16 dest;
     if (result)
     {
         // prevent items from being added to the queue when stored
@@ -12083,21 +12085,20 @@ void Player::_LoadInventory(uint32 timediff)
         do
         {
             Field *fields = result->Fetch();
-            uint8  slot      = fields[0].GetUInt8();
-            uint32 item_guid = fields[1].GetUInt32();
-            uint32 item_id   = fields[2].GetUInt32();
+            uint32 bag_guid  = fields[1].GetUInt32();
+            uint8  slot      = fields[2].GetUInt8();
+            uint32 item_guid = fields[3].GetUInt32();
+            uint32 item_id   = fields[4].GetUInt32();
 
             ItemPrototype const * proto = objmgr.GetItemPrototype(item_id);
 
             if(!proto)
             {
-                sLog.outError( "Player::_LoadInventory: Player %s have unknown item (id: #%u) in inventory, skipped.", GetName(),item_id );
+                sLog.outError( "Player::_LoadInventory: Player %s has an unknown item (id: #%u) in inventory, skipped.", GetName(),item_id );
                 continue;
             }
 
             Item *item = NewItemOrBag(proto);
-            item->SetSlot( slot );
-            item->SetContainer( NULL );
 
             if(!item->LoadFromDB(item_guid, GetGUID()))
             {
@@ -12106,36 +12107,63 @@ void Player::_LoadInventory(uint32 timediff)
             }
 
             bool success = true;
-            dest = ((INVENTORY_SLOT_BAG_0 << 8) | slot);
-            if( IsInventoryPos( dest ) )
+
+            if (!bag_guid)
             {
-                if( !CanStoreItem( INVENTORY_SLOT_BAG_0, slot, dest, item, false ) == EQUIP_ERR_OK )
+                // the item is not in a bag
+                item->SetContainer( NULL );
+                item->SetSlot(slot);
+
+                // destinated position
+                uint16 dest = ((INVENTORY_SLOT_BAG_0 << 8) | slot);
+
+                if( IsInventoryPos( dest ) )
                 {
-                    success = false;
-                    continue;
+                    if( !CanStoreItem( INVENTORY_SLOT_BAG_0, slot, dest, item, false ) == EQUIP_ERR_OK )
+                    {
+                        success = false;
+                        continue;
+                    }
+
+                    item = StoreItem(dest, item, true);
+                }
+                else if( IsEquipmentPos( dest ) )
+                {
+                    if( !CanEquipItem( slot, dest, item, false, false ) == EQUIP_ERR_OK )
+                    {
+                        success = false;
+                        continue;
+                    }
+
+                    QuickEquipItem(dest, item);
+                }
+                else if( IsBankPos( dest ) )
+                {
+                    if( !CanBankItem( INVENTORY_SLOT_BAG_0, slot, dest, item, false, false ) == EQUIP_ERR_OK )
+                    {
+                        success = false;
+                        continue;
+                    }
+
+                    item = BankItem(dest, item, true);
                 }
 
-                item = StoreItem(dest, item, true);
+                if(success)
+                {
+                    // store bags that may contain items in them
+                    if(item->IsBag() && IsBagPos(dest))
+                        bagMap[item_guid] = (Bag*)item;
+                }
             }
-            else if( IsEquipmentPos( dest ) )
+            else
             {
-                if( !CanEquipItem( slot, dest, item, false, false ) == EQUIP_ERR_OK )
-                {
+                item->SetSlot(NULL_SLOT);
+                // the item is in a bag, find the bag
+                std::map<uint64, Bag*>::iterator itr = bagMap.find(bag_guid);
+                if(itr != bagMap.end())
+                    itr->second->StoreItem(slot, item, true );
+                else
                     success = false;
-                    continue;
-                }
-
-                QuickEquipItem(dest, item);
-            }
-            else if( IsBankPos( dest ) )
-            {
-                if( !CanBankItem( INVENTORY_SLOT_BAG_0, slot, dest, item, false, false ) == EQUIP_ERR_OK )
-                {
-                    success = false;
-                    continue;
-                }
-
-                item = BankItem(dest, item, true);
             }
 
             // item's state may have changed after stored
