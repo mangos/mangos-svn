@@ -454,6 +454,10 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             if (spellInfo->Dispel == 2)                     //IMMUNE_DISPEL_CURSE
                 return SPELL_CURSE;
 
+            // family flag 37 (only part spells have family name)
+            if (spellInfo->SpellFamilyFlags & 0x2000000000LL)
+                return SPELL_WARLOCK_ARMOR;
+
             break;
         }
         case SPELLFAMILY_MAGE:
@@ -483,7 +487,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
         }
     }
 
-    // only warlock armor/skin have this (but not all armor/skin have warlock family set)
+    // only warlock armor/skin have this (in additional to family cases)
     if( spellInfo->SpellVisual == 130 && spellInfo->SpellIconID == 89)
     {
         return SPELL_WARLOCK_ARMOR;
