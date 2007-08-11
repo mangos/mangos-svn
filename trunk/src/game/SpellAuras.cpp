@@ -468,7 +468,7 @@ void Aura::Update(uint32 diff)
         }
     }
 
-    if(m_isPeriodic && (m_duration >= 0 || m_isPassive))
+    if(m_isPeriodic && (m_duration >= 0 || m_isPassive || m_permanent))
     {
         m_periodicTimer -= diff;
         if(m_periodicTimer <= 0)                            // tick also at m_periodicTimer==0 to prevent lost last tick in case max m_duration == (max m_periodicTimer)*N
