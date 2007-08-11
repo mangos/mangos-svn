@@ -47,7 +47,8 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
         // stop attack state at client
         WorldPacket data( SMSG_ATTACKSTOP, (4+16) );            // we guess size
         data.append(GetPlayer()->GetPackGUID());
-        data.append(guid);
+        data.append(guid);  // must be packed guid
+        data << uint32(0);  // unk, can be 1 also
         SendPacket(&data);
         return;
     }
@@ -59,7 +60,8 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
         // stop attack state at client
         WorldPacket data( SMSG_ATTACKSTOP, (4+16) );            // we guess size
         data.append(GetPlayer()->GetPackGUID());
-        data.append(guid);
+        data.append(guid);  // must be packed guid
+        data << uint32(0);  // unk, can be 1 also
         SendPacket(&data);
         return;
     }

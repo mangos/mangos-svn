@@ -955,7 +955,7 @@ enum OpCodes
     CMSG_GROUP_PROMOTE                              = 910, // make main-tank / main-assistant
     // 911
     SMSG_ALLOW_MOVE                                 = 912, // uint32, allow player movement, value increments every time and reset to 0 after far teleport, used for client-server synchronization
-    CMSG_ALLOW_MOVE_ACK                             = 913, // client response to SMSG_ALLOW_MOVE
+    CMSG_ALLOW_MOVE_ACK                             = 913, // client response to SMSG_ALLOW_MOVE (counter + client time)
     // 914
     // 915
     // 916
@@ -992,7 +992,7 @@ enum OpCodes
     */
     // 933
     SMSG_CAST_SUCCESS                               = 934,
-    SMSG_UNKNOWN_935                                = 935, // teleport/movement opcode
+    SMSG_UNKNOWN_935                                = 935, // teleport/movement opcode (MSG?)
     // 936
     // 937
     // 938
@@ -1001,7 +1001,7 @@ enum OpCodes
     SMSG_UNKNOWN_941                                = 941, // teleport/movement opcode
     SMSG_UNKNOWN_942                                = 942, // Everyone is Ready! (message)
     // 943
-    // 944
+    SMSG_UNKNOWN_944                                = 944, // chat related (seen it when talk with GM)
     // 945
     // 946
     // 947

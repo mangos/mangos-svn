@@ -2957,9 +2957,11 @@ void Aura::HandleAuraModTotalHealthPercentRegen(bool apply, bool Real)
     Need additional checking for auras who reduce or increase healing, magic effect like Dumpen Magic,
     so this aura not fully working.
     */
-    if( GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED )
+    if((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) && apply)
     {
-        m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
+        m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);
+        if(m_target->GetTypeId() == TYPEID_PLAYER)
+            ((Player*)m_target)->SetStandState(PLAYER_STATE_SIT);
     }
 
     if(apply && m_periodicTimer <= 0)
@@ -2980,8 +2982,12 @@ void Aura::HandleAuraModTotalHealthPercentRegen(bool apply, bool Real)
 
 void Aura::HandleAuraModTotalManaPercentRegen(bool apply, bool Real)
 {
-    if( GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED )
-        m_target->ApplyModFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT,apply);
+    if((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) && apply)
+    {
+        m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);
+        if(m_target->GetTypeId() == TYPEID_PLAYER)
+            ((Player*)m_target)->SetStandState(PLAYER_STATE_SIT);
+    }
 
     if(apply && m_periodicTimer <= 0 && m_target->getPowerType() == POWER_MANA)
     {
@@ -3005,10 +3011,12 @@ void Aura::HandleAuraModTotalManaPercentRegen(bool apply, bool Real)
 
 void Aura::HandleModRegen(bool apply, bool Real)            // eating
 {
-    if ((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) != 0 && apply)
+    if ((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) && apply)
+    {
+        m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);
         if(m_target->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)m_target)->SetStandState(1);  // sit?
-        //m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);
+            ((Player*)m_target)->SetStandState(PLAYER_STATE_SIT);
+    }
 
     if(apply && m_periodicTimer <= 0)
     {
@@ -3028,10 +3036,12 @@ void Aura::HandleModRegen(bool apply, bool Real)            // eating
 
 void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
 {
-    if (GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED)
+    if ((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) && apply)
+    {
+        m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);
         if(m_target->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)m_target)->SetStandState(1);  // sit?
-        //m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);
+            ((Player*)m_target)->SetStandState(PLAYER_STATE_SIT);
+    }
 
     if(apply && m_periodicTimer <= 0)
     {

@@ -369,65 +369,9 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         }
     }
 
-    // rest_start
-
-    // home bind stuff
-    {
-        QueryResult *result4 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
-        if (result4)
-        {
-            Field *fields = result4->Fetch();
-            _player->m_homebindMapId = fields[0].GetUInt32();
-            _player->m_homebindZoneId = fields[1].GetUInt16();
-            _player->m_homebindX = fields[2].GetFloat();
-            _player->m_homebindY = fields[3].GetFloat();
-            _player->m_homebindZ = fields[4].GetFloat();
-            delete result4;
-        }
-        else
-        {
-            int plrace = GetPlayer()->getRace();
-            int plclass = GetPlayer()->getClass();
-            QueryResult *result5 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `playercreateinfo` WHERE `race` = '%u' AND `class` = '%u'", plrace, plclass);
-
-            if(!result5)
-            {
-                sLog.outErrorDb("Table `playercreateinfo` not have data for race %u class %u , character can't be loaded.",plrace, plclass);
-                LogoutPlayer(false);                            // without save
-                return;
-            }
-
-            Field *fields = result5->Fetch();
-            // store and send homebind for player
-            _player->m_homebindMapId = fields[0].GetUInt32();
-            _player->m_homebindZoneId = fields[1].GetUInt16();
-            _player->m_homebindX = fields[2].GetFloat();
-            _player->m_homebindY = fields[3].GetFloat();
-            _player->m_homebindZ = fields[4].GetFloat();
-            sDatabase.PExecute("INSERT INTO `character_homebind` (`guid`,`map`,`zone`,`position_x`,`position_y`,`position_z`) VALUES ('%u', '%u', '%u', '%f', '%f', '%f')", GUID_LOPART(playerGuid), _player->m_homebindMapId, (uint32)_player->m_homebindZoneId, _player->m_homebindX, _player->m_homebindY, _player->m_homebindZ);
-            delete result5;
-        }
-
-        data.Initialize (SMSG_BINDPOINTUPDATE, 5*4);
-        data << _player->m_homebindX << _player->m_homebindY << _player->m_homebindZ;
-        data << (uint32) _player->m_homebindMapId;
-        data << (uint32) _player->m_homebindZoneId;
-        SendPacket (&data);
-
-        DEBUG_LOG("Setting player home position: mapid is: %u, zoneid is %u, X is %f, Y is %f, Z is %f\n",
-            _player->m_homebindMapId,_player->m_homebindZoneId,_player->m_homebindX,_player->m_homebindY, _player->m_homebindZ);
-    }
-
-    data.Initialize( SMSG_TUTORIAL_FLAGS, 8*32 );
-    for (int i = 0; i < 8; i++)
-        data << uint32( GetPlayer()->GetTutorialInt(i) );
-    SendPacket(&data);
-    //sLog.outDebug( "WORLD: Sent tutorial flags." );
+    pCurrChar->SendInitialPackets();
 
     pCurrChar->_LoadSpellCooldowns();
-    GetPlayer()->SendInitialSpells();
-    GetPlayer()->SendInitialActionButtons();
-    GetPlayer()->SendInitialReputations();
 
     /*if(GetPlayer()->getClass() == CLASS_HUNTER || GetPlayer()->getClass() == CLASS_ROGUE)
     {
@@ -461,20 +405,6 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         }
     }
 
-    pCurrChar->SendInitWorldStates();
-
-    pCurrChar->CastSpell(pCurrChar, 836, true); // LOGINEFFECT
-
-    data.Initialize(SMSG_LOGIN_SETTIMESPEED, 8);
-    time_t gameTime = sWorld.GetGameTime();
-    struct tm *lt = localtime(&gameTime);
-    uint32 xmitTime = (lt->tm_year - 100) << 24 | lt->tm_mon  << 20 |
-        (lt->tm_mday - 1) << 14 | lt->tm_wday << 11 |
-        lt->tm_hour << 6 | lt->tm_min;
-    data << xmitTime;
-    data << (float)0.017f;                      // game speed
-    SendPacket( &data );
-
     GetPlayer()->UpdateHonorFields();
 
     QueryResult *result = sDatabase.PQuery("SELECT `guildid`,`rank` FROM `guild_member` WHERE `guid` = '%u'",pCurrChar->GetGUIDLow());
@@ -496,6 +426,9 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     {
         // TODO : Teleport to zone-in area
     }
+
+    if(pCurrChar->m_transport)
+        pCurrChar->SetMovementFlags(MOVEMENTFLAG_ONTRANSPORT);
 
     MapManager::Instance().GetMap(pCurrChar->GetMapId(), pCurrChar)->Add(pCurrChar);
     ObjectAccessor::Instance().AddObject(pCurrChar);
@@ -600,10 +533,6 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     if(pCurrChar->isGameMaster())
         SendNotification("GM mode is ON");
     m_playerLoading = false;
-
-    data.Initialize(SMSG_UNKNOWN_811, 4);
-    data << uint32(0);
-    SendPacket(&data);
 }
 
 void WorldSession::HandleSetFactionAtWar( WorldPacket & recv_data )

@@ -4033,12 +4033,14 @@ bool ChatHandler::HandleSendOpcodeCommand(const char* args)
         unit = m_session->GetPlayer();
 
     uint16 opcode = atoi(args);
-    /*WorldPacket data(opcode, 20);
-    data.append(unit->GetPackGUID());
+    WorldPacket data(opcode, 20);
+    data << uint32(0);
+    ((Player*)unit)->GetSession()->SendPacket(&data);
+    /*data.append(unit->GetPackGUID());
     data << urand(0, 1024);
     data << urand(0, 1024);
     data << urand(0, 1024);*/
-    uint32 random = urand(1, 3);
+    /*uint32 random = urand(1, 3);
     uint8 temp = 3;
     if(temp == 1)
     {
@@ -4059,7 +4061,7 @@ bool ChatHandler::HandleSendOpcodeCommand(const char* args)
         WorldPacket data;
         ((Player*)unit)->GetSession()->BuildArenaTeamEventPacket(&data, opcode, random, "str1", "str2", "str3");
         ((Player*)unit)->GetSession()->SendPacket(&data);
-    }
+    }*/
     PSendSysMessage(LANG_COMMAND_OPCODESENT, opcode, unit->GetName());
     return true;
 }

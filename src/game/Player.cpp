@@ -79,6 +79,7 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_transY = 0.0f;
     m_transZ = 0.0f;
     m_transO = 0.0f;
+    m_transTime = 0;
 
     m_speakTime = 0;
     m_speakCount = 0;
@@ -1391,6 +1392,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         m_transY = 0.0f;
         m_transZ = 0.0f;
         m_transO = 0.0f;
+        m_transTime = 0;
     }
 
     SetSemaphoreTeleport(true);
@@ -1430,6 +1432,11 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     }
     else
     {
+        // reset movement flags at teleport, because player will continue move with these flags after teleport
+        SetMovementFlags(0);
+        if(m_transport)
+            SetMovementFlags(MOVEMENTFLAG_ONTRANSPORT);
+
         // far teleport to another map
         Map* oldmap = MapManager::Instance().GetMap(GetMapId(), this);
         
@@ -1522,9 +1529,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             //SaveToDB();
 
             // Client reset some data at NEW_WORLD teleport, resending its to client.
-            SendInitWorldStates();
-            SendInitialSpells();
-            SendInitialActionButtons();
+            //SendInitialPackets(); // done in MSG_MOVE_WORLDPORT_ACK handler
 
             // reset instance validity
             m_InstanceValid = true;
@@ -2943,8 +2948,8 @@ void Player::InitVisibleBits()
     updateVisualBits.SetBit(UNIT_FIELD_PETNUMBER);
     updateVisualBits.SetBit(UNIT_FIELD_PET_NAME_TIMESTAMP);
     updateVisualBits.SetBit(UNIT_DYNAMIC_FLAGS);
-    updateVisualBits.SetBit(UNIT_MOD_CAST_SPEED);           // ?
-    updateVisualBits.SetBit(UNIT_FIELD_BYTES_2);            // ?
+    updateVisualBits.SetBit(UNIT_MOD_CAST_SPEED);
+    updateVisualBits.SetBit(UNIT_FIELD_BYTES_2);
 
     updateVisualBits.SetBit(PLAYER_FLAGS);
     updateVisualBits.SetBit(PLAYER_BYTES);
@@ -2982,6 +2987,8 @@ void Player::InitVisibleBits()
         // random properties
         updateVisualBits.SetBit((uint16)(PLAYER_VISIBLE_ITEM_1_PROPERTIES + (i*16)));
     }
+
+    updateVisualBits.SetBit(PLAYER_CHOSEN_TITLE);
 
     updateVisualBits.SetBit(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY);
     updateVisualBits.SetBit(UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + 1);
@@ -3282,7 +3289,8 @@ void Player::BuildPlayerRepop()
 void Player::SendDelayResponse(const uint32 ml_seconds)
 {
     WorldPacket data(SMSG_QUERY_TIME_RESPONSE, 4);
-    data << (uint32)getMSTime();
+    data << (uint32)time(NULL);
+    data << (uint32)0;
     GetSession()->SendPacket( &data );
 }
 
@@ -11648,8 +11656,8 @@ float Player::GetFloatValueFromDB(uint16 index, uint64 guid)
 bool Player::LoadFromDB( uint32 guid )
 {
     // NOTE: all fields in `character` must be read to prevent lost character data at next save in case wrong DB structure.
-    //                                             0      1         2      3      4      5       6            7            8            9     10            11         12          13          14          15           16            17                  18                  19                  20        21        22        23         24          25        26             27       [28]   [29]
-    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`rename`,`zone`,`online` FROM `character` WHERE `guid` = '%u'", guid);
+    //                                             0      1         2      3      4      5       6            7            8            9     10            11         12          13          14          15           16            17                  18                  19                  20        21        22        23         24          25        26             27
+    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`rename` FROM `character` WHERE `guid` = '%u'", guid);
 
     if(!result)
     {
@@ -14087,7 +14095,6 @@ void Player::AddSpellCooldown(uint32 spellid, uint32 itemid, time_t end_time)
     m_spellCooldowns[spellid] = sc;
 }
 
-
 bool Player::EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot)    //slot to be excluded while counting
 {
     if(!enchantmentcondition)
@@ -14494,6 +14501,84 @@ void Player::SetGroup(Group *group, int8 subgroup)
         m_group.link(group, this);
         m_group.setSubGroup((uint8)subgroup);
     }
+}
+
+void Player::SendInitialPackets()
+{
+    WorldPacket data(SMSG_SET_REST_START, 4);
+    data << uint32(0);  // unknown, may be rest state time or expirience
+    GetSession()->SendPacket(&data);
+
+    // home bind stuff
+    QueryResult *result4 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", GetGUIDLow());
+    if (result4)
+    {
+        Field *fields = result4->Fetch();
+        m_homebindMapId = fields[0].GetUInt32();
+        m_homebindZoneId = fields[1].GetUInt16();
+        m_homebindX = fields[2].GetFloat();
+        m_homebindY = fields[3].GetFloat();
+        m_homebindZ = fields[4].GetFloat();
+        delete result4;
+    }
+    else
+    {
+        int plrace = getRace();
+        int plclass = getClass();
+        QueryResult *result5 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `playercreateinfo` WHERE `race` = '%u' AND `class` = '%u'", plrace, plclass);
+
+        if(!result5)
+        {
+            sLog.outErrorDb("Table `playercreateinfo` not have data for race %u class %u , character can't be loaded.",plrace, plclass);
+            GetSession()->LogoutPlayer(false);                            // without save
+            return;
+        }
+
+        Field *fields = result5->Fetch();
+        // store and send homebind for player
+        m_homebindMapId = fields[0].GetUInt32();
+        m_homebindZoneId = fields[1].GetUInt16();
+        m_homebindX = fields[2].GetFloat();
+        m_homebindY = fields[3].GetFloat();
+        m_homebindZ = fields[4].GetFloat();
+        sDatabase.PExecute("INSERT INTO `character_homebind` (`guid`,`map`,`zone`,`position_x`,`position_y`,`position_z`) VALUES ('%u', '%u', '%u', '%f', '%f', '%f')", GetGUIDLow(), m_homebindMapId, (uint32)m_homebindZoneId, m_homebindX, m_homebindY, m_homebindZ);
+        delete result5;
+    }
+
+    data.Initialize(SMSG_BINDPOINTUPDATE, 5*4);
+    data << m_homebindX << m_homebindY << m_homebindZ;
+    data << (uint32) m_homebindMapId;
+    data << (uint32) m_homebindZoneId;
+    GetSession()->SendPacket(&data);
+
+    // SMSG_SET_PROFICIENCY
+    // SMSG_UPDATE_AURA_DURATION
+
+    // tutorial stuff
+    data.Initialize(SMSG_TUTORIAL_FLAGS, 8*32);
+    for (int i = 0; i < 8; i++)
+        data << uint32( GetTutorialInt(i) );
+    GetSession()->SendPacket(&data);
+
+    SendInitialSpells();
+    SendInitialActionButtons();
+    SendInitialReputations();
+    UpdateZone(GetZoneId());
+    SendInitWorldStates();
+
+    // SMSG_SET_AURA_SINGLE
+
+    data.Initialize(SMSG_LOGIN_SETTIMESPEED, 8);
+    time_t gameTime = sWorld.GetGameTime();
+    struct tm *lt = localtime(&gameTime);
+    uint32 xmitTime = (lt->tm_year - 100) << 24 | lt->tm_mon  << 20 |
+        (lt->tm_mday - 1) << 14 | lt->tm_wday << 11 |
+        lt->tm_hour << 6 | lt->tm_min;
+    data << xmitTime;
+    data << (float)0.01666667f;            // game speed
+    GetSession()->SendPacket( &data );
+
+    CastSpell(this, 836, true);            // LOGINEFFECT
 }
 
 template void Player::UpdateVisibilityOf(Player*        target, UpdateData& data, UpdateDataMapType& data_updates);

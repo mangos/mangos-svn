@@ -133,14 +133,28 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
     uint8  flags      = m_updateFlag;
     uint32 flags2     = 0;
 
+    if(GetTypeId() == TYPEID_PLAYER)
+    {
+        flags2 = ((Player*)this)->GetMovementFlags();
+
+        // remove unknown, unused etc flags for now
+        flags2 &= ~MOVEMENTFLAG_SPLINE;
+        flags2 &= ~MOVEMENTFLAG_SPLINE2;
+        flags2 &= ~MOVEMENTFLAG_JUMPING;
+        flags2 &= ~MOVEMENTFLAG_SWIMMING;
+    }
+
     /** lower flag1 **/
     if(target == this) // building packet for oneself
+    {
         flags |= UPDATEFLAG_SELF;
+        updatetype = UPDATETYPE_CREATE_OBJECT2;
+    }
 
     if(flags & UPDATEFLAG_HASPOSITION)
     {
         // UPDATETYPE_CREATE_OBJECT2 dynamic objects, corpses...
-        if(isType(TYPE_DYNAMICOBJECT) || isType(TYPE_CORPSE) || isType(TYPE_PLAYER))
+        if(isType(TYPE_DYNAMICOBJECT) || isType(TYPE_CORPSE))
             updatetype = UPDATETYPE_CREATE_OBJECT2;
 
         // UPDATETYPE_CREATE_OBJECT2 for pets...
@@ -163,17 +177,17 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
     }
 
     // flags2 only used at LIVING objects
-    if(flags & UPDATEFLAG_LIVING)
+    /*if(flags & UPDATEFLAG_LIVING)
     {
         if(m_objectTypeId == TYPEID_PLAYER && ((Player*)this)->GetTransport() != 0)
-            flags2 |= 0x0200;
+            flags2 |= MOVEMENTFLAG_ONTRANSPORT;
 
-        /*if(m_objectTypeId == TYPEID_PLAYER)
+        if(m_objectTypeId == TYPEID_PLAYER)
         {
             updatetype = UPDATETYPE_CREATE_OBJECT2; // dunno when exactly this's used
             //flags2 |= 0x00002000;
-        }*/
-    }
+        }
+    }*/
 
     //sLog.outDebug("BuildCreateUpdate: update-type: %u, object-type: %u got flags: %X, flags2: %X", updatetype, m_objectTypeId, flags, flags2);
 
@@ -260,12 +274,12 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
                 case 6491:                  // Spirit Healer
                 case 13116:                 // Alliance Spirit Guide
                 case 13117:                 // Horde Spirit Guide
-                    flags2 |= 0x10000000;
+                    flags2 |= MOVEMENTFLAG_WATERWALKING;   // waterwalking movement flag?
                     break;
             }
         }
 
-        *data << flags2;
+        *data << flags2;                    // movement flags
         *data << getMSTime();               // this appears to be time in ms but can be any thing (mask, flags)
     }
 
@@ -289,32 +303,36 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
 
     if (flags & UPDATEFLAG_LIVING)          // 0x20
     {
-        if(flags2 & 0x0200)
+        if(flags2 & MOVEMENTFLAG_ONTRANSPORT)   // 0x200
         {
             *data << (uint64)((Player*)this)->GetTransport()->GetGUID();
             *data << (float)((Player*)this)->GetTransOffsetX();
             *data << (float)((Player*)this)->GetTransOffsetY();
             *data << (float)((Player*)this)->GetTransOffsetZ();
             *data << (float)((Player*)this)->GetTransOffsetO();
-            *data << uint32(0x11);          //unk, mask or flags
+            //*data << uint32(0x11);          // unk, mask or flags
+            *data << (uint32)((Player*)this)->GetTransTime();
         }
 
-        /*if(flags2 & 0x200000)
+        /*if(flags2 & MOVEMENTFLAG_SWIMMING)  // 0x200000
         {
-            *data << (float)0;
+            // is't part of movement packet, we must store and send it...
+            *data << (float)0;              // we can get this value from movement packets?
         }*/
 
+        // fall time according movement packet structure...
         *data << (uint32)0;                 // unknown
 
-        /*if(flags2 & 0x2000)                 // unknown, unused now
+        /*if(flags2 & MOVEMENTFLAG_JUMPING)   // 0x2000
         {
+            // is't part of movement packet, we must store and send it...
             *data << (float)0;
             *data << (float)0;
             *data << (float)0;
             *data << (float)0;
         }*/
 
-        /*if(flags2 & 0x4000000)
+        /*if(flags2 & MOVEMENTFLAG_SPLINE)    // 0x4000000
         {
             *data << uint32(0);
         }*/
@@ -328,61 +346,70 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
         *data << ((Unit*)this)->GetSpeed( MOVE_FLYBACK );
         *data << ((Unit*)this)->GetSpeed( MOVE_TURN );
 
-        /*if(flags2 & 0x8000000)              // splines?
+        /*if(flags2 & MOVEMENTFLAG_SPLINE2)   // 0x8000000
         {
             uint32 flags3 = 0;
-            *data << uint32(flags3);
-            if(flags3 & 0x10000)
+
+            *data << flags3;                // splines flag?
+
+            if(flags3 & 0x10000)            // probably x,y,z coords there
             {
                 *data << (float)0;
                 *data << (float)0;
                 *data << (float)0;
             }
-            if(flags3 & 0x20000)
+
+            if(flags3 & 0x20000)            // probably guid there
             {
                 *data << uint64(0);
             }
-            if(flags3 & 0x40000)
+
+            if(flags3 & 0x40000)            // may be orientation
             {
                 *data << (float)0;
             }
 
-            *data << uint32(0); // curr tick?
-            *data << uint32(0); // last tick?
-            *data << uint32(0); // ticks count?
+            *data << uint32(0);             // passed move time?
+            *data << uint32(0);             // full move time?
+            *data << uint32(0);             // ticks count?
+
             uint32 poscount = 0;
-            *data << poscount;
+
+            *data << poscount;              // points count
+
             for(uint32 i = 0; i < poscount; i++)
             {
+                // path points
                 *data << (float)0;
                 *data << (float)0;
                 *data << (float)0;
             }
-            // end coords
-            *data << (float)0;
-            *data << (float)0;
-            *data << (float)0;
+
+            // target position (path end)
+            *data << ((Unit*)this)->GetPositionX();
+            *data << ((Unit*)this)->GetPositionY();
+            *data << ((Unit*)this)->GetPositionZ();
         }*/
     }
 
     if(flags & UPDATEFLAG_ALL)              // 0x10
     {
-        *data << uint32(0);                 // unk
+        *data << uint32(0);                 // unk, probably timestamp
     }
 
     if(flags & UPDATEFLAG_HIGHGUID)         // 0x8
     {
-        *data << uint32(0);                 // unk
+        *data << uint32(0);                 // unk, probably timestamp
     }
 
-    //if(flags & UPDATEFLAG_FULLGUID)       // 0x4
-    //{
-        // packed guid (probably target guid)
-    //}
+    /*if(flags & UPDATEFLAG_FULLGUID)       // 0x4
+    {
+        packed guid (probably target guid)  // unk
+    }*/
 
     if(flags & UPDATEFLAG_TRANSPORT)        // 0x2
     {
-        *data << getMSTime();               // unsure
+        *data << getMSTime();               // ms time
     }
 }
 
@@ -966,7 +993,7 @@ void WorldObject::BuildTeleportAckMsg(WorldPacket *data, float x, float y, float
     data->Initialize(MSG_MOVE_TELEPORT_ACK, 41);
     data->append(GetPackGUID());
     *data << uint32(0);             // this value increments every time
-    *data << uint32(0x1000);        // movement flags? 0x10000000
+    *data << uint32(0);             // movement flags?
     *data << getMSTime();           // time
     *data << x;
     *data << y;
