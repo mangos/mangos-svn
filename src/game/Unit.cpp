@@ -4231,18 +4231,6 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
     // custom check for proc spell
     switch(auraSpellInfo->Id)
     {
-        // Impr. Countercasting
-        case 11255:
-        case 12598:
-        {
-            if(!procSpell)
-                return;
-
-            // if Countercasting spell casted and target also casting in this moment.
-            if(procSpell->SpellVisual==239 && pVictim && pVictim->IsNonMeleeSpellCasted(true))
-                break;                                          // fall through to std. handler
-            return;
-        }
         // Lightning Capacitor
         case 37657:
         {
