@@ -1625,7 +1625,7 @@ void Player::RegenerateAll()
     uint32 regenDelay = 2000;
 
     // Not in combat or they have regeneration
-    if (!isInCombat() || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT))
+    if (!isInCombat() || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT) || HasAuraType(SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT) )
     {
         RegenerateHealth();
         if (!isInCombat())
@@ -1744,8 +1744,11 @@ void Player::RegenerateHealth()
 
     float addvalue = 0.0;
 
-    switch (Class)
+    // normal regen case (maybe partly in combat case)
+    if (!isInCombat() || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT) )
     {
+        switch (Class)
+        {
         case CLASS_DRUID:   addvalue = (Spirit*0.11 + 1)   * HealthIncreaseRate; break;
         case CLASS_HUNTER:  addvalue = (Spirit*0.43 - 5.5) * HealthIncreaseRate; break;
         case CLASS_MAGE:    addvalue = (Spirit*0.11 + 1)   * HealthIncreaseRate; break;
@@ -1755,19 +1758,19 @@ void Player::RegenerateHealth()
         case CLASS_SHAMAN:  addvalue = (Spirit*0.28 - 3.6) * HealthIncreaseRate; break;
         case CLASS_WARLOCK: addvalue = (Spirit*0.12 + 1.5) * HealthIncreaseRate; break;
         case CLASS_WARRIOR: addvalue = (Spirit*1.26 - 22.6)* HealthIncreaseRate; break;
-    }
+        }
 
-    if (!isInCombat())
-    {
-        AuraList const& mModHealthRegenPct = GetAurasByType(SPELL_AURA_MOD_HEALTH_REGEN_PERCENT);
-        for(AuraList::const_iterator i = mModHealthRegenPct.begin(); i != mModHealthRegenPct.end(); ++i)
-            addvalue *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
-    }
-    else if(HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT))
-        addvalue *= m_AuraModifiers[SPELL_AURA_MOD_REGEN_DURING_COMBAT] / 100.0f;
+        if (!isInCombat())
+        {
+            AuraList const& mModHealthRegenPct = GetAurasByType(SPELL_AURA_MOD_HEALTH_REGEN_PERCENT);
+            for(AuraList::const_iterator i = mModHealthRegenPct.begin(); i != mModHealthRegenPct.end(); ++i)
+                addvalue *= (100.0f + (*i)->GetModifier()->m_amount) / 100.0f;
+        }
+        else if(HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT))
+            addvalue *= m_AuraModifiers[SPELL_AURA_MOD_REGEN_DURING_COMBAT] / 100.0f;
 
-    switch (getStandState())
-    {
+        switch (getStandState())
+        {
         case PLAYER_STATE_SIT_CHAIR:
         case PLAYER_STATE_SIT_LOW_CHAIR:
         case PLAYER_STATE_SIT_MEDIUM_CHAIR:
@@ -1776,7 +1779,14 @@ void Player::RegenerateHealth()
         case PLAYER_STATE_SLEEP:
         case PLAYER_STATE_KNEEL:
             addvalue *= 1.5; break;
+        }
+
     }
+
+    // always regeneration bonus (including combat)
+    AuraList const& mModHealthRegenFlat = GetAurasByType(SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT);
+    for(AuraList::const_iterator i = mModHealthRegenFlat.begin(); i != mModHealthRegenFlat.end(); ++i)
+        addvalue += (*i)->GetModifier()->m_amount;
 
     if(addvalue < 0)
         addvalue = 0;

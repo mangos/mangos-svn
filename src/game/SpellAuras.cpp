@@ -165,7 +165,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNoImmediateEffect,                         //113 SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN
     &Aura::HandleNoImmediateEffect,                         //114 SPELL_AURA_MOD_RANGED_DAMAGE_TAKEN_PCT
     &Aura::HandleAuraHealing,                               //115 SPELL_AURA_MOD_HEALING
-    &Aura::HandleNULL,                                      //116 SPELL_AURA_IGNORE_REGEN_INTERRUPT
+    &Aura::HandleNoImmediateEffect,                         //116 SPELL_AURA_MOD_REGEN_DURING_COMBAT
     &Aura::HandleNoImmediateEffect,                         //117 SPELL_AURA_MOD_MECHANIC_RESISTANCE
     &Aura::HandleAuraHealingPct,                            //118 SPELL_AURA_MOD_HEALING_PCT
     &Aura::HandleNULL,                                      //119 SPELL_AURA_SHARE_PET_TRACKING useless
@@ -210,7 +210,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleShieldBlockValue,                          //158 SPELL_AURA_MOD_SHIELD_BLOCKVALUE
     &Aura::HandleNULL,                                      //159 SPELL_AURA_NO_PVP_CREDIT      only for Honorless Target spell
     &Aura::HandleNULL,                                      //160 SPELL_AURA_MOD_AOE_AVOIDANCE
-    &Aura::HandleNULL,                                      //161 SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT
+    &Aura::HandleNoImmediateEffect,                         //161 SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT
     &Aura::HandleNULL,                                      //162 SPELL_AURA_POWER_BURN_MANA
     &Aura::HandleNULL,                                      //163 SPELL_AURA_MOD_CRIT_DAMAGE_BONUS_MELEE
     &Aura::HandleNULL,                                      //164
