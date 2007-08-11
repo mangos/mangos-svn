@@ -103,9 +103,9 @@ void Bag::SaveToDB()
     Item::SaveToDB();
 }
 
-bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid)
+bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult *result)
 {
-    if(!Item::LoadFromDB(guid, owner_guid))
+    if(!Item::LoadFromDB(guid, owner_guid, result))
         return false;
 
     // cleanup bag content related item value fields (its will be filled correctly from `character_inventory`)
@@ -119,41 +119,6 @@ bool Bag::LoadFromDB(uint32 guid, uint64 owner_guid)
         }
     }
 
-    if(!IsInBag())                                          // equiped bag
-    {
-        QueryResult *result = sDatabase.PQuery("SELECT `slot`,`item`,`item_template` FROM `character_inventory` WHERE `guid` = '%u' AND `bag` = '%u'", GUID_LOPART(GetOwnerGUID()), GetGUIDLow());
-
-        if (result)
-        {
-            do
-            {
-                Field *fields = result->Fetch();
-                uint8  slot      = fields[0].GetUInt8();
-                uint32 item_guid = fields[1].GetUInt32();
-                uint32 item_id   = fields[2].GetUInt32();
-
-                ItemPrototype const *proto = objmgr.GetItemPrototype(item_id);
-
-                if(!proto)
-                {
-                    sLog.outError( "Bag::LoadFromDB: Player %d have unknown item (id: #%u) in bag #%u, skipped.", GUID_LOPART(GetOwnerGUID()), item_id, GetSlot());
-                    continue;
-                }
-
-                Item *item = NewItemOrBag(proto);
-                item->SetSlot(NULL_SLOT);
-                if(!item->LoadFromDB(item_guid, owner_guid))
-                {
-                    delete item;
-                    continue;
-                }
-                StoreItem( slot, item, true );
-                item->SetState(ITEM_UNCHANGED);
-            } while (result->NextRow());
-
-            delete result;
-        }
-    }
     return true;
 }
 

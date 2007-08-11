@@ -255,9 +255,14 @@ void Item::SaveToDB()
     SetState(ITEM_UNCHANGED);
 }
 
-bool Item::LoadFromDB(uint32 guid, uint64 owner_guid)
+bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult *result)
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `data` FROM `item_instance` WHERE `guid` = '%u'", guid);
+    bool delete_result = false;
+    if(!result)
+    {
+        result = sDatabase.PQuery("SELECT `data` FROM `item_instance` WHERE `guid` = '%u'", guid);
+        delete_result = true;
+    }
 
     if (!result)
     {
@@ -272,11 +277,11 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid)
     if(!LoadValues(fields[0].GetString()))
     {
         sLog.outError("ERROR: Item #%d have broken data in `data` field. Can't be loaded.",guid);
-        delete result;
+        if (delete_result) delete result;
         return false;
     }
 
-    delete result;
+    if (delete_result) delete result;
 
     if(owner_guid != 0 && GetOwnerGUID()!=owner_guid)
     {

@@ -52,9 +52,12 @@ class Bag : public Item
         uint32 GetFreeSlots() const;
 
         // DB operations
-        void SaveToDB();                                    // overwrite virtual Item::SaveToDB
-        bool LoadFromDB(uint32 guid, uint64 owner_guid);    // overwrite virtual Item::LoadFromDB
-        void DeleteFromDB();                                // overwrite virtual Item::DeleteFromDB
+        // overwrite virtual Item::SaveToDB
+        void SaveToDB();
+        // overwrite virtual Item::LoadFromDB
+        bool LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult *result = NULL);
+        // overwrite virtual Item::DeleteFromDB
+        void DeleteFromDB();
 
         void BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) const;
 

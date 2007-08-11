@@ -26,6 +26,7 @@
 
 struct SpellEntry;
 class Bag;
+class QueryResult;
 
 typedef struct
 {
@@ -190,7 +191,7 @@ class MANGOS_DLL_SPEC Item : public Object
         bool IsBindedNotWith(uint64 guid) const { return IsSoulBound() && GetOwnerGUID()!= guid; }
 
         virtual void SaveToDB();
-        virtual bool LoadFromDB(uint32 guid, uint64 owner_guid);
+        virtual bool LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult *result = NULL);
         virtual void DeleteFromDB();
         void DeleteFromInventoryDB();
 
