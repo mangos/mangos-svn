@@ -4239,7 +4239,7 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                 return;
 
             // if Countercasting spell casted and target also casting in this moment.
-            if(procSpell->SpellVisual==239 && pVictim && pVictim->IsNonMeleeSpellCasted(false))
+            if(procSpell->SpellVisual==239 && pVictim && pVictim->IsNonMeleeSpellCasted(true))
                 break;                                          // fall through to std. handler
             return;
         }
