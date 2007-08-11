@@ -1411,21 +1411,16 @@ void Map::CreatureRelocationNotify(Creature *creature, Cell cell, CellPair cellp
 
 void Map::SendInitSelf( Player * player )
 {
-    // build data for self presence in world at own client (one time for map)
+    sLog.outDetail("Creating player data for himself %u", player->GetGUIDLow());
+
     UpdateData data;
 
-    Transport *t = player->GetTransport();
-    if (t)
-    {
-        t->BuildCreateUpdateBlockForPlayer(&data, player);
-    }
-
-    sLog.outDetail("Creating player data for himself %u", player->GetGUIDLow());
-    player->BuildCreateUpdateBlockForPlayer(&data, player);
-
-    // attach to player data also current transport data
+    // attach to player data current transport data
     if(Transport* tr = player->GetTransport())
         tr->BuildCreateUpdateBlockForPlayer(&data, player);
+
+    // build data for self presence in world at own client (one time for map)
+    player->BuildCreateUpdateBlockForPlayer(&data, player);
 
     WorldPacket packet;
     data.BuildPacket(&packet);
