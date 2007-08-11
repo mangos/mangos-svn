@@ -430,53 +430,63 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
     if(!spellInfo) return SPELL_NORMAL;
 
-    if(spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN)
+    switch(spellInfo->SpellFamilyName)
     {
-        if (IsSealSpell(spellId))
-            return SPELL_SEAL;
-
-        if (spellInfo->SpellFamilyFlags & 0x10000000)
-            return SPELL_BLESSING;
-
-        for (int i = 0; i < 3; i++)
+        case SPELLFAMILY_PALADIN:
         {
-            // only paladin auras have this
-            if (spellInfo->Effect[i] == 35)                 //SPELL_EFFECT_APPLY_AREA_AURA
-                return SPELL_AURA;
+            if (IsSealSpell(spellId))
+                return SPELL_SEAL;
+
+            if (spellInfo->SpellFamilyFlags & 0x10000000)
+                return SPELL_BLESSING;
+
+            for (int i = 0; i < 3; i++)
+            {
+                // only paladin auras have this
+                if (spellInfo->Effect[i] == 35)             //SPELL_EFFECT_APPLY_AREA_AURA
+                    return SPELL_AURA;
+            }
+            break;
+        }
+        case SPELLFAMILY_WARLOCK:
+        {
+            // only warlock curses have this
+            if (spellInfo->Dispel == 2)                     //IMMUNE_DISPEL_CURSE
+                return SPELL_CURSE;
+
+            break;
+        }
+        case SPELLFAMILY_MAGE:
+        {
+            // family flags 18(Molten), 25(Frost/Ice), 28(Mage)
+            if (spellInfo->SpellFamilyFlags & 0x12040000)
+                return SPELL_MAGE_ARMOR;
+
+            break;
+        }
+        case SPELLFAMILY_SHAMAN:
+        {
+            // family flags 10 (Lightning), 42 (Earth)
+            // todo: add Water (has no SpellFamilyName/SpellFamilyFlag)
+            if (spellInfo->SpellFamilyFlags & 0x40000000400LL)
+                return SPELL_ELEMENTAL_SHIELD;
+
+            break;
+        }
+        case SPELLFAMILY_HUNTER:
+        {
+            // only hunter stings have this
+            if (spellInfo->Dispel == 4)                     //IMMUNE_DISPEL_POISON
+                return SPELL_STING;
+
+            break;
         }
     }
 
-    if(spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK)
+    // only warlock armor/skin have this (but not all armor/skin have warlock family set)
+    if( spellInfo->SpellVisual == 130 && spellInfo->SpellIconID == 89)
     {
-        // only warlock curses have this
-        if (spellInfo->Dispel == 2)                         //IMMUNE_DISPEL_CURSE
-            return SPELL_CURSE;
-
-        // family flag 37
-        if (spellInfo->SpellFamilyFlags & 0x2000000000LL)
-            return SPELL_WARLOCK_ARMOR;
-    }
-
-    if(spellInfo->SpellFamilyName == SPELLFAMILY_MAGE)
-    {
-        // family flags 18(Molten), 25(Frost/Ice), 28(Mage)
-        if (spellInfo->SpellFamilyFlags & 0x12040000)
-            return SPELL_MAGE_ARMOR;
-    }
-
-    if(spellInfo->SpellFamilyName == SPELLFAMILY_SHAMAN)
-    {
-        // family flags 10 (Lightning), 42 (Earth)
-        // todo: add Water (has no SpellFamilyName/SpellFamilyFlag)
-        if (spellInfo->SpellFamilyFlags & 0x40000000400LL)
-            return SPELL_ELEMENTAL_SHIELD;
-    }
-
-    if(spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER)
-    {
-        // only hunter stings have this
-        if (spellInfo->Dispel == 4)                         //IMMUNE_DISPEL_POISON
-            return SPELL_STING;
+        return SPELL_WARLOCK_ARMOR;
     }
 
     // only hunter aspects have this (but not all aspects in hunter family)
