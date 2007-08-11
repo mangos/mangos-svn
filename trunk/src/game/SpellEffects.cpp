@@ -2655,39 +2655,49 @@ void Spell::EffectScriptEffect(uint32 i)
     else if(!m_spellInfo->Reagent[0])
     {
         // paladin's holy light / flash of light
-        if ((m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN) &&
-            (m_spellInfo->SpellIconID == 70 || m_spellInfo->SpellIconID  == 242))
-            EffectHeal( i );
-
-        if(m_spellInfo->SpellVisual == 5651 && m_spellInfo->SpellIconID == 205)
+        if( m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN )
         {
-            // paladin's judgement
-            if(!unitTarget || !unitTarget->isAlive())
-                return;
-            uint32 spellId2 = 0;
-
-            // all seals have aura dummy
-            Unit::AuraList const& m_dummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
-
-            for(Unit::AuraList::const_iterator itr = m_dummyAuras.begin(); itr != m_dummyAuras.end(); ++itr)
+            switch(m_spellInfo->SpellFamilyFlags)
             {
-                SpellEntry const *spellInfo = (*itr)->GetSpellProto();
+                // Holy Light & Flash of Light
+                case 0x80000000:
+                case 0x40000000:
+                {
+                    EffectHeal(i);
+                    break;
+                }
+                // Judgement
+                case 0x800000:
+                {
+                    if(!unitTarget || !unitTarget->isAlive())
+                        return;
+                    uint32 spellId2 = 0;
 
-                // search seal (all seals have judgement's aura dummy spell id in 2 effect
-                if ( !spellInfo || !IsSealSpell((*itr)->GetId()) || (*itr)->GetEffIndex() != 2 )
-                    continue;
+                    // all seals have aura dummy
+                    Unit::AuraList const& m_dummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
 
-                spellId2 = (*itr)->GetBasePoints()+1;
+                    for(Unit::AuraList::const_iterator itr = m_dummyAuras.begin(); itr != m_dummyAuras.end(); ++itr)
+                    {
+                        SpellEntry const *spellInfo = (*itr)->GetSpellProto();
 
-                if(spellId2 <= 1)
-                    continue;
+                        // search seal (all seals have judgement's aura dummy spell id in 2 effect
+                        if ( !spellInfo || !IsSealSpell((*itr)->GetId()) || (*itr)->GetEffIndex() != 2 )
+                            continue;
 
-                // found, remove seal
-                m_caster->RemoveAurasDueToSpell((*itr)->GetId());
-                break;
+                        spellId2 = (*itr)->GetBasePoints()+1;
+
+                        if(spellId2 <= 1)
+                            continue;
+
+                        // found, remove seal
+                        m_caster->RemoveAurasDueToSpell((*itr)->GetId());
+                        break;
+                    }
+
+                    m_caster->CastSpell(unitTarget,spellId2,true);
+                    break;
+                }
             }
-
-            m_caster->CastSpell(unitTarget,spellId2,true);
         }
     }
     else
@@ -2695,24 +2705,12 @@ void Spell::EffectScriptEffect(uint32 i)
         uint32 itemtype;
         switch(m_spellInfo->Id)
         {
-            case 6201:
-                itemtype = 5512;                            //spell 6261;    //primary healstone
-                break;
-            case 6202:
-                itemtype = 5511;                            //spell 6262;    //inferior healstone
-                break;
-            case 5699:
-                itemtype = 5509;                            //spell 5720;    //healstone
-                break;
-            case 11729:
-                itemtype = 5510;                            //spell 5723;    //strong healstone
-                break;
-            case 11730:
-                itemtype = 9421;                            //spell 11732;   //super healstone
-                break;
-            case 27230:
-                itemtype = 22103;                           //spell 27235;   //Master Healthstone
-                break;
+            case  6201: itemtype =  5512; break;            //primary healstone
+            case  6202: itemtype =  5511; break;            //inferior healstone
+            case  5699: itemtype =  5509; break;            //healstone
+            case 11729: itemtype =  5510; break;            //strong healstone
+            case 11730: itemtype =  9421; break;            //super healstone
+            case 27230: itemtype = 22103; break;            //Master Healthstone
             default:
                 return;
         }
