@@ -573,7 +573,7 @@ void WorldSession::SendPartyMemberStatsChanged(uint64 Guid, uint32 mask)
         return;*/
 
     if(mask & GROUP_UPDATE_FLAG_POWER_TYPE) // if update power type, update current/max power also
-        mask |= (GROUP_UPDATE_FLAG_POWER | GROUP_UPDATE_FLAG_MAX_POWER);
+        mask |= (GROUP_UPDATE_FLAG_CUR_POWER | GROUP_UPDATE_FLAG_MAX_POWER);
 
     uint32 byteCount = 0;
     for (int i=1;i<GROUP_UPDATE_FLAGS_COUNT;++i)
@@ -593,7 +593,7 @@ void WorldSession::SendPartyMemberStatsChanged(uint64 Guid, uint32 mask)
         if (player)
         {
             if (player->IsPvP())
-                data << (uint8) MEMBER_STATUS_ONLINE_PVP;
+                data << uint8(MEMBER_STATUS_ONLINE | MEMBER_STATUS_PVP);
             else
                 data << (uint8) MEMBER_STATUS_ONLINE;
         }
@@ -601,7 +601,7 @@ void WorldSession::SendPartyMemberStatsChanged(uint64 Guid, uint32 mask)
             data << (uint8) MEMBER_STATUS_OFFLINE;
     }
 
-    if (mask & GROUP_UPDATE_FLAG_HP)
+    if (mask & GROUP_UPDATE_FLAG_CUR_HP)
         data << (uint16) player->GetHealth();
 
     if (mask & GROUP_UPDATE_FLAG_MAX_HP)
@@ -611,7 +611,7 @@ void WorldSession::SendPartyMemberStatsChanged(uint64 Guid, uint32 mask)
     if (mask & GROUP_UPDATE_FLAG_POWER_TYPE)
         data << (uint8) powerType;
 
-    if (mask & GROUP_UPDATE_FLAG_POWER)
+    if (mask & GROUP_UPDATE_FLAG_CUR_POWER)
         data << (uint16) player->GetPower(powerType);
 
     if (mask & GROUP_UPDATE_FLAG_MAX_POWER)
@@ -680,14 +680,15 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
     //sLog.outDebug("Received opcode CMSG_REQUEST_RAID_INFO");
 
     WorldPacket data(SMSG_RAID_INSTANCE_INFO, 4);
-    data << (uint32)0;
+    data << (uint32)0;          // count (max is 10)
 
     /*data << (uint32)count;
     for(int i=0; i<count; i++)
     {
         data << (uint32)mapid;
-        data << (uint32)time_left_in_seconds;
+        data << (uint32)time_left_in_seconds; // time to reset
         data << (uint32)instanceid;
+        data << (uint32)0;      // unknown
     }*/
 
     GetPlayer()->GetSession()->SendPacket(&data);

@@ -165,7 +165,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ MSG_MOVE_SET_PITCH ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
     objmgr.opcodeTable[ MSG_MOVE_WORLDPORT_ACK ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMoveWorldportAckOpcode        );
     objmgr.opcodeTable[ CMSG_FORCE_RUN_SPEED_CHANGE_ACK ]       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck           );
-    objmgr.opcodeTable[ CMSG_FORCE_RUN_BACK_SPEED_CHANGE_ACK ]  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck       );
+    objmgr.opcodeTable[ CMSG_FORCE_RUN_BACK_SPEED_CHANGE_ACK ]  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck           );
     objmgr.opcodeTable[ CMSG_FORCE_SWIM_SPEED_CHANGE_ACK ]      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck           );
     objmgr.opcodeTable[ CMSG_FORCE_MOVE_ROOT_ACK ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMoveRootAck                   );
     objmgr.opcodeTable[ CMSG_FORCE_MOVE_UNROOT_ACK ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMoveUnRootAck                 );
@@ -177,7 +177,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_MOVE_FEATHER_FALL_ACK ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleFeatherFallAck                );
     objmgr.opcodeTable[ CMSG_MOVE_WATER_WALK_ACK ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMoveWaterWalkAck              );
     objmgr.opcodeTable[ CMSG_FORCE_WALK_SPEED_CHANGE_ACK ]      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck           );
-    objmgr.opcodeTable[ CMSG_FORCE_SWIM_BACK_SPEED_CHANGE_ACK ] = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck      );
+    objmgr.opcodeTable[ CMSG_FORCE_SWIM_BACK_SPEED_CHANGE_ACK ] = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck           );
     objmgr.opcodeTable[ CMSG_FORCE_TURN_RATE_CHANGE_ACK ]       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck           );
     objmgr.opcodeTable[ CMSG_FORCE_FLY_SPEED_CHANGE_ACK ]       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleForceSpeedChangeAck           );
 
@@ -725,7 +725,7 @@ void WorldSession::KickPlayer()
     if(!_socket)
         return;
 
-    // player will be  logout and session will removed in next update tick
+    // player will be logout and session will removed in next update tick
     _socket->CloseSocket();
     _socket = NULL;
 }
@@ -1230,9 +1230,13 @@ void WorldSession::HandleAllowMoveAckOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("CMSG_ALLOW_MOVE_ACK");
 
-    uint32 unk, time;
-    recv_data >> unk >> time;
-    sLog.outDebug("response sent %u %u", unk, time/1000);
+    uint32 counter, time_;
+    recv_data >> counter >> time_;
+
+    // time_ seems always more than getMSTime()
+    uint32 diff = time_ - getMSTime();
+
+    sLog.outDebug("response sent: counter %u, time %u (HEX: %X), ms. time %u, diff %u", counter, time_, time_, getMSTime(), diff);
 }
 
 void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)

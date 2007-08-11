@@ -34,16 +34,15 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
 
     MapManager::Instance().GetMap(GetPlayer()->GetMapId(), GetPlayer())->Remove(GetPlayer(),false);
     MapManager::Instance().GetMap(GetPlayer()->GetMapId(), GetPlayer())->Add(GetPlayer());
-    WorldPacket data(SMSG_SET_REST_START, 4);
-    data << uint32(time(NULL));//getMSTime();
-    SendPacket(&data);
+
+    GetPlayer()->SendInitialPackets();
 
     GetPlayer()->SetDontMove(false);
 }
 
 void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data,4+4+4+4+4+4);
+    CHECK_PACKET_SIZE(recv_data, 4+4+4+4+4+4);
 
     if(GetPlayer()->GetDontMove())
         return;
@@ -52,45 +51,54 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     uint32 flags, time, fallTime;
     float x, y, z, orientation;
 
-    uint32 t_GUIDl, t_GUIDh;
+    uint64 t_GUID;
     float  t_x, t_y, t_z, t_o;
+    uint32 t_time;
     float  s_angle;
     float  j_unk1, j_sinAngle, j_cosAngle, j_xyspeed;
+    float  u_unk1;
 
     recv_data >> flags >> time;
     recv_data >> x >> y >> z >> orientation;
-    if (flags & MOVEMENTFLAG_ONTRANSPORT) // and if opcode 909?
+    if(flags & MOVEMENTFLAG_ONTRANSPORT) // and if opcode 909?
     {
         // recheck
-        CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4+4+4+4+4+4);
+        CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+8+4+4+4+4+4);
 
-        recv_data >> t_GUIDl >> t_GUIDh;
-        recv_data >> t_x >> t_y >> t_z >> t_o;
+        recv_data >> t_GUID;
+        recv_data >> t_x >> t_y >> t_z >> t_o >> t_time;
     }
-    if (flags & MOVEMENTFLAG_SWIMMING)
+    if(flags & MOVEMENTFLAG_SWIMMING)
     {
         // recheck
-        CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4);
+        CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4);
 
         recv_data >> s_angle;                               // kind of angle, -1.55=looking down, 0=looking straight forward, +1.55=looking up
     }
 
     // recheck
-    CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4);
+    CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4);
 
     recv_data >> fallTime;                                  // duration of last jump (when in jump duration from jump begin to now)
 
-    if ( (flags & MOVEMENTFLAG_JUMPING) || (flags & MOVEMENTFLAG_FALLING) )
+    if((flags & MOVEMENTFLAG_JUMPING) || (flags & MOVEMENTFLAG_FALLING))
     {
         // recheck
-        CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4+4+4+4);
+        CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4+4+4+4);
 
         recv_data >> j_unk1;                                // ?constant, but different when jumping in water and on land?
         recv_data >> j_sinAngle >> j_cosAngle;              // sin + cos of angle between orientation0 and players orientation
         recv_data >> j_xyspeed;                             // speed of xy movement
     }
-    /*----------------*/
 
+    if(flags & MOVEMENTFLAG_SPLINE)
+    {
+        // recheck
+        CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4);
+
+        recv_data >> u_unk1;                                // unknown
+    }
+    /*----------------*/
 
     if (!MaNGOS::IsValidMapCoord(x, y))
         return;
@@ -106,7 +114,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
             for (MapManager::TransportSet::iterator iter = MapManager::Instance().m_Transports.begin(); iter != MapManager::Instance().m_Transports.end(); ++iter)
             {
-                if ((*iter)->GetGUIDLow() == t_GUIDl)
+                if ((*iter)->GetGUID() == t_GUID)
                 {
                     GetPlayer()->m_transport = (*iter);
                     (*iter)->AddPassenger(GetPlayer());
@@ -118,6 +126,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         GetPlayer()->m_transY = t_y;
         GetPlayer()->m_transZ = t_z;
         GetPlayer()->m_transO = t_o;
+        GetPlayer()->m_transTime = t_time;
     }
     else if (GetPlayer()->m_transport)                      // if we were on a transport, leave
     {
@@ -127,9 +136,10 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         GetPlayer()->m_transY = 0.0f;
         GetPlayer()->m_transZ = 0.0f;
         GetPlayer()->m_transO = 0.0f;
+        GetPlayer()->m_transTime = 0;
     }
 
-    if (GetPlayer()->HasMovementFlags(MOVEMENTFLAG_FALLING) && !(flags&MOVEMENTFLAG_FALLING))
+    if (GetPlayer()->HasMovementFlags(MOVEMENTFLAG_FALLING) && !(flags & MOVEMENTFLAG_FALLING))
     {
         Player *target = GetPlayer();
         if (fallTime > 1100 && !target->isDead() && !target->isGameMaster() &&
@@ -148,7 +158,8 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         //handle fall and logout at the sametime
         if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE))
         {
-            target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
+            target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);
+            target->SetStandState(PLAYER_STATE_SIT);
             // Can't move
             WorldPacket data( SMSG_FORCE_MOVE_ROOT, 12 );
             data.append(target->GetPackGUID());
@@ -162,7 +173,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     /*----------------------*/
 
     /* process position-change */
-    WorldPacket data(recv_data.GetOpcode(), (8+recv_data.size()));
+    WorldPacket data(recv_data.GetOpcode(), (GetPlayer()->GetPackGUID().size()+recv_data.size()));
     data.append(GetPlayer()->GetPackGUID());
     data.append(recv_data.contents(), recv_data.size());
     GetPlayer()->SendMessageToSet(&data, false);
@@ -173,18 +184,20 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
 void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
 {
-    CHECK_PACKET_SIZE(recv_data,8+4+4+4+4+4+4+4);
+    CHECK_PACKET_SIZE(recv_data, 8+4+4+4+4+4+4+4);
 
     /* extract packet */
     uint64 guid;
     uint32 unk1, flags, time, fallTime;
     float x, y, z, orientation;
 
-    uint32 t_GUIDl, t_GUIDh;
+    uint64 t_GUID;
     float  t_x, t_y, t_z, t_o;
+    uint32 t_time;
     float  s_angle;
     float  j_unk1, j_sinAngle, j_cosAngle, j_xyspeed;
-    float newspeed;
+    float  u_unk1;
+    float  newspeed;
 
     recv_data >> guid;
 
@@ -200,36 +213,44 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
     if (flags & MOVEMENTFLAG_ONTRANSPORT)
     {
         // recheck
-        CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4+4+4+4+4+4);
+        CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+8+4+4+4+4+4);
 
-        recv_data >> t_GUIDl >> t_GUIDh;
-        recv_data >> t_x >> t_y >> t_z >> t_o;
+        recv_data >> t_GUID;
+        recv_data >> t_x >> t_y >> t_z >> t_o >> t_time;
     }
     if (flags & MOVEMENTFLAG_SWIMMING)
     {
         // recheck
-        CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4);
+        CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4);
 
         recv_data >> s_angle;                               // kind of angle, -1.55=looking down, 0=looking straight forward, +1.55=looking up
     }
 
     // recheck
-    CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4);
+    CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4);
 
     recv_data >> fallTime;                                  // duration of last jump (when in jump duration from jump begin to now)
 
-    if (flags & MOVEMENTFLAG_JUMPING)
+    if ((flags & MOVEMENTFLAG_JUMPING) || (flags & MOVEMENTFLAG_FALLING))
     {
         // recheck
-        CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4+4+4+4);
+        CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4+4+4+4);
 
         recv_data >> j_unk1;                                // ?constant, but different when jumping in water and on land?
         recv_data >> j_sinAngle >> j_cosAngle;              // sin + cos of angle between orientation0 and players orientation
         recv_data >> j_xyspeed;                             // speed of xy movement
     }
 
+    if(flags & MOVEMENTFLAG_SPLINE)
+    {
+        // recheck
+        CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4);
+
+        recv_data >> u_unk1;                                // unknown
+    }
+
     // recheck
-    CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4);
+    CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4);
 
     recv_data >> newspeed;
     /*----------------*/

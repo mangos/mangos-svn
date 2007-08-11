@@ -2150,8 +2150,7 @@ void Unit::SendAttackStop(Unit* victim)
     WorldPacket data( SMSG_ATTACKSTOP, (4+16) );            // we guess size
     data.append(GetPackGUID());
     data.append(victim->GetPackGUID()); // can be 0x00...
-    data << uint32( 0 ); // can be 0x1
-    //data << (uint32)0; // removed in 2.0.8
+    data << uint32(0);  // can be 0x1
 
     SendMessageToSet(&data, true);
     sLog.outDetail("%s %u stopped attacking %s %u", (GetTypeId()==TYPEID_PLAYER ? "player" : "creature"), GetGUIDLow(), (victim->GetTypeId()==TYPEID_PLAYER ? "player" : "creature"),victim->GetGUIDLow());
@@ -6497,7 +6496,7 @@ float Unit::GetWeaponDamageRange(WeaponAttackType attType ,WeaponDamageRange typ
 void Unit::SetLevel(uint32 lvl)
 {
     SetUInt32Value(UNIT_FIELD_LEVEL,lvl);
-    
+
     // group update
     if (GetTypeId() == TYPEID_PLAYER)
         ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_LEVEL);
@@ -6513,7 +6512,7 @@ void Unit::SetHealth(uint32 val)
 
     // group update
     if (GetTypeId() == TYPEID_PLAYER)
-        ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_HP);
+        ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_CUR_HP);
 }
 
 void Unit::SetMaxHealth(uint32 val) 
@@ -6539,7 +6538,7 @@ void Unit::SetPower(Powers power, uint32 val)
 
     // group update
     if (GetTypeId() == TYPEID_PLAYER)
-        ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_POWER);
+        ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_CUR_POWER);
 }
 
 void Unit::SetMaxPower(Powers power, uint32 val) 
@@ -6558,16 +6557,16 @@ void Unit::SetMaxPower(Powers power, uint32 val)
 void Unit::ApplyPowerMod(Powers power, uint32 val, bool apply)
 {
     ApplyModUInt32Value(UNIT_FIELD_POWER1+power, val, apply);
-    
+
     // group update
     if (GetTypeId() == TYPEID_PLAYER)
-        ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_POWER);
+        ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_CUR_POWER);
 }
 
 void Unit::ApplyMaxPowerMod(Powers power, uint32 val, bool apply)
 {
     ApplyModUInt32Value(UNIT_FIELD_MAXPOWER1+power, val, apply);
-    
+
     // group update
     if (GetTypeId() == TYPEID_PLAYER)
         ((Player*)this)->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_MAX_POWER);

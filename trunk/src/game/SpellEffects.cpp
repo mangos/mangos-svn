@@ -445,49 +445,6 @@ void Spell::EffectDummy(uint32 i)
         return;
     }
 
-    /*//BattleGround spells
-    if(m_caster->GetTypeId() == TYPEID_PLAYER && ((Player*)m_caster)->InBattleGround())
-    {
-        BattleGround* bg = sBattleGroundMgr.GetBattleGround(((Player*)m_caster)->GetBattleGroundId());
-        if(bg && bg->GetStatus() == STATUS_INPROGRESS)
-        {
-            switch(m_spellInfo->Id)
-            {
-                case 23383:                                 // Alliance Flag Click
-                    sLog.outDebug("Alliance Flag Click");
-                    if(((Player*)m_caster)->GetTeam() == ALLIANCE)
-                                                            // Alliance Flag Returns (Event)
-                        m_caster->CastSpell(m_caster, 23385, true, 0);
-                    if(((Player*)m_caster)->GetTeam() == HORDE)
-                                                            // Silverwing Flag
-                        m_caster->CastSpell(m_caster, 23335, true, 0);
-                    break;
-                case 23384:                                 // Horde Flag Click
-                    sLog.outDebug("Horde Flag Click");
-                    if(((Player*)m_caster)->GetTeam() == HORDE)
-                                                            // Horde Flag Returns (Event)
-                        m_caster->CastSpell(m_caster, 23386, true, 0);
-                    if(((Player*)m_caster)->GetTeam() == ALLIANCE)
-                                                            // Warsong Flag
-                        m_caster->CastSpell(m_caster, 23333, true, 0);
-                    break;
-                case 23389:                                 // Alliance Flag Capture
-                    sLog.outDebug("Alliance Flag Capture");
-                    if(bg->GetID()==BATTLEGROUND_WS_ID)
-                        ((BattleGroundWS*)bg)->EventPlayerCapturedFlag((Player*)m_caster);
-                    break;
-                case 23390:                                 // Horde Flag Capture
-                    sLog.outDebug("Horde Flag Capture");
-                    if(bg->GetID()==BATTLEGROUND_WS_ID) 
-                        ((BattleGroundWS*)bg)->EventPlayerCapturedFlag((Player*)m_caster);
-                    break;
-                default:
-                    sLog.outDebug("Unknown spellid %u at BG dummy", m_spellInfo->Id);
-                    break;
-            }
-        }
-    }*/
-
     // starshards/curse of agony hack .. this applies to 1.10 only
     if (m_triggeredByAura)
     {

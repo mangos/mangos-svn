@@ -236,6 +236,7 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
     if(GetPlayer()->CanFreeMove())
     {
         Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
+        Target->SetStandState(PLAYER_STATE_SIT);
 
         WorldPacket data( SMSG_FORCE_MOVE_ROOT, (8+4) );     // guess size
         data.append(Target->GetPackGUID());
@@ -278,6 +279,7 @@ void WorldSession::HandleLogoutCancelOpcode( WorldPacket & recv_data )
         //! Stand Up
         //! Removes the flag so player stands
         GetPlayer()->RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
+        GetPlayer()->SetStandState(PLAYER_STATE_NONE);
 
         //! DISABLE_ROTATE
         GetPlayer()->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
@@ -306,8 +308,8 @@ void WorldSession::SendGMTicketGetTicket(uint32 status, char const* text)
 void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & recv_data )
 {
     WorldPacket data( SMSG_QUERY_TIME_RESPONSE, 4 );
-    //    data << (uint32)20;
-    data << (uint32)getMSTime();
+    data << (uint32)time(NULL);
+    data << (uint32)0;
     SendPacket( &data );
 
     uint64 guid;
@@ -399,7 +401,8 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
             sDatabase.PExecute("INSERT INTO `character_ticket` (`guid`,`ticket_text`,`ticket_category`) VALUES ('%u', '%s', '%u')", _player->GetGUIDLow(), ticketText.c_str(), category);
 
             WorldPacket data( SMSG_QUERY_TIME_RESPONSE, 4 );
-            data << (uint32)getMSTime();
+            data << (uint32)time(NULL);
+            data << (uint32)0;
             SendPacket( &data );
 
             data.Initialize( SMSG_GMTICKET_CREATE, 4 );
@@ -935,13 +938,13 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
 void WorldSession::HandleUpdateAccountData(WorldPacket &recv_data)
 {
     sLog.outDetail("WORLD: Received CMSG_UPDATE_ACCOUNT_DATA");
-    recv_data.hexlike();
+    //recv_data.hexlike();
 }
 
 void WorldSession::HandleRequestAccountData(WorldPacket& recv_data)
 {
     sLog.outDetail("WORLD: Received CMSG_REQUEST_ACCOUNT_DATA");
-    recv_data.hexlike();
+    //recv_data.hexlike();
 }
 
 void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)

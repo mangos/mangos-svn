@@ -591,29 +591,29 @@ enum TradeSlots
 
 enum MovementFlags
 {
-    MOVEMENTFLAG_FORWARD        = 0x1,
-    MOVEMENTFLAG_BACKWARD       = 0x2,
-    MOVEMENTFLAG_STRAFE_LEFT    = 0x4,
-    MOVEMENTFLAG_STRAFE_RIGHT   = 0x8,
-    MOVEMENTFLAG_LEFT           = 0x10,
-    MOVEMENTFLAG_RIGHT          = 0x20,
-    MOVEMENTFLAG_PITCH_UP       = 0x40,
-    MOVEMENTFLAG_PITCH_DOWN     = 0x80,
-    MOVEMENTFLAG_WALK           = 0x100,
-    MOVEMENTFLAG_ONTRANSPORT    = 0x200,
+    MOVEMENTFLAG_FORWARD        = 0x00000001,
+    MOVEMENTFLAG_BACKWARD       = 0x00000002,
+    MOVEMENTFLAG_STRAFE_LEFT    = 0x00000004,
+    MOVEMENTFLAG_STRAFE_RIGHT   = 0x00000008,
+    MOVEMENTFLAG_LEFT           = 0x00000010,
+    MOVEMENTFLAG_RIGHT          = 0x00000020,
+    MOVEMENTFLAG_PITCH_UP       = 0x00000040,
+    MOVEMENTFLAG_PITCH_DOWN     = 0x00000080,
+    MOVEMENTFLAG_WALK           = 0x00000100,
+    MOVEMENTFLAG_ONTRANSPORT    = 0x00000200,
     // 0x400
-    MOVEMENTFLAG_FLY_UNK1       = 0x800,
-    MOVEMENTFLAG_UNK4           = 0x1000,
-    MOVEMENTFLAG_JUMPING        = 0x2000,
-    MOVEMENTFLAG_FALLING        = 0x4000,
+    MOVEMENTFLAG_FLY_UNK1       = 0x00000800,
+    MOVEMENTFLAG_UNK4           = 0x00001000,   // can't move, only rotate(turn) around
+    MOVEMENTFLAG_JUMPING        = 0x00002000,
+    MOVEMENTFLAG_FALLING        = 0x00004000,
     // 0x8000, 0x10000, 0x20000, 0x40000, 0x80000, 0x100000
-    MOVEMENTFLAG_SWIMMING       = 0x200000, // appears with fly also, swim in air LOL
-    MOVEMENTFLAG_FLY_UP         = 0x400000,
-    MOVEMENTFLAG_CAN_FLY        = 0x800000,
-    MOVEMENTFLAG_FLYING         = 0x1000000,
+    MOVEMENTFLAG_SWIMMING       = 0x00200000,   // appears with fly flag also
+    MOVEMENTFLAG_FLY_UP         = 0x00400000,
+    MOVEMENTFLAG_CAN_FLY        = 0x00800000,
+    MOVEMENTFLAG_FLYING         = 0x01000000,
     // 0x2000000
-    MOVEMENTFLAG_SPLINE         = 0x4000000,
-    // 0x8000000
+    MOVEMENTFLAG_SPLINE         = 0x04000000,   // probably wrong name
+    MOVEMENTFLAG_SPLINE2        = 0x08000000,
     MOVEMENTFLAG_WATERWALKING   = 0x10000000,
     MOVEMENTFLAG_SAFE_FALL      = 0x20000000, // active rogue safe fall spell (passive)
     MOVEMENTFLAG_UNK3           = 0x40000000
@@ -658,6 +658,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool IsUnderWater() const;
 
         void SetStandState(uint8 state);
+        void SendInitialPackets();
 
         bool CanInteractWithNPCs(bool alive = true) const;
 
@@ -1416,12 +1417,14 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SetTransOffset(float x, float y, float z, float orientation)
             { m_transX = x; m_transY = y; m_transZ = z; m_transO = orientation; }
+        void SetTransTime(uint32 Time) { m_transTime = Time; }
         void GetTransOffset( float &x, float &y, float &z, float &o ) const
             { x = m_transX; y = m_transY; z = m_transZ; o = m_transO; }
         float GetTransOffsetX() const { return m_transX; }
         float GetTransOffsetY() const { return m_transY; }
         float GetTransOffsetZ() const { return m_transZ; }
         float GetTransOffsetO() const { return m_transO; }
+        uint32 GetTransTime() const { return m_transTime; }
 
         uint32 GetSaveTimer() const { return m_nextSave; }
         void   SetSaveTimer(uint32 timer) { m_nextSave = timer; }
@@ -1671,6 +1674,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         float m_transY;
         float m_transZ;
         float m_transO;
+        uint32 m_transTime;
 
         Transport * m_transport;
 
