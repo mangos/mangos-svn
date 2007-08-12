@@ -28,7 +28,7 @@ template<class LOCK_TYPE,class T, class CONTAINER>
 inline void
 Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &visitor, Map &m) const
 {
-    CellPair standing_cell = (const CellPair &)l;
+    CellPair standing_cell = l.i_cellPair;
     CellPair cell_iter;
 
     switch( (district_t)this->data.Part.reserved )

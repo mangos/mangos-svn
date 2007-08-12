@@ -153,7 +153,6 @@ struct MANGOS_DLL_DECL CellLock
     const Cell* operator->(void) const { return &i_cell; }
     const Cell* operator->(void) { return &i_cell; }
     operator const Cell &(void) const { return i_cell; }
-    operator const CellPair &(void) const { return i_cellPair; }
     CellLock<T>& operator=(const CellLock<T> &cell)
     {
         this->~CellLock();
