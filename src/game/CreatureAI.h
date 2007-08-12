@@ -54,7 +54,7 @@ class MANGOS_DLL_SPEC CreatureAI
         virtual void DamageDeal(Unit *done_to, uint32 &damage) {}
 
         // Called at any Damage from any attacker (before damage apply)
-        virtual void DamageTaken(Unit *done_by, uint32 &damage) {}
+        virtual void DamageTaken(Unit *done_by, uint32 &damage) { AttackedBy(done_by); }
 
         // Is unit visible for MoveInLineOfSight
         virtual bool IsVisible(Unit *) const = 0;
@@ -75,6 +75,9 @@ class MANGOS_DLL_SPEC CreatureAI
 
         // Called when vitim entered water and creature can not enter water
         virtual bool canReachByRangeAttack(Unit*) { return false; }
+
+        // Called when the creature is attacked
+        virtual void AttackedBy(Unit *attacker) {}
 };
 
 struct SelectableAI : public FactoryHolder<CreatureAI>, public Permissible<Creature>

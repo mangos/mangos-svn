@@ -662,11 +662,11 @@ struct CharmInfo
         uint32 GetPetNumber() const { return m_petnumber; }
         void SetPetNumber(uint32 petnumber, bool statwindow);
 
-        void SetCommandState(uint8 st) { m_CommandState = st; }
-        uint8 GetCommandState() { return m_CommandState; }
+        void SetCommandState(CommandStates st) { m_CommandState = st; }
+        CommandStates GetCommandState() { return m_CommandState; }
         bool HasCommandState(CommandStates state) { return (m_CommandState == state); }
-        void SetReactState(uint8 st) { m_ReactSate = st; }
-        uint8 GetReactState() { return m_ReactSate; }
+        void SetReactState(ReactStates st) { m_ReactSate = st; }
+        ReactStates GetReactState() { return m_ReactSate; }
         bool HasReactState(ReactStates state) { return (m_ReactSate == state); }
 
         void InitPossessCreateSpells();
@@ -682,9 +682,9 @@ struct CharmInfo
         Unit* m_unit;
         UnitActionBarEntry PetActionBar[10];
         CharmSpellEntry m_charmspells[4];
-        uint8   m_CommandState;
-        uint8   m_ReactSate;
-        uint32  m_petnumber;
+        CommandStates   m_CommandState;
+        ReactStates     m_ReactSate;
+        uint32          m_petnumber;
 };
 
 // delay time next attack to prevent client attack animation problems

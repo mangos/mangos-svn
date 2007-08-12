@@ -1,4 +1,4 @@
-/* 
+/*
  * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
  *
  * This program is free software; you can redistribute it and/or modify
@@ -33,6 +33,8 @@ class MANGOS_DLL_DECL PetAI : public CreatureAI
         void MoveInLineOfSight(Unit *);
         void AttackStart(Unit *);
         void EnterEvadeMode();
+        void DamageTaken(Unit *done_by, uint32 &damage) { AttackedBy(done_by); }
+        void AttackedBy(Unit *attacker);
         bool IsVisible(Unit *) const;
 
         void UpdateAI(const uint32);

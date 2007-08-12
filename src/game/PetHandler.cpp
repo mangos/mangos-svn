@@ -158,13 +158,9 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
             switch(spellid)
             {
                 case REACT_PASSIVE:                         //passive
-                    charmInfo->SetReactState( REACT_PASSIVE );
-                    break;
                 case REACT_DEFENSIVE:                       //recovery
-                    charmInfo->SetReactState( REACT_DEFENSIVE );
-                    break;
                 case REACT_AGGRESSIVE:                      //activete
-                    charmInfo->SetReactState( REACT_AGGRESSIVE );
+                    charmInfo->SetReactState( ReactStates(spellid) );
                     break;
             }
             break;
