@@ -35,7 +35,6 @@
 #include "Database/DatabaseEnv.h"
 #include "AuctionHouseObject.h"
 #include "Mail.h"
-#include "Spell.h"
 #include "ObjectAccessor.h"
 #include "ObjectDefines.h"
 #include "Policies/Singleton.h"

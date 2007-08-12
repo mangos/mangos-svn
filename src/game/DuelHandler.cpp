@@ -23,7 +23,6 @@
 #include "ObjectMgr.h"
 #include "Log.h"
 #include "Opcodes.h"
-#include "Spell.h"
 #include "UpdateData.h"
 #include "MapManager.h"
 

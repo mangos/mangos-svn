@@ -28,7 +28,6 @@
 #include "MapManager.h"
 #include "ObjectAccessor.h"
 #include "Language.h"
-#include "SpellAuras.h"
 #include "AccountMgr.h"
 
 bool ChatHandler::ShowHelpForCommand(ChatCommand *table, const char* cmd)

@@ -427,9 +427,6 @@ void Spell::FillTargetMap()
             }
         }
 
-        // filter targets by immunity and creature type 
-        uint32 SpellCreatureType = GetTargetCreatureTypeMask();
-
         //Check targets for LOS visibility (except spells without range limitations )
         bool skipLOS = false;
         switch(m_spellInfo->Effect[i])
@@ -444,14 +441,10 @@ void Spell::FillTargetMap()
             // Check targets for creature type mask and remove not appropriate (skip explicit self target case, maybe need other explicit targets)
             if(m_spellInfo->EffectImplicitTargetA[i]!=TARGET_SELF )
             {
-                if (SpellCreatureType)
+                if (!CheckTargetCreatureType(*itr))
                 {
-                    uint32 TargetCreatureType = (*itr)->GetCreatureTypeMask();
-                    if(TargetCreatureType && !(SpellCreatureType & TargetCreatureType))
-                    {
-                        itr = tmpUnitMap.erase(itr);
-                        continue;
-                    }
+                    itr = tmpUnitMap.erase(itr);
+                    continue;
                 }
             }
 
@@ -2294,19 +2287,12 @@ uint8 Spell::CanCast()
         //ignore self casts (including area casts when caster selected as target)
         if(target != m_caster)
         {
-            uint32 SpellCreatureType = GetTargetCreatureTypeMask();
-
-            if(SpellCreatureType)
+            if(!CheckTargetCreatureType(target))
             {
-                uint32 TargetCreatureType = target->GetCreatureTypeMask();
-
-                if(TargetCreatureType && !(SpellCreatureType & TargetCreatureType))
-                {
-                    if(TargetCreatureType == 0x40)
-                        return SPELL_FAILED_TARGET_IS_PLAYER;
-                    else
-                        return SPELL_FAILED_BAD_TARGETS;
-                }
+                if(target->GetTypeId()==TYPEID_PLAYER)
+                    return SPELL_FAILED_TARGET_IS_PLAYER;
+                else
+                    return SPELL_FAILED_BAD_TARGETS;
             }
         }
 
@@ -3370,18 +3356,31 @@ bool Spell::IsAffectedBy(SpellEntry const *spellInfo, uint32 effectId)
     return objmgr.IsAffectedBySpell(m_spellInfo,spellInfo->Id,effectId,spellInfo->EffectItemType[effectId]);
 }
 
-uint32 Spell::GetTargetCreatureTypeMask() const
+bool Spell::CheckTargetCreatureType(Unit* target) const
 {
+    uint32 spellCreatureTargetMask = m_spellInfo->TargetCreatureType;
+
     // Curse of Doom : not find another way to fix spell target check :/
     if(m_spellInfo->SpellFamilyName==SPELLFAMILY_WARLOCK && m_spellInfo->SpellFamilyFlags == 0x0200000000LL)
-        return 0x7FF - 0x40;
+    {
+        // not allow cast at player
+        if(target->GetTypeId()==TYPEID_PLAYER)
+            return false;
+
+        spellCreatureTargetMask = 0x7FF;
+    }
 
     // Dismiss Pet
     if(m_spellInfo->Id == 2641)
-        return  0;
+        spellCreatureTargetMask =  0;
 
-    // generic case
-    return m_spellInfo->TargetCreatureType;
+    if (spellCreatureTargetMask)
+    {
+        uint32 TargetCreatureType = target->GetCreatureTypeMask();
+        
+        return !TargetCreatureType || (spellCreatureTargetMask & TargetCreatureType);
+    }
+    return true;
 }
 
 CurrentSpellTypes Spell::GetCurrentContainer()

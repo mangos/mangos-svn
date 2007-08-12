@@ -23,7 +23,6 @@
 #include "Map.h"
 #include "MapManager.h"
 #include "Player.h"
-#include "Spell.h"
 #include "ObjectMgr.h"
 #include "UnitEvents.h"
 

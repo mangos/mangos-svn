@@ -29,7 +29,6 @@
 #include "Player.h"
 #include "QuestDef.h"
 #include "GossipDef.h"
-#include "Spell.h"
 #include "UpdateData.h"
 #include "Channel.h"
 #include "ChannelMgr.h"
@@ -2207,6 +2206,8 @@ void Player::InitStatsForLevel(bool reapplyMods)
         SetResistanceBuffMods(SpellSchools(i), true, 0);
         SetResistanceBuffMods(SpellSchools(i), false, 0);
     }
+
+    SetUInt32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE,0);
 
     SetFloatValue(UNIT_FIELD_POWER_COST_MODIFIER,0);
 
