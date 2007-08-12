@@ -12103,7 +12103,7 @@ void Player::_LoadInventory(uint32 timediff)
 
             Item *item = NewItemOrBag(proto);
 
-            if(!item->LoadFromDB(item_guid, GetGUID()))
+            if(!item->LoadFromDB(item_guid, GetGUID(), result))
             {
                 delete item;
                 continue;
@@ -12129,14 +12129,14 @@ void Player::_LoadInventory(uint32 timediff)
                 }
                 else if( IsEquipmentPos( dest ) )
                 {
-                    if( !CanEquipItem( slot, dest, item, false, false ) == EQUIP_ERR_OK )
+                    if( CanEquipItem( slot, dest, item, false, false ) == EQUIP_ERR_OK )
                         QuickEquipItem(dest, item);
                     else
                         success = false;
                 }
                 else if( IsBankPos( dest ) )
                 {
-                    if( !CanBankItem( INVENTORY_SLOT_BAG_0, slot, dest, item, false, false ) == EQUIP_ERR_OK )
+                    if( CanBankItem( INVENTORY_SLOT_BAG_0, slot, dest, item, false, false ) == EQUIP_ERR_OK )
                         item = BankItem(dest, item, true);
                     else
                         success = false;
