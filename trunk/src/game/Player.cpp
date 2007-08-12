@@ -12074,10 +12074,12 @@ bool Player::CanSpeak() const
 
 void Player::_LoadInventory(uint32 timediff)
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `data`,`bag`,`slot`,`item`,`item_template` FROM `character_inventory` JOIN `item_instance` ON `character_inventory`.`item` = `item_instance`.`guid` WHERE `character_inventory`.`guid` = '%u' ORDER BY `bag`", GetGUIDLow());
+    QueryResult *result = sDatabase.PQuery("SELECT `data`,`bag`,`slot`,`item`,`item_template` FROM `character_inventory` JOIN `item_instance` ON `character_inventory`.`item` = `item_instance`.`guid` WHERE `character_inventory`.`guid` = '%u' ORDER BY `bag`,`slot`", GetGUIDLow());
     std::map<uint64, Bag*> bagMap;                          // fast guid lookup for bags
     //NOTE: the "order by `bag`" is important because it makes sure
     //the bagMap is filled before items in the bags are loaded
+    //NOTE2: the "order by `slot`" is needed becaue mainhand weapons are (wrongly?)
+    //expected to be equipped before offhand items (TODO: fixme)
 
     if (result)
     {
@@ -12120,33 +12122,24 @@ void Player::_LoadInventory(uint32 timediff)
 
                 if( IsInventoryPos( dest ) )
                 {
-                    if( !CanStoreItem( INVENTORY_SLOT_BAG_0, slot, dest, item, false ) == EQUIP_ERR_OK )
-                    {
+                    if( CanStoreItem( INVENTORY_SLOT_BAG_0, slot, dest, item, false ) == EQUIP_ERR_OK )
+                        item = StoreItem(dest, item, true);
+                    else
                         success = false;
-                        continue;
-                    }
-
-                    item = StoreItem(dest, item, true);
                 }
                 else if( IsEquipmentPos( dest ) )
                 {
                     if( !CanEquipItem( slot, dest, item, false, false ) == EQUIP_ERR_OK )
-                    {
+                        QuickEquipItem(dest, item);
+                    else
                         success = false;
-                        continue;
-                    }
-
-                    QuickEquipItem(dest, item);
                 }
                 else if( IsBankPos( dest ) )
                 {
                     if( !CanBankItem( INVENTORY_SLOT_BAG_0, slot, dest, item, false, false ) == EQUIP_ERR_OK )
-                    {
+                        item = BankItem(dest, item, true);
+                    else
                         success = false;
-                        continue;
-                    }
-
-                    item = BankItem(dest, item, true);
                 }
 
                 if(success)
