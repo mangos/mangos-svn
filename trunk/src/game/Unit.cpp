@@ -4932,10 +4932,11 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         TakenTotalMod = 1.0f;
     }
     // Ice Lance
-    if(spellProto->Id == 30455 && pVictim->isFrozen())
+    if(spellProto->Id == 30455)
     {
-        CastingTime /= 3.0f;
-        TakenTotalMod *= 3.0f;
+        CastingTime /= 3.0f;                                // applied 1/3 bonuses in case generic target
+        if(pVictim->isFrozen())                             // and compensate this for frozen target.
+            TakenTotalMod *= 3.0f;
     }
 
     // Level Factor
