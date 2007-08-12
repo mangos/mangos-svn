@@ -4931,6 +4931,12 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
         DoneTotalMod = 1.0f;
         TakenTotalMod = 1.0f;
     }
+    // Ice Lance
+    if(spellProto->Id == 30455 && pVictim->isFrozen())
+    {
+        CastingTime /= 3.0f;
+        TakenTotalMod *= 3.0f;
+    }
 
     // Level Factor
     float LvlPenalty = 0.0f;
@@ -4999,12 +5005,25 @@ bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect, Unit
         // flat: Resilience - reduce crit chance by x%
         crit_chance -= pVictim->m_modResilience;
 
+        // flat: scripted (increase crit chance ... against ... target by x%
+        AuraList const& mOverrideClassScript = GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+        for(AuraList::const_iterator i = mOverrideClassScript.begin(); i != mOverrideClassScript.end(); ++i)
+        {
+            switch((*i)->GetModifier()->m_miscvalue)
+            {
+                case 849: if(pVictim->isFrozen()) crit_chance+= 10; break; //Shatter Rank 1
+                case 910: if(pVictim->isFrozen()) crit_chance+= 20; break; //Shatter Rank 2
+                case 911: if(pVictim->isFrozen()) crit_chance+= 30; break; //Shatter Rank 3
+                case 912: if(pVictim->isFrozen()) crit_chance+= 40; break; //Shatter Rank 4
+                case 913: if(pVictim->isFrozen()) crit_chance+= 50; break; //Shatter Rank 5
+            }
+        }
+
         // percent
         AuraList const& mAttackerSpellCritPCT = pVictim->GetAurasByType(SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE_PCT);
         for(AuraList::const_iterator i = mAttackerSpellCritPCT.begin(); i != mAttackerSpellCritPCT.end(); ++i)
             if((*i)->GetModifier()->m_miscvalue == -2 || ((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0)
                 crit_chance += crit_chance * (*i)->GetModifier()->m_amount/1000;
-
     }
 
     crit_chance = crit_chance > 0.0 ? crit_chance : 0.0;
@@ -6759,4 +6778,13 @@ void CharmInfo::SetPetNumber(uint32 petnumber, bool statwindow)
         m_unit->SetUInt32Value(UNIT_FIELD_PETNUMBER, m_petnumber);
     else
         m_unit->SetUInt32Value(UNIT_FIELD_PETNUMBER, 0);
+}
+
+bool Unit::isFrozen() const
+{    
+    AuraList const& mRoot = GetAurasByType(SPELL_AURA_MOD_ROOT);
+    for(AuraList::const_iterator i = mRoot.begin(); i != mRoot.end(); ++i)
+        if( (*i)->GetSpellProto()->School == SPELL_SCHOOL_FROST)
+            return true;
+    return false;
 }
