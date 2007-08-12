@@ -20,7 +20,6 @@
 #include "Player.h"
 #include "BattleGround.h"
 #include "Creature.h"
-#include "Spell.h"
 #include "ObjectMgr.h"
 #include "MapManager.h"
 #include "Language.h"                                       // for chat messages

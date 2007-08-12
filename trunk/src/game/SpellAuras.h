@@ -18,7 +18,6 @@
 #ifndef MANGOS_SPELLAURAS_H
 #define MANGOS_SPELLAURAS_H
 
-#include "Spell.h"
 #include "SpellAuraDefines.h"
 
 struct DamageManaShield

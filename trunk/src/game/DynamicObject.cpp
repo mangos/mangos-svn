@@ -25,7 +25,6 @@
 #include "World.h"
 #include "ObjectMgr.h"
 #include "Database/DatabaseEnv.h"
-#include "Spell.h"
 #include "SpellAuras.h"
 #include "MapManager.h"
 #include "RedZoneDistrict.h"

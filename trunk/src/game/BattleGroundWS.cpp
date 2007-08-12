@@ -22,7 +22,6 @@
 #include "BattleGroundWS.h"
 #include "Creature.h"
 #include "Chat.h"
-#include "Spell.h"
 #include "ObjectMgr.h"
 #include "MapManager.h"
 #include "Language.h"
