@@ -522,7 +522,7 @@ bool Map::CanEnter(Player* player)
     if (!Instanceable()) return(true);
     
     // GMs can avoid raid limitations
-    if (IsRaid() && (!player->isGameMaster()))
+    if (IsRaid() && (!player->isGameMaster() && !sWorld.getConfig(CONFIG_INSTANCE_IGNORE_RAID)))
     {
         Group* group = player->GetGroup();
         if (!group || !group->isRaidGroup())

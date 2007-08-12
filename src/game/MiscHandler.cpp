@@ -914,7 +914,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
 
             // item and level or GM
             if( (!pProto || GetPlayer()->HasItemCount(ReqItem, 1)) && 
-                (GetPlayer()->getLevel() >= at->requiredLevel || sWorld.getConfig(CONFIG_IGNORE_AT_LEVEL_REQUIREMENT)) 
+                (GetPlayer()->getLevel() >= at->requiredLevel || sWorld.getConfig(CONFIG_INSTANCE_IGNORE_LEVEL)) 
                 || GetPlayer()->isGameMaster() )
                 GetPlayer()->TeleportTo(at->target_mapId,at->target_X,at->target_Y,at->target_Z,at->target_Orientation,true,false);
             else
@@ -925,7 +925,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         }
         else 
         {
-            if(GetPlayer()->getLevel() >= at->requiredLevel || sWorld.getConfig(CONFIG_IGNORE_AT_LEVEL_REQUIREMENT) || GetPlayer()->isGameMaster())
+            if(GetPlayer()->getLevel() >= at->requiredLevel || sWorld.getConfig(CONFIG_INSTANCE_IGNORE_LEVEL) || GetPlayer()->isGameMaster())
                     GetPlayer()->TeleportTo(at->target_mapId,at->target_X,at->target_Y,at->target_Z,at->target_Orientation,true,false);
             else
             {    

@@ -142,9 +142,14 @@ MaxPlayerLevel = 70
 ActivateWeather = 1
 
 # Ignore level requirement to enter instance
-# 	   1 (true)
+#          1 (true)
 # Default: 0 (false)
-IgnoreATLevelRequirement = 0
+Instance.IgnoreLevel = 0
+
+# Ignore raid requirement to enter instance
+#          1 (true)
+# Default: 0 (false)
+Instance.IgnoreRaid = 0
 
 #  quest level difference to hide for player low level quests: if player_level > quest_level + LowLevelQuestsHideDiff then quest ! mark not show for quest giver
 #          -1 (show all available quests marks) 
