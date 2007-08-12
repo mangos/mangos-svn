@@ -221,8 +221,8 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     SetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP, fields[6].GetUInt32());
     SetUInt64Value(UNIT_FIELD_CREATEDBY, owner->GetGUID());
 
-    m_charmInfo->SetReactState(fields[7].GetUInt32());
-    m_charmInfo->SetCommandState(fields[8].GetUInt32());
+    m_charmInfo->SetReactState( ReactStates( fields[7].GetUInt8() ));
+    m_charmInfo->SetCommandState( CommandStates( fields[8].GetUInt8() ));
     m_loyaltyPoints = fields[9].GetInt32();
 
     uint32 savedhealth = fields[15].GetUInt32();

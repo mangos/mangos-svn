@@ -26,6 +26,7 @@
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "Creature.h"
+#include "World.h"
 
 int PetAI::Permissible(const Creature *creature)
 {
@@ -51,6 +52,7 @@ void PetAI::MoveInLineOfSight(Unit *u)
         float attackRadius = i_pet.GetAttackDistance(u);
         if(i_pet.IsWithinDistInMap(u, attackRadius) && i_pet.GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE)
         {
+            if(!i_pet.IsWithinLOSInMap(u)) return;
             AttackStart(u);
             if(u->HasStealthAura())
                 u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
@@ -343,7 +345,9 @@ void PetAI::UpdateAI(const uint32 diff)
 
 bool PetAI::_isVisible(Unit *u) const
 {
-    return false;                                           //( ((Creature*)&i_pet)->GetDistanceSq(u) * 1.0<= sWorld.getConfig(CONFIG_SIGHT_GUARDER) && !u->m_stealth && u->isAlive());
+    //return false;                                           //( ((Creature*)&i_pet)->GetDistanceSq(u) * 1.0<= sWorld.getConfig(CONFIG_SIGHT_GUARDER) && !u->m_stealth && u->isAlive());
+    return i_pet.GetDistanceSq(u) < sWorld.getConfig(CONFIG_SIGHT_GUARDER)
+        && u->isVisibleForOrDetect(&i_pet,true);
 }
 
 void PetAI::UpdateAllies()
@@ -381,4 +385,12 @@ void PetAI::UpdateAllies()
     }
     else                                                    //remove group
         m_AllySet.insert(owner->GetGUID());
+}
+
+void PetAI::AttackedBy(Unit *attacker)
+{
+    //when attacked, fight back in case 1)no victim already AND 2)not set to passive AND 3)not set to stay, unless can it can reach attacker with melee attack anyway
+    if(!i_pet.getVictim() && !i_pet.GetCharmInfo()->HasReactState(REACT_PASSIVE) &&
+      (!i_pet.GetCharmInfo()->HasCommandState(COMMAND_STAY) || i_pet.canReachWithAttack(attacker)))
+        AttackStart(attacker);
 }
