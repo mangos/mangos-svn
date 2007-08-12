@@ -3372,15 +3372,16 @@ bool Spell::IsAffectedBy(SpellEntry const *spellInfo, uint32 effectId)
 
 uint32 Spell::GetTargetCreatureTypeMask() const
 {
-    uint32 SpellCreatureType = m_spellInfo->TargetCreatureType;
+    // Curse of Doom : not find another way to fix spell target check :/
+    if(m_spellInfo->SpellFamilyName==SPELLFAMILY_WARLOCK && m_spellInfo->SpellFamilyFlags == 0x0200000000LL)
+        return 0x7FF - 0x40;
 
-    // not find another way to fix spell target check :/
-    if(m_spellInfo->Id == 603)
-        SpellCreatureType = 0x7FF - 0x40;                   //Curse of Doom
-    else
-        if(m_spellInfo->Id == 2641)                         // Dismiss Pet
-            SpellCreatureType = 0;
-    return SpellCreatureType;
+    // Dismiss Pet
+    if(m_spellInfo->Id == 2641)
+        return  0;
+
+    // generic case
+    return m_spellInfo->TargetCreatureType;
 }
 
 CurrentSpellTypes Spell::GetCurrentContainer()
