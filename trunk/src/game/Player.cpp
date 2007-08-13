@@ -1406,6 +1406,9 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             DuelComplete(2);
     }
 
+    // reset movement flags at teleport, because player will continue move with these flags after teleport
+    SetMovementFlags(0);
+
     if ((this->GetMapId() == mapid) && (!m_transport))
     {
         // near teleport
@@ -1431,8 +1434,6 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     }
     else
     {
-        // reset movement flags at teleport, because player will continue move with these flags after teleport
-        SetMovementFlags(0);
         if(m_transport)
             SetMovementFlags(MOVEMENTFLAG_ONTRANSPORT);
 
