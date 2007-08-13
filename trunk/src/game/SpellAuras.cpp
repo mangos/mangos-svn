@@ -1762,7 +1762,13 @@ void Aura::HandleModCharm(bool apply, bool Real)
         {
             m_target->SetCharmerGUID(GetCasterGUID());
             m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,caster->getFaction());
-            m_target->SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
+
+            // Note: Apply this to player is most big BAD thing that can be find in this case: 
+            //       This will corrupt player race/class data
+            // FIXME:Apply this to charmed creature also incorrect with big chance but not damage many
+            //       And this not restored and charm end
+            //    m_target->SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
+
             caster->SetCharm(m_target);
 
             if(caster->getVictim()==m_target)
