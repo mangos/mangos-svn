@@ -1225,7 +1225,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             SendMessageToSet(&data,true);
 
             DealDamage(pVictim, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), &cleanDamage, DOT, spellProto->School, spellProto, procFlag, true);
-            ProcDamageAndSpell(pVictim, 0, PROC_FLAG_TAKE_DAMAGE, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), spellProto);
+            ProcDamageAndSpell(pVictim, PROC_FLAG_HIT_SPELL, PROC_FLAG_TAKE_DAMAGE, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), spellProto);
             break;
         }
         case SPELL_AURA_PERIODIC_HEAL:
@@ -3817,17 +3817,24 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
 
         // Combustion
         case 11129:
-            {
-                CastSpell(this, 28682, true, NULL, triggredByAura);
-                if (!(procFlag & PROC_FLAG_CRIT_SPELL))         //no crit
-                    triggredByAura->m_procCharges += 1;         //-> reincrease procCharge count since it was decreased before
-                else if (triggredByAura->m_procCharges == 0)    //no more charges left and crit
-                    RemoveAurasDueToSpell(28682);               //-> remove Combustion auras
-                return;
-            }
-
+        {
+            CastSpell(this, 28682, true, NULL, triggredByAura);
+            if (!(procFlag & PROC_FLAG_CRIT_SPELL))         //no crit
+                triggredByAura->m_procCharges += 1;         //-> reincrease procCharge count since it was decreased before
+            else if (triggredByAura->m_procCharges == 0)    //no more charges left and crit
+                RemoveAurasDueToSpell(28682);               //-> remove Combustion auras
+            return;
+        }
+        // Nightfall
+        case 18094: 
+        case 18095:
+        {
+            CastSpell(this, 17941, true, NULL, triggredByAura);
+            return;
+        }
         // VE
         case 15286:
+        {
             if(!pVictim)
                 return;
 
@@ -3837,7 +3844,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 pVictim->CastCustomSpell(pVictim, 15290, &VEHealBasePoints0, NULL, NULL, true, NULL, triggredByAura);
             }
             return;
-
+        }
         // Eye of Eye
         case 9799:
         case 25988:
