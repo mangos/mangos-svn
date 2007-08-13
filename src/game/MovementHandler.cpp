@@ -174,6 +174,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     /*----------------------*/
 
     /* process position-change */
+    recv_data.put<uint32>(4, getMSTime());
     WorldPacket data(recv_data.GetOpcode(), (GetPlayer()->GetPackGUID().size()+recv_data.size()));
     data.append(GetPlayer()->GetPackGUID());
     data.append(recv_data.contents(), recv_data.size());

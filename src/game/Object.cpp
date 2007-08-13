@@ -34,6 +34,7 @@
 #include "Log.h"
 #include "Transports.h"
 #include "VMapFactory.h"
+#include "FlightMaster.h"
 
 uint32 GuidHigh2TypeId(uint32 guid_hi)
 {
@@ -137,11 +138,20 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
     {
         flags2 = ((Player*)this)->GetMovementFlags();
 
+        if((flags2 & MOVEMENTFLAG_ONTRANSPORT) && ((Player*)this)->GetTransport() == 0)
+            flags2 &= ~MOVEMENTFLAG_ONTRANSPORT;
+
         // remove unknown, unused etc flags for now
         flags2 &= ~MOVEMENTFLAG_SPLINE;
         flags2 &= ~MOVEMENTFLAG_SPLINE2;
         flags2 &= ~MOVEMENTFLAG_JUMPING;
         flags2 &= ~MOVEMENTFLAG_SWIMMING;
+
+        if(((Player*)this)->isInFlight())
+        {
+            if(FlightMaster::Instance().GetFlightMovementGenerator((Player*)this))
+                flags2 = (MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_SPLINE2);
+        }
     }
 
     /** lower flag1 **/
@@ -352,9 +362,17 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
         *data << ((Unit*)this)->GetSpeed( MOVE_FLYBACK );
         *data << ((Unit*)this)->GetSpeed( MOVE_TURN );
 
-        /*if(flags2 & MOVEMENTFLAG_SPLINE2)   // 0x8000000
+        if(flags2 & MOVEMENTFLAG_SPLINE2)   // 0x8000000
         {
-            uint32 flags3 = 0;
+            FlightPathMovementGenerator *fmg = FlightMaster::Instance().GetFlightMovementGenerator((Player*)this);
+            if (!fmg)
+            {
+                // how we can get there?
+                sLog.outError("Bad thing happens :(");
+                return;
+            }
+
+            uint32 flags3 = 0x00000300;
 
             *data << flags3;                // splines flag?
 
@@ -375,27 +393,46 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
                 *data << (float)0;
             }
 
-            *data << uint32(0);             // passed move time?
-            *data << uint32(0);             // full move time?
+            Path &path = fmg->GetPath();
+
+            float x, y, z;
+            ((Player*)this)->GetPosition(x, y, z);
+
+            uint32 inflighttime = uint32(path.GetPassedLength(fmg->GetCurrentNode(), x, y, z) * 32);
+            uint32 traveltime = uint32(path.GetTotalLength() * 32);
+
+            *data << uint32(inflighttime);  // passed move time?
+            *data << uint32(traveltime);    // full move time?
             *data << uint32(0);             // ticks count?
 
-            uint32 poscount = 0;
+            uint32 poscount = uint32(path.Size());
 
-            *data << poscount;              // points count
+            *data << uint32(poscount);      // points count
 
-            for(uint32 i = 0; i < poscount; i++)
+            for(uint32 i = 0; i < poscount; ++i)
+            {
+                *data << path.GetNodes()[i].x;
+                *data << path.GetNodes()[i].y;
+                *data << path.GetNodes()[i].z;
+            }
+
+            /*for(uint32 i = 0; i < poscount; i++)
             {
                 // path points
                 *data << (float)0;
                 *data << (float)0;
                 *data << (float)0;
-            }
+            }*/
+
+            *data << path.GetNodes()[poscount-1].x;
+            *data << path.GetNodes()[poscount-1].y;
+            *data << path.GetNodes()[poscount-1].z;
 
             // target position (path end)
-            *data << ((Unit*)this)->GetPositionX();
+            /**data << ((Unit*)this)->GetPositionX();
             *data << ((Unit*)this)->GetPositionY();
-            *data << ((Unit*)this)->GetPositionZ();
-        }*/
+            *data << ((Unit*)this)->GetPositionZ();*/
+        }
     }
 
     if(flags & UPDATEFLAG_ALL)              // 0x10

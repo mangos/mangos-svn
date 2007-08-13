@@ -51,6 +51,25 @@ class Path
             return len;
         }
 
+        float GetPassedLength(uint32 curnode, float x, float y, float z)
+        {
+            float len = 0, xd, yd, zd;
+            for(unsigned int idx=1; idx < curnode; ++idx)
+            {
+                xd = i_nodes[ idx ].x - i_nodes[ idx-1 ].x;
+                yd = i_nodes[ idx ].y - i_nodes[ idx-1 ].y;
+                zd = i_nodes[ idx ].z - i_nodes[ idx-1 ].z;
+                len += (float)sqrt( xd * xd + yd*yd + zd*zd );
+            }
+
+            xd = x - i_nodes[curnode-1].x;
+            yd = y - i_nodes[curnode-1].y;
+            zd = z - i_nodes[curnode-1].z;
+            len += (float)sqrt( xd * xd + yd*yd + zd*zd );
+
+            return len;
+        }
+
         PathNode& operator[](const unsigned int idx) { return i_nodes[idx]; }
         const PathNode& operator()(const unsigned int idx) const { return i_nodes[idx]; }
 
