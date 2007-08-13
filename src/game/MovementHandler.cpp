@@ -35,7 +35,8 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
     MapManager::Instance().GetMap(GetPlayer()->GetMapId(), GetPlayer())->Remove(GetPlayer(),false);
     MapManager::Instance().GetMap(GetPlayer()->GetMapId(), GetPlayer())->Add(GetPlayer());
 
-    GetPlayer()->SendInitialPackets();
+    if(!GetPlayer()->SendInitialPackets())
+        return;                                             // fatal error in character state setup
 
     GetPlayer()->SetDontMove(false);
 }

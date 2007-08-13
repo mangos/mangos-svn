@@ -148,13 +148,19 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
     if(target == this) // building packet for oneself
     {
         flags |= UPDATEFLAG_SELF;
+
+        /*** temporary reverted - until real source of stack corruption will not found
         updatetype = UPDATETYPE_CREATE_OBJECT2;
+        ****/
     }
 
     if(flags & UPDATEFLAG_HASPOSITION)
     {
         // UPDATETYPE_CREATE_OBJECT2 dynamic objects, corpses...
+        if(isType(TYPE_DYNAMICOBJECT) || isType(TYPE_CORPSE) || isType(TYPE_PLAYER))
+        /*** temporary reverted - until real source of stack corruption will not found
         if(isType(TYPE_DYNAMICOBJECT) || isType(TYPE_CORPSE))
+        ***/
             updatetype = UPDATETYPE_CREATE_OBJECT2;
 
         // UPDATETYPE_CREATE_OBJECT2 for pets...
