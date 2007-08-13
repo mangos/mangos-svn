@@ -5082,9 +5082,9 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
         AuraList const& mDummyAuras = pVictim->GetAurasByType(SPELL_AURA_DUMMY);
         for(AuraList::const_iterator i = mDummyAuras.begin();i != mDummyAuras.end(); ++i)
             if((*i)->GetSpellProto()->SpellVisual == 9180)
-                if (spellProto->SpellFamilyFlags & 0x40000000 && (*i)->GetEffIndex() == 1) //FoL
+                if ((spellProto->SpellFamilyFlags & 0x40000000) && (*i)->GetEffIndex() == 1) //FoL
                     AdvertisedBenefit += (*i)->GetModifier()->m_amount;
-                else if (spellProto->SpellFamilyFlags & 0x80000000 && (*i)->GetEffIndex() == 0) //HL
+                else if ((spellProto->SpellFamilyFlags & 0x80000000) && (*i)->GetEffIndex() == 0) //HL
                     AdvertisedBenefit += (*i)->GetModifier()->m_amount;
     }
 
