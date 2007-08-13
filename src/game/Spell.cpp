@@ -287,7 +287,7 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur, u
     }
 
     // determine reflection
-    bool m_canReflect = false;
+    m_canReflect = false;
     for(int j=0;j<3;j++)
     {
         if (m_spellInfo->Effect[j]==0)

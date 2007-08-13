@@ -121,7 +121,10 @@ void CliLoadPlayerDump(char*command,pPrintf zprintf)
     }
     char * name = strtok(NULL, " ");
     char * guid = name ? strtok(NULL, " ") : NULL;
-    objmgr.LoadPlayerDump(file, atoi(acc), name ? name : "", guid ? atoi(guid) : 0);
+    if(objmgr.LoadPlayerDump(file, atoi(acc), name ? name : "", guid ? atoi(guid) : 0))
+        zprintf("Character loaded successfully!");
+    else
+        zprintf("Failed to load the character!");
 }
 
 /// Reload the scripts and notify the players
