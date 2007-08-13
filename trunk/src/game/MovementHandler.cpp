@@ -33,10 +33,14 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
     sLog.outDebug( "WORLD: got MSG_MOVE_WORLDPORT_ACK." );
 
     MapManager::Instance().GetMap(GetPlayer()->GetMapId(), GetPlayer())->Remove(GetPlayer(),false);
+
+    if(!GetPlayer()->SendInitialPacketsBeforeAddToMap())
+        return;                                             // fatal error in character state setup
+
     MapManager::Instance().GetMap(GetPlayer()->GetMapId(), GetPlayer())->Add(GetPlayer());
 
-    if(!GetPlayer()->SendInitialPackets())
-        return;                                             // fatal error in character state setup
+    GetPlayer()->SendInitialPacketsAfterAddToMap();
+
 
     GetPlayer()->SetDontMove(false);
 }

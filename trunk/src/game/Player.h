@@ -658,7 +658,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool IsUnderWater() const;
 
         void SetStandState(uint8 state);
-        bool SendInitialPackets();
+        bool SendInitialPacketsBeforeAddToMap();
+        void SendInitialPacketsAfterAddToMap();
 
         bool CanInteractWithNPCs(bool alive = true) const;
 

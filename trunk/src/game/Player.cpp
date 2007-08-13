@@ -1536,8 +1536,6 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
             // re-add us to the map here
             MapManager::Instance().GetMap(GetMapId(), this)->Add(this);
-
-            SendEnchantmentDurations();                     // must be after add to map
         }
     }
 
@@ -14527,7 +14525,7 @@ void Player::SetGroup(Group *group, int8 subgroup)
     }
 }
 
-bool Player::SendInitialPackets()
+bool Player::SendInitialPacketsBeforeAddToMap()
 {
     WorldPacket data(SMSG_SET_REST_START, 4);
     data << uint32(0);  // unknown, may be rest state time or expirience
@@ -14604,6 +14602,38 @@ bool Player::SendInitialPackets()
 
     CastSpell(this, 836, true);            // LOGINEFFECT
     return true;
+}
+
+void Player::SendInitialPacketsAfterAddToMap()
+{
+    // set some aura effects that send packet to player client after add player to map
+    // SendMessageToSet not send it to player not it map, only for aura that not changed anything at re-apply
+    // same auras state lost at far teleport, send it one more time in this case also
+    static const uint32 auratypes[] = {
+        SPELL_AURA_WATER_WALK, SPELL_AURA_FEATHER_FALL, SPELL_AURA_HOVER,
+        SPELL_AURA_SAFE_FALL,  SPELL_AURA_MOD_FEAR,     SPELL_AURA_FLY,
+        0
+    };
+    for(uint32 const* itr = &auratypes[0]; itr && itr[0] !=0; ++itr)
+    {
+        Unit::AuraList const& auraList = GetAurasByType(*itr);
+        if(!auraList.empty())
+            auraList.front()->ApplyModifier(true,true);
+    }
+
+    if(HasAuraType(SPELL_AURA_MOD_STUN))
+        SetMovement(MOVE_ROOT);
+
+    // manual send package (have code in ApplyModifier(true,true); that don't must be re-applied.
+    if(HasAuraType(SPELL_AURA_MOD_ROOT))
+    {
+        WorldPacket data(SMSG_FORCE_MOVE_ROOT, 10);
+        data.append(GetPackGUID());
+        data << (uint32)2;
+        SendMessageToSet(&data,true);
+    }
+
+    SendEnchantmentDurations();                     // must be after add to map
 }
 
 template void Player::UpdateVisibilityOf(Player*        target, UpdateData& data, UpdateDataMapType& data_updates);
