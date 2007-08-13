@@ -31,9 +31,7 @@
 #include "Auth/md5.h"
 #include "MapManager.h"
 #include "ObjectAccessor.h"
-#include "Transports.h"
 #include "Group.h"
-#include "SpellAuras.h"
 
 // check used symbols in player name at creating and rename
 std::string notAllowedChars = "\t\v\b\f\a\n\r\\\"\'\? <>[](){}_=+-|/!@#$%^&*~`.,0123456789\0";
@@ -371,26 +369,8 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     pCurrChar->_LoadSpellCooldowns();
 
-    if(!pCurrChar->SendInitialPackets())
+    if(!pCurrChar->SendInitialPacketsBeforeAddToMap())
         return;                                             // fatal error in character state setup
-
-    /*if(GetPlayer()->getClass() == CLASS_HUNTER || GetPlayer()->getClass() == CLASS_ROGUE)
-    {
-        uint32 shiftdata=0x01;
-        for(uint8 i=0;i<32;i++)
-        {
-            if ( 522753 & shiftdata )
-            {
-                data.Initialize(SMSG_SET_FLAT_SPELL_MODIFIER);
-                data << uint8(i);
-                data << uint8(5);
-                data << uint16(1);
-                data << uint16(0);
-                SendPacket(&data);
-            }
-            shiftdata=shiftdata<<1;
-        }
-    }*/
 
     //Show cinematic at the first time that player login
     if( !GetPlayer()->getCinematic() )
@@ -435,43 +415,11 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     ObjectAccessor::Instance().AddObject(pCurrChar);
     //sLog.outDebug("Player %s added to Map.",pCurrChar->GetName());
 
-    /* done in Map::Add(Player*)
-    if (pCurrChar->m_transport)
-    {
-        Transport* curTrans = pCurrChar->m_transport;
-        pCurrChar->TeleportTo(curTrans->GetMapId(), curTrans->GetPositionX(), curTrans->GetPositionY(), curTrans->GetPositionZ(), curTrans->GetOrientation(), true, false);
-    }
-    */
+    pCurrChar->SendInitialPacketsAfterAddToMap();
 
     sDatabase.PExecute("UPDATE `character` SET `online` = 1 WHERE `guid` = '%u'", pCurrChar->GetGUIDLow());
     loginDatabase.PExecute("UPDATE `account` SET `online` = 1 WHERE `id` = '%u'", GetAccountId());
     plr->SetInGameTime( getMSTime() );
-
-    // set some aura effects that send packet to player client after add player to map
-    // SendMessageToSet not send it to player not it map, only for aura that not changed anything at re-apply
-    static const uint32 auratypes[] = {
-        SPELL_AURA_WATER_WALK, SPELL_AURA_FEATHER_FALL, SPELL_AURA_HOVER,
-        SPELL_AURA_SAFE_FALL,  SPELL_AURA_MOD_FEAR,     SPELL_AURA_FLY,
-        0
-    };
-    for(uint32 const* itr = &auratypes[0]; itr && itr[0] !=0; ++itr)
-    {
-        Unit::AuraList const& auraList = pCurrChar->GetAurasByType(*itr);
-        if(!auraList.empty())
-            auraList.front()->ApplyModifier(true,true);
-    }
-
-    if(pCurrChar->HasAuraType(SPELL_AURA_MOD_STUN))
-        pCurrChar->SetMovement(MOVE_ROOT);
-
-    // manual send package (have code in ApplyModifier(true,true); that don't must be re-applied.
-    if(pCurrChar->HasAuraType(SPELL_AURA_MOD_ROOT))
-    {
-        WorldPacket data(SMSG_FORCE_MOVE_ROOT, 10);
-        data.append(pCurrChar->GetPackGUID());
-        data << (uint32)2;
-        pCurrChar->SendMessageToSet(&data,true);
-    }
 
     // announce group about member online (must be after add to player list to receive announce to self)
     if(pCurrChar->GetGroup())
@@ -489,8 +437,6 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     data<<pCurrChar->getLevel();
     data<<pCurrChar->getClass();
     pCurrChar->BroadcastPacketToFriendListers(&data);
-
-    pCurrChar->SendEnchantmentDurations();                  // must be after add to map
 
     // Place character in world (and load zone) before some object loading
     pCurrChar->LoadCorpse();
