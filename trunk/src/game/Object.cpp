@@ -198,10 +198,10 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
     //sLog.outDebug("BuildCreateUpdate: update-type: %u, object-type: %u got flags: %X, flags2: %X", updatetype, m_objectTypeId, flags, flags2);
 
     ByteBuffer buf(500);
-    buf << updatetype;
+    buf << (uint8)updatetype;
     //buf.append(GetPackGUID());    //client crashes when using this
     buf << (uint8)0xFF << GetGUID();
-    buf << m_objectTypeId;
+    buf << (uint8)m_objectTypeId;
 
     _BuildMovementUpdate(&buf, flags, flags2);
 
