@@ -63,6 +63,10 @@ class MANGOS_DLL_DECL PathMovementGenerator
         // template pattern.. override required
         virtual void LoadPath(T &) = 0;
         virtual void ReloadPath(T &) = 0;
+        uint32 GetCurrentNode()
+        {
+            return i_currentNode;
+        }
 
     protected:
         uint32 i_currentNode;

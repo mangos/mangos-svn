@@ -45,7 +45,6 @@ class MANGOS_DLL_DECL FlightMaster : public MaNGOS::Singleton<FlightMaster, MaNG
     FlightMapType i_flights;
 
     public:
-
         /** ReportFlight reports a certain flight just started
          * so that the flight master can keep track of the flight.
          */
@@ -90,5 +89,13 @@ class MANGOS_DLL_DECL FlightMaster : public MaNGOS::Singleton<FlightMaster, MaNG
             }
         }
 
+        FlightPathMovementGenerator* GetFlightMovementGenerator(Player *plr)
+        {
+            FlightMapType::iterator iter = i_flights.find(plr);
+            if (iter == i_flights.end())
+                return 0;
+            else 
+                return iter->second;
+        }
 };
 #endif

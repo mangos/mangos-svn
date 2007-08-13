@@ -369,10 +369,10 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         }
     }
 
+    pCurrChar->_LoadSpellCooldowns();
+
     if(!pCurrChar->SendInitialPackets())
         return;                                             // fatal error in character state setup
-
-    pCurrChar->_LoadSpellCooldowns();
 
     /*if(GetPlayer()->getClass() == CLASS_HUNTER || GetPlayer()->getClass() == CLASS_ROGUE)
     {
