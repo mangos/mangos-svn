@@ -369,7 +369,8 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         }
     }
 
-    pCurrChar->SendInitialPackets();
+    if(!pCurrChar->SendInitialPackets())
+        return;                                             // fatal error in character state setup
 
     pCurrChar->_LoadSpellCooldowns();
 

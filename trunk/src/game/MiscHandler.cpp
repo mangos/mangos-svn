@@ -307,7 +307,7 @@ void WorldSession::SendGMTicketGetTicket(uint32 status, char const* text)
 
 void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & recv_data )
 {
-    WorldPacket data( SMSG_QUERY_TIME_RESPONSE, 4 );
+    WorldPacket data( SMSG_QUERY_TIME_RESPONSE, 4+4 );
     data << (uint32)time(NULL);
     data << (uint32)0;
     SendPacket( &data );
@@ -400,7 +400,7 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
         {
             sDatabase.PExecute("INSERT INTO `character_ticket` (`guid`,`ticket_text`,`ticket_category`) VALUES ('%u', '%s', '%u')", _player->GetGUIDLow(), ticketText.c_str(), category);
 
-            WorldPacket data( SMSG_QUERY_TIME_RESPONSE, 4 );
+            WorldPacket data( SMSG_QUERY_TIME_RESPONSE, 4+4 );
             data << (uint32)time(NULL);
             data << (uint32)0;
             SendPacket( &data );

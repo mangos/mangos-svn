@@ -3289,7 +3289,7 @@ void Player::BuildPlayerRepop()
 
 void Player::SendDelayResponse(const uint32 ml_seconds)
 {
-    WorldPacket data(SMSG_QUERY_TIME_RESPONSE, 4);
+    WorldPacket data( SMSG_QUERY_TIME_RESPONSE, 4+4 );
     data << (uint32)time(NULL);
     data << (uint32)0;
     GetSession()->SendPacket( &data );
@@ -11657,8 +11657,9 @@ float Player::GetFloatValueFromDB(uint16 index, uint64 guid)
 bool Player::LoadFromDB( uint32 guid )
 {
     // NOTE: all fields in `character` must be read to prevent lost character data at next save in case wrong DB structure.
-    //                                             0      1         2      3      4      5       6            7            8            9     10            11         12          13          14          15           16            17                  18                  19                  20        21        22        23         24          25        26             27
-    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`rename` FROM `character` WHERE `guid` = '%u'", guid);
+    // !!! NOTE: including unused `zone`,`online`
+    //                                             0      1         2      3      4      5       6            7            8            9     10            11         12          13          14          15           16            17                  18                  19                  20        21        22        23         24          25        26             27       [28]   [29]
+    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`rename`,`zone`,`online` FROM `character` WHERE `guid` = '%u'", guid);
 
     if(!result)
     {
@@ -14525,7 +14526,7 @@ void Player::SetGroup(Group *group, int8 subgroup)
     }
 }
 
-void Player::SendInitialPackets()
+bool Player::SendInitialPackets()
 {
     WorldPacket data(SMSG_SET_REST_START, 4);
     data << uint32(0);  // unknown, may be rest state time or expirience
@@ -14553,7 +14554,7 @@ void Player::SendInitialPackets()
         {
             sLog.outErrorDb("Table `playercreateinfo` not have data for race %u class %u , character can't be loaded.",plrace, plclass);
             GetSession()->LogoutPlayer(false);                            // without save
-            return;
+            return false;
         }
 
         Field *fields = result5->Fetch();
@@ -14601,6 +14602,7 @@ void Player::SendInitialPackets()
     GetSession()->SendPacket( &data );
 
     CastSpell(this, 836, true);            // LOGINEFFECT
+    return true;
 }
 
 template void Player::UpdateVisibilityOf(Player*        target, UpdateData& data, UpdateDataMapType& data_updates);
