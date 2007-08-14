@@ -261,9 +261,9 @@ enum QuestUpdateState
     QUEST_NEW = 2
 };
 
-struct quest_status
+struct QuestStatusData
 {
-    quest_status()
+    QuestStatusData()
         : m_quest(NULL), m_status(QUEST_STATUS_NONE),m_rewarded(false),m_explored(false),
         m_spellComplete(false), m_timer(0), uState(QUEST_NEW)
     {
