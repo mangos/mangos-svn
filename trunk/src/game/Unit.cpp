@@ -5424,7 +5424,9 @@ void Unit::Unmount()
     if(GetTypeId() == TYPEID_PLAYER && ((Player*)this)->GetOldPetNumber() && isAlive())
     {
         Pet* NewPet = new Pet(this);
-        NewPet->LoadPetFromDB(this, 0, ((Player*)this)->GetOldPetNumber(), true);
+        if(!NewPet->LoadPetFromDB(this, 0, ((Player*)this)->GetOldPetNumber(), true))
+             delete NewPet;
+
         ((Player*)this)->SetOldPetNumber(0);
     }
 }

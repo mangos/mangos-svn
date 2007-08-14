@@ -139,7 +139,7 @@ class ArenaTeam
         MemberList::iterator membersbegin(){ return members.begin(); }
         MemberList::iterator membersEnd(){ return members.end(); }
 
-        void LoadArenaTeamFromDB(uint32 ArenaTeamId);
+        bool LoadArenaTeamFromDB(uint32 ArenaTeamId);
         void LoadMembersFromDB(uint32 ArenaTeamId);
         void LoadStatsFromDB(uint32 ArenaTeamId);
         void LoadPlayerStats(ArenaTeamMember* member);

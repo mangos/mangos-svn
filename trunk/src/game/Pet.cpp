@@ -1355,10 +1355,9 @@ bool Pet::addSpell(uint16 spell_id, uint16 active, PetSpellState state, uint16 s
             return false;
     }
 
-    PetSpell *newspell;
     uint32 oldspell_id = 0;
 
-    newspell = new PetSpell;
+    PetSpell *newspell = new PetSpell;
     newspell->state = state;
 
     if(active == ACT_DECIDE)//active was not used before, so we save it's autocast/passive state here

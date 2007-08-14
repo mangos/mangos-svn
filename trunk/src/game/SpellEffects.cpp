@@ -3474,8 +3474,6 @@ void Spell::EffectTransmitted(uint32 i)
     float fx,fy,fz;
     m_caster->GetClosePoint(NULL,fx,fy,fz,dis);
 
-    GameObject* pGameObj = new GameObject(m_caster);
-
     if(name_id==35591)
     {
         Map* map = MapManager::Instance().GetMap(cMap, m_caster);
@@ -3490,6 +3488,8 @@ void Spell::EffectTransmitted(uint32 i)
         // replace by water level in this case
         fz = map->GetWaterLevel(fx,fy);
     }
+
+    GameObject* pGameObj = new GameObject(m_caster);
 
     if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), name_id,cMap,
         fx, fy, fz, m_caster->GetOrientation(), 0, 0, 0, 0, 100, 0))
