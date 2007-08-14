@@ -413,6 +413,7 @@ pkgdata_DATA = \
 	4294_spell_proc_event.sql \
 	4296_spell_proc_event.sql \
 	4317_spell_affect.sql \
+	4320_spell_affect.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -806,4 +807,5 @@ EXTRA_DIST = \
 	4294_spell_proc_event.sql \
 	4296_spell_proc_event.sql \
 	4317_spell_affect.sql \
+	4320_spell_affect.sql \
 	README

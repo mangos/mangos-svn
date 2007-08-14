@@ -1326,6 +1326,70 @@ CREATE TABLE `fishing_loot_template` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
 --
+-- Table structure for table `game_event`
+--
+
+DROP TABLE IF EXISTS `game_event`;
+CREATE TABLE `game_event` (
+  `entry` mediumint(8) unsigned NOT NULL COMMENT 'Entry of the game event',
+  `start` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Absolute start date, the event will never start before',
+  `end` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Absolute end date, the event will never start afler',
+  `occurence` bigint(20) unsigned NOT NULL DEFAULT '86400' COMMENT 'Delay in hours between occurences of the event',
+  `length` bigint(20) unsigned NOT NULL DEFAULT '43200' COMMENT 'Length in hours of the event',
+  `description` varchar(255) DEFAULT NULL COMMENT 'Description of the event displayed in console',
+  PRIMARY KEY (`entry`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `game_event`
+--
+
+LOCK TABLES `game_event` WRITE;
+/*!40000 ALTER TABLE `game_event` DISABLE KEYS */;
+/*!40000 ALTER TABLE `game_event` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `game_event_creature`
+--
+
+DROP TABLE IF EXISTS `game_event_creature`;
+CREATE TABLE `game_event_creature` (
+  `guid` int(10) unsigned NOT NULL,
+  `event` mediumint(9) NOT NULL DEFAULT '0' COMMENT 'Put negatives values to remove during event',
+  PRIMARY KEY (`guid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `game_event_creature`
+--
+
+LOCK TABLES `game_event_creature` WRITE;
+/*!40000 ALTER TABLE `game_event_creature` DISABLE KEYS */;
+/*!40000 ALTER TABLE `game_event_creature` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `game_event_gameobject`
+--
+
+DROP TABLE IF EXISTS `game_event_gameobject`;
+CREATE TABLE `game_event_gameobject` (
+  `guid` int(10) unsigned NOT NULL,
+  `event` mediumint(9) NOT NULL DEFAULT '0' COMMENT 'Put negatives values to remove during event',
+  PRIMARY KEY (`guid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `game_event_gameobject`
+--
+
+LOCK TABLES `game_event_gameobject` WRITE;
+/*!40000 ALTER TABLE `game_event_gameobject` DISABLE KEYS */;
+/*!40000 ALTER TABLE `game_event_gameobject` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `game_graveyard_zone`
 --
 
@@ -10421,8 +10485,8 @@ INSERT INTO `spell_affect` VALUES
 (31658,0,0,0,0,0,0,1,0),
 (31659,0,0,0,0,0,0,1,0),
 (31660,0,0,0,0,0,0,1,0),
-(31670,0,0,0,0,0,0,0x500080000,0),
-(31672,0,0,0,0,0,0,0x500080000,0),
+(31670,0,0,0,0,0,0,0x500000200,0),
+(31672,0,0,0,0,0,0,0x500000200,0),
 (31682,0,0,0,0,0,0,32,0),
 (31682,1,0,0,0,0,0,32,0),
 (31683,0,0,0,0,0,0,32,0),
