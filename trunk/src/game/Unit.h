@@ -707,7 +707,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         DiminishingLevels GetDiminishing(DiminishingMechanics  mech);
         void IncrDiminishing(DiminishingMechanics  mech, uint32 duration);
         void UpdateDiminishingTime(DiminishingMechanics  mech);
-        float ApplyDiminishingToDuration(DiminishingMechanics  mech, int32 duration);
+        float ApplyDiminishingToDuration(DiminishingMechanics  mech, int32 duration,Unit* caster);
 
         virtual void Update( uint32 time );
 

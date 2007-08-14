@@ -7561,6 +7561,43 @@ uint8 Player::CanTakeMoreSimilarItems(Item* pItem) const
     return EQUIP_ERR_OK;
 }
 
+bool Player::HasItemTotemCategory( uint32 TotemCategory ) const
+{
+    Item *pItem;
+    for(uint8 i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; ++i)
+    {
+        pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pItem && pItem->GetProto()->TotemCategory == TotemCategory )
+            return true;
+    }
+    for(uint8 i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; ++i)
+    {
+        pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pItem && pItem->GetProto()->TotemCategory == TotemCategory )
+            return true;
+    }
+    Bag *pBag;
+    ItemPrototype const *pBagProto;
+    for(uint8 i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+    {
+        pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pBag )
+        {
+            pBagProto = pBag->GetProto();
+            if( pBagProto )
+            {
+                for(uint32 j = 0; j < pBagProto->ContainerSlots; ++j)
+                {
+                    pItem = GetItemByPos( i, j );
+                    if( pItem && pItem->GetProto()->TotemCategory == TotemCategory )
+                        return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+
 uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap ) const
 {
     dest = 0;

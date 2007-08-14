@@ -6244,10 +6244,24 @@ DiminishingMechanics Unit::Mechanic2DiminishingMechanics(uint32 mech)
     return DIMINISHING_NONE;
 }
 
-float Unit::ApplyDiminishingToDuration(DiminishingMechanics  mech, int32 duration)
+float Unit::ApplyDiminishingToDuration(DiminishingMechanics  mech, int32 duration,Unit* caster)
 {
     if(duration == -1 || mech == DIMINISHING_NONE)
         return 1.0f;
+
+    // Duration of crowd control abilities on pvp target is limited by 12 sec.
+    if(duration > 12000)
+    {
+        // test pet/charm masters instead pets/charmeds
+        Unit const* targetOwner = GetCharmerOrOwner();
+        Unit const* casterOwner = caster->GetCharmerOrOwner();
+
+        Unit const* target = targetOwner ? targetOwner : this;
+        Unit const* source = casterOwner ? casterOwner : caster;
+
+        if(target->GetTypeId() == TYPEID_PLAYER && source->GetTypeId() == TYPEID_PLAYER)
+            duration = 12000;
+    }
 
     float mod = 1.0f;
 

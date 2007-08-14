@@ -444,7 +444,7 @@ void Aura::Update(uint32 diff)
                 float z = MapManager::Instance().GetMap(mapid, m_target)->GetHeight(x,y, m_target->GetPositionZ());
                 // Control the target to not climb or drop when dz > |x|,x = 1.3 for temp.
                 // fixed me if it needs checking when the position will be in water?
-                if(z<=pos_z+1.3 && z>=pos_z-1.3)
+                if((z<=pos_z+1.3 && z>=pos_z-1.3) && m_target->IsWithinLOS(x,y,z)) //+vmaps
                 {
                     m_target->SendMonsterMove(x,y,z,0,true,(diff*2));
                     if(m_target->GetTypeId() != TYPEID_PLAYER)
@@ -457,7 +457,7 @@ void Aura::Update(uint32 diff)
                     x = m_target->GetPositionX() + (speed*sinf(m_fearMoveAngle))/mod;
                     y = m_target->GetPositionY() + (speed*cosf(m_fearMoveAngle))/mod;    
                     z = MapManager::Instance().GetMap(mapid, m_target)->GetHeight(x,y, m_target->GetPositionZ());
-                    if(z<=pos_z+1.3 && z>=pos_z-1.3)
+                    if((z<=pos_z+1.3 && z>=pos_z-1.3) && m_target->IsWithinLOS(x,y,z)) //+vmaps
                     {
                         m_target->SendMonsterMove(x,y,z,0,true,(diff*2));
                         if(m_target->GetTypeId() != TYPEID_PLAYER)
@@ -1763,12 +1763,6 @@ void Aura::HandleModCharm(bool apply, bool Real)
             m_target->SetCharmerGUID(GetCasterGUID());
             m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,caster->getFaction());
 
-            // Note: Apply this to player is most big BAD thing that can be find in this case: 
-            //       This will corrupt player race/class data
-            // FIXME:Apply this to charmed creature also incorrect with big chance but not damage many
-            //       And this not restored and charm end
-            //    m_target->SetUInt32Value(UNIT_FIELD_BYTES_0,2048);
-
             caster->SetCharm(m_target);
 
             if(caster->getVictim()==m_target)
@@ -1789,7 +1783,9 @@ void Aura::HandleModCharm(bool apply, bool Real)
                     CreatureInfo const *cinfo = ((Creature*)m_target)->GetCreatureInfo();
                     if(cinfo && cinfo->type == CREATURE_TYPE_DEMON)
                     {
-                         //just to enable stat window
+                        //to prevent client crash
+                        m_target->SetFlag(UNIT_FIELD_BYTES_0, 2048);
+                        //just to enable stat window
                         charmInfo->SetPetNumber(objmgr.GeneratePetNumber(), true);
                         //if charmed two demons the same session, the 2nd gets the 1st one's name
                         m_target->SetUInt32Value(UNIT_FIELD_PET_NAME_TIMESTAMP, time(NULL));
@@ -1820,14 +1816,35 @@ void Aura::HandleModCharm(bool apply, bool Real)
             {
                 ((Player*)m_target)->setFactionForRace(m_target->getRace());
             }
-            else if(m_target->GetTypeId() == TYPEID_UNIT)
+            else
             {
                 CreatureInfo const *cinfo = ((Creature*)m_target)->GetCreatureInfo();
-                m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
-                if(m_target->GetCharmInfo())
-                    m_target->GetCharmInfo()->SetPetNumber(0, true);
-                else
-                    sLog.outError("Aura::HandleModCharm: target="I64FMTD" with typeid=%d has a charm aura but no charm info!", m_target->GetGUID(), m_target->GetTypeId());
+
+                // restore faction
+                if(((Creature*)m_target)->isPet())
+                {
+                    if(Unit* owner = m_target->GetOwner())
+                        m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,owner->getFaction());
+                    else if(cinfo)
+                        m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
+                }
+                else if(cinfo)                              // normal creature
+                    m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
+
+                // restore UNIT_FIELD_BYTES_0
+                if(cinfo && caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_WARLOCK && cinfo->type == CREATURE_TYPE_DEMON)
+                {
+                    CreatureDataAddon const *cainfo = objmgr.GetCreatureAddon(m_target->GetGUIDLow());
+                    if(cainfo && cainfo->bytes0 != 0)
+                        m_target->SetUInt32Value(UNIT_FIELD_BYTES_0, cainfo->bytes0);
+                    else
+                        m_target->RemoveFlag(UNIT_FIELD_BYTES_0, 2048);
+
+                    if(m_target->GetCharmInfo())
+                        m_target->GetCharmInfo()->SetPetNumber(0, true);
+                    else
+                        sLog.outError("Aura::HandleModCharm: target="I64FMTD" with typeid=%d has a charm aura but no charm info!", m_target->GetGUID(), m_target->GetTypeId());
+                }
             }
 
             caster->SetCharm(0);
@@ -1995,6 +2012,10 @@ void Aura::HandleAuraModDisarm(bool Apply, bool Real)
 
 void Aura::HandleAuraModStun(bool apply, bool Real)
 {
+    // only at real add/remove aura
+    if(!Real)
+        return;
+
     Unit* caster = GetCaster();
 
     if (apply)
@@ -2007,76 +2028,72 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         if (caster && (GetSpellProto()->Mechanic == MECHANIC_KNOCKOUT))
             caster->AttackStop();
 
-        // only at real add aura
-        if(Real)
+        if( caster )
         {
-            if( caster )
+            //If this is a knockout spell for rogues attacker stops
+            if( caster->GetTypeId() == TYPEID_PLAYER && 
+                (GetSpellProto()->Mechanic == MECHANIC_KNOCKOUT || GetSpellProto()->Mechanic == MECHANIC_STUNDED) && GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE )
             {
-                //If this is a knockout spell for rogues attacker stops
-                if( caster->GetTypeId() == TYPEID_PLAYER && 
-                    (GetSpellProto()->Mechanic == MECHANIC_KNOCKOUT || GetSpellProto()->Mechanic == MECHANIC_STUNDED) && GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE )
-                {
-                    caster->AttackStop();
-                }
-
-                //Save last orientation
-                m_target->SetOrientation(m_target->GetAngle(caster));
+                caster->AttackStop();
             }
 
-            // Creature specific
-            if(m_target->GetTypeId() != TYPEID_PLAYER)
-            {
-                ((Creature *)m_target)->StopMoving();
-            }
-
-            WorldPacket data(SMSG_FORCE_MOVE_ROOT, 8);
-
-            data.append(m_target->GetPackGUID());
-            data << uint32(0);
-            m_target->SendMessageToSet(&data,true);
+            //Save last orientation
+            m_target->SetOrientation(m_target->GetAngle(caster));
         }
+
+        // Creature specific
+        if(m_target->GetTypeId() != TYPEID_PLAYER)
+        {
+            ((Creature *)m_target)->StopMoving();
+        }
+
+        WorldPacket data(SMSG_FORCE_MOVE_ROOT, 8);
+
+        data.append(m_target->GetPackGUID());
+        data << uint32(0);
+        m_target->SendMessageToSet(&data,true);
     }
     else
     {
+        // Real remove called after current aura remove from lists, check if other similar auras active
+        if(m_target->HasAuraType(SPELL_AURA_MOD_STUN))
+            return;
+
         m_target->clearUnitState(UNIT_STAT_STUNDED);
         m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
 
-        // only at real remove aura
-        if(Real)
+        if(caster && m_target->isAlive())
+            m_target->SetUInt64Value (UNIT_FIELD_TARGET,GetCasterGUID());
+
+        WorldPacket data(SMSG_FORCE_MOVE_UNROOT, 8+4);
+        data.append(m_target->GetPackGUID());
+        data << uint32(0);
+        m_target->SendMessageToSet(&data,true);
+        if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_HUNTER && GetSpellProto()->SpellIconID == 1721)
         {
-            if(caster && m_target->isAlive())
-                m_target->SetUInt64Value (UNIT_FIELD_TARGET,GetCasterGUID());
+            if( !caster || caster->GetTypeId()!=TYPEID_PLAYER )
+                return;
 
-            WorldPacket data(SMSG_FORCE_MOVE_UNROOT, 8+4);
-            data.append(m_target->GetPackGUID());
-            data << uint32(0);
-            m_target->SendMessageToSet(&data,true);
-            if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_HUNTER && GetSpellProto()->SpellIconID == 1721)
+            uint32 spell_id = 0;
+
+            switch(GetSpellProto()->Id)
             {
-                if( !caster || caster->GetTypeId()!=TYPEID_PLAYER )
-                    return;
-
-                uint32 spell_id = 0;
-
-                switch(GetSpellProto()->Id)
-                {
-                    case 19386: spell_id = 24131; break;
-                    case 24132: spell_id = 24134; break;
-                    case 24133: spell_id = 24135; break;
-                    case 27068: spell_id = 27069; break;
-                    default:
-                        sLog.outError("Spell selection called for unexpected original spell %u, new spell for this spell family?",GetSpellProto()->Id);
-                        return;
-                }
-
-                SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id);
-
-                if(!spellInfo)
-                    return;
-
-                caster->CastSpell(m_target,spellInfo,true,NULL,this);
+            case 19386: spell_id = 24131; break;
+            case 24132: spell_id = 24134; break;
+            case 24133: spell_id = 24135; break;
+            case 27068: spell_id = 27069; break;
+            default:
+                sLog.outError("Spell selection called for unexpected original spell %u, new spell for this spell family?",GetSpellProto()->Id);
                 return;
             }
+
+            SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell_id);
+
+            if(!spellInfo)
+                return;
+
+            caster->CastSpell(m_target,spellInfo,true,NULL,this);
+            return;
         }
     }
 }
@@ -2211,6 +2228,10 @@ void Aura::HandleInvisibilityDetect(bool Apply, bool Real)
 
 void Aura::HandleAuraModRoot(bool apply, bool Real)
 {
+    // only at real add/remove aura
+    if(!Real)
+        return;
+
     Unit* caster = GetCaster();
     uint32 apply_stat = UNIT_STAT_ROOT;
     if (apply)
@@ -2219,48 +2240,57 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
         m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
         m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
 
-        // only at real add aura
-        if(Real)
-        {
-            //Save last orientation
-            if (caster)
-                m_target->SetOrientation(m_target->GetAngle(caster));
+        //Save last orientation
+        if (caster)
+            m_target->SetOrientation(m_target->GetAngle(caster));
 
-            if(m_target->GetTypeId() == TYPEID_PLAYER)
-            {
-                WorldPacket data(SMSG_FORCE_MOVE_ROOT, 10);
-                data.append(m_target->GetPackGUID());
-                data << (uint32)2;
-                m_target->SendMessageToSet(&data,true);
-            }
-            else
-                ((Creature *)m_target)->StopMoving();
+        if(m_target->GetTypeId() == TYPEID_PLAYER)
+        {
+            WorldPacket data(SMSG_FORCE_MOVE_ROOT, 10);
+            data.append(m_target->GetPackGUID());
+            data << (uint32)2;
+            m_target->SendMessageToSet(&data,true);
         }
+        else
+            ((Creature *)m_target)->StopMoving();
     }
     else
     {
+        // Real remove called after current aura remove from lists, check if other similar auras active
+        if(m_target->HasAuraType(SPELL_AURA_MOD_ROOT))
+            return;
+
         m_target->clearUnitState(UNIT_STAT_ROOT);
         m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
         if(caster && m_target->isAlive())                   // set creature facing on root effect if alive
             m_target->SetUInt64Value (UNIT_FIELD_TARGET,GetCasterGUID());
 
-        // only at real remove aura
-        if(Real)
+        if(m_target->GetTypeId() == TYPEID_PLAYER)
         {
-            if(m_target->GetTypeId() == TYPEID_PLAYER)
-            {
-                WorldPacket data(SMSG_FORCE_MOVE_UNROOT, 10);
-                data.append(m_target->GetPackGUID());
-                data << (uint32)2;
-                m_target->SendMessageToSet(&data,true);
-            }
+            WorldPacket data(SMSG_FORCE_MOVE_UNROOT, 10);
+            data.append(m_target->GetPackGUID());
+            data << (uint32)2;
+            m_target->SendMessageToSet(&data,true);
         }
     }
 }
 
 void Aura::HandleAuraModSilence(bool apply, bool Real)
 {
-    m_target->m_silenced = apply;
+    // only at real add/remove aura
+    if(!Real)
+        return;
+
+    if(apply)
+        m_target->m_silenced = true;
+    else
+    {
+        // Real remove called after current aura remove from lists, check if other similar auras active
+        if(m_target->HasAuraType(SPELL_AURA_MOD_SILENCE))
+            return;
+
+        m_target->m_silenced = false;
+    }
 }
 
 void Aura::HandleModThreat(bool apply, bool Real)
