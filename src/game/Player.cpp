@@ -1547,7 +1547,9 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         if(pet && m_oldpetnumber)
         {
             Pet* NewPet = new Pet(this);
-            NewPet->LoadPetFromDB(this, 0, m_oldpetnumber, true);
+            if(!NewPet->LoadPetFromDB(this, 0, m_oldpetnumber, true))
+                 delete NewPet;
+
             m_oldpetnumber = 0;
         }
     }
@@ -2429,9 +2431,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
             return false;
     }
 
-    PlayerSpell *newspell;
-
-    newspell = new PlayerSpell;
+    PlayerSpell *newspell = new PlayerSpell;
     newspell->active = active;
     newspell->state = state;
 

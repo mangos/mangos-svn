@@ -142,7 +142,7 @@ bool ArenaTeam::AddMember(uint64 PlayerGuid)
     return true;
 }
 
-void ArenaTeam::LoadArenaTeamFromDB(uint32 ArenaTeamId)
+bool ArenaTeam::LoadArenaTeamFromDB(uint32 ArenaTeamId)
 {
     LoadStatsFromDB(ArenaTeamId);
     LoadMembersFromDB(ArenaTeamId);
@@ -151,7 +151,7 @@ void ArenaTeam::LoadArenaTeamFromDB(uint32 ArenaTeamId)
     QueryResult *result = sDatabase.PQuery("SELECT `arenateamid`,`name`,`captainguid`,`type`,`EmblemStyle`,`EmblemColor`,`BorderStyle`,`BorderColor`,`BackgroundColor` FROM `arena_team` WHERE `arenateamid` = '%u'", ArenaTeamId);
 
     if(!result)
-        return;
+        return false;
 
     Field *fields = result->Fetch();
 
@@ -166,6 +166,8 @@ void ArenaTeam::LoadArenaTeamFromDB(uint32 ArenaTeamId)
     BackgroundColor = fields[8].GetUInt32();
 
     delete result;
+
+    return true;
 }
 
 void ArenaTeam::LoadStatsFromDB(uint32 ArenaTeamId)

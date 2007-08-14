@@ -1494,7 +1494,6 @@ void ObjectMgr::LoadGuilds()
 
 void ObjectMgr::LoadArenaTeams()
 {
-    ArenaTeam *newarenateam;
     uint32 count = 0;
 
     QueryResult *result = sDatabase.Query( "SELECT `arenateamid` FROM `arena_team`" );
@@ -1520,8 +1519,12 @@ void ObjectMgr::LoadArenaTeams()
         bar.step();
         count++;
 
-        newarenateam = new ArenaTeam;
-        newarenateam->LoadArenaTeamFromDB(fields[0].GetUInt32());
+        ArenaTeam *newarenateam = new ArenaTeam;
+        if(!newarenateam->LoadArenaTeamFromDB(fields[0].GetUInt32()))
+        {
+            delete newarenateam;
+            continue;
+        }
         AddArenaTeam(newarenateam);
     }while( result->NextRow() );
 
