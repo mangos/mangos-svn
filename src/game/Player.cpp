@@ -10474,22 +10474,24 @@ void Player::AddQuest( Quest *pQuest, Object *questGiver )
                 uState = QUEST_NEW;
         }
 
-        mQuestStatus[quest_id].m_quest = pQuest;
-        mQuestStatus[quest_id].m_status = QUEST_STATUS_INCOMPLETE;
-        mQuestStatus[quest_id].m_explored = false;
+        QuestStatusData& questStatusData = mQuestStatus[quest_id];
 
-        mQuestStatus[quest_id].uState = uState;             // mark quest as new or changed
+        questStatusData.m_quest = pQuest;
+        questStatusData.m_status = QUEST_STATUS_INCOMPLETE;
+        questStatusData.m_explored = false;
+
+        questStatusData.uState = uState;             // mark quest as new or changed
 
         if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
         {
             for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
-                mQuestStatus[quest_id].m_itemcount[i] = 0;
+                questStatusData.m_itemcount[i] = 0;
         }
 
         if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL_OR_CAST ) )
         {
             for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
-                mQuestStatus[quest_id].m_creatureOrGOcount[i] = 0;
+                questStatusData.m_creatureOrGOcount[i] = 0;
         }
 
         GiveQuestSourceItem( quest_id );
@@ -10508,7 +10510,7 @@ void Player::AddQuest( Quest *pQuest, Object *questGiver )
         }
         else
         {
-            mQuestStatus[quest_id].m_timer = 0;
+            questStatusData.m_timer = 0;
             SetUInt32Value( log_slot + 2, 0 );
         }
 
@@ -11373,7 +11375,7 @@ bool Player::HasQuestForItem( uint32 itemid )
 {
     for( QuestStatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++i )
     {
-        quest_status qs=i->second;
+        QuestStatusData qs=i->second;
 
         if (qs.m_status == QUEST_STATUS_INCOMPLETE)
         {
@@ -12268,58 +12270,61 @@ void Player::_LoadQuestStatus()
             Quest* pQuest = objmgr.mQuestTemplates[quest_id];// used to be new, no delete?
             if( pQuest )
             {
-                mQuestStatus[quest_id].m_quest = pQuest;
+                // find or create
+                QuestStatusData& questStatusData = mQuestStatus[quest_id];
+
+                questStatusData.m_quest = pQuest;
 
                 uint32 qstatus = fields[1].GetUInt32();
                 if(qstatus < MAX_QUEST_STATUS)
-                    mQuestStatus[quest_id].m_status = QuestStatus(qstatus);
+                    questStatusData.m_status = QuestStatus(qstatus);
                 else
                 {
-                    mQuestStatus[quest_id].m_status = QUEST_STATUS_NONE;
+                    questStatusData.m_status = QUEST_STATUS_NONE;
                     sLog.outError("Player %s have invalid quest %d status (%d), replaced by QUEST_STATUS_NONE(0).",GetName(),quest_id,qstatus);
                 }
 
-                mQuestStatus[quest_id].m_rewarded = ( fields[2].GetUInt8() > 0 );
-                mQuestStatus[quest_id].m_explored = ( fields[3].GetUInt8() > 0 );
+                questStatusData.m_rewarded = ( fields[2].GetUInt8() > 0 );
+                questStatusData.m_explored = ( fields[3].GetUInt8() > 0 );
 
                 time_t quest_time = time_t(fields[4].GetUInt64());
 
-                if( objmgr.mQuestTemplates[quest_id]->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) && !GetQuestRewardStatus(quest_id) )
+                if( questStatusData.m_quest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) && !GetQuestRewardStatus(quest_id) &&  questStatusData.m_status != QUEST_STATUS_NONE )
                 {
                     AddTimedQuest( quest_id );
 
                     if (quest_time <= sWorld.GetGameTime())
-                        mQuestStatus[quest_id].m_timer = 1;
+                        questStatusData.m_timer = 1;
                     else
-                        mQuestStatus[quest_id].m_timer = (quest_time - sWorld.GetGameTime()) * 1000;
+                        questStatusData.m_timer = (quest_time - sWorld.GetGameTime()) * 1000;
                 }
                 else
                     quest_time = 0;
 
-                mQuestStatus[quest_id].m_creatureOrGOcount[0] = fields[5].GetUInt32();
-                mQuestStatus[quest_id].m_creatureOrGOcount[1] = fields[6].GetUInt32();
-                mQuestStatus[quest_id].m_creatureOrGOcount[2] = fields[7].GetUInt32();
-                mQuestStatus[quest_id].m_creatureOrGOcount[3] = fields[8].GetUInt32();
-                mQuestStatus[quest_id].m_itemcount[0] = fields[9].GetUInt32();
-                mQuestStatus[quest_id].m_itemcount[1] = fields[10].GetUInt32();
-                mQuestStatus[quest_id].m_itemcount[2] = fields[11].GetUInt32();
-                mQuestStatus[quest_id].m_itemcount[3] = fields[12].GetUInt32();
+                questStatusData.m_creatureOrGOcount[0] = fields[5].GetUInt32();
+                questStatusData.m_creatureOrGOcount[1] = fields[6].GetUInt32();
+                questStatusData.m_creatureOrGOcount[2] = fields[7].GetUInt32();
+                questStatusData.m_creatureOrGOcount[3] = fields[8].GetUInt32();
+                questStatusData.m_itemcount[0] = fields[9].GetUInt32();
+                questStatusData.m_itemcount[1] = fields[10].GetUInt32();
+                questStatusData.m_itemcount[2] = fields[11].GetUInt32();
+                questStatusData.m_itemcount[3] = fields[12].GetUInt32();
 
-                mQuestStatus[quest_id].uState = QUEST_UNCHANGED;
+                questStatusData.uState = QUEST_UNCHANGED;
 
                 // add to quest log
                 if( slot < MAX_QUEST_LOG_SIZE &&
-                    ( mQuestStatus[quest_id].m_status==QUEST_STATUS_INCOMPLETE ||
-                    mQuestStatus[quest_id].m_status==QUEST_STATUS_COMPLETE && !mQuestStatus[quest_id].m_rewarded ) )
+                    ( questStatusData.m_status==QUEST_STATUS_INCOMPLETE ||
+                    questStatusData.m_status==QUEST_STATUS_COMPLETE && !questStatusData.m_rewarded ) )
                 {
                     uint32 state = 0;
-                    if(mQuestStatus[quest_id].m_status == QUEST_STATUS_COMPLETE)
+                    if(questStatusData.m_status == QUEST_STATUS_COMPLETE)
                         state |= 1 << 24;
 
                     for(uint8 idx = 0; idx < QUEST_OBJECTIVES_COUNT; ++idx)
                     {
-                        if(mQuestStatus[quest_id].m_creatureOrGOcount[idx])
-                            state += (mQuestStatus[quest_id].m_creatureOrGOcount[idx] << ( 6 * idx ));
+                        if(questStatusData.m_creatureOrGOcount[idx])
+                            state += (questStatusData.m_creatureOrGOcount[idx] << ( 6 * idx ));
                     }
 
                     SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*slot+0,quest_id);
