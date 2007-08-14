@@ -62,10 +62,13 @@ class Path
                 len += (float)sqrt( xd * xd + yd*yd + zd*zd );
             }
 
-            xd = x - i_nodes[curnode-1].x;
-            yd = y - i_nodes[curnode-1].y;
-            zd = z - i_nodes[curnode-1].z;
-            len += (float)sqrt( xd * xd + yd*yd + zd*zd );
+            if(curnode > 0)
+            {
+                xd = x - i_nodes[curnode-1].x;
+                yd = y - i_nodes[curnode-1].y;
+                zd = z - i_nodes[curnode-1].z;
+                len += (float)sqrt( xd * xd + yd*yd + zd*zd );
+            }
 
             return len;
         }
