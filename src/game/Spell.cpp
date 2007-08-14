@@ -3052,6 +3052,24 @@ uint8 Spell::CheckItems()
     if(totems != 0)
         return uint8(0x70); // TODO: replace this const
 
+    //Check items for TotemCategory
+    uint32 TotemCategory = 2;
+    for(int i=0;i<2;++i)
+    {
+        if(m_spellInfo->TotemCategory[i] != 0)
+        {
+            if( p_caster->HasItemTotemCategory(m_spellInfo->TotemCategory[i]) )
+            {
+                TotemCategory -= 1;
+                continue;
+            }
+        }
+        else
+            TotemCategory -= 1;
+    }
+    if(TotemCategory != 0)
+        return uint8(0x70);                                 // TODO: replace this const
+
     for(int i = 0; i < 3; i++)
     {
         switch (m_spellInfo->Effect[i])

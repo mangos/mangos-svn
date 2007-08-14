@@ -1007,7 +1007,7 @@ void Spell::EffectApplyAura(uint32 i)
             (m_spellInfo->SpellVisual == 185 && m_spellInfo->SpellIconID == 228))
             mech = DIMINISHING_NONE;
 
-        diminishingMod = unitTarget->ApplyDiminishingToDuration(mech,Aur->GetAuraDuration());
+        diminishingMod = unitTarget->ApplyDiminishingToDuration(mech,Aur->GetAuraDuration(),m_caster);
 
         int32 duration = Aur->GetAuraDuration();
 
