@@ -222,15 +222,24 @@ void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
     if(objmgr.GetPlayer(guid))
         return;
 
-    {
-        Player plr(this);
+    uint32 accountId = 0;
+    std::string name;
 
-        // "GetAccountId()==db stored account id" checked in LoadFromDB (prevent deleting not own character using cheating tools)
-        if(!plr.LoadFromDB( GUID_LOPART(guid) ))
-            return;
-        sLog.outBasic("Account: %d Delete Character:[%s] (guid:%u)",GetAccountId(),plr.GetName(),guid);
-        plr.DeleteFromDB();
+    QueryResult *result = sDatabase.PQuery("SELECT `account`,`name` FROM `character` WHERE `guid`='%u'", guid);
+    if(result)
+    {
+        Field *fields = result->Fetch();
+        accountId = fields[0].GetUInt32();
+        name = fields[1].GetCppString();
+        delete result;
     }
+
+    // prevent deleting other players' characters using cheating tools
+    if(accountId != GetAccountId())
+        return;
+
+    sLog.outBasic("Account: %d Delete Character:[%s] (guid:%u)",GetAccountId(),name.c_str(),guid);
+    Player::DeleteFromDB(guid, GetAccountId());
 
     WorldPacket data(SMSG_CHAR_DELETE, 1);
     data << (uint8)CHAR_DELETE_SUCCESS;

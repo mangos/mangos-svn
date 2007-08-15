@@ -28,7 +28,11 @@ class MANGOS_DLL_SPEC TargetedMovementGenerator : public MovementGenerator
 {
     public:
 
-        TargetedMovementGenerator(Unit &target) : i_offset(0), i_angle(0) { i_target.link(&target, this); }
+        TargetedMovementGenerator(Unit &target) : i_offset(0), i_angle(0)
+        {
+            i_target.link(&target, this);
+            float size_dummy = target.GetObjectSize();
+        }
         TargetedMovementGenerator(Unit &target, float offset, float angle) : i_offset(offset), i_angle(angle) { i_target.link(&target, this); }
         ~TargetedMovementGenerator() {}
 

@@ -111,7 +111,9 @@ enum ITEM_BONDING_TYPE
 // masks for ITEM_FIELD_FLAGS field
 enum ITEM_FLAGS
 {
-    ITEM_FLAGS_BINDED                           = 1
+    ITEM_FLAGS_BINDED                           = 1,
+    ITEM_FLAGS_CONJURED                         = 2,
+    ITEM_FLAGS_WRAPPED                          = 8
 };
 
 enum BAG_FAMILY

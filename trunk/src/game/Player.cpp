@@ -3117,41 +3117,43 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
     return TRAINER_SPELL_GREEN;
 }
 
-void Player::DeleteFromDB()
+void Player::DeleteFromDB(uint64 playerguid, uint32 accountId)
 {
-    uint32 guid = GetGUIDLow();
+    uint32 guid = GUID_LOPART(playerguid);
 
     // convert corpse to bones if exist (to prevent exiting Corpse in World without DB entry)
     // bones will be deleted by corpse/bones deleting thread shortly
-    SpawnCorpseBones();
+    ObjectAccessor::Instance().ConvertCorpseForPlayer(playerguid);
 
     // remove from guild
-    if(GetGuildId() != 0)
+    uint32 guildId = GetGuildIdFromDB(playerguid);
+    if(guildId != 0)
     {
-        Guild* guild = objmgr.GetGuildById(GetGuildId());
+        Guild* guild = objmgr.GetGuildById(guildId);
         if(guild)
             guild->DelMember(guid);
     }
 
-    // remove from group
-    UninviteFromGroup();
-    RemoveFromGroup();
+    // the player was uninvited already on logout so just remove from group
+    QueryResult *resultGroup = sDatabase.PQuery("SELECT `leaderGuid` FROM `group_member` WHERE `memberGuid`='%u'", guid);
+    if(resultGroup)
+    {
+        uint64 leaderGuid = MAKE_GUID((*resultGroup)[0].GetUInt32(),HIGHGUID_PLAYER);
+        delete resultGroup;
+        Group* group = objmgr.GetGroupByLeader(leaderGuid);
+        if(group)
+        {
+            RemoveFromGroup(group, playerguid);
+        }
+    }
 
     // remove signs from petitions (also remove petitions if owner);
-    RemovePetitionsAndSigns(GetGUID(), 10);
+    RemovePetitionsAndSigns(playerguid, 10);
 
-    // unsummon and delete pet not required: player deleted from CLI or character list with not loaded pet.
+    // unsummon and delete for pets is not required: player deleted from CLI or character list with not loaded pet.
 
     // NOW we can finally clear other DB data related to character
     sDatabase.BeginTransaction();
-
-    for(int i = 0; i < BANK_SLOT_ITEM_END; i++)
-    {
-        if(m_items[i] == NULL)
-            continue;
-        m_items[i]->DeleteFromDB();                         // Bag items delete also by virtual call Bag::DeleteFromDB
-    }
-
     sDatabase.PExecute("DELETE FROM `character` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_action` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_aura` WHERE `guid` = '%u'",guid);
@@ -3167,24 +3169,22 @@ void Player::DeleteFromDB()
     sDatabase.PExecute("DELETE FROM `character_ticket` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_tutorial` WHERE `guid` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `item_instance` WHERE `owner_guid` = '%u'",guid);
-
     sDatabase.PExecute("DELETE FROM `character_social` WHERE `guid` = '%u' OR `friend`='%u'",guid,guid);
-    m_ignorelist.clear();
-
     sDatabase.PExecute("DELETE FROM `mail` WHERE `receiver` = '%u'",guid);
     sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u'",guid);
     sDatabase.CommitTransaction();
 
-    //loginDatabase.PExecute("UPDATE `realmcharacters` SET `numchars` = `numchars` - 1 WHERE `acctid` = %d AND `realmid` = %d", GetSession()->GetAccountId(), realmID);
-    QueryResult *resultCount = sDatabase.PQuery("SELECT COUNT(guid) FROM `character` WHERE `account` = '%u'", GetSession()->GetAccountId());
-    uint32 charCount = 0;
+    loginDatabase.PExecute("UPDATE `realmcharacters` SET `numchars` = `numchars` - 1 WHERE `acctid` = %d AND `realmid` = %d", accountId, realmID);
+    // TODO: The following is much safer in theory but in practice it doesn't always work because
+    // there is a chance that the player will not have been deleted from the character table yet
+    /*QueryResult *resultCount = sDatabase.PQuery("SELECT COUNT(guid) FROM `character` WHERE `account` = '%u'", accountId);
     if (resultCount)
     {
         Field *fields = resultCount->Fetch();
-        charCount = fields[0].GetUInt32();
+        uint32 charCount = fields[0].GetUInt32();
         delete resultCount;
-        loginDatabase.PExecute("INSERT INTO `realmcharacters` (`numchars`, `acctid`, `realmid`) VALUES (%u, %u, %u) ON DUPLICATE KEY UPDATE `numchars` = '%u'", charCount, GetSession()->GetAccountId(), realmID, charCount);
-    }
+        loginDatabase.PExecute("INSERT INTO `realmcharacters` (`numchars`, `acctid`, `realmid`) VALUES (%u, %u, %u) ON DUPLICATE KEY UPDATE `numchars` = '%u'", charCount, accountId, realmID, charCount);
+    }*/
 }
 
 void Player::SetMovement(uint8 pType)
@@ -9038,7 +9038,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
                 DestroyItem(slot,i,update);
         }
 
-        if(pItem->HasFlag(ITEM_FIELD_FLAGS, 8))
+        if(pItem->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_WRAPPED))
             sDatabase.PExecute("DELETE FROM `character_gifts` WHERE `item_guid` = '%u'", pItem->GetGUIDLow());
 
         //pItem->SetOwnerGUID(0);
@@ -12149,6 +12149,15 @@ void Player::_LoadInventory(uint32 timediff)
             if(!item->LoadFromDB(item_guid, GetGUID(), result))
             {
                 delete item;
+                continue;
+            }
+
+            // "Conjured items disappear if you are logged out for more than 15 minutes"
+            if ((timediff > 15*60) && (item->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_CONJURED)))
+            {
+                sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `item` = '%u'", item_guid);
+                item->FSetState(ITEM_REMOVED);
+                item->SaveToDB();                           // it also deletes item object !
                 continue;
             }
 

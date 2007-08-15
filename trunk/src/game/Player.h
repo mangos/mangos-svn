@@ -1214,7 +1214,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendMessageToSet(WorldPacket *data, bool self);// overwrite Object::SendMessageToSet
         void SendMessageToOwnTeamSet(WorldPacket *data, bool self);
 
-        void DeleteFromDB();
+        static void DeleteFromDB(uint64 playerguid, uint32 accountId);
 
         Corpse *GetCorpse() const;
         void SpawnCorpseBones();
