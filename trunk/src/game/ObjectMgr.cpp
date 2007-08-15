@@ -3758,35 +3758,35 @@ void ObjectMgr::LoadQuestRelationsHelper(QuestRelations& map,char const* table)
 
 // Character Dumps (Write/Load)
 
-#define NUM_TBLS 13
+#define DUMP_TABLE_COUNT 13
 
-struct tbl
+struct DumpTable
 {
-    char name[30];
+    char const* name;
     uint8 type;
 };
 
-tbl tbls[NUM_TBLS] = {
-    { "character", 1 },
-    { "character_action", 0 },
-    { "character_aura", 0 },
-    { "character_homebind", 0 },
-    { "character_inventory", 2 },
-    { "character_kill", 0 },
-    { "character_queststatus", 0 },
-    { "character_reputation", 0 },
-    { "character_spell", 0 },
+static DumpTable dumpTables[DUMP_TABLE_COUNT] = {
+    { "character",                1 },
+    { "character_action",         0 },
+    { "character_aura",           0 },
+    { "character_homebind",       0 },
+    { "character_inventory",      2 },
+    { "character_kill",           0 },
+    { "character_queststatus",    0 },
+    { "character_reputation",     0 },
+    { "character_spell",          0 },
     { "character_spell_cooldown", 0 },
-    { "item_instance", 3 },
-    { "character_ticket", 0 },
-    { "character_tutorial", 0 }
+    { "item_instance",            3 },
+    { "character_ticket",         0 },
+    { "character_tutorial",       0 }
 };
 
-std::string CreateDumpString(char *table, QueryResult *result)
+std::string CreateDumpString(char const* tableName, QueryResult *result)
 {
-    if(!table || !result) return "";
+    if(!tableName || !result) return "";
     std::ostringstream ss;
-    ss << "INSERT INTO `" << table << "` VALUES (";
+    ss << "INSERT INTO `" << tableName << "` VALUES (";
     Field *fields = result->Fetch();
     for(uint32 i = 0; i < result->GetFieldCount(); i++)
     {
@@ -3803,7 +3803,7 @@ std::string CreateDumpString(char *table, QueryResult *result)
     return ss.str();
 }
 
-bool DumpPlayerTable(FILE *file, uint32 guid, char *tableFrom, char *tableTo, int8 type = 0)
+bool DumpPlayerTable(FILE *file, uint32 guid, char const*tableFrom, char const*tableTo, uint8 type = 0)
 {
     if (!file || !tableFrom || !tableTo) return false;
     QueryResult *result = sDatabase.PQuery("SELECT * FROM `%s` WHERE `%s` = '%d'", tableFrom, type != 3 ? "guid" : "owner_guid", guid);
@@ -3823,8 +3823,8 @@ bool ObjectMgr::WritePlayerDump(std::string file, uint32 guid)
     FILE *fout = fopen(file.c_str(), "w");
     if (!fout) { sLog.outError("Failed to open file!\r\n"); return false; }
 
-    for(int i = 0; i < NUM_TBLS; i++)
-        DumpPlayerTable(fout, guid, tbls[i].name, tbls[i].name, tbls[i].type);
+    for(int i = 0; i < DUMP_TABLE_COUNT; i++)
+        DumpPlayerTable(fout, guid, dumpTables[i].name, dumpTables[i].name, dumpTables[i].type);
 
     // TODO: Add pets/instance/group/gifts..
     // TODO: Add a dump level option to skip some non-important tables
@@ -3992,9 +3992,9 @@ bool ObjectMgr::LoadPlayerDump(std::string file, uint32 account, std::string nam
         // determine table name and load type
         std::string tn = gettablename(line);
         uint8 type, i;
-        for(i = 0; i < NUM_TBLS; i++)
-            if (tn == tbls[i].name) { type = tbls[i].type; break; }
-        if (i == NUM_TBLS)
+        for(i = 0; i < DUMP_TABLE_COUNT; i++)
+            if (tn == dumpTables[i].name) { type = dumpTables[i].type; break; }
+        if (i == DUMP_TABLE_COUNT)
         {
             sLog.outError("LoadPlayerDump: Unknown table: '%s'!", tn.c_str());
             ROLLBACK;
