@@ -73,6 +73,7 @@ class MANGOS_DLL_SPEC WorldSession
         ~WorldSession();
 
         bool PlayerLoading() { return m_playerLoading; }
+        bool PlayerLogout() const { return m_playerLogout; }
 
         void SizeError(WorldPacket const& packet, uint32 size) const;
 
@@ -92,11 +93,7 @@ class MANGOS_DLL_SPEC WorldSession
         bool IsTBC() const { return m_isTBC; }
 
         /// Is the user engaged in a log out process?
-        bool isLogingOut() const
-        {
-            if (_logoutTime) return true;
-            else return false;
-        }
+        bool isLogingOut() const { return _logoutTime || m_playerLogout; }
 
         /// Engage the logout process for the user
         void LogoutRequest(time_t requestTime)
@@ -561,7 +558,8 @@ class MANGOS_DLL_SPEC WorldSession
         bool m_isTBC;
 
         time_t _logoutTime;
-        bool m_playerLoading;
+        bool m_playerLoading;                               // code processed in LoginPlayer
+        bool m_playerLogout;                             // code processed in LogoutPlayer
         bool m_playerRecentlyLogout;
 
         void FillOpcodeHandlerHashTable();

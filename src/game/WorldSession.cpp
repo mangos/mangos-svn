@@ -44,7 +44,7 @@
 WorldSession::WorldSession(uint32 id, WorldSocket *sock, uint32 sec, bool tbc, time_t mute_time) :
 LookingForGroup_auto_join(false), LookingForGroup_auto_add(false), m_muteTime(mute_time),
 _player(NULL), _socket(sock),_security(sec), _accountId(id), m_isTBC(tbc),
-_logoutTime(0), m_playerLoading(false), m_playerRecentlyLogout(false)
+_logoutTime(0), m_playerLoading(false), m_playerLogout(false), m_playerRecentlyLogout(false)
 {
     FillOpcodeHandlerHashTable();
 }
@@ -583,6 +583,8 @@ bool WorldSession::Update(uint32 diff)
 /// %Log the player out
 void WorldSession::LogoutPlayer(bool Save)
 {
+    m_playerLogout = true;
+
     if (_player)
     {
         ///- If the player just died before logging out, make him appear as a ghost
@@ -715,6 +717,7 @@ void WorldSession::LogoutPlayer(bool Save)
         sLog.outDebug( "SESSION: Sent SMSG_LOGOUT_COMPLETE Message" );
     }
 
+    m_playerLogout = false;
     m_playerRecentlyLogout = true;
     LogoutRequest(0);
 }

@@ -148,6 +148,8 @@ Player::Player (WorldSession *session): Unit( 0 )
 
     for ( int aX = 0 ; aX < 8 ; aX++ )
         m_Tutorials[ aX ] = 0x00;
+    m_TutorialsChanged = false;
+
     ItemsSetEff[0]=0;
     ItemsSetEff[1]=0;
     ItemsSetEff[2]=0;
@@ -1468,8 +1470,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
         if (map && MapManager::Instance().CanPlayerEnter(mapid, this) &&  map->AddInstanced(this))
         {
-            if (oldmap) oldmap->Remove(this, false);
-
+            // send transfer packets
             WorldPacket data(SMSG_TRANSFER_PENDING, (4+4+4));
             data << uint32(mapid);
             if (m_transport)
@@ -1488,6 +1489,9 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 data << (uint32)mapid << (float)x << (float)y << (float)z << (float)orientation;
             }
             GetSession()->SendPacket( &data );
+
+            // remove from old map now
+            if (oldmap) oldmap->Remove(this, false);
 
             data.Initialize(SMSG_UNKNOWN_811, 4);
             data << uint32(0);
@@ -12489,6 +12493,8 @@ void Player::_LoadTutorials()
 
         delete result;
     }
+
+    m_TutorialsChanged = false;
 }
 
 /*********************************************************/
@@ -12877,6 +12883,9 @@ void Player::_SaveSpells()
 
 void Player::_SaveTutorials()
 {
+    if(!m_TutorialsChanged)
+        return;
+
     uint32 Rows=0;
     // it's better than rebuilding indexes multiple times
     QueryResult *result = sDatabase.PQuery("SELECT count(*) AS r FROM `character_tutorial` WHERE `guid` = '%u'", GetGUIDLow() );
@@ -12895,6 +12904,8 @@ void Player::_SaveTutorials()
     {
         sDatabase.PExecute("INSERT INTO `character_tutorial` (`guid`,`tut0`,`tut1`,`tut2`,`tut3`,`tut4`,`tut5`,`tut6`,`tut7`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7]);
     };
+
+    m_TutorialsChanged = false;
 }
 
 void Player::outDebugValues() const

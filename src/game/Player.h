@@ -963,7 +963,11 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetTutorialInt(uint32 intId, uint32 value)
         {
             ASSERT( (intId < 8) );
-            m_Tutorials[intId] = value;
+            if(m_Tutorials[intId]!=value)
+            {
+                m_Tutorials[intId] = value;
+                m_TutorialsChanged = true;
+            }
         }
         bool HasItemInBackpack (uint32 itemId, uint32 count = 1) { return false; }
         bool HasSpaceForItemInBackpack (uint32 itemId, uint32 count = 1) { return false; }
@@ -1644,7 +1648,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 tradeGold;
 
         time_t m_nextThinkTime;
+
         uint32 m_Tutorials[8];
+        bool   m_TutorialsChanged;
+
         uint32 m_regenTimer;
         uint32 m_breathTimer;
         uint32 m_drunkTimer;
