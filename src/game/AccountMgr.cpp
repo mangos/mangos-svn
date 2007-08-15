@@ -72,15 +72,13 @@ int AccountMgr::DeleteAccount(uint32 accid)
         {
             Field *fields = result->Fetch();
             uint32 guidlo = fields[0].GetUInt32();
+            uint64 guid = MAKE_GUID(guidlo, HIGHGUID_PLAYER);
 
             // kick if player currently
-            if(Player* p = objmgr.GetPlayer(MAKE_GUID(guidlo,HIGHGUID_PLAYER)))
+            if(Player* p = objmgr.GetPlayer(guid))
                 p->GetSession()->KickPlayer();
 
-            WorldSession acc_s(accid,NULL,0,true,0);        // some invalid session
-            Player acc_player(&acc_s);
-            acc_player.LoadFromDB(guidlo);
-            acc_player.DeleteFromDB();
+            Player::DeleteFromDB(guid, accid);
         } while (result->NextRow());
 
         delete result;
