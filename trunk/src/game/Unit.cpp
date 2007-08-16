@@ -3931,6 +3931,20 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
         default: break;
     }
 
+    switch(dummySpell->SpellFamilyName)
+    {
+        case SPELLFAMILY_SHAMAN:
+            if(dummySpell->SpellFamilyFlags==0x40000000000LL)
+            {
+                int32 HealBasePoints0 = dummySpell->EffectBasePoints[0];
+                CastCustomSpell(this,379,&HealBasePoints0,NULL,NULL,true,NULL,triggredByAura);
+                return;
+            }
+            break;
+        default:
+            break;
+    }
+
     // Non SpellID checks
     switch(dummySpell->SpellIconID)
     {
