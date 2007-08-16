@@ -76,7 +76,11 @@ int AccountMgr::DeleteAccount(uint32 accid)
 
             // kick if player currently
             if(Player* p = objmgr.GetPlayer(guid))
-                p->GetSession()->KickPlayer();
+            {
+                WorldSession* s = p->GetSession();
+                s->KickPlayer();                            // mark session to remove at next session list update
+                s->LogoutPlayer(false);                     // logout player without waiting next session list update
+            }
 
             Player::DeleteFromDB(guid, accid);
         } while (result->NextRow());
