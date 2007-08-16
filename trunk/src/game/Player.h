@@ -969,8 +969,6 @@ class MANGOS_DLL_SPEC Player : public Unit
                 m_TutorialsChanged = true;
             }
         }
-        bool HasItemInBackpack (uint32 itemId, uint32 count = 1) { return false; }
-        bool HasSpaceForItemInBackpack (uint32 itemId, uint32 count = 1) { return false; }
 
         QuestStatusMap& getQuestStatusMap() { return mQuestStatus; };
 
@@ -1128,6 +1126,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UninviteFromGroup();
         static void RemoveFromGroup(Group* group, uint64 guid);
         void RemoveFromGroup() { RemoveFromGroup(GetGroup(),GetGUID()); }
+        void SendUpdateToOutOfRangeGroupMembers();
 
         void SetInGuild(uint32 GuildId) { SetUInt32Value(PLAYER_GUILDID, GuildId); Player::SetUInt32ValueInDB(PLAYER_GUILDID, GuildId, this->GetGUID()); }
         void SetRank(uint32 rankId){ SetUInt32Value(PLAYER_GUILDRANK, rankId); Player::SetUInt32ValueInDB(PLAYER_GUILDRANK, rankId, this->GetGUID()); }

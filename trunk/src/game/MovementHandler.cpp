@@ -32,7 +32,60 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug( "WORLD: got MSG_MOVE_WORLDPORT_ACK." );
 
-    MapManager::Instance().GetMap(GetPlayer()->GetMapId(), GetPlayer())->Remove(GetPlayer(),false);
+    MapEntry const* mEntry = sMapStore.LookupEntry(GetPlayer()->GetMapId());
+    if(!mEntry)
+    {
+        LogoutPlayer(false);
+        return;
+    }
+
+    // resurrect character at enter into instance where his corpse exist
+    Corpse *corpse = GetPlayer()->GetCorpse();
+    if (corpse && corpse->GetType() == CORPSE_RESURRECTABLE && corpse->GetMapId() == GetPlayer()->GetMapId())
+    {
+        if( mEntry && (mEntry->map_type == MAP_INSTANCE || mEntry->map_type == MAP_RAID) )
+        {
+            GetPlayer()->ResurrectPlayer(0.5f,false);
+            GetPlayer()->SpawnCorpseBones();
+            GetPlayer()->SaveToDB();
+        }
+    }
+
+    //SaveToDB();
+
+    // Client reset some data at NEW_WORLD teleport, resending its to client.
+    //SendInitialPackets(); // done in MSG_MOVE_WORLDPORT_ACK handler
+
+    // reset instance validity
+    GetPlayer()->m_InstanceValid = true;
+
+    // re-add us to the map here
+    MapManager::Instance().GetMap(GetPlayer()->GetMapId(), GetPlayer())->Add(GetPlayer());
+
+    // resummon pet
+    if(GetPlayer()->m_oldpetnumber)
+    {
+        Pet* NewPet = new Pet(GetPlayer());
+        if(!NewPet->LoadPetFromDB(GetPlayer(), 0, GetPlayer()->m_oldpetnumber, true))
+            delete NewPet;
+
+        GetPlayer()->m_oldpetnumber = 0;
+    }
+
+    GetPlayer()->SetSemaphoreTeleport(false);
+
+    GetPlayer()->UpdateZone(GetPlayer()->GetZoneId());
+
+    // remove new continent flight forms
+    if(!IsExpansionMap(mEntry))                         // non TBC map
+    {
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_MOD_SPEED_MOUNTED_FLIGHT);
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FLY);
+    }
+
+    // honorless target
+    if(GetPlayer()->pvpInfo.inHostileArea) 
+        GetPlayer()->CastSpell(GetPlayer(), 2479, true);
 
     if(!GetPlayer()->SendInitialPacketsBeforeAddToMap())
         return;                                             // fatal error in character state setup
