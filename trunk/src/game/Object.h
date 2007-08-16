@@ -84,8 +84,6 @@ class MANGOS_DLL_SPEC Object
     public:
         virtual ~Object ( );
 
-        virtual void Update ( float /*time*/ ) { }
-
         const bool& IsInWorld() const { return m_inWorld; }
         virtual void AddToWorld()
         {
@@ -232,6 +230,8 @@ class MANGOS_DLL_SPEC WorldObject : public Object
 {
     public:
         virtual ~WorldObject ( ) {}
+
+        virtual void Update ( uint32 time_diff ATTR_UNUSED ) { }
 
         void _Create (uint32 guidlow, uint32 guidhigh, uint32 mapid, float x, float y, float z, float ang, uint32 nameId);
 

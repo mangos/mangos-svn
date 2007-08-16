@@ -48,19 +48,19 @@ class MANGOS_DLL_SPEC CreatureAI
         virtual void EnterEvadeMode() = 0;
 
         // Called at any heal cast/item used (call non implemented)
-        virtual void HealBy(Unit *healer, uint32 amount_healed) {}
+        virtual void HealBy(Unit *healer ATTR_UNUSED, uint32 amount_healed ATTR_UNUSED) {}
 
         // Called at any Damage to any victim (before damage apply)
-        virtual void DamageDeal(Unit *done_to, uint32 &damage) {}
+        virtual void DamageDeal(Unit *done_to ATTR_UNUSED, uint32 &damage ATTR_UNUSED) {}
 
         // Called at any Damage from any attacker (before damage apply)
-        virtual void DamageTaken(Unit *done_by, uint32 &damage) { AttackedBy(done_by); }
+        virtual void DamageTaken(Unit *done_by, uint32 &damage ATTR_UNUSED) { AttackedBy(done_by); }
 
         // Is unit visible for MoveInLineOfSight
         virtual bool IsVisible(Unit *) const = 0;
 
         // Called at World update tick
-        virtual void UpdateAI(const uint32 diff) = 0;
+        virtual void UpdateAI(const uint32 diff ) = 0;
 
         // Called when the creature is killed
         virtual void JustDied(Unit *) {}
@@ -68,7 +68,7 @@ class MANGOS_DLL_SPEC CreatureAI
         // Called when the creature kills a unit
         virtual void KilledUnit(Unit *) {}
 
-        virtual void SummonedCreatureDespawn(Creature* unit) {}
+        virtual void SummonedCreatureDespawn(Creature* unit ATTR_UNUSED) {}
 
         // Called when hit by a spell
         virtual void SpellHit(Unit*, const SpellEntry*) {}
@@ -77,7 +77,7 @@ class MANGOS_DLL_SPEC CreatureAI
         virtual bool canReachByRangeAttack(Unit*) { return false; }
 
         // Called when the creature is attacked
-        virtual void AttackedBy(Unit *attacker) {}
+        virtual void AttackedBy(Unit *attacker ATTR_UNUSED) {}
 };
 
 struct SelectableAI : public FactoryHolder<CreatureAI>, public Permissible<Creature>

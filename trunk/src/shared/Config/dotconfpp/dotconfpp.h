@@ -94,7 +94,7 @@ private:
     int macroSubstitute(DOTCONFDocumentNode * tagNode, int valueIndex);
 
 protected:
-    virtual void error(int lineNum, const char * fileName, const char * fmt, ...);
+    virtual void error(int lineNum, const char * fileName, const char * fmt, ...) ATTR_PRINTF(4,5);
 
 public:
     DOTCONFDocument(CaseSensitive caseSensitivity = CASESENSETIVE);

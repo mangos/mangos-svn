@@ -55,9 +55,9 @@ namespace VMAP
         //Gets a 50 byte binary block
         void initFromBinBlock(void *pBinBlock);
 
-        RayIntersectionIterator<TreeNode, TriangleBox> beginRayIntersection(const Ray& ray, double pMaxTime, bool skipAABoxTests = false) const; 
+        RayIntersectionIterator<TreeNode, TriangleBox> beginRayIntersection(const Ray& ray, double pMaxTime, bool skipAABoxTests = false); 
 
-        RayIntersectionIterator<TreeNode, TriangleBox> endRayIntersection() const;
+        RayIntersectionIterator<TreeNode, TriangleBox> endRayIntersection();
 
         void fillRenderArray(Array<TriangleBox> &pArray, const TreeNode* pTreeNode);
 
@@ -76,10 +76,12 @@ namespace VMAP
 
 
         // get start pos bases on the global array
-        inline TriangleBox* getTriangles() const { return((TriangleBox*) &BaseModel::getTriangle(iTrianglesPos)); }
+        inline TriangleBox const* getTriangles() const { return &BaseModel::getTriangle(iTrianglesPos); }
+        inline TriangleBox      * getTriangles()       { return &BaseModel::getTriangle(iTrianglesPos); }
 
         // get start pos bases on the global array
-        inline TreeNode* getTreeNodes() const{ return((TreeNode*) &BaseModel::getTreeNode(iNodesPos)); }
+        inline TreeNode const* getTreeNodes() const { return &BaseModel::getTreeNode(iNodesPos); }
+        inline TreeNode      * getTreeNodes()       { return &BaseModel::getTreeNode(iNodesPos); }
 
         // internal method usign internal offset
         inline const TreeNode& getTreeNode(int pPos) const { return(SubModel::getTreeNodes()[pPos]); }

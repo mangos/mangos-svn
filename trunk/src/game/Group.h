@@ -284,7 +284,7 @@ class MANGOS_DLL_SPEC Group
         void EndRoll();
 
         void LinkMember(GroupReference *pRef) { m_memberMgr.insertFirst(pRef); }
-        void DelinkMember(GroupReference *pRef) { }
+        void DelinkMember(GroupReference *pRef ATTR_UNUSED ) { }
 
     protected:
         bool _addMember(const uint64 &guid, const char* name, bool isAssistant=false);

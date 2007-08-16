@@ -37,7 +37,7 @@ namespace MaNGOS
                 at_exit( destroyer );
             }
 
-            static void OnDeadReference(void)               // We don't handle Dead Reference for now
+            static void OnDeadReference(void) ATTR_NORETURN // We don't handle Dead Reference for now
             {
                 throw std::runtime_error("Dead Reference");
             }

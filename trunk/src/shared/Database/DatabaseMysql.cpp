@@ -166,25 +166,6 @@ bool DatabaseMysql::Initialize(const char *infoString)
     }
 }
 
-QueryResult* DatabaseMysql::PQuery(const char *format,...)
-{
-    if(!format) return NULL;
-
-    va_list ap;
-    char szQuery [MAX_QUERY_LEN];
-    va_start(ap, format);
-    int res = vsnprintf( szQuery, MAX_QUERY_LEN, format, ap );
-    va_end(ap);
-
-    if(res==-1)
-    {
-        sLog.outError("SQL Query truncated (and not execute) for format: %s",format);
-        return false;
-    }
-
-    return Query(szQuery);
-}
-
 QueryResult* DatabaseMysql::Query(const char *sql)
 {
     if (!mMysql)
@@ -253,26 +234,6 @@ bool DatabaseMysql::Execute(const char *sql)
     }
 
     return true;
-}
-
-bool DatabaseMysql::PExecute(const char * format,...)
-{
-    if (!format)
-        return false;
-
-    va_list ap;
-    char szQuery [MAX_QUERY_LEN];
-    va_start(ap, format);
-    int res = vsnprintf( szQuery, MAX_QUERY_LEN, format, ap );
-    va_end(ap);
-
-    if(res==-1)
-    {
-        sLog.outError("SQL Query truncated (and not execute) for format: %s",format);
-        return false;
-    }
-
-    return Execute(szQuery);
 }
 
 bool DatabaseMysql::DirectExecute(const char* sql)

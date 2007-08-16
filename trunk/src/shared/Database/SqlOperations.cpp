@@ -30,10 +30,10 @@ void SqlTransaction::Execute(Database *db)
     db->DirectExecute("START TRANSACTION");
     while(!m_queue.empty())
     {
-        char *sql = (char*)m_queue.front();
+        char const *sql = m_queue.front();
         m_queue.pop();
         db->DirectExecute(sql);
-        free(sql);
+        free((void*)const_cast<char*>(sql));
     }
     db->DirectExecute("COMMIT");
 }

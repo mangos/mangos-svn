@@ -92,25 +92,6 @@ bool DatabasePostgre::Initialize(const char *infoString)
 
 }
 
-QueryResult* DatabasePostgre::PQuery(const char *format,...)
-{
-    if(!format) return NULL;
-
-    va_list ap;
-    char szQuery [1024];
-    va_start(ap, format);
-    int res = vsnprintf( szQuery, 1024, format, ap );
-    va_end(ap);
-
-    if(res==-1)
-    {
-        sLog.outError("SQL Query truncated (and not execute) for format: %s",format);
-        return false;
-    }
-
-    return Query(szQuery);
-}
-
 QueryResult* DatabasePostgre::Query(const char *sql)
 {
     if (!mPGconn)
@@ -187,26 +168,6 @@ bool DatabasePostgre::Execute(const char *sql)
     }
 
     return true;
-}
-
-bool DatabasePostgre::PExecute(const char * format,...)
-{
-    if (!format)
-        return false;
-
-    va_list ap;
-    char szQuery [1024];
-    va_start(ap, format);
-    int res = vsnprintf( szQuery, 1024, format, ap );
-    va_end(ap);
-
-    if(res==-1)
-    {
-        sLog.outError("SQL Query truncated (and not execute) for format: %s",format);
-        return false;
-    }
-
-    return Execute(szQuery);
 }
 
 bool DatabasePostgre::DirectExecute(const char* sql)

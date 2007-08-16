@@ -49,14 +49,14 @@ class Database
         virtual void HaltDelayThread() = 0;
 
         virtual QueryResult* Query(const char *sql) = 0;
-        virtual QueryResult* PQuery(const char *format,...) = 0;
+                QueryResult* PQuery(const char *format,...) ATTR_PRINTF(2,3);
 
         virtual bool Execute(const char *sql) = 0;
-        virtual bool PExecute(const char *format,...) = 0;
+                bool PExecute(const char *format,...) ATTR_PRINTF(2,3);
         virtual bool DirectExecute(const char* sql) = 0;
 
         // Writes SQL commands to a LOG file (see mangosd.conf "LogSQL")
-        bool PExecuteLog(const char *format,...);
+        bool PExecuteLog(const char *format,...) ATTR_PRINTF(2,3);
 
         virtual bool BeginTransaction()                     // nothing do if DB not support transactions
         {

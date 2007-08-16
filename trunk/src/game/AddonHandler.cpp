@@ -77,7 +77,7 @@ bool AddonHandler::BuildAddonPacket(WorldPacket *Source, WorldPacket *Target, ui
 
     AddOnPacked.resize(AddonRealSize);                      //resize target for zlib action
 
-    if (!uncompress((uint8*)AddOnPacked.contents(), &AddonRealSize, (uint8*)(*Source).contents() + CurrentPosition, (*Source).size() - CurrentPosition)!= Z_OK)
+    if (!uncompress(const_cast<uint8*>(AddOnPacked.contents()), &AddonRealSize, const_cast<uint8*>((*Source).contents() + CurrentPosition), (*Source).size() - CurrentPosition)!= Z_OK)
     {
         Target->Initialize(SMSG_ADDON_INFO);
 

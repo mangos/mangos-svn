@@ -1020,7 +1020,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         float GetCreateStat(Stats stat) const { return m_createStats[stat]; }
 
         void SetCurrentCastedSpell(Spell * pSpell);
-        virtual void ProhibitSpellScholl(uint32 idSchool /* from SpellSchools */, uint32 unTimeMs ) { }
+        virtual void ProhibitSpellScholl(uint32 idSchool /* from SpellSchools */ ATTR_UNUSED, uint32 unTimeMs ATTR_UNUSED ) { }
         void InterruptSpell(uint32 spellType);
 
         // set withDelayed to true to account delayed spells as casted
@@ -1107,7 +1107,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void TauntFadeOut(Unit *taunter);
         ThreatManager& getThreatManager() { return m_ThreatManager; }
         void addHatedBy(HostilReference* pHostilReference) { m_HostilRefManager.insertFirst(pHostilReference); };
-        void removeHatedBy(HostilReference* pHostilReference) {};  // nothing to do yet
+        void removeHatedBy(HostilReference* pHostilReference ATTR_UNUSED ) {};  // nothing to do yet
         HostilRefManager& getHostilRefManager() { return m_HostilRefManager; }
 
         Aura* GetAura(uint32 spellId, uint32 effindex);
@@ -1158,7 +1158,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         Creature* SummonCreature(uint32 id, float x, float y, float z, float ang,TempSummonType spwtype,uint32 despwtime);
 
         void addFollower(FollowerReference* pRef) { m_FollowingRefManager.insertFirst(pRef); }
-        void removeFollower(FollowerReference* pRef) {  } // nothing to do yet
+        void removeFollower(FollowerReference* pRef ATTR_UNUSED ) { } // nothing to do yet
         static Unit* GetUnit(WorldObject& object, uint64 guid);
     protected:
         explicit Unit ( WorldObject *instantiator );
