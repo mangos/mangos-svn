@@ -63,11 +63,13 @@ namespace VMAP
         void getMember(Array<TriangleBox>& pMembers);
 
         inline const TriangleBox& getTriangle(int pPos) const { return(iTriangles[pPos]); }
+        inline       TriangleBox& getTriangle(int pPos)       { return(iTriangles[pPos]); }
 
 
         inline void setTriangle(const TriangleBox& pTriangleBox, int pPos) { iTriangles[pPos] = pTriangleBox; }
 
         inline const TreeNode& getTreeNode(int pPos) const { return(getTreeNodes()[pPos]); }
+        inline       TreeNode& getTreeNode(int pPos)       { return(getTreeNodes()[pPos]); }
 
         inline const void setTreeNode(const TreeNode& pTreeNode, int pPos) { getTreeNodes()[pPos] = pTreeNode; }
 

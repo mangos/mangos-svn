@@ -19,6 +19,8 @@
 #ifndef MANGOSSERVER_MEMORY_H
 #define MANGOSSERVER_MEMORY_H
 
+#include "Platform/CompilerDefs.h"
+
 #if COMPILER == COMPILER_MICROSOFT
 // Visual Leak Detector support enabled
 #include <vld/vld.h>

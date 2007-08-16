@@ -45,10 +45,8 @@ class DatabaseMysql : public Database
         bool Initialize(const char *infoString);
         void InitDelayThread();
         void HaltDelayThread();
-        QueryResult* PQuery(const char *format,...);
         QueryResult* Query(const char *sql);
         bool Execute(const char *sql);
-        bool PExecute(const char *format,...);
         bool DirectExecute(const char* sql);
         bool BeginTransaction();
         bool CommitTransaction();

@@ -55,7 +55,7 @@ bool Config::GetString(const char* name, std::string *value)
     if(!mConf)
         return false;
 
-    DOTCONFDocumentNode *node = (DOTCONFDocumentNode *)mConf->findNode(name);
+    DOTCONFDocumentNode const *node = mConf->findNode(name);
     if(!node || !node->getValue())
         return false;
 
@@ -70,7 +70,7 @@ std::string Config::GetStringDefault(const char* name, const char* def)
     if(!mConf)
         return std::string(def);
 
-    DOTCONFDocumentNode *node = (DOTCONFDocumentNode *)mConf->findNode(name);
+    DOTCONFDocumentNode const *node = mConf->findNode(name);
     if(!node || !node->getValue())
         return std::string(def);
 
@@ -83,7 +83,7 @@ bool Config::GetBool(const char* name, bool *value)
     if(!mConf)
         return false;
 
-    DOTCONFDocumentNode *node = (DOTCONFDocumentNode *)mConf->findNode(name);
+    DOTCONFDocumentNode const *node = mConf->findNode(name);
     if(!node || !node->getValue())
         return false;
 
@@ -113,7 +113,7 @@ bool Config::GetInt(const char* name, int *value)
     if(!mConf)
         return false;
 
-    DOTCONFDocumentNode *node = (DOTCONFDocumentNode *)mConf->findNode(name);
+    DOTCONFDocumentNode const *node = mConf->findNode(name);
     if(!node || !node->getValue())
         return false;
 
@@ -128,7 +128,7 @@ bool Config::GetFloat(const char* name, float *value)
     if(!mConf)
         return false;
 
-    DOTCONFDocumentNode *node = (DOTCONFDocumentNode *)mConf->findNode(name);
+    DOTCONFDocumentNode const *node = mConf->findNode(name);
     if(!node || !node->getValue())
         return false;
 

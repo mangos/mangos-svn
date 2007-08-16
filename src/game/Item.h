@@ -260,7 +260,7 @@ class MANGOS_DLL_SPEC Item : public Object
             ItemPrototype const *itemProto = GetProto();
             return itemProto && itemProto->StartQuest == quest_id;
         }
-        bool hasInvolvedQuest(uint32 quest_id) const { return false; }
+        bool hasInvolvedQuest(uint32 quest_id ATTR_UNUSED) const { return false; }
 
     private:
         uint8 m_slot;

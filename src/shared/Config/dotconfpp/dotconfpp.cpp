@@ -204,16 +204,16 @@ int DOTCONFDocument::parseLine()
                     closed = false;
                 } else { 
                     nodeName+=2;
-                    std::list<DOTCONFDocumentNode*>::reverse_iterator i=nodeTree.rbegin();
-                    for(; i!=nodeTree.rend(); i++){
-                        if(!cmp_func(nodeName, (*i)->name) && !(*i)->closed){
-                            (*i)->closed = true;
-                            curParent = (*i)->parentNode;
-                            curPrev = *i;
+                    std::list<DOTCONFDocumentNode*>::reverse_iterator itr=nodeTree.rbegin();
+                    for(; itr!=nodeTree.rend(); ++itr){
+                        if(!cmp_func(nodeName, (*itr)->name) && !(*itr)->closed){
+                            (*itr)->closed = true;
+                            curParent = (*itr)->parentNode;
+                            curPrev = *itr;
                             break;
                         }
                     }
-                    if(i==nodeTree.rend()){
+                    if(itr==nodeTree.rend()){
                         error(curLine, fileName, "not matched closing tag </%s>", nodeName);
                         return -1;
                     }
@@ -427,16 +427,16 @@ int DOTCONFDocument::checkRequiredOptions()
     return 0;
 }
 
-void DOTCONFDocument::error(int lineNum, const char * fileName, const char * fmt, ...)
+void DOTCONFDocument::error(int lineNum, const char * fileName_, const char * fmt, ...)
 {
     va_list args;
     va_start(args, fmt);
 
-    size_t len = (lineNum!=0?strlen(fileName):0) + strlen(fmt) + 50;
+    size_t len = (lineNum!=0?strlen(fileName_):0) + strlen(fmt) + 50;
     char * buf = (char*)mempool->alloc(len);
 
     if(lineNum)
-        (void) snprintf(buf, len, "DOTCONF++: file '%s', line %d: %s\n", fileName, lineNum, fmt);
+        (void) snprintf(buf, len, "DOTCONF++: file '%s', line %d: %s\n", fileName_, lineNum, fmt);
     else
         (void) snprintf(buf, len, "DOTCONF++: %s\n", fmt);
 

@@ -237,7 +237,7 @@ class PetWithIdCheck
             if(u->GetTypeId()!=TYPEID_UNIT)
                 return false;
 
-            if(!((Creature*)u)->isPet())
+            if(!((Creature const*)u)->isPet())
                 return false;
 
             if(u->GetEntry()!=i_entry)

@@ -36,7 +36,7 @@ void Sha1Hash::UpdateData(const uint8 *dta, int len)
 
 void Sha1Hash::UpdateData(const std::string &str)
 {
-    UpdateData((uint8 *)str.c_str(), str.length());
+    UpdateData((uint8 const*)str.c_str(), str.length());
 }
 
 void Sha1Hash::UpdateBigNumbers(BigNumber *bn0, ...)

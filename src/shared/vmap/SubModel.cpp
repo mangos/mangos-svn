@@ -182,12 +182,12 @@ namespace VMAP
 
     //==========================================================
 
-    RayIntersectionIterator<TreeNode, TriangleBox> SubModel::beginRayIntersection(const Ray& ray, double pMaxTime, bool skipAABoxTests) const {
+    RayIntersectionIterator<TreeNode, TriangleBox> SubModel::beginRayIntersection(const Ray& ray, double pMaxTime, bool skipAABoxTests) {
         NodeValueAccess<TreeNode, TriangleBox> vna = NodeValueAccess<TreeNode, TriangleBox>(getTreeNodes(), getTriangles());
         return RayIntersectionIterator<TreeNode, TriangleBox>(vna, ray, &getTreeNode(0), pMaxTime, skipAABoxTests);
     }
 
-    RayIntersectionIterator<TreeNode, TriangleBox> SubModel::endRayIntersection() const {
+    RayIntersectionIterator<TreeNode, TriangleBox> SubModel::endRayIntersection() {
         return RayIntersectionIterator<TreeNode, TriangleBox>();
     }
 

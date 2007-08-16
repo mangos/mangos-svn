@@ -152,7 +152,7 @@ void Log::ResetColor(bool stdout_stream)
 
 void Log::SetLogLevel(char *Level)
 {
-    uint32 NewLevel =atoi((char*)Level);
+    int32 NewLevel =atoi((char*)Level);
     if ( NewLevel <0 )
         NewLevel = 0;
     m_logLevel = NewLevel;
@@ -162,7 +162,7 @@ void Log::SetLogLevel(char *Level)
 
 void Log::SetLogFileLevel(char *Level)
 {
-    uint32 NewLevel =atoi((char*)Level);
+    int32 NewLevel =atoi((char*)Level);
     if ( NewLevel <0 )
         NewLevel = 0;
     m_logFileLevel = NewLevel;

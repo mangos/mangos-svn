@@ -40,11 +40,6 @@ SQLStorage sItemStorage(ItemPrototypefmt,"entry","item_template");
 SQLStorage sPageTextStore(PageTextfmt,"entry","page_text");
 SQLStorage sSpellThreatStore(SpellThreatfmt,"entry","spell_threat");
 
-void FreeStorage(SQLStorage * p)
-{
-    p->Free();
-}
-
 void SQLStorage::Free ()
 {
     uint32 offset=0;
@@ -146,7 +141,7 @@ void SQLStorage::Load ()
                     offset+=sizeof(float);
                     break;
                 case FT_STRING:
-                    char * tmp=(char*)fields[x].GetString();
+                    char const* tmp = fields[x].GetString();
                     char* st;
                     if(!tmp)
                     {

@@ -19,7 +19,9 @@
 #ifndef MANGOSSERVER_COMMON_H
 #define MANGOSSERVER_COMMON_H
 
-#ifndef __GNUC__
+#include "Platform/Define.h"
+
+#if COMPILER == COMPILER_MICROSOFT
 
 #pragma warning(disable:4996)
 
@@ -139,10 +141,12 @@ enum TimeConstants
     MONTH  = DAY*30
 };
 
-#ifdef WIN32
+#if PLATFORM == PLATFORM_WIN32
 #  define MANGOS_DLL_SPEC __declspec(dllexport)
+//#  define DECLSPEC_NORETURN -- define in win32 api
 #else
 #  define MANGOS_DLL_SPEC
+#  define DECLSPEC_NORETURN
 #endif
 
 // we always use stdlibc++ std::max/std::min, undefine some not C++ standart defines (Win API and some pother platforms)

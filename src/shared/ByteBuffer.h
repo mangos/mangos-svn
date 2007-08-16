@@ -117,13 +117,13 @@ class ByteBuffer
         }
         ByteBuffer &operator<<(const std::string &value)
         {
-            append((uint8 *)value.c_str(), value.length());
+            append((uint8 const *)value.c_str(), value.length());
             append((uint8)0);
             return *this;
         }
         ByteBuffer &operator<<(const char *str)
         {
-            append((uint8 *)str, str ? strlen(str) : 0);
+            append((uint8 const *)str, str ? strlen(str) : 0);
             append((uint8)0);
             return *this;
         }
@@ -209,9 +209,9 @@ class ByteBuffer
             return _rpos;
         };
 
-        size_t rpos(size_t rpos)
+        size_t rpos(size_t rpos_)
         {
-            _rpos = rpos;
+            _rpos = rpos_;
             return _rpos;
         };
 
@@ -220,9 +220,9 @@ class ByteBuffer
             return _wpos;
         }
 
-        size_t wpos(size_t wpos)
+        size_t wpos(size_t wpos_)
         {
-            _wpos = wpos;
+            _wpos = wpos_;
             return _wpos;
         }
 
@@ -262,7 +262,7 @@ class ByteBuffer
 
         void append(const std::string& str)
         {
-            append((uint8 *)str.c_str(),str.size() + 1);
+            append((uint8 const*)str.c_str(),str.size() + 1);
         }
         void append(const char *src, size_t cnt)
         {
@@ -313,7 +313,7 @@ class ByteBuffer
             sLog.outDebug("STORAGE_SIZE: %u", size() );
             for(uint32 i = 0; i < size(); i++)
                 sLog.outDebugInLine("%u - ", read<uint8>(i) );
-            sLog.outDebug("");
+            sLog.outDebug(" ");
         }
 
         void textlike()
@@ -324,7 +324,7 @@ class ByteBuffer
             sLog.outDebug("STORAGE_SIZE: %u", size() );
             for(uint32 i = 0; i < size(); i++)
                 sLog.outDebugInLine("%c", read<uint8>(i) );
-            sLog.outDebug("");
+            sLog.outDebug(" ");
         }
 
         void hexlike()
@@ -374,7 +374,7 @@ class ByteBuffer
                     }
                 }
             }
-            sLog.outDebug("");
+            sLog.outDebug(" ");
         }
 
     protected:

@@ -378,7 +378,7 @@ bool AuthSocket::_HandleLogonChallenge()
             ///- Get the account details from the account table
             // No SQL injection (escaped user name)
 
-            QueryResult *result = dbRealmServer.PQuery("SELECT `I`,`id`,`locked`,`last_ip`,`online` FROM `account` WHERE `username` = '%s'",_safelogin.c_str ());
+            result = dbRealmServer.PQuery("SELECT `I`,`id`,`locked`,`last_ip`,`online` FROM `account` WHERE `username` = '%s'",_safelogin.c_str ());
             if( result )
             {
                 ///- If the IP is 'locked', check that the player comes indeed from the correct IP address
@@ -506,7 +506,7 @@ bool AuthSocket::_HandleLogonChallenge()
         }
     }
     /// </ul>
-    SendBuf((char *)pkt.contents(), pkt.size());
+    SendBuf((char const*)pkt.contents(), pkt.size());
     return true;
 }
 
@@ -682,7 +682,7 @@ bool AuthSocket::_HandleRealmList()
     hdr << (uint16)pkt.size();
     hdr.append(pkt);
 
-    SendBuf((char *)hdr.contents(), hdr.size());
+    SendBuf((char const*)hdr.contents(), hdr.size());
 
     // Set check field before possable relogin to realm
     _SetVSFields(rI);
