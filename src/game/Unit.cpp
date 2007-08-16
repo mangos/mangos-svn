@@ -604,7 +604,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
             if(player!=pVictim)
             {
                 // prepare data for near group iteration (PvP and !PvP cases
-                uint32 xp = PvP ? 0 : MaNGOS::XP::Gain(player, pVictim);
+                uint32 xp = PvP || IsNoDamageXPArea(player->GetAreaId()) ? 0 : MaNGOS::XP::Gain(player, pVictim);
                 bool honored_kill = false;
 
                 Group *pGroup = player->GetGroup();
@@ -5537,8 +5537,16 @@ bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList) 
     if (u==this)
         return true;
 
+    // player visible for other player if not logout and at same transport 
+    // including case when player is out of world
+    bool at_same_transport = 
+        GetTypeId() == TYPEID_PLAYER &&  u->GetTypeId()==TYPEID_PLAYER &&
+        !((Player*)this)->GetSession()->PlayerLogout() && !((Player*)u)->GetSession()->PlayerLogout() &&
+        !((Player*)this)->GetSession()->PlayerLoading() && !((Player*)u)->GetSession()->PlayerLoading() &&
+        ((Player*)this)->GetTransport() && ((Player*)this)->GetTransport() == ((Player*)u)->GetTransport();
+
     // not in world
-    if(!IsInWorld() || !u->IsInWorld())
+    if(!at_same_transport && (!IsInWorld() || !u->IsInWorld()))
         return false;
 
     // always seen by owner
@@ -5577,11 +5585,16 @@ bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList) 
     }
     else if(GetTypeId()==TYPEID_PLAYER)                     // distance for show player
     {
-        // in case two player at same transport ignore distance checks
-        if(!((Player*)this)->GetTransport() || u->GetTypeId()!=TYPEID_PLAYER || ((Player*)this)->GetTransport() != ((Player*)u)->GetTransport())
+        if(u->GetTypeId()==TYPEID_PLAYER)
         {
             // Players far than max visible distance for player or not in our map are not visible too
-            if (!IsWithinDistInMap(u,World::GetMaxVisibleDistanceForPlayer()+(inVisibleList ? World::GetVisibleUnitGreyDistance() : 0.0f)))
+            if (!at_same_transport && !IsWithinDistInMap(u,World::GetMaxVisibleDistanceForPlayer()+(inVisibleList ? World::GetVisibleUnitGreyDistance() : 0.0f)))
+                return false;
+        }
+        else
+        {
+            // Units far than max visible distance for creature or not in our map are not visible too
+            if (!IsWithinDistInMap(u,World::GetMaxVisibleDistanceForCreature()+(inVisibleList ? World::GetVisibleUnitGreyDistance() : 0.0f)))
                 return false;
         }
     }
