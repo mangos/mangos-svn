@@ -83,6 +83,7 @@ bool IsSingleTarget(uint32 spellId);
 AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id);
 AreaTableEntry const* GetAreaEntryByAreaFlag(uint32 area_flag);
 uint32 GetAreaFlagByMapId(uint32 mapid);
+inline bool IsNoDamageXPArea(uint32 area_id) { return area_id==3712 || area_id==3803; }
 bool CanUsedWhileStealthed(uint32 spellId);
 ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id);
 
