@@ -1462,8 +1462,10 @@ void Map::SendRemoveTransports( Player * player )
 
     MapManager::TransportSet& tset = tmap[player->GetMapId()];
 
+    // except used transport 
     for (MapManager::TransportSet::iterator i = tset.begin(); i != tset.end(); ++i)
-        (*i)->BuildOutOfRangeUpdateBlock(&transData);
+        if(player->GetTransport() != (*i))
+            (*i)->BuildOutOfRangeUpdateBlock(&transData);
 
     WorldPacket packet;
     transData.BuildPacket(&packet);

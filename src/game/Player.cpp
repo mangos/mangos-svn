@@ -973,11 +973,7 @@ void Player::Update( uint32 p_time )
     UpdateHomebindTime(p_time);
 
     // group update
-    if (m_groupUpdateMask != GROUP_UPDATE_FLAG_NONE && GetGroup())
-    {
-        GetGroup()->UpdatePlayerOutOfRange(this, m_groupUpdateMask);
-        m_groupUpdateMask = GROUP_UPDATE_FLAG_NONE;
-    }
+    SendUpdateToOutOfRangeGroupMembers();
 
     Pet* pet = GetPet();
     if(pet && !IsWithinDistInMap(pet, OWNER_MAX_DISTANCE))
@@ -1381,9 +1377,6 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     8323198=0x7F007E=0x400000 + 0x200000 + 0x100000 + 0x80000 + 0x40000 + 0x20000 + 0x10000 + 0x40 + 0x20 + 0x10 + 0x8 + 0x4 + 0x2
     */
 
-    // prepare zone change detect
-    uint32 old_zone = GetZoneId();
-
     // if we were on a transport, leave
     if (ignore_transport && m_transport)
     {
@@ -1413,6 +1406,9 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
     if ((this->GetMapId() == mapid) && (!m_transport))
     {
+        // prepare zone change detect
+        uint32 old_zone = GetZoneId();
+
         // near teleport
         WorldPacket data;
         BuildTeleportAckMsg(&data, x, y, z, orientation);
@@ -1433,9 +1429,38 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
                 RemovePet(pet, PET_SAVE_NOT_IN_SLOT);
             }
         }
+
+        if (outofrange)
+        {
+            CombatStop();
+
+            // resummon pet
+            if(pet && m_oldpetnumber)
+            {
+                Pet* NewPet = new Pet(this);
+                if(!NewPet->LoadPetFromDB(this, 0, m_oldpetnumber, true))
+                    delete NewPet;
+
+                m_oldpetnumber = 0;
+            }
+        }
+
+        SetSemaphoreTeleport(false);
+
+        UpdateZone(GetZoneId());
+
+        // new zone 
+        if(old_zone != GetZoneId())
+        {
+            // honorless target
+            if(pvpInfo.inHostileArea) 
+                CastSpell(this, 2479, true);
+        }
     }
     else
     {
+        CombatStop();
+
         if(m_transport)
             SetMovementFlags(MOVEMENTFLAG_ONTRANSPORT);
 
@@ -1453,6 +1478,11 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             RemovePet(pet, PET_SAVE_NOT_IN_SLOT);
         }
 
+        // Check enter rights before map getting to avoid creating instance copy for player
+        // this check not dependent from map instance copy and same for all instance copies of selected map
+        if (!MapManager::Instance().CanPlayerEnter(mapid, this))
+            return;
+
         // now we must check if we are going to be homebind after teleport, if it is so,
         // we must re-instantiate again (entering instance to be homebind is not very good idea)
         // this only affects entering instances, not re-logging in (teleport is not used on login)
@@ -1468,7 +1498,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             map = MapManager::Instance().GetMap(mapid, this);
         }
 
-        if (map && MapManager::Instance().CanPlayerEnter(mapid, this) &&  map->AddInstanced(this))
+        if (map &&  map->AddInstanced(this))
         {
             // send transfer packets
             WorldPacket data(SMSG_TRANSFER_PENDING, (4+4+4));
@@ -1490,12 +1520,12 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             }
             GetSession()->SendPacket( &data );
 
-            // remove from old map now
-            if (oldmap) oldmap->Remove(this, false);
-
             data.Initialize(SMSG_UNKNOWN_811, 4);
             data << uint32(0);
             GetSession()->SendPacket( &data );
+
+            // remove from old map now
+            if (oldmap) oldmap->Remove(this, false);
 
             // new final coordinates
             float final_x = x;
@@ -1517,64 +1547,8 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
             // move packet sent by client always after far teleport
             // SetPosition(final_x, final_y, final_z, final_o, true);
-
-            // resurrect character at enter into instance where his corpse exist
-            Corpse *corpse = GetCorpse();
-            if (corpse && corpse->GetType() == CORPSE_RESURRECTABLE && corpse->GetMapId() == mapid)
-            {
-                if( mEntry && (mEntry->map_type == MAP_INSTANCE || mEntry->map_type == MAP_RAID) )
-                {
-                    ResurrectPlayer(0.5f,false);
-                    SpawnCorpseBones();
-                    SaveToDB();
-                }
-            }
             SetDontMove(true);
-            //SaveToDB();
-
-            // Client reset some data at NEW_WORLD teleport, resending its to client.
-            //SendInitialPackets(); // done in MSG_MOVE_WORLDPORT_ACK handler
-
-            // reset instance validity
-            m_InstanceValid = true;
-
-            // re-add us to the map here
-            MapManager::Instance().GetMap(GetMapId(), this)->Add(this);
         }
-    }
-
-    if (outofrange)
-    {
-        CombatStop();
-
-        // resummon pet
-        if(pet && m_oldpetnumber)
-        {
-            Pet* NewPet = new Pet(this);
-            if(!NewPet->LoadPetFromDB(this, 0, m_oldpetnumber, true))
-                 delete NewPet;
-
-            m_oldpetnumber = 0;
-        }
-    }
-
-    SetSemaphoreTeleport(false);
-
-    UpdateZone(GetZoneId());
-
-    // new zone 
-    if(old_zone != GetZoneId())
-    {
-        // remove new continent flight forms
-        if(!IsExpansionMap(mEntry))                         // non TBC map
-        {
-            RemoveSpellsCausingAura(SPELL_AURA_MOD_SPEED_MOUNTED_FLIGHT);
-            RemoveSpellsCausingAura(SPELL_AURA_FLY);
-        }
-
-        // honorless target
-        if(pvpInfo.inHostileArea) 
-            CastSpell(this, 2479, true);
     }
 }
 
@@ -14696,6 +14670,16 @@ void Player::SendInitialPacketsAfterAddToMap()
     }
 
     SendEnchantmentDurations();                     // must be after add to map
+}
+
+void Player::SendUpdateToOutOfRangeGroupMembers()
+{
+    if (m_groupUpdateMask == GROUP_UPDATE_FLAG_NONE)
+        return;
+    if(Group* group = GetGroup())
+        group->UpdatePlayerOutOfRange(this, m_groupUpdateMask);
+
+    m_groupUpdateMask = GROUP_UPDATE_FLAG_NONE;
 }
 
 template void Player::UpdateVisibilityOf(Player*        target, UpdateData& data, UpdateDataMapType& data_updates);
