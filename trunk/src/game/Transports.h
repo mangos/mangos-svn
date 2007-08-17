@@ -76,8 +76,11 @@ class Transport : public GameObject
         void Update(uint32 p_time);
         bool AddPassenger(Player* passenger);
         bool RemovePassenger(Player* passenger);
-        std::string m_name;
 
+        typedef std::set<Player*> PlayerSet;
+        PlayerSet const& GetPassengers() const { return m_passengers; }
+
+        std::string m_name;
     private:
         struct WayPoint
         {
@@ -98,9 +101,6 @@ class Transport : public GameObject
         uint32 m_pathTime;
         uint32 m_timer;
 
-        void TeleportTransport(uint32 oldMapid, uint32 newMapid, float x, float y, float z);
-
-        typedef std::set<Player*> PlayerSet;
         PlayerSet m_passengers;
 
     public:
@@ -110,6 +110,7 @@ class Transport : public GameObject
         uint32 m_period;
 
     private:
+        void TeleportTransport(uint32 oldMapid, uint32 newMapid, float x, float y, float z);
         WayPointMap::iterator GetNextWayPoint();
 };
 #endif
