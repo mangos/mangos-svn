@@ -334,6 +334,7 @@ pkgdata_DATA = \
 	3845_account.sql \
 	3845_command.sql \
 	3859_spell_affect.sql \
+	3860_creature_template.sql \
 	3862_prospecting_loot_template.sql \
 	3874_spell_scripts.sql \
 	3875_item_template.sql \
@@ -675,10 +676,13 @@ EXTRA_DIST = \
 	3801_command.sql \
 	3802_arena_teams.sql \
 	3802_petitions.sql \
+	3805_spell_proc_event.sql \
+	3806_petitions.sql \
 	3833_quest_template.sql \
 	3845_account.sql \
 	3845_command.sql \
 	3859_spell_affect.sql \
+	3860_creature_template.sql \
 	3862_prospecting_loot_template.sql \
 	3874_spell_scripts.sql \
 	3875_item_template.sql \
@@ -713,3 +717,4 @@ EXTRA_DIST = \
 	4036_spell_proc_event.sql \
 	4037_spell_proc_event.sql \
 	README
+

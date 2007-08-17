@@ -117,6 +117,10 @@ EXTRA_DIST += \
 EXTRA_DIST += \
 	sqlite/sqlite.h
 
+#  VLD header files for Win32 builds
+EXTRA_DIST += \
+	vld/vld.h
+
 #  Zlib header files for Win32 builds
 EXTRA_DIST += \
 	zlib/zconf.h \

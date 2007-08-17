@@ -93,24 +93,49 @@ libmangosdatabase_a_SOURCES = \
 	Database/dbcfile.h
 
 libmangosnetwork_a_SOURCES = \
-        Network/Base64.cpp \
-        Network/CircularBuffer.cpp \
-        Network/Ipv4Address.cpp \
-        Network/Ipv6Address.cpp \
-        Network/ISocketHandler.cpp \
-        Network/Mutex.cpp \
-        Network/Parse.cpp \
-        Network/RandomNumber.cpp \
-        Network/ResolvServer.cpp \
-        Network/ResolvSocket.cpp \
-        Network/Socket.cpp \
-        Network/SocketHandler.cpp \
-        Network/socket_include.cpp \
-        Network/StdoutLog.cpp \
-        Network/TcpSocket.cpp \
-        Network/Thread.cpp \
-        Network/UdpSocket.cpp \
-        Network/Utility.cpp
+	Network/Base64.cpp \
+	Network/Base64.h \
+	Network/CircularBuffer.cpp \
+	Network/CircularBuffer.h \
+	Network/IFile.h \
+	Network/ISocketHandler.cpp \
+	Network/ISocketHandler.h \
+	Network/Ipv4Address.cpp \
+	Network/Ipv4Address.h \
+	Network/Ipv6Address.cpp \
+	Network/Ipv6Address.h \
+	Network/ListenSocket.h \
+	Network/Mutex.cpp \
+	Network/Mutex.h \
+	Network/Parse.cpp \
+	Network/Parse.h \
+	Network/RandomNumber.cpp \
+	Network/RandomNumber.h \
+	Network/ResolvServer.cpp \
+	Network/ResolvServer.h \
+	Network/ResolvSocket.cpp \
+	Network/ResolvSocket.h \
+	Network/SctpSocket.h \
+	Network/Socket.cpp \
+	Network/Socket.h \
+	Network/SocketAddress.h \
+	Network/SocketHandler.cpp \
+	Network/SocketHandler.h \
+	Network/StdLog.h \
+	Network/StdoutLog.cpp \
+	Network/StdoutLog.h \
+	Network/TcpSocket.cpp \
+	Network/TcpSocket.h \
+	Network/Thread.cpp \
+	Network/Thread.h \
+	Network/UdpSocket.cpp \
+	Network/UdpSocket.h \
+	Network/Uid.h \
+	Network/Utility.cpp \
+	Network/Utility.h \
+	Network/socket_include.cpp \
+	Network/socket_include.h \
+	Network/sockets-config.h
 
 ## Additional files to include when running 'make dist'
 #  Disabled packet logger
