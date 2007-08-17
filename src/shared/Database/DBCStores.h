@@ -87,6 +87,8 @@ inline bool IsNoDamageXPArea(uint32 area_id) { return area_id==3712 || area_id==
 bool CanUsedWhileStealthed(uint32 spellId);
 ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id);
 
+bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredTotemCategoryId);
+
 template<class T>
 class DBCStorage
 {
@@ -182,6 +184,7 @@ extern DBCStorage <TaxiNodesEntry>            sTaxiNodesStore;
 extern TaxiMask                               sTaxiNodesMask;
 extern TaxiPathSetBySource                    sTaxiPathSetBySource;
 extern TaxiPathNodesByPath                    sTaxiPathNodesByPath;
+//extern DBCStorage <TotemCategoryEntry>        sTotemCategoryStore; -- use IsTotemCategoryCompatiableWith
 extern DBCStorage <WorldSafeLocsEntry>        sWorldSafeLocsStore;
 
 void LoadDBCStores(std::string dataPath);

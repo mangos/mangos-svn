@@ -107,6 +107,8 @@ struct TaxiPathNodeEntry
 };
 static DBCStorage <TaxiPathNodeEntry> sTaxiPathNodeStore(TaxiPathNodeEntryfmt);
 
+DBCStorage <TotemCategoryEntry> sTotemCategoryStore(TotemCategoryEntryfmt);
+
 DBCStorage <WorldSafeLocsEntry> sWorldSafeLocsStore(WorldSafeLocsEntryfmt);
 
 typedef std::list<std::string> StoreProblemList;
@@ -147,8 +149,8 @@ void LoadDBCStores(std::string dataPath)
 {
     std::string tmpPath="";
 
-    const uint32 DBCFilesCount = 36;
-    //const uint32 DBCFilesCount = 37; -- gtChanceToMeleeCrit.dbc not loaded temporary
+    const uint32 DBCFilesCount = 37;
+    //const uint32 DBCFilesCount = 38; -- gtChanceToMeleeCrit.dbc not loaded temporary
 
     barGoLink bar( DBCFilesCount );
 
@@ -268,6 +270,7 @@ void LoadDBCStores(std::string dataPath)
             sTaxiPathNodesByPath[entry->path][entry->index] = TaxiPathNode(entry->mapid,entry->x,entry->y,entry->z,entry->actionFlag,entry->delay);
     sTaxiPathNodeStore.Clear();
 
+    LoadDBC(bar,bad_dbc_files,sTotemCategoryStore,       dataPath+"dbc/TotemCategory.dbc");
     LoadDBC(bar,bad_dbc_files,sWorldSafeLocsStore,       dataPath+"dbc/WorldSafeLocs.dbc");
 
     // error checks
@@ -726,6 +729,26 @@ ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id)
             return ch;
     }
     return NULL;
+}
+
+bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredTotemCategoryId)
+{
+    if(requiredTotemCategoryId==0)
+        return true;
+    if(itemTotemCategoryId==0)
+        return false;
+
+    TotemCategoryEntry const* itemEntry = sTotemCategoryStore.LookupEntry(itemTotemCategoryId);
+    if(!itemEntry)
+        return false;
+    TotemCategoryEntry const* reqEntry = sTotemCategoryStore.LookupEntry(requiredTotemCategoryId);
+    if(!reqEntry)
+        return false;
+
+    if(itemEntry->categoryType!=reqEntry->categoryType)
+        return false;
+
+    return (itemEntry->categoryMask & reqEntry->categoryMask)==reqEntry->categoryMask;
 }
 
 // script support functions
