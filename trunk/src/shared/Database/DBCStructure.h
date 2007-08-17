@@ -290,7 +290,7 @@ struct MapEntry
                                                             //21-23 unused (something PvPZone related - levels?)
                                                             //24-27
     //char*     hordeIntro                                  //28-43 text for PvP Zones
-                                                            //44 intro text flags, used in hack way to detect expansion maps
+    //uint32    flags;                                      //44 intro text flags, used in hack way to detect expansion maps
     //char*     allianceIntro                               //45-60 text for PvP Zones
                                                             //46 intro text flags
                                                             //47-65 not used
@@ -300,7 +300,7 @@ struct MapEntry
                                                             //99 text flags
     //chat*     unknownText2                                //100-115 unknown empty text fields
                                                             //116 text flags
-    int32 parent_map;                                       //117 map_id of parent map
+    int32       parent_map;                                 //117 map_id of parent map
     //float start_x                                         //118 enter x coordinate (if exist single entry)
     //float start_y                                         //119 enter y coordinate (if exist single entry)
                                                             //120-122
@@ -308,7 +308,7 @@ struct MapEntry
 
 inline bool IsExpansionMap(MapEntry const* map)
 {
-    return map && (map->MapID==530 || map->parent_map==530);
+    return map && (map->MapID == 530 || map->parent_map == 530);
 }
 
 struct SkillLineEntry

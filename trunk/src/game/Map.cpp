@@ -461,8 +461,8 @@ bool Map::AddInstanced(Player *player)
         // GMs can avoid player limits
         if ((i_Players.size() >= i_maxPlayers) && (!player->isGameMaster()))
         {
-            sLog.outDetail("MAP: Instance '%u' of map '%s' cannot have more than '%u' players. Player '%s' rejected", GetInstanceId(), GetMapName(), i_maxPlayers, player->GetName() );
-            player->GetSession()->SendAreaTriggerMessage("Sorry, the instance is full (%u players maximum)", i_maxPlayers);
+            sLog.outDetail("MAP: Instance '%u' of map '%s' cannot have more than '%u' players. Player '%s' rejected", GetInstanceId(), GetMapName(), i_maxPlayers, player->GetName());
+            player->SendTransferAborted(GetId(), TRANSFER_ABORT_MAX_PLAYERS);
             return(false);
         }
 
@@ -478,6 +478,9 @@ bool Map::AddInstanced(Player *player)
 
     // reinitialize reset time
     InitResetTime();
+
+    if (IsRaid())
+        player->SendRaidInstanceResetWarning(RAID_INSTANCE_WELCOME, GetId(), i_resetTime-time(NULL));
 
     return(true);
 }
@@ -508,7 +511,6 @@ void Map::InitResetTime()
 
 void Map::Reset()
 {
-
     objmgr.DeleteRespawnTimeForInstance(GetInstanceId());
 
     UnloadAll();
@@ -520,19 +522,20 @@ void Map::Reset()
 bool Map::CanEnter(Player* player)
 {
     if (!Instanceable()) return(true);
-    
+
     // GMs can avoid raid limitations
     if (IsRaid() && (!player->isGameMaster() && !sWorld.getConfig(CONFIG_INSTANCE_IGNORE_RAID)))
     {
         Group* group = player->GetGroup();
         if (!group || !group->isRaidGroup())
         {
+            // probably there must be special opcode, because client has this string constant in GlobalStrings.lua
             player->GetSession()->SendAreaTriggerMessage("You must be in a raid group to enter %s instance", GetMapName());
             sLog.outDebug("MAP: Player '%s' must be in a raid group to enter instance of '%s'", player->GetName(), GetMapName());
             return(false);
         }
     }
-    
+
     if (!player->isAlive())
     {
         if(Corpse *corpse = player->GetCorpse())
@@ -832,6 +835,10 @@ Map::PlayerRelocation(Player *player, float x, float y, float z, float orientati
     if( old_cell.DiffGrid(new_cell) || old_cell.DiffCell(new_cell) )
     {
         DEBUG_LOG("Player %s relocation grid[%u,%u]cell[%u,%u]->grid[%u,%u]cell[%u,%u]", player->GetName(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
+
+        // update player position for group at taxi flight
+        if(player->GetGroup() && player->isInFlight())
+            player->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_POSITION);
 
         NGridType &grid(*i_grids[old_cell.GridX()][old_cell.GridY()]);
 
@@ -1447,7 +1454,7 @@ void Map::SendInitTransports( Player * player )
     MapManager::TransportSet& tset = tmap[player->GetMapId()];
 
     for (MapManager::TransportSet::iterator i = tset.begin(); i != tset.end(); ++i)
-        if((*i)!=player->GetTransport())                    // send data for current transport in other place
+        if((*i) != player->GetTransport())                  // send data for current transport in other place
             (*i)->BuildCreateUpdateBlockForPlayer(&transData, player);
 
     WorldPacket packet;

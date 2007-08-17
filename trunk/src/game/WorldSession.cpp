@@ -442,7 +442,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_ARENA_TEAM_PROMOTE_TO_CAPTAIN ]    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamPromoteToCaptainOpcode );
     objmgr.opcodeTable[ CMSG_AREA_SPIRIT_HEALER_QUERY ]         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAreaSpiritHealerQueryOpcode   );
     objmgr.opcodeTable[ CMSG_AREA_SPIRIT_HEALER_QUEUE ]         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAreaSpiritHealerQueueOpcode   );
-    objmgr.opcodeTable[ CMSG_MOVE_SHIP_909 ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMoveShipOpcode                );
+    objmgr.opcodeTable[ CMSG_MOVE_SHIP_909 ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               ); // HandleMoveShipOpcode
     objmgr.opcodeTable[ MSG_MOVE_FLY_STATE_CHANGE ]             = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
     objmgr.opcodeTable[ CMSG_DISMOUNT ]                         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleDismountOpcode                );
     objmgr.opcodeTable[ CMSG_SELF_RES ]                         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSelfResOpcode                 );
@@ -1113,7 +1113,7 @@ OpcodeHandler* WorldSession::_GetOpcodeHandlerTable() const
 /// \todo Complete HandleCancelChanneling function
 void WorldSession::HandleCancelChanneling( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data,4);
+    CHECK_PACKET_SIZE(recv_data, 4);
 
     uint32 spellid;
     recv_data >> spellid;
@@ -1121,7 +1121,7 @@ void WorldSession::HandleCancelChanneling( WorldPacket & recv_data )
 
 void WorldSession::HandleFarSightOpcode( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data,1);
+    CHECK_PACKET_SIZE(recv_data, 1);
 
     sLog.outDebug("WORLD: CMSG_FAR_SIGHT");
     //recv_data.hexlike();
@@ -1162,6 +1162,8 @@ void WorldSession::SendAreaTriggerMessage(const char* Text, ...)
 
 void WorldSession::HandleDungeonDifficultyOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data, 4);
+
     sLog.outDebug("MSG_SET_DUNGEON_DIFFICULTY");
 
     uint32 difficulty;
@@ -1173,6 +1175,8 @@ void WorldSession::HandleDungeonDifficultyOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleChooseTitleOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data, 4);
+
     sLog.outDebug("CMSG_CHOOSE_TITLE");
 
     uint32 title;
@@ -1211,13 +1215,15 @@ BA B8 1B 40 CE 06 00 00 | 00 00 80 3F
 
 void WorldSession::HandleRealmStateRequestOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data, 4);
+
     sLog.outDebug("CMSG_REALM_STATE_REQUEST");
 
     uint32 unk;
     std::string split_date = "01/01/01";
     recv_data >> unk;
 
-    WorldPacket data(SMSG_REALM_STATE_RESPONSE, 17);
+    WorldPacket data(SMSG_REALM_STATE_RESPONSE, 4+4+split_date.size()+1);
     data << unk;
     data << uint32(0x00000000); // realm split state
     // split states:
@@ -1231,6 +1237,8 @@ void WorldSession::HandleRealmStateRequestOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleAllowMoveAckOpcode( WorldPacket & recv_data )
 {
+    CHECK_PACKET_SIZE(recv_data, 4+4);
+
     sLog.outDebug("CMSG_ALLOW_MOVE_ACK");
 
     uint32 counter, time_;
@@ -1244,6 +1252,8 @@ void WorldSession::HandleAllowMoveAckOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
 {
+    CHECK_PACKET_SIZE(recv_data, 1);
+
     sLog.outDebug("Received opcode CMSG_WHOIS");
     std::string charname, acc, email, lastip, msg;
     recv_data >> charname;
@@ -1294,7 +1304,7 @@ void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
             lastip = "Unknown";
         msg = charname + "'s " + "account is " + acc + ", e-mail: " + email + ", last ip: " + lastip;
 
-        WorldPacket data(SMSG_WHOIS,msg.size()+1);
+        WorldPacket data(SMSG_WHOIS, msg.size()+1);
         data << msg;
         _player->GetSession()->SendPacket(&data);
     }
@@ -1361,7 +1371,7 @@ void WorldSession::HandleDismountOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleMoveFlyModeChangeAckOpcode( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data,8+4+4);
+    CHECK_PACKET_SIZE(recv_data, 8+4+4);
 
     // fly mode on/off
     sLog.outDebug("WORLD: CMSG_MOVE_FLY_MODE_CHANGE_ACK");
@@ -1402,39 +1412,43 @@ void WorldSession::HandleSelfResOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleReportSpamOpcode( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data,4+8+4+4+4+4+1);
+    CHECK_PACKET_SIZE(recv_data, 1+8);
     sLog.outDebug("WORLD: CMSG_REPORT_SPAM");
     recv_data.hexlike();
-    /*
-    WORLD: CMSG_REPORT_SPAM
-    STORAGE_SIZE: 113
-    01 08 00 00 00 00 00 00 00 00 00 00 00 0E 00 00
-    00 01 00 00 00 A1 00 00 00 54 79 70 65 3A 20 5B
-    31 34 5D 2C 20 43 68 61 6E 6E 65 6C 3A 20 5B 47
-    65 6E 65 72 61 6C 20 2D 20 44 61 72 6E 61 73 73
-    75 73 5D 2C 20 50 6C 61 79 65 72 20 4E 61 6D 65
-    3A 20 5B 4E 73 66 67 5D 2C 20 54 65 78 74 3A 20
-    5B 69 20 61 6D 20 61 20 73 70 61 6D 6D 65 72 5D
-    00
-    */
-    uint8 unk1;
-    uint64 guid;
-    uint32 unk2, unk3, unk4, unk5;
-    std::string description;
-    recv_data >> unk1;          // unk 0x01 const
-    recv_data >> guid;          // player guid
-    recv_data >> unk2;          // probably language
-    recv_data >> unk3;          // message type?
-    recv_data >> unk4;          // probably channel id
-    recv_data >> unk5;          // unk random value
-    recv_data >> description;   // spam description string (messagetype, channel name, player name, message)
+
+    uint8 spam_type;                                // 0 - mail, 1 - chat
+    uint64 spammer_guid;
+    uint32 unk1, unk2, unk3, unk4 = 0;
+    std::string description = "";
+    recv_data >> spam_type;                         // unk 0x01 const, may be spam type (mail/chat)
+    recv_data >> spammer_guid;                      // player guid
+    switch(spam_type)
+    {
+        case 0:
+            CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4+4+4);
+            recv_data >> unk1;                      // unk
+            recv_data >> unk2;                      // probably mail id
+            recv_data >> unk3;                      // unk
+            break;
+        case 1:
+            CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4+4+4+4+1);
+            recv_data >> unk1;                      // probably language
+            recv_data >> unk2;                      // message type?
+            recv_data >> unk3;                      // probably channel id
+            recv_data >> unk4;                      // unk random value
+            recv_data >> description;               // spam description string (messagetype, channel name, player name, message)
+            break;
+    }
+
+    // NOTE: all chat messages from this spammer automatically ignored by spam reporter until logout in case chat spam.
+    // if it's mail spam - ALL mails from this spammer automatically removed by client
 
     // Complaint Received message
-    WorldPacket data(SMSG_REPORT_SPAM_RESPONSE, 0);
+    WorldPacket data(SMSG_REPORT_SPAM_RESPONSE, 1);
     data << uint8(0);
     SendPacket(&data);
 
-    sLog.outDebug("unk1 %u, guid %u, unk2 %u, unk3, %u, unk4 %u, unk5 %u, message %s", unk1, GUID_LOPART(guid), unk2, unk3, unk4, unk5, description.c_str());
+    sLog.outDebug("REPORT SPAM: type %u, guid %u, unk2 %u, unk3, %u, unk4 %u, unk5 %u, message %s", spam_type, GUID_LOPART(spammer_guid), unk1, unk2, unk3, unk4, description.c_str());
 }
 
 void WorldSession::HandleRequestPetInfoOpcode( WorldPacket & recv_data )

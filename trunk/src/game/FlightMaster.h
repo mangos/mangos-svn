@@ -89,7 +89,7 @@ class MANGOS_DLL_DECL FlightMaster : public MaNGOS::Singleton<FlightMaster, MaNG
             }
         }
 
-        FlightPathMovementGenerator* GetFlightMovementGenerator(Player *plr)
+        FlightPathMovementGenerator* GetFlightPathMovementGenerator(Player *plr)
         {
             FlightMapType::iterator iter = i_flights.find(plr);
             if (iter == i_flights.end())

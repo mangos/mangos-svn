@@ -601,11 +601,11 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
         case CHAT_MSG_WHISPER:
         case CHAT_MSG_CHANNEL:
         case CHAT_MSG_RAID_LEADER:
-        case CHAT_MSG_RAID_WARN:
+        case CHAT_MSG_RAID_WARNING:
+        case CHAT_MSG_BG_SYSTEM_NEUTRAL:
+        case CHAT_MSG_BG_SYSTEM_ALLIANCE:
+        case CHAT_MSG_BG_SYSTEM_HORDE:
         case CHAT_MSG_BATTLEGROUND:
-        case CHAT_MSG_BATTLEGROUND_HORDE:
-        case CHAT_MSG_BATTLEGROUND_ALLIANCE:
-        case CHAT_MSG_BATTLEGROUND_CHAT:
         case CHAT_MSG_BATTLEGROUND_LEADER:
             target_guid = session ? session->GetPlayer()->GetGUID() : 0;
             break;

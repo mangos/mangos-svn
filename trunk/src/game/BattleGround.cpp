@@ -440,7 +440,7 @@ void BattleGround::EndBattleGround(uint32 winner)
 
     if(Source)
     {
-        sChatHandler.FillMessageData(&data, Source->GetSession(), CHAT_MSG_BATTLEGROUND, LANG_UNIVERSAL, NULL, Source->GetGUID(), winmsg, NULL);
+        sChatHandler.FillMessageData(&data, Source->GetSession(), CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_UNIVERSAL, NULL, Source->GetGUID(), winmsg, NULL);
         SendPacketToAll(&data);
     }
 

@@ -551,7 +551,7 @@ void WorldSession::SendPartyMemberStatsChanged(uint64 Guid, uint32 mask)
 {
     if (mask == GROUP_UPDATE_FLAG_NONE)
         return;
-    
+
     Player *player = objmgr.GetPlayer(Guid);
     if(!player) //currently do not send update if player is offline
         return;
@@ -565,7 +565,7 @@ void WorldSession::SendPartyMemberStatsChanged(uint64 Guid, uint32 mask)
     for (int i=1;i<GROUP_UPDATE_FLAGS_COUNT;++i)
         if (mask & 1<<i)
             byteCount += GroupUpdateLength[i];
-    
+
     WorldPacket data(SMSG_PARTY_MEMBER_STATS, 8+4+byteCount);
     if (player)
         data.append(player->GetPackGUID());
@@ -629,35 +629,27 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
     Player *player = objmgr.GetPlayer(Guid);
     if(!player)
         return;
-    WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 30);
+    WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 4+1+2+2+1+2*6+8+1+8);
 
     data.append(player->GetPackGUID());
-    uint32 mask1 = 0x7FFC0BFF;                  //1111111111111000000101111111111
-                 //0x7FFC0BF7;                  //1111111111111000000101111110111
-                 //0x7FFC1BF7;                  //1111111111111000001101111110111
-                                                //1111111111111--not used in mask
+    uint32 mask1 = 0x7FFC0BFF;                              // real flags used 0x000040BFF
+                 //0x7FFC1BFF;                              // for hunters etc (GROUP_UPDATE_FLAG_PET_MODEL_ID)
     Powers powerType = player->getPowerType();
-    data << (uint32) mask1;
-    data << (uint8)  MEMBER_STATUS_ONLINE;       //should be member's online status
-    data << (uint16) player->GetHealth();
-    data << (uint16) player->GetMaxHealth();
-    data << (uint8) powerType;
-    data << (uint16) player->GetMaxPower(powerType);
-    data << (uint16) player->GetPower(powerType);
-    data << (uint16) player->getLevel();
-    data << (uint16) player->GetZoneId();
-    data << (uint16) player->GetPositionX();
-    data << (uint16) player->GetPositionY();
-    ///some unknown parts, don't know how to divide it :
-    data << (uint32) 0;
-    data << (uint16) 0;
-    data << (uint8)  0;
-    data << (uint16) 0x00FF;
-    //ending packets
-    data << (uint32) 0;
-    // it should not be decimal constant ?!
-    //data << (uint32) 4278190080;                //0xFF000000
-    data << (uint32) 0xFF000000;                //0xFF000000
+    data << (uint32) mask1;                                 // group update mask
+    data << (uint8)  MEMBER_STATUS_ONLINE;                  // member's online status
+    data << (uint16) player->GetHealth();                   // GROUP_UPDATE_FLAG_CUR_HP
+    data << (uint16) player->GetMaxHealth();                // GROUP_UPDATE_FLAG_MAX_HP
+    data << (uint8)  powerType;                             // GROUP_UPDATE_FLAG_POWER_TYPE
+    data << (uint16) player->GetPower(powerType);           // GROUP_UPDATE_FLAG_CUR_POWER
+    data << (uint16) player->GetMaxPower(powerType);        // GROUP_UPDATE_FLAG_MAX_POWER
+    data << (uint16) player->getLevel();                    // GROUP_UPDATE_FLAG_LEVEL
+    data << (uint16) player->GetZoneId();                   // GROUP_UPDATE_FLAG_ZONE
+    data << (uint16) player->GetPositionX();                // GROUP_UPDATE_FLAG_POSITION
+    data << (uint16) player->GetPositionY();                // GROUP_UPDATE_FLAG_POSITION
+    data << (uint64) 0xFF00000000000000LL;                  // GROUP_UPDATE_FLAG_AURAS
+    //data << (uint16) player->GetPet()->GetUInt32Value(UNIT_FIELD_DISPLAYID);    // GROUP_UPDATE_FLAG_PET_MODEL_ID, for hunters etc...
+    data << (uint8)  0x00;                                  // GROUP_UPDATE_FLAG_PET_NAME
+    data << (uint64) 0xFF00000000000000LL;                  // GROUP_UPDATE_FLAG_PET_AURAS
     SendPacket(&data);
 }
 
