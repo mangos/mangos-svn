@@ -1749,7 +1749,7 @@ void Spell::SendCastResult(uint8 result)
     if (m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    if(((Player*)m_caster)->GetSession()->PlayerLoading()) // don't send cast results at loading time
+    if(((Player*)m_caster)->GetSession()->PlayerLoading())  // don't send cast results at loading time
         return;
 
     if(result != 0)

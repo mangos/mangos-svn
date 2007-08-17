@@ -51,16 +51,28 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
         }
     }
 
-    //SaveToDB();
-
-    // Client reset some data at NEW_WORLD teleport, resending its to client.
-    //SendInitialPackets(); // done in MSG_MOVE_WORLDPORT_ACK handler
-
     // reset instance validity
     GetPlayer()->m_InstanceValid = true;
 
-    // re-add us to the map here
+    GetPlayer()->SetSemaphoreTeleport(false);
+
+    // remove new continent flight forms
+    if(mEntry->MapID != 530)                                // non TBC map
+    {
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_MOD_SPEED_MOUNTED_FLIGHT);
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FLY);
+    }
+
+    if(!GetPlayer()->SendInitialPacketsBeforeAddToMap())
+        return;                                             // fatal error in character state setup
+
     MapManager::Instance().GetMap(GetPlayer()->GetMapId(), GetPlayer())->Add(GetPlayer());
+
+    GetPlayer()->SendInitialPacketsAfterAddToMap();
+
+    // honorless target
+    if(GetPlayer()->pvpInfo.inHostileArea) 
+        GetPlayer()->CastSpell(GetPlayer(), 2479, true);
 
     // resummon pet
     if(GetPlayer()->m_oldpetnumber)
@@ -71,29 +83,6 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
 
         GetPlayer()->m_oldpetnumber = 0;
     }
-
-    GetPlayer()->SetSemaphoreTeleport(false);
-
-    GetPlayer()->UpdateZone(GetPlayer()->GetZoneId());
-
-    // remove new continent flight forms
-    if(!IsExpansionMap(mEntry))                         // non TBC map
-    {
-        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_MOD_SPEED_MOUNTED_FLIGHT);
-        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FLY);
-    }
-
-    // honorless target
-    if(GetPlayer()->pvpInfo.inHostileArea) 
-        GetPlayer()->CastSpell(GetPlayer(), 2479, true);
-
-    if(!GetPlayer()->SendInitialPacketsBeforeAddToMap())
-        return;                                             // fatal error in character state setup
-
-    MapManager::Instance().GetMap(GetPlayer()->GetMapId(), GetPlayer())->Add(GetPlayer());
-
-    GetPlayer()->SendInitialPacketsAfterAddToMap();
-
 
     GetPlayer()->SetDontMove(false);
 }
@@ -118,7 +107,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
     recv_data >> flags >> time;
     recv_data >> x >> y >> z >> orientation;
-    if(flags & MOVEMENTFLAG_ONTRANSPORT) // and if opcode 909?
+    if(flags & MOVEMENTFLAG_ONTRANSPORT)                    // and if opcode 909?
     {
         // recheck
         CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+8+4+4+4+4+4);

@@ -134,26 +134,6 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
     uint8  flags      = m_updateFlag;
     uint32 flags2     = 0;
 
-    if(GetTypeId() == TYPEID_PLAYER)
-    {
-        flags2 = ((Player*)this)->GetMovementFlags();
-
-        if((flags2 & MOVEMENTFLAG_ONTRANSPORT) && ((Player*)this)->GetTransport() == 0)
-            flags2 &= ~MOVEMENTFLAG_ONTRANSPORT;
-
-        // remove unknown, unused etc flags for now
-        flags2 &= ~MOVEMENTFLAG_SPLINE;
-        flags2 &= ~MOVEMENTFLAG_SPLINE2;
-        flags2 &= ~MOVEMENTFLAG_JUMPING;
-        flags2 &= ~MOVEMENTFLAG_SWIMMING;
-
-        if(((Player*)this)->isInFlight())
-        {
-            if(FlightMaster::Instance().GetFlightMovementGenerator((Player*)this))
-                flags2 = (MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_SPLINE2);
-        }
-    }
-
     /** lower flag1 **/
     if(target == this) // building packet for oneself
     {
@@ -283,16 +263,41 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
 
     if (flags & UPDATEFLAG_LIVING)          // 0x20
     {
-        if(m_objectTypeId == TYPEID_UNIT)
+        switch(GetTypeId())
         {
-            switch(GetEntry())
-            {
-                case 6491:                  // Spirit Healer
-                case 13116:                 // Alliance Spirit Guide
-                case 13117:                 // Horde Spirit Guide
-                    flags2 |= MOVEMENTFLAG_WATERWALKING;   // waterwalking movement flag?
-                    break;
-            }
+            case TYPEID_UNIT:
+                {
+                    switch(GetEntry())
+                    {
+                        case 6491:          // Spirit Healer
+                        case 13116:         // Alliance Spirit Guide
+                        case 13117:         // Horde Spirit Guide
+                            flags2 |= MOVEMENTFLAG_WATERWALKING;   // waterwalking movement flag?
+                            break;
+                    }
+                }
+                break;
+            case TYPEID_PLAYER:
+                {
+                    flags2 = ((Player*)this)->GetMovementFlags();
+
+                    if(((Player*)this)->GetTransport())
+                        flags2 |= MOVEMENTFLAG_ONTRANSPORT;
+                    else
+                        flags2 &= ~MOVEMENTFLAG_ONTRANSPORT;
+
+                    // remove unknown, unused etc flags for now
+                    flags2 &= ~MOVEMENTFLAG_SPLINE;
+                    flags2 &= ~MOVEMENTFLAG_SPLINE2;
+                    flags2 &= ~MOVEMENTFLAG_JUMPING;
+                    flags2 &= ~MOVEMENTFLAG_FALLING;
+                    flags2 &= ~MOVEMENTFLAG_SWIMMING;
+
+                    if(((Player*)this)->isInFlight())
+                        if(FlightMaster::Instance().GetFlightPathMovementGenerator((Player*)this))
+                            flags2 = (MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_SPLINE2);
+                }
+                break;
         }
 
         *data << flags2;                    // movement flags
@@ -326,7 +331,6 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
             *data << (float)((Player*)this)->GetTransOffsetY();
             *data << (float)((Player*)this)->GetTransOffsetZ();
             *data << (float)((Player*)this)->GetTransOffsetO();
-            //*data << uint32(0x11);          // unk, mask or flags
             *data << (uint32)((Player*)this)->GetTransTime();
         }
 
@@ -339,7 +343,8 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
         // fall time according movement packet structure...
         *data << (uint32)0;                 // unknown
 
-        /*if(flags2 & MOVEMENTFLAG_JUMPING)   // 0x2000
+        // 0x2000 or 0x4000
+        /*if((flags2 & MOVEMENTFLAG_JUMPING) || (flags2 & MOVEMENTFLAG_FALLING))
         {
             // is't part of movement packet, we must store and send it...
             *data << (float)0;
@@ -364,7 +369,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
 
         if(flags2 & MOVEMENTFLAG_SPLINE2)   // 0x8000000
         {
-            FlightPathMovementGenerator *fmg = FlightMaster::Instance().GetFlightMovementGenerator((Player*)this);
+            FlightPathMovementGenerator *fmg = FlightMaster::Instance().GetFlightPathMovementGenerator((Player*)this);
             if (!fmg)
             {
                 // how we can get there?

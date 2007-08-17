@@ -228,7 +228,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             sChatHandler.FillMessageData(&data, this, CHAT_MSG_RAID_LEADER, lang, "", 0, msg.c_str());
             group->BroadcastPacket(&data);
         } break;
-        case CHAT_MSG_RAID_WARN:
+        case CHAT_MSG_RAID_WARNING:
         {
             std::string msg="";
             recv_data >> msg;
@@ -238,11 +238,11 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 return;
 
             WorldPacket data;
-            sChatHandler.FillMessageData(&data, this, CHAT_MSG_RAID_WARN, lang, "", 0, msg.c_str());
+            sChatHandler.FillMessageData(&data, this, CHAT_MSG_RAID_WARNING, lang, "", 0, msg.c_str());
             group->BroadcastPacket(&data);
         } break;
 
-        case CHAT_MSG_BATTLEGROUND_CHAT:
+        case CHAT_MSG_BATTLEGROUND:
         {
             std::string msg="";
             recv_data >> msg;
@@ -252,7 +252,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 return;
 
             WorldPacket data;
-            sChatHandler.FillMessageData(&data, this, CHAT_MSG_BATTLEGROUND_CHAT, lang, "", 0, msg.c_str());
+            sChatHandler.FillMessageData(&data, this, CHAT_MSG_BATTLEGROUND, lang, "", 0, msg.c_str());
             group->BroadcastPacket(&data);
         } break;
 

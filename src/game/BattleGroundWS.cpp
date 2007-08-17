@@ -100,7 +100,7 @@ void BattleGroundWS::RespawnFlag(uint32 Team, bool captured)
     {
         WorldPacket data;
         const char *message = LANG_BG_F_PLACED;
-        sChatHandler.FillMessageData(&data, NULL, CHAT_MSG_BATTLEGROUND, LANG_UNIVERSAL, NULL, 0, message, NULL);
+        sChatHandler.FillMessageData(&data, NULL, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_UNIVERSAL, NULL, 0, message, NULL);
         SendPacketToAll(&data);
 
         PlaySoundToAll(8232);                               // flags respawned sound...
@@ -122,7 +122,7 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
         m_FlagState[1] = FLAG_STATE_ON_BASE;                // horde flag in base (but not respawned yet)
         Source->RemoveAurasDueToSpell(23333);               // Drop Horde Flag from Player
         message = LANG_BG_CAPTURED_HF;
-        type = CHAT_MSG_BATTLEGROUND_HORDE;
+        type = CHAT_MSG_BG_SYSTEM_ALLIANCE;
         if(GetTeamScore(ALLIANCE) < MAX_TEAM_SCORE)
             AddPoint(ALLIANCE, 1);
         PlaySoundToAll(8173);
@@ -133,7 +133,7 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
         m_FlagState[0] = FLAG_STATE_ON_BASE;                // alliance flag in base (but not respawned yet)
         Source->RemoveAurasDueToSpell(23335);               // Drop Alliance Flag from Player
         message = LANG_BG_CAPTURED_AF;
-        type = CHAT_MSG_BATTLEGROUND_ALLIANCE;
+        type = CHAT_MSG_BG_SYSTEM_HORDE;
         if(GetTeamScore(HORDE) < MAX_TEAM_SCORE)
             AddPoint(HORDE, 1);
         PlaySoundToAll(8213);
@@ -194,14 +194,14 @@ void BattleGroundWS::EventPlayerDroppedFlag(Player *Source)
         SetHordeFlagPicker(0);
         m_FlagState[1] = FLAG_STATE_ON_GROUND;              // horde flag dropped
         message = LANG_BG_DROPPED_HF;
-        type = CHAT_MSG_BATTLEGROUND_ALLIANCE;
+        type = CHAT_MSG_BG_SYSTEM_HORDE;
     }
     if(Source->GetTeam() == HORDE)
     {
         SetAllianceFlagPicker(0);
         m_FlagState[0] = FLAG_STATE_ON_GROUND;              // alliance flag dropped
         message = LANG_BG_DROPPED_AF;
-        type = CHAT_MSG_BATTLEGROUND_HORDE;
+        type = CHAT_MSG_BG_SYSTEM_ALLIANCE;
     }
 
     UpdateFlagState(Source->GetTeam(), 1);
@@ -228,7 +228,7 @@ void BattleGroundWS::EventPlayerReturnedFlag(Player *Source)
     {
         m_FlagState[0] = FLAG_STATE_ON_BASE;                // alliance flag in base
         message = LANG_BG_RETURNED_AF;
-        type = CHAT_MSG_BATTLEGROUND_HORDE;
+        type = CHAT_MSG_BG_SYSTEM_ALLIANCE;
         UpdateFlagState(HORDE, 1);
         RespawnFlag(ALLIANCE, false);
     }
@@ -236,7 +236,7 @@ void BattleGroundWS::EventPlayerReturnedFlag(Player *Source)
     {
         m_FlagState[1] = FLAG_STATE_ON_BASE;                // horde flag in base
         message = LANG_BG_RETURNED_HF;
-        type = CHAT_MSG_BATTLEGROUND_ALLIANCE;
+        type = CHAT_MSG_BG_SYSTEM_HORDE;
         UpdateFlagState(ALLIANCE, 1);
         RespawnFlag(HORDE, false);
     }
@@ -260,7 +260,7 @@ void BattleGroundWS::EventPlayerPickedUpFlag(Player *Source)
     if(Source->GetTeam() == ALLIANCE)
     {
         message = LANG_BG_PICKEDUP_HF;
-        type = CHAT_MSG_BATTLEGROUND_HORDE;
+        type = CHAT_MSG_BG_SYSTEM_ALLIANCE;
         PlaySoundToAll(8212);
         MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_H_FLAG].object->GetMapId(), m_bgobjects[BG_OBJECT_H_FLAG].object)->Remove(m_bgobjects[BG_OBJECT_H_FLAG].object, false);
         SetHordeFlagPicker(Source->GetGUID());              // pick up Horde Flag
@@ -269,7 +269,7 @@ void BattleGroundWS::EventPlayerPickedUpFlag(Player *Source)
     if(Source->GetTeam() == HORDE)
     {
         message = LANG_BG_PICKEDUP_AF;
-        type = CHAT_MSG_BATTLEGROUND_ALLIANCE;
+        type = CHAT_MSG_BG_SYSTEM_HORDE;
         PlaySoundToAll(8174);
         MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_A_FLAG].object->GetMapId(), m_bgobjects[BG_OBJECT_A_FLAG].object)->Remove(m_bgobjects[BG_OBJECT_A_FLAG].object, false);
         SetAllianceFlagPicker(Source->GetGUID());           // pick up Alliance Flag

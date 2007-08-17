@@ -417,9 +417,6 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         // TODO : Teleport to zone-in area
     }
 
-    if(pCurrChar->m_transport)
-        pCurrChar->SetMovementFlags(MOVEMENTFLAG_ONTRANSPORT);
-
     MapManager::Instance().GetMap(pCurrChar->GetMapId(), pCurrChar)->Add(pCurrChar);
     ObjectAccessor::Instance().AddObject(pCurrChar);
     //sLog.outDebug("Player %s added to Map.",pCurrChar->GetName());

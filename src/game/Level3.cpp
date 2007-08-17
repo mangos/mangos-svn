@@ -3916,7 +3916,6 @@ bool ChatHandler::HandleBanListCommand(const char* args)
     std::string Type = cType;
     loginDatabase.escape_string(Filter);
 
-
     QueryResult* result  = NULL;
     Field *fields = NULL;
     if(Type == "ip")
@@ -4032,9 +4031,28 @@ bool ChatHandler::HandleSendOpcodeCommand(const char* args)
     if (!unit || (unit->GetTypeId() != TYPEID_PLAYER))
         unit = m_session->GetPlayer();
 
-    uint16 opcode = atoi(args);
+    char* op = strtok((char*)args, " ");
+    if(!op)
+        return false;
+    char* val1 = strtok(NULL, " ");
+    if(!val1)
+        return false;
+    char* val2 = strtok(NULL, " ");
+    if(!val2)
+        return false;
+    char* val3 = strtok(NULL, " ");
+    if(!val3)
+        return false;
+
+    uint16 opcode = atoi(op);
+    uint32 value1 = atoi(val1);
+    uint32 value2 = atoi(val2);
+    uint32 value3 = atoi(val3);
+
     WorldPacket data(opcode, 20);
-    data << uint32(0);
+    data << uint32(value1);
+    data << uint32(value2);
+    data << uint32(value3);
     ((Player*)unit)->GetSession()->SendPacket(&data);
     /*data.append(unit->GetPackGUID());
     data << urand(0, 1024);

@@ -1347,11 +1347,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         if(GetTransport())
             RepopAtGraveyard();                             // teleport to near graveyard if on transport, looks blizz like :)
 
-        // send error message
-        WorldPacket data(SMSG_TRANSFER_ABORTED, 4+2);
-        data << mapid;
-        data << uint16(0x0106);                             // unk, probably error message id, now it's "You must have The Burning Crusade expansion installed to access this area.", look for other messages in GlobalStrings.lua (TRANSFER_ABORT_*).
-        GetSession()->SendPacket(&data);
+        SendTransferAborted(mapid, TRANSFER_ABORT_INSUF_EXPAN_LVL1);
 
         return;                                             // normal client can't teleport to this map...
     }
@@ -1461,12 +1457,9 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     {
         CombatStop();
 
-        if(m_transport)
-            SetMovementFlags(MOVEMENTFLAG_ONTRANSPORT);
-
         // far teleport to another map
         Map* oldmap = MapManager::Instance().GetMap(GetMapId(), this);
-        
+
         if(outofrange && pet)
         {
             //leaving map -> delete pet right away (doing this later will cause problems)
@@ -1543,7 +1536,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
             // set position
             SetMapId(mapid);
-            Relocate(final_x, final_y, final_z,final_o);
+            Relocate(final_x, final_y, final_z, final_o);
 
             // move packet sent by client always after far teleport
             // SetPosition(final_x, final_y, final_z, final_o, true);
@@ -14680,6 +14673,23 @@ void Player::SendUpdateToOutOfRangeGroupMembers()
         group->UpdatePlayerOutOfRange(this, m_groupUpdateMask);
 
     m_groupUpdateMask = GROUP_UPDATE_FLAG_NONE;
+}
+
+void Player::SendTransferAborted(uint32 mapid, uint16 reason)
+{
+    WorldPacket data(SMSG_TRANSFER_ABORTED, 4+2);
+    data << uint32(mapid);
+    data << uint16(reason);                         // transfer abort reason
+    GetSession()->SendPacket(&data);
+}
+
+void Player::SendRaidInstanceResetWarning(uint32 type, uint32 mapid, uint32 time)
+{
+    WorldPacket data(SMSG_INSTANCE_RESET_SCHEDULED, 4+4+4);
+    data << uint32(type);
+    data << uint32(mapid);
+    data << uint32(time);
+    GetSession()->SendPacket(&data);
 }
 
 template void Player::UpdateVisibilityOf(Player*        target, UpdateData& data, UpdateDataMapType& data_updates);

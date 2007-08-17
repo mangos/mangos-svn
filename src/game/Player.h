@@ -589,8 +589,29 @@ enum TradeSlots
     TRADE_SLOT_NONTRADED        = 6
 };
 
+enum TransferAbortReason
+{
+    TRANSFER_ABORT_MAX_PLAYERS          = 0x0001,   // Transfer Aborted: instance is full
+    TRANSFER_ABORT_NOT_FOUND            = 0x0002,   // Transfer Aborted: instance not found
+    TRANSFER_ABORT_TOO_MANY_INSTANCES   = 0x0003,   // You have entered too many instances recently.
+    TRANSFER_ABORT_ZONE_IN_COMBAT       = 0x0005,   // Unable to zone in while an encounter is in progress.
+    TRANSFER_ABORT_INSUF_EXPAN_LVL1     = 0x0106,   // You must have TBC expansion installed to access this area.
+    TRANSFER_ABORT_DIFFICULTY1          = 0x0007,   // Normal difficulty mode is not available for %s.
+    TRANSFER_ABORT_DIFFICULTY2          = 0x0107,   // Heroic difficulty mode is not available for %s.
+    TRANSFER_ABORT_DIFFICULTY3          = 0x0207    // Epic difficulty mode is not available for %s.
+};
+
+enum InstanceResetWarningType
+{
+    RAID_INSTANCE_WARNING_HOURS     = 1,    // WARNING! %s is scheduled to reset in %d hour(s).
+    RAID_INSTANCE_WARNING_MIN       = 2,    // WARNING! %s is scheduled to reset in %d minute(s)!
+    RAID_INSTANCE_WARNING_MIN_SOON  = 3,    // WARNING! %s is scheduled to reset in %d minute(s). Please exit the zone or you will be returned to your bind location!
+    RAID_INSTANCE_WELCOME           = 4     // Welcome to %s. This raid instance is scheduled to reset in %s.
+};
+
 enum MovementFlags
 {
+    MOVEMENTFLAG_NONE           = 0x00000000,
     MOVEMENTFLAG_FORWARD        = 0x00000001,
     MOVEMENTFLAG_BACKWARD       = 0x00000002,
     MOVEMENTFLAG_STRAFE_LEFT    = 0x00000004,
@@ -615,7 +636,7 @@ enum MovementFlags
     MOVEMENTFLAG_SPLINE         = 0x04000000,   // probably wrong name
     MOVEMENTFLAG_SPLINE2        = 0x08000000,
     MOVEMENTFLAG_WATERWALKING   = 0x10000000,
-    MOVEMENTFLAG_SAFE_FALL      = 0x20000000, // active rogue safe fall spell (passive)
+    MOVEMENTFLAG_SAFE_FALL      = 0x20000000,   // active rogue safe fall spell (passive)
     MOVEMENTFLAG_UNK3           = 0x40000000
 };
 
@@ -660,6 +681,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetStandState(uint8 state);
         bool SendInitialPacketsBeforeAddToMap();
         void SendInitialPacketsAfterAddToMap();
+        void SendTransferAborted(uint32 mapid, uint16 reason);
+        void SendRaidInstanceResetWarning(uint32 type, uint32 mapid, uint32 time);
 
         bool CanInteractWithNPCs(bool alive = true) const;
 
