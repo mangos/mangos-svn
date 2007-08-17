@@ -68,7 +68,10 @@ void PetAI::AttackStart(Unit *u)
     if(i_pet.Attack(u))
     {
         i_pet.clearUnitState(UNIT_STAT_FOLLOW);
-        i_pet->Clear();
+        // TMGs call CreatureRelocation which via MoveInLineOfSight can call this function
+        // thus with the following clear the original TMG gets invalidated and crash, doh
+        // hope it doesn't start to leak memory without this :-/
+        //i_pet->Clear();
         i_victimGuid = u->GetGUID();
         i_pet->Mutate(new TargetedMovementGenerator(*u));
     }
