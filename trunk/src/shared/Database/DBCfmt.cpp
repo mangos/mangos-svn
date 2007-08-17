@@ -54,4 +54,5 @@ const char TalentTabEntryfmt[]="nxxxxxxxxxxxxxxxxxxxixx";
 const char TaxiNodesEntryfmt[]="nifffxxxxxxxxxxxxxxxxxii";
 const char TaxiPathEntryfmt[]="niii";
 const char TaxiPathNodeEntryfmt[]="diiifffiixx";
+const char TotemCategoryEntryfmt[]="nxxxxxxxxxxxxxxxxxii";
 const char WorldSafeLocsEntryfmt[]="nifffxxxxxxxxxxxxxxxxx";

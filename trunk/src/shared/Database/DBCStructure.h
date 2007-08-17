@@ -556,6 +556,26 @@ struct TaxiNodesEntry
     uint32    alliance_mount_type;                          //24
 };
 
+enum TotemCategoryType
+{
+    TOTEM_CATEGORY_TYPE_KNIFE   = 1,
+    TOTEM_CATEGORY_TYPE_TOTEM   = 2,
+    TOTEM_CATEGORY_TYPE_ROD     = 3,
+    TOTEM_CATEGORY_TYPE_PICK    = 21,
+    TOTEM_CATEGORY_TYPE_STONE   = 22,
+    TOTEM_CATEGORY_TYPE_HAMMER  = 23,
+    TOTEM_CATEGORY_TYPE_SPANNER = 24
+};
+
+struct TotemCategoryEntry
+{
+    uint32    ID;                                           // 0
+    //char*   name[16];                                     // 1-16
+                                                            //17 string flags, unused    
+    uint32    categoryType;                                 //18 (one for specialization)
+    uint32    categoryMask;                                 //19 (compatibility mask for same type: different for totems, compatible from high to low for rods)
+};
+
 struct WorldSafeLocsEntry
 {
     uint32    ID;
