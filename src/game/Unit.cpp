@@ -1942,6 +1942,11 @@ MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (const Unit *pVictim, WeaponAtt
             if((*i)->GetModifier()->m_miscvalue == -2 || ((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellInfo->School)) != 0)
                 crit_chance += (*i)->GetModifier()->m_amount;
 
+        // flat
+        AuraList const& mAttackerSWCrit = pVictim->GetAurasByType(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE);
+        for(AuraList::const_iterator i = mAttackerSWCrit.begin(); i != mAttackerSWCrit.end(); ++i)
+            crit_chance += (*i)->GetModifier()->m_amount;
+
         // Spellmods
         ((Player*)this)->ApplySpellMod(spellInfo->Id, SPELLMOD_CRITICAL_CHANCE, crit_chance);
     }
@@ -1959,11 +1964,16 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     int32 miss_chance = (int32)(MeleeMissChanceCalc(pVictim));
 
     // Critical hit chance
-    int32 crit_chance = (int32)(GetUnitCriticalChance(attType)*100);
+    float crit_chance = GetUnitCriticalChance(attType);
+
+    // flat
+    AuraList const& mAttackerSWCrit = pVictim->GetAurasByType(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE);
+    for(AuraList::const_iterator i = mAttackerSWCrit.begin(); i != mAttackerSWCrit.end(); ++i)
+        crit_chance += (*i)->GetModifier()->m_amount;
 
     // Useful if want to specify crit & miss chances for melee, else it could be removed
     DEBUG_LOG("MELEE OUTCOME: hit %u crit %u miss %u", m_modHitChance,crit_chance,miss_chance);
-    return RollMeleeOutcomeAgainst(pVictim, attType, crit_chance, miss_chance, m_modHitChance);
+    return RollMeleeOutcomeAgainst(pVictim, attType, int32(crit_chance * 100 ), miss_chance, m_modHitChance);
 }
 
 MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType, int32 crit_chance, int32 miss_chance, int32 hit_chance) const
@@ -1995,9 +2005,9 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
         return MELEE_HIT_MISS;
     }
 
-    // always crit against a sitting target
-    if (   (pVictim->GetTypeId() == TYPEID_PLAYER)
-        && (((Player*)pVictim)->getStandState() & (PLAYER_STATE_SLEEP | PLAYER_STATE_SIT
+    // always crit against a sitting target (except 0 crit chance)
+    if( (pVictim->GetTypeId() == TYPEID_PLAYER) && crit_chance > 0 &&
+        (((Player*)pVictim)->getStandState() & (PLAYER_STATE_SLEEP | PLAYER_STATE_SIT
         | PLAYER_STATE_SIT_CHAIR
         | PLAYER_STATE_SIT_LOW_CHAIR
         | PLAYER_STATE_SIT_MEDIUM_CHAIR
@@ -5043,11 +5053,10 @@ bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect, Unit
             }
         }
 
-        // percent
-        AuraList const& mAttackerSpellCritPCT = pVictim->GetAurasByType(SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE_PCT);
-        for(AuraList::const_iterator i = mAttackerSpellCritPCT.begin(); i != mAttackerSpellCritPCT.end(); ++i)
-            if((*i)->GetModifier()->m_miscvalue == -2 || ((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0)
-                crit_chance += crit_chance * (*i)->GetModifier()->m_amount/1000;
+        // flat
+        AuraList const& mAttackerSWCrit = pVictim->GetAurasByType(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE);
+        for(AuraList::const_iterator i = mAttackerSWCrit.begin(); i != mAttackerSWCrit.end(); ++i)
+            crit_chance += (*i)->GetModifier()->m_amount;
     }
 
     crit_chance = crit_chance > 0.0 ? crit_chance : 0.0;
