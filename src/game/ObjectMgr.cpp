@@ -2850,7 +2850,7 @@ bool ObjectMgr::IsAffectedBySpell(SpellEntry const *spellInfo, uint32 spellId, u
     {
         if (spellAffect->SpellId && (spellAffect->SpellId == spellInfo->Id))
             return true;
-        if (spellAffect->SchoolMask && (spellAffect->SchoolMask & spellInfo->School))
+        if (spellAffect->SchoolMask && (spellAffect->SchoolMask & (1 << spellInfo->School)))
             return true;
         if (spellAffect->Category && (spellAffect->Category == spellInfo->Category))
             return true;
