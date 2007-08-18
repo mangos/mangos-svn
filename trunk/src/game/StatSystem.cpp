@@ -716,7 +716,7 @@ void Pet::UpdateAttackPowerAndDamage(bool ranged)
     float bonusAP = 0.0f;
     UnitMods unitMod = UNIT_MOD_ATTACK_POWER;
     
-    if(GetEntry() == 412) // imp's attack power
+    if(GetEntry() == 416) // imp's attack power
         val = GetStat(STAT_STRENGTH) - 10.0;
     else
         val = 2 * GetStat(STAT_STRENGTH) - 20.0;

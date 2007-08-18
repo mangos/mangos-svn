@@ -650,7 +650,7 @@ void Player::HandleLava()
     if ((m_isunderwater & 0x80) && isAlive())
     {
         //Single trigger Set BreathTimer
-        if (!(m_isunderwater & 0x04))
+        if (!(m_isunderwater & 0x80))
         {
             m_isunderwater|= 0x04;
             m_breathTimer = 1000;
@@ -658,12 +658,14 @@ void Player::HandleLava()
         //Reset BreathTimer and still in the lava
         if (!m_breathTimer)
         {
-            uint64 guid;
-            //uint32 damage = 10;
+            uint64 guid = GetGUID();
             uint32 damage = GetMaxHealth() / 3 + urand(0, getLevel()-1);
+            uint32 dmgZone = MapManager::Instance().GetMap(GetMapId(), this)->GetZoneId(GetPositionX(),GetPositionY());
 
-            guid = GetGUID();
-            EnvironmentalDamage(guid, DAMAGE_LAVA, damage);
+            // correct mask for deal with damage only in lava areas
+            if (dmgZone & 0x220)
+                EnvironmentalDamage(guid, DAMAGE_LAVA, damage);
+
             m_breathTimer = 1000;
         }
 
@@ -4573,8 +4575,8 @@ bool Player::SetPosition(float x, float y, float z, float orientation, bool tele
     else if ((z < (water_z - 2)) && (flag1 & 0x01))
         m_isunderwater|= 0x01;
 
-    //!in lava check, anywhere under lava level 
-    if ((z < (water_z - 0)) && (flag1 & 0x02))
+    //!in lava check, anywhere under lava level
+    if ((z < (height_z - 0)) && (flag1 == 0x00) && IsInWater())
         m_isunderwater|= 0x80;
 
     CheckExploreSystem();
