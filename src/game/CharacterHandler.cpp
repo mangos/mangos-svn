@@ -32,19 +32,52 @@
 #include "MapManager.h"
 #include "ObjectAccessor.h"
 #include "Group.h"
+#include "Database/DatabaseImpl.h"
 
 // check used symbols in player name at creating and rename
 std::string notAllowedChars = "\t\v\b\f\a\n\r\\\"\'\? <>[](){}_=+-|/!@#$%^&*~`.,0123456789\0";
 
-void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
+class LoginQueryHolder : public SqlQueryHolder
+{
+    private:
+        uint32 m_accountId;
+        uint64 m_guid;
+    public:
+        LoginQueryHolder(uint32 accountId, uint64 guid)
+            : m_accountId(accountId), m_guid(guid) {}
+        uint64 GetGuid() const { return m_guid; }
+        uint32 GetAccountId() const { return m_accountId; }
+};
+
+// don't call WorldSession directly
+// it may get deleted before the query callbacks get executed
+// instead pass an account id to this handler
+class CharacterHandler
+{
+    public:
+        void HandleCharEnumCallback(QueryResult * result, uint32 account)
+        {
+            if(!result) return;
+            WorldSession * session = sWorld.FindSession(account);
+            if(!session) return;
+            session->HandleCharEnum(result, account);
+        }
+        void HandlePlayerLoginCallback(QueryResult * /*dummy*/, SqlQueryHolder * holder)
+        {
+            if (!holder) return;
+            WorldSession *session = sWorld.FindSession(((LoginQueryHolder*)holder)->GetAccountId());
+            if(!session) return;
+            session->HandlePlayerLogin((LoginQueryHolder*)holder);
+        }
+} chrHandler;
+
+void WorldSession::HandleCharEnum(QueryResult * result, uint32 account)
 {
     // keys can be non cleared if player open realm list and close it by 'cancel'
     loginDatabase.PExecute("UPDATE `account` SET `v` = '0', `s` = '0' WHERE `id` = '%u'", GetAccountId());
 
     WorldPacket data(SMSG_CHAR_ENUM, 100);                  // we guess size
-
-    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account` = '%u' ORDER BY `guid`", GetAccountId());
-
+    
     uint8 num = 0;
 
     data << num;
@@ -56,9 +89,9 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
         {
             sLog.outDetail("Loading char guid %u from account %u.",(*result)[0].GetUInt32(),GetAccountId());
 
-            if(plr->MinimalLoadFromDB( (*result)[0].GetUInt32() ))
+            if(plr->MinimalLoadFromDB( result, (*result)[0].GetUInt32() ))
             {
-                plr->BuildEnumData( &data );
+                plr->BuildEnumData( result, &data );
                 num++;
             }
         }
@@ -71,6 +104,18 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
     data.put<uint8>(0, num);
 
     SendPacket( &data );
+}
+
+void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
+{
+    /// get all the data necesary for loading all characters (along with their pets) on the account
+    sDatabase.AsyncPQuery(&chrHandler, &CharacterHandler::HandleCharEnumCallback, GetAccountId(),
+        //                  0                   1                   2                         3                         4                         5                   6                       7                        8
+        "SELECT `character`.`data`, `character`.`name`, `character`.`position_x`, `character`.`position_y`, `character`.`position_z`, `character`.`map`, `character`.`totaltime`, `character`.`leveltime`, `character`.`rename`,"
+        //                   9                       10                        11
+            "`character_pet`.`entry`,`character_pet`.`modelid`,`character_pet`.`level`"
+        "FROM `character` LEFT JOIN `character_pet` ON `character`.`guid`=`character_pet`.`owner` AND `character_pet`.`slot`='0'"
+        "WHERE `character`.`account` = '%u' ORDER BY `character`.`guid`", GetAccountId());
 }
 
 void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
@@ -257,48 +302,95 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     recv_data >> playerGuid;
 
-    Player* plr = new Player(this);
+    LoginQueryHolder *holder = new LoginQueryHolder(GetAccountId(), playerGuid);
+    holder->Reserve(18);
+    
+    // 0 - LoadFromDB
+    holder->PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`rename`,`zone`,`online` FROM `character` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
+    // 1 - _LoadGroup
+    holder->PQuery("SELECT `leaderGuid` FROM `group_member` WHERE `memberGuid`='%u'", GUID_LOPART(playerGuid));
+    // 2 - _LoadBoundInstances
+    holder->PQuery("SELECT `map`,`instance`,`leader` FROM `character_instance` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
+    // 3 - _LoadAuras
+    holder->PQuery("SELECT `caster_guid`,`spell`,`effect_index`,`amount`,`remaintime` FROM `character_aura` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
+    // 4 - _LoadSpells
+    holder->PQuery("SELECT `spell`,`slot`,`active` FROM `character_spell` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
+    // 5 - _LoadQuestStatus
+    holder->PQuery("SELECT `quest`,`status`,`rewarded`,`explored`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4` FROM `character_queststatus` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
+    // 6 - _LoadTutorials
+    holder->PQuery("SELECT `tut0`,`tut1`,`tut2`,`tut3`,`tut4`,`tut5`,`tut6`,`tut7` FROM `character_tutorial` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
+    // 7 - _LoadReputation
+    holder->PQuery("SELECT `faction`,`standing`,`flags` FROM `character_reputation` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
+    // 8 - _LoadInventory
+    holder->PQuery("SELECT `data`,`bag`,`slot`,`item`,`item_template` FROM `character_inventory` JOIN `item_instance` ON `character_inventory`.`item` = `item_instance`.`guid` WHERE `character_inventory`.`guid` = '%u' ORDER BY `bag`,`slot`", GUID_LOPART(playerGuid));
+    // 9 - _LoadActions
+    holder->PQuery("SELECT `button`,`action`,`type`,`misc` FROM `character_action` WHERE `guid` = '%u' ORDER BY `button`", GUID_LOPART(playerGuid));
+    // 10 - HandlePlayerLogin : unread mail count
+    holder->PQuery("SELECT MIN(`deliver_time`) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0", GUID_LOPART(playerGuid));
+    // 11 - HandlePlayerLogin : nearest delivery time
+    holder->PQuery("SELECT MIN(`deliver_time`) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0", GUID_LOPART(playerGuid));
+    // 12 - _LoadIgnoreList
+    holder->PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u'", GUID_LOPART(playerGuid));
+    // 13 - _LoadFriendList
+    holder->PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u' LIMIT 255", GUID_LOPART(playerGuid));
+    // 14 - _LoadHomeBind
+    holder->PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
+    // 15 - _LoadSpellCooldowns
+    holder->PQuery("SELECT `spell`,`item`,`time` FROM `character_spell_cooldown` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
+    // TODO - UpdateHonorFields
+    // 16 - HandlePlayerLogin : guildid, rank
+    holder->PQuery("SELECT `guildid`,`rank` FROM `guild_member` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
+
+    sDatabase.DelayQueryHolder(&chrHandler, &CharacterHandler::HandlePlayerLoginCallback, (SqlQueryHolder*)holder);
+}
+
+void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
+{
+    uint64 playerGuid = holder->GetGuid();
+
+    Player* pCurrChar = new Player(this);
 
     // "GetAccountId()==db stored account id" checked in LoadFromDB (prevent login not own character using cheating tools)
-    if(!plr->LoadFromDB(GUID_LOPART(playerGuid)))
+    if(!pCurrChar->LoadFromDB(GUID_LOPART(playerGuid), holder))
     {
         KickPlayer();                                       // disconnect client, player no set to session and it will not deleted or saved at kick
-        delete plr;                                         // delete it manually
+        delete pCurrChar;                                   // delete it manually
+        delete holder;                                      // delete all unprocessed queries
         m_playerLoading = false;
         return;
     }
+    else
+        SetPlayer(pCurrChar);
 
     //set a count of unread mails
     time_t cTime = time(NULL);
-    QueryResult *resultMails = sDatabase.PQuery("SELECT COUNT(id) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0 AND `deliver_time` <= '" I64FMTD "'", GUID_LOPART(playerGuid),(uint64)cTime);
+    //QueryResult *resultMails = sDatabase.PQuery("SELECT COUNT(id) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0 AND `deliver_time` <= '" I64FMTD "'", GUID_LOPART(playerGuid),(uint64)cTime);
+    QueryResult *resultMails = holder->GetResult(10);
     if (resultMails)
     {
         Field *fieldMail = resultMails->Fetch();
-        plr->unReadMails = fieldMail[0].GetUInt8();
+        pCurrChar->unReadMails = fieldMail[0].GetUInt8();
         delete resultMails;
     }
 
     // store nearest delivery time (it > 0 and if it < current then at next player update SendNewMaill will be called)
-    resultMails = sDatabase.PQuery("SELECT MIN(`deliver_time`) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0", GUID_LOPART(playerGuid));
+    //resultMails = sDatabase.PQuery("SELECT MIN(`deliver_time`) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0", GUID_LOPART(playerGuid));
+    resultMails = holder->GetResult(11);
     if (resultMails)
     {
         Field *fieldMail = resultMails->Fetch();
-        plr->m_nextMailDelivereTime = (time_t)fieldMail[0].GetUInt64();
+        pCurrChar->m_nextMailDelivereTime = (time_t)fieldMail[0].GetUInt64();
         delete resultMails;
     }
-
-    SetPlayer(plr);
-
-    Player *pCurrChar = GetPlayer();
 
     pCurrChar->SendDungeonDifficulty();
 
     WorldPacket data( SMSG_LOGIN_VERIFY_WORLD, 20 );
-    data << plr->GetMapId();
-    data << plr->GetPositionX();
-    data << plr->GetPositionY();
-    data << plr->GetPositionZ();
-    data << plr->GetOrientation();
+    data << pCurrChar->GetMapId();
+    data << pCurrChar->GetPositionX();
+    data << pCurrChar->GetPositionY();
+    data << pCurrChar->GetPositionZ();
+    data << pCurrChar->GetOrientation();
     SendPacket(&data);
 
     data.Initialize( SMSG_ACCOUNT_DATA_MD5, 128 );
@@ -306,7 +398,8 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         data << uint32(0);
     SendPacket(&data);
 
-    pCurrChar->LoadIgnoreList();
+    pCurrChar->_LoadIgnoreList(holder->GetResult(12));
+    pCurrChar->_LoadFriendList(holder->GetResult(13));
     pCurrChar->SendFriendlist();
     pCurrChar->SendIgnorelist();
 
@@ -376,17 +469,24 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         }
     }
 
-    pCurrChar->_LoadSpellCooldowns();
+    if(!pCurrChar->_LoadHomeBind(holder->GetResult(14)))
+    {
+        LogoutPlayer(false);                                // without save
+        delete pCurrChar;
+        delete holder;
+        return;
+    }
 
-    if(!pCurrChar->SendInitialPacketsBeforeAddToMap())
-        return;                                             // fatal error in character state setup
+    pCurrChar->_LoadSpellCooldowns(holder->GetResult(15));
+    
+    pCurrChar->SendInitialPacketsBeforeAddToMap();
 
     //Show cinematic at the first time that player login
-    if( !GetPlayer()->getCinematic() )
+    if( !pCurrChar->getCinematic() )
     {
-        GetPlayer()->setCinematic(1);
+        pCurrChar->setCinematic(1);
 
-        ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(GetPlayer()->getRace());
+        ChrRacesEntry const* rEntry = sChrRacesStore.LookupEntry(pCurrChar->getRace());
         if(rEntry)
         {
             data.Initialize( SMSG_TRIGGER_CINEMATIC,4 );
@@ -395,16 +495,17 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         }
     }
 
-    GetPlayer()->UpdateHonorFields();
+    pCurrChar->UpdateHonorFields();
 
-    QueryResult *result = sDatabase.PQuery("SELECT `guildid`,`rank` FROM `guild_member` WHERE `guid` = '%u'",pCurrChar->GetGUIDLow());
+    //QueryResult *result = sDatabase.PQuery("SELECT `guildid`,`rank` FROM `guild_member` WHERE `guid` = '%u'",pCurrChar->GetGUIDLow());
+    QueryResult *resultGuild = holder->GetResult(16);
 
-    if(result)
+    if(resultGuild)
     {
-        Field *fields = result->Fetch();
+        Field *fields = resultGuild->Fetch();
         pCurrChar->SetInGuild(fields[0].GetUInt32());
         pCurrChar->SetRank(fields[1].GetUInt32());
-        delete result;
+        delete resultGuild;
     }
     else if(pCurrChar->GetGuildId())                        // clear guild related fields in case wrong data about non existed membership
     {
@@ -425,7 +526,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     sDatabase.PExecute("UPDATE `character` SET `online` = 1 WHERE `guid` = '%u'", pCurrChar->GetGUIDLow());
     loginDatabase.PExecute("UPDATE `account` SET `online` = 1 WHERE `id` = '%u'", GetAccountId());
-    plr->SetInGameTime( getMSTime() );
+    pCurrChar->SetInGameTime( getMSTime() );
 
     // announce group about member online (must be after add to player list to receive announce to self)
     if(pCurrChar->GetGroup())
@@ -486,6 +587,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     if(pCurrChar->isGameMaster())
         SendNotification("GM mode is ON");
     m_playerLoading = false;
+    delete holder;
 }
 
 void WorldSession::HandleSetFactionAtWar( WorldPacket & recv_data )

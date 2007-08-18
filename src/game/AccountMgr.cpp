@@ -82,7 +82,7 @@ int AccountMgr::DeleteAccount(uint32 accid)
                 s->LogoutPlayer(false);                     // logout player without waiting next session list update
             }
 
-            Player::DeleteFromDB(guid, accid);
+            Player::DeleteFromDB(guid, accid, false);       // no need to update realm character
         } while (result->NextRow());
 
         delete result;

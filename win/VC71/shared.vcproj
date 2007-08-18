@@ -134,6 +134,9 @@
 				RelativePath="..\..\src\shared\Database\DatabaseEnv.h">
 			</File>
 			<File
+				RelativePath="..\..\src\shared\Database\DatabaseImpl.h">
+			</File>
+			<File
 				RelativePath="..\..\src\shared\Database\DatabaseMysql.cpp">
 			</File>
 			<File

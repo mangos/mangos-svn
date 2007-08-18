@@ -105,6 +105,11 @@ bool Database::PExecuteLog(const char * format,...)
     return Execute(szQuery);
 }
 
+void Database::SetResultQueue(SqlResultQueue * queue)
+{
+    m_queryQueues[ZThread::ThreadImpl::current()] = queue;
+}
+
 QueryResult* Database::PQuery(const char *format,...)
 {
     if(!format) return NULL;

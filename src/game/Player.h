@@ -432,7 +432,27 @@ enum GMFlags
     GM_INVISIBLE       = 16
 };
 
+// Social : friends/ignores
+
+enum FriendStatus
+{
+    FRIEND_STATUS_OFFLINE = 0,
+    FRIEND_STATUS_ONLINE  = 1,
+    FRIEND_STATUS_AFK     = 2,
+    //FRIEND_STATUS_UNK3
+    FRIEND_STATUS_DND     = 4
+};
+
+struct FriendInfo
+{
+    uint8 Status;
+    uint32 Area;
+    uint32 Level;
+    uint32 Class;
+};
+
 typedef std::set<uint32> IgnoreList;
+typedef std::set<uint64> FriendList;
 
 typedef std::map<uint32, QuestStatusData> QuestStatusMap;
 
@@ -671,7 +691,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void Update( uint32 time );
 
-        void BuildEnumData( WorldPacket * p_data );
+        void BuildEnumData( QueryResult * result,  WorldPacket * p_data );
 
         void SetInWater(bool apply);
 
@@ -679,7 +699,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool IsUnderWater() const;
 
         void SetStandState(uint8 state);
-        bool SendInitialPacketsBeforeAddToMap();
+        void SendInitialPacketsBeforeAddToMap();
         void SendInitialPacketsAfterAddToMap();
         void SendTransferAborted(uint32 mapid, uint16 reason);
         void SendRaidInstanceResetWarning(uint32 type, uint32 mapid, uint32 time);
@@ -696,9 +716,13 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void SendFriendlist();
         void SendIgnorelist();
-        void AddToIgnoreList(uint64 guid, std::string name);
+        bool AddToIgnoreList(uint64 guid, std::string name);
+        bool AddToFriendList(uint64 guid, std::string name);
+        void RemoveFromFriendList(uint64 guid);
         void RemoveFromIgnoreList(uint64 guid);
         bool HasInIgnoreList(uint64 guid) const { return m_ignorelist.find(GUID_LOPART(guid)) != m_ignorelist.end(); }
+        bool HasInFriendList(uint64 guid) const { return m_friendlist.find(GUID_LOPART(guid)) != m_friendlist.end(); }
+        void GetFriendInfo(uint64 friendGUID, FriendInfo &friendInfo);
 
         uint32 GetTaximask( uint8 index ) const { return m_taximask[index]; }
         void SetTaximask( uint8 index, uint32 value ) { m_taximask[index] = value; }
@@ -932,8 +956,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***                   LOAD SYSTEM                     ***/
         /*********************************************************/
 
-        bool LoadFromDB(uint32 guid);
-        bool MinimalLoadFromDB(uint32 guid);
+        bool LoadFromDB(uint32 guid, SqlQueryHolder *holder);
+        bool MinimalLoadFromDB(QueryResult *result, uint32 guid);
         static bool   LoadValuesArrayFromDB(Tokens& data,uint64 guid);
         static uint32 GetUInt32ValueFromArray(Tokens const& data, uint16 index);
         static float  GetFloatValueFromArray(Tokens const& data, uint16 index);
@@ -1106,7 +1130,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void ProhibitSpellScholl(uint32 idSchool /* from SpellSchools */, uint32 unTimeMs );
         void RemoveSpellCooldown(uint32 spell_id) { m_spellCooldowns.erase(spell_id); }
         void RemoveAllSpellCooldown();
-        void _LoadSpellCooldowns();
+        void _LoadSpellCooldowns(QueryResult *result);
         void _SaveSpellCooldowns();
 
         void setResurrect(uint64 guid,float X, float Y, float Z, uint32 health, uint32 mana)
@@ -1236,7 +1260,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendMessageToSet(WorldPacket *data, bool self);// overwrite Object::SendMessageToSet
         void SendMessageToOwnTeamSet(WorldPacket *data, bool self);
 
-        static void DeleteFromDB(uint64 playerguid, uint32 accountId);
+        static void DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmChars = true);
 
         Corpse *GetCorpse() const;
         void SpawnCorpseBones();
@@ -1557,19 +1581,21 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***                   LOAD SYSTEM                     ***/
         /*********************************************************/
 
-        void _LoadActions();
-        void _LoadAuras(uint32 timediff);
-        void _LoadBoundInstances();
-        void _LoadInventory(uint32 timediff);
+        void _LoadActions(QueryResult *result);
+        void _LoadAuras(QueryResult *result, uint32 timediff);
+        void _LoadBoundInstances(QueryResult *result);
+        void _LoadInventory(QueryResult *result, uint32 timediff);
         void _LoadMail();
         void _LoadMailedItems();
-        void _LoadQuestStatus();
-        void _LoadGroup();
-        void _LoadReputation();
-        void _LoadSpells(uint32 timediff);
+        void _LoadQuestStatus(QueryResult *result);
+        void _LoadGroup(QueryResult *result);
+        void _LoadReputation(QueryResult *result);
+        void _LoadSpells(QueryResult *result, uint32 timediff);
         void _LoadTaxiMask(const char* data);
-        void _LoadTutorials();
-        void LoadIgnoreList();
+        void _LoadTutorials(QueryResult *result);
+        void _LoadIgnoreList(QueryResult *result);
+        void _LoadFriendList(QueryResult *result);
+        bool _LoadHomeBind(QueryResult *result);
 
         /*********************************************************/
         /***                   SAVE SYSTEM                     ***/
@@ -1714,6 +1740,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_usedTalentCount;
 
         IgnoreList m_ignorelist;
+        FriendList m_friendlist;
 
         // Groups
         GroupReference m_group;
