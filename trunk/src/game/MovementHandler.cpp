@@ -63,11 +63,8 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FLY);
     }
 
-    if(!GetPlayer()->SendInitialPacketsBeforeAddToMap())
-        return;                                             // fatal error in character state setup
-
+    GetPlayer()->SendInitialPacketsBeforeAddToMap();
     MapManager::Instance().GetMap(GetPlayer()->GetMapId(), GetPlayer())->Add(GetPlayer());
-
     GetPlayer()->SendInitialPacketsAfterAddToMap();
 
     // honorless target

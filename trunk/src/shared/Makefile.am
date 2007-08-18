@@ -74,6 +74,7 @@ libmangosdatabase_a_SOURCES = \
 	Database/Database.cpp \
 	Database/Database.h \
 	Database/DatabaseEnv.h \
+	Database/DatabaseImpl.h \
 	Database/DatabaseMysql.cpp \
 	Database/DatabasePostgre.cpp \
 	Database/DatabaseMysql.h \

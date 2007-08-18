@@ -539,7 +539,6 @@ void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
     sLog.outDebug( "WORLD: Received CMSG_FRIEND_LIST"  );
 
     GetPlayer()->SendFriendlist();
-
     GetPlayer()->SendIgnorelist();
 }
 
@@ -549,11 +548,14 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Received CMSG_ADD_FRIEND"  );
 
-    std::string friendName = LANG_FRIEND_IGNORE_UNKNOWN;
-    unsigned char friendResult = FRIEND_NOT_FOUND;
-    Player *pfriend=NULL;
-    uint64 friendGuid = 0;
-    uint32 friendArea = 0, friendLevel = 0, friendClass = 0;
+    std::string friendName  = LANG_FRIEND_IGNORE_UNKNOWN;
+    uint8 friendResult      = FRIEND_NOT_FOUND;
+
+    Player *pFriend     = NULL;
+    uint64 friendGuid   = 0;
+    uint32 friendArea   = 0;
+    uint32 friendLevel  = 0;
+    uint32 friendClass  = 0;
 
     recv_data >> friendName;
 
@@ -570,44 +572,37 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
 
     if(friendGuid)
     {
-        pfriend = ObjectAccessor::Instance().FindPlayer(friendGuid);
-        if(pfriend==GetPlayer())
+        pFriend = ObjectAccessor::Instance().FindPlayer(friendGuid);
+        if(pFriend==GetPlayer())
             friendResult = FRIEND_SELF;
         else if(GetPlayer()->GetTeam()!=objmgr.GetPlayerTeamByGUID(friendGuid))
             friendResult = FRIEND_ENEMY;
-        else
-        {
-            QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character_social` WHERE `guid` = '%u' AND `flags` = 'FRIEND' AND `friend` = '%u'", GetPlayer()->GetGUIDLow(), GUID_LOPART(friendGuid));
-
-            if( result )
-                friendResult = FRIEND_ALREADY;
-
-            delete result;
-        }
-
+        else if(GetPlayer()->HasInFriendList(friendGuid))
+            friendResult = FRIEND_ALREADY;
     }
 
     WorldPacket data( SMSG_FRIEND_STATUS, (1+8+1+4+4+4) );  // guess size
 
     if (friendGuid && friendResult==FRIEND_NOT_FOUND)
     {
-        if( pfriend && pfriend->IsInWorld() && pfriend->IsVisibleGloballyFor(GetPlayer()))
+        if( pFriend && pFriend->IsInWorld() && pFriend->IsVisibleGloballyFor(GetPlayer()))
         {
             friendResult = FRIEND_ADDED_ONLINE;
-            friendArea = pfriend->GetZoneId();
-            friendLevel = pfriend->getLevel();
-            friendClass = pfriend->getClass();
-
+            friendArea   = pFriend->GetZoneId();
+            friendLevel  = pFriend->getLevel();
+            friendClass  = pFriend->getClass();
         }
         else
             friendResult = FRIEND_ADDED_OFFLINE;
 
-        sDatabase.PExecute("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) VALUES ('%u', '%s', '%u', 'FRIEND')",
-            GetPlayer()->GetGUIDLow(), friendName.c_str(), GUID_LOPART(friendGuid));
+        if(!GetPlayer()->AddToFriendList(friendGuid, friendName))
+        {
+            friendResult = FRIEND_LIST_FULL;
+            sLog.outDetail( "WORLD: %s's friend list is full.", GetPlayer()->GetName());
+        }
 
         sLog.outDetail( "WORLD: %s Guid found '%u' area:%u Level:%u Class:%u. ",
             friendName.c_str(), GUID_LOPART(friendGuid), friendArea, friendLevel, friendClass);
-
     }
     else if(friendResult==FRIEND_ALREADY)
     {
@@ -636,20 +631,15 @@ void WorldSession::HandleDelFriendOpcode( WorldPacket & recv_data )
     CHECK_PACKET_SIZE(recv_data,8);
 
     uint64 FriendGUID;
+    uint8 FriendResult = FRIEND_REMOVED;
 
     sLog.outDebug( "WORLD: Received CMSG_DEL_FRIEND"  );
     recv_data >> FriendGUID;
 
-    uint8 FriendResult = FRIEND_REMOVED;
+    GetPlayer()->RemoveFromFriendList(FriendGUID);
 
     WorldPacket data( SMSG_FRIEND_STATUS, 9 );
-
     data << (uint8)FriendResult << (uint64)FriendGUID;
-
-    uint32 guidlow = GetPlayer()->GetGUIDLow();
-
-    sDatabase.PExecute("DELETE FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u' AND `friend` = '%u'",guidlow, GUID_LOPART(FriendGUID));
-
     SendPacket( &data );
 
     sLog.outDebug( "WORLD: Sent motd (SMSG_FRIEND_STATUS)" );

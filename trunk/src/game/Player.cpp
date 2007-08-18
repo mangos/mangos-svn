@@ -52,20 +52,11 @@
 #include "BattleGround.h"
 #include "ArenaTeam.h"
 #include "Chat.h"
+#include "Database/DatabaseImpl.h"
 
 #include <cmath>
 
 #define DEFAULT_SWITCH_WEAPON        1500
-
-typedef struct FriendStr
-{
-    uint64 PlayerGUID;
-    unsigned char Status;
-
-    uint32 Area;
-    uint32 Level;
-    uint32 Class;
-} FriendStr;
 
 const int32 Player::ReputationRank_Length[MAX_REPUTATION_RANK] = {36000, 3000, 3000, 3000, 6000, 12000, 21000, 1000};
 
@@ -1026,7 +1017,7 @@ void Player::setDeathState(DeathState s)
     }
 }
 
-void Player::BuildEnumData( WorldPacket * p_data )
+void Player::BuildEnumData( QueryResult * result, WorldPacket * p_data )
 {
     *p_data << GetGUID();
     *p_data << m_name;
@@ -1098,22 +1089,17 @@ void Player::BuildEnumData( WorldPacket * p_data )
         uint32 petFamily  = 0;
 
         // show pet at selection character in character list  only for non-ghost character
-        if(isAlive()&&(pClass==CLASS_WARLOCK||pClass==CLASS_HUNTER))
+        if(result && isAlive() && (pClass == CLASS_WARLOCK || pClass == CLASS_HUNTER))
         {
-            QueryResult *result = sDatabase.PQuery("SELECT `entry`,`modelid`,`level` FROM `character_pet` WHERE `owner` = '%u' AND `slot` = '0'", GetGUIDLow() );
-            if(result)
-            {
-                Field* fields = result->Fetch();
+            Field* fields = result->Fetch();
 
-                uint32 entry = fields[0].GetUInt32();
-                CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(entry);
-                if(cInfo)
-                {
-                    petDisplayId = fields[1].GetUInt32();
-                    petLevel     = fields[2].GetUInt32();
-                    petFamily    = cInfo->family;
-                }
-                delete result;
+            uint32 entry = fields[9].GetUInt32();
+            CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(entry);
+            if(cInfo)
+            {
+                petDisplayId = fields[10].GetUInt32();
+                petLevel     = fields[11].GetUInt32();
+                petFamily    = cInfo->family;
             }
         }
 
@@ -1122,7 +1108,7 @@ void Player::BuildEnumData( WorldPacket * p_data )
         *p_data << (uint32)petFamily;
     }
 
-    ItemPrototype const *items[EQUIPMENT_SLOT_END];
+    /*ItemPrototype const *items[EQUIPMENT_SLOT_END];
     for (int i = 0; i < EQUIPMENT_SLOT_END; i++)
         items[i] = NULL;
 
@@ -1145,14 +1131,18 @@ void Player::BuildEnumData( WorldPacket * p_data )
             }
         } while (result->NextRow());
         delete result;
-    }
+    }*/
 
-    for (int i = 0; i < EQUIPMENT_SLOT_END; i++)
+    for (uint8 slot = 0; slot < EQUIPMENT_SLOT_END; slot++)
     {
-        if (items[i] != NULL)
+        int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (slot * 16);
+        uint32 item_id = GetUInt32Value(VisibleBase);
+        const ItemPrototype * proto = objmgr.GetItemPrototype(item_id);
+
+        if (proto != NULL)
         {
-            *p_data << (uint32)items[i]->DisplayInfoID;
-            *p_data << (uint8)items[i]->InventoryType;
+            *p_data << (uint32)proto->DisplayInfoID;
+            *p_data << (uint8)proto->InventoryType;
         }
         else
         {
@@ -1196,87 +1186,106 @@ uint8 Player::chatTag()
         return 0;
 }
 
+void Player::GetFriendInfo(uint64 friendGUID, FriendInfo &friendInfo)
+{
+    Player *pFriend = ObjectAccessor::Instance().FindPlayer(friendGUID);
+
+    uint32 team = GetTeam();
+    uint32 security = GetSession()->GetSecurity();
+    bool allowTwoSideWhoList = sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
+    bool gmInWhoList         = sWorld.getConfig(CONFIG_GM_IN_WHO_LIST);
+
+    // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
+    // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
+    if( pFriend && pFriend->GetName() &&
+        ( security > SEC_PLAYER ||
+        ( pFriend->GetTeam() == team || allowTwoSideWhoList ) &&
+        (pFriend->GetSession()->GetSecurity() == SEC_PLAYER || gmInWhoList && pFriend->IsVisibleGloballyFor(this) )))
+    {
+        if(pFriend->isAFK())
+            friendInfo.Status = FRIEND_STATUS_AFK;
+        else if(pFriend->isDND())
+            friendInfo.Status = FRIEND_STATUS_DND;
+        else
+            friendInfo.Status = FRIEND_STATUS_ONLINE;
+        friendInfo.Area = pFriend->GetZoneId();
+        friendInfo.Level = pFriend->getLevel();
+        friendInfo.Class = pFriend->getClass();
+    }
+    else
+    {
+        friendInfo.Status = FRIEND_STATUS_OFFLINE;
+        friendInfo.Area = 0;
+        friendInfo.Level = 0;
+        friendInfo.Class = 0;
+    }
+}
+
+bool Player::AddToFriendList(uint64 guid, std::string name)
+{
+    // prevent list (client-side) overflow
+    if(m_friendlist.size() >= (255-1))
+        return false;
+
+    sDatabase.PExecute("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) VALUES ('%u', '%s', '%u', 'FRIEND')",
+            GetGUIDLow(), name.c_str(), GUID_LOPART(guid));
+    m_friendlist.insert(GUID_LOPART(guid));
+    return true;
+}
+
+void Player::RemoveFromFriendList(uint64 guid)
+{
+    sDatabase.PExecute("DELETE FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u' AND `friend` = '%u'", GetGUIDLow(), GUID_LOPART(guid));
+    m_friendlist.erase(GUID_LOPART(guid));
+}
+
+void Player::_LoadFriendList(QueryResult *result)
+{
+    //QueryResult *result = sDatabase.PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u' LIMIT 255",GetGUIDLow());
+    if(!result) return;
+
+    do
+    {
+        Field *fields  = result->Fetch();
+        m_friendlist.insert(fields[0].GetUInt64());
+    }
+    while( result->NextRow() );
+    delete result;
+}
+
 void Player::SendFriendlist()
 {
-    uint8 i=0;
-    Field *fields;
-    Player* pObj;
-    FriendStr friendstr[255];
+    FriendInfo info;
+    uint8 size = (uint8)m_friendlist.size();
 
-    QueryResult *result = sDatabase.PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u'",GetGUIDLow());
-    if(result)
+    WorldPacket data(SMSG_FRIEND_LIST, (1+size*15));           // just can guess size
+    data << size;
+
+    for (FriendList::iterator itr = m_friendlist.begin(); itr != m_friendlist.end(); ++itr)
     {
-        fields = result->Fetch();
+        GetFriendInfo(*itr, info);
+        sLog.outDetail( "WORLD: Adding Friend Guid: %u, Status:%u, Area:%u, Level:%u Class:%u", 
+            GUID_LOPART(*itr), info.Status, info.Area, info.Level, info.Class);
 
-        uint32 team = GetTeam();
-        uint32 security = GetSession()->GetSecurity();
-        bool allowTwoSideWhoList = sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
-        bool gmInWhoList         = sWorld.getConfig(CONFIG_GM_IN_WHO_LIST);
-
-        do
-        {
-            friendstr[i].PlayerGUID = fields[0].GetUInt64();
-            pObj = ObjectAccessor::Instance().FindPlayer(friendstr[i].PlayerGUID);
-
-            // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
-            // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
-            if( pObj && pObj->GetName() &&
-                ( security > SEC_PLAYER ||
-                ( pObj->GetTeam() == team || allowTwoSideWhoList ) &&
-                (pObj->GetSession()->GetSecurity() == SEC_PLAYER || gmInWhoList && pObj->IsVisibleGloballyFor(this) )))
-            {
-                if(pObj->isAFK())
-                    friendstr[i].Status = 2;
-                else if(pObj->isDND())
-                    friendstr[i].Status = 4;
-                else
-                    friendstr[i].Status = 1;
-                friendstr[i].Area = pObj->GetZoneId();
-                friendstr[i].Level = pObj->getLevel();
-                friendstr[i].Class = pObj->getClass();
-            }
-            else
-            {
-                friendstr[i].Status = 0;
-                friendstr[i].Area = 0;
-                friendstr[i].Level = 0;
-                friendstr[i].Class = 0;
-            }
-            i++;
-
-            // prevent overflow
-            if(i==255)
-                break;
-        } while( result->NextRow() );
-
-        delete result;
+        data << *itr << info.Status;
+        if (info.Status != 0)
+            data << info.Area << info.Level << info.Class;
     }
 
-    WorldPacket data(SMSG_FRIEND_LIST, (1+i*15));           // just can guess size
-    data << i;
-
-    for (int j=0; j < i; j++)
-    {
-        sLog.outDetail( "WORLD: Adding Friend Guid: %u, Status:%u, Area:%u, Level:%u Class:%u",GUID_LOPART(friendstr[j].PlayerGUID), friendstr[j].Status, friendstr[j].Area,friendstr[j].Level,friendstr[j].Class  );
-
-        data << friendstr[j].PlayerGUID << friendstr[j].Status ;
-        if (friendstr[j].Status != 0)
-            data << friendstr[j].Area << friendstr[j].Level << friendstr[j].Class;
-    }
-
-    this->GetSession()->SendPacket( &data );
+    GetSession()->SendPacket( &data );
     sLog.outDebug( "WORLD: Sent (SMSG_FRIEND_LIST)" );
 }
 
-void Player::AddToIgnoreList(uint64 guid, std::string name)
+bool Player::AddToIgnoreList(uint64 guid, std::string name)
 {
     // prevent list (client-side) overflow
     if(m_ignorelist.size() >= (255-1))
-        return;
+        return false;
 
     sDatabase.PExecute("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) VALUES ('%u', '%s', '%u', 'IGNORE')",
         GetGUIDLow(), name.c_str(), GUID_LOPART(guid));
     m_ignorelist.insert(GUID_LOPART(guid));
+    return true;
 }
 
 void Player::RemoveFromIgnoreList(uint64 guid)
@@ -1285,9 +1294,9 @@ void Player::RemoveFromIgnoreList(uint64 guid)
     m_ignorelist.erase(GUID_LOPART(guid));
 }
 
-void Player::LoadIgnoreList()
+void Player::_LoadIgnoreList(QueryResult *result)
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u'", GetGUIDLow());
+    //QueryResult *result = sDatabase.PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u'", GetGUIDLow());
 
     if(!result) return;
 
@@ -2645,11 +2654,11 @@ void Player::RemoveAllSpellCooldown()
     }
 }
 
-void Player::_LoadSpellCooldowns()
+void Player::_LoadSpellCooldowns(QueryResult *result)
 {
     m_spellCooldowns.clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT `spell`,`item`,`time` FROM `character_spell_cooldown` WHERE `guid` = '%u'",GetGUIDLow());
+    //QueryResult *result = sDatabase.PQuery("SELECT `spell`,`item`,`time` FROM `character_spell_cooldown` WHERE `guid` = '%u'",GetGUIDLow());
 
     if(result)
     {
@@ -3084,7 +3093,7 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
     return TRAINER_SPELL_GREEN;
 }
 
-void Player::DeleteFromDB(uint64 playerguid, uint32 accountId)
+void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmChars)
 {
     uint32 guid = GUID_LOPART(playerguid);
 
@@ -3141,17 +3150,8 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId)
     sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u'",guid);
     sDatabase.CommitTransaction();
 
-    loginDatabase.PExecute("UPDATE `realmcharacters` SET `numchars` = `numchars` - 1 WHERE `acctid` = %d AND `realmid` = %d", accountId, realmID);
-    // TODO: The following is much safer in theory but in practice it doesn't always work because
-    // there is a chance that the player will not have been deleted from the character table yet
-    /*QueryResult *resultCount = sDatabase.PQuery("SELECT COUNT(guid) FROM `character` WHERE `account` = '%u'", accountId);
-    if (resultCount)
-    {
-        Field *fields = resultCount->Fetch();
-        uint32 charCount = fields[0].GetUInt32();
-        delete resultCount;
-        loginDatabase.PExecute("INSERT INTO `realmcharacters` (`numchars`, `acctid`, `realmid`) VALUES (%u, %u, %u) ON DUPLICATE KEY UPDATE `numchars` = '%u'", charCount, accountId, realmID, charCount);
-    }*/
+    //loginDatabase.PExecute("UPDATE `realmcharacters` SET `numchars` = `numchars` - 1 WHERE `acctid` = %d AND `realmid` = %d", accountId, realmID);
+    if(updateRealmChars) sWorld.UpdateRealmCharCount(accountId);
 }
 
 void Player::SetMovement(uint8 pType)
@@ -3681,36 +3681,25 @@ void Player::UpdateLocalChannels()
 
 void Player::BroadcastPacketToFriendListers(WorldPacket *packet)
 {
-    Field *fields;
-    Player *pfriend;
-
-    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character_social` WHERE `flags` = 'FRIEND' AND `friend` = '%u'", GetGUIDLow());
-
-    if(!result) return;
-
-    uint32 team = GetTeam();
-    uint32 security = GetSession()->GetSecurity();
+    uint32 team              = GetTeam();
+    uint32 security          = GetSession()->GetSecurity();
     bool gmInWhoList         = sWorld.getConfig(CONFIG_GM_IN_WHO_LIST);
     bool allowTwoSideWhoList = sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
 
-    do
+    for(FriendList::iterator itr = m_friendlist.begin(); itr != m_friendlist.end(); ++itr)
     {
-        fields = result->Fetch();
-
-        pfriend = ObjectAccessor::Instance().FindPlayer(fields[0].GetUInt64());
+        Player *pFriend = ObjectAccessor::Instance().FindPlayer(*itr);
 
         // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
         // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
-        if( pfriend && pfriend->IsInWorld() &&
-            ( pfriend->GetSession()->GetSecurity() > SEC_PLAYER ||
-            ( pfriend->GetTeam() == team || allowTwoSideWhoList ) &&
-            (security == SEC_PLAYER || gmInWhoList && IsVisibleGloballyFor(pfriend) )))
+        if( pFriend && pFriend->IsInWorld() &&
+            ( pFriend->GetSession()->GetSecurity() > SEC_PLAYER ||
+            ( pFriend->GetTeam() == team || allowTwoSideWhoList ) &&
+            (security == SEC_PLAYER || gmInWhoList && IsVisibleGloballyFor(pFriend) )))
         {
-            pfriend->GetSession()->SendPacket(packet);
+            pFriend->GetSession()->SendPacket(packet);
         }
-
-    }while( result->NextRow() );
-    delete result;
+    }
 }
 
 void Player::UpdateDefense()
@@ -11552,19 +11541,23 @@ void Player::SendQuestUpdateAddCreature( uint32 quest_id, uint64 guid, uint32 cr
 /***                   LOAD SYSTEM                     ***/
 /*********************************************************/
 
-bool Player::MinimalLoadFromDB( uint32 guid )
+bool Player::MinimalLoadFromDB( QueryResult *result, uint32 guid )
 {
-    //                                             0      1      2            3            4            5     6           7           8
-    QueryResult *result = sDatabase.PQuery("SELECT `data`,`name`,`position_x`,`position_y`,`position_z`,`map`,`totaltime`,`leveltime`,`rename` FROM `character` WHERE `guid` = '%u'",guid);
+    bool delete_result = true;
     if(!result)
-        return false;
+    {
+        //                                             0      1      2            3            4            5     6           7           8
+        QueryResult *result = sDatabase.PQuery("SELECT `data`,`name`,`position_x`,`position_y`,`position_z`,`map`,`totaltime`,`leveltime`,`rename` FROM `character` WHERE `guid` = '%u'",guid);
+        if(!result) return false;
+    }
+    else delete_result = false;
 
     Field *fields = result->Fetch();
 
     if(!LoadValues( fields[0].GetString()))
     {
         sLog.outError("ERROR: Player #%d have broken data in `data` field. Can't be loaded.",GUID_LOPART(guid));
-        delete result;
+        if(delete_result) delete result;
         return false;
     }
 
@@ -11578,11 +11571,12 @@ bool Player::MinimalLoadFromDB( uint32 guid )
 
     m_needRename = fields[8].GetBool();
 
-    _LoadGroup();
+    // I don't see these used anywhere ..
+    /*_LoadGroup();
 
-    _LoadBoundInstances();
+    _LoadBoundInstances();*/
 
-    delete result;
+    if (delete_result) delete result;
 
     for (int i = 0; i < PLAYER_SLOTS_COUNT; i++)
         m_items[i] = NULL;
@@ -11663,12 +11657,13 @@ float Player::GetFloatValueFromDB(uint16 index, uint64 guid)
     return result;
 }
 
-bool Player::LoadFromDB( uint32 guid )
+bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 {
     // NOTE: all fields in `character` must be read to prevent lost character data at next save in case wrong DB structure.
     // !!! NOTE: including unused `zone`,`online`
-    //                                             0      1         2      3      4      5       6            7            8            9     10            11         12          13          14          15           16            17                  18                  19                  20        21        22        23         24          25        26             27       [28]   [29]
-    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`rename`,`zone`,`online` FROM `character` WHERE `guid` = '%u'", guid);
+    ////                                             0      1         2      3      4      5       6            7            8            9     10            11         12          13          14          15           16            17                  18                  19                  20        21        22        23         24          25        26             27       [28]   [29]
+    //QueryResult *result = sDatabase.PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`rename`,`zone`,`online` FROM `character` WHERE `guid` = '%u'", guid);
+    QueryResult *result = holder->GetResult(0);
 
     if(!result)
     {
@@ -11743,9 +11738,9 @@ bool Player::LoadFromDB( uint32 guid )
     Relocate(fields[6].GetFloat(),fields[7].GetFloat(),fields[8].GetFloat(),fields[10].GetFloat());
     SetMapId(fields[9].GetUInt32());
 
-    _LoadGroup();
+    _LoadGroup(holder->GetResult(1));
 
-    _LoadBoundInstances();
+    _LoadBoundInstances(holder->GetResult(2));
 
     SetRecallPosition(GetMapId(),GetPositionX(),GetPositionY(),GetPositionZ(),GetOrientation());
 
@@ -11878,26 +11873,26 @@ bool Player::LoadFromDB( uint32 guid )
     //mails are loaded only when needed ;-) - when player in game click on mailbox.
     //_LoadMail();
 
-    _LoadAuras(time_diff);
+    _LoadAuras(holder->GetResult(3), time_diff);
 
     // add ghost flag (must be after aura load: PLAYER_FLAGS_GHOST set in aura)
     if( HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST) )
         m_deathState = DEAD;
 
-    _LoadSpells(time_diff);
+    _LoadSpells(holder->GetResult(4), time_diff);
 
     // after spell load
     InitTalentForLevel();
 
-    _LoadQuestStatus();
+    _LoadQuestStatus(holder->GetResult(5));
 
-    _LoadTutorials();
+    _LoadTutorials(holder->GetResult(6));
 
-    _LoadReputation();                                      // must be before inventory (some items required reputation check)
+    _LoadReputation(holder->GetResult(7));                  // must be before inventory (some items required reputation check)
 
-    _LoadInventory(time_diff);
+    _LoadInventory(holder->GetResult(8), time_diff);
 
-    _LoadActions();
+    _LoadActions(holder->GetResult(9));
 
     //apply all stat bonuses from items and auras
     SetCanModifyStats(true);
@@ -11941,11 +11936,11 @@ bool Player::LoadFromDB( uint32 guid )
     return true;
 }
 
-void Player::_LoadActions()
+void Player::_LoadActions(QueryResult *result)
 {
     m_actionButtons.clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT `button`,`action`,`type`,`misc` FROM `character_action` WHERE `guid` = '%u' ORDER BY `button`",GetGUIDLow());
+    //QueryResult *result = sDatabase.PQuery("SELECT `button`,`action`,`type`,`misc` FROM `character_action` WHERE `guid` = '%u' ORDER BY `button`",GetGUIDLow());
 
     if(result)
     {
@@ -11965,7 +11960,7 @@ void Player::_LoadActions()
     }
 }
 
-void Player::_LoadAuras(uint32 timediff)
+void Player::_LoadAuras(QueryResult *result, uint32 timediff)
 {
     m_Auras.clear();
     for (int i = 0; i < TOTAL_AURAS; i++)
@@ -11976,7 +11971,7 @@ void Player::_LoadAuras(uint32 timediff)
     for(uint8 j = 0; j < 6; j++)
         SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + j), 0);
 
-    QueryResult *result = sDatabase.PQuery("SELECT `caster_guid`,`spell`,`effect_index`,`amount`,`remaintime` FROM `character_aura` WHERE `guid` = '%u'",GetGUIDLow());
+    //QueryResult *result = sDatabase.PQuery("SELECT `caster_guid`,`spell`,`effect_index`,`amount`,`remaintime` FROM `character_aura` WHERE `guid` = '%u'",GetGUIDLow());
 
     if(result)
     {
@@ -12082,9 +12077,9 @@ bool Player::CanSpeak() const
     return  GetSession()->m_muteTime <= time (NULL);
 }
 
-void Player::_LoadInventory(uint32 timediff)
+void Player::_LoadInventory(QueryResult *result, uint32 timediff)
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `data`,`bag`,`slot`,`item`,`item_template` FROM `character_inventory` JOIN `item_instance` ON `character_inventory`.`item` = `item_instance`.`guid` WHERE `character_inventory`.`guid` = '%u' ORDER BY `bag`,`slot`", GetGUIDLow());
+    //QueryResult *result = sDatabase.PQuery("SELECT `data`,`bag`,`slot`,`item`,`item_template` FROM `character_inventory` JOIN `item_instance` ON `character_inventory`.`item` = `item_instance`.`guid` WHERE `character_inventory`.`guid` = '%u' ORDER BY `bag`,`slot`", GetGUIDLow());
     std::map<uint64, Bag*> bagMap;                          // fast guid lookup for bags
     //NOTE: the "order by `bag`" is important because it makes sure
     //the bagMap is filled before items in the bags are loaded
@@ -12268,14 +12263,14 @@ void Player::LoadPet()
         delete pet;
 }
 
-void Player::_LoadQuestStatus()
+void Player::_LoadQuestStatus(QueryResult *result)
 {
     mQuestStatus.clear();
 
     uint32 slot = 0;
 
-    //                                             0       1        2          3          4       5           6           7           8           9            10           11           12
-    QueryResult *result = sDatabase.PQuery("SELECT `quest`,`status`,`rewarded`,`explored`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4` FROM `character_queststatus` WHERE `guid` = '%u'", GetGUIDLow());
+    ////                                             0       1        2          3          4       5           6           7           8           9            10           11           12
+    //QueryResult *result = sDatabase.PQuery("SELECT `quest`,`status`,`rewarded`,`explored`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4` FROM `character_queststatus` WHERE `guid` = '%u'", GetGUIDLow());
 
     if(result)
     {
@@ -12368,14 +12363,14 @@ void Player::_LoadQuestStatus()
     }
 }
 
-void Player::_LoadReputation()
+void Player::_LoadReputation(QueryResult *result)
 {
     m_factions.clear();
 
     // Set initial reputations (so everything is nifty before DB data load)
     SetInitialFactions();
 
-    QueryResult *result = sDatabase.PQuery("SELECT `faction`,`standing`,`flags` FROM `character_reputation` WHERE `guid` = '%u'",GetGUIDLow());
+    //QueryResult *result = sDatabase.PQuery("SELECT `faction`,`standing`,`flags` FROM `character_reputation` WHERE `guid` = '%u'",GetGUIDLow());
 
     if(result)
     {
@@ -12416,13 +12411,13 @@ void Player::_LoadReputation()
     }
 }
 
-void Player::_LoadSpells(uint32 timediff)
+void Player::_LoadSpells(QueryResult *result, uint32 timediff)
 {
     for (PlayerSpellMap::iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
         delete itr->second;
     m_spells.clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT `spell`,`slot`,`active` FROM `character_spell` WHERE `guid` = '%u'",GetGUIDLow());
+    //QueryResult *result = sDatabase.PQuery("SELECT `spell`,`slot`,`active` FROM `character_spell` WHERE `guid` = '%u'",GetGUIDLow());
 
     if(result)
     {
@@ -12452,9 +12447,9 @@ void Player::_LoadTaxiMask(const char* data)
     }
 }
 
-void Player::_LoadTutorials()
+void Player::_LoadTutorials(QueryResult *result)
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `tut0`,`tut1`,`tut2`,`tut3`,`tut4`,`tut5`,`tut6`,`tut7` FROM `character_tutorial` WHERE `guid` = '%u'",GetGUIDLow());
+    //QueryResult *result = sDatabase.PQuery("SELECT `tut0`,`tut1`,`tut2`,`tut3`,`tut4`,`tut5`,`tut6`,`tut7` FROM `character_tutorial` WHERE `guid` = '%u'",GetGUIDLow());
 
     if(result)
     {
@@ -14026,9 +14021,9 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
         SendBuyError( BUY_ERR_CANT_FIND_ITEM, NULL, item, 0);
 }
 
-void Player::_LoadGroup()
+void Player::_LoadGroup(QueryResult *result)
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `leaderGuid` FROM `group_member` WHERE `memberGuid`='%u'", GetGUIDLow());
+    //QueryResult *result = sDatabase.PQuery("SELECT `leaderGuid` FROM `group_member` WHERE `memberGuid`='%u'", GetGUIDLow());
     if(result)
     {
         uint64 leaderGuid = MAKE_GUID((*result)[0].GetUInt32(),HIGHGUID_PLAYER);
@@ -14042,11 +14037,11 @@ void Player::_LoadGroup()
     }
 }
 
-void Player::_LoadBoundInstances()
+void Player::_LoadBoundInstances(QueryResult *result)
 {
     m_BoundInstances.clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT `map`,`instance`,`leader` FROM `character_instance` WHERE `guid` = '%u'", GetGUIDLow());
+    //QueryResult *result = sDatabase.PQuery("SELECT `map`,`instance`,`leader` FROM `character_instance` WHERE `guid` = '%u'", GetGUIDLow());
     if(result)
     {
         do
@@ -14554,48 +14549,52 @@ void Player::SetGroup(Group *group, int8 subgroup)
     }
 }
 
-bool Player::SendInitialPacketsBeforeAddToMap()
+bool Player::_LoadHomeBind(QueryResult *result)
 {
-    WorldPacket data(SMSG_SET_REST_START, 4);
-    data << uint32(0);  // unknown, may be rest state time or expirience
-    GetSession()->SendPacket(&data);
-
-    // home bind stuff
-    QueryResult *result4 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", GetGUIDLow());
-    if (result4)
+    //QueryResult *result = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
+    if (result)
     {
-        Field *fields = result4->Fetch();
+        Field *fields = result->Fetch();
         m_homebindMapId = fields[0].GetUInt32();
         m_homebindZoneId = fields[1].GetUInt16();
         m_homebindX = fields[2].GetFloat();
         m_homebindY = fields[3].GetFloat();
         m_homebindZ = fields[4].GetFloat();
-        delete result4;
+        delete result;
     }
     else
     {
         int plrace = getRace();
         int plclass = getClass();
-        QueryResult *result5 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `playercreateinfo` WHERE `race` = '%u' AND `class` = '%u'", plrace, plclass);
+        QueryResult *result1 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `playercreateinfo` WHERE `race` = '%u' AND `class` = '%u'", plrace, plclass);
 
-        if(!result5)
+        if(!result1)
         {
             sLog.outErrorDb("Table `playercreateinfo` not have data for race %u class %u , character can't be loaded.",plrace, plclass);
-            GetSession()->LogoutPlayer(false);                            // without save
             return false;
         }
 
-        Field *fields = result5->Fetch();
-        // store and send homebind for player
+        Field *fields = result1->Fetch();
         m_homebindMapId = fields[0].GetUInt32();
         m_homebindZoneId = fields[1].GetUInt16();
         m_homebindX = fields[2].GetFloat();
         m_homebindY = fields[3].GetFloat();
         m_homebindZ = fields[4].GetFloat();
         sDatabase.PExecute("INSERT INTO `character_homebind` (`guid`,`map`,`zone`,`position_x`,`position_y`,`position_z`) VALUES ('%u', '%u', '%u', '%f', '%f', '%f')", GetGUIDLow(), m_homebindMapId, (uint32)m_homebindZoneId, m_homebindX, m_homebindY, m_homebindZ);
-        delete result5;
+        delete result1;
     }
+    DEBUG_LOG("Setting player home position: mapid is: %u, zoneid is %u, X is %f, Y is %f, Z is %f\n",
+        m_homebindMapId, m_homebindZoneId, m_homebindX, m_homebindY, m_homebindZ);
+    return true;
+}
 
+void Player::SendInitialPacketsBeforeAddToMap()
+{
+    WorldPacket data(SMSG_SET_REST_START, 4);
+    data << uint32(0);  // unknown, may be rest state time or expirience
+    GetSession()->SendPacket(&data);
+
+    // Homebind
     data.Initialize(SMSG_BINDPOINTUPDATE, 5*4);
     data << m_homebindX << m_homebindY << m_homebindZ;
     data << (uint32) m_homebindMapId;
@@ -14630,7 +14629,6 @@ bool Player::SendInitialPacketsBeforeAddToMap()
     GetSession()->SendPacket( &data );
 
     CastSpell(this, 836, true);            // LOGINEFFECT
-    return true;
 }
 
 void Player::SendInitialPacketsAfterAddToMap()

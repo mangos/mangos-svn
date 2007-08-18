@@ -38,6 +38,8 @@ class Weather;
 struct ScriptAction;
 struct ScriptInfo;
 class CliCommandHolder;
+class SqlResultQueue;
+class QueryResult;
 
 /// Timers for different object refresh rates
 enum WorldTimers
@@ -324,9 +326,16 @@ class World
         void ProcessCliCommands();
         void QueueCliCommand(CliCommandHolder* command) { cliCmdQueue.add(command); }
 
+        void UpdateResultQueue();
+        void InitResultQueue();
+
+        void UpdateRealmCharCount(uint32 accid);
+
     protected:
         void _UpdateGameTime();
         void ScriptsProcess();
+        // callback for UpdateRealmCharacters
+        void _UpdateRealmCharCount(QueryResult *resultCharCount, uint32 accountId);
 
     private:
         time_t m_startTime;
@@ -366,6 +375,7 @@ class World
 
         // CLI command holder to be thread safe
         ZThread::LockedQueue<CliCommandHolder*, ZThread::FastMutex> cliCmdQueue;
+        SqlResultQueue *m_resultQueue;
 };
 
 extern uint32 realmID;

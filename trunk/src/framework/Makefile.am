@@ -56,6 +56,7 @@ EXTRA_DIST = \
 	Utilities/LinkedReference/RefManager.h \
 	Utilities/LinkedReference/Reference.h \
 	Utilities/ByteConverter.h \
+	Utilities/Callback.h \
 	Utilities/EventProcessor.h \
 	Utilities/HashMap.h \
 	Utilities/LinkedList.h \

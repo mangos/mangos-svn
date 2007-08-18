@@ -251,6 +251,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\framework\Utilities\Callback.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\framework\Utilities\EventProcessor.cpp"
 				>
 			</File>

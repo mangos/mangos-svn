@@ -33,6 +33,9 @@ class Player;
 class WorldPacket;
 class WorldSocket;
 class WorldSession;
+class QueryResult;
+class LoginQueryHolder;
+class CharacterHandler;
 
 #define CHECK_PACKET_SIZE(P,S) if((P).size() < (S)) return SizeError((P),(S));
 
@@ -68,6 +71,7 @@ enum PartyResult
 /// Player session in the World
 class MANGOS_DLL_SPEC WorldSession
 {
+    friend class CharacterHandler;
     public:
         WorldSession(uint32 id, WorldSocket *sock, uint32 sec, bool tbc, time_t mute_time);
         ~WorldSession();
@@ -181,6 +185,8 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleCharDeleteOpcode(WorldPacket& recvPacket);
         void HandleCharCreateOpcode(WorldPacket& recvPacket);
         void HandlePlayerLoginOpcode(WorldPacket& recvPacket);
+        void HandleCharEnum(QueryResult * result, uint32 account);
+        void HandlePlayerLogin(LoginQueryHolder * holder);
 
         // played time
         void HandlePlayedTime(WorldPacket& recvPacket);

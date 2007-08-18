@@ -21,7 +21,6 @@
 
 #include "Log.h"
 #include "Object.h"
-#include "Item.h"
 #include "Bag.h"
 #include "Creature.h"
 #include "Player.h"
@@ -55,6 +54,7 @@ class Guild;
 class ArenaTeam;
 class Path;
 class TransportPath;
+class Item;
 
 struct ScriptInfo
 {

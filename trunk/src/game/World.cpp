@@ -48,6 +48,7 @@
 #include "VMapFactory.h"
 #include "GlobalEvents.h"
 #include "GameEvent.h"
+#include "Database/DatabaseImpl.h"
 
 INSTANTIATE_SINGLETON_1( World );
 
@@ -833,6 +834,9 @@ void World::Update(time_t diff)
         sBattleGroundMgr.Update(diff);
     }
 
+    // execute callbacks from sql queries that were queued recently
+    UpdateResultQueue();
+
     ///- Erase corpses once every 20 minutes
     if (m_timers[WUPDATE_CORPSES].Passed())
     {
@@ -1382,4 +1386,32 @@ void World::ProcessCliCommands()
     }
     // print the console message here so it looks right
     zprintf("mangos>");
+}
+
+void World::InitResultQueue()
+{
+    m_resultQueue = new SqlResultQueue;
+    sDatabase.SetResultQueue(m_resultQueue);
+}
+
+void World::UpdateResultQueue()
+{
+    m_resultQueue->Update();
+}
+
+void World::UpdateRealmCharCount(uint32 accountId)
+{
+    sDatabase.AsyncPQuery(this, &World::_UpdateRealmCharCount, accountId, 
+        "SELECT COUNT(guid) FROM `character` WHERE `account` = '%u'", accountId);
+}
+
+void World::_UpdateRealmCharCount(QueryResult *resultCharCount, uint32 accountId)
+{
+    if (resultCharCount)
+    {
+        Field *fields = resultCharCount->Fetch();
+        uint32 charCount = fields[0].GetUInt32();
+        delete resultCharCount;
+        loginDatabase.PExecute("INSERT INTO `realmcharacters` (`numchars`, `acctid`, `realmid`) VALUES (%u, %u, %u) ON DUPLICATE KEY UPDATE `numchars` = '%u'", charCount, accountId, realmID, charCount);
+    }
 }
