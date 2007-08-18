@@ -1386,8 +1386,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void CastItemEquipSpell(Item *item);
         void CastItemCombatSpell(Item *item,Unit* Target);
-        bool IsItemSpellToEquip(SpellEntry const *spellInfo);
-        bool IsItemSpellToCombat(SpellEntry const *spellInfo);
 
         void SendInitWorldStates();
         void SendUpdateWorldState(uint32 Field, uint32 Value);

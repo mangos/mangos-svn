@@ -2523,11 +2523,24 @@ void ObjectMgr::LoadTavernAreaTriggers()
     sLog.outString( ">> Loaded %u tavern triggers", count );
 }
 
-uint32 ObjectMgr::GetNearestTaxiNode( float x, float y, float z, uint32 mapid )
+uint32 ObjectMgr::GetNearestTaxiNode( float x, float y, float z, uint32 mapid, uint32 defNodeId )
 {
     bool found = false;
     float dist;
     uint32 id = 0;
+
+    // some taxi nodes have equal coordinates, select provided node in this case as prefered
+    if(defNodeId)
+    {
+        TaxiNodesEntry const* node = sTaxiNodesStore.LookupEntry(defNodeId);
+        if(node && node->map_id == mapid)
+        {
+            dist = (node->x - x)*(node->x - x)+(node->y - y)*(node->y - y)+(node->z - z)*(node->z - z);
+            id = defNodeId;
+            found = true;
+        }
+    }
+
     for(uint32 i = 1; i < sTaxiNodesStore.nCount; ++i)
     {
         TaxiNodesEntry const* node = sTaxiNodesStore.LookupEntry(i);

@@ -54,7 +54,7 @@ void WorldSession::SendTaxiStatus( uint64 guid )
         GetPlayer( )->GetPositionX( ),
         GetPlayer( )->GetPositionY( ),
         GetPlayer( )->GetPositionZ( ),
-        GetPlayer( )->GetMapId( ) );
+        GetPlayer( )->GetMapId( ), 0 );
 
     // not found nearest
     if(curloc == 0)
@@ -109,7 +109,7 @@ void WorldSession::SendTaxiMenu( uint64 guid )
         GetPlayer( )->GetPositionX( ),
         GetPlayer( )->GetPositionY( ),
         GetPlayer( )->GetPositionZ( ),
-        GetPlayer( )->GetMapId( ) );
+        GetPlayer( )->GetMapId( ), 0 );
 
     if ( curloc == 0 )
         return;
@@ -166,7 +166,7 @@ bool WorldSession::SendLearnNewTaxiNode( uint64 guid )
         GetPlayer( )->GetPositionX( ),
         GetPlayer( )->GetPositionY( ),
         GetPlayer( )->GetPositionZ( ),
-        GetPlayer( )->GetMapId( ) );
+        GetPlayer( )->GetMapId( ), 0 );
 
     if ( curloc == 0 )
         return true;                                        // `true` send to avoid WorldSession::SendTaxiMenu call with one more curlock seartch with same false result.

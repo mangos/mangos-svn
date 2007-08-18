@@ -5970,75 +5970,19 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
         if(!pEnchant) continue;
         for (int s=0;s<3;s++)
         {
-            uint32 enchant_display = pEnchant->display_type[s];
+            if(pEnchant->type[s]!=ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL)
+                continue;
+
             float chance = pEnchant->amount[s] != 0 ? float(pEnchant->amount[s]) : GetWeaponProcChance();
-            uint32 enchant_spell_id = pEnchant->spellid[s];
-            SpellEntry const *enchantSpell_info = sSpellStore.LookupEntry(enchant_spell_id);
-
-            if(!enchantSpell_info) continue;
-
-            if(enchant_display!=4 && enchant_display!=2 && enchant_display!=5 && IsItemSpellToCombat(enchantSpell_info))
-                if (roll_chance_f(chance))
-                    this->CastSpell(Target, enchantSpell_info->Id, true);
-        }
-    }
-}
-
-// only some item spell/auras effects can be executed when item is equipped.
-// If not you can have unexpected beaviur. like item giving damage to player when equip.
-bool Player::IsItemSpellToEquip(SpellEntry const *spellInfo)
-{
-    return (GetDuration(spellInfo) == -1);                  // infinite duration -> passive aura
-    /*
-    for(int j = 0; j< 3; j++)
-    {
-        if(spellInfo->Effect[j] == 6)
-        {
-            switch(spellInfo->EffectApplyAuraName[j])
+            if (roll_chance_f(chance))
             {
-                case 3:
-                case 23:
-                case 8:
-                case 84:
-                case 85:
-                case 42:
-                case 43:
-                    return false;
+                if(IsPositiveSpell(pEnchant->spellid[s]))
+                    CastSpell(this, pEnchant->spellid[s], true);
+                else
+                    CastSpell(Target, pEnchant->spellid[s], true);
             }
         }
     }
-
-    return true;
-    */
-}
-
-// only some item spell/auras effects can be executed when in combat.
-// If not you can have unexpected beaviur. like having stats always growing each attack.
-bool Player::IsItemSpellToCombat(SpellEntry const *spellInfo)
-{
-    return (GetDuration(spellInfo) != -1);                  // infinite duration -> passive aura
-
-    /*
-    for(int j = 0; j< 3; j++)
-    {
-        if(spellInfo->Effect[j] == 6)
-        {
-            switch(spellInfo->EffectApplyAuraName[j])
-            {
-                case 3:
-                case 23:
-                case 8:
-                case 84:
-                case 85:
-                case 42:
-                case 43:
-                    return true;
-            }
-        }
-    }
-
-    return false;
-    */
 }
 
 void Player::_RemoveAllItemMods()
@@ -9816,177 +9760,182 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
 
     for (int s=0; s<3; s++)
     {
-        uint32 enchant_display_type = pEnchant->display_type[s];
+        uint32 enchant_display_type = pEnchant->type[s];
         uint32 enchant_amount = pEnchant->amount[s];
         uint32 enchant_spell_id = pEnchant->spellid[s];
 
         switch(enchant_display_type)
         {
-        case 2:
-            if(getClass() == CLASS_HUNTER)
-            {
-                HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_VALUE, float(enchant_amount), apply);
-            }
-            else
-            {
-                HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND, TOTAL_VALUE, float(enchant_amount), apply);
-            }
-            break;
-
-        case 3:
-            if(enchant_spell_id)
-            {
-                if(apply)
-                    CastSpell(this,enchant_spell_id,true,item);
+            case ITEM_ENCHANTMENT_TYPE_NONE:
+                break;
+            case ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL:
+                // processed in Player::CastItemCombatSpell
+                break;
+            case ITEM_ENCHANTMENT_TYPE_DAMAGE:
+                if(getClass() == CLASS_HUNTER)
+                    HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_VALUE, float(enchant_amount), apply);
                 else
-                    RemoveAurasDueToItem(item);
-            }
-            break;
+                    HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND, TOTAL_VALUE, float(enchant_amount), apply);
+                break;
 
-        case 4:
-            if (!enchant_amount)
-            {
-                ItemRandomSuffixEntry const *item_rand = sItemRandomSuffixStore.LookupEntry(abs(item->GetItemRandomPropertyId()));
-                if(item_rand)
+            case ITEM_ENCHANTMENT_TYPE_EQUIP_SPELL:
+                if(enchant_spell_id)
                 {
-                    for (int k=0; k<3; k++)
+                    if(apply)
+                        CastSpell(this,enchant_spell_id,true,item);
+                    else
+                        RemoveAurasDueToItem(item);
+                }
+                break;
+            case ITEM_ENCHANTMENT_TYPE_RESISTANCE:
+                if (!enchant_amount)
+                {
+                    ItemRandomSuffixEntry const *item_rand = sItemRandomSuffixStore.LookupEntry(abs(item->GetItemRandomPropertyId()));
+                    if(item_rand)
                     {
-                        if(item_rand->enchant_id[k] == enchant_id)
+                        for (int k=0; k<3; k++)
                         {
-                            enchant_amount = uint32((item_rand->prefix[k]*item->GetItemSuffixFactor()) / 10000 );
-                            break;
+                            if(item_rand->enchant_id[k] == enchant_id)
+                            {
+                                enchant_amount = uint32((item_rand->prefix[k]*item->GetItemSuffixFactor()) / 10000 );
+                                break;
+                            }
                         }
                     }
                 }
-            }
 
-            HandleStatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + enchant_spell_id), TOTAL_VALUE, float(enchant_amount), apply);
-            break;
-
-        case 6:                                             // Shaman Rockbiter Weapon
-            // enchant_amount is then containing the number of damage per second to add to the weapon
-            if(getClass() == CLASS_SHAMAN)
+                HandleStatModifier(UnitMods(UNIT_MOD_RESISTANCE_START + enchant_spell_id), TOTAL_VALUE, float(enchant_amount), apply);
+                break;
+            case ITEM_ENCHANTMENT_TYPE_STAT:
             {
-                if (item->GetSlot() == EQUIPMENT_SLOT_MAINHAND)
+                if (!enchant_amount)
                 {
-                    ApplyModFloatValue(UNIT_FIELD_MINDAMAGE,enchant_amount,apply);
-                    ApplyModFloatValue(UNIT_FIELD_MAXDAMAGE,enchant_amount,apply);
-                }
-                if (item->GetSlot() == EQUIPMENT_SLOT_OFFHAND)
-                {
-                    ApplyModFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE,enchant_amount,apply);
-                    ApplyModFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE,enchant_amount,apply);
-                }
-            }
-            break;
-
-        case 5:
-            if (!enchant_amount)
-            {
-                ItemRandomSuffixEntry const *item_rand_suffix = sItemRandomSuffixStore.LookupEntry(abs(item->GetItemRandomPropertyId()));
-                if(item_rand_suffix)
-                {
-                    for (int k=0; k<3; k++)
+                    ItemRandomSuffixEntry const *item_rand_suffix = sItemRandomSuffixStore.LookupEntry(abs(item->GetItemRandomPropertyId()));
+                    if(item_rand_suffix)
                     {
-                        if(item_rand_suffix->enchant_id[k] == enchant_id) 
+                        for (int k=0; k<3; k++)
                         {
-                            enchant_amount = uint32((item_rand_suffix->prefix[k]*item->GetItemSuffixFactor()) / 10000 );
-                            break;
+                            if(item_rand_suffix->enchant_id[k] == enchant_id) 
+                            {
+                                enchant_amount = uint32((item_rand_suffix->prefix[k]*item->GetItemSuffixFactor()) / 10000 );
+                                break;
+                            }
                         }
                     }
                 }
+
+                sLog.outDebug("Adding %u to stat nb %u",enchant_amount,enchant_spell_id);
+                switch (enchant_spell_id)
+                {
+                    case ITEM_MOD_AGILITY:
+                        sLog.outDebug("+ %u AGILITY",enchant_amount);
+                        HandleStatModifier(UNIT_MOD_STAT_AGILITY, TOTAL_VALUE, float(enchant_amount), apply);
+                        ApplyPosStatMod(STAT_AGILITY, enchant_amount, apply);
+                        break;
+                    case ITEM_MOD_STRENGTH:
+                        sLog.outDebug("+ %u STRENGTH",enchant_amount);
+                        HandleStatModifier(UNIT_MOD_STAT_STRENGTH, TOTAL_VALUE, float(enchant_amount), apply);
+                        ApplyPosStatMod(STAT_STRENGTH, enchant_amount, apply);
+                        break;
+                    case ITEM_MOD_INTELLECT:
+                        sLog.outDebug("+ %u INTELLECT",enchant_amount);
+                        HandleStatModifier(UNIT_MOD_STAT_INTELLECT, TOTAL_VALUE, float(enchant_amount), apply);
+                        ApplyPosStatMod(STAT_INTELLECT, enchant_amount, apply);
+                        break;
+                    case ITEM_MOD_SPIRIT:
+                        sLog.outDebug("+ %u SPIRIT",enchant_amount);
+                        HandleStatModifier(UNIT_MOD_STAT_SPIRIT, TOTAL_VALUE, float(enchant_amount), apply);
+                        ApplyPosStatMod(STAT_SPIRIT, enchant_amount, apply);
+                        break;
+                    case ITEM_MOD_STAMINA:
+                        sLog.outDebug("+ %u STAMINA",enchant_amount);
+                        HandleStatModifier(UNIT_MOD_STAT_STAMINA, TOTAL_VALUE, float(enchant_amount), apply);
+                        ApplyPosStatMod(STAT_STAMINA, enchant_amount, apply);
+                        break;
+                    case ITEM_MOD_DEFENSE_SKILL_RATING:
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_DEFENCE_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u DEFENCE", enchant_amount);
+                        break;
+                    case  ITEM_MOD_DODGE_RATING:
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_DODGE_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u DODGE", enchant_amount);
+                        break;
+                    case ITEM_MOD_PARRY_RATING:
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_PARRY_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u PARRY", enchant_amount);
+                        break;
+                    case ITEM_MOD_BLOCK_RATING:
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_BLOCK_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u SHIELD_BLOCK", enchant_amount);
+                        break;
+                    case ITEM_MOD_HIT_MELEE_RATING:
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_HIT_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u MELEE_HIT", enchant_amount);
+                        break;
+                    case ITEM_MOD_HIT_RANGED_RATING:
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_HIT_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u RANGED_HIT", enchant_amount);
+                        break;
+                    case ITEM_MOD_HIT_SPELL_RATING:
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_HIT_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u SPELL_HIT", enchant_amount);
+                        break;
+                    case ITEM_MOD_CRIT_MELEE_RATING: // CS = Critical Strike
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_CRIT_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u MELEE_CRIT", enchant_amount);
+                        break;
+                    case ITEM_MOD_CRIT_RANGED_RATING:
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_CRIT_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u RANGED_CRIT", enchant_amount);
+                        break;
+                    case ITEM_MOD_CRIT_SPELL_RATING:
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_CRIT_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u SPELL_CRIT", enchant_amount);
+                        break;
+                        // Values from ITEM_STAT_MELEE_HA_RATING to ITEM_STAT_SPELL_HASTE_RATING are never used
+                        // in Enchantments
+                    case ITEM_MOD_HIT_RATING:
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_HIT_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u HIT", enchant_amount);
+                        break;
+                    case ITEM_MOD_CRIT_RATING:
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_CRIT_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u CRITICAL", enchant_amount);
+                        break;
+                        // Values ITEM_STAT_HA_RATING and ITEM_STAT_CA_RATING are never used in Enchantment
+                    case ITEM_MOD_RESILIENCE_RATING:
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RESILIENCE_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u RESILIENCE", enchant_amount);
+                        break;
+                        // Value ITEM_STAT_HASTE_RATING is never used in Enchantment
+                    default:
+                        break;
+                }     
+                break;
             }
-
-            sLog.outDebug("Adding %u to stat nb %u",enchant_amount,enchant_spell_id);
-            switch (enchant_spell_id)
+            case ITEM_ENCHANTMENT_TYPE_TOTEM:                // Shaman Rockbiter Weapon
             {
-            case ITEM_MOD_AGILITY:
-                sLog.outDebug("+ %u AGILITY",enchant_amount);
-                HandleStatModifier(UNIT_MOD_STAT_AGILITY, TOTAL_VALUE, float(enchant_amount), apply);
-                ApplyPosStatMod(STAT_AGILITY, enchant_amount, apply);
+                // enchant_amount is then containing the number of damage per second to add to the weapon
+                if(getClass() == CLASS_SHAMAN)
+                {
+                    if (item->GetSlot() == EQUIPMENT_SLOT_MAINHAND)
+                    {
+                        ApplyModFloatValue(UNIT_FIELD_MINDAMAGE,enchant_amount,apply);
+                        ApplyModFloatValue(UNIT_FIELD_MAXDAMAGE,enchant_amount,apply);
+                    }
+                    if (item->GetSlot() == EQUIPMENT_SLOT_OFFHAND)
+                    {
+                        ApplyModFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE,enchant_amount,apply);
+                        ApplyModFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE,enchant_amount,apply);
+                    }
+                }
                 break;
-            case ITEM_MOD_STRENGTH:
-                sLog.outDebug("+ %u STRENGTH",enchant_amount);
-                HandleStatModifier(UNIT_MOD_STAT_STRENGTH, TOTAL_VALUE, float(enchant_amount), apply);
-                ApplyPosStatMod(STAT_STRENGTH, enchant_amount, apply);
-                break;
-            case ITEM_MOD_INTELLECT:
-                sLog.outDebug("+ %u INTELLECT",enchant_amount);
-                HandleStatModifier(UNIT_MOD_STAT_INTELLECT, TOTAL_VALUE, float(enchant_amount), apply);
-                ApplyPosStatMod(STAT_INTELLECT, enchant_amount, apply);
-                break;
-            case ITEM_MOD_SPIRIT:
-                sLog.outDebug("+ %u SPIRIT",enchant_amount);
-                HandleStatModifier(UNIT_MOD_STAT_SPIRIT, TOTAL_VALUE, float(enchant_amount), apply);
-                ApplyPosStatMod(STAT_SPIRIT, enchant_amount, apply);
-                break;
-            case ITEM_MOD_STAMINA:
-                sLog.outDebug("+ %u STAMINA",enchant_amount);
-                HandleStatModifier(UNIT_MOD_STAT_STAMINA, TOTAL_VALUE, float(enchant_amount), apply);
-                ApplyPosStatMod(STAT_STAMINA, enchant_amount, apply);
-                break;
-            case ITEM_MOD_DEFENSE_SKILL_RATING:
-                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_DEFENCE_RATING, enchant_amount, apply);
-                sLog.outDebug("+ %u DEFENCE", enchant_amount);
-                break;
-            case  ITEM_MOD_DODGE_RATING:
-                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_DODGE_RATING, enchant_amount, apply);
-                sLog.outDebug("+ %u DODGE", enchant_amount);
-                break;
-            case ITEM_MOD_PARRY_RATING:
-                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_PARRY_RATING, enchant_amount, apply);
-                sLog.outDebug("+ %u PARRY", enchant_amount);
-                break;
-            case ITEM_MOD_BLOCK_RATING:
-                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_BLOCK_RATING, enchant_amount, apply);
-                sLog.outDebug("+ %u SHIELD_BLOCK", enchant_amount);
-                break;
-            case ITEM_MOD_HIT_MELEE_RATING:
-                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_HIT_RATING, enchant_amount, apply);
-                sLog.outDebug("+ %u MELEE_HIT", enchant_amount);
-                break;
-            case ITEM_MOD_HIT_RANGED_RATING:
-                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_HIT_RATING, enchant_amount, apply);
-                sLog.outDebug("+ %u RANGED_HIT", enchant_amount);
-                break;
-            case ITEM_MOD_HIT_SPELL_RATING:
-                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_HIT_RATING, enchant_amount, apply);
-                sLog.outDebug("+ %u SPELL_HIT", enchant_amount);
-                break;
-            case ITEM_MOD_CRIT_MELEE_RATING: // CS = Critical Strike
-                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_CRIT_RATING, enchant_amount, apply);
-                sLog.outDebug("+ %u MELEE_CRIT", enchant_amount);
-                break;
-            case ITEM_MOD_CRIT_RANGED_RATING:
-                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_CRIT_RATING, enchant_amount, apply);
-                sLog.outDebug("+ %u RANGED_CRIT", enchant_amount);
-                break;
-            case ITEM_MOD_CRIT_SPELL_RATING:
-                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_CRIT_RATING, enchant_amount, apply);
-                sLog.outDebug("+ %u SPELL_CRIT", enchant_amount);
-                break;
-                // Values from ITEM_STAT_MELEE_HA_RATING to ITEM_STAT_SPELL_HASTE_RATING are never used
-                // in Enchantments
-            case ITEM_MOD_HIT_RATING:
-                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_HIT_RATING, enchant_amount, apply);
-                sLog.outDebug("+ %u HIT", enchant_amount);
-                break;
-            case ITEM_MOD_CRIT_RATING:
-                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_CRIT_RATING, enchant_amount, apply);
-                sLog.outDebug("+ %u CRITICAL", enchant_amount);
-                break;
-                // Values ITEM_STAT_HA_RATING and ITEM_STAT_CA_RATING are never used in Enchantment
-            case ITEM_MOD_RESILIENCE_RATING:
-                ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RESILIENCE_RATING, enchant_amount, apply);
-                sLog.outDebug("+ %u RESILIENCE", enchant_amount);
-                break;
-                // Value ITEM_STAT_HASTE_RATING is never used in Enchantment
-
+            }
             default:
+                sLog.outError("Unknown item enchantment display type: %d",enchant_display_type);
                 break;
-            }     
-        }
-    }
+        }/*switch(enchant_display_type)*/
+    }/*for*/
 
     // visualize enchantment at player and equipped items
     int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (item->GetSlot() * 16);
@@ -13632,6 +13581,8 @@ void Player::HandleStealthedUnitsDetection()
 
 bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes)
 {
+    ClearTaxiDestinations();
+
     if(nodes.size() < 2)
         return false;
 
@@ -13673,9 +13624,9 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes)
         return false;
     }
 
-    uint32 curloc = objmgr.GetNearestTaxiNode(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId());
-
     uint32 sourcenode = nodes[0];
+
+    uint32 curloc = objmgr.GetNearestTaxiNode(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), sourcenode);
 
     // starting node != nearest node (cheat?)
     if(curloc != sourcenode)
@@ -13691,8 +13642,6 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes)
 
     uint32 prevnode = sourcenode;
     uint32 lastnode = 0;
-
-    ClearTaxiDestinations();
 
     for(uint32 i = 1; i < nodes.size(); ++i)
     {
