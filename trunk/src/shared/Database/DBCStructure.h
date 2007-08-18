@@ -490,10 +490,21 @@ struct SpellDurationEntry
     int32     Duration[3];
 };
 
+enum ItemEnchantmentType
+{
+    ITEM_ENCHANTMENT_TYPE_NONE         = 0,
+    ITEM_ENCHANTMENT_TYPE_COMBAT_SPELL = 1,
+    ITEM_ENCHANTMENT_TYPE_DAMAGE       = 2,
+    ITEM_ENCHANTMENT_TYPE_EQUIP_SPELL  = 3,
+    ITEM_ENCHANTMENT_TYPE_RESISTANCE   = 4,
+    ITEM_ENCHANTMENT_TYPE_STAT         = 5,
+    ITEM_ENCHANTMENT_TYPE_TOTEM        = 6
+};
+
 struct SpellItemEnchantmentEntry
 {
     uint32      ID;                                         // 0
-    uint32      display_type[3];                            // 1-3
+    uint32      type[3];                                    // 1-3
     uint32      amount[3];                                  // 4-6
     //uint32    amount2[3]                                  // 7-9 always same as similar `amount` value
     uint32      spellid[3];                                 // 10-12
