@@ -28,7 +28,7 @@ bool GameEvent::CheckOneGameEvent(uint16 entry)
 {
     // Get the event information
     time_t currenttime = time(NULL);
-    if ((mGameEvent[entry].start < currenttime) && (currenttime < mGameEvent[entry].end) && (((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * 3600)) < (mGameEvent[entry].length * 3600)))
+    if ((mGameEvent[entry].start < currenttime) && (currenttime < mGameEvent[entry].end) && (((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * 60)) < (mGameEvent[entry].length * 60)))
         return true;
     else
         return false;
@@ -48,11 +48,11 @@ uint32 GameEvent::NextCheck(uint16 entry)
    
     uint32 delay;
     // in event, we return the end of it
-    if ((((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * 3600)) < (mGameEvent[entry].length * 3600)))
+    if ((((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * 60)) < (mGameEvent[entry].length * 60)))
         // we return the delay before it ends
-        delay = (mGameEvent[entry].length * 3600) - ((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * 3600));
+        delay = (mGameEvent[entry].length * 60) - ((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * 60));
     else // not in window, we return the delay before next start
-        delay = (mGameEvent[entry].occurence * 3600) - ((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * 3600));
+        delay = (mGameEvent[entry].occurence * 60) - ((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * 60));
     // In case the end is before next check
     if ((mGameEvent[entry].end - currenttime) < delay)
         return (mGameEvent[entry].end - currenttime);
@@ -105,9 +105,6 @@ void GameEvent::LoadFromDB()
         pGameEvent.occurence    = fields[3].GetUInt32();
         pGameEvent.length       = fields[4].GetUInt32();
         pGameEvent.description  = fields[5].GetCppString();
-        
-        if (CheckOneGameEvent(event_id))
-            AddActiveEvent(event_id);
 
     } while( result->NextRow() );
 
