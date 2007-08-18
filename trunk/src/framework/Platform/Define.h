@@ -98,6 +98,14 @@ typedef uint32      DWORD;
 #endif
 typedef uint64      OBJECT_HANDLE;
 
+#if PLATFORM == PLATFORM_WIN32
+#  ifndef DECLSPEC_NORETURN
+#    define DECLSPEC_NORETURN __declspec(noreturn)
+#  endif 
+#else
+#  define DECLSPEC_NORETURN
+#endif
+
 #if COMPILER == COMPILER_GNU
 #  define ATTR_NORETURN __attribute__((noreturn))
 #  define ATTR_PRINTF(F,V) __attribute__ ((format (printf, F, V)))

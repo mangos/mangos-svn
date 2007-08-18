@@ -320,7 +320,7 @@ class ObjectMgr
         uint32 GetPlayerAccountIdByGUID(const uint64 &guid) const;
         uint32 GetSecurityByAccount(uint32 acc_id) const;
 
-        uint32 GetNearestTaxiNode( float x, float y, float z, uint32 mapid, uint32 defNodeId );
+        uint32 GetNearestTaxiNode( float x, float y, float z, uint32 mapid );
         void GetTaxiPath( uint32 source, uint32 destination, uint32 &path, uint32 &cost);
         uint16 GetTaxiMount( uint32 id, uint32 team );
         void GetTaxiPathNodes( uint32 path, Path &pathnodes );

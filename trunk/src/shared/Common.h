@@ -143,10 +143,8 @@ enum TimeConstants
 
 #if PLATFORM == PLATFORM_WIN32
 #  define MANGOS_DLL_SPEC __declspec(dllexport)
-//#  define DECLSPEC_NORETURN -- define in win32 api
 #else
 #  define MANGOS_DLL_SPEC
-#  define DECLSPEC_NORETURN
 #endif
 
 // we always use stdlibc++ std::max/std::min, undefine some not C++ standart defines (Win API and some pother platforms)

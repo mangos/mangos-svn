@@ -336,7 +336,7 @@ inline uint8 ItemSubClassToDurabilityMultiplierId(uint32 ItemClass, uint32 ItemS
 }
 
 // Only GCC 4.1.0 and later support #pragma pack(push,1) syntax
-#if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
+#if defined( __GNUC__ ) && (__GNUC__ < 4 || __GNUC__ == 4 && __GNUC_MINOR__ < 1)
 #pragma pack(1)
 #else
 #pragma pack(push,1)
@@ -443,7 +443,7 @@ struct ItemPrototype
     uint32 DisenchantID;
 };
 
-#if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
+#if defined( __GNUC__ ) && (__GNUC__ < 4 || __GNUC__ == 4 && __GNUC_MINOR__ < 1)
 #pragma pack()
 #else
 #pragma pack(pop)

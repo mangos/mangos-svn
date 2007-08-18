@@ -37,10 +37,14 @@ namespace MaNGOS
                 at_exit( destroyer );
             }
 
-            static void OnDeadReference(void) ATTR_NORETURN // We don't handle Dead Reference for now
-            {
-                throw std::runtime_error("Dead Reference");
-            }
+            DECLSPEC_NORETURN static void OnDeadReference(void) ATTR_NORETURN;
+
     };
+
+    template <class T>
+    inline void ObjectLifeTime<T>::OnDeadReference(void) // We don't handle Dead Reference for now
+    {
+        throw std::runtime_error("Dead Reference");
+    }
 }
 #endif

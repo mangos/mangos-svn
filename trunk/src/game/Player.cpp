@@ -13628,10 +13628,13 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes)
 
     uint32 sourcenode = nodes[0];
 
-    uint32 curloc = objmgr.GetNearestTaxiNode(GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), sourcenode);
-
-    // starting node != nearest node (cheat?)
-    if(curloc != sourcenode)
+    // starting node too far away (cheat?)
+    TaxiNodesEntry const* node = sTaxiNodesStore.LookupEntry(sourcenode);
+    if( !node || node->map_id != GetMapId() ||
+        (node->x - GetPositionX())*(node->x - GetPositionX())+
+        (node->y - GetPositionY())*(node->y - GetPositionY())+
+        (node->z - GetPositionZ())*(node->z - GetPositionZ()) > 
+        (2*INTERACTION_DISTANCE)*(2*INTERACTION_DISTANCE)*(2*INTERACTION_DISTANCE) )
     {
         WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
         data << uint32(ERR_TAXIUNSPECIFIEDSERVERERROR);
