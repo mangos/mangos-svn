@@ -1765,6 +1765,16 @@ void Spell::SendCastResult(uint8 result)
             case SPELL_FAILED_REQUIRES_AREA:
                 data << uint32(m_spellInfo->AreaId);
                 break;
+            case SPELL_FAILED_TOTEMS:
+                if(m_spellInfo->Totem[0])
+                    data << uint32(m_spellInfo->Totem[0]);
+                if(m_spellInfo->Totem[1])
+                    data << uint32(m_spellInfo->Totem[1]);
+            case SPELL_FAILED_TOTEM_CATEGORY:
+                if(m_spellInfo->TotemCategory[0])
+                    data << uint32(m_spellInfo->TotemCategory[0]);
+                if(m_spellInfo->TotemCategory[1])
+                    data << uint32(m_spellInfo->TotemCategory[1]);
         }
         ((Player*)m_caster)->GetSession()->SendPacket(&data);
     }
@@ -3037,7 +3047,7 @@ uint8 Spell::CheckItems()
     }
 
     uint32 totems = 2;
-    for(int i=0;i<2;i++)
+    for(int i=0;i<2;++i)
     {
         if(m_spellInfo->Totem[i] != 0)
         {
@@ -3050,7 +3060,7 @@ uint8 Spell::CheckItems()
         totems -= 1;
     }
     if(totems != 0)
-        return uint8(0x70); // TODO: replace this const
+        return (uint8)SPELL_FAILED_TOTEMS;                     //0x7C
 
     //Check items for TotemCategory
     uint32 TotemCategory = 2;
@@ -3068,7 +3078,7 @@ uint8 Spell::CheckItems()
             TotemCategory -= 1;
     }
     if(TotemCategory != 0)
-        return uint8(0x70);                                 // TODO: replace this const
+        return (uint8)SPELL_FAILED_TOTEM_CATEGORY;             //0x7B
 
     for(int i = 0; i < 3; i++)
     {
