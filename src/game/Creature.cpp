@@ -1000,6 +1000,7 @@ void Creature::SaveToDB()
 
 void Creature::SelectLevel(const CreatureInfo *cinfo)
 {
+    // level
     uint32 minlevel = std::min(cinfo->maxlevel, cinfo->minlevel);
     uint32 maxlevel = std::max(cinfo->maxlevel, cinfo->minlevel);
     uint32 level = minlevel == maxlevel ? minlevel : urand(minlevel, maxlevel);
@@ -1007,14 +1008,18 @@ void Creature::SelectLevel(const CreatureInfo *cinfo)
 
     float rellevel = maxlevel == minlevel ? 0 : (float(level - minlevel))/(maxlevel - minlevel);
 
+    // health
+    float healthmod = _GetDamageMod(isPet() ? 0 : cinfo->rank);
+
     uint32 minhealth = std::min(cinfo->maxhealth, cinfo->minhealth);
     uint32 maxhealth = std::max(cinfo->maxhealth, cinfo->minhealth);
-    uint32 health = uint32(_GetHealthMod(isPet() ? 0 : cinfo->rank) * (minhealth + uint32(rellevel*(maxhealth - minhealth))));
+    uint32 health = uint32(healthmod * (minhealth + uint32(rellevel*(maxhealth - minhealth))));
 
     SetCreateHealth(health);
     SetMaxHealth(health);
     SetHealth(health);
 
+    // mana
     uint32 minmana = std::min(cinfo->maxmana, cinfo->minmana);
     uint32 maxmana = std::max(cinfo->maxmana, cinfo->minmana);
     uint32 mana = minmana + uint32(rellevel*(maxmana - minmana));
@@ -1022,6 +1027,20 @@ void Creature::SelectLevel(const CreatureInfo *cinfo)
     SetCreateMana(mana);
     SetMaxPower(POWER_MANA, mana);                          //MAX Mana
     SetPower(POWER_MANA, mana);
+
+    SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, health);
+    SetModifierValue(UNIT_MOD_MANA, BASE_VALUE, mana);
+
+    // damage
+    float damagemod = _GetDamageMod(isPet() ? 0 : cinfo->rank);
+
+    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, cinfo->mindmg * damagemod);
+    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, cinfo->maxdmg * damagemod);
+
+    SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE,cinfo->minrangedmg * damagemod);
+    SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE,cinfo->maxrangedmg * damagemod);
+
+    SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, cinfo->attackpower * damagemod);
 }
 
 float Creature::_GetHealthMod(int32 Rank)
@@ -1076,7 +1095,6 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
         return false;
     }
     uint32 rank = isPet()? 0 : cinfo->rank;
-    float damagemod = _GetDamageMod(rank);
 
     uint32 display_id = cinfo->randomDisplayID();
 
@@ -1092,14 +1110,6 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
 
     SetUInt32Value(UNIT_NPC_FLAGS,cinfo->npcflag);
 
-    SetModifierValue(UNIT_MOD_ATTACK_POWER, BASE_VALUE, cinfo->attackpower);
-
-    SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, cinfo->mindmg * damagemod);
-    SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, cinfo->maxdmg * damagemod);
-
-    SetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE,cinfo->minrangedmg * damagemod);
-    SetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE,cinfo->maxrangedmg * damagemod);
-
     SetAttackTime(BASE_ATTACK,  cinfo->baseattacktime);
     SetAttackTime(RANGED_ATTACK,cinfo->rangeattacktime);
 
@@ -1113,9 +1123,6 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     SetModifierValue(UNIT_MOD_RESISTANCE_FROST,  BASE_VALUE, float(cinfo->resistance4));
     SetModifierValue(UNIT_MOD_RESISTANCE_SHADOW, BASE_VALUE, float(cinfo->resistance5));
     SetModifierValue(UNIT_MOD_RESISTANCE_ARCANE, BASE_VALUE, float(cinfo->resistance6));
-
-    SetModifierValue(UNIT_MOD_HEALTH, BASE_VALUE, float(cinfo->maxhealth));
-    SetModifierValue(UNIT_MOD_MANA, BASE_VALUE, float(cinfo->maxmana));
 
     //this is probably wrong
     SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, cinfo->equipmodel[0]);
