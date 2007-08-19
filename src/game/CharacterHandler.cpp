@@ -57,7 +57,6 @@ class CharacterHandler
     public:
         void HandleCharEnumCallback(QueryResult * result, uint32 account)
         {
-            if(!result) return;
             WorldSession * session = sWorld.FindSession(account);
             if(!session) return;
             session->HandleCharEnum(result, account);
