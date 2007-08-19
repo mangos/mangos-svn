@@ -73,8 +73,9 @@ enum ServerMessageType
 
 struct ScriptAction
 {
-    Object* source;
-    Object* target;
+    uint64 sourceGUID;
+    uint64 targetGUID;
+    uint64 ownerGUID;                                       // owner of source if source is item
     ScriptInfo const* script;                               // pointer to static script data
 };
 
@@ -870,15 +871,22 @@ void World::ScriptsStart(ScriptMapMap const& scripts, uint32 id, Object* source,
     if (s == scripts.end())
         return;
 
+    // prepare static data
+    uint64 sourceGUID = source->GetGUID();
+    uint64 targetGUID = target ? target->GetGUID() : (uint64)0;
+    uint64 ownerGUID  = (source->GetTypeId()==TYPEID_ITEM) ? ((Item*)source)->GetOwnerGUID() : (uint64)0;
+
     ///- Schedule script execution for all scripts in the script map
     ScriptMap const *s2 = &(s->second);
     bool immedScript = false;
     for (ScriptMap::const_iterator iter = s2->begin(); iter != s2->end(); ++iter)
     {
         ScriptAction sa;
-        sa.source = source;
+        sa.sourceGUID = sourceGUID;
+        sa.targetGUID = targetGUID;
+        sa.ownerGUID  = ownerGUID;
+
         sa.script = &iter->second;
-        sa.target = target;
         scriptSchedule.insert(std::pair<time_t, ScriptAction>(m_gameTime + iter->first, sa));
         if (iter->first == 0)
             immedScript = true;
@@ -900,126 +908,183 @@ void World::ScriptsProcess()
     while (!scriptSchedule.empty() && (iter->first <= m_gameTime))
     {
         ScriptAction const& step = iter->second;
+
+        Object* source = NULL;
+
+        if(step.sourceGUID)
+        {
+            switch(GUID_HIPART(step.sourceGUID))
+            {
+            case HIGHGUID_ITEM:
+                // case HIGHGUID_CONTAINER: ==HIGHGUID_ITEM
+                {
+                    Player* player = HashMapHolder<Player>::Find(step.ownerGUID);
+                    if(player)
+                        source = player->GetItemByGuid(step.sourceGUID);
+                    break;
+                }
+            case HIGHGUID_UNIT:
+                source = HashMapHolder<Creature>::Find(step.sourceGUID);
+                break;
+            case HIGHGUID_PLAYER:
+                source = HashMapHolder<Player>::Find(step.sourceGUID);
+                break;
+            case HIGHGUID_GAMEOBJECT:
+                source = HashMapHolder<GameObject>::Find(step.sourceGUID);
+                break;
+            case HIGHGUID_CORPSE:
+                source = HashMapHolder<Corpse>::Find(step.sourceGUID);
+                break;
+            default:
+                sLog.outError("*_script source with unsupported high guid value %u",GUID_HIPART(step.sourceGUID));
+                break;
+            }
+        }
+
+        Object* target = NULL;
+
+        if(step.targetGUID)
+        {
+            switch(GUID_HIPART(step.targetGUID))
+            {
+            case HIGHGUID_UNIT:
+                target = HashMapHolder<Creature>::Find(step.targetGUID);
+                break;
+            case HIGHGUID_PLAYER:                           // empty GUID case also
+                target = HashMapHolder<Player>::Find(step.targetGUID);
+                break;
+            case HIGHGUID_GAMEOBJECT:
+                target = HashMapHolder<GameObject>::Find(step.targetGUID);
+                break;
+            case HIGHGUID_CORPSE:
+                target = HashMapHolder<Corpse>::Find(step.targetGUID);
+                break;
+            default:
+                sLog.outError("*_script source with unsupported high guid value %u",GUID_HIPART(step.targetGUID));
+                break;
+            }
+        }
+
         switch (step.script->command)
         {
             case SCRIPT_COMMAND_SAY:
-                if(!step.source || !step.target)
+                if(!source)
                 {
                     sLog.outError("SCRIPT_COMMAND_SAY call for NULL creature.");
                     break;
                 }
 
-                if(step.source->GetTypeId()!=TYPEID_UNIT)
+                if(source->GetTypeId()!=TYPEID_UNIT)
                 {
-                    sLog.outError("SCRIPT_COMMAND_SAY call for non-creature (TypeId: %u), skipping.",step.source->GetTypeId());
+                    sLog.outError("SCRIPT_COMMAND_SAY call for non-creature (TypeId: %u), skipping.",source->GetTypeId());
                     break;
                 }
 
-                ((Creature *)step.source)->Say(step.script->datatext.c_str(), 0, 0);
+                ((Creature *)source)->Say(step.script->datatext.c_str(), 0, 0);
                 break;
             case SCRIPT_COMMAND_EMOTE:
-                if(!step.source)
+                if(source)
                 {
                     sLog.outError("SCRIPT_COMMAND_EMOTE call for NULL creature.");
                     break;
                 }
 
-                if(step.source->GetTypeId()!=TYPEID_UNIT)
+                if(source->GetTypeId()!=TYPEID_UNIT)
                 {
-                    sLog.outError("SCRIPT_COMMAND_EMOTE call for non-creature (TypeId: %u), skipping.",step.source->GetTypeId());
+                    sLog.outError("SCRIPT_COMMAND_EMOTE call for non-creature (TypeId: %u), skipping.",source->GetTypeId());
                     break;
                 }
 
-                ((Creature *)step.source)->HandleEmoteCommand(step.script->datalong);
+                ((Creature *)source)->HandleEmoteCommand(step.script->datalong);
                 break;
             case SCRIPT_COMMAND_FIELD_SET:
-                if(!step.source)
+                if(source)
                 {
                     sLog.outError("SCRIPT_COMMAND_FIELD_SET call for NULL object.");
                     break;
                 }
-                if(step.script->datalong <= OBJECT_FIELD_ENTRY || step.script->datalong >= step.source->GetValuesCount())
+                if(step.script->datalong <= OBJECT_FIELD_ENTRY || step.script->datalong >= source->GetValuesCount())
                 {
                     sLog.outError("SCRIPT_COMMAND_FIELD_SET call for wrong field %u (max count: %u) in object (TypeId: %u).",
-                        step.script->datalong,step.source->GetValuesCount(),step.source->GetTypeId());
+                        step.script->datalong,source->GetValuesCount(),source->GetTypeId());
                     break;
                 }
 
-                step.source->SetUInt32Value(step.script->datalong, step.script->datalong2);
+                source->SetUInt32Value(step.script->datalong, step.script->datalong2);
                 break;
             case SCRIPT_COMMAND_MOVE_TO:
-                if(!step.source)
+                if(source)
                 {
                     sLog.outError("SCRIPT_COMMAND_MOVE_TO call for NULL creature.");
                     break;
                 }
 
-                if(step.source->GetTypeId()!=TYPEID_UNIT)
+                if(source->GetTypeId()!=TYPEID_UNIT)
                 {
-                    sLog.outError("SCRIPT_COMMAND_MOVE_TO call for non-creature (TypeId: %u), skipping.",step.source->GetTypeId());
+                    sLog.outError("SCRIPT_COMMAND_MOVE_TO call for non-creature (TypeId: %u), skipping.",source->GetTypeId());
                     break;
                 }
-                ((Unit *)step.source)->SendMoveToPacket(step.script->x, step.script->y, step.script->z, false, step.script->datalong2 );
-                MapManager::Instance().GetMap(((Unit *)step.source)->GetMapId(), ((Unit *)step.source))->CreatureRelocation(((Creature *)step.source), step.script->x, step.script->y, step.script->z, 0);
+                ((Unit *)source)->SendMoveToPacket(step.script->x, step.script->y, step.script->z, false, step.script->datalong2 );
+                MapManager::Instance().GetMap(((Unit *)source)->GetMapId(), ((Unit *)source))->CreatureRelocation(((Creature *)source), step.script->x, step.script->y, step.script->z, 0);
                 break;
             case SCRIPT_COMMAND_FLAG_SET:
-                if(!step.source)
+                if(!source)
                 {
                     sLog.outError("SCRIPT_COMMAND_FLAG_SET call for NULL object.");
                     break;
                 }
-                if(step.script->datalong <= OBJECT_FIELD_ENTRY || step.script->datalong >= step.source->GetValuesCount())
+                if(step.script->datalong <= OBJECT_FIELD_ENTRY || step.script->datalong >= source->GetValuesCount())
                 {
                     sLog.outError("SCRIPT_COMMAND_FLAG_SET call for wrong field %u (max count: %u) in object (TypeId: %u).",
-                        step.script->datalong,step.source->GetValuesCount(),step.source->GetTypeId());
+                        step.script->datalong,source->GetValuesCount(),source->GetTypeId());
                     break;
                 }
 
-                step.source->SetFlag(step.script->datalong, step.script->datalong2);
+                source->SetFlag(step.script->datalong, step.script->datalong2);
                 break;
             case SCRIPT_COMMAND_FLAG_REMOVE:
-                if(!step.source)
+                if(!source)
                 {
                     sLog.outError("SCRIPT_COMMAND_FLAG_REMOVE call for NULL object.");
                     break;
                 }
-                if(step.script->datalong <= OBJECT_FIELD_ENTRY || step.script->datalong >= step.source->GetValuesCount())
+                if(step.script->datalong <= OBJECT_FIELD_ENTRY || step.script->datalong >= source->GetValuesCount())
                 {
                     sLog.outError("SCRIPT_COMMAND_FLAG_REMOVE call for wrong field %u (max count: %u) in object (TypeId: %u).",
-                        step.script->datalong,step.source->GetValuesCount(),step.source->GetTypeId());
+                        step.script->datalong,source->GetValuesCount(),source->GetTypeId());
                     break;
                 }
 
-                step.source->RemoveFlag(step.script->datalong, step.script->datalong2);
+                source->RemoveFlag(step.script->datalong, step.script->datalong2);
                 break;
 
             case SCRIPT_COMMAND_TELEPORT_TO:
-                if (!step.target)
+                if (!target)
                 {
                     sLog.outError("SCRIPT_COMMAND_TELEPORT_TO call for NULL object.");
                     break;
                 }
 
-                if (step.target->GetTypeId() != TYPEID_PLAYER)
+                if (target->GetTypeId() != TYPEID_PLAYER)
                 {
-                    sLog.outError("SCRIPT_COMMAND_TELEPORT_TO call for non-player (TypeId: %u), skipping.", step.target->GetTypeId());
+                    sLog.outError("SCRIPT_COMMAND_TELEPORT_TO call for non-player (TypeId: %u), skipping.", target->GetTypeId());
                     break;
                 }
 
-                ((Player*)step.target)->TeleportTo(step.script->datalong, step.script->x, step.script->y, step.script->z, step.script->o);
+                ((Player*)target)->TeleportTo(step.script->datalong, step.script->x, step.script->y, step.script->z, step.script->o);
                 break;
 
             case SCRIPT_COMMAND_TEMP_SUMMON:
             {
-                if(!step.source)
+                if(!source)
                 {
                     sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON call for NULL unit.");
                     break;
                 }
 
-                if(!step.source->isType(TYPE_UNIT))         // must be any Unit (creature or player)
+                if(!source->isType(TYPE_UNIT))         // must be any Unit (creature or player)
                 {
-                    sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON call for non-unit (TypeId: %u), skipping.",step.source->GetTypeId());
+                    sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON call for non-unit (TypeId: %u), skipping.",source->GetTypeId());
                     break;
                 }
 
@@ -1028,16 +1093,16 @@ void World::ScriptsProcess()
                 float z = step.script->z;
                 float o = step.script->o;
 
-                Creature* pCreature = ((Unit*)step.source)->SummonCreature(step.script->datalong, x, y, z, o,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,step.script->datalong2);
+                Creature* pCreature = ((Unit*)source)->SummonCreature(step.script->datalong, x, y, z, o,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,step.script->datalong2);
                 if (!pCreature)
                 {
                     sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON failed for creature (entry: %u).",step.script->datalong);
                     break;
                 }
 
-                if( pCreature->Attack((Unit *)step.source) )
+                if( pCreature->Attack((Unit *)source) )
                 {
-                    (*pCreature)->Mutate(new TargetedMovementGenerator(*((Unit *)step.source)));
+                    (*pCreature)->Mutate(new TargetedMovementGenerator(*((Unit *)source)));
                 }
                 break;
             }

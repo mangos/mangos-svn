@@ -2596,108 +2596,138 @@ void Spell::EffectSummonObjectWild(uint32 i)
 
 void Spell::EffectScriptEffect(uint32 i)
 {
-    // we must implement hunter pet summon at login there (spell 6962)
+    // TODO: we must implement hunter pet summon at login there (spell 6962)
 
-    // Keep in top, because core use it for npc aggro other npc
-    if( m_spellInfo->Id == SPELL_ID_AGGRO )
+    // by spell id
+    switch(m_spellInfo->Id)
     {
-        if( !m_caster || m_caster->GetTypeId() != TYPEID_UNIT || !m_caster->getVictim() )
-            return;
-
-        float radius = sWorld.getConfig(CONFIG_CREATURE_FAMILY_ASSISTEMCE_RADIUS);
-        if(radius > 0)
+        // Keep in top, because core use it for npc aggro other npc
+        case SPELL_ID_AGGRO:
         {
-            std::list<Creature*> assistList;
-
-            {
-                CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-                Cell cell = RedZone::GetZone(p);
-                cell.data.Part.reserved = ALL_DISTRICT;
-                cell.SetNoCreate();
-
-                MaNGOS::AnyAssistCreatureInRangeCheck u_check(m_caster, m_caster->getVictim(), radius);
-                MaNGOS::CreatureListSearcher<MaNGOS::AnyAssistCreatureInRangeCheck> searcher(assistList, u_check);
-
-                TypeContainerVisitor<MaNGOS::CreatureListSearcher<MaNGOS::AnyAssistCreatureInRangeCheck>, GridTypeMapContainer >  grid_creature_searcher(searcher);
-
-                CellLock<GridReadGuard> cell_lock(cell, p);
-                cell_lock->Visit(cell_lock, grid_creature_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
-            }
-
-            for(std::list<Creature*>::iterator iter = assistList.begin(); iter != assistList.end(); ++iter)
-            {
-                ((Creature*)m_caster)->SetNoCallAssistence(true);
-                (*iter)->SetNoCallAssistence(true);
-                if((*iter)->AI())
-                    (*iter)->AI()->AttackStart(m_caster->getVictim());
-            }
-        }
-    }
-    else if(!m_spellInfo->Reagent[0])
-    {
-        // paladin's holy light / flash of light
-        if( m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN )
-        {
-            switch(m_spellInfo->SpellFamilyFlags)
-            {
-                // Holy Light & Flash of Light
-                case 0x80000000:
-                case 0x40000000:
-                {
-                    EffectHeal(i);
-                    break;
-                }
-                // Judgement
-                case 0x800000:
-                {
-                    if(!unitTarget || !unitTarget->isAlive())
-                        return;
-                    uint32 spellId2 = 0;
-
-                    // all seals have aura dummy
-                    Unit::AuraList const& m_dummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
-
-                    for(Unit::AuraList::const_iterator itr = m_dummyAuras.begin(); itr != m_dummyAuras.end(); ++itr)
-                    {
-                        SpellEntry const *spellInfo = (*itr)->GetSpellProto();
-
-                        // search seal (all seals have judgement's aura dummy spell id in 2 effect
-                        if ( !spellInfo || !IsSealSpell((*itr)->GetId()) || (*itr)->GetEffIndex() != 2 )
-                            continue;
-
-                        spellId2 = (*itr)->GetBasePoints()+1;
-
-                        if(spellId2 <= 1)
-                            continue;
-
-                        // found, remove seal
-                        m_caster->RemoveAurasDueToSpell((*itr)->GetId());
-                        break;
-                    }
-
-                    m_caster->CastSpell(unitTarget,spellId2,true);
-                    break;
-                }
-            }
-        }
-    }
-    else
-    {
-        uint32 itemtype;
-        switch(m_spellInfo->Id)
-        {
-            case  6201: itemtype =  5512; break;            //primary healstone
-            case  6202: itemtype =  5511; break;            //inferior healstone
-            case  5699: itemtype =  5509; break;            //healstone
-            case 11729: itemtype =  5510; break;            //strong healstone
-            case 11730: itemtype =  9421; break;            //super healstone
-            case 27230: itemtype = 22103; break;            //Master Healthstone
-            default:
+            if( !m_caster || m_caster->GetTypeId() != TYPEID_UNIT || !m_caster->getVictim() )
                 return;
+
+            float radius = sWorld.getConfig(CONFIG_CREATURE_FAMILY_ASSISTEMCE_RADIUS);
+            if(radius > 0)
+            {
+                std::list<Creature*> assistList;
+
+                {
+                    CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+                    Cell cell = RedZone::GetZone(p);
+                    cell.data.Part.reserved = ALL_DISTRICT;
+                    cell.SetNoCreate();
+
+                    MaNGOS::AnyAssistCreatureInRangeCheck u_check(m_caster, m_caster->getVictim(), radius);
+                    MaNGOS::CreatureListSearcher<MaNGOS::AnyAssistCreatureInRangeCheck> searcher(assistList, u_check);
+
+                    TypeContainerVisitor<MaNGOS::CreatureListSearcher<MaNGOS::AnyAssistCreatureInRangeCheck>, GridTypeMapContainer >  grid_creature_searcher(searcher);
+
+                    CellLock<GridReadGuard> cell_lock(cell, p);
+                    cell_lock->Visit(cell_lock, grid_creature_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+                }
+
+                for(std::list<Creature*>::iterator iter = assistList.begin(); iter != assistList.end(); ++iter)
+                {
+                    ((Creature*)m_caster)->SetNoCallAssistence(true);
+                    (*iter)->SetNoCallAssistence(true);
+                    if((*iter)->AI())
+                        (*iter)->AI()->AttackStart(m_caster->getVictim());
+                }
+            }
+
+            return;
         }
-        DoCreateItem( i, itemtype );
+
+        // healstone creating spells
+        case  6201:
+        case  6202:
+        case  5699:
+        case 11729:
+        case 11730:
+        case 27230:
+        {
+            uint32 itemtype;
+            switch(m_spellInfo->Id)
+            {
+                case  6201: itemtype =  5512; break;    //primary healstone
+                case  6202: itemtype =  5511; break;    //inferior healstone
+                case  5699: itemtype =  5509; break;    //healstone
+                case 11729: itemtype =  5510; break;    //strong healstone
+                case 11730: itemtype =  9421; break;    //super healstone
+                case 27230: itemtype = 22103; break;    //Master Healthstone
+                default:
+                    return;
+            }
+            DoCreateItem( i, itemtype );
+            return;
+        }
+
+        // Orb teleport spells
+        case 35376:
+        case 35727:
+        {
+            uint32 spellid;
+            switch(m_spellInfo->Id)
+            {
+                case 35376: spellid =  25649; break;
+                case 35727: spellid =  35730; break;
+                // FIXME: exist 6 more similar scripting teleport
+                default:
+                    return;
+            }
+            unitTarget->CastSpell(unitTarget,35730,false);
+            return;
+        }
     }
 
+    // paladin's holy light / flash of light
+    if( m_spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN )
+    {
+        switch(m_spellInfo->SpellFamilyFlags)
+        {
+            // Holy Light & Flash of Light
+            case 0x80000000:
+            case 0x40000000:
+            {
+                EffectHeal(i);
+                return;
+            }
+            // Judgement
+            case 0x800000:
+            {
+                if(!unitTarget || !unitTarget->isAlive())
+                    return;
+                uint32 spellId2 = 0;
+
+                // all seals have aura dummy
+                Unit::AuraList const& m_dummyAuras = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+
+                for(Unit::AuraList::const_iterator itr = m_dummyAuras.begin(); itr != m_dummyAuras.end(); ++itr)
+                {
+                    SpellEntry const *spellInfo = (*itr)->GetSpellProto();
+
+                    // search seal (all seals have judgement's aura dummy spell id in 2 effect
+                    if ( !spellInfo || !IsSealSpell((*itr)->GetId()) || (*itr)->GetEffIndex() != 2 )
+                        continue;
+
+                    spellId2 = (*itr)->GetBasePoints()+1;
+
+                    if(spellId2 <= 1)
+                        continue;
+
+                    // found, remove seal
+                    m_caster->RemoveAurasDueToSpell((*itr)->GetId());
+                    break;
+                }
+
+                m_caster->CastSpell(unitTarget,spellId2,true);
+                return;
+            }
+        }
+    }
+
+    // normal DB scripted effect
     if(!unitTarget)
         return;
 

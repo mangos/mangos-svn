@@ -201,41 +201,6 @@ class ObjectMgr
         
         typedef HM_NAMESPACE::hash_map<uint32, PetCreateSpellEntry> PetCreateSpellMap;
 
-        template <class T>
-            typename HM_NAMESPACE::hash_map<uint32, T*>::iterator
-            Begin() { return _GetContainer<T>().begin(); }
-        template <class T>
-            typename HM_NAMESPACE::hash_map<uint32, T*>::iterator
-            End() { return _GetContainer<T>().end(); }
-        template <class T>
-            T* GetObject(const uint64 &guid)
-        {
-            const HM_NAMESPACE::hash_map<uint32, T*> &container = _GetContainer<T>();
-            typename HM_NAMESPACE::hash_map<uint32, T*>::const_iterator itr =
-                container.find(GUID_LOPART(guid));
-            if(itr == container.end() || itr->second->GetGUID() != guid)
-                return NULL;
-            else
-                return itr->second;
-        }
-        template <class T>
-            void AddObject(T *obj)
-        {
-            ASSERT(obj && obj->GetTypeId() == _GetTypeId<T>());
-            ASSERT(_GetContainer<T>().find(obj->GetGUIDLow()) == _GetContainer<T>().end());
-            _GetContainer<T>()[obj->GetGUIDLow()] = obj;
-        }
-        template <class T>
-            bool RemoveObject(T *obj)
-        {
-            HM_NAMESPACE::hash_map<uint32, T*> &container = _GetContainer<T>();
-            typename HM_NAMESPACE::hash_map<uint32, T*>::iterator i = container.find(obj->GetGUIDLow());
-            if(i == container.end())
-                return false;
-            container.erase(i);
-            return true;
-        }
-
         Player* GetPlayer(const char* name) const { return ObjectAccessor::Instance().FindPlayerByName(name);}
         Player* GetPlayer(uint64 guid) const { return ObjectAccessor::Instance().FindPlayer(guid); }
 
@@ -643,9 +608,6 @@ class ObjectMgr
         uint32 m_hiCorpseGuid;
 
         uint32 m_hiPetNumber;
-
-        template<class T> HM_NAMESPACE::hash_map<uint32,T*>& _GetContainer();
-        template<class T> TYPEID _GetTypeId() const;
 
         typedef HM_NAMESPACE::hash_map<uint32, GossipText*> GossipTextMap;
         typedef HM_NAMESPACE::hash_map<uint32, uint32> QuestAreaTriggerMap;
