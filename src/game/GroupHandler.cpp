@@ -157,11 +157,21 @@ void WorldSession::HandleGroupAcceptOpcode( WorldPacket & recv_data )
     Group *group = GetPlayer()->GetGroupInvite();
     if (!group) return;
 
+    // remove in from ivites in any case
+    group->RemoveInvite(GetPlayer());
+
+
     /** error handling **/
     /********************/
 
+    // not have place
+    if(group->IsFull())
+    {
+        SendPartyResult(PARTY_OP_INVITE, "", PARTY_RESULT_PARTY_FULL);
+        return;
+    }
+
     // everything's fine, do it
-    group->RemoveInvite(GetPlayer());
     if(!group->AddMember(GetPlayer()->GetGUID(), GetPlayer()->GetName()))
         return;
 

@@ -361,9 +361,6 @@ m_periodicTimer(0), m_PeriodicEventId(0), m_removeOnDeath(false),m_fearMoveAngle
 
 Aura::~Aura()
 {
-    // free custom m_spellProto
-    if(m_spellProto != sSpellStore.LookupEntry(m_spellProto->Id))
-        delete m_spellProto;
 }
 
 AreaAura::AreaAura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target,

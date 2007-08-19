@@ -416,6 +416,7 @@ pkgdata_DATA = \
 	4320_spell_affect.sql \
 	4331_spell_chain.sql \
 	4331_spell_proc_event.sql \
+	4341_game_event.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -812,4 +813,5 @@ EXTRA_DIST = \
 	4320_spell_affect.sql \
 	4331_spell_chain.sql \
 	4331_spell_proc_event.sql \
+	4341_game_event.sql \
 	README
