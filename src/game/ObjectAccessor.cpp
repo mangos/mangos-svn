@@ -368,7 +368,7 @@ ObjectAccessor::_buildUpdateObject(Object *obj, UpdateDataMapType &update_player
         pl = item->GetOwner();
         build_for_all = false;
     }
-    else if( obj->isType(TYPE_CONTAINER) )
+    else if( obj->isType(TYPE_CONTAINER) )                  // not called? all container are items
     {
         Container *c = static_cast<Container *>(obj);
         assert( c != NULL );

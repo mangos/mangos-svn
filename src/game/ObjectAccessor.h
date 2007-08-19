@@ -90,12 +90,12 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         typedef HM_NAMESPACE::hash_map<uint64, Corpse* >      Player2CorpsesMapType;
         typedef HM_NAMESPACE::hash_map<Player*, UpdateData>::value_type UpdateDataValueType;
 
-        template<class T> T* GetObjectInWorld(uint64 guid, T* /*fake*/)
+        template<class T> static T* GetObjectInWorld(uint64 guid, T* /*fake*/)
         {
             return HashMapHolder<T>::Find(guid);
         }
         
-        template<class T> T* GetObjectInWorld(uint32 mapid, float x, float y, uint64 guid, T* /*fake*/)
+        template<class T> static T* GetObjectInWorld(uint32 mapid, float x, float y, uint64 guid, T* /*fake*/)
         {
             T* obj = HashMapHolder<T>::Find(guid);
             if(!obj || obj->GetMapId() != mapid) return NULL;

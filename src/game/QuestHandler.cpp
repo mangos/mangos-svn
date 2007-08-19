@@ -139,6 +139,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
                     Script->QuestAccept(_player, ((Creature*)pObject), qInfo );
                     break;
                 case TYPEID_ITEM:
+                case TYPEID_CONTAINER:
                 {
                     Script->ItemQuestAccept(_player, ((Item*)pObject), qInfo );
 
