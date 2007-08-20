@@ -290,7 +290,7 @@ Aura::Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, U
 m_procCharges(0), m_absorbDmg(0), m_spellmod(NULL), m_spellId(spellproto->Id), m_effIndex(eff), m_caster_guid(0), m_target(target),
 m_timeCla(1000), m_castItemGuid(castItem?castItem->GetGUID():0), m_auraSlot(MAX_AURAS),
 m_positive(false), m_permanent(false), m_isPeriodic(false), m_isTrigger(false), m_isAreaAura(false), m_isPersistent(false),
-m_periodicTimer(0), m_PeriodicEventId(0), m_removeOnDeath(false),m_fearMoveAngle(0)
+m_periodicTimer(0), m_PeriodicEventId(0), m_updated(false), m_removeOnDeath(false),m_fearMoveAngle(0)
 {
     assert(target);
 
@@ -941,7 +941,10 @@ void Aura::TriggerSpell()
     {
         case 29528: trigger_spell_id = 28713; break;        // Inoculation
         case 29917: trigger_spell_id = 29916; break;        // Feed Captured Animal
-        case 1515:                                          // Tame Beast
+        case   768:                                         // Cat Form (passive)
+            // trigger_spell_id not set and unknown effect triggered in this case, ignoring for while
+            return;
+        case  1515:                                         // Tame Beast
         {
             // TODO: currently this used as hack for Tame beast triggered spell, 
             // BUT this can be correct way to provide target for ALL this function calls 
