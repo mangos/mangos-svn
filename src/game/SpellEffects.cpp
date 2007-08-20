@@ -483,6 +483,8 @@ void Spell::EffectDummy(uint32 i)
             if(m_caster->GetTypeId() == TYPEID_PLAYER)
                 m_caster->SendHealSpellOnPlayerPet(m_caster, m_spellInfo->Id, mana, POWER_MANA,false);
         }
+        else
+            SendCastResult(SPELL_FAILED_FIZZLE);
         return;
     }
 
@@ -2241,7 +2243,25 @@ void Spell::EffectSummonPet(uint32 i)
 
     // petentry==0 for hunter "call pet" (current pet summoned if any)
     if(NewSummon->LoadPetFromDB(m_caster,petentry))
+    {
+        if(NewSummon->getPetType()==SUMMON_PET)
+        {
+            //Remove Demonic Sacrifice auras (known pet)
+            Unit::AuraList const& auraClassScripts = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+            for(Unit::AuraList::const_iterator itr = auraClassScripts.begin();itr!=auraClassScripts.end();)
+            {
+                if((*itr)->GetModifier()->m_miscvalue==2228)
+                {
+                    m_caster->RemoveAurasDueToSpell((*itr)->GetId());
+                    itr = auraClassScripts.begin();
+                }
+                else
+                    ++itr;
+            }
+        }
+
         return;
+    }
 
     // not error in case fail hunter call pet
     if(!petentry)
@@ -2292,9 +2312,22 @@ void Spell::EffectSummonPet(uint32 i)
         NewSummon->InitStatsForLevel( petlevel);
         NewSummon->InitPetCreateSpells();
 
-        // generate new name for summon pet
         if(NewSummon->getPetType()==SUMMON_PET)
         {
+            //Remove Demonic Sacrifice auras (new pet)
+            Unit::AuraList const& auraClassScripts = m_caster->GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+            for(Unit::AuraList::const_iterator itr = auraClassScripts.begin();itr!=auraClassScripts.end();)
+            {
+                if((*itr)->GetModifier()->m_miscvalue==2228)
+                {
+                    m_caster->RemoveAurasDueToSpell((*itr)->GetId());
+                    itr = auraClassScripts.begin();
+                }
+                else
+                    ++itr;
+            }
+
+            // generate new name for summon pet
             std::string new_name=objmgr.GeneratePetName(petentry);
             if(new_name!="")
                 NewSummon->SetName(new_name);
@@ -3248,18 +3281,7 @@ void Spell::EffectQuestComplete(uint32 i)
 
     uint32 quest_id = m_spellInfo->EffectMiscValue[i];
 
-    if(_player->CanCompleteQuest( quest_id ) )
-    {
-        _player->CompleteQuest( quest_id );
-        _player->SetQuestSpellComplete( quest_id );
-    }
-    else
-        return;
-
-    if(_player->GetQuestRewardStatus( quest_id ))
-        return;
-
-    _player->PlayerTalkClass->SendQuestGiverOfferReward( quest_id, _player->GetGUID(), true, NULL, 0 );
+   _player->AreaExplored(quest_id);
 }
 
 void Spell::EffectSelfResurrect(uint32 i)
