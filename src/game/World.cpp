@@ -116,6 +116,8 @@ World::~World()
     m_weathers.clear();
 
     VMAP::VMapFactory::clear();
+
+    if(m_resultQueue) delete m_resultQueue;
 }
 
 /// Find a player in a specified zone
