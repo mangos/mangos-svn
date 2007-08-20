@@ -264,8 +264,8 @@ enum QuestUpdateState
 struct QuestStatusData
 {
     QuestStatusData()
-        : m_quest(NULL), m_status(QUEST_STATUS_NONE),m_rewarded(false),m_explored(false),
-        m_spellComplete(false), m_timer(0), uState(QUEST_NEW)
+        : m_quest(NULL), m_status(QUEST_STATUS_NONE),m_rewarded(false),
+        m_explored(false), m_timer(0), uState(QUEST_NEW)
     {
         memset(m_itemcount,    0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
         memset(m_creatureOrGOcount, 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
@@ -276,7 +276,6 @@ struct QuestStatusData
     QuestStatus m_status;
     bool m_rewarded;
     bool m_explored;
-    bool m_spellComplete;                                   // used to bypass anti-cheat checking in case Spell::EffectQuestComplete when player guid send instead creature/GO
     uint32 m_timer;
     QuestUpdateState uState;
 

@@ -1249,7 +1249,12 @@ void Player::_LoadFriendList(QueryResult *result)
     do
     {
         Field *fields  = result->Fetch();
+
         m_friendlist.insert(fields[0].GetUInt64());
+
+        // prevent list (client-side) overflow
+        if(m_ignorelist.size() >= 255)
+            break;
     }
     while( result->NextRow() );
     delete result;
@@ -10491,7 +10496,6 @@ void Player::IncompleteQuest( uint32 quest_id )
     if( quest_id )
     {
         SetQuestStatus( quest_id, QUEST_STATUS_INCOMPLETE );
-        SetQuestSpellComplete( quest_id, false );
 
         uint16 log_slot = GetQuestSlot( quest_id );
         if( log_slot )
@@ -10574,10 +10578,7 @@ void Player::RewardQuest( Quest *pQuest, uint32 reward, Object* questGiver )
         if ( !pQuest->IsRepeatable() )
             SetQuestStatus(quest_id, QUEST_STATUS_COMPLETE);
         else
-        {
             SetQuestStatus(quest_id, QUEST_STATUS_NONE);
-            SetQuestSpellComplete(quest_id, false);
-        }
 
         mQuestStatus[quest_id].m_rewarded = true;
         SendQuestReward( pQuest, XP, questGiver );
@@ -11035,18 +11036,6 @@ void Player::SetQuestStatus( uint32 quest_id, QuestStatus status )
         if (mQuestStatus[quest_id].uState != QUEST_NEW) mQuestStatus[quest_id].uState = QUEST_CHANGED;
     }
 }
-
-void Player::SetQuestSpellComplete(uint32 quest_id, bool state )
-{
-    mQuestStatus[quest_id].m_spellComplete = state;
-}
-
-bool Player::IsQuestSpellComplete(uint32 quest_id) const
-{
-    QuestStatusMap::const_iterator iter = mQuestStatus.find(quest_id);
-    return iter != mQuestStatus.end() ? iter->second.m_spellComplete : false;
-}
-
 
 void Player::AdjustQuestReqItemCount( uint32 quest_id )
 {

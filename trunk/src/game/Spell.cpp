@@ -2351,10 +2351,10 @@ uint8 Spell::CanCast()
         }
     }
 
-    if((m_spellInfo->AttributesEx3 & 0x800) != 0) // need check...
+    if((m_spellInfo->AttributesEx3 & 0x800) != 0)
         return SPELL_FAILED_ONLY_BATTLEGROUNDS;
 
-    if(m_spellInfo->AreaId && m_spellInfo->AreaId != m_caster->GetZoneId())
+    if(m_spellInfo->AreaId && m_spellInfo->AreaId != m_caster->GetAreaId())
         return SPELL_FAILED_REQUIRES_AREA;
 
     // not let players cast non-triggered spells at mount (and let do it to creatures)
