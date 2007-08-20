@@ -61,6 +61,7 @@ void SqlResultQueue::Update()
     {
         MaNGOS::IQueryCallback * callback = next();
         callback->Execute();
+        delete callback;
     }
 }
 
