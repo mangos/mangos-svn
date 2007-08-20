@@ -11498,7 +11498,7 @@ bool Player::MinimalLoadFromDB( QueryResult *result, uint32 guid )
     if(!result)
     {
         //                                             0      1      2            3            4            5     6           7           8
-        QueryResult *result = sDatabase.PQuery("SELECT `data`,`name`,`position_x`,`position_y`,`position_z`,`map`,`totaltime`,`leveltime`,`rename` FROM `character` WHERE `guid` = '%u'",guid);
+        result = sDatabase.PQuery("SELECT `data`,`name`,`position_x`,`position_y`,`position_z`,`map`,`totaltime`,`leveltime`,`rename` FROM `character` WHERE `guid` = '%u'",guid);
         if(!result) return false;
     }
     else delete_result = false;
