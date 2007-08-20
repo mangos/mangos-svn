@@ -1039,7 +1039,8 @@ void Player::BuildEnumData( QueryResult * result, WorldPacket * p_data )
     *p_data << uint8(bytes);
 
     *p_data << uint8(getLevel());                           // player level
-    uint32 zoneId = MapManager::Instance().GetMap(GetMapId(), this)->GetZoneId(GetPositionX(),GetPositionY());
+    // do not use GetMap! it will spawn a new instance since the bound instances are not loaded
+    uint32 zoneId = MapManager::Instance().GetZoneId(GetMapId(), GetPositionX(),GetPositionY());
 
     *p_data << zoneId;
     *p_data << GetMapId();

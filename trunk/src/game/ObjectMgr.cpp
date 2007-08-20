@@ -97,6 +97,9 @@ ObjectMgr::~ObjectMgr()
         delete (*itr);
     for (GuildSet::iterator itr = mGuildSet.begin(); itr != mGuildSet.end(); ++itr)
         delete (*itr);
+
+    for(ItemMap::iterator itr = mAitems.begin(); itr != mAitems.end(); ++itr)
+        delete itr->second;
 }
 
 Group * ObjectMgr::GetGroupByLeader(const uint64 &guid) const
