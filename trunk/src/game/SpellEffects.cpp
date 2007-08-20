@@ -222,11 +222,31 @@ void Spell::EffectResurrectNew(uint32 i)
 
 void Spell::EffectInstaKill(uint32 i)
 {
-    if( unitTarget && unitTarget->isAlive() )
+    if( !unitTarget || !unitTarget->isAlive() )
+        return;
+
+    // Demonic Sacrifice
+    if(m_spellInfo->Id==18788 && unitTarget->GetTypeId()==TYPEID_UNIT)
     {
-        uint32 health = unitTarget->GetHealth();
-        m_caster->DealDamage(unitTarget, health, NULL, DIRECT_DAMAGE, 0, NULL, 0, false);
+        uint32 entry = unitTarget->GetEntry();
+        uint32 spellID;
+        switch(entry)
+        {    
+            case   416: spellID=18789; break;               //imp
+            case   417: spellID=18792; break;               //fellhunter
+            case  1860: spellID=18790; break;               //void
+            case  1863: spellID=18791; break;               //succubus
+            case 17252: spellID=35701; break;               //fellguard
+            default:
+                sLog.outError("EffectInstaKill: Unhandled creature entry (%u) case.",entry);
+                return;
+        }
+
+        m_caster->CastSpell(m_caster,spellID,true);
     }
+
+    uint32 health = unitTarget->GetHealth();
+    m_caster->DealDamage(unitTarget, health, NULL, DIRECT_DAMAGE, 0, NULL, 0, false);
 }
 
 void Spell::EffectSchoolDMG(uint32 i)
@@ -433,14 +453,35 @@ void Spell::EffectDummy(uint32 i)
         break;
     }
 
-    //Life Tap
-    if(m_spellInfo->SpellVisual == 1225 && m_spellInfo->SpellIconID == 208)
-    {
-        int32 mod = m_currentBasePoints[0]+1;
-        if(int32(m_caster->GetHealth()) > mod)
+
+    //Life Tap (only it have this with dummy effect)
+    if(m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && m_spellInfo->SpellFamilyFlags == 0x40000)
+    { 
+        float cost = m_currentBasePoints[0]+1;
+
+        if (m_caster->GetTypeId() == TYPEID_PLAYER)
+            ((Player *)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, cost);
+
+        uint32 dmg = m_caster->SpellDamageBonus(m_caster, m_spellInfo,uint32(cost > 0 ? cost : 0), SPELL_DIRECT_DAMAGE);
+        
+        if(int32(m_caster->GetHealth()) > dmg)
         {
-            m_caster->ModifyHealth(-mod);
-            m_caster->ModifyPower(POWER_MANA,mod);
+            m_caster->SendSpellNonMeleeDamageLog(m_caster, m_spellInfo->Id, dmg, m_spellInfo->School, 0, 0, false, 0, false);
+            m_caster->DealDamage(m_caster,dmg,NULL,DIRECT_DAMAGE,m_spellInfo->School,m_spellInfo,PROC_FLAG_NONE,false);
+
+            int32 mana = dmg;
+
+            Unit::AuraList const& auraDummy = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+            for(Unit::AuraList::const_iterator itr = auraDummy.begin(); itr != auraDummy.end(); ++itr)
+            {
+                // only Imp. Life Tap have this in combination with dummy aura
+                if((*itr)->GetSpellProto()->SpellFamilyName==SPELLFAMILY_WARLOCK && (*itr)->GetSpellProto()->SpellIconID == 208)
+                    mana = ((*itr)->GetModifier()->m_amount + 100)* mana / 100;
+            }
+
+            m_caster->ModifyPower(POWER_MANA,mana);
+            if(m_caster->GetTypeId() == TYPEID_PLAYER)
+                m_caster->SendHealSpellOnPlayerPet(m_caster, m_spellInfo->Id, mana, POWER_MANA,false);
         }
         return;
     }
