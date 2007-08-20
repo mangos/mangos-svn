@@ -2672,11 +2672,11 @@ void Spell::EffectScriptEffect(uint32 i)
             {
                 case 35376: spellid =  25649; break;
                 case 35727: spellid =  35730; break;
-                // FIXME: exist 6 more similar scripting teleport
+                // FIXME: exist 6 more similar scripting teleports
                 default:
                     return;
             }
-            unitTarget->CastSpell(unitTarget,35730,false);
+            unitTarget->CastSpell(unitTarget,spellid,false);
             return;
         }
     }
