@@ -141,12 +141,12 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
     if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
         return;
 
+    //Check player targets and remove if in GM mode or GM invisibility (for not self casting case)
+    if( target->GetTypeId()==TYPEID_PLAYER && target != i_check && (((Player*)target)->isGameMaster() || ((Player*)target)->GetVisibility()==VISIBILITY_OFF) )
+        return;
+
     if( i_check->GetTypeId()==TYPEID_PLAYER )
     {
-        //Check player targets and remove if in GM mode or GM invisibility (for not self casting case)
-        if( target != i_check && (((Player*)target)->isGameMaster() || ((Player*)target)->GetVisibility()==VISIBILITY_OFF) )
-            return;
-
         if (i_check->IsFriendlyTo( target ))
             return;
     }
