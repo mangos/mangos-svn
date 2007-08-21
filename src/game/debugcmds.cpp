@@ -31,7 +31,7 @@
 #include "GossipDef.h"
 #include "Language.h"
 
-bool ChatHandler::HandleDebugInArcCommand(const char* args)
+bool ChatHandler::HandleDebugInArcCommand(const char* /*args*/)
 {
     Object *obj = getSelectedUnit();
 
@@ -125,7 +125,7 @@ bool ChatHandler::HandleGetItemState(const char* args)
 
     std::string state_str = args;
 
-    ItemUpdateState state;
+    ItemUpdateState state = ITEM_UNCHANGED;
     bool list_queue = false, check_all = false;
     if (state_str == "unchanged") state = ITEM_UNCHANGED;
     else if (state_str == "changed") state = ITEM_CHANGED;
@@ -158,9 +158,9 @@ bool ChatHandler::HandleGetItemState(const char* args)
             {
                 Bag *bag = (Bag*)item;
                 const ItemPrototype *proto = bag->GetProto();
-                for (uint8 i = 0; i < proto->ContainerSlots; i++)
+                for (uint8 j = 0; j < proto->ContainerSlots; ++j)
                 {
-                    Item* item = bag->GetItemByPos(i);
+                    Item* item = bag->GetItemByPos(j);
                     if (item && item->GetState() == state)
                         PSendSysMessage("bag: 255 slot: %d guid: %d owner: %d", item->GetSlot(), item->GetGUIDLow(), GUID_LOPART(item->GetOwnerGUID()));
                 }
@@ -177,7 +177,7 @@ bool ChatHandler::HandleGetItemState(const char* args)
             if(!item) continue;
 
             Bag *container = item->GetContainer();
-            uint8 bag_slot = container ? container->GetSlot() : INVENTORY_SLOT_BAG_0;
+            uint8 bag_slot = container ? container->GetSlot() : uint8(INVENTORY_SLOT_BAG_0);
 
             std::string st;
             switch(item->GetState())
@@ -218,8 +218,7 @@ bool ChatHandler::HandleGetItemState(const char* args)
                 error = true; continue;
             }
 
-            Bag *container = item->GetContainer();
-            if (container)
+            if (Bag *container = item->GetContainer())
             {
                 PSendSysMessage("item at slot: %d guid: %d has a container (slot: %d, guid: %d) but shouldnt!", item->GetSlot(), item->GetGUIDLow(), container->GetSlot(), container->GetGUIDLow());
                 error = true; continue;
@@ -256,14 +255,14 @@ bool ChatHandler::HandleGetItemState(const char* args)
             {
                 Bag *bag = (Bag*)item;
                 const ItemPrototype *proto = bag->GetProto();
-                for (uint8 i = 0; i < proto->ContainerSlots; i++)
+                for (uint8 j = 0; j < proto->ContainerSlots; ++j)
                 {
-                    Item* item = bag->GetItemByPos(i);
+                    Item* item = bag->GetItemByPos(j);
                     if (!item) continue;
 
-                    if (item->GetSlot() != i)
+                    if (item->GetSlot() != j)
                     {
-                        PSendSysMessage("the item in bag %d slot %d, guid %d has an incorrect slot value: %d", bag->GetSlot(), i, item->GetGUIDLow(), item->GetSlot());
+                        PSendSysMessage("the item in bag %d slot %d, guid %d has an incorrect slot value: %d", bag->GetSlot(), j, item->GetGUIDLow(), item->GetSlot());
                         error = true; continue;
                     }
 

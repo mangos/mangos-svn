@@ -39,7 +39,7 @@ class MANGOS_DLL_DECL ObjectGridLoader
         void Load(GridType &grid);
         void Visit(GameObjectMapType &m);
         void Visit(CreatureMapType &m);
-        void Visit(CorpseMapType &m) {}
+        void Visit(CorpseMapType &) {}
 
         void Visit(DynamicObjectMapType&) { }
 

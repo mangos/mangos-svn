@@ -389,7 +389,7 @@ void ObjectMgr::LoadCreatureTemplates()
     sCreatureStorage.Load();
 
     sLog.outString( ">> Loaded %u creature definitions", sCreatureStorage.RecordCount );
-    sLog.outString( "" );
+    sLog.outString();
 }
 
 void ObjectMgr::LoadCreatureAddons()
@@ -397,7 +397,7 @@ void ObjectMgr::LoadCreatureAddons()
     sCreatureDataAddonStorage.Load();
 
     sLog.outString( ">> Loaded %u creature addons", sCreatureDataAddonStorage.RecordCount );
-    sLog.outString( "" );
+    sLog.outString();
 }
 
 void ObjectMgr::LoadCreatures()
@@ -460,7 +460,7 @@ void ObjectMgr::LoadCreatures()
 
     delete result;
     
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Loaded %u creatures", mCreatureDataMap.size() );
 }
 
@@ -498,7 +498,7 @@ void ObjectMgr::LoadGameobjects()
 
         bar.step();
 
-        sLog.outString("");
+        sLog.outString();
         sLog.outErrorDb(">> Loaded 0 gameobjects. DB table `gameobject` is empty.");
         return;
     }
@@ -538,7 +538,7 @@ void ObjectMgr::LoadGameobjects()
 
     delete result;
 
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Loaded %u gameobjects", mGameObjectDataMap.size());
 }
 
@@ -575,7 +575,7 @@ void ObjectMgr::LoadCreatureRespawnTimes()
 
         bar.step();
 
-        sLog.outString("");
+        sLog.outString();
         sLog.outString(">> Loaded 0 creature respawn times.");
         return;
     }
@@ -599,7 +599,7 @@ void ObjectMgr::LoadCreatureRespawnTimes()
     delete result;
 
     sLog.outString( ">> Loaded %u creature respawn times", mCreatureRespawnTimes.size() );
-    sLog.outString( "" );
+    sLog.outString();
 }
 
 void ObjectMgr::LoadGameobjectRespawnTimes()
@@ -617,7 +617,7 @@ void ObjectMgr::LoadGameobjectRespawnTimes()
 
         bar.step();
 
-        sLog.outString("");
+        sLog.outString();
         sLog.outString(">> Loaded 0 gameobject respawn times.");
         return;
     }
@@ -641,7 +641,7 @@ void ObjectMgr::LoadGameobjectRespawnTimes()
     delete result;
 
     sLog.outString( ">> Loaded %u gameobject respawn times", mGORespawnTimes.size() );
-    sLog.outString( "" );
+    sLog.outString();
 }
 
 void ObjectMgr::LoadSpellThreats()
@@ -649,7 +649,7 @@ void ObjectMgr::LoadSpellThreats()
     sSpellThreatStore.Load();
 
     sLog.outString( ">> Loaded %u aggro generating spells", sSpellThreatStore.RecordCount );
-    sLog.outString( "" );
+    sLog.outString();
 }
 
 // name must be checked to correctness (if received) before call this function
@@ -785,16 +785,16 @@ void ObjectMgr::LoadAuctions()
     } while (result->NextRow());
     delete result;
 
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Loaded %u auctions", AuctionCount );
-    sLog.outString( "" );
+    sLog.outString();
 }
 
 void ObjectMgr::LoadItemPrototypes()
 {
     sItemStorage.Load ();
     sLog.outString( ">> Loaded %u item prototypes", sItemStorage.RecordCount );
-    sLog.outString( "" );
+    sLog.outString();
 }
 
 void ObjectMgr::LoadAuctionItems()
@@ -840,7 +840,7 @@ void ObjectMgr::LoadAuctionItems()
 
     delete result;
 
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Loaded %u auction items", count );
 }
 
@@ -857,7 +857,7 @@ void ObjectMgr::LoadPetLevelInfo()
         {
             barGoLink bar( 1 );
 
-            sLog.outString( "" );
+            sLog.outString();
             sLog.outString( ">> Loaded %u level pet stats definitions", count );
             sLog.outErrorDb( "Error loading pet_levelstats table or table empty.");
             return;
@@ -915,7 +915,7 @@ void ObjectMgr::LoadPetLevelInfo()
 
         delete result;
 
-        sLog.outString( "" );
+        sLog.outString();
         sLog.outString( ">> Loaded %u level pet stats definitions", count );
     }
 
@@ -975,7 +975,7 @@ void ObjectMgr::LoadPlayerInfo()
         {
             barGoLink bar( 1 );
 
-            sLog.outString( "" );
+            sLog.outString();
             sLog.outString( ">> Loaded %u player create definitions", count );
             sLog.outErrorDb( "Error loading `playercreateinfo` table or table empty.");
             exit(1);
@@ -1023,7 +1023,7 @@ void ObjectMgr::LoadPlayerInfo()
 
         delete result;
 
-        sLog.outString( "" );
+        sLog.outString();
         sLog.outString( ">> Loaded %u player create definitions", count );
     }
 
@@ -1038,7 +1038,7 @@ void ObjectMgr::LoadPlayerInfo()
         {
             barGoLink bar( 1 );
 
-            sLog.outString( "" );
+            sLog.outString();
             sLog.outString( ">> Loaded %u player create items", count );
             sLog.outErrorDb( "Error loading `playercreateinfo_item` table or table empty.");
         }
@@ -1075,7 +1075,7 @@ void ObjectMgr::LoadPlayerInfo()
 
             delete result;
 
-            sLog.outString( "" );
+            sLog.outString();
             sLog.outString( ">> Loaded %u player create items", count );
         }
     }
@@ -1091,7 +1091,7 @@ void ObjectMgr::LoadPlayerInfo()
         {
             barGoLink bar( 1 );
 
-            sLog.outString( "" );
+            sLog.outString();
             sLog.outString( ">> Loaded %u player create spells", count );
             sLog.outErrorDb( "Error loading `playercreateinfo_spell` table or table empty.");
         }
@@ -1127,7 +1127,7 @@ void ObjectMgr::LoadPlayerInfo()
 
             delete result;
 
-            sLog.outString( "" );
+            sLog.outString();
             sLog.outString( ">> Loaded %u player create spells", count );
         }
     }
@@ -1143,7 +1143,7 @@ void ObjectMgr::LoadPlayerInfo()
         {
             barGoLink bar( 1 );
 
-            sLog.outString( "" );
+            sLog.outString();
             sLog.outString( ">> Loaded %u player create skills", count );
             sLog.outErrorDb( "Error loading `playercreateinfo_skill` table or table empty.");
         }
@@ -1182,7 +1182,7 @@ void ObjectMgr::LoadPlayerInfo()
 
             delete result;
 
-            sLog.outString( "" );
+            sLog.outString();
             sLog.outString( ">> Loaded %u player create skills", count );
         }
     }
@@ -1198,7 +1198,7 @@ void ObjectMgr::LoadPlayerInfo()
         {
             barGoLink bar( 1 );
 
-            sLog.outString( "" );
+            sLog.outString();
             sLog.outString( ">> Loaded %u player create actions", count );
             sLog.outErrorDb( "Error loading `playercreateinfo_action` table or table empty.");
         }
@@ -1237,7 +1237,7 @@ void ObjectMgr::LoadPlayerInfo()
 
             delete result;
 
-            sLog.outString( "" );
+            sLog.outString();
             sLog.outString( ">> Loaded %u player create actions", count );
         }
     }
@@ -1253,7 +1253,7 @@ void ObjectMgr::LoadPlayerInfo()
         {
             barGoLink bar( 1 );
 
-            sLog.outString( "" );
+            sLog.outString();
             sLog.outString( ">> Loaded %u level stats definitions", count );
             sLog.outErrorDb( "Error loading player_levelstats table or table empty.");
             exit(1);
@@ -1311,7 +1311,7 @@ void ObjectMgr::LoadPlayerInfo()
 
         delete result;
 
-        sLog.outString( "" );
+        sLog.outString();
         sLog.outString( ">> Loaded %u level stats definitions", count );
     }
 
@@ -1464,7 +1464,7 @@ void ObjectMgr::LoadGuilds()
 
         bar.step();
 
-        sLog.outString( "" );
+        sLog.outString();
         sLog.outString( ">> Loaded %u guild definitions", count );
         return;
     }
@@ -1491,7 +1491,7 @@ void ObjectMgr::LoadGuilds()
 
     delete result;
 
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Loaded %u guild definitions", count );
 }
 
@@ -1508,7 +1508,7 @@ void ObjectMgr::LoadArenaTeams()
 
         bar.step();
 
-        sLog.outString( "" );
+        sLog.outString();
         sLog.outString( ">> Loaded %u arenateam definitions", count );
         return;
     }
@@ -1533,7 +1533,7 @@ void ObjectMgr::LoadArenaTeams()
 
     delete result;
 
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Loaded %u arenateam definitions", count );
 }
 
@@ -1550,7 +1550,7 @@ void ObjectMgr::LoadGroups()
 
         bar.step();
 
-        sLog.outString( "" );
+        sLog.outString();
         sLog.outString( ">> Loaded %u group definitions", count );
         return;
     }
@@ -1575,7 +1575,7 @@ void ObjectMgr::LoadGroups()
 
     delete result;
 
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Loaded %u group definitions", count );
 }
 
@@ -1615,7 +1615,7 @@ void ObjectMgr::LoadQuests()
         barGoLink bar( 1 );
         bar.step();
 
-        sLog.outString( "" );
+        sLog.outString();
         sLog.outString( ">> Loaded 0 quests definitions" );
         sLog.outErrorDb("`quest_template` table is empty!");
         return;
@@ -1848,7 +1848,7 @@ void ObjectMgr::LoadQuests()
             mExclusiveQuestGroups.insert(std::pair<uint32, uint32>(qinfo->ExclusiveGroup, qinfo->GetQuestId()));
     }
 
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Loaded %u quests definitions", mQuestTemplates.size() );
 }
 
@@ -1862,7 +1862,7 @@ void ObjectMgr::LoadSpellChains()
         barGoLink bar( 1 );
         bar.step();
 
-        sLog.outString( "" );
+        sLog.outString();
         sLog.outString( ">> Loaded 0 spell chain records" );
         sLog.outErrorDb("`spell_chains` table is empty!");
         return;
@@ -1941,7 +1941,7 @@ void ObjectMgr::LoadSpellChains()
 
     delete result;
 
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Loaded %u spell chain records", count );
 }
 
@@ -1953,7 +1953,7 @@ void ObjectMgr::LoadSpellLearnSkills()
         barGoLink bar( 1 );
         bar.step();
 
-        sLog.outString( "" );
+        sLog.outString();
         sLog.outString( ">> Loaded 0 spell learn skills" );
         sLog.outErrorDb("`spell_learn_skill` table is empty!");
         return;
@@ -2033,7 +2033,7 @@ void ObjectMgr::LoadSpellLearnSkills()
         }
     }
 
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Loaded %u spell learn skills + found in DBC %u", count, dbc_count );
 }
 
@@ -2045,7 +2045,7 @@ void ObjectMgr::LoadSpellLearnSpells()
         barGoLink bar( 1 );
         bar.step();
 
-        sLog.outString( "" );
+        sLog.outString();
         sLog.outString( ">> Loaded 0 spell learn spells" );
         sLog.outErrorDb("`spell_learn_spell` table is empty!");
         return;
@@ -2133,7 +2133,7 @@ void ObjectMgr::LoadSpellLearnSpells()
         }
     }
 
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Loaded %u spell learn spells + found in DBC %u", count, dbc_count );
 }
 
@@ -2145,7 +2145,7 @@ void ObjectMgr::LoadPetCreateSpells()
         barGoLink bar( 1 );
         bar.step();
 
-        sLog.outString( "" );
+        sLog.outString();
         sLog.outString( ">> Loaded 0 pet create spells" );
         sLog.outErrorDb("`petcreateinfo_spell` table is empty!");
         return;
@@ -2189,7 +2189,7 @@ void ObjectMgr::LoadPetCreateSpells()
 
     delete result;
 
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Loaded %u pet create spells", count );
 }
 
@@ -2206,7 +2206,7 @@ void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
         barGoLink bar( 1 );
         bar.step();
 
-        sLog.outString( "" );
+        sLog.outString();
         sLog.outString( ">> Loaded %u script definitions", count );
         return;
     }
@@ -2242,7 +2242,7 @@ void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
 
     delete result;
 
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Loaded %u script definitions", count );
 }
 
@@ -2257,7 +2257,7 @@ void ObjectMgr::LoadItemTexts()
         barGoLink bar( 1 );
         bar.step();
 
-        sLog.outString( "" );
+        sLog.outString();
         sLog.outString( ">> Loaded %u item pages", count );
         return;
     }
@@ -2279,7 +2279,7 @@ void ObjectMgr::LoadItemTexts()
 
     delete result;
 
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Loaded %u item texts", count );
 }
 
@@ -2287,7 +2287,7 @@ void ObjectMgr::LoadPageTexts()
 {
     sPageTextStore.Load ();
     sLog.outString( ">> Loaded %u page texts", sPageTextStore.RecordCount );
-    sLog.outString( "" );
+    sLog.outString();
 }
 
 void ObjectMgr::AddGossipText(GossipText *pGText)
@@ -2319,7 +2319,7 @@ void ObjectMgr::LoadGossipText()
         barGoLink bar( 1 );
         bar.step();
 
-        sLog.outString( "" );
+        sLog.outString();
         sLog.outString( ">> Loaded %u npc texts", count );
         return;
     }
@@ -2363,7 +2363,7 @@ void ObjectMgr::LoadGossipText()
 
     } while( result->NextRow() );
 
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Loaded %u npc texts", count );
     delete result;
 }
@@ -2449,7 +2449,7 @@ void ObjectMgr::LoadQuestAreaTriggers()
         barGoLink bar( 1 );
         bar.step();
 
-        sLog.outString( "" );
+        sLog.outString();
         sLog.outString( ">> Loaded %u quest trigger points", count );
         return;
     }
@@ -2478,7 +2478,7 @@ void ObjectMgr::LoadQuestAreaTriggers()
 
     delete result;
 
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Loaded %u quest trigger points", count );
 }
 
@@ -2495,7 +2495,7 @@ void ObjectMgr::LoadTavernAreaTriggers()
         barGoLink bar( 1 );
         bar.step();
 
-        sLog.outString( "" );
+        sLog.outString();
         sLog.outString( ">> Loaded %u tavern triggers", count );
         return;
     }
@@ -2522,7 +2522,7 @@ void ObjectMgr::LoadTavernAreaTriggers()
 
     delete result;
 
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Loaded %u tavern triggers", count );
 }
 
@@ -2734,7 +2734,7 @@ void ObjectMgr::LoadAreaTriggers()
 
         bar.step();
 
-        sLog.outString( "" );
+        sLog.outString();
         sLog.outString( ">> Loaded %u area trigger definitions", count );
         return;
     }
@@ -2781,7 +2781,7 @@ void ObjectMgr::LoadAreaTriggers()
 
     delete result;
 
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Loaded %u area trigger definitions", count );
 }
 
@@ -2800,7 +2800,7 @@ void ObjectMgr::LoadSpellAffects()
 
         bar.step();
 
-        sLog.outString( "" );
+        sLog.outString();
         sLog.outString( ">> Loaded %u spell affect definitions", count );
         return;
     }
@@ -2839,7 +2839,7 @@ void ObjectMgr::LoadSpellAffects()
 
     delete result;
 
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Loaded %u spell affect definitions", count );
 }
 
@@ -2892,7 +2892,7 @@ void ObjectMgr::LoadSpellProcEvents()
 
         bar.step();
 
-        sLog.outString( "" );
+        sLog.outString();
         sLog.outString( ">> Loaded %u spell proc event conditions", count  );
         return;
     }
@@ -2930,7 +2930,7 @@ void ObjectMgr::LoadSpellProcEvents()
 
     delete result;
 
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Loaded %u spell proc event conditions", count  );
 }
 
@@ -3059,7 +3059,7 @@ void ObjectMgr::LoadGameobjectInfo()
     sGOStorage.Load();
 
     sLog.outString( ">> Loaded %u game object templates", sGOStorage.RecordCount );
-    sLog.outString( "" );
+    sLog.outString();
 }
 
 void ObjectMgr::LoadExplorationBaseXP()
@@ -3073,7 +3073,7 @@ void ObjectMgr::LoadExplorationBaseXP()
 
         bar.step();
 
-        sLog.outString( "" );
+        sLog.outString();
         sLog.outString( ">> Loaded %u BaseXP definitions", count );
         return;
     }
@@ -3094,7 +3094,7 @@ void ObjectMgr::LoadExplorationBaseXP()
 
     delete result;
 
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Loaded %u BaseXP definitions", count );
 }
 
@@ -3114,7 +3114,7 @@ void ObjectMgr::LoadPetNames()
 
         bar.step();
 
-        sLog.outString( "" );
+        sLog.outString();
         sLog.outString( ">> Loaded %u pet name parts", count );
         return;
     }
@@ -3138,7 +3138,7 @@ void ObjectMgr::LoadPetNames()
     while (result->NextRow());
     delete result;
 
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Loaded %u pet name parts", count );
 }
 
@@ -3155,7 +3155,7 @@ void ObjectMgr::LoadPetNumber()
     barGoLink bar( 1 );
     bar.step();
 
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Loaded the max pet number: %d", m_hiPetNumber-1);
 }
 
@@ -3220,7 +3220,7 @@ void ObjectMgr::LoadCorpses()
 
         bar.step();
 
-        sLog.outString( "" );
+        sLog.outString();
         sLog.outString( ">> Loaded %u corpses", count );
         return;
     }
@@ -3250,7 +3250,7 @@ void ObjectMgr::LoadCorpses()
     while (result->NextRow());
     delete result;
 
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Loaded %u corpses", count );
 }
 
@@ -3358,7 +3358,7 @@ void ObjectMgr::LoadReputationOnKill()
 
         bar.step();
 
-        sLog.outString("");
+        sLog.outString();
         sLog.outErrorDb(">> Loaded 0 creature award reputation definitions. DB table `creature_onkill_reputation` is empty.");
         return;
     }
@@ -3410,7 +3410,7 @@ void ObjectMgr::LoadReputationOnKill()
 
     delete result;
 
-    sLog.outString("");
+    sLog.outString();
     sLog.outString(">> Loaded %u creature award reputation definitions", count);
 }
 
@@ -3514,7 +3514,7 @@ void ObjectMgr::CleanupInstances()
         bar.step();
     }
 
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Initialized %u instances, deleted %u old instances", okcount, delcount );
 }
 
@@ -3560,7 +3560,7 @@ void ObjectMgr::PackInstances()
         bar.step();
     }
 
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Instance numbers remapped, next instance id is %u", InstanceNumber );
 }
 
@@ -3577,7 +3577,7 @@ void ObjectMgr::LoadWeatherZoneChances()
 
         bar.step();
 
-        sLog.outString("");
+        sLog.outString();
         sLog.outErrorDb(">> Loaded 0 weather definitions. DB table `game_weather` is empty.");
         return;
     }
@@ -3624,7 +3624,7 @@ void ObjectMgr::LoadWeatherZoneChances()
 
     delete result;
 
-    sLog.outString("");
+    sLog.outString();
     sLog.outString(">> Loaded %u weather definitions", count);
 }
 
@@ -3728,7 +3728,7 @@ void ObjectMgr::LoadQuestRelationsHelper(QuestRelations& map,char const* table)
 
         bar.step();
 
-        sLog.outString("");
+        sLog.outString();
         sLog.outErrorDb(">> Loaded 0 quest relations from %s. DB table `%s` is empty.",table,table);
         return;
     }
@@ -3756,7 +3756,7 @@ void ObjectMgr::LoadQuestRelationsHelper(QuestRelations& map,char const* table)
 
     delete result;
 
-    sLog.outString("");
+    sLog.outString();
     sLog.outString(">> Loaded %u quest relations from %s", count,table);
 }
 

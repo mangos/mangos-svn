@@ -39,12 +39,12 @@ namespace MaNGOS
         return ((ContainerMapList<SPECIFIC_TYPE>*)&elements)->_element.getSize();
     };
 
-    template<class SPECIFIC_TYPE> size_t Count(const ContainerMapList<TypeNull> &elements, SPECIFIC_TYPE* /*fake*/)
+    template<class SPECIFIC_TYPE> size_t Count(const ContainerMapList<TypeNull> &/*elements*/, SPECIFIC_TYPE* /*fake*/)
     {
         return 0;
     }
 
-    template<class SPECIFIC_TYPE, class T> size_t Count(const ContainerMapList<T> &elements, SPECIFIC_TYPE* /*fake*/)
+    template<class SPECIFIC_TYPE, class T> size_t Count(const ContainerMapList<T> &/*elements*/, SPECIFIC_TYPE* /*fake*/)
     {
         return 0;
     }
@@ -60,24 +60,24 @@ namespace MaNGOS
     }
 
     // non-const find functions
-    template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Find(ContainerMapList<SPECIFIC_TYPE> &elements, OBJECT_HANDLE hdl, SPECIFIC_TYPE* /*fake*/)
+    template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Find(ContainerMapList<SPECIFIC_TYPE> &/*elements*/, OBJECT_HANDLE /*hdl*/, SPECIFIC_TYPE* /*fake*/)
     {
         //typename std::map<OBJECT_HANDLE, SPECIFIC_TYPE *>::iterator iter = elements._element.find(hdl);
         //return (iter == elements._element.end() ? NULL : iter->second);
         return NULL;
     };
 
-    template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Find(ContainerMapList<TypeNull> &elements, OBJECT_HANDLE hdl, SPECIFIC_TYPE* /*fake*/)
+    template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Find(ContainerMapList<TypeNull> &/*elements*/, OBJECT_HANDLE /*hdl*/, SPECIFIC_TYPE* /*fake*/)
     {
         return NULL;                                        // terminate recursion
     }
 
-    template<class SPECIFIC_TYPE, class T> SPECIFIC_TYPE* Find(ContainerMapList<T> &elements, OBJECT_HANDLE hdl, SPECIFIC_TYPE* /*fake*/)
+    template<class SPECIFIC_TYPE, class T> SPECIFIC_TYPE* Find(ContainerMapList<T> &/*elements*/, OBJECT_HANDLE /*hdl*/, SPECIFIC_TYPE* /*fake*/)
     {
         return NULL;                                        // this is a missed
     }
 
-    template<class SPECIFIC_TYPE, class H, class T> SPECIFIC_TYPE* Find(ContainerMapList<TypeList<H, T> >&elements, OBJECT_HANDLE hdl, SPECIFIC_TYPE* fake)
+    template<class SPECIFIC_TYPE, class H, class T> SPECIFIC_TYPE* Find(ContainerMapList<TypeList<H, T> >&/*elements*/, OBJECT_HANDLE /*hdl*/, SPECIFIC_TYPE* /*fake*/)
     {
         //SPECIFIC_TYPE* t = Find(elements._elements, hdl,fake);
         //return (t != NULL ? t :Find(elements._TailElements, hdl,fake));
@@ -85,19 +85,19 @@ namespace MaNGOS
     }
 
     // const find functions
-    template<class SPECIFIC_TYPE> const SPECIFIC_TYPE* Find(const ContainerMapList<SPECIFIC_TYPE> &elements, OBJECT_HANDLE hdl, SPECIFIC_TYPE* /*fake*/)
+    template<class SPECIFIC_TYPE> const SPECIFIC_TYPE* Find(const ContainerMapList<SPECIFIC_TYPE> &/*elements*/, OBJECT_HANDLE /*hdl*/, SPECIFIC_TYPE* /*fake*/)
     {
         //typename SPECIFIC_TYPE::iterator iter = elements._element.find(hdl);
         //return (iter == elements._element.end() ? NULL : iter->second);
         return NULL;
     };
 
-    template<class SPECIFIC_TYPE> const SPECIFIC_TYPE* Find(const ContainerMapList<TypeNull> &elements, OBJECT_HANDLE hdl, SPECIFIC_TYPE* /*fake*/)
+    template<class SPECIFIC_TYPE> const SPECIFIC_TYPE* Find(const ContainerMapList<TypeNull> &/*elements*/, OBJECT_HANDLE /*hdl*/, SPECIFIC_TYPE* /*fake*/)
     {
         return NULL;
     }
 
-    template<class SPECIFIC_TYPE, class T> const SPECIFIC_TYPE* Find(const ContainerMapList<T> &elements, OBJECT_HANDLE hdl, SPECIFIC_TYPE* /*fake*/)
+    template<class SPECIFIC_TYPE, class T> const SPECIFIC_TYPE* Find(const ContainerMapList<T> &/*elements*/, OBJECT_HANDLE /*hdl*/, SPECIFIC_TYPE* /*fake*/)
     {
         return NULL;
     }
@@ -119,13 +119,13 @@ namespace MaNGOS
         return obj;
     };
 
-    template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Insert(ContainerMapList<TypeNull> &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
+    template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Insert(ContainerMapList<TypeNull> &/*elements*/, SPECIFIC_TYPE * /*obj*/, OBJECT_HANDLE /*hdl*/)
     {
         return NULL;
     }
 
     // this is a missed
-    template<class SPECIFIC_TYPE, class T> SPECIFIC_TYPE* Insert(ContainerMapList<T> &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
+    template<class SPECIFIC_TYPE, class T> SPECIFIC_TYPE* Insert(ContainerMapList<T> &/*elements*/, SPECIFIC_TYPE * /*obj*/, OBJECT_HANDLE /*hdl*/)
     {
         return NULL;                                        // a missed
     }
@@ -151,13 +151,13 @@ namespace MaNGOS
         return obj;
     }
 
-    template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Remove(ContainerMapList<TypeNull> &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
+    template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Remove(ContainerMapList<TypeNull> &/*elements*/, SPECIFIC_TYPE * /*obj*/, OBJECT_HANDLE /*hdl*/)
     {
         return NULL;
     }
 
     // this is a missed
-    template<class SPECIFIC_TYPE, class T> SPECIFIC_TYPE* Remove(ContainerMapList<T> &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
+    template<class SPECIFIC_TYPE, class T> SPECIFIC_TYPE* Remove(ContainerMapList<T> &/*elements*/, SPECIFIC_TYPE * /*obj*/, OBJECT_HANDLE /*hdl*/)
     {
         return NULL;                                        // a missed
     }

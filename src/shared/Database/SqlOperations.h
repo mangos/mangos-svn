@@ -86,7 +86,7 @@ class SqlQuery : public SqlOperation
     public:
         SqlQuery(const char *sql, MaNGOS::IQueryCallback * callback, SqlResultQueue * queue)
             : m_sql(strdup(sql)), m_callback(callback), m_queue(queue) {}
-        ~SqlQuery() { free((void*)m_sql); }
+        ~SqlQuery() { free((void*)const_cast<char*>(m_sql)); }
         void Execute(Database *db);
 };
 

@@ -764,7 +764,7 @@ void CliRunnable::run()
     char commandbuf[256];
 
     ///- Display the list of available CLI functions then beep
-    sLog.outString("");
+    sLog.outString();
     /// \todo Shoudn't we use here also the sLog singleton?
     CliHelp(NULL,&printf);
 

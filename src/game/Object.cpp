@@ -928,7 +928,7 @@ void WorldObject::GetRandomPoint( float x, float y, float z, float distance, flo
         rand_z = z;                                         // hack required in case LOS height disabled
 }
 
-void WorldObject::Say(const char* text, const uint32 language, const uint64 TargetGuid)
+void WorldObject::MonsterSay(const char* text, const uint32 language, const uint64 TargetGuid)
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);    
     data << (uint8)CHAT_MSG_MONSTER_SAY;
@@ -945,7 +945,7 @@ void WorldObject::Say(const char* text, const uint32 language, const uint64 Targ
     SendMessageToSet(&data, true);
 }
 
-void WorldObject::Yell(const char* text, const uint32 language, const uint64 TargetGuid)
+void WorldObject::MonsterYell(const char* text, const uint32 language, const uint64 TargetGuid)
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);    
     data << (uint8)CHAT_MSG_MONSTER_YELL;
@@ -962,7 +962,7 @@ void WorldObject::Yell(const char* text, const uint32 language, const uint64 Tar
     SendMessageToSet(&data, true);
 }
 
-void WorldObject::TextEmote(const char* text, const uint64 TargetGuid)
+void WorldObject::MonsterTextEmote(const char* text, const uint64 TargetGuid)
 {
     std::string rightText = "%s ";
     rightText.append(text);
@@ -982,7 +982,7 @@ void WorldObject::TextEmote(const char* text, const uint64 TargetGuid)
     SendMessageToSet(&data, true);          // SendMessageToOwnTeamSet()?
 }
 
-void WorldObject::Whisper(const uint64 receiver, const char* text)
+void WorldObject::MonsterWhisper(const uint64 receiver, const char* text)
 {
     WorldPacket data(SMSG_MESSAGECHAT, 200);
     data << (uint8)CHAT_MSG_MONSTER_WHISPER;

@@ -692,7 +692,6 @@ INSERT INTO `command` VALUES
 ('addmove',2,'Syntax: .addmove #creature_guid [#waittime]\r\n\r\nAdd your current location as a waypoint for creature with guid #creature_guid. And optional add wait time.'),
 ('addquest',3,'Syntax: .addquest #quest_id\r\n\r\nAdd to character quest log quest #quest_id. Quest started from item can\'t be added by this command but correct .additem call provided in command output.'),
 ('addtele',3,'Syntax: .addtele $name\r\n\r\nAdd current your position to .tele command target locations list with name $name.'),
-('AddSpawn',2,'Not yet implemented.'),
 ('addspw',2,'Syntax: .addspw #creatureid\r\n\r\nSpawn a creature by the given template id of #creatureid.'),
 ('addweapon',3,'Not yet implemented.'),
 ('addvendoritem',2,'Syntax: .addvendoritem #itemId <#maxcount><#incrtime>\r\n\r\nAdd item #itemid to item list of selected vendor. Also optionally set max count item in vendor item list and time to item count restoring.'),

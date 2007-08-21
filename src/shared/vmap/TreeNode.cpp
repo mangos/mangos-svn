@@ -21,12 +21,12 @@
 namespace VMAP
 {
 
-    const TreeNode* TreeNode::getChild(TreeNode* pValueArray,int pNo) const {
-        if(iChilds[pNo] != -1) {
+    TreeNode const* TreeNode::getChild(TreeNode const* pValueArray,int pNo) const
+    {
+        if(iChilds[pNo] != -1)
             return(&pValueArray[iChilds[pNo]]);
-        } else {
+        else
             return(0);
-        }
     }
 
     //=================================================================

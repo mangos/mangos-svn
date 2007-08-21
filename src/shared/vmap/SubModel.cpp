@@ -182,12 +182,14 @@ namespace VMAP
 
     //==========================================================
 
-    RayIntersectionIterator<TreeNode, TriangleBox> SubModel::beginRayIntersection(const Ray& ray, double pMaxTime, bool skipAABoxTests) {
+    RayIntersectionIterator<TreeNode, TriangleBox> SubModel::beginRayIntersection(const Ray& ray, double pMaxTime, bool skipAABoxTests) const
+    {
         NodeValueAccess<TreeNode, TriangleBox> vna = NodeValueAccess<TreeNode, TriangleBox>(getTreeNodes(), getTriangles());
         return RayIntersectionIterator<TreeNode, TriangleBox>(vna, ray, &getTreeNode(0), pMaxTime, skipAABoxTests);
     }
 
-    RayIntersectionIterator<TreeNode, TriangleBox> SubModel::endRayIntersection() {
+    RayIntersectionIterator<TreeNode, TriangleBox> SubModel::endRayIntersection() const
+    {
         return RayIntersectionIterator<TreeNode, TriangleBox>();
     }
 
@@ -223,8 +225,9 @@ namespace VMAP
 #endif
 
 
-    RealTime SubModel::getIntersectionTime(const Ray& pRay, bool pExitAtFirst, float pMaxDist)  {
-        TriangleBox *firstObject;
+    RealTime SubModel::getIntersectionTime(const Ray& pRay, bool pExitAtFirst, float pMaxDist) const
+    {
+        TriangleBox const *firstObject;
         double  firstDistance = inf();
 
 #ifdef _DEBUG_VMAPS
@@ -248,7 +251,7 @@ namespace VMAP
             double t = testIntersectionWithTriangle(obj,testT, relativeRay);
 #ifdef _DEBUG_VMAPS
             if(debugCount == 5) {
-                firstObject = (TriangleBox*) tri;
+                firstObject = tri;
                 firstDistance = 1;
             }
             ++debugCount;
@@ -262,7 +265,7 @@ namespace VMAP
                 obj.markBreakNode();
                 if(firstDistance > t && pMaxDist >= t) {
                     firstDistance = t;
-                    firstObject   = (TriangleBox*) tri;
+                    firstObject   = tri;
                     if(pExitAtFirst) break;
                 }
             }
@@ -275,7 +278,7 @@ namespace VMAP
                     obj.markBreakNode();
                     if(firstDistance > t && pMaxDist >= t) {
                         firstDistance = t;
-                        firstObject   = (TriangleBox*) tri;
+                        firstObject   = tri;
                         if(pExitAtFirst) break;
                     }
                 }

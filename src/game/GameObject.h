@@ -129,6 +129,11 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         uint32 GetDBTableGUIDLow() const { return m_DBTableGuid; }
 
+        void Say(const char* text, const uint32 language, const uint64 TargetGuid) { MonsterSay(text,language,TargetGuid); }
+        void Yell(const char* text, const uint32 language, const uint64 TargetGuid) { MonsterYell(text,language,TargetGuid); }
+        void TextEmote(const char* text, const uint64 TargetGuid) { MonsterTextEmote(text,TargetGuid); }
+        void Whisper(const uint64 receiver, const char* text) { MonsterWhisper(receiver,text); }
+
         void SaveToDB();
         bool LoadFromDB(uint32 guid, uint32 InstanceId);
         void DeleteFromDB();

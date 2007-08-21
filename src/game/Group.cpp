@@ -69,7 +69,10 @@ bool Group::Create(const uint64 &guid, const char * name)
     sDatabase.BeginTransaction();
     sDatabase.PExecute("DELETE FROM `group` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
     sDatabase.PExecute("DELETE FROM `group_member` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
-    sDatabase.PExecute("INSERT INTO `group`(`leaderGuid`,`mainTank`,`mainAssistant`,`lootMethod`,`looterGuid`,`lootThreshold`,`icon1`,`icon2`,`icon3`,`icon4`,`icon5`,`icon6`,`icon7`,`icon8`,`isRaid`) VALUES('%u','%u','%u','%u','%u','%u','%u','%u','%u','%u','%u','%u','%u','%u',0)", GUID_LOPART(m_leaderGuid), GUID_LOPART(m_mainTank), GUID_LOPART(m_mainAssistant), m_lootMethod, GUID_LOPART(m_looterGuid), m_lootThreshold, m_targetIcons[0], m_targetIcons[1], m_targetIcons[2], m_targetIcons[3], m_targetIcons[4], m_targetIcons[5], m_targetIcons[6], m_targetIcons[7]);
+    sDatabase.PExecute("INSERT INTO `group`(`leaderGuid`,`mainTank`,`mainAssistant`,`lootMethod`,`looterGuid`,`lootThreshold`,`icon1`,`icon2`,`icon3`,`icon4`,`icon5`,`icon6`,`icon7`,`icon8`,`isRaid`) "
+        "VALUES('%u','%u','%u','%u','%u','%u','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "',0)", 
+        GUID_LOPART(m_leaderGuid), GUID_LOPART(m_mainTank), GUID_LOPART(m_mainAssistant), uint32(m_lootMethod), 
+        GUID_LOPART(m_looterGuid), uint32(m_lootThreshold), m_targetIcons[0], m_targetIcons[1], m_targetIcons[2], m_targetIcons[3], m_targetIcons[4], m_targetIcons[5], m_targetIcons[6], m_targetIcons[7]);
 
     for(Group::member_citerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
     {
@@ -105,7 +108,7 @@ bool Group::LoadGroupFromDB(const uint64 &leaderGuid)
     m_lootThreshold = (ItemQualities)(*result)[4].GetUInt16();
 
     for(int i=0; i<TARGETICONCOUNT; i++)
-        m_targetIcons[i] = (*result)[5+i].GetUInt8();
+        m_targetIcons[i] = (*result)[5+i].GetUInt64();
     delete result;
 
     result = sDatabase.PQuery("SELECT `memberGuid`,`assistant`,`subgroup` FROM `group_member` WHERE `leaderGuid`='%u'", GUID_LOPART(leaderGuid));

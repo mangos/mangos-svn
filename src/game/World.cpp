@@ -1442,17 +1442,17 @@ void World::ProcessCliCommands()
     if (cliCmdQueue.empty()) return;
 
     CliCommandHolder *command;
-    pPrintf zprintf;
+    pPrintf p_zprintf;
     while (!cliCmdQueue.empty())
     {
         sLog.outDebug("CLI command under processing...");
         command = cliCmdQueue.next();
         command->Execute();
-        zprintf=command->GetOutputMethod();
+        p_zprintf=command->GetOutputMethod();
         delete command;
     }
     // print the console message here so it looks right
-    zprintf("mangos>");
+    p_zprintf("mangos>");
 }
 
 void World::InitResultQueue()

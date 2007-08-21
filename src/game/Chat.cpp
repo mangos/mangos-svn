@@ -248,7 +248,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "unban",       SEC_ADMINISTRATOR, &ChatHandler::HandleUnBanCommand,            "",   NULL },
         { "baninfo",     SEC_ADMINISTRATOR, &ChatHandler::HandleBanInfoCommand,          "",   NULL },
         { "banlist",     SEC_ADMINISTRATOR, &ChatHandler::HandleBanListCommand,          "",   NULL },
-        { "AddSpawn",    SEC_GAMEMASTER,    &ChatHandler::HandleSpawnCommand,            "",   NULL },
         { "standstate",  SEC_ADMINISTRATOR, &ChatHandler::HandleStandStateCommand,       "",   NULL },
         { "start",       SEC_PLAYER,        &ChatHandler::HandleStartCommand,            "",   NULL },
         { "taxicheat",   SEC_MODERATOR,     &ChatHandler::HandleTaxiCheatCommand,        "",   NULL },
@@ -665,48 +664,6 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
         *data << session->GetPlayer()->chatTag();
     else
         *data << uint8(0);
-}
-
-void ChatHandler::SpawnCreature(WorldSession *session, const char* name, uint32 level)
-{
-    /*
-    //SpawnCreature is invallid, remains for educatial reasons
-    Temp. disabled (c) Phantomas
-        WorldPacket data;
-
-        Player *chr = session->GetPlayer();
-        float x = chr->GetPositionX();
-        float y = chr->GetPositionY();
-        float z = chr->GetPositionZ();
-        float o = chr->GetOrientation();
-
-        Creature* pCreature = new Creature();
-
-        if(!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), name, chr->GetMapId(), x, y, z, o, objmgr.AddCreatureTemplate(pCreature->GetName(), displayId)))
-        {
-            delete pCreature;
-            return false;
-        }
-        pCreature->SetZoneId(chr->GetZoneId());
-        pCreature->SetUInt32Value(OBJECT_FIELD_ENTRY, objmgr.AddCreatureTemplate(pCreature->GetName(), displayId));
-        pCreature->SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
-        pCreature->SetUInt32Value(UNIT_FIELD_DISPLAYID, displayId);
-        pCreature->SetHealth(28 + 30*level);
-        pCreature->SetMaxHealth(28 + 30*level);
-        pCreature->SetLevel(level);
-
-        pCreature->SetFloatValue(UNIT_FIELD_COMBATREACH , 1.5f);
-        pCreature->SetFloatValue(UNIT_FIELD_MAXDAMAGE ,  5.0f);
-        pCreature->SetFloatValue(UNIT_FIELD_MINDAMAGE , 8.0f);
-        pCreature->SetUInt32Value(UNIT_FIELD_BASEATTACKTIME, 1900);
-        pCreature->SetUInt32Value(UNIT_FIELD_RANGEDATTACKTIME, 2000);
-        pCreature->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 2.0f);
-        pCreature->AIM_Initialize();
-        sLog.outError("AddObject at Chat.cpp");
-
-        MapManager::Instance().GetMap(pCreature->GetMapId())->Add(pCreature);
-        pCreature->SaveToDB();
-    */
 }
 
 Player * ChatHandler::getSelectedPlayer()

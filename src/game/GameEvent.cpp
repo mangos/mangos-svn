@@ -54,7 +54,7 @@ uint32 GameEvent::NextCheck(uint16 entry)
     else // not in window, we return the delay before next start
         delay = (mGameEvent[entry].occurence * 60) - ((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * 60));
     // In case the end is before next check
-    if ((mGameEvent[entry].end - currenttime) < delay)
+    if (mGameEvent[entry].end  < currenttime + delay)
         return (mGameEvent[entry].end - currenttime);
     else
         return delay;
@@ -66,7 +66,7 @@ void GameEvent::LoadFromDB()
     if( !result )
     {
         sLog.outErrorDb(">> Table game_event is empty:");
-        sLog.outString("");
+        sLog.outString();
         return;
     }
 
@@ -81,7 +81,7 @@ void GameEvent::LoadFromDB()
     {
         mGameEvent.clear();
         sLog.outErrorDb(">> Table game_event is empty:");
-        sLog.outString("");
+        sLog.outString();
         return;
     }
 
@@ -108,7 +108,7 @@ void GameEvent::LoadFromDB()
 
     } while( result->NextRow() );
 
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Loaded %u game events", count );
     delete result;
 
@@ -123,7 +123,7 @@ void GameEvent::LoadFromDB()
         barGoLink bar2(1);
         bar2.step();
 
-        sLog.outString("");
+        sLog.outString();
         sLog.outErrorDb(">> Loaded %u creatures in game events", count );
     } else {
 
@@ -141,7 +141,7 @@ void GameEvent::LoadFromDB()
             crelist.push_back(guid);
 
         } while( result->NextRow() );
-        sLog.outString("");
+        sLog.outString();
         sLog.outString( ">> Loaded %u creatures in game events", count );
         delete result;
     }
@@ -157,7 +157,7 @@ void GameEvent::LoadFromDB()
         barGoLink bar3(1);
         bar3.step();
 
-        sLog.outString("");
+        sLog.outString();
         sLog.outErrorDb(">> Loaded %u gameobjects in game events", count );
     } else {
 
@@ -175,7 +175,7 @@ void GameEvent::LoadFromDB()
             golist.push_back(guid);
 
         } while( result->NextRow() );
-        sLog.outString("");
+        sLog.outString();
         sLog.outString( ">> Loaded %u gameobjects in game events", count );
     
         delete result;

@@ -278,6 +278,18 @@ void Log::outTitle( const char * str)
     fflush(stdout);
 }
 
+void Log::outString()
+{
+    printf( "\n" );
+    if(logfile)
+    {
+        outTimestamp(logfile);
+        fprintf(logfile, "\n" );
+        fflush(logfile);
+    }
+    fflush(stdout);
+}
+
 void Log::outString( const char * str, ... )
 {
     if( !str ) return;

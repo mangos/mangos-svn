@@ -1504,11 +1504,13 @@ namespace G3D {
 
         @cite Implementation by Pete Hopkins
         */
-        RayIntersectionIterator beginRayIntersection(const Ray& ray, double pMaxTime, bool skipAABoxTests = false) const {
+        RayIntersectionIterator beginRayIntersection(const Ray& ray, double pMaxTime, bool skipAABoxTests = false) const
+        {
             return RayIntersectionIterator(ray, root, pMaxTime, skipAABoxTests);
         }
 
-        RayIntersectionIterator endRayIntersection() const {
+        RayIntersectionIterator endRayIntersection() const
+        {
             return RayIntersectionIterator();
         }
 

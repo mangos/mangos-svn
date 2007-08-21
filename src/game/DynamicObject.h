@@ -48,6 +48,11 @@ class DynamicObject : public WorldObject
         void Delay(int32 delaytime);
         bool isVisibleForInState(Player const* u, bool inVisibleList) const;
 
+        void Say(const char* text, const uint32 language, const uint64 TargetGuid) { MonsterSay(text,language,TargetGuid); }
+        void Yell(const char* text, const uint32 language, const uint64 TargetGuid) { MonsterYell(text,language,TargetGuid); }
+        void TextEmote(const char* text, const uint64 TargetGuid) { MonsterTextEmote(text,TargetGuid); }
+        void Whisper(const uint64 receiver, const char* text) { MonsterWhisper(receiver,text); }
+
         GridReference<DynamicObject> &GetGridRef() { return m_gridRef; }
     protected:
         uint64 m_casterGuid;

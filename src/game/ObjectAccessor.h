@@ -103,19 +103,19 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
             CellPair p = MaNGOS::ComputeCellPair(x,y);
             if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
             {
-                sLog.outError("ObjectAccessor::GetObjectInWorld: invalid coordiates supplied X:%u Y:%u grid cell [%u:%u]", x, y, p.x_coord, p.y_coord);
+                sLog.outError("ObjectAccessor::GetObjectInWorld: invalid coordinates supplied X:%f Y:%f grid cell [%u:%u]", x, y, p.x_coord, p.y_coord);
                 return NULL;
             }
 
             CellPair q = MaNGOS::ComputeCellPair(obj->GetPositionX(),obj->GetPositionY());
             if(q.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || q.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
             {
-                sLog.outError("ObjectAccessor::GetObjecInWorld: object "I64FMTD" has invalid coordinates X:%u Y:%u grid cell [%u:%u]", obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), q.x_coord, q.y_coord);
+                sLog.outError("ObjectAccessor::GetObjecInWorld: object "I64FMTD" has invalid coordinates X:%f Y:%f grid cell [%u:%u]", obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), q.x_coord, q.y_coord);
                 return NULL;
             }
             
-            uint32 dx = p.x_coord - q.x_coord;
-            uint32 dy = p.y_coord - q.y_coord;
+            int32 dx = int32(p.x_coord) - int32(q.x_coord);
+            int32 dy = int32(p.y_coord) - int32(q.y_coord);
 
             if (dx > -2 && dx < 2 && dy > -2 && dy < 2) return obj;
             else return NULL;                

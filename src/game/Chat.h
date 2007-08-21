@@ -65,19 +65,17 @@ class ChatHandler
 
         static void SendSysMessage(         WorldSession* session, const char *str);
         static void SendSysMultilineMessage(WorldSession* session, const char *str);
-        static void PSendSysMessage(         WorldSession* session, const char *format, ...);
-        static void PSendSysMultilineMessage(WorldSession* session, const char *format, ...);
+        static void PSendSysMessage(         WorldSession* session, const char *format, ...) ATTR_PRINTF(2,3);
+        static void PSendSysMultilineMessage(WorldSession* session, const char *format, ...) ATTR_PRINTF(2,3);
 
         int ParseCommands(const char* text, WorldSession *session);
 
     protected:
-        void SpawnCreature(WorldSession *session, const char* pName, uint32 level);
-
         bool hasStringAbbr(const char* s1, const char* s2);
         void SendSysMessage(const char *str) { SendSysMessage(m_session,str); }
         void SendSysMultilineMessage(const char *str) { SendSysMultilineMessage(m_session,str); }
-        void PSendSysMessage(const char *format, ...);
-        void PSendSysMultilineMessage(const char *format, ...);
+        void PSendSysMessage(const char *format, ...) ATTR_PRINTF(2,3);
+        void PSendSysMultilineMessage(const char *format, ...) ATTR_PRINTF(2,3);
         void SendGlobalSysMessage(const char *str);
 
         bool ExecuteCommandInTable(ChatCommand *table, const char* text);
@@ -172,7 +170,6 @@ class ChatHandler
         bool HandleSubNameCommand(const char* args);
         bool HandleProgCommand(const char* args);
         bool HandleItemMoveCommand(const char* args);
-        bool HandleSpawnCommand(const char* args);
         bool HandleDeleteCommand(const char* args);
         bool HandleDeMorphCommand(const char* args);
         bool HandleAddVendorItemCommand(const char* args);

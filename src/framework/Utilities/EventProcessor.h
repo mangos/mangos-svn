@@ -34,9 +34,9 @@ class BasicEvent
         // this method executes when the event is triggered
         // return false if event does not want to be deleted
         // e_time is execution time, p_time is update interval
-        virtual bool Execute(uint64 e_time ATTR_UNUSED, uint32 p_time ATTR_UNUSED) { return(true); } 
+        virtual bool Execute(uint64 /*e_time*/, uint32 /*p_time*/) { return true; } 
  
-        virtual void Abort(uint64 e_time ATTR_UNUSED) {}    // this method executes when the event is aborted
+        virtual void Abort(uint64 /*e_time*/) {}            // this method executes when the event is aborted
 
         bool to_Abort; // set by externals when the event is aborted, aborted events don't execute
                        // and get Abort call when deleted

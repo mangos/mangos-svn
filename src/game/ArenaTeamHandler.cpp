@@ -162,7 +162,7 @@ void WorldSession::HandleArenaTeamAddMemberOpcode(WorldPacket & recv_data)
     sLog.outDebug("WORLD: Sent SMSG_ARENA_TEAM_INVITE");
 }
 
-void WorldSession::HandleArenaTeamInviteAcceptOpcode(WorldPacket & recv_data)
+void WorldSession::HandleArenaTeamInviteAcceptOpcode(WorldPacket & /*recv_data*/)
 {
     sLog.outDebug("CMSG_ARENA_TEAM_INVITE_ACCEPT");         // empty opcode
 
@@ -194,7 +194,7 @@ void WorldSession::HandleArenaTeamInviteAcceptOpcode(WorldPacket & recv_data)
     at->BroadcastPacket(&data);
 }
 
-void WorldSession::HandleArenaTeamInviteDeclineOpcode(WorldPacket & recv_data)
+void WorldSession::HandleArenaTeamInviteDeclineOpcode(WorldPacket & /*recv_data*/)
 {
     sLog.outDebug("CMSG_ARENA_TEAM_INVITE_DECLINE");        // empty opcode
 

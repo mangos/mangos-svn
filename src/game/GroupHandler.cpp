@@ -152,7 +152,7 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
     SendPartyResult(PARTY_OP_INVITE, membername, PARTY_RESULT_OK);
 }
 
-void WorldSession::HandleGroupAcceptOpcode( WorldPacket & recv_data )
+void WorldSession::HandleGroupAcceptOpcode( WorldPacket & /*recv_data*/ )
 {
     Group *group = GetPlayer()->GetGroupInvite();
     if (!group) return;
@@ -180,7 +180,7 @@ void WorldSession::HandleGroupAcceptOpcode( WorldPacket & recv_data )
     GetPlayer()->SetGroup(group, subgroup);
 }
 
-void WorldSession::HandleGroupDeclineOpcode( WorldPacket & recv_data )
+void WorldSession::HandleGroupDeclineOpcode( WorldPacket & /*recv_data*/ )
 {
     Group  *group  = GetPlayer()->GetGroupInvite();
     if (!group) return;
@@ -290,7 +290,7 @@ void WorldSession::HandleGroupSetLeaderOpcode( WorldPacket & recv_data )
     group->ChangeLeader(guid);
 }
 
-void WorldSession::HandleGroupDisbandOpcode( WorldPacket & recv_data )
+void WorldSession::HandleGroupDisbandOpcode( WorldPacket & /*recv_data*/ )
 {
     if(!GetPlayer()->GetGroup())
         return;
@@ -437,7 +437,7 @@ void WorldSession::HandleRaidIconTargetOpcode( WorldPacket & recv_data )
     }
 }
 
-void WorldSession::HandleRaidConvertOpcode( WorldPacket & recv_data )
+void WorldSession::HandleRaidConvertOpcode( WorldPacket & /*recv_data*/ )
 {
     Group *group = GetPlayer()->GetGroup();
     if(!group) return;
@@ -663,7 +663,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
     SendPacket(&data);
 }
 
-/*!*/void WorldSession::HandleRequestRaidInfoOpcode( WorldPacket & recv_data )
+/*!*/void WorldSession::HandleRequestRaidInfoOpcode( WorldPacket & /*recv_data*/ )
 {
     //sLog.outDebug("Received opcode CMSG_REQUEST_RAID_INFO");
 

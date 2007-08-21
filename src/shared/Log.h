@@ -80,6 +80,7 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
         void InitColors(std::string init_str);
         void outTitle( const char * str);
         void outCommand( const char * str, ...)      ATTR_PRINTF(2,3);
+        void outString();                                              // any log level
         void outString( const char * str, ... )      ATTR_PRINTF(2,3); // any log level
         void outError( const char * err, ... )       ATTR_PRINTF(2,3); // any log level
         void outBasic( const char * str, ... )       ATTR_PRINTF(2,3); // log level >= 1

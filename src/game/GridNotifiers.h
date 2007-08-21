@@ -174,7 +174,7 @@ namespace MaNGOS
                 i_check = owner;
         }
 
-        template<class T> inline void Visit(GridRefManager<T>  &m) {}
+        template<class T> inline void Visit(GridRefManager<T>  &) {}
         #ifdef WIN32
         template<> inline void Visit<Player>(PlayerMapType &);
         template<> inline void Visit<Creature>(CreatureMapType &);
@@ -301,7 +301,7 @@ namespace MaNGOS
         void Visit(CreatureMapType &m);
         void Visit(PlayerMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &m) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
     };
 
     template<class Check>
@@ -315,7 +315,7 @@ namespace MaNGOS
         void Visit(PlayerMapType &m);
         void Visit(CreatureMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &m) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
     };
 
     // Creature searchers
@@ -330,7 +330,7 @@ namespace MaNGOS
 
         void Visit(CreatureMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &m) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
     };
 
     template<class Check>
@@ -343,7 +343,7 @@ namespace MaNGOS
 
         void Visit(CreatureMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &m) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
     };
 
     // CHECKS && DO classes
@@ -356,8 +356,8 @@ namespace MaNGOS
             RespawnDo() {}
             void operator()(Creature* u) const { u->Respawn(); }
             void operator()(GameObject* u) const { u->Respawn(); }
-            void operator()(WorldObject* u) const {}
-            void operator()(Corpse* u) const {}
+            void operator()(WorldObject*) const {}
+            void operator()(Corpse*) const {}
     };
 
     // GameObject checks

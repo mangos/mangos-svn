@@ -203,7 +203,7 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
     guild->BroadcastPacket(&data);
 }
 
-void WorldSession::HandleGuildAcceptOpcode(WorldPacket& recvPacket)
+void WorldSession::HandleGuildAcceptOpcode(WorldPacket& /*recvPacket*/)
 {
     Guild *guild;
     Player *player = GetPlayer();
@@ -230,7 +230,7 @@ void WorldSession::HandleGuildAcceptOpcode(WorldPacket& recvPacket)
     //sLog.outDebug("WORLD: Sent (SMSG_GUILD_EVENT)");
 }
 
-void WorldSession::HandleGuildDeclineOpcode(WorldPacket& recvPacket)
+void WorldSession::HandleGuildDeclineOpcode(WorldPacket& /*recvPacket*/)
 {
     //sLog.outDebug("WORLD: Received CMSG_GUILD_DECLINE");
 
@@ -238,7 +238,7 @@ void WorldSession::HandleGuildDeclineOpcode(WorldPacket& recvPacket)
     GetPlayer()->SetInGuild(0);
 }
 
-void WorldSession::HandleGuildInfoOpcode(WorldPacket& recvPacket)
+void WorldSession::HandleGuildInfoOpcode(WorldPacket& /*recvPacket*/)
 {
     Guild *guild;
     //sLog.outDebug("WORLD: Received CMSG_GUILD_INFO");
@@ -261,7 +261,7 @@ void WorldSession::HandleGuildInfoOpcode(WorldPacket& recvPacket)
     SendPacket(&data);
 }
 
-void WorldSession::HandleGuildRosterOpcode(WorldPacket& recvPacket)
+void WorldSession::HandleGuildRosterOpcode(WorldPacket& /*recvPacket*/)
 {
     //sLog.outDebug("WORLD: Received CMSG_GUILD_ROSTER");
 
@@ -434,7 +434,7 @@ void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
     guild->BroadcastPacket(&data);
 }
 
-void WorldSession::HandleGuildLeaveOpcode(WorldPacket& recvPacket)
+void WorldSession::HandleGuildLeaveOpcode(WorldPacket& /*recvPacket*/)
 {
     std::string plName;
     Guild *guild;
@@ -474,7 +474,7 @@ void WorldSession::HandleGuildLeaveOpcode(WorldPacket& recvPacket)
     SendGuildCommandResult(GUILD_QUIT_S, plName, GUILD_PLAYER_NO_MORE_IN_GUILD);
 }
 
-void WorldSession::HandleGuildDisbandOpcode(WorldPacket& recvPacket)
+void WorldSession::HandleGuildDisbandOpcode(WorldPacket& /*recvPacket*/)
 {
     std::string name;
     Guild *guild;
@@ -791,7 +791,7 @@ void WorldSession::HandleGuildAddRankOpcode(WorldPacket& recvPacket)
     guild->Roster(this);
 }
 
-void WorldSession::HandleGuildDelRankOpcode(WorldPacket& recvPacket)
+void WorldSession::HandleGuildDelRankOpcode(WorldPacket& /*recvPacket*/)
 {
     Guild *guild;
     std::string rankname;

@@ -40,7 +40,7 @@
 #include "SpellAuras.h"
 #include "Pet.h"
 
-void WorldSession::HandleRepopRequestOpcode( WorldPacket & recv_data )
+void WorldSession::HandleRepopRequestOpcode( WorldPacket & /*recv_data*/ )
 {
     sLog.outDebug( "WORLD: Recvd CMSG_REPOP_REQUEST Message" );
 
@@ -195,7 +195,7 @@ void WorldSession::HandleWhoOpcode( WorldPacket & recv_data )
     sLog.outDebug( "WORLD: Send SMSG_WHO Message" );
 }
 
-void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
+void WorldSession::HandleLogoutRequestOpcode( WorldPacket & /*recv_data*/ )
 {
     Player* Target = GetPlayer();
 
@@ -253,12 +253,12 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
 
 }
 
-void WorldSession::HandlePlayerLogoutOpcode( WorldPacket & recv_data )
+void WorldSession::HandlePlayerLogoutOpcode( WorldPacket & /*recv_data*/ )
 {
     sLog.outDebug( "WORLD: Recvd CMSG_PLAYER_LOGOUT Message" );
 }
 
-void WorldSession::HandleLogoutCancelOpcode( WorldPacket & recv_data )
+void WorldSession::HandleLogoutCancelOpcode( WorldPacket & /*recv_data*/ )
 {
     sLog.outDebug( "WORLD: Recvd CMSG_LOGOUT_CANCEL Message" );
 
@@ -305,7 +305,7 @@ void WorldSession::SendGMTicketGetTicket(uint32 status, char const* text)
     SendPacket( &data );
 }
 
-void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & recv_data )
+void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & /*recv_data*/ )
 {
     WorldPacket data( SMSG_QUERY_TIME_RESPONSE, 4+4 );
     data << (uint32)time(NULL);
@@ -351,7 +351,7 @@ void WorldSession::HandleGMTicketUpdateTextOpcode( WorldPacket & recv_data )
     sDatabase.PExecute("UPDATE `character_ticket` SET `ticket_text` = '%s' WHERE `guid` = '%u'", ticketText.c_str(), _player->GetGUIDLow());
 }
 
-void WorldSession::HandleGMTicketDeleteOpcode( WorldPacket & recv_data )
+void WorldSession::HandleGMTicketDeleteOpcode( WorldPacket & /*recv_data*/ )
 {
     uint32 guid = GetPlayer()->GetGUIDLow();
 
@@ -421,7 +421,7 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
     }
 }
 
-void WorldSession::HandleGMTicketSystemStatusOpcode( WorldPacket & recv_data )
+void WorldSession::HandleGMTicketSystemStatusOpcode( WorldPacket & /*recv_data*/ )
 {
     WorldPacket data( SMSG_GMTICKET_SYSTEMSTATUS,4 );
     data << uint32(1); // we can also disable ticket system by sending 0 value
@@ -534,7 +534,7 @@ void WorldSession::HandleStandStateChangeOpcode( WorldPacket & recv_data )
     }
 }
 
-void WorldSession::HandleFriendListOpcode( WorldPacket & recv_data )
+void WorldSession::HandleFriendListOpcode( WorldPacket & /*recv_data*/ )
 {
     sLog.outDebug( "WORLD: Received CMSG_FRIEND_LIST"  );
 
@@ -925,13 +925,13 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     }
 }
 
-void WorldSession::HandleUpdateAccountData(WorldPacket &recv_data)
+void WorldSession::HandleUpdateAccountData(WorldPacket &/*recv_data*/)
 {
     sLog.outDetail("WORLD: Received CMSG_UPDATE_ACCOUNT_DATA");
     //recv_data.hexlike();
 }
 
-void WorldSession::HandleRequestAccountData(WorldPacket& recv_data)
+void WorldSession::HandleRequestAccountData(WorldPacket& /*recv_data*/)
 {
     sLog.outDetail("WORLD: Received CMSG_REQUEST_ACCOUNT_DATA");
     //recv_data.hexlike();
@@ -974,23 +974,23 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
     }
 }
 
-void WorldSession::HandleCompleteCinema( WorldPacket & recv_data )
+void WorldSession::HandleCompleteCinema( WorldPacket & /*recv_data*/ )
 {
     DEBUG_LOG( "WORLD: Player is watching cinema" );
 }
 
-void WorldSession::HandleNextCinematicCamera( WorldPacket & recv_data )
+void WorldSession::HandleNextCinematicCamera( WorldPacket & /*recv_data*/ )
 {
     DEBUG_LOG( "WORLD: Which movie to play" );
 }
 
-void WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & recv_data )
+void WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & /*recv_data*/ )
 {
     WorldSession::Update( getMSTime() );
     DEBUG_LOG( "WORLD: Time Lag/Synchronization Resent/Update" );
 }
 
-void WorldSession::HandleFeatherFallAck(WorldPacket &recv_data)
+void WorldSession::HandleFeatherFallAck(WorldPacket &/*recv_data*/)
 {
     DEBUG_LOG("WORLD: CMSG_MOVE_FEATHER_FALL_ACK");
 }
@@ -1096,7 +1096,7 @@ void WorldSession::HandleWardenDataOpcode(WorldPacket& recv_data)
     sLog.outDebug("Received opcode CMSG_WARDEN_DATA, not resolve.uint8 = %u",tmp);
 }
 
-void WorldSession::HandlePlayedTime(WorldPacket& recv_data)
+void WorldSession::HandlePlayedTime(WorldPacket& /*recv_data*/)
 {
     uint32 TotalTimePlayed = GetPlayer()->GetTotalPlayedTime();
     uint32 LevelPlayedTime = GetPlayer()->GetLevelPlayedTime();

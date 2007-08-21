@@ -297,9 +297,9 @@ void LoadDBCStores(std::string dataPath)
         exit(1);
     }
 
-    sLog.outString( " " );
+    sLog.outString();
     sLog.outString( ">> Loaded %d data stores", DBCFilesCount );
-    sLog.outString( " " );
+    sLog.outString();
 }
 
 float GetRadius(SpellRadiusEntry const *radius)
