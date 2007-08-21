@@ -1406,7 +1406,9 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
 
 void Aura::HandleAuraTransform(bool apply, bool Real)
 {
-    if(!m_target)
+    // skip if player not added to map at loading or far teleport (to prevent client crash)
+    // it will applied in Player::SendInitialPacketsAfterAddToMap after adding to map
+    if(m_target->GetTypeId()==TYPEID_PLAYER && !((Player*)m_target)->IsInWorld())
         return;
 
     if (apply)

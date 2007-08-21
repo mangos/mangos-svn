@@ -15,6 +15,7 @@
 #define G3D_MATRIX3_H
 
 #include "G3D/platform.h"
+#include "G3D/System.h"
 #include "G3D/Vector3.h"
 #include "G3D/Vector4.h"
 
@@ -91,7 +92,7 @@ public:
 
     // assignment and comparison
     inline Matrix3& operator= (const Matrix3& rkMatrix) {
-        memcpy(elt, rkMatrix.elt, 9 * sizeof(float));
+        System::memcpy(elt, rkMatrix.elt, 9 * sizeof(float));
         return *this;
     }
 

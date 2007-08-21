@@ -20,7 +20,6 @@
 #include "GossipDef.h"
 #include "ObjectMgr.h"
 #include "Opcodes.h"
-#include <string.h>
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "Util.h"
