@@ -196,7 +196,7 @@ void BattleGroundWS::EventPlayerDroppedFlag(Player *Source)
         message = LANG_BG_DROPPED_HF;
         type = CHAT_MSG_BG_SYSTEM_HORDE;
     }
-    if(Source->GetTeam() == HORDE)
+    else
     {
         SetAllianceFlagPicker(0);
         m_FlagState[0] = FLAG_STATE_ON_GROUND;              // alliance flag dropped
@@ -212,7 +212,7 @@ void BattleGroundWS::EventPlayerDroppedFlag(Player *Source)
 
     if(Source->GetTeam() == ALLIANCE)
         UpdateWorldState(FLAG_UNK_HORDE, uint32(-1));
-    if(Source->GetTeam() == HORDE)
+    else
         UpdateWorldState(FLAG_UNK_ALLIANCE, uint32(-1));
 }
 
@@ -232,7 +232,7 @@ void BattleGroundWS::EventPlayerReturnedFlag(Player *Source)
         UpdateFlagState(HORDE, 1);
         RespawnFlag(ALLIANCE, false);
     }
-    if(Source->GetTeam() == HORDE)
+    else
     {
         m_FlagState[1] = FLAG_STATE_ON_BASE;                // horde flag in base
         message = LANG_BG_RETURNED_HF;
@@ -266,7 +266,7 @@ void BattleGroundWS::EventPlayerPickedUpFlag(Player *Source)
         SetHordeFlagPicker(Source->GetGUID());              // pick up Horde Flag
         m_FlagState[1] = FLAG_STATE_ON_PLAYER;              // horde flag pickedup
     }
-    if(Source->GetTeam() == HORDE)
+    else
     {
         message = LANG_BG_PICKEDUP_AF;
         type = CHAT_MSG_BG_SYSTEM_HORDE;
@@ -284,7 +284,7 @@ void BattleGroundWS::EventPlayerPickedUpFlag(Player *Source)
 
     if(Source->GetTeam() == ALLIANCE)
         UpdateWorldState(FLAG_UNK_HORDE, 1);
-    if(Source->GetTeam() == HORDE)
+    else
         UpdateWorldState(FLAG_UNK_ALLIANCE, 1);
 }
 

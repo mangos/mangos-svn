@@ -111,12 +111,6 @@ namespace MaNGOS
 
 /// --------- GENERIC CALLBACKS ----------
 
-#define C4 _Callback < Class, ParamType1, ParamType2, ParamType3, ParamType4 >
-#define C3 _Callback < Class, ParamType1, ParamType2, ParamType3 >
-#define C2 _Callback < Class, ParamType1, ParamType2 >
-#define C1 _Callback < Class, ParamType1 >
-#define C0 _Callback < Class >
-
 namespace MaNGOS
 {
     class ICallback
@@ -135,58 +129,61 @@ namespace MaNGOS
     };
 
     template < class Class, typename ParamType1 = void, typename ParamType2 = void, typename ParamType3 = void, typename ParamType4 = void >
-    class Callback : public _ICallback< C4 >
+    class Callback : 
+        public _ICallback< _Callback < Class, ParamType1, ParamType2, ParamType3, ParamType4 > >
     {
+        private:
+            typedef _Callback < Class, ParamType1, ParamType2, ParamType3, ParamType4 > C4;
         public:
             Callback(Class *object, typename C4::Method method, ParamType1 param1, ParamType2 param2, ParamType3 param3, ParamType4 param4)
                 : _ICallback< C4 >(C4(object, method, param1, param2, param3, param4)) {}
     };
 
     template < class Class, typename ParamType1, typename ParamType2, typename ParamType3 >
-    class Callback < Class, ParamType1, ParamType2, ParamType3 > : public _ICallback< C3 >
+    class Callback < Class, ParamType1, ParamType2, ParamType3 > : 
+        public _ICallback< _Callback < Class, ParamType1, ParamType2, ParamType3 > >
     {
+        private:
+            typedef _Callback < Class, ParamType1, ParamType2, ParamType3 > C3;
         public:
             Callback(Class *object, typename C3::Method method, ParamType1 param1, ParamType2 param2, ParamType3 param3)
                 : _ICallback< C3 >(C3(object, method, param1, param2, param3)) {}
     };
 
     template < class Class, typename ParamType1, typename ParamType2 >
-    class Callback < Class, ParamType1, ParamType2 > : public _ICallback< C2 >
+    class Callback < Class, ParamType1, ParamType2 > : 
+        public _ICallback< _Callback < Class, ParamType1, ParamType2 > >
     {
+        private:
+            typedef _Callback < Class, ParamType1, ParamType2 > C2;
         public:
             Callback(Class *object, typename C2::Method method, ParamType1 param1, ParamType2 param2)
                 : _ICallback< C2 >(C2(object, method, param1, param2)) {}
     };
 
     template < class Class, typename ParamType1 >
-    class Callback < Class, ParamType1 > : public _ICallback< C1 >
+    class Callback < Class, ParamType1 > : 
+        public _ICallback< _Callback < Class, ParamType1 > >
     {
+        private:
+            typedef _Callback < Class, ParamType1 > C1;
         public:
             Callback(Class *object, typename C1::Method method, ParamType1 param1)
                 : _ICallback< C1 >(C1(object, method, param1)) {}
     };
 
     template < class Class >
-    class Callback < Class > : public _ICallback< C0 >
+    class Callback < Class > : public _ICallback< _Callback < Class > >
     {
+        private:
+            typedef _Callback < Class > C0;
         public:
             Callback(Class *object, typename C0::Method method)
                 : _ICallback< C0 >(C0(object, method)) {}
     };
 }
 
-#undef C4
-#undef C3
-#undef C2
-#undef C1
-#undef C0
-
 /// ---------- QUERY CALLBACKS -----------
-
-#define QC3 _Callback < Class, QueryResult*, ParamType1, ParamType2, ParamType3 >
-#define QC2 _Callback < Class, QueryResult*, ParamType1, ParamType2 >
-#define QC1 _Callback < Class, QueryResult*, ParamType1 >
-#define QC0 _Callback < Class, QueryResult* >
 
 class QueryResult;
 
@@ -212,41 +209,47 @@ namespace MaNGOS
     };
 
     template < class Class, typename ParamType1 = void, typename ParamType2 = void, typename ParamType3 = void >
-    class QueryCallback : public _IQueryCallback< QC3 >
+    class QueryCallback : 
+        public _IQueryCallback< _Callback < Class, QueryResult*, ParamType1, ParamType2, ParamType3 > >
     {
+        private:
+            typedef _Callback < Class, QueryResult*, ParamType1, ParamType2, ParamType3 > QC3;
         public:
             QueryCallback(Class *object, typename QC3::Method method, QueryResult* result, ParamType1 param1, ParamType2 param2, ParamType3 param3)
                 : _IQueryCallback< QC3 >(QC3(object, method, result, param1, param2, param3)) {}
     };
 
     template < class Class, typename ParamType1, typename ParamType2 >
-    class QueryCallback < Class, ParamType1, ParamType2 > : public _IQueryCallback< QC2 >
+    class QueryCallback < Class, ParamType1, ParamType2 > : 
+        public _IQueryCallback< _Callback < Class, QueryResult*, ParamType1, ParamType2 > >
     {
+        private:
+            typedef _Callback < Class, QueryResult*, ParamType1, ParamType2 > QC2;
         public:
             QueryCallback(Class *object, typename QC2::Method method, QueryResult* result, ParamType1 param1, ParamType2 param2)
                 : _IQueryCallback< QC2 >(QC2(object, method, result, param1, param2)) {}
     };
 
     template < class Class, typename ParamType1 >
-    class QueryCallback < Class, ParamType1 > : public _IQueryCallback< QC1 >
+    class QueryCallback < Class, ParamType1 > : 
+        public _IQueryCallback< _Callback < Class, QueryResult*, ParamType1 > >
     {
+        private:
+            typedef _Callback < Class, QueryResult*, ParamType1 > QC1;
         public:
             QueryCallback(Class *object, typename QC1::Method method, QueryResult* result, ParamType1 param1)
                 : _IQueryCallback< QC1 >(QC1(object, method, result, param1)) {}
     };
 
     template < class Class >
-    class QueryCallback < Class > : public _IQueryCallback< QC0 >
+    class QueryCallback < Class > : public _IQueryCallback< _Callback < Class, QueryResult* > >
     {
+        private:
+            typedef _Callback < Class, QueryResult* > QC0;
         public:
             QueryCallback(Class *object, typename QC0::Method method, QueryResult* result)
                 : _IQueryCallback< QC0 >(QC0(object, method, result)) {}
     };
 }
-
-#undef QC3
-#undef QC2
-#undef QC1
-#undef QC0
 
 #endif

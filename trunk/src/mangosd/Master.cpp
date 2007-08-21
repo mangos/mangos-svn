@@ -153,7 +153,7 @@ void Master::Run()
                         sLog.outError("Can't set used processors (hex): %x",curAff);
                 }
             }
-            sLog.outString("");
+            sLog.outString();
         }
 
         uint32 Prio = sConfig.GetIntDefault("ProcessPriority", 0);
@@ -164,7 +164,7 @@ void Master::Run()
                 sLog.outString("mangosd process priority class set to HIGH");
             else
                 sLog.outError("ERROR: Can't set mangosd process priority class.");
-            sLog.outString("");
+            sLog.outString();
         }
     }
     #endif

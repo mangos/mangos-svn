@@ -157,7 +157,7 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
     }
 }
 
-void WorldSession::HandleBattleGroundPlayerPositionsOpcode( WorldPacket &recv_data )
+void WorldSession::HandleBattleGroundPlayerPositionsOpcode( WorldPacket & /*recv_data*/ )
 {
                                                             // empty opcode
     sLog.outDebug("WORLD: Recvd MSG_BATTLEGROUND_PLAYER_POSITIONS Message");
@@ -201,7 +201,7 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode( WorldPacket &recv_da
     }
 }
 
-void WorldSession::HandleBattleGroundPVPlogdataOpcode( WorldPacket &recv_data )
+void WorldSession::HandleBattleGroundPVPlogdataOpcode( WorldPacket & /*recv_data*/ )
 {
     sLog.outDebug( "WORLD: Recvd MSG_PVP_LOG_DATA Message");
 
@@ -285,9 +285,9 @@ void WorldSession::HandleBattleGroundPlayerPortOpcode( WorldPacket &recv_data )
     }
 }
 
-void WorldSession::HandleBattleGroundLeaveOpcode( WorldPacket &recv_data )
+void WorldSession::HandleBattleGroundLeaveOpcode( WorldPacket & /*recv_data*/ )
 {
-    CHECK_PACKET_SIZE(recv_data, 1+1+4+2);
+    //CHECK_PACKET_SIZE(recv_data, 1+1+4+2);
 
     sLog.outDebug( "WORLD: Recvd CMSG_LEAVE_BATTLEFIELD Message");
 
@@ -300,7 +300,7 @@ void WorldSession::HandleBattleGroundLeaveOpcode( WorldPacket &recv_data )
     _player->LeaveBattleground();
 }
 
-void WorldSession::HandleBattlefieldStatusOpcode( WorldPacket & recv_data )
+void WorldSession::HandleBattlefieldStatusOpcode( WorldPacket & /*recv_data*/ )
 {
     // empty opcode
     sLog.outDebug( "WORLD: Battleground status" );
@@ -326,24 +326,20 @@ void WorldSession::HandleAreaSpiritHealerQueryOpcode( WorldPacket & recv_data )
     CHECK_PACKET_SIZE(recv_data, 8);
 
     if(!_player->InBattleGround())
-    {
         return;
-    }
-    else
-    {
-        BattleGround *bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundId());
-        if(!bg)
-            return;
 
-        uint64 guid;
-        recv_data >> guid;
-        WorldPacket data(SMSG_AREA_SPIRIT_HEALER_TIME, 12);
-        uint32 time_ = 30000 - (getMSTime() - bg->GetLastResurrectTime()); // resurrect every 30 seconds
-        if(time_ == uint32(-1))
-            time_ = 0;
-        data << guid << time_;
-        SendPacket(&data);
-    }
+    BattleGround *bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundId());
+    if(!bg)
+        return;
+
+    uint64 guid;
+    recv_data >> guid;
+    WorldPacket data(SMSG_AREA_SPIRIT_HEALER_TIME, 12);
+    uint32 time_ = 30000 - (getMSTime() - bg->GetLastResurrectTime()); // resurrect every 30 seconds
+    if(time_ == uint32(-1))
+        time_ = 0;
+    data << guid << time_;
+    SendPacket(&data);
 }
 
 void WorldSession::HandleAreaSpiritHealerQueueOpcode( WorldPacket & recv_data )
@@ -353,18 +349,14 @@ void WorldSession::HandleAreaSpiritHealerQueueOpcode( WorldPacket & recv_data )
     CHECK_PACKET_SIZE(recv_data, 8);
 
     if(!_player->InBattleGround())
-    {
         return;
-    }
-    else
-    {
-        BattleGround *bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundId());
-        if(!bg)
-            return;
 
-        uint64 guid;
-        recv_data >> guid;
+    BattleGround *bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundId());
+    if(!bg)
+        return;
 
-        bg->AddPlayerToResurrectQueue(guid, _player->GetGUID());
-    }
+    uint64 guid;
+    recv_data >> guid;
+
+    bg->AddPlayerToResurrectQueue(guid, _player->GetGUID());
 }

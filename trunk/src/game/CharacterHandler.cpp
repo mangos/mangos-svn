@@ -59,7 +59,7 @@ class CharacterHandler
         {
             WorldSession * session = sWorld.FindSession(account);
             if(!session) return;
-            session->HandleCharEnum(result, account);
+            session->HandleCharEnum(result);
         }
         void HandlePlayerLoginCallback(QueryResult * /*dummy*/, SqlQueryHolder * holder)
         {
@@ -70,7 +70,7 @@ class CharacterHandler
         }
 } chrHandler;
 
-void WorldSession::HandleCharEnum(QueryResult * result, uint32 account)
+void WorldSession::HandleCharEnum(QueryResult * result)
 {
     // keys can be non cleared if player open realm list and close it by 'cancel'
     loginDatabase.PExecute("UPDATE `account` SET `v` = '0', `s` = '0' WHERE `id` = '%u'", GetAccountId());
@@ -105,7 +105,7 @@ void WorldSession::HandleCharEnum(QueryResult * result, uint32 account)
     SendPacket( &data );
 }
 
-void WorldSession::HandleCharEnumOpcode( WorldPacket & recv_data )
+void WorldSession::HandleCharEnumOpcode( WorldPacket & /*recv_data*/ )
 {
     /// get all the data necesary for loading all characters (along with their pets) on the account
     sDatabase.AsyncPQuery(&chrHandler, &CharacterHandler::HandleCharEnumCallback, GetAccountId(),
@@ -269,7 +269,7 @@ void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
     uint32 accountId = 0;
     std::string name;
 
-    QueryResult *result = sDatabase.PQuery("SELECT `account`,`name` FROM `character` WHERE `guid`='%u'", guid);
+    QueryResult *result = sDatabase.PQuery("SELECT `account`,`name` FROM `character` WHERE `guid`='%u'", GUID_LOPART(guid));
     if(result)
     {
         Field *fields = result->Fetch();
@@ -282,7 +282,7 @@ void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
     if(accountId != GetAccountId())
         return;
 
-    sLog.outBasic("Account: %d Delete Character:[%s] (guid:%u)",GetAccountId(),name.c_str(),guid);
+    sLog.outBasic("Account: %d Delete Character:[%s] (guid:%u)",GetAccountId(),name.c_str(),GUID_LOPART(guid));
     Player::DeleteFromDB(guid, GetAccountId());
 
     WorldPacket data(SMSG_CHAR_DELETE, 1);
@@ -362,7 +362,6 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         SetPlayer(pCurrChar);
 
     //set a count of unread mails
-    time_t cTime = time(NULL);
     //QueryResult *resultMails = sDatabase.PQuery("SELECT COUNT(id) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0 AND `deliver_time` <= '" I64FMTD "'", GUID_LOPART(playerGuid),(uint64)cTime);
     QueryResult *resultMails = holder->GetResult(10);
     if (resultMails)
@@ -605,7 +604,7 @@ void WorldSession::HandleSetFactionAtWar( WorldPacket & recv_data )
 }
 
 //I think this function is never used :/ I dunno, but i guess this opcode not exists
-void WorldSession::HandleSetFactionCheat( WorldPacket & recv_data )
+void WorldSession::HandleSetFactionCheat( WorldPacket & /*recv_data*/ )
 {
     //CHECK_PACKET_SIZE(recv_data,4+4);
 
@@ -632,7 +631,7 @@ void WorldSession::HandleSetFactionCheat( WorldPacket & recv_data )
     GetPlayer()->UpdateReputation();
 }
 
-void WorldSession::HandleMeetingStoneInfo( WorldPacket & recv_data )
+void WorldSession::HandleMeetingStoneInfo( WorldPacket & /*recv_data*/ )
 {
     DEBUG_LOG( "WORLD: Received CMSG_MEETING_STONE_INFO" );
 
@@ -658,13 +657,13 @@ void WorldSession::HandleTutorialFlag( WorldPacket & recv_data )
     //sLog.outDebug("Received Tutorial Flag Set {%u}.", iFlag);
 }
 
-void WorldSession::HandleTutorialClear( WorldPacket & recv_data )
+void WorldSession::HandleTutorialClear( WorldPacket & /*recv_data*/ )
 {
     for ( uint32 iI = 0; iI < 8; iI++)
         GetPlayer()->SetTutorialInt( iI, 0xFFFFFFFF );
 }
 
-void WorldSession::HandleTutorialReset( WorldPacket & recv_data )
+void WorldSession::HandleTutorialReset( WorldPacket & /*recv_data*/ )
 {
     for ( uint32 iI = 0; iI < 8; iI++)
         GetPlayer()->SetTutorialInt( iI, 0x00000000 );
@@ -691,13 +690,13 @@ void WorldSession::HandleSetWatchedFactionInactiveOpcode(WorldPacket & recv_data
     _player->SetFactionInactive(replistid, inactive);
 }
 
-void WorldSession::HandleToggleHelmOpcode( WorldPacket & recv_data )
+void WorldSession::HandleToggleHelmOpcode( WorldPacket & /*recv_data*/ )
 {
     DEBUG_LOG("CMSG_TOGGLE_HELM for %s", _player->GetName());
     _player->ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_HELM);
 }
 
-void WorldSession::HandleToggleCloakOpcode( WorldPacket & recv_data )
+void WorldSession::HandleToggleCloakOpcode( WorldPacket & /*recv_data*/ )
 {
     DEBUG_LOG("CMSG_TOGGLE_CLOAK for %s", _player->GetName());
     _player->ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_HIDE_CLOAK);

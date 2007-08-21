@@ -76,7 +76,7 @@ namespace VMAP
 
         inline unsigned int getNSubModel() const { return(iNSubModel); }
 
-        RealTime getIntersectionTime(const Ray&, bool pExitAtFirst, float pMaxDist);
+        RealTime getIntersectionTime(const Ray&, bool pExitAtFirst, float pMaxDist) const;
 
         void countSubModelsAndNodesAndTriangles(AABSPTree<SubModel *>::Node& pNode, int& nSubModels, int& nNodes, int& nTriangles);
 

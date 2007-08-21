@@ -425,7 +425,11 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 GetGossipCount( uint32 gossipid );
         void addGossipOption(GossipOption const& gso) { m_goptions.push_back(gso); }
 
-        inline void setEmoteState(uint8 emote) { m_emoteState = emote; };
+        void setEmoteState(uint8 emote) { m_emoteState = emote; };
+        void Say(const char* text, const uint32 language, const uint64 TargetGuid) { MonsterSay(text,language,TargetGuid); }
+        void Yell(const char* text, const uint32 language, const uint64 TargetGuid) { MonsterYell(text,language,TargetGuid); }
+        void TextEmote(const char* text, const uint64 TargetGuid) { MonsterTextEmote(text,TargetGuid); }
+        void Whisper(const uint64 receiver, const char* text) { MonsterWhisper(receiver,text); }
 
         void setDeathState(DeathState s);                   // overwrite virtual Unit::setDeathState
 
@@ -490,8 +494,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
                                                             // req. for correct show non-prof. trainers like weaponmaster.
         void _RealtimeSetCreatureInfo();
 
-        float _GetHealthMod(int32 Rank);
-        float _GetDamageMod(int32 Rank);
+        static float _GetHealthMod(int32 Rank);
+        static float _GetDamageMod(int32 Rank);
 
         uint32 m_lootMoney;
         uint64 m_lootRecipient;

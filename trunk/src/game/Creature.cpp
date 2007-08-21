@@ -332,7 +332,7 @@ bool Creature::Create (uint32 guidlow, uint32 mapid, float x, float y, float z, 
 
     if(!IsPositionValid())
     {
-        sLog.outError("ERROR: Creature (guidlow %d, entry %d) not created. Suggested coordinates isn't valid (X: %d Y: ^%d)",guidlow,Entry,x,y);
+        sLog.outError("ERROR: Creature (guidlow %d, entry %d) not created. Suggested coordinates isn't valid (X: %f Y: %f)",guidlow,Entry,x,y);
         return false;
     }
 
@@ -1000,6 +1000,8 @@ void Creature::SaveToDB()
 
 void Creature::SelectLevel(const CreatureInfo *cinfo)
 {
+    uint32 rank = isPet()? 0 : cinfo->rank;
+
     // level
     uint32 minlevel = std::min(cinfo->maxlevel, cinfo->minlevel);
     uint32 maxlevel = std::max(cinfo->maxlevel, cinfo->minlevel);
@@ -1009,7 +1011,7 @@ void Creature::SelectLevel(const CreatureInfo *cinfo)
     float rellevel = maxlevel == minlevel ? 0 : (float(level - minlevel))/(maxlevel - minlevel);
 
     // health
-    float healthmod = _GetDamageMod(isPet() ? 0 : cinfo->rank);
+    float healthmod = _GetHealthMod(rank);
 
     uint32 minhealth = std::min(cinfo->maxhealth, cinfo->minhealth);
     uint32 maxhealth = std::max(cinfo->maxhealth, cinfo->minhealth);
@@ -1032,7 +1034,7 @@ void Creature::SelectLevel(const CreatureInfo *cinfo)
     SetModifierValue(UNIT_MOD_MANA, BASE_VALUE, mana);
 
     // damage
-    float damagemod = _GetDamageMod(isPet() ? 0 : cinfo->rank);
+    float damagemod = _GetDamageMod(rank);
 
     SetBaseWeaponDamage(BASE_ATTACK, MINDAMAGE, cinfo->mindmg * damagemod);
     SetBaseWeaponDamage(BASE_ATTACK, MAXDAMAGE, cinfo->maxdmg * damagemod);
@@ -1094,7 +1096,6 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
         sLog.outErrorDb("Error: creature entry %u does not exist.",Entry);
         return false;
     }
-    uint32 rank = isPet()? 0 : cinfo->rank;
 
     uint32 display_id = cinfo->randomDisplayID();
 

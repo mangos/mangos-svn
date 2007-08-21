@@ -162,7 +162,7 @@ namespace VMAP
 
             NodeValueAccess<TNode, TValue>* iNodeValueAccess;
 
-            void init(NodeValueAccess<TNode, TValue>* pNodeValueAccess, const TNode* inNode, const Ray& ray, float inMinTime, float inMaxTime, float pGlobalMaxTime) {
+            void init(NodeValueAccess<TNode, TValue>* pNodeValueAccess, const TNode* inNode, const Ray& ray, float inMinTime, float inMaxTime) {
                 node     = inNode;
                 minTime  = inMinTime;
                 maxTime  = inMaxTime;
@@ -294,7 +294,7 @@ namespace VMAP
         {
             iNodeValueAccess = pNodeValueAccess;
             stack.resize(stackLength);
-            stack[stackIndex].init(&iNodeValueAccess, root, ray, 0, inf(), pMaxTime);
+            stack[stackIndex].init(&iNodeValueAccess, root, ray, 0, inf());
             //stack[stackIndex].init(&iNodeValueAccess, root, ray, 0, pMaxTime);
             boxMaxDist2 = pMaxTime*pMaxTime;
             boxMaxDist = pMaxTime;
@@ -380,8 +380,7 @@ namespace VMAP
                         s->startTime = s->endTime;
                         s->endTime   = s->maxTime;
                         s->endTime2  = square(s->maxTime);
-                        s->nextChild = (s->nextChild >= 0) ?
-                            (1 - s->nextChild) : -1;
+                        s->nextChild = (s->nextChild >= 0) ? (1 - s->nextChild) : -1;
 
                         // this could be changed somehow,
                         // since Array already does the
@@ -395,7 +394,8 @@ namespace VMAP
                         // back to this frame, so we can
                         // remove it.
 
-                        if (stackIndex == breakFrameIndex) {
+                        if (stackIndex == breakFrameIndex)
+                        {
                             // This will be the case if the
                             // break frame is set on a node, but
                             // the node is exhausted so it won't
@@ -412,14 +412,14 @@ namespace VMAP
                     // There could have been a resize on the array, so
                     // do not use s (pointer into the array)!
 
-                    if (child != NULL) {
+                    if (child != NULL)
+                    {
                         ++stackIndex;
-                        stack[stackIndex].init(&iNodeValueAccess,
-                            child, ray,
-                            childStartTime, childEndTime, boxMaxDist);
+                        stack[stackIndex].init(&iNodeValueAccess, child, ray, childStartTime, childEndTime);
                     }
 
-                    if ((stackIndex < 0) || (stackIndex == breakFrameIndex)) {
+                    if ((stackIndex < 0) || (stackIndex == breakFrameIndex))
+                    {
                         isEnd = true;
                         break;
                     }
@@ -428,12 +428,15 @@ namespace VMAP
                     continue;
                 }
 
-                if (skipAABoxTests) {
+                if (skipAABoxTests)
+                {
                     // No AABox test-- return everything
                     minDistance = s->startTime;
                     maxDistance = s->endTime;
                     break;
-                } else {
+                }
+                else
+                {
                     double t2;
                     // this can be an exact equals because the two
                     // variables are initialized to the same thing

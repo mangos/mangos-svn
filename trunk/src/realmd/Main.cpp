@@ -156,7 +156,7 @@ int main(int argc, char **argv)
                         sLog.outError("Can't set used processors (hex): %x", curAff);
                 }
             }
-            sLog.outString("");
+            sLog.outString();
         }
 
         uint32 Prio = sConfig.GetIntDefault("ProcessPriority", 0);
@@ -167,7 +167,7 @@ int main(int argc, char **argv)
                 sLog.outString("realmd process priority class set to HIGH");
             else
                 sLog.outError("ERROR: Can't set realmd process priority class.");
-            sLog.outString("");
+            sLog.outString();
         }
     }
     #endif

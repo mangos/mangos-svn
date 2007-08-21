@@ -196,18 +196,18 @@ class CliCommandHolder
     private:
         const CliCommand *cmd;
         char *args;
-        pPrintf zprintf;
+        pPrintf m_zprintf;
     public:
-        CliCommandHolder(const CliCommand *command, const char *arguments, pPrintf zprintf) 
-            : cmd(command), zprintf(zprintf)
+        CliCommandHolder(const CliCommand *command, const char *arguments, pPrintf p_zprintf) 
+            : cmd(command), m_zprintf(p_zprintf)
         {
             size_t len = strlen(arguments)+1;
             args = new char[len];
             memcpy(args, arguments, len);
         }
         ~CliCommandHolder() { delete[] args; }
-        void Execute() const { cmd->Func(args, zprintf); }
-        pPrintf GetOutputMethod() const {return (zprintf);}
+        void Execute() const { cmd->Func(args, m_zprintf); }
+        pPrintf GetOutputMethod() const {return (m_zprintf);}
 };
 
 /// The World

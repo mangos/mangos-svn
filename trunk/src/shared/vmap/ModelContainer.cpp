@@ -189,19 +189,22 @@ namespace VMAP
 
     //==========================================================
 
-    ModelContainer::~ModelContainer(void) {
+    ModelContainer::~ModelContainer(void)
+    {
         free();
         if(iSubModel != 0) delete [] iSubModel;
     }
     //==========================================================
 
-    RayIntersectionIterator<TreeNode, SubModel> ModelContainer::beginRayIntersection(const Ray& ray, double pMaxTime, bool skipAABoxTests) const {
+    RayIntersectionIterator<TreeNode, SubModel> ModelContainer::beginRayIntersection(const Ray& ray, double pMaxTime, bool skipAABoxTests) const
+    {
         NodeValueAccess<TreeNode, SubModel> vna = NodeValueAccess<TreeNode, SubModel>(getTreeNodes(), iSubModel);
         return RayIntersectionIterator<TreeNode, SubModel>(vna, ray, &getTreeNode(0), pMaxTime, skipAABoxTests);
     }
     //==========================================================
 
-    RayIntersectionIterator<TreeNode, SubModel> ModelContainer::endRayIntersection() const {
+    RayIntersectionIterator<TreeNode, SubModel> ModelContainer::endRayIntersection() const
+    {
         return RayIntersectionIterator<TreeNode, SubModel>();
     }
 
@@ -219,7 +222,7 @@ namespace VMAP
 
     typedef RayIntersectionIterator<TreeNode, SubModel> IT;
 
-    RealTime ModelContainer::getIntersectionTime(const Ray& pRay, bool pExitAtFirst, float pMaxDist) {
+    RealTime ModelContainer::getIntersectionTime(const Ray& pRay, bool pExitAtFirst, float pMaxDist) const {
 #ifdef _DEBUG_VMAPS
         for(unsigned int i=0; i<getNSubModel(); i++) {
             SubModel model = getSubModel(i);
@@ -253,7 +256,7 @@ namespace VMAP
             that the ray hits the bounding box of obj.  (*obj) has type T,
             so you can call methods directly using the "->" operator.
             */
-            SubModel *model = (SubModel *) &(*obj);
+            SubModel const *model =  &(*obj);
 
             RealTime t = model->getIntersectionTime(pRay, pExitAtFirst, pMaxDist);
             if(t > 0 && t < inf()) {

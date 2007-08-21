@@ -145,7 +145,7 @@ void AggressorAI::EnterEvadeMode()
 }
 
 void
-AggressorAI::UpdateAI(const uint32 diff)
+AggressorAI::UpdateAI(const uint32 /*diff*/)
 {
     // update i_victimGuid if i_creature.getVictim() !=0 and changed
     if(!i_creature.SelectHostilTarget() || !i_creature.getVictim())

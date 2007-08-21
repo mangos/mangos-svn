@@ -211,12 +211,13 @@ class BattleGround
         uint8 GetTeamIndexByTeamId(uint32 Team) const { return Team == ALLIANCE ? 0 : 1; }
 
         /* Triggers handle */
-        virtual void HandleAreaTrigger(Player* Source, uint32 Trigger) {}
-                                                                // must be implemented in BG subclass
-        virtual void HandleKillPlayer(Player* player) {}        // must be implemented in BG subclass if need
-        virtual void HandleDropFlag(Player* player) {}          // must be implemented in BG subclass if need
+        virtual void HandleAreaTrigger(Player* /*Source*/, uint32 /*Trigger*/) {}
+                                                            // must be implemented in BG subclass
+        virtual void HandleKillPlayer(Player* /*player*/) {}// must be implemented in BG subclass if need
+        virtual void HandleDropFlag(Player* /*player*/) {}  // must be implemented in BG subclass if need
     protected:
-        virtual void RemovePlayer(Player *plr, uint64 guid){}   // must be implemented in BG subclass
+        virtual void RemovePlayer(Player * /*player*/, uint64 /*guid*/) {}
+                                                            // must be implemented in BG subclass
     private:
         /* Battleground */
         uint32 m_ID;

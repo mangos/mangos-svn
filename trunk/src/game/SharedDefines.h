@@ -409,7 +409,7 @@ enum GameobjectTypes
     MAX_GAMEOBJECT_TYPE                    = 32             // sending to client this or greater value can crash client.
 };
 
-enum TextEmote
+enum TextEmotes
 {
     TEXTEMOTE_AGREE                = 1,
     TEXTEMOTE_AMAZE                = 2,

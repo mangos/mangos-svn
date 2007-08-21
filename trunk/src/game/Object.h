@@ -231,7 +231,7 @@ class MANGOS_DLL_SPEC WorldObject : public Object
     public:
         virtual ~WorldObject ( ) {}
 
-        virtual void Update ( uint32 time_diff ATTR_UNUSED ) { }
+        virtual void Update ( uint32 /*time_diff*/ ) { }
 
         void _Create (uint32 guidlow, uint32 guidhigh, uint32 mapid, float x, float y, float z, float ang, uint32 nameId);
 
@@ -297,10 +297,10 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         bool IsBeingTeleported() { return mSemaphoreTeleport; }
         void SetSemaphoreTeleport(bool semphsetting) { mSemaphoreTeleport = semphsetting; }
 
-        virtual void Say(const char* text, const uint32 language, const uint64 TargetGuid);
-        virtual void Yell(const char* text, const uint32 language, const uint64 TargetGuid);
-        virtual void TextEmote(const char* text, const uint64 TargetGuid);
-        virtual void Whisper(const uint64 receiver, const char* text);
+        void MonsterSay(const char* text, const uint32 language, const uint64 TargetGuid);
+        void MonsterYell(const char* text, const uint32 language, const uint64 TargetGuid);
+        void MonsterTextEmote(const char* text, const uint64 TargetGuid);
+        void MonsterWhisper(const uint64 receiver, const char* text);
 
         void SendDestroyObject(uint64 guid);
         void SendObjectDeSpawnAnim(uint64 guid);

@@ -55,7 +55,7 @@ template<class VISITOR, class H, class T> void VisitorHelper(VISITOR &v, Contain
 }
 
 // terminate condition container map list
-template<class VISITOR> void VisitorHelper(VISITOR &v, ContainerMapList<TypeNull> &c)
+template<class VISITOR> void VisitorHelper(VISITOR &/*v*/, ContainerMapList<TypeNull> &/*c*/)
 {
 }
 
@@ -77,7 +77,7 @@ template<class VISITOR, class T> void VisitorHelper(VISITOR &v, ContainerArrayLi
     v.Visit(c._element);
 }
 
-template<class VISITOR> void VisitorHelper(VISITOR &v, ContainerArrayList<TypeNull> &c)
+template<class VISITOR> void VisitorHelper(VISITOR &/*v*/, ContainerArrayList<TypeNull> &/*c*/)
 {
 }
 

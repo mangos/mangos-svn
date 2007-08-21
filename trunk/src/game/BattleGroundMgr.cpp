@@ -264,7 +264,7 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
 
         bar.step();
 
-        sLog.outString("");
+        sLog.outString();
         sLog.outErrorDb(">> Loaded 0 battlegrounds. DB table `battleground_template` is empty.");
         return;
     }
@@ -337,7 +337,7 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
 
     delete result;
 
-    sLog.outString( "" );
+    sLog.outString();
     sLog.outString( ">> Loaded %u battlegrounds", count );
 }
 

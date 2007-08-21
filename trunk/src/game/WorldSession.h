@@ -82,10 +82,10 @@ class MANGOS_DLL_SPEC WorldSession
         void SizeError(WorldPacket const& packet, uint32 size) const;
 
         void SendPacket(WorldPacket* packet);
-        void SendNotification(const char *format,...);
+        void SendNotification(const char *format,...) ATTR_PRINTF(2,3);
         void SendLfgResult(uint32 type, uint32 entry, uint8 lfg_type);
         void SendPartyResult(PartyOperation operation, std::string member, PartyResult res);
-        void SendAreaTriggerMessage(const char* Text, ...);
+        void SendAreaTriggerMessage(const char* Text, ...) ATTR_PRINTF(2,3);
 
         uint32 GetSecurity() const { return _security; }
         uint32 GetAccountId() const { return _accountId; }
@@ -185,7 +185,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleCharDeleteOpcode(WorldPacket& recvPacket);
         void HandleCharCreateOpcode(WorldPacket& recvPacket);
         void HandlePlayerLoginOpcode(WorldPacket& recvPacket);
-        void HandleCharEnum(QueryResult * result, uint32 account);
+        void HandleCharEnum(QueryResult * result);
         void HandlePlayerLogin(LoginQueryHolder * holder);
 
         // played time

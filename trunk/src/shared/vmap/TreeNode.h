@@ -56,11 +56,10 @@ namespace VMAP
             iStartPosition = pStartPosition;
             iNumberOfValues = pNValues;
         }
-        inline bool hasChilds() {
-            return(iChilds > 0 || iChilds > 0); 
-        }
+        
+        bool hasChilds() const { return(iChilds > 0 || iChilds > 0); }
 
-        const TreeNode* getChild(TreeNode *pValueArray,int pNo) const;
+        TreeNode const* getChild(TreeNode const* pValueArray, int pNo) const;
         // pChildNo = 0 or 1
         inline void setChildPos(int pChildNo, int pChildPosInTreeNodeArray) { iChilds[pChildNo] = pChildPosInTreeNodeArray; }
 

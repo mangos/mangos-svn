@@ -55,13 +55,13 @@ namespace VMAP
         //Gets a 50 byte binary block
         void initFromBinBlock(void *pBinBlock);
 
-        RayIntersectionIterator<TreeNode, TriangleBox> beginRayIntersection(const Ray& ray, double pMaxTime, bool skipAABoxTests = false); 
+        RayIntersectionIterator<TreeNode, TriangleBox> beginRayIntersection(const Ray& ray, double pMaxTime, bool skipAABoxTests = false) const; 
 
-        RayIntersectionIterator<TreeNode, TriangleBox> endRayIntersection();
+        RayIntersectionIterator<TreeNode, TriangleBox> endRayIntersection() const;
 
         void fillRenderArray(Array<TriangleBox> &pArray, const TreeNode* pTreeNode);
 
-        RealTime getIntersectionTime(const Ray& pRay, bool pExitAtFirst, float pMaxDist);
+        RealTime getIntersectionTime(const Ray& pRay, bool pExitAtFirst, float pMaxDist) const;
 
         void countNodesAndTriangles(AABSPTree<Triangle>::Node& pNode, int &pNNodes, int &pNTriabgles);
 

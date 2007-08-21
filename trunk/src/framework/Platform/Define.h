@@ -109,11 +109,9 @@ typedef uint64      OBJECT_HANDLE;
 #if COMPILER == COMPILER_GNU
 #  define ATTR_NORETURN __attribute__((noreturn))
 #  define ATTR_PRINTF(F,V) __attribute__ ((format (printf, F, V)))
-#  define ATTR_UNUSED __attribute__((__unused__))
 #else
 #  define ATTR_NORETURN
 #  define ATTR_PRINTF(F,V)
-#  define ATTR_UNUSED
 #endif
 
 #endif

@@ -545,39 +545,6 @@ bool ChatHandler::HandleItemMoveCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleSpawnCommand(const char* args)
-{
-    char* pEntry = strtok((char*)args, " ");
-    if (!pEntry)
-        return false;
-
-    char* pFlags = strtok(NULL, " ");
-    if (!pFlags)
-        return false;
-
-    char* pLevel = strtok(NULL, " ");
-    if (!pLevel)
-        return false;
-
-    char* pName = strtok(NULL, "%");
-    if (!pName)
-        return false;
-
-    uint32 level  = atoi(pLevel);
-
-    for (uint8 i = 0; i < strlen(pName); i++)
-    {
-        if(!isalpha(pName[i]) && pName[i]!=' ')
-        {
-            SendSysMessage(LANG_CHARS_ONLY);
-            return false;
-        }
-    }
-    SpawnCreature(m_session, pName, level);
-
-    return true;
-}
-
 bool ChatHandler::HandleAddSpwCommand(const char* args)
 {
     char* charID = strtok((char*)args, " ");

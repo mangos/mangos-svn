@@ -128,14 +128,14 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
 
         delete result;
 
-        sLog.outString( "" );
+        sLog.outString();
         sLog.outString( ">> Loaded %u loot definitions", count );
         if(ssNonLootableItems.str().size() > 0)
             sLog.outErrorDb("Some items can't be succesfully looted: not exist or have in chance field value < 0.000001 with quest chance ==0 in `%s` DB table . List:\n%s",tablename,ssNonLootableItems.str().c_str());
     }
     else
     {
-        sLog.outString( "" );
+        sLog.outString();
         sLog.outErrorDb( ">> Loaded 0 loot definitions. DB table `%s` is empty.",tablename );
     }
 }
