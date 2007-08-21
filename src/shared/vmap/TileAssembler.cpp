@@ -20,11 +20,12 @@
 #include <G3D/Vector3.h>
 #include <G3D/Triangle.h>
 
-
-
 #include "TileAssembler.h"
 #include "CoordModelMapping.h"
 #include "ModelContainer.h"
+
+#include <string.h>
+
 
 #ifdef _ASSEMBLER_DEBUG
 FILE *g_df = NULL;

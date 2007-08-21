@@ -19,6 +19,8 @@
 #include <iostream>
 #include <fstream>
 
+#include <string.h>
+
 #include "ModelContainer.h"
 #include "VMapDefinitions.h"
 

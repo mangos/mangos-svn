@@ -18,6 +18,8 @@
 
 #include "CoordModelMapping.h"
 
+#include <string.h>
+
 namespace VMAP
 {
 
