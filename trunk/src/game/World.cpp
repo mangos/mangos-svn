@@ -985,7 +985,7 @@ void World::ScriptsProcess()
                 ((Creature *)source)->Say(step.script->datatext.c_str(), 0, 0);
                 break;
             case SCRIPT_COMMAND_EMOTE:
-                if(source)
+                if(!source)
                 {
                     sLog.outError("SCRIPT_COMMAND_EMOTE call for NULL creature.");
                     break;
@@ -1000,7 +1000,7 @@ void World::ScriptsProcess()
                 ((Creature *)source)->HandleEmoteCommand(step.script->datalong);
                 break;
             case SCRIPT_COMMAND_FIELD_SET:
-                if(source)
+                if(!source)
                 {
                     sLog.outError("SCRIPT_COMMAND_FIELD_SET call for NULL object.");
                     break;
@@ -1015,7 +1015,7 @@ void World::ScriptsProcess()
                 source->SetUInt32Value(step.script->datalong, step.script->datalong2);
                 break;
             case SCRIPT_COMMAND_MOVE_TO:
-                if(source)
+                if(!source)
                 {
                     sLog.outError("SCRIPT_COMMAND_MOVE_TO call for NULL creature.");
                     break;
