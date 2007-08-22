@@ -443,16 +443,16 @@ void WorldSession::HandlePetUnlearnOpcode(WorldPacket& recvPacket)
     uint64 guid;
     recvPacket >> guid;
 
-    if(!_player->GetPet() || _player->GetPet()->getPetType() != HUNTER_PET || _player->GetPet()->m_spells.size() <= 1)
+    Pet* pet = _player->GetPet();
+
+    if(!pet || pet->getPetType() != HUNTER_PET || pet->m_spells.size() <= 1)
         return;
 
-    if(guid != _player->GetPet()->GetGUID())
+    if(guid != pet->GetGUID())
     {
         sLog.outError( "HandlePetUnlearnOpcode.Pet %u isn't pet of player %s .\n", uint32(GUID_LOPART(guid)),GetPlayer()->GetName() );
         return;
     }
-
-    Creature* pet = _player->GetPet();
 
     CharmInfo *charmInfo = pet->GetCharmInfo();
     if(!charmInfo)
@@ -461,7 +461,7 @@ void WorldSession::HandlePetUnlearnOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    uint32 cost = ((Pet*)pet)->resetTalentsCost();
+    uint32 cost = pet->resetTalentsCost();
 
     if (GetPlayer()->GetMoney() < cost)
     {
@@ -469,9 +469,9 @@ void WorldSession::HandlePetUnlearnOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    for(PetSpellMap::iterator itr = ((Pet*)pet)->m_spells.begin(); itr != ((Pet*)pet)->m_spells.end(); ++itr)
-        ((Pet*)pet)->removeSpell(itr->first);
-    ((Pet*)pet)->SetTP(pet->getLevel() * (((Pet*)pet)->GetLoyaltyLevel() - 1));
+    for(PetSpellMap::iterator itr = pet->m_spells.begin(); itr != pet->m_spells.end(); ++itr)
+        pet->removeSpell(itr->first);
+    pet->SetTP(pet->getLevel() * (pet->GetLoyaltyLevel() - 1));
 
     for(uint8 i = 0; i < 10; i++)
     {
@@ -485,13 +485,13 @@ void WorldSession::HandlePetUnlearnOpcode(WorldPacket& recvPacket)
     {
         SpellEntry const *learn_spellproto = sSpellStore.LookupEntry(CreateSpells->familypassive);
         if(learn_spellproto)
-            ((Pet*)pet)->addSpell(CreateSpells->familypassive);
+            pet->addSpell(CreateSpells->familypassive);
     }
     else
         sLog.outDetail("HandlePetUnlearnOpcode: pet has no createspell entry.");
 
-    ((Pet*)pet)->m_resetTalentsTime = time(NULL);
-    ((Pet*)pet)->m_resetTalentsCost = cost;
+    pet->m_resetTalentsTime = time(NULL);
+    pet->m_resetTalentsCost = cost;
     GetPlayer()->ModifyMoney(-(int32)cost);
 
     GetPlayer()->PetSpellInitialize();
