@@ -38,7 +38,7 @@ bool stopEvent = false;                                     ///< Setting it to t
 RealmList m_realmList;                                      ///< Holds the list of realms for this server
 
 #ifdef DO_POSTGRESQL
-DatabasePostgre dbRealmServer;                                ///< Accessor to the realm server database
+DatabasePostgre dbRealmServer;                              ///< Accessor to the realm server database
 #else
 DatabaseMysql dbRealmServer;                                ///< Accessor to the realm server database
 #endif
