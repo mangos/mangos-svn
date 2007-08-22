@@ -477,9 +477,14 @@ void WorldSession::HandlePetUnlearnOpcode(WorldPacket& recvPacket)
 
     //still keep passive
     PetCreateSpellEntry const* CreateSpells = objmgr.GetPetCreateSpellEntry(pet->GetEntry());
-    SpellEntry const *learn_spellproto = sSpellStore.LookupEntry(CreateSpells->familypassive);
-    if(learn_spellproto)
-        ((Pet*)pet)->addSpell(CreateSpells->familypassive);
+    if(CreateSpells)
+    {
+        SpellEntry const *learn_spellproto = sSpellStore.LookupEntry(CreateSpells->familypassive);
+        if(learn_spellproto)
+            ((Pet*)pet)->addSpell(CreateSpells->familypassive);
+    }
+    else
+        sLog.outDetail("HandlePetUnlearnOpcode: pet has no createspell entry.");
     
     ((Pet*)pet)->m_resetTalentsTime = time(NULL);
     ((Pet*)pet)->m_resetTalentsCost = cost;
