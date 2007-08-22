@@ -2136,7 +2136,7 @@ uint32 Unit::CalculateDamage (WeaponAttackType attType)
     if(max_damage == 0.0)
         max_damage = 5.0;
 
-    return urand ((uint32)min_damage, (uint32)max_damage);
+    return rand32((uint32)min_damage, (uint32)max_damage);
 }
 
 void Unit::SendAttackStart(Unit* pVictim)

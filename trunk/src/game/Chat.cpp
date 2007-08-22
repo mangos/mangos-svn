@@ -409,16 +409,25 @@ void ChatHandler::SendSysMultilineMessage(WorldSession* session, const char *str
     WorldPacket data;
 
     const char* line = str;
-    const char* pos = line;
-    while((pos = strchr(line, '\n')) != NULL)
+    const char* pos = strchr(line, '\n');
+    while(pos != NULL)
     {
-        strncpy(buf, line, pos-line);
-        buf[pos-line]=0;
+        if (pos-line > sizeof(buf)-1)
+        {
+            strncpy(buf, line, sizeof(buf)-1);
+            buf[sizeof(buf)-1]=0;
+            line += sizeof(buf) - 1;
+        }
+        else
+        {
+            strncpy(buf, line, pos-line);
+            buf[pos-line]=0;
+            line = pos+1;
+            pos = strchr(line, '\n');
+        }
 
         FillSystemMessageData(&data, session, buf);
         session->SendPacket(&data);
-
-        line = pos+1;
     }
 
     FillSystemMessageData(&data, session, line);
