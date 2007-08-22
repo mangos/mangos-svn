@@ -42,7 +42,7 @@ namespace MaNGOS
     };
 
     template <class T>
-    inline void ObjectLifeTime<T>::OnDeadReference(void) // We don't handle Dead Reference for now
+        inline void ObjectLifeTime<T>::OnDeadReference(void)// We don't handle Dead Reference for now
     {
         throw std::runtime_error("Dead Reference");
     }

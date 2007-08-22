@@ -101,7 +101,7 @@ typedef uint64      OBJECT_HANDLE;
 #if PLATFORM == PLATFORM_WIN32
 #  ifndef DECLSPEC_NORETURN
 #    define DECLSPEC_NORETURN __declspec(noreturn)
-#  endif 
+#  endif
 #else
 #  define DECLSPEC_NORETURN
 #endif
@@ -113,6 +113,4 @@ typedef uint64      OBJECT_HANDLE;
 #  define ATTR_NORETURN
 #  define ATTR_PRINTF(F,V)
 #endif
-
 #endif
-
