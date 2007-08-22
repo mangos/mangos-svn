@@ -101,7 +101,7 @@ void CliWritePlayerDump(char*command,pPrintf zprintf)
 {
     char * file = strtok(command, " ");
     char * p2 = strtok(NULL, " ");
-    if(!file || !p2) 
+    if(!file || !p2)
     {
         zprintf("Syntax is: writepdump $filename $playerGUID\r\n");
         return;
@@ -259,7 +259,7 @@ void CliInfo(char*,pPrintf zprintf)
         return;
     }
 
-    int linesize = 1+15+2+20+3+15+2+4+1+5+3;                    // see format string
+    int linesize = 1+15+2+20+3+15+2+4+1+5+3;                // see format string
     char* buf = new char[resultDB->GetRowCount()*linesize+1];
     char* bufPos = buf;
 
@@ -389,8 +389,7 @@ void CliBan(char*command,pPrintf zprintf)
     char* reason = strtok(NULL," ");
     char* duration = strtok(NULL," ");
 
-
-    if(!type||!nameOrIP||!reason) // ?!? input of single char "0"-"9" wouldn't detect when with: || !atoi(duration)
+    if(!type||!nameOrIP||!reason)                           // ?!? input of single char "0"-"9" wouldn't detect when with: || !atoi(duration)
     {
         zprintf("Syntax: ban account|ip|character $AccountOrIpOrCharacter $reason ($duration[s|m|h|d]) \r\n");
         return;
@@ -401,18 +400,18 @@ void CliBan(char*command,pPrintf zprintf)
 
     switch (sWorld.BanAccount(type, nameOrIP, duration, reason, "Set by console."))
     {
-    case BAN_SUCCESS:
-        if(atoi(duration)>0)
-            zprintf("%s is banned for %s. Reason: %s.\r\n",nameOrIP,secsToTimeString(TimeStringToSecs(duration),true,false).c_str(),reason);
-        else
-            zprintf("%s is banned permanently. Reason: %s.\r\n",nameOrIP,reason);
-        break;
-    case BAN_NOTFOUND:
-        zprintf("%s %s not found\r\n", type, nameOrIP);
-        break;
-    case BAN_SYNTAX_ERROR:
-        zprintf("Syntax: ban account|ip|character $AccountOrIpOrCharacter $reason ($duration[s|m|h|d]) \r\n");
-        break;
+        case BAN_SUCCESS:
+            if(atoi(duration)>0)
+                zprintf("%s is banned for %s. Reason: %s.\r\n",nameOrIP,secsToTimeString(TimeStringToSecs(duration),true,false).c_str(),reason);
+            else
+                zprintf("%s is banned permanently. Reason: %s.\r\n",nameOrIP,reason);
+            break;
+        case BAN_NOTFOUND:
+            zprintf("%s %s not found\r\n", type, nameOrIP);
+            break;
+        case BAN_SYNTAX_ERROR:
+            zprintf("Syntax: ban account|ip|character $AccountOrIpOrCharacter $reason ($duration[s|m|h|d]) \r\n");
+            break;
     }
 }
 
@@ -481,7 +480,7 @@ void CliSetGM(char *command,pPrintf zprintf)
     char *szAcc = strtok(command," ");
     char *szLevel =  strtok(NULL," ");
 
-    if(!szAcc||!szLevel)                                              //wrong syntax 'setgm' without name
+    if(!szAcc||!szLevel)                                    //wrong syntax 'setgm' without name
     {
         zprintf("Syntax is: setgm $character $number (0 - normal, 3 - gamemaster)>\r\n");
         return;
@@ -574,15 +573,15 @@ void ParseCommand( pPrintf zprintf, char* input)
             ///- Circle through the command table and, if found, put the command in the queue
             for ( x=0;x<CliTotalCmds;x++)
                 if(!strcmp(Commands[x].cmd,supposedCommand))
-                {
-                    sWorld.QueueCliCommand(new CliCommandHolder(&Commands[x], arguments, zprintf));
-                    bSuccess=true;
-                    break;
-                }
+            {
+                sWorld.QueueCliCommand(new CliCommandHolder(&Commands[x], arguments, zprintf));
+                bSuccess=true;
+                break;
+            }
 
-                ///- Display an error message if the command is unknown
-                if(x==CliTotalCmds)
-                    zprintf("Unknown command: %s\r\n", input);
+            ///- Display an error message if the command is unknown
+            if(x==CliTotalCmds)
+                zprintf("Unknown command: %s\r\n", input);
         }
     }
     if (!bSuccess)
@@ -662,7 +661,7 @@ void CliSetTBC(char *command,pPrintf zprintf)
         return;
     }
 
-    int lev=atoi(szTBC);                                  //get int anyway (0 if error)
+    int lev=atoi(szTBC);                                    //get int anyway (0 if error)
 
     if((lev > 1)|| (lev < 0))
     {
@@ -722,7 +721,7 @@ void CliSend(char *playerN,pPrintf zprintf)
         zprintf("Player %s not found!\r\n", plr);
         return;
     }
-    
+
     if (rPlayer->GetSession()->isLogingOut())
     {
         zprintf("Cannot send message while player %s is logging out!\r\n",plr);
@@ -733,7 +732,7 @@ void CliSend(char *playerN,pPrintf zprintf)
     //Use SendAreaTriggerMessage for fastest delivery.
     rPlayer->GetSession()->SendAreaTriggerMessage("%s", msg);
     rPlayer->GetSession()->SendAreaTriggerMessage("|cffff0000[Message from administrator]:|r");
-    
+
     //Confirmation message
     zprintf("Message '%s' sent to %s\r\n",msg , plr);
 }
