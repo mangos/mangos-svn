@@ -73,7 +73,10 @@ BattleGround::BattleGround()
 
 BattleGround::~BattleGround()
 {
+    for(BGObjects::iterator itr = m_bgobjects.begin(); itr != m_bgobjects.end(); ++itr)
+        delete itr->object;
 
+    m_bgobjects.clear();
 }
 
 void BattleGround::Update(time_t diff)
@@ -820,18 +823,21 @@ void BattleGround::RemovePlayerFromResurrectQueue(uint64 player_guid)
 
 bool BattleGround::SpawnObject(uint32 entry, uint32 type, float x, float y, float z, float o, float rotation0, float rotation1, float rotation2, float rotation3, uint32 spellid, uint32 timer)
 {
-    BattleGroundObjectInfo info;
-    info.object         = new GameObject(NULL);
-    info.spellid        = spellid;
-    info.timer          = timer;
-    m_bgobjects[type]   = info;
+    if(type >= m_bgobjects.size())
+        return false;
 
-    if(!m_bgobjects[type].object->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), entry, GetMapId(), x, y, z, o, rotation0, rotation1, rotation2, rotation3, 100, 0))
+    BattleGroundObjectInfo& info = m_bgobjects[type];
+    info.object         = new GameObject(NULL);
+
+    if(!info.object->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), entry, GetMapId(), x, y, z, o, rotation0, rotation1, rotation2, rotation3, 100, 0))
     {
-        delete m_bgobjects[type].object;
+        delete info.object;
         info.object = NULL;
         return false;
     }
+
+    info.spellid        = spellid;
+    info.timer          = timer;
 
     return true;
 }
