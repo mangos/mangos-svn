@@ -40,5 +40,4 @@ class QueryResultSqlite : public QueryResult
         uint32 mTableIndex;
 };
 #endif
-
 #endif

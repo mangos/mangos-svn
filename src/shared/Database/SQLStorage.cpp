@@ -80,7 +80,7 @@ void SQLStorage::Load ()
         RecordCount=fields[0].GetUInt32();
         delete result;
     }
-    else 
+    else
         RecordCount = 0;
 
     result = sDatabase.PQuery("SELECT * FROM `%s`",table);

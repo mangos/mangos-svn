@@ -42,5 +42,4 @@ extern DatabasePostgre loginDatabase;
 extern DatabaseMysql sDatabase;
 extern DatabaseMysql loginDatabase;
 #endif
-
 #endif

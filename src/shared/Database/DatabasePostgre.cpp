@@ -43,7 +43,8 @@ DatabasePostgre::DatabasePostgre() : Database()
 
 DatabasePostgre::~DatabasePostgre()
 {
-    if( mPGconn ) {
+    if( mPGconn )
+    {
         PQfinish(mPGconn);
         mPGconn = NULL;
     }
@@ -77,14 +78,16 @@ bool DatabasePostgre::Initialize(const char *infoString)
 
     mPGconn = PQsetdbLogin(host.c_str(), port_or_socket.c_str(), NULL, NULL, database.c_str(), user.c_str(), password.c_str());
 
-	/* check to see that the backend connection was successfully made */
-	if (PQstatus(mPGconn) != CONNECTION_OK)
-	{
+    /* check to see that the backend connection was successfully made */
+    if (PQstatus(mPGconn) != CONNECTION_OK)
+    {
         sLog.outError( "Could not connect to Postgre database at %s: %s\n",
             host.c_str(), PQerrorMessage(mPGconn));
-		PQfinish(mPGconn);
+        PQfinish(mPGconn);
         return false;
-    } else {
+    }
+    else
+    {
         sLog.outDetail( "Connected to Postgre database at %s\n",
             host.c_str());
         return true;
@@ -100,30 +103,30 @@ QueryResult* DatabasePostgre::Query(const char *sql)
     uint64 rowCount = 0;
     uint32 fieldCount = 0;
 
-        // guarded block for thread-safe mySQL request
-        ZThread::Guard<ZThread::FastMutex> query_connection_guard((ZThread::ThreadImpl::current()==tranThread?tranMutex:mMutex));
+    // guarded block for thread-safe mySQL request
+    ZThread::Guard<ZThread::FastMutex> query_connection_guard((ZThread::ThreadImpl::current()==tranThread?tranMutex:mMutex));
 
-        // Send the query
-        PGresult * result = PQexec(mPGconn, sql);
+    // Send the query
+    PGresult * result = PQexec(mPGconn, sql);
 
-        if (PQresultStatus(result) != PGRES_COMMAND_OK)
-        {
-            sLog.outErrorDb( "SQL: %s", sql );
-            sLog.outErrorDb("query ERROR: %s", PQerrorMessage(mPGconn));
-            PQclear(result);
-            return NULL;
-        }
-        else
-        {
-            DEBUG_LOG( "SQL: %s", sql );
-        }
+    if (PQresultStatus(result) != PGRES_COMMAND_OK)
+    {
+        sLog.outErrorDb( "SQL: %s", sql );
+        sLog.outErrorDb("query ERROR: %s", PQerrorMessage(mPGconn));
+        PQclear(result);
+        return NULL;
+    }
+    else
+    {
+        DEBUG_LOG( "SQL: %s", sql );
+    }
 
+    rowCount = PQntuples(result);
+    fieldCount = PQnfields(result);
+    // end guarded block
 
-        rowCount = PQntuples(result);
-        fieldCount = PQnfields(result);
-        // end guarded block
-
-    if (!result ) {
+    if (!result )
+    {
         PQclear(result);
         return NULL;
     }
@@ -134,8 +137,8 @@ QueryResult* DatabasePostgre::Query(const char *sql)
         return NULL;
     }
 
-	QueryResultPostgre * queryResult = new QueryResultPostgre(result, fieldCount, rowCount);
-	return queryResult;
+    QueryResultPostgre * queryResult = new QueryResultPostgre(result, fieldCount, rowCount);
+    return queryResult;
 
     queryResult->NextRow();
 
@@ -250,5 +253,4 @@ void DatabasePostgre::InitDelayThread()
 void DatabasePostgre::HaltDelayThread()
 {
 }
-
 #endif

@@ -50,5 +50,4 @@ void SqlDelayThread::Stop()
 {
     m_running = false;
 }
-
 #endif

@@ -107,5 +107,4 @@ enum Field::DataTypes QueryResultMysql::ConvertNativeType(enum_field_types mysql
             return Field::DB_TYPE_UNKNOWN;
     }
 }
-
 #endif

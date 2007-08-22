@@ -31,19 +31,18 @@ class SqlDelayThread : public ZThread::Runnable
 {
     typedef ZThread::LockedQueue<SqlOperation*, ZThread::FastMutex> SqlQueue;
     private:
-        SqlQueue m_sqlQueue;                                ///< Queue of SQL statements  
+        SqlQueue m_sqlQueue;                                ///< Queue of SQL statements
         Database* m_dbEngine;                               ///< Pointer to used Database engine
         bool m_running;
 
         SqlDelayThread();
     public:
         SqlDelayThread(Database* db);
-        
+
         ///< Put sql statement to delay queue
         inline void Delay(SqlOperation* sql) { m_sqlQueue.add(sql); }
 
         virtual void Stop();                                ///< Stop event
         virtual void run();                                 ///< Main Thread loop
 };
-
 #endif                                                      //__SQLDELAYTHREAD_H

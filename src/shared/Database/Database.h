@@ -37,7 +37,7 @@ class Database
 {
     protected:
         Database() : m_threadBody(NULL), m_delayThread(NULL) {};
-        
+
         TransactionQueues m_tranQueues;                     ///< Transaction queues from diff. threads
         QueryQueues m_queryQueues;                          ///< Query queues from diff threads
         SqlDelayThread* m_threadBody;                       ///< Pointer to delay sql executer
@@ -46,13 +46,13 @@ class Database
     public:
 
         virtual ~Database();
-        
+
         virtual bool Initialize(const char *infoString);
         virtual void InitDelayThread() = 0;
         virtual void HaltDelayThread() = 0;
 
         virtual QueryResult* Query(const char *sql) = 0;
-                QueryResult* PQuery(const char *format,...) ATTR_PRINTF(2,3);
+        QueryResult* PQuery(const char *format,...) ATTR_PRINTF(2,3);
 
         /// Async queries and query holders, implemented in DatabaseImpl.h
         template<class Class>
@@ -69,7 +69,7 @@ class Database
             bool DelayQueryHolder(Class *object, void (Class::*method)(QueryResult*, SqlQueryHolder*, ParamType1), SqlQueryHolder *holder, ParamType1 param1);
 
         virtual bool Execute(const char *sql) = 0;
-                bool PExecute(const char *format,...) ATTR_PRINTF(2,3);
+        bool PExecute(const char *format,...) ATTR_PRINTF(2,3);
         virtual bool DirectExecute(const char* sql) = 0;
 
         // Writes SQL commands to a LOG file (see mangosd.conf "LogSQL")
@@ -102,9 +102,8 @@ class Database
         void SetResultQueue(SqlResultQueue * queue);
 
     private:
-        // 0 - do not log, 1 - log sql commands        
+        // 0 - do not log, 1 - log sql commands
         uint32 m_logSQL;
         std::string m_logsDir;
 };
-
 #endif

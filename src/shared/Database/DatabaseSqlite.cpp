@@ -98,5 +98,4 @@ bool DatabaseSqlite::Execute(const char *sql)
 
     return true;
 }
-
 #endif

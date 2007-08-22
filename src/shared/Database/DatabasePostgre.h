@@ -31,8 +31,6 @@
 #include <libpq-fe.h>
 #endif
 
-
-
 class DatabasePostgre : public Database
 {
     friend class MaNGOS::OperatorNew<DatabasePostgre>;
@@ -44,11 +42,11 @@ class DatabasePostgre : public Database
         //! Initializes Postgres and connects to a server.
         /*! infoString should be formated like hostname;username;password;database. */
         bool Initialize(const char *infoString);
-	void InitDelayThread();
-	void HaltDelayThread();
+        void InitDelayThread();
+        void HaltDelayThread();
         QueryResult* Query(const char *sql);
         bool Execute(const char *sql);
-	bool DirectExecute(const char* sql);
+        bool DirectExecute(const char* sql);
         bool BeginTransaction();
         bool CommitTransaction();
         bool RollbackTransaction();

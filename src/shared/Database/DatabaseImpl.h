@@ -62,7 +62,7 @@ Database::AsyncPQuery(Class *object, void (Class::*method)(QueryResult*), const 
         sLog.outError("SQL Query truncated (and not execute) for format: %s",format);
         return false;
     }
-    
+
     return AsyncQuery(object, method, szQuery);
 }
 
@@ -83,7 +83,7 @@ Database::AsyncPQuery(Class *object, void (Class::*method)(QueryResult*, ParamTy
         sLog.outError("SQL Query truncated (and not execute) for format: %s",format);
         return false;
     }
-    
+
     return AsyncQuery(object, method, param1, szQuery);
 }
 

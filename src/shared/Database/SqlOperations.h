@@ -118,5 +118,4 @@ class SqlQueryHolderEx : public SqlOperation
             : m_holder(holder), m_callback(callback), m_queue(queue) {}
         void Execute(Database *db);
 };
-
 #endif                                                      //__SQLOPERATIONS_H
