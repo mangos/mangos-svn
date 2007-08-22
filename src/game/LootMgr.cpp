@@ -264,7 +264,7 @@ void FillLoot(Loot *loot, uint32 loot_id, LootStore& store)
                 );
         else if ( loot->items.size() < MAX_NR_LOOT_ITEMS )
         {
-            // non-group and non-quest loot reference 
+            // non-group and non-quest loot reference
             if(item_iter->chanceOrRef < 0 && item_iter->questChanceOrGroup == 0)
             {
                 // Reference to another loot

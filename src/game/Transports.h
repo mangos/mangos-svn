@@ -25,7 +25,6 @@
 #include <set>
 #include <string>
 
-
 class TransportPath
 {
     public:

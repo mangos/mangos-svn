@@ -402,28 +402,28 @@ namespace MaNGOS
 
     class AnyAoETargetUnitInObjectRangeCheck
     {
-    public:
-        AnyAoETargetUnitInObjectRangeCheck(WorldObject* obj, Unit* funit, float range)
-            : i_obj(obj), i_funit(funit), i_range(range)
-        {
-            Unit* check = i_funit;
-            Unit* owner = i_funit->GetOwner();
-            if(owner)
-                check = owner;
-            i_targetForPlayer = ( check->GetTypeId()==TYPEID_PLAYER );
-        }
-        bool operator()(Unit* u)
-        {
-            if(u->isAlive() && (i_targetForPlayer ? !i_funit->IsFriendlyTo(u) : i_funit->IsHostileTo(u) )&& i_obj->IsWithinDistInMap(u, i_range))
-                return true;
+        public:
+            AnyAoETargetUnitInObjectRangeCheck(WorldObject* obj, Unit* funit, float range)
+                : i_obj(obj), i_funit(funit), i_range(range)
+            {
+                Unit* check = i_funit;
+                Unit* owner = i_funit->GetOwner();
+                if(owner)
+                    check = owner;
+                i_targetForPlayer = ( check->GetTypeId()==TYPEID_PLAYER );
+            }
+            bool operator()(Unit* u)
+            {
+                if(u->isAlive() && (i_targetForPlayer ? !i_funit->IsFriendlyTo(u) : i_funit->IsHostileTo(u) )&& i_obj->IsWithinDistInMap(u, i_range))
+                    return true;
 
-            return false;
-        }
-    private:
-        bool i_targetForPlayer;
-        WorldObject* const i_obj;
-        Unit* const i_funit;
-        float i_range;
+                return false;
+            }
+        private:
+            bool i_targetForPlayer;
+            WorldObject* const i_obj;
+            Unit* const i_funit;
+            float i_range;
     };
 
     struct AnyDeadUnitCheck
@@ -485,52 +485,50 @@ namespace MaNGOS
 
     class AnyAssistCreatureInRangeCheck
     {
-    public:
-        AnyAssistCreatureInRangeCheck(Unit* funit, Unit* enemy, float range)
-            : i_funit(funit), i_enemy(enemy), i_range(range)
-        {
-        }
-        bool operator()(Creature* u)
-        {
-            if(u == i_funit)
-                return false;
+        public:
+            AnyAssistCreatureInRangeCheck(Unit* funit, Unit* enemy, float range)
+                : i_funit(funit), i_enemy(enemy), i_range(range)
+            {
+            }
+            bool operator()(Creature* u)
+            {
+                if(u == i_funit)
+                    return false;
 
-            // we don't need help from zombies :)
-            if( !u->isAlive() )
-                return false;
+                // we don't need help from zombies :)
+                if( !u->isAlive() )
+                    return false;
 
-            // only free creature
-            if( u->GetCharmerOrOwnerGUID() )
-                return false;
+                // only free creature
+                if( u->GetCharmerOrOwnerGUID() )
+                    return false;
 
-            // skip fighting creature
-            if( u->isInCombat() )
-                return false;
+                // skip fighting creature
+                if( u->isInCombat() )
+                    return false;
 
-            // too far
-            if( !i_funit->IsWithinDistInMap(u, i_range) )
-                return false;
+                // too far
+                if( !i_funit->IsWithinDistInMap(u, i_range) )
+                    return false;
 
-            // skip non hostile to caster enemy creatures
-            if( !u->IsHostileTo(i_enemy) )
-                return false;
+                // skip non hostile to caster enemy creatures
+                if( !u->IsHostileTo(i_enemy) )
+                    return false;
 
-            // only from same creature faction
-            if(u->getFaction() != i_funit->getFaction() )
-                return false;
+                // only from same creature faction
+                if(u->getFaction() != i_funit->getFaction() )
+                    return false;
 
-            if(!u->IsWithinLOSInMap(i_enemy) )
-                return false;
+                if(!u->IsWithinLOSInMap(i_enemy) )
+                    return false;
 
-            return true;
-        }
-    private:
-        Unit* const i_funit;
-        Unit* const i_enemy;
-        float i_range;
+                return true;
+            }
+        private:
+            Unit* const i_funit;
+            Unit* const i_enemy;
+            float i_range;
     };
-
-
 
     #ifndef WIN32
     template<> void PlayerRelocationNotifier::Visit<Creature>(CreatureMapType &);

@@ -23,7 +23,7 @@
 #include "Creature.h"
 #include "GameObject.h"
 
-#define max_ge_check_delay 86400 // 1 day in secondes
+#define max_ge_check_delay 86400                            // 1 day in secondes
 
 struct GameEventData
 {

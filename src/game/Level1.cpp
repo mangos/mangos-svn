@@ -35,7 +35,7 @@
 #endif
 bool ChatHandler::HandleSayCommand(const char* args)
 {
-    uint64 guid = m_session->GetPlayer()->GetSelection();    
+    uint64 guid = m_session->GetPlayer()->GetSelection();
     Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
 
     if(!pCreature)
@@ -51,7 +51,7 @@ bool ChatHandler::HandleSayCommand(const char* args)
 
 bool ChatHandler::HandleYellCommand(const char* args)
 {
-    uint64 guid = m_session->GetPlayer()->GetSelection();    
+    uint64 guid = m_session->GetPlayer()->GetSelection();
     Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
 
     if(!pCreature)
@@ -67,7 +67,7 @@ bool ChatHandler::HandleYellCommand(const char* args)
 
 bool ChatHandler::HandleEmote2Command(const char* args)
 {
-    uint64 guid = m_session->GetPlayer()->GetSelection();        
+    uint64 guid = m_session->GetPlayer()->GetSelection();
     Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
 
     if(!pCreature)
@@ -81,12 +81,12 @@ bool ChatHandler::HandleEmote2Command(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleWhisperCommand(const char* args)        //WTF? what should it do?
+bool ChatHandler::HandleWhisperCommand(const char* args)    //WTF? what should it do?
 {
     char* receiver = strtok((char*)args, " ");
     char* text = strtok(NULL, "");
 
-    uint64 guid = m_session->GetPlayer()->GetSelection();  
+    uint64 guid = m_session->GetPlayer()->GetSelection();
     Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
 
     if(!pCreature || !receiver || !text)
@@ -96,7 +96,7 @@ bool ChatHandler::HandleWhisperCommand(const char* args)        //WTF? what shou
     }
 
     pCreature->Whisper(atol(receiver), text);
-    
+
     return true;
 }
 
@@ -109,14 +109,14 @@ bool ChatHandler::HandleAnnounceCommand(const char* args)
     str += args;
     sWorld.SendWorldText(str.c_str(), NULL);
 
-#ifdef _DEBUG_VMAPS
+    #ifdef _DEBUG_VMAPS
     VMAP::IVMapManager *vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
     float x,y,z;
     m_session->GetPlayer()->GetPosition(x,y,z);
     char buffer[100];
     sprintf(buffer, "pos %f,%f,%f",x,y,z);
     vMapManager->processCommand(buffer);
-#endif
+    #endif
     return true;
 }
 
@@ -139,10 +139,10 @@ bool ChatHandler::HandleGMOnCommand(const char* args)
 {
     m_session->GetPlayer()->SetGameMaster(true);
     m_session->SendNotification("GM mode is ON");
-#ifdef _DEBUG_VMAPS
+    #ifdef _DEBUG_VMAPS
     VMAP::IVMapManager *vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
     vMapManager->processCommand("stoplog");
-#endif
+    #endif
     return true;
 }
 
@@ -150,10 +150,10 @@ bool ChatHandler::HandleGMOffCommand(const char* args)
 {
     m_session->GetPlayer()->SetGameMaster(false);
     m_session->SendNotification("GM mode is OFF");
-#ifdef _DEBUG_VMAPS
+    #ifdef _DEBUG_VMAPS
     VMAP::IVMapManager *vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
     vMapManager->processCommand("startlog");
-#endif
+    #endif
     return true;
 }
 
@@ -234,8 +234,8 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
         if (MapManager::Instance().GetMap(m_session->GetPlayer()->GetMapId(), m_session->GetPlayer())->Instanceable())
         {
             if ( (MapManager::Instance().GetMap(chr->GetMapId(), chr)->Instanceable()) &&
-                (MapManager::Instance().GetMap(chr->GetMapId(), chr)->GetInstanceId() != 
-                  MapManager::Instance().GetMap(m_session->GetPlayer()->GetMapId(), m_session->GetPlayer())->GetInstanceId()) )
+                (MapManager::Instance().GetMap(chr->GetMapId(), chr)->GetInstanceId() !=
+                MapManager::Instance().GetMap(m_session->GetPlayer()->GetMapId(), m_session->GetPlayer())->GetInstanceId()) )
             {
                 // cannot summon from instance to instance
                 PSendSysMessage(LANG_CANNOT_SUMMON_TO_INST,chr->GetName());
@@ -243,7 +243,7 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
             }
 
             // we are in instance, and can summon only player in our group with us as lead
-            if ( !m_session->GetPlayer()->GetGroup() || !chr->GetGroup() || 
+            if ( !m_session->GetPlayer()->GetGroup() || !chr->GetGroup() ||
                 (chr->GetGroup()->GetLeaderGUID() != m_session->GetPlayer()->GetGUID()) ||
                 (m_session->GetPlayer()->GetGroup()->GetLeaderGUID() != m_session->GetPlayer()->GetGUID()) )
                 // the last check is a bit excessive, but let it be, just in case
@@ -314,8 +314,8 @@ bool ChatHandler::HandleGonameCommand(const char* args)
         if (MapManager::Instance().GetMap(chr->GetMapId(), chr)->Instanceable())
         {
             if ( (MapManager::Instance().GetMap(_player->GetMapId(), _player)->Instanceable()) &&
-                (MapManager::Instance().GetMap(chr->GetMapId(), chr)->GetInstanceId() != 
-                  MapManager::Instance().GetMap(_player->GetMapId(), _player)->GetInstanceId()) )
+                (MapManager::Instance().GetMap(chr->GetMapId(), chr)->GetInstanceId() !=
+                MapManager::Instance().GetMap(_player->GetMapId(), _player)->GetInstanceId()) )
             {
                 // cannot go from instance to instance
                 PSendSysMessage(LANG_CANNOT_GO_INST_INST,chr->GetName());
@@ -346,7 +346,8 @@ bool ChatHandler::HandleGonameCommand(const char* args)
 
             // bind us to the players instance
             BoundInstancesMap::iterator i = chr->m_BoundInstances.find(chr->GetMapId());
-            if (i == chr->m_BoundInstances.end()) return true; // error, the player has no instance bound!!!
+                                                            // error, the player has no instance bound!!!
+            if (i == chr->m_BoundInstances.end()) return true;
             _player->m_BoundInstances[chr->GetMapId()] = std::pair < uint32, uint32 >(i->second.first, i->second.second);
             _player->SetInstanceId(chr->GetInstanceId());
         }
@@ -1306,7 +1307,7 @@ bool ChatHandler::HandleModifyMountCommand(const char* args)
     data.Initialize( SMSG_FORCE_RUN_SPEED_CHANGE, (8+4+1+4) );
     data.append(chr->GetPackGUID());
     data << (uint32)0;
-    data << (uint8)0; //new 2.1.0
+    data << (uint8)0;                                       //new 2.1.0
     data << float(speed);
     chr->SendMessageToSet( &data, true );
 
@@ -1442,7 +1443,7 @@ bool ChatHandler::HandleTeleCommand(const char * args)
         return true;
     }
 
-    char* cId = extractKeyFromLink((char*)args,"Htele");           // string or [name] Shift-click form |color|Htele:name|h[name]|h|r
+    char* cId = extractKeyFromLink((char*)args,"Htele");    // string or [name] Shift-click form |color|Htele:name|h[name]|h|r
     if(!cId)
         return false;
 
@@ -1597,7 +1598,7 @@ bool ChatHandler::HandleSendMailCommand(const char* args)
     std::string name    = pName;
     std::string subject = msgSubject;
     std::string text    = msgText;
-    
+
     normalizePlayerName(name);
 
     uint32 receiver_guid = objmgr.GetPlayerGUIDByName(name);
@@ -1636,7 +1637,7 @@ bool ChatHandler::HandleNameTeleCommand(const char * args)
     if(!tail)
         return false;
 
-    char* cId = extractKeyFromLink((char*)tail,"Htele");           // string or [name] Shift-click form |color|Htele:name|h[name]|h|r
+    char* cId = extractKeyFromLink((char*)tail,"Htele");    // string or [name] Shift-click form |color|Htele:name|h[name]|h|r
     if(!cId)
         return false;
 
@@ -1711,7 +1712,7 @@ bool ChatHandler::HandleNameTeleCommand(const char * args)
 }
 
 bool ChatHandler::HandleGroupTeleCommand(const char * args)
-{    
+{
     Player *player = getSelectedPlayer();
     if (!player)
     {
@@ -1719,7 +1720,7 @@ bool ChatHandler::HandleGroupTeleCommand(const char * args)
         return true;
     }
 
-    char* cId = extractKeyFromLink((char*)args,"Htele");           // string or [name] Shift-click form |color|Htele:name|h[name]|h|r
+    char* cId = extractKeyFromLink((char*)args,"Htele");    // string or [name] Shift-click form |color|Htele:name|h[name]|h|r
     if(!cId)
         return false;
 
@@ -1745,7 +1746,7 @@ bool ChatHandler::HandleGroupTeleCommand(const char * args)
         PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
         return true;
     }
-    
+
     Group *grp = player->GetGroup();
 
     if(!grp)
@@ -1753,7 +1754,7 @@ bool ChatHandler::HandleGroupTeleCommand(const char * args)
         PSendSysMessage(LANG_NOT_IN_GROUP,player->GetName());
         return true;
     }
-    
+
     for(GroupReference *itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
     {
         Player *pl = itr->getSource();
@@ -1828,7 +1829,6 @@ bool ChatHandler::HandleGroupgoCommand(const char* args)
         return true;
     }
 
-
     for(GroupReference *itr = grp->GetFirstMember(); itr != NULL; itr = itr->next())
     {
         Player *pl = itr->getSource();
@@ -1852,7 +1852,7 @@ bool ChatHandler::HandleGroupgoCommand(const char* args)
         {
             Map* plMap = MapManager::Instance().GetMap(pl->GetMapId(), pl);
 
-            if ( plMap->Instanceable() && plMap->GetInstanceId() != gmMap->GetInstanceId() ) 
+            if ( plMap->Instanceable() && plMap->GetInstanceId() != gmMap->GetInstanceId() )
             {
                 // cannot summon from instance to instance
                 PSendSysMessage(LANG_CANNOT_SUMMON_TO_INST,pl->GetName());

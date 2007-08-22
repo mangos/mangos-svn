@@ -21,7 +21,7 @@
 #include "GroupReference.h"
 
 void GroupReference::targetObjectBuildLink()
-{ 
+{
     // called from link()
     getTarget()->LinkMember(this);
 }
@@ -33,7 +33,7 @@ void GroupReference::targetObjectDestroyLink()
 }
 
 void GroupReference::sourceObjectDestroyLink()
-{ 
+{
     // called from invalidate()
     getTarget()->DelinkMember(this);
 }

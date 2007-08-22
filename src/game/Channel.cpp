@@ -21,13 +21,13 @@
 #include "World.h"
 
 Channel::Channel(std::string _name, uint32 _channal_id)
-    : name(_name), announce(true), moderate(false), channel_id(_channal_id), m_ownerGUID(0), password("")
+: name(_name), announce(true), moderate(false), channel_id(_channal_id), m_ownerGUID(0), password("")
 {
     // set special flags if built-in channel
     ChatChannelsEntry const* ch = GetChannelEntryFor(_channal_id);
     if(ch)
     {
-        channel_id = ch->ChannelID;                         // built-in channel    
+        channel_id = ch->ChannelID;                         // built-in channel
         announce = false;                                   // no join/leave announces
     }
 }
@@ -482,8 +482,8 @@ void Channel::Say(uint64 p, const char *what, uint32 lang)
         WorldPacket data(SMSG_MESSAGECHAT,1+4+8+4+name.size()+1+8+4+messageLength+1);
         data << (uint8)CHAT_MSG_CHANNEL;
         data << (uint32)lang;
-        data << p;                      //2.1.0
-        data << uint32(0);              //2.1.0
+        data << p;                                          //2.1.0
+        data << uint32(0);                                  //2.1.0
         data << name;
         data << p;
         data << messageLength;

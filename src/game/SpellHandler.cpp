@@ -182,7 +182,7 @@ void WorldSession::HandleOpenItemOpcode(WorldPacket& recvPacket)
         }
     }
 
-    if(pItem->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_WRAPPED))                 // wrapped?
+    if(pItem->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_WRAPPED))// wrapped?
     {
         QueryResult *result = sDatabase.PQuery("SELECT `entry`, `flags` FROM `character_gifts` WHERE `item_guid` = '%u'", pItem->GetGUIDLow());
         if (result)
@@ -270,7 +270,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             }
             break;
 
-        //big gun, its a spell/aura
+            //big gun, its a spell/aura
         case GAMEOBJECT_TYPE_GOOBER:                        //10
             info = obj->GetGOInfo();
             spellId = info ? info->sound10 : 0;
@@ -459,7 +459,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                             // check if flag dropped
                             if(((BattleGroundWS*)bg)->GetFlagState(ALLIANCE) != FLAG_STATE_ON_BASE)
                                 return;
-                            spellId = 23335;    // Silverwing Flag
+                            spellId = 23335;                // Silverwing Flag
                             break;
                         case 179831:
                             // check if it's correct bg
@@ -468,13 +468,13 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                             // check if flag dropped
                             if(((BattleGroundWS*)bg)->GetFlagState(HORDE) != FLAG_STATE_ON_BASE)
                                 return;
-                            spellId = 23333;    // Warsong Flag
+                            spellId = 23333;                // Warsong Flag
                             break;
                         case 184141:
                             // check if it's correct bg
                             if(bg->GetID() != BATTLEGROUND_EY)
                                 return;
-                            spellId = 34976;    // Netherstorm Flag
+                            spellId = 34976;                // Netherstorm Flag
                             break;
                     }
                 }
@@ -622,11 +622,11 @@ void WorldSession::HandlePetCancelAuraOpcode( WorldPacket& recvPacket)
 
     uint64 guid;
     uint16 spellId;
-//    uint16 unknown; what's this for? always 0 during tests
+    //    uint16 unknown; what's this for? always 0 during tests
 
     recvPacket >> guid;
     recvPacket >> spellId;
-    
+
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId );
     if(!spellInfo)
     {

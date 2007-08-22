@@ -45,14 +45,14 @@ enum QuestFailedReasons
     INVALIDREASON_DONT_HAVE_REQ        = 0,
     INVALIDREASON_DONT_HAVE_REQLEVEL   = 1,
     INVALIDREASON_DONT_HAVE_RACE       = 6,
-    INVALIDREASON_UNKNOWN7             = 7,  //quest completed
+    INVALIDREASON_UNKNOWN7             = 7,                 //quest completed
     INVALIDREASON_HAVE_TIMED_QUEST     = 12,
     INVALIDREASON_HAVE_QUEST           = 13,
-    INVALIDREASON_UNKNOWN16            = 16, //need expantion account
-    INVALIDREASON_DONT_HAVE_REQ_ITEMS  = 21, //2.1.3
-    INVALIDREASON_DONT_HAVE_REQ_MONEY  = 23, //2.1.3
-    INVALIDREASON_UNKNOWN26            = 26, //"you have completed 10 daily quests today"
-    INVALIDREASON_UNKNOWN27            = 27, //"You cannot completed quests once you have reached tired time"
+    INVALIDREASON_UNKNOWN16            = 16,                //need expantion account
+    INVALIDREASON_DONT_HAVE_REQ_ITEMS  = 21,                //2.1.3
+    INVALIDREASON_DONT_HAVE_REQ_MONEY  = 23,                //2.1.3
+    INVALIDREASON_UNKNOWN26            = 26,                //"you have completed 10 daily quests today"
+    INVALIDREASON_UNKNOWN27            = 27,                //"You cannot completed quests once you have reached tired time"
 };
 
 enum QuestShareMessages

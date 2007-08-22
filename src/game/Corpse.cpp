@@ -33,7 +33,8 @@ Corpse::Corpse( WorldObject *instantiator, CorpseType type ) : WorldObject( inst
 {
     m_objectType |= TYPE_CORPSE;
     m_objectTypeId = TYPEID_CORPSE;
-    m_updateFlag = (UPDATEFLAG_HIGHGUID | UPDATEFLAG_ALL | UPDATEFLAG_HASPOSITION); // 2.1.2 - 0x58
+                                                            // 2.1.2 - 0x58
+    m_updateFlag = (UPDATEFLAG_HIGHGUID | UPDATEFLAG_ALL | UPDATEFLAG_HASPOSITION);
 
     m_valuesCount = CORPSE_END;
 
@@ -233,14 +234,14 @@ void Corpse::_ConvertCorpseToBones()
     Corpse *bones = new Corpse(this);
     bones->Create(GetGUIDLow());
 
-    for (int i = 3; i < CORPSE_END; i++)                    // don't overwrite guid and object type 
+    for (int i = 3; i < CORPSE_END; i++)                    // don't overwrite guid and object type
     {
         bones->SetUInt32Value(i, GetUInt32Value(i));
     }
     bones->m_grid = m_grid;
     // bones->m_time = m_time;                              // don't overwrite time
     // bones->m_inWorld = m_inWorld;                        // don't overwrite world state
-    // bones->m_type = m_type;                              // don't overwrite type 
+    // bones->m_type = m_type;                              // don't overwrite type
     bones->Relocate(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
     bones->SetMapId(GetMapId());
 
@@ -267,7 +268,7 @@ void Corpse::_ConvertCorpseToBones()
     // add bones in grid store if grid loaded where corpse placed
     if(!MapManager::Instance().GetMap(bones->GetMapId(), bones)->IsRemovalGrid(bones->GetPositionX(),bones->GetPositionY()))
     {
-        MapManager::Instance().GetMap(bones->GetMapId(), bones)->Add(bones); 
+        MapManager::Instance().GetMap(bones->GetMapId(), bones)->Add(bones);
     }
     // or prepare to delete at next tick if grid not loaded
     else

@@ -65,7 +65,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             // send in universal language in two side iteration allowed mode
             if (sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHAT) || _player->isGameMaster())
                 lang = LANG_UNIVERSAL;
-        
+
             // but overwrite it by SPELL_AURA_MOD_LANGUAGE auras (only single case used)
             Unit::AuraList const& ModLangAuras = _player->GetAurasByType(SPELL_AURA_MOD_LANGUAGE);
             if(!ModLangAuras.empty())
@@ -83,10 +83,9 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             GetPlayer()->UpdateSpeakTime();
     }
 
-
     switch(type)
     {
-        case CHAT_MSG_SAY:  
+        case CHAT_MSG_SAY:
         case CHAT_MSG_EMOTE:
         case CHAT_MSG_YELL:
         {
@@ -102,7 +101,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 GetPlayer()->TextEmote(msg);
             else if(type == CHAT_MSG_YELL)
                 GetPlayer()->Yell(msg, lang);
-        } break;        
+        } break;
 
         case CHAT_MSG_WHISPER:
         {

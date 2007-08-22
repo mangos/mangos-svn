@@ -186,10 +186,10 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
         data << (uint32)info->type;
         data << (uint32)info->displayId;
         data << info->name;
-        data << uint8(0) << uint8(0) << uint8(0);               // name2, name3, name4
-        data << uint8(0);                                       // 2.0.3, string
-        data << uint8(0);                                       // 2.0.3, string
-        data << uint8(0);                                       // 2.0.3, probably string
+        data << uint8(0) << uint8(0) << uint8(0);           // name2, name3, name4
+        data << uint8(0);                                   // 2.0.3, string
+        data << uint8(0);                                   // 2.0.3, string
+        data << uint8(0);                                   // 2.0.3, probably string
         data << uint32(info->sound0);
         data << uint32(info->sound1);
         data << uint32(info->sound2);

@@ -120,7 +120,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "tp",          SEC_MODERATOR,     &ChatHandler::HandleModifyTalentCommand,     "",   NULL },
         { "titles",      SEC_MODERATOR,     &ChatHandler::HandleModifyKnownTitlesCommand, "",  NULL },
         { "mount",       SEC_MODERATOR,     &ChatHandler::HandleModifyMountCommand,       "",  NULL },
-          
+
         { NULL,          0, NULL,                                        "",   NULL }
     };
 
@@ -619,7 +619,7 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
             break;
         case CHAT_MSG_MONSTER_SAY:
             *data << (uint64)speaker->GetGUID();
-            *data << uint32(0);                                     // 2.1.0
+            *data << uint32(0);                             // 2.1.0
             *data << (uint32)(strlen(((Creature *)speaker)->GetCreatureInfo()->Name) + 1);
             *data << ((Creature *)speaker)->GetCreatureInfo()->Name;
             break;
@@ -649,8 +649,8 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
         target_guid = 0;                                    // only for CHAT_MSG_WHISPER_INFORM used original value target_guid
     }*/
 
-    *data << target_guid;   // there 0 for BG messages
-    *data << uint32(0);     //2.1.0 unk
+    *data << target_guid;                                   // there 0 for BG messages
+    *data << uint32(0);                                     //2.1.0 unk
 
     if (type == CHAT_MSG_CHANNEL)
     {
@@ -665,7 +665,7 @@ void ChatHandler::FillMessageData( WorldPacket *data, WorldSession* session, uin
     if (type == CHAT_MSG_SAY || type == CHAT_MSG_YELL || type == CHAT_MSG_PARTY)
         *data << target_guid;*/
 
-    *data << target_guid;   // WTF?, for type=3
+    *data << target_guid;                                   // WTF?, for type=3
 
     *data << messageLength;
     *data << message;
@@ -706,7 +706,7 @@ char*     ChatHandler::extractKeyFromLink(char* text, char const* linkType)
     if(!text && !*text)
         return NULL;
 
-    // return non link case 
+    // return non link case
     if(text[0]!='|')
         return strtok(text, " ");
 
@@ -734,7 +734,6 @@ char*     ChatHandler::extractKeyFromLink(char* text, char const* linkType)
     strtok(NULL, " ");                                      // skip link tail (to allow continue strtok(NULL,s) use after retturn from function
     return cKey;
 }
-
 
 char const *fmtstring( char const *format, ... )
 {

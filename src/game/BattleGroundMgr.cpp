@@ -253,7 +253,7 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
     BattlemasterListEntry const *bl;
     WorldSafeLocsEntry const *start;
 
-    uint32 count = 0; 
+    uint32 count = 0;
 
     //                                            0     1                   2        3        4                  5                6               7
     QueryResult *result = sDatabase.Query("SELECT `id`, `MaxPlayersPerTeam`,`MinLvl`,`MaxLvl`,`AllianceStartLoc`,`AllianceStartO`,`HordeStartLoc`,`HordeStartO` FROM `battleground_template`");
@@ -326,7 +326,6 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
         HStartLoc[1] = start->y;
         HStartLoc[2] = start->z;
         HStartLoc[3] = fields[7].GetFloat();
-
 
         //sLog.outDetail("Creating battleground %s, %u-%u", bl->name[sWorld.GetDBClang()], MinLvl, MaxLvl);
         if(!CreateBattleGround(bg_ID, MaxPlayersPerTeam, MinLvl, MaxLvl, bl->name[sWorld.GetDBClang()], bl->mapid1, AStartLoc[0], AStartLoc[1], AStartLoc[2], AStartLoc[3], HStartLoc[0], HStartLoc[1], HStartLoc[2], HStartLoc[3]))

@@ -197,7 +197,7 @@ enum Language
     LANG_TROLL          = 14,
     LANG_GUTTERSPEAK    = 33,
     LANG_DRAENEI        = 35,
-    LANG_ADDON          = 0xFFFFFFFF   // used by addons
+    LANG_ADDON          = 0xFFFFFFFF                        // used by addons
 };
 
 #define LANGUAGES_COUNT 17
@@ -911,7 +911,7 @@ enum LockType
 enum TrainerType                                            // this is important type for npcs!
 {
     TRAINER_TYPE_CLASS             = 0,
-    TRAINER_TYPE_MOUNTS            = 1, // on blizz it's 2
+    TRAINER_TYPE_MOUNTS            = 1,                     // on blizz it's 2
     TRAINER_TYPE_TRADESKILLS       = 2,
     TRAINER_TYPE_PETS              = 3
 };
@@ -1189,9 +1189,9 @@ enum SkillType
 inline bool IsPrimaryProfessionSkill(uint32 skill)
 {
     return  skill == SKILL_HERBALISM     || skill == SKILL_MINING     || skill == SKILL_LEATHERWORKING ||
-            skill == SKILL_BLACKSMITHING || skill == SKILL_ALCHEMY    || skill == SKILL_ENCHANTING     ||
-            skill == SKILL_TAILORING     || skill == SKILL_ENGINERING || skill == SKILL_SKINNING       ||
-            skill == SKILL_JEWELCRAFTING;
+        skill == SKILL_BLACKSMITHING || skill == SKILL_ALCHEMY    || skill == SKILL_ENCHANTING     ||
+        skill == SKILL_TAILORING     || skill == SKILL_ENGINERING || skill == SKILL_SKINNING       ||
+        skill == SKILL_JEWELCRAFTING;
 }
 
 inline bool IsProfessionSkill(uint32 skill)
@@ -1271,7 +1271,7 @@ enum UnitFlags1
 };
 
 //#define SPELL_ID_AGGRO                    22764 not in 2.1.0 dbc
-#define SPELL_ID_AGGRO                    38192 //Tap Mob and Aggro Summoner
+#define SPELL_ID_AGGRO                    38192             //Tap Mob and Aggro Summoner
 
 enum WeatherTypes
 {
@@ -1382,5 +1382,4 @@ enum ChatMsg
     CHAT_MSG_MONSTER_PARTY                        = 0x5E,
     CHAT_MSG_RESTRICTED                           = 0x5F,
 };
-
 #endif

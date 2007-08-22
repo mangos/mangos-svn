@@ -169,7 +169,7 @@ void PetAI::UpdateAI(const uint32 diff)
         i_victimGuid = i_pet.getVictim()->GetGUID();
 
     Unit* owner = i_pet.GetCharmerOrOwner();
-    
+
     if(m_updateAlliesTimer <= diff)
     {
         UpdateAllies();
@@ -231,7 +231,7 @@ void PetAI::UpdateAI(const uint32 diff)
             }
         }
     }
-    
+
     //Autocast
     HM_NAMESPACE::hash_map<uint32, Unit*> targetMap;
     targetMap.clear();
@@ -276,7 +276,7 @@ void PetAI::UpdateAI(const uint32 diff)
             uint16 active = i_pet.GetCharmInfo()->GetCharmSpell(i)->active;
             if(spell_id == 0 || active != ACT_ENABLED)
                 continue;
-            
+
             SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
             if(!spellInfo || IsPassiveSpell(spell_id))
                 continue;
@@ -368,7 +368,7 @@ void PetAI::UpdateAllies()
         return;
     //owner is in group; group members filled in already (no raid -> subgroupcount = whole count)
     if(pGroup && !pGroup->isRaidGroup() && m_AllySet.size() == (pGroup->GetMembersCount() + 2))
-           return;
+        return;
 
     m_AllySet.clear();
     m_AllySet.insert(i_pet.GetGUID());
@@ -394,6 +394,6 @@ void PetAI::AttackedBy(Unit *attacker)
 {
     //when attacked, fight back in case 1)no victim already AND 2)not set to passive AND 3)not set to stay, unless can it can reach attacker with melee attack anyway
     if(!i_pet.getVictim() && i_pet.GetCharmInfo() && !i_pet.GetCharmInfo()->HasReactState(REACT_PASSIVE) &&
-      (!i_pet.GetCharmInfo()->HasCommandState(COMMAND_STAY) || i_pet.canReachWithAttack(attacker)))
+        (!i_pet.GetCharmInfo()->HasCommandState(COMMAND_STAY) || i_pet.canReachWithAttack(attacker)))
         AttackStart(attacker);
 }

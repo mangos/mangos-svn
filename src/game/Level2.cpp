@@ -188,7 +188,9 @@ bool ChatHandler::HandleTargetObjectCommand(const char* args)
     {
         strcat(eventFilter,")");
         strcat(eventFilter2,"))");
-    } else {
+    }
+    else
+    {
         strcpy(eventFilter,"");
         strcpy(eventFilter2,"");
     }

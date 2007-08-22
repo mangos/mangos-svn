@@ -43,12 +43,12 @@ enum GroupMemberOnlineStatus
     MEMBER_STATUS_OFFLINE   = 0x00,
     MEMBER_STATUS_ONLINE    = 0x01,
     MEMBER_STATUS_PVP       = 0x02,
-    MEMBER_STATUS_UNK0      = 0x04, // dead? (health=0)
-    MEMBER_STATUS_UNK1      = 0x08, // ghost? (health=1)
-    MEMBER_STATUS_UNK2      = 0x10, // never seen
-    MEMBER_STATUS_UNK3      = 0x20, // never seen
-    MEMBER_STATUS_UNK4      = 0x40, // appears with dead and ghost flags
-    MEMBER_STATUS_UNK5      = 0x80, // never seen
+    MEMBER_STATUS_UNK0      = 0x04,                         // dead? (health=0)
+    MEMBER_STATUS_UNK1      = 0x08,                         // ghost? (health=1)
+    MEMBER_STATUS_UNK2      = 0x10,                         // never seen
+    MEMBER_STATUS_UNK3      = 0x20,                         // never seen
+    MEMBER_STATUS_UNK4      = 0x40,                         // appears with dead and ghost flags
+    MEMBER_STATUS_UNK5      = 0x80,                         // never seen
 };
 
 enum GroupType
@@ -62,25 +62,25 @@ class BattleGround;
 enum GroupUpdateFlags
 {
     GROUP_UPDATE_FLAG_NONE              = 0x00000000,
-    GROUP_UPDATE_FLAG_ONLINE            = 0x00000001, // uint8, flags
-    GROUP_UPDATE_FLAG_CUR_HP            = 0x00000002, // uint16
-    GROUP_UPDATE_FLAG_MAX_HP            = 0x00000004, // uint16
-    GROUP_UPDATE_FLAG_POWER_TYPE        = 0x00000008, // uint8
-    GROUP_UPDATE_FLAG_CUR_POWER         = 0x00000010, // uint16
-    GROUP_UPDATE_FLAG_MAX_POWER         = 0x00000020, // uint16
-    GROUP_UPDATE_FLAG_LEVEL             = 0x00000040, // uint16
-    GROUP_UPDATE_FLAG_ZONE              = 0x00000080, // uint16
-    GROUP_UPDATE_FLAG_POSITION          = 0x00000100, // uint16, uint16
-    GROUP_UPDATE_FLAG_AURAS             = 0x00000200, // uint64 mask, for each bit set uint16 spellid?
-    GROUP_UPDATE_FLAG_PET_GUID          = 0x00000400, // uint64 pet guid
-    GROUP_UPDATE_FLAG_PET_NAME          = 0x00000800, // pet name, NULL terminated string
-    GROUP_UPDATE_FLAG_PET_MODEL_ID      = 0x00001000, // uint16, model id
-    GROUP_UPDATE_FLAG_PET_CUR_HP        = 0x00002000, // uint16 pet cur health
-    GROUP_UPDATE_FLAG_PET_MAX_HP        = 0x00004000, // uint16 pet max health
-    GROUP_UPDATE_FLAG_PET_POWER_TYPE    = 0x00008000, // uint8 pet power type
-    GROUP_UPDATE_FLAG_PET_CUR_POWER     = 0x00010000, // uint16 pet cur power
-    GROUP_UPDATE_FLAG_PET_MAX_POWER     = 0x00020000, // uint16 pet max power
-    GROUP_UPDATE_FLAG_PET_AURAS         = 0x00040000, // uint64 mask, for each bit set uint16 spellid?, pet auras...
+    GROUP_UPDATE_FLAG_ONLINE            = 0x00000001,       // uint8, flags
+    GROUP_UPDATE_FLAG_CUR_HP            = 0x00000002,       // uint16
+    GROUP_UPDATE_FLAG_MAX_HP            = 0x00000004,       // uint16
+    GROUP_UPDATE_FLAG_POWER_TYPE        = 0x00000008,       // uint8
+    GROUP_UPDATE_FLAG_CUR_POWER         = 0x00000010,       // uint16
+    GROUP_UPDATE_FLAG_MAX_POWER         = 0x00000020,       // uint16
+    GROUP_UPDATE_FLAG_LEVEL             = 0x00000040,       // uint16
+    GROUP_UPDATE_FLAG_ZONE              = 0x00000080,       // uint16
+    GROUP_UPDATE_FLAG_POSITION          = 0x00000100,       // uint16, uint16
+    GROUP_UPDATE_FLAG_AURAS             = 0x00000200,       // uint64 mask, for each bit set uint16 spellid?
+    GROUP_UPDATE_FLAG_PET_GUID          = 0x00000400,       // uint64 pet guid
+    GROUP_UPDATE_FLAG_PET_NAME          = 0x00000800,       // pet name, NULL terminated string
+    GROUP_UPDATE_FLAG_PET_MODEL_ID      = 0x00001000,       // uint16, model id
+    GROUP_UPDATE_FLAG_PET_CUR_HP        = 0x00002000,       // uint16 pet cur health
+    GROUP_UPDATE_FLAG_PET_MAX_HP        = 0x00004000,       // uint16 pet max health
+    GROUP_UPDATE_FLAG_PET_POWER_TYPE    = 0x00008000,       // uint8 pet power type
+    GROUP_UPDATE_FLAG_PET_CUR_POWER     = 0x00010000,       // uint16 pet cur power
+    GROUP_UPDATE_FLAG_PET_MAX_POWER     = 0x00020000,       // uint16 pet max power
+    GROUP_UPDATE_FLAG_PET_AURAS         = 0x00040000,       // uint64 mask, for each bit set uint16 spellid?, pet auras...
     //GROUP_UPDATE_FLAG_UNK1              = 0x00080000, // unused
     //GROUP_UPDATE_FLAG_UNK2              = 0x00100000, // unused
     //GROUP_UPDATE_FLAG_UNK3              = 0x00200000, // unused
@@ -97,7 +97,7 @@ enum GroupUpdateFlags
     GROUP_UPDATE_FLAGS_COUNT            = 10
 };
 
-                                                                 //0, 1, 2, 3, 4, 5, 6, 7, 8, 9
+                                                            //0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 static const uint8 GroupUpdateLength[GROUP_UPDATE_FLAGS_COUNT] = { 0, 1, 2, 2, 1, 2, 2, 2, 2, 4};
 
 /** request member stats checken **/
@@ -127,7 +127,7 @@ class MANGOS_DLL_SPEC Group
             uint32 itemRandomSuffix;
             int32  itemRandomPropId;
             typedef std::map<uint64, RollVote> PlayerVote;
-            PlayerVote playerVote;               //vote position correspond with player position (in group)
+            PlayerVote playerVote;                          //vote position correspond with player position (in group)
             uint8 totalPlayersRolling;
             uint8 totalNeed;
             uint8 totalGreed;
@@ -234,7 +234,7 @@ class MANGOS_DLL_SPEC Group
         {
             if(!isRaidGroup())
                 return;
-            
+
             if(_setMainTank(guid))
                 SendUpdate();
         }
@@ -242,7 +242,7 @@ class MANGOS_DLL_SPEC Group
         {
             if(!isRaidGroup())
                 return;
-            
+
             if(_setMainAssistant(guid))
                 SendUpdate();
         }

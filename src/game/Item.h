@@ -96,7 +96,7 @@ enum InventoryChangeFailure
     EQUIP_ERR_BAG_FULL4                          = 56,
     EQUIP_ERR_ITEM_SOLD_OUT                      = 57,
     EQUIP_ERR_OBJECT_IS_BUSY                     = 58,
-    EQUIP_ERR_NONE                               = 59,   
+    EQUIP_ERR_NONE                               = 59,
     EQUIP_ERR_NOT_IN_COMBAT                      = 60,
     EQUIP_ERR_NOT_WHILE_DISARMED                 = 61,
     EQUIP_ERR_BAG_FULL6                          = 62,
@@ -112,8 +112,8 @@ enum InventoryChangeFailure
     EQUIP_ERR_MAIL_BOUND_ITEM                    = 72,
     EQUIP_ERR_NO_SPLIT_WHILE_PROSPECTING         = 73,
     EQUIP_ERR_ITEM_MAX_COUNT_EQUIPPED_SOCKETED   = 75,
-    EQUIP_ERR_ITEM_UNIQUE_EQUIPPABLE_SOCKETED    = 76 
-     
+    EQUIP_ERR_ITEM_UNIQUE_EQUIPPABLE_SOCKETED    = 76
+
 };
 
 enum BuyFailure
@@ -124,18 +124,18 @@ enum BuyFailure
     BUY_ERR_SELLER_DONT_LIKE_YOU                 = 4,
     BUY_ERR_DISTANCE_TOO_FAR                     = 5,
     BUY_ERR_CANT_CARRY_MORE                      = 8,
-    BUY_ERR_LEVEL_REQUIRE                        = 11, // 2.0.1 - rank
+    BUY_ERR_LEVEL_REQUIRE                        = 11,      // 2.0.1 - rank
     BUY_ERR_REPUTATION_REQUIRE                   = 12
 };
 
 enum SellFailure
 {
     SELL_ERR_CANT_FIND_ITEM                      = 1,
-    SELL_ERR_CANT_SELL_ITEM                      = 2, // merchant doesn't like that item
-    SELL_ERR_CANT_FIND_VENDOR                    = 3, // merchant doesn't like you
-    SELL_ERR_YOU_DONT_OWN_THAT_ITEM              = 4, // you don't own that item
-    SELL_ERR_UNK                                 = 5, // nothing appears...
-    SELL_ERR_ONLY_EMPTY_BAG                      = 6  // can only do with empty bags
+    SELL_ERR_CANT_SELL_ITEM                      = 2,       // merchant doesn't like that item
+    SELL_ERR_CANT_FIND_VENDOR                    = 3,       // merchant doesn't like you
+    SELL_ERR_YOU_DONT_OWN_THAT_ITEM              = 4,       // you don't own that item
+    SELL_ERR_UNK                                 = 5,       // nothing appears...
+    SELL_ERR_ONLY_EMPTY_BAG                      = 6        // can only do with empty bags
 };
 
 // -1 from client enchantment slot number
@@ -255,7 +255,7 @@ class MANGOS_DLL_SPEC Item : public Object
             uState = state;
         }
 
-        bool hasQuest(uint32 quest_id) const 
+        bool hasQuest(uint32 quest_id) const
         {
             ItemPrototype const *itemProto = GetProto();
             return itemProto && itemProto->StartQuest == quest_id;
@@ -267,6 +267,6 @@ class MANGOS_DLL_SPEC Item : public Object
         Bag *m_container;
         ItemUpdateState uState;
         int16 uQueuePos;
-        bool mb_in_trade;    // true if item is currently in trade-window
+        bool mb_in_trade;                                   // true if item is currently in trade-window
 };
 #endif

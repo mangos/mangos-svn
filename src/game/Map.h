@@ -94,7 +94,9 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
     public:
 
         Map(uint32 id, time_t, uint32 aInstanceId);
-        virtual ~Map() {};    // Important! Else memleak at MapInstanced class destruction
+        virtual ~Map()                                      // Important! Else memleak at MapInstanced class destruction
+        {
+        };
 
         void Add(Player *);
         bool AddInstanced(Player *);
@@ -115,17 +117,17 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
 
         template<class LOCK_TYPE, class T, class CONTAINER> void Visit(const CellLock<LOCK_TYPE> &cell, TypeContainerVisitor<T, CONTAINER> &visitor);
 
-/*        inline bool IsActiveGrid(WorldObject *obj) const
-        {
-            return IsActiveGrid(obj->GetPositionX(),obj->GetPositionY());
-        }
+        /*        inline bool IsActiveGrid(WorldObject *obj) const
+                {
+                    return IsActiveGrid(obj->GetPositionX(),obj->GetPositionY());
+                }
 
-        inline bool IsActiveGrid(float x, float y) const
-        {
-            GridPair p = MaNGOS::ComputeGridPair(x, y);
-            return( i_grids[p.x_coord][p.y_coord]->GetGridState() == GRID_STATE_ACTIVE );
-        }
-*/
+                inline bool IsActiveGrid(float x, float y) const
+                {
+                    GridPair p = MaNGOS::ComputeGridPair(x, y);
+                    return( i_grids[p.x_coord][p.y_coord]->GetGridState() == GRID_STATE_ACTIVE );
+                }
+        */
 
         inline bool IsRemovalGrid(float x, float y) const
         {
@@ -154,10 +156,11 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         static void InitStateMachine();
         static void DeleteStateMachine();
 
-        float GetHeight(float x, float y, float z, bool pCheckVMap=true); // some calls like isInWater should not use vmaps due to processor power
+                                                            // some calls like isInWater should not use vmaps due to processor power
+        float GetHeight(float x, float y, float z, bool pCheckVMap=true);
         // return height of VMAP_INVALID_HEIGHT
         float GetVMapHeight(float x, float y, float z);
-        bool IsInWater(float x, float y, float z); // does not use z pos. This is for future use
+        bool IsInWater(float x, float y, float z);          // does not use z pos. This is for future use
 
         uint16 GetAreaFlag(float x, float y );
         uint8 GetTerrainType(float x, float y );

@@ -85,7 +85,7 @@ void BattleGround::Update(time_t diff)
     }
 
     if(!found)                                              // BG is empty
-    //if(!GetPlayersSize() && !GetQueuedPlayersSize() && !GetRemovedPlayersSize()) // BG is empty
+        //if(!GetPlayersSize() && !GetQueuedPlayersSize() && !GetRemovedPlayersSize()) // BG is empty
         return;
 
     if(CanStartBattleGround())
@@ -100,7 +100,7 @@ void BattleGround::Update(time_t diff)
             Player *plr = objmgr.GetPlayer(itr->first);
             switch(itr->second)
             {
-                case 0: // currently in queue and was removed from queue
+                case 0:                                     // currently in queue and was removed from queue
                     RemovePlayerFromQueue(itr->first);
                     if(plr)
                     {
@@ -108,13 +108,13 @@ void BattleGround::Update(time_t diff)
                         plr->GetSession()->SendPacket(&data);
                     }
                     break;
-                case 1: // currently in bg and was removed from bg
+                case 1:                                     // currently in bg and was removed from bg
                     if(plr)
                         RemovePlayer(itr->first, true, true);
                     else
                         RemovePlayer(itr->first, false, false);
                     break;
-                case 2: // revive queue
+                case 2:                                     // revive queue
                     RemovePlayerFromResurrectQueue(itr->first);
                     break;
             }
@@ -219,7 +219,8 @@ void BattleGround::Update(time_t diff)
             if(plr->IsWithinDistInMap(sh, 20.0f))           // 20 yards radius
             {
                 // spell not working, only visual effect :(
-                sh->CastSpell(plr, SPELL_SPIRIT_HEAL, true, 0, 0, 0);   // Spirit Heal, effect 117
+                                                            // Spirit Heal, effect 117
+                sh->CastSpell(plr, SPELL_SPIRIT_HEAL, true, 0, 0, 0);
 
                 plr->ResurrectPlayer(1.0f);                 // temp
                 plr->SpawnCorpseBones();                    // temp
@@ -734,45 +735,45 @@ void BattleGround::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
 {
     std::map<uint64, BattleGroundScore>::iterator itr = m_PlayerScores.find(Source->GetGUID());
 
-    if(itr == m_PlayerScores.end())                     // player not found...
+    if(itr == m_PlayerScores.end())                         // player not found...
         return;
 
     switch(type)
     {
-        case SCORE_KILLS:                               // kills
+        case SCORE_KILLS:                                   // kills
             itr->second.KillingBlows += value;
             break;
-        case SCORE_FLAG_CAPTURES:                       // flags captured
+        case SCORE_FLAG_CAPTURES:                           // flags captured
             itr->second.FlagCaptures += value;
             break;
-        case SCORE_FLAG_RETURNS:                        // flags returned
+        case SCORE_FLAG_RETURNS:                            // flags returned
             itr->second.FlagReturns += value;
             break;
-        case SCODE_DEATHS:                              // deaths
-             itr->second.Deaths += value;
+        case SCODE_DEATHS:                                  // deaths
+            itr->second.Deaths += value;
             break;
         default:
-             sLog.outDebug("Unknown player score type %u", type);
+            sLog.outDebug("Unknown player score type %u", type);
             break;
     }
 }
 
 uint32 BattleGround::GetQueuedPlayersSize(uint32 level) const
 {
-     if(level >= 10 && level <= 19)
-         return m_QueuedPlayers[0].size();
-     else if(level >= 20 && level <= 29)
-         return m_QueuedPlayers[1].size();
-     else if(level >= 30 && level <= 39)
-         return m_QueuedPlayers[2].size();
-     else if(level >= 40 && level <= 49)
-         return m_QueuedPlayers[3].size();
-     else if(level >= 50 && level <= 59)
-         return m_QueuedPlayers[4].size();
-     else if(level >= 60 && level <= 69)
-         return m_QueuedPlayers[5].size();
-     else
-         return m_QueuedPlayers[6].size();
+    if(level >= 10 && level <= 19)
+        return m_QueuedPlayers[0].size();
+    else if(level >= 20 && level <= 29)
+        return m_QueuedPlayers[1].size();
+    else if(level >= 30 && level <= 39)
+        return m_QueuedPlayers[2].size();
+    else if(level >= 40 && level <= 49)
+        return m_QueuedPlayers[3].size();
+    else if(level >= 50 && level <= 59)
+        return m_QueuedPlayers[4].size();
+    else if(level >= 60 && level <= 69)
+        return m_QueuedPlayers[5].size();
+    else
+        return m_QueuedPlayers[6].size();
 }
 
 void BattleGround::AddPlayerToResurrectQueue(uint64 npc_guid, uint64 player_guid)

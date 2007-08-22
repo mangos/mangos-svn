@@ -38,5 +38,4 @@ class MANGOS_DLL_SPEC GroupReference : public Reference<Group, Player>
         uint8 getSubGroup() { return iSubGroup; }
         void setSubGroup(uint8 pSubGroup) { iSubGroup = pSubGroup; }
 };
-
 #endif

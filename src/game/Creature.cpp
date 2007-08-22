@@ -50,8 +50,8 @@ uint32 CreatureInfo::randomDisplayID() const
 }
 
 Creature::Creature( WorldObject *instantiator ) :
-Unit( instantiator ), i_AI(NULL), i_motionMaster(this), 
-lootForPickPocketed(false), lootForBody(false), m_groupLootTimer(0), lootingGroupLeaderGUID(0), 
+Unit( instantiator ), i_AI(NULL), i_motionMaster(this),
+lootForPickPocketed(false), lootForBody(false), m_groupLootTimer(0), lootingGroupLeaderGUID(0),
 m_itemsLoaded(false), m_trainerSpellsLoaded(false), m_trainer_type(0), m_lootMoney(0), m_lootRecipient(0),
 m_deathTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_respawnradius(0.0),
 m_gossipOptionLoaded(false),m_NPCTextId(0),
@@ -100,7 +100,7 @@ void Creature::RemoveFromWorld()
 void Creature::LoadTrainerSpells()
 {
     if(m_trainerSpellsLoaded)
-        return; 
+        return;
 
     m_trainer_spells.clear();
     m_trainer_type = 0;
@@ -708,7 +708,7 @@ void Creature::OnGossipSelect(Player* player, uint32 option)
         case GOSSIP_OPTION_PETITIONER:
             player->PlayerTalkClass->CloseGossip();
             player->GetSession()->SendPetitionShowList( guid );
-            break;            
+            break;
         case GOSSIP_OPTION_TABARDDESIGNER:
             player->PlayerTalkClass->CloseGossip();
             player->GetSession()->SendTabardVendorActivate( guid );
@@ -1207,7 +1207,7 @@ bool Creature::LoadFromDB(uint32 guid, uint32 InstanceId)
     if(curhealth)
     {
         curhealth = uint32(curhealth*_GetHealthMod(GetCreatureInfo()->rank));
-        if(curhealth < 1) 
+        if(curhealth < 1)
             curhealth = 1;
     }
 
@@ -1420,14 +1420,14 @@ bool Creature::IsImmunedToSpell(SpellEntry const* spellInfo) const
         return false;
     if( isWorldBoss() )
         if( (MECHANIC_FEAR      == spellInfo->Mechanic) ||
-            (MECHANIC_SLEEP     == spellInfo->Mechanic) ||
-            (MECHANIC_STUNDED   == spellInfo->Mechanic) ||
-            (MECHANIC_DAZED     == spellInfo->Mechanic) ||
-            (MECHANIC_BANISH    == spellInfo->Mechanic) ||
-            (MECHANIC_FREEZE    == spellInfo->Mechanic) ||
-            (MECHANIC_ROOT      == spellInfo->Mechanic) ||
-            (MECHANIC_CONFUSED  == spellInfo->Mechanic) ||
-            (MECHANIC_POLYMORPH == spellInfo->Mechanic) )
+        (MECHANIC_SLEEP     == spellInfo->Mechanic) ||
+        (MECHANIC_STUNDED   == spellInfo->Mechanic) ||
+        (MECHANIC_DAZED     == spellInfo->Mechanic) ||
+        (MECHANIC_BANISH    == spellInfo->Mechanic) ||
+        (MECHANIC_FREEZE    == spellInfo->Mechanic) ||
+        (MECHANIC_ROOT      == spellInfo->Mechanic) ||
+        (MECHANIC_CONFUSED  == spellInfo->Mechanic) ||
+        (MECHANIC_POLYMORPH == spellInfo->Mechanic) )
             return true;
 
     return Unit::IsImmunedToSpell(spellInfo);

@@ -94,7 +94,6 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
         return;
     }
 
-
     Group *group = GetPlayer()->GetGroup();
 
     if(group)
@@ -137,7 +136,7 @@ void WorldSession::HandleGroupInviteOpcode( WorldPacket & recv_data )
     }
     else
     {
-        // already existed group: if can't add then just leave 
+        // already existed group: if can't add then just leave
         if(!group->AddInvite(player))
         {
             return;
@@ -159,7 +158,6 @@ void WorldSession::HandleGroupAcceptOpcode( WorldPacket & /*recv_data*/ )
 
     // remove in from ivites in any case
     group->RemoveInvite(GetPlayer());
-
 
     /** error handling **/
     /********************/
@@ -184,7 +182,7 @@ void WorldSession::HandleGroupDeclineOpcode( WorldPacket & /*recv_data*/ )
 {
     Group  *group  = GetPlayer()->GetGroupInvite();
     if (!group) return;
-    
+
     Player *leader = objmgr.GetPlayer(group->GetLeaderGUID());
 
     /** error handling **/
@@ -563,12 +561,12 @@ void WorldSession::SendPartyMemberStatsChanged(uint64 Guid, uint32 mask)
         return;
 
     Player *player = objmgr.GetPlayer(Guid);
-    if(!player) //currently do not send update if player is offline
+    if(!player)                                             //currently do not send update if player is offline
         return;
     /*if(!player && mask != GROUP_UPDATE_FLAG_ONLINE) //if player is offline - then send nothing, but OFFLINE status
         return;*/
 
-    if(mask & GROUP_UPDATE_FLAG_POWER_TYPE) // if update power type, update current/max power also
+    if(mask & GROUP_UPDATE_FLAG_POWER_TYPE)                 // if update power type, update current/max power also
         mask |= (GROUP_UPDATE_FLAG_CUR_POWER | GROUP_UPDATE_FLAG_MAX_POWER);
 
     uint32 byteCount = 0;
@@ -643,7 +641,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
 
     data.append(player->GetPackGUID());
     uint32 mask1 = 0x7FFC0BFF;                              // real flags used 0x000040BFF
-                 //0x7FFC1BFF;                              // for hunters etc (GROUP_UPDATE_FLAG_PET_MODEL_ID)
+    //0x7FFC1BFF;                              // for hunters etc (GROUP_UPDATE_FLAG_PET_MODEL_ID)
     Powers powerType = player->getPowerType();
     data << (uint32) mask1;                                 // group update mask
     data << (uint8)  MEMBER_STATUS_ONLINE;                  // member's online status
@@ -668,7 +666,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
     //sLog.outDebug("Received opcode CMSG_REQUEST_RAID_INFO");
 
     WorldPacket data(SMSG_RAID_INSTANCE_INFO, 4);
-    data << (uint32)0;          // count (max is 10)
+    data << (uint32)0;                                      // count (max is 10)
 
     /*data << (uint32)count;
     for(int i=0; i<count; i++)

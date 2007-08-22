@@ -37,13 +37,13 @@
 
 // Charters ID in item_template
 #define GUILD_CHARTER               5863
-#define GUILD_CHARTER_COST          1000    // 10 S
+#define GUILD_CHARTER_COST          1000                    // 10 S
 #define ARENA_TEAM_CHARTER_2v2      23560
-#define ARENA_TEAM_CHARTER_2v2_COST 800000  // 80 G
+#define ARENA_TEAM_CHARTER_2v2_COST 800000                  // 80 G
 #define ARENA_TEAM_CHARTER_3v3      23561
-#define ARENA_TEAM_CHARTER_3v3_COST 1200000 // 120 G
+#define ARENA_TEAM_CHARTER_3v3_COST 1200000                 // 120 G
 #define ARENA_TEAM_CHARTER_5v5      23562
-#define ARENA_TEAM_CHARTER_5v5_COST 2000000 // 200 G
+#define ARENA_TEAM_CHARTER_5v5_COST 2000000                 // 200 G
 
 void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
 {
@@ -121,17 +121,17 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
             case 1:
                 charterid = ARENA_TEAM_CHARTER_2v2;
                 cost = ARENA_TEAM_CHARTER_2v2_COST;
-                type = 2;   // 2v2
+                type = 2;                                   // 2v2
                 break;
             case 2:
                 charterid = ARENA_TEAM_CHARTER_3v3;
                 cost = ARENA_TEAM_CHARTER_3v3_COST;
-                type = 3;   // 3v3
+                type = 3;                                   // 3v3
                 break;
             case 3:
                 charterid = ARENA_TEAM_CHARTER_5v5;
                 cost = ARENA_TEAM_CHARTER_5v5_COST;
-                type = 5;   // 5v5
+                type = 5;                                   // 5v5
                 break;
             default:
                 sLog.outDebug("unknown selection at buy petition: %u", unk10);
@@ -201,7 +201,8 @@ void WorldSession::HandlePetitionShowSignOpcode(WorldPacket & recv_data)
 {
     CHECK_PACKET_SIZE(recv_data, 8);
 
-    sLog.outDebug("Received opcode CMSG_PETITION_SHOW_SIGNATURES"); // ok
+                                                            // ok
+    sLog.outDebug("Received opcode CMSG_PETITION_SHOW_SIGNATURES");
     //recv_data.hexlike();
 
     if(_player->GetGuildId())
@@ -457,11 +458,11 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket & recv_data)
     }
 
     signs += 1;
-    if(signs > type)                                          // client signs maximum
+    if(signs > type)                                        // client signs maximum
         return;
 
     //client doesn't allow to sign petition two times by one character, but not check sign by another character from same account
-    //not allow sign another player from already sign player account 
+    //not allow sign another player from already sign player account
     result = sDatabase.PQuery("SELECT `playerguid` FROM `petition_sign` WHERE `player_account` = '%u'", GetAccountId());
 
     if(result)
@@ -630,7 +631,7 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
         if(_player->GetGuildId())
         {
             data.Initialize(SMSG_TURN_IN_PETITION_RESULTS, 4);
-            data << (uint32)PETITION_TURN_ALREADY_IN_GUILD;                              // already in guild
+            data << (uint32)PETITION_TURN_ALREADY_IN_GUILD; // already in guild
             _player->GetSession()->SendPacket(&data);
             return;
         }
@@ -670,7 +671,7 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
     if(signs < count)
     {
         data.Initialize(SMSG_TURN_IN_PETITION_RESULTS, 4);
-        data << (uint32)PETITION_TURN_NEED_MORE_SIGNATURES;                                  // need more signatures...
+        data << (uint32)PETITION_TURN_NEED_MORE_SIGNATURES; // need more signatures...
         SendPacket(&data);
         delete result;
         return;
@@ -709,7 +710,7 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
     // delete charter item
     _player->DestroyItem((pos >> 8),(pos & 255), true);
 
-    if(type == 9)                                   // create guild
+    if(type == 9)                                           // create guild
     {
         Guild* guild = new Guild;
         if(!guild->create(_player->GetGUID(), name))
@@ -730,7 +731,7 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
             result->NextRow();
         }
     }
-    else                                            // or arena team
+    else                                                    // or arena team
     {
         ArenaTeam* at = new ArenaTeam;
         if(!at->create(_player->GetGUID(), type, name))
@@ -777,7 +778,7 @@ void WorldSession::HandlePetitionShowListOpcode(WorldPacket & recv_data)
 {
     CHECK_PACKET_SIZE(recv_data, 8);
 
-    sLog.outDebug("Received CMSG_PETITION_SHOWLIST");   // ok
+    sLog.outDebug("Received CMSG_PETITION_SHOWLIST");       // ok
     //recv_data.hexlike();
 
     uint64 guid;
@@ -802,40 +803,40 @@ void WorldSession::SendPetitionShowList(uint64 guid)
         count = 3;
 
     WorldPacket data(SMSG_PETITION_SHOWLIST, 8+1+4*6);
-    data << guid;                                       // npc guid
-    data << count;                                      // count
+    data << guid;                                           // npc guid
+    data << count;                                          // count
     if(count == 1)
     {
-        data << uint32(1);                              // index
-        data << uint32(GUILD_CHARTER);                  // charter entry
-        data << uint32(16161);                          // charter display id
-        data << uint32(GUILD_CHARTER_COST);             // charter cost
-        data << uint32(0);                              // unknown
-        data << uint32(9);                              // required signs?
+        data << uint32(1);                                  // index
+        data << uint32(GUILD_CHARTER);                      // charter entry
+        data << uint32(16161);                              // charter display id
+        data << uint32(GUILD_CHARTER_COST);                 // charter cost
+        data << uint32(0);                                  // unknown
+        data << uint32(9);                                  // required signs?
     }
     else
     {
         // 2v2
-        data << uint32(1);                              // index
-        data << uint32(ARENA_TEAM_CHARTER_2v2);         // charter entry
-        data << uint32(16161);                          // charter display id
-        data << uint32(ARENA_TEAM_CHARTER_2v2_COST);    // charter cost
-        data << uint32(0);                              // unknown
-        data << uint32(2);                              // required signs?
+        data << uint32(1);                                  // index
+        data << uint32(ARENA_TEAM_CHARTER_2v2);             // charter entry
+        data << uint32(16161);                              // charter display id
+        data << uint32(ARENA_TEAM_CHARTER_2v2_COST);        // charter cost
+        data << uint32(0);                                  // unknown
+        data << uint32(2);                                  // required signs?
         // 3v3
-        data << uint32(2);                              // index
-        data << uint32(ARENA_TEAM_CHARTER_3v3);         // charter entry
-        data << uint32(16161);                          // charter display id
-        data << uint32(ARENA_TEAM_CHARTER_3v3_COST);    // charter cost
-        data << uint32(0);                              // unknown
-        data << uint32(3);                              // required signs?
+        data << uint32(2);                                  // index
+        data << uint32(ARENA_TEAM_CHARTER_3v3);             // charter entry
+        data << uint32(16161);                              // charter display id
+        data << uint32(ARENA_TEAM_CHARTER_3v3_COST);        // charter cost
+        data << uint32(0);                                  // unknown
+        data << uint32(3);                                  // required signs?
         // 5v5
-        data << uint32(3);                              // index
-        data << uint32(ARENA_TEAM_CHARTER_5v5);         // charter entry
-        data << uint32(16161);                          // charter display id
-        data << uint32(ARENA_TEAM_CHARTER_5v5_COST);    // charter cost
-        data << uint32(0);                              // unknown
-        data << uint32(5);                              // required signs?
+        data << uint32(3);                                  // index
+        data << uint32(ARENA_TEAM_CHARTER_5v5);             // charter entry
+        data << uint32(16161);                              // charter display id
+        data << uint32(ARENA_TEAM_CHARTER_5v5_COST);        // charter cost
+        data << uint32(0);                                  // unknown
+        data << uint32(5);                                  // required signs?
     }
     //for(uint8 i = 0; i < count; i++)
     //{

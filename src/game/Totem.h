@@ -54,7 +54,6 @@ class Totem : public Creature
         void UpdateAttackPowerAndDamage(bool ranged ) {}
         void UpdateDamagePhysical(WeaponAttackType attType) {}
 
-
     protected:
         TotemType m_type;
         uint32 m_duration;

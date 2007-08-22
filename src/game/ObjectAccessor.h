@@ -46,7 +46,7 @@ template <class T>
 class HashMapHolder
 {
     public:
-        
+
         typedef HM_NAMESPACE::hash_map< uint64, T* >   MapType;
         typedef ZThread::FastMutex LockType;
         typedef MaNGOS::GeneralLock<LockType > Guard;
@@ -94,7 +94,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         {
             return HashMapHolder<T>::Find(guid);
         }
-        
+
         template<class T> static T* GetObjectInWorld(uint32 mapid, float x, float y, uint64 guid, T* /*fake*/)
         {
             T* obj = HashMapHolder<T>::Find(guid);
@@ -113,12 +113,12 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
                 sLog.outError("ObjectAccessor::GetObjecInWorld: object "I64FMTD" has invalid coordinates X:%f Y:%f grid cell [%u:%u]", obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), q.x_coord, q.y_coord);
                 return NULL;
             }
-            
+
             int32 dx = int32(p.x_coord) - int32(q.x_coord);
             int32 dy = int32(p.y_coord) - int32(q.y_coord);
 
             if (dx > -2 && dx < 2 && dy > -2 && dy < 2) return obj;
-            else return NULL;                
+            else return NULL;
         }
 
         Object*   GetObjectByTypeMask(Player const &, uint64, uint32 typemask);

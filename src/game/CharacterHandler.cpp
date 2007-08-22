@@ -19,7 +19,7 @@
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
-#include "WorldSocket.h" 
+#include "WorldSocket.h"
 #include "WorldSession.h"
 #include "Opcodes.h"
 #include "Log.h"
@@ -76,7 +76,7 @@ void WorldSession::HandleCharEnum(QueryResult * result)
     loginDatabase.PExecute("UPDATE `account` SET `v` = '0', `s` = '0' WHERE `id` = '%u'", GetAccountId());
 
     WorldPacket data(SMSG_CHAR_ENUM, 100);                  // we guess size
-    
+
     uint8 num = 0;
 
     data << num;
@@ -109,10 +109,10 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & /*recv_data*/ )
 {
     /// get all the data necesary for loading all characters (along with their pets) on the account
     sDatabase.AsyncPQuery(&chrHandler, &CharacterHandler::HandleCharEnumCallback, GetAccountId(),
-        //                  0                   1                   2                         3                         4                         5                   6                       7                        8
+    //                  0                   1                   2                         3                         4                         5                   6                       7                        8
         "SELECT `character`.`data`, `character`.`name`, `character`.`position_x`, `character`.`position_y`, `character`.`position_z`, `character`.`map`, `character`.`totaltime`, `character`.`leveltime`, `character`.`rename`,"
-        //                   9                       10                        11
-            "`character_pet`.`entry`,`character_pet`.`modelid`,`character_pet`.`level`"
+    //                   9                       10                        11
+        "`character_pet`.`entry`,`character_pet`.`modelid`,`character_pet`.`level`"
         "FROM `character` LEFT JOIN `character_pet` ON `character`.`guid`=`character_pet`.`owner` AND `character_pet`.`slot`='0'"
         "WHERE `character`.`account` = '%u' ORDER BY `character`.`guid`", GetAccountId());
 }
@@ -303,7 +303,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     LoginQueryHolder *holder = new LoginQueryHolder(GetAccountId(), playerGuid);
     holder->Reserve(18);
-    
+
     // 0 - LoadFromDB
     holder->PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`rename`,`zone`,`online` FROM `character` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
     // 1 - _LoadGroup
@@ -403,12 +403,12 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
 
     // Activate Spam Reporting Future
     data.Initialize(SMSG_ACTIVATE_SPAM_REPORTING, 1);
-    data << uint8(2);                                   // unknown thing
+    data << uint8(2);                                       // unknown thing
     SendPacket(&data);
 
     // Send MOTD
     {
-        data.Initialize(SMSG_MOTD, 50); // new in 2.0.1
+        data.Initialize(SMSG_MOTD, 50);                     // new in 2.0.1
         data << (uint32)0;
 
         uint32 linecount=0;
@@ -476,7 +476,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     }
 
     pCurrChar->_LoadSpellCooldowns(holder->GetResult(15));
-    
+
     pCurrChar->SendInitialPacketsBeforeAddToMap();
 
     //Show cinematic at the first time that player login
@@ -552,8 +552,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     {
         // not blizz like, we must correctly save and load player instead...
         if(pCurrChar->getRace() == RACE_NIGHTELF)
-            pCurrChar->CastSpell(pCurrChar, 20584, true, 0);    // auras SPELL_AURA_INCREASE_SPEED(+speed in wisp form), SPELL_AURA_INCREASE_SWIM_SPEED(+swim speed in wisp form), SPELL_AURA_TRANSFORM (to wisp form)
-        pCurrChar->CastSpell(pCurrChar, 8326, true, 0);         // auras SPELL_AURA_GHOST, SPELL_AURA_INCREASE_SPEED(why?), SPELL_AURA_INCREASE_SWIM_SPEED(why?)
+            pCurrChar->CastSpell(pCurrChar, 20584, true, 0);// auras SPELL_AURA_INCREASE_SPEED(+speed in wisp form), SPELL_AURA_INCREASE_SWIM_SPEED(+swim speed in wisp form), SPELL_AURA_TRANSFORM (to wisp form)
+        pCurrChar->CastSpell(pCurrChar, 8326, true, 0);     // auras SPELL_AURA_GHOST, SPELL_AURA_INCREASE_SPEED(why?), SPELL_AURA_INCREASE_SWIM_SPEED(why?)
 
         //pCurrChar->SetUInt32Value(UNIT_FIELD_AURA+41, 8326);
         //pCurrChar->SetUInt32Value(UNIT_FIELD_AURA+42, 20584);
@@ -740,7 +740,7 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if(objmgr.GetPlayerGUIDByName(newname))         // character with this name already exist
+    if(objmgr.GetPlayerGUIDByName(newname))                 // character with this name already exist
     {
         WorldPacket data(SMSG_CHAR_RENAME, 1);
         data << (uint8)CHAR_CREATE_NAME_IN_USE;

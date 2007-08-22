@@ -91,39 +91,46 @@ void WorldSession::SendUpdateTrade()
         _player->pTrader->GetSession()->SendTradeStatus(TRADE_STATUS_BACK_TO_TRADE);
     }
 
-    WorldPacket data(SMSG_TRADE_STATUS_EXTENDED, (100));                            // guess size
-    data << (uint8 ) 1;                                                             // can be different (only seen 0 and 1)
-    data << (uint32) TRADE_SLOT_COUNT;                                              // trade slots count/number?, = next field in most cases
-    data << (uint32) TRADE_SLOT_COUNT;                                              // trade slots count/number?, = prev field in most cases
-    data << (uint32) _player->pTrader->tradeGold;                                   // trader gold
-    data << (uint32) 0;                                                             // unknown
+    WorldPacket data(SMSG_TRADE_STATUS_EXTENDED, (100));    // guess size
+    data << (uint8 ) 1;                                     // can be different (only seen 0 and 1)
+    data << (uint32) TRADE_SLOT_COUNT;                      // trade slots count/number?, = next field in most cases
+    data << (uint32) TRADE_SLOT_COUNT;                      // trade slots count/number?, = prev field in most cases
+    data << (uint32) _player->pTrader->tradeGold;           // trader gold
+    data << (uint32) 0;                                     // unknown
 
     for(uint8 i = 0; i < TRADE_SLOT_COUNT; i++)
     {
         item = (_player->pTrader->tradeItems[i] != NULL_SLOT ? _player->pTrader->GetItemByPos( _player->pTrader->tradeItems[i] ) : NULL);
 
-        data << (uint8) i;                                                          // trade slot number, if not specified, then end of packet
+        data << (uint8) i;                                  // trade slot number, if not specified, then end of packet
 
         if(item)
         {
-            data << (uint32) item->GetProto()->ItemId;                              // entry
-            data << (uint32) item->GetProto()->DisplayInfoID;                       // display id
-            data << (uint32) item->GetUInt32Value(ITEM_FIELD_STACK_COUNT);          // stack count
-            data << (uint32) 0;                                                     // probably gift=1, created_by=0?
-            data << (uint32) item->GetUInt32Value(ITEM_FIELD_GIFTCREATOR);          // gift creator
-            data << (uint32) 0;                                                     // ITEM_FIELD_GIFTCREATOR high_guid
+            data << (uint32) item->GetProto()->ItemId;      // entry
+                                                            // display id
+            data << (uint32) item->GetProto()->DisplayInfoID;
+                                                            // stack count
+            data << (uint32) item->GetUInt32Value(ITEM_FIELD_STACK_COUNT);
+            data << (uint32) 0;                             // probably gift=1, created_by=0?
+                                                            // gift creator
+            data << (uint32) item->GetUInt32Value(ITEM_FIELD_GIFTCREATOR);
+            data << (uint32) 0;                             // ITEM_FIELD_GIFTCREATOR high_guid
             data << (uint32) item->GetEnchantmentId(PERM_ENCHANTMENT_SLOT);
-            data << (uint32) 0;//item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+1);    // enchantment id (permanent/gems?)
-            data << (uint32) 0;//item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+2);    // enchantment id (permanent/gems?)
-            data << (uint32) 0;//item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+3);    // enchantment id (permanent/gems?)
-            data << (uint32) item->GetUInt32Value(ITEM_FIELD_CREATOR);              // creator
-            data << (uint32) 0;                                                     // ITEM_FIELD_CREATOR high_guid
-            data << (uint32) item->GetSpellCharges();                               // charges
-            data << (uint32) item->GetItemSuffixFactor();                           // SuffixFactor
-            data << (uint32) item->GetItemRandomPropertyId();                       // random properties id
-            data << (uint32) item->GetProto()->LockID;                              // lock id
-            data << (uint32) item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);        // max durability
-            data << (uint32) item->GetUInt32Value(ITEM_FIELD_DURABILITY);           // durability
+            data << (uint32) 0;                             //item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+1);    // enchantment id (permanent/gems?)
+            data << (uint32) 0;                             //item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+2);    // enchantment id (permanent/gems?)
+            data << (uint32) 0;                             //item->GetUInt32Value(ITEM_FIELD_ENCHANTMENT+3);    // enchantment id (permanent/gems?)
+                                                            // creator
+            data << (uint32) item->GetUInt32Value(ITEM_FIELD_CREATOR);
+            data << (uint32) 0;                             // ITEM_FIELD_CREATOR high_guid
+            data << (uint32) item->GetSpellCharges();       // charges
+            data << (uint32) item->GetItemSuffixFactor();   // SuffixFactor
+                                                            // random properties id
+            data << (uint32) item->GetItemRandomPropertyId();
+            data << (uint32) item->GetProto()->LockID;      // lock id
+                                                            // max durability
+            data << (uint32) item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY);
+                                                            // durability
+            data << (uint32) item->GetUInt32Value(ITEM_FIELD_DURABILITY);
         }
         else
         {
@@ -174,14 +181,16 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
             if(_player->tradeItems[i] != NULL_SLOT )
             {
                 sLog.outDebug("player trade item bag: %u slot: %u",_player->tradeItems[i] >> 8, _player->tradeItems[i] & 255 );
-                myItems[i]=_player->GetItemByPos( _player->tradeItems[i] ); //Can return NULL
+                                                            //Can return NULL
+                myItems[i]=_player->GetItemByPos( _player->tradeItems[i] );
                 if (myItems[i])
                     myItems[i]->SetInTrade();
             }
             if(_player->pTrader->tradeItems[i] != NULL_SLOT)
             {
                 sLog.outDebug("partner trade item bag: %u slot: %u",_player->pTrader->tradeItems[i] >> 8,_player->pTrader->tradeItems[i] & 255);
-                hisItems[i]=_player->pTrader->GetItemByPos( _player->pTrader->tradeItems[i]); //Can return NULL
+                                                            //Can return NULL
+                hisItems[i]=_player->pTrader->GetItemByPos( _player->pTrader->tradeItems[i]);
                 if(hisItems[i])
                     hisItems[i]->SetInTrade();
             }
@@ -254,7 +263,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
                     _player->pTrader->ItemAddedQuestCheck(myItems[i]->GetEntry(),myItems[i]->GetCount());
                     _player->pTrader->StoreItem( dst, myItems[i], true);
                 }
-                else 
+                else
                 {
                     // in case of fatal error move items back
                     sLog.outError("player can't store item: %u",hisItems[i]->GetGUIDLow());

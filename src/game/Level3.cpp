@@ -40,7 +40,7 @@
 
 bool ChatHandler::HandleReloadCommand(const char* arg)
 {
-    // this is error catcher for wrong table name in .reload commands 
+    // this is error catcher for wrong table name in .reload commands
     PSendSysMessage("Db table with name starting from '%s' not found and can't be reloaded.",arg);
     return true;
 }
@@ -277,7 +277,6 @@ bool ChatHandler::HandleSecurityCommand(const char* args)
     std::string targetName;
     uint32 targetAccountId = 0;
     uint32 targetSecurity = 0;
-
 
     Player* targetPlayer = getSelectedPlayer();
     if(targetPlayer)
@@ -1310,19 +1309,19 @@ bool ChatHandler::HandleLearnAllGMCommand(const char* args)
 {
     static const char *gmSpellList[] =
     {
-        "24347", // Become A Fish, No Breath Bar
-        "35132", // Visual Boom
-        "38488", // Attack 4000-8000 AOE
-        "38795", // Attack 2000 AOE + Slow Down 90%
-        "15712", // Attack 200
-        "1852",  // GM Spell Silence
-        "31899", // Kill
-        "31924", // Kill
-        "29878", // Kill My Self
-        "26644", // More Kill
+        "24347",                                            // Become A Fish, No Breath Bar
+        "35132",                                            // Visual Boom
+        "38488",                                            // Attack 4000-8000 AOE
+        "38795",                                            // Attack 2000 AOE + Slow Down 90%
+        "15712",                                            // Attack 200
+        "1852",                                             // GM Spell Silence
+        "31899",                                            // Kill
+        "31924",                                            // Kill
+        "29878",                                            // Kill My Self
+        "26644",                                            // More Kill
 
-        "28550", //Invisible 24
-        "23452", //Invisible + Target
+        "28550",                                            //Invisible 24
+        "23452",                                            //Invisible + Target
         "0"
     };
 
@@ -1350,17 +1349,17 @@ bool ChatHandler::HandleLearnAllMySpellsCommand(const char* args)
     uint32 family = 0;
     switch(m_session->GetPlayer()->getClass())
     {
-    case CLASS_WARRIOR: family = SPELLFAMILY_WARRIOR; break;
-    case CLASS_PALADIN: family = SPELLFAMILY_PALADIN; break;
-    case CLASS_HUNTER:  family = SPELLFAMILY_HUNTER;  break;
-    case CLASS_ROGUE:   family = SPELLFAMILY_ROGUE;   break;
-    case CLASS_PRIEST:  family = SPELLFAMILY_PRIEST;  break;
-    case CLASS_SHAMAN:  family = SPELLFAMILY_SHAMAN;  break;
-    case CLASS_MAGE:    family = SPELLFAMILY_MAGE;    break;
-    case CLASS_WARLOCK: family = SPELLFAMILY_WARLOCK; break;
-    case CLASS_DRUID:   family = SPELLFAMILY_DRUID;   break;
-    default: 
-        return true;
+        case CLASS_WARRIOR: family = SPELLFAMILY_WARRIOR; break;
+        case CLASS_PALADIN: family = SPELLFAMILY_PALADIN; break;
+        case CLASS_HUNTER:  family = SPELLFAMILY_HUNTER;  break;
+        case CLASS_ROGUE:   family = SPELLFAMILY_ROGUE;   break;
+        case CLASS_PRIEST:  family = SPELLFAMILY_PRIEST;  break;
+        case CLASS_SHAMAN:  family = SPELLFAMILY_SHAMAN;  break;
+        case CLASS_MAGE:    family = SPELLFAMILY_MAGE;    break;
+        case CLASS_WARLOCK: family = SPELLFAMILY_WARLOCK; break;
+        case CLASS_DRUID:   family = SPELLFAMILY_DRUID;   break;
+        default:
+            return true;
     }
 
     for (uint32 i = 0; i < sSpellStore.GetNumRows(); i++)
@@ -1473,13 +1472,13 @@ bool ChatHandler::HandleLearnAllCraftsCommand(const char* args)
 
         if (skillInfo->categoryId == SKILL_CATEGORY_PROFESSION || skillInfo->categoryId == SKILL_CATEGORY_SECONDARY)
             for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
-            {
-                SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(j);
-                if( !skillLine )
-                    continue;
-                if( skillLine->skillId == i && !skillLine->forward_spellid )
-                    m_session->GetPlayer()->learnSpell((uint16)skillLine->spellId);
-            }
+        {
+            SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(j);
+            if( !skillLine )
+                continue;
+            if( skillLine->skillId == i && !skillLine->forward_spellid )
+                m_session->GetPlayer()->learnSpell((uint16)skillLine->spellId);
+        }
     }
 
     PSendSysMessage(LANG_COMMAND_LEARN_ALL_CRAFT, m_session->GetPlayer()->GetName());
@@ -1682,7 +1681,7 @@ bool ChatHandler::HandleAddItemSetCommand(const char* args)
     if (!*args)
         return false;
 
-    char* cId = extractKeyFromLink((char*)args,"Hitemset");  // number or [name] Shift-click form |color|Hitemset:itemset_id|h[name]|h|r
+    char* cId = extractKeyFromLink((char*)args,"Hitemset"); // number or [name] Shift-click form |color|Hitemset:itemset_id|h[name]|h|r
     if (!cId)
         return false;
 
@@ -1926,7 +1925,8 @@ bool ChatHandler::HandleListObjectCommand(const char* args)
     if(!*args)
         return false;
 
-    char* cId = extractKeyFromLink((char*)args,"Hgameobject_entry");  // number or [name] Shift-click form |color|Hgameobject_entry:go_id|h[name]|h|r
+                                                            // number or [name] Shift-click form |color|Hgameobject_entry:go_id|h[name]|h|r
+    char* cId = extractKeyFromLink((char*)args,"Hgameobject_entry");
     if(!cId)
         return false;
 
@@ -1986,7 +1986,8 @@ bool ChatHandler::HandleListCreatureCommand(const char* args)
     if(!*args)
         return false;
 
-    char* cId = extractKeyFromLink((char*)args,"Hcreature_entry");  // number or [name] Shift-click form |color|Hcreature_entry:creature_id|h[name]|h|r
+                                                            // number or [name] Shift-click form |color|Hcreature_entry:creature_id|h[name]|h|r
+    char* cId = extractKeyFromLink((char*)args,"Hcreature_entry");
     if(!cId)
         return false;
 
@@ -2216,7 +2217,7 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
 
 bool ChatHandler::HandleLookupQuestCommand(const char* args)
 {
-    Player* target = getSelectedPlayer();    
+    Player* target = getSelectedPlayer();
     if( !target )
     {
         PSendSysMessage(LANG_PLAYER_NOT_FOUND);
@@ -2487,7 +2488,6 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
 {
     if (!*args)
         return false;
-
 
     char* pParam1 = strtok((char*)args, " ");
     uint32 id = atoi((char*)pParam1);
@@ -3545,7 +3545,7 @@ bool ChatHandler::HandleResetCommand (const char * args)
         // set UNIT_FIELD_BYTES_1 to init state but preserve m_form value
         player->SetUInt32Value(UNIT_FIELD_BYTES_1, player->m_form<<16 | unitfield );
 
-        player->SetUInt32Value(UNIT_FIELD_BYTES_2, 0x2800 ); // 0x2800, 0x2801 2.0.8...
+        player->SetUInt32Value(UNIT_FIELD_BYTES_2, 0x2800 );// 0x2800, 0x2801 2.0.8...
         player->SetUInt32Value(UNIT_FIELD_FLAGS , UNIT_FLAG_UNKNOWN1 );
 
                                                             //-1 is default value
@@ -3770,17 +3770,17 @@ bool ChatHandler::HandleBanCommand(const char* args)
 
     switch(sWorld.BanAccount(type, nameOrIP, duration, reason,m_session->GetPlayerName()))
     {
-    case BAN_SUCCESS:
-        if(atoi(duration)>0)
-            PSendSysMessage(LANG_BAN_YOUBANNED,nameOrIP,secsToTimeString(TimeStringToSecs(duration),true).c_str(),reason);
-        else
-            PSendSysMessage(LANG_BAN_YOUPERMBANNED,nameOrIP,reason);
-        break;
-    case BAN_SYNTAX_ERROR:
-        return false;
-    case BAN_NOTFOUND:
-        PSendSysMessage(LANG_BAN_NOTFOUND,type,nameOrIP);
-        break;
+        case BAN_SUCCESS:
+            if(atoi(duration)>0)
+                PSendSysMessage(LANG_BAN_YOUBANNED,nameOrIP,secsToTimeString(TimeStringToSecs(duration),true).c_str(),reason);
+            else
+                PSendSysMessage(LANG_BAN_YOUPERMBANNED,nameOrIP,reason);
+            break;
+        case BAN_SYNTAX_ERROR:
+            return false;
+        case BAN_NOTFOUND:
+            PSendSysMessage(LANG_BAN_NOTFOUND,type,nameOrIP);
+            break;
     }
 
     return true;
@@ -3870,7 +3870,8 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
             return true;
         }
         PSendSysMessage(LANG_BANINFO_BANHISTORY,accountname.c_str());
-        do{
+        do
+        {
             fields = result->Fetch();
             bool active = false;
             if(fields[2].GetBool() && (fields[1].GetUInt64() == (uint64)0 ||fields[3].GetUInt64() >= (uint64)0) )
@@ -3878,7 +3879,7 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
             bool permanent = (fields[1].GetUInt64() == (uint64)0);
             std::string bantime = permanent?LANG_BANINFO_INFINITE:secsToTimeString(fields[1].GetUInt64(), true);
             PSendSysMessage(LANG_BANINFO_HISTORYENTRY,
-                    fields[0].GetString(), bantime.c_str(), active ? LANG_BANINFO_YES:LANG_BANINFO_NO, fields[4].GetString(), fields[5].GetString());
+                fields[0].GetString(), bantime.c_str(), active ? LANG_BANINFO_YES:LANG_BANINFO_NO, fields[4].GetString(), fields[5].GetString());
         }while (result->NextRow());
 
         delete result;
@@ -3895,8 +3896,8 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
         fields = result->Fetch();
         bool permanent = (fields[6].GetUInt64()==(uint64)0);
         PSendSysMessage(LANG_BANINFO_IPENTRY,
-                fields[0].GetString(), fields[1].GetString(), permanent ? LANG_BANINFO_NEVER:fields[2].GetString(),
-                permanent ? LANG_BANINFO_INFINITE:secsToTimeString(fields[3].GetUInt64(), true).c_str(), fields[4].GetString(), fields[5].GetString());
+            fields[0].GetString(), fields[1].GetString(), permanent ? LANG_BANINFO_NEVER:fields[2].GetString(),
+            permanent ? LANG_BANINFO_INFINITE:secsToTimeString(fields[3].GetUInt64(), true).c_str(), fields[4].GetString(), fields[5].GetString());
         delete result;
         return true;
     }
@@ -3911,7 +3912,7 @@ bool ChatHandler::HandleBanListCommand(const char* args)
     char* cType = strtok((char*)args, " ");
     char* cFilter = strtok(NULL, "");
     if(!cType || !cFilter)
-       return false;
+        return false;
     std::string Filter = cFilter;
     std::string Type = cType;
     loginDatabase.escape_string(Filter);
@@ -3949,7 +3950,7 @@ bool ChatHandler::HandleBanListCommand(const char* args)
     }
     else if(Type == "character")
     {
-        result = sDatabase.PQuery("SELECT `account` FROM `character`, WHERE name LIKE \"%%%s%%\" ",Filter.c_str()); 
+        result = sDatabase.PQuery("SELECT `account` FROM `character`, WHERE name LIKE \"%%%s%%\" ",Filter.c_str());
         if (!result)
         {
             PSendSysMessage(LANG_BANLIST_NOCHARACTER);
@@ -4187,7 +4188,7 @@ bool ChatHandler::HandleLoadPDumpCommand(const char *args)
     char * name = strtok(NULL, " ");
     char * guid = name ? strtok(NULL, " ") : NULL;
 
-    if(objmgr.LoadPlayerDump(file, atoi(acc), name ? name : "", guid ? atoi(guid) : 0))    
+    if(objmgr.LoadPlayerDump(file, atoi(acc), name ? name : "", guid ? atoi(guid) : 0))
         PSendSysMessage(LANG_COMMAND_IMPORT_SUCCESS);
     else
         PSendSysMessage(LANG_COMMAND_IMPORT_FAILED);
