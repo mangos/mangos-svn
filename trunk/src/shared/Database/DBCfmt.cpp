@@ -19,7 +19,8 @@
 const char AreaTableEntryfmt[]="iiinixxxxxissssssssssssssssxixxxxxx";
 const char BankBagSlotPricesEntryfmt[]="ni";
 const char BattlemasterListEntryfmt[]="niixxxxxxiiiixxssssssssssssssssx";
-const char ChatChannelsEntryfmt[]="iixssssssssssssssssxxxxxxxxxxxxxxxxxx";  // data not sorted (more compact store)
+                                                            // data not sorted (more compact store)
+const char ChatChannelsEntryfmt[]="iixssssssssssssssssxxxxxxxxxxxxxxxxxx";
 const char ChrClassesEntryfmt[]="nxixxxxxxxxxxxxxxxxxxxxx";
 const char ChrRacesEntryfmt[]="nxixiixxixxxxissssssssssssssssxxxxx";
 const char CreatureFamilyfmt[]="nxxxxxiissssssssssssssssxx";

@@ -45,5 +45,4 @@ class QueryResultMysql : public QueryResult
         MYSQL_RES *mResult;
 };
 #endif
-
 #endif

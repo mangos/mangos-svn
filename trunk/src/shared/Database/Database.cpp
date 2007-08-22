@@ -34,7 +34,8 @@ bool Database::Initialize(const char *)
     // (See method: PExecuteLog)
     m_logSQL = sConfig.GetIntDefault("LogSQL", 0);
     m_logsDir = sConfig.GetStringDefault("LogsDir","");
-    if(!m_logsDir.empty()) {
+    if(!m_logsDir.empty())
+    {
         if((m_logsDir.at(m_logsDir.length()-1)!='/') && (m_logsDir.at(m_logsDir.length()-1)!='\\'))
             m_logsDir.append("/");
     }
@@ -89,7 +90,7 @@ bool Database::PExecuteLog(const char * format,...)
 
         FILE* log_file;
         std::string logsDir_fname = m_logsDir+fName;
-        log_file = fopen(logsDir_fname.c_str(), "a"); 
+        log_file = fopen(logsDir_fname.c_str(), "a");
         if (log_file)
         {
             fprintf(log_file, "%s;\n", szQuery);
@@ -148,4 +149,3 @@ bool Database::PExecute(const char * format,...)
 
     return Execute(szQuery);
 }
-

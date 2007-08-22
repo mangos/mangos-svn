@@ -96,8 +96,8 @@ bool SqlQueryHolder::PQuery(const char *format, ...)
     {
         sLog.outError("SQL Query truncated (and not execute) for format: %s",format);
         return false;
-    }    
-    
+    }
+
     return Query(szQuery);
 }
 

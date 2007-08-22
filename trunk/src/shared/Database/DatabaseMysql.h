@@ -73,5 +73,4 @@ class DatabaseMysql : public Database
         bool _TransactionCmd(const char *sql);
 };
 #endif
-
 #endif

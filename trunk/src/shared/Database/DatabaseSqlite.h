@@ -40,5 +40,4 @@ class DatabaseSqlite : public Database
         sqlite *mSqlite;
 };
 #endif
-
 #endif

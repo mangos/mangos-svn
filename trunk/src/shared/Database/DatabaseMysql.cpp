@@ -141,9 +141,9 @@ bool DatabaseMysql::Initialize(const char *infoString)
     {
         sLog.outDetail( "Connected to MySQL database at %s\n",
             host.c_str());
-        
+
         /*----------SET AUTOCOMMIT OFF---------*/
-        // It seems mysql 5.0.x have enabled this feature 
+        // It seems mysql 5.0.x have enabled this feature
         // by default. In crash case you can lose data!!!
         // So better to turn this off
         if (!mysql_autocommit(mMysql, 0))
@@ -220,11 +220,11 @@ bool DatabaseMysql::Execute(const char *sql)
 
     // don't use queued execution if it has not been initialized
     if (!m_threadBody) return DirectExecute(sql);
-    
+
     tranThread = ZThread::ThreadImpl::current();            // owner of this transaction
     TransactionQueues::iterator i = m_tranQueues.find(tranThread);
     if (i != m_tranQueues.end() && i->second != NULL)
-    {   // Statement for transaction
+    {                                                       // Statement for transaction
         i->second->DelayExecute(sql);
     }
     else
@@ -285,14 +285,14 @@ bool DatabaseMysql::BeginTransaction()
     if (!m_threadBody)
     {
         if (tranThread==ZThread::ThreadImpl::current())
-            return false;                                       // huh? this thread already started transaction
+            return false;                                   // huh? this thread already started transaction
         mMutex.acquire();
         if (!_TransactionCmd("START TRANSACTION"))
         {
-            mMutex.release();                                   // can't start transaction
+            mMutex.release();                               // can't start transaction
             return false;
         }
-        return true;                                            // transaction started
+        return true;                                        // transaction started
     }
 
     tranThread = ZThread::ThreadImpl::current();            // owner of this transaction
@@ -303,7 +303,7 @@ bool DatabaseMysql::BeginTransaction()
         delete i->second;
 
     m_tranQueues[tranThread] = new SqlTransaction();
-    
+
     return true;
 }
 
@@ -387,5 +387,4 @@ void DatabaseMysql::HaltDelayThread()
     m_delayThread = NULL;
     m_threadBody = NULL;
 }
-
 #endif

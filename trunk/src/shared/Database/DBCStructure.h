@@ -49,7 +49,7 @@ struct AreaTableEntry
                                                             // 5-9 unused
     int32     area_level;                                   //10
     char*     area_name[16];                                //11-26
-                                                            //27, string flags, unused    
+                                                            //27, string flags, unused
     uint32    team;                                         //28
 };
 
@@ -80,7 +80,7 @@ struct ChatChannelsEntry
     uint32      flags;                                      // 1
     char*       pattern[16];                                // 3-18
                                                             //19 string flags, unused
-   //char*       name[16];                                  //20-35 unused
+    //char*       name[16];                                  //20-35 unused
                                                             //36 string flag, unused
 };
 
@@ -106,7 +106,7 @@ struct ChrRacesEntry
     uint32      TeamID;                                     // 8 (7-Alliance 1-Horde)
                                                             // 9-12 unused
     uint32      startmovie;                                 // 13
-    char*       name[16];                                   // 14-29 used for DBC language detection/selection 
+    char*       name[16];                                   // 14-29 used for DBC language detection/selection
                                                             // 30 string flags, unused
 };
 
@@ -117,19 +117,19 @@ struct CreatureFamilyEntry
     uint32    tamable;                                      // 6 if this = 270 then "is tamable Creature" (or 0 is non-tamable)
     uint32    petFoodMask;                                  // 7
     char*     Name[16];                                     // 8-23
-                                                            // 24 string flags, unused 
+                                                            // 24 string flags, unused
 };
 
 struct DurabilityCostsEntry
 {
-    uint32    Itemlvl;                                       // 0
-    uint32    multiplier[29];                                // 1-29
+    uint32    Itemlvl;                                      // 0
+    uint32    multiplier[29];                               // 1-29
 };
 
 struct DurabilityQualityEntry
 {
-    uint32    Id;                                            // 0
-    float     quality_mod;                                   // 1
+    uint32    Id;                                           // 0
+    float     quality_mod;                                  // 1
 };
 
 struct EmotesTextEntry
@@ -148,7 +148,7 @@ struct FactionEntry
                                                             //14-17 unused
     uint32      team;                                       //18
     char*       name[16];                                   //19-34
-                                                            //35 string flags, unused 
+                                                            //35 string flags, unused
 };
 
 enum FactionMasks
@@ -428,9 +428,9 @@ struct SpellEntry
     uint32    TotemCategory[2];                             //208-209
     uint32    AreaId;                                       //210
 
-private:
-    // prevent creating custom entries (copy data from original infact)
-    SpellEntry(SpellEntry const&);                          // DON'T must have implementation
+    private:
+        // prevent creating custom entries (copy data from original infact)
+        SpellEntry(SpellEntry const&);                      // DON'T must have implementation
 };
 
 typedef std::set<uint32> SpellCategorySet;
@@ -447,7 +447,7 @@ struct SpellFocusObjectEntry
 {
     uint32    ID;                                           // 0
     char*     Name[16];                                     // 1-15 unused
-                                                            // 16 string flags, unused     
+                                                            // 16 string flags, unused
 };
 */
 
@@ -562,7 +562,7 @@ struct TaxiNodesEntry
     float     y;                                            // 3
     float     z;                                            // 4
     //char*     name[16];                                   // 5-21
-                                                            //22 string flags, unused    
+                                                            //22 string flags, unused
     uint32    horde_mount_type;                             //23
     uint32    alliance_mount_type;                          //24
 };
@@ -582,7 +582,7 @@ struct TotemCategoryEntry
 {
     uint32    ID;                                           // 0
     //char*   name[16];                                     // 1-16
-                                                            //17 string flags, unused    
+                                                            //17 string flags, unused
     uint32    categoryType;                                 //18 (one for specialization)
     uint32    categoryMask;                                 //19 (compatibility mask for same type: different for totems, compatible from high to low for rods)
 };
@@ -633,5 +633,4 @@ typedef std::vector<TaxiPathNodeList> TaxiPathNodesByPath;
 
 #define TaxiMaskSize 8
 typedef uint32 TaxiMask[TaxiMaskSize];
-
 #endif

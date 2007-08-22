@@ -170,8 +170,8 @@ void LoadDBCStores(std::string dataPath)
     LoadDBC(bar,bad_dbc_files,sFactionTemplateStore,     dataPath+"dbc/FactionTemplate.dbc");
     LoadDBC(bar,bad_dbc_files,sGemPropertiesStore,       dataPath+"dbc/GemProperties.dbc");
     LoadDBC(bar,bad_dbc_files,sGtChanceToMeleeCritBaseStore,dataPath+"dbc/gtChanceToMeleeCritBase.dbc");
-//    LoadDBC(bar,bad_dbc_files,sGtChanceToMeleeCritStore, dataPath+"dbc/gtChanceToMeleeCrit.dbc"); -- not used currently
-//    LoadDBC(bar,bad_dbc_files,sItemDisplayInfoStore,     dataPath+"dbc/ItemDisplayInfo.dbc");     -- not used currently
+    //    LoadDBC(bar,bad_dbc_files,sGtChanceToMeleeCritStore, dataPath+"dbc/gtChanceToMeleeCrit.dbc"); -- not used currently
+    //    LoadDBC(bar,bad_dbc_files,sItemDisplayInfoStore,     dataPath+"dbc/ItemDisplayInfo.dbc");     -- not used currently
     LoadDBC(bar,bad_dbc_files,sItemExtendedCostStore,    dataPath+"dbc/ItemExtendedCost.dbc");
     LoadDBC(bar,bad_dbc_files,sItemRandomPropertiesStore,dataPath+"dbc/ItemRandomProperties.dbc");
     LoadDBC(bar,bad_dbc_files,sItemRandomSuffixStore,    dataPath+"dbc/ItemRandomSuffix.dbc");
@@ -497,7 +497,7 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
     }
 
     // only hunter aspects have this (but not all aspects in hunter family)
-    if( spellInfo->activeIconID == 122 && spellInfo->School == 3/*SPELL_SCHOOL_NATURE*/ && 
+    if( spellInfo->activeIconID == 122 && spellInfo->School == 3/*SPELL_SCHOOL_NATURE*/ &&
         (spellInfo->Attributes & 0x50000) != 0 && (spellInfo->Attributes & 0x9000010) == 0)
     {
         return SPELL_ASPECT;
@@ -505,9 +505,9 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
 
     for(int i = 0; i < 3; i++)
         if(spellInfo->Effect[i] == 6                        //SPELL_EFFECT_APPLY_AURA
-        && (spellInfo->EffectApplyAuraName[i] == 44         //SPELL_AURA_TRACK_CREATURES
-        || spellInfo->EffectApplyAuraName[i] == 45          //SPELL_AURA_TRACK_RESOURCES
-        || spellInfo->EffectApplyAuraName[i] == 151))       //SPELL_AURA_TRACK_STEALTHED
+        && (spellInfo->EffectApplyAuraName[i] == 44     //SPELL_AURA_TRACK_CREATURES
+        || spellInfo->EffectApplyAuraName[i] == 45      //SPELL_AURA_TRACK_RESOURCES
+        || spellInfo->EffectApplyAuraName[i] == 151))   //SPELL_AURA_TRACK_STEALTHED
             return SPELL_TRACKER;
 
     return SPELL_NORMAL;
@@ -538,17 +538,17 @@ static bool IsPositiveTarget(uint32 target)
     // non-positive targets
     switch(target)
     {
-    case 6:                                             //TARGET_S_E:
-    case 15:                                            //TARGET_AE_E:
-    case 16:                                            //TARGET_AE_E_INSTANT:
-    case 22:                                            //TARGET_AC_E:
-    case 24:                                            //TARGET_INFRONT:
-    case 25:                                            //TARGET_DUELVSPLAYER:
-    case 28:                                            //TARGET_AE_E_CHANNEL:
-    case 53:                                            //TARGET_AE_SELECTED:
-        return false;
-    default:
-        break;
+        case 6:                                             //TARGET_S_E:
+        case 15:                                            //TARGET_AE_E:
+        case 16:                                            //TARGET_AE_E_INSTANT:
+        case 22:                                            //TARGET_AC_E:
+        case 24:                                            //TARGET_INFRONT:
+        case 25:                                            //TARGET_DUELVSPLAYER:
+        case 28:                                            //TARGET_AE_E_CHANNEL:
+        case 53:                                            //TARGET_AE_SELECTED:
+            return false;
+        default:
+            break;
     }
     return true;
 }
@@ -560,10 +560,10 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
 
     switch(spellId)
     {
-        case 23333: // BG spell
-        case 23335: // BG spell
+        case 23333:                                         // BG spell
+        case 23335:                                         // BG spell
             return true;
-        case 28441: // not possitive dummy spell
+        case 28441:                                         // not possitive dummy spell
             return false;
     }
 
@@ -585,7 +585,7 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                 // dummy aura can be positive or negative dependent from casted spell
                 switch(spellproto->Id)
                 {
-                    case 13139: // net-o-matic special effect
+                    case 13139:                             // net-o-matic special effect
                         return false;
                     default:
                         break;
@@ -616,13 +616,13 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
             case 95 /*SPELL_AURA_GHOST*/:
                 return false;
             case 33 /*SPELL_AURA_MOD_DECREASE_SPEED*/:      // used in positive spells also
-                // part of positive spell if casted at self
-                if(spellproto->EffectImplicitTargetA[effIndex] != 1/*TARGET_SELF*/)
-                    return false;
-                // but not this if this first effect (don't found batter check)
-                if(spellproto->Attributes & 0x4000000 && effIndex==0)
-                    return false;
-                break;
+            // part of positive spell if casted at self
+            if(spellproto->EffectImplicitTargetA[effIndex] != 1/*TARGET_SELF*/)
+                return false;
+            // but not this if this first effect (don't found batter check)
+            if(spellproto->Attributes & 0x4000000 && effIndex==0)
+                return false;
+            break;
             case 77 /*SPELL_AURA_MECHANIC_IMMUNITY*/:
             {
                 // non-positive immunities
