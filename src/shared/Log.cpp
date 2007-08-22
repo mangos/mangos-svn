@@ -608,5 +608,5 @@ void Log::outRALog(    const char * str, ... )
         va_end(ap);
         fflush(raLogfile);
     }
-     fflush(stdout);
+    fflush(stdout);
 }

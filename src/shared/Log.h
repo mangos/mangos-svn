@@ -80,16 +80,25 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
         void InitColors(std::string init_str);
         void outTitle( const char * str);
         void outCommand( const char * str, ...)      ATTR_PRINTF(2,3);
-        void outString();                                              // any log level
-        void outString( const char * str, ... )      ATTR_PRINTF(2,3); // any log level
-        void outError( const char * err, ... )       ATTR_PRINTF(2,3); // any log level
-        void outBasic( const char * str, ... )       ATTR_PRINTF(2,3); // log level >= 1
-        void outDetail( const char * str, ... )      ATTR_PRINTF(2,3); // log level >= 2
-        void outDebugInLine( const char * str, ... ) ATTR_PRINTF(2,3); // log level >= 3
-        void outDebug( const char * str, ... )       ATTR_PRINTF(2,3); // log level >= 3
-        void outMenu( const char * str, ... )        ATTR_PRINTF(2,3); // any log level
-        void outErrorDb( const char * str, ... )     ATTR_PRINTF(2,3); // any log level
-        void outRALog( const char * str, ... )       ATTR_PRINTF(2,3); // any log level
+        void outString();                                   // any log level
+                                                            // any log level
+        void outString( const char * str, ... )      ATTR_PRINTF(2,3);
+                                                            // any log level
+        void outError( const char * err, ... )       ATTR_PRINTF(2,3);
+                                                            // log level >= 1
+        void outBasic( const char * str, ... )       ATTR_PRINTF(2,3);
+                                                            // log level >= 2
+        void outDetail( const char * str, ... )      ATTR_PRINTF(2,3);
+                                                            // log level >= 3
+        void outDebugInLine( const char * str, ... ) ATTR_PRINTF(2,3);
+                                                            // log level >= 3
+        void outDebug( const char * str, ... )       ATTR_PRINTF(2,3);
+                                                            // any log level
+        void outMenu( const char * str, ... )        ATTR_PRINTF(2,3);
+                                                            // any log level
+        void outErrorDb( const char * str, ... )     ATTR_PRINTF(2,3);
+                                                            // any log level
+        void outRALog( const char * str, ... )       ATTR_PRINTF(2,3);
         void SetLogLevel(char * Level);
         void SetLogFileLevel(char * Level);
         void SetColor(bool stdout_stream, Color color);
@@ -122,5 +131,4 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
 // primary for script library
 void MANGOS_DLL_SPEC debug_log(const char * str, ...) ATTR_PRINTF(1,2);
 void MANGOS_DLL_SPEC error_log(const char * str, ...) ATTR_PRINTF(1,2);
-
 #endif

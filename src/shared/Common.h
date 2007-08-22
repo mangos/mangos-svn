@@ -121,7 +121,6 @@
 #define I64FMT "%016llX"
 #define I64FMTD "%llu"
 #define SI64FMTD "%lld"
-
 #endif
 
 #define GUID_HIPART(x)   (uint32)((x) >> 32)
@@ -156,6 +155,4 @@ enum TimeConstants
 #ifdef min
 #undef min
 #endif
-
 #endif
-
