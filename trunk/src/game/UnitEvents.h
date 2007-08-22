@@ -28,7 +28,8 @@ class HostilReference;
 //==============================================================
 //==============================================================
 
-enum UNIT_EVENT_TYPE {
+enum UNIT_EVENT_TYPE
+{
     // Player/Pet changed on/offline status
     UEV_THREAT_REF_ONLINE_STATUS        = 1<<0,
 
@@ -66,16 +67,16 @@ enum UNIT_EVENT_TYPE {
 
 //==============================================================
 
-class MANGOS_DLL_SPEC UnitBaseEvent 
+class MANGOS_DLL_SPEC UnitBaseEvent
 {
-private:
-    uint32 iType;
-public:
-    UnitBaseEvent(uint32 pType) { iType = pType; }
-    uint16 getType() const { return iType; }
-    bool matchesTypeMask(uint32 pMask) const { return iType & pMask; }
-    
-    void setType(uint32 pType) { iType = pType; }
+    private:
+        uint32 iType;
+    public:
+        UnitBaseEvent(uint32 pType) { iType = pType; }
+        uint16 getType() const { return iType; }
+        bool matchesTypeMask(uint32 pMask) const { return iType & pMask; }
+
+        void setType(uint32 pType) { iType = pType; }
 
 };
 
@@ -83,55 +84,53 @@ public:
 
 class MANGOS_DLL_SPEC ThreatRefStatusChangeEvent : public UnitBaseEvent
 {
-private:
-    HostilReference* iHostilReference;
-    union {
-        float iFValue;
-        int32 iIValue;
-        bool iBValue;
-    };
-    ThreatManager* iThreatManager;
-public:
-    ThreatRefStatusChangeEvent(uint32 pType) : UnitBaseEvent(pType) { iHostilReference = NULL; }
+    private:
+        HostilReference* iHostilReference;
+        union
+        {
+            float iFValue;
+            int32 iIValue;
+            bool iBValue;
+        };
+        ThreatManager* iThreatManager;
+    public:
+        ThreatRefStatusChangeEvent(uint32 pType) : UnitBaseEvent(pType) { iHostilReference = NULL; }
 
-    ThreatRefStatusChangeEvent(uint32 pType, HostilReference* pHostilReference) : UnitBaseEvent(pType) { iHostilReference = pHostilReference; }
+        ThreatRefStatusChangeEvent(uint32 pType, HostilReference* pHostilReference) : UnitBaseEvent(pType) { iHostilReference = pHostilReference; }
 
-    ThreatRefStatusChangeEvent(uint32 pType, HostilReference* pHostilReference, float pValue) : UnitBaseEvent(pType) { iHostilReference = pHostilReference; iFValue = pValue; }
+        ThreatRefStatusChangeEvent(uint32 pType, HostilReference* pHostilReference, float pValue) : UnitBaseEvent(pType) { iHostilReference = pHostilReference; iFValue = pValue; }
 
-    ThreatRefStatusChangeEvent(uint32 pType, HostilReference* pHostilReference, bool pValue) : UnitBaseEvent(pType) { iHostilReference = pHostilReference; iBValue = pValue; }
+        ThreatRefStatusChangeEvent(uint32 pType, HostilReference* pHostilReference, bool pValue) : UnitBaseEvent(pType) { iHostilReference = pHostilReference; iBValue = pValue; }
 
-    int32 getIValue() const { return iIValue; }
+        int32 getIValue() const { return iIValue; }
 
-    float getFValue() const { return iFValue; }
+        float getFValue() const { return iFValue; }
 
-    bool getBValue() const { return iBValue; }
+        bool getBValue() const { return iBValue; }
 
-    void setBValue(bool pValue) { iBValue = pValue; }
+        void setBValue(bool pValue) { iBValue = pValue; }
 
-    HostilReference* getReference() const { return iHostilReference; }
+        HostilReference* getReference() const { return iHostilReference; }
 
-    void setThreatManager(ThreatManager* pThreatManager) { iThreatManager = pThreatManager; }
+        void setThreatManager(ThreatManager* pThreatManager) { iThreatManager = pThreatManager; }
 
-    ThreatManager* getThreatManager() const { return iThreatManager; }
+        ThreatManager* getThreatManager() const { return iThreatManager; }
 };
 
 //==============================================================
 
 class MANGOS_DLL_SPEC ThreatManagerEvent : public ThreatRefStatusChangeEvent
 {
-private:
-    ThreatContainer* iThreatContainer;
-public:
-    ThreatManagerEvent(uint32 pType) : ThreatRefStatusChangeEvent(pType) {}
-    ThreatManagerEvent(uint32 pType, HostilReference* pHostilReference) : ThreatRefStatusChangeEvent(pType, pHostilReference) {}
+    private:
+        ThreatContainer* iThreatContainer;
+    public:
+        ThreatManagerEvent(uint32 pType) : ThreatRefStatusChangeEvent(pType) {}
+        ThreatManagerEvent(uint32 pType, HostilReference* pHostilReference) : ThreatRefStatusChangeEvent(pType, pHostilReference) {}
 
+        void setThreatContainer(ThreatContainer* pThreatContainer) { iThreatContainer = pThreatContainer; }
 
-    void setThreatContainer(ThreatContainer* pThreatContainer) { iThreatContainer = pThreatContainer; }
-
-    ThreatContainer* getThreatContainer() const { return iThreatContainer; }
+        ThreatContainer* getThreatContainer() const { return iThreatContainer; }
 };
 
 //==============================================================
-
-
 #endif

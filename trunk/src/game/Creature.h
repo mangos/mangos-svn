@@ -342,11 +342,11 @@ class MANGOS_DLL_SPEC Creature : public Unit
             SendMonsterMove(GetPositionX(), GetPositionY(), GetPositionZ(),0,true,0);
         }
 
-        uint32 GetShieldBlockValue() const                        //dunno mob block value
+        uint32 GetShieldBlockValue() const                  //dunno mob block value
         {
             return (getLevel()/2 + uint32(GetStat(STAT_STRENGTH)/20));
         }
-        
+
         void _AddCreatureSpellCooldown(uint32 spell_id, time_t end_time);
         void _AddCreatureCategoryCooldown(uint32 category, time_t apply_time);
         void AddCreatureSpellCooldown(uint32 spellid);
@@ -361,7 +361,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void UpdateMaxPower(Powers power);
         void UpdateAttackPowerAndDamage(bool ranged = false);
         void UpdateDamagePhysical(WeaponAttackType attType);
-
 
         /*********************************************************/
         /***                    VENDOR SYSTEM                  ***/
@@ -403,7 +402,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         /***                    TRAINER SYSTEM                 ***/
         /*********************************************************/
         typedef std::list<TrainerSpell> SpellsList;
-        void LoadTrainerSpells();                                   // must be called before access to trainer spells, lazy loading at first call
+        void LoadTrainerSpells();                           // must be called before access to trainer spells, lazy loading at first call
         void ReloadTrainerSpells() { m_trainerSpellsLoaded = false; LoadTrainerSpells(); }
         SpellsList const& GetTrainerSpells() const { return m_trainer_spells; }
         uint32 GetTrainerType() const { return m_trainer_type; }

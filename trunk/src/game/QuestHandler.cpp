@@ -98,7 +98,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
     if(!pObject
         || (pObject->GetTypeId()!=TYPEID_PLAYER && !pObject->hasQuest(quest))
         || (pObject->GetTypeId()==TYPEID_PLAYER && !((Player*)pObject)->CanShareQuest(quest))
-      )
+        )
     {
         _player->PlayerTalkClass->CloseGossip();
         _player->SetDivider( 0 );
@@ -230,7 +230,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
     Object* pObject = ObjectAccessor::Instance().GetObjectByTypeMask(*_player, guid,TYPE_UNIT|TYPE_GAMEOBJECT);
     if(!pObject)
         return;
-    
+
     if(!pObject->hasInvolvedQuest(quest))
         return;
 

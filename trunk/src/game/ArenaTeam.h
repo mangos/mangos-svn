@@ -1,20 +1,20 @@
 /* 
-* Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
-*
-* This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation; either version 2 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+ * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
 
 #ifndef MANGOSSERVER_ARENATEAM_H
 #define MANGOSSERVER_ARENATEAM_H
@@ -25,7 +25,7 @@ enum ArenaTeamCommandTypes
     ERR_ARENA_TEAM_INVITE_SS                = 0x01,
     //ERR_ARENA_TEAM_QUIT_S                   = 0x02,
     ERR_ARENA_TEAM_QUIT_S                   = 0x03,
-    ERR_ARENA_TEAM_FOUNDER_S                = 0x0C  // need check, probably wrong...
+    ERR_ARENA_TEAM_FOUNDER_S                = 0x0C          // need check, probably wrong...
 };
 
 enum ArenaTeamCommandErrors
@@ -48,12 +48,12 @@ enum ArenaTeamCommandErrors
 
 enum ArenaTeamEvents
 {
-    ERR_ARENA_TEAM_JOIN_SS                  = 3,    // player name + arena team name
-    ERR_ARENA_TEAM_LEAVE_SS                 = 4,    // player name + arena team name
-    ERR_ARENA_TEAM_REMOVE_SSS               = 5,    // player name + arena team name + captain name
-    ERR_ARENA_TEAM_LEADER_IS_SS             = 6,    // player name + arena team name
-    ERR_ARENA_TEAM_LEADER_CHANGED_SSS       = 7,    // old captain + new captain + arena team name
-    ERR_ARENA_TEAM_DISBANDED_S              = 8     // captain name + arena team name
+    ERR_ARENA_TEAM_JOIN_SS                  = 3,            // player name + arena team name
+    ERR_ARENA_TEAM_LEAVE_SS                 = 4,            // player name + arena team name
+    ERR_ARENA_TEAM_REMOVE_SSS               = 5,            // player name + arena team name + captain name
+    ERR_ARENA_TEAM_LEADER_IS_SS             = 6,            // player name + arena team name
+    ERR_ARENA_TEAM_LEADER_CHANGED_SSS       = 7,            // old captain + new captain + arena team name
+    ERR_ARENA_TEAM_DISBANDED_S              = 8             // captain name + arena team name
 };
 
 /*

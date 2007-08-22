@@ -45,10 +45,10 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
             sLog.outError( "WORLD: Enemy %s %u not found",(GUID_HIPART(guid)==HIGHGUID_PLAYER ? "player" : "creature"),GUID_LOPART(guid));
 
         // stop attack state at client
-        WorldPacket data( SMSG_ATTACKSTOP, (4+20) );            // we guess size
+        WorldPacket data( SMSG_ATTACKSTOP, (4+20) );        // we guess size
         data.append(GetPlayer()->GetPackGUID());
-        data << uint8(0x00);                                    // must be packed guid
-        data << uint32(0);                                      // unk, can be 1 also
+        data << uint8(0x00);                                // must be packed guid
+        data << uint32(0);                                  // unk, can be 1 also
         SendPacket(&data);
         return;
     }
@@ -58,10 +58,10 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
         sLog.outError( "WORLD: Enemy %s %u is friendly",(GUID_HIPART(guid)==HIGHGUID_PLAYER ? "player" : "creature"),GUID_LOPART(guid));
 
         // stop attack state at client
-        WorldPacket data( SMSG_ATTACKSTOP, (4+20) );            // we guess size
+        WorldPacket data( SMSG_ATTACKSTOP, (4+20) );        // we guess size
         data.append(GetPlayer()->GetPackGUID());
-        data.append(pEnemy->GetPackGUID());                     // must be packed guid
-        data << uint32(0);                                      // unk, can be 1 also
+        data.append(pEnemy->GetPackGUID());                 // must be packed guid
+        data << uint32(0);                                  // unk, can be 1 also
         SendPacket(&data);
         return;
     }

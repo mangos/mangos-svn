@@ -38,7 +38,7 @@ inline const char* LookupName(uint32 id, const char* table[])
 
     return "UNKNOWN";*/
     //fast code
-    if (id > MAX_OPCODE_ID) 
+    if (id > MAX_OPCODE_ID)
         return "UNKNOWN OPCODE_CODE received, it is more than max!";
     return table[id];
 }

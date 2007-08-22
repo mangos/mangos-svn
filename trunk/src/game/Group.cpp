@@ -70,13 +70,13 @@ bool Group::Create(const uint64 &guid, const char * name)
     sDatabase.PExecute("DELETE FROM `group` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
     sDatabase.PExecute("DELETE FROM `group_member` WHERE `leaderGuid`='%u'", GUID_LOPART(m_leaderGuid));
     sDatabase.PExecute("INSERT INTO `group`(`leaderGuid`,`mainTank`,`mainAssistant`,`lootMethod`,`looterGuid`,`lootThreshold`,`icon1`,`icon2`,`icon3`,`icon4`,`icon5`,`icon6`,`icon7`,`icon8`,`isRaid`) "
-        "VALUES('%u','%u','%u','%u','%u','%u','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "',0)", 
-        GUID_LOPART(m_leaderGuid), GUID_LOPART(m_mainTank), GUID_LOPART(m_mainAssistant), uint32(m_lootMethod), 
+        "VALUES('%u','%u','%u','%u','%u','%u','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "','" I64FMTD "',0)",
+        GUID_LOPART(m_leaderGuid), GUID_LOPART(m_mainTank), GUID_LOPART(m_mainAssistant), uint32(m_lootMethod),
         GUID_LOPART(m_looterGuid), uint32(m_lootThreshold), m_targetIcons[0], m_targetIcons[1], m_targetIcons[2], m_targetIcons[3], m_targetIcons[4], m_targetIcons[5], m_targetIcons[6], m_targetIcons[7]);
 
     for(Group::member_citerator itr = m_memberSlots.begin(); itr != m_memberSlots.end(); ++itr)
     {
-        sDatabase.PExecute("INSERT INTO `group_member`(`leaderGuid`,`memberGuid`,`assistant`,`subgroup`) VALUES('%u','%u','%u','%u')", 
+        sDatabase.PExecute("INSERT INTO `group_member`(`leaderGuid`,`memberGuid`,`assistant`,`subgroup`) VALUES('%u','%u','%u','%u')",
             GUID_LOPART(m_leaderGuid), GUID_LOPART(itr->guid), (itr->assistant==1)?1:0, itr->group);
     }
     sDatabase.CommitTransaction();
@@ -359,7 +359,7 @@ void Group::SendLootAllPassed(uint64 Guid, uint32 NumberOfPlayers, const Roll &r
     data << uint32(NumberOfPlayers);                        // The number of players rolling for it???
     data << uint32(r.itemid);                               // The itemEntryId for the item that shall be rolled for
     data << uint32(r.itemRandomPropId);                     // Item random property ID
-    data << uint32(r.itemRandomSuffix);                     // Item random suffix ID 
+    data << uint32(r.itemRandomSuffix);                     // Item random suffix ID
 
     for( Roll::PlayerVote::const_iterator itr=r.playerVote.begin(); itr!=r.playerVote.end(); ++itr)
     {
@@ -531,7 +531,7 @@ void Group::EndRoll()
     {
         //need more testing here, if rolls disappear
         itr = RollId.begin();
-        CountTheRoll(itr, GetMembersCount());                //i don't have to edit player votes, who didn't vote ... he will pass
+        CountTheRoll(itr, GetMembersCount());               //i don't have to edit player votes, who didn't vote ... he will pass
     }
 }
 
@@ -754,7 +754,7 @@ void Group::SendUpdate()
         data << (uint8)(isBGGroup() ? 1 : 0);               // 2.0.x, isBattleGroundGroup?
         data << (uint8)(citr->group);                       // groupid
         data << (uint8)(citr->assistant?0x80:0);            // 2.1.0 unk, member flags?
-        data << uint64(0x50000000FFFFFFFELL);                 // 2.1.0 unk const. guid?
+        data << uint64(0x50000000FFFFFFFELL);               // 2.1.0 unk const. guid?
         data << uint32(GetMembersCount()-1);
         for(member_citerator citr2 = m_memberSlots.begin(); citr2 != m_memberSlots.end(); ++citr2)
         {
@@ -917,7 +917,7 @@ void Group::_setLeader(const uint64 &guid)
                     {
                         if (i_BoundInstances->second.second == GUID_LOPART(old_guid))
                         {
-                            
+
                             i_BoundInstances->second.second = GUID_LOPART(new_guid);
                             changed_bindings.insert(i_BoundInstances->first);
                         }
@@ -968,7 +968,7 @@ void Group::_setLeader(const uint64 &guid)
             sDatabase.Execute(ss.str().c_str());
         }
     }
-    
+
     sDatabase.BeginTransaction();
     sDatabase.PExecute("UPDATE `group` SET `leaderGuid`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(slot->guid), GUID_LOPART(m_leaderGuid));
     sDatabase.PExecute("UPDATE `group_member` SET `leaderGuid`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(slot->guid), GUID_LOPART(m_leaderGuid));
@@ -1020,7 +1020,6 @@ bool Group::_setAssistantFlag(const uint64 &guid, const bool &state)
     member_witerator slot = _getMemberWSlot(guid);
     if(slot==m_memberSlots.end())
         return false;
-
 
     slot->assistant = state;
     sDatabase.PExecute("UPDATE `group_member` SET `assistant`='%u' WHERE `memberGuid`='%u'", (state==true)?1:0, GUID_LOPART(guid));

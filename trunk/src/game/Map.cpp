@@ -80,11 +80,12 @@ bool Map::ExistVMap(uint32 mapid,int x,int y)
     {
         if(vmgr->isMapLoadingEnabled())
         {
-            bool exists = vmgr->existsMap((sWorld.GetDataPath()+ "vmaps").c_str(),  mapid, y,x); // x and y are swaped !!
+                                                            // x and y are swaped !!
+            bool exists = vmgr->existsMap((sWorld.GetDataPath()+ "vmaps").c_str(),  mapid, y,x);
             if(!exists)
             {
                 std::string name = vmgr->getDirFileName(mapid,x,y);
-                sLog.outError("Could not find vmap file '%s'", (sWorld.GetDataPath()+"vmaps/"+name).c_str()); 
+                sLog.outError("Could not find vmap file '%s'", (sWorld.GetDataPath()+"vmaps/"+name).c_str());
                 return false;
             }
         }
@@ -95,7 +96,8 @@ bool Map::ExistVMap(uint32 mapid,int x,int y)
 
 void Map::LoadVMap(int x,int y)
 {
-    int vmapLoadResult = VMAP::VMapFactory::createOrGetVMapManager()->loadMap((sWorld.GetDataPath()+ "vmaps").c_str(),  GetId(), y,x); // x and y are swaped !!
+                                                            // x and y are swaped !!
+    int vmapLoadResult = VMAP::VMapFactory::createOrGetVMapManager()->loadMap((sWorld.GetDataPath()+ "vmaps").c_str(),  GetId(), y,x);
     switch(vmapLoadResult)
     {
         case VMAP::VMAP_LOAD_RESULT_OK:
@@ -349,9 +351,9 @@ Map::EnsureGridCreated(const GridPair &p)
             i_grids[p.x_coord][p.y_coord] = new NGridType(p.x_coord*MAX_NUMBER_OF_GRIDS + p.y_coord);
             i_info[p.x_coord][p.y_coord] = new GridInfo(i_gridExpiry,sWorld.getConfig(CONFIG_GRID_UNLOAD));
             i_gridMask[p.x_coord] |= mask;
-            
+
             i_grids[p.x_coord][p.y_coord]->SetGridState(GRID_STATE_IDLE);
-            
+
             //z coord
             int gx=63-p.x_coord;
             int gy=63-p.y_coord;
@@ -452,7 +454,7 @@ bool Map::AddInstanced(Player *player)
     }
 
     // TODO: Not sure about checking player level: already done in HandleAreaTriggerOpcode
-    // GM's still can teleport player in instance. 
+    // GM's still can teleport player in instance.
     // Is it needed?
 
     {
@@ -737,7 +739,7 @@ void Map::Remove(Player *player, bool remove)
     if (Instanceable())
     {
         sLog.outDetail("MAP: Removing player '%s' from instance '%u' of map '%s' before relocating to other map", player->GetName(), GetInstanceId(), GetMapName());
-        RemoveInstanced(player); // remove from instance player list, etc.
+        RemoveInstanced(player);                            // remove from instance player list, etc.
     }
 
     CellPair p = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
@@ -1073,7 +1075,8 @@ bool Map::UnloadGrid(const uint32 &x, const uint32 &y)
             ((MapInstanced*)(MapManager::Instance().GetBaseMap(i_id)))->RemoveGridMapReference(GridPair(gx, gy));
         GridMaps[gx][gy] = NULL;
     }
-    VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(GetId(), gy, gx); // x and y are swaped
+                                                            // x and y are swaped
+    VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(GetId(), gy, gx);
 
     DEBUG_LOG("Unloading grid[%u,%u] for map %u finished", x,y, i_id);
     return true;
@@ -1083,7 +1086,7 @@ void Map::UnloadAll()
 {
     // clear all delayed moves, useless anyway do this moves before map unload.
     i_creaturesToMove.clear();
-    
+
     for(unsigned int i=0; i < MAX_NUMBER_OF_GRIDS; ++i)
     {
         uint64 mask = 1;
@@ -1103,16 +1106,16 @@ float Map::GetVMapHeight(float x, float y, float z)
     float height=VMAP_INVALID_HEIGHT;
     if(vmgr->isHeightCalcEnabled())
     {
-        height = vmgr->getHeight(GetId(), x, y, z + 2); // look from a bit higher pos to find the floor
-        if(height != VMAP_INVALID_HEIGHT) 
+        height = vmgr->getHeight(GetId(), x, y, z + 2);     // look from a bit higher pos to find the floor
+        if(height != VMAP_INVALID_HEIGHT)
         {
             // we have a vmap height for that place, but now we have to test
             // if the normal map height has higher priority here
             // If normal map height has priority, we return VMAP_INVALID_HEIGHT
             int gx,gy;
             GridPair p = MaNGOS::ComputeGridPair(x, y);
-            gx=(int)(32-x/SIZE_OF_GRIDS) ;                          //grid x
-            gy=(int)(32-y/SIZE_OF_GRIDS);                           //grid y
+            gx=(int)(32-x/SIZE_OF_GRIDS) ;                  //grid x
+            gy=(int)(32-y/SIZE_OF_GRIDS);                   //grid y
             if(GridMaps[gx][gy])
             {
                 float lx,ly;
@@ -1120,7 +1123,7 @@ float Map::GetVMapHeight(float x, float y, float z)
                 ly=MAP_RESOLUTION*(32 -y/SIZE_OF_GRIDS - gy);
                 float normheight = GridMaps[gx][gy]->Z[(int)(lx)][(int)(ly)];
                 if((z>=(normheight-0.2f)) && fabs(normheight-z) < fabs(height-z))
-                    height=VMAP_INVALID_HEIGHT; // normal map height has pri
+                    height=VMAP_INVALID_HEIGHT;             // normal map height has pri
             }
         }
     }
@@ -1168,7 +1171,8 @@ float Map::GetHeight(float x, float y, float z, bool pUseVmaps)
         }
         if(pUseVmaps)
         {
-            float vmapheight = vmgr->getHeight(GetId(), x, y, z + 2); // look from a bit higher pos to find the floor
+                                                            // look from a bit higher pos to find the floor
+            float vmapheight = vmgr->getHeight(GetId(), x, y, z + 2);
             // if the land map did not find the height or if we are already under the surface and vmap found a height
             // or if the distance of the vmap height is less the land height distance
             if(!mapHeightFound || (z<height && vmapheight != VMAP_INVALID_HEIGHT) || fabs(height-z) > fabs(vmapheight-z))
@@ -1310,6 +1314,7 @@ uint32 Map::GetZoneId(uint16 areaflag)
     else
         return 0;
 }
+
 bool Map::IsInWater(float x, float y, float pZ)
 {
     // This method is called too often to use vamps for that (4. parameter = false).
@@ -1365,7 +1370,6 @@ void Map::UpdatePlayerVisibility( Player* player, Cell cell, CellPair cellpair )
 {
     cell.data.Part.reserved = ALL_DISTRICT;
 
-
     MaNGOS::PlayerNotifier pl_notifier(*player);
     TypeContainerVisitor<MaNGOS::PlayerNotifier, WorldTypeMapContainer > player_notifier(pl_notifier);
 
@@ -1407,7 +1411,7 @@ void Map::CreatureRelocationNotify(Creature *creature, Cell cell, CellPair cellp
     CellLock<ReadGuard> cell_lock(cell, cellpair);
     MaNGOS::CreatureRelocationNotifier relocationNotifier(*creature);
     cell.data.Part.reserved = ALL_DISTRICT;
-    cell.SetNoCreate();                             // not trigger load unloaded grids at notifier call
+    cell.SetNoCreate();                                     // not trigger load unloaded grids at notifier call
 
     TypeContainerVisitor<MaNGOS::CreatureRelocationNotifier, WorldTypeMapContainer > c2world_relocation(relocationNotifier);
     TypeContainerVisitor<MaNGOS::CreatureRelocationNotifier, GridTypeMapContainer >  c2grid_relocation(relocationNotifier);
@@ -1475,7 +1479,7 @@ void Map::SendRemoveTransports( Player * player )
 
     MapManager::TransportSet& tset = tmap[player->GetMapId()];
 
-    // except used transport 
+    // except used transport
     for (MapManager::TransportSet::iterator i = tset.begin(); i != tset.end(); ++i)
         if(player->GetTransport() != (*i))
             (*i)->BuildOutOfRangeUpdateBlock(&transData);

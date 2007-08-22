@@ -205,7 +205,7 @@ bool Guild::LoadGuildFromDB(uint32 GuildId)
     {
         DelMember(leaderGuid);
 
-        // check no members case (disbanded) 
+        // check no members case (disbanded)
         if(members.size()==0)
             return false;
     }
@@ -683,7 +683,7 @@ void Guild::Query(WorldSession *session)
     data << Id;
     data << name;
     RankList::iterator itr;
-    for (size_t i = 0 ; i < 10; ++i)                           // show always 10 ranks
+    for (size_t i = 0 ; i < 10; ++i)                        // show always 10 ranks
     {
         if(i < m_ranks.size())
             data << m_ranks[i].name;

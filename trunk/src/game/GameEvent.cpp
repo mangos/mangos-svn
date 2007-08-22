@@ -39,19 +39,19 @@ uint32 GameEvent::NextCheck(uint16 entry)
     time_t currenttime = time(NULL);
 
     // outdated event: we return max
-    if (currenttime > mGameEvent[entry].end) 
+    if (currenttime > mGameEvent[entry].end)
         return max_ge_check_delay;
 
     // never started event, we return delay before start
     if (mGameEvent[entry].start > currenttime)
         return (mGameEvent[entry].start - currenttime);
-   
+
     uint32 delay;
     // in event, we return the end of it
     if ((((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * 60)) < (mGameEvent[entry].length * 60)))
         // we return the delay before it ends
         delay = (mGameEvent[entry].length * 60) - ((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * 60));
-    else // not in window, we return the delay before next start
+    else                                                    // not in window, we return the delay before next start
         delay = (mGameEvent[entry].occurence * 60) - ((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * 60));
     // In case the end is before next check
     if (mGameEvent[entry].end  < currenttime + delay)
@@ -85,7 +85,7 @@ void GameEvent::LoadFromDB()
         return;
     }
 
-    uint32 count = 0; 
+    uint32 count = 0;
 
     barGoLink bar( result->GetRowCount() );
     do
@@ -117,7 +117,7 @@ void GameEvent::LoadFromDB()
     result = sDatabase.Query("SELECT `creature`.`guid`,`game_event_creature`.`event` "
         "FROM `creature` JOIN `game_event_creature` ON `creature`.`guid` = `game_event_creature`.`guid`");
 
-    count = 0; 
+    count = 0;
     if( !result )
     {
         barGoLink bar2(1);
@@ -125,16 +125,18 @@ void GameEvent::LoadFromDB()
 
         sLog.outString();
         sLog.outErrorDb(">> Loaded %u creatures in game events", count );
-    } else {
+    }
+    else
+    {
 
         barGoLink bar2( result->GetRowCount() );
         do
         {
             count++;
             Field *fields = result->Fetch();
-        
+
             bar2.step();
-        
+
             uint32 guid = fields[0].GetUInt32();
 
             GuidList& crelist = mGameEventCreatureGuids[max_event_id + fields[1].GetInt16()];
@@ -151,7 +153,7 @@ void GameEvent::LoadFromDB()
     result = sDatabase.Query("SELECT `gameobject`.`guid`,`game_event_gameobject`.`event` "
         "FROM `gameobject` JOIN `game_event_gameobject` ON `gameobject`.`guid`=`game_event_gameobject`.`guid`");
 
-    count = 0; 
+    count = 0;
     if( !result )
     {
         barGoLink bar3(1);
@@ -159,14 +161,16 @@ void GameEvent::LoadFromDB()
 
         sLog.outString();
         sLog.outErrorDb(">> Loaded %u gameobjects in game events", count );
-    } else {
+    }
+    else
+    {
 
         barGoLink bar3( result->GetRowCount() );
         do
         {
             count++;
             Field *fields = result->Fetch();
-            
+
             bar3.step();
 
             uint32 guid = fields[0].GetUInt32();
@@ -177,12 +181,12 @@ void GameEvent::LoadFromDB()
         } while( result->NextRow() );
         sLog.outString();
         sLog.outString( ">> Loaded %u gameobjects in game events", count );
-    
+
         delete result;
     }
 }
 
-uint32 GameEvent::Initialize() // return the next event delay in ms
+uint32 GameEvent::Initialize()                              // return the next event delay in ms
 {
     m_ActiveEvents.clear();
     uint32 delay = Update();
@@ -191,9 +195,9 @@ uint32 GameEvent::Initialize() // return the next event delay in ms
     return delay;
 }
 
-uint32 GameEvent::Update() // return the next event delay in ms
-{   
-    uint32 nextEventDelay = max_ge_check_delay; // 1 day
+uint32 GameEvent::Update()                                  // return the next event delay in ms
+{
+    uint32 nextEventDelay = max_ge_check_delay;             // 1 day
     uint32 calcDelay;
     for (uint16 itr = 1; itr <= max_event_id; itr++)
     {
@@ -206,13 +210,17 @@ uint32 GameEvent::Update() // return the next event delay in ms
                 AddActiveEvent(itr);
                 ApplyNewEvent(itr);
             }
-        } else {
+        }
+        else
+        {
             //sLog.outDebug("GameEvent %u is not active",itr->first);
             if (IsActiveEvent(itr))
             {
                 RemoveActiveEvent(itr);
                 UnApplyEvent(itr);
-            } else {
+            }
+            else
+            {
                 if (!isSystemInit)
                 {
                     int16 event_nid = (-1) * (itr);
@@ -226,7 +234,7 @@ uint32 GameEvent::Update() // return the next event delay in ms
             nextEventDelay = calcDelay;
     }
     sLog.outBasic("Next game event check in %u secondes.", nextEventDelay + 1);
-    return (nextEventDelay + 1) * 1000; // Add 1 seconde to be sure event has started/stopped at next call
+    return (nextEventDelay + 1) * 1000;                     // Add 1 seconde to be sure event has started/stopped at next call
 }
 
 void GameEvent::UnApplyEvent(uint16 event_id)
@@ -270,7 +278,9 @@ void GameEvent::GameEventSpawn(int16 event_id)
                 if (!pCreature->LoadFromDB(*itr, map->GetInstanceId()))
                 {
                     delete pCreature;
-                } else {
+                }
+                else
+                {
                     map->Add(pCreature);
                 }
             }
@@ -293,7 +303,9 @@ void GameEvent::GameEventSpawn(int16 event_id)
                 if (!pGameobject->LoadFromDB(*itr, map->GetInstanceId()))
                 {
                     delete pGameobject;
-                } else {
+                }
+                else
+                {
                     map->Add(pGameobject);
                 }
             }

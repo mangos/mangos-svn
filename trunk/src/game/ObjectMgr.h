@@ -121,7 +121,7 @@ struct PetLevelInfo
     uint16 armor;
 };
 
-struct ReputationOnKillEntry 
+struct ReputationOnKillEntry
 {
     uint32 repfaction1;
     uint32 repfaction2;
@@ -141,7 +141,8 @@ struct PetCreateSpellEntry
 };
 
 #define WEATHER_SEASONS 4
-struct WeatherSeasonChances {
+struct WeatherSeasonChances
+{
     uint32 rainChance;
     uint32 snowChance;
     uint32 stormChance;
@@ -198,7 +199,7 @@ class ObjectMgr
         typedef HM_NAMESPACE::hash_map<uint32, ReputationOnKillEntry> RepOnKillMap;
 
         typedef HM_NAMESPACE::hash_map<uint32, WeatherZoneChances> WeatherZoneMap;
-        
+
         typedef HM_NAMESPACE::hash_map<uint32, PetCreateSpellEntry> PetCreateSpellMap;
 
         Player* GetPlayer(const char* name) const { return ObjectAccessor::Instance().FindPlayerByName(name);}
@@ -337,7 +338,7 @@ class ObjectMgr
                 return &itr->second;
             return NULL;
         }
-        
+
         PetCreateSpellEntry const* GetPetCreateSpellEntry(uint32 id) const
         {
             PetCreateSpellMap::const_iterator itr = mPetCreateSpell.find(id);
@@ -533,7 +534,7 @@ class ObjectMgr
         {
             return SpellLearnSpells.upper_bound(spell_id);
         }
-        
+
         bool IsSpellLearnToSpell(uint32 spell_id1,uint32 spell_id2) const
         {
             SpellLearnSpellMap::const_iterator b = GetBeginSpellLearnSpell(spell_id1);
@@ -635,7 +636,7 @@ class ObjectMgr
         RepOnKillMap        mRepOnKill;
 
         WeatherZoneMap      mWeatherZoneMap;
-        
+
         PetCreateSpellMap   mPetCreateSpell;
 
     private:

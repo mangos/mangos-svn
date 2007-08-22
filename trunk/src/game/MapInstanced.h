@@ -26,7 +26,9 @@ class MANGOS_DLL_DECL MapInstanced : public Map
     public:
 
         MapInstanced(uint32 id, time_t, uint32 aInstanceId);
-        ~MapInstanced() {}    // Important! Else memleak at class destruction
+        ~MapInstanced()                                     // Important! Else memleak at class destruction
+        {
+        }
 
         virtual void Update(const uint32&);
         virtual void MoveAllCreaturesInMoveList();
@@ -46,7 +48,7 @@ class MANGOS_DLL_DECL MapInstanced : public Map
     private:
 
         void CreateInstance(uint32 InstanceId, Map* &map);
-    
+
         HM_NAMESPACE::hash_map< uint32, Map* > InstancedMaps;
 
         Map* _FindMap(uint32 InstanceId)
@@ -58,5 +60,4 @@ class MANGOS_DLL_DECL MapInstanced : public Map
 
         uint16 GridMapReference[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
 };
-
 #endif

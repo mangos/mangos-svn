@@ -24,7 +24,7 @@
 #include "ObjectAccessor.h"
 #include "CreatureAI.h"
 
-TemporarySummon::TemporarySummon( WorldObject *instantiator, Unit* summoner ) : 
+TemporarySummon::TemporarySummon( WorldObject *instantiator, Unit* summoner ) :
 Creature(instantiator), m_type(TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN), m_timer(0), m_lifetime(0), m_summoner(summoner)
 {
 }
@@ -60,7 +60,7 @@ void TemporarySummon::Update( uint32 diff )
             }
             else if (m_timer != m_lifetime)
                 m_timer = m_lifetime;
-            
+
             break;
         }
 
@@ -86,7 +86,7 @@ void TemporarySummon::Update( uint32 diff )
                 UnSummon();
                 return;
             }
-            
+
             break;
         }
         case TEMPSUMMON_DEAD_DESPAWN:
@@ -96,7 +96,7 @@ void TemporarySummon::Update( uint32 diff )
                 UnSummon();
                 return;
             }
-            break;            
+            break;
         }
         case TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN:
         {
@@ -106,7 +106,7 @@ void TemporarySummon::Update( uint32 diff )
                 UnSummon();
                 return;
             }
-            
+
             if (!isInCombat())
             {
                 if (m_timer <= diff)
@@ -129,7 +129,7 @@ void TemporarySummon::Update( uint32 diff )
                 UnSummon();
                 return;
             }
-            
+
             if (!isInCombat())
             {
                 if (m_timer <= diff)

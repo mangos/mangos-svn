@@ -77,24 +77,23 @@ ObjectGridRespawnMover::Visit(CreatureMapType &m)
 // for loading world object at grid loading (Corpses)
 class ObjectWorldLoader
 {
-public:
-    explicit ObjectWorldLoader(ObjectGridLoader& gloader)
-        : i_cell(gloader.i_cell), i_grid(gloader.i_grid), i_map(gloader.i_map), i_corpses (0)
-    {}
+    public:
+        explicit ObjectWorldLoader(ObjectGridLoader& gloader)
+            : i_cell(gloader.i_cell), i_grid(gloader.i_grid), i_map(gloader.i_map), i_corpses (0)
+            {}
 
-    void Visit(CorpseMapType &m);
+        void Visit(CorpseMapType &m);
 
-    template<class T>
-    void Visit(GridRefManager<T>&) { }
+        template<class T>
+            void Visit(GridRefManager<T>&) { }
 
-private:
-    Cell i_cell;
-    NGridType &i_grid;
-    Map* i_map;
-public:
-    uint32 i_corpses;
+    private:
+        Cell i_cell;
+        NGridType &i_grid;
+        Map* i_map;
+    public:
+        uint32 i_corpses;
 };
-
 
 template<class T> void addUnitState(T *obj, CellPair const& cell_pair)
 {

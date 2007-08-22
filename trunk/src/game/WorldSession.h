@@ -67,7 +67,6 @@ enum PartyResult
     PARTY_RESULT_TARGET_IGNORE_YOU    = 9
 };
 
-
 /// Player session in the World
 class MANGOS_DLL_SPEC WorldSession
 {
@@ -565,7 +564,7 @@ class MANGOS_DLL_SPEC WorldSession
 
         time_t _logoutTime;
         bool m_playerLoading;                               // code processed in LoginPlayer
-        bool m_playerLogout;                             // code processed in LogoutPlayer
+        bool m_playerLogout;                                // code processed in LogoutPlayer
         bool m_playerRecentlyLogout;
 
         void FillOpcodeHandlerHashTable();

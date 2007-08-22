@@ -304,7 +304,7 @@ void PlayerMenu::SendQuestGiverQuestDetails( Quest *pQuest, uint64 npcGUID, bool
     data << pQuest->GetObjectives();
     data << (uint32)ActivateAccept;
     data << pQuest->GetSuggestedPlayers();
-    
+
     ItemPrototype const* IProto;
 
     data << pQuest->GetRewChoiceItemsCount();
@@ -438,7 +438,7 @@ void PlayerMenu::SendQuestQueryResponse( Quest *pQuest )
     for (iI = 0; iI < QUEST_OBJECTIVES_COUNT; iI++)
     {
         if (pQuest->ReqCreatureOrGOId[iI] < 0)
-        { 
+        {
             // client expected gameobject template id in form (id|0x80000000)
             data << uint32((pQuest->ReqCreatureOrGOId[iI]*(-1))|0x80000000);
         }

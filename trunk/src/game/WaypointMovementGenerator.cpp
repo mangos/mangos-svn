@@ -196,9 +196,6 @@ WaypointMovementGenerator::Update(Creature &creature, const uint32 &diff)
     // Waypoint movement can be switched on/off
     // This is quite handy for escort quests and other stuff
 
-
-
-
     if(i_creature.hasUnitState(UNIT_STAT_ROOT) || i_creature.hasUnitState(UNIT_STAT_STUNDED))
         return true;
 
@@ -364,8 +361,8 @@ WaypointMovementGenerator::WPAIScript(Creature &pCreature, std::string pAiscript
             }
         }
         sLog.outDebug("guard-sw");
-    }// guard-sw
-}// WPAIScript
+    }                                                       // guard-sw
+}                                                           // WPAIScript
 
 std::set<uint32> WaypointMovementGenerator::si_waypointHolders;
 

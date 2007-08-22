@@ -68,7 +68,7 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
     GetPlayer()->SendInitialPacketsAfterAddToMap();
 
     // honorless target
-    if(GetPlayer()->pvpInfo.inHostileArea) 
+    if(GetPlayer()->pvpInfo.inHostileArea)
         GetPlayer()->CastSpell(GetPlayer(), 2479, true);
 
     // resummon pet

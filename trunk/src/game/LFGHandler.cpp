@@ -255,14 +255,14 @@ void WorldSession::SendLfgResult(uint32 type, uint32 entry, uint8 lfg_type)
         Group *group = plr->GetGroup();
         if(group)
         {
-            data << group->GetMembersCount()-1; // count of group members without group leader
+            data << group->GetMembersCount()-1;             // count of group members without group leader
             for(GroupReference *itr = group->GetFirstMember(); itr != NULL; itr = itr->next())
             {
                 Player *member = itr->getSource();
                 if(member && member->GetGUID() != plr->GetGUID())
                 {
-                    data.append(member->GetPackGUID()); // packed guid
-                    data << member->getLevel(); // player level
+                    data.append(member->GetPackGUID());     // packed guid
+                    data << member->getLevel();             // player level
                 }
             }
         }

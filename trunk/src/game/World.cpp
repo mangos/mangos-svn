@@ -291,7 +291,7 @@ void World::SetInitialWorldSettings()
     rate_values[RATE_HONOR] = sConfig.GetFloatDefault("Rate.Honor",1);
     rate_values[RATE_MINING_AMOUNT] = sConfig.GetFloatDefault("Rate.Mining.Amount",1);
     rate_values[RATE_MINING_NEXT]   = sConfig.GetFloatDefault("Rate.Mining.Next",1);
-    rate_values[RATE_TALENT] = sConfig.GetFloatDefault("Rate.Talent",1);        
+    rate_values[RATE_TALENT] = sConfig.GetFloatDefault("Rate.Talent",1);
     if(rate_values[RATE_TALENT] < 0)
     {
         sLog.outError("Rate.Talent (%f) mustbe > 0. Using 1 instead.",rate_values[RATE_TALENT]);
@@ -529,7 +529,7 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "Loading Creature Reputation OnKill Data..." );
     objmgr.LoadReputationOnKill();
-    
+
     sLog.outString( "Loading Pet Create Spells..." );
     objmgr.LoadPetCreateSpells();
 
@@ -676,7 +676,7 @@ void World::SetInitialWorldSettings()
 
     sLog.outString("Starting Game Event system..." );
     uint32 nextGameEvent = gameeventmgr.Initialize();
-    m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent); //depend on next event
+    m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent);    //depend on next event
 
     sLog.outString( "WORLD: World initialized" );
 }
@@ -851,7 +851,7 @@ void World::Update(time_t diff)
     ///- Process Game events when necessary
     if (m_timers[WUPDATE_EVENTS].Passed())
     {
-        m_timers[WUPDATE_EVENTS].Reset(); // to give time for Update() to be processed
+        m_timers[WUPDATE_EVENTS].Reset();                   // to give time for Update() to be processed
         uint32 nextGameEvent = gameeventmgr.Update();
         m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent);
         m_timers[WUPDATE_EVENTS].Reset();
@@ -917,29 +917,29 @@ void World::ScriptsProcess()
         {
             switch(GUID_HIPART(step.sourceGUID))
             {
-            case HIGHGUID_ITEM:
-                // case HIGHGUID_CONTAINER: ==HIGHGUID_ITEM
-                {
-                    Player* player = HashMapHolder<Player>::Find(step.ownerGUID);
-                    if(player)
-                        source = player->GetItemByGuid(step.sourceGUID);
+                case HIGHGUID_ITEM:
+                    // case HIGHGUID_CONTAINER: ==HIGHGUID_ITEM
+                    {
+                        Player* player = HashMapHolder<Player>::Find(step.ownerGUID);
+                        if(player)
+                            source = player->GetItemByGuid(step.sourceGUID);
+                        break;
+                    }
+                case HIGHGUID_UNIT:
+                    source = HashMapHolder<Creature>::Find(step.sourceGUID);
                     break;
-                }
-            case HIGHGUID_UNIT:
-                source = HashMapHolder<Creature>::Find(step.sourceGUID);
-                break;
-            case HIGHGUID_PLAYER:
-                source = HashMapHolder<Player>::Find(step.sourceGUID);
-                break;
-            case HIGHGUID_GAMEOBJECT:
-                source = HashMapHolder<GameObject>::Find(step.sourceGUID);
-                break;
-            case HIGHGUID_CORPSE:
-                source = HashMapHolder<Corpse>::Find(step.sourceGUID);
-                break;
-            default:
-                sLog.outError("*_script source with unsupported high guid value %u",GUID_HIPART(step.sourceGUID));
-                break;
+                case HIGHGUID_PLAYER:
+                    source = HashMapHolder<Player>::Find(step.sourceGUID);
+                    break;
+                case HIGHGUID_GAMEOBJECT:
+                    source = HashMapHolder<GameObject>::Find(step.sourceGUID);
+                    break;
+                case HIGHGUID_CORPSE:
+                    source = HashMapHolder<Corpse>::Find(step.sourceGUID);
+                    break;
+                default:
+                    sLog.outError("*_script source with unsupported high guid value %u",GUID_HIPART(step.sourceGUID));
+                    break;
             }
         }
 
@@ -949,21 +949,21 @@ void World::ScriptsProcess()
         {
             switch(GUID_HIPART(step.targetGUID))
             {
-            case HIGHGUID_UNIT:
-                target = HashMapHolder<Creature>::Find(step.targetGUID);
-                break;
-            case HIGHGUID_PLAYER:                           // empty GUID case also
-                target = HashMapHolder<Player>::Find(step.targetGUID);
-                break;
-            case HIGHGUID_GAMEOBJECT:
-                target = HashMapHolder<GameObject>::Find(step.targetGUID);
-                break;
-            case HIGHGUID_CORPSE:
-                target = HashMapHolder<Corpse>::Find(step.targetGUID);
-                break;
-            default:
-                sLog.outError("*_script source with unsupported high guid value %u",GUID_HIPART(step.targetGUID));
-                break;
+                case HIGHGUID_UNIT:
+                    target = HashMapHolder<Creature>::Find(step.targetGUID);
+                    break;
+                case HIGHGUID_PLAYER:                       // empty GUID case also
+                    target = HashMapHolder<Player>::Find(step.targetGUID);
+                    break;
+                case HIGHGUID_GAMEOBJECT:
+                    target = HashMapHolder<GameObject>::Find(step.targetGUID);
+                    break;
+                case HIGHGUID_CORPSE:
+                    target = HashMapHolder<Corpse>::Find(step.targetGUID);
+                    break;
+                default:
+                    sLog.outError("*_script source with unsupported high guid value %u",GUID_HIPART(step.targetGUID));
+                    break;
             }
         }
 
@@ -1084,7 +1084,7 @@ void World::ScriptsProcess()
                     break;
                 }
 
-                if(!source->isType(TYPE_UNIT))         // must be any Unit (creature or player)
+                if(!source->isType(TYPE_UNIT))              // must be any Unit (creature or player)
                 {
                     sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON call for non-unit (TypeId: %u), skipping.",source->GetTypeId());
                     break;
@@ -1234,13 +1234,13 @@ uint8 World::BanAccount(std::string type, std::string nameOrIP, std::string dura
         resultAccounts = sDatabase.PQuery("SELECT `account` FROM `character` WHERE `name` = '%s'",nameOrIP.c_str());
     }
     else
-        return BAN_SYNTAX_ERROR;   //Syntax problem
+        return BAN_SYNTAX_ERROR;                            //Syntax problem
 
     if(!resultAccounts)
         if(type=="ip")
-            return BAN_SUCCESS;   // ip correctly banned but nobody affected (yet)
-        else
-            return BAN_NOTFOUND;   // Nobody to ban
+            return BAN_SUCCESS;                             // ip correctly banned but nobody affected (yet)
+    else
+        return BAN_NOTFOUND;                                // Nobody to ban
 
     ///- Disconnect all affected players (for IP it can be several)
     do
@@ -1468,7 +1468,7 @@ void World::UpdateResultQueue()
 
 void World::UpdateRealmCharCount(uint32 accountId)
 {
-    sDatabase.AsyncPQuery(this, &World::_UpdateRealmCharCount, accountId, 
+    sDatabase.AsyncPQuery(this, &World::_UpdateRealmCharCount, accountId,
         "SELECT COUNT(guid) FROM `character` WHERE `account` = '%u'", accountId);
 }
 

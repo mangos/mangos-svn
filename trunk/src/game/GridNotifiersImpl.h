@@ -58,7 +58,8 @@ MaNGOS::PlayerRelocationNotifier::Visit(PlayerMapType &m)
 
         // Cancel Trade
         if(i_player.GetTrader()==iter->getSource())
-            if(!i_player.IsWithinDistInMap(iter->getSource(), 5))     // iteraction distance
+                                                            // iteraction distance
+            if(!i_player.IsWithinDistInMap(iter->getSource(), 5))
                 i_player.GetSession()->SendCancelTrade();   // will clode both side trade windows
     }
 }

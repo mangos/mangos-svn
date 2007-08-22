@@ -56,7 +56,7 @@ void Totem::Update( uint32 time )
 void Totem::Summon(Unit* owner)
 {
     sLog.outDebug("AddObject at Totem.cpp line 49");
-    
+
     SetInstanceId(owner->GetInstanceId());
     MapManager::Instance().GetMap(GetMapId(), owner)->Add((Creature*)this);
 

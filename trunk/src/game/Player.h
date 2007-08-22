@@ -149,7 +149,8 @@ struct PlayerLevelInfo
 
 struct PlayerInfo
 {
-    PlayerInfo() : displayId_m(0),displayId_f(0),levelInfo(NULL)             // existence checked by displayId != 0             // existence checked by displayId != 0
+                                                            // existence checked by displayId != 0             // existence checked by displayId != 0
+    PlayerInfo() : displayId_m(0),displayId_f(0),levelInfo(NULL)
     {
     }
 
@@ -202,7 +203,7 @@ enum FactionFlags
     FACTION_FLAG_VISIBLE    = 0x01,
     FACTION_FLAG_AT_WAR     = 0x02,
     FACTION_FLAG_UNKNOWN    = 0x04,
-    FACTION_FLAG_INVISIBLE  = 0x08, // unsure
+    FACTION_FLAG_INVISIBLE  = 0x08,                         // unsure
     FACTION_FLAG_OWN_TEAM   = 0x10,
     FACTION_FLAG_INACTIVE   = 0x20
 };
@@ -335,15 +336,15 @@ enum PlayerFlags
     PLAYER_FLAGS_GHOST          = 0x00000010,
     PLAYER_FLAGS_RESTING        = 0x00000020,
     PLAYER_FLAGS_FFA_PVP        = 0x00000080,
-    PLAYER_FLAGS_UNK            = 0x00000100,                   // show PvP in tooltip
+    PLAYER_FLAGS_UNK            = 0x00000100,               // show PvP in tooltip
     PLAYER_FLAGS_IN_PVP         = 0x00000200,
     PLAYER_FLAGS_HIDE_HELM      = 0x00000400,
     PLAYER_FLAGS_HIDE_CLOAK     = 0x00000800,
-    PLAYER_FLAGS_UNK1           = 0x00001000,                   // played long time
-    PLAYER_FLAGS_UNK2           = 0x00002000,                   // played too long time
-    PLAYER_FLAGS_UNK3           = 0x00008000,                   // strange visual effect (2.0.1), looks like PLAYER_FLAGS_GHOST flag
-    PLAYER_FLAGS_UNK4           = 0x00020000,                   // taxi benchmark mode (on/off) (2.0.1)
-    PLAYER_UNK                  = 0x00040000,                   // 2.0.8...
+    PLAYER_FLAGS_UNK1           = 0x00001000,               // played long time
+    PLAYER_FLAGS_UNK2           = 0x00002000,               // played too long time
+    PLAYER_FLAGS_UNK3           = 0x00008000,               // strange visual effect (2.0.1), looks like PLAYER_FLAGS_GHOST flag
+    PLAYER_FLAGS_UNK4           = 0x00020000,               // taxi benchmark mode (on/off) (2.0.1)
+    PLAYER_UNK                  = 0x00040000,               // 2.0.8...
 };
 
 enum PlayerKnownTitles
@@ -611,22 +612,22 @@ enum TradeSlots
 
 enum TransferAbortReason
 {
-    TRANSFER_ABORT_MAX_PLAYERS          = 0x0001,   // Transfer Aborted: instance is full
-    TRANSFER_ABORT_NOT_FOUND            = 0x0002,   // Transfer Aborted: instance not found
-    TRANSFER_ABORT_TOO_MANY_INSTANCES   = 0x0003,   // You have entered too many instances recently.
-    TRANSFER_ABORT_ZONE_IN_COMBAT       = 0x0005,   // Unable to zone in while an encounter is in progress.
-    TRANSFER_ABORT_INSUF_EXPAN_LVL1     = 0x0106,   // You must have TBC expansion installed to access this area.
-    TRANSFER_ABORT_DIFFICULTY1          = 0x0007,   // Normal difficulty mode is not available for %s.
-    TRANSFER_ABORT_DIFFICULTY2          = 0x0107,   // Heroic difficulty mode is not available for %s.
-    TRANSFER_ABORT_DIFFICULTY3          = 0x0207    // Epic difficulty mode is not available for %s.
+    TRANSFER_ABORT_MAX_PLAYERS          = 0x0001,           // Transfer Aborted: instance is full
+    TRANSFER_ABORT_NOT_FOUND            = 0x0002,           // Transfer Aborted: instance not found
+    TRANSFER_ABORT_TOO_MANY_INSTANCES   = 0x0003,           // You have entered too many instances recently.
+    TRANSFER_ABORT_ZONE_IN_COMBAT       = 0x0005,           // Unable to zone in while an encounter is in progress.
+    TRANSFER_ABORT_INSUF_EXPAN_LVL1     = 0x0106,           // You must have TBC expansion installed to access this area.
+    TRANSFER_ABORT_DIFFICULTY1          = 0x0007,           // Normal difficulty mode is not available for %s.
+    TRANSFER_ABORT_DIFFICULTY2          = 0x0107,           // Heroic difficulty mode is not available for %s.
+    TRANSFER_ABORT_DIFFICULTY3          = 0x0207            // Epic difficulty mode is not available for %s.
 };
 
 enum InstanceResetWarningType
 {
-    RAID_INSTANCE_WARNING_HOURS     = 1,    // WARNING! %s is scheduled to reset in %d hour(s).
-    RAID_INSTANCE_WARNING_MIN       = 2,    // WARNING! %s is scheduled to reset in %d minute(s)!
-    RAID_INSTANCE_WARNING_MIN_SOON  = 3,    // WARNING! %s is scheduled to reset in %d minute(s). Please exit the zone or you will be returned to your bind location!
-    RAID_INSTANCE_WELCOME           = 4     // Welcome to %s. This raid instance is scheduled to reset in %s.
+    RAID_INSTANCE_WARNING_HOURS     = 1,                    // WARNING! %s is scheduled to reset in %d hour(s).
+    RAID_INSTANCE_WARNING_MIN       = 2,                    // WARNING! %s is scheduled to reset in %d minute(s)!
+    RAID_INSTANCE_WARNING_MIN_SOON  = 3,                    // WARNING! %s is scheduled to reset in %d minute(s). Please exit the zone or you will be returned to your bind location!
+    RAID_INSTANCE_WELCOME           = 4                     // Welcome to %s. This raid instance is scheduled to reset in %s.
 };
 
 enum MovementFlags
@@ -644,28 +645,28 @@ enum MovementFlags
     MOVEMENTFLAG_ONTRANSPORT    = 0x00000200,
     // 0x400
     MOVEMENTFLAG_FLY_UNK1       = 0x00000800,
-    MOVEMENTFLAG_UNK4           = 0x00001000,   // can't move, only rotate(turn) around
+    MOVEMENTFLAG_UNK4           = 0x00001000,               // can't move, only rotate(turn) around
     MOVEMENTFLAG_JUMPING        = 0x00002000,
     MOVEMENTFLAG_FALLING        = 0x00004000,
     // 0x8000, 0x10000, 0x20000, 0x40000, 0x80000, 0x100000
-    MOVEMENTFLAG_SWIMMING       = 0x00200000,   // appears with fly flag also
+    MOVEMENTFLAG_SWIMMING       = 0x00200000,               // appears with fly flag also
     MOVEMENTFLAG_FLY_UP         = 0x00400000,
     MOVEMENTFLAG_CAN_FLY        = 0x00800000,
     MOVEMENTFLAG_FLYING         = 0x01000000,
     // 0x2000000
-    MOVEMENTFLAG_SPLINE         = 0x04000000,   // probably wrong name
+    MOVEMENTFLAG_SPLINE         = 0x04000000,               // probably wrong name
     MOVEMENTFLAG_SPLINE2        = 0x08000000,
     MOVEMENTFLAG_WATERWALKING   = 0x10000000,
-    MOVEMENTFLAG_SAFE_FALL      = 0x20000000,   // active rogue safe fall spell (passive)
+    MOVEMENTFLAG_SAFE_FALL      = 0x20000000,               // active rogue safe fall spell (passive)
     MOVEMENTFLAG_UNK3           = 0x40000000
 };
 
 // flags that use in movement check for example at spell casting
 MovementFlags const movementFlagsMask = MovementFlags(
-    MOVEMENTFLAG_FORWARD |MOVEMENTFLAG_BACKWARD|MOVEMENTFLAG_STRAFE_LEFT|MOVEMENTFLAG_STRAFE_RIGHT|
-    MOVEMENTFLAG_LEFT    |MOVEMENTFLAG_RIGHT   |MOVEMENTFLAG_PITCH_UP   |MOVEMENTFLAG_PITCH_DOWN|
-    MOVEMENTFLAG_WALK    |MOVEMENTFLAG_FLY_UNK1|MOVEMENTFLAG_JUMPING    |MOVEMENTFLAG_FALLING|
-    MOVEMENTFLAG_SWIMMING|MOVEMENTFLAG_FLY_UP  |MOVEMENTFLAG_FLYING     |MOVEMENTFLAG_SPLINE
+MOVEMENTFLAG_FORWARD |MOVEMENTFLAG_BACKWARD|MOVEMENTFLAG_STRAFE_LEFT|MOVEMENTFLAG_STRAFE_RIGHT|
+MOVEMENTFLAG_LEFT    |MOVEMENTFLAG_RIGHT   |MOVEMENTFLAG_PITCH_UP   |MOVEMENTFLAG_PITCH_DOWN|
+MOVEMENTFLAG_WALK    |MOVEMENTFLAG_FLY_UNK1|MOVEMENTFLAG_JUMPING    |MOVEMENTFLAG_FALLING|
+MOVEMENTFLAG_SWIMMING|MOVEMENTFLAG_FLY_UP  |MOVEMENTFLAG_FLYING     |MOVEMENTFLAG_SPLINE
 );
 
 typedef HM_NAMESPACE::hash_map< uint32, std::pair < uint32, uint32 > > BoundInstancesMap;
@@ -1025,7 +1026,7 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint8 GetComboPoints() { return m_comboPoints; }
         uint64 GetComboTarget() { return m_comboTarget; }
-        
+
         void AddComboPoints(uint64 target, int8 count);
         void SetComboPoints(uint64 target, int8 count);
         void ClearComboPoints();
@@ -1353,7 +1354,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetDrunkValue(uint16 newDrunkValue);
         uint16 GetDrunkValue() const { return m_drunk; }
         uint32 GetDeathTimer() const { return m_deathTimer; }
-        uint32 GetShieldBlockValue() const;                       // overwrite Unit version (virtual)
+        uint32 GetShieldBlockValue() const;                 // overwrite Unit version (virtual)
         bool CanParry() const { return m_canParry; }
         void SetCanParry(bool value) { m_canParry = value; }
         bool CanDualWield() const { return m_canDualWield; }
@@ -1416,7 +1417,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         float GetBattleGroundEntryPointZ() const { return m_bgEntryPointZ; }
         float GetBattleGroundEntryPointO() const { return m_bgEntryPointO; }
         void SetBattleGroundEntryPoint(uint32 Map, float PosX, float PosY, float PosZ, float PosO )
-        { 
+        {
             m_bgEntryPointMap = Map;
             m_bgEntryPointX = PosX;
             m_bgEntryPointY = PosY;
@@ -1492,7 +1493,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         float m_homebindY;
         float m_homebindZ;
 
-        // currently visible objects at player client 
+        // currently visible objects at player client
         typedef std::set<uint64> ClientGUIDs;
         ClientGUIDs m_clientGUIDs;
 
@@ -1504,7 +1505,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateVisibilityOf(WorldObject* target);
 
         template<class T>
-        void UpdateVisibilityOf(T* target, UpdateData& data, UpdateDataMapType& data_updates);
+            void UpdateVisibilityOf(T* target, UpdateData& data, UpdateDataMapType& data_updates);
 
         // Stealth detection system
         uint32 m_DetectInvTimer;
@@ -1518,7 +1519,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetNeedRename(bool rename) { m_needRename = rename; }
 
         LookingForGroup m_lookingForGroup;
-        
+
         // Temporarily removed pet cache
         uint32 GetOldPetNumber() const { return m_oldpetnumber; }
         void SetOldPetNumber(uint32 petnumber) { m_oldpetnumber = petnumber; }
@@ -1664,7 +1665,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         ActionButtonList m_actionButtons;
 
         float m_auraBaseMod[BASEMOD_END][MOD_END];
-        
+
         SpellModList m_spellMods[32];                       // 32 = SPELLMOD_COUNT
         int32 m_totalSpellMod[32][64];                      // 32 = SPELLMOD_COUNT; 64 = size of SpellFamilyFlags
         int32 m_SpellModRemoveCount;

@@ -136,7 +136,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
     uint32 flags2     = 0;
 
     /** lower flag1 **/
-    if(target == this) // building packet for oneself
+    if(target == this)                                      // building packet for oneself
     {
         flags |= UPDATEFLAG_SELF;
 
@@ -149,9 +149,9 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
     {
         // UPDATETYPE_CREATE_OBJECT2 dynamic objects, corpses...
         if(isType(TYPE_DYNAMICOBJECT) || isType(TYPE_CORPSE) || isType(TYPE_PLAYER))
-        /*** temporary reverted - until real source of stack corruption will not found
-        if(isType(TYPE_DYNAMICOBJECT) || isType(TYPE_CORPSE))
-        ***/
+            /*** temporary reverted - until real source of stack corruption will not found
+            if(isType(TYPE_DYNAMICOBJECT) || isType(TYPE_CORPSE))
+            ***/
             updatetype = UPDATETYPE_CREATE_OBJECT2;
 
         // UPDATETYPE_CREATE_OBJECT2 for pets...
@@ -262,52 +262,52 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
 {
     *data << (uint8)flags;
 
-    if (flags & UPDATEFLAG_LIVING)          // 0x20
+    if (flags & UPDATEFLAG_LIVING)                          // 0x20
     {
         switch(GetTypeId())
         {
             case TYPEID_UNIT:
+            {
+                switch(GetEntry())
                 {
-                    switch(GetEntry())
-                    {
-                        case 6491:          // Spirit Healer
-                        case 13116:         // Alliance Spirit Guide
-                        case 13117:         // Horde Spirit Guide
-                            flags2 |= MOVEMENTFLAG_WATERWALKING;   // waterwalking movement flag?
-                            break;
-                    }
+                    case 6491:                              // Spirit Healer
+                    case 13116:                             // Alliance Spirit Guide
+                    case 13117:                             // Horde Spirit Guide
+                        flags2 |= MOVEMENTFLAG_WATERWALKING;// waterwalking movement flag?
+                        break;
                 }
-                break;
+            }
+            break;
             case TYPEID_PLAYER:
-                {
-                    flags2 = ((Player*)this)->GetMovementFlags();
+            {
+                flags2 = ((Player*)this)->GetMovementFlags();
 
-                    if(((Player*)this)->GetTransport())
-                        flags2 |= MOVEMENTFLAG_ONTRANSPORT;
-                    else
-                        flags2 &= ~MOVEMENTFLAG_ONTRANSPORT;
+                if(((Player*)this)->GetTransport())
+                    flags2 |= MOVEMENTFLAG_ONTRANSPORT;
+                else
+                    flags2 &= ~MOVEMENTFLAG_ONTRANSPORT;
 
-                    // remove unknown, unused etc flags for now
-                    flags2 &= ~MOVEMENTFLAG_SPLINE;
-                    flags2 &= ~MOVEMENTFLAG_SPLINE2;
-                    flags2 &= ~MOVEMENTFLAG_JUMPING;
-                    flags2 &= ~MOVEMENTFLAG_FALLING;
-                    flags2 &= ~MOVEMENTFLAG_SWIMMING;
+                // remove unknown, unused etc flags for now
+                flags2 &= ~MOVEMENTFLAG_SPLINE;
+                flags2 &= ~MOVEMENTFLAG_SPLINE2;
+                flags2 &= ~MOVEMENTFLAG_JUMPING;
+                flags2 &= ~MOVEMENTFLAG_FALLING;
+                flags2 &= ~MOVEMENTFLAG_SWIMMING;
 
-                    if(((Player*)this)->isInFlight())
-                        if(FlightMaster::Instance().GetFlightPathMovementGenerator((Player*)this))
-                            flags2 = (MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_SPLINE2);
-                }
-                break;
+                if(((Player*)this)->isInFlight())
+                    if(FlightMaster::Instance().GetFlightPathMovementGenerator((Player*)this))
+                        flags2 = (MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_SPLINE2);
+            }
+            break;
         }
 
-        *data << flags2;                    // movement flags
-        *data << getMSTime();               // this appears to be time in ms but can be any thing (mask, flags)
+        *data << flags2;                                    // movement flags
+        *data << getMSTime();                               // this appears to be time in ms but can be any thing (mask, flags)
     }
 
-    if (flags & UPDATEFLAG_HASPOSITION)     // 0x40
+    if (flags & UPDATEFLAG_HASPOSITION)                     // 0x40
     {
-        if(flags & UPDATEFLAG_TRANSPORT)    // 0x2
+        if(flags & UPDATEFLAG_TRANSPORT)                    // 0x2
         {
             *data << (float)0;
             *data << (float)0;
@@ -323,9 +323,9 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
         }
     }
 
-    if (flags & UPDATEFLAG_LIVING)          // 0x20
+    if (flags & UPDATEFLAG_LIVING)                          // 0x20
     {
-        if(flags2 & MOVEMENTFLAG_ONTRANSPORT)   // 0x200
+        if(flags2 & MOVEMENTFLAG_ONTRANSPORT)               // 0x200
         {
             *data << (uint64)((Player*)this)->GetTransport()->GetGUID();
             *data << (float)((Player*)this)->GetTransOffsetX();
@@ -342,7 +342,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
         }*/
 
         // fall time according movement packet structure...
-        *data << (uint32)0;                 // unknown
+        *data << (uint32)0;                                 // unknown
 
         // 0x2000 or 0x4000
         /*if((flags2 & MOVEMENTFLAG_JUMPING) || (flags2 & MOVEMENTFLAG_FALLING))
@@ -368,7 +368,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
         *data << ((Unit*)this)->GetSpeed( MOVE_FLYBACK );
         *data << ((Unit*)this)->GetSpeed( MOVE_TURN );
 
-        if(flags2 & MOVEMENTFLAG_SPLINE2)   // 0x8000000
+        if(flags2 & MOVEMENTFLAG_SPLINE2)                   // 0x8000000
         {
             FlightPathMovementGenerator *fmg = FlightMaster::Instance().GetFlightPathMovementGenerator((Player*)this);
             if (!fmg)
@@ -380,21 +380,21 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
 
             uint32 flags3 = 0x00000300;
 
-            *data << flags3;                // splines flag?
+            *data << flags3;                                // splines flag?
 
-            if(flags3 & 0x10000)            // probably x,y,z coords there
+            if(flags3 & 0x10000)                            // probably x,y,z coords there
             {
                 *data << (float)0;
                 *data << (float)0;
                 *data << (float)0;
             }
 
-            if(flags3 & 0x20000)            // probably guid there
+            if(flags3 & 0x20000)                            // probably guid there
             {
                 *data << uint64(0);
             }
 
-            if(flags3 & 0x40000)            // may be orientation
+            if(flags3 & 0x40000)                            // may be orientation
             {
                 *data << (float)0;
             }
@@ -407,13 +407,13 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
             uint32 inflighttime = uint32(path.GetPassedLength(fmg->GetCurrentNode(), x, y, z) * 32);
             uint32 traveltime = uint32(path.GetTotalLength() * 32);
 
-            *data << uint32(inflighttime);  // passed move time?
-            *data << uint32(traveltime);    // full move time?
-            *data << uint32(0);             // ticks count?
+            *data << uint32(inflighttime);                  // passed move time?
+            *data << uint32(traveltime);                    // full move time?
+            *data << uint32(0);                             // ticks count?
 
             uint32 poscount = uint32(path.Size());
 
-            *data << uint32(poscount);      // points count
+            *data << uint32(poscount);                      // points count
 
             for(uint32 i = 0; i < poscount; ++i)
             {
@@ -436,19 +436,19 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
 
             // target position (path end)
             /**data << ((Unit*)this)->GetPositionX();
-            *data << ((Unit*)this)->GetPositionY();
-            *data << ((Unit*)this)->GetPositionZ();*/
+             *data << ((Unit*)this)->GetPositionY();
+             *data << ((Unit*)this)->GetPositionZ();*/
         }
     }
 
-    if(flags & UPDATEFLAG_ALL)              // 0x10
+    if(flags & UPDATEFLAG_ALL)                              // 0x10
     {
-        *data << uint32(0);                 // unk, probably timestamp
+        *data << uint32(0);                                 // unk, probably timestamp
     }
 
-    if(flags & UPDATEFLAG_HIGHGUID)         // 0x8
+    if(flags & UPDATEFLAG_HIGHGUID)                         // 0x8
     {
-        *data << uint32(0);                 // unk, probably timestamp
+        *data << uint32(0);                                 // unk, probably timestamp
     }
 
     /*if(flags & UPDATEFLAG_FULLGUID)       // 0x4
@@ -456,9 +456,9 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
         packed guid (probably target guid)  // unk
     }*/
 
-    if(flags & UPDATEFLAG_TRANSPORT)        // 0x2
+    if(flags & UPDATEFLAG_TRANSPORT)                        // 0x2
     {
-        *data << getMSTime();               // ms time
+        *data << getMSTime();                               // ms time
     }
 }
 
@@ -638,7 +638,7 @@ void Object::SetFloatValue( uint16 index, float value )
 
 void Object::SetStatFloatValue( uint16 index, float value)
 {
-    if(value < 0)   
+    if(value < 0)
         value = 0.0f;
 
     SetFloatValue(index, value);
@@ -646,7 +646,7 @@ void Object::SetStatFloatValue( uint16 index, float value)
 
 void Object::SetStatInt32Value( uint16 index, int32 value)
 {
-    if(value < 0)   
+    if(value < 0)
         value = 0;
 
     SetUInt32Value(index, uint32(value));
@@ -823,6 +823,7 @@ bool WorldObject::IsWithinDistInMap(const WorldObject* obj, const float dist2com
 
     return distsq < maxdist * maxdist;
 }
+
 bool WorldObject::IsWithinLOSInMap(const WorldObject* obj) const
 {
     if (!IsInMap(obj)) return false;
@@ -891,8 +892,8 @@ void WorldObject::GetContactPoint( const WorldObject* obj, float &x, float &y, f
     {
         z = MapManager::Instance().GetMap(GetMapId(), this)->GetVMapHeight(x,y,GetPositionZ());
         if(z != VMAP_INVALID_HEIGHT)
-            z += 0.2f; // just to be sure that we are not a few pixel under the surface
-        else 
+            z += 0.2f;                                      // just to be sure that we are not a few pixel under the surface
+        else
             z = GetPositionZ();
     }
     else
@@ -920,8 +921,8 @@ void WorldObject::GetRandomPoint( float x, float y, float z, float distance, flo
     {
         rand_z = MapManager::Instance().GetMap(GetMapId(), this)->GetHeight(x,y,z);
         if(rand_z != VMAP_INVALID_HEIGHT)
-            rand_z += 0.2f; // just to be sure that we are not a few pixel under the surface
-        else 
+            rand_z += 0.2f;                                 // just to be sure that we are not a few pixel under the surface
+        else
             rand_z = GetPositionZ();
     }
     else
@@ -930,34 +931,34 @@ void WorldObject::GetRandomPoint( float x, float y, float z, float distance, flo
 
 void WorldObject::MonsterSay(const char* text, const uint32 language, const uint64 TargetGuid)
 {
-    WorldPacket data(SMSG_MESSAGECHAT, 200);    
+    WorldPacket data(SMSG_MESSAGECHAT, 200);
     data << (uint8)CHAT_MSG_MONSTER_SAY;
     data << (uint32)language;
     data << (uint64)GetGUID();
-    data << (uint32)0;                      //2.1.0
+    data << (uint32)0;                                      //2.1.0
     data << (uint32)(strlen(GetName())+1);
     data << GetName();
-    data << (uint64)TargetGuid;             //Unit Target
+    data << (uint64)TargetGuid;                             //Unit Target
     data << (uint32)(strlen(text)+1);
     data << text;
-    data << (uint8)0;                       // ChatTag
+    data << (uint8)0;                                       // ChatTag
 
     SendMessageToSet(&data, true);
 }
 
 void WorldObject::MonsterYell(const char* text, const uint32 language, const uint64 TargetGuid)
 {
-    WorldPacket data(SMSG_MESSAGECHAT, 200);    
+    WorldPacket data(SMSG_MESSAGECHAT, 200);
     data << (uint8)CHAT_MSG_MONSTER_YELL;
     data << (uint32)language;
     data << (uint64)GetGUID();
-    data << (uint32)0;                      //2.1.0
+    data << (uint32)0;                                      //2.1.0
     data << (uint32)(strlen(GetName())+1);
     data << GetName();
-    data << (uint64)TargetGuid;             //Unit Target
+    data << (uint64)TargetGuid;                             //Unit Target
     data << (uint32)(strlen(text)+1);
     data << text;
-    data << (uint8)0;                       // ChatTag
+    data << (uint8)0;                                       // ChatTag
 
     SendMessageToSet(&data, true);
 }
@@ -967,19 +968,19 @@ void WorldObject::MonsterTextEmote(const char* text, const uint64 TargetGuid)
     std::string rightText = "%s ";
     rightText.append(text);
 
-    WorldPacket data(SMSG_MESSAGECHAT, 200);    
+    WorldPacket data(SMSG_MESSAGECHAT, 200);
     data << (uint8)CHAT_MSG_MONSTER_EMOTE;
     data << (uint32)LANG_UNIVERSAL;
-    data << (uint64)GetGUID();              // 2.1.0
-    data << (uint32)0;                      // 2.1.0
+    data << (uint64)GetGUID();                              // 2.1.0
+    data << (uint32)0;                                      // 2.1.0
     data << (uint32)(strlen(GetName())+1);
     data << GetName();
-    data << (uint64)TargetGuid;             //Unit Target
+    data << (uint64)TargetGuid;                             //Unit Target
     data << (uint32)(rightText.length()+1);
     data << rightText;
-    data << (uint8)0;                       // ChatTag
+    data << (uint8)0;                                       // ChatTag
 
-    SendMessageToSet(&data, true);          // SendMessageToOwnTeamSet()?
+    SendMessageToSet(&data, true);                          // SendMessageToOwnTeamSet()?
 }
 
 void WorldObject::MonsterWhisper(const uint64 receiver, const char* text)
@@ -989,10 +990,10 @@ void WorldObject::MonsterWhisper(const uint64 receiver, const char* text)
     data << (uint32)LANG_UNIVERSAL;
     data << (uint32)1;
     data << GetName();
-    data << (uint64)receiver;               //Also the Unit Target
+    data << (uint64)receiver;                               //Also the Unit Target
     data << (uint32)(strlen(text)+1);
     data << text;
-    data << (uint8)0;                       // ChatTag
+    data << (uint8)0;                                       // ChatTag
 
     Player *player = objmgr.GetPlayer(receiver);
     if(player && player->GetSession())
@@ -1010,8 +1011,8 @@ void WorldObject::GetClosePoint( const WorldObject* victim, float &x, float &y, 
     {
         z = MapManager::Instance().GetMap(GetMapId(), this)->GetHeight(x,y,GetPositionZ());
         if(z != VMAP_INVALID_HEIGHT)
-            z += 0.2f; // just to be sure that we are not a few pixel under the surface
-        else 
+            z += 0.2f;                                      // just to be sure that we are not a few pixel under the surface
+        else
             z = GetPositionZ();
     }
     else
@@ -1028,8 +1029,8 @@ void WorldObject::BuildHeartBeatMsg(WorldPacket *data) const
     data->Initialize(MSG_MOVE_HEARTBEAT, 32);
 
     data->append(GetPackGUID());
-    *data << uint32(0);             // movement flags?
-    *data << getMSTime();           // time
+    *data << uint32(0);                                     // movement flags?
+    *data << getMSTime();                                   // time
     *data << m_positionX;
     *data << m_positionY;
     *data << m_positionZ;
@@ -1041,9 +1042,9 @@ void WorldObject::BuildTeleportAckMsg(WorldPacket *data, float x, float y, float
 {
     data->Initialize(MSG_MOVE_TELEPORT_ACK, 41);
     data->append(GetPackGUID());
-    *data << uint32(0);             // this value increments every time
-    *data << uint32(0);             // movement flags?
-    *data << getMSTime();           // time
+    *data << uint32(0);                                     // this value increments every time
+    *data << uint32(0);                                     // movement flags?
+    *data << getMSTime();                                   // time
     *data << x;
     *data << y;
     *data << z;
