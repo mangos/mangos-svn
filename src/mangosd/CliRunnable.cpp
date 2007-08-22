@@ -495,15 +495,21 @@ void CliSetGM(char *command,pPrintf zprintf)
 
     ///- Try to find the account, then update the GM level
     // No SQL injection (account name is escaped)
-    QueryResult *result = loginDatabase.PQuery("SELECT 1 FROM `account` WHERE `username` = '%s'",safe_account_name.c_str());
+    QueryResult *result = loginDatabase.PQuery("SELECT `id` FROM `account` WHERE `username` = '%s'",safe_account_name.c_str());
 
     if (result)
     {
+        Field *fields = result->Fetch();
+        uint32 account_id = fields[0].GetUInt32();
+        delete result;
+
+        WorldSession* session = sWorld.FindSession(account_id);
+        if(session)
+            session->SetSecurity(lev);
+
         // No SQL injection (account name is escaped)
         loginDatabase.PExecute("UPDATE `account` SET `gmlevel` = '%d' WHERE `username` = '%s'",lev,safe_account_name.c_str());
         zprintf("We added %s gmlevel %d\r\n",szAcc,lev);
-
-        delete result;
     }
     else
     {
