@@ -59,18 +59,28 @@ BattleGround::BattleGround()
     m_raids[0]          = NULL;
     m_raids[1]          = NULL;
 
+    m_PlayersCount[0]   = 0;
+    m_PlayersCount[1]   = 0;
+
     m_Queue_type        = 1;
+
+    m_startDelay        = 0;
+    m_doorsSpawned      = false;
+    m_ArenaType         = 0;
+    m_BattleGroundType  = 3;
+    m_Winner            = 2;
 }
 
 BattleGround::~BattleGround()
 {
+
 }
 
 void BattleGround::Update(time_t diff)
 {
     bool found = false;
 
-    if(GetPlayersSize())
+    if(GetPlayersSize() || GetRemovedPlayersSize() || GetReviveQueueSize())
         found = true;
     else
     {
@@ -85,11 +95,10 @@ void BattleGround::Update(time_t diff)
     }
 
     if(!found)                                              // BG is empty
-        //if(!GetPlayersSize() && !GetQueuedPlayersSize() && !GetRemovedPlayersSize()) // BG is empty
         return;
 
     if(CanStartBattleGround())
-        StartBattleGround();                                //Queue is full, we must invite to BG
+        StartBattleGround();                                // Queue is full, we must invite to BG
 
     WorldPacket data;
 
@@ -125,7 +134,7 @@ void BattleGround::Update(time_t diff)
     // Invite reminder and idle remover (from queue only)
     QueuedPlayersMap& pQueue = m_QueuedPlayers[GetQueueType()];
 
-    if(GetQueuedPlayersSize((GetQueueType()+2)*10))
+    if(GetQueuedPlayersSize((GetQueueType()+1)*10))
     {
         for(QueuedPlayersMap::iterator itr = pQueue.begin(); itr != pQueue.end(); ++itr)
         {
@@ -186,7 +195,7 @@ void BattleGround::Update(time_t diff)
             Player *plr = objmgr.GetPlayer(itr->first);
             if(plr)
             {
-                itr->second.LastOnlineTime = getMSTime();
+                itr->second.LastOnlineTime = getMSTime();   // update last online time
             }
             else
             {
@@ -247,6 +256,7 @@ void BattleGround::Update(time_t diff)
                 m_RemovedPlayers[itr->first] = 1;           // add to remove list (BG)
             }
             SetStatus(STATUS_WAIT_QUEUE);
+            SetWinner(2);
         }
     }
     //sLog.outError("m_Status=%u diff=%u", m_Status, diff);
@@ -361,8 +371,7 @@ void BattleGround::EndBattleGround(uint32 winner)
 
         PlaySoundToAll(SOUND_ALLIANCE_WINS);                // alliance wins sound...
 
-        sBattleGroundMgr.BuildPvpLogDataPacket(&data, this, 1);
-        SendPacketToAll(&data);
+        SetWinner(1);
     }
     else if(winner == HORDE)
     {
@@ -370,8 +379,7 @@ void BattleGround::EndBattleGround(uint32 winner)
 
         PlaySoundToAll(SOUND_HORDE_WINS);                   // horde wins sound...
 
-        sBattleGroundMgr.BuildPvpLogDataPacket(&data, this, 0);
-        SendPacketToAll(&data);
+        SetWinner(0);
     }
 
     SetStatus(STATUS_WAIT_LEAVE);
@@ -395,6 +403,9 @@ void BattleGround::EndBattleGround(uint32 winner)
         }
 
         BlockMovement(plr);
+
+        sBattleGroundMgr.BuildPvpLogDataPacket(&data, this);
+        plr->GetSession()->SendPacket(&data);
 
         uint32 time1 = getMSTime() - GetStartTime();
 
@@ -461,7 +472,10 @@ void BattleGround::RemovePlayer(uint64 guid, bool Transport, bool SendPacket)
     // Remove from lists/maps
     std::map<uint64, BattleGroundPlayer>::iterator itr = m_Players.find(guid);
     if(itr != m_Players.end())
+    {
+        UpdatePlayersCountByTeam(itr->second.Team, true);   // -1 player
         m_Players.erase(itr);
+    }
 
     std::map<uint64, BattleGroundScore>::iterator itr2 = m_PlayerScores.find(guid);
     if(itr2 != m_PlayerScores.end())
@@ -535,6 +549,7 @@ void BattleGround::RemovePlayer(uint64 guid, bool Transport, bool SendPacket)
     if(!GetPlayersSize())
     {
         SetStatus(STATUS_WAIT_QUEUE);
+        SetWinner(2);
         m_Players.clear();
         m_PlayerScores.clear();
         //m_TeamScores[0] = 0;
@@ -690,6 +705,8 @@ void BattleGround::AddPlayer(Player *plr)
     m_Players[guid] = bp;
     m_PlayerScores[guid] = sc;
 
+    UpdatePlayersCountByTeam(plr->GetTeam(), false);        // +1 player
+
     plr->SendInitWorldStates();
 
     plr->RemoveFromGroup();                                 // leave old group before join battleground raid group, not blizz like (old group must be restored after leave BG)...
@@ -711,24 +728,20 @@ void BattleGround::AddPlayer(Player *plr)
     sBattleGroundMgr.BuildPlayerJoinedBattleGroundPacket(&data, plr);
     SendPacketToTeam(plr->GetTeam(), &data);
 
+    if(isArena())
+    {
+        plr->CastSpell(plr, SPELL_ARENA_PREPARATION, true);
+        plr->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
+    }
+
     // Log
     sLog.outDetail("BATTLEGROUND: Player %s joined the battle.", plr->GetName());
 }
 
-bool BattleGround::HasFreeSlots(uint32 Team) const
+bool BattleGround::HasFreeSlots(uint32 Team)
 {
     // queue is unlimited, so we can check free slots only if bg is started...
-    uint8 free = 0;
-    for(std::map<uint64, BattleGroundPlayer>::const_iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
-    {
-        Player *plr = objmgr.GetPlayer(itr->first);
-        if(plr && plr->GetTeam() == Team)
-        {
-            free++;
-        }
-    }
-
-    return (free < GetMaxPlayersPerTeam());
+    return ((GetPlayersCountByTeam(Team) < GetMaxPlayersPerTeam()) && (GetPlayersSize() < GetMaxPlayers()));
 }
 
 void BattleGround::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
@@ -749,7 +762,7 @@ void BattleGround::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
         case SCORE_FLAG_RETURNS:                            // flags returned
             itr->second.FlagReturns += value;
             break;
-        case SCODE_DEATHS:                                  // deaths
+        case SCORE_DEATHS:                                  // deaths
             itr->second.Deaths += value;
             break;
         default:
@@ -803,4 +816,22 @@ void BattleGround::RemovePlayerFromResurrectQueue(uint64 player_guid)
             break;
         }
     }
+}
+
+bool BattleGround::SpawnObject(uint32 entry, uint32 type, float x, float y, float z, float o, float rotation0, float rotation1, float rotation2, float rotation3, uint32 spellid, uint32 timer)
+{
+    BattleGroundObjectInfo info;
+    info.object         = new GameObject(NULL);
+    info.spellid        = spellid;
+    info.timer          = timer;
+    m_bgobjects[type]   = info;
+
+    if(!m_bgobjects[type].object->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), entry, GetMapId(), x, y, z, o, rotation0, rotation1, rotation2, rotation3, 100, 0))
+    {
+        delete m_bgobjects[type].object;
+        info.object = NULL;
+        return false;
+    }
+
+    return true;
 }

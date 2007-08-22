@@ -38,6 +38,7 @@
 #include "Util.h"
 #include "Totem.h"
 #include "TemporarySummon.h"
+#include "BattleGroundMgr.h"
 
 #include <math.h>
 
@@ -505,6 +506,29 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
 
     if (health <= damage)
     {
+        // battleground things
+        if(pVictim->GetTypeId() == TYPEID_PLAYER && (((Player*)pVictim)->InBattleGround()))
+        {
+            Player *killed = ((Player*)pVictim);
+            Player *killer = NULL;
+            if(GetTypeId() == TYPEID_PLAYER)
+                killer = ((Player*)this);
+            else if(GetTypeId() == TYPEID_UNIT && ((Creature*)this)->isPet())
+            {
+                Unit *owner = GetOwner();
+                if(owner->GetTypeId() == TYPEID_PLAYER)
+                    killer = ((Player*)owner);
+            }
+
+            BattleGround *bg = sBattleGroundMgr.GetBattleGround(killed->GetBattleGroundId());
+            if(bg)
+            {
+                bg->HandleKillPlayer(killed, killer);               // drop flags and etc
+                bg->UpdatePlayerScore(killed, SCORE_DEATHS, 1);     // add +1 deaths
+                if(killer)
+                    bg->UpdatePlayerScore(killer, SCORE_KILLS, 1);  // add +1 kills
+            }
+        }
 
         DEBUG_LOG("DealDamage: victim just died");
 
@@ -579,7 +603,6 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
 
             if(player->GetCharmGUID() && (pet = player->GetCharm()))
                 pet->ClearInCombat();
-
         }
         // FIXME: or charmed (can be player). Maybe must be check before GetTypeId() == TYPEID_PLAYER
         else if(GetCharmerOrOwnerGUID())                    // Pet or timed creature, etc

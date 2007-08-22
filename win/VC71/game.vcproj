@@ -179,6 +179,12 @@
 				RelativePath="..\..\src\game\BattleGroundMgr.h">
 			</File>
 			<File
+				RelativePath="..\..\src\game\BattleGroundNA.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundNA.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\BattleGroundWS.cpp">
 			</File>
 			<File

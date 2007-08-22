@@ -230,7 +230,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //178 SPELL_AURA_MOD_DEBUFF_RESISTANCE
     &Aura::HandleNoImmediateEffect,                         //179 SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE implemented in Unit::SpellCriticalBonus
     &Aura::HandleNULL,                                      //180 SPELL_AURA_MOD_SPELL_DAMAGE_VS_UNDEAD,
-    &Aura::HandleNULL,                                      //181
+    &Aura::HandleNULL,                                      //181 unused
     &Aura::HandleNULL,                                      //182 SPELL_AURA_MOD_ARMOR_OF_INTELLECT
     &Aura::HandleNULL,                                      //183 SPELL_AURA_MOD_CRITICAL_THREAT
     &Aura::HandleNULL,                                      //184 SPELL_AURA_MOD_ATTACKER_MELEE_HIT_CHANCE
@@ -245,7 +245,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //193 SPELL_AURA_MELEE_SLOW
     &Aura::HandleNoImmediateEffect,                         //194 SPELL_AURA_MOD_SPELL_DAMAGE_OF_INTELLECT  implemented in Unit::SpellDamageBonus
     &Aura::HandleNoImmediateEffect,                         //195 SPELL_AURA_MOD_SPELL_HEALING_OF_INTELLECT implemented in Unit::SpellHealingBonus
-    &Aura::HandleNULL,                                      //196                                   unused
+    &Aura::HandleNULL,                                      //196
     &Aura::HandleNoImmediateEffect,                         //197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE implemented in Unit::SpellCriticalBonus Unit::RollMeleeOutcomeAgainst Unit::RollPhysicalOutcomeAgainst
     &Aura::HandleNULL,                                      //198 SPELL_AURA_MOD_ALL_WEAPON_SKILLS
     &Aura::HandleNULL,                                      //199 SPELL_AURA_MOD_INCREASES_SPELL_PCT_TO_HIT
@@ -254,20 +254,20 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //202 SPELL_AURA_CANNOT_BE_DODGED
     &Aura::HandleNULL,                                      //203 SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_DAMAGE
     &Aura::HandleNULL,                                      //204 SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_DAMAGE
-    &Aura::HandleNULL,                                      //205                                   unused
+    &Aura::HandleNULL,                                      //205
     &Aura::HandleNULL,                                      //206 SPELL_AURA_MOD_SPEED_MOUNTED
     &Aura::HandleAuraModSpeedMountedFlight,                 //207 SPELL_AURA_MOD_SPEED_MOUNTED_FLIGHT
     &Aura::HandleAuraModSpeedFlight,                        //208 SPELL_AURA_MOD_SPEED_FLIGHT, used only in spell: Flight Form (Passive)
-    &Aura::HandleNULL,                                      //209                                   unused
-    &Aura::HandleNULL,                                      //210                                   unused
-    &Aura::HandleNULL,                                      //211                                   unused
+    &Aura::HandleNULL,                                      //209
+    &Aura::HandleNULL,                                      //210
+    &Aura::HandleNULL,                                      //211
     &Aura::HandleNULL,                                      //212 SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_INTELLECT
     &Aura::HandleNoImmediateEffect,                         //213 SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT
     &Aura::HandleNULL,                                      //214
     &Aura::HandleNULL,                                      //215
     &Aura::HandleModCastingSpeed,                           //216 SPELL_AURA_HASTE_SPELLS
     &Aura::HandleNULL,                                      //217                                   unused
-    &Aura::HandleNULL,                                      //218                                   unused
+    &Aura::HandleNULL,                                      //218 ranged attack haste?
     &Aura::HandleModManaRegen,                              //219 SPELL_AURA_MOD_MANA_REGEN
     &Aura::HandleNoImmediateEffect,                         //220 SPELL_AURA_MOD_SPELL_HEALING_OF_STRENGTH
     &Aura::HandleNULL,                                      //221 ignored
@@ -1933,8 +1933,8 @@ void Aura::HandleModFear(bool Apply, bool Real)
         if(Real)
         {
             WorldPacket data(SMSG_DEATH_NOTIFY_OBSOLETE, 9);
-            data<<m_target->GetGUID();
-            data<<uint8(0x00);
+            data.append(m_target->GetPackGUID());
+            data << uint8(0x00);
             m_target->SendMessageToSet(&data,true);
         }
     }
@@ -1950,8 +1950,8 @@ void Aura::HandleModFear(bool Apply, bool Real)
             if(m_target->GetTypeId() != TYPEID_PLAYER && caster)
                 m_target->Attack(caster);
             WorldPacket data(SMSG_DEATH_NOTIFY_OBSOLETE, 9);
-            data<<m_target->GetGUID();
-            data<<uint8(0x01);
+            data.append(m_target->GetPackGUID());
+            data << uint8(0x01);
             m_target->SendMessageToSet(&data,true);
         }
     }
@@ -2243,7 +2243,7 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
     {
         m_target->addUnitState(UNIT_STAT_ROOT);
         m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
-        m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+        m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));// probably wrong
 
         //Save last orientation
         if (caster)
@@ -2266,7 +2266,7 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
             return;
 
         m_target->clearUnitState(UNIT_STAT_ROOT);
-        m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));// probably wrong
         if(caster && m_target->isAlive())                   // set creature facing on root effect if alive
             m_target->SetUInt64Value (UNIT_FIELD_TARGET,GetCasterGUID());
 

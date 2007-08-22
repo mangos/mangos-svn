@@ -28,6 +28,7 @@
 
 #define SOUND_HORDE_WINS            8454
 #define SOUND_ALLIANCE_WINS         8455
+#define SOUND_BG_START              3439
 
 #define ITEM_WSG_MARK_LOSER         24950
 #define ITEM_WSG_MARK_WINNER        24951
@@ -38,12 +39,14 @@
 
 #define SPELL_WAITING_FOR_RESURRECT 2584
 #define SPELL_SPIRIT_HEAL           22012
+#define SPELL_ARENA_PREPARATION     32727
 
 #define RESURRECTION_INTERVAL       30000
 #define REMIND_INTERVAL             30000
 #define INVITE_ACCEPT_WAIT_TIME     120000
 #define TIME_TO_AUTOREMOVE          120000
 #define MAX_OFFLINE_TIME            300000
+#define START_DELAY                 60000
 
 enum BattleGroundStatus
 {
@@ -81,6 +84,13 @@ struct BattleGroundPlayer
     uint32  Team;                                           // Player's team
 };
 
+struct BattleGroundObjectInfo
+{
+    GameObject  *object;
+    int32       timer;
+    uint32      spellid;
+};
+
 #define MAX_QUEUED_PLAYERS_MAP 7
 
 enum BattleGroundId
@@ -100,12 +110,25 @@ enum ScoreType
     SCORE_KILLS             = 1,
     SCORE_FLAG_CAPTURES     = 2,
     SCORE_FLAG_RETURNS      = 3,
-    SCODE_DEATHS            = 4,
+    SCORE_DEATHS            = 4,
     SCORE_DAMAGE_DONE       = 5,
     SCORE_HEALING_DONE      = 6,
     SCORE_BONUS_HONOR       = 7,
     SCORE_HONORABLE_KILLS   = 8
     // TODO: Add more
+};
+
+enum ArenaType
+{
+    ARENA_TYPE_2v2          = 2,
+    ARENA_TYPE_3v3          = 3,
+    ARENA_TYPE_5v5          = 5
+};
+
+enum BattleGroundType
+{
+    TYPEID_BATTLEGROUND     = 3,
+    TYPEID_ARENA            = 4
 };
 
 class BattleGround
@@ -145,6 +168,10 @@ class BattleGround
         uint32 GetMinPlayers() const { return m_MinPlayers; }
         void SetLevelRange(uint32 min, uint32 max) { m_LevelMin = min; m_LevelMax = max; }
 
+        int GetStartDelayTime() { return m_startDelay; }
+        void ModifyStartDelayTime(int diff) { m_startDelay -= diff; }
+        void SetStartDelayTime(int time) { m_startDelay = time; }
+
         uint32 GetMinLevel() const { return m_LevelMin; }
         uint32 GetMaxLevel() const { return m_LevelMax; }
 
@@ -153,9 +180,21 @@ class BattleGround
         void SetMinPlayersPerTeam(uint32 MinPlayers) { m_MinPlayersPerTeam = MinPlayers; }
         uint32 GetMinPlayersPerTeam() const { return m_MinPlayersPerTeam; }
 
-        bool HasFreeSlots(uint32 Team) const;
-        bool isArena() { return m_isArena; }
+        bool HasFreeSlots(uint32 Team);
 
+        void SetBattleGroundType(uint8 type) { m_BattleGroundType = type; }
+        bool isArena() { return m_BattleGroundType == TYPEID_ARENA; }
+        bool isBattleGround() { return m_BattleGroundType == TYPEID_BATTLEGROUND; }
+        void SetArenaType(uint8 type) { m_ArenaType = type; }
+        uint8 GetArenaType() { return m_ArenaType; }
+
+        uint8 GetWinner() { return m_Winner; }
+        void SetWinner(uint8 winner) { m_Winner = winner; }
+
+        bool isDoorsSpawned() { return m_doorsSpawned; }
+        void SetDoorsSpawned(bool state) { m_doorsSpawned = state; }
+
+        std::map<uint64, BattleGroundPlayer> *GetPlayers() { return &m_Players; }
         uint32 GetPlayersSize() const { return m_Players.size(); }
         uint32 GetQueuedPlayersSize(uint32 level) const;
         uint32 GetRemovedPlayersSize() const { return m_RemovedPlayers.size(); }
@@ -199,6 +238,9 @@ class BattleGround
         void EndBattleGround(uint32 winner);
         void BlockMovement(Player *plr);
 
+        std::map<uint32, BattleGroundObjectInfo> m_bgobjects;
+        bool SpawnObject(uint32 entry, uint32 type, float x, float y, float z, float o, float rotation0,  float rotation1,  float rotation2,  float rotation3, uint32 spellid = 0, uint32 timer = 0);
+
         /* Raid Group */
         Group *GetBgRaid(uint32 TeamID) { return TeamID == ALLIANCE ? m_raids[0] : m_raids[1]; }
         void SetBgRaid(uint32 TeamID, Group *bg_raid)
@@ -212,15 +254,26 @@ class BattleGround
         void UpdatePlayerScore(Player *Source, uint32 type, uint32 value);
 
         uint8 GetTeamIndexByTeamId(uint32 Team) const { return Team == ALLIANCE ? 0 : 1; }
+        uint32 GetPlayersCountByTeam(uint32 Team) { return m_PlayersCount[GetTeamIndexByTeamId(Team)]; }
+        void UpdatePlayersCountByTeam(uint32 Team, bool remove)
+        {
+            if(remove)
+                m_PlayersCount[GetTeamIndexByTeamId(Team)]--;
+            else
+                m_PlayersCount[GetTeamIndexByTeamId(Team)]++;
+        }
 
         /* Triggers handle */
+        // must be implemented in BG subclass
         virtual void HandleAreaTrigger(Player* /*Source*/, uint32 /*Trigger*/) {}
-                                                            // must be implemented in BG subclass
-        virtual void HandleKillPlayer(Player* /*player*/) {}// must be implemented in BG subclass if need
-        virtual void HandleDropFlag(Player* /*player*/) {}  // must be implemented in BG subclass if need
+        // must be implemented in BG subclass if need
+        virtual void HandleKillPlayer(Player* /*player*/, Player* /*killer*/) {}
+        // must be implemented in BG subclass if need
+        virtual void HandleDropFlag(Player* /*player*/) {}
     protected:
+        // must be implemented in BG subclass
         virtual void RemovePlayer(Player * /*player*/, uint64 /*guid*/) {}
-                                                            // must be implemented in BG subclass
+
     private:
         /* Battleground */
         uint32 m_ID;
@@ -230,7 +283,11 @@ class BattleGround
         uint32 m_EndTime;
         uint32 m_LastResurrectTime;
         uint32 m_Queue_type;
-        bool m_isArena;
+        uint8  m_ArenaType;
+        uint8  m_BattleGroundType;
+        uint8  m_Winner;
+        int32  m_startDelay;
+        bool   m_doorsSpawned;
         char const *m_Name;
 
         /* Scorekeeping */
@@ -239,13 +296,16 @@ class BattleGround
         /* Player lists */
         std::map<uint64, BattleGroundPlayer> m_Players;
         std::map<uint64, uint64> m_ReviveQueue;             // Spirit Guide guid + Player guid
-        std::map<uint64, uint8> m_RemovedPlayers;           // uint8 - remove type (0 - bgqueue, 1 - bg, 2 - resurrect queue)
+        std::map<uint64, uint8> m_RemovedPlayers;           // uint8 is remove type (0 - bgqueue, 1 - bg, 2 - resurrect queue)
 
         typedef std::map<uint64, BattleGroundQueue> QueuedPlayersMap;
         QueuedPlayersMap m_QueuedPlayers[MAX_QUEUED_PLAYERS_MAP];
 
         /* Raid Group */
         Group *m_raids[2];                                  // 0 - alliance, 1 - horde
+
+        /* Players count by team */
+        uint32 m_PlayersCount[2];
 
         /* Limits */
         uint32 m_LevelMin;

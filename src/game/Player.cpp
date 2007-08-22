@@ -765,7 +765,6 @@ void Player::Update( uint32 p_time )
         Unit *pVictim = getVictim();
         if( !IsNonMeleeSpellCasted(false) && pVictim)
         {
-
             // default combat reach 10
             // TODO add weapon,skill check
 
@@ -3358,16 +3357,6 @@ void Player::ResurrectPlayer(float restore_percent, bool updateToWorld)
 
 void Player::KillPlayer()
 {
-    if(InBattleGround())
-    {
-        BattleGround* bg = sBattleGroundMgr.GetBattleGround(GetBattleGroundId());
-        if(bg)
-        {
-            bg->HandleKillPlayer(this);                     // drop flags and etc
-            bg->UpdatePlayerScore(this, SCODE_DEATHS, 1);   // add +1 deaths
-        }
-    }
-
     SetMovement(MOVE_ROOT);
 
     StopMirrorTimer(FATIGUE_TIMER);                         //disable timers(bars)
@@ -6486,6 +6475,9 @@ void Player::SendInitWorldStates()
         case 3521:
             NumberOfFields = 35;
             break;
+        case 3698:
+            NumberOfFields = 9;
+            break;
         case 3703:
             NumberOfFields = 9;
             break;
@@ -6599,6 +6591,7 @@ void Player::SendInitWorldStates()
             data << uint32(0x530) << uint32(0x0);           // 79
             data << uint32(0x52f) << uint32(0x0);           // 80
             data << uint32(0x52d) << uint32(0x1);           // 81
+            break;
         case 3277:                                          // WSG
             data << uint32(0x62d) << uint32(0x0);           // 7 1581 alliance flag captures
             data << uint32(0x62e) << uint32(0x0);           // 8 1582 horde flag captures
@@ -6657,6 +6650,7 @@ void Player::SendInitWorldStates()
             data << uint32(0x9a8) << uint32(0x0);           // 20
             data << uint32(0x9a7) << uint32(0x0);           // 21
             data << uint32(0x9a6) << uint32(0x1);           // 22
+            break;
         case 3519:                                          // Terokkar Forest
             data << uint32(0xa41) << uint32(0x0);           // 10
             data << uint32(0xa40) << uint32(0x14);          // 11
@@ -6685,6 +6679,7 @@ void Player::SendInitWorldStates()
             data << uint32(0xa88) << uint32(0x0);           // 34
             data << uint32(0xad0) << uint32(0x0);           // 35
             data << uint32(0xacf) << uint32(0x1);           // 36
+            break;
         case 3521:                                          // Zangarmarsh
             data << uint32(0x9e1) << uint32(0x0);           // 10
             data << uint32(0x9e0) << uint32(0x0);           // 11
@@ -6712,6 +6707,12 @@ void Player::SendInitWorldStates()
             data << uint32(0xa61) << uint32(0x1);           // 33
             data << uint32(0xa60) << uint32(0x1);           // 34
             data << uint32(0xa5f) << uint32(0x0);           // 35
+            break;
+        case 3698:                                          // Nagrand Arena
+            data << uint32(0xa0f) << uint32(0x0);           // 7
+            data << uint32(0xa10) << uint32(0x0);           // 8
+            data << uint32(0xa11) << uint32(0x0);           // 9
+            break;
         case 3703:                                          // Shattrath City
             break;
         default:

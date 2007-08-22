@@ -399,6 +399,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_BATTLEFIELD_PORT ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundPlayerPortOpcode  );
     objmgr.opcodeTable[ CMSG_BATTLEFIELD_LIST ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundListOpcode        );
     objmgr.opcodeTable[ CMSG_LEAVE_BATTLEFIELD ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundLeaveOpcode       );
+    objmgr.opcodeTable[ CMSG_ARENAMASTER_JOIN ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleBattleGroundArenaJoin         );
 
     objmgr.opcodeTable[ CMSG_SET_ACTIONBAR_TOGGLES ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetActionBar                  );
     objmgr.opcodeTable[ CMSG_FIELD_WATCHED_FACTION_SHOW_BAR ]   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSetWatchedFactionIndexOpcode  );
@@ -1320,7 +1321,7 @@ void WorldSession::HandleResetInstancesOpcode( WorldPacket & recv_data )
     sLog.outDebug("WORLD: CMSG_RESET_INSTANCES");
     /*
         uint32 mapid = 0;
-        WorldPacket data(SMSG_RESET_INSTANCES_RESULT, 4);
+        WorldPacket data(SMSG_RESET_INSTANCES_SUCCESS, 4);
         data << mapid;
         _player->GetSession()->SendPacket(&data);
     */

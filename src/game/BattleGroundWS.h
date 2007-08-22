@@ -22,7 +22,7 @@
 #include "BattleGround.h"
 
 #define MAX_TEAM_SCORE      3
-#define FLAG_RESPAWN_TIME   60000
+#define FLAG_RESPAWN_TIME   23000
 #define BUFF_RESPAWN_TIME   180000
 
 #define SOUND_FLAG_CAPTURED_ALLIANCE 8173
@@ -52,23 +52,26 @@ enum BattleGroundObjectTypes
     BG_OBJECT_REGENBUFF_2   = 5,
     BG_OBJECT_BERSERKBUFF_1 = 6,
     BG_OBJECT_BERSERKBUFF_2 = 7,
-    // TODO: Add and handle gates
-    BG_OBJECT_MAX           = 8
+    BG_OBJECT_SEPARATOR     = 8,        // separator between doors and other objects
+    BG_OBJECT_DOOR_A_1      = 8,
+    BG_OBJECT_DOOR_A_2      = 9,
+    BG_OBJECT_DOOR_A_3      = 10,
+    BG_OBJECT_DOOR_A_4      = 11,
+    BG_OBJECT_DOOR_A_5      = 12,
+    BG_OBJECT_DOOR_A_6      = 13,
+    BG_OBJECT_DOOR_H_1      = 14,
+    BG_OBJECT_DOOR_H_2      = 15,
+    BG_OBJECT_DOOR_H_3      = 16,
+    BG_OBJECT_DOOR_H_4      = 17,
+    BG_OBJECT_MAX           = 18
 };
 
 enum FlagState
 {
     FLAG_STATE_ON_BASE      = 0,
-    FLAG_STATE_ON_PLAYER    = 1,
-    FLAG_STATE_ON_GROUND    = 2
-};
-
-struct BattleGroundObjectInfo
-{
-    GameObject  *object;
-    bool        spawned;
-    int32       timer;
-    uint32      spellid;
+    FLAG_STATE_WAIT_RESPAWN = 1,
+    FLAG_STATE_ON_PLAYER    = 2,
+    FLAG_STATE_ON_GROUND    = 3
 };
 
 class BattleGroundWS : public BattleGround
@@ -99,7 +102,7 @@ class BattleGroundWS : public BattleGround
 
         void RemovePlayer(Player *plr, uint64 guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
-        void HandleKillPlayer(Player* player);
+        void HandleKillPlayer(Player* player, Player *killer);
         void HandleDropFlag(Player* player);
         bool SetupBattleGround();
         void Reset();
@@ -117,8 +120,5 @@ class BattleGroundWS : public BattleGround
         uint64 m_FlagKeepers[2];                            // 0 - alliance, 1 - horde
         uint8 m_FlagState[2];                               // for checking flag state
         uint32 m_TeamScores[2];
-
-        std::map<uint32, BattleGroundObjectInfo> m_bgobjects;
-        //std::set<uint32, BattleGroundObjectInfo> m_bgobjects2;
 };
 #endif

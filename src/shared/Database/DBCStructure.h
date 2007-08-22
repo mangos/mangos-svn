@@ -62,9 +62,8 @@ struct BankBagSlotPricesEntry
 struct BattlemasterListEntry
 {
     uint32      id;                                         // 0
-    uint32      mapid1;                                     // 1
-    uint32      mapid2;                                     // 2 for arenas...
-                                                            // 3-8 unused
+    uint32      mapid[3];                                   // 1-3 mapid
+                                                            // 4-8 unused
     uint32      type;                                       // 9 (3 - BG, 4 - arena)
     uint32      minlvl;                                     //10
     uint32      maxlvl;                                     //11

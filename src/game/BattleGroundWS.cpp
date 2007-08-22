@@ -42,40 +42,100 @@ BattleGroundWS::~BattleGroundWS()
 void BattleGroundWS::Update(time_t diff)
 {
     BattleGround::Update(diff);
-    //If BG-Status = WAIT_JOIN and Min players in BG, we must start BG
-    if(GetStatus() == STATUS_WAIT_JOIN && GetPlayersSize() >= GetMinPlayers())
+
+    // after bg start we get there (once)
+    if((GetStatus() == STATUS_WAIT_JOIN) && !isDoorsSpawned() && GetPlayersSize() >= 1)
     {
-        for(uint32 i = 0; i < BG_OBJECT_MAX; i++)
+        for(uint32 i = BG_OBJECT_SEPARATOR; i < BG_OBJECT_MAX; i++)
         {
-            // activate
-            m_bgobjects[i].spawned = true;
             // respawn
             MapManager::Instance().GetMap(m_bgobjects[i].object->GetMapId(), m_bgobjects[i].object)->Add(m_bgobjects[i].object);
         }
-        sLog.outDebug("Objects activated and respawned...");
+        sLog.outDebug("Doors spawned...");
 
-        SetStatus(STATUS_IN_PROGRESS);
+        SetDoorsSpawned(true);
+        SetStartDelayTime(START_DELAY);
+
+        WorldPacket data;
+        const char *message = LANG_BG_WSG_ONE_MINUTE;
+        sChatHandler.FillMessageData(&data, NULL, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_UNIVERSAL, NULL, 0, message, NULL);
+        SendPacketToAll(&data);
+    }
+
+    // after bg start and doors spawn we get there
+    if((GetStatus() == STATUS_WAIT_JOIN) && isDoorsSpawned())
+    {
+        ModifyStartDelayTime(diff);
+
+        // delay expired (1 minute)
+        if(GetStartDelayTime() < 0)
+        {
+            for(uint32 i = BG_OBJECT_SEPARATOR; i < BG_OBJECT_MAX; i++)
+            {
+                // despawn
+                MapManager::Instance().GetMap(m_bgobjects[i].object->GetMapId(), m_bgobjects[i].object)->Remove(m_bgobjects[i].object, false);
+            }
+            sLog.outDebug("Doors despawned...");
+
+            for(uint32 i = 0; i < BG_OBJECT_SEPARATOR; i++)
+            {
+                // respawn
+                MapManager::Instance().GetMap(m_bgobjects[i].object->GetMapId(), m_bgobjects[i].object)->Add(m_bgobjects[i].object);
+            }
+            sLog.outDebug("Objects activated and respawned...");
+
+            WorldPacket data;
+            const char *message = LANG_BG_WSG_BEGIN;
+            sChatHandler.FillMessageData(&data, NULL, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_UNIVERSAL, NULL, 0, message, NULL);
+            SendPacketToAll(&data);
+
+            PlaySoundToAll(SOUND_BG_START);
+
+            SetStatus(STATUS_IN_PROGRESS);
+
+            SetDoorsSpawned(false);
+            SetStartDelayTime(0);
+        }
     }
 
     if(GetStatus() == STATUS_IN_PROGRESS)
     {
-        for(uint32 i = 0; i < BG_OBJECT_MAX; i++)
+        for(uint32 i = 0; i < BG_OBJECT_SEPARATOR; i++)
         {
-            m_bgobjects[i].timer -= diff;
+            switch(i)
+            {
+                case BG_OBJECT_A_FLAG:
+                    if(m_FlagState[0] == FLAG_STATE_WAIT_RESPAWN)
+                        m_bgobjects[i].timer -= diff;
+                    break;
+                case BG_OBJECT_H_FLAG:
+                    if(m_FlagState[1] == FLAG_STATE_WAIT_RESPAWN)
+                        m_bgobjects[i].timer -= diff;
+                    break;
+                default:
+                    m_bgobjects[i].timer -= diff;
+                    break;
+            }
+
             if(m_bgobjects[i].timer < 0)
                 m_bgobjects[i].timer = 0;
 
-            if(m_bgobjects[i].timer == 0 && !m_bgobjects[i].spawned)
+            if(m_bgobjects[i].timer == 0 && !m_bgobjects[i].object->IsInWorld())
             {
-                if(i == BG_OBJECT_A_FLAG)
-                    RespawnFlag(ALLIANCE, true);
-                else if(i == BG_OBJECT_H_FLAG)
-                    RespawnFlag(HORDE, true);
-                else
-                    MapManager::Instance().GetMap(m_bgobjects[i].object->GetMapId(), m_bgobjects[i].object)->Add(m_bgobjects[i].object);
-
-                // mark as spawned
-                m_bgobjects[i].spawned = true;
+                switch(i)
+                {
+                    case BG_OBJECT_A_FLAG:
+                        if(m_FlagState[0] == FLAG_STATE_WAIT_RESPAWN)
+                            RespawnFlag(ALLIANCE, true);
+                        break;
+                    case BG_OBJECT_H_FLAG:
+                        if(m_FlagState[1] == FLAG_STATE_WAIT_RESPAWN)
+                            RespawnFlag(HORDE, true);
+                        break;
+                    default:
+                        MapManager::Instance().GetMap(m_bgobjects[i].object->GetMapId(), m_bgobjects[i].object)->Add(m_bgobjects[i].object);
+                        break;
+                }
             }
         }
     }
@@ -83,17 +143,18 @@ void BattleGroundWS::Update(time_t diff)
 
 void BattleGroundWS::RespawnFlag(uint32 Team, bool captured)
 {
-    // need delay between flag capture and it's respawn about 30-60 seconds...
     if(Team == ALLIANCE)
     {
         sLog.outDebug("Respawn Alliance flag");
         MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_A_FLAG].object->GetMapId(), m_bgobjects[BG_OBJECT_A_FLAG].object)->Add(m_bgobjects[BG_OBJECT_A_FLAG].object);
+        m_FlagState[0] = FLAG_STATE_ON_BASE;
     }
 
     if(Team == HORDE)
     {
         sLog.outDebug("Respawn Horde flag");
         MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_H_FLAG].object->GetMapId(), m_bgobjects[BG_OBJECT_H_FLAG].object)->Add(m_bgobjects[BG_OBJECT_H_FLAG].object);
+        m_FlagState[1] = FLAG_STATE_ON_BASE;
     }
 
     if(captured)
@@ -119,7 +180,7 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
     if(Source->GetTeam() == ALLIANCE)
     {
         SetHordeFlagPicker(0);                              // must be before aura remove to prevent 2 events (drop+capture) at the same time
-        m_FlagState[1] = FLAG_STATE_ON_BASE;                // horde flag in base (but not respawned yet)
+        m_FlagState[1] = FLAG_STATE_WAIT_RESPAWN;           // horde flag in base (but not respawned yet)
         Source->RemoveAurasDueToSpell(23333);               // Drop Horde Flag from Player
         message = LANG_BG_CAPTURED_HF;
         type = CHAT_MSG_BG_SYSTEM_ALLIANCE;
@@ -130,7 +191,7 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
     if(Source->GetTeam() == HORDE)
     {
         SetAllianceFlagPicker(0);                           // must be before aura remove to prevent 2 events (drop+capture) at the same time
-        m_FlagState[0] = FLAG_STATE_ON_BASE;                // alliance flag in base (but not respawned yet)
+        m_FlagState[0] = FLAG_STATE_WAIT_RESPAWN;           // alliance flag in base (but not respawned yet)
         Source->RemoveAurasDueToSpell(23335);               // Drop Alliance Flag from Player
         message = LANG_BG_CAPTURED_AF;
         type = CHAT_MSG_BG_SYSTEM_HORDE;
@@ -169,13 +230,9 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
         {
             case ALLIANCE:
                 m_bgobjects[BG_OBJECT_H_FLAG].timer     = FLAG_RESPAWN_TIME;
-                m_bgobjects[BG_OBJECT_H_FLAG].spawned   = false;
-                //RespawnFlag(HORDE, true);
                 break;
             case HORDE:
                 m_bgobjects[BG_OBJECT_A_FLAG].timer     = FLAG_RESPAWN_TIME;
-                m_bgobjects[BG_OBJECT_A_FLAG].spawned   = false;
-                //RespawnFlag(ALLIANCE, true);
                 break;
         }
     }
@@ -226,7 +283,6 @@ void BattleGroundWS::EventPlayerReturnedFlag(Player *Source)
 
     if(Source->GetTeam() == ALLIANCE)
     {
-        m_FlagState[0] = FLAG_STATE_ON_BASE;                // alliance flag in base
         message = LANG_BG_RETURNED_AF;
         type = CHAT_MSG_BG_SYSTEM_ALLIANCE;
         UpdateFlagState(HORDE, 1);
@@ -234,7 +290,6 @@ void BattleGroundWS::EventPlayerReturnedFlag(Player *Source)
     }
     else
     {
-        m_FlagState[1] = FLAG_STATE_ON_BASE;                // horde flag in base
         message = LANG_BG_RETURNED_HF;
         type = CHAT_MSG_BG_SYSTEM_HORDE;
         UpdateFlagState(ALLIANCE, 1);
@@ -290,6 +345,7 @@ void BattleGroundWS::EventPlayerPickedUpFlag(Player *Source)
 
 void BattleGroundWS::RemovePlayer(Player *plr, uint64 guid)
 {
+    // sometimes flag aura not removed :(
     if(IsAllianceFlagPickedup() || IsHordeFlagPickedup())
     {
         if(m_FlagKeepers[0] == guid)
@@ -298,11 +354,8 @@ void BattleGroundWS::RemovePlayer(Player *plr, uint64 guid)
                 plr->RemoveAurasDueToSpell(23335);
             else
             {
-                //AllianceFlagSpawn[0] = 0;
-                //AllianceFlagSpawn[1] = 1;
                 SetAllianceFlagPicker(0);
                 RespawnFlag(ALLIANCE, false);
-                m_FlagState[0] = FLAG_STATE_ON_BASE;
             }
         }
         if(m_FlagKeepers[1] == guid)
@@ -311,11 +364,8 @@ void BattleGroundWS::RemovePlayer(Player *plr, uint64 guid)
                 plr->RemoveAurasDueToSpell(23333);
             else
             {
-                //HordeFlagSpawn[0] = 0;
-                //HordeFlagSpawn[1] = 1;
                 SetHordeFlagPicker(0);
                 RespawnFlag(HORDE, false);
-                m_FlagState[1] = FLAG_STATE_ON_BASE;
             }
         }
     }
@@ -324,8 +374,11 @@ void BattleGroundWS::RemovePlayer(Player *plr, uint64 guid)
     {
         for(uint32 i = 0; i < BG_OBJECT_MAX; i++)
         {
-            // despawn
-            MapManager::Instance().GetMap(m_bgobjects[i].object->GetMapId(), m_bgobjects[i].object)->Remove(m_bgobjects[i].object, false);
+            if(m_bgobjects[i].object->IsInWorld())
+            {
+                // despawn
+                MapManager::Instance().GetMap(m_bgobjects[i].object->GetMapId(), m_bgobjects[i].object)->Remove(m_bgobjects[i].object, false);
+            }
         }
         sLog.outDebug("Objects despawned...");
 
@@ -349,7 +402,7 @@ void BattleGroundWS::UpdateTeamScore(uint32 team)
         UpdateWorldState(FLAG_CAPTURES_HORDE, GetTeamScore(team));
 }
 
-void BattleGroundWS::HandleAreaTrigger(Player* Source, uint32 Trigger)
+void BattleGroundWS::HandleAreaTrigger(Player *Source, uint32 Trigger)
 {
     // this is wrong way to implement these things. On official it done by gameobject spell cast.
     if(GetStatus() != STATUS_IN_PROGRESS)
@@ -358,77 +411,68 @@ void BattleGroundWS::HandleAreaTrigger(Player* Source, uint32 Trigger)
     uint32 SpellId = 0;
     switch(Trigger)
     {
-        case 3686:                                          //Alliance elixir of speed spawn. Trigger not working, because located inside other areatrigger, can be replaced by IsWithinDist(object, dist) in BattleGround::Update().
-            if(!m_bgobjects[BG_OBJECT_SPEEDBUFF_1].spawned)
+        case 3686:                                          // Alliance elixir of speed spawn. Trigger not working, because located inside other areatrigger, can be replaced by IsWithinDist(object, dist) in BattleGround::Update().
+            if(!m_bgobjects[BG_OBJECT_SPEEDBUFF_1].object->IsInWorld())
                 break;
             MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_SPEEDBUFF_1].object->GetMapId(), m_bgobjects[BG_OBJECT_SPEEDBUFF_1].object)->Remove(m_bgobjects[BG_OBJECT_SPEEDBUFF_1].object, false);
                                                             // 3 minutes
             m_bgobjects[BG_OBJECT_SPEEDBUFF_1].timer = BUFF_RESPAWN_TIME;
-            m_bgobjects[BG_OBJECT_SPEEDBUFF_1].spawned = false;
             SpellId = m_bgobjects[BG_OBJECT_SPEEDBUFF_1].spellid;
             break;
-        case 3687:                                          //Horde elixir of speed spawn. Trigger not working, because located inside other areatrigger, can be replaced by IsWithinDist(object, dist) in BattleGround::Update().
-            if(!m_bgobjects[BG_OBJECT_SPEEDBUFF_2].spawned)
+        case 3687:                                          // Horde elixir of speed spawn. Trigger not working, because located inside other areatrigger, can be replaced by IsWithinDist(object, dist) in BattleGround::Update().
+            if(!m_bgobjects[BG_OBJECT_SPEEDBUFF_2].object->IsInWorld())
                 break;
             MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_SPEEDBUFF_2].object->GetMapId(), m_bgobjects[BG_OBJECT_SPEEDBUFF_2].object)->Remove(m_bgobjects[BG_OBJECT_SPEEDBUFF_2].object, false);
                                                             // 3 minutes
             m_bgobjects[BG_OBJECT_SPEEDBUFF_2].timer = BUFF_RESPAWN_TIME;
-            m_bgobjects[BG_OBJECT_SPEEDBUFF_2].spawned = false;
             SpellId = m_bgobjects[BG_OBJECT_SPEEDBUFF_2].spellid;
             break;
-        case 3706:                                          //Alliance elixir of regeneration spawn
-            if(!m_bgobjects[BG_OBJECT_REGENBUFF_1].spawned)
+        case 3706:                                          // Alliance elixir of regeneration spawn
+            if(!m_bgobjects[BG_OBJECT_REGENBUFF_1].object->IsInWorld())
                 break;
             MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_REGENBUFF_1].object->GetMapId(), m_bgobjects[BG_OBJECT_REGENBUFF_1].object)->Remove(m_bgobjects[BG_OBJECT_REGENBUFF_1].object, false);
                                                             // 3 minutes
             m_bgobjects[BG_OBJECT_REGENBUFF_1].timer = BUFF_RESPAWN_TIME;
-            m_bgobjects[BG_OBJECT_REGENBUFF_1].spawned = false;
             SpellId = m_bgobjects[BG_OBJECT_REGENBUFF_1].spellid;
             break;
-        case 3708:                                          //Horde elixir of regeneration spawn
-            if(!m_bgobjects[BG_OBJECT_REGENBUFF_2].spawned)
+        case 3708:                                          // Horde elixir of regeneration spawn
+            if(!m_bgobjects[BG_OBJECT_REGENBUFF_2].object->IsInWorld())
                 break;
             MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_REGENBUFF_2].object->GetMapId(), m_bgobjects[BG_OBJECT_REGENBUFF_2].object)->Remove(m_bgobjects[BG_OBJECT_REGENBUFF_2].object, false);
                                                             // 3 minutes
             m_bgobjects[BG_OBJECT_REGENBUFF_2].timer = BUFF_RESPAWN_TIME;
-            m_bgobjects[BG_OBJECT_REGENBUFF_2].spawned = false;
             SpellId = m_bgobjects[BG_OBJECT_REGENBUFF_2].spellid;
             break;
-        case 3707:                                          //Alliance elixir of berserk spawn
-            if(!m_bgobjects[BG_OBJECT_BERSERKBUFF_1].spawned)
+        case 3707:                                          // Alliance elixir of berserk spawn
+            if(!m_bgobjects[BG_OBJECT_BERSERKBUFF_1].object->IsInWorld())
                 break;
             MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_BERSERKBUFF_1].object->GetMapId(), m_bgobjects[BG_OBJECT_BERSERKBUFF_1].object)->Remove(m_bgobjects[BG_OBJECT_BERSERKBUFF_1].object, false);
                                                             // 3 minutes
             m_bgobjects[BG_OBJECT_BERSERKBUFF_1].timer = BUFF_RESPAWN_TIME;
-            m_bgobjects[BG_OBJECT_BERSERKBUFF_1].spawned = false;
             SpellId = m_bgobjects[BG_OBJECT_BERSERKBUFF_1].spellid;
             break;
-        case 3709:                                          //Horde elixir of berserk spawn
-            if(!m_bgobjects[BG_OBJECT_BERSERKBUFF_2].spawned)
+        case 3709:                                          // Horde elixir of berserk spawn
+            if(!m_bgobjects[BG_OBJECT_BERSERKBUFF_2].object->IsInWorld())
                 break;
             MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_BERSERKBUFF_2].object->GetMapId(), m_bgobjects[BG_OBJECT_BERSERKBUFF_2].object)->Remove(m_bgobjects[BG_OBJECT_BERSERKBUFF_2].object, false);
                                                             // 3 minutes
             m_bgobjects[BG_OBJECT_BERSERKBUFF_2].timer = BUFF_RESPAWN_TIME;
-            m_bgobjects[BG_OBJECT_BERSERKBUFF_2].spawned = false;
             SpellId = m_bgobjects[BG_OBJECT_BERSERKBUFF_2].spellid;
             break;
-        case 3646:                                          //Alliance Flag spawn
+        case 3646:                                          // Alliance Flag spawn
             if(m_FlagState[1] && !m_FlagState[0])
                 if(GetHordeFlagPickerGUID() == Source->GetGUID())
                     EventPlayerCapturedFlag(Source);
             break;
-        case 3647:                                          //Horde Flag spawn
+        case 3647:                                          // Horde Flag spawn
             if(m_FlagState[0] && !m_FlagState[1])
                 if(GetAllianceFlagPickerGUID() == Source->GetGUID())
                     EventPlayerCapturedFlag(Source);
             break;
-        case 4628:                                          // new 2.1.0?
-        case 4629:                                          // new 2.1.0?
-        case 4631:                                          // Unk1
-        case 4633:                                          // Unk2
-            break;
-        case 3669:                                          // Warsong Gulch Horde Exit (removed, but trigger still exist).
-        case 3671:                                          // Warsong Gulch Alliance Exit (removed, but trigger still exist).
+        case 3649:                                          // unk1
+        case 3688:                                          // unk2
+        case 4628:                                          // unk3
+        case 4629:                                          // unk4
             break;
         default:
         {
@@ -454,44 +498,46 @@ void BattleGroundWS::HandleAreaTrigger(Player* Source, uint32 Trigger)
 
 bool BattleGroundWS::SetupBattleGround()
 {
-    BattleGroundObjectInfo info;
-    for(uint32 i = 0; i < BG_OBJECT_MAX; i++)
-    {
-        info.object     = new GameObject(NULL);
-        info.spawned    = false;
-        info.spellid    = 0;
-        info.timer      = 0;
-        m_bgobjects[i]  = info;
-    }
-
-    if(!m_bgobjects[BG_OBJECT_A_FLAG].object->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179830, GetMapId(), 1540.35, 1481.31, 352.635, 6.24, 0, 0, sin(6.24/2), cos(6.24/2), 0, 0))
+    // flags
+    if(!SpawnObject(179830, BG_OBJECT_A_FLAG, 1540.423, 1481.325, 351.8284, 3.089233, 0, 0, 0.9996573, 0.02617699))
         return false;
-    if(!m_bgobjects[BG_OBJECT_H_FLAG].object->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179831, GetMapId(), 915.809, 1433.73, 346.172, 3.244, 0, 0, sin(3.244/2), cos(3.244/2), 0, 0))
+    if(!SpawnObject(179831, BG_OBJECT_H_FLAG, 916.0226, 1434.405, 345.413, 0.01745329, 0, 0, 0.008726535, 0.9999619))
         return false;
-
-    if(!m_bgobjects[BG_OBJECT_SPEEDBUFF_1].object->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179871, GetMapId(), 1449.98, 1468.86, 342.66, 4.866, 0, 0, sin(4.866/2), cos(4.866/2), 0, 0))
+    // buffs
+    if(!SpawnObject(179871, BG_OBJECT_SPEEDBUFF_1, 1449.93, 1470.71, 342.6346, -1.64061, 0, 0, 0.7313537, -0.6819983, 23451))
         return false;
-    m_bgobjects[BG_OBJECT_SPEEDBUFF_1].spellid = 23451;
-
-    if(!m_bgobjects[BG_OBJECT_SPEEDBUFF_2].object->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179871, GetMapId(), 1006.22, 1445.98, 335.77, 1.683, 0, 0, sin(1.683/2), cos(1.683/2), 0, 0))
+    if(!SpawnObject(179899, BG_OBJECT_SPEEDBUFF_2, 1005.171, 1447.946, 335.9032, 1.64061, 0, 0, 0.7313537, 0.6819984, 23451))
         return false;
-    m_bgobjects[BG_OBJECT_SPEEDBUFF_2].spellid = 23451;
-
-    if(!m_bgobjects[BG_OBJECT_REGENBUFF_1].object->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179904, GetMapId(), 1316.94, 1551.99, 313.234, 5.869, 0, 0, sin(5.869/2), cos(5.869/2), 0, 0))
+    if(!SpawnObject(179904, BG_OBJECT_REGENBUFF_1, 1317.506, 1550.851, 313.2344, -0.2617996, 0, 0, 0.1305263, -0.9914448, 23493))
         return false;
-    m_bgobjects[BG_OBJECT_REGENBUFF_1].spellid = 23493;
-
-    if(!m_bgobjects[BG_OBJECT_REGENBUFF_2].object->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179904, GetMapId(), 1110.1, 1353.24, 316.513, 5.68, 0, 0, sin(5.68/2), cos(5.68/2), 0, 0))
+    if(!SpawnObject(179906, BG_OBJECT_REGENBUFF_2, 1110.451, 1353.656, 316.5181, -0.6806787, 0, 0, 0.333807, -0.9426414, 23493))
         return false;
-    m_bgobjects[BG_OBJECT_REGENBUFF_2].spellid = 23493;
-
-    if(!m_bgobjects[BG_OBJECT_BERSERKBUFF_1].object->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179905, GetMapId(), 1318.68, 1378.03, 314.753, 1.001, 0, 0, sin(1.001/2), cos(1.001/2), 0, 0))
+    if(!SpawnObject(179905, BG_OBJECT_BERSERKBUFF_1, 1320.09, 1378.79, 314.7532, 1.186824, 0, 0, 0.5591929, 0.8290376, 23505))
         return false;
-    m_bgobjects[BG_OBJECT_BERSERKBUFF_1].spellid = 23505;
-
-    if(!m_bgobjects[BG_OBJECT_BERSERKBUFF_2].object->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179905, GetMapId(), 1141.36, 1560.99, 306.791, 3.858, 0, 0, sin(3.858/2), cos(3.858/2), 0, 0))
+    if(!SpawnObject(179907, BG_OBJECT_BERSERKBUFF_2, 1139.688, 1560.288, 306.8432, -2.443461, 0, 0, 0.9396926, -0.3420201, 23505))
         return false;
-    m_bgobjects[BG_OBJECT_BERSERKBUFF_2].spellid = 23505;
+    // alliance gates
+    if(!SpawnObject(179918, BG_OBJECT_DOOR_A_1, 1503.335, 1493.466, 352.1888, 3.115414, 0, 0, 0.9999143, 0.01308903))
+        return false;
+    if(!SpawnObject(179919, BG_OBJECT_DOOR_A_2, 1492.478, 1457.912, 342.9689, 3.115414, 0, 0, 0.9999143, 0.01308903))
+        return false;
+    if(!SpawnObject(179920, BG_OBJECT_DOOR_A_3, 1468.503, 1494.357, 351.8618, 3.115414, 0, 0, 0.9999143, 0.01308903))
+        return false;
+    if(!SpawnObject(179921, BG_OBJECT_DOOR_A_4, 1471.555, 1458.778, 362.6332, 3.115414, 0, 0, 0.9999143, 0.01308903))
+        return false;
+    if(!SpawnObject(180322, BG_OBJECT_DOOR_A_5, 1492.347, 1458.34, 342.3712, -0.03490669, 0, 0, 0.01745246, -0.9998477))
+        return false;
+    if(!SpawnObject(180322, BG_OBJECT_DOOR_A_6, 1503.466, 1493.367, 351.7352, -0.03490669, 0, 0, 0.01745246, -0.9998477))
+        return false;
+    // horde gates
+    if(!SpawnObject(179916, BG_OBJECT_DOOR_H_1, 949.1663, 1423.772, 345.6241, -0.5756807, -0.01673368, -0.004956111, -0.2839723, 0.9586737))
+        return false;
+    if(!SpawnObject(179917, BG_OBJECT_DOOR_H_2, 953.0507, 1459.842, 340.6526, -1.99662, -0.1971825, 0.1575096, -0.8239487, 0.5073641))
+        return false;
+    if(!SpawnObject(180322, BG_OBJECT_DOOR_H_3, 949.9523, 1422.751, 344.9273, 0, 0, 0, 0, 1))
+        return false;
+    if(!SpawnObject(180322, BG_OBJECT_DOOR_H_4, 950.7952, 1459.583, 342.1523, 0.05235988, 0, 0, 0.02617695, 0.9996573))
+        return false;
 
     return true;
 }
@@ -505,6 +551,7 @@ void BattleGroundWS::Reset()
     m_TeamScores[0]     = 0;
     m_TeamScores[1]     = 0;
 
+    SetWinner(2);
     SetStatus(STATUS_WAIT_QUEUE);
     SetStartTime(0);
     SetEndTime(0);
@@ -516,8 +563,11 @@ void BattleGroundWS::Reset()
     //m_RemovedPlayers.clear();
 }
 
-void BattleGroundWS::HandleKillPlayer(Player* player)
+void BattleGroundWS::HandleKillPlayer(Player *player, Player *killer)
 {
+    if(GetStatus() != STATUS_IN_PROGRESS)
+        return;
+
     if(player->GetTeam() == HORDE && IsAllianceFlagPickedup())
     {
         if(GetAllianceFlagPickerGUID() == player->GetGUID())
@@ -536,8 +586,11 @@ void BattleGroundWS::HandleKillPlayer(Player* player)
     }
 }
 
-void BattleGroundWS::HandleDropFlag( Player* player )
+void BattleGroundWS::HandleDropFlag(Player *player)
 {
+    if(GetStatus() != STATUS_IN_PROGRESS)
+        return;
+
     if(player->GetTeam() == HORDE)
     {
         if(IsAllianceFlagPickedup())
@@ -546,7 +599,7 @@ void BattleGroundWS::HandleDropFlag( Player* player )
             {
                 SetAllianceFlagPicker(0);
                 player->RemoveAurasDueToSpell(23335);
-                player->CastSpell(player,23336,true,NULL);
+                player->CastSpell(player, 23336, true, NULL);
             }
         }
     }
@@ -558,7 +611,7 @@ void BattleGroundWS::HandleDropFlag( Player* player )
             {
                 SetHordeFlagPicker(0);
                 player->RemoveAurasDueToSpell(23333);
-                player->CastSpell(player,23334,true,NULL);
+                player->CastSpell(player, 23334, true, NULL);
             }
         }
     }
