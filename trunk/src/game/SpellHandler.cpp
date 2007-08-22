@@ -459,6 +459,12 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                             // check if flag dropped
                             if(((BattleGroundWS*)bg)->GetFlagState(ALLIANCE) != FLAG_STATE_ON_BASE)
                                 return;
+                            // check if it's correct flag
+                            if(((BattleGroundWS*)bg)->m_bgobjects[BG_OBJECT_A_FLAG].object->GetGUID() != obj->GetGUID())
+                                return;
+                            // check player team
+                            if(_player->GetTeam() == ALLIANCE)
+                                return;
                             spellId = 23335;                // Silverwing Flag
                             break;
                         case 179831:
@@ -467,6 +473,12 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                                 return;
                             // check if flag dropped
                             if(((BattleGroundWS*)bg)->GetFlagState(HORDE) != FLAG_STATE_ON_BASE)
+                                return;
+                            // check if it's correct flag
+                            if(((BattleGroundWS*)bg)->m_bgobjects[BG_OBJECT_H_FLAG].object->GetGUID() != obj->GetGUID())
+                                return;
+                            // check player team
+                            if(_player->GetTeam() == HORDE)
                                 return;
                             spellId = 23333;                // Warsong Flag
                             break;

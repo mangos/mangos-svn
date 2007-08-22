@@ -28,15 +28,12 @@
 
 BattleGroundWS::BattleGroundWS()
 {
+    m_bgobjects.resize(BG_OBJECT_MAX);
     Reset();
 }
 
 BattleGroundWS::~BattleGroundWS()
 {
-    for(uint32 i = 0; i < BG_OBJECT_MAX; i++)
-        delete m_bgobjects[i].object;
-
-    m_bgobjects.clear();
 }
 
 void BattleGroundWS::Update(time_t diff)
@@ -46,7 +43,7 @@ void BattleGroundWS::Update(time_t diff)
     // after bg start we get there (once)
     if((GetStatus() == STATUS_WAIT_JOIN) && !isDoorsSpawned() && GetPlayersSize() >= 1)
     {
-        for(uint32 i = BG_OBJECT_SEPARATOR; i < BG_OBJECT_MAX; i++)
+        for(uint32 i = BG_OBJECT_SEPARATOR; i < m_bgobjects.size(); i++)
         {
             // respawn
             MapManager::Instance().GetMap(m_bgobjects[i].object->GetMapId(), m_bgobjects[i].object)->Add(m_bgobjects[i].object);
@@ -70,7 +67,7 @@ void BattleGroundWS::Update(time_t diff)
         // delay expired (1 minute)
         if(GetStartDelayTime() < 0)
         {
-            for(uint32 i = BG_OBJECT_SEPARATOR; i < BG_OBJECT_MAX; i++)
+            for(uint32 i = BG_OBJECT_SEPARATOR; i < m_bgobjects.size(); i++)
             {
                 // despawn
                 MapManager::Instance().GetMap(m_bgobjects[i].object->GetMapId(), m_bgobjects[i].object)->Remove(m_bgobjects[i].object, false);
@@ -372,7 +369,7 @@ void BattleGroundWS::RemovePlayer(Player *plr, uint64 guid)
 
     if(!GetPlayersSize())
     {
-        for(uint32 i = 0; i < BG_OBJECT_MAX; i++)
+        for(uint32 i = 0; i < m_bgobjects.size(); i++)
         {
             if(m_bgobjects[i].object->IsInWorld())
             {

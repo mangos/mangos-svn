@@ -86,6 +86,8 @@ struct BattleGroundPlayer
 
 struct BattleGroundObjectInfo
 {
+    BattleGroundObjectInfo() : object(NULL), timer(0), spellid(0) {}
+
     GameObject  *object;
     int32       timer;
     uint32      spellid;
@@ -238,7 +240,8 @@ class BattleGround
         void EndBattleGround(uint32 winner);
         void BlockMovement(Player *plr);
 
-        std::map<uint32, BattleGroundObjectInfo> m_bgobjects;
+        typedef std::vector<BattleGroundObjectInfo> BGObjects;
+        BGObjects m_bgobjects;
         bool SpawnObject(uint32 entry, uint32 type, float x, float y, float z, float o, float rotation0,  float rotation1,  float rotation2,  float rotation3, uint32 spellid = 0, uint32 timer = 0);
 
         /* Raid Group */
