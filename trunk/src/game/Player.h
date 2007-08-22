@@ -645,7 +645,7 @@ enum MovementFlags
     MOVEMENTFLAG_ONTRANSPORT    = 0x00000200,
     // 0x400
     MOVEMENTFLAG_FLY_UNK1       = 0x00000800,
-    MOVEMENTFLAG_UNK4           = 0x00001000,               // can't move, only rotate(turn) around
+    MOVEMENTFLAG_UNK4           = 0x00001000,               // can't move, only rotate(turn) around, rooted?
     MOVEMENTFLAG_JUMPING        = 0x00002000,
     MOVEMENTFLAG_FALLING        = 0x00004000,
     // 0x8000, 0x10000, 0x20000, 0x40000, 0x80000, 0x100000

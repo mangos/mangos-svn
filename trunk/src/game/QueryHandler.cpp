@@ -224,15 +224,20 @@ void WorldSession::HandleCorpseQueryOpcode(WorldPacket &recv_data)
 
     Corpse *corpse = GetPlayer()->GetCorpse();
 
-    if(!corpse) return;
+    uint8 found = 1;
+    if(!corpse)
+        found = 0;
 
-    WorldPacket data(MSG_CORPSE_QUERY, (5*4+1));
-    data << uint8(0x01);
-    data << corpse->GetMapId();
-    data << corpse->GetPositionX();
-    data << corpse->GetPositionY();
-    data << corpse->GetPositionZ();
-    data << _player->GetMapId();
+    WorldPacket data(MSG_CORPSE_QUERY, (1+found*(5*4)));
+    data << uint8(found);
+    if(found)
+    {
+        data << corpse->GetMapId();
+        data << corpse->GetPositionX();
+        data << corpse->GetPositionY();
+        data << corpse->GetPositionZ();
+        data << _player->GetMapId();
+    }
     SendPacket(&data);
 }
 

@@ -815,7 +815,7 @@ enum OpCodes
     SMSG_SET_SWIM_BACK_SPEED                        = 770,  // swim back speed
     SMSG_SET_TURN_RATE                              = 771,  // turn rate (note: client crashes if fly mode enabled, and turn rate = 0)
     SMSG_UNKNOWN_772                                = 772,  // packed GUID
-    SMSG_UNKNOWN_773                                = 773,  // set movement flag 0x20000000
+    SMSG_UNKNOWN_773                                = 773,  // set movement flag 0x20000000 (safe fall)
     SMSG_UNKNOWN_774                                = 774,  // stop effect of 773 opcode
     SMSG_UNKNOWN_775                                = 775,  // movement related, looks like hover, movement flag 0x40000000, we can't jump if we are lands
     SMSG_UNKNOWN_776                                = 776,  // stop effect of 775 opcode
@@ -840,8 +840,8 @@ enum OpCodes
     // 795
     SMSG_UNKNOWN_796                                = 796,  // uint64, guid?
     CMSG_RESET_INSTANCES                            = 797,  // reset instances, empty
-    SMSG_RESET_INSTANCES_RESULT                     = 798,  // uint32 mapid, chat message: %s has been reset.
-    // 799
+    SMSG_RESET_INSTANCES_SUCCESS                    = 798,  // uint32 mapid, chat message: %s has been reset.
+    SMSG_RESET_INSTANCES_FAILED                     = 799,  // uint32 reason, uint32 mapid
     SMSG_UNKNOWN_800                                = 800,  // uint32 mapid, instance related (save?)
     MSG_RAID_ICON_TARGET                            = 801,  // uint8+uint8+uint64 guid or only uint8(0x01)
     MSG_RAID_READY_CHECK                            = 802,  // uint64+uint8
@@ -857,7 +857,7 @@ enum OpCodes
     // 812
     // 813
     // 814
-    SMSG_UNKNOWN_815                                = 815,  // spell related, uint64 guid + spellid
+    SMSG_UNKNOWN_815                                = 815,  // spell related, uint64 guid + spellid (You are killed by spell_name)
     SMSG_UNKNOWN_816                                = 816,  // spell related, uint64 guid + spellid + uint32 count + for(count) uint64 guid (target?)
     // 817
     SMSG_ANTISPAM                                   = 818,  // 2.0.8, received before server MOTD, strange regexp sequence, looks like anti spam filter for chat messages...
@@ -953,7 +953,7 @@ enum OpCodes
     CMSG_REALM_STATE_REQUEST                        = 908,  // realm related, uint32, appears at select character screen, uint32 0xFFFFFFFF by default
     CMSG_MOVE_SHIP_909                              = 909,  // movement related, transport related(ships)
     CMSG_GROUP_PROMOTE                              = 910,  // make main-tank / main-assistant
-    // 911
+    SMSG_ALREADY_IN_ARENA_TEAM                      = 911,  // %s is already in an arena team of that size (uint64 guid)
     SMSG_ALLOW_MOVE                                 = 912,  // uint32, allow player movement, value increments every time and reset to 0 after far teleport, used for client-server synchronization
     CMSG_ALLOW_MOVE_ACK                             = 913,  // client response to SMSG_ALLOW_MOVE (counter + client time)
     // 914

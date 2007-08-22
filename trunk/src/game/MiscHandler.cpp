@@ -250,7 +250,6 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & /*recv_data*/ )
     data << uint8(0);
     SendPacket( &data );
     LogoutRequest(time(NULL));
-
 }
 
 void WorldSession::HandlePlayerLogoutOpcode( WorldPacket & /*recv_data*/ )
@@ -726,7 +725,6 @@ void WorldSession::HandleDelIgnoreOpcode( WorldPacket & recv_data )
     SendPacket( &data );
 
     sLog.outDebug( "WORLD: Sent motd (SMSG_FRIEND_STATUS)" );
-
 }
 
 void WorldSession::HandleBugOpcode( WorldPacket & recv_data )
@@ -756,7 +754,6 @@ void WorldSession::HandleBugOpcode( WorldPacket & recv_data )
     sDatabase.escape_string(type);
     sDatabase.escape_string(content);
     sDatabase.PExecute ("INSERT INTO `bugreport` (`type`,`content`) VALUES('%s', '%s')", type.c_str( ), content.c_str( ));
-
 }
 
 void WorldSession::HandleCorpseReclaimOpcode(WorldPacket &recv_data)

@@ -511,6 +511,9 @@
 #define LANG_BG_PICKEDUP_HF              "The Horde flag was picked up by $n!"
 #define LANG_BG_PICKEDUP_AF              "The Alliance Flag was picked up by $n!"
 #define LANG_BG_F_PLACED                 "The flags are now placed at their bases."
+#define LANG_BG_WSG_ONE_MINUTE           "The battle for Warsong Gulch begins in 1 minute."
+#define LANG_BG_WSG_HALF_MINUTE          "The battle for Warsong Gulch begins in 30 seconds. Prepare yourselves!"
+#define LANG_BG_WSG_BEGIN                "Let the battle for Warsong Gulch begin!"
 
 #define LANG_ARENA_ONE_TOOLOW            "You must be level %u to form an arena team"
 #define LANG_ARENA_ONE_MINUTE            "One minute until the Arena battle begins!"

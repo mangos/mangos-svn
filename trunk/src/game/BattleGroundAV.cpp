@@ -40,7 +40,7 @@ void BattleGroundAV::Update(time_t diff)
     BattleGround::Update(diff);
 }
 
-void BattleGroundAV::RemovePlayer(Player *plr,uint64 guid)
+void BattleGroundAV::RemovePlayer(Player *plr, uint64 guid)
 {
 
 }
@@ -54,7 +54,16 @@ void BattleGroundAV::HandleAreaTrigger(Player *Source, uint32 Trigger)
     uint32 SpellId = 0;
     switch(Trigger)
     {
-        case 0:
+        case 95:
+        case 2606:
+        case 2608:
+        case 3326:
+        case 3327:
+        case 3328:
+        case 3329:
+        case 3330:
+        case 3331:
+            break;
         default:
             sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);
             Source->GetSession()->SendAreaTriggerMessage("Warning: Unhandled AreaTrigger in Battleground: %u", Trigger);

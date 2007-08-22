@@ -184,7 +184,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectReduceThreatPercent,                      //125 SPELL_EFFECT_REDUCE_THREAT_PERCENT
     &Spell::EffectNULL,                                     //126 SPELL_EFFECT_126                      spell steal effect?
     &Spell::EffectProspecting,                              //127 SPELL_EFFECT_PROSPECTING              Prospecting spell
-    &Spell::EffectNULL,                                     //128 SPELL_EFFECT_128 probably apply aura again
+    &Spell::EffectApplyAura,                                //128 SPELL_EFFECT_128 probably apply aura again
     &Spell::EffectNULL,                                     //129 SPELL_EFFECT_129 probably apply aura again
     &Spell::EffectNULL,                                     //130 SPELL_EFFECT_130                      threat redirect
     &Spell::EffectNULL,                                     //131 SPELL_EFFECT_131                      unused
@@ -2861,7 +2861,7 @@ void Spell::EffectDuel(uint32 i)
     if ((caster->GetMapId() != 0 && caster->GetMapId() != 1 && caster->GetMapId() != 530) ||
                                                             // capital city flag, for a list of all zone flags have a look at Player.cpp
         (GetAreaEntryByAreaID(caster->GetZoneId()) && (GetAreaEntryByAreaID(caster->GetZoneId())->flags & 0x100) != 0) ||
-        (GetAreaEntryByAreaID(caster->GetZoneId()) && (GetAreaEntryByAreaID(target->GetZoneId())->flags & 0x100) != 0))
+        (GetAreaEntryByAreaID(target->GetZoneId()) && (GetAreaEntryByAreaID(target->GetZoneId())->flags & 0x100) != 0))
     {
         SendCastResult(SPELL_FAILED_NO_DUELING);            // Dueling isn't allowed here
         return;

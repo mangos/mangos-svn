@@ -46,11 +46,13 @@ libmangosgame_a_SOURCES = \
 	BattleGroundAB.cpp \
 	BattleGroundAV.cpp \
 	BattleGroundEY.cpp \
+	BattleGroundNA.cpp \
 	BattleGroundWS.cpp \
 	BattleGround.h \
 	BattleGroundAB.h \
 	BattleGroundAV.h \
 	BattleGroundEY.h \
+	BattleGroundNA.h \
 	BattleGroundWS.h \
 	BattleGroundHandler.cpp \
 	BattleGroundMgr.cpp \
