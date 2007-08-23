@@ -1282,7 +1282,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void CleanupChannels();
         void UpdateLocalChannels();
 
-        void BroadcastPacketToFriendListers(WorldPacket *packet);
+        void BroadcastPacketToFriendListers(WorldPacket *packet, bool extern_result = false, QueryResult *result = NULL);
 
         void UpdateDefense();
         void UpdateWeaponSkill (WeaponAttackType attType);

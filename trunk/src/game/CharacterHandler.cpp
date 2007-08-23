@@ -302,7 +302,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     recv_data >> playerGuid;
 
     LoginQueryHolder *holder = new LoginQueryHolder(GetAccountId(), playerGuid);
-    holder->Reserve(18);
+    holder->Reserve(19);
 
     // 0 - LoadFromDB
     holder->PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`rename`,`zone`,`online` FROM `character` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
@@ -339,6 +339,8 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     // TODO - UpdateHonorFields
     // 16 - HandlePlayerLogin : guildid, rank
     holder->PQuery("SELECT `guildid`,`rank` FROM `guild_member` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
+    // 17 - BroadcastPacketToFriendListers
+    holder->PQuery("SELECT `guid` FROM `character_social` WHERE `flags` = 'FRIEND' AND `friend` = '%u'", GUID_LOPART(playerGuid));
 
     sDatabase.DelayQueryHolder(&chrHandler, &CharacterHandler::HandlePlayerLoginCallback, (SqlQueryHolder*)holder);
 }
@@ -541,7 +543,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     data<<pCurrChar->GetAreaId();
     data<<pCurrChar->getLevel();
     data<<pCurrChar->getClass();
-    pCurrChar->BroadcastPacketToFriendListers(&data);
+    pCurrChar->BroadcastPacketToFriendListers(&data, true, holder->GetResult(17));
 
     // Place character in world (and load zone) before some object loading
     pCurrChar->LoadCorpse();

@@ -3677,16 +3677,24 @@ void Player::UpdateLocalChannels()
     sLog.outDebug("Player: channels cleaned up!");
 }
 
-void Player::BroadcastPacketToFriendListers(WorldPacket *packet)
+void Player::BroadcastPacketToFriendListers(WorldPacket *packet, bool extern_result, QueryResult *result)
 {
+    /// this is sent out to those that have the player in their friendlist
+    /// (not necesarily those that are in the player's friendlist)
+    if(!extern_result)
+        result = sDatabase.PQuery("SELECT `guid` FROM `character_social` WHERE `flags` = 'FRIEND' AND `friend` = '%u'", GetGUIDLow());
+
+    if(!result) return;
+
     uint32 team              = GetTeam();
     uint32 security          = GetSession()->GetSecurity();
     bool gmInWhoList         = sWorld.getConfig(CONFIG_GM_IN_WHO_LIST);
     bool allowTwoSideWhoList = sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
 
-    for(FriendList::iterator itr = m_friendlist.begin(); itr != m_friendlist.end(); ++itr)
+    do
     {
-        Player *pFriend = ObjectAccessor::Instance().FindPlayer(*itr);
+        Field *fields = result->Fetch();
+        Player *pFriend = ObjectAccessor::Instance().FindPlayer(fields[0].GetUInt64());
 
         // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
         // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
@@ -3697,7 +3705,10 @@ void Player::BroadcastPacketToFriendListers(WorldPacket *packet)
         {
             pFriend->GetSession()->SendPacket(packet);
         }
-    }
+    }while( result->NextRow() );
+
+    // note: always deletes the result, even if it was external, use accordingly
+    delete result;
 }
 
 void Player::UpdateDefense()
