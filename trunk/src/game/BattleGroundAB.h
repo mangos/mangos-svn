@@ -18,7 +18,7 @@
 #ifndef __BATTLEGROUNDAB_H
 #define __BATTLEGROUNDAB_H
 
-#include "BattleGround.h"
+class BattleGround;
 
 enum BattleGroundABPoints
 {

@@ -43,14 +43,18 @@ libmangosgame_a_SOURCES = \
 	Bag.cpp \
 	Bag.h \
 	BattleGround.cpp \
+	BattleGroundAA.cpp \
 	BattleGroundAB.cpp \
 	BattleGroundAV.cpp \
+	BattleGroundBE.cpp \
 	BattleGroundEY.cpp \
 	BattleGroundNA.cpp \
 	BattleGroundWS.cpp \
 	BattleGround.h \
+	BattleGroundAA.h \
 	BattleGroundAB.h \
 	BattleGroundAV.h \
+	BattleGroundBE.h \
 	BattleGroundEY.h \
 	BattleGroundNA.h \
 	BattleGroundWS.h \

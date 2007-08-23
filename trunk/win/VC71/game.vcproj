@@ -152,6 +152,12 @@
 				RelativePath="..\..\src\game\BattleGround.h">
 			</File>
 			<File
+				RelativePath="..\..\src\game\BattleGroundAA.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundAA.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\BattleGroundAB.cpp">
 			</File>
 			<File
@@ -162,6 +168,12 @@
 			</File>
 			<File
 				RelativePath="..\..\src\game\BattleGroundAV.h">
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundBE.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundBE.h">
 			</File>
 			<File
 				RelativePath="..\..\src\game\BattleGroundEY.cpp">

@@ -118,8 +118,9 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
     // check Deserter debuff
     if( !_player->CanJoinToBattleground() )
     {
-        // TODO: this can be special status packet, text also not standard currently
-        SendNotification("You left a battleground and must wait before entering another one.");
+        WorldPacket data(SMSG_GROUP_JOINED_BATTLEGROUND, 4);
+        data << (uint32) 0xFFFFFFFE;
+        _player->GetSession()->SendPacket(&data);
         return;
     }
 
@@ -272,24 +273,26 @@ void WorldSession::HandleBattleGroundPlayerPortOpcode( WorldPacket &recv_data )
     {
         if(_player->InBattleGroundQueue())
         {
+            WorldPacket data;
             switch(action)
             {
-                case 1:
+                case 1:                                     // port to battleground
+                    _player->RemoveFromGroup();
+                    sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, _player->GetTeam(), STATUS_IN_PROGRESS, 0, getMSTime()-bg->GetStartTime());
+                    _player->GetSession()->SendPacket(&data);
                     bg->RemovePlayerFromQueue(_player->GetGUID());
                     _player->SetBattleGroundId(bg->GetID());
                     sBattleGroundMgr.SendToBattleGround(_player, bgId);
                     bg->AddPlayer(_player);
                     break;
-                case 0:
-                {
+                case 0:                                     // leave queue
                     bg->RemovePlayerFromQueue(_player->GetGUID());
-                    WorldPacket data;
                     sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, _player->GetTeam(), STATUS_NONE, 0, 0);
                     SendPacket(&data);
                     break;
-                }
                 default:
                     sLog.outError("Battleground port: unknown action %u", action);
+                    break;
             }
         }
     }
@@ -426,7 +429,7 @@ void WorldSession::HandleBattleGroundArenaJoin( WorldPacket & recv_data )
         return;
 
     // check existence
-    BattleGround *bg = sBattleGroundMgr.GetBattleGround(BATTLEGROUND_NA);
+    BattleGround *bg = sBattleGroundMgr.GetBattleGround(BATTLEGROUND_AA);
     if(!bg)
         return;
 
@@ -438,7 +441,7 @@ void WorldSession::HandleBattleGroundArenaJoin( WorldPacket & recv_data )
             Player *member = itr->getSource();
             if(!member) continue;
 
-            member->SetBattleGroundQueueId(BATTLEGROUND_NA);// add to queue
+            member->SetBattleGroundQueueId(BATTLEGROUND_AA);// add to queue
 
             // store entry point coords (same as leader entry point)
             member->SetBattleGroundEntryPoint(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
@@ -447,14 +450,14 @@ void WorldSession::HandleBattleGroundArenaJoin( WorldPacket & recv_data )
             // send status packet (in queue)
             sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, member->GetTeam(), STATUS_WAIT_QUEUE, 0, 0);
             member->GetSession()->SendPacket(&data);
-            sBattleGroundMgr.BuildGroupJoinedBattlegroundPacket(&data, BATTLEGROUND_NA);
+            sBattleGroundMgr.BuildGroupJoinedBattlegroundPacket(&data, BATTLEGROUND_AA);
             member->GetSession()->SendPacket(&data);
             bg->AddPlayerToQueue(member->GetGUID(), member->getLevel());
         }
     }
     else
     {
-        _player->SetBattleGroundQueueId(BATTLEGROUND_NA);   // add to queue
+        _player->SetBattleGroundQueueId(BATTLEGROUND_AA);   // add to queue
 
         // store entry point coords
         _player->SetBattleGroundEntryPoint(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());

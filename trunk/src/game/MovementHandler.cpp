@@ -27,6 +27,7 @@
 #include "UpdateMask.h"
 #include "MapManager.h"
 #include "Transports.h"
+#include "BattleGroundMgr.h"
 
 void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
 {
@@ -66,6 +67,30 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
     GetPlayer()->SendInitialPacketsBeforeAddToMap();
     MapManager::Instance().GetMap(GetPlayer()->GetMapId(), GetPlayer())->Add(GetPlayer());
     GetPlayer()->SendInitialPacketsAfterAddToMap();
+
+    // for testing...
+    if(_player->InBattleGround())
+    {
+        BattleGround *bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundId());
+        if(bg)
+        {
+            if(bg->GetMapId() == _player->GetMapId())       // we teleported to bg
+            {
+                if(!bg->GetBgRaid(_player->GetTeam()))      // first player joined
+                {
+                    Group *group = new Group;
+                    bg->SetBgRaid(_player->GetTeam(), group);
+                    group->ConvertToRaid();
+                    group->AddMember(_player->GetGUID(), _player->GetName());
+                    group->ChangeLeader(_player->GetGUID());
+                }
+                else                                        // raid already exist
+                {
+                    bg->GetBgRaid(_player->GetTeam())->AddMember(_player->GetGUID(), _player->GetName());
+                }
+            }
+        }
+    }
 
     // honorless target
     if(GetPlayer()->pvpInfo.inHostileArea)

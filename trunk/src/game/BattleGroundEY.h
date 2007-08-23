@@ -19,7 +19,7 @@
 #ifndef __BATTLEGROUNDEY_H
 #define __BATTLEGROUNDEY_H
 
-#include "BattleGround.h"
+class BattleGround;
 
 class BattleGroundEY : public BattleGround
 {

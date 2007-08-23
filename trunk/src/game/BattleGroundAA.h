@@ -15,34 +15,22 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
-#ifndef __BATTLEGROUNDNA_H
-#define __BATTLEGROUNDNA_H
+#ifndef __BATTLEGROUNDAA_H
+#define __BATTLEGROUNDAA_H
 
 class BattleGround;
 
-enum BattleGroundNAObjectTypes
-{
-    BG_NA_OBJECT_DOOR_1      = 0,
-    BG_NA_OBJECT_DOOR_2      = 1,
-    BG_NA_OBJECT_DOOR_3      = 2,
-    BG_NA_OBJECT_DOOR_4      = 3,
-    BG_NA_OBJECT_MAX         = 4
-};
-
-class BattleGroundNA : public BattleGround
+class BattleGroundAA : public BattleGround
 {
     friend class BattleGroundMgr;
 
     public:
-        BattleGroundNA();
-        ~BattleGroundNA();
+        BattleGroundAA();
+        ~BattleGroundAA();
         void Update(time_t diff);
         void RemovePlayer(Player *plr,uint64 guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         bool SetupBattleGround();
         void HandleKillPlayer(Player* player, Player *killer);
-
-    private:
-        uint32 m_TeamKills[2];                              // count of kills for each team
 };
 #endif
