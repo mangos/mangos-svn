@@ -43,6 +43,6 @@ class BattleGroundNA : public BattleGround
         void HandleKillPlayer(Player* player, Player *killer);
 
     private:
-        uint32 m_TeamKills[2];              // count of kills for each team
+        uint32 m_TeamKills[2];                              // count of kills for each team
 };
 #endif

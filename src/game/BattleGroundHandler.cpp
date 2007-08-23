@@ -73,7 +73,7 @@ void WorldSession::HandleBattleGroundHelloOpcode( WorldPacket & recv_data )
 
     if(!strcmp(unit->GetCreatureInfo()->SubName, "Arena Battlemaster"))
     {
-        bgid = 6;   // all arenas
+        bgid = 6;                                           // all arenas
     }
 
     uint32 PlayerLevel = _player->getLevel();
@@ -397,10 +397,10 @@ void WorldSession::HandleBattleGroundArenaJoin( WorldPacket & recv_data )
     sLog.outDebug("WORLD: CMSG_ARENAMASTER_JOIN");
     recv_data.hexlike();
 
-    uint64 guid;                                                // arena Battlemaster guid
-    uint8 type;                                                 // 2v2, 3v3 or 5v5
-    uint8 asGroup;                                              // asGroup
-    uint8 isRated;                                              // isRated
+    uint64 guid;                                            // arena Battlemaster guid
+    uint8 type;                                             // 2v2, 3v3 or 5v5
+    uint8 asGroup;                                          // asGroup
+    uint8 isRated;                                          // isRated
     recv_data >> guid >> type >> asGroup >> isRated;
 
     uint8 arenatype = 0;
@@ -438,7 +438,7 @@ void WorldSession::HandleBattleGroundArenaJoin( WorldPacket & recv_data )
             Player *member = itr->getSource();
             if(!member) continue;
 
-            member->SetBattleGroundQueueId(BATTLEGROUND_NA);    // add to queue
+            member->SetBattleGroundQueueId(BATTLEGROUND_NA);// add to queue
 
             // store entry point coords (same as leader entry point)
             member->SetBattleGroundEntryPoint(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
@@ -454,7 +454,7 @@ void WorldSession::HandleBattleGroundArenaJoin( WorldPacket & recv_data )
     }
     else
     {
-        _player->SetBattleGroundQueueId(BATTLEGROUND_NA);       // add to queue
+        _player->SetBattleGroundQueueId(BATTLEGROUND_NA);   // add to queue
 
         // store entry point coords
         _player->SetBattleGroundEntryPoint(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());

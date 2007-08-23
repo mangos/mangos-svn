@@ -131,7 +131,7 @@ void BattleGroundNA::HandleKillPlayer(Player *player, Player *killer)
 
     uint32 killer_team_index = GetTeamIndexByTeamId(killer->GetTeam());
 
-    m_TeamKills[killer_team_index]++;              // add kills to killer's team
+    m_TeamKills[killer_team_index]++;                       // add kills to killer's team
 
     if(m_TeamKills[killer_team_index] >= GetPlayersCountByTeam(player->GetTeam()))
     {
@@ -149,8 +149,8 @@ void BattleGroundNA::HandleAreaTrigger(Player *Source, uint32 Trigger)
     uint32 SpellId = 0;
     switch(Trigger)
     {
-        case 4536:  // buff trigger?
-        case 4537:  // buff trigger?
+        case 4536:                                          // buff trigger?
+        case 4537:                                          // buff trigger?
             break;
         default:
             sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);

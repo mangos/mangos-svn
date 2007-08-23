@@ -88,7 +88,7 @@ void BattleGroundMgr::BuildBattleGroundStatusPacket(WorldPacket *data, BattleGro
             break;
     }
     /*if(bg->isArena())
-        *data << uint32(BATTLEGROUND_ARENAS);               // all arenas
+     *data << uint32(BATTLEGROUND_ARENAS);               // all arenas
     else*/
     *data << uint32(bg->GetID());                           // id from DBC
     *data << uint16(0x1F90);                                // unk value 8080
@@ -391,16 +391,16 @@ void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket *data, uint64 guid
         PlayerLevel = plr->getLevel();
 
     data->Initialize(SMSG_BATTLEFIELD_LIST);
-    *data << uint64(guid);                                          // battlemaster guid
-    *data << uint32(bgId);                                          // battleground id
-    if(bgId == BATTLEGROUND_ARENAS)                                 // arena
+    *data << uint64(guid);                                  // battlemaster guid
+    *data << uint32(bgId);                                  // battleground id
+    if(bgId == BATTLEGROUND_ARENAS)                         // arena
     {
-        *data << uint8(5);                                          // unk
-        *data << uint32(0);                                         // unk
+        *data << uint8(5);                                  // unk
+        *data << uint32(0);                                 // unk
     }
-    else                                                            // battleground
+    else                                                    // battleground
     {
-        *data << uint8(0x00);                                       // unk
+        *data << uint8(0x00);                               // unk
 
         std::list<uint32> SendList;
         for(std::map<uint32, BattleGround*>::iterator itr = m_BattleGrounds.begin(); itr != m_BattleGrounds.end(); ++itr)
@@ -411,11 +411,11 @@ void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket *data, uint64 guid
             }
         }
 
-        *data << uint32(SendList.size());                           // number of bg instances
+        *data << uint32(SendList.size());                   // number of bg instances
 
         for(std::list<uint32>::iterator i = SendList.begin(); i != SendList.end(); ++i)
         {
-            *data << uint32(*i);                                    // bg instance id
+            *data << uint32(*i);                            // bg instance id
         }
         SendList.clear();
     }
