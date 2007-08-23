@@ -2243,7 +2243,8 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
     {
         m_target->addUnitState(UNIT_STAT_ROOT);
         m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
-        m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));// probably wrong
+                                                            // probably wrong
+        m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
 
         //Save last orientation
         if (caster)
@@ -2266,7 +2267,8 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
             return;
 
         m_target->clearUnitState(UNIT_STAT_ROOT);
-        m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));// probably wrong
+                                                            // probably wrong
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
         if(caster && m_target->isAlive())                   // set creature facing on root effect if alive
             m_target->SetUInt64Value (UNIT_FIELD_TARGET,GetCasterGUID());
 

@@ -896,7 +896,7 @@ void WorldSession::HandleGuildSaveEmblemOpcode(WorldPacket& recvPacket)
 
     if(GetPlayer()->GetMoney() < 10*GOLD)
     {
-        WorldPacket data(MSG_SAVE_GUILD_EMBLEM, 4);    
+        WorldPacket data(MSG_SAVE_GUILD_EMBLEM, 4);
         data << (uint32)4;                                  //"You have not enough money"
         SendPacket(&data);
         return;

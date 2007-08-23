@@ -523,10 +523,12 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
             BattleGround *bg = sBattleGroundMgr.GetBattleGround(killed->GetBattleGroundId());
             if(bg)
             {
-                bg->HandleKillPlayer(killed, killer);               // drop flags and etc
-                bg->UpdatePlayerScore(killed, SCORE_DEATHS, 1);     // add +1 deaths
+                bg->HandleKillPlayer(killed, killer);       // drop flags and etc
+                                                            // add +1 deaths
+                bg->UpdatePlayerScore(killed, SCORE_DEATHS, 1);
                 if(killer)
-                    bg->UpdatePlayerScore(killer, SCORE_KILLS, 1);  // add +1 kills
+                                                            // add +1 kills
+                    bg->UpdatePlayerScore(killer, SCORE_KILLS, 1);
             }
         }
 

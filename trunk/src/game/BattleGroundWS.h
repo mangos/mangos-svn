@@ -52,7 +52,7 @@ enum BattleGroundObjectTypes
     BG_OBJECT_REGENBUFF_2   = 5,
     BG_OBJECT_BERSERKBUFF_1 = 6,
     BG_OBJECT_BERSERKBUFF_2 = 7,
-    BG_OBJECT_SEPARATOR     = 8,        // separator between doors and other objects
+    BG_OBJECT_SEPARATOR     = 8,                            // separator between doors and other objects
     BG_OBJECT_DOOR_A_1      = 8,
     BG_OBJECT_DOOR_A_2      = 9,
     BG_OBJECT_DOOR_A_3      = 10,
