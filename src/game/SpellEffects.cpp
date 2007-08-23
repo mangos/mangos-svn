@@ -3649,6 +3649,7 @@ void Spell::EffectTransmitted(uint32 i)
         {
             int32 duration = GetDuration(m_spellInfo);
             pGameObj->SetRespawnTime(duration > 0 ? duration/1000 : 0);
+            pGameObj->lootid = name_id;                     // set loot only for default case
             break;
         }
     }
@@ -3657,7 +3658,6 @@ void Spell::EffectTransmitted(uint32 i)
 
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel() );
     pGameObj->SetSpellId(m_spellInfo->Id);
-    pGameObj->lootid = name_id;
 
     DEBUG_LOG("AddObject at SpellEfects.cpp EffectTransmitted\n");
     //m_caster->AddGameObject(pGameObj);
