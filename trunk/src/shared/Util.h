@@ -62,7 +62,7 @@ inline double rand_norm(void)
 
 /* Return a random number in the range min..max (inclusive). For reliable results, the difference
  * between max and min should be less than RAND32_MAX. */
-inline uint32 rand32(const uint32 min, const uint32 max)
+inline uint32 rand32(uint32 min, uint32 max)
 {
     return uint32(rand_norm() * (max-min+1)) + min;
 }
@@ -76,13 +76,13 @@ inline double rand_chance(void)
 }
 
 /* Return true if a random roll fits in the specified chance (range 0-100). */
-inline bool roll_chance_f(const float& chance)
+inline bool roll_chance_f(float chance)
 {
     return chance > rand_chance();
 }
 
 /* Return true if a random roll fits in the specified chance (range 0-100). */
-inline bool roll_chance_i(int const& chance)
+inline bool roll_chance_i(int chance)
 {
     return chance > irand(0, 99);
 }

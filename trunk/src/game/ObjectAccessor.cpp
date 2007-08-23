@@ -556,21 +556,30 @@ ObjectAccessor::Update(const uint32  &diff)
             update_cell << 1;
             update_cell -= 1;
 
-            for( ; update_cell.x_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP && abs(int32(standing_cell.x_coord) - int32(update_cell.x_coord)) < 2; update_cell >> 1 )
+            if(update_cell.x_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP && update_cell.y_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP)
             {
-                for(CellPair cell_iter=update_cell; cell_iter.y_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP && abs(int32(standing_cell.y_coord) - int32(cell_iter.y_coord)) < 2; cell_iter += 1 )
+                for( ; abs(int32(standing_cell.x_coord) - int32(update_cell.x_coord)) < 2; update_cell >> 1 )
                 {
-                    uint32 cell_id = (cell_iter.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_iter.x_coord;
-                    if( !map->marked_cells.test(cell_id) )
+                    for(CellPair cell_iter=update_cell; abs(int32(standing_cell.y_coord) - int32(cell_iter.y_coord)) < 2; cell_iter += 1 )
                     {
-                        map->marked_cells.set(cell_id);
-                        Cell cell = RedZone::GetZone(cell_iter);
-                        cell.data.Part.reserved = CENTER_DISTRICT;
-                        cell.SetNoCreate();
-                        CellLock<NullGuard> cell_lock(cell, cell_iter);
-                        cell_lock->Visit(cell_lock, grid_object_update,  *map);
-                        cell_lock->Visit(cell_lock, world_object_update, *map);
+                        uint32 cell_id = (cell_iter.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_iter.x_coord;
+                        if( !map->marked_cells.test(cell_id) )
+                        {
+                            map->marked_cells.set(cell_id);
+                            Cell cell = RedZone::GetZone(cell_iter);
+                            cell.data.Part.reserved = CENTER_DISTRICT;
+                            cell.SetNoCreate();
+                            CellLock<NullGuard> cell_lock(cell, cell_iter);
+                            cell_lock->Visit(cell_lock, grid_object_update,  *map);
+                            cell_lock->Visit(cell_lock, world_object_update, *map);
+                        }
+
+                        if(cell_iter.y_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP)
+                            break;
                     }
+
+                    if(update_cell.x_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP)
+                        break;
                 }
             }
         }

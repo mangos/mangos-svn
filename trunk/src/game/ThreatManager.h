@@ -20,6 +20,7 @@
 #define _THREATMANAGER
 
 #include "Common.h"
+#include "SharedDefines.h"
 #include "Utilities/LinkedReference/Reference.h"
 #include "UnitEvents.h"
 
@@ -38,7 +39,7 @@ struct SpellEntry;
 class ThreatCalcHelper
 {
     public:
-        static float calcThreat(Unit* pHatedUnit, Unit* pHatingUnit, float threat, uint8 school = 0, SpellEntry const *threatSpell = NULL);
+        static float calcThreat(Unit* pHatedUnit, Unit* pHatingUnit, float threat, SpellSchools school = SPELL_SCHOOL_NORMAL, SpellEntry const *threatSpell = NULL);
 
 };
 
@@ -182,7 +183,7 @@ class MANGOS_DLL_SPEC ThreatManager
 
         void clearReferences();
 
-        void addThreat(Unit* pVictim, float threat, uint8 school = 0, SpellEntry const *threatSpell = NULL);
+        void addThreat(Unit* pVictim, float threat, SpellSchools school = SPELL_SCHOOL_NORMAL, SpellEntry const *threatSpell = NULL);
         void modifyThreatPercent(Unit *pVictim, int32 pPercent);
 
         float getThreat(Unit *pVictim, bool pAlsoSearchOfflineList = false);

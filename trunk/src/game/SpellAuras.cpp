@@ -2350,7 +2350,7 @@ void Aura::HandleAuraModTotalThreat(bool Apply, bool Real)
     else
         threatMod =  float(-m_modifier.m_amount);
 
-    m_target->getHostilRefManager().threatAssist(caster, threatMod, true);
+    m_target->getHostilRefManager().threatAssist(caster, threatMod);
 }
 
 void Aura::HandleModTaunt(bool apply, bool Real)
@@ -3068,7 +3068,7 @@ void Aura::HandleModRegen(bool apply, bool Real)            // eating
         {
             SpellEntry const *spellProto = GetSpellProto();
             if (spellProto)
-                m_target->getHostilRefManager().threatAssist(caster, float(gain) * 0.5f, spellProto->School, spellProto);
+                m_target->getHostilRefManager().threatAssist(caster, float(gain) * 0.5f, spellProto);
         }
     }
 
@@ -3101,7 +3101,7 @@ void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
             {
                 SpellEntry const *spellProto = GetSpellProto();
                 if (spellProto)
-                    m_target->getHostilRefManager().threatAssist(caster, float(gain) * 0.5f, spellProto->School, spellProto);
+                    m_target->getHostilRefManager().threatAssist(caster, float(gain) * 0.5f, spellProto);
             }
         }
     }
@@ -3126,7 +3126,7 @@ void Aura::HandleModManaRegen(bool apply, bool Real)
         {
             SpellEntry const *spellProto = GetSpellProto();
             if (spellProto)
-                m_target->getHostilRefManager().threatAssist(caster, float(gain) * 0.5f, spellProto->School, spellProto);
+                m_target->getHostilRefManager().threatAssist(caster, float(gain) * 0.5f, spellProto);
         }
     }
 

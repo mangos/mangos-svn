@@ -31,7 +31,7 @@
 //==============================================================
 
 // The pHatingUnit is not used yet
-float ThreatCalcHelper::calcThreat(Unit* pHatedUnit, Unit* pHatingUnit, float pThreat, uint8 pSchool, SpellEntry const *pThreatSpell)
+float ThreatCalcHelper::calcThreat(Unit* pHatedUnit, Unit* pHatingUnit, float pThreat, SpellSchools pSchool, SpellEntry const *pThreatSpell)
 {
     if (pHatedUnit->GetTypeId() == TYPEID_PLAYER && pThreatSpell)
         ((Player*)pHatedUnit)->ApplySpellMod(pThreatSpell->Id, SPELLMOD_THREAT, pThreat);
@@ -321,7 +321,7 @@ void ThreatManager::clearReferences()
 
 //============================================================
 
-void ThreatManager::addThreat(Unit* pVictim, float pThreat, uint8 pSchool, SpellEntry const *pThreatSpell)
+void ThreatManager::addThreat(Unit* pVictim, float pThreat, SpellSchools pSchool, SpellEntry const *pThreatSpell)
 {
     //function deals with adding threat and adding players and pets into ThreatList
     //mobs, NPCs, guards have ThreatList and HateOfflineList

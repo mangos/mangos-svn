@@ -348,8 +348,8 @@ enum WeaponAttackType
 
 enum DamageEffectType
 {
-    DIRECT_DAMAGE           = 0,
-    SPELL_DIRECT_DAMAGE     = 1,
+    DIRECT_DAMAGE           = 0,                            // used for normal weapon damage (not for class abilities or spells)
+    SPELL_DIRECT_DAMAGE     = 1,                            // spell/class abilities damage
     DOT                     = 2,
     HEAL                    = 3,
     NODAMAGE                = 4,                            // used also in case when damage applied to health but not applied to spell channelInterruptFlags/etc
@@ -829,9 +829,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void Unmount();
 
         uint16 GetMaxSkillValueForLevel() const { return getLevel()*5; }
-        void DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, uint8 damageSchool, SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss);
+        void DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchools damageSchool, SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss);
         void DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32 *damage, CleanDamage *cleanDamage, bool *crit = false, bool isTriggeredSpell = false);
-        void DoAttackDamage(Unit *pVictim, uint32 *damage, CleanDamage *cleanDamage, uint32 *blocked_amount, uint32 *damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType, SpellEntry const *spellCasted = NULL, bool isTriggeredSpell = false);
+        void DoAttackDamage(Unit *pVictim, uint32 *damage, CleanDamage *cleanDamage, uint32 *blocked_amount, SpellSchools damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType, SpellEntry const *spellCasted = NULL, bool isTriggeredSpell = false);
         void ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVictim, uint32 damage = 0, SpellEntry const *procSpell = NULL, bool isTriggeredSpell = false, WeaponAttackType attType = BASE_ATTACK);
         void CastMeleeProcDamageAndSpell(Unit* pVictim, uint32 damage, WeaponAttackType attType, MeleeHitOutcome outcome, SpellEntry const *spellCasted = NULL, bool isTriggeredSpell = false);
         void HandleDummyAuraProc(Unit *pVictim, SpellEntry const *spellProto, uint32 effIndex, uint32 damage, Aura* triggredByAura, SpellEntry const * procSpell, uint32 procFlag);
@@ -949,8 +949,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         void DeMorph();
 
-        void SendAttackStateUpdate(uint32 HitInfo, Unit *target, uint8 SwingType, uint32 DamageType, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, uint32 TargetState, uint32 BlockedAmount);
-        void SendSpellNonMeleeDamageLog(Unit *target,uint32 SpellID,uint32 Damage, uint8 DamageType,uint32 AbsorbedDamage, uint32 Resist,bool PhysicalDamage, uint32 Blocked, bool CriticalHit = false);
+        void SendAttackStateUpdate(uint32 HitInfo, Unit *target, uint8 SwingType, SpellSchools DamageType, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, uint32 TargetState, uint32 BlockedAmount);
+        void SendSpellNonMeleeDamageLog(Unit *target,uint32 SpellID,uint32 Damage, SpellSchools DamageType,uint32 AbsorbedDamage, uint32 Resist,bool PhysicalDamage, uint32 Blocked, bool CriticalHit = false);
 
         void SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, bool Run, uint32 Time);
 
@@ -1100,8 +1100,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         // Threat related methodes
         bool CanHaveThreatList() const;
-        void AddThreat(Unit* pVictim, float threat, uint8 school = 0, SpellEntry const *threatSpell = NULL);
-        float ApplyTotalThreatModifier(float threat, uint8 school = 0);
+        void AddThreat(Unit* pVictim, float threat, SpellSchools school = SPELL_SCHOOL_NORMAL, SpellEntry const *threatSpell = NULL);
+        float ApplyTotalThreatModifier(float threat, SpellSchools school = SPELL_SCHOOL_NORMAL);
         void DeleteThreatList();
         bool SelectHostilTarget();
         void TauntApply(Unit* pVictim);
@@ -1142,7 +1142,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool IsImmunedToSpellEffect(uint32 effect) const;
 
         uint32 CalcArmorReducedDamage(Unit* pVictim, const uint32 damage);
-        void CalcAbsorbResist(Unit *pVictim, uint32 School, const uint32 damage, uint32 *absorb, uint32 *resist);
+        void CalcAbsorbResist(Unit *pVictim, SpellSchools school, const uint32 damage, uint32 *absorb, uint32 *resist);
 
         float GetSpeed( UnitMoveType mtype ) const;
         float GetSpeedRate( UnitMoveType mtype ) const { return m_speed_rate[mtype]; }
