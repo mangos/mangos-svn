@@ -42,7 +42,7 @@
 
 #define    ITEM_SUFFIXFACTOR_RARE_MOD            1.24
 
-enum ITEM_STAT_TYPE
+enum ItemModType
 {
     ITEM_MOD_MANA                     = 0,
     ITEM_MOD_HEALTH                   = 1,
@@ -78,18 +78,7 @@ enum ITEM_STAT_TYPE
     ITEM_MOD_HASTE_RATING             = 36
 };
 
-enum ITEM_DAMAGE_TYPE
-{
-    NORMAL_DAMAGE                               = 0,
-    HOLY_DAMAGE                                 = 1,
-    FIRE_DAMAGE                                 = 2,
-    NATURE_DAMAGE                               = 3,
-    FROST_DAMAGE                                = 4,
-    SHADOW_DAMAGE                               = 5,
-    ARCANE_DAMAGE                               = 6
-};
-
-enum ITEM_SPELLTRIGGER_TYPE
+enum ItemSpelltriggerType
 {
     USE                                         = 0,
     ON_EQUIP                                    = 1,
@@ -97,7 +86,7 @@ enum ITEM_SPELLTRIGGER_TYPE
     SOULSTONE                                   = 4
 };
 
-enum ITEM_BONDING_TYPE
+enum ItemBondingType
 {
     NO_BIND                                     = 0,
     BIND_WHEN_PICKED_UP                         = 1,
@@ -136,7 +125,7 @@ enum BAG_FAMILY
 enum SOCKET_CONTENT ();
 */
 
-enum SOCKET_COLOR
+enum SocketColor
 {
     SOCKET_COLOR_META                           = 1,
     SOCKET_COLOR_RED                            = 2,
@@ -144,7 +133,7 @@ enum SOCKET_COLOR
     SOCKET_COLOR_BLUE                           = 8
 };
 
-enum INVENTORY_TYPES
+enum InventoryType
 {
     INVTYPE_NON_EQUIP                           = 0,
     INVTYPE_HEAD                                = 1,
@@ -178,7 +167,7 @@ enum INVENTORY_TYPES
     NUM_INVENTORY_TYPES                         = 29
 };
 
-enum INVENTORY_CLASS
+enum ItemClass
 {
     ITEM_CLASS_CONSUMABLE                       = 0,
     ITEM_CLASS_CONTAINER                        = 1,

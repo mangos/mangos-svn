@@ -19,12 +19,13 @@
 #include "HostilRefManager.h"
 #include "ThreatManager.h"
 #include "Unit.h"
+#include "Database/DBCStructure.h"
 
 // send threat to all my hateres for the pVictim
 // The pVictim is hated than by them as well
 // use for buffs and healing threat functionality
 
-void HostilRefManager::threatAssist(Unit *pVictim, float pThreat, uint8 pSchool, SpellEntry const *pThreatSpell, bool pSingleTarget)
+void HostilRefManager::threatAssist(Unit *pVictim, float pThreat, SpellEntry const *pThreatSpell, bool pSingleTarget)
 {
     HostilReference* ref;
 
@@ -32,7 +33,7 @@ void HostilRefManager::threatAssist(Unit *pVictim, float pThreat, uint8 pSchool,
     ref = getFirst();
     while(ref != NULL)
     {
-        float threat = ThreatCalcHelper::calcThreat(pVictim, iOwner, pThreat, pSchool, pThreatSpell);
+        float threat = ThreatCalcHelper::calcThreat(pVictim, iOwner, pThreat, (pThreatSpell ? SpellSchools(pThreatSpell->School) : SPELL_SCHOOL_NORMAL), pThreatSpell);
         if(pVictim == getOwner())
             ref->addThreat(float (threat) / size);          // It is faster to modify the threat durectly if possible
         else

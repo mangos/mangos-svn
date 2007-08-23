@@ -246,7 +246,7 @@ void Spell::EffectInstaKill(uint32 i)
     }
 
     uint32 health = unitTarget->GetHealth();
-    m_caster->DealDamage(unitTarget, health, NULL, DIRECT_DAMAGE, 0, NULL, 0, false);
+    m_caster->DealDamage(unitTarget, health, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_NORMAL, NULL, 0, false);
 }
 
 void Spell::EffectSchoolDMG(uint32 i)
@@ -465,8 +465,8 @@ void Spell::EffectDummy(uint32 i)
 
         if(int32(m_caster->GetHealth()) > dmg)
         {
-            m_caster->SendSpellNonMeleeDamageLog(m_caster, m_spellInfo->Id, dmg, m_spellInfo->School, 0, 0, false, 0, false);
-            m_caster->DealDamage(m_caster,dmg,NULL,DIRECT_DAMAGE,m_spellInfo->School,m_spellInfo,PROC_FLAG_NONE,false);
+            m_caster->SendSpellNonMeleeDamageLog(m_caster, m_spellInfo->Id, dmg, SpellSchools(m_spellInfo->School), 0, 0, false, 0, false);
+            m_caster->DealDamage(m_caster,dmg,NULL,DIRECT_DAMAGE,SpellSchools(m_spellInfo->School),m_spellInfo,PROC_FLAG_NONE,false);
 
             int32 mana = dmg;
 
@@ -1254,7 +1254,7 @@ void Spell::EffectHeal( uint32 i )
             m_caster->SendHealSpellOnPlayer(unitTarget, m_spellInfo->Id, addhealth, crit);
 
         int32 gain = unitTarget->ModifyHealth( addhealth );
-        unitTarget->getHostilRefManager().threatAssist(m_caster, float(gain) * 0.5f, m_spellInfo->School, m_spellInfo);
+        unitTarget->getHostilRefManager().threatAssist(m_caster, float(gain) * 0.5f, m_spellInfo);
 
         uint32 procHealer = PROC_FLAG_HEAL;
         if (crit)
@@ -2486,7 +2486,7 @@ void Spell::EffectWeaponDmg(uint32 i)
 
     uint32 hitInfo = 0;
     uint32 nohitMask = HITINFO_ABSORB | HITINFO_RESIST | HITINFO_MISS;
-    uint32 damageType = NORMAL_DAMAGE;
+    SpellSchools damageType = SPELL_SCHOOL_NORMAL;
     uint32 victimState = VICTIMSTATE_NORMAL;
     uint32 blocked_dmg = 0;
     uint32 absorbed_dmg = 0;
@@ -2512,13 +2512,13 @@ void Spell::EffectWeaponDmg(uint32 i)
             if( unitTarget->IsImmunedToSpellDamage(m_spellInfo) )
                 return;
 
-            damageType = pItem->GetProto()->Damage->DamageType;
+            damageType = SpellSchools(pItem->GetProto()->Damage->DamageType);
         }
     }
 
-    if(damageType==NORMAL_DAMAGE && unitTarget->IsImmunedToPhysicalDamage() )
+    if(damageType==SPELL_SCHOOL_NORMAL && unitTarget->IsImmunedToPhysicalDamage() )
     {
-        m_caster->SendAttackStateUpdate (HITINFO_MISS, unitTarget, 1, NORMAL_DAMAGE, 0, 0, 0, VICTIMSTATE_IS_IMMUNE, 0);
+        m_caster->SendAttackStateUpdate (HITINFO_MISS, unitTarget, 1, SPELL_SCHOOL_NORMAL, 0, 0, 0, VICTIMSTATE_IS_IMMUNE, 0);
         return;
     }
 
@@ -2527,19 +2527,19 @@ void Spell::EffectWeaponDmg(uint32 i)
     //if crit eff = (bonus + weapon) * 2
     //In a word, bonus + weapon will be calculated together in cases of miss, armor reduce, crit, etc.
     uint32 eff_damage = bonus;
-    m_caster->DoAttackDamage(unitTarget, &eff_damage, &cleanDamage, &blocked_dmg, &damageType, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType, m_spellInfo, m_IsTriggeredSpell);
+    m_caster->DoAttackDamage(unitTarget, &eff_damage, &cleanDamage, &blocked_dmg, damageType, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType, m_spellInfo, m_IsTriggeredSpell);
 
     for (j = 0; j < 3; j++)
         if (m_spellInfo->Effect[j] == SPELL_EFFECT_WEAPON_PERCENT_DAMAGE)
             eff_damage = uint32(eff_damage * (m_currentBasePoints[j]+1) / 100);
 
     if ((hitInfo & nohitMask) && attType != RANGED_ATTACK)  // not send ranged miss/etc
-        m_caster->SendAttackStateUpdate(hitInfo & nohitMask, unitTarget, 1, m_spellInfo->School, eff_damage, absorbed_dmg, resisted_dmg, 1, blocked_dmg);
+        m_caster->SendAttackStateUpdate(hitInfo & nohitMask, unitTarget, 1, SpellSchools(m_spellInfo->School), eff_damage, absorbed_dmg, resisted_dmg, 1, blocked_dmg);
 
     if(hitInfo & HITINFO_CRITICALHIT)
         criticalhit = true;
 
-    m_caster->SendSpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, eff_damage, (damageType==NORMAL_DAMAGE ? m_spellInfo->School : damageType), absorbed_dmg, resisted_dmg, false, blocked_dmg, criticalhit);
+    m_caster->SendSpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, eff_damage, (damageType==SPELL_SCHOOL_NORMAL ? SpellSchools(m_spellInfo->School) : damageType), absorbed_dmg, resisted_dmg, false, blocked_dmg, criticalhit);
 
     // Bloodthirst
     if (BTAura)
@@ -2556,7 +2556,7 @@ void Spell::EffectWeaponDmg(uint32 i)
         eff_damage = 0;
     }
 
-    m_caster->DealDamage(unitTarget, eff_damage, &cleanDamage, SPELL_DIRECT_DAMAGE, 0, NULL, 0, true);
+    m_caster->DealDamage(unitTarget, eff_damage, &cleanDamage, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_NORMAL, NULL, 0, true);
 
     // take ammo
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
@@ -2620,7 +2620,7 @@ void Spell::EffectHealMaxHealth(uint32 i)
         m_caster->SetPower(POWER_MANA, 0);
 
     int32 gain = unitTarget->ModifyHealth(heal);
-    unitTarget->getHostilRefManager().threatAssist(m_caster, float(gain) * 0.5f, m_spellInfo->School, m_spellInfo);
+    unitTarget->getHostilRefManager().threatAssist(m_caster, float(gain) * 0.5f, m_spellInfo);
 
     if(unitTarget->GetTypeId() == TYPEID_PLAYER)
         m_caster->SendHealSpellOnPlayer(unitTarget, m_spellInfo->Id, heal);
