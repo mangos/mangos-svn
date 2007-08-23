@@ -19,7 +19,7 @@
 #ifndef __BATTLEGROUNDAV_H
 #define __BATTLEGROUNDAV_H
 
-#include "BattleGround.h"
+class BattleGround;
 
 class BattleGroundAV : public BattleGround
 {

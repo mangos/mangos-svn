@@ -101,8 +101,8 @@ enum BattleGroundId
     BATTLEGROUND_WS     = 2,
     BATTLEGROUND_AB     = 3,
     BATTLEGROUND_NA     = 4,
-    BATTLEGROUND_BEA    = 5,
-    BATTLEGROUND_ARENAS = 6,
+    BATTLEGROUND_BE     = 5,
+    BATTLEGROUND_AA     = 6,
     BATTLEGROUND_EY     = 7,
     BATTLEGROUND_RL     = 8
 };
@@ -210,7 +210,7 @@ class BattleGround
         void AddPlayer(Player *plr);
         void AddPlayerToResurrectQueue(uint64 npc_guid, uint64 player_guid);
         void RemovePlayerFromResurrectQueue(uint64 player_guid);
-        void AddPlayerToQueue(uint64 guid, uint32 level);
+        void AddPlayerToQueue(uint64 guid, uint32 level, uint32 invitetime = 0, uint32 lastinvitetime = 0, bool isinvited = false, uint32 lastonlinetime = 0);
         void RemovePlayerFromQueue(uint64 guid);
         bool CanStartBattleGround();
         void StartBattleGround();
@@ -231,7 +231,7 @@ class BattleGround
         }
 
         /* Packet Transfer */
-        void SendPacketToTeam(uint32 TeamID, WorldPacket *packet);
+        void SendPacketToTeam(uint32 TeamID, WorldPacket *packet, Player *sender = NULL, bool self = true);
         void SendPacketToAll(WorldPacket *packet);
         void PlaySoundToTeam(uint32 SoundID, uint32 TeamID);
         void PlaySoundToAll(uint32 SoundID);

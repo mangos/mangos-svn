@@ -71,15 +71,5 @@ void BattleGroundAV::HandleAreaTrigger(Player *Source, uint32 Trigger)
     }
 
     if(SpellId)
-    {
-        SpellEntry const *Entry = sSpellStore.LookupEntry(SpellId);
-
-        if(!Entry)
-        {
-            sLog.outError("ERROR: Tried to cast unknown spell id %d to player.", SpellId);
-            return;
-        }
-
-        Source->CastSpell(Source, Entry, true, 0);
-    }
+        Source->CastSpell(Source, SpellId, true);
 }

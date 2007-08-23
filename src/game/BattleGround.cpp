@@ -149,17 +149,24 @@ void BattleGround::Update(time_t diff)
 
                 if(GetStatus() == STATUS_IN_PROGRESS)
                 {
-                    if(!itr->second.IsInvited)              // not invited yet
+                    if(isBattleGround())
                     {
-                        if(HasFreeSlots(plr->GetTeam()))
+                        if(!itr->second.IsInvited)          // not invited yet
                         {
-                            plr->SaveToDB();
-                            sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME, 0);
-                            plr->GetSession()->SendPacket(&data);
-                            itr->second.IsInvited = true;
-                            itr->second.InviteTime = getMSTime();
-                            itr->second.LastInviteTime = getMSTime();
+                            if(HasFreeSlots(plr->GetTeam()))
+                            {
+                                plr->SaveToDB();
+                                sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME, 0);
+                                plr->GetSession()->SendPacket(&data);
+                                itr->second.IsInvited = true;
+                                itr->second.InviteTime = getMSTime();
+                                itr->second.LastInviteTime = getMSTime();
+                            }
                         }
+                    }
+                    else if(isArena())
+                    {
+                        m_RemovedPlayers[itr->first] = 0;   // add to remove list (queue)
                     }
                 }
 
@@ -260,6 +267,15 @@ void BattleGround::Update(time_t diff)
             }
             SetStatus(STATUS_WAIT_QUEUE);
             SetWinner(2);
+
+            if(isArena())
+            {
+                BattleGround *bg = sBattleGroundMgr.GetBattleGround(BATTLEGROUND_AA);
+                if(!bg)
+                    return;
+
+                bg->SetStatus(STATUS_WAIT_QUEUE);
+            }
         }
     }
     //sLog.outError("m_Status=%u diff=%u", m_Status, diff);
@@ -290,7 +306,7 @@ void BattleGround::SendPacketToAll(WorldPacket *packet)
     }
 }
 
-void BattleGround::SendPacketToTeam(uint32 TeamID, WorldPacket *packet)
+void BattleGround::SendPacketToTeam(uint32 TeamID, WorldPacket *packet, Player *sender, bool self)
 {
     for(std::map<uint64, BattleGroundPlayer>::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
     {
@@ -301,6 +317,9 @@ void BattleGround::SendPacketToTeam(uint32 TeamID, WorldPacket *packet)
             sLog.outError("Player " I64FMTD " not found!", itr->first);
             continue;
         }
+
+        if(!self && sender && (plr->GetGUID() == sender->GetGUID()))
+            continue;
 
         if(plr->GetTeam() == TeamID)
             plr->GetSession()->SendPacket(packet);
@@ -505,6 +524,12 @@ void BattleGround::RemovePlayer(uint64 guid, bool Transport, bool SendPacket)
 
     if(plr)
     {
+        if(isArena())
+        {
+            plr->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
+            plr->RemoveAurasDueToSpell(SPELL_ARENA_PREPARATION);
+        }
+
         WorldPacket data;
         if(SendPacket)
         {
@@ -552,23 +577,42 @@ void BattleGround::RemovePlayer(uint64 guid, bool Transport, bool SendPacket)
     if(!GetPlayersSize())
     {
         SetStatus(STATUS_WAIT_QUEUE);
+        if(isArena())
+        {
+            BattleGround *bg = sBattleGroundMgr.GetBattleGround(BATTLEGROUND_AA);
+            if(!bg)
+                return;
+
+            bg->SetStatus(STATUS_WAIT_QUEUE);
+        }
         SetWinner(2);
         m_Players.clear();
         m_PlayerScores.clear();
+
+        for(uint32 i = 0; i < m_bgobjects.size(); i++)
+        {
+            if(m_bgobjects[i].object->IsInWorld())
+            {
+                // despawn
+                MapManager::Instance().GetMap(m_bgobjects[i].object->GetMapId(), m_bgobjects[i].object)->Remove(m_bgobjects[i].object, false);
+            }
+        }
+        sLog.outDebug("Objects despawned...");
+
         //m_TeamScores[0] = 0;
         //m_TeamScores[1] = 0;
     }
 }
 
-void BattleGround::AddPlayerToQueue(uint64 guid, uint32 level)
+void BattleGround::AddPlayerToQueue(uint64 guid, uint32 level, uint32 invitetime, uint32 lastinvitetime, bool isinvited, uint32 lastonlinetime)
 {
     if(GetQueuedPlayersSize(level) < GetMaxPlayers())
     {
         BattleGroundQueue q;
-        q.InviteTime = 0;
-        q.LastInviteTime = 0;
-        q.IsInvited = false;
-        q.LastOnlineTime = 0;
+        q.InviteTime = invitetime;
+        q.LastInviteTime = lastinvitetime;
+        q.IsInvited = isinvited;
+        q.LastOnlineTime = lastonlinetime;
 
         if(level >= 10 && level <= 19)
             m_QueuedPlayers[0][guid] = q;
@@ -664,6 +708,25 @@ void BattleGround::StartBattleGround()
 
     WorldPacket data;
 
+    BattleGround *bg = NULL;
+
+    if(GetID() == BATTLEGROUND_AA)
+    {
+        // we must select one of running arena
+        uint8 arenas[2] = { BATTLEGROUND_NA, BATTLEGROUND_BE };
+        uint8 arena_type = arenas[urand(0, 1)];
+
+        bg = sBattleGroundMgr.GetBattleGround(arena_type);
+        if(!bg)
+            return;
+
+        bg->SetStatus(STATUS_WAIT_JOIN);
+        bg->SetQueueType(GetQueueType());
+
+        bg->SetStartTime(getMSTime());
+        bg->SetLastResurrectTime(getMSTime() + RESURRECTION_INTERVAL);
+    }
+
     for(QueuedPlayersMap::iterator itr = pQueue.begin(); itr != pQueue.end(); ++itr)
     {
         Player *plr = objmgr.GetPlayer(itr->first);
@@ -671,17 +734,33 @@ void BattleGround::StartBattleGround()
         {
             // Save before join (player must loaded out of bg, if disconnected at bg,etc), it's not blizz like...
             plr->SaveToDB();
-            sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME , 0);
-            plr->GetSession()->SendPacket(&data);
-            itr->second.IsInvited = true;
-            itr->second.InviteTime = getMSTime();
-            itr->second.LastInviteTime = getMSTime();
+
+            if(GetID() == BATTLEGROUND_AA)
+            {
+                // add to new queue
+                plr->SetBattleGroundQueueId(bg->GetID());
+                bg->AddPlayerToQueue(plr->GetGUID(), plr->getLevel(), getMSTime(), getMSTime(), true, getMSTime());
+                sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, plr->GetTeam(), STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME , 0);
+                plr->GetSession()->SendPacket(&data);
+            }
+            else
+            {
+                sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME , 0);
+                plr->GetSession()->SendPacket(&data);
+                itr->second.IsInvited = true;
+                itr->second.InviteTime = getMSTime();
+                itr->second.LastInviteTime = getMSTime();
+            }
         }
         else
         {
             sLog.outError("Player " I64FMTD " not found!", itr->first);
         }
     }
+
+    // all players added to other queue, we can clear this queue now
+    if(GetID() == BATTLEGROUND_AA)
+        pQueue.clear();
 }
 
 void BattleGround::AddPlayer(Player *plr)
@@ -709,7 +788,8 @@ void BattleGround::AddPlayer(Player *plr)
     m_PlayerScores[guid] = sc;
 
     UpdatePlayersCountByTeam(plr->GetTeam(), false);        // +1 player
-
+/*
+    // temporary disabled for testing
     plr->SendInitWorldStates();
 
     plr->RemoveFromGroup();                                 // leave old group before join battleground raid group, not blizz like (old group must be restored after leave BG)...
@@ -726,10 +806,10 @@ void BattleGround::AddPlayer(Player *plr)
     {
         GetBgRaid(plr->GetTeam())->AddMember(guid, plr->GetName());
     }
-
+*/
     WorldPacket data;
     sBattleGroundMgr.BuildPlayerJoinedBattleGroundPacket(&data, plr);
-    SendPacketToTeam(plr->GetTeam(), &data);
+    SendPacketToTeam(plr->GetTeam(), &data, plr, false);
 
     if(isArena())
     {

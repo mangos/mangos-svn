@@ -24,6 +24,8 @@
 #include "BattleGroundEY.h"
 #include "BattleGroundWS.h"
 #include "BattleGroundNA.h"
+#include "BattleGroundBE.h"
+#include "BattleGroundAA.h"
 #include "SharedDefines.h"
 #include "Policies/SingletonImp.h"
 #include "MapManager.h"
@@ -77,10 +79,13 @@ void BattleGroundMgr::BuildBattleGroundStatusPacket(WorldPacket *data, BattleGro
         case BATTLEGROUND_AB:
             *data << uint8(1);
             break;
-        case BATTLEGROUND_ARENAS:
+        /*case BATTLEGROUND_AA:
             *data << uint8(4);
-            break;
+            break;*/
         case BATTLEGROUND_NA:
+        case BATTLEGROUND_BE:
+        case BATTLEGROUND_AA:
+        case BATTLEGROUND_RL:
             *data << uint8(5);
             break;
         default:                                            // unknown
@@ -193,6 +198,9 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
                 *data << (uint32)itr->second.FlagReturns;   // unk
                 break;
             case BATTLEGROUND_NA:
+            case BATTLEGROUND_BE:
+            case BATTLEGROUND_AA:
+            case BATTLEGROUND_RL:
                 *data << (uint32)0;                         // 0
                 break;
             default:
@@ -254,6 +262,8 @@ uint32 BattleGroundMgr::CreateBattleGround(uint32 bg_ID, uint32 MaxPlayersPerTea
         case BATTLEGROUND_WS: bg = new BattleGroundWS; break;
         case BATTLEGROUND_AB: bg = new BattleGroundAB; break;
         case BATTLEGROUND_NA: bg = new BattleGroundNA; break;
+        case BATTLEGROUND_BE: bg = new BattleGroundBE; break;
+        case BATTLEGROUND_AA: bg = new BattleGroundAA; break;
         case BATTLEGROUND_EY: bg = new BattleGroundEY; break;
         default:bg = new BattleGround;   break;             // placeholder for non implemented BG
     }
@@ -345,30 +355,48 @@ void BattleGroundMgr::CreateInitialBattleGrounds()
         start1 = fields[4].GetUInt32();
 
         start = sWorldSafeLocsStore.LookupEntry(start1);
-        if(!start)
+        if(start)
+        {
+            AStartLoc[0] = start->x;
+            AStartLoc[1] = start->y;
+            AStartLoc[2] = start->z;
+            AStartLoc[3] = fields[5].GetFloat();
+        }
+        else if(bg_ID == BATTLEGROUND_AA)
+        {
+            AStartLoc[0] = 0;
+            AStartLoc[1] = 0;
+            AStartLoc[2] = 0;
+            AStartLoc[3] = fields[5].GetFloat();
+        }
+        else
         {
             sLog.outErrorDb("Table `battleground_template` for id %u have non-existed WorldSafeLocs.dbc id %u in field `AllianceStartLoc`. BG not created.",bg_ID,start1);
             continue;
         }
 
-        AStartLoc[0] = start->x;
-        AStartLoc[1] = start->y;
-        AStartLoc[2] = start->z;
-        AStartLoc[3] = fields[5].GetFloat();
-
         start2 = fields[6].GetUInt32();
 
         start = sWorldSafeLocsStore.LookupEntry(start2);
-        if(!start)
+        if(start)
+        {
+            HStartLoc[0] = start->x;
+            HStartLoc[1] = start->y;
+            HStartLoc[2] = start->z;
+            HStartLoc[3] = fields[7].GetFloat();
+        }
+        else if(bg_ID == BATTLEGROUND_AA)
+        {
+            HStartLoc[0] = 0;
+            HStartLoc[1] = 0;
+            HStartLoc[2] = 0;
+            HStartLoc[3] = fields[7].GetFloat();
+        }
+        else
         {
             sLog.outErrorDb("Table `battleground_template` for id %u have non-existed WorldSafeLocs.dbc id %u in field `HordeStartLoc`. BG not created.",bg_ID,start2);
             continue;
         }
-
-        HStartLoc[0] = start->x;
-        HStartLoc[1] = start->y;
-        HStartLoc[2] = start->z;
-        HStartLoc[3] = fields[7].GetFloat();
 
         //sLog.outDetail("Creating battleground %s, %u-%u", bl->name[sWorld.GetDBClang()], MinLvl, MaxLvl);
         if(!CreateBattleGround(bg_ID, MaxPlayersPerTeam, MinLvl, MaxLvl, bl->name[sWorld.GetDBClang()], bl->mapid[0], AStartLoc[0], AStartLoc[1], AStartLoc[2], AStartLoc[3], HStartLoc[0], HStartLoc[1], HStartLoc[2], HStartLoc[3], bl->type))
@@ -393,7 +421,7 @@ void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket *data, uint64 guid
     data->Initialize(SMSG_BATTLEFIELD_LIST);
     *data << uint64(guid);                                  // battlemaster guid
     *data << uint32(bgId);                                  // battleground id
-    if(bgId == BATTLEGROUND_ARENAS)                         // arena
+    if(bgId == BATTLEGROUND_AA)                             // arenas
     {
         *data << uint8(5);                                  // unk
         *data << uint32(0);                                 // unk

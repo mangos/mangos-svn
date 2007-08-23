@@ -40,7 +40,7 @@ void BattleGroundEY::Update(time_t diff)
     BattleGround::Update(diff);
 }
 
-void BattleGroundEY::RemovePlayer(Player *plr,uint64 guid)
+void BattleGroundEY::RemovePlayer(Player *plr, uint64 guid)
 {
 
 }
@@ -54,7 +54,20 @@ void BattleGroundEY::HandleAreaTrigger(Player *Source, uint32 Trigger)
     uint32 SpellId = 0;
     switch(Trigger)
     {
-        case 0:
+        case 4476:
+        case 4512:
+        case 4514:
+        case 4515:
+        case 4516:
+        case 4517:
+        case 4518:
+        case 4519:
+        case 4530:
+        case 4531:
+        case 4568:
+        case 4569:
+        case 4570:
+        case 4571:
             break;
         default:
             sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);
@@ -63,15 +76,5 @@ void BattleGroundEY::HandleAreaTrigger(Player *Source, uint32 Trigger)
     }
 
     if(SpellId)
-    {
-        SpellEntry const *Entry = sSpellStore.LookupEntry(SpellId);
-
-        if(!Entry)
-        {
-            sLog.outError("ERROR: Tried to cast unknown spell id %u to player.", SpellId);
-            return;
-        }
-
-        Source->CastSpell(Source, Entry, true, 0);
-    }
+        Source->CastSpell(Source, SpellId, true);
 }

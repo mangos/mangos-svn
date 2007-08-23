@@ -67,7 +67,7 @@ void BattleGroundNA::Update(time_t diff)
         // delay expired (1 minute)
         if(GetStartDelayTime() < 0)
         {
-            for(uint32 i = BG_NA_OBJECT_DOOR_3; i < m_bgobjects.size(); i++)
+            for(uint32 i = BG_NA_OBJECT_DOOR_1; i <= BG_NA_OBJECT_DOOR_2; i++)
             {
                 // despawn
                 MapManager::Instance().GetMap(m_bgobjects[i].object->GetMapId(), m_bgobjects[i].object)->Remove(m_bgobjects[i].object, false);
@@ -101,21 +101,7 @@ void BattleGroundNA::Update(time_t diff)
 
 void BattleGroundNA::RemovePlayer(Player *plr, uint64 guid)
 {
-    if(plr)
-        plr->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
 
-    if(!GetPlayersSize())
-    {
-        for(uint32 i = 0; i < m_bgobjects.size(); i++)
-        {
-            if(m_bgobjects[i].object->IsInWorld())
-            {
-                // despawn
-                MapManager::Instance().GetMap(m_bgobjects[i].object->GetMapId(), m_bgobjects[i].object)->Remove(m_bgobjects[i].object, false);
-            }
-        }
-        sLog.outDebug("Objects despawned...");
-    }
 }
 
 void BattleGroundNA::HandleKillPlayer(Player *player, Player *killer)
@@ -159,29 +145,29 @@ void BattleGroundNA::HandleAreaTrigger(Player *Source, uint32 Trigger)
     }
 
     if(SpellId)
-    {
-        SpellEntry const *Entry = sSpellStore.LookupEntry(SpellId);
-
-        if(!Entry)
-        {
-            sLog.outError("ERROR: Tried to cast unknown spell id %u to player.", SpellId);
-            return;
-        }
-
-        Source->CastSpell(Source, Entry, true, 0);
-    }
+        Source->CastSpell(Source, SpellId, true);
 }
 
 bool BattleGroundNA::SetupBattleGround()
 {
-    if(!SpawnObject(183977, BG_NA_OBJECT_DOOR_1, 4023.709, 2981.777, 10.70117, -2.648788, 0, 0, 0.9697962, -0.2439165))
+    // gates
+    if(!SpawnObject(183978, BG_NA_OBJECT_DOOR_1, 4031.854, 2966.833, 12.6462, -2.648788, 0, 0, 0.9697962, -0.2439165))
         return false;
-    if(!SpawnObject(183979, BG_NA_OBJECT_DOOR_2, 4090.064, 2858.438, 10.23631, 0.4928045, 0, 0, 0.2439165, 0.9697962))
+    if(!SpawnObject(183980, BG_NA_OBJECT_DOOR_2, 4081.179, 2874.97, 12.39171, 0.4928045, 0, 0, 0.2439165, 0.9697962))
         return false;
-    if(!SpawnObject(183978, BG_NA_OBJECT_DOOR_3, 4031.854, 2966.833, 12.6462, -2.648788, 0, 0, 0.9697962, -0.2439165))
+    if(!SpawnObject(183977, BG_NA_OBJECT_DOOR_3, 4023.709, 2981.777, 10.70117, -2.648788, 0, 0, 0.9697962, -0.2439165))
         return false;
-    if(!SpawnObject(183980, BG_NA_OBJECT_DOOR_4, 4081.179, 2874.97, 12.39171, 0.4928045, 0, 0, 0.2439165, 0.9697962))
+    if(!SpawnObject(183979, BG_NA_OBJECT_DOOR_4, 4090.064, 2858.438, 10.23631, 0.4928045, 0, 0, 0.2439165, 0.9697962))
         return false;
 
     return true;
 }
+/*
+20:12:14 id:036668 [S2C] SMSG_INIT_WORLD_STATES (706 = 0x02C2) len: 86
+0000: 2f 02 00 00 72 0e 00 00 00 00 00 00 09 00 11 0a  |  /...r...........
+0010: 00 00 01 00 00 00 0f 0a 00 00 00 00 00 00 10 0a  |  ................
+0020: 00 00 00 00 00 00 d4 08 00 00 00 00 00 00 d8 08  |  ................
+0030: 00 00 00 00 00 00 d7 08 00 00 00 00 00 00 d6 08  |  ................
+0040: 00 00 00 00 00 00 d5 08 00 00 00 00 00 00 d3 08  |  ................
+0050: 00 00 00 00 00 00                                |  ......
+*/

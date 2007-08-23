@@ -369,16 +369,6 @@ void BattleGroundWS::RemovePlayer(Player *plr, uint64 guid)
 
     if(!GetPlayersSize())
     {
-        for(uint32 i = 0; i < m_bgobjects.size(); i++)
-        {
-            if(m_bgobjects[i].object->IsInWorld())
-            {
-                // despawn
-                MapManager::Instance().GetMap(m_bgobjects[i].object->GetMapId(), m_bgobjects[i].object)->Remove(m_bgobjects[i].object, false);
-            }
-        }
-        sLog.outDebug("Objects despawned...");
-
         Reset();
     }
 }
@@ -480,17 +470,7 @@ void BattleGroundWS::HandleAreaTrigger(Player *Source, uint32 Trigger)
     }
 
     if(SpellId)
-    {
-        SpellEntry const *Entry = sSpellStore.LookupEntry(SpellId);
-
-        if(!Entry)
-        {
-            sLog.outError("ERROR: Tried to cast unknown spell id %u to player.", SpellId);
-            return;
-        }
-
-        Source->CastSpell(Source, Entry, true, 0);
-    }
+        Source->CastSpell(Source, SpellId, true);
 }
 
 bool BattleGroundWS::SetupBattleGround()

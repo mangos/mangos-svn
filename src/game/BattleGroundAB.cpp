@@ -52,11 +52,11 @@ void BattleGroundAB::Update(time_t diff)
     if(GetStatus() == STATUS_IN_PROGRESS)
     {
         for(int i = 0;i < 5; i++)
-            if(m_Points[i])                                 //If point is controled
+            if(m_Points[i])                                 // If point is controled
                 AddPoint(m_Points[i], diff);
-        if(GetTeamScore(ALLIANCE) >= (2000*1000))           //1 score/per second
+        if(GetTeamScore(ALLIANCE) >= (2000*1000))           // 1 score/per second
             EndBattleGround(ALLIANCE);
-        if(GetTeamScore(HORDE) >= (2000*1000))              //1 score/per second
+        if(GetTeamScore(HORDE) >= (2000*1000))              // 1 score/per second
             EndBattleGround(HORDE);
     }
 }
@@ -102,15 +102,5 @@ void BattleGroundAB::HandleAreaTrigger(Player *Source, uint32 Trigger)
     }
 
     if(SpellId)
-    {
-        SpellEntry const *Entry = sSpellStore.LookupEntry(SpellId);
-
-        if(!Entry)
-        {
-            sLog.outError("ERROR: Tried to cast unknown spell id %u to player.", SpellId);
-            return;
-        }
-
-        Source->CastSpell(Source, Entry, true, 0);
-    }
+        Source->CastSpell(Source, SpellId, true);
 }
