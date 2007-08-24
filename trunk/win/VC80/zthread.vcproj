@@ -15,8 +15,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\zthread___Win32_Debug"
-			IntermediateDirectory=".\zthread___Win32_Debug"
+			OutputDirectory=".\zthread___$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\zthread___$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
@@ -46,7 +46,7 @@
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\zthread___Win32_Debug/zthread.pch"
+				PrecompiledHeaderFile=".\zthread___$(PlatformName)_$(ConfigurationName)/zthread.pch"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
@@ -82,8 +82,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\zthread___Win32_Release"
-			IntermediateDirectory=".\zthread___Win32_Release"
+			OutputDirectory=".\zthread___$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\zthread___$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
@@ -110,7 +110,7 @@
 				RuntimeLibrary="0"
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\zthread___Win32_Release/zthread.pch"
+				PrecompiledHeaderFile=".\zthread___$(PlatformName)_$(ConfigurationName)/zthread.pch"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"

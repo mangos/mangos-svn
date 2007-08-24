@@ -12,8 +12,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\g3dlite___Win32_Debug"
-			IntermediateDirectory=".\g3dlite___Win32_Debug"
+			OutputDirectory=".\g3dlite___$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\g3dlite___$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="2">
 			<Tool
@@ -26,9 +26,9 @@
 				RuntimeLibrary="1"
 				BufferSecurityCheck="TRUE"
 				UsePrecompiledHeader="0"
-				AssemblerListingLocation=".\g3dlite___Win32_Debug\"
-				ObjectFile=".\g3dlite___Win32_Debug\"
-				ProgramDataBaseFileName=".\g3dlite___Win32_Debug\"
+				AssemblerListingLocation=".\g3dlite___$(PlatformName)_$(ConfigurationName)\"
+				ObjectFile=".\g3dlite___$(PlatformName)_$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\g3dlite___$(PlatformName)_$(ConfigurationName)\"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="4"/>
@@ -59,8 +59,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\g3dlite___Win32_Release"
-			IntermediateDirectory=".\g3dlite___Win32_Release"
+			OutputDirectory=".\g3dlite___$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\g3dlite___$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="2">
 			<Tool
@@ -69,9 +69,9 @@
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="0"
 				UsePrecompiledHeader="0"
-				AssemblerListingLocation=".\g3dlite___Win32_Release\"
-				ObjectFile=".\g3dlite___Win32_Release\"
-				ProgramDataBaseFileName=".\g3dlite___Win32_Release\"
+				AssemblerListingLocation=".\g3dlite___$(PlatformName)_$(ConfigurationName)\"
+				ObjectFile=".\g3dlite___$(PlatformName)_$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\g3dlite___$(PlatformName)_$(ConfigurationName)\"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="3"/>

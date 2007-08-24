@@ -13,8 +13,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="./framework__Win32_Debug"
-			IntermediateDirectory="./framework__Win32_Debug"
+			OutputDirectory="./framework__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="./framework__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="2"
 			ManagedExtensions="FALSE">
@@ -29,10 +29,10 @@
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile="./framework__Win32_Debug/framework.pch"
-				AssemblerListingLocation="./framework__Win32_Debug/"
-				ObjectFile="./framework__Win32_Debug/"
-				ProgramDataBaseFileName="./framework__Win32_Debug/"
+				PrecompiledHeaderFile="./framework__$(PlatformName)_$(ConfigurationName)/framework.pch"
+				AssemblerListingLocation="./framework__$(PlatformName)_$(ConfigurationName)/"
+				ObjectFile="./framework__$(PlatformName)_$(ConfigurationName)/"
+				ProgramDataBaseFileName="./framework__$(PlatformName)_$(ConfigurationName)/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				Detect64BitPortabilityProblems="TRUE"
@@ -42,7 +42,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="./framework__Win32_Debug/framework.lib"/>
+				OutputFile="./framework__$(PlatformName)_$(ConfigurationName)/framework.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool
@@ -64,8 +64,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="./framework__Win32_Release"
-			IntermediateDirectory="./framework__Win32_Release"
+			OutputDirectory="./framework__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="./framework__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="2"
 			ManagedExtensions="FALSE">
@@ -81,10 +81,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile="./framework__Win32_Release/framework.pch"
-				AssemblerListingLocation="./framework__Win32_Release/"
-				ObjectFile="./framework__Win32_Release/"
-				ProgramDataBaseFileName="./framework__Win32_Release/"
+				PrecompiledHeaderFile="./framework__$(PlatformName)_$(ConfigurationName)/framework.pch"
+				AssemblerListingLocation="./framework__$(PlatformName)_$(ConfigurationName)/"
+				ObjectFile="./framework__$(PlatformName)_$(ConfigurationName)/"
+				ProgramDataBaseFileName="./framework__$(PlatformName)_$(ConfigurationName)/"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="3"
@@ -93,7 +93,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="./framework__Win32_Release/framework.lib"/>
+				OutputFile="./framework__$(PlatformName)_$(ConfigurationName)/framework.lib"/>
 			<Tool
 				Name="VCMIDLTool"/>
 			<Tool

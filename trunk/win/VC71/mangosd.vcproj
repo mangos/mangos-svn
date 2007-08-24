@@ -13,8 +13,8 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\..\bin\Release"
-			IntermediateDirectory=".\Release"
+			OutputDirectory="./mangosd__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="./mangosd__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -28,10 +28,10 @@
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
-				PrecompiledHeaderFile=".\Release\mangosd.pch"
-				AssemblerListingLocation=".\Release/"
-				ObjectFile=".\Release/"
-				ProgramDataBaseFileName=".\Release/"
+				PrecompiledHeaderFile="./mangosd__$(PlatformName)_$(ConfigurationName)mangosd.pch"
+				AssemblerListingLocation="./mangosd__$(PlatformName)_$(ConfigurationName)/"
+				ObjectFile="./mangosd__$(PlatformName)_$(ConfigurationName)/"
+				ProgramDataBaseFileName="./mangosd__$(PlatformName)_$(ConfigurationName)/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				Detect64BitPortabilityProblems="TRUE"
@@ -42,17 +42,17 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
-				OutputFile=".\..\..\bin\release\mangosd.exe"
+				OutputFile="./mangosd__$(PlatformName)_$(ConfigurationName)/mangosd.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\dep\lib\release"
-				ProgramDatabaseFile=".\..\..\bin\Release/mangosd.pdb"
+				ProgramDatabaseFile="./mangosd__$(PlatformName)_$(ConfigurationName)/mangosd.pdb"
 				SubSystem="1"
 				ImportLibrary="$(OutDir)/mangosd.lib"
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\..\..\bin\Release/mangosd.tlb"/>
+				TypeLibraryName="./mangosd__$(PlatformName)_$(ConfigurationName)/mangosd.tlb"/>
 			<Tool
 				Name="VCPostBuildEventTool"
 				CommandLine="copy ..\..\dep\lib\release\*.dll ..\..\bin\release"/>
@@ -77,8 +77,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\..\bin\Debug"
-			IntermediateDirectory=".\Debug"
+			OutputDirectory="./mangosd__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="./mangosd__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -92,10 +92,10 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="TRUE"
-				PrecompiledHeaderFile=".\Debug\mangosd.pch"
-				AssemblerListingLocation=".\Debug/"
-				ObjectFile=".\Debug/"
-				ProgramDataBaseFileName=".\Debug/"
+				PrecompiledHeaderFile="./mangosd__$(PlatformName)_$(ConfigurationName)/mangosd.pch"
+				AssemblerListingLocation="./mangosd__$(PlatformName)_$(ConfigurationName)/"
+				ObjectFile="./mangosd__$(PlatformName)_$(ConfigurationName)/"
+				ProgramDataBaseFileName="./mangosd__$(PlatformName)_$(ConfigurationName)/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				Detect64BitPortabilityProblems="TRUE"
@@ -107,20 +107,20 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
-				OutputFile=".\..\..\bin\Debug\mangosd.exe"
+				OutputFile="./mangosd__$(PlatformName)_$(ConfigurationName)/mangosd.exe"
 				Version=""
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\dep\lib\debug"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\..\..\bin\Debug/mangosd.pdb"
+				ProgramDatabaseFile="./mangosd__$(PlatformName)_$(ConfigurationName)/mangosd.pdb"
 				SubSystem="1"
 				ImportLibrary="$(OutDir)/mangosd.lib"
 				FixedBaseAddress="1"
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\..\..\bin\Debug/mangosd.tlb"/>
+				TypeLibraryName="./mangosd__$(PlatformName)_$(ConfigurationName)/mangosd.tlb"/>
 			<Tool
 				Name="VCPostBuildEventTool"
 				CommandLine="copy ..\..\dep\lib\debug\*.dll ..\..\bin\debug"/>
