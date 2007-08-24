@@ -117,7 +117,7 @@ void BattleGroundBE::HandleKillPlayer(Player *player, Player *killer)
 
     uint32 killer_team_index = GetTeamIndexByTeamId(killer->GetTeam());
 
-    m_TeamKills[killer_team_index]++;              // add kills to killer's team
+    m_TeamKills[killer_team_index]++;                       // add kills to killer's team
 
     if(m_TeamKills[killer_team_index] >= GetPlayersCountByTeam(player->GetTeam()))
     {
@@ -167,6 +167,7 @@ bool BattleGroundBE::SetupBattleGround()
 
     return true;
 }
+
 /*
 21:45:46 id:231310 [S2C] SMSG_INIT_WORLD_STATES (706 = 0x02C2) len: 86
 0000: 32 02 00 00 76 0e 00 00 00 00 00 00 09 00 f3 09  |  2...v...........

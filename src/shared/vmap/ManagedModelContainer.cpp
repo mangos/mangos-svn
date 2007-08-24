@@ -18,7 +18,8 @@
 
 #include "ManagedModelContainer.h"
 
-namespace VMAP {
+namespace VMAP
+{
 
     ManagedModelContainer::ManagedModelContainer(void) : ModelContainer()
     {

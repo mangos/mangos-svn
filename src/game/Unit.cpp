@@ -6673,7 +6673,7 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
         ProcTriggeredData(SpellEntry const * _spellInfo, uint32 _spellParam, Aura* _triggeredByAura)
             : spellInfo(_spellInfo), spellParam(_spellParam), triggeredByAura(_triggeredByAura),
             triggeredByAura_SpellPair(Unit::spellEffectPair(triggeredByAura->GetId(),triggeredByAura->GetEffIndex()))
-        {}
+            {}
 
         SpellEntry const * spellInfo;
         uint32 spellParam;
@@ -6694,7 +6694,7 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
             next = i; next++;
 
             SpellEntry const *spellProto = (*i)->GetSpellProto();
-            if(!spellProto) 
+            if(!spellProto)
                 continue;
 
             SpellProcEventEntry const *spellProcEvent = objmgr.GetSpellProcEvent(spellProto->Id);
@@ -6763,9 +6763,9 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                 int32 i_spell_param;
                 switch(*aur)
                 {
-                case SPELL_AURA_PROC_TRIGGER_SPELL: i_spell_param = procFlag;    break;
-                case SPELL_AURA_DUMMY:              i_spell_param = i_spell_eff; break;
-                default: i_spell_param = (*i)->GetModifier()->m_amount;          break;
+                    case SPELL_AURA_PROC_TRIGGER_SPELL: i_spell_param = procFlag;    break;
+                    case SPELL_AURA_DUMMY:              i_spell_param = i_spell_eff; break;
+                    default: i_spell_param = (*i)->GetModifier()->m_amount;          break;
                 }
 
                 procTriggered.push_back( ProcTriggeredData(spellProto,i_spell_param,*i) );

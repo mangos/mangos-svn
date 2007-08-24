@@ -16,7 +16,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-
 #include <G3D/Vector3.h>
 #include <G3D/Triangle.h>
 
@@ -26,26 +25,25 @@
 
 #include <string.h>
 
-
 #ifdef _ASSEMBLER_DEBUG
 FILE *g_df = NULL;
 #endif
 
 namespace VMAP
 {
-//=================================================================
+    //=================================================================
 
-    Vector3 ModelPosition::transform(const Vector3& pIn) const { 
+    Vector3 ModelPosition::transform(const Vector3& pIn) const
+    {
         //return(pIn);
         Vector3 out = pIn * iScale;
-        out = izMatrix * out;        
+        out = izMatrix * out;
         out = ixMatrix * out;
-        out = iyMatrix * out;        
+        out = iyMatrix * out;
         return(out);
 
     }
     //=================================================================
-
 
     TileAssembler::TileAssembler(const std::string& pSrcDirName, const std::string& pDestDirName)
     {
@@ -66,15 +64,17 @@ namespace VMAP
 
     //=================================================================
 
-    void TileAssembler::init() {
+    void TileAssembler::init()
+    {
         iCoordModelMapping = new CoordModelMapping();
-        addWorldAreaMapId(0); //Azeroth
-        addWorldAreaMapId(1); //Kalimdor
-        addWorldAreaMapId(530); //Expansion01
+        addWorldAreaMapId(0);                               //Azeroth
+        addWorldAreaMapId(1);                               //Kalimdor
+        addWorldAreaMapId(530);                             //Expansion01
     }
     //=================================================================
 
-    std::string getModNameFromModPosName(const std::string& pModPosName) {
+    std::string getModNameFromModPosName(const std::string& pModPosName)
+    {
 
         size_t spos = pModPosName.find_first_of('#');
         std::string modelFileName = pModPosName.substr(0,spos);
@@ -83,10 +83,12 @@ namespace VMAP
 
     //=================================================================
 
-    unsigned int TileAssembler::getUniqueNameId(const std::string pName) { 
+    unsigned int TileAssembler::getUniqueNameId(const std::string pName)
+    {
         unsigned int result;
 
-        if(!iUniqueNameIds.containsKey(pName)) {
+        if(!iUniqueNameIds.containsKey(pName))
+        {
             iCurrentUniqueNameId++;
             iUniqueNameIds.set(pName, iCurrentUniqueNameId);
         }
@@ -96,7 +98,8 @@ namespace VMAP
 
     //=================================================================
 
-    std::string TileAssembler::getDirEntryNameFromModName(unsigned int pMapId, const std::string& pModPosName) {
+    std::string TileAssembler::getDirEntryNameFromModName(unsigned int pMapId, const std::string& pModPosName)
+    {
         size_t spos;
         char buffer[20];
 
@@ -120,9 +123,11 @@ namespace VMAP
 
     //=================================================================
 
-    void emptyArray(Array<ModelContainer*>& mc) {
+    void emptyArray(Array<ModelContainer*>& mc)
+    {
         int no=mc.size();
-        while(no > 0) {
+        while(no > 0)
+        {
             --no;
             delete mc[no];
             mc.remove(no);
@@ -130,15 +135,16 @@ namespace VMAP
     }
 
     //=================================================================
-    bool TileAssembler::convertWorld() {
+    bool TileAssembler::convertWorld()
+    {
 
-#ifdef _ASSEMBLER_DEBUG
-#   ifdef _DEBUG
+        #ifdef _ASSEMBLER_DEBUG
+        #   ifdef _DEBUG
         ::g_df = fopen("../TileAssembler_debug.txt", "wb");
-#   else
+        #   else
         ::g_df = fopen("../TileAssembler_release.txt", "wb");
-#   endif
-#endif
+        #   endif
+        #endif
 
         bool result = true;
         std::string fname = iSrcDir;
@@ -148,382 +154,415 @@ namespace VMAP
         iCoordModelMapping->readCoordinateMapping(fname);
 
         Array<unsigned int> mapIds = iCoordModelMapping->getMaps();
-        if(mapIds.size() == 0) {
-            result = false;
-        }
-        for(int i=0; i<mapIds.size() && result; ++i) {
-            unsigned int mapId = mapIds[i];
-
-#ifdef _ASSEMBLER_DEBUG
-            if(mapId == 0)  // "Azeroth" just for debug
-            {
-                for(int x=28; x<29 && result; ++x) { //debug
-                    for(int y=28; y<29 && result; ++y) {
-#else
-            // ignore DeeprunTram (369) it is too large for short vector and not important
-            // ignore test (13), Test (29) , development (451)
-            if(mapId != 369 && mapId != 13 && mapId != 29 && mapId != 451)  
-            {
-                for(int x=0; x<66 && result; ++x) {
-                    for(int y=0; y<66 && result; ++y) {
-#endif
-                        Array<ModelContainer*> mc;
-                        std::string dirname;
-                        char buffer[100];
-                        if(iCoordModelMapping->isWorldAreaMap(mapId) && x<65 && y<65) {
-                            sprintf(buffer, "%03u_%d_%d",mapId,x,y); 
-                            dirname = std::string(buffer);
-                        } else {
-                            sprintf(buffer, "%03u",mapId); 
-                            dirname = std::string(buffer);
-                        }
-                        result = fillModelContainerArray(dirname, mapId, x, y, mc);
-                        emptyArray(mc);
-                    }
-                }
-            }
-       }
-#ifdef _ASSEMBLER_DEBUG
-        if(::g_df) fclose(::g_df);
-#endif
-
-        return result;
-    }
-
-    //=================================================================
-
-    bool TileAssembler::fillModelContainerArray(const std::string& pDirFileName, unsigned int pMapId, int pXPos, int pYPos, Array<ModelContainer*>& pMC)
-    {
-        bool result = true;
-        ModelContainer* modelContainer;
-
-        NameCollection nameCollection = iCoordModelMapping->getFilenamesForCoordinate(pMapId, pXPos, pYPos);
-        if(nameCollection.size() > 0)
+        if(mapIds.size() == 0)
         {
             result = false;
-            char dirfilename[500];
-            sprintf(dirfilename,"%s/%s.vmdir",iDestDir.c_str(),pDirFileName.c_str());
-            FILE *dirfile = fopen(dirfilename, "ab");
-            if(dirfile)
+        }
+        for(int i=0; i<mapIds.size() && result; ++i)
+        {
+            unsigned int mapId = mapIds[i];
+
+            #ifdef _ASSEMBLER_DEBUG
+            if(mapId == 0)                                  // "Azeroth" just for debug
             {
-                result = true;
-                char destnamebuffer[500];
-                char fullnamedestnamebuffer[500];
-                if(nameCollection.iMainFiles.size() >0) {
-                    sprintf(destnamebuffer,"%03u_%i_%i.vmap",pMapId, pXPos, pYPos);
-                    std::string checkDoubleStr = std::string(dirfilename);
-                    checkDoubleStr.append("##");
-                    checkDoubleStr.append(std::string(destnamebuffer));
-                    // Check, if same file already is in the same dir file
-                    if(!iCoordModelMapping->isAlreadyProcessedSingleFile(checkDoubleStr))
-                    {
-                        iCoordModelMapping->addAlreadyProcessedSingleFile(checkDoubleStr);
-                        fprintf(dirfile, "%s\n",destnamebuffer);
-                        sprintf(fullnamedestnamebuffer,"%s/%s",iDestDir.c_str(),destnamebuffer);
-                        modelContainer = processNames(nameCollection.iMainFiles, fullnamedestnamebuffer);
-                        if(modelContainer) {
-                            pMC.append(modelContainer);
-                        } else {
-                            result = false;
-                        }
-                    }
-                }
-                // process the large singe files
-                int pos = 0;
-                while(result && (pos < nameCollection.iSingeFiles.size()))
+                for(int x=28; x<29 && result; ++x)          //debug
                 {
-                    std::string destFileName = iDestDir;
-                    destFileName.append("/");
-                    std::string dirEntryName = getDirEntryNameFromModName(pMapId,nameCollection.iSingeFiles[pos]);
-                    std::string checkDoubleStr = std::string(dirfilename);
-                    checkDoubleStr.append("##");
-                    checkDoubleStr.append(nameCollection.iSingeFiles[pos]);
-                    // Check, if same file already is in the same dir file
-                    if(!iCoordModelMapping->isAlreadyProcessedSingleFile(checkDoubleStr))
+                    for(int y=28; y<29 && result; ++y)
                     {
-                        iCoordModelMapping->addAlreadyProcessedSingleFile(checkDoubleStr);
-                        fprintf(dirfile, "%s\n",dirEntryName.c_str());
-                        destFileName.append(dirEntryName);
-
-                        Array<std::string> positionarray;
-                        positionarray.append(nameCollection.iSingeFiles[pos]);
-
-                        if(!iCoordModelMapping->isAlreadyProcessedSingleFile(nameCollection.iSingeFiles[pos])) {
-                            modelContainer = processNames(positionarray, destFileName.c_str());
-                            iCoordModelMapping->addAlreadyProcessedSingleFile(nameCollection.iSingeFiles[pos]);
-                            if(modelContainer) {
-                                pMC.append(modelContainer);
-                            } else {
-                                result = false;
+                        #else
+                        // ignore DeeprunTram (369) it is too large for short vector and not important
+                        // ignore test (13), Test (29) , development (451)
+                        if(mapId != 369 && mapId != 13 && mapId != 29 && mapId != 451)
+                        {
+                            for(int x=0; x<66 && result; ++x)
+                            {
+                                for(int y=0; y<66 && result; ++y)
+                                {
+                                    #endif
+                                    Array<ModelContainer*> mc;
+                                    std::string dirname;
+                                    char buffer[100];
+                                    if(iCoordModelMapping->isWorldAreaMap(mapId) && x<65 && y<65)
+                                    {
+                                        sprintf(buffer, "%03u_%d_%d",mapId,x,y);
+                                        dirname = std::string(buffer);
+                                    }
+                                    else
+                                    {
+                                        sprintf(buffer, "%03u",mapId);
+                                        dirname = std::string(buffer);
+                                    }
+                                    result = fillModelContainerArray(dirname, mapId, x, y, mc);
+                                    emptyArray(mc);
+                                }
                             }
                         }
                     }
-                    ++pos;
-                }
-                fclose(dirfile);
-            }
-        }
-        return(result);
-    }
+                    #ifdef _ASSEMBLER_DEBUG
+                    if(::g_df) fclose(::g_df);
+                    #endif
 
-    //=================================================================
-
-    void removeEntriesFromTree(AABSPTree<SubModel *>* pTree) {
-        Array<SubModel *> submodelArray;
-        pTree->getMembers(submodelArray);
-        int no = submodelArray.size();
-        while(no > 0) {
-            --no;
-            delete submodelArray[no];
-        }
-    }
-
-    //=================================================================
-
-    ModelContainer* TileAssembler::processNames(const Array<std::string>& pPositions, const char* pDestFileName)
-    {
-        ModelContainer *modelContainer = 0;
-
-        Vector3 basepos = Vector3(0,0,0);
-        AABSPTree<SubModel *>* mainTree = new AABSPTree<SubModel *>();
-
-        int pos = 0;
-
-        bool result = true;
-        while(result && (pos < pPositions.size())) {
-            std::string modelPosString = pPositions[pos];
-            std::string modelFileName = getModNameFromModPosName(modelPosString);
-
-            if(!fillModelIntoTree(mainTree, basepos, modelPosString, modelFileName)) {
-                result = false;
-                break;
-            }
-            ++pos;    
-        }
-        if(result && mainTree->size() > 0) {
-            mainTree->balance();
-            modelContainer = new ModelContainer(mainTree);
-            modelContainer->writeFile(pDestFileName);
-        }
-        removeEntriesFromTree(mainTree);
-
-        delete mainTree;
-
-        return(modelContainer);
-    }
-
-    //=================================================================
-    bool TileAssembler::readRawFile(std::string& pModelFilename,  ModelPosition& pModelPosition, AABSPTree<SubModel *> *pMainTree)
-    {
-        bool result = false;
-
-        std::string filename = iSrcDir;
-        if(filename.length() >0)
-            filename.append("/");
-        filename.append(pModelFilename);
-        FILE *rf = fopen(filename.c_str(), "rb");
-        if(!rf) {
-            // depending on the extractor version, the data could be located in the root dir
-            std::string baseModelFilename = pModelFilename.substr((pModelFilename.find_first_of("/")+1),pModelFilename.length());
-            filename = iSrcDir;
-            if(filename.length() >0)
-                filename.append("/");
-            filename.append(baseModelFilename);
-            rf = fopen(filename.c_str(), "rb");
-        }
-        char ident[8];
-
-        int trianglecount =0;
-
-
-#ifdef _ASSEMBLER_DEBUG
-        int startgroup = 0; //2;
-        int endgroup = INT_MAX;; //2;
-        fprintf(::g_df,"-------------------------------------------------\n");
-        fprintf(::g_df,"%s\n", pModelFilename.c_str());
-        fprintf(::g_df,"-------------------------------------------------\n");
-#else
-        int startgroup = 0;
-        int endgroup = INT_MAX;
-#endif
-
-        if(rf) {
-            if(fread(&ident, 8, 1, rf) != 1) { fclose(rf); return(false); }
-            if(strcmp(ident, "VMAP001") == 0) {
-                // OK, do nothing
-            } else if(strcmp(ident, "VMAP002") == 0) {
-                // we have to read one int. This is needed during the export and we have to skip it here
-                int tempNVectors;
-                if(fread(&tempNVectors, sizeof(int), 1, rf) != 1) { fclose(rf); return(false); }
-
-            } else {
-                // wrong version
-                fclose(rf);
-                return(false);
-            }
-            uint32 groups;
-            char blockId[5];
-            blockId[4] = 0;
-            int blocksize;
-
-            if(fread(&groups, sizeof(uint32), 1, rf) != 1) { fclose(rf); return(false); }
-
-            for(int g=0;g<(int)groups;g++)
-            {
-                // group MUST NOT have more then 65536 indexes !! Array will have a problem with that !! (strange ...)
-                Array<int> tempIndexArray;
-                Array<Vector3> tempVertexArray;
-
-                AABSPTree<Triangle> *gtree = new AABSPTree<Triangle>();
-
-                uint32 flags;
-                if(fread(&flags, sizeof(uint32), 1, rf) != 1) { fclose(rf); return(false); }
-
-                uint32 branches;
-                if(fread(&blockId, 4, 1, rf) != 1) { fclose(rf); return(false); }
-                if(strcmp(blockId, "GRP ") != 0) { fclose(rf); return(false); }
-                if(fread(&blocksize, sizeof(int), 1, rf) != 1) { fclose(rf); return(false); }
-                if(fread(&branches, sizeof(uint32), 1, rf) != 1) { fclose(rf); return(false); }
-                for(int b=0;b<(int)branches; b++)
-                {
-                    uint32 indexes;
-                    // indexes for each branch (not used jet)
-                    if(fread(&indexes, sizeof(uint32), 1, rf) != 1) { fclose(rf); return(false); }
+                    return result;
                 }
 
-                // ---- indexes            
-                if(fread(&blockId, 4, 1, rf) != 1) { fclose(rf); return(false); }
-                if(strcmp(blockId, "INDX") != 0) { fclose(rf); return(false); }
-                if(fread(&blocksize, sizeof(int), 1, rf) != 1) { fclose(rf); return(false); }
-                unsigned int nindexes;
-                if(fread(&nindexes, sizeof(uint32), 1, rf) != 1) { fclose(rf); return(false); }
-                if(nindexes >0)
+                //=================================================================
+
+                bool TileAssembler::fillModelContainerArray(const std::string& pDirFileName, unsigned int pMapId, int pXPos, int pYPos, Array<ModelContainer*>& pMC)
                 {
-                    unsigned short *indexarray = new unsigned short[nindexes*sizeof(unsigned short)];
-                    if(fread(indexarray, sizeof(unsigned short), nindexes, rf) != nindexes) { fclose(rf); return(false); }
-                    for(int i=0;i<(int)nindexes; i++) {
-                        unsigned short val = indexarray[i];
-                        tempIndexArray.append(val);
+                    bool result = true;
+                    ModelContainer* modelContainer;
+
+                    NameCollection nameCollection = iCoordModelMapping->getFilenamesForCoordinate(pMapId, pXPos, pYPos);
+                    if(nameCollection.size() > 0)
+                    {
+                        result = false;
+                        char dirfilename[500];
+                        sprintf(dirfilename,"%s/%s.vmdir",iDestDir.c_str(),pDirFileName.c_str());
+                        FILE *dirfile = fopen(dirfilename, "ab");
+                        if(dirfile)
+                        {
+                            result = true;
+                            char destnamebuffer[500];
+                            char fullnamedestnamebuffer[500];
+                            if(nameCollection.iMainFiles.size() >0)
+                            {
+                                sprintf(destnamebuffer,"%03u_%i_%i.vmap",pMapId, pXPos, pYPos);
+                                std::string checkDoubleStr = std::string(dirfilename);
+                                checkDoubleStr.append("##");
+                                checkDoubleStr.append(std::string(destnamebuffer));
+                                // Check, if same file already is in the same dir file
+                                if(!iCoordModelMapping->isAlreadyProcessedSingleFile(checkDoubleStr))
+                                {
+                                    iCoordModelMapping->addAlreadyProcessedSingleFile(checkDoubleStr);
+                                    fprintf(dirfile, "%s\n",destnamebuffer);
+                                    sprintf(fullnamedestnamebuffer,"%s/%s",iDestDir.c_str(),destnamebuffer);
+                                    modelContainer = processNames(nameCollection.iMainFiles, fullnamedestnamebuffer);
+                                    if(modelContainer)
+                                    {
+                                        pMC.append(modelContainer);
+                                    }
+                                    else
+                                    {
+                                        result = false;
+                                    }
+                                }
+                            }
+                            // process the large singe files
+                            int pos = 0;
+                            while(result && (pos < nameCollection.iSingeFiles.size()))
+                            {
+                                std::string destFileName = iDestDir;
+                                destFileName.append("/");
+                                std::string dirEntryName = getDirEntryNameFromModName(pMapId,nameCollection.iSingeFiles[pos]);
+                                std::string checkDoubleStr = std::string(dirfilename);
+                                checkDoubleStr.append("##");
+                                checkDoubleStr.append(nameCollection.iSingeFiles[pos]);
+                                // Check, if same file already is in the same dir file
+                                if(!iCoordModelMapping->isAlreadyProcessedSingleFile(checkDoubleStr))
+                                {
+                                    iCoordModelMapping->addAlreadyProcessedSingleFile(checkDoubleStr);
+                                    fprintf(dirfile, "%s\n",dirEntryName.c_str());
+                                    destFileName.append(dirEntryName);
+
+                                    Array<std::string> positionarray;
+                                    positionarray.append(nameCollection.iSingeFiles[pos]);
+
+                                    if(!iCoordModelMapping->isAlreadyProcessedSingleFile(nameCollection.iSingeFiles[pos]))
+                                    {
+                                        modelContainer = processNames(positionarray, destFileName.c_str());
+                                        iCoordModelMapping->addAlreadyProcessedSingleFile(nameCollection.iSingeFiles[pos]);
+                                        if(modelContainer)
+                                        {
+                                            pMC.append(modelContainer);
+                                        }
+                                        else
+                                        {
+                                            result = false;
+                                        }
+                                    }
+                                }
+                                ++pos;
+                            }
+                            fclose(dirfile);
+                        }
                     }
-                    delete indexarray;
+                    return(result);
                 }
 
-                // ---- vectors
-                if(fread(&blockId, 4, 1, rf) != 1) {fclose(rf); return(false); }
-                if(strcmp(blockId, "VERT") != 0) { fclose(rf); return(false); }
-                if(fread(&blocksize, sizeof(int), 1, rf) != 1) { fclose(rf); return(false); }
-                unsigned int nvectors;
-                if(fread(&nvectors, sizeof(int), 1, rf) != 1) { fclose(rf); return(false); }
-                float *vectorarray = 0;
-                if(nvectors >0)
-                {
-                    vectorarray = new float[nvectors*sizeof(float)*3];
-                    if(fread(vectorarray, sizeof(float)*3, nvectors, rf) != nvectors) { fclose(rf); return(false); }
-                }
-                // ----- liquit
-                if(flags & 1)
-                {
-                    // we have liquit -> not handled yet ... skip
-                    if(fread(&blockId, 4, 1, rf) != 1) { fclose(rf); return(false); }
-                    if(strcmp(blockId, "LIQU") != 0) { fclose(rf); return(false); }
-                    if(fread(&blocksize, sizeof(int), 1, rf) != 1) { fclose(rf); return(false); }
-                    fseek(rf, blocksize, SEEK_CUR);
-                }
+                //=================================================================
 
-                for(unsigned int i=0, indexNo=0; indexNo<nvectors; indexNo++)
+                void removeEntriesFromTree(AABSPTree<SubModel *>* pTree)
                 {
-                    Vector3 v = Vector3(vectorarray[i+2], vectorarray[i+1], vectorarray[i+0]);
-                    i+=3;
-                    v = pModelPosition.transform(v);
-
-                    float swapy = v.y;
-                    v.y = v.x;
-                    v.x = swapy;
-
-                    tempVertexArray.append(v);
-                }
-
-                // ---- calculate triangles
-                int rest = nindexes%3;
-                if(rest != 0)
-                {
-                    nindexes -= rest;
-                }
-
-                for(unsigned int i=0;i<(nindexes);)
-                {
-                    Triangle t = Triangle(tempVertexArray[tempIndexArray[i+2]], tempVertexArray[tempIndexArray[i+1]], tempVertexArray[tempIndexArray[i+0]] );
-                    i+=3;
-                    trianglecount++;
-                    if(g>= startgroup && g <= endgroup) {
-                        gtree->insert(t);
+                    Array<SubModel *> submodelArray;
+                    pTree->getMembers(submodelArray);
+                    int no = submodelArray.size();
+                    while(no > 0)
+                    {
+                        --no;
+                        delete submodelArray[no];
                     }
                 }
 
-                if(vectorarray != 0)
-                {
-                    delete vectorarray;
-                }
+                //=================================================================
 
-                if(gtree->size() >0)
+                ModelContainer* TileAssembler::processNames(const Array<std::string>& pPositions, const char* pDestFileName)
                 {
-                    gtree->balance();
-                    SubModel *sm = new SubModel(gtree);
-#ifdef _ASSEMBLER_DEBUG
-                    if(::g_df) fprintf(::g_df,"group trianglies: %d, Tris: %d, Nodes: %d, gtree.triangles: %d\n", g, sm->getNTriangles(), sm->getNNodes(), gtree->memberTable.size());
-                    if(sm->getNTriangles() !=  gtree->memberTable.size()) {
-                        if(::g_df) fprintf(::g_df,"ERROR !!!! group trianglies: %d, Tris: %d, Nodes: %d, gtree.triangles: %d\n", g, sm->getNTriangles(), sm->getNNodes(), gtree->memberTable.size());
+                    ModelContainer *modelContainer = 0;
+
+                    Vector3 basepos = Vector3(0,0,0);
+                    AABSPTree<SubModel *>* mainTree = new AABSPTree<SubModel *>();
+
+                    int pos = 0;
+
+                    bool result = true;
+                    while(result && (pos < pPositions.size()))
+                    {
+                        std::string modelPosString = pPositions[pos];
+                        std::string modelFileName = getModNameFromModPosName(modelPosString);
+
+                        if(!fillModelIntoTree(mainTree, basepos, modelPosString, modelFileName))
+                        {
+                            result = false;
+                            break;
+                        }
+                        ++pos;
                     }
-#endif
-                    sm->setBasePosition(pModelPosition.iPos);
-                    pMainTree->insert(sm);
+                    if(result && mainTree->size() > 0)
+                    {
+                        mainTree->balance();
+                        modelContainer = new ModelContainer(mainTree);
+                        modelContainer->writeFile(pDestFileName);
+                    }
+                    removeEntriesFromTree(mainTree);
+
+                    delete mainTree;
+
+                    return(modelContainer);
                 }
-                delete gtree;
-            }
-            fclose(rf);
-            result = true;
-        }
-        return(result);
-    }
 
-    //=================================================================
+                //=================================================================
+                bool TileAssembler::readRawFile(std::string& pModelFilename,  ModelPosition& pModelPosition, AABSPTree<SubModel *> *pMainTree)
+                {
+                    bool result = false;
 
-    bool TileAssembler::fillModelIntoTree(AABSPTree<SubModel *> *pMainTree, const Vector3& pBasePos, std::string& pPos, std::string& pModelFilename)
-    {
-        bool result = false;
-        ModelPosition modelPosition;
-        getModelPosition(pPos, modelPosition);
-        // all should be relative to object base position
-        modelPosition.moveToBasePos(pBasePos);
+                    std::string filename = iSrcDir;
+                    if(filename.length() >0)
+                        filename.append("/");
+                    filename.append(pModelFilename);
+                    FILE *rf = fopen(filename.c_str(), "rb");
+                    if(!rf)
+                    {
+                        // depending on the extractor version, the data could be located in the root dir
+                        std::string baseModelFilename = pModelFilename.substr((pModelFilename.find_first_of("/")+1),pModelFilename.length());
+                        filename = iSrcDir;
+                        if(filename.length() >0)
+                            filename.append("/");
+                        filename.append(baseModelFilename);
+                        rf = fopen(filename.c_str(), "rb");
+                    }
+                    char ident[8];
 
-        modelPosition.init();
+                    int trianglecount =0;
 
-        if(readRawFile(pModelFilename,  modelPosition, pMainTree)) {
-            result = true;
-        }
+                    #ifdef _ASSEMBLER_DEBUG
+                    int startgroup = 0;                     //2;
+                    int endgroup = INT_MAX;;                //2;
+                    fprintf(::g_df,"-------------------------------------------------\n");
+                    fprintf(::g_df,"%s\n", pModelFilename.c_str());
+                    fprintf(::g_df,"-------------------------------------------------\n");
+                    #else
+                    int startgroup = 0;
+                    int endgroup = INT_MAX;
+                    #endif
 
-        return result;
-    }
+                    if(rf)
+                    {
+                        if(fread(&ident, 8, 1, rf) != 1) { fclose(rf); return(false); }
+                        if(strcmp(ident, "VMAP001") == 0)
+                        {
+                            // OK, do nothing
+                        }
+                        else if(strcmp(ident, "VMAP002") == 0)
+                        {
+                            // we have to read one int. This is needed during the export and we have to skip it here
+                            int tempNVectors;
+                            if(fread(&tempNVectors, sizeof(int), 1, rf) != 1) { fclose(rf); return(false); }
 
-    //=================================================================
-    void TileAssembler::getModelPosition(std::string& pPosString, ModelPosition& pModelPosition) {
-        float vposarray[3];
-        float vdirarray[3];
-        float scale;
+                        }
+                        else
+                        {
+                            // wrong version
+                            fclose(rf);
+                            return(false);
+                        }
+                        uint32 groups;
+                        char blockId[5];
+                        blockId[4] = 0;
+                        int blocksize;
 
-        size_t spos = pPosString.find_first_of('#');
-        std::string stripedPosString = pPosString.substr(spos+1,pPosString.length());
+                        if(fread(&groups, sizeof(uint32), 1, rf) != 1) { fclose(rf); return(false); }
 
-        sscanf(stripedPosString.c_str(), "%f,%f,%f_%f,%f,%f_%f",
-            &vposarray[0],&vposarray[1],&vposarray[2],
-            &vdirarray[0],&vdirarray[1],&vdirarray[2],
-            &scale);
+                        for(int g=0;g<(int)groups;g++)
+                        {
+                            // group MUST NOT have more then 65536 indexes !! Array will have a problem with that !! (strange ...)
+                            Array<int> tempIndexArray;
+                            Array<Vector3> tempVertexArray;
 
-        pModelPosition.iPos = Vector3(vposarray[0], vposarray[1], vposarray[2]);
-        pModelPosition.iDir = Vector3(vdirarray[0], vdirarray[1], vdirarray[2]);
-        pModelPosition.iScale = scale;
+                            AABSPTree<Triangle> *gtree = new AABSPTree<Triangle>();
 
-    }
-    //==========================================
+                            uint32 flags;
+                            if(fread(&flags, sizeof(uint32), 1, rf) != 1) { fclose(rf); return(false); }
 
-} // VMAP
+                            uint32 branches;
+                            if(fread(&blockId, 4, 1, rf) != 1) { fclose(rf); return(false); }
+                            if(strcmp(blockId, "GRP ") != 0) { fclose(rf); return(false); }
+                            if(fread(&blocksize, sizeof(int), 1, rf) != 1) { fclose(rf); return(false); }
+                            if(fread(&branches, sizeof(uint32), 1, rf) != 1) { fclose(rf); return(false); }
+                            for(int b=0;b<(int)branches; b++)
+                            {
+                                uint32 indexes;
+                                // indexes for each branch (not used jet)
+                                if(fread(&indexes, sizeof(uint32), 1, rf) != 1) { fclose(rf); return(false); }
+                            }
+
+                            // ---- indexes
+                            if(fread(&blockId, 4, 1, rf) != 1) { fclose(rf); return(false); }
+                            if(strcmp(blockId, "INDX") != 0) { fclose(rf); return(false); }
+                            if(fread(&blocksize, sizeof(int), 1, rf) != 1) { fclose(rf); return(false); }
+                            unsigned int nindexes;
+                            if(fread(&nindexes, sizeof(uint32), 1, rf) != 1) { fclose(rf); return(false); }
+                            if(nindexes >0)
+                            {
+                                unsigned short *indexarray = new unsigned short[nindexes*sizeof(unsigned short)];
+                                if(fread(indexarray, sizeof(unsigned short), nindexes, rf) != nindexes) { fclose(rf); return(false); }
+                                for(int i=0;i<(int)nindexes; i++)
+                                {
+                                    unsigned short val = indexarray[i];
+                                    tempIndexArray.append(val);
+                                }
+                                delete indexarray;
+                            }
+
+                            // ---- vectors
+                            if(fread(&blockId, 4, 1, rf) != 1) {fclose(rf); return(false); }
+                            if(strcmp(blockId, "VERT") != 0) { fclose(rf); return(false); }
+                            if(fread(&blocksize, sizeof(int), 1, rf) != 1) { fclose(rf); return(false); }
+                            unsigned int nvectors;
+                            if(fread(&nvectors, sizeof(int), 1, rf) != 1) { fclose(rf); return(false); }
+                            float *vectorarray = 0;
+                            if(nvectors >0)
+                            {
+                                vectorarray = new float[nvectors*sizeof(float)*3];
+                                if(fread(vectorarray, sizeof(float)*3, nvectors, rf) != nvectors) { fclose(rf); return(false); }
+                            }
+                            // ----- liquit
+                            if(flags & 1)
+                            {
+                                // we have liquit -> not handled yet ... skip
+                                if(fread(&blockId, 4, 1, rf) != 1) { fclose(rf); return(false); }
+                                if(strcmp(blockId, "LIQU") != 0) { fclose(rf); return(false); }
+                                if(fread(&blocksize, sizeof(int), 1, rf) != 1) { fclose(rf); return(false); }
+                                fseek(rf, blocksize, SEEK_CUR);
+                            }
+
+                            for(unsigned int i=0, indexNo=0; indexNo<nvectors; indexNo++)
+                            {
+                                Vector3 v = Vector3(vectorarray[i+2], vectorarray[i+1], vectorarray[i+0]);
+                                i+=3;
+                                v = pModelPosition.transform(v);
+
+                                float swapy = v.y;
+                                v.y = v.x;
+                                v.x = swapy;
+
+                                tempVertexArray.append(v);
+                            }
+
+                            // ---- calculate triangles
+                            int rest = nindexes%3;
+                            if(rest != 0)
+                            {
+                                nindexes -= rest;
+                            }
+
+                            for(unsigned int i=0;i<(nindexes);)
+                            {
+                                Triangle t = Triangle(tempVertexArray[tempIndexArray[i+2]], tempVertexArray[tempIndexArray[i+1]], tempVertexArray[tempIndexArray[i+0]] );
+                                i+=3;
+                                trianglecount++;
+                                if(g>= startgroup && g <= endgroup)
+                                {
+                                    gtree->insert(t);
+                                }
+                            }
+
+                            if(vectorarray != 0)
+                            {
+                                delete vectorarray;
+                            }
+
+                            if(gtree->size() >0)
+                            {
+                                gtree->balance();
+                                SubModel *sm = new SubModel(gtree);
+                                #ifdef _ASSEMBLER_DEBUG
+                                if(::g_df) fprintf(::g_df,"group trianglies: %d, Tris: %d, Nodes: %d, gtree.triangles: %d\n", g, sm->getNTriangles(), sm->getNNodes(), gtree->memberTable.size());
+                                if(sm->getNTriangles() !=  gtree->memberTable.size())
+                                {
+                                    if(::g_df) fprintf(::g_df,"ERROR !!!! group trianglies: %d, Tris: %d, Nodes: %d, gtree.triangles: %d\n", g, sm->getNTriangles(), sm->getNNodes(), gtree->memberTable.size());
+                                }
+                                #endif
+                                sm->setBasePosition(pModelPosition.iPos);
+                                pMainTree->insert(sm);
+                            }
+                            delete gtree;
+                        }
+                        fclose(rf);
+                        result = true;
+                    }
+                    return(result);
+                }
+
+                //=================================================================
+
+                bool TileAssembler::fillModelIntoTree(AABSPTree<SubModel *> *pMainTree, const Vector3& pBasePos, std::string& pPos, std::string& pModelFilename)
+                {
+                    bool result = false;
+                    ModelPosition modelPosition;
+                    getModelPosition(pPos, modelPosition);
+                    // all should be relative to object base position
+                    modelPosition.moveToBasePos(pBasePos);
+
+                    modelPosition.init();
+
+                    if(readRawFile(pModelFilename,  modelPosition, pMainTree))
+                    {
+                        result = true;
+                    }
+
+                    return result;
+                }
+
+                //=================================================================
+                void TileAssembler::getModelPosition(std::string& pPosString, ModelPosition& pModelPosition)
+                {
+                    float vposarray[3];
+                    float vdirarray[3];
+                    float scale;
+
+                    size_t spos = pPosString.find_first_of('#');
+                    std::string stripedPosString = pPosString.substr(spos+1,pPosString.length());
+
+                    sscanf(stripedPosString.c_str(), "%f,%f,%f_%f,%f,%f_%f",
+                        &vposarray[0],&vposarray[1],&vposarray[2],
+                        &vdirarray[0],&vdirarray[1],&vdirarray[2],
+                        &scale);
+
+                    pModelPosition.iPos = Vector3(vposarray[0], vposarray[1], vposarray[2]);
+                    pModelPosition.iDir = Vector3(vdirarray[0], vdirarray[1], vdirarray[2]);
+                    pModelPosition.iScale = scale;
+
+                }
+                //==========================================
+
+            }                                               // VMAP

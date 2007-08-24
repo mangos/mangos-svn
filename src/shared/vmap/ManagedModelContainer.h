@@ -26,23 +26,23 @@
 This is a ModelContainer with reference count information.
 */
 
-namespace VMAP {
+namespace VMAP
+{
     //=======================================================
 
     class ManagedModelContainer :
-        public ModelContainer
+    public ModelContainer
     {
-    private:
-        int refCount;
-    public:
-        ManagedModelContainer(void) ;
-        ~ManagedModelContainer(void);
+        private:
+            int refCount;
+        public:
+            ManagedModelContainer(void) ;
+            ~ManagedModelContainer(void);
 
-        void incRefCount() { ++refCount; }
-        void decRefCount() { --refCount; if(refCount < 0) refCount = 0; }
-        int getRefCount() { return refCount; }
+            void incRefCount() { ++refCount; }
+            void decRefCount() { --refCount; if(refCount < 0) refCount = 0; }
+            int getRefCount() { return refCount; }
     };
-
 
     //=======================================================
 }

@@ -788,25 +788,25 @@ void BattleGround::AddPlayer(Player *plr)
     m_PlayerScores[guid] = sc;
 
     UpdatePlayersCountByTeam(plr->GetTeam(), false);        // +1 player
-/*
-    // temporary disabled for testing
-    plr->SendInitWorldStates();
+    /*
+        // temporary disabled for testing
+        plr->SendInitWorldStates();
 
-    plr->RemoveFromGroup();                                 // leave old group before join battleground raid group, not blizz like (old group must be restored after leave BG)...
+        plr->RemoveFromGroup();                                 // leave old group before join battleground raid group, not blizz like (old group must be restored after leave BG)...
 
-    if(!GetBgRaid(plr->GetTeam()))                          // first player joined
-    {
-        Group *group = new Group;
-        SetBgRaid(plr->GetTeam(), group);
-        group->ConvertToRaid();
-        group->AddMember(guid, plr->GetName());
-        group->ChangeLeader(plr->GetGUID());
-    }
-    else                                                    // raid already exist
-    {
-        GetBgRaid(plr->GetTeam())->AddMember(guid, plr->GetName());
-    }
-*/
+        if(!GetBgRaid(plr->GetTeam()))                          // first player joined
+        {
+            Group *group = new Group;
+            SetBgRaid(plr->GetTeam(), group);
+            group->ConvertToRaid();
+            group->AddMember(guid, plr->GetName());
+            group->ChangeLeader(plr->GetGUID());
+        }
+        else                                                    // raid already exist
+        {
+            GetBgRaid(plr->GetTeam())->AddMember(guid, plr->GetName());
+        }
+    */
     WorldPacket data;
     sBattleGroundMgr.BuildPlayerJoinedBattleGroundPacket(&data, plr);
     SendPacketToTeam(plr->GetTeam(), &data, plr, false);
