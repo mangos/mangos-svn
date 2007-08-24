@@ -242,7 +242,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //190 SPELL_AURA_MOD_FACTION_REPUTATION_GAIN
     &Aura::HandleNULL,                                      //191 SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED
     &Aura::HandleNULL,                                      //192 SPELL_AURA_HASTE_MELEE
-    &Aura::HandleNULL,                                      //193 SPELL_AURA_MELEE_SLOW
+    &Aura::HandleModCombatSpeedPct,                         //193 SPELL_AURA_MELEE_SLOW (infact combat (any type attack) speed pct)
     &Aura::HandleNoImmediateEffect,                         //194 SPELL_AURA_MOD_SPELL_DAMAGE_OF_INTELLECT  implemented in Unit::SpellDamageBonus
     &Aura::HandleNoImmediateEffect,                         //195 SPELL_AURA_MOD_SPELL_HEALING_OF_INTELLECT implemented in Unit::SpellHealingBonus
     &Aura::HandleNULL,                                      //196
@@ -3299,6 +3299,16 @@ void Aura::HandleModSpellCritChanceShool(bool apply, bool Real)
 void Aura::HandleModCastingSpeed(bool apply, bool Real)
 {
     m_target->ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED,-m_modifier.m_amount,apply);
+}
+
+void Aura::HandleModCombatSpeedPct(bool apply, bool Real)
+{
+    m_target->ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED,-m_modifier.m_amount,apply);
+    m_target->ApplyAttackTimePercentMod(BASE_ATTACK,m_modifier.m_amount,apply);
+    if(m_modifier.m_amount >= 0)
+        m_target->ApplyAttackTimePercentMod(RANGED_ATTACK, m_modifier.m_amount, apply);
+    else
+        m_target->ApplyAttackTimePercentMod(RANGED_ATTACK, -m_modifier.m_amount, !apply);
 }
 
 void Aura::HandleModAttackSpeed(bool apply, bool Real)
