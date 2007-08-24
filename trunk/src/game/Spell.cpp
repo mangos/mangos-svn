@@ -457,10 +457,19 @@ void Spell::FillTargetMap()
             }
 
             //Check player targets and remove if in GM mode or GM invisibility (for not self casting case)
-            if( (*itr) != m_caster && (*itr)->GetTypeId()==TYPEID_PLAYER && (((Player*)(*itr))->isGameMaster() || ((Player*)(*itr))->GetVisibility()==VISIBILITY_OFF) )
+            if( (*itr) != m_caster && (*itr)->GetTypeId()==TYPEID_PLAYER)
             {
-                itr = tmpUnitMap.erase(itr);
-                continue;
+                if(((Player*)(*itr))->GetVisibility()==VISIBILITY_OFF)
+                {
+                    itr = tmpUnitMap.erase(itr);
+                    continue;
+                }
+
+                if(((Player*)(*itr))->isGameMaster() && !IsPositiveSpell(m_spellInfo->Id))
+                {
+                    itr = tmpUnitMap.erase(itr);
+                    continue;
+                }
             }
 
             //Check targets for LOS visibility (except spells without range limitations )

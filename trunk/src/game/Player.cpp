@@ -13728,7 +13728,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes)
     return true;
 }
 
-void Player::ProhibitSpellScholl(uint32 idSchool /* from SpellSchools */, uint32 unTimeMs )
+void Player::ProhibitSpellScholl(SpellSchools idSchool, uint32 unTimeMs )
 {
                                                             // last check 2.0.10
     WorldPacket data(SMSG_SPELL_COOLDOWN, 8+1+m_spells.size()*8);
@@ -14588,8 +14588,8 @@ void Player::SendInitialPacketsBeforeAddToMap()
     // SMSG_UPDATE_AURA_DURATION
 
     // tutorial stuff
-    data.Initialize(SMSG_TUTORIAL_FLAGS, 8*32);
-    for (int i = 0; i < 8; i++)
+    data.Initialize(SMSG_TUTORIAL_FLAGS, 8*4);
+    for (int i = 0; i < 8; ++i)
         data << uint32( GetTutorialInt(i) );
     GetSession()->SendPacket(&data);
 

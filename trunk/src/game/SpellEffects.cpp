@@ -2639,7 +2639,7 @@ void Spell::EffectInterruptCast(uint32 i)
     {
         if (unitTarget->m_currentSpells[i])
         {
-            unitTarget->ProhibitSpellScholl(unitTarget->m_currentSpells[i]->m_spellInfo->School, GetDuration(m_spellInfo));
+            unitTarget->ProhibitSpellScholl(SpellSchools(unitTarget->m_currentSpells[i]->m_spellInfo->School), GetDuration(m_spellInfo));
             unitTarget->InterruptSpell(i);
         }
     }
