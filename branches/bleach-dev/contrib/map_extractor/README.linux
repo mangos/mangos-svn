@@ -1,7 +1,0 @@
-Linux instructions
-------------------
-1. you need to compile mangos server
-2. compile libmpq/ library
-3. compile the extractor
-4. run
- 
