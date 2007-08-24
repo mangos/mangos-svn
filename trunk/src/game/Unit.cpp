@@ -6666,20 +6666,20 @@ bool Unit::isFrozen() const
     return false;
 }
 
-    struct ProcTriggeredData
-    {
-        ProcTriggeredData(SpellEntry const * _spellInfo, uint32 _spellParam, Aura* _triggeredByAura)
-            : spellInfo(_spellInfo), spellParam(_spellParam), triggeredByAura(_triggeredByAura),
-            triggeredByAura_SpellPair(Unit::spellEffectPair(triggeredByAura->GetId(),triggeredByAura->GetEffIndex()))
-            {}
+struct ProcTriggeredData
+{
+    ProcTriggeredData(SpellEntry const * _spellInfo, uint32 _spellParam, Aura* _triggeredByAura)
+        : spellInfo(_spellInfo), spellParam(_spellParam), triggeredByAura(_triggeredByAura),
+        triggeredByAura_SpellPair(Unit::spellEffectPair(triggeredByAura->GetId(),triggeredByAura->GetEffIndex()))
+    {}
 
-        SpellEntry const * spellInfo;
-        uint32 spellParam;
-        Aura* triggeredByAura;
-        Unit::spellEffectPair triggeredByAura_SpellPair;
-    };
+    SpellEntry const * spellInfo;
+    uint32 spellParam;
+    Aura* triggeredByAura;
+    Unit::spellEffectPair triggeredByAura_SpellPair;
+};
 
-    typedef std::list< ProcTriggeredData > ProcTriggeredList;
+typedef std::list< ProcTriggeredData > ProcTriggeredList;
 
 void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag, AuraTypeSet const& procAuraTypes, WeaponAttackType attType, SpellEntry const * procSpell, uint32 damage )
 {

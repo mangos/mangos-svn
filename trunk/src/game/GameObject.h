@@ -143,7 +143,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
             m_respawnTime = respawn > 0 ? time(NULL) + respawn : 0;
             m_respawnDelayTime = respawn > 0 ? respawn : 0;
         }
-        void Respawn() { if(m_respawnTime > 0) m_respawnTime = time(NULL); }
+        void Respawn();
         bool isSpawned() const { return m_respawnDelayTime == 0 || m_respawnTime > 0 && GetOwnerGUID() || m_respawnTime == 0 && !GetOwnerGUID(); }
         void Refresh();
         void Delete();

@@ -266,7 +266,7 @@ void GameObject::Update(uint32 p_time)
             SendDestroyObject(GetGUID());
             m_respawnTime = time(NULL) + m_respawnDelayTime;
 
-            // if option not set then object will be ssaved at grif unload
+            // if option not set then object will be saved at grid unload
             if(sWorld.getConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATLY))
                 SaveRespawnTime();
 
@@ -526,4 +526,13 @@ bool GameObject::isVisibleForInState(Player const* u, bool inVisibleList) const
 {
     return IsInWorld() && u->IsInWorld() && ( IsTransport() && IsInMap(u) ||
         isSpawned() && IsWithinDistInMap(u,World::GetMaxVisibleDistanceForObject()+(inVisibleList ? World::GetVisibleObjectGreyDistance() : 0.0f)) );
+}
+
+void GameObject::Respawn()
+{
+    if(m_respawnTime > 0)
+    {
+        m_respawnTime = time(NULL);
+        objmgr.SaveGORespawnTime(m_DBTableGuid,GetInstanceId(),0);
+    }
 }
