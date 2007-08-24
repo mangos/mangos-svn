@@ -2488,7 +2488,7 @@ void Aura::HandleModMechanicImmunity(bool apply, bool Real)
         {
             next = iter;
             next++;
-            SpellEntry const *spell = sSpellStore.LookupEntry(iter->second->GetId());
+            SpellEntry const *spell = iter->second->GetSpellProto();
             if(spell->Mechanic == mechanic && !iter->second->IsPositive() && spell->Id != GetId())
             {
                 m_target->RemoveAurasDueToSpell(spell->Id);

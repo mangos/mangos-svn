@@ -1126,7 +1126,7 @@ class MANGOS_DLL_SPEC Player : public Unit
             return itr != m_spellCooldowns.end() && itr->second.end > t ? itr->second.end - t : 0;
         }
         void AddSpellCooldown(uint32 spell_id, uint32 itemid, time_t end_time);
-        void ProhibitSpellScholl(uint32 idSchool /* from SpellSchools */, uint32 unTimeMs );
+        void ProhibitSpellScholl(SpellSchools idSchool, uint32 unTimeMs );
         void RemoveSpellCooldown(uint32 spell_id) { m_spellCooldowns.erase(spell_id); }
         void RemoveAllSpellCooldown();
         void _LoadSpellCooldowns(QueryResult *result);

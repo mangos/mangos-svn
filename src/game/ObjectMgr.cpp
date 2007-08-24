@@ -2933,6 +2933,32 @@ void ObjectMgr::LoadSpellProcEvents()
     sLog.outString( ">> Loaded %u spell proc event conditions", count  );
 }
 
+bool ObjectMgr::IsSpellProcEventCanTriggeredBy( SpellProcEventEntry const * spellProcEvent, SpellEntry const * procSpell, uint32 procFlags )
+{
+    if((procFlags & spellProcEvent->procFlags) == 0)
+        return false;
+
+    // Additional checks in case spell cast/hit/crit is the event
+    // Check (if set) school, category, skill line, spell talent mask
+    if(spellProcEvent->schoolMask && (!procSpell || !procSpell->School || ((1<<procSpell->School) & spellProcEvent->schoolMask) == 0))
+        return false;
+    if(spellProcEvent->category && (!procSpell || procSpell->Category != spellProcEvent->category))
+        return false;
+    if(spellProcEvent->skillId)
+    {
+        if (!procSpell) return false;
+        SkillLineAbilityEntry const *skillLineEntry = sSkillLineAbilityStore.LookupEntry(procSpell->Id);
+        if(!skillLineEntry || skillLineEntry->skillId != spellProcEvent->skillId)
+            return false;
+    }
+    if(spellProcEvent->spellFamilyName && (!procSpell || spellProcEvent->spellFamilyName != procSpell->SpellFamilyName))
+        return false;
+    if(spellProcEvent->spellFamilyMask && (!procSpell || (spellProcEvent->spellFamilyMask & procSpell->SpellFamilyFlags) == 0))
+        return false;
+
+    return true;
+}
+
 void ObjectMgr::SetHighestGuids()
 {
     QueryResult *result = sDatabase.Query( "SELECT MAX(`guid`) FROM `character`" );
