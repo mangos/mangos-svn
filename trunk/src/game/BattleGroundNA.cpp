@@ -162,6 +162,7 @@ bool BattleGroundNA::SetupBattleGround()
 
     return true;
 }
+
 /*
 20:12:14 id:036668 [S2C] SMSG_INIT_WORLD_STATES (706 = 0x02C2) len: 86
 0000: 2f 02 00 00 72 0e 00 00 00 00 00 00 09 00 11 0a  |  /...r...........

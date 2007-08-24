@@ -79,9 +79,9 @@ void BattleGroundMgr::BuildBattleGroundStatusPacket(WorldPacket *data, BattleGro
         case BATTLEGROUND_AB:
             *data << uint8(1);
             break;
-        /*case BATTLEGROUND_AA:
-            *data << uint8(4);
-            break;*/
+            /*case BATTLEGROUND_AA:
+             *data << uint8(4);
+                break;*/
         case BATTLEGROUND_NA:
         case BATTLEGROUND_BE:
         case BATTLEGROUND_AA:

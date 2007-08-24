@@ -19,7 +19,6 @@
 #ifndef _MODELCONTAINER_H
 #define _MODELCONTAINER_H
 
-
 // load our modified version first !!
 #include "AABSPTree.h"
 
@@ -33,7 +32,6 @@
 #include "SubModel.h"
 #include "BaseModel.h"
 
-
 namespace VMAP
 {
     /**
@@ -45,54 +43,53 @@ namespace VMAP
     Therefore we are able to just load a binary block and do not need to mess around with memory allocation and pointers.
     */
 
-
     //=====================================================
 
     class ModelContainer : public BaseModel
     {
-    private:
-        unsigned int iNSubModel;
-        SubModel *iSubModel;
-        //Vector3 iDirection;
-        AABox iBox;
+        private:
+            unsigned int iNSubModel;
+            SubModel *iSubModel;
+            //Vector3 iDirection;
+            AABox iBox;
 
-    public:
-        ModelContainer() : BaseModel() { iNSubModel =0; iSubModel = 0; };
+        public:
+            ModelContainer() : BaseModel() { iNSubModel =0; iSubModel = 0; };
 
-        // for the mainnode
-        ModelContainer(unsigned int pNTriangles, unsigned int pNNodes, unsigned int pNSubModel);
+            // for the mainnode
+            ModelContainer(unsigned int pNTriangles, unsigned int pNNodes, unsigned int pNSubModel);
 
-        ModelContainer(AABSPTree<SubModel *> *pTree);
+            ModelContainer(AABSPTree<SubModel *> *pTree);
 
-        ~ModelContainer(void);
+            ~ModelContainer(void);
 
-        RayIntersectionIterator<TreeNode, SubModel> beginRayIntersection(const Ray& ray, double pMaxTime, bool skipAABoxTests = false) const; 
+            RayIntersectionIterator<TreeNode, SubModel> beginRayIntersection(const Ray& ray, double pMaxTime, bool skipAABoxTests = false) const;
 
-        RayIntersectionIterator<TreeNode, SubModel> endRayIntersection() const;
+            RayIntersectionIterator<TreeNode, SubModel> endRayIntersection() const;
 
-        inline const void setSubModel(const SubModel& pSubModel, int pPos) { iSubModel[pPos] = pSubModel; }
+            inline const void setSubModel(const SubModel& pSubModel, int pPos) { iSubModel[pPos] = pSubModel; }
 
-        inline const SubModel& getSubModel(int pPos) const { return iSubModel[pPos]; }
+            inline const SubModel& getSubModel(int pPos) const { return iSubModel[pPos]; }
 
-        inline unsigned int getNSubModel() const { return(iNSubModel); }
+            inline unsigned int getNSubModel() const { return(iNSubModel); }
 
-        RealTime getIntersectionTime(const Ray&, bool pExitAtFirst, float pMaxDist) const;
+            RealTime getIntersectionTime(const Ray&, bool pExitAtFirst, float pMaxDist) const;
 
-        void countSubModelsAndNodesAndTriangles(AABSPTree<SubModel *>::Node& pNode, int& nSubModels, int& nNodes, int& nTriangles);
+            void countSubModelsAndNodesAndTriangles(AABSPTree<SubModel *>::Node& pNode, int& nSubModels, int& nNodes, int& nTriangles);
 
-        void fillContainer(const AABSPTree<SubModel *>::Node& pNode, int &pSubModelPos, int &pTreeNodePos, int &pTrianglePos, Vector3& pLo, Vector3& pHi, Vector3& pFinalLo, Vector3& pFinalHi);
+            void fillContainer(const AABSPTree<SubModel *>::Node& pNode, int &pSubModelPos, int &pTreeNodePos, int &pTrianglePos, Vector3& pLo, Vector3& pHi, Vector3& pFinalLo, Vector3& pFinalHi);
 
-        bool readRawFile(const char *name);
+            bool readRawFile(const char *name);
 
-        inline const AABox& getAABoxBounds() const { return(iBox); }
+            inline const AABox& getAABoxBounds() const { return(iBox); }
 
-        inline void setBounds(const Vector3& lo, const Vector3& hi) { iBox.set(lo,hi); }
+            inline void setBounds(const Vector3& lo, const Vector3& hi) { iBox.set(lo,hi); }
 
-        bool writeFile(const char *filename);
+            bool writeFile(const char *filename);
 
-        bool readFile(const char *filename);
+            bool readFile(const char *filename);
 
-        size_t getMemUsage();
+            size_t getMemUsage();
     };
 
     //=====================================================

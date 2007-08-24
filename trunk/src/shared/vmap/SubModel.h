@@ -38,59 +38,57 @@ namespace VMAP
     */
     class SubModel : public BaseModel
     {
-    private:
-        unsigned int iNodesPos;
-        unsigned int iTrianglesPos;
-        bool iHasInternalMemAlloc;
-        ShortBox iBox;
-#ifdef _DEBUG_VIEW
-        Array<TriangleBox *> iDrawBox;
-#endif
-    public:
-        SubModel() : BaseModel(){ };
+        private:
+            unsigned int iNodesPos;
+            unsigned int iTrianglesPos;
+            bool iHasInternalMemAlloc;
+            ShortBox iBox;
+        #ifdef _DEBUG_VIEW
+            Array<TriangleBox *> iDrawBox;
+        #endif
+        public:
+            SubModel() : BaseModel(){ };
 
-        SubModel(unsigned int pNTriangles, TriangleBox *pTriangles, unsigned int pTrianglesPos, unsigned int pNNodes, TreeNode *pTreeNodes, unsigned int pNodesPos);
-        SubModel(AABSPTree<Triangle> *pTree);
-        ~SubModel(void);
-        //Gets a 50 byte binary block
-        void initFromBinBlock(void *pBinBlock);
+            SubModel(unsigned int pNTriangles, TriangleBox *pTriangles, unsigned int pTrianglesPos, unsigned int pNNodes, TreeNode *pTreeNodes, unsigned int pNodesPos);
+            SubModel(AABSPTree<Triangle> *pTree);
+            ~SubModel(void);
+            //Gets a 50 byte binary block
+            void initFromBinBlock(void *pBinBlock);
 
-        RayIntersectionIterator<TreeNode, TriangleBox> beginRayIntersection(const Ray& ray, double pMaxTime, bool skipAABoxTests = false) const; 
+            RayIntersectionIterator<TreeNode, TriangleBox> beginRayIntersection(const Ray& ray, double pMaxTime, bool skipAABoxTests = false) const;
 
-        RayIntersectionIterator<TreeNode, TriangleBox> endRayIntersection() const;
+            RayIntersectionIterator<TreeNode, TriangleBox> endRayIntersection() const;
 
-        void fillRenderArray(Array<TriangleBox> &pArray, const TreeNode* pTreeNode);
+            void fillRenderArray(Array<TriangleBox> &pArray, const TreeNode* pTreeNode);
 
-        RealTime getIntersectionTime(const Ray& pRay, bool pExitAtFirst, float pMaxDist) const;
+            RealTime getIntersectionTime(const Ray& pRay, bool pExitAtFirst, float pMaxDist) const;
 
-        void countNodesAndTriangles(AABSPTree<Triangle>::Node& pNode, int &pNNodes, int &pNTriabgles);
+            void countNodesAndTriangles(AABSPTree<Triangle>::Node& pNode, int &pNNodes, int &pNTriabgles);
 
-        void fillContainer(const AABSPTree<Triangle>::Node& pNode, int &pTreeNodePos, int &pTrianglePos, Vector3& pLo, Vector3& pHi);
+            void fillContainer(const AABSPTree<Triangle>::Node& pNode, int &pTreeNodePos, int &pTrianglePos, Vector3& pLo, Vector3& pHi);
 
+            inline const ShortBox& getReletiveBounds() const { return(iBox); }
 
-        inline const ShortBox& getReletiveBounds() const { return(iBox); }
+            inline void setReletiveBounds(const ShortVector& lo, const ShortVector& hi) { iBox.setLo(lo); iBox.setHi(hi); }
 
-        inline void setReletiveBounds(const ShortVector& lo, const ShortVector& hi) { iBox.setLo(lo); iBox.setHi(hi); }
+            inline const AABox getAABoxBounds() const { return(AABox(iBox.getLo().getVector3() + getBasePosition(), iBox.getHi().getVector3()+ getBasePosition())); }
 
-        inline const AABox getAABoxBounds() const { return(AABox(iBox.getLo().getVector3() + getBasePosition(), iBox.getHi().getVector3()+ getBasePosition())); }
+            // get start pos bases on the global array
+            inline TriangleBox const* getTriangles() const { return &BaseModel::getTriangle(iTrianglesPos); }
+            inline TriangleBox      * getTriangles()       { return &BaseModel::getTriangle(iTrianglesPos); }
 
+            // get start pos bases on the global array
+            inline TreeNode const* getTreeNodes() const { return &BaseModel::getTreeNode(iNodesPos); }
+            inline TreeNode      * getTreeNodes()       { return &BaseModel::getTreeNode(iNodesPos); }
 
-        // get start pos bases on the global array
-        inline TriangleBox const* getTriangles() const { return &BaseModel::getTriangle(iTrianglesPos); }
-        inline TriangleBox      * getTriangles()       { return &BaseModel::getTriangle(iTrianglesPos); }
+            // internal method usign internal offset
+            inline const TreeNode& getTreeNode(int pPos) const { return(SubModel::getTreeNodes()[pPos]); }
 
-        // get start pos bases on the global array
-        inline TreeNode const* getTreeNodes() const { return &BaseModel::getTreeNode(iNodesPos); }
-        inline TreeNode      * getTreeNodes()       { return &BaseModel::getTreeNode(iNodesPos); }
+            // internal method usign internal offset
+            inline const TriangleBox& getTriangle(int pPos) const { return(SubModel::getTriangles()[pPos]); }
 
-        // internal method usign internal offset
-        inline const TreeNode& getTreeNode(int pPos) const { return(SubModel::getTreeNodes()[pPos]); }
-
-        // internal method usign internal offset
-        inline const TriangleBox& getTriangle(int pPos) const { return(SubModel::getTriangles()[pPos]); }
-
-        inline unsigned int getNodesPos() const { return(iNodesPos); }
-        inline unsigned int getTrianglesPos() const { return(iTrianglesPos); }
+            inline unsigned int getNodesPos() const { return(iNodesPos); }
+            inline unsigned int getTrianglesPos() const { return(iTrianglesPos); }
     };
 
     unsigned int hashCode(const SubModel& pSm);
@@ -98,5 +96,5 @@ namespace VMAP
     void getBounds(const SubModel& pSm, G3D::AABox& pAABox);
     void getBounds(const SubModel* pSm, G3D::AABox& pAABox);
     //====================================
-} // VMAP
+}                                                           // VMAP
 #endif

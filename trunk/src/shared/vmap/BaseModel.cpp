@@ -22,22 +22,26 @@ namespace VMAP
 {
     //==========================================================
 
-    void BaseModel::getMember(Array<TriangleBox>& pMembers) {
-        for(unsigned int i=0; i<iNTriangles; i++) {
+    void BaseModel::getMember(Array<TriangleBox>& pMembers)
+    {
+        for(unsigned int i=0; i<iNTriangles; i++)
+        {
             pMembers.append(iTriangles[i]);
         }
     }
 
     //==========================================================
-    BaseModel::BaseModel(unsigned int pNNodes, unsigned int  pNTriangles) { 
+    BaseModel::BaseModel(unsigned int pNNodes, unsigned int  pNTriangles)
+    {
         init(pNNodes, pNTriangles);
     };
 
     //==========================================================
 
-    void BaseModel::init(unsigned int pNNodes, unsigned int  pNTriangles) {
-        iNNodes = pNNodes; 
-        iNTriangles = pNTriangles; 
+    void BaseModel::init(unsigned int pNNodes, unsigned int  pNTriangles)
+    {
+        iNNodes = pNNodes;
+        iNTriangles = pNTriangles;
         iTriangles = 0;
         iTreeNodes = 0;
         if(iNNodes >0) iTreeNodes = new TreeNode[iNNodes];
@@ -46,9 +50,10 @@ namespace VMAP
 
     //==========================================================
 
-    void BaseModel::free() {
+    void BaseModel::free()
+    {
         if(getTriangles() != 0) delete [] getTriangles(); setNTriangles(0);
         if(getTreeNodes() != 0) delete [] getTreeNodes(); setNNodes(0);
     }
 
-} // VMAP
+}                                                           // VMAP
