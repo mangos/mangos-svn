@@ -186,14 +186,14 @@ void BattleGroundWS::EventPlayerDroppedFlag(Player *Source)
     if(Source->GetTeam() == ALLIANCE)
     {
         SetHordeFlagPicker(0);
-        m_FlagState[1] = true;                      // horde flag dropped
+        m_FlagState[1] = true;                              // horde flag dropped
         message = LANG_BG_DROPPED_HF;
         type = CHAT_MSG_BATTLEGROUND_ALLIANCE;
     }
     if(Source->GetTeam() == HORDE)
     {
         SetAllianceFlagPicker(0);
-        m_FlagState[0] = true;                      // alliance flag dropped
+        m_FlagState[0] = true;                              // alliance flag dropped
         message = LANG_BG_DROPPED_AF;
         type = CHAT_MSG_BATTLEGROUND_HORDE;
     }
@@ -352,71 +352,77 @@ void BattleGroundWS::HandleAreaTrigger(Player* Source, uint32 Trigger)
     uint32 SpellId = 0;
     switch(Trigger)
     {
-        case 3686:                                                  //Alliance elixir of speed spawn. Trigger not working, because located inside other areatrigger, can be replaced by IsWithinDist(object, dist) in BattleGround::Update().
+        case 3686:                                          //Alliance elixir of speed spawn. Trigger not working, because located inside other areatrigger, can be replaced by IsWithinDist(object, dist) in BattleGround::Update().
             if(!m_bgobjects[BG_OBJECT_SPEEDBUFF_1].spawned)
                 break;
             MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_SPEEDBUFF_1].object->GetMapId(), m_bgobjects[BG_OBJECT_SPEEDBUFF_1].object)->Remove(m_bgobjects[BG_OBJECT_SPEEDBUFF_1].object, false);
-            m_bgobjects[BG_OBJECT_SPEEDBUFF_1].timer = BUFF_RESPAWN_TIME;   // 3 minutes
+                                                            // 3 minutes
+            m_bgobjects[BG_OBJECT_SPEEDBUFF_1].timer = BUFF_RESPAWN_TIME;
             m_bgobjects[BG_OBJECT_SPEEDBUFF_1].spawned = false;
             SpellId = m_bgobjects[BG_OBJECT_SPEEDBUFF_1].spellid;
             break;
-        case 3687:                                                  //Horde elixir of speed spawn. Trigger not working, because located inside other areatrigger, can be replaced by IsWithinDist(object, dist) in BattleGround::Update().
+        case 3687:                                          //Horde elixir of speed spawn. Trigger not working, because located inside other areatrigger, can be replaced by IsWithinDist(object, dist) in BattleGround::Update().
             if(!m_bgobjects[BG_OBJECT_SPEEDBUFF_2].spawned)
                 break;
             MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_SPEEDBUFF_2].object->GetMapId(), m_bgobjects[BG_OBJECT_SPEEDBUFF_2].object)->Remove(m_bgobjects[BG_OBJECT_SPEEDBUFF_2].object, false);
-            m_bgobjects[BG_OBJECT_SPEEDBUFF_2].timer = BUFF_RESPAWN_TIME;   // 3 minutes
+                                                            // 3 minutes
+            m_bgobjects[BG_OBJECT_SPEEDBUFF_2].timer = BUFF_RESPAWN_TIME;
             m_bgobjects[BG_OBJECT_SPEEDBUFF_2].spawned = false;
             SpellId = m_bgobjects[BG_OBJECT_SPEEDBUFF_2].spellid;
             break;
-        case 3706:                                                  //Alliance elixir of regeneration spawn
+        case 3706:                                          //Alliance elixir of regeneration spawn
             if(!m_bgobjects[BG_OBJECT_REGENBUFF_1].spawned)
                 break;
             MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_REGENBUFF_1].object->GetMapId(), m_bgobjects[BG_OBJECT_REGENBUFF_1].object)->Remove(m_bgobjects[BG_OBJECT_REGENBUFF_1].object, false);
-            m_bgobjects[BG_OBJECT_REGENBUFF_1].timer = BUFF_RESPAWN_TIME;   // 3 minutes
+                                                            // 3 minutes
+            m_bgobjects[BG_OBJECT_REGENBUFF_1].timer = BUFF_RESPAWN_TIME;
             m_bgobjects[BG_OBJECT_REGENBUFF_1].spawned = false;
             SpellId = m_bgobjects[BG_OBJECT_REGENBUFF_1].spellid;
             break;
-        case 3708:                                                  //Horde elixir of regeneration spawn
+        case 3708:                                          //Horde elixir of regeneration spawn
             if(!m_bgobjects[BG_OBJECT_REGENBUFF_2].spawned)
                 break;
             MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_REGENBUFF_2].object->GetMapId(), m_bgobjects[BG_OBJECT_REGENBUFF_2].object)->Remove(m_bgobjects[BG_OBJECT_REGENBUFF_2].object, false);
-            m_bgobjects[BG_OBJECT_REGENBUFF_2].timer = BUFF_RESPAWN_TIME;   // 3 minutes
+                                                            // 3 minutes
+            m_bgobjects[BG_OBJECT_REGENBUFF_2].timer = BUFF_RESPAWN_TIME;
             m_bgobjects[BG_OBJECT_REGENBUFF_2].spawned = false;
             SpellId = m_bgobjects[BG_OBJECT_REGENBUFF_2].spellid;
             break;
-        case 3707:                                                  //Alliance elixir of berserk spawn
+        case 3707:                                          //Alliance elixir of berserk spawn
             if(!m_bgobjects[BG_OBJECT_BERSERKBUFF_1].spawned)
                 break;
             MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_BERSERKBUFF_1].object->GetMapId(), m_bgobjects[BG_OBJECT_BERSERKBUFF_1].object)->Remove(m_bgobjects[BG_OBJECT_BERSERKBUFF_1].object, false);
-            m_bgobjects[BG_OBJECT_BERSERKBUFF_1].timer = BUFF_RESPAWN_TIME; // 3 minutes
+                                                            // 3 minutes
+            m_bgobjects[BG_OBJECT_BERSERKBUFF_1].timer = BUFF_RESPAWN_TIME;
             m_bgobjects[BG_OBJECT_BERSERKBUFF_1].spawned = false;
             SpellId = m_bgobjects[BG_OBJECT_BERSERKBUFF_1].spellid;
             break;
-        case 3709:                                                  //Horde elixir of berserk spawn
+        case 3709:                                          //Horde elixir of berserk spawn
             if(!m_bgobjects[BG_OBJECT_BERSERKBUFF_2].spawned)
                 break;
             MapManager::Instance().GetMap(m_bgobjects[BG_OBJECT_BERSERKBUFF_2].object->GetMapId(), m_bgobjects[BG_OBJECT_BERSERKBUFF_2].object)->Remove(m_bgobjects[BG_OBJECT_BERSERKBUFF_2].object, false);
-            m_bgobjects[BG_OBJECT_BERSERKBUFF_2].timer = BUFF_RESPAWN_TIME; // 3 minutes
+                                                            // 3 minutes
+            m_bgobjects[BG_OBJECT_BERSERKBUFF_2].timer = BUFF_RESPAWN_TIME;
             m_bgobjects[BG_OBJECT_BERSERKBUFF_2].spawned = false;
             SpellId = m_bgobjects[BG_OBJECT_BERSERKBUFF_2].spellid;
             break;
-        case 3646:                                                  //Alliance Flag spawn
+        case 3646:                                          //Alliance Flag spawn
             if(m_FlagState[1] && !m_FlagState[0])
                 if(GetHordeFlagPickerGUID() == Source->GetGUID())
                     EventPlayerCapturedFlag(Source);
             break;
-        case 3647:                                                  //Horde Flag spawn
+        case 3647:                                          //Horde Flag spawn
             if(m_FlagState[0] && !m_FlagState[1])
                 if(GetAllianceFlagPickerGUID() == Source->GetGUID())
                     EventPlayerCapturedFlag(Source);
             break;
-        case 4628:                                                  // new 2.1.0?
-        case 4629:                                                  // new 2.1.0?
-        case 4631:                                                  // Unk1
-        case 4633:                                                  // Unk2
+        case 4628:                                          // new 2.1.0?
+        case 4629:                                          // new 2.1.0?
+        case 4631:                                          // Unk1
+        case 4633:                                          // Unk2
             break;
-        case 3669:                                                  // Warsong Gulch Horde Exit (removed, but trigger still exist).
-        case 3671:                                                  // Warsong Gulch Alliance Exit (removed, but trigger still exist).
+        case 3669:                                          // Warsong Gulch Horde Exit (removed, but trigger still exist).
+        case 3671:                                          // Warsong Gulch Alliance Exit (removed, but trigger still exist).
             break;
         default:
         {

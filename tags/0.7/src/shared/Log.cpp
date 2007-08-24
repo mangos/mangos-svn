@@ -492,6 +492,7 @@ void Log::outDebug( const char * str, ... )
     }
     fflush(stdout);
 }
+
 void Log::outCommand( const char * str, ... )
 {
     if( !str ) return;
@@ -595,5 +596,5 @@ void Log::outRALog(    const char * str, ... )
         va_end(ap);
         fflush(raLogfile);
     }
-     fflush(stdout);
+    fflush(stdout);
 }

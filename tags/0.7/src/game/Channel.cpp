@@ -21,13 +21,13 @@
 #include "Chat.h"
 
 Channel::Channel(std::string _name, uint32 _channal_id)
-    : name(_name), announce(true), channel_id(_channal_id), moderate(false), m_ownerGUID(0), password("")
+: name(_name), announce(true), channel_id(_channal_id), moderate(false), m_ownerGUID(0), password("")
 {
     // set special flags if built-in channel
     ChatChannelsEntry const* ch = GetChannelEntryFor(_channal_id);
     if(ch)
     {
-        channel_id = ch->ChannelID;                         // built-in channel    
+        channel_id = ch->ChannelID;                         // built-in channel
         announce = false;                                   // no join/leave announces
     }
 }

@@ -70,7 +70,7 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
         if( dberLogfile != NULL )
             fclose(dberLogfile);
         dberLogfile = NULL;
-        
+
         if (raLogfile != NULL)
             fclose(raLogfile);
         raLogfile = NULL;

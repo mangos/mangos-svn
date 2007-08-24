@@ -256,7 +256,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
 
     data >> m_name;
 
-    //if(m_name.size() == 0) //not need double check 
+    //if(m_name.size() == 0) //not need double check
     //    return false;
 
     normalizePlayerName(m_name);
@@ -338,7 +338,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
         case POWER_ENERGY:
         case POWER_MANA:
             unitfield = 0x00000000;
-    	    break;
+            break;
         case POWER_RAGE:
             unitfield = 0x00110000;
             break;
@@ -1308,7 +1308,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     // with 0x10 we can't teleport to Kharazan with normal client
     bool tbc = GetSession()->IsTBC() && sWorld.getConfig(CONFIG_EXPANSION);
 
-    if(!tbc && (mEntry->map_flag & not_tbc_map) == 0)   // normal client and TBC map
+    if(!tbc && (mEntry->map_flag & not_tbc_map) == 0)       // normal client and TBC map
     {
         sLog.outDebug("Player %s using Normal client and tried teleport to non existing map %u", GetName(), mapid);
 
@@ -1481,18 +1481,18 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
     UpdateZone(GetZoneId());
 
-    // new zone 
+    // new zone
     if(old_zone != GetZoneId())
     {
         // remove new continent flight forms
-        if(mEntry->map_flag & not_tbc_map)   // non TBC map
+        if(mEntry->map_flag & not_tbc_map)                  // non TBC map
         {
             RemoveSpellsCausingAura(SPELL_AURA_MOD_SPEED_MOUNTED_FLIGHT);
             RemoveSpellsCausingAura(SPELL_AURA_FLY);
         }
 
         // honorless target
-        if(pvpInfo.inHostileArea) 
+        if(pvpInfo.inHostileArea)
             CastSpell(this, 2479, true);
     }
 }
@@ -1802,7 +1802,7 @@ void Player::SetGMVisible(bool on)
     if(on)
     {
         m_GMFlags &= ~GM_INVISIBLE;                         //remove flag
-        
+
         // Reapply stealth/invisibility if active or show if not any
         if(HasAuraType(SPELL_AURA_MOD_STEALTH))
             SetVisibility(VISIBILITY_GROUP_STEALTH);
@@ -2162,7 +2162,7 @@ void Player::SendInitialSpells()
 
         data << uint16(itr->first);
         //data << uint16(itr->second->slotId);
-        data << uint16(0); // it's not slot id
+        data << uint16(0);                                  // it's not slot id
     }
 
     uint16 spellCooldowns = m_spellCooldowns.size();
@@ -2397,7 +2397,8 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
             (spell_id == 21156 && m_form == FORM_BATTLESTANCE)||
             (spell_id == 21178 && m_form == FORM_BEAR) ||
             (spell_id == 33948 && m_form == FORM_FLIGHT) )
-            if (!spellInfo->CasterAuraState || HasFlag(UNIT_FIELD_AURASTATE, (1<<(spellInfo->CasterAuraState-1)))) //Check CasterAuraStates
+                                                            //Check CasterAuraStates
+            if (!spellInfo->CasterAuraState || HasFlag(UNIT_FIELD_AURASTATE, (1<<(spellInfo->CasterAuraState-1))))
                 CastSpell(this, spell_id, true);
     }
 
@@ -3059,7 +3060,7 @@ void Player::SetMovement(uint8 pType)
         case MOVE_LAND_WALK:  data.Initialize(SMSG_MOVE_LAND_WALK,    GetPackGUID().size()+4); break;
         default:
             sLog.outError("Player::SetMovement: Unsupported move type (%d), data not sent to client.",pType);
-            return; 
+            return;
     }
     data.append(GetPackGUID());
     data << uint32(0);
@@ -3344,7 +3345,7 @@ void Player::CreateCorpse()
 
     uint32 flags = 0x04;
     if(InBattleGround())
-        flags |= 0x20;                                  // make it lootable for money
+        flags |= 0x20;                                      // make it lootable for money
     corpse->SetUInt32Value( CORPSE_FIELD_FLAGS, flags );
 
     corpse->SetUInt32Value( CORPSE_FIELD_DISPLAY_ID, GetUInt32Value(UNIT_FIELD_DISPLAYID) );
@@ -3446,39 +3447,39 @@ void Player::DurabilityRepair(uint16 pos, bool cost, bool discount)
 
     if(cost)
     {
-      
+
         uint32 LostDurability = maxDurability - curDurability;
         if(LostDurability>0)
         {
-          
+
             ItemPrototype const *ditemProto = sItemStorage.LookupEntry<ItemPrototype>(item->GetEntry());
             if(!ditemProto)
             {
                 sLog.outError("ERROR: RepairDurability: Unknown item id %u", ditemProto);
                 return;
             }
-            
+
             DurabilityCostsEntry const *dcost = sDurabilityCostsStore.LookupEntry(ditemProto->ItemLevel);
             if(!dcost)
             {
                 sLog.outError("ERROR: RepairDurability: Wrong item lvl %u", dcost);
                 return;
             }
-            
-            DurabilityQualityEntry const *dQualitymodEntry = sDurabilityQualityStore.LookupEntry((ditemProto->Quality+1)*2);                
+
+            DurabilityQualityEntry const *dQualitymodEntry = sDurabilityQualityStore.LookupEntry((ditemProto->Quality+1)*2);
             if(!dQualitymodEntry)
             {
                 sLog.outError("ERROR: RepairDurability: Wrong dQualityModEntry %u", dQualitymodEntry);
                 return;
             }
-            
-            uint32 dmultiplier = dcost->multiplier[ItemSubClassToDurabilityMultiplierId(ditemProto->Class,ditemProto->SubClass)];            
+
+            uint32 dmultiplier = dcost->multiplier[ItemSubClassToDurabilityMultiplierId(ditemProto->Class,ditemProto->SubClass)];
             uint32 costs = uint32(LostDurability*dmultiplier*double(dQualitymodEntry->quality_mod));
 
             if(discount)
                 costs = 9 * costs / 10;
 
-            if (costs==0) //fix for ITEM_QUALITY_ARTIFACT
+            if (costs==0)                                   //fix for ITEM_QUALITY_ARTIFACT
                 costs=1;
 
             if (GetMoney() < costs)
@@ -3573,7 +3574,7 @@ void Player::UpdateLocalChannels()
         if(!ch)
             continue;
 
-        if((ch->flags & 4) == 4)                          // global channel without zone name in pattern
+        if((ch->flags & 4) == 4)                            // global channel without zone name in pattern
             continue;
 
         //  new channel
@@ -3590,7 +3591,7 @@ void Player::UpdateLocalChannels()
             std::string name = (*i)->GetName();             // stroe name, (*i)erase in LeftChannel
             LeftChannel(*i);                                // remove from player's channel list
             cMgr->LeftChannel(name);                        // delete if empty
-       }
+        }
     }
     sLog.outDebug("Player: channels cleaned up!");
 }
@@ -3781,12 +3782,12 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
             ApplyModUInt32Value(PLAYER_FIELD_RANGED_CRIT_RATING, value, apply);
             ApplyModFloatValue(PLAYER_CRIT_PERCENTAGE,RatingChange,apply);
             break;
-        /*
-        case PLAYER_FIELD_HIT_AVOIDANCE_RATING:
-            break;
-        case PLAYER_FIELD_CRIT_AVOIDANCE_RATING:
-            break;
-        */
+            /*
+            case PLAYER_FIELD_HIT_AVOIDANCE_RATING:
+                break;
+            case PLAYER_FIELD_CRIT_AVOIDANCE_RATING:
+                break;
+            */
         case PLAYER_FIELD_RESILIENCE_RATING:
             //Resilience: 25
             RatingChange = value/(25.0 * RatingCoeffecient);
@@ -4515,7 +4516,8 @@ void Player::SetFactionAtWar(uint32 repListID, bool atWar)
     {
         if(itr->ReputationListID == repListID)
         {
-            if(((itr->Flags & FACTION_FLAG_AT_WAR) != 0) == atWar)               // already set
+                                                            // already set
+            if(((itr->Flags & FACTION_FLAG_AT_WAR) != 0) == atWar)
                 break;
 
             if( atWar )
@@ -4534,7 +4536,8 @@ void Player::SetFactionInactive(uint32 repListID, bool inactive)
     {
         if(itr->ReputationListID == repListID)
         {
-            if(((itr->Flags & FACTION_FLAG_INACTIVE) != 0) == inactive)         // already set
+                                                            // already set
+            if(((itr->Flags & FACTION_FLAG_INACTIVE) != 0) == inactive)
                 break;
 
             if(inactive)
@@ -5047,7 +5050,7 @@ void Player::UpdateZone(uint32 newZone)
             ++iter;
     }
 
-    // recent client version not send leave/join channel packets for built-in local channels 
+    // recent client version not send leave/join channel packets for built-in local channels
     UpdateLocalChannels();
 }
 
@@ -5240,7 +5243,7 @@ void Player::_ApplyItemMods(Item *item, uint8 slot,bool apply)
 
     ApplyEnchantment(item, apply);
 
-    if(proto->Socket[0].Color)    //only (un)equipping of items with sockets can influence metagems, so no need to waste time with normal items
+    if(proto->Socket[0].Color)                              //only (un)equipping of items with sockets can influence metagems, so no need to waste time with normal items
         CorrectMetaGemEnchants(slot, apply);
 
     sLog.outDebug("_ApplyItemMods complete.");
@@ -5266,11 +5269,11 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
                 ApplyMaxPowerMod(POWER_MANA, val, apply);
                 //typestr = "Mana";
                 break;
-            case ITEM_MOD_HEALTH:                          // modify HP
+            case ITEM_MOD_HEALTH:                           // modify HP
                 ApplyMaxHealthMod(val, apply);
                 //typestr = "Health";
                 break;
-            case ITEM_MOD_AGILITY:                         // modify agility
+            case ITEM_MOD_AGILITY:                          // modify agility
                 ApplyStatMod(STAT_AGILITY,                val, apply);
                 if(val > 0)
                     ApplyPosStatMod(STAT_AGILITY,         val, apply);
@@ -5278,7 +5281,7 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
                     ApplyNegStatMod(STAT_AGILITY,        -val, apply);
                 //typestr = "AGILITY";
                 break;
-            case ITEM_MOD_STRENGTH:                        //modify strength
+            case ITEM_MOD_STRENGTH:                         //modify strength
                 ApplyStatMod(STAT_STRENGTH,               val, apply);
                 if(val > 0)
                     ApplyPosStatMod(STAT_STRENGTH,        val, apply);
@@ -5286,7 +5289,7 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
                     ApplyNegStatMod(STAT_STRENGTH,       -val, apply);
                 //typestr = "STRENGHT";
                 break;
-            case ITEM_MOD_INTELLECT:                       //modify intellect
+            case ITEM_MOD_INTELLECT:                        //modify intellect
                 ApplyStatMod(STAT_INTELLECT,              val, apply);
                 if(val > 0)
                     ApplyPosStatMod(STAT_INTELLECT,       val, apply);
@@ -5295,7 +5298,7 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
                 //ApplyMaxPowerMod(POWER_MANA,              val*15, apply);
                 //typestr = "INTELLECT";
                 break;
-            case ITEM_MOD_SPIRIT:                          //modify spirit
+            case ITEM_MOD_SPIRIT:                           //modify spirit
                 ApplyStatMod(STAT_SPIRIT,                 val, apply);
                 if(val > 0)
                     ApplyPosStatMod(STAT_SPIRIT,          val, apply);
@@ -5303,7 +5306,7 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
                     ApplyNegStatMod(STAT_SPIRIT,         -val, apply);
                 //typestr = "SPIRIT";
                 break;
-            case ITEM_MOD_STAMINA:                         //modify stamina
+            case ITEM_MOD_STAMINA:                          //modify stamina
                 ApplyStatMod(STAT_STAMINA,                val, apply);
                 if(val > 0)
                     ApplyPosStatMod(STAT_STAMINA,         val, apply);
@@ -5792,7 +5795,7 @@ void Player::_ApplyAllItemMods()
 
 void Player::_ApplyAmmoBonuses(bool apply)
 {
-    // check ammo 
+    // check ammo
     uint32 ammo_id = GetUInt32Value(PLAYER_AMMO_ID);
     if(!ammo_id)
         return;
@@ -6884,7 +6887,7 @@ uint32 Player::GetBankItemCount( uint32 item, Item* eItem ) const
         if( pBag )
             count += pBag->GetItemCount(item,eItem);
     }
-    
+
     if(eItem && eItem->GetProto()->GemProperties)
     {
         for(int i = BANK_SLOT_ITEM_START; i < BANK_SLOT_ITEM_END; i++)
@@ -6894,7 +6897,7 @@ uint32 Player::GetBankItemCount( uint32 item, Item* eItem ) const
                 count += pItem->GetGemCountWithID(item);
         }
     }
-    
+
     return count;
 }
 
@@ -8413,7 +8416,6 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
                 }
             }
 
-
             m_items[slot] = NULL;
             SetUInt64Value((uint16)(PLAYER_FIELD_INV_SLOT_HEAD + (slot*2)), 0);
 
@@ -8781,7 +8783,8 @@ void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
 
         if(pSrcItem->m_lootGenerated)                       // prevent split looting item (item
         {
-            SendEquipError( EQUIP_ERR_COULDNT_SPLIT_ITEMS, pSrcItem, NULL ); //best error message found for attempting to split while looting
+                                                            //best error message found for attempting to split while looting
+            SendEquipError( EQUIP_ERR_COULDNT_SPLIT_ITEMS, pSrcItem, NULL );
             return;
         }
 
@@ -9372,64 +9375,64 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
 
         switch(enchant_display_type)
         {
-        case 2:
-            if(getClass() == CLASS_HUNTER)
-            {
-                ApplyModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE,enchant_amount,apply);
-                ApplyModFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE,enchant_amount,apply);
-            }
-            else
-            {
-                ApplyModFloatValue(UNIT_FIELD_MINDAMAGE,enchant_amount,apply);
-                ApplyModFloatValue(UNIT_FIELD_MAXDAMAGE,enchant_amount,apply);
-            }
-            break;
-
-        case 3:
-            if(enchant_spell_id)
-            {
-                if(apply)
-                    CastSpell(this,enchant_spell_id,true,item);
-                else
-                    RemoveAurasDueToItem(item);
-            }
-            break;
-
-        case 4:
-            if (!enchant_amount)
-            {
-                ItemRandomSuffixEntry const *item_rand = sItemRandomSuffixStore.LookupEntry(abs(item->GetItemRandomPropertyId()));
-                if(item_rand)
+            case 2:
+                if(getClass() == CLASS_HUNTER)
                 {
-                    for (int k=0; k<3; k++)
+                    ApplyModFloatValue(UNIT_FIELD_MINRANGEDDAMAGE,enchant_amount,apply);
+                    ApplyModFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE,enchant_amount,apply);
+                }
+                else
+                {
+                    ApplyModFloatValue(UNIT_FIELD_MINDAMAGE,enchant_amount,apply);
+                    ApplyModFloatValue(UNIT_FIELD_MAXDAMAGE,enchant_amount,apply);
+                }
+                break;
+
+            case 3:
+                if(enchant_spell_id)
+                {
+                    if(apply)
+                        CastSpell(this,enchant_spell_id,true,item);
+                    else
+                        RemoveAurasDueToItem(item);
+                }
+                break;
+
+            case 4:
+                if (!enchant_amount)
+                {
+                    ItemRandomSuffixEntry const *item_rand = sItemRandomSuffixStore.LookupEntry(abs(item->GetItemRandomPropertyId()));
+                    if(item_rand)
                     {
-                        if(item_rand->enchant_id[k] == enchant_id)
+                        for (int k=0; k<3; k++)
                         {
-                            enchant_amount = uint32((item_rand->prefix[k]*item->GetItemSuffixFactor()) / 10000 );
-                            break;
+                            if(item_rand->enchant_id[k] == enchant_id)
+                            {
+                                enchant_amount = uint32((item_rand->prefix[k]*item->GetItemSuffixFactor()) / 10000 );
+                                break;
+                            }
                         }
                     }
                 }
-            }
 
-            if(enchant_spell_id)
-                ApplyResistanceMod(SpellSchools(enchant_spell_id), enchant_amount, apply);
-            else
-                ApplyArmorMod(enchant_amount,apply);
-            break;
+                if(enchant_spell_id)
+                    ApplyResistanceMod(SpellSchools(enchant_spell_id), enchant_amount, apply);
+                else
+                    ApplyArmorMod(enchant_amount,apply);
+                break;
 
-        case 6:                                             // Shaman Rockbiter Weapon
-            // enchant_amount is then containing the number of damage per second to add to the weapon
-            if(getClass() == CLASS_SHAMAN)
-                ApplyModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,enchant_amount,apply);
-            break;
+            case 6:                                         // Shaman Rockbiter Weapon
+                // enchant_amount is then containing the number of damage per second to add to the weapon
+                if(getClass() == CLASS_SHAMAN)
+                    ApplyModFloatValue(PLAYER_FIELD_MOD_DAMAGE_DONE_POS,enchant_amount,apply);
+                break;
 
-        case 5:
-            HasStatEnchant = true;
-            break;
+            case 5:
+                HasStatEnchant = true;
+                break;
 
-        default:
-            break;
+            default:
+                break;
         }
     }
 
@@ -9452,7 +9455,7 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
                     {
                         for (int k=0; k<3; k++)
                         {
-                            if(item_rand_suffix->enchant_id[k] == enchant_id) 
+                            if(item_rand_suffix->enchant_id[k] == enchant_id)
                             {
                                 enchant_amount = uint32((item_rand_suffix->prefix[k]*item->GetItemSuffixFactor()) / 10000 );
                                 break;
@@ -9464,87 +9467,87 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
                 sLog.outDebug("Adding %u to stat nb %u",enchant_amount,enchant_spell_id);
                 switch (enchant_spell_id)
                 {
-                case ITEM_MOD_AGILITY:
-                    sLog.outDebug("+ %u AGILITY",enchant_amount);
-                    ApplyPosStatMod(STAT_AGILITY, enchant_amount, apply);
-                    ApplyStatMod(STAT_AGILITY, enchant_amount, apply);
-                    break;
-                case ITEM_MOD_STRENGTH:
-                    sLog.outDebug("+ %u STRENGTH",enchant_amount);
-                    ApplyPosStatMod(STAT_STRENGTH, enchant_amount, apply);
-                    ApplyStatMod(STAT_STRENGTH, enchant_amount, apply);
-                    break;
-                case ITEM_MOD_INTELLECT:
-                    sLog.outDebug("+ %u INTELLECT",enchant_amount);
-                    ApplyPosStatMod(STAT_INTELLECT, enchant_amount, apply);
-                    ApplyStatMod(STAT_INTELLECT, enchant_amount, apply);
-                    break;
-                case ITEM_MOD_SPIRIT:
-                    sLog.outDebug("+ %u SPIRIT",enchant_amount);
-                    ApplyPosStatMod(STAT_SPIRIT, enchant_amount, apply);
-                    ApplyStatMod(STAT_SPIRIT, enchant_amount, apply);
-                    break;
-                case ITEM_MOD_STAMINA:
-                    sLog.outDebug("+ %u STAMINA",enchant_amount);
-                    ApplyPosStatMod(STAT_STAMINA, enchant_amount, apply);
-                    ApplyStatMod(STAT_STAMINA, enchant_amount, apply);
-                    break;
-                case ITEM_MOD_DEFENSE_SKILL_RATING:
-                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_DEFENCE_RATING, enchant_amount, apply);
-                    sLog.outDebug("+ %u DEFENCE", enchant_amount);
-                    break;
-                case  ITEM_MOD_DODGE_RATING:
-                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_DODGE_RATING, enchant_amount, apply);
-                    sLog.outDebug("+ %u DODGE", enchant_amount);
-                    break;
-                case ITEM_MOD_PARRY_RATING:
-                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_PARRY_RATING, enchant_amount, apply);
-                    sLog.outDebug("+ %u PARRY", enchant_amount);
-                    break;
-                case ITEM_MOD_BLOCK_RATING:
-                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_BLOCK_RATING, enchant_amount, apply);
-                    sLog.outDebug("+ %u SHIELD_BLOCK", enchant_amount);
-                    break;
-                case ITEM_MOD_HIT_MELEE_RATING:
-                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_HIT_RATING, enchant_amount, apply);
-                    sLog.outDebug("+ %u MELEE_HIT", enchant_amount);
-                    break;
-                case ITEM_MOD_HIT_RANGED_RATING:
-                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_HIT_RATING, enchant_amount, apply);
-                    sLog.outDebug("+ %u RANGED_HIT", enchant_amount);
-                    break;
-                case ITEM_MOD_HIT_SPELL_RATING:
-                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_HIT_RATING, enchant_amount, apply);
-                    sLog.outDebug("+ %u SPELL_HIT", enchant_amount);
-                    break;
-                case ITEM_MOD_CRIT_MELEE_RATING: // CS = Critical Strike
-                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_CRIT_RATING, enchant_amount, apply);
-                    sLog.outDebug("+ %u MELEE_CRIT", enchant_amount);
-                    break;
-                case ITEM_MOD_CRIT_RANGED_RATING:
-                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_CRIT_RATING, enchant_amount, apply);
-                    sLog.outDebug("+ %u RANGED_CRIT", enchant_amount);
-                    break;
-                case ITEM_MOD_CRIT_SPELL_RATING:
-                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_CRIT_RATING, enchant_amount, apply);
-                    sLog.outDebug("+ %u SPELL_CRIT", enchant_amount);
-                    break;
-                    // Values from ITEM_STAT_MELEE_HA_RATING to ITEM_STAT_SPELL_HASTE_RATING are never used
-                    // in Enchantments
-                case ITEM_MOD_HIT_RATING:
-                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_HIT_RATING, enchant_amount, apply);
-                    sLog.outDebug("+ %u HIT", enchant_amount);
-                    break;
-                case ITEM_MOD_CRIT_RATING:
-                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_CRIT_RATING, enchant_amount, apply);
-                    sLog.outDebug("+ %u CRITICAL", enchant_amount);
-                    break;
-                    // Values ITEM_STAT_HA_RATING and ITEM_STAT_CA_RATING are never used in Enchantment
-                case ITEM_MOD_RESILIENCE_RATING:
-                    ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RESILIENCE_RATING, enchant_amount, apply);
-                    sLog.outDebug("+ %u RESILIENCE", enchant_amount);
-                    break;
-                    // Value ITEM_STAT_HASTE_RATING is never used in Enchantment
+                    case ITEM_MOD_AGILITY:
+                        sLog.outDebug("+ %u AGILITY",enchant_amount);
+                        ApplyPosStatMod(STAT_AGILITY, enchant_amount, apply);
+                        ApplyStatMod(STAT_AGILITY, enchant_amount, apply);
+                        break;
+                    case ITEM_MOD_STRENGTH:
+                        sLog.outDebug("+ %u STRENGTH",enchant_amount);
+                        ApplyPosStatMod(STAT_STRENGTH, enchant_amount, apply);
+                        ApplyStatMod(STAT_STRENGTH, enchant_amount, apply);
+                        break;
+                    case ITEM_MOD_INTELLECT:
+                        sLog.outDebug("+ %u INTELLECT",enchant_amount);
+                        ApplyPosStatMod(STAT_INTELLECT, enchant_amount, apply);
+                        ApplyStatMod(STAT_INTELLECT, enchant_amount, apply);
+                        break;
+                    case ITEM_MOD_SPIRIT:
+                        sLog.outDebug("+ %u SPIRIT",enchant_amount);
+                        ApplyPosStatMod(STAT_SPIRIT, enchant_amount, apply);
+                        ApplyStatMod(STAT_SPIRIT, enchant_amount, apply);
+                        break;
+                    case ITEM_MOD_STAMINA:
+                        sLog.outDebug("+ %u STAMINA",enchant_amount);
+                        ApplyPosStatMod(STAT_STAMINA, enchant_amount, apply);
+                        ApplyStatMod(STAT_STAMINA, enchant_amount, apply);
+                        break;
+                    case ITEM_MOD_DEFENSE_SKILL_RATING:
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_DEFENCE_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u DEFENCE", enchant_amount);
+                        break;
+                    case  ITEM_MOD_DODGE_RATING:
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_DODGE_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u DODGE", enchant_amount);
+                        break;
+                    case ITEM_MOD_PARRY_RATING:
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_PARRY_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u PARRY", enchant_amount);
+                        break;
+                    case ITEM_MOD_BLOCK_RATING:
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_BLOCK_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u SHIELD_BLOCK", enchant_amount);
+                        break;
+                    case ITEM_MOD_HIT_MELEE_RATING:
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_HIT_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u MELEE_HIT", enchant_amount);
+                        break;
+                    case ITEM_MOD_HIT_RANGED_RATING:
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_HIT_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u RANGED_HIT", enchant_amount);
+                        break;
+                    case ITEM_MOD_HIT_SPELL_RATING:
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_HIT_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u SPELL_HIT", enchant_amount);
+                        break;
+                    case ITEM_MOD_CRIT_MELEE_RATING:        // CS = Critical Strike
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_MELEE_CRIT_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u MELEE_CRIT", enchant_amount);
+                        break;
+                    case ITEM_MOD_CRIT_RANGED_RATING:
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RANGED_CRIT_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u RANGED_CRIT", enchant_amount);
+                        break;
+                    case ITEM_MOD_CRIT_SPELL_RATING:
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_SPELL_CRIT_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u SPELL_CRIT", enchant_amount);
+                        break;
+                        // Values from ITEM_STAT_MELEE_HA_RATING to ITEM_STAT_SPELL_HASTE_RATING are never used
+                        // in Enchantments
+                    case ITEM_MOD_HIT_RATING:
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_HIT_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u HIT", enchant_amount);
+                        break;
+                    case ITEM_MOD_CRIT_RATING:
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_CRIT_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u CRITICAL", enchant_amount);
+                        break;
+                        // Values ITEM_STAT_HA_RATING and ITEM_STAT_CA_RATING are never used in Enchantment
+                    case ITEM_MOD_RESILIENCE_RATING:
+                        ((Player*)this)->ApplyRatingMod(PLAYER_FIELD_RESILIENCE_RATING, enchant_amount, apply);
+                        sLog.outDebug("+ %u RESILIENCE", enchant_amount);
+                        break;
+                        // Value ITEM_STAT_HASTE_RATING is never used in Enchantment
                 }
             }
         }
@@ -9554,7 +9557,6 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
     // visualize enchantment at player and equipped items
     int VisibleBase = PLAYER_VISIBLE_ITEM_1_0 + (item->GetSlot() * 16);
     SetUInt32Value(VisibleBase+1 + slot +1, apply? item->GetEnchantmentId(slot) : 0);
-
 
     if(apply_dur)
     {
@@ -9718,7 +9720,7 @@ void Player::SendPreparedQuest( uint64 guid )
             else if( status == DIALOG_STATUS_INCOMPLETE )
                 PlayerTalkClass->SendQuestGiverRequestItems( pQuest, guid, false, true );
             // Send completable on repeatable quest if player don't have quest
-            else if( pQuest->IsRepeatable() ) 
+            else if( pQuest->IsRepeatable() )
                 PlayerTalkClass->SendQuestGiverRequestItems( pQuest, guid, CanCompleteRepeatableQuest(pQuest), true );
             else
                 PlayerTalkClass->SendQuestGiverQuestDetails( pQuest, guid, true );
@@ -9928,9 +9930,10 @@ bool Player::CanCompleteRepeatableQuest( Quest *pQuest )
 
     if( !CanRewardQuest(pQuest, false) )
         return false;
-        
+
     return true;
 }
+
 bool Player::CanRewardQuest( Quest *pQuest, bool msg )
 {
     if( pQuest )
@@ -10012,7 +10015,7 @@ void Player::AddQuest( Quest *pQuest, Object *questGiver )
     if( pQuest )
     {
         uint16 log_slot = GetQuestSlot( 0 );
-        assert(log_slot);        
+        assert(log_slot);
 
         uint32 quest_id = pQuest->GetQuestId();
 
@@ -10070,7 +10073,7 @@ void Player::AddQuest( Quest *pQuest, Object *questGiver )
         }
 
         //starting initial quest script
-        if(questGiver && pQuest->GetQuestStartScript()!=0)                    
+        if(questGiver && pQuest->GetQuestStartScript()!=0)
             sWorld.ScriptsStart(sQuestStartScripts, pQuest->GetQuestStartScript(), questGiver, this);
     }
 }
@@ -10653,7 +10656,6 @@ bool Player::IsQuestSpellComplete(uint32 quest_id) const
     QuestStatusMap::const_iterator iter = mQuestStatus.find(quest_id);
     return iter != mQuestStatus.end() ? iter->second.m_spellComplete : false;
 }
-
 
 void Player::AdjustQuestReqItemCount( uint32 quest_id )
 {
@@ -12223,7 +12225,7 @@ void Player::_SaveInventory()
         itr->item->SetEnchantmentDuration(itr->slot,itr->leftduration);
     }
 
-    // if no changes 
+    // if no changes
     if (m_itemUpdateQueue.empty()) return;
 
     // do not save if the update queue is corrupt
@@ -12399,7 +12401,7 @@ void Player::_SaveTutorials()
     {
         sDatabase.PExecute("UPDATE `character_tutorial` SET `tut0`='%u', `tut1`='%u', `tut2`='%u', `tut3`='%u', `tut4`='%u', `tut5`='%u', `tut6`='%u', `tut7`='%u' WHERE `guid` = '%u'",
             m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7], GetGUIDLow() );
-    } 
+    }
     else
     {
         sDatabase.PExecute("INSERT INTO `character_tutorial` (`guid`,`tut0`,`tut1`,`tut2`,`tut3`,`tut4`,`tut5`,`tut6`,`tut7`) VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u', '%u')", GetGUIDLow(), m_Tutorials[0], m_Tutorials[1], m_Tutorials[2], m_Tutorials[3], m_Tutorials[4], m_Tutorials[5], m_Tutorials[6], m_Tutorials[7]);
@@ -12408,7 +12410,7 @@ void Player::_SaveTutorials()
 
 void Player::outDebugValues() const
 {
-    if(!sLog.IsOutDebug())                           // optimize disabled debug output
+    if(!sLog.IsOutDebug())                                  // optimize disabled debug output
         return;
 
     sLog.outDebug("HP is: \t\t\t%u\t\tMP is: \t\t\t%u",GetMaxHealth(), GetMaxPower(POWER_MANA));
@@ -12846,7 +12848,7 @@ int32 Player::GetTotalPctMods(uint32 spellId, uint8 op)
 
 bool Player::IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mod)
 {
-    if (!mod || !spellInfo) 
+    if (!mod || !spellInfo)
         return false;
 
     if ((mod->charges == -1) && (mod->lastAffected != spellInfo->Id))
@@ -12875,9 +12877,9 @@ bool Player::IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mo
             return true;
     }
     else
-        if (mod->mask & spellInfo->SpellFamilyFlags)
-            return true;
-    
+    if (mod->mask & spellInfo->SpellFamilyFlags)
+        return true;
+
     return false;
 }
 
@@ -12885,9 +12887,9 @@ void Player::AddSpellMod(SpellModifier* mod, bool apply)
 {
     uint64 shiftdata=0x01, Opcode=SMSG_SET_FLAT_SPELL_MODIFIER;
 
-    if (mod->type == SPELLMOD_FLAT) 
+    if (mod->type == SPELLMOD_FLAT)
         Opcode = SMSG_SET_FLAT_SPELL_MODIFIER;
-    else if (mod->type == SPELLMOD_PCT) 
+    else if (mod->type == SPELLMOD_PCT)
         Opcode = SMSG_SET_PCT_SPELL_MODIFIER;
 
     for(int eff=0;eff<64;++eff)
@@ -12919,22 +12921,22 @@ void Player::RemoveSpellMods(uint32 spellId)
 {
     if(!spellId || (m_SpellModRemoveCount == 0))
         return;
-    
+
     for(int i=0;i<SPELLMOD_COUNT;++i)
         for (SpellModList::iterator itr = m_spellMods[i].begin(), next; itr != m_spellMods[i].end(); itr = next)
+    {
+        next = itr;
+        next++;
+        SpellModifier *mod = *itr;
+        if (mod && mod->charges == -1 && mod->lastAffected == spellId)
         {
-            next = itr;
-            next++;
-            SpellModifier *mod = *itr;
-            if (mod && mod->charges == -1 && mod->lastAffected == spellId)
-            {
-                RemoveAurasDueToSpell(mod->spellId);
-                if (m_spellMods[i].empty())
-                    break;
-                else
-                    next = m_spellMods[i].begin();
-            }
+            RemoveAurasDueToSpell(mod->spellId);
+            if (m_spellMods[i].empty())
+                break;
+            else
+                next = m_spellMods[i].begin();
         }
+    }
 }
 
 void Player::RemoveAreaAurasFromGroup()
@@ -13062,8 +13064,8 @@ void Player::HandleStealthedUnitsDetection()
             m_clientGUIDs.insert((*i)->GetGUID());
 
             #ifdef MANGOS_DEBUG
-                if((sLog.getLogFilter() & LOG_FILTER_VISIBILITY_CHANGES)==0)
-                    sLog.outDebug("Object %u (Type: %u) is detected in stealth by player %u. Distance = %f",(*i)->GetGUIDLow(),(*i)->GetTypeId(),GetGUIDLow(),sqrt(GetDistanceSq(*i)));
+            if((sLog.getLogFilter() & LOG_FILTER_VISIBILITY_CHANGES)==0)
+                sLog.outDebug("Object %u (Type: %u) is detected in stealth by player %u. Distance = %f",(*i)->GetGUIDLow(),(*i)->GetTypeId(),GetGUIDLow(),sqrt(GetDistanceSq(*i)));
             #endif
             i = stealthedUnits.erase(i);
             continue;
@@ -13633,7 +13635,8 @@ uint32 Player::GetBlockValue() const
     return m_AuraModifiers[SPELL_AURA_MOD_SHIELD_BLOCKVALUE]*(m_AuraModifiers[SPELL_AURA_MOD_SHIELD_BLOCKVALUE_PCT]+100)/100;
 }
 
-bool Player::EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot)    //slot to be excluded while counting
+                                                            //slot to be excluded while counting
+bool Player::EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot)
 {
     if(!enchantmentcondition)
         return true;
@@ -13641,7 +13644,7 @@ bool Player::EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot)
     SpellItemEnchantmentConditionEntry const *Condition = sSpellItemEnchantmentConditionStore.LookupEntry(enchantmentcondition);
 
     if(!Condition)
-            return true;
+        return true;
 
     uint8 curcount[4] = {0, 0, 0, 0};
 
@@ -13649,7 +13652,7 @@ bool Player::EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot)
     for(uint8 i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; ++i)
     {
         if(i == slot)
-                continue;
+            continue;
         Item *pItem2 = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
         if(pItem2 && pItem2->GetProto()->Socket[0].Color)
         {
@@ -13698,14 +13701,15 @@ bool Player::EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot)
         // if have <CompareColor> use them as count, else use <value> from Condition
         uint32 _cmp_gem = Condition->CompareColor[i] ? curcount[Condition->CompareColor[i] - 1]: Condition->Value[i];
 
-        switch(Condition->Comparator[i]) {
-            case 2: // requires less <color> than (<value> || <comparecolor>) gems
+        switch(Condition->Comparator[i])
+        {
+            case 2:                                         // requires less <color> than (<value> || <comparecolor>) gems
                 activate &= (_cur_gem < _cmp_gem) ? true : false;
                 break;
-            case 3: // requires more <color> than (<value> || <comparecolor>) gems
+            case 3:                                         // requires more <color> than (<value> || <comparecolor>) gems
                 activate &= (_cur_gem > _cmp_gem) ? true : false;
                 break;
-            case 5: // requires at least <color> than (<value> || <comparecolor>) gems
+            case 5:                                         // requires at least <color> than (<value> || <comparecolor>) gems
                 activate &= (_cur_gem >= _cmp_gem) ? true : false;
                 break;
         }
@@ -13716,11 +13720,11 @@ bool Player::EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot)
     return activate;
 }
 
-
 void Player::CorrectMetaGemEnchants(uint8 exceptslot, bool apply)
 {
 
-    for(uint32 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)    //cycle all equipped items
+                                                            //cycle all equipped items
+    for(uint32 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
     {
         //enchants for the slot being socketed are handled by Player::ApplyItemMods
         if(slot == exceptslot)
@@ -13744,34 +13748,39 @@ void Player::CorrectMetaGemEnchants(uint8 exceptslot, bool apply)
             uint32 condition = enchantEntry->EnchantmentCondition;
             if(condition)
             {
-                bool wasactive = EnchantmentFitsRequirements(condition, apply ? exceptslot : -1);    //was enchant active with/without item?
-                if(wasactive ^ EnchantmentFitsRequirements(condition, apply ? -1 : exceptslot))    //should it now be?
+                                                            //was enchant active with/without item?
+                bool wasactive = EnchantmentFitsRequirements(condition, apply ? exceptslot : -1);
+                                                            //should it now be?
+                if(wasactive ^ EnchantmentFitsRequirements(condition, apply ? -1 : exceptslot))
                 {
                     // ignore item gem conditions
-                    ApplyEnchantment(pItem,EnchantmentSlot(enchant_slot),!wasactive,true,true);                            //if state changed, (dis)apply enchant
+                                                            //if state changed, (dis)apply enchant
+                    ApplyEnchantment(pItem,EnchantmentSlot(enchant_slot),!wasactive,true,true);
                 }
             }
         }
     }
 }
 
-void Player::ToggleMetaGemsActive(uint16 exceptslot, bool apply)        //if false -> then toggled off if was on| if true -> toggled on if was off AND meets requirements
+                                                            //if false -> then toggled off if was on| if true -> toggled on if was off AND meets requirements
+void Player::ToggleMetaGemsActive(uint16 exceptslot, bool apply)
 {
-    for(int slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; slot++)    //cycle all equipped items
+                                                            //cycle all equipped items
+    for(int slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; slot++)
     {
         //enchants for the slot being socketed are handled by WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
         if(slot == exceptslot) continue;
 
         Item *pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, slot );
 
-        if(!pItem || !pItem->GetProto()->Socket[0].Color)    //if item has no sockets or no item is equipped go to next item
+        if(!pItem || !pItem->GetProto()->Socket[0].Color)   //if item has no sockets or no item is equipped go to next item
             continue;
 
         //cycle all (gem)enchants
         for(uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+3; ++enchant_slot)
         {
             uint32 enchant_id = pItem->GetEnchantmentId(EnchantmentSlot(enchant_slot));
-            if(!enchant_id)                                    //if no enchant go to next enchant(slot)
+            if(!enchant_id)                                 //if no enchant go to next enchant(slot)
                 continue;
 
             SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
@@ -13852,7 +13861,7 @@ bool Player::IsVisibleGloballyFor( Player* u ) const
 {
     if(!u)
         return false;
-    
+
     // Always can see self
     if (u==this)
         return true;
@@ -13883,13 +13892,13 @@ void Player::UpdateVisibilityOf(WorldObject* target)
             m_clientGUIDs.erase(target->GetGUID());
 
             #ifdef MANGOS_DEBUG
-                if((sLog.getLogFilter() & LOG_FILTER_VISIBILITY_CHANGES)==0)
-                    sLog.outDebug("Object %u (Type: %u) out of range for player %u. Distance = %f",target->GetGUIDLow(),target->GetTypeId(),GetGUIDLow(),sqrt(GetDistanceSq(target)));
+            if((sLog.getLogFilter() & LOG_FILTER_VISIBILITY_CHANGES)==0)
+                sLog.outDebug("Object %u (Type: %u) out of range for player %u. Distance = %f",target->GetGUIDLow(),target->GetTypeId(),GetGUIDLow(),sqrt(GetDistanceSq(target)));
             #endif
 
             // activate stealth detection system
             if(m_DetectInvTimer==0 && target->isType(TYPE_UNIT) && (
-                ((Unit*)target)->GetVisibility()==VISIBILITY_GROUP_STEALTH || 
+                ((Unit*)target)->GetVisibility()==VISIBILITY_GROUP_STEALTH ||
                 ((Unit*)target)->GetVisibility()==VISIBILITY_GROUP_NO_DETECT ) &&
                 IsWithinDistInMap(target,DETECT_DISTANCE) )
                 m_DetectInvTimer = 1;
@@ -13904,15 +13913,15 @@ void Player::UpdateVisibilityOf(WorldObject* target)
                 m_clientGUIDs.insert(target->GetGUID());
 
             #ifdef MANGOS_DEBUG
-                if((sLog.getLogFilter() & LOG_FILTER_VISIBILITY_CHANGES)==0)
-                    sLog.outDebug("Object %u (Type: %u) is visible now for player %u. Distance = %f",target->GetGUIDLow(),target->GetTypeId(),GetGUIDLow(),sqrt(GetDistanceSq(target)));
+            if((sLog.getLogFilter() & LOG_FILTER_VISIBILITY_CHANGES)==0)
+                sLog.outDebug("Object %u (Type: %u) is visible now for player %u. Distance = %f",target->GetGUIDLow(),target->GetTypeId(),GetGUIDLow(),sqrt(GetDistanceSq(target)));
             #endif
         }
         else
         {
             // activate stealth detection system
             if(m_DetectInvTimer==0 && target->isType(TYPE_UNIT) && (
-                ((Unit*)target)->GetVisibility()==VISIBILITY_GROUP_STEALTH || 
+                ((Unit*)target)->GetVisibility()==VISIBILITY_GROUP_STEALTH ||
                 ((Unit*)target)->GetVisibility()==VISIBILITY_GROUP_NO_DETECT ) &&
                 IsWithinDistInMap(target,DETECT_DISTANCE) )
                 m_DetectInvTimer = 1;
@@ -13920,13 +13929,13 @@ void Player::UpdateVisibilityOf(WorldObject* target)
     }
 }
 
-template<class T> 
+template<class T>
 inline void UpdateVisibilityOf_helper(std::set<uint64>& s64, T* target)
 {
     s64.insert(target->GetGUID());
 }
 
-template<> 
+template<>
 inline void UpdateVisibilityOf_helper(std::set<uint64>& s64, GameObject* target)
 {
     if(!target->IsTransport())
@@ -13944,13 +13953,13 @@ void Player::UpdateVisibilityOf(T* target, UpdateData& data, UpdateDataMapType& 
             m_clientGUIDs.erase(target->GetGUID());
 
             #ifdef MANGOS_DEBUG
-                if((sLog.getLogFilter() & LOG_FILTER_VISIBILITY_CHANGES)==0)
-                    sLog.outDebug("Object %u (Type: %u) is out of range for player %u. Distance = %f",target->GetGUIDLow(),target->GetTypeId(),GetGUIDLow(),sqrt(GetDistanceSq(target)));
+            if((sLog.getLogFilter() & LOG_FILTER_VISIBILITY_CHANGES)==0)
+                sLog.outDebug("Object %u (Type: %u) is out of range for player %u. Distance = %f",target->GetGUIDLow(),target->GetTypeId(),GetGUIDLow(),sqrt(GetDistanceSq(target)));
             #endif
 
             // activate invisibility detection system
             if(m_DetectInvTimer==0 && target->isType(TYPE_UNIT) && (
-                ((Unit*)target)->GetVisibility()==VISIBILITY_GROUP_STEALTH || 
+                ((Unit*)target)->GetVisibility()==VISIBILITY_GROUP_STEALTH ||
                 ((Unit*)target)->GetVisibility()==VISIBILITY_GROUP_NO_DETECT ) )
                 m_DetectInvTimer = 1;
         }
@@ -13964,8 +13973,8 @@ void Player::UpdateVisibilityOf(T* target, UpdateData& data, UpdateDataMapType& 
             UpdateVisibilityOf_helper(m_clientGUIDs,target);
 
             #ifdef MANGOS_DEBUG
-                if((sLog.getLogFilter() & LOG_FILTER_VISIBILITY_CHANGES)==0)
-                    sLog.outDebug("Object %u (Type: %u) is visible now for player %u. Distance = %f",target->GetGUIDLow(),target->GetTypeId(),GetGUIDLow(),sqrt(GetDistanceSq(target)));
+            if((sLog.getLogFilter() & LOG_FILTER_VISIBILITY_CHANGES)==0)
+                sLog.outDebug("Object %u (Type: %u) is visible now for player %u. Distance = %f",target->GetGUIDLow(),target->GetTypeId(),GetGUIDLow(),sqrt(GetDistanceSq(target)));
             #endif
         }
     }

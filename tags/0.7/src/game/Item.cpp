@@ -206,7 +206,7 @@ void Item::SaveToDB()
         case ITEM_NEW:
         {
             uint32 Rows=0;
-            
+
             // it's better than rebuilding indexes multiple times
             QueryResult *result = sDatabase.PQuery("select count(*) as r from `item_instance` where `guid` = '%u'", guid);
             if(result)
@@ -214,7 +214,7 @@ void Item::SaveToDB()
                 Rows = result->Fetch()[0].GetUInt32();
                 delete result;
             }
-            
+
             // guess - instance exists ?
             if (!Rows)
             {
@@ -321,7 +321,7 @@ uint32 Item::GetSkill()
 {
     const static uint32 item_weapon_skills[MAX_ITEM__SUBCLASS_WEAPON] =
     {
-        SKILL_AXES,     SKILL_2H_AXES,  SKILL_BOWS,          SKILL_GUNS,      SKILL_MACES,  
+        SKILL_AXES,     SKILL_2H_AXES,  SKILL_BOWS,          SKILL_GUNS,      SKILL_MACES,
         SKILL_2H_MACES, SKILL_POLEARMS, SKILL_SWORDS,        SKILL_2H_SWORDS, 0,
         SKILL_STAVES,   0,              0,                   SKILL_UNARMED,   0,
         SKILL_DAGGERS,  SKILL_THROWN,   SKILL_ASSASSINATION, SKILL_CROSSBOWS, SKILL_WANDS,
@@ -413,7 +413,7 @@ int32 Item::GenerateItemRandomPropertyId(uint32 item_id)
     {
         uint32 randomPropId = GetItemEnchantMod(itemProto->RandomProperty);
         ItemRandomPropertiesEntry const *random_id = sItemRandomPropertiesStore.LookupEntry(randomPropId);
-        if(!random_id) 
+        if(!random_id)
         {
             sLog.outErrorDb("Enchantment id #%u used but it doesn't have records in 'ItemRandomProperties.dbc'",randomPropId);
             return 0;
@@ -686,6 +686,7 @@ void Item::SetEnchantmentDuration(EnchantmentSlot slot, uint32 duration)
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+ENCHANTMENT_DURATION_OFFSET,duration);
     SetState(ITEM_CHANGED);
 }
+
 void Item::SetEnchantmentCharges(EnchantmentSlot slot, uint32 charges)
 {
     SetUInt32Value(ITEM_FIELD_ENCHANTMENT+slot*3+ENCHANTMENT_CHARGES_OFFSET,charges);

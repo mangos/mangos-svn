@@ -33,30 +33,30 @@ namespace MaNGOS
 {
     /* ContainerMapList Helpers */
     // count functions
-//    template<class SPECIFIC_TYPE> size_t Count(const ContainerMapList<SPECIFIC_TYPE> &elements, CountedPtr<SPECIFIC_TYPE>* /*fake*/)
-//    {
-//        return elements._element.size();
-//    };
-//
-//    template<class SPECIFIC_TYPE> size_t Count(const ContainerMapList<TypeNull> &elements, CountedPtr<SPECIFIC_TYPE>* /*fake*/)
-//    {
-//        return 0;
-//    }
-//
-//    template<class SPECIFIC_TYPE, class T> size_t Count(const ContainerMapList<T> &elements, CountedPtr<SPECIFIC_TYPE>* /*fake*/)
-//    {
-//        return 0;
-//    }
-//
-//    template<class SPECIFIC_TYPE, class T> size_t Count(const ContainerMapList<TypeList<SPECIFIC_TYPE, T> >&elements, SPECIFIC_TYPE* fake)
-//    {
-//        return Count(elements._elements,fake);
-//    }
-//
-//    template<class SPECIFIC_TYPE, class H, class T> size_t Count(const ContainerMapList<TypeList<H, T> >&elements, SPECIFIC_TYPE* fake)
-//    {
-//        return Count(elements._TailElements, fake);
-//    }
+    //    template<class SPECIFIC_TYPE> size_t Count(const ContainerMapList<SPECIFIC_TYPE> &elements, CountedPtr<SPECIFIC_TYPE>* /*fake*/)
+    //    {
+    //        return elements._element.size();
+    //    };
+    //
+    //    template<class SPECIFIC_TYPE> size_t Count(const ContainerMapList<TypeNull> &elements, CountedPtr<SPECIFIC_TYPE>* /*fake*/)
+    //    {
+    //        return 0;
+    //    }
+    //
+    //    template<class SPECIFIC_TYPE, class T> size_t Count(const ContainerMapList<T> &elements, CountedPtr<SPECIFIC_TYPE>* /*fake*/)
+    //    {
+    //        return 0;
+    //    }
+    //
+    //    template<class SPECIFIC_TYPE, class T> size_t Count(const ContainerMapList<TypeList<SPECIFIC_TYPE, T> >&elements, SPECIFIC_TYPE* fake)
+    //    {
+    //        return Count(elements._elements,fake);
+    //    }
+    //
+    //    template<class SPECIFIC_TYPE, class H, class T> size_t Count(const ContainerMapList<TypeList<H, T> >&elements, SPECIFIC_TYPE* fake)
+    //    {
+    //        return Count(elements._TailElements, fake);
+    //    }
 
     // non-const find functions
     template<class SPECIFIC_TYPE> CountedPtr<SPECIFIC_TYPE>& Find(ContainerMapList<SPECIFIC_TYPE> &elements, OBJECT_HANDLE hdl, CountedPtr<SPECIFIC_TYPE>* /*fake*/)
@@ -67,12 +67,12 @@ namespace MaNGOS
 
     template<class SPECIFIC_TYPE> CountedPtr<SPECIFIC_TYPE>& Find(ContainerMapList<TypeNull> &elements, OBJECT_HANDLE hdl, CountedPtr<SPECIFIC_TYPE>* /*fake*/)
     {
-        return NullPtr<SPECIFIC_TYPE>((SPECIFIC_TYPE*)NULL);                                        // terminate recursion
+        return NullPtr<SPECIFIC_TYPE>((SPECIFIC_TYPE*)NULL);// terminate recursion
     }
 
     template<class SPECIFIC_TYPE, class T> CountedPtr<SPECIFIC_TYPE>& Find(ContainerMapList<T> &elements, OBJECT_HANDLE hdl, CountedPtr<SPECIFIC_TYPE>* /*fake*/)
     {
-        return NullPtr<SPECIFIC_TYPE>((SPECIFIC_TYPE*)NULL);                                        // this is a missed
+        return NullPtr<SPECIFIC_TYPE>((SPECIFIC_TYPE*)NULL);// this is a missed
     }
 
     template<class SPECIFIC_TYPE, class H, class T> CountedPtr<SPECIFIC_TYPE>& Find(ContainerMapList<TypeList<H, T> >&elements, OBJECT_HANDLE hdl, CountedPtr<SPECIFIC_TYPE>* fake)
@@ -122,7 +122,7 @@ namespace MaNGOS
     // this is a missed
     template<class SPECIFIC_TYPE, class T> CountedPtr<SPECIFIC_TYPE>& Insert(ContainerMapList<T> &elements, CountedPtr<SPECIFIC_TYPE> &obj, OBJECT_HANDLE hdl)
     {
-        return NullPtr<SPECIFIC_TYPE>((SPECIFIC_TYPE*)NULL);                                        // a missed
+        return NullPtr<SPECIFIC_TYPE>((SPECIFIC_TYPE*)NULL);// a missed
     }
 
     // Recursion
@@ -142,7 +142,7 @@ namespace MaNGOS
             return true;
         }
 
-        return false; // found... terminate the search
+        return false;                                       // found... terminate the search
     }
 
     template<class SPECIFIC_TYPE> bool Remove(ContainerMapList<TypeNull> &elements, CountedPtr<SPECIFIC_TYPE> &obj, OBJECT_HANDLE hdl)

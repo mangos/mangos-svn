@@ -179,7 +179,7 @@ enum CharacterSlot
 
 enum Language
 {
-    LANG_UNIVERSAL2     = -1,   // used by addons?, may be LANG_ADDON?
+    LANG_UNIVERSAL2     = -1,                               // used by addons?, may be LANG_ADDON?
     LANG_GLOBAL         = 0,
     LANG_UNIVERSAL      = 0,
     LANG_ORCISH         = 1,
@@ -1176,9 +1176,9 @@ enum SkillType
 inline bool IsPrimaryProfessionSkill(uint32 skill)
 {
     return  skill == SKILL_HERBALISM     || skill == SKILL_MINING     || skill == SKILL_LEATHERWORKING ||
-            skill == SKILL_BLACKSMITHING || skill == SKILL_ALCHEMY    || skill == SKILL_ENCHANTING     ||
-            skill == SKILL_TAILORING     || skill == SKILL_ENGINERING || skill == SKILL_SKINNING       ||
-            skill == SKILL_JEWELCRAFTING;
+        skill == SKILL_BLACKSMITHING || skill == SKILL_ALCHEMY    || skill == SKILL_ENCHANTING     ||
+        skill == SKILL_TAILORING     || skill == SKILL_ENGINERING || skill == SKILL_SKINNING       ||
+        skill == SKILL_JEWELCRAFTING;
 }
 
 inline bool IsProfessionSkill(uint32 skill)
@@ -1268,5 +1268,4 @@ enum WeatherTypes
 };
 
 #define MAX_WEATHER_TYPE 4
-
 #endif

@@ -59,17 +59,17 @@ void WorldSession::HandleBattleGroundHelloOpcode( WorldPacket & recv_data )
         case 1216:
             bgid = 1;
             break;
-        //WSG Battlemaster
+            //WSG Battlemaster
         case 1641:
         case 1514:
             bgid = 2;
             break;
-        //AB Battlemaster
+            //AB Battlemaster
         case 1577:
         case 412:
             bgid = 3;
             break;
-        // todo: add more...
+            // todo: add more...
     }
 
     uint32 PlayerLevel = _player->getLevel();
@@ -131,7 +131,8 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
                 member->SetBattleGroundEntryPoint(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
 
                 WorldPacket data;
-                sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, member->GetTeam(), STATUS_WAIT_QUEUE, 0, 0); // send status packet (in queue)
+                                                            // send status packet (in queue)
+                sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, member->GetTeam(), STATUS_WAIT_QUEUE, 0, 0);
                 member->GetSession()->SendPacket(&data);
                 sBattleGroundMgr.BuildGroupJoinedBattlegroundPacket(&data, bgid);
                 member->GetSession()->SendPacket(&data);
@@ -147,7 +148,8 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
         _player->SetBattleGroundEntryPoint(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
 
         WorldPacket data;
-        sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, _player->GetTeam(), STATUS_WAIT_QUEUE, 0, 0); // send status packet (in queue)
+                                                            // send status packet (in queue)
+        sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, _player->GetTeam(), STATUS_WAIT_QUEUE, 0, 0);
         SendPacket(&data);
         bg->AddPlayerToQueue(_player->GetGUID(), _player->getLevel());
     }
@@ -336,7 +338,8 @@ void WorldSession::HandleAreaSpiritHealerQueryOpcode( WorldPacket & recv_data )
         uint64 guid;
         recv_data >> guid;
         WorldPacket data(SMSG_AREA_SPIRIT_HEALER_TIME, 12);
-        uint32 time_ = 30000 - (getMSTime() - bg->GetLastResurrectTime()); // resurrect every 30 seconds
+                                                            // resurrect every 30 seconds
+        uint32 time_ = 30000 - (getMSTime() - bg->GetLastResurrectTime());
         if(time_ == uint32(-1))
             time_ = 0;
         data << guid << time_;

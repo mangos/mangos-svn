@@ -230,7 +230,7 @@ void WorldSession::SendLfgResult(uint32 type, uint32 entry, uint8 lfg_type)
     data << uint32(0);                                      // count again, strange, placeholder
 
     ObjectAccessor::PlayersMapType const& players = ObjectAccessor::Instance().GetPlayers();
-    
+
     for(ObjectAccessor::PlayersMapType::const_iterator iter = players.begin(); iter != players.end(); ++iter)
     {
         uint64 guid = iter->first;
@@ -258,15 +258,15 @@ void WorldSession::SendLfgResult(uint32 type, uint32 entry, uint8 lfg_type)
         Group *group = plr->groupInfo.group;
         if(group)
         {
-            data << group->GetMembersCount()-1; // count of group members without group leader
+            data << group->GetMembersCount()-1;             // count of group members without group leader
             Group::MemberList const& members = group->GetMembers();
             for(Group::member_citerator itr = members.begin(); itr != members.end(); ++itr)
             {
                 Player *member = objmgr.GetPlayer(itr->guid);
                 if(member && member->GetGUID() != plr->GetGUID())
                 {
-                    data.append(member->GetPackGUID()); // packed guid
-                    data << member->getLevel(); // player level
+                    data.append(member->GetPackGUID());     // packed guid
+                    data << member->getLevel();             // player level
                 }
             }
         }

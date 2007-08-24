@@ -266,8 +266,8 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
         {
             gm_accid = GetPlayerAccountIdByGUID(bidder_guid);
             gm_security = GetSecurityByAccount(gm_accid);
-            
-            if(gm_security > SEC_PLAYER )                                // not do redundant DB requests
+
+            if(gm_security > SEC_PLAYER )                   // not do redundant DB requests
                 GetPlayerNameByGUID(bidder_guid,gm_name);
         }
 
@@ -394,9 +394,9 @@ void ObjectMgr::LoadCreatureAddons()
 
 void ObjectMgr::LoadCreatures()
 {
-    uint32 count = 0; 
+    uint32 count = 0;
 
-    //                                            0      1    2     3            4            5            6             7               8           9                 
+    //                                            0      1    2     3            4            5            6             7               8           9
     QueryResult *result = sDatabase.Query("SELECT `guid`,`id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,"
     //   10                 11                 12                 13                  14          15        16           17             18
         "`spawn_position_x`,`spawn_position_y`,`spawn_position_z`,`spawn_orientation`,`curhealth`,`curmana`,`DeathState`,`MovementType`,`auras` "
@@ -461,9 +461,9 @@ void ObjectMgr::LoadCreatures()
 
 void ObjectMgr::LoadGameobjects()
 {
-    uint32 count = 0; 
+    uint32 count = 0;
 
-    //                                            0      1    2     3            4            5            6             
+    //                                            0      1    2     3            4            5            6
     QueryResult *result = sDatabase.Query("SELECT `guid`,`id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,"
     //   7           8           9           10          11     12              13             14
         "`rotation0`,`rotation1`,`rotation2`,`rotation3`,`loot`,`spawntimesecs`,`animprogress`,`dynflags` "
@@ -527,7 +527,7 @@ void ObjectMgr::LoadCreatureRespawnTimes()
     // remove outdated data
     sDatabase.Execute("DELETE FROM `creature_respawn` WHERE `respawntime` <= UNIX_TIMESTAMP(NOW())");
 
-    uint32 count = 0; 
+    uint32 count = 0;
 
     QueryResult *result = sDatabase.Query("SELECT `guid`,`respawntime`,`instance` FROM `creature_respawn`");
 
@@ -569,7 +569,7 @@ void ObjectMgr::LoadGameobjectRespawnTimes()
     // remove outdated data
     sDatabase.Execute("DELETE FROM `gameobject_respawn` WHERE `respawntime` <= UNIX_TIMESTAMP(NOW())");
 
-    uint32 count = 0; 
+    uint32 count = 0;
 
     QueryResult *result = sDatabase.Query("SELECT `guid`,`respawntime`,`instance` FROM `gameobject_respawn`");
 
@@ -1556,7 +1556,7 @@ void ObjectMgr::LoadQuests()
         "`RewRepFaction1`,`RewRepFaction2`,`RewRepFaction3`,`RewRepFaction4`,`RewRepFaction5`,`RewRepValue1`,`RewRepValue2`,`RewRepValue3`,`RewRepValue4`,`RewRepValue5`,"
     //   91              92      93         94           95       96       97         98              99              100             101
         "`RewOrReqMoney`,`RewXpOrMoney`,`RewSpell`,`PointMapId`,`PointX`,`PointY`,`PointOpt`,`DetailsEmote1`,`DetailsEmote2`,`DetailsEmote3`,`DetailsEmote4`,"
-    //   102               103             104                 105                 106                 107                 108           109          110     
+    //   102               103             104                 105                 106                 107                 108           109          110
         "`IncompleteEmote`,`CompleteEmote`,`OfferRewardEmote1`,`OfferRewardEmote2`,`OfferRewardEmote3`,`OfferRewardEmote4`,`StartScript`,`CompleteScript`,`Repeatable`"
         " FROM `quest_template`");
     if(result == NULL)
@@ -2700,8 +2700,8 @@ void ObjectMgr::LoadSpellAffects()
 
         if (!sSpellStore.LookupEntry(entry))
         {
-         sLog.outErrorDb("Spell %u listed in `spell_affect` not exist", entry);
-         continue;
+            sLog.outErrorDb("Spell %u listed in `spell_affect` not exist", entry);
+            continue;
         }
 
         SpellAffection sa;
@@ -3104,9 +3104,9 @@ bool ObjectMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2)
         bool isModifier = false;
         for (int i = 0; i < 3; i++)
         {
-            if (spellInfo_1->EffectApplyAuraName[i] == SPELL_AURA_ADD_FLAT_MODIFIER || 
+            if (spellInfo_1->EffectApplyAuraName[i] == SPELL_AURA_ADD_FLAT_MODIFIER ||
                 spellInfo_1->EffectApplyAuraName[i] == SPELL_AURA_ADD_PCT_MODIFIER  ||
-                spellInfo_2->EffectApplyAuraName[i] == SPELL_AURA_ADD_FLAT_MODIFIER || 
+                spellInfo_2->EffectApplyAuraName[i] == SPELL_AURA_ADD_FLAT_MODIFIER ||
                 spellInfo_2->EffectApplyAuraName[i] == SPELL_AURA_ADD_PCT_MODIFIER )
                 isModifier = true;
         }
@@ -3168,11 +3168,11 @@ bool ObjectMgr::IsPrimaryProfessionFirstRankSpell(uint32 spellId)
 
 void ObjectMgr::LoadReputationOnKill()
 {
-    uint32 count = 0; 
+    uint32 count = 0;
 
     //                                             0             1                      2
     QueryResult *result = sDatabase.Query("SELECT `creature_id`,`RewOnKillRepFaction1`,`RewOnKillRepFaction2`,"
-        //3              4              5                    6              7              8                   9
+    //3              4              5                    6              7              8                   9
         "`IsTeamAward1`,`MaxStanding1`,`RewOnKillRepValue1`,`IsTeamAward2`,`MaxStanding2`,`RewOnKillRepValue2`,`TeamDependent` "
         "FROM `creature_onkill_reputation`");
 
@@ -3209,7 +3209,7 @@ void ObjectMgr::LoadReputationOnKill()
 
         if(repOnKill.repfaction1)
         {
-            FactionEntry const *factionEntry1 = sFactionStore.LookupEntry(repOnKill.repfaction1); 
+            FactionEntry const *factionEntry1 = sFactionStore.LookupEntry(repOnKill.repfaction1);
             if(!factionEntry1)
             {
                 sLog.outErrorDb("Faction (faction.dbc) %u not existed but used in `creature_onkill_reputation`",repOnKill.repfaction1);
@@ -3219,7 +3219,7 @@ void ObjectMgr::LoadReputationOnKill()
 
         if(repOnKill.repfaction2)
         {
-            FactionEntry const *factionEntry2 = sFactionStore.LookupEntry(repOnKill.repfaction2); 
+            FactionEntry const *factionEntry2 = sFactionStore.LookupEntry(repOnKill.repfaction2);
             if(!factionEntry2)
             {
                 sLog.outErrorDb("Faction (faction.dbc) %u not existed but used in `creature_onkill_reputation`",repOnKill.repfaction2);
@@ -3390,7 +3390,7 @@ void ObjectMgr::PackInstances()
 
 void ObjectMgr::LoadWeatherZoneChances()
 {
-    uint32 count = 0; 
+    uint32 count = 0;
 
     //                                             0      1                    2                    3                     4                    5                    6                     7                  8                  9                   10                   11                   12
     QueryResult *result = sDatabase.Query("SELECT `zone`,`spring_rain_chance`,`spring_snow_chance`,`spring_storm_chance`,`summer_rain_chance`,`summer_snow_chance`,`summer_storm_chance`,`fall_rain_chance`,`fall_snow_chance`,`fall_storm_chance`,`winter_rain_chance`,`winter_snow_chance`,`winter_storm_chance` FROM `game_weather`");
@@ -3434,7 +3434,6 @@ void ObjectMgr::LoadWeatherZoneChances()
                 wzc.data[season].snowChance = 25;
                 sLog.outErrorDb("Weather for zone %u season %u have wrong snow chance > 100%",zone_id,season);
             }
-
 
             if(wzc.data[season].stormChance > 100)
             {
@@ -3540,7 +3539,7 @@ void ObjectMgr::DeleteCorpseCellData(uint32 mapid, uint32 cellid, uint32 player_
 
 void ObjectMgr::LoadQuestRelationsHelper(QuestRelations& map,char const* table)
 {
-    uint32 count = 0; 
+    uint32 count = 0;
 
     QueryResult *result = sDatabase.PQuery("SELECT `id`,`quest` FROM `%s`",table);
 
@@ -3592,19 +3591,20 @@ struct tbl
     uint8 type;
 };
 
-tbl tbls[NUM_TBLS] = {
+tbl tbls[NUM_TBLS] =
+{
     "character", 1,
     "character_action", 0,
     "character_aura", 0,
     "character_homebind", 0,
     "character_inventory", 2,
-    "character_kill", 0, 
-    "character_queststatus", 0, 
-    "character_reputation", 0, 
-    "character_spell", 0, 
-    "character_spell_cooldown", 0, 
-    "item_instance", 3, 
-    "character_ticket", 0, 
+    "character_kill", 0,
+    "character_queststatus", 0,
+    "character_reputation", 0,
+    "character_spell", 0,
+    "character_spell_cooldown", 0,
+    "item_instance", 3,
+    "character_ticket", 0,
     "character_tutorial", 0
 };
 
@@ -3654,7 +3654,7 @@ bool ObjectMgr::WritePlayerDump(std::string file, uint32 guid)
 
     // TODO: Add pets/instance/group/gifts..
     // TODO: Add a dump level option to skip some non-important tables
-    
+
     fclose(fout);
     return true;
 }
@@ -3664,14 +3664,16 @@ bool findnth(std::string &str, int n, string::size_type &s, string::size_type &e
     s = str.find("VALUES ('")+9;
     if (s == string::npos) return false;
 
-    do {
+    do
+    {
         e = str.find("'",s);
         if (e == string::npos) return false;
     } while(str[e-1] == '\\');
 
     for(int i = 1; i < n; i++)
     {
-        do {
+        do
+        {
             s = e+4;
             e = str.find("'",s);
             if (e == string::npos) return false;
@@ -3820,12 +3822,12 @@ bool ObjectMgr::LoadPlayerDump(std::string file, uint32 account, std::string nam
         uint8 type, i;
         for(i = 0; i < NUM_TBLS; i++)
             if (tn == tbls[i].name) { type = tbls[i].type; break; }
-        if (i == NUM_TBLS)
+            if (i == NUM_TBLS)
         {
             sLog.outError("LoadPlayerDump: Unknown table: '%s'!", tn.c_str());
             ROLLBACK;
         }
-        
+
         // change the data to server values
         if(type <= 2)                                       // most tables
             if(!changenth(line, 1, newguid)) ROLLBACK;
@@ -3846,7 +3848,7 @@ bool ObjectMgr::LoadPlayerDump(std::string file, uint32 account, std::string nam
                 if (result)
                 {
                     delete result;
-                    if(!changenth(line, 29, "1")) ROLLBACK;     // rename on login
+                    if(!changenth(line, 29, "1")) ROLLBACK; // rename on login
                 }
             }
             else if(!changenth(line, 4, name.c_str())) ROLLBACK;

@@ -550,7 +550,7 @@ void WorldSession::HandleRaidReadyCheckOpcode( WorldPacket & recv_data )
 
 /*not called : this should server send when some member bits are changed:*/
 void WorldSession::SendPartyMemberStatsChanged( uint64 Guid )
-{                                               //todo FIX ME
+{                                                           //todo FIX ME
     //do nothing
     return;
 
@@ -563,16 +563,16 @@ void WorldSession::SendPartyMemberStatsChanged( uint64 Guid )
 
     data.append(player->GetPackGUID());
     /*we have to create update mask, not this way*/
-    uint32 mask = 7;                            //only sends info that member's HP changed
+    uint32 mask = 7;                                        //only sends info that member's HP changed
     data << (uint32) mask;
     if (mask & 1)
-        data << (uint8) MEMBER_STATUS_ONLINE;   //there should be member's online status
+        data << (uint8) MEMBER_STATUS_ONLINE;               //there should be member's online status
     if (mask & 2)
         data << (uint16) player->GetHealth();
     if (mask & 4)
         data << (uint16) player->GetMaxHealth();
     Powers powerType = player->getPowerType();
-    if (mask & 8)                          //this mask bit is always 0
+    if (mask & 8)                                           //this mask bit is always 0
         data << (uint8)  powerType;
     if (mask & 16)
         data << (uint16) player->GetMaxPower(powerType);
@@ -606,13 +606,13 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
     WorldPacket data(SMSG_PARTY_MEMBER_STATS_FULL, 30);
 
     data.append(player->GetPackGUID());
-    uint32 mask1 = 0x7FFC0BFF;                  //1111111111111000000101111111111
-                 //0x7FFC0BF7;                  //1111111111111000000101111110111
-                 //0x7FFC1BF7;                  //1111111111111000001101111110111
-                                                //1111111111111--not used in mask
+    uint32 mask1 = 0x7FFC0BFF;                              //1111111111111000000101111111111
+    //0x7FFC0BF7;                  //1111111111111000000101111110111
+    //0x7FFC1BF7;                  //1111111111111000001101111110111
+    //1111111111111--not used in mask
     Powers powerType = player->getPowerType();
     data << (uint32) mask1;
-    data << (uint8)  MEMBER_STATUS_ONLINE;       //should be member's online status
+    data << (uint8)  MEMBER_STATUS_ONLINE;                  //should be member's online status
     data << (uint16) player->GetHealth();
     data << (uint16) player->GetMaxHealth();
     data << (uint8) powerType;
@@ -631,7 +631,7 @@ void WorldSession::HandleRequestPartyMemberStatsOpcode( WorldPacket &recv_data )
     data << (uint32) 0;
     // it should not be decimal constant ?!
     //data << (uint32) 4278190080;                //0xFF000000
-    data << (uint32) 0xFF000000;                //0xFF000000
+    data << (uint32) 0xFF000000;                            //0xFF000000
     SendPacket(&data);
 }
 

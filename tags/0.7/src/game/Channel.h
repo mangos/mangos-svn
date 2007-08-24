@@ -34,11 +34,11 @@ class Channel
         YOUJOINED       = 0x02,
         YOULEFT         = 0x03,
         WRONGPASS       = 0x04,
-        NOTON1          = 0x05, // Not on channel channel name.
+        NOTON1          = 0x05,                             // Not on channel channel name.
         NOTMOD          = 0x06,
         SETPASS         = 0x07,
         CHANGEOWNER     = 0x08,
-        NOTON2          = 0x09, // Player %s is not on channel.
+        NOTON2          = 0x09,                             // Player %s is not on channel.
         NOTOWNER        = 0x0A,
         WHOOWNER        = 0x0B,
         MODECHANGE      = 0x0C,
@@ -51,17 +51,17 @@ class Channel
         YOUAREBANNED    = 0x13,
         BANNED          = 0x14,
         UNBANNED        = 0x15,
-        UNKNOWN1        = 0x16, // is not banned
+        UNKNOWN1        = 0x16,                             // is not banned
         ALREADYON       = 0x17,
         INVITED         = 0x18,
-        WRONGALLIANCE   = 0x19, // target is in the wrong alliance for channel name
-        UNKNOWN2        = 0x1A, // wrong alliance for channel name
-        UNKNOWN3        = 0x1B, // invalid channel name
+        WRONGALLIANCE   = 0x19,                             // target is in the wrong alliance for channel name
+        UNKNOWN2        = 0x1A,                             // wrong alliance for channel name
+        UNKNOWN3        = 0x1B,                             // invalid channel name
         ISNOTMODERATED  = 0x1C,
         YOUINVITED      = 0x1D,
-        UNKNOWN4        = 0x1E, // %s has been banned.
-        UNKNOWN5        = 0x1F, // The number of messages that can be sent to this channel is limited, please wait to send another message.
-        UNKNOWN6        = 0x20  // You are in not the correct area for this channel.
+        UNKNOWN4        = 0x1E,                             // %s has been banned.
+        UNKNOWN5        = 0x1F,                             // The number of messages that can be sent to this channel is limited, please wait to send another message.
+        UNKNOWN6        = 0x20                              // You are in not the correct area for this channel.
     };
 
     struct PlayerInfo
@@ -139,7 +139,7 @@ class Channel
             return !(players.size() > 1);
         }
 
-        uint8 GetFlag(uint64 p) 
+        uint8 GetFlag(uint64 p)
         {
             uint8 flag=0;
 

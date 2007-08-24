@@ -128,17 +128,19 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
                                                             // this enables popup window (pet dismiss, cancel)
             break;
         case HUNTER_PET:
-            SetUInt32Value(UNIT_FIELD_BYTES_0, 0x2020100); //??
+            SetUInt32Value(UNIT_FIELD_BYTES_0, 0x2020100);  //??
             SetUInt32Value(UNIT_FIELD_BYTES_1,(fields[13].GetUInt32()<<8));
             SetUInt32Value(UNIT_FIELD_BYTES_2, 0x00022801); // can't be renamed (byte (0x02))
-            SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1);// + UNIT_FLAG_RESTING);
+                                                            // + UNIT_FLAG_RESTING);
+            SetUInt32Value(UNIT_FIELD_FLAGS, UNIT_FLAG_UNKNOWN1);
                                                             // this enables popup window (pet abandon, cancel)
 
             // pet not renamed yet, let rename if wont
             if(!fields[17].GetBool())
             {
                 //SetUInt32Value(UNIT_FIELD_BYTES_2, uint32(0x03 << 16)); // check it...
-                SetUInt32Value(UNIT_FIELD_BYTES_2, 0x00032801); // 0x03
+                                                            // 0x03
+                SetUInt32Value(UNIT_FIELD_BYTES_2, 0x00032801);
                 //SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_RENAME); // old, not working...
             }
 
@@ -500,7 +502,7 @@ bool Pet::CreateBaseAtCreature(Creature* creature)
     {
         SetUInt32Value(UNIT_FIELD_BYTES_0, 0x2020100);
         SetUInt32Value(UNIT_FIELD_BYTES_1, 0x100);
-        SetUInt32Value(UNIT_FIELD_BYTES_2, 0x00032801); // can be renamed (byte 0x03)...
+        SetUInt32Value(UNIT_FIELD_BYTES_2, 0x00032801);     // can be renamed (byte 0x03)...
 
         //SetUInt32Value(UNIT_FIELD_BYTES_1,creature->GetUInt32Value(UNIT_FIELD_BYTES_1));
 

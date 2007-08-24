@@ -1288,7 +1288,7 @@ bool ChatHandler::HandleAddItemSetCommand(const char* args)
     if (!*args)
         return false;
 
-    char* cId = extractKeyFromLink((char*)args,"Hitemset");  // number or [name] Shift-click form |color|Hitemset:itemset_id|h[name]|h|r
+    char* cId = extractKeyFromLink((char*)args,"Hitemset"); // number or [name] Shift-click form |color|Hitemset:itemset_id|h[name]|h|r
     if (!cId)
         return false;
 
@@ -1528,7 +1528,8 @@ bool ChatHandler::HandleListObjectCommand(const char* args)
     if(!*args)
         return false;
 
-    char* cId = extractKeyFromLink((char*)args,"Hgameobject_entry");  // number or [name] Shift-click form |color|Hgameobject_entry:go_id|h[name]|h|r
+                                                            // number or [name] Shift-click form |color|Hgameobject_entry:go_id|h[name]|h|r
+    char* cId = extractKeyFromLink((char*)args,"Hgameobject_entry");
     if(!cId)
         return false;
 
@@ -1590,7 +1591,8 @@ bool ChatHandler::HandleListCreatureCommand(const char* args)
     if(!*args)
         return false;
 
-    char* cId = extractKeyFromLink((char*)args,"Hcreature_entry");  // number or [name] Shift-click form |color|Hcreature_entry:creature_id|h[name]|h|r
+                                                            // number or [name] Shift-click form |color|Hcreature_entry:creature_id|h[name]|h|r
+    char* cId = extractKeyFromLink((char*)args,"Hcreature_entry");
     if(!cId)
         return false;
 
@@ -2070,7 +2072,6 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
 {
     if (!*args)
         return false;
-
 
     char* pParam1 = strtok((char*)args, " ");
     uint32 id = atoi((char*)pParam1);
@@ -3133,7 +3134,7 @@ bool ChatHandler::HandleResetCommand (const char * args)
         // set UNIT_FIELD_BYTES_1 to init state but preserve m_form value
         player->SetUInt32Value(UNIT_FIELD_BYTES_1, player->m_form<<16 | unitfield );
 
-        player->SetUInt32Value(UNIT_FIELD_BYTES_2, 0x2800 ); // 0x2800, 0x2801 2.0.8...
+        player->SetUInt32Value(UNIT_FIELD_BYTES_2, 0x2800 );// 0x2800, 0x2801 2.0.8...
         player->SetUInt32Value(UNIT_FIELD_FLAGS , UNIT_FLAG_UNKNOWN1 );
 
                                                             //-1 is default value
@@ -3358,8 +3359,8 @@ bool ChatHandler::HandleBanCommand(const char* args)
     if(sWorld.BanAccount(type, nameOrIP, duration, reason,m_session->GetPlayerName()))
         if(atoi(duration)>0)
             PSendSysMessage(LANG_BAN_YOUBANNED,nameOrIP,secsToTimeString(TimeStringToSecs(duration),true).c_str(),reason);
-        else
-            PSendSysMessage(LANG_BAN_YOUPERMBANNED,nameOrIP,reason);
+    else
+        PSendSysMessage(LANG_BAN_YOUPERMBANNED,nameOrIP,reason);
     else
         PSendSysMessage(LANG_BAN_NOTFOUND,type,nameOrIP);
 
@@ -3450,7 +3451,8 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
             return true;
         }
         PSendSysMessage(LANG_BANINFO_BANHISTORY,accountname.c_str());
-        do{
+        do
+        {
             fields = result->Fetch();
             bool active = false;
             if(fields[2].GetBool() && (fields[1].GetUInt64() == (uint64)0 ||fields[3].GetUInt64() >= (uint64)0) )
@@ -3458,7 +3460,7 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
             bool permanent = (fields[1].GetUInt64() == (uint64)0);
             std::string bantime = permanent?LANG_BANINFO_INFINITE:secsToTimeString(fields[1].GetUInt64(), true);
             PSendSysMessage(LANG_BANINFO_HISTORYENTRY,
-                    fields[0].GetString(), bantime.c_str(), active ? LANG_BANINFO_YES:LANG_BANINFO_NO, fields[4].GetString(), fields[5].GetString());
+                fields[0].GetString(), bantime.c_str(), active ? LANG_BANINFO_YES:LANG_BANINFO_NO, fields[4].GetString(), fields[5].GetString());
         }while (result->NextRow());
 
         delete result;
@@ -3475,8 +3477,8 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
         fields = result->Fetch();
         bool permanent = (fields[6].GetUInt64()==(uint64)0);
         PSendSysMessage(LANG_BANINFO_IPENTRY,
-                fields[0].GetString(), fields[1].GetString(), permanent ? LANG_BANINFO_NEVER:fields[2].GetString(),
-                permanent ? LANG_BANINFO_INFINITE:secsToTimeString(fields[3].GetUInt64(), true).c_str(), fields[4].GetString(), fields[5].GetString());
+            fields[0].GetString(), fields[1].GetString(), permanent ? LANG_BANINFO_NEVER:fields[2].GetString(),
+            permanent ? LANG_BANINFO_INFINITE:secsToTimeString(fields[3].GetUInt64(), true).c_str(), fields[4].GetString(), fields[5].GetString());
         delete result;
         return true;
     }
@@ -3491,11 +3493,10 @@ bool ChatHandler::HandleBanListCommand(const char* args)
     char* cType = strtok((char*)args, " ");
     char* cFilter = strtok(NULL, "");
     if(!cType || !cFilter)
-       return false;
+        return false;
     std::string Filter = cFilter;
     std::string Type = cType;
     loginDatabase.escape_string(Filter);
-
 
     QueryResult* result  = NULL;
     Field *fields = NULL;
@@ -3530,7 +3531,7 @@ bool ChatHandler::HandleBanListCommand(const char* args)
     }
     else if(Type == "character")
     {
-        result = sDatabase.PQuery("SELECT `account` FROM `character`, WHERE name LIKE \"%%%s%%\" ",Filter.c_str()); 
+        result = sDatabase.PQuery("SELECT `account` FROM `character`, WHERE name LIKE \"%%%s%%\" ",Filter.c_str());
         if (!result)
         {
             PSendSysMessage(LANG_BANLIST_NOCHARACTER);
@@ -3724,7 +3725,7 @@ bool ChatHandler::HandleLoadPDumpCommand(const char *args)
     char * name = strtok(NULL, " ");
     char * guid = name ? strtok(NULL, " ") : NULL;
 
-    if(objmgr.LoadPlayerDump(file, atoi(acc), name ? name : "", guid ? atoi(guid) : 0))    
+    if(objmgr.LoadPlayerDump(file, atoi(acc), name ? name : "", guid ? atoi(guid) : 0))
         PSendSysMessage(LANG_COMMAND_IMPORT_SUCCESS);
     else
         PSendSysMessage(LANG_COMMAND_IMPORT_FAILED);

@@ -396,7 +396,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         /***                    TRAINER SYSTEM                 ***/
         /*********************************************************/
         typedef std::list<TrainerSpell> SpellsList;
-        void LoadTrainerSpells();                                   // must be called before access to trainer spells, lazy loading at first call
+        void LoadTrainerSpells();                           // must be called before access to trainer spells, lazy loading at first call
         void ReloadTrainerSpells() { m_trainerSpellsLoaded = false; LoadTrainerSpells(); }
         SpellsList const& GetTrainerSpells() const { return m_trainer_spells; }
         uint32 GetTrainerType() const { return m_trainer_type; }

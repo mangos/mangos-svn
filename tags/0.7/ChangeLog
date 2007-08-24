@@ -1,23 +1,4 @@
-MaNGOS 0.8    (??? ??, 2006) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.8
-
- MaNGOS 0.8  -adds further improvements to the
- server core as well as to the majority of game classes and the game content
- database.
-
- ==== Game Features ====
- *
-
- ==== Server Features ====
- * 
-
- * Fixed Bugs: ???
- * Total number of changes: ???
-
- The complete list of closed tickets can be found here:
-   https://svn.mangosproject.org/trac/MaNGOS/query?status=closed&milestone=0.8
-
-
-MaNGOS 0.7    (Jul 9, 2006) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.7
+MaNGOS 0.7    (Jul 9, 2007) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.7
 
  MaNGOS 0.7 - Codename "Eye of the Storm" -adds further improvements to the
  server core as well as to the majority of game classes and the game content

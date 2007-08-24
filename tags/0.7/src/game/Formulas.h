@@ -192,9 +192,12 @@ namespace MaNGOS
 
         inline uint32 mxp(uint32 lvl)
         {
-            if (lvl < 60) {
+            if (lvl < 60)
+            {
                 return (45 + (5*lvl));
-            }else{
+            }
+            else
+            {
                 return (235 + (5*lvl));
             }
         }
@@ -202,11 +205,16 @@ namespace MaNGOS
         inline uint32 xp_to_level(uint32 lvl)
         {
             uint32 xp = 0;
-            if (lvl < 60) {
+            if (lvl < 60)
+            {
                 xp = (8*lvl + xp_Diff(lvl)) * mxp(lvl);
-            }else if (lvl == 60){
+            }
+            else if (lvl == 60)
+            {
                 xp = (155 + mxp(lvl) * (1344 - 69 - ((69 - lvl) * (7 + (69 - lvl) * 8 - 1)/2)));
-            }else{
+            }
+            else
+            {
                 xp = (155 + mxp(lvl) * (1344 - ((69-lvl) * (7 + (69 - lvl) * 8 - 1)/2)));
             }
             // The XP to Level is always rounded to the nearest 100 points (50 rounded to low).

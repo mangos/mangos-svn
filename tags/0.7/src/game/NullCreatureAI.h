@@ -31,7 +31,7 @@ class MANGOS_DLL_DECL NullCreatureAI : public CreatureAI
         void MoveInLineOfSight(Unit *) {}
         void AttackStart(Unit *) {}
         void EnterEvadeMode() {}
-        
+
         bool IsVisible(Unit *) const { return false;  }
 
         void UpdateAI(const uint32) {}

@@ -60,5 +60,4 @@ struct GossipText
     uint32 Text_ID;
     GossipTextOption Options[8];
 };
-
 #endif

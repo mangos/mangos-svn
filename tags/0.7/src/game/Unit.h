@@ -219,11 +219,11 @@ enum DamageEffectType
 
 enum UnitVisibility
 {
-    VISIBILITY_OFF                = 0,                         // absolute, not detectable, GM-like, can see all other
+    VISIBILITY_OFF                = 0,                      // absolute, not detectable, GM-like, can see all other
     VISIBILITY_ON                 = 1,
-    VISIBILITY_GROUP_STEALTH      = 2,                         // detect chance, seen and can see group members
-    VISIBILITY_GROUP_INVISIBILITY = 3,                         // invisibility, can see and can be seen only another invisible unit or invisible detection unit
-    VISIBILITY_GROUP_NO_DETECT    = 4                          // state just at stealth apply for update Grid state
+    VISIBILITY_GROUP_STEALTH      = 2,                      // detect chance, seen and can see group members
+    VISIBILITY_GROUP_INVISIBILITY = 3,                      // invisibility, can see and can be seen only another invisible unit or invisible detection unit
+    VISIBILITY_GROUP_NO_DETECT    = 4                       // state just at stealth apply for update Grid state
 };
 
 // Value masks for UNIT_FIELD_FLAGS
@@ -271,7 +271,7 @@ enum TempSummonType
     TEMPSUMMON_CORPSE_DESPAWN              = 5,             // despawns instantly after death
     TEMPSUMMON_CORPSE_TIMED_DESPAWN        = 6,             // despawns after a specified time after death
     TEMPSUMMON_DEAD_DESPAWN                = 7,             // despawns when the creature disappears
-    TEMPSUMMON_MANUAL_DESPAWN              = 8              // despawns when UnSummon() is called        
+    TEMPSUMMON_MANUAL_DESPAWN              = 8              // despawns when UnSummon() is called
 };
 
 enum ProcFlags
@@ -319,7 +319,7 @@ enum AuraState
     AURA_STATE_UNKNOWN1       = 4,
     AURA_STATE_JUDGEMENT      = 5,
     AURA_STATE_UNKNOWN2       = 6,
-    AURA_STATE_PARRY          = 7,                           // unsure
+    AURA_STATE_PARRY          = 7,                          // unsure
     AURA_STATE_UNKNOWN3       = 8,
     AURA_STATE_UNKNOWN4       = 9,
     AURA_STATE_UNKNOWN5       = 10,
@@ -471,12 +471,12 @@ enum MeleeHitOutcome
 };
 struct CleanDamage
 {
-    CleanDamage(uint32 _damage, WeaponAttackType _attackType, MeleeHitOutcome _hitOutCome) : 
-        damage(_damage), attackType(_attackType), hitOutCome(_hitOutCome) {}
+    CleanDamage(uint32 _damage, WeaponAttackType _attackType, MeleeHitOutcome _hitOutCome) :
+    damage(_damage), attackType(_attackType), hitOutCome(_hitOutCome) {}
 
     uint32 damage;
     WeaponAttackType attackType;
-    MeleeHitOutcome hitOutCome; 
+    MeleeHitOutcome hitOutCome;
 };
 
 // delay time next attack to privent client attack animanation problems
@@ -553,7 +553,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void clearUnitState(uint32 f) { m_state &= ~f; };
         bool CanFreeMove() const
         {
-            return !hasUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_FLEEING | UNIT_STAT_IN_FLIGHT | 
+            return !hasUnitState(UNIT_STAT_CONFUSED | UNIT_STAT_FLEEING | UNIT_STAT_IN_FLIGHT |
                 UNIT_STAT_ROOT | UNIT_STAT_STUNDED ) && GetOwnerGUID()==0;
         }
 
@@ -600,7 +600,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void ApplyMaxPowerMod(Powers power, uint32 val, bool apply) { ApplyModFloatValue(UNIT_FIELD_MAXPOWER1+power, val, apply); }
         void ApplyMaxPowerPercentMod(Powers power, float val, bool apply) { ApplyPercentModFloatValue(UNIT_FIELD_MAXPOWER1+power, val, apply); }
 
-        uint32 GetAttackTime(WeaponAttackType att) const { return (uint32)(GetFloatValue(UNIT_FIELD_BASEATTACKTIME+att)/m_modAttackSpeedPct[att]); } 
+        uint32 GetAttackTime(WeaponAttackType att) const { return (uint32)(GetFloatValue(UNIT_FIELD_BASEATTACKTIME+att)/m_modAttackSpeedPct[att]); }
         void SetAttackTime(WeaponAttackType att, uint32 val) { SetFloatValue(UNIT_FIELD_BASEATTACKTIME+att,val*m_modAttackSpeedPct[att]); }
         void ApplyAttackTimePercentMod(WeaponAttackType att,float val, bool apply) { ApplyPercentModFloatVar(m_modAttackSpeedPct[att], val, !apply); ApplyPercentModFloatValue(UNIT_FIELD_BASEATTACKTIME+att,val,!apply);}
 
@@ -825,7 +825,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         // common function for visibility checks for player/creatures with detection code
         bool isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList = false) const;
-        
+
         // virtual functions for all world objects types
         bool isVisibleForInState(Player const* u, bool inVisibleList) const;
         // function for low level grid visibility checks in player/creature cases
@@ -920,7 +920,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         Creature* SummonCreature(uint32 id, uint32 mapid, float x, float y, float z, float ang,TempSummonType spwtype,uint32 despwtime);
 
         void addFollower(FollowerReference* pRef) { m_FollowingRefManager.insertFirst(pRef); }
-        void removeFollower(FollowerReference* pRef) {  } // nothing to do yet
+        void removeFollower(FollowerReference* pRef)        // nothing to do yet
+        {
+        }
 
         static Unit* GetUnit(WorldObject& object, uint64 guid);
     protected:

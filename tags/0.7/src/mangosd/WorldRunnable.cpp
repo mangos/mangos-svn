@@ -65,7 +65,7 @@ void WorldRunnable::run()
 
     MapManager::Instance().UnloadAll();                     // unload all grids (including locked in memory)
 
-    ///- End the database thread    
+    ///- End the database thread
     sDatabase.ThreadEnd();                                  // free mySQL thread resources
 
     StopEventSystem();

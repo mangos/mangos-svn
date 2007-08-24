@@ -145,7 +145,8 @@ struct PlayerLevelInfo
 
 struct PlayerInfo
 {
-    PlayerInfo() : displayId_m(0),displayId_f(0),levelInfo(NULL)             // existence checked by displayId != 0             // existence checked by displayId != 0
+                                                            // existence checked by displayId != 0             // existence checked by displayId != 0
+    PlayerInfo() : displayId_m(0),displayId_f(0),levelInfo(NULL)
     {
     }
 
@@ -211,7 +212,7 @@ enum FactionFlags
     FACTION_FLAG_VISIBLE    = 0x01,
     FACTION_FLAG_AT_WAR     = 0x02,
     FACTION_FLAG_UNKNOWN    = 0x04,
-    FACTION_FLAG_INVISIBLE  = 0x08, // unsure
+    FACTION_FLAG_INVISIBLE  = 0x08,                         // unsure
     FACTION_FLAG_OWN_TEAM   = 0x10,
     FACTION_FLAG_INACTIVE   = 0x20
 };
@@ -341,15 +342,15 @@ enum PlayerFlags
     PLAYER_FLAGS_GHOST          = 0x00000010,
     PLAYER_FLAGS_RESTING        = 0x00000020,
     PLAYER_FLAGS_FFA_PVP        = 0x00000080,
-    PLAYER_FLAGS_UNK            = 0x00000100,                   // show PvP in tooltip
+    PLAYER_FLAGS_UNK            = 0x00000100,               // show PvP in tooltip
     PLAYER_FLAGS_IN_PVP         = 0x00000200,
     PLAYER_FLAGS_HIDE_HELM      = 0x00000400,
     PLAYER_FLAGS_HIDE_CLOAK     = 0x00000800,
-    PLAYER_FLAGS_UNK1           = 0x00001000,                   // played long time
-    PLAYER_FLAGS_UNK2           = 0x00002000,                   // played too long time
-    PLAYER_FLAGS_UNK3           = 0x00008000,                   // strange visual effect (2.0.1), looks like PLAYER_FLAGS_GHOST flag
-    PLAYER_FLAGS_UNK4           = 0x00020000,                   // taxi benchmark mode (on/off) (2.0.1)
-    PLAYER_UNK                  = 0x00040000,                   // 2.0.8...
+    PLAYER_FLAGS_UNK1           = 0x00001000,               // played long time
+    PLAYER_FLAGS_UNK2           = 0x00002000,               // played too long time
+    PLAYER_FLAGS_UNK3           = 0x00008000,               // strange visual effect (2.0.1), looks like PLAYER_FLAGS_GHOST flag
+    PLAYER_FLAGS_UNK4           = 0x00020000,               // taxi benchmark mode (on/off) (2.0.1)
+    PLAYER_UNK                  = 0x00040000,               // 2.0.8...
 };
 
 enum PlayerKnownTitles
@@ -613,7 +614,7 @@ enum MovementFlags
     MOVEMENTFLAG_JUMPING        = 0x2000,
     MOVEMENTFLAG_FALLING        = 0x4000,
     // 0x8000, 0x10000, 0x20000, 0x40000, 0x80000, 0x100000
-    MOVEMENTFLAG_SWIMMING       = 0x200000, // appears with fly also, swim in air LOL
+    MOVEMENTFLAG_SWIMMING       = 0x200000,                 // appears with fly also, swim in air LOL
     MOVEMENTFLAG_FLY_UP         = 0x400000,
     MOVEMENTFLAG_CAN_FLY        = 0x800000,
     MOVEMENTFLAG_FLYING         = 0x1000000,
@@ -1309,7 +1310,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         float GetBattleGroundEntryPointZ() const { return m_bgEntryPointZ; }
         float GetBattleGroundEntryPointO() const { return m_bgEntryPointO; }
         void SetBattleGroundEntryPoint(uint32 Map, float PosX, float PosY, float PosZ, float PosO )
-        { 
+        {
             m_bgEntryPointMap = Map;
             m_bgEntryPointX = PosX;
             m_bgEntryPointY = PosY;
@@ -1381,7 +1382,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         float m_homebindY;
         float m_homebindZ;
 
-        // currently visible objects at player client 
+        // currently visible objects at player client
         typedef std::set<uint64> ClientGUIDs;
         ClientGUIDs m_clientGUIDs;
 
@@ -1393,7 +1394,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateVisibilityOf(WorldObject* target);
 
         template<class T>
-        void UpdateVisibilityOf(T* target, UpdateData& data, UpdateDataMapType& data_updates);
+            void UpdateVisibilityOf(T* target, UpdateData& data, UpdateDataMapType& data_updates);
 
         // Stealth detection system
         uint32 m_DetectInvTimer;

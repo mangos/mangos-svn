@@ -56,7 +56,7 @@ class MANGOS_DLL_DECL FlightMaster : public MaNGOS::Singleton<FlightMaster, MaNG
         }
 
         /** RemoveFromFlight removes a certain player from the flight map.
-         * Should be called when the player is logging out  
+         * Should be called when the player is logging out
          */
         inline bool RemoveFromFlight(Player *pl)
         {

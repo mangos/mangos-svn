@@ -124,17 +124,17 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
 
         template<class LOCK_TYPE, class T, class CONTAINER> void Visit(const CellLock<LOCK_TYPE> &cell, TypeContainerVisitor<T, CONTAINER> &visitor);
 
-/*        inline bool IsActiveGrid(WorldObject *obj) const
-        {
-            return IsActiveGrid(obj->GetPositionX(),obj->GetPositionY());
-        }
+        /*        inline bool IsActiveGrid(WorldObject *obj) const
+                {
+                    return IsActiveGrid(obj->GetPositionX(),obj->GetPositionY());
+                }
 
-        inline bool IsActiveGrid(float x, float y) const
-        {
-            GridPair p = MaNGOS::ComputeGridPair(x, y);
-            return( i_grids[p.x_coord][p.y_coord]->GetGridState() == GRID_STATE_ACTIVE );
-        }
-*/
+                inline bool IsActiveGrid(float x, float y) const
+                {
+                    GridPair p = MaNGOS::ComputeGridPair(x, y);
+                    return( i_grids[p.x_coord][p.y_coord]->GetGridState() == GRID_STATE_ACTIVE );
+                }
+        */
 
         inline bool IsRemovalGrid(float x, float y) const
         {

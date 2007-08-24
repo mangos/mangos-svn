@@ -273,7 +273,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             }
             break;
 
-        //big gun, its a spell/aura
+            //big gun, its a spell/aura
         case GAMEOBJECT_TYPE_GOOBER:                        //10
             info = obj->GetGOInfo();
             spellId = info ? info->sound10 : 0;
@@ -475,13 +475,13 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                     switch(info->id)
                     {
                         case 179830:
-                            spellId = 23335;    // Silverwing Flag
+                            spellId = 23335;                // Silverwing Flag
                             break;
                         case 179831:
-                            spellId = 23333;    // Warsong Flag
+                            spellId = 23333;                // Warsong Flag
                             break;
                         case 184141:
-                            spellId = 34976;    // Netherstorm Flag
+                            spellId = 34976;                // Netherstorm Flag
                             break;
                     }
                 }
@@ -551,7 +551,6 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
     Spell *spell = new Spell(spellCaster, spellInfo, false, 0);
 
     SpellCastTargets targets;
-
 
     targets.setUnitTarget( spellTarget );
 

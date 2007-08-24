@@ -278,7 +278,7 @@ m_spellId(spellproto->Id), m_effIndex(eff), m_caster_guid(0), m_target(target),
 m_timeCla(1000), m_auraSlot(MAX_AURAS),m_positive(false), m_permanent(false),
 m_isPeriodic(false), m_isTrigger(false), m_periodicTimer(0), m_PeriodicEventId(0),
 m_procCharges(0), m_absorbDmg(0), m_isPersistent(false), m_removeOnDeath(false),
-m_isAreaAura(false), m_castItemGuid(castItem?castItem->GetGUID():0) 
+m_isAreaAura(false), m_castItemGuid(castItem?castItem->GetGUID():0)
 {
     assert(target);
 
@@ -331,7 +331,7 @@ m_isAreaAura(false), m_castItemGuid(castItem?castItem->GetGUID():0)
     {
         m_caster_guid = caster->GetGUID();
         damage = CalculateDamage();
-        
+
         if (!damage && castItem && castItem->GetItemSuffixFactor())
         {
             ItemRandomSuffixEntry const *item_rand_suffix = sItemRandomSuffixStore.LookupEntry(abs(castItem->GetItemRandomPropertyId()));
@@ -344,10 +344,10 @@ m_isAreaAura(false), m_castItemGuid(castItem?castItem->GetGUID():0)
                     {
                         for (int t=0; t<3; t++)
                             if(pEnchant->spellid[t] == spellproto->Id)
-                            {
-                                damage = uint32((item_rand_suffix->prefix[k]*castItem->GetItemSuffixFactor()) / 10000 );
-                                break;
-                            }
+                        {
+                            damage = uint32((item_rand_suffix->prefix[k]*castItem->GetItemSuffixFactor()) / 10000 );
+                            break;
+                        }
                     }
 
                     if(damage)
@@ -993,7 +993,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
     // Reincarnation (passive)
     if (GetId() == 20608 && m_target && m_target->GetTypeId()==TYPEID_PLAYER)
     {
-        // applied at any apply and not real unapply to catch unapply death case 
+        // applied at any apply and not real unapply to catch unapply death case
         // when cooldown pass and required item exist to set PLAYER_SELF_RES_SPELL
         if( (!Real || apply) && !((Player*)m_target)->HasSpellCooldown(21169) && ((Player*)m_target)->HasItemCount(17030,1) )
         {
@@ -1094,7 +1094,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         }
         else
         {
-            // remove only own spell 
+            // remove only own spell
             if(player->GetUInt32Value(PLAYER_SELF_RES_SPELL)==spellid)
                 player->SetUInt32Value(PLAYER_SELF_RES_SPELL, 0);
         }
@@ -1451,13 +1451,13 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
                 // Gnome Female
                 case 1564: m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 10149); break;
                 // BloodElf Female
-                case 15475: m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17830); break; 
+                case 15475: m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17830); break;
                 // BloodElf Male
-                case 15476: m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17829); break; 
+                case 15476: m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17829); break;
                 // Dranei Female
-                case 16126: m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17828); break; 
+                case 16126: m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17828); break;
                 // Dranei Male
-                case 16125: m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17827); break; 
+                case 16125: m_target->SetUInt32Value(UNIT_FIELD_DISPLAYID, 17827); break;
                 default: break;
             }
         }
@@ -1812,7 +1812,7 @@ void Aura::HandleModConfuse(bool apply, bool Real)
         {
             //This fixes blind so it doesn't continue to attack
             // TODO: may other spells casted confuse aura (but not all) stop attack
-            if( caster && caster->GetTypeId() == TYPEID_PLAYER && 
+            if( caster && caster->GetTypeId() == TYPEID_PLAYER &&
                 GetSpellProto()->Mechanic == MECHANIC_CONFUSED && GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE )
             {
                 caster->AttackStop();
@@ -1957,7 +1957,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
             if( caster )
             {
                 //If this is a knockout spell for rogues attacker stops
-                if( caster->GetTypeId() == TYPEID_PLAYER && 
+                if( caster->GetTypeId() == TYPEID_PLAYER &&
                     GetSpellProto()->Mechanic == MECHANIC_KNOCKOUT && GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE )
                 {
                     caster->AttackStop();
@@ -1975,8 +1975,8 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
                 if( GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE && (GetSpellProto()->SpellIconID == 249) )
                 {
                     //Unit will not attack player if out of range
-                   ((Creature *)m_target)->CombatStop();
-                   ((Creature *)m_target)->DeleteThreatList();
+                    ((Creature *)m_target)->CombatStop();
+                    ((Creature *)m_target)->DeleteThreatList();
                 }
             }
 
@@ -2004,12 +2004,12 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
 
             //If sap is used then threat is removed and mob goes back to normal waypoint
             if( m_target->GetTypeId() != TYPEID_PLAYER && GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE && (GetSpellProto()->SpellIconID == 249))
-            {  
+            {
                 //Units no longer brain dead after they come back from sap ;p
                 if (((Creature *)m_target)->AI())
                     ((Creature *)m_target)->AI()->EnterEvadeMode();
             }
-                        
+
             if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_HUNTER && GetSpellProto()->SpellIconID == 1721)
             {
                 if( !caster || caster->GetTypeId()!=TYPEID_PLAYER )
@@ -2289,7 +2289,7 @@ void Aura::HandleModTaunt(bool apply, bool Real)
 
     if(apply)
     {
-         m_target->TauntApply(caster);
+        m_target->TauntApply(caster);
     }
     else
     {
@@ -3050,7 +3050,7 @@ void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
 {
     m_target->ApplyMaxHealthMod(m_modifier.m_amount,apply);
 
-    if(GetSpellProto()->Id == 12976 && Real) //Warrior Last Stand
+    if(GetSpellProto()->Id == 12976 && Real)                //Warrior Last Stand
     {
         if(apply)
             m_target->ModifyHealth(m_modifier.m_amount);
@@ -3738,10 +3738,10 @@ void Aura::HandleModRating(bool apply, bool Real)
             if (pItem && pItem->IsFitToSpellRequirements(GetSpellProto()))
                 ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_RANGED_WEAPON_SKILL_RATING,m_modifier.m_amount,apply);*/
         }
-        
+
         if (m_modifier.m_miscvalue & SPELL_RATING_DEFENCE)
             ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_DEFENCE_RATING,m_modifier.m_amount,apply);
-        
+
         if (m_modifier.m_miscvalue & SPELL_RATING_DODGE)
             ((Player*)m_target)->ApplyRatingMod(PLAYER_FIELD_DODGE_RATING,m_modifier.m_amount,apply);
 

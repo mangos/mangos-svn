@@ -62,7 +62,7 @@ void WorldSession::HandleArenaTeamQueryOpcode(WorldPacket & recv_data)
     recv_data >> ArenaTeamId;
 
     ArenaTeam *arenateam = objmgr.GetArenaTeamById(ArenaTeamId);
-    if(!arenateam)                  // arena team not found
+    if(!arenateam)                                          // arena team not found
         return;
 
     arenateam->Query(this);
@@ -76,7 +76,7 @@ void WorldSession::HandleArenaTeamRosterOpcode(WorldPacket & recv_data)
 
     CHECK_PACKET_SIZE(recv_data, 1);
 
-    uint8 team_slot;                      // probably team_size or slot
+    uint8 team_slot;                                        // probably team_size or slot
     recv_data >> team_slot;
 
     ArenaTeam *arenateam = objmgr.GetArenaTeamById(_player->GetArenaTeamId(team_slot));
@@ -93,7 +93,7 @@ void WorldSession::HandleArenaTeamAddMemberOpcode(WorldPacket & recv_data)
 
     CHECK_PACKET_SIZE(recv_data, 1+1);
 
-    uint8 team_slot;            // slot?
+    uint8 team_slot;                                        // slot?
     std::string Invitedname;
 
     Player * player = NULL;
@@ -116,7 +116,8 @@ void WorldSession::HandleArenaTeamAddMemberOpcode(WorldPacket & recv_data)
     if(player->getLevel() != 70)
     {
         //SendArenaTeamCommandResult(ARENA_TEAM_INVITE_SS,"",Invitedname,ARENA_TEAM_PLAYER_NOT_FOUND_S);
-        SendNotification("%s is not high enough level to join your team", player->GetName());   // can't find related opcode
+                                                            // can't find related opcode
+        SendNotification("%s is not high enough level to join your team", player->GetName());
         return;
     }
 
@@ -207,7 +208,7 @@ void WorldSession::HandleArenaTeamLeaveOpcode(WorldPacket & recv_data)
 
     CHECK_PACKET_SIZE(recv_data, 1);
 
-    uint8 team_slot; // slot?
+    uint8 team_slot;                                        // slot?
     recv_data >> team_slot;
 
     uint32 at_id = _player->GetArenaTeamId(team_slot);
@@ -252,7 +253,7 @@ void WorldSession::HandleArenaTeamDisbandOpcode(WorldPacket & recv_data)
 
     CHECK_PACKET_SIZE(recv_data, 1);
 
-    uint8 team_slot; // slot?
+    uint8 team_slot;                                        // slot?
     recv_data >> team_slot;
 
     uint32 at_id = _player->GetArenaTeamId(team_slot);
@@ -430,9 +431,9 @@ void WorldSession::BuildArenaTeamEventPacket(WorldPacket *data, uint8 eventid, u
 
 void WorldSession::SendNotInArenaTeamPacket(uint8 type)
 {
-    WorldPacket data(SMSG_ARENA_NO_TEAM, 4+1);  // 886 - You are not in a %uv%u arena team
-    data << uint32(0);                          // unk(0)
-    data << type;                               // team type (2=2v2,3=3v3,5=5v5), can be used for custom types...
+    WorldPacket data(SMSG_ARENA_NO_TEAM, 4+1);              // 886 - You are not in a %uv%u arena team
+    data << uint32(0);                                      // unk(0)
+    data << type;                                           // team type (2=2v2,3=3v3,5=5v5), can be used for custom types...
     SendPacket(&data);
 }
 

@@ -98,6 +98,7 @@ bool ChatHandler::HandleMuteCommand(const char* args)
 
     return true;
 }
+
 bool ChatHandler::HandleUnmuteCommand(const char* args)
 {
     if (!*args)

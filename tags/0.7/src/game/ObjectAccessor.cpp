@@ -256,12 +256,12 @@ ObjectAccessor::_update()
         i_objects.clear();
     }
 
-    WorldPacket packet; // here we allocate a std::vector with a size of 0x10000
+    WorldPacket packet;                                     // here we allocate a std::vector with a size of 0x10000
     for(UpdateDataMapType::iterator iter = update_players.begin(); iter != update_players.end(); ++iter)
     {
         iter->second.BuildPacket(&packet);
         iter->first->GetSession()->SendPacket(&packet);
-        packet.clear(); // clean the string
+        packet.clear();                                     // clean the string
     }
 }
 
@@ -503,26 +503,26 @@ ObjectAccessor::AddCorpsesToGrid(GridPair const& gridpair,GridType& grid,Map* ma
     Guard guard(i_corpseGuard);
     for(Player2CorpsesMapType::iterator iter = i_player2corpse.begin(); iter != i_player2corpse.end(); ++iter)
         if(iter->second->GetGrid()==gridpair)
+    {
+        // verify, if the corpse in our instance (add only corpses which are)
+        if (map->Instanceable())
         {
-            // verify, if the corpse in our instance (add only corpses which are)
-            if (map->Instanceable())
-            {
-                if (iter->second->GetInstanceId() == map->GetInstanceId())
-                {
-                    grid.AddWorldObject(iter->second,iter->second->GetGUID());
-                }
-            }
-            else
+            if (iter->second->GetInstanceId() == map->GetInstanceId())
             {
                 grid.AddWorldObject(iter->second,iter->second->GetGUID());
             }
         }
+        else
+        {
+            grid.AddWorldObject(iter->second,iter->second->GetGUID());
+        }
+    }
 }
 
 bool
 ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid)
 {
-//    Guard guard(i_corpseGuard);
+    //    Guard guard(i_corpseGuard);
 
     Player2CorpsesMapType::iterator iter = i_player2corpse.find(player_guid);
 

@@ -36,7 +36,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
     recv_data >> talent_id >> requested_rank;
 
     uint32 CurTalentPoints =  GetPlayer()->GetFreeTalentPoints();
-;
+    ;
     if(CurTalentPoints == 0)
         return;
 
@@ -155,7 +155,7 @@ void WorldSession::HandleTalentWipeOpcode( WorldPacket & recv_data )
 
     if(!(_player->resetTalents()))
     {
-        WorldPacket data( MSG_TALENT_WIPE_CONFIRM, 0);         //you have not any talent
+        WorldPacket data( MSG_TALENT_WIPE_CONFIRM, 0);      //you have not any talent
         SendPacket( &data );
         return;
     }

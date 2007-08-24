@@ -159,7 +159,6 @@ uint32 Bag::GetFreeSlots() const
     return slots;
 }
 
-
 void Bag::RemoveItem( uint8 slot, bool update )
 {
     assert(slot < MAX_BAG_SIZE);

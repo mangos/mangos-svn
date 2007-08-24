@@ -106,7 +106,7 @@ enum ResponseCodes
     CHAR_LOGIN_DISABLED                    = 0x43,
     CHAR_LOGIN_NO_CHARACTER                = 0x44,
     CHAR_LOGIN_LOCKED_FOR_TRANSFER         = 0x45,
-    CHAR_LOGIN_LOCKED_BY_BILLING           = 0x46, 
+    CHAR_LOGIN_LOCKED_BY_BILLING           = 0x46,
 
     CHAR_NAME_NO_NAME                      = 0x47,
     CHAR_NAME_TOO_SHORT                    = 0x48,
@@ -121,7 +121,7 @@ enum ResponseCodes
     CHAR_NAME_INVALID_SPACE                = 0x51,
     CHAR_NAME_CONSECUTIVE_SPACES           = 0x52,
     CHAR_NAME_FAILURE                      = 0x53,
-    CHAR_NAME_SUCCESS                      = 0x54, 
+    CHAR_NAME_SUCCESS                      = 0x54,
 };
 
 class WorldPacket;

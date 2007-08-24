@@ -442,7 +442,7 @@ bool Map::AddInstanced(Player *player)
     }
 
     // TODO: Not sure about checking player level: already done in HandleAreaTriggerOpcode
-    // GM's still can teleport player in instance. 
+    // GM's still can teleport player in instance.
     // Is it needed?
 
     {
@@ -510,7 +510,7 @@ void Map::Reset()
 bool Map::CanEnter(Player* player)
 {
     if (!Instanceable()) return(true);
-    
+
     // GMs can avoid raid limitations
     if (IsRaid() && (!player->isGameMaster()))
     {
@@ -522,7 +522,7 @@ bool Map::CanEnter(Player* player)
             return(false);
         }
     }
-    
+
     if (!player->isAlive())
     {
         player->GetCorpse()->GetMapId();
@@ -814,7 +814,7 @@ void Map::Remove(Player *player, bool remove)
     if (Instanceable())
     {
         sLog.outDetail("MAP: Removing player '%s' from instance '%u' of map '%s' before relocating to other map", player->GetName(), GetInstanceId(), GetMapName());
-        RemoveInstanced(player); // remove from instance player list, etc.
+        RemoveInstanced(player);                            // remove from instance player list, etc.
     }
 
     CellPair p = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
@@ -1418,7 +1418,6 @@ void Map::UpdatePlayerVisibility( Player* player, Cell cell, CellPair cellpair )
 {
     cell.data.Part.reserved = ALL_DISTRICT;
 
-
     MaNGOS::PlayerNotifier pl_notifier(*player);
     TypeContainerVisitor<MaNGOS::PlayerNotifier, WorldTypeMapContainer > player_notifier(pl_notifier);
 
@@ -1463,7 +1462,7 @@ void Map::CreatureRelocationNotify(Creature *creature, Cell cell, CellPair cellp
     CellLock<ReadGuard> cell_lock(cell, cellpair);
     MaNGOS::CreatureRelocationNotifier relocationNotifier(*creature);
     cell.data.Part.reserved = ALL_DISTRICT;
-    cell.SetNoCreate();                             // not trigger load unloaded grids at notifier call
+    cell.SetNoCreate();                                     // not trigger load unloaded grids at notifier call
 
     TypeContainerVisitor<MaNGOS::CreatureRelocationNotifier, WorldTypeMapContainer > c2world_relocation(relocationNotifier);
     TypeContainerVisitor<MaNGOS::CreatureRelocationNotifier, GridTypeMapContainer >  c2grid_relocation(relocationNotifier);
@@ -1532,7 +1531,6 @@ void Map::SendRemoveTransports( Player * player )
     transData.BuildPacket(&packet);
     player->GetSession()->SendPacket(&packet);
 }
-
 
 template void Map::Add(CorpsePtr&);
 template void Map::Add(Creature *);

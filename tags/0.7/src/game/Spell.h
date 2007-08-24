@@ -127,26 +127,26 @@ enum SpellNotifyPushType
 
 enum Rating
 {
-    SPELL_RATING_SKILL                      = 0x0000001, // 0
-    SPELL_RATING_DEFENCE                    = 0x0000002, // 1
-    SPELL_RATING_DODGE                      = 0x0000004, // 2
-    SPELL_RATING_PARRY                      = 0x0000008, // 3
-    SPELL_RATING_BLOCK                      = 0x0000010, // 4
-    SPELL_RATING_MELEE_HIT                  = 0x0000020, // 5
-    SPELL_RATING_RANGED_HIT                 = 0x0000040, // 6
-    SPELL_RATING_SPELL_HIT                  = 0x0000080, // 7
-    SPELL_RATING_MELEE_CRIT_HIT             = 0x0000100, // 8
-    SPELL_RATING_RANGED_CRIT_HIT            = 0x0000200, // 9
-    SPELL_RATING_SPELL_CRIT_HIT             = 0x0000400, // 10
+    SPELL_RATING_SKILL                      = 0x0000001,    // 0
+    SPELL_RATING_DEFENCE                    = 0x0000002,    // 1
+    SPELL_RATING_DODGE                      = 0x0000004,    // 2
+    SPELL_RATING_PARRY                      = 0x0000008,    // 3
+    SPELL_RATING_BLOCK                      = 0x0000010,    // 4
+    SPELL_RATING_MELEE_HIT                  = 0x0000020,    // 5
+    SPELL_RATING_RANGED_HIT                 = 0x0000040,    // 6
+    SPELL_RATING_SPELL_HIT                  = 0x0000080,    // 7
+    SPELL_RATING_MELEE_CRIT_HIT             = 0x0000100,    // 8
+    SPELL_RATING_RANGED_CRIT_HIT            = 0x0000200,    // 9
+    SPELL_RATING_SPELL_CRIT_HIT             = 0x0000400,    // 10
     //more ratings here?
-    SPELL_RATING_MELEE_HASTE                = 0x0020000, // 17
-    SPELL_RATING_RANGED_HASTE               = 0x0040000, // 18
-    SPELL_RATING_SPELL_HASTE                = 0x0080000, // 19
-    SPELL_RATING_HIT                        = 0x0100000, // 20
-    SPELL_RATING_CRIT_HIT                   = 0x0200000, // 21
-    SPELL_RATING_HIT_AVOIDANCE              = 0x0400000, // 22
-    SPELL_RATING_CRIT_AVOIDANCE             = 0x0800000, // 23
-    SPELL_RATING_RESILIENCE                 = 0x1000000  // 24
+    SPELL_RATING_MELEE_HASTE                = 0x0020000,    // 17
+    SPELL_RATING_RANGED_HASTE               = 0x0040000,    // 18
+    SPELL_RATING_SPELL_HASTE                = 0x0080000,    // 19
+    SPELL_RATING_HIT                        = 0x0100000,    // 20
+    SPELL_RATING_CRIT_HIT                   = 0x0200000,    // 21
+    SPELL_RATING_HIT_AVOIDANCE              = 0x0400000,    // 22
+    SPELL_RATING_CRIT_AVOIDANCE             = 0x0800000,    // 23
+    SPELL_RATING_RESILIENCE                 = 0x1000000     // 24
 
 };
 
@@ -648,7 +648,7 @@ namespace MaNGOS
         const uint32& i_index;
         Unit* i_originalCaster;
 
-        SpellNotifierPlayer(Spell &spell, std::list<Unit*> &data, const uint32 &i) 
+        SpellNotifierPlayer(Spell &spell, std::list<Unit*> &data, const uint32 &i)
             : i_data(data), i_spell(spell), i_index(i)
         {
             i_originalCaster = i_spell.GetOriginalCaster();
@@ -740,23 +740,23 @@ namespace MaNGOS
                             continue;
                         break;
                     case SPELL_TARGETS_AOE_DAMAGE:
+                    {
+                        Unit* check = i_originalCaster;
+                        Unit* owner = i_originalCaster->GetCharmerOrOwner();
+                        if(owner)
+                            check = owner;
+                        if( check->GetTypeId()==TYPEID_PLAYER )
                         {
-                            Unit* check = i_originalCaster;
-                            Unit* owner = i_originalCaster->GetCharmerOrOwner();
-                            if(owner)
-                                check = owner;
-                            if( check->GetTypeId()==TYPEID_PLAYER )
-                            {
-                                if (check->IsFriendlyTo( itr->second ))
-                                    continue;
-                            }
-                            else
-                            {
-                                if (!check->IsHostileTo( itr->second ))
-                                    continue;
-                            }
+                            if (check->IsFriendlyTo( itr->second ))
+                                continue;
                         }
-                        break;
+                        else
+                        {
+                            if (!check->IsHostileTo( itr->second ))
+                                continue;
+                        }
+                    }
+                    break;
                     default: continue;
                 }
 
@@ -809,23 +809,23 @@ namespace MaNGOS
                             continue;
                         break;
                     case SPELL_TARGETS_AOE_DAMAGE:
+                    {
+                        Unit* check = i_originalCaster;
+                        Unit* owner = i_originalCaster->GetCharmerOrOwner();
+                        if(owner)
+                            check = owner;
+                        if( check->GetTypeId()==TYPEID_PLAYER )
                         {
-                            Unit* check = i_originalCaster;
-                            Unit* owner = i_originalCaster->GetCharmerOrOwner();
-                            if(owner)
-                                check = owner;
-                            if( check->GetTypeId()==TYPEID_PLAYER )
-                            {
-                                if (check->IsFriendlyTo( itr->second ))
-                                    continue;
-                            }
-                            else
-                            {
-                                if (!check->IsHostileTo( itr->second ))
-                                    continue;
-                            }
+                            if (check->IsFriendlyTo( itr->second ))
+                                continue;
                         }
-                        break;
+                        else
+                        {
+                            if (!check->IsHostileTo( itr->second ))
+                                continue;
+                        }
+                    }
+                    break;
                     default: continue;
                 }
 

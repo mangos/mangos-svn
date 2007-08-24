@@ -19,7 +19,7 @@
 #include "Common.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
-#include "WorldSocket.h" 
+#include "WorldSocket.h"
 #include "WorldSession.h"
 #include "Opcodes.h"
 #include "Log.h"
@@ -95,7 +95,6 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 
     recv_data >> race_;
     recv_data >> class_;
-
 
     WorldPacket data(SMSG_CHAR_CREATE, 1);                  // returned with diff.values in all cases
 
@@ -305,10 +304,9 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     pCurrChar->SendFriendlist();
     pCurrChar->SendIgnorelist();
 
-
     // Send MOTD
     {
-        data.Initialize(SMSG_MOTD, 50); // new in 2.0.1
+        data.Initialize(SMSG_MOTD, 50);                     // new in 2.0.1
         data << (uint32)0;
 
         uint32 linecount=0;
@@ -391,7 +389,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
             if(!result5)
             {
                 sLog.outErrorDb("Table `playercreateinfo` not have data for race %u class %u , character can't be loaded.",plrace, plclass);
-                LogoutPlayer(false);                            // without save
+                LogoutPlayer(false);                        // without save
                 return;
             }
 
@@ -461,7 +459,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
 
     pCurrChar->SendInitWorldStates();
 
-    pCurrChar->CastSpell(pCurrChar, 836, true); // LOGINEFFECT
+    pCurrChar->CastSpell(pCurrChar, 836, true);             // LOGINEFFECT
 
     data.Initialize(SMSG_LOGIN_SETTIMESPEED, 8);
     time_t gameTime = sWorld.GetGameTime();
@@ -470,7 +468,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
         (lt->tm_mday - 1) << 14 | lt->tm_wday << 11 |
         lt->tm_hour << 6 | lt->tm_min;
     data << xmitTime;
-    data << (float)0.017f;                      // game speed
+    data << (float)0.017f;                                  // game speed
     SendPacket( &data );
 
     GetPlayer()->UpdateHonorFields();
@@ -549,8 +547,8 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     {
         // not blizz like, we must correctly save and load player instead...
         if(pCurrChar->getRace() == RACE_NIGHTELF)
-            pCurrChar->CastSpell(pCurrChar, 20584, true, 0);    // auras SPELL_AURA_INCREASE_SPEED(+speed in wisp form), SPELL_AURA_INCREASE_SWIM_SPEED(+swim speed in wisp form), SPELL_AURA_TRANSFORM (to wisp form)
-        pCurrChar->CastSpell(pCurrChar, 8326, true, 0);         // auras SPELL_AURA_GHOST, SPELL_AURA_INCREASE_SPEED(why?), SPELL_AURA_INCREASE_SWIM_SPEED(why?)
+            pCurrChar->CastSpell(pCurrChar, 20584, true, 0);// auras SPELL_AURA_INCREASE_SPEED(+speed in wisp form), SPELL_AURA_INCREASE_SWIM_SPEED(+swim speed in wisp form), SPELL_AURA_TRANSFORM (to wisp form)
+        pCurrChar->CastSpell(pCurrChar, 8326, true, 0);     // auras SPELL_AURA_GHOST, SPELL_AURA_INCREASE_SPEED(why?), SPELL_AURA_INCREASE_SWIM_SPEED(why?)
 
         //pCurrChar->SetUInt32Value(UNIT_FIELD_AURA+41, 8326);
         //pCurrChar->SetUInt32Value(UNIT_FIELD_AURA+42, 20584);
@@ -737,7 +735,7 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if(objmgr.GetPlayerGUIDByName(newname))         // character with this name already exist
+    if(objmgr.GetPlayerGUIDByName(newname))                 // character with this name already exist
     {
         WorldPacket data(SMSG_CHAR_RENAME, 1);
         data << (uint8)CHAR_CREATE_NAME_IN_USE;

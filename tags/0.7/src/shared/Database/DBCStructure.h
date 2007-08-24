@@ -119,14 +119,14 @@ struct CreatureFamilyEntry
 
 struct DurabilityCostsEntry
 {
-    uint32    Itemlvl;                                       // 0
-    uint32    multiplier[29];                                // 1-29
+    uint32    Itemlvl;                                      // 0
+    uint32    multiplier[29];                               // 1-29
 };
 
 struct DurabilityQualityEntry
 {
-    uint32    Id;                                            // 0
-    float     quality_mod;                                   // 1
+    uint32    Id;                                           // 0
+    float     quality_mod;                                  // 1
 };
 
 struct EmotesTextEntry
@@ -504,7 +504,7 @@ struct TaxiNodesEntry
     float     z;                                            // 4
     //char*     name[8];                                    // 5-12, unused
                                                             //13 string flags, unused
-    uint32    horde_mount_type;                             //14 
+    uint32    horde_mount_type;                             //14
     uint32    alliance_mount_type;                          //15
 };
 
@@ -554,5 +554,4 @@ typedef std::vector<TaxiPathNodeList> TaxiPathNodesByPath;
 
 #define TaxiMaskSize 8
 typedef uint32 TaxiMask[TaxiMaskSize];
-
 #endif

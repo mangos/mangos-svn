@@ -118,7 +118,9 @@ class BattleGround
         BattleGround();
         virtual ~BattleGround();
         virtual void Update(time_t diff);                   // must be implemented in BG subclass of BG specific update code, but must in begginning call parent version
-        virtual void SetupBattleGround() {}                 // must be implemented in BG subclass
+        virtual void SetupBattleGround()                    // must be implemented in BG subclass
+        {
+        }
 
         /* Battleground */
         void SetName(char const* Name) { m_Name = Name; }
@@ -207,9 +209,11 @@ class BattleGround
 
         /* Triggers handle */
         virtual void HandleAreaTrigger(Player* Source, uint32 Trigger) {}
-                                                                // must be implemented in BG subclass
+                                                            // must be implemented in BG subclass
     protected:
-        virtual void RemovePlayer(Player *plr, uint64 guid){}   // must be implemented in BG subclass
+        virtual void RemovePlayer(Player *plr, uint64 guid) // must be implemented in BG subclass
+        {
+        }
     private:
         /* Battleground */
         uint32 m_ID;

@@ -62,7 +62,7 @@ class Database
         // must be called before finish thread run (one time for thread using one from existed Database objects)
         virtual void ThreadEnd();
     private:
-        // 0 - do not log, 1 - log sql commands        
+        // 0 - do not log, 1 - log sql commands
         uint32 m_logSQL;
 };
 #endif

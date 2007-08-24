@@ -77,8 +77,8 @@ VisibleNotifier::Notify()
         i_player.m_clientGUIDs.erase(*itr);
 
         #ifdef MANGOS_DEBUG
-            if((sLog.getLogFilter() & LOG_FILTER_VISIBILITY_CHANGES)==0)
-                sLog.outDebug("Object %u (Type: %u) is out of range (no in active cells set) now for player %u",GUID_LOPART(*itr),GuidHigh2TypeId(GUID_HIPART(*itr)),i_player.GetGUIDLow());
+        if((sLog.getLogFilter() & LOG_FILTER_VISIBILITY_CHANGES)==0)
+            sLog.outDebug("Object %u (Type: %u) is out of range (no in active cells set) now for player %u",GUID_LOPART(*itr),GuidHigh2TypeId(GUID_HIPART(*itr)),i_player.GetGUIDLow());
         #endif
     }
 

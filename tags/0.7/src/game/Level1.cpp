@@ -34,7 +34,7 @@
 
 bool ChatHandler::HandleSayCommand(const char* args)
 {
-    uint64 guid = m_session->GetPlayer()->GetSelection();    
+    uint64 guid = m_session->GetPlayer()->GetSelection();
     Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
 
     if(!pCreature)
@@ -50,7 +50,7 @@ bool ChatHandler::HandleSayCommand(const char* args)
 
 bool ChatHandler::HandleYellCommand(const char* args)
 {
-    uint64 guid = m_session->GetPlayer()->GetSelection();    
+    uint64 guid = m_session->GetPlayer()->GetSelection();
     Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
 
     if(!pCreature)
@@ -66,7 +66,7 @@ bool ChatHandler::HandleYellCommand(const char* args)
 
 bool ChatHandler::HandleEmote2Command(const char* args)
 {
-    uint64 guid = m_session->GetPlayer()->GetSelection();        
+    uint64 guid = m_session->GetPlayer()->GetSelection();
     Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
 
     if(!pCreature)
@@ -80,12 +80,12 @@ bool ChatHandler::HandleEmote2Command(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleWhisperCommand(const char* args)        //WTF? what should it do?
+bool ChatHandler::HandleWhisperCommand(const char* args)    //WTF? what should it do?
 {
     char* receiver = strtok((char*)args, " ");
     char* text = strtok(NULL, "");
 
-    uint64 guid = m_session->GetPlayer()->GetSelection();  
+    uint64 guid = m_session->GetPlayer()->GetSelection();
     Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
 
     if(!pCreature || !receiver || !text)
@@ -95,7 +95,7 @@ bool ChatHandler::HandleWhisperCommand(const char* args)        //WTF? what shou
     }
 
     pCreature->Whisper(atol(receiver), text);
-    
+
     return true;
 }
 
@@ -226,8 +226,8 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
         if (MapManager::Instance().GetMap(m_session->GetPlayer()->GetMapId(), m_session->GetPlayer())->Instanceable())
         {
             if ( (MapManager::Instance().GetMap(chr->GetMapId(), chr)->Instanceable()) &&
-                (MapManager::Instance().GetMap(chr->GetMapId(), chr)->GetInstanceId() != 
-                  MapManager::Instance().GetMap(m_session->GetPlayer()->GetMapId(), m_session->GetPlayer())->GetInstanceId()) )
+                (MapManager::Instance().GetMap(chr->GetMapId(), chr)->GetInstanceId() !=
+                MapManager::Instance().GetMap(m_session->GetPlayer()->GetMapId(), m_session->GetPlayer())->GetInstanceId()) )
             {
                 // cannot summon from instance to instance
                 PSendSysMessage(LANG_CANNOT_INST_INST);
@@ -235,7 +235,7 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
             }
 
             // we are in instance, and can summon only player in our group with us as lead
-            if ( !m_session->GetPlayer()->groupInfo.group || !chr->groupInfo.group || 
+            if ( !m_session->GetPlayer()->groupInfo.group || !chr->groupInfo.group ||
                 (chr->groupInfo.group->GetLeaderGUID() != m_session->GetPlayer()->GetGUID()) ||
                 (m_session->GetPlayer()->groupInfo.group->GetLeaderGUID() != m_session->GetPlayer()->GetGUID()) )
                 // the last check is a bit excessive, but let it be, just in case
@@ -303,8 +303,8 @@ bool ChatHandler::HandleGonameCommand(const char* args)
         if (MapManager::Instance().GetMap(chr->GetMapId(), chr)->Instanceable())
         {
             if ( (MapManager::Instance().GetMap(_player->GetMapId(), _player)->Instanceable()) &&
-                (MapManager::Instance().GetMap(chr->GetMapId(), chr)->GetInstanceId() != 
-                  MapManager::Instance().GetMap(_player->GetMapId(), _player)->GetInstanceId()) )
+                (MapManager::Instance().GetMap(chr->GetMapId(), chr)->GetInstanceId() !=
+                MapManager::Instance().GetMap(_player->GetMapId(), _player)->GetInstanceId()) )
             {
                 // cannot go from instance to instance
                 PSendSysMessage(LANG_CANNOT_INST_INST);
@@ -335,7 +335,8 @@ bool ChatHandler::HandleGonameCommand(const char* args)
 
             // bind us to the players instance
             BoundInstancesMap::iterator i = chr->m_BoundInstances.find(chr->GetMapId());
-            if (i == chr->m_BoundInstances.end()) return true; // error, the player has no instance bound!!!
+                                                            // error, the player has no instance bound!!!
+            if (i == chr->m_BoundInstances.end()) return true;
             _player->m_BoundInstances[chr->GetMapId()] = std::pair < uint32, uint32 >(i->second.first, i->second.second);
             _player->SetInstanceId(chr->GetInstanceId());
         }
@@ -1430,7 +1431,7 @@ bool ChatHandler::HandleTeleCommand(const char * args)
         return true;
     }
 
-    char* cId = extractKeyFromLink((char*)args,"Htele");           // string or [name] Shift-click form |color|Htele:name|h[name]|h|r
+    char* cId = extractKeyFromLink((char*)args,"Htele");    // string or [name] Shift-click form |color|Htele:name|h[name]|h|r
     if(!cId)
         return false;
 
@@ -1585,7 +1586,7 @@ bool ChatHandler::HandleSendMailCommand(const char* args)
     std::string name    = pName;
     std::string subject = msgSubject;
     std::string text    = msgText;
-    
+
     normalizePlayerName(name);
 
     uint32 receiver_guid = objmgr.GetPlayerGUIDByName(name);

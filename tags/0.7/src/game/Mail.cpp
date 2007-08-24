@@ -357,10 +357,10 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
         pl->m_mailsUpdated = true;
         pl->RemoveMItem(it->GetGUIDLow());
         Item* it2 = pl->StoreItem( dest, it, true);
-        if(it2->GetOwnerGUID() != pl->GetGUID()) 
-        { 
-            it2->SetOwnerGUID(pl->GetGUID()); 
-            it2->SetState(ITEM_CHANGED); 
+        if(it2->GetOwnerGUID() != pl->GetGUID())
+        {
+            it2->SetOwnerGUID(pl->GetGUID());
+            it2->SetState(ITEM_CHANGED);
         }
         if(it2 == it)                                       // only set if not merged to existed stack (*it can be deleted already but we can compare pointers any way)
             it->SetState(ITEM_NEW, pl);
@@ -496,12 +496,12 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         // in reversed order and reversed field order in enchantment
         for(uint8 i = 0; i < 5; i++)                        // new 2.0.1
         {
-            data << (uint32) 0;                             
+            data << (uint32) 0;
             data << getMSTime();                            //enchantment apply time?
             data << (uint32) 0;
         }
 
-        // last (5) currently know only iteration 
+        // last (5) currently know only iteration
         data << (uint32) 0;
         data << getMSTime();                                //enchantment apply time?
         data << (uint32) (it ? it->GetEnchantmentId(PERM_ENCHANTMENT_SLOT) : 0);

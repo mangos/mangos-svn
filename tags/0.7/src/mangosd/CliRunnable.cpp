@@ -249,7 +249,7 @@ void CliInfo(char*,pPrintf zprintf)
         return;
     }
 
-    int linesize = 1+15+2+20+3+15+2+4+1+5+3;                    // see format string
+    int linesize = 1+15+2+20+3+15+2+4+1+5+3;                // see format string
     char* buf = new char[resultDB->GetRowCount()*linesize+1];
     char* bufPos = buf;
 
@@ -394,7 +394,7 @@ void CliBan(char*command,pPrintf zprintf)
 
     char* duration = strtok(NULL," ");
 
-    if(!duration)  // ?!? input of single char "0"-"9" wouldn't detect when with: || !atoi(duration)
+    if(!duration)                                           // ?!? input of single char "0"-"9" wouldn't detect when with: || !atoi(duration)
     {
         zprintf("Syntax: ban account|ip|character $AccountOrIpOrCharacter (duration[s|m|h|d])* reason\n");
         return;
@@ -671,7 +671,7 @@ void CliSetTBC(char *command,pPrintf zprintf)
         return;
     }
 
-    int lev=atoi(szTBC);                                  //get int anyway (0 if error)
+    int lev=atoi(szTBC);                                    //get int anyway (0 if error)
 
     if((lev > 1)|| (lev < 0))
     {
@@ -725,7 +725,7 @@ void CliSend(char *playerN,pPrintf zprintf)
         zprintf("%s not found!\r\n", plr);
         return;
     }
-    
+
     if (rPlayer->GetSession()->isLogingOut())
     {
         zprintf("Cant send message while %s is logging out!\r\n",plr);
@@ -735,7 +735,7 @@ void CliSend(char *playerN,pPrintf zprintf)
     //Use SendAreaTriggerMessage for fastest delivery.
     rPlayer->GetSession()->SendAreaTriggerMessage("%s", msg);
     rPlayer->GetSession()->SendAreaTriggerMessage("|cffff0000[Message from administrator]:|r");
-    
+
     //Confirmation message
     zprintf("I said '%s' to %s\r\n",msg , plr);
 }

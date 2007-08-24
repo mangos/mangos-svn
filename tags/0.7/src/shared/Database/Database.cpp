@@ -71,8 +71,8 @@ bool Database::PExecuteLog(const char * format,...)
     {
         time_t curr;
         tm local;
-        time(&curr);                                            // get current time_t value
-        local=*(localtime(&curr));                              // dereference and assign
+        time(&curr);                                        // get current time_t value
+        local=*(localtime(&curr));                          // dereference and assign
         char fName[128];
         sprintf( fName, "%04d-%02d-%02d_logSQL.sql", local.tm_year+1900, local.tm_mon+1, local.tm_mday );
 
@@ -81,7 +81,7 @@ bool Database::PExecuteLog(const char * format,...)
         if (log_file)
         {
             fprintf(log_file, szQuery );
-            fprintf(log_file, ";" );            
+            fprintf(log_file, ";" );
             fprintf(log_file, "\n" );
             fflush(log_file);
             fclose(log_file);

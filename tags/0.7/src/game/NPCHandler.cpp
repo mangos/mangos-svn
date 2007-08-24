@@ -213,7 +213,7 @@ void WorldSession::HandleTrainerBuySpellOpcode( WorldPacket & recv_data )
     _player->ModifyMoney( -int32(trainer_spell->spellcost) );
     if(spellInfo->powerType == 2)
     {
-        _player->addSpell(spellId,4);                   // active = 4 for spell book of hunter's pet
+        _player->addSpell(spellId,4);                       // active = 4 for spell book of hunter's pet
         return;
     }
 

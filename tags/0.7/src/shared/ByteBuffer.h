@@ -307,7 +307,7 @@ class ByteBuffer
         }
         void print_storage()
         {
-            if(!sLog.IsOutDebug())                           // optimize disabled debug output
+            if(!sLog.IsOutDebug())                          // optimize disabled debug output
                 return;
 
             sLog.outDebug("STORAGE_SIZE: %u", size() );
@@ -318,7 +318,7 @@ class ByteBuffer
 
         void textlike()
         {
-            if(!sLog.IsOutDebug())                           // optimize disabled debug output
+            if(!sLog.IsOutDebug())                          // optimize disabled debug output
                 return;
 
             sLog.outDebug("STORAGE_SIZE: %u", size() );
@@ -329,7 +329,7 @@ class ByteBuffer
 
         void hexlike()
         {
-            if(!sLog.IsOutDebug())                           // optimize disabled debug output
+            if(!sLog.IsOutDebug())                          // optimize disabled debug output
                 return;
 
             uint32 j = 1, k = 1;

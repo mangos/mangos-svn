@@ -228,7 +228,7 @@ void WorldSession::HandleLogoutRequestOpcode( WorldPacket & recv_data )
     {
         Target->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
 
-        WorldPacket data( SMSG_FORCE_MOVE_ROOT, (8+4) );     // guess size
+        WorldPacket data( SMSG_FORCE_MOVE_ROOT, (8+4) );    // guess size
         data.append(Target->GetPackGUID());
         data << (uint32)2;
         SendPacket( &data );
@@ -281,15 +281,15 @@ void WorldSession::SendGMTicketGetTicket(uint32 status, char const* text)
 {
     int len = text ? strlen(text) : 0;
     WorldPacket data( SMSG_GMTICKET_GETTICKET, (4+len+1+4+2+4+4) );
-    data << status;             // standart 0x0A, 0x06 if text present
+    data << status;                                         // standart 0x0A, 0x06 if text present
     if(status == 6)
     {
-        data << text;           // ticket text
-        data << uint8(0x7);     // ticket category
-        data << uint32(0);      // time from ticket creation?
-        data << uint16(0);      // const
-        data << uint32(49024);  // const
-        data << uint32(49024);  // const
+        data << text;                                       // ticket text
+        data << uint8(0x7);                                 // ticket category
+        data << uint32(0);                                  // time from ticket creation?
+        data << uint16(0);                                  // const
+        data << uint32(49024);                              // const
+        data << uint32(49024);                              // const
     }
     SendPacket( &data );
 }
@@ -359,9 +359,9 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
     float x, y, z;
     uint8 category;
     std::string ticketText = "";
-    std::string unk_text; // "Reserved for future use" text
+    std::string unk_text;                                   // "Reserved for future use" text
 
-    recv_data >> category >> map >> x >> y >> z; // last check 2.0.12
+    recv_data >> category >> map >> x >> y >> z;            // last check 2.0.12
     recv_data >> ticketText;
     recv_data >> unk_text;
 
@@ -410,7 +410,7 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
 void WorldSession::HandleGMTicketSystemStatusOpcode( WorldPacket & recv_data )
 {
     WorldPacket data( SMSG_GMTICKET_SYSTEMSTATUS,4 );
-    data << uint32(1); // we can also disable ticket system by sending 0 value
+    data << uint32(1);                                      // we can also disable ticket system by sending 0 value
 
     SendPacket( &data );
 }
@@ -441,7 +441,7 @@ void WorldSession::HandleZoneUpdateOpcode( WorldPacket & recv_data )
     sLog.outDetail("WORLD: Recvd ZONE_UPDATE: %u", newZone);
 
     if(newZone != _player->GetZoneId())
-        GetPlayer()->SendInitWorldStates(); // only if really enters to new zone, not just area change, works strange...
+        GetPlayer()->SendInitWorldStates();                 // only if really enters to new zone, not just area change, works strange...
 
     GetPlayer()->UpdateZone(newZone);
 }
@@ -893,8 +893,8 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
             // pProto != NULL checked and fixed (if need with error output) at server load and don't must be happens here
 
             // item and level or GM
-            if( (!pProto || GetPlayer()->HasItemCount(ReqItem, 1)) && 
-                (GetPlayer()->getLevel() >= at->requiredLevel || sWorld.getConfig(CONFIG_IGNORE_AT_LEVEL_REQUIREMENT)) 
+            if( (!pProto || GetPlayer()->HasItemCount(ReqItem, 1)) &&
+                (GetPlayer()->getLevel() >= at->requiredLevel || sWorld.getConfig(CONFIG_IGNORE_AT_LEVEL_REQUIREMENT))
                 || GetPlayer()->isGameMaster() )
                 GetPlayer()->TeleportTo(at->target_mapId,at->target_X,at->target_Y,at->target_Z,at->target_Orientation,true,false);
             else
@@ -903,12 +903,12 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
                 SendAreaTriggerMessage(LANG_LEVEL_MINREQUIRED "%u and have item %s" LANG_LEVEL_MINREQUIRED_END,(uint32)at->requiredLevel,pProto->Name1);
             }
         }
-        else 
+        else
         {
             if(GetPlayer()->getLevel() >= at->requiredLevel || sWorld.getConfig(CONFIG_IGNORE_AT_LEVEL_REQUIREMENT) || GetPlayer()->isGameMaster())
-                    GetPlayer()->TeleportTo(at->target_mapId,at->target_X,at->target_Y,at->target_Z,at->target_Orientation,true,false);
+                GetPlayer()->TeleportTo(at->target_mapId,at->target_X,at->target_Y,at->target_Z,at->target_Orientation,true,false);
             else
-            {    
+            {
                 SendAreaTriggerMessage(LANG_LEVEL_MINREQUIRED "%u" LANG_LEVEL_MINREQUIRED_END,(uint32)at->requiredLevel );
             }
         }
@@ -991,32 +991,31 @@ void WorldSession::HandleMoveUnRootAck(WorldPacket& recv_data)
 
     sLog.outDebug( "WORLD: CMSG_FORCE_MOVE_UNROOT_ACK" );
     recv_data.hexlike();
-/*  uint64 guid;
-    uint64 unknown1;
-    uint32 unknown2;
-    float PositionX;
-    float PositionY;
-    float PositionZ;
-    float Orientation;
+    /*  uint64 guid;
+        uint64 unknown1;
+        uint32 unknown2;
+        float PositionX;
+        float PositionY;
+        float PositionZ;
+        float Orientation;
 
-    recv_data >> guid;
-    recv_data >> unknown1;
-    recv_data >> unknown2;
-    recv_data >> PositionX;
-    recv_data >> PositionY;
-    recv_data >> PositionZ;
-    recv_data >> Orientation;
+        recv_data >> guid;
+        recv_data >> unknown1;
+        recv_data >> unknown2;
+        recv_data >> PositionX;
+        recv_data >> PositionY;
+        recv_data >> PositionZ;
+        recv_data >> Orientation;
 
-    // TODO for later may be we can use for anticheat
-    //    DEBUG_LOG("Guid " I64FMTD,guid);
-    //    DEBUG_LOG("unknown1 " I64FMTD,unknown1);
-    //    DEBUG_LOG("unknown2 %u",unknown2);
-    //    DEBUG_LOG("X %f",PositionX);
-    //    DEBUG_LOG("Y %f",PositionY);
-    //    DEBUG_LOG("Z %f",PositionZ);
-    //    DEBUG_LOG("O %f",Orientation);*/
+        // TODO for later may be we can use for anticheat
+        //    DEBUG_LOG("Guid " I64FMTD,guid);
+        //    DEBUG_LOG("unknown1 " I64FMTD,unknown1);
+        //    DEBUG_LOG("unknown2 %u",unknown2);
+        //    DEBUG_LOG("X %f",PositionX);
+        //    DEBUG_LOG("Y %f",PositionY);
+        //    DEBUG_LOG("Z %f",PositionZ);
+        //    DEBUG_LOG("O %f",Orientation);*/
 }
-
 
 void WorldSession::HandleMoveRootAck(WorldPacket& recv_data)
 {
@@ -1024,30 +1023,30 @@ void WorldSession::HandleMoveRootAck(WorldPacket& recv_data)
 
     sLog.outDebug( "WORLD: CMSG_FORCE_MOVE_ROOT_ACK" );
     recv_data.hexlike();
-/*  uint64 guid;
-    uint64 unknown1;
-    uint32 unknown2;
-    float PositionX;
-    float PositionY;
-    float PositionZ;
-    float Orientation;
+    /*  uint64 guid;
+        uint64 unknown1;
+        uint32 unknown2;
+        float PositionX;
+        float PositionY;
+        float PositionZ;
+        float Orientation;
 
-    recv_data >> guid;
-    recv_data >> unknown1;
-    recv_data >> unknown2;
-    recv_data >> PositionX;
-    recv_data >> PositionY;
-    recv_data >> PositionZ;
-    recv_data >> Orientation;
+        recv_data >> guid;
+        recv_data >> unknown1;
+        recv_data >> unknown2;
+        recv_data >> PositionX;
+        recv_data >> PositionY;
+        recv_data >> PositionZ;
+        recv_data >> Orientation;
 
-    // for later may be we can use for anticheat
-    //    DEBUG_LOG("Guid " I64FMTD,guid);
-    //    DEBUG_LOG("unknown1 " I64FMTD,unknown1);
-    //    DEBUG_LOG("unknown1 %u",unknown2);
-    //    DEBUG_LOG("X %f",PositionX);
-    //    DEBUG_LOG("Y %f",PositionY);
-    //    DEBUG_LOG("Z %f",PositionZ);
-    //    DEBUG_LOG("O %f",Orientation);*/
+        // for later may be we can use for anticheat
+        //    DEBUG_LOG("Guid " I64FMTD,guid);
+        //    DEBUG_LOG("unknown1 " I64FMTD,unknown1);
+        //    DEBUG_LOG("unknown1 %u",unknown2);
+        //    DEBUG_LOG("X %f",PositionX);
+        //    DEBUG_LOG("Y %f",PositionY);
+        //    DEBUG_LOG("Z %f",PositionZ);
+        //    DEBUG_LOG("O %f",Orientation);*/
 }
 
 void WorldSession::HandleMoveTeleportAck(WorldPacket& recv_data)

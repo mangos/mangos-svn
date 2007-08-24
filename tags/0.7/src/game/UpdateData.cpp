@@ -118,7 +118,7 @@ bool UpdateData::BuildPacket(WorldPacket *packet)
         {
             //buf.appendPackGUID(*i);
             buf << (uint8)0xFF;
-            buf << (uint64) *i;            
+            buf << (uint64) *i;
         }
     }
 

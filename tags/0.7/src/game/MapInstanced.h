@@ -38,7 +38,7 @@ class MANGOS_DLL_DECL MapInstanced : public Map
     private:
 
         void CreateInstance(uint32 InstanceId, Map* &map);
-    
+
         HM_NAMESPACE::hash_map< uint32, Map* > InstancedMaps;
 
         Map* _FindMap(uint32 InstanceId)
@@ -48,5 +48,4 @@ class MANGOS_DLL_DECL MapInstanced : public Map
             return(i == InstancedMaps.end() ? NULL : i->second);
         }
 };
-
 #endif

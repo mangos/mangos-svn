@@ -118,7 +118,7 @@ struct PetLevelInfo
     uint16 mana;
 };
 
-struct ReputationOnKillEntry 
+struct ReputationOnKillEntry
 {
     uint32 repfaction1;
     uint32 repfaction2;
@@ -132,7 +132,8 @@ struct ReputationOnKillEntry
 };
 
 #define WEATHER_SEASONS 4
-struct WeatherSeasonChances {
+struct WeatherSeasonChances
+{
     uint32 rainChance;
     uint32 snowChance;
     uint32 stormChance;
@@ -365,12 +366,12 @@ class ObjectMgr
         void LoadGroups();
         void LoadQuests();
         void LoadQuestRelations()
-        { 
+        {
             LoadQuestRelationsHelper(mGOQuestRelations,"gameobject_questrelation");
             LoadQuestRelationsHelper(mGOQuestInvolvedRelations,"gameobject_involvedrelation");
             LoadQuestRelationsHelper(mCreatureQuestRelations,"creature_questrelation");
             LoadQuestRelationsHelper(mCreatureQuestInvolvedRelations,"creature_involvedrelation");
-        } 
+        }
         void LoadQuestRelationsHelper(QuestRelations& map,char const* table);
         QuestRelations mGOQuestRelations;
         QuestRelations mGOQuestInvolvedRelations;

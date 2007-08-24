@@ -37,7 +37,8 @@ GameObject::GameObject( WorldObject *instantiator ) : WorldObject( instantiator 
 {
     m_objectType |= TYPE_GAMEOBJECT;
     m_objectTypeId = TYPEID_GAMEOBJECT;
-    m_updateFlag = (UPDATEFLAG_HIGHGUID | UPDATEFLAG_ALL | UPDATEFLAG_HASPOSITION); // 2.0.10 - 0x58
+                                                            // 2.0.10 - 0x58
+    m_updateFlag = (UPDATEFLAG_HIGHGUID | UPDATEFLAG_ALL | UPDATEFLAG_HASPOSITION);
 
     m_valuesCount = GAMEOBJECT_END;
     m_respawnTime = 0;
@@ -397,7 +398,6 @@ void GameObject::SaveToDB()
         << GetUInt32Value (GAMEOBJECT_ANIMPROGRESS) << ", "
         << GetUInt32Value (GAMEOBJECT_DYN_FLAGS) << ")";;
 
-
     sDatabase.BeginTransaction();
     sDatabase.PExecuteLog("DELETE FROM `gameobject` WHERE `guid` = '%u'", m_DBTableGuid);
     sDatabase.PExecuteLog( ss.str( ).c_str( ) );
@@ -487,7 +487,6 @@ bool GameObject::hasInvolvedQuest(uint32 quest_id) const
     }
     return false;
 }
-
 
 bool GameObject::IsTransport() const
 {

@@ -231,15 +231,15 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
         {
             // locked doors are opened with spelleffect openlock, prevent remove its as looted
             go->SetUInt32Value(GAMEOBJECT_FLAGS,33);
-            go->SetUInt32Value(GAMEOBJECT_STATE,0);        //open
+            go->SetUInt32Value(GAMEOBJECT_STATE,0);         //open
             go->SetLootState(GO_CLOSED);
-            go->SetRespawnTime(5);                         //close door in 5 seconds                
+            go->SetRespawnTime(5);                          //close door in 5 seconds
         }
         else if (loot->isLooted() || go->GetGoType() == GAMEOBJECT_TYPE_FISHINGNODE)
         {
             // GO is mineral vein? so it is not removed after its looted
-            if(go->GetGoType() == GAMEOBJECT_TYPE_CHEST) 
-            { 
+            if(go->GetGoType() == GAMEOBJECT_TYPE_CHEST)
+            {
                 uint32 go_min = go->GetGOInfo()->sound4;
                 uint32 go_max = go->GetGOInfo()->sound5;
 

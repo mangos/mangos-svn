@@ -159,7 +159,6 @@ class MANGOS_DLL_SPEC Group
             return (mslot1->group==slot2->group);
         }
 
-
         MemberList const& GetMembers() const { return m_members; }
         uint32 GetMembersCount() const { return m_members.size(); }
         uint32 GetMemberCountForXPAtKill(Unit const* victim);
@@ -198,7 +197,7 @@ class MANGOS_DLL_SPEC Group
         {
             if(!isRaidGroup())
                 return;
-            
+
             if(_setMainTank(guid))
                 SendUpdate();
         }
@@ -206,7 +205,7 @@ class MANGOS_DLL_SPEC Group
         {
             if(!isRaidGroup())
                 return;
-            
+
             if(_setMainAssistant(guid))
                 SendUpdate();
         }

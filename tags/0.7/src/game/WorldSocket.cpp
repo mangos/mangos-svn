@@ -232,7 +232,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     SOCKET_CHECK_PACKET_SIZE(recvPacket,4+4+1+4+20);
 
     ///- Read the content of the packet
-    recvPacket >> BuiltNumberClient;                    // for now no use
+    recvPacket >> BuiltNumberClient;                        // for now no use
     recvPacket >> unk2;
     recvPacket >> account;
 
@@ -320,7 +320,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     ///- Re-check account ban (same check as in realmd) /// TO DO: why on earth do 2 checks for same thing?
     QueryResult *banresult = loginDatabase.PQuery("SELECT `bandate`,`unbandate` FROM `account_banned` WHERE `id` = '%u' AND `active` = 1", id);
-    if(banresult)                        // if account banned
+    if(banresult)                                           // if account banned
     {
         packet.Initialize( SMSG_AUTH_RESPONSE, 1 );
         packet << uint8( AUTH_BANNED );
@@ -382,7 +382,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     packet << (uint32)0;                                    // unknown random value...
     packet << (uint8)2;
     packet << (uint32)0;
-    packet << (uint8)(tbc ? 1 : 0);                                // 0 - normal, 1 - TBC, must be set in database manually for each account
+    packet << (uint8)(tbc ? 1 : 0);                         // 0 - normal, 1 - TBC, must be set in database manually for each account
     SendPacket(&packet);
 
     ///- Create a new WorldSession for the player and add it to the World

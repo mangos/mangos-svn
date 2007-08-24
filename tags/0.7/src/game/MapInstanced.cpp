@@ -96,7 +96,8 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
 
     if (InstanceId != 0) map = _FindMap(InstanceId);
 
-    if (map && obj->GetTypeId() != TYPEID_PLAYER) return(map); // return map for non-player objects
+                                                            // return map for non-player objects
+    if (map && obj->GetTypeId() != TYPEID_PLAYER) return(map);
 
     if (obj->GetTypeId() != TYPEID_PLAYER)
     {
@@ -124,16 +125,16 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
     if (i != player->m_BoundInstances.end())
     {
         // well, we have an instance bound, really, verify self or group leader
-        if (!((player->GetGUIDLow() == i->second.second) || 
-            (player->groupInfo.group && 
-             (GUID_LOPART(player->groupInfo.group->GetLeaderGUID()) == i->second.second))))
+        if (!((player->GetGUIDLow() == i->second.second) ||
+            (player->groupInfo.group &&
+            (GUID_LOPART(player->groupInfo.group->GetLeaderGUID()) == i->second.second))))
         {
             // well, we are bound to instance, but are not a leader and are not in the correct group
             // we must not rebind us or the instantiator (which can surely be the same)
             // will remain bound if accepted into group or will be unbound, if we go to homebind
-            InstanceId = i->second.first; // restore the instance bound
-            player->m_InstanceValid = false; // player instance is invalid
-            if (InstanceId != 0) map = _FindMap(InstanceId); // restore the map bound
+            InstanceId = i->second.first;                   // restore the instance bound
+            player->m_InstanceValid = false;                // player instance is invalid
+            if (InstanceId != 0) map = _FindMap(InstanceId);// restore the map bound
         }
     }
     else
@@ -142,7 +143,7 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
         map = NULL;
     }
 
-    if (map) return(map); // here we go, the map is found and we are correctly bound
+    if (map) return(map);                                   // here we go, the map is found and we are correctly bound
 
     Player* instantiator = NULL;
     uint32 instantiator_id = 0;
@@ -154,7 +155,7 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
     {
         // either we are not bound to the instance, or we have to create new instance, do it
         InstanceId = 0;
-    
+
         // determine the instantiator which designates the instance id
         if (player->groupInfo.group)
         {
@@ -173,7 +174,7 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
             sLog.outDebug("MAPINSTANCED: Player '%s' is not in group, instantiating map for player", player->GetName());
             instantiator = player;
         }
-    
+
         // now, get the real instance id from the instantiator
         if (instantiator_online)
         {
@@ -315,7 +316,7 @@ bool MapInstanced::IsValidInstance(uint32 InstanceId)
     if (m && m->NeedsReset())
     {
         // check for real reset need (can only reset if no players)
-        if (m->GetPlayersCount() == 0) return(false); // map exists, but needs reset
+        if (m->GetPlayersCount() == 0) return(false);       // map exists, but needs reset
         // shift reset time of the map to a bit later
         m->InitResetTime();
     }

@@ -42,5 +42,4 @@ enum eAuthResults
     REALM_AUTH_UNKNOWN5=0x0e,                               ///< Connected.
     REALM_AUTH_PARENTAL_CONTROL=0x0f                        ///< Access to this account has been blocked by parental controls. Your settings may be changed in your account preferences at <site>
 };
-
 #endif

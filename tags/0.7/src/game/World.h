@@ -175,7 +175,7 @@ class CliCommandHolder
         char *args;
         pPrintf zprintf;
     public:
-        CliCommandHolder(const CliCommand *command, const char *arguments, pPrintf zprintf) 
+        CliCommandHolder(const CliCommand *command, const char *arguments, pPrintf zprintf)
             : cmd(command), zprintf(zprintf)
         {
             size_t len = strlen(arguments)+1;

@@ -121,7 +121,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "tp",          SEC_MODERATOR,     &ChatHandler::HandleModifyTalentCommand,     "",   NULL },
         { "titles",      SEC_MODERATOR,     &ChatHandler::HandleModifyKnownTitlesCommand, "",  NULL },
         { "mount",       SEC_MODERATOR,     &ChatHandler::HandleModifyMountCommand,       "",  NULL },
-          
+
         { NULL,          0, NULL,                                        "",   NULL }
     };
 
@@ -671,7 +671,7 @@ char*     ChatHandler::extractKeyFromLink(char* text, char const* linkType)
     if(text && !*text)
         return NULL;
 
-    // return non link case 
+    // return non link case
     if(text && text[0]!='|')
         return strtok(text, " ");
 
@@ -697,7 +697,6 @@ char*     ChatHandler::extractKeyFromLink(char* text, char const* linkType)
     strtok(NULL, " ");                                      // skip link tail (to allow continue strtok(NULL,s) use after retturn from function
     return cKey;
 }
-
 
 char const *fmtstring( char const *format, ... )
 {

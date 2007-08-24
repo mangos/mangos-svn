@@ -201,8 +201,8 @@ enum INVENTORY_CLASS
 enum ITEM_SUBCLASS_CONSUMABLE
 {
     ITEM_SUBCLASS_CONSUMABLE                    = 0,
-    ITEM_SUBCLASS_FOOD                          = 1, // Cheese/Bread(OBSOLETE)
-    ITEM_SUBCLASS_LIQUID                        = 2, // Liquid(OBSOLETE)
+    ITEM_SUBCLASS_FOOD                          = 1,        // Cheese/Bread(OBSOLETE)
+    ITEM_SUBCLASS_LIQUID                        = 2,        // Liquid(OBSOLETE)
     ITEM_SUBCLASS_POTION                        = 3,
     ITEM_SUBCLASS_SCROLL                        = 4,
     ITEM_SUBCLASS_BANDAGE                       = 5,
@@ -260,7 +260,7 @@ enum ITEM_SUBCLASS_GEM
     ITEM_SUBCLASS_GEM_SIMPLE                    = 7,
     ITEM_SUBCLASS_GEM_PRISMATIC                 = 8
 };
- 
+
 enum ITEM_SUBCLASS_ARMOR
 {
     ITEM_SUBCLASS_ARMOR_MISC                    = 0,
@@ -278,11 +278,11 @@ enum ITEM_SUBCLASS_ARMOR
 
 enum ITEM_SUBCLASS_PROJECTILE
 {
-    ITEM_SUBCLASS_WAND                          = 0, // ABS
-    ITEM_SUBCLASS_BOLT                          = 1, // ABS
+    ITEM_SUBCLASS_WAND                          = 0,        // ABS
+    ITEM_SUBCLASS_BOLT                          = 1,        // ABS
     ITEM_SUBCLASS_ARROW                         = 2,
-    ITEM_SUBCLASS_BULLET                        = 3, 
-    ITEM_SUBCLASS_THROWN                        = 4  // ABS
+    ITEM_SUBCLASS_BULLET                        = 3,
+    ITEM_SUBCLASS_THROWN                        = 4         // ABS
 };
 
 enum ITEM_SUBCLASS_TRADE_GOODS
@@ -311,8 +311,8 @@ enum ITEM_SUBCLASS_BOOK
 
 enum ITEM_SUBCLASS_QUIVER
 {
-    ITEM_SUBCLASS_QUIVER0                       = 0, // ABS
-    ITEM_SUBCLASS_QUIVER1                       = 1, // ABS
+    ITEM_SUBCLASS_QUIVER0                       = 0,        // ABS
+    ITEM_SUBCLASS_QUIVER1                       = 1,        // ABS
     ITEM_SUBCLASS_QUIVER                        = 2,
     ITEM_SUBCLASS_AMMO_POUCH                    = 3
 };

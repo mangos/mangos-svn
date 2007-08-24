@@ -95,7 +95,7 @@ Creature::~Creature()
 void Creature::LoadTrainerSpells()
 {
     if(m_trainerSpellsLoaded)
-        return; 
+        return;
 
     m_trainer_spells.clear();
     m_trainer_type = 0;
@@ -689,7 +689,7 @@ void Creature::OnGossipSelect(Player* player, uint32 option)
         case GOSSIP_OPTION_PETITIONER:
             player->PlayerTalkClass->CloseGossip();
             player->GetSession()->SendPetitionShowList( guid );
-            break;            
+            break;
         case GOSSIP_OPTION_TABARDDESIGNER:
             player->PlayerTalkClass->CloseGossip();
             player->GetSession()->SendTabardVendorActivate( guid );
@@ -1172,7 +1172,7 @@ bool Creature::LoadFromDB(uint32 guid, uint32 InstanceId)
     if(curhealth)
     {
         curhealth = uint32(curhealth*_GetHealthMod(GetCreatureInfo()->rank));
-        if(curhealth < 1) 
+        if(curhealth < 1)
             curhealth = 1;
     }
 

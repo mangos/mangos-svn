@@ -94,7 +94,7 @@ bool WorldSession::SendAuctionInfo(WorldPacket & data, AuctionEntry* auction)
     {
         data << (uint32) pItem->GetEnchantmentId(EnchantmentSlot(i));
         data << (uint32) pItem->GetEnchantmentDuration(EnchantmentSlot(i));
-        data << (uint32) pItem->GetEnchantmentCharges(EnchantmentSlot(i));                                                  
+        data << (uint32) pItem->GetEnchantmentCharges(EnchantmentSlot(i));
     }
 
     data << (uint32) pItem->GetItemRandomPropertyId();      //random item property id

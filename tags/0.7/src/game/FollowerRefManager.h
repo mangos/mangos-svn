@@ -28,6 +28,4 @@ class FollowerRefManager : public RefManager<Unit, TargetedMovementGenerator>
 {
 
 };
-
-
 #endif

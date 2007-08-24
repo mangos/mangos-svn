@@ -128,7 +128,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
     uint32 flags2     = 0;
 
     /** lower flag1 **/
-    if(target == this) // building packet for oneself
+    if(target == this)                                      // building packet for oneself
         flags |= UPDATEFLAG_SELF;
 
     if(flags & UPDATEFLAG_HASPOSITION)
@@ -245,27 +245,27 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
 {
     *data << (uint8)flags;
 
-    if (flags & UPDATEFLAG_LIVING)          // 0x20
+    if (flags & UPDATEFLAG_LIVING)                          // 0x20
     {
         if(m_objectTypeId == TYPEID_UNIT)
         {
             switch(GetEntry())
             {
-                case 6491:                  // Spirit Healer
-                case 13116:                 // Alliance Spirit Guide
-                case 13117:                 // Horde Spirit Guide
+                case 6491:                                  // Spirit Healer
+                case 13116:                                 // Alliance Spirit Guide
+                case 13117:                                 // Horde Spirit Guide
                     flags2 |= 0x10000000;
                     break;
             }
         }
 
         *data << flags2;
-        *data << getMSTime();               // this appears to be time in ms but can be any thing (mask, flags)
+        *data << getMSTime();                               // this appears to be time in ms but can be any thing (mask, flags)
     }
 
-    if (flags & UPDATEFLAG_HASPOSITION)     // 0x40
+    if (flags & UPDATEFLAG_HASPOSITION)                     // 0x40
     {
-        if(flags & UPDATEFLAG_TRANSPORT)    // 0x2
+        if(flags & UPDATEFLAG_TRANSPORT)                    // 0x2
         {
             *data << (float)0;
             *data << (float)0;
@@ -281,7 +281,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
         }
     }
 
-    if (flags & UPDATEFLAG_LIVING)          // 0x20
+    if (flags & UPDATEFLAG_LIVING)                          // 0x20
     {
         if(flags2 & 0x0200)
         {
@@ -290,7 +290,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
             *data << (float)((Player*)this)->GetTransOffsetY();
             *data << (float)((Player*)this)->GetTransOffsetZ();
             *data << (float)((Player*)this)->GetTransOffsetO();
-            *data << uint32(0x11);          //unk, mask or flags
+            *data << uint32(0x11);                          //unk, mask or flags
         }
 
         /*if(flags2 & 0x200000)
@@ -298,7 +298,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
             *data << (float)0;
         }*/
 
-        *data << (uint32)0;                 // unknown
+        *data << (uint32)0;                                 // unknown
 
         /*if(flags2 & 0x2000)                 // unknown, unused now
         {
@@ -359,24 +359,24 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
         }*/
     }
 
-    if(flags & UPDATEFLAG_ALL)              // 0x10
+    if(flags & UPDATEFLAG_ALL)                              // 0x10
     {
-        *data << uint32(0);                 // unk
+        *data << uint32(0);                                 // unk
     }
 
-    if(flags & UPDATEFLAG_HIGHGUID)         // 0x8
+    if(flags & UPDATEFLAG_HIGHGUID)                         // 0x8
     {
-        *data << uint32(0);                 // unk
+        *data << uint32(0);                                 // unk
     }
 
     //if(flags & UPDATEFLAG_FULLGUID)       // 0x4
     //{
-        // packed guid (probably target guid)
+    // packed guid (probably target guid)
     //}
 
-    if(flags & UPDATEFLAG_TRANSPORT)        // 0x2
+    if(flags & UPDATEFLAG_TRANSPORT)                        // 0x2
     {
-        *data << getMSTime();               // unsure
+        *data << getMSTime();                               // unsure
     }
 }
 
@@ -775,32 +775,32 @@ void WorldObject::GetContactPoint( const WorldObject* obj, float &x, float &y, f
 
 void WorldObject::Say(const char* text, const uint32 language, const uint64 TargetGuid)
 {
-    WorldPacket data(SMSG_MESSAGECHAT, 200);    
+    WorldPacket data(SMSG_MESSAGECHAT, 200);
     data << (uint8)CHAT_MSG_MONSTER_SAY;
     data << (uint32)language;
     data << (uint64)GetGUID();
     data << (uint32)(strlen(GetName())+1);
     data << GetName();
-    data << (uint64)TargetGuid;             //Unit Target
+    data << (uint64)TargetGuid;                             //Unit Target
     data << (uint32)(strlen(text)+1);
     data << text;
-    data << (uint8)0;                       // ChatTag
+    data << (uint8)0;                                       // ChatTag
 
     SendMessageToSet(&data, true);
 }
 
 void WorldObject::Yell(const char* text, const uint32 language, const uint64 TargetGuid)
 {
-    WorldPacket data(SMSG_MESSAGECHAT, 200);    
+    WorldPacket data(SMSG_MESSAGECHAT, 200);
     data << (uint8)CHAT_MSG_MONSTER_YELL;
     data << (uint32)language;
     data << (uint64)GetGUID();
     data << (uint32)(strlen(GetName())+1);
     data << GetName();
-    data << (uint64)TargetGuid;             //Unit Target
+    data << (uint64)TargetGuid;                             //Unit Target
     data << (uint32)(strlen(text)+1);
     data << text;
-    data << (uint8)0;                       // ChatTag
+    data << (uint8)0;                                       // ChatTag
 
     SendMessageToSet(&data, true);
 }
@@ -810,17 +810,17 @@ void WorldObject::TextEmote(const char* text, const uint64 TargetGuid)
     std::string rightText = "%s ";
     rightText.append(text);
 
-    WorldPacket data(SMSG_MESSAGECHAT, 200);    
+    WorldPacket data(SMSG_MESSAGECHAT, 200);
     data << (uint8)CHAT_MSG_MONSTER_EMOTE;
     data << (uint32)LANG_UNIVERSAL;
     data << (uint32)(strlen(GetName())+1);
     data << GetName();
-    data << (uint64)TargetGuid;             //Unit Target
+    data << (uint64)TargetGuid;                             //Unit Target
     data << (uint32)(rightText.length()+1);
     data << rightText;
-    data << (uint8)0;                       // ChatTag
+    data << (uint8)0;                                       // ChatTag
 
-    SendMessageToSet(&data, true);          // SendMessageToOwnTeamSet()?
+    SendMessageToSet(&data, true);                          // SendMessageToOwnTeamSet()?
 }
 
 void WorldObject::Whisper(const uint64 receiver, const char* text)
@@ -830,10 +830,10 @@ void WorldObject::Whisper(const uint64 receiver, const char* text)
     data << (uint32)LANG_UNIVERSAL;
     data << (uint32)1;
     data << GetName();
-    data << (uint64)receiver;               //Also the Unit Target
+    data << (uint64)receiver;                               //Also the Unit Target
     data << (uint32)(strlen(text)+1);
     data << text;
-    data << (uint8)0;                       // ChatTag
+    data << (uint8)0;                                       // ChatTag
 
     Player *player = objmgr.GetPlayer(receiver);
     if(player && player->GetSession())
@@ -861,8 +861,8 @@ void WorldObject::BuildHeartBeatMsg(WorldPacket *data) const
     data->Initialize(MSG_MOVE_HEARTBEAT, 32);
 
     data->append(GetPackGUID());
-    *data << uint32(0);             // movement flags?
-    *data << getMSTime();           // time
+    *data << uint32(0);                                     // movement flags?
+    *data << getMSTime();                                   // time
     *data << m_positionX;
     *data << m_positionY;
     *data << m_positionZ;
@@ -874,9 +874,9 @@ void WorldObject::BuildTeleportAckMsg(WorldPacket *data, float x, float y, float
 {
     data->Initialize(MSG_MOVE_TELEPORT_ACK, 41);
     data->append(GetPackGUID());
-    *data << uint32(0);             // this value increments every time
-    *data << uint32(0x1000);        // movement flags? 0x10000000
-    *data << getMSTime();           // time
+    *data << uint32(0);                                     // this value increments every time
+    *data << uint32(0x1000);                                // movement flags? 0x10000000
+    *data << getMSTime();                                   // time
     *data << x;
     *data << y;
     *data << z;

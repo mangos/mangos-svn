@@ -242,14 +242,14 @@ void AuthSocket::OnRead()
             return;
 
         ///- Get the command out of it
-        ibuf.SoftRead((char *)&_cmd, 1); // UQ1: No longer exists in new net code ???
+        ibuf.SoftRead((char *)&_cmd, 1);                    // UQ1: No longer exists in new net code ???
         //ibuf.Read((char *)&_cmd, 1);
         /*char *command = (char *)malloc(1);
 
         ibuf.Read(command, 1);
 
         _cmd = (uint8)command;*/
-//      assert(0);
+        //      assert(0);
         size_t i;
 
         ///- Circle through known commands and call the correct command handler
@@ -441,7 +441,7 @@ bool AuthSocket::_HandleLogonChallenge()
                         pkt.append(N.AsByteArray(), 32);
                         pkt.append(s.AsByteArray(), s.GetNumBytes());
                         pkt.append(unk3.AsByteArray(), 16);
-                        pkt << (uint8)0;                // Added in 1.12.x client branch
+                        pkt << (uint8)0;                    // Added in 1.12.x client branch
                     }
                 }
                 delete result;
@@ -649,9 +649,9 @@ bool AuthSocket::_HandleRealmList()
     RealmList::RealmMap::const_iterator i;
     for( i = m_realmList.begin(); i != m_realmList.end(); i++ )
     {
-        pkt << i->second->icon;     // realm type
-        pkt << (uint8) 0;           // if 1, then realm locked
-        pkt << i->second->color;    // if 2, then realm is offline
+        pkt << i->second->icon;                             // realm type
+        pkt << (uint8) 0;                                   // if 1, then realm locked
+        pkt << i->second->color;                            // if 2, then realm is offline
         pkt << i->first;
         pkt << i->second->address;
         /// \todo Fix realm population
@@ -666,7 +666,7 @@ bool AuthSocket::_HandleRealmList()
         }
         pkt << AmountOfCharacters;
         pkt << i->second->timezone;
-        pkt << (uint8) 0x2C; // unk, may be realm number/id?
+        pkt << (uint8) 0x2C;                                // unk, may be realm number/id?
     }
     pkt << (uint8) 0x10;
     pkt << (uint8) 0x00;

@@ -35,12 +35,12 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
     MapManager::Instance().GetMap(GetPlayer()->GetMapId(), GetPlayer())->Remove(GetPlayer(),false);
     MapManager::Instance().GetMap(GetPlayer()->GetMapId(), GetPlayer())->Add(GetPlayer());
     WorldPacket data(SMSG_SET_REST_START, 4);
-    data << uint32(time(NULL));//getMSTime();
+    data << uint32(time(NULL));                             //getMSTime();
     SendPacket(&data);
 
     GetPlayer()->SetDontMove(false);
 
-    _player->SendAllowMove();   // resend after worldport complete
+    _player->SendAllowMove();                               // resend after worldport complete
 }
 
 void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
@@ -61,7 +61,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
     recv_data >> flags >> time;
     recv_data >> x >> y >> z >> orientation;
-    if (flags & MOVEMENTFLAG_ONTRANSPORT) // and if opcode 909?
+    if (flags & MOVEMENTFLAG_ONTRANSPORT)                   // and if opcode 909?
     {
         // recheck
         CHECK_PACKET_SIZE(recv_data,recv_data.rpos()+4+4+4+4+4+4);

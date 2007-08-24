@@ -97,8 +97,8 @@ class BattleGroundWS : public BattleGround
         void RemovePoint(uint32 TeamID, uint32 Points = 1) { m_TeamScores[GetTeamIndexByTeamId(TeamID)] -= Points; }
 
     private:
-        uint64 m_FlagKeepers[2];                              // 0 - alliance, 1 - horde
-        bool m_FlagState[2];                                  // for checking in base/dropped state
+        uint64 m_FlagKeepers[2];                            // 0 - alliance, 1 - horde
+        bool m_FlagState[2];                                // for checking in base/dropped state
         uint32 m_TeamScores[2];
 
         std::map<uint32, BattleGroundObjectInfo> m_bgobjects;

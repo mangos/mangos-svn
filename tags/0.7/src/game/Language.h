@@ -211,7 +211,7 @@
 #define LANG_WAYPOINT_NOTFOUND           "Creature (GUID: %u) No waypoint found."
 #define LANG_WAYPOINT_NOTFOUNDLAST       "Creature (GUID: %u) Last waypoint not found."
 #define LANG_WAYPOINT_NOTFOUNDSEARCH     "Creature (GUID: %u) No waypoint found - used 'wpguid'. Now trying to find it by its position..."
-#define LANG_WAYPOINT_NOTFOUNDDBPROBLEM  "Creature (GUID: %u) No waypoints found - This is a MaNGOS db problem (single float)."           
+#define LANG_WAYPOINT_NOTFOUNDDBPROBLEM  "Creature (GUID: %u) No waypoints found - This is a MaNGOS db problem (single float)."
 #define LANG_WAYPOINT_CREATSELECTED      "Selected creature is ignored - provided GUID is used"
 #define LANG_WAYPOINT_CREATNOTFOUND      "Creature (GUID: %u) not found"
 #define LANG_WAYPOINT_VP_SELECT          "You must select a visual waypoint."
@@ -228,7 +228,7 @@
 #define LANG_WAYPOINT_CHANGED_NO         "Waypoint %s modified."
 #define LANG_WAYPOINT_EXPORTED           "WP export successfull."
 #define LANG_WAYPOINT_NOTHINGTOEXPORT    "No waypoints found inside the database."
-#define LANG_WAYPOINT_IMPORTED           "File imported."      
+#define LANG_WAYPOINT_IMPORTED           "File imported."
 #define LANG_WAYPOINT_REMOVED            "Waypoint removed."
 #define LANG_WAYPOINT_NOTREMOVED         "Warning: Could not delete WP from the world with ID: %d"
 #define LANG_WAYPOINT_TOOFAR1            "This happens if the waypoint is too far away from your char."
@@ -294,7 +294,6 @@
 #define LANG_YOUR_CHAT_ENABLED           "Your chat has been enabled."
 #define LANG_YOU_ENABLE_CHAT             "You have enabled %s's chat."
 
-
 // level 3 chat
 #define LANG_SCRIPTS_RELOADED            "|cffff0000[System Message]:|rScripts reloaded"
 #define LANG_YOU_CHANGE_SECURITY         "You change security level of %s to %i."
@@ -352,7 +351,7 @@
 #define LANG_COMMAND_GRAVEYARDERROR      "No faction in Graveyard with id= #%u , fix your DB"
 #define LANG_COMMAND_GRAVEYARD_NOTEAM    "invalid team, please fix database"
 #define LANG_COMMAND_GRAVEYARD_ANY       "any"
-#define LANG_COMMAND_GRAVEYARD_ALLIANCE  "alliance" 
+#define LANG_COMMAND_GRAVEYARD_ALLIANCE  "alliance"
 #define LANG_COMMAND_GRAVEYARD_HORDE     "horde"
 #define LANG_COMMAND_GRAVEYARDNEAREST    "Graveyard #%u (faction: %s) is nearest from linked to zone #%u."
 #define LANG_COMMAND_ZONENOGRAVEYARDS    "Zone #%u doesn't have linked graveyards."

@@ -134,44 +134,62 @@ uint32 GenerateEnchSuffixFactor(uint32 item_id)
         switch(itemProto->InventoryType)
         {
             case INVTYPE_HEAD:
-                { suffixFactor = ITEM_SUFFIXFACTOR_HEAD_MOD; }  break;
+                { suffixFactor = ITEM_SUFFIXFACTOR_HEAD_MOD; }
+                break;
             case INVTYPE_NECK:
-                { suffixFactor = ITEM_SUFFIXFACTOR_NECK_MOD; }  break;
+                { suffixFactor = ITEM_SUFFIXFACTOR_NECK_MOD; }
+                break;
             case INVTYPE_SHOULDERS:
-                { suffixFactor = ITEM_SUFFIXFACTOR_SHOULDERS_MOD; }  break;
+                { suffixFactor = ITEM_SUFFIXFACTOR_SHOULDERS_MOD; }
+                break;
             case INVTYPE_CHEST:
             case INVTYPE_ROBE:
             case INVTYPE_BODY:
-                { suffixFactor = ITEM_SUFFIXFACTOR_CHEST_MOD; }  break;
+                { suffixFactor = ITEM_SUFFIXFACTOR_CHEST_MOD; }
+                break;
             case INVTYPE_WAIST:
-                { suffixFactor = ITEM_SUFFIXFACTOR_WAIST_MOD; }  break;
+                { suffixFactor = ITEM_SUFFIXFACTOR_WAIST_MOD; }
+                break;
             case INVTYPE_LEGS:
-                { suffixFactor = ITEM_SUFFIXFACTOR_LEGS_MOD; }  break;
+                { suffixFactor = ITEM_SUFFIXFACTOR_LEGS_MOD; }
+                break;
             case INVTYPE_FEET:
-                { suffixFactor = ITEM_SUFFIXFACTOR_FEET_MOD; }  break;
+                { suffixFactor = ITEM_SUFFIXFACTOR_FEET_MOD; }
+                break;
             case INVTYPE_WRISTS:
-                { suffixFactor = ITEM_SUFFIXFACTOR_WRISTS_MOD; }  break;
+                { suffixFactor = ITEM_SUFFIXFACTOR_WRISTS_MOD; }
+                break;
             case INVTYPE_HANDS:
-                { suffixFactor = ITEM_SUFFIXFACTOR_HANDS_MOD; }  break;
+                { suffixFactor = ITEM_SUFFIXFACTOR_HANDS_MOD; }
+                break;
             case INVTYPE_FINGER:
-                { suffixFactor = ITEM_SUFFIXFACTOR_FINGER_MOD; }  break;
+                { suffixFactor = ITEM_SUFFIXFACTOR_FINGER_MOD; }
+                break;
             case INVTYPE_SHIELD:
-                { suffixFactor = ITEM_SUFFIXFACTOR_SHIELD_MOD; }  break;
+                { suffixFactor = ITEM_SUFFIXFACTOR_SHIELD_MOD; }
+                break;
             case INVTYPE_RANGED:
-                { suffixFactor = ITEM_SUFFIXFACTOR_RANGED_MOD; }  break;
+                { suffixFactor = ITEM_SUFFIXFACTOR_RANGED_MOD; }
+                break;
             case INVTYPE_CLOAK:
-                { suffixFactor = ITEM_SUFFIXFACTOR_BACK_MOD; }  break;
+                { suffixFactor = ITEM_SUFFIXFACTOR_BACK_MOD; }
+                break;
             case INVTYPE_2HWEAPON:
-                { suffixFactor = ITEM_SUFFIXFACTOR_2HAND_MOD; }  break;
+                { suffixFactor = ITEM_SUFFIXFACTOR_2HAND_MOD; }
+                break;
             case INVTYPE_WEAPONMAINHAND:
-                { suffixFactor = ITEM_SUFFIXFACTOR_MAIN_HAND_MOD; }  break;
+                { suffixFactor = ITEM_SUFFIXFACTOR_MAIN_HAND_MOD; }
+                break;
             case INVTYPE_WEAPONOFFHAND:
             case INVTYPE_HOLDABLE:
-                { suffixFactor = ITEM_SUFFIXFACTOR_OFF_HAND_MOD; }  break;
+                { suffixFactor = ITEM_SUFFIXFACTOR_OFF_HAND_MOD; }
+                break;
             case INVTYPE_THROWN:
-                { suffixFactor = ITEM_SUFFIXFACTOR_THROWN_MOD; }  break;
+                { suffixFactor = ITEM_SUFFIXFACTOR_THROWN_MOD; }
+                break;
             case INVTYPE_WEAPON:
-                { suffixFactor = ITEM_SUFFIXFACTOR_ONE_HAND_MOD; }  break;
+                { suffixFactor = ITEM_SUFFIXFACTOR_ONE_HAND_MOD; }
+                break;
             default:  return 0;
         }
 

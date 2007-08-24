@@ -22,7 +22,7 @@
 #if COMPILER == COMPILER_MICROSOFT
 // Visual Leak Detector support enabled
 #include <vld/vld.h>
-// standard Visual Studio leak check disabled, 
+// standard Visual Studio leak check disabled,
 //#  define _CRTDBG_MAP_ALLOC
 //#  include <stdlib.h>
 //#  include <crtdbg.h>

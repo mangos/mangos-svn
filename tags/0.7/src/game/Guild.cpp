@@ -234,7 +234,7 @@ bool Guild::LoadGuildFromDB(uint32 GuildId)
     {
         DelMember(leaderGuid);
 
-        // check no members case (disbanded) 
+        // check no members case (disbanded)
         if(members.size()==0)
             return false;
     }

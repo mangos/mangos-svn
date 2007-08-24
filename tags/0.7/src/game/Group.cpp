@@ -47,7 +47,7 @@ bool Group::Create(const uint64 &guid, const char * name)
 
     for(Group::member_citerator itr = m_members.begin(); itr != m_members.end(); ++itr)
     {
-        sDatabase.PExecute("INSERT INTO `group_member`(`leaderGuid`,`memberGuid`,`assistant`,`subgroup`) VALUES('%u','%u','%u','%u')", 
+        sDatabase.PExecute("INSERT INTO `group_member`(`leaderGuid`,`memberGuid`,`assistant`,`subgroup`) VALUES('%u','%u','%u','%u')",
             GUID_LOPART(m_leaderGuid), GUID_LOPART(itr->guid), (itr->assistant==1)?1:0, itr->group);
     }
     sDatabase.CommitTransaction();
@@ -326,7 +326,7 @@ void Group::SendLootAllPassed(uint64 Guid, uint32 NumberOfPlayers, const Roll &r
     data << uint32(NumberOfPlayers);                        // The number of players rolling for it???
     data << uint32(r.itemid);                               // The itemEntryId for the item that shall be rolled for
     data << uint32(r.itemRandomPropId);                     // Item random property ID
-    data << uint32(r.itemRandomSuffix);                     // Item random suffix ID 
+    data << uint32(r.itemRandomSuffix);                     // Item random suffix ID
 
     map<uint64, RollVote>::const_iterator itr;
     for (itr=r.playerVote.begin(); itr!=r.playerVote.end(); itr++)
@@ -717,7 +717,7 @@ void Group::SendUpdate()
                                                             // guess size
         WorldPacket data(SMSG_GROUP_LIST, (6+8+8+1+2+m_members.size()*20));
         data << (uint8)m_groupType;
-        data << (uint8)((m_bgGroup==true) ? 1 : 0);//2.0.x
+        data << (uint8)((m_bgGroup==true) ? 1 : 0);         //2.0.x
                                                             // own flags (groupid | (assistant?0x80:0))
         data << (uint8)(citr->group | (citr->assistant?0x80:0));
 
@@ -738,9 +738,9 @@ void Group::SendUpdate()
         data << m_leaderGuid;
         data << (uint8)m_lootMethod;
         data << m_looterGuid;
-        data << (uint16)m_lootThreshold; // loot threshold
-        data << m_mainTank;//2.0.x
-        data << m_mainAssistant;//2.0.x
+        data << (uint16)m_lootThreshold;                    // loot threshold
+        data << m_mainTank;                                 //2.0.x
+        data << m_mainAssistant;                            //2.0.x
 
         player->GetSession()->SendPacket( &data );
     }
@@ -872,7 +872,7 @@ void Group::_setLeader(const uint64 &guid)
                     {
                         if (i_BoundInstances->second.second == GUID_LOPART(old_guid))
                         {
-                            
+
                             i_BoundInstances->second.second = GUID_LOPART(new_guid);
                             changed_bindings.insert(i_BoundInstances->first);
                         }
@@ -923,7 +923,7 @@ void Group::_setLeader(const uint64 &guid)
             sDatabase.Execute(ss.str().c_str());
         }
     }
-    
+
     sDatabase.BeginTransaction();
     sDatabase.PExecute("UPDATE `group` SET `leaderGuid`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(slot->guid), GUID_LOPART(m_leaderGuid));
     sDatabase.PExecute("UPDATE `group_member` SET `leaderGuid`='%u' WHERE `leaderGuid`='%u'", GUID_LOPART(slot->guid), GUID_LOPART(m_leaderGuid));
@@ -976,7 +976,6 @@ bool Group::_setAssistantFlag(const uint64 &guid, const bool &state)
     member_witerator slot = _getMemberWSlot(guid);
     if(slot==m_members.end())
         return false;
-
 
     slot->assistant = state;
     sDatabase.PExecute("UPDATE `group_member` SET `assistant`='%u' WHERE `memberGuid`='%u'", (state==true)?1:0, GUID_LOPART(guid));

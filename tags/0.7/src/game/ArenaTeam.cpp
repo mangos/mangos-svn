@@ -1,20 +1,20 @@
 /* 
-* Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
-*
-* This program is free software; you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation; either version 2 of the License, or
-* (at your option) any later version.
-*
-* This program is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with this program; if not, write to the Free Software
-* Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
-*/
+ * Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+ */
 
 #include "WorldPacket.h"
 #include "ObjectMgr.h"
@@ -26,11 +26,11 @@ ArenaTeam::ArenaTeam()
     Type            = 0;
     Name            = "";
     CaptainGuid     = 0;
-    EmblemStyle     = 0;        // icon
-    EmblemColor     = 0;        // icon color
-    BorderStyle     = 0;        // border
-    BorderColor     = 0;        // border color
-    BackgroundColor = 0;        // background
+    EmblemStyle     = 0;                                    // icon
+    EmblemColor     = 0;                                    // icon color
+    BorderStyle     = 0;                                    // border
+    BorderColor     = 0;                                    // border color
+    BackgroundColor = 0;                                    // background
     stats.games     = 0;
     stats.played    = 0;
     stats.rank      = 0;
@@ -46,9 +46,9 @@ ArenaTeam::~ArenaTeam()
 
 bool ArenaTeam::create(uint64 captainGuid, uint32 type, std::string ArenaTeamName)
 {
-    if(!objmgr.GetPlayer(captainGuid))              // player not exist
+    if(!objmgr.GetPlayer(captainGuid))                      // player not exist
         return false;
-    if(objmgr.GetArenaTeamByName(ArenaTeamName))    // arena team with this name already exist
+    if(objmgr.GetArenaTeamByName(ArenaTeamName))            // arena team with this name already exist
         return false;
 
     sLog.outDebug("GUILD: creating arena team %s to leader: %u", ArenaTeamName.c_str(), GUID_LOPART(CaptainGuid));
@@ -86,9 +86,10 @@ bool ArenaTeam::AddMember(uint64 PlayerGuid)
     std::string plName;
     uint8 plClass;
 
-    if(!objmgr.GetPlayerNameByGUID(PlayerGuid, plName))             // player doesnt exist
+    if(!objmgr.GetPlayerNameByGUID(PlayerGuid, plName))     // player doesnt exist
         return false;
-    if(Player::GetArenaTeamIdFromDB(PlayerGuid, GetSlot()) != 0)    // player already in arenateam of that size
+                                                            // player already in arenateam of that size
+    if(Player::GetArenaTeamIdFromDB(PlayerGuid, GetSlot()) != 0)
         return false;
 
     // remove all player signs from another petitions
@@ -307,38 +308,38 @@ void ArenaTeam::Roster(WorldSession *session)
     Player *pl = NULL;
 
     WorldPacket data(SMSG_ARENA_TEAM_ROSTER, 100);
-    data << GetSlot();                          // slot
-    data << GetMembersSize();                   // members count
-    data << uint32(0);                          // unknown (may be arena team id?)
+    data << GetSlot();                                      // slot
+    data << GetMembersSize();                               // members count
+    data << uint32(0);                                      // unknown (may be arena team id?)
 
     for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
     {
         pl = objmgr.GetPlayer(itr->guid);
         if(pl)
         {
-            data << pl->GetGUID();              // guid
-            data << uint8(1);                   // online flag
-            data << pl->GetName();              // member name
-            data << pl->GetZoneId();            // unknown, probably rank or zone (0 and 1 ?)
-            data << uint8(pl->getLevel());      // unknown, probably level
-            data << pl->getClass();             // class
-            data << itr->played_week;           // played this week
-            data << itr->wons_week;             // wins this week
-            data << itr->played_season;         // played this season
-            data << itr->wons_season;           // wins this season
+            data << pl->GetGUID();                          // guid
+            data << uint8(1);                               // online flag
+            data << pl->GetName();                          // member name
+            data << pl->GetZoneId();                        // unknown, probably rank or zone (0 and 1 ?)
+            data << uint8(pl->getLevel());                  // unknown, probably level
+            data << pl->getClass();                         // class
+            data << itr->played_week;                       // played this week
+            data << itr->wons_week;                         // wins this week
+            data << itr->played_season;                     // played this season
+            data << itr->wons_season;                       // wins this season
         }
         else
         {
-            data << itr->guid;                  // guid
-            data << uint8(0);                   // online flag
-            data << itr->name;                  // member name
-            data << uint32(0);                  // unknown, zone id?
-            data << uint8(0);                   // unknown, level?
-            data << itr->Class;                 // class
-            data << itr->played_week;           // played this week
-            data << itr->wons_week;             // wins this week
-            data << itr->played_season;         // played this season
-            data << itr->wons_season;           // wins this season
+            data << itr->guid;                              // guid
+            data << uint8(0);                               // online flag
+            data << itr->name;                              // member name
+            data << uint32(0);                              // unknown, zone id?
+            data << uint8(0);                               // unknown, level?
+            data << itr->Class;                             // class
+            data << itr->played_week;                       // played this week
+            data << itr->wons_week;                         // wins this week
+            data << itr->played_season;                     // played this season
+            data << itr->wons_season;                       // wins this season
         }
     }
     session->SendPacket(&data);
@@ -348,14 +349,14 @@ void ArenaTeam::Roster(WorldSession *session)
 void ArenaTeam::Query(WorldSession *session)
 {
     WorldPacket data(SMSG_ARENA_TEAM_QUERY_RESPONSE, 4*7+GetName().size()+1);
-    data << GetId();                            // team id
-    data << GetName();                          // team name
-    data << GetType();                          // arena team type (2=2x2, 3=3x3 or 5=5x5)
-    data << EmblemStyle;                        // emblem style?
-    data << EmblemColor;                        // emblem color?
-    data << BorderStyle;                        // border style?
-    data << BorderColor;                        // border color?
-    data << BackgroundColor;                    // background color?
+    data << GetId();                                        // team id
+    data << GetName();                                      // team name
+    data << GetType();                                      // arena team type (2=2x2, 3=3x3 or 5=5x5)
+    data << EmblemStyle;                                    // emblem style?
+    data << EmblemColor;                                    // emblem color?
+    data << BorderStyle;                                    // border style?
+    data << BorderColor;                                    // border color?
+    data << BackgroundColor;                                // background color?
     session->SendPacket(&data);
     sLog.outDebug("WORLD: Sent SMSG_ARENA_TEAM_QUERY_RESPONSE");
 }
@@ -363,26 +364,26 @@ void ArenaTeam::Query(WorldSession *session)
 void ArenaTeam::Stats(WorldSession *session)
 {
     WorldPacket data(SMSG_ARENA_TEAM_STATS, 4*7);
-    data << GetId();                            // arena team id
-    data << stats.rating;                       // rating
-    data << stats.games;                        // games
-    data << stats.wins;                         // wins
-    data << stats.played;                       // played
-    data << stats.wins2;                        // wins(again o_O)
-    data << stats.rank;                         // rank
+    data << GetId();                                        // arena team id
+    data << stats.rating;                                   // rating
+    data << stats.games;                                    // games
+    data << stats.wins;                                     // wins
+    data << stats.played;                                   // played
+    data << stats.wins2;                                    // wins(again o_O)
+    data << stats.rank;                                     // rank
     session->SendPacket(&data);
 }
 
 void ArenaTeam::InspectStats(WorldSession *session)
 {
     WorldPacket data(MSG_INSPECT_ARENA_STATS, 8+1+4*5);
-    data << session->GetPlayer()->GetGUID();    // player guid
-    data << GetSlot();                          // slot (0...2)
-    data << GetId();                            // arena team id
-    data << stats.rating;                       // rating
-    data << stats.games;                        // games
-    data << stats.wins;                         // wins
-    data << stats.played;                       // played (count of all games, that played...)
+    data << session->GetPlayer()->GetGUID();                // player guid
+    data << GetSlot();                                      // slot (0...2)
+    data << GetId();                                        // arena team id
+    data << stats.rating;                                   // rating
+    data << stats.games;                                    // games
+    data << stats.wins;                                     // wins
+    data << stats.played;                                   // played (count of all games, that played...)
     session->SendPacket(&data);
 }
 
