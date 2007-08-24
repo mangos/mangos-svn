@@ -15,8 +15,8 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\shared___Win32_Release"
-			IntermediateDirectory=".\shared___Win32_Release"
+			OutputDirectory=".\shared___$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\shared___$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
@@ -48,10 +48,10 @@
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\shared___Win32_Release/shared.pch"
-				AssemblerListingLocation=".\shared___Win32_Release/"
-				ObjectFile=".\shared___Win32_Release/"
-				ProgramDataBaseFileName=".\shared___Win32_Release/"
+				PrecompiledHeaderFile=".\shared___$(PlatformName)_$(ConfigurationName)/shared.pch"
+				AssemblerListingLocation=".\shared___$(PlatformName)_$(ConfigurationName)/"
+				ObjectFile=".\shared___$(PlatformName)_$(ConfigurationName)/"
+				ProgramDataBaseFileName=".\shared___$(PlatformName)_$(ConfigurationName)/"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				Detect64BitPortabilityProblems="true"
@@ -70,8 +70,8 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies=".\g3dlite___Win32_Release\g3dlite.lib"
-				OutputFile=".\shared___Win32_Release\shared.lib"
+				AdditionalDependencies=".\g3dlite___$(PlatformName)_$(ConfigurationName)\g3dlite.lib"
+				OutputFile=".\shared___$(PlatformName)_$(ConfigurationName)\shared.lib"
 				SuppressStartupBanner="true"
 			/>
 			<Tool
@@ -92,8 +92,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\shared___Win32_Debug"
-			IntermediateDirectory=".\shared___Win32_Debug"
+			OutputDirectory=".\shared___$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\shared___$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
@@ -124,10 +124,10 @@
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\shared___Win32_Debug\shared.pch"
-				AssemblerListingLocation=".\shared___Win32_Debug\"
-				ObjectFile=".\shared___Win32_Debug\"
-				ProgramDataBaseFileName=".\shared___Win32_Debug\"
+				PrecompiledHeaderFile=".\shared___$(PlatformName)_$(ConfigurationName)\shared.pch"
+				AssemblerListingLocation=".\shared___$(PlatformName)_$(ConfigurationName)\"
+				ObjectFile=".\shared___$(PlatformName)_$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\shared___$(PlatformName)_$(ConfigurationName)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				Detect64BitPortabilityProblems="true"
@@ -147,8 +147,8 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies=".\g3dlite___Win32_Debug\g3dlite.lib"
-				OutputFile=".\shared___Win32_Debug\shared.lib"
+				AdditionalDependencies=".\g3dlite___$(PlatformName)_$(ConfigurationName)\g3dlite.lib"
+				OutputFile=".\shared___$(PlatformName)_$(ConfigurationName)\shared.lib"
 				SuppressStartupBanner="true"
 			/>
 			<Tool

@@ -14,8 +14,8 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\..\..\bin\Release"
-			IntermediateDirectory=".\realmlistRelease"
+			OutputDirectory="./realmd__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="./realmd__$(PlatformName)_$(ConfigurationName)/"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -29,10 +29,10 @@
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
-				PrecompiledHeaderFile=".\Release/realmd.pch"
-				AssemblerListingLocation=".\realmlistRelease/"
-				ObjectFile=".\realmlistRelease/"
-				ProgramDataBaseFileName=".\realmlistRelease/"
+				PrecompiledHeaderFile="./realmd__$(PlatformName)_$(ConfigurationName)/realmd.pch"
+				AssemblerListingLocation="./realmd__$(PlatformName)_$(ConfigurationName)/"
+				ObjectFile="./realmd__$(PlatformName)_$(ConfigurationName)/"
+				ProgramDataBaseFileName="./realmd__$(PlatformName)_$(ConfigurationName)/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				Detect64BitPortabilityProblems="TRUE"
@@ -43,15 +43,15 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="zthread.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
-				OutputFile=".\..\..\bin\release\realmd.exe"
+				OutputFile="./realmd__$(PlatformName)_$(ConfigurationName)/realmd.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="..\..\dep\lib\release;.\zthread___Win32_Release"
-				ProgramDatabaseFile=".\..\..\bin\Release/realmd.pdb"
+				AdditionalLibraryDirectories="..\..\dep\lib\release;.\zthread___$(PlatformName)_$(ConfigurationName)"
+				ProgramDatabaseFile="./realmd__$(PlatformName)_$(ConfigurationName)/realmd.pdb"
 				SubSystem="1"/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\..\..\bin\Release/realmd.tlb"/>
+				TypeLibraryName="./realmd__$(PlatformName)_$(ConfigurationName)/realmd.tlb"/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool
@@ -75,8 +75,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\..\..\bin\Debug"
-			IntermediateDirectory=".\realmlistDebug"
+			OutputDirectory="./realmd__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory="./realmd__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -90,10 +90,10 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="TRUE"
-				PrecompiledHeaderFile=".\Debug/realmd.pch"
-				AssemblerListingLocation=".\realmlistDebug/"
-				ObjectFile=".\realmlistDebug/"
-				ProgramDataBaseFileName=".\realmlistDebug/"
+				PrecompiledHeaderFile="./realmd__$(PlatformName)_$(ConfigurationName)/realmd.pch"
+				AssemblerListingLocation="./realmd__$(PlatformName)_$(ConfigurationName)/"
+				ObjectFile="./realmd__$(PlatformName)_$(ConfigurationName)/"
+				ProgramDataBaseFileName="./realmd__$(PlatformName)_$(ConfigurationName)/"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				Detect64BitPortabilityProblems="TRUE"
@@ -105,17 +105,17 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="zthread.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
-				OutputFile=".\..\..\bin\Debug\realmd.exe"
+				OutputFile="./realmd__$(PlatformName)_$(ConfigurationName)/realmd.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
-				AdditionalLibraryDirectories="..\..\dep\lib\debug;.\zthread___Win32_Debug"
+				AdditionalLibraryDirectories="..\..\dep\lib\debug;.\zthread___$(PlatformName)_$(ConfigurationName)"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\..\..\bin\Debug/realmd.pdb"
+				ProgramDatabaseFile="./realmd__$(PlatformName)_$(ConfigurationName)/realmd.pdb"
 				SubSystem="1"
 				FixedBaseAddress="1"/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName=".\..\..\bin\Debug/realmd.tlb"/>
+				TypeLibraryName="./realmd__$(PlatformName)_$(ConfigurationName)/realmd.tlb"/>
 			<Tool
 				Name="VCPostBuildEventTool"/>
 			<Tool

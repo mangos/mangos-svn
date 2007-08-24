@@ -13,8 +13,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="..\..\bin\Debug"
-			IntermediateDirectory=".\script___Win32_Debug"
+			OutputDirectory=".\script___$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\script___$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="2"
 			CharacterSet="2">
 			<Tool
@@ -33,10 +33,10 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="mangosd.lib  zlib.lib zthread.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
+				AdditionalDependencies="mangosd.lib zlib.lib zthread.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
 				OutputFile="$(OutDir)/MaNGOSScript.dll"
 				LinkIncremental="2"
-				AdditionalLibraryDirectories="..\..\bin\debug;..\..\dep\lib\debug;.\zlib___Win32_Debug;.\zthread___Win32_Debug"
+				AdditionalLibraryDirectories=".\mangosd___$(PlatformName)_$(ConfigurationName);..\..\dep\lib\debug;.\zlib___$(PlatformName)_$(ConfigurationName);.\zthread___$(PlatformName)_$(ConfigurationName)"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="$(OutDir)/MaNGOSScript.pdb"
 				SubSystem="2"
@@ -65,8 +65,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="..\..\bin\Release"
-			IntermediateDirectory=".\script___Win32_Release"
+			OutputDirectory=".\script___$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\script___$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="2"
 			CharacterSet="2">
 			<Tool
@@ -85,7 +85,7 @@
 				AdditionalDependencies="mangosd.lib zlib.lib zthread.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
 				OutputFile="$(OutDir)/MaNGOSScript.dll"
 				LinkIncremental="1"
-				AdditionalLibraryDirectories="..\..\bin\release;..\..\dep\lib\release;.\zlib___Win32_Release;.\zthread___Win32_Release"
+				AdditionalLibraryDirectories=".\mangosd___$(PlatformName)_$(ConfigurationName);..\..\dep\lib\release;.\zlib___$(PlatformName)_$(ConfigurationName);.\zthread___$(PlatformName)_$(ConfigurationName)"
 				GenerateDebugInformation="FALSE"
 				SubSystem="2"
 				OptimizeReferences="2"

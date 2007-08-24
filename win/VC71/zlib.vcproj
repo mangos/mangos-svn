@@ -13,8 +13,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\zlib___Win32_Debug"
-			IntermediateDirectory=".\zlib___Win32_Debug"
+			OutputDirectory=".\zlib___$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\zlib___$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="2">
 			<Tool
@@ -27,7 +27,7 @@
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\zlib___Win32_Debug/zlib.pch"
+				PrecompiledHeaderFile=".\zlib___$(PlatformName)_$(ConfigurationName)/zlib.pch"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="3"/>
@@ -57,8 +57,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\zlib___Win32_Release"
-			IntermediateDirectory=".\zlib___Win32_Release"
+			OutputDirectory=".\zlib___$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\zlib___$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="2">
 			<Tool
@@ -68,7 +68,7 @@
 				RuntimeLibrary="0"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\zlib___Win32_Release/zlib.pch"
+				PrecompiledHeaderFile=".\zlib___$(PlatformName)_$(ConfigurationName)/zlib.pch"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="3"/>
