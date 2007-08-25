@@ -94,7 +94,7 @@ void Corpse::SaveToDB()
 {
     // prevent DB data inconsistance problems and duplicates
     sDatabase.BeginTransaction();
-    DeleteFromDB(false);
+    DeleteFromDB();
 
     std::ostringstream ss;
     ss  << "INSERT INTO `corpse` (`guid`,`player`,`position_x`,`position_y`,`position_z`,`orientation`,`zone`,`map`,`data`,`time`,`bones_flag`,`instance`) VALUES ("
@@ -121,23 +121,14 @@ void Corpse::DeleteBonesFromWorld()
     ObjectAccessor::Instance().AddObjectToRemoveList(this);
 }
 
-void Corpse::DeleteFromDB(bool inner_transaction)
+void Corpse::DeleteFromDB()
 {
-    std::ostringstream ss;
-
-    if(inner_transaction)
-        sDatabase.BeginTransaction();
-
     if(GetType() == CORPSE_BONES)
         // only specific bones
-        ss  << "DELETE FROM `corpse` WHERE `guid` = '" << GetGUIDLow() << "'";
+        sDatabase.PExecute("DELETE FROM `corpse` WHERE `guid` = '%d'", GetGUIDLow());
     else
         // all corpses (not bones)
-        ss  << "DELETE FROM `corpse` WHERE `player` = '" << GUID_LOPART(GetOwnerGUID()) << "' AND `bones_flag` = '0'";
-    sDatabase.Execute( ss.str().c_str() );
-
-    if(inner_transaction)
-        sDatabase.CommitTransaction();
+        sDatabase.PExecute("DELETE FROM `corpse` WHERE `player` = '%d' AND `bones_flag` = '0'",  GUID_LOPART(GetOwnerGUID()));
 }
 
 bool Corpse::LoadFromDB(uint32 guid, QueryResult *result, uint32 InstanceId)
@@ -198,81 +189,6 @@ bool Corpse::LoadFromDB(uint32 guid, Field *fields)
     m_grid = MaNGOS::ComputeGridPair(GetPositionX(), GetPositionY());
 
     return true;
-}
-
-void Corpse::_ConvertCorpseToBones()
-{
-    // corpse can be converted in another thread already
-    if(GetType()!=CORPSE_RESURRECTABLE)
-        return;
-
-    Corpse *corpse = ObjectAccessor::Instance().GetCorpseForPlayerGUID(GetOwnerGUID());
-    if(!corpse)
-    {
-        sLog.outError("ERROR: Try remove corpse that not in map for GUID %ul", GetOwnerGUID());
-        return;
-    }
-
-    if (corpse != this)
-    {
-        sLog.outError("ERROR: Found another corpse while deleting corpse for GUID %ul", GetOwnerGUID());
-        return;
-    }
-
-    DEBUG_LOG("Deleting Corpse and spawning bones.\n");
-
-    // remove corpse from player_guid -> corpse map
-    ObjectAccessor::Instance().RemoveCorpse(this);
-
-    // remove resurrectble corpse from grid object registry (loaded state checked into call)
-    MapManager::Instance().GetMap(GetMapId(), this)->Remove(corpse,false);
-
-    // remove corpse from DB
-    DeleteFromDB();
-
-    // Create bones, don't change Corpse
-    Corpse *bones = new Corpse(this);
-    bones->Create(GetGUIDLow());
-
-    for (int i = 3; i < CORPSE_END; i++)                    // don't overwrite guid and object type
-    {
-        bones->SetUInt32Value(i, GetUInt32Value(i));
-    }
-    bones->m_grid = m_grid;
-    // bones->m_time = m_time;                              // don't overwrite time
-    // bones->m_inWorld = m_inWorld;                        // don't overwrite world state
-    // bones->m_type = m_type;                              // don't overwrite type
-    bones->Relocate(GetPositionX(), GetPositionY(), GetPositionZ(), GetOrientation());
-    bones->SetMapId(GetMapId());
-
-    uint32 flags = 0x05;
-    {
-        Player* player = ObjectAccessor::Instance().FindPlayer(GetOwnerGUID());
-        if(player && player->InBattleGround())
-            flags |= 0x20;                                  // make it lootable for money, TODO: implement effect
-    }
-
-    bones->SetUInt32Value(CORPSE_FIELD_FLAGS, flags);
-
-    bones->SetUInt64Value(CORPSE_FIELD_OWNER, 0);
-
-    for (int i = 0; i < EQUIPMENT_SLOT_END; i++)
-    {
-        if(corpse->GetUInt32Value(CORPSE_FIELD_ITEM + i))
-            bones->SetUInt32Value(CORPSE_FIELD_ITEM + i, 0);
-    }
-
-    // add bones to DB
-    bones->SaveToDB();
-
-    // add bones in grid store if grid loaded where corpse placed
-    if(!MapManager::Instance().GetMap(bones->GetMapId(), bones)->IsRemovalGrid(bones->GetPositionX(),bones->GetPositionY()))
-    {
-        MapManager::Instance().GetMap(bones->GetMapId(), bones)->Add(bones);
-    }
-    // or prepare to delete at next tick if grid not loaded
-    else
-        bones->DeleteBonesFromWorld();
 }
 
 bool Corpse::isVisibleForInState(Player const* u, bool inVisibleList) const
