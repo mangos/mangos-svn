@@ -33,6 +33,7 @@
 #include "Util.h"
 #include "AccountMgr.h"
 #include "CliRunnable.h"
+#include "MapManager.h"
 
 //CliCommand and CliCommandHolder are defined in World.h to avoid cyclic deps
 
@@ -54,6 +55,7 @@ void CliCreate(char*,pPrintf);
 void CliDelete(char*,pPrintf);
 void CliLoadScripts(char*,pPrintf);
 void CliKick(char*,pPrintf);
+void CliTele(char*,pPrintf);
 void CliMotd(char*,pPrintf);
 void CliCorpses(char*,pPrintf);
 void CliSetLogLevel(char*,pPrintf);
@@ -91,7 +93,8 @@ const CliCommand Commands[]=
     {"writepdump", &CliWritePlayerDump,"Write a player dump to a file"},
     {"loadpdump", &CliLoadPlayerDump,"Load a player dump from a file"},
     {"saveall", &CliSave,"Save all players"},
-    {"send", &CliSend,"Send message to a player"}
+    {"send", &CliSend,"Send message to a player"},
+    {"tele", &CliTele,"Teleport player to location"}
 };
 /// \todo Need some pragma pack? Else explain why in a comment.
 #define CliTotalCmds sizeof(Commands)/sizeof(CliCommand)
@@ -609,6 +612,76 @@ void CliKick(char*command,pPrintf zprintf)
     normalizePlayerName(name);
 
     sWorld.KickPlayer(name);
+}
+
+/// Teleport a character to location
+void CliTele(char*command,pPrintf zprintf)
+{
+    char *charName = strtok(command, " ");
+    char *locName = strtok(NULL, " ");
+
+    if (!charName || !locName)
+    {
+        zprintf("Syntax is: tele $charactername $location\r\n");
+        return;
+    }
+
+    std::string name = charName;
+    normalizePlayerName(name);
+
+    std::string location = locName;
+
+    sDatabase.escape_string(location);
+    QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `game_tele` WHERE `name` = '%s'",location.c_str());
+    if (!result)
+    {
+        zprintf(LANG_COMMAND_TELE_NOTFOUND "\r\n");
+        return;
+    }
+
+    Field *fields = result->Fetch();
+    float x = fields[0].GetFloat();
+    float y = fields[1].GetFloat();
+    float z = fields[2].GetFloat();
+    float ort = fields[3].GetFloat();
+    int mapid = fields[4].GetUInt16();
+    delete result;
+
+    if(!MapManager::IsValidMapCoord(mapid,x,y))
+    {
+        zprintf(LANG_INVALID_TARGET_COORD "\r\n",x,y,mapid);
+        return;
+    }
+
+    Player *chr = objmgr.GetPlayer(name.c_str());
+    if (chr)
+    {
+
+        if(chr->IsBeingTeleported()==true)
+        {
+            zprintf(LANG_IS_TELEPORTED "\r\n",chr->GetName());
+            return;
+        }
+
+        if(chr->isInFlight())
+        {
+            zprintf(LANG_CHAR_IN_FLIGHT "\r\n",chr->GetName());
+            return;
+        }
+
+        zprintf(LANG_TELEPORTING_TO "\r\n",chr->GetName(),"", location.c_str());
+
+        chr->SetRecallPosition(chr->GetMapId(),chr->GetPositionX(),chr->GetPositionY(),chr->GetPositionZ(),chr->GetOrientation());
+
+        chr->TeleportTo(mapid,x,y,z,chr->GetOrientation());
+    }
+    else if (uint64 guid = objmgr.GetPlayerGUIDByName(name.c_str()))
+    {
+        zprintf(LANG_TELEPORTING_TO "\r\n",name.c_str(), LANG_OFFLINE, location.c_str());
+        Player::SavePositionInDB(mapid,x,y,z,ort,MapManager::Instance().GetZoneId(mapid,x,y),guid);
+    }
+    else
+        zprintf(LANG_NO_PLAYER "\r\n",name.c_str());
 }
 
 /// Display/Define the 'Message of the day' for the realm
