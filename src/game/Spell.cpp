@@ -2212,7 +2212,8 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
     switch(eff)
     {
         case SPELL_EFFECT_APPLY_AURA:
-        case SPELL_EFFECT_APPLY_AURA_NEW:
+        case SPELL_EFFECT_APPLY_PET_AURA:
+        case SPELL_EFFECT_APPLY_AURA_NEW2:
         case SPELL_EFFECT_PERSISTENT_AREA_AURA:
             damage = 0;
             break;

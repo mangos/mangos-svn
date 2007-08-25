@@ -576,7 +576,8 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
         return false;
 
     // non-positive aura use
-    if(spellproto->Effect[effIndex]==6 /*SPELL_EFFECT_APPLY_AURA*/)
+    if( spellproto->Effect[effIndex]==6 /*SPELL_EFFECT_APPLY_AURA*/ || 
+        spellproto->Effect[effIndex]==128 /*SPELL_EFFECT_APPLY_AURA_NEW2*/ )
     {
         switch(spellproto->EffectApplyAuraName[effIndex])
         {
