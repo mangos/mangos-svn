@@ -1391,7 +1391,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendDirectMessage(WorldPacket *data);
 
         PlayerMenu* PlayerTalkClass;
-        ItemsSetEffect * ItemsSetEff[3];
+        std::vector<ItemSetEffect *> ItemSetEff;
         void FlightComplete(void);
 
         void SendLoot(uint64 guid, LootType loot_type);

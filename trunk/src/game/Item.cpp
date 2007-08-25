@@ -38,28 +38,30 @@ void AddItemsSetItem(Player*player,Item *item)
     if(set->required_skill_id )
         if(player->GetSkillValue(set->required_skill_id) < set->required_skill_value) return;
 
-    ItemsSetEffect *eff=NULL;
+    ItemSetEffect *eff=NULL;
 
-    for(uint32 x =0;x<3;x++)
-        if(player->ItemsSetEff[x])
-            if(player->ItemsSetEff[x]->setid==setid)
-            {
-                eff=player->ItemsSetEff[x];
-                break;
-            }
+    for(size_t x = 0; x < player->ItemSetEff.size(); x++)
+        if(player->ItemSetEff[x] && player->ItemSetEff[x]->setid == setid)
+        {
+            eff = player->ItemSetEff[x];
+            break;
+        }
 
     if(!eff)
     {
-        eff=new ItemsSetEffect;
-        memset(eff,0,sizeof(ItemsSetEffect));
-        eff->setid=setid;
+        eff = new ItemSetEffect;
+        memset(eff,0,sizeof(ItemSetEffect));
+        eff->setid = setid;
 
-        for(uint32 x =0;x<3;x++)
-            if(!player->ItemsSetEff[x])
-        {
-            player->ItemsSetEff[x]=eff;
-            break;
-        }
+        size_t x = 0;
+        for(; x < player->ItemSetEff.size(); x++)
+            if(!player->ItemSetEff[x])
+                break;
+
+        if(x < player->ItemSetEff.size())
+            player->ItemSetEff[x]=eff;
+        else
+            player->ItemSetEff.push_back(eff);
     }
 
     ++eff->item_count;
@@ -105,15 +107,14 @@ void RemoveItemsSetItem(Player*player,ItemPrototype const *proto)
         return;
     }
 
-    ItemsSetEffect *eff=NULL;
-    uint32 setindex=0;
-    for(;setindex<3;setindex++)
-        if(player->ItemsSetEff[setindex])
-            if(player->ItemsSetEff[setindex]->setid==setid)
-            {
-                eff=player->ItemsSetEff[setindex];
-                break;
-            }
+    ItemSetEffect *eff = NULL;
+    size_t setindex = 0;
+    for(;setindex < player->ItemSetEff.size(); setindex++)
+        if(player->ItemSetEff[setindex] && player->ItemSetEff[setindex]->setid == setid)
+        {
+            eff = player->ItemSetEff[setindex];
+            break;
+        }
 
     // can be in case now enough skill requirement for set appling but set has been appliend when skill requirement not enough
     if(!eff)
@@ -134,15 +135,13 @@ void RemoveItemsSetItem(Player*player,ItemPrototype const *proto)
                             eff->spells[z]=NULL;
                             break;
                         }
-
             }
 
     if(!eff->item_count)                                    //all items of a set were removed
     {
-        assert(eff==player->ItemsSetEff[setindex]);
+        assert(eff == player->ItemSetEff[setindex]);
         delete eff;
-        player->ItemsSetEff[setindex]=NULL;
-
+        player->ItemSetEff[setindex] = NULL;
     }
 }
 
