@@ -42,7 +42,7 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
-				OutputFile="./mangosd__$(PlatformName)_$(ConfigurationName)/mangosd.exe"
+				OutputFile="..\..\bin\release\mangosd.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\dep\lib\release"
@@ -107,7 +107,7 @@
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
 				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
-				OutputFile="./mangosd__$(PlatformName)_$(ConfigurationName)/mangosd.exe"
+				OutputFile="..\..\bin\debug\mangosd.exe"
 				Version=""
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
@@ -179,14 +179,6 @@
 				>
 			</File>
 		</Filter>
-		<File
-			RelativePath="..\..\src\game\AccountMgr.cpp"
-			>
-		</File>
-		<File
-			RelativePath="..\..\src\game\AccountMgr.h"
-			>
-		</File>
 		<File
 			RelativePath="..\..\src\mangosd\CliRunnable.cpp"
 			>
