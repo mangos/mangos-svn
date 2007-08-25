@@ -34,13 +34,15 @@ void SqlDelayThread::run()
 
     while (m_running)
     {
+        // if the running state gets turned off while sleeping
+        // empty the queue before exiting
+        ZThread::Thread::sleep(10);
         while (!m_sqlQueue.empty())
         {
             s = m_sqlQueue.next();
             s->Execute(m_dbEngine);
             delete s;
         }
-        ZThread::Thread::sleep(10);
     }
 
     mysql_thread_end();

@@ -33,7 +33,7 @@ typedef struct
     uint32 setid;
     uint32 item_count;
     SpellEntry const *spells[8];
-}ItemsSetEffect;
+}ItemSetEffect;
 
 enum InventoryChangeFailure
 {

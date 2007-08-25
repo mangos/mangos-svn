@@ -141,9 +141,6 @@ Player::Player (WorldSession *session): Unit( 0 )
         m_Tutorials[ aX ] = 0x00;
     m_TutorialsChanged = false;
 
-    ItemsSetEff[0]=0;
-    ItemsSetEff[1]=0;
-    ItemsSetEff[2]=0;
     m_regenTimer = 0;
     m_weaponChangeTimer = 0;
     m_breathTimer = 0;
@@ -249,6 +246,10 @@ Player::~Player ()
     {
         m_transport->RemovePassenger(this);
     }
+
+    for(size_t x = 0; x < ItemSetEff.size(); x++)
+        if(ItemSetEff[x])
+            delete ItemSetEff[x];
 }
 
 bool Player::Create( uint32 guidlow, WorldPacket& data )
@@ -663,7 +664,7 @@ void Player::HandleLava()
             uint32 dmgZone = MapManager::Instance().GetMap(GetMapId(), this)->GetZoneId(GetPositionX(),GetPositionY());
 
             // correct mask for deal with damage only in lava areas
-            if (dmgZone & 0x220)
+            if ((dmgZone/5) & 0x408)
                 EnvironmentalDamage(guid, DAMAGE_LAVA, damage);
 
             m_breathTimer = 1000;
