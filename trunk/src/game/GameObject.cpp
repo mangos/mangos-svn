@@ -219,7 +219,6 @@ void GameObject::Update(uint32 p_time)
                         default:
                             if(GetOwnerGUID())              // despawn timer
                             {
-                                m_respawnTime = 0;
                                 Delete();
                                 return;
                             }

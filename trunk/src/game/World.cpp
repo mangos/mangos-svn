@@ -98,6 +98,7 @@ World::World()
     m_gameTime=time(NULL);
     m_startTime=m_gameTime;
     m_maxSessionsCount = 0;
+    m_resultQueue = NULL;
 }
 
 /// World destructor
