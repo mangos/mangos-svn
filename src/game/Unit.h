@@ -381,7 +381,7 @@ enum UnitFlags
     UNIT_FLAG_UNKNOWN12      = 0x00000400,                  // loot animation
     UNIT_FLAG_PET_IN_COMBAT  = 0x00000800,                  // in combat?, 2.0.8
     UNIT_FLAG_PVP            = 0x00001000,                  // ok
-    UNIT_FLAG_MOUNT          = 0x00002000,                  // silenced, 2.1.1
+    UNIT_FLAG_MOUNT_OLD      = 0x00002000,                  // silenced, 2.1.1
     UNIT_FLAG_UNKNOWN4       = 0x00004000,                  // 2.0.8
     UNIT_FLAG_UNKNOWN13      = 0x00008000,
     UNIT_FLAG_UNKNOWN14      = 0x00010000,
@@ -395,7 +395,7 @@ enum UnitFlags
     UNIT_FLAG_UNKNOWN5       = 0x01000000,                  // used in spell Eyes of the Beast for pet...
     UNIT_FLAG_NOT_SELECTABLE = 0x02000000,                  // ok
     UNIT_FLAG_SKINNABLE      = 0x04000000,
-    UNIT_FLAG_UNKNOWN16      = 0x08000000,
+    UNIT_FLAG_MOUNT          = 0x08000000,                  // the client seems to handle it perfectly
     UNIT_FLAG_UNKNOWN17      = 0x10000000,
     UNIT_FLAG_UNKNOWN6       = 0x20000000,                  // used in Feing Death spell
     UNIT_FLAG_SHEATHE        = 0x40000000

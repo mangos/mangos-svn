@@ -2369,7 +2369,7 @@ uint8 Spell::CanCast()
         return SPELL_FAILED_REQUIRES_AREA;
 
     // not let players cast non-triggered spells at mount (and let do it to creatures)
-    if(m_caster->IsMounted() && !m_IsTriggeredSpell && m_caster->GetTypeId()==TYPEID_PLAYER)
+    if(m_caster->IsMounted() && !m_IsTriggeredSpell && m_caster->GetTypeId()==TYPEID_PLAYER && !CanCastWhileMounted(m_spellInfo->Id))
         return SPELL_FAILED_NOT_MOUNTED;
 
     // always (except passive spells) check items (focus object can be required for any type casts)

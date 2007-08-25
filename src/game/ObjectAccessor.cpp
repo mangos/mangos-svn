@@ -500,20 +500,69 @@ ObjectAccessor::AddCorpsesToGrid(GridPair const& gridpair,GridType& grid,Map* ma
 bool
 ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid)
 {
-    //    Guard guard(i_corpseGuard);
-
-    Player2CorpsesMapType::iterator iter = i_player2corpse.find(player_guid);
-
-    // corpse can be converted in another thread already
-    if( iter == i_player2corpse.end() )
+    Corpse *corpse = GetCorpseForPlayerGUID(player_guid);
+    if(!corpse)
+    {
+        sLog.outError("ERROR: Try remove corpse that not in map for GUID %ul", player_guid);
         return false;
+    }
 
-    Corpse *corpse = iter->second;
+    DEBUG_LOG("Deleting Corpse and spawning bones.\n");
 
     // remove corpse from player_guid -> corpse map
-    // i_player2corpse.erase(iter);
+    RemoveCorpse(corpse);
 
-    corpse->_ConvertCorpseToBones();
+    // remove resurrectble corpse from grid object registry (loaded state checked into call)
+    MapManager::Instance().GetMap(corpse->GetMapId(), corpse)->Remove(corpse,false);
+
+    // remove corpse from DB
+    corpse->DeleteFromDB();
+
+    // Create bones, don't change Corpse
+    Corpse *bones = new Corpse(corpse);
+    bones->Create(corpse->GetGUIDLow());
+
+    for (int i = 3; i < CORPSE_END; i++)                    // don't overwrite guid and object type
+        bones->SetUInt32Value(i, corpse->GetUInt32Value(i));
+
+    bones->SetGrid(corpse->GetGrid());
+    // bones->m_time = m_time;                              // don't overwrite time
+    // bones->m_inWorld = m_inWorld;                        // don't overwrite world state
+    // bones->m_type = m_type;                              // don't overwrite type
+    bones->Relocate(corpse->GetPositionX(), corpse->GetPositionY(), corpse->GetPositionZ(), corpse->GetOrientation());
+    bones->SetMapId(corpse->GetMapId());
+
+    uint32 flags = 0x05;
+    {
+        Player* owner = FindPlayer(player_guid);
+        if(owner && owner->InBattleGround())
+            flags |= 0x20;                                  // make it lootable for money, TODO: implement effect
+    }
+
+    bones->SetUInt32Value(CORPSE_FIELD_FLAGS, flags);
+
+    bones->SetUInt64Value(CORPSE_FIELD_OWNER, 0);
+
+    for (int i = 0; i < EQUIPMENT_SLOT_END; i++)
+    {
+        if(corpse->GetUInt32Value(CORPSE_FIELD_ITEM + i))
+            bones->SetUInt32Value(CORPSE_FIELD_ITEM + i, 0);
+    }
+
+    // add bones to DB
+    bones->SaveToDB();
+
+    // add bones in grid store if grid loaded where corpse placed
+    if(!MapManager::Instance().GetMap(bones->GetMapId(), bones)->IsRemovalGrid(bones->GetPositionX(),bones->GetPositionY()))
+    {
+        MapManager::Instance().GetMap(bones->GetMapId(), bones)->Add(bones);
+    }
+    // or prepare to delete at next tick if grid not loaded
+    else
+        bones->DeleteBonesFromWorld();
+
+    // all references to the corpse should be removed at this point
+    delete corpse;
 
     return true;
 }

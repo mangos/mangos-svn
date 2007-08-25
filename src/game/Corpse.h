@@ -50,7 +50,7 @@ class Corpse : public WorldObject
         bool LoadFromDB(uint32 guid, Field *fields);
 
         void DeleteBonesFromWorld();
-        void DeleteFromDB(bool inner_transaction = true);
+        void DeleteFromDB();
 
         uint64 const& GetOwnerGUID() const { return GetUInt64Value(CORPSE_FIELD_OWNER); }
 
@@ -59,10 +59,9 @@ class Corpse : public WorldObject
         CorpseType GetType() const { return m_type; }
 
         GridPair const& GetGrid() const { return m_grid; }
+        void SetGrid(GridPair const& grid) { m_grid = grid; }
 
         bool isVisibleForInState(Player const* u, bool inVisibleList) const;
-
-        void _ConvertCorpseToBones();                       // only call from ObjectAccessor::ConvertCorpseForPlayer
 
         void Say(const char* text, const uint32 language, const uint64 TargetGuid) { MonsterSay(text,language,TargetGuid); }
         void Yell(const char* text, const uint32 language, const uint64 TargetGuid) { MonsterYell(text,language,TargetGuid); }

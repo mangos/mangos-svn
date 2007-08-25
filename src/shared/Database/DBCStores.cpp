@@ -428,6 +428,17 @@ bool IsSealSpell(uint32 spellId)
         spellInfo->SpellVisual == 8062 || spellInfo->SpellVisual == 8072 || spellInfo->SpellVisual == 8073 );
 }
 
+bool CanCastWhileMounted(uint32 spellId)
+{
+	SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
+
+	if(!spellInfo)
+		return false;
+
+	return (spellInfo->Attributes == 151322624 && spellInfo->AttributesEx2 == 16 && spellInfo->AttributesExEx == 2097152) || 
+		   (spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && spellInfo->SpellFamilyFlags == 0x800000);
+}
+
 SpellSpecific GetSpellSpecific(uint32 spellId)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
