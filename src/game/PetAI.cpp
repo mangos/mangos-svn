@@ -54,8 +54,7 @@ void PetAI::MoveInLineOfSight(Unit *u)
         {
             if(!i_pet.IsWithinLOSInMap(u)) return;
             AttackStart(u);
-            if(u->HasStealthAura())
-                u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+            u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
         }
     }
 }

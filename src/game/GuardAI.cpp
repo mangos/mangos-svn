@@ -48,8 +48,7 @@ void GuardAI::MoveInLineOfSight(Unit *u)
         {
             //Need add code to let guard suport player
             AttackStart(u);
-            if(u->HasStealthAura())
-                u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+            u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
         }
     }
 }

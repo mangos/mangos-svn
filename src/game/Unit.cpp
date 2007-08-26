@@ -403,10 +403,9 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
     }
 
     // remove affects at any damage (including 0 damage)
-    if(HasStealthAura())
-        RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-    if(HasInvisibilityAura())
-        RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
+    RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+    RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
+
     // remove death simulation at damage
     if(hasUnitState(UNIT_STAT_DIED))
         RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);

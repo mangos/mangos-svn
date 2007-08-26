@@ -13718,6 +13718,9 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes)
     //Checks and preparations done, DO FLIGHT
     setDismountCost(money - totalcost);
 
+    // prevent stealth flight
+    RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+
     WorldPacket data(SMSG_ACTIVATETAXIREPLY, 4);
     data << uint32(ERR_TAXIOK);
     GetSession()->SendPacket(&data);

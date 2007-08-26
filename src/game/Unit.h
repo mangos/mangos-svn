@@ -912,22 +912,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool HasAura(uint32 spellId, uint32 effIndex) const
             { return m_Auras.find(spellEffectPair(spellId, effIndex)) != m_Auras.end(); }
 
-        bool HasStealthAura() const                         // cache this in a bool someday
-        {
-            return HasAuraType(SPELL_AURA_MOD_STEALTH);
-        }
-        bool HasInvisibilityAura() const                    // cache this in a bool someday
-        {
-            return HasAuraType(SPELL_AURA_MOD_INVISIBILITY);
-        }
-        bool isFeared() const                               // cache this in a bool someday
-        {
-            return HasAuraType(SPELL_AURA_MOD_FEAR);
-        }
-        bool isInRoots() const                              // cache this in a bool someday
-        {
-            return HasAuraType(SPELL_AURA_MOD_ROOT);
-        }
+        bool HasStealthAura()      const { return HasAuraType(SPELL_AURA_MOD_STEALTH); }
+        bool HasInvisibilityAura() const { return HasAuraType(SPELL_AURA_MOD_INVISIBILITY); }
+        bool isFeared()  const { return HasAuraType(SPELL_AURA_MOD_FEAR); }
+        bool isInRoots() const { return HasAuraType(SPELL_AURA_MOD_ROOT); }
 
         bool isFrozen() const;
 
