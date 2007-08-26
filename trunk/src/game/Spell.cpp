@@ -326,8 +326,18 @@ void Spell::FillTargetMap()
 
         std::list<Unit*> tmpUnitMap;
 
-        SetTargetMap(i,m_spellInfo->EffectImplicitTargetA[i],tmpUnitMap);
-        SetTargetMap(i,m_spellInfo->EffectImplicitTargetB[i],tmpUnitMap);
+        // TargetA/TargetB dependent from each other, we not switch to full support this dependences
+        // but need it support inn some know cases
+        if( m_spellInfo->EffectImplicitTargetA[i]==TARGET_ALL_AROUND_CASTER && 
+            m_spellInfo->EffectImplicitTargetB[i]==TARGET_ALL_PARTY)
+        {
+            SetTargetMap(i,m_spellInfo->EffectImplicitTargetB[i],tmpUnitMap);
+        }
+        else
+        {
+            SetTargetMap(i,m_spellInfo->EffectImplicitTargetA[i],tmpUnitMap);
+            SetTargetMap(i,m_spellInfo->EffectImplicitTargetB[i],tmpUnitMap);
+        }
 
         if( (m_spellInfo->EffectImplicitTargetA[i]==0 || m_spellInfo->EffectImplicitTargetA[i]==18) &&
             (m_spellInfo->EffectImplicitTargetB[i]==0 || m_spellInfo->EffectImplicitTargetB[i]==18) )
@@ -2272,7 +2282,8 @@ uint8 Spell::CanCast()
         if(VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_caster->IsWithinLOSInMap(target))
             return SPELL_FAILED_LINE_OF_SIGHT;
 
-        //TODO: after switch in Cast::preper (?) need implement auto-selecting appropriate cast level.
+        // auto selection spell rank implemented in WorldSession::HandleCastSpellOpcode
+        // this case can be triggered if rank not found (too low-levele target for first rank)
         if(m_caster->GetTypeId() == TYPEID_PLAYER && !IsPassiveSpell(m_spellInfo->Id) && !m_CastItem)
         {
             for(int i=0;i<3;i++)
