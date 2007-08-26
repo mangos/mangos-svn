@@ -606,12 +606,45 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    Spell *spell = new Spell(_player, spellInfo, false, 0);
-
+    // client provided targets
     SpellCastTargets targets;
     targets.read(&recvPacket,_player);
-    spell->prepare(&targets);
 
+    // auto-selection buff level base at target level (in spellInfo)
+    if(!IsPassiveSpell(spellId) && targets.getUnitTarget())
+    {
+        bool needRankSelection = false;
+        for(int i=0;i<3;i++)
+        {
+            if(IsPositiveEffect(spellId, i) && spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA)
+            {
+                needRankSelection = true;
+                break;
+            }
+        }
+
+        if(needRankSelection)
+        {
+            for(uint32 nextSpellId = spellId; nextSpellId!=0; nextSpellId = objmgr.GetPrevSpellInChain(nextSpellId))
+            {
+                SpellEntry const *nextSpellInfo = sSpellStore.LookupEntry(nextSpellId);
+                if(!nextSpellInfo)
+                    break;
+
+                // if found appropriate level
+                if(targets.getUnitTarget()->getLevel() + 10 >= nextSpellInfo->spellLevel)
+                {
+                    SpellEntry const *spellInfo = sSpellStore.LookupEntry(nextSpellId);
+                    break;
+                }
+            }
+
+            // if appropriate spell rank not found spellInfo store original casted spell and will output error in Spell::CanCast
+        }
+    }
+
+    Spell *spell = new Spell(_player, spellInfo, false, 0);
+    spell->prepare(&targets);
 }
 
 void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
