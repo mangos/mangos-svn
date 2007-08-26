@@ -2280,7 +2280,9 @@ uint8 Spell::CanCast()
 
     if(target)
     {
-        if(VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_caster->IsWithinLOSInMap(target)) return SPELL_FAILED_LINE_OF_SIGHT;
+        if(VMAP::VMapFactory::checkSpellForLoS(m_spellInfo->Id) && !m_caster->IsWithinLOSInMap(target))
+            return SPELL_FAILED_LINE_OF_SIGHT;
+
         //TODO: after switch in Cast::preper (?) need implement auto-selecting appropriate cast level.
         if(m_caster->GetTypeId() == TYPEID_PLAYER && !IsPassiveSpell(m_spellInfo->Id) && !m_CastItem)
         {
