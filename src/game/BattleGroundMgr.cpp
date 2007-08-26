@@ -26,6 +26,7 @@
 #include "BattleGroundNA.h"
 #include "BattleGroundBE.h"
 #include "BattleGroundAA.h"
+#include "BattleGroundRL.h"
 #include "SharedDefines.h"
 #include "Policies/SingletonImp.h"
 #include "MapManager.h"
@@ -64,7 +65,7 @@ void BattleGroundMgr::BuildBattleGroundStatusPacket(WorldPacket *data, BattleGro
         *data << uint32(0);
         return;
     }
-    // queue sounds: 8458, 8459, 8462, 8463, is it used on official?
+
     data->Initialize(SMSG_BATTLEFIELD_STATUS, (4+1+1+4+2+4+1+4+4+4));
     *data << uint32(0x0);                                   // queue id (0...2)
     *data << uint8(bg->GetArenaType());                     // team type (0=BG, 2=2x2, 3=3x3, 5=5x5), for arenas
@@ -79,9 +80,6 @@ void BattleGroundMgr::BuildBattleGroundStatusPacket(WorldPacket *data, BattleGro
         case BATTLEGROUND_AB:
             *data << uint8(1);
             break;
-            /*case BATTLEGROUND_AA:
-             *data << uint8(4);
-                break;*/
         case BATTLEGROUND_NA:
         case BATTLEGROUND_BE:
         case BATTLEGROUND_AA:
@@ -92,13 +90,20 @@ void BattleGroundMgr::BuildBattleGroundStatusPacket(WorldPacket *data, BattleGro
             *data << uint8(0);
             break;
     }
-    /*if(bg->isArena())
-     *data << uint32(BATTLEGROUND_ARENAS);               // all arenas
-    else*/
-    *data << uint32(bg->GetID());                           // id from DBC
+
+    if(bg->isArena() && (StatusID == STATUS_WAIT_QUEUE))
+        *data << uint32(BATTLEGROUND_AA);                   // all arenas
+    else
+        *data << uint32(bg->GetID());                       // BG id from DBC
+
     *data << uint16(0x1F90);                                // unk value 8080
     *data << uint32(bg->GetInstanceID());                   // instance id
-    *data << uint8(bg->GetTeamIndexByTeamId(team));         // team
+
+    if(bg->isBattleGround())
+        *data << uint8(bg->GetTeamIndexByTeamId(team));     // team
+    else
+        *data << uint8(bg->isRated());                      // is rated battle
+
     *data << uint32(StatusID);                              // status
     switch(StatusID)
     {
@@ -132,17 +137,17 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
     {
         for(uint8 i = 0; i < 2; i++)
         {
-            *data << uint32(0x00005fe9+i);                  // unk
+            *data << uint32(3000+1+i);                      // rating change: showed value - 3000
             *data << uint8(0);                              // string
         }
     }
 
-    if(bg->GetWinner() < 2)
+    if(bg->GetWinner() < 2)                                 // we have winner
     {
         *data << uint8(1);                                  // bg ended
         *data << uint8(bg->GetWinner());                    // who win
     }
-    else
+    else                                                    // no winner yet
     {
         *data << uint8(0);                                  // bg in progress
     }
@@ -265,6 +270,7 @@ uint32 BattleGroundMgr::CreateBattleGround(uint32 bg_ID, uint32 MaxPlayersPerTea
         case BATTLEGROUND_BE: bg = new BattleGroundBE; break;
         case BATTLEGROUND_AA: bg = new BattleGroundAA; break;
         case BATTLEGROUND_EY: bg = new BattleGroundEY; break;
+        case BATTLEGROUND_RL: bg = new BattleGroundRL; break;
         default:bg = new BattleGround;   break;             // placeholder for non implemented BG
     }
 

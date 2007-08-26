@@ -17,23 +17,16 @@
  */
 
 #include "Common.h"
-#include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "Opcodes.h"
 #include "Log.h"
 #include "Player.h"
-#include "World.h"
 #include "ObjectMgr.h"
 #include "WorldSession.h"
-#include "UpdateData.h"
-#include "ScriptCalls.h"
 #include "MapManager.h"
 #include "ObjectAccessor.h"
 #include "Object.h"
 #include "BattleGroundMgr.h"
-#include "BattleGroundAV.h"
-#include "BattleGroundAB.h"
-#include "BattleGroundEY.h"
 #include "BattleGroundWS.h"
 #include "BattleGround.h"
 
@@ -51,24 +44,27 @@ void WorldSession::HandleBattleGroundHelloOpcode( WorldPacket & recv_data )
     if(!unit)
         return;
 
+    if(!unit->isBattleMaster())                             // it's not battlemaster
+        return;
+
     switch(unit->GetCreatureInfo()->faction)
     {
-        //AV Battlemaster
+        // AV Battlemaster
         case 1214:
         case 1216:
             bgid = 1;
             break;
-            //WSG Battlemaster
+        // WSG Battlemaster
         case 1641:
         case 1514:
             bgid = 2;
             break;
-            //AB Battlemaster
+        // AB Battlemaster
         case 1577:
         case 412:
             bgid = 3;
             break;
-            // todo: add more...
+        // todo: add more...
     }
 
     if(!strcmp(unit->GetCreatureInfo()->SubName, "Arena Battlemaster"))
@@ -452,7 +448,7 @@ void WorldSession::HandleBattleGroundArenaJoin( WorldPacket & recv_data )
             member->GetSession()->SendPacket(&data);
             sBattleGroundMgr.BuildGroupJoinedBattlegroundPacket(&data, BATTLEGROUND_AA);
             member->GetSession()->SendPacket(&data);
-            bg->AddPlayerToQueue(member->GetGUID(), member->getLevel());
+            bg->AddPlayerToQueue(member->GetGUID(), member->getLevel(), 0, 0, false, 0, isRated, asGroup, arenatype);
         }
     }
     else
@@ -466,6 +462,6 @@ void WorldSession::HandleBattleGroundArenaJoin( WorldPacket & recv_data )
         // send status packet (in queue)
         sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, _player->GetTeam(), STATUS_WAIT_QUEUE, 0, 0);
         SendPacket(&data);
-        bg->AddPlayerToQueue(_player->GetGUID(), _player->getLevel());
+        bg->AddPlayerToQueue(_player->GetGUID(), _player->getLevel(), 0, 0, false, 0, isRated, asGroup, arenatype);
     }
 }

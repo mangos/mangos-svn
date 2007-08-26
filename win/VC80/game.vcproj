@@ -270,6 +270,14 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\BattleGroundRL.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\src\game\BattleGroundRL.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\BattleGroundWS.cpp"
 				>
 			</File>

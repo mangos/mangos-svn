@@ -19,31 +19,31 @@
 #include "Object.h"
 #include "Player.h"
 #include "BattleGround.h"
-#include "BattleGroundNA.h"
+#include "BattleGroundRL.h"
 #include "Creature.h"
 #include "Chat.h"
 #include "ObjectMgr.h"
 #include "MapManager.h"
 #include "Language.h"
 
-BattleGroundNA::BattleGroundNA()
+BattleGroundRL::BattleGroundRL()
 {
-    m_bgobjects.resize(BG_NA_OBJECT_MAX);
+    m_bgobjects.resize(BG_RL_OBJECT_MAX);
 }
 
-BattleGroundNA::~BattleGroundNA()
+BattleGroundRL::~BattleGroundRL()
 {
 
 }
 
-void BattleGroundNA::Update(time_t diff)
+void BattleGroundRL::Update(time_t diff)
 {
     BattleGround::Update(diff);
 
     // after bg start we get there
     if(GetStatus() == STATUS_WAIT_JOIN && !isDoorsSpawned() && GetPlayersSize() >= 1)
     {
-        for(uint32 i = BG_NA_OBJECT_DOOR_1; i <= BG_NA_OBJECT_DOOR_4; i++)
+        for(uint32 i = BG_RL_OBJECT_DOOR_1; i <= BG_RL_OBJECT_DOOR_2; i++)
         {
             SpawnBGObject(i, RESPAWN_IMMEDIATELY);
         }
@@ -66,7 +66,7 @@ void BattleGroundNA::Update(time_t diff)
         // delay expired (1 minute)
         if(GetStartDelayTime() < 0)
         {
-            for(uint32 i = BG_NA_OBJECT_DOOR_1; i <= BG_NA_OBJECT_DOOR_2; i++)
+            for(uint32 i = BG_RL_OBJECT_DOOR_1; i <= BG_RL_OBJECT_DOOR_2; i++)
             {
                 SpawnBGObject(i, RESPAWN_ONE_DAY);
             }
@@ -97,12 +97,12 @@ void BattleGroundNA::Update(time_t diff)
     }*/
 }
 
-void BattleGroundNA::RemovePlayer(Player *plr, uint64 guid)
+void BattleGroundRL::RemovePlayer(Player *plr, uint64 guid)
 {
 
 }
 
-void BattleGroundNA::HandleKillPlayer(Player *player, Player *killer)
+void BattleGroundRL::HandleKillPlayer(Player *player, Player *killer)
 {
     if(GetStatus() != STATUS_IN_PROGRESS)
         return;
@@ -124,7 +124,7 @@ void BattleGroundNA::HandleKillPlayer(Player *player, Player *killer)
     }
 }
 
-void BattleGroundNA::HandleAreaTrigger(Player *Source, uint32 Trigger)
+void BattleGroundRL::HandleAreaTrigger(Player *Source, uint32 Trigger)
 {
     // this is wrong way to implement these things. On official it done by gameobject spell cast.
     if(GetStatus() != STATUS_IN_PROGRESS)
@@ -134,8 +134,8 @@ void BattleGroundNA::HandleAreaTrigger(Player *Source, uint32 Trigger)
     uint64 buff_guid = 0;
     switch(Trigger)
     {
-        case 4536:                                          // buff trigger?
-        case 4537:                                          // buff trigger?
+        case 4696:                                          // buff trigger?
+        case 4697:                                          // buff trigger?
             break;
         default:
             sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);
@@ -159,27 +159,23 @@ void BattleGroundNA::HandleAreaTrigger(Player *Source, uint32 Trigger)
     }
 }
 
-bool BattleGroundNA::SetupBattleGround()
+bool BattleGroundRL::SetupBattleGround()
 {
     // gates
-    if(!AddObject(BG_NA_OBJECT_DOOR_1, 183978, 4031.854, 2966.833, 12.6462, -2.648788, 0, 0, 0.9697962, -0.2439165, 0))
+    if(!AddObject(BG_RL_OBJECT_DOOR_1, 185918, 1293.561, 1601.938, 31.60557, -1.457349, 0, 0, -0.6658813, 0.7460576, 0))
         return false;
-    if(!AddObject(BG_NA_OBJECT_DOOR_2, 183980, 4081.179, 2874.97, 12.39171, 0.4928045, 0, 0, 0.2439165, 0.9697962, 0))
-        return false;
-    if(!AddObject(BG_NA_OBJECT_DOOR_3, 183977, 4023.709, 2981.777, 10.70117, -2.648788, 0, 0, 0.9697962, -0.2439165, 0))
-        return false;
-    if(!AddObject(BG_NA_OBJECT_DOOR_4, 183979, 4090.064, 2858.438, 10.23631, 0.4928045, 0, 0, 0.2439165, 0.9697962, 0))
+    if(!AddObject(BG_RL_OBJECT_DOOR_2, 185917, 1278.648, 1730.557, 31.60557, 1.684245, 0, 0, 0.7460582, 0.6658807, 0))
         return false;
 
     return true;
 }
 
 /*
-20:12:14 id:036668 [S2C] SMSG_INIT_WORLD_STATES (706 = 0x02C2) len: 86
-0000: 2f 02 00 00 72 0e 00 00 00 00 00 00 09 00 11 0a  |  /...r...........
-0010: 00 00 01 00 00 00 0f 0a 00 00 00 00 00 00 10 0a  |  ................
-0020: 00 00 00 00 00 00 d4 08 00 00 00 00 00 00 d8 08  |  ................
-0030: 00 00 00 00 00 00 d7 08 00 00 00 00 00 00 d6 08  |  ................
-0040: 00 00 00 00 00 00 d5 08 00 00 00 00 00 00 d3 08  |  ................
-0050: 00 00 00 00 00 00                                |  ......
+Packet S->C, id 600, SMSG_INIT_WORLD_STATES (706), len 86
+0000: 3C 02 00 00 80 0F 00 00 00 00 00 00 09 00 BA 0B | <...............
+0010: 00 00 01 00 00 00 B9 0B 00 00 02 00 00 00 B8 0B | ................
+0020: 00 00 00 00 00 00 D8 08 00 00 00 00 00 00 D7 08 | ................
+0030: 00 00 00 00 00 00 D6 08 00 00 00 00 00 00 D5 08 | ................
+0040: 00 00 00 00 00 00 D3 08 00 00 00 00 00 00 D4 08 | ................
+0050: 00 00 00 00 00 00                               | ......
 */

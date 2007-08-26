@@ -38,15 +38,20 @@
 #define ITEM_AV_MARK_WINNER         24955
 
 #define SPELL_WAITING_FOR_RESURRECT 2584
+#define SPELL_SPIRIT_HEAL_CHANNEL   22011
 #define SPELL_SPIRIT_HEAL           22012
 #define SPELL_ARENA_PREPARATION     32727
 
-#define RESURRECTION_INTERVAL       30000
-#define REMIND_INTERVAL             30000
-#define INVITE_ACCEPT_WAIT_TIME     120000
-#define TIME_TO_AUTOREMOVE          120000
-#define MAX_OFFLINE_TIME            300000
-#define START_DELAY                 60000
+#define RESURRECTION_INTERVAL       30000                   // ms
+#define REMIND_INTERVAL             30000                   // ms
+#define INVITE_ACCEPT_WAIT_TIME     120000                  // ms
+#define TIME_TO_AUTOREMOVE          120000                  // ms
+#define MAX_OFFLINE_TIME            300000                  // ms
+#define START_DELAY1                60000                   // ms
+#define START_DELAY2                30000                   // ms
+#define RESPAWN_ONE_DAY             86400                   // secs
+#define RESPAWN_IMMEDIATELY         0                       // secs
+#define BUFF_RESPAWN_TIME           180                     // secs
 
 enum BattleGroundStatus
 {
@@ -76,6 +81,9 @@ struct BattleGroundQueue
     uint32  LastInviteTime;                                 // last invite time
     bool    IsInvited;                                      // was invited flag
     uint32  LastOnlineTime;                                 // for tracking and removing offline players from queue after 5 minutes
+    bool IsRated;
+    bool AsGroup; // uint32 GroupId;
+    uint8 ArenaType;
 };
 
 struct BattleGroundPlayer
@@ -172,7 +180,7 @@ class BattleGround
 
         int GetStartDelayTime() { return m_startDelay; }
         void ModifyStartDelayTime(int diff) { m_startDelay -= diff; }
-        void SetStartDelayTime(int time) { m_startDelay = time; }
+        void SetStartDelayTime(int Time) { m_startDelay = Time; }
 
         uint32 GetMinLevel() const { return m_LevelMin; }
         uint32 GetMaxLevel() const { return m_LevelMax; }
@@ -189,6 +197,8 @@ class BattleGround
         bool isBattleGround() { return m_BattleGroundType == TYPEID_BATTLEGROUND; }
         void SetArenaType(uint8 type) { m_ArenaType = type; }
         uint8 GetArenaType() { return m_ArenaType; }
+        bool isRated() { return m_IsRated; }
+        void SetRated(bool state) { m_IsRated = state; }
 
         uint8 GetWinner() { return m_Winner; }
         void SetWinner(uint8 winner) { m_Winner = winner; }
@@ -210,7 +220,7 @@ class BattleGround
         void AddPlayer(Player *plr);
         void AddPlayerToResurrectQueue(uint64 npc_guid, uint64 player_guid);
         void RemovePlayerFromResurrectQueue(uint64 player_guid);
-        void AddPlayerToQueue(uint64 guid, uint32 level, uint32 invitetime = 0, uint32 lastinvitetime = 0, bool isinvited = false, uint32 lastonlinetime = 0);
+        void AddPlayerToQueue(uint64 guid, uint32 level, uint32 invitetime = 0, uint32 lastinvitetime = 0, bool isinvited = false, uint32 lastonlinetime = 0, bool israted = false, bool asgroup = false, uint8 arenatype = 0);
         void RemovePlayerFromQueue(uint64 guid);
         bool CanStartBattleGround();
         void StartBattleGround();
@@ -240,9 +250,12 @@ class BattleGround
         void EndBattleGround(uint32 winner);
         void BlockMovement(Player *plr);
 
-        typedef std::vector<BattleGroundObjectInfo> BGObjects;
+        std::list<uint64> m_SpiritGuides;
+        typedef std::vector<uint64> BGObjects;
         BGObjects m_bgobjects;
-        bool SpawnObject(uint32 entry, uint32 type, float x, float y, float z, float o, float rotation0,  float rotation1,  float rotation2,  float rotation3, uint32 spellid = 0, uint32 timer = 0);
+        void SpawnBGObject(uint32 type, uint32 respawntime);
+        bool AddObject(uint32 type, uint32 entry, float x, float y, float z, float o, float rotation0,  float rotation1,  float rotation2,  float rotation3, uint32 respawntime = 0);
+        bool AddSpiritGuide(float x, float y, float z, float o, uint32 team);
 
         /* Raid Group */
         Group *GetBgRaid(uint32 TeamID) { return TeamID == ALLIANCE ? m_raids[0] : m_raids[1]; }
@@ -286,11 +299,12 @@ class BattleGround
         uint32 m_EndTime;
         uint32 m_LastResurrectTime;
         uint32 m_Queue_type;
-        uint8  m_ArenaType;
-        uint8  m_BattleGroundType;
-        uint8  m_Winner;
+        uint8  m_ArenaType;                                 // 2=2v2, 3=3v3, 5=5v5
+        uint8  m_BattleGroundType;                          // 3=BG, 4=arena
+        uint8  m_Winner;                                    // 0=alliance, 1=horde, 2=none
         int32  m_startDelay;
         bool   m_doorsSpawned;
+        bool   m_IsRated;                                   // is this battle rated?
         char const *m_Name;
 
         /* Scorekeeping */

@@ -43,15 +43,20 @@ void BattleGroundBE::Update(time_t diff)
     // after bg start we get there
     if(GetStatus() == STATUS_WAIT_JOIN && !isDoorsSpawned() && GetPlayersSize() >= 1)
     {
-        for(uint32 i = 0; i <= BG_BE_OBJECT_DOOR_4; i++)
+        for(uint32 i = BG_BE_OBJECT_DOOR_1; i <= BG_BE_OBJECT_DOOR_4; i++)
         {
-            // respawn
-            MapManager::Instance().GetMap(m_bgobjects[i].object->GetMapId(), m_bgobjects[i].object)->Add(m_bgobjects[i].object);
+            SpawnBGObject(i, RESPAWN_IMMEDIATELY);
         }
         sLog.outDebug("Doors spawned...");
 
+        for(uint32 i = BG_BE_OBJECT_BUFF_1; i <= BG_BE_OBJECT_BUFF_2; i++)
+        {
+            SpawnBGObject(i, RESPAWN_ONE_DAY);
+        }
+        sLog.outDebug("Buffs despawned...");
+
         SetDoorsSpawned(true);
-        SetStartDelayTime(START_DELAY);
+        SetStartDelayTime(START_DELAY1);
 
         WorldPacket data;
         const char *message = LANG_ARENA_ONE_MINUTE;
@@ -69,10 +74,15 @@ void BattleGroundBE::Update(time_t diff)
         {
             for(uint32 i = BG_BE_OBJECT_DOOR_1; i <= BG_BE_OBJECT_DOOR_2; i++)
             {
-                // despawn
-                MapManager::Instance().GetMap(m_bgobjects[i].object->GetMapId(), m_bgobjects[i].object)->Remove(m_bgobjects[i].object, false);
+                SpawnBGObject(i, RESPAWN_ONE_DAY);
             }
             sLog.outDebug("Doors despawned...");
+
+            for(uint32 i = BG_BE_OBJECT_BUFF_1; i <= BG_BE_OBJECT_BUFF_2; i++)
+            {
+                SpawnBGObject(i, 60);
+            }
+            sLog.outDebug("Buffs prepared to spawn...");
 
             WorldPacket data;
             const char *message = LANG_ARENA_BEGUN;
@@ -93,10 +103,10 @@ void BattleGroundBE::Update(time_t diff)
         }
     }
 
-    if(GetStatus() == STATUS_IN_PROGRESS)
+    /*if(GetStatus() == STATUS_IN_PROGRESS)
     {
         // update something
-    }
+    }*/
 }
 
 void BattleGroundBE::RemovePlayer(Player *plr, uint64 guid)
@@ -133,10 +143,14 @@ void BattleGroundBE::HandleAreaTrigger(Player *Source, uint32 Trigger)
         return;
 
     uint32 SpellId = 0;
+    uint64 buff_guid = 0;
     switch(Trigger)
     {
         case 4538:                                          // buff trigger?
+            buff_guid = m_bgobjects[BG_BE_OBJECT_BUFF_1];
+            break;
         case 4539:                                          // buff trigger?
+            buff_guid = m_bgobjects[BG_BE_OBJECT_BUFF_2];
             break;
         default:
             sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);
@@ -144,25 +158,37 @@ void BattleGroundBE::HandleAreaTrigger(Player *Source, uint32 Trigger)
             break;
     }
 
-    if(SpellId)
-        Source->CastSpell(Source, SpellId, true);
+    if(buff_guid)
+    {
+        GameObject *obj = HashMapHolder<GameObject>::Find(buff_guid);
+        if(obj)
+        {
+            if(!obj->isSpawned())
+                return;                                     // buff not spawned yet
+            obj->SetRespawnTime(BUFF_RESPAWN_TIME);
+            obj->SetLootState(GO_LOOTED);
+            SpellId = obj->GetGOInfo()->sound3;
+            if(SpellId)
+                Source->CastSpell(Source, SpellId, true);
+        }
+    }
 }
 
 bool BattleGroundBE::SetupBattleGround()
 {
     // gates
-    if(!SpawnObject(183971, BG_BE_OBJECT_DOOR_1, 6287.277, 282.1877, 3.810925, -2.260201, 0, 0, 0.9044551, -0.4265689))
+    if(!AddObject(BG_BE_OBJECT_DOOR_1, 183971, 6287.277, 282.1877, 3.810925, -2.260201, 0, 0, 0.9044551, -0.4265689, 0))
         return false;
-    if(!SpawnObject(183973, BG_BE_OBJECT_DOOR_2, 6189.546, 241.7099, 3.101481, 0.8813917, 0, 0, 0.4265689, 0.9044551))
+    if(!AddObject(BG_BE_OBJECT_DOOR_2, 183973, 6189.546, 241.7099, 3.101481, 0.8813917, 0, 0, 0.4265689, 0.9044551, 0))
         return false;
-    if(!SpawnObject(183970, BG_BE_OBJECT_DOOR_3, 6299.116, 296.5494, 3.308032, 0.8813917, 0, 0, 0.4265689, 0.9044551))
+    if(!AddObject(BG_BE_OBJECT_DOOR_3, 183970, 6299.116, 296.5494, 3.308032, 0.8813917, 0, 0, 0.4265689, 0.9044551, 0))
         return false;
-    if(!SpawnObject(183972, BG_BE_OBJECT_DOOR_4, 6177.708, 227.3481, 3.604374, -2.260201, 0, 0, 0.9044551, -0.4265689))
+    if(!AddObject(BG_BE_OBJECT_DOOR_4, 183972, 6177.708, 227.3481, 3.604374, -2.260201, 0, 0, 0.9044551, -0.4265689, 0))
         return false;
     // buffs
-    if(!SpawnObject(184663, BG_BE_OBJECT_BUFF_1, 6249.042, 275.3239, 11.22033, -1.448624, 0, 0, 0.6626201, -0.7489557, 34709))
+    if(!AddObject(BG_BE_OBJECT_BUFF_1, 184663, 6249.042, 275.3239, 11.22033, -1.448624, 0, 0, 0.6626201, -0.7489557, 120))
         return false;
-    if(!SpawnObject(184664, BG_BE_OBJECT_BUFF_2, 6228.26, 249.566, 11.21812, -0.06981307, 0, 0, 0.03489945, -0.9993908, 34709))
+    if(!AddObject(BG_BE_OBJECT_BUFF_2, 184664, 6228.26, 249.566, 11.21812, -0.06981307, 0, 0, 0.03489945, -0.9993908, 120))
         return false;
 
     return true;

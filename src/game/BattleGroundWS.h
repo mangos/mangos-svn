@@ -23,7 +23,6 @@ class BattleGround;
 
 #define MAX_TEAM_SCORE      3
 #define FLAG_RESPAWN_TIME   23000
-#define BUFF_RESPAWN_TIME   180000
 
 #define SOUND_FLAG_CAPTURED_ALLIANCE 8173
 #define SOUND_FLAG_CAPTURED_HORDE    8213
@@ -52,7 +51,6 @@ enum BattleGroundObjectTypes
     BG_OBJECT_REGENBUFF_2   = 5,
     BG_OBJECT_BERSERKBUFF_1 = 6,
     BG_OBJECT_BERSERKBUFF_2 = 7,
-    BG_OBJECT_SEPARATOR     = 8,                            // separator between doors and other objects
     BG_OBJECT_DOOR_A_1      = 8,
     BG_OBJECT_DOOR_A_2      = 9,
     BG_OBJECT_DOOR_A_3      = 10,
@@ -120,5 +118,6 @@ class BattleGroundWS : public BattleGround
         uint64 m_FlagKeepers[2];                            // 0 - alliance, 1 - horde
         uint8 m_FlagState[2];                               // for checking flag state
         uint32 m_TeamScores[2];
+        int32 m_FlagsTimer[2];
 };
 #endif

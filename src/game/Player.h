@@ -347,6 +347,7 @@ enum PlayerFlags
     PLAYER_UNK                  = 0x00040000,               // 2.0.8...
 };
 
+// used for PLAYER__FIELD_KNOWN_TITLES field
 enum PlayerKnownTitles
 {
     PLAYER_TITLE_DISABLED             = 0x00000000,
@@ -381,6 +382,43 @@ enum PlayerKnownTitles
     PLAYER_TITLE_HIGH_WARLORD         = 0x10000000,
     PLAYER_TITLE_UNUSED1              = 0x20000000,
     PLAYER_TITLE_UNUSED2              = 0x40000000
+};
+
+// used for PLAYER__FIELD_KNOWN_TITLES+1 field
+enum PlayerKnownTitles2
+{
+    PLAYER_TITLE_UNUSED3              = 0x00000000,
+    PLAYER_TITLE_UNUSED4              = 0x00000001,
+    PLAYER_TITLE_UNUSED5              = 0x00000002,
+    PLAYER_TITLE_UNUSED6              = 0x00000004,
+    PLAYER_TITLE_UNUSED7              = 0x00000008,
+    PLAYER_TITLE_UNUSED8              = 0x00000010,
+    PLAYER_TITLE_UNUSED9              = 0x00000020,
+    PLAYER_TITLE_UNUSED10             = 0x00000040,
+    PLAYER_TITLE_UNUSED11             = 0x00000080,
+    PLAYER_TITLE_UNUSED12             = 0x00000100,
+    PLAYER_TITLE_UNUSED13             = 0x00000200,
+    PLAYER_TITLE_UNUSED14             = 0x00000400,
+    PLAYER_TITLE_UNUSED15             = 0x00000800,
+    PLAYER_TITLE_UNUSED16             = 0x00001000,
+    PLAYER_TITLE_UNUSED17             = 0x00002000,
+    PLAYER_TITLE_UNUSED18             = 0x00004000,
+    PLAYER_TITLE_UNUSED19             = 0x00008000,
+    PLAYER_TITLE_UNUSED20             = 0x00010000,
+    PLAYER_TITLE_UNUSED21             = 0x00020000,
+    PLAYER_TITLE_UNUSED22             = 0x00040000,
+    PLAYER_TITLE_UNUSED23             = 0x00080000,
+    PLAYER_TITLE_UNUSED24             = 0x00100000,
+    PLAYER_TITLE_UNUSED25             = 0x00200000,
+    PLAYER_TITLE_UNUSED26             = 0x00400000,
+    PLAYER_TITLE_UNUSED27             = 0x00800000,
+    PLAYER_TITLE_UNUSED28             = 0x01000000,
+    PLAYER_TITLE_UNUSED29             = 0x02000000,
+    PLAYER_TITLE_UNUSED30             = 0x04000000,
+    PLAYER_TITLE_UNUSED31             = 0x08000000,
+    PLAYER_TITLE_UNUSED32             = 0x10000000,
+    PLAYER_TITLE_UNUSED33             = 0x20000000,
+    PLAYER_TITLE_UNUSED34             = 0x40000000
 };
 
 enum ActivateTaxiReplies

@@ -2525,12 +2525,12 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool Real)
                                 // Warsong Flag, horde
                                 if(GetSpellProto()->Id == 23333)
                                     // Horde Flag Drop
-                                    m_target->CastSpell(m_target, 23334, true, NULL, this);
+                                    ((BattleGroundWS*)bg)->EventPlayerDroppedFlag(((Player*)m_target));
                             if(((BattleGroundWS*)bg)->IsAllianceFlagPickedup())
                                 // Silverwing Flag, alliance
                                 if(GetSpellProto()->Id == 23335)
                                     // Alliance Flag Drop
-                                    m_target->CastSpell(m_target, 23336, true, NULL, this);
+                                    ((BattleGroundWS*)bg)->EventPlayerDroppedFlag(((Player*)m_target));
                             break;
                         }
                         case BATTLEGROUND_AB:

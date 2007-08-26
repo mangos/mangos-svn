@@ -838,7 +838,7 @@ enum OpCodes
     SMSG_UNKNOWN_793                                = 793,  // packed guid + uint32 unk
     SMSG_UNKNOWN_794                                = 794,  // packed guid, movement related, set 0x1000 movement flag, all speed to 0, except turn rate
     // 795
-    SMSG_UNKNOWN_796                                = 796,  // uint64, guid?
+    SMSG_UNKNOWN_796                                = 796,  // uint64, guid, chat related?
     CMSG_RESET_INSTANCES                            = 797,  // reset instances, empty
     SMSG_RESET_INSTANCES_SUCCESS                    = 798,  // uint32 mapid, chat message: %s has been reset.
     SMSG_RESET_INSTANCES_FAILED                     = 799,  // uint32 reason, uint32 mapid
@@ -969,7 +969,7 @@ enum OpCodes
     // 924
     SMSG_SET_COMBO_POINTS                           = 925,  // set combo points
     // 926
-    // 927
+    SMSG_UNKNOWN_927                                = 927,  // uint64 guid + unk's
     // 928
     // 929
     // 930
@@ -995,12 +995,12 @@ enum OpCodes
     SMSG_UNKNOWN_935                                = 935,  // teleport/movement opcode (MSG?)
     // 936
     // 937
-    // 938
+    SMSG_UNKNOWN_938                                = 938,  // uint64, uint64, uint32 spellid, uint32, uint32
     // 939
-    // 940
+    SMSG_UNKNOWN_940                                = 940,  // packed guid (received at spell cast)
     SMSG_UNKNOWN_941                                = 941,  // teleport/movement opcode
     SMSG_UNKNOWN_942                                = 942,  // Everyone is Ready! (message)
-    // 943
+    CMSG_UNKNOWN_943                                = 943,  // uint8, uint8
     SMSG_UNKNOWN_944                                = 944,  // chat related (seen it when talk with GM)
     // 945
     // 946
@@ -1013,10 +1013,54 @@ enum OpCodes
     CMSG_REPORT_SPAM                                = 953,  // Report Spam chat button
     SMSG_REPORT_SPAM_RESPONSE                       = 954,  // Complaint Registered. (message)
     SMSG_ACTIVATE_SPAM_REPORTING                    = 955,  // unk uint8
+    // 956
+    // 957
+    // 958
+    // 959
+    // 960
+    // 961
+    // 962
+    // 963
+    // 964
+    // 965
+    // 966
+    SMSG_UNKNOWN_967                                = 967,  // uint8, uint8
+    // 968
+    // 969
+    // 970
+    // 971
+    // 972
+    // 973
+    // 974
+    // 975
+    CMSG_UNKNOWN_976                                = 976,  // string channel name
+    CMSG_UNKNOWN_977                                = 977,  // uint32, string
+    CMSG_UNKNOWN_978                                = 978,  // string channel name
+    SMSG_UNKNOWN_979                                = 979,  // string channel name, uint8, uint32
+    // 980
+    // 981
+    // 982
+    // 983
+    SMSG_UNKNOWN_984                                = 984,  // unk's + string channel name + uint64 guid
+    // 985
+    // 986
+    // 987
+    // 988
+    // 989
+    // 990
+    // 991
+    // 992
+    // 993
+    // 994
+    // 995
+    CMSG_UNKNOWN_996                                = 996,  // string channel name
+    SMSG_UNKNOWN_997                                = 997,  // uint64 guid + uint8 + uint8 + uint32 + string channel name
+    SMSG_UNKNOWN_998                                = 998,  // uint64 guid + uint8 + uint32 + string channel name
+    // 999
 };
 
 //if you add new opcode .. Do NOT forget to change the following define MAX_OPCODE_ID and also add new opcode to table in opcodes.cpp
-#define MAX_OPCODE_ID 955
+#define MAX_OPCODE_ID 999
 
 /// Results of friend related commands
 enum FriendsResult

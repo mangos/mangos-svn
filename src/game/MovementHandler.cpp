@@ -24,7 +24,6 @@
 #include "World.h"
 #include "ObjectMgr.h"
 #include "Player.h"
-#include "UpdateMask.h"
 #include "MapManager.h"
 #include "Transports.h"
 #include "BattleGroundMgr.h"
@@ -68,7 +67,6 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
     MapManager::Instance().GetMap(GetPlayer()->GetMapId(), GetPlayer())->Add(GetPlayer());
     GetPlayer()->SendInitialPacketsAfterAddToMap();
 
-    // for testing...
     if(_player->InBattleGround())
     {
         BattleGround *bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundId());
