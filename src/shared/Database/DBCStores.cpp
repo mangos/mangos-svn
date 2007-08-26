@@ -604,7 +604,6 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                 }
             }   break;
             case 23 /*SPELL_AURA_PERIODIC_TRIGGER_SPELL*/:
-            case 42 /*SPELL_AURA_PROC_TRIGGER_SPELL*/:
                 if(spellId != spellproto->EffectTriggerSpell[effIndex])
                 {
                     uint32 spellTriggeredId = spellproto->EffectTriggerSpell[effIndex];
@@ -623,18 +622,21 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                     }
                 }
                 break;
+            case 42 /*SPELL_AURA_PROC_TRIGGER_SPELL*/:
+                // many positive auras have negative triggered spells at damage for example and this not make it negative (it can be canceled for example)
+                break;
             case 26 /*SPELL_AURA_MOD_ROOT          */:
             case 27 /*SPELL_AURA_MOD_SILENCE       */:
             case 95 /*SPELL_AURA_GHOST*/:
                 return false;
             case 33 /*SPELL_AURA_MOD_DECREASE_SPEED*/:      // used in positive spells also
-            // part of positive spell if casted at self
-            if(spellproto->EffectImplicitTargetA[effIndex] != 1/*TARGET_SELF*/)
-                return false;
-            // but not this if this first effect (don't found batter check)
-            if(spellproto->Attributes & 0x4000000 && effIndex==0)
-                return false;
-            break;
+                // part of positive spell if casted at self
+                if(spellproto->EffectImplicitTargetA[effIndex] != 1/*TARGET_SELF*/)
+                    return false;
+                // but not this if this first effect (don't found batter check)
+                if(spellproto->Attributes & 0x4000000 && effIndex==0)
+                    return false;
+                break;
             case 77 /*SPELL_AURA_MECHANIC_IMMUNITY*/:
             {
                 // non-positive immunities
@@ -664,6 +666,7 @@ bool IsPositiveSpell(uint32 spellId)
     if (!spellproto) return false;
 
     // spells with atleast one negative effect are considered negative
+    // some self-applied spells have negative effects but in self casting case negative check ignored.
     for (int i = 0; i < 3; i++)
         if (!IsPositiveEffect(spellId, i))
             return false;
