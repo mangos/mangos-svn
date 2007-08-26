@@ -67,7 +67,7 @@ enum Targets
     TARGET_ALL_ENEMY_IN_AREA_INSTANT   = 16,
     TARGET_ALL_PARTY_AROUND_CASTER     = 20,
     TARGET_SINGLE_FRIEND               = 21,
-    TARGET_ALL_ENEMIES_AROUND_CASTER   = 22,
+    TARGET_ALL_AROUND_CASTER           = 22,                // used only in TargetA, target selection dependent from TargetB
     TARGET_GAMEOBJECT                  = 23,
     TARGET_IN_FRONT_OF_CASTER          = 24,
     TARGET_DUELVSPLAYER                = 25,
@@ -75,6 +75,7 @@ enum Targets
     TARGET_MASTER                      = 27,
     TARGET_ALL_ENEMY_IN_AREA_CHANNELED = 28,
     TARGET_MINION                      = 32,
+    TARGET_ALL_PARTY                   = 33,
     TARGET_SINGLE_PARTY                = 35,
     TARGET_AREAEFFECT_PARTY            = 37,
     TARGET_SELF_FISHING                = 39,

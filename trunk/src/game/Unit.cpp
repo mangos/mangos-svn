@@ -2994,25 +2994,18 @@ void Unit::RemoveFirstAuraByDispel(uint32 dispel_type, Unit *pCaster)
     {
         if ((*i).second && (*i).second->GetSpellProto()->Dispel == dispel_type)
         {
+            SpellEntry const* spellInfo = (*i).second->GetSpellProto();
+            uint32 eff = (*i).second->GetEffIndex();
+
             if(dispel_type == 1)
             {
                 bool positive = true;
-                switch((*i).second->GetSpellProto()->EffectImplicitTargetA[(*i).second->GetEffIndex()])
-                {
-                    case TARGET_CHAIN_DAMAGE:
-                    case TARGET_ALL_ENEMY_IN_AREA:
-                    case TARGET_ALL_ENEMY_IN_AREA_INSTANT:
-                    case TARGET_ALL_ENEMIES_AROUND_CASTER:
-                    case TARGET_IN_FRONT_OF_CASTER:
-                    case TARGET_DUELVSPLAYER:
-                    case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
-                    case TARGET_CURRENT_SELECTED_ENEMY:
-                        positive = false;
-                        break;
 
-                    default:
-                        positive = ((*i).second->GetSpellProto()->AttributesEx & (1<<7)) ? false : true;
-                }
+                if(!IsPositiveTarget(spellInfo->EffectImplicitTargetA[eff],spellInfo->EffectImplicitTargetB[eff]))
+                    positive = false;
+                else
+                    positive = (spellInfo->AttributesEx & (1<<7))==0;
+
                 if(positive && IsFriendlyTo(pCaster))       // PBW
                 {
                     ++i;

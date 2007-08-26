@@ -544,20 +544,21 @@ bool IsSpellSingleEffectPerCaster(uint32 spellId)
     }
 }
 
-static bool IsPositiveTarget(uint32 target)
+bool IsPositiveTarget(uint32 targetA, uint32 targetB)
 {
     // non-positive targets
-    switch(target)
+    switch(targetA)
     {
-        case 6:                                             //TARGET_S_E:
-        case 15:                                            //TARGET_AE_E:
-        case 16:                                            //TARGET_AE_E_INSTANT:
-        case 22:                                            //TARGET_AC_E:
-        case 24:                                            //TARGET_INFRONT:
-        case 25:                                            //TARGET_DUELVSPLAYER:
-        case 28:                                            //TARGET_AE_E_CHANNEL:
-        case 53:                                            //TARGET_AE_SELECTED:
+        case 6:                                             //TARGET_CHAIN_DAMAGE
+        case 15:                                            //TARGET_ALL_ENEMY_IN_AREA
+        case 16:                                            //TARGET_ALL_ENEMY_IN_AREA_INSTANT
+        case 24:                                            //TARGET_IN_FRONT_OF_CASTER
+        case 25:                                            //TARGET_DUELVSPLAYER
+        case 28:                                            //TARGET_ALL_ENEMY_IN_AREA_CHANNELED
+        case 53:                                            //TARGET_CURRENT_SELECTED_ENEMY
             return false;
+        case 22:                                            //TARGET_ALL_AROUND_CASTER
+            return (targetB == 33 /*TARGET_ALL_PARTY*/);
         default:
             break;
     }
@@ -579,7 +580,7 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
     }
 
     // non-positive targets
-    if(!IsPositiveTarget(spellproto->EffectImplicitTargetA[effIndex]))
+    if(!IsPositiveTarget(spellproto->EffectImplicitTargetA[effIndex],spellproto->EffectImplicitTargetB[effIndex]))
         return false;
 
     // AttributesEx check
@@ -616,7 +617,7 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                         {
                             // if non-positive trigger cast targeted to positive target this main cast is non-positive
                             // this will place this spell auras as debuffs
-                            if(IsPositiveTarget(spellTriggeredProto->EffectImplicitTargetA[effIndex]) && !IsPositiveEffect(spellTriggeredId,i))
+                            if(IsPositiveTarget(spellTriggeredProto->EffectImplicitTargetA[effIndex],spellTriggeredProto->EffectImplicitTargetB[effIndex]) && !IsPositiveEffect(spellTriggeredId,i))
                                 return false;
                         }
                     }
