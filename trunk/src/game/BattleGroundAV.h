@@ -29,7 +29,7 @@ class BattleGroundAV : public BattleGround
         BattleGroundAV();
         ~BattleGroundAV();
         void Update(time_t diff);
-        void RemovePlayer(Player *plr,uint64 guid);
+        void RemovePlayer(Player *plr, uint64 guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         //bool SetupBattleGround();
 

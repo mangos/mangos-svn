@@ -37,7 +37,7 @@ class BattleGroundNA : public BattleGround
         BattleGroundNA();
         ~BattleGroundNA();
         void Update(time_t diff);
-        void RemovePlayer(Player *plr,uint64 guid);
+        void RemovePlayer(Player *plr, uint64 guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         bool SetupBattleGround();
         void HandleKillPlayer(Player* player, Player *killer);

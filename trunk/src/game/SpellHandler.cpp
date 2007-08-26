@@ -460,7 +460,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                             if(((BattleGroundWS*)bg)->GetFlagState(ALLIANCE) != FLAG_STATE_ON_BASE)
                                 return;
                             // check if it's correct flag
-                            if(((BattleGroundWS*)bg)->m_bgobjects[BG_OBJECT_A_FLAG].object->GetGUID() != obj->GetGUID())
+                            if(((BattleGroundWS*)bg)->m_bgobjects[BG_OBJECT_A_FLAG] != obj->GetGUID())
                                 return;
                             // check player team
                             if(_player->GetTeam() == ALLIANCE)
@@ -475,7 +475,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                             if(((BattleGroundWS*)bg)->GetFlagState(HORDE) != FLAG_STATE_ON_BASE)
                                 return;
                             // check if it's correct flag
-                            if(((BattleGroundWS*)bg)->m_bgobjects[BG_OBJECT_H_FLAG].object->GetGUID() != obj->GetGUID())
+                            if(((BattleGroundWS*)bg)->m_bgobjects[BG_OBJECT_H_FLAG] != obj->GetGUID())
                                 return;
                             // check player team
                             if(_player->GetTeam() == HORDE)
@@ -519,14 +519,17 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                             // check if flag dropped
                             if(((BattleGroundWS*)bg)->GetFlagState(ALLIANCE) != FLAG_STATE_ON_GROUND)
                                 return;
+                            obj->Delete();
                             if(_player->GetTeam() == ALLIANCE)
                             {
                                 ((BattleGroundWS*)bg)->EventPlayerReturnedFlag(_player);
-                                obj->Delete();
                                 return;
                             }
-                            if(_player->GetTeam() == HORDE)
-                                spellId = 23335;            // Silverwing Flag
+                            else
+                            {
+                                _player->CastSpell(_player, 23335, true);
+                                return;
+                            }
                             break;
                         case 179786:                        // Warsong Flag
                             // check if it's correct bg
@@ -535,14 +538,17 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                             // check if flag dropped
                             if(((BattleGroundWS*)bg)->GetFlagState(HORDE) != FLAG_STATE_ON_GROUND)
                                 return;
+                            obj->Delete();
                             if(_player->GetTeam() == HORDE)
                             {
                                 ((BattleGroundWS*)bg)->EventPlayerReturnedFlag(_player);
-                                obj->Delete();
                                 return;
                             }
-                            if(_player->GetTeam() == ALLIANCE)
-                                spellId = 23333;            // Warsong Flag
+                            else
+                            {
+                                _player->CastSpell(_player, 23333, true);
+                                return;
+                            }
                             break;
                     }
                 }
