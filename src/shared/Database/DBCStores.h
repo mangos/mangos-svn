@@ -78,8 +78,11 @@ bool IsSpellSingleEffectPerCaster(uint32 spellId);
 bool IsPassiveSpell(uint32 spellId);
 bool IsNonCombatSpell(uint32 spellId);
 uint32 GetTalentSpellCost(uint32 spellId);
+
 bool IsPositiveSpell(uint32 spellId);
 bool IsPositiveEffect(uint32 spellId, uint32 effIndex);
+bool IsPositiveTarget(uint32 targetA, uint32 targetB);
+
 bool IsSingleTarget(uint32 spellId);
 AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id);
 AreaTableEntry const* GetAreaEntryByAreaFlag(uint32 area_flag);

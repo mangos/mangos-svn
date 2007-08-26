@@ -293,22 +293,10 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur, u
         if (m_spellInfo->Effect[j]==0)
             continue;
 
-        switch(m_spellInfo->EffectImplicitTargetA[j])
-        {
-            case TARGET_CHAIN_DAMAGE:
-            case TARGET_ALL_ENEMY_IN_AREA:
-            case TARGET_ALL_ENEMY_IN_AREA_INSTANT:
-            case TARGET_ALL_ENEMIES_AROUND_CASTER:
-            case TARGET_IN_FRONT_OF_CASTER:
-            case TARGET_DUELVSPLAYER:
-            case TARGET_ALL_ENEMY_IN_AREA_CHANNELED:
-                //case TARGET_AE_SELECTED:
-                m_canReflect = true;
-                break;
-
-            default:
-                m_canReflect = (m_spellInfo->AttributesEx & (1<<7)) ? true : false;
-        }
+        if(!IsPositiveTarget(m_spellInfo->EffectImplicitTargetA[j],m_spellInfo->EffectImplicitTargetB[j]))
+            m_canReflect = true;
+        else
+            m_canReflect = (m_spellInfo->AttributesEx & (1<<7)) ? true : false;
 
         if(m_canReflect)
             continue;
@@ -651,6 +639,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             }
         }break;
         case TARGET_ALL_PARTY_AROUND_CASTER:
+        case TARGET_ALL_PARTY:
         {
             Unit* owner = m_caster->GetCharmerOrOwner();
             Group  *pGroup = NULL;
@@ -693,7 +682,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             if(m_targets.getUnitTarget())
                 TagUnitMap.push_back(m_targets.getUnitTarget());
         }break;
-        case TARGET_ALL_ENEMIES_AROUND_CASTER:
+        case TARGET_ALL_AROUND_CASTER:
         {
             CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
             Cell cell = RedZone::GetZone(p);
