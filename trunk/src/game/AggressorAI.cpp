@@ -54,8 +54,7 @@ AggressorAI::MoveInLineOfSight(Unit *u)
         {
             if(!i_creature.IsWithinLOSInMap(u)) return;
             AttackStart(u);
-            if(u->HasStealthAura())
-                u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+            u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
         }
     }
 }

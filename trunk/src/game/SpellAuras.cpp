@@ -2139,10 +2139,9 @@ void Aura::HandleModStealth(bool apply, bool Real)
         {
             bool reallyRemove =true;
             SpellEntry const *spellInfo = GetSpellProto();
-            if(spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE &&
+            if( spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE &&
                 (spellInfo->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE_VANISH) &&
-                (m_target->HasStealthAura() ||
-                m_target->HasInvisibilityAura()))
+                (m_target->HasStealthAura() || m_target->HasInvisibilityAura()) )
                 reallyRemove = false;                       // vanish it timed out, but we have stealth active as well
             if(reallyRemove)
             {

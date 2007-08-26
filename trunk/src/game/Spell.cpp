@@ -937,7 +937,7 @@ void Spell::prepare(SpellCastTargets * targets)
     }
 
     // stealth must be removed at cast starting (at show channel bar)
-    // skip trigered spell (item equip spell casting and other not explicit character casts/item uses)
+    // skip triggered spell (item equip spell casting and other not explicit character casts/item uses)
     if ( !m_IsTriggeredSpell && !CanUsedWhileStealthed(m_spellInfo->Id) )
         m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
 

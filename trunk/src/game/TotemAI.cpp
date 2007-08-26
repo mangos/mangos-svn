@@ -57,8 +57,7 @@ TotemAI::MoveInLineOfSight(Unit *u)
     if(i_totem.IsWithinDistInMap(u, attackRadius))
     {
         AttackStart(u);
-        if(u->HasStealthAura())
-            u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+        u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
     }
 }
 
