@@ -653,20 +653,17 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
         {
             Unit* owner = m_caster->GetCharmerOrOwner();
             Group  *pGroup = NULL;
-            Player *groupMember = NULL;
 
             if(owner)
             {
                 if(owner->GetTypeId() == TYPEID_PLAYER)
                 {
-                    groupMember = (Player*)owner;
                     pGroup = ((Player*)owner)->GetGroup();
                 }
             }
             else if (m_caster->GetTypeId() == TYPEID_PLAYER)
             {
-                groupMember = (Player*)m_caster;
-                pGroup = groupMember->GetGroup();
+                pGroup = ((Player*)m_caster)->GetGroup();
             }
 
             if(pGroup)
@@ -674,7 +671,9 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                 for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
                 {
                     Player* Target = itr->getSource();
-                    if(Target && m_caster->IsWithinDistInMap(Target, radius))
+
+                    // IsHostileTo check duel and controlled by enemy
+                    if(Target && m_caster->IsWithinDistInMap(Target, radius) && !m_caster->IsHostileTo(Target))
                         TagUnitMap.push_back(Target);
                 }
             }
@@ -781,26 +780,25 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
         case TARGET_AREAEFFECT_PARTY:
         {
             Unit* owner = m_caster->GetCharmerOrOwner();
-            Player *groupMember = NULL;
             Group  *pGroup = NULL;
 
             if(owner)
             {
                 TagUnitMap.push_back(m_caster);
                 if(owner->GetTypeId() == TYPEID_PLAYER)
-                    groupMember = (Player*)owner;
+                    pGroup = ((Player*)owner)->GetGroup();
             }
             else if (m_caster->GetTypeId() == TYPEID_PLAYER)
-                groupMember = (Player*)m_caster;
-
-            if (groupMember) pGroup = groupMember->GetGroup();
+                pGroup = ((Player*)m_caster)->GetGroup();
 
             if(pGroup)
             {
                 for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
                 {
                     Player* Target = itr->getSource();
-                    if(Target && m_caster->IsWithinDistInMap(Target, radius))
+
+                    // IsHostileTo check duel and controlled by enemy
+                    if(Target && m_caster->IsWithinDistInMap(Target, radius) && !m_caster->IsHostileTo(Target))
                         TagUnitMap.push_back(Target);
                 }
             }
@@ -811,6 +809,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             }
             else
                 TagUnitMap.push_back(m_caster);
+
         }break;
         case TARGET_SELF_FISHING:
         {
@@ -873,8 +872,14 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                 for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
                 {
                     Player* Target = itr->getSource();
-                    if(Target && targetPlayer->IsWithinDistInMap(Target, radius) && targetPlayer->getClass() == Target->getClass())
+
+                    // IsHostileTo check duel and controlled by enemy
+                    if( Target && targetPlayer->IsWithinDistInMap(Target, radius) && 
+                        targetPlayer->getClass() == Target->getClass() &&
+                        !m_caster->IsHostileTo(Target) )
+                    {
                         TagUnitMap.push_back(Target);
+                    }
                 }
             }
             else if(m_targets.getUnitTarget())
