@@ -78,8 +78,8 @@ extern char *mysql_unix_port;
 #define CLIENT_NET_WRITE_TIMEOUT	365*24*3600	/* Timeout on write */
 
 #ifdef __NETWARE__
-// Only GCC 4.1.0 and later support #pragma pack(push,8) syntax 
-#if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1) 
+// GCC have alternative #pragma pack(8) syntax and old gcc version not support pack(push,8), also any gcc version not support it at some paltform
+#if defined( __GNUC__ )
 #pragma pack(8) 
 #else 
 #pragma pack(push,8) 
@@ -861,8 +861,8 @@ int		STDCALL mysql_drop_db(MYSQL *mysql, const char *DB);
 
 #ifdef __NETWARE__
 
-// Only GCC 4.1.0 and later support #pragma pack(pop) syntax
-#if defined( __GNUC__ ) && (GCC_MAJOR < 4 || GCC_MAJOR == 4 && GCC_MINOR < 1)
+// GCC have alternative #pragma pack() syntax and old gcc version not support pack(pop), also any gcc version not support it at some paltform
+#if defined( __GNUC__ )
 #pragma pack()
 #else
 #pragma pack(pop)

@@ -324,8 +324,8 @@ inline uint8 ItemSubClassToDurabilityMultiplierId(uint32 ItemClass, uint32 ItemS
     return 0;
 }
 
-// Only GCC 4.1.0 and later support #pragma pack(push,1) syntax
-#if defined( __GNUC__ ) && (__GNUC__ < 4 || __GNUC__ == 4 && __GNUC_MINOR__ < 1)
+// GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some paltform
+#if defined( __GNUC__ )
 #pragma pack(1)
 #else
 #pragma pack(push,1)
@@ -432,9 +432,11 @@ struct ItemPrototype
     uint32 DisenchantID;
 };
 
-#if defined( __GNUC__ ) && (__GNUC__ < 4 || __GNUC__ == 4 && __GNUC_MINOR__ < 1)
+// GCC have alternative #pragma pack() syntax and old gcc version not support pack(pop), also any gcc version not support it at some paltform
+#if defined( __GNUC__ )
 #pragma pack()
 #else
 #pragma pack(pop)
 #endif
+
 #endif
