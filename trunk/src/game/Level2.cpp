@@ -307,7 +307,7 @@ bool ChatHandler::HandleGoObjectCommand(const char* args)
 //teleport to creature
 bool ChatHandler::HandleGoCreatureCommand(const char* args)
 {
-    
+
     if(!*args)
         return false;
     Player* _player = m_session->GetPlayer();

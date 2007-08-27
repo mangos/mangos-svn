@@ -6663,7 +6663,7 @@ struct ProcTriggeredData
     ProcTriggeredData(SpellEntry const * _spellInfo, uint32 _spellParam, Aura* _triggeredByAura)
         : spellInfo(_spellInfo), spellParam(_spellParam), triggeredByAura(_triggeredByAura),
         triggeredByAura_SpellPair(Unit::spellEffectPair(triggeredByAura->GetId(),triggeredByAura->GetEffIndex()))
-    {}
+        {}
 
     SpellEntry const * spellInfo;
     uint32 spellParam;

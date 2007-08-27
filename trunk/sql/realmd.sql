@@ -49,10 +49,10 @@ CREATE TABLE `account` (
 LOCK TABLES `account` WRITE;
 /*!40000 ALTER TABLE `account` DISABLE KEYS */;
 INSERT INTO `account` VALUES 
-(1,'administrator',SHA1('ADMINISTRATOR:ADMINISTRATOR'),3,'','0','0','','2006-04-25 10:18:56','127.0.0.1',0,0,'0000-00-00 00:00:00',0,0,0),
-(2,'gamemaster',SHA1('GAMEMASTER:GAMEMASTER'),2,'','0','0','','2006-04-25 10:18:56','127.0.0.1',0,0,'0000-00-00 00:00:00',0,0,0),
-(3,'moderator',SHA1('MODERATOR:MODERATOR'),1,'','0','0','','2006-04-25 10:19:35','127.0.0.1',0,0,'0000-00-00 00:00:00',0,0,0),
-(4,'player',SHA1('PLAYER:PLAYER'),0,'','0','0','','2006-04-25 10:19:35','127.0.0.1',0,0,'0000-00-00 00:00:00',0,0,0);
+(1,'administrator','a34b29541b87b7e4823683ce6c7bf6ae68beaaac',3,'','0','0','','2006-04-25 10:18:56','127.0.0.1',0,0,'0000-00-00 00:00:00',0,0,0),
+(2,'gamemaster','7841e21831d7c6bc0b57fbe7151eb82bd65ea1f9',2,'','0','0','','2006-04-25 10:18:56','127.0.0.1',0,0,'0000-00-00 00:00:00',0,0,0),
+(3,'moderator','a7f5fbff0b4eec2d6b6e78e38e8312e64d700008',1,'','0','0','','2006-04-25 10:19:35','127.0.0.1',0,0,'0000-00-00 00:00:00',0,0,0),
+(4,'player','3ce8a96d17c5ae88a30681024e86279f1a38c041',0,'','0','0','','2006-04-25 10:19:35','127.0.0.1',0,0,'0000-00-00 00:00:00',0,0,0);
 /*!40000 ALTER TABLE `account` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -62,12 +62,12 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `account_banned`;
 CREATE TABLE `account_banned` (
-  `id` int(11) NOT NULL COMMENT   'Account id' default '0',
-   `bandate` bigint(40) NOT NULL default '0',
+  `id` int(11) NOT NULL default '0' COMMENT 'Account id',
+  `bandate` bigint(40) NOT NULL default '0',
   `unbandate` bigint(40) NOT NULL default '0',
-   `bannedby` VARCHAR(50) NOT NULL,
-   `banreason` VARCHAR(255) NOT NULL,
-   `active` TINYINT NOT NULL DEFAULT 1,
+  `bannedby` varchar(50) NOT NULL,
+  `banreason` varchar(255) NOT NULL,
+  `active` tinyint(4) NOT NULL default '1',
   PRIMARY KEY  (`id`,`bandate`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Ban List';
 
@@ -89,8 +89,8 @@ CREATE TABLE `ip_banned` (
   `ip` varchar(32) NOT NULL default '127.0.0.1',
   `bandate` bigint(40) NOT NULL,
   `unbandate` bigint(40) NOT NULL,
-  `bannedby` VARCHAR(50) NOT NULL DEFAULT '[Console]',
-  `banreason` VARCHAR(255) NOT NULL DEFAULT 'no reason',
+  `bannedby` varchar(50) NOT NULL default '[Console]',
+  `banreason` varchar(255) NOT NULL default 'no reason',
   PRIMARY KEY  (`ip`,`bandate`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Banned IPs';
 
@@ -161,4 +161,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2007-04-23  8:56:41
+-- Dump completed on 2007-08-27  9:19:21

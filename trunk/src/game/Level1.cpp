@@ -124,17 +124,17 @@ bool ChatHandler::HandleNotifyCommand(const char* args)
 //Enable\Dissable GM Mode
 bool ChatHandler::HandleGMmodeCommand(const char* args)
 {
-    if(!*args) return false; 
+    if(!*args) return false;
 
     std::string argstr = (char*)args;
 
     if (argstr == "on")
-    {   
+    {
         m_session->GetPlayer()->SetGameMaster(true);
         m_session->SendNotification("GM mode is ON");
         #ifdef _DEBUG_VMAPS
-            VMAP::IVMapManager *vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
-            vMapManager->processCommand("stoplog");
+        VMAP::IVMapManager *vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
+        vMapManager->processCommand("stoplog");
         #endif
         return true;
     }
@@ -144,8 +144,8 @@ bool ChatHandler::HandleGMmodeCommand(const char* args)
         m_session->GetPlayer()->SetGameMaster(false);
         m_session->SendNotification("GM mode is OFF");
         #ifdef _DEBUG_VMAPS
-            VMAP::IVMapManager *vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
-            vMapManager->processCommand("startlog");
+        VMAP::IVMapManager *vMapManager = VMAP::VMapFactory::createOrGetVMapManager();
+        vMapManager->processCommand("startlog");
         #endif
         return true;
     }
@@ -453,7 +453,7 @@ bool ChatHandler::HandleRecallCommand(const char* args)
 bool ChatHandler::HandleModifyKnownTitlesCommand(const char* args)
 {
     if(!*args)
-       return false;
+        return false;
 
     uint32 titles = atoi((char*)args);
 
@@ -745,7 +745,7 @@ bool ChatHandler::HandleModifyFactionCommand(const char* args)
 //Edit Player Spell
 bool ChatHandler::HandleModifySpellCommand(const char* args)
 {
-       if(!*args) return false;
+    if(!*args) return false;
     char* pspellflatid = strtok((char*)args, " ");
     if (!pspellflatid)
         return false;
@@ -845,7 +845,7 @@ bool ChatHandler::HandleTaxiCheatCommand(const char* args)
         }
         return true;
     }
-    
+
     if (argstr == "off")
     {
         chr->SetTaxiCheater(false);
@@ -864,8 +864,6 @@ bool ChatHandler::HandleTaxiCheatCommand(const char* args)
 
     return false;
 }
-
-
 
 //Edit Player Aspeed
 bool ChatHandler::HandleModifyASpeedCommand(const char* args)

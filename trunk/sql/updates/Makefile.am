@@ -421,6 +421,8 @@ pkgdata_DATA = \
 	4369_battleground_template.sql \
 	4376_battleground_template.sql \
 	4392_battleground_template.sql \
+	4395_spell_chain.sql \
+	4397_command.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -822,4 +824,6 @@ EXTRA_DIST = \
 	4369_battleground_template.sql \
 	4376_battleground_template.sql \
 	4392_battleground_template.sql \
+	4395_spell_chain.sql \
+	4397_command.sql \
 	README

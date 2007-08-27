@@ -82,7 +82,7 @@ struct BattleGroundQueue
     bool    IsInvited;                                      // was invited flag
     uint32  LastOnlineTime;                                 // for tracking and removing offline players from queue after 5 minutes
     bool IsRated;
-    bool AsGroup; // uint32 GroupId;
+    bool AsGroup;                                           // uint32 GroupId;
     uint8 ArenaType;
 };
 

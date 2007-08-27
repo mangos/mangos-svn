@@ -2165,7 +2165,7 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
 
 bool ChatHandler::HandleCreateGuildCommand(const char* args)
 {
-    
+
     if (!*args)
         return false;
 

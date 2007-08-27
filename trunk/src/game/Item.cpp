@@ -42,10 +42,10 @@ void AddItemsSetItem(Player*player,Item *item)
 
     for(size_t x = 0; x < player->ItemSetEff.size(); x++)
         if(player->ItemSetEff[x] && player->ItemSetEff[x]->setid == setid)
-        {
-            eff = player->ItemSetEff[x];
-            break;
-        }
+    {
+        eff = player->ItemSetEff[x];
+        break;
+    }
 
     if(!eff)
     {
@@ -111,10 +111,10 @@ void RemoveItemsSetItem(Player*player,ItemPrototype const *proto)
     size_t setindex = 0;
     for(;setindex < player->ItemSetEff.size(); setindex++)
         if(player->ItemSetEff[setindex] && player->ItemSetEff[setindex]->setid == setid)
-        {
-            eff = player->ItemSetEff[setindex];
-            break;
-        }
+    {
+        eff = player->ItemSetEff[setindex];
+        break;
+    }
 
     // can be in case now enough skill requirement for set appling but set has been appliend when skill requirement not enough
     if(!eff)

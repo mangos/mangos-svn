@@ -2,7 +2,7 @@
 --
 -- Host: localhost    Database: mangos
 -- ------------------------------------------------------
--- Server version5.0.38-Ubuntu_0ubuntu1-log
+-- Server version	5.0.38-Ubuntu_0ubuntu1-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -215,10 +215,10 @@ CREATE TABLE `battleground_template` (
 LOCK TABLES `battleground_template` WRITE;
 /*!40000 ALTER TABLE `battleground_template` DISABLE KEYS */;
 INSERT INTO `battleground_template` VALUES 
-('1', '0', '0', '0',  '611', '2.72532',  '610','2.27452'),
-('2', '0', '0', '0',  '769', '3.14159',  '770','3.14159'),
-('3', '0', '0', '0',  '890', '3.40156',  '889','0.263892'),
-('7', '0', '0', '0', '1103', '3.40156', '1104','0.263892');
+(1,0,0,0,611,2.72532,610,2.27452),
+(2,0,0,0,769,3.14159,770,3.14159),
+(3,0,0,0,890,3.40156,889,0.263892),
+(7,0,0,0,1103,3.40156,1104,0.263892);
 /*!40000 ALTER TABLE `battleground_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -277,8 +277,8 @@ CREATE TABLE `character` (
   `transguid` bigint(20) unsigned NOT NULL default '0',
   `gmstate` tinyint(3) unsigned NOT NULL default '0',
   `stable_slots` tinyint(1) unsigned NOT NULL default '0',
-  `rename` tinyint (3) unsigned NOT NULL default '0',  
-  `zone` INT(11) UNSIGNED NOT NULL DEFAULT '0',
+  `rename` tinyint(3) unsigned NOT NULL default '0',
+  `zone` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`),
   KEY `idx_account` (`account`),
   KEY `idx_online` (`online`)
@@ -326,7 +326,7 @@ CREATE TABLE `character_aura` (
   `caster_guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Full Global Unique Identifier',
   `spell` int(11) unsigned NOT NULL default '0',
   `effect_index` int(11) unsigned NOT NULL default '0',
-  `amount`     int(11) NOT NULL default '0',
+  `amount` int(11) NOT NULL default '0',
   `remaintime` int(11) NOT NULL default '0',
   PRIMARY KEY  (`guid`,`spell`,`effect_index`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
@@ -462,7 +462,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `character_pet`;
 CREATE TABLE `character_pet` (
-  `id` int(11) unsigned NOT NULL  default '0',
+  `id` int(11) unsigned NOT NULL default '0',
   `entry` int(11) unsigned NOT NULL default '0',
   `owner` int(11) unsigned NOT NULL default '0',
   `modelid` int(11) unsigned default '0',
@@ -702,8 +702,8 @@ INSERT INTO `command` VALUES
 ('announce',1,'Syntax: .announce $MessageToBroadcast\r\n\r\nSend a global message to all players online in chat log.'),
 ('notify',1,'Syntax: .notify $MessageToBroadcast\r\n\r\nSend a global message to all players online in screen.'),
 ('aura',3,'Syntax: .aura #spellid\r\n\r\nAdd the aura from spell #spellid to the selected Unit.'),
-('ban','3','Syntax is: ban <account|ip|character> $NameOrIp $bantime $reason\r\nBan account or IP and kick player.\r\n$bantime: negative value leads to permban, otherwise use a timestring like "4d20h3s".'),
-('unban','3','Syntax is: unban <account|ip|character> $NameOrIp\r\nUnban account or IP.'),
+('ban',3,'Syntax is: ban <account|ip|character> $NameOrIp $bantime $reason\r\nBan account or IP and kick player.\r\n$bantime: negative value leads to permban, otherwise use a timestring like \"4d20h3s\".'),
+('unban',3,'Syntax is: unban <account|ip|character> $NameOrIp\r\nUnban account or IP.'),
 ('bank',3,'Syntax: .bank\r\n\r\nShow your bank inventory.'),
 ('changelevel',2,'Syntax: .changelevel #level\r\n\r\nChange the level of the selected creature to #level.\r\n\r\n#level may range from 1 to 63.'),
 ('commands',0,'Syntax: .commands\r\n\r\nDisplay a list of available commands for your account level.'),
@@ -725,9 +725,9 @@ INSERT INTO `command` VALUES
 ('factionid',2,'Syntax: .factionid #factionid\r\n\r\nSet the faction of the selected creature to #factionid.'),
 ('gameobject',3,'Syntax: .gameobject #id <lootID> <spawntimeSecs>\r\n\r\nAdd a game object from game object templates to the world at your current location using the #id.\r\nlootID specifies the loot-template to be used and spawntimeSecs sets the spawntime, both are optional.'),
 ('getvalue',3,'Syntax: .getvalue #field #isInt\r\n\r\nGet the field #field of the selected creature. If no creature is selected, get the content of your field.\r\n\r\nUse a #isInt of value 1 if the expected field content is an integer.'),
-('gm', 1, 'Syntax: .gm on/off\r\n\r\nEnable or Disable GM MODE'),
+('gm',1,'Syntax: .gm on/off\r\n\r\nEnable or Disable GM MODE'),
 ('gocreature',2,'Syntax: .gocreature #creature_guid\r\nTeleport your character to creature with guid #creature_guid.\r\n.gocreature #creature_name\r\nTeleport your character to creature with this name.\r\n.gocreature id #creature_id\r\nTeleport your character to a creature that was spawned from the template with this entry.\r\n*If* more than one creature is found, then you are teleported to the first that is found inside the database.'),
-('gogrid', '1', 'Syntax: .gogrid #gridX #gridY [#mapId]\n\nTeleport the gm to center of grid with provided indexes at map #mapId (or current map if it not provided).'),
+('gogrid',1,'Syntax: .gogrid #gridX #gridY [#mapId]\n\nTeleport the gm to center of grid with provided indexes at map #mapId (or current map if it not provided).'),
 ('goobject',1,'Syntax: .goobject #object_guid\r\nTeleport your character to gameobject with guid #object_guid'),
 ('goname',1,'Syntax: .goname $charactername\r\n\r\nTeleport to the given character. Either specify the character name or click on the character\'s portrait, e.g. when you are in a group.'),
 ('goxy',1,'Syntax: .goxy #x #y [#mapid]\r\n\r\nTeleport player to point with (#x,#y) coordinates at ground(water) level at map #mapid or same map if #mapid not provided.'),
@@ -831,8 +831,8 @@ INSERT INTO `command` VALUES
 ('transport',3,'Not yet implemented.'),
 ('turnobject',2,'Syntax: .turnobject #goguid \r\n\r\nSet for gameobject #goguid orientation same as current character orientation.'),
 ('unaura',3,'Syntax: .unaura #spellid\r\n\r\nRemove aura due to spell #spellid from the selected Unit.'),
-('baninfo','3','Syntax is: baninfo <account|ip|character>\r\nWatch full information about a specific ban.'),
-('banlist','3','Syntax is: banlist <account|ip|character> $NameOrIp\r\nsearches the banlist for a pattern.'),
+('baninfo',3,'Syntax is: baninfo <account|ip|character>\r\nWatch full information about a specific ban.'),
+('banlist',3,'Syntax is: banlist <account|ip|character> $NameOrIp\r\nsearches the banlist for a pattern.'),
 ('unlearn',3,'Syntax: .unlearn #startspell #endspell\r\n\r\nUnlearn for selected player the range of spells between id #startspell and #endspell. If no #endspell is provided, just unlearn spell of id #startspell.'),
 ('update',3,'Syntax: .update #field #value\r\n\r\nUpdate the field #field of the selected character or creature with value #value.\r\n\r\nIf no #value is provided, display the content of field #field.'),
 ('visible',1,'Syntax: .visible on/off\r\n\r\nOutput current visibility state or make GM visible(on) and invisible(off) for other players.'),
@@ -868,7 +868,7 @@ CREATE TABLE `corpse` (
   `instance` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`),
   KEY `idx_bones_flag` (`bones_flag`),
-  INDEX (`instance`)
+  KEY `instance` (`instance`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Death System';
 
 --
@@ -1088,7 +1088,7 @@ CREATE TABLE `creature_respawn` (
   `respawntime` bigint(40) NOT NULL default '0',
   `instance` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`,`instance`),
-  INDEX (`instance`)
+  KEY `instance` (`instance`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Grid Loading System';
 
 --
@@ -1320,18 +1320,27 @@ CREATE TABLE `fishing_loot_template` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
 --
+-- Dumping data for table `fishing_loot_template`
+--
+
+LOCK TABLES `fishing_loot_template` WRITE;
+/*!40000 ALTER TABLE `fishing_loot_template` DISABLE KEYS */;
+/*!40000 ALTER TABLE `fishing_loot_template` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `game_event`
 --
 
 DROP TABLE IF EXISTS `game_event`;
 CREATE TABLE `game_event` (
   `entry` mediumint(8) unsigned NOT NULL COMMENT 'Entry of the game event',
-  `start` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Absolute start date, the event will never start before',
-  `end` timestamp NOT NULL DEFAULT '0000-00-00 00:00:00' COMMENT 'Absolute end date, the event will never start afler',
-  `occurence` bigint(20) unsigned NOT NULL DEFAULT '86400' COMMENT 'Delay in hours between occurences of the event',
-  `length` bigint(20) unsigned NOT NULL DEFAULT '43200' COMMENT 'Length in hours of the event',
-  `description` varchar(255) DEFAULT NULL COMMENT 'Description of the event displayed in console',
-  PRIMARY KEY (`entry`)
+  `start` timestamp NOT NULL default '0000-00-00 00:00:00' COMMENT 'Absolute start date, the event will never start before',
+  `end` timestamp NOT NULL default '0000-00-00 00:00:00' COMMENT 'Absolute end date, the event will never start afler',
+  `occurence` bigint(20) unsigned NOT NULL default '86400' COMMENT 'Delay in hours between occurences of the event',
+  `length` bigint(20) unsigned NOT NULL default '43200' COMMENT 'Length in hours of the event',
+  `description` varchar(255) default NULL COMMENT 'Description of the event displayed in console',
+  PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -1350,8 +1359,8 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `game_event_creature`;
 CREATE TABLE `game_event_creature` (
   `guid` int(10) unsigned NOT NULL,
-  `event` mediumint(9) NOT NULL DEFAULT '0' COMMENT 'Put negatives values to remove during event',
-  PRIMARY KEY (`guid`)
+  `event` mediumint(9) NOT NULL default '0' COMMENT 'Put negatives values to remove during event',
+  PRIMARY KEY  (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -1370,8 +1379,8 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `game_event_gameobject`;
 CREATE TABLE `game_event_gameobject` (
   `guid` int(10) unsigned NOT NULL,
-  `event` mediumint(9) NOT NULL DEFAULT '0' COMMENT 'Put negatives values to remove during event',
-  PRIMARY KEY (`guid`)
+  `event` mediumint(9) NOT NULL default '0' COMMENT 'Put negatives values to remove during event',
+  PRIMARY KEY  (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -1568,7 +1577,7 @@ CREATE TABLE `gameobject_respawn` (
   `respawntime` bigint(40) NOT NULL default '0',
   `instance` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`,`instance`),
-  INDEX (`instance`)
+  KEY `instance` (`instance`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Grid Loading System';
 
 --
@@ -1835,17 +1844,16 @@ INSERT INTO `instance_template` VALUES
 /*!40000 ALTER TABLE `instance_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
-
 --
 -- Table structure for table `item_enchantment_template`
 --
 
 DROP TABLE IF EXISTS `item_enchantment_template`;
 CREATE TABLE `item_enchantment_template` (
-  `entry` int(11) unsigned NOT NULL DEFAULT '0',
-  `ench` int(10) unsigned NOT NULL DEFAULT '0',
-  `chance` float unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`entry`,`ench`)
+  `entry` int(11) unsigned NOT NULL default '0',
+  `ench` int(10) unsigned NOT NULL default '0',
+  `chance` float unsigned NOT NULL default '0',
+  PRIMARY KEY  (`entry`,`ench`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Item Random Enchantment System';
 
 --
@@ -2424,7 +2432,7 @@ CREATE TABLE `pet_aura` (
   `caster_guid` bigint(20) unsigned NOT NULL default '0' COMMENT 'Full Global Unique Identifier',
   `spell` int(11) unsigned NOT NULL default '0',
   `effect_index` int(11) unsigned NOT NULL default '0',
-  `amount`     int(11) NOT NULL default '0',
+  `amount` int(11) NOT NULL default '0',
   `remaintime` int(11) NOT NULL default '0',
   PRIMARY KEY  (`guid`,`spell`,`effect_index`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Pet System';
@@ -2710,7 +2718,7 @@ LOCK TABLES `pet_spell` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `pet_spell`
+-- Table structure for table `pet_spell_cooldown`
 --
 
 DROP TABLE IF EXISTS `pet_spell_cooldown`;
@@ -2736,13 +2744,13 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `petcreateinfo_spell`;
 CREATE TABLE `petcreateinfo_spell` (
-  `entry` int(11) unsigned NOT NULL DEFAULT '0',
-  `Spell1` int(11) unsigned NOT NULL DEFAULT '0',
-  `Spell2` int(11) unsigned NOT NULL DEFAULT '0',
-  `Spell3` int(11) unsigned NOT NULL DEFAULT '0',
-  `Spell4` int(11) unsigned NOT NULL DEFAULT '0',
-  `FamilyPassive` int(11) unsigned NOT NULL DEFAULT '0',
-  PRIMARY KEY (`entry`)
+  `entry` int(11) unsigned NOT NULL default '0',
+  `Spell1` int(11) unsigned NOT NULL default '0',
+  `Spell2` int(11) unsigned NOT NULL default '0',
+  `Spell3` int(11) unsigned NOT NULL default '0',
+  `Spell4` int(11) unsigned NOT NULL default '0',
+  `FamilyPassive` int(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Pet Create Spells';
 
 --
@@ -9588,7 +9596,6 @@ LOCK TABLES `prospecting_loot_template` WRITE;
 /*!40000 ALTER TABLE `prospecting_loot_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
-
 --
 -- Table structure for table `quest_end_scripts`
 --
@@ -9608,7 +9615,7 @@ CREATE TABLE `quest_end_scripts` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table `scripts`
+-- Dumping data for table `quest_end_scripts`
 --
 
 LOCK TABLES `quest_end_scripts` WRITE;
@@ -9635,7 +9642,7 @@ CREATE TABLE `quest_start_scripts` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
--- Dumping data for table `scripts`
+-- Dumping data for table `quest_start_scripts`
 --
 
 LOCK TABLES `quest_start_scripts` WRITE;
@@ -9658,7 +9665,7 @@ CREATE TABLE `quest_template` (
   `RequiredSkillValue` int(11) unsigned NOT NULL default '1',
   `RequiredRepFaction` int(11) unsigned NOT NULL default '0',
   `RequiredRepValue` int(11) unsigned NOT NULL default '0',
-  `SuggestedPlayers` int(11) unsigned NOT NULL DEFAULT '0',
+  `SuggestedPlayers` int(11) unsigned NOT NULL default '0',
   `LimitTime` int(11) unsigned NOT NULL default '0',
   `SpecialFlags` int(11) unsigned NOT NULL default '0',
   `PrevQuestId` int(11) NOT NULL default '0',
@@ -9796,7 +9803,6 @@ LOCK TABLES `skinning_loot_template` WRITE;
 /*!40000 ALTER TABLE `skinning_loot_template` DISABLE KEYS */;
 /*!40000 ALTER TABLE `skinning_loot_template` ENABLE KEYS */;
 UNLOCK TABLES;
-
 
 --
 -- Table structure for table `spell_affect`
@@ -10479,8 +10485,8 @@ INSERT INTO `spell_affect` VALUES
 (31658,0,0,0,0,0,0,1,0),
 (31659,0,0,0,0,0,0,1,0),
 (31660,0,0,0,0,0,0,1,0),
-(31670,0,0,0,0,0,0,0x500000200,0),
-(31672,0,0,0,0,0,0,0x500000200,0),
+(31670,0,0,0,0,0,0,21474836992,0),
+(31672,0,0,0,0,0,0,21474836992,0),
 (31682,0,0,0,0,0,0,32,0),
 (31682,1,0,0,0,0,0,32,0),
 (31683,0,0,0,0,0,0,32,0),
@@ -12333,8 +12339,6 @@ INSERT INTO `spell_chain` VALUES
 (35694,0,35694,1),
 (35698,35694,35694,2),
 (40120,33943,33943,2);
-
-
 /*!40000 ALTER TABLE `spell_chain` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -12479,6 +12483,10 @@ CREATE TABLE `spell_proc_event` (
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
+--
+-- Dumping data for table `spell_proc_event`
+--
+
 LOCK TABLES `spell_proc_event` WRITE;
 /*!40000 ALTER TABLE `spell_proc_event` DISABLE KEYS */;
 INSERT INTO `spell_proc_event` VALUES 
@@ -12488,9 +12496,9 @@ INSERT INTO `spell_proc_event` VALUES
 (742,0,0,0,0,0,1,0),
 (905,0,0,0,0,0,1049602,0),
 (945,0,0,0,0,0,1049602,0),
-(974,0,0,0,0,0,0x100402,0),
+(974,0,0,0,0,0,1049602,0),
 (1120,0,0,0,0,0,4,0),
-(2652, 0,0,0,0,0,0x2,0),
+(2652,0,0,0,0,0,2,0),
 (2689,0,0,0,0,0,4,0),
 (3235,0,0,0,0,0,2,0),
 (3284,0,0,0,0,0,2,0),
@@ -12682,7 +12690,7 @@ INSERT INTO `spell_proc_event` VALUES
 (12289,0,0,26,0,2,131072,0),
 (12292,0,0,0,0,0,128,0),
 (12298,0,0,0,0,0,64,0),
-(12311,0,0,0,4,0x800,0x20000,0),
+(12311,0,0,0,4,2048,131072,0),
 (12317,0,0,0,0,0,8658944,0),
 (12319,0,0,0,0,0,69632,0),
 (12322,0,0,0,0,0,1,0),
@@ -12725,7 +12733,7 @@ INSERT INTO `spell_proc_event` VALUES
 (12849,0,0,0,0,0,69632,0),
 (12867,0,0,0,0,0,69632,0),
 (12947,0,0,0,0,0,1,0),
-(12958,0,0,0,4,0x800,0x20000,0),
+(12958,0,0,0,4,2048,131072,0),
 (12971,0,0,0,0,0,69632,0),
 (12972,0,0,0,0,0,69632,0),
 (12973,0,0,0,0,0,69632,0),
@@ -12907,11 +12915,11 @@ INSERT INTO `spell_proc_event` VALUES
 (19228,0,0,0,0,64,131072,0),
 (19232,0,0,0,0,64,131072,0),
 (19233,0,0,0,0,64,131072,0),
-(19261,0,0,0,0,0,0x2,0),
-(19262,0,0,0,0,0,0x2,0),
-(19264,0,0,0,0,0,0x2,0),
-(19265,0,0,0,0,0,0x2,0),
-(19266,0,0,0,0,0,0x2,0),
+(19261,0,0,0,0,0,2,0),
+(19262,0,0,0,0,0,2,0),
+(19264,0,0,0,0,0,2,0),
+(19265,0,0,0,0,0,2,0),
+(19266,0,0,0,0,0,2,0),
 (19271,0,0,0,0,0,1048576,0),
 (19273,0,0,0,0,0,1048576,0),
 (19274,0,0,0,0,0,1048576,0),
@@ -13066,7 +13074,7 @@ INSERT INTO `spell_proc_event` VALUES
 (24949,0,0,0,0,0,32,0),
 (25020,0,0,0,0,0,1026,0),
 (25023,0,0,0,0,0,2,0),
-(25461,0,0,0,0,0,0x2,0),
+(25461,0,0,0,0,0,2,0),
 (25469,0,0,0,0,0,1049602,0),
 (25472,0,0,0,0,0,1049602,0),
 (25477,0,0,0,0,0,1049602,0),
@@ -13183,9 +13191,9 @@ INSERT INTO `spell_proc_event` VALUES
 (30080,0,0,0,0,0,2,0),
 (30081,0,0,0,0,0,2,0),
 (30160,0,0,0,0,0,65536,0),
-(30299,36,0,0,0,0,0x100000,0),
-(30301,36,0,0,0,0,0x100000,0),
-(30302,36,0,0,0,0,0x100000,0),
+(30299,36,0,0,0,0,1048576,0),
+(30301,36,0,0,0,0,1048576,0),
+(30302,36,0,0,0,0,1048576,0),
 (30339,0,0,0,0,0,1,0),
 (30482,0,0,0,0,0,32768,0),
 (30675,0,0,0,11,3,16384,0),
@@ -13213,8 +13221,8 @@ INSERT INTO `spell_proc_event` VALUES
 (31833,0,0,0,10,2147483648,16384,0),
 (31835,0,0,0,10,2147483648,16384,0),
 (31836,0,0,0,10,2147483648,16384,0),
-(32593,0,0,0,0,0,0x100402,0),
-(32594,0,0,0,0,0,0x100402,0),
+(32593,0,0,0,0,0,1049602,0),
+(32594,0,0,0,0,0,1049602,0),
 (33012,0,0,0,0,0,4,0),
 (33014,0,0,0,0,0,4,0),
 (33089,0,0,0,0,0,64,0),
@@ -13257,7 +13265,7 @@ INSERT INTO `spell_proc_event` VALUES
 (34916,32,0,0,0,0,32768,0),
 (34917,32,0,0,0,0,32768,0),
 (34935,0,0,0,0,0,2,0),
-(34938,0,0,0,0,0,2,0), 
+(34938,0,0,0,0,0,2,0),
 (34939,0,0,0,0,0,2,0),
 (34948,0,0,0,0,0,4,0),
 (34949,0,0,0,0,0,4,0),
@@ -13276,8 +13284,7 @@ INSERT INTO `spell_proc_event` VALUES
 (39437,4,0,0,0,0,16384,0),
 (40475,0,0,0,0,0,524289,3),
 (41434,0,0,0,0,0,1,2),
-(42083,0,0,0,0,0,4198400,0); 
-
+(42083,0,0,0,0,0,4198400,0);
 /*!40000 ALTER TABLE `spell_proc_event` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -13394,6 +13401,18 @@ CREATE TABLE `transports` (
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Transports';
 
+--
+-- Dumping data for table `transports`
+--
+
+LOCK TABLES `transports` WRITE;
+/*!40000 ALTER TABLE `transports` DISABLE KEYS */;
+/*!40000 ALTER TABLE `transports` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for table `uptime`
+--
 
 DROP TABLE IF EXISTS `uptime`;
 CREATE TABLE `uptime` (
@@ -13403,14 +13422,13 @@ CREATE TABLE `uptime` (
   PRIMARY KEY  (`starttime`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Uptime system';
 
-
 --
--- Dumping data for table `transports`
+-- Dumping data for table `uptime`
 --
 
-LOCK TABLES `transports` WRITE;
-/*!40000 ALTER TABLE `transports` DISABLE KEYS */;
-/*!40000 ALTER TABLE `transports` ENABLE KEYS */;
+LOCK TABLES `uptime` WRITE;
+/*!40000 ALTER TABLE `uptime` DISABLE KEYS */;
+/*!40000 ALTER TABLE `uptime` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
@@ -13422,6 +13440,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
-
--- Dump completed on 2007-05-15  6:46:42
-
+-- Dump completed on 2007-08-27  9:19:21
