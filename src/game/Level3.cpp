@@ -38,6 +38,7 @@
 #include "CellImpl.h"
 #include "Weather.h"
 
+//reload commands
 bool ChatHandler::HandleReloadCommand(const char* arg)
 {
     // this is error catcher for wrong table name in .reload commands
@@ -345,125 +346,6 @@ bool ChatHandler::HandleSecurityCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleGoXYCommand(const char* args)
-{
-    Player* _player = m_session->GetPlayer();
-
-    if(_player->isInFlight())
-    {
-        SendSysMessage(LANG_YOU_IN_FLIGHT);
-        return true;
-    }
-
-    char* px = strtok((char*)args, " ");
-    char* py = strtok(NULL, " ");
-    char* pmapid = strtok(NULL, " ");
-
-    if (!px || !py)
-        return false;
-
-    float x = (float)atof(px);
-    float y = (float)atof(py);
-    uint32 mapid;
-    if (pmapid)
-        mapid = (uint32)atoi(pmapid);
-    else mapid = _player->GetMapId();
-
-    if(!MapManager::IsValidMapCoord(mapid,x,y))
-    {
-        PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
-        return true;
-    }
-
-    Map *map = MapManager::Instance().GetMap(mapid, _player);
-    float z = std::max(map->GetHeight(x, y, 0), map->GetWaterLevel(x, y));
-    _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
-    _player->TeleportTo(mapid, x, y, z, _player->GetOrientation());
-
-    return true;
-}
-
-bool ChatHandler::HandleGoGridCommand(const char* args)
-{
-    Player* _player = m_session->GetPlayer();
-
-    if(_player->isInFlight())
-    {
-        SendSysMessage(LANG_YOU_IN_FLIGHT);
-        return true;
-    }
-
-    char* px = strtok((char*)args, " ");
-    char* py = strtok(NULL, " ");
-    char* pmapid = strtok(NULL, " ");
-
-    if (!px || !py)
-        return false;
-
-    float grid_x = (float)atof(px);
-    float grid_y = (float)atof(py);
-    uint32 mapid;
-    if (pmapid)
-        mapid = (uint32)atoi(pmapid);
-    else mapid = _player->GetMapId();
-
-    // center of grid
-    float x = (grid_x-CENTER_GRID_ID+0.5)*SIZE_OF_GRIDS;
-    float y = (grid_y-CENTER_GRID_ID+0.5)*SIZE_OF_GRIDS;
-
-    if(!MapManager::IsValidMapCoord(mapid,x,y))
-    {
-        PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
-        return true;
-    }
-
-    Map *map = MapManager::Instance().GetMap(mapid, _player);
-    float z = std::max(map->GetHeight(x, y, 0), map->GetWaterLevel(x, y));
-    _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
-    _player->TeleportTo(mapid, x, y, z, _player->GetOrientation());
-
-    return true;
-}
-
-bool ChatHandler::HandleWorldPortCommand(const char* args)
-{
-    Player* _player = m_session->GetPlayer();
-
-    if(_player->isInFlight())
-    {
-        SendSysMessage(LANG_YOU_IN_FLIGHT);
-        return true;
-    }
-
-    char* pContinent = strtok((char*)args, " ");
-    if (!pContinent)
-        return false;
-
-    char* px = strtok(NULL, " ");
-    char* py = strtok(NULL, " ");
-    char* pz = strtok(NULL, " ");
-
-    if (!px || !py || !pz)
-        return false;
-
-    float x = atof(px);
-    float y = atof(py);
-    float z = atof(pz);
-    uint32 mapid = atoi(pContinent);
-
-    if(!MapManager::IsValidMapCoord(mapid,x,y))
-    {
-        PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
-        return true;
-    }
-
-    _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
-
-    _player->TeleportTo(mapid, x, y, z,_player->GetOrientation());
-
-    return true;
-}
-
 bool ChatHandler::HandleAllowMovementCommand(const char* args)
 {
     if(sWorld.getAllowMovement())
@@ -476,42 +358,6 @@ bool ChatHandler::HandleAllowMovementCommand(const char* args)
         sWorld.SetAllowMovement(true);
         SendSysMessage(LANG_CREATURE_MOVE_ENABLED);
     }
-    return true;
-}
-
-bool ChatHandler::HandleGoCommand(const char* args)
-{
-    Player* _player = m_session->GetPlayer();
-
-    if(_player->isInFlight())
-    {
-        SendSysMessage(LANG_YOU_IN_FLIGHT);
-        return true;
-    }
-
-    char* px = strtok((char*)args, " ");
-    char* py = strtok(NULL, " ");
-    char* pz = strtok(NULL, " ");
-    char* pmapid = strtok(NULL, " ");
-
-    if (!px || !py || !pz || !pmapid)
-        return false;
-
-    float x = (float)atof(px);
-    float y = (float)atof(py);
-    float z = (float)atof(pz);
-    uint32 mapid = (uint32)atoi(pmapid);
-
-    if(!MapManager::IsValidMapCoord(mapid,x,y))
-    {
-        PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
-        return true;
-    }
-
-    _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
-
-    _player->TeleportTo(mapid, x, y, z,_player->GetOrientation());
-
     return true;
 }
 
@@ -2319,13 +2165,14 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
 
 bool ChatHandler::HandleCreateGuildCommand(const char* args)
 {
+    
+    if (!*args)
+        return false;
+
     Guild *guild;
     Player * player;
     char *lname,*gname;
     std::string guildname;
-
-    if (!*args)
-        return false;
 
     lname = strtok((char*)args, " ");
     gname = strtok(NULL, "");
@@ -2378,37 +2225,6 @@ bool ChatHandler::HandleGetDistanceCommand(const char* args)
     }
 
     PSendSysMessage(LANG_DISTANCE, sqrt(m_session->GetPlayer()->GetDistanceSq(pUnit)),sqrt(m_session->GetPlayer()->GetDistance2dSq(pUnit)));
-
-    return true;
-}
-
-bool ChatHandler::HandleObjectCommand(const char* args)
-{
-    if (!*args)
-        return false;
-
-    uint32 display_id = atoi((char*)args);
-
-    char* safe = strtok((char*)args, " ");
-
-    Player *chr = m_session->GetPlayer();
-    float x = chr->GetPositionX();
-    float y = chr->GetPositionY();
-    float z = chr->GetPositionZ();
-    float o = chr->GetOrientation();
-
-    GameObject* pGameObj = new GameObject(chr);
-    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id, chr->GetMapId(), x, y, z, o, 0, 0, 0, 0, 0, 0))
-    {
-        delete pGameObj;
-        return false;
-    }
-    sLog.outDebug(LANG_ADD_OBJ_LV3);
-
-    if(strcmp(safe,"true") == 0)
-        pGameObj->SaveToDB();
-
-    MapManager::Instance().GetMap(pGameObj->GetMapId(), pGameObj)->Add(pGameObj);
 
     return true;
 }
@@ -2484,96 +2300,6 @@ bool ChatHandler::HandleAddWeaponCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleGameObjectCommand(const char* args)
-{
-    if (!*args)
-        return false;
-
-    char* pParam1 = strtok((char*)args, " ");
-    uint32 id = atoi((char*)pParam1);
-    if(!id)
-        return false;
-
-    char* lootID = strtok(NULL, " ");
-    char* spawntimeSecs = strtok(NULL, " ");
-
-    const GameObjectInfo *goI = objmgr.GetGameObjectInfo(id);
-
-    if (!goI)
-    {
-        PSendSysMessage(LANG_GAMEOBJECT_NOT_EXIST,id);
-        return false;
-    }
-
-    Player *chr = m_session->GetPlayer();
-    float x = float(chr->GetPositionX());
-    float y = float(chr->GetPositionY());
-    float z = float(chr->GetPositionZ());
-    float o = float(chr->GetOrientation());
-
-    float rot2 = sin(o/2);
-    float rot3 = cos(o/2);
-
-    GameObject* pGameObj = new GameObject(chr);
-    uint32 lowGUID = objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT);
-
-    if(!pGameObj->Create(lowGUID, goI->id, chr->GetMapId(), x, y, z, o, 0, 0, rot2, rot3, 0, 0))
-    {
-        delete pGameObj;
-        return false;
-    }
-    //pGameObj->SetZoneId(chr->GetZoneId());
-    pGameObj->SetMapId(chr->GetMapId());
-    //pGameObj->SetNameId(id);
-    sLog.outDebug(LANG_GAMEOBJECT_CURRENT, goI->name, lowGUID, x, y, z, o);
-
-    if( lootID )
-    {
-        uint32 value = atoi((char*)lootID);
-        pGameObj->lootid = value;
-        //sLog.outDebug("*** LOOT: %d", value);
-    }
-
-    if( spawntimeSecs )
-    {
-        uint32 value = atoi((char*)spawntimeSecs);
-        pGameObj->SetRespawnTime(value);
-        //sLog.outDebug("*** spawntimeSecs: %d", value);
-    }
-
-    pGameObj->SaveToDB();
-    MapManager::Instance().GetMap(pGameObj->GetMapId(), pGameObj)->Add(pGameObj);
-
-    PSendSysMessage(LANG_GAMEOBJECT_ADD,id,goI->name,lowGUID,x,y,z);
-
-    return true;
-}
-
-bool ChatHandler::HandleAnimCommand(const char* args)
-{
-    if (!*args)
-        return false;
-
-    uint32 anim_id = atoi((char*)args);
-
-    WorldPacket data( SMSG_EMOTE, (8+4) );
-    data << anim_id << m_session->GetPlayer( )->GetGUID();
-    WPAssert(data.size() == 12);
-    MapManager::Instance().GetMap(m_session->GetPlayer()->GetMapId(), m_session->GetPlayer())->MessageBoardcast(m_session->GetPlayer(), &data, true);
-    return true;
-}
-
-bool ChatHandler::HandleStandStateCommand(const char* args)
-{
-    if (!*args)
-        return false;
-
-    uint32 anim_id = atoi((char*)args);
-    m_session->GetPlayer( )->SetUInt32Value( UNIT_NPC_EMOTESTATE , anim_id );
-
-    return true;
-}
-
 bool ChatHandler::HandleDieCommand(const char* args)
 {
     Unit* target = getSelectedUnit();
@@ -2614,22 +2340,6 @@ bool ChatHandler::HandleReviveCommand(const char* args)
     SelectedPlayer->ResurrectPlayer(0.5f);
     SelectedPlayer->SpawnCorpseBones();
     SelectedPlayer->SaveToDB();
-    return true;
-}
-
-bool ChatHandler::HandleMorphCommand(const char* args)
-{
-    if (!*args)
-        return false;
-
-    uint16 display_id = (uint16)atoi((char*)args);
-
-    Unit *target = getSelectedUnit();
-    if(!target)
-        target = m_session->GetPlayer();
-
-    target->SetUInt32Value(UNIT_FIELD_DISPLAYID, display_id);
-
     return true;
 }
 
@@ -2815,7 +2525,7 @@ bool ChatHandler::HandleSpawnTransportCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleEmoteCommand(const char* args)
+bool ChatHandler::HandlePlayEmoteCommand(const char* args)
 {
     uint32 emote = atoi((char*)args);
 
@@ -4137,44 +3847,6 @@ bool ChatHandler::HandlePlaySound2Command(const char* args)
 
     uint32 soundid = atoi(args);
     m_session->GetPlayer()->PlaySound(soundid, false);
-    return true;
-}
-
-bool ChatHandler::HandleSendChannelNotifyCommand(const char* args)
-{
-    if(!args)
-        return false;
-
-    const char *name = "test";
-    uint8 code = atoi(args);
-
-    WorldPacket data(SMSG_CHANNEL_NOTIFY, (1+10));
-    data << code;                                           // notify type
-    data << name;                                           // channel name
-    data << uint32(0);
-    data << uint32(0);
-    m_session->SendPacket(&data);
-    return true;
-}
-
-bool ChatHandler::HandleSendChatMsgCommand(const char* args)
-{
-    if(!args)
-        return false;
-
-    const char *msg = "testtest";
-    uint8 type = atoi(args);
-
-    WorldPacket data(SMSG_MESSAGECHAT, 100);
-    data << type;                                           // message type
-    data << uint32(0);                                      // lang
-    data << m_session->GetPlayer()->GetGUID();              // guid
-    data << uint32(0);
-    data << uint64(0);
-    data << uint32(9);                                      // msg len
-    data << msg;                                            // msg
-    data << uint8(0);                                       // chat tag
-    m_session->SendPacket(&data);
     return true;
 }
 
