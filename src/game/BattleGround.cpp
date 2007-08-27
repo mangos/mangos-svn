@@ -963,18 +963,18 @@ bool BattleGround::AddSpiritGuide(float x, float y, float z, float o, uint32 tea
     objmgr.AddCreatureToGrid(guid, &data);
 
     m_SpiritGuides.push_back(MAKE_GUID(guid, HIGHGUID_UNIT));
-/*
-    // set some fields to off like values
-    pCreature->SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT, pCreature->GetGUID());
-    // aura
-    pCreature->SetUInt32Value(UNIT_FIELD_AURA, SPELL_SPIRIT_HEAL_CHANNEL);
-    pCreature->SetUInt32Value(UNIT_FIELD_AURAFLAGS, 0x00000009);
-    pCreature->SetUInt32Value(UNIT_FIELD_AURALEVELS, 0x0000003C);
-    pCreature->SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS, 0x000000FF);
-    // casting visual effect
-    pCreature->SetUInt32Value(UNIT_CHANNEL_SPELL, SPELL_SPIRIT_HEAL_CHANNEL);
-    // correct cast speed
-    pCreature->SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
-*/
+    /*
+        // set some fields to off like values
+        pCreature->SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT, pCreature->GetGUID());
+        // aura
+        pCreature->SetUInt32Value(UNIT_FIELD_AURA, SPELL_SPIRIT_HEAL_CHANNEL);
+        pCreature->SetUInt32Value(UNIT_FIELD_AURAFLAGS, 0x00000009);
+        pCreature->SetUInt32Value(UNIT_FIELD_AURALEVELS, 0x0000003C);
+        pCreature->SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS, 0x000000FF);
+        // casting visual effect
+        pCreature->SetUInt32Value(UNIT_CHANNEL_SPELL, SPELL_SPIRIT_HEAL_CHANNEL);
+        // correct cast speed
+        pCreature->SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
+    */
     return true;
 }

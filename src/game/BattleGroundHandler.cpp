@@ -54,17 +54,17 @@ void WorldSession::HandleBattleGroundHelloOpcode( WorldPacket & recv_data )
         case 1216:
             bgid = 1;
             break;
-        // WSG Battlemaster
+            // WSG Battlemaster
         case 1641:
         case 1514:
             bgid = 2;
             break;
-        // AB Battlemaster
+            // AB Battlemaster
         case 1577:
         case 412:
             bgid = 3;
             break;
-        // todo: add more...
+            // todo: add more...
     }
 
     if(!strcmp(unit->GetCreatureInfo()->SubName, "Arena Battlemaster"))

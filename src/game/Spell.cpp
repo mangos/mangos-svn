@@ -328,7 +328,7 @@ void Spell::FillTargetMap()
 
         // TargetA/TargetB dependent from each other, we not switch to full support this dependences
         // but need it support inn some know cases
-        if( m_spellInfo->EffectImplicitTargetA[i]==TARGET_ALL_AROUND_CASTER && 
+        if( m_spellInfo->EffectImplicitTargetA[i]==TARGET_ALL_AROUND_CASTER &&
             m_spellInfo->EffectImplicitTargetB[i]==TARGET_ALL_PARTY)
         {
             SetTargetMap(i,m_spellInfo->EffectImplicitTargetB[i],tmpUnitMap);
@@ -874,7 +874,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                     Player* Target = itr->getSource();
 
                     // IsHostileTo check duel and controlled by enemy
-                    if( Target && targetPlayer->IsWithinDistInMap(Target, radius) && 
+                    if( Target && targetPlayer->IsWithinDistInMap(Target, radius) &&
                         targetPlayer->getClass() == Target->getClass() &&
                         !m_caster->IsHostileTo(Target) )
                     {

@@ -430,13 +430,13 @@ bool IsSealSpell(uint32 spellId)
 
 bool CanCastWhileMounted(uint32 spellId)
 {
-	SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
 
-	if(!spellInfo)
-		return false;
+    if(!spellInfo)
+        return false;
 
-	return (spellInfo->Attributes == 151322624 && spellInfo->AttributesEx2 == 16 && spellInfo->AttributesExEx == 2097152) || 
-		   (spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && spellInfo->SpellFamilyFlags == 0x800000);
+    return (spellInfo->Attributes == 151322624 && spellInfo->AttributesEx2 == 16 && spellInfo->AttributesExEx == 2097152) ||
+        (spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && spellInfo->SpellFamilyFlags == 0x800000);
 }
 
 SpellSpecific GetSpellSpecific(uint32 spellId)
@@ -588,7 +588,7 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
         return false;
 
     // non-positive aura use
-    if( spellproto->Effect[effIndex]==6 /*SPELL_EFFECT_APPLY_AURA*/ || 
+    if( spellproto->Effect[effIndex]==6 /*SPELL_EFFECT_APPLY_AURA*/ ||
         spellproto->Effect[effIndex]==128 /*SPELL_EFFECT_APPLY_AURA_NEW2*/ )
     {
         switch(spellproto->EffectApplyAuraName[effIndex])
@@ -631,13 +631,13 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
             case 95 /*SPELL_AURA_GHOST*/:
                 return false;
             case 33 /*SPELL_AURA_MOD_DECREASE_SPEED*/:      // used in positive spells also
-                // part of positive spell if casted at self
-                if(spellproto->EffectImplicitTargetA[effIndex] != 1/*TARGET_SELF*/)
-                    return false;
-                // but not this if this first effect (don't found batter check)
-                if(spellproto->Attributes & 0x4000000 && effIndex==0)
-                    return false;
-                break;
+            // part of positive spell if casted at self
+            if(spellproto->EffectImplicitTargetA[effIndex] != 1/*TARGET_SELF*/)
+                return false;
+            // but not this if this first effect (don't found batter check)
+            if(spellproto->Attributes & 0x4000000 && effIndex==0)
+                return false;
+            break;
             case 77 /*SPELL_AURA_MECHANIC_IMMUNITY*/:
             {
                 // non-positive immunities

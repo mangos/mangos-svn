@@ -355,29 +355,52 @@ enum EUnitFields
     PLAYER_FIELD_COMBAT_RATING_1              = 0x0566,     // 23 1 2
 
     // custom                                                                   // client names:
-    PLAYER_FIELD_ALL_WEAPONS_SKILL_RATING     = PLAYER_FIELD_COMBAT_RATING_1,   // CR_WEAPON_SKILL
-    PLAYER_FIELD_DEFENCE_RATING               = PLAYER_FIELD_COMBAT_RATING_1+1, // CR_DEFENSE_SKILL
-    PLAYER_FIELD_DODGE_RATING                 = PLAYER_FIELD_COMBAT_RATING_1+2, // CR_DODGE
-    PLAYER_FIELD_PARRY_RATING                 = PLAYER_FIELD_COMBAT_RATING_1+3, // CR_PARRY
-    PLAYER_FIELD_BLOCK_RATING                 = PLAYER_FIELD_COMBAT_RATING_1+4, // CR_BLOCK
-    PLAYER_FIELD_MELEE_HIT_RATING             = PLAYER_FIELD_COMBAT_RATING_1+5, // CR_HIT_MELEE
-    PLAYER_FIELD_RANGED_HIT_RATING            = PLAYER_FIELD_COMBAT_RATING_1+6, // CR_HIT_RANGED
-    PLAYER_FIELD_SPELL_HIT_RATING             = PLAYER_FIELD_COMBAT_RATING_1+7, // CR_HIT_SPELL
-    PLAYER_FIELD_MELEE_CRIT_RATING            = PLAYER_FIELD_COMBAT_RATING_1+8, // CR_CRIT_MELEE
-    PLAYER_FIELD_RANGED_CRIT_RATING           = PLAYER_FIELD_COMBAT_RATING_1+9, // CR_CRIT_RANGED
-    PLAYER_FIELD_SPELL_CRIT_RATING            = PLAYER_FIELD_COMBAT_RATING_1+10,// CR_CRIT_SPELL
-    PLAYER_FIELD_HIT_RATING                   = PLAYER_FIELD_COMBAT_RATING_1+11,// CR_HIT_TAKEN_MELEE
-    PLAYER_FIELD_CRIT_RATING                  = PLAYER_FIELD_COMBAT_RATING_1+12,// CR_HIT_TAKEN_RANGED
-    PLAYER_FIELD_UNK3_RATING                  = PLAYER_FIELD_COMBAT_RATING_1+13,// CR_HIT_TAKEN_SPELL
-    PLAYER_FIELD_UNK4_RATING                  = PLAYER_FIELD_COMBAT_RATING_1+14,// CR_CRIT_TAKEN_MELEE
-    PLAYER_FIELD_UNK5_RATING                  = PLAYER_FIELD_COMBAT_RATING_1+15,// CR_CRIT_TAKEN_RANGED
-    PLAYER_FIELD_RESILIENCE_RATING            = PLAYER_FIELD_COMBAT_RATING_1+16,// CR_CRIT_TAKEN_SPELL
-    PLAYER_FIELD_MELEE_HASTE_RATING           = PLAYER_FIELD_COMBAT_RATING_1+17,// CR_HASTE_MELEE
-    PLAYER_FIELD_RANGED_HASTE_RATING          = PLAYER_FIELD_COMBAT_RATING_1+19,// CR_HASTE_RANGED
-    PLAYER_FIELD_SPELL_HASTE_RATING           = PLAYER_FIELD_COMBAT_RATING_1+20,// CR_HASTE_SPELL
-    PLAYER_FIELD_MELEE_WEAPON_SKILL_RATING    = PLAYER_FIELD_COMBAT_RATING_1+21,// CR_WEAPON_SKILL_MAINHAND
-    PLAYER_FIELD_OFFHAND_WEAPON_SKILL_RATING  = PLAYER_FIELD_COMBAT_RATING_1+22,// CR_WEAPON_SKILL_OFFHAND
-    PLAYER_FIELD_RANGED_WEAPON_SKILL_RATING   = PLAYER_FIELD_COMBAT_RATING_1+23,// CR_WEAPON_SKILL_RANGED
+                                                            // CR_WEAPON_SKILL
+    PLAYER_FIELD_ALL_WEAPONS_SKILL_RATING     = PLAYER_FIELD_COMBAT_RATING_1,
+                                                            // CR_DEFENSE_SKILL
+    PLAYER_FIELD_DEFENCE_RATING               = PLAYER_FIELD_COMBAT_RATING_1+1,
+                                                            // CR_DODGE
+    PLAYER_FIELD_DODGE_RATING                 = PLAYER_FIELD_COMBAT_RATING_1+2,
+                                                            // CR_PARRY
+    PLAYER_FIELD_PARRY_RATING                 = PLAYER_FIELD_COMBAT_RATING_1+3,
+                                                            // CR_BLOCK
+    PLAYER_FIELD_BLOCK_RATING                 = PLAYER_FIELD_COMBAT_RATING_1+4,
+                                                            // CR_HIT_MELEE
+    PLAYER_FIELD_MELEE_HIT_RATING             = PLAYER_FIELD_COMBAT_RATING_1+5,
+                                                            // CR_HIT_RANGED
+    PLAYER_FIELD_RANGED_HIT_RATING            = PLAYER_FIELD_COMBAT_RATING_1+6,
+                                                            // CR_HIT_SPELL
+    PLAYER_FIELD_SPELL_HIT_RATING             = PLAYER_FIELD_COMBAT_RATING_1+7,
+                                                            // CR_CRIT_MELEE
+    PLAYER_FIELD_MELEE_CRIT_RATING            = PLAYER_FIELD_COMBAT_RATING_1+8,
+                                                            // CR_CRIT_RANGED
+    PLAYER_FIELD_RANGED_CRIT_RATING           = PLAYER_FIELD_COMBAT_RATING_1+9,
+                                                            // CR_CRIT_SPELL
+    PLAYER_FIELD_SPELL_CRIT_RATING            = PLAYER_FIELD_COMBAT_RATING_1+10,
+                                                            // CR_HIT_TAKEN_MELEE
+    PLAYER_FIELD_HIT_RATING                   = PLAYER_FIELD_COMBAT_RATING_1+11,
+                                                            // CR_HIT_TAKEN_RANGED
+    PLAYER_FIELD_CRIT_RATING                  = PLAYER_FIELD_COMBAT_RATING_1+12,
+                                                            // CR_HIT_TAKEN_SPELL
+    PLAYER_FIELD_UNK3_RATING                  = PLAYER_FIELD_COMBAT_RATING_1+13,
+                                                            // CR_CRIT_TAKEN_MELEE
+    PLAYER_FIELD_UNK4_RATING                  = PLAYER_FIELD_COMBAT_RATING_1+14,
+                                                            // CR_CRIT_TAKEN_RANGED
+    PLAYER_FIELD_UNK5_RATING                  = PLAYER_FIELD_COMBAT_RATING_1+15,
+                                                            // CR_CRIT_TAKEN_SPELL
+    PLAYER_FIELD_RESILIENCE_RATING            = PLAYER_FIELD_COMBAT_RATING_1+16,
+                                                            // CR_HASTE_MELEE
+    PLAYER_FIELD_MELEE_HASTE_RATING           = PLAYER_FIELD_COMBAT_RATING_1+17,
+                                                            // CR_HASTE_RANGED
+    PLAYER_FIELD_RANGED_HASTE_RATING          = PLAYER_FIELD_COMBAT_RATING_1+19,
+                                                            // CR_HASTE_SPELL
+    PLAYER_FIELD_SPELL_HASTE_RATING           = PLAYER_FIELD_COMBAT_RATING_1+20,
+                                                            // CR_WEAPON_SKILL_MAINHAND
+    PLAYER_FIELD_MELEE_WEAPON_SKILL_RATING    = PLAYER_FIELD_COMBAT_RATING_1+21,
+                                                            // CR_WEAPON_SKILL_OFFHAND
+    PLAYER_FIELD_OFFHAND_WEAPON_SKILL_RATING  = PLAYER_FIELD_COMBAT_RATING_1+22,
+                                                            // CR_WEAPON_SKILL_RANGED
+    PLAYER_FIELD_RANGED_WEAPON_SKILL_RATING   = PLAYER_FIELD_COMBAT_RATING_1+23,
 
     PLAYER_FIELD_ARENA_TEAM_INFO_1_1          = 0x057D,     // 15 1 2
 

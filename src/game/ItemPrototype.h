@@ -438,5 +438,4 @@ struct ItemPrototype
 #else
 #pragma pack(pop)
 #endif
-
 #endif
