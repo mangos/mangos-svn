@@ -39,18 +39,6 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
         return;
     }
 
-    // resurrect character at enter into instance where his corpse exist
-    Corpse *corpse = GetPlayer()->GetCorpse();
-    if (corpse && corpse->GetType() == CORPSE_RESURRECTABLE && corpse->GetMapId() == GetPlayer()->GetMapId())
-    {
-        if( mEntry && (mEntry->map_type == MAP_INSTANCE || mEntry->map_type == MAP_RAID) )
-        {
-            GetPlayer()->ResurrectPlayer(0.5f,false);
-            GetPlayer()->SpawnCorpseBones();
-            GetPlayer()->SaveToDB();
-        }
-    }
-
     // reset instance validity
     GetPlayer()->m_InstanceValid = true;
 
@@ -66,6 +54,18 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
     GetPlayer()->SendInitialPacketsBeforeAddToMap();
     MapManager::Instance().GetMap(GetPlayer()->GetMapId(), GetPlayer())->Add(GetPlayer());
     GetPlayer()->SendInitialPacketsAfterAddToMap();
+
+    // resurrect character at enter into instance where his corpse exist after add to map
+    Corpse *corpse = GetPlayer()->GetCorpse();
+    if (corpse && corpse->GetType() == CORPSE_RESURRECTABLE && corpse->GetMapId() == GetPlayer()->GetMapId())
+    {
+        if( mEntry && (mEntry->map_type == MAP_INSTANCE || mEntry->map_type == MAP_RAID) )
+        {
+            GetPlayer()->ResurrectPlayer(0.5f,false);
+            GetPlayer()->SpawnCorpseBones();
+            GetPlayer()->SaveToDB();
+        }
+    }
 
     if(_player->InBattleGround())
     {
