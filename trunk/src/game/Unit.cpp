@@ -942,7 +942,7 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
     {
         // Physical damage school
         case SPELL_SCHOOL_NORMAL:
-
+        {
             // Calculate physical outcome
             MeleeHitOutcome outcome;
             outcome = RollPhysicalOutcomeAgainst(pVictim, BASE_ATTACK, spellInfo);
@@ -964,14 +964,16 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
             }
 
             //  Hitinfo, Victimstate
-            uint32 hitInfo, victimState;
-            hitInfo = HITINFO_NORMALSWING;
+            uint32 hitInfo = HITINFO_NORMALSWING;
+            uint32 victimState = VICTIMSTATE_NORMAL;
 
             //Calculate armor mitigation
             uint32 damageAfterArmor;
             damageAfterArmor = CalcArmorReducedDamage(pVictim, *damage);
             cleanDamage->damage += *damage - damageAfterArmor;
             *damage = damageAfterArmor;
+
+            uint32 blocked_amount = 0;
 
             // Classify outcome
             switch (outcome)
@@ -1052,7 +1054,6 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
                 }
                 case MELEE_HIT_BLOCK:
                 {
-                    uint32 blocked_amount;
                     blocked_amount = uint32(pVictim->GetShieldBlockValue());
                     if (blocked_amount >= *damage)
                     {
@@ -1078,13 +1079,14 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
             }
 
             // Update attack state
-            SendAttackStateUpdate(victimState ? hitInfo|victimState : hitInfo, pVictim, 1, SpellSchools(spellInfo->School), 0, 0,0,1,0);
+            SendAttackStateUpdate(victimState ? hitInfo|victimState : hitInfo, pVictim, 1, SpellSchools(spellInfo->School), *damage, 0,0,1,blocked_amount);
 
             // do all damage=0 cases here
             if(damage <= 0)
                 CastMeleeProcDamageAndSpell(pVictim,0,BASE_ATTACK,outcome,spellInfo,isTriggeredSpell);
 
             break;
+        }
 
             // Other schools
         case SPELL_SCHOOL_HOLY:
@@ -2096,8 +2098,8 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
         return MELEE_HIT_CRIT;
     }
 
-    // Max 40% chance to score a glancing blow against mobs that are higher level
-    if( GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && getLevel() < pVictim->getLevel() )
+    // Max 40% chance to score a glancing blow against mobs that are higher level (can do only players and pets and not with ranged weapon)
+    if( attType != RANGED_ATTACK && (GetTypeId() == TYPEID_PLAYER || ((Creature*)this)->isPet()) && pVictim->GetTypeId() != TYPEID_PLAYER && getLevel() < pVictim->getLevel() )
     {
         // cap possible value (with bonuses > max skill)
         int32 skill = GetWeaponSkillValue(attType);

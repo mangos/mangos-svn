@@ -481,7 +481,7 @@ void Spell::FillTargetMap()
             if ((*itr)->IsImmunedToSpell(m_spellInfo))
             {
                 // FIXME: this must be spell immune message instead melee attack message
-                m_caster->SendAttackStateUpdate(HITINFO_NOACTION, *itr, 1, SPELL_SCHOOL_NORMAL, 0, 0, 0, VICTIMSTATE_IS_IMMUNE, 0);
+                m_caster->SendAttackStateUpdate(HITINFO_NOACTION, *itr, 1, SpellSchools(m_spellInfo->School), 0, 0, 0, VICTIMSTATE_IS_IMMUNE, 0);
                 itr = tmpUnitMap.erase(itr);
                 continue;
             }
