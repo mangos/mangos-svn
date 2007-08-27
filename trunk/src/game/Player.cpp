@@ -1558,6 +1558,8 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             // move packet sent by client always after far teleport
             // SetPosition(final_x, final_y, final_z, final_o, true);
             SetDontMove(true);
+
+            // code for finish transfer to new map called in WorldSession::HandleMoveWorldportAckOpcode at client packet
         }
     }
 }
