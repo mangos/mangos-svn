@@ -50,16 +50,14 @@ bool ChatHandler::HandleReloadAllCommand(const char*)
 {
     HandleReloadAreaTriggerTemplateCommand("");
     //HandleReloadAreaTriggerTavernCommand(""); -- reloaded in HandleReloadAreaTriggerTavernCommand
-    HandleReloadCommandCommand("");
     //HandleReloadQuestAreaTriggersCommand(""); -- reloaded in HandleReloadAllQuestCommand
 
     HandleReloadAllLootCommand("");
-
     HandleReloadAllQuestCommand("");
+    HandleReloadAllSpellCommand("");
 
-    HandleReloadSpellAffectCommand("");
-    HandleReloadSpellChainCommand("");
-    HandleReloadSpellProcEventCommand("");
+    HandleReloadCommandCommand("");
+    HandleReloadReservedNameCommand("");
     return true;
 }
 
@@ -223,6 +221,14 @@ bool ChatHandler::HandleReloadLootTemplatesSkinningCommand(const char*)
     sLog.outString( "Re-Loading Loot Tables... (`skinning_loot_template`)" );
     LoadLootTable(LootTemplates_Skinning,     "skinning_loot_template");
     SendGlobalSysMessage("DB table `skinning_loot_template` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadReservedNameCommand(const char*)
+{
+    sLog.outString( "Loading ReservedNames... (`reserved_name`)" );
+    objmgr.LoadReservedPlayersNames();
+    SendGlobalSysMessage("DB table `reserved_name` (player reserved names) reloaded.");
     return true;
 }
 

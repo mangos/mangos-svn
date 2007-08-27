@@ -170,21 +170,22 @@ ChatCommand * ChatHandler::getCommandTable()
         { "areatrigger_involvedrelation",SEC_ADMINISTRATOR, &ChatHandler::HandleReloadQuestAreaTriggersCommand,       "", NULL },
         { "command",                     SEC_ADMINISTRATOR, &ChatHandler::HandleReloadCommandCommand,                 "", NULL },
         { "creature_involvedrelation",   SEC_ADMINISTRATOR, &ChatHandler::HandleReloadCreatureQuestInvRelationsCommand,"",NULL },
-        { "creature_questrelation",      SEC_ADMINISTRATOR, &ChatHandler::HandleReloadCreatureQuestRelationsCommand,  "", NULL },
-        { "gameobject_involvedrelation", SEC_ADMINISTRATOR, &ChatHandler::HandleReloadGOQuestInvRelationsCommand,     "", NULL },
-        { "gameobject_questrelation",    SEC_ADMINISTRATOR, &ChatHandler::HandleReloadGOQuestRelationsCommand,        "", NULL },
         { "creature_loot_template",      SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesCreatureCommand,   "", NULL },
+        { "creature_questrelation",      SEC_ADMINISTRATOR, &ChatHandler::HandleReloadCreatureQuestRelationsCommand,  "", NULL },
         { "disenchant_loot_template",    SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesDisenchantCommand, "", NULL },
         { "fishing_loot_template",       SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesFishingCommand,    "", NULL },
+        { "gameobject_involvedrelation", SEC_ADMINISTRATOR, &ChatHandler::HandleReloadGOQuestInvRelationsCommand,     "", NULL },
+        { "gameobject_questrelation",    SEC_ADMINISTRATOR, &ChatHandler::HandleReloadGOQuestRelationsCommand,        "", NULL },
         { "gameobject_loot_template",    SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesGameobjectCommand, "", NULL },
         { "item_loot_template",          SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesItemCommand,       "", NULL },
         { "pickpocketing_loot_template", SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesPickpocketingCommand,"",NULL},
-        { "skinning_loot_template",      SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesSkinningCommand,   "", NULL },
         { "prospecting_loot_template",   SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesProspectingCommand,"", NULL },
-
+        { "prospecting_loot_template",   SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesProspectingCommand,"", NULL },
+        { "reserved_name",               SEC_ADMINISTRATOR, &ChatHandler::HandleReloadReservedNameCommand,            "", NULL },
         { "spell_affect",                SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellAffectCommand,             "", NULL },
         { "spell_chain",                 SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellChainCommand,              "", NULL },
         { "spell_proc_event",            SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellProcEventCommand,          "", NULL },
+
         { "",                            SEC_ADMINISTRATOR, &ChatHandler::HandleReloadCommand,                        "", NULL },
         { NULL,                          0,                 NULL,                                                     "", NULL }
     };

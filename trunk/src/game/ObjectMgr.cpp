@@ -4081,3 +4081,41 @@ bool ObjectMgr::LoadPlayerDump(std::string file, uint32 account, std::string nam
     fclose(fin);
     return true;
 }
+
+void ObjectMgr::LoadReservedPlayersNames()
+{
+    m_ReservedNames.clear();                                // need for reload case
+
+    QueryResult *result = sDatabase.PQuery("SELECT `name` FROM `reserved_name`");
+
+    uint32 count = 0;
+
+    if( !result )
+    {
+        barGoLink bar( 1 );
+        bar.step();
+
+        sLog.outString();
+        sLog.outString( ">> Loaded %u reserved player names", count );
+        return;
+    }
+
+    barGoLink bar( result->GetRowCount() );
+
+    Field* fields;
+    do
+    {
+        bar.step();
+        fields = result->Fetch();
+        std::string name= fields[0].GetCppString();
+        normalizePlayerName(name);
+        m_ReservedNames.insert(name);
+        ++count;
+
+    } while ( result->NextRow() );
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString( ">> Loaded %u reserved player names", count );
+}

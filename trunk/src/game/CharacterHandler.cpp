@@ -173,7 +173,15 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     {
         data << (uint8)CHAR_NAME_INVALID_CHARACTER;
         SendPacket( &data );
-        sLog.outError("Account:[%d] tried to Create character whit empty name ",GetAccountId());
+        sLog.outError("Account:[%d] tried to Create character with empty name or with not allowed by client charcters",GetAccountId());
+        return;
+    }
+
+    // check name limitations
+    if(GetSecurity() == SEC_PLAYER && objmgr.IsReservedName(name)) 
+    {
+        data << (uint8)CHAR_NAME_RESERVED;
+        SendPacket( &data );
         return;
     }
 
@@ -738,6 +746,15 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
     {
         WorldPacket data(SMSG_CHAR_RENAME, 1);
         data << (uint8)CHAR_NAME_INVALID_CHARACTER;;
+        SendPacket( &data );
+        return;
+    }
+
+    // check name limitations
+    if(GetSecurity() == SEC_PLAYER && objmgr.IsReservedName(newname)) 
+    {
+        WorldPacket data(SMSG_CHAR_RENAME, 1);
+        data << (uint8)CHAR_NAME_RESERVED;
         SendPacket( &data );
         return;
     }

@@ -594,10 +594,19 @@ class ObjectMgr
         bool WritePlayerDump(std::string file, uint32 guid);
         bool LoadPlayerDump(std::string file, uint32 account, std::string name = "", uint32 newGuid = 0);
 
+        // grid objects
         void AddCreatureToGrid(uint32 guid, CreatureData const* data);
         void RemoveCreatureFromGrid(uint32 guid, CreatureData const* data);
         void AddGameobjectToGrid(uint32 guid, GameObjectData const* data);
         void RemoveGameobjectFromGrid(uint32 guid, GameObjectData const* data);
+        
+        //reserved names
+        void LoadReservedPlayersNames();
+        bool IsReservedName(std::string name) const
+        {
+            return m_ReservedNames.find(name) != m_ReservedNames.end();
+        }
+
     protected:
         uint32 m_auctionid;
         uint32 m_mailid;
@@ -640,6 +649,10 @@ class ObjectMgr
         WeatherZoneMap      mWeatherZoneMap;
 
         PetCreateSpellMap   mPetCreateSpell;
+
+        //character reserved names
+        typedef std::set<std::string> ReservedNamesMap;
+        ReservedNamesMap  m_ReservedNames;
 
     private:
         typedef std::map<uint32,PetLevelInfo*> PetLevelInfoMap;

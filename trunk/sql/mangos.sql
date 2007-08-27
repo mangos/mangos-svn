@@ -9780,6 +9780,25 @@ LOCK TABLES `quest_template` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `reserved_name`
+--
+
+DROP TABLE IF EXISTS `reserved_name`;
+CREATE TABLE `reserved_name` (
+  `name` VARCHAR(12) NOT NULL DEFAULT '',
+  PRIMARY KEY  (`name`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player Reserved Names';
+
+--
+-- Dumping data for table `reserved_name`
+--
+
+LOCK TABLES `reserved_name` WRITE;
+/*!40000 ALTER TABLE `reserved_name` DISABLE KEYS */;
+/*!40000 ALTER TABLE `reserved_name` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `skinning_loot_template`
 --
 
