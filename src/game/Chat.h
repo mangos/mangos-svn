@@ -134,6 +134,7 @@ class ChatHandler
         bool HandleReloadAllQuestCommand(const char* args);
         bool HandleReloadAllLootCommand(const char* args);
         bool HandleReloadAllSpellCommand(const char* args);
+
         bool HandleReloadAreaTriggerTavernCommand(const char* args);
         bool HandleReloadAreaTriggerTemplateCommand(const char* args);
         bool HandleReloadCommandCommand(const char* args);
@@ -149,8 +150,8 @@ class ChatHandler
         bool HandleReloadLootTemplatesPickpocketingCommand(const char* args);
         bool HandleReloadLootTemplatesSkinningCommand(const char* args);
         bool HandleReloadLootTemplatesProspectingCommand(const char* args);
-
         bool HandleReloadQuestAreaTriggersCommand(const char* args);
+        bool HandleReloadReservedNameCommand(const char*);
         bool HandleReloadSpellAffectCommand(const char* args);
         bool HandleReloadSpellChainCommand(const char* args);
         bool HandleReloadSpellProcEventCommand(const char* args);

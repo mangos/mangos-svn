@@ -608,8 +608,11 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading ArenaTeams..." );
     objmgr.LoadArenaTeams();
 
-    sLog.outString( "Loading Groups.." );
+    sLog.outString( "Loading Groups..." );
     objmgr.LoadGroups();
+ 
+    sLog.outString( "Loading ReservedNames..." );
+    objmgr.LoadReservedPlayersNames();
 
     objmgr.SetHighestGuids();
 

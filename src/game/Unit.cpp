@@ -772,7 +772,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
         else                                                // victim is a player
         {
             // Rage from damage received
-            if(this != pVictim && pVictim->GetTypeId() == TYPEID_PLAYER && pVictim->getPowerType() == POWER_RAGE)
+            if(this != pVictim && pVictim->getPowerType() == POWER_RAGE)
             {
                 uint32 rage_damage = damage + (cleanDamage ? cleanDamage->damage : 0);
                 ((Player*)pVictim)->RewardRage(rage_damage, 0, false);
