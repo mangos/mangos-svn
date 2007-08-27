@@ -8743,6 +8743,8 @@ Item* Player::EquipItem( uint16 pos, Item *pItem, bool update )
                 pItem->AddToWorld();
                 pItem->SendUpdateToPlayer( this );
             }
+
+            ApplyEquipCooldown(pItem);
         }
         else
         {
@@ -8764,9 +8766,11 @@ Item* Player::EquipItem( uint16 pos, Item *pItem, bool update )
 
             RemoveEnchantmentDurations(pItem);
             AddEnchantmentDurations(pItem2);
+            ApplyEquipCooldown(pItem2);
             return pItem2;
         }
     }
+
     return pItem;
 }
 
@@ -14465,6 +14469,12 @@ void Player::UpdateVisibilityOf(T* target, UpdateData& data, UpdateDataMapType& 
     }
 }
 
+template void Player::UpdateVisibilityOf(Player*        target, UpdateData& data, UpdateDataMapType& data_updates);
+template void Player::UpdateVisibilityOf(Creature*      target, UpdateData& data, UpdateDataMapType& data_updates);
+template void Player::UpdateVisibilityOf(Corpse*        target, UpdateData& data, UpdateDataMapType& data_updates);
+template void Player::UpdateVisibilityOf(GameObject*    target, UpdateData& data, UpdateDataMapType& data_updates);
+template void Player::UpdateVisibilityOf(DynamicObject* target, UpdateData& data, UpdateDataMapType& data_updates);
+
 void Player::InitPrimaryProffesions()
 {
     SetFreePrimaryProffesions(sWorld.getConfig(CONFIG_MAX_PRIMARY_TRADE_SKILL));
@@ -14690,8 +14700,20 @@ void Player::SendRaidInstanceResetWarning(uint32 type, uint32 mapid, uint32 time
     GetSession()->SendPacket(&data);
 }
 
-template void Player::UpdateVisibilityOf(Player*        target, UpdateData& data, UpdateDataMapType& data_updates);
-template void Player::UpdateVisibilityOf(Creature*      target, UpdateData& data, UpdateDataMapType& data_updates);
-template void Player::UpdateVisibilityOf(Corpse*        target, UpdateData& data, UpdateDataMapType& data_updates);
-template void Player::UpdateVisibilityOf(GameObject*    target, UpdateData& data, UpdateDataMapType& data_updates);
-template void Player::UpdateVisibilityOf(DynamicObject* target, UpdateData& data, UpdateDataMapType& data_updates);
+void Player::ApplyEquipCooldown( Item * pItem )
+{
+    for(int i = 0; i <5; ++i)
+    {
+        _Spell const& spellData = pItem->GetProto()->Spells[i];
+
+        if( spellData.SpellTrigger != USE )
+            continue;
+
+        AddSpellCooldown(spellData.SpellId, pItem->GetEntry(), time(NULL) + 30);
+
+        WorldPacket data(SMSG_ITEM_COOLDOWN, 12);
+        data << pItem->GetGUID();
+        data << uint32(spellData.SpellId);
+        GetSession()->SendPacket(&data);
+    }
+}
