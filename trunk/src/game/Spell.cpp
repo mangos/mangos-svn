@@ -2405,7 +2405,7 @@ uint8 Spell::CanCast()
             mechanic_immune |= 1 << m_spellInfo->EffectMiscValue[i];
 
     //Check whether the cast should be prevented by any state you might have.
-    uint8 prevented_reason;
+    uint8 prevented_reason = 0;
     if(m_caster->hasUnitState(UNIT_STAT_STUNDED))
         prevented_reason = SPELL_FAILED_STUNNED;
     else if(m_caster->hasUnitState(UNIT_STAT_CONFUSED))
@@ -2417,43 +2417,46 @@ uint8 Spell::CanCast()
     else if(m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED) && m_spellInfo->School == SPELL_SCHOOL_NORMAL)
         prevented_reason = SPELL_FAILED_PACIFIED;
 
-    if(prevented_reason && (school_immune || mechanic_immune))
+    if(prevented_reason)
     {
-        //Checking auras is needed now, because you are prevented by some state but the spell grants immunity.
-        Unit::AuraMap auras = m_caster->GetAuras();
-        for(Unit::AuraMap::iterator itr = auras.begin(); itr != auras.end(); itr++)
+        if(school_immune || mechanic_immune)
         {
-            if(itr->second)
+            //Checking auras is needed now, because you are prevented by some state but the spell grants immunity.
+            Unit::AuraMap auras = m_caster->GetAuras();
+            for(Unit::AuraMap::iterator itr = auras.begin(); itr != auras.end(); itr++)
             {
-                if(( (1 << itr->second->GetSpellProto()->School) & school_immune) ||
-                    ( (1 << itr->second->GetSpellProto()->Mechanic) & mechanic_immune))
+                if(itr->second)
+                {
+                    if( ((1 << itr->second->GetSpellProto()->School) & school_immune) ||
+                        ((1 << itr->second->GetSpellProto()->Mechanic) & mechanic_immune) )
                         continue;
 
-                //Make a second check for spell failed so the right SPELL_FAILED message is returned.
-                //That is needed when your casting is prevented by multiple states and you are only immune to some of them.
-                switch(itr->second->GetModifier()->m_auraname)
-                {
-                case SPELL_AURA_MOD_STUN:
-                    return SPELL_FAILED_STUNNED;
-                case SPELL_AURA_MOD_CONFUSE:
-                    return SPELL_FAILED_CONFUSED;
-                case SPELL_AURA_MOD_FEAR:
-                    return SPELL_FAILED_FLEEING;
-                case SPELL_AURA_MOD_SILENCE:
-                    if(m_spellInfo->School != SPELL_SCHOOL_NORMAL)
-                        return SPELL_FAILED_SILENCED;
-                    break;
-                case SPELL_AURA_MOD_PACIFY:
-                    if(m_spellInfo->School == SPELL_SCHOOL_NORMAL)
-                        return SPELL_FAILED_PACIFIED;
-                    break;
+                    //Make a second check for spell failed so the right SPELL_FAILED message is returned.
+                    //That is needed when your casting is prevented by multiple states and you are only immune to some of them.
+                    switch(itr->second->GetModifier()->m_auraname)
+                    {
+                    case SPELL_AURA_MOD_STUN:
+                        return SPELL_FAILED_STUNNED;
+                    case SPELL_AURA_MOD_CONFUSE:
+                        return SPELL_FAILED_CONFUSED;
+                    case SPELL_AURA_MOD_FEAR:
+                        return SPELL_FAILED_FLEEING;
+                    case SPELL_AURA_MOD_SILENCE:
+                        if(m_spellInfo->School != SPELL_SCHOOL_NORMAL)
+                            return SPELL_FAILED_SILENCED;
+                        break;
+                    case SPELL_AURA_MOD_PACIFY:
+                        if(m_spellInfo->School == SPELL_SCHOOL_NORMAL)
+                            return SPELL_FAILED_PACIFIED;
+                        break;
+                    }
                 }
             }
         }
-    }
-    else if(prevented_reason)
         //You are prevented from casting and the spell casted does not grant immunity. Return a failed error.
-        return prevented_reason;
+        else
+            return prevented_reason;
+    }
 
     for (int i = 0; i < 3; i++)
     {
