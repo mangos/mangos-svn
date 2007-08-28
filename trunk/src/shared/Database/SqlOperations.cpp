@@ -37,7 +37,19 @@ void SqlTransaction::Execute(Database *db)
     {
         char const *sql = m_queue.front();
         m_queue.pop();
-        db->DirectExecute(sql);
+
+        if(!db->DirectExecute(sql))
+        {
+            free((void*)const_cast<char*>(sql));
+            db->DirectExecute("ROLLBACK");
+            while(!m_queue.empty())
+            {
+                free((void*)const_cast<char*>(m_queue.front()));
+                m_queue.pop();
+            }
+            return;
+        }
+
         free((void*)const_cast<char*>(sql));
     }
     db->DirectExecute("COMMIT");
@@ -101,6 +113,12 @@ bool SqlQueryHolder::PQuery(const char *format, ...)
     return Query(szQuery);
 }
 
+void SqlQueryHolder::DummyQuery()
+{
+    /// a query for dummies, actually a placeholder for a query
+    m_queries.push_back(SqlResultPair(NULL, NULL));
+}
+
 QueryResult* SqlQueryHolder::GetResult(size_t index)
 {
     if(index < m_queries.size())
@@ -157,7 +175,7 @@ void SqlQueryHolderEx::Execute(Database *db)
     {
         /// execute all queries in the holder and pass the results
         char *sql = (char*)queries[i].first;
-        m_holder->SetResult(i, db->Query(sql));
+        if(sql) m_holder->SetResult(i, db->Query(sql));
     }
 
     /// sync with the caller thread

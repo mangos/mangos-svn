@@ -5250,7 +5250,7 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
                 KillInfo &info = m_killsPerPlayer[uVictim->GetGUIDLow()];
                 // gradually decrease the honor for subsequent kills
                 // no honor reward for killing a player more than 'limit' times per day
-                honor *= 1 - info.count / limit;
+                honor *= (float)(limit - info.count) / (float)limit;
                 // if the kill is not present in the DB keep in new state so it will be insterted
                 // otherwise adding a kill means it will need to be updated
                 if(info.state != KILL_NEW)

@@ -1927,21 +1927,22 @@ void Aura::HandleModFear(bool Apply, bool Real)
     if( Apply )
     {
         m_target->addUnitState(UNIT_STAT_FLEEING);
-        m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE | UNIT_FLAG_FLEEING);
+        m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
 
         // only at real add aura
         if(Real)
         {
-            WorldPacket data(SMSG_DEATH_NOTIFY_OBSOLETE, 9);
+            // what is this for ? (doesn't work anyway)
+            /*WorldPacket data(SMSG_DEATH_NOTIFY_OBSOLETE, 9);
             data.append(m_target->GetPackGUID());
             data << uint8(0x00);
-            m_target->SendMessageToSet(&data,true);
+            m_target->SendMessageToSet(&data,true);*/
         }
     }
     else
     {
         m_target->clearUnitState(UNIT_STAT_FLEEING);
-        m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE | UNIT_FLAG_FLEEING);
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_FLEEING);
 
         // only at real remove aura
         if(Real)
@@ -1949,10 +1950,12 @@ void Aura::HandleModFear(bool Apply, bool Real)
             Unit* caster = GetCaster();
             if(m_target->GetTypeId() != TYPEID_PLAYER && caster)
                 m_target->Attack(caster);
-            WorldPacket data(SMSG_DEATH_NOTIFY_OBSOLETE, 9);
+
+            // what is this for ? (doesn't work anyway)
+            /*WorldPacket data(SMSG_DEATH_NOTIFY_OBSOLETE, 9);
             data.append(m_target->GetPackGUID());
             data << uint8(0x01);
-            m_target->SendMessageToSet(&data,true);
+            m_target->SendMessageToSet(&data,true);*/
         }
     }
 }
