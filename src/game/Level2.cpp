@@ -3067,3 +3067,61 @@ bool ChatHandler::HandleStandStateCommand(const char* args)
 
     return true;
 }
+
+bool ChatHandler::HandleAddHonorCommand(const char* args)
+{
+    if (!*args)
+        return false;
+
+    Player *target = getSelectedPlayer();
+    if(!target)
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        return true;
+    }
+
+    uint32 amount = (uint32)atoi(args);
+    target->RewardHonor(NULL, 1, amount);
+    return true;
+}
+
+bool ChatHandler::HandleHonorAddKillCommand(const char* args)
+{
+    Unit *target = getSelectedUnit();
+    if(!target)
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        return true;
+    }
+
+    m_session->GetPlayer()->RewardHonor(target, 1);
+    return true;
+}
+
+bool ChatHandler::HandleHonorFlushKillsCommand(const char* args)
+{
+    Player *target = getSelectedPlayer();
+    if(!target)
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        return true;
+    }
+
+    KillInfoMap &kmap = target->GetKillsPerPlayer();
+    kmap.clear();
+    target->SetFlushKills(true);
+    return true;
+}
+
+bool ChatHandler::HandleUpdateHonorFieldsCommand(const char* args)
+{
+    Player *target = getSelectedPlayer();
+    if(!target)
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        return true;
+    }
+
+    target->UpdateHonorFields(true);
+    return true;
+}

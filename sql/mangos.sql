@@ -279,6 +279,9 @@ CREATE TABLE `character` (
   `stable_slots` tinyint(1) unsigned NOT NULL default '0',
   `rename` tinyint(3) unsigned NOT NULL default '0',
   `zone` int(11) unsigned NOT NULL default '0',
+  `last_honor_date` int(11) unsigned NOT NULL default '0',
+  `pending_kills` int(11) NOT NULL default '0',
+  `last_kill_date` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`),
   KEY `idx_account` (`account`),
   KEY `idx_online` (`online`)
@@ -440,12 +443,11 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `character_kill`;
 CREATE TABLE `character_kill` (
-  `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
-  `creature_template` int(11) unsigned NOT NULL default '0' COMMENT 'Creature Identifier',
-  `honor` float NOT NULL default '0',
-  `date` int(11) unsigned NOT NULL default '0',
-  KEY `idx_guid` (`guid`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
+  `guid` int(11) NOT NULL default '0',
+  `victim_guid` int(11) NOT NULL default '0',
+  `count` tinyint(3) NOT NULL default '0',
+  PRIMARY KEY  (`guid`,`victim_guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Kills Yesterday';
 
 --
 -- Dumping data for table `character_kill`
@@ -737,6 +739,11 @@ INSERT INTO `command` VALUES
 ('guid',2,'Syntax: .guid\r\n\r\nDisplay the GUID for the selected character.'),
 ('help',0,'Syntax: .help $command\r\n\r\nDisplay usage instructions for the given $command.'),
 ('hidearea',3,'Syntax: .hidearea #areaid\r\n\r\nHide the area of #areaid to the selected character. If no character is selected, hide this area to you.'),
+('honor',2,'Syntax: .honor $command [$value] Various honor related commands. Use .help honor $command to get help on specific parameter usage. Supported parameters include add, addkill, flushkills, update'),
+('honor add',2,'Syntax: .honor add $amount\r\n\r\nAdd a certain amount of honor (gained today) to the selected player.'),
+('honor addkill',2,'Syntax: .honor addkikll\r\n\r\nAdd the targeted unit as one of your pvp kills today (you only get honor if it\'s a racial leader or a player)'),
+('honor flushkills',2,'Syntax: .honor flushkills\r\n\r\nClear today\'s kills from the player limit storage (immediately) and from the DB (on next save) for the selected player.'),
+('honor update',2,'Syntax: .honor update\r\n\r\nForce the yesterday\'s honor fields to be updated with today\'s data, which will get reset for the selected player.'),
 ('hover',3,'Syntax: .hover #flag\r\n\r\nEnable or disable hover mode for your character.\r\n\r\nUse a #flag of value 1 to enable, use a #flag value of 0 to disable hover.'),
 ('idleshutdown',3,'Syntax: .idleshutdown #delay|cancel\r\n\r\nShut the server down after #delay seconds if no active connections are present (no players) or cancel the shutdown if cancel value is used.'),
 ('info',0,'Syntax: .info\r\n\r\nDisplay the number of connected players.'),
@@ -769,7 +776,7 @@ INSERT INTO `command` VALUES
 ('lookuptele',1,'Syntax: .lookuptele $substring\r\n\r\nSearch and output all .tele command locations with provide $substring in name.'),
 ('maxskill',3,'Syntax: .maxskill\r\nSets all skills of the targeted player to their maximum values for its current level.'),
 ('Mod32Value',3,'Syntax: .Mod32Value #field #value\r\n\r\nAdd #value to field #field of your character.'),
-('modify',1,'Syntax: .modify $parameter $value\r\n\r\nModify the value of various parameters. Use .help modify $parameter to get help on specific parameter usage.\r\n\r\nSupported parameters include hp, mana, rage, energy, money, speed, swim, scale, bit, bwalk, aspeed, faction, spell and tp.'),
+('modify',1,'Syntax: .modify $parameter $value\r\n\r\nModify the value of various parameters. Use .help modify $parameter to get help on specific parameter usage.\r\n\r\nSupported parameters include hp, mana, rage, energy, money, speed, swim, scale, bit, bwalk, aspeed, faction, spell, tp and honor.'),
 ('modify aspeed',1,'Syntax: .modify aspeed #rate\r\n\r\nModify all speeds -run,swim,run back,swim back- of the selected player to \"normalbase speed for this move type\"*rate. If no player is selected, modify your speed.\r\n\r\n #rate may range from 0.1 to 10.'),
 ('modify bit',1,'Syntax: .modify bit #field #bit\r\n\r\nToggle the #bit bit of the #field field for the selected player. If no player is selected, modify your character.'),
 ('modify bwalk',1,'Syntax: .modify bwalk #rate\r\n\r\nModify the speed of the selected player while running backwards to \"normal walk back speed\"*rate. If no player is selected, modify your speed.\r\n\r\n #rate may range from 0.1 to 10.'),
@@ -785,6 +792,7 @@ INSERT INTO `command` VALUES
 ('modify spell',1,''),
 ('modify swim',1,'Syntax: .modify swim #rate\r\n\r\nModify the swim speed of the selected player to \"normal swim speed\"*rate. If no player is selected, modify your speed.\r\n\r\n #rate may range from 0.1 to 10.'),
 ('modify titles',1,'Syntax:\n.modify titles #mask\n.titles #mask\n\nAllows user to use all titles from #mask.\n\n #mask=0 disables the title-choose-field'),
+('modify honor',1,'Syntax: .modify honor $amount\r\n\r\nAdded $amount to the selected player\'s total honor points.'),
 ('money',1,'Syntax:\r\n.modify money #money\r\n.money #money\r\n\r\nAdd or remove money to the selected player. If no player is selected, modify your money.\r\n\r\n #gold can be negative to remove money.'),
 ('morph',2,'Syntax: .morph #displayid\r\n\r\nChange your current model id to #displayid.'),
 ('movecreature',2,'Syntax: .movecreature [#creature_guid]\r\n\r\nMove the targeted creature spawn point to your coordinates.'),

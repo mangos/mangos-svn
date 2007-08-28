@@ -438,3 +438,9 @@ vmap.ignoreMapIds = "369"
 # These spells are ignored for LoS calculation
 # List of ids with delimiter ','
 vmap.ignoreSpellIds = "7720"
+
+# Subseqent kills of the same player decrease the amount of honor gained.
+# Maximum number of times a user may kill another player in one day and get honor for it.
+# Default: 10
+# Disable: 0 or any value larger than 255
+Honor.KillLimit = 10

@@ -120,6 +120,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "tp",          SEC_MODERATOR,     &ChatHandler::HandleModifyTalentCommand,     "",   NULL },
         { "titles",      SEC_MODERATOR,     &ChatHandler::HandleModifyKnownTitlesCommand, "",  NULL },
         { "mount",       SEC_MODERATOR,     &ChatHandler::HandleModifyMountCommand,       "",  NULL },
+        { "honor",       SEC_MODERATOR,     &ChatHandler::HandleModifyHonorCommand,       "",  NULL },
 
         { NULL,          0, NULL,                                        "",   NULL }
     };
@@ -188,6 +189,16 @@ ChatCommand * ChatHandler::getCommandTable()
 
         { "",                            SEC_ADMINISTRATOR, &ChatHandler::HandleReloadCommand,                        "", NULL },
         { NULL,                          0,                 NULL,                                                     "", NULL }
+    };
+
+    static ChatCommand honorCommandTable[] =
+    {
+        { "add",            SEC_GAMEMASTER,     &ChatHandler::HandleAddHonorCommand,            "", NULL },
+        { "addkill",        SEC_GAMEMASTER,     &ChatHandler::HandleHonorAddKillCommand,        "", NULL },
+        { "flushkills",     SEC_GAMEMASTER,     &ChatHandler::HandleHonorFlushKillsCommand,     "", NULL },
+        { "update",         SEC_GAMEMASTER,     &ChatHandler::HandleUpdateHonorFieldsCommand,   "", NULL },
+
+        { NULL,             0,                  NULL,                                           "",   NULL }
     };
 
     static ChatCommand commandTable[] =
@@ -332,6 +343,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "writepdump",  SEC_ADMINISTRATOR, &ChatHandler::HandleWritePDumpCommand,       "",   NULL },
         { "mute",        SEC_GAMEMASTER,    &ChatHandler::HandleMuteCommand,             "",   NULL },
         { "unmute",      SEC_GAMEMASTER,    &ChatHandler::HandleUnmuteCommand,           "",   NULL },
+        { "honor",       SEC_GAMEMASTER,    NULL,                                        "",   honorCommandTable },
 
         //! Development Commands
         { "setvalue",    SEC_ADMINISTRATOR, &ChatHandler::HandleSetValue,                "",   NULL },

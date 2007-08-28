@@ -1479,6 +1479,33 @@ bool ChatHandler::HandleModifyBitCommand(const char* args)
 }
 
 //Teleport by game_tele entry
+bool ChatHandler::HandleModifyHonorCommand (const char* args)
+{
+    if (!*args)
+        return false;
+
+    Player *target = getSelectedPlayer();
+    if(!target)
+    {
+        SendSysMessage(LANG_PLAYER_NOT_FOUND);
+        return true;
+    }
+
+    uint32 amount = (uint32)atoi(args);
+
+    if (amount < 0 || amount > 999999)
+    {
+        SendSysMessage(LANG_BAD_VALUE);
+        return true;
+    }
+
+    target->SetHonorPoints(amount);
+
+    PSendSysMessage(LANG_COMMAND_MODIFY_HONOR, target->GetName(), amount);
+    
+    return true;
+}
+
 bool ChatHandler::HandleTeleCommand(const char * args)
 {
     if(!*args)

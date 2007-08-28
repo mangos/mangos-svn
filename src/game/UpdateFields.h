@@ -349,7 +349,7 @@ enum EUnitFields
     PLAYER_FIELD_KILLS                        = 0x0560,     // 1 2 2
     PLAYER_FIELD_TODAY_CONTRIBUTION           = 0x0561,     // 1 1 2
     PLAYER_FIELD_YESTERDAY_CONTRIBUTION       = 0x0562,     // 1 1 2
-    PLAYER_FIELD_LIFETIME_HONORBALE_KILLS     = 0x0563,     // 1 1 2
+    PLAYER_FIELD_LIFETIME_HONORABLE_KILLS     = 0x0563,     // 1 1 2
     PLAYER_FIELD_BYTES2                       = 0x0564,     // 1 5 2
     PLAYER_FIELD_WATCHED_FACTION_INDEX        = 0x0565,     // 1 1 2
     PLAYER_FIELD_COMBAT_RATING_1              = 0x0566,     // 23 1 2

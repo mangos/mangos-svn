@@ -313,7 +313,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     holder->Reserve(19);
 
     // 0 - LoadFromDB
-    holder->PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`rename`,`zone`,`online` FROM `character` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
+    holder->PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`rename`,`zone`,`online`,`pending_honor`,`last_honor_date`,`last_kill_date` FROM `character` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
     // 1 - _LoadGroup
     holder->PQuery("SELECT `leaderGuid` FROM `group_member` WHERE `memberGuid`='%u'", GUID_LOPART(playerGuid));
     // 2 - _LoadBoundInstances
@@ -332,9 +332,9 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     holder->PQuery("SELECT `data`,`bag`,`slot`,`item`,`item_template` FROM `character_inventory` JOIN `item_instance` ON `character_inventory`.`item` = `item_instance`.`guid` WHERE `character_inventory`.`guid` = '%u' ORDER BY `bag`,`slot`", GUID_LOPART(playerGuid));
     // 9 - _LoadActions
     holder->PQuery("SELECT `button`,`action`,`type`,`misc` FROM `character_action` WHERE `guid` = '%u' ORDER BY `button`", GUID_LOPART(playerGuid));
-    // 10 - HandlePlayerLogin : unread mail count
+    // 10 - _LoadMailInit
     holder->PQuery("SELECT MIN(`deliver_time`) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0", GUID_LOPART(playerGuid));
-    // 11 - HandlePlayerLogin : nearest delivery time
+    // 11 - _LoadMailInit
     holder->PQuery("SELECT MIN(`deliver_time`) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0", GUID_LOPART(playerGuid));
     // 12 - _LoadIgnoreList
     holder->PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u'", GUID_LOPART(playerGuid));
@@ -344,10 +344,14 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     holder->PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
     // 15 - _LoadSpellCooldowns
     holder->PQuery("SELECT `spell`,`item`,`time` FROM `character_spell_cooldown` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
-    // TODO - UpdateHonorFields
-    // 16 - HandlePlayerLogin : guildid, rank
+    // 16 - _LoadHonor
+    if(sWorld.getConfig(CONFIG_HONOR_KILL_LIMIT))
+        holder->PQuery("SELECT `victim_guid`,`count` FROM `character_kill` WHERE `guid`='%u'", GUID_LOPART(playerGuid));
+    else
+        holder->DummyQuery();
+    // 17 - HandlePlayerLogin : guildid, rank
     holder->PQuery("SELECT `guildid`,`rank` FROM `guild_member` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
-    // 17 - BroadcastPacketToFriendListers
+    // 18 - BroadcastPacketToFriendListers
     holder->PQuery("SELECT `guid` FROM `character_social` WHERE `flags` = 'FRIEND' AND `friend` = '%u'", GUID_LOPART(playerGuid));
 
     sDatabase.DelayQueryHolder(&chrHandler, &CharacterHandler::HandlePlayerLoginCallback, (SqlQueryHolder*)holder);
@@ -371,26 +375,6 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     else
         SetPlayer(pCurrChar);
 
-    //set a count of unread mails
-    //QueryResult *resultMails = sDatabase.PQuery("SELECT COUNT(id) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0 AND `deliver_time` <= '" I64FMTD "'", GUID_LOPART(playerGuid),(uint64)cTime);
-    QueryResult *resultMails = holder->GetResult(10);
-    if (resultMails)
-    {
-        Field *fieldMail = resultMails->Fetch();
-        pCurrChar->unReadMails = fieldMail[0].GetUInt8();
-        delete resultMails;
-    }
-
-    // store nearest delivery time (it > 0 and if it < current then at next player update SendNewMaill will be called)
-    //resultMails = sDatabase.PQuery("SELECT MIN(`deliver_time`) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0", GUID_LOPART(playerGuid));
-    resultMails = holder->GetResult(11);
-    if (resultMails)
-    {
-        Field *fieldMail = resultMails->Fetch();
-        pCurrChar->m_nextMailDelivereTime = (time_t)fieldMail[0].GetUInt64();
-        delete resultMails;
-    }
-
     pCurrChar->SendDungeonDifficulty();
 
     WorldPacket data( SMSG_LOGIN_VERIFY_WORLD, 20 );
@@ -406,8 +390,6 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         data << uint32(0);
     SendPacket(&data);
 
-    pCurrChar->_LoadIgnoreList(holder->GetResult(12));
-    pCurrChar->_LoadFriendList(holder->GetResult(13));
     pCurrChar->SendFriendlist();
     pCurrChar->SendIgnorelist();
 
@@ -477,16 +459,6 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         }
     }
 
-    if(!pCurrChar->_LoadHomeBind(holder->GetResult(14)))
-    {
-        LogoutPlayer(false);                                // without save
-        delete pCurrChar;
-        delete holder;
-        return;
-    }
-
-    pCurrChar->_LoadSpellCooldowns(holder->GetResult(15));
-
     pCurrChar->SendInitialPacketsBeforeAddToMap();
 
     //Show cinematic at the first time that player login
@@ -503,10 +475,8 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
         }
     }
 
-    pCurrChar->UpdateHonorFields();
-
     //QueryResult *result = sDatabase.PQuery("SELECT `guildid`,`rank` FROM `guild_member` WHERE `guid` = '%u'",pCurrChar->GetGUIDLow());
-    QueryResult *resultGuild = holder->GetResult(16);
+    QueryResult *resultGuild = holder->GetResult(17);
 
     if(resultGuild)
     {
@@ -551,7 +521,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     data<<pCurrChar->GetAreaId();
     data<<pCurrChar->getLevel();
     data<<pCurrChar->getClass();
-    pCurrChar->BroadcastPacketToFriendListers(&data, true, holder->GetResult(17));
+    pCurrChar->BroadcastPacketToFriendListers(&data, true, holder->GetResult(18));
 
     // Place character in world (and load zone) before some object loading
     pCurrChar->LoadCorpse();
