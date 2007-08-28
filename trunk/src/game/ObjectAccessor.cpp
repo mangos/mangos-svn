@@ -503,7 +503,9 @@ ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid)
     Corpse *corpse = GetCorpseForPlayerGUID(player_guid);
     if(!corpse)
     {
-        sLog.outError("ERROR: Try remove corpse that not in map for GUID %ul", player_guid);
+        //in fact this function is called from several places
+        //even when player doesn't have a corpse, not an error
+        //sLog.outError("ERROR: Try remove corpse that not in map for GUID %ul", player_guid);
         return false;
     }
 

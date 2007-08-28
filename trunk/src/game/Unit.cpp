@@ -3211,7 +3211,7 @@ void Unit::RemoveAllAurasOnDeath()
     // and disable the mods for the passive ones
     for(AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end();)
     {
-        if (!iter->second->IsPassive())
+        if (!iter->second->IsPassive() && !iter->second->IsDeathPersistent()) 
             RemoveAura(iter, true);
         else
             ++iter;
