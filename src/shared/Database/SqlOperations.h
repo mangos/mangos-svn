@@ -101,6 +101,7 @@ class SqlQueryHolder
         ~SqlQueryHolder();
         bool Query(const char *sql);
         bool PQuery(const char *format, ...);
+        void DummyQuery();
         void Reserve(size_t size);
         QueryResult* GetResult(size_t index);
         void SetResult(size_t index, QueryResult *result);

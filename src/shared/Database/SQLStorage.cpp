@@ -56,7 +56,6 @@ void SQLStorage::Free ()
 
     delete [] pIndex;
     delete [] data;
-
 }
 
 void SQLStorage::Load ()
