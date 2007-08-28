@@ -468,6 +468,8 @@ CREATE TABLE `character_pet` (
   `entry` int(11) unsigned NOT NULL default '0',
   `owner` int(11) unsigned NOT NULL default '0',
   `modelid` int(11) unsigned default '0',
+  `CreatedBySpell` int(11) unsigned NOT NULL default '0',
+  `PetType` tinyint(3) unsigned NOT NULL default '0',
   `level` int(11) unsigned NOT NULL default '1',
   `exp` int(11) unsigned NOT NULL default '0',
   `nextlvlexp` int(11) unsigned NOT NULL default '100',

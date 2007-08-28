@@ -3594,7 +3594,10 @@ void Player::RepopAtGraveyard()
     AreaTableEntry const *zone = GetAreaEntryByAreaID(GetAreaId());
 
     if(zone && zone->flags & 0x1000)                        //Such zones are considered unreachable without flying and the player must be automatically revived
+    {
         ResurrectPlayer(0.5f);
+        SpawnCorpseBones();
+    }
 
     WorldSafeLocsEntry const *ClosestGrave = objmgr.GetClosestGraveYard( GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam() );
 
