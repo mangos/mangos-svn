@@ -2922,15 +2922,16 @@ void Aura::HandleModBaseResistance(bool apply, bool Real)
 
 void Aura::HandleAuraModStat(bool apply, bool Real)
 {
-    if (m_modifier.m_miscvalue < -1 || m_modifier.m_miscvalue > 4)
+    if (m_modifier.m_miscvalue < -2 || m_modifier.m_miscvalue > 4)
     {
-        sLog.outError("WARNING: Misc Value for SPELL_AURA_MOD_STAT not valid");
+        sLog.outError("WARNING: Spell %u effect %u have unsupported misc value (%i) for SPELL_AURA_MOD_STAT ",GetId(),GetEffIndex(),m_modifier.m_miscvalue);
         return;
     }
 
     for(int32 i = STAT_STRENGTH; i < MAX_STATS; i++)
     {
-        if (m_modifier.m_miscvalue == -1 || m_modifier.m_miscvalue == i)
+        // -1 or -2 is all stats ( misc < -2 checked in function beggining )
+        if (m_modifier.m_miscvalue < 0 || m_modifier.m_miscvalue == i)
         {
             //m_target->ApplyStatMod(Stats(i), m_modifier.m_amount,apply);
             m_target->HandleStatModifier(UnitMods(UNIT_MOD_STAT_START + i), TOTAL_VALUE, float(m_modifier.m_amount), apply);
