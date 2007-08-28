@@ -388,6 +388,10 @@ void World::SetInitialWorldSettings()
     if(m_configs[CONFIG_QUEST_HIGH_LEVEL_HIDE_DIFF] > 255)
         m_configs[CONFIG_QUEST_HIGH_LEVEL_HIDE_DIFF] = 255;
 
+    m_configs[CONFIG_HONOR_KILL_LIMIT] = sConfig.GetIntDefault("Honor.KillLimit", 10);
+    if(m_configs[CONFIG_HONOR_KILL_LIMIT] > 255)
+        m_configs[CONFIG_HONOR_KILL_LIMIT] = 0;
+
     m_VisibleUnitGreyDistance = sConfig.GetFloatDefault("Visibility.Distance.Grey.Unit", 1);
     if(m_VisibleUnitGreyDistance >  MAX_VISIBILITY_DISTANCE)
     {

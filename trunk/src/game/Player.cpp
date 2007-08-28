@@ -211,6 +211,13 @@ Player::Player (WorldSession *session): Unit( 0 )
         m_auraBaseMod[i][FLAT_MOD] = 0.0f;
         m_auraBaseMod[i][PCT_MOD] = 1.0f;
     }
+
+    // Honor System
+    m_honorPending = 0;
+    m_lastHonorDate = 0;
+    m_lastKillDate = 0;
+    m_flushKills = false;
+    m_saveKills = false;
 }
 
 Player::~Player ()
@@ -394,7 +401,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value( PLAYER__FIELD_KNOWN_TITLES, 0 );        // 0=disabled
     SetUInt32Value( PLAYER_CHOSEN_TITLE, 0 );
     SetUInt32Value( PLAYER_FIELD_KILLS, 0 );
-    SetUInt32Value( PLAYER_FIELD_LIFETIME_HONORBALE_KILLS, 0 );
+    SetUInt32Value( PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 0 );
     SetUInt32Value( PLAYER_FIELD_TODAY_CONTRIBUTION, 0 );
     SetUInt32Value( PLAYER_FIELD_YESTERDAY_CONTRIBUTION, 0 );
 
@@ -2212,7 +2219,7 @@ void Player::InitStatsForLevel(bool reapplyMods)
 
     // cleanup mounted state (it will set correctly at aura loading if player saved at mount.
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
-    RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT | UNIT_FLAG_MOUNT_OLD);
+    RemoveFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_MOUNT | UNIT_FLAG_SILENCED);
 
     // cleanup player flags (will be re-applied if need at aura load), to avoid have ghost flag without ghost aura, for example.
     RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_AFK | PLAYER_FLAGS_DND | PLAYER_FLAGS_GM | PLAYER_FLAGS_GHOST);
@@ -5155,108 +5162,140 @@ void Player::UpdateArenaFields(void)
     /* arena calcs go here */
 }
 
-void Player::UpdateHonorFields()
+void Player::UpdateHonorFields(bool force)
 {
+    /// called when rewarding honor and at each save
     uint32 today = uint32(time(NULL) / DAY) * DAY;
     uint32 yesterday = today - DAY;
 
-    QueryResult *result = sDatabase.PQuery("SELECT sum(`honor`) FROM `character_kill` WHERE `guid`='%u' AND `date`<'%u'", GUID_LOPART(GetGUID()), today);
-    if(result)
+    if ((m_honorPending && m_lastHonorDate < today) || force)
     {
-        float honor = (*result)[0].GetFloat();
-        delete result;
+        // if we have pending honor it either got added today or yesterday
+        // if the last was added yesterday then this is the first update after midnight
+        
+        // update yesterday's contribution
+        SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, (uint32)(m_honorPending*10));
+        // add the pending honor points, a day has passed
+        SetHonorPoints(GetHonorPoints()+uint32(m_honorPending));
+        // this is the first update today, reset today's contribution and pending honor
+        SetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, 0);
+        m_honorPending = 0;
+    }
 
-        if(honor != 0)
+    uint16 kills_today = GetUInt32Value(PLAYER_FIELD_KILLS) & 0xFFFF;
+    if ((kills_today && m_lastKillDate < today) || force)
+    {
+        // if we have pending kills they were done today or yesterday
+        // if the last was done yesterday then this is the first update after midnight
+
+        if(sWorld.getConfig(CONFIG_HONOR_KILL_LIMIT))
         {
-            //float honor=0.0, honor_yesterday=0.0;
-            float honor_yesterday=0.0;
-            uint32 kills_yesterday=0;
-
-            result = sDatabase.PQuery("SELECT sum(`honor`),count(`honor`) FROM `character_kill` WHERE `guid`='%u' AND `date`<'%u' AND `date`>='%u'", GUID_LOPART(GetGUID()), today, yesterday);
-            if(result)
-            {
-                honor_yesterday = (*result)[0].GetFloat();
-                kills_yesterday = (*result)[1].GetUInt32();
-                delete result;
-            }
-
-            SetHonorPoints(GetHonorPoints()+uint32(honor));
-            SetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, 0);
-            SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, (uint32)(honor_yesterday*10));
-            SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS, (kills_yesterday<<16));
-
-            sDatabase.PExecute("DELETE FROM `character_kill` WHERE `date`<'%u' AND `guid`='%u'", today,GUID_LOPART(GetGUID()));
+            // clear all of today's kills, they will be flushed from the DB on next save
+            m_killsPerPlayer.clear();
+            m_flushKills = true;
         }
+
+        // this is the first update today, kills_today become yeseterday's kills
+        SetUInt32Value(PLAYER_FIELD_KILLS, kills_today << 16);
     }
 }
 
-//How much honor Player gains from uVictim
-bool Player::RewardHonor(Unit *uVictim, uint32 count )
+///Calculate the amount of honor gained based on the victim
+///and the size of the group for which the honor is divided
+///An exact honor value can also be given (overriding the calcs)
+bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
 {
-    if(!uVictim || uVictim == this || uVictim->GetAura(2479, 0))
-        return false;
+    uint64 victim_guid = 0;
+    uint32 now = time(NULL);
+    UpdateHonorFields();
 
-    if(count < 1)
-        count = 1;
-
-    float honor = 0;
-
-    if( uVictim->GetTypeId() == TYPEID_PLAYER )
+    if(honor <= 0)
     {
-        Player *pVictim = (Player *)uVictim;
-
-        if( GetTeam() == pVictim->GetTeam() )
+        if(!uVictim || uVictim == this || uVictim->GetAura(2479, 0))
             return false;
 
-        float f = 1;                                        //need for total kills (?? need more info)
-        uint32 k_grey = 0;
-        uint32 k_level = getLevel();
-        uint32 v_level = pVictim->getLevel();
-        if(k_level <= 5)
-            k_grey = 0;
-        else if( k_level <= 39 )
-            k_grey = k_level - 5 - k_level/10;
+        victim_guid = uVictim->GetGUID();
+
+        if( uVictim->GetTypeId() == TYPEID_PLAYER )
+        {
+            Player *pVictim = (Player *)uVictim;
+
+            if( GetTeam() == pVictim->GetTeam() )
+                return false;
+
+            float f = 1;                                        //need for total kills (?? need more info)
+            uint32 k_grey = 0;
+            uint32 k_level = getLevel();
+            uint32 v_level = pVictim->getLevel();
+            if(k_level <= 5)
+                k_grey = 0;
+            else if( k_level <= 39 )
+                k_grey = k_level - 5 - k_level/10;
+            else
+                k_grey = k_level - 1 - k_level/5;
+
+            if(v_level<=k_grey)
+                return false;
+
+            float diff_level = (k_level == k_grey) ? 1 : ((float)(v_level - k_grey)) / ((float)(k_level - k_grey));
+
+            int32 v_rank =1;                                    //need more info
+
+            honor = ((f * diff_level * (190 + v_rank*10))/6);
+            honor *= ((float)k_level) / 70.0;                   //factor of dependence on levels of the killer
+
+            uint8 limit = sWorld.getConfig(CONFIG_HONOR_KILL_LIMIT);
+            if(limit)
+            {
+                KillInfo &info = m_killsPerPlayer[uVictim->GetGUIDLow()];
+                // gradually decrease the honor for subsequent kills
+                // no honor reward for killing a player more than 'limit' times per day
+                honor *= 1 - info.count / limit;
+                // if the kill is not present in the DB keep in new state so it will be insterted
+                // otherwise adding a kill means it will need to be updated
+                if(info.state != KILL_NEW)
+                    info.state = KILL_CHANGED;
+
+                // count the number of times a certain player was killed in one day
+                if(info.count < limit)
+                    info.count++;
+            }
+
+            // count the number of playerkills in one day
+            ApplyModUInt32Value(PLAYER_FIELD_KILLS, 1, true);
+            // and those in a lifetime
+            ApplyModUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 1, true);
+
+            m_lastKillDate = now;
+            m_saveKills = true;
+        }
         else
-            k_grey = k_level - 1 - k_level/5;
+        {
+            Creature *cVictim = (Creature *)uVictim;
 
-        if(v_level<=k_grey)
-            return false;
+            if (!cVictim->isRacialLeader())
+                return false;
 
-        float diff_level = (k_level == k_grey) ? 1 : ((float)(v_level - k_grey)) / ((float)(k_level - k_grey));
-
-        int32 v_rank =1;                                    //need more info
-
-        honor = ((f * diff_level * (190 + v_rank*10))/6);
-        honor *= ((float)k_level) / 70.0;                   //factor of dependence on levels of the killer
-
+            honor = 100;                                        // ??? need more info
+        }
     }
-    else
-    {
-        Creature *cVictim = (Creature *)uVictim;
 
-        if (!cVictim->isRacialLeader())
-            return false;
-
-        honor = 100;                                        // ??? need more info
-
-    }
+    if(groupsize < 1)
+        groupsize = 1;
 
     honor *= sWorld.getRate(RATE_HONOR);
-    honor /= count;
-
+    honor /= groupsize;
+    
     float approx_honor = honor * (((float)urand(8,12))/10); // approx honor: 80% - 120% of real honor
 
     WorldPacket data(SMSG_PVP_CREDIT,4+8);
     data << (uint32) approx_honor*10;
-    data << (uint64) uVictim->GetGUID();
+    data << (uint64) victim_guid;
     GetSession()->SendPacket(&data);
 
-    UpdateHonorFields();                                    // to prevent CalcluateHonor() on a new day before old honor was UpdateHonorFields()
-    sDatabase.PExecute("INSERT INTO `character_kill` (`guid`,`creature_template`,`honor`,`date`) VALUES (%u, %u, %f, %u)", GUID_LOPART(GetGUID()), uVictim->GetEntry(), honor, time(0));
+    m_lastHonorDate = now;
+    m_honorPending += honor;
 
-    ApplyModUInt32Value(PLAYER_FIELD_KILLS, 1, true);       // add 1 today_kill
-                                                            // add 1 lifetime_kill
-    ApplyModUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS, 1, true);
     ApplyModUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, (uint32)(approx_honor*10), true);
     return true;
 }
@@ -11654,8 +11693,8 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 {
     // NOTE: all fields in `character` must be read to prevent lost character data at next save in case wrong DB structure.
     // !!! NOTE: including unused `zone`,`online`
-    ////                                             0      1         2      3      4      5       6            7            8            9     10            11         12          13          14          15           16            17                  18                  19                  20        21        22        23         24          25        26             27       [28]   [29]
-    //QueryResult *result = sDatabase.PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`rename`,`zone`,`online` FROM `character` WHERE `guid` = '%u'", guid);
+    ////                                             0      1         2      3      4      5       6            7            8            9     10            11         12          13          14          15           16            17                  18                  19                  20        21        22        23         24          25        26             27       [28]   [29]     30              31                32
+    //QueryResult *result = sDatabase.PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`rename`,`zone`,`online`,`pending_honor`,`last_honor_date`,`last_kill_date` FROM `character` WHERE `guid` = '%u'", guid);
     QueryResult *result = holder->GetResult(0);
 
     if(!result)
@@ -11807,6 +11846,11 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 
     m_needRename = fields[27].GetBool();
 
+    // Honor system
+    m_honorPending = fields[30].GetFloat();
+    m_lastHonorDate = fields[31].GetUInt32();
+    m_lastKillDate = fields[32].GetUInt32();
+
     delete result;
 
     // clear channel spell data (if saved at channel spell casting)
@@ -11885,6 +11929,19 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     _LoadInventory(holder->GetResult(8), time_diff);
 
     _LoadActions(holder->GetResult(9));
+
+    // unread mails and next delivery time, actual mails not loaded
+    _LoadMailInit(holder->GetResult(10), holder->GetResult(11));
+
+    _LoadIgnoreList(holder->GetResult(12));
+    _LoadFriendList(holder->GetResult(13));
+
+    if(!_LoadHomeBind(holder->GetResult(14)))
+        return false;
+
+    _LoadSpellCooldowns(holder->GetResult(15));
+
+    _LoadHonor(holder->GetResult(16));
 
     //apply all stat bonuses from items and auras
     SetCanModifyStats(true);
@@ -12038,35 +12095,76 @@ void Player::LoadCorpse()
     }
 }
 
-void Player::UpdateSpeakTime()
+void Player::_LoadHonor(QueryResult *result)
 {
-    time_t current = time (NULL);
-    if(m_speakTime > current)
+    uint32 today = uint32(time(NULL) / DAY) * DAY;
+    uint32 yesterday = today - DAY;
+
+    if (m_honorPending && m_lastHonorDate < today)
     {
-        uint32 max_count = sWorld.getConfig(CONFIG_CHATFLOOD_MESSAGE_COUNT);
-        if(!max_count)
-            return;
-
-        ++m_speakCount;
-        if(m_speakCount >= max_count)
+        if(m_lastHonorDate >= yesterday)
         {
-            // prevent overwrite mute time, if message send just before mutes set, for example.
-            time_t new_mute = current + sWorld.getConfig(CONFIG_CHATFLOOD_MUTE_TIME);
-            if(GetSession()->m_muteTime < new_mute)
-                GetSession()->m_muteTime = new_mute;
+            // the honorPending is always for one day
+            // if honor was last gained yesterday then
+            // honorPending is the total honor yesterday
+            SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, (uint32)(m_honorPending*10));
+        }
+        else
+        {
+            // no honor yesterday, reset yesterday's contribution
+            SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, 0);
+        }
 
-            m_speakCount = 0;
+        // add the pending honor points, a day has passed
+        SetHonorPoints(GetHonorPoints()+uint32(m_honorPending));
+        // this is the first login today, reset today's contribution and pending honor
+        SetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, 0);
+        m_honorPending = 0;
+    }
+
+    // load kills today
+    uint32 kills = GetUInt32Value(PLAYER_FIELD_KILLS);      // today + yesterday << 16
+    uint16 kills_today = kills & 0xFFFF;
+    if(kills_today)
+    {
+        if (m_lastKillDate >= today)
+        {
+            // kills in the DB are for one day always
+            // so if the last was today then they all were
+            // QueryResult *result = sDatabase.PQuery("SELECT `victim_guid`,`count` FROM `character_kill` WHERE `guid`='%u'", GetGUIDLow());
+            if (result && sWorld.getConfig(CONFIG_HONOR_KILL_LIMIT))
+            {
+                do
+                {
+                    Field *fields  = result->Fetch();
+                    uint32 victim_guid = fields[0].GetUInt32();
+                    uint8 count = fields[1].GetUInt8();
+
+                    KillInfo &info = m_killsPerPlayer[victim_guid];
+                    info.state = KILL_UNCHANGED;
+                    info.count = count;
+                }
+                while( result->NextRow() );
+            }
+        }
+        else
+        {
+            if(m_lastKillDate >= yesterday)
+            {
+                // if the last victim was killed yesterday then
+                // kills_today is actually the total kills yesterday
+                SetUInt32Value(PLAYER_FIELD_KILLS, kills_today << 16);
+            }
+            else
+            {
+                // no kills yesterday or today, reset
+                SetUInt32Value(PLAYER_FIELD_KILLS, 0);
+            }
         }
     }
-    else
-        m_speakCount = 0;
 
-    m_speakTime = current + sWorld.getConfig(CONFIG_CHATFLOOD_MESSAGE_DELAY);
-}
-
-bool Player::CanSpeak() const
-{
-    return  GetSession()->m_muteTime <= time (NULL);
+    if(result)
+        delete result;
 }
 
 void Player::_LoadInventory(QueryResult *result, uint32 timediff)
@@ -12212,6 +12310,27 @@ void Player::_LoadMailedItems()
     while( result->NextRow() );
 
     delete result;
+}
+
+void Player::_LoadMailInit(QueryResult *resultUnread, QueryResult *resultDelivery)
+{
+    //set a count of unread mails
+    //QueryResult *resultMails = sDatabase.PQuery("SELECT COUNT(id) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0 AND `deliver_time` <= '" I64FMTD "'", GUID_LOPART(playerGuid),(uint64)cTime);
+    if (resultUnread)
+    {
+        Field *fieldMail = resultUnread->Fetch();
+        unReadMails = fieldMail[0].GetUInt8();
+        delete resultUnread;
+    }
+
+    // store nearest delivery time (it > 0 and if it < current then at next player update SendNewMaill will be called)
+    //resultMails = sDatabase.PQuery("SELECT MIN(`deliver_time`) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0", GUID_LOPART(playerGuid));
+    if (resultDelivery)
+    {
+        Field *fieldMail = resultDelivery->Fetch();
+        m_nextMailDelivereTime = (time_t)fieldMail[0].GetUInt64();
+        delete resultDelivery;
+    }
 }
 
 void Player::_LoadMail()
@@ -12461,6 +12580,81 @@ void Player::_LoadTutorials(QueryResult *result)
     m_TutorialsChanged = false;
 }
 
+void Player::_LoadGroup(QueryResult *result)
+{
+    //QueryResult *result = sDatabase.PQuery("SELECT `leaderGuid` FROM `group_member` WHERE `memberGuid`='%u'", GetGUIDLow());
+    if(result)
+    {
+        uint64 leaderGuid = MAKE_GUID((*result)[0].GetUInt32(),HIGHGUID_PLAYER);
+        delete result;
+        Group* group = objmgr.GetGroupByLeader(leaderGuid);
+        if(group)
+        {
+            uint8 subgroup = group->GetMemberGroup(GetGUID());
+            SetGroup(group, subgroup);
+        }
+    }
+}
+
+void Player::_LoadBoundInstances(QueryResult *result)
+{
+    m_BoundInstances.clear();
+
+    //QueryResult *result = sDatabase.PQuery("SELECT `map`,`instance`,`leader` FROM `character_instance` WHERE `guid` = '%u'", GetGUIDLow());
+    if(result)
+    {
+        do
+        {
+            Field *fields = result->Fetch();
+            m_BoundInstances[fields[0].GetUInt32()] = std::pair< uint32, uint32 >(fields[1].GetUInt32(), fields[2].GetUInt32());
+        } while(result->NextRow());
+        delete result;
+    }
+
+    // correctly set current instance (if needed)
+    BoundInstancesMap::iterator i = m_BoundInstances.find(GetMapId());
+    if (i != m_BoundInstances.end()) SetInstanceId(i->second.first); else SetInstanceId(0);
+}
+
+bool Player::_LoadHomeBind(QueryResult *result)
+{
+    //QueryResult *result = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
+    if (result)
+    {
+        Field *fields = result->Fetch();
+        m_homebindMapId = fields[0].GetUInt32();
+        m_homebindZoneId = fields[1].GetUInt16();
+        m_homebindX = fields[2].GetFloat();
+        m_homebindY = fields[3].GetFloat();
+        m_homebindZ = fields[4].GetFloat();
+        delete result;
+    }
+    else
+    {
+        int plrace = getRace();
+        int plclass = getClass();
+        QueryResult *result1 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `playercreateinfo` WHERE `race` = '%u' AND `class` = '%u'", plrace, plclass);
+
+        if(!result1)
+        {
+            sLog.outErrorDb("Table `playercreateinfo` not have data for race %u class %u , character can't be loaded.",plrace, plclass);
+            return false;
+        }
+
+        Field *fields = result1->Fetch();
+        m_homebindMapId = fields[0].GetUInt32();
+        m_homebindZoneId = fields[1].GetUInt16();
+        m_homebindX = fields[2].GetFloat();
+        m_homebindY = fields[3].GetFloat();
+        m_homebindZ = fields[4].GetFloat();
+        sDatabase.PExecute("INSERT INTO `character_homebind` (`guid`,`map`,`zone`,`position_x`,`position_y`,`position_z`) VALUES ('%u', '%u', '%u', '%f', '%f', '%f')", GetGUIDLow(), m_homebindMapId, (uint32)m_homebindZoneId, m_homebindX, m_homebindY, m_homebindZ);
+        delete result1;
+    }
+    DEBUG_LOG("Setting player home position: mapid is: %u, zoneid is %u, X is %f, Y is %f, Z is %f\n",
+        m_homebindMapId, m_homebindZoneId, m_homebindX, m_homebindY, m_homebindZ);
+    return true;
+}
+
 /*********************************************************/
 /***                   SAVE SYSTEM                     ***/
 /*********************************************************/
@@ -12506,7 +12700,8 @@ void Player::SaveToDB()
         "`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,"
         "`taximask`,`online`,`cinematic`,"
         "`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,"
-        "`trans_x`, `trans_y`, `trans_z`, `trans_o`, `transguid`, `gmstate`, `stable_slots`,`rename`,`zone`) VALUES ("
+        "`trans_x`, `trans_y`, `trans_z`, `trans_o`, `transguid`, `gmstate`, `stable_slots`,`rename`,`zone`,"
+        "`pending_honor`, `last_honor_date`, `last_kill_date`) VALUES ("
         << GetGUIDLow() << ", "
         << GetSession()->GetAccountId() << ", '"
         << m_name << "', "
@@ -12577,6 +12772,13 @@ void Player::SaveToDB()
     ss << ", ";
     ss << GetZoneId();
 
+    ss << ", ";
+    ss << m_honorPending;
+    ss << ", ";
+    ss << m_lastHonorDate;
+    ss << ", ";
+    ss << m_lastKillDate;
+
     ss << " )";
 
     sDatabase.Execute( ss.str().c_str() );
@@ -12593,6 +12795,7 @@ void Player::SaveToDB()
     _SaveAuras();
     _SaveReputation();
     _SaveBoundInstances();
+    _SaveHonor();
 
     sDatabase.CommitTransaction();
 
@@ -12872,6 +13075,42 @@ void Player::_SaveTutorials()
     m_TutorialsChanged = false;
 }
 
+void Player::_SaveHonor()
+{
+    // first save/honor gain after midnight will also update the player's honor fields
+    UpdateHonorFields();
+
+    // the character_kill tables are not used if the config is set to 0
+    if(!sWorld.getConfig(CONFIG_HONOR_KILL_LIMIT))
+        return;
+
+    // flush all kills from the DB at midnight
+    if(m_flushKills)
+    {
+        sDatabase.PExecute("DELETE FROM `character_kill` WHERE `guid` = '%u'", GetGUIDLow());
+        m_flushKills = false;
+    }
+
+    // only if there's something to save
+    if(m_saveKills)
+    {
+        for(KillInfoMap::iterator itr = m_killsPerPlayer.begin(); itr != m_killsPerPlayer.end(); ++itr)
+        {
+            switch(itr->second.state)
+            {
+                case KILL_NEW:
+                    sDatabase.PExecute("REPLACE INTO `character_kill` VALUES ('%u','%u','%u')", GetGUIDLow(), itr->first, itr->second.count);
+                    break;
+                case KILL_CHANGED:
+                    sDatabase.PExecute("UPDATE `character_kill` SET `count`='%u' WHERE `guid` = '%u' AND `victim_guid` = '%u'", itr->second.count, GetGUIDLow(), itr->first);
+                    break;
+            }
+            itr->second.state = KILL_UNCHANGED;
+        }
+        m_saveKills = false;
+    }
+}
+
 void Player::outDebugValues() const
 {
     if(!sLog.IsOutDebug())                                  // optimize disabled debug output
@@ -12889,6 +13128,41 @@ void Player::outDebugValues() const
     sLog.outDebug("MIN_OFFHAND_DAMAGE is: \t%f\tMAX_OFFHAND_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE), GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE));
     sLog.outDebug("MIN_RANGED_DAMAGE is: \t%f\tMAX_RANGED_DAMAGE is: \t%f",GetFloatValue(UNIT_FIELD_MINRANGEDDAMAGE), GetFloatValue(UNIT_FIELD_MAXRANGEDDAMAGE));
     sLog.outDebug("ATTACK_TIME is: \t%u\t\tRANGE_ATTACK_TIME is: \t%u",GetAttackTime(BASE_ATTACK), GetAttackTime(RANGED_ATTACK));
+}
+
+/*********************************************************/
+/***               FLOOD FILTER SYSTEM                 ***/
+/*********************************************************/
+
+void Player::UpdateSpeakTime()
+{
+    time_t current = time (NULL);
+    if(m_speakTime > current)
+    {
+        uint32 max_count = sWorld.getConfig(CONFIG_CHATFLOOD_MESSAGE_COUNT);
+        if(!max_count)
+            return;
+
+        ++m_speakCount;
+        if(m_speakCount >= max_count)
+        {
+            // prevent overwrite mute time, if message send just before mutes set, for example.
+            time_t new_mute = current + sWorld.getConfig(CONFIG_CHATFLOOD_MUTE_TIME);
+            if(GetSession()->m_muteTime < new_mute)
+                GetSession()->m_muteTime = new_mute;
+
+            m_speakCount = 0;
+        }
+    }
+    else
+        m_speakCount = 0;
+
+    m_speakTime = current + sWorld.getConfig(CONFIG_CHATFLOOD_MESSAGE_DELAY);
+}
+
+bool Player::CanSpeak() const
+{
+    return  GetSession()->m_muteTime <= time (NULL);
 }
 
 /*********************************************************/
@@ -14022,42 +14296,6 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
         SendBuyError( BUY_ERR_CANT_FIND_ITEM, NULL, item, 0);
 }
 
-void Player::_LoadGroup(QueryResult *result)
-{
-    //QueryResult *result = sDatabase.PQuery("SELECT `leaderGuid` FROM `group_member` WHERE `memberGuid`='%u'", GetGUIDLow());
-    if(result)
-    {
-        uint64 leaderGuid = MAKE_GUID((*result)[0].GetUInt32(),HIGHGUID_PLAYER);
-        delete result;
-        Group* group = objmgr.GetGroupByLeader(leaderGuid);
-        if(group)
-        {
-            uint8 subgroup = group->GetMemberGroup(GetGUID());
-            SetGroup(group, subgroup);
-        }
-    }
-}
-
-void Player::_LoadBoundInstances(QueryResult *result)
-{
-    m_BoundInstances.clear();
-
-    //QueryResult *result = sDatabase.PQuery("SELECT `map`,`instance`,`leader` FROM `character_instance` WHERE `guid` = '%u'", GetGUIDLow());
-    if(result)
-    {
-        do
-        {
-            Field *fields = result->Fetch();
-            m_BoundInstances[fields[0].GetUInt32()] = std::pair< uint32, uint32 >(fields[1].GetUInt32(), fields[2].GetUInt32());
-        } while(result->NextRow());
-        delete result;
-    }
-
-    // correctly set current instance (if needed)
-    BoundInstancesMap::iterator i = m_BoundInstances.find(GetMapId());
-    if (i != m_BoundInstances.end()) SetInstanceId(i->second.first); else SetInstanceId(0);
-}
-
 void Player::_SaveBoundInstances()
 {
     sDatabase.PExecute("DELETE FROM `character_instance` WHERE (`guid` = '%u')", GetGUIDLow());
@@ -14561,45 +14799,6 @@ void Player::SetGroup(Group *group, int8 subgroup)
         m_group.link(group, this);
         m_group.setSubGroup((uint8)subgroup);
     }
-}
-
-bool Player::_LoadHomeBind(QueryResult *result)
-{
-    //QueryResult *result = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
-    if (result)
-    {
-        Field *fields = result->Fetch();
-        m_homebindMapId = fields[0].GetUInt32();
-        m_homebindZoneId = fields[1].GetUInt16();
-        m_homebindX = fields[2].GetFloat();
-        m_homebindY = fields[3].GetFloat();
-        m_homebindZ = fields[4].GetFloat();
-        delete result;
-    }
-    else
-    {
-        int plrace = getRace();
-        int plclass = getClass();
-        QueryResult *result1 = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `playercreateinfo` WHERE `race` = '%u' AND `class` = '%u'", plrace, plclass);
-
-        if(!result1)
-        {
-            sLog.outErrorDb("Table `playercreateinfo` not have data for race %u class %u , character can't be loaded.",plrace, plclass);
-            return false;
-        }
-
-        Field *fields = result1->Fetch();
-        m_homebindMapId = fields[0].GetUInt32();
-        m_homebindZoneId = fields[1].GetUInt16();
-        m_homebindX = fields[2].GetFloat();
-        m_homebindY = fields[3].GetFloat();
-        m_homebindZ = fields[4].GetFloat();
-        sDatabase.PExecute("INSERT INTO `character_homebind` (`guid`,`map`,`zone`,`position_x`,`position_y`,`position_z`) VALUES ('%u', '%u', '%u', '%f', '%f', '%f')", GetGUIDLow(), m_homebindMapId, (uint32)m_homebindZoneId, m_homebindX, m_homebindY, m_homebindZ);
-        delete result1;
-    }
-    DEBUG_LOG("Setting player home position: mapid is: %u, zoneid is %u, X is %f, Y is %f, Z is %f\n",
-        m_homebindMapId, m_homebindZoneId, m_homebindX, m_homebindY, m_homebindZ);
-    return true;
 }
 
 void Player::SendInitialPacketsBeforeAddToMap()

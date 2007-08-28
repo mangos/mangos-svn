@@ -291,6 +291,7 @@
 #define LANG_COMMAND_TICKETDEL           "Ticket deleted."
 #define LANG_COMMAND_SPAWNDIST           "Spawn distance changed to: %i"
 #define LANG_COMMAND_SPAWNTIME           "Spawn time changed to: %i"
+#define LANG_COMMAND_MODIFY_HONOR        "The honor of %s was set to %u!"
 
 #define LANG_YOUR_CHAT_DISABLED          "Your chat has been disabled for %u minutes."
 #define LANG_YOU_DISABLE_CHAT            "You have disabled %s's chat for %u minutes."

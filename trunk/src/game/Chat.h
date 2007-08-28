@@ -127,6 +127,7 @@ class ChatHandler
         bool HandleModifyFactionCommand(const char* args);
         bool HandleModifySpellCommand(const char* args);
         bool HandleModifyTalentCommand (const char* args);
+        bool HandleModifyHonorCommand (const char* args);
 
         bool HandleReloadCommand(const char* args);
         bool HandleReloadAllCommand(const char* args);
@@ -156,6 +157,11 @@ class ChatHandler
         bool HandleReloadSpellChainCommand(const char* args);
         bool HandleReloadSpellProcEventCommand(const char* args);
 
+        bool HandleAddHonorCommand(const char* args);
+        bool HandleHonorAddKillCommand(const char* args);
+        bool HandleHonorFlushKillsCommand(const char* args);
+        bool HandleUpdateHonorFieldsCommand(const char* args);
+        
         bool HandleLoadScriptsCommand(const char* args);
         bool HandleSendQuestPartyMsgCommand(const char* args);
         bool HandleSendQuestInvalidMsgCommand(const char* args);

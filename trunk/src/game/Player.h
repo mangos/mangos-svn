@@ -709,6 +709,23 @@ MOVEMENTFLAG_SWIMMING|MOVEMENTFLAG_FLY_UP  |MOVEMENTFLAG_FLYING     |MOVEMENTFLA
 
 typedef HM_NAMESPACE::hash_map< uint32, std::pair < uint32, uint32 > > BoundInstancesMap;
 
+enum KillStates
+{
+    KILL_UNCHANGED  = 0,
+    KILL_CHANGED    = 1,
+    KILL_NEW        = 2
+    // no removed state, all kills are flushed at midnight
+};
+
+struct KillInfo
+{
+    uint8 count;
+    KillStates state;
+    KillInfo() : count(0), state(KILL_NEW) {}
+};
+
+typedef std::map<uint32, KillInfo> KillInfoMap;
+
 class MANGOS_DLL_SPEC Player : public Unit
 {
     friend class WorldSession;
@@ -1383,12 +1400,14 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***                  PVP SYSTEM                       ***/
         /*********************************************************/
         void UpdateArenaFields();
-        void UpdateHonorFields();
-        bool RewardHonor(Unit *pVictim, uint32 count);
+        void UpdateHonorFields(bool force = false);
+        bool RewardHonor(Unit *pVictim, uint32 groupsize, float honor = -1);
         uint32 GetHonorPoints() { return GetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY); }
         uint32 GetArenaPoints() { return GetUInt32Value(PLAYER_FIELD_ARENA_CURRENCY); }
         void SetHonorPoints(uint32 val) { SetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY, val); }
         void SetArenaPoints(uint32 val) { SetUInt32Value(PLAYER_FIELD_ARENA_CURRENCY, val); }
+        void SetFlushKills(bool value) { m_flushKills = value; }
+        KillInfoMap& GetKillsPerPlayer() { return m_killsPerPlayer; }
         //End of PvP System
 
         void SetDrunkValue(uint16 newDrunkValue);
@@ -1591,6 +1610,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetGroupUpdateFlag(uint32 flag) { m_groupUpdateMask |= flag;}
 
         GridReference<Player> &GetGridRef() { return m_gridRef; }
+
     protected:
 
         /*********************************************************/
@@ -1622,6 +1642,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadAuras(QueryResult *result, uint32 timediff);
         void _LoadBoundInstances(QueryResult *result);
         void _LoadInventory(QueryResult *result, uint32 timediff);
+        void _LoadMailInit(QueryResult *resultUnread, QueryResult *resultDelivery);
         void _LoadMail();
         void _LoadMailedItems();
         void _LoadQuestStatus(QueryResult *result);
@@ -1633,6 +1654,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadIgnoreList(QueryResult *result);
         void _LoadFriendList(QueryResult *result);
         bool _LoadHomeBind(QueryResult *result);
+        void _LoadHonor(QueryResult *result);
 
         /*********************************************************/
         /***                   SAVE SYSTEM                     ***/
@@ -1647,12 +1669,13 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _SaveReputation();
         void _SaveSpells();
         void _SaveTutorials();
+        void _SaveHonor();
 
         void _SetCreateBits(UpdateMask *updateMask, Player *target) const;
         void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
 
         /*********************************************************/
-        /***              ENVIROMENTAL SYSTEM                  ***/
+        /***              ENVIRONMENTAL SYSTEM                 ***/
         /*********************************************************/
         void HandleDrowning (uint32 UnderWaterTime);
         void HandleLava();
@@ -1663,6 +1686,16 @@ class MANGOS_DLL_SPEC Player : public Unit
         void EnvironmentalDamage(uint64 Guid, uint8 Type, uint32 Amount);
         uint8 m_isunderwater;
         bool m_isInWater;
+
+        /*********************************************************/
+        /***                  HONOR SYSTEM                     ***/
+        /*********************************************************/
+        float m_honorPending;
+        uint32 m_lastHonorDate;
+        uint32 m_lastKillDate;
+        KillInfoMap m_killsPerPlayer;
+        bool m_flushKills;
+        bool m_saveKills;
 
         void outDebugValues() const;
         bool _removeSpell(uint16 spell_id);
