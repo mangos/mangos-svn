@@ -226,6 +226,7 @@ class Aura
         bool IsTrigger() const { return m_isTrigger; }
         bool IsPassive() const { return m_isPassive; }
         bool IsPersistent() const { return m_isPersistent; }
+        bool IsDeathPersistent() const { return m_isDeathPersist; }
 
         virtual void Update(uint32 diff);
         void ApplyModifier(bool apply, bool Real = false);
@@ -268,6 +269,7 @@ class Aura
         bool m_isAreaAura;
         bool m_isPassive;
         bool m_isPersistent;
+        bool m_isDeathPersist;
 
         int32 m_periodicTimer;
         uint32 m_PeriodicEventId;

@@ -2393,38 +2393,67 @@ uint8 Spell::CanCast()
             return castResult;
     }
 
-    // check some states that must be ignored in case casing dispelling spell
-    //bool skip_charm   = false;
-    bool skip_silence = false;
-    bool skip_stun    = false;
-    //bool skip_fear    = false;
-    bool skip_confused= false;
-    for(int i=0;i<3;i++)
+    uint8 school_immune = 0;
+    uint32 mechanic_immune = 0;
+
+    //Check if the spell grants school or mechanic immunity.
+    //We use bitmasks so the loop is done only once and not on every aura check below.
+    for(int i = 0;i < 3; i ++)
+        if(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_SCHOOL_IMMUNITY)
+            school_immune |= m_spellInfo->EffectMiscValue[i];
+        else if(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MECHANIC_IMMUNITY)
+            mechanic_immune |= 1 << m_spellInfo->EffectMiscValue[i];
+
+    //Check whether the cast should be prevented by any state you might have.
+    uint8 prevented_reason;
+    if(m_caster->hasUnitState(UNIT_STAT_STUNDED))
+        prevented_reason = SPELL_FAILED_STUNNED;
+    else if(m_caster->hasUnitState(UNIT_STAT_CONFUSED))
+        prevented_reason = SPELL_FAILED_CONFUSED;
+    else if(m_caster->hasUnitState(UNIT_STAT_FLEEING))
+        prevented_reason = SPELL_FAILED_FLEEING;
+    else if(m_caster->m_silenced && m_spellInfo->School != SPELL_SCHOOL_NORMAL)
+        prevented_reason = SPELL_FAILED_SILENCED;
+    else if(m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED) && m_spellInfo->School == SPELL_SCHOOL_NORMAL)
+        prevented_reason = SPELL_FAILED_PACIFIED;
+
+    if(prevented_reason && (school_immune || mechanic_immune))
     {
-        if(m_spellInfo->Effect[i] == SPELL_EFFECT_DISPEL_MECHANIC
-            || m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MECHANIC_IMMUNITY)
+        //Checking auras is needed now, because you are prevented by some state but the spell grants immunity.
+        Unit::AuraMap auras = m_caster->GetAuras();
+        for(Unit::AuraMap::iterator itr = auras.begin(); itr != auras.end(); itr++)
         {
-            switch(m_spellInfo->EffectMiscValue[i])
+            if(itr->second)
             {
-                //case MECHANIC_CHARM:     skip_charm   = true; break;
-                case MECHANIC_SILENCE:   skip_silence = true; break;
-                case MECHANIC_FREEZE:
-                case MECHANIC_KNOCKOUT:
-                case MECHANIC_SLEEP:
-                case MECHANIC_STUNDED:   skip_stun    = true; break;
-                //case MECHANIC_FEAR:      skip_fear    = true; break;
-                case MECHANIC_CONFUSED:
-                case MECHANIC_POLYMORPH: skip_confused = true; break;
-                default:break;
+                if(( (1 << itr->second->GetSpellProto()->School) & school_immune) ||
+                    ( (1 << itr->second->GetSpellProto()->Mechanic) & mechanic_immune))
+                        continue;
+
+                //Make a second check for spell failed so the right SPELL_FAILED message is returned.
+                //That is needed when your casting is prevented by multiple states and you are only immune to some of them.
+                switch(itr->second->GetModifier()->m_auraname)
+                {
+                case SPELL_AURA_MOD_STUN:
+                    return SPELL_FAILED_STUNNED;
+                case SPELL_AURA_MOD_CONFUSE:
+                    return SPELL_FAILED_CONFUSED;
+                case SPELL_AURA_MOD_FEAR:
+                    return SPELL_FAILED_FLEEING;
+                case SPELL_AURA_MOD_SILENCE:
+                    if(m_spellInfo->School != SPELL_SCHOOL_NORMAL)
+                        return SPELL_FAILED_SILENCED;
+                    break;
+                case SPELL_AURA_MOD_PACIFY:
+                    if(m_spellInfo->School == SPELL_SCHOOL_NORMAL)
+                        return SPELL_FAILED_PACIFIED;
+                    break;
+                }
             }
         }
     }
-    if(!skip_confused && m_caster->hasUnitState(UNIT_STAT_CONFUSED))
-        return SPELL_FAILED_CONFUSED;
-    if(!skip_stun && m_caster->hasUnitState(UNIT_STAT_STUNDED))
-        return SPELL_FAILED_STUNNED;
-    if(!skip_silence && m_caster->m_silenced)
-        return SPELL_FAILED_SILENCED;
+    else if(prevented_reason)
+        //You are prevented from casting and the spell casted does not grant immunity. Return a failed error.
+        return prevented_reason;
 
     for (int i = 0; i < 3; i++)
     {

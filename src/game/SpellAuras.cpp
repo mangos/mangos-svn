@@ -357,6 +357,9 @@ m_periodicTimer(0), m_PeriodicEventId(0), m_updated(false), m_removeOnDeath(fals
 
     m_effIndex = eff;
     SetModifier(spellproto->EffectApplyAuraName[eff], damage, spellproto->EffectAmplitude[eff], spellproto->EffectMiscValue[eff], type);
+
+    //(spellproto->AttributesEx3 & 0x100000) all death persistent spells have this flag
+    m_isDeathPersist = (spellproto->AttributesEx3 & 0x100000) != 0;
 }
 
 Aura::~Aura()
