@@ -424,6 +424,7 @@ pkgdata_DATA = \
 	4395_spell_chain.sql \
 	4397_command.sql \
 	4401_spell_chain.sql \
+	4403_reserved_name.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -828,4 +829,6 @@ EXTRA_DIST = \
 	4395_spell_chain.sql \
 	4397_command.sql \
 	4401_spell_chain.sql \
+	4403_reserved_name.sql \
 	README
+
