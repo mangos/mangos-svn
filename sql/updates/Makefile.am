@@ -425,6 +425,9 @@ pkgdata_DATA = \
 	4397_command.sql \
 	4401_spell_chain.sql \
 	4403_reserved_name.sql \
+	4407_character.sql \
+	4407_character_kill.sql \
+	4407_command.sql \
 	README
 
 ## Additional files to include when running 'make dist'

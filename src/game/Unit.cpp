@@ -1088,7 +1088,7 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
             break;
         }
 
-            // Other schools
+        // Other schools
         case SPELL_SCHOOL_HOLY:
         case SPELL_SCHOOL_FIRE:
         case SPELL_SCHOOL_NATURE:
@@ -3211,7 +3211,7 @@ void Unit::RemoveAllAurasOnDeath()
     // and disable the mods for the passive ones
     for(AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end();)
     {
-        if (!iter->second->IsPassive() && !iter->second->IsDeathPersistent()) 
+        if (!iter->second->IsPassive() && !iter->second->IsDeathPersistent())
             RemoveAura(iter, true);
         else
             ++iter;

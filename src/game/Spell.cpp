@@ -2401,8 +2401,8 @@ uint8 Spell::CanCast()
     for(int i = 0;i < 3; i ++)
         if(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_SCHOOL_IMMUNITY)
             school_immune |= m_spellInfo->EffectMiscValue[i];
-        else if(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MECHANIC_IMMUNITY)
-            mechanic_immune |= 1 << m_spellInfo->EffectMiscValue[i];
+    else if(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MECHANIC_IMMUNITY)
+        mechanic_immune |= 1 << m_spellInfo->EffectMiscValue[i];
 
     //Check whether the cast should be prevented by any state you might have.
     uint8 prevented_reason = 0;
@@ -2435,20 +2435,20 @@ uint8 Spell::CanCast()
                     //That is needed when your casting is prevented by multiple states and you are only immune to some of them.
                     switch(itr->second->GetModifier()->m_auraname)
                     {
-                    case SPELL_AURA_MOD_STUN:
-                        return SPELL_FAILED_STUNNED;
-                    case SPELL_AURA_MOD_CONFUSE:
-                        return SPELL_FAILED_CONFUSED;
-                    case SPELL_AURA_MOD_FEAR:
-                        return SPELL_FAILED_FLEEING;
-                    case SPELL_AURA_MOD_SILENCE:
-                        if(m_spellInfo->School != SPELL_SCHOOL_NORMAL)
-                            return SPELL_FAILED_SILENCED;
-                        break;
-                    case SPELL_AURA_MOD_PACIFY:
-                        if(m_spellInfo->School == SPELL_SCHOOL_NORMAL)
-                            return SPELL_FAILED_PACIFIED;
-                        break;
+                        case SPELL_AURA_MOD_STUN:
+                            return SPELL_FAILED_STUNNED;
+                        case SPELL_AURA_MOD_CONFUSE:
+                            return SPELL_FAILED_CONFUSED;
+                        case SPELL_AURA_MOD_FEAR:
+                            return SPELL_FAILED_FLEEING;
+                        case SPELL_AURA_MOD_SILENCE:
+                            if(m_spellInfo->School != SPELL_SCHOOL_NORMAL)
+                                return SPELL_FAILED_SILENCED;
+                            break;
+                        case SPELL_AURA_MOD_PACIFY:
+                            if(m_spellInfo->School == SPELL_SCHOOL_NORMAL)
+                                return SPELL_FAILED_PACIFIED;
+                            break;
                     }
                 }
             }

@@ -599,7 +599,7 @@ class ObjectMgr
         void RemoveCreatureFromGrid(uint32 guid, CreatureData const* data);
         void AddGameobjectToGrid(uint32 guid, GameObjectData const* data);
         void RemoveGameobjectFromGrid(uint32 guid, GameObjectData const* data);
-        
+
         //reserved names
         void LoadReservedPlayersNames();
         bool IsReservedName(std::string name) const

@@ -5175,7 +5175,7 @@ void Player::UpdateHonorFields(bool force)
     {
         // if we have pending honor it either got added today or yesterday
         // if the last was added yesterday then this is the first update after midnight
-        
+
         // update yesterday's contribution
         SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, (uint32)(m_honorPending*10));
         // add the pending honor points, a day has passed
@@ -5226,7 +5226,7 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
             if( GetTeam() == pVictim->GetTeam() )
                 return false;
 
-            float f = 1;                                        //need for total kills (?? need more info)
+            float f = 1;                                    //need for total kills (?? need more info)
             uint32 k_grey = 0;
             uint32 k_level = getLevel();
             uint32 v_level = pVictim->getLevel();
@@ -5242,10 +5242,10 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
 
             float diff_level = (k_level == k_grey) ? 1 : ((float)(v_level - k_grey)) / ((float)(k_level - k_grey));
 
-            int32 v_rank =1;                                    //need more info
+            int32 v_rank =1;                                //need more info
 
             honor = ((f * diff_level * (190 + v_rank*10))/6);
-            honor *= ((float)k_level) / 70.0;                   //factor of dependence on levels of the killer
+            honor *= ((float)k_level) / 70.0;               //factor of dependence on levels of the killer
 
             uint8 limit = sWorld.getConfig(CONFIG_HONOR_KILL_LIMIT);
             if(limit)
@@ -5279,7 +5279,7 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
             if (!cVictim->isRacialLeader())
                 return false;
 
-            honor = 100;                                        // ??? need more info
+            honor = 100;                                    // ??? need more info
         }
     }
 
@@ -5288,7 +5288,7 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
 
     honor *= sWorld.getRate(RATE_HONOR);
     honor /= groupsize;
-    
+
     float approx_honor = honor * (((float)urand(8,12))/10); // approx honor: 80% - 120% of real honor
 
     WorldPacket data(SMSG_PVP_CREDIT,4+8);

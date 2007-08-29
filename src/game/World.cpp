@@ -614,7 +614,7 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "Loading Groups..." );
     objmgr.LoadGroups();
- 
+
     sLog.outString( "Loading ReservedNames..." );
     objmgr.LoadReservedPlayersNames();
 
