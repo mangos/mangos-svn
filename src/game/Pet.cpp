@@ -80,10 +80,16 @@ Pet::Pet(WorldObject *instantiator, PetType type) : Creature( instantiator )
     // pets always have a charminfo, even if they are not actually charmed
     CharmInfo* charmInfo = InitCharmInfo(this);
 
-    if(type == MINI_PET)
+    if(type == MINI_PET)                                    // always passive and follow
+    {
         charmInfo->SetReactState(REACT_PASSIVE);
-    else if(type == GUARDIAN_PET)
+        charmInfo->SetCommandState(COMMAND_FOLLOW);
+    }
+    else if(type == GUARDIAN_PET)                           // always aggressive and follow
+    {
         charmInfo->SetReactState(REACT_AGGRESSIVE);
+        charmInfo->SetCommandState(COMMAND_FOLLOW);
+    }
 
     m_spells.clear();
     m_Auras.clear();

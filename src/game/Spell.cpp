@@ -1735,7 +1735,7 @@ void Spell::finish(bool ok)
     }
 
     // call triggered spell only at successful cast
-    if(m_TriggerSpells.size() > 0)
+    if(!m_TriggerSpells.empty())
         TriggerSpell();
 
     //handle SPELL_AURA_ADD_TARGET_TRIGGER auras
@@ -2255,9 +2255,7 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
 
 void Spell::TriggerSpell()
 {
-    if(m_TriggerSpells.size() < 1) return;
-
-    for(std::list<SpellEntry const*>::iterator si=m_TriggerSpells.begin(); si!=m_TriggerSpells.end(); ++si)
+    for(TriggerSpells::iterator si=m_TriggerSpells.begin(); si!=m_TriggerSpells.end(); ++si)
     {
         Spell* spell = new Spell(m_caster, (*si), true, NULL, 0, this->m_selfContainer);
         spell->prepare(&m_targets);                         // use original spell original targets
