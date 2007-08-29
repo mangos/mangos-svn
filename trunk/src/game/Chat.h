@@ -161,7 +161,7 @@ class ChatHandler
         bool HandleHonorAddKillCommand(const char* args);
         bool HandleHonorFlushKillsCommand(const char* args);
         bool HandleUpdateHonorFieldsCommand(const char* args);
-        
+
         bool HandleLoadScriptsCommand(const char* args);
         bool HandleSendQuestPartyMsgCommand(const char* args);
         bool HandleSendQuestInvalidMsgCommand(const char* args);

@@ -178,7 +178,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     }
 
     // check name limitations
-    if(GetSecurity() == SEC_PLAYER && objmgr.IsReservedName(name)) 
+    if(GetSecurity() == SEC_PLAYER && objmgr.IsReservedName(name))
     {
         data << (uint8)CHAR_NAME_RESERVED;
         SendPacket( &data );
@@ -721,7 +721,7 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
     }
 
     // check name limitations
-    if(GetSecurity() == SEC_PLAYER && objmgr.IsReservedName(newname)) 
+    if(GetSecurity() == SEC_PLAYER && objmgr.IsReservedName(newname))
     {
         WorldPacket data(SMSG_CHAR_RENAME, 1);
         data << (uint8)CHAR_NAME_RESERVED;
