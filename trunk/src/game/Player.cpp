@@ -10844,11 +10844,15 @@ bool Player::SatisfyQuestReputation( uint32 quest_id, bool msg )
     Quest * qInfo = objmgr.mQuestTemplates[quest_id];
     if( qInfo )
     {
-        uint32 faction_id = qInfo->GetRequiredRepFaction();
-        if(!faction_id)
-            return true;
+        uint32 fIdMin = qInfo->GetRequiredMinRepFaction();  //Min required rep
+        if(fIdMin && GetReputation(fIdMin) < int32(qInfo->GetRequiredMinRepValue()))
+            return false;
 
-        return GetReputation(faction_id) >= int32(qInfo->GetRequiredRepValue());
+        uint32 fIdMax = qInfo->GetRequiredMaxRepFaction();  //Max required rep
+        if(fIdMax && GetReputation(fIdMax) >= int32(qInfo->GetRequiredMaxRepValue()))
+            return false;
+
+        return true;
     }
     return false;
 }
