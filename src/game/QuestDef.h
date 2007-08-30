@@ -139,43 +139,45 @@ class Quest
         bool HasSpecialFlag( uint32 flag ) const { return (SpecialFlags & flag ) != 0; }
 
         // table data accessors:
-        uint32 GetQuestId() { return QuestId; }
-        int32  GetZoneOrSort() { return ZoneOrSort; }
-        uint32 GetMinLevel() { return MinLevel; }
-        uint32 GetQuestLevel() { return QuestLevel; }
-        uint32 GetType() { return Type; }
-        uint32 GetRequiredRaces() { return RequiredRaces; }
-        uint32 GetRequiredSkillValue() { return RequiredSkillValue; }
-        uint32 GetRequiredRepFaction() { return RequiredRepFaction; }
-        uint32 GetRequiredRepValue() { return RequiredRepValue; }
-        uint32 GetSuggestedPlayers() { return SuggestedPlayers; }
-        uint32 GetLimitTime() { return LimitTime; }
-        int32  GetNextQuestId() { return NextQuestId; }
-        uint32 GetExclusiveGroup() { return ExclusiveGroup; }
-        uint32 GetNextQuestInChain() { return NextQuestInChain; }
-        uint32 GetSrcItemId() { return SrcItemId; }
-        uint32 GetSrcItemCount() { return SrcItemCount; }
-        uint32 GetSrcSpell() { return SrcSpell; }
-        const char* GetTitle() { return Title.c_str(); }
-        const char* GetDetails() { return Details.c_str(); }
-        const char* GetObjectives() { return Objectives.c_str(); }
-        const char* GetOfferRewardText() { return OfferRewardText.c_str(); }
-        const char* GetRequestItemsText() { return RequestItemsText.c_str(); }
-        const char* GetEndText() { return EndText.c_str(); }
-        int32  GetRewOrReqMoney() { return RewOrReqMoney; }
-        uint32 GetRewXpOrMoney() { return RewXpOrMoney; }
-        uint32 GetRewSpell() { return RewSpell; }
-        uint32 GetPointMapId() { return PointMapId; }
-        float  GetPointX() { return PointX; }
-        float  GetPointY (){ return PointY; }
-        uint32 GetPointOpt() { return PointOpt; }
-        uint32 GetIncompleteEmote() { return IncompleteEmote; }
-        uint32 GetCompleteEmote() { return CompleteEmote; }
-        uint32 GetQuestStartScript() { return QuestStartScript; }
-        uint32 GetQuestCompleteScript() { return QuestCompleteScript; }
-        bool   IsRepeatable() { return bool(Repeatable); }
-        bool   IsAutoComplete() { return Objectives.size() == 0; }
-        uint32 GetSpecialFlags() { return SpecialFlags; }
+        uint32 GetQuestId() const { return QuestId; }
+        int32  GetZoneOrSort() const { return ZoneOrSort; }
+        uint32 GetMinLevel() const { return MinLevel; }
+        uint32 GetQuestLevel() const { return QuestLevel; }
+        uint32 GetType() const { return Type; }
+        uint32 GetRequiredRaces() const { return RequiredRaces; }
+        uint32 GetRequiredSkillValue() const { return RequiredSkillValue; }
+        uint32 GetRequiredMinRepFaction() const { return RequiredMinRepFaction; }
+        uint32 GetRequiredMinRepValue() const { return RequiredMinRepValue; }
+        uint32 GetRequiredMaxRepFaction() const { return RequiredMaxRepFaction; }
+        uint32 GetRequiredMaxRepValue() const { return RequiredMaxRepValue; }
+        uint32 GetSuggestedPlayers() const { return SuggestedPlayers; }
+        uint32 GetLimitTime() const { return LimitTime; }
+        int32  GetNextQuestId() const { return NextQuestId; }
+        uint32 GetExclusiveGroup() const { return ExclusiveGroup; }
+        uint32 GetNextQuestInChain() const { return NextQuestInChain; }
+        uint32 GetSrcItemId() const { return SrcItemId; }
+        uint32 GetSrcItemCount() const { return SrcItemCount; }
+        uint32 GetSrcSpell() const { return SrcSpell; }
+        const char* GetTitle() const { return Title.c_str(); }
+        const char* GetDetails() const { return Details.c_str(); }
+        const char* GetObjectives() const { return Objectives.c_str(); }
+        const char* GetOfferRewardText() const { return OfferRewardText.c_str(); }
+        const char* GetRequestItemsText() const { return RequestItemsText.c_str(); }
+        const char* GetEndText() const { return EndText.c_str(); }
+        int32  GetRewOrReqMoney() const { return RewOrReqMoney; }
+        uint32 GetRewXpOrMoney() const { return RewXpOrMoney; }
+        uint32 GetRewSpell() const { return RewSpell; }
+        uint32 GetPointMapId() const { return PointMapId; }
+        float  GetPointX() const { return PointX; }
+        float  GetPointY() const { return PointY; }
+        uint32 GetPointOpt() const { return PointOpt; }
+        uint32 GetIncompleteEmote() const { return IncompleteEmote; }
+        uint32 GetCompleteEmote() const { return CompleteEmote; }
+        uint32 GetQuestStartScript() const { return QuestStartScript; }
+        uint32 GetQuestCompleteScript() const { return QuestCompleteScript; }
+        bool   IsRepeatable() const { return bool(Repeatable); }
+        bool   IsAutoComplete() const { return Objectives.size() == 0; }
+        uint32 GetSpecialFlags() const { return SpecialFlags; }
 
         // multiple values
         std::string ObjectiveText[QUEST_OBJECTIVES_COUNT];
@@ -196,10 +198,10 @@ class Quest
         uint32 DetailsEmote[QUEST_EMOTE_COUNT];
         uint32 OfferRewardEmote[QUEST_EMOTE_COUNT];
 
-        uint32 GetReqItemsCount() { return m_reqitemscount; }
-        uint32 GetReqCreatureOrGOcount() { return m_reqCreatureOrGOcount; }
-        uint32 GetRewChoiceItemsCount() { return m_rewchoiceitemscount; }
-        uint32 GetRewItemsCount() { return m_rewitemscount; }
+        uint32 GetReqItemsCount() const { return m_reqitemscount; }
+        uint32 GetReqCreatureOrGOcount() const { return m_reqCreatureOrGOcount; }
+        uint32 GetRewChoiceItemsCount() const { return m_rewchoiceitemscount; }
+        uint32 GetRewItemsCount() const { return m_rewitemscount; }
 
         typedef std::vector<int32> PrevQuests;
         PrevQuests prevQuests;
@@ -222,8 +224,10 @@ class Quest
         uint32 Type;
         uint32 RequiredRaces;
         uint32 RequiredSkillValue;
-        uint32 RequiredRepFaction;
-        uint32 RequiredRepValue;
+        uint32 RequiredMinRepFaction;
+        uint32 RequiredMinRepValue;
+        uint32 RequiredMaxRepFaction;
+        uint32 RequiredMaxRepValue;
         uint32 SuggestedPlayers;
         uint32 LimitTime;
         uint32 SpecialFlags;

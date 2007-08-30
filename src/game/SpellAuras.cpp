@@ -2115,6 +2115,11 @@ void Aura::HandleModStealth(bool apply, bool Real)
     {
         m_target->m_stealthvalue = m_modifier.m_amount;
 
+        // drop flag at stealth in bg
+        if(Real && m_target->GetTypeId()==TYPEID_PLAYER && ((Player*)m_target)->InBattleGround())
+            if(BattleGround *bg = sBattleGroundMgr.GetBattleGround(((Player*)m_target)->GetBattleGroundId()))
+                bg->HandleDropFlag((Player*)m_target);
+
         // not apply flag for RACE_NIGHTELF stealth
         if(GetId()!=20580)
             m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_CREEP);
@@ -2188,6 +2193,11 @@ void Aura::HandleInvisibility(bool Apply, bool Real)
     if(Apply)
     {
         m_target->m_invisibilityvalue = m_modifier.m_amount;
+
+        // drop flag at invisible in bg
+        if(Real && m_target->GetTypeId()==TYPEID_PLAYER && ((Player*)m_target)->InBattleGround())
+            if(BattleGround *bg = sBattleGroundMgr.GetBattleGround(((Player*)m_target)->GetBattleGroundId()))
+                bg->HandleDropFlag((Player*)m_target);
 
         // only at real aura add
         if(Real)

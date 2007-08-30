@@ -379,10 +379,10 @@ void PlayerMenu::SendQuestQueryResponse( Quest *pQuest )
 
     data << uint32(pQuest->GetType());
     data << uint32(pQuest->GetSuggestedPlayers());
-    data << uint32(pQuest->GetRequiredRepFaction());
-    data << uint32(pQuest->GetRequiredRepValue());
-    data << uint32(0);                                      // reputation related (faction)
-    data << uint32(0);                                      // reputation related (value)
+    data << uint32(pQuest->GetRequiredMinRepFaction());
+    data << uint32(pQuest->GetRequiredMinRepValue());
+    data << uint32(pQuest->GetRequiredMaxRepFaction());
+    data << uint32(pQuest->GetRequiredMaxRepValue());
 
     data << uint32(pQuest->GetNextQuestInChain());
     data << uint32(pQuest->GetRewOrReqMoney());
