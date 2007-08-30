@@ -24,6 +24,7 @@
 #include "World.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "GossipDef.h"
 #include "QuestDef.h"
 #include "ObjectAccessor.h"
 #include "ScriptCalls.h"

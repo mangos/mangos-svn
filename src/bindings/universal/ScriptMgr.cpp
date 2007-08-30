@@ -19,6 +19,8 @@
 #include "config.h"
 #include "ScriptMgr.h"
 #include "../../game/TargetedMovementGenerator.h"
+#include "../../game/GossipDef.h"
+#include "../../game/GameObject.h"
 
 //uint8 loglevel = 0;
 int nrscripts;
@@ -241,14 +243,14 @@ bool ReceiveEmote ( Player *player, Creature *_Creature, uint32 emote )
 }
 
 MANGOS_DLL_EXPORT
-bool ItemUse( Player *player, Item* _Item)
+bool ItemUse( Player *player, Item* _Item, SpellCastTargets const& targets)
 {
     Script *tmpscript = NULL;
 
     tmpscript = GetScriptByName(_Item->GetProto()->ScriptName);
     if(!tmpscript || !tmpscript->pItemUse) return false;
 
-    return tmpscript->pItemUse(player,_Item);
+    return tmpscript->pItemUse(player,_Item,targets);
 }
 
 MANGOS_DLL_EXPORT
