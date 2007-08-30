@@ -19,13 +19,16 @@
 #ifndef SCRIPTMGR_H
 #define SCRIPTMGR_H
 
-#include "../../game/Player.h"
-#include "../../game/GameObject.h"
-#include "../../game/SharedDefines.h"
-#include "../../game/GossipDef.h"
-#include "../../game/QuestDef.h"
-#include "../../game/WorldSession.h"
+//Only required includes
 #include "../../game/CreatureAI.h"
+#include "../../game/Creature.h"
+
+class Player;
+class Creature;
+class Quest;
+class Item;
+class GameObject;
+class SpellCastTargets;
 
 #define MAX_SCRIPTS 1000
 
@@ -56,7 +59,7 @@ struct Script
     bool (*pGOQuestAccept       )(Player *player, GameObject *_GO, Quest *_Quest );
     bool (*pGOChooseReward      )(Player *player, GameObject *_GO, Quest *_Quest, uint32 opt );
     bool (*pReceiveEmote        )(Player *player, Creature *_Creature, uint32 emote );
-    bool (*pItemUse             )(Player *player, Item* _Item);
+    bool (*pItemUse             )(Player *player, Item* _Item, SpellCastTargets const& targets);
 
     CreatureAI* (*GetAI)(Creature *_Creature);
     // -----------------------------------------

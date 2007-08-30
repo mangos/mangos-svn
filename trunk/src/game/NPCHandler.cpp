@@ -26,6 +26,7 @@
 #include "World.h"
 #include "ObjectMgr.h"
 #include "Player.h"
+#include "GossipDef.h"
 #include "SpellAuras.h"
 #include "UpdateMask.h"
 #include "ScriptCalls.h"

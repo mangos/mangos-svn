@@ -65,7 +65,7 @@ void GameEvent::LoadFromDB()
     QueryResult *result = sDatabase.Query("SELECT MAX(`entry`) FROM `game_event`");
     if( !result )
     {
-        sLog.outErrorDb(">> Table game_event is empty:");
+        sLog.outString(">> Table game_event is empty:");
         sLog.outString();
         return;
     }
@@ -80,7 +80,7 @@ void GameEvent::LoadFromDB()
     if( !result )
     {
         mGameEvent.clear();
-        sLog.outErrorDb(">> Table game_event is empty:");
+        sLog.outString(">> Table game_event is empty:");
         sLog.outString();
         return;
     }

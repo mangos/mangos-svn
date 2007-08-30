@@ -91,13 +91,13 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         }
     }
 
-    //Note: If script stop casting it must send appropriate data to client to prevent stuck item in gray state.
-    if(!Script->ItemUse(pUser,pItem))
-    {
-        // no script or script not procces request by self
+    SpellCastTargets targets;
+    targets.read(&recvPacket, pUser);
 
-        SpellCastTargets targets;
-        targets.read(&recvPacket, pUser);
+    //Note: If script stop casting it must send appropriate data to client to prevent stuck item in gray state.
+    if(!Script->ItemUse(pUser,pItem,targets))
+    {
+        // no script or script not process request by self
 
         // use triggered flag only for items with many spell casts and for not first cast
         int count = 0;

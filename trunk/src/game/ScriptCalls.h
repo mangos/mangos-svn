@@ -19,8 +19,15 @@
 #ifndef __SCRIPT_CALLS_H
 #define __SCRIPT_CALLS_H
 
-#include "GossipDef.h"
-#include "Player.h"
+#include "Common.h"
+
+class Creature;
+class CreatureAI;
+class GameObject;
+class Item;
+class Player;
+class Quest;
+class SpellCastTargets;
 
 bool LoadScriptingModule(char const* libName = "");
 void UnloadScriptingModule();
@@ -43,7 +50,7 @@ typedef bool(MANGOS_IMPORT * scriptCallItemQuestAccept)(Player *player, Item *, 
 typedef bool(MANGOS_IMPORT * scriptCallGOQuestAccept)(Player *player, GameObject *, Quest *);
 typedef bool(MANGOS_IMPORT * scriptCallGOChooseReward)(Player *player, GameObject *, Quest *, uint32 opt );
 typedef bool(MANGOS_IMPORT * scriptCallReceiveEmote) ( Player *player, Creature *_Creature, uint32 emote );
-typedef bool(MANGOS_IMPORT * scriptCallItemUse) (Player *player, Item *_Item);
+typedef bool(MANGOS_IMPORT * scriptCallItemUse) (Player *player, Item *_Item, SpellCastTargets const& targets);
 typedef CreatureAI* (MANGOS_IMPORT * scriptCallGetAI) ( Creature *_Creature );
 
 typedef struct
