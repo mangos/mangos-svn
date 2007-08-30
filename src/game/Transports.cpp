@@ -224,6 +224,7 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32> &mapids)
     }
 
     int lastStop = -1;
+    int firstStop = -1;
 
     // first cell is arrived at by teleportation :S
     keyFrames[0].distFromPrev = 0;
@@ -247,7 +248,12 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32> &mapids)
                 pow(keyFrames[i].z - keyFrames[i - 1].z, 2));
         }
         if (keyFrames[i].actionflag == 2)
+        {
+            // remember first stop frame
+            if(firstStop == -1)
+                firstStop = i;
             lastStop = i;
+        }
     }
 
     float tmpDist = 0;
@@ -263,7 +269,7 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32> &mapids)
 
     for (int i = int(keyFrames.size()) - 1; i >= 0; i--)
     {
-        int j = (i + (keyFrames.size() - lastStop)) % keyFrames.size();
+        int j = (i + (firstStop+1)) % keyFrames.size();
         tmpDist += keyFrames[(j + 1) % keyFrames.size()].distFromPrev;
         keyFrames[j].distUntilStop = tmpDist;
         if (keyFrames[j].actionflag == 2)
