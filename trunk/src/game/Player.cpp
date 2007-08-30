@@ -106,6 +106,10 @@ Player::Player (WorldSession *session): Unit( 0 )
 
     m_nextSave = sWorld.getConfig(CONFIG_INTERVAL_SAVE);
 
+    // randomize first save time in range [CONFIG_INTERVAL_SAVE] around [CONFIG_INTERVAL_SAVE]
+    // this must help in case next save after mass player load after server startup
+    m_nextSave = rand32(m_nextSave/2,m_nextSave*3/2);
+
     m_resurrectGUID = 0;
     m_resurrectX = m_resurrectY = m_resurrectZ = 0;
     m_resurrectHealth = m_resurrectMana = 0;
