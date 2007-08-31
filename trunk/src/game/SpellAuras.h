@@ -148,8 +148,6 @@ class Aura
         void HandleAuraTransform(bool Apply, bool Real);
         void HandleModSpellCritChance(bool Apply, bool Real);
         void HandleAuraModIncreaseSwimSpeed(bool Apply, bool Real);
-        void HandleAuraManaShield(bool Apply, bool Real);
-        void HandleAuraSchoolAbsorb(bool Apply, bool Real);
         void HandleModPowerCost(bool Apply, bool Real);
         void HandleFarSight(bool Apply, bool Real);
         void HandleModPossessPet(bool Apply, bool Real);
@@ -241,7 +239,6 @@ class Aura
         void SetRemoveOnDeath(bool rod) { m_removeOnDeath = rod; }
 
         int32 m_procCharges;
-        int32 m_absorbDmg;
 
         // add/remove SPELL_AURA_MOD_SHAPESHIFT (36) linked auras
         void HandleShapeshiftBoosts(bool apply);

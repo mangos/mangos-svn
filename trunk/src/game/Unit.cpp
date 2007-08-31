@@ -1470,56 +1470,61 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, const uint32 dama
     int32 currentAbsorb, manaReduction, maxAbsorb;
     float manaMultiplier;
 
-    if (school == SPELL_SCHOOL_NORMAL)
-    {
-        AuraList const& vManaShield = pVictim->GetAurasByType(SPELL_AURA_MANA_SHIELD);
-        for(AuraList::const_iterator i = vManaShield.begin(), next; i != vManaShield.end() && RemainingDamage >= 0; i = next)
-        {
-            next = i; next++;
-            if (RemainingDamage - (*i)->m_absorbDmg >= 0)
-                currentAbsorb = (*i)->m_absorbDmg;
-            else
-                currentAbsorb = RemainingDamage;
-
-            manaMultiplier = (*i)->GetSpellProto()->EffectMultipleValue[(*i)->GetEffIndex()];
-            maxAbsorb = int32(pVictim->GetPower(POWER_MANA) / manaMultiplier);
-            if (currentAbsorb > maxAbsorb)
-                currentAbsorb = maxAbsorb;
-
-            (*i)->m_absorbDmg -= currentAbsorb;
-            if((*i)->m_absorbDmg <= 0)
-            {
-                pVictim->RemoveAurasDueToSpell((*i)->GetId());
-                next = vManaShield.begin();
-            }
-
-            manaReduction = int32(currentAbsorb * manaMultiplier);
-            pVictim->ApplyPowerMod(POWER_MANA, manaReduction, false);
-
-            RemainingDamage -= currentAbsorb;
-        }
-    }
-
+    // absorb without mana cost
     AuraList const& vSchoolAbsorb = pVictim->GetAurasByType(SPELL_AURA_SCHOOL_ABSORB);
     for(AuraList::const_iterator i = vSchoolAbsorb.begin(), next; i != vSchoolAbsorb.end() && RemainingDamage >= 0; i = next)
     {
         next = i; next++;
-        if ((*i)->GetModifier()->m_miscvalue & int32(1<<school))
-        {
-            if (RemainingDamage - (*i)->m_absorbDmg >= 0)
-            {
-                currentAbsorb = (*i)->m_absorbDmg;
-                pVictim->RemoveAurasDueToSpell((*i)->GetId());
-                next = vSchoolAbsorb.begin();
-            }
-            else
-            {
-                currentAbsorb = RemainingDamage;
-                (*i)->m_absorbDmg -= RemainingDamage;
-            }
 
-            RemainingDamage -= currentAbsorb;
+        if (((*i)->GetModifier()->m_miscvalue & int32(1<<school))==0)
+            continue;
+
+        if (RemainingDamage >= (*i)->GetModifier()->m_amount)
+        {
+            currentAbsorb = (*i)->GetModifier()->m_amount;
+            pVictim->RemoveAurasDueToSpell((*i)->GetId());
+            next = vSchoolAbsorb.begin();
         }
+        else
+        {
+            currentAbsorb = RemainingDamage;
+            (*i)->GetModifier()->m_amount -= RemainingDamage;
+        }
+
+        RemainingDamage -= currentAbsorb;
+    }
+
+    // absorb by mana cost
+    AuraList const& vManaShield = pVictim->GetAurasByType(SPELL_AURA_MANA_SHIELD);
+    for(AuraList::const_iterator i = vManaShield.begin(), next; i != vManaShield.end() && RemainingDamage >= 0; i = next)
+    {
+        next = i; next++;
+
+        // check damage school mask
+        if(((*i)->GetModifier()->m_miscvalue & int32(1<< school))==0)
+            continue;
+
+        if (RemainingDamage >= (*i)->GetModifier()->m_amount)
+            currentAbsorb = (*i)->GetModifier()->m_amount;
+        else
+            currentAbsorb = RemainingDamage;
+
+        manaMultiplier = (*i)->GetSpellProto()->EffectMultipleValue[(*i)->GetEffIndex()];
+        maxAbsorb = int32(pVictim->GetPower(POWER_MANA) / manaMultiplier);
+        if (currentAbsorb > maxAbsorb)
+            currentAbsorb = maxAbsorb;
+
+        (*i)->GetModifier()->m_amount -= currentAbsorb;
+        if((*i)->GetModifier()->m_amount <= 0)
+        {
+            pVictim->RemoveAurasDueToSpell((*i)->GetId());
+            next = vManaShield.begin();
+        }
+
+        manaReduction = int32(currentAbsorb * manaMultiplier);
+        pVictim->ApplyPowerMod(POWER_MANA, manaReduction, false);
+
+        RemainingDamage -= currentAbsorb;
     }
 
     *absorb = damage - RemainingDamage - *resist;
@@ -1811,6 +1816,22 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
         //*damageType = 0;
         CastMeleeProcDamageAndSpell(pVictim, 0, attType, outcome, spellCasted, isTriggeredSpell);
         return;
+    }
+
+    // update at damage Judgement aura duration that applied by attacker at victim
+    if(*damage)
+    {
+        AuraMap& vAuras = pVictim->GetAuras();
+        for(AuraMap::iterator itr = vAuras.begin(); itr != vAuras.end(); ++itr)
+        {
+            SpellEntry const *spellInfo = (*itr).second->GetSpellProto();
+            if( spellInfo->AttributesEx3 == 0x40000 && spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN &&
+                ((*itr).second->GetCaster() == this && (!spellCasted || spellCasted->Id == 35395)) )
+            {
+                (*itr).second->SetAuraDuration(GetDuration(spellInfo));
+                (*itr).second->UpdateAuraDuration();
+            }
+        }
     }
 
     CastMeleeProcDamageAndSpell(pVictim, (*damage - *absorbDamage - *resistDamage - *blocked_amount), attType, outcome, spellCasted, isTriggeredSpell);

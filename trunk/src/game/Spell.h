@@ -184,7 +184,7 @@ class SpellCastTargets
         }
 
         uint64 getUnitTargetGUID() const { return m_unitTargetGUID; }
-        Unit *getUnitTarget() { return m_unitTarget; }
+        Unit *getUnitTarget() const { return m_unitTarget; }
         void setUnitTarget(Unit *target);
 
         uint64 getGOTargetGUID() const { return m_GOTargetGUID; }
