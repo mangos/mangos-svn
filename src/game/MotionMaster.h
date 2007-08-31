@@ -34,6 +34,7 @@ class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator *>
         MovementGenerator* operator->(void) { return top(); }
 
         using std::stack<MovementGenerator *>::top;
+        using std::stack<MovementGenerator *>::empty;
 
         void UpdateMotion(const uint32 &diff);
 

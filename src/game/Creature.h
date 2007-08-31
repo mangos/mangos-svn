@@ -327,6 +327,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
             return GetCreatureInfo()->rank == CREATURE_ELITE_WORLDBOSS;
         }
 
+        bool IsInEvadeMode() const;
+
         void AIM_Initialize();
         MotionMaster* operator->(void) { return &i_motionMaster; }
 
