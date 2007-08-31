@@ -454,6 +454,14 @@ void Spell::FillTargetMap()
                 continue;
             }
 
+            // Evade target
+            if( (*itr)->GetTypeId()==TYPEID_UNIT && ((Creature*)(*itr))->IsInEvadeMode() )
+            {
+                m_caster->SendAttackStateUpdate(HITINFO_RESIST|HITINFO_SWINGNOHITSOUND, (*itr), 1, SpellSchools(m_spellInfo->School), 0, 0,0,VICTIMSTATE_EVADES,0);
+                itr = tmpUnitMap.erase(itr);
+                continue;
+            }
+
             //Check player targets and remove if in GM mode or GM invisibility (for not self casting case)
             if( (*itr) != m_caster && (*itr)->GetTypeId()==TYPEID_PLAYER)
             {

@@ -391,7 +391,8 @@ void Unit::RemoveSpellbyDamageTaken(uint32 auraType, uint32 damage)
 
 void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchools damageSchool, SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
 {
-    if (!pVictim->isAlive() || pVictim->isInFlight()) return;
+    if (!pVictim->isAlive() || pVictim->isInFlight() || pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())
+        return;
 
     //You don't lose health from damage taken from another player while in a sanctuary
     //You still see it in the combat log though
@@ -950,22 +951,31 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
             //Used to store the Hit Outcome
             cleanDamage->hitOutCome = outcome;
 
-            // Return miss first (sends miss message)
-            if(outcome == MELEE_HIT_MISS)
+            // Return miss/evade first (sends miss message)
+            switch(outcome)
             {
-                SendAttackStateUpdate(HITINFO_MISS, pVictim, 1, SpellSchools(spellInfo->School), 0, 0,0,1,0);
-                *damage = 0;
+                case MELEE_HIT_EVADE:
+                {
+                    SendAttackStateUpdate(HITINFO_MISS, pVictim, 1, SpellSchools(spellInfo->School), 0, 0,0,VICTIMSTATE_EVADES,0);
+                    *damage = 0;
+                    return;
+                }
+                case MELEE_HIT_MISS:
+                {
+                    SendAttackStateUpdate(HITINFO_MISS, pVictim, 1, SpellSchools(spellInfo->School), 0, 0,0,VICTIMSTATE_NORMAL,0);
+                    *damage = 0;
 
-                if(GetTypeId()== TYPEID_PLAYER)
-                    ((Player*)this)->UpdateWeaponSkill(BASE_ATTACK);
+                    if(GetTypeId()== TYPEID_PLAYER)
+                        ((Player*)this)->UpdateWeaponSkill(BASE_ATTACK);
 
-                CastMeleeProcDamageAndSpell(pVictim,0,BASE_ATTACK,MELEE_HIT_MISS,spellInfo,isTriggeredSpell);
-                return;
+                    CastMeleeProcDamageAndSpell(pVictim,0,BASE_ATTACK,MELEE_HIT_MISS,spellInfo,isTriggeredSpell);
+                    return;
+                }
             }
 
             //  Hitinfo, Victimstate
             uint32 hitInfo = HITINFO_NORMALSWING;
-            uint32 victimState = VICTIMSTATE_NORMAL;
+            VictimState victimState = VICTIMSTATE_NORMAL;
 
             //Calculate armor mitigation
             uint32 damageAfterArmor;
@@ -1071,7 +1081,8 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
                     break;
 
                 }
-                case MELEE_HIT_MISS:
+                case MELEE_HIT_EVADE:                       // already processed early
+                case MELEE_HIT_MISS:                        // already processed early
                 case MELEE_HIT_GLANCING:
                 case MELEE_HIT_CRUSHING:
                 case MELEE_HIT_NORMAL:
@@ -1079,7 +1090,7 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
             }
 
             // Update attack state
-            SendAttackStateUpdate(victimState ? hitInfo|victimState : hitInfo, pVictim, 1, SpellSchools(spellInfo->School), *damage, 0,0,1,blocked_amount);
+            SendAttackStateUpdate(hitInfo, pVictim, 1, SpellSchools(spellInfo->School), *damage, 0,0,victimState,blocked_amount);
 
             // do all damage=0 cases here
             if(damage <= 0)
@@ -1097,12 +1108,12 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
         case SPELL_SCHOOL_ARCANE:
 
             //Spell miss (sends resist message)
-            if(SpellMissChanceCalc(pVictim) > urand(0,10000))
+            if( SpellMissChanceCalc(pVictim) > urand(0,10000) )
             {
                 cleanDamage->damage = 0;
                 *damage = 0;
                 ProcDamageAndSpell(pVictim, PROC_FLAG_TARGET_RESISTS, PROC_FLAG_RESIST_SPELL, 0, spellInfo,isTriggeredSpell);
-                SendAttackStateUpdate(HITINFO_RESIST|HITINFO_SWINGNOHITSOUND, pVictim, 1, SpellSchools(spellInfo->School), 0, 0,0,1,0);
+                SendAttackStateUpdate(HITINFO_RESIST|HITINFO_SWINGNOHITSOUND, pVictim, 1, SpellSchools(spellInfo->School), 0, 0,0,VICTIMSTATE_NORMAL,0);
                 return;
             }
 
@@ -1162,13 +1173,13 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, 
             // Handle absorb & resists
             if(damage <= absorb + resist && absorb)
             {
-                SendAttackStateUpdate(HITINFO_ABSORB|HITINFO_SWINGNOHITSOUND, pVictim, 1, SpellSchools(spellInfo->School),damage, absorb,resist,1,0);
+                SendAttackStateUpdate(HITINFO_ABSORB|HITINFO_SWINGNOHITSOUND, pVictim, 1, SpellSchools(spellInfo->School),damage, absorb,resist,VICTIMSTATE_NORMAL,0);
                 return;
             }
             else if(damage <= resist)                       // If we didn't fully absorb check if we fully resisted
             {
                 ProcDamageAndSpell(pVictim, PROC_FLAG_TARGET_RESISTS, PROC_FLAG_RESIST_SPELL, 0, spellInfo,isTriggeredSpell);
-                SendAttackStateUpdate(HITINFO_RESIST|HITINFO_SWINGNOHITSOUND, pVictim, 1, SpellSchools(spellInfo->School), damage, absorb,resist,1,0);
+                SendAttackStateUpdate(HITINFO_RESIST|HITINFO_SWINGNOHITSOUND, pVictim, 1, SpellSchools(spellInfo->School), damage, absorb,resist,VICTIMSTATE_NORMAL,0);
                 return;
             }
         }
@@ -1530,7 +1541,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, const uint32 dama
     *absorb = damage - RemainingDamage - *resist;
 }
 
-void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDamage, uint32 *blocked_amount, SpellSchools damageType, uint32 *hitInfo, uint32 *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType, SpellEntry const *spellCasted, bool isTriggeredSpell)
+void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDamage, uint32 *blocked_amount, SpellSchools damageType, uint32 *hitInfo, VictimState *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType, SpellEntry const *spellCasted, bool isTriggeredSpell)
 {
     pVictim->ModifyAuraState(AURA_STATE_PARRY, false);
     pVictim->ModifyAuraState(AURA_STATE_DEFENSE, false);
@@ -1544,14 +1555,24 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
     else
         outcome = RollPhysicalOutcomeAgainst (pVictim, attType, spellCasted);
 
-    if (outcome == MELEE_HIT_MISS)
+    switch(outcome)
     {
-        *hitInfo |= HITINFO_MISS;
-        *damage = 0;
-        cleanDamage->damage = 0;
-        if(GetTypeId()== TYPEID_PLAYER)
-            ((Player*)this)->UpdateWeaponSkill(attType);
-        return;
+        case MELEE_HIT_EVADE:
+        {
+            *hitInfo |= HITINFO_MISS;
+            *damage = 0;
+            cleanDamage->damage = 0;
+            return;
+        }
+        case MELEE_HIT_MISS:
+        {
+            *hitInfo |= HITINFO_MISS;
+            *damage = 0;
+            cleanDamage->damage = 0;
+            if(GetTypeId()== TYPEID_PLAYER)
+                ((Player*)this)->UpdateWeaponSkill(attType);
+            return;
+        }
     }
 
     /// If this is a creature and it attacks from behind it has a probability to daze it's victim
@@ -1928,7 +1949,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool is
     else
         return;
 
-    uint32   victimState = VICTIMSTATE_NORMAL;
+    VictimState victimState = VICTIMSTATE_NORMAL;
 
     uint32   damage = 0;
     CleanDamage cleanDamage = CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL );
@@ -2029,6 +2050,9 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
 
 MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType, int32 crit_chance, int32 miss_chance, int32 hit_chance) const
 {
+    if(pVictim->GetTypeId()==TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())
+        return MELEE_HIT_EVADE;
+
     int32 skillDiff =  GetWeaponSkillValue(attType) - pVictim->GetDefenseSkillValue();
     // bonus from skills is 0.04%
     int32    skillBonus = skillDiff * 4;
@@ -2749,7 +2773,7 @@ void Unit::SetInFront(Unit const* target)
     SetOrientation(GetAngle(target));
 }
 
-bool Unit::isInAccessablePlaceFor(Creature* c) const
+bool Unit::isInAccessablePlaceFor(Creature const* c) const
 {
     if(IsInWater())
         return c->isCanSwimOrFly();
@@ -3435,7 +3459,7 @@ void Unit::SendSpellNonMeleeDamageLog(Unit *target,uint32 SpellID,uint32 Damage,
     SendMessageToSet( &data, true );
 }
 
-void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit *target, uint8 SwingType, SpellSchools DamageType, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, uint32 TargetState, uint32 BlockedAmount)
+void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit *target, uint8 SwingType, SpellSchools DamageType, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, VictimState TargetState, uint32 BlockedAmount)
 {
     sLog.outDebug("WORLD: Sending SMSG_ATTACKERSTATEUPDATE");
 
@@ -3450,7 +3474,7 @@ void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit *target, uint8 SwingType, 
 
     //
     data << (float)(Damage-AbsorbDamage-Resist-BlockedAmount);
-    // still need to double check damaga
+    // still need to double check damage
     data << (uint32)(Damage-AbsorbDamage-Resist-BlockedAmount);
     data << (uint32)AbsorbDamage;
     data << (uint32)Resist;
@@ -3522,6 +3546,8 @@ void Unit::CastMeleeProcDamageAndSpell(Unit* pVictim, uint32 damage, WeaponAttac
 
     switch(outcome)
     {
+        case MELEE_HIT_EVADE:
+            return;
         case MELEE_HIT_MISS:
             if(attType == BASE_ATTACK || attType == OFF_ATTACK)
             {
@@ -4407,8 +4433,16 @@ bool Unit::Attack(Unit *victim, bool playerMeleeAttack)
         return false;
 
     // anyone don't must attack GM in GM-mode
-    if(victim->GetTypeId()==TYPEID_PLAYER && ((Player*)victim)->isGameMaster())
-        return false;
+    if(victim->GetTypeId()==TYPEID_PLAYER)
+    {
+        if(((Player*)victim)->isGameMaster())
+            return false;
+    }
+    else
+    {
+        if(((Creature*)victim)->IsInEvadeMode())
+            return false;
+    }
 
     if (m_attacking)
     {
@@ -5303,7 +5337,7 @@ void Unit::ClearInCombat(bool force)
         ((Player*)this)->ClearComboPoints();
 }
 
-bool Unit::isTargetableForAttack()
+bool Unit::isTargetableForAttack() const
 {
     if (GetTypeId()==TYPEID_PLAYER && ((Player *)this)->isGameMaster())
         return false;
@@ -5922,8 +5956,21 @@ bool Unit::SelectHostilTarget()
         return true;
     }
 
-    if(isInCombat() && !HasAuraType(SPELL_AURA_MOD_TAUNT) && CanFreeMove() && m_attackers.empty())
-        ((Creature*)this)->AI()->EnterEvadeMode();
+    // no target but something prevent go to evade mode
+    if( !isInCombat() || HasAuraType(SPELL_AURA_MOD_TAUNT) || !CanFreeMove() )
+        return false;
+
+    // last case when creature don't must go to evade mode:
+    // it in combat but attacker not make any damage and not enter to aggro radius to have record in threat list
+    // for example at owner command to pet attack some far away creature
+    for(AttackerSet::const_iterator itr = m_attackers.begin(); itr != m_attackers.end(); ++itr)
+    {
+        if( (*itr)->IsInMap(this) && (*itr)->isTargetableForAttack() && (*itr)->isInAccessablePlaceFor((Creature*)this) )
+            return false;
+    }
+
+    // enter in evade mode in other case
+   ((Creature*)this)->AI()->EnterEvadeMode();
 
     return false;
 }

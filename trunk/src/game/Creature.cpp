@@ -241,7 +241,9 @@ void Creature::Update(uint32 diff)
         {
             Unit::Update( diff );
             i_motionMaster.UpdateMotion(diff);
-            i_AI->UpdateAI(diff);
+
+            if(!IsInEvadeMode())
+                i_AI->UpdateAI(diff);
 
             if(m_regenTimer > 0)
             {
@@ -1680,4 +1682,9 @@ bool Creature::HasSpellCooldown(uint32 spell_id) const
 {
     CreatureSpellCooldowns::const_iterator itr = m_CreatureSpellCooldowns.find(spell_id);
     return (itr != m_CreatureSpellCooldowns.end() && itr->second > time(NULL)) || m_GlobalCooldown > 0 || HasCategoryCooldown(spell_id);
+}
+
+bool Creature::IsInEvadeMode() const
+{
+    return !i_motionMaster.empty() && i_motionMaster.top()->GetMovementGeneratorType() == HOME_MOTION_TYPE;
 }

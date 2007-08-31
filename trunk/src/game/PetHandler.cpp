@@ -110,7 +110,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     if( GetPlayer()->IsFriendlyTo(TargetUnit))
                         return;
 
-                    if(TargetUnit!=pet->getVictim())
+                    if(pet->getVictim() && TargetUnit!=pet->getVictim())
                         pet->AttackStop();
 
                     if(pet->GetTypeId()!=TYPEID_PLAYER)

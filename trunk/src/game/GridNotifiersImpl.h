@@ -72,7 +72,7 @@ inline void PlayerCreatureRelocationWorker(Player* pl, Creature* c)
     // Creature AI reaction
     if(!c->hasUnitState(UNIT_STAT_CHASE | UNIT_STAT_SEARCHING | UNIT_STAT_FLEEING))
     {
-        if( c->AI() && c->AI()->IsVisible(pl) )
+        if( c->AI() && c->AI()->IsVisible(pl) && !c->IsInEvadeMode() )
             c->AI()->MoveInLineOfSight(pl);
     }
 }
@@ -81,13 +81,13 @@ inline void CreatureCreatureRelocationWorker(Creature* c1, Creature* c2)
 {
     if(!c1->hasUnitState(UNIT_STAT_CHASE | UNIT_STAT_SEARCHING | UNIT_STAT_FLEEING))
     {
-        if( c1->AI() && c1->AI()->IsVisible(c2) )
+        if( c1->AI() && c1->AI()->IsVisible(c2) && !c1->IsInEvadeMode() )
             c1->AI()->MoveInLineOfSight(c2);
     }
 
     if(!c2->hasUnitState(UNIT_STAT_CHASE | UNIT_STAT_SEARCHING | UNIT_STAT_FLEEING))
     {
-        if( c2->AI() && c2->AI()->IsVisible(c1) )
+        if( c2->AI() && c2->AI()->IsVisible(c1) && !c2->IsInEvadeMode() )
             c2->AI()->MoveInLineOfSight(c1);
     }
 }
@@ -140,6 +140,10 @@ inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)
 
     //Check targets for not_selectable unit flag and remove
     if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+        return;
+
+    // Evade target
+    if( target->GetTypeId()==TYPEID_UNIT && ((Creature*)target)->IsInEvadeMode() )
         return;
 
     //Check player targets and remove if in GM mode or GM invisibility (for not self casting case)

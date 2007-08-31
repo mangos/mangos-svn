@@ -2467,7 +2467,7 @@ void Spell::EffectWeaponDmg(uint32 i)
     uint32 hitInfo = 0;
     uint32 nohitMask = HITINFO_ABSORB | HITINFO_RESIST | HITINFO_MISS;
     SpellSchools damageType = SPELL_SCHOOL_NORMAL;
-    uint32 victimState = VICTIMSTATE_NORMAL;
+    VictimState victimState = VICTIMSTATE_NORMAL;
     uint32 blocked_dmg = 0;
     uint32 absorbed_dmg = 0;
     uint32 resisted_dmg = 0;
@@ -2514,7 +2514,7 @@ void Spell::EffectWeaponDmg(uint32 i)
             eff_damage = uint32(eff_damage * (m_currentBasePoints[j]+1) / 100);
 
     if ((hitInfo & nohitMask) && attType != RANGED_ATTACK)  // not send ranged miss/etc
-        m_caster->SendAttackStateUpdate(hitInfo & nohitMask, unitTarget, 1, SpellSchools(m_spellInfo->School), eff_damage, absorbed_dmg, resisted_dmg, 1, blocked_dmg);
+        m_caster->SendAttackStateUpdate(hitInfo & nohitMask, unitTarget, 1, SpellSchools(m_spellInfo->School), eff_damage, absorbed_dmg, resisted_dmg, VICTIMSTATE_NORMAL, blocked_dmg);
 
     if(hitInfo & HITINFO_CRITICALHIT)
         criticalhit = true;
