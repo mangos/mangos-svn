@@ -20,6 +20,8 @@
 #define MANGOS_HOMEMOVEMENTGENERATOR_H
 
 #include "MovementGenerator.h"
+#include "DestinationHolder.h"
+#include "Traveller.h"
 
 class MANGOS_DLL_SPEC HomeMovementGenerator : public MovementGenerator
 {
@@ -36,8 +38,8 @@ class MANGOS_DLL_SPEC HomeMovementGenerator : public MovementGenerator
 
     private:
         void _setTargetLocation(Creature &);
+        DestinationHolder<CreatureTraveller> i_destinationHolder;
 
         uint32 i_travel_timer;
-        void _reLocate(Creature &);
 };
 #endif

@@ -301,7 +301,7 @@ void Spell::EffectDummy(uint32 i)
     }
 
     // Judgement of command
-    if (m_spellInfo->Attributes == 0x50800 && m_spellInfo->AttributesEx == 128)
+    if (m_spellInfo->SpellIconID==561 && m_spellInfo->SpellFamilyName==SPELLFAMILY_PALADIN)
     {
         if(!unitTarget)
             return;

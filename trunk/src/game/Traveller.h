@@ -55,7 +55,7 @@ struct MANGOS_DLL_DECL Traveller
     void MoveTo(float x, float y, float z, uint32 t) {}
 };
 
-// specializetion for creatures
+// specialization for creatures
 template<>
 inline float Traveller<Creature>::Speed()
 {

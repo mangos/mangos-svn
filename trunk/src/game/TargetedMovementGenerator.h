@@ -52,6 +52,6 @@ class MANGOS_DLL_SPEC TargetedMovementGenerator : public MovementGenerator
         FollowerReference i_target;
         float i_offset;
         float i_angle;
-        DestinationHolder<Traveller<Creature> > i_destinationHolder;
+        DestinationHolder<CreatureTraveller> i_destinationHolder;
 };
 #endif
