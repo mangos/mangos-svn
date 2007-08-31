@@ -26,6 +26,7 @@
 void
 HomeMovementGenerator::Initialize(Creature & owner)
 {
+    owner.setMoveRunFlag(true);
     _setTargetLocation(owner);
 }
 
@@ -45,34 +46,22 @@ HomeMovementGenerator::_setTargetLocation(Creature & owner)
 
     float x, y, z;
     owner.GetRespawnCoord(x, y, z);
-    Traveller<Creature> traveller(owner);
 
-    DestinationHolder<Traveller<Creature> > i_destinationHolder;
+    CreatureTraveller traveller(owner);
 
     uint32 travel_time = i_destinationHolder.SetDestination(traveller, x, y, z);
     modifyTravelTime(travel_time);
-    traveller.Relocation(x,y,z);
     owner.clearUnitState(UNIT_STAT_ALL_STATE);
-}
-
-void
-HomeMovementGenerator::_reLocate(Creature &owner)           // resend clients the creature's actual position
-{
-
-    if (owner.GetTypeId() == TYPEID_UNIT)
-    {
-        sLog.outDebug("HomeMovementGenerator::_reLocate() called, where Unit.GetGUIDLow()=%d", owner.GetGUIDLow());
-        ObjectAccessor::UpdateObjectVisibility(&owner);
-    }
 }
 
 bool
 HomeMovementGenerator::Update(Creature &owner, const uint32& time_diff)
 {
+    CreatureTraveller traveller( owner);
+    i_destinationHolder.UpdateTraveller(traveller, time_diff, false);
 
     if (time_diff > i_travel_timer)
     {
-        _reLocate(owner);
         owner.setMoveRunFlag(false);
         return false;
     }
@@ -80,5 +69,4 @@ HomeMovementGenerator::Update(Creature &owner, const uint32& time_diff)
     i_travel_timer -= time_diff;
 
     return true;
-
 }

@@ -891,7 +891,7 @@ void WorldObject::GetContactPoint( const WorldObject* obj, float &x, float &y, f
     if(VMAP::VMapFactory::createOrGetVMapManager()->isHeightCalcEnabled())
     {
         z = MapManager::Instance().GetMap(GetMapId(), this)->GetVMapHeight(x,y,GetPositionZ());
-        if(z != VMAP_INVALID_HEIGHT)
+        if(z > VMAP_INVALID_HEIGHT)
             z += 0.2f;                                      // just to be sure that we are not a few pixel under the surface
         else
             z = GetPositionZ();
@@ -1010,7 +1010,7 @@ void WorldObject::GetClosePoint( const WorldObject* victim, float &x, float &y, 
     if(VMAP::VMapFactory::createOrGetVMapManager()->isHeightCalcEnabled())
     {
         z = MapManager::Instance().GetMap(GetMapId(), this)->GetHeight(x,y,GetPositionZ());
-        if(z != VMAP_INVALID_HEIGHT)
+        if(z > VMAP_INVALID_HEIGHT)
             z += 0.2f;                                      // just to be sure that we are not a few pixel under the surface
         else
             z = GetPositionZ();

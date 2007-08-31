@@ -67,7 +67,7 @@ TargetedMovementGenerator::_setTargetLocation(Creature &owner)
     float  bothObjectSize = i_target->GetObjectSize() + owner.GetObjectSize() + CONTACT_DISTANCE;
     if( i_destinationHolder.HasDestination() && i_destinationHolder.GetDestinationDiff(x,y,z) < bothObjectSize )
         return;
-    Traveller<Creature> traveller(owner);
+    CreatureTraveller traveller(owner);
     i_destinationHolder.SetDestination(traveller, x, y, z);
     owner.addUnitState(UNIT_STAT_CHASE);
 }
