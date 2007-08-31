@@ -18,6 +18,8 @@
 
 #include "sc_defines.h"
 
+#include "../../game/Player.h"
+
 uint32 GetSkillLevel(Player *player,uint32 trskill)
 {
     // Returns the level of some tradetrskill known by player

@@ -118,7 +118,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleFeignDeath,                                // 66 SPELL_AURA_FEIGN_DEATH
     &Aura::HandleAuraModDisarm,                             // 67 SPELL_AURA_MOD_DISARM
     &Aura::HandleAuraModStalked,                            // 68 SPELL_AURA_MOD_STALKED
-    &Aura::HandleAuraSchoolAbsorb,                          // 69 SPELL_AURA_SCHOOL_ABSORB
+    &Aura::HandleNoImmediateEffect,                         // 69 SPELL_AURA_SCHOOL_ABSORB implemented in Unit::CalcAbsorbResist
     &Aura::HandleNULL,                                      // 70 SPELL_AURA_EXTRA_ATTACKS      Useless
     &Aura::HandleModSpellCritChanceShool,                   // 71 SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL
     &Aura::HandleModPowerCost,                              // 72 SPELL_AURA_MOD_POWER_COST
@@ -146,7 +146,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleInterruptRegen,                            // 94 SPELL_AURA_INTERRUPT_REGEN
     &Aura::HandleAuraGhost,                                 // 95 SPELL_AURA_GHOST
     &Aura::HandleNULL,                                      // 96 SPELL_AURA_SPELL_MAGNET
-    &Aura::HandleAuraManaShield,                            // 97 SPELL_AURA_MANA_SHIELD
+    &Aura::HandleNoImmediateEffect,                         // 97 SPELL_AURA_MANA_SHIELD implemented in Unit::CalcAbsorbResist
     &Aura::HandleAuraModSkill,                              // 98 SPELL_AURA_MOD_SKILL_TALENT
     &Aura::HandleAuraModAttackPower,                        // 99 SPELL_AURA_MOD_ATTACK_POWER
     &Aura::HandleNULL,                                      //100 SPELL_AURA_AURAS_VISIBLE
@@ -287,7 +287,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
 };
 
 Aura::Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster, Item* castItem) :
-m_procCharges(0), m_absorbDmg(0), m_spellmod(NULL), m_spellId(spellproto->Id), m_effIndex(eff), m_caster_guid(0), m_target(target),
+m_procCharges(0), m_spellmod(NULL), m_spellId(spellproto->Id), m_effIndex(eff), m_caster_guid(0), m_target(target),
 m_timeCla(1000), m_castItemGuid(castItem?castItem->GetGUID():0), m_auraSlot(MAX_AURAS),
 m_positive(false), m_permanent(false), m_isPeriodic(false), m_isTrigger(false), m_isAreaAura(false), m_isPersistent(false),
 m_periodicTimer(0), m_PeriodicEventId(0), m_updated(false), m_removeOnDeath(false),m_fearMoveAngle(0)
@@ -2637,46 +2637,6 @@ void Aura::HandleAuraDamageShield(bool apply, bool Real)
     }*/
 }
 
-void Aura::HandleAuraManaShield(bool apply, bool Real)
-{
-    if (apply && !m_absorbDmg)
-        m_absorbDmg = m_modifier.m_amount;
-
-    /*if(apply)
-    {
-
-        for(std::list<struct DamageManaShield*>::iterator i = m_target->m_damageManaShield.begin();i != m_target->m_damageManaShield.end();i++)
-        {
-            if(GetId() == (*i)->m_spellId)
-            {
-                delete *i;
-                m_target->m_damageManaShield.erase(i);
-            }
-        }
-
-        DamageManaShield *dms = new DamageManaShield();
-
-        dms->m_spellId = GetId();
-        dms->m_modType = m_modifier.m_auraname;
-        dms->m_totalAbsorb = m_modifier.m_amount;
-        dms->m_currAbsorb = 0;
-        dms->m_schoolType = m_modifier.m_miscvalue;
-        m_target->m_damageManaShield.push_back(dms);
-    }
-    else
-    {
-        for(std::list<struct DamageManaShield*>::iterator i = m_target->m_damageManaShield.begin();i != m_target->m_damageManaShield.end();i++)
-        {
-            if(GetId() == (*i)->m_spellId)
-            {
-                delete *i;
-                m_target->m_damageManaShield.erase(i);
-                break;
-            }
-        }
-    }*/
-}
-
 void Aura::HandleAuraModStalked(bool apply, bool Real)
 {
     // used by spells: Hunter's Mark, Mind Vision, Syndicate Tracker (MURP) DND
@@ -2684,43 +2644,6 @@ void Aura::HandleAuraModStalked(bool apply, bool Real)
         m_target->SetFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TRACK_UNIT);
     else
         m_target->RemoveFlag(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_TRACK_UNIT);
-}
-
-void Aura::HandleAuraSchoolAbsorb(bool apply, bool Real)
-{
-    if (apply && !m_absorbDmg)
-        m_absorbDmg = m_modifier.m_amount;
-    /*if(apply)
-    {
-
-        for(std::list<struct DamageManaShield*>::iterator i = m_target->m_damageManaShield.begin();i != m_target->m_damageManaShield.end();i++)
-        {
-            if(GetId() == (*i)->m_spellId)
-            {
-                m_target->m_damageManaShield.erase(i);
-            }
-        }
-
-        DamageManaShield *dms = new DamageManaShield();
-
-        dms->m_spellId = GetId();
-        dms->m_modType = m_modifier.m_auraname;
-        dms->m_totalAbsorb = m_modifier.m_amount;
-        dms->m_currAbsorb = 0;
-        dms->m_schoolType = m_modifier.m_miscvalue;
-        m_target->m_damageManaShield.push_back(dms);
-    }
-    else
-    {
-        for(std::list<struct DamageManaShield*>::iterator i = m_target->m_damageManaShield.begin();i != m_target->m_damageManaShield.end();i++)
-        {
-            if(GetId() == (*i)->m_spellId)
-            {
-                m_target->m_damageManaShield.erase(i);
-                break;
-            }
-        }
-    }*/
 }
 
 /*********************************************************/
