@@ -38,10 +38,6 @@ class MANGOS_DLL_DECL ReactorAI : public CreatureAI
         static int Permissible(const Creature *);
 
     private:
-
-        bool needToStop(void) const;
-        void stopAttack(void);
-
         Creature &i_creature;
         uint64 i_victimGuid;
 };

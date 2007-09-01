@@ -45,9 +45,6 @@ class MANGOS_DLL_DECL AggressorAI : public CreatureAI
         static int Permissible(const Creature *);
 
     private:
-        void _stopAttack(void);
-        bool _needToStop(void) const;
-
         Creature &i_creature;
         uint64 i_victimGuid;
         AggressorState i_state;

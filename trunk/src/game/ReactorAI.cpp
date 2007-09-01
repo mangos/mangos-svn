@@ -57,11 +57,6 @@ ReactorAI::AttackStart(Unit *p)
     }
 }
 
-void
-ReactorAI::stopAttack()
-{
-}
-
 bool
 ReactorAI::IsVisible(Unit *pl) const
 {
@@ -72,48 +67,19 @@ void
 ReactorAI::UpdateAI(const uint32 time_diff)
 {
     // update i_victimGuid if i_creature.getVictim() !=0 and changed
-    if(!i_creature.SelectHostilTarget())
+    if(!i_creature.SelectHostilTarget() || !i_creature.getVictim())
         return;
 
     i_victimGuid = i_creature.getVictim()->GetGUID();
 
-    // i_creature.getVictim() can't be used for check in case stop fighting, i_creature.getVictim() cleared at Unit death etc.
-    if( i_victimGuid )
+    if( i_creature.IsWithinDistInMap(i_creature.getVictim(), ATTACK_DISTANCE))
     {
-        if( needToStop() )
+        if( i_creature.isAttackReady() )
         {
-            DEBUG_LOG("Reactor AI stoped attacking [guid=%u]", i_creature.GetGUIDLow());
-            EnterEvadeMode();                               // i_victimGuid == 0 && i_creature.getVictim() == NULL now
-            return;
-        }
-
-        if( i_creature.IsWithinDistInMap(i_creature.getVictim(), ATTACK_DISTANCE))
-        {
-            if( i_creature.isAttackReady() )
-            {
-                i_creature.AttackerStateUpdate(i_creature.getVictim());
-                i_creature.resetAttackTimer();
-            }
+            i_creature.AttackerStateUpdate(i_creature.getVictim());
+            i_creature.resetAttackTimer();
         }
     }
-}
-
-bool
-ReactorAI::needToStop() const
-{
-    if( !i_creature.isAlive() || !i_creature.getVictim())
-        return true;
-
-    /*if(!i_creature.getVictim()->isTargetableForAttack() || !i_creature.getVictim()->isInAccessablePlaceFor(&i_creature))
-        return true;*/
-    //no need for this checks because mob changes its victim only when
-    //1) victim is dead (check is in SelectHostilTarget() func)
-    //2) victim is out of threat radius
-
-    float rx,ry,rz;
-    i_creature.GetRespawnCoord(rx, ry, rz);
-    float length = i_creature.getVictim()->GetDistanceSq(rx,ry,rz);
-    return ( length > CREATURE_THREAT_RADIUS );
 }
 
 void

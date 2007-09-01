@@ -59,39 +59,6 @@ AggressorAI::MoveInLineOfSight(Unit *u)
     }
 }
 
-bool
-AggressorAI::_needToStop() const
-{
-    if( !i_creature.isAlive() || !i_creature.getVictim())
-        return true;
-
-    //if(!i_creature.getVictim()->isTargetableForAttack() || !i_creature.getVictim()->isInAccessablePlaceFor(&i_creature))
-    //return true;
-    //no need for this checks because mob changes its victim only when
-    //1) victim is dead (check is in SelectHostilTarget() func)
-    //2) victim is out of threat radius
-
-    // chaise only at same map
-    if(!i_creature.IsInMap(i_creature.getVictim()))
-        return true;
-
-    // instance not have threat radius for stop
-    Map* map = MapManager::Instance().GetMap(i_creature.GetMapId(),&i_creature);
-    if(map->Instanceable())
-        return false;
-
-    float rx,ry,rz;
-    i_creature.GetRespawnCoord(rx, ry, rz);
-    float length = i_creature.getVictim()->GetDistanceSq(rx,ry,rz);
-    return ( length > CREATURE_THREAT_RADIUS );
-}
-
-void AggressorAI::_stopAttack()
-{
-    DEBUG_LOG("What we do HERE ?");
-    return;
-}
-
 void AggressorAI::EnterEvadeMode()
 {
     if( !i_creature.isAlive() )
@@ -152,25 +119,12 @@ AggressorAI::UpdateAI(const uint32 /*diff*/)
 
     i_victimGuid = i_creature.getVictim()->GetGUID();
 
-    // i_creature.getVictim() can't be used for check in case stop fighting, i_creature.getVictim() clearóâ at Unit death etc.
-    if( i_victimGuid )
+    if( i_creature.IsWithinDistInMap(i_creature.getVictim(), ATTACK_DISTANCE))
     {
-        if( _needToStop() )
+        if( i_creature.isAttackReady() )
         {
-            DEBUG_LOG("Aggressor AI stoped attacking [guid=%u]", i_creature.GetGUIDLow());
-            EnterEvadeMode();                               // i_victimGuid == 0 && i_creature.getVictim() == NULL now
-            return;
-        }
-
-        assert((i_victimGuid != 0) == (i_creature.getVictim() != NULL) && "i_victimGuid and i_creature.getVictim() not synchronized.");
-
-        if( i_creature.IsWithinDistInMap(i_creature.getVictim(), ATTACK_DISTANCE))
-        {
-            if( i_creature.isAttackReady() )
-            {
-                i_creature.AttackerStateUpdate(i_creature.getVictim());
-                i_creature.resetAttackTimer();
-            }
+            i_creature.AttackerStateUpdate(i_creature.getVictim());
+            i_creature.resetAttackTimer();
         }
     }
 }

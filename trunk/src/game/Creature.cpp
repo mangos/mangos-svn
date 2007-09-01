@@ -1583,13 +1583,26 @@ bool Creature::IsOutOfThreatArea(Unit* pVictim) const
     if(!pVictim)
         return true;
 
+    if(!pVictim->IsInMap(this))
+        return true;
+
     if(!pVictim->isTargetableForAttack())
         return true;
 
+    if(!pVictim->isInAccessablePlaceFor(this))
+        return true;
+
+    // we not need get instance map, base map provide all info
+    Map* map = MapManager::Instance().GetBaseMap(GetMapId());
+
+    if(map->Instanceable())
+        return false;
+
     float rx,ry,rz;
     GetRespawnCoord(rx, ry, rz);
+
     float length = pVictim->GetDistanceSq(rx,ry,rz);
-    return ( length > CREATURE_THREAT_RADIUS );
+    return ( length > 10000.0f);                            // real value unknown
 }
 
 //creature_addon table
