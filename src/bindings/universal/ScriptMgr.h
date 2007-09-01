@@ -114,9 +114,6 @@ struct MANGOS_DLL_DECL ScriptedAI : public CreatureAI
 
     Creature* m_creature;
 
-    // Check condition for attack stop
-    virtual bool needToStop() const;
-
     //= Some useful helpers =========================
 
     // Start attack of victim and go to him

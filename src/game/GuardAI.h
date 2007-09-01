@@ -45,9 +45,6 @@ class MANGOS_DLL_DECL GuardAI : public CreatureAI
         static int Permissible(const Creature *);
 
     private:
-        bool _needToStop(void) const;
-        void _stopAttack(void);
-
         Creature &i_creature;
         uint64 i_victimGuid;
         GuardState i_state;

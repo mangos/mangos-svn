@@ -265,26 +265,16 @@ CreatureAI* GetAI(Creature *_Creature )
 
 void ScriptedAI::UpdateAI(const uint32)
 {
-    if( m_creature->getVictim() != NULL )
+    //Check if we have a current target
+    if( m_creature->isAlive() && m_creature->SelectHostilTarget() && m_creature->getVictim())
     {
-        if( needToStop() )
-        {
-            DoStopAttack();
-        }
-        else if( m_creature->IsStopped() )
+        //If we are within range melee the target
+        if( m_creature->IsWithinDistInMap(m_creature->getVictim(), ATTACK_DISTANCE))
         {
             if( m_creature->isAttackReady() )
             {
-                if(!m_creature->canReachWithAttack(m_creature->getVictim()))
-                    return;
                 m_creature->AttackerStateUpdate(m_creature->getVictim());
                 m_creature->resetAttackTimer();
-
-                if ( !m_creature->getVictim() )
-                    return;
-
-                if( needToStop() )
-                    DoStopAttack();
             }
         }
     }
@@ -316,9 +306,4 @@ void ScriptedAI::DoGoHome()
 {
     if( !m_creature->getVictim() && m_creature->isAlive() )
         (*m_creature)->TargetedHome();
-}
-
-bool ScriptedAI::needToStop() const
-{
-    return ( !m_creature->getVictim()->isTargetableForAttack() || !m_creature->isAlive() );
 }

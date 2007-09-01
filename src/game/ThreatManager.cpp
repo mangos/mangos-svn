@@ -258,7 +258,7 @@ void ThreatContainer::update()
 
 //============================================================
 // return the next best victim
-// could be the current victum
+// could be the current victim
 
 HostilReference* ThreatContainer::selectNextVictim(Creature* pAttacker, HostilReference* pCurrentVictim)
 {
@@ -271,29 +271,30 @@ HostilReference* ThreatContainer::selectNextVictim(Creature* pAttacker, HostilRe
         Unit* target = currentRef->getTarget();
         assert(target);                                     // if the ref has status online the target must be there !
 
-        if(pCurrentVictim)
+        if(!pAttacker->IsOutOfThreatArea(target))           // skip non attackable currently targets
         {
-            if(pCurrentVictim == currentRef || (currentRef->getThreat() < 1.3f * pCurrentVictim->getThreat()))
+            if(pCurrentVictim)                              // select 1.3/1.1 better target in comparison current target
             {
-                found = true;
-                break;                                      // The list is sorted, we will not find a better target
-            }
+                // list sorted and and we check current target, then this is best case
+                if(pCurrentVictim == currentRef || currentRef->getThreat() <= 1.1f * pCurrentVictim->getThreat() )
+                {
+                    currentRef = pCurrentVictim;            // for second case
+                    found = true;
+                    break;
+                }
 
-            Map* map = MapManager::Instance().GetMap(pAttacker->GetMapId(), pAttacker);
-                                                            // The ref hat status online => the place must be accessable  && target->isInAccessablePlaceFor( ((Creature*)pAttacker) ))
-            if(map->Instanceable() || (!((Creature*)pAttacker)->IsOutOfThreatArea(target)))
-            {
-                if((pAttacker->IsWithinDistInMap(target, ATTACK_DISTANCE) && (currentRef->getThreat() > 1.1f * pCurrentVictim->getThreat())) || (currentRef->getThreat() > 1.3f * pCurrentVictim->getThreat()))
+                if( currentRef->getThreat() > 1.3f * pCurrentVictim->getThreat() || 
+                    currentRef->getThreat() > 1.1f * pCurrentVictim->getThreat() && pAttacker->IsWithinDistInMap(target, ATTACK_DISTANCE) )
                 {                                           //implement 110% threat rule for targets in melee range
                     found = true;                           //and 130% rule for targets in ranged distances
                     break;                                  //for selecting alive targets
                 }
             }
-        }
-        else if(!(pAttacker)->IsOutOfThreatArea(target))    // The ref hat status online => the place must be accessable && target->isInAccessablePlaceFor( (pAttacker) ) )
-        {
-            found = true;
-            break;
+            else                                            // select any
+            {
+                found = true;
+                break;
+            }
         }
     }
     if(!found)
