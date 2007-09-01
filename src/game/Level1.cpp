@@ -84,7 +84,26 @@ bool ChatHandler::HandleTextEmoteCommand(const char* args)
     return true;
 }
 
-//play NPC emote
+// make npc whisper to player
+bool ChatHandler::HandleNpcWhisperCommand(const char* args)
+{
+    char* receiver = strtok((char*)args, " ");
+    char* text = strtok(NULL, "");
+
+    uint64 guid = m_session->GetPlayer()->GetSelection();  
+    Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
+
+    if(!pCreature || !receiver || !text)
+    {
+        return false;
+    }
+
+    pCreature->Whisper(atol(receiver), text);
+    
+    return true;
+}
+
+// global announce
 bool ChatHandler::HandleAnnounceCommand(const char* args)
 {
     if(!*args)

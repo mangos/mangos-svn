@@ -2531,6 +2531,7 @@ bool ChatHandler::HandleSpawnTransportCommand(const char* args)
     return true;
 }
 
+//play npc emote
 bool ChatHandler::HandlePlayEmoteCommand(const char* args)
 {
     uint32 emote = atoi((char*)args);

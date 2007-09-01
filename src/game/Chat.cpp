@@ -294,6 +294,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "setskill",    SEC_ADMINISTRATOR, &ChatHandler::HandleSetSkillCommand,         "",   NULL },
         { "whispers",    SEC_MODERATOR,     &ChatHandler::HandleWhispersCommand,         "",   NULL },
         { "say",         SEC_MODERATOR,     &ChatHandler::HandleSayCommand,              "",   NULL },
+        { "npcwhisper",  SEC_MODERATOR,     &ChatHandler::HandleNpcWhisperCommand,       "",   NULL },
         { "yell",        SEC_MODERATOR,     &ChatHandler::HandleYellCommand,             "",   NULL },
         { "textemote",   SEC_MODERATOR,     &ChatHandler::HandleTextEmoteCommand,        "",   NULL },
         { "gocreature",  SEC_GAMEMASTER,    &ChatHandler::HandleGoCreatureCommand,       "",   NULL },
