@@ -104,6 +104,7 @@ class ChatHandler
         bool HandleTaxiCheatCommand(const char* args);
         bool HandleWhispersCommand(const char* args);
         bool HandleSayCommand(const char* args);
+        bool HandleNpcWhisperCommand(const char* args);
         bool HandleYellCommand(const char* args);
         bool HandlePlayEmoteCommand(const char* args);
         bool HandleSendMailCommand(const char* args);

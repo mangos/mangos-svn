@@ -988,9 +988,11 @@ void WorldObject::MonsterWhisper(const uint64 receiver, const char* text)
     WorldPacket data(SMSG_MESSAGECHAT, 200);
     data << (uint8)CHAT_MSG_MONSTER_WHISPER;
     data << (uint32)LANG_UNIVERSAL;
-    data << (uint32)1;
+    data << (uint64)GetGUID();
+    data << (uint32)0;                                      //unk1
+    data << (uint32)(strlen(GetName())+1);
     data << GetName();
-    data << (uint64)receiver;                               //Also the Unit Target
+    data << (uint64)receiver;                               // Player's guid
     data << (uint32)(strlen(text)+1);
     data << text;
     data << (uint8)0;                                       // ChatTag
