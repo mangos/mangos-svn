@@ -142,7 +142,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      // 90 SPELL_AURA_MOD_RESIST_CHANCE  Useless
     &Aura::HandleNoImmediateEffect,                         // 91 SPELL_AURA_MOD_DETECT_RANGE
     &Aura::HandleNULL,                                      // 92 SPELL_AURA_PREVENTS_FLEEING
-    &Aura::HandleNULL,                                      // 93 SPELL_AURA_MOD_UNATTACKABLE
+    &Aura::HandleModUnattackable,                           // 93 SPELL_AURA_MOD_UNATTACKABLE
     &Aura::HandleInterruptRegen,                            // 94 SPELL_AURA_INTERRUPT_REGEN
     &Aura::HandleAuraGhost,                                 // 95 SPELL_AURA_GHOST
     &Aura::HandleNULL,                                      // 96 SPELL_AURA_SPELL_MAGNET
@@ -225,7 +225,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //173 SPELL_AURA_ALLOW_CHAMPION_SPELLS  only for Proclaim Champion spell
     &Aura::HandleNoImmediateEffect,                         //174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_SPIRIT     implemented in Unit::SpellDamageBonus
     &Aura::HandleNoImmediateEffect,                         //175 SPELL_AURA_MOD_SPELL_HEALING_OF_SPIRIT    implemented in Unit::SpellHealingBonus
-    &Aura::HandleNULL,                                      //176 SPELL_AURA_SPIRIT_OF_REDEMPTION   only for Spirit of Redemption spell
+    &Aura::HandleSpiritOfRedumption,                        //176 SPELL_AURA_SPIRIT_OF_REDEMPTION   only for Spirit of Redemption spell, die at aura end
     &Aura::HandleNULL,                                      //177 SPELL_AURA_AOE_CHARM
     &Aura::HandleNULL,                                      //178 SPELL_AURA_MOD_DEBUFF_RESISTANCE
     &Aura::HandleNoImmediateEffect,                         //179 SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE implemented in Unit::SpellCriticalBonus
@@ -1322,6 +1322,9 @@ void Aura::HandleAuraModShapeshift(bool apply, bool Real)
         case FORM_BERSERKERSTANCE:
         case FORM_DEFENSIVESTANCE:
             PowerType = POWER_RAGE;
+            break;
+        case FORM_SPIRITOFREDEMPTION:
+            modelid = 16031;
             break;
         default:
             sLog.outError("Auras: Unknown Shapeshift Type: %u", m_modifier.m_miscvalue);
@@ -3567,13 +3570,16 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             m_target->SetSpeed(MOVE_FLY,3.8f,true);
             spellId = 40122;
             break;
+        case FORM_SPIRITOFREDEMPTION:
+            spellId= 27792;
+            spellId2 = 27795;                               // must be second, this important at aura remove to prevent to early iterator invalidation.
+            break;
         case FORM_GHOSTWOLF:
         case FORM_AMBIENT:
         case FORM_GHOUL:
         case FORM_SHADOW:
         case FORM_STEALTH:
         case FORM_CREATURECAT:
-        case FORM_SPIRITOFREDEMPTION:
             spellId = 0;
             break;
     }
@@ -3899,4 +3905,21 @@ void Aura::HandleAuraRetainComboPoints(bool apply, bool Real)
 
     if(!apply)                                              // combo points was added in SPELL_EFFECT_ADD_COMBO_POINTS handler
         target->AddComboPoints(target->GetSelection(), -m_modifier.m_amount);
+}
+
+void Aura::HandleModUnattackable( bool Apply, bool Real )
+{
+    if(Apply)
+        m_target->CombatStop(true);
+
+    m_target->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE,Apply);
+}
+
+void Aura::HandleSpiritOfRedumption( bool apply, bool Real )
+{
+    if(!Real)
+        return;
+    // die at aura end
+    if(!apply)
+        m_target->DealDamage(m_target, m_target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_NORMAL, GetSpellProto(), 0, false);
 }

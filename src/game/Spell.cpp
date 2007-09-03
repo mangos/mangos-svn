@@ -448,7 +448,7 @@ void Spell::FillTargetMap()
             }
 
             //Check targets for not_selectable unit flag and remove
-            if ((*itr)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE))
+            if ((*itr) != m_caster && (*itr)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE))
             {
                 itr = tmpUnitMap.erase(itr);
                 continue;
@@ -2420,7 +2420,7 @@ uint8 Spell::CanCast()
         prevented_reason = SPELL_FAILED_FLEEING;
     else if(m_caster->m_silenced && m_spellInfo->School != SPELL_SCHOOL_NORMAL)
         prevented_reason = SPELL_FAILED_SILENCED;
-    else if(m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED) && m_spellInfo->School == SPELL_SCHOOL_NORMAL)
+    else if(m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED) && m_spellInfo->School == SPELL_SCHOOL_NORMAL && !m_triggeredByAura)
         prevented_reason = SPELL_FAILED_PACIFIED;
 
     if(prevented_reason)

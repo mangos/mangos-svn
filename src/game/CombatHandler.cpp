@@ -53,7 +53,7 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
         return;
     }
 
-    if(_player->IsFriendlyTo(pEnemy))
+    if(_player->IsFriendlyTo(pEnemy) || pEnemy->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE))
     {
         sLog.outError( "WORLD: Enemy %s %u is friendly",(GUID_HIPART(guid)==HIGHGUID_PLAYER ? "player" : "creature"),GUID_LOPART(guid));
 

@@ -369,7 +369,7 @@ enum UnitVisibility
 enum UnitFlags
 {
     UNIT_FLAG_UNKNOWN7       = 0x00000001,
-    UNIT_FLAG_UNKNOWN8       = 0x00000002,                  // not attackable
+    UNIT_FLAG_NON_ATTACKABLE = 0x00000002,                  // not attackable
     UNIT_FLAG_DISABLE_MOVE   = 0x00000004,
     UNIT_FLAG_UNKNOWN1       = 0x00000008,                  // for all units, make unit attackable even it's friendly in some cases...
     UNIT_FLAG_RENAME         = 0x00000010,
