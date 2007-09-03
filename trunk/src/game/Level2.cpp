@@ -2962,13 +2962,13 @@ bool ChatHandler::HandleRenameCommand(const char* args)
     if(target)
     {
         PSendSysMessage(LANG_RENAME_PLAYER, target->GetName());
-        target->SetNeedRename(true);
-        sDatabase.PExecute("UPDATE `character` SET `rename` = '1' WHERE `guid` = '%u'", target->GetGUIDLow());
+        target->SetAtLoginFlag(AT_LOGIN_RENAME);
+        sDatabase.PExecute("UPDATE `character` SET `at_login` = `at_login` | '1' WHERE `guid` = '%u'", target->GetGUIDLow());
     }
     else
     {
         PSendSysMessage(LANG_RENAME_PLAYER_GUID, oldname.c_str(), GUID_LOPART(targetGUID));
-        sDatabase.PExecute("UPDATE `character` SET `rename` = '1' WHERE `guid` = '%u'", GUID_LOPART(targetGUID));
+        sDatabase.PExecute("UPDATE `character` SET `at_login` = `at_login` | '1' WHERE `guid` = '%u'", GUID_LOPART(targetGUID));
     }
 
     return true;

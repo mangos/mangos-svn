@@ -129,7 +129,7 @@ Player::Player (WorldSession *session): Unit( 0 )
 
     m_dungeonDifficulty = DUNGEONDIFFICULTY_NORMAL;
 
-    m_needRename = false;
+    m_atLoginFlags = AT_LOGIN_NONE;
 
     m_dontMove = false;
 
@@ -1078,7 +1078,7 @@ void Player::BuildEnumData( QueryResult * result, WorldPacket * p_data )
         flags |= 0x08;
     if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST))
         flags |= 0x20;
-    if(isNeedRename())
+    if(HasAtLoginFlag(AT_LOGIN_RENAME))
         flags |= 0x40;
     *p_data << uint8(flags);                                // flags description below
     // 0x01 - unknown
@@ -2776,6 +2776,13 @@ uint32 Player::resetTalentsCost() const
 
 bool Player::resetTalents(bool no_cost)
 {
+    // not need after this call
+    if(HasAtLoginFlag(AT_LOGIN_RESET_TALENTS))
+    {
+        m_atLoginFlags = m_atLoginFlags & ~AT_LOGIN_RESET_TALENTS;
+        sDatabase.PExecute("UPDATE `character` set `at_login` = `at_login` & ~ '%u' WHERE `guid` ='%u'", uint32(AT_LOGIN_RESET_TALENTS), GetGUIDLow());
+    }
+
     uint32 level = getLevel();
     uint32 talentPointsForLevel = level < 10 ? 0 : uint32((level-9)*sWorld.getRate(RATE_TALENT));
 
@@ -11594,8 +11601,8 @@ bool Player::MinimalLoadFromDB( QueryResult *result, uint32 guid )
     bool delete_result = true;
     if(!result)
     {
-        //                                             0      1      2            3            4            5     6           7           8
-        result = sDatabase.PQuery("SELECT `data`,`name`,`position_x`,`position_y`,`position_z`,`map`,`totaltime`,`leveltime`,`rename` FROM `character` WHERE `guid` = '%u'",guid);
+        //                                0      1      2            3            4            5     6           7           8
+        result = sDatabase.PQuery("SELECT `data`,`name`,`position_x`,`position_y`,`position_z`,`map`,`totaltime`,`leveltime`,`at_login` FROM `character` WHERE `guid` = '%u'",guid);
         if(!result) return false;
     }
     else delete_result = false;
@@ -11617,7 +11624,7 @@ bool Player::MinimalLoadFromDB( QueryResult *result, uint32 guid )
     m_Played_time[0] = fields[6].GetUInt32();
     m_Played_time[1] = fields[7].GetUInt32();
 
-    m_needRename = fields[8].GetBool();
+    m_atLoginFlags = fields[8].GetUInt32();
 
     // I don't see these used anywhere ..
     /*_LoadGroup();
@@ -11709,8 +11716,8 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 {
     // NOTE: all fields in `character` must be read to prevent lost character data at next save in case wrong DB structure.
     // !!! NOTE: including unused `zone`,`online`
-    ////                                             0      1         2      3      4      5       6            7            8            9     10            11         12          13          14          15           16            17                  18                  19                  20        21        22        23         24          25        26             27       [28]   [29]     30              31                32
-    //QueryResult *result = sDatabase.PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`rename`,`zone`,`online`,`pending_honor`,`last_honor_date`,`last_kill_date` FROM `character` WHERE `guid` = '%u'", guid);
+    ////                                             0      1         2      3      4      5       6            7            8            9     10            11         12          13          14          15           16            17                  18                  19                  20        21        22        23         24          25        26             27         [28]   [29]     30              31                32
+    //QueryResult *result = sDatabase.PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`at_login`,`zone`,`online`,`pending_honor`,`last_honor_date`,`last_kill_date` FROM `character` WHERE `guid` = '%u'", guid);
     QueryResult *result = holder->GetResult(0);
 
     if(!result)
@@ -11860,7 +11867,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
         m_stableSlots = 2;
     }
 
-    m_needRename = fields[27].GetBool();
+    m_atLoginFlags = fields[27].GetUInt32();
 
     // Honor system
     m_honorPending = fields[30].GetFloat();
@@ -12716,7 +12723,7 @@ void Player::SaveToDB()
         "`map`,`position_x`,`position_y`,`position_z`,`orientation`,`data`,"
         "`taximask`,`online`,`cinematic`,"
         "`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,"
-        "`trans_x`, `trans_y`, `trans_z`, `trans_o`, `transguid`, `gmstate`, `stable_slots`,`rename`,`zone`,"
+        "`trans_x`, `trans_y`, `trans_z`, `trans_o`, `transguid`, `gmstate`, `stable_slots`,`at_login`,`zone`,"
         "`pending_honor`, `last_honor_date`, `last_kill_date`) VALUES ("
         << GetGUIDLow() << ", "
         << GetSession()->GetAccountId() << ", '"
@@ -12783,7 +12790,7 @@ void Player::SaveToDB()
     ss << uint32(m_stableSlots);                            // to prevent save uint8 as char
 
     ss << ", ";
-    ss << (isNeedRename()? 1 : 0);
+    ss << uint32(m_atLoginFlags);
 
     ss << ", ";
     ss << GetZoneId();
@@ -14935,5 +14942,34 @@ void Player::ApplyEquipCooldown( Item * pItem )
         data << pItem->GetGUID();
         data << uint32(spellData.SpellId);
         GetSession()->SendPacket(&data);
+    }
+}
+
+void Player::resetSpells()
+{
+    // not need after this call
+    if(HasAtLoginFlag(AT_LOGIN_RESET_SPELLS))
+    {
+        m_atLoginFlags = m_atLoginFlags & ~AT_LOGIN_RESET_SPELLS;
+        sDatabase.PExecute("UPDATE `character` set `at_login` = `at_login` & ~ '%u' WHERE `guid` ='%u'", uint32(AT_LOGIN_RESET_SPELLS), GetGUIDLow());
+    }
+
+    // make full copy of map (spells removed and marked as deleted at another spell remove
+    // and we can't use original map for safe iterative with visit each spell at loop end
+    PlayerSpellMap smap = GetSpellMap();
+
+    for(PlayerSpellMap::const_iterator iter = smap.begin();iter != smap.end(); ++iter)
+        removeSpell(iter->first);                           // only iter->first can be accessed, object by iter->second can be deleted already
+
+    PlayerInfo const *info = objmgr.GetPlayerInfo(getRace(),getClass());
+    std::list<CreateSpellPair>::const_iterator spell_itr;
+    for (spell_itr = info->spell.begin(); spell_itr!=info->spell.end(); spell_itr++)
+    {
+        uint16 tspell = spell_itr->first;
+        if (tspell)
+        {
+            sLog.outDebug("PLAYER: Adding initial spell, id = %u",tspell);
+            learnSpell(tspell);
+        }
     }
 }

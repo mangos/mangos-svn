@@ -201,6 +201,17 @@ ChatCommand * ChatHandler::getCommandTable()
         { NULL,             0,                  NULL,                                           "",   NULL }
     };
 
+    static ChatCommand resetCommandTable[] =
+    {
+        { "honor",          SEC_ADMINISTRATOR,  &ChatHandler::HandleResetHonorCommand,          "", NULL },
+        { "level",          SEC_ADMINISTRATOR,  &ChatHandler::HandleResetLevelCommand,          "", NULL },
+        { "spells",         SEC_ADMINISTRATOR,  &ChatHandler::HandleResetSpellsCommand,         "", NULL },
+        { "stats",          SEC_ADMINISTRATOR,  &ChatHandler::HandleResetStatsCommand,          "", NULL },
+        { "talents",        SEC_ADMINISTRATOR,  &ChatHandler::HandleResetTalentsCommand,        "", NULL },
+
+        { NULL,             0,                  NULL,                                           "",   NULL }
+    };
+
     static ChatCommand commandTable[] =
     {
         { "acct",        SEC_PLAYER,        &ChatHandler::HandleAcctCommand,             "",   NULL },
@@ -209,6 +220,8 @@ ChatCommand * ChatHandler::getCommandTable()
         { "anim",        SEC_GAMEMASTER,    &ChatHandler::HandleAnimCommand,             "",   NULL },
         { "announce",    SEC_MODERATOR,     &ChatHandler::HandleAnnounceCommand,         "",   NULL },
         { "notify",      SEC_MODERATOR,     &ChatHandler::HandleNotifyCommand,           "",   NULL },
+        { "goxy",        SEC_MODERATOR,     &ChatHandler::HandleGoXYCommand,             "",   NULL },
+        { "goxyz",       SEC_MODERATOR,     &ChatHandler::HandleGoXYZCommand,            "",   NULL },
         { "goname",      SEC_MODERATOR,     &ChatHandler::HandleGonameCommand,           "",   NULL },
         { "namego",      SEC_MODERATOR,     &ChatHandler::HandleNamegoCommand,           "",   NULL },
         { "groupgo",     SEC_MODERATOR,     &ChatHandler::HandleGroupgoCommand,          "",   NULL },
@@ -257,7 +270,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "standstate",  SEC_GAMEMASTER,    &ChatHandler::HandleStandStateCommand,       "",   NULL },
         { "start",       SEC_PLAYER,        &ChatHandler::HandleStartCommand,            "",   NULL },
         { "taxicheat",   SEC_MODERATOR,     &ChatHandler::HandleTaxiCheatCommand,        "",   NULL },
-        { "goxy",        SEC_MODERATOR,     &ChatHandler::HandleGoXYCommand,             "",   NULL },
         { "gogrid",      SEC_MODERATOR,     &ChatHandler::HandleGoGridCommand,           "",   NULL },
         { "addweapon",   SEC_ADMINISTRATOR, &ChatHandler::HandleAddWeaponCommand,        "",   NULL },
         { "allowmove",   SEC_ADMINISTRATOR, &ChatHandler::HandleAllowMovementCommand,    "",   NULL },
@@ -287,7 +299,8 @@ ChatCommand * ChatHandler::getCommandTable()
         { "addtele",     SEC_ADMINISTRATOR, &ChatHandler::HandleAddTeleCommand,          "",   NULL },
         { "deltele",     SEC_ADMINISTRATOR, &ChatHandler::HandleDelTeleCommand,          "",   NULL },
         { "listauras",   SEC_ADMINISTRATOR, &ChatHandler::HandleListAurasCommand,        "",   NULL },
-        { "reset",       SEC_ADMINISTRATOR, &ChatHandler::HandleResetCommand,            "",   NULL },
+        { "reset",       SEC_ADMINISTRATOR, NULL,                                        "",   resetCommandTable },
+        { "resetall",    SEC_ADMINISTRATOR, &ChatHandler::HandleResetAllCommand,         "",   NULL },
         { "ticket",      SEC_GAMEMASTER,    &ChatHandler::HandleTicketCommand,           "",   NULL },
         { "delticket",   SEC_GAMEMASTER,    &ChatHandler::HandleDelTicketCommand,        "",   NULL },
         { "maxskill",    SEC_ADMINISTRATOR, &ChatHandler::HandleMaxSkillCommand,         "",   NULL },
