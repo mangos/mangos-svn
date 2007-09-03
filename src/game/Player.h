@@ -471,6 +471,15 @@ enum GMFlags
     GM_INVISIBLE       = 16
 };
 
+// 2^n values
+enum AtLoginFlags
+{
+    AT_LOGIN_NONE          = 0,
+    AT_LOGIN_RENAME        = 1,
+    AT_LOGIN_RESET_SPELLS  = 2,
+    AT_LOGIN_RESET_TALENTS = 4
+};
+
 // Social : friends/ignores
 
 enum FriendStatus
@@ -1150,6 +1159,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool addSpell(uint16 spell_id,uint8 active, PlayerSpellState state = PLAYERSPELL_NEW, uint16 slot_id=0xffff);
         void learnSpell(uint16 spell_id);
         void removeSpell(uint16 spell_id);
+        void resetSpells();
 
         uint32 GetFreeTalentPoints() const { return GetUInt32Value(PLAYER_CHARACTER_POINTS1); }
         void SetFreeTalentPoints(uint32 points) { SetUInt32Value(PLAYER_CHARACTER_POINTS1,points); }
@@ -1574,8 +1584,8 @@ class MANGOS_DLL_SPEC Player : public Unit
                                                             // overwrite Unit version
         uint8 m_forced_speed_changes[MAX_MOVE_TYPE];
 
-        bool isNeedRename() const { return m_needRename; }
-        void SetNeedRename(bool rename) { m_needRename = rename; }
+        bool HasAtLoginFlag(AtLoginFlags f) const { return m_atLoginFlags & f; }
+        void SetAtLoginFlag(AtLoginFlags f) { m_atLoginFlags |= f; }
 
         LookingForGroup m_lookingForGroup;
 
@@ -1709,7 +1719,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         time_t m_speakTime;
         uint32 m_speakCount;
         uint32 m_dungeonDifficulty;
-        bool m_needRename;
+
+        uint32 m_atLoginFlags;
 
         Item* m_items[PLAYER_SLOTS_COUNT];
         uint32 m_currentBuybackSlot;

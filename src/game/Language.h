@@ -211,6 +211,17 @@
 #define LANG_ITEM_NOT_IN_LIST            "Item '%i' not found in vendor list."
 #define LANG_ITEM_ALREADY_IN_LIST        "Item '%i' already in vendor list."
 
+#define LANG_RESET_SPELLS_ONLINE         "Spells of %s reset."
+#define LANG_RESET_SPELLS_OFFLINE        "Spells of %s will reset at next login."
+#define LANG_RESET_TALENTS_ONLINE        "Spells of %s reset."
+#define LANG_RESET_TALENTS_OFFLINE       "Spells of %s will reset at next login."
+#define LANG_RESET_SPELLS                "Your spells reset."
+#define LANG_RESET_TALENTS               "Your talents reset."
+
+#define LANG_RESETALL_UNKNOWN_CASE       "Unknown case '%s' for .resetall command. Type full correct case name."
+#define LANG_RESETALL_SPELLS             "Spells will reset for all players at login. Strongly recommend re-login!"
+#define LANG_RESETALL_TALENTS            "Talents will reset for all players at login. Strongly recommend re-login!"
+
 #define LANG_WAYPOINT_NOTFOUND           "Creature (GUID: %u) No waypoint found."
 #define LANG_WAYPOINT_NOTFOUNDLAST       "Creature (GUID: %u) Last waypoint not found."
 #define LANG_WAYPOINT_NOTFOUNDSEARCH     "Creature (GUID: %u) No waypoint found - used 'wpguid'. Now trying to find it by its position..."

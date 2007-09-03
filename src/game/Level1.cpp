@@ -2031,6 +2031,50 @@ bool ChatHandler::HandleGoXYCommand(const char* args)
     return true;
 }
 
+//teleport at coordinates, including Z
+bool ChatHandler::HandleGoXYZCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+    Player* _player = m_session->GetPlayer();
+
+    if(_player->isInFlight())
+    {
+        SendSysMessage(LANG_YOU_IN_FLIGHT);
+        return true;
+    }
+
+    char* px = strtok((char*)args, " ");
+    char* py = strtok(NULL, " ");
+    char* pz = strtok(NULL, " ");
+    char* pmapid = strtok(NULL, " ");
+
+    if (!px || !py || !pz)
+        return false;
+
+    float x = (float)atof(px);
+    float y = (float)atof(py);
+    float z = (float)atof(pz);
+    uint32 mapid;
+    if (pmapid)
+        mapid = (uint32)atoi(pmapid);
+    else 
+        mapid = _player->GetMapId();
+
+    if(!MapManager::IsValidMapCoord(mapid,x,y))
+    {
+        PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,mapid);
+        return true;
+    }
+
+    Map *map = MapManager::Instance().GetMap(mapid, _player);
+    _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
+    _player->TeleportTo(mapid, x, y, z, _player->GetOrientation());
+
+    return true;
+}
+
 //teleport to grid
 bool ChatHandler::HandleGoGridCommand(const char* args)
 {

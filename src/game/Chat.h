@@ -208,6 +208,7 @@ class ChatHandler
         bool HandleShutDownCommand(const char* args);
         bool HandleSecurityCommand(const char* args);
         bool HandleGoXYCommand(const char* args);
+        bool HandleGoXYZCommand(const char* args);
         bool HandleGoGridCommand(const char* args);
         bool HandleAddWeaponCommand(const char* args);
         bool HandleAllowMovementCommand(const char* args);
@@ -256,9 +257,17 @@ class ChatHandler
         bool HandleTeleCommand(const char * args);
         bool HandleAddTeleCommand(const char * args);
         bool HandleDelTeleCommand(const char * args);
-        bool HandleListAurasCommand (const char * args);
+        bool HandleListAurasCommand(const char * args);
         bool HandleLookupTeleCommand(const char * args);
-        bool HandleResetCommand (const char * args);
+
+        bool HandleResetHonorCommand(const char * args);
+        bool HandleResetLevelCommand(const char * args);
+        bool HandleResetSpellsCommand(const char * args);
+
+        bool HandleResetStatsCommand(const char * args);
+        bool HandleResetTalentsCommand(const char * args);
+
+        bool HandleResetAllCommand(const char * args);
         bool HandleTicketCommand(const char* args);
         bool HandleDelTicketCommand(const char* args);
         bool HandleMaxSkillCommand(const char* args);

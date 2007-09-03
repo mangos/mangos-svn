@@ -109,9 +109,9 @@ void WorldSession::HandleCharEnumOpcode( WorldPacket & /*recv_data*/ )
 {
     /// get all the data necesary for loading all characters (along with their pets) on the account
     sDatabase.AsyncPQuery(&chrHandler, &CharacterHandler::HandleCharEnumCallback, GetAccountId(),
-    //                  0                   1                   2                         3                         4                         5                   6                       7                        8
-        "SELECT `character`.`data`, `character`.`name`, `character`.`position_x`, `character`.`position_y`, `character`.`position_z`, `character`.`map`, `character`.`totaltime`, `character`.`leveltime`, `character`.`rename`,"
-    //                   9                       10                        11
+    //          0                   1                   2                         3                         4                         5                   6                       7                        8
+        "SELECT `character`.`data`, `character`.`name`, `character`.`position_x`, `character`.`position_y`, `character`.`position_z`, `character`.`map`, `character`.`totaltime`, `character`.`leveltime`, `character`.`at_login`,"
+    //   9                       10                        11
         "`character_pet`.`entry`,`character_pet`.`modelid`,`character_pet`.`level`"
         "FROM `character` LEFT JOIN `character_pet` ON `character`.`guid`=`character_pet`.`owner` AND `character_pet`.`slot`='0'"
         "WHERE `character`.`account` = '%u' ORDER BY `character`.`guid`", GetAccountId());
@@ -313,7 +313,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     holder->Reserve(19);
 
     // 0 - LoadFromDB
-    holder->PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`rename`,`zone`,`online`,`pending_honor`,`last_honor_date`,`last_kill_date` FROM `character` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
+    holder->PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`at_login`,`zone`,`online`,`pending_honor`,`last_honor_date`,`last_kill_date` FROM `character` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
     // 1 - _LoadGroup
     holder->PQuery("SELECT `leaderGuid` FROM `group_member` WHERE `memberGuid`='%u'", GUID_LOPART(playerGuid));
     // 2 - _LoadBoundInstances
@@ -558,6 +558,19 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     if(pCurrChar->isAlive())
         pCurrChar->LoadPet();
 
+    // Apply at_login requests
+    if(pCurrChar->HasAtLoginFlag(AT_LOGIN_RESET_SPELLS))
+    {
+        pCurrChar->resetSpells();
+        SendNotification("Spells has been reset.");
+    }
+
+    if(pCurrChar->HasAtLoginFlag(AT_LOGIN_RESET_TALENTS))
+    {
+        pCurrChar->resetTalents(true);
+        SendNotification("Talents has been reset.");
+    }
+
     // show time before shutdown if shutdown planned.
     if(sWorld.IsShutdowning())
         sWorld.ShutdownMsg(true,pCurrChar);
@@ -746,7 +759,7 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
     }
 
     sDatabase.escape_string(newname);
-    sDatabase.PExecute("UPDATE `character` set `name` = '%s', `rename` = '0' WHERE `guid` ='%u'", newname.c_str(), GUID_LOPART(guid));
+    sDatabase.PExecute("UPDATE `character` set `name` = '%s', `at_login` = `at_login` & ~ '%u' WHERE `guid` ='%u'", newname.c_str(), uint32(AT_LOGIN_RENAME),GUID_LOPART(guid));
 
     WorldPacket data(SMSG_CHAR_RENAME,1+8+(newname.size()+1));
     data << (uint8)RESPONSE_SUCCESS;

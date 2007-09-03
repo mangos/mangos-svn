@@ -3178,14 +3178,9 @@ bool ChatHandler::HandleListAurasCommand (const char * args)
     return true;
 }
 
-bool ChatHandler::HandleResetCommand (const char * args)
+bool ChatHandler::HandleResetHonorCommand (const char * args)
 {
-    if(!*args)
-        return false;
-
-    char* arg = strtok((char*)args, " ");
-    std::string argstr = arg;
-    char* pName = strtok(NULL, "");
+    char* pName = strtok((char*)args, "");
     Player *player = NULL;
     if (pName)
     {
@@ -3203,127 +3198,266 @@ bool ChatHandler::HandleResetCommand (const char * args)
         return true;
     }
 
-    if (argstr == "stats" || argstr == "level")
+    player->SetUInt32Value(PLAYER_FIELD_KILLS, 0);
+    player->SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 0);
+    player->SetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY, 0);
+    player->SetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, 0);
+    player->SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, 0);
+    KillInfoMap &kmap = player->GetKillsPerPlayer();
+    kmap.clear();
+    player->SetFlushKills(true);
+
+    return true;
+}
+
+static bool HandleResetStatsOrLevelHelper(Player* player)
+{
+    PlayerInfo const *info = objmgr.GetPlayerInfo(player->getRace(), player->getClass());
+    if(!info) return false;
+
+    ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(player->getClass());
+    if(!cEntry)
     {
-        PlayerInfo const *info = objmgr.GetPlayerInfo(player->getRace(), player->getClass());
-        if(!info) return false;
+        sLog.outError("Class %u not found in DBÑ (Wrong DBC files?)",player->getClass());
+        return false;
+    }
 
-        ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(player->getClass());
-        if(!cEntry)
+    uint8 powertype = cEntry->powerType;
+
+    uint32 unitfield;
+    if(powertype == POWER_RAGE)
+        unitfield = 0x1100EE00;
+    else if(powertype == POWER_ENERGY)
+        unitfield = 0x00000000;
+    else if(powertype == POWER_MANA)
+        unitfield = 0x0000EE00;
+    else
+    {
+        sLog.outError("Invalid default powertype %u for player (class %u)",powertype,player->getClass());
+        return false;
+    }
+
+    // reset m_form if no aura
+    if(!player->HasAuraType(SPELL_AURA_MOD_SHAPESHIFT))
+        player->m_form = 0;
+
+    player->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 0.388999998569489f );
+    player->SetFloatValue(UNIT_FIELD_COMBATREACH, 1.5f   );
+
+    player->setFactionForRace(player->getRace());
+
+    player->SetUInt32Value(UNIT_FIELD_BYTES_0, ( ( player->getRace() ) | ( player->getClass() << 8 ) | ( player->getGender() << 16 ) | ( powertype << 24 ) ) );
+
+    // reset only if player not in some form;
+    if(!player->m_form)
+    {
+        switch(player->getGender())
         {
-            sLog.outError("Class %u not found in DBÑ (Wrong DBC files?)",player->getClass());
-            return true;
-        }
-
-        uint8 powertype = cEntry->powerType;
-
-        uint32 unitfield;
-        if(powertype == POWER_RAGE)
-            unitfield = 0x1100EE00;
-        else if(powertype == POWER_ENERGY)
-            unitfield = 0x00000000;
-        else if(powertype == POWER_MANA)
-            unitfield = 0x0000EE00;
-        else
-        {
-            sLog.outError("Invalid default powertype %u for player (class %u)",powertype,player->getClass());
-            return true;
-        }
-
-        // reset m_form if no aura
-        if(!player->HasAuraType(SPELL_AURA_MOD_SHAPESHIFT))
-            player->m_form = 0;
-
-        player->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS, 0.388999998569489f );
-        player->SetFloatValue(UNIT_FIELD_COMBATREACH, 1.5f   );
-
-        player->setFactionForRace(player->getRace());
-
-        player->SetUInt32Value(UNIT_FIELD_BYTES_0, ( ( player->getRace() ) | ( player->getClass() << 8 ) | ( player->getGender() << 16 ) | ( powertype << 24 ) ) );
-
-        // reset only if player not in some form;
-        if(!player->m_form)
-        {
-            switch(player->getGender())
-            {
-                case GENDER_FEMALE:
-                    player->SetUInt32Value(UNIT_FIELD_DISPLAYID, info->displayId_f);
-                    player->SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, info->displayId_f);
-                    break;
-                case GENDER_MALE:
-                    player->SetUInt32Value(UNIT_FIELD_DISPLAYID, info->displayId_m);
-                    player->SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, info->displayId_m);
-                    break;
-                default:
-                    break;
-            }
-        }
-
-        // set UNIT_FIELD_BYTES_1 to init state but preserve m_form value
-        player->SetUInt32Value(UNIT_FIELD_BYTES_1, player->m_form<<16 | unitfield );
-
-        player->SetUInt32Value(UNIT_FIELD_BYTES_2, 0x2800 );// 0x2800, 0x2801 2.0.8...
-        player->SetUInt32Value(UNIT_FIELD_FLAGS , UNIT_FLAG_UNKNOWN1 );
-
-                                                            //-1 is default value
-        player->SetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, uint32(-1));
-
-        //player->SetUInt32Value(PLAYER_FIELD_BYTES, 0xEEE00000 );
-
-        if(argstr == "level")
-        {
-            player->SetLevel(1);
-            player->InitStatsForLevel(true);
-            player->InitTalentForLevel();
-            player->SetUInt32Value(PLAYER_XP,0);
-
-            // reset level to summoned pet
-            Pet* pet = player->GetPet();
-            if(pet && pet->getPetType()==SUMMON_PET)
-                pet->InitStatsForLevel(1);
-        }
-        else
-        {
-            player->InitStatsForLevel(true);
-            player->InitTalentForLevel();
+        case GENDER_FEMALE:
+            player->SetUInt32Value(UNIT_FIELD_DISPLAYID, info->displayId_f);
+            player->SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, info->displayId_f);
+            break;
+        case GENDER_MALE:
+            player->SetUInt32Value(UNIT_FIELD_DISPLAYID, info->displayId_m);
+            player->SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, info->displayId_m);
+            break;
+        default:
+            break;
         }
     }
-    else if (argstr == "talents")
-        player->resetTalents(true);
-    else if (argstr == "spells")
-    {
-        // make full copy of map (spells removed and marked as deleted at another spell remove
-        // and we can't use original map for safe iterative with visit each spell at loop end
-        PlayerSpellMap smap = player->GetSpellMap();
 
-        for(PlayerSpellMap::const_iterator iter = smap.begin();iter != smap.end(); ++iter)
-            player->removeSpell(iter->first);               // only iter->first can be accessed, object by iter->second can be deleted already
+    // set UNIT_FIELD_BYTES_1 to init state but preserve m_form value
+    player->SetUInt32Value(UNIT_FIELD_BYTES_1, player->m_form<<16 | unitfield );
 
-        PlayerInfo const *info = objmgr.GetPlayerInfo(player->getRace(),player->getClass());
-        std::list<CreateSpellPair>::const_iterator spell_itr;
-        for (spell_itr = info->spell.begin(); spell_itr!=info->spell.end(); spell_itr++)
-        {
-            uint16 tspell = spell_itr->first;
-            if (tspell)
-            {
-                sLog.outDebug("PLAYER: Adding initial spell, id = %u",tspell);
-                player->learnSpell(tspell);
-            }
-        }
-    }
-    else if (argstr == "honor")
+    player->SetUInt32Value(UNIT_FIELD_BYTES_2, 0x2800 );// 0x2800, 0x2801 2.0.8...
+    player->SetUInt32Value(UNIT_FIELD_FLAGS , UNIT_FLAG_UNKNOWN1 );
+
+    //-1 is default value
+    player->SetUInt32Value(PLAYER_FIELD_WATCHED_FACTION_INDEX, uint32(-1));
+
+    //player->SetUInt32Value(PLAYER_FIELD_BYTES, 0xEEE00000 );
+    return true;
+}
+
+bool ChatHandler::HandleResetLevelCommand(const char * args)
+{
+    char* pName = strtok((char*)args, "");
+    Player *player = NULL;
+    if (pName)
     {
-        player->SetUInt32Value(PLAYER_FIELD_KILLS, 0);
-        player->SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 0);
-        player->SetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY, 0);
-        player->SetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, 0);
-        player->SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, 0);
-        KillInfoMap &kmap = player->GetKillsPerPlayer();
-        kmap.clear();
-        player->SetFlushKills(true);
+        std::string name = pName;
+        normalizePlayerName(name);
+        uint64 guid = objmgr.GetPlayerGUIDByName(name.c_str());
+        player = objmgr.GetPlayer(guid);
     }
     else
+        player = getSelectedPlayer();
+
+    if(!player)
+    {
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
+        return true;
+    }
+
+    if(!HandleResetStatsOrLevelHelper(player))
         return false;
+
+    player->SetLevel(1);
+    player->InitStatsForLevel(true);
+    player->InitTalentForLevel();
+    player->SetUInt32Value(PLAYER_XP,0);
+
+    // reset level to summoned pet
+    Pet* pet = player->GetPet();
+    if(pet && pet->getPetType()==SUMMON_PET)
+        pet->InitStatsForLevel(1);
+
+    return true;
+}
+
+bool ChatHandler::HandleResetStatsCommand(const char * args)
+{
+    char* pName = strtok((char*)args, "");
+    Player *player = NULL;
+    if (pName)
+    {
+        std::string name = pName;
+        normalizePlayerName(name);
+        uint64 guid = objmgr.GetPlayerGUIDByName(name.c_str());
+        player = objmgr.GetPlayer(guid);
+    }
+    else
+        player = getSelectedPlayer();
+
+    if(!player)
+    {
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
+        return true;
+    }
+
+    if(!HandleResetStatsOrLevelHelper(player))
+        return false;
+
+    player->InitStatsForLevel(true);
+    player->InitTalentForLevel();
+
+    return true;
+}
+
+bool ChatHandler::HandleResetSpellsCommand(const char * args)
+{
+    char* pName = strtok((char*)args, "");
+    Player *player = NULL;
+    uint64 playerGUID = 0;
+    if (pName)
+    {
+        std::string name = pName;
+        normalizePlayerName(name);
+        player = objmgr.GetPlayer(name.c_str());
+        if(!player)
+            playerGUID = objmgr.GetPlayerGUIDByName(name.c_str());
+    }
+    else
+        player = getSelectedPlayer();
+
+    if(!player && !playerGUID)
+    {
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
+        return true;
+    }
+
+    if(player)
+    {
+        player->resetSpells();
+
+        WorldPacket data;
+        FillSystemMessageData(&data, player->GetSession(), LANG_RESETALL_SPELLS);
+        player->GetSession()->SendPacket( &data );
+
+        if(m_session->GetPlayer()!=player)
+            PSendSysMessage(LANG_RESET_SPELLS_ONLINE,player->GetName());
+    }
+    else
+    {
+        sDatabase.PExecute("UPDATE `character` SET `at_login` = `at_login` | '%u'",uint32(AT_LOGIN_RESET_SPELLS));
+        PSendSysMessage(LANG_RESET_SPELLS_OFFLINE,pName);
+    }
+
+    return true;
+}
+
+bool ChatHandler::HandleResetTalentsCommand(const char * args)
+{
+    char* pName = strtok((char*)args, "");
+    Player *player = NULL;
+    uint64 playerGUID = 0;
+    if (pName)
+    {
+        std::string name = pName;
+        normalizePlayerName(name);
+        player = objmgr.GetPlayer(name.c_str());
+        if(!player)
+            playerGUID = objmgr.GetPlayerGUIDByName(name.c_str());
+    }
+    else
+        player = getSelectedPlayer();
+
+    if(!player && !playerGUID)
+    {
+        SendSysMessage(LANG_NO_CHAR_SELECTED);
+        return true;
+    }
+
+    if(player)
+    {
+        player->resetTalents(true);
+
+        WorldPacket data;
+        FillSystemMessageData(&data, player->GetSession(), LANG_RESET_TALENTS);
+        player->GetSession()->SendPacket( &data );
+
+        if(m_session->GetPlayer()!=player)
+            PSendSysMessage(LANG_RESET_TALENTS_ONLINE,player->GetName());
+    }
+    else
+    {
+        sDatabase.PExecute("UPDATE `character` SET `at_login` = `at_login` | '%u'",uint32(AT_LOGIN_RESET_TALENTS));
+        PSendSysMessage(LANG_RESET_TALENTS_OFFLINE,pName);
+    }
+
+    return true;
+}
+
+bool ChatHandler::HandleResetAllCommand(const char * args)
+{
+    if(!*args)
+        return false;
+
+    std::string casename = args;
+
+    AtLoginFlags atLogin;
+
+    // Command specially created as single command to prevent using short case names
+    if(casename=="spells")
+    {
+        atLogin = AT_LOGIN_RESET_SPELLS;
+        sWorld.SendWorldText(LANG_RESETALL_SPELLS);
+    }
+    else if(casename=="talents")
+    {
+        atLogin = AT_LOGIN_RESET_TALENTS;
+        sWorld.SendWorldText(LANG_RESETALL_TALENTS);
+    }
+    else
+    {
+        PSendSysMessage(LANG_RESETALL_UNKNOWN_CASE,args);
+        return true;
+    }
+
+    sDatabase.PExecute("UPDATE `character` SET `at_login` = `at_login` | '%u'",atLogin);
+    HashMapHolder<Player>::MapType const& plist = ObjectAccessor::Instance().GetPlayers();
+    for(HashMapHolder<Player>::MapType::const_iterator itr = plist.begin(); itr != plist.end(); ++itr)
+        itr->second->SetAtLoginFlag(atLogin);
 
     return true;
 }
