@@ -538,12 +538,37 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
         AttackStop();
         pVictim->CombatStop(true);
 
+        // if talent known but not triggered (check priest class for speedup check)
+        Aura* spiritOfRedumtionTalentReady = NULL;
+        if( (!spellProto || spellProto->Id != 27795 ) &&    // not called from SPELL_AURA_SPIRIT_OF_REDEMPTION
+            pVictim->getClass()==CLASS_PRIEST )             // speedup check
+        {
+            AuraList const& vDummyAuras = pVictim->GetAurasByType(SPELL_AURA_DUMMY);
+            for(AuraList::const_iterator itr = vDummyAuras.begin(); itr != vDummyAuras.end(); ++itr)
+            {
+                if((*itr)->GetSpellProto()->SpellIconID==1654)
+                {
+                    spiritOfRedumtionTalentReady = *itr;
+                    break;
+                }
+            }
+        }
+
         DEBUG_LOG("SET JUST_DIED");
-        pVictim->setDeathState(JUST_DIED);
+        if(!spiritOfRedumtionTalentReady)
+            pVictim->setDeathState(JUST_DIED);
 
         DEBUG_LOG("DealDamageHealth1");
-        pVictim->SetHealth(0);
 
+        if(spiritOfRedumtionTalentReady)
+        {
+            // FORM_SPIRITOFREDEMPTION and related auras
+            pVictim->CastSpell(pVictim,27827,true,NULL,spiritOfRedumtionTalentReady);
+            pVictim->SetHealth(1);
+        }
+        else
+            pVictim->SetHealth(0);
+        
         // Call KilledUnit for creatures
         if (GetTypeId() == TYPEID_UNIT && ((Creature*)this)->AI())
             ((Creature*)this)->AI()->KilledUnit(pVictim);
@@ -3201,13 +3226,14 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
             UpdateDiminishingTime(mech);
     }
 
-    // must remove before removing from list (its remove dependent auras and _i_ is only safe iterator value
+    // some ShapeshiftBoosts at remove trigger removing other auras including parent Shapeshift aura
+    // remove aura from list before to prevent deleting it before 
+    m_Auras.erase(i);
+    m_removedAuras++;                                       // internal count used by unit update
+
     // remove the shapeshift aura's boosts
     if(Aur->GetModifier()->m_auraname == SPELL_AURA_MOD_SHAPESHIFT)
         Aur->HandleShapeshiftBoosts(false);
-
-    m_Auras.erase(i);
-    m_removedAuras++;                                       // internal count used by unit update
 
     Aur->_RemoveAura();
     delete Aur;
@@ -5341,6 +5367,10 @@ bool Unit::isTargetableForAttack() const
 {
     if (GetTypeId()==TYPEID_PLAYER && ((Player *)this)->isGameMaster())
         return false;
+
+    if(HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE))
+        return false;
+
     return isAlive() && !hasUnitState(UNIT_STAT_DIED)&& !isInFlight() /*&& !isStealth()*/;
 }
 

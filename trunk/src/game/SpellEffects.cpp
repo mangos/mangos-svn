@@ -960,7 +960,25 @@ void Spell::EffectTriggerSpell(uint32 i)
         return;
     }
 
-    m_TriggerSpells.push_back(spellInfo);
+    // some triggered spells must be casted instantly (for example, if next effect case instant kill caster)
+    bool instant = false;
+    for(uint32 j = i+1; j < 3; ++j)
+    {
+        if(m_spellInfo->Effect[j]==SPELL_EFFECT_INSTAKILL && m_spellInfo->EffectImplicitTargetA[j]==TARGET_SELF)
+        {
+            instant = true;
+            break;
+        }
+    }
+
+    if(instant)
+    {
+        // in case multi-targets, spell must be casted one time, at last target in list)
+        if(unitTarget && m_targetUnitGUIDs[i].back()==unitTarget->GetGUID())
+            m_caster->CastSpell(unitTarget,spellInfo,true,NULL,NULL,m_originalCasterGUID);
+    }
+    else
+        m_TriggerSpells.push_back(spellInfo);
 }
 
 void Spell::EffectTeleportUnits(uint32 i)
