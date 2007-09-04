@@ -1146,6 +1146,7 @@ CREATE TABLE `creature_template` (
   `rank` tinyint(3) unsigned default '0',
   `mindmg` float default '0',
   `maxdmg` float default '0',
+  `dmgschool` tinyint(1) not NULL default 0,
   `attackpower` int(10) unsigned NOT NULL default '0',
   `baseattacktime` int(4) unsigned default '0',
   `rangeattacktime` int(4) unsigned default '0',
@@ -1204,7 +1205,7 @@ CREATE TABLE `creature_template` (
 LOCK TABLES `creature_template` WRITE;
 /*!40000 ALTER TABLE `creature_template` DISABLE KEYS */;
 INSERT INTO `creature_template` VALUES 
-(1,10045,0,'Waypoint (Only GM can see it)','Visual',1,1,64,64,0,0,0,35,0,0.91,0,14,15,100,2000,2200,4096,0,0.5,8,2,0,0,0,0,1.76,2.42,100,2.56,8,1,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,3,0,'');
+(1,10045,0,'Waypoint (Only GM can see it)','Visual',1,1,64,64,0,0,0,35,0,0.91,0,14,15,0,100,2000,2200,4096,0,0.5,8,2,0,0,0,0,1.76,2.42,100,2.56,8,1,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,3,0,'');
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
 UNLOCK TABLES;
 

@@ -163,6 +163,7 @@ struct CreatureInfo
     uint32  rank;
     float   mindmg;
     float   maxdmg;
+    uint32  dmgschool;
     uint32  attackpower;
     uint32  baseattacktime;
     uint32  rangeattacktime;
