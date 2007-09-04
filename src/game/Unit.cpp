@@ -72,6 +72,7 @@ static Unit::AuraTypeSet GenerateVictimProcAuraTypes()
     auraTypes.insert(SPELL_AURA_PROC_TRIGGER_DAMAGE);
     auraTypes.insert(SPELL_AURA_DUMMY);
     auraTypes.insert(SPELL_AURA_MOD_PARRY_PERCENT);
+    auraTypes.insert(SPELL_AURA_MOD_BLOCK_PERCENT);
     return auraTypes;
 }
 
@@ -2044,7 +2045,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool is
             GetGUIDLow(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), damage, absorbed_dmg, blocked_dmg, resisted_dmg);
 }
 
-MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType, SpellEntry const *spellInfo)
+MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (Unit const *pVictim, WeaponAttackType attType, SpellEntry const *spellInfo)
 {
     // Miss chance based on melee
     int32 miss_chance = (int32)(MeleeMissChanceCalc(pVictim));
@@ -6934,6 +6935,14 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
             {
                 sLog.outDebug("ProcDamageAndSpell: casting spell id %u (triggered by %s dummy aura of spell %u)", i->spellInfo->Id,(isVictim?"a victim's":"an attacker's"),i->triggeredByAura->GetId());
                 HandleDummyAuraProc(pTarget, i->spellInfo, i->spellParam, damage, i->triggeredByAura, procSpell, procFlag);
+            }
+            else if(*aur == SPELL_AURA_MOD_BLOCK_PERCENT)
+            {
+                // nothing do, just charges counter
+            }
+            else if(*aur == SPELL_AURA_MOD_PARRY_PERCENT)
+            {
+                // nothing do, just charges counter
             }
         }
 
