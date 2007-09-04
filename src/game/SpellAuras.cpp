@@ -3493,7 +3493,18 @@ void Aura::HandleModPowerCost(bool apply, bool Real)
 {
     //UNIT_FIELD_POWER_COST_MULTIPLIER = multiplier - 1
     float val = m_target->GetFloatValue(UNIT_FIELD_POWER_COST_MODIFIER) + 1.0f;
-    ApplyPercentModFloatVar(val,m_modifier.m_amount,apply);
+
+    if(val || apply)
+        ApplyPercentModFloatVar(val,m_modifier.m_amount,apply);
+    else
+    {
+        // recalculate value in case val==0 (-100 percent applied) at modifier remove (current aura already removed)
+        val = 1.0f;
+        Unit::AuraList const& auras = m_target->GetAurasByType(SPELL_AURA_MOD_POWER_COST);
+        for(Unit::AuraList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+            ApplyPercentModFloatVar(val,(*itr)->GetModifier()->m_amount,true);
+    }
+
     m_target->SetFloatValue(UNIT_FIELD_POWER_COST_MODIFIER,val - 1.0f);
 }
 
