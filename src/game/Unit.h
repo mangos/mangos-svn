@@ -1131,7 +1131,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool IsImmunedToSpellEffect(uint32 effect) const;
 
         uint32 CalcArmorReducedDamage(Unit* pVictim, const uint32 damage);
-        void CalcAbsorbResist(Unit *pVictim, SpellSchools school, const uint32 damage, uint32 *absorb, uint32 *resist);
+        void CalcAbsorbResist(Unit *pVictim, SpellSchools school, DamageEffectType damagetype, const uint32 damage, uint32 *absorb, uint32 *resist);
 
         float GetSpeed( UnitMoveType mtype ) const;
         float GetSpeedRate( UnitMoveType mtype ) const { return m_speed_rate[mtype]; }
