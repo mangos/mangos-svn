@@ -1193,6 +1193,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         float m_speed_rate[MAX_MOVE_TYPE];
 
         CharmInfo *m_charmInfo;
+
+        SpellSchools GetMeleeDamageSchool() const;
     private:
         void SendAttackStop(Unit* victim);                  // only from AttackStop(Unit*)
         void SendAttackStart(Unit* pVictim);                // only from Unit::AttackStart(Unit*)

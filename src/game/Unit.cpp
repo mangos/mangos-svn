@@ -1982,30 +1982,32 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool is
     uint32   absorbed_dmg = 0;
     uint32   resisted_dmg = 0;
 
-    if( pVictim->IsImmunedToPhysicalDamage() )
+    SpellSchools meleeSchool = GetMeleeDamageSchool();
+
+    if( meleeSchool == SPELL_SCHOOL_NORMAL && pVictim->IsImmunedToPhysicalDamage() )
     {
-        SendAttackStateUpdate (HITINFO_MISS, pVictim, 1, SPELL_SCHOOL_NORMAL, 0, 0, 0, VICTIMSTATE_IS_IMMUNE, 0);
+        SendAttackStateUpdate (HITINFO_MISS, pVictim, 1, meleeSchool, 0, 0, 0, VICTIMSTATE_IS_IMMUNE, 0);
         return;
     }
 
-    DoAttackDamage (pVictim, &damage, &cleanDamage, &blocked_dmg, SPELL_SCHOOL_NORMAL, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType);
+    DoAttackDamage (pVictim, &damage, &cleanDamage, &blocked_dmg, meleeSchool, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType);
 
     cleanDamage.damage += blocked_dmg;
 
     if (hitInfo & HITINFO_MISS)
         //send miss
-        SendAttackStateUpdate (hitInfo, pVictim, 1, SPELL_SCHOOL_NORMAL, damage, absorbed_dmg, resisted_dmg, victimState, blocked_dmg);
+        SendAttackStateUpdate (hitInfo, pVictim, 1, meleeSchool, damage, absorbed_dmg, resisted_dmg, victimState, blocked_dmg);
     else
     {
         //do animation
-        SendAttackStateUpdate (hitInfo, pVictim, 1, SPELL_SCHOOL_NORMAL, damage, absorbed_dmg, resisted_dmg, victimState, blocked_dmg);
+        SendAttackStateUpdate (hitInfo, pVictim, 1, meleeSchool, damage, absorbed_dmg, resisted_dmg, victimState, blocked_dmg);
 
         if (damage > (absorbed_dmg + resisted_dmg + blocked_dmg))
             damage -= (absorbed_dmg + resisted_dmg + blocked_dmg);
         else
             damage = 0;
 
-        DealDamage (pVictim, damage, &cleanDamage, DIRECT_DAMAGE, SPELL_SCHOOL_NORMAL, NULL, 0, true);
+        DealDamage (pVictim, damage, &cleanDamage, DIRECT_DAMAGE, meleeSchool, NULL, 0, true);
 
         if(GetTypeId() == TYPEID_PLAYER && pVictim->isAlive())
         {
@@ -6926,4 +6928,26 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
             }
         }
     }
+}
+
+SpellSchools Unit::GetMeleeDamageSchool() const
+{
+    if(GetTypeId()==TYPEID_UNIT)
+    {
+        CreatureInfo const* cInfo = ((Creature*)this)->GetCreatureInfo();
+        if(cInfo)
+        {
+            if(cInfo->dmgschool >= MAX_SPELL_SCHOOL)
+            {
+                sLog.outErrorDb("Invalid spell school value (%u) in creature+_template.dmgschool for entry %u",cInfo->dmgschool,cInfo->Entry);
+                return SPELL_SCHOOL_NORMAL;
+            }
+            else 
+                return SpellSchools(cInfo->dmgschool);
+        }
+        else
+            return SPELL_SCHOOL_NORMAL;
+    }
+    else
+        return SPELL_SCHOOL_NORMAL;
 }
