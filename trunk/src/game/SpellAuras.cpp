@@ -3162,6 +3162,16 @@ void Aura::HandleAuraModBlockPercent(bool apply, bool Real)
     if(m_target->GetTypeId()!=TYPEID_PLAYER)
         return;
 
+    if(apply && Real && !m_procCharges)
+    {
+        m_procCharges = GetSpellProto()->procCharges;
+
+        ((Player *)m_target)->ApplySpellMod(GetId(), SPELLMOD_EXTRA_BLOCKS, m_procCharges);
+
+        if (!m_procCharges)
+            m_procCharges = -1;
+    }
+
     ((Player*)m_target)->HandleBaseModValue(BLOCK_PERCENTAGE, FLAT_MOD, float (m_modifier.m_amount), apply);
     //sLog.outError("BONUS BLOCK CHANCE: + %f", float(m_modifier.m_amount));
 }

@@ -436,6 +436,7 @@ pkgdata_DATA = \
 	4425_command.sql \
 	4425_character.sql \
 	4426_creature_template.sql \
+	4430_spell_proc_event.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -852,4 +853,5 @@ EXTRA_DIST = \
 	4425_command.sql \
 	4425_character.sql \
 	4426_creature_template.sql \
+	4430_spell_proc_event.sql \
 	README
