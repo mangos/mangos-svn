@@ -1190,7 +1190,7 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, 
         uint32 absorb = 0;
         uint32 resist = 0;
 
-        CalcAbsorbResist(pVictim,SpellSchools(spellInfo->School), damage, &absorb, &resist);
+        CalcAbsorbResist(pVictim,SpellSchools(spellInfo->School), SPELL_DIRECT_DAMAGE, damage, &absorb, &resist);
 
         // Only send absorbed message if we actually absorbed some damage
         if(damage > 0)
@@ -1263,7 +1263,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             pdamage = pdamageReductedArmor;
         }
 
-        CalcAbsorbResist(pVictim, SpellSchools(spellProto->School), pdamage, &absorb, &resist);
+        CalcAbsorbResist(pVictim, SpellSchools(spellProto->School), DOT, pdamage, &absorb, &resist);
     }
 
     sLog.outDetail("PeriodicAuraLog: %u (TypeId: %u) attacked %u (TypeId: %u) for %u dmg inflicted by %u abs is %u",
@@ -1481,7 +1481,7 @@ uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage)
     return (newdamage > 1) ? newdamage : 1;
 }
 
-void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, const uint32 damage, uint32 *absorb, uint32 *resist)
+void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType damagetype, const uint32 damage, uint32 *absorb, uint32 *resist)
 {
     if(!pVictim || !pVictim->isAlive() || !damage)
         return;
@@ -1489,13 +1489,33 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, const uint32 dama
     // Magic damage, check for resists
     if (school != SPELL_SCHOOL_NORMAL)
     {
-        int32 tmpvalue2 = pVictim->GetResistance(school);
+        float tmpvalue2 = 0.0;
+        tmpvalue2 += (float)pVictim->GetResistance(SpellSchools(school));
         AuraList const& mModTargetRes = GetAurasByType(SPELL_AURA_MOD_TARGET_RESISTANCE);
         for(AuraList::const_iterator i = mModTargetRes.begin(); i != mModTargetRes.end(); ++i)
             if ((*i)->GetModifier()->m_miscvalue & int32(1 << school))
-                tmpvalue2 += (*i)->GetModifier()->m_amount;
-        if (tmpvalue2 < 0) tmpvalue2 = 0;
-        *resist += uint32(damage*tmpvalue2*0.0025*pVictim->getLevel()/getLevel());
+                tmpvalue2 += (float)((*i)->GetModifier()->m_amount);
+        tmpvalue2 *= (float)(0.15 / getLevel());
+        if (tmpvalue2 < 0.0)
+            tmpvalue2 = 0.0;
+        if (tmpvalue2 > 0.75)
+            tmpvalue2 = 0.75;
+        uint32 ran = urand(0, 100);
+        uint32 faq[4] = {24,6,4,6};
+        uint8 m = 0;
+        float Binom = 0.0;
+        for (uint8 i = 0; i < 4; i++)
+        {
+            Binom += 2400 *( powf(tmpvalue2, i) * powf( (1-tmpvalue2), (4-i)))/faq[i];
+            if (ran > Binom )
+                m++;
+            else
+                break;
+        }
+        if (damagetype == DOT && m == 4)
+            *resist += uint32(damage - 1);
+        else
+            *resist += uint32(damage * m / 4);
         if(*resist > damage)
             *resist = damage;
     }
@@ -1848,7 +1868,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
     if(*victimState != VICTIMSTATE_BLOCKS)
     {
         MeleeDamageBonus(pVictim, damage,attType);
-        CalcAbsorbResist(pVictim, damageType, *damage-*blocked_amount, absorbDamage, resistDamage);
+        CalcAbsorbResist(pVictim, damageType, DIRECT_DAMAGE, *damage-*blocked_amount, absorbDamage, resistDamage);
     }
 
     if (*absorbDamage) *hitInfo |= HITINFO_ABSORB;
