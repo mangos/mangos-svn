@@ -14760,11 +14760,15 @@ void Player::SendComboPoints()
 
 void Player::AddComboPoints(uint64 target, int8 count)
 {
+    if(!count)
+        return;
+
+    // without combo points lost (duration checked in aura)
+    RemoveSpellsCausingAura(SPELL_AURA_RETAIN_COMBO_POINTS);
+
     if(target == m_comboTarget)
     {
         m_comboPoints += count;
-        if (m_comboPoints > 5) m_comboPoints = 5;
-        if (m_comboPoints < 0) m_comboPoints = 0;
     }
     else
     {
@@ -14772,23 +14776,8 @@ void Player::AddComboPoints(uint64 target, int8 count)
         m_comboPoints = count;
     }
 
-    SendComboPoints();
-}
-
-void Player::SetComboPoints(uint64 target, int8 count)
-{
-    Unit *combotarget = ObjectAccessor::Instance().GetUnit(*this, target);
-    if(!combotarget)
-        return;
-
-    if(count > 5)
-        count = 5;
-
-    if(count < 0)
-        count = 0;
-
-    m_comboTarget = target;
-    m_comboPoints = count;
+    if (m_comboPoints > 5) m_comboPoints = 5;
+    if (m_comboPoints < 0) m_comboPoints = 0;
 
     SendComboPoints();
 }
@@ -14797,6 +14786,9 @@ void Player::ClearComboPoints()
 {
     if(!m_comboTarget)
         return;
+
+    // without combopoints lost (duration checked in aura)
+    RemoveSpellsCausingAura(SPELL_AURA_RETAIN_COMBO_POINTS);
 
     m_comboPoints = 0;
 
