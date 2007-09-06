@@ -13,8 +13,8 @@
 	<Configurations>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="./mangosd__$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="./mangosd__$(PlatformName)_$(ConfigurationName)"
+			OutputDirectory=".\mangosd__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\mangosd__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -28,10 +28,10 @@
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
-				PrecompiledHeaderFile="./mangosd__$(PlatformName)_$(ConfigurationName)mangosd.pch"
-				AssemblerListingLocation="./mangosd__$(PlatformName)_$(ConfigurationName)/"
-				ObjectFile="./mangosd__$(PlatformName)_$(ConfigurationName)/"
-				ProgramDataBaseFileName="./mangosd__$(PlatformName)_$(ConfigurationName)/"
+				PrecompiledHeaderFile=".\mangosd__$(PlatformName)_$(ConfigurationName)\mangosd.pch"
+				AssemblerListingLocation=".\mangosd__$(PlatformName)_$(ConfigurationName)\"
+				ObjectFile=".\mangosd__$(PlatformName)_$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\mangosd__$(PlatformName)_$(ConfigurationName)\"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				Detect64BitPortabilityProblems="TRUE"
@@ -46,13 +46,13 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\dep\lib\release"
-				ProgramDatabaseFile="./mangosd__$(PlatformName)_$(ConfigurationName)/mangosd.pdb"
+				ProgramDatabaseFile=".\mangosd__$(PlatformName)_$(ConfigurationName)\mangosd.pdb"
 				SubSystem="1"
-				ImportLibrary="$(OutDir)/mangosd.lib"
+				ImportLibrary="$(OutDir)\mangosd.lib"
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName="./mangosd__$(PlatformName)_$(ConfigurationName)/mangosd.tlb"/>
+				TypeLibraryName=".\mangosd__$(PlatformName)_$(ConfigurationName)\mangosd.tlb"/>
 			<Tool
 				Name="VCPostBuildEventTool"
 				CommandLine="copy ..\..\dep\lib\release\*.dll ..\..\bin\release"/>
@@ -77,8 +77,8 @@
 		</Configuration>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="./mangosd__$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="./mangosd__$(PlatformName)_$(ConfigurationName)"
+			OutputDirectory=".\mangosd__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\mangosd__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="1"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -92,10 +92,10 @@
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="TRUE"
-				PrecompiledHeaderFile="./mangosd__$(PlatformName)_$(ConfigurationName)/mangosd.pch"
-				AssemblerListingLocation="./mangosd__$(PlatformName)_$(ConfigurationName)/"
-				ObjectFile="./mangosd__$(PlatformName)_$(ConfigurationName)/"
-				ProgramDataBaseFileName="./mangosd__$(PlatformName)_$(ConfigurationName)/"
+				PrecompiledHeaderFile=".\mangosd__$(PlatformName)_$(ConfigurationName)\mangosd.pch"
+				AssemblerListingLocation=".\mangosd__$(PlatformName)_$(ConfigurationName)\"
+				ObjectFile=".\mangosd__$(PlatformName)_$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\mangosd__$(PlatformName)_$(ConfigurationName)\"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				Detect64BitPortabilityProblems="TRUE"
@@ -113,14 +113,14 @@
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\dep\lib\debug"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile="./mangosd__$(PlatformName)_$(ConfigurationName)/mangosd.pdb"
+				ProgramDatabaseFile=".\mangosd__$(PlatformName)_$(ConfigurationName)\mangosd.pdb"
 				SubSystem="1"
 				ImportLibrary="$(OutDir)/mangosd.lib"
 				FixedBaseAddress="1"
 			/>
 			<Tool
 				Name="VCMIDLTool"
-				TypeLibraryName="./mangosd__$(PlatformName)_$(ConfigurationName)/mangosd.tlb"/>
+				TypeLibraryName=".\mangosd__$(PlatformName)_$(ConfigurationName)\mangosd.tlb"/>
 			<Tool
 				Name="VCPostBuildEventTool"
 				CommandLine="copy ..\..\dep\lib\debug\*.dll ..\..\bin\debug"/>

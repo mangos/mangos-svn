@@ -13,8 +13,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\zthread___$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory=".\zthread___$(PlatformName)_$(ConfigurationName)"
+			OutputDirectory=".\zthread__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\zthread__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="2">
 			<Tool
@@ -27,7 +27,7 @@
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\zthread___$(PlatformName)_$(ConfigurationName)/zthread.pch"
+				PrecompiledHeaderFile=".\zthread__$(PlatformName)_$(ConfigurationName)\zthread.pch"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="3"/>
@@ -57,8 +57,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\zthread___$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory=".\zthread___$(PlatformName)_$(ConfigurationName)"
+			OutputDirectory=".\zthread__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\zthread__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
 			CharacterSet="2">
 			<Tool
@@ -68,7 +68,7 @@
 				RuntimeLibrary="0"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\zthread___$(PlatformName)_$(ConfigurationName)/zthread.pch"
+				PrecompiledHeaderFile=".\zthread__$(PlatformName)_$(ConfigurationName)\zthread.pch"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
 				DebugInformationFormat="3"/>
