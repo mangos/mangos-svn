@@ -350,6 +350,7 @@ struct _Spell
     uint32 SpellId;
     uint32 SpellTrigger;
     int32  SpellCharges;
+    float  SpellPPMRate;
     int32  SpellCooldown;
     uint32 SpellCategory;
     int32  SpellCategoryCooldown;
