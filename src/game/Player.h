@@ -1452,7 +1452,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void InitDataForForm();
 
         void CastItemEquipSpell(Item *item);
-        void CastItemCombatSpell(Item *item,Unit* Target);
+        void CastItemCombatSpell(Item *item,Unit* Target, WeaponAttackType attType);
 
         void SendInitWorldStates();
         void SendUpdateWorldState(uint32 Field, uint32 Value);

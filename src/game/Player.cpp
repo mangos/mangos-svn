@@ -6022,7 +6022,7 @@ void Player::CastItemEquipSpell(Item *item)
     }
 }
 
-void Player::CastItemCombatSpell(Item *item,Unit* Target)
+void Player::CastItemCombatSpell(Item *item,Unit* Target, WeaponAttackType attType)
 {
     if(!item || item->IsBroken())
         return;
@@ -6047,7 +6047,19 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target)
 
         if(proto->Spells[i].SpellTrigger != CHANCE_ON_HIT) continue;
 
-        float chance = spellInfo->procChance <= 100 ? float(spellInfo->procChance) : GetWeaponProcChance();
+        float chance = spellInfo->procChance;
+
+        if(chance > 100)
+        {
+            if(proto->Spells[i].SpellPPMRate)
+            {
+                uint32 WeaponSpeed = GetAttackTime(attType);
+                chance = GetPPMProcChance(WeaponSpeed, proto->Spells[i].SpellPPMRate);
+            }
+            else
+                chance = GetWeaponProcChance();
+        }
+
         if (roll_chance_f(chance))
             this->CastSpell(Target, spellInfo->Id, true, item);
     }

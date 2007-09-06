@@ -2033,7 +2033,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool is
         if(GetTypeId() == TYPEID_PLAYER && pVictim->isAlive())
         {
             for(int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
-                ((Player*)this)->CastItemCombatSpell(((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0,i),pVictim);
+                ((Player*)this)->CastItemCombatSpell(((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0,i),pVictim,attType);
         }
     }
 
@@ -3014,6 +3014,10 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
             if ((*i).second->GetSpellProto()->EffectTriggerSpell[j] == spellProto->Id)
                 is_triggered_by_spell = true;
         if (is_triggered_by_spell) continue;
+        // prevent removing aura that triggered by aura at triggering aura add
+        for(int j = 0; j < 3; ++j)
+            if (spellProto->EffectTriggerSpell[j] == i_spellId)
+                is_triggered_by_spell = true;
 
         // prevent remove dummy triggered spells at next effect aura add
         for(int j = 0; j < 3; ++j)

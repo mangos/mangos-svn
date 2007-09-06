@@ -29,7 +29,7 @@ extern DatabaseMysql  sDatabase;
 const char CreatureInfofmt[]="iiissiiiiiiiiififfiiiiiififiiiiffifiiiiiiiiiiiiiiiiiiiiiiiiiiisiiis";
 const char CreatureDataAddonInfofmt[]="iiiiiiiiiiii";
 const char GameObjectInfofmt[]="iiisiifiiiiiiiiiiiiiiiiiiiiiiiis";
-const char ItemPrototypefmt[]="iiiisiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffiffiffiffiffiiiiiiiiiifiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiisiiiiiiiiiiiiiiiiiiiiiiiiiifsi";
+const char ItemPrototypefmt[]="iiiisiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffiffiffiffiffiiiiiiiiiifiiifiiiiiifiiiiiifiiiiiifiiiiiifiiiisiiiiiiiiiiiiiiiiiiiiiiiiiifsi";
 const char PageTextfmt[]="isi";
 const char SpellThreatfmt[]="ii";
 
