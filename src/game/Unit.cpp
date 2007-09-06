@@ -6108,7 +6108,7 @@ void Unit::CalculateSpellDamageAndDuration(int32* damage, int32* duration, Spell
     }
 
     if(unitPlayer && needClearCombo)
-        unitPlayer->SetComboPoints(unitPlayer->GetComboTarget(), 0);
+        unitPlayer->ClearComboPoints();
 }
 
 void Unit::AddDiminishing(DiminishingMechanics mech, uint32 hitTime, uint32 hitCount)

@@ -3657,7 +3657,14 @@ void Aura::HandleShapeshiftBoosts(bool apply)
         Unit::AuraMap& tAuras = m_target->GetAuras();
         for (Unit::AuraMap::iterator itr = tAuras.begin(); itr != tAuras.end();)
         {
-            if ((*itr).second->GetSpellProto()->Stances & uint32(1<<form))
+            // not removed at form lost
+            if(itr->second->GetModifier()->m_auraname==SPELL_AURA_RETAIN_COMBO_POINTS)
+            {
+                ++itr;
+                continue;
+            }
+
+            if (itr->second->GetSpellProto()->Stances & uint32(1<<form))
                 m_target->RemoveAura(itr);
             else
                 ++itr;
@@ -3924,7 +3931,9 @@ void Aura::HandleAuraRetainComboPoints(bool apply, bool Real)
 
     Player *target = (Player*)m_target;
 
-    if(!apply)                                              // combo points was added in SPELL_EFFECT_ADD_COMBO_POINTS handler
+    // combo points was added in SPELL_EFFECT_ADD_COMBO_POINTS handler
+    // remove only if aura expire by time (in case combo points amount change aura removed without combo points lost)
+    if( !apply && Real && m_duration==0 )
         target->AddComboPoints(target->GetSelection(), -m_modifier.m_amount);
 }
 
