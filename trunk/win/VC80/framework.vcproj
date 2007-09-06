@@ -17,8 +17,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory="./framework__$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="./framework__$(PlatformName)_$(ConfigurationName)"
+			OutputDirectory=".\framework__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\framework__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
@@ -43,17 +43,17 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/Zl"
 				Optimization="0"
-				AdditionalIncludeDirectories="../../src/framework"
+				AdditionalIncludeDirectories="..\..\src\framework"
 				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_LIB"
 				MinimalRebuild="false"
 				BasicRuntimeChecks="3"
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="./framework__$(PlatformName)_$(ConfigurationName)/framework.pch"
-				AssemblerListingLocation="./framework__$(PlatformName)_$(ConfigurationName)/"
-				ObjectFile="./framework__$(PlatformName)_$(ConfigurationName)/"
-				ProgramDataBaseFileName="./framework__$(PlatformName)_$(ConfigurationName)/"
+				PrecompiledHeaderFile=".\framework__$(PlatformName)_$(ConfigurationName)\framework.pch"
+				AssemblerListingLocation=".\framework__$(PlatformName)_$(ConfigurationName)\"
+				ObjectFile=".\framework__$(PlatformName)_$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\framework__$(PlatformName)_$(ConfigurationName)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				Detect64BitPortabilityProblems="true"
@@ -71,7 +71,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="./framework__$(PlatformName)_$(ConfigurationName)/framework.lib"
+				OutputFile=".\framework__$(PlatformName)_$(ConfigurationName)\framework.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
@@ -91,8 +91,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory="./framework__$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory="./framework__$(PlatformName)_$(ConfigurationName)"
+			OutputDirectory=".\framework__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\framework__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			CharacterSet="2"
@@ -117,7 +117,7 @@
 				Name="VCCLCompilerTool"
 				AdditionalOptions="/Zl"
 				InlineFunctionExpansion="1"
-				AdditionalIncludeDirectories="../../src/framework"
+				AdditionalIncludeDirectories="..\..\src\framework"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
 				StringPooling="true"
 				MinimalRebuild="false"
@@ -125,10 +125,10 @@
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile="./framework__$(PlatformName)_$(ConfigurationName)/framework.pch"
-				AssemblerListingLocation="./framework__$(PlatformName)_$(ConfigurationName)/"
-				ObjectFile="./framework__$(PlatformName)_$(ConfigurationName)/"
-				ProgramDataBaseFileName="./framework__$(PlatformName)_$(ConfigurationName)/"
+				PrecompiledHeaderFile=".\framework__$(PlatformName)_$(ConfigurationName)\framework.pch"
+				AssemblerListingLocation=".\framework__$(PlatformName)_$(ConfigurationName)\"
+				ObjectFile=".\framework__$(PlatformName)_$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\framework__$(PlatformName)_$(ConfigurationName)\"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="true"
 				DebugInformationFormat="3"
@@ -145,7 +145,7 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				OutputFile="./framework__$(PlatformName)_$(ConfigurationName)/framework.lib"
+				OutputFile=".\framework__$(PlatformName)_$(ConfigurationName)\framework.lib"
 			/>
 			<Tool
 				Name="VCALinkTool"
