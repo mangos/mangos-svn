@@ -16,8 +16,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\game___$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory=".\game___$(PlatformName)_$(ConfigurationName)"
+			OutputDirectory=".\game__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\game__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
@@ -50,10 +50,10 @@
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\game___$(PlatformName)_$(ConfigurationName)\game.pch"
-				AssemblerListingLocation=".\game___$(PlatformName)_$(ConfigurationName)\"
-				ObjectFile=".\game___$(PlatformName)_$(ConfigurationName)\"
-				ProgramDataBaseFileName=".\game___$(PlatformName)_$(ConfigurationName)\"
+				PrecompiledHeaderFile=".\game__$(PlatformName)_$(ConfigurationName)\game.pch"
+				AssemblerListingLocation=".\game__$(PlatformName)_$(ConfigurationName)\"
+				ObjectFile=".\game__$(PlatformName)_$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\game__$(PlatformName)_$(ConfigurationName)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				Detect64BitPortabilityProblems="true"
@@ -73,8 +73,8 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies=".\shared___$(PlatformName)_$(ConfigurationName)\shared.lib"
-				OutputFile=".\game___$(PlatformName)_$(ConfigurationName)\game.lib"
+				AdditionalDependencies=".\shared__$(PlatformName)_$(ConfigurationName)\shared.lib"
+				OutputFile=".\game__$(PlatformName)_$(ConfigurationName)\game.lib"
 				SuppressStartupBanner="true"
 			/>
 			<Tool
@@ -95,8 +95,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\game___$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory=".\game___$(PlatformName)_$(ConfigurationName)"
+			OutputDirectory=".\game__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\game__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
 			InheritedPropertySheets="$(VCInstallDir)VCProjectDefaults\UpgradeFromVC71.vsprops"
 			UseOfMFC="0"
@@ -128,10 +128,10 @@
 				EnableFunctionLevelLinking="true"
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
-				PrecompiledHeaderFile=".\game___$(PlatformName)_$(ConfigurationName)\game.pch"
-				AssemblerListingLocation=".\game___$(PlatformName)_$(ConfigurationName)\"
-				ObjectFile=".\game___$(PlatformName)_$(ConfigurationName)\"
-				ProgramDataBaseFileName=".\game___$(PlatformName)_$(ConfigurationName)\"
+				PrecompiledHeaderFile=".\game__$(PlatformName)_$(ConfigurationName)\game.pch"
+				AssemblerListingLocation=".\game__$(PlatformName)_$(ConfigurationName)\"
+				ObjectFile=".\game__$(PlatformName)_$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\game__$(PlatformName)_$(ConfigurationName)\"
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				Detect64BitPortabilityProblems="true"
@@ -150,8 +150,8 @@
 			/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies=".\shared___$(PlatformName)_$(ConfigurationName)\shared.lib"
-				OutputFile=".\game___$(PlatformName)_$(ConfigurationName)\game.lib"
+				AdditionalDependencies=".\shared__$(PlatformName)_$(ConfigurationName)\shared.lib"
+				OutputFile=".\game__$(PlatformName)_$(ConfigurationName)\game.lib"
 				SuppressStartupBanner="true"
 			/>
 			<Tool

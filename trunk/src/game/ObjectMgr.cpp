@@ -390,6 +390,22 @@ void ObjectMgr::LoadCreatureTemplates()
 
     sLog.outString( ">> Loaded %u creature definitions", sCreatureStorage.RecordCount );
     sLog.outString();
+
+    // check data correctness
+    for(uint32 i = 1; i < sCreatureStorage.MaxEntry; ++i)
+    {
+        CreatureInfo const* cInfo = sCreatureStorage.LookupEntry<CreatureInfo>(i);
+        if(!cInfo)
+            continue;
+
+        if(cInfo->InhabitType <= 0 || cInfo->InhabitType > INHAVIT_ANYWHERE)
+        {
+            sLog.outErrorDb("Creature (Entry: %u) have wrong value (%u) in `InhabitType`, creature will not correctly walk/swim/fly",cInfo->Entry,cInfo->InhabitType);
+
+            // attempt fix loaded data to less problematic state
+            const_cast<CreatureInfo*>(cInfo)->InhabitType = INHAVIT_ANYWHERE;
+        }
+    }
 }
 
 void ObjectMgr::LoadCreatureAddons()

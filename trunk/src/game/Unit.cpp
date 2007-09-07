@@ -3014,10 +3014,6 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
             if ((*i).second->GetSpellProto()->EffectTriggerSpell[j] == spellProto->Id)
                 is_triggered_by_spell = true;
         if (is_triggered_by_spell) continue;
-        // prevent removing aura that triggered by aura at triggering aura add
-        for(int j = 0; j < 3; ++j)
-            if (spellProto->EffectTriggerSpell[j] == i_spellId)
-                is_triggered_by_spell = true;
 
         // prevent remove dummy triggered spells at next effect aura add
         for(int j = 0; j < 3; ++j)
@@ -4116,11 +4112,31 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
             return;
         }
         case 2006:
-            //Rampage
-            //Effects: 30029(Rank 1), 30031(Rank 2), 30032(Rank 3)
-            //Check EffectTriggerSpell[1] to determine correct effect id
-            //CastSpell(this, triggredByAura->GetSpellProto()->EffectTriggerSpell[1], true, NULL, triggredByAura);
-            return;
+        {
+            switch(auraSpellInfo->SpellFamilyName)
+            {
+                case SPELLFAMILY_WARRIOR:
+                {
+                    //Rampage (overwrite non existing triggered spell call in spell.dbc
+                    if(auraSpellInfo->SpellFamilyFlags==0x100000)
+                    {
+                        //all ranks have effect[0]==AURA (Proc Trigger Spell, non-existed) 
+                        //and effect[1]==TriggerSpell
+
+                        if(auraSpellInfo->Effect[1]!=SPELL_EFFECT_TRIGGER_SPELL)
+                        {
+                            sLog.outError("Unit::HandleProcTriggerSpell: Spell %u have wrong effect in RM",triggeredByAura->GetSpellProto()->Id);
+                            return;
+                        }
+                        
+                        CastSpell(this, auraSpellInfo->EffectTriggerSpell[1], true, NULL, triggeredByAura);
+                        return;
+                    }
+                    break;
+                }
+            }
+            break;
+        }
         case 2013:
         {
             //Nature's Guardian
@@ -4634,8 +4650,19 @@ void Unit::ModifyAuraState(uint32 flag, bool apply)
             Unit::AuraMap& tAuras = GetAuras();
             for (Unit::AuraMap::iterator itr = tAuras.begin(); itr != tAuras.end();)
             {
-                if ((*itr).second->GetSpellProto()->CasterAuraState == flag)
+                SpellEntry const* spellProto = (*itr).second->GetSpellProto();
+                if (spellProto->CasterAuraState == flag)
+                {
+                    // exceptions (applied at state but not removed at state change)
+                    if(spellProto->SpellIconID==2006 && spellProto->SpellFamilyName==SPELLFAMILY_WARRIOR && spellProto->SpellFamilyFlags==0x100000)
+                    {
+                        ++itr;
+                        continue;
+                    }
+
+
                     RemoveAura(itr);
+                }
                 else
                     ++itr;
             }

@@ -275,7 +275,7 @@ class Aura
         bool m_updated;
         bool m_removeOnDeath;
     private:
-        void UpdateSlotCounter(uint8 slot,bool add);
+        void UpdateSlotCounterAndDuration(bool add);
         float m_fearMoveAngle;
 };
 
