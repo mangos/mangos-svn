@@ -1,8 +1,12 @@
-MaNGOS 0.8    (??? ??, 2006) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.8
+MaNGOS 0.8    (??? ??, 2007) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.8
 
  MaNGOS 0.8  -adds further improvements to the
  server core as well as to the majority of game classes and the game content
  database.
+ 
+ Important License Change Notice: MaNGOS still is licensed under the terms
+ of the GPL v2, but we now have added an exception to officially allow our
+ users to link MaNGOS against the OpenSSL libraries.
 
  ==== Game Features ====
  *
