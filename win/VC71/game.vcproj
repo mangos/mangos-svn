@@ -13,8 +13,8 @@
 	<Configurations>
 		<Configuration
 			Name="Debug|Win32"
-			OutputDirectory=".\game___$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory=".\game___$(PlatformName)_$(ConfigurationName)"
+			OutputDirectory=".\game__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\game__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -30,10 +30,10 @@
 				RuntimeLibrary="1"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\game___$(PlatformName)_$(ConfigurationName)\game.pch"
-				AssemblerListingLocation=".\game___$(PlatformName)_$(ConfigurationName)\"
-				ObjectFile=".\game___$(PlatformName)_$(ConfigurationName)\"
-				ProgramDataBaseFileName=".\game___$(PlatformName)_$(ConfigurationName)\"
+				PrecompiledHeaderFile=".\game__$(PlatformName)_$(ConfigurationName)\game.pch"
+				AssemblerListingLocation=".\game__$(PlatformName)_$(ConfigurationName)\"
+				ObjectFile=".\game__$(PlatformName)_$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\game__$(PlatformName)_$(ConfigurationName)\"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				Detect64BitPortabilityProblems="TRUE"
@@ -43,8 +43,8 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies=".\shared___$(PlatformName)_$(ConfigurationName)\shared.lib"
-				OutputFile=".\game___$(PlatformName)_$(ConfigurationName)\game.lib"
+				AdditionalDependencies=".\shared__$(PlatformName)_$(ConfigurationName)\shared.lib"
+				OutputFile=".\game__$(PlatformName)_$(ConfigurationName)\game.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>
@@ -69,8 +69,8 @@
 		</Configuration>
 		<Configuration
 			Name="Release|Win32"
-			OutputDirectory=".\game___$(PlatformName)_$(ConfigurationName)"
-			IntermediateDirectory=".\game___$(PlatformName)_$(ConfigurationName)"
+			OutputDirectory=".\game__$(PlatformName)_$(ConfigurationName)"
+			IntermediateDirectory=".\game__$(PlatformName)_$(ConfigurationName)"
 			ConfigurationType="4"
 			UseOfMFC="0"
 			ATLMinimizesCRunTimeLibraryUsage="FALSE"
@@ -85,10 +85,10 @@
 				EnableFunctionLevelLinking="TRUE"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
-				PrecompiledHeaderFile=".\game___$(PlatformName)_$(ConfigurationName)\game.pch"
-				AssemblerListingLocation=".\game___$(PlatformName)_$(ConfigurationName)\"
-				ObjectFile=".\game___$(PlatformName)_$(ConfigurationName)\"
-				ProgramDataBaseFileName=".\game___$(PlatformName)_$(ConfigurationName)\"
+				PrecompiledHeaderFile=".\game__$(PlatformName)_$(ConfigurationName)\game.pch"
+				AssemblerListingLocation=".\game__$(PlatformName)_$(ConfigurationName)\"
+				ObjectFile=".\game__$(PlatformName)_$(ConfigurationName)\"
+				ProgramDataBaseFileName=".\game__$(PlatformName)_$(ConfigurationName)\"
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				Detect64BitPortabilityProblems="TRUE"
@@ -97,8 +97,8 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLibrarianTool"
-				AdditionalDependencies=".\shared___$(PlatformName)_$(ConfigurationName)\shared.lib"
-				OutputFile=".\game___$(PlatformName)_$(ConfigurationName)\game.lib"
+				AdditionalDependencies=".\shared__$(PlatformName)_$(ConfigurationName)\shared.lib"
+				OutputFile=".\game__$(PlatformName)_$(ConfigurationName)\game.lib"
 				SuppressStartupBanner="TRUE"/>
 			<Tool
 				Name="VCMIDLTool"/>

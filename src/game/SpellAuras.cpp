@@ -752,9 +752,14 @@ void Aura::_AddAura()
                 m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot), value);
             }
 
+            SetAuraSlot( slot );
+            UpdateAuraDuration();
         }
         else
-            UpdateSlotCounter(slot,true);
+        {
+            SetAuraSlot( slot );
+            UpdateSlotCounterAndDuration(true);
+        }
 
         // Update Seals information
         if( IsSealSpell(GetId()) )
@@ -763,9 +768,6 @@ void Aura::_AddAura()
         // Conflagrate aura state
         if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && (GetSpellProto()->SpellFamilyFlags & 4))
             m_target->ModifyAuraState(AURA_STATE_IMMOLATE,true);
-
-        SetAuraSlot( slot );
-        UpdateAuraDuration();
     }
 }
 
@@ -840,21 +842,30 @@ void Aura::_RemoveAura()
             SendCoolDownEvent();
     }
     else                                                    // decrease count for spell
-        UpdateSlotCounter(slot,false);
+        UpdateSlotCounterAndDuration(false);
 }
 
-void Aura::UpdateSlotCounter(uint8 slot, bool add)
+void Aura::UpdateSlotCounterAndDuration(bool add)
 {
+    uint8 slot = GetAuraSlot();
     if(slot >= MAX_AURAS)
         return;
 
     // calculate amount of similar auras by same effect index (similar different spells)
     int8 count = 0;
 
+    // calculate auras and update durations in case aura adding
     Unit::AuraList const& aura_list = m_target->GetAurasByType(GetModifier()->m_auraname);
     for(Unit::AuraList::const_iterator i = aura_list.begin();i != aura_list.end(); ++i)
+    {
         if((*i)->m_spellId==m_spellId && (*i)->m_effIndex==m_effIndex)
+        {
             ++count;
+
+            if(add)
+                (*i)->SetAuraDuration(GetAuraDuration());
+        }
+    }
 
     // at aura add aura not added yet, at aura remove aura already removed
     // in field stored (count-1)
@@ -871,6 +882,8 @@ void Aura::UpdateSlotCounter(uint8 slot, bool add)
     val = (val & ~byte_mask) | (count << byte_bitpos);
 
     m_target->SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS+index, val);
+
+    UpdateAuraDuration();
 }
 
 /*********************************************************/

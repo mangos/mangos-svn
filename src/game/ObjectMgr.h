@@ -348,6 +348,7 @@ class ObjectMgr
                 return &itr->second;
             return NULL;
         }
+
         void LoadGuilds();
         void LoadArenaTeams();
         void LoadGroups();
