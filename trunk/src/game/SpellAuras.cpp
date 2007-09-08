@@ -3049,6 +3049,12 @@ void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
         if(int32(pt) != m_modifier.m_miscvalue)
             return;
 
+        if ( GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED ){ // eating anim
+            m_target->HandleEmoteCommand(EMOTE_ONESHOT_EAT);
+        } else if ( GetSpellProto()->Id == 20577 ){ // cannibalize anim
+            m_target->HandleEmoteCommand(398);
+        }
+
         // Prevent rage regeneration in combat with rage loss slowdown warrior talent and 0<->1 switching range out combat.
         if( !(pt == POWER_RAGE && (m_target->isInCombat() || m_target->GetPower(POWER_RAGE) == 0)) )
         {
