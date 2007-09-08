@@ -916,6 +916,8 @@ enum TrainerType                                            // this is important
     TRAINER_TYPE_PETS              = 3
 };
 
+#define MAX_TRAINER_TYPE 4
+
 enum CreatureType
 {
     CREATURE_TYPE_BEAST            = 1,

@@ -6996,15 +6996,7 @@ SpellSchools Unit::GetMeleeDamageSchool() const
     {
         CreatureInfo const* cInfo = ((Creature*)this)->GetCreatureInfo();
         if(cInfo)
-        {
-            if(cInfo->dmgschool >= MAX_SPELL_SCHOOL)
-            {
-                sLog.outErrorDb("Invalid spell school value (%u) in creature+_template.dmgschool for entry %u",cInfo->dmgschool,cInfo->Entry);
-                return SPELL_SCHOOL_NORMAL;
-            }
-            else 
-                return SpellSchools(cInfo->dmgschool);
-        }
+            return SpellSchools(cInfo->dmgschool);          // checked at creature_template loading
         else
             return SPELL_SCHOOL_NORMAL;
     }

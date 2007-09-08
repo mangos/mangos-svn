@@ -1260,7 +1260,7 @@ void Pet::_LoadAuras(uint32 timediff)
     for(uint8 j = 0; j < 6; j++)
         SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + j), 0);
 
-    QueryResult *result = sDatabase.PQuery("SELECT `caster_guid`,`spell`,`effect_index`,`amount`,`remaintime` FROM `pet_aura` WHERE `guid` = '%u'",m_charmInfo->GetPetNumber());
+    QueryResult *result = sDatabase.PQuery("SELECT `caster_guid`,`spell`,`effect_index`,`amount`,`maxduration`,`remaintime`,`remaincharges` FROM `pet_aura` WHERE `guid` = '%u'",m_charmInfo->GetPetNumber());
 
     if(result)
     {
@@ -1271,7 +1271,9 @@ void Pet::_LoadAuras(uint32 timediff)
             uint32 spellid = fields[1].GetUInt32();
             uint32 effindex = fields[2].GetUInt32();
             int32 damage     = (int32)fields[3].GetUInt32();
-            int32 remaintime = (int32)fields[4].GetUInt32();
+            int32 maxduration = (int32)fields[4].GetUInt32();
+            int32 remaintime = (int32)fields[5].GetUInt32();
+            int32 remaincharges = (int32)fields[6].GetUInt32();
 
             SpellEntry const* spellproto = sSpellStore.LookupEntry(spellid);
             if(!spellproto)
@@ -1295,6 +1297,15 @@ void Pet::_LoadAuras(uint32 timediff)
                 remaintime -= timediff;
             }
 
+            // prevent wrong values of remaincharges
+            if(spellproto->procCharges)
+            {
+                if(remaincharges <= 0 || remaincharges > spellproto->procCharges)
+                    remaincharges = spellproto->procCharges;
+            }
+            else
+                remaincharges = -1;
+
             Aura* aura;
             if(spellproto->Effect[effindex] == SPELL_EFFECT_APPLY_AREA_AURA)
                 aura = new AreaAura(spellproto, effindex, NULL, this, NULL);
@@ -1302,7 +1313,7 @@ void Pet::_LoadAuras(uint32 timediff)
                 aura = new Aura(spellproto, effindex, NULL, this, NULL);
             if(!damage)
                 damage = aura->GetModifier()->m_amount;
-            aura->SetLoadedState(caster_guid,damage,remaintime);
+            aura->SetLoadedState(caster_guid,damage,maxduration,remaintime,remaincharges);
             AddAura(aura);
         }
         while( result->NextRow() );
@@ -1326,9 +1337,9 @@ void Pet::_SaveAuras()
                 break;
 
         if (i == 3 && !itr->second->IsPassive())
-            sDatabase.PExecute("INSERT INTO `pet_aura` (`guid`,`caster_guid`,`spell`,`effect_index`,`amount`,`remaintime`) "
-                "VALUES ('%u', '" I64FMTD "', '%u', '%u', '%d', '%d')",
-                m_charmInfo->GetPetNumber(), itr->second->GetCasterGUID(),(uint32)(*itr).second->GetId(), (uint32)(*itr).second->GetEffIndex(),(*itr).second->GetModifier()->m_amount,int((*itr).second->GetAuraDuration()));
+            sDatabase.PExecute("INSERT INTO `pet_aura` (`guid`,`caster_guid`,`spell`,`effect_index`,`amount`,`maxduration`,`remaintime`,`remaincharges`) "
+                "VALUES ('%u', '" I64FMTD "', '%u', '%u', '%d', '%d', '%d', '%d')",
+                m_charmInfo->GetPetNumber(), itr->second->GetCasterGUID(),(uint32)(*itr).second->GetId(), (uint32)(*itr).second->GetEffIndex(),(*itr).second->GetModifier()->m_amount,int((*itr).second->GetAuraMaxDuration()),int((*itr).second->GetAuraDuration()),int((*itr).second->m_procCharges));
     }
 }
 

@@ -319,7 +319,7 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     // 2 - _LoadBoundInstances
     holder->PQuery("SELECT `map`,`instance`,`leader` FROM `character_instance` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
     // 3 - _LoadAuras
-    holder->PQuery("SELECT `caster_guid`,`spell`,`effect_index`,`amount`,`remaintime` FROM `character_aura` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
+    holder->PQuery("SELECT `caster_guid`,`spell`,`effect_index`,`amount`,`maxduration`,`remaintime`,`remaincharges` FROM `character_aura` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
     // 4 - _LoadSpells
     holder->PQuery("SELECT `spell`,`slot`,`active` FROM `character_spell` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
     // 5 - _LoadQuestStatus

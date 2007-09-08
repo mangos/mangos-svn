@@ -91,8 +91,8 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAuraModSchoolImmunity,                     // 39 SPELL_AURA_SCHOOL_IMMUNITY
     &Aura::HandleAuraModDmgImmunity,                        // 40 SPELL_AURA_DAMAGE_IMMUNITY
     &Aura::HandleAuraModDispelImmunity,                     // 41 SPELL_AURA_DISPEL_IMMUNITY
-    &Aura::HandleAuraProcTriggerSpell,                      // 42 SPELL_AURA_PROC_TRIGGER_SPELL
-    &Aura::HandleAuraProcTriggerDamage,                     // 43 SPELL_AURA_PROC_TRIGGER_DAMAGE
+    &Aura::HandleNoImmediateEffect,                         // 42 SPELL_AURA_PROC_TRIGGER_SPELL
+    &Aura::HandleNoImmediateEffect,                         // 43 SPELL_AURA_PROC_TRIGGER_DAMAGE
     &Aura::HandleAuraTrackCreatures,                        // 44 SPELL_AURA_TRACK_CREATURES
     &Aura::HandleAuraTrackResources,                        // 45 SPELL_AURA_TRACK_RESOURCES
     &Aura::HandleNULL,                                      // 46 SPELL_AURA_MOD_PARRY_SKILL    obsolete?
@@ -314,13 +314,13 @@ m_periodicTimer(0), m_PeriodicEventId(0), m_updated(false), m_removeOnDeath(fals
     {
         m_caster_guid = target->GetGUID();
         damage = m_currentBasePoints+1;                     // stored value-1
-        target->CalculateSpellDamageAndDuration(NULL,&m_duration,m_spellProto,m_effIndex,m_currentBasePoints);
+        target->CalculateSpellDamageAndDuration(NULL,&m_maxduration,m_spellProto,m_effIndex,m_currentBasePoints);
     }
     else
     {
         m_caster_guid = caster->GetGUID();
 
-        caster->CalculateSpellDamageAndDuration(&damage,&m_duration,m_spellProto,m_effIndex,m_currentBasePoints);
+        caster->CalculateSpellDamageAndDuration(&damage,&m_maxduration,m_spellProto,m_effIndex,m_currentBasePoints);
 
         if (!damage && castItem && castItem->GetItemSuffixFactor())
         {
@@ -333,7 +333,7 @@ m_periodicTimer(0), m_PeriodicEventId(0), m_updated(false), m_removeOnDeath(fals
                     if(pEnchant)
                     {
                         for (int t=0; t<3; t++)
-                            if(pEnchant->spellid[t] == spellproto->Id)
+                            if(pEnchant->spellid[t] == m_spellProto->Id)
                         {
                             damage = uint32((item_rand_suffix->prefix[k]*castItem->GetItemSuffixFactor()) / 10000 );
                             break;
@@ -347,19 +347,26 @@ m_periodicTimer(0), m_PeriodicEventId(0), m_updated(false), m_removeOnDeath(fals
         }
     }
 
-    if(m_duration == -1 || m_isPassive && spellproto->DurationIndex == 0)
+    if(m_maxduration == -1 || m_isPassive && m_spellProto->DurationIndex == 0)
         m_permanent = true;
 
     if(!m_permanent && caster && caster->GetTypeId() == TYPEID_PLAYER)
-        ((Player *)caster)->ApplySpellMod(m_spellId, SPELLMOD_DURATION, m_duration);
+        ((Player *)caster)->ApplySpellMod(m_spellId, SPELLMOD_DURATION, m_maxduration);
 
-    sLog.outDebug("Aura: construct Spellid : %u, Aura : %u Duration : %d Target : %d Damage : %d", spellproto->Id, spellproto->EffectApplyAuraName[eff], m_duration, spellproto->EffectImplicitTargetA[eff],damage);
+    m_duration = m_maxduration;
+
+    sLog.outDebug("Aura: construct Spellid : %u, Aura : %u Duration : %d Target : %d Damage : %d", m_spellProto->Id, m_spellProto->EffectApplyAuraName[eff], m_maxduration, m_spellProto->EffectImplicitTargetA[eff],damage);
 
     m_effIndex = eff;
-    SetModifier(spellproto->EffectApplyAuraName[eff], damage, spellproto->EffectAmplitude[eff], spellproto->EffectMiscValue[eff], type);
+    SetModifier(m_spellProto->EffectApplyAuraName[eff], damage, m_spellProto->EffectAmplitude[eff], m_spellProto->EffectMiscValue[eff], type);
 
     //(spellproto->AttributesEx3 & 0x100000) all death persistent spells have this flag
-    m_isDeathPersist = (spellproto->AttributesEx3 & 0x100000) != 0;
+    m_isDeathPersist = (m_spellProto->AttributesEx3 & 0x100000) != 0;
+
+    if(m_spellProto->procCharges)
+        m_procCharges = m_spellProto->procCharges;
+    else
+        m_procCharges = -1;
 }
 
 Aura::~Aura()
@@ -658,18 +665,25 @@ void Aura::UpdateAuraDuration()
         ((Player*)m_target)->SendDirectMessage(&data);
     }
 
+    // not send in case p,ayer loading (will not work anyway until player not added to map), sent in visibility change code
+    if(m_target->GetTypeId() == TYPEID_PLAYER && ((Player*)m_target)->GetSession()->PlayerLoading())
+        return;
+
     Unit* caster = GetCaster();
 
     if(caster && caster->GetTypeId() == TYPEID_PLAYER && caster != m_target)
-    {
-        WorldPacket data(SMSG_SET_AURA_SINGLE, (8+2+4+4+4));
-        data.append(m_target->GetPackGUID());
-        data << uint8(m_auraSlot);
-        data << uint32(GetSpellProto()->Id);
-        data << uint32(GetAuraDuration());                  // full
-        data << uint32(GetAuraDuration());                  // remain
-        ((Player*)caster)->GetSession()->SendPacket(&data);
-    }
+        SendAuraDurationForCaster((Player*)caster);
+}
+
+void Aura::SendAuraDurationForCaster(Player* caster)
+{
+    WorldPacket data(SMSG_SET_AURA_SINGLE, (8+2+4+4+4));
+    data.append(m_target->GetPackGUID());
+    data << uint8(m_auraSlot);
+    data << uint32(GetSpellProto()->Id);
+    data << uint32(GetAuraMaxDuration());               // full
+    data << uint32(GetAuraDuration());                  // remain
+    caster->GetSession()->SendPacket(&data);
 }
 
 void Aura::_AddAura()
@@ -1037,19 +1051,11 @@ void Aura::HandleInterruptRegen(bool apply, bool Real)
 
 void Aura::HandleAuraDummy(bool apply, bool Real)
 {
-    Unit* caster = GetCaster();
-
-    // Must be processed before any auras code
-    if(apply && Real && !m_procCharges)
-    {
-        m_procCharges = GetSpellProto()->procCharges;
-        if (!m_procCharges)
-            m_procCharges = -1;
-    }
-
     // spells required only Real aura add/remove
     if(!Real)
         return;
+
+    Unit* caster = GetCaster();
 
     // Mangle (Cat) combo && damage
     if( m_spellProto->SpellFamilyName==SPELLFAMILY_DRUID && m_spellProto->SpellFamilyFlags == 0x40000000000LL &&
@@ -2663,30 +2669,6 @@ void Aura::HandleAuraModStalked(bool apply, bool Real)
 }
 
 /*********************************************************/
-/***                 PROC TRIGGER                      ***/
-/*********************************************************/
-
-void Aura::HandleAuraProcTriggerSpell(bool apply, bool Real)
-{
-    if(Real && apply && !m_procCharges)
-    {
-        m_procCharges = GetSpellProto()->procCharges;
-        if (!m_procCharges)
-            m_procCharges = -1;
-    }
-}
-
-void Aura::HandleAuraProcTriggerDamage(bool apply, bool Real)
-{
-    if(Real && apply && !m_procCharges)
-    {
-        m_procCharges = GetSpellProto()->procCharges;
-        if (!m_procCharges)
-            m_procCharges = -1;
-    }
-}
-
-/*********************************************************/
 /***                   PERIODIC                        ***/
 /*********************************************************/
 
@@ -3049,9 +3031,14 @@ void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
         if(int32(pt) != m_modifier.m_miscvalue)
             return;
 
-        if ( GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED ){ // eating anim
+        if ( GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED )
+        {
+            // eating anim
             m_target->HandleEmoteCommand(EMOTE_ONESHOT_EAT);
-        } else if ( GetSpellProto()->Id == 20577 ){ // cannibalize anim
+        }
+        else if( GetSpellProto()->Id == 20577 )
+        {
+            // cannibalize anim
             m_target->HandleEmoteCommand(398);
         }
 
@@ -3157,13 +3144,6 @@ void Aura::HandleAuraModParryPercent(bool apply, bool Real)
     if(m_target->GetTypeId()!=TYPEID_PLAYER)
         return;
 
-    if(Real && apply && !m_procCharges)
-    {
-        m_procCharges = GetSpellProto()->procCharges;
-        if (!m_procCharges)
-            m_procCharges = -1;
-    }
-
     ((Player*)m_target)->HandleBaseModValue(PARRY_PERCENTAGE, FLAT_MOD, float (m_modifier.m_amount), apply);
 }
 
@@ -3181,15 +3161,8 @@ void Aura::HandleAuraModBlockPercent(bool apply, bool Real)
     if(m_target->GetTypeId()!=TYPEID_PLAYER)
         return;
 
-    if(apply && Real && !m_procCharges)
-    {
-        m_procCharges = GetSpellProto()->procCharges;
-
+    if(apply && Real && m_procCharges >= 0)
         ((Player *)m_target)->ApplySpellMod(GetId(), SPELLMOD_EXTRA_BLOCKS, m_procCharges);
-
-        if (!m_procCharges)
-            m_procCharges = -1;
-    }
 
     ((Player*)m_target)->HandleBaseModValue(BLOCK_PERCENTAGE, FLAT_MOD, float (m_modifier.m_amount), apply);
     //sLog.outError("BONUS BLOCK CHANCE: + %f", float(m_modifier.m_amount));
@@ -3972,3 +3945,4 @@ void Aura::HandleSpiritOfRedumption( bool apply, bool Real )
     if(!apply)
         m_target->DealDamage(m_target, m_target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_NORMAL, GetSpellProto(), 0, false);
 }
+

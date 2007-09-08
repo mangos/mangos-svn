@@ -12055,7 +12055,7 @@ void Player::_LoadAuras(QueryResult *result, uint32 timediff)
     for(uint8 j = 0; j < 6; j++)
         SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + j), 0);
 
-    //QueryResult *result = sDatabase.PQuery("SELECT `caster_guid`,`spell`,`effect_index`,`amount`,`remaintime` FROM `character_aura` WHERE `guid` = '%u'",GetGUIDLow());
+    //QueryResult *result = sDatabase.PQuery("SELECT `caster_guid`,`spell`,`effect_index`,`amount`,`maxduration`,`remaintime`,`remaincharges` FROM `character_aura` WHERE `guid` = '%u'",GetGUIDLow());
 
     if(result)
     {
@@ -12066,7 +12066,9 @@ void Player::_LoadAuras(QueryResult *result, uint32 timediff)
             uint32 spellid = fields[1].GetUInt32();
             uint32 effindex = fields[2].GetUInt32();
             int32 damage     = (int32)fields[3].GetUInt32();
-            int32 remaintime = (int32)fields[4].GetUInt32();
+            int32 maxduration = (int32)fields[4].GetUInt32();
+            int32 remaintime = (int32)fields[5].GetUInt32();
+            int32 remaincharges = (int32)fields[6].GetUInt32();
 
             SpellEntry const* spellproto = sSpellStore.LookupEntry(spellid);
             if(!spellproto)
@@ -12090,6 +12092,15 @@ void Player::_LoadAuras(QueryResult *result, uint32 timediff)
                 remaintime -= timediff;
             }
 
+            // prevent wrong values of remaincharges
+            if(spellproto->procCharges)
+            {
+                if(remaincharges <= 0 || remaincharges > spellproto->procCharges)
+                    remaincharges = spellproto->procCharges;
+            }
+            else
+                remaincharges = -1;
+
             Aura* aura;
             if(spellproto->Effect[effindex] == SPELL_EFFECT_APPLY_AREA_AURA)
                 aura = new AreaAura(spellproto, effindex, NULL, this, NULL);
@@ -12097,7 +12108,7 @@ void Player::_LoadAuras(QueryResult *result, uint32 timediff)
                 aura = new Aura(spellproto, effindex, NULL, this, NULL);
             if(!damage)
                 damage = aura->GetModifier()->m_amount;
-            aura->SetLoadedState(caster_guid,damage,remaintime);
+            aura->SetLoadedState(caster_guid,damage,maxduration,remaintime,remaincharges);
             AddAura(aura);
         }
         while( result->NextRow() );
@@ -12901,9 +12912,9 @@ void Player::_SaveAuras()
         if (i == 3 && !itr->second->IsPassive())
         {
             sDatabase.PExecute("DELETE FROM `character_aura` WHERE `guid` = '%u' and `spell` = '%u' and  `effect_index`= '%u'",GetGUIDLow(),(uint32)(*itr).second->GetId(), (uint32)(*itr).second->GetEffIndex());
-            sDatabase.PExecute("INSERT INTO `character_aura` (`guid`,`caster_guid`,`spell`,`effect_index`,`amount`,`remaintime`) "
-                "VALUES ('%u', '" I64FMTD "' ,'%u', '%u', '%d', '%d')",
-                GetGUIDLow(), itr->second->GetCasterGUID(), (uint32)(*itr).second->GetId(), (uint32)(*itr).second->GetEffIndex(), (*itr).second->GetModifier()->m_amount,int((*itr).second->GetAuraDuration()));
+            sDatabase.PExecute("INSERT INTO `character_aura` (`guid`,`caster_guid`,`spell`,`effect_index`,`amount`,`maxduration`,`remaintime`,`remaincharges`) "
+                "VALUES ('%u', '" I64FMTD "' ,'%u', '%u', '%d', '%d', '%d', '%d')",
+                GetGUIDLow(), itr->second->GetCasterGUID(), (uint32)(*itr).second->GetId(), (uint32)(*itr).second->GetEffIndex(), (*itr).second->GetModifier()->m_amount,int((*itr).second->GetAuraMaxDuration()),int((*itr).second->GetAuraDuration()),int((*itr).second->m_procCharges));
         }
     }
 }
@@ -13923,6 +13934,12 @@ void Player::HandleStealthedUnitsDetection()
             if((sLog.getLogFilter() & LOG_FILTER_VISIBILITY_CHANGES)==0)
                 sLog.outDebug("Object %u (Type: %u) is detected in stealth by player %u. Distance = %f",(*i)->GetGUIDLow(),(*i)->GetTypeId(),GetGUIDLow(),sqrt(GetDistanceSq(*i)));
             #endif
+
+            // target aura duration for caster show only if target exist at caster client 
+            // send data at target visibility change (adding to client)
+            if((*i)!=this && (*i)->isType(TYPE_UNIT))
+                SendAuraDurationsForTarget(*i);
+
             i = stealthedUnits.erase(i);
             continue;
         }
@@ -14683,6 +14700,11 @@ void Player::UpdateVisibilityOf(WorldObject* target)
             if((sLog.getLogFilter() & LOG_FILTER_VISIBILITY_CHANGES)==0)
                 sLog.outDebug("Object %u (Type: %u) is visible now for player %u. Distance = %f",target->GetGUIDLow(),target->GetTypeId(),GetGUIDLow(),sqrt(GetDistanceSq(target)));
             #endif
+
+            // target aura duration for caster show only if target exist at caster client 
+            // send data at target visibility change (adding to client)
+            if(target!=this && target->isType(TYPE_UNIT))
+                SendAuraDurationsForTarget((Unit*)target);
         }
         else
         {
@@ -14710,7 +14732,7 @@ inline void UpdateVisibilityOf_helper(std::set<uint64>& s64, GameObject* target)
 }
 
 template<class T>
-void Player::UpdateVisibilityOf(T* target, UpdateData& data, UpdateDataMapType& data_updates)
+void Player::UpdateVisibilityOf(T* target, UpdateData& data, UpdateDataMapType& data_updates, std::set<WorldObject*>& visibleNow)
 {
     if(HaveAtClient(target))
     {
@@ -14735,6 +14757,7 @@ void Player::UpdateVisibilityOf(T* target, UpdateData& data, UpdateDataMapType& 
     {
         if(target->isVisibleForInState(this,false))
         {
+            visibleNow.insert(target);
             target->BuildUpdate(data_updates);
             target->BuildCreateUpdateBlockForPlayer(&data, this);
             UpdateVisibilityOf_helper(m_clientGUIDs,target);
@@ -14747,11 +14770,11 @@ void Player::UpdateVisibilityOf(T* target, UpdateData& data, UpdateDataMapType& 
     }
 }
 
-template void Player::UpdateVisibilityOf(Player*        target, UpdateData& data, UpdateDataMapType& data_updates);
-template void Player::UpdateVisibilityOf(Creature*      target, UpdateData& data, UpdateDataMapType& data_updates);
-template void Player::UpdateVisibilityOf(Corpse*        target, UpdateData& data, UpdateDataMapType& data_updates);
-template void Player::UpdateVisibilityOf(GameObject*    target, UpdateData& data, UpdateDataMapType& data_updates);
-template void Player::UpdateVisibilityOf(DynamicObject* target, UpdateData& data, UpdateDataMapType& data_updates);
+template void Player::UpdateVisibilityOf(Player*        target, UpdateData& data, UpdateDataMapType& data_updates, std::set<WorldObject*>& visibleNow);
+template void Player::UpdateVisibilityOf(Creature*      target, UpdateData& data, UpdateDataMapType& data_updates, std::set<WorldObject*>& visibleNow);
+template void Player::UpdateVisibilityOf(Corpse*        target, UpdateData& data, UpdateDataMapType& data_updates, std::set<WorldObject*>& visibleNow);
+template void Player::UpdateVisibilityOf(GameObject*    target, UpdateData& data, UpdateDataMapType& data_updates, std::set<WorldObject*>& visibleNow);
+template void Player::UpdateVisibilityOf(DynamicObject* target, UpdateData& data, UpdateDataMapType& data_updates, std::set<WorldObject*>& visibleNow);
 
 void Player::InitPrimaryProffesions()
 {
@@ -14975,5 +14998,17 @@ void Player::resetSpells()
             sLog.outDebug("PLAYER: Adding initial spell, id = %u",tspell);
             learnSpell(tspell);
         }
+    }
+}
+
+void Player::SendAuraDurationsForTarget(Unit* target)
+{
+    for(Unit::AuraMap::const_iterator itr = target->GetAuras().begin(); itr != target->GetAuras().end(); ++itr)
+    {
+        Aura* aura = itr->second;
+        if(aura->GetAuraSlot() >= MAX_AURAS || aura->IsPassive() || aura->GetCasterGUID()!=GetGUID())
+            continue;
+
+        aura->SendAuraDurationForCaster(this);
     }
 }
