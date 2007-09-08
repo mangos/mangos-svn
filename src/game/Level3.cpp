@@ -3163,7 +3163,7 @@ bool ChatHandler::HandleListAurasCommand (const char * args)
     PSendSysMessage(LANG_COMMAND_TARGET_LISTAURAS, uAuras.size());
     for (Unit::AuraMap::iterator itr = uAuras.begin(); itr != uAuras.end(); ++itr)
     {
-        PSendSysMessage(LANG_COMMAND_TARGET_AURADETAIL, itr->second->GetId(), itr->second->GetEffIndex(), itr->second->GetModifier()->m_auraname, itr->second->GetAuraDuration(), itr->second->GetSpellProto()->SpellName[0]);
+        PSendSysMessage(LANG_COMMAND_TARGET_AURADETAIL, itr->second->GetId(), itr->second->GetEffIndex(), itr->second->GetModifier()->m_auraname, itr->second->GetAuraDuration(), itr->second->GetAuraMaxDuration(), itr->second->GetSpellProto()->SpellName[sWorld.GetDBClang()]);
     }
     for (int i = 0; i < TOTAL_AURAS; i++)
     {
@@ -3172,7 +3172,7 @@ bool ChatHandler::HandleListAurasCommand (const char * args)
         PSendSysMessage(LANG_COMMAND_TARGET_LISTAURATYPE, uAuraList.size(), i);
         for (Unit::AuraList::const_iterator itr = uAuraList.begin(); itr != uAuraList.end(); ++itr)
         {
-            PSendSysMessage(LANG_COMMAND_TARGET_AURASIMPLE, (*itr)->GetId(), (*itr)->GetEffIndex(), (*itr)->GetSpellProto()->SpellName[0]);
+            PSendSysMessage(LANG_COMMAND_TARGET_AURASIMPLE, (*itr)->GetId(), (*itr)->GetEffIndex(), (*itr)->GetSpellProto()->SpellName[sWorld.GetDBClang()]);
         }
     }
     return true;

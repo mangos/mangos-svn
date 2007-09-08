@@ -51,6 +51,7 @@ namespace MaNGOS
         UpdateData i_data;
         UpdateDataMapType i_data_updates;
         Player::ClientGUIDs i_clientGUIDs;
+        std::set<WorldObject*> i_visibleNow;
 
         explicit VisibleNotifier(Player &player) : i_player(player),i_clientGUIDs(player.m_clientGUIDs) {}
         template<class T> void Visit(GridRefManager<T> &m);

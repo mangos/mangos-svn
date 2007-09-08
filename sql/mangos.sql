@@ -334,7 +334,9 @@ CREATE TABLE `character_aura` (
   `spell` int(11) unsigned NOT NULL default '0',
   `effect_index` int(11) unsigned NOT NULL default '0',
   `amount` int(11) NOT NULL default '0',
+  `maxduration`   int(11) NOT NULL default '0',
   `remaintime` int(11) NOT NULL default '0',
+  `remaincharges` int(11) NOT NULL default '0',
   PRIMARY KEY  (`guid`,`spell`,`effect_index`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
@@ -2461,7 +2463,9 @@ CREATE TABLE `pet_aura` (
   `spell` int(11) unsigned NOT NULL default '0',
   `effect_index` int(11) unsigned NOT NULL default '0',
   `amount` int(11) NOT NULL default '0',
+  `maxduration`   int(11) NOT NULL default '0',
   `remaintime` int(11) NOT NULL default '0',
+  `remaincharges` int(11) NOT NULL default '0',
   PRIMARY KEY  (`guid`,`spell`,`effect_index`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Pet System';
 

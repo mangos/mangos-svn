@@ -497,8 +497,7 @@ bool Creature::isCanTrainingOf(Player* pPlayer, bool msg) const
             }
             break;
         default:
-            sLog.outErrorDb("Creature %u (entry: %u) have trainer type %u",GetGUIDLow(),GetCreatureInfo()->Entry,GetCreatureInfo()->trainer_type);
-            return false;
+            return false;                                   // checked and error output at creature_template loading
     }
     return true;
 }
@@ -1151,14 +1150,13 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     SetFloatValue(UNIT_FIELD_COMBATREACH,cinfo->combat_reach );
 
     FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(cinfo->faction);
-    if (factionTemplate)
+    if (factionTemplate)                                    // check and error show at loading templates
     {
         FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionTemplate->faction);
         if (factionEntry)
             if (cinfo->civilian != 1 && (factionEntry->team == ALLIANCE || factionEntry->team == HORDE))
                 SetPvP(true);
-    } else
-    sLog.outErrorDb("Error: invalid faction (%u) for creature (GUIDLow: %u Entry: %u)", cinfo->faction, GetGUIDLow(),Entry);
+    }
 
     m_spells[0] = cinfo->spell1;
     m_spells[1] = cinfo->spell2;
@@ -1171,13 +1169,8 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     SetSpeed(MOVE_SWIM,     cinfo->speed);
     SetSpeed(MOVE_SWIMBACK, cinfo->speed);
 
-    if(cinfo->MovementType < MAX_DB_MOTION_TYPE)
-        m_defaultMovementType = MovementGeneratorType(cinfo->MovementType);
-    else
-    {
-        m_defaultMovementType = IDLE_MOTION_TYPE;
-        sLog.outErrorDb("Creature template %u have wrong movement generator type value %u, ignore and set to IDLE.",Entry,cinfo->MovementType);
-    }
+    // checked at loading
+    m_defaultMovementType = MovementGeneratorType(cinfo->MovementType);
 
     return true;
 }
@@ -1244,16 +1237,8 @@ bool Creature::LoadFromDB(uint32 guid, uint32 InstanceId)
         objmgr.SaveCreatureRespawnTime(m_DBTableGuid,GetInstanceId(),0);
     }
 
-    {
-        uint32 mtg = data->movementType;
-        if(mtg < MAX_DB_MOTION_TYPE)
-            m_defaultMovementType = MovementGeneratorType(mtg);
-        else
-        {
-            m_defaultMovementType = IDLE_MOTION_TYPE;
-            sLog.outErrorDb("Creature (GUID: %u ID: %u) have wrong movement generator type value %u, ignore and set to IDLE.",guid,GetEntry(),mtg);
-        }
-    }
+    // checked at creature_template loading
+    m_defaultMovementType = MovementGeneratorType(data->movementType);
 
     AIM_Initialize();
     return true;

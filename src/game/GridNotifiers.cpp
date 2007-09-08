@@ -62,7 +62,7 @@ VisibleNotifier::Visit(PlayerMapType &m)
             continue;
 
         iter->getSource()->UpdateVisibilityOf(&i_player);
-        i_player.UpdateVisibilityOf(iter->getSource(),i_data,i_data_updates);
+        i_player.UpdateVisibilityOf(iter->getSource(),i_data,i_data_updates,i_visibleNow);
         i_clientGUIDs.erase(iter->getSource()->GetGUID());
     }
 }
@@ -79,7 +79,7 @@ VisibleNotifier::Notify()
             if(i_clientGUIDs.find((*itr)->GetGUID())!=i_clientGUIDs.end())
             {
                 (*itr)->UpdateVisibilityOf(&i_player);
-                i_player.UpdateVisibilityOf((*itr),i_data,i_data_updates);
+                i_player.UpdateVisibilityOf((*itr),i_data,i_data_updates,i_visibleNow);
                 i_clientGUIDs.erase((*itr)->GetGUID());
             }
         }
@@ -127,6 +127,14 @@ VisibleNotifier::Notify()
                 plr->UpdateVisibilityOf(&i_player);
         }
     }
+
+    // Now do operations that required done at object visibility change to visible
+
+    // target aura duration for caster show only if target exist at caster client 
+    // send data at target visibility change (adding to client)
+    for(std::set<WorldObject*>::const_iterator vItr = i_visibleNow.begin(); vItr != i_visibleNow.end(); ++vItr)
+        if((*vItr)!=&i_player && (*vItr)->isType(TYPE_UNIT))
+            i_player.SendAuraDurationsForTarget((Unit*)(*vItr));
 }
 
 void

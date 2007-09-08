@@ -382,7 +382,7 @@
 #define LANG_COMMAND_TP_DELETEERR        "Teleport location NOT deleted: database error."
 
 #define LANG_COMMAND_TARGET_LISTAURAS    "Target unit has %d auras:"
-#define LANG_COMMAND_TARGET_AURADETAIL   "id: %d eff: %d type: %d duration: %d name: %s"
+#define LANG_COMMAND_TARGET_AURADETAIL   "id: %d eff: %d type: %d duration: %d maxduration: %d name: %s"
 #define LANG_COMMAND_TARGET_LISTAURATYPE "Target unit has %d auras of type %d:"
 #define LANG_COMMAND_TARGET_AURASIMPLE   "id: %d eff: %d name: %s"
 

@@ -398,12 +398,29 @@ void ObjectMgr::LoadCreatureTemplates()
         if(!cInfo)
             continue;
 
+        FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(cInfo->faction);
+        if(!factionTemplate)
+            sLog.outErrorDb("Creature (Entry: %u) have non-existed faction template (%u)", cInfo->Entry, cInfo->faction);
+
+        if(cInfo->dmgschool >= MAX_SPELL_SCHOOL)
+        {
+            sLog.outErrorDb("Creature (Entry: %u) have invalid spell school value (%u) in `dmgschool`",cInfo->Entry,cInfo->dmgschool);
+            const_cast<CreatureInfo*>(cInfo)->dmgschool = SPELL_SCHOOL_NORMAL;
+        }
+
+        if((cInfo->npcflag & UNIT_NPC_FLAG_TRAINER) && cInfo->trainer_type >= MAX_TRAINER_TYPE)
+            sLog.outErrorDb("Creature (Entry: %u) have trainer wrong type %u",cInfo->Entry,cInfo->trainer_type);
+
         if(cInfo->InhabitType <= 0 || cInfo->InhabitType > INHAVIT_ANYWHERE)
         {
             sLog.outErrorDb("Creature (Entry: %u) have wrong value (%u) in `InhabitType`, creature will not correctly walk/swim/fly",cInfo->Entry,cInfo->InhabitType);
-
-            // attempt fix loaded data to less problematic state
             const_cast<CreatureInfo*>(cInfo)->InhabitType = INHAVIT_ANYWHERE;
+        }
+
+        if(cInfo->MovementType >= MAX_DB_MOTION_TYPE)
+        {
+            sLog.outErrorDb("Creature (Entry: %u) have wrong movement generator type (%u), ignore and set to IDLE.",cInfo->Entry,cInfo->MovementType);
+            const_cast<CreatureInfo*>(cInfo)->MovementType = IDLE_MOTION_TYPE;
         }
     }
 }

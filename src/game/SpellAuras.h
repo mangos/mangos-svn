@@ -123,8 +123,6 @@ class Aura
         void HandleAuraModSchoolImmunity(bool Apply, bool Real);
         void HandleAuraModDmgImmunity(bool Apply, bool Real);
         void HandleAuraModDispelImmunity(bool Apply, bool Real);
-        void HandleAuraProcTriggerSpell(bool Apply, bool Real);
-        void HandleAuraProcTriggerDamage(bool Apply, bool Real);
         void HandleAuraTrackCreatures(bool Apply, bool Real);
         void HandleAuraTrackResources(bool Apply, bool Real);
         void HandleAuraModParryPercent(bool Apply, bool Real);
@@ -197,20 +195,26 @@ class Aura
         uint32 GetEffIndex() const{ return m_effIndex; }
         void SetEffIndex(uint32 eff) { m_effIndex = eff; }
         int32 GetBasePoints() const { return m_currentBasePoints; }
+        
+        int32 GetAuraMaxDuration() const { return m_maxduration; }
+        void SetAuraMaxDuration(int32 duration) { m_maxduration = duration; }
         int32 GetAuraDuration() const { return m_duration; }
         void SetAuraDuration(int32 duration) { m_duration = duration; }
         time_t GetAuraApplyTime() { return m_applyTime; }
         void UpdateAuraDuration();
+        void SendAuraDurationForCaster(Player* caster);
 
         uint64 const& GetCasterGUID() const { return m_caster_guid; }
         Unit* GetCaster() const;
         Unit* GetTarget() const { return m_target; }
         void SetTarget(Unit* target) { m_target = target; }
-        void SetLoadedState(uint64 caster_guid,int32 damage,int32 duration)
+        void SetLoadedState(uint64 caster_guid,int32 damage,int32 maxduration,int32 duration,int32 charges)
         {
             m_caster_guid = caster_guid;
             m_modifier.m_amount = damage;
+            m_maxduration = maxduration;
             m_duration = duration;
+            m_procCharges = charges;
         }
 
         uint8 GetAuraSlot() const { return m_auraSlot; }
@@ -253,6 +257,7 @@ class Aura
         int32 m_currentBasePoints;                          // cache SpellEntry::EffectBasePoints and use for set custom base points
         uint64 m_caster_guid;
         Unit* m_target;
+        int32 m_maxduration;
         int32 m_duration;
         int32 m_timeCla;
         // it is NOT safe to keep a pointer to the item because it may get deleted
