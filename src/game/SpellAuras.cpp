@@ -782,6 +782,12 @@ void Aura::_AddAura()
         // Conflagrate aura state
         if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && (GetSpellProto()->SpellFamilyFlags & 4))
             m_target->ModifyAuraState(AURA_STATE_IMMOLATE,true);
+
+        if(GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID
+            && (GetSpellProto()->SpellFamilyFlags == 0x40 || GetSpellProto()->SpellFamilyFlags == 0x10))
+        {
+            m_target->ModifyAuraState(AURA_STATE_SWIFTMEND, true);
+        }
     }
 }
 
@@ -849,6 +855,25 @@ void Aura::_RemoveAura()
         // Conflagrate aura state
         if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_WARLOCK && (GetSpellProto()->SpellFamilyFlags & 4))
             m_target->ModifyAuraState(AURA_STATE_IMMOLATE, false);
+
+        // Swiftmend aura state
+        if(GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID
+            && (GetSpellProto()->SpellFamilyFlags == 0x40 || GetSpellProto()->SpellFamilyFlags == 0x10))
+        {
+            bool found = false;
+            Unit::AuraList const& RejorRegr = m_target->GetAurasByType(SPELL_AURA_PERIODIC_HEAL);
+            for(Unit::AuraList::const_iterator i = RejorRegr.begin(); i != RejorRegr.end(); ++i)
+            {
+                if((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID
+                    && ((*i)->GetSpellProto()->SpellFamilyFlags == 0x40 || (*i)->GetSpellProto()->SpellFamilyFlags == 0x10) )
+                {
+                    found = true;
+                    break;
+                }
+            }
+            if(!found)
+                m_target->ModifyAuraState(AURA_STATE_SWIFTMEND, false);
+        }
 
         // reset cooldown state for spells infinity/long aura (it's all self applied (?))
         int32 duration = GetDuration(GetSpellProto());

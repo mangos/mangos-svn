@@ -1247,6 +1247,40 @@ void Spell::EffectHeal( uint32 i )
 {
     if( unitTarget && unitTarget->isAlive() && damage >= 0)
     {
+        //Swiftmend - consumes Regrowth or Rejuvenation
+        if (m_spellInfo->TargetAuraState == AURA_STATE_SWIFTMEND)
+        {
+            Unit::AuraList const& RejorRegr = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_HEAL);
+            if(!RejorRegr.empty())
+            {
+                // find most short by duration
+                Unit::AuraList::const_iterator short_itr = RejorRegr.begin();
+                for(Unit::AuraList::const_iterator i = RejorRegr.begin(); i != RejorRegr.end(); ++i)
+                {
+                    if((*i)->GetSpellProto()->SpellFamilyName == SPELLFAMILY_DRUID
+                        && ((*i)->GetSpellProto()->SpellFamilyFlags == 0x40 || (*i)->GetSpellProto()->SpellFamilyFlags == 0x10) )
+                    {
+                        if((*i)->GetAuraDuration() < (*short_itr)->GetAuraDuration())
+                            short_itr = i;
+                    }
+                }
+
+                switch((*short_itr)->GetSpellProto()->SpellFamilyFlags)
+                {
+                    case 16:                                //Rejuvenation
+                        damage += (*short_itr)->GetModifier()->m_amount * 4;
+                        unitTarget->RemoveAurasDueToSpell((*short_itr)->GetId());
+                        break;
+                    case 64:                                //Regrowth
+                        damage += (*short_itr)->GetModifier()->m_amount * 6;
+                        unitTarget->RemoveAurasDueToSpell((*short_itr)->GetId());
+                        break;
+                    default:
+                        break;
+                }
+            }
+        }
+
         int32 addhealth = m_caster->SpellHealingBonus(m_spellInfo, uint32(damage),HEAL, unitTarget);
         bool crit = m_caster->SpellCriticalBonus(m_spellInfo, &addhealth, NULL);
         if(unitTarget->GetTypeId() == TYPEID_PLAYER)
