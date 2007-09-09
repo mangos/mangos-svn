@@ -992,8 +992,9 @@ void Spell::EffectApplyAura(uint32 i)
 {
     if(!unitTarget)
         return;
-                                                            // ghost spell check
-    if(!unitTarget->isAlive() && !(m_spellInfo->Id == 20584 || m_spellInfo->Id == 8326))
+    // ghost spell check, allow apply any auras at player loading in ghost mode (will be cleanup after load)
+    if( !unitTarget->isAlive() && m_spellInfo->Id != 20584 && m_spellInfo->Id != 8326 &&
+        (unitTarget->GetTypeId()!=TYPEID_PLAYER || !((Player*)unitTarget)->GetSession()->PlayerLoading()) )
         return;
 
     /* WTF: ?

@@ -11978,6 +11978,11 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 
     _LoadHonor(holder->GetResult(16));
 
+    // Spell code allow apply any auras to dead character in load time in aura/spell/item loading
+    // Do now before stats re-calculation cleanup for ghost state unexpected auras
+    if(!isAlive())
+        RemoveAllAurasOnDeath();
+
     //apply all stat bonuses from items and auras
     SetCanModifyStats(true);
     UpdateAllStats();

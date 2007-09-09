@@ -2857,13 +2857,6 @@ long Unit::GetTotalAuraModifier(uint32 ModifierID) const
 
 bool Unit::AddAura(Aura *Aur, bool uniq)
 {
-                                                            // ghost spell check
-    if (!isAlive() && !(Aur->GetSpellProto()->Id == 20584 || Aur->GetSpellProto()->Id == 8326))
-    {
-        delete Aur;
-        return false;
-    }
-
     if(Aur->GetTarget() != this)
     {
         sLog.outError("Aura (spell %u eff %u) add to aura list of %s (lowguid: %u) but Aura target is %s (lowguid: %u)",
