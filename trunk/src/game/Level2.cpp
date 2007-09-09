@@ -682,7 +682,6 @@ bool ChatHandler::HandleTurnObjectCommand(const char* args)
 //move selected creature
 bool ChatHandler::HandleMoveCreatureCommand(const char* args)
 {
-    if(!*args) return false;
     uint32 lowguid = 0;
 
     Creature* pCreature = getSelectedCreature();
