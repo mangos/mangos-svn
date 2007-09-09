@@ -438,9 +438,12 @@ pkgdata_DATA = \
 	4426_creature_template.sql \
 	4430_spell_proc_event.sql \
 	4432_item_template.sql \
-	4434_spell_proc_event.sql \
 	4432_spell_chain.sql \
 	4432_spell_proc_event.sql \
+	4434_spell_proc_event.sql \
+	4437_character_aura.sql \
+	4437_pet_aura.sql \
+	4439_spell_proc_event.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -859,7 +862,10 @@ EXTRA_DIST = \
 	4426_creature_template.sql \
 	4430_spell_proc_event.sql \
 	4432_item_template.sql \
-	4434_spell_proc_event.sql \
 	4432_spell_chain.sql \
 	4432_spell_proc_event.sql \
+	4434_spell_proc_event.sql \
+	4437_character_aura.sql \
+	4437_pet_aura.sql \
+	4439_spell_proc_event.sql \
 	README
