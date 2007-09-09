@@ -223,9 +223,16 @@ Map::Map(uint32 id, time_t expiry, uint32 ainstanceId) : i_id(id), i_gridExpiry(
             i_maxPlayers = fields[0].GetUInt32();
             i_resetDelayTime = fields[1].GetUInt32();
             i_resetTime = (time_t) fields[2].GetUInt64();
-            if (i_resetTime == 0) InitResetTime();
+            delete result;
         }
-        delete result;
+        else
+        {
+            sLog.outErrorDb("Instance (Map: %u Id: %u) not have records in `instance_template` and `instance` in DB. Using default settings.",id,i_InstanceId);
+            i_maxPlayers = 0;
+            i_resetDelayTime = 0;
+            i_resetTime = (time_t)0;
+        }
+        if (i_resetTime == 0) InitResetTime();
     }
 
     i_Players.clear();
@@ -461,7 +468,7 @@ bool Map::AddInstanced(Player *player)
         Guard guard(*this);
 
         // GMs can avoid player limits
-        if ((i_Players.size() >= i_maxPlayers) && (!player->isGameMaster()))
+        if (i_maxPlayers && (i_Players.size() >= i_maxPlayers) && (!player->isGameMaster()))
         {
             sLog.outDetail("MAP: Instance '%u' of map '%s' cannot have more than '%u' players. Player '%s' rejected", GetInstanceId(), GetMapName(), i_maxPlayers, player->GetName());
             player->SendTransferAborted(GetId(), TRANSFER_ABORT_MAX_PLAYERS);

@@ -3745,6 +3745,18 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             return;
         }
 
+        //Soul Leech
+        case 30293:
+        case 30295:
+        case 30296:
+        {   
+            if(!procSpell)
+                return;
+            int32 HealthBasePoints0 = int32(damage*triggredByAura->GetModifier()->m_amount/100)-1;
+            CastCustomSpell(this,30294,&HealthBasePoints0,NULL,NULL,true,NULL,triggredByAura);
+            return;
+        }
+
         // L.Overload
         case 30675:
         case 30678:
