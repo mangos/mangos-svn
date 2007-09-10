@@ -9816,7 +9816,7 @@ void Player::AddEnchantmentDurations(Item *item)
 
         uint32 duration = item->GetEnchantmentDuration(EnchantmentSlot(x));
         if( duration > 0 )
-            AddEnchantmentDuration(item,EnchantmentSlot(x+1),duration);
+            AddEnchantmentDuration(item,EnchantmentSlot(x),duration);
     }
 }
 
@@ -9902,12 +9902,13 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
                 // processed in Player::CastItemCombatSpell
                 break;
             case ITEM_ENCHANTMENT_TYPE_DAMAGE:
-                if(getClass() == CLASS_HUNTER)
-                    HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_VALUE, float(enchant_amount), apply);
-                else
+                if (item->GetSlot() == EQUIPMENT_SLOT_MAINHAND)
                     HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND, TOTAL_VALUE, float(enchant_amount), apply);
+                else if (item->GetSlot() == EQUIPMENT_SLOT_OFFHAND)
+                    HandleStatModifier(UNIT_MOD_DAMAGE_OFFHAND, TOTAL_VALUE, float(enchant_amount), apply);
+                else if (item->GetSlot() == EQUIPMENT_SLOT_RANGED)
+                    HandleStatModifier(UNIT_MOD_DAMAGE_RANGED, TOTAL_VALUE, float(enchant_amount), apply);
                 break;
-
             case ITEM_ENCHANTMENT_TYPE_EQUIP_SPELL:
                 if(enchant_spell_id)
                 {
@@ -10045,18 +10046,18 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
             }
             case ITEM_ENCHANTMENT_TYPE_TOTEM:               // Shaman Rockbiter Weapon
             {
-                // enchant_amount is then containing the number of damage per second to add to the weapon
                 if(getClass() == CLASS_SHAMAN)
                 {
-                    if (item->GetSlot() == EQUIPMENT_SLOT_MAINHAND)
+                    float addValue = 0.0f; 
+                    if(item->GetSlot() == EQUIPMENT_SLOT_MAINHAND)
                     {
-                        ApplyModFloatValue(UNIT_FIELD_MINDAMAGE,enchant_amount,apply);
-                        ApplyModFloatValue(UNIT_FIELD_MAXDAMAGE,enchant_amount,apply);
+                        addValue = float(enchant_amount * item->GetProto()->Delay/1000.0f);
+                        HandleStatModifier(UNIT_MOD_DAMAGE_MAINHAND, TOTAL_VALUE, addValue, apply);
                     }
-                    if (item->GetSlot() == EQUIPMENT_SLOT_OFFHAND)
+                    else if(item->GetSlot() == EQUIPMENT_SLOT_OFFHAND )
                     {
-                        ApplyModFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE,enchant_amount,apply);
-                        ApplyModFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE,enchant_amount,apply);
+                        addValue = float(enchant_amount * item->GetProto()->Delay/1000.0f);
+                        HandleStatModifier(UNIT_MOD_DAMAGE_OFFHAND, TOTAL_VALUE, addValue, apply);
                     }
                 }
                 break;
