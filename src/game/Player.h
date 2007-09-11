@@ -735,6 +735,13 @@ struct KillInfo
 
 typedef std::map<uint32, KillInfo> KillInfoMap;
 
+enum RestType
+{
+    REST_TYPE_NO        = 0,
+    REST_TYPE_IN_TAVERN = 1,
+    REST_TYPE_IN_CITY   = 2
+};
+
 class MANGOS_DLL_SPEC Player : public Unit
 {
     friend class WorldSession;
@@ -827,8 +834,9 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void setDeathState(DeathState s);                   // overwrite Unit::setDeathState
 
-        void InnEnter (int time,float x,float y,float z)
+        void InnEnter (int time,uint32 mapid, float x,float y,float z)
         {
+            inn_pos_mapid = mapid;
             inn_pos_x = x;
             inn_pos_y = y;
             inn_pos_z = z;
@@ -838,14 +846,15 @@ class MANGOS_DLL_SPEC Player : public Unit
         float GetRestBonus() const { return m_rest_bonus; };
         void SetRestBonus(float rest_bonus_new);
 
-        int GetRestType() const { return rest_type; };
-        void SetRestType(int n_r_type) { rest_type = n_r_type; };
+        RestType GetRestType() const { return rest_type; };
+        void SetRestType(RestType n_r_type) { rest_type = n_r_type; };
 
-        float GetInnPosX () const { return inn_pos_x; };
-        float GetInnPosY () const { return inn_pos_y; };
-        float GetInnPosZ () const { return inn_pos_z; };
+        uint32 GetInnPosMapId() const { return inn_pos_mapid; };
+        float GetInnPosX() const { return inn_pos_x; };
+        float GetInnPosY() const { return inn_pos_y; };
+        float GetInnPosZ() const { return inn_pos_z; };
 
-        int GetTimeInnEter() const { return time_inn_enter; };
+        int GetTimeInnEnter() const { return time_inn_enter; };
         void UpdateInnerTime (int time) { time_inn_enter = time; };
 
         void RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent = false);
@@ -1789,6 +1798,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         time_t m_lastManaUse;
         uint32 m_weaponChangeTimer;
 
+        uint32 m_zoneUpdateId;
+        uint32 m_zoneUpdateTimer;
+
         uint32 m_deathTimer;
         time_t m_resurrectingSicknessExpire;
 
@@ -1801,11 +1813,12 @@ class MANGOS_DLL_SPEC Player : public Unit
         float m_ammoDPS;
         ////////////////////Rest System/////////////////////
         int time_inn_enter;
-        float inn_pos_x;
-        float inn_pos_y;
-        float inn_pos_z;
+        uint32 inn_pos_mapid;
+        float  inn_pos_x;
+        float  inn_pos_y;
+        float  inn_pos_z;
         float m_rest_bonus;
-        int rest_type;
+        RestType rest_type;
         ////////////////////Rest System/////////////////////
 
         // Transports
@@ -1840,6 +1853,24 @@ class MANGOS_DLL_SPEC Player : public Unit
 void AddItemsSetItem(Player*player,Item *item);
 void RemoveItemsSetItem(Player*player,ItemPrototype const *proto);
 
+template <class T> T ApplySpellMod_Helper(float value);
+
+template <> inline float ApplySpellMod_Helper(float value)
+{
+    return value;
+}
+
+template <> inline int32 ApplySpellMod_Helper(float value)
+{
+    return int32(value+0.5);
+}
+
+template <> inline uint32 ApplySpellMod_Helper(float value)
+{
+    return uint32(value+0.5);
+}
+
+
 // "the bodies of template functions must be made available in a header file"
 template <class T> T Player::ApplySpellMod(uint32 spellId, uint8 op, T &basevalue)
 {
@@ -1869,7 +1900,7 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, uint8 op, T &basevalu
     }
 
     float diff = (float)basevalue*(float)totalpct/100.0f + (float)totalflat;
-    basevalue = T((float)basevalue + diff);
-    return T(diff);
+    basevalue = ApplySpellMod_Helper<T>((float)basevalue + diff);
+    return ApplySpellMod_Helper<T>(diff);
 }
 #endif

@@ -880,8 +880,8 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
 
         if(at)
         {
-            GetPlayer()->InnEnter(time(NULL),at->trigger_X,at->trigger_Y,at->trigger_Z);
-            GetPlayer()->SetRestType(1);
+            GetPlayer()->InnEnter(time(NULL),at->trigger_mapId,at->trigger_X,at->trigger_Y,at->trigger_Z);
+            GetPlayer()->SetRestType(REST_TYPE_IN_TAVERN);
         }
     }
     else if(GetPlayer()->InBattleGround())
