@@ -5185,7 +5185,7 @@ bool Unit::IsDamageToThreatSpell(SpellEntry const * spellInfo) const
         return false;
 
     uint32 family = spellInfo->SpellFamilyName;
-    uint32 flags = spellInfo->SpellFamilyFlags;
+    uint64 flags = spellInfo->SpellFamilyFlags;
 
     if((family == 5 && flags == 256) ||                     //Searing Pain
         (family == 6 && flags == 8192) ||                   //Mind Blast

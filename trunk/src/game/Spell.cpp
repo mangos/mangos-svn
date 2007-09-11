@@ -265,7 +265,7 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur, u
         casttime = int32(casttime*p_caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
     }
 
-    m_timer = casttime<0?0:casttime;
+    m_timer = 0;                                            // will set to castime in preper
 
     for(int i=0;i<3;i++)
         m_needAliveTarget[i] = false;
@@ -941,6 +941,8 @@ void Spell::prepare(SpellCastTargets * targets)
     m_castPositionY = m_caster->GetPositionY();
     m_castPositionZ = m_caster->GetPositionZ();
     m_castOrientation = m_caster->GetOrientation();
+
+    m_timer = casttime<0?0:casttime;
 
     // create and add update event for this spell
     SpellEvent* Event = new SpellEvent(this);

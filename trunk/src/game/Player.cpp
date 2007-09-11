@@ -56,7 +56,7 @@
 
 #include <cmath>
 
-#define DEFAULT_SWITCH_WEAPON        1500
+#define ZONE_UPDATE_INTERVAL 1000
 
 const int32 Player::ReputationRank_Length[MAX_REPUTATION_RANK] = {36000, 3000, 3000, 3000, 6000, 12000, 21000, 1000};
 
@@ -102,6 +102,10 @@ Player::Player (WorldSession *session): Unit( 0 )
 
     m_regenTimer = 0;
     m_weaponChangeTimer = 0;
+
+    m_zoneUpdateId = 0;
+    m_zoneUpdateTimer = 0;
+
     m_dismountCost = 0;
 
     m_nextSave = sWorld.getConfig(CONFIG_INTERVAL_SAVE);
@@ -181,11 +185,12 @@ Player::Player (WorldSession *session): Unit( 0 )
 
     ////////////////////Rest System/////////////////////
     time_inn_enter=0;
+    inn_pos_mapid=0;
     inn_pos_x=0;
     inn_pos_y=0;
     inn_pos_z=0;
     m_rest_bonus=0;
-    rest_type=0;
+    rest_type=REST_TYPE_NO;
     ////////////////////Rest System/////////////////////
 
     m_mailsLoaded = false;
@@ -857,22 +862,15 @@ void Player::Update( uint32 p_time )
 
     if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
     {
-        if(roll_chance_i(3) && GetTimeInnEter() > 0)        //freeze update
+        if(roll_chance_i(3) && GetTimeInnEnter() > 0)        //freeze update
         {
-            int time_inn = time(NULL)-GetTimeInnEter();
+            int time_inn = time(NULL)-GetTimeInnEnter();
             if (time_inn >= 10)                             //freeze update
             {
                 float bubble = 0.125*sWorld.getRate(RATE_REST_INGAME);
                                                             //speed collect rest bonus (section/in hour)
                 SetRestBonus( GetRestBonus()+ time_inn*((float)GetUInt32Value(PLAYER_NEXT_LEVEL_XP)/72000)*bubble );
                 UpdateInnerTime(time(NULL));
-            }
-        }
-        if(GetRestType()==1)                                //rest in tavern
-        {
-            if(sqrt((GetPositionX()-GetInnPosX())*(GetPositionX()-GetInnPosX())+(GetPositionY()-GetInnPosY())*(GetPositionY()-GetInnPosY())+(GetPositionZ()-GetInnPosZ())*(GetPositionZ()-GetInnPosZ()))>40)
-            {
-                RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
             }
         }
     }
@@ -891,6 +889,20 @@ void Player::Update( uint32 p_time )
             m_weaponChangeTimer = 0;
         else
             m_weaponChangeTimer -= p_time;
+    }
+
+    if (m_zoneUpdateTimer > 0)
+    {
+        if(p_time >= m_zoneUpdateTimer)
+        {
+            uint32 newzone = GetZoneId();
+            if( m_zoneUpdateId != newzone )
+                UpdateZone(newzone);
+            else
+                m_zoneUpdateTimer = ZONE_UPDATE_INTERVAL;
+        }
+        else
+            m_zoneUpdateTimer -= p_time;
     }
 
     if (isAlive())
@@ -5412,9 +5424,8 @@ uint32 Player::GetZoneIdFromDB(uint64 guid)
 
 void Player::UpdateZone(uint32 newZone)
 {
-    /// \todo Fix me: We might receive zoneupdate for a new entered zone, but the player coordinates are still in the old zone
-    if (newZone != GetZoneId())
-        sLog.outDebug("Zone update problem: received zone = %u, current zone = %u",newZone,GetZoneId());
+    m_zoneUpdateId    = newZone;
+    m_zoneUpdateTimer = ZONE_UPDATE_INTERVAL;
 
     AreaTableEntry const* zone = GetAreaEntryByAreaID(newZone);
     if(!zone)
@@ -5475,18 +5486,30 @@ void Player::UpdateZone(uint32 newZone)
     {
         UpdatePvP(false, true);                             // i'm right? need disable PvP in this area...
     }
-    else if((zone->flags & 0x100) != 0)                     // in capital city
+
+    if((zone->flags & 0x100) != 0)                          // in capital city
     {
         SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
-        SetRestType(2);
-        InnEnter(time(0),0,0,0);
+        SetRestType(REST_TYPE_IN_CITY);
+        InnEnter(time(0),GetMapId(),0,0,0);
     }
     else                                                    // anywhere else
     {
-        //if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING) && GetRestType()==2)
-        if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
+        if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))     // but resting (walk from city or maybe in tavern or leave tavern recently)
         {
-            RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+            if(GetRestType()==REST_TYPE_IN_TAVERN)          // has been in tavern. Is still in?
+            {
+                if(GetMapId()!=GetInnPosMapId() || sqrt((GetPositionX()-GetInnPosX())*(GetPositionX()-GetInnPosX())+(GetPositionY()-GetInnPosY())*(GetPositionY()-GetInnPosY())+(GetPositionZ()-GetInnPosZ())*(GetPositionZ()-GetInnPosZ()))>40)
+                {
+                    RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+                    SetRestType(REST_TYPE_NO);
+                }
+            }
+            else                                            // not in tavern (leave city then)
+            {
+                RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
+                SetRestType(REST_TYPE_NO);
+            }
         }
     }
 

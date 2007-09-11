@@ -430,6 +430,11 @@ void Spell::EffectDummy(uint32 i)
                     {
                         Spell *spell = new Spell(m_caster, spellInfo, true);
 
+                        // enchanting spell selected by calculated damage-per-sec in enchanting effect
+                        // at calculation applied affect from Elemental Weapons talent
+                        // real enchantment damage-1
+                        spell->m_currentBasePoints[1] = damage-1;
+
                         SpellCastTargets targets;
                         targets.setItemTarget( item );
                         spell->prepare(&targets);
@@ -441,6 +446,11 @@ void Spell::EffectDummy(uint32 i)
                     if(item->IsFitToSpellRequirements(m_spellInfo))
                     {
                         Spell *spell = new Spell(m_caster, spellInfo, true);
+
+                        // enchanting spell selected by calculated damage-per-sec in enchanting effect
+                        // at calculation applied affect from Elemental Weapons talent
+                        // real enchantment damage-1
+                        spell->m_currentBasePoints[1] = damage-1;
 
                         SpellCastTargets targets;
                         targets.setItemTarget( item );
@@ -2144,37 +2154,97 @@ void Spell::EffectEnchantItemTmp(uint32 i)
     if(!itemTarget)
         return;
 
-    if (m_spellInfo->EffectMiscValue[i])
+    uint32 enchant_id = m_spellInfo->EffectMiscValue[i];
+
+    //Shaman Rockbiter Weapon
+    if(i==0 && m_spellInfo->Effect[1]==SPELL_EFFECT_DUMMY)
     {
-        uint32 enchant_id = m_spellInfo->EffectMiscValue[i];
-        int32 duration = GetDuration(m_spellInfo);
-        if(duration == 0)
-            duration = (m_spellInfo->SpellFamilyName==SPELLFAMILY_ROGUE) ? 1800 : m_currentBasePoints[i]+1;
-        if(duration <= 1)
-            duration = 300;
-        SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
-        if(!pEnchant)
-            return;
+        int32 enchnting_damage = m_currentBasePoints[1]+1;
 
-        // item can be in trade slot and have owner diff. from caster
-        Player* item_owner = itemTarget->GetOwner();
-        if(!item_owner)
-            return;
-
-        if(item_owner!=p_caster && p_caster->GetSession()->GetSecurity() > SEC_PLAYER && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
-            sLog.outCommand("GM %s (Account: %u) enchanting(temp): %s (Entry: %d) for player: %s (Account: %u)",
-                p_caster->GetName(),p_caster->GetSession()->GetAccountId(),
-                itemTarget->GetProto()->Name1,itemTarget->GetEntry(),
-                item_owner->GetName(),item_owner->GetSession()->GetAccountId());
-
-        // remove old enchanting before applying new if equipped
-        item_owner->ApplyEnchantment(itemTarget,TEMP_ENCHANTMENT_SLOT,false);
-
-        itemTarget->SetEnchantment(TEMP_ENCHANTMENT_SLOT, enchant_id, duration*1000, 0);
-
-        // add new enchanting if equipped
-        item_owner->ApplyEnchantment(itemTarget,TEMP_ENCHANTMENT_SLOT,true);
+        // enchanting id selected by calculated damage-per-sec stored in Effect[1] base value
+        // with already applied percent bonus from Elemental Weapons talent
+        switch(enchnting_damage)
+        {
+            // Rank 1
+            case  2: enchant_id =   29; break;              //  0% [ 7% ==  2, 14% == 2, 20% == 2]
+            // Rank 2
+            case  4: enchant_id =    6; break;              //  0% [ 7% ==  4]
+            case  5: enchant_id = 3025; break;              // 14% [20% ==  5]
+            // Rank 3
+            case  6: enchant_id =    1; break;              //  0% [ 7% ==  6]
+            case  7: enchant_id = 3027; break;              // 14% [20% ==  7]
+            // Rank 4
+            case  9: enchant_id = 3032; break;              //  0%
+            case 10: enchant_id =  503; break;              //  7% [14% == 10]
+            case 11: enchant_id = 3031; break;              // 20%
+            // Rank 5
+            case 15: enchant_id = 3035; break;              // 0%
+            case 16: enchant_id = 1663; break;              // 7%
+            case 17: enchant_id = 3033; break;              // 14%
+            case 18: enchant_id = 3034; break;              // 20%
+            // Rank 6
+            case 28: enchant_id = 3038; break;              // 0%
+            case 30: enchant_id =  683; break;              // 7%
+            case 32: enchant_id = 3036; break;              // 14%
+            case 34: enchant_id = 3037; break;              // 20%
+            // Rank 7
+            case 40: enchant_id = 3041; break;              // 0%
+            case 43: enchant_id = 1664; break;              // 7%
+            case 46: enchant_id = 3039; break;              // 14%
+            case 48: enchant_id = 3040; break;              // 20%
+            // Rank 8
+            case 49: enchant_id = 3044; break;              // 0%
+            case 52: enchant_id = 2632; break;              // 7%
+            case 56: enchant_id = 3042; break;              // 14%
+            case 59: enchant_id = 3043; break;              // 20%
+            // Rank 9
+            case 62: enchant_id = 2633; break;              // 0%
+            case 66: enchant_id = 3018; break;              // 7%
+            case 71: enchant_id = 3019; break;              // 14%
+            case 74: enchant_id = 3020; break;              // 20%
+            default:
+                sLog.outError("Spell::EffectEnchantItemTmp: Damage %u not handled in S'RW",damage);
+                return;
+        }
     }
+
+    if (!enchant_id)
+    {
+        sLog.outError("Spell %u Effect %u (SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY) have 0 as enchanting id",m_spellInfo->Id,i);
+        return;
+    }
+
+    SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+    if(!pEnchant)
+    {
+        sLog.outError("Spell %u Effect %u (SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY) have not existed enchanting id %u ",m_spellInfo->Id,i,enchant_id);
+        return;
+    }
+
+    int32 duration = GetDuration(m_spellInfo);
+    if(duration == 0)
+        duration = (m_spellInfo->SpellFamilyName==SPELLFAMILY_ROGUE) ? 1800 : m_currentBasePoints[i]+1;
+    if(duration <= 1)
+        duration = 300;
+
+    // item can be in trade slot and have owner diff. from caster
+    Player* item_owner = itemTarget->GetOwner();
+    if(!item_owner)
+        return;
+
+    if(item_owner!=p_caster && p_caster->GetSession()->GetSecurity() > SEC_PLAYER && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
+        sLog.outCommand("GM %s (Account: %u) enchanting(temp): %s (Entry: %d) for player: %s (Account: %u)",
+        p_caster->GetName(),p_caster->GetSession()->GetAccountId(),
+        itemTarget->GetProto()->Name1,itemTarget->GetEntry(),
+        item_owner->GetName(),item_owner->GetSession()->GetAccountId());
+
+    // remove old enchanting before applying new if equipped
+    item_owner->ApplyEnchantment(itemTarget,TEMP_ENCHANTMENT_SLOT,false);
+
+    itemTarget->SetEnchantment(TEMP_ENCHANTMENT_SLOT, enchant_id, duration*1000, 0);
+
+    // add new enchanting if equipped
+    item_owner->ApplyEnchantment(itemTarget,TEMP_ENCHANTMENT_SLOT,true);
 }
 
 void Spell::EffectTameCreature(uint32 i)

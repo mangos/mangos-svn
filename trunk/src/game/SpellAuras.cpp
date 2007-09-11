@@ -1099,7 +1099,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             mod->spellId = m_spellId;
             mod->effectId = m_effIndex;
             mod->lastAffected = 0;
-            mod->mask = 0x00000008000 | 0x00000001000;
+            mod->mask = 0x00008000 | 0x00001000;
             mod->charges = 0;
 
             m_spellmod = mod;
