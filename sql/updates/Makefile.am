@@ -425,16 +425,16 @@ pkgdata_DATA = \
 	4397_command.sql \
 	4401_spell_chain.sql \
 	4403_reserved_name.sql \
-	4407_character.sql \
 	4407_character_kill.sql \
+	4407_character.sql \
 	4407_command.sql \
 	4414_spell_chain.sql \
 	4414_spell_proc_event.sql \
 	4417_quest_template.sql \
 	4420_spell_proc_event.sql \
 	4422_command.sql \
-	4425_command.sql \
 	4425_character.sql \
+	4425_command.sql \
 	4426_creature_template.sql \
 	4430_spell_proc_event.sql \
 	4432_item_template.sql \
@@ -444,6 +444,7 @@ pkgdata_DATA = \
 	4437_character_aura.sql \
 	4437_pet_aura.sql \
 	4439_spell_proc_event.sql \
+	4446_creature_template.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -849,16 +850,16 @@ EXTRA_DIST = \
 	4397_command.sql \
 	4401_spell_chain.sql \
 	4403_reserved_name.sql \
-	4407_character.sql \
 	4407_character_kill.sql \
+	4407_character.sql \
 	4407_command.sql \
 	4414_spell_chain.sql \
 	4414_spell_proc_event.sql \
 	4417_quest_template.sql \
 	4420_spell_proc_event.sql \
 	4422_command.sql \
-	4425_command.sql \
 	4425_character.sql \
+	4425_command.sql \
 	4426_creature_template.sql \
 	4430_spell_proc_event.sql \
 	4432_item_template.sql \
@@ -868,4 +869,5 @@ EXTRA_DIST = \
 	4437_character_aura.sql \
 	4437_pet_aura.sql \
 	4439_spell_proc_event.sql \
+	4446_creature_template.sql \
 	README
