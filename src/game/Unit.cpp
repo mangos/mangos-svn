@@ -6245,10 +6245,10 @@ DiminishingMechanics Unit::Mechanic2DiminishingMechanics(uint32 mech)
     return DIMINISHING_NONE;
 }
 
-float Unit::ApplyDiminishingToDuration(DiminishingMechanics  mech, int32 duration,Unit* caster)
+void Unit::ApplyDiminishingToDuration(DiminishingMechanics  mech, int32 &duration,Unit* caster)
 {
     if(duration == -1 || mech == DIMINISHING_NONE)
-        return 1.0f;
+        return;
 
     // Duration of crowd control abilities on pvp target is limited by 10 sec. (2.2.0)
     if(duration > 10000)
@@ -6280,7 +6280,7 @@ float Unit::ApplyDiminishingToDuration(DiminishingMechanics  mech, int32 duratio
         }
     }
 
-    return mod;
+    duration = int32(duration * mod);
 }
 
 Creature* Unit::SummonCreature(uint32 id, float x, float y, float z, float ang,TempSummonType spwtype,uint32 despwtime)

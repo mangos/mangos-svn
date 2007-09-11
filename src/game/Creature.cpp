@@ -1145,8 +1145,7 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     LoadCreaturesAddon();
     
     CreatureDisplayInfoEntry const* ScaleEntry = sCreatureDisplayInfoStore.LookupEntry(display_id);
-    if (ScaleEntry) SetFloatValue(OBJECT_FIELD_SCALE_X, ScaleEntry->scale);
-    else SetFloatValue(OBJECT_FIELD_SCALE_X, 1);
+    SetFloatValue(OBJECT_FIELD_SCALE_X, ScaleEntry ? ScaleEntry->scale : 1);
 
     SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,cinfo->bounding_radius);
     SetFloatValue(UNIT_FIELD_COMBATREACH,cinfo->combat_reach );
