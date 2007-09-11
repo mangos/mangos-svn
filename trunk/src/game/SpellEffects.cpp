@@ -1060,17 +1060,6 @@ void Spell::EffectApplyAura(uint32 i)
         }
     }
 
-    bool added = unitTarget->AddAura(Aur);
-
-    // Aura not added and deleted in AddAura call;
-    if (!added)
-        return;
-
-    // found crash at character loading, broken pointer to Aur...
-    // Aur was deleted in AddAura()...
-    if(!Aur)
-        return;
-
     // Update aura duration based at diminishingMod
     {
         // Diminishing modifier calculation
@@ -1083,17 +1072,18 @@ void Spell::EffectApplyAura(uint32 i)
         {
             switch(m_spellInfo->EffectApplyAuraName[i])
             {
-                case SPELL_AURA_MOD_CONFUSE:
-                    mech = DIMINISHING_MECHANIC_CONFUSE; break;
-                case SPELL_AURA_MOD_CHARM: case SPELL_AURA_MOD_FEAR:
-                    mech = DIMINISHING_MECHANIC_CHARM; break;
-                case SPELL_AURA_MOD_STUN:
-                    mech = DIMINISHING_MECHANIC_STUN; break;
-                case SPELL_AURA_MOD_ROOT:
-                    mech = DIMINISHING_MECHANIC_ROOT; break;
-                case SPELL_AURA_MOD_DECREASE_SPEED:
-                    mech = DIMINISHING_MECHANIC_SPEED; break;
-                default: break;
+            case SPELL_AURA_MOD_CONFUSE:
+                mech = DIMINISHING_MECHANIC_CONFUSE; break;
+            case SPELL_AURA_MOD_CHARM: 
+            case SPELL_AURA_MOD_FEAR:
+                mech = DIMINISHING_MECHANIC_CHARM; break;
+            case SPELL_AURA_MOD_STUN:
+                mech = DIMINISHING_MECHANIC_STUN; break;
+            case SPELL_AURA_MOD_ROOT:
+                mech = DIMINISHING_MECHANIC_ROOT; break;
+            case SPELL_AURA_MOD_DECREASE_SPEED:
+                mech = DIMINISHING_MECHANIC_SPEED; break;
+            default: break;
             }
         }
 
@@ -1102,17 +1092,14 @@ void Spell::EffectApplyAura(uint32 i)
             (m_spellInfo->SpellVisual == 185 && m_spellInfo->SpellIconID == 228))
             mech = DIMINISHING_NONE;
 
-        diminishingMod = unitTarget->ApplyDiminishingToDuration(mech,Aur->GetAuraMaxDuration(),m_caster);
-
         int32 duration = Aur->GetAuraMaxDuration();
 
-        if(duration > 0)
-            duration = int32(duration *diminishingMod);
+        unitTarget->ApplyDiminishingToDuration(mech,duration,m_caster);
 
         // if Aura removed and deleted, do not continue.
         if(duration== 0 && !(Aur->IsPermanent()))
         {
-            unitTarget->RemoveAura(m_spellInfo->Id,i);
+            delete Aur;
             return;
         }
 
@@ -1120,9 +1107,19 @@ void Spell::EffectApplyAura(uint32 i)
         {
             Aur->SetAuraMaxDuration(duration);
             Aur->SetAuraDuration(duration);
-            Aur->UpdateAuraDuration();
         }
     }
+
+    bool added = unitTarget->AddAura(Aur);
+
+    // Aura not added and deleted in AddAura call;
+    if (!added)
+        return;
+
+    // found crash at character loading, broken pointer to Aur...
+    // Aur was deleted in AddAura()...
+    if(!Aur)
+        return;
 
     // TODO Make a way so it works for every related spell!
     if(unitTarget->GetTypeId()==TYPEID_PLAYER)              // Negative buff should only be applied on players
