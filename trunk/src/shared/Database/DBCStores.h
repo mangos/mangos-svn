@@ -154,6 +154,7 @@ extern DBCStorage <BattlemasterListEntry>     sBattlemasterListStore;
 //extern DBCStorage <ChatChannelsEntry>         sChatChannelsStore; -- accessed using function, no usable index
 extern DBCStorage <ChrClassesEntry>           sChrClassesStore;
 extern DBCStorage <ChrRacesEntry>             sChrRacesStore;
+extern DBCStorage <CreatureDisplayInfoEntry>  sCreatureDisplayInfoStore;
 extern DBCStorage <CreatureFamilyEntry>       sCreatureFamilyStore;
 extern DBCStorage <DurabilityCostsEntry>      sDurabilityCostsStore;
 extern DBCStorage <DurabilityQualityEntry>    sDurabilityQualityStore;

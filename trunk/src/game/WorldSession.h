@@ -547,9 +547,6 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleReportSpamOpcode(WorldPacket& recv_data);
         void HandleRequestPetInfoOpcode(WorldPacket& recv_data);
 
-        // testing...
-        void HandleMoveShipOpcode(WorldPacket& recv_data);
-
         // Socket gem
         void HandleSocketOpcode(WorldPacket& recv_data);
 

@@ -444,8 +444,9 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_AREA_SPIRIT_HEALER_QUERY ]         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAreaSpiritHealerQueryOpcode   );
     objmgr.opcodeTable[ CMSG_AREA_SPIRIT_HEALER_QUEUE ]         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAreaSpiritHealerQueueOpcode   );
                                                             // HandleMoveShipOpcode
-    objmgr.opcodeTable[ CMSG_MOVE_SHIP_909 ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
+    objmgr.opcodeTable[ MSG_MOVE_SHIP_909 ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
     objmgr.opcodeTable[ MSG_MOVE_FLY_STATE_CHANGE ]             = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
+    objmgr.opcodeTable[ MSG_UNKNOWN_935]                        = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleMovementOpcodes               );
     objmgr.opcodeTable[ CMSG_DISMOUNT ]                         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleDismountOpcode                );
     objmgr.opcodeTable[ CMSG_SELF_RES ]                         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSelfResOpcode                 );
     objmgr.opcodeTable[ CMSG_SOCKET_ITEM ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSocketOpcode                  );
@@ -1324,27 +1325,6 @@ void WorldSession::HandleResetInstancesOpcode( WorldPacket & recv_data )
         WorldPacket data(SMSG_RESET_INSTANCES_SUCCESS, 4);
         data << mapid;
         _player->GetSession()->SendPacket(&data);
-    */
-}
-
-void WorldSession::HandleMoveShipOpcode( WorldPacket & recv_data )
-{
-    sLog.outDebug("WORLD: CMSG_MOVE_SHIP_909");
-    recv_data.hexlike();
-    /*
-    WORLD: CMSG_MOVE_SHIP_909
-    STORAGE_SIZE: 56
-    01 02 80 00 7A 48 DF 00 | BA 8A 05 46 19 9D 7E 44
-    42 10 BA 40 5C 90 77 40 | 74 B0 02 00 00 00 00 80
-    42 D4 0B C0 65 FD 50 C1 | 42 10 BA 40 20 7F 13 40
-    5E 49 DF 00 C0 00 00 00
-
-    WORLD: CMSG_MOVE_SHIP_909
-    STORAGE_SIZE: 60
-    01 02 80 04 F0 D6 E0 00 | 3A B2 CD 45 C3 5B 3F 44
-    E4 4F B8 40 58 E7 4B 40 | 00 00 00 00 00 00 00 00
-    3A B2 CD 45 C3 5B 3F 44 | E4 4F B8 40 58 E7 4B 40
-    D4 D7 E0 00 CF 00 00 00 | E4 4F B8 40
     */
 }
 

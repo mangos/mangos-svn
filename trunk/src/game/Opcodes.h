@@ -951,7 +951,7 @@ enum OpCodes
     // 906
     SMSG_REALM_STATE_RESPONSE                       = 907,  // response to 908 opcode, uint32+uint32+string(date)
     CMSG_REALM_STATE_REQUEST                        = 908,  // realm related, uint32, appears at select character screen, uint32 0xFFFFFFFF by default
-    CMSG_MOVE_SHIP_909                              = 909,  // movement related, transport related(ships)
+    MSG_MOVE_SHIP_909                               = 909,  // movement related, transport related(ships)
     CMSG_GROUP_PROMOTE                              = 910,  // make main-tank / main-assistant
     SMSG_ALREADY_IN_ARENA_TEAM                      = 911,  // %s is already in an arena team of that size (uint64 guid)
     SMSG_ALLOW_MOVE                                 = 912,  // uint32, allow player movement, value increments every time and reset to 0 after far teleport, used for client-server synchronization
@@ -992,7 +992,7 @@ enum OpCodes
     */
     // 933
     SMSG_CAST_SUCCESS                               = 934,
-    SMSG_UNKNOWN_935                                = 935,  // teleport/movement opcode (MSG?)
+    MSG_UNKNOWN_935                                 = 935,  // teleport/movement opcode
     // 936
     // 937
     SMSG_UNKNOWN_938                                = 938,  // uint64, uint64, uint32 spellid, uint32, uint32

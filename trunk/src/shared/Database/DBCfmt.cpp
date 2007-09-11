@@ -23,6 +23,7 @@ const char BattlemasterListEntryfmt[]="niiixxxxxiiiixxssssssssssssssssx";
 const char ChatChannelsEntryfmt[]="iixssssssssssssssssxxxxxxxxxxxxxxxxxx";
 const char ChrClassesEntryfmt[]="nxixxxxxxxxxxxxxxxxxxxxx";
 const char ChrRacesEntryfmt[]="nxixiixxixxxxissssssssssssssssxxxxx";
+const char CreatureDisplayInfofmt[]="nxxxfxxxxxxxxxxxxxxxx";
 const char CreatureFamilyfmt[]="nxxxxxiissssssssssssssssxx";
 const char DurabilityCostsfmt[]="niiiiiiiiiiiiiiiiiiiiiiiiiiiii";
 const char DurabilityQualityfmt[]="nf";

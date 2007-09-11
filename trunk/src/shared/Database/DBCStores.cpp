@@ -38,6 +38,7 @@ DBCStorage <BattlemasterListEntry> sBattlemasterListStore(BattlemasterListEntryf
 DBCStorage <ChatChannelsEntry> sChatChannelsStore(ChatChannelsEntryfmt);
 DBCStorage <ChrClassesEntry> sChrClassesStore(ChrClassesEntryfmt);
 DBCStorage <ChrRacesEntry> sChrRacesStore(ChrRacesEntryfmt);
+DBCStorage <CreatureDisplayInfoEntry> sCreatureDisplayInfoStore(CreatureDisplayInfofmt);
 DBCStorage <CreatureFamilyEntry> sCreatureFamilyStore(CreatureFamilyfmt);
 
 DBCStorage <DurabilityQualityEntry> sDurabilityQualityStore(DurabilityQualityfmt);
@@ -149,8 +150,8 @@ void LoadDBCStores(std::string dataPath)
 {
     std::string tmpPath="";
 
-    const uint32 DBCFilesCount = 37;
-    //const uint32 DBCFilesCount = 38; -- gtChanceToMeleeCrit.dbc not loaded temporary
+    const uint32 DBCFilesCount = 38;
+    //const uint32 DBCFilesCount = 39; -- gtChanceToMeleeCrit.dbc not loaded temporary
 
     barGoLink bar( DBCFilesCount );
 
@@ -162,6 +163,7 @@ void LoadDBCStores(std::string dataPath)
     LoadDBC(bar,bad_dbc_files,sChatChannelsStore,        dataPath+"dbc/ChatChannels.dbc");
     LoadDBC(bar,bad_dbc_files,sChrClassesStore,          dataPath+"dbc/ChrClasses.dbc");
     LoadDBC(bar,bad_dbc_files,sChrRacesStore,            dataPath+"dbc/ChrRaces.dbc");
+    LoadDBC(bar,bad_dbc_files,sCreatureDisplayInfoStore, dataPath+"dbc/CreatureDisplayInfo.dbc");    
     LoadDBC(bar,bad_dbc_files,sCreatureFamilyStore,      dataPath+"dbc/CreatureFamily.dbc");
     LoadDBC(bar,bad_dbc_files,sDurabilityCostsStore,     dataPath+"dbc/DurabilityCosts.dbc");
     LoadDBC(bar,bad_dbc_files,sDurabilityQualityStore,   dataPath+"dbc/DurabilityQuality.dbc");
