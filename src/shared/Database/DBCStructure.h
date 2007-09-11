@@ -109,6 +109,14 @@ struct ChrRacesEntry
                                                             // 30 string flags, unused
 };
 
+struct CreatureDisplayInfoEntry
+{
+    uint32      Displayid;                                  //0
+                                                            //1-3,unused
+    float       scale;                                      //4
+                                                            //5-20,unused
+};
+
 struct CreatureFamilyEntry
 {
     uint32    ID;                                           // 0

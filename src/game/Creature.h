@@ -169,7 +169,6 @@ struct CreatureInfo
     uint32  rangeattacktime;
     uint32  Flags;
     uint32  dynamicflags;
-    float   size;
     uint32  family;
     float   bounding_radius;
     uint32  trainer_type;

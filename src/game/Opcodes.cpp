@@ -938,7 +938,7 @@ const char* g_worldOpcodeNames[] =
     "UNKNOWN906",                                           // 906
     "SMSG_REALM_STATE_RESPONSE",                            // 907
     "CMSG_REALM_STATE_REQUEST",                             // 908
-    "CMSG_MOVE_SHIP_909",                                   // 909
+    "MSG_MOVE_SHIP_909",                                    // 909
     "CMSG_GROUP_PROMOTE",                                   // 910
     "UNKNOWN911",                                           // 911
     "SMSG_ALLOW_MOVE",                                      // 912
@@ -964,7 +964,7 @@ const char* g_worldOpcodeNames[] =
     "SMSG_SET_AURA_SINGLE",                                 // 932
     "UNKNOWN933",                                           // 933
     "SMSG_CAST_SUCCESS",                                    // 934
-    "SMSG_UNKNOWN_935",                                     // 935
+    "MSG_UNKNOWN_935",                                      // 935
     "UNKNOWN936",                                           // 936
     "UNKNOWN937",                                           // 937
     "UNKNOWN938",                                           // 938
