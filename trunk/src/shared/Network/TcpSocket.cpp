@@ -141,16 +141,15 @@ TcpSocket::TcpSocket(ISocketHandler& h,size_t isize,size_t osize) : Socket(h)
 
 TcpSocket::~TcpSocket()
 {
-	if (m_mes.size())
+	if (!m_mes.empty())
 	{
 		Handler().LogError(this, "TcpSocket destructor", 0, "Output buffer not empty", LOG_LEVEL_WARNING);
 	}
-	while (m_mes.size())
+	while (!m_mes.empty())
 	{
-		ucharp_v::iterator it = m_mes.begin();
-		MES *p = *it;
+		MES *p = m_mes.front();
+        m_mes.pop_front();
 		delete p;
-		m_mes.erase(it);
 	}
 #ifdef SOCKETS_DYNAMIC_TEMP
 	delete[] m_buf;
