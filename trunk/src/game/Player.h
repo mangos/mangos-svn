@@ -121,6 +121,7 @@ enum ActionButtonType
 {
     ACTION_BUTTON_SPELL = 0,
     ACTION_BUTTON_MACRO = 64,
+    ACTION_BUTTON_CMACRO= 65,
     ACTION_BUTTON_ITEM  = 128
 };
 

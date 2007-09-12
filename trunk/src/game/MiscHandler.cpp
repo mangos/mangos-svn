@@ -951,7 +951,7 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
     }
     else
     {
-        if(type==ACTION_BUTTON_MACRO)
+        if(type==ACTION_BUTTON_MACRO || type==ACTION_BUTTON_CMACRO)
         {
             sLog.outDetail( "MISC: Added Macro %u into button %u", action, button );
             GetPlayer()->addActionButton(button,action,type,misc);
