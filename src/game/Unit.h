@@ -378,7 +378,7 @@ enum UnitFlags
     UNIT_FLAG_UNKNOWN10      = 0x00000080,
     UNIT_FLAG_UNKNOWN2       = 0x00000100,                  // 2.0.8
     UNIT_FLAG_UNKNOWN11      = 0x00000200,
-    UNIT_FLAG_UNKNOWN12      = 0x00000400,                  // loot animation
+    UNIT_FLAG_LOOTING        = 0x00000400,                  // loot animation
     UNIT_FLAG_PET_IN_COMBAT  = 0x00000800,                  // in combat?, 2.0.8
     UNIT_FLAG_PVP            = 0x00001000,                  // ok
     UNIT_FLAG_SILENCED       = 0x00002000,                  // silenced, 2.1.1
