@@ -225,6 +225,8 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
     player->SetLootGUID(0);
     player->SendLootRelease(lguid);
 
+    player->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_LOOTING);
+
     if (IS_GAMEOBJECT_GUID(lguid))
     {
         GameObject *go =

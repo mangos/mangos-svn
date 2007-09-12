@@ -6536,6 +6536,9 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     // add 'this' player as one of the players that are looting 'loot'
     if (permission != NONE_PERMISSION)
         loot->AddLooter(GetGUID());
+
+    if ( loot_type == LOOT_CORPSE && !IS_ITEM_GUID(guid) )
+        SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_LOOTING);
 }
 
 void Player::SendNotifyLootMoneyRemoved()
