@@ -1311,6 +1311,10 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             SendMessageToSet(&data,true);
 
             int32 gain = pVictim->ModifyHealth(pdamage);
+
+            //Do check before because mod->auraName can be invalidate by DealDamage.
+            bool procSpell = (mod->m_auraname == SPELL_AURA_PERIODIC_HEAL && pVictim != this);
+
             pVictim->getHostilRefManager().threatAssist(this, float(gain) * 0.5f, spellProto);
 
             // heal for caster damage
@@ -1339,7 +1343,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
                 }
             }
 
-            if(mod->m_auraname == SPELL_AURA_PERIODIC_HEAL && pVictim != this)
+            if(procSpell)
                 ProcDamageAndSpell(pVictim, PROC_FLAG_HEAL, PROC_FLAG_HEALED, pdamage, spellProto);
             break;
         }
