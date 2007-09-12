@@ -6052,10 +6052,14 @@ bool Unit::SelectHostilTarget()
     // last case when creature don't must go to evade mode:
     // it in combat but attacker not make any damage and not enter to aggro radius to have record in threat list
     // for example at owner command to pet attack some far away creature
-    for(AttackerSet::const_iterator itr = m_attackers.begin(); itr != m_attackers.end(); ++itr)
+    // Note: creature not have targeted movement generator but have attacker in this case 
+    if( (*((Creature*)this))->empty() || (*((Creature*)this))->top()->GetMovementGeneratorType() != TARGETED_MOTION_TYPE )
     {
-        if( (*itr)->IsInMap(this) && (*itr)->isTargetableForAttack() && (*itr)->isInAccessablePlaceFor((Creature*)this) )
-            return false;
+        for(AttackerSet::const_iterator itr = m_attackers.begin(); itr != m_attackers.end(); ++itr)
+        {
+            if( (*itr)->IsInMap(this) && (*itr)->isTargetableForAttack() && (*itr)->isInAccessablePlaceFor((Creature*)this) )
+                return false;
+        }
     }
 
     // enter in evade mode in other case
