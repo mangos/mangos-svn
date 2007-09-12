@@ -135,7 +135,6 @@ Unit::Unit( WorldObject *instantiator )
     //m_AurasCheck = 2000;
     //m_removeAuraTimer = 4;
     //tmpAura = NULL;
-    m_silenced = false;
     waterbreath = false;
 
     m_Visibility = VISIBILITY_ON;

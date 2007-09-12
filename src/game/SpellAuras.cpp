@@ -2351,14 +2351,17 @@ void Aura::HandleAuraModSilence(bool apply, bool Real)
         return;
 
     if(apply)
-        m_target->m_silenced = true;
+    {
+        m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED);
+        m_target->InterruptNonMeleeSpells(false);
+    }
     else
     {
         // Real remove called after current aura remove from lists, check if other similar auras active
         if(m_target->HasAuraType(SPELL_AURA_MOD_SILENCE))
             return;
 
-        m_target->m_silenced = false;
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED);
     }
 }
 
