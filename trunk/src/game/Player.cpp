@@ -664,6 +664,8 @@ void Player::HandleDrowning(uint32 UnderWaterTime)
 
 void Player::HandleLava()
 {
+    bool ValidArea = false;
+    
     if ((m_isunderwater & 0x80) && isAlive())
     {
         //Single trigger Set BreathTimer
@@ -679,8 +681,28 @@ void Player::HandleLava()
             uint32 damage = GetMaxHealth() / 3 + urand(0, getLevel()-1);
             uint32 dmgZone = MapManager::Instance().GetMap(GetMapId(), this)->GetZoneId(GetPositionX(),GetPositionY());
 
-            // correct mask for deal with damage only in lava areas
-            if ((dmgZone/5) & 0x408)
+            // Deal lava damage only in lava zones.
+            switch(dmgZone)
+            {
+               case 0x8D:
+                   ValidArea = false;
+                   break;
+               case 0x94:
+                   ValidArea = false;
+                   break;
+               case 0x2CE:
+                   ValidArea = false;
+                   break;
+               case 0x2CF:
+                   ValidArea = false;
+                   break;
+               default:
+                   if (dmgZone / 5 & 0x408)
+                       ValidArea = true;
+             }
+
+            // if is valid area and is not gamemaster then deal damage
+            if ( ValidArea && !isGameMaster() )
                 EnvironmentalDamage(guid, DAMAGE_LAVA, damage);
 
             m_breathTimer = 1000;

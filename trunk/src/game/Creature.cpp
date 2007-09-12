@@ -1462,7 +1462,7 @@ SpellEntry const *Creature::reachWithSpellAttack(Unit *pVictim)
         //    continue;
         if( dist > range * range || dist < minrange * minrange )
             continue;
-        if(m_silenced)
+        if(HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
             continue;
         return spellInfo;
     }
@@ -1506,7 +1506,7 @@ SpellEntry const *Creature::reachWithSpellCure(Unit *pVictim)
         //    continue;
         if( dist > range * range || dist < minrange * minrange )
             continue;
-        if(m_silenced)
+        if(HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
             continue;
         return spellInfo;
     }

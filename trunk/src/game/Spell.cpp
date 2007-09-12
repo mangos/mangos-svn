@@ -2420,7 +2420,7 @@ uint8 Spell::CanCast()
         prevented_reason = SPELL_FAILED_CONFUSED;
     else if(m_caster->hasUnitState(UNIT_STAT_FLEEING))
         prevented_reason = SPELL_FAILED_FLEEING;
-    else if(m_caster->m_silenced && m_spellInfo->School != SPELL_SCHOOL_NORMAL)
+    else if(m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED) && m_spellInfo->School != SPELL_SCHOOL_NORMAL)
         prevented_reason = SPELL_FAILED_SILENCED;
     else if(m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED) && m_spellInfo->School == SPELL_SCHOOL_NORMAL && !m_triggeredByAura)
         prevented_reason = SPELL_FAILED_PACIFIED;
