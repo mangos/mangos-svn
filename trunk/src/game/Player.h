@@ -1854,24 +1854,6 @@ class MANGOS_DLL_SPEC Player : public Unit
 void AddItemsSetItem(Player*player,Item *item);
 void RemoveItemsSetItem(Player*player,ItemPrototype const *proto);
 
-template <class T> T ApplySpellMod_Helper(float value);
-
-template <> inline float ApplySpellMod_Helper(float value)
-{
-    return value;
-}
-
-template <> inline int32 ApplySpellMod_Helper(float value)
-{
-    return int32(value+0.5);
-}
-
-template <> inline uint32 ApplySpellMod_Helper(float value)
-{
-    return uint32(value+0.5);
-}
-
-
 // "the bodies of template functions must be made available in a header file"
 template <class T> T Player::ApplySpellMod(uint32 spellId, uint8 op, T &basevalue)
 {
@@ -1901,7 +1883,7 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, uint8 op, T &basevalu
     }
 
     float diff = (float)basevalue*(float)totalpct/100.0f + (float)totalflat;
-    basevalue = ApplySpellMod_Helper<T>((float)basevalue + diff);
-    return ApplySpellMod_Helper<T>(diff);
+    basevalue = T((float)basevalue + diff);
+    return T(diff);
 }
 #endif

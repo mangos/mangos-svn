@@ -220,6 +220,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "anim",        SEC_GAMEMASTER,    &ChatHandler::HandleAnimCommand,             "",   NULL },
         { "announce",    SEC_MODERATOR,     &ChatHandler::HandleAnnounceCommand,         "",   NULL },
         { "notify",      SEC_MODERATOR,     &ChatHandler::HandleNotifyCommand,           "",   NULL },
+        { "go",          SEC_MODERATOR,     &ChatHandler::HandleGoXYZCommand,            "",   NULL },
         { "goxy",        SEC_MODERATOR,     &ChatHandler::HandleGoXYCommand,             "",   NULL },
         { "goxyz",       SEC_MODERATOR,     &ChatHandler::HandleGoXYZCommand,            "",   NULL },
         { "goname",      SEC_MODERATOR,     &ChatHandler::HandleGonameCommand,           "",   NULL },
