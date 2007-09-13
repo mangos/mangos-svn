@@ -5160,6 +5160,15 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo) const
         if(itr->type == spellInfo->Mechanic)
             return true;
 
+    if( !(spellInfo->AttributesEx & 0x10000))               // unaffected by school immunity
+    {
+        SpellImmuneList const& schoolList = m_spellImmune[IMMUNITY_SCHOOL];
+        for(SpellImmuneList::const_iterator itr = schoolList.begin(); itr != schoolList.end(); ++itr)
+            if(!(IsPositiveSpell(itr->spellId) && IsPositiveSpell(spellInfo->Id))
+                && (itr->type & (1 << spellInfo->School)))
+                    return true;
+    }
+
     int32 chance = 0;
     AuraList const& mModMechanicRes = GetAurasByType(SPELL_AURA_MOD_MECHANIC_RESISTANCE);
     for(AuraList::const_iterator i = mModMechanicRes.begin();i != mModMechanicRes.end(); ++i)

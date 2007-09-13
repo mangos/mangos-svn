@@ -424,10 +424,13 @@ bool IsSealSpell(uint32 spellId)
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
 
     // SpellID 25780 is Righteous Fury, NOT seal !
-    return spellId != 25780 && spellInfo && (
+    /*return spellId != 25780 && spellInfo && (
         spellInfo->SpellVisual ==  298 || spellInfo->SpellVisual == 7975 || spellInfo->SpellVisual == 7978 ||
         spellInfo->SpellVisual == 7986 || spellInfo->SpellVisual == 7987 || spellInfo->SpellVisual == 7992 ||
-        spellInfo->SpellVisual == 8062 || spellInfo->SpellVisual == 8072 || spellInfo->SpellVisual == 8073 );
+        spellInfo->SpellVisual == 8062 || spellInfo->SpellVisual == 8072 || spellInfo->SpellVisual == 8073 );*/
+    //Collection of all the seal family flags. No other paladin spell has any of those.
+    return spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN &&
+        ( spellInfo->SpellFamilyFlags & 0xA000200 );
 }
 
 bool CanCastWhileMounted(uint32 spellId)

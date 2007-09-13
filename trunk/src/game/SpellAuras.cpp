@@ -2624,6 +2624,32 @@ void Aura::HandleAuraModStateImmunity(bool apply, bool Real)
 void Aura::HandleAuraModSchoolImmunity(bool apply, bool Real)
 {
     m_target->ApplySpellImmune(GetId(),IMMUNITY_SCHOOL,m_modifier.m_miscvalue,apply);
+
+    if(Real && apply)
+    {
+        if(IsPositiveSpell(GetId()))                        //Only positive immunity removes auras
+        {
+            uint32 school_mask = m_modifier.m_miscvalue;
+            Unit::AuraMap& Auras = m_target->GetAuras();
+            for(Unit::AuraMap::iterator iter = Auras.begin(), next; iter != Auras.end(); iter = next)
+            {
+                next = iter;
+                next++;
+                SpellEntry const *spell = iter->second->GetSpellProto();
+                if( ( (1 << spell->School) & school_mask)   //Check for school mask
+                    && !( spell->AttributesEx & 0x10000)    //Spells unaffected by invulnerability
+                    && !iter->second->IsPositive()          //Don't remove positive spells
+                    && spell->Id != GetId())                //Don't remove self
+                {
+                    m_target->RemoveAurasDueToSpell(spell->Id);
+                    if(Auras.empty())
+                        break;
+                    else
+                        next = Auras.begin();
+                }
+            }
+        }
+    }
 }
 
 void Aura::HandleAuraModDmgImmunity(bool apply, bool Real)
