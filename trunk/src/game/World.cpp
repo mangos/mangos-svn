@@ -909,7 +909,7 @@ void World::ScriptsStart(ScriptMapMap const& scripts, uint32 id, Object* source,
 /// Process queued scripts
 void World::ScriptsProcess()
 {
-    if (scriptSchedule.size() == 0)
+    if (scriptSchedule.empty())
         return;
 
     ///- Process overdue queued scripts

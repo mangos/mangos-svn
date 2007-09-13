@@ -101,7 +101,7 @@ void WorldSession::HandleArenaTeamAddMemberOpcode(WorldPacket & recv_data)
 
     recv_data >> team_slot >> Invitedname;
 
-    if(Invitedname.size() != 0)
+    if(!Invitedname.empty())
     {
         normalizePlayerName(Invitedname);
 

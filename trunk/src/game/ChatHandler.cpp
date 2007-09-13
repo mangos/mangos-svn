@@ -110,7 +110,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             CHECK_PACKET_SIZE(recv_data,4+4+(to.size()+1)+1);
             recv_data >> msg;
 
-            if(to.size() == 0)
+            if(to.empty())
             {
                 WorldPacket data(SMSG_CHAT_PLAYER_NOT_FOUND, (to.size()+1));
                 data<<to;
@@ -292,7 +292,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             recv_data >> msg;
 
             _player->afkMsg = msg;
-            if((msg.size() == 0 || !_player->isAFK()) && !_player->isInCombat() )
+            if((msg.empty() || !_player->isAFK()) && !_player->isInCombat() )
             {
                 _player->ToggleAFK();
                 if(_player->isAFK() && _player->isDND())
@@ -306,7 +306,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             recv_data >> msg;
 
             GetPlayer()->dndMsg = msg;
-            if(msg.size() == 0 || !GetPlayer()->isDND())
+            if(msg.empty() || !GetPlayer()->isDND())
             {
                 GetPlayer()->ToggleDND();
                 if(GetPlayer()->isDND() && GetPlayer()->isAFK())

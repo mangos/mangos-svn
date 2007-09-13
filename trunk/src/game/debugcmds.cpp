@@ -190,7 +190,7 @@ bool ChatHandler::HandleGetItemState(const char* args)
 
             PSendSysMessage("bag: %d slot: %d guid: %d - state: %s", bag_slot, item->GetSlot(), item->GetGUIDLow(), st.c_str());
         }
-        if (!updateQueue.size())
+        if (updateQueue.empty())
             PSendSysMessage("updatequeue empty");
     }
 

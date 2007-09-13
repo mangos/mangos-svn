@@ -91,7 +91,7 @@ DEB(		fprintf(stderr, "************ Resolve failed\n");)
 		m_parent = NULL;
 	}
 	else
-	if (key == "Name" && !m_resolv_host.size() && m_parent)
+	if (key == "Name" && m_resolv_host.empty() && m_parent)
 	{
 		if (Handler().Valid(m_parent))
 			m_parent -> OnReverseResolved(m_resolv_id, value);
@@ -226,7 +226,7 @@ DEB(	fprintf(stderr, "ResolvSocket::OnDetached(); query=%s, data=%s\n", m_query.
 
 void ResolvSocket::OnConnect()
 {
-	if (m_resolv_host.size())
+	if (!m_resolv_host.empty())
 	{
 #ifdef ENABLE_IPV6
 		std::string msg = (m_resolve_ipv6 ? "gethostbyname2 " : "gethostbyname ") + m_resolv_host + "\n";

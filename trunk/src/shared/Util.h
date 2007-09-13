@@ -112,7 +112,7 @@ inline void ApplyPercentModFloatVar(float& var, float val, bool apply)
 
 inline void normalizePlayerName(std::string& name)
 {
-    assert(name.size() > 0);
+    assert(!name.empty());
     name[0] = toupper(name[0]);
     for(size_t i = 1; i < name.size(); ++i)
         name[i] = tolower(name[i]);

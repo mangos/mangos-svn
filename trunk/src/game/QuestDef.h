@@ -176,7 +176,7 @@ class Quest
         uint32 GetQuestStartScript() const { return QuestStartScript; }
         uint32 GetQuestCompleteScript() const { return QuestCompleteScript; }
         bool   IsRepeatable() const { return bool(Repeatable); }
-        bool   IsAutoComplete() const { return Objectives.size() == 0; }
+        bool   IsAutoComplete() const { return Objectives.empty(); }
         uint32 GetSpecialFlags() const { return SpecialFlags; }
 
         // multiple values

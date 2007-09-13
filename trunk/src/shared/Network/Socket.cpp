@@ -294,7 +294,7 @@ SOCKET Socket::CreateSocket(int af,int type, const std::string& protocol)
 	m_socket_type = type;
 	m_socket_protocol = protocol;
 #endif
-	if (protocol.size())
+	if (!protocol.empty())
 	{
 		p = getprotobyname( protocol.c_str() );
 		if (!p)
@@ -1251,4 +1251,6 @@ void Socket::OnResolveFailed(int)
 #ifdef SOCKETS_NAMESPACE
 }
 #endif
+
+
 

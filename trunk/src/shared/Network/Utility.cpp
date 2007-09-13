@@ -96,7 +96,7 @@ std::string Utility::bigint2string(uint64_t l)
 		str = (char)(a + 48) + str;
 		tmp /= 10;
 	}
-	if (!str.size())
+	if (str.empty())
 	{
 		str = "0";
 	}
@@ -225,7 +225,7 @@ bool Utility::isipv6(const std::string& str)
 	}
 	Parse pa(str,":.");
 	std::string tmp = pa.getword();
-	while (tmp.size())
+	while (!tmp.empty())
 	{
 		if (tmp.size() > 4)
 		{
@@ -603,7 +603,7 @@ bool Utility::u2ip(const std::string& host, struct sockaddr_in& sa, int ai_flags
 			//
 			ai = ai -> ai_next;
 		}
-		if (!vec.size())
+		if (vec.empty())
 			return false;
 		ai = vec[prng.next() % vec.size()];
 		{
@@ -665,7 +665,7 @@ bool Utility::u2ip(const std::string& host, struct sockaddr_in6& sa, int ai_flag
 		for (std::list<std::string>::iterator it = vec.begin(); it != vec.end(); it++)
 		{
 			std::string bytepair = *it;
-			if (bytepair.size())
+			if (!bytepair.empty())
 			{
 				addr16[i++] = htons(Utility::hex2unsigned(bytepair));
 			}
@@ -720,7 +720,7 @@ bool Utility::u2ip(const std::string& host, struct sockaddr_in6& sa, int ai_flag
 			//
 			ai = ai -> ai_next;
 		}
-		if (!vec.size())
+		if (vec.empty())
 			return false;
 		ai = vec[prng.next() % vec.size()];
 		{

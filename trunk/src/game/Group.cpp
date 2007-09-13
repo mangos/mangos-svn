@@ -490,7 +490,7 @@ void Group::CountRollVote(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers
         return;
 
     if (roll->loot)
-        if (roll->loot->items.size() == 0)
+        if (roll->loot->items.empty())
             return;
 
     switch (Choise)

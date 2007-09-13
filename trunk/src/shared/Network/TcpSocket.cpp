@@ -684,7 +684,7 @@ DEB(			const char *errbuf = ERR_error_string(errnr, NULL);
 			}
 			obuf.Remove(n);
 			// move data from m_mes to immediate output buffer
-			while (obuf.Space() && m_mes.size())
+			while (obuf.Space() && !m_mes.empty())
 			{
 				ucharp_v::iterator it = m_mes.begin();
 				MES *p = *it;
@@ -708,7 +708,7 @@ DEB(			const char *errbuf = ERR_error_string(errnr, NULL);
 			bool bw;
 			bool bx;
 			Handler().Get(GetSocket(), br, bw, bx);
-			if (obuf.GetLength() || m_mes.size())
+			if (obuf.GetLength() || !m_mes.empty())
 				Set(br, true);
 			else
 				Set(br, false);
@@ -755,7 +755,7 @@ signal is not sent when the write call specified the MSG_NOSIGNAL flag.
 		}
 		obuf.Remove(n);
 		// move data from m_mes to immediate output buffer
-		while (obuf.Space() && m_mes.size())
+		while (obuf.Space() && !m_mes.empty())
 		{
 			ucharp_v::iterator it = m_mes.begin();
 			MES *p = *it;
@@ -779,7 +779,7 @@ signal is not sent when the write call specified the MSG_NOSIGNAL flag.
 		bool bw;
 		bool bx;
 		Handler().Get(GetSocket(), br, bw, bx);
-		if (obuf.GetLength() || m_mes.size())
+		if (obuf.GetLength() || !m_mes.empty())
 			Set(br, true);
 		else
 			Set(br, false);
@@ -813,7 +813,7 @@ void TcpSocket::SendBuf(const char *buf,size_t len,int)
 	}
 	//
 	size_t ptr = 0;
-	if (!m_mes.size() && obuf.Space())
+	if (m_mes.empty() && obuf.Space())
 	{
 		if (len <= obuf.Space()) // entire block of data fits
 		{
@@ -1209,7 +1209,7 @@ void TcpSocket::InitializeContext(const std::string& context,const std::string& 
 		m_ssl_ctx = server_contexts[context] = SSL_CTX_new(meth);
 		SSL_CTX_set_mode(m_ssl_ctx, SSL_MODE_AUTO_RETRY);
 		// session id
-		if (context.size())
+		if (!context.empty())
 			SSL_CTX_set_session_id_context(m_ssl_ctx, (const unsigned char *)context.c_str(), (unsigned int)context.size());
 		else
 			SSL_CTX_set_session_id_context(m_ssl_ctx, (const unsigned char *)"--empty--", 9);

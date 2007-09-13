@@ -111,7 +111,7 @@ MutexImpl<List, Behavior>::~MutexImpl() {
 
     }
 
-    if(_waiters.size() > 0) { 
+    if(!_waiters.empty()) { 
 
       ZTDEBUG("** You are destroying a mutex which is blocking %d threads. **\n", _waiters.size());
       assert(0); // Destroyed mutex while in use

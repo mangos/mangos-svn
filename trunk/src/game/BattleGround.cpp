@@ -85,7 +85,7 @@ void BattleGround::Update(time_t diff)
     {
         for(int i = 0; i < MAX_QUEUED_PLAYERS_MAP; ++i)
         {
-            if(m_QueuedPlayers[i].size())
+            if(!m_QueuedPlayers[i].empty())
             {
                 found = true;
                 break;

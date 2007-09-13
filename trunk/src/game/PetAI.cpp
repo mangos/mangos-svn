@@ -313,7 +313,7 @@ void PetAI::UpdateAI(const uint32 diff)
     }
 
     //found units to cast on to
-    if(targetMap.size() > 0)
+    if(!targetMap.empty())
     {
         uint32 index = urand(1, targetMap.size());
         HM_NAMESPACE::hash_map<uint32, Unit*>::iterator itr;

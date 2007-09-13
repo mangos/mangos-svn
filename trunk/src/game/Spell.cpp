@@ -1294,7 +1294,7 @@ uint64 Spell::handle_delayed(uint64 t_offset)
         }
 
         // are some units pending
-        if (m_unitsHitList[j].size() != 0)
+        if (!m_unitsHitList[j].empty())
         {
             finished = false;
             uint64 min_time = m_unitsHitList[j].begin()->first;
@@ -1303,7 +1303,7 @@ uint64 Spell::handle_delayed(uint64 t_offset)
         }
 
         // are some gameobjects pending?
-        if (m_objectsHitList[j].size() != 0)
+        if (!m_objectsHitList[j].empty())
         {
             finished = false;
             uint64 min_time = m_objectsHitList[j].begin()->first;

@@ -160,16 +160,16 @@ namespace ZThread {
       
         Guard<LockType> g(_lock);
       
-        while (_queue.size() == 0 && !_canceled) 
+        while (_queue.empty() && !_canceled) 
           _notEmpty.wait();
     
-        if(_queue.size() == 0) // Queue canceled
+        if(_queue.empty()) // Queue canceled
           throw Cancellation_Exception();  
       
         T item = _queue.front();
         _queue.pop_front();
 
-        if(_queue.size() == 0) // Wake empty waiters
+        if(_queue.empty()) // Wake empty waiters
           _isEmpty.broadcast();
 
         return item;
@@ -198,18 +198,18 @@ namespace ZThread {
   
         Guard<LockType> g(_lock, timeout);
       
-        while(_queue.size() == 0 && !_canceled) {
+        while(_queue.empty() && !_canceled) {
           if(!_notEmpty.wait(timeout))
             throw Timeout_Exception();
         }
 
-        if( _queue.size() == 0) // Queue canceled
+        if( _queue.empty()) // Queue canceled
           throw Cancellation_Exception();  
 
         T item = _queue.front();
         _queue.pop_front();
 
-        if(_queue.size() == 0) // Wake empty waiters
+        if(_queue.empty()) // Wake empty waiters
           _isEmpty.broadcast();
 
         return item;
@@ -285,7 +285,7 @@ namespace ZThread {
 
         Guard<LockType> g(_lock);
 
-        while(_queue.size() > 0) // Wait for an empty signal
+        while(!_queue.empty()) // Wait for an empty signal
           _isEmpty.wait();
     
         return true;
@@ -314,7 +314,7 @@ namespace ZThread {
   
         Guard<LockType> g(_lock, timeout);
 
-        while(_queue.size() > 0) // Wait for an empty signal
+        while(!_queue.empty()) // Wait for an empty signal
           _isEmpty.wait(timeout);
     
         return true;

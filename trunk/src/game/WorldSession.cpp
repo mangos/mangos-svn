@@ -1266,7 +1266,7 @@ void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if(!charname.size())
+    if(charname.empty())
     {
         SendNotification("Please provide character name");
         return;
@@ -1296,13 +1296,13 @@ void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
     {
         fields = result->Fetch();
         acc = fields[0].GetCppString();
-        if(!acc.size())
+        if(acc.empty())
             acc = "Unknown";
         email = fields[1].GetCppString();
-        if(!email.size())
+        if(email.empty())
             email = "Unknown";
         lastip = fields[2].GetCppString();
-        if(!lastip.size())
+        if(lastip.empty())
             lastip = "Unknown";
         msg = charname + "'s " + "account is " + acc + ", e-mail: " + email + ", last ip: " + lastip;
 
