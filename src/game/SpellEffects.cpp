@@ -2160,19 +2160,21 @@ void Spell::EffectEnchantItemTmp(uint32 i)
 
         // enchanting id selected by calculated damage-per-sec stored in Effect[1] base value
         // with already applied percent bonus from Elemental Weapons talent
+        // Note: damage calculated (correctly) with rounding int32(float(v)) but 
+        // RW enchantments applied damage int32(float(v)+0.5), this create  0..1 difference sometime
         switch(enchnting_damage)
         {
             // Rank 1
             case  2: enchant_id =   29; break;              //  0% [ 7% ==  2, 14% == 2, 20% == 2]
             // Rank 2
-            case  4: enchant_id =    6; break;              //  0% [ 7% ==  4]
-            case  5: enchant_id = 3025; break;              // 14% [20% ==  5]
+            case  4: enchant_id =    6; break;              //  0% [ 7% ==  4, 14% == 4]
+            case  5: enchant_id = 3025; break;              // 20%
             // Rank 3
-            case  6: enchant_id =    1; break;              //  0% [ 7% ==  6]
-            case  7: enchant_id = 3027; break;              // 14% [20% ==  7]
+            case  6: enchant_id =    1; break;              //  0% [ 7% ==  6, 14% == 6]
+            case  7: enchant_id = 3027; break;              // 20%
             // Rank 4
-            case  9: enchant_id = 3032; break;              //  0%
-            case 10: enchant_id =  503; break;              //  7% [14% == 10]
+            case  9: enchant_id = 3032; break;              //  0% [ 7% ==  6]
+            case 10: enchant_id =  503; break;              // 14%
             case 11: enchant_id = 3031; break;              // 20%
             // Rank 5
             case 15: enchant_id = 3035; break;              // 0%
@@ -2181,26 +2183,26 @@ void Spell::EffectEnchantItemTmp(uint32 i)
             case 18: enchant_id = 3034; break;              // 20%
             // Rank 6
             case 28: enchant_id = 3038; break;              // 0%
-            case 30: enchant_id =  683; break;              // 7%
-            case 32: enchant_id = 3036; break;              // 14%
-            case 34: enchant_id = 3037; break;              // 20%
+            case 29: enchant_id =  683; break;              // 7%
+            case 31: enchant_id = 3036; break;              // 14%
+            case 33: enchant_id = 3037; break;              // 20%
             // Rank 7
             case 40: enchant_id = 3041; break;              // 0%
-            case 43: enchant_id = 1664; break;              // 7%
-            case 46: enchant_id = 3039; break;              // 14%
+            case 42: enchant_id = 1664; break;              // 7%
+            case 45: enchant_id = 3039; break;              // 14%
             case 48: enchant_id = 3040; break;              // 20%
             // Rank 8
             case 49: enchant_id = 3044; break;              // 0%
             case 52: enchant_id = 2632; break;              // 7%
-            case 56: enchant_id = 3042; break;              // 14%
-            case 59: enchant_id = 3043; break;              // 20%
+            case 55: enchant_id = 3042; break;              // 14%
+            case 58: enchant_id = 3043; break;              // 20%
             // Rank 9
             case 62: enchant_id = 2633; break;              // 0%
             case 66: enchant_id = 3018; break;              // 7%
-            case 71: enchant_id = 3019; break;              // 14%
+            case 70: enchant_id = 3019; break;              // 14%
             case 74: enchant_id = 3020; break;              // 20%
             default:
-                sLog.outError("Spell::EffectEnchantItemTmp: Damage %u not handled in S'RW",damage);
+                sLog.outError("Spell::EffectEnchantItemTmp: Damage %u not handled in S'RW",enchnting_damage);
                 return;
         }
     }

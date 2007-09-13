@@ -942,7 +942,7 @@ void Spell::prepare(SpellCastTargets * targets)
     m_castPositionZ = m_caster->GetPositionZ();
     m_castOrientation = m_caster->GetOrientation();
 
-    m_timer = casttime<0?0:casttime;
+    ReSetTimer();
 
     // create and add update event for this spell
     SpellEvent* Event = new SpellEvent(this);
@@ -3352,7 +3352,7 @@ void Spell::Delayed(int32 delaytime)
     m_timer += delaytime;
 
     if(int32(m_timer) > casttime)
-        m_timer = (casttime > 0 ? casttime : 0);
+        ReSetTimer();
 
     WorldPacket data(SMSG_SPELL_DELAYED, 8+4);
     data.append(m_caster->GetPackGUID());
