@@ -277,6 +277,20 @@ void Spell::EffectSchoolDMG(uint32 i)
         {
             damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.2);
         }
+        //Judgement of Vengeance
+        else if(m_spellInfo->Id == 31804)
+        {
+            uint32 stacks = 0;
+            Unit::AuraList auras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
+            for(Unit::AuraList::iterator itr = auras.begin(); itr!=auras.end(); itr++)
+                if((*itr)->GetId() == 31803)
+                    stacks++;
+            if(!stacks)
+                //No damage if the target isn't affected by this
+                damage = -1;
+            else
+                damage *= stacks;
+        }
 
         if(damage >= 0)
             m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell, true);
