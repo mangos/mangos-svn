@@ -958,6 +958,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint64 GetCharmerOrOwnerGUID() const { return GetCharmerGUID() ? GetCharmerGUID() : GetOwnerGUID(); }
         void SetCharmerGUID(uint64 owner) { SetUInt64Value(UNIT_FIELD_CHARMEDBY, owner); }
 
+        Player* GetSpellModOwner();
+
         Unit* GetOwner() const;
         Pet* GetPet() const;
         Unit* GetCharmer() const;

@@ -215,8 +215,6 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur, u
     ASSERT( Caster != NULL && info != NULL );
     ASSERT( info == sSpellStore.LookupEntry( info->Id ) && "`info` must be pointer to sSpellStore element");
 
-    Player* p_caster;
-
     m_spellInfo = info;
     m_caster = Caster;
     m_selfContainer = NULL;
@@ -258,12 +256,10 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur, u
 
     casttime = GetCastTime(sCastTimesStore.LookupEntry(m_spellInfo->CastingTimeIndex));
 
-    if( m_caster->GetTypeId() == TYPEID_PLAYER && m_spellInfo )
-    {
-        p_caster = ((Player*)m_caster);
-        ((Player*)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_CASTING_TIME, casttime);
-        casttime = int32(casttime*p_caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
-    }
+    if(Player* modOwner = m_caster->GetSpellModOwner())
+        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_CASTING_TIME, casttime);
+
+    casttime = int32(casttime*m_caster->GetFloatValue(UNIT_MOD_CAST_SPEED));
 
     m_timer = 0;                                            // will set to castime in preper
 
@@ -2907,8 +2903,8 @@ uint8 Spell::CheckRange()
     float max_range = GetMaxRange(srange);
     float min_range = GetMinRange(srange);
 
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        ((Player *)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, max_range);
+    if(Player* modOwner = m_caster->GetSpellModOwner())
+        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RANGE, max_range);
 
     Unit *target = m_targets.getUnitTarget();
 
@@ -2983,8 +2979,8 @@ uint8 Spell::CheckMana(uint32 *mana)
         if((*i)->GetModifier()->m_miscvalue & int32(1 << m_spellInfo->School))
             manaCost += (*i)->GetModifier()->m_amount;
 
-    if (m_caster->GetTypeId() == TYPEID_PLAYER)
-        ((Player *)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, manaCost);
+    if(Player* modOwner = m_caster->GetSpellModOwner())
+        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, manaCost);
 
     manaCost *= (1.0f + m_caster->GetFloatValue(UNIT_FIELD_POWER_COST_MODIFIER));
 

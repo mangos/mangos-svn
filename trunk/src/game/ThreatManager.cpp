@@ -33,8 +33,11 @@
 // The pHatingUnit is not used yet
 float ThreatCalcHelper::calcThreat(Unit* pHatedUnit, Unit* pHatingUnit, float pThreat, SpellSchools pSchool, SpellEntry const *pThreatSpell)
 {
-    if (pHatedUnit->GetTypeId() == TYPEID_PLAYER && pThreatSpell)
-        ((Player*)pHatedUnit)->ApplySpellMod(pThreatSpell->Id, SPELLMOD_THREAT, pThreat);
+    if(pThreatSpell)
+    {
+        if( Player* modOwner = pHatingUnit->GetSpellModOwner() )
+            modOwner->ApplySpellMod(pThreatSpell->Id, SPELLMOD_THREAT, pThreat);
+    }
 
     float threat = pHatedUnit->ApplyTotalThreatModifier(pThreat, pSchool);
     return threat;

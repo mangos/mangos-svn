@@ -482,8 +482,8 @@ void Spell::EffectDummy(uint32 i)
     {
         float cost = m_currentBasePoints[0]+1;
 
-        if (m_caster->GetTypeId() == TYPEID_PLAYER)
-            ((Player *)m_caster)->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, cost);
+        if(Player* modOwner = m_caster->GetSpellModOwner())
+            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, cost);
 
         uint32 dmg = m_caster->SpellDamageBonus(m_caster, m_spellInfo,uint32(cost > 0 ? cost : 0), SPELL_DIRECT_DAMAGE);
 
