@@ -159,7 +159,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     }
 
     // prevent character creating with invalid name
-    if(name.size() == 0)
+    if(name.empty())
     {
         data << (uint8)CHAR_NAME_INVALID_CHARACTER;
         SendPacket( &data );
@@ -715,7 +715,7 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
     }
 
     // prevent character rename to invalid name
-    if(newname.size() == 0)                                 // checked by client
+    if(newname.empty())                                 // checked by client
     {
         WorldPacket data(SMSG_CHAR_RENAME, 1);
         data << (uint8)CHAR_NAME_NO_NAME;

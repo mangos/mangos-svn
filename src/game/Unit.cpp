@@ -2900,19 +2900,7 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
         }
     }
 
-    // adding linked auras
-    // add the shapeshift aura's boosts
-    if(Aur->GetModifier()->m_auraname == SPELL_AURA_MOD_SHAPESHIFT)
-        Aur->HandleShapeshiftBoosts(true);
-
-    Aur->_AddAura();
-    m_Auras.insert(AuraMap::value_type(spellEffectPair(Aur->GetId(), Aur->GetEffIndex()), Aur));
-    if (Aur->GetModifier()->m_auraname < TOTAL_AURAS)
-    {
-        m_modAuras[Aur->GetModifier()->m_auraname].push_back(Aur);
-        m_AuraModifiers[Aur->GetModifier()->m_auraname] += (Aur->GetModifier()->m_amount);
-    }
-
+    // update single target auras list (before aura add to aura list, to prevent unexpected remove recently added aura)
     if (IsSingleTarget(Aur->GetId()) && Aur->GetTarget() && Aur->GetSpellProto())
     {
         if(Unit* caster = Aur->GetCaster())
@@ -2941,6 +2929,21 @@ bool Unit::AddAura(Aura *Aur, bool uniq)
             scAuras.push_back(Aur);
         }
     }
+
+    // adding linked auras
+    // add the shapeshift aura's boosts
+    if(Aur->GetModifier()->m_auraname == SPELL_AURA_MOD_SHAPESHIFT)
+        Aur->HandleShapeshiftBoosts(true);
+
+    // add aura, register in lists and arrays
+    Aur->_AddAura();
+    m_Auras.insert(AuraMap::value_type(spellEffectPair(Aur->GetId(), Aur->GetEffIndex()), Aur));
+    if (Aur->GetModifier()->m_auraname < TOTAL_AURAS)
+    {
+        m_modAuras[Aur->GetModifier()->m_auraname].push_back(Aur);
+        m_AuraModifiers[Aur->GetModifier()->m_auraname] += (Aur->GetModifier()->m_amount);
+    }
+
     return true;
 }
 
@@ -4622,7 +4625,7 @@ bool Unit::isAttackingPlayer() const
 
 void Unit::RemoveAllAttackers()
 {
-    while (m_attackers.size() != 0)
+    while (!m_attackers.empty())
     {
         AttackerSet::iterator iter = m_attackers.begin();
         if(!(*iter)->AttackStop())

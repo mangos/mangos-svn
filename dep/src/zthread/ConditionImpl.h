@@ -86,7 +86,7 @@ ConditionImpl<List>::~ConditionImpl() {
 #ifndef NDEBUG
 
     // It is an error to destroy a condition with threads waiting on it.
-    if(_waiters.size() != 0) {
+    if(!_waiters.empty()) {
 
       ZTDEBUG("** You are destroying a condition variable which still has waiting threads. **\n");
       assert(0); 

@@ -100,10 +100,10 @@ namespace ZThread {
     
         Guard<LockType> g(_lock);
 
-        if(_queue.size() == 0 && _canceled)
+        if(_queue.empty() && _canceled)
           throw Cancellation_Exception();
     
-        if(_queue.size() == 0)
+        if(_queue.empty())
           throw NoSuchElement_Exception();
 
         T item = _queue.front();
@@ -121,10 +121,10 @@ namespace ZThread {
 
         Guard<LockType> g(_lock, timeout);
 
-        if(_queue.size() == 0 && _canceled)
+        if(_queue.empty() && _canceled)
           throw Cancellation_Exception();
     
-        if(_queue.size() == 0)
+        if(_queue.empty())
           throw NoSuchElement_Exception();
 
         T item = _queue.front();
@@ -138,7 +138,7 @@ namespace ZThread {
       {
           Guard<LockType> g(_lock);
 
-          if(_queue.size() == 0)
+          if(_queue.empty())
               throw NoSuchElement_Exception();
 
           return _queue.front();

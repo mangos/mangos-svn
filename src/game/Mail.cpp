@@ -54,7 +54,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     recv_data >> itemId;
     recv_data >> money >> COD;                              //then there are two (uint32) 0;
 
-    if (receiver.size() == 0)
+    if (receiver.empty())
         return;
     normalizePlayerName(receiver);
     //sDatabase.escape_string(receiver);                      // prevent SQL injection
@@ -134,7 +134,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     pl->SendMailResult(0, 0, MAIL_OK);
 
     uint32 itemTextId = 0;
-    if (body.size() > 0)
+    if (!body.empty())
     {
         itemTextId = objmgr.CreateItemText( body );
     }

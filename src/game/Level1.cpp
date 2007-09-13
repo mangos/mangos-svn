@@ -1705,7 +1705,7 @@ bool ChatHandler::HandleSendMailCommand(const char* args)
     time_t etime = dtime + (30 * DAY);
     uint32 messagetype = MAIL_GM;
     uint32 itemTextId = 0;
-    if (text.size() > 0)
+    if (!text.empty())
     {
         itemTextId = objmgr.CreateItemText( text );
     }

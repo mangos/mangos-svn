@@ -558,7 +558,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
 
     recv_data >> friendName;
 
-    if(friendName.size() == 0)
+    if(friendName.empty())
         return;
 
     normalizePlayerName(friendName);
@@ -656,7 +656,7 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
 
     recv_data >> IgnoreName;
 
-    if(IgnoreName.size() == 0)
+    if(IgnoreName.empty())
         return;
 
     normalizePlayerName(IgnoreName);

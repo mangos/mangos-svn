@@ -1184,7 +1184,7 @@ void Pet::_LoadSpellCooldowns()
 
         delete result;
 
-        if(m_CreatureSpellCooldowns.size() > 0 && GetOwner())
+        if(!m_CreatureSpellCooldowns.empty() && GetOwner())
         {
             ((Player*)GetOwner())->GetSession()->SendPacket(&data);
         }
@@ -1555,7 +1555,7 @@ void Pet::CheckLearning(uint32 spellid)
 
     Unit* owner = GetOwner();
 
-    if(m_teachspells.size() == 0 || !owner || owner->GetTypeId() != TYPEID_PLAYER)
+    if(m_teachspells.empty() || !owner || owner->GetTypeId() != TYPEID_PLAYER)
         return;
 
     TeachSpellMap::iterator itr = m_teachspells.find(spellid);

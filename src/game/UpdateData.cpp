@@ -105,10 +105,10 @@ bool UpdateData::BuildPacket(WorldPacket *packet)
 {
     ByteBuffer buf(m_data.size() + 10 + m_outOfRangeGUIDs.size()*8);
 
-    buf << (uint32) (m_outOfRangeGUIDs.size() > 0 ? m_blockCount + 1 : m_blockCount);
+    buf << (uint32) (!m_outOfRangeGUIDs.empty() ? m_blockCount + 1 : m_blockCount);
     buf << (uint8) 0;
 
-    if(m_outOfRangeGUIDs.size())
+    if(!m_outOfRangeGUIDs.empty())
     {
         buf << (uint8) UPDATETYPE_OUT_OF_RANGE_OBJECTS;
         buf << (uint32) m_outOfRangeGUIDs.size();

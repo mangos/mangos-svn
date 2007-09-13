@@ -776,7 +776,7 @@ void Player::Update( uint32 p_time )
 
     CheckExploreSystem();
 
-    if (m_timedquests.size() > 0)
+    if (!m_timedquests.empty())
     {
         std::set<uint32>::iterator iter = m_timedquests.begin();
         while (iter != m_timedquests.end())
@@ -2704,7 +2704,7 @@ void Player::removeSpell(uint16 spell_id)
 
 void Player::RemoveAllSpellCooldown()
 {
-    if(m_spellCooldowns.size() > 0)
+    if(!m_spellCooldowns.empty())
     {
         for(SpellCooldowns::const_iterator itr = m_spellCooldowns.begin();itr != m_spellCooldowns.end(); ++itr)
         {
@@ -10865,7 +10865,7 @@ bool Player::SatisfyQuestPreviousQuest( uint32 quest_id, bool msg )
     if( qInfo )
     {
         // No previous quest (might be first quest in a series)
-        if( qInfo->prevQuests.size() == 0 )
+        if( qInfo->prevQuests.empty())
             return true;
 
         for(Quest::PrevQuests::iterator iter = qInfo->prevQuests.begin(); iter != qInfo->prevQuests.end(); ++iter )
@@ -11050,7 +11050,7 @@ bool Player::SatisfyQuestPrevChain( uint32 quest_id, bool msg )
     if( qInfo )
     {
         // No previous quest in chain
-        if( qInfo->prevChainQuests.size() == 0 )
+        if( qInfo->prevChainQuests.empty())
             return true;
 
         for(Quest::PrevChainQuests::iterator iter = qInfo->prevChainQuests.begin(); iter != qInfo->prevChainQuests.end(); ++iter )

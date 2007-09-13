@@ -122,7 +122,7 @@ void Channel::Leave(uint64 p, bool send)
 
         if(changeowner)
         {
-            uint64 newowner = players.size() > 0 ? players.begin()->second.player : 0;
+            uint64 newowner = !players.empty() ? players.begin()->second.player : 0;
             SetOwner(newowner);
         }
     }
@@ -181,7 +181,7 @@ void Channel::KickOrBan(uint64 good, const char *badname, bool ban)
 
             if(changeowner)
             {
-                uint64 newowner = players.size() > 0 ? good : false;
+                uint64 newowner = !players.empty() ? good : false;
                 SetOwner(newowner);
             }
         }

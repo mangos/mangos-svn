@@ -281,7 +281,7 @@ void LoadDBCStores(std::string dataPath)
         sLog.outError("\nIncorrect DataDir value in mangosd.conf or ALL required *.dbc files (%d) not found by path: %sdbc",DBCFilesCount,dataPath.c_str());
         exit(1);
     }
-    else if(bad_dbc_files.size() > 0 )
+    else if(!bad_dbc_files.empty() )
     {
 
         std::string str;

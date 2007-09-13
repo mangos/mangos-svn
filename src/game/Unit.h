@@ -736,7 +736,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
             if(itr != m_attackers.end())
                 m_attackers.erase(itr);
 
-            if (m_attackers.size() == 0)
+            if (m_attackers.empty())
             {
                 clearUnitState(UNIT_STAT_ATTACK_BY);
                 if(!m_attacking)
@@ -748,7 +748,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
             if (getVictim() != NULL)
                 return getVictim();
 
-            if (m_attackers.size() > 0)
+            if (!m_attackers.empty())
                 return *(m_attackers.begin());
 
             return NULL;

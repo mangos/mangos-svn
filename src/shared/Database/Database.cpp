@@ -53,7 +53,7 @@ void Database::ThreadEnd()
 
 void Database::escape_string(std::string& str)
 {
-    if(str.size()==0)
+    if(str.empty())
         return;
 
     char* buf = new char[str.size()*2+1];

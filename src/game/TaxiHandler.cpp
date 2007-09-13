@@ -214,7 +214,7 @@ void WorldSession::HandleActivateTaxiFarOpcode ( WorldPacket & recv_data )
         nodes.push_back(node);
     }
 
-    if(nodes.size() < 1)
+    if(nodes.empty())
         return;
 
     sLog.outDebug( "WORLD: Received CMSG_ACTIVATETAXI_FAR from %d to %d" ,nodes.front(),nodes.back());

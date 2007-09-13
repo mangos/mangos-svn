@@ -114,7 +114,7 @@ SocketHandler::~SocketHandler()
 	}
 #endif
 	{
-		while (m_sockets.size())
+		while (!m_sockets.empty())
 		{
 DEB(			fprintf(stderr, "Emptying sockets list in SocketHandler destructor, %d instances\n", m_sockets.size());)
 			socket_m::iterator it = m_sockets.begin();
@@ -248,14 +248,14 @@ int SocketHandler::Select(long sec,long usec)
 
 int SocketHandler::Select()
 {
-	if (m_fds_callonconnect.size() ||
+	if (!m_fds_callonconnect.empty() ||
 #ifdef ENABLE_DETACH
-		(!m_slave && m_fds_detach.size()) ||
+		(!m_slave && !m_fds_detach.empty()) ||
 #endif
-		m_fds_connecting.size() ||
-		m_fds_retry.size() ||
-		m_fds_close.size() ||
-		m_fds_erase.size())
+		!m_fds_connecting.empty() ||
+		!m_fds_retry.empty() ||
+		!m_fds_close.empty() ||
+		!m_fds_erase.empty())
 	{
 		return Select(0, 200000);
 	}
@@ -474,7 +474,7 @@ DEB(			fprintf(stderr, "m_maxsock: %d\n", m_maxsock);
 	} // if (n > 0)
 
 	// check CallOnConnect
-	if (m_fds_callonconnect.size())
+	if (!m_fds_callonconnect.empty())
 	{
 		socket_v tmp = m_fds_callonconnect;
 		for (socket_v::iterator it = tmp.begin(); it != tmp.end(); it++)
@@ -531,7 +531,7 @@ DEB(			fprintf(stderr, "m_maxsock: %d\n", m_maxsock);
 		}
 	}
 #ifdef ENABLE_DETACH
-	if (!m_slave && m_fds_detach.size())
+	if (!m_slave && !m_fds_detach.empty())
 	{
 		for (socket_v::iterator it = m_fds_detach.begin(); it != m_fds_detach.end(); it++)
 		{
@@ -564,7 +564,7 @@ DEB(			fprintf(stderr, "m_maxsock: %d\n", m_maxsock);
 	}
 #endif
 	// check Connecting - connection timeout
-	if (m_fds_connecting.size())
+	if (!m_fds_connecting.empty())
 	{
 		socket_v tmp = m_fds_connecting;
 		for (socket_v::iterator it = tmp.begin(); it != tmp.end(); it++)
@@ -631,7 +631,7 @@ DEB(			fprintf(stderr, "m_maxsock: %d\n", m_maxsock);
 		}
 	}
 	// check retry client connect
-	if (m_fds_retry.size())
+	if (!m_fds_retry.empty())
 	{
 		socket_v tmp = m_fds_retry;
 		for (socket_v::iterator it = tmp.begin(); it != tmp.end(); it++)
@@ -673,7 +673,7 @@ DEB(	fprintf(stderr, "Close() before retry client connect\n");)
 		}
 	}
 	// check close and delete
-	if (m_fds_close.size())
+	if (!m_fds_close.empty())
 	{
 		socket_v tmp = m_fds_close;
 DEB(fprintf(stderr, "m_fds_close.size() == %d\n", m_fds_close.size());)
@@ -791,7 +791,7 @@ DEB(	fprintf(stderr, "Close() before OnDelete\n");)
 
 	// check erased sockets
 	bool check_max_fd = false;
-	while (m_fds_erase.size())
+	while (!m_fds_erase.empty())
 	{
 		socket_v::iterator it = m_fds_erase.begin();
 		SOCKET nn = *it;
@@ -854,7 +854,7 @@ DEB(	fprintf(stderr, "Close() before OnDelete\n");)
 		}
 	}
 	// remove Add's that fizzed
-	while (m_delete.size())
+	while (!m_delete.empty())
 	{
 		std::list<Socket *>::iterator it = m_delete.begin();
 		Socket *p = *it;
