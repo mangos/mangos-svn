@@ -1660,8 +1660,10 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
     // Instant Attacks (Spellmods)
     // TODO: AP bonus related to mainhand weapon
     if(spellCasted)
-        if(GetTypeId()== TYPEID_PLAYER)
-            ((Player*)this)->ApplySpellMod(spellCasted->Id, SPELLMOD_DAMAGE, *damage);
+    {
+        if(Player* modOwner = GetSpellModOwner())
+            modOwner->ApplySpellMod(spellCasted->Id, SPELLMOD_DAMAGE, *damage);
+    }
 
     if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && pVictim->GetCreatureType() != CREATURE_TYPE_CRITTER )
         ((Player*)this)->UpdateCombatSkills(pVictim, attType, outcome, false);
@@ -1681,9 +1683,10 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
             crit_bonus = *damage;
 
             // Apply crit_damage bonus for melee spells
-            if (GetTypeId() == TYPEID_PLAYER && spellCasted)
+            if (spellCasted)
             {
-                ((Player*)this)->ApplySpellMod(spellCasted->Id, SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus);
+                if(Player* modOwner = GetSpellModOwner())
+                    modOwner->ApplySpellMod(spellCasted->Id, SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus);
             }
 
             *damage += crit_bonus;
@@ -2069,10 +2072,11 @@ MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (Unit const *pVictim, WeaponAtt
         AuraList const& mAttackerSWCrit = pVictim->GetAurasByType(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE);
         for(AuraList::const_iterator i = mAttackerSWCrit.begin(); i != mAttackerSWCrit.end(); ++i)
             crit_chance += (*i)->GetModifier()->m_amount;
-
-        // Spellmods
-        ((Player*)this)->ApplySpellMod(spellInfo->Id, SPELLMOD_CRITICAL_CHANCE, crit_chance);
     }
+
+    // Spellmods
+    if(Player* modOwner = GetSpellModOwner())
+        modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_CRITICAL_CHANCE, crit_chance);
 
     DEBUG_LOG("PHYSICAL OUTCOME: hit %u crit %f miss %u",m_modHitChance,crit_chance,miss_chance);
 
@@ -4922,8 +4926,10 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
 
     // Spellmod SpellDamage
     float SpellModSpellDamage = 100.0f;
-    if (GetTypeId() == TYPEID_PLAYER)
-        ((Player*)this)->ApplySpellMod(spellProto->Id,SPELLMOD_SPELL_DAMAGE,SpellModSpellDamage);
+
+    if(Player* modOwner = GetSpellModOwner())
+        modOwner->ApplySpellMod(spellProto->Id,SPELLMOD_SPELL_DAMAGE,SpellModSpellDamage);
+
     SpellModSpellDamage /= 100.0f;
 
     float DoneActualBenefit = DoneAdvertisedBenefit * (CastingTime / 3500.0f) * (100.0f - LvlPenalty) * LvlFactor * DotFactor * SpellModSpellDamage / 100.0f;
@@ -4961,10 +4967,8 @@ bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect, Unit
 
     // percent done
     // only players use intelligence for critical chance computations
-    if (GetTypeId() == TYPEID_PLAYER)
-    {
-        ((Player*)this)->ApplySpellMod(spellProto->Id, SPELLMOD_CRITICAL_CHANCE, crit_chance);
-    }
+    if(Player* modOwner = GetSpellModOwner())
+        modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CRITICAL_CHANCE, crit_chance);
 
     // taken
     if (pVictim)
@@ -5007,8 +5011,10 @@ bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect, Unit
     if (roll_chance_f(crit_chance))
     {
         int32 crit_bonus = *peffect / 2;
-        if (GetTypeId() == TYPEID_PLAYER)                   // adds additional damage to crit_bonus (from talents)
-            ((Player*)this)->ApplySpellMod(spellProto->Id, SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus);
+
+        // adds additional damage to crit_bonus (from talents)
+        if(Player* modOwner = GetSpellModOwner())
+            modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus);
 
         *peffect += crit_bonus;
         // Resilience - reduce crit damage by 2x%
@@ -6122,25 +6128,29 @@ void Unit::CalculateSpellDamageAndDuration(int32* damage, int32* duration, Spell
             needClearCombo = true;
         }
 
-        if (GetTypeId() == TYPEID_PLAYER)
+        if(Player* modOwner = GetSpellModOwner())
         {
-            ((Player *)this)->ApplySpellMod(spellProto->Id,SPELLMOD_ALL_EFFECTS, value);
+            modOwner->ApplySpellMod(spellProto->Id,SPELLMOD_ALL_EFFECTS, value);
             switch(effect_index)
             {
-                case 0:
-                    ((Player*)this)->ApplySpellMod(spellProto->Id,SPELLMOD_EFFECT1, value);
-                    break;
-                case 1:
-                    ((Player*)this)->ApplySpellMod(spellProto->Id,SPELLMOD_EFFECT2, value);
-                    break;
-                case 2:
-                    ((Player*)this)->ApplySpellMod(spellProto->Id,SPELLMOD_EFFECT3, value);
-                    break;
+            case 0:
+                modOwner->ApplySpellMod(spellProto->Id,SPELLMOD_EFFECT1, value);
+                break;
+            case 1:
+                modOwner->ApplySpellMod(spellProto->Id,SPELLMOD_EFFECT2, value);
+                break;
+            case 2:
+                modOwner->ApplySpellMod(spellProto->Id,SPELLMOD_EFFECT3, value);
+                break;
             }
+            if( spellProto->Effect[effect_index] == SPELL_EFFECT_APPLY_AURA &&
+                (spellProto->EffectApplyAuraName[effect_index] == SPELL_AURA_PERIODIC_DAMAGE ||
+                spellProto->EffectApplyAuraName[effect_index] == SPELL_AURA_PERIODIC_HEAL ||
+                spellProto->EffectApplyAuraName[effect_index] == SPELL_AURA_PERIODIC_LEECH) )
+                modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_DOT, value);
 
-            ((Player*)this)->ApplySpellMod(spellProto->Id, SPELLMOD_DAMAGE, value);
-
-        }
+            modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_DAMAGE, value);
+        } 
 
         *damage = value;
     }
@@ -6909,10 +6919,10 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                 }
             }
 
-            // Need to use floats here, cuz calculated PPM chance often is about 1-2%
             float chance = (float)spellProto->procChance;
-            if(GetTypeId() == TYPEID_PLAYER)
-                ((Player*)this)->ApplySpellMod(spellProto->Id,SPELLMOD_CHANCE_OF_SUCCESS,chance);
+
+            if(Player* modOwner = GetSpellModOwner())
+                modOwner->ApplySpellMod(spellProto->Id,SPELLMOD_CHANCE_OF_SUCCESS,chance);
 
             if(!isVictim && spellProcEvent->ppmRate != 0)
             {
@@ -7024,3 +7034,17 @@ SpellSchools Unit::GetMeleeDamageSchool() const
     else
         return SPELL_SCHOOL_NORMAL;
 }
+
+Player* Unit::GetSpellModOwner()
+{
+    if(GetTypeId()==TYPEID_PLAYER)
+        return (Player*)this;
+    if(((Creature*)this)->isPet() || ((Creature*)this)->isTotem())
+    {
+        Unit* owner = GetOwner();
+        if(owner && owner->GetTypeId()==TYPEID_PLAYER)
+            return (Player*)owner;
+    }
+    return NULL;
+}
+
