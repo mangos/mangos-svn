@@ -102,6 +102,8 @@ Pet::~Pet()
 {
     if(m_uint32Values)                                      // only for fully created Object
     {
+        for (PetSpellMap::iterator i = m_spells.begin(); i != m_spells.end(); ++i)
+            delete i->second;
         ObjectAccessor::Instance().RemoveObject(this);
     }
 }

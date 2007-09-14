@@ -951,7 +951,7 @@ void Group::_setLeader(const uint64 &guid)
         }
 
         // rebind changed associations in database
-        if (changed_bindings.size() > 0)
+        if (!changed_bindings.empty())
         {
             std::ostringstream ss;
             ss << "UPDATE `character_instance` SET `leader` = '" << GUID_LOPART(new_guid) << "' WHERE (`map` IN (";

@@ -284,17 +284,23 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     x.SetBinary(sha1.GetDigest(), sha1.GetLength());
     v = g.ModExp(x, N);
 
-    sLog.outDebug("SOCKET: (s,v) check s: %s v_old: %s v_new: %s", s.AsHexStr(), fields[6].GetString(), v.AsHexStr() );
+    const char* sStr = s.AsHexStr();    //Must be freed by OPENSSL_free()
+    const char* vStr = v.AsHexStr();    //Must be freed by OPENSSL_free()
+    sLog.outDebug("SOCKET: (s,v) check s: %s v_old: %s v_new: %s", sStr, fields[6].GetString(), vStr );
     loginDatabase.PExecute("UPDATE `account` SET `v` = '0', `s` = '0' WHERE `username` = '%s'", safe_account.c_str());
-    if ( strcmp(v.AsHexStr(),fields[6].GetString() ) )
+    if ( strcmp(vStr,fields[6].GetString() ) )
     {
         packet.Initialize( SMSG_AUTH_RESPONSE, 1 );
         packet << uint8( AUTH_UNKNOWN_ACCOUNT );
         SendPacket( &packet );
         sLog.outDetail( "SOCKET: User not logged.");
         delete result;
+        OPENSSL_free((void*)sStr);
+        OPENSSL_free((void*)vStr);
         return;
     }
+    OPENSSL_free((void*)sStr);
+    OPENSSL_free((void*)vStr);
 
     ///- Re-check ip locking (same check as in realmd).
     if(fields[4].GetUInt8() == 1)                           // if ip is locked
@@ -494,7 +500,7 @@ void WorldSocket::SendSinglePacket()
 
         ///- Send the header and body to the client
         TcpSocket::SendBuf((char*)&hdr, 4);
-        if(packet->size()) TcpSocket::SendBuf((char*)packet->contents(), packet->size());
+        if(!packet->empty()) TcpSocket::SendBuf((char*)packet->contents(), packet->size());
 
         delete packet;
     }

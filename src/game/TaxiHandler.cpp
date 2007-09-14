@@ -140,7 +140,7 @@ void WorldSession::SendDoFlight( uint16 MountId, uint32 path )
     GetPlayer( )->Mount( MountId, true );
     FlightPathMovementGenerator *flight(new FlightPathMovementGenerator(*_player, path));
     Path &pathnodes(flight->GetPath());
-    assert( pathnodes.Size() > 0 );
+    assert( !pathnodes.Empty() );
 
     uint32 traveltime = uint32(pathnodes.GetTotalLength( ) * 32);
     WorldPacket data( SMSG_MONSTER_MOVE, (8+4+4+4+4+1+4+4+4+pathnodes.Size()*4*3) );

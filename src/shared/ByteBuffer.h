@@ -248,6 +248,7 @@ class ByteBuffer
         const uint8 *contents() const { return &_storage[0]; };
 
         inline size_t size() const { return _storage.size(); };
+		inline bool empty() const { return _storage.empty(); };
 
         void resize(size_t newsize)
         {

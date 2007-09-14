@@ -83,7 +83,7 @@ void WorldSession::HandleGuildInviteOpcode(WorldPacket& recvPacket)
 
     recvPacket >> Invitedname;
 
-    if(Invitedname.size() != 0)
+    if(!Invitedname.empty())
     {
         normalizePlayerName(Invitedname);
 
@@ -159,7 +159,7 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
 
     recvPacket >> plName;
 
-    if(plName.size() == 0)
+    if(plName.empty())
         return;
 
     normalizePlayerName(plName);
@@ -286,7 +286,7 @@ void WorldSession::HandleGuildPromoteOpcode(WorldPacket& recvPacket)
 
     recvPacket >> plName;
 
-    if(plName.size() == 0)
+    if(plName.empty())
         return;
 
     normalizePlayerName(plName);
@@ -369,7 +369,7 @@ void WorldSession::HandleGuildDemoteOpcode(WorldPacket& recvPacket)
 
     recvPacket >> plName;
 
-    if(plName.size() == 0)
+    if(plName.empty())
         return;
 
     normalizePlayerName(plName);
@@ -513,7 +513,7 @@ void WorldSession::HandleGuildLeaderOpcode(WorldPacket& recvPacket)
 
     recvPacket >> name;
 
-    if(name.size() == 0)
+    if(name.empty())
         return;
 
     normalizePlayerName(name);
@@ -585,7 +585,7 @@ void WorldSession::HandleGuildMOTDOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    if(recvPacket.size() != 0)
+    if(!recvPacket.empty())
         recvPacket >> MOTD;
     else
         MOTD = "";
@@ -615,7 +615,7 @@ void WorldSession::HandleGuildSetPublicNoteOpcode(WorldPacket& recvPacket)
 
     recvPacket >> name;
 
-    if(name.size() == 0)
+    if(name.empty())
         return;
 
     normalizePlayerName(name);
@@ -675,7 +675,7 @@ void WorldSession::HandleGuildSetOfficerNoteOpcode(WorldPacket& recvPacket)
 
     recvPacket >> plName;
 
-    if(plName.size() == 0)
+    if(plName.empty())
         return;
 
     normalizePlayerName(plName);

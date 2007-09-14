@@ -305,7 +305,7 @@ QuestItemList* FillQuestLoot(Player* player, Loot *loot)
         }
     }
 
-    if (ql->size() == 0)
+    if (ql->empty())
     {
         delete ql;
         return NULL;

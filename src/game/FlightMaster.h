@@ -51,6 +51,9 @@ class MANGOS_DLL_DECL FlightMaster : public MaNGOS::Singleton<FlightMaster, MaNG
         inline void ReportFlight(Player *pl, FlightPathMovementGenerator *gen)
         {
             Guard guard(*this);
+            FlightMapType::iterator i = i_flights.find(pl);
+            if (i != i_flights.end())
+                delete i->second;
             i_flights[pl] = gen;
         }
 

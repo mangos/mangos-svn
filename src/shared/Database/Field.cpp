@@ -33,12 +33,12 @@ Field::Field(Field &f)
     if (value && (mValue = new char[strlen(value) + 1]))
         strcpy(mValue, value);
     else
-        mValue = 0;
+        mValue = NULL;
 
     if (name && (mName = new char[strlen(name) + 1]))
         strcpy(mName, name);
     else
-        mName = 0;
+        mName = NULL;
 
     mType = f.GetType();
 }

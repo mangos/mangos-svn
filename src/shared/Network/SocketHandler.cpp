@@ -1070,7 +1070,7 @@ port_t SocketHandler::GetResolverPort()
 #ifdef ENABLE_POOL
 ISocketHandler::PoolSocket *SocketHandler::FindConnection(int type,const std::string& protocol,SocketAddress& ad)
 {
-	for (socket_m::iterator it = m_sockets.begin(); it != m_sockets.end() && m_sockets.size(); it++)
+	for (socket_m::iterator it = m_sockets.begin(); it != m_sockets.end() && !m_sockets.empty(); it++)
 	{
 		PoolSocket *pools = dynamic_cast<PoolSocket *>(it -> second);
 		if (pools)
