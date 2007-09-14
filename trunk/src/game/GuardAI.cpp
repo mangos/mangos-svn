@@ -59,7 +59,7 @@ void GuardAI::EnterEvadeMode()
     {
         DEBUG_LOG("Creature stopped attacking because he's dead [guid=%u]", i_creature.GetGUIDLow());
         i_creature.StopMoving();
-        i_creature->Idle();
+        i_creature.GetMotionMaster()->Idle();
 
         i_state = STATE_NORMAL;
 
@@ -99,8 +99,8 @@ void GuardAI::EnterEvadeMode()
     i_state = STATE_NORMAL;
 
     // Remove TargetedMovementGenerator from MotionMaster stack list, and add HomeMovementGenerator instead
-    if( i_creature->top()->GetMovementGeneratorType() == TARGETED_MOTION_TYPE )
-        i_creature->TargetedHome();
+    if( i_creature.GetMotionMaster()->top()->GetMovementGeneratorType() == TARGETED_MOTION_TYPE )
+        i_creature.GetMotionMaster()->TargetedHome();
 }
 
 void GuardAI::UpdateAI(const uint32 diff)
@@ -140,6 +140,6 @@ void GuardAI::AttackStart(Unit *u)
     {
         i_creature.AddThreat(u, 0.0f);
         i_victimGuid = u->GetGUID();
-        i_creature->Mutate(new TargetedMovementGenerator(*u));
+        i_creature.GetMotionMaster()->Mutate(new TargetedMovementGenerator<Creature>(*u));
     }
 }

@@ -19,14 +19,34 @@
 #ifndef MANGOS_MOTIONMASTER_H
 #define MANGOS_MOTIONMASTER_H
 
-#include "MovementGenerator.h"
+#include "Common.h"
 #include <stack>
+
+class MovementGenerator;
+class Unit;
+
+#define     CANNOT_HANDLE_TYPE   -1
+
+// values 0 ... MAX_DB_MOTION_TYPE-1 used in DB
+enum MovementGeneratorType
+{
+    IDLE_MOTION_TYPE      = 0,                              // IdleMovementGenerator.h
+    RANDOM_MOTION_TYPE    = 1,                              // RandomMovementGenerator.h
+    WAYPOINT_MOTION_TYPE  = 2,                              // WaypointMovementGenerator.h
+    MAX_DB_MOTION_TYPE    = 3,                              // *** this and below motion types can't be set in DB.
+    ANIMAL_RANDOM_MOTION_TYPE = MAX_DB_MOTION_TYPE,         // AnimalRandomMovementGenerator.h
+    CONFUSED_MOTION_TYPE  = 4,                              // ConfusedMovementGenerator.h
+    TARGETED_MOTION_TYPE  = 5,                              // TargetedMovementGenerator.h
+    TAXI_MOTION_TYPE      = 6,                              // TaxiMovementGenerator.h
+    HOME_MOTION_TYPE      = 7,                              // HomeMovementGenerator.h
+    FLIGHT_MOTION_TYPE    = 8                               // WaypointMovementGenerator.h
+};
 
 class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator *>
 {
     public:
 
-        explicit MotionMaster(Creature *creature) : i_owner(creature) {}
+        explicit MotionMaster(Unit *unit) : i_owner(unit) {}
         ~MotionMaster();
 
         void Initialize();
@@ -46,16 +66,9 @@ class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator *>
 
         void TargetedHome();
 
-        void Mutate(MovementGenerator *m)
-        {
-            // HomeMovement is not that important, delete it if meanwhile a new comes
-            if (!empty() && top()->GetMovementGeneratorType() == HOME_MOTION_TYPE)
-                MovementExpired(false);
-            m->Initialize(*i_owner);
-            push(m);
-        }
+        void Mutate(MovementGenerator *m);
 
     private:
-        Creature *i_owner;
+        Unit *i_owner;
 };
 #endif

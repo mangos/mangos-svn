@@ -32,6 +32,7 @@
 #include "FollowerReference.h"
 #include "FollowerRefManager.h"
 #include "Utilities/EventProcessor.h"
+#include "MotionMaster.h"
 #include <list>
 
 // Passive Spell codes explicit used in code
@@ -1152,6 +1153,20 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void addFollower(FollowerReference* pRef) { m_FollowingRefManager.insertFirst(pRef); }
         void removeFollower(FollowerReference* /*pRef*/ ) { } // nothing to do yet
         static Unit* GetUnit(WorldObject& object, uint64 guid);
+
+        MotionMaster* GetMotionMaster() { return &i_motionMaster; }
+
+        bool IsStopped() const { return !(hasUnitState(UNIT_STAT_MOVING)); }
+        void StopMoving()
+        {
+            clearUnitState(UNIT_STAT_MOVING);
+            // send explicit stop packet
+            SendMonsterMove(GetPositionX(), GetPositionY(), GetPositionZ(),0,true,0);
+        }
+
+        void setMoveRunFlag(bool f) { m_moveRun = f; }
+        bool getMoveRunFlag() const { return m_moveRun; }
+
     protected:
         explicit Unit ( WorldObject *instantiator );
 
@@ -1197,6 +1212,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         CharmInfo *m_charmInfo;
 
         SpellSchools GetMeleeDamageSchool() const;
+
+        MotionMaster i_motionMaster;
+        bool m_moveRun;
+
     private:
         void SendAttackStop(Unit* victim);                  // only from AttackStop(Unit*)
         void SendAttackStart(Unit* pVictim);                // only from Unit::AttackStart(Unit*)

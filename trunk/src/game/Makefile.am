@@ -96,8 +96,6 @@ libmangosgame_a_SOURCES = \
 	DuelHandler.cpp \
 	DynamicObject.cpp \
 	DynamicObject.h \
-	FlightMaster.cpp \
-	FlightMaster.h \
 	Formulas.h \
 	GameEvent.cpp \
 	GameEvent.h \

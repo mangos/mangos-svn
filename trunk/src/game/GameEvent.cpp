@@ -21,6 +21,7 @@
 #include "ProgressBar.h"
 #include "Log.h"
 #include "MapManager.h"
+#include "Policies/SingletonImp.h"
 
 INSTANTIATE_SINGLETON_1(GameEvent);
 

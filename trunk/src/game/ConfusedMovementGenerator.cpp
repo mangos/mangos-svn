@@ -22,25 +22,26 @@
 #include "ConfusedMovementGenerator.h"
 #include "DestinationHolderImp.h"
 
+template<class T>
 void
-ConfusedMovementGenerator::Initialize(Creature &creature)
+ConfusedMovementGenerator<T>::Initialize(T &unit)
 {
     const float wander_distance=11;
     float x,y,z,z2;
-    x = creature.GetPositionX();
-    y = creature.GetPositionY();
-    z = creature.GetPositionZ();
-    uint32 mapid=creature.GetMapId();
+    x = unit.GetPositionX();
+    y = unit.GetPositionY();
+    z = unit.GetPositionZ();
+    uint32 mapid=unit.GetMapId();
 
-    Map* map = MapManager::Instance().GetMap(mapid, &creature);
+    Map* map = MapManager::Instance().GetMap(mapid, &unit);
     z2 = map->GetHeight(x,y,z);
     if( fabs( z2 - z ) < 5 )
         z = z2;
 
     i_nextMove = 1;
 
-    bool is_water_ok = creature.isCanSwimOrFly();
-    bool is_land_ok  = creature.isCanWalkOrFly();
+    bool is_water_ok, is_land_ok;
+    _InitSpecific(unit, is_water_ok, is_land_ok);
 
     for(unsigned int idx=0; idx < MAX_CONF_WAYPOINTS+1; ++idx)
     {
@@ -66,60 +67,83 @@ ConfusedMovementGenerator::Initialize(Creature &creature)
             z = z2;
         i_waypoints[idx][2] =  z;
     }
-    creature.StopMoving();
+
+    unit.StopMoving();
+    unit.setMoveRunFlag(true);
 }
 
+template<>
 void
-ConfusedMovementGenerator::Reset(Creature &creature)
+ConfusedMovementGenerator<Creature>::_InitSpecific(Creature &creature, bool &is_water_ok, bool &is_land_ok)
+{
+    is_water_ok = creature.isCanSwimOrFly();
+    is_land_ok  = creature.isCanWalkOrFly();
+}
+
+template<>
+void
+ConfusedMovementGenerator<Player>::_InitSpecific(Player &, bool &is_water_ok, bool &is_land_ok)
+{
+    is_water_ok = true;
+    is_land_ok  = true;
+}
+
+template<class T>
+void
+ConfusedMovementGenerator<T>::Reset(T &unit)
 {
     i_nextMove = 1;
     i_nextMoveTime.Reset(0);
-    creature.StopMoving();
+    i_destinationHolder.ResetUpdate();
+    unit.StopMoving();
 }
 
+template<class T>
 bool
-ConfusedMovementGenerator::Update(Creature &creature, const uint32 &diff)
+ConfusedMovementGenerator<T>::Update(T &unit, const uint32 &diff)
 {
-    if(!&creature)
+    if(!&unit)
         return true;
-    if(creature.hasUnitState(UNIT_STAT_ROOT) || creature.hasUnitState(UNIT_STAT_STUNDED))
+    if(unit.hasUnitState(UNIT_STAT_ROOT) || unit.hasUnitState(UNIT_STAT_STUNDED))
         return true;
-    i_nextMoveTime.Update(diff);
-    i_destinationHolder.ResetUpdate();
+
     if( i_nextMoveTime.Passed() )
     {
-        if( creature.IsStopped() )
+        // currently moving, update location
+        Traveller<T> traveller(unit);
+        if( i_destinationHolder.UpdateTraveller(traveller, diff, false))
         {
+            if( i_destinationHolder.HasArrived())
+            {
+                // arrived, stop and wait a bit
+                unit.StopMoving();
+
+                i_nextMove = urand(1,MAX_CONF_WAYPOINTS);
+                i_nextMoveTime.Reset(urand(0, 1500-1));         // TODO: check the minimum reset time, should be probably higher
+            }
+        }
+    }
+    else
+    {
+        // waiting for next move
+        i_nextMoveTime.Update(diff);
+        if( i_nextMoveTime.Passed() )
+        {
+            // start moving
             assert( i_nextMove <= MAX_CONF_WAYPOINTS );
             const float x = i_waypoints[i_nextMove][0];
             const float y = i_waypoints[i_nextMove][1];
             const float z = i_waypoints[i_nextMove][2];
-            creature.addUnitState(UNIT_STAT_ROAMING);
-            CreatureTraveller traveller(creature);
+            Traveller<T> traveller(unit);
             i_destinationHolder.SetDestination(traveller, x, y, z);
-            traveller.Relocation(x,y,z);
-            i_nextMoveTime.Reset( i_destinationHolder.GetTotalTravelTime() );
-        }
-        else
-        {
-            creature.StopMoving();
-            creature.setMoveRunFlag(true);
-
-            i_nextMove = urand(1,MAX_CONF_WAYPOINTS);
-            i_nextMoveTime.Reset(urand(0, 1500-1));         // TODO: check the minimum reset time, should be probably higher
         }
     }
     return true;
 }
 
-int
-ConfusedMovementGenerator::Permissible(const Creature *creature)
-{
-    if( creature->HasFlag(UNIT_NPC_FLAGS,
-        UNIT_NPC_FLAG_VENDOR | UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER | UNIT_NPC_FLAG_TAXIVENDOR |
-        UNIT_NPC_FLAG_TRAINER | UNIT_NPC_FLAG_SPIRITHEALER | UNIT_NPC_FLAG_SPIRITGUIDE | UNIT_NPC_FLAG_BANKER |
-        UNIT_NPC_FLAG_PETITIONER | UNIT_NPC_FLAG_TABARDDESIGNER | UNIT_NPC_FLAG_STABLE) )
-        return CANNOT_HANDLE_TYPE;
-
-    return CONFUSED_MOTION_TYPE;
-}
+template void ConfusedMovementGenerator<Player>::Initialize(Player &player);
+template void ConfusedMovementGenerator<Creature>::Initialize(Creature &creature);
+template void ConfusedMovementGenerator<Player>::Reset(Player &player);
+template void ConfusedMovementGenerator<Creature>::Reset(Creature &creature);
+template bool ConfusedMovementGenerator<Player>::Update(Player &player, const uint32 &diff);
+template bool ConfusedMovementGenerator<Creature>::Update(Creature &creature, const uint32 &diff);

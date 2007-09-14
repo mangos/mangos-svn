@@ -38,8 +38,10 @@ struct StackCleaner
     }
 };
 */
+
+template<class T>
 void
-TargetedMovementGenerator::_setTargetLocation(Creature &owner)
+TargetedMovementGenerator<T>::_setTargetLocation(T &owner)
 {
     if( !&i_target || !&owner )
         return;
@@ -67,13 +69,14 @@ TargetedMovementGenerator::_setTargetLocation(Creature &owner)
     float  bothObjectSize = i_target->GetObjectSize() + owner.GetObjectSize() + CONTACT_DISTANCE;
     if( i_destinationHolder.HasDestination() && i_destinationHolder.GetDestinationDiff(x,y,z) < bothObjectSize )
         return;
-    CreatureTraveller traveller(owner);
+    Traveller<T> traveller(owner);
     i_destinationHolder.SetDestination(traveller, x, y, z);
     owner.addUnitState(UNIT_STAT_CHASE);
 }
 
+template<class T>
 void
-TargetedMovementGenerator::Initialize(Creature &owner)
+TargetedMovementGenerator<T>::Initialize(T &owner)
 {
     if(!&owner)
         return;
@@ -81,14 +84,16 @@ TargetedMovementGenerator::Initialize(Creature &owner)
     _setTargetLocation(owner);
 }
 
+template<class T>
 void
-TargetedMovementGenerator::Reset(Creature &owner)
+TargetedMovementGenerator<T>::Reset(T &owner)
 {
     Initialize(owner);
 }
 
+template<class T>
 bool
-TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
+TargetedMovementGenerator<T>::Update(T &owner, const uint32 & time_diff)
 {
     if(!i_target.isValid())
     {
@@ -108,7 +113,7 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
     if (!owner.hasUnitState(UNIT_STAT_FOLLOW) && owner.getVictim() != i_target.getTarget())
         return true;
 
-    Traveller<Creature> traveller(owner);
+    Traveller<T> traveller(owner);
 
     if( !i_destinationHolder.HasDestination() )
         _setTargetLocation(owner);
@@ -149,3 +154,12 @@ TargetedMovementGenerator::Update(Creature &owner, const uint32 & time_diff)
     }
     return true;
 }
+
+template void TargetedMovementGenerator<Player>::_setTargetLocation(Player &);
+template void TargetedMovementGenerator<Creature>::_setTargetLocation(Creature &);
+template void TargetedMovementGenerator<Player>::Initialize(Player &);
+template void TargetedMovementGenerator<Creature>::Initialize(Creature &);
+template void TargetedMovementGenerator<Player>::Reset(Player &);
+template void TargetedMovementGenerator<Creature>::Reset(Creature &);
+template bool TargetedMovementGenerator<Player>::Update(Player &, const uint32 &);
+template bool TargetedMovementGenerator<Creature>::Update(Creature &, const uint32 &);

@@ -63,7 +63,7 @@ DestinationHolder<TRAVELLER>::_findOffSetPoint(float x1, float y1, float x2, flo
 
 template<typename TRAVELLER>
 uint32
-DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, float dest_x, float dest_y, float dest_z)
+DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, float dest_x, float dest_y, float dest_z, bool sendMove)
 {
     if (i_destSet && i_destX == dest_x && i_destY == dest_y && i_destZ == dest_z)
         return 0;
@@ -73,12 +73,12 @@ DestinationHolder<TRAVELLER>::SetDestination(TRAVELLER &traveller, float dest_x,
     i_destY = dest_y;
     i_destZ = dest_z;
 
-    return StartTravel(traveller);
+    return StartTravel(traveller, sendMove);
 }
 
 template<typename TRAVELLER>
 uint32
-DestinationHolder<TRAVELLER>::StartTravel(TRAVELLER &traveller)
+DestinationHolder<TRAVELLER>::StartTravel(TRAVELLER &traveller, bool sendMove)
 {
     if(!i_destSet) return 0;
 
@@ -97,7 +97,7 @@ DestinationHolder<TRAVELLER>::StartTravel(TRAVELLER &traveller)
     i_totalTravelTime = static_cast<uint32>( dist/speed + 0.5 );
     i_timeStarted = getMSTime();
     i_timeElapsed = 0;
-    traveller.MoveTo(i_destX, i_destY, i_destZ, i_totalTravelTime);
+    if(sendMove) traveller.MoveTo(i_destX, i_destY, i_destZ, i_totalTravelTime);
     return i_totalTravelTime;
 }
 

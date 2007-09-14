@@ -42,7 +42,7 @@ namespace AIRegistry
         (new CreatureAIFactory<PetAI>("PetAI"))->RegisterSelf();
         (new CreatureAIFactory<TotemAI>("TotemAI"))->RegisterSelf();
 
-        (new MovementGeneratorFactory<RandomMovementGenerator>(RANDOM_MOTION_TYPE))->RegisterSelf();
-        (new MovementGeneratorFactory<WaypointMovementGenerator>(WAYPOINT_MOTION_TYPE))->RegisterSelf();
+        (new MovementGeneratorFactory<RandomMovementGenerator<Creature> >(RANDOM_MOTION_TYPE))->RegisterSelf();
+        (new MovementGeneratorFactory<WaypointMovementGenerator<Creature> >(WAYPOINT_MOTION_TYPE))->RegisterSelf();
     }
 }

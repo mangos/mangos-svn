@@ -22,8 +22,6 @@
 #include "Common.h"
 #include "Unit.h"
 #include "UpdateMask.h"
-#include "MotionMaster.h"
-#include "MovementGenerator.h"
 #include "ItemPrototype.h"
 #include "LootMgr.h"
 #include "Database/DatabaseEnv.h"
@@ -275,7 +273,6 @@ typedef std::map<uint32,time_t> CreatureSpellCooldowns;
 class MANGOS_DLL_SPEC Creature : public Unit
 {
     CreatureAI *i_AI;
-    MotionMaster i_motionMaster;
 
     public:
 
@@ -329,20 +326,9 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool IsInEvadeMode() const;
 
         void AIM_Initialize();
-        MotionMaster* operator->(void) { return &i_motionMaster; }
 
         void AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool run, uint8 type);
         CreatureAI* AI() { return i_AI; }
-
-        void setMoveRunFlag(bool f) { m_moveRun = f; }
-        bool getMoveRunFlag() const { return m_moveRun; }
-        bool IsStopped() const { return !(hasUnitState(UNIT_STAT_MOVING)); }
-        void StopMoving()
-        {
-            clearUnitState(UNIT_STAT_MOVING);
-            // send explicit stop packet
-            SendMonsterMove(GetPositionX(), GetPositionY(), GetPositionZ(),0,true,0);
-        }
 
         uint32 GetShieldBlockValue() const                  //dunno mob block value
         {
@@ -513,7 +499,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 m_NPCTextId;                                 // cached value
 
         float respawn_cord[3];
-        bool m_moveRun;
 
         uint8 m_emoteState;
         bool m_isPet;                                       // set only in Pet::Pet

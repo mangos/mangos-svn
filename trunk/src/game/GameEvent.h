@@ -34,7 +34,7 @@ struct GameEventData
     std::string description;
 };
 
-class MANGOS_DLL_DECL GameEvent
+class GameEvent
 {
     public:
         GameEvent();

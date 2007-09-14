@@ -137,9 +137,12 @@ void WorldSession::SendTaxiMenu( uint64 guid )
 
 void WorldSession::SendDoFlight( uint16 MountId, uint32 path )
 {
-    GetPlayer( )->Mount( MountId, true );
-    FlightPathMovementGenerator *flight(new FlightPathMovementGenerator(*_player, path));
-    Path &pathnodes(flight->GetPath());
+    GetPlayer()->Mount( MountId, true );
+    
+    FlightPathMovementGenerator *flight = new FlightPathMovementGenerator(path);
+    GetPlayer()->GetMotionMaster()->Mutate(flight);
+
+    Path &pathnodes = flight->GetPath();
     assert( !pathnodes.Empty() );
 
     uint32 traveltime = uint32(pathnodes.GetTotalLength( ) * 32);

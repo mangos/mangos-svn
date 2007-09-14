@@ -22,6 +22,6 @@
 IdleMovementGenerator si_idleMovement;
 
 void
-IdleMovementGenerator::Reset(Creature &owner)
+IdleMovementGenerator::Reset(Unit &owner)
 {
 }

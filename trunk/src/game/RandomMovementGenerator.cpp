@@ -32,8 +32,9 @@ then you may uncomment the following line to have correct random motion.
 // uncomment now for wide testing purpose
 #define USE_INTERPOLATION
 
+template<>
 void
-RandomMovementGenerator::Initialize(Creature &creature)
+RandomMovementGenerator<Creature>::Initialize(Creature &creature)
 {
     float x,y,z,z2, wander_distance;
     creature.GetRespawnCoord(x, y, z);
@@ -86,16 +87,18 @@ RandomMovementGenerator::Initialize(Creature &creature)
     creature.StopMoving();
 }
 
+template<>
 void
-RandomMovementGenerator::Reset(Creature &creature)
+RandomMovementGenerator<Creature>::Reset(Creature &creature)
 {
     i_nextMove = 1;
     i_nextMoveTime.Reset(urand(0,10000-1));                 // TODO: check the lower bound (it is probably too small)
     creature.StopMoving();
 }
 
+template<>
 bool
-RandomMovementGenerator::Update(Creature &creature, const uint32 &diff)
+RandomMovementGenerator<Creature>::Update(Creature &creature, const uint32 &diff)
 {
     if(!&creature)
         return true;
@@ -140,16 +143,4 @@ RandomMovementGenerator::Update(Creature &creature, const uint32 &diff)
         }
     }
     return true;
-}
-
-int
-RandomMovementGenerator::Permissible(const Creature *creature)
-{
-    if( creature->HasFlag(UNIT_NPC_FLAGS,
-        UNIT_NPC_FLAG_VENDOR | UNIT_NPC_FLAG_GOSSIP | UNIT_NPC_FLAG_QUESTGIVER | UNIT_NPC_FLAG_TAXIVENDOR |
-        UNIT_NPC_FLAG_TRAINER | UNIT_NPC_FLAG_SPIRITHEALER | UNIT_NPC_FLAG_SPIRITGUIDE | UNIT_NPC_FLAG_BANKER |
-        UNIT_NPC_FLAG_PETITIONER | UNIT_NPC_FLAG_TABARDDESIGNER | UNIT_NPC_FLAG_STABLE) )
-        return CANNOT_HANDLE_TYPE;
-
-    return RANDOM_MOTION_TYPE;
 }

@@ -51,12 +51,12 @@ uint32 CreatureInfo::randomDisplayID() const
 }
 
 Creature::Creature( WorldObject *instantiator ) :
-Unit( instantiator ), i_AI(NULL), i_motionMaster(this),
+Unit( instantiator ), i_AI(NULL),
 lootForPickPocketed(false), lootForBody(false), m_groupLootTimer(0), lootingGroupLeaderGUID(0),
 m_itemsLoaded(false), m_trainerSpellsLoaded(false), m_trainer_type(0), m_lootMoney(0), m_lootRecipient(0),
 m_deathTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_respawnradius(0.0),
 m_gossipOptionLoaded(false),m_NPCTextId(0),
-m_moveRun(false), m_emoteState(0), m_isPet(false), m_isTotem(false),
+m_emoteState(0), m_isPet(false), m_isTotem(false),
 m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE)
 {
     m_valuesCount = UNIT_END;
@@ -241,7 +241,6 @@ void Creature::Update(uint32 diff)
         case ALIVE:
         {
             Unit::Update( diff );
-            i_motionMaster.UpdateMotion(diff);
 
             if(!IsInEvadeMode())
                 i_AI->UpdateAI(diff);

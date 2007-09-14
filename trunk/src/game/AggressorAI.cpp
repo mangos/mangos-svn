@@ -100,8 +100,8 @@ void AggressorAI::EnterEvadeMode()
         i_creature.RemoveAllAuras();
 
         // Remove TargetedMovementGenerator from MotionMaster stack list, and add HomeMovementGenerator instead
-        if( i_creature->top()->GetMovementGeneratorType() == TARGETED_MOTION_TYPE )
-            i_creature->TargetedHome();
+        if( i_creature.GetMotionMaster()->top()->GetMovementGeneratorType() == TARGETED_MOTION_TYPE )
+            i_creature.GetMotionMaster()->TargetedHome();
     }
 
     i_creature.DeleteThreatList();
@@ -149,7 +149,7 @@ AggressorAI::AttackStart(Unit *u)
         i_victimGuid = u->GetGUID();
 
         i_creature.resetAttackTimer();
-        i_creature->Mutate(new TargetedMovementGenerator(*u));
+        i_creature.GetMotionMaster()->Mutate(new TargetedMovementGenerator<Creature>(*u));
         if (u->GetTypeId() == TYPEID_PLAYER)
             i_creature.SetLootRecipient((Player*)u);
     }

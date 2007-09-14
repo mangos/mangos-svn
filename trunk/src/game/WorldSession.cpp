@@ -37,7 +37,6 @@
 #include "ObjectAccessor.h"
 #include "BattleGroundMgr.h"
 #include "Language.h"                                       // for CMSG_DISMOUNT handler
-#include "FlightMaster.h"
 #include "Chat.h"
 
 /// WorldSession constructor
@@ -681,13 +680,6 @@ void WorldSession::LogoutPlayer(bool Save)
         // a) in group; b) not in raid group; c) logging out normally (not being kicked or disconnected)
         if(_player->GetGroup() && !_player->GetGroup()->isRaidGroup() && _socket)
             _player->RemoveFromGroup();
-
-        // remove player from the FlightMaster if it's currently in flight
-        if(_player->isInFlight())
-        {
-            if(!FlightMaster::Instance().RemoveFromFlight(_player))
-                sLog.outError("WorldSession::LogoutPlayer: the player named %s is in flight state but is not in flight!", _player->GetName());
-        }
 
         ///- Remove the player from the world
         ObjectAccessor::Instance().RemoveObject(_player);

@@ -1720,9 +1720,9 @@ void Aura::HandleModPossess(bool apply, bool Real)
             m_target->DeleteThreatList();
             if(m_target->GetTypeId() == TYPEID_UNIT)
             {
-                ((Creature*)m_target)->StopMoving();
-                (*(Creature*)m_target)->Clear();
-                (*(Creature*)m_target)->Idle();
+                m_target->StopMoving();
+                m_target->GetMotionMaster()->Clear();
+                m_target->GetMotionMaster()->Idle();
                 CharmInfo *charmInfo = ((Creature*)m_target)->InitCharmInfo(m_target);
                 charmInfo->InitPossessCreateSpells();
             }
@@ -1922,13 +1922,20 @@ void Aura::HandleModCharm(bool apply, bool Real)
 void Aura::HandleModConfuse(bool apply, bool Real)
 {
     Unit* caster = GetCaster();
-    uint32 apply_stat = UNIT_STAT_CONFUSED;
 
     if( apply )
     {
         m_target->addUnitState(UNIT_STAT_CONFUSED);
-                                                            // probably wrong
-        m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+        m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
+
+        if(m_target->GetTypeId() == TYPEID_PLAYER)
+        {
+            Player *player = (Player*)m_target;
+            WorldPacket data(SMSG_DEATH_NOTIFY_OBSOLETE, 10);
+            data.append(player->GetPackGUID());             // target's viewpoint
+            data << uint8(0x00);                            // movement disabled
+            player->GetSession()->SendPacket(&data);
+        }
 
         // Rogue/Blind ability stops attack
         // TODO: does all confuses ?
@@ -1946,26 +1953,36 @@ void Aura::HandleModConfuse(bool apply, bool Real)
             }
 
             if (m_target->GetTypeId() == TYPEID_UNIT)
-                (*((Creature*)m_target))->Mutate(new ConfusedMovementGenerator(*((Creature*)m_target)));
+                m_target->GetMotionMaster()->Mutate(new ConfusedMovementGenerator<Creature>(*((Creature*)m_target)));
+            else
+                m_target->GetMotionMaster()->Mutate(new ConfusedMovementGenerator<Player>(*((Player*)m_target)));
         }
     }
     else
     {
         m_target->clearUnitState(UNIT_STAT_CONFUSED);
-                                                            // probably wrong
-        m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
+        m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_CONFUSED);
+
+        if(m_target->GetTypeId() == TYPEID_PLAYER)
+        {
+            Player *player = (Player*)m_target;
+            WorldPacket data(SMSG_DEATH_NOTIFY_OBSOLETE, 10);
+            data.append(player->GetPackGUID());             // target's viewpoint
+            data << uint8(0x01);                            // movement enabled
+            player->GetSession()->SendPacket(&data);
+        }
 
         // only at real remove aura
         if(Real)
         {
+            m_target->GetMotionMaster()->MovementExpired(false);
+
             if (m_target->GetTypeId() == TYPEID_UNIT)
             {
                 Creature* c = (Creature*)m_target;
-                (*c)->MovementExpired(false);
-
                 // if in combat restore movement generator
                 if(c->getVictim())
-                    (*c)->Mutate(new TargetedMovementGenerator(*c->getVictim()));
+                    c->GetMotionMaster()->Mutate(new TargetedMovementGenerator<Creature>(*c->getVictim()));
             }
         }
     }
@@ -4000,4 +4017,5 @@ void Aura::HandleSpiritOfRedumption( bool apply, bool Real )
     if(!apply)
         m_target->DealDamage(m_target, m_target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_NORMAL, GetSpellProto(), 0, false);
 }
+
 

@@ -72,7 +72,7 @@ void PetAI::AttackStart(Unit *u)
         // hope it doesn't start to leak memory without this :-/
         //i_pet->Clear();
         i_victimGuid = u->GetGUID();
-        i_pet->Mutate(new TargetedMovementGenerator(*u));
+        i_pet.GetMotionMaster()->Mutate(new TargetedMovementGenerator<Creature>(*u));
     }
 }
 
@@ -113,8 +113,8 @@ void PetAI::_stopAttack()
     {
         DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%u]", i_pet.GetGUIDLow());
         i_pet.StopMoving();
-        i_pet->Clear();
-        i_pet->Idle();
+        i_pet.GetMotionMaster()->Clear();
+        i_pet.GetMotionMaster()->Idle();
         i_victimGuid = 0;
         i_pet.CombatStop(true);
         i_pet.getHostilRefManager().deleteReferences();
@@ -147,15 +147,15 @@ void PetAI::_stopAttack()
     if(owner && i_pet.GetCharmInfo() && i_pet.GetCharmInfo()->HasCommandState(COMMAND_FOLLOW))
     {
         i_pet.addUnitState(UNIT_STAT_FOLLOW);
-        i_pet->Clear();
-        i_pet->Mutate(new TargetedMovementGenerator(*owner,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE));
+        i_pet.GetMotionMaster()->Clear();
+        i_pet.GetMotionMaster()->Mutate(new TargetedMovementGenerator<Creature>(*owner,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE));
     }
     else
     {
         i_pet.clearUnitState(UNIT_STAT_FOLLOW);
         i_pet.addUnitState(UNIT_STAT_STOPPED);
-        i_pet->Clear();
-        i_pet->Idle();
+        i_pet.GetMotionMaster()->Clear();
+        i_pet.GetMotionMaster()->Idle();
     }
     i_victimGuid = 0;
     i_pet.AttackStop();
@@ -225,8 +225,8 @@ void PetAI::UpdateAI(const uint32 diff)
             if (!i_pet.hasUnitState(UNIT_STAT_FOLLOW) )
             {
                 i_pet.addUnitState(UNIT_STAT_FOLLOW);
-                i_pet->Clear();
-                i_pet->Mutate(new TargetedMovementGenerator(*owner,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE));
+                i_pet.GetMotionMaster()->Clear();
+                i_pet.GetMotionMaster()->Mutate(new TargetedMovementGenerator<Creature>(*owner,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE));
             }
         }
     }

@@ -24,19 +24,19 @@
 #include "DestinationHolderImp.h"
 
 void
-HomeMovementGenerator::Initialize(Creature & owner)
+HomeMovementGenerator<Creature>::Initialize(Creature & owner)
 {
     owner.setMoveRunFlag(true);
     _setTargetLocation(owner);
 }
 
 void
-HomeMovementGenerator::Reset(Creature &)
+HomeMovementGenerator<Creature>::Reset(Creature &)
 {
 }
 
 void
-HomeMovementGenerator::_setTargetLocation(Creature & owner)
+HomeMovementGenerator<Creature>::_setTargetLocation(Creature & owner)
 {
     if( !&owner )
         return;
@@ -55,7 +55,7 @@ HomeMovementGenerator::_setTargetLocation(Creature & owner)
 }
 
 bool
-HomeMovementGenerator::Update(Creature &owner, const uint32& time_diff)
+HomeMovementGenerator<Creature>::Update(Creature &owner, const uint32& time_diff)
 {
     CreatureTraveller traveller( owner);
     i_destinationHolder.UpdateTraveller(traveller, time_diff, false);

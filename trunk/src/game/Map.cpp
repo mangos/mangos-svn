@@ -1052,7 +1052,7 @@ bool Map::CreatureRespawnRelocation(Creature *c)
     Cell resp_cell = RedZone::GetZone(resp_val);
 
     c->CombatStop(true);
-    (*c)->Clear();
+    c->GetMotionMaster()->Clear();
 
     #ifdef MANGOS_DEBUG
     if((sLog.getLogFilter() & LOG_FILTER_CREATURE_MOVES)==0)
@@ -1063,7 +1063,7 @@ bool Map::CreatureRespawnRelocation(Creature *c)
     if(CreatureCellRelocation(c,resp_cell))
     {
         c->Relocate(resp_x, resp_y, resp_z, c->GetOrientation());
-        (*c)->Initialize();                                 // prevent possible problems with default move generators
+        c->GetMotionMaster()->Initialize();                                 // prevent possible problems with default move generators
         CreatureRelocationNotify(c,resp_cell,resp_cell.cellPair());
         return true;
     }

@@ -52,17 +52,17 @@ struct WaypointBehavior
 };
 
 template<class T>
-class MANGOS_DLL_DECL PathMovementGenerator
+class MANGOS_DLL_DECL PathMovementBase
 {
     public:
-        PathMovementGenerator() : i_currentNode(0) {}
-        virtual ~PathMovementGenerator() {};
+        PathMovementBase() : i_currentNode(0) {}
+        virtual ~PathMovementBase() {};
 
         inline bool MovementInProgress(void) const { return i_currentNode < i_path.Size(); }
 
-        // template pattern.. override required
-        virtual void LoadPath(T &) = 0;
-        virtual void ReloadPath(T &) = 0;
+        // template pattern, not defined .. override required
+        void LoadPath(T &);
+        void ReloadPath(T &);
         uint32 GetCurrentNode()
         {
             return i_currentNode;
@@ -70,7 +70,7 @@ class MANGOS_DLL_DECL PathMovementGenerator
 
     protected:
         uint32 i_currentNode;
-        DestinationHolder<Traveller<T> > i_destinationHolder;
+        DestinationHolder< Traveller<T> > i_destinationHolder;
         Path i_path;
 };
 
@@ -78,71 +78,65 @@ class MANGOS_DLL_DECL PathMovementGenerator
  * from the DB and apply it to the creature's movement generator.
  * Hence, the creature will move according to its predefined way points.
  */
-class MANGOS_DLL_DECL WaypointMovementGenerator : public MovementGenerator, public PathMovementGenerator<Creature>
+
+template<class T>
+class MANGOS_DLL_DECL WaypointMovementGenerator;
+
+template<>
+class MANGOS_DLL_DECL WaypointMovementGenerator<Creature>
+    : public MovementGeneratorMedium< Creature, WaypointMovementGenerator<Creature> >,
+      public PathMovementBase<Creature>
 {
-    Creature &i_creature;
     TimeTracker i_nextMoveTime;
     std::vector<uint32> i_delays;
     std::vector<WaypointBehavior *> i_wpBehaviour;
     public:
-        WaypointMovementGenerator(Creature &c) : i_creature(c), i_nextMoveTime(0) {}
-        ~WaypointMovementGenerator() { _unload(); }
+        WaypointMovementGenerator(Creature &) : i_nextMoveTime(0) {}
+        ~WaypointMovementGenerator() { ClearWaypoints(); }
         void WPAIScript(Creature &pCreature, std::string pAiscript);
-        void Initialize(Creature &c)
+        void Initialize(Creature &u)
         {
             i_nextMoveTime.Reset(0);                        // TODO: check the lower bound (0 is probably too small)
-            i_creature.StopMoving();
-            LoadPath(c);
+            u.StopMoving();
+            LoadPath(u);
         }
 
-        void Reset(Creature &c) { ReloadPath(c); }
-        bool Update(Creature &creature, const uint32 &diff);
+        void Reset(Creature &u) { ReloadPath(u); }
+        bool Update(Creature &u, const uint32 &diff);
         MovementGeneratorType GetMovementGeneratorType() { return WAYPOINT_MOTION_TYPE; }
 
         // now path movement implmementation
-        void LoadPath(Creature &c) { _load(c); }
-        void ReloadPath(Creature &c) { _unload(); _load(c); }
+        void LoadPath(Creature &c);
+        void ReloadPath(Creature &c) { ClearWaypoints(); LoadPath(c); }
 
         // statics
         static void Initialize(void);
-        static int Permissible(const Creature *);
     private:
-        void _load(Creature &);
-        void _unload(void);
+        void ClearWaypoints();
         static std::set<uint32> si_waypointHolders;
 };
 
 /** FlightPathMovementGenerator generates movement of the player for the paths
  * and hence generates ground and activities for the player.
  */
-class MANGOS_DLL_DECL FlightPathMovementGenerator : public PathMovementGenerator<Player>
+class MANGOS_DLL_DECL FlightPathMovementGenerator
+    : public MovementGeneratorMedium< Player, FlightPathMovementGenerator >, 
+      public PathMovementBase<Player>
 {
     uint32 i_pathId;
-    Player &i_player;
     public:
-        FlightPathMovementGenerator(Player &pl, uint32 id);
-        void Initialize(void);
+        FlightPathMovementGenerator::FlightPathMovementGenerator(uint32 id) : i_pathId(id) {}
+        void Initialize(Player &);
+        void Reset(Player &) {}
+        bool Update(Player &, const uint32 &);
+        MovementGeneratorType GetMovementGeneratorType() { return FLIGHT_MOTION_TYPE; }
+
+        void EndFlight(Player &);
 
         void LoadPath(Player &);
         void ReloadPath(Player &) { /* don't reload flight path */ }
-        void UpdatePath(Player &pl, const uint32 &);
 
         Path& GetPath(void) { return i_path; }
-        Player& GetPassenger(void) const { return i_player; }
         inline bool HasArrived(void) const { return (i_currentNode >= i_path.Size()); }
-
-        bool CheckFlight(const uint32 diff)
-        {
-            UpdatePath(i_player, diff);
-            if( HasArrived() )
-            {
-                float x, y, z;
-                i_destinationHolder.GetLocationNow(x, y, z);
-                i_player.SetPosition(x, y, z, i_player.GetOrientation());
-                i_player.FlightComplete();
-                return true;
-            }
-            return false;
-        }
 };
 #endif

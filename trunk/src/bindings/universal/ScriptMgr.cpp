@@ -313,7 +313,7 @@ void ScriptedAI::DoStartAttack(Unit* victim)
 {
     if( m_creature->Attack(victim) )
     {
-        (*m_creature)->Mutate(new TargetedMovementGenerator(*victim));
+        m_creature->GetMotionMaster()->Mutate(new TargetedMovementGenerator<Creature>(*victim));
     }
 }
 
@@ -328,5 +328,5 @@ void ScriptedAI::DoStopAttack()
 void ScriptedAI::DoGoHome()
 {
     if( !m_creature->getVictim() && m_creature->isAlive() )
-        (*m_creature)->TargetedHome();
+        m_creature->GetMotionMaster()->TargetedHome();
 }

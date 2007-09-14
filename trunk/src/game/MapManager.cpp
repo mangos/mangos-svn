@@ -21,7 +21,6 @@
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
 #include "ObjectAccessor.h"
-#include "FlightMaster.h"
 #include "RedZoneDistrict.h"
 #include "Transports.h"
 #include "GridDefines.h"
@@ -118,7 +117,6 @@ MapManager::Update(time_t diff)
         iter->second->Update(i_timer.GetCurrent());
 
     ObjectAccessor::Instance().Update(i_timer.GetCurrent());
-    FlightMaster::Instance().FlightReportUpdate(i_timer.GetCurrent());
     for (TransportSet::iterator iter = m_Transports.begin(); iter != m_Transports.end(); ++iter)
         (*iter)->Update(i_timer.GetCurrent());
 

@@ -24,34 +24,38 @@
 #include "Traveller.h"
 #include "FollowerReference.h"
 
-class MANGOS_DLL_SPEC TargetedMovementGenerator : public MovementGenerator
+class MANGOS_DLL_SPEC TargetedMovementGeneratorBase
+{
+    public:
+        TargetedMovementGeneratorBase(Unit &target) { i_target.link(&target, this); }
+        void stopFollowing() { };
+    protected:
+        FollowerReference i_target;
+};
+
+template<class T>
+class MANGOS_DLL_SPEC TargetedMovementGenerator
+    : public MovementGeneratorMedium< T, TargetedMovementGenerator<T> >, public TargetedMovementGeneratorBase
 {
     public:
 
-        TargetedMovementGenerator(Unit &target) : i_offset(0), i_angle(0)
-        {
-            i_target.link(&target, this);
-
-            // volatile to prevent remove call at optimization
-            volatile float size_dummy = target.GetObjectSize();
-        }
-        TargetedMovementGenerator(Unit &target, float offset, float angle) : i_offset(offset), i_angle(angle) { i_target.link(&target, this); }
+        TargetedMovementGenerator(Unit &target)
+            : TargetedMovementGeneratorBase(target), i_offset(0), i_angle(0) {}
+        TargetedMovementGenerator(Unit &target, float offset, float angle)
+            : TargetedMovementGeneratorBase(target), i_offset(offset), i_angle(angle) {}
         ~TargetedMovementGenerator() {}
 
-        void Initialize(Creature &);
-        void Reset(Creature &);
-        bool Update(Creature &, const uint32 &);
+        void Initialize(T &);
+        void Reset(T &);
+        bool Update(T &, const uint32 &);
         MovementGeneratorType GetMovementGeneratorType() { return TARGETED_MOTION_TYPE; }
-
-        void stopFollowing() { };
 
     private:
 
-        void _setTargetLocation(Creature &);
+        void _setTargetLocation(T &);
 
-        FollowerReference i_target;
         float i_offset;
         float i_angle;
-        DestinationHolder<CreatureTraveller> i_destinationHolder;
+        DestinationHolder< Traveller<T> > i_destinationHolder;
 };
 #endif
