@@ -37,6 +37,12 @@ void ScriptsFree()
 {                                                           // Free resources before library unload
     for(int i=0;i<nrscripts;i++)
         delete m_scripts[i];
+
+    for(int i=0;i<num_inst_scripts;i++)
+        delete m_instance_scripts[i];
+
+    nrscripts = 0;
+    num_inst_scripts = 0;
 }
 
 MANGOS_DLL_EXPORT

@@ -45,6 +45,15 @@ const char MAP_MAGIC[] = "MAP_1.02";
 
 static GridState* si_GridStates[MAX_GRID_STATE];
 
+Map::~Map()
+{
+    if(i_data)
+    {
+        delete i_data;
+        i_data = NULL;
+    }
+}
+
 bool Map::ExistMap(uint32 mapid,int x,int y)
 {
     int len = sWorld.GetDataPath().length()+strlen("maps/%03u%02u%02u.map")+1;
