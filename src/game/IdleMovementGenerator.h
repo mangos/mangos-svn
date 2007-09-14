@@ -25,9 +25,9 @@ class MANGOS_DLL_SPEC IdleMovementGenerator : public MovementGenerator
 {
     public:
 
-        void Initialize(Creature &) {  }
-        void Reset(Creature &);
-        bool Update(Creature &, const uint32 &) { return true; }
+        void Initialize(Unit &) {  }
+        void Reset(Unit &);
+        bool Update(Unit &, const uint32 &) { return true; }
         MovementGeneratorType GetMovementGeneratorType() { return IDLE_MOTION_TYPE; }
 };
 

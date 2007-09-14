@@ -51,7 +51,7 @@ ReactorAI::AttackStart(Unit *p)
         DEBUG_LOG("Tag unit GUID: %u (TypeId: %u) as a victim", p->GetGUIDLow(), p->GetTypeId());
         i_creature.AddThreat(p, 0.0f);
         i_victimGuid = p->GetGUID();
-        i_creature->Mutate(new TargetedMovementGenerator(*p));
+        i_creature.GetMotionMaster()->Mutate(new TargetedMovementGenerator<Creature>(*p));
         if (p->GetTypeId() == TYPEID_PLAYER)
             i_creature.SetLootRecipient((Player*)p);
     }
@@ -88,8 +88,8 @@ ReactorAI::EnterEvadeMode()
     if( !i_creature.isAlive() )
     {
         DEBUG_LOG("Creature stoped attacking cuz his dead [guid=%u]", i_creature.GetGUIDLow());
-        i_creature->MovementExpired();
-        i_creature->Idle();
+        i_creature.GetMotionMaster()->MovementExpired();
+        i_creature.GetMotionMaster()->Idle();
         i_victimGuid = 0;
         i_creature.CombatStop(true);
         i_creature.DeleteThreatList();
@@ -121,6 +121,6 @@ ReactorAI::EnterEvadeMode()
     i_creature.CombatStop(true);
 
     // Remove TargetedMovementGenerator from MotionMaster stack list, and add HomeMovementGenerator instead
-    if( i_creature->top()->GetMovementGeneratorType() == TARGETED_MOTION_TYPE )
-        i_creature->TargetedHome();
+    if( i_creature.GetMotionMaster()->top()->GetMovementGeneratorType() == TARGETED_MOTION_TYPE )
+        i_creature.GetMotionMaster()->TargetedHome();
 }

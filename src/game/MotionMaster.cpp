@@ -42,9 +42,14 @@ MotionMaster::Initialize()
     }
 
     // set new default movement generator
-    MovementGenerator* movement = FactorySelector::selectMovementGenerator(i_owner);
-    push(  movement == NULL ? &si_idleMovement : movement );
-    top()->Initialize(*i_owner);
+    if(i_owner->GetTypeId() == TYPEID_UNIT)
+    {
+        MovementGenerator* movement = FactorySelector::selectMovementGenerator((Creature*)i_owner);
+        push(  movement == NULL ? &si_idleMovement : movement );
+        top()->Initialize(*i_owner);
+    }
+    else
+        push(&si_idleMovement);
 }
 
 MotionMaster::~MotionMaster()
@@ -118,11 +123,20 @@ MotionMaster::TargetedHome()
     DEBUG_LOG("Target home location %u", i_owner->GetGUIDLow());
 
     Clear(false);
-    Mutate(new HomeMovementGenerator());
+    Mutate(new HomeMovementGenerator<Creature>());
 }
 
 void MotionMaster::Idle(void)
 {
     if( !isStatic( top() ) )
         push( &si_idleMovement );
+}
+
+void MotionMaster::Mutate(MovementGenerator *m)
+{
+    // HomeMovement is not that important, delete it if meanwhile a new comes
+    if (!empty() && top()->GetMovementGeneratorType() == HOME_MOTION_TYPE)
+        MovementExpired(false);
+    m->Initialize(*i_owner);
+    push(m);
 }

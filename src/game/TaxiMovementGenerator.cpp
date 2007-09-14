@@ -18,7 +18,7 @@
 
 #include "TaxiMovementGenerator.h"
 
-void
+/*void
 TaxiMovementGenerator::Initialize(const Creature &)
 {
 }
@@ -38,4 +38,4 @@ bool
 TaxiMovementGenerator::Update(Creature &, const uint32 &time_diff)
 {
     return true;
-}
+}*/

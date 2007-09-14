@@ -503,12 +503,6 @@
 				RelativePath="..\..\src\game\DynamicObject.h">
 			</File>
 			<File
-				RelativePath="..\..\src\game\FlightMaster.cpp">
-			</File>
-			<File
-				RelativePath="..\..\src\game\FlightMaster.h">
-			</File>
-			<File
 				RelativePath="..\..\src\game\Formulas.h">
 			</File>
 			<File

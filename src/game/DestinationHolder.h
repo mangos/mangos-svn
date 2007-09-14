@@ -41,7 +41,7 @@ class MANGOS_DLL_DECL DestinationHolder
         DestinationHolder() : i_tracker(TRAVELLER_UPDATE_INTERVAL), i_totalTravelTime(0), i_timeStarted(0), i_timeElapsed(0),
             i_destSet(false), i_fromX(0), i_fromY(0), i_fromZ(0), i_destX(0), i_destY(0), i_destZ(0) {}
 
-        uint32 SetDestination(TRAVELLER &traveller, float dest_x, float dest_y, float dest_z);
+        uint32 SetDestination(TRAVELLER &traveller, float dest_x, float dest_y, float dest_z, bool sendMove = true);
         bool UpdateExpired(void) const { return i_tracker.Passed(); }
         void ResetUpdate(uint32 t = TRAVELLER_UPDATE_INTERVAL) { i_tracker.Reset(t); }
         uint32 GetTotalTravelTime(void) const { return i_totalTravelTime; }
@@ -50,7 +50,7 @@ class MANGOS_DLL_DECL DestinationHolder
         float GetDestinationDiff(float x, float y, float z) const;
         bool HasArrived(void) const { return (i_totalTravelTime == 0 || i_timeElapsed >= i_totalTravelTime); }
         bool UpdateTraveller(TRAVELLER &traveller, uint32 diff, bool force_update);
-        uint32 StartTravel(TRAVELLER &traveller);
+        uint32 StartTravel(TRAVELLER &traveller, bool sendMove = true);
         void GetLocationNow(float &x, float &y, float &z) const;
         float GetDistanceFromDestSq(const WorldObject &obj) const;
 

@@ -25,21 +25,23 @@
 
 #define MAX_CONF_WAYPOINTS 24
 
-class MANGOS_DLL_DECL ConfusedMovementGenerator : public MovementGenerator
+template<class T>
+class MANGOS_DLL_DECL ConfusedMovementGenerator 
+    : public MovementGeneratorMedium< T, ConfusedMovementGenerator<T> >
 {
     public:
-        ConfusedMovementGenerator(const Creature &) : i_nextMoveTime(0) {}
+        ConfusedMovementGenerator(const Unit &) : i_nextMoveTime(0) {}
 
-        void Initialize(Creature &);
-        void Reset(Creature &);
-        bool Update(Creature &, const uint32 &);
+        void Initialize(T &);
+        void Reset(T &);
+        bool Update(T &, const uint32 &);
+
         MovementGeneratorType GetMovementGeneratorType() { return CONFUSED_MOTION_TYPE; }
-
-        static int Permissible(const Creature *);
     private:
+        void _InitSpecific(T &, bool &, bool &);
         TimeTracker i_nextMoveTime;
         float i_waypoints[MAX_CONF_WAYPOINTS+1][3];
-        DestinationHolder<CreatureTraveller> i_destinationHolder;
+        DestinationHolder< Traveller<T> > i_destinationHolder;
         uint32 i_nextMove;
 };
 #endif

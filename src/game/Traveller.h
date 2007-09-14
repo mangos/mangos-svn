@@ -87,6 +87,12 @@ inline void Traveller<Player>::Relocation(float x, float y, float z, float orien
     MapManager::Instance().GetMap(i_traveller.GetMapId(), &i_traveller)->PlayerRelocation(&i_traveller, x, y, z, orientation);
 }
 
+template<>
+inline void Traveller<Player>::MoveTo(float x, float y, float z, uint32 t)
+{
+    i_traveller.SendMonsterMove(x, y, z, t, i_traveller.getMoveRunFlag(), 0);
+}
+
 typedef Traveller<Creature> CreatureTraveller;
 typedef Traveller<Player> PlayerTraveller;
 #endif

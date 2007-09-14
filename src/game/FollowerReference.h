@@ -21,10 +21,10 @@
 
 #include "Utilities/LinkedReference/Reference.h"
 
-class TargetedMovementGenerator;
+class TargetedMovementGeneratorBase;
 class Unit;
 
-class MANGOS_DLL_SPEC FollowerReference : public Reference<Unit, TargetedMovementGenerator>
+class MANGOS_DLL_SPEC FollowerReference : public Reference<Unit, TargetedMovementGeneratorBase>
 {
     protected:
         void targetObjectBuildLink();

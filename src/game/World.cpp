@@ -672,7 +672,7 @@ void World::SetInitialWorldSettings()
     MapManager::Instance().Initialize();
     RedZone::Initialize();
     AIRegistry::Initialize();
-    WaypointMovementGenerator::Initialize();
+    WaypointMovementGenerator<Creature>::Initialize();
     Player::InitVisibleBits();
 
     //Not sure if this can be moved up in the sequence (with static data loading) as it uses MapManager
@@ -1112,7 +1112,7 @@ void World::ScriptsProcess()
 
                 if( pCreature->Attack((Unit *)source) )
                 {
-                    (*pCreature)->Mutate(new TargetedMovementGenerator(*((Unit *)source)));
+                    pCreature->GetMotionMaster()->Mutate(new TargetedMovementGenerator<Creature>(*((Unit *)source)));
                 }
                 break;
             }

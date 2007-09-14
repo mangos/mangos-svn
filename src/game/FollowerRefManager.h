@@ -22,9 +22,9 @@
 #include "Utilities/LinkedReference/RefManager.h"
 
 class Unit;
-class TargetedMovementGenerator;
+class TargetedMovementGeneratorBase;
 
-class FollowerRefManager : public RefManager<Unit, TargetedMovementGenerator>
+class FollowerRefManager : public RefManager<Unit, TargetedMovementGeneratorBase>
 {
 
 };

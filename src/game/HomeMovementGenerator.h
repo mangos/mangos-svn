@@ -23,7 +23,14 @@
 #include "DestinationHolder.h"
 #include "Traveller.h"
 
-class MANGOS_DLL_SPEC HomeMovementGenerator : public MovementGenerator
+class Creature;
+
+template < class T >
+class MANGOS_DLL_SPEC HomeMovementGenerator;
+
+template <>
+class MANGOS_DLL_SPEC HomeMovementGenerator<Creature>
+    : public MovementGeneratorMedium< Creature, HomeMovementGenerator<Creature> >
 {
     public:
 
@@ -38,8 +45,9 @@ class MANGOS_DLL_SPEC HomeMovementGenerator : public MovementGenerator
 
     private:
         void _setTargetLocation(Creature &);
-        DestinationHolder<CreatureTraveller> i_destinationHolder;
+        DestinationHolder< Traveller<Creature> > i_destinationHolder;
 
         uint32 i_travel_timer;
 };
+
 #endif

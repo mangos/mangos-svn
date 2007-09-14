@@ -78,24 +78,16 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
             switch(spellid)
             {
                 case COMMAND_STAY:                          //flat=1792  //STAY
-                    ((Creature*)pet)->StopMoving();
-                    (*((Creature*)pet))->Clear();
-                    (*((Creature*)pet))->Idle();
+                    pet->StopMoving();
+                    pet->GetMotionMaster()->Clear();
+                    pet->GetMotionMaster()->Idle();
                     charmInfo->SetCommandState( COMMAND_STAY );
                     break;
                 case COMMAND_FOLLOW:                        //spellid=1792  //FOLLOW
-                    DEBUG_LOG("Start shits 1");
                     pet->AttackStop();
-                    DEBUG_LOG("Start shits 2");
                     pet->addUnitState(UNIT_STAT_FOLLOW);
-                    DEBUG_LOG("Start shits 3");
-                    (*((Creature*)pet))->Clear();
-                    DEBUG_LOG("Start shits 4");
-                    (*((Creature*)pet))->Mutate(new TargetedMovementGenerator(*_player,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE));
-                    DEBUG_LOG("Start shits 5");
-
-                    DEBUG_LOG("Start shits 6");
-                    DEBUG_LOG("Start shits 7");
+                    pet->GetMotionMaster()->Clear();
+                    pet->GetMotionMaster()->Mutate(new TargetedMovementGenerator<Creature>(*_player,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE));
                     charmInfo->SetCommandState( COMMAND_FOLLOW );
                     break;
                 case COMMAND_ATTACK:                        //spellid=1792  //ATTACK
@@ -115,7 +107,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
 
                     if(pet->GetTypeId()!=TYPEID_PLAYER)
                     {
-                        (*((Creature*)pet))->Clear();
+                        pet->GetMotionMaster()->Clear();
                         if (((Creature*)pet)->AI())
                             ((Creature*)pet)->AI()->AttackStart(TargetUnit);
 
@@ -232,7 +224,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     pet->clearUnitState(UNIT_STAT_FOLLOW);
                     if(unit_target!=pet->getVictim())
                         pet->AttackStop();
-                    (*(Creature*)pet)->Clear();
+                    pet->GetMotionMaster()->Clear();
                     if (((Creature*)pet)->AI())
                         ((Creature*)pet)->AI()->AttackStart(unit_target);
                 }

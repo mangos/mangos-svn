@@ -39,6 +39,7 @@
 #include "Totem.h"
 #include "TemporarySummon.h"
 #include "BattleGroundMgr.h"
+#include "MovementGenerator.h"
 
 #include <math.h>
 
@@ -108,7 +109,7 @@ bool IsPassiveStackableSpell( uint32 spellId )
 }
 
 Unit::Unit( WorldObject *instantiator )
-: WorldObject( instantiator ), m_ThreatManager(this), m_HostilRefManager(this)
+: WorldObject( instantiator ), i_motionMaster(this), m_ThreatManager(this), m_HostilRefManager(this)
 {
     m_objectType |= TYPE_UNIT;
     m_objectTypeId = TYPEID_UNIT;
@@ -184,6 +185,7 @@ Unit::Unit( WorldObject *instantiator )
 
     m_removedAuras = 0;
     m_charmInfo = NULL;
+    m_moveRun = false;
 }
 
 Unit::~Unit()
@@ -259,6 +261,8 @@ void Unit::Update( uint32 p_time )
     if(GetHealth() < GetMaxHealth()*0.2)
         ModifyAuraState(AURA_STATE_HEALTHLESS, true);
     else ModifyAuraState(AURA_STATE_HEALTHLESS, false);
+
+    i_motionMaster.UpdateMotion(p_time);
 }
 
 bool Unit::haveOffhandWeapon() const
@@ -6074,7 +6078,7 @@ bool Unit::SelectHostilTarget()
     // it in combat but attacker not make any damage and not enter to aggro radius to have record in threat list
     // for example at owner command to pet attack some far away creature
     // Note: creature not have targeted movement generator but have attacker in this case 
-    if( (*((Creature*)this))->empty() || (*((Creature*)this))->top()->GetMovementGeneratorType() != TARGETED_MOTION_TYPE )
+    if( GetMotionMaster()->empty() || GetMotionMaster()->top()->GetMovementGeneratorType() != TARGETED_MOTION_TYPE )
     {
         for(AttackerSet::const_iterator itr = m_attackers.begin(); itr != m_attackers.end(); ++itr)
         {

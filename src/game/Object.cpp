@@ -34,7 +34,7 @@
 #include "Log.h"
 #include "Transports.h"
 #include "VMapFactory.h"
-#include "FlightMaster.h"
+#include "WaypointMovementGenerator.h"
 
 uint32 GuidHigh2TypeId(uint32 guid_hi)
 {
@@ -295,8 +295,10 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
                 flags2 &= ~MOVEMENTFLAG_SWIMMING;
 
                 if(((Player*)this)->isInFlight())
-                    if(FlightMaster::Instance().GetFlightPathMovementGenerator((Player*)this))
-                        flags2 = (MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_SPLINE2);
+                {
+                    WPAssert(!((Player*)this)->GetMotionMaster()->empty() && ((Player*)this)->GetMotionMaster()->top()->GetMovementGeneratorType() == FLIGHT_MOTION_TYPE);
+                    flags2 = (MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_SPLINE2); 
+                }
             }
             break;
         }
@@ -370,13 +372,15 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
 
         if(flags2 & MOVEMENTFLAG_SPLINE2)                   // 0x8000000
         {
-            FlightPathMovementGenerator *fmg = FlightMaster::Instance().GetFlightPathMovementGenerator((Player*)this);
-            if (!fmg)
+            if(!((Player*)this)->isInFlight())
             {
-                // how we can get there?
-                sLog.outError("Bad thing happens :(");
+                sLog.outDebug("_BuildMovementUpdate: MOVEMENTFLAG_SPLINE2 but not in flight");
                 return;
             }
+            
+            WPAssert(!((Player*)this)->GetMotionMaster()->empty() && ((Player*)this)->GetMotionMaster()->top()->GetMovementGeneratorType() == FLIGHT_MOTION_TYPE);
+
+            FlightPathMovementGenerator *fmg = (FlightPathMovementGenerator*)(((Player*)this)->GetMotionMaster()->top());
 
             uint32 flags3 = 0x00000300;
 

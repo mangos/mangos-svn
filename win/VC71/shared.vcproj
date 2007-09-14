@@ -454,6 +454,9 @@
 			<File
 				RelativePath="..\..\src\shared\Network\Utility.h">
 			</File>
+			<File
+				RelativePath="..\..\src\shared\WorldPacket.h">
+			</File>
 		</Filter>
 		<Filter
 			Name="vmaps"

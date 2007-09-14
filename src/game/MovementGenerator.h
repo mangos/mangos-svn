@@ -24,40 +24,52 @@
 #include "Dynamic/ObjectRegistry.h"
 #include "Dynamic/FactoryHolder.h"
 #include "Common.h"
+#include "MotionMaster.h"
 
-class Creature;
-
-#define     CANNOT_HANDLE_TYPE   -1
-
-// values 0 ... MAX_DB_MOTION_TYPE-1 used in DB
-enum MovementGeneratorType
-{
-    IDLE_MOTION_TYPE      = 0,                              // IdleMovementGenerator.h
-    RANDOM_MOTION_TYPE    = 1,                              // RandomMovementGenerator.h
-    WAYPOINT_MOTION_TYPE  = 2,                              // WaypointMovementGenerator.h
-    MAX_DB_MOTION_TYPE    = 3,                              // *** this and below motion types can't be set in DB.
-    ANIMAL_RANDOM_MOTION_TYPE = MAX_DB_MOTION_TYPE,         // AnimalRandomMovementGenerator.h
-    CONFUSED_MOTION_TYPE  = 4,                              // ConfusedMovementGenerator.h
-    TARGETED_MOTION_TYPE  = 5,                              // TargetedMovementGenerator.h
-    TAXI_MOTION_TYPE      = 6,                              // TaxiMovementGenerator.h
-    HOME_MOTION_TYPE      = 7                               // HomeMovementGenerator.h
-};
+class Unit;
 
 class MANGOS_DLL_SPEC MovementGenerator
 {
     public:
         virtual ~MovementGenerator();
 
-        virtual void Initialize(Creature &) = 0;
+        virtual void Initialize(Unit &) = 0;
 
-        virtual void Reset(Creature &) = 0;
+        virtual void Reset(Unit &) = 0;
 
-        virtual bool Update(Creature &, const uint32 &time_diff) = 0;
+        virtual bool Update(Unit &, const uint32 &time_diff) = 0;
 
         virtual MovementGeneratorType GetMovementGeneratorType() = 0;
 };
 
-struct SelectableMovement : public FactoryHolder<MovementGenerator,MovementGeneratorType>, public Permissible<Creature>
+template<class T, class D>
+class MANGOS_DLL_SPEC MovementGeneratorMedium : public MovementGenerator
+{
+    public:
+        void Initialize(Unit &u)
+        {
+            //u->AssertIsType<T>();
+            (static_cast<D*>(this))->Initialize(*((T*)&u));
+        }
+        void Reset(Unit &u)
+        {
+            //u->AssertIsType<T>();
+            (static_cast<D*>(this))->Reset(*((T*)&u));
+        }
+        bool Update(Unit &u, const uint32 &time_diff)
+        {
+            //u->AssertIsType<T>();
+            return (static_cast<D*>(this))->Update(*((T*)&u), time_diff);
+        }
+    public:
+        // will not link if not overridden in the generators
+        void Initialize(T &u);
+        void Reset(T &u);
+        bool Update(T &u, const uint32 &time_diff);
+};
+
+
+struct SelectableMovement : public FactoryHolder<MovementGenerator,MovementGeneratorType>
 {
     SelectableMovement(MovementGeneratorType mgt) : FactoryHolder<MovementGenerator,MovementGeneratorType>(mgt) {}
 };
@@ -68,8 +80,6 @@ struct MovementGeneratorFactory : public SelectableMovement
     MovementGeneratorFactory(MovementGeneratorType mgt) : SelectableMovement(mgt) {}
 
     MovementGenerator* Create(void *) const;
-
-    int Permit(const Creature *c) const { return REAL_MOVEMENT::Permissible(c); }
 };
 
 typedef FactoryHolder<MovementGenerator,MovementGeneratorType> MovementGeneratorCreator;

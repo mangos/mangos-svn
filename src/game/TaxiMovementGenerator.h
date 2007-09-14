@@ -21,7 +21,7 @@
 
 #include "MovementGenerator.h"
 
-class MANGOS_DLL_DECL TaxiMovementGenerator : public MovementGenerator
+/*class MANGOS_DLL_DECL TaxiMovementGenerator : public MovementGenerator
 {
     public:
 
@@ -30,5 +30,5 @@ class MANGOS_DLL_DECL TaxiMovementGenerator : public MovementGenerator
         bool GetNext(const Creature &, float &x, float &y, float &z, float &orientation);
         bool Update(Creature &, const uint32 &);
         MovementGeneratorType GetMovementGeneratorType() { return TAXI_MOTION_TYPE; }
-};
+};*/
 #endif
