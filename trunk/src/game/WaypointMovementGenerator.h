@@ -125,7 +125,7 @@ class MANGOS_DLL_DECL FlightPathMovementGenerator
 {
     uint32 i_pathId;
     public:
-        FlightPathMovementGenerator::FlightPathMovementGenerator(uint32 id) : i_pathId(id) {}
+        FlightPathMovementGenerator(uint32 id) : i_pathId(id) {}
         void Initialize(Player &);
         void Reset(Player &) {}
         bool Update(Player &, const uint32 &);
