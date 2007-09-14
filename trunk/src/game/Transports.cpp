@@ -196,7 +196,7 @@ bool Transport::GenerateWaypoints(uint32 pathid, std::set<uint32> &mapids)
     TransportPath path;
     objmgr.GetTransportPathNodes(pathid, path);
 
-    if (!path.Size())
+    if (path.Empty())
         return false;
 
     std::vector<keyFrame> keyFrames;

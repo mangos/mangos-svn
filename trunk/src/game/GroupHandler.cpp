@@ -225,7 +225,7 @@ void WorldSession::HandleGroupUninviteNameOpcode(WorldPacket & recv_data)
 
     std::string membername;
     recv_data >> membername;
-    if(membername.size() <= 0)
+    if(membername.empty())
         return;
     normalizePlayerName(membername);
 
@@ -524,7 +524,7 @@ void WorldSession::HandleRaidReadyCheckOpcode( WorldPacket & recv_data )
     Group *group = GetPlayer()->GetGroup();
     if(!group) return;
 
-    if(recv_data.size() == 0)                               // request
+    if(recv_data.empty())                               // request
     {
         /** error handling **/
         if(!group->IsLeader(GetPlayer()->GetGUID()))

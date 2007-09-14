@@ -58,14 +58,22 @@ class CharacterHandler
         void HandleCharEnumCallback(QueryResult * result, uint32 account)
         {
             WorldSession * session = sWorld.FindSession(account);
-            if(!session) return;
+            if(!session)
+            {
+                delete result;
+                return;
+            }
             session->HandleCharEnum(result);
         }
         void HandlePlayerLoginCallback(QueryResult * /*dummy*/, SqlQueryHolder * holder)
         {
             if (!holder) return;
             WorldSession *session = sWorld.FindSession(((LoginQueryHolder*)holder)->GetAccountId());
-            if(!session) return;
+            if(!session)
+            {
+                delete holder;
+                return;
+            }
             session->HandlePlayerLogin((LoginQueryHolder*)holder);
         }
 } chrHandler;

@@ -200,7 +200,7 @@ WaypointMovementGenerator::Update(Creature &creature, const uint32 &diff)
         return true;
 
     // prevent crash at empty waypoint path.
-    if(i_path.Size()==0)
+    if(i_path.Empty())
     {
         return true;
     }
