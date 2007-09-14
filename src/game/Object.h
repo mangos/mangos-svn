@@ -76,6 +76,7 @@ class WorldSession;
 class Player;
 class MapCell;
 class UpdateMask;
+class InstanceData;
 
 typedef HM_NAMESPACE::hash_map<Player*, UpdateData> UpdateDataMapType;
 
@@ -274,6 +275,8 @@ class MANGOS_DLL_SPEC WorldObject : public Object
 
         uint32 GetZoneId() const;
         uint32 GetAreaId() const;
+
+        InstanceData* GetInstanceData();
 
         const char* GetName() const { return m_name.c_str(); }
         void SetName(std::string newname) { m_name=newname; }

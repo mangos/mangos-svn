@@ -25,6 +25,8 @@
 //uint8 loglevel = 0;
 int nrscripts;
 Script *m_scripts[MAX_SCRIPTS];
+InstanceDataScript* m_instance_scripts[MAX_INSTANCE_SCRIPTS];
+int num_inst_scripts;
 
 // -- Scripts to be added --
 extern void AddSC_default();
@@ -41,8 +43,12 @@ MANGOS_DLL_EXPORT
 void ScriptsInit()
 {
     nrscripts = 0;
+    num_inst_scripts = 0;
     for(int i=0;i<MAX_SCRIPTS;i++)
-        m_scripts[i]=NULL;
+    {
+         m_scripts[i]=NULL;
+         m_instance_scripts[i]=NULL;
+    }
 
     // -- Inicialize the Scripts to be Added --
     AddSC_default();
@@ -261,6 +267,17 @@ CreatureAI* GetAI(Creature *_Creature )
     if(!tmpscript || !tmpscript->GetAI) return NULL;
 
     return tmpscript->GetAI(_Creature);
+}
+
+MANGOS_DLL_EXPORT
+InstanceData* CreateInstanceData(Map *map)
+{
+    std::string name = map->GetScript();
+    if(!name.empty())
+        for(int i=0;i<num_inst_scripts;i++)
+            if(m_instance_scripts[i] && m_instance_scripts[i]->name == name)
+                return m_instance_scripts[i]->GetInstanceData(map);
+    return NULL;
 }
 
 void ScriptedAI::UpdateAI(const uint32)

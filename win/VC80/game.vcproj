@@ -390,6 +390,10 @@
 				>
 			</File>
 			<File
+				RelativePath="..\..\src\game\InstanceData.h"
+				>
+			</File>
+			<File
 				RelativePath="..\..\src\game\ItemHandler.cpp"
 				>
 			</File>

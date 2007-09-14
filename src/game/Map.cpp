@@ -23,6 +23,7 @@
 #include "GridStates.h"
 #include "RedZoneDistrict.h"
 #include "CellImpl.h"
+#include "InstanceData.h"
 #include "Map.h"
 #include "GridNotifiersImpl.h"
 #include "Config/ConfigEnv.h"
@@ -30,6 +31,7 @@
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "World.h"
+#include "ScriptCalls.h"
 
 #include "MapManager.h"
 #include "MapInstanced.h"
@@ -216,14 +218,26 @@ Map::Map(uint32 id, time_t expiry, uint32 ainstanceId) : i_id(id), i_gridExpiry(
     if (Instanceable())
     {
         sLog.outDetail("INSTANCEMAP: Loading instance template");
-        QueryResult* result = sDatabase.PQuery("SELECT `instance_template`.`maxplayers`, `instance_template`.`reset_delay`, `instance`.`resettime` FROM `instance_template` LEFT JOIN `instance` ON ((`instance_template`.`map` = `instance`.`map`) AND (`instance`.`id` = '%u')) WHERE `instance_template`.`map` = '%u'", i_InstanceId, id);
+        QueryResult* result = sDatabase.PQuery("SELECT `instance_template`.`maxplayers`, `instance_template`.`reset_delay`, `instance`.`resettime`, `instance_template`.`script`, `instance`.`data` FROM `instance_template` LEFT JOIN `instance` ON ((`instance_template`.`map` = `instance`.`map`) AND (`instance`.`id` = '%u')) WHERE `instance_template`.`map` = '%u'", i_InstanceId, id);
         if (result)
         {
             Field* fields = result->Fetch();
             i_maxPlayers = fields[0].GetUInt32();
             i_resetDelayTime = fields[1].GetUInt32();
             i_resetTime = (time_t) fields[2].GetUInt64();
+            i_script = fields[3].GetCppString();
+            i_data = Script->CreateInstanceData(this);
+            if(i_data)
+            {
+                sLog.outDebug("New instance data, \"%s\" ,initialized!",i_script.c_str());
+                const char* data = fields[4].GetString();
+                if(data)
+                    i_data->Load(data);
+                else
+                    i_data->Initialize();
+            }
             delete result;
+            if (i_resetTime == 0) InitResetTime();
         }
         else
         {
@@ -234,6 +248,8 @@ Map::Map(uint32 id, time_t expiry, uint32 ainstanceId) : i_id(id), i_gridExpiry(
         }
         if (i_resetTime == 0) InitResetTime();
     }
+    else
+        i_data = NULL;
 
     i_Players.clear();
 }
@@ -475,6 +491,8 @@ bool Map::AddInstanced(Player *player)
             return(false);
         }
 
+        if(i_data)
+            i_data->OnPlayerEnter(player);
         i_Players.push_back(player);
     }
 
@@ -510,9 +528,10 @@ void Map::InitResetTime()
 
         if(GetInstanceId())
         {
+            const char* instance_data = i_data ? i_data->Save() : "";
             sDatabase.BeginTransaction();
             sDatabase.PExecute("DELETE FROM `instance` WHERE `id` = '%u'", GetInstanceId());
-            sDatabase.PExecute("INSERT INTO `instance` VALUES ('%u', '%u', '" I64FMTD "')", GetInstanceId(), i_id, (uint64)this->i_resetTime);
+            sDatabase.PExecute("INSERT INTO `instance` VALUES ('%u', '%u', '" I64FMTD "','%s')", GetInstanceId(), i_id, (uint64)this->i_resetTime, instance_data);
             sDatabase.CommitTransaction();
         }
     }
@@ -561,6 +580,13 @@ bool Map::CanEnter(Player* player)
         {
             sLog.outDebug("Map::CanEnter - player '%s' is dead but doesn't have a corpse!", player->GetName());
         }
+    }
+
+    if(i_data && i_data->IsEncounterInProgress())
+    {
+        sLog.outDebug("MAP: Player '%s' can't enter instance '%s' while an encounter is in progress.", player->GetName(), GetMapName());
+        player->SendTransferAborted(GetId(), TRANSFER_ABORT_ZONE_IN_COMBAT);
+        return(false);
     }
 
     return(true);
@@ -739,6 +765,9 @@ void Map::Update(const uint32 &t_diff)
             mask <<= 1;
         }
     }
+
+    if(i_data)
+        i_data->Update(t_diff);
 }
 
 void Map::Remove(Player *player, bool remove)

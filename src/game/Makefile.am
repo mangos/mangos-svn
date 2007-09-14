@@ -128,6 +128,7 @@ libmangosgame_a_SOURCES = \
 	HostilRefManager.h \
 	IdleMovementGenerator.cpp \
 	IdleMovementGenerator.h \
+	InstanceData.h \
 	Item.cpp \
 	Item.h \
 	ItemEnchantmentMgr.cpp \
