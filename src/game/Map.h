@@ -96,9 +96,7 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         typedef std::list<Player*> PlayerList;
 
         Map(uint32 id, time_t, uint32 aInstanceId);
-        virtual ~Map()                                      // Important! Else memleak at MapInstanced class destruction
-        {
-        };
+        virtual ~Map();                                     // Important! Else memleak at MapInstanced class destruction
 
         void Add(Player *);
         bool AddInstanced(Player *);

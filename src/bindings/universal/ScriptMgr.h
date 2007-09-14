@@ -80,7 +80,7 @@ class InstanceDataScript
 
 extern int nrscripts;
 extern Script *m_scripts[MAX_SCRIPTS];
-extern InstanceDataScript *data_store[MAX_INSTANCE_SCRIPTS];
+extern InstanceDataScript *m_instance_scripts[MAX_INSTANCE_SCRIPTS];
 extern int num_inst_scripts;
 
 #define VISIBLE_RANGE (26.46f)
