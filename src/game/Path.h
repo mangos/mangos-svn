@@ -35,7 +35,7 @@ class Path
         }
 
         inline unsigned int Size(void) const { return i_nodes.size(); }
-		inline bool Empty(void) const { return i_nodes.empty(); }
+        inline bool Empty(void) const { return i_nodes.empty(); }
         inline void Resize(unsigned int sz) { i_nodes.resize(sz); }
         inline void Clear(void) { i_nodes.clear(); }
         inline PathNode* GetNodes() { return &i_nodes[0]; }
