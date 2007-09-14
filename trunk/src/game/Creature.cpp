@@ -35,6 +35,7 @@
 #include "Formulas.h"
 #include "SpellAuras.h"
 #include "WaypointMovementGenerator.h"
+#include "InstanceData.h"
 
 // apply implementation of the singletons
 #include "Policies/SingletonImp.h"
@@ -1172,6 +1173,15 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
 
     // checked at loading
     m_defaultMovementType = MovementGeneratorType(cinfo->MovementType);
+
+    //Notify the map's instance data.
+    //Only works if you create the object in it, not if it is moves to that map.
+    //Normally non-players do not teleport to other maps.
+    Map *map = MapManager::Instance().GetMap(GetMapId(), this);
+    if(map && map->GetInstanceData())
+    {
+        map->GetInstanceData()->OnCreatureCreate(this, Entry);
+    }
 
     return true;
 }

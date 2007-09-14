@@ -22,6 +22,7 @@
 //Only required includes
 #include "../../game/CreatureAI.h"
 #include "../../game/Creature.h"
+#include "../../game/InstanceData.h"
 
 class Player;
 class Creature;
@@ -29,8 +30,10 @@ class Quest;
 class Item;
 class GameObject;
 class SpellCastTargets;
+class Map;
 
 #define MAX_SCRIPTS 1000
+#define MAX_INSTANCE_SCRIPTS 1000
 
 struct Script
 {
@@ -66,8 +69,19 @@ struct Script
 
 };
 
+class InstanceDataScript
+{
+    public:
+        InstanceDataScript() : GetInstanceData(NULL) {};
+
+        std::string name;
+        InstanceData* (*GetInstanceData)(Map *_Map);
+};
+
 extern int nrscripts;
 extern Script *m_scripts[MAX_SCRIPTS];
+extern InstanceDataScript *data_store[MAX_INSTANCE_SCRIPTS];
+extern int num_inst_scripts;
 
 #define VISIBLE_RANGE (26.46f)
 
@@ -140,4 +154,5 @@ struct MANGOS_DLL_DECL ScriptedAI : public CreatureAI
 
     void DoGoHome();
 };
+
 #endif

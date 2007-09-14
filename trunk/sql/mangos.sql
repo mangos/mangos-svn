@@ -1801,6 +1801,7 @@ CREATE TABLE `instance` (
   `id` int(11) unsigned NOT NULL default '0',
   `map` int(11) unsigned NOT NULL default '0',
   `resettime` bigint(40) NOT NULL default '0',
+  `data` longtext,
   PRIMARY KEY  (`id`),
   KEY `map` (`map`),
   KEY `resettime` (`resettime`)
@@ -1830,6 +1831,7 @@ CREATE TABLE `instance_template` (
   `startLocY` float default NULL,
   `startLocZ` float default NULL,
   `startLocO` float default NULL,
+  `script` varchar(255) NOT NULL default '',
   PRIMARY KEY  (`map`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 

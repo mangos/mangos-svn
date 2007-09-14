@@ -870,4 +870,6 @@ EXTRA_DIST = \
 	4437_pet_aura.sql \
 	4439_spell_proc_event.sql \
 	4446_creature_template.sql \
+	4464_instance.sql \
+	4464_instance_template.sql \
 	README

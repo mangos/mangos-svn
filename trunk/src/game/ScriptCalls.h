@@ -28,6 +28,8 @@ class Item;
 class Player;
 class Quest;
 class SpellCastTargets;
+class Map;
+class InstanceData;
 
 bool LoadScriptingModule(char const* libName = "");
 void UnloadScriptingModule();
@@ -52,6 +54,7 @@ typedef bool(MANGOS_IMPORT * scriptCallGOChooseReward)(Player *player, GameObjec
 typedef bool(MANGOS_IMPORT * scriptCallReceiveEmote) ( Player *player, Creature *_Creature, uint32 emote );
 typedef bool(MANGOS_IMPORT * scriptCallItemUse) (Player *player, Item *_Item, SpellCastTargets const& targets);
 typedef CreatureAI* (MANGOS_IMPORT * scriptCallGetAI) ( Creature *_Creature );
+typedef InstanceData* (MANGOS_IMPORT * scriptCallCreateInstanceData) (Map *map);
 
 typedef struct
 {
@@ -75,6 +78,7 @@ typedef struct
     scriptCallReceiveEmote ReceiveEmote;
     scriptCallItemUse ItemUse;
     scriptCallGetAI GetAI;
+    scriptCallCreateInstanceData CreateInstanceData;
 
     MANGOS_LIBRARY_HANDLE hScriptsLib;
 }_ScriptSet,*ScriptsSet;

@@ -32,6 +32,7 @@
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
+#include "InstanceData.h"
 
 GameObject::GameObject( WorldObject *instantiator ) : WorldObject( instantiator )
 {
@@ -135,6 +136,15 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
 
     SetUInt32Value (GAMEOBJECT_ANIMPROGRESS, animprogress);
     SetUInt32Value (GAMEOBJECT_DYN_FLAGS, dynflags);
+
+    //Notify the map's instance data.
+    //Only works if you create the object in it, not if it is moves to that map.
+    //Normally non-players do not teleport to other maps.
+    Map *map = MapManager::Instance().GetMap(GetMapId(), this);
+    if(map && map->GetInstanceData())
+    {
+        map->GetInstanceData()->OnObjectCreate(this);
+    }
 
     return true;
 }

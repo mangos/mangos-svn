@@ -36,6 +36,7 @@
 
 class Unit;
 class WorldPacket;
+class InstanceData;
 
 namespace ZThread
 {
@@ -92,6 +93,7 @@ typedef HM_NAMESPACE::hash_map<Creature*, CreatureMover> CreatureMoveList;
 class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mutex>
 {
     public:
+        typedef std::list<Player*> PlayerList;
 
         Map(uint32 id, time_t, uint32 aInstanceId);
         virtual ~Map()                                      // Important! Else memleak at MapInstanced class destruction
@@ -187,9 +189,12 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         // assert print helper
         bool CheckGridIntegrity(Creature* c, bool moved) const;
 
+        std::string GetScript() { return(i_script); }
+        InstanceData* GetInstanceData() { return(i_data); }
         uint32 GetInstanceId() { return(i_InstanceId); }
         bool NeedsReset() { return(Instanceable() && ((i_resetTime == 0) || (i_resetTime <= time(NULL)))); }
         uint32 GetPlayersCount() {return(i_Players.size()); }
+        PlayerList* GetPlayers() {return (&i_Players); }
         void Reset();
         bool CanEnter(Player* player);
         const char* GetMapName() const;
@@ -254,8 +259,9 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         uint32 i_resetDelayTime;
         uint32 i_InstanceId;
         uint32 i_maxPlayers;
+        InstanceData* i_data;
+        std::string i_script;
 
-        typedef std::list<Player*> PlayerList;
         PlayerList i_Players;
 
         // Type specific code for add/remove to/from grid

@@ -771,6 +771,11 @@ uint32 WorldObject::GetAreaId() const
     return MapManager::Instance().GetMap(m_mapId, this)->GetAreaId(m_positionX,m_positionY);
 }
 
+InstanceData* WorldObject::GetInstanceData()
+{
+    return MapManager::Instance().GetMap(m_mapId, this)->GetInstanceData();
+}
+
                                                             //slow
 float WorldObject::GetDistanceSq(const WorldObject* obj) const
 {

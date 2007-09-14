@@ -72,6 +72,7 @@ bool LoadScriptingModule(char const* libName)
         ||!(testScript->ReceiveEmote        =(scriptCallReceiveEmote        )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ReceiveEmote"        ))
         ||!(testScript->ItemUse             =(scriptCallItemUse             )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"ItemUse"             ))
         ||!(testScript->GetAI               =(scriptCallGetAI               )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"GetAI"               ))
+        ||!(testScript->CreateInstanceData  =(scriptCallCreateInstanceData  )MANGOS_GET_PROC_ADDR(testScript->hScriptsLib,"CreateInstanceData"  ))
         )
     {
         printf("Error loading Scripts Library %s !\n Library missing required functions.",name.c_str());
