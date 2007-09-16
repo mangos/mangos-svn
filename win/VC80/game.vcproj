@@ -870,14 +870,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\TaxiMovementGenerator.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\src\game\TaxiMovementGenerator.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\TemporarySummon.cpp"
 				>
 			</File>

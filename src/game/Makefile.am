@@ -207,8 +207,6 @@ libmangosgame_a_SOURCES = \
 	TargetedMovementGenerator.cpp \
 	TargetedMovementGenerator.h \
 	TaxiHandler.cpp \
-	TaxiMovementGenerator.cpp \
-	TaxiMovementGenerator.h \
 	TemporarySummon.cpp \
 	TemporarySummon.h \
 	tools.cpp \

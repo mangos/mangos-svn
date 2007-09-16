@@ -37,13 +37,14 @@ enum MovementGeneratorType
     ANIMAL_RANDOM_MOTION_TYPE = MAX_DB_MOTION_TYPE,         // AnimalRandomMovementGenerator.h
     CONFUSED_MOTION_TYPE  = 4,                              // ConfusedMovementGenerator.h
     TARGETED_MOTION_TYPE  = 5,                              // TargetedMovementGenerator.h
-    TAXI_MOTION_TYPE      = 6,                              // TaxiMovementGenerator.h
-    HOME_MOTION_TYPE      = 7,                              // HomeMovementGenerator.h
-    FLIGHT_MOTION_TYPE    = 8                               // WaypointMovementGenerator.h
+    HOME_MOTION_TYPE      = 6,                              // HomeMovementGenerator.h
+    FLIGHT_MOTION_TYPE    = 7                               // WaypointMovementGenerator.h
 };
 
 class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator *>
 {
+    private:
+        typedef std::stack<MovementGenerator *> Impl;
     public:
 
         explicit MotionMaster(Unit *unit) : i_owner(unit) {}
@@ -53,8 +54,12 @@ class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator *>
 
         MovementGenerator* operator->(void) { return top(); }
 
-        using std::stack<MovementGenerator *>::top;
-        using std::stack<MovementGenerator *>::empty;
+        using Impl::top;
+        using Impl::empty;
+
+        typedef Impl::container_type::const_iterator const_iterator;
+        const_iterator begin() const { return Impl::c.begin(); }
+        const_iterator end() const { return Impl::c.end(); }
 
         void UpdateMotion(const uint32 &diff);
 

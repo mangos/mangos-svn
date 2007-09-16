@@ -807,6 +807,7 @@ INSERT INTO `command` VALUES
 ('morph',2,'Syntax: .morph #displayid\r\n\r\nChange your current model id to #displayid.'),
 ('movecreature',2,'Syntax: .movecreature [#creature_guid]\r\n\r\nMove the targeted creature spawn point to your coordinates.'),
 ('moveobject',2,'Syntax: .moveobject #goguid [#x #y #z]\r\n\r\nMove gameobject #goguid to character coordinates (or to (#x,#y,#z) coordinates if its provide).'),
+('movegens',3,'Syntax: .movegens\r\n  Show movement generators stack for selected creature or player.'),
 ('mute',1,'Syntax: .mute $playerName $timeInMinutes\r\n\r\nDisible chat messaging for any character from account of character $playerName at $timeInMinutes minutes.'),
 ('unmute',1,'Syntax: .unmute $playerName\r\n\r\nRestore chat messaging for any character from account of character $playerName.'),
 ('name',2,'Syntax: .name $name\r\n\r\nChange the name of the selected creature or character to $name.\r\n\r\nCommand disabled.'),
@@ -1207,7 +1208,7 @@ CREATE TABLE `creature_template` (
 LOCK TABLES `creature_template` WRITE;
 /*!40000 ALTER TABLE `creature_template` DISABLE KEYS */;
 INSERT INTO `creature_template` VALUES 
-(1,10045,0,'Waypoint (Only GM can see it)','Visual',1,1,64,64,0,0,0,35,0,0.91,0,14,15,0,100,2000,2200,4096,0,0.5,8,2,0,0,0,0,1.76,2.42,100,2.56,8,1,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,3,0,'');
+(1,10045,0,'Waypoint (Only GM can see it)','Visual',1,1,64,64,0,0,0,35,0,0.91,0,14,15,0,100,2000,2200,4096,0,8,2,0,0,0,0,1.76,2.42,100,2.56,8,1,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,3,0,'');
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1842,32 +1843,32 @@ CREATE TABLE `instance_template` (
 LOCK TABLES `instance_template` WRITE;
 /*!40000 ALTER TABLE `instance_template` DISABLE KEYS */;
 INSERT INTO `instance_template` VALUES 
-(33,22,30,10,7200,NULL,NULL,NULL,NULL),
-(34,24,32,10,7200,NULL,NULL,NULL,NULL),
-(36,15,20,10,7200,NULL,NULL,NULL,NULL),
-(43,15,21,10,7200,NULL,NULL,NULL,NULL),
-(47,29,38,10,7200,NULL,NULL,NULL,NULL),
-(48,24,32,10,7200,NULL,NULL,NULL,NULL),
-(70,35,47,10,7200,NULL,NULL,NULL,NULL),
-(90,29,38,10,7200,NULL,NULL,NULL,NULL),
-(109,45,55,10,7200,NULL,NULL,NULL,NULL),
-(129,37,46,10,7200,NULL,NULL,NULL,NULL),
-(189,34,45,10,7200,NULL,NULL,NULL,NULL),
-(209,44,54,10,7200,NULL,NULL,NULL,NULL),
-(229,58,0,10,120000,78.5083,-225.044,49.839,5.1),
-(230,52,0,5,7200,NULL,NULL,NULL,NULL),
-(249,60,0,40,432000,NULL,NULL,NULL,NULL),
-(289,57,0,5,7200,NULL,NULL,NULL,NULL),
-(309,60,0,20,259200,NULL,NULL,NULL,NULL),
-(329,58,60,5,7200,NULL,NULL,NULL,NULL),
-(349,46,55,10,7200,NULL,NULL,NULL,NULL),
-(389,13,18,10,7200,NULL,NULL,NULL,NULL),
-(409,60,0,40,604800,NULL,NULL,NULL,NULL),
-(429,55,60,5,7200,NULL,NULL,NULL,NULL),
-(469,60,0,40,604800,NULL,NULL,NULL,NULL),
-(509,60,0,20,259200,NULL,NULL,NULL,NULL),
-(531,60,0,40,604800,NULL,NULL,NULL,NULL),
-(533,60,0,40,604800,NULL,NULL,NULL,NULL);
+(33,22,30,10,7200,NULL,NULL,NULL,NULL,''),
+(34,24,32,10,7200,NULL,NULL,NULL,NULL,''),
+(36,15,20,10,7200,NULL,NULL,NULL,NULL,''),
+(43,15,21,10,7200,NULL,NULL,NULL,NULL,''),
+(47,29,38,10,7200,NULL,NULL,NULL,NULL,''),
+(48,24,32,10,7200,NULL,NULL,NULL,NULL,''),
+(70,35,47,10,7200,NULL,NULL,NULL,NULL,''),
+(90,29,38,10,7200,NULL,NULL,NULL,NULL,''),
+(109,45,55,10,7200,NULL,NULL,NULL,NULL,''),
+(129,37,46,10,7200,NULL,NULL,NULL,NULL,''),
+(189,34,45,10,7200,NULL,NULL,NULL,NULL,''),
+(209,44,54,10,7200,NULL,NULL,NULL,NULL,''),
+(229,58,0,10,120000,78.5083,-225.044,49.839,5.1,''),
+(230,52,0,5,7200,NULL,NULL,NULL,NULL,''),
+(249,60,0,40,432000,NULL,NULL,NULL,NULL,''),
+(289,57,0,5,7200,NULL,NULL,NULL,NULL,''),
+(309,60,0,20,259200,NULL,NULL,NULL,NULL,''),
+(329,58,60,5,7200,NULL,NULL,NULL,NULL,''),
+(349,46,55,10,7200,NULL,NULL,NULL,NULL,''),
+(389,13,18,10,7200,NULL,NULL,NULL,NULL,''),
+(409,60,0,40,604800,NULL,NULL,NULL,NULL,''),
+(429,55,60,5,7200,NULL,NULL,NULL,NULL,''),
+(469,60,0,40,604800,NULL,NULL,NULL,NULL,''),
+(509,60,0,20,259200,NULL,NULL,NULL,NULL,''),
+(531,60,0,40,604800,NULL,NULL,NULL,NULL,''),
+(533,60,0,40,604800,NULL,NULL,NULL,NULL,'');
 /*!40000 ALTER TABLE `instance_template` ENABLE KEYS */;
 UNLOCK TABLES;
 

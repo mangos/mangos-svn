@@ -37,6 +37,7 @@
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "Weather.h"
+#include "TargetedMovementGenerator.h"
 
 //reload commands
 bool ChatHandler::HandleReloadCommand(const char* arg)
@@ -4035,5 +4036,67 @@ bool ChatHandler::HandleWritePDumpCommand(const char *args)
     else
         PSendSysMessage(LANG_COMMAND_EXPORT_FAILED);
 
+    return true;
+}
+
+bool ChatHandler::HandleMovegensCommand(const char *args)
+{
+    Unit* unit = getSelectedUnit();
+    if(!unit)
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        return true;
+    }
+
+    PSendSysMessage(LANG_MOVEGENS_LIST,(unit->GetTypeId()==TYPEID_PLAYER ? "Player" : "Creature" ),unit->GetGUIDLow());
+
+    MotionMaster* mm = unit->GetMotionMaster();
+    for(MotionMaster::const_iterator itr = mm->begin(); itr != mm->end(); ++itr)
+    {
+        switch((*itr)->GetMovementGeneratorType())
+        {
+        case IDLE_MOTION_TYPE:          SendSysMessage("   " LANG_MOVEGENS_IDLE);          break;
+        case RANDOM_MOTION_TYPE:        SendSysMessage("   " LANG_MOVEGENS_RANDOM);        break;
+        case WAYPOINT_MOTION_TYPE:      SendSysMessage("   " LANG_MOVEGENS_WAYPOINT);      break;
+        case ANIMAL_RANDOM_MOTION_TYPE: SendSysMessage("   " LANG_MOVEGENS_ANIMAL_RANDOM); break;
+        case CONFUSED_MOTION_TYPE:      SendSysMessage("   " LANG_MOVEGENS_CONFUSED);      break;
+        case TARGETED_MOTION_TYPE: 
+        {
+            if(unit->GetTypeId()==TYPEID_PLAYER)
+            {
+                TargetedMovementGenerator<Player> const* mgen = static_cast<TargetedMovementGenerator<Player> const*>(*itr);
+                Unit* target = mgen->GetTarget();
+                if(target)
+                    PSendSysMessage("   " LANG_MOVEGENS_TARGETED_PLAYER,target->GetName(),target->GetGUIDLow()); 
+                else
+                    SendSysMessage("   " LANG_MOVEGENS_TARGETED_NULL); 
+            }
+            else
+            {
+                TargetedMovementGenerator<Creature> const* mgen = static_cast<TargetedMovementGenerator<Creature> const*>(*itr);
+                Unit* target = mgen->GetTarget();
+                if(target)
+                    PSendSysMessage("   " LANG_MOVEGENS_TARGETED_CREATURE,target->GetName(),target->GetGUIDLow()); 
+                else
+                    SendSysMessage("   " LANG_MOVEGENS_TARGETED_NULL); 
+            }
+            break;
+        }
+        case HOME_MOTION_TYPE:
+            if(unit->GetTypeId()==TYPEID_UNIT)
+            {
+                float x,y,z;
+                ((Creature*)unit)->GetRespawnCoord(x,y,z);
+                PSendSysMessage("   " LANG_MOVEGENS_HOME_CREATURE,x,y,z); 
+            }
+            else
+                SendSysMessage("   " LANG_MOVEGENS_HOME_PLAYER); 
+            break;
+        case FLIGHT_MOTION_TYPE:        SendSysMessage("   " LANG_MOVEGENS_FLIGHT);  break;
+        default: 
+            PSendSysMessage("   " LANG_MOVEGENS_UNKNOWN,(*itr)->GetMovementGeneratorType());
+            break;
+        }
+    }
     return true;
 }
