@@ -445,6 +445,9 @@ pkgdata_DATA = \
 	4437_pet_aura.sql \
 	4439_spell_proc_event.sql \
 	4446_creature_template.sql \
+	4464_instance.sql \
+	4464_instance_template.sql \
+	4470_command.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -872,4 +875,5 @@ EXTRA_DIST = \
 	4446_creature_template.sql \
 	4464_instance.sql \
 	4464_instance_template.sql \
+	4470_command.sql \
 	README
