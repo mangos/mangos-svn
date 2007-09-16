@@ -234,6 +234,7 @@ void WorldSession::HandleArenaTeamLeaveOpcode(WorldPacket & recv_data)
     if(_player->GetGUID() == at->GetCaptain())
     {
         at->Disband(this);
+        delete at;
         return;
     }
 
@@ -278,6 +279,7 @@ void WorldSession::HandleArenaTeamDisbandOpcode(WorldPacket & recv_data)
     }
 
     at->Disband(this);
+    delete at;
 }
 
 void WorldSession::HandleArenaTeamRemoveFromTeamOpcode(WorldPacket & recv_data)

@@ -321,6 +321,8 @@ void Creature::RegenerateHealth()
 void Creature::AIM_Initialize()
 {
     i_motionMaster.Initialize();
+    if (i_AI)
+        delete i_AI;
     i_AI = FactorySelector::selectAI(this);
 }
 
