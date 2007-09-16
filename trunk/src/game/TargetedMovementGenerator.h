@@ -28,7 +28,7 @@ class MANGOS_DLL_SPEC TargetedMovementGeneratorBase
 {
     public:
         TargetedMovementGeneratorBase(Unit &target) { i_target.link(&target, this); }
-        void stopFollowing() { };
+        void stopFollowing() { }
     protected:
         FollowerReference i_target;
 };
@@ -50,6 +50,7 @@ class MANGOS_DLL_SPEC TargetedMovementGenerator
         bool Update(T &, const uint32 &);
         MovementGeneratorType GetMovementGeneratorType() { return TARGETED_MOTION_TYPE; }
 
+        Unit* GetTarget() const;
     private:
 
         void _setTargetLocation(T &);

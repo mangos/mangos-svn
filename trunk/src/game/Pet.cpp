@@ -158,7 +158,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     }
 
     float px, py, pz;
-    owner->GetClosePoint(NULL, px, py, pz,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE);
+    owner->GetClosePoint(px, py, pz,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE);
     uint32 guid=objmgr.GenerateLowGuid(HIGHGUID_UNIT);
     if(!Create(guid, owner->GetMapId(), px, py, pz, owner->GetOrientation(), petentry))
     {

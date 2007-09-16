@@ -259,8 +259,18 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         void GetPosition( float &x, float &y, float &z ) const
             { x = m_positionX; y = m_positionY; z = m_positionZ; }
         float GetOrientation( ) const { return m_orientation; }
-        void GetClosePoint( const WorldObject* victim, float &x, float &y, float &z, float distance = 0, float angle = 0 ) const;
-        void GetContactPoint( const WorldObject* obj, float &x, float &y, float &z, float distance = CONTACT_DISTANCE) const;
+        void GetNearPoint2D( float &x, float &y, float distance, float absAngle) const;
+        void GetNearPoint( float &x, float &y, float &z, float distance,float absAngle) const;
+        void GetClosePoint(float &x, float &y, float &z, float distance = 0, float angle = 0 ) const
+        {
+            // angle calculated from current orientation
+            GetNearPoint(x,y,z,distance,GetOrientation() + angle);
+        }
+        void GetContactPoint( const WorldObject* obj, float &x, float &y, float &z, float distance = CONTACT_DISTANCE) const
+        {
+            // angle to face `obj` to `this` using distance includes size of `obj`
+            GetNearPoint(x,y,z,obj->GetObjectSize() + distance,GetAngle( obj ));
+        }
         const float GetObjectSize() const
         {
             return ( m_valuesCount > UNIT_FIELD_BOUNDINGRADIUS ) ? m_floatValues[UNIT_FIELD_BOUNDINGRADIUS] : 0.39f;
@@ -320,6 +330,8 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         virtual bool isVisibleForInState(Player const* u, bool inVisibleList) const = 0;
     protected:
         explicit WorldObject( WorldObject *instantiator );
+
+        void _UpdatePositionZ(float x, float y, float &z) const;
 
         std::string m_name;
 

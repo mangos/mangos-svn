@@ -359,6 +359,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "mute",        SEC_GAMEMASTER,    &ChatHandler::HandleMuteCommand,             "",   NULL },
         { "unmute",      SEC_GAMEMASTER,    &ChatHandler::HandleUnmuteCommand,           "",   NULL },
         { "honor",       SEC_GAMEMASTER,    NULL,                                        "",   honorCommandTable },
+        { "movegens",    SEC_ADMINISTRATOR, &ChatHandler::HandleMovegensCommand,         "",   NULL },
 
         //! Development Commands
         { "setvalue",    SEC_ADMINISTRATOR, &ChatHandler::HandleSetValue,                "",   NULL },

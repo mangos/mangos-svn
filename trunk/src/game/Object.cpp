@@ -890,23 +890,18 @@ bool WorldObject::HasInArc(const float arcangle, const WorldObject* obj) const
     return (( angle >= lborder ) && ( angle <= rborder ));
 }
 
-void WorldObject::GetContactPoint( const WorldObject* obj, float &x, float &y, float &z, float distance ) const
+void WorldObject::GetNearPoint2D(float &x, float &y, float distance, float absAngle ) const
 {
-    // angle to face `obj` to `this`
-    float angle = GetAngle( obj );
-    x = GetPositionX() + (GetObjectSize() + obj->GetObjectSize() + distance ) * cos(angle);
-    y = GetPositionY() + (GetObjectSize() + obj->GetObjectSize() + distance ) * sin(angle);
+    x = GetPositionX() + (GetObjectSize() + distance) * cos(absAngle);
+    y = GetPositionY() + (GetObjectSize() + distance) * sin(absAngle);
+}
 
-    if(VMAP::VMapFactory::createOrGetVMapManager()->isHeightCalcEnabled())
-    {
-        z = MapManager::Instance().GetMap(GetMapId(), this)->GetVMapHeight(x,y,GetPositionZ());
-        if(z > VMAP_INVALID_HEIGHT)
-            z += 0.2f;                                      // just to be sure that we are not a few pixel under the surface
-        else
-            z = GetPositionZ();
-    }
-    else
-        z = GetPositionZ();                                 // hack required in case LOS height disabled
+void WorldObject::GetNearPoint(float &x, float &y, float &z, float distance, float absAngle ) const
+{
+    GetNearPoint2D(x,y,distance,absAngle);
+    z = GetPositionZ();
+
+    _UpdatePositionZ(x,y,z);                                // update to LOS height if available
 }
 
 void WorldObject::GetRandomPoint( float x, float y, float z, float distance, float &rand_x, float &rand_y, float &rand_z) const
@@ -925,17 +920,24 @@ void WorldObject::GetRandomPoint( float x, float y, float z, float distance, flo
 
     rand_x = x + new_dist * cos(angle);
     rand_y = y + new_dist * sin(angle);
+    rand_z = z;
 
+    _UpdatePositionZ(rand_x,rand_y,rand_z);                 // update to LOS height if available
+}
+
+void WorldObject::_UpdatePositionZ(float x, float y, float &z) const
+{
     if(VMAP::VMapFactory::createOrGetVMapManager()->isHeightCalcEnabled())
     {
-        rand_z = MapManager::Instance().GetMap(GetMapId(), this)->GetHeight(x,y,z);
-        if(rand_z != VMAP_INVALID_HEIGHT)
-            rand_z += 0.2f;                                 // just to be sure that we are not a few pixel under the surface
-        else
-            rand_z = GetPositionZ();
+        float new_z = MapManager::Instance().GetMap(GetMapId(), this)->GetHeight(x,y,z);
+        if(new_z > VMAP_INVALID_HEIGHT)
+            z = new_z+ 0.2f;                                // just to be sure that we are not a few pixel under the surface
     }
-    else
-        rand_z = z;                                         // hack required in case LOS height disabled
+}
+
+bool WorldObject::IsPositionValid() const
+{
+    return MaNGOS::IsValidMapCoord(m_positionX,m_positionY);
 }
 
 void WorldObject::MonsterSay(const char* text, const uint32 language, const uint64 TargetGuid)
@@ -1009,30 +1011,6 @@ void WorldObject::MonsterWhisper(const uint64 receiver, const char* text)
     Player *player = objmgr.GetPlayer(receiver);
     if(player && player->GetSession())
         player->GetSession()->SendPacket(&data);
-}
-
-void WorldObject::GetClosePoint( const WorldObject* victim, float &x, float &y, float &z, float distance, float angle ) const
-{
-    angle += victim ? GetAngle( victim ) : GetOrientation();
-
-    x = GetPositionX() + (GetObjectSize() + distance) * cos(angle);
-    y = GetPositionY() + (GetObjectSize() + distance) * sin(angle);
-
-    if(VMAP::VMapFactory::createOrGetVMapManager()->isHeightCalcEnabled())
-    {
-        z = MapManager::Instance().GetMap(GetMapId(), this)->GetHeight(x,y,GetPositionZ());
-        if(z > VMAP_INVALID_HEIGHT)
-            z += 0.2f;                                      // just to be sure that we are not a few pixel under the surface
-        else
-            z = GetPositionZ();
-    }
-    else
-        z = GetPositionZ();                                 // hack required in case LOS height disabled
-}
-
-bool WorldObject::IsPositionValid() const
-{
-    return MaNGOS::IsValidMapCoord(m_positionX,m_positionY);
 }
 
 void WorldObject::BuildHeartBeatMsg(WorldPacket *data) const

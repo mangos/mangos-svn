@@ -1726,7 +1726,7 @@ void Spell::EffectSummon(uint32 i)
 
     // before caster
     float x,y,z;
-    m_caster->GetClosePoint(NULL,x,y,z);
+    m_caster->GetClosePoint(x,y,z);
 
     if(!spawnCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),
         m_caster->GetMapId(),x,y,z,-m_caster->GetOrientation(),
@@ -1944,7 +1944,7 @@ void Spell::EffectSummonWild(uint32 i)
     float center_z = m_targets.m_destZ;
 
     if (center_x == 0 || center_y == 0 || center_z == 0)
-        m_caster->GetClosePoint(NULL, center_x, center_y, center_z);
+        m_caster->GetClosePoint(center_x, center_y, center_z);
 
     float radius = GetRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
 
@@ -2020,7 +2020,7 @@ void Spell::EffectSummonGuardian(uint32 i)
         float center_z = m_targets.m_destZ;
 
         if (center_x == 0 || center_y == 0 || center_z == 0)
-            m_caster->GetClosePoint(NULL, center_x, center_y, center_z);
+            m_caster->GetClosePoint(center_x, center_y, center_z);
 
         float radius = GetRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
 
@@ -2084,7 +2084,7 @@ void Spell::EffectTeleUnitsFaceCaster(uint32 i)
     float dis = GetRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
 
     float fx,fy,fz;
-    m_caster->GetClosePoint(NULL,fx,fy,fz,unitTarget->GetObjectSize() + dis);
+    m_caster->GetClosePoint(fx,fy,fz,unitTarget->GetObjectSize() + dis);
 
     // teleport a bit above terrain level to avoid falling below it
     fz = MapManager::Instance ().GetMap(mapid, m_caster)->GetHeight(fx,fy,fz) + 1.5;
@@ -2329,7 +2329,7 @@ void Spell::EffectTameCreature(uint32 i)
 void Spell::EffectSummonPet(uint32 i)
 {
     float px, py, pz;
-    m_caster->GetClosePoint(NULL, px, py, pz);
+    m_caster->GetClosePoint(px, py, pz);
 
     uint32 petentry = m_spellInfo->EffectMiscValue[i];
 
@@ -2774,7 +2774,7 @@ void Spell::EffectSummonObjectWild(uint32 i)
 
     // before caster
     float x,y,z;
-    m_caster->GetClosePoint(NULL,x,y,z);
+    m_caster->GetClosePoint(x,y,z);
 
     if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id, target->GetMapId(),
         x, y, z, target->GetOrientation(), 0, 0, 0, 0, 100, 0))
@@ -3073,7 +3073,7 @@ void Spell::EffectSummonPlayer(uint32 i)
 
     // before caster
     float x,y,z;
-    m_caster->GetClosePoint(NULL,x,y,z);
+    m_caster->GetClosePoint(x,y,z);
 
     ((Player*)unitTarget)->TeleportTo(m_caster->GetMapId(), x, y, z,unitTarget->GetOrientation());
 }
@@ -3286,7 +3286,7 @@ void Spell::EffectSummonObject(uint32 i)
     float rot3 = cos(m_caster->GetOrientation()/2);
 
     float x,y,z;
-    m_caster->GetClosePoint(NULL,x,y,z);
+    m_caster->GetClosePoint(x,y,z);
 
     if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id,m_caster->GetMapId(), x, y, z, m_caster->GetOrientation(), 0, 0, rot2, rot3, 0, 0))
     {
@@ -3361,7 +3361,7 @@ void Spell::EffectMomentMove(uint32 i)
 
         // before caster
         float fx,fy,fz;
-        m_caster->GetClosePoint(NULL,fx,fy,fz,dis);
+        m_caster->GetClosePoint(fx,fy,fz,dis);
         float ox,oy,oz;
         m_caster->GetPosition(ox,oy,oz);
         VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(mapid, ox,oy,oz+0.5, fx,fy,oz+0.5,fx,fy,fz, -0.5);
@@ -3510,7 +3510,7 @@ void Spell::EffectSummonCritter(uint32 i)
 
         // before caster
         float x,y,z;
-        m_caster->GetClosePoint(NULL,x,y,z);
+        m_caster->GetClosePoint(x,y,z);
 
         if(!critter->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT),
             m_caster->GetMapId(),x,y,z,m_caster->GetOrientation(),m_spellInfo->EffectMiscValue[i]))
@@ -3710,7 +3710,7 @@ void Spell::EffectTransmitted(uint32 i)
     uint32 name_id = m_spellInfo->EffectMiscValue[i];
 
     float fx,fy,fz;
-    m_caster->GetClosePoint(NULL,fx,fy,fz,dis);
+    m_caster->GetClosePoint(fx,fy,fz,dis);
 
     if(name_id==35591)
     {
@@ -3831,7 +3831,7 @@ void Spell::EffectSummonDemon(uint32 i)
     float pz = m_targets.m_destZ;
 
     if (px == 0 || py == 0 || pz == 0)
-        m_caster->GetClosePoint(NULL, px, py, pz);
+        m_caster->GetClosePoint(px, py, pz);
 
     Creature* Charmed = m_caster->SummonCreature(m_spellInfo->EffectMiscValue[i], px, py, pz, m_caster->GetOrientation(),TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,3600000);
 

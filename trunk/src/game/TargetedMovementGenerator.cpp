@@ -62,7 +62,7 @@ TargetedMovementGenerator<T>::_setTargetLocation(T &owner)
     else
     {
         // to at i_offset distance from target and i_angle from target facing
-        i_target->GetClosePoint(NULL,x,y,z,owner.GetObjectSize() + i_offset,i_angle);
+        i_target->GetClosePoint(x,y,z,owner.GetObjectSize() + i_offset,i_angle);
     }
 
     //We don't update Mob Movement, if the difference between New destination and last destination is < BothObjectSize
@@ -155,6 +155,13 @@ TargetedMovementGenerator<T>::Update(T &owner, const uint32 & time_diff)
     return true;
 }
 
+template<class T>
+Unit* 
+TargetedMovementGenerator<T>::GetTarget() const
+{
+    return i_target.getTarget();
+}
+
 template void TargetedMovementGenerator<Player>::_setTargetLocation(Player &);
 template void TargetedMovementGenerator<Creature>::_setTargetLocation(Creature &);
 template void TargetedMovementGenerator<Player>::Initialize(Player &);
@@ -163,3 +170,5 @@ template void TargetedMovementGenerator<Player>::Reset(Player &);
 template void TargetedMovementGenerator<Creature>::Reset(Creature &);
 template bool TargetedMovementGenerator<Player>::Update(Player &, const uint32 &);
 template bool TargetedMovementGenerator<Creature>::Update(Creature &, const uint32 &);
+template Unit* TargetedMovementGenerator<Player>::GetTarget() const;
+template Unit* TargetedMovementGenerator<Creature>::GetTarget() const;
