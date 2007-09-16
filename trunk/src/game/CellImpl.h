@@ -31,6 +31,9 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
     CellPair standing_cell = l.i_cellPair;
     CellPair cell_iter;
 
+    if (standing_cell.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || standing_cell.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP)
+        return;
+
     switch( (district_t)this->data.Part.reserved )
     {
         case ALL_DISTRICT:
