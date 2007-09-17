@@ -208,7 +208,9 @@ void Map::DeleteStateMachine()
     delete si_GridStates[GRID_STATE_REMOVAL];
 }
 
-Map::Map(uint32 id, time_t expiry, uint32 ainstanceId) : i_id(id), i_gridExpiry(expiry), i_mapEntry (sMapStore.LookupEntry(id)), i_resetTime(0), i_InstanceId(ainstanceId)
+Map::Map(uint32 id, time_t expiry, uint32 ainstanceId) 
+  : i_id(id), i_gridExpiry(expiry), i_mapEntry (sMapStore.LookupEntry(id)), 
+  i_resetTime(0), i_resetDelayTime(0), i_InstanceId(ainstanceId), i_maxPlayers(0), i_data(NULL)
 {
     for(unsigned int idx=0; idx < MAX_NUMBER_OF_GRIDS; ++idx)
     {
