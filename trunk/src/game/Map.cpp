@@ -235,15 +235,20 @@ Map::Map(uint32 id, time_t expiry, uint32 ainstanceId) : i_id(id), i_gridExpiry(
             i_resetDelayTime = fields[1].GetUInt32();
             i_resetTime = (time_t) fields[2].GetUInt64();
             i_script = fields[3].GetCppString();
-            i_data = Script->CreateInstanceData(this);
-            if(i_data)
+            
+            if(i_InstanceId!=0)
             {
-                sLog.outDebug("New instance data, \"%s\" ,initialized!",i_script.c_str());
-                const char* data = fields[4].GetString();
-                if(data)
-                    i_data->Load(data);
-                else
-                    i_data->Initialize();
+                i_data = Script->CreateInstanceData(this);
+            
+                if(i_data)
+                {
+                    sLog.outDebug("New instance data, \"%s\" ,initialized!",i_script.c_str());
+                    const char* data = fields[4].GetString();
+                    if(data)
+                        i_data->Load(data);
+                    else
+                        i_data->Initialize();
+                }
             }
             delete result;
             if (i_resetTime == 0) InitResetTime();
@@ -556,7 +561,7 @@ void Map::Reset()
     InitResetTime();
 }
 
-bool Map::CanEnter(Player* player)
+bool Map::CanEnter(Player* player) const
 {
     if (!Instanceable()) return(true);
 

@@ -187,17 +187,16 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         // assert print helper
         bool CheckGridIntegrity(Creature* c, bool moved) const;
 
-        std::string GetScript() { return(i_script); }
-        InstanceData* GetInstanceData() { return(i_data); }
-        uint32 GetInstanceId() { return(i_InstanceId); }
-        bool NeedsReset() { return(Instanceable() && ((i_resetTime == 0) || (i_resetTime <= time(NULL)))); }
-        uint32 GetPlayersCount() {return(i_Players.size()); }
-        PlayerList* GetPlayers() {return (&i_Players); }
+        std::string GetScript() { return i_script; }
+        InstanceData* GetInstanceData() const { return i_data; }
+        uint32 GetInstanceId() const { return i_InstanceId; }
+        bool NeedsReset() const { return Instanceable() && ( i_resetTime == 0 || i_resetTime <= time(NULL)); }
+        uint32 GetPlayersCount() const { return i_Players.size(); }
         void Reset();
-        bool CanEnter(Player* player);
+        bool CanEnter(Player* player) const;
         const char* GetMapName() const;
-        bool Instanceable() { return(i_mapEntry && ((i_mapEntry->map_type == MAP_INSTANCE) || (i_mapEntry->map_type == MAP_RAID))); }
-        bool IsRaid() { return(i_mapEntry && (i_mapEntry->map_type == MAP_RAID)); }
+        bool Instanceable() const { return(i_mapEntry && ((i_mapEntry->map_type == MAP_INSTANCE) || (i_mapEntry->map_type == MAP_RAID))); }
+        bool IsRaid() const { return(i_mapEntry && (i_mapEntry->map_type == MAP_RAID)); }
         virtual bool RemoveBones(uint64 guid, float x, float y);
         void InitResetTime();
 
