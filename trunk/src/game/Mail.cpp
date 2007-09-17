@@ -141,19 +141,23 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
     pl->ModifyMoney( -30 - money );
 
+    bool needItemDelay = false;
+
     if (pItem)
     {
+        uint32 rc_account = 0;
+        if(receive)
+            rc_account = receive->GetSession()->GetAccountId();
+        else
+            rc_account = objmgr.GetPlayerAccountIdByGUID(rc);
+
+        // if item send to character at another account, then apply item delivery delay
+        needItemDelay = pl->GetSession()->GetAccountId() != rc_account;
+
         if( GetSecurity() > SEC_PLAYER && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
         {
-            uint32 accId = 0;
-            if(receive)
-                accId = receive->GetSession()->GetAccountId();
-            else
-            {
-                accId = objmgr.GetPlayerAccountIdByGUID(rc);
-            }
             sLog.outCommand("GM %s (Account: %u) mail item: %s (Entry: %u Count: %u) and money: %u to player: %s (Account: %u)",
-                GetPlayerName(),GetAccountId(),pItem->GetProto()->Name1,pItem->GetEntry(),pItem->GetCount(),money,receiver.c_str(),accId);
+                GetPlayerName(),GetAccountId(),pItem->GetProto()->Name1,pItem->GetEntry(),pItem->GetCount(),money,receiver.c_str(),rc_account);
         }
 
         //item reminds in item_instance table already, used it in mail now
@@ -170,8 +174,8 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     uint32 item_template = pItem ? pItem->GetEntry() : 0;   //item prototype
     mailId = objmgr.GenerateMailID();
 
-    // If theres is an item, there is a one hour delivery delay.
-    time_t dtime = (itemId != 0) ? time(NULL) + sWorld.getConfig(CONFIG_MAIL_DELIVERY_DELAY) : time(NULL);
+    // If theres is an item, there is a one hour delivery delay if sent to another account's character.
+    time_t dtime = needItemDelay ? time(NULL) + sWorld.getConfig(CONFIG_MAIL_DELIVERY_DELAY) : time(NULL);
 
     time_t etime = dtime + DAY * ((COD > 0)? 3 : 30);       //time if COD 3 days, if no COD 30 days
 
