@@ -134,6 +134,7 @@ void Totem::UnSummon()
 void Totem::SetOwner(uint64 guid)
 {
     SetUInt64Value(UNIT_FIELD_SUMMONEDBY, guid);
+    SetUInt64Value(UNIT_FIELD_CREATEDBY, guid);
     Unit *owner = this->GetOwner();
     if (owner)
     {
