@@ -543,7 +543,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
         pVictim->CombatStop(true);
 
         // if talent known but not triggered (check priest class for speedup check)
-        Aura* spiritOfRedumtionTalentReady = NULL;
+        Aura* spiritOfRedemtionTalentReady = NULL;
         if( (!spellProto || spellProto->Id != 27795 ) &&    // not called from SPELL_AURA_SPIRIT_OF_REDEMPTION
             pVictim->getClass()==CLASS_PRIEST )             // speedup check
         {
@@ -552,22 +552,22 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
             {
                 if((*itr)->GetSpellProto()->SpellIconID==1654)
                 {
-                    spiritOfRedumtionTalentReady = *itr;
+                    spiritOfRedemtionTalentReady = *itr;
                     break;
                 }
             }
         }
 
         DEBUG_LOG("SET JUST_DIED");
-        if(!spiritOfRedumtionTalentReady)
+        if(!spiritOfRedemtionTalentReady)
             pVictim->setDeathState(JUST_DIED);
 
         DEBUG_LOG("DealDamageHealth1");
 
-        if(spiritOfRedumtionTalentReady)
+        if(spiritOfRedemtionTalentReady)
         {
             // FORM_SPIRITOFREDEMPTION and related auras
-            pVictim->CastSpell(pVictim,27827,true,NULL,spiritOfRedumtionTalentReady);
+            pVictim->CastSpell(pVictim,27827,true,NULL,spiritOfRedemtionTalentReady);
             pVictim->SetHealth(1);
         }
         else
