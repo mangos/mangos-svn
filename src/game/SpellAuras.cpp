@@ -225,7 +225,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //173 SPELL_AURA_ALLOW_CHAMPION_SPELLS  only for Proclaim Champion spell
     &Aura::HandleNoImmediateEffect,                         //174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_SPIRIT     implemented in Unit::SpellDamageBonus
     &Aura::HandleNoImmediateEffect,                         //175 SPELL_AURA_MOD_SPELL_HEALING_OF_SPIRIT    implemented in Unit::SpellHealingBonus
-    &Aura::HandleSpiritOfRedumption,                        //176 SPELL_AURA_SPIRIT_OF_REDEMPTION   only for Spirit of Redemption spell, die at aura end
+    &Aura::HandleSpiritOfRedemption,                        //176 SPELL_AURA_SPIRIT_OF_REDEMPTION   only for Spirit of Redemption spell, die at aura end
     &Aura::HandleNULL,                                      //177 SPELL_AURA_AOE_CHARM
     &Aura::HandleNULL,                                      //178 SPELL_AURA_MOD_DEBUFF_RESISTANCE
     &Aura::HandleNoImmediateEffect,                         //179 SPELL_AURA_MOD_ATTACKER_SPELL_CRIT_CHANCE implemented in Unit::SpellCriticalBonus
@@ -4009,7 +4009,7 @@ void Aura::HandleModUnattackable( bool Apply, bool Real )
     m_target->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE,Apply);
 }
 
-void Aura::HandleSpiritOfRedumption( bool apply, bool Real )
+void Aura::HandleSpiritOfRedemption( bool apply, bool Real )
 {
     if(!Real)
         return;
@@ -4017,5 +4017,6 @@ void Aura::HandleSpiritOfRedumption( bool apply, bool Real )
     if(!apply)
         m_target->DealDamage(m_target, m_target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_NORMAL, GetSpellProto(), 0, false);
 }
+
 
 

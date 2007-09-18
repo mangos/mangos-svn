@@ -3093,14 +3093,13 @@ void Spell::EffectSummonTotem(uint32 i)
     }
 
     float angle = slot < 4 ? m_caster->GetOrientation() + M_PI/4 - (slot*M_PI/2) : m_caster->GetOrientation();
-    float x = m_caster->GetPositionX() + 2 * cos(angle);
-    float y = m_caster->GetPositionY() + 2 * sin(angle);
-    float z = m_caster->GetPositionZ();
 
-    Map* map = MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster);
-    float z2 = map->GetHeight(x,y,z);
-    if( fabs( z2 - z ) < 5 )
-        z = z2;
+    float x,y,z;
+    m_caster->GetClosePoint(x,y,z,2,angle);
+
+    // totem must be at same Z in case swimming caster and etc.
+    if( fabs( z - m_caster->GetPositionZ() ) > 5 )
+        z = m_caster->GetPositionZ();
 
     if(slot <4 )
     {
