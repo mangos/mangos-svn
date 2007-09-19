@@ -6346,7 +6346,7 @@ void Unit::ApplyDiminishingToDuration(DiminishingMechanics  mech, int32 &duratio
 
 Creature* Unit::SummonCreature(uint32 id, float x, float y, float z, float ang,TempSummonType spwtype,uint32 despwtime)
 {
-    TemporarySummon* pCreature = new TemporarySummon(this,this);
+    TemporarySummon* pCreature = new TemporarySummon(this, GetGUID());
 
     pCreature->SetInstanceId(GetInstanceId());
 
@@ -7082,3 +7082,4 @@ Player* Unit::GetSpellModOwner()
     }
     return NULL;
 }
+
