@@ -20,21 +20,22 @@
 #define MANGOSSERVER_TEMPSUMMON_H
 
 #include "Creature.h"
+#include "ObjectAccessor.h"
 
 class TemporarySummon : public Creature
 {
     public:
-        explicit TemporarySummon( WorldObject *instantiator, Unit* summoner = NULL);
+        explicit TemporarySummon( WorldObject *instantiator, uint64 summoner = 0);
         virtual ~TemporarySummon(){};
         void Update(uint32 time);
         void Summon(TempSummonType type, uint32 lifetime);
         void UnSummon();
         void SaveToDB();
-        Unit* GetSummoner() const { return m_summoner; }
+        Unit* GetSummoner() const { return m_summoner ? ObjectAccessor::Instance().GetUnit(*this, m_summoner) : NULL; }
     private:
         TempSummonType m_type;
         uint32 m_timer;
         uint32 m_lifetime;
-        Unit* m_summoner;
+        uint64 m_summoner;
 };
 #endif

@@ -24,7 +24,7 @@
 #include "ObjectAccessor.h"
 #include "CreatureAI.h"
 
-TemporarySummon::TemporarySummon( WorldObject *instantiator, Unit* summoner ) :
+TemporarySummon::TemporarySummon( WorldObject *instantiator, uint64 summoner ) :
 Creature(instantiator), m_type(TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN), m_timer(0), m_lifetime(0), m_summoner(summoner)
 {
 }
@@ -171,8 +171,11 @@ void TemporarySummon::UnSummon()
     CleanupsBeforeDelete();
     ObjectAccessor::Instance().AddObjectToRemoveList(this);
 
-    if(m_summoner && m_summoner->GetTypeId()==TYPEID_UNIT && ((Creature*)m_summoner)->AI())
-        ((Creature*)m_summoner)->AI()->SummonedCreatureDespawn(this);
+    Unit* sum;
+    if (m_summoner && (sum = ObjectAccessor::Instance().GetUnit(*this, m_summoner)) && sum->GetTypeId() == TYPEID_UNIT && ((Creature*)sum)->AI())
+    {
+        ((Creature*)sum)->AI()->SummonedCreatureDespawn(this);
+    }
 }
 
 void TemporarySummon::SaveToDB()
