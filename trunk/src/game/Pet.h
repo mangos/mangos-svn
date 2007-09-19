@@ -104,7 +104,7 @@ enum PetTalk
 
 typedef HM_NAMESPACE::hash_map<uint16, PetSpell*> PetSpellMap;
 typedef std::map<uint32,uint32> TeachSpellMap;
-typedef std::set<uint32> AutoSpellList;
+typedef std::vector<uint32> AutoSpellList;
 
 #define HAPPINESS_LEVEL_SIZE        333000
 
@@ -140,6 +140,15 @@ class Pet : public Creature
         void setDeathState(DeathState s);                   // overwrite virtual Creature::setDeathState and Unit::setDeathState
         void Update(uint32 diff);                           // overwrite virtual Creature::Update and Unit::Update
 
+        uint8 GetPetAutoSpellSize() const { return m_autospells.size(); }
+        uint32 GePetAutoSpellOnPos(uint8 pos) const
+        {
+            if (pos >= m_autospells.size())
+                return 0;
+            else
+                return m_autospells[pos];
+        }
+
         void RegenerateFocus();
         void LooseHappiness();
         void TickLoyaltyChange();
@@ -155,7 +164,7 @@ class Pet : public Creature
         bool InitStatsForLevel(uint32 level);
         bool HaveInDiet(ItemPrototype const* item) const;
         uint32 GetCurrentFoodBenefitLevel(uint32 itemlevel);
-        void SetDuration(uint32 dur) { m_duration = dur; }
+        void SetDuration(int32 dur) { m_duration = dur; }
 
         int32 GetBonusDamage() { return m_bonusdamage; }
         void SetBonusDamage(int32 damage) { m_bonusdamage = damage; }
@@ -173,12 +182,8 @@ class Pet : public Creature
         void   ToggleAutocast(uint32 spellid, bool apply);
         bool   HasTPForSpell(uint32 spellid);
         int32  GetTPForSpell(uint32 spellid);
-        void   SendActionFeedback(uint8 msg);
-        void   SendPetTalk(PetTalk pettalk);
-        void   SendCastFail(uint32 spellid, uint8 msg);
 
-        bool HasSpell(uint32 spell);
-        void SendSpellCooldown(uint32 spell_id, time_t cooltime);
+        bool HasSpell(uint32 spell) const;
         void AddTeachSpell(uint32 learned_id, uint32 source_id) { m_teachspells[learned_id] = source_id; }
 
         void _LoadSpellCooldowns();
@@ -214,7 +219,7 @@ class Pet : public Creature
         uint32  m_happinessTimer;
         uint32  m_loyaltyTimer;
         PetType m_petType;
-        uint32  m_duration;                                 // time until unsummon (used mostly for summoned guardians and not used for controlled pets)
+        int32   m_duration;                                 // time until unsummon (used mostly for summoned guardians and not used for controlled pets)
         int32   m_loyaltyPoints;
         int32   m_bonusdamage;
     private:

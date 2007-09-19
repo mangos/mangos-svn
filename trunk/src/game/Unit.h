@@ -913,6 +913,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool HasAuraType(uint32 auraType) const;
         bool HasAura(uint32 spellId, uint32 effIndex) const
             { return m_Auras.find(spellEffectPair(spellId, effIndex)) != m_Auras.end(); }
+        
+        bool virtual HasSpell(uint32 spellID) const { return false; }
 
         bool HasStealthAura()      const { return HasAuraType(SPELL_AURA_MOD_STEALTH); }
         bool HasInvisibilityAura() const { return HasAuraType(SPELL_AURA_MOD_INVISIBILITY); }
@@ -1166,6 +1168,15 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         void setMoveRunFlag(bool f) { m_moveRun = f; }
         bool getMoveRunFlag() const { return m_moveRun; }
+
+        ///----------Pet responses methods-----------------
+        void SendPetCastFail(uint32 spellid, uint8 msg);
+        void SendPetActionFeedback (uint8 msg);
+        void SendPetTalk (uint32 pettalk);
+        void SendPetSpellCooldown (uint32 spellid, time_t cooltime);
+        void SendPetClearCooldown (uint32 spellid);
+        void SendPetAIReaction(uint64 guid);
+        ///----------End of Pet responses methods----------
 
     protected:
         explicit Unit ( WorldObject *instantiator );
