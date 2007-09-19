@@ -1695,6 +1695,17 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
 
             *damage += crit_bonus;
 
+            if(attType == RANGED_ATTACK)
+            {
+                int32 mod = pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_DAMAGE);
+                *damage = int32((*damage) * float((100.0f + mod)/100.0f));
+            }
+            else
+            {
+                int32 mod = pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_DAMAGE);
+                *damage = int32((*damage) * float((100.0f + mod)/100.0f));
+            }
+
             // Resilience - reduce crit damage by 2x%
             uint32 resilienceReduction;
             resilienceReduction = uint32(pVictim->m_modResilience * 2/100 * (*damage));
@@ -2124,8 +2135,16 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
         roll, hit_chance, (uint32)(pVictim->GetUnitDodgeChance()*100), (uint32)(pVictim->GetUnitParryChance()*100),
         (uint32)(pVictim->GetUnitBlockChance()*100), crit_chance);
 
-    // dual wield has 24% base chance to miss instead of 5%, also
-    // base miss rate is 5% and can't get higher than 60%
+    if(attType == RANGED_ATTACK)
+    {
+        int32 mod = pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE);
+        miss_chance -= mod * 100;
+    }
+    else
+    {
+        int32 mod = pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_HIT_CHANCE);
+        miss_chance -= mod * 100;
+    }
 
     // Inherit if passed
     tmp = miss_chance - skillBonus;
@@ -2319,6 +2338,9 @@ uint32 Unit::SpellMissChanceCalc(Unit *pVictim) const
         misschance += leveldif * 100;
     else
         misschance += (leveldif - 2) * chance;
+
+    int32 mod = pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE);
+    misschance -= mod * 100;
 
     return misschance < 100 ? 100 : misschance;
 }
@@ -5268,6 +5290,12 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
         for(AuraList::const_iterator i = mRangedAttackPowerAttackerBonus.begin();i != mRangedAttackPowerAttackerBonus.end(); ++i)
             DoneFlatBenefit += int32((*i)->GetModifier()->m_amount/14.0f * GetAttackTime(RANGED_ATTACK)/1000);
     }
+    else
+    {
+        AuraList const& mMeleeAttackPowerAttackerBonus = pVictim->GetAurasByType(SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS);
+        for(AuraList::const_iterator i = mMeleeAttackPowerAttackerBonus.begin();i != mMeleeAttackPowerAttackerBonus.end(); ++i)
+            DoneFlatBenefit += int32((*i)->GetModifier()->m_amount/14.0f * GetAttackTime(attType)/1000);
+    }
 
     // ..taken
     AuraList const& mDamageTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
@@ -7054,4 +7082,3 @@ Player* Unit::GetSpellModOwner()
     }
     return NULL;
 }
-
