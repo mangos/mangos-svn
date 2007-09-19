@@ -448,6 +448,7 @@ pkgdata_DATA = \
 	4464_instance.sql \
 	4464_instance_template.sql \
 	4470_command.sql \
+	4480_spell_affect.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -876,4 +877,5 @@ EXTRA_DIST = \
 	4464_instance.sql \
 	4464_instance_template.sql \
 	4470_command.sql \
+	4480_spell_affect.sql \
 	README

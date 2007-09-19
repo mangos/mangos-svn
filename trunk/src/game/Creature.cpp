@@ -1166,6 +1166,8 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     m_spells[2] = cinfo->spell3;
     m_spells[3] = cinfo->spell4;
 
+    SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
+
     SetSpeed(MOVE_WALK,     cinfo->speed );
     SetSpeed(MOVE_RUN,      cinfo->speed );
     SetSpeed(MOVE_WALKBACK, cinfo->speed );

@@ -28,7 +28,6 @@
 Totem::Totem( WorldObject *instantiator ) : Creature( instantiator )
 {
     m_isTotem = true;
-    m_spell = 0;
     m_duration = 0;
     m_type = TOTEM_PASSIVE;
 }
@@ -78,8 +77,8 @@ void Totem::Summon(Unit* owner)
 
     switch(m_type)
     {
-        case TOTEM_PASSIVE: CastSpell(this, m_spell, true); break;
-        case TOTEM_STATUE:  CastSpell(GetOwner(), m_spell, true); break;
+        case TOTEM_PASSIVE: CastSpell(this, GetSpell(), true); break;
+        case TOTEM_STATUE:  CastSpell(GetOwner(), GetSpell(), true); break;
         default: break;
     }
 }
@@ -87,13 +86,13 @@ void Totem::Summon(Unit* owner)
 void Totem::UnSummon()
 {
     if (m_type == TOTEM_LAST_BURST)
-        this->CastSpell(this, m_spell, true);
+        this->CastSpell(this, GetSpell(), true);
 
     SendObjectDeSpawnAnim(GetGUID());
     SendDestroyObject(GetGUID());
 
     CombatStop(true);
-    RemoveAurasDueToSpell(m_spell);
+    RemoveAurasDueToSpell(GetSpell());
     Unit *owner = this->GetOwner();
     if (owner)
     {
@@ -107,7 +106,7 @@ void Totem::UnSummon()
             }
         }
 
-        owner->RemoveAurasDueToSpell(m_spell);
+        owner->RemoveAurasDueToSpell(GetSpell());
 
         //remove aura all party members too
         Group *pGroup = NULL;
@@ -121,7 +120,7 @@ void Totem::UnSummon()
                 {
                     Player* Target = itr->getSource();
                     if(Target && pGroup->SameSubGroup((Player*)owner, Target))
-                        Target->RemoveAurasDueToSpell(m_spell);
+                        Target->RemoveAurasDueToSpell(GetSpell());
                 }
             }
         }
@@ -154,8 +153,7 @@ Unit *Totem::GetOwner()
 void Totem::SetSpell(uint32 spellId)
 {
     //now, spellId is the spell of EffectSummonTotem , not the spell1 of totem!
-    m_spell = this->GetCreatureInfo()->spell1;
-    if (GetDuration(sSpellStore.LookupEntry(m_spell)) != -1)
+    if (GetDuration(sSpellStore.LookupEntry(GetSpell())) != -1)
         m_type = TOTEM_ACTIVE;
 
     if(spellId)
