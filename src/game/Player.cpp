@@ -2504,6 +2504,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
 
                         // mark old spell as disable (SMSG_SUPERCEDED_SPELL replace it in client by new)
                         itr->second->active = 0;
+                        itr->second->state = PLAYERSPELL_CHANGED;
                         superceded_old = true;              // new spell replace old in action bars and spell book.
                     }
                     else
@@ -2513,6 +2514,8 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
 
                         // mark new spell as disable (not learned yet for client and will not learned)
                         newspell->active = 0;
+                        if(newspell->state != PLAYERSPELL_NEW)
+                            newspell->state = PLAYERSPELL_CHANGED;
                     }
 
                     GetSession()->SendPacket( &data );
