@@ -350,10 +350,15 @@ m_periodicTimer(0), m_PeriodicEventId(0), m_updated(false), m_removeOnDeath(fals
     if(m_maxduration == -1 || m_isPassive && m_spellProto->DurationIndex == 0)
         m_permanent = true;
 
-    if(!m_permanent && caster && caster->GetTypeId() == TYPEID_PLAYER)
-        ((Player *)caster)->ApplySpellMod(m_spellId, SPELLMOD_DURATION, m_maxduration);
+    Player* modOwner = caster ? caster->GetSpellModOwner() : NULL;
+
+    if(!m_permanent && modOwner)
+        modOwner->ApplySpellMod(m_spellId, SPELLMOD_DURATION, m_maxduration);
 
     m_duration = m_maxduration;
+
+    if(modOwner)
+        modOwner->ApplySpellMod(m_spellId, SPELLMOD_ACTIVATION_TIME, m_periodicTimer);
 
     sLog.outDebug("Aura: construct Spellid : %u, Aura : %u Duration : %d Target : %d Damage : %d", m_spellProto->Id, m_spellProto->EffectApplyAuraName[eff], m_maxduration, m_spellProto->EffectImplicitTargetA[eff],damage);
 
@@ -4017,6 +4022,7 @@ void Aura::HandleSpiritOfRedemption( bool apply, bool Real )
     if(!apply)
         m_target->DealDamage(m_target, m_target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_NORMAL, GetSpellProto(), 0, false);
 }
+
 
 
 
