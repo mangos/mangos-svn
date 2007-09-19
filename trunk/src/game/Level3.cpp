@@ -1058,7 +1058,6 @@ bool ChatHandler::HandleLearnAllCommand(const char* args)
         "7430",
         "3922",
         "3923",
-        "3921",
         "7411",
         "7418",
         "7421",
@@ -2372,7 +2371,13 @@ bool ChatHandler::HandleAuraCommand(const char* args)
             uint8 eff = spellInfo->Effect[i];
             if (eff>=TOTAL_SPELL_EFFECTS)
                 continue;
-            if (eff == SPELL_EFFECT_APPLY_AURA || eff == SPELL_EFFECT_APPLY_AREA_AURA || eff == SPELL_EFFECT_PERSISTENT_AREA_AURA)
+            if(eff == SPELL_EFFECT_APPLY_AREA_AURA)
+            {
+                Aura *Aur = new AreaAura(spellInfo, i, NULL, target, NULL);
+                target->AddAura(Aur);
+            }
+            else
+            if (eff == SPELL_EFFECT_APPLY_AURA || eff == SPELL_EFFECT_PERSISTENT_AREA_AURA)
             {
                 Aura *Aur = new Aura(spellInfo, i, NULL, target);
                 target->AddAura(Aur);
