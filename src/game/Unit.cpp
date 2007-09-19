@@ -7083,3 +7083,80 @@ Player* Unit::GetSpellModOwner()
     return NULL;
 }
 
+///----------Pet responses methods-----------------
+void Unit::SendPetCastFail(uint32 spellid, uint8 msg)
+{
+    Unit *owner = GetCharmerOrOwner();
+    if(!owner || owner->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    WorldPacket data(SMSG_PET_CAST_FAILED, (4+1+1));
+    data << uint32(spellid);
+    data << uint8(2);
+    data << uint8(msg);
+    ((Player*)owner)->GetSession()->SendPacket(&data);
+}
+
+void Unit::SendPetActionFeedback (uint8 msg)
+{
+    Unit* owner = GetOwner();
+    if(!owner || owner->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    WorldPacket data(SMSG_PET_ACTION_FEEDBACK, 1);
+    data << uint8(msg);
+    ((Player*)owner)->GetSession()->SendPacket(&data);
+}
+
+void Unit::SendPetTalk (uint32 pettalk)
+{
+    Unit* owner = GetOwner();
+    if(!owner || owner->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    WorldPacket data(SMSG_AI_UNKNOWN, 8+4);
+    data << uint64(GetGUID());
+    data << uint32(pettalk);
+    ((Player*)owner)->GetSession()->SendPacket(&data);
+}
+
+void Unit::SendPetSpellCooldown (uint32 spellid, time_t cooltime)
+{
+    Unit* owner = GetOwner();
+    if(!owner || owner->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    WorldPacket data(SMSG_SPELL_COOLDOWN, 8+8);
+    data << GetGUID();
+    data << uint8(0x0);
+    data << uint32(spellid);
+    data << uint32(cooltime);
+
+    ((Player*)owner)->GetSession()->SendPacket(&data);
+}
+
+void Unit::SendPetClearCooldown (uint32 spellid)
+{
+    Unit* owner = GetOwner();
+    if(!owner || owner->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8+4));
+    data << spellid;
+    data << GetGUID();
+    data << uint32(0);
+
+    ((Player*)owner)->GetSession()->SendPacket(&data);
+}
+
+void Unit::SendPetAIReaction(uint64 guid)
+{
+    Unit* owner = GetOwner();
+    if(!owner || owner->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    WorldPacket data(SMSG_AI_REACTION, 12);
+    data << guid << uint32(00000002);
+    ((Player*)owner)->GetSession()->SendPacket(&data);
+}
+///----------End of Pet responses methods----------

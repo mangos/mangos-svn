@@ -286,9 +286,6 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     //load spells/cooldowns/auras
     SetCanModifyStats(true);
     _LoadAuras(timediff);
-    //InitStatsForLevel(getLevel());
-    _LoadSpells(timediff);
-    _LoadSpellCooldowns();
 
     if(getPetType() == SUMMON_PET && !current)              //all (?) summon pets come with full health when called, but not when they are current
     {
@@ -303,6 +300,11 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
 
     AIM_Initialize();
     MapManager::Instance().GetMap(owner->GetMapId(), owner)->Add((Creature*)this);
+
+    // Spells should be loaded after pet is added to map, because in CanCast is check on it
+    _LoadSpells(timediff);
+    _LoadSpellCooldowns();
+
     owner->SetPet(this);                                    // in DB stored only full controlled creature
     sLog.outDebug("New Pet has guid %u", GetGUIDLow());
 
@@ -1487,20 +1489,6 @@ bool Pet::_removeSpell(uint16 spell_id)
     return false;
 }
 
-void Pet::SendSpellCooldown(uint32 spell_id, time_t cooltime)
-{
-    WorldPacket data(SMSG_SPELL_COOLDOWN, 8+8);
-
-    data << GetGUID();
-    data << uint8(0x0);
-    data << uint32(spell_id);
-    data << uint32(cooltime);
-
-    Unit* owner = GetOwner();
-    if(owner && owner->GetTypeId() == TYPEID_PLAYER)
-        ((Player*)owner)->GetSession()->SendPacket(&data);
-}
-
 void Pet::InitPetCreateSpells()
 {
     m_charmInfo->InitPetActionBar();
@@ -1571,43 +1559,6 @@ void Pet::CheckLearning(uint32 spellid)
     }
 }
 
-void Pet::SendActionFeedback(uint8 msg)
-{
-    Unit* owner = GetOwner();
-    if(!owner || owner->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    WorldPacket data(SMSG_PET_ACTION_FEEDBACK, 1);
-    data << uint8(msg);
-    ((Player*)owner)->GetSession()->SendPacket(&data);
-}
-
-void Pet::SendPetTalk(PetTalk pettalk)
-{
-    Unit* owner = GetOwner();
-
-    if(!owner || owner->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    WorldPacket data(SMSG_AI_UNKNOWN, 8+4);
-    data << uint64(GetGUID());
-    data << uint32(pettalk);
-    ((Player*)owner)->GetSession()->SendPacket(&data);
-}
-
-void Pet::SendCastFail(uint32 spellid, uint8 msg)
-{
-    Unit *owner = GetCharmerOrOwner();
-    if(!owner || owner->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    WorldPacket data(SMSG_PET_CAST_FAILED, (4+1+1));
-    data << uint32(spellid);
-    data << uint8(2);
-    data << uint8(msg);
-    ((Player*)owner)->GetSession()->SendPacket(&data);
-}
-
 uint32 Pet::resetTalentsCost() const
 {
     uint32 days = (sWorld.GetGameTime() - m_resetTalentsTime)/DAY;
@@ -1633,17 +1584,28 @@ void Pet::ToggleAutocast(uint32 spellid, bool apply)
 
     PetSpellMap::const_iterator itr = m_spells.find((uint16)spellid);
 
-    if(apply && m_autospells.find(spellid) == m_autospells.end())
+    int i;
+
+    if(apply)
     {
-        m_autospells.insert(spellid);
-        itr->second->active = ACT_ENABLED;
-        itr->second->state = PETSPELL_CHANGED;
+        for (i = 0; i < m_autospells.size() && m_autospells[i] != spellid; i++);
+        if (i == m_autospells.size())
+        {
+            m_autospells.push_back(spellid);
+            itr->second->active = ACT_ENABLED;
+            itr->second->state = PETSPELL_CHANGED;
+        }
     }
-    else if(!apply && m_autospells.find(spellid) != m_autospells.end())
+    else
     {
-        m_autospells.erase(spellid);
-        itr->second->active = ACT_DISABLED;
-        itr->second->state = PETSPELL_CHANGED;
+        AutoSpellList::iterator itr2 = m_autospells.begin();
+        for (i = 0; i < m_autospells.size() && m_autospells[i] != spellid; i++, itr2++);
+        if (i < m_autospells.size())
+        {
+            m_autospells.erase(itr2);
+            itr->second->active = ACT_DISABLED;
+            itr->second->state = PETSPELL_CHANGED;
+        }
     }
 }
 
@@ -1720,20 +1682,7 @@ bool Pet::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float 
     return true;
 }
 
-bool Pet::HasSpell(uint32 spell)
+bool Pet::HasSpell(uint32 spell) const
 {
-    if(GetTypeId() == TYPEID_PLAYER)                        //NO charmed player can cast a spell
-        return false;
-
-    if(isCharmed())
-    {
-        uint8 i;
-        for(i = 0; i < CREATURE_MAX_SPELLS; ++i)
-            if(spell == ((Creature*)this)->m_spells[i])
-                break;
-        return i < CREATURE_MAX_SPELLS;                     //broke before end of iteration of known spells
-    }
-
-    PetSpellMap::const_iterator itr = m_spells.find((uint16)spell);
-    return (itr != m_spells.end() && itr->second->state != PETSPELL_REMOVED);
+    return (m_spells.find(spell) != m_spells.end());
 }

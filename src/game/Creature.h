@@ -341,6 +341,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool HasSpellCooldown(uint32 spell_id) const;
         bool HasCategoryCooldown(uint32 spell_id) const;
 
+        bool HasSpell(uint32 spellID) const;
+
         bool UpdateStats(Stats stat);
         bool UpdateAllStats();
         void UpdateResistances(uint32 school);
@@ -468,6 +470,16 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool hasInvolvedQuest(uint32 quest_id)  const;
 
         GridReference<Creature> &GetGridRef() { return m_gridRef; }
+
+        virtual uint8 GetPetAutoSpellSize() const { return CREATURE_MAX_SPELLS; }
+        virtual uint32 GePetAutoSpellOnPos(uint8 pos) const
+        {
+            if (pos >= CREATURE_MAX_SPELLS || m_charmInfo->GetCharmSpell(pos)->active != ACT_ENABLED)
+                return 0;
+            else
+                return m_charmInfo->GetCharmSpell(pos)->spellId;
+        }
+
     protected:
         // vendor items
         typedef std::vector<CreatureItem> CreatureItems;
