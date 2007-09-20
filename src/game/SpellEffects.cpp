@@ -3092,7 +3092,7 @@ void Spell::EffectSummonTotem(uint32 i)
         default: return;
     }
 
-    float angle = slot < 4 ? m_caster->GetOrientation() + M_PI/4 - (slot*M_PI/2) : m_caster->GetOrientation();
+    float angle = slot < 4 ? M_PI/4 - (slot*M_PI/2) : 0;
 
     float x,y,z;
     m_caster->GetClosePoint(x,y,z,2,angle);
@@ -3126,11 +3126,15 @@ void Spell::EffectSummonTotem(uint32 i)
         m_caster->m_TotemSlot[slot] = pTotem->GetGUID();
 
     pTotem->SetOwner(m_caster->GetGUID());
-    //pTotem->SetSpell(pTotem->GetCreatureInfo()->spell1);
     pTotem->SetSpell(m_spellInfo->Id);                      //use SummonTotem spellid
-    pTotem->SetDuration(GetDuration(m_spellInfo));
-    pTotem->SetMaxHealth(m_currentBasePoints[i]+1);
-    pTotem->SetHealth(m_currentBasePoints[i]+1);
+
+    int32 duration=GetDuration(m_spellInfo);
+    if(Player* modOwner = m_caster->GetSpellModOwner())
+        modOwner->ApplySpellMod(m_spellInfo->Id,SPELLMOD_DURATION, duration);
+    pTotem->SetDuration(duration);
+
+    pTotem->SetMaxHealth(damage);
+    pTotem->SetHealth(damage);
     pTotem->SetUInt32Value(UNIT_CREATED_BY_SPELL,m_spellInfo->Id);
     pTotem->Summon(m_caster);
 }
