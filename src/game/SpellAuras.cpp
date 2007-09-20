@@ -3013,23 +3013,29 @@ void Aura::HandleAuraModTotalHealthPercentRegen(bool apply, bool Real)
     Need additional checking for auras who reduce or increase healing, magic effect like Dumpen Magic,
     so this aura not fully working.
     */
-    if((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) && apply)
+    if(apply)
     {
-        m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);
-        if(m_target->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)m_target)->SetStandState(PLAYER_STATE_SIT);
-    }
+        if(!m_target->isAlive())
+            return;
 
-    if(apply && m_periodicTimer <= 0)
-    {
-        m_periodicTimer += m_modifier.periodictime;
-        float modifier = m_currentBasePoints+1;
-        m_modifier.m_amount = uint32(m_target->GetMaxHealth() * modifier/100);
-
-        if(m_target->GetHealth() < m_target->GetMaxHealth())
+        if((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED))
         {
-            // PeriodicAuraLog can cast triggered spells with stats changes
-            m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier,GetEffIndex());
+            m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);
+            if(m_target->GetTypeId() == TYPEID_PLAYER)
+                ((Player*)m_target)->SetStandState(PLAYER_STATE_SIT);
+        }
+
+        if(m_periodicTimer <= 0)
+        {
+            m_periodicTimer += m_modifier.periodictime;
+            float modifier = m_currentBasePoints+1;
+            m_modifier.m_amount = uint32(m_target->GetMaxHealth() * modifier/100);
+
+            if(m_target->GetHealth() < m_target->GetMaxHealth())
+            {
+                // PeriodicAuraLog can cast triggered spells with stats changes
+                m_target->PeriodicAuraLog(m_target, GetSpellProto(), &m_modifier,GetEffIndex());
+            }
         }
     }
 
@@ -3067,23 +3073,29 @@ void Aura::HandleAuraModTotalManaPercentRegen(bool apply, bool Real)
 
 void Aura::HandleModRegen(bool apply, bool Real)            // eating
 {
-    if ((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) && apply)
+    if(apply)
     {
-        m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);
-        if(m_target->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)m_target)->SetStandState(PLAYER_STATE_SIT);
-    }
+        if(!m_target->isAlive())
+            return;
 
-    if(apply && m_periodicTimer <= 0)
-    {
-        m_periodicTimer += 5000;
-        int32 gain = m_target->ModifyHealth(m_modifier.m_amount);
-        Unit *caster = GetCaster();
-        if (caster)
+        if ((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED))
         {
-            SpellEntry const *spellProto = GetSpellProto();
-            if (spellProto)
-                m_target->getHostilRefManager().threatAssist(caster, float(gain) * 0.5f, spellProto);
+            m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);
+            if(m_target->GetTypeId() == TYPEID_PLAYER)
+                ((Player*)m_target)->SetStandState(PLAYER_STATE_SIT);
+        }
+
+        if(m_periodicTimer <= 0)
+        {
+            m_periodicTimer += 5000;
+            int32 gain = m_target->ModifyHealth(m_modifier.m_amount);
+            Unit *caster = GetCaster();
+            if (caster)
+            {
+                SpellEntry const *spellProto = GetSpellProto();
+                if (spellProto)
+                    m_target->getHostilRefManager().threatAssist(caster, float(gain) * 0.5f, spellProto);
+            }
         }
     }
 

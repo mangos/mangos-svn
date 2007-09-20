@@ -1345,17 +1345,21 @@ void Spell::EffectHealthLeach(uint32 i)
     else
         new_damage = damage;
 
-    float multiplier = m_spellInfo->EffectMultipleValue[i];
+    if(m_caster->isAlive())
+    {
+        float multiplier = m_spellInfo->EffectMultipleValue[i];
 
-    if(Player *modOwner = m_caster->GetSpellModOwner())
-        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_MULTIPLE_VALUE, multiplier);
+        if(Player *modOwner = m_caster->GetSpellModOwner())
+            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_MULTIPLE_VALUE, multiplier);
 
-    int32 tmpvalue = int32(new_damage*multiplier);
+        int32 tmpvalue = int32(new_damage*multiplier);
 
-    m_caster->ModifyHealth(tmpvalue);
+        m_caster->ModifyHealth(tmpvalue);
 
-    if(unitTarget->GetTypeId() == TYPEID_PLAYER)
-        m_caster->SendHealSpellOnPlayer(unitTarget, m_spellInfo->Id, uint32(tmpvalue));
+        if(unitTarget->GetTypeId() == TYPEID_PLAYER)
+            m_caster->SendHealSpellOnPlayer(unitTarget, m_spellInfo->Id, uint32(tmpvalue));
+
+    }
 
     m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage, m_IsTriggeredSpell, true);
 }
