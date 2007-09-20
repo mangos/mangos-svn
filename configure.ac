@@ -20,7 +20,7 @@ AC_CONFIG_SRCDIR([src/shared/Base.cpp])
 ## Prelude, basic settings for Automake
 #  Turn on all warnings and error messages, and enforce GNU
 #  standards for the package.
-AM_INIT_AUTOMAKE([-Wall -Werror dist-bzip2])
+AM_INIT_AUTOMAKE([-Wall -Werror])
 AM_MAINTAINER_MODE
 
 ## Check for required dependencies.
