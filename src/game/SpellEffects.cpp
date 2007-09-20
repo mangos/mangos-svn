@@ -1201,9 +1201,6 @@ void Spell::EffectManaDrain(uint32 i)
         return;
 
     uint32 curPower = unitTarget->GetPower(drain_power);
-    float tmpvalue = m_spellInfo->EffectMultipleValue[i];
-    if(!tmpvalue)
-        tmpvalue = 1;
 
     int32 new_damage;
     if(curPower < uint32(damage))
@@ -1214,7 +1211,16 @@ void Spell::EffectManaDrain(uint32 i)
     unitTarget->ModifyPower(drain_power,-new_damage);
 
     if(drain_power == POWER_MANA)
-        m_caster->ModifyPower(POWER_MANA,uint32(new_damage*tmpvalue));
+    {
+        float manaMultiplier = m_spellInfo->EffectMultipleValue[i];
+        if(manaMultiplier==0)
+            manaMultiplier = 1;
+
+        if(Player *modOwner = m_caster->GetSpellModOwner())
+            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_MULTIPLE_VALUE, manaMultiplier);
+
+        m_caster->ModifyPower(POWER_MANA,uint32(new_damage*manaMultiplier));
+    }
 }
 
 void Spell::EffectSendEvent(uint32 i)
@@ -1339,7 +1345,12 @@ void Spell::EffectHealthLeach(uint32 i)
     else
         new_damage = damage;
 
-    int32 tmpvalue = int32(new_damage*m_spellInfo->EffectMultipleValue[i]);
+    float multiplier = m_spellInfo->EffectMultipleValue[i];
+
+    if(Player *modOwner = m_caster->GetSpellModOwner())
+        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_MULTIPLE_VALUE, multiplier);
+
+    int32 tmpvalue = int32(new_damage*multiplier);
 
     m_caster->ModifyHealth(tmpvalue);
 

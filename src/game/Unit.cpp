@@ -1353,6 +1353,10 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         case SPELL_AURA_PERIODIC_LEECH:
         {
             float multiplier = spellProto->EffectMultipleValue[effect_idx] > 0 ? spellProto->EffectMultipleValue[effect_idx] : 1;
+
+            if(Player *modOwner = GetSpellModOwner())
+                modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_MULTIPLE_VALUE, multiplier);
+
             uint32 pdamage = mod->m_amount;
 
             pdamage = SpellDamageBonus(pVictim,spellProto,pdamage,DOT);
@@ -1390,7 +1394,15 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
 
             pVictim->ModifyPower(power, -drain_amount);
 
-            float gain_multiplier = GetMaxPower(power) > 0 ? spellProto->EffectMultipleValue[effect_idx] : 0;
+            float gain_multiplier = 0;
+
+            if(GetMaxPower(power) > 0)
+            {
+                gain_multiplier = spellProto->EffectMultipleValue[effect_idx];
+
+                if(Player *modOwner = GetSpellModOwner())
+                    modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_MULTIPLE_VALUE, gain_multiplier);
+            }
 
             WorldPacket data(SMSG_PERIODICAURALOG, (21+16));// we guess size
             data.append(pVictim->GetPackGUID());
@@ -1574,6 +1586,9 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType 
             currentAbsorb = RemainingDamage;
 
         manaMultiplier = (*i)->GetSpellProto()->EffectMultipleValue[(*i)->GetEffIndex()];
+        if(Player *modOwner = GetSpellModOwner())
+            modOwner->ApplySpellMod((*i)->GetId(), SPELLMOD_MULTIPLE_VALUE, manaMultiplier);
+
         maxAbsorb = int32(pVictim->GetPower(POWER_MANA) / manaMultiplier);
         if (currentAbsorb > maxAbsorb)
             currentAbsorb = maxAbsorb;
@@ -6708,6 +6723,7 @@ void Unit::CleanupsBeforeDelete()
 {
     if(m_uint32Values)                                      // only for fully created object
     {
+        InterruptNonMeleeSpells(true);
         m_Events.KillAllEvents();
         CombatStop(true);
         DeleteThreatList();
