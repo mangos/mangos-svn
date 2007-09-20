@@ -9421,7 +9421,7 @@ void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
                 if( msg == EQUIP_ERR_OK )
                 {
                     Item *pDstItem = GetItemByPos(dstbag, dstslot);
-                    if (!pDstItem || pDstItem && pDstItem->GetCount() + pSrcItem->GetCount() <= pSrcItem->GetProto()->Stackable)
+                    if (!pDstItem || pDstItem && pDstItem->GetCount() + count <= pDstItem->GetProto()->Stackable)
                     {
                         if( IsInWorld() )
                             pSrcItem->SendUpdateToPlayer( this );
@@ -9450,7 +9450,7 @@ void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
                 if( msg == EQUIP_ERR_OK )
                 {
                     Item *pDstItem = GetItemByPos(dstbag, dstslot);
-                    if (!pDstItem || pDstItem && pDstItem->GetCount() + pSrcItem->GetCount() <= pSrcItem->GetProto()->Stackable)
+                    if (!pDstItem || pDstItem && pDstItem->GetCount() + count <= pDstItem->GetProto()->Stackable)
                     {
                         if( IsInWorld() )
                             pSrcItem->SendUpdateToPlayer( this );
@@ -9479,7 +9479,7 @@ void Player::SplitItem( uint16 src, uint16 dst, uint32 count )
                 if( msg == EQUIP_ERR_OK )
                 {
                     Item *pDstItem = GetItemByPos(dstbag, dstslot);
-                    if (!pDstItem || pDstItem && pDstItem->GetCount() + pSrcItem->GetCount() <= pSrcItem->GetProto()->Stackable)
+                    if (!pDstItem || pDstItem && pDstItem->GetCount() + count <= pDstItem->GetProto()->Stackable)
                     {
                         if( IsInWorld() )
                             pSrcItem->SendUpdateToPlayer( this );
