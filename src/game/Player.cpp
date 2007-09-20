@@ -7703,9 +7703,20 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
 
             if( bag == NULL_BAG )
             {
-                // search stack for merge to (ignore keyring - keys not merged)
+                // search stack for merge to
                 if( pProto->Stackable > 1 )
                 {
+                    for(uint32 i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
+                    {
+                        pos = ( (INVENTORY_SLOT_BAG_0 << 8) | i );
+                        pItem2 = GetItemByPos( pos );
+                        if( pItem2 && pItem2->GetEntry() == pItem->GetEntry() && pItem2->GetCount() + pItem->GetCount() <= pProto->Stackable )
+                        {
+                            dest = pos;
+                            return EQUIP_ERR_OK;
+                        }
+                    }
+
                     for(int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
                     {
                         pos = ( (INVENTORY_SLOT_BAG_0 << 8) | i );
@@ -7828,11 +7839,21 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                             return EQUIP_ERR_NONEMPTY_BAG_OVER_OTHER_BAG;
                     }
 
-                    // search stack in bag for merge to (ignore keyring - keys not merged)
+                    // search stack in bag for merge to
                     if( pProto->Stackable > 1 )
                     {
                         if( bag == INVENTORY_SLOT_BAG_0 )
                         {
+                            for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
+                            {
+                                pItem2 = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+                                if( pItem2 && pItem2->GetEntry() == pItem->GetEntry() && pItem2->GetCount() + pItem->GetCount() <= pProto->Stackable )
+                                {
+                                    dest = ( (INVENTORY_SLOT_BAG_0 << 8) | i );
+                                    return EQUIP_ERR_OK;
+                                }
+                            }
+
                             for(int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
                             {
                                 pItem2 = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
@@ -8005,6 +8026,16 @@ uint8 Player::CanStoreItems( Item **pItems,int count) const
         }
     }
 
+    for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
+    {
+        pItem2 = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+
+        if (pItem2 && !pItem2->IsInTrade())
+        {
+            inv_keys[i-KEYRING_SLOT_START] = pItem2->GetCount();
+        }
+    }
+
     for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
     {
         Bag     *pBag;
@@ -8056,10 +8087,23 @@ uint8 Player::CanStoreItems( Item **pItems,int count) const
         if(res != EQUIP_ERR_OK)
             return res;
 
-        // search stack for merge to (ignore keyring - keys not merged)
+        // search stack for merge to
         if( pProto->Stackable > 1 )
         {
             bool b_found = false;
+
+            for(int t = KEYRING_SLOT_START; t < KEYRING_SLOT_END; t++)
+            {
+                pItem2 = GetItemByPos( INVENTORY_SLOT_BAG_0, t );
+                if( pItem2 && pItem2->GetEntry() == pItem->GetEntry() && inv_keys[t-KEYRING_SLOT_START] + pItem->GetCount() <= pProto->Stackable )
+                {
+                    inv_keys[t-KEYRING_SLOT_START] += pItem->GetCount();
+                    b_found = true;
+                    break;
+                }
+            }
+            if (b_found) continue;
+
             for(int t = INVENTORY_SLOT_ITEM_START; t < INVENTORY_SLOT_ITEM_END; t++)
             {
                 pItem2 = GetItemByPos( INVENTORY_SLOT_BAG_0, t );
