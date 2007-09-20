@@ -452,6 +452,8 @@ pkgdata_DATA = \
 	4481_spell_affect.sql \
 	4482_playercreateinfo.sql \
 	4482_spell_proc_event.sql \
+	4488_db_version.sql \
+	4491_spell_affect.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -884,4 +886,6 @@ EXTRA_DIST = \
 	4481_spell_affect.sql \
 	4482_playercreateinfo.sql \
 	4482_spell_proc_event.sql \
+	4488_db_version.sql \
+	4491_spell_affect.sql \
 	README
