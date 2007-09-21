@@ -598,7 +598,7 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
 
             if(gso->Option!="" && cantalking )
             {
-                pm->GetGossipMenu()->AddMenuItem((uint8)gso->Icon,gso->Option.c_str(), gossipid,gso->Action,false);
+                pm->GetGossipMenu()->AddMenuItem((uint8)gso->Icon,gso->Option, gossipid,gso->Action,false);
                 ingso=gso;
             }
         }

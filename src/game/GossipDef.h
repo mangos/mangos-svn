@@ -99,8 +99,8 @@ class MANGOS_DLL_SPEC GossipMenu
         GossipMenu();
         ~GossipMenu();
 
-        void AddMenuItem(uint8 Icon, char const * Message, bool Coded = false);
-        void AddMenuItem(uint8 Icon, char const * Message, uint32 dtSender, uint32 dtAction, bool Coded = false);
+        void AddMenuItem(uint8 Icon, std::string Message, bool Coded = false);
+        void AddMenuItem(uint8 Icon, std::string Message, uint32 dtSender, uint32 dtAction, bool Coded = false);
 
         unsigned int MenuItemCount()
         {
