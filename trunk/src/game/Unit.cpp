@@ -2186,8 +2186,10 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     }
 
     // stunned target cannot dodge and this is check in GetUnitDodgeChance()
-    tmp = (int32)(pVictim->GetUnitDodgeChance()*100) - skillBonus2;
-    if (tmp > 0 && roll < (sum += tmp))
+    tmp = (int32)(pVictim->GetUnitDodgeChance()*100);
+    if (   (tmp > 0)                                    // check if unit _can_ dodge
+        && ((tmp -= skillBonus2) > 0)
+        && roll < (sum += tmp))
     {
         DEBUG_LOG ("RollMeleeOutcomeAgainst: DODGE <%d, %d)", sum-tmp, sum);
         return MELEE_HIT_DODGE;
@@ -2425,7 +2427,15 @@ float Unit::GetUnitDodgeChance() const
 {
     if(hasUnitState(UNIT_STAT_STUNDED))
         return 0;
-    return GetTypeId() == TYPEID_PLAYER ? GetFloatValue(PLAYER_DODGE_PERCENTAGE) : 5;
+    if( GetTypeId() == TYPEID_PLAYER ) 
+        return GetFloatValue(PLAYER_DODGE_PERCENTAGE);
+    else
+    {
+        if(((Creature const*)this)->isTotem())
+            return 0;
+        else
+            return 5;
+    }
 }
 
 float Unit::GetUnitParryChance() const
@@ -2459,17 +2469,21 @@ float Unit::GetUnitParryChance() const
 
 float Unit::GetUnitBlockChance() const
 {
-    float chance = 0;
     if(GetTypeId() == TYPEID_PLAYER)
     {
         Item *tmpitem = ((Player const*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
         if(tmpitem && !tmpitem->IsBroken() && tmpitem->GetProto()->Block)
-            chance = GetFloatValue(PLAYER_BLOCK_PERCENTAGE);
+            return GetFloatValue(PLAYER_BLOCK_PERCENTAGE);
+        else
+            return 0;
     }
     else
-        chance = 5;
-
-    return chance;
+    {
+        if(((Creature const*)this)->isTotem())
+            return 0;
+        else
+            return 5;
+    }
 }
 
 uint16 Unit::GetWeaponSkillValue (WeaponAttackType attType) const

@@ -85,9 +85,6 @@ void Totem::Summon(Unit* owner)
 
 void Totem::UnSummon()
 {
-    if (m_type == TOTEM_LAST_BURST)
-        this->CastSpell(this, GetSpell(), true);
-
     SendObjectDeSpawnAnim(GetGUID());
     SendDestroyObject(GetGUID());
 
@@ -150,21 +147,12 @@ Unit *Totem::GetOwner()
     return ObjectAccessor::Instance().GetUnit(*this, ownerid);
 }
 
-void Totem::SetSpell(uint32 spellId)
+void Totem::SetTypeBySummonSpell(SpellEntry const * spellProto)
 {
     //now, spellId is the spell of EffectSummonTotem , not the spell1 of totem!
     if (GetDuration(sSpellStore.LookupEntry(GetSpell())) != -1)
         m_type = TOTEM_ACTIVE;
 
-    if(spellId)
-    {
-        SpellEntry const *spellinfo = sSpellStore.LookupEntry(spellId);
-        if ( spellinfo)
-        {
-            if(spellinfo->SpellIconID==2056)
-                m_type = TOTEM_STATUE;                      //Jewelery statue
-            else if(spellinfo->SpellFamilyFlags == 0x28000000 )
-                m_type = TOTEM_LAST_BURST;                  //For Fire Nova Totem and Corrupted Fire Nova Totem
-        }
-    }
+    if(spellProto->SpellIconID==2056)
+        m_type = TOTEM_STATUE;                              //Jewelery statue
 }

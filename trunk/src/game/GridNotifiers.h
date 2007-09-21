@@ -291,6 +291,7 @@ namespace MaNGOS
 
     // Unit searchers
 
+    // First accepted by Check Unit if any
     template<class Check>
         struct MANGOS_DLL_DECL UnitSearcher
     {
@@ -305,6 +306,22 @@ namespace MaNGOS
         template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
     };
 
+    // Last accepted by Check Unit if any (Check can change requirements at each call)
+    template<class Check>
+    struct MANGOS_DLL_DECL UnitLastSearcher
+    {
+        Unit* &i_object;
+        Check & i_check;
+
+        UnitLastSearcher(Unit* & result, Check & check) : i_object(result),i_check(check) {}
+
+        void Visit(CreatureMapType &m);
+        void Visit(PlayerMapType &m);
+
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+    };
+
+    // All accepted by Check units if any
     template<class Check>
         struct MANGOS_DLL_DECL UnitListSearcher
     {
@@ -366,7 +383,7 @@ namespace MaNGOS
     class GameObjectFocusCheck
     {
         public:
-            GameObjectFocusCheck(Unit* unit,uint32 focusId) : i_unit(unit), i_focusId(focusId) {}
+            GameObjectFocusCheck(Unit const* unit,uint32 focusId) : i_unit(unit), i_focusId(focusId) {}
             bool operator()(GameObject* go) const
             {
                 if(go->GetGOInfo()->type != GAMEOBJECT_TYPE_SPELL_FOCUS || go->GetGOInfo()->sound0 != i_focusId)
@@ -377,7 +394,7 @@ namespace MaNGOS
                 return go->IsWithinDistInMap(i_unit, dist);
             }
         private:
-            Unit* i_unit;
+            Unit const* i_unit;
             uint32 i_focusId;
 
     };
@@ -387,7 +404,7 @@ namespace MaNGOS
     class AnyUnfriendlyUnitInObjectRangeCheck
     {
         public:
-            AnyUnfriendlyUnitInObjectRangeCheck(WorldObject* obj, Unit* funit, float range) : i_obj(obj), i_funit(funit), i_range(range) {}
+            AnyUnfriendlyUnitInObjectRangeCheck(WorldObject const* obj, Unit const* funit, float range) : i_obj(obj), i_funit(funit), i_range(range) {}
             bool operator()(Unit* u)
             {
                 if(u->isAlive() && !i_funit->IsFriendlyTo(u) && i_obj->IsWithinDistInMap(u, i_range))
@@ -396,19 +413,44 @@ namespace MaNGOS
                 return false;
             }
         private:
-            WorldObject* const i_obj;
-            Unit* const i_funit;
+            WorldObject const* i_obj;
+            Unit const* i_funit;
             float i_range;
+    };
+
+    // Success at unit in range, range update for next check (this can be use with UnitLastSearcher to find nearest unit)
+    class NearestAttackableUnitInObjectRangeCheck
+    {
+    public:
+        NearestAttackableUnitInObjectRangeCheck(WorldObject const* obj, Unit const* funit, float range) : i_obj(obj), i_funit(funit), i_range(range) {}
+        bool operator()(Unit* u)
+        {
+            if( u->isTargetableForAttack() && i_obj->IsWithinDistInMap(u, i_range) && 
+                !i_funit->IsFriendlyTo(u) && u->isVisibleForOrDetect(i_funit,false)  )
+            {
+                i_range = sqrt(i_obj->GetDistanceSq(u));    // use found unit range as new range limit for next check
+                return true;
+            }
+
+            return false;
+        }
+    private:
+        WorldObject const* i_obj;
+        Unit const* i_funit;
+        float i_range;
+
+        // prevent clone this object
+        NearestAttackableUnitInObjectRangeCheck(NearestAttackableUnitInObjectRangeCheck const&);
     };
 
     class AnyAoETargetUnitInObjectRangeCheck
     {
         public:
-            AnyAoETargetUnitInObjectRangeCheck(WorldObject* obj, Unit* funit, float range)
+            AnyAoETargetUnitInObjectRangeCheck(WorldObject const* obj, Unit const* funit, float range)
                 : i_obj(obj), i_funit(funit), i_range(range)
             {
-                Unit* check = i_funit;
-                Unit* owner = i_funit->GetOwner();
+                Unit const* check = i_funit;
+                Unit const* owner = i_funit->GetOwner();
                 if(owner)
                     check = owner;
                 i_targetForPlayer = ( check->GetTypeId()==TYPEID_PLAYER );
@@ -422,8 +464,8 @@ namespace MaNGOS
             }
         private:
             bool i_targetForPlayer;
-            WorldObject* const i_obj;
-            Unit* const i_funit;
+            WorldObject const* i_obj;
+            Unit const* i_funit;
             float i_range;
     };
 
