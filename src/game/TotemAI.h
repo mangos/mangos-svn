@@ -23,6 +23,7 @@
 #include "Timer.h"
 
 class Creature;
+class Totem;
 
 class MANGOS_DLL_DECL TotemAI : public CreatureAI
 {
@@ -39,9 +40,7 @@ class MANGOS_DLL_DECL TotemAI : public CreatureAI
         static int Permissible(const Creature *);
 
     private:
-        Creature &i_totem;
+        Totem &i_totem;
         uint64 i_victimGuid;
-        Unit* i_owner;
-        TimeTracker i_tracker;
 };
 #endif

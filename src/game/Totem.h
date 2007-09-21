@@ -25,8 +25,7 @@ enum TotemType
 {
     TOTEM_PASSIVE    = 0,
     TOTEM_ACTIVE     = 1,
-    TOTEM_LAST_BURST = 2,
-    TOTEM_STATUE     = 3
+    TOTEM_STATUE     = 2
 };
 
 class Totem : public Creature
@@ -41,7 +40,7 @@ class Totem : public Creature
         uint32 GetTotemDuration() const { return m_duration; }
         Unit *GetOwner();
         TotemType GetTotemType() const { return m_type; }
-        void SetSpell(uint32 spellId);
+        void SetTypeBySummonSpell(SpellEntry const * spellProto);
         void SetDuration(uint32 dur) { m_duration = dur; }
         void SetOwner(uint64 guid);
 

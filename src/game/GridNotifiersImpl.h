@@ -386,6 +386,26 @@ void MaNGOS::UnitListSearcher<Check>::Visit(CreatureMapType &m)
             i_objects.push_back(itr->getSource());
 }
 
+template<class Check>
+void MaNGOS::UnitLastSearcher<Check>::Visit(CreatureMapType &m)
+{
+    for(CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
+    {
+        if(i_check(itr->getSource()))
+            i_object = itr->getSource();
+    }
+}
+
+template<class Check>
+void MaNGOS::UnitLastSearcher<Check>::Visit(PlayerMapType &m)
+{
+    for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
+    {
+        if(i_check(itr->getSource()))
+            i_object = itr->getSource();
+    }
+}
+
 // Creature searchers
 
 template<class Check>
