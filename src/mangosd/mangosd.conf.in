@@ -444,3 +444,8 @@ vmap.ignoreSpellIds = "7720"
 # Default: 10
 # Disable: 0 or any value larger than 255
 Honor.KillLimit = 10
+
+# Check final move position, summon position, etc for visible collision with other objects or wall (last if vmap enable)
+# Default: 1 (enable, required more CPU for work)
+#          0 (disable, less nice position selection but will less CPU use)
+DetectPosCollision = 1

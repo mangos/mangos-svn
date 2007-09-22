@@ -28,10 +28,6 @@
 #include <set>
 #include <string>
 
-#ifndef M_PI
-#define M_PI            3.14159265358979323846
-#endif
-
 #define CONTACT_DISTANCE            0.5
 #define INTERACTION_DISTANCE        5
 #define ATTACK_DISTANCE                 5
@@ -260,16 +256,16 @@ class MANGOS_DLL_SPEC WorldObject : public Object
             { x = m_positionX; y = m_positionY; z = m_positionZ; }
         float GetOrientation( ) const { return m_orientation; }
         void GetNearPoint2D( float &x, float &y, float distance, float absAngle) const;
-        void GetNearPoint( float &x, float &y, float &z, float distance,float absAngle) const;
-        void GetClosePoint(float &x, float &y, float &z, float distance = 0, float angle = 0 ) const
+        void GetNearPoint( WorldObject const* searcher, float &x, float &y, float &z, float distance2d,float absAngle) const;
+        void GetClosePoint(float &x, float &y, float &z, float distance2d = 0, float angle = 0) const
         {
             // angle calculated from current orientation
-            GetNearPoint(x,y,z,distance,GetOrientation() + angle);
+            GetNearPoint(NULL,x,y,z,distance2d,GetOrientation() + angle);
         }
-        void GetContactPoint( const WorldObject* obj, float &x, float &y, float &z, float distance = CONTACT_DISTANCE) const
+        void GetContactPoint( const WorldObject* obj, float &x, float &y, float &z, float distance2d = CONTACT_DISTANCE) const
         {
             // angle to face `obj` to `this` using distance includes size of `obj`
-            GetNearPoint(x,y,z,obj->GetObjectSize() + distance,GetAngle( obj ));
+            GetNearPoint(obj,x,y,z,distance2d,GetAngle( obj ));
         }
         const float GetObjectSize() const
         {
@@ -294,6 +290,8 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         float GetDistanceSq( const WorldObject* obj ) const;
         float GetDistance2dSq( const WorldObject* obj ) const;
         float GetDistanceSq(const float x, const float y, const float z) const;
+        float GetDistance2d(const WorldObject* obj) const;
+        float GetDistance2d(const float x, const float y) const;
         float GetDistanceZ(const WorldObject* obj) const;
         bool IsInMap(const WorldObject* obj) const { return GetMapId()==obj->GetMapId() && GetInstanceId()==obj->GetInstanceId(); }
         bool IsWithinDistInMap(const WorldObject* obj, const float dist2compare) const;

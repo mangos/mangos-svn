@@ -102,7 +102,7 @@ RandomMovementGenerator<Creature>::Update(Creature &creature, const uint32 &diff
 {
     if(!&creature)
         return true;
-    if(creature.hasUnitState(UNIT_STAT_ROOT) || creature.hasUnitState(UNIT_STAT_STUNDED))
+    if(creature.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNDED))
         return true;
     i_nextMoveTime.Update(diff);
     #ifdef USE_INTERPOLATION

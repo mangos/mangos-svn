@@ -392,6 +392,8 @@ void World::SetInitialWorldSettings()
     if(m_configs[CONFIG_HONOR_KILL_LIMIT] > 255)
         m_configs[CONFIG_HONOR_KILL_LIMIT] = 0;
 
+    m_configs[CONFIG_DETECT_POS_COLLISION] = sConfig.GetIntDefault("DetectPosCollision", 1);
+
     m_VisibleUnitGreyDistance = sConfig.GetFloatDefault("Visibility.Distance.Grey.Unit", 1);
     if(m_VisibleUnitGreyDistance >  MAX_VISIBILITY_DISTANCE)
     {

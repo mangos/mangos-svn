@@ -1627,9 +1627,7 @@ void Spell::update(uint32 difftime)
 
                     // check for incapacitating player states
                     //Player can use vanish even if he is incapacitated
-                    if( ( m_caster->hasUnitState(UNIT_STAT_STUNDED) ||
-                        m_caster->hasUnitState(UNIT_STAT_ROOT) ||
-                        m_caster->hasUnitState(UNIT_STAT_CONFUSED)) &&
+                    if( m_caster->hasUnitState(UNIT_STAT_STUNDED | UNIT_STAT_ROOT | UNIT_STAT_CONFUSED) &&
                         !(m_spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && m_spellInfo->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE_VANISH))
                         cancel();
 

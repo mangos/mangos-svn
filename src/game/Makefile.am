@@ -171,6 +171,8 @@ libmangosgame_a_SOURCES = \
 	Object.h \
 	ObjectMgr.cpp \
 	ObjectMgr.h \
+	ObjectPosSelector.cpp \
+	ObjectPosSelector.h \
 	Opcodes.cpp \
 	Opcodes.h \
 	Path.h \
