@@ -13676,6 +13676,38 @@ INSERT INTO `spell_proc_event` VALUES
 UNLOCK TABLES;
 
 --
+-- Table structure for table `spell_script_target`
+--
+
+DROP TABLE IF EXISTS `spell_script_target`;
+CREATE TABLE `spell_script_target` (
+  `entry` int(6) unsigned NOT NULL,
+  `type` int(8) unsigned default '0',
+  `targetEntry` int(11) default '0'
+) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Spell System';
+LOCK TABLES `transports` WRITE;
+
+--
+-- Dumping data for table `spell_script_target`
+--
+
+LOCK TABLES `spell_script_target` WRITE;
+/*!40000 ALTER TABLE `spell_script_target` DISABLE KEYS */;
+INSERT INTO `spell_script_target` VALUES 
+(11637, 1, 6220),
+(11637, 1, 6218),
+(11637, 1, 6219),
+(12709, 1, 6219),
+(12709, 1, 6220),
+(12709, 1, 6218),
+(31210, 2, 17544),
+(31225, 2, 17768),
+(33067, 0, 0), 
+(39094, 0, 0);
+/*!40000 ALTER TABLE `spell_script_target` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `spell_scripts`
 --
 

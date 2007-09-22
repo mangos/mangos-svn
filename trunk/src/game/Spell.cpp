@@ -550,7 +550,7 @@ struct TargetDistanceOrder : public std::binary_function<const Unit, const Unit,
     // functor for operator ">"
     bool operator()(const Unit* _Left, const Unit* _Right) const
     {
-        return (MainTarget->GetDistanceSq(_Left) < MainTarget->GetDistanceSq(_Right));
+        return (MainTarget->GetDistance(_Left) < MainTarget->GetDistance(_Right));
     }
 };
 
@@ -814,6 +814,13 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             else
                 TagUnitMap.push_back(m_caster);
 
+        }break;
+        case TARGET_SCRIPT:
+        {
+            if(m_targets.getUnitTarget())
+                TagUnitMap.push_back(m_targets.getUnitTarget());
+            if(m_targets.getItemTarget())
+                m_targetItems[i].push_back(m_targets.getItemTarget());
         }break;
         case TARGET_SELF_FISHING:
         {
@@ -1158,7 +1165,7 @@ void Spell::cast(bool skipCheck)
                         if(unit)
                         {
                             // cool, unit is present, calculate interval
-                            dist = sqrt(m_caster->GetDistanceSq(unit->GetPositionX(), unit->GetPositionY(), unit->GetPositionZ()));
+                            dist = m_caster->GetDistance(unit->GetPositionX(), unit->GetPositionY(), unit->GetPositionZ());
                             if (dist < 5.0f) dist = 5.0f;
                             interval = (uint64) floor(dist / m_spellInfo->speed * 1000.0f);
                             m_unitsHitList[j].insert(std::pair<uint64, uint64> (interval, targetGUID));
@@ -1198,7 +1205,7 @@ void Spell::cast(bool skipCheck)
                         if(go)
                         {
                             // cool, unit is present, calculate interval
-                            dist = sqrt(m_caster->GetDistanceSq(go->GetPositionX(), go->GetPositionY(), go->GetPositionZ()));
+                            dist = m_caster->GetDistance(go->GetPositionX(), go->GetPositionY(), go->GetPositionZ());
                             if (dist < 5.0f) dist = 5.0f;
                             interval = (uint64) floor(dist / m_spellInfo->speed * 1000.0f);
                             m_objectsHitList[j].insert(std::pair<uint64, uint64> (interval, targetGUID));
@@ -1733,9 +1740,10 @@ void Spell::finish(bool ok)
         }
 
         if( m_targets.getGOTarget() )
-        {
-            ((Player*)m_caster)->CastedCreatureOrGO(m_targets.getGOTarget()->GetEntry(),m_targets.getGOTarget()->GetGUID(),m_spellInfo->Id);
-        }
+            ((Player*)m_caster)->CastedCreatureOrGO( m_targets.getGOTarget()->GetEntry(), m_targets.getGOTarget()->GetGUID(), m_spellInfo->Id );
+        else if( focusObject )
+            ((Player*)m_caster)->CastedCreatureOrGO( focusObject->GetEntry(), focusObject->GetGUID(), m_spellInfo->Id );
+
     }
 
     // call triggered spell only at successful cast
@@ -2389,6 +2397,87 @@ uint8 Spell::CanCast()
     if(!IsPassiveSpell(m_spellInfo->Id))
         if(uint8 castResult = CheckItems())
             return castResult;
+
+    //ImpliciteTargetA-B = 38, If fact there is 0 Spell with  ImpliciteTargetB=38
+    for(uint8 j = 0; j < 3; j++)
+    {
+        if( m_spellInfo->EffectImplicitTargetA[j] == TARGET_SCRIPT || m_spellInfo->EffectImplicitTargetB[j] == TARGET_SCRIPT )
+        {
+            bool okDoo;
+            for(SpellScriptTarget::const_iterator i_spellST = objmgr.mSpellScriptTarget.lower_bound(m_spellInfo->Id); i_spellST != objmgr.mSpellScriptTarget.upper_bound(m_spellInfo->Id); ++i_spellST)
+            {
+                okDoo = false;
+                switch(i_spellST->second.type)
+                {
+                    case SPELL_TARGET_TYPE_CREATURE:
+                    case SPELL_TARGET_TYPE_DEAD:
+                    {
+                        Creature *p_Creature = NULL;
+
+                        CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+                        Cell cell = RedZone::GetZone(p);
+                        cell.data.Part.reserved = ALL_DISTRICT;
+                        cell.SetNoCreate();                    // Really don't know what is that???
+
+                        SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
+                        float max_range = GetMaxRange(srange);
+
+                        MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*m_caster,i_spellST->second.targetEntry,i_spellST->second.type!=SPELL_TARGET_TYPE_DEAD,max_range);
+                        MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(p_Creature, u_check);
+
+                        TypeContainerVisitor<MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck>, GridTypeMapContainer >  grid_creature_searcher(searcher);
+
+                        CellLock<GridReadGuard> cell_lock(cell, p);
+                        cell_lock->Visit(cell_lock, grid_creature_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+
+                        if(p_Creature )
+                        { 
+                            m_targetUnitGUIDs[j].push_back(p_Creature->GetGUID());
+                            okDoo = true;
+                        }
+                        break;
+                    }
+                    case SPELL_TARGET_TYPE_GAMEOBJECT:
+                    {
+                        GameObject* p_GameObject = NULL;
+
+                        if(i_spellST->second.targetEntry)
+                        {
+                            CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+                            Cell cell = RedZone::GetZone(p);
+                            cell.data.Part.reserved = ALL_DISTRICT;
+
+                            SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
+                            float max_range = GetMaxRange(srange);
+
+                            MaNGOS::NearestGameObjectEntryInObjectRangeCheck go_check(*m_caster,i_spellST->second.targetEntry,max_range);
+                            MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck> checker(p_GameObject,go_check);
+
+                            TypeContainerVisitor<MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck>, GridTypeMapContainer > object_checker(checker);
+                            CellLock<GridReadGuard> cell_lock(cell, p);
+                            cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+
+                            if(p_GameObject)
+                            {
+                                m_targetGameobjectGUIDs[j].push_back(p_GameObject->GetGUID());
+                                okDoo = true;
+                            }
+                        }
+                        else if( focusObject )                     //Focus Object
+                        {
+                            m_targetGameobjectGUIDs[j].push_back(focusObject->GetGUID());
+                            okDoo = true;
+                        }
+                        break;
+                    }
+                }
+                if(okDoo)                                          //Found and Set Target
+                    break;
+            }
+            if(!okDoo)
+                return SPELL_FAILED_BAD_TARGETS;                   //Missing DB Entry or targets for this spellEffect.
+        }
+    }
 
     if(uint8 castResult = CheckRange())
         return castResult;
@@ -3069,14 +3158,10 @@ uint8 Spell::CheckItems()
         CellLock<GridReadGuard> cell_lock(cell, p);
         cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
 
-        if(!ok) return (uint8)SPELL_FAILED_REQUIRES_SPELL_FOCUS;
+        if(!ok) 
+            return (uint8)SPELL_FAILED_REQUIRES_SPELL_FOCUS;
 
-        focusObject = ok;
-
-        if(m_targets.IsEmpty())
-            m_targets.setGOTarget(ok);
-
-        // game object found in range
+        focusObject = ok;                                          // game object found in range
     }
 
     for(uint32 i=0;i<8;i++)

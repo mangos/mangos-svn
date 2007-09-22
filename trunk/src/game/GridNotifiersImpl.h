@@ -329,6 +329,16 @@ void MaNGOS::GameObjectSearcher<Check>::Visit(GameObjectMapType &m)
 }
 
 template<class Check>
+void MaNGOS::GameObjectLastSearcher<Check>::Visit(GameObjectMapType &m)
+{
+    for(GameObjectMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
+    {
+        if(i_check(itr->getSource()))
+            i_object = itr->getSource();
+    }
+}
+
+template<class Check>
 void MaNGOS::GameObjectListSearcher<Check>::Visit(GameObjectMapType &m)
 {
     for(GameObjectMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
@@ -371,22 +381,6 @@ void MaNGOS::UnitSearcher<Check>::Visit(PlayerMapType &m)
 }
 
 template<class Check>
-void MaNGOS::UnitListSearcher<Check>::Visit(PlayerMapType &m)
-{
-    for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
-        if(i_check(itr->getSource()))
-            i_objects.push_back(itr->getSource());
-}
-
-template<class Check>
-void MaNGOS::UnitListSearcher<Check>::Visit(CreatureMapType &m)
-{
-    for(CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
-        if(i_check(itr->getSource()))
-            i_objects.push_back(itr->getSource());
-}
-
-template<class Check>
 void MaNGOS::UnitLastSearcher<Check>::Visit(CreatureMapType &m)
 {
     for(CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
@@ -406,6 +400,22 @@ void MaNGOS::UnitLastSearcher<Check>::Visit(PlayerMapType &m)
     }
 }
 
+template<class Check>
+void MaNGOS::UnitListSearcher<Check>::Visit(PlayerMapType &m)
+{
+    for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
+        if(i_check(itr->getSource()))
+            i_objects.push_back(itr->getSource());
+}
+
+template<class Check>
+void MaNGOS::UnitListSearcher<Check>::Visit(CreatureMapType &m)
+{
+    for(CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
+        if(i_check(itr->getSource()))
+            i_objects.push_back(itr->getSource());
+}
+
 // Creature searchers
 
 template<class Check>
@@ -421,6 +431,16 @@ void MaNGOS::CreatureSearcher<Check>::Visit(CreatureMapType &m)
             i_object = itr->getSource();
             return;
         }
+    }
+}
+
+template<class Check>
+void MaNGOS::CreatureLastSearcher<Check>::Visit(CreatureMapType &m)
+{
+    for(CreatureMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
+    {
+        if(i_check(itr->getSource()))
+            i_object = itr->getSource();
     }
 }
 

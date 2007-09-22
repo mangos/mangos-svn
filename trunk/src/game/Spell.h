@@ -78,6 +78,7 @@ enum Targets
     TARGET_ALL_PARTY                   = 33,
     TARGET_SINGLE_PARTY                = 35,
     TARGET_AREAEFFECT_PARTY            = 37,
+    TARGET_SCRIPT                      = 38,
     TARGET_SELF_FISHING                = 39,
     TARGET_TOTEM_EARTH                 = 41,
     TARGET_TOTEM_WATER                 = 42,
@@ -688,7 +689,7 @@ namespace MaNGOS
                 if( i_originalCaster->IsFriendlyTo(pPlayer) )
                     continue;
 
-                if( pPlayer->GetDistanceSq(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < radius * radius )
+                if( pPlayer->GetDistance(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < radius )
                     i_data.push_back(pPlayer);
             }
         }
@@ -781,7 +782,7 @@ namespace MaNGOS
                             i_data->push_back(itr->getSource());
                         break;
                     case PUSH_DEST_CENTER:
-                        if((itr->getSource()->GetDistanceSq(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < i_radius * i_radius ))
+                        if((itr->getSource()->GetDistance(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < i_radius ))
                             i_data->push_back(itr->getSource());
                         break;
                 }

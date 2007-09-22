@@ -516,6 +516,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Spell Proc Event conditions..." );
     objmgr.LoadSpellProcEvents();
 
+    sLog.outString( "Loading SpellsScriptTarget...");
+    objmgr.LoadSpellScriptTarget();
+
     sLog.outString( "Loading Aggro Spells Definitions...");
     objmgr.LoadSpellThreats();
 

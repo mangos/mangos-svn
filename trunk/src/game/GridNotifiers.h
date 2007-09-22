@@ -276,6 +276,20 @@ namespace MaNGOS
         template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &m) {}
     };
 
+    // Last accepted by Check GO if any (Check can change requirements at each call)
+    template<class Check>
+    struct MANGOS_DLL_DECL GameObjectLastSearcher
+    {
+        GameObject* &i_object;
+        Check& i_check;
+
+        GameObjectLastSearcher(GameObject* & result, Check& check) : i_object(result),i_check(check) {}
+
+        void Visit(GameObjectMapType &m);
+
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &m) {}
+    };
+
     template<class Check>
         struct MANGOS_DLL_DECL GameObjectListSearcher
     {
@@ -351,8 +365,22 @@ namespace MaNGOS
         template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
     };
 
+    // Last accepted by Check Creature if any (Check can change requirements at each call)
     template<class Check>
-        struct MANGOS_DLL_DECL CreatureListSearcher
+    struct MANGOS_DLL_DECL CreatureLastSearcher
+    {
+        Creature* &i_object;
+        Check & i_check;
+
+        CreatureLastSearcher(Creature* & result, Check & check) : i_object(result),i_check(check) {}
+
+        void Visit(CreatureMapType &m);
+
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
+    };
+
+    template<class Check>
+    struct MANGOS_DLL_DECL CreatureListSearcher
     {
         std::list<Creature*> &i_objects;
         Check& i_check;
@@ -399,6 +427,29 @@ namespace MaNGOS
 
     };
 
+    // Success at unit in range, range update for next check (this can be use with GameobjectLastSearcher to find nearest GO)
+    class NearestGameObjectEntryInObjectRangeCheck
+    {
+        public:
+            NearestGameObjectEntryInObjectRangeCheck(WorldObject const& obj,uint32 entry, float range) : i_obj(obj), i_entry(entry), i_range(range) {}
+            bool operator()(GameObject* go)
+            {
+                if(go->GetEntry() == i_entry && i_obj.IsWithinDistInMap(go, i_range))
+                {
+                    i_range = i_obj.GetDistance(go);        // use found GO range as new range limit for next check
+                    return true;
+                }
+                return false;
+            }
+        private:
+            WorldObject const& i_obj;
+            uint32 i_entry;
+            float  i_range;
+
+            // prevent clone this object
+            NearestGameObjectEntryInObjectRangeCheck(NearestGameObjectEntryInObjectRangeCheck const&);
+    };
+
     // Unit checks
 
     class AnyUnfriendlyUnitInObjectRangeCheck
@@ -428,7 +479,7 @@ namespace MaNGOS
             if( u->isTargetableForAttack() && i_obj->IsWithinDistInMap(u, i_range) && 
                 !i_funit->IsFriendlyTo(u) && u->isVisibleForOrDetect(i_funit,false)  )
             {
-                i_range = sqrt(i_obj->GetDistanceSq(u));    // use found unit range as new range limit for next check
+                i_range = i_obj->GetDistance(u);            // use found unit range as new range limit for next check
                 return true;
             }
 
@@ -571,6 +622,32 @@ namespace MaNGOS
             Unit* const i_funit;
             Unit* const i_enemy;
             float i_range;
+    };
+
+    // Success at unit in range, range update for next check (this can be use with CreatureLastSearcher to find nearest creature)
+    class NearestCreatureEntryWithLiveStateInObjectRangeCheck
+    {
+        public:
+            NearestCreatureEntryWithLiveStateInObjectRangeCheck(WorldObject const& obj,uint32 entry, bool alive, float range) 
+                : i_obj(obj), i_entry(entry), i_alive(alive), i_range(range) {}
+
+            bool operator()(Creature* u)
+            {
+                if(u->GetEntry() == i_entry && u->isAlive()==i_alive && i_obj.IsWithinDistInMap(u, i_range))
+                {
+                    i_range = i_obj.GetDistance(u);         // use found unit range as new range limit for next check
+                    return true;
+                }
+                return false;
+            }
+        private:
+            WorldObject const& i_obj;
+            uint32 i_entry;
+            bool   i_alive;
+            float  i_range;
+
+            // prevent clone this object
+            NearestCreatureEntryWithLiveStateInObjectRangeCheck(NearestCreatureEntryWithLiveStateInObjectRangeCheck const&);
     };
 
     #ifndef WIN32

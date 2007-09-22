@@ -5727,7 +5727,7 @@ bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList) 
     // Special cases
     bool IsVisible = true;
     bool isInFront = u->isInFront(this,World::GetMaxVisibleDistanceForObject());
-    float distance = sqrt(GetDistanceSq(u));
+    float distance = GetDistance(u);
 
     // If is attacked then stealth is lost, some creature can use stealth too
     if (this->isAttacked())
@@ -5739,7 +5739,7 @@ bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList) 
         return IsVisible;
 
     //If a mob or player is stunned he will not be able to detect stealth
-    if ((u->hasUnitState(UNIT_STAT_STUNDED)) && (u != this))
+    if (u->hasUnitState(UNIT_STAT_STUNDED) && (u != this))
     {
         IsVisible=false;
         return IsVisible;

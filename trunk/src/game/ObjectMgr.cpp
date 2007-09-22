@@ -3831,6 +3831,64 @@ void ObjectMgr::LoadQuestRelationsHelper(QuestRelations& map,char const* table)
     sLog.outString(">> Loaded %u quest relations from %s", count,table);
 }
 
+void ObjectMgr::LoadSpellScriptTarget()
+{
+    mSpellScriptTarget.clear();                             // need for reload case
+
+    uint32 count = 0;
+
+    QueryResult *result = sDatabase.Query("SELECT `entry`,`type`,`targetEntry` FROM `spell_script_target`");
+
+    if(!result)
+    {
+        barGoLink bar(1);
+
+        bar.step();
+
+        sLog.outString();
+        sLog.outErrorDb(">> Loaded 0 SpellScriptTarget from `spell_script_target`. DB table `spell_script_target` is empty.");
+        return;
+    }
+
+    barGoLink bar(result->GetRowCount());
+
+    do
+    {
+        Field *fields = result->Fetch();
+        bar.step();
+
+        uint32 spellId     = fields[0].GetUInt32();
+        uint32 type        = fields[1].GetUInt32();
+        uint32 targetEntry = fields[2].GetUInt32();
+
+        if( !sSpellStore.LookupEntry(spellId) )
+        {
+            sLog.outErrorDb("Table `spell_script_target`: spellId %u listed for TargetEntry %u not exist.",spellId,targetEntry);
+            continue;
+        }
+
+        if( type >= MAX_SPELL_TARGET_TYPE )
+        {
+            sLog.outErrorDb("Table `spell_script_target`: target type %u for TargetEntry %u incorrect.",type,targetEntry);
+            continue;
+        }
+
+        if( type != SPELL_TARGET_TYPE_GAMEOBJECT && targetEntry==0 )
+        {
+            sLog.outErrorDb("Table `spell_script_target`: target entry == 0 for not GO target type (%u).",type);
+            continue;
+        }
+        mSpellScriptTarget.insert(SpellScriptTarget::value_type(spellId,SpellTargetEntry(SpellTargetType(type),targetEntry)));
+
+        count++;
+    } while (result->NextRow());
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString(">> Loaded %u SpellScriptTarget from `spell_script_target`", count);
+}
+
 // Character Dumps (Write/Load)
 
 #define DUMP_TABLE_COUNT 13

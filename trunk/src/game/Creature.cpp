@@ -1470,10 +1470,10 @@ SpellEntry const *Creature::reachWithSpellAttack(Unit *pVictim)
         SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
         float range = GetMaxRange(srange);
         float minrange = GetMinRange(srange);
-        float dist = GetDistanceSq(pVictim);
+        float dist = GetDistance(pVictim);
         //if(!isInFront( pVictim, range ) && spellInfo->AttributesEx )
         //    continue;
-        if( dist > range * range || dist < minrange * minrange )
+        if( dist > range || dist < minrange )
             continue;
         if(HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
             continue;
@@ -1514,10 +1514,10 @@ SpellEntry const *Creature::reachWithSpellCure(Unit *pVictim)
         SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(spellInfo->rangeIndex);
         float range = GetMaxRange(srange);
         float minrange = GetMinRange(srange);
-        float dist = GetDistanceSq(pVictim);
+        float dist = GetDistance(pVictim);
         //if(!isInFront( pVictim, range ) && spellInfo->AttributesEx )
         //    continue;
-        if( dist > range * range || dist < minrange * minrange )
+        if( dist > range || dist < minrange )
             continue;
         if(HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED))
             continue;

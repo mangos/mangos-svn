@@ -92,6 +92,7 @@ bool ChatHandler::HandleReloadAllSpellCommand(const char*)
     HandleReloadSpellAffectCommand("a");
     HandleReloadSpellChainCommand("a");
     HandleReloadSpellProcEventCommand("a");
+    HandleReloadSpellScriptTargetCommand("a");
     return true;
 }
 
@@ -254,6 +255,14 @@ bool ChatHandler::HandleReloadSpellProcEventCommand(const char*)
     sLog.outString( "Re-Loading Spell Proc Event conditions..." );
     objmgr.LoadSpellProcEvents();
     SendGlobalSysMessage("DB table `spell_proc_event` (spell proc trigger requirements) reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadSpellScriptTargetCommand(const char*)
+{
+    sLog.outString( "Re-Loading SpellsScriptTarget..." );
+    objmgr.LoadSpellScriptTarget();
+    SendGlobalSysMessage("DB table `spell_script_target` (spell targets selection in case specific creature/GO requirements.");
     return true;
 }
 
@@ -2230,7 +2239,7 @@ bool ChatHandler::HandleGetDistanceCommand(const char* args)
         return true;
     }
 
-    PSendSysMessage(LANG_DISTANCE, sqrt(m_session->GetPlayer()->GetDistanceSq(pUnit)),sqrt(m_session->GetPlayer()->GetDistance2dSq(pUnit)));
+    PSendSysMessage(LANG_DISTANCE, m_session->GetPlayer()->GetDistance(pUnit),m_session->GetPlayer()->GetDistance2d(pUnit));
 
     return true;
 }
