@@ -13693,17 +13693,6 @@ LOCK TABLES `transports` WRITE;
 
 LOCK TABLES `spell_script_target` WRITE;
 /*!40000 ALTER TABLE `spell_script_target` DISABLE KEYS */;
-INSERT INTO `spell_script_target` VALUES 
-(11637, 1, 6220),
-(11637, 1, 6218),
-(11637, 1, 6219),
-(12709, 1, 6219),
-(12709, 1, 6220),
-(12709, 1, 6218),
-(31210, 2, 17544),
-(31225, 2, 17768),
-(33067, 0, 0), 
-(39094, 0, 0);
 /*!40000 ALTER TABLE `spell_script_target` ENABLE KEYS */;
 UNLOCK TABLES;
 
