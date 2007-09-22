@@ -41,7 +41,7 @@ HomeMovementGenerator<Creature>::_setTargetLocation(Creature & owner)
     if( !&owner )
         return;
 
-    if( owner.hasUnitState(UNIT_STAT_ROOT) || owner.hasUnitState(UNIT_STAT_STUNDED) )
+    if( owner.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNDED) )
         return;
 
     float x, y, z;

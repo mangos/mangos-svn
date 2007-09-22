@@ -51,6 +51,13 @@ class MANGOS_DLL_SPEC TargetedMovementGenerator
         MovementGeneratorType GetMovementGeneratorType() { return TARGETED_MOTION_TYPE; }
 
         Unit* GetTarget() const;
+
+        bool GetDestination(float &x, float &y, float &z)
+        {
+            if(!i_destinationHolder.HasDestination()) return false;
+            i_destinationHolder.GetDestination(x,y,z);
+            return true;
+        }
     private:
 
         void _setTargetLocation(T &);
