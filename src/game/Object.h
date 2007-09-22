@@ -287,9 +287,11 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         const char* GetName() const { return m_name.c_str(); }
         void SetName(std::string newname) { m_name=newname; }
 
-        float GetDistanceSq( const WorldObject* obj ) const;
-        float GetDistance2dSq( const WorldObject* obj ) const;
-        float GetDistanceSq(const float x, const float y, const float z) const;
+        float GetDistanceSq( const WorldObject* obj ) const { float d = GetDistance(obj); return d*d; }
+        float GetDistanceSq(const float x, const float y, const float z) const { float d = GetDistance(x,y,z); return d*d; }
+        float GetDistance( const WorldObject* obj ) const;
+        float GetDistance(const float x, const float y, const float z) const;
+        float GetDistance2dSq( const WorldObject* obj ) const { float d = GetDistance2d(obj); return d*d; }
         float GetDistance2d(const WorldObject* obj) const;
         float GetDistance2d(const float x, const float y) const;
         float GetDistanceZ(const WorldObject* obj) const;

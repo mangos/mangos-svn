@@ -111,6 +111,24 @@ typedef HM_NAMESPACE::hash_map<uint32,GameObjectData> GameObjectDataMap;
 
 typedef std::multimap<uint32,uint32> QuestRelations;
 
+enum SpellTargetType
+{
+    SPELL_TARGET_TYPE_GAMEOBJECT = 0,
+    SPELL_TARGET_TYPE_CREATURE   = 1,
+    SPELL_TARGET_TYPE_DEAD       = 2
+};
+
+#define MAX_SPELL_TARGET_TYPE 3
+
+struct SpellTargetEntry
+{
+    SpellTargetEntry(SpellTargetType type_,uint32 targetEntry_) : type(type_), targetEntry(targetEntry_) {}
+    SpellTargetType type;
+    uint32 targetEntry;
+};
+
+typedef std::multimap<uint32,SpellTargetEntry> SpellScriptTarget;
+
 struct PetLevelInfo
 {
     PetLevelInfo() : health(0), mana(0) { for(int i=0; i < MAX_STATS; ++i ) stats[i] = 0; }
@@ -369,6 +387,10 @@ class ObjectMgr
         void LoadSpellChains();
         void LoadSpellLearnSkills();
         void LoadSpellLearnSpells();
+
+        SpellScriptTarget mSpellScriptTarget;
+        void LoadSpellScriptTarget();
+
         void LoadPetCreateSpells();
         void LoadScripts(ScriptMapMap& scripts, char const* tablename);
         void LoadCreatureTemplates();

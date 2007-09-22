@@ -789,14 +789,14 @@ InstanceData* WorldObject::GetInstanceData()
 }
 
                                                             //slow
-float WorldObject::GetDistanceSq(const WorldObject* obj) const
+float WorldObject::GetDistance(const WorldObject* obj) const
 {
     float dx = GetPositionX() - obj->GetPositionX();
     float dy = GetPositionY() - obj->GetPositionY();
     float dz = GetPositionZ() - obj->GetPositionZ();
     float sizefactor = GetObjectSize() + obj->GetObjectSize();
     float dist = sqrt((dx*dx) + (dy*dy) + (dz*dz)) - sizefactor;
-    return ( dist > 0 ? dist * dist : 0);
+    return ( dist > 0 ? dist : 0);
 }
 
 float WorldObject::GetDistance2d(float x, float y) const
@@ -808,14 +808,14 @@ float WorldObject::GetDistance2d(float x, float y) const
     return ( dist > 0 ? dist : 0);
 }
 
-float WorldObject::GetDistanceSq(const float x, const float y, const float z) const
+float WorldObject::GetDistance(const float x, const float y, const float z) const
 {
     float dx = GetPositionX() - x;
     float dy = GetPositionY() - y;
     float dz = GetPositionZ() - z;
     float sizefactor = GetObjectSize();
     float dist = sqrt((dx*dx) + (dy*dy) + (dz*dz)) - sizefactor;
-    return ( dist > 0 ? dist * dist : 0);
+    return ( dist > 0 ? dist : 0);
 }
 
 float WorldObject::GetDistance2d(const WorldObject* obj) const
@@ -825,12 +825,6 @@ float WorldObject::GetDistance2d(const WorldObject* obj) const
     float sizefactor = GetObjectSize() + obj->GetObjectSize();
     float dist = sqrt((dx*dx) + (dy*dy)) - sizefactor;
     return ( dist > 0 ? dist : 0);
-}
-
-float WorldObject::GetDistance2dSq(const WorldObject* obj) const
-{
-    float dist = GetDistance2d(obj);
-    return dist * dist;
 }
 
 float WorldObject::GetDistanceZ(const WorldObject* obj) const
