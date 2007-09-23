@@ -18,6 +18,12 @@ CREATE TABLE `creature_model_info` (
   PRIMARY KEY  (`modelid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Creature System (Model related info)';
 
+-- Correct possible db problems
+UPDATE `creature_template` SET `bounding_radius`=0 WHERE `bounding_radius` IS NULL;
+UPDATE `creature_template` SET `combat_reach`=0 WHERE `combat_reach` IS NULL;
+UPDATE `creature_template` SET `modelid_m`=0 WHERE `modelid_m` IS NULL;
+UPDATE `creature_template` SET `modelid_f`=0 WHERE `modelid_f` IS NULL;
+
 -- All models defined in creature_template are used to build the table
 INSERT IGNORE INTO `creature_model_info` (`modelid`) SELECT DISTINCT `modelid_m` FROM `creature_template`;
 INSERT IGNORE INTO `creature_model_info` (`modelid`) SELECT DISTINCT `modelid_f` FROM `creature_template`;
