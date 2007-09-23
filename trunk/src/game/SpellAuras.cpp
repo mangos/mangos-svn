@@ -1178,6 +1178,10 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         }
     }
 
+    // Victorious
+    if(GetId()==32216)
+        m_target->ModifyAuraState(AURA_STATE_VICTORY_RUSH, apply);
+
     if(!apply)
     {
         if( (IsQuestTameSpell(GetId())) && caster && caster->isAlive() && m_target && m_target->isAlive())

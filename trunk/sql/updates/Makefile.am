@@ -457,6 +457,9 @@ pkgdata_DATA = \
 	4496_spell_script_target.sql \
 	4498_spell_proc_event.sql \
 	4499_spell_script_target.sql \
+	4501.sql \
+	4503_spell_chain.sql \
+	4503_spell_proc_event.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -895,4 +898,6 @@ EXTRA_DIST = \
 	4498_spell_proc_event.sql \
 	4499_spell_script_target.sql \
 	4501.sql \
+	4503_spell_chain.sql \
+	4503_spell_proc_event.sql \
 	README

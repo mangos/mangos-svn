@@ -4240,6 +4240,17 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
     // (if triggered spell non-custom code must be in next section)
     switch(auraSpellInfo->Id)
     {
+        // Health Restore
+        case 33510:
+        {
+            // at melee hit call std triggered spell
+            if(procFlags & PROC_FLAG_HIT_MELEE)
+                break;
+
+            // else (at range hit) called custom case
+            CastSpell(this, 39557, true, NULL, triggeredByAura);
+            return;
+        }
         // Lightning Capacitor
         case 37657:
         {
@@ -4262,6 +4273,12 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                 RemoveAurasDueToSpell(37658);
                 CastSpell(pVictim, 37661, true, NULL, triggeredByAura);
             }
+            return;
+        }
+        // Healing Discount
+        case 37705:
+        {
+            CastSpell(this, 37706, true, NULL, triggeredByAura);
             return;
         }
     }

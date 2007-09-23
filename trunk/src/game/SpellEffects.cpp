@@ -253,43 +253,67 @@ void Spell::EffectSchoolDMG(uint32 i)
 {
     if( unitTarget && unitTarget->isAlive())
     {
-        // Bloodthirst
-        if(m_spellInfo->Category == 971 && m_spellInfo->SpellVisual == 372)
-            return EffectWeaponDmg(i);
-        // Ferocious Bite
-        else if(m_spellInfo->SpellFamilyName==SPELLFAMILY_DRUID  && (m_spellInfo->SpellFamilyFlags & 0x000800000) && m_spellInfo->SpellVisual==6587)
+        switch(m_spellInfo->SpellFamilyName)
         {
-            damage += m_caster->GetPower(POWER_ENERGY);
-            m_caster->SetPower(POWER_ENERGY,0);
-        }
-        // Mongoose Bite
-        else if(m_spellInfo->SpellFamilyName==SPELLFAMILY_HUNTER && (m_spellInfo->SpellFamilyFlags & 0x000000002) && m_spellInfo->SpellVisual==342)
-        {
-            damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.2);
-        }
-        // Arcane Shoot
-        else if(m_spellInfo->SpellFamilyName==SPELLFAMILY_HUNTER && (m_spellInfo->SpellFamilyFlags & 0x00000800) && m_spellInfo->maxLevel > 0)
-        {
-            damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.15);
-        }
-        // Steady Shot
-        else if(m_spellInfo->SpellFamilyName==SPELLFAMILY_HUNTER && (m_spellInfo->SpellFamilyFlags & 0x100000000LL))
-        {
-            damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.2);
-        }
-        //Judgement of Vengeance
-        else if(m_spellInfo->Id == 31804)
-        {
-            uint32 stacks = 0;
-            Unit::AuraList auras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
-            for(Unit::AuraList::iterator itr = auras.begin(); itr!=auras.end(); itr++)
-                if((*itr)->GetId() == 31803)
-                    stacks++;
-            if(!stacks)
-                //No damage if the target isn't affected by this
-                damage = -1;
-            else
-                damage *= stacks;
+            case SPELLFAMILY_WARRIOR:
+            {
+                // Bloodthirst
+                if((m_spellInfo->SpellFamilyFlags & 0x2000000) && m_spellInfo->SpellVisual == 372)
+                    return EffectWeaponDmg(i);
+                // Victory Rush
+                else if(m_spellInfo->SpellFamilyFlags & 0x10000000000LL)
+                {
+                    damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.45);
+                }
+                break;
+            }
+            case SPELLFAMILY_DRUID:
+            {
+                // Ferocious Bite
+                if((m_spellInfo->SpellFamilyFlags & 0x000800000) && m_spellInfo->SpellVisual==6587)
+                {
+                    damage += m_caster->GetPower(POWER_ENERGY);
+                    m_caster->SetPower(POWER_ENERGY,0);
+                }
+                break;
+            }
+            case SPELLFAMILY_HUNTER:
+            {
+                // Mongoose Bite
+                if((m_spellInfo->SpellFamilyFlags & 0x000000002) && m_spellInfo->SpellVisual==342)
+                {
+                    damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.2);
+                }
+                // Arcane Shoot
+                else if((m_spellInfo->SpellFamilyFlags & 0x00000800) && m_spellInfo->maxLevel > 0)
+                {
+                    damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.15);
+                }
+                // Steady Shot
+                else if((m_spellInfo->SpellFamilyFlags & 0x100000000LL))
+                {
+                    damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.2);
+                }
+                break;
+            }
+            case SPELLFAMILY_PALADIN:
+            {
+                //Judgement of Vengeance
+                if(m_spellInfo->SpellFamilyFlags & 0x800000000LL)
+                {
+                    uint32 stacks = 0;
+                    Unit::AuraList auras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
+                    for(Unit::AuraList::iterator itr = auras.begin(); itr!=auras.end(); itr++)
+                        if((*itr)->GetId() == 31803)
+                            stacks++;
+                    if(!stacks)
+                        //No damage if the target isn't affected by this
+                        damage = -1;
+                    else
+                        damage *= stacks;
+                }
+                break;
+            }
         }
 
         if(damage >= 0)
@@ -2544,7 +2568,8 @@ void Spell::EffectWeaponDmg(uint32 i)
 
     // Bloodthirst
     uint32 BTAura = 0;
-    if(m_spellInfo->Category == 971 && m_spellInfo->SpellVisual == 372)
+    // Bloodthirst
+    if(m_spellInfo->SpellFamilyName==SPELLFAMILY_WARRIOR && (m_spellInfo->SpellFamilyFlags & 0x2000000) && m_spellInfo->SpellVisual == 372)
     {
         switch(m_spellInfo->Id)
         {

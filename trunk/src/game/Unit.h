@@ -462,7 +462,8 @@ enum AuraState
     AURA_STATE_PARRY          = 7,                          // unsure
     AURA_STATE_UNKNOWN3       = 8,
     AURA_STATE_UNKNOWN4       = 9,
-    AURA_STATE_UNKNOWN5       = 10,
+    AURA_STATE_VICTORY_RUSH   = 10,                         // for warrior
+    AURA_STATE_KILL_COMMAND   = 10,                         // for hunter
     AURA_STATE_CRIT           = 11,
     AURA_STATE_UNKNOWN6       = 12,
     AURA_STATE_UNKNOWN7       = 13,
