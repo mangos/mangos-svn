@@ -398,9 +398,19 @@ void ObjectMgr::LoadCreatureTemplates()
         if(!cInfo)
             continue;
 
-        FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(cInfo->faction);
+        FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(cInfo->faction_A);
         if(!factionTemplate)
-            sLog.outErrorDb("Creature (Entry: %u) have non-existed faction template (%u)", cInfo->Entry, cInfo->faction);
+            sLog.outErrorDb("Creature (Entry: %u) have non-existed faction_A template (%u)", cInfo->Entry, cInfo->faction_A);
+        factionTemplate = sFactionTemplateStore.LookupEntry(cInfo->faction_H);
+        if(!factionTemplate)
+            sLog.outErrorDb("Creature (Entry: %u) have non-existed faction_H template (%u)", cInfo->Entry, cInfo->faction_H);
+
+        CreatureModelInfo const* minfo = sCreatureModelStorage.LookupEntry<CreatureModelInfo>(cInfo->DisplayID_A);
+        if (!minfo)
+            sLog.outErrorDb("Creature (Entry: %u) have non-existed modelId_A (%u)", cInfo->Entry, cInfo->DisplayID_A);
+        minfo = sCreatureModelStorage.LookupEntry<CreatureModelInfo>(cInfo->DisplayID_H);
+        if (!minfo)
+            sLog.outErrorDb("Creature (Entry: %u) have non-existed modelId_H (%u)", cInfo->Entry, cInfo->DisplayID_H);
 
         if(cInfo->dmgschool >= MAX_SPELL_SCHOOL)
         {
@@ -433,13 +443,62 @@ void ObjectMgr::LoadCreatureAddons()
     sLog.outString();
 }
 
+EquipmentInfo const* ObjectMgr::GetEquipmentInfo(uint32 entry)
+{
+    return sEquipmentStorage.LookupEntry<EquipmentInfo>(entry);
+}
+
+void ObjectMgr::LoadEquipmentTemplates()
+{
+    sEquipmentStorage.Load();
+
+    sLog.outString( ">> Loaded %u equipment template", sEquipmentStorage.RecordCount );
+    sLog.outString();
+}
+
+CreatureModelInfo const* ObjectMgr::GetCreatureModelInfo(uint32 modelid)
+{
+    return sCreatureModelStorage.LookupEntry<CreatureModelInfo>(modelid);
+}
+
+CreatureModelInfo const* ObjectMgr::GetCreatureModelRandomGender(uint32 display_id)
+{
+    CreatureModelInfo const *minfo = GetCreatureModelInfo(display_id);
+    if(!minfo)
+        return NULL;
+
+    // If a model for another gender exists, 50% chance to use it
+    if(minfo->modelid_other_gender != 0 && urand(0,1) == 0)
+    {
+        CreatureModelInfo const *minfo_tmp = GetCreatureModelInfo(minfo->modelid_other_gender);
+        if(!minfo_tmp)
+        {
+            sLog.outErrorDb("Model (Entry: %u) has modelid_other_gender %u not found in table `creature_model_based_info`. ", minfo->modelid, minfo->modelid_other_gender);
+            return minfo;                                   // not fatal, just use the previous one
+        }
+        else
+           return minfo_tmp;
+    }
+    else
+        return minfo;
+}
+
+void ObjectMgr::LoadCreatureModelInfo()
+{
+    sCreatureModelStorage.Load();
+
+    sLog.outString( ">> Loaded %u creature model based info", sCreatureModelStorage.RecordCount );
+    sLog.outString();
+}
+
 void ObjectMgr::LoadCreatures()
 {
     uint32 count = 0;
-
-    //                                            0      1    2     3            4            5            6             7               8           9
-    QueryResult *result = sDatabase.Query("SELECT `creature`.`guid`,`id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,"
-    //   10                 11                 12                 13                  14          15        16           17             18
+    //                                                       0      1    2     3
+    QueryResult *result = sDatabase.Query("SELECT `creature`.`guid`,`id`,`map`,`modelid`,"
+    //    4             5            6            7            8             9               10          11
+        "`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,"
+    //   12                 13                 14                 15                  16          17        18           19             20      21
         "`spawn_position_x`,`spawn_position_y`,`spawn_position_z`,`spawn_orientation`,`curhealth`,`curmana`,`DeathState`,`MovementType`,`auras`,`event` "
         "FROM `creature` LEFT OUTER JOIN `game_event_creature` ON `creature`.`guid`=`game_event_creature`.`guid`");
 
@@ -467,23 +526,25 @@ void ObjectMgr::LoadCreatures()
 
         data.id             = fields[ 1].GetUInt32();
         data.mapid          = fields[ 2].GetUInt32();
-        data.posX           = fields[ 3].GetFloat();
-        data.posY           = fields[ 4].GetFloat();
-        data.posZ           = fields[ 5].GetFloat();
-        data.orientation    = fields[ 6].GetFloat();
-        data.spawntimesecs  = fields[ 7].GetUInt32();
-        data.spawndist      = fields[ 8].GetFloat();
-        data.currentwaypoint= fields[ 9].GetUInt32();
-        data.spawn_posX     = fields[10].GetFloat();
-        data.spawn_posY     = fields[11].GetFloat();
-        data.spawn_posZ     = fields[12].GetFloat();
-        data.spawn_orientation = fields[13].GetFloat();
-        data.curhealth      = fields[14].GetUInt32();
-        data.curmana        = fields[15].GetUInt32();
-        data.deathState     = fields[16].GetUInt8();
-        data.movementType   = fields[17].GetUInt8();
-        data.auras          = fields[18].GetCppString();
-        int16 gameEvent     = fields[19].GetInt16();
+        data.displayid      = fields[ 3].GetUInt32();
+        data.equipmentId    = fields[ 4].GetUInt32();
+        data.posX           = fields[ 5].GetFloat();
+        data.posY           = fields[ 6].GetFloat();
+        data.posZ           = fields[ 7].GetFloat();
+        data.orientation    = fields[ 8].GetFloat();
+        data.spawntimesecs  = fields[ 9].GetUInt32();
+        data.spawndist      = fields[10].GetFloat();
+        data.currentwaypoint= fields[11].GetUInt32();
+        data.spawn_posX     = fields[12].GetFloat();
+        data.spawn_posY     = fields[13].GetFloat();
+        data.spawn_posZ     = fields[14].GetFloat();
+        data.spawn_orientation = fields[15].GetFloat();
+        data.curhealth      = fields[16].GetUInt32();
+        data.curmana        = fields[17].GetUInt32();
+        data.deathState     = fields[18].GetUInt8();
+        data.movementType   = fields[19].GetUInt8();
+        data.auras          = fields[20].GetCppString();
+        int16 gameEvent     = fields[21].GetInt16();
 
         if (gameEvent==0)                                   // if not this is to be managed by GameEvent System
             AddCreatureToGrid(guid, &data);
@@ -519,9 +580,9 @@ void ObjectMgr::LoadGameobjects()
 {
     uint32 count = 0;
 
-    //                                            0      1    2     3            4            5            6
+    //                                                         0      1    2     3            4            5            6
     QueryResult *result = sDatabase.Query("SELECT `gameobject`.`guid`,`id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,"
-    //   7           8           9           10          11     12              13             14
+    //   7           8           9           10          11     12              13             14         15
         "`rotation0`,`rotation1`,`rotation2`,`rotation3`,`loot`,`spawntimesecs`,`animprogress`,`dynflags`,`event` "
         "FROM `gameobject` LEFT OUTER JOIN `game_event_gameobject` ON `gameobject`.`guid`=`game_event_gameobject`.`guid`");
 
@@ -2640,15 +2701,23 @@ uint16 ObjectMgr::GetTaxiMount( uint32 id, uint32 team )
         {
             CreatureInfo const *ci = objmgr.GetCreatureTemplate(node->alliance_mount_type);
             if(ci)
-                mount_id = ci->randomDisplayID();
+                mount_id = ci->DisplayID_A;
         }
         if (team == HORDE)
         {
             CreatureInfo const *ci = objmgr.GetCreatureTemplate(node->horde_mount_type);
             if(ci)
-                mount_id = ci->randomDisplayID();
+                mount_id = ci->DisplayID_H;
         }
     }
+    CreatureModelInfo const *minfo = objmgr.GetCreatureModelInfo(mount_id);
+    if(!minfo)
+    {
+        sLog.outErrorDb("Creature (Entry: %u) has model %u not found in table `creature_model_based_info`, can't load. ",id,mount_id);
+        return false;
+    }
+    if(minfo->modelid_other_gender!=0)
+        mount_id = urand(0,1) ? mount_id : minfo->modelid_other_gender;
 
     return mount_id;
 }

@@ -894,4 +894,5 @@ EXTRA_DIST = \
 	4496_spell_script_target.sql \
 	4498_spell_proc_event.sql \
 	4499_spell_script_target.sql \
+	4501.sql \
 	README
