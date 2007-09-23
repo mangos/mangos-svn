@@ -3049,7 +3049,7 @@ bool ChatHandler::HandleAnimCommand(const char* args)
     WorldPacket data( SMSG_EMOTE, (8+4) );
     data << anim_id << m_session->GetPlayer( )->GetGUID();
     WPAssert(data.size() == 12);
-    MapManager::Instance().GetMap(m_session->GetPlayer()->GetMapId(), m_session->GetPlayer())->MessageBoardcast(m_session->GetPlayer(), &data, true);
+    MapManager::Instance().GetMap(m_session->GetPlayer()->GetMapId(), m_session->GetPlayer())->MessageBroadcast(m_session->GetPlayer(), &data, true);
     return true;
 }
 
