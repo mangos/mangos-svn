@@ -64,9 +64,9 @@ void Totem::Summon(Unit* owner)
     if(owner->GetTypeId()==TYPEID_PLAYER && cinfo)
     {
         if(((Player*)owner)->GetTeam()==HORDE)
-            SetUInt32Value(UNIT_FIELD_DISPLAYID,cinfo->DisplayID_m);
+            SetUInt32Value(UNIT_FIELD_DISPLAYID, cinfo->DisplayID_H);
         else
-            SetUInt32Value(UNIT_FIELD_DISPLAYID,cinfo->DisplayID_f? cinfo->DisplayID_f : cinfo->DisplayID_m);
+            SetUInt32Value(UNIT_FIELD_DISPLAYID, cinfo->DisplayID_A);
     }
 
     WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM, 8);

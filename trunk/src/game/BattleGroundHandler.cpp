@@ -47,7 +47,7 @@ void WorldSession::HandleBattleGroundHelloOpcode( WorldPacket & recv_data )
     if(!unit->isBattleMaster())                             // it's not battlemaster
         return;
 
-    switch(unit->GetCreatureInfo()->faction)
+    switch(unit->GetCreatureInfo()->faction_A)
     {
         // AV Battlemaster
         case 1214:

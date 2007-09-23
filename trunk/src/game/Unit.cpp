@@ -6398,8 +6398,14 @@ Creature* Unit::SummonCreature(uint32 id, float x, float y, float z, float ang,T
     TemporarySummon* pCreature = new TemporarySummon(this, GetGUID());
 
     pCreature->SetInstanceId(GetInstanceId());
+    uint32 team = 0;
+    if (GetTypeId()==TYPEID_PLAYER)
+        if (((Player*)this)->GetTeam()==HORDE)
+            team = HORDE;
+        else if (((Player*)this)->GetTeam()==ALLIANCE)
+            team = ALLIANCE;
 
-    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), GetMapId(), x, y, z, ang, id))
+    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), GetMapId(), x, y, z, ang, id, team))
     {
         delete pCreature;
         return NULL;

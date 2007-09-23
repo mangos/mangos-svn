@@ -542,6 +542,11 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
     if (!charID)
         return false;
 
+    char* team = strtok(NULL, " ");
+    int32 teamval = 0;
+    if (team) { teamval = atoi(team); }
+    if (teamval < 0) { teamval = 0; }
+
     uint32 id  = atoi(charID);
 
     Player *chr = m_session->GetPlayer();
@@ -551,7 +556,7 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
     float o = chr->GetOrientation();
 
     Creature* pCreature = new Creature(chr);
-    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(), x, y, z, o, id))
+    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(), x, y, z, o, id, (uint32)teamval))
     {
         delete pCreature;
         return false;
@@ -1228,6 +1233,7 @@ bool ChatHandler::HandleSetModelCommand(const char* args)
     }
 
     pCreature->SetUInt32Value(UNIT_FIELD_DISPLAYID, displayId);
+    pCreature->SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, displayId);
 
     pCreature->SaveToDB();
 
@@ -2182,7 +2188,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
 
         Creature* wpCreature = new Creature(chr);
         if (!wpCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(),
-            chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(), chr->GetOrientation(), VISUAL_WAYPOINT))
+            chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(), chr->GetOrientation(), VISUAL_WAYPOINT,0))
         {
             PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, VISUAL_WAYPOINT);
             delete wpCreature;
@@ -2277,7 +2283,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
                 // re-create
                 Creature* wpCreature2 = new Creature(chr);
                 if (!wpCreature2->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(),
-                    chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(), chr->GetOrientation(), VISUAL_WAYPOINT))
+                    chr->GetPositionX(), chr->GetPositionY(), chr->GetPositionZ(), chr->GetOrientation(), VISUAL_WAYPOINT, 0))
                 {
                     PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, VISUAL_WAYPOINT);
                     delete wpCreature2;
@@ -2762,7 +2768,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
             float o = chr->GetOrientation();
 
             Creature* wpCreature = new Creature(chr);
-            if (!wpCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(), x, y, z, o, id))
+            if (!wpCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(), x, y, z, o, id, 0))
             {
                 PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, id);
                 delete wpCreature;
@@ -2807,7 +2813,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
         float o = chr->GetOrientation();
 
         Creature* pCreature = new Creature(chr);
-        if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(), x, y, z, o, id))
+        if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(), x, y, z, o, id, 0))
         {
             PSendSysMessage(LANG_WAYPOINT_VP_NOTCREATED, id);
             delete pCreature;
@@ -2855,7 +2861,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
         float o = chr->GetOrientation();
 
         Creature* pCreature = new Creature(chr);
-        if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(), x, y, z, o, id))
+        if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), chr->GetMapId(), x, y, z, o, id, 0))
         {
             PSendSysMessage(LANG_WAYPOINT_NOTCREATED, id);
             delete pCreature;

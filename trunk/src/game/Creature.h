@@ -144,8 +144,8 @@ struct TrainerSpell
 struct CreatureInfo
 {
     uint32  Entry;
-    uint32  DisplayID_m;
-    uint32  DisplayID_f;
+    uint32  DisplayID_A;
+    uint32  DisplayID_H;
     char*   Name;
     char*   SubName;
     uint32  minlevel;
@@ -155,7 +155,8 @@ struct CreatureInfo
     uint32  minmana;
     uint32  maxmana;
     uint32  armor;
-    uint32  faction;
+    uint32  faction_A;
+    uint32  faction_H;
     uint32  npcflag;
     float   speed;
     uint32  rank;
@@ -168,7 +169,6 @@ struct CreatureInfo
     uint32  Flags;
     uint32  dynamicflags;
     uint32  family;
-    float   bounding_radius;
     uint32  trainer_type;
     uint32  trainer_spell;
     uint32  classNum;
@@ -176,13 +176,9 @@ struct CreatureInfo
     float   minrangedmg;
     float   maxrangedmg;
     uint32  rangedattackpower;
-    float   combat_reach;
     uint32  type;
     uint32  civilian;
     uint32  flag1;
-    uint32  equipmodel[3];
-    uint32  equipinfo[3];
-    uint32  equipslot[3];
     uint32  lootid;
     uint32  pickpocketLootId;
     uint32  SkinLootId;
@@ -202,9 +198,17 @@ struct CreatureInfo
     uint32  MovementType;
     uint32 InhabitType;
     uint32 RacialLeader;
+    uint32 RegenHealth;
+    uint32 equipmentId;
     char const* ScriptName;
+};
 
-    uint32 randomDisplayID() const;
+struct EquipmentInfo
+{
+    uint32  entry;
+    uint32  equipmodel[3];
+    uint32  equipinfo[3];
+    uint32  equipslot[3];
 };
 
 // from `creature` table
@@ -212,6 +216,8 @@ struct CreatureData
 {
     uint32 id;                                              // entry in creature_template
     uint32 mapid;
+    uint32 displayid;
+    int32 equipmentId;
     float posX;
     float posY;
     float posZ;
@@ -245,6 +251,15 @@ struct CreatureDataAddon
     uint32 auralevels;
     uint32 auraapplications;
     uint32 aurastate;
+};
+
+struct CreatureModelInfo
+{
+    uint32 modelid;
+    float bounding_radius;
+    float combat_reach;
+    uint32 gender;
+    uint32 modelid_other_gender;
 };
 
 enum InhabitTypeValues
@@ -282,17 +297,19 @@ class MANGOS_DLL_SPEC Creature : public Unit
         void AddToWorld();
         void RemoveFromWorld();
 
-        bool Create (uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 Entry);
-        bool CreateFromProto(uint32 guidlow,uint32 Entry);
+        bool Create (uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 Entry, uint32 team, const CreatureData *data = NULL);
+        bool CreateFromProto(uint32 guidlow,uint32 Entry,uint32 team, const CreatureData *data = NULL);
         bool LoadCreaturesAddon();
         void SelectLevel(const CreatureInfo *cinfo);
-
+        bool LoadEquipment(uint32 equip_entry);
+        
         uint32 GetDBTableGUIDLow() const { return m_DBTableGuid; }
         char const* GetSubName() const { return GetCreatureInfo()->SubName; }
 
         void Update( uint32 time );                         // overwrited Unit::Update
         void GetRespawnCoord(float &x, float &y, float &z) const { x = respawn_cord[0]; y = respawn_cord[1]; z = respawn_cord[2]; }
         void GetRespawnDist(float &d) const { d = m_respawnradius; }
+        uint32 GetEquipmentId() const { return m_equipmentId; }
 
         bool isPet() const { return m_isPet; }
         void SetRespawnCoord(float x, float y, float z) { respawn_cord[0] = x; respawn_cord[1] = y; respawn_cord[2] = z; }
@@ -470,7 +487,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool hasInvolvedQuest(uint32 quest_id)  const;
 
         GridReference<Creature> &GetGridRef() { return m_gridRef; }
-
+        bool isRegeneratingHealth() { return m_regenHealth; }
         virtual uint8 GetPetAutoSpellSize() const { return CREATURE_MAX_SPELLS; }
         virtual uint32 GePetAutoSpellOnPos(uint8 pos) const
         {
@@ -523,6 +540,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool m_AlreadyCallAssistence;
 
         uint32 m_DBTableGuid;
+        bool m_regenHealth;
+        uint32 m_equipmentId;
     private:
         GridReference<Creature> m_gridRef;
 };

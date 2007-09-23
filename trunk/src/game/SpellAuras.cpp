@@ -1227,9 +1227,25 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
             if(BattleGround *bg = sBattleGroundMgr.GetBattleGround(((Player*)m_target)->GetBattleGroundId()))
                 bg->HandleDropFlag((Player*)m_target);
 
-        uint32 displayId = ci->randomDisplayID();
-        if(displayId != 0)
-            m_target->Mount(displayId);
+        uint32 team = 0;
+        if (m_target->GetTypeId()==TYPEID_PLAYER)
+            if (((Player*)m_target)->GetTeam()==HORDE)
+                team = HORDE;
+            else if (((Player*)m_target)->GetTeam()==ALLIANCE)
+                team = ALLIANCE;
+
+        uint32 displayId = (team==HORDE) ? ci->DisplayID_H : ci->DisplayID_A;
+
+        CreatureModelInfo const *minfo = objmgr.GetCreatureModelRandomGender(displayId);
+        if(!minfo)
+        {
+            sLog.outErrorDb("Creature (Entry: %u) has model %u not found in table `creature_model_based_info`, can't load. ", m_modifier.m_miscvalue, displayId);
+            return;
+        }
+        else
+            displayId = minfo->modelid;                     // can change for other gender
+
+        m_target->Mount(displayId);
     }
     else
     {
@@ -1533,7 +1549,7 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
             }
             else
             {
-                m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, ci->randomDisplayID());
+                m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, ci->DisplayID_A); // Will use the default model here
             }
             m_target->setTransForm(GetSpellProto()->Id);
         }
@@ -1758,7 +1774,7 @@ void Aura::HandleModPossess(bool apply, bool Real)
             else if(m_target->GetTypeId() == TYPEID_UNIT)
             {
                 CreatureInfo const *cinfo = ((Creature*)m_target)->GetCreatureInfo();
-                m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
+                m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction_A);
             }
 
             caster->SetCharm(0);
@@ -1886,10 +1902,10 @@ void Aura::HandleModCharm(bool apply, bool Real)
                     if(Unit* owner = m_target->GetOwner())
                         m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,owner->getFaction());
                     else if(cinfo)
-                        m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
+                        m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction_A);
                 }
                 else if(cinfo)                              // normal creature
-                    m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
+                    m_target->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction_A);
 
                 // restore UNIT_FIELD_BYTES_0
                 if(cinfo && caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_WARLOCK && cinfo->type == CREATURE_TYPE_DEMON)

@@ -1638,32 +1638,24 @@ bool Pet::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float 
         return false;
     }
 
-    uint32 display_id = cinfo->randomDisplayID();
+    CreatureModelInfo const *minfo = objmgr.GetCreatureModelRandomGender(cinfo->DisplayID_A);
+    if(!minfo)
+    {
+        sLog.outErrorDb("Creature (Entry: %u) has model %u not found in table `creature_model_based_info`, can't load.", Entry, cinfo->DisplayID_A);
+        return false;
+    }
 
-    SetUInt32Value(UNIT_FIELD_DISPLAYID,display_id );
-    SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID,display_id );
-    SetUInt32Value(UNIT_FIELD_BYTES_2,1);                   // let creature used equiped weapon in fight
+    SetUInt32Value(UNIT_FIELD_DISPLAYID, minfo->modelid);
+    SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, minfo->modelid);
+    SetUInt32Value(UNIT_FIELD_BYTES_2, 1);                   // let creature used equiped weapon in fight
 
     SetName(GetCreatureInfo()->Name);
 
-    //this is probably wrong
-    SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, cinfo->equipmodel[0]);
-    SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO , cinfo->equipinfo[0]);
-    SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO  + 1, cinfo->equipslot[0]);
-
-    SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY+1, cinfo->equipmodel[1]);
-    SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 2, cinfo->equipinfo[1]);
-    SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 2 + 1, cinfo->equipslot[1]);
-
-    SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY+2, cinfo->equipmodel[2]);
-    SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 4, cinfo->equipinfo[2]);
-    SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 4 + 1, cinfo->equipslot[2]);
-    
-    CreatureDisplayInfoEntry const* ScaleEntry = sCreatureDisplayInfoStore.LookupEntry(display_id);
+    CreatureDisplayInfoEntry const* ScaleEntry = sCreatureDisplayInfoStore.LookupEntry(minfo->modelid);
     SetFloatValue(OBJECT_FIELD_SCALE_X, ScaleEntry ? ScaleEntry->scale : 1 );
 
-    SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,cinfo->bounding_radius);
-    SetFloatValue(UNIT_FIELD_COMBATREACH,cinfo->combat_reach );
+    SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,minfo->bounding_radius);
+    SetFloatValue(UNIT_FIELD_COMBATREACH,minfo->combat_reach );
 
     SetSpeed(MOVE_WALK,     cinfo->speed );
     SetSpeed(MOVE_RUN,      cinfo->speed );

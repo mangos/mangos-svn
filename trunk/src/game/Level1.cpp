@@ -176,7 +176,7 @@ bool ChatHandler::HandleGMmodeCommand(const char* args)
 //Enable\Dissable Invisible mode
 bool ChatHandler::HandleVisibleCommand(const char* args)
 {
-    if (!args)
+    if (!*args)
     {
         SendSysMessage(LANG_USE_BOL);
         PSendSysMessage(LANG_YOU_ARE, m_session->GetPlayer()->isGMVisible() ?  LANG_VISIBLE : LANG_INVISIBLE);

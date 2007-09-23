@@ -915,6 +915,8 @@ CREATE TABLE `creature` (
   `guid` int(11) unsigned NOT NULL auto_increment COMMENT 'Global Unique Identifier',
   `id` int(11) unsigned NOT NULL default '0' COMMENT 'Creature Identifier',
   `map` int(11) unsigned NOT NULL default '0' COMMENT 'Map Identifier',
+  `modelid` int(11) unsigned default '0',
+  `equipment_id` int(11) NOT NULL default '0',
   `position_x` float NOT NULL default '0',
   `position_y` float NOT NULL default '0',
   `position_z` float NOT NULL default '0',
@@ -932,7 +934,8 @@ CREATE TABLE `creature` (
   `MovementType` tinyint(3) unsigned NOT NULL default '0',
   `auras` longtext,
   PRIMARY KEY  (`guid`),
-  KEY `idx_map` (`map`)
+  KEY `idx_map` (`map`),
+  KEY `index_id` (`id`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Creature System';
 
 --
@@ -973,6 +976,32 @@ CREATE TABLE `creature_addon` (
 LOCK TABLES `creature_addon` WRITE;
 /*!40000 ALTER TABLE `creature_addon` DISABLE KEYS */;
 /*!40000 ALTER TABLE `creature_addon` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for creature_equip_template
+--
+CREATE TABLE `creature_equip_template` (
+  `entry` int(11) unsigned NOT NULL default '0' COMMENT 'Unique entry',
+  `equipmodel1` int(11) unsigned NOT NULL default '0',
+  `equipmodel2` int(11) unsigned NOT NULL default '0',
+  `equipmodel3` int(11) unsigned NOT NULL default '0',
+  `equipinfo1` int(11) unsigned NOT NULL default '0',
+  `equipinfo2` int(11) unsigned NOT NULL default '0',
+  `equipinfo3` int(11) unsigned NOT NULL default '0',
+  `equipslot1` int(11) NOT NULL default '0',
+  `equipslot2` int(11) NOT NULL default '0',
+  `equipslot3` int(11) NOT NULL default '0',
+  PRIMARY KEY  (`entry`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Creature System (Equipment)';
+
+--
+-- Dumping data for table `creature_equip_template`
+--
+
+LOCK TABLES `creature_equip_template` WRITE;
+/*!40000 ALTER TABLE ``creature_equip_template` DISABLE KEYS */;
+/*!40000 ALTER TABLE ``creature_equip_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1018,6 +1047,29 @@ CREATE TABLE `creature_loot_template` (
 LOCK TABLES `creature_loot_template` WRITE;
 /*!40000 ALTER TABLE `creature_loot_template` DISABLE KEYS */;
 /*!40000 ALTER TABLE `creature_loot_template` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
+-- Table structure for creature_model_info
+--
+
+DROP TABLE IF EXISTS `creature_model_info`;
+CREATE TABLE `creature_model_info` (
+  `modelid` int(11) unsigned NOT NULL default '0',
+  `bounding_radius` float NOT NULL default '0',
+  `combat_reach` float NOT NULL default '0',
+  `gender` tinyint(2) unsigned NOT NULL default '2',
+  `modelid_other_gender` int(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`modelid`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Creature System (Model related info)';
+
+--
+-- Dumping data for table `creature_model_info`
+--
+
+LOCK TABLES `creature_model_info` WRITE;
+/*!40000 ALTER TABLE `creature_model_info` DISABLE KEYS */;
+/*!40000 ALTER TABLE `creature_model_info` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1133,10 +1185,10 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `creature_template`;
 CREATE TABLE `creature_template` (
   `entry` int(11) unsigned NOT NULL default '0',
-  `modelid_m` int(11) unsigned default '0',
-  `modelid_f` int(11) unsigned default '0',
-  `name` varchar(100) NOT NULL default '0',
-  `subname` varchar(100) default NULL,
+  `modelid_A` int(11) unsigned NOT NULL default '0',
+  `modelid_H` int(11) unsigned NOT NULL default '0',
+  `name` char(100) NOT NULL default '0',
+  `subname` char(100) default NULL,
   `minlevel` tinyint(3) unsigned default '1',
   `maxlevel` tinyint(3) unsigned default '1',
   `minhealth` int(5) unsigned default '0',
@@ -1144,20 +1196,20 @@ CREATE TABLE `creature_template` (
   `minmana` int(5) unsigned default '0',
   `maxmana` int(5) unsigned default '0',
   `armor` int(10) unsigned NOT NULL default '0',
-  `faction` int(4) unsigned default '0',
+  `faction_A` int(4) unsigned NOT NULL default '0',
+  `faction_H` int(4) unsigned NOT NULL default '0',
   `npcflag` int(4) unsigned default '0',
   `speed` float default '0',
   `rank` tinyint(3) unsigned default '0',
   `mindmg` float default '0',
   `maxdmg` float default '0',
-  `dmgschool` tinyint(1) not NULL default 0,
+  `dmgschool` tinyint(1) NOT NULL default '0',
   `attackpower` int(10) unsigned NOT NULL default '0',
   `baseattacktime` int(4) unsigned default '0',
   `rangeattacktime` int(4) unsigned default '0',
   `flags` int(11) unsigned default '0',
   `dynamicflags` int(11) unsigned default '0',
   `family` int(11) default '0',
-  `bounding_radius` float default '0',
   `trainer_type` tinyint(3) default '0',
   `trainer_spell` int(11) unsigned default '0',
   `class` tinyint(3) unsigned default '0',
@@ -1165,19 +1217,9 @@ CREATE TABLE `creature_template` (
   `minrangedmg` float NOT NULL default '0',
   `maxrangedmg` float NOT NULL default '0',
   `rangedattackpower` smallint(5) unsigned NOT NULL default '0',
-  `combat_reach` float NOT NULL default '0',
   `type` tinyint(3) unsigned default '0',
   `civilian` tinyint(3) unsigned NOT NULL default '0',
   `flag1` int(11) unsigned default '0',
-  `equipmodel1` int(10) unsigned NOT NULL default '0',
-  `equipmodel2` int(10) unsigned NOT NULL default '0',
-  `equipmodel3` int(10) unsigned NOT NULL default '0',
-  `equipinfo1` int(10) unsigned NOT NULL default '0',
-  `equipinfo2` int(10) unsigned NOT NULL default '0',
-  `equipinfo3` int(10) unsigned NOT NULL default '0',
-  `equipslot1` int(11) NOT NULL default '0',
-  `equipslot2` int(11) NOT NULL default '0',
-  `equipslot3` int(11) NOT NULL default '0',
   `lootid` int(10) unsigned NOT NULL default '0',
   `pickpocketloot` int(10) unsigned NOT NULL default '0',
   `skinloot` int(10) unsigned NOT NULL default '0',
@@ -1193,11 +1235,13 @@ CREATE TABLE `creature_template` (
   `spell4` int(11) unsigned NOT NULL default '0',
   `mingold` int(30) unsigned NOT NULL default '0',
   `maxgold` int(30) unsigned NOT NULL default '0',
-  `AIName` varchar(128) NOT NULL default '',
+  `AIName` char(128) NOT NULL default '',
   `MovementType` tinyint(3) unsigned NOT NULL default '0',
   `InhabitType` tinyint(1) unsigned NOT NULL default '3',
   `RacialLeader` tinyint(1) unsigned NOT NULL default '0',
-  `ScriptName` varchar(128) NOT NULL default '',
+  `RegenHealth` tinyint(1) unsigned NOT NULL default '1',
+  `equipment_id` int(11) unsigned NOT NULL default '0',
+  `ScriptName` char(128) NOT NULL default '',
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System';
 

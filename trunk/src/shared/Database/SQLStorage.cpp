@@ -26,8 +26,10 @@ extern DatabasePostgre  sDatabase;
 extern DatabaseMysql  sDatabase;
 #endif
 
-const char CreatureInfofmt[]="iiissiiiiiiiiififfiiiiiiifiiiiffifiiiiiiiiiiiiiiiiiiiiiiiiiiisiiis";
+const char CreatureInfofmt[]="iiissiiiiiiiiiififfiiiiiiiiiiiffiiiiiiiiiiiiiiiiiiisiiiiis";
 const char CreatureDataAddonInfofmt[]="iiiiiiiiiiii";
+const char CreatureModelfmt[]="iffii";
+const char EquipmentInfofmt[]="iiiiiiiiii";
 const char GameObjectInfofmt[]="iiisiifiiiiiiiiiiiiiiiiiiiiiiiis";
 const char ItemPrototypefmt[]="iiiisiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffiffiffiffiffiiiiiiiiiifiiifiiiiiifiiiiiifiiiiiifiiiiiifiiiisiiiiiiiiiiiiiiiiiiiiiiiiiifsi";
 const char PageTextfmt[]="isi";
@@ -35,6 +37,8 @@ const char SpellThreatfmt[]="ii";
 
 SQLStorage sCreatureStorage(CreatureInfofmt,"entry","creature_template");
 SQLStorage sCreatureDataAddonStorage(CreatureDataAddonInfofmt,"guid","creature_addon");
+SQLStorage sCreatureModelStorage(CreatureModelfmt,"modelid","creature_model_info");
+SQLStorage sEquipmentStorage(EquipmentInfofmt,"entry","creature_equip_template");
 SQLStorage sGOStorage(GameObjectInfofmt,"entry","gameobject_template");
 SQLStorage sItemStorage(ItemPrototypefmt,"entry","item_template");
 SQLStorage sPageTextStore(PageTextfmt,"entry","page_text");

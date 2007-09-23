@@ -534,6 +534,12 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Item Texts..." );
     objmgr.LoadItemTexts();
 
+    sLog.outString( "Loading Creature Model Based Info Data..." );
+    objmgr.LoadCreatureModelInfo();
+
+    sLog.outString( "Loading Equipment templates...");
+    objmgr.LoadEquipmentTemplates();
+
     sLog.outString( "Loading Creature templates..." );
     objmgr.LoadCreatureTemplates();
 

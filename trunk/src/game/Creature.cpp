@@ -40,16 +40,6 @@
 // apply implementation of the singletons
 #include "Policies/SingletonImp.h"
 
-uint32 CreatureInfo::randomDisplayID() const
-{
-    if(DisplayID_f==0)
-        return DisplayID_m;
-    else if(DisplayID_m==0)
-        return DisplayID_f;
-    else
-        return urand(0,1) ? DisplayID_m : DisplayID_f;
-}
-
 Creature::Creature( WorldObject *instantiator ) :
 Unit( instantiator ), i_AI(NULL),
 lootForPickPocketed(false), lootForBody(false), m_groupLootTimer(0), lootingGroupLeaderGUID(0),
@@ -292,6 +282,8 @@ void Creature::RegenerateMana()
 
 void Creature::RegenerateHealth()
 {
+    if (!isRegeneratingHealth())
+        return;
     uint32 curValue = GetHealth();
     uint32 maxValue = GetMaxHealth();
 
@@ -326,7 +318,7 @@ void Creature::AIM_Initialize()
     i_AI = FactorySelector::selectAI(this);
 }
 
-bool Creature::Create (uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 Entry)
+bool Creature::Create (uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 Entry, uint32 team, const CreatureData *data)
 {
     respawn_cord[0] = x;
     respawn_cord[1] = y;
@@ -342,7 +334,7 @@ bool Creature::Create (uint32 guidlow, uint32 mapid, float x, float y, float z, 
 
     SetOrientation(ang);
     //oX = x;     oY = y;    dX = x;    dY = y;    m_moveTime = 0;    m_startMove = 0;
-    return  CreateFromProto(guidlow, Entry);
+    return  CreateFromProto(guidlow, Entry, team, data);
 }
 
 uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
@@ -949,9 +941,33 @@ void Creature::SaveToDB()
     // update in loaded data
     CreatureData& data = objmgr.NewCreatureData(m_DBTableGuid);
 
+    uint32 displayId = GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID);
+
+    // check if it's a custom model and if not, use 0 for displayId
+    CreatureInfo const *cinfo = GetCreatureInfo();
+    if(cinfo)
+    {
+        if(displayId != cinfo->DisplayID_A && displayId != cinfo->DisplayID_H)
+        {
+            CreatureModelInfo const *minfo = objmgr.GetCreatureModelInfo(cinfo->DisplayID_A);
+            if(!minfo || displayId != minfo->modelid_other_gender)
+            {
+                minfo = objmgr.GetCreatureModelInfo(cinfo->DisplayID_H);
+                if(minfo && displayId == minfo->modelid_other_gender)
+                    displayId = 0;
+            }
+            else
+                displayId = 0;
+        }
+        else
+            displayId = 0;
+    }
+
     // data->guid = guid don't must be update at save
     data.id = GetEntry();
     data.mapid = GetMapId();
+    data.displayid = displayId;
+    data.equipmentId = GetEquipmentId();
     data.posX = GetPositionX();
     data.posY = GetPositionY();
     data.posZ = GetPositionZ();
@@ -979,6 +995,8 @@ void Creature::SaveToDB()
         << m_DBTableGuid << ","
         << GetEntry() << ","
         << GetMapId() <<","
+        << displayId <<","
+        << GetEquipmentId() <<","
         << GetPositionX() << ","
         << GetPositionY() << ","
         << GetPositionZ() << ","
@@ -1086,7 +1104,7 @@ float Creature::_GetDamageMod(int32 Rank)
     }
 }
 
-bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
+bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const CreatureData *data)
 {
     Object::_Create(guidlow, HIGHGUID_UNIT);
 
@@ -1100,17 +1118,56 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
         return false;
     }
 
-    uint32 display_id = cinfo->randomDisplayID();
+    if (cinfo->DisplayID_A == 0 || cinfo->DisplayID_H == 0) // Cancel load if no model defined
+    {
+        sLog.outErrorDb("Creature (Entry: %u) has no model defined for Horde or Alliance in table `creature_template`, can't load. ",Entry);
+        return false;
+    }
 
-    SetUInt32Value(UNIT_FIELD_DISPLAYID,display_id );
-    SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID,display_id );
-    SetUInt32Value(UNIT_FIELD_BYTES_2,1);                   // let creature used equiped weapon in fight
+    m_regenHealth = (cinfo->RegenHealth == 1);
+
+    // Load creature model (display id)
+    uint32 display_id;
+    if (!data || data->displayid == 0)                      // use defaults from the template
+        // DisplayID_A is used if no team is given
+        display_id = (team == HORDE) ? cinfo->DisplayID_H : cinfo->DisplayID_A;            
+    else                                                    // overriden in creature data
+        display_id = data->displayid;
+
+    CreatureModelInfo const *minfo = objmgr.GetCreatureModelRandomGender(display_id);
+    if (!minfo)
+    {
+        sLog.outErrorDb("Creature (Entry: %u) has model %u not found in table `creature_model_based_info`, can't load. ", Entry, display_id);
+        return false;
+    }
+    else
+        display_id = minfo->modelid;                        // it can be different (for another gender)
+
+    SetUInt32Value(UNIT_FIELD_DISPLAYID, display_id);
+    SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, display_id);
+    SetUInt32Value(UNIT_FIELD_BYTES_2, 1);                  // let creature use equiped weapon in fight
+    SetUInt32Value(UNIT_FIELD_BYTES_0, ( minfo->gender << 16 ));
+
+    // Load creature equipment
+    if(!data || data->equipmentId == 0)
+    {                                                       // use default from the template
+        if(!LoadEquipment(cinfo->equipmentId))
+            sLog.outErrorDb("Creature (Entry: %u) has equipment_id %u (default from creature template) not found in table `creature_equip_template`.", Entry, cinfo->equipmentId);
+    }
+    else if(data && data->equipmentId != -1)
+    {                                                        // override, -1 means no equipment
+        if(!LoadEquipment(data->equipmentId))
+            sLog.outErrorDb("Creature (Entry: %u) has equipment_id %u (override from creature data) not found in table `equipment`. ", data->id, data->equipmentId);
+    }
 
     SetName(GetCreatureInfo()->Name);
 
     SelectLevel(cinfo);
 
-    SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,cinfo->faction);
+    if (team == HORDE)
+        SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, cinfo->faction_H);
+    else
+        SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE, cinfo->faction_A);
 
     SetUInt32Value(UNIT_NPC_FLAGS,cinfo->npcflag);
 
@@ -1128,19 +1185,6 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     SetModifierValue(UNIT_MOD_RESISTANCE_SHADOW, BASE_VALUE, float(cinfo->resistance5));
     SetModifierValue(UNIT_MOD_RESISTANCE_ARCANE, BASE_VALUE, float(cinfo->resistance6));
 
-    //this is probably wrong
-    SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY, cinfo->equipmodel[0]);
-    SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO , cinfo->equipinfo[0]);
-    SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO  + 1, cinfo->equipslot[0]);
-
-    SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY+1, cinfo->equipmodel[1]);
-    SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 2, cinfo->equipinfo[1]);
-    SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 2 + 1, cinfo->equipslot[1]);
-
-    SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY+2, cinfo->equipmodel[2]);
-    SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 4, cinfo->equipinfo[2]);
-    SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + 4 + 1, cinfo->equipslot[2]);
-
     SetCanModifyStats(true);
     UpdateAllStats();
 
@@ -1149,10 +1193,10 @@ bool Creature::CreateFromProto(uint32 guidlow,uint32 Entry)
     CreatureDisplayInfoEntry const* ScaleEntry = sCreatureDisplayInfoStore.LookupEntry(display_id);
     SetFloatValue(OBJECT_FIELD_SCALE_X, ScaleEntry ? ScaleEntry->scale : 1);
 
-    SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,cinfo->bounding_radius);
-    SetFloatValue(UNIT_FIELD_COMBATREACH,cinfo->combat_reach );
+    SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,minfo->bounding_radius);
+    SetFloatValue(UNIT_FIELD_COMBATREACH,minfo->combat_reach );
 
-    FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(cinfo->faction);
+    FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(cinfo->faction_A);
     if (factionTemplate)                                    // check and error show at loading templates
     {
         FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionTemplate->faction);
@@ -1204,7 +1248,8 @@ bool Creature::LoadFromDB(uint32 guid, uint32 InstanceId)
     if (InstanceId != 0) guid = objmgr.GenerateLowGuid(HIGHGUID_UNIT);
     SetInstanceId(InstanceId);
 
-    if(!Create(guid,data->mapid,data->posX,data->posY,data->posZ,data->orientation,data->id))
+    uint16 team = 0;
+    if(!Create(guid,data->mapid,data->posX,data->posY,data->posZ,data->orientation,data->id,team,data))
         return false;
 
     m_DBTableGuid = stored_guid;
@@ -1255,6 +1300,25 @@ bool Creature::LoadFromDB(uint32 guid, uint32 InstanceId)
     m_defaultMovementType = MovementGeneratorType(data->movementType);
 
     AIM_Initialize();
+    return true;
+}
+
+bool Creature::LoadEquipment(uint32 equip_entry)
+{
+    if(equip_entry == 0)
+        return true;
+
+    EquipmentInfo const *einfo = objmgr.GetEquipmentInfo(equip_entry);
+    if (!einfo)
+        return false;
+
+    m_equipmentId = equip_entry;
+    for (uint8 i=0;i<3;i++)
+    {
+        SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + i, einfo->equipmodel[i]);
+        SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + (i * 2), einfo->equipinfo[i]);
+        SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + (i * 2) + 1, einfo->equipslot[i]);
+    }
     return true;
 }
 

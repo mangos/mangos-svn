@@ -3127,11 +3127,18 @@ void Spell::EffectSummonTotem(uint32 i)
         }
     }
 
+    uint32 team = 0;
+    if (m_caster->GetTypeId()==TYPEID_PLAYER)
+        if (((Player*)m_caster)->GetTeam()==HORDE)
+            team = HORDE;
+        else if (((Player*)m_caster)->GetTeam()==ALLIANCE)
+            team = ALLIANCE;
+
     Totem* pTotem = new Totem(m_caster);
 
     if(!pTotem->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT),
         m_caster->GetMapId(), x, y, z, m_caster->GetOrientation(),
-        m_spellInfo->EffectMiscValue[i] ))
+        m_spellInfo->EffectMiscValue[i], team ))
     {
         delete pTotem;
         return;

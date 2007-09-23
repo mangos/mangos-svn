@@ -135,7 +135,7 @@ void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
     if (unit)
         data << ((unit->isPet()) ? "Pet" : ci->SubName);    // subname
     else
-        data << ci->Name;                                   // may be it's typo? must be subname I think...
+        data << ci->SubName;
 
     data << ci->flag1;                                      // flags          wdbFeild7=wad flags1
 
@@ -152,7 +152,7 @@ void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
     if (unit)
         data << unit->GetUInt32Value(UNIT_FIELD_DISPLAYID); //DisplayID      wdbFeild13
     else
-        data << (uint32)ci->randomDisplayID();
+        data << (uint32)ci->DisplayID_A;                    // Let's send only the default model
 
     data << (float)1;                                       // unk
     data << (float)1;                                       // unk

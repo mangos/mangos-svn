@@ -44,6 +44,8 @@
 
 extern SQLStorage sCreatureStorage;
 extern SQLStorage sCreatureDataAddonStorage;
+extern SQLStorage sCreatureModelStorage;
+extern SQLStorage sEquipmentStorage;
 extern SQLStorage sGOStorage;
 extern SQLStorage sPageTextStore;
 extern SQLStorage sItemStorage;
@@ -244,6 +246,9 @@ class ObjectMgr
         void RemoveArenaTeam(ArenaTeam* arenateam) { mArenaTeamSet.erase( arenateam ); }
 
         CreatureInfo const *GetCreatureTemplate( uint32 id );
+        CreatureModelInfo const *GetCreatureModelInfo( uint32 modelid );
+        CreatureModelInfo const* GetCreatureModelRandomGender(uint32 display_id);
+        EquipmentInfo const *GetEquipmentInfo( uint32 entry );
         CreatureDataAddon const *GetCreatureAddon( uint32 lowguid )
         {
             return sCreatureDataAddonStorage.LookupEntry<CreatureDataAddon>(lowguid);
@@ -397,6 +402,8 @@ class ObjectMgr
         void LoadCreatures();
         void LoadCreatureRespawnTimes();
         void LoadCreatureAddons();
+        void LoadCreatureModelInfo();
+        void LoadEquipmentTemplates();
         void LoadGameobjects();
         void LoadGameobjectRespawnTimes();
         void LoadSpellProcEvents();
