@@ -4236,7 +4236,8 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
             return;
     }
 
-    // custom check for proc spell
+    // custom check for proc spell and cast custom triggered spell 
+    // (if triggered spell non-custom code must be in next section)
     switch(auraSpellInfo->Id)
     {
         // Lightning Capacitor
@@ -4271,6 +4272,25 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
     {
         sLog.outError("Unit::HandleProcTriggerSpell: Spell %u have 0 in EffectTriggered[%d], not handled custom case?",auraSpellInfo->Id,triggeredByAura->GetEffIndex());
         return;
+    }
+
+    // custom check for proc spell
+    switch(auraSpellInfo->Id)
+    {
+        // Bonus Healing (item spell)
+        case 40971:
+        {
+            if(!pVictim || !pVictim->isAlive())
+                return;
+
+            // bonus if health < 50%
+            if(pVictim->GetHealth() >= pVictim->GetMaxHealth()*triggeredByAura->GetModifier()->m_amount/100)
+                return;
+
+            // cast at target positive spell 
+            CastSpell(pVictim,trigger_spell_id,true,NULL,triggeredByAura);
+            return;
+        }
     }
 
     // but with dummy basepoints or other customs
