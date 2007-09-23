@@ -714,7 +714,7 @@ T* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl, T *fake)
     return NULL;
 }*/
 
-void Map::MessageBoardcast(Player *player, WorldPacket *msg, bool to_self, bool own_team_only)
+void Map::MessageBroadcast(Player *player, WorldPacket *msg, bool to_self, bool own_team_only)
 {
     CellPair p = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
     assert( p.x_coord >= 0 && p.x_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP &&
@@ -732,13 +732,13 @@ void Map::MessageBoardcast(Player *player, WorldPacket *msg, bool to_self, bool 
     cell_lock->Visit(cell_lock, message, *this);
 }
 
-void Map::MessageBoardcast(WorldObject *obj, WorldPacket *msg)
+void Map::MessageBroadcast(WorldObject *obj, WorldPacket *msg)
 {
     CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
 
     if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
     {
-        sLog.outError("Map::MessageBoardcast: Object " I64FMTD " have invalid coordinates X:%f Y:%f grid cell [%u:%u]", obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
+        sLog.outError("Map::MessageBroadcast: Object " I64FMTD " have invalid coordinates X:%f Y:%f grid cell [%u:%u]", obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
         return;
     }
 

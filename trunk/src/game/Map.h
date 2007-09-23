@@ -107,9 +107,9 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
 
         virtual void Update(const uint32&);
 
-        void MessageBoardcast(Player *, WorldPacket *, bool to_self, bool own_team_only = false);
+        void MessageBroadcast(Player *, WorldPacket *, bool to_self, bool own_team_only = false);
 
-        void MessageBoardcast(WorldObject *, WorldPacket *);
+        void MessageBroadcast(WorldObject *, WorldPacket *);
 
         void PlayerRelocation(Player *, float x, float y, float z, float angl);
 

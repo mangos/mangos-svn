@@ -4691,12 +4691,12 @@ void Player::SetRecallPosition(uint32 map, float x, float y, float z, float o)
 
 void Player::SendMessageToSet(WorldPacket *data, bool self)
 {
-    MapManager::Instance().GetMap(GetMapId(), this)->MessageBoardcast(this, data, self);
+    MapManager::Instance().GetMap(GetMapId(), this)->MessageBroadcast(this, data, self);
 }
 
 void Player::SendMessageToOwnTeamSet(WorldPacket *data, bool self)
 {
-    MapManager::Instance().GetMap(GetMapId(), this)->MessageBoardcast(this, data, self,true);
+    MapManager::Instance().GetMap(GetMapId(), this)->MessageBroadcast(this, data, self,true);
 }
 
 void Player::SendDirectMessage(WorldPacket *data)

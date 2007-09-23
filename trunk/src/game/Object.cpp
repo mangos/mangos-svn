@@ -1045,7 +1045,7 @@ void WorldObject::BuildTeleportAckMsg(WorldPacket *data, float x, float y, float
 
 void WorldObject::SendMessageToSet(WorldPacket *data, bool bToSelf)
 {
-    MapManager::Instance().GetMap(m_mapId, this)->MessageBoardcast(this, data);
+    MapManager::Instance().GetMap(m_mapId, this)->MessageBroadcast(this, data);
 }
 
 void WorldObject::SendDestroyObject(uint64 guid)
