@@ -981,6 +981,8 @@ UNLOCK TABLES;
 --
 -- Table structure for creature_equip_template
 --
+
+DROP TABLE IF EXISTS `creature_equip_template`;
 CREATE TABLE `creature_equip_template` (
   `entry` int(11) unsigned NOT NULL default '0' COMMENT 'Unique entry',
   `equipmodel1` int(11) unsigned NOT NULL default '0',
@@ -1000,8 +1002,8 @@ CREATE TABLE `creature_equip_template` (
 --
 
 LOCK TABLES `creature_equip_template` WRITE;
-/*!40000 ALTER TABLE ``creature_equip_template` DISABLE KEYS */;
-/*!40000 ALTER TABLE ``creature_equip_template` ENABLE KEYS */;
+/*!40000 ALTER TABLE `creature_equip_template` DISABLE KEYS */;
+/*!40000 ALTER TABLE `creature_equip_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -1252,7 +1254,7 @@ CREATE TABLE `creature_template` (
 LOCK TABLES `creature_template` WRITE;
 /*!40000 ALTER TABLE `creature_template` DISABLE KEYS */;
 INSERT INTO `creature_template` VALUES 
-(1,10045,0,'Waypoint (Only GM can see it)','Visual',1,1,64,64,0,0,0,35,0,0.91,0,14,15,0,100,2000,2200,4096,0,8,2,0,0,0,0,1.76,2.42,100,2.56,8,1,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,3,0,'');
+(1,10045,10045,'Waypoint (Only GM can see it)','Visual',1,1,64,64,0,0,0,35,35,0,0.91,0,14,15,0,100,2000,2200,4096,0,8,0,0,0,0,1.76,2.42,100,8,1,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,3,0,1,0,'');
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -12851,17 +12853,10 @@ CREATE TABLE `spell_learn_spell` (
 LOCK TABLES `spell_learn_spell` WRITE;
 /*!40000 ALTER TABLE `spell_learn_spell` DISABLE KEYS */;
 INSERT INTO `spell_learn_spell` VALUES 
-(4036,3918,0),
-(4036,3919,0),
-(4036,3920,0),
-(3908,2387,0),
-(3908,2963,0),
-(7411,7418,0),
-(7411,7421,0),
-(7411,13262,0),
-(2259,2329,0),
-(2259,7183,0),
-(2259,2330,0),
+(71,355,0),
+(71,7386,0),
+(264,3018,0),
+(266,3018,0),
 (2018,2663,0),
 (2018,12260,0),
 (2018,2660,0),
@@ -12872,18 +12867,30 @@ INSERT INTO `spell_learn_spell` VALUES
 (2108,2149,0),
 (2108,7126,0),
 (2108,2881,0),
+(2259,2329,0),
+(2259,7183,0),
+(2259,2330,0),
+(2366,2383,0),
 (2550,818,0),
 (2550,2540,0),
 (2550,2538,0),
 (2550,8604,0),
-(3273,3275,0),
-(7620,7738,0),
+(2567,2764,0),
 (2575,2580,0),
 (2575,2656,0),
 (2575,2657,0),
-(2366,2383,0),
-(2567,2764,0),
+(3273,3275,0),
 (2842,8681,0),
+(3908,2387,0),
+(3908,2963,0),
+(4036,3918,0),
+(4036,3919,0),
+(4036,3920,0),
+(5011,3018,0),
+(7411,7418,0),
+(7411,7421,0),
+(7411,13262,0),
+(7620,7738,0),
 (25229,25255,0),
 (25229,25493,0),
 (25229,26925,0),

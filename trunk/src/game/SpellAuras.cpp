@@ -1605,7 +1605,7 @@ void Aura::HandleAuraModSkill(bool apply, bool Real)
         return;
 
     uint32 prot=GetSpellProto()->EffectMiscValue[m_effIndex];
-    int32 points = m_currentBasePoints+1;
+    int32 points = GetModifier()->m_amount;
 
     ((Player*)m_target)->ModifySkillBonus(prot,(apply ? points: -points));
     if(prot == SKILL_DEFENSE)
@@ -3048,8 +3048,7 @@ void Aura::HandleAuraModTotalHealthPercentRegen(bool apply, bool Real)
         if(m_periodicTimer <= 0)
         {
             m_periodicTimer += m_modifier.periodictime;
-            float modifier = m_currentBasePoints+1;
-            m_modifier.m_amount = uint32(m_target->GetMaxHealth() * modifier/100);
+            m_modifier.m_amount = uint32(m_target->GetMaxHealth() * m_modifier.m_amount/100);
 
             if(m_target->GetHealth() < m_target->GetMaxHealth())
             {
@@ -3076,9 +3075,8 @@ void Aura::HandleAuraModTotalManaPercentRegen(bool apply, bool Real)
         m_periodicTimer += m_modifier.periodictime;
         if (m_modifier.m_amount)
         {
-            float modifier = m_currentBasePoints+1;
                                                             // take percent (m_modifier.m_amount) max mana
-            m_modifier.m_amount = uint32((m_target->GetMaxPower(POWER_MANA) * modifier)/100);
+            m_modifier.m_amount = uint32((m_target->GetMaxPower(POWER_MANA) * m_modifier.m_amount)/100);
         }
 
         if(m_target->GetPower(POWER_MANA) < m_target->GetMaxPower(POWER_MANA))

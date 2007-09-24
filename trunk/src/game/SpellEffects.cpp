@@ -264,6 +264,7 @@ void Spell::EffectSchoolDMG(uint32 i)
                 else if(m_spellInfo->SpellFamilyFlags & 0x10000000000LL)
                 {
                     damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.45);
+                    m_caster->ModifyAuraState(AURA_STATE_VICTORY_RUSH, false);
                 }
                 break;
             }
@@ -2948,8 +2949,8 @@ void Spell::EffectScriptEffect(uint32 i)
                     if ( !spellInfo || !IsSealSpell((*itr)->GetId()) || (*itr)->GetEffIndex() != 2 )
                         continue;
 
-                    // must be calculated base at raw base points, GetModifier()->m_value for S.Righteousness modified by SPELLMOD_DAMAGE
-                    spellId2 = (*itr)->GetBasePoints()+1;
+                    // must be calculated base at raw base points in spell proto, GetModifier()->m_value for S.Righteousness modified by SPELLMOD_DAMAGE
+                    spellId2 = (*itr)->GetSpellProto()->EffectBasePoints[2]+1;
 
                     if(spellId2 <= 1)
                         continue;
