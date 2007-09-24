@@ -3834,6 +3834,21 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 ((Player*)this)->RemoveSpellCooldown(procSpell->Id);
             // prepare cast as triggered spell (this need for correct targets selection after not finished currently cast)
             m_currentSpells[CURRENT_GENERIC_SPELL]->AddTriggeredSpell(procSpell);
+
+            return;
+        }
+        //Seal of Vengeance
+        case 31801:
+        {
+            if(effIndex != 0)                               // effect 1,2 used by seal unleashing code
+                return;
+ 
+            if(!pVictim)
+                return;
+
+            CastSpell(pVictim, 31803, true);
+
+            return;
         }
 
         // Spiritual Att.

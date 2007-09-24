@@ -2948,6 +2948,7 @@ void Spell::EffectScriptEffect(uint32 i)
                     if ( !spellInfo || !IsSealSpell((*itr)->GetId()) || (*itr)->GetEffIndex() != 2 )
                         continue;
 
+                    // must be calculated base at raw base points, GetModifier()->m_value for S.Righteousness modified by SPELLMOD_DAMAGE
                     spellId2 = (*itr)->GetBasePoints()+1;
 
                     if(spellId2 <= 1)

@@ -516,9 +516,6 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Spell Proc Event conditions..." );
     objmgr.LoadSpellProcEvents();
 
-    sLog.outString( "Loading SpellsScriptTarget...");
-    objmgr.LoadSpellScriptTarget();
-
     sLog.outString( "Loading Aggro Spells Definitions...");
     objmgr.LoadSpellThreats();
 
@@ -542,6 +539,9 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "Loading Creature templates..." );
     objmgr.LoadCreatureTemplates();
+
+    sLog.outString( "Loading SpellsScriptTarget...");
+    objmgr.LoadSpellScriptTarget();                         // must be after LoadCreatureTemplates and LoadGameobjectInfo
 
     sLog.outString( "Loading Creature Reputation OnKill Data..." );
     objmgr.LoadReputationOnKill();

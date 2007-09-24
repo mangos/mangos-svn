@@ -460,6 +460,8 @@ pkgdata_DATA = \
 	4501.sql \
 	4503_spell_chain.sql \
 	4503_spell_proc_event.sql \
+	4504_spell_affect.sql \
+	4504_spell_proc_event.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -900,4 +902,6 @@ EXTRA_DIST = \
 	4501.sql \
 	4503_spell_chain.sql \
 	4503_spell_proc_event.sql \
+	4504_spell_affect.sql \
+	4504_spell_proc_event.sql \
 	README

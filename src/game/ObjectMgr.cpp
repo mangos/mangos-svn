@@ -34,6 +34,7 @@
 #include "Policies/SingletonImp.h"
 #include "Language.h"
 #include "GameEvent.h"
+#include "Spell.h"
 
 INSTANTIATE_SINGLETON_1(ObjectMgr);
 
@@ -3930,9 +3931,26 @@ void ObjectMgr::LoadSpellScriptTarget()
         uint32 type        = fields[1].GetUInt32();
         uint32 targetEntry = fields[2].GetUInt32();
 
-        if( !sSpellStore.LookupEntry(spellId) )
+        SpellEntry const* spellProto = sSpellStore.LookupEntry(spellId);
+
+        if(!spellProto)
         {
             sLog.outErrorDb("Table `spell_script_target`: spellId %u listed for TargetEntry %u not exist.",spellId,targetEntry);
+            continue;
+        }
+
+        bool targetfound = false;
+        for(int i = 0; i <3; ++i)
+        {
+            if(spellProto->EffectImplicitTargetA[i]==TARGET_SCRIPT||spellProto->EffectImplicitTargetB[i]==TARGET_SCRIPT)
+            {
+                targetfound = true;
+                break;
+            }
+        }
+        if(!targetfound)
+        {
+            sLog.outErrorDb("Table `spell_script_target`: spellId %u listed for TargetEntry %u not have target TARGET_SCRIPT(38).",spellId,targetEntry);
             continue;
         }
 
@@ -3942,11 +3960,36 @@ void ObjectMgr::LoadSpellScriptTarget()
             continue;
         }
 
-        if( type != SPELL_TARGET_TYPE_GAMEOBJECT && targetEntry==0 )
+        switch(type)
         {
-            sLog.outErrorDb("Table `spell_script_target`: target entry == 0 for not GO target type (%u).",type);
-            continue;
+            case SPELL_TARGET_TYPE_GAMEOBJECT:
+            {
+                if( targetEntry==0 )
+                    break;
+
+                if(!sGOStorage.LookupEntry<GameObjectInfo>(targetEntry))
+                {
+                    sLog.outErrorDb("Table `spell_script_target`: gameobject template entry %u not exist.",targetEntry);
+                    continue;
+                }
+                break;
+            }
+            default:
+            {
+                if( targetEntry==0 )
+                {
+                    sLog.outErrorDb("Table `spell_script_target`: target entry == 0 for not GO target type (%u).",type);
+                    continue;
+                }
+                if(!sCreatureStorage.LookupEntry<CreatureInfo>(targetEntry))
+                {
+                    sLog.outErrorDb("Table `spell_script_target`: creature template entry %u not exist.",targetEntry);
+                    continue;
+                }
+                break;
+            }
         }
+
         mSpellScriptTarget.insert(SpellScriptTarget::value_type(spellId,SpellTargetEntry(SpellTargetType(type),targetEntry)));
 
         count++;
