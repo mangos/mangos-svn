@@ -2056,6 +2056,8 @@ void ObjectMgr::LoadSpellChains()
 
 void ObjectMgr::LoadSpellLearnSkills()
 {
+    mSpellLearnSkills.clear();                              // need for reload case
+
     QueryResult *result = sDatabase.PQuery("SELECT `entry`, `SkillID`, `Value`, `MaxValue` FROM `spell_learn_skill`");
     if(!result)
     {
@@ -2099,7 +2101,7 @@ void ObjectMgr::LoadSpellLearnSkills()
             continue;
         }
 
-        SpellLearnSkills[spell_id] = node;
+        mSpellLearnSkills[spell_id] = node;
 
         ++count;
     } while( result->NextRow() );
@@ -2135,7 +2137,7 @@ void ObjectMgr::LoadSpellLearnSkills()
                     continue;                               // skip already added spell-skill pair
                 }
 
-                SpellLearnSkills[spell] = dbc_node;
+                mSpellLearnSkills[spell] = dbc_node;
                 ++dbc_count;
                 break;
             }
@@ -2148,6 +2150,8 @@ void ObjectMgr::LoadSpellLearnSkills()
 
 void ObjectMgr::LoadSpellLearnSpells()
 {
+    mSpellLearnSpells.clear();                              // need for reload case
+
     QueryResult *result = sDatabase.PQuery("SELECT `entry`, `SpellID`,`IfNoSpell` FROM `spell_learn_spell`");
     if(!result)
     {
@@ -2193,7 +2197,7 @@ void ObjectMgr::LoadSpellLearnSpells()
             continue;
         }
 
-        SpellLearnSpells.insert(SpellLearnSpellMap::value_type(spell_id,node));
+        mSpellLearnSpells.insert(SpellLearnSpellMap::value_type(spell_id,node));
 
         ++count;
     } while( result->NextRow() );
@@ -2235,7 +2239,7 @@ void ObjectMgr::LoadSpellLearnSpells()
 
                 if(!found)                                  // add new spell-spell pair if not found
                 {
-                    SpellLearnSpells.insert(SpellLearnSpellMap::value_type(spell,dbc_node));
+                    mSpellLearnSpells.insert(SpellLearnSpellMap::value_type(spell,dbc_node));
                     ++dbc_count;
                 }
             }

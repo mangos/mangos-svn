@@ -533,12 +533,12 @@ class ObjectMgr
         };
 
         typedef std::map<uint32, SpellLearnSkillNode> SpellLearnSkillMap;
-        SpellLearnSkillMap SpellLearnSkills;
+        SpellLearnSkillMap mSpellLearnSkills;
 
         SpellLearnSkillNode const* GetSpellLearnSkill(uint32 spell_id)
         {
-            SpellLearnSkillMap::const_iterator itr = SpellLearnSkills.find(spell_id);
-            if(itr != SpellLearnSkills.end())
+            SpellLearnSkillMap::const_iterator itr = mSpellLearnSkills.find(spell_id);
+            if(itr != mSpellLearnSkills.end())
                 return &itr->second;
             else
                 return NULL;
@@ -552,19 +552,19 @@ class ObjectMgr
         };
 
         typedef std::multimap<uint32, SpellLearnSpellNode> SpellLearnSpellMap;
-        SpellLearnSpellMap SpellLearnSpells;
+        SpellLearnSpellMap mSpellLearnSpells;
 
         bool IsSpellLearnSpell(uint32 spell_id) const
         {
-            return SpellLearnSpells.count(spell_id)!=0;
+            return mSpellLearnSpells.count(spell_id)!=0;
         }
         SpellLearnSpellMap::const_iterator GetBeginSpellLearnSpell(uint32 spell_id) const
         {
-            return SpellLearnSpells.lower_bound(spell_id);
+            return mSpellLearnSpells.lower_bound(spell_id);
         }
         SpellLearnSpellMap::const_iterator GetEndSpellLearnSpell(uint32 spell_id) const
         {
-            return SpellLearnSpells.upper_bound(spell_id);
+            return mSpellLearnSpells.upper_bound(spell_id);
         }
 
         bool IsSpellLearnToSpell(uint32 spell_id1,uint32 spell_id2) const

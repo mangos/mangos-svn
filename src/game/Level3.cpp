@@ -91,6 +91,8 @@ bool ChatHandler::HandleReloadAllSpellCommand(const char*)
 {
     HandleReloadSpellAffectCommand("a");
     HandleReloadSpellChainCommand("a");
+    HandleReloadSpellLearnSkillCommand("a");
+    HandleReloadSpellLearnSpellCommand("a");
     HandleReloadSpellProcEventCommand("a");
     HandleReloadSpellScriptTargetCommand("a");
     return true;
@@ -247,6 +249,22 @@ bool ChatHandler::HandleReloadSpellChainCommand(const char*)
     sLog.outString( "Re-Loading Spell Chain Data... " );
     objmgr.LoadSpellChains();
     SendGlobalSysMessage("DB table `spell_chain` (spell ranks) reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadSpellLearnSkillCommand(const char*)
+{
+    sLog.outString( "Re-Loading Spell Learn Skills..." );
+    objmgr.LoadSpellLearnSkills();
+    SendGlobalSysMessage("DB table `spell_learn_skill` reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadSpellLearnSpellCommand(const char*)
+{
+    sLog.outString( "Re-Loading Spell Learn Spells..." );
+    objmgr.LoadSpellLearnSpells();
+    SendGlobalSysMessage("DB table `spell_learn_spell` reloaded.");
     return true;
 }
 

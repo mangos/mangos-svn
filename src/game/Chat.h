@@ -156,6 +156,8 @@ class ChatHandler
         bool HandleReloadReservedNameCommand(const char*);
         bool HandleReloadSpellAffectCommand(const char* args);
         bool HandleReloadSpellChainCommand(const char* args);
+        bool HandleReloadSpellLearnSkillCommand(const char* args);
+        bool HandleReloadSpellLearnSpellCommand(const char* args);
         bool HandleReloadSpellProcEventCommand(const char* args);
         bool HandleReloadSpellScriptTargetCommand(const char* args);
 
