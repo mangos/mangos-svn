@@ -372,9 +372,16 @@ void GameObject::Delete()
 
 void GameObject::getFishLoot(Loot *fishloot)
 {
-    uint32 zone = GetZoneId();
     fishloot->clear();
-    FillLoot(fishloot, zone, LootTemplates_Fishing);
+
+    uint32 subzone = GetAreaId();
+
+    // if subzone loot exist use it
+    if(LootTemplates_Fishing.find(subzone) != LootTemplates_Fishing.end())
+        FillLoot(fishloot, subzone, LootTemplates_Fishing);
+    // else use zone loot
+    else
+        FillLoot(fishloot, GetZoneId(), LootTemplates_Fishing);
 }
 
 void GameObject::SaveToDB()
