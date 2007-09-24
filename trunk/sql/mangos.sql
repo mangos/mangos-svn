@@ -9772,7 +9772,7 @@ CREATE TABLE `quest_template` (
   `SpecialFlags` int(11) unsigned NOT NULL default '0',
   `PrevQuestId` int(11) NOT NULL default '0',
   `NextQuestId` int(11) NOT NULL default '0',
-  `ExclusiveGroup` int(11) unsigned NOT NULL default '0',
+  `ExclusiveGroup` int(11) NOT NULL default '0',
   `NextQuestInChain` int(11) unsigned NOT NULL default '0',
   `SrcItemId` int(11) unsigned NOT NULL default '0',
   `SrcItemCount` int(11) unsigned NOT NULL default '0',

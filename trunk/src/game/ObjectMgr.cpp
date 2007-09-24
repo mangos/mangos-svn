@@ -1954,7 +1954,7 @@ void ObjectMgr::LoadQuests()
         }
 
         if(qinfo->ExclusiveGroup)
-            mExclusiveQuestGroups.insert(std::pair<uint32, uint32>(qinfo->ExclusiveGroup, qinfo->GetQuestId()));
+            mExclusiveQuestGroups.insert(std::pair<int32, uint32>(qinfo->ExclusiveGroup, qinfo->GetQuestId()));
     }
 
     sLog.outString();

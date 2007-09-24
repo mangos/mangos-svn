@@ -37,7 +37,7 @@ Quest::Quest(Field * questRecord)
     SpecialFlags = questRecord[13].GetUInt32();
     PrevQuestId = questRecord[14].GetInt32();
     NextQuestId = questRecord[15].GetInt32();
-    ExclusiveGroup = questRecord[16].GetUInt32();
+    ExclusiveGroup = questRecord[16].GetInt32();
     NextQuestInChain = questRecord[17].GetUInt32();
     SrcItemId = questRecord[18].GetUInt32();
     SrcItemCount = questRecord[19].GetUInt32();

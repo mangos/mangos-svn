@@ -153,7 +153,7 @@ class Quest
         uint32 GetSuggestedPlayers() const { return SuggestedPlayers; }
         uint32 GetLimitTime() const { return LimitTime; }
         int32  GetNextQuestId() const { return NextQuestId; }
-        uint32 GetExclusiveGroup() const { return ExclusiveGroup; }
+        int32  GetExclusiveGroup() const { return ExclusiveGroup; }
         uint32 GetNextQuestInChain() const { return NextQuestInChain; }
         uint32 GetSrcItemId() const { return SrcItemId; }
         uint32 GetSrcItemCount() const { return SrcItemCount; }
@@ -233,7 +233,7 @@ class Quest
         uint32 SpecialFlags;
         int32  PrevQuestId;
         int32  NextQuestId;
-        uint32 ExclusiveGroup;
+        int32  ExclusiveGroup;
         uint32 NextQuestInChain;
         uint32 SrcItemId;
         uint32 SrcItemCount;

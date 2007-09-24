@@ -462,7 +462,7 @@ class ObjectMgr
 
         typedef HM_NAMESPACE::hash_map<uint32, Quest*> QuestMap;
         QuestMap mQuestTemplates;
-        typedef std::multimap<uint32, uint32> ExclusiveQuestGroups;
+        typedef std::multimap<int32, uint32> ExclusiveQuestGroups;
         ExclusiveQuestGroups mExclusiveQuestGroups;
 
         struct SpellChainNode
