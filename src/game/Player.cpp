@@ -10983,8 +10983,9 @@ bool Player::SatisfyQuestPreviousQuest( uint32 quest_id, bool msg )
 
                         QuestStatusMap::iterator i_exstatus = mQuestStatus.find( exclude_Id );
 
-                        // alternative quest from group also must be completed and rewarded(reported)
-                        if( i_exstatus->second.m_status != QUEST_STATUS_INCOMPLETE &&
+                        // alternative quest from group also must be active
+                        if( i_exstatus == mQuestStatus.end() ||
+                            i_exstatus->second.m_status != QUEST_STATUS_INCOMPLETE &&
                             (i_prevstatus->second.m_status != QUEST_STATUS_COMPLETE || GetQuestRewardStatus(prevId)) )
                         {
                             if( msg )
