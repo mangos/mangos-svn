@@ -3048,7 +3048,6 @@ void Aura::HandleAuraModTotalHealthPercentRegen(bool apply, bool Real)
         if(m_periodicTimer <= 0)
         {
             m_periodicTimer += m_modifier.periodictime;
-            m_modifier.m_amount = uint32(m_target->GetMaxHealth() * m_modifier.m_amount/100);
 
             if(m_target->GetHealth() < m_target->GetMaxHealth())
             {
@@ -3073,11 +3072,6 @@ void Aura::HandleAuraModTotalManaPercentRegen(bool apply, bool Real)
     if(apply && m_periodicTimer <= 0 && m_target->getPowerType() == POWER_MANA)
     {
         m_periodicTimer += m_modifier.periodictime;
-        if (m_modifier.m_amount)
-        {
-                                                            // take percent (m_modifier.m_amount) max mana
-            m_modifier.m_amount = uint32((m_target->GetMaxPower(POWER_MANA) * m_modifier.m_amount)/100);
-        }
 
         if(m_target->GetPower(POWER_MANA) < m_target->GetMaxPower(POWER_MANA))
         {
