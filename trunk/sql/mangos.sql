@@ -2,7 +2,7 @@
 --
 -- Host: localhost    Database: mangos
 -- ------------------------------------------------------
--- Server version	5.0.38-Ubuntu_0ubuntu1-log
+-- Server version	5.0.45-Debian_1ubuntu2-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -214,7 +214,7 @@ CREATE TABLE `battleground_template` (
 
 LOCK TABLES `battleground_template` WRITE;
 /*!40000 ALTER TABLE `battleground_template` DISABLE KEYS */;
-INSERT INTO `battleground_template` VALUES 
+INSERT INTO `battleground_template` VALUES
 (1,0,0,0,611,2.72532,610,2.27452),
 (2,0,0,0,769,3.14159,770,3.14159),
 (4,2,10,70,929,0,936,3.14159),
@@ -335,7 +335,7 @@ CREATE TABLE `character_aura` (
   `spell` int(11) unsigned NOT NULL default '0',
   `effect_index` int(11) unsigned NOT NULL default '0',
   `amount` int(11) NOT NULL default '0',
-  `maxduration`   int(11) NOT NULL default '0',
+  `maxduration` int(11) NOT NULL default '0',
   `remaintime` int(11) NOT NULL default '0',
   `remaincharges` int(11) NOT NULL default '0',
   PRIMARY KEY  (`guid`,`spell`,`effect_index`)
@@ -696,7 +696,7 @@ CREATE TABLE `command` (
 
 LOCK TABLES `command` WRITE;
 /*!40000 ALTER TABLE `command` DISABLE KEYS */;
-INSERT INTO `command` VALUES 
+INSERT INTO `command` VALUES
 ('acct',0,'Syntax: .acct\r\n\r\nDisplay the access level of your account.'),
 ('addgo',2,'Syntax: .addgo #id <lootID> <spawntimeSecs>\r\n\r\nAdd a game object from game object templates to the world at your current location using the #id.\r\nlootID specifies the loot-template to be used and spawntimesecs sets the spawntime, both are optional.\r\n\r\nNote: this is a copy of .gameobject.'),
 ('additem',3,'Syntax: .additem #itemid/[#itemname]/#shift-click-item-link #itemcount\r\n\r\nAdds the specified number of items of id #itemid (or exact (!) name $itemname in brackets, or link created by shift-click at item in inventory or recipe) to your or selected character inventory. If #itemcount is omitted, only one item will be added.\r\n.'),
@@ -869,8 +869,7 @@ INSERT INTO `command` VALUES
 ('wp add',2,'Syntax: .wp add [#creature_guid or Select a Creature]'),
 ('wp modify',2,'Syntax: .wp modify [#creature_guid or Select a Creature]\r\nadd - Add a waypoint after the selected visual\r\nimport $filename for selected npc\r\nexport $filename for selected npc\r\nwaittime $time\r\nemote ID\r\nspell ID\r\ntext1| text2| text3| text4| text5 <text>\r\nmodel1 ID\r\nmodel2 ID\r\naiscript $Name\r\nmove(moves wp to player pos)\r\ndel (deletes the wp)\r\n\r\nOnly one parameter per time!'),
 ('wp show',2,'Syntax: .wp show [#creature_guid or Select a Creature]\r\non\r\nfirst\r\nlast\r\noff\r\ninfo\r\n\r\nFor using info you have to do first show on and than select a Visual-Waypoint and do the show info!'),
-('npcwhisper', '1', 'Syntax: .npcwhisper #playerguid #text\r\nMake the selected npc whisper #text to  #playerguid.');
-
+('npcwhisper',1,'Syntax: .npcwhisper #playerguid #text\r\nMake the selected npc whisper #text to  #playerguid.');
 /*!40000 ALTER TABLE `command` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -979,7 +978,7 @@ LOCK TABLES `creature_addon` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for creature_equip_template
+-- Table structure for table `creature_equip_template`
 --
 
 DROP TABLE IF EXISTS `creature_equip_template`;
@@ -1052,7 +1051,7 @@ LOCK TABLES `creature_loot_template` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for creature_model_info
+-- Table structure for table `creature_model_info`
 --
 
 DROP TABLE IF EXISTS `creature_model_info`;
@@ -1253,7 +1252,7 @@ CREATE TABLE `creature_template` (
 
 LOCK TABLES `creature_template` WRITE;
 /*!40000 ALTER TABLE `creature_template` DISABLE KEYS */;
-INSERT INTO `creature_template` VALUES 
+INSERT INTO `creature_template` VALUES
 (1,10045,10045,'Waypoint (Only GM can see it)','Visual',1,1,64,64,0,0,0,35,35,0,0.91,0,14,15,0,100,2000,2200,4096,0,8,0,0,0,0,1.76,2.42,100,8,1,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,3,0,1,0,'');
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -1264,7 +1263,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `db_version`;
 CREATE TABLE `db_version` (
-  `version` varchar(120)
+  `version` varchar(120) default NULL
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Used DB version notes';
 
 --
@@ -1273,7 +1272,8 @@ CREATE TABLE `db_version` (
 
 LOCK TABLES `db_version` WRITE;
 /*!40000 ALTER TABLE `db_version` DISABLE KEYS */;
-INSERT INTO `db_version` VALUES ( 'Mangos default database.' );
+INSERT INTO `db_version` VALUES
+('Mangos default database.');
 /*!40000 ALTER TABLE `db_version` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -1319,7 +1319,7 @@ CREATE TABLE `exploration_basexp` (
 
 LOCK TABLES `exploration_basexp` WRITE;
 /*!40000 ALTER TABLE `exploration_basexp` DISABLE KEYS */;
-INSERT INTO `exploration_basexp` VALUES 
+INSERT INTO `exploration_basexp` VALUES
 (0,0),
 (1,5),
 (2,15),
@@ -1907,7 +1907,7 @@ CREATE TABLE `instance_template` (
 
 LOCK TABLES `instance_template` WRITE;
 /*!40000 ALTER TABLE `instance_template` DISABLE KEYS */;
-INSERT INTO `instance_template` VALUES 
+INSERT INTO `instance_template` VALUES
 (33,22,30,10,7200,NULL,NULL,NULL,NULL,''),
 (34,24,32,10,7200,NULL,NULL,NULL,NULL,''),
 (36,15,20,10,7200,NULL,NULL,NULL,NULL,''),
@@ -2157,7 +2157,7 @@ CREATE TABLE `item_template` (
 
 LOCK TABLES `item_template` WRITE;
 /*!40000 ALTER TABLE `item_template` DISABLE KEYS */;
-INSERT INTO `item_template` VALUES 
+INSERT INTO `item_template` VALUES
 (65020,0,0,-1,'Tough Jerky',2473,1,0,6,25,1,0,2047,255,5,1,0,0,0,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,433,0,-1,0,0,11,1000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0),
 (65021,0,0,-1,'Refreshing Spring Water',18084,1,0,6,25,1,0,2047,255,5,1,0,0,0,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,430,0,-1,0,0,59,1000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0),
 (65022,0,0,-1,'Darnassian Bleu',6353,1,0,6,25,1,0,2047,255,5,1,0,0,0,0,0,0,0,0,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1000,0,0,433,0,-1,0,0,11,1000,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,-1,0,'internalItemHandler',0),
@@ -2531,7 +2531,7 @@ CREATE TABLE `pet_aura` (
   `spell` int(11) unsigned NOT NULL default '0',
   `effect_index` int(11) unsigned NOT NULL default '0',
   `amount` int(11) NOT NULL default '0',
-  `maxduration`   int(11) NOT NULL default '0',
+  `maxduration` int(11) NOT NULL default '0',
   `remaintime` int(11) NOT NULL default '0',
   `remaincharges` int(11) NOT NULL default '0',
   PRIMARY KEY  (`guid`,`spell`,`effect_index`)
@@ -2593,7 +2593,7 @@ CREATE TABLE `pet_name_generation` (
 
 LOCK TABLES `pet_name_generation` WRITE;
 /*!40000 ALTER TABLE `pet_name_generation` DISABLE KEYS */;
-INSERT INTO `pet_name_generation` VALUES 
+INSERT INTO `pet_name_generation` VALUES
 (1,'Aba',416,0),
 (2,'Az',416,0),
 (3,'Bel',416,0),
@@ -2957,7 +2957,7 @@ CREATE TABLE `player_levelstats` (
 
 LOCK TABLES `player_levelstats` WRITE;
 /*!40000 ALTER TABLE `player_levelstats` DISABLE KEYS */;
-INSERT INTO `player_levelstats` VALUES 
+INSERT INTO `player_levelstats` VALUES
 (1,1,1,60,0,23,20,22,20,21),
 (1,1,2,79,0,24,21,23,20,21),
 (1,1,3,98,0,25,21,24,20,22),
@@ -6623,7 +6623,7 @@ CREATE TABLE `playercreateinfo` (
 
 LOCK TABLES `playercreateinfo` WRITE;
 /*!40000 ALTER TABLE `playercreateinfo` DISABLE KEYS */;
-INSERT INTO `playercreateinfo` VALUES 
+INSERT INTO `playercreateinfo` VALUES
 (1,1,0,12,-8949,-132,84),
 (1,2,0,12,-8949,-132,84),
 (1,4,0,12,-8949,-132,84),
@@ -6700,7 +6700,7 @@ CREATE TABLE `playercreateinfo_action` (
 
 LOCK TABLES `playercreateinfo_action` WRITE;
 /*!40000 ALTER TABLE `playercreateinfo_action` DISABLE KEYS */;
-INSERT INTO `playercreateinfo_action` VALUES 
+INSERT INTO `playercreateinfo_action` VALUES
 (1,1,1,78,0,0),
 (1,1,0,6603,0,0),
 (1,1,11,65020,128,0),
@@ -7000,7 +7000,7 @@ CREATE TABLE `playercreateinfo_item` (
 
 LOCK TABLES `playercreateinfo_item` WRITE;
 /*!40000 ALTER TABLE `playercreateinfo_item` DISABLE KEYS */;
-INSERT INTO `playercreateinfo_item` VALUES 
+INSERT INTO `playercreateinfo_item` VALUES
 (1,1,38,1),
 (1,1,39,1),
 (1,1,40,1),
@@ -7450,7 +7450,7 @@ CREATE TABLE `playercreateinfo_skill` (
 
 LOCK TABLES `playercreateinfo_skill` WRITE;
 /*!40000 ALTER TABLE `playercreateinfo_skill` DISABLE KEYS */;
-INSERT INTO `playercreateinfo_skill` VALUES 
+INSERT INTO `playercreateinfo_skill` VALUES
 (1,1,183,'GENERIC (DND)'),
 (1,2,183,'GENERIC (DND)'),
 (1,4,183,'GENERIC (DND)'),
@@ -7662,7 +7662,7 @@ CREATE TABLE `playercreateinfo_spell` (
 
 LOCK TABLES `playercreateinfo_spell` WRITE;
 /*!40000 ALTER TABLE `playercreateinfo_spell` DISABLE KEYS */;
-INSERT INTO `playercreateinfo_spell` VALUES 
+INSERT INTO `playercreateinfo_spell` VALUES
 (1,1,78,'Heroic Strike',1),
 (1,1,81,'Dodge',1),
 (1,1,107,'Block',1),
@@ -9887,7 +9887,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `reserved_name`;
 CREATE TABLE `reserved_name` (
-  `name` VARCHAR(12) NOT NULL DEFAULT '',
+  `name` varchar(12) NOT NULL default '',
   PRIMARY KEY  (`name`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player Reserved Names';
 
@@ -9949,7 +9949,7 @@ CREATE TABLE `spell_affect` (
 
 LOCK TABLES `spell_affect` WRITE;
 /*!40000 ALTER TABLE `spell_affect` DISABLE KEYS */;
-INSERT INTO `spell_affect` VALUES 
+INSERT INTO `spell_affect` VALUES
 (11069,1,0,0,0,0,0,1,0),
 (11070,1,0,0,0,0,0,32,0),
 (11083,0,0,0,0,8,0,0,0),
@@ -10883,7 +10883,7 @@ CREATE TABLE `spell_chain` (
 
 LOCK TABLES `spell_chain` WRITE;
 /*!40000 ALTER TABLE `spell_chain` DISABLE KEYS */;
-INSERT INTO `spell_chain` VALUES 
+INSERT INTO `spell_chain` VALUES
 (10,0,10,1),
 (17,0,17,1),
 (53,0,53,1),
@@ -12789,7 +12789,7 @@ CREATE TABLE `spell_learn_skill` (
 
 LOCK TABLES `spell_learn_skill` WRITE;
 /*!40000 ALTER TABLE `spell_learn_skill` DISABLE KEYS */;
-INSERT INTO `spell_learn_skill` VALUES 
+INSERT INTO `spell_learn_skill` VALUES
 (9078,415,1,1),
 (9077,414,1,1),
 (8737,413,1,1),
@@ -12852,7 +12852,7 @@ CREATE TABLE `spell_learn_spell` (
 
 LOCK TABLES `spell_learn_spell` WRITE;
 /*!40000 ALTER TABLE `spell_learn_spell` DISABLE KEYS */;
-INSERT INTO `spell_learn_spell` VALUES 
+INSERT INTO `spell_learn_spell` VALUES
 (71,355,0),
 (71,7386,0),
 (264,3018,0),
@@ -12921,17 +12921,14 @@ CREATE TABLE `spell_proc_event` (
 
 LOCK TABLES `spell_proc_event` WRITE;
 /*!40000 ALTER TABLE `spell_proc_event` DISABLE KEYS */;
-INSERT INTO `spell_proc_event` VALUES 
+INSERT INTO `spell_proc_event` VALUES
 (168,0,0,0,0,0,2,0),
 (324,0,0,0,0,0,1049602,0),
 (325,0,0,0,0,0,1049602,0),
-(588,0,0,0,0,0,1026,0),
-(602,0,0,0,0,0,1026,0),
 (742,0,0,0,0,0,1,0),
 (905,0,0,0,0,0,1049602,0),
 (945,0,0,0,0,0,1049602,0),
 (974,0,0,0,0,0,1049602,0),
-(1006,0,0,0,0,0,1026,0),
 (1120,0,0,0,0,0,4,0),
 (2565,0,0,0,0,0,64,0),
 (2652,0,0,0,0,0,2,0),
@@ -13055,7 +13052,6 @@ INSERT INTO `spell_proc_event` VALUES
 (7098,0,0,0,0,0,1,0),
 (7102,0,0,0,0,0,1,0),
 (7103,0,0,0,0,0,2,0),
-(7128,0,0,0,0,0,1026,0),
 (7131,0,0,0,0,0,664232,0),
 (7137,0,0,0,0,0,1,0),
 (7276,0,0,0,0,0,1,0),
@@ -13111,8 +13107,6 @@ INSERT INTO `spell_proc_event` VALUES
 (10426,0,0,0,0,0,1049602,0),
 (10431,0,0,0,0,0,1049602,0),
 (10432,0,0,0,0,0,1049602,0),
-(10951,0,0,0,0,0,1026,0),
-(10952,0,0,0,0,0,1026,0),
 (11103,4,0,0,0,0,131072,0),
 (11119,4,0,0,0,0,65536,0),
 (11120,4,0,0,0,0,65536,0),
@@ -13157,7 +13151,7 @@ INSERT INTO `spell_proc_event` VALUES
 (12701,0,0,0,0,0,1,0.66504),
 (12702,0,0,0,0,0,1,0.99756),
 (12703,0,0,0,0,0,1,1.33008),
-(12704,0,0,0,0,0,1,1.66260),
+(12704,0,0,0,0,0,1,1.6626),
 (12724,0,0,0,0,0,64,0),
 (12725,0,0,0,0,0,64,0),
 (12726,0,0,0,0,0,64,0),
@@ -13519,7 +13513,6 @@ INSERT INTO `spell_proc_event` VALUES
 (24949,0,0,0,0,0,32,0),
 (25020,0,0,0,0,0,1026,0),
 (25023,0,0,0,0,0,2,0),
-(25431,0,0,0,0,0,1026,0),
 (25441,0,0,0,0,0,1048576,0),
 (25461,0,0,0,0,0,2,0),
 (25469,0,0,0,0,0,1049602,0),
@@ -13645,9 +13638,9 @@ INSERT INTO `spell_proc_event` VALUES
 (30080,0,0,0,0,0,2,0),
 (30081,0,0,0,0,0,2,0),
 (30160,0,0,0,0,0,65536,0),
-(30293,0,0,0,5,824633721729,131072, 0),
-(30295,0,0,0,5,824633721729,131072, 0),
-(30296,0,0,0,5,824633721729,131072, 0),
+(30293,0,0,0,5,824633721729,131072,0),
+(30295,0,0,0,5,824633721729,131072,0),
+(30296,0,0,0,5,824633721729,131072,0),
 (30299,36,0,0,0,0,1048576,0),
 (30301,36,0,0,0,0,1048576,0),
 (30302,36,0,0,0,0,1048576,0),
@@ -13689,7 +13682,6 @@ INSERT INTO `spell_proc_event` VALUES
 (32394,0,0,0,5,73014445058,131072,0),
 (32593,0,0,0,0,0,1049602,0),
 (32594,0,0,0,0,0,1049602,0),
-(32837,0,0,0,0,0,16384,0),
 (33012,0,0,0,0,0,4,0),
 (33014,0,0,0,0,0,4,0),
 (33089,0,0,0,0,0,64,0),
@@ -13761,7 +13753,15 @@ INSERT INTO `spell_proc_event` VALUES
 (40482,0,0,0,0,0,65536,0),
 (40971,0,0,0,0,0,134217728,0),
 (41434,0,0,0,0,0,1,2),
-(42083,0,0,0,0,0,4198400,0);
+(42083,0,0,0,0,0,4198400,0),
+(32837,0,0,0,0,0,16384,0),
+(588,0,0,0,0,0,1026,0),
+(602,0,0,0,0,0,1026,0),
+(1006,0,0,0,0,0,1026,0),
+(7128,0,0,0,0,0,1026,0),
+(10951,0,0,0,0,0,1026,0),
+(10952,0,0,0,0,0,1026,0),
+(25431,0,0,0,0,0,1026,0);
 /*!40000 ALTER TABLE `spell_proc_event` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -13830,7 +13830,7 @@ CREATE TABLE `spell_threat` (
 
 LOCK TABLES `spell_threat` WRITE;
 /*!40000 ALTER TABLE `spell_threat` DISABLE KEYS */;
-INSERT INTO `spell_threat` VALUES 
+INSERT INTO `spell_threat` VALUES
 (1672,180),
 (9881,207),
 (11556,43),
@@ -13938,4 +13938,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2007-08-27  9:19:21
+-- Dump completed on 2007-09-25 10:13:06
