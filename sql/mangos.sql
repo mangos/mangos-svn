@@ -13776,7 +13776,6 @@ CREATE TABLE `spell_script_target` (
   `targetEntry` int(11) unsigned default '0',
   UNIQUE KEY `entry_type_target` (`entry`,`type`,`targetEntry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1 COMMENT='Spell System';
-LOCK TABLES `transports` WRITE;
 
 --
 -- Dumping data for table `spell_script_target`
