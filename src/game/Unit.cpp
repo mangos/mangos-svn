@@ -72,8 +72,11 @@ static Unit::AuraTypeSet GenerateVictimProcAuraTypes()
     auraTypes.insert(SPELL_AURA_PROC_TRIGGER_SPELL);
     auraTypes.insert(SPELL_AURA_PROC_TRIGGER_DAMAGE);
     auraTypes.insert(SPELL_AURA_DUMMY);
+
+    // for charges counting
     auraTypes.insert(SPELL_AURA_MOD_PARRY_PERCENT);
     auraTypes.insert(SPELL_AURA_MOD_BLOCK_PERCENT);
+    auraTypes.insert(SPELL_AURA_MOD_RESISTANCE);
     return auraTypes;
 }
 
@@ -7102,32 +7105,35 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                 }
             }
 
-            if(*aur == SPELL_AURA_PROC_TRIGGER_SPELL)
+            switch(*aur)
             {
-                sLog.outDebug("ProcDamageAndSpell: casting spell %u (triggered by %s aura of spell %u)", i->spellInfo->Id,(isVictim?"a victim's":"an attacker's"),i->triggeredByAura->GetId());
-                HandleProcTriggerSpell(pTarget, damage, i->triggeredByAura, procSpell,i->spellParam);
-            }
-            else if(*aur == SPELL_AURA_PROC_TRIGGER_DAMAGE)
-            {
-                sLog.outDebug("ProcDamageAndSpell: doing %u damage from spell id %u (triggered by %s aura of spell %u)", i->spellParam, i->spellInfo->Id,(isVictim?"a victim's":"an attacker's"),i->triggeredByAura->GetId());
-                uint32 damage = i->spellParam;
-                // TODO: remove hack for Seal of Righteousness. That should not be there
-                if(!isVictim && i->spellInfo->SpellVisual == 7986)
-                    damage = (damage * GetAttackTime(BASE_ATTACK))/60/1000;
-                SpellNonMeleeDamageLog(pTarget, i->spellInfo->Id, damage, true, true);
-            }
-            else if(*aur == SPELL_AURA_DUMMY)
-            {
-                sLog.outDebug("ProcDamageAndSpell: casting spell id %u (triggered by %s dummy aura of spell %u)", i->spellInfo->Id,(isVictim?"a victim's":"an attacker's"),i->triggeredByAura->GetId());
-                HandleDummyAuraProc(pTarget, i->spellInfo, i->spellParam, damage, i->triggeredByAura, procSpell, procFlag);
-            }
-            else if(*aur == SPELL_AURA_MOD_BLOCK_PERCENT)
-            {
-                // nothing do, just charges counter
-            }
-            else if(*aur == SPELL_AURA_MOD_PARRY_PERCENT)
-            {
-                // nothing do, just charges counter
+                case SPELL_AURA_PROC_TRIGGER_SPELL:
+                {
+                    sLog.outDebug("ProcDamageAndSpell: casting spell %u (triggered by %s aura of spell %u)", i->spellInfo->Id,(isVictim?"a victim's":"an attacker's"),i->triggeredByAura->GetId());
+                    HandleProcTriggerSpell(pTarget, damage, i->triggeredByAura, procSpell,i->spellParam);
+                    break;
+                }
+                case SPELL_AURA_PROC_TRIGGER_DAMAGE:
+                {
+                    sLog.outDebug("ProcDamageAndSpell: doing %u damage from spell id %u (triggered by %s aura of spell %u)", i->spellParam, i->spellInfo->Id,(isVictim?"a victim's":"an attacker's"),i->triggeredByAura->GetId());
+                    uint32 damage = i->spellParam;
+                    // TODO: remove hack for Seal of Righteousness. That should not be there
+                    if(!isVictim && i->spellInfo->SpellVisual == 7986)
+                        damage = (damage * GetAttackTime(BASE_ATTACK))/60/1000;
+                    SpellNonMeleeDamageLog(pTarget, i->spellInfo->Id, damage, true, true);
+                    break;
+                }
+                case SPELL_AURA_DUMMY:
+                {
+                    sLog.outDebug("ProcDamageAndSpell: casting spell id %u (triggered by %s dummy aura of spell %u)", i->spellInfo->Id,(isVictim?"a victim's":"an attacker's"),i->triggeredByAura->GetId());
+                    HandleDummyAuraProc(pTarget, i->spellInfo, i->spellParam, damage, i->triggeredByAura, procSpell, procFlag);
+                    break;
+                }
+                default:
+                {
+                    // nothing do, just charges counter
+                    break;
+                }
             }
         }
 

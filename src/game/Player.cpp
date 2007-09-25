@@ -5136,9 +5136,7 @@ int32 Player::CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep)
 
     AuraList const& mReputationGain = GetAurasByType(SPELL_AURA_MOD_REPUTATION_GAIN);
     for(AuraList::const_iterator i = mReputationGain.begin();i != mReputationGain.end(); ++i)
-    {
-        repMod = ((*i)->GetModifier()->m_amount) / 100;
-    }
+        repMod += ((*i)->GetModifier()->m_amount);
 
     percent += rep > 0 ? repMod : -repMod;
 
