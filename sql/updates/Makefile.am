@@ -465,6 +465,7 @@ pkgdata_DATA = \
 	4506_spell_learn_spell.sql \
 	4507_quest_template.sql \
 	4510_spell_proc_event.sql \
+	4513_spell_proc_event.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -910,4 +911,5 @@ EXTRA_DIST = \
 	4506_spell_learn_spell.sql \
 	4507_quest_template.sql \
 	4510_spell_proc_event.sql \
+	4513_spell_proc_event.sql \
 	README
