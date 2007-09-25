@@ -2541,11 +2541,23 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
     newspell->slotId = tmpslot;
     m_spells[spell_id] = newspell;
 
-    if (IsPassiveSpell(spell_id) || GetTalentSpellCost(spell_id) != 0 && objmgr.IsSpellLearnSpell(spell_id))
+    uint32 talentCost = GetTalentSpellCost(spell_id);
+
+    // cast talents with SPELL_EFFECT_LEARN_SPELL (other dependent spells will learned later as not auto-learned)
+    // note: all spells with SPELL_EFFECT_LEARN_SPELL isn't passive
+    if( talentCost > 0 && (spellInfo->Effect[0]==SPELL_EFFECT_LEARN_SPELL || spellInfo->Effect[1]==SPELL_EFFECT_LEARN_SPELL || spellInfo->Effect[2]==SPELL_EFFECT_LEARN_SPELL) )
+    {
+        // ignore stance requirement for talent learn spell (stance set for spell only for client spell description show)
+        CastSpell(this, spell_id, true);
+    }
+    // also cast passive spells (including all talents without SPELL_EFFECT_LEARN_SPELL) with additional checks
+    else if (IsPassiveSpell(spell_id))
     {
         // if spell doesn't require a stance or the player is in the required stance
-        if( (!spellInfo->Stances && spell_id != 5420 && spell_id != 5419 && spell_id != 7376 &&
-            spell_id != 7381 && spell_id != 21156 && spell_id != 21009 && spell_id != 21178 && spell_id != 33948 && spell_id != 40121) ||
+        if( ( !spellInfo->Stances && 
+            spell_id != 5420 && spell_id != 5419 && spell_id != 7376 &&
+            spell_id != 7381 && spell_id != 21156 && spell_id != 21009 && 
+            spell_id != 21178 && spell_id != 33948 && spell_id != 40121 ) ||
             m_form != 0 && (spellInfo->Stances & (1<<(m_form-1))) ||
             (spell_id ==  5420 && m_form == FORM_TREE) ||
             (spell_id ==  5419 && m_form == FORM_TRAVEL) ||
@@ -2561,7 +2573,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
     }
 
     // update used talent points count
-    m_usedTalentCount += GetTalentSpellCost(spell_id);
+    m_usedTalentCount += talentCost;
 
     // update free primary prof.points (if any, can be none in case GM .learn prof. learning)
     if(uint32 freeProfs = GetFreePrimaryProffesionPoints())
