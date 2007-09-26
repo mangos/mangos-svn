@@ -369,7 +369,12 @@ m_periodicTimer(0), m_PeriodicEventId(0), m_updated(false), m_removeOnDeath(fals
     m_isDeathPersist = (m_spellProto->AttributesEx3 & 0x100000) != 0;
 
     if(m_spellProto->procCharges)
+    {
         m_procCharges = m_spellProto->procCharges;
+
+        if(modOwner)
+            modOwner->ApplySpellMod(m_spellId, SPELLMOD_CHARGES, m_procCharges);
+    }
     else
         m_procCharges = -1;
 }
@@ -3261,9 +3266,6 @@ void Aura::HandleAuraModBlockPercent(bool apply, bool Real)
     if(m_target->GetTypeId()!=TYPEID_PLAYER)
         return;
 
-    if(apply && Real && m_procCharges >= 0)
-        ((Player *)m_target)->ApplySpellMod(GetId(), SPELLMOD_EXTRA_BLOCKS, m_procCharges);
-
     ((Player*)m_target)->HandleBaseModValue(BLOCK_PERCENTAGE, FLAT_MOD, float (m_modifier.m_amount), apply);
     //sLog.outError("BONUS BLOCK CHANCE: + %f", float(m_modifier.m_amount));
 }
@@ -4046,8 +4048,3 @@ void Aura::HandleSpiritOfRedemption( bool apply, bool Real )
     if(!apply)
         m_target->DealDamage(m_target, m_target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_NORMAL, GetSpellProto(), 0, false);
 }
-
-
-
-
-
