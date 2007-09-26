@@ -1104,7 +1104,6 @@ void Spell::cast(bool skipCheck)
     FillTargetMap();
     SendCastResult(castResult);
     SendSpellGo();                                          // we must send smsg_spell_go packet before m_castItem delete in TakeCastItem()...
-    TakeCastItem();                                         // we must remove consumed cast item before HandleEffects to allow place crafted item in same slot
 
     // Pass cast spell event to handler (not send triggered by aura spells)
     if (m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_MELEE && m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_RANGED && !m_triggeredByAura)
@@ -1431,6 +1430,9 @@ void Spell::_handle_reflection_phase(std::set<uint64> *reflectTargets)
 
 void Spell::_handle_finish_phase()
 {
+    // Remove used for cast item if need (it can be already NULL after TakeReagents call
+    TakeCastItem();
+
     // spell log
     if(m_needSpellLog)
         SendLogExecute();
