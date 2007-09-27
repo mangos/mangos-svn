@@ -530,7 +530,9 @@ class Spell
         void writeSpellGoTargets( WorldPacket * data );
         void writeAmmoToPacket( WorldPacket * data );
         void FillTargetMap();
+
         void SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap);
+        bool CheckTarget( Unit* target, uint32 eff, bool hitPhase );
 
         void SendCastResult(uint8 result);
         void SendSpellStart();
