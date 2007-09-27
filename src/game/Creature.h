@@ -415,6 +415,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         uint32 GetTrainerType() const { return m_trainer_type; }
 
         CreatureInfo const *GetCreatureInfo() const;
+        CreatureDataAddon const* GetCreatureAddon() const;
 
         uint32 getDialogStatus(Player *pPlayer, uint32 defstatus);
 

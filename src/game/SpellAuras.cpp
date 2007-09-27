@@ -1919,7 +1919,7 @@ void Aura::HandleModCharm(bool apply, bool Real)
                 // restore UNIT_FIELD_BYTES_0
                 if(cinfo && caster->GetTypeId() == TYPEID_PLAYER && caster->getClass() == CLASS_WARLOCK && cinfo->type == CREATURE_TYPE_DEMON)
                 {
-                    CreatureDataAddon const *cainfo = objmgr.GetCreatureAddon(m_target->GetGUIDLow());
+                    CreatureDataAddon const *cainfo = ((Creature*)m_target)->GetCreatureAddon();
                     if(cainfo && cainfo->bytes0 != 0)
                         m_target->SetUInt32Value(UNIT_FIELD_BYTES_0, cainfo->bytes0);
                     else

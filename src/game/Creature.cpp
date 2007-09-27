@@ -1668,10 +1668,16 @@ bool Creature::IsOutOfThreatArea(Unit* pVictim) const
     return ( length > 10000.0f);                            // real value unknown
 }
 
+CreatureDataAddon const* Creature::GetCreatureAddon() const
+{
+    return objmgr.GetCreatureAddon(m_DBTableGuid);
+}
+
+
 //creature_addon table
 bool Creature::LoadCreaturesAddon()
 {
-    CreatureDataAddon const *cainfo = objmgr.GetCreatureAddon(GetGUIDLow());
+    CreatureDataAddon const *cainfo = GetCreatureAddon();
     if(!cainfo)
         return false;
 
