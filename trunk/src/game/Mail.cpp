@@ -212,7 +212,7 @@ void WorldSession::HandleMarkAsRead(WorldPacket & recv_data )
         if (pl->unReadMails)
             pl->unReadMails--;
         m->checked = m->checked | READ;
-        m->expire_time = time(NULL) + (30 * DAY);
+        // m->expire_time = time(NULL) + (30 * DAY);  // Expire time do not change at reading mail
         pl->m_mailsUpdated = true;
         m->state = MAIL_STATE_CHANGED;
     }
