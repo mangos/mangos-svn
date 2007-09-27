@@ -157,6 +157,9 @@ namespace SOCKETS_NAMESPACE {
 #  if !defined(MSG_NOSIGNAL)
 #   define MSG_NOSIGNAL 0
 #  endif
+#  include <netinet/in.h>
+typedef	in_addr_t ipaddr_t;
+typedef	in_port_t port_t;
 #elif defined __APPLE_CC__ 
 // ----------------------------------------
 // Mac OS X
