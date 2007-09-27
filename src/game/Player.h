@@ -1665,7 +1665,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadInventory(QueryResult *result, uint32 timediff);
         void _LoadMailInit(QueryResult *resultUnread, QueryResult *resultDelivery);
         void _LoadMail();
-        void _LoadMailedItems();
+        void _LoadMailedItem(uint32 item_guid, uint32 item_template);
         void _LoadQuestStatus(QueryResult *result);
         void _LoadGroup(QueryResult *result);
         void _LoadReputation(QueryResult *result);

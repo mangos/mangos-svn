@@ -12500,40 +12500,24 @@ void Player::_LoadInventory(QueryResult *result, uint32 timediff)
     _ApplyAllItemMods();
 }
 
-// load mailed items which should receive current player
-void Player::_LoadMailedItems()
+// load mailed item which should receive current player
+void Player::_LoadMailedItem(uint32 item_guid, uint32 item_template)
 {
-    QueryResult *result = sDatabase.PQuery( "SELECT `item_guid`,`item_template` FROM `mail` WHERE `receiver` = '%u' AND `item_guid` > 0", GetGUIDLow());
+    ItemPrototype const *proto = objmgr.GetItemPrototype(item_template);
 
-    if( !result )
-        return;
-
-    Field *fields;
-    do
+    if(!proto)
     {
-        fields = result->Fetch();
-        uint32 item_guid = fields[0].GetUInt32();
-        uint32 item_template = fields[1].GetUInt32();
-
-        ItemPrototype const *proto = objmgr.GetItemPrototype(item_template);
-
-        if(!proto)
-        {
-            sLog.outError( "Player %u have unknown item_template (ProtoType) in mailed items(GUID: %u template: %u) in mail, skipped.", GetGUIDLow(), item_guid, item_template);
-            continue;
-        }
-        Item *item = NewItemOrBag(proto);
-        if(!item->LoadFromDB(item_guid, 0))
-        {
-            sLog.outError( "Player::_LoadMailedItems - Mailed Item doesn't exist!!!! - item guid: %u", item_guid);
-            delete item;
-            continue;
-        }
-        AddMItem(item);
+        sLog.outError( "Player %u have unknown item_template (ProtoType) in mailed items(GUID: %u template: %u) in mail, skipped.", GetGUIDLow(), item_guid, item_template);
+        return;
     }
-    while( result->NextRow() );
-
-    delete result;
+    Item *item = NewItemOrBag(proto);
+    if(!item->LoadFromDB(item_guid, 0))
+    {
+        sLog.outError( "Player::_LoadMailedItems - Mailed Item doesn't exist!!!! - item guid: %u", item_guid);
+        delete item;
+        return;
+    }
+    AddMItem(item);
 }
 
 void Player::_LoadMailInit(QueryResult *resultUnread, QueryResult *resultDelivery)
@@ -12559,8 +12543,6 @@ void Player::_LoadMailInit(QueryResult *resultUnread, QueryResult *resultDeliver
 
 void Player::_LoadMail()
 {
-    _LoadMailedItems();
-
     m_mail.clear();
     //mails are in right order
     QueryResult *result = sDatabase.PQuery("SELECT `id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked` FROM `mail` WHERE `receiver` = '%u' ORDER BY `id` DESC",GetGUIDLow());
@@ -12584,6 +12566,10 @@ void Player::_LoadMail()
             m->COD = fields[11].GetUInt32();
             m->checked = fields[12].GetUInt32();
             m->state = MAIL_STATE_UNCHANGED;
+
+            if (m->item_guid)
+                _LoadMailedItem(m->item_guid, m->item_template);
+
             m_mail.push_back(m);
         } while( result->NextRow() );
         delete result;
