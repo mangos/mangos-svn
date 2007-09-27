@@ -422,76 +422,15 @@ void Spell::FillTargetMap()
             }
         }
 
-        //Check targets for LOS visibility (except spells without range limitations )
-        bool skipLOS = false;
-        switch(m_spellInfo->Effect[i])
-        {
-            case SPELL_EFFECT_SUMMON_PLAYER:
-                skipLOS = true;
-                break;
-        }
-
         for (std::list<Unit*>::iterator itr = tmpUnitMap.begin() ; itr != tmpUnitMap.end();)
         {
-            // Check targets for creature type mask and remove not appropriate (skip explicit self target case, maybe need other explicit targets)
-            if(m_spellInfo->EffectImplicitTargetA[i]!=TARGET_SELF )
-            {
-                if (!CheckTargetCreatureType(*itr))
-                {
-                    itr = tmpUnitMap.erase(itr);
-                    continue;
-                }
-            }
-
-            //Check targets for not_selectable unit flag and remove
-            if ((*itr) != m_caster && (*itr)->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE))
+            if(!CheckTarget(*itr, i, false ))
             {
                 itr = tmpUnitMap.erase(itr);
                 continue;
             }
-
-            // Evade target
-            if( (*itr)->GetTypeId()==TYPEID_UNIT && ((Creature*)(*itr))->IsInEvadeMode() )
-            {
-                m_caster->SendAttackStateUpdate(HITINFO_RESIST|HITINFO_SWINGNOHITSOUND, (*itr), 1, SpellSchools(m_spellInfo->School), 0, 0,0,VICTIMSTATE_EVADES,0);
-                itr = tmpUnitMap.erase(itr);
-                continue;
-            }
-
-            //Check player targets and remove if in GM mode or GM invisibility (for not self casting case)
-            if( (*itr) != m_caster && (*itr)->GetTypeId()==TYPEID_PLAYER)
-            {
-                if(((Player*)(*itr))->GetVisibility()==VISIBILITY_OFF)
-                {
-                    itr = tmpUnitMap.erase(itr);
-                    continue;
-                }
-
-                if(((Player*)(*itr))->isGameMaster() && !IsPositiveSpell(m_spellInfo->Id))
-                {
-                    itr = tmpUnitMap.erase(itr);
-                    continue;
-                }
-            }
-
-            //Check targets for LOS visibility (except spells without range limitations )
-            if(!skipLOS && !(*itr)->IsWithinLOSInMap(m_caster))
-            {
-                itr = tmpUnitMap.erase(itr);
-                continue;
-            }
-
-            //Check targets for immune and remove immunes targets
-            if ((*itr)->IsImmunedToSpell(m_spellInfo))
-            {
-                // FIXME: this must be spell immune message instead melee attack message
-                m_caster->SendAttackStateUpdate(HITINFO_NOACTION, *itr, 1, SpellSchools(m_spellInfo->School), 0, 0, 0, VICTIMSTATE_IS_IMMUNE, 0);
-                itr = tmpUnitMap.erase(itr);
-                continue;
-            }
-
-            // ok
-            ++itr;
+            else
+                ++itr;
         }
 
         for(std::list<Unit*>::iterator iunit= tmpUnitMap.begin();iunit != tmpUnitMap.end();++iunit)
@@ -1386,7 +1325,7 @@ void Spell::_handle_unit_phase(const uint64 targetGUID, const uint32 effectNumbe
 {
     // check m_caster->GetGUID() let load auras at login and speedup most often case
     Unit* unit = m_caster->GetGUID()==targetGUID ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,targetGUID);
-    if(unit)
+    if(unit && CheckTarget(unit, effectNumber, true ))
     {
         HandleEffects(unit,NULL,NULL,effectNumber,m_damageMultipliers[effectNumber]);
 
@@ -3569,6 +3508,61 @@ CurrentSpellTypes Spell::GetCurrentContainer()
     else
         return(CURRENT_GENERIC_SPELL);
 }
+
+bool Spell::CheckTarget( Unit* target, uint32 eff, bool hitPhase )
+{
+    // Check targets for creature type mask and remove not appropriate (skip explicit self target case, maybe need other explicit targets)
+    if(m_spellInfo->EffectImplicitTargetA[eff]!=TARGET_SELF )
+    {
+        if (!CheckTargetCreatureType(target))
+            return false;
+    }
+
+    //Check targets for not_selectable unit flag and remove
+    if (target != m_caster && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE))
+        return false;
+
+    // Evade target (only at hit)
+    if( hitPhase && target->GetTypeId()==TYPEID_UNIT && ((Creature*)target)->IsInEvadeMode() )
+    {
+        m_caster->SendAttackStateUpdate(HITINFO_RESIST|HITINFO_SWINGNOHITSOUND, target, 1, SpellSchools(m_spellInfo->School), 0, 0,0,VICTIMSTATE_EVADES,0);
+        return false;
+    }
+
+    //Check player targets and remove if in GM mode or GM invisibility (for not self casting case)
+    if( target != m_caster && target->GetTypeId()==TYPEID_PLAYER)
+    {
+        if(((Player*)target)->GetVisibility()==VISIBILITY_OFF)
+            return false;
+
+        if(((Player*)target)->isGameMaster() && !IsPositiveSpell(m_spellInfo->Id))
+            return false;
+    }
+
+    //Check targets for LOS visibility (except spells without range limitations )
+    bool skipLOS = false;
+    switch(m_spellInfo->Effect[eff])
+    {
+    case SPELL_EFFECT_SUMMON_PLAYER:
+        skipLOS = true;
+        break;
+    }
+
+    //Check targets for LOS visibility (except spells without range limitations )
+    if(!skipLOS && !target->IsWithinLOSInMap(m_caster))
+        return false;
+
+    //Check targets for immune and remove immunes targets
+    if (hitPhase && target->IsImmunedToSpell(m_spellInfo))
+    {
+        // FIXME: this must be spell immune message instead melee attack message
+        m_caster->SendAttackStateUpdate(HITINFO_NOACTION, target, 1, SpellSchools(m_spellInfo->School), 0, 0, 0, VICTIMSTATE_IS_IMMUNE, 0);
+        return false;
+    }
+
+    return true;
+}
+
 
 SpellEvent::SpellEvent(Spell* spell) : BasicEvent()
 {
