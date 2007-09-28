@@ -442,15 +442,21 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
     if(pVictim->GetTypeId() != TYPEID_PLAYER)
     {
         //pVictim->SetInFront(this);
-        // no loot,xp,health if type 8 /critters/
+        // no xp,health if type 8 /critters/
         if ( pVictim->GetCreatureType() == CREATURE_TYPE_CRITTER)
         {
             pVictim->setDeathState(JUST_DIED);
             pVictim->SetHealth(0);
             pVictim->CombatStop(true);
             pVictim->DeleteThreatList();
+
+            // allow loot only if has loot_id in creature_template
+            CreatureInfo const* cInfo = ((Creature*)pVictim)->GetCreatureInfo();
+            if(cInfo && cInfo->lootid)
+                pVictim->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
             return;
         }
+
         if(!pVictim->isInCombat() && ((Creature*)pVictim)->AI())
             ((Creature*)pVictim)->AI()->AttackStart(this);
     }
