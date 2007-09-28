@@ -1058,9 +1058,6 @@ void Spell::EffectApplyAura(uint32 i)
 
     Aura* Aur = new Aura(m_spellInfo, i, &m_currentBasePoints[i], unitTarget,m_caster, m_CastItem);
 
-    if(!Aur)                                                // is it useless?
-        return;
-
     if (!Aur->IsPositive() && Aur->GetCasterGUID() != Aur->GetTarget()->GetGUID())
     {
         bool attack = false;
