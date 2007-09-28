@@ -1979,9 +1979,9 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
         {
             SpellEntry const *spellInfo = (*itr).second->GetSpellProto();
             if( spellInfo->AttributesEx3 == 0x40000 && spellInfo->SpellFamilyName == SPELLFAMILY_PALADIN &&
-                ((*itr).second->GetCaster() == this && (!spellCasted || spellCasted->Id == 35395)) )
+                ((*itr).second->GetCasterGUID() == GetGUID() && (!spellCasted || spellCasted->Id == 35395)) )
             {
-                (*itr).second->SetAuraDuration(GetDuration(spellInfo));
+                (*itr).second->SetAuraDuration((*itr).second->GetAuraMaxDuration());
                 (*itr).second->UpdateAuraDuration();
             }
         }
