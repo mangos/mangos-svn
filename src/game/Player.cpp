@@ -10508,7 +10508,7 @@ bool Player::CanCompleteQuest( uint32 quest_id )
                 }
             }
 
-            if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL_OR_CAST ) )
+            if ( qInfo->HasSpecialFlag(QUEST_SPECIAL_FLAGS_KILL_OR_CAST + QUEST_SPECIAL_FLAGS_SPEAKTO) )
             {
                 for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
                 {
@@ -10671,7 +10671,7 @@ void Player::AddQuest( Quest *pQuest, Object *questGiver )
                 questStatusData.m_itemcount[i] = 0;
         }
 
-        if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL_OR_CAST ) )
+        if ( pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_KILL_OR_CAST + QUEST_SPECIAL_FLAGS_SPEAKTO) )
         {
             for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
                 questStatusData.m_creatureOrGOcount[i] = 0;
@@ -11482,7 +11482,7 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
         // just if !ingroup || !noraidgroup || raidgroup
         if ( qInfo && mQuestStatus[questid].m_status == QUEST_STATUS_INCOMPLETE && (!GetGroup() || !GetGroup()->isRaidGroup() || qInfo->GetType() == QUEST_TYPE_RAID))
         {
-            if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL_OR_CAST ) )
+            if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL_OR_CAST) )
             {
                 for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
                 {
@@ -11578,7 +11578,56 @@ void Player::CastedCreatureOrGO( uint32 entry, uint64 guid, uint32 spell_id )
         }
     }
 }
+void Player::TalkedToCreature( uint32 entry, uint64 guid )
+{
+    uint32 questid;
+    uint32 reqTalkCount;
+    uint32 curTalkCount;
+    uint32 addTalkCount = 1;
+    for( int i = 0; i < MAX_QUEST_LOG_SIZE; i++ )
+    {
+        questid = GetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i);
 
+        if(!questid)
+            continue;
+
+        Quest * qInfo = objmgr.mQuestTemplates[questid];
+        if ( qInfo && mQuestStatus[questid].m_status == QUEST_STATUS_INCOMPLETE )
+        {
+            if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_SPEAKTO ) )
+            {
+                for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
+                {
+                    if(qInfo->ReqSpell[j] > 0 || qInfo->ReqCreatureOrGOId[j] < 0)// skip spell casts and Gameobject objectives
+                        continue;
+
+                    uint32 reqTarget = 0;
+
+                    if(qInfo->ReqCreatureOrGOId[j] > 0)            // creature activate objectives
+                        reqTarget = qInfo->ReqCreatureOrGOId[j];   // checked at quest_template loading
+                    else
+                        continue;
+
+                    if ( reqTarget == entry )
+                    {
+                        reqTalkCount = qInfo->ReqCreatureOrGOCount[j];
+                        curTalkCount = mQuestStatus[questid].m_creatureOrGOcount[j];
+                        if ( curTalkCount < reqTalkCount )
+                        {
+                            mQuestStatus[questid].m_creatureOrGOcount[j] = curTalkCount + addTalkCount;
+                            if (mQuestStatus[questid].uState != QUEST_NEW) mQuestStatus[questid].uState = QUEST_CHANGED;
+
+                            SendQuestUpdateAddCreature( questid, guid, j, curTalkCount, addTalkCount);
+                        }
+                        if ( CanCompleteQuest( questid ) )
+                            CompleteQuest( questid );
+                        return;
+                    }
+                }
+            }
+        }
+    }
+}
 void Player::MoneyChanged( uint32 count )
 {
     uint32 questid;
