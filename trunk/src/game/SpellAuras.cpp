@@ -2129,20 +2129,13 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
         m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
 
-        // Stop attack if spell has knockout effect
-        if (caster && (GetSpellProto()->Mechanic == MECHANIC_KNOCKOUT))
-            caster->AttackStop();
-
-        if( caster )
+        if (caster)
         {
-            //If this is a knockout spell for rogues attacker stops
-            if( caster->GetTypeId() == TYPEID_PLAYER &&
-                (GetSpellProto()->Mechanic == MECHANIC_KNOCKOUT || GetSpellProto()->Mechanic == MECHANIC_STUNDED) && GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE )
-            {
+            // Stop attack if spell has knockout effect
+            if(GetSpellProto()->Mechanic == MECHANIC_KNOCKOUT)
                 caster->AttackStop();
-            }
 
-            //Save last orientation
+            //Save last orientation (maybe must be current attacking target?)
             m_target->SetOrientation(m_target->GetAngle(caster));
         }
 
