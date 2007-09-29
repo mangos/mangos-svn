@@ -266,23 +266,24 @@ bool Guild::LoadMembersFromDB(uint32 GuildId)
 bool Guild::FillPlayerData(uint64 guid, MemberSlot* memslot)
 {
     std::string plName;
-    uint8 plLevel, plClass;
+    uint32 plLevel;
+    uint32 plClass;
     uint32 plZone;
 
     Player* pl = objmgr.GetPlayer(guid);
     if(pl)
     {
-        plName = pl->GetName();
-        plLevel = (uint8)pl->getLevel();
-        plClass = (uint8)pl->getClass();
-        plZone = pl->GetZoneId();
+        plName  = pl->GetName();
+        plLevel = pl->getLevel();
+        plClass = pl->getClass();
+        plZone  = pl->GetZoneId();
     }
     else
     {
         if(!objmgr.GetPlayerNameByGUID(guid, plName))       // player doesn't exist
             return false;
 
-        plLevel = (uint8)Player::GetUInt32ValueFromDB(UNIT_FIELD_LEVEL, guid);
+        plLevel = Player::GetUInt32ValueFromDB(UNIT_FIELD_LEVEL, guid);
         if(plLevel<1||plLevel>255)                          // can be at broken `data` field
         {
             sLog.outError("Player (GUID: %u) have broken data in field `character`.`data`.",GUID_LOPART(guid));
@@ -293,7 +294,13 @@ bool Guild::FillPlayerData(uint64 guid, MemberSlot* memslot)
         QueryResult *result = sDatabase.PQuery("SELECT `class` FROM `character` WHERE `guid`='%u'", GUID_LOPART(guid));
         if(!result)
             return false;
-        plClass = (*result)[0].GetUInt8();
+        plClass = (*result)[0].GetUInt32();
+        if(plClass<CLASS_WARRIOR||plClass>=MAX_CLASSES)     // can be at broken `class` field
+        {
+            sLog.outError("Player (GUID: %u) have broken data in field `character`.`class`.",GUID_LOPART(guid));
+            return false;
+        }
+
         delete result;
     }
 
