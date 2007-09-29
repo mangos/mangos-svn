@@ -1005,6 +1005,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void ItemRemovedQuestCheck( uint32 entry, uint32 count );
         void KilledMonster( uint32 entry, uint64 guid );
         void CastedCreatureOrGO( uint32 entry, uint64 guid, uint32 spell_id );
+        void TalkedToCreature( uint32 entry, uint64 guid );
         void MoneyChanged( uint32 value );
         bool HasQuestForItem( uint32 itemid );
         bool CanShareQuest(uint32 quest_id);
