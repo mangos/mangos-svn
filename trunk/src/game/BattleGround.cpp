@@ -24,6 +24,7 @@
 #include "MapManager.h"
 #include "Language.h"                                       // for chat messages
 #include "Chat.h"
+#include "SpellAuras.h"
 
 BattleGround::BattleGround()
 {
@@ -97,7 +98,7 @@ void BattleGround::Update(time_t diff)
         return;
 
     if(CanStartBattleGround())
-        StartBattleGround();                                // Queue is full, we must invite to BG
+        StartBattleGround(diff);                            // Queue is full, we must invite to BG
 
     WorldPacket data;
 
@@ -138,12 +139,16 @@ void BattleGround::Update(time_t diff)
         for(QueuedPlayersMap::iterator itr = pQueue.begin(); itr != pQueue.end(); ++itr)
         {
             Player *plr = objmgr.GetPlayer(itr->first);
+            itr->second.LastOnlineTime += diff;
+
             if(plr)
             {
                 // update last online time
-                itr->second.LastOnlineTime = getMSTime();
+                itr->second.LastOnlineTime = 0;
+                itr->second.InviteTime += diff;
+                itr->second.LastInviteTime += diff;
 
-                if(GetStatus() == STATUS_IN_PROGRESS)
+                if(GetStatus() == STATUS_WAIT_JOIN || GetStatus() == STATUS_IN_PROGRESS)
                 {
                     if(!itr->second.IsInvited)              // not invited yet
                     {
@@ -153,36 +158,29 @@ void BattleGround::Update(time_t diff)
                             sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME, 0);
                             plr->GetSession()->SendPacket(&data);
                             itr->second.IsInvited = true;
-                            itr->second.InviteTime = getMSTime();
-                            itr->second.LastInviteTime = getMSTime();
+                            itr->second.InviteTime = 0;
+                            itr->second.LastInviteTime = 0;
                         }
                     }
                 }
 
                 if(itr->second.IsInvited)                   // already was invited
                 {
-                    uint32 t = getMSTime() - itr->second.LastInviteTime;
-                    uint32 tt = getMSTime() - itr->second.InviteTime;
-                    if (tt >= INVITE_ACCEPT_WAIT_TIME)      // remove idle player from queue
+                    if (itr->second.InviteTime >= INVITE_ACCEPT_WAIT_TIME)      // remove idle player from queue
                     {
                         m_RemovedPlayers[itr->first] = 0;   // add to remove list (queue)
                     }
-                    else if(t >= REMIND_INTERVAL)           // remind every 30 seconds
+                    else if(itr->second.LastInviteTime >= REMIND_INTERVAL)           // remind every 30 seconds
                     {
-                        sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME - tt, 0);
+                        sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME - itr->second.InviteTime, 0);
                         plr->GetSession()->SendPacket(&data);
-                        itr->second.LastInviteTime = getMSTime();
+                        itr->second.LastInviteTime = 0;
                     }
                 }
             }
             else
-            {
-                uint32 t = getMSTime() - itr->second.LastOnlineTime;
-                if(t >= MAX_OFFLINE_TIME)                   // 5 minutes
-                {
+                if(itr->second.LastOnlineTime >= MAX_OFFLINE_TIME)                   // 5 minutes
                     m_RemovedPlayers[itr->first] = 0;       // add to remove list (queue)
-                }
-            }
         }
     }
 
@@ -192,70 +190,74 @@ void BattleGround::Update(time_t diff)
         for(std::map<uint64, BattleGroundPlayer>::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
         {
             Player *plr = objmgr.GetPlayer(itr->first);
+            itr->second.LastOnlineTime += diff;
+
             if(plr)
-            {
-                itr->second.LastOnlineTime = getMSTime();   // update last online time
-            }
+                itr->second.LastOnlineTime = 0;   // update last online time
             else
-            {
-                uint32 t = getMSTime() - itr->second.LastOnlineTime;
-                if(t >= MAX_OFFLINE_TIME)                   // 5 minutes
-                {
+                if(itr->second.LastOnlineTime >= MAX_OFFLINE_TIME)                   // 5 minutes
                     m_RemovedPlayers[itr->first] = 1;       // add to remove list (BG)
-                }
-            }
         }
     }
 
-    bool need_res = (getMSTime() - m_LastResurrectTime) >= RESURRECTION_INTERVAL;
-    if(GetReviveQueueSize() && need_res)
+    m_LastResurrectTime += diff;
+    if (m_LastResurrectTime >= RESURRECTION_INTERVAL)
     {
-        for(std::map<uint64, uint64>::iterator itr = m_ReviveQueue.begin(); itr != m_ReviveQueue.end(); ++itr)
+        if(GetReviveQueueSize())
         {
-            Player *plr = objmgr.GetPlayer(itr->second);
-            if(!plr)
+            for(std::map<uint64, std::vector<uint64> >::iterator itr = m_ReviveQueue.begin(); itr != m_ReviveQueue.end(); ++itr)
             {
-                continue;
+                Creature *sh = NULL;
+                for(std::vector<uint64>::iterator itr2 = (itr->second).begin(); itr2 != (itr->second).end(); ++itr2)
+                {
+                    Player *plr = objmgr.GetPlayer(*itr2);
+                    if(!plr)
+                        continue;
+
+                    if (!sh)
+                    {
+                        sh = ObjectAccessor::Instance().GetCreature(*plr, itr->first);
+                        // only for visual effect
+                        if (sh)
+                            sh->CastSpell(sh, SPELL_SPIRIT_HEAL, true);   // Spirit Heal, effect 117
+                    }
+
+                    plr->CastSpell(plr, SPELL_RESURRECTION_VISUAL, true);   // Resurrection visual
+                    m_ResurrectQueue.push_back(*itr2);
+                }
+                (itr->second).clear();
             }
 
-            Creature *sh = ObjectAccessor::Instance().GetCreature(*plr, itr->first);
-            if(!sh)
-            {
-                continue;
-            }
-
-            if(plr->IsWithinDistInMap(sh, 20.0f))           // 20 yards radius
-            {
-                // spell not working, only visual effect :(
-                                                            // Spirit Heal, effect 117
-                sh->CastSpell(plr, SPELL_SPIRIT_HEAL, true);
-
-                plr->ResurrectPlayer(1.0f);                 // temp
-                plr->SpawnCorpseBones();                    // temp
-            }
+            m_ReviveQueue.clear();
+            m_LastResurrectTime = 0;
         }
-
-        m_ReviveQueue.clear();
-        m_LastResurrectTime = getMSTime();
+        else
+            // queue is clear and time passed, just update last resurrection time
+            m_LastResurrectTime = 0;
     }
-    else if(need_res)
+    else if (m_LastResurrectTime > 500)    // Resurrect players only half a second later, to see spirit heal effect on NPC
     {
-        // queue is clear and time passed, just update last resurrection time
-        m_LastResurrectTime = getMSTime();
+        for(std::vector<uint64>::iterator itr = m_ResurrectQueue.begin(); itr != m_ResurrectQueue.end(); ++itr)
+        {
+            Player *plr = objmgr.GetPlayer(*itr);
+            if(!plr)
+                continue;
+            plr->ResurrectPlayer(1.0f);
+            ObjectAccessor::Instance().ConvertCorpseForPlayer(*itr);
+        }
+        m_ResurrectQueue.clear();
     }
 
     if(GetStatus() == STATUS_WAIT_LEAVE)
     {
         // remove all players from battleground after 2 minutes
-        uint32 d = getMSTime() - GetEndTime();
-        if(d >= TIME_TO_AUTOREMOVE)                         // 2 minutes
+        m_EndTime += diff;
+        if(m_EndTime >= TIME_TO_AUTOREMOVE)                         // 2 minutes
         {
             for(std::map<uint64, BattleGroundPlayer>::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
             {
                 m_RemovedPlayers[itr->first] = 1;           // add to remove list (BG)
             }
-            SetStatus(STATUS_WAIT_QUEUE);
-            SetWinner(2);
 
             if(isArena())
             {
@@ -267,7 +269,6 @@ void BattleGround::Update(time_t diff)
             }
         }
     }
-    //sLog.outError("m_Status=%u diff=%u", m_Status, diff);
 }
 
 void BattleGround::SetTeamStartLoc(uint32 TeamID, float X, float Y, float Z, float O)
@@ -388,7 +389,7 @@ void BattleGround::EndBattleGround(uint32 winner)
     }
 
     SetStatus(STATUS_WAIT_LEAVE);
-    SetEndTime(getMSTime());
+    m_EndTime = 0;
 
     uint32 mark = 0;
 
@@ -412,9 +413,7 @@ void BattleGround::EndBattleGround(uint32 winner)
         sBattleGroundMgr.BuildPvpLogDataPacket(&data, this);
         plr->GetSession()->SendPacket(&data);
 
-        uint32 time1 = getMSTime() - GetStartTime();
-
-        sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), STATUS_IN_PROGRESS, TIME_TO_AUTOREMOVE, time1);
+        sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), STATUS_IN_PROGRESS, TIME_TO_AUTOREMOVE, GetStartTime());
         plr->GetSession()->SendPacket(&data);
 
         if(plr->GetTeam() == winner)
@@ -483,11 +482,15 @@ void BattleGround::RemovePlayer(uint64 guid, bool Transport, bool SendPacket)
     if(itr2 != m_PlayerScores.end())
         m_PlayerScores.erase(itr2);
 
-    for(std::map<uint64, uint64>::iterator itr3 = m_ReviveQueue.begin(); itr3 != m_ReviveQueue.end(); ++itr3)
+    for(std::map<uint64, std::vector<uint64> >::iterator itr3 = m_ReviveQueue.begin(); itr3 != m_ReviveQueue.end(); ++itr3)
     {
-        if(itr3->second == guid)
+        std::vector<uint64>::iterator itr4 = (itr3->second).begin();
+        for(; itr4 != (itr3->second).end(); ++itr4)
+            if (*itr4 == guid)
+                break;
+        if (itr4 != (itr3->second).end())
         {
-            m_ReviveQueue.erase(itr3);
+            (itr3->second).erase(itr4);
             break;
         }
     }
@@ -537,7 +540,7 @@ void BattleGround::RemovePlayer(uint64 guid, bool Transport, bool SendPacket)
 
         // Let others know
         sBattleGroundMgr.BuildPlayerLeftBattleGroundPacket(&data, plr);
-        SendPacketToAll(&data);
+        SendPacketToTeam(plr->GetTeam(), &data, plr, false);
 
         // Log
         sLog.outDetail("BATTLEGROUND: Player %s left the battle.", plr->GetName());
@@ -571,7 +574,7 @@ void BattleGround::RemovePlayer(uint64 guid, bool Transport, bool SendPacket)
         {
             SpawnBGObject(i, RESPAWN_ONE_DAY);
         }
-        sLog.outDebug("Objects despawned...");
+        sLog.outDebug("BG: Objects despawned...");
     }
 }
 
@@ -673,10 +676,11 @@ bool BattleGround::CanStartBattleGround()
     return false;
 }
 
-void BattleGround::StartBattleGround()
+void BattleGround::StartBattleGround(time_t diff)
 {
-    SetStartTime(getMSTime());
-    SetLastResurrectTime(getMSTime() + RESURRECTION_INTERVAL);
+    SetStartTime(0);
+
+    SetLastResurrectTime(0);
 
     QueuedPlayersMap& pQueue = m_QueuedPlayers[GetQueueType()];
 
@@ -697,8 +701,8 @@ void BattleGround::StartBattleGround()
         bg->SetStatus(STATUS_WAIT_JOIN);
         bg->SetQueueType(GetQueueType());
 
-        bg->SetStartTime(getMSTime());
-        bg->SetLastResurrectTime(getMSTime() + RESURRECTION_INTERVAL);
+        bg->SetStartTime(0);
+        bg->SetLastResurrectTime(0);
     }
 
     for(QueuedPlayersMap::iterator itr = pQueue.begin(); itr != pQueue.end(); ++itr)
@@ -713,7 +717,7 @@ void BattleGround::StartBattleGround()
             {
                 // add to new queue
                 plr->SetBattleGroundQueueId(bg->GetID());
-                bg->AddPlayerToQueue(plr->GetGUID(), plr->getLevel(), getMSTime(), getMSTime(), true, getMSTime(), itr->second.IsRated, itr->second.AsGroup, itr->second.ArenaType);
+                bg->AddPlayerToQueue(plr->GetGUID(), plr->getLevel(), 0, 0, true, 0, itr->second.IsRated, itr->second.AsGroup, itr->second.ArenaType);
                 sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, plr->GetTeam(), STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME , 0);
                 plr->GetSession()->SendPacket(&data);
             }
@@ -722,8 +726,8 @@ void BattleGround::StartBattleGround()
                 sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME , 0);
                 plr->GetSession()->SendPacket(&data);
                 itr->second.IsInvited = true;
-                itr->second.InviteTime = getMSTime();
-                itr->second.LastInviteTime = getMSTime();
+                itr->second.InviteTime = 0;
+                itr->second.LastInviteTime = 0;
             }
         }
         else
@@ -754,13 +758,15 @@ void BattleGround::AddPlayer(Player *plr)
     uint64 guid = plr->GetGUID();
 
     BattleGroundPlayer bp;
-    bp.LastOnlineTime = getMSTime();
+    bp.LastOnlineTime = 0;
     bp.Team = plr->GetTeam();
 
     // Add to list/maps
     m_Players[guid] = bp;
     m_PlayerScores[guid] = sc;
 
+    if (m_ID == 3)    // Only implemented for AB (also have a look at Player::SendInitWorldSettings() !
+        _SendCurrentGameState(plr);
     UpdatePlayersCountByTeam(plr->GetTeam(), false);        // +1 player
 
     WorldPacket data;
@@ -834,31 +840,39 @@ uint32 BattleGround::GetQueuedPlayersSize(uint32 level) const
 
 void BattleGround::AddPlayerToResurrectQueue(uint64 npc_guid, uint64 player_guid)
 {
-    m_ReviveQueue[npc_guid] = player_guid;
+    m_ReviveQueue[npc_guid].push_back(player_guid);
 
     Player *plr = objmgr.GetPlayer(player_guid);
     if(!plr)
         return;
 
     plr->CastSpell(plr, SPELL_WAITING_FOR_RESURRECT, true);
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry( SPELL_WAITING_FOR_RESURRECT );
+    if(spellInfo)
+    {
+        Aura *Aur = new Aura(spellInfo, 0, NULL, plr);
+        plr->AddAura(Aur);
+    }
 }
 
 void BattleGround::RemovePlayerFromResurrectQueue(uint64 player_guid)
 {
-    for(std::map<uint64, uint64>::iterator itr = m_ReviveQueue.begin(); itr != m_ReviveQueue.end(); ++itr)
-    {
-        if(itr->second == player_guid)
+    for(std::map<uint64, std::vector<uint64> >::iterator itr = m_ReviveQueue.begin(); itr != m_ReviveQueue.end(); ++itr)
+        for(std::vector<uint64>::iterator itr2 =(itr->second).begin(); itr2 != (itr->second).end(); ++itr2)
         {
-            m_ReviveQueue.erase(itr);
-            Player *plr = objmgr.GetPlayer(player_guid);
-            if(!plr)
+            if(*itr2 == player_guid)
+            {
+                (itr->second).erase(itr2);
+
+                Player *plr = objmgr.GetPlayer(player_guid);
+                if(!plr)
+                    return;
+
+                plr->RemoveAurasDueToSpell(SPELL_WAITING_FOR_RESURRECT);
+
                 return;
-
-            plr->RemoveAurasDueToSpell(SPELL_WAITING_FOR_RESURRECT);
-
-            break;
+            }
         }
-    }
 }
 
 bool BattleGround::AddObject(uint32 type, uint32 entry, float x, float y, float z, float o, float rotation0, float rotation1, float rotation2, float rotation3, uint32 spawntime)

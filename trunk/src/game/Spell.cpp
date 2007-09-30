@@ -161,7 +161,7 @@ void SpellCastTargets::read ( WorldPacket * data,Unit *caster )
     if(m_targetMask & TARGET_FLAG_STRING)
         *data >> m_strTarget;
 
-    if(m_targetMask & TARGET_FLAG_CORPSE)
+    if((m_targetMask & TARGET_FLAG_CORPSE) || (m_targetMask & TARGET_FLAG_PVP_CORPSE))
         m_CorpseTargetGUID = readGUID(*data);
 
     // find real units/GOs
@@ -203,7 +203,7 @@ void SpellCastTargets::write ( WorldPacket * data, bool forceAppend)
     if(m_targetMask & TARGET_FLAG_STRING)
         *data << m_strTarget;
 
-    if(m_targetMask & TARGET_FLAG_CORPSE)
+    if((m_targetMask & TARGET_FLAG_CORPSE) || (m_targetMask & TARGET_FLAG_PVP_CORPSE))
         data->appendPackGUID(m_CorpseTargetGUID);
 
     if(forceAppend && data->size() == len)
@@ -402,6 +402,22 @@ void Spell::FillTargetMap()
                                                             // AreaAura
                     if(m_spellInfo->Attributes == 0x9050000 || m_spellInfo->Attributes == 0x10000)
                         SetTargetMap(i,TARGET_AREAEFFECT_PARTY,tmpUnitMap);
+                    break;
+                case SPELL_EFFECT_SKIN_PLAYER_CORPSE:
+                    if(m_targets.getUnitTarget())
+                    {
+                        tmpUnitMap.push_back(m_targets.getUnitTarget());
+                    }
+                    else if (m_targets.getCorpseTargetGUID())
+                    {
+                        Corpse *corpse = ObjectAccessor::Instance().GetCorpse(*m_caster,m_targets.getCorpseTargetGUID());
+                        if(corpse)
+                        {
+                            Player* owner = ObjectAccessor::Instance().FindPlayer(corpse->GetOwnerGUID());
+                            if(owner)
+                                tmpUnitMap.push_back(owner);
+                        }
+                    }
                     break;
                 default:
                     break;

@@ -1262,6 +1262,11 @@ enum UnitDynFlags
     UNIT_DYNFLAG_DEAD              = 0x0020
 };
 
+enum CorpseDynFlags
+{
+    CORPSE_DYNFLAG_LOOTABLE        = 0x0001
+};
+
 enum UnitFlags1
 {
     UNIT_FLAG_NOT_ATTACKABLE       = 0x0002,

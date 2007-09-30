@@ -452,7 +452,8 @@ enum LootType
     LOOT_FISHING                = 3,
     LOOT_PICKPOCKETING          = 4,                        // unsupported by client, sending LOOT_SKINNING instead
     LOOT_DISENCHANTING          = 5,                        // unsupported by client, sending LOOT_SKINNING instead
-    LOOT_PROSPECTING            = 6                         // unsupported by client, sending LOOT_SKINNING instead
+    LOOT_PROSPECTING            = 6,                        // unsupported by client, sending LOOT_SKINNING instead
+    LOOT_INSIGNIA               = 7                         // unsupported by client, sending LOOT_SKINNING instead
 };
 
 enum MirrorTimerType
@@ -1309,6 +1310,8 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         const uint64& GetLootGUID() const { return m_lootGuid; }
         void SetLootGUID(const uint64 &guid) { m_lootGuid = guid; }
+
+        void RemovedInsignia(Player* looterPlr);
 
         WorldSession* GetSession() const { return m_session; }
         void SetSession(WorldSession *s) { m_session = s; }

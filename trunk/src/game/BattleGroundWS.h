@@ -21,55 +21,55 @@
 
 class BattleGround;
 
-#define MAX_TEAM_SCORE      3
-#define FLAG_RESPAWN_TIME   23000
+#define BG_WS_MAX_TEAM_SCORE      3
+#define BG_WS_FLAG_RESPAWN_TIME   23000
 
-#define SOUND_FLAG_CAPTURED_ALLIANCE 8173
-#define SOUND_FLAG_CAPTURED_HORDE    8213
-#define SOUND_FLAG_PLACED            8232
+#define BG_WS_SOUND_FLAG_CAPTURED_ALLIANCE 8173
+#define BG_WS_SOUND_FLAG_CAPTURED_HORDE    8213
+#define BG_WS_SOUND_FLAG_PLACED            8232
 
-#define SPELL_WARSONG_FLAG      23333
-#define SPELL_SILVERWING_FLAG   23335
+#define BG_WS_SPELL_WARSONG_FLAG      23333
+#define BG_WS_SPELL_SILVERWING_FLAG   23335
 
 // WorldStates
-#define FLAG_UNK_ALLIANCE       1545
-#define FLAG_UNK_HORDE          1546
+#define BG_WS_FLAG_UNK_ALLIANCE       1545
+#define BG_WS_FLAG_UNK_HORDE          1546
 //#define FLAG_UNK                1547
-#define FLAG_CAPTURES_ALLIANCE  1581
-#define FLAG_CAPTURES_HORDE     1582
-#define FLAG_CAPTURES_MAX       1601
-#define FLAG_STATE_HORDE        2338
-#define FLAG_STATE_ALLIANCE     2339
+#define BG_WS_FLAG_CAPTURES_ALLIANCE  1581
+#define BG_WS_FLAG_CAPTURES_HORDE     1582
+#define BG_WS_FLAG_CAPTURES_MAX       1601
+#define BG_WS_FLAG_STATE_HORDE        2338
+#define BG_WS_FLAG_STATE_ALLIANCE     2339
 
-enum BattleGroundObjectTypes
+enum BG_WS_ObjectTypes
 {
-    BG_OBJECT_A_FLAG        = 0,
-    BG_OBJECT_H_FLAG        = 1,
-    BG_OBJECT_SPEEDBUFF_1   = 2,
-    BG_OBJECT_SPEEDBUFF_2   = 3,
-    BG_OBJECT_REGENBUFF_1   = 4,
-    BG_OBJECT_REGENBUFF_2   = 5,
-    BG_OBJECT_BERSERKBUFF_1 = 6,
-    BG_OBJECT_BERSERKBUFF_2 = 7,
-    BG_OBJECT_DOOR_A_1      = 8,
-    BG_OBJECT_DOOR_A_2      = 9,
-    BG_OBJECT_DOOR_A_3      = 10,
-    BG_OBJECT_DOOR_A_4      = 11,
-    BG_OBJECT_DOOR_A_5      = 12,
-    BG_OBJECT_DOOR_A_6      = 13,
-    BG_OBJECT_DOOR_H_1      = 14,
-    BG_OBJECT_DOOR_H_2      = 15,
-    BG_OBJECT_DOOR_H_3      = 16,
-    BG_OBJECT_DOOR_H_4      = 17,
-    BG_OBJECT_MAX           = 18
+    BG_WS_OBJECT_A_FLAG        = 0,
+    BG_WS_OBJECT_H_FLAG        = 1,
+    BG_WS_OBJECT_SPEEDBUFF_1   = 2,
+    BG_WS_OBJECT_SPEEDBUFF_2   = 3,
+    BG_WS_OBJECT_REGENBUFF_1   = 4,
+    BG_WS_OBJECT_REGENBUFF_2   = 5,
+    BG_WS_OBJECT_BERSERKBUFF_1 = 6,
+    BG_WS_OBJECT_BERSERKBUFF_2 = 7,
+    BG_WS_OBJECT_DOOR_A_1      = 8,
+    BG_WS_OBJECT_DOOR_A_2      = 9,
+    BG_WS_OBJECT_DOOR_A_3      = 10,
+    BG_WS_OBJECT_DOOR_A_4      = 11,
+    BG_WS_OBJECT_DOOR_A_5      = 12,
+    BG_WS_OBJECT_DOOR_A_6      = 13,
+    BG_WS_OBJECT_DOOR_H_1      = 14,
+    BG_WS_OBJECT_DOOR_H_2      = 15,
+    BG_WS_OBJECT_DOOR_H_3      = 16,
+    BG_WS_OBJECT_DOOR_H_4      = 17,
+    BG_WS_OBJECT_MAX           = 18
 };
 
-enum FlagState
+enum BG_WS_FlagState
 {
-    FLAG_STATE_ON_BASE      = 0,
-    FLAG_STATE_WAIT_RESPAWN = 1,
-    FLAG_STATE_ON_PLAYER    = 2,
-    FLAG_STATE_ON_GROUND    = 3
+    BG_WS_FLAG_STATE_ON_BASE      = 0,
+    BG_WS_FLAG_STATE_WAIT_RESPAWN = 1,
+    BG_WS_FLAG_STATE_ON_PLAYER    = 2,
+    BG_WS_FLAG_STATE_ON_GROUND    = 3
 };
 
 class BattleGroundWS : public BattleGround
