@@ -427,7 +427,7 @@ ObjectAccessor::GetPet(uint64 guid)
     return GetObjectInWorld(guid, (Pet*)NULL);
 }
 
-Corpse *
+Corpse*
 ObjectAccessor::GetCorpseForPlayerGUID(uint64 guid)
 {
     Guard guard(i_corpseGuard);
@@ -497,7 +497,7 @@ ObjectAccessor::AddCorpsesToGrid(GridPair const& gridpair,GridType& grid,Map* ma
     }
 }
 
-bool
+Corpse*
 ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid)
 {
     Corpse *corpse = GetCorpseForPlayerGUID(player_guid);
@@ -506,7 +506,7 @@ ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid)
         //in fact this function is called from several places
         //even when player doesn't have a corpse, not an error
         //sLog.outError("ERROR: Try remove corpse that not in map for GUID %ul", player_guid);
-        return false;
+        return NULL;
     }
 
     DEBUG_LOG("Deleting Corpse and spawning bones.\n");
@@ -534,15 +534,7 @@ ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid)
     bones->Relocate(corpse->GetPositionX(), corpse->GetPositionY(), corpse->GetPositionZ(), corpse->GetOrientation());
     bones->SetMapId(corpse->GetMapId());
 
-    uint32 flags = 0x05;
-    {
-        Player* owner = FindPlayer(player_guid);
-        if(owner && owner->InBattleGround())
-            flags |= 0x20;                                  // make it lootable for money, TODO: implement effect
-    }
-
-    bones->SetUInt32Value(CORPSE_FIELD_FLAGS, flags);
-
+    bones->SetUInt32Value(CORPSE_FIELD_FLAGS, 0x05);
     bones->SetUInt64Value(CORPSE_FIELD_OWNER, 0);
 
     for (int i = 0; i < EQUIPMENT_SLOT_END; i++)
@@ -566,7 +558,7 @@ ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid)
     // all references to the corpse should be removed at this point
     delete corpse;
 
-    return true;
+    return bones;
 }
 
 void

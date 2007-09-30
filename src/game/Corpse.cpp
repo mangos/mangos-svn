@@ -40,6 +40,8 @@ Corpse::Corpse( WorldObject *instantiator, CorpseType type ) : WorldObject( inst
 
     m_type = type;
     m_time = time(NULL) - CORPSE_RECLAIM_DELAY;             // to prevent resurrecting delay at load
+
+    lootForBody = false;
 }
 
 Corpse::~Corpse()

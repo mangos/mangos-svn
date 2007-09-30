@@ -65,6 +65,8 @@ class BattleGroundMgr
 
         void SendToBattleGround(Player *pl, uint32 bgId);
 
+        void SendAreaSpiritHealerQueryOpcode(Player *pl, BattleGround *bg, uint64 guid);
+
     private:
 
         /* Battlegrounds */

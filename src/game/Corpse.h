@@ -22,6 +22,7 @@
 #include "Object.h"
 #include "Database/DatabaseEnv.h"
 #include "GridDefines.h"
+#include "LootMgr.h"
 
 enum CorpseType
 {
@@ -62,6 +63,10 @@ class Corpse : public WorldObject
         void SetGrid(GridPair const& grid) { m_grid = grid; }
 
         bool isVisibleForInState(Player const* u, bool inVisibleList) const;
+
+        Loot loot;                    // remove insignia ONLY at BG
+        Player* lootRecipient;
+        bool lootForBody;
 
         void Say(const char* text, const uint32 language, const uint64 TargetGuid) { MonsterSay(text,language,TargetGuid); }
         void Yell(const char* text, const uint32 language, const uint64 TargetGuid) { MonsterYell(text,language,TargetGuid); }

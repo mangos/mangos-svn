@@ -542,6 +542,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
                 if(killer)
                                                             // add +1 kills
                     bg->UpdatePlayerScore(killer, SCORE_KILLS, 1);
+                                                            // to be able to remove insignia
+                killed->SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE );
             }
         }
 
@@ -2975,6 +2977,13 @@ long Unit::GetTotalAuraModifier(uint32 ModifierID) const
 
 bool Unit::AddAura(Aura *Aur, bool uniq)
 {
+                                                            // ghost spell check
+    if (!isAlive() && !(Aur->GetSpellProto()->Id == 20584 || Aur->GetSpellProto()->Id == 8326 || Aur->GetSpellProto()->Id == 2584)) // whisp aura, ghost spell, waiting to resurrect spell
+    {
+        delete Aur;
+        return false;
+    }
+
     if(Aur->GetTarget() != this)
     {
         sLog.outError("Aura (spell %u eff %u) add to aura list of %s (lowguid: %u) but Aura target is %s (lowguid: %u)",

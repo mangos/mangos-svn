@@ -40,6 +40,7 @@
 #define SPELL_WAITING_FOR_RESURRECT 2584
 #define SPELL_SPIRIT_HEAL_CHANNEL   22011
 #define SPELL_SPIRIT_HEAL           22012
+#define SPELL_RESURRECTION_VISUAL   24171
 #define SPELL_ARENA_PREPARATION     32727
 
 #define RESURRECTION_INTERVAL       30000                   // ms
@@ -223,7 +224,7 @@ class BattleGround
         void AddPlayerToQueue(uint64 guid, uint32 level, uint32 invitetime = 0, uint32 lastinvitetime = 0, bool isinvited = false, uint32 lastonlinetime = 0, bool israted = false, bool asgroup = false, uint8 arenatype = 0);
         void RemovePlayerFromQueue(uint64 guid);
         bool CanStartBattleGround();
-        void StartBattleGround();
+        void StartBattleGround(time_t diff);
         void RemovePlayer(uint64 guid, bool Transport = false, bool SendPacket = false);
 
         /* Location */
@@ -286,9 +287,16 @@ class BattleGround
         virtual void HandleKillPlayer(Player* /*player*/, Player* /*killer*/) {}
         // must be implemented in BG subclass if need
         virtual void HandleDropFlag(Player* /*player*/) {}
+
     protected:
         // must be implemented in BG subclass
         virtual void RemovePlayer(Player * /*player*/, uint64 /*guid*/) {}
+
+        virtual void _SendCurrentGameState(Player *plr) {}
+
+        /* Player lists, those need to be accessable by inherited classes */
+        std::map<uint64, BattleGroundPlayer> m_Players;
+        std::map<uint64, std::vector<uint64> > m_ReviveQueue;// Spirit Guide guid + Player list GUIDS
 
     private:
         /* Battleground */
@@ -311,8 +319,7 @@ class BattleGround
         std::map<uint64, BattleGroundScore> m_PlayerScores; // Player scores
 
         /* Player lists */
-        std::map<uint64, BattleGroundPlayer> m_Players;
-        std::map<uint64, uint64> m_ReviveQueue;             // Spirit Guide guid + Player guid
+        std::vector<uint64> m_ResurrectQueue;                // Player GUID
         std::map<uint64, uint8> m_RemovedPlayers;           // uint8 is remove type (0 - bgqueue, 1 - bg, 2 - resurrect queue)
 
         typedef std::map<uint64, BattleGroundQueue> QueuedPlayersMap;

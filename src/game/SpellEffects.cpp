@@ -1544,6 +1544,19 @@ void Spell::EffectOpenLock(uint32 i)
     // Get lockId
     if(gameObjTarget)
     {
+        // Arathi Basin banner opening !
+        if ((gameObjTarget->GetGOInfo()->id >= BG_AB_OBJECTID_BANNER_A) && (gameObjTarget->GetGOInfo()->id <= BG_AB_OBJECTID_BANNER_CONT_H) ||
+            (gameObjTarget->GetGOInfo()->id >= BG_AB_OBJECTID_NODE_BANNER_0) && (gameObjTarget->GetGOInfo()->id <= BG_AB_OBJECTID_NODE_BANNER_4))
+        {
+            BattleGround *bg = sBattleGroundMgr.GetBattleGround(player->GetBattleGroundId());
+            if(!bg)
+                return;
+            // check if it's correct bg
+            if(bg->GetID() != BATTLEGROUND_AB)
+                return;
+            ((BattleGroundAB*)bg)->ClickBanner(player);
+            return;
+        }
         lockId = gameObjTarget->GetGOInfo()->sound0;
         guid = gameObjTarget->GetGUID();
     }
@@ -3901,8 +3914,13 @@ void Spell::EffectSummonDemon(uint32 i)
     }
 }
 
+/* There is currently no need for this effect. We handle it in BattleGround.cpp
+   If we would handle the resurrection here, the spiritguide would instantly disappear as the
+   player revives, and so we wouldn't see the spirit heal visual effect on the npc.
+   This is why we use a half sec delay between the visual effect and the resurrection itself */
 void Spell::EffectSpiritHeal(uint32 i)
 {
+    /*
     if(!unitTarget) return;
     if(unitTarget->GetTypeId() != TYPEID_PLAYER) return;
     if(unitTarget->isAlive()) return;
@@ -3912,9 +3930,15 @@ void Spell::EffectSpiritHeal(uint32 i)
     //((Player*)unitTarget)->setResurrect(m_caster->GetGUID(), unitTarget->GetPositionX(), unitTarget->GetPositionY(), unitTarget->GetPositionZ(), unitTarget->GetMaxHealth(), unitTarget->GetMaxPower(POWER_MANA));
     ((Player*)unitTarget)->ResurrectPlayer(1.0f);
     ((Player*)unitTarget)->SpawnCorpseBones();
+    */
 }
 
+// remove insignia spell effect
 void Spell::EffectSkinPlayerCorpse(uint32 i)
 {
     sLog.outDebug("Effect: SkinPlayerCorpse");
+    if ( (m_caster->GetTypeId() != TYPEID_PLAYER) || (unitTarget->GetTypeId() != TYPEID_PLAYER) || (unitTarget->isAlive()) )
+        return;
+
+    ((Player*)unitTarget)->RemovedInsignia( (Player*)m_caster );
 }

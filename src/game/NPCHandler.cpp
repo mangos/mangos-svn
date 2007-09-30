@@ -35,6 +35,8 @@
 #include "MapManager.h"
 #include "Pet.h"
 #include "WaypointMovementGenerator.h"
+#include "BattleGroundMgr.h"
+#include "BattleGround.h"
 
 void WorldSession::HandleTabardVendorActivateOpcode( WorldPacket & recv_data )
 {
@@ -250,6 +252,18 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
     {
         unit->StopMoving();
         //npcIsStopped[unit->GetGUID()] = true;
+    }
+
+    // If spiritguide, no need for gossip menu, just put player into resurrect queue
+    if (unit->isSpiritGuide())
+    {
+        BattleGround *bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundId());
+        if(bg)
+        {
+            bg->AddPlayerToResurrectQueue(unit->GetGUID(), _player->GetGUID());
+            sBattleGroundMgr.SendAreaSpiritHealerQueryOpcode(_player, bg, unit->GetGUID());
+            return;
+        }
     }
 
     if(!Script->GossipHello( _player, unit ))

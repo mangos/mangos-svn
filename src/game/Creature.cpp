@@ -572,7 +572,7 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                     case GOSSIP_OPTION_TAXIVENDOR:
                         if ( pPlayer->GetSession()->SendLearnNewTaxiNode(GetGUID()) )
                             return;
-                    case GOSSIP_OPTION_GUARD:
+                    case GOSSIP_OPTION_SPIRITGUIDE:
                     case GOSSIP_OPTION_INNKEEPER:
                     case GOSSIP_OPTION_BANKER:
                     case GOSSIP_OPTION_PETITIONER:
@@ -710,7 +710,7 @@ void Creature::OnGossipSelect(Player* player, uint32 option)
         case GOSSIP_OPTION_AUCTIONEER:
             player->GetSession()->SendAuctionHello( guid, this );
             break;
-        case GOSSIP_OPTION_GUARD:
+        case GOSSIP_OPTION_SPIRITGUIDE:
         case GOSSIP_GUARD_SPELLTRAINER:
         case GOSSIP_GUARD_SKILLTRAINER:
             prepareGossipMenu( player,gossip->Id );
@@ -725,7 +725,7 @@ void Creature::OnGossipSelect(Player* player, uint32 option)
 
 void Creature::OnPoiSelect(Player* player, GossipOption const *gossip)
 {
-    if(gossip->GossipId==GOSSIP_OPTION_GUARD || gossip->GossipId==GOSSIP_GUARD_SPELLTRAINER || gossip->GossipId==GOSSIP_GUARD_SKILLTRAINER)
+    if(gossip->GossipId==GOSSIP_GUARD_SPELLTRAINER || gossip->GossipId==GOSSIP_GUARD_SKILLTRAINER)
     {
         float x,y;
         bool findnpc=false;

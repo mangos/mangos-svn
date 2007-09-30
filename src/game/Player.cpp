@@ -50,6 +50,8 @@
 #include "Transports.h"
 #include "Weather.h"
 #include "BattleGround.h"
+#include "BattleGroundMgr.h"
+#include "BattleGroundAB.h"
 #include "ArenaTeam.h"
 #include "Chat.h"
 #include "Database/DatabaseImpl.h"
@@ -3293,6 +3295,9 @@ void Player::BuildPlayerRepop()
     SetMovement(MOVE_WATER_WALK);
     SetMovement(MOVE_UNROOT);
 
+    // BG - remove insignia related
+    RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE);
+
     // setting new speed
     /*if (getRace() == RACE_NIGHTELF)
     {
@@ -3492,7 +3497,7 @@ void Player::CreateCorpse()
 
     uint32 flags = 0x04;
     if(InBattleGround())
-        flags |= 0x20;                                      // make it lootable for money
+        flags |= 0x20;                                  // to be able to remove insignia
     corpse->SetUInt32Value( CORPSE_FIELD_FLAGS, flags );
 
     corpse->SetUInt32Value( CORPSE_FIELD_DISPLAY_ID, GetUInt32Value(UNIT_FIELD_DISPLAYID) );
@@ -3665,7 +3670,18 @@ void Player::RepopAtGraveyard()
         SpawnCorpseBones();
     }
 
-    WorldSafeLocsEntry const *ClosestGrave = objmgr.GetClosestGraveYard( GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam() );
+    WorldSafeLocsEntry const *ClosestGrave = NULL;
+ 
+    // Special handle for battleground maps
+    if (GetMapId() == 529)        // AB
+    {
+        BattleGround *bg = sBattleGroundMgr.GetBattleGround(GetBattleGroundId());
+        if (bg && (bg->GetID() == BATTLEGROUND_AB))
+            ClosestGrave = ((BattleGroundAB*)bg)->SelectGraveYard(this);
+    }
+
+    if (!ClosestGrave)
+        ClosestGrave = objmgr.GetClosestGraveYard( GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam() );
 
     if(ClosestGrave)
     {
@@ -6302,6 +6318,42 @@ bool Player::CheckAmmoCompatibility(const ItemPrototype *ammo_proto) const
     return true;
 }
 
+/*  If in a battleground a player dies, and an enemy removes the insignia, the player's bones is lootable
+    Called by remove insignia spell effect    */
+void Player::RemovedInsignia(Player* looterPlr)
+{
+    if (!GetBattleGroundId())
+        return;
+
+    // If not released spirit, do it !
+    if(m_deathTimer > 0)
+    {
+        m_deathTimer = 0;
+        RepopAtGraveyard();
+        BuildPlayerRepop();
+    }
+
+    Corpse *corpse = GetCorpse();
+    if (!corpse)
+        return;
+    corpse->loot.gold = getLevel();
+
+    // We have to convert player corpse to bones, not to be able to resurrect there
+    // SpawnCorpseBones isn't handy, 'cos it saves player while he in BG
+    Corpse *bones = ObjectAccessor::Instance().ConvertCorpseForPlayer(GetGUID());
+    if (!bones)
+        return;
+
+    // Now we must make bones lootable, and send player loot
+    bones->SetFlag(CORPSE_FIELD_DYNAMIC_FLAGS, CORPSE_DYNFLAG_LOOTABLE);
+
+    // We store the level of our player in the gold field
+    // We retrieve this information at Player::SendLoot()
+    bones->loot.gold = getLevel();
+    bones->lootRecipient = looterPlr;
+    looterPlr->SendLoot(bones->GetGUID(), LOOT_INSIGNIA);
+}
+
 /*Loot type MUST be
 1-corpse, go
 2-skinning
@@ -6397,7 +6449,31 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             }
         }
     }
-    else
+    else if (IS_CORPSE_GUID(guid))        // remove insignia
+    {
+        Corpse *bones = ObjectAccessor::Instance().GetCorpse(*this, guid);
+
+        if (!bones || !((loot_type == LOOT_CORPSE) || (loot_type == LOOT_INSIGNIA)) || (bones->GetType() != CORPSE_BONES) )
+        {
+            SendLootRelease(guid);
+            return;
+        }
+
+        loot = &bones->loot;
+
+        if (!bones->lootForBody)
+        {
+            bones->lootForBody = true;
+            uint32 pLevel = bones->loot.gold;
+            bones->loot.clear();
+            // It may need a better formula
+            // Now it works like this: lvl10: ~6copper, lvl70: ~9silver
+            bones->loot.gold = (uint32)( urand(50, 150) * 0.016f * pow( ((float)pLevel)/5.76f, 2.5f) * sWorld.getRate(RATE_DROP_MONEY) );
+        }
+
+        if (bones->lootRecipient != this)
+            permission = NONE_PERMISSION;
+    } else
     {
         Creature *creature =
             ObjectAccessor::Instance().GetCreature(*this, guid);
@@ -6406,7 +6482,6 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
         if (!creature || creature->isAlive()!=(loot_type == LOOT_PICKPOCKETING) || !creature->IsWithinDistInMap(this,INTERACTION_DISTANCE))
         {
             SendLootRelease(guid);
-
             return;
         }
 
@@ -6534,8 +6609,8 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             q_list = itr->second;
     }
 
-    // LOOT_PICKPOCKETING, LOOT_PROSPECTING, and LOOT_DISENCHANTING unsupported by client, sending LOOT_SKINNING instead
-    if(loot_type == LOOT_PICKPOCKETING || loot_type == LOOT_DISENCHANTING || loot_type == LOOT_PROSPECTING)
+    // LOOT_PICKPOCKETING, LOOT_PROSPECTING, LOOT_DISENCHANTING and LOOT_INSIGNIA unsupported by client, sending LOOT_SKINNING instead
+    if(loot_type == LOOT_PICKPOCKETING || loot_type == LOOT_DISENCHANTING || loot_type == LOOT_PROSPECTING || loot_type == LOOT_INSIGNIA)
         loot_type = LOOT_SKINNING;
 
     WorldPacket data(SMSG_LOOT_RESPONSE, (9+50));           // we guess size
@@ -6578,6 +6653,9 @@ void Player::SendUpdateWorldState(uint32 Field, uint32 Value)
 
 void Player::SendInitWorldStates()
 {
+    if (GetZoneId() == 3358)    // Zone 3358 - Arathi Basin. We send initworldstates from BG code
+        return;
+
     // data depends on zoneid/mapid...
     uint16 NumberOfFields = 0;
     uint32 mapid = GetMapId();
@@ -14832,11 +14910,23 @@ bool Player::CanJoinToBattleground() const
 
 bool Player::IsVisibleInGridForPlayer( Player* pl ) const
 {
+    // It seems in battleground everyone sees everyone, except the enemy-faction ghosts
+    if (InBattleGround())
+    {
+        if (!(isAlive() || m_deathTimer > 0) && !IsFriendlyTo(pl))
+            return false;
+        return true;
+    }
+
     // Live player see live player or dead player with not realized corpse
     if(pl->isAlive() || pl->m_deathTimer > 0)
     {
         return isAlive() || m_deathTimer > 0;
     }
+
+    // Ghost see other friendly ghosts, that's for sure
+    if(!(isAlive() || m_deathTimer > 0) && IsFriendlyTo(pl))
+        return true;
 
     // Dead player see live players near own corpse
     if(isAlive())

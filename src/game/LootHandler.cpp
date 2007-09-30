@@ -157,6 +157,13 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
         if( pGameObject && (pGameObject->GetOwnerGUID()==_player->GetGUID() || pGameObject->IsWithinDistInMap(_player,INTERACTION_DISTANCE)) )
             pLoot = &pGameObject->loot;
     }
+    else if( IS_CORPSE_GUID( guid ) )    // remove insignia ONLY in BG
+    {
+        Corpse *bones = ObjectAccessor::Instance().GetCorpse(*GetPlayer(), guid);
+
+        if (bones && bones->IsWithinDistInMap(_player,INTERACTION_DISTANCE) )
+            pLoot = &bones->loot;
+    }
     else
     {
         Creature* pCreature = ObjectAccessor::Instance().GetCreature(*GetPlayer(), guid);
@@ -300,6 +307,20 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
         else
             // not fully looted object
             go->SetLootState(GO_OPEN);
+    }
+    else if (IS_CORPSE_GUID(lguid))        // ONLY remove insignia at BG
+    {
+        Corpse *corpse = ObjectAccessor::Instance().GetCorpse(*player, lguid);
+        if (!corpse)
+            return;
+
+        loot = &corpse->loot;
+
+        if (loot->isLooted())
+        {
+            loot->clear();
+            corpse->RemoveFlag(CORPSE_FIELD_DYNAMIC_FLAGS, CORPSE_DYNFLAG_LOOTABLE);
+        }
     }
     else if (IS_ITEM_GUID(lguid))
     {

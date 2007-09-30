@@ -457,10 +457,10 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                             if(bg->GetID() != BATTLEGROUND_WS)
                                 return;
                             // check if flag dropped
-                            if(((BattleGroundWS*)bg)->GetFlagState(ALLIANCE) != FLAG_STATE_ON_BASE)
+                            if(((BattleGroundWS*)bg)->GetFlagState(ALLIANCE) != BG_WS_FLAG_STATE_ON_BASE)
                                 return;
                             // check if it's correct flag
-                            if(((BattleGroundWS*)bg)->m_bgobjects[BG_OBJECT_A_FLAG] != obj->GetGUID())
+                            if(((BattleGroundWS*)bg)->m_bgobjects[BG_WS_OBJECT_A_FLAG] != obj->GetGUID())
                                 return;
                             // check player team
                             if(_player->GetTeam() == ALLIANCE)
@@ -472,10 +472,10 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                             if(bg->GetID() != BATTLEGROUND_WS)
                                 return;
                             // check if flag dropped
-                            if(((BattleGroundWS*)bg)->GetFlagState(HORDE) != FLAG_STATE_ON_BASE)
+                            if(((BattleGroundWS*)bg)->GetFlagState(HORDE) != BG_WS_FLAG_STATE_ON_BASE)
                                 return;
                             // check if it's correct flag
-                            if(((BattleGroundWS*)bg)->m_bgobjects[BG_OBJECT_H_FLAG] != obj->GetGUID())
+                            if(((BattleGroundWS*)bg)->m_bgobjects[BG_WS_OBJECT_H_FLAG] != obj->GetGUID())
                                 return;
                             // check player team
                             if(_player->GetTeam() == HORDE)
@@ -517,7 +517,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                             if(bg->GetID() != BATTLEGROUND_WS)
                                 return;
                             // check if flag dropped
-                            if(((BattleGroundWS*)bg)->GetFlagState(ALLIANCE) != FLAG_STATE_ON_GROUND)
+                            if(((BattleGroundWS*)bg)->GetFlagState(ALLIANCE) != BG_WS_FLAG_STATE_ON_GROUND)
                                 return;
                             obj->Delete();
                             if(_player->GetTeam() == ALLIANCE)
@@ -536,7 +536,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                             if(bg->GetID() != BATTLEGROUND_WS)
                                 return;
                             // check if flag dropped
-                            if(((BattleGroundWS*)bg)->GetFlagState(HORDE) != FLAG_STATE_ON_GROUND)
+                            if(((BattleGroundWS*)bg)->GetFlagState(HORDE) != BG_WS_FLAG_STATE_ON_GROUND)
                                 return;
                             obj->Delete();
                             if(_player->GetTeam() == HORDE)
@@ -665,6 +665,14 @@ void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
         return;
 
     _player->RemoveAurasDueToSpell(spellId);
+
+    if (spellId == 2584)    // Waiting to resurrect spell cancel, we must remove player from resurrect queue
+    {
+        BattleGround *bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundId());
+        if(!bg)
+            return;
+        bg->RemovePlayerFromResurrectQueue(_player->GetGUID());
+    }
 }
 
 void WorldSession::HandlePetCancelAuraOpcode( WorldPacket& recvPacket)

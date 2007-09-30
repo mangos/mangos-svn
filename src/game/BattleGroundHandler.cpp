@@ -274,7 +274,7 @@ void WorldSession::HandleBattleGroundPlayerPortOpcode( WorldPacket &recv_data )
             {
                 case 1:                                     // port to battleground
                     _player->RemoveFromGroup();
-                    sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, _player->GetTeam(), STATUS_IN_PROGRESS, 0, getMSTime()-bg->GetStartTime());
+                    sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, _player->GetTeam(), STATUS_IN_PROGRESS, 0, bg->GetStartTime());
                     _player->GetSession()->SendPacket(&data);
                     bg->RemovePlayerFromQueue(_player->GetGUID());
                     _player->SetBattleGroundId(bg->GetID());
@@ -324,8 +324,7 @@ void WorldSession::HandleBattlefieldStatusOpcode( WorldPacket & /*recv_data*/ )
         {
             if((bg->GetStatus() == STATUS_IN_PROGRESS) || (bg->GetStatus() == STATUS_WAIT_JOIN))
             {
-                uint32 time1 = getMSTime() - bg->GetStartTime();
-                sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, _player->GetTeam(), STATUS_IN_PROGRESS, 0, time1);
+                sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, _player->GetTeam(), STATUS_IN_PROGRESS, 0, bg->GetStartTime());
                 SendPacket(&data);
             }
         }
@@ -361,13 +360,8 @@ void WorldSession::HandleAreaSpiritHealerQueryOpcode( WorldPacket & recv_data )
 
     uint64 guid;
     recv_data >> guid;
-    WorldPacket data(SMSG_AREA_SPIRIT_HEALER_TIME, 12);
-                                                            // resurrect every 30 seconds
-    uint32 time_ = 30000 - (getMSTime() - bg->GetLastResurrectTime());
-    if(time_ == uint32(-1))
-        time_ = 0;
-    data << guid << time_;
-    SendPacket(&data);
+
+    sBattleGroundMgr.SendAreaSpiritHealerQueryOpcode(_player, bg, guid);
 }
 
 void WorldSession::HandleAreaSpiritHealerQueueOpcode( WorldPacket & recv_data )
