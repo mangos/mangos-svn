@@ -1187,8 +1187,6 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const 
     SetCanModifyStats(true);
     UpdateAllStats();
 
-    LoadCreaturesAddon();
-    
     CreatureDisplayInfoEntry const* ScaleEntry = sCreatureDisplayInfoStore.LookupEntry(display_id);
     SetFloatValue(OBJECT_FIELD_SCALE_X, ScaleEntry ? ScaleEntry->scale : 1);
 
@@ -1252,7 +1250,7 @@ bool Creature::LoadFromDB(uint32 guid, uint32 InstanceId)
         return false;
 
     m_DBTableGuid = stored_guid;
-
+    LoadCreaturesAddon();
     if(GetCreatureInfo()->rank > 0)
         this->m_corpseDelay *= 3;                           //if creature is elite, then remove corpse later
 
@@ -1778,4 +1776,3 @@ bool Creature::HasSpell(uint32 spellID) const
             break;
     return i < CREATURE_MAX_SPELLS;                     //broke before end of iteration of known spells
 }
-
