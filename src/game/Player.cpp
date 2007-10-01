@@ -10443,7 +10443,7 @@ void Player::SendPreparedQuest( uint64 guid )
             else
             {
                 qe = gossiptext->Options[0].Emotes[0];
-                title = gossiptext->Options[0].Text_0;
+                title = gossiptext->Options[0].Text_0 == "" ? gossiptext->Options[0].Text_1 : gossiptext->Options[0].Text_0;
                 if( &title == NULL )
                     title = "";
             }

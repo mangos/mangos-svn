@@ -271,10 +271,15 @@ void WorldSession::HandleNpcTextQueryOpcode( WorldPacket & recv_data )
     for (int i=0; i<8; i++)
     {
         data << pGossip->Options[i].Probability;
-        data << pGossip->Options[i].Text_0;
+
+        if ( pGossip->Options[i].Text_0 == "" )
+            data << pGossip->Options[i].Text_1;
+        else
+            data << pGossip->Options[i].Text_0;
 
         if ( pGossip->Options[i].Text_1 == "" )
-            data << pGossip->Options[i].Text_0; else
+            data << pGossip->Options[i].Text_0; 
+        else
             data << pGossip->Options[i].Text_1;
 
         data << pGossip->Options[i].Language;
