@@ -109,6 +109,15 @@ void BattleGroundBE::Update(time_t diff)
     }*/
 }
 
+void BattleGroundBE::AddPlayer(Player *plr)
+{
+    BattleGround::AddPlayer(plr);
+    //create score and add it to map, default values are set in constructor
+    BattleGroundBEScore* sc = new BattleGroundBEScore;
+
+    m_PlayerScores[plr->GetGUID()] = sc;
+}
+
 void BattleGroundBE::RemovePlayer(Player *plr, uint64 guid)
 {
 

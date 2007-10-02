@@ -161,6 +161,15 @@ struct BG_AB_BannerTimer
     uint8       teamIndex;
 };
 
+class BattleGroundABScore : public BattleGroundScore
+{
+    public:
+        BattleGroundABScore(): BasesAssaulted(0), BasesDefended(0) {};
+        virtual ~BattleGroundABScore() {};
+        uint32 BasesAssaulted;
+        uint32 BasesDefended;
+};
+
 class BattleGroundAB : public BattleGround
 {
     friend class BattleGroundMgr;
@@ -169,7 +178,8 @@ class BattleGroundAB : public BattleGround
         BattleGroundAB();
         ~BattleGroundAB();
         void Update(time_t diff);
-        void RemovePlayer(Player *plr, uint64 guid);
+        void AddPlayer(Player *plr);
+        void RemovePlayer(Player *plr,uint64 guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         bool SetupBattleGround();
         void Reset();

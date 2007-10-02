@@ -29,6 +29,14 @@ enum BattleGroundNAObjectTypes
     BG_NA_OBJECT_MAX         = 4
 };
 
+class BattleGroundNAScore : public BattleGroundScore
+{
+    public:
+        BattleGroundNAScore() {};
+        virtual ~BattleGroundNAScore() {};
+        //TODO fix me
+};
+
 class BattleGroundNA : public BattleGround
 {
     friend class BattleGroundMgr;
@@ -37,6 +45,10 @@ class BattleGroundNA : public BattleGround
         BattleGroundNA();
         ~BattleGroundNA();
         void Update(time_t diff);
+
+        /* inherited from BattlegroundClass */
+        virtual void AddPlayer(Player *plr);
+
         void RemovePlayer(Player *plr, uint64 guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         bool SetupBattleGround();

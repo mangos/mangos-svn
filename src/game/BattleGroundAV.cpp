@@ -40,7 +40,16 @@ void BattleGroundAV::Update(time_t diff)
     BattleGround::Update(diff);
 }
 
-void BattleGroundAV::RemovePlayer(Player *plr, uint64 guid)
+void BattleGroundAV::AddPlayer(Player *plr)
+{
+    BattleGround::AddPlayer(plr);
+    //create score and add it to map, default values are set in constructor
+    BattleGroundAVScore* sc = new BattleGroundAVScore;
+
+    m_PlayerScores[plr->GetGUID()] = sc;
+}
+
+void BattleGroundAV::RemovePlayer(Player *plr,uint64 guid)
 {
 
 }

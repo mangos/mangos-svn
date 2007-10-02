@@ -65,7 +65,7 @@ void BattleGroundWS::Update(time_t diff)
     }
 
     // after bg start and doors spawn we get there
-    if((GetStatus() == STATUS_WAIT_JOIN) && isDoorsSpawned())
+    if((GetStatus() == STATUS_WAIT_JOIN) && isDoorsSpawned() /*only FOR DEBUG commented : && GetPlayersSize() > GetMinPlayers()*/ )
     {
         ModifyStartDelayTime(diff);
 
@@ -121,6 +121,15 @@ void BattleGroundWS::Update(time_t diff)
                 RespawnFlag(HORDE, true);
         }
     }
+}
+
+void BattleGroundWS::AddPlayer(Player *plr)
+{
+    BattleGround::AddPlayer(plr);
+    //create score and add it to map, default values are set in constructor
+    BattleGroundWGScore* sc = new BattleGroundWGScore;
+
+    m_PlayerScores[plr->GetGUID()] = sc;
 }
 
 void BattleGroundWS::RespawnFlag(uint32 Team, bool captured)
@@ -218,6 +227,7 @@ void BattleGroundWS::EventPlayerDroppedFlag(Player *Source)
 
     const char *message;
     uint8 type = 0;
+    bool set = false;
 
     if(Source->GetTeam() == ALLIANCE)
     {
@@ -231,6 +241,7 @@ void BattleGroundWS::EventPlayerDroppedFlag(Player *Source)
                 message = LANG_BG_WS_DROPPED_HF;
                 type = CHAT_MSG_BG_SYSTEM_HORDE;
                 Source->CastSpell(Source, 23334, true);
+                set = true;
             }
         }
     }
@@ -246,20 +257,24 @@ void BattleGroundWS::EventPlayerDroppedFlag(Player *Source)
                 message = LANG_BG_WS_DROPPED_AF;
                 type = CHAT_MSG_BG_SYSTEM_ALLIANCE;
                 Source->CastSpell(Source, 23336, true);
+                set = true;
             }
         }
     }
 
     UpdateFlagState(Source->GetTeam(), 1);
 
-    WorldPacket data;
-    sChatHandler.FillMessageData(&data, Source->GetSession(), type, LANG_UNIVERSAL, NULL, Source->GetGUID(), message, NULL);
-    SendPacketToAll(&data);
+    if (set)
+    {
+        WorldPacket data;
+        sChatHandler.FillMessageData(&data, Source->GetSession(), type, LANG_UNIVERSAL, NULL, Source->GetGUID(), message, NULL);
+        SendPacketToAll(&data);
 
-    if(Source->GetTeam() == ALLIANCE)
-        UpdateWorldState(BG_WS_FLAG_UNK_HORDE, uint32(-1));
-    else
-        UpdateWorldState(BG_WS_FLAG_UNK_ALLIANCE, uint32(-1));
+        if(Source->GetTeam() == ALLIANCE)
+            UpdateWorldState(BG_WS_FLAG_UNK_HORDE, uint32(-1));
+        else
+            UpdateWorldState(BG_WS_FLAG_UNK_ALLIANCE, uint32(-1));
+    }
 }
 
 void BattleGroundWS::EventPlayerReturnedFlag(Player *Source)

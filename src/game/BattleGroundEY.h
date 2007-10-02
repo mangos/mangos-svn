@@ -21,6 +21,14 @@
 
 class BattleGround;
 
+class BattleGroundEYScore : public BattleGroundScore
+{
+    public:
+        BattleGroundEYScore () {};
+        virtual ~BattleGroundEYScore() {};
+        //todo FIX ME! (add special columns...)
+};
+
 class BattleGroundEY : public BattleGround
 {
     friend class BattleGroundMgr;
@@ -29,7 +37,11 @@ class BattleGroundEY : public BattleGround
         BattleGroundEY();
         ~BattleGroundEY();
         void Update(time_t diff);
-        void RemovePlayer(Player *plr, uint64 guid);
+
+        /* inherited from BattlegroundClass */
+        virtual void AddPlayer(Player *plr);
+
+        void RemovePlayer(Player *plr,uint64 guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         //bool SetupBattleGround();
 

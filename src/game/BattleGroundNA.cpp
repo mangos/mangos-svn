@@ -47,7 +47,7 @@ void BattleGroundNA::Update(time_t diff)
         {
             SpawnBGObject(i, RESPAWN_IMMEDIATELY);
         }
-        sLog.outDebug("Doors spawned...");
+        sLog.outDebug("BattlegroundNA: Doors spawned...");
 
         SetDoorsSpawned(true);
         SetStartDelayTime(START_DELAY1);
@@ -95,6 +95,15 @@ void BattleGroundNA::Update(time_t diff)
     {
         // update something
     }*/
+}
+
+void BattleGroundNA::AddPlayer(Player *plr)
+{
+    BattleGround::AddPlayer(plr);
+    //create score and add it to map, default values are set in constructor
+    BattleGroundNAScore* sc = new BattleGroundNAScore;
+
+    m_PlayerScores[plr->GetGUID()] = sc;
 }
 
 void BattleGroundNA::RemovePlayer(Player *plr, uint64 guid)

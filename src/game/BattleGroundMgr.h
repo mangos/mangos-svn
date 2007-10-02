@@ -24,7 +24,100 @@
 
 class BattleGround;
 
+//TODO it is not possible to have this structure, because we should have BattlegroundSet for each queue
+//so i propose to change this type to array 1..MAX_BATTLEGROUND_TYPES of sets or maps..
 typedef std::map<uint32, BattleGround*> BattleGroundSet;
+//typedef std::map<uint32, BattleGroundQueue*> BattleGroundQueueSet;
+typedef std::deque<BattleGround*> BGFreeSlotQueueType;
+
+#define MAX_BATTLEGROUND_QUEUES 7                           // for level ranges 10-19, 20-29, 30-39, 40-49, 50-59, 60-69, 70+
+
+#define MAX_BATTLEGROUND_TYPES 9                            // each BG type will be in array
+
+#define BG_REMIND_INVITE_TIME 60000                         // when this time pass, player get invitation request again
+
+struct PlayerQueueInfo
+{
+    uint32  InviteTime;                                     // first invite time
+    uint32  LastInviteTime;                                 // last invite time
+    uint32  IsInvitedToBGInstanceGUID;                      // was invited to certain BG
+    uint32  LastOnlineTime;                                 // for tracking and removing offline players from queue after 5 minutes
+    uint32  Team;                                           // Player team (ALLIANCE/HORDE)
+    bool IsRated;
+    bool AsGroup;                                           // uint32 GroupId;
+    uint8 ArenaType;
+};
+
+struct PlayersCount
+{
+    uint32 Alliance;
+    uint32 Horde;
+};
+
+template<class _Kty, class _Ty> class bgqueue: public std::map<_Kty, _Ty>
+{
+    public:
+        uint32 Alliance;
+        uint32 Horde;
+        //bool   Ready; // not used now
+        //uint32 AverageTime; //not already implemented (it should be average time in queue for last 10 players)
+};
+
+class BattleGroundQueue
+{
+    public:
+        BattleGroundQueue();
+        ~BattleGroundQueue();
+/*
+        uint32 GetType();
+        void SetType(uint32 type);*/
+
+        void Update(uint32 bgTypeId, uint32 queue_id);
+
+        void AddPlayer(Player *plr, uint32 bgTypeId);
+        void RemovePlayer(uint64 guid);
+
+        uint32 GetQueueIdByPlayerLevel(uint32 level);
+
+        typedef bgqueue<uint64, PlayerQueueInfo> QueuedPlayersMap;
+        QueuedPlayersMap m_QueuedPlayers[MAX_BATTLEGROUND_QUEUES];
+};
+
+/*
+    This class is used to invite player to BG again, when minute lasts from his first invitation
+    it is capable to solve all possibilities
+*/
+class BGQueueInviteEvent : public BasicEvent
+{
+    public:
+        BGQueueInviteEvent(uint64 pl_guid, uint32 BgInstanceGUID) : m_PlayerGuid(pl_guid), m_BgInstanceGUID(BgInstanceGUID) {};
+        virtual ~BGQueueInviteEvent() {};
+
+        virtual bool Execute(uint64 e_time, uint32 p_time);
+        virtual void Abort(uint64 e_time);
+    private:
+        uint64 m_PlayerGuid;
+        uint32 m_BgInstanceGUID;
+
+};
+
+/*
+    This class is used to remove player from BG queue after 2 minutes from first invitation
+*/
+class BGQueueRemoveEvent : public BasicEvent
+{
+    public:
+        BGQueueRemoveEvent(uint64 pl_guid, uint32 bgInstanceGUID, uint32 playersTeam) : m_PlayerGuid(pl_guid), m_BgInstanceGUID(bgInstanceGUID), m_PlayersTeam(playersTeam) {};
+        virtual ~BGQueueRemoveEvent() {};
+
+        virtual bool Execute(uint64 e_time, uint32 p_time);
+        virtual void Abort(uint64 e_time);
+    private:
+        uint64 m_PlayerGuid;
+        uint32 m_BgInstanceGUID;
+        uint32 m_PlayersTeam;
+};
+
 
 class BattleGroundMgr
 {
@@ -37,12 +130,16 @@ class BattleGroundMgr
         /* Packet Building */
         void BuildPlayerJoinedBattleGroundPacket(WorldPacket *data, Player *plr);
         void BuildPlayerLeftBattleGroundPacket(WorldPacket *data, Player *plr);
-        void BuildBattleGroundListPacket(WorldPacket *data, uint64 guid, Player *plr, uint32 bgId);
-        void BuildGroupJoinedBattlegroundPacket(WorldPacket *data, uint32 bgid);
+        void BuildBattleGroundListPacket(WorldPacket *data, uint64 guid, Player *plr, uint32 bgTypeId);
+        void BuildGroupJoinedBattlegroundPacket(WorldPacket *data, uint32 bgTypeId);
         void BuildUpdateWorldStatePacket(WorldPacket *data, uint32 field, uint32 value);
         void BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg);
-        void BuildBattleGroundStatusPacket(WorldPacket *data, BattleGround *bg, uint32 team, uint8 StatusID, uint32 Time1, uint32 Time2);
+        void BuildBattleGroundStatusPacket(WorldPacket *data, BattleGround *bg, uint32 team, uint8 QueueSlot, uint8 StatusID, uint32 Time1, uint32 Time2);
         void BuildPlaySoundPacket(WorldPacket *data, uint32 soundid);
+
+        /* Player invitation */
+        // called from Queue update, or from Addplayer to queue
+        void InvitePlayer(Player* plr, uint32 bgInstanceGUID);
 
         /* Battlegrounds */
         BattleGroundSet::iterator GetBattleGroundsBegin() { return m_BattleGrounds.begin(); };
@@ -57,13 +154,19 @@ class BattleGroundMgr
                 return NULL;
         };
 
-        uint32 CreateBattleGround(uint32 bg_ID, uint32 MaxPlayersPerTeam, uint32 LevelMin, uint32 LevelMax, char* BattleGroundName, uint32 MapID, float Team1StartLocX, float Team1StartLocY, float Team1StartLocZ, float Team1StartLocO, float Team2StartLocX, float Team2StartLocY, float Team2StartLocZ, float Team2StartLocO, uint8 type);
+        uint32 CreateBattleGround(uint32 bgTypeId, uint32 MaxPlayersPerTeam, uint32 LevelMin, uint32 LevelMax, char* BattleGroundName, uint32 MapID, float Team1StartLocX, float Team1StartLocY, float Team1StartLocZ, float Team1StartLocO, float Team2StartLocX, float Team2StartLocY, float Team2StartLocZ, float Team2StartLocO);
 
         inline void AddBattleGround(uint32 ID, BattleGround* BG) { m_BattleGrounds[ID] = BG; };
 
         void CreateInitialBattleGrounds();
 
-        void SendToBattleGround(Player *pl, uint32 bgId);
+        void SendToBattleGround(Player *pl, uint32 bgTypeId);
+
+        /* Battleground queues */
+        //these queues are instantiated when creating BattlegroundMrg
+        BattleGroundQueue m_BattleGroundQueues[MAX_BATTLEGROUND_TYPES]; // public, because we need to access them in BG handler code
+
+        BGFreeSlotQueueType BGFreeSlotQueue[MAX_BATTLEGROUND_TYPES];
 
         void SendAreaSpiritHealerQueryOpcode(Player *pl, BattleGround *bg, uint64 guid);
 
