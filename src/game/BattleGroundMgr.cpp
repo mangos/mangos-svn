@@ -77,10 +77,10 @@ void BattleGroundQueue::AddPlayer(Player *plr, uint32 bgTypeId)
     else
         m_QueuedPlayers[queue_id].Horde++;
 
-    // temporary BG queue status message 
+    /* temporary BG queue status message 
     std::ostringstream str;
     str << "Battleground queue invited status: horde: " << m_QueuedPlayers[queue_id].Horde << ", aliance: " << m_QueuedPlayers[queue_id].Alliance;
-    plr->Say(str.str(), LANG_UNIVERSAL);
+    plr->Say(str.str(), LANG_UNIVERSAL);*/
 
     this->Update(bgTypeId, queue_id);
 }
