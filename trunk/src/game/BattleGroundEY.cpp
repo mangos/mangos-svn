@@ -40,7 +40,16 @@ void BattleGroundEY::Update(time_t diff)
     BattleGround::Update(diff);
 }
 
-void BattleGroundEY::RemovePlayer(Player *plr, uint64 guid)
+void BattleGroundEY::AddPlayer(Player *plr)
+{
+    BattleGround::AddPlayer(plr);
+    //create score and add it to map
+    BattleGroundEYScore* sc = new BattleGroundEYScore;
+
+    m_PlayerScores[plr->GetGUID()] = sc;
+}
+
+void BattleGroundEY::RemovePlayer(Player *plr,uint64 guid)
 {
 
 }

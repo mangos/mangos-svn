@@ -27,6 +27,14 @@ enum BattleGroundRLObjectTypes
     BG_RL_OBJECT_MAX         = 2
 };
 
+class BattleGroundRLScore : public BattleGroundScore
+{
+    public:
+        BattleGroundRLScore() {};
+        virtual ~BattleGroundRLScore() {};
+        //TODO fix me
+};
+
 class BattleGroundRL : public BattleGround
 {
     friend class BattleGroundMgr;
@@ -35,6 +43,10 @@ class BattleGroundRL : public BattleGround
         BattleGroundRL();
         ~BattleGroundRL();
         void Update(time_t diff);
+
+        /* inherited from BattlegroundClass */
+        virtual void AddPlayer(Player *plr);
+
         void RemovePlayer(Player *plr, uint64 guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         bool SetupBattleGround();

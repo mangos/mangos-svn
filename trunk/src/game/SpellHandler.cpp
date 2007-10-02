@@ -454,7 +454,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                     {
                         case 179830:
                             // check if it's correct bg
-                            if(bg->GetID() != BATTLEGROUND_WS)
+                            if(bg->GetTypeID() != BATTLEGROUND_WS)
                                 return;
                             // check if flag dropped
                             if(((BattleGroundWS*)bg)->GetFlagState(ALLIANCE) != BG_WS_FLAG_STATE_ON_BASE)
@@ -469,7 +469,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                             break;
                         case 179831:
                             // check if it's correct bg
-                            if(bg->GetID() != BATTLEGROUND_WS)
+                            if(bg->GetTypeID() != BATTLEGROUND_WS)
                                 return;
                             // check if flag dropped
                             if(((BattleGroundWS*)bg)->GetFlagState(HORDE) != BG_WS_FLAG_STATE_ON_BASE)
@@ -484,7 +484,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                             break;
                         case 184141:
                             // check if it's correct bg
-                            if(bg->GetID() != BATTLEGROUND_EY)
+                            if(bg->GetTypeID() != BATTLEGROUND_EY)
                                 return;
                             spellId = 34976;                // Netherstorm Flag
                             break;
@@ -514,7 +514,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                     {
                         case 179785:                        // Silverwing Flag
                             // check if it's correct bg
-                            if(bg->GetID() != BATTLEGROUND_WS)
+                            if(bg->GetTypeID() != BATTLEGROUND_WS)
                                 return;
                             // check if flag dropped
                             if(((BattleGroundWS*)bg)->GetFlagState(ALLIANCE) != BG_WS_FLAG_STATE_ON_GROUND)
@@ -533,7 +533,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                             break;
                         case 179786:                        // Warsong Flag
                             // check if it's correct bg
-                            if(bg->GetID() != BATTLEGROUND_WS)
+                            if(bg->GetTypeID() != BATTLEGROUND_WS)
                                 return;
                             // check if flag dropped
                             if(((BattleGroundWS*)bg)->GetFlagState(HORDE) != BG_WS_FLAG_STATE_ON_GROUND)

@@ -1489,11 +1489,51 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
 
         bool InBattleGround() const { return m_bgBattleGroundID != 0; }
-        bool InBattleGroundQueue() const { return m_bgBattleGroundQueueID != 0; }
-        uint32 GetBattleGroundId() const { return m_bgBattleGroundID; }
-        uint32 GetBattleGroundQueueId() const { return m_bgBattleGroundQueueID; }
-        void SetBattleGroundId(uint8 val) { m_bgBattleGroundID = val; }
-        void SetBattleGroundQueueId(uint8 val) { m_bgBattleGroundQueueID = val; }
+        bool InBattleGroundQueue() const
+        {
+            for (int i=0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; i++)
+                if (m_bgBattleGroundQueueID[i] != 0)
+                    return true;
+            return false;
+        }
+        uint32 GetBattleGroundId() const    { return m_bgBattleGroundID; }
+        uint32 GetBattleGroundQueueId(uint32 index) const { return m_bgBattleGroundQueueID[index]; }
+        uint32 GetBattleGroundQueueIndex(uint32 queue_id) const
+        {
+            for (int i=0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; i++)
+            {
+                if (m_bgBattleGroundQueueID[i] == queue_id)
+                {
+                    return i;
+                }
+            }
+            return PLAYER_MAX_BATTLEGROUND_QUEUES;
+        }
+
+        void SetBattleGroundId(uint32 val)  { m_bgBattleGroundID = val; }
+        uint32 AddBattleGroundQueueId(uint32 val)
+        {
+            for (int i=0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; i++)
+            {
+                if (m_bgBattleGroundQueueID[i] == 0 || m_bgBattleGroundQueueID[i] == val)
+                {
+                    m_bgBattleGroundQueueID[i] = val;
+                    return i;
+                }
+            }
+            return PLAYER_MAX_BATTLEGROUND_QUEUES;
+        }
+        void RemoveBattleGroundQueueId(uint32 val)
+        {
+            for (int i=0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; i++)
+            {
+                if (m_bgBattleGroundQueueID[i] == val)
+                {
+                    m_bgBattleGroundQueueID[i] = 0;
+                    return;
+                }
+            }
+        }
 
         uint32 GetBattleGroundEntryPointMap() const { return m_bgEntryPointMap; }
         float GetBattleGroundEntryPointX() const { return m_bgEntryPointX; }
@@ -1642,8 +1682,12 @@ class MANGOS_DLL_SPEC Player : public Unit
         /***               BATTLEGROUND SYSTEM                 ***/
         /*********************************************************/
 
-        uint8 m_bgBattleGroundID;
-        uint8 m_bgBattleGroundQueueID;
+        /* this variable is set to bg->m_InstanceID, when player is teleported to BG - (it is battleground's GUID)*/
+        uint32 m_bgBattleGroundID;
+        /*
+        this is an array of BG queues (BgTypeIDs) in which is player
+        */
+        uint32 m_bgBattleGroundQueueID[PLAYER_MAX_BATTLEGROUND_QUEUES];
         uint32 m_bgEntryPointMap;
         float m_bgEntryPointX;
         float m_bgEntryPointY;

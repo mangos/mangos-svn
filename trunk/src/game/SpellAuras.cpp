@@ -2619,7 +2619,7 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool Real)
                 BattleGround *bg = sBattleGroundMgr.GetBattleGround(((Player*)m_target)->GetBattleGroundId());
                 if(bg)
                 {
-                    switch(bg->GetID())
+                    switch(bg->GetTypeID())
                     {
                         case BATTLEGROUND_AV:
                         {

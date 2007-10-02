@@ -166,7 +166,8 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_DetectInvTimer = 1000;
 
     m_bgBattleGroundID = 0;
-    m_bgBattleGroundQueueID = 0;
+    for (int j=0; j < PLAYER_MAX_BATTLEGROUND_QUEUES; j++)
+        m_bgBattleGroundQueueID[j] = 0;
 
     m_movement_flags = 0;
 
@@ -1250,7 +1251,7 @@ void Player::GetFriendInfo(uint64 friendGUID, FriendInfo &friendInfo)
     if( pFriend && pFriend->GetName() &&
         ( security > SEC_PLAYER ||
         ( pFriend->GetTeam() == team || allowTwoSideWhoList ) &&
-        (pFriend->GetSession()->GetSecurity() == SEC_PLAYER || gmInWhoList && pFriend->IsVisibleGloballyFor(this) )))
+        ( pFriend->GetSession()->GetSecurity() == SEC_PLAYER || gmInWhoList && pFriend->IsVisibleGloballyFor(this) )))
     {
         if(pFriend->isAFK())
             friendInfo.Status = FRIEND_STATUS_AFK;
@@ -2354,7 +2355,7 @@ void Player::RemoveMail(uint32 id)
     {
         if ((*itr)->messageID == id)
         {
-            //do not delete item. because Player::removeMail() is called when returning mail to sender.
+            //do not delete item, because Player::removeMail() is called when returning mail to sender.
             m_mail.erase(itr);
             return;
         }
@@ -3676,7 +3677,7 @@ void Player::RepopAtGraveyard()
     if (GetMapId() == 529)        // AB
     {
         BattleGround *bg = sBattleGroundMgr.GetBattleGround(GetBattleGroundId());
-        if (bg && (bg->GetID() == BATTLEGROUND_AB))
+        if (bg && (bg->GetTypeID() == BATTLEGROUND_AB))
             ClosestGrave = ((BattleGroundAB*)bg)->SelectGraveYard(this);
     }
 

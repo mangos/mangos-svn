@@ -20,6 +20,14 @@
 
 class BattleGround;
 
+class BattleGroundAAScore : public BattleGroundScore
+{
+    public:
+        BattleGroundAAScore() {};
+        virtual ~BattleGroundAAScore() {};
+        //TODO fix me
+};
+
 class BattleGroundAA : public BattleGround
 {
     friend class BattleGroundMgr;
@@ -28,6 +36,10 @@ class BattleGroundAA : public BattleGround
         BattleGroundAA();
         ~BattleGroundAA();
         void Update(time_t diff);
+
+        /* inherited from BattlegroundClass */
+        virtual void AddPlayer(Player *plr);
+
         void RemovePlayer(Player *plr, uint64 guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         bool SetupBattleGround();

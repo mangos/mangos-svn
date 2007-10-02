@@ -41,6 +41,16 @@ class BattleGround;
 #define BG_WS_FLAG_STATE_HORDE        2338
 #define BG_WS_FLAG_STATE_ALLIANCE     2339
 
+class BattleGroundWGScore : public BattleGroundScore
+{
+    public:
+        BattleGroundWGScore() : FlagCaptures(0), FlagReturns(0), Unk2(0) {};
+        virtual ~BattleGroundWGScore() {};
+        uint32 FlagCaptures;
+        uint32 FlagReturns;
+        uint32 Unk2;                    //i have no idea what is this
+};
+
 enum BG_WS_ObjectTypes
 {
     BG_WS_OBJECT_A_FLAG        = 0,
@@ -81,6 +91,9 @@ class BattleGroundWS : public BattleGround
         BattleGroundWS();
         ~BattleGroundWS();
         void Update(time_t diff);
+
+        /* inherited from BattlegroundClass */
+        virtual void AddPlayer(Player *plr);
 
         /* BG Flags */
         uint64 GetAllianceFlagPickerGUID() const { return m_FlagKeepers[0]; }

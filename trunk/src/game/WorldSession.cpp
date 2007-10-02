@@ -626,9 +626,15 @@ void WorldSession::LogoutPlayer(bool Save)
 
         if(_player->InBattleGroundQueue())
         {
-            BattleGround* bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundQueueId());
-            if(bg)
-                bg->RemovePlayerFromQueue(_player->GetGUID());
+            for (int i=0; i < PLAYER_MAX_BATTLEGROUND_QUEUES; i++)
+            {
+                int32 bgTypeId = _player->GetBattleGroundQueueId(i);
+                if (bgTypeId != 0)
+                {
+                    _player->RemoveBattleGroundQueueId(bgTypeId);
+                    sBattleGroundMgr.m_BattleGroundQueues[ bgTypeId ].RemovePlayer(_player->GetGUID());
+                }
+            }
         }
 
         ///- Reset the online field in the account table

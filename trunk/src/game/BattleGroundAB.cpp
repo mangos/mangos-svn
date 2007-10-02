@@ -41,7 +41,7 @@ void BattleGroundAB::Update(time_t diff)
 {
     BattleGround::Update(diff);
 
-    if (GetStatus() == STATUS_WAIT_JOIN)
+    if (GetStatus() == STATUS_WAIT_JOIN /* for debug commented: && GetPlayersSize() > GetMinPlayers()*/)
     {
         ModifyStartDelayTime(diff);
 
@@ -220,6 +220,15 @@ void BattleGroundAB::Update(time_t diff)
             m_buffchecktimer = 0;
         }
     }
+}
+
+void BattleGroundAB::AddPlayer(Player *plr)
+{
+    BattleGround::AddPlayer(plr);
+    //create score and add it to map, default values are set in the constructor
+    BattleGroundABScore* sc = new BattleGroundABScore;
+
+    m_PlayerScores[plr->GetGUID()] = sc;
 }
 
 void BattleGroundAB::RemovePlayer(Player *plr, uint64 guid)

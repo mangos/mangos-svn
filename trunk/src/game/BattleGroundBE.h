@@ -31,6 +31,14 @@ enum BattleGroundBEObjectTypes
     BG_BE_OBJECT_MAX         = 6
 };
 
+class BattleGroundBEScore : public BattleGroundScore
+{
+    public:
+        BattleGroundBEScore() {};
+        virtual ~BattleGroundBEScore() {};
+        //TODO fix me
+};
+
 class BattleGroundBE : public BattleGround
 {
     friend class BattleGroundMgr;
@@ -39,6 +47,10 @@ class BattleGroundBE : public BattleGround
         BattleGroundBE();
         ~BattleGroundBE();
         void Update(time_t diff);
+
+        /* inherited from BattlegroundClass */
+        virtual void AddPlayer(Player *plr);
+
         void RemovePlayer(Player *plr, uint64 guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         bool SetupBattleGround();

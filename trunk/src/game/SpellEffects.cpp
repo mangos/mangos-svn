@@ -1255,15 +1255,38 @@ void Spell::EffectSendEvent(uint32 i)
             switch(m_spellInfo->Id)
             {
                 case 23333:                                 // Pickup Horde Flag
-                    if(bg->GetID()==BATTLEGROUND_WS)
+                    if(bg->GetTypeID()==BATTLEGROUND_WS)
                         ((BattleGroundWS*)bg)->EventPlayerPickedUpFlag(((Player*)m_caster));
                     sLog.outDebug("Send Event Horde Flag Picked Up");
                     break;
+                /* not used :
+                case 23334:                                 // Drop Horde Flag
+                    if(bg->GetTypeID()==BATTLEGROUND_WS)
+                        ((BattleGroundWS*)bg)->EventPlayerDroppedFlag(((Player*)m_caster));
+                    sLog.outDebug("Drop Horde Flag");
+                    break;
+                */
                 case 23335:                                 // Pickup Alliance Flag
-                    if(bg->GetID()==BATTLEGROUND_WS)
+                    if(bg->GetTypeID()==BATTLEGROUND_WS)
                         ((BattleGroundWS*)bg)->EventPlayerPickedUpFlag(((Player*)m_caster));
                     sLog.outDebug("Send Event Alliance Flag Picked Up");
                     break;
+                /* not used :
+                case 23336:                                 // Drop Alliance Flag
+                    if(bg->GetTypeID()==BATTLEGROUND_WS)
+                        ((BattleGroundWS*)bg)->EventPlayerDroppedFlag(((Player*)m_caster));
+                    sLog.outDebug("Drop Alliance Flag");
+                    break;
+                case 23385:                                 // Alliance Flag Returns
+                    if(bg->GetTypeID()==BATTLEGROUND_WS)
+                        ((BattleGroundWS*)bg)->EventPlayerReturnedFlag(((Player*)m_caster));
+                    sLog.outDebug("Alliance Flag Returned");
+                    break;
+                case 23386:                                   // Horde Flag Returns
+                    if(bg->GetTypeID()==BATTLEGROUND_WS)
+                        ((BattleGroundWS*)bg)->EventPlayerReturnedFlag(((Player*)m_caster));
+                    sLog.outDebug("Horde Flag Returned");
+                    break;*/
                 default:
                     sLog.outDebug("Unknown spellid %u in BG event", m_spellInfo->Id);
                     break;
@@ -1552,7 +1575,7 @@ void Spell::EffectOpenLock(uint32 i)
             if(!bg)
                 return;
             // check if it's correct bg
-            if(bg->GetID() != BATTLEGROUND_AB)
+            if(bg->GetTypeID() != BATTLEGROUND_AB)
                 return;
             ((BattleGroundAB*)bg)->ClickBanner(player);
             return;
