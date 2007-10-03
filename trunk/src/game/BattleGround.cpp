@@ -466,6 +466,10 @@ void BattleGround::RemovePlayer(uint64 guid, bool Transport, bool SendPacket)
         // this call is important, because player, when joins to battleground, this method is not called, so it must be called when leaving bg
         plr->RemoveBattleGroundQueueId(m_TypeID);
 
+        DecreaseInvitedCount(plr->GetTeam());
+        //we should update battleground queue
+        sBattleGroundMgr.m_BattleGroundQueues[GetTypeID()].Update(GetTypeID(), GetQueueType());
+
         if(!plr->GetBattleGroundId())
             return;
 
