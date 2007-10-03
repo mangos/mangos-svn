@@ -10587,7 +10587,7 @@ bool Player::CanCompleteQuest( uint32 quest_id )
                 }
             }
 
-            if ( qInfo->HasSpecialFlag(QUEST_SPECIAL_FLAGS_KILL_OR_CAST + QUEST_SPECIAL_FLAGS_SPEAKTO) )
+            if ( qInfo->HasSpecialFlag(QUEST_SPECIAL_FLAGS_KILL_OR_CAST | QUEST_SPECIAL_FLAGS_SPEAKTO) )
             {
                 for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
                 {
@@ -10750,7 +10750,7 @@ void Player::AddQuest( Quest *pQuest, Object *questGiver )
                 questStatusData.m_itemcount[i] = 0;
         }
 
-        if ( pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_KILL_OR_CAST + QUEST_SPECIAL_FLAGS_SPEAKTO) )
+        if ( pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_KILL_OR_CAST | QUEST_SPECIAL_FLAGS_SPEAKTO) )
         {
             for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
                 questStatusData.m_creatureOrGOcount[i] = 0;
