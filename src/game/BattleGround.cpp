@@ -35,6 +35,8 @@ BattleGround::BattleGround()
     m_EndTime           = 0;
     m_LastResurrectTime = 0;
     m_Queue_type        = MAX_BATTLEGROUND_QUEUES;
+    m_InvitedAlliance   = 0;
+    m_InvitedHorde      = 0;
     m_ArenaType         = 0;
     m_IsArena           = false;
     m_Winner            = 2;
