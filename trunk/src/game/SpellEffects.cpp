@@ -1473,6 +1473,10 @@ void Spell::EffectCreateItem(uint32 i)
 void Spell::EffectPersistentAA(uint32 i)
 {
     float radius = GetRadius(sSpellRadiusStore.LookupEntry(m_spellInfo->EffectRadiusIndex[i]));
+
+    if(Player* modOwner = m_caster->GetSpellModOwner())
+        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, radius);
+
     int32 duration = GetDuration(m_spellInfo);
     DynamicObject* dynObj = new DynamicObject(m_caster);
     if(!dynObj->Create(objmgr.GenerateLowGuid(HIGHGUID_DYNAMICOBJECT), m_caster, m_spellInfo->Id, i, m_targets.m_destX, m_targets.m_destY, m_targets.m_destZ, duration, radius))

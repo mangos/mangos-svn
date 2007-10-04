@@ -290,6 +290,8 @@ class AreaAura : public Aura
         AreaAura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
         ~AreaAura();
         void Update(uint32 diff);
+    private:
+        float m_radius;
 };
 
 class PersistentAreaAura : public Aura
