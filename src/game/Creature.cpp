@@ -46,7 +46,7 @@ lootForPickPocketed(false), lootForBody(false), m_groupLootTimer(0), lootingGrou
 m_itemsLoaded(false), m_trainerSpellsLoaded(false), m_trainer_type(0), m_lootMoney(0), m_lootRecipient(0),
 m_deathTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_respawnradius(0.0),
 m_gossipOptionLoaded(false),m_NPCTextId(0), m_emoteState(0), m_isPet(false), m_isTotem(false),
-m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE), m_regenHealth(false)
+m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE), m_regenHealth(true)
 {
     m_valuesCount = UNIT_END;
 
@@ -1123,7 +1123,7 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const 
         return false;
     }
 
-    m_regenHealth = (cinfo->RegenHealth == 1);
+    m_regenHealth = (cinfo->RegenHealth != 0);
 
     // Load creature model (display id)
     uint32 display_id;
