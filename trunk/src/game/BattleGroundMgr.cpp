@@ -201,11 +201,12 @@ void BattleGroundQueue::Update(uint32 bgTypeId, uint32 queue_id)
                     // player will be invited, if in bg there is a free slot for him
                     if (bg->HasFreeSlotsForTeam(plr->GetTeam()))
                     {
+                        // iterator to player's queue status
+                        QueuedPlayersMap::iterator itrPlayerStatus = m_QueuedPlayers[queue_id].find(*itr2);
+
                         // remove him from time queue
                         m_PlayersSortedByWaitTime[queue_id].erase(itr2);
 
-                        // iterator to player's queue status
-                        QueuedPlayersMap::iterator itrPlayerStatus = m_QueuedPlayers[queue_id].find(*itr2);
                         // only check to be sure ... but this condition shouldn't be true (if it is true, then there is a bug somewhere and pls report it)
                         if (itrPlayerStatus == m_QueuedPlayers[queue_id].end())
                             continue;
@@ -274,11 +275,12 @@ void BattleGroundQueue::Update(uint32 bgTypeId, uint32 queue_id)
             // player will be invited, if in bg there is a free slot for him
             if (bg2->HasFreeSlotsForTeam(plr->GetTeam()))
             {
+                // iterator to player's queue status
+                QueuedPlayersMap::iterator itrPlayerStatus = m_QueuedPlayers[queue_id].find(*itr2);
+
                 // remove him from time queue
                 m_PlayersSortedByWaitTime[queue_id].erase(itr2);
 
-                // iterator to player's queue status
-                QueuedPlayersMap::iterator itrPlayerStatus = m_QueuedPlayers[queue_id].find(*itr2);
                 // only check to be sure ... but this condition shouldn't be true (if it is true, then there is a bug somewhere and report it)
                 if (itrPlayerStatus == m_QueuedPlayers[queue_id].end())
                     continue;
