@@ -469,6 +469,7 @@ pkgdata_DATA = \
 	4517_spell_affect.sql \
 	4524_spell_proc_event.sql \
 	4537_player_levelstats.sql \
+	4540_battleground_template.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -918,4 +919,5 @@ EXTRA_DIST = \
 	4517_spell_affect.sql \
 	4524_spell_proc_event.sql \
 	4537_player_levelstats.sql \
+	4540_battleground_template.sql \
 	README
