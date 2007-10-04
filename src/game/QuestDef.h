@@ -147,9 +147,9 @@ class Quest
         uint32 GetRequiredRaces() const { return RequiredRaces; }
         uint32 GetRequiredSkillValue() const { return RequiredSkillValue; }
         uint32 GetRequiredMinRepFaction() const { return RequiredMinRepFaction; }
-        uint32 GetRequiredMinRepValue() const { return RequiredMinRepValue; }
+         int32 GetRequiredMinRepValue() const { return RequiredMinRepValue; }
         uint32 GetRequiredMaxRepFaction() const { return RequiredMaxRepFaction; }
-        uint32 GetRequiredMaxRepValue() const { return RequiredMaxRepValue; }
+         int32 GetRequiredMaxRepValue() const { return RequiredMaxRepValue; }
         uint32 GetSuggestedPlayers() const { return SuggestedPlayers; }
         uint32 GetLimitTime() const { return LimitTime; }
         int32  GetNextQuestId() const { return NextQuestId; }
@@ -225,9 +225,9 @@ class Quest
         uint32 RequiredRaces;
         uint32 RequiredSkillValue;
         uint32 RequiredMinRepFaction;
-        uint32 RequiredMinRepValue;
+        int32  RequiredMinRepValue;
         uint32 RequiredMaxRepFaction;
-        uint32 RequiredMaxRepValue;
+        int32  RequiredMaxRepValue;
         uint32 SuggestedPlayers;
         uint32 LimitTime;
         uint32 SpecialFlags;

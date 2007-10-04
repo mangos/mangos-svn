@@ -29,9 +29,9 @@ Quest::Quest(Field * questRecord)
     RequiredRaces = questRecord[5].GetUInt32();
     RequiredSkillValue = questRecord[6].GetUInt32();
     RequiredMinRepFaction = questRecord[7].GetUInt32();
-    RequiredMinRepValue = questRecord[8].GetUInt32();
+    RequiredMinRepValue = questRecord[8].GetInt32();
     RequiredMaxRepFaction = questRecord[9].GetUInt32();
-    RequiredMaxRepValue = questRecord[10].GetUInt32();
+    RequiredMaxRepValue = questRecord[10].GetInt32();
     SuggestedPlayers = questRecord[11].GetUInt32();
     LimitTime = questRecord[12].GetUInt32();
     SpecialFlags = questRecord[13].GetUInt32();

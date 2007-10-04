@@ -1786,16 +1786,16 @@ void ObjectMgr::LoadQuests()
             // no changes, quest can't be done for this requirement
         }
 
-        if(qinfo->RequiredMinRepValue && int32(qinfo->RequiredMinRepValue) > Player::Reputation_Cap)
+        if(qinfo->RequiredMinRepValue && qinfo->RequiredMinRepValue > Player::Reputation_Cap)
         {
-            sLog.outErrorDb("Quest %u has `RequiredMinRepValue` = %u but max reputation is %u, quest can't be done.",
+            sLog.outErrorDb("Quest %u has `RequiredMinRepValue` = %d but max reputation is %u, quest can't be done.",
                 qinfo->GetQuestId(),qinfo->RequiredMinRepValue,Player::Reputation_Cap);
             // no changes, quest can't be done for this requirement
         }
 
         if(qinfo->RequiredMinRepValue && qinfo->RequiredMaxRepValue && qinfo->RequiredMaxRepValue <= qinfo->RequiredMinRepValue)
         {
-            sLog.outErrorDb("Quest %u has `RequiredMaxRepValue` = %u and `RequiredMinRepValue` = %u, quest can't be done.",
+            sLog.outErrorDb("Quest %u has `RequiredMaxRepValue` = %d and `RequiredMinRepValue` = %d, quest can't be done.",
                 qinfo->GetQuestId(),qinfo->RequiredMaxRepValue,qinfo->RequiredMinRepValue);
             // no changes, quest can't be done for this requirement
         }
