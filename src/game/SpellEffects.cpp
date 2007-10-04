@@ -1046,14 +1046,6 @@ void Spell::EffectApplyAura(uint32 i)
         (unitTarget->GetTypeId()!=TYPEID_PLAYER || !((Player*)unitTarget)->GetSession()->PlayerLoading()) )
         return;
 
-    /* WTF: ?
-    //If m_immuneToState type contain this aura type, IMMUNE aura.
-    if(unitTarget->IsImmunedToSpellEffect(m_spellInfo->EffectApplyAuraName[i]))
-    {
-        SendCastResult(SPELL_FAILED_IMMUNE);
-        return;
-    }*/
-
     sLog.outDebug("Spell: Aura is: %u", m_spellInfo->EffectApplyAuraName[i]);
 
     Aura* Aur = new Aura(m_spellInfo, i, &m_currentBasePoints[i], unitTarget,m_caster, m_CastItem);
