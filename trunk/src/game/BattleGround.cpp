@@ -626,7 +626,7 @@ bool BattleGround::HasFreeSlotsForTeam(uint32 Team) const
         otherTeam = GetInvitedCount(HORDE);
     else
         otherTeam = GetInvitedCount(ALLIANCE);
-    if (GetStatus() > STATUS_WAIT_JOIN && GetStatus() < STATUS_WAIT_LEAVE)
+    if (GetStatus() == STATUS_IN_PROGRESS)
         return (GetInvitedCount(Team) <= otherTeam && GetInvitedCount(Team) < GetMaxPlayersPerTeam());
 
     return false;
@@ -640,6 +640,7 @@ bool BattleGround::HasFreeSlots() const
 
 void BattleGround::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
 {
+    //this procedure should be moved to bg subclass code to update special properties of a score
     std::map<uint64, BattleGroundScore*>::iterator itr = m_PlayerScores.find(Source->GetGUID());
 
     if(itr == m_PlayerScores.end())                         // player not found...
@@ -647,17 +648,22 @@ void BattleGround::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
 
     switch(type)
     {
-        case SCORE_KILLS:                                   // kills
+        case SCORE_KILLS:                                   // Killing blows
             itr->second->KillingBlows += value;
             break;
-            //this code is temporarily commented, we should move it into BG subclass
-        /*case SCORE_FLAG_CAPTURES:                       // flags captured
-            itr->second->FlagCaptures += value;
+        case SCORE_DAMAGE_DONE:                             // Damage Done
+            itr->second->DamageDone += value;
+             break;
+        case SCORE_HEALING_DONE:                            // Healing Done
+            itr->second->HealingDone += value;
             break;
-        case SCORE_FLAG_RETURNS:                            // flags returned
-            itr->second->FlagReturns += value;
-            break;*/
-        case SCORE_DEATHS:                                  // deaths
+        case SCORE_BONUS_HONOR:                             // Honor bonus
+            itr->second->BonusHonor += value;
+            break;
+        case SCORE_HONORABLE_KILLS:                         // Honorable kills
+            itr->second->HonorableKills += value;
+            break;
+        case SCORE_DEATHS:                                  // Deaths
             itr->second->Deaths += value;
             break;
         default:

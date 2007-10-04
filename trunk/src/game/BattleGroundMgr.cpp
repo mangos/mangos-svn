@@ -72,6 +72,9 @@ void BattleGroundQueue::AddPlayer(Player *plr, uint32 bgTypeId)
 
     m_QueuedPlayers[queue_id][plr->GetGUID()] = info;
 
+    //add player to waiting order queue
+    m_PlayersSortedByWaitTime[queue_id].push_back(plr->GetGUID());
+
     if(plr->GetTeam() == ALLIANCE)
         m_QueuedPlayers[queue_id].Alliance++;
     else
@@ -93,6 +96,7 @@ void BattleGroundQueue::RemovePlayer(uint64 guid)
     QueuedPlayersMap::iterator itr;
     if(!plr)
     {                                                       //player is offline, we need to find him somewhere in queues
+        /// there is something wrong if this code is run, because we have in queue only online players!
         for (uint32 i = 0; i < MAX_BATTLEGROUND_QUEUES; i++)
         {
             QueuedPlayersMap::iterator itr = m_QueuedPlayers[i].find(guid);
@@ -109,7 +113,14 @@ void BattleGroundQueue::RemovePlayer(uint64 guid)
         itr = m_QueuedPlayers[queue_id].find(guid);
     }
 
-    //all variables are set, so remove player:
+    //all variables are set, so remove player
+    //remove player from time queue
+    for (PlayerGuidsSortedByTimeQueue::iterator iter = m_PlayersSortedByWaitTime[queue_id].begin(); iter != m_PlayersSortedByWaitTime[queue_id].end(); ++iter)
+    {
+        if ((*iter) == guid)
+            m_PlayersSortedByWaitTime[queue_id].erase(iter);
+    }
+
     if(itr != m_QueuedPlayers[queue_id].end())
     {
         if (!itr->second.IsInvitedToBGInstanceGUID)
@@ -172,26 +183,43 @@ void BattleGroundQueue::Update(uint32 bgTypeId, uint32 queue_id)
             //we must check both teams
             BattleGround* bg = *itr; //we have to store battleground pointer here, because when battleground is full, it is removed from free queue (not yet implemented!!)
             // and iterator is invalid
-            if (m_QueuedPlayers[queue_id].Alliance > 0)
+
+            //check if there are some players in queue
+            if (m_QueuedPlayers[queue_id].Alliance > 0 || m_QueuedPlayers[queue_id].Horde > 0)
             {
-                if (bg->HasFreeSlotsForTeam(ALLIANCE))
+                for (PlayerGuidsSortedByTimeQueue::iterator itr2 = m_PlayersSortedByWaitTime[queue_id].begin(); itr2 != m_PlayersSortedByWaitTime[queue_id].end(); ++itr2)
                 {
-                    for (QueuedPlayersMap::iterator itr2 = m_QueuedPlayers[queue_id].begin(); itr2 != m_QueuedPlayers[queue_id].end(); ++itr2)
+                    Player* plr = objmgr.GetPlayer(*itr2);
+                    if (!plr)
                     {
-                        if (!itr2->second.IsInvitedToBGInstanceGUID && itr2->second.Team == ALLIANCE)
+                        //something is wrong!, kick player from queue
+                        sLog.outError("BATTLEGROUND: problem with inviting offline player to Battleground queue .... pls report bug");
+                        this->RemovePlayer(*itr2);
+                        continue;
+                    }
+
+                    // player will be invited, if in bg there is a free slot for him
+                    if (bg->HasFreeSlotsForTeam(plr->GetTeam()))
+                    {
+                        // remove him from time queue
+                        m_PlayersSortedByWaitTime[queue_id].erase(itr2);
+
+                        // iterator to player's queue status
+                        QueuedPlayersMap::iterator itrPlayerStatus = m_QueuedPlayers[queue_id].find(*itr2);
+                        // only check to be sure ... but this condition shouldn't be true (if it is true, then there is a bug somewhere and pls report it)
+                        if (itrPlayerStatus == m_QueuedPlayers[queue_id].end())
+                            continue;
+
+                        // check if player is not already invited
+                        if (!itrPlayerStatus->second.IsInvitedToBGInstanceGUID)
                         {
-                            Player* plr = objmgr.GetPlayer(itr2->first);
-                            if (!plr)
-                            {
-                                //something is wrong!, kick player from queue
-                                sLog.outError("BATTLEGROUND: problem with inviting offline player to Battleground queue .... pls report bug");
-                                this->RemovePlayer(itr2->first);
-                                continue;
-                            }
-                            itr2->second.IsInvitedToBGInstanceGUID = bg->GetInstanceID();
-                            itr2->second.InviteTime = getMSTime();
-                            itr2->second.LastInviteTime = getMSTime();
-                            m_QueuedPlayers[queue_id].Alliance--;
+                            itrPlayerStatus->second.IsInvitedToBGInstanceGUID = bg->GetInstanceID();
+                            itrPlayerStatus->second.InviteTime = getMSTime();
+                            itrPlayerStatus->second.LastInviteTime = getMSTime();
+                            if(itrPlayerStatus->second.Team == ALLIANCE)
+                                m_QueuedPlayers[queue_id].Alliance--;
+                            else
+                                m_QueuedPlayers[queue_id].Horde--;
                             sBattleGroundMgr.InvitePlayer(plr, bg->GetInstanceID());
 
                             WorldPacket data;
@@ -200,43 +228,17 @@ void BattleGroundQueue::Update(uint32 bgTypeId, uint32 queue_id)
                             plr->GetSession()->SendPacket(&data);
                         }
                     }
-                }
-            }
-            if (m_QueuedPlayers[queue_id].Horde > 0)
-            {
-                if (bg->HasFreeSlotsForTeam(HORDE))
-                {
-                    for (QueuedPlayersMap::iterator itr2 = m_QueuedPlayers[queue_id].begin(); itr2 != m_QueuedPlayers[queue_id].end(); ++itr2)
-                    {
-                        if (!itr2->second.IsInvitedToBGInstanceGUID && itr2->second.Team == HORDE)
-                        {
-                            Player* plr = objmgr.GetPlayer(itr2->first);
-                            if (!plr)
-                            {
-                                //something is wrong!, kick player from queue
-                                sLog.outError("BATTLEGROUND: problem with inviting offline player to Battleground queue .... pls report bug");
-                                this->RemovePlayer(itr2->first);
-                                continue;
-                            }
-                            itr2->second.IsInvitedToBGInstanceGUID = bg->GetInstanceID();
-                            itr2->second.InviteTime = getMSTime();
-                            itr2->second.LastInviteTime = getMSTime();
-                            m_QueuedPlayers[queue_id].Horde--;
-                            sBattleGroundMgr.InvitePlayer(plr, bg->GetInstanceID());
 
-                            WorldPacket data;
-                            uint32 queueSlot = plr->GetBattleGroundQueueIndex(bgTypeId);
-                            sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, plr->GetTeam(), queueSlot, STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME, 0);
-                            plr->GetSession()->SendPacket(&data);
-                        }
+                    //if battleground is FULL, then it is removed from free slot queue - not yet implemented!
+                    if (!bg->HasFreeSlots())
+                    {
+                        //if bg is full, there is no need to invite other players, so break
+                        break;
+                        //remove BG from BGFreeSlotQueue - not used now, in this system we don't remove BGs from free queue
+                        //bg->RemoveFromBGFreeSlotQueue() --- do not uncomment this - not yet implemented
                     }
                 }
             }
-            //if battleground is FULL, then it is removed from free slot queue - not yet implemented!
-            /*if (!bg->HasFreeSlots())
-            {
-                //remove BG from BGFreeSlotQueueType - not used now, in this system we don't remove BGs from free queue
-            }*/
         }
     }
 
@@ -258,34 +260,48 @@ void BattleGroundQueue::Update(uint32 bgTypeId, uint32 queue_id)
         bg2->SetStatus(STATUS_WAIT_JOIN);
         bg2->SetQueueType(queue_id);
 
-        for (QueuedPlayersMap::iterator iter = m_QueuedPlayers[queue_id].begin(); iter != m_QueuedPlayers[queue_id].end(); ++iter)
+        for (PlayerGuidsSortedByTimeQueue::iterator itr2 = m_PlayersSortedByWaitTime[queue_id].begin(); itr2 != m_PlayersSortedByWaitTime[queue_id].end(); ++itr2)
         {
-            uint32 player_guid = iter->first;
-            Player* plr2 = objmgr.GetPlayer(player_guid);
-            if (!plr2)
+            Player* plr = objmgr.GetPlayer(*itr2);
+            if (!plr)
             {
-                //remove player - this code shouldn't be called
-                sLog.outError("BATTLEGROUND: Removing offline player from BG queue! BG queue does not support offline players yet");
-                sBattleGroundMgr.m_BattleGroundQueues[queue_id].RemovePlayer(player_guid);
+                //something is wrong!, kick player from queue
+                sLog.outError("BATTLEGROUND: problem with inviting offline player to Battleground queue .... pls report bug");
+                this->RemovePlayer(*itr2);
                 continue;
             }
-            if (bg2->HasFreeSlotsForTeam(iter->second.Team))
+
+            // player will be invited, if in bg there is a free slot for him
+            if (bg2->HasFreeSlotsForTeam(plr->GetTeam()))
             {
-                iter->second.IsInvitedToBGInstanceGUID = bg2->GetInstanceID();
-                iter->second.InviteTime = getMSTime();
-                iter->second.LastInviteTime = getMSTime();
+                // remove him from time queue
+                m_PlayersSortedByWaitTime[queue_id].erase(itr2);
 
-                if(iter->second.Team == ALLIANCE)
-                    m_QueuedPlayers[queue_id].Alliance--;
-                else
-                    m_QueuedPlayers[queue_id].Horde--;
+                // iterator to player's queue status
+                QueuedPlayersMap::iterator itrPlayerStatus = m_QueuedPlayers[queue_id].find(*itr2);
+                // only check to be sure ... but this condition shouldn't be true (if it is true, then there is a bug somewhere and report it)
+                if (itrPlayerStatus == m_QueuedPlayers[queue_id].end())
+                    continue;
 
-                sBattleGroundMgr.InvitePlayer(plr2, bg2->GetInstanceID());
+                //check if player is not already invited
+                if (!itrPlayerStatus->second.IsInvitedToBGInstanceGUID)
+                {
+                    itrPlayerStatus->second.IsInvitedToBGInstanceGUID = bg2->GetInstanceID();
+                    itrPlayerStatus->second.InviteTime = getMSTime();
+                    itrPlayerStatus->second.LastInviteTime = getMSTime();
 
-                WorldPacket data;
-                uint32 queueSlot = plr2->GetBattleGroundQueueIndex(bgTypeId);
-                sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg2, iter->second.Team, queueSlot, STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME, 0);
-                plr2->GetSession()->SendPacket(&data);
+                    if(itrPlayerStatus->second.Team == ALLIANCE)
+                        m_QueuedPlayers[queue_id].Alliance--;
+                    else
+                        m_QueuedPlayers[queue_id].Horde--;
+
+                    sBattleGroundMgr.InvitePlayer(plr, bg2->GetInstanceID());
+
+                    WorldPacket data;
+                    uint32 queueSlot = plr->GetBattleGroundQueueIndex(bgTypeId);
+                    sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg2, plr->GetTeam(), queueSlot, STATUS_WAIT_JOIN, INVITE_ACCEPT_WAIT_TIME, 0);
+                    plr->GetSession()->SendPacket(&data);
+                }
             }
         }
         bg2->StartBattleGround(0);
