@@ -387,6 +387,13 @@ AreaAura::AreaAura(SpellEntry const* spellproto, uint32 eff, int32 *currentBaseP
 Unit *caster, Item* castItem) : Aura(spellproto, eff, currentBasePoints, target, caster, castItem)
 {
     m_isAreaAura = true;
+
+    // caster==NULL in constructor args if target==caster in fact
+    Unit* caster_ptr = caster ? caster : target;
+
+    m_radius = GetRadius(sSpellRadiusStore.LookupEntry(GetSpellProto()->EffectRadiusIndex[m_effIndex]));
+    if(Player* modOwner = caster_ptr->GetSpellModOwner())
+        modOwner->ApplySpellMod(GetSpellProto()->Id, SPELLMOD_RADIUS, m_radius);
 }
 
 AreaAura::~AreaAura()
@@ -538,7 +545,6 @@ void AreaAura::Update(uint32 diff)
                 pGroup = ((Player*)owner)->GetGroup();
         }
 
-        float radius =  GetRadius(sSpellRadiusStore.LookupEntry(GetSpellProto()->EffectRadiusIndex[m_effIndex]));
         if(pGroup)
         {
             for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
@@ -561,7 +567,7 @@ void AreaAura::Update(uint32 diff)
 
                 Aura *t_aura = Target->GetAura(m_spellId, m_effIndex);
 
-                if(caster->IsWithinDistInMap(Target, radius) )
+                if(caster->IsWithinDistInMap(Target, m_radius) )
                 {
                     // apply aura to players in range that dont have it yet
                     if (!t_aura)
@@ -586,7 +592,7 @@ void AreaAura::Update(uint32 diff)
             if (owner)
             {
                 Aura *o_aura = owner->GetAura(m_spellId, m_effIndex);
-                if(caster->IsWithinDistInMap(owner, radius))
+                if(caster->IsWithinDistInMap(owner, m_radius))
                 {
                     if (!o_aura)
                     {
@@ -608,7 +614,6 @@ void AreaAura::Update(uint32 diff)
     {
         Unit * tmp_target = m_target;
         Unit* caster = GetCaster();
-        float radius =  GetRadius(sSpellRadiusStore.LookupEntry(GetSpellProto()->EffectRadiusIndex[m_effIndex]));
         uint32 tmp_spellId = m_spellId, tmp_effIndex = m_effIndex;
 
         // WARNING: the aura may get deleted during the update
@@ -616,7 +621,7 @@ void AreaAura::Update(uint32 diff)
         Aura::Update(diff);
 
         // remove aura if out-of-range from caster (after teleport for example)
-        if(!caster || !caster->IsWithinDistInMap(tmp_target, radius) )
+        if(!caster || !caster->IsWithinDistInMap(tmp_target, m_radius) )
             tmp_target->RemoveAura(tmp_spellId, tmp_effIndex);
     }
     else Aura::Update(diff);

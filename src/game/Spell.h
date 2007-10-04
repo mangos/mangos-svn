@@ -668,21 +668,17 @@ namespace MaNGOS
         std::list<Unit*> &i_data;
         Spell &i_spell;
         const uint32& i_index;
+        float i_radius;
         Unit* i_originalCaster;
 
-        SpellNotifierPlayer(Spell &spell, std::list<Unit*> &data, const uint32 &i)
-            : i_data(data), i_spell(spell), i_index(i)
+        SpellNotifierPlayer(Spell &spell, std::list<Unit*> &data, const uint32 &i, float radius)
+            : i_data(data), i_spell(spell), i_index(i), i_radius(radius)
         {
             i_originalCaster = i_spell.GetOriginalCaster();
         }
 
         void Visit(PlayerMapType &m)
         {
-            float radius = GetRadius(sSpellRadiusStore.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i_index]));
-
-            if(!i_originalCaster)
-                return;
-
             for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
             {
                 Player * pPlayer = itr->getSource();
@@ -692,7 +688,7 @@ namespace MaNGOS
                 if( i_originalCaster->IsFriendlyTo(pPlayer) )
                     continue;
 
-                if( pPlayer->GetDistance(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < radius )
+                if( pPlayer->GetDistance(i_spell.m_targets.m_destX, i_spell.m_targets.m_destY, i_spell.m_targets.m_destZ) < i_radius )
                     i_data.push_back(pPlayer);
             }
         }
@@ -708,14 +704,10 @@ namespace MaNGOS
         SpellTargets i_TargetType;
         Unit* i_originalCaster;
 
-        SpellNotifierCreatureAndPlayer(Spell &spell, std::list<Unit*> &data, const uint32 &i, const uint32 &type,
+        SpellNotifierCreatureAndPlayer(Spell &spell, std::list<Unit*> &data, const uint32 &i, float radius, const uint32 &type,
             SpellTargets TargetType = SPELL_TARGETS_NOT_FRIENDLY)
-            : i_data(&data), i_spell(spell), i_push_type(type), i_TargetType(TargetType)
+            : i_data(&data), i_spell(spell), i_radius(radius), i_push_type(type), i_TargetType(TargetType)
         {
-            if (i_spell.m_spellInfo->EffectRadiusIndex[i])
-                i_radius = GetRadius(sSpellRadiusStore.LookupEntry(i_spell.m_spellInfo->EffectRadiusIndex[i]));
-            else
-                i_radius = GetMaxRange(sSpellRangeStore.LookupEntry(i_spell.m_spellInfo->rangeIndex));
             i_originalCaster = spell.GetOriginalCaster();
         }
 
