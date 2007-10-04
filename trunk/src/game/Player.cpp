@@ -11120,11 +11120,11 @@ bool Player::SatisfyQuestReputation( uint32 quest_id, bool msg )
     if( qInfo )
     {
         uint32 fIdMin = qInfo->GetRequiredMinRepFaction();  //Min required rep
-        if(fIdMin && GetReputation(fIdMin) < int32(qInfo->GetRequiredMinRepValue()))
+        if(fIdMin && GetReputation(fIdMin) < qInfo->GetRequiredMinRepValue())
             return false;
 
         uint32 fIdMax = qInfo->GetRequiredMaxRepFaction();  //Max required rep
-        if(fIdMax && GetReputation(fIdMax) >= int32(qInfo->GetRequiredMaxRepValue()))
+        if(fIdMax && GetReputation(fIdMax) >= qInfo->GetRequiredMaxRepValue())
             return false;
 
         return true;
