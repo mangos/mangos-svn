@@ -470,6 +470,8 @@ pkgdata_DATA = \
 	4524_spell_proc_event.sql \
 	4537_player_levelstats.sql \
 	4540_battleground_template.sql \
+	4544_creature_addon.sql \
+	4544_creature_template_addon.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -920,4 +922,6 @@ EXTRA_DIST = \
 	4524_spell_proc_event.sql \
 	4537_player_levelstats.sql \
 	4540_battleground_template.sql \
+	4544_creature_addon.sql \
+	4544_creature_template_addon.sql \
 	README

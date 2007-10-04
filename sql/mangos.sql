@@ -954,7 +954,6 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `creature_addon`;
 CREATE TABLE `creature_addon` (
   `guid` int(11) NOT NULL default '0',
-  `RefId` int(11) NOT NULL default '0',
   `mount` int(11) unsigned NOT NULL default '0',
   `bytes0` int(11) unsigned NOT NULL default '0',
   `bytes1` int(11) unsigned NOT NULL default '0',
@@ -965,8 +964,7 @@ CREATE TABLE `creature_addon` (
   `auralevels` int(11) unsigned NOT NULL default '0',
   `auraapplications` int(11) unsigned NOT NULL default '0',
   `aurastate` int(11) unsigned NOT NULL default '0',
-  UNIQUE KEY `guid` (`guid`),
-  KEY `emote` (`emote`,`RefId`,`mount`,`aura`)
+  UNIQUE KEY `guid` (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -1257,6 +1255,36 @@ INSERT INTO `creature_template` VALUES
 (1,10045,10045,'Waypoint (Only GM can see it)','Visual',1,1,64,64,0,0,0,35,35,0,0.91,0,14,15,0,100,2000,2200,4096,0,8,0,0,0,0,1.76,2.42,100,8,1,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,3,0,1,0,'');
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `creature_template_addon`
+--
+
+DROP TABLE IF EXISTS `creature_template_addon`;
+CREATE TABLE `creature_template_addon` (
+  `entry` int(11) NOT NULL default '0',
+  `mount` int(11) unsigned NOT NULL default '0',
+  `bytes0` int(11) unsigned NOT NULL default '0',
+  `bytes1` int(11) unsigned NOT NULL default '0',
+  `bytes2` int(11) unsigned NOT NULL default '0',
+  `emote` int(11) unsigned NOT NULL default '0',
+  `aura` int(11) unsigned NOT NULL default '0',
+  `auraflags` int(11) unsigned NOT NULL default '0',
+  `auralevels` int(11) unsigned NOT NULL default '0',
+  `auraapplications` int(11) unsigned NOT NULL default '0',
+  `aurastate` int(11) unsigned NOT NULL default '0',
+  UNIQUE KEY `entry` (`entry`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `creature_template_addon`
+--
+
+LOCK TABLES `creature_template_addon` WRITE;
+/*!40000 ALTER TABLE `creature_template_addon` DISABLE KEYS */;
+/*!40000 ALTER TABLE `creature_template_addon` ENABLE KEYS */;
+UNLOCK TABLES;
+
 
 --
 -- Table structure for table `db_version`
