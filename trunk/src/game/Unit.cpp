@@ -885,7 +885,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
 
             assert(he->duel);
 
-            he->ModifyHealth(1);
+            he->SetHealth(1);
             CombatStop();                                   // for case killed by pet
             if(he->duel->opponent!=this)
                 he->duel->opponent->CombatStop();
@@ -2977,8 +2977,9 @@ long Unit::GetTotalAuraModifier(uint32 ModifierID) const
 
 bool Unit::AddAura(Aura *Aur, bool uniq)
 {
-                                                            // ghost spell check
-    if (!isAlive() && !(Aur->GetSpellProto()->Id == 20584 || Aur->GetSpellProto()->Id == 8326 || Aur->GetSpellProto()->Id == 2584)) // whisp aura, ghost spell, waiting to resurrect spell
+    // ghost spell check, allow apply any auras at player loading in ghost mode (will be cleanup after load)
+    if( !isAlive() && Aur->GetSpellProto()->Id != 20584 && Aur->GetSpellProto()->Id != 8326 && Aur->GetSpellProto()->Id != 2584 &&
+        (GetTypeId()!=TYPEID_PLAYER || !((Player*)this)->GetSession()->PlayerLoading()) )
     {
         delete Aur;
         return false;
