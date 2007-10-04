@@ -360,6 +360,7 @@ const char* BattleGroundAB::_GetNodeName(uint8 node)
         case BG_AB_NODE_GOLD_MINE: return LANG_BG_AB_NODE_4;
         default: ASSERT(0);
     }
+    return "";
 }
 
 void BattleGroundAB::_SendCurrentGameState(Player *plr) //this should be done in player->sendinitialworldstates method!
@@ -370,7 +371,7 @@ void BattleGroundAB::_SendCurrentGameState(Player *plr) //this should be done in
     data << uint32(plr->GetMapId());
     data << uint32(plr->GetZoneId());
     data << uint32(plr->GetAreaId());
-    data << uint16(38);                                 // count of uint64 blocks
+    data << uint16(38);                                     // count of uint64 blocks
     data << uint32(0x8d8) << uint32(0x0);                   // 1
     data << uint32(0x8d7) << uint32(0x0);                   // 2
     data << uint32(0x8d6) << uint32(0x0);                   // 3

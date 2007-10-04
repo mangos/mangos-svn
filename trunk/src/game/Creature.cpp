@@ -1667,7 +1667,10 @@ bool Creature::IsOutOfThreatArea(Unit* pVictim) const
 
 CreatureDataAddon const* Creature::GetCreatureAddon() const
 {
-    return objmgr.GetCreatureAddon(m_DBTableGuid);
+    if(CreatureDataAddon const* addon = ObjectMgr::GetCreatureAddon(m_DBTableGuid))
+        return addon;
+
+    return ObjectMgr::GetCreatureTemplateAddon(GetEntry());
 }
 
 

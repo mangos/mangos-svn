@@ -553,7 +553,7 @@ void World::SetInitialWorldSettings()
     objmgr.LoadCreatures();
 
     sLog.outString( "Loading Creature Addon Data..." );
-    objmgr.LoadCreatureAddons();
+    objmgr.LoadCreatureAddons();                            // must be after LoadCreatureTemplates() and LoadCreatures()
 
     sLog.outString( "Loading Creature Respawn Data..." );   // must be after PackInstances()
     objmgr.LoadCreatureRespawnTimes();

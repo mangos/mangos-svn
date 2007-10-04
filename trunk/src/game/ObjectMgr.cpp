@@ -438,10 +438,37 @@ void ObjectMgr::LoadCreatureTemplates()
 
 void ObjectMgr::LoadCreatureAddons()
 {
+    sCreatureInfoAddonStorage.Load();
+
+    sLog.outString( ">> Loaded %u creature template addons", sCreatureInfoAddonStorage.RecordCount );
+    sLog.outString();
+
+    // check data correctness
+    for(uint32 i = 1; i < sCreatureInfoAddonStorage.MaxEntry; ++i)
+    {
+        CreatureDataAddon const* addon = sCreatureInfoAddonStorage.LookupEntry<CreatureDataAddon>(i);
+        if(!addon)
+            continue;
+
+        if(!sCreatureStorage.LookupEntry<CreatureInfo>(addon->guidOrEntry))
+            sLog.outErrorDb("Creature (Entry: %u) not exist but have record in `creature_template_addon`",addon->guidOrEntry);
+    }
+
     sCreatureDataAddonStorage.Load();
 
     sLog.outString( ">> Loaded %u creature addons", sCreatureDataAddonStorage.RecordCount );
     sLog.outString();
+
+    // check data correctness
+    for(uint32 i = 1; i < sCreatureDataAddonStorage.MaxEntry; ++i)
+    {
+        CreatureDataAddon const* addon = sCreatureDataAddonStorage.LookupEntry<CreatureDataAddon>(i);
+        if(!addon)
+            continue;
+
+        if(mCreatureDataMap.find(addon->guidOrEntry)==mCreatureDataMap.end())
+            sLog.outErrorDb("Creature (GUID: %u) not exist but have record in `creature_addon`",addon->guidOrEntry);
+    }
 }
 
 EquipmentInfo const* ObjectMgr::GetEquipmentInfo(uint32 entry)

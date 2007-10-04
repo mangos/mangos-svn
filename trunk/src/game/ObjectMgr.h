@@ -44,6 +44,7 @@
 
 extern SQLStorage sCreatureStorage;
 extern SQLStorage sCreatureDataAddonStorage;
+extern SQLStorage sCreatureInfoAddonStorage;
 extern SQLStorage sCreatureModelStorage;
 extern SQLStorage sEquipmentStorage;
 extern SQLStorage sGOStorage;
@@ -249,9 +250,14 @@ class ObjectMgr
         CreatureModelInfo const *GetCreatureModelInfo( uint32 modelid );
         CreatureModelInfo const* GetCreatureModelRandomGender(uint32 display_id);
         EquipmentInfo const *GetEquipmentInfo( uint32 entry );
-        CreatureDataAddon const *GetCreatureAddon( uint32 lowguid )
+        static CreatureDataAddon const *GetCreatureAddon( uint32 lowguid )
         {
             return sCreatureDataAddonStorage.LookupEntry<CreatureDataAddon>(lowguid);
+        }
+
+        static CreatureDataAddon const *GetCreatureTemplateAddon( uint32 entry )
+        {
+            return sCreatureInfoAddonStorage.LookupEntry<CreatureDataAddon>(entry);
         }
 
         static ItemPrototype const* GetItemPrototype(uint32 id) { return sItemStorage.LookupEntry<ItemPrototype>(id); }
