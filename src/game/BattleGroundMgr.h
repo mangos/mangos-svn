@@ -81,6 +81,8 @@ class BattleGroundQueue
 
         typedef bgqueue<uint64, PlayerQueueInfo> QueuedPlayersMap;
         QueuedPlayersMap m_QueuedPlayers[MAX_BATTLEGROUND_QUEUES];
+        typedef std::deque<uint64> PlayerGuidsSortedByTimeQueue;
+        PlayerGuidsSortedByTimeQueue m_PlayersSortedByWaitTime[MAX_BATTLEGROUND_QUEUES];
 };
 
 /*
