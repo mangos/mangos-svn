@@ -306,7 +306,7 @@ void WorldSession::HandleBattleGroundPlayerPortOpcode( WorldPacket &recv_data )
                     sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, _player->GetTeam(), queueSlot, STATUS_IN_PROGRESS, 0, bg->GetStartTime());
                     _player->GetSession()->SendPacket(&data);
                     // remove battleground queue status from BGmgr
-                    sBattleGroundMgr.m_BattleGroundQueues[bgTypeId].RemovePlayer(_player->GetGUID());
+                    sBattleGroundMgr.m_BattleGroundQueues[bgTypeId].RemovePlayer(_player->GetGUID(), false);
                     // check if player is not deserter
                     if( !_player->CanJoinToBattleground() )
                     {
@@ -324,7 +324,7 @@ void WorldSession::HandleBattleGroundPlayerPortOpcode( WorldPacket &recv_data )
                     queueSlot = _player->GetBattleGroundQueueIndex(bgTypeId);
                     _player->RemoveBattleGroundQueueId(bgTypeId); // must be called this way, because if you move this call to queue->removeplayer, it causes bugs
                     sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, _player->GetTeam(), queueSlot, STATUS_NONE, 0, 0);
-                    sBattleGroundMgr.m_BattleGroundQueues[bgTypeId].RemovePlayer(_player->GetGUID());
+                    sBattleGroundMgr.m_BattleGroundQueues[bgTypeId].RemovePlayer(_player->GetGUID(), true);
                     SendPacket(&data);
                     break;
                 default:
