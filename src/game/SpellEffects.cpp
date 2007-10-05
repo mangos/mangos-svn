@@ -3236,29 +3236,25 @@ void Spell::EffectEnchantHeldItem(uint32 i)
     if (m_spellInfo->EffectMiscValue[i])
     {
         uint32 enchant_id = m_spellInfo->EffectMiscValue[i];
-        int32 duration = GetDuration(m_spellInfo);
-        if(duration == 0)
-            duration = m_currentBasePoints[i]+1;
-        if(duration == 1)
-            duration = 300;
+        int32 duration = GetDuration(m_spellInfo);          //Try duration index first ..
+        if(!duration)
+            duration = m_currentBasePoints[i]+1;            //Base points after ..
+        if(!duration)
+            duration = 10;                                  //10 seconds for enchants which don't have listed duration
 
         SpellItemEnchantmentEntry const *pEnchant = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
         if(!pEnchant)
             return;
 
-        EnchantmentSlot slot;
+        // Always go to temp enchantment slot
+        EnchantmentSlot slot = TEMP_ENCHANTMENT_SLOT;
 
-        if (item->GetItemSuffixFactor())
-            slot = (duration <= 0) ? PROP_ENCHANTMENT_SLOT_0 : PROP_ENCHANTMENT_SLOT_1;
-        else
-            slot = (duration <= 0) ? PROP_ENCHANTMENT_SLOT_3 : PROP_ENCHANTMENT_SLOT_4;
+        // Enchantment will not be applied if a different one already exists
+        if(item->GetEnchantmentId(slot) && item->GetEnchantmentId(slot) != enchant_id)
+            return;
 
-        // remove old enchanting before applying new
-        item_owner->ApplyEnchantment(item,slot,false);
-
+        //Apply the temporary enchantment
         item->SetEnchantment(slot, enchant_id, duration*1000, 0);
-
-        // add new enchanting
         item_owner->ApplyEnchantment(item,slot,true);
     }
 }
