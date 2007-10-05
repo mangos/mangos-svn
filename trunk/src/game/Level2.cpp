@@ -1282,8 +1282,16 @@ bool ChatHandler::HandleFactionIdCommand(const char* args)
     pCreature->setFaction(factionId);
 
     // faction is set in creature_template - not inside creature
-    //pCreature->SaveToDB(); -- obsolete
-    sDatabase.PExecuteLog("UPDATE `creature_template` SET `faction` = '%u' WHERE `entry` = '%u'", factionId, pCreature->GetEntry());
+
+    // update in memory
+    if(CreatureInfo const *cinfo = pCreature->GetCreatureInfo())
+    {
+        const_cast<CreatureInfo*>(cinfo)->faction_A = factionId;
+        const_cast<CreatureInfo*>(cinfo)->faction_H = factionId;
+    }
+
+    // and DB
+    sDatabase.PExecuteLog("UPDATE `creature_template` SET `faction_A` = '%u', `faction_H` = '%u' WHERE `entry` = '%u'", factionId, factionId, pCreature->GetEntry());
 
     return true;
 }
