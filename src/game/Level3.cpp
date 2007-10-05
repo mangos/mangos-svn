@@ -3404,7 +3404,7 @@ bool ChatHandler::HandleResetSpellsCommand(const char * args)
         player->resetSpells();
 
         WorldPacket data;
-        FillSystemMessageData(&data, player->GetSession(), LANG_RESETALL_SPELLS);
+        FillSystemMessageData(&data, player->GetSession(), LANG_RESET_SPELLS);
         player->GetSession()->SendPacket( &data );
 
         if(m_session->GetPlayer()!=player)

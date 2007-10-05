@@ -15292,6 +15292,7 @@ void Player::resetSpells()
     for(PlayerSpellMap::const_iterator iter = smap.begin();iter != smap.end(); ++iter)
         removeSpell(iter->first);                           // only iter->first can be accessed, object by iter->second can be deleted already
 
+    // learn default race/class spells
     PlayerInfo const *info = objmgr.GetPlayerInfo(getRace(),getClass());
     std::list<CreateSpellPair>::const_iterator spell_itr;
     for (spell_itr = info->spell.begin(); spell_itr!=info->spell.end(); spell_itr++)
@@ -15302,6 +15303,29 @@ void Player::resetSpells()
             sLog.outDebug("PLAYER: Adding initial spell, id = %u",tspell);
             learnSpell(tspell);
         }
+    }
+
+    // learn spells received from quest completing
+    for(QuestStatusMap::const_iterator itr = mQuestStatus.begin(); itr != mQuestStatus.end(); ++itr)
+    {
+        // skip no rewarded quests
+        if(!itr->second.m_rewarded)
+            continue;
+
+        Quest const* quest = objmgr.mQuestTemplates[itr->first];
+
+        // skip quests without rewarded spell
+        if( !quest || !quest->GetRewSpell() )
+            continue;
+
+        uint32 spell_id = quest->GetRewSpell();
+
+        // skip quests with not teaching spell
+        SpellEntry const *spellInfo = sSpellStore.LookupEntry(spell_id);
+        if(spellInfo->Effect[0] != SPELL_EFFECT_LEARN_SPELL)
+            continue;
+
+        CastSpell( this, spell_id, true);
     }
 }
 
