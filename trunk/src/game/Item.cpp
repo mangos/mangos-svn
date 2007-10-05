@@ -313,7 +313,7 @@ Player* Item::GetOwner()const
 
 uint32 Item::GetSkill()
 {
-    const static uint32 item_weapon_skills[MAX_ITEM__SUBCLASS_WEAPON] =
+    const static uint32 item_weapon_skills[MAX_ITEM_SUBCLASS_WEAPON] =
     {
         SKILL_AXES,     SKILL_2H_AXES,  SKILL_BOWS,          SKILL_GUNS,      SKILL_MACES,
         SKILL_2H_MACES, SKILL_POLEARMS, SKILL_SWORDS,        SKILL_2H_SWORDS, 0,
@@ -330,7 +330,7 @@ uint32 Item::GetSkill()
     switch (GetProto()->Class)
     {
         case ITEM_CLASS_WEAPON:
-            if( GetProto()->SubClass >= MAX_ITEM__SUBCLASS_WEAPON )
+            if( GetProto()->SubClass >= MAX_ITEM_SUBCLASS_WEAPON )
                 return 0;
             else
                 return item_weapon_skills[GetProto()->SubClass];

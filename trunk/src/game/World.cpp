@@ -522,7 +522,10 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading NPC Texts..." );
     objmgr.LoadGossipText();
 
-    sLog.outString( "Loading Items..." );
+    sLog.outString( "Loading Item Random Enchantments Table..." );
+    LoadRandomEnchantmentsTable();
+
+    sLog.outString( "Loading Items..." );                   // must be after LoadRandomEnchantmentsTable
     objmgr.LoadItemPrototypes();
 
     sLog.outString( "Loading Page Texts..." );
@@ -608,9 +611,6 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "Loading Loot Tables..." );
     LoadLootTables();
-
-    sLog.outString( "Loading Item Random Enchantments Table..." );
-    LoadRandomEnchantmentsTable();
 
     ///- Load dynamic data tables from the database
     sLog.outString( "Loading Auctions..." );

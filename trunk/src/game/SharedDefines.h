@@ -145,7 +145,9 @@ enum ItemQualities
     ITEM_QUALITY_ARTIFACT              = 6                  //LIGHT YELLOW
 };
 
-enum sheathTypes
+#define MAX_ITEM_QUALITY                 7
+
+enum SheathTypes
 {
     SHEATHETYPE_NONE                   = 0,
     SHEATHETYPE_MAINHAND               = 1,
@@ -156,6 +158,8 @@ enum sheathTypes
     SHEATHETYPE_HIPWEAPONRIGHT         = 6,
     SHEATHETYPE_SHIELD                 = 7
 };
+
+#define MAX_SHEATHETYPE                  8
 
 enum CharacterSlot
 {
@@ -1187,8 +1191,11 @@ enum SkillType
     SKILL_PET_SPOREBAT             = 765,
     SKILL_PET_WARP_STALKER         = 766,
     SKILL_PET_RAVAGER              = 767,
-    SKILL_PET_SERPENT              = 768
+    SKILL_PET_SERPENT              = 768,
+    SKILL_INTERNAL                 = 769
 };
+
+#define MAX_SKILL_TYPE               770
 
 inline bool IsPrimaryProfessionSkill(uint32 skill)
 {
@@ -1391,4 +1398,20 @@ enum ChatMsg
     CHAT_MSG_MONSTER_PARTY                        = 0x5E,
     CHAT_MSG_RESTRICTED                           = 0x5F,
 };
+
+// Values from ItemPetFood (power of (value-1) used for compare with CreatureFamilyEntry.petDietMask
+enum PetDiet
+{
+    PET_DIET_MEAT     = 1,
+    PET_DIET_FISH     = 2,
+    PET_DIET_CHEESE   = 3,
+    PET_DIET_BREAD    = 4,
+    PET_DIET_FUNGAS   = 5,
+    PET_DIET_FRUIT    = 6,
+    PET_DIET_RAW_MEAT = 7,
+    PET_DIET_RAW_FISH = 8
+};
+
+#define MAX_PET_DIET 9
+
 #endif
