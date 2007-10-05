@@ -94,15 +94,18 @@ void BattleGroundQueue::RemovePlayer(uint64 guid, bool decreaseInvitedCount)
 
     uint32 queue_id = 0;
     QueuedPlayersMap::iterator itr;
+    bool IsSet = false;
     if(!plr)
     {                                                       //player is offline, we need to find him somewhere in queues
         /// there is something wrong if this code is run, because we have in queue only online players!
+        sLog.outError("Battleground: removing offline player from BG queue - this might not happen, but it should not cause crash");
         for (uint32 i = 0; i < MAX_BATTLEGROUND_QUEUES; i++)
         {
-            QueuedPlayersMap::iterator itr = m_QueuedPlayers[i].find(guid);
+            itr = m_QueuedPlayers[i].find(guid);
             if(itr != m_QueuedPlayers[i].end())
             {
                 queue_id = i;
+                IsSet = true;
                 break;
             }
         }
@@ -111,13 +114,14 @@ void BattleGroundQueue::RemovePlayer(uint64 guid, bool decreaseInvitedCount)
     {                                                       //player is online, we have his level, so we can find exact queue from his level
         queue_id = GetQueueIdByPlayerLevel(plr->getLevel());
         itr = m_QueuedPlayers[queue_id].find(guid);
+        IsSet = true;
     }
 
     //all variables are set, so remove player
     //remove player from time queue
     m_PlayersSortedByWaitTime[queue_id].remove(guid);
 
-    if(itr != m_QueuedPlayers[queue_id].end())
+    if (IsSet && itr != m_QueuedPlayers[queue_id].end())
     {
         if (!itr->second.IsInvitedToBGInstanceGUID)
         {
