@@ -1073,6 +1073,9 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
 
 bool Pet::HaveInDiet(ItemPrototype const* item) const
 {
+    if (!item->FoodType)
+        return false; 
+
     CreatureInfo const* cInfo = GetCreatureInfo();
     if(!cInfo)
         return false;
@@ -1087,46 +1090,9 @@ bool Pet::HaveInDiet(ItemPrototype const* item) const
         item->Class == ITEM_CLASS_CONSUMABLE  && item->SubClass != 0 && item->SubClass != ITEM_SUBCLASS_FOOD )
         return false;
 
-    // FIXME: food type check not implemented
-    return true;
-
-    /*
     uint32 diet = cFamily->petFoodMask;
-
-    if(diet & PET_DIET_MEAT)
-    {
-    }
-
-    if(diet & PET_DIET_FISH)
-    {
-    }
-
-    if(diet & PET_DIET_CHEESE)
-    {
-    }
-
-    if(diet & PET_DIET_BREAD)
-    {
-    }
-
-    if(diet & PET_DIET_FUNGAS)
-    {
-    }
-
-    if(diet & PET_DIET_FRUIT)
-    {
-    }
-
-    if(diet & PET_DIET_RAW_MEAT)
-    {
-    }
-
-    if(diet & PET_DIET_RAW_FISH)
-    {
-    }
-
-    return false;
-    */
+    uint32 FoodMask = 1 << (item->FoodType-1);
+    return diet & FoodMask;  
 }
 
 uint32 Pet::GetCurrentFoodBenefitLevel(uint32 itemlevel)

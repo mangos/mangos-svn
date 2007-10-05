@@ -474,6 +474,7 @@ pkgdata_DATA = \
 	4544_creature_template_addon.sql \
 	4547_spell_affect.sql \
 	4547_spell_proc_event.sql \
+	4551_item_template.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -928,4 +929,5 @@ EXTRA_DIST = \
 	4544_creature_template_addon.sql \
 	4547_spell_affect.sql \
 	4547_spell_proc_event.sql \
+	4551_item_template.sql \
 	README

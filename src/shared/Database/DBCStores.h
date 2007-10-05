@@ -189,7 +189,7 @@ extern DBCStorage <TaxiNodesEntry>            sTaxiNodesStore;
 extern TaxiMask                               sTaxiNodesMask;
 extern TaxiPathSetBySource                    sTaxiPathSetBySource;
 extern TaxiPathNodesByPath                    sTaxiPathNodesByPath;
-//extern DBCStorage <TotemCategoryEntry>        sTotemCategoryStore; -- use IsTotemCategoryCompatiableWith
+extern DBCStorage <TotemCategoryEntry>        sTotemCategoryStore;
 extern DBCStorage <WorldSafeLocsEntry>        sWorldSafeLocsStore;
 
 void LoadDBCStores(std::string dataPath);

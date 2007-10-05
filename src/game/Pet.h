@@ -43,19 +43,6 @@ enum PetSaveMode
     PET_SAVE_NOT_IN_SLOT      = 3
 };
 
-// Used for values in CreatureFamilyEntry.petDietMask
-enum PetDietMask
-{
-    PET_DIET_MEAT     = 0x01,
-    PET_DIET_FISH     = 0x02,
-    PET_DIET_CHEESE   = 0x04,
-    PET_DIET_BREAD    = 0x08,
-    PET_DIET_FUNGAS   = 0x10,
-    PET_DIET_FRUIT    = 0x20,
-    PET_DIET_RAW_MEAT = 0x40,
-    PET_DIET_RAW_FISH = 0x80
-};
-
 enum HappinessState
 {
     UNHAPPY = 1,

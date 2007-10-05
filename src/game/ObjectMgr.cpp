@@ -917,6 +917,150 @@ void ObjectMgr::LoadItemPrototypes()
     sItemStorage.Load ();
     sLog.outString( ">> Loaded %u item prototypes", sItemStorage.RecordCount );
     sLog.outString();
+
+    // check data correctness
+    for(uint32 i = 1; i < sItemStorage.MaxEntry; ++i)
+    {
+        ItemPrototype const* proto = sItemStorage.LookupEntry<ItemPrototype >(i);
+        if(!proto)
+            continue;
+
+        if(proto->Class >= MAX_ITEM_CLASS)
+        {
+            sLog.outErrorDb("Item (Entry: %u) have wrong Class value (%u)",i,proto->Class);
+            const_cast<ItemPrototype*>(proto)->Class = ITEM_CLASS_MISC;
+        }
+
+        if(proto->SubClass >= MaxItemSubclassValues[proto->Class])
+        {
+            sLog.outErrorDb("Item (Entry: %u) have wrong Subclass value (%u) for class %u",i,proto->SubClass,proto->Class);
+            const_cast<ItemPrototype*>(proto)->SubClass = 0;// exist for all item classes
+        }
+
+        if(proto->Quality >= MAX_ITEM_QUALITY)
+        {
+            sLog.outErrorDb("Item (Entry: %u) have wrong Quality value (%u)",i,proto->Quality);
+            const_cast<ItemPrototype*>(proto)->Quality = ITEM_QUALITY_NORMAL;
+        }
+
+        if(proto->InventoryType >= MAX_INVTYPE)
+        {
+            sLog.outErrorDb("Item (Entry: %u) have wrong InventoryType value (%u)",i,proto->InventoryType);
+            const_cast<ItemPrototype*>(proto)->InventoryType = INVTYPE_NON_EQUIP;
+        }
+
+        if(proto->RequiredSkill >= MAX_SKILL_TYPE)
+        {
+            sLog.outErrorDb("Item (Entry: %u) have wrong RequiredSkill value (%u)",i,proto->RequiredSkill);
+            const_cast<ItemPrototype*>(proto)->RequiredSkill = 0;
+        }
+
+        if(proto->RequiredSpell && !sSpellStore.LookupEntry(proto->RequiredSpell))
+        {
+            sLog.outErrorDb("Item (Entry: %u) have wrong (non-existed) spell in RequiredSpell (%u)",i,proto->RequiredSpell);
+            const_cast<ItemPrototype*>(proto)->RequiredSpell = 0;
+        }
+
+        if(proto->RequiredReputationFaction && !sFactionStore.LookupEntry(proto->RequiredReputationFaction))
+        {
+            sLog.outErrorDb("Item (Entry: %u) have wrong (non-existed) faction in RequiredReputationFaction (%u)",i,proto->RequiredReputationFaction);
+            const_cast<ItemPrototype*>(proto)->RequiredReputationFaction = 0;
+        }
+
+        for (int j = 0; j < 10; j++)
+        {
+            // for ItemStatValue != 0
+            if(proto->ItemStat[j].ItemStatValue && proto->ItemStat[j].ItemStatType >= MAX_ITEM_MOD)
+            {
+                sLog.outErrorDb("Item (Entry: %u) have wrong stat_type%d (%u)",i,j+1,proto->ItemStat[j].ItemStatType);
+                const_cast<ItemPrototype*>(proto)->ItemStat[j].ItemStatType = 0;
+            }
+        }
+
+        for (int j = 0; j < 5; j++)
+        {
+            if(proto->Damage[j].DamageType >= MAX_SPELL_SCHOOL)
+            {
+                sLog.outErrorDb("Item (Entry: %u) have wrong dmg_type%d (%u)",i,j+1,proto->Damage[j].DamageType);
+                const_cast<ItemPrototype*>(proto)->Damage[j].DamageType = 0;
+            }
+        }
+
+        for (int j = 0; j < 5; j++)
+        {
+            if(proto->Spells[j].SpellId && !sSpellStore.LookupEntry(proto->Spells[j].SpellId))
+            {
+                sLog.outErrorDb("Item (Entry: %u) have wrong (not-existed) spell in spellid_%d (%u)",i,j+1,proto->Spells[j].SpellId);
+                const_cast<ItemPrototype*>(proto)->Spells[j].SpellId = 0;
+            }
+        }
+
+        if(proto->Bonding >= MAX_BIND_TYPE)
+            sLog.outErrorDb("Item (Entry: %u) have wrong Bonding value (%u)",i,proto->Bonding);
+
+        if(proto->LockID && !sLockStore.LookupEntry(proto->LockID))
+            sLog.outErrorDb("Item (Entry: %u) have wrong LockID (%u)",i,proto->LockID);
+
+        if(proto->Sheath >= MAX_SHEATHETYPE)
+        {
+            sLog.outErrorDb("Item (Entry: %u) have wrong Sheath (%u)",i,proto->Sheath);
+            const_cast<ItemPrototype*>(proto)->Sheath = SHEATHETYPE_NONE;
+        }
+
+        if(proto->RandomProperty && !sItemRandomPropertiesStore.LookupEntry(GetItemEnchantMod(proto->RandomProperty)))
+        {
+            sLog.outErrorDb("Item (Entry: %u) have unknown (wrong or not listed in `item_enchantment_template`) RandomProperty (%u)",i,proto->RandomProperty);
+            const_cast<ItemPrototype*>(proto)->RandomProperty = 0;
+        }
+
+        if(proto->RandomSuffix && !sItemRandomSuffixStore.LookupEntry(GetItemEnchantMod(proto->RandomSuffix)))
+        {
+            sLog.outErrorDb("Item (Entry: %u) have wrong RandomSuffix (%u)",i,proto->RandomSuffix);
+            const_cast<ItemPrototype*>(proto)->RandomSuffix = 0;
+        }
+
+        if(proto->ItemSet && !sItemSetStore.LookupEntry(proto->ItemSet))
+        {
+            sLog.outErrorDb("Item (Entry: %u) have wrong ItemSet (%u)",i,proto->ItemSet);
+            const_cast<ItemPrototype*>(proto)->ItemSet = 0;
+        }
+
+        if(proto->Area && !GetAreaEntryByAreaID(proto->Area))
+            sLog.outErrorDb("Item (Entry: %u) have wrong Area (%u)",i,proto->Area);
+
+        if(proto->Map && !sMapStore.LookupEntry(proto->Map))
+            sLog.outErrorDb("Item (Entry: %u) have wrong Map (%u)",i,proto->Map);
+
+        if(proto->BagFamily >= MAX_BAG_FAMILY)
+        {
+            sLog.outErrorDb("Item (Entry: %u) have wrong BagFamily (%u)",i,proto->BagFamily);
+            const_cast<ItemPrototype*>(proto)->BagFamily = BAG_FAMILY_NONE;
+        }
+
+        if(proto->TotemCategory && !sTotemCategoryStore.LookupEntry(proto->TotemCategory))
+            sLog.outErrorDb("Item (Entry: %u) have wrong TotemCategory (%u)",i,proto->TotemCategory);
+
+        for (int j = 0; j < 3; j++)
+        {
+            if(proto->Socket[j].Color && (proto->Socket[j].Color & SOCKET_COLOR_ALL) != proto->Socket[j].Color)
+            {
+                sLog.outErrorDb("Item (Entry: %u) have wrong socketColor_%d (%u)",i,j+1,proto->Socket[j].Color);
+                const_cast<ItemPrototype*>(proto)->Socket[j].Color = 0;
+            }
+        }
+
+        if(proto->GemProperties && !sGemPropertiesStore.LookupEntry(proto->GemProperties))
+            sLog.outErrorDb("Item (Entry: %u) have wrong GemProperties (%u)",i,proto->GemProperties);
+
+        if(proto->ExtendedCost && !sItemExtendedCostStore.LookupEntry(proto->ExtendedCost))
+            sLog.outErrorDb("Item (Entry: %u) have wrong ExtendedCost (%u)",i,proto->ExtendedCost);
+
+        if(proto->FoodType >= MAX_PET_DIET)
+        {
+            sLog.outErrorDb("Item (Entry: %u) have wrong FoodType value (%u)",i,proto->FoodType);
+            const_cast<ItemPrototype*>(proto)->FoodType = 0;
+        }
+    }
 }
 
 void ObjectMgr::LoadAuctionItems()

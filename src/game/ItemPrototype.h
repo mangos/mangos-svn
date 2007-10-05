@@ -78,6 +78,8 @@ enum ItemModType
     ITEM_MOD_HASTE_RATING             = 36
 };
 
+#define MAX_ITEM_MOD                    37
+
 enum ItemSpelltriggerType
 {
     USE                                         = 0,
@@ -97,6 +99,8 @@ enum ItemBondingType
     QUEST_ITEM1                                 = 5
 };
 
+#define MAX_BIND_TYPE                             6
+
 // masks for ITEM_FIELD_FLAGS field
 enum ITEM_FLAGS
 {
@@ -111,8 +115,8 @@ enum BAG_FAMILY
     BAG_FAMILY_ARROWS                           = 1,
     BAG_FAMILY_BULLETS                          = 2,
     BAG_FAMILY_SOUL_SHARDS                      = 3,
-    //BAG_FAMILY_UNK1                            = 4,
-    //BAG_FAMILY_UNK1                            = 5,
+    //BAG_FAMILY_UNK1                           = 4,
+    //BAG_FAMILY_UNK1                           = 5,
     BAG_FAMILY_HERBS                            = 6,
     BAG_FAMILY_ENCHANTING_SUPP                  = 7,
     BAG_FAMILY_ENGINEERING_SUPP                 = 8,
@@ -120,6 +124,8 @@ enum BAG_FAMILY
     BAG_FAMILY_GEMS                             = 10,
     BAG_FAMILY_MINING_SUPP                      = 11
 };
+
+#define MAX_BAG_FAMILY                            12
 
 /* TODO: Not entirely positive on need for this??
 enum SOCKET_CONTENT ();
@@ -132,6 +138,8 @@ enum SocketColor
     SOCKET_COLOR_YELLOW                         = 4,
     SOCKET_COLOR_BLUE                           = 8
 };
+
+#define SOCKET_COLOR_ALL (SOCKET_COLOR_META | SOCKET_COLOR_RED | SOCKET_COLOR_YELLOW | SOCKET_COLOR_BLUE)
 
 enum InventoryType
 {
@@ -163,9 +171,10 @@ enum InventoryType
     INVTYPE_THROWN                              = 25,
     INVTYPE_RANGEDRIGHT                         = 26,
     INVTYPE_QUIVER                              = 27,
-    INVTYPE_RELIC                               = 28,
-    NUM_INVENTORY_TYPES                         = 29
+    INVTYPE_RELIC                               = 28
 };
+
+#define MAX_INVTYPE                               29
 
 enum ItemClass
 {
@@ -187,9 +196,11 @@ enum ItemClass
     ITEM_CLASS_MISC                             = 15
 };
 
+#define MAX_ITEM_CLASS                            16
+
 // Client understand only 0 subclass for ITEM_CLASS_CONSUMABLE
 // but this value used in code as implementation workaround
-enum ITEM_SUBCLASS_CONSUMABLE
+enum ItemSubclass—onsumable
 {
     ITEM_SUBCLASS_CONSUMABLE                    = 0,
     ITEM_SUBCLASS_FOOD                          = 1,        // Cheese/Bread(OBSOLETE)
@@ -201,7 +212,9 @@ enum ITEM_SUBCLASS_CONSUMABLE
     ITEM_SUBCLASS_COMBAT_EFFECT                 = 7
 };
 
-enum ITEM_SUBCLASS_CONTAINER
+#define MAX_ITEM_SUBCLASS_CONSUMABLE              8
+
+enum ItemSubclassContainer
 {
     ITEM_SUBCLASS_CONTAINER                     = 0,
     ITEM_SUBCLASS_SOUL_CONTAINER                = 1,
@@ -212,7 +225,9 @@ enum ITEM_SUBCLASS_CONTAINER
     ITEM_SUBCLASS_MINING_CONTAINER              = 6
 };
 
-enum INVENTORY_SUBCLASS_WEAPON
+#define MAX_ITEM_SUBCLASS_CONTAINER               7
+
+enum ItemSubclassWeapon
 {
     ITEM_SUBCLASS_WEAPON_AXE                    = 0,
     ITEM_SUBCLASS_WEAPON_AXE2                   = 1,
@@ -237,9 +252,9 @@ enum INVENTORY_SUBCLASS_WEAPON
     ITEM_SUBCLASS_WEAPON_FISHING_POLE           = 20
 };
 
-#define MAX_ITEM__SUBCLASS_WEAPON                 21
+#define MAX_ITEM_SUBCLASS_WEAPON                  21
 
-enum ITEM_SUBCLASS_GEM
+enum ItemSubclassGem
 {
     ITEM_SUBCLASS_GEM_RED                       = 0,
     ITEM_SUBCLASS_GEM_BLUE                      = 1,
@@ -252,7 +267,9 @@ enum ITEM_SUBCLASS_GEM
     ITEM_SUBCLASS_GEM_PRISMATIC                 = 8
 };
 
-enum ITEM_SUBCLASS_ARMOR
+#define MAX_ITEM_SUBCLASS_GEM                     9
+
+enum ItemSubclassArmor
 {
     ITEM_SUBCLASS_ARMOR_MISC                    = 0,
     ITEM_SUBCLASS_ARMOR_CLOTH                   = 1,
@@ -265,9 +282,17 @@ enum ITEM_SUBCLASS_ARMOR
     ITEM_SUBCLASS_ARMOR_IDOL                    = 8,
     ITEM_SUBCLASS_ARMOR_TOTEM                   = 9
 };
+
 #define MAX_ITEM_SUBCLASS_ARMOR                  10
 
-enum ITEM_SUBCLASS_PROJECTILE
+enum ItemSubclassReagent
+{
+    ITEM_SUBCLASS_REAGENT                       = 0
+};
+
+#define MAX_ITEM_SUBCLASS_REAGENT                 1
+
+enum ItemSubclassProjectile
 {
     ITEM_SUBCLASS_WAND                          = 0,        // ABS
     ITEM_SUBCLASS_BOLT                          = 1,        // ABS
@@ -276,7 +301,9 @@ enum ITEM_SUBCLASS_PROJECTILE
     ITEM_SUBCLASS_THROWN                        = 4         // ABS
 };
 
-enum ITEM_SUBCLASS_TRADE_GOODS
+#define MAX_ITEM_SUBCLASS_PROJECTILE              5
+
+enum ItemSubclassTradeGoods
 {
     ITEM_SUBCLASS_TRADE_GOODS                   = 0,
     ITEM_SUBCLASS_PARTS                         = 1,
@@ -285,7 +312,16 @@ enum ITEM_SUBCLASS_TRADE_GOODS
     ITEM_SUBCLASS_GEMS                          = 4
 };
 
-enum ITEM_SUBCLASS_BOOK
+#define MAX_ITEM_SUBCLASS_TRADE_GOODS             5
+
+enum ItemSubclassGeneric
+{
+    ITEM_SUBCLASS_GENERIC                       = 0
+};
+
+#define MAX_ITEM_SUBCLASS_GENERIC                 1
+
+enum ItemSubclassRecipe
 {
     ITEM_SUBCLASS_BOOK                          = 0,
     ITEM_SUBCLASS_LEATHERWORKING_PATTERN        = 1,
@@ -300,7 +336,16 @@ enum ITEM_SUBCLASS_BOOK
     ITEM_SUBCLASS_JEWELCRAFTING                 = 10
 };
 
-enum ITEM_SUBCLASS_QUIVER
+#define MAX_ITEM_SUBCLASS_RECIPE                  11
+
+enum ItemSubclassMoney
+{
+    ITEM_SUBCLASS_MONEY                         = 0
+};
+
+#define MAX_ITEM_SUBCLASS_MONEY                   1
+
+enum ItemSubclassQuiver
 {
     ITEM_SUBCLASS_QUIVER0                       = 0,        // ABS
     ITEM_SUBCLASS_QUIVER1                       = 1,        // ABS
@@ -308,10 +353,54 @@ enum ITEM_SUBCLASS_QUIVER
     ITEM_SUBCLASS_AMMO_POUCH                    = 3
 };
 
-enum ITEM_SUBCLASS_KEY
+#define MAX_ITEM_SUBCLASS_QUIVER                  4
+
+enum ItemSubclassQuest
+{
+    ITEM_SUBCLASS_QUEST                         = 0
+};
+
+#define MAX_ITEM_SUBCLASS_QUEST                   1
+
+enum ItemSubclassKey
 {
     ITEM_SUBCLASS_KEY                           = 0,
     ITEM_SUBCLASS_LOCKPICK                      = 1
+};
+
+#define MAX_ITEM_SUBCLASS_KEY                     2
+
+enum ItemSubclassPermanent
+{
+    ITEM_SUBCLASS_PERMANENT                     = 0
+};
+
+#define MAX_ITEM_SUBCLASS_PERMANENT               1
+
+enum ItemSubclassMisc
+{
+    ITEM_SUBCLASS_MISC                          = 0
+};
+
+#define MAX_ITEM_SUBCLASS_MISC                    1
+
+const uint32 MaxItemSubclassValues[MAX_ITEM_CLASS] = {
+    MAX_ITEM_SUBCLASS_CONSUMABLE,
+    MAX_ITEM_SUBCLASS_CONTAINER,
+    MAX_ITEM_SUBCLASS_WEAPON,
+    MAX_ITEM_SUBCLASS_GEM,
+    MAX_ITEM_SUBCLASS_ARMOR,
+    MAX_ITEM_SUBCLASS_REAGENT,
+    MAX_ITEM_SUBCLASS_PROJECTILE,
+    MAX_ITEM_SUBCLASS_TRADE_GOODS,
+    MAX_ITEM_SUBCLASS_GENERIC,
+    MAX_ITEM_SUBCLASS_RECIPE,
+    MAX_ITEM_SUBCLASS_MONEY,
+    MAX_ITEM_SUBCLASS_QUIVER,
+    MAX_ITEM_SUBCLASS_QUEST,
+    MAX_ITEM_SUBCLASS_KEY,
+    MAX_ITEM_SUBCLASS_PERMANENT,
+    MAX_ITEM_SUBCLASS_MISC
 };
 
 inline uint8 ItemSubClassToDurabilityMultiplierId(uint32 ItemClass, uint32 ItemSubClass)
@@ -431,6 +520,7 @@ struct ItemPrototype
     float  ArmorDamageModifier;
     char* ScriptName;
     uint32 DisenchantID;
+    uint32 FoodType;
 };
 
 // GCC have alternative #pragma pack() syntax and old gcc version not support pack(pop), also any gcc version not support it at some paltform
