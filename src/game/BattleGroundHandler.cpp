@@ -496,6 +496,10 @@ void WorldSession::HandleBattleGroundArenaJoin( WorldPacket & recv_data )
                 //player has deserter aura .. do nothing
             */
 
+            if (member->GetBattleGroundQueueIndex(BATTLEGROUND_AA) < PLAYER_MAX_BATTLEGROUND_QUEUES)
+                //player is already in this queue
+                return;
+
             uint32 queueSlot = member->AddBattleGroundQueueId(BATTLEGROUND_AA);// add to queue
             if (queueSlot == PLAYER_MAX_BATTLEGROUND_QUEUES)
             {
@@ -522,6 +526,10 @@ void WorldSession::HandleBattleGroundArenaJoin( WorldPacket & recv_data )
         /*if (!member->CanJoinToBattleground())
             //player has deserter aura .. do nothing
         */
+
+        if (_player->GetBattleGroundQueueIndex(BATTLEGROUND_AA) < PLAYER_MAX_BATTLEGROUND_QUEUES)
+            //player is already in this queue
+            return;
 
         uint32 queueSlot = _player->AddBattleGroundQueueId(BATTLEGROUND_AA);
         if (queueSlot == PLAYER_MAX_BATTLEGROUND_QUEUES)

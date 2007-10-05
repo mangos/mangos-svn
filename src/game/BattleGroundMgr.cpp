@@ -63,14 +63,13 @@ void BattleGroundQueue::AddPlayer(Player *plr, uint32 bgTypeId)
 {
     uint32 queue_id = GetQueueIdByPlayerLevel(plr->getLevel());
 
-    PlayerQueueInfo info;
+    //if player isn't in queue, he is added, if already is, then values are overwritten, no memory leak
+    PlayerQueueInfo& info = m_QueuedPlayers[queue_id][plr->GetGUID()];
     info.InviteTime                 = 0;
     info.IsInvitedToBGInstanceGUID  = 0;
     info.LastInviteTime             = 0;
     info.LastOnlineTime             = getMSTime();
     info.Team                       = plr->GetTeam();
-
-    m_QueuedPlayers[queue_id][plr->GetGUID()] = info;
 
     //add player to waiting order queue
     m_PlayersSortedByWaitTime[queue_id].push_back(plr->GetGUID());
