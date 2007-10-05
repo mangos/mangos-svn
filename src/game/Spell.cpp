@@ -517,8 +517,9 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
     else
         radius = GetMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
 
-    if(Player* modOwner = m_originalCaster->GetSpellModOwner())
-        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, radius);
+    if(m_originalCaster)
+        if(Player* modOwner = m_originalCaster->GetSpellModOwner())
+            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_RADIUS, radius);
 
     uint32 unMaxTargets = m_spellInfo->MaxAffectedTargets;
     switch(cur)
