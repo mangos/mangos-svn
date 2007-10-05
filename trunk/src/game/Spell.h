@@ -681,6 +681,9 @@ namespace MaNGOS
 
         void Visit(PlayerMapType &m)
         {
+            if(!i_originalCaster)
+                return;
+
             for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
             {
                 Player * pPlayer = itr->getSource();
