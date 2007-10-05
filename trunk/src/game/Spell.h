@@ -533,6 +533,8 @@ class Spell
         void FillTargetMap();
 
         void SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap);
+
+        Unit* SelectMagnetTarget();
         bool CheckTarget( Unit* target, uint32 eff, bool hitPhase );
 
         void SendCastResult(uint8 result);

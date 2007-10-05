@@ -543,13 +543,18 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
         }
         case TARGET_CHAIN_DAMAGE:
         {
-            Unit* pUnitTarget = m_targets.getUnitTarget();
-            if(!pUnitTarget)
-                break;
             if (m_spellInfo->EffectChainTarget[i] <= 1)
-                TagUnitMap.push_back(pUnitTarget);
+            {
+                Unit* pUnitTarget = SelectMagnetTarget();
+                if(pUnitTarget)
+                    TagUnitMap.push_back(pUnitTarget);
+            }
             else
             {
+                Unit* pUnitTarget = m_targets.getUnitTarget();
+                if(!pUnitTarget)
+                    break;
+
                 unMaxTargets = m_spellInfo->EffectChainTarget[i];
                 CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
                 Cell cell = RedZone::GetZone(p);
@@ -692,8 +697,20 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
         }break;
         case TARGET_DUELVSPLAYER:
         {
-            if(m_targets.getUnitTarget())
-                TagUnitMap.push_back(m_targets.getUnitTarget());
+            Unit *target = m_targets.getUnitTarget();
+            if(target)
+            {
+                if(m_caster->IsFriendlyTo(target))
+                {
+                    TagUnitMap.push_back(target);
+                }
+                else
+                {
+                    Unit* pUnitTarget = SelectMagnetTarget();
+                    if(pUnitTarget)
+                        TagUnitMap.push_back(pUnitTarget);
+                }
+            }
         }break;
         case TARGET_GAMEOBJECT_ITEM:
         {
@@ -736,8 +753,9 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
         }break;
         case TARGET_SINGLE_ENEMY:
         {
-            if(m_targets.getUnitTarget())
-                TagUnitMap.push_back(m_targets.getUnitTarget());
+            Unit* pUnitTarget = SelectMagnetTarget();
+            if(pUnitTarget)
+                TagUnitMap.push_back(pUnitTarget);
         }break;
         case TARGET_AREAEFFECT_PARTY:
         {
@@ -3582,6 +3600,22 @@ bool Spell::CheckTarget( Unit* target, uint32 eff, bool hitPhase )
     return true;
 }
 
+Unit* Spell::SelectMagnetTarget()
+{
+    Unit* target = m_targets.getUnitTarget();
+
+    if(target && target->HasAuraType(SPELL_AURA_SPELL_MAGNET) && !(m_spellInfo->Attributes & 0x10))
+    {
+        Aura* magnet = target->GetAurasByType(SPELL_AURA_SPELL_MAGNET).front();
+        if(Unit* caster = magnet->GetCaster())
+        {
+            target = caster;
+            m_targets.setUnitTarget(target);
+        }
+    }
+
+    return target;
+}
 
 SpellEvent::SpellEvent(Spell* spell) : BasicEvent()
 {
