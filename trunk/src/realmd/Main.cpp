@@ -106,7 +106,7 @@ int main(int argc, char **argv)
         return 1;
 
     ///- Get the list of realms for the server
-    m_realmList.GetAndAddRealms(dbstring);
+    m_realmList.Initialize(sConfig.GetIntDefault("RealmsStateUpdateDelay", 20));
     if (m_realmList.size() == 0)
     {
         sLog.outError("No valid realms specified.");

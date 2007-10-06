@@ -646,6 +646,9 @@ bool AuthSocket::_HandleRealmList()
     std::string rI = (*result)[1].GetCppString();
     delete result;
 
+    ///- Update realm list if need
+    m_realmList.UpdateIfNeed();
+
     ///- Circle through realms in the RealmList and construct the return packet (including # of user characters in each realm)
     uint8 AmountOfCharacters = 0;
 
@@ -655,15 +658,15 @@ bool AuthSocket::_HandleRealmList()
     RealmList::RealmMap::const_iterator i;
     for( i = m_realmList.begin(); i != m_realmList.end(); i++ )
     {
-        pkt << i->second->icon;                             // realm type
+        pkt << i->second.icon;                             // realm type
         pkt << (uint8) 0;                                   // if 1, then realm locked
-        pkt << i->second->color;                            // if 2, then realm is offline
+        pkt << i->second.color;                            // if 2, then realm is offline
         pkt << i->first;
-        pkt << i->second->address;
+        pkt << i->second.address;
         /// \todo Fix realm population
         pkt << (float) 0.0;                                 //this is population 0.5 = low 1.0 = medium 2.0 high     (float)(maxplayers / players)*2
         // No SQL injection. id of realm is controlled by the database.
-        result = dbRealmServer.PQuery( "SELECT `numchars` FROM `realmcharacters` WHERE `realmid` = '%d' AND `acctid`='%u'",i->second->m_ID,id);
+        result = dbRealmServer.PQuery( "SELECT `numchars` FROM `realmcharacters` WHERE `realmid` = '%d' AND `acctid`='%u'",i->second.m_ID,id);
         if( result )
         {
             Field *fields = result->Fetch();
@@ -671,7 +674,7 @@ bool AuthSocket::_HandleRealmList()
             delete result;
         }
         pkt << AmountOfCharacters;
-        pkt << i->second->timezone;
+        pkt << i->second.timezone;
         pkt << (uint8) 0x2C;                                // unk, may be realm number/id?
     }
     pkt << (uint8) 0x10;

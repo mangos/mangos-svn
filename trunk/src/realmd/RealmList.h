@@ -29,62 +29,37 @@
 /// Storage object for a realm
 struct Realm
 {
-
     std::string name;
     std::string address;
     uint8 icon;
     uint8 color;
     uint8 timezone;
     uint32 m_ID;
-
-    // Leave these db functions commented out in case we need to maintain connections
-    // to the realm db's at some point.
-    //    std::string m_dbstring;
-    //    DatabaseMysql dbRealm;
-
-                                                            //, std::string dbstring)
-    Realm (uint32 ID, const char *Name, const char *Address, uint8 Icon, uint8 Color, uint8 Timezone)
-    {
-        m_ID = ID;
-        name = Name;
-        address = Address;
-
-        icon = Icon;
-        color = Color;
-        timezone = Timezone;
-    }
-
-    /*
-          int dbinit()
-          {
-              return dbRealm.Initialize(m_dbstring.c_str());
-          }
-    */
-
-    ~Realm ()
-    {
-    }
 };
 
 /// Storage object for the list of realms on the server
 class RealmList
 {
     public:
-        typedef std::map<std::string, Realm*> RealmMap;
+        typedef std::map<std::string, Realm> RealmMap;
 
         RealmList();
-        ~RealmList();
+        ~RealmList() {}
 
-                                                            //, const char *dbstring );
-        void AddRealm( uint32 ID, const char *name, const char *address, uint32 port, uint8 icon, uint8 color, uint8 timezone);
-        void GetAndAddRealms(std::string dbstring);
+        void Initialize(uint32 updateInterval);
 
-        RealmMap::const_iterator begin() const { return _realms.begin(); }
-        RealmMap::const_iterator end() const { return _realms.end(); }
-        uint32 size() const { return _realms.size(); }
+        void UpdateIfNeed();
 
+        RealmMap::const_iterator begin() const { return m_realms.begin(); }
+        RealmMap::const_iterator end() const { return m_realms.end(); }
+        uint32 size() const { return m_realms.size(); }
     private:
-        RealmMap _realms;                                   ///< Internal map of realms
+        void UpdateRealms(bool init);
+        void UpdateRealm( uint32 ID, const char *name, const char *address, uint32 port, uint8 icon, uint8 color, uint8 timezone);
+    private:
+        RealmMap m_realms;                                  ///< Internal map of realms
+        uint32   m_UpdateInterval;
+        time_t   m_NextUpdateTime;
 };
 #endif
 /// @}

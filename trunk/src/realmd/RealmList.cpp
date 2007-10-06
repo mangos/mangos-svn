@@ -33,24 +33,57 @@ extern DatabasePostgre dbRealmServer;
 extern DatabaseMysql dbRealmServer;
 #endif
 
-RealmList::RealmList( )
+RealmList::RealmList( ) : m_UpdateInterval(0), m_NextUpdateTime(time(NULL))
 {
-}
-
-/// Destroys the internal realm map
-RealmList::~RealmList( )
-{
-    for( RealmMap::iterator i = _realms.begin(); i != _realms.end(); i++ )
-        delete i->second;
-
-    _realms.clear( );
 }
 
 /// Load the realm list from the database
-void RealmList::GetAndAddRealms(std::string dbstring)
+void RealmList::Initialize(uint32 updateInterval)
 {
+    m_UpdateInterval = updateInterval;
+
     ///- Get the content of the realmlist table in the database
-    QueryResult *result = dbRealmServer.Query( "SELECT `id`, `name`,`address`,`port`,`icon`,`color`,`timezone` FROM `realmlist` ORDER BY `name`" );
+    UpdateRealms(true);
+}
+
+void RealmList::UpdateRealm( uint32 ID, const char *name, const char *address, uint32 port, uint8 icon, uint8 color, uint8 timezone)
+{
+    ///- Create new if not exist or update existed
+    Realm& realm = m_realms[name];
+
+    realm.m_ID      = ID;
+    realm.name      = name;
+    realm.icon      = icon;
+    realm.color     = color;
+    realm.timezone  = timezone;
+
+    ///- Append port to IP address.
+    std::string addr = address ? address : "";
+    std::ostringstream ss;
+    ss << addr << ":" << port;
+    realm.address   = ss.str();
+}
+
+void RealmList::UpdateIfNeed()
+{
+    // maybe disabled or updated recently
+    if(!m_UpdateInterval || m_NextUpdateTime > time(NULL))
+        return;
+
+    m_NextUpdateTime = time(NULL) + m_UpdateInterval;
+
+    // Clears Realm list
+    m_realms.clear();
+
+    // Get the content of the realmlist table in the database
+    UpdateRealms(false);
+}
+
+void RealmList::UpdateRealms(bool init)
+{
+    sLog.outDetail("Updating Realm List...");
+
+    QueryResult *result = dbRealmServer.Query( "SELECT `id`, `name`,`address`,`port`,`icon`,`color`,`timezone` FROM `realmlist` WHERE `color` != '3' ORDER BY `name`" );
 
     ///- Circle through results and add them to the realm map
     if(result)
@@ -58,54 +91,10 @@ void RealmList::GetAndAddRealms(std::string dbstring)
         do
         {
             Field *fields = result->Fetch();
-            AddRealm(fields[0].GetUInt32(), fields[1].GetString(),fields[2].GetString(),fields[3].GetUInt32(),fields[4].GetUInt8(), fields[5].GetUInt8(), fields[6].GetUInt8());
+            UpdateRealm(fields[0].GetUInt32(), fields[1].GetString(),fields[2].GetString(),fields[3].GetUInt32(),fields[4].GetUInt8(), fields[5].GetUInt8(), fields[6].GetUInt8());
+            if(init)
+                sLog.outString("Added realm \"%s\".", fields[1].GetString());
         } while( result->NextRow() );
         delete result;
-    }
-    //if (_realms.size() == 0)
-    //{
-    //    sLog.outString( "Realm:***There are no valid realms specified in the database!  Working in localhost mode!***" );
-    //    //AddRealm("localhost","127.0.0.1",1,0,1,dbstring.c_str());
-    //    AddRealm("localhost","127.0.0.1",1,0,1);
-    //}
-    return;
-}
-
-                                                            //, const char *dbstring )
-/// Add a Realm to the realm list
-void RealmList::AddRealm( uint32 ID, const char *name, const char *address, uint32 port, uint8 icon, uint8 color, uint8 timezone)
-{
-    if( _realms.find( name ) == _realms.end() )
-    {
-                                                            //, dbstring);
-        ///- If no Realm with same name exists, create it
-        Realm *newRealm = new Realm(ID, name, address, icon, color, timezone);
-
-        //        sLog.outString("Realm \"%s\", database \"%s\"", newRealm->name.c_str(), newRealm->m_dbstring.c_str() );
-        //        if (dbstring[0] == 0) {
-        //            sLog.outError("No dbstring specified, skipping realm \"%s\".", newRealm->name);
-        //            return;
-        //        }
-        //
-        //        if(!newRealm->dbinit())
-        //        {
-        //            sLog.outError("Cannot connect to database, skipping realm");
-        //        }
-        //        else
-        //        {
-
-        ///- Append port to IP address.
-        std::string addr(address);
-
-        std::ostringstream ss;
-        ss << addr << ":" << port;
-        addr = ss.str();
-
-        newRealm->address = addr;
-
-        ///- Add the new Realm to the list
-        _realms[name] = newRealm;
-        sLog.outString("Added realm \"%s\".", newRealm->name.c_str());
-        //        }
     }
 }
