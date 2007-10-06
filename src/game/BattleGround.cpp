@@ -467,8 +467,9 @@ void BattleGround::RemovePlayer(uint64 guid, bool Transport, bool SendPacket)
         plr->RemoveBattleGroundQueueId(m_TypeID);
 
         DecreaseInvitedCount(plr->GetTeam());
-        //we should update battleground queue
-        sBattleGroundMgr.m_BattleGroundQueues[GetTypeID()].Update(GetTypeID(), GetQueueType());
+        //we should update battleground queue, but only if bg isn't ending
+        if (GetQueueType() < MAX_BATTLEGROUND_QUEUES)
+            sBattleGroundMgr.m_BattleGroundQueues[GetTypeID()].Update(GetTypeID(), GetQueueType());
 
         if(!plr->GetBattleGroundId())
             return;

@@ -180,7 +180,7 @@ void BattleGroundQueue::Update(uint32 bgTypeId, uint32 queue_id)
     for (itr = sBattleGroundMgr.BGFreeSlotQueue[bgTypeId].begin(); itr != sBattleGroundMgr.BGFreeSlotQueue[bgTypeId].end(); ++itr)
     {
         // battleground is running, so if:
-        if ((*itr)->GetQueueType() == queue_id && (*itr)->GetStatus() < STATUS_WAIT_LEAVE)
+        if ((*itr)->GetQueueType() == queue_id && (*itr)->GetStatus() > STATUS_WAIT_QUEUE && (*itr)->GetStatus() < STATUS_WAIT_LEAVE)
         {
             //we must check both teams
             BattleGround* bg = *itr; //we have to store battleground pointer here, because when battleground is full, it is removed from free queue (not yet implemented!!)
