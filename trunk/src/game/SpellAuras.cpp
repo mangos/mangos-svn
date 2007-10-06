@@ -3658,6 +3658,7 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             break;
         case FORM_DIREBEAR:
             spellId = 9635;
+            spellId2 = 21178;
             HotWSpellId = 24899;
             break;
         case FORM_CREATUREBEAR:
