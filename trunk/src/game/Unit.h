@@ -476,30 +476,30 @@ enum Mechanics
     MECHANIC_CHARM            = 1,
     MECHANIC_CONFUSED         = 2,
     MECHANIC_DISARM           = 3,
-    MECHANIC_ATTRACT          = 4,
+    MECHANIC_DISTRACT         = 4,
     MECHANIC_FEAR             = 5,
-    MECHANIC_STUPID           = 6,
+    MECHANIC_FUMBLE           = 6,
     MECHANIC_ROOT             = 7,
-    MECHANIC_PEACE            = 8,
+    MECHANIC_PACIFY           = 8,      //0 spells use this mechanic
     MECHANIC_SILENCE          = 9,
     MECHANIC_SLEEP            = 10,
-    MECHANIC_CHASE            = 11,
-    MECHANIC_STUNDED          = 12,
+    MECHANIC_SNARE            = 11,
+    MECHANIC_STUN             = 12,
     MECHANIC_FREEZE           = 13,
     MECHANIC_KNOCKOUT         = 14,
     MECHANIC_BLEED            = 15,
-    MECHANIC_HEAL             = 16,
+    MECHANIC_BANDAGE          = 16,
     MECHANIC_POLYMORPH        = 17,
     MECHANIC_BANISH           = 18,
-    MECHANIC_SHIELDED         = 19,
-    MECHANIC_DURANCED         = 20,
+    MECHANIC_SHIELD           = 19,
+    MECHANIC_SHACKLE          = 20,
     MECHANIC_MOUNT            = 21,
-    MECHANIC_PERSUADED        = 22,
-    MECHANIC_TURNED           = 23,
+    MECHANIC_PERSUADE         = 22,     //0 spells use this mechanic
+    MECHANIC_TURN             = 23,
     MECHANIC_HORROR           = 24,
     MECHANIC_INVULNERABILITY  = 25,
-    MECHANIC_INTERRUPTED      = 26,
-    MECHANIC_DAZED            = 27,
+    MECHANIC_INTERRUPT        = 26,
+    MECHANIC_DAZE             = 27,
     MECHANIC_DISCOVERY        = 28
 };
 
@@ -524,7 +524,7 @@ enum DiminishingMechanics
     DIMINISHING_MECHANIC_CHARM      = 2,                    // fear, mind control, sleep
     DIMINISHING_MECHANIC_STUN       = 3,                    // stun
     DIMINISHING_MECHANIC_ROOT       = 4,                    // roots, freeze
-    DIMINISHING_MECHANIC_SPEED      = 5                     // speed reduction
+    DIMINISHING_MECHANIC_SNARE      = 5                     // speed reduction (snares)
 };
 
 enum DiminishingLevels

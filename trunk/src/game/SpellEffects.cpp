@@ -1110,7 +1110,7 @@ void Spell::EffectApplyAura(uint32 i)
             case SPELL_AURA_MOD_ROOT:
                 mech = DIMINISHING_MECHANIC_ROOT; break;
             case SPELL_AURA_MOD_DECREASE_SPEED:
-                mech = DIMINISHING_MECHANIC_SPEED; break;
+                mech = DIMINISHING_MECHANIC_SNARE; break;
             default: break;
             }
         }
@@ -1165,7 +1165,7 @@ void Spell::EffectApplyAura(uint32 i)
                                                             //AV
             (m_spellInfo->SpellVisual == 7880 && m_spellInfo->SpellIconID == 2168))
             spellId = 25771;                                // Forbearance
-        else if (m_spellInfo->Mechanic == MECHANIC_HEAL)    // Bandages
+        else if (m_spellInfo->Mechanic == MECHANIC_BANDAGE) // Bandages
             spellId = 11196;                                // Recently Bandaged
 
         SpellEntry const *AdditionalSpellInfo = sSpellStore.LookupEntry(spellId);

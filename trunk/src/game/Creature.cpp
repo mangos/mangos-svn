@@ -1480,17 +1480,28 @@ bool Creature::IsImmunedToSpell(SpellEntry const* spellInfo) const
 {
     if (!spellInfo)
         return false;
-    if( isWorldBoss() )
-        if( (MECHANIC_FEAR      == spellInfo->Mechanic) ||
-        (MECHANIC_SLEEP     == spellInfo->Mechanic) ||
-        (MECHANIC_STUNDED   == spellInfo->Mechanic) ||
-        (MECHANIC_DAZED     == spellInfo->Mechanic) ||
-        (MECHANIC_BANISH    == spellInfo->Mechanic) ||
-        (MECHANIC_FREEZE    == spellInfo->Mechanic) ||
-        (MECHANIC_ROOT      == spellInfo->Mechanic) ||
-        (MECHANIC_CONFUSED  == spellInfo->Mechanic) ||
-        (MECHANIC_POLYMORPH == spellInfo->Mechanic) )
-            return true;
+
+    if( isWorldBoss() && (
+        (MECHANIC_CHARM         == spellInfo->Mechanic) ||
+        (MECHANIC_CONFUSED      == spellInfo->Mechanic) ||
+        (MECHANIC_DISARM        == spellInfo->Mechanic) ||
+        (MECHANIC_DISTRACT      == spellInfo->Mechanic) ||
+        (MECHANIC_FEAR          == spellInfo->Mechanic) ||
+        (MECHANIC_ROOT          == spellInfo->Mechanic) ||
+        (MECHANIC_SILENCE       == spellInfo->Mechanic) ||
+        (MECHANIC_SLEEP         == spellInfo->Mechanic) ||
+        (MECHANIC_SNARE         == spellInfo->Mechanic) ||
+        (MECHANIC_STUN          == spellInfo->Mechanic) ||
+        (MECHANIC_FREEZE        == spellInfo->Mechanic) ||
+        (MECHANIC_KNOCKOUT      == spellInfo->Mechanic) ||
+        (MECHANIC_POLYMORPH     == spellInfo->Mechanic) ||
+        (MECHANIC_BANISH        == spellInfo->Mechanic) ||
+        (MECHANIC_SHACKLE       == spellInfo->Mechanic) ||
+        (MECHANIC_TURN          == spellInfo->Mechanic) ||
+        (MECHANIC_HORROR        == spellInfo->Mechanic) ||
+        (MECHANIC_INTERRUPT     == spellInfo->Mechanic) ||
+        (MECHANIC_DAZE          == spellInfo->Mechanic) )) 
+        return true;
 
     return Unit::IsImmunedToSpell(spellInfo);
 }
