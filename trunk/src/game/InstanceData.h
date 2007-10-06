@@ -45,16 +45,6 @@ class MANGOS_DLL_SPEC InstanceData
         //When save is needed, this function generates the data
         virtual const char* Save() { return NULL; }
 
-        //All-purpose get-data
-        virtual uint32 GetData(char *type) { return 0; }
-
-        virtual Creature* GetUnit(char *identifier) = 0;
-        
-        virtual GameObject* GetGO(char *identifier) = 0;
-        
-        //Opposite to get
-        virtual void SetData(char *type, uint32 data) {}
-
         //Called every map update
         virtual void Update(uint32 diff) {}
 
