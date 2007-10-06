@@ -103,6 +103,9 @@ void Master::Run()
     ZThread::Thread t(new WorldRunnable);
     t.setPriority ((ZThread::Priority )2);
 
+    // set server online
+    loginDatabase.PExecute("UPDATE `realmlist` SET `color` = 0 WHERE `id` = '%d'",realmID);
+
     if (sConfig.GetBoolDefault("Console.Enable", 1))
     {
         ///- Launch CliRunnable thread
@@ -200,6 +203,9 @@ void Master::Run()
             delete loginDatabase.Query("SELECT 1 FROM `realmlist` LIMIT 1");
         }
     }
+
+    // set server offline
+    loginDatabase.PExecute("UPDATE `realmlist` SET `color` = 2 WHERE `id` = '%d'",realmID);
 
     ///- Remove signal handling before leaving
     _UnhookSignals();

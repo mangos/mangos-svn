@@ -475,6 +475,7 @@ pkgdata_DATA = \
 	4547_spell_affect.sql \
 	4547_spell_proc_event.sql \
 	4551_item_template.sql \
+	4556_realmlist.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -930,4 +931,5 @@ EXTRA_DIST = \
 	4547_spell_affect.sql \
 	4547_spell_proc_event.sql \
 	4551_item_template.sql \
+	4556_realmlist.sql \
 	README

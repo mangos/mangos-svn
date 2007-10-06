@@ -56,3 +56,9 @@ UseProcessors = 0
 #          0 (Normal)
 # Default: 1 (HIGH)
 ProcessPriority = 1
+
+
+# Realm list Update up delay (updated at realm list request if delay expired).
+#          0  (Disabled)
+# Default: 20 
+RealmsStateUpdateDelay = 20
