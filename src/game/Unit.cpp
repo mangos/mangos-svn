@@ -6420,14 +6420,18 @@ DiminishingMechanics Unit::Mechanic2DiminishingMechanics(uint32 mech)
     {
         case MECHANIC_CHARM: case MECHANIC_FEAR: case MECHANIC_SLEEP:
             return DIMINISHING_MECHANIC_CHARM;
+
         case MECHANIC_CONFUSED: case MECHANIC_KNOCKOUT: case MECHANIC_POLYMORPH:
             return DIMINISHING_MECHANIC_CONFUSE;
+
         case MECHANIC_ROOT: case MECHANIC_FREEZE:
             return DIMINISHING_MECHANIC_ROOT;
-        case MECHANIC_STUNDED:
+
+        case MECHANIC_STUN:
             return DIMINISHING_MECHANIC_STUN;
-        case MECHANIC_CHASE:
-            return DIMINISHING_MECHANIC_SPEED;
+
+        case MECHANIC_SNARE:
+            return DIMINISHING_MECHANIC_SNARE;
         default:
             break;
     }
