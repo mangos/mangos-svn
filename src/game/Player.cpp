@@ -2567,7 +2567,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
             (spell_id ==  7376 && m_form == FORM_DEFENSIVESTANCE) ||
             (spell_id ==  7381 && m_form == FORM_BERSERKERSTANCE) ||
             (spell_id == 21156 && m_form == FORM_BATTLESTANCE)||
-            (spell_id == 21178 && m_form == FORM_BEAR) ||
+            (spell_id == 21178 && (m_form == FORM_BEAR || m_form == FORM_DIREBEAR) ) ||
             (spell_id == 33948 && m_form == FORM_FLIGHT) ||
             (spell_id == 40121 && m_form == FORM_SWIFT_FLIGHT) )
                                                             //Check CasterAuraStates
