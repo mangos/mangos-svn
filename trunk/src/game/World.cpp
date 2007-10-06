@@ -1198,6 +1198,15 @@ void World::KickAll()
         itr->second->KickPlayer();
 }
 
+/// Kick (and save) all players with security level less `sec`
+void World::KickAllLess(AccountTypes sec)
+{
+    // session not removed at kick and will removed in next update tick
+    for (SessionMap::iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+        if(itr->second->GetSecurity() < sec)
+            itr->second->KickPlayer();
+}
+
 /// Kick (and save) the designated player
 bool World::KickPlayer(std::string playerName)
 {

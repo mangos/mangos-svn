@@ -339,7 +339,10 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     ///- Check that we do not exceed the maximum number of online players in the realm
     uint32 num = sWorld.GetSessionCount();
-    if (sWorld.GetPlayerLimit() > 0 && num >= sWorld.GetPlayerLimit() && security == SEC_PLAYER )
+    uint32 pLimit = sWorld.GetPlayerAmountLimit();
+    AccountTypes allowedAccountType = sWorld.GetPlayerSecurityLimit();
+    
+    if( pLimit > 0 && num >= pLimit || security < allowedAccountType) 
     {
         /// \todo Handle the waiting queue when the server is full
         SendAuthWaitQue(1);

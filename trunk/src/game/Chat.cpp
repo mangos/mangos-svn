@@ -324,6 +324,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "idleshutdown",SEC_ADMINISTRATOR, &ChatHandler::HandleIdleShutDownCommand,     "",   NULL },
         { "shutdown",    SEC_ADMINISTRATOR, &ChatHandler::HandleShutDownCommand,         "",   NULL },
         { "pinfo",       SEC_GAMEMASTER,    &ChatHandler::HandlePInfoCommand,            "",   NULL },
+        { "plimit",      SEC_ADMINISTRATOR, &ChatHandler::HandlePLimitCommand,           "",   NULL },
         { "visible",     SEC_MODERATOR,     &ChatHandler::HandleVisibleCommand,          "",   NULL },
         { "playsound",   SEC_MODERATOR,     &ChatHandler::HandlePlaySoundCommand,        "",   NULL },
         { "listcreature",SEC_ADMINISTRATOR, &ChatHandler::HandleListCreatureCommand,     "",   NULL },
