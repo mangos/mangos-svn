@@ -234,10 +234,12 @@ class World
         Weather* AddWeather(uint32 zone_id);
         void RemoveWeather(uint32 zone_id);
 
-        /// Get the active session server limit
-        uint32 GetPlayerLimit() const { return m_playerLimit; }
-        /// Set the active session server limit
-        void SetPlayerLimit(uint32 limit) { m_playerLimit = limit; }
+        /// Get the active session server limit (or security level limitations)
+        uint32 GetPlayerAmountLimit() const { return m_playerLimit >= 0 ? m_playerLimit : 0; }
+        AccountTypes GetPlayerSecurityLimit() const { return m_playerLimit <= 0 ? AccountTypes(-m_playerLimit) : SEC_PLAYER; }
+
+        /// Set the active session server limit (or security level limitation)
+        void SetPlayerLimit(int32 limit) { m_playerLimit = limit >= -SEC_ADMINISTRATOR ? limit : -SEC_ADMINISTRATOR; }
 
         /// \todo Actions on m_allowMovement still to be implemented
         /// Is movement allowed?
@@ -312,6 +314,7 @@ class World
 
         bool KickPlayer(std::string playerName);
         void KickAll();
+        void KickAllLess(AccountTypes sec);
         uint8 BanAccount(std::string type, std::string nameOrIP, std::string duration, std::string reason, std::string author);
         bool RemoveBanAccount(std::string type, std::string nameOrIP);
 
@@ -357,7 +360,7 @@ class World
 
         float rate_values[MAX_RATES];
         uint32 m_configs[CONFIG_VALUE_COUNT];
-        uint32 m_playerLimit;
+        int32 m_playerLimit;
         uint32 m_langid;
         void DetectDBCLang();
         bool m_allowMovement;

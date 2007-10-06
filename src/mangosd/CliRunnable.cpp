@@ -65,7 +65,7 @@ void CliWritePlayerDump(char*,pPrintf);
 void CliLoadPlayerDump(char*,pPrintf);
 void CliSave(char*,pPrintf);
 void CliSend(char*,pPrintf);
-
+void CliPLimit(char*,pPrintf);
 /// Table of known commands
 const CliCommand Commands[]=
 {
@@ -94,7 +94,8 @@ const CliCommand Commands[]=
     {"loadpdump", &CliLoadPlayerDump,"Load a player dump from a file"},
     {"saveall", &CliSave,"Save all players"},
     {"send", &CliSend,"Send message to a player"},
-    {"tele", &CliTele,"Teleport player to location"}
+    {"tele", &CliTele,"Teleport player to location"},
+    {"plimit", &CliPLimit,"Show or set player login limitations"}
 };
 /// \todo Need some pragma pack? Else explain why in a comment.
 #define CliTotalCmds sizeof(Commands)/sizeof(CliCommand)
@@ -814,6 +815,54 @@ void CliSend(char *playerN,pPrintf zprintf)
 
     //Confirmation message
     zprintf("Message '%s' sent to %s\r\n",msg , plr);
+}
+
+void CliPLimit(char *args,pPrintf zprintf)
+{
+    if(*args)
+    {
+        char* param = strtok((char*)args, " ");
+        if(!param || !*param)
+            return;
+
+        int l = strlen(param);
+
+        if(     strncmp(param,"player",l) == 0 )
+            sWorld.SetPlayerLimit(-SEC_PLAYER);
+        else if(strncmp(param,"moderator",l) == 0 )
+            sWorld.SetPlayerLimit(-SEC_MODERATOR);
+        else if(strncmp(param,"gamemaster",l) == 0 )
+            sWorld.SetPlayerLimit(-SEC_GAMEMASTER);
+        else if(strncmp(param,"administrator",l) == 0 )
+            sWorld.SetPlayerLimit(-SEC_ADMINISTRATOR);
+        else if(strncmp(param,"default",l) == 0 )
+            sWorld.SetPlayerLimit(DEFAULT_PLAYER_LIMIT);
+        else
+        {
+            int val = atoi(param);
+            if(val < -SEC_ADMINISTRATOR) val = -SEC_ADMINISTRATOR;
+
+            sWorld.SetPlayerLimit(val);
+        }
+
+        // kick all low security level players
+        if(sWorld.GetPlayerAmountLimit() > SEC_PLAYER)
+            sWorld.KickAllLess(sWorld.GetPlayerSecurityLimit());
+    }
+
+    uint32 pLimit = sWorld.GetPlayerAmountLimit();
+    AccountTypes allowedAccountType = sWorld.GetPlayerSecurityLimit();
+    char const* secName = "";
+    switch(allowedAccountType)
+    {
+    case SEC_PLAYER:        secName = "Player";        break;
+    case SEC_MODERATOR:     secName = "Moderator";     break;
+    case SEC_GAMEMASTER:    secName = "Gamemaster";    break;
+    case SEC_ADMINISTRATOR: secName = "Administrator"; break;
+    default:                secName = "<???>";         break;
+    }
+
+    zprintf("Player limits: amount %u, min. security level %s.\r\n",pLimit,secName); 
 }
 
 /// @}

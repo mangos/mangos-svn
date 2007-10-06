@@ -141,6 +141,14 @@ enum TimeConstants
     MONTH  = DAY*30
 };
 
+enum AccountTypes
+{
+    SEC_PLAYER         = 0,
+    SEC_MODERATOR      = 1,
+    SEC_GAMEMASTER     = 2,
+    SEC_ADMINISTRATOR  = 3
+};
+
 #if PLATFORM == PLATFORM_WIN32
 #  define MANGOS_DLL_SPEC __declspec(dllexport)
 #else

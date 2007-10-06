@@ -38,6 +38,7 @@
 #include "CellImpl.h"
 #include "Weather.h"
 #include "TargetedMovementGenerator.h"
+#include "SystemConfig.h"
 
 //reload commands
 bool ChatHandler::HandleReloadCommand(const char* arg)
@@ -4130,5 +4131,55 @@ bool ChatHandler::HandleMovegensCommand(const char *args)
             break;
         }
     }
+    return true;
+}
+
+bool ChatHandler::HandlePLimitCommand(const char *args)
+{
+    if(*args)
+    {
+        char* param = strtok((char*)args, " ");
+        if(!param)
+            return false;
+
+        int l = strlen(param);
+
+        if(     strncmp(param,"player",l) == 0 )
+            sWorld.SetPlayerLimit(-SEC_PLAYER);
+        else if(strncmp(param,"moderator",l) == 0 )
+            sWorld.SetPlayerLimit(-SEC_MODERATOR);
+        else if(strncmp(param,"gamemaster",l) == 0 )
+            sWorld.SetPlayerLimit(-SEC_GAMEMASTER);
+        else if(strncmp(param,"administrator",l) == 0 )
+            sWorld.SetPlayerLimit(-SEC_ADMINISTRATOR);
+        else if(strncmp(param,"default",l) == 0 )
+            sWorld.SetPlayerLimit(DEFAULT_PLAYER_LIMIT);
+        else
+        {
+            int val = atoi(param);
+            if(val < -SEC_ADMINISTRATOR) val = -SEC_ADMINISTRATOR;
+
+            sWorld.SetPlayerLimit(val);
+        }
+
+        // kick all low security level players
+        if(sWorld.GetPlayerAmountLimit() > SEC_PLAYER)
+            sWorld.KickAllLess(sWorld.GetPlayerSecurityLimit());
+    }
+
+    uint32 pLimit = sWorld.GetPlayerAmountLimit();
+    AccountTypes allowedAccountType = sWorld.GetPlayerSecurityLimit();
+    char const* secName = "";
+    switch(allowedAccountType)
+    {
+        case SEC_PLAYER:        secName = "Player";        break;
+        case SEC_MODERATOR:     secName = "Moderator";     break;
+        case SEC_GAMEMASTER:    secName = "Gamemaster";    break;
+        case SEC_ADMINISTRATOR: secName = "Administrator"; break;
+        default:                secName = "<???>";         break;
+    }
+
+    PSendSysMessage("Player limits: amount %u, min. security level %s.",pLimit,secName); 
+
     return true;
 }

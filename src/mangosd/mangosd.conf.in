@@ -127,8 +127,12 @@ ProcessPriority = 1
 #          9 (best compression) 
 Compression = 1
 
-# Maximum number of players in the world. Excluding GM's
+# Maximum number of players in the world. Excluding Mods, GM's and Admins
 # Default: 100
+#          0 (for infinite players)
+#         -1 (for Mods, GM's and Admins only)
+#         -2 (for GM's and Admins only)
+#         -3 (for Admins only)
 PlayerLimit = 100
 
 # Max level that can reached by player for expirience (in range from 1 to 255).

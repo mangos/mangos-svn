@@ -39,14 +39,6 @@ class CharacterHandler;
 
 #define CHECK_PACKET_SIZE(P,S) if((P).size() < (S)) return SizeError((P),(S));
 
-enum AccountTypes
-{
-    SEC_PLAYER         = 0,
-    SEC_MODERATOR      = 1,
-    SEC_GAMEMASTER     = 2,
-    SEC_ADMINISTRATOR  = 3
-};
-
 enum PartyOperation
 {
     PARTY_OP_INVITE = 0,
