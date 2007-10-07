@@ -109,9 +109,9 @@ void BattleGround::Update(time_t diff)
                     break;*/
                 case 1:                                     // currently in bg and was removed from bg
                     if(plr)
-                        RemovePlayer(itr->first, true, true);
+                        RemovePlayerAtLeave(itr->first, true, true);
                     else
-                        RemovePlayer(itr->first, false, false);
+                        RemovePlayerAtLeave(itr->first, false, false);
                     break;
                 case 2:                                     // revive queue
                     RemovePlayerFromResurrectQueue(itr->first);
@@ -408,7 +408,7 @@ void BattleGround::BlockMovement(Player *plr)
     plr->GetSession()->SendPacket(&data);
 }
 
-void BattleGround::RemovePlayer(uint64 guid, bool Transport, bool SendPacket)
+void BattleGround::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPacket)
 {
     // Remove from lists/maps
     std::map<uint64, BattleGroundPlayer>::iterator itr = m_Players.find(guid);
@@ -594,9 +594,9 @@ void BattleGround::AddPlayer(Player *plr)
 }
 
 /* This method should be called only once ... it adds pointer to queue */
-void BattleGround::AddToBGFreeSlotQueue() const
+void BattleGround::AddToBGFreeSlotQueue()
 {
-    sBattleGroundMgr.BGFreeSlotQueue[m_TypeID].push_front((BattleGround*) this);
+    sBattleGroundMgr.BGFreeSlotQueue[m_TypeID].push_front(this);
 }
 
 /* This method removes this battleground from free queue - it must be called when deleting battleground - not used now*/

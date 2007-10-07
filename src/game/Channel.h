@@ -93,7 +93,7 @@ class Channel
         }
         void MakeJoined(WorldPacket *data, uint64 joined) { *MakeNotifyPacket(data,JOINED) << joined; }
         void MakeLeft(WorldPacket *data, uint64 left) { *MakeNotifyPacket(data,LEFT) << left; }
-        void MakeYouJoined(WorldPacket *data, uint64 p) { *MakeNotifyPacket(data,YOUJOINED) << (uint32)channel_id << (uint32)0; }
+        void MakeYouJoined(WorldPacket *data) { *MakeNotifyPacket(data,YOUJOINED) << (uint32)channel_id << (uint32)0; }
         void MakeYouLeft(WorldPacket *data) { *MakeNotifyPacket(data,YOULEFT) << (uint32)channel_id << (uint8)1; }
         void MakeWrongPass(WorldPacket *data) { MakeNotifyPacket(data,WRONGPASS); }
         void MakeNotOn(WorldPacket *data) { MakeNotifyPacket(data,NOTON1); }

@@ -1180,7 +1180,7 @@ bool ChatHandler::HandleLearnAllCommand(const char* args)
         loop++;
     }
 
-    PSendSysMessage(LANG_COMMAND_LEARN_ALL_LANG, m_session->GetPlayer()->GetName());
+    SendSysMessage(LANG_COMMAND_LEARN_MANY_SPELLS);
 
     return true;
 }
@@ -1213,7 +1213,7 @@ bool ChatHandler::HandleLearnAllGMCommand(const char* args)
         m_session->GetPlayer()->learnSpell((uint16)spell);
     }
 
-    PSendSysMessage(LANG_LEARNING_GM_SKILLS, m_session->GetPlayer()->GetName());
+    SendSysMessage(LANG_LEARNING_GM_SKILLS);
     return true;
 }
 
@@ -1338,7 +1338,7 @@ bool ChatHandler::HandleLearnAllLangCommand(const char* args)
     for(int i = 1; i < LANGUAGES_COUNT; ++i)
         m_session->GetPlayer()->learnSpell(lang_description[i].spell_id);
 
-    PSendSysMessage(LANG_COMMAND_LEARN_ALL_LANG, m_session->GetPlayer()->GetName());
+    SendSysMessage(LANG_COMMAND_LEARN_ALL_LANG);
     return true;
 }
 
@@ -1361,7 +1361,7 @@ bool ChatHandler::HandleLearnAllCraftsCommand(const char* args)
         }
     }
 
-    PSendSysMessage(LANG_COMMAND_LEARN_ALL_CRAFT, m_session->GetPlayer()->GetName());
+    SendSysMessage(LANG_COMMAND_LEARN_ALL_CRAFT);
     return true;
 }
 
@@ -1523,8 +1523,8 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
             {
                 uint32 countForStack = pProto->Stackable - itemStack->GetCount();
                 // recheck with real item amount
-                uint8 msg = plTarget->CanStoreNewItem( itemStack->GetBagSlot(), itemStack->GetSlot(), dest, itemId, countForStack, false );
-                if( msg == EQUIP_ERR_OK )
+                uint8 msg2 = plTarget->CanStoreNewItem( itemStack->GetBagSlot(), itemStack->GetSlot(), dest, itemId, countForStack, false );
+                if( msg2 == EQUIP_ERR_OK )
                 {
                     item = plTarget->StoreNewItem( dest, itemId, countForStack, true, Item::GenerateItemRandomPropertyId(itemId));
                     countForStore-= countForStack;
@@ -3759,7 +3759,7 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
         else
             return false;
 
-        QueryResult *result = loginDatabase.PQuery("SELECT FROM_UNIXTIME(`bandate`), `unbandate`-`bandate`, `active`, `unbandate`-UNIX_TIMESTAMP(),`banreason`,`bannedby` FROM `account_banned` WHERE `id` = '%u' ORDER BY `bandate` ASC",accountid);
+        QueryResult *result = loginDatabase.PQuery("SELECT FROM_UNIXTIME(`bandate`), `unbandate`-`bandate`, `active`, `unbandate`,`banreason`,`bannedby` FROM `account_banned` WHERE `id` = '%u' ORDER BY `bandate` ASC",accountid);
         if(!result)
         {
             PSendSysMessage(LANG_BANINFO_NOACCOUNTBAN, accountname.c_str());
@@ -3769,8 +3769,10 @@ bool ChatHandler::HandleBanInfoCommand(const char* args)
         do
         {
             fields = result->Fetch();
+
+            time_t unbandate = time_t(fields[3].GetUInt64());
             bool active = false;
-            if(fields[2].GetBool() && (fields[1].GetUInt64() == (uint64)0 ||fields[3].GetUInt64() >= (uint64)0) )
+            if(fields[2].GetBool() && (fields[1].GetUInt64() == (uint64)0 ||unbandate >= time(NULL)) )
                 active = true;
             bool permanent = (fields[1].GetUInt64() == (uint64)0);
             std::string bantime = permanent?LANG_BANINFO_INFINITE:secsToTimeString(fields[1].GetUInt64(), true);
@@ -4176,7 +4178,7 @@ bool ChatHandler::HandlePLimitCommand(const char *args)
         case SEC_MODERATOR:     secName = "Moderator";     break;
         case SEC_GAMEMASTER:    secName = "Gamemaster";    break;
         case SEC_ADMINISTRATOR: secName = "Administrator"; break;
-        default:                secName = "<???>";         break;
+        default:                secName = "<unknown>";     break;
     }
 
     PSendSysMessage("Player limits: amount %u, min. security level %s.",pLimit,secName); 

@@ -92,7 +92,7 @@ class FastLock : private NonCopyable {
    * @return bool
    * @exception Synchronization_Exception - not thrown
    */
-  inline bool tryAcquire(unsigned long timeout=0) {
+  inline bool tryAcquire(unsigned long /*timeout*/=0) {
 
     return (pthread_mutex_trylock(&_mtx) == 0);
 

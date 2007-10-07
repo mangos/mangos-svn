@@ -55,7 +55,7 @@ uint32 GameEvent::NextCheck(uint16 entry)
     else                                                    // not in window, we return the delay before next start
         delay = (mGameEvent[entry].occurence * 60) - ((currenttime - mGameEvent[entry].start) % (mGameEvent[entry].occurence * 60));
     // In case the end is before next check
-    if (mGameEvent[entry].end  < currenttime + delay)
+    if (mGameEvent[entry].end  < time_t(currenttime + delay))
         return (mGameEvent[entry].end - currenttime);
     else
         return delay;
@@ -66,14 +66,16 @@ void GameEvent::LoadFromDB()
     QueryResult *result = sDatabase.Query("SELECT MAX(`entry`) FROM `game_event`");
     if( !result )
     {
-        sLog.outString(">> Table game_event is empty:");
+        sLog.outString(">> Table game_event is empty.");
         sLog.outString();
         return;
     }
-
-    Field *fields = result->Fetch();
-    max_event_id = fields[0].GetUInt16();
-    delete result;
+    else
+    {
+        Field *fields = result->Fetch();
+        max_event_id = fields[0].GetUInt16();
+        delete result;
+    }
 
     mGameEvent.resize(max_event_id + 1);
 

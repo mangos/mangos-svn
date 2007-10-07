@@ -263,7 +263,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
             }
         }
         else
-            _player->PlayerTalkClass->SendQuestGiverOfferReward( quest, guid, true, NULL, 0);
+            _player->PlayerTalkClass->SendQuestGiverOfferReward( quest, guid, true );
     }
 }
 
@@ -288,7 +288,7 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
     if( pQuest )
     {
         if ( _player->CanCompleteQuest( quest ) )
-            _player->PlayerTalkClass->SendQuestGiverOfferReward( quest, guid, true, NULL, 0);
+            _player->PlayerTalkClass->SendQuestGiverOfferReward( quest, guid, true );
     }
 }
 

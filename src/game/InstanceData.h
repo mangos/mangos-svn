@@ -32,7 +32,7 @@ class MANGOS_DLL_SPEC InstanceData
     public:
 
         InstanceData(Map *map) : instance(map) {}
-        ~InstanceData() {}
+        virtual ~InstanceData() {}
 
         Map *instance;
 
@@ -40,26 +40,26 @@ class MANGOS_DLL_SPEC InstanceData
         virtual void Initialize() {}
 
         //On load
-        virtual void Load(const char* data) {} 
+        virtual void Load(const char* /*data*/) {} 
 
         //When save is needed, this function generates the data
         virtual const char* Save() { return NULL; }
 
         //Called every map update
-        virtual void Update(uint32 diff) {}
+        virtual void Update(uint32 /*diff*/) {}
 
         //Used by the map's CanEnter function.
         //This is to prevent players from entering during boss encounters.
         virtual bool IsEncounterInProgress() const { return false; };
 
         //Called when a player successfuly enters the instance.
-        virtual void OnPlayerEnter(Player *p) {}
+        virtual void OnPlayerEnter(Player *) {}
 
         //Called when a gameobject is created
-        virtual void OnObjectCreate(GameObject *obj) {}
+        virtual void OnObjectCreate(GameObject *) {}
 
         //called on creature creation
-        virtual void OnCreatureCreate(Creature *creature, uint32 creature_entry) {}
+        virtual void OnCreatureCreate(Creature * /*creature*/, uint32 /*creature_entry*/) {}
 };
 
 #endif

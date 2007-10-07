@@ -662,7 +662,7 @@ void WorldSession::HandleAutoStoreBagItemOpcode( WorldPacket & recv_data )
     }
 }
 
-void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& recvPacket)
+void WorldSession::HandleBuyBankSlotOpcode(WorldPacket& /*recvPacket*/)
 {
     sLog.outDebug("WORLD: CMSG_BUY_BANK_SLOT");
 

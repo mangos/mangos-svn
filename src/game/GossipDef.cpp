@@ -463,7 +463,7 @@ void PlayerMenu::SendQuestQueryResponse( Quest *pQuest )
     //sLog.outDebug( "WORLD: Sent SMSG_QUEST_QUERY_RESPONSE questid=%u",pQuest->GetQuestId() );
 }
 
-void PlayerMenu::SendQuestGiverOfferReward( uint32 quest_id, uint64 npcGUID, bool EnbleNext, QEmote Emotes[], unsigned int EmoteCnt )
+void PlayerMenu::SendQuestGiverOfferReward( uint32 quest_id, uint64 npcGUID, bool EnbleNext )
 {
     Quest * qInfo = objmgr.mQuestTemplates[quest_id];
     if(!qInfo)
@@ -561,7 +561,7 @@ void PlayerMenu::SendQuestGiverRequestItems( Quest *pQuest, uint64 npcGUID, bool
     // We may wish a better check, perhaps checking the real quest requirements
     if (strlen(pQuest->GetRequestItemsText()) == 0)
     {
-        SendQuestGiverOfferReward(pQuest->GetQuestId(), npcGUID, true, NULL, 0);
+        SendQuestGiverOfferReward(pQuest->GetQuestId(), npcGUID, true);
         return;
     }
 

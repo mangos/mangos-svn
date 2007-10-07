@@ -717,8 +717,7 @@ T* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl, T *fake)
 void Map::MessageBroadcast(Player *player, WorldPacket *msg, bool to_self, bool own_team_only)
 {
     CellPair p = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
-    assert( p.x_coord >= 0 && p.x_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP &&
-        p.y_coord >= 0 && p.y_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP );
+    assert( p.x_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP && p.y_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP );
 
     Cell cell = RedZone::GetZone(p);
     cell.data.Part.reserved = ALL_DISTRICT;
@@ -800,8 +799,7 @@ void Map::Remove(Player *player, bool remove)
     }
 
     CellPair p = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
-    assert( p.x_coord >= 0 && p.x_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP &&
-        p.y_coord >= 0 && p.y_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP );
+    assert( p.x_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP && p.y_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP );
 
     Cell cell = RedZone::GetZone(p);
     uint64 mask = CalculateGridMask(cell.data.Part.grid_y);

@@ -35,12 +35,14 @@ class LinkedListElement
         LinkedListElement() { iNext = NULL; iPrev = NULL; }
         ~LinkedListElement() { delink(); }
 
-        bool hasNext() { return(iNext->iNext != NULL); }
-        bool hasPrev() { return(iPrev->iPrev != NULL); }
-        bool isInList() { return(iNext != NULL && iPrev != NULL); }
+        bool hasNext() const { return(iNext->iNext != NULL); }
+        bool hasPrev() const { return(iPrev->iPrev != NULL); }
+        bool isInList() const { return(iNext != NULL && iPrev != NULL); }
 
-        LinkedListElement* next() { return hasNext() ? iNext : NULL; }
-        LinkedListElement* prev() { return hasPrev() ? iPrev : NULL; }
+        LinkedListElement      * next()       { return hasNext() ? iNext : NULL; }
+        LinkedListElement const* next() const { return hasNext() ? iNext : NULL; }
+        LinkedListElement      * prev()       { return hasPrev() ? iPrev : NULL; }
+        LinkedListElement const* prev() const { return hasPrev() ? iPrev : NULL; }
 
         void delink()
         {
@@ -85,11 +87,13 @@ class LinkedListHead
             iSize = 0;
         }
 
-        bool isEmpty() { return(!iFirst.iNext->isInList()); }
+        bool isEmpty() const { return(!iFirst.iNext->isInList()); }
 
-        LinkedListElement* getFirst() { return(isEmpty() ? NULL : iFirst.iNext); }
+        LinkedListElement      * getFirst()       { return(isEmpty() ? NULL : iFirst.iNext); }
+        LinkedListElement const* getFirst() const { return(isEmpty() ? NULL : iFirst.iNext); }
 
-        LinkedListElement* getLast() { return(isEmpty() ? NULL : iLast.iPrev); }
+        LinkedListElement      * getLast() { return(isEmpty() ? NULL : iLast.iPrev); }
+        LinkedListElement const* getLast() const  { return(isEmpty() ? NULL : iLast.iPrev); }
 
         void insertFirst(LinkedListElement* pElem)
         {
@@ -101,12 +105,12 @@ class LinkedListHead
             iLast.insertBefore(pElem);
         }
 
-        uint32 getSize()
+        uint32 getSize() const
         {
             if(!iSize)
             {
                 uint32 result = 0;
-                LinkedListElement* e = getFirst();
+                LinkedListElement const* e = getFirst();
                 while(e)
                 {
                     ++result;

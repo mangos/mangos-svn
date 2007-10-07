@@ -147,7 +147,7 @@ public:
 	// -------------------------------------------------------------------------
 #ifdef ENABLE_POOL
 	/** Find available open connection (used by connection pool). */
-	virtual ISocketHandler::PoolSocket *FindConnection(int type,const std::string& protocol,SocketAddress&) {
+	virtual ISocketHandler::PoolSocket *FindConnection(int /*type*/,const std::string& /*protocol*/,SocketAddress&) {
 		return NULL;
 	}
 	/** Enable connection pool (by default disabled). */
@@ -208,7 +208,7 @@ public:
 	/** Queue a dns request.
 		\param host Hostname to be resolved
 		\param port Port number will be echoed in Socket::OnResolved callback */
-	virtual int Resolve(Socket *,const std::string& host,port_t port) {
+	virtual int Resolve(Socket *,const std::string& /*host*/,port_t /*port*/) {
 		return -1;
 	}
 #ifdef ENABLE_IPV6
@@ -217,7 +217,7 @@ public:
 	}
 #endif
 	/** Do a reverse dns lookup. */
-	virtual int Resolve(Socket *,ipaddr_t a) {
+	virtual int Resolve(Socket *,ipaddr_t) {
 		return -1;
 	}
 #ifdef ENABLE_IPV6

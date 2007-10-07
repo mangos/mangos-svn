@@ -88,7 +88,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
 
     if(!IsPositionValid())
     {
-        sLog.outError("ERROR: Gameobject (GUID: %u Entry: %u ) not created. Suggested coordinates isn't valid (X: %d Y: ^%d)",guidlow,name_id,x,y);
+        sLog.outError("ERROR: Gameobject (GUID: %u Entry: %u ) not created. Suggested coordinates isn't valid (X: %f Y: %f)",guidlow,name_id,x,y);
         return false;
     }
 

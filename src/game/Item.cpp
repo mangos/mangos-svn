@@ -265,7 +265,7 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult *result)
 
     if (!result)
     {
-        sLog.outError("ERROR: Item (GUID: %u owner: %u) not found in table `item_instance`, can't load. ",guid,owner_guid);
+        sLog.outError("ERROR: Item (GUID: %u owner: %u) not found in table `item_instance`, can't load. ",guid,GUID_LOPART(owner_guid));
         return false;
     }
 
@@ -548,7 +548,7 @@ void Item::RemoveFromUpdateQueueOf(Player *player)
 
 uint8 Item::GetBagSlot() const
 {
-    return m_container ? m_container->GetSlot() : INVENTORY_SLOT_BAG_0;
+    return m_container ? m_container->GetSlot() : uint8(INVENTORY_SLOT_BAG_0);
 }
 
 bool Item::IsEquipped() const
@@ -560,7 +560,7 @@ bool Item::CanBeTraded() const
 {
     if(HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_BINDED) || GetProto()->Class == ITEM_CLASS_QUEST)
         return false;
-    if(IsBag() && !((Bag*)this)->IsEmpty())
+    if(IsBag() && !((Bag const*)this)->IsEmpty())
         return false;
 
     if(Player* owner = GetOwner())
