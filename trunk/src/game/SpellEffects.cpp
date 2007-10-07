@@ -1172,7 +1172,7 @@ void Spell::EffectApplyAura(uint32 i)
         if (AdditionalSpellInfo)
         {
             Aura* AdditionalAura = new Aura(AdditionalSpellInfo, 0, &m_currentBasePoints[0], unitTarget,m_caster, 0);
-            unitTarget->AddAura(AdditionalAura, 0);
+            unitTarget->AddAura(AdditionalAura);
             sLog.outDebug("Spell: Additional Aura is: %u", AdditionalSpellInfo->EffectApplyAuraName[0]);
         }
     }
