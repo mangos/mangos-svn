@@ -3413,7 +3413,7 @@ bool ChatHandler::HandleResetSpellsCommand(const char * args)
     }
     else
     {
-        sDatabase.PExecute("UPDATE `character` SET `at_login` = `at_login` | '%u'",uint32(AT_LOGIN_RESET_SPELLS));
+        sDatabase.PExecute("UPDATE `character` SET `at_login` = `at_login` | '%u' WHERE `guid` = '%u'",uint32(AT_LOGIN_RESET_SPELLS), GUID_LOPART(playerGUID));
         PSendSysMessage(LANG_RESET_SPELLS_OFFLINE,pName);
     }
 
@@ -3455,7 +3455,7 @@ bool ChatHandler::HandleResetTalentsCommand(const char * args)
     }
     else
     {
-        sDatabase.PExecute("UPDATE `character` SET `at_login` = `at_login` | '%u'",uint32(AT_LOGIN_RESET_TALENTS));
+        sDatabase.PExecute("UPDATE `character` SET `at_login` = `at_login` | '%u' WHERE `guid` = '%u'",uint32(AT_LOGIN_RESET_TALENTS), GUID_LOPART(playerGUID) );
         PSendSysMessage(LANG_RESET_TALENTS_OFFLINE,pName);
     }
 
