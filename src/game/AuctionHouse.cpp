@@ -227,7 +227,19 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
         return;
     }
     // prevent sending bag with items (cheat: can be placed in bag after adding equiped empty bag to auction)
-    if(!it || !it->CanBeTraded())
+    if(!it)
+    {
+        SendAuctionCommandResult(0, AUCTION_SELL_ITEM, AUCTION_ITEM_NOT_FOUND);
+        return;
+    }
+
+    if(!it->CanBeTraded())
+    {
+        SendAuctionCommandResult(0, AUCTION_SELL_ITEM, AUCTION_INTERNAL_ERROR);
+        return;
+    }
+
+    if (it->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_CONJURED))
     {
         SendAuctionCommandResult(0, AUCTION_SELL_ITEM, AUCTION_INTERNAL_ERROR);
         return;
@@ -274,6 +286,8 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     objmgr.AddAItem(it);
     pl->RemoveItem( (pos >> 8),(pos & 255), true);
     it->RemoveFromUpdateQueueOf(pl);
+    it->RemoveFromWorld();
+    it->DestroyForPlayer( pl );
 
     sDatabase.BeginTransaction();
     it->DeleteFromInventoryDB();

@@ -120,16 +120,17 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     {
         item_pos = pl->GetPosByGuid(itemId);
         pItem = pl->GetItemByPos( item_pos );
-        // prevent sending bag with items (cheat: can be placed in bag after adding equiped empty bag to mail)
+        // prevent sending bag with items (cheat: can be placed in bag after adding equipped empty bag to mail)
         if(!pItem || !pItem->CanBeTraded())
         {
             pl->SendMailResult(0, 0, MAIL_ERR_INTERNAL_ERROR);
             return;
         }
-        /*if (pItem->GetUInt32Value(???) { //todo find conjured_item index to item->data array
-            pl->SendMailResult(0, 0, MAIL_ERR_CANNOT_MAIL_CONJURED_ITEM);
+        if (pItem->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_CONJURED))
+        {
+            pl->SendMailResult(0, 0, MAIL_ERR_INTERNAL_ERROR);
             return;
-        }*/
+        }
     }
     pl->SendMailResult(0, 0, MAIL_OK);
 
@@ -163,7 +164,11 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         //item reminds in item_instance table already, used it in mail now
         pl->RemoveItem( (item_pos >> 8), (item_pos & 255), true );
         pItem->RemoveFromUpdateQueueOf( pl );
-        pItem->RemoveFromWorld();
+        if(pItem->IsInWorld())
+        {
+            pItem->RemoveFromWorld();
+            pItem->DestroyForPlayer( pl );
+        }
 
         sDatabase.BeginTransaction();
         pItem->DeleteFromInventoryDB();                     //deletes item from character's inventory
