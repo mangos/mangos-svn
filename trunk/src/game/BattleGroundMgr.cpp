@@ -324,7 +324,7 @@ void BattleGroundQueue::Update(uint32 bgTypeId, uint32 queue_id)
 /***            BATTLEGROUND QUEUE EVENTS              ***/
 /*********************************************************/
 
-bool BGQueueInviteEvent::Execute(uint64 e_time, uint32 p_time)
+bool BGQueueInviteEvent::Execute(uint64 /*e_time*/, uint32 p_time)
 {
     Player* plr = objmgr.GetPlayer( m_PlayerGuid );
     if (!plr)
@@ -351,13 +351,13 @@ bool BGQueueInviteEvent::Execute(uint64 e_time, uint32 p_time)
     return true;                                        //event will be deleted
 }
 
-void BGQueueInviteEvent::Abort(uint64 e_time)
+void BGQueueInviteEvent::Abort(uint64 /*e_time*/)
 {
     //this should not be called
     sLog.outError("Battleground invite event ABORTED!");
 }
 
-bool BGQueueRemoveEvent::Execute(uint64 e_time, uint32 p_time)
+bool BGQueueRemoveEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
 {
     Player* plr = objmgr.GetPlayer( m_PlayerGuid );
     if (!plr)
@@ -389,7 +389,7 @@ bool BGQueueRemoveEvent::Execute(uint64 e_time, uint32 p_time)
     return true;
 }
 
-void BGQueueRemoveEvent::Abort(uint64 e_time)
+void BGQueueRemoveEvent::Abort(uint64 /*e_time*/)
 {
     //this should not be called
     sLog.outError("Battleground remove event ABORTED!");

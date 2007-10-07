@@ -709,9 +709,9 @@ namespace MaNGOS
         SpellTargets i_TargetType;
         Unit* i_originalCaster;
 
-        SpellNotifierCreatureAndPlayer(Spell &spell, std::list<Unit*> &data, const uint32 &i, float radius, const uint32 &type,
+        SpellNotifierCreatureAndPlayer(Spell &spell, std::list<Unit*> &data, float radius, const uint32 &type,
             SpellTargets TargetType = SPELL_TARGETS_NOT_FRIENDLY)
-            : i_data(&data), i_spell(spell), i_radius(radius), i_push_type(type), i_TargetType(TargetType)
+            : i_data(&data), i_spell(spell), i_push_type(type), i_radius(radius), i_TargetType(TargetType)
         {
             i_originalCaster = spell.GetOriginalCaster();
         }
@@ -790,16 +790,16 @@ namespace MaNGOS
         }
 
         #ifdef WIN32
-        template<> inline void Visit(CorpseMapType &m ) {}
-        template<> inline void Visit(GameObjectMapType &m ) {}
-        template<> inline void Visit(DynamicObjectMapType &m ) {}
+        template<> inline void Visit(CorpseMapType & ) {}
+        template<> inline void Visit(GameObjectMapType & ) {}
+        template<> inline void Visit(DynamicObjectMapType & ) {}
         #endif
     };
 
     #ifndef WIN32
-    template<> inline void SpellNotifierCreatureAndPlayer::Visit(CorpseMapType &m ) {}
-    template<> inline void SpellNotifierCreatureAndPlayer::Visit(GameObjectMapType &m ) {}
-    template<> inline void SpellNotifierCreatureAndPlayer::Visit(DynamicObjectMapType &m ) {}
+    template<> inline void SpellNotifierCreatureAndPlayer::Visit(CorpseMapType& ) {}
+    template<> inline void SpellNotifierCreatureAndPlayer::Visit(GameObjectMapType& ) {}
+    template<> inline void SpellNotifierCreatureAndPlayer::Visit(DynamicObjectMapType& ) {}
     #endif
 }
 

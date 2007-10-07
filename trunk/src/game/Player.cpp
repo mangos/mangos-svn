@@ -14891,7 +14891,7 @@ void Player::LeaveBattleground()
     BattleGround *bg = sBattleGroundMgr.GetBattleGround(GetBattleGroundId());
     if(bg)
     {
-        bg->RemovePlayer(GetGUID(), true, true);
+        bg->RemovePlayerAtLeave(GetGUID(), true, true);
 
         if(bg->GetStatus() == STATUS_IN_PROGRESS)
             CastSpell(this, 26013, true);                   // Deserter

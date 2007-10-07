@@ -310,10 +310,10 @@ void WorldSession::HandleBattleGroundPlayerPortOpcode( WorldPacket &recv_data )
                     // check if player is not deserter
                     if( !_player->CanJoinToBattleground() )
                     {
-                        WorldPacket data;
-                        data.Initialize(SMSG_GROUP_JOINED_BATTLEGROUND, 4);
-                        data << (uint32) 0xFFFFFFFE;
-                        SendPacket(&data);
+                        WorldPacket data2;
+                        data2.Initialize(SMSG_GROUP_JOINED_BATTLEGROUND, 4);
+                        data2 << (uint32) 0xFFFFFFFE;
+                        SendPacket(&data2);
                         return;
                     }
                     _player->SetBattleGroundId(bg->GetTypeID());
@@ -374,12 +374,12 @@ void WorldSession::HandleBattlefieldStatusOpcode( WorldPacket & /*recv_data*/ )
                 uint32 queue_id = _player->GetBattleGroundQueueId(i);
                 if (i == queueSlot || !queue_id)
                     continue;
-                BattleGround *bg = sBattleGroundMgr.GetBattleGround(queue_id);
-                if(bg)
+                BattleGround *bg2 = sBattleGroundMgr.GetBattleGround(queue_id);
+                if(bg2)
                 {
                     //in this call is small bug, this call should be filled by player's waiting time in queue
                     //this call nulls all timers for client : 
-                    sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, _player->GetTeam(), i, STATUS_WAIT_QUEUE, 0, 0);
+                    sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg2, _player->GetTeam(), i, STATUS_WAIT_QUEUE, 0, 0);
                     SendPacket(&data);
                 }
             }

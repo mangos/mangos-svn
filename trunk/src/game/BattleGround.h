@@ -189,7 +189,7 @@ class BattleGround
         void SetLevelRange(uint32 min, uint32 max) { m_LevelMin = min; m_LevelMax = max; }
         void SetRated(bool state)           { m_IsRated = state; }
         void SetArenaType(uint8 type)       { m_ArenaType = type; }
-        void SetArenaorBGType(bool isArena) { m_IsArena = isArena; }
+        void SetArenaorBGType(bool _isArena) { m_IsArena = _isArena; }
         void SetWinner(uint8 winner) { m_Winner = winner; }
 
         void ModifyStartDelayTime(int diff) { m_startDelay -= diff; }
@@ -198,7 +198,7 @@ class BattleGround
         void SetMaxPlayersPerTeam(uint32 MaxPlayers) { m_MaxPlayersPerTeam = MaxPlayers; }
         void SetMinPlayersPerTeam(uint32 MinPlayers) { m_MinPlayersPerTeam = MinPlayers; }
 
-        void AddToBGFreeSlotQueue() const;                      //this queue will be useful when more battlegrounds instances will be available
+        void AddToBGFreeSlotQueue();                            //this queue will be useful when more battlegrounds instances will be available
         void RemoveFromBGFreeSlotQueue();                       //this method could delete whole BG instance, if another free is available
 
         void DecreaseInvitedCount(uint32 team)      { (team == ALLIANCE) ? m_InvitedAlliance-- : m_InvitedHorde--; }
@@ -296,18 +296,19 @@ class BattleGround
         // must be implemented in BG subclass if need
         virtual void HandleDropFlag(Player* /*player*/) {}
 
-        virtual void AddPlayer(Player *plr);                    // must be implemented in BG subclass
-        virtual void RemovePlayer(uint64 guid, bool Transport, bool SendPacket);   // must be implemented in BG subclass
+        virtual void AddPlayer(Player *plr);                // must be implemented in BG subclass
+        virtual void RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPacket);
+                                                            // can be extended in in BG subclass
 
     protected:
         /* Scorekeeping */
-        std::map<uint64, BattleGroundScore*> m_PlayerScores; // Player scores
+        std::map<uint64, BattleGroundScore*> m_PlayerScores;// Player scores
         // must be implemented in BG subclass
         virtual void RemovePlayer(Player * /*player*/, uint64 /*guid*/) {}
 
-        virtual void _SendCurrentGameState(Player *plr) {}
+        virtual void _SendCurrentGameState(Player * /*plr*/) {}
 
-        /* Player lists, those need to be accessable by inherited classes */
+        /* Player lists, those need to be accessible by inherited classes */
         std::map<uint64, BattleGroundPlayer> m_Players;
         std::map<uint64, std::vector<uint64> > m_ReviveQueue;// Spirit Guide guid + Player list GUIDS
 
@@ -322,9 +323,9 @@ class BattleGround
         uint32 m_Queue_type;
         uint8  m_ArenaType;                                 // 2=2v2, 3=3v3, 5=5v5
         // this variable is not used .... it can be found in many other ways... but to store it in BG object instance is useless
-        //uint8  m_BattleGroundType;                          // 3=BG, 4=arena
+        //uint8  m_BattleGroundType;                        // 3=BG, 4=arena
         //instead of uint8 (in previous line) is bool used
-        bool m_IsArena;
+        bool   m_IsArena;
         uint8  m_Winner;                                    // 0=alliance, 1=horde, 2=none
         int32  m_startDelay;
         bool   m_doorsSpawned;
@@ -332,7 +333,7 @@ class BattleGround
         char const *m_Name;
 
         /* Player lists */
-        std::vector<uint64> m_ResurrectQueue;                // Player GUID
+        std::vector<uint64> m_ResurrectQueue;               // Player GUID
         std::map<uint64, uint8> m_RemovedPlayers;           // uint8 is remove type (0 - bgqueue, 1 - bg, 2 - resurrect queue)
 
         /* Invited counters are useful for player invitation to BG - do not allow, if BG is started to one faction to have 2 more players than another faction */

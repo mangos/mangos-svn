@@ -35,8 +35,7 @@ namespace MaNGOS
     // count functions
     template<class SPECIFIC_TYPE> size_t Count(const ContainerMapList<SPECIFIC_TYPE> &elements, SPECIFIC_TYPE* /*fake*/)
     {
-        //return elements._element.size();
-        return ((ContainerMapList<SPECIFIC_TYPE>*)&elements)->_element.getSize();
+        return elements._element.getSize();
     };
 
     template<class SPECIFIC_TYPE> size_t Count(const ContainerMapList<TypeNull> &/*elements*/, SPECIFIC_TYPE* /*fake*/)
@@ -112,7 +111,7 @@ namespace MaNGOS
     }
 
     // non-const insert functions
-    template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Insert(ContainerMapList<SPECIFIC_TYPE> &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
+    template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Insert(ContainerMapList<SPECIFIC_TYPE> &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE /*hdl*/)
     {
         //elements._element[hdl] = obj;
         obj->GetGridRef().link(&elements._element, obj);
@@ -138,7 +137,7 @@ namespace MaNGOS
     }
 
     // non-const remove method
-    template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Remove(ContainerMapList<SPECIFIC_TYPE> &elements, SPECIFIC_TYPE *obj, OBJECT_HANDLE hdl)
+    template<class SPECIFIC_TYPE> SPECIFIC_TYPE* Remove(ContainerMapList<SPECIFIC_TYPE> & /*elements*/, SPECIFIC_TYPE *obj, OBJECT_HANDLE /*hdl*/)
     {
         /*typename std::map<OBJECT_HANDLE, SPECIFIC_TYPE *>::iterator iter = elements._element.find(hdl);
         if( iter != elements._element.end() )

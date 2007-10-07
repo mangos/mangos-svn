@@ -74,7 +74,7 @@ void Channel::Join(uint64 p, const char *pass)
         data.clear();
         players[p] = pinfo;
 
-        MakeYouJoined(&data,p);
+        MakeYouJoined(&data);
         SendToOne(&data,p);
 
         // if no owner first logged will become

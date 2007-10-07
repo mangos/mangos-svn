@@ -126,7 +126,7 @@ QueryResult* SqlQueryHolder::GetResult(size_t index)
         /// the query strings are freed on the first GetResult or in the destructor
         if(m_queries[index].first != NULL)
         {
-            free((void*)m_queries[index].first);
+            free((void*)(const_cast<char*>(m_queries[index].first)));
             m_queries[index].first = NULL;
         }
         /// when you get a result aways remember to delete it!
@@ -151,7 +151,7 @@ SqlQueryHolder::~SqlQueryHolder()
         /// results used already (getresult called) are expected to be deleted
         if(m_queries[i].first != NULL)
         {
-            free((void*)m_queries[i].first);
+            free((void*)(const_cast<char*>(m_queries[i].first)));
             if(m_queries[i].second)
                 delete m_queries[i].second;
         }
@@ -174,7 +174,7 @@ void SqlQueryHolderEx::Execute(Database *db)
     for(size_t i = 0; i < queries.size(); i++)
     {
         /// execute all queries in the holder and pass the results
-        char *sql = (char*)queries[i].first;
+        char const *sql = queries[i].first;
         if(sql) m_holder->SetResult(i, db->Query(sql));
     }
 

@@ -231,10 +231,10 @@ void BattleGroundAB::AddPlayer(Player *plr)
     m_PlayerScores[plr->GetGUID()] = sc;
 }
 
-void BattleGroundAB::RemovePlayer(Player *plr, uint64 guid)
+void BattleGroundAB::RemovePlayer(Player * /*plr*/, uint64 /*guid*/)
 {
 
-    if(!GetPlayersSize())
+    if(GetPlayersSize()==0)
     {
         sLog.outDebug("Arathi Basin: BG ended, objects despawning...");
 
@@ -426,10 +426,10 @@ void BattleGroundAB::_SendNodeUpdate(uint8 node)
 
     // How many bases each team owns
     uint8 ally = 0, horde = 0;
-    for (uint8 node = 0; node < 5; ++node)
-        if (m_Nodes[node] == 3)
+    for (uint8 i = 0; i < 5; ++i)
+        if (m_Nodes[i] == 3)
             ++ally;
-        else if (m_Nodes[node] == 4)
+        else if (m_Nodes[i] == 4)
             ++horde;
 
     UpdateWorldState(BG_AB_OP_OCCUPIED_BASES_ALLY, ally);

@@ -435,7 +435,7 @@ void Guild::ChangeRank(uint64 guid, uint32 newRank)
     else
         Player::SetUInt32ValueInDB(PLAYER_GUILDRANK, newRank, guid);
 
-    sDatabase.PExecute( "UPDATE `guild_member` SET `rank`='%u' WHERE `guid`='%u'", newRank, guid );
+    sDatabase.PExecute( "UPDATE `guild_member` SET `rank`='%u' WHERE `guid`='%u'", newRank, GUID_LOPART(guid) );
 }
 
 void Guild::SetPNOTE(uint64 guid,std::string pnote)
@@ -523,7 +523,7 @@ void Guild::BroadcastPacket(WorldPacket *packet)
     }
 }
 
-void Guild::CreateRank(std::string name,uint32 rights)
+void Guild::CreateRank(std::string name_,uint32 rights)
 {
     if(m_ranks.size() >= GUILD_MAXRANKS)
         return;
@@ -539,16 +539,16 @@ void Guild::CreateRank(std::string name,uint32 rights)
     else
         rank = 0;
 
-    AddRank(name,rights);
+    AddRank(name_,rights);
 
     // name now can be used for encoding to DB
-    sDatabase.escape_string(name);
-    sDatabase.PExecute( "INSERT INTO `guild_rank` (`guildid`,`rid`,`rname`,`rights`) VALUES ('%u', '%u', '%s', '%u')", Id, (rank+1), name.c_str(), rights );
+    sDatabase.escape_string(name_);
+    sDatabase.PExecute( "INSERT INTO `guild_rank` (`guildid`,`rid`,`rname`,`rights`) VALUES ('%u', '%u', '%s', '%u')", Id, (rank+1), name_.c_str(), rights );
 }
 
-void Guild::AddRank(std::string name,uint32 rights)
+void Guild::AddRank(std::string name_,uint32 rights)
 {
-    m_ranks.push_back(RankInfo(name,rights));
+    m_ranks.push_back(RankInfo(name_,rights));
 }
 
 void Guild::DelRank()
@@ -578,16 +578,16 @@ uint32 Guild::GetRankRights(uint32 rankId)
     return m_ranks[rankId].rights;
 }
 
-void Guild::SetRankName(uint32 rankId, std::string name)
+void Guild::SetRankName(uint32 rankId, std::string name_)
 {
     if(rankId >= m_ranks.size())
         return;
 
-    m_ranks[rankId].name = name;
+    m_ranks[rankId].name = name_;
 
     // name now can be used for encoding to DB
-    sDatabase.escape_string(name);
-    sDatabase.PExecute("UPDATE `guild_rank` SET `rname`='%s' WHERE `rid`='%u' AND `guildid`='%u'", name.c_str(), (rankId+1), Id);
+    sDatabase.escape_string(name_);
+    sDatabase.PExecute("UPDATE `guild_rank` SET `rname`='%s' WHERE `rid`='%u' AND `guildid`='%u'", name_.c_str(), (rankId+1), Id);
 }
 
 void Guild::SetRankRights(uint32 rankId, uint32 rights)
@@ -617,8 +617,8 @@ void Guild::Disband()
         i++;
     }
 
-    for(uint32 i=0; i<count; i++)
-        this->DelMember(memberGuids[i], true);
+    for(uint32 j=0; j<count; j++)
+        this->DelMember(memberGuids[j], true);
     delete[] memberGuids;
 
     sDatabase.BeginTransaction();

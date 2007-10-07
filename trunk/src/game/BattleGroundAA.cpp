@@ -44,19 +44,16 @@ void BattleGroundAA::AddPlayer(Player *plr)
     m_PlayerScores[plr->GetGUID()] = sc;
 }
 
-void BattleGroundAA::RemovePlayer(Player *plr, uint64 guid)
+void BattleGroundAA::RemovePlayer(Player * /*plr*/, uint64 /*guid*/)
 {
-
 }
 
-void BattleGroundAA::HandleKillPlayer(Player *player, Player *killer)
+void BattleGroundAA::HandleKillPlayer(Player * /*player*/, Player * /*killer*/)
 {
-
 }
 
-void BattleGroundAA::HandleAreaTrigger(Player *Source, uint32 Trigger)
+void BattleGroundAA::HandleAreaTrigger(Player * /*Source*/, uint32 /*Trigger*/)
 {
-
 }
 
 bool BattleGroundAA::SetupBattleGround()

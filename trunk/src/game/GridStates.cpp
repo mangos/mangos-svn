@@ -56,7 +56,7 @@ IdleState::Update(Map &m, NGridType &grid, GridInfo &info, const uint32 &x, cons
 }
 
 void
-RemovalState::Update(Map &m, NGridType &grid, GridInfo &info, const uint32 &x, const uint32 &y, const uint32 &t_diff) const
+RemovalState::Update(Map &m, NGridType &/*grid*/, GridInfo &info, const uint32 &x, const uint32 &y, const uint32 &t_diff) const
 {
     if(info.i_unloadflag)
     {

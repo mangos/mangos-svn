@@ -150,13 +150,13 @@ const uint32 BG_AB_SpiritGuideTeamId[2] = { ALLIANCE, HORDE };
 struct BG_AB_BuffObjectInfo
 {
     GameObject  *object;
-    int32       timer;
+    uint32      timer;
     uint32      spellId;
 };
 
 struct BG_AB_BannerTimer
 {
-    int32       timer;
+    uint32      timer;
     uint8       type;
     uint8       teamIndex;
 };
@@ -177,6 +177,7 @@ class BattleGroundAB : public BattleGround
     public:
         BattleGroundAB();
         ~BattleGroundAB();
+
         void Update(time_t diff);
         void AddPlayer(Player *plr);
         void RemovePlayer(Player *plr,uint64 guid);

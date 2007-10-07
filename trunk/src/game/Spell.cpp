@@ -606,7 +606,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                 cell.data.Part.reserved = ALL_DISTRICT;
                 cell.SetNoCreate();
 
-                MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, i, radius, PUSH_DEST_CENTER,SPELL_TARGETS_AOE_DAMAGE);
+                MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, radius, PUSH_DEST_CENTER,SPELL_TARGETS_AOE_DAMAGE);
 
                 TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > world_object_notifier(notifier);
                 TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer >  grid_object_notifier(notifier);
@@ -666,7 +666,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             cell.data.Part.reserved = ALL_DISTRICT;
             cell.SetNoCreate();
 
-            MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, i, radius, PUSH_SELF_CENTER,SPELL_TARGETS_AOE_DAMAGE);
+            MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, radius, PUSH_SELF_CENTER,SPELL_TARGETS_AOE_DAMAGE);
 
             TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > world_object_notifier(notifier);
             TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer >  grid_object_notifier(notifier);
@@ -687,7 +687,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             cell.data.Part.reserved = ALL_DISTRICT;
             cell.SetNoCreate();
 
-            MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, i, radius, PUSH_IN_FRONT,SPELL_TARGETS_AOE_DAMAGE);
+            MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, radius, PUSH_IN_FRONT,SPELL_TARGETS_AOE_DAMAGE);
 
             TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > world_object_notifier(notifier);
             TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer >  grid_object_notifier(notifier);
@@ -738,7 +738,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                 cell.data.Part.reserved = ALL_DISTRICT;
                 cell.SetNoCreate();
 
-                MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, i, radius, PUSH_DEST_CENTER,SPELL_TARGETS_AOE_DAMAGE);
+                MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, radius, PUSH_DEST_CENTER,SPELL_TARGETS_AOE_DAMAGE);
 
                 TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > world_object_notifier(notifier);
                 TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer >  grid_object_notifier(notifier);
@@ -819,7 +819,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                 cell.data.Part.reserved = ALL_DISTRICT;
                 cell.SetNoCreate();
 
-                MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, i, radius, PUSH_SELF_CENTER, SPELL_TARGETS_FRIENDLY);
+                MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_FRIENDLY);
 
                 TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > world_object_notifier(notifier);
                 TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer >  grid_object_notifier(notifier);
@@ -1275,12 +1275,13 @@ uint64 Spell::handle_delayed(uint64 t_offset)
     {
         for(SpellTargetTimeMap::iterator itr = m_unitsHitList[j].begin(); itr != m_unitsHitList[j].end() && itr->first <= t_offset; )
         {
+            SpellTargetTimeMap::iterator itr2 = itr;
+            ++itr;
+
             // check m_caster->GetGUID() let load auras at login and speedup most often case
-            Unit* unit = m_caster->GetGUID()==itr->second ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,itr->second);
+            Unit* unit = m_caster->GetGUID()==itr2->second ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,itr2->second);
             if(!unit || !CheckTarget(unit, j, true ))
-                itr = m_unitsHitList[j].erase(itr);
-            else
-                ++itr;
+                m_unitsHitList[j].erase(itr2);
         }
 
     }
