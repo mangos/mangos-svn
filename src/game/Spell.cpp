@@ -1273,8 +1273,7 @@ uint64 Spell::handle_delayed(uint64 t_offset)
     // now recheck units targeting correctness (need before any effects apply to prevent adding immunity at first effect not allow apply seconf spell effect and similar cases)
     for(uint32 j = 0;j<3;j++)
     {
-        SpellTargetTimeMap::iterator itr;
-        while (((itr = m_unitsHitList[j].begin()) != m_unitsHitList[j].end()) && (itr->first <= t_offset))
+        for(SpellTargetTimeMap::iterator itr = m_unitsHitList[j].begin(); itr != m_unitsHitList[j].end() && itr->first <= t_offset; )
         {
             // check m_caster->GetGUID() let load auras at login and speedup most often case
             Unit* unit = m_caster->GetGUID()==itr->second ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,itr->second);
