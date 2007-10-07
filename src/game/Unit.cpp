@@ -2975,7 +2975,7 @@ long Unit::GetTotalAuraModifier(uint32 ModifierID) const
     return modifier;
 }
 
-bool Unit::AddAura(Aura *Aur, bool uniq)
+bool Unit::AddAura(Aura *Aur)
 {
     // ghost spell check, allow apply any auras at player loading in ghost mode (will be cleanup after load)
     if( !isAlive() && Aur->GetSpellProto()->Id != 20584 && Aur->GetSpellProto()->Id != 8326 && Aur->GetSpellProto()->Id != 2584 &&

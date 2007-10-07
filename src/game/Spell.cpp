@@ -1219,6 +1219,21 @@ void Spell::handle_immediate()
     // process immediate effects (items, ground, etc.) also initialize some variables
     _handle_immediate_phase();
 
+    // now recheck units targeting correctness (need before any effects apply to prevent adding immunity at first effect not allow apply seconf spell effect and similar cases)
+    for(uint32 j = 0;j<3;j++)
+    {
+        for (std::list<uint64>::iterator itr = m_targetUnitGUIDs[j].begin(); itr != m_targetUnitGUIDs[j].end();)
+        {
+            // check m_caster->GetGUID() let load auras at login and speedup most often case
+            Unit* unit = m_caster->GetGUID()==*itr ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,*itr);
+            if(!unit || !CheckTarget(unit, j, true ))
+                itr = m_targetUnitGUIDs[j].erase(itr);
+            else
+                ++itr;
+        }
+
+    }
+
     std::set<uint64> reflectTargets;
 
     // now process units and gameobjects, executing them one by one (also create list for reflection if needed)
@@ -1255,8 +1270,23 @@ uint64 Spell::handle_delayed(uint64 t_offset)
         m_immediateHandled = true;
     }
 
+    // now recheck units targeting correctness (need before any effects apply to prevent adding immunity at first effect not allow apply seconf spell effect and similar cases)
+    for(uint32 j = 0;j<3;j++)
+    {
+        SpellTargetTimeMap::iterator itr;
+        while (((itr = m_unitsHitList[j].begin()) != m_unitsHitList[j].end()) && (itr->first <= t_offset))
+        {
+            // check m_caster->GetGUID() let load auras at login and speedup most often case
+            Unit* unit = m_caster->GetGUID()==itr->second ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,itr->second);
+            if(!unit || !CheckTarget(unit, j, true ))
+                itr = m_unitsHitList[j].erase(itr);
+            else
+                ++itr;
+        }
+
+    }
+
     std::set<uint64> reflectTargets;
-    SpellTargetTimeMap::iterator itr;
 
     // now process units and gameobjects, executing them one by one (also create list for reflection if needed)
     for(uint32 j = 0;j<3;j++)
@@ -1264,6 +1294,7 @@ uint64 Spell::handle_delayed(uint64 t_offset)
         if ((m_spellInfo->Effect[j]==0) || (m_spellInfo->Effect[j] == SPELL_EFFECT_SEND_EVENT))
             continue;
 
+        SpellTargetTimeMap::iterator itr;
         while (((itr = m_unitsHitList[j].begin()) != m_unitsHitList[j].end()) && (itr->first <= t_offset))
         {
             _handle_unit_phase(itr->second, j, &reflectTargets);
@@ -1363,7 +1394,7 @@ void Spell::_handle_unit_phase(const uint64 targetGUID, const uint32 effectNumbe
 {
     // check m_caster->GetGUID() let load auras at login and speedup most often case
     Unit* unit = m_caster->GetGUID()==targetGUID ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,targetGUID);
-    if(unit && CheckTarget(unit, effectNumber, true ))
+    if(unit)
     {
         HandleEffects(unit,NULL,NULL,effectNumber,m_damageMultipliers[effectNumber]);
 

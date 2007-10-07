@@ -977,7 +977,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         CharmInfo* GetCharmInfo() { return m_charmInfo; }
         CharmInfo* InitCharmInfo(Unit* charm);
 
-        bool AddAura(Aura *aur, bool uniq = false);
+        bool AddAura(Aura *aur);
 
         void RemoveFirstAuraByDispel(uint32 dispel_type, Unit *pCaster);
         void RemoveAura(AuraMap::iterator &i, bool onDeath = false);
