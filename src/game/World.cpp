@@ -89,7 +89,6 @@ struct ScriptAction
 #define SCRIPT_COMMAND_FLAG_SET              4
 #define SCRIPT_COMMAND_FLAG_REMOVE           5
 #define SCRIPT_COMMAND_TELEPORT_TO           6
-#define SCRIPT_COMMAND_SUMMON_GAMEOBJECT     9
 #define SCRIPT_COMMAND_TEMP_SUMMON_CREATURE 10
 #define SCRIPT_COMMAND_OPEN_DOOR            11
 
@@ -1103,56 +1102,6 @@ void World::ScriptsProcess()
                 Player* pSource = target && target->GetTypeId() == TYPEID_PLAYER ? (Player*)target : (Player*)source;
 
                 pSource->TeleportTo(step.script->datalong, step.script->x, step.script->y, step.script->z, step.script->o);
-                break;
-            }
-
-            case SCRIPT_COMMAND_SUMMON_GAMEOBJECT:
-            {
-                if(!step.script->datalong)                  // gameobject not specified
-                {
-                    sLog.outError("SCRIPT_COMMAND_SUMMON_GAMEOBJECT call for NULL gameobject.");
-                    break;
-                }
-
-                if(!source)
-                {
-                    sLog.outError("SCRIPT_COMMAND_SUMMON_GAMEOBJECT call for NULL unit.");
-                    break;
-                }
-
-                if(!source->isType(TYPE_UNIT))              // must be any Unit (creature or player)
-                {
-                    sLog.outError("SCRIPT_COMMAND_SUMMON_GAMEOBJECT call for non-unit (TypeId: %u), skipping.",source->GetTypeId());
-                    break;
-                }
-
-                Unit* pSummoner = (Unit*)source;
-
-                float x = step.script->x;
-                float y = step.script->y;
-                float z = step.script->z;
-                float o = step.script->o;
-
-                GameObject* pGameObj = new GameObject( pSummoner );
-                if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), step.script->datalong, pSummoner->GetMapId(),
-                                                    x, y, z, o, 0, 0, 0, 0, 100, 0))
-                {
-                    delete pGameObj;
-                    sLog.outError("SCRIPT_COMMAND_SUMMON_GAMEOBJECT failed for gameobject (entry: %u).",step.script->datalong);
-                    break;
-                }
-
-                // set loot only for chest
-                if(pGameObj->GetGoType() == GAMEOBJECT_TYPE_CHEST)
-                    pGameObj->lootid = pGameObj->GetEntry();
-
-                pGameObj->SetRespawnTime(step.script->datalong2/1000);
-
-                // make dropped flag clickable for other players (not set owner guid (created by) for this)...
-                if(pGameObj->GetGoType() != GAMEOBJECT_TYPE_FLAGDROP)
-                    pSummoner->AddGameObject(pGameObj);
-
-                MapManager::Instance().GetMap(pGameObj->GetMapId(), pGameObj)->Add(pGameObj);
                 break;
             }
 
