@@ -1164,20 +1164,21 @@ void World::ScriptsProcess()
                     break;
                 }
 
+                Unit* caster = (Unit*)source;
+
                 GameObject *door = NULL;
                 int32 time_to_close = step.script->datalong2<5 ? 5 : (int32)step.script->datalong2;
-                float max_range = 1.7e+38;
 
-                CellPair p(MaNGOS::ComputeCellPair(((Unit*)source)->GetPositionX(), ((Unit*)source)->GetPositionY()));
+                CellPair p(MaNGOS::ComputeCellPair(caster->GetPositionX(), caster->GetPositionY()));
                 Cell cell = RedZone::GetZone(p);
                 cell.data.Part.reserved = ALL_DISTRICT;
 
-                MaNGOS::NearestGameObjectEntryInObjectRangeCheck go_check(*((Unit*)source),step.script->datalong,max_range);
-                MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck> checker(door,go_check);
+                MaNGOS::GameObjectWithDbGUIDCheck go_check(*caster,step.script->datalong);
+                MaNGOS::GameObjectSearcher<MaNGOS::GameObjectWithDbGUIDCheck> checker(door,go_check);
 
-                TypeContainerVisitor<MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck>, GridTypeMapContainer > object_checker(checker);
+                TypeContainerVisitor<MaNGOS::GameObjectSearcher<MaNGOS::GameObjectWithDbGUIDCheck>, GridTypeMapContainer > object_checker(checker);
                 CellLock<GridReadGuard> cell_lock(cell, p);
-                cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(((Unit*)source)->GetMapId(), (Unit*)source));
+                cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(caster->GetMapId(), (Unit*)source));
 
                 if ( !door )
                 {
