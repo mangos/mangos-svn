@@ -342,7 +342,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     uint32 pLimit = sWorld.GetPlayerAmountLimit();
     AccountTypes allowedAccountType = sWorld.GetPlayerSecurityLimit();
     
-    if( pLimit > 0 && num >= pLimit || security < allowedAccountType) 
+    if( pLimit > 0 && num >= pLimit && security == SEC_PLAYER || security < allowedAccountType) 
     {
         /// \todo Handle the waiting queue when the server is full
         SendAuthWaitQue(1);
