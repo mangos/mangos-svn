@@ -11588,7 +11588,9 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
                         }
                         if ( CanCompleteQuest( questid ) )
                             CompleteQuest( questid );
-                        return;
+                        
+                        // same objective target can be in many active quests, but not in 2 objectives for single quest (code optimization).
+                        continue;
                     }
                 }
             }
@@ -11650,7 +11652,9 @@ void Player::CastedCreatureOrGO( uint32 entry, uint64 guid, uint32 spell_id )
                         }
                         if ( CanCompleteQuest( questid ) )
                             CompleteQuest( questid );
-                        return;
+
+                        // same objective target can be in many active quests, but not in 2 objectives for single quest (code optimization).
+                        continue;
                     }
                 }
             }
@@ -11700,7 +11704,9 @@ void Player::TalkedToCreature( uint32 entry, uint64 guid )
                         }
                         if ( CanCompleteQuest( questid ) )
                             CompleteQuest( questid );
-                        return;
+
+                        // same objective target can be in many active quests, but not in 2 objectives for single quest (code optimization).
+                        continue;
                     }
                 }
             }
