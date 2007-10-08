@@ -3550,6 +3550,8 @@ void Spell::EffectCharge(uint32 i)
         ((Creature *)unitTarget)->StopMoving();
 
     m_caster->SendMonsterMove(x, y, z, 0, true,1);
+    if(m_caster->GetTypeId() != TYPEID_PLAYER)
+        MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster)->CreatureRelocation((Creature*)m_caster,x,y,z,m_caster->GetOrientation());
 
     m_caster->Attack(unitTarget,true);
 }

@@ -1802,7 +1802,9 @@ void Aura::HandleModPossess(bool apply, bool Real)
             if(m_target->GetTypeId() == TYPEID_UNIT)
             {
                 ((Creature*)m_target)->AIM_Initialize();
-                ((Creature*)m_target)->Attack(caster);
+
+                if (((Creature*)m_target)->AI())
+                    ((Creature*)m_target)->AI()->AttackStart(caster);
             }
         }
         if(caster->GetTypeId() == TYPEID_PLAYER)
@@ -1948,7 +1950,8 @@ void Aura::HandleModCharm(bool apply, bool Real)
             if(m_target->GetTypeId() == TYPEID_UNIT)
             {
                 ((Creature*)m_target)->AIM_Initialize();
-                ((Creature*)m_target)->Attack(caster);
+                if (((Creature*)m_target)->AI())
+                    ((Creature*)m_target)->AI()->AttackStart(caster);
             }
         }
     }
@@ -2025,7 +2028,6 @@ void Aura::HandleModConfuse(bool apply, bool Real)
 
 void Aura::HandleModFear(bool Apply, bool Real)
 {
-    uint32 apply_stat = UNIT_STAT_FLEEING;
     if( Apply )
     {
         m_target->addUnitState(UNIT_STAT_FLEEING);
@@ -2034,6 +2036,11 @@ void Aura::HandleModFear(bool Apply, bool Real)
         // only at real add aura
         if(Real)
         {
+            //FIX ME: we need Mutate to now not existed FleeMovementGenerator (see Aura::Update hack code)
+            // at this moment Idle instead
+            m_target->GetMotionMaster()->MovementExpired(false);
+            m_target->GetMotionMaster()->Idle();
+
             // what is this for ? (doesn't work anyway)
             /*WorldPacket data(SMSG_DEATH_NOTIFY_OBSOLETE, 9);
             data.append(m_target->GetPackGUID());
@@ -2049,9 +2056,21 @@ void Aura::HandleModFear(bool Apply, bool Real)
         // only at real remove aura
         if(Real)
         {
-            Unit* caster = GetCaster();
-            if(m_target->GetTypeId() != TYPEID_PLAYER && caster)
-                m_target->Attack(caster);
+            m_target->GetMotionMaster()->MovementExpired(false);
+
+            if(m_target->GetTypeId() != TYPEID_PLAYER)
+            {
+                // restore appropriate movement generator
+                if(m_target->getVictim())
+                    m_target->GetMotionMaster()->Mutate(new TargetedMovementGenerator<Creature>(*m_target->getVictim()));
+                else
+                    m_target->GetMotionMaster()->Initialize();
+
+                // attack caster if can
+                Unit* caster = GetCaster();
+                if(caster && caster != m_target->getVictim())
+                    ((Creature*)m_target)->AI()->AttackStart(caster);
+            }
 
             // what is this for ? (doesn't work anyway)
             /*WorldPacket data(SMSG_DEATH_NOTIFY_OBSOLETE, 9);

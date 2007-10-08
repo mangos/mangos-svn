@@ -536,9 +536,7 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text)
         if(strlen(table[i].Name) && !hasStringAbbr(table[i].Name, cmd.c_str()))
             continue;
 
-        if(m_session->GetSecurity() < table[i].SecurityLevel)
-            continue;
-
+        // select subcommand from child commands list
         if(table[i].ChildCommands != NULL)
         {
             if(!ExecuteCommandInTable(table[i].ChildCommands, text))
@@ -551,6 +549,10 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text)
 
             return true;
         }
+
+        // check security level only for simple  command (without child commands)
+        if(m_session->GetSecurity() < table[i].SecurityLevel)
+            continue;
 
         // table[i].Name == "" is special case: send original command to handler
         if((this->*(table[i].Handler))(strlen(table[i].Name)!=0 ? text : oldtext))
