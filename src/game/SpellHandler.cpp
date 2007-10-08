@@ -248,7 +248,12 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             obj->SetRespawnTime(5);                         //close door in 5 seconds
 
             return;
-        case GAMEOBJECT_TYPE_QUESTGIVER:                    // 2
+        //button
+        case GAMEOBJECT_TYPE_BUTTON:                        //1
+            sWorld.ScriptsStart(sButtonScripts, obj->GetEntry(), spellCaster, obj);
+            return;
+
+        case GAMEOBJECT_TYPE_QUESTGIVER:                    //2
             _player->PrepareQuestMenu( guid );
             _player->SendPreparedQuest( guid );
             return;

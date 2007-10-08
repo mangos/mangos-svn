@@ -41,6 +41,7 @@ INSTANTIATE_SINGLETON_1(ObjectMgr);
 ScriptMapMap sQuestEndScripts;
 ScriptMapMap sQuestStartScripts;
 ScriptMapMap sSpellScripts;
+ScriptMapMap sButtonScripts;
 
 ObjectMgr::ObjectMgr()
 {

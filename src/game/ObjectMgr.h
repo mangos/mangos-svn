@@ -78,6 +78,7 @@ typedef std::map<uint32, ScriptMap > ScriptMapMap;
 extern ScriptMapMap sQuestEndScripts;
 extern ScriptMapMap sQuestStartScripts;
 extern ScriptMapMap sSpellScripts;
+extern ScriptMapMap sButtonScripts;
 
 struct AreaTrigger
 {

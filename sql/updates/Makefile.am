@@ -477,6 +477,8 @@ pkgdata_DATA = \
 	4551_item_template.sql \
 	4556_realmlist.sql \
 	4561_command.sql \
+	4571_button_scripts.sql \
+	4571_button_scripts.sql \
 	README
 
 ## Additional files to include when running 'make dist'

@@ -50,6 +50,9 @@
 #include "GameEvent.h"
 #include "Database/DatabaseImpl.h"
 
+#include "GridNotifiersImpl.h"
+#include "CellImpl.h"
+
 INSTANTIATE_SINGLETON_1( World );
 
 volatile bool World::m_stopEvent = false;
@@ -79,14 +82,16 @@ struct ScriptAction
     ScriptInfo const* script;                               // pointer to static script data
 };
 
-#define SCRIPT_COMMAND_SAY          0
-#define SCRIPT_COMMAND_EMOTE        1
-#define SCRIPT_COMMAND_FIELD_SET    2
-#define SCRIPT_COMMAND_MOVE_TO      3
-#define SCRIPT_COMMAND_FLAG_SET     4
-#define SCRIPT_COMMAND_FLAG_REMOVE  5
-#define SCRIPT_COMMAND_TELEPORT_TO  6
-#define SCRIPT_COMMAND_TEMP_SUMMON 10
+#define SCRIPT_COMMAND_SAY                   0
+#define SCRIPT_COMMAND_EMOTE                 1
+#define SCRIPT_COMMAND_FIELD_SET             2
+#define SCRIPT_COMMAND_MOVE_TO               3
+#define SCRIPT_COMMAND_FLAG_SET              4
+#define SCRIPT_COMMAND_FLAG_REMOVE           5
+#define SCRIPT_COMMAND_TELEPORT_TO           6
+#define SCRIPT_COMMAND_SUMMON_GAMEOBJECT     9
+#define SCRIPT_COMMAND_TEMP_SUMMON_CREATURE 10
+#define SCRIPT_COMMAND_OPEN_DOOR            11
 
 /// World constructor
 World::World()
@@ -640,6 +645,7 @@ void World::SetInitialWorldSettings()
     objmgr.LoadScripts(sQuestStartScripts,"quest_start_scripts");
     objmgr.LoadScripts(sQuestEndScripts,  "quest_end_scripts");
     objmgr.LoadScripts(sSpellScripts,     "spell_scripts");
+    objmgr.LoadScripts(sButtonScripts,    "button_scripts");
 
     sLog.outString( "Initializing Scripts..." );
     if(!LoadScriptingModule())
@@ -1080,23 +1086,84 @@ void World::ScriptsProcess()
                 break;
 
             case SCRIPT_COMMAND_TELEPORT_TO:
-                if (!target)
+            {
+                // accept player in any one from target/source arg
+                if (!target && !source)
                 {
                     sLog.outError("SCRIPT_COMMAND_TELEPORT_TO call for NULL object.");
                     break;
                 }
 
-                if (target->GetTypeId() != TYPEID_PLAYER)
+                if((!target || target->GetTypeId() != TYPEID_PLAYER) && (!source || source->GetTypeId() != TYPEID_PLAYER))              // must be only Player
                 {
-                    sLog.outError("SCRIPT_COMMAND_TELEPORT_TO call for non-player (TypeId: %u), skipping.", target->GetTypeId());
+                    sLog.outError("SCRIPT_COMMAND_TELEPORT_TO call for non-player (TypeIdSource: %u)(TypeIdTarget: %u), skipping.", source ? source->GetTypeId() : 0, target ? target->GetTypeId() : 0);
                     break;
                 }
 
-                ((Player*)target)->TeleportTo(step.script->datalong, step.script->x, step.script->y, step.script->z, step.script->o);
-                break;
+                Player* pSource = target && target->GetTypeId() == TYPEID_PLAYER ? (Player*)target : (Player*)source;
 
-            case SCRIPT_COMMAND_TEMP_SUMMON:
+                pSource->TeleportTo(step.script->datalong, step.script->x, step.script->y, step.script->z, step.script->o);
+                break;
+            }
+
+            case SCRIPT_COMMAND_SUMMON_GAMEOBJECT:
             {
+                if(!step.script->datalong)                  // gameobject not specified
+                {
+                    sLog.outError("SCRIPT_COMMAND_SUMMON_GAMEOBJECT call for NULL gameobject.");
+                    break;
+                }
+
+                if(!source)
+                {
+                    sLog.outError("SCRIPT_COMMAND_SUMMON_GAMEOBJECT call for NULL unit.");
+                    break;
+                }
+
+                if(!source->isType(TYPE_UNIT))              // must be any Unit (creature or player)
+                {
+                    sLog.outError("SCRIPT_COMMAND_SUMMON_GAMEOBJECT call for non-unit (TypeId: %u), skipping.",source->GetTypeId());
+                    break;
+                }
+
+                Unit* pSummoner = (Unit*)source;
+
+                float x = step.script->x;
+                float y = step.script->y;
+                float z = step.script->z;
+                float o = step.script->o;
+
+                GameObject* pGameObj = new GameObject( pSummoner );
+                if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), step.script->datalong, pSummoner->GetMapId(),
+                                                    x, y, z, o, 0, 0, 0, 0, 100, 0))
+                {
+                    delete pGameObj;
+                    sLog.outError("SCRIPT_COMMAND_SUMMON_GAMEOBJECT failed for gameobject (entry: %u).",step.script->datalong);
+                    break;
+                }
+
+                // set loot only for chest
+                if(pGameObj->GetGoType() == GAMEOBJECT_TYPE_CHEST)
+                    pGameObj->lootid = pGameObj->GetEntry();
+
+                pGameObj->SetRespawnTime(step.script->datalong2/1000);
+
+                // make dropped flag clickable for other players (not set owner guid (created by) for this)...
+                if(pGameObj->GetGoType() != GAMEOBJECT_TYPE_FLAGDROP)
+                    pSummoner->AddGameObject(pGameObj);
+
+                MapManager::Instance().GetMap(pGameObj->GetMapId(), pGameObj)->Add(pGameObj);
+                break;
+            }
+
+            case SCRIPT_COMMAND_TEMP_SUMMON_CREATURE:
+            {
+                if(!step.script->datalong)              // creature not specified
+                {
+                    sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON call for NULL creature.");
+                    break;
+                }
+
                 if(!source)
                 {
                     sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON call for NULL unit.");
@@ -1125,6 +1192,75 @@ void World::ScriptsProcess()
                 {
                     pCreature->GetMotionMaster()->Mutate(new TargetedMovementGenerator<Creature>(*((Unit *)source)));
                 }
+                break;
+            }
+
+            case SCRIPT_COMMAND_OPEN_DOOR:
+            {
+                if(!step.script->datalong)                  // door not specified
+                {
+                    sLog.outError("SCRIPT_COMMAND_OPEN_DOOR call for NULL door.");
+                    break;
+                }
+
+                if(!source)
+                {
+                    sLog.outError("SCRIPT_COMMAND_OPEN_DOOR call for NULL unit.");
+                    break;
+                }
+
+                if(!source->isType(TYPE_UNIT))              // must be any Unit (creature or player)
+                {
+                    sLog.outError("SCRIPT_COMMAND_OPEN_DOOR call for non-unit (TypeId: %u), skipping.",source->GetTypeId());
+                    break;
+                }
+
+                GameObject *door = NULL;
+                int32 time_to_close = step.script->datalong2<5 ? 5 : (int32)step.script->datalong2;
+                float max_range = 1.7e+38;
+
+                CellPair p(MaNGOS::ComputeCellPair(((Unit*)source)->GetPositionX(), ((Unit*)source)->GetPositionY()));
+                Cell cell = RedZone::GetZone(p);
+                cell.data.Part.reserved = ALL_DISTRICT;
+
+                MaNGOS::NearestGameObjectEntryInObjectRangeCheck go_check(*((Unit*)source),step.script->datalong,max_range);
+                MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck> checker(door,go_check);
+
+                TypeContainerVisitor<MaNGOS::GameObjectLastSearcher<MaNGOS::NearestGameObjectEntryInObjectRangeCheck>, GridTypeMapContainer > object_checker(checker);
+                CellLock<GridReadGuard> cell_lock(cell, p);
+                cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(((Unit*)source)->GetMapId(), (Unit*)source));
+
+                if ( !door )
+                {
+                    sLog.outError("SCRIPT_COMMAND_OPEN_DOOR failed for gameobject(entry: %u).", step.script->datalong);
+                    break;
+                }
+                if ( door->GetGoType() != GAMEOBJECT_TYPE_DOOR )
+                {
+                    sLog.outError("SCRIPT_COMMAND_OPEN_DOOR failed for non-door(GoType: %u).", door->GetGoType());
+                    break;
+                }
+
+                if( !door->GetUInt32Value(GAMEOBJECT_STATE) ) 
+                    break;                                  //door already  open
+
+                door->SetUInt32Value(GAMEOBJECT_FLAGS,33);
+                door->SetUInt32Value(GAMEOBJECT_STATE,0);   //open door
+                door->SetLootState(GO_CLOSED);
+                door->SetRespawnTime(time_to_close);        //close door in ? seconds
+
+                if(target && target->isType(TYPE_GAMEOBJECT) && ((GameObject*)target)->GetGoType()==GAMEOBJECT_TYPE_BUTTON)
+                {
+                    ((GameObject*)target)->SetUInt32Value(GAMEOBJECT_FLAGS,33);
+
+                    //push button
+                    ((GameObject*)target)->SetUInt32Value(GAMEOBJECT_STATE,0);
+                    ((GameObject*)target)->SetLootState(GO_CLOSED);
+
+                    //return button in ? seconds
+                    ((GameObject*)target)->SetRespawnTime(time_to_close);
+                }
+
                 break;
             }
             default:
