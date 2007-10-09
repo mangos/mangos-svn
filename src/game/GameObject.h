@@ -82,7 +82,7 @@ struct GameObjectData
     float rotation2;
     float rotation3;
     uint32 lootid;
-    uint32 spawntimesecs;
+    int32  spawntimesecs;
     uint32 animprogress;
     uint32 dynflags;
 };
@@ -124,7 +124,11 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         bool IsTransport() const;
 
-        void SetOwnerGUID(uint64 owner) { SetUInt64Value(OBJECT_FIELD_CREATED_BY, owner); }
+        void SetOwnerGUID(uint64 owner)
+        {
+            m_spawnedByDefault = false;                     // all object with owner is de-spawned after delay
+            SetUInt64Value(OBJECT_FIELD_CREATED_BY, owner);
+        }
         uint64 GetOwnerGUID() const { return GetUInt64Value(OBJECT_FIELD_CREATED_BY); }
         Unit* GetOwner() const;
 
@@ -145,7 +149,12 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
             m_respawnDelayTime = respawn > 0 ? respawn : 0;
         }
         void Respawn();
-        bool isSpawned() const { return m_respawnDelayTime == 0 || m_respawnTime > 0 && GetOwnerGUID() || m_respawnTime == 0 && !GetOwnerGUID(); }
+        bool isSpawned() const { 
+            return m_respawnDelayTime == 0 && m_spawnedByDefault || 
+                m_respawnTime > 0 && !m_spawnedByDefault || 
+                m_respawnTime == 0 && m_spawnedByDefault;
+        }
+        bool isSpawnedByDefault() const { return m_spawnedByDefault; }
         void Refresh();
         void Delete();
         void SetSpellId(uint32 id) { m_spellId = id;}
@@ -185,6 +194,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         uint32      m_respawnDelayTime;                     // (secs) if 0 then current GO state no dependent from timer
         uint32      m_flags;
         LootState   m_lootState;
+        bool        m_spawnedByDefault;
         std::list<uint32> m_SkillupList;
 
         std::set<uint32> m_unique_users;

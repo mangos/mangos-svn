@@ -82,16 +82,6 @@ struct ScriptAction
     ScriptInfo const* script;                               // pointer to static script data
 };
 
-#define SCRIPT_COMMAND_SAY                   0
-#define SCRIPT_COMMAND_EMOTE                 1
-#define SCRIPT_COMMAND_FIELD_SET             2
-#define SCRIPT_COMMAND_MOVE_TO               3
-#define SCRIPT_COMMAND_FLAG_SET              4
-#define SCRIPT_COMMAND_FLAG_REMOVE           5
-#define SCRIPT_COMMAND_TELEPORT_TO           6
-#define SCRIPT_COMMAND_TEMP_SUMMON_CREATURE 10
-#define SCRIPT_COMMAND_OPEN_DOOR            11
-
 /// World constructor
 World::World()
 {
@@ -641,10 +631,10 @@ void World::SetInitialWorldSettings()
 
     ///- Load and initialize scripts
     sLog.outString( "Loading Scripts..." );
-    objmgr.LoadScripts(sQuestStartScripts,"quest_start_scripts");
-    objmgr.LoadScripts(sQuestEndScripts,  "quest_end_scripts");
-    objmgr.LoadScripts(sSpellScripts,     "spell_scripts");
-    objmgr.LoadScripts(sButtonScripts,    "button_scripts");
+    objmgr.LoadQuestStartScripts();                         // must be after load Creature/Gameobject(Template/Data) and QuestTemplate
+    objmgr.LoadQuestEndScripts();                           // must be after load Creature/Gameobject(Template/Data) and QuestTemplate
+    objmgr.LoadSpellScripts();                              // must be after load Creature/Gameobject(Template/Data)
+    objmgr.LoadButtonScripts();                             // must be after load Creature/Gameobject(Template/Data)
 
     sLog.outString( "Initializing Scripts..." );
     if(!LoadScriptingModule())
@@ -855,7 +845,7 @@ void World::Update(time_t diff)
         MapManager::Instance().Update(diff);                // As interval = 0
 
         ///- Process necessary scripts
-        if (!scriptSchedule.empty())
+        if (!m_scriptSchedule.empty())
             ScriptsProcess();
 
         sBattleGroundMgr.Update(diff);
@@ -913,7 +903,7 @@ void World::ScriptsStart(ScriptMapMap const& scripts, uint32 id, Object* source,
         sa.ownerGUID  = ownerGUID;
 
         sa.script = &iter->second;
-        scriptSchedule.insert(std::pair<time_t, ScriptAction>(m_gameTime + iter->first, sa));
+        m_scriptSchedule.insert(std::pair<time_t, ScriptAction>(m_gameTime + iter->first, sa));
         if (iter->first == 0)
             immedScript = true;
     }
@@ -925,13 +915,13 @@ void World::ScriptsStart(ScriptMapMap const& scripts, uint32 id, Object* source,
 /// Process queued scripts
 void World::ScriptsProcess()
 {
-    if (scriptSchedule.empty())
+    if (m_scriptSchedule.empty())
         return;
 
     ///- Process overdue queued scripts
-    std::multimap<time_t, ScriptAction>::iterator iter = scriptSchedule.begin();
+    std::multimap<time_t, ScriptAction>::iterator iter = m_scriptSchedule.begin();
                                                             // ok as multimap is a *sorted* associative container
-    while (!scriptSchedule.empty() && (iter->first <= m_gameTime))
+    while (!m_scriptSchedule.empty() && (iter->first <= m_gameTime))
     {
         ScriptAction const& step = iter->second;
 
@@ -1144,6 +1134,67 @@ void World::ScriptsProcess()
                 break;
             }
 
+            case SCRIPT_COMMAND_RESPAWN_GAMEOBJECT:
+            {
+                if(!step.script->datalong)                  // gameobject not specified
+                {
+                    sLog.outError("SCRIPT_COMMAND_RESPAWN_GAMEOBJECT call for NULL gameobject.");
+                    break;
+                }
+
+                if(!source)
+                {
+                    sLog.outError("SCRIPT_COMMAND_RESPAWN_GAMEOBJECT call for NULL unit.");
+                    break;
+                }
+
+                if(!source->isType(TYPE_UNIT))              // must be any Unit (creature or player)
+                {
+                    sLog.outError("SCRIPT_COMMAND_RESPAWN_GAMEOBJECT call for non-unit (TypeId: %u), skipping.",source->GetTypeId());
+                    break;
+                }
+
+                Unit* caster = (Unit*)source;
+
+                GameObject *go = NULL;
+                int32 time_to_despawn = step.script->datalong2<5 ? 5 : (int32)step.script->datalong2;
+
+                CellPair p(MaNGOS::ComputeCellPair(caster->GetPositionX(), caster->GetPositionY()));
+                Cell cell = RedZone::GetZone(p);
+                cell.data.Part.reserved = ALL_DISTRICT;
+
+                MaNGOS::GameObjectWithDbGUIDCheck go_check(*caster,step.script->datalong);
+                MaNGOS::GameObjectSearcher<MaNGOS::GameObjectWithDbGUIDCheck> checker(go,go_check);
+
+                TypeContainerVisitor<MaNGOS::GameObjectSearcher<MaNGOS::GameObjectWithDbGUIDCheck>, GridTypeMapContainer > object_checker(checker);
+                CellLock<GridReadGuard> cell_lock(cell, p);
+                cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(caster->GetMapId(), (Unit*)source));
+
+                if ( !go )
+                {
+                    sLog.outError("SCRIPT_COMMAND_RESPAWN_GAMEOBJECT failed for gameobject(guid: %u).", step.script->datalong);
+                    break;
+                }
+
+                if( go->GetGoType()==GAMEOBJECT_TYPE_FISHINGNODE || 
+                    go->GetGoType()==GAMEOBJECT_TYPE_FISHINGNODE || 
+                    go->GetGoType()==GAMEOBJECT_TYPE_DOOR        || 
+                    go->GetGoType()==GAMEOBJECT_TYPE_BUTTON      || 
+                    go->GetGoType()==GAMEOBJECT_TYPE_TRAP )
+                {
+                    sLog.outError("SCRIPT_COMMAND_RESPAWN_GAMEOBJECT can not be used with gameobject of type %u (guid: %u).", uint32(go->GetGoType()), step.script->datalong);
+                    break;
+                }
+
+                if( go->isSpawned() ) 
+                    break;                                  //gameobject already spawned
+
+                go->SetLootState(GO_CLOSED);
+                go->SetRespawnTime(time_to_despawn);        //despawn object in ? seconds
+
+                MapManager::Instance().GetMap(go->GetMapId(), go)->Add(go);
+                break;
+            }
             case SCRIPT_COMMAND_OPEN_DOOR:
             {
                 if(!step.script->datalong)                  // door not specified
@@ -1182,7 +1233,7 @@ void World::ScriptsProcess()
 
                 if ( !door )
                 {
-                    sLog.outError("SCRIPT_COMMAND_OPEN_DOOR failed for gameobject(entry: %u).", step.script->datalong);
+                    sLog.outError("SCRIPT_COMMAND_OPEN_DOOR failed for gameobject(guid: %u).", step.script->datalong);
                     break;
                 }
                 if ( door->GetGoType() != GAMEOBJECT_TYPE_DOOR )
@@ -1218,9 +1269,9 @@ void World::ScriptsProcess()
                 break;
         }
 
-        scriptSchedule.erase(iter);
+        m_scriptSchedule.erase(iter);
 
-        iter = scriptSchedule.begin();
+        iter = m_scriptSchedule.begin();
     }
     return;
 }

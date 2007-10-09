@@ -1635,7 +1635,7 @@ CREATE TABLE `gameobject` (
   `rotation2` float NOT NULL default '0',
   `rotation3` float NOT NULL default '0',
   `loot` int(11) unsigned NOT NULL default '0',
-  `spawntimesecs` int(11) unsigned NOT NULL default '0',
+  `spawntimesecs` int(11) NOT NULL default '0',
   `animprogress` int(11) unsigned NOT NULL default '0',
   `dynflags` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`)

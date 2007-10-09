@@ -309,7 +309,8 @@ void GameEvent::GameEventSpawn(int16 event_id)
                 }
                 else
                 {
-                    map->Add(pGameobject);
+                    if(pGameobject->isSpawnedByDefault())
+                        map->Add(pGameobject);
                 }
             }
         }

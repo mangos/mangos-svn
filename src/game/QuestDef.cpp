@@ -141,7 +141,7 @@ Quest::Quest(Field * questRecord)
     }
 }
 
-uint32 Quest::XPValue( Player *pPlayer )
+uint32 Quest::XPValue( Player *pPlayer ) const
 {
     if( pPlayer )
     {

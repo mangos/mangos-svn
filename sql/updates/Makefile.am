@@ -478,6 +478,7 @@ pkgdata_DATA = \
 	4556_realmlist.sql \
 	4561_command.sql \
 	4571_button_scripts.sql \
+	4577_gameobject.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -936,4 +937,5 @@ EXTRA_DIST = \
 	4556_realmlist.sql \
 	4561_command.sql \
 	4571_button_scripts.sql \
+	4577_gameobject.sql \
 	README

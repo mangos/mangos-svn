@@ -238,7 +238,6 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
     uint32 t = obj->GetUInt32Value(GAMEOBJECT_TYPE_ID);
     switch(t)
     {
-        //door
         case GAMEOBJECT_TYPE_DOOR:                          //0
             obj->SetUInt32Value(GAMEOBJECT_FLAGS,33);
             obj->SetUInt32Value(GAMEOBJECT_STATE,0);        //open
@@ -246,18 +245,24 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 
             obj->SetLootState(GO_CLOSED);
             obj->SetRespawnTime(5);                         //close door in 5 seconds
-
             return;
-        //button
+
         case GAMEOBJECT_TYPE_BUTTON:                        //1
-            sWorld.ScriptsStart(sButtonScripts, obj->GetEntry(), spellCaster, obj);
+            obj->SetUInt32Value(GAMEOBJECT_FLAGS,33);
+            obj->SetUInt32Value(GAMEOBJECT_STATE,0);        //open
+            obj->SetLootState(GO_CLOSED);
+            obj->SetRespawnTime(2);                         //close in 1 seconds
+
+            // activate script
+            sWorld.ScriptsStart(sButtonScripts, obj->GetDBTableGUIDLow(), spellCaster, obj);
             return;
 
         case GAMEOBJECT_TYPE_QUESTGIVER:                    //2
             _player->PrepareQuestMenu( guid );
             _player->SendPreparedQuest( guid );
             return;
-            //Sitting: Wooden bench, chairs enzz
+
+        //Sitting: Wooden bench, chairs enzz
         case GAMEOBJECT_TYPE_CHAIR:                         //7
 
             info = obj->GetGOInfo();
@@ -275,7 +280,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             }
             break;
 
-            //big gun, its a spell/aura
+        //big gun, its a spell/aura
         case GAMEOBJECT_TYPE_GOOBER:                        //10
             info = obj->GetGOInfo();
             spellId = info ? info->sound10 : 0;
@@ -310,7 +315,8 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                 return;
             }
             break;
-            //fishing bobber
+
+        //fishing bobber
         case GAMEOBJECT_TYPE_FISHINGNODE:                   //17
         {
             if(_player->GetGUID() != obj->GetOwnerGUID())

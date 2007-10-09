@@ -861,7 +861,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     uint32 quest_id = objmgr.GetQuestForAreaTrigger( Trigger_ID );
     if( quest_id && GetPlayer()->isAlive())
     {
-        Quest* pQuest = GetPlayer()->GetActiveQuest(quest_id);
+        Quest const* pQuest = GetPlayer()->GetActiveQuest(quest_id);
         if( pQuest )
         {
             if( !Script->scriptAreaTrigger( GetPlayer(), pQuest, Trigger_ID ) )

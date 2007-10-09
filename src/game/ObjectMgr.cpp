@@ -648,7 +648,7 @@ void ObjectMgr::LoadGameobjects()
         data.rotation2      = fields[ 9].GetFloat();
         data.rotation3      = fields[10].GetFloat();
         data.lootid         = fields[11].GetUInt32();
-        data.spawntimesecs  = fields[12].GetUInt32();
+        data.spawntimesecs  = fields[12].GetInt32();
         data.animprogress   = fields[13].GetUInt32();
         data.dynflags       = fields[14].GetUInt32();
         int16 gameEvent     = fields[15].GetInt16();
@@ -2480,7 +2480,12 @@ void ObjectMgr::LoadPetCreateSpells()
 
 void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
 {
+    if(sWorld.IsScriptScheduled())                          // function don't must be called in time scripts use.
+        return;
+
     sLog.outString( "%s :", tablename);
+
+    scripts.clear();                                        // need for reload support
 
     QueryResult *result = sDatabase.PQuery( "SELECT `id`,`delay`,`command`,`datalong`,`datalong2`,`datatext`, `x`, `y`, `z`, `o` FROM `%s`", tablename );
 
@@ -2515,6 +2520,93 @@ void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
         tmp.z = fields[8].GetFloat();
         tmp.o = fields[9].GetFloat();
 
+        // generic command args check
+        switch(tmp.command)
+        {
+            case SCRIPT_COMMAND_TELEPORT_TO:
+            {
+                if(!sMapStore.LookupEntry(tmp.datalong))
+                {
+                    sLog.outErrorDb("Table `%s` have invalid map (Id: %u) in SCRIPT_COMMAND_TELEPORT_TO for script id %u",tablename,tmp.datalong,tmp.id);
+                    continue;
+                }
+
+                if(!MaNGOS::IsValidMapCoord(tmp.x,tmp.y))
+                {
+                    sLog.outErrorDb("Table `%s` have invalid coordinates (X: %f Y: %f) in SCRIPT_COMMAND_TELEPORT_TO for script id %u",tablename,tmp.x,tmp.y,tmp.id);
+                    continue;
+                }
+                break;
+            }
+
+            case SCRIPT_COMMAND_TEMP_SUMMON_CREATURE:
+            {
+                if(!MaNGOS::IsValidMapCoord(tmp.x,tmp.y))
+                {
+                    sLog.outErrorDb("Table `%s` have invalid coordinates (X: %f Y: %f) in SCRIPT_COMMAND_TEMP_SUMMON_CREATURE for script id %u",tablename,tmp.x,tmp.y,tmp.id);
+                    continue;
+                }
+
+                if(!GetCreatureTemplate(tmp.datalong))
+                {
+                    sLog.outErrorDb("Table `%s` have invalid creature (Entry: %u) in SCRIPT_COMMAND_TEMP_SUMMON_CREATURE for script id %u",tablename,tmp.datalong,tmp.id);
+                    continue;
+                }
+                break;
+            }
+
+            case SCRIPT_COMMAND_RESPAWN_GAMEOBJECT:
+            {
+                GameObjectData const* data = GetGOData(tmp.datalong);
+                if(!data)
+                {
+                    sLog.outErrorDb("Table `%s` have invalid gameobject (GUID: %u) in SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id %u",tablename,tmp.datalong,tmp.id);
+                    continue;
+                }
+
+                GameObjectInfo const* info = GetGameObjectInfo(data->id);
+                if(!info)
+                {
+                    sLog.outErrorDb("Table `%s` have gameobject with invalid entry (GUID: %u Entry: %u) in SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id %u",tablename,tmp.datalong,data->id,tmp.id);
+                    continue;
+                }
+
+                if( info->id==GAMEOBJECT_TYPE_FISHINGNODE || 
+                    info->id==GAMEOBJECT_TYPE_FISHINGNODE || 
+                    info->id==GAMEOBJECT_TYPE_DOOR        || 
+                    info->id==GAMEOBJECT_TYPE_BUTTON      || 
+                    info->id==GAMEOBJECT_TYPE_TRAP )
+                {
+                    sLog.outErrorDb("Table `%s` have gameobject type (%u) unsupported by command SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id %u",tablename,info->id,tmp.id);
+                    continue;
+                }
+                break;
+            }
+            case SCRIPT_COMMAND_OPEN_DOOR:
+            {
+                GameObjectData const* data = GetGOData(tmp.datalong);
+                if(!data)
+                {
+                    sLog.outErrorDb("Table `%s` have invalid gameobject (GUID: %u) in SCRIPT_COMMAND_OPEN_DOOR for script id %u",tablename,tmp.datalong,tmp.id);
+                    continue;
+                }
+
+                GameObjectInfo const* info = GetGameObjectInfo(data->id);
+                if(!info)
+                {
+                    sLog.outErrorDb("Table `%s` have gameobject with invalid entry (GUID: %u Entry: %u) in SCRIPT_COMMAND_OPEN_DOOR for script id %u",tablename,tmp.datalong,data->id,tmp.id);
+                    continue;
+                }
+
+                if( info->id!=GAMEOBJECT_TYPE_DOOR)
+                {
+                    sLog.outErrorDb("Table `%s` have gameobject type (%u) unsupported by command SCRIPT_COMMAND_OPEN_DOOR for script id %u",tablename,info->id,tmp.id);
+                    continue;
+                }
+                break;
+            }
+        }
+
         if (scripts.find(tmp.id) == scripts.end())
         {
             ScriptMap emptyMap;
@@ -2530,6 +2622,55 @@ void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
     sLog.outString();
     sLog.outString( ">> Loaded %u script definitions", count );
 }
+
+void ObjectMgr::LoadButtonScripts()
+{
+    LoadScripts(sButtonScripts,    "button_scripts");
+
+    // check ids
+    for(ScriptMapMap::const_iterator itr = sButtonScripts.begin(); itr != sButtonScripts.end(); ++itr)
+    {
+        if(!GetGOData(itr->first))
+            sLog.outErrorDb("Table `button_scripts` have non-existed gameobject (GUID: %u) as script id",itr->first);
+    }
+}
+
+void ObjectMgr::LoadQuestEndScripts()
+{
+    objmgr.LoadScripts(sQuestEndScripts,  "quest_end_scripts");
+
+    // check ids
+    for(ScriptMapMap::const_iterator itr = sButtonScripts.begin(); itr != sButtonScripts.end(); ++itr)
+    {
+        if(!GetQuestTemplate(itr->first))
+            sLog.outErrorDb("Table `quest_end_scripts` have non-existed quest (Id: %u) as script id",itr->first);
+    }
+}
+
+void ObjectMgr::LoadQuestStartScripts()
+{
+    objmgr.LoadScripts(sQuestStartScripts,"quest_start_scripts");
+
+    // check ids
+    for(ScriptMapMap::const_iterator itr = sButtonScripts.begin(); itr != sButtonScripts.end(); ++itr)
+    {
+        if(!GetQuestTemplate(itr->first))
+            sLog.outErrorDb("Table `quest_start_scripts` have non-existed quest (Id: %u) as script id",itr->first);
+    }
+}
+
+void ObjectMgr::LoadSpellScripts()
+{
+    objmgr.LoadScripts(sSpellScripts,     "spell_scripts");
+
+    // check ids
+    for(ScriptMapMap::const_iterator itr = sButtonScripts.begin(); itr != sButtonScripts.end(); ++itr)
+    {
+        if(!sSpellStore.LookupEntry(itr->first))
+            sLog.outErrorDb("Table `spell_scripts` have non-existed spell (Id: %u) as script id",itr->first);
+    }
+}
+
 
 void ObjectMgr::LoadItemTexts()
 {

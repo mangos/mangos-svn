@@ -134,7 +134,7 @@ class Quest
     friend class ObjectMgr;
     public:
         Quest(Field * questRecord);
-        uint32 XPValue( Player *pPlayer );
+        uint32 XPValue( Player *pPlayer ) const;
 
         bool HasSpecialFlag( uint32 flag ) const { return (SpecialFlags & flag ) != 0; }
 
@@ -275,7 +275,7 @@ struct QuestStatusData
         memset(m_creatureOrGOcount, 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
     }
 
-    Quest *m_quest;
+    Quest const *m_quest;
 
     QuestStatus m_status;
     bool m_rewarded;
