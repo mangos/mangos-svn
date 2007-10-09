@@ -322,6 +322,12 @@ class ObjectMgr
         void GetTaxiPathNodes( uint32 path, Path &pathnodes );
         void GetTransportPathNodes( uint32 path, TransportPath &pathnodes );
 
+        Quest const* GetQuestTemplate(uint32 quest_id) const
+        {
+            QuestMap::const_iterator itr = mQuestTemplates.find(quest_id);
+            return itr != mQuestTemplates.end() ? itr->second : NULL;
+        }
+
         uint32 GetQuestForAreaTrigger(uint32 Trigger_ID) const
         {
             QuestAreaTriggerMap::const_iterator itr = mQuestAreaTriggerMap.find(Trigger_ID);
@@ -400,11 +406,15 @@ class ObjectMgr
         void LoadSpellLearnSkills();
         void LoadSpellLearnSpells();
 
+        void LoadButtonScripts();
+        void LoadQuestEndScripts();
+        void LoadQuestStartScripts();
+        void LoadSpellScripts();
+
         SpellScriptTarget mSpellScriptTarget;
         void LoadSpellScriptTarget();
 
         void LoadPetCreateSpells();
-        void LoadScripts(ScriptMapMap& scripts, char const* tablename);
         void LoadCreatureTemplates();
         void LoadCreatures();
         void LoadCreatureRespawnTimes();
@@ -467,8 +477,6 @@ class ObjectMgr
                 return "There is no info for this item";
         }
 
-        typedef HM_NAMESPACE::hash_map<uint32, Quest*> QuestMap;
-        QuestMap mQuestTemplates;
         typedef std::multimap<int32, uint32> ExclusiveQuestGroups;
         ExclusiveQuestGroups mExclusiveQuestGroups;
 
@@ -658,6 +666,9 @@ class ObjectMgr
 
         uint32 m_hiPetNumber;
 
+        typedef HM_NAMESPACE::hash_map<uint32, Quest*> QuestMap;
+        QuestMap mQuestTemplates;
+
         typedef HM_NAMESPACE::hash_map<uint32, GossipText*> GossipTextMap;
         typedef HM_NAMESPACE::hash_map<uint32, uint32> QuestAreaTriggerMap;
         typedef HM_NAMESPACE::hash_map<uint32, std::string> ItemTextMap;
@@ -692,6 +703,8 @@ class ObjectMgr
         ReservedNamesMap  m_ReservedNames;
 
     private:
+        void LoadScripts(ScriptMapMap& scripts, char const* tablename);
+
         typedef std::map<uint32,PetLevelInfo*> PetLevelInfoMap;
         // PetLevelInfoMap[creature_id][level]
         PetLevelInfoMap petInfo;                            // [creature_id][level]

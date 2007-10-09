@@ -88,6 +88,23 @@ bool ChatHandler::HandleReloadAllLootCommand(const char*)
     return true;
 }
 
+bool ChatHandler::HandleReloadAllScriptsCommand(const char*)
+{
+    if(sWorld.IsScriptScheduled())
+    {
+        PSendSysMessage("DB scripts used currently, please attempt reload later."); 
+        return true;
+    }
+
+    sLog.outString( "Re-Loading Scripts..." );
+    HandleReloadButtonScriptsCommand("a");
+    HandleReloadQuestEndScriptsCommand("a");
+    HandleReloadQuestStartScriptsCommand("a");
+    HandleReloadSpellScriptsCommand("a");
+    SendGlobalSysMessage("DB tables `*_scripts` reloaded.");
+    return true;
+}
+
 bool ChatHandler::HandleReloadAllSpellCommand(const char*)
 {
     HandleReloadSpellAffectCommand("a");
@@ -282,6 +299,82 @@ bool ChatHandler::HandleReloadSpellScriptTargetCommand(const char*)
     sLog.outString( "Re-Loading SpellsScriptTarget..." );
     objmgr.LoadSpellScriptTarget();
     SendGlobalSysMessage("DB table `spell_script_target` (spell targets selection in case specific creature/GO requirements.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadButtonScriptsCommand(const char* arg)
+{
+    if(sWorld.IsScriptScheduled())
+    {
+        SendSysMessage("DB scripts used currently, please attempt reload later."); 
+        return true;
+    }
+
+    if(*arg!='a')
+        sLog.outString( "Re-Loading Scripts from `button_scripts`...");
+
+    objmgr.LoadButtonScripts();
+
+    if(*arg!='a')
+        SendGlobalSysMessage("DB table `button_scripts` reloaded.");
+
+    return true;
+}
+
+bool ChatHandler::HandleReloadQuestEndScriptsCommand(const char* arg)
+{
+    if(sWorld.IsScriptScheduled())
+    {
+        SendSysMessage("DB scripts used currently, please attempt reload later."); 
+        return true;
+    }
+
+    if(*arg!='a')
+        sLog.outString( "Re-Loading Scripts from `quest_end_scripts`...");
+
+    objmgr.LoadButtonScripts();
+
+    if(*arg!='a')
+        SendGlobalSysMessage("DB table `quest_end_scripts` reloaded.");
+
+    return true;
+}
+
+bool ChatHandler::HandleReloadQuestStartScriptsCommand(const char* arg)
+{
+    if(sWorld.IsScriptScheduled())
+    {
+        SendSysMessage("DB scripts used currently, please attempt reload later."); 
+        return true;
+    }
+
+    if(*arg!='a')
+        sLog.outString( "Re-Loading Scripts from `quest_start_scripts`...");
+
+    objmgr.LoadButtonScripts();
+
+    if(*arg!='a')
+        SendGlobalSysMessage("DB table `quest_start_scripts` reloaded.");
+
+    return true;
+}
+
+bool ChatHandler::HandleReloadSpellScriptsCommand(const char* arg)
+{
+    if(sWorld.IsScriptScheduled())
+    {
+        SendSysMessage("DB scripts used currently, please attempt reload later."); 
+        return true;
+    }
+
+    if(*arg!='a')
+        sLog.outString( "Re-Loading Scripts from `spell_scripts`...");
+
+    objmgr.LoadButtonScripts();
+
+    if(*arg!='a')
+        SendGlobalSysMessage("DB table `spell_scripts` reloaded.");
+
     return true;
 }
 
@@ -3557,9 +3650,9 @@ bool ChatHandler::HandleAddQuest(const char* args)
 
     uint32 entry = atol(cId);
 
-    ObjectMgr::QuestMap::iterator qIter = objmgr.mQuestTemplates.find(entry);
+    Quest const* pQuest = objmgr.GetQuestTemplate(entry);
 
-    if(qIter == objmgr.mQuestTemplates.end())
+    if(!pQuest)
     {
         PSendSysMessage(LANG_COMMAND_QUEST_NOTFOUND,entry);
         return true;
@@ -3578,7 +3671,6 @@ bool ChatHandler::HandleAddQuest(const char* args)
     }
 
     // ok, normal (creature/GO starting) quest
-    Quest* pQuest = qIter->second;
     if( player->CanAddQuest( pQuest, true ) )
     {
         player->AddQuest( pQuest, NULL );
@@ -3607,9 +3699,9 @@ bool ChatHandler::HandleRemoveQuest(const char* args)
 
     uint32 entry = atol(cId);
 
-    ObjectMgr::QuestMap::iterator qIter = objmgr.mQuestTemplates.find(entry);
+    Quest const* pQuest = objmgr.GetQuestTemplate(entry);
 
-    if(qIter == objmgr.mQuestTemplates.end())
+    if(!pQuest)
     {
         PSendSysMessage(LANG_COMMAND_QUEST_NOTFOUND, entry);
         return true;

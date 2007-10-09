@@ -45,6 +45,7 @@ GameObject::GameObject( WorldObject *instantiator ) : WorldObject( instantiator 
     m_respawnTime = 0;
     m_respawnDelayTime = 25;
     m_lootState = GO_CLOSED;
+    m_spawnedByDefault = true;
     m_usetimes = 0;
     m_spellId = 0;
     lootid=0;
@@ -228,9 +229,15 @@ void GameObject::Update(uint32 p_time)
                         case GAMEOBJECT_TYPE_TRAP:
                             break;
                         default:
-                            if(GetOwnerGUID())              // despawn timer
+                            if(!m_spawnedByDefault)         // despawn timer
                             {
-                                Delete();
+                                if(GetOwnerGUID())
+                                {
+                                    Delete();
+                                    return;
+                                }
+
+                                SetLootState(GO_LOOTED);    // can be despawned
                                 return;
                             }
                                                             // respawn timer
@@ -274,6 +281,13 @@ void GameObject::Update(uint32 p_time)
             SetLootState(GO_CLOSED);
 
             SendDestroyObject(GetGUID());
+
+            if(!m_spawnedByDefault)
+            {
+                m_respawnTime = 0;
+                return;
+            }
+
             m_respawnTime = time(NULL) + m_respawnDelayTime;
 
             // if option not set then object will be saved at grid unload
@@ -345,12 +359,13 @@ void GameObject::Update(uint32 p_time)
 void GameObject::Refresh()
 {
     // not refresh despawned not casted GO (despawned casted GO destroyed in all cases anyway)
-    if(m_respawnTime > 0 && !GetOwnerGUID())
+    if(m_respawnTime > 0 && m_spawnedByDefault)
         return;
 
     SendDestroyObject(GetGUID());
 
-    MapManager::Instance().GetMap(GetMapId(), this)->Add(this);
+    if(isSpawned())
+        MapManager::Instance().GetMap(GetMapId(), this)->Add(this);
 }
 
 void GameObject::AddUse(Player* player)
@@ -407,7 +422,7 @@ void GameObject::SaveToDB()
     data.rotation2 = GetFloatValue(GAMEOBJECT_ROTATION+2);
     data.rotation3 = GetFloatValue(GAMEOBJECT_ROTATION+3);
     data.lootid = lootid;
-    data.spawntimesecs = m_respawnDelayTime;
+    data.spawntimesecs = m_spawnedByDefault ? m_respawnDelayTime : -(int32)m_respawnDelayTime;
     data.animprogress = GetUInt32Value (GAMEOBJECT_ANIMPROGRESS);
     data.dynflags = GetUInt32Value (GAMEOBJECT_DYN_FLAGS);
 
@@ -471,13 +486,23 @@ bool GameObject::LoadFromDB(uint32 guid, uint32 InstanceId)
     m_DBTableGuid = stored_guid;
 
     lootid=data->lootid;
-    m_respawnDelayTime=data->spawntimesecs;
-    m_respawnTime=objmgr.GetGORespawnTime(stored_guid,InstanceId);
-
-    if(m_respawnTime && m_respawnTime <= time(NULL))        // ready to respawn
+    if(data->spawntimesecs >= 0)
     {
+        m_spawnedByDefault = true;
+        m_respawnDelayTime=data->spawntimesecs;
+        m_respawnTime=objmgr.GetGORespawnTime(stored_guid,InstanceId);
+
+        if(m_respawnTime && m_respawnTime <= time(NULL))        // ready to respawn
+        {
+            m_respawnTime = 0;
+            objmgr.SaveGORespawnTime(m_DBTableGuid,GetInstanceId(),0);
+        }
+    }
+    else
+    {
+        m_spawnedByDefault = false;
+        m_respawnDelayTime=-data->spawntimesecs;
         m_respawnTime = 0;
-        objmgr.SaveGORespawnTime(m_DBTableGuid,GetInstanceId(),0);
     }
 
     return true;
@@ -535,7 +560,7 @@ Unit* GameObject::GetOwner() const
 
 void GameObject::SaveRespawnTime()
 {
-    if(m_respawnTime > time(NULL) && !GetOwnerGUID())
+    if(m_respawnTime > time(NULL) && m_spawnedByDefault)
         objmgr.SaveGORespawnTime(m_DBTableGuid,GetInstanceId(),m_respawnTime);
 }
 
@@ -547,7 +572,7 @@ bool GameObject::isVisibleForInState(Player const* u, bool inVisibleList) const
 
 void GameObject::Respawn()
 {
-    if(m_respawnTime > 0)
+    if(m_spawnedByDefault && m_respawnTime > 0)
     {
         m_respawnTime = time(NULL);
         objmgr.SaveGORespawnTime(m_DBTableGuid,GetInstanceId(),0);

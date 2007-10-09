@@ -341,14 +341,14 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
     uint32 result = defstatus;
     QuestStatus status;
     uint32 quest_id;
-    Quest *pQuest;
+    Quest const *pQuest;
 
     QuestRelations const& qir = objmgr.mCreatureQuestInvolvedRelations;
     for(QuestRelations::const_iterator i = qir.lower_bound(GetEntry()); i != qir.upper_bound(GetEntry()); ++i )
     {
         uint32 result2 = 0;
         quest_id = i->second;
-        pQuest = objmgr.mQuestTemplates[quest_id];
+        pQuest = objmgr.GetQuestTemplate(quest_id);
         if ( !pQuest ) continue;
 
         status = pPlayer->GetQuestStatus( quest_id );
@@ -371,7 +371,8 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
     for(QuestRelations::const_iterator i = qr.lower_bound(GetEntry()); i != qr.upper_bound(GetEntry()); ++i )
     {
         uint32 result2 = 0;
-        pQuest = objmgr.mQuestTemplates[quest_id = i->second];
+        quest_id = i->second;
+        pQuest = objmgr.GetQuestTemplate(quest_id);
         if ( !pQuest )
             continue;
 

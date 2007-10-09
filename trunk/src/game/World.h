@@ -179,6 +179,18 @@ enum BanReturn
     BAN_NOTFOUND
 };
 
+// DB scripting commands
+#define SCRIPT_COMMAND_SAY                   0
+#define SCRIPT_COMMAND_EMOTE                 1
+#define SCRIPT_COMMAND_FIELD_SET             2
+#define SCRIPT_COMMAND_MOVE_TO               3
+#define SCRIPT_COMMAND_FLAG_SET              4
+#define SCRIPT_COMMAND_FLAG_REMOVE           5
+#define SCRIPT_COMMAND_TELEPORT_TO           6
+#define SCRIPT_COMMAND_RESPAWN_GAMEOBJECT    9
+#define SCRIPT_COMMAND_TEMP_SUMMON_CREATURE 10
+#define SCRIPT_COMMAND_OPEN_DOOR            11
+
 /// CLI related stuff, define here to prevent cyclic dependancies
 
 typedef int(* pPrintf)(const char*,...);
@@ -319,6 +331,7 @@ class World
         bool RemoveBanAccount(std::string type, std::string nameOrIP);
 
         void ScriptsStart(std::map<uint32, std::multimap<uint32, ScriptInfo> > const& scripts, uint32 id, Object* source, Object* target);
+        bool IsScriptScheduled() const { return !m_scriptSchedule.empty(); }
 
         // for max speed access
         static float GetMaxVisibleDistanceForCreature() { return m_MaxVisibleDistanceForCreature; }
@@ -356,7 +369,7 @@ class World
         uint32 m_maxSessionsCount;
         std::set<WorldSession*> m_kicked_sessions;
 
-        std::multimap<time_t, ScriptAction> scriptSchedule;
+        std::multimap<time_t, ScriptAction> m_scriptSchedule;
 
         float rate_values[MAX_RATES];
         uint32 m_configs[CONFIG_VALUE_COUNT];

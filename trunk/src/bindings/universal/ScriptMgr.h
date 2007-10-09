@@ -48,19 +48,19 @@ struct Script
 
     // -- Quest/gossip Methods to be scripted --
     bool (*pGossipHello         )(Player *player, Creature *_Creature);
-    bool (*pQuestAccept         )(Player *player, Creature *_Creature, Quest *_Quest );
+    bool (*pQuestAccept         )(Player *player, Creature *_Creature, Quest const*_Quest );
     bool (*pGossipSelect        )(Player *player, Creature *_Creature, uint32 sender, uint32 action );
     bool (*pGossipSelectWithCode)(Player *player, Creature *_Creature, uint32 sender, uint32 action, char* sCode );
-    bool (*pQuestSelect         )(Player *player, Creature *_Creature, Quest *_Quest );
-    bool (*pQuestComplete       )(Player *player, Creature *_Creature, Quest *_Quest );
+    bool (*pQuestSelect         )(Player *player, Creature *_Creature, Quest const*_Quest );
+    bool (*pQuestComplete       )(Player *player, Creature *_Creature, Quest const*_Quest );
     uint32 (*pNPCDialogStatus   )(Player *player, Creature *_Creature );
-    bool (*pChooseReward        )(Player *player, Creature *_Creature, Quest *_Quest, uint32 opt );
-    bool (*pItemHello           )(Player *player, Item *_Item, Quest *_Quest );
+    bool (*pChooseReward        )(Player *player, Creature *_Creature, Quest const*_Quest, uint32 opt );
+    bool (*pItemHello           )(Player *player, Item *_Item, Quest const*_Quest );
     bool (*pGOHello             )(Player *player, GameObject *_GO );
-    bool (*pAreaTrigger         )(Player *player, Quest *_Quest, uint32 triggerID );
-    bool (*pItemQuestAccept     )(Player *player, Item *_Item, Quest *_Quest );
-    bool (*pGOQuestAccept       )(Player *player, GameObject *_GO, Quest *_Quest );
-    bool (*pGOChooseReward      )(Player *player, GameObject *_GO, Quest *_Quest, uint32 opt );
+    bool (*pAreaTrigger         )(Player *player, Quest const*_Quest, uint32 triggerID );
+    bool (*pItemQuestAccept     )(Player *player, Item *_Item, Quest const*_Quest );
+    bool (*pGOQuestAccept       )(Player *player, GameObject *_GO, Quest const*_Quest );
+    bool (*pGOChooseReward      )(Player *player, GameObject *_GO, Quest const*_Quest, uint32 opt );
     bool (*pReceiveEmote        )(Player *player, Creature *_Creature, uint32 emote );
     bool (*pItemUse             )(Player *player, Item* _Item, SpellCastTargets const& targets);
 

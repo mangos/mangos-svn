@@ -135,10 +135,12 @@ class ChatHandler
         bool HandleReloadAllAreaCommand(const char* args);
         bool HandleReloadAllQuestCommand(const char* args);
         bool HandleReloadAllLootCommand(const char* args);
+        bool HandleReloadAllScriptsCommand(const char* args);
         bool HandleReloadAllSpellCommand(const char* args);
 
         bool HandleReloadAreaTriggerTavernCommand(const char* args);
         bool HandleReloadAreaTriggerTemplateCommand(const char* args);
+        bool HandleReloadButtonScriptsCommand(const char* args);
         bool HandleReloadCommandCommand(const char* args);
         bool HandleReloadCreatureQuestRelationsCommand(const char* args);
         bool HandleReloadCreatureQuestInvRelationsCommand(const char* args);
@@ -153,6 +155,8 @@ class ChatHandler
         bool HandleReloadLootTemplatesSkinningCommand(const char* args);
         bool HandleReloadLootTemplatesProspectingCommand(const char* args);
         bool HandleReloadQuestAreaTriggersCommand(const char* args);
+        bool HandleReloadQuestEndScriptsCommand(const char* args);
+        bool HandleReloadQuestStartScriptsCommand(const char* args);
         bool HandleReloadReservedNameCommand(const char*);
         bool HandleReloadSpellAffectCommand(const char* args);
         bool HandleReloadSpellChainCommand(const char* args);
@@ -160,6 +164,7 @@ class ChatHandler
         bool HandleReloadSpellLearnSpellCommand(const char* args);
         bool HandleReloadSpellProcEventCommand(const char* args);
         bool HandleReloadSpellScriptTargetCommand(const char* args);
+        bool HandleReloadSpellScriptsCommand(const char* args);
 
         bool HandleAddHonorCommand(const char* args);
         bool HandleHonorAddKillCommand(const char* args);

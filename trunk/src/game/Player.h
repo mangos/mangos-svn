@@ -966,19 +966,19 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void PrepareQuestMenu( uint64 guid );
         void SendPreparedQuest( uint64 guid );
-        Quest *GetActiveQuest( uint32 quest_id ) const;
-        Quest *GetNextQuest( uint64 guid, Quest *pQuest );
+        Quest const *GetActiveQuest( uint32 quest_id ) const;
+        Quest const *GetNextQuest( uint64 guid, Quest const *pQuest );
         bool CanSeeStartQuest( uint32 quest_id );
-        bool CanTakeQuest( Quest *pQuest, bool msg );
-        bool CanAddQuest( Quest *pQuest, bool msg );
+        bool CanTakeQuest( Quest const *pQuest, bool msg );
+        bool CanAddQuest( Quest const *pQuest, bool msg );
         bool CanCompleteQuest( uint32 quest_id );
-        bool CanCompleteRepeatableQuest(Quest *pQuest);
-        bool CanRewardQuest( Quest *pQuest, bool msg );
-        bool CanRewardQuest( Quest *pQuest, uint32 reward, bool msg );
-        void AddQuest( Quest *pQuest, Object *questGiver );
+        bool CanCompleteRepeatableQuest(Quest const *pQuest);
+        bool CanRewardQuest( Quest const *pQuest, bool msg );
+        bool CanRewardQuest( Quest const *pQuest, uint32 reward, bool msg );
+        void AddQuest( Quest const *pQuest, Object *questGiver );
         void CompleteQuest( uint32 quest_id );
         void IncompleteQuest( uint32 quest_id );
-        void RewardQuest( Quest *pQuest, uint32 reward, Object* questGiver );
+        void RewardQuest( Quest const *pQuest, uint32 reward, Object* questGiver );
         void FailQuest( uint32 quest_id );
         void FailTimedQuest( uint32 quest_id );
         bool SatisfyQuestClass( uint32 quest_id, bool msg );
@@ -1012,12 +1012,12 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool CanShareQuest(uint32 quest_id);
 
         void SendQuestComplete( uint32 quest_id );
-        void SendQuestReward( Quest *pQuest, uint32 XP, Object* questGiver );
+        void SendQuestReward( Quest const *pQuest, uint32 XP, Object* questGiver );
         void SendQuestFailed( uint32 quest_id );
         void SendQuestTimerFailed( uint32 quest_id );
         void SendCanTakeQuestResponse( uint32 msg );
         void SendPushToPartyResponse( Player *pPlayer, uint32 msg );
-        void SendQuestUpdateAddItem( uint32 quest_id, uint32 item_idx, uint32 count );
+        void SendQuestUpdateAddItem( Quest const* pQuest, uint32 item_idx, uint32 count );
         void SendQuestUpdateAddCreature( uint32 quest_id, uint64 guid, uint32 creature_idx, uint32 old_count, uint32 add_count );
 
         uint64 GetDivider() { return m_divider; };
@@ -1404,7 +1404,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool ModifyFactionReputation(FactionEntry const* factionEntry, int32 standing);
         int32 CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep);
         void RewardReputation(Unit *pVictim, float rate);
-        void RewardReputation(Quest *pQuest);
+        void RewardReputation(Quest const *pQuest);
         void SetInitialFactions();
         void UpdateReputation() const;
         void SendSetFactionStanding(const Faction* faction) const;

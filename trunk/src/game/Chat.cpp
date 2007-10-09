@@ -164,11 +164,13 @@ ChatCommand * ChatHandler::getCommandTable()
         { "all",                SEC_ADMINISTRATOR, &ChatHandler::HandleReloadAllCommand,                 "", NULL },
         { "all_quest",          SEC_ADMINISTRATOR, &ChatHandler::HandleReloadAllQuestCommand,            "", NULL },
         { "all_loot",           SEC_ADMINISTRATOR, &ChatHandler::HandleReloadAllLootCommand,             "", NULL },
+        { "all_scripts",        SEC_ADMINISTRATOR, &ChatHandler::HandleReloadAllSpellCommand,            "", NULL },
         { "all_spell",          SEC_ADMINISTRATOR, &ChatHandler::HandleReloadAllSpellCommand,            "", NULL },
 
         { "areatrigger_tavern",          SEC_ADMINISTRATOR, &ChatHandler::HandleReloadAreaTriggerTavernCommand,       "", NULL },
         { "areatrigger_template",        SEC_ADMINISTRATOR, &ChatHandler::HandleReloadAreaTriggerTemplateCommand,     "", NULL },
         { "areatrigger_involvedrelation",SEC_ADMINISTRATOR, &ChatHandler::HandleReloadQuestAreaTriggersCommand,       "", NULL },
+        { "button_scripts",              SEC_ADMINISTRATOR, &ChatHandler::HandleReloadButtonScriptsCommand,           "", NULL },
         { "command",                     SEC_ADMINISTRATOR, &ChatHandler::HandleReloadCommandCommand,                 "", NULL },
         { "creature_involvedrelation",   SEC_ADMINISTRATOR, &ChatHandler::HandleReloadCreatureQuestInvRelationsCommand,"",NULL },
         { "creature_loot_template",      SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesCreatureCommand,   "", NULL },
@@ -182,6 +184,8 @@ ChatCommand * ChatHandler::getCommandTable()
         { "pickpocketing_loot_template", SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesPickpocketingCommand,"",NULL},
         { "prospecting_loot_template",   SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesProspectingCommand,"", NULL },
         { "prospecting_loot_template",   SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesProspectingCommand,"", NULL },
+        { "quest_end_scripts",           SEC_ADMINISTRATOR, &ChatHandler::HandleReloadQuestEndScriptsCommand,         "", NULL },
+        { "quest_start_scripts",         SEC_ADMINISTRATOR, &ChatHandler::HandleReloadQuestStartScriptsCommand,       "", NULL },
         { "reserved_name",               SEC_ADMINISTRATOR, &ChatHandler::HandleReloadReservedNameCommand,            "", NULL },
         { "spell_affect",                SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellAffectCommand,             "", NULL },
         { "spell_chain",                 SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellChainCommand,              "", NULL },
@@ -189,6 +193,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "spell_learn_spell",           SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellLearnSpellCommand,         "", NULL },
         { "spell_proc_event",            SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellProcEventCommand,          "", NULL },
         { "spell_script_target",         SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellScriptTargetCommand,       "", NULL },
+        { "spell_scripts",               SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellScriptsCommand,            "", NULL },
 
         { "",                            SEC_ADMINISTRATOR, &ChatHandler::HandleReloadCommand,                        "", NULL },
         { NULL,                          0,                 NULL,                                                     "", NULL }

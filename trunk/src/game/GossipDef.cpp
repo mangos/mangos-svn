@@ -130,10 +130,12 @@ void PlayerMenu::SendGossipMenu( uint32 TitleTextId, uint64 npcGUID )
     for ( uint16 iI = 0; iI < pQuestMenu->MenuItemCount(); iI++ )
     {
         uint32 questID = pQuestMenu->GetItem(iI).m_qId;
+        Quest const* pQuest = objmgr.GetQuestTemplate(questID);
+
         data << questID;
         data << uint32( pQuestMenu->GetItem(iI).m_qIcon );
-        data << uint32( objmgr.mQuestTemplates[questID]->GetQuestLevel() );
-        data << objmgr.mQuestTemplates[questID]->GetTitle();
+        data << uint32( pQuest ? pQuest->GetQuestLevel() : 0 );
+        data << (pQuest ? pQuest->GetTitle() : "");
     }
 
     pSession->SendPacket( &data );
@@ -238,7 +240,7 @@ QuestMenu::~QuestMenu()
 
 void QuestMenu::AddMenuItem( uint32 QuestId, uint8 Icon)
 {
-    Quest * qinfo = objmgr.mQuestTemplates[QuestId];
+    Quest const* qinfo = objmgr.GetQuestTemplate(QuestId);
     if (!qinfo) return;
 
     ASSERT( m_qItems.size() <= GOSSIP_MAX_MENU_ITEMS  );
@@ -281,10 +283,12 @@ void PlayerMenu::SendQuestGiverQuestList( QEmote eEmote, std::string Title, uint
     {
         QuestMenuItem qmi=pQuestMenu->GetItem(iI);
         uint32 questID = qmi.m_qId;
+        Quest const *pQuest = objmgr.GetQuestTemplate(questID);
+
         data << questID;
         data << uint32( qmi.m_qIcon );
-        data << uint32( objmgr.mQuestTemplates[questID]->GetQuestLevel() );
-        data << objmgr.mQuestTemplates[questID]->GetTitle();
+        data << uint32( pQuest ? pQuest->GetQuestLevel() : 0 );
+        data << ( pQuest ? pQuest->GetTitle() : "" );
     }
     pSession->SendPacket( &data );
     //uint32 fqid=pQuestMenu->GetItem(0).m_qId;
@@ -300,7 +304,7 @@ void PlayerMenu::SendQuestGiverStatus( uint32 questStatus, uint64 npcGUID )
     //sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_STATUS NPC Guid=%u, status=%u",GUID_LOPART(npcGUID),questStatus);
 }
 
-void PlayerMenu::SendQuestGiverQuestDetails( Quest *pQuest, uint64 npcGUID, bool ActivateAccept)
+void PlayerMenu::SendQuestGiverQuestDetails( Quest const *pQuest, uint64 npcGUID, bool ActivateAccept )
 {
     WorldPacket data(SMSG_QUESTGIVER_QUEST_DETAILS, 100);   // guess size
 
@@ -373,7 +377,7 @@ void PlayerMenu::SendQuestGiverQuestDetails( Quest *pQuest, uint64 npcGUID, bool
     //sLog.outDebug("WORLD: Sent SMSG_QUESTGIVER_QUEST_DETAILS NPCGuid=%u, questid=%u",GUID_LOPART(npcGUID),pQuest->GetQuestId());
 }
 
-void PlayerMenu::SendQuestQueryResponse( Quest *pQuest )
+void PlayerMenu::SendQuestQueryResponse( Quest const *pQuest )
 {
     WorldPacket data( SMSG_QUEST_QUERY_RESPONSE, 100 );     // guess size
 
@@ -465,7 +469,7 @@ void PlayerMenu::SendQuestQueryResponse( Quest *pQuest )
 
 void PlayerMenu::SendQuestGiverOfferReward( uint32 quest_id, uint64 npcGUID, bool EnbleNext )
 {
-    Quest * qInfo = objmgr.mQuestTemplates[quest_id];
+    Quest const* qInfo = objmgr.GetQuestTemplate(quest_id);
     if(!qInfo)
         return;
 
@@ -553,7 +557,7 @@ void PlayerMenu::SendQuestGiverOfferReward( uint32 quest_id, uint64 npcGUID, boo
     //sLog.outDebug( "WORLD: Sent SMSG_QUESTGIVER_OFFER_REWARD NPCGuid=%u, questid=%u",GUID_LOPART(npcGUID),quest_id );
 }
 
-void PlayerMenu::SendQuestGiverRequestItems( Quest *pQuest, uint64 npcGUID, bool Completable, bool CloseOnCancel )
+void PlayerMenu::SendQuestGiverRequestItems( Quest const *pQuest, uint64 npcGUID, bool Completable, bool CloseOnCancel )
 {
     // We can always call to RequestItems, but this packet only goes out if there are actually
     // items.  Otherwise, we'll skip straight to the OfferReward
