@@ -500,40 +500,41 @@ void Spell::EffectDummy(uint32 i)
                 return;
             }
             break;
-    }
-
-    //Life Tap (only it have this with dummy effect)
-    if(m_spellInfo->SpellFamilyName == SPELLFAMILY_WARLOCK && m_spellInfo->SpellFamilyFlags == 0x40000)
-    {
-        float cost = m_currentBasePoints[0]+1;
-
-        if(Player* modOwner = m_caster->GetSpellModOwner())
-            modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, cost);
-
-        uint32 dmg = m_caster->SpellDamageBonus(m_caster, m_spellInfo,uint32(cost > 0 ? cost : 0), SPELL_DIRECT_DAMAGE);
-
-        if(int32(m_caster->GetHealth()) > dmg)
-        {
-            m_caster->SendSpellNonMeleeDamageLog(m_caster, m_spellInfo->Id, dmg, SpellSchools(m_spellInfo->School), 0, 0, false, 0, false);
-            m_caster->DealDamage(m_caster,dmg,NULL,DIRECT_DAMAGE,SpellSchools(m_spellInfo->School),m_spellInfo,PROC_FLAG_NONE,false);
-
-            int32 mana = dmg;
-
-            Unit::AuraList const& auraDummy = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
-            for(Unit::AuraList::const_iterator itr = auraDummy.begin(); itr != auraDummy.end(); ++itr)
+        case SPELLFAMILY_WARLOCK:
+            //Life Tap (only it have this with dummy effect)
+            if (m_spellInfo->SpellFamilyFlags == 0x40000)
             {
-                // only Imp. Life Tap have this in combination with dummy aura
-                if((*itr)->GetSpellProto()->SpellFamilyName==SPELLFAMILY_WARLOCK && (*itr)->GetSpellProto()->SpellIconID == 208)
-                    mana = ((*itr)->GetModifier()->m_amount + 100)* mana / 100;
-            }
+                float cost = m_currentBasePoints[0]+1;
 
-            m_caster->ModifyPower(POWER_MANA,mana);
-            if(m_caster->GetTypeId() == TYPEID_PLAYER)
-                m_caster->SendHealSpellOnPlayerPet(m_caster, m_spellInfo->Id, mana, POWER_MANA,false);
-        }
-        else
-            SendCastResult(SPELL_FAILED_FIZZLE);
-        return;
+                if(Player* modOwner = m_caster->GetSpellModOwner())
+                    modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, cost);
+
+                uint32 dmg = m_caster->SpellDamageBonus(m_caster, m_spellInfo,uint32(cost > 0 ? cost : 0), SPELL_DIRECT_DAMAGE);
+
+                if(int32(m_caster->GetHealth()) > dmg)
+                {
+                    m_caster->SendSpellNonMeleeDamageLog(m_caster, m_spellInfo->Id, dmg, SpellSchools(m_spellInfo->School), 0, 0, false, 0, false);
+                    m_caster->DealDamage(m_caster,dmg,NULL,DIRECT_DAMAGE,SpellSchools(m_spellInfo->School),m_spellInfo,PROC_FLAG_NONE,false);
+
+                    int32 mana = dmg;
+
+                    Unit::AuraList const& auraDummy = m_caster->GetAurasByType(SPELL_AURA_DUMMY);
+                    for(Unit::AuraList::const_iterator itr = auraDummy.begin(); itr != auraDummy.end(); ++itr)
+                    {
+                        // only Imp. Life Tap have this in combination with dummy aura
+                        if((*itr)->GetSpellProto()->SpellFamilyName==SPELLFAMILY_WARLOCK && (*itr)->GetSpellProto()->SpellIconID == 208)
+                            mana = ((*itr)->GetModifier()->m_amount + 100)* mana / 100;
+                    }
+
+                    m_caster->ModifyPower(POWER_MANA,mana);
+                    if(m_caster->GetTypeId() == TYPEID_PLAYER)
+                        m_caster->SendHealSpellOnPlayerPet(m_caster, m_spellInfo->Id, mana, POWER_MANA,false);
+                }
+                else
+                    SendCastResult(SPELL_FAILED_FIZZLE);
+                return;
+            }
+            break;
     }
 
     // starshards/curse of agony hack .. this applies to 1.10 only
@@ -932,6 +933,26 @@ void Spell::EffectDummy(uint32 i)
             }
 
             m_caster->CastSpell(m_caster,spell_id,true,NULL);
+            return;
+        }
+
+        // Blessing of Faith
+        case 37877:
+        {
+            if(!unitTarget)
+                return;
+
+            uint32 spell_id = 0;
+            switch(unitTarget->getClass())
+            {
+                case CLASS_DRUID:   spell_id = 37878; break;
+                case CLASS_PALADIN: spell_id = 37879; break;
+                case CLASS_PRIEST:  spell_id = 37880; break;
+                case CLASS_SHAMAN:  spell_id = 37881; break;
+                default: return;                            // ignore for not healing classes
+            }
+
+            m_caster->CastSpell(m_caster,spell_id,true);
             return;
         }
 

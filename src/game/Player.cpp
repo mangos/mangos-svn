@@ -11323,6 +11323,30 @@ void Player::SetQuestStatus( uint32 quest_id, QuestStatus status )
     }
 }
 
+// not used in MaNGOS, but used in scripting code
+uint32 Player::GetReqKillOrCastCurrentCount(uint32 quest_id, uint32 entry)
+{
+    Quest const* qInfo = objmgr.GetQuestTemplate(quest_id);
+
+    if( !qInfo )
+        return 0;
+
+    uint32 curkillcount;
+    uint32 reqkill;
+
+    for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
+    {
+        reqkill = qInfo->ReqCreatureOrGOId[j];
+
+        if ( reqkill == entry )
+        {
+            curkillcount = mQuestStatus[quest_id].m_creatureOrGOcount[j];
+            return curkillcount;
+        }
+    }
+    return 0;
+}
+
 void Player::AdjustQuestReqItemCount( Quest const* pQuest )
 {
     if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
