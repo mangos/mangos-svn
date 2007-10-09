@@ -135,7 +135,17 @@ void PlayerMenu::SendGossipMenu( uint32 TitleTextId, uint64 npcGUID )
         data << questID;
         data << uint32( pQuestMenu->GetItem(iI).m_qIcon );
         data << uint32( pQuest ? pQuest->GetQuestLevel() : 0 );
-        data << (pQuest ? pQuest->GetTitle() : "");
+        std::string Title = pQuest->GetTitle();
+        if (pSession->GetSessionLanguage()>0)
+        {
+            QuestLocale const *ql = objmgr.GetQuestLocale(questID);
+            if (ql)
+            {
+                if (ql->Title[pSession->GetSessionLanguage()]!="")
+                    Title=ql->Title[pSession->GetSessionLanguage()];
+            }
+        }
+        data << Title;
     }
 
     pSession->SendPacket( &data );
@@ -178,34 +188,54 @@ void PlayerMenu::SendTalking( uint32 textID )
         data << uint32( 0 );
         data << "Greetings $N";
         data << "Greetings $N";
-    } else
+    } else {
+        std::string Text_0[8],Text_1[8];
+        for (int i=0;i<8;i++)
+        {
+            Text_0[i]=pGossip->Options[i].Text_0;
+            Text_1[i]=pGossip->Options[i].Text_1;
+        }
 
-    for (int i=0; i<8; i++)
-    {
-        data << pGossip->Options[i].Probability;
+        if (pSession->GetSessionLanguage()>0)
+        {
+            NpcTextLocale const *nl = objmgr.GetNpcTextLocale(textID);
+            if (nl)
+            {
+                for (int i=0;i<8;i++)
+                {
+                    if (nl->Text_0[i][pSession->GetSessionLanguage()]!="")
+                        Text_0[i]=nl->Text_0[i][pSession->GetSessionLanguage()];
+                    if (nl->Text_1[i][pSession->GetSessionLanguage()]!="")
+                        Text_1[i]=nl->Text_1[i][pSession->GetSessionLanguage()];
+                }
+            }
+        }
+        for (int i=0; i<8; i++)
+        {
+            data << pGossip->Options[i].Probability;
 
-        if ( pGossip->Options[i].Text_0 == "" )
-            data << pGossip->Options[i].Text_1;
-        else
-            data << pGossip->Options[i].Text_0;
+            if ( Text_0[i] == "" )
+                data << Text_1[i];
+            else
+                data << Text_0[i];
 
-        if ( pGossip->Options[i].Text_1 == "" )
-            data << pGossip->Options[i].Text_0; 
-        else
-            data << pGossip->Options[i].Text_1;
+            if ( Text_1[i] == "" )
+                data << Text_0[i]; 
+            else
+                data << Text_1[i];
 
-        data << pGossip->Options[i].Language;
+            data << pGossip->Options[i].Language;
 
-        data << pGossip->Options[i].Emotes[0]._Delay;
-        data << pGossip->Options[i].Emotes[0]._Emote;
+            data << pGossip->Options[i].Emotes[0]._Delay;
+            data << pGossip->Options[i].Emotes[0]._Emote;
 
-        data << pGossip->Options[i].Emotes[1]._Delay;
-        data << pGossip->Options[i].Emotes[1]._Emote;
+            data << pGossip->Options[i].Emotes[1]._Delay;
+            data << pGossip->Options[i].Emotes[1]._Emote;
 
-        data << pGossip->Options[i].Emotes[2]._Delay;
-        data << pGossip->Options[i].Emotes[2]._Emote;
+            data << pGossip->Options[i].Emotes[2]._Delay;
+            data << pGossip->Options[i].Emotes[2]._Emote;
+        }
     }
-
     pSession->SendPacket( &data );
 
     sLog.outDetail( "WORLD: Sent SMSG_NPC_TEXT_UPDATE " );
@@ -308,9 +338,28 @@ void PlayerMenu::SendQuestGiverQuestDetails( Quest const *pQuest, uint64 npcGUID
 {
     WorldPacket data(SMSG_QUESTGIVER_QUEST_DETAILS, 100);   // guess size
 
+    std::string Title,Details,Objectives,EndText;
+    Title = pQuest->GetTitle();
+    Details = pQuest->GetDetails();
+    Objectives = pQuest->GetObjectives();
+    EndText = pQuest->GetEndText();
+    if (pSession->GetSessionLanguage()>0)
+    {
+        QuestLocale const *ql = objmgr.GetQuestLocale(pQuest->GetQuestId());
+        if (ql)
+        {
+            if (ql->Title[pSession->GetSessionLanguage()]!="")
+                Title=ql->Title[pSession->GetSessionLanguage()];
+            if (ql->Details[pSession->GetSessionLanguage()]!="")
+                Details=ql->Details[pSession->GetSessionLanguage()];
+            if (ql->Objectives[pSession->GetSessionLanguage()]!="")
+                Objectives=ql->Objectives[pSession->GetSessionLanguage()];
+        }
+    }
+
     data << npcGUID;
-    data << pQuest->GetQuestId() << pQuest->GetTitle() << pQuest->GetDetails();
-    data << pQuest->GetObjectives();
+    data << pQuest->GetQuestId() << Title << Details;
+    data << Objectives;
     data << (uint32)ActivateAccept;
     data << pQuest->GetSuggestedPlayers();
 
@@ -379,6 +428,31 @@ void PlayerMenu::SendQuestGiverQuestDetails( Quest const *pQuest, uint64 npcGUID
 
 void PlayerMenu::SendQuestQueryResponse( Quest const *pQuest )
 {
+    std::string Title,Details,Objectives,EndText;
+    std::string ObjectiveText[QUEST_OBJECTIVES_COUNT];
+    Title = pQuest->GetTitle();
+    Details = pQuest->GetDetails();
+    Objectives = pQuest->GetObjectives();
+    EndText = pQuest->GetEndText();
+    for (int i=0;i<QUEST_OBJECTIVES_COUNT;i++)
+        ObjectiveText[i]=pQuest->ObjectiveText[i];
+    if (pSession->GetSessionLanguage()>0)
+    {
+        QuestLocale const *ql = objmgr.GetQuestLocale(pQuest->GetQuestId());
+        if (ql)
+        {
+            if (ql->Title[pSession->GetSessionLanguage()]!="")
+                Title=ql->Title[pSession->GetSessionLanguage()];
+            if (ql->Details[pSession->GetSessionLanguage()]!="")
+                Details=ql->Details[pSession->GetSessionLanguage()];
+            if (ql->Objectives[pSession->GetSessionLanguage()]!="")
+                Objectives=ql->Objectives[pSession->GetSessionLanguage()];
+            for (int i=0;i<QUEST_OBJECTIVES_COUNT;i++)
+                if (ql->ObjectiveText[i][pSession->GetSessionLanguage()]!="")
+                    ObjectiveText[i]=ql->ObjectiveText[i][pSession->GetSessionLanguage()];
+        }
+    }
+
     WorldPacket data( SMSG_QUEST_QUERY_RESPONSE, 100 );     // guess size
 
     data << uint32(pQuest->GetQuestId());
@@ -439,10 +513,10 @@ void PlayerMenu::SendQuestQueryResponse( Quest const *pQuest )
     data << pQuest->GetPointY();
     data << pQuest->GetPointOpt();
 
-    data << pQuest->GetTitle();
-    data << pQuest->GetObjectives();
-    data << pQuest->GetDetails();
-    data << pQuest->GetEndText();
+    data << Title;
+    data << Objectives;
+    data << Details;
+    data << EndText;
 
     for (iI = 0; iI < QUEST_OBJECTIVES_COUNT; iI++)
     {
@@ -461,7 +535,7 @@ void PlayerMenu::SendQuestQueryResponse( Quest const *pQuest )
     }
 
     for (iI = 0; iI < QUEST_OBJECTIVES_COUNT; iI++)
-        data << pQuest->ObjectiveText[iI];
+        data << ObjectiveText[iI];
 
     pSession->SendPacket( &data );
     //sLog.outDebug( "WORLD: Sent SMSG_QUEST_QUERY_RESPONSE questid=%u",pQuest->GetQuestId() );
@@ -469,12 +543,27 @@ void PlayerMenu::SendQuestQueryResponse( Quest const *pQuest )
 
 void PlayerMenu::SendQuestGiverOfferReward( Quest const* pQuest, uint64 npcGUID, bool EnbleNext )
 {
+    std::string Title,OfferRewardText;
+    Title = pQuest->GetTitle();
+    OfferRewardText = pQuest->GetOfferRewardText();
+    if (pSession->GetSessionLanguage()>0)
+    {
+        QuestLocale const *ql = objmgr.GetQuestLocale(pQuest->GetQuestId());
+        if (ql)
+        {
+            if (ql->Title[pSession->GetSessionLanguage()]!="")
+                Title=ql->Title[pSession->GetSessionLanguage()];
+            if (ql->OfferRewardText[pSession->GetSessionLanguage()]!="")
+                OfferRewardText=ql->OfferRewardText[pSession->GetSessionLanguage()];
+        }
+    }
+
     WorldPacket data( SMSG_QUESTGIVER_OFFER_REWARD, 50 );   // guess size
 
     data << npcGUID;
     data << pQuest->GetQuestId();
-    data << pQuest->GetTitle();
-    data << pQuest->GetOfferRewardText();
+    data << Title;
+    data << OfferRewardText;
 
     data << uint32( EnbleNext );
 
@@ -559,18 +648,33 @@ void PlayerMenu::SendQuestGiverRequestItems( Quest const *pQuest, uint64 npcGUID
     // items.  Otherwise, we'll skip straight to the OfferReward
 
     // We may wish a better check, perhaps checking the real quest requirements
-    if (strlen(pQuest->GetRequestItemsText()) == 0)
+    if (pQuest->GetRequestItemsText().size() == 0)
     {
         SendQuestGiverOfferReward(pQuest, npcGUID, true);
         return;
     }
 
+    std::string Title,RequestItemsText;
+    Title = pQuest->GetTitle();
+    RequestItemsText = pQuest->GetRequestItemsText();
+    if (pSession->GetSessionLanguage()>0)
+    {
+        QuestLocale const *ql = objmgr.GetQuestLocale(pQuest->GetQuestId());
+        if (ql)
+        {
+            if (ql->Title[pSession->GetSessionLanguage()]!="")
+                Title=ql->Title[pSession->GetSessionLanguage()];
+            if (ql->RequestItemsText[pSession->GetSessionLanguage()]!="")
+                RequestItemsText=ql->RequestItemsText[pSession->GetSessionLanguage()];
+        }
+    }
+
     WorldPacket data( SMSG_QUESTGIVER_REQUEST_ITEMS, 50 );  // guess size
     data << npcGUID;
     data << pQuest->GetQuestId();
-    data << pQuest->GetTitle();
+    data << Title;
 
-    data << pQuest->GetRequestItemsText();
+    data << RequestItemsText;
 
     data << uint32(0x00);                                   // unk
 

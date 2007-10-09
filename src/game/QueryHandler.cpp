@@ -114,8 +114,6 @@ void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
         //    return;
     }
 
-    //CreatureInfo const *ci = unit->GetCreatureInfo();
-
     CreatureInfo const *ci = objmgr.GetCreatureTemplate(entry);
 
     if (!ci)
@@ -124,18 +122,38 @@ void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
         return;
     }
 
+    std::string Name, SubName;
+    //CreatureInfo const *ci = unit->GetCreatureInfo();
+    Name = ci->Name;
+    SubName = ci->SubName;
+
+    if (GetSessionLanguage()>0)
+    {
+        CreatureLocale const *cl = objmgr.GetCreatureLocale(entry);
+        if (cl)
+        {
+            if (cl->Name[GetSessionLanguage()]!="") // default to english
+                Name = cl->Name[GetSessionLanguage()];
+            if (cl->SubName[GetSessionLanguage()]!="") // same
+                SubName = cl->SubName[GetSessionLanguage()];
+        }
+    }
+
     sLog.outDetail("WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u - GUID: %u.", ci->Name, entry, guid);
 
     WorldPacket data( SMSG_CREATURE_QUERY_RESPONSE, 100 );  // guess size
     data << (uint32)entry;                                  // creature entry
-    data << (unit ? unit->GetName() : ci->Name);            // creature name
+    if (unit)
+        data << ((unit->isPet()) ? unit->GetName() : Name); // creature name
+    else
+        data << Name;
 
     data << uint8(0) << uint8(0) << uint8(0);               // name2, name3, name4, always empty
 
     if (unit)
-        data << ((unit->isPet()) ? "Pet" : ci->SubName);    // subname
+        data << ((unit->isPet()) ? "Pet" : SubName);        // subname
     else
-        data << ci->SubName;
+        data << SubName;
 
     data << ci->flag1;                                      // flags          wdbFeild7=wad flags1
 
@@ -157,7 +175,7 @@ void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
     data << (float)1;                                       // unk
     data << (float)1;                                       // unk
     data << uint8(ci->civilian);
-    data << uint8(0);                                       // boss flag?
+    data << uint8(ci->RacialLeader);
     SendPacket( &data );
 }
 
@@ -171,6 +189,7 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
     recv_data >> entryID;
     recv_data >> guid;
 
+    std::string Name;
     const GameObjectInfo *info = objmgr.GetGameObjectInfo(entryID);
                                                             // guess size
     WorldPacket data ( SMSG_GAMEOBJECT_QUERY_RESPONSE, 150 );
@@ -181,11 +200,21 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
     }
     else
     {
+        Name = info->name;
+        if (GetSessionLanguage()>0)
+        {
+            GameObjectLocale const *gl = objmgr.GetGameObjectLocale(entryID);
+            if (gl)
+            {
+                if (gl->Name[GetSessionLanguage()]!="") // default to english
+                    Name = gl->Name[GetSessionLanguage()];
+            }
+        }
         sLog.outDetail("WORLD: CMSG_GAMEOBJECT_QUERY '%s' - Entry: %u - GUID: %u.", info->name, entryID, guid);
         data << entryID;
         data << (uint32)info->type;
         data << (uint32)info->displayId;
-        data << info->name;
+        data << Name;
         data << uint8(0) << uint8(0) << uint8(0);           // name2, name3, name4
         data << uint8(0);                                   // 2.0.3, string
         data << uint8(0);                                   // 2.0.3, string
@@ -266,32 +295,54 @@ void WorldSession::HandleNpcTextQueryOpcode( WorldPacket & recv_data )
         data << uint32( 0 );
         data << "Greetings $N";
         data << "Greetings $N";
-    } else
+    } else {
+        std::string Text_0[8], Text_1[8];
+        for (int i=0;i<8;i++)
+        {
+            Text_0[i]=pGossip->Options[i].Text_0;
+            Text_1[i]=pGossip->Options[i].Text_1;
+        }
 
-    for (int i=0; i<8; i++)
-    {
-        data << pGossip->Options[i].Probability;
+        if (GetSessionLanguage()>0)
+        {
+            NpcTextLocale const *nl = objmgr.GetNpcTextLocale(textID);
+            if (nl)
+            {
+                for (int i=0;i<8;i++)
+                {
+                    if (nl->Text_0[i][GetSessionLanguage()]!="")
+                        Text_0[i]=nl->Text_0[i][GetSessionLanguage()];
+                    if (nl->Text_1[i][GetSessionLanguage()]!="")
+                        Text_1[i]=nl->Text_1[i][GetSessionLanguage()];
+                }
+            }
+        }
 
-        if ( pGossip->Options[i].Text_0 == "" )
-            data << pGossip->Options[i].Text_1;
-        else
-            data << pGossip->Options[i].Text_0;
+        for (int i=0; i<8; i++)
+        {
+            data << pGossip->Options[i].Probability;
 
-        if ( pGossip->Options[i].Text_1 == "" )
-            data << pGossip->Options[i].Text_0; 
-        else
-            data << pGossip->Options[i].Text_1;
+            if ( Text_0[i] == "" )
+                data << Text_1[i];
+            else
+                data << Text_0[i];
 
-        data << pGossip->Options[i].Language;
+            if ( Text_1[i] == "" )
+                data << Text_0[i];
+            else
+                data << Text_1[i];
 
-        data << pGossip->Options[i].Emotes[0]._Delay;
-        data << pGossip->Options[i].Emotes[0]._Emote;
+            data << pGossip->Options[i].Language;
 
-        data << pGossip->Options[i].Emotes[1]._Delay;
-        data << pGossip->Options[i].Emotes[1]._Emote;
+            data << pGossip->Options[i].Emotes[0]._Delay;
+            data << pGossip->Options[i].Emotes[0]._Emote;
 
-        data << pGossip->Options[i].Emotes[2]._Delay;
-        data << pGossip->Options[i].Emotes[2]._Emote;
+            data << pGossip->Options[i].Emotes[1]._Delay;
+            data << pGossip->Options[i].Emotes[1]._Emote;
+
+            data << pGossip->Options[i].Emotes[2]._Delay;
+            data << pGossip->Options[i].Emotes[2]._Emote;
+        }
     }
 
     SendPacket( &data );
@@ -323,7 +374,17 @@ void WorldSession::HandlePageQueryOpcode( WorldPacket & recv_data )
         }
         else
         {
-            data << pPage->Text;
+            std::string Text = pPage->Text;
+            if (GetSessionLanguage()>0)
+            {
+                PageTextLocale const *pl = objmgr.GetPageTextLocale(pageID);
+                if (pl)
+                {
+                    if (pl->Text[GetSessionLanguage()]!="")
+                        Text = pl->Text[GetSessionLanguage()];
+                }
+            }
+            data << Text;
             data << uint32(pPage->Next_Page);
             pageID = pPage->Next_Page;
         }

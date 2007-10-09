@@ -448,6 +448,15 @@ bool AuthSocket::_HandleLogonChallenge()
                         pkt.append(s.AsByteArray(), s.GetNumBytes());
                         pkt.append(unk3.AsByteArray(), 16);
                         pkt << (uint8)0;                    // Added in 1.12.x client branch
+
+                        QueryResult *localeresult = dbRealmServer.PQuery("SELECT `locale` FROM `localization` WHERE `string` = '%c%c'",ch->country[3],ch->country[2]);
+                        if( localeresult )
+                            _localization=(*localeresult)[0].GetUInt8();
+                        else
+                            _localization=LOCALE_ENG; 
+                        if (_localization>=MAX_LOCALE)
+                            _localization=LOCALE_ENG;
+                        sLog.outBasic("[AuthChallenge] acount %s is using '%c%c' locale (%u)", _login.c_str (), ch->country[3],ch->country[2], _localization);
                     }
                 }
                 delete result;
@@ -595,7 +604,7 @@ bool AuthSocket::_HandleLogonProof()
 
         ///- Update the sessionkey, last_ip and last login time in the account table for this account
         // No SQL injection (escaped user name) and IP address as received by socket
-        dbRealmServer.PExecute("UPDATE `account` SET `sessionkey` = '%s', `last_ip` = '%s', `last_login` = NOW() WHERE `username` = '%s'",K.AsHexStr(), GetRemoteAddress().c_str(), _safelogin.c_str() );
+        dbRealmServer.PExecute("UPDATE `account` SET `sessionkey` = '%s', `last_ip` = '%s', `last_login` = NOW(), `locale` = '%u' WHERE `username` = '%s'",K.AsHexStr(), GetRemoteAddress().c_str(),  _localization, _safelogin.c_str() );
 
         ///- Finish SRP6 and send the final result to the client
         sha.Initialize();

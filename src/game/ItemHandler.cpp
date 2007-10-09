@@ -203,6 +203,20 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 
     if( pProto )
     {
+        std::string Name, Description;
+        Name = pProto->Name1;
+        Description = pProto->Description;
+        if (GetSessionLanguage()>0)
+        {
+            ItemLocale const *il = objmgr.GetItemLocale(pProto->ItemId);
+            if (il)
+            {
+                if (il->Name[GetSessionLanguage()]!="") // default to english
+                    Name = il->Name[GetSessionLanguage()];
+                if (il->Description[GetSessionLanguage()]!="") // default to english
+                    Description = il->Description[GetSessionLanguage()];
+            }
+        }
         data << pProto->ItemId;
         data << pProto->Class;
 
@@ -210,7 +224,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         data << uint32(pProto->Class==ITEM_CLASS_CONSUMABLE ? 0 : pProto->SubClass);
 
         data << uint32(-1);                                 // new 2.0.3, not exist in wdb cache?
-        data << pProto->Name1;
+        data << Name;
         data << uint8(0x00);                                //pProto->Name2; // blizz not send name there, just uint8(0x00); <-- \0 = empty string = empty name...
         data << uint8(0x00);                                //pProto->Name3; // blizz not send name there, just uint8(0x00);
         data << uint8(0x00);                                //pProto->Name4; // blizz not send name there, just uint8(0x00);
@@ -308,7 +322,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
             }
         }
         data << pProto->Bonding;
-        data << pProto->Description;
+        data << Description;
         data << pProto->PageText;
         data << pProto->LanguageID;
         data << pProto->PageMaterial;
@@ -812,10 +826,21 @@ void WorldSession::HandleItemNameQueryOpcode(WorldPacket & recv_data)
     ItemPrototype const *pProto = objmgr.GetItemPrototype( itemid );
     if( pProto )
     {
+        std::string Name;
+        Name = pProto->Name1;
+        if (GetSessionLanguage()>0)
+        {
+            ItemLocale const *il = objmgr.GetItemLocale(pProto->ItemId);
+            if (il)
+            {
+                if (il->Name[GetSessionLanguage()]!="") // default to english
+                    Name = il->Name[GetSessionLanguage()];
+            }
+        }
                                                             // guess size
         WorldPacket data(SMSG_ITEM_NAME_QUERY_RESPONSE, (4+10));
         data << pProto->ItemId;
-        data << pProto->Name1;
+        data << Name;
         SendPacket(&data);
         return;
     }

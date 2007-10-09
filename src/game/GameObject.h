@@ -68,6 +68,12 @@ struct GameObjectInfo
     char   *ScriptName;
 };
 
+struct GameObjectLocale
+{
+    uint32 Entry;
+    std::string Name[8];
+};
+
 // from `ganeobject`
 struct GameObjectData
 {

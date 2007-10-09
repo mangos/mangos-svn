@@ -938,4 +938,5 @@ EXTRA_DIST = \
 	4561_command.sql \
 	4571_button_scripts.sql \
 	4577_gameobject.sql \
+	4579.sql \
 	README

@@ -10447,6 +10447,15 @@ void Player::SendPreparedQuest( uint64 guid )
                 title = gossiptext->Options[0].Text_0 == "" ? gossiptext->Options[0].Text_1 : gossiptext->Options[0].Text_0;
                 if( &title == NULL )
                     title = "";
+                if (GetSession()->GetSessionLanguage()>0)
+                {
+                    NpcTextLocale const *nl = objmgr.GetNpcTextLocale(textid);
+                    if (nl)
+                    {
+                        if (nl->Text_0[0][GetSession()->GetSessionLanguage()]!="" || nl->Text_1[0][GetSession()->GetSessionLanguage()]!="")
+                            title = nl->Text_0[0][GetSession()->GetSessionLanguage()]=="" ? nl->Text_1[0][GetSession()->GetSessionLanguage()] : nl->Text_0[0][GetSession()->GetSessionLanguage()];
+                    }
+                }
             }
         }
         PlayerTalkClass->SendQuestGiverQuestList( qe, title, guid );

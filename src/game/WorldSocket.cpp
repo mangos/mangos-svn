@@ -221,6 +221,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     uint32 unk2;
     uint32 BuiltNumberClient;
     uint32 id, security;
+    uint8  locale;
     bool tbc = false;
     std::string account;
     Sha1Hash sha1;
@@ -248,8 +249,8 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     std::string safe_account=account;                       // Duplicate, else will screw the SHA hash verification below
     loginDatabase.escape_string(safe_account);
     //No SQL injection, username escaped.
-    //                                                 0    1         2            3         4         5           6    7    8     9
-    QueryResult *result = loginDatabase.PQuery("SELECT `id`,`gmlevel`,`sessionkey`,`last_ip`,`locked`, `I`, `v`, `s`, `tbc`,`mutetime` FROM `account` WHERE `username` = '%s'", safe_account.c_str());
+    //                                                 0    1         2            3         4         5           6    7    8     9   10
+    QueryResult *result = loginDatabase.PQuery("SELECT `id`,`gmlevel`,`sessionkey`,`last_ip`,`locked`, `I`, `v`, `s`, `tbc`,`mutetime`,`locale` FROM `account` WHERE `username` = '%s'", safe_account.c_str());
 
     ///- Stop if the account is not found
     if ( !result )
@@ -321,7 +322,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     security = fields[1].GetUInt16();
     K.SetHexStr(fields[2].GetString());
     time_t mutetime = time_t(fields[9].GetUInt64());
-
+    locale = fields[10].GetUInt8();
     delete result;
 
     ///- Re-check account ban (same check as in realmd) /// TO DO: why on earth do 2 checks for same thing?
@@ -395,7 +396,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     SendPacket(&packet);
 
     ///- Create a new WorldSession for the player and add it to the World
-    _session = new WorldSession(id, this,security,tbc,mutetime);
+    _session = new WorldSession(id, this,security,tbc,mutetime,locale);
     sWorld.AddSession(_session);
 
     if(sLog.IsOutDebug())                                   // optimize disabled debug output
