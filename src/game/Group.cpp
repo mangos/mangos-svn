@@ -540,82 +540,88 @@ void Group::CountTheRoll(Rolls::iterator roll, uint32 NumberOfPlayers)
     //end of the roll
     if (roll->totalNeed > 0)
     {
-        uint8 maxresul = 0;
-        uint64 maxguid  = (*roll->playerVote.begin()).first;
-        Player *player;
-
-        for( Roll::PlayerVote::const_iterator itr=roll->playerVote.begin(); itr!=roll->playerVote.end(); ++itr)
+        if(!roll->playerVote.empty())
         {
-            if (itr->second != NEED)
-                continue;
+            uint8 maxresul = 0;
+            uint64 maxguid  = (*roll->playerVote.begin()).first;
+            Player *player;
 
-            uint8 randomN = urand(1, 99);
-            SendLootRoll(0, itr->first, randomN, 1, *roll);
-            if (maxresul < randomN)
+            for( Roll::PlayerVote::const_iterator itr=roll->playerVote.begin(); itr!=roll->playerVote.end(); ++itr)
             {
-                maxguid  = itr->first;
-                maxresul = randomN;
-            }
-        }
-        SendLootRollWon(0, maxguid, maxresul, 1, *roll);
-        player = objmgr.GetPlayer(maxguid);
+                if (itr->second != NEED)
+                    continue;
 
-        if(player && player->GetSession())
-        {
-            uint16 dest;
-            LootItem *item = &(roll->loot->items[roll->itemSlot]);
-            uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, roll->itemid, item->count, false );
-            if ( msg == EQUIP_ERR_OK )
-            {
-                item->is_looted = true;
-                roll->loot->NotifyItemRemoved(roll->itemSlot);
-                player->StoreNewItem( dest, roll->itemid, item->count, true, item->randomPropertyId);
+                uint8 randomN = urand(1, 99);
+                SendLootRoll(0, itr->first, randomN, 1, *roll);
+                if (maxresul < randomN)
+                {
+                    maxguid  = itr->first;
+                    maxresul = randomN;
+                }
             }
-            else
+            SendLootRollWon(0, maxguid, maxresul, 1, *roll);
+            player = objmgr.GetPlayer(maxguid);
+
+            if(player && player->GetSession())
             {
-                item->is_blocked = false;
-                player->SendEquipError( msg, NULL, NULL );
+                uint16 dest;
+                LootItem *item = &(roll->loot->items[roll->itemSlot]);
+                uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, roll->itemid, item->count, false );
+                if ( msg == EQUIP_ERR_OK )
+                {
+                    item->is_looted = true;
+                    roll->loot->NotifyItemRemoved(roll->itemSlot);
+                    player->StoreNewItem( dest, roll->itemid, item->count, true, item->randomPropertyId);
+                }
+                else
+                {
+                    item->is_blocked = false;
+                    player->SendEquipError( msg, NULL, NULL );
+                }
             }
         }
     }
     else if (roll->totalGreed > 0)
     {
-        uint8 maxresul = 0;
-        uint64 maxguid = (*roll->playerVote.begin()).first;
-        Player *player;
-
-        Roll::PlayerVote::iterator itr;
-        for (itr=roll->playerVote.begin(); itr!=roll->playerVote.end(); ++itr)
+        if(!roll->playerVote.empty())
         {
-            if (itr->second != GREED)
-                continue;
+            uint8 maxresul = 0;
+            uint64 maxguid = (*roll->playerVote.begin()).first;
+            Player *player;
 
-            uint8 randomN = urand(1, 99);
-            SendLootRoll(0, itr->first, randomN, 2, *roll);
-            if (maxresul < randomN)
+            Roll::PlayerVote::iterator itr;
+            for (itr=roll->playerVote.begin(); itr!=roll->playerVote.end(); ++itr)
             {
-                maxguid  = itr->first;
-                maxresul = randomN;
-            }
-        }
-        SendLootRollWon(0, maxguid, maxresul, 2, *roll);
-        player = objmgr.GetPlayer(maxguid);
+                if (itr->second != GREED)
+                    continue;
 
-        if(player && player->GetSession())
-        {
-            uint16 dest;
-            LootItem *item = &(roll->loot->items[roll->itemSlot]);
-            uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, roll->itemid, item->count, false );
-            if ( msg == EQUIP_ERR_OK )
-            {
-                item->is_looted = true;
-                roll->loot->NotifyItemRemoved(roll->itemSlot);
-                player->StoreNewItem( dest, roll->itemid, item->count, true, item->randomPropertyId);
+                uint8 randomN = urand(1, 99);
+                SendLootRoll(0, itr->first, randomN, 2, *roll);
+                if (maxresul < randomN)
+                {
+                    maxguid  = itr->first;
+                    maxresul = randomN;
+                }
             }
-            else
+            SendLootRollWon(0, maxguid, maxresul, 2, *roll);
+            player = objmgr.GetPlayer(maxguid);
+
+            if(player && player->GetSession())
             {
-                item->is_blocked = false;
-                player->SendEquipError( msg, NULL, NULL );
+                uint16 dest;
+                LootItem *item = &(roll->loot->items[roll->itemSlot]);
+                uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, roll->itemid, item->count, false );
+                if ( msg == EQUIP_ERR_OK )
+                {
+                    item->is_looted = true;
+                    roll->loot->NotifyItemRemoved(roll->itemSlot);
+                    player->StoreNewItem( dest, roll->itemid, item->count, true, item->randomPropertyId);
+                }
+                else
+                {
+                    item->is_blocked = false;
+                    player->SendEquipError( msg, NULL, NULL );
+                }
             }
         }
     }
