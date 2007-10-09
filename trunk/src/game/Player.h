@@ -998,6 +998,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool GetQuestRewardStatus( uint32 quest_id );
         QuestStatus GetQuestStatus( uint32 quest_id );
         void SetQuestStatus( uint32 quest_id, QuestStatus status );
+        uint32 GetReqKillOrCastCurrentCount(uint32 quest_id, uint32 entry);
         void AdjustQuestReqItemCount( Quest const* pQuest );
         uint16 GetQuestSlot( uint32 quest_id );
         void AreaExplored( uint32 questId );
