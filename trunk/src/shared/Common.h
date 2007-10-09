@@ -149,6 +149,14 @@ enum AccountTypes
     SEC_ADMINISTRATOR  = 3
 };
 
+enum LocalesConstants
+{
+    LOCALE_ENG = 0,
+    LOCALE_FR  = 2,
+    LOCALE_DE  = 3,
+    MAX_LOCALE = 8
+};
+
 #if PLATFORM == PLATFORM_WIN32
 #  define MANGOS_DLL_SPEC __declspec(dllexport)
 #else

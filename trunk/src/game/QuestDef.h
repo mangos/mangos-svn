@@ -126,6 +126,18 @@ enum __QuestSpecialFlags                                    //according to mango
     //QUEST_SPECIAL_FLAGS_UNK5          = 2048,             // unknown tbc
 };
 
+struct QuestLocale
+{
+    uint32 Entry;
+    std::string Title[8];
+    std::string Details[8];
+    std::string Objectives[8];
+    std::string OfferRewardText[8];
+    std::string RequestItemsText[8];
+    std::string EndText[8];
+    std::string ObjectiveText[QUEST_OBJECTIVES_COUNT][8];
+};
+ 
 // This Quest class provides a convenient way to access a few pretotaled (cached) quest details,
 // all base quest information, and any utility functions such as generating the amount of
 // xp to give
@@ -147,9 +159,9 @@ class Quest
         uint32 GetRequiredRaces() const { return RequiredRaces; }
         uint32 GetRequiredSkillValue() const { return RequiredSkillValue; }
         uint32 GetRequiredMinRepFaction() const { return RequiredMinRepFaction; }
-         int32 GetRequiredMinRepValue() const { return RequiredMinRepValue; }
+        int32  GetRequiredMinRepValue() const { return RequiredMinRepValue; }
         uint32 GetRequiredMaxRepFaction() const { return RequiredMaxRepFaction; }
-         int32 GetRequiredMaxRepValue() const { return RequiredMaxRepValue; }
+        int32  GetRequiredMaxRepValue() const { return RequiredMaxRepValue; }
         uint32 GetSuggestedPlayers() const { return SuggestedPlayers; }
         uint32 GetLimitTime() const { return LimitTime; }
         int32  GetNextQuestId() const { return NextQuestId; }
@@ -158,12 +170,12 @@ class Quest
         uint32 GetSrcItemId() const { return SrcItemId; }
         uint32 GetSrcItemCount() const { return SrcItemCount; }
         uint32 GetSrcSpell() const { return SrcSpell; }
-        const char* GetTitle() const { return Title.c_str(); }
-        const char* GetDetails() const { return Details.c_str(); }
-        const char* GetObjectives() const { return Objectives.c_str(); }
-        const char* GetOfferRewardText() const { return OfferRewardText.c_str(); }
-        const char* GetRequestItemsText() const { return RequestItemsText.c_str(); }
-        const char* GetEndText() const { return EndText.c_str(); }
+        std::string GetTitle() const { return Title; }
+        std::string GetDetails() const { return Details; }
+        std::string GetObjectives() const { return Objectives; }
+        std::string GetOfferRewardText() const { return OfferRewardText; }
+        std::string GetRequestItemsText() const { return RequestItemsText; }
+        std::string GetEndText() const { return EndText; }
         int32  GetRewOrReqMoney() const { return RewOrReqMoney; }
         uint32 GetRewXpOrMoney() const { return RewXpOrMoney; }
         uint32 GetRewSpell() const { return RewSpell; }

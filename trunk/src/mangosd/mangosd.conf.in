@@ -54,6 +54,14 @@ MaxPingTime = 30
 # 255 = Auto Detect (Default)
 DBC.Locale = 255
 
+# Full localization support activation
+# Use the same codes as for DBC language to enable localization support in this language
+# Be informed that activating it consumes some memory (around 57MB per language activated)
+# ex: StringLocalize = "2" will activate French on top of default English
+# You can activate several languages like StringLocalize = "2 3" for French and German
+# StringLocalize = "" (Default = Disabled)
+StringLocalize = ""
+
 # Enable logging of GM commands - all SQL code will be written to a log file
 # All commands are written to a file: YYYY-MM-DD_logSQL.sql
 # If a new day starts (00:00:00) then a new file is created - the old

@@ -349,11 +349,16 @@ class World
 
         void UpdateRealmCharCount(uint32 accid);
 
+        typedef std::set<uint8> LocalizationMap;
+        LocalizationMap const* GetSupportedLocals() const { return &m_SupportedLocals; }
+
     protected:
         void _UpdateGameTime();
         void ScriptsProcess();
         // callback for UpdateRealmCharacters
         void _UpdateRealmCharCount(QueryResult *resultCharCount, uint32 accountId);
+        void SetSupportedLocals(uint8 local) { m_SupportedLocals.insert(local); }
+        void FillSupportedLocals(std::string str);
 
     private:
         time_t m_startTime;
@@ -394,6 +399,9 @@ class World
         // CLI command holder to be thread safe
         ZThread::LockedQueue<CliCommandHolder*, ZThread::FastMutex> cliCmdQueue;
         SqlResultQueue *m_resultQueue;
+
+        // Localization
+        LocalizationMap m_SupportedLocals;
 };
 
 extern uint32 realmID;

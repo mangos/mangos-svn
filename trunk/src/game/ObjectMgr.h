@@ -112,6 +112,12 @@ typedef HM_NAMESPACE::hash_map<uint64/*(instance,guid) pair*/,time_t> RespawnTim
 
 typedef HM_NAMESPACE::hash_map<uint32,CreatureData> CreatureDataMap;
 typedef HM_NAMESPACE::hash_map<uint32,GameObjectData> GameObjectDataMap;
+typedef HM_NAMESPACE::hash_map<uint32,CreatureLocale> CreatureLocaleMap;
+typedef HM_NAMESPACE::hash_map<uint32,GameObjectLocale> GameObjectLocaleMap;
+typedef HM_NAMESPACE::hash_map<uint32,ItemLocale> ItemLocaleMap;
+typedef HM_NAMESPACE::hash_map<uint32,QuestLocale> QuestLocaleMap;
+typedef HM_NAMESPACE::hash_map<uint32,NpcTextLocale> NpcTextLocaleMap;
+typedef HM_NAMESPACE::hash_map<uint32,PageTextLocale> PageTextLocaleMap;
 
 typedef std::multimap<uint32,uint32> QuestRelations;
 
@@ -415,17 +421,23 @@ class ObjectMgr
         void LoadSpellScriptTarget();
 
         void LoadPetCreateSpells();
+        void LoadCreatureLocales();
         void LoadCreatureTemplates();
         void LoadCreatures();
         void LoadCreatureRespawnTimes();
         void LoadCreatureAddons();
         void LoadCreatureModelInfo();
         void LoadEquipmentTemplates();
+        void LoadGameObjectLocales();
         void LoadGameobjects();
         void LoadGameobjectRespawnTimes();
         void LoadSpellProcEvents();
         void LoadSpellThreats();
         void LoadItemPrototypes();
+        void LoadItemLocales();
+        void LoadQuestLocales();
+        void LoadNpcTextLocales();
+        void LoadPageTextLocales();
 
         void LoadGossipText();
 
@@ -617,6 +629,43 @@ class ObjectMgr
         CreatureData& NewCreatureData(uint32 guid) { return mCreatureDataMap[guid]; }
         void DeleteCreatureData(uint32 guid);
 
+        CreatureLocale const* GetCreatureLocale(uint32 entry) const
+        {
+            CreatureLocaleMap::const_iterator itr = mCreatureLocaleMap.find(entry);
+            if(itr==mCreatureLocaleMap.end()) return NULL;
+            return &itr->second;
+        }
+        GameObjectLocale const* GetGameObjectLocale(uint32 entry) const
+        {
+            GameObjectLocaleMap::const_iterator itr = mGameObjectLocaleMap.find(entry);
+            if(itr==mGameObjectLocaleMap.end()) return NULL;
+            return &itr->second;
+        }
+        ItemLocale const* GetItemLocale(uint32 entry) const
+        {
+            ItemLocaleMap::const_iterator itr = mItemLocaleMap.find(entry);
+            if(itr==mItemLocaleMap.end()) return NULL;
+            return &itr->second;
+        }
+        QuestLocale const* GetQuestLocale(uint32 entry) const
+        {
+            QuestLocaleMap::const_iterator itr = mQuestLocaleMap.find(entry);
+            if(itr==mQuestLocaleMap.end()) return NULL;
+            return &itr->second;
+        }
+        NpcTextLocale const* GetNpcTextLocale(uint32 entry) const
+        {
+            NpcTextLocaleMap::const_iterator itr = mNpcTextLocaleMap.find(entry);
+            if(itr==mNpcTextLocaleMap.end()) return NULL;
+            return &itr->second;
+        }
+        PageTextLocale const* GetPageTextLocale(uint32 entry) const
+        {
+            PageTextLocaleMap::const_iterator itr = mPageTextLocaleMap.find(entry);
+            if(itr==mPageTextLocaleMap.end()) return NULL;
+            return &itr->second;
+        }
+
         GameObjectData const* GetGOData(uint32 guid) const
         {
             GameObjectDataMap::const_iterator itr = mGameObjectDataMap.find(guid);
@@ -721,7 +770,13 @@ class ObjectMgr
 
         MapObjectGuids mMapObjectGuids;
         CreatureDataMap mCreatureDataMap;
+        CreatureLocaleMap mCreatureLocaleMap;
         GameObjectDataMap mGameObjectDataMap;
+        GameObjectLocaleMap mGameObjectLocaleMap;
+        ItemLocaleMap mItemLocaleMap;
+        QuestLocaleMap mQuestLocaleMap;
+        NpcTextLocaleMap mNpcTextLocaleMap;
+        PageTextLocaleMap mPageTextLocaleMap;
         RespawnTimes mCreatureRespawnTimes;
         RespawnTimes mGORespawnTimes;
 

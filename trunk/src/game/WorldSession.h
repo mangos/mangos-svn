@@ -64,7 +64,7 @@ class MANGOS_DLL_SPEC WorldSession
 {
     friend class CharacterHandler;
     public:
-        WorldSession(uint32 id, WorldSocket *sock, uint32 sec, bool tbc, time_t mute_time);
+        WorldSession(uint32 id, WorldSocket *sock, uint32 sec, bool tbc, time_t mute_time, uint8 locale);
         ~WorldSession();
 
         bool PlayerLoading() { return m_playerLoading; }
@@ -170,6 +170,9 @@ class MANGOS_DLL_SPEC WorldSession
 
         // Account mute time
         time_t m_muteTime;
+
+        // Locales
+        uint8 GetSessionLanguage() { return m_sessionLanguage; }
     protected:
 
         void HandleCharEnumOpcode(WorldPacket& recvPacket);
@@ -556,6 +559,7 @@ class MANGOS_DLL_SPEC WorldSession
         bool m_playerLoading;                               // code processed in LoginPlayer
         bool m_playerLogout;                                // code processed in LogoutPlayer
         bool m_playerRecentlyLogout;
+        uint8 m_sessionLanguage;
 
         void FillOpcodeHandlerHashTable();
 

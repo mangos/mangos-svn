@@ -386,6 +386,59 @@ CreatureInfo const* ObjectMgr::GetCreatureTemplate(uint32 id)
     return sCreatureStorage.LookupEntry<CreatureInfo>(id);
 }
 
+void ObjectMgr::LoadCreatureLocales()
+{
+    const World::LocalizationMap *Locales = sWorld.GetSupportedLocals();
+
+    World::LocalizationMap::const_iterator itr = Locales->begin();
+    std::ostringstream ostr;
+    ostr << "`name_loc" << (int)*itr << "`,`subname_loc" << (int)*itr << "`";
+    itr++;
+    while (itr != Locales->end())
+    { 
+        ostr << ",`name_loc" << (int)*itr << "`,`subname_loc" << (int)*itr << "`";
+        itr++;
+    }
+
+    QueryResult *result = sDatabase.PQuery("SELECT `entry`,%s FROM `locales_creature`",ostr.str().c_str());
+
+    if(!result)
+    {
+        barGoLink bar(1);
+
+        bar.step();
+
+        sLog.outString("");
+        sLog.outErrorDb(">> Loaded 0 creature locale strings. DB table `locales_creature` is empty.");
+        return;
+    }
+
+    barGoLink bar(result->GetRowCount());
+
+    do
+    {
+        Field *fields = result->Fetch();
+        bar.step();
+
+        uint32 entry = fields[0].GetUInt32();
+
+        CreatureLocale& data = mCreatureLocaleMap[entry];
+        uint16 currentIndex=0;
+        for (itr = Locales->begin(); itr != Locales->end(); ++itr)
+        {
+            data.Name[*itr]   = fields[currentIndex*2+1].GetCppString();
+            data.SubName[*itr]= fields[currentIndex*2+2].GetCppString();
+            currentIndex++;
+        }
+
+    } while (result->NextRow());
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString( ">> Loaded %u creature locale strings", mCreatureLocaleMap.size() );
+}
+
 void ObjectMgr::LoadCreatureTemplates()
 {
     sCreatureStorage.Load();
@@ -911,6 +964,58 @@ void ObjectMgr::LoadAuctions()
     sLog.outString();
     sLog.outString( ">> Loaded %u auctions", AuctionCount );
     sLog.outString();
+}
+
+void ObjectMgr::LoadItemLocales()
+{
+    const World::LocalizationMap *Locales = sWorld.GetSupportedLocals();
+
+    World::LocalizationMap::const_iterator itr = Locales->begin();
+    std::ostringstream ostr;
+    ostr << "`name_loc" << (int)*itr << "`,`description_loc" << (int)*itr << "`";
+    itr++;
+    while (itr != Locales->end())
+    { 
+        ostr << ",`name_loc" << (int)*itr << "`,`description_loc" << (int)*itr << "`";
+        itr++;
+    }
+
+    QueryResult *result = sDatabase.PQuery("SELECT `entry`,%s FROM `locales_item`",ostr.str().c_str());
+
+    if(!result)
+    {
+        barGoLink bar(1);
+
+        bar.step();
+
+        sLog.outString("");
+        sLog.outErrorDb(">> Loaded 0 Item locale strings. DB table `locales_item` is empty.");
+        return;
+    }
+
+    barGoLink bar(result->GetRowCount());
+
+    do
+    {
+        Field *fields = result->Fetch();
+        bar.step();
+
+        uint32 entry = fields[0].GetUInt32();
+
+        ItemLocale& data = mItemLocaleMap[entry];
+        uint16 currentIndex=0;
+        for (itr = Locales->begin(); itr != Locales->end(); ++itr)
+        {
+            data.Name[*itr]   = fields[currentIndex*2+1].GetCppString();
+            data.Description[*itr]= fields[currentIndex*2+2].GetCppString();
+            currentIndex++;
+        }
+    } while (result->NextRow());
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString( ">> Loaded %u Item locale strings", mItemLocaleMap.size() );
 }
 
 void ObjectMgr::LoadItemPrototypes()
@@ -2140,6 +2245,69 @@ void ObjectMgr::LoadQuests()
     sLog.outString( ">> Loaded %u quests definitions", mQuestTemplates.size() );
 }
 
+void ObjectMgr::LoadQuestLocales()
+{
+    const World::LocalizationMap *Locales = sWorld.GetSupportedLocals();
+
+    World::LocalizationMap::const_iterator itr = Locales->begin();
+    std::ostringstream ostr;
+    ostr << "`Title_loc" << (int)*itr << "`,`Details_loc" << (int)*itr << "`,`Objectives_loc" << (int)*itr;
+    ostr << "`,`OfferRewardText_loc" << (int)*itr << "`,`RequestItemsText_loc" << (int)*itr << "`,`EndText_loc" << (int)*itr;
+    ostr << "`,`ObjectiveText1_loc" << (int)*itr <<  "`,`ObjectiveText2_loc" << (int)*itr <<  "`,`ObjectiveText3_loc" << (int)*itr <<  "`,`ObjectiveText4_loc" << (int)*itr << "`";
+    
+    itr++;
+    while (itr != Locales->end())
+    { 
+        ostr << ",`Title_loc" << (int)*itr << "`,`Details_loc" << (int)*itr << "`,`Objectives_loc" << (int)*itr;
+        ostr << "`,`OfferRewardText_loc" << (int)*itr << "`,`RequestItemsText_loc" << (int)*itr << "`,`EndText_loc" << (int)*itr;
+        ostr << "`,`ObjectiveText1_loc" << (int)*itr <<  "`,`ObjectiveText2_loc" << (int)*itr <<  "`,`ObjectiveText3_loc" << (int)*itr <<  "`,`ObjectiveText4_loc" << (int)*itr << "`";
+        itr++;
+    }
+
+    QueryResult *result = sDatabase.PQuery("SELECT `entry`,%s FROM `locales_quest`",ostr.str().c_str());
+
+    if(!result)
+    {
+        barGoLink bar(1);
+
+        bar.step();
+
+        sLog.outString("");
+        sLog.outErrorDb(">> Loaded 0 Quest locale strings. DB table `locales_quest` is empty.");
+        return;
+    }
+
+    barGoLink bar(result->GetRowCount());
+
+    do
+    {
+        Field *fields = result->Fetch();
+        bar.step();
+
+        uint32 entry = fields[0].GetUInt32();
+
+        QuestLocale& data = mQuestLocaleMap[entry];
+        uint16 currentIndex=0;
+        for (itr = Locales->begin(); itr != Locales->end(); ++itr)
+        {
+            data.Title[*itr]            = fields[currentIndex*10+1].GetCppString();
+            data.Details[*itr]          = fields[currentIndex*10+2].GetCppString();
+            data.Objectives[*itr]       = fields[currentIndex*10+3].GetCppString();
+            data.OfferRewardText[*itr]  = fields[currentIndex*10+4].GetCppString();
+            data.RequestItemsText[*itr] = fields[currentIndex*10+5].GetCppString();
+            data.EndText[*itr]          = fields[currentIndex*10+2].GetCppString();
+            for (int i=0;i<4;i++)
+                data.ObjectiveText[i][*itr] = fields[currentIndex*10+6+i].GetCppString();
+            currentIndex++;
+        }
+    } while (result->NextRow());
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString( ">> Loaded %u Quest locale strings", mQuestLocaleMap.size() );
+}
+
 void ObjectMgr::LoadSpellChains()
 {
     mSpellChains.clear();                                   // need for reload case
@@ -2723,6 +2891,58 @@ void ObjectMgr::LoadPageTexts()
     sLog.outString();
 }
 
+void ObjectMgr::LoadPageTextLocales()
+{
+    const World::LocalizationMap *Locales = sWorld.GetSupportedLocals();
+
+    World::LocalizationMap::const_iterator itr = Locales->begin();
+    std::ostringstream ostr;
+    ostr << "`text_loc" << (int)*itr << "`";
+    itr++;
+    while (itr != Locales->end())
+    { 
+        ostr << ",`text_loc" << (int)*itr << "`";
+        itr++;
+    }
+
+    QueryResult *result = sDatabase.PQuery("SELECT `entry`,%s FROM `locales_page_text`",ostr.str().c_str());
+
+    if(!result)
+    {
+        barGoLink bar(1);
+
+        bar.step();
+
+        sLog.outString("");
+        sLog.outErrorDb(">> Loaded 0 PageText locale strings. DB table `locales_page_text` is empty.");
+        return;
+    }
+
+    barGoLink bar(result->GetRowCount());
+
+    do
+    {
+        Field *fields = result->Fetch();
+        bar.step();
+
+        uint32 entry = fields[0].GetUInt32();
+
+        PageTextLocale& data = mPageTextLocaleMap[entry];
+        uint16 currentIndex=0;
+        for (itr = Locales->begin(); itr != Locales->end(); ++itr)
+        {
+            data.Text[*itr]   = fields[currentIndex+1].GetCppString();
+            currentIndex++;
+        }
+
+    } while (result->NextRow());
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString( ">> Loaded %u PageText locale strings", mPageTextLocaleMap.size() );
+}
+
 void ObjectMgr::AddGossipText(GossipText *pGText)
 {
     ASSERT( pGText->Text_ID );
@@ -2799,6 +3019,64 @@ void ObjectMgr::LoadGossipText()
     sLog.outString();
     sLog.outString( ">> Loaded %u npc texts", count );
     delete result;
+}
+
+void ObjectMgr::LoadNpcTextLocales()
+{
+    const World::LocalizationMap *Locales = sWorld.GetSupportedLocals();
+
+    World::LocalizationMap::const_iterator itr = Locales->begin();
+    std::ostringstream ostr;
+    ostr << "`Text0_0_loc" << (int)*itr << "`,`Text0_1_loc" << (int)*itr << "`";
+    for (int i=1;i<8;i++)
+        ostr << ",`Text" << i << "_0_loc" << (int)*itr << "`,`Text" << i << "_1_loc" << (int)*itr << "`";
+    itr++;
+    while (itr != Locales->end())
+    {
+        for (int i=0;i<8;i++)
+            ostr << ",`Text" << i << "_0_loc" << (int)*itr << "`,`Text" << i << "_1_loc" << (int)*itr << "`";
+        itr++;
+    }
+
+    QueryResult *result = sDatabase.PQuery("SELECT `entry`,%s FROM `locales_npc_text`",ostr.str().c_str());
+
+    if(!result)
+    {
+        barGoLink bar(1);
+
+        bar.step();
+
+        sLog.outString("");
+        sLog.outErrorDb(">> Loaded 0 Quest locale strings. DB table `locales_npc_text` is empty.");
+        return;
+    }
+
+    barGoLink bar(result->GetRowCount());
+
+    do
+    {
+        Field *fields = result->Fetch();
+        bar.step();
+
+        uint32 entry = fields[0].GetUInt32();
+
+        NpcTextLocale& data = mNpcTextLocaleMap[entry];
+        uint16 currentIndex=0;
+        for (itr = Locales->begin(); itr != Locales->end(); ++itr)
+        {
+            for (int i=0;i<8;i++)
+            {
+                data.Text_0[i][*itr]         = fields[currentIndex*16+1+i*2].GetCppString();
+                data.Text_1[i][*itr]         = fields[currentIndex*16+2+i*2].GetCppString();
+            }
+            currentIndex++;
+        }
+    } while (result->NextRow());
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString( ">> Loaded %u NpcText locale strings", mNpcTextLocaleMap.size() );
 }
 
 //not very fast function but it is called only once a day, or on starting-up
@@ -3518,6 +3796,58 @@ uint32 ObjectMgr::GenerateLowGuid(uint32 guidhigh)
     }
 
     return 0;
+}
+
+void ObjectMgr::LoadGameObjectLocales()
+{
+    const World::LocalizationMap *Locales = sWorld.GetSupportedLocals();
+
+    World::LocalizationMap::const_iterator itr = Locales->begin();
+    std::ostringstream ostr;
+    ostr << "`name_loc" << (int)*itr << "`";
+    itr++;
+    while (itr != Locales->end())
+    { 
+        ostr << ",`name_loc" << (int)*itr << "`";
+        itr++;
+    }
+
+    QueryResult *result = sDatabase.PQuery("SELECT `entry`,%s FROM `locales_gameobject`",ostr.str().c_str());
+
+    if(!result)
+    {
+        barGoLink bar(1);
+
+        bar.step();
+
+        sLog.outString("");
+        sLog.outErrorDb(">> Loaded 0 gameobject locale strings. DB table `locales_gameobject` is empty.");
+        return;
+    }
+
+    barGoLink bar(result->GetRowCount());
+
+    do
+    {
+        Field *fields = result->Fetch();
+        bar.step();
+
+        uint32 entry = fields[0].GetUInt32();
+
+        GameObjectLocale& data = mGameObjectLocaleMap[entry];
+        uint16 currentIndex=0;
+        for (itr = Locales->begin(); itr != Locales->end(); ++itr)
+        {
+            data.Name[*itr]   = fields[currentIndex+1].GetCppString();
+            currentIndex++;
+        }
+
+    } while (result->NextRow());
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString( ">> Loaded %u gameobject locale strings", mGameObjectLocaleMap.size() );
 }
 
 void ObjectMgr::LoadGameobjectInfo()

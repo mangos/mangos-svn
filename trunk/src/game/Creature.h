@@ -203,6 +203,13 @@ struct CreatureInfo
     char const* ScriptName;
 };
 
+struct CreatureLocale
+{
+    uint32 Entry;
+    std::string Name[8];
+    std::string SubName[8];
+};
+
 struct EquipmentInfo
 {
     uint32  entry;

@@ -475,6 +475,9 @@ void World::SetInitialWorldSettings()
         exit(1);
     }
 
+    std::string localization = sConfig.GetStringDefault("StringLocalize", "");
+    FillSupportedLocals(localization);
+
     ///- Update the realm entry in the database with the realm type from the config file
     //No SQL injection as values are treated as integers
     loginDatabase.PExecute("UPDATE `realmlist` SET `icon` = %u WHERE `id` = '%d'", m_configs[CONFIG_GAME_TYPE],realmID);
@@ -495,6 +498,17 @@ void World::SetInitialWorldSettings()
     objmgr.PackInstances();
 
     ///- Load static data tables from the database
+    if (m_SupportedLocals.size()>0)
+    {
+        sLog.outString( "Loading Localization strings..." );
+        objmgr.LoadCreatureLocales();
+        objmgr.LoadGameObjectLocales();
+        objmgr.LoadItemLocales();
+        objmgr.LoadQuestLocales();
+        objmgr.LoadNpcTextLocales();
+        objmgr.LoadPageTextLocales();
+    }
+
     sLog.outString( "Loading Game Object Templates..." );
     objmgr.LoadGameobjectInfo();
 
@@ -1646,4 +1660,30 @@ void World::_UpdateRealmCharCount(QueryResult *resultCharCount, uint32 accountId
         delete resultCharCount;
         loginDatabase.PExecute("INSERT INTO `realmcharacters` (`numchars`, `acctid`, `realmid`) VALUES (%u, %u, %u) ON DUPLICATE KEY UPDATE `numchars` = '%u'", charCount, accountId, realmID, charCount);
     }
+}
+
+void World::FillSupportedLocals(std::string str)
+{
+    if(str=="")
+    {
+        return; // English by default if none selected
+    }
+    int local;
+    std::istringstream ss(str);
+    for(int i = 0; i < 8; ++i)
+    {
+        ss >> local;
+        if (local > 0 && local <8)
+            SetSupportedLocals((uint8) local);
+        if(!ss)
+            break;
+    }
+    if (m_SupportedLocals.empty())
+    {
+        sLog.outError("Unable to determine your Locales!!");
+        exit(1);
+    }
+    LocalizationMap::const_iterator itr;
+    for (itr = m_SupportedLocals.begin(); itr != m_SupportedLocals.end(); ++itr)
+        sLog.outString("Support for local %u will be used",*itr);
 }

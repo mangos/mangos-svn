@@ -523,6 +523,13 @@ struct ItemPrototype
     uint32 FoodType;
 };
 
+struct ItemLocale
+{
+    uint32 Entry;
+    std::string Name[8];
+    std::string Description[8];
+};
+
 // GCC have alternative #pragma pack() syntax and old gcc version not support pack(pop), also any gcc version not support it at some paltform
 #if defined( __GNUC__ )
 #pragma pack()
