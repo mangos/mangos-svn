@@ -263,7 +263,7 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
             GetPlayerName(),GetAccountId(),it->GetProto()->Name1,it->GetEntry(),it->GetCount());
     }
 
-    pl->ModifyMoney( ((int32) deposit) * -1 );
+    pl->ModifyMoney( -int32(deposit) );
 
     AuctionEntry *AH = new AuctionEntry;
     AH->Id = objmgr.GenerateAuctionID();
@@ -349,18 +349,18 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
             {
                 if ( auction->bidder == pl->GetGUIDLow() )
                 {
-                    pl->ModifyMoney(((uint32)(price - auction->bid)) * -1);
+                    pl->ModifyMoney( -int32(price - auction->bid));
                 }
                 else
                 {
                     // mail to last bidder and return money
                     SendAuctionOutbiddedMail( auction , price );
-                    pl->ModifyMoney(((int32) price) * -1);
+                    pl->ModifyMoney( -int32(price) );
                 }
             }
             else
             {
-                pl->ModifyMoney(((int32) price) * -1);
+                pl->ModifyMoney( -int32(price) );
             }
             auction->bidder = pl->GetGUIDLow();
             auction->bid = price;
@@ -448,7 +448,7 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
                     return;
                 //some auctionBidderNotification would be needed, but don't know that parts..
                 SendAuctionCancelledToBidderMail( auction );
-                pl->ModifyMoney( ((int32) auctionCut) * -1 );
+                pl->ModifyMoney( -int32(auctionCut) );
             }
             // Return the item by mail
             std::ostringstream msgAuctionCanceledOwner;

@@ -966,9 +966,9 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         void PrepareQuestMenu( uint64 guid );
         void SendPreparedQuest( uint64 guid );
-        Quest const *GetActiveQuest( uint32 quest_id ) const;
+        bool IsActiveQuest( uint32 quest_id ) const;
         Quest const *GetNextQuest( uint64 guid, Quest const *pQuest );
-        bool CanSeeStartQuest( uint32 quest_id );
+        bool CanSeeStartQuest( Quest const *pQuest );
         bool CanTakeQuest( Quest const *pQuest, bool msg );
         bool CanAddQuest( Quest const *pQuest, bool msg );
         bool CanCompleteQuest( uint32 quest_id );
@@ -981,25 +981,24 @@ class MANGOS_DLL_SPEC Player : public Unit
         void RewardQuest( Quest const *pQuest, uint32 reward, Object* questGiver );
         void FailQuest( uint32 quest_id );
         void FailTimedQuest( uint32 quest_id );
-        bool SatisfyQuestClass( uint32 quest_id, bool msg );
-        bool SatisfyQuestLevel( uint32 quest_id, bool msg );
+        bool SatisfyQuestClass( Quest const* qInfo, bool msg );
+        bool SatisfyQuestLevel( Quest const* qInfo, bool msg );
         bool SatisfyQuestLog( bool msg );
-        bool SatisfyQuestPreviousQuest( uint32 quest_id, bool msg );
-        bool SatisfyQuestRace( uint32 quest_id, bool msg );
-        bool SatisfyQuestReputation( uint32 quest_id, bool msg );
-        bool SatisfyQuestSkill( uint32 quest_id, bool msg );
-        bool SatisfyQuestStatus( uint32 quest_id, bool msg );
-        bool SatisfyQuestTimed( uint32 quest_id, bool msg );
-        bool SatisfyQuestExclusiveGroup( uint32 quest_id, bool msg );
-        bool SatisfyQuestNextChain( uint32 quest_id, bool msg );
-        bool SatisfyQuestPrevChain( uint32 quest_id, bool msg );
-        bool GiveQuestSourceItem( uint32 quest_id );
+        bool SatisfyQuestPreviousQuest( Quest const* qInfo, bool msg );
+        bool SatisfyQuestRace( Quest const* qInfo, bool msg );
+        bool SatisfyQuestReputation( Quest const* qInfo, bool msg );
+        bool SatisfyQuestSkill( Quest const* qInfo, bool msg );
+        bool SatisfyQuestStatus( Quest const* qInfo, bool msg );
+        bool SatisfyQuestTimed( Quest const* qInfo, bool msg );
+        bool SatisfyQuestExclusiveGroup( Quest const* qInfo, bool msg );
+        bool SatisfyQuestNextChain( Quest const* qInfo, bool msg );
+        bool SatisfyQuestPrevChain( Quest const* qInfo, bool msg );
+        bool GiveQuestSourceItem( Quest const *pQuest );
         bool TakeQuestSourceItem( uint32 quest_id, bool msg );
         bool GetQuestRewardStatus( uint32 quest_id );
         QuestStatus GetQuestStatus( uint32 quest_id );
-        uint32 GetReqKillOrCastCurrentCount(uint32 quest_id, uint32 entry);
         void SetQuestStatus( uint32 quest_id, QuestStatus status );
-        void AdjustQuestReqItemCount( uint32 questId );
+        void AdjustQuestReqItemCount( Quest const* pQuest );
         uint16 GetQuestSlot( uint32 quest_id );
         void AreaExplored( uint32 questId );
         void ItemAddedQuestCheck( uint32 entry, uint32 count );
@@ -1018,7 +1017,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendCanTakeQuestResponse( uint32 msg );
         void SendPushToPartyResponse( Player *pPlayer, uint32 msg );
         void SendQuestUpdateAddItem( Quest const* pQuest, uint32 item_idx, uint32 count );
-        void SendQuestUpdateAddCreature( uint32 quest_id, uint64 guid, uint32 creature_idx, uint32 old_count, uint32 add_count );
+        void SendQuestUpdateAddCreature( Quest const* pQuest, uint64 guid, uint32 creature_idx, uint32 old_count, uint32 add_count );
 
         uint64 GetDivider() { return m_divider; };
         void SetDivider( uint64 guid ) { m_divider = guid; };
@@ -1071,7 +1070,13 @@ class MANGOS_DLL_SPEC Player : public Unit
         void setWeaponChangeTimer(uint32 time) {m_weaponChangeTimer = time;}
 
         uint32 GetMoney() { return GetUInt32Value (PLAYER_FIELD_COINAGE); }
-        void ModifyMoney( int32 d ) { SetMoney (GetMoney() + d > 0 ? GetMoney() + d : 0); }
+        void ModifyMoney( int32 d )
+        {
+            if(d < 0)
+                SetMoney (GetMoney() > uint32(-d) ? GetMoney() + d : 0);
+            else
+                SetMoney (GetMoney() + d > 0 ? GetMoney() + d : 0);
+        }
         void SetMoney( uint32 value )
         {
             SetUInt32Value (PLAYER_FIELD_COINAGE, value);

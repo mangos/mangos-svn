@@ -73,6 +73,7 @@ bool ChatHandler::HandleReloadAllAreaCommand(const char*)
 bool ChatHandler::HandleReloadAllQuestCommand(const char* args)
 {
     HandleReloadQuestAreaTriggersCommand("a");
+    HandleReloadQuestTemplateCommand("a");
 
     sLog.outString( "Re-Loading Quests Relations..." );
     objmgr.LoadQuestRelations();
@@ -179,6 +180,14 @@ bool ChatHandler::HandleReloadQuestAreaTriggersCommand(const char*)
     sLog.outString( "Re-Loading Quest Area Triggers..." );
     objmgr.LoadQuestAreaTriggers();
     SendGlobalSysMessage("DB table `areatrigger_involvedrelation` (quest area triggers) reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadQuestTemplateCommand(const char*)
+{
+    sLog.outString( "Re-Loading Quest Templates..." );
+    objmgr.LoadQuests();
+    SendGlobalSysMessage("DB table `quest_templatea` (quest definitions) reloaded.");
     return true;
 }
 
