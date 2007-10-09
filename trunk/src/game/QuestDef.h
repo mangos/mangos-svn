@@ -268,14 +268,12 @@ enum QuestUpdateState
 struct QuestStatusData
 {
     QuestStatusData()
-        : m_quest(NULL), m_status(QUEST_STATUS_NONE),m_rewarded(false),
+        : m_status(QUEST_STATUS_NONE),m_rewarded(false),
         m_explored(false), m_timer(0), uState(QUEST_NEW)
     {
         memset(m_itemcount,    0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
         memset(m_creatureOrGOcount, 0, QUEST_OBJECTIVES_COUNT * sizeof(uint32));
     }
-
-    Quest const *m_quest;
 
     QuestStatus m_status;
     bool m_rewarded;

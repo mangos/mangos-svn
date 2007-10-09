@@ -379,9 +379,9 @@ uint32 Creature::getDialogStatus(Player *pPlayer, uint32 defstatus)
         status = pPlayer->GetQuestStatus( quest_id );
         if ( status == QUEST_STATUS_NONE )
         {
-            if ( pPlayer->CanSeeStartQuest( quest_id ) )
+            if ( pPlayer->CanSeeStartQuest( pQuest ) )
             {
-                if ( pPlayer->SatisfyQuestLevel(quest_id, false) )
+                if ( pPlayer->SatisfyQuestLevel(pQuest, false) )
                 {
                     if ( pQuest->IsAutoComplete() || (pQuest->IsRepeatable() && pPlayer->getQuestStatusMap()[quest_id].m_rewarded))
                         result2 = DIALOG_STATUS_REWARD_REP;

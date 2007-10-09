@@ -179,7 +179,7 @@ class MANGOS_DLL_SPEC PlayerMenu
         void SendQuestQueryResponse ( Quest const *pQuest );
         void SendQuestGiverQuestDetails( Quest const *pQuest, uint64 npcGUID, bool ActivateAccept);
 
-        void SendQuestGiverOfferReward( uint32 quest_id, uint64 npcGUID, bool EnbleNext );
+        void SendQuestGiverOfferReward( Quest const* pQuest, uint64 npcGUID, bool EnbleNext );
         void SendQuestGiverRequestItems( Quest const *pQuest, uint64 npcGUID, bool Completable, bool CloseOnCancel );
 };
 #endif

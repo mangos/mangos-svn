@@ -467,18 +467,14 @@ void PlayerMenu::SendQuestQueryResponse( Quest const *pQuest )
     //sLog.outDebug( "WORLD: Sent SMSG_QUEST_QUERY_RESPONSE questid=%u",pQuest->GetQuestId() );
 }
 
-void PlayerMenu::SendQuestGiverOfferReward( uint32 quest_id, uint64 npcGUID, bool EnbleNext )
+void PlayerMenu::SendQuestGiverOfferReward( Quest const* pQuest, uint64 npcGUID, bool EnbleNext )
 {
-    Quest const* qInfo = objmgr.GetQuestTemplate(quest_id);
-    if(!qInfo)
-        return;
-
     WorldPacket data( SMSG_QUESTGIVER_OFFER_REWARD, 50 );   // guess size
 
     data << npcGUID;
-    data << quest_id;
-    data << qInfo->GetTitle();
-    data << qInfo->GetOfferRewardText();
+    data << pQuest->GetQuestId();
+    data << pQuest->GetTitle();
+    data << pQuest->GetOfferRewardText();
 
     data << uint32( EnbleNext );
 
@@ -487,7 +483,7 @@ void PlayerMenu::SendQuestGiverOfferReward( uint32 quest_id, uint64 npcGUID, boo
     uint32 EmoteCount = 0;
     for (uint32 i = 0; i < QUEST_EMOTE_COUNT; i++)
     {
-        if(qInfo->OfferRewardEmote[i] <= 0)
+        if(pQuest->OfferRewardEmote[i] <= 0)
             break;
         EmoteCount++;
     }
@@ -496,18 +492,18 @@ void PlayerMenu::SendQuestGiverOfferReward( uint32 quest_id, uint64 npcGUID, boo
     for (uint32 i = 0; i < EmoteCount; i++)
     {
         data << uint32(0);                                  // Delay Emote
-        data << qInfo->OfferRewardEmote[i];
+        data << pQuest->OfferRewardEmote[i];
     }
 
     ItemPrototype const *pItem;
 
-    data << uint32(qInfo->GetRewChoiceItemsCount());
-    for (uint32 i=0; i < qInfo->GetRewChoiceItemsCount(); i++)
+    data << uint32(pQuest->GetRewChoiceItemsCount());
+    for (uint32 i=0; i < pQuest->GetRewChoiceItemsCount(); i++)
     {
-        pItem = objmgr.GetItemPrototype( qInfo->RewChoiceItemId[i] );
+        pItem = objmgr.GetItemPrototype( pQuest->RewChoiceItemId[i] );
 
-        data << uint32(qInfo->RewChoiceItemId[i]);
-        data << uint32(qInfo->RewChoiceItemCount[i]);
+        data << uint32(pQuest->RewChoiceItemId[i]);
+        data << uint32(pQuest->RewChoiceItemCount[i]);
 
         if ( pItem )
             data << uint32(pItem->DisplayInfoID);
@@ -515,12 +511,12 @@ void PlayerMenu::SendQuestGiverOfferReward( uint32 quest_id, uint64 npcGUID, boo
             data << uint32(0);
     }
 
-    data << uint32(qInfo->GetRewItemsCount());
-    for (uint16 i=0; i < qInfo->GetRewItemsCount(); i++)
+    data << uint32(pQuest->GetRewItemsCount());
+    for (uint16 i=0; i < pQuest->GetRewItemsCount(); i++)
     {
-        pItem = objmgr.GetItemPrototype(qInfo->RewItemId[i]);
-        data << uint32(qInfo->RewItemId[i]);
-        data << uint32(qInfo->RewItemCount[i]);
+        pItem = objmgr.GetItemPrototype(pQuest->RewItemId[i]);
+        data << uint32(pQuest->RewItemId[i]);
+        data << uint32(pQuest->RewItemCount[i]);
 
         if ( pItem )
             data << uint32(pItem->DisplayInfoID);
@@ -528,23 +524,23 @@ void PlayerMenu::SendQuestGiverOfferReward( uint32 quest_id, uint64 npcGUID, boo
             data << uint32(0);
     }
 
-    data << uint32(qInfo->GetRewOrReqMoney());
+    data << uint32(pQuest->GetRewOrReqMoney());
     data << uint32(0x08);
 
     // check if RewSpell is teaching another spell
-    if(qInfo->GetRewSpell())
+    if(pQuest->GetRewSpell())
     {
-        SpellEntry const *rewspell = sSpellStore.LookupEntry(qInfo->GetRewSpell());
+        SpellEntry const *rewspell = sSpellStore.LookupEntry(pQuest->GetRewSpell());
         if(rewspell)
         {
             if(rewspell->Effect[0] == SPELL_EFFECT_LEARN_SPELL)
                 data << uint32(rewspell->EffectTriggerSpell[0]);
             else
-                data << uint32(qInfo->GetRewSpell());
+                data << uint32(pQuest->GetRewSpell());
         }
         else
         {
-            sLog.outErrorDb("Quest %u have non-existed RewSpell %u, ignored.",qInfo->GetQuestId(),qInfo->GetRewSpell());
+            sLog.outErrorDb("Quest %u have non-existed RewSpell %u, ignored.",pQuest->GetQuestId(),pQuest->GetRewSpell());
             data << uint32(0);
         }
     }
@@ -565,7 +561,7 @@ void PlayerMenu::SendQuestGiverRequestItems( Quest const *pQuest, uint64 npcGUID
     // We may wish a better check, perhaps checking the real quest requirements
     if (strlen(pQuest->GetRequestItemsText()) == 0)
     {
-        SendQuestGiverOfferReward(pQuest->GetQuestId(), npcGUID, true);
+        SendQuestGiverOfferReward(pQuest, npcGUID, true);
         return;
     }
 

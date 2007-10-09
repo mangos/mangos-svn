@@ -140,7 +140,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         itemTextId = objmgr.CreateItemText( body );
     }
 
-    pl->ModifyMoney( -30 - money );
+    pl->ModifyMoney( -int32(30 + money) );
 
     bool needItemDelay = false;
 

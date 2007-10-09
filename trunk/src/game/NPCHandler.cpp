@@ -678,7 +678,7 @@ void WorldSession::HandleBuyStableSlot( WorldPacket & recv_data )
         if(_player->GetMoney() >= SlotPrice->Price)
         {
             ++GetPlayer()->m_stableSlots;
-            _player->SetMoney(_player->GetMoney() - SlotPrice->Price);
+            _player->ModifyMoney(-int32(SlotPrice->Price));
             data << uint8(0x0A);                            // success buy
         }
         else

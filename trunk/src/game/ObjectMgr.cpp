@@ -1848,6 +1848,13 @@ void ObjectMgr::LoadGroups()
 
 void ObjectMgr::LoadQuests()
 {
+    // For reload case
+    for(QuestMap::const_iterator itr=mQuestTemplates.begin(); itr != mQuestTemplates.end(); ++itr)
+        delete itr->second;
+    mQuestTemplates.clear();
+
+    mExclusiveQuestGroups.clear();
+
     //                                            0       1            2          3            4
     QueryResult *result = sDatabase.Query("SELECT `entry`,`ZoneOrSort`,`MinLevel`,`QuestLevel`,`Type`,"
     //   5               6                    7                       8                     9                       10                    11                 12

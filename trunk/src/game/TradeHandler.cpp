@@ -313,16 +313,16 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
                 _player->GetName(),_player->GetSession()->GetAccountId());
         }
 
-        // update moneys
-        _player->ModifyMoney( -((int32)_player->tradeGold) );
+        // update money
+        _player->ModifyMoney( -int32(_player->tradeGold) );
         _player->ModifyMoney(_player->pTrader->tradeGold );
-        _player->pTrader->ModifyMoney( -((int32)_player->pTrader->tradeGold) );
+        _player->pTrader->ModifyMoney( -int32(_player->pTrader->tradeGold) );
         _player->pTrader->ModifyMoney(_player->tradeGold );
 
         _player->ClearTrade();
         _player->pTrader->ClearTrade();
 
-        // desynced with the other saves here (SaveInventoryAndGoldToDB() not have own transaction guards)
+        // desynchronized with the other saves here (SaveInventoryAndGoldToDB() not have own transaction guards)
         sDatabase.BeginTransaction();
         _player->SaveInventoryAndGoldToDB();
         _player->pTrader->SaveInventoryAndGoldToDB();

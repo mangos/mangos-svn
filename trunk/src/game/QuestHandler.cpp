@@ -263,7 +263,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
             }
         }
         else
-            _player->PlayerTalkClass->SendQuestGiverOfferReward( quest, guid, true );
+            _player->PlayerTalkClass->SendQuestGiverOfferReward( pQuest, guid, true );
     }
 }
 
@@ -288,7 +288,7 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
     if( pQuest )
     {
         if ( _player->CanCompleteQuest( quest ) )
-            _player->PlayerTalkClass->SendQuestGiverOfferReward( quest, guid, true );
+            _player->PlayerTalkClass->SendQuestGiverOfferReward( pQuest, guid, true );
     }
 }
 
@@ -424,7 +424,7 @@ void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
                         continue;
                     }
 
-                    if( !pPlayer->SatisfyQuestStatus( quest, false ) )
+                    if( !pPlayer->SatisfyQuestStatus( pQuest, false ) )
                     {
                         _player->SendPushToPartyResponse( pPlayer, QUEST_PARTY_MSG_HAVE_QUEST );
                         continue;
