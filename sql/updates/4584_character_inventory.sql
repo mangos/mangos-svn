@@ -1,2 +1,2 @@
 ALTER TABLE `character_inventory` 
-   ADD INDEX ( `guid` );
+   ADD KEY 'idx_guid' ( `guid` );

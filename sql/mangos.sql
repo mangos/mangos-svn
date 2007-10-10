@@ -461,7 +461,7 @@ CREATE TABLE `character_inventory` (
   `item` int(11) unsigned NOT NULL default '0' COMMENT 'Item Global Unique Identifier',
   `item_template` int(11) unsigned NOT NULL default '0' COMMENT 'Item Identifier',
   PRIMARY KEY  (`item`),
-  INDEX ( `guid` )
+  KEY 'idx_guid' ( `guid` )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --
@@ -2025,7 +2025,8 @@ CREATE TABLE `item_instance` (
   `guid` int(11) unsigned NOT NULL default '0',
   `owner_guid` int(11) unsigned NOT NULL default '0',
   `data` longtext,
-  PRIMARY KEY  (`guid`)
+  PRIMARY KEY  (`guid`),
+  KEY `idx_owner_guid` ( `owner_guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Item System';
 
 --
