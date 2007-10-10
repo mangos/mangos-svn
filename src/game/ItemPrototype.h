@@ -82,11 +82,13 @@ enum ItemModType
 
 enum ItemSpelltriggerType
 {
-    USE                                         = 0,
-    ON_EQUIP                                    = 1,
-    CHANCE_ON_HIT                               = 2,
-    SOULSTONE                                   = 4
+    ITEM_SPELLTRIGGER_ON_USE          = 0,
+    ITEM_SPELLTRIGGER_ON_EQUIP        = 1,
+    ITEM_SPELLTRIGGER_CHANCE_ON_HIT   = 2,
+    ITEM_SPELLTRIGGER_SOULSTONE       = 4
 };
+
+#define MAX_ITEM_SPELLTRIGGER           5
 
 enum ItemBondingType
 {

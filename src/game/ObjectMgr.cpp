@@ -1094,7 +1094,13 @@ void ObjectMgr::LoadItemPrototypes()
 
         for (int j = 0; j < 5; j++)
         {
-            if(proto->Spells[j].SpellId && !sSpellStore.LookupEntry(proto->Spells[j].SpellId))
+            if(proto->Spells[j].SpellTrigger >= MAX_ITEM_SPELLTRIGGER)
+            {
+                sLog.outErrorDb("Item (Entry: %u) have wrong item spell trigger value in spelltrigger_%d (%u)",i,j+1,proto->Spells[j].SpellTrigger);
+                const_cast<ItemPrototype*>(proto)->Spells[j].SpellId = 0;
+                const_cast<ItemPrototype*>(proto)->Spells[j].SpellTrigger = ITEM_SPELLTRIGGER_ON_USE;
+            }
+            else if(proto->Spells[j].SpellId && !sSpellStore.LookupEntry(proto->Spells[j].SpellId))
             {
                 sLog.outErrorDb("Item (Entry: %u) have wrong (not-existed) spell in spellid_%d (%u)",i,j+1,proto->Spells[j].SpellId);
                 const_cast<ItemPrototype*>(proto)->Spells[j].SpellId = 0;
