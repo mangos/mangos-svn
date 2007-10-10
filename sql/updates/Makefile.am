@@ -479,6 +479,9 @@ pkgdata_DATA = \
 	4561_command.sql \
 	4571_button_scripts.sql \
 	4577_gameobject.sql \
+	4579.sql \
+	4582_spell_affect.sql \
+	4584_character_inventory.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -939,4 +942,6 @@ EXTRA_DIST = \
 	4571_button_scripts.sql \
 	4577_gameobject.sql \
 	4579.sql \
+	4582_spell_affect.sql \
+	4584_character_inventory.sql \
 	README

@@ -460,7 +460,8 @@ CREATE TABLE `character_inventory` (
   `slot` tinyint(3) unsigned NOT NULL default '0',
   `item` int(11) unsigned NOT NULL default '0' COMMENT 'Item Global Unique Identifier',
   `item_template` int(11) unsigned NOT NULL default '0' COMMENT 'Item Identifier',
-  PRIMARY KEY  (`item`)
+  PRIMARY KEY  (`item`),
+  INDEX ( `guid` )
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --
