@@ -6089,12 +6089,19 @@ void Player::CastItemEquipSpell(Item *item)
 
     for (int i = 0; i < 5; i++)
     {
-        if(!proto->Spells[i].SpellId ) continue;
-        if(proto->Spells[i].SpellTrigger != ON_EQUIP) continue;
+        _Spell const& spellData = proto->Spells[i];
 
-        DEBUG_LOG("WORLD: cast Item spellId - %i", proto->Spells[i].SpellId);
+        // no spell
+        if(!spellData.SpellId )
+            continue;
 
-        CastSpell(this,proto->Spells[i].SpellId,true,item);
+        // wrong triggering type
+        if(spellData.SpellTrigger != ITEM_SPELLTRIGGER_ON_EQUIP)
+            continue;
+
+        DEBUG_LOG("WORLD: cast Item spellId - %i", spellData.SpellId);
+
+        CastSpell(this,spellData.SpellId,true,item);
     }
 }
 
@@ -6112,25 +6119,31 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target, WeaponAttackType attTy
 
     for (int i = 0; i < 5; i++)
     {
-        if(!proto->Spells[i].SpellId ) continue;
+        _Spell const& spellData = proto->Spells[i];
 
-        SpellEntry const *spellInfo = sSpellStore.LookupEntry(proto->Spells[i].SpellId);
+        // no spell
+        if(!spellData.SpellId )
+            continue;
+
+        // wrong triggering type
+        if(spellData.SpellTrigger != ITEM_SPELLTRIGGER_CHANCE_ON_HIT)
+            continue;
+
+        SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellData.SpellId);
         if(!spellInfo)
         {
-            sLog.outError("WORLD: unknown Item spellid %i", proto->Spells[i].SpellId);
+            sLog.outError("WORLD: unknown Item spellid %i", spellData.SpellId);
             continue;
         }
-
-        if(proto->Spells[i].SpellTrigger != CHANCE_ON_HIT) continue;
 
         float chance = spellInfo->procChance;
 
         if(chance > 100)
         {
-            if(proto->Spells[i].SpellPPMRate)
+            if(spellData.SpellPPMRate)
             {
                 uint32 WeaponSpeed = GetAttackTime(attType);
-                chance = GetPPMProcChance(WeaponSpeed, proto->Spells[i].SpellPPMRate);
+                chance = GetPPMProcChance(WeaponSpeed, spellData.SpellPPMRate);
             }
             else
                 chance = GetWeaponProcChance();
@@ -15187,7 +15200,12 @@ void Player::ApplyEquipCooldown( Item * pItem )
     {
         _Spell const& spellData = pItem->GetProto()->Spells[i];
 
-        if( spellData.SpellTrigger != USE )
+        // no spell
+        if( !spellData.SpellId )
+            continue;
+
+        // wrong triggering type
+        if( spellData.SpellTrigger != ITEM_SPELLTRIGGER_ON_USE )
             continue;
 
         AddSpellCooldown(spellData.SpellId, pItem->GetEntry(), time(NULL) + 30);

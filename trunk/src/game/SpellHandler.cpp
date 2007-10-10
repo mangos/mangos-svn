@@ -104,18 +104,20 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 
         for(int i = 0; i <5; ++i)
         {
-            if( proto->Spells[i].SpellTrigger != USE )
+            _Spell const& spellData = pItem->GetProto()->Spells[i];
+
+            // no spell
+            if(!spellData.SpellId)
                 continue;
 
-            uint32 spellId = proto->Spells[i].SpellId;
-
-            if(!spellId)
+            // wrong triggering type
+            if( spellData.SpellTrigger != ITEM_SPELLTRIGGER_ON_USE )
                 continue;
 
-            SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
+            SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellData.SpellId);
             if(!spellInfo)
             {
-                sLog.outError("Item (Entry: %u) in have wrong spell id %u, ignoring ",proto->ItemId, spellId);
+                sLog.outError("Item (Entry: %u) in have wrong spell id %u, ignoring ",proto->ItemId, spellData.SpellId);
                 continue;
             }
 
