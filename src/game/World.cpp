@@ -1738,6 +1738,7 @@ void World::InitDailyQuestResetTime()
 
 void World::ResetDailyQuests()
 {
+    sLog.outDetail("Daily quests reset for all characters.");
     sDatabase.Execute("DELETE FROM `character_queststatus_daily`");
     for(SessionMap::iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
         if(itr->second->GetPlayer())
