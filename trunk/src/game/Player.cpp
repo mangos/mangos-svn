@@ -6141,15 +6141,14 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target, WeaponAttackType attTy
 
         float chance = spellInfo->procChance;
 
-        if(chance > 100)
+        if(spellData.SpellPPMRate)
         {
-            if(spellData.SpellPPMRate)
-            {
-                uint32 WeaponSpeed = GetAttackTime(attType);
-                chance = GetPPMProcChance(WeaponSpeed, spellData.SpellPPMRate);
-            }
-            else
-                chance = GetWeaponProcChance();
+            uint32 WeaponSpeed = GetAttackTime(attType);
+            chance = GetPPMProcChance(WeaponSpeed, spellData.SpellPPMRate);
+        }
+        else if(chance > 100)
+        {
+            chance = GetWeaponProcChance();
         }
 
         if (roll_chance_f(chance))
