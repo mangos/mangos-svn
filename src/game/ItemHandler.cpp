@@ -934,7 +934,7 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
         case 21830: item->SetUInt32Value(OBJECT_FIELD_ENTRY, 21831); break;
     }
     item->SetUInt64Value(ITEM_FIELD_GIFTCREATOR, _player->GetGUID());
-    item->SetUInt32Value(ITEM_FIELD_FLAGS, 8);              // wrapped ?
+    item->SetUInt32Value(ITEM_FIELD_FLAGS, ITEM_FLAGS_WRAPPED);
     item->SetState(ITEM_CHANGED, _player);
 
     if(item->GetState()==ITEM_NEW)                          // save new item, to have alway for `character_gifts` record in `item_template`

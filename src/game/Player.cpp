@@ -10890,7 +10890,7 @@ void Player::RewardQuest( Quest const *pQuest, uint32 reward, Object* questGiver
 
     ModifyMoney( pQuest->GetRewOrReqMoney() );
 
-    if(pQuest->GetType()==QUEST_TYPE_DAILY)
+    if(pQuest->IsDaily())
         SetDailyQuestStatus(quest_id);
 
     if ( !pQuest->IsRepeatable() )
@@ -11239,7 +11239,7 @@ bool Player::SatisfyQuestPrevChain( Quest const* qInfo, bool msg )
 
 bool Player::SatisfyQuestDay( Quest const* qInfo, bool msg )
 {
-    if(qInfo->GetType()!= QUEST_TYPE_DAILY)
+    if(!qInfo->IsDaily())
         return true;
 
     bool have_slot = false;
