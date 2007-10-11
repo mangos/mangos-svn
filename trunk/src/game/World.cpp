@@ -93,6 +93,7 @@ World::World()
     m_startTime=m_gameTime;
     m_maxSessionsCount = 0;
     m_resultQueue = NULL;
+    m_NextDailyQuestReset = 0;
 }
 
 /// World destructor
@@ -702,6 +703,9 @@ void World::SetInitialWorldSettings()
     sLog.outString("Deleting expired bans..." );
     loginDatabase.Execute("DELETE FROM `ip_banned` WHERE `unbandate`<=UNIX_TIMESTAMP() AND `unbandate`<>`bandate`");
 
+    sLog.outString("Calculate next daily quest reset time..." );
+    InitDailyQuestResetTime();
+
     sLog.outString("Starting Game Event system..." );
     uint32 nextGameEvent = gameeventmgr.Initialize();
     m_timers[WUPDATE_EVENTS].SetInterval(nextGameEvent);    //depend on next event
@@ -749,6 +753,13 @@ void World::Update(time_t diff)
 
     ///- Update the game time and check for shutdown time
     _UpdateGameTime();
+
+    /// Handle daily quests reset time
+    if(m_gameTime > m_NextDailyQuestReset)
+    {
+        ResetDailyQuests();
+        m_NextDailyQuestReset += 24*HOUR;
+    }
 
     /// <ul><li> Handle auctions when the timer has passed
     if (m_timers[WUPDATE_AUCTIONS].Passed())
@@ -1512,7 +1523,6 @@ void World::_UpdateGameTime()
             ShutdownMsg();
         }
     }
-    return;
 }
 
 /// Shutdown the server
@@ -1686,4 +1696,50 @@ void World::FillSupportedLocals(std::string str)
     LocalizationMap::const_iterator itr;
     for (itr = m_SupportedLocals.begin(); itr != m_SupportedLocals.end(); ++itr)
         sLog.outString("Support for local %u will be used",*itr);
+}
+
+void World::InitDailyQuestResetTime()
+{
+    time_t mostRecentQuestTime;
+
+    QueryResult* result = sDatabase.Query("SELECT MAX(`time`) FROM `character_queststatus_daily`");
+    if(result)
+    {
+        Field *fields = result->Fetch();
+
+        mostRecentQuestTime = (time_t)fields[0].GetUInt64();
+    }
+    else
+        mostRecentQuestTime = 0;
+
+    // client built-in time for reset is 6:00 AM
+    // FIX ME: client not show day start time
+    time_t curTime = time(NULL);
+    tm localTm = *localtime(&curTime);
+    localTm.tm_hour = 6;
+    localTm.tm_min  = 0;
+    localTm.tm_sec  = 0;
+
+    // current day reset time
+    time_t curDayResetTime = mktime(&localTm);
+
+    // last rest time before current moment
+    time_t resetTime = (curTime < curDayResetTime) ? curDayResetTime - 24*HOUR : curDayResetTime;
+
+    // need reset (if we have quest time before last reset time (not processed by some reason)
+    if(mostRecentQuestTime && mostRecentQuestTime <= resetTime)
+        m_NextDailyQuestReset = mostRecentQuestTime;
+    else
+    {
+        // plan next reset time
+        m_NextDailyQuestReset = (curTime >= curDayResetTime) ? curDayResetTime + 24*HOUR : curDayResetTime;
+    }
+}
+
+void World::ResetDailyQuests()
+{
+    sDatabase.Execute("DELETE FROM `character_queststatus_daily`");
+    for(SessionMap::iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
+        if(itr->second->GetPlayer())
+            itr->second->GetPlayer()->ResetDailyQuestStatus();
 }

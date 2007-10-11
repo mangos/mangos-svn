@@ -151,6 +151,9 @@ Player::Player (WorldSession *session): Unit( 0 )
         m_Tutorials[ aX ] = 0x00;
     m_TutorialsChanged = false;
 
+    m_DailyQuestChanged = false;
+    m_lastDailyQuestTime = 0;
+
     m_regenTimer = 0;
     m_weaponChangeTimer = 0;
     m_breathTimer = 0;
@@ -10524,7 +10527,7 @@ bool Player::CanSeeStartQuest( Quest const *pQuest )
         SatisfyQuestExclusiveGroup( pQuest, false ) &&
         SatisfyQuestSkill( pQuest, false ) && SatisfyQuestReputation( pQuest, false ) &&
         SatisfyQuestPreviousQuest( pQuest, false ) && SatisfyQuestNextChain( pQuest, false ) &&
-        SatisfyQuestPrevChain( pQuest, false ) )
+        SatisfyQuestPrevChain( pQuest, false ) && SatisfyQuestDay( pQuest, false ) )
     {
         return getLevel() + sWorld.getConfig(CONFIG_QUEST_HIGH_LEVEL_HIDE_DIFF) >= pQuest->GetMinLevel();
     }
@@ -10538,7 +10541,8 @@ bool Player::CanTakeQuest( Quest const *pQuest, bool msg )
         && SatisfyQuestRace( pQuest, msg ) && SatisfyQuestLevel( pQuest, msg ) && SatisfyQuestClass( pQuest, msg )
         && SatisfyQuestSkill( pQuest, msg ) && SatisfyQuestReputation( pQuest, msg )
         && SatisfyQuestPreviousQuest( pQuest, msg ) && SatisfyQuestTimed( pQuest, msg )
-        && SatisfyQuestNextChain( pQuest, msg ) && SatisfyQuestPrevChain( pQuest, msg );
+        && SatisfyQuestNextChain( pQuest, msg ) && SatisfyQuestPrevChain( pQuest, msg )
+        && SatisfyQuestDay( pQuest, msg );
 }
 
 bool Player::CanAddQuest( Quest const *pQuest, bool msg )
@@ -10649,6 +10653,10 @@ bool Player::CanRewardQuest( Quest const *pQuest, bool msg )
 {
     // not auto complete quest and not completed quest (only cheating case, then ignore without message)
     if(!pQuest->IsAutoComplete() && GetQuestStatus(pQuest->GetQuestId()) != QUEST_STATUS_COMPLETE)
+        return false;
+
+    // daily quest can't be rewarded (10 daily quest already completed)
+    if(!SatisfyQuestDay(pQuest,true))
         return false;
 
     // rewarded and not repeatable quest (only cheating case, then ignore without message)
@@ -10882,6 +10890,9 @@ void Player::RewardQuest( Quest const *pQuest, uint32 reward, Object* questGiver
         ModifyMoney( MaNGOS::XP::xp_to_money(pQuest->GetRewXpOrMoney(), pQuest->GetQuestLevel()) );
 
     ModifyMoney( pQuest->GetRewOrReqMoney() );
+
+    if(pQuest->GetType()==QUEST_TYPE_DAILY)
+        SetDailyQuestStatus(quest_id);
 
     if ( !pQuest->IsRepeatable() )
         SetQuestStatus(quest_id, QUEST_STATUS_COMPLETE);
@@ -11224,6 +11235,32 @@ bool Player::SatisfyQuestPrevChain( Quest const* qInfo, bool msg )
     }
 
     // No previous quest in chain active
+    return true;
+}
+
+bool Player::SatisfyQuestDay( Quest const* qInfo, bool msg )
+{
+    if(qInfo->GetType()!= QUEST_TYPE_DAILY)
+        return true;
+
+    bool have_slot = false;
+    for(uint32 quest_daily_idx = 0; quest_daily_idx < 10; ++quest_daily_idx)
+    {
+        uint32 id = GetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1+quest_daily_idx);
+        if(qInfo->GetQuestId()==id)
+            return false;
+
+        if(!id)
+            have_slot = true;
+    }
+
+    if(!have_slot)
+    {
+        if( msg )
+            SendCanTakeQuestResponse( INVALIDREASON_HAVE_10_DAILY_QUESTS );
+        return false;
+    }
+
     return true;
 }
 
@@ -12195,27 +12232,28 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     InitTalentForLevel();
 
     _LoadQuestStatus(holder->GetResult(5));
+    _LoadDailyQuestStatus(holder->GetResult(6));
 
-    _LoadTutorials(holder->GetResult(6));
+    _LoadTutorials(holder->GetResult(7));
 
-    _LoadReputation(holder->GetResult(7));                  // must be before inventory (some items required reputation check)
+    _LoadReputation(holder->GetResult(8));                  // must be before inventory (some items required reputation check)
 
-    _LoadInventory(holder->GetResult(8), time_diff);
+    _LoadInventory(holder->GetResult(9), time_diff);
 
-    _LoadActions(holder->GetResult(9));
+    _LoadActions(holder->GetResult(10));
 
     // unread mails and next delivery time, actual mails not loaded
-    _LoadMailInit(holder->GetResult(10), holder->GetResult(11));
+    _LoadMailInit(holder->GetResult(11), holder->GetResult(12));
 
-    _LoadIgnoreList(holder->GetResult(12));
-    _LoadFriendList(holder->GetResult(13));
+    _LoadIgnoreList(holder->GetResult(13));
+    _LoadFriendList(holder->GetResult(14));
 
-    if(!_LoadHomeBind(holder->GetResult(14)))
+    if(!_LoadHomeBind(holder->GetResult(15)))
         return false;
 
-    _LoadSpellCooldowns(holder->GetResult(15));
+    _LoadSpellCooldowns(holder->GetResult(16));
 
-    _LoadHonor(holder->GetResult(16));
+    _LoadHonor(holder->GetResult(17));
 
     // Spell code allow apply any auras to dead character in load time in aura/spell/item loading
     // Do now before stats re-calculation cleanup for ghost state unexpected auras
@@ -12732,7 +12770,7 @@ void Player::_LoadQuestStatus(QueryResult *result)
                     ++slot;
                 }
 
-                sLog.outDebug("Quest status is {%u} for quest {%u}", mQuestStatus[quest_id].m_status, quest_id);
+                sLog.outDebug("Quest status is {%u} for quest {%u} for player (GUID: %u)", mQuestStatus[quest_id].m_status, quest_id, GetGUIDLow());
             }
         }
         while( result->NextRow() );
@@ -12747,6 +12785,50 @@ void Player::_LoadQuestStatus(QueryResult *result)
         SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i+1,0);
         SetUInt32Value(PLAYER_QUEST_LOG_1_1 + 3*i+2,0);
     }
+}
+
+void Player::_LoadDailyQuestStatus(QueryResult *result)
+{
+
+    for(uint32 quest_daily_idx = 0; quest_daily_idx < 10; ++quest_daily_idx)
+        SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1+quest_daily_idx,0);
+
+    //QueryResult *result = sDatabase.PQuery("SELECT `quest`,`time` FROM `character_queststatus_daily` WHERE `guid` = '%u'", GetGUIDLow());
+
+    if(result)
+    {
+        uint32 quest_daily_idx = 0;
+
+        do{
+            if(quest_daily_idx >= 10)                       // max amount with exist data in query
+            {
+                sLog.outError("Player (GUID: %u) have more 10 daily quest records in `charcter_queststatus_daily`",GetGUIDLow());
+                break;
+            }
+
+            Field *fields = result->Fetch();
+
+            uint32 quest_id = fields[0].GetUInt32();
+
+            // save _any_ from daily quest times (it must be after last reset anyway)
+            m_lastDailyQuestTime = (time_t)fields[1].GetUInt64();
+
+            Quest const* pQuest = objmgr.GetQuestTemplate(quest_id);
+            if( !pQuest )
+                continue;
+
+            SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1+quest_daily_idx,quest_id);
+            ++quest_daily_idx;
+
+            sLog.outDebug("Daily quest {%u} cooldown for player (GUID: %u)", quest_id, GetGUIDLow());
+
+        }
+        while( result->NextRow() );
+
+        delete result;
+    }
+
+    m_DailyQuestChanged = false;
 }
 
 void Player::_LoadReputation(QueryResult *result)
@@ -13062,6 +13144,7 @@ void Player::SaveToDB()
 
     _SaveInventory();
     _SaveQuestStatus();
+    _SaveDailyQuestStatus();
     _SaveTutorials();
     _SaveSpells();
     _SaveSpellCooldowns();
@@ -13290,6 +13373,23 @@ void Player::_SaveQuestStatus()
         };
         i->second.uState = QUEST_UNCHANGED;
     }
+}
+
+void Player::_SaveDailyQuestStatus()
+{
+    if(!m_DailyQuestChanged)
+        return;
+
+    m_DailyQuestChanged = false;
+
+    // save last daily quest time for all quests: we need only mostly reset time for reset check anyway
+
+    // we don't need transactions here.
+    sDatabase.PExecute("DELETE FROM `character_queststatus_daily` WHERE `guid` = '%u'",GetGUIDLow());
+    for(uint32 quest_daily_idx = 0; quest_daily_idx < 10; ++quest_daily_idx)
+        if(GetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1+quest_daily_idx))
+            sDatabase.PExecute("INSERT INTO `character_queststatus_daily` (`guid`,`quest`,`time`) VALUES ('%u', '%u','" I64FMTD "')",
+                GetGUIDLow(), GetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1+quest_daily_idx),uint64(m_lastDailyQuestTime));
 }
 
 void Player::_SaveReputation()
@@ -15280,4 +15380,28 @@ void Player::SendAuraDurationsForTarget(Unit* target)
 
         aura->SendAuraDurationForCaster(this);
     }
+}
+
+void Player::SetDailyQuestStatus( uint32 quest_id )
+{
+    for(uint32 quest_daily_idx = 0; quest_daily_idx < 10; ++quest_daily_idx)
+    {
+        if(!GetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1+quest_daily_idx))
+        {
+            SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1+quest_daily_idx,quest_id);
+            m_lastDailyQuestTime = time(NULL);              // last daily quest time
+            m_DailyQuestChanged = true;
+            break;
+        }
+    }
+}
+
+void Player::ResetDailyQuestStatus()
+{
+    for(uint32 quest_daily_idx = 0; quest_daily_idx < 10; ++quest_daily_idx)
+        SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1+quest_daily_idx,0);
+    
+    // DB data deleted in caller
+    m_DailyQuestChanged = false;
+    m_lastDailyQuestTime = 0;
 }

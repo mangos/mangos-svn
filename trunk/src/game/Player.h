@@ -993,11 +993,16 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool SatisfyQuestExclusiveGroup( Quest const* qInfo, bool msg );
         bool SatisfyQuestNextChain( Quest const* qInfo, bool msg );
         bool SatisfyQuestPrevChain( Quest const* qInfo, bool msg );
+        bool SatisfyQuestDay( Quest const* qInfo, bool msg );
         bool GiveQuestSourceItem( Quest const *pQuest );
         bool TakeQuestSourceItem( uint32 quest_id, bool msg );
         bool GetQuestRewardStatus( uint32 quest_id );
         QuestStatus GetQuestStatus( uint32 quest_id );
         void SetQuestStatus( uint32 quest_id, QuestStatus status );
+
+        void SetDailyQuestStatus( uint32 quest_id );
+        void ResetDailyQuestStatus();
+
         uint32 GetReqKillOrCastCurrentCount(uint32 quest_id, uint32 entry);
         void AdjustQuestReqItemCount( Quest const* pQuest );
         uint16 GetQuestSlot( uint32 quest_id );
@@ -1721,6 +1726,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadMail();
         void _LoadMailedItem(uint32 item_guid, uint32 item_template);
         void _LoadQuestStatus(QueryResult *result);
+        void _LoadDailyQuestStatus(QueryResult *result);
         void _LoadGroup(QueryResult *result);
         void _LoadReputation(QueryResult *result);
         void _LoadSpells(QueryResult *result, uint32 timediff);
@@ -1741,6 +1747,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _SaveInventory();
         void _SaveMail();
         void _SaveQuestStatus();
+        void _SaveDailyQuestStatus();
         void _SaveReputation();
         void _SaveSpells();
         void _SaveTutorials();
@@ -1845,6 +1852,9 @@ class MANGOS_DLL_SPEC Player : public Unit
 
         uint32 m_Tutorials[8];
         bool   m_TutorialsChanged;
+
+        bool   m_DailyQuestChanged;
+        time_t m_lastDailyQuestTime;
 
         uint32 m_regenTimer;
         uint32 m_breathTimer;

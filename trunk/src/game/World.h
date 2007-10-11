@@ -360,6 +360,8 @@ class World
         void SetSupportedLocals(uint8 local) { m_SupportedLocals.insert(local); }
         void FillSupportedLocals(std::string str);
 
+        void InitDailyQuestResetTime();
+        void ResetDailyQuests();
     private:
         time_t m_startTime;
         time_t m_gameTime;
@@ -402,6 +404,9 @@ class World
 
         // Localization
         LocalizationMap m_SupportedLocals;
+
+        // next daily quests reset time
+        time_t m_NextDailyQuestReset;
 };
 
 extern uint32 realmID;
