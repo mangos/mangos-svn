@@ -2028,6 +2028,13 @@ void ObjectMgr::LoadQuests()
 
         // additional quest integrity checks (GO, creature_template and item_template must be loaded already)
 
+        if(qinfo->Type == QUEST_TYPE_DAILY && (qinfo->GetSpecialFlags() & QUEST_SPECIAL_FLAGS_DAILY) == 0)
+        {
+            sLog.outErrorDb("Quest %u has `Type` = %u (QUEST_TYPE_DAILY) but not have set in `SpecialFlags` flag mask %u (QUEST_SPECIAL_FLAGS_DAILY).",
+                qinfo->GetQuestId(),qinfo->Type,QUEST_SPECIAL_FLAGS_DAILY);
+            qinfo->SpecialFlags |= QUEST_SPECIAL_FLAGS_DAILY;
+        }
+
         if(qinfo->RequiredSkillValue && qinfo->RequiredSkillValue > sWorld.GetConfigMaxSkillValue())
         {
             sLog.outErrorDb("Quest %u has `RequiredSkillValue` = %u but max possible skill is %u, quest can't be done.",

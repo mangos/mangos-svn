@@ -124,6 +124,7 @@ enum __QuestSpecialFlags                                    //according to mango
     //QUEST_SPECIAL_FLAGS_UNK3          = 512,              // unknown tbc
     //QUEST_SPECIAL_FLAGS_UNK4          = 1024,             // unknown tbc
     //QUEST_SPECIAL_FLAGS_UNK5          = 2048,             // unknown tbc
+    QUEST_SPECIAL_FLAGS_DAILY         = 4096
 };
 
 struct QuestLocale
@@ -190,6 +191,7 @@ class Quest
         bool   IsRepeatable() const { return bool(Repeatable); }
         bool   IsAutoComplete() const { return Objectives.empty(); }
         uint32 GetSpecialFlags() const { return SpecialFlags; }
+        bool   IsDaily() const { return SpecialFlags & QUEST_SPECIAL_FLAGS_DAILY; }
 
         // multiple values
         std::string ObjectiveText[QUEST_OBJECTIVES_COUNT];

@@ -239,7 +239,9 @@ namespace VMAP
             instanceTree = new MapTree(pBasePath);
             iInstanceMapTrees.set(pMapId, instanceTree);
         }
-        instanceTree = iInstanceMapTrees.get(pMapId);
+        else
+            instanceTree = iInstanceMapTrees.get(pMapId);
+
         unsigned int mapTileIdent = MAP_TILE_IDENT(x,y);
         result = instanceTree->loadMap(dirFileName, mapTileIdent);
         if(!result)                                         // remove on fail

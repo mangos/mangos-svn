@@ -149,11 +149,11 @@ enum EnchantmentSlot
     BONUS_ENCHANTMENT_SLOT      = 5,
     MAX_INSPECTED_ENCHANTMENT_SLOT = 6,
 
-    PROP_ENCHANTMENT_SLOT_0     = 6,                        // used with RandomSuffix   (or have HELD enchantments)
-    PROP_ENCHANTMENT_SLOT_1     = 7,                        // used with RandomSuffix   (or have HELD enchantments)
+    PROP_ENCHANTMENT_SLOT_0     = 6,                        // used with RandomSuffix 
+    PROP_ENCHANTMENT_SLOT_1     = 7,                        // used with RandomSuffix 
     PROP_ENCHANTMENT_SLOT_2     = 8,                        // used with RandomSuffix and RandomProperty
-    PROP_ENCHANTMENT_SLOT_3     = 9,                        // used with RandomProperty (or have HELD enchantments)
-    PROP_ENCHANTMENT_SLOT_4     = 10,                       // used with RandomProperty (or have HELD enchantments)
+    PROP_ENCHANTMENT_SLOT_3     = 9,                        // used with RandomProperty
+    PROP_ENCHANTMENT_SLOT_4     = 10,                       // used with RandomProperty
     MAX_ENCHANTMENT_SLOT        = 11
 };
 

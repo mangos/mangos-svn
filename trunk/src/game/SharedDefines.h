@@ -984,6 +984,8 @@ enum CreatureEliteType
     CREATURE_ELITE_RARE            = 4
 };
 
+
+// values based at QuestInfo.dbc 
 enum QuestTypes
 {
     QUEST_TYPE_ELITE               = 1,
@@ -998,6 +1000,7 @@ enum QuestTypes
     QUEST_TYPE_DAILY               = 87
 };
 
+// values based at QuestSort.dbc 
 enum QuestSort
 {
     QUEST_SORT_EPIC                = 1,
