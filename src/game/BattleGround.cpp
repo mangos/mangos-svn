@@ -195,10 +195,13 @@ void BattleGround::Update(time_t diff)
             {
                 m_RemovedPlayers[itr->first] = 1;           // add to remove list (BG)
             }
+            //this is not a good place to change battleground status, if some player's are already invited in queue, it can cause problems
+            /*
             SetStatus(STATUS_WAIT_QUEUE);
             SetQueueType(MAX_BATTLEGROUND_QUEUES);
             SetWinner(2);
 
+            //and following code ... WTF?
             if(isArena())
             {
                 BattleGround *bg = sBattleGroundMgr.GetBattleGround(BATTLEGROUND_AA);
@@ -206,7 +209,7 @@ void BattleGround::Update(time_t diff)
                     return;
 
                 bg->SetStatus(STATUS_WAIT_QUEUE);
-            }
+            }*/
         }
     }
 }
@@ -511,7 +514,20 @@ void BattleGround::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
 
     if(!GetPlayersSize())
     {
+        //this code will reset battleground queue status, should be called only once
+        // all this code should be moved to virtual void Reset()  - which should be implemented
         SetStatus(STATUS_WAIT_QUEUE);
+        SetQueueType(MAX_BATTLEGROUND_QUEUES);
+        SetWinner(2);
+
+        if (m_InvitedAlliance > 0 || m_InvitedHorde > 0)
+            sLog.outError("BattleGround system ERROR: bad counter, m_InvitedAlliance: %d, m_InvitedHorde: %d", m_InvitedAlliance, m_InvitedHorde);
+
+        m_InvitedAlliance = 0;
+        m_InvitedHorde = 0;
+
+        //WTF? :
+        /*
         if(isArena())
         {
             BattleGround *bg = sBattleGroundMgr.GetBattleGround(BATTLEGROUND_AA);
@@ -519,11 +535,12 @@ void BattleGround::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
                 return;
 
             bg->SetStatus(STATUS_WAIT_QUEUE);
-        }
-        SetWinner(2);
+        }*/
+
         m_Players.clear();
         m_PlayerScores.clear();
 
+        //this code is used to despawn objects in WSG? or in all BGs???
         for(uint32 i = 0; i < m_bgobjects.size(); i++)
         {
             SpawnBGObject(i, RESPAWN_ONE_DAY);
