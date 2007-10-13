@@ -39,6 +39,7 @@
 #include "Weather.h"
 #include "TargetedMovementGenerator.h"
 #include "SystemConfig.h"
+#include "Config/ConfigEnv.h"
 
 //reload commands
 bool ChatHandler::HandleReloadCommand(const char* arg)
@@ -4255,8 +4256,8 @@ bool ChatHandler::HandlePLimitCommand(const char *args)
             sWorld.SetPlayerLimit(-SEC_GAMEMASTER);
         else if(strncmp(param,"administrator",l) == 0 )
             sWorld.SetPlayerLimit(-SEC_ADMINISTRATOR);
-        else if(strncmp(param,"default",l) == 0 )
-            sWorld.SetPlayerLimit(DEFAULT_PLAYER_LIMIT);
+        else if(strncmp(param,"reset",l) == 0 )
+            sWorld.SetPlayerLimit( sConfig.GetIntDefault("PlayerLimit", DEFAULT_PLAYER_LIMIT) );
         else
         {
             int val = atoi(param);

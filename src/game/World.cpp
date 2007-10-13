@@ -250,7 +250,7 @@ void World::SetInitialWorldSettings()
     }
 
     ///- Read the player limit and the Message of the day from the config file
-    SetPlayerLimit( sConfig.GetIntDefault("PlayerLimit", DEFAULT_PLAYER_LIMIT) );
+    SetPlayerLimit( sConfig.GetIntDefault("PlayerLimit", DEFAULT_PLAYER_LIMIT), true );
     SetMotd( sConfig.GetStringDefault("Motd", "Welcome to the Massive Network Game Object Server." ).c_str() );
 
     ///- Read all rates from the config file
@@ -1743,4 +1743,18 @@ void World::ResetDailyQuests()
     for(SessionMap::iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
         if(itr->second->GetPlayer())
             itr->second->GetPlayer()->ResetDailyQuestStatus();
+}
+
+void World::SetPlayerLimit( int32 limit, bool needUpdate )
+{
+    if(limit < -SEC_ADMINISTRATOR)
+        limit = -SEC_ADMINISTRATOR;
+
+    // lock update need
+    bool db_update_need = needUpdate || (limit < 0) != (m_playerLimit < 0) || (limit < 0 && m_playerLimit < 0 && limit != m_playerLimit);
+
+    m_playerLimit = limit;
+
+    if(db_update_need)
+        loginDatabase.PExecute("UPDATE `realmlist` SET `allowedSecurityLevel` = '%u' WHERE `id` = '%d'",uint8(GetPlayerSecurityLimit()),realmID);
 }

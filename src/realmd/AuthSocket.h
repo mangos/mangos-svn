@@ -69,6 +69,7 @@ class AuthSocket: public TcpSocket
         std::string _login;
         std::string _safelogin;
         uint8 _localization;
+        AccountTypes _accountSecurityLevel;
 };
 #endif
 /// @}

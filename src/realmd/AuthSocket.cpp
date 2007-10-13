@@ -218,6 +218,8 @@ AuthSocket::AuthSocket(ISocketHandler &h) : TcpSocket(h)
     g.SetDword(7);
     _authed = false;
     pPatch=NULL;
+
+    _accountSecurityLevel = SEC_PLAYER;
 }
 
 /// Close patch file descriptor before leaving
@@ -378,7 +380,7 @@ bool AuthSocket::_HandleLogonChallenge()
             ///- Get the account details from the account table
             // No SQL injection (escaped user name)
 
-            result = dbRealmServer.PQuery("SELECT `I`,`id`,`locked`,`last_ip`,`online` FROM `account` WHERE `username` = '%s'",_safelogin.c_str ());
+            result = dbRealmServer.PQuery("SELECT `I`,`id`,`locked`,`last_ip`,`gmlevel` FROM `account` WHERE `username` = '%s'",_safelogin.c_str ());
             if( result )
             {
                 ///- If the IP is 'locked', check that the player comes indeed from the correct IP address
@@ -448,6 +450,9 @@ bool AuthSocket::_HandleLogonChallenge()
                         pkt.append(s.AsByteArray(), s.GetNumBytes());
                         pkt.append(unk3.AsByteArray(), 16);
                         pkt << (uint8)0;                    // Added in 1.12.x client branch
+
+                        uint8 secLevel = (*result)[4].GetUInt8();
+                        _accountSecurityLevel = secLevel <= SEC_ADMINISTRATOR ? AccountTypes(secLevel) : SEC_ADMINISTRATOR;
 
                         QueryResult *localeresult = dbRealmServer.PQuery("SELECT `locale` FROM `localization` WHERE `string` = '%c%c'",ch->country[3],ch->country[2]);
                         if( localeresult )
@@ -659,21 +664,14 @@ bool AuthSocket::_HandleRealmList()
     m_realmList.UpdateIfNeed();
 
     ///- Circle through realms in the RealmList and construct the return packet (including # of user characters in each realm)
-    uint8 AmountOfCharacters = 0;
-
     ByteBuffer pkt;
     pkt << (uint32) 0;
     pkt << (uint16) m_realmList.size();
     RealmList::RealmMap::const_iterator i;
     for( i = m_realmList.begin(); i != m_realmList.end(); i++ )
     {
-        pkt << i->second.icon;                             // realm type
-        pkt << (uint8) 0;                                   // if 1, then realm locked
-        pkt << i->second.color;                            // if 2, then realm is offline
-        pkt << i->first;
-        pkt << i->second.address;
-        /// \todo Fix realm population
-        pkt << (float) 0.0;                                 //this is population 0.5 = low 1.0 = medium 2.0 high     (float)(maxplayers / players)*2
+        uint8 AmountOfCharacters;
+
         // No SQL injection. id of realm is controlled by the database.
         result = dbRealmServer.PQuery( "SELECT `numchars` FROM `realmcharacters` WHERE `realmid` = '%d' AND `acctid`='%u'",i->second.m_ID,id);
         if( result )
@@ -682,6 +680,18 @@ bool AuthSocket::_HandleRealmList()
             AmountOfCharacters = fields[0].GetUInt8();
             delete result;
         }
+        else
+            AmountOfCharacters = 0;
+
+        uint8 lock = (i->second.allowedSecurityLevel > _accountSecurityLevel) ? 1 : 0;
+
+        pkt << i->second.icon;                             // realm type
+        pkt << lock;                                       // if 1, then realm locked
+        pkt << i->second.color;                            // if 2, then realm is offline
+        pkt << i->first;
+        pkt << i->second.address;
+        /// \todo Fix realm population
+        pkt << (float) 0.0;                                 //this is population 0.5 = low 1.0 = medium 2.0 high     (float)(maxplayers / players)*2
         pkt << AmountOfCharacters;
         pkt << i->second.timezone;
         pkt << (uint8) 0x2C;                                // unk, may be realm number/id?
