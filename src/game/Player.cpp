@@ -10554,8 +10554,6 @@ bool Player::CanAddQuest( Quest const *pQuest, bool msg )
     {
         uint32 count = pQuest->GetSrcItemCount();
         uint16 dest;
-        if( count <= 0 )
-            count = 1;
         uint8 msg = CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, srcitem, count, false );
 
         // player already have max number (in most case 1) source item, no additional item needed and quest can be added.

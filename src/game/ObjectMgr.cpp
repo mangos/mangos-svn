@@ -2070,11 +2070,26 @@ void ObjectMgr::LoadQuests()
             // no changes, quest can't be done for this requirement
         }
 
-        if(qinfo->SrcItemId && !sItemStorage.LookupEntry<ItemPrototype>(qinfo->SrcItemId))
+        if(qinfo->SrcItemId)
         {
-            sLog.outErrorDb("Quest %u has `SrcItemId` = %u but item with entry %u doesn't exist, quest can't be done.",
-                qinfo->GetQuestId(),qinfo->SrcItemId,qinfo->SrcItemId);
-            qinfo->SrcItemId = 0;                           // quest can't be done for this requirement
+            if(!sItemStorage.LookupEntry<ItemPrototype>(qinfo->SrcItemId))
+            {
+                sLog.outErrorDb("Quest %u has `SrcItemId` = %u but item with entry %u doesn't exist, quest can't be done.",
+                    qinfo->GetQuestId(),qinfo->SrcItemId,qinfo->SrcItemId);
+                qinfo->SrcItemId = 0;                           // quest can't be done for this requirement
+            }
+            else if(qinfo->SrcItemCount==0)
+            {
+                sLog.outErrorDb("Quest %u has `SrcItemId` = %u but `SrcItemCount` = 0, set to 1 but need fix to DB anyway.",
+                    qinfo->GetQuestId(),qinfo->SrcItemId);
+                qinfo->SrcItemCount = 1;                        // update to 1 for allow quest work for backward comptibility with DB
+            }
+        }
+        else if(qinfo->SrcItemCount>0)
+        {
+            sLog.outErrorDb("Quest %u has `SrcItemId` = 0 but `SrcItemCount` = %u, useless value.",
+                qinfo->GetQuestId(),qinfo->SrcItemCount);
+            qinfo->SrcItemCount=0;                              // no quest work changes in fact
         }
 
         if(qinfo->SrcSpell && !sSpellStore.LookupEntry(qinfo->SrcSpell))
@@ -2089,19 +2104,32 @@ void ObjectMgr::LoadQuests()
             uint32 id = qinfo->ReqItemId[j];
             if(id)
             {
+                if(qinfo->ReqItemCount[j]==0)
+                {
+                    sLog.outErrorDb("Quest %u has `ReqItemId%d` = %u but `ReqItemCount%d` = 0, quest can't be done.",
+                        qinfo->GetQuestId(),j+1,id,j+1);
+                    // no changes, quest can't be done for this requirement
+                }
+
                 if((qinfo->SpecialFlags & QUEST_SPECIAL_FLAGS_DELIVER)==0)
                 {
                     sLog.outErrorDb("Quest %u has `ReqItemId%d` = %u but `SpecialFlags` not have set delivery flag bit, quest can be done without item delivery!",
                         qinfo->GetQuestId(),j+1,id);
-                    // no changes, quest can be incorrectly done, but we already report this
+                    qinfo->ReqItemCount[j] = 0;             // prevent incorrect work of quest
                 }
 
                 if(!sItemStorage.LookupEntry<ItemPrototype>(id))
                 {
                     sLog.outErrorDb("Quest %u has `ReqItemId%d` = %u but item with entry %u doesn't exist, quest can't be done.",
                         qinfo->GetQuestId(),j+1,id,id);
-                    // no changes, quest can't be done for this requirement
+                    qinfo->ReqItemCount[j] = 0;             // prevent incorrect work of quest
                 }
+            }
+            else if(qinfo->ReqItemCount[j]>0)
+            {
+                sLog.outErrorDb("Quest %u has `ReqItemId%d` = 0 but `ReqItemCount%d` = %u, quest can't be done.",
+                    qinfo->GetQuestId(),j+1,j+1,qinfo->ReqItemCount[j]);
+                qinfo->ReqItemCount[j] = 0;                 // prevent incorrect work of quest
             }
         }
 
@@ -2116,12 +2144,19 @@ void ObjectMgr::LoadQuests()
                         qinfo->GetQuestId(),j+1,id,id);
                     // no changes, quest can't be done for this requirement
                 }
+
                 if(!qinfo->ReqSourceCount[j])
                 {
                     sLog.outErrorDb("Quest %u has `ReqSourceId%d` = %u but `ReqSourceCount%d` = 0, quest can't be done.",
                         qinfo->GetQuestId(),j+1,id,j+1);
-                    // no changes, quest can't be done for this requirement
+                    qinfo->ReqSourceCount[j] = 0;           // prevent incorrect work of quest
                 }
+            }
+            else if(qinfo->ReqSourceCount[j]>0)
+            {
+                sLog.outErrorDb("Quest %u has `ReqSourceId%d` = 0 but `ReqSourceCount%d` = %u.",
+                    qinfo->GetQuestId(),j+1,j+1,qinfo->ReqSourceCount[j]);
+                // no changes, quest ignore this data
             }
         }
 
@@ -2163,11 +2198,27 @@ void ObjectMgr::LoadQuests()
                 qinfo->ReqCreatureOrGOId[j] = 0;            // quest can't be done for this requirement
             }
 
-            if(id && (qinfo->SpecialFlags & QUEST_SPECIAL_FLAGS_KILL_OR_CAST)==0)
+            if(id)
             {
-                sLog.outErrorDb("Quest %u has `ReqCreatureOrGOId%d` = %u but `SpecialFlags` not have set killOrCast flag bit, quest can be done without creature/go kill/cast!",
-                    qinfo->GetQuestId(),j+1,id);
-                // no changes, quest can be incorrectly done, but we already report this
+                if((qinfo->SpecialFlags & QUEST_SPECIAL_FLAGS_KILL_OR_CAST)==0)
+                {
+                    sLog.outErrorDb("Quest %u has `ReqCreatureOrGOId%d` = %u but `SpecialFlags` not have set killOrCast flag bit, quest can be done without creature/go kill/cast!",
+                        qinfo->GetQuestId(),j+1,id);
+                    // no changes, quest can be incorrectly done, but we already report this
+                }
+
+                if(!qinfo->ReqCreatureOrGOCount[j])
+                {
+                    sLog.outErrorDb("Quest %u has `ReqCreatureOrGOId%d` = %u but `ReqCreatureOrGOCount%d` = 0, quest can't be done.",
+                        qinfo->GetQuestId(),j+1,id,j+1);
+                    // no changes, quest can be incorrectly done, but we already report this
+                }
+            }
+            else if(qinfo->ReqCreatureOrGOCount[j]>0)
+            {
+                sLog.outErrorDb("Quest %u has `ReqCreatureOrGOId%d` = 0 but `ReqCreatureOrGOCount%d` = %u.",
+                    qinfo->GetQuestId(),j+1,j+1,qinfo->ReqCreatureOrGOCount[j]);
+                // no changes, quest ignore this data
             }
         }
 
@@ -2185,32 +2236,80 @@ void ObjectMgr::LoadQuests()
         for(int j = 0; j < QUEST_REWARD_CHOICES_COUNT; ++j )
         {
             uint32 id = qinfo->RewChoiceItemId[j];
-            if(id && !sItemStorage.LookupEntry<ItemPrototype>(id))
+            if(id)
             {
-                sLog.outErrorDb("Quest %u has `RewChoiceItemId%d` = %u but item with entry %u doesn't exist, quest will not reward this item.",
-                    qinfo->GetQuestId(),j+1,id,id);
-                qinfo->RewChoiceItemId[j] = 0;              // no changes, quest will not reward this
+                if(!sItemStorage.LookupEntry<ItemPrototype>(id))
+                {
+                    sLog.outErrorDb("Quest %u has `RewChoiceItemId%d` = %u but item with entry %u doesn't exist, quest will not reward this item.",
+                        qinfo->GetQuestId(),j+1,id,id);
+                    qinfo->RewChoiceItemId[j] = 0;              // no changes, quest will not reward this
+                }
+
+                if(!qinfo->RewChoiceItemCount[j])
+                {
+                    sLog.outErrorDb("Quest %u has `RewChoiceItemId%d` = %u but `RewChoiceItemCount%d` = 0, quest can't be done.",
+                        qinfo->GetQuestId(),j+1,id,j+1);
+                    // no changes, quest can't be done
+                }
+            }
+            else if(qinfo->RewChoiceItemCount[j]>0)
+            {
+                sLog.outErrorDb("Quest %u has `RewChoiceItemId%d` = 0 but `RewChoiceItemCount%d` = %u.",
+                    qinfo->GetQuestId(),j+1,j+1,qinfo->RewChoiceItemCount[j]);
+                // no changes, quest ignore this data
             }
         }
 
         for(int j = 0; j < QUEST_REWARDS_COUNT; ++j )
         {
             uint32 id = qinfo->RewItemId[j];
-            if(id && !sItemStorage.LookupEntry<ItemPrototype>(id))
+            if(id)
             {
-                sLog.outErrorDb("Quest %u has `RewItemId%d` = %u but item with entry %u doesn't exist, quest will not reward this item.",
-                    qinfo->GetQuestId(),j+1,id,id);
-                qinfo->RewItemId[j] = 0;                    // no changes, quest will not reward this item
+                if(!sItemStorage.LookupEntry<ItemPrototype>(id))
+                {
+                    sLog.outErrorDb("Quest %u has `RewItemId%d` = %u but item with entry %u doesn't exist, quest will not reward this item.",
+                        qinfo->GetQuestId(),j+1,id,id);
+                    qinfo->RewItemId[j] = 0;                    // no changes, quest will not reward this item
+                }
+
+                if(!qinfo->RewItemCount[j])
+                {
+                    sLog.outErrorDb("Quest %u has `RewItemId%d` = %u but `RewItemCount%d` = 0, quest will not reward item.",
+                        qinfo->GetQuestId(),j+1,id,j+1);
+                    // no changes
+                }
+            }
+            else if(qinfo->RewItemCount[j]>0)
+            {
+                sLog.outErrorDb("Quest %u has `RewItemId%d` = 0 but `RewItemCount%d` = %u.",
+                    qinfo->GetQuestId(),j+1,j+1,qinfo->RewItemCount[j]);
+                // no changes, quest ignore this data
             }
         }
 
         for(int j = 0; j < QUEST_REPUTATIONS_COUNT; ++j)
         {
-            if(qinfo->RewRepFaction[j] && !sFactionStore.LookupEntry(qinfo->RewRepFaction[j]))
+            if(qinfo->RewRepFaction[j])
             {
-                sLog.outErrorDb("Quest %u has `RewRepFaction%d` = %u but raw faction (faction.dbc) %u doesn't exist, quest will not reward reputation for this faction.",
-                    qinfo->GetQuestId(),j+1,qinfo->RewRepFaction[j] ,qinfo->RewRepFaction[j] );
-                qinfo->RewRepFaction[j] = 0;                // no changes, quest will not reward this
+                if(!qinfo->RewRepValue[j])
+                {
+                    sLog.outErrorDb("Quest %u has `RewRepFaction%d` = %u but `RewRepValue%d` = 0, quest will not reward reputation.",
+                        qinfo->GetQuestId(),j+1,qinfo->RewRepValue[j],j+1);
+                    // no changes
+                }
+
+                if(!sFactionStore.LookupEntry(qinfo->RewRepFaction[j]))
+                {
+                    sLog.outErrorDb("Quest %u has `RewRepFaction%d` = %u but raw faction (faction.dbc) %u doesn't exist, quest will not reward reputation for this faction.",
+                        qinfo->GetQuestId(),j+1,qinfo->RewRepFaction[j] ,qinfo->RewRepFaction[j] );
+                    qinfo->RewRepFaction[j] = 0;                // quest will not reward this
+                }
+            }
+            else if(qinfo->RewRepValue[j]!=0)
+            {
+                sLog.outErrorDb("Quest %u has `RewRepFaction%d` = 0 but `RewRepValue%d` = %u.",
+                    qinfo->GetQuestId(),j+1,j+1,qinfo->RewRepValue[j]);
+                // no changes, quest ignore this data
             }
         }
 
@@ -2218,7 +2317,7 @@ void ObjectMgr::LoadQuests()
         {
             sLog.outErrorDb("Quest %u has `RewSpell` = %u but spell %u doesn't exist, quest will not have a spell reward.",
                 qinfo->GetQuestId(),qinfo->RewSpell,qinfo->RewSpell);
-            qinfo->RewSpell = 0;                            // no changes, quest will not reward this
+            qinfo->RewSpell = 0;                            // quest will not reward this
         }
 
         if(qinfo->NextQuestInChain)
