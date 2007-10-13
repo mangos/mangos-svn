@@ -260,7 +260,7 @@ void BattleGroundQueue::Update(uint32 bgTypeId, uint32 queue_id)
 
     /* folowing code is working with current Battleground system and it should be removed, when BGs will work like instances */
     BattleGround* bg2 = sBattleGroundMgr.GetBattleGround(bgTypeId);
-    if (bg2->GetQueueType() != queue_id && bg2->GetQueueType() != MAX_BATTLEGROUND_QUEUES)
+    if (bg2->GetQueueType() != MAX_BATTLEGROUND_QUEUES || bg2->GetStatus() != STATUS_WAIT_QUEUE)
         return;
     if (m_QueuedPlayers[queue_id].Alliance >= bg2->GetMinPlayersPerTeam() && m_QueuedPlayers[queue_id].Horde >= bg2->GetMinPlayersPerTeam())
     {
