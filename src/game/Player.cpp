@@ -6462,6 +6462,8 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 item->m_lootGenerated = true;
                 loot->clear();
                 FillLoot(loot, item->GetEntry(), LootTemplates_Item);
+
+                loot->generateMoneyLoot(item->GetProto()->MinMoneyLoot,item->GetProto()->MaxMoneyLoot);
             }
         }
     }
@@ -6489,7 +6491,8 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
         if (bones->lootRecipient != this)
             permission = NONE_PERMISSION;
-    } else
+    }
+    else
     {
         Creature *creature =
             ObjectAccessor::Instance().GetCreature(*this, guid);
@@ -6556,7 +6559,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                     FillLoot(loot, lootid, LootTemplates_Creature);
                 }
 
-                creature->generateMoneyLoot();
+                loot->generateMoneyLoot(creature->GetCreatureInfo()->mingold,creature->GetCreatureInfo()->maxgold);
 
                 if (recipient->GetGroup())
                 {

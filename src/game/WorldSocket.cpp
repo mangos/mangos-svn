@@ -344,13 +344,6 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     {
         WorldPacket Packet(SMSG_AUTH_RESPONSE, 15);
         Packet << uint8(AUTH_UNAVAILABLE); 
-        Packet << uint8(CHAR_LIST_FAILED);
-        Packet << uint8(0x73);
-        Packet << uint8(0);
-        Packet << uint8(0);
-        Packet << uint32(0);
-        Packet << uint8(0);
-        Packet << uint32(0);
         SendPacket(&Packet);  
         return;
     }
@@ -391,7 +384,6 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     {
         packet.Initialize( SMSG_AUTH_RESPONSE, 1 );
         packet << uint8( AUTH_FAILED );
-
         SendPacket( &packet );
 
         sLog.outDetail( "SOCKET: Sent Auth Response (authentification failed)." );

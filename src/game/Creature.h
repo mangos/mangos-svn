@@ -453,7 +453,6 @@ class MANGOS_DLL_SPEC Creature : public Unit
         Loot loot;
         bool lootForPickPocketed;
         bool lootForBody;
-        void generateMoneyLoot();
         Player *GetLootRecipient() const;
         void SetLootRecipient (Player *player);
 

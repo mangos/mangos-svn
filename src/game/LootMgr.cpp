@@ -378,6 +378,19 @@ bool Loot::isLooted()
     return gold == 0 && unlootedCount == 0;
 }
 
+void Loot::generateMoneyLoot( uint32 minAmount, uint32 maxAmount )
+{
+    if (maxAmount > 0)
+    {
+        if (maxAmount <= minAmount)
+            gold = uint32(maxAmount * sWorld.getRate(RATE_DROP_MONEY));
+        else if ((maxAmount - minAmount) < 32700)
+            gold = uint32(urand(minAmount, maxAmount) * sWorld.getRate(RATE_DROP_MONEY));
+        else
+            gold = uint32(urand(minAmount >> 8, maxAmount >> 8) * sWorld.getRate(RATE_DROP_MONEY)) << 8;
+    }
+}
+
 ByteBuffer& operator<<(ByteBuffer& b, LootItem const& li)
 {
     b << uint32(li.itemid);
