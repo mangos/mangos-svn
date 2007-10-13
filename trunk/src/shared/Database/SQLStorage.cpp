@@ -32,7 +32,7 @@ const char CreatureModelfmt[]="iffii";
 const char CreatureInfoAddonInfofmt[]="iiiiiiiiiii";
 const char EquipmentInfofmt[]="iiiiiiiiii";
 const char GameObjectInfofmt[]="iiisiifiiiiiiiiiiiiiiiiiiiiiiiis";
-const char ItemPrototypefmt[]="iiiisiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffiffiffiffiffiiiiiiiiiifiiifiiiiiifiiiiiifiiiiiifiiiiiifiiiisiiiiiiiiiiiiiiiiiiiiiiiiiifsii";
+const char ItemPrototypefmt[]="iiiisiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiiffiffiffiffiffiiiiiiiiiifiiifiiiiiifiiiiiifiiiiiifiiiiiifiiiisiiiiiiiiiiiiiiiiiiiiiiiiiifsiiii";
 const char PageTextfmt[]="isi";
 const char SpellThreatfmt[]="ii";
 

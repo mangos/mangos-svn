@@ -485,6 +485,9 @@ pkgdata_DATA = \
 	4585_item_instance.sql \
 	4587_character_quest_daily.sql \
 	4588_command.sql \
+	4592_command.sql \
+	4592_realmlist.sql \
+	4594_item_template.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -950,4 +953,7 @@ EXTRA_DIST = \
 	4585_item_instance.sql \
 	4587_character_quest_daily.sql \
 	4588_command.sql \
+	4592_command.sql \
+	4592_realmlist.sql \
+	4594_item_template.sql \
 	README

@@ -148,6 +148,8 @@ struct Loot
     void NotifyMoneyRemoved();
     void AddLooter(uint64 GUID) { PlayersLooting.insert(GUID); }
     void RemoveLooter(uint64 GUID) { PlayersLooting.erase(GUID); }
+
+    void generateMoneyLoot(uint32 minAmount, uint32 maxAmount);
 };
 
 struct LootView

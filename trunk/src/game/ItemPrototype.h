@@ -523,6 +523,8 @@ struct ItemPrototype
     char* ScriptName;
     uint32 DisenchantID;
     uint32 FoodType;
+    uint32 MinMoneyLoot;
+    uint32 MaxMoneyLoot;
 };
 
 struct ItemLocale

@@ -881,23 +881,6 @@ void Creature::LoadGossipOptions()
     m_gossipOptionLoaded = true;
 }
 
-void Creature::generateMoneyLoot()
-{
-    uint32 maxgold = GetCreatureInfo()->maxgold;
-
-    if (maxgold > 0)
-    {
-        uint32 mingold = GetCreatureInfo()->mingold;
-
-        if (maxgold <= mingold)
-            loot.gold = uint32(maxgold * sWorld.getRate(RATE_DROP_MONEY));
-        else if ((maxgold - mingold) < 32700)
-            loot.gold = uint32(urand(mingold, maxgold) * sWorld.getRate(RATE_DROP_MONEY));
-        else
-            loot.gold = uint32(urand(mingold >> 8, maxgold >> 8) * sWorld.getRate(RATE_DROP_MONEY)) << 8;
-    }
-}
-
 void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool run, uint8 type)
 {
     /*    uint32 timeElap = getMSTime();
