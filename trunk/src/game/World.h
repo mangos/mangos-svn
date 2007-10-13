@@ -251,7 +251,7 @@ class World
         AccountTypes GetPlayerSecurityLimit() const { return m_playerLimit <= 0 ? AccountTypes(-m_playerLimit) : SEC_PLAYER; }
 
         /// Set the active session server limit (or security level limitation)
-        void SetPlayerLimit(int32 limit) { m_playerLimit = limit >= -SEC_ADMINISTRATOR ? limit : -SEC_ADMINISTRATOR; }
+        void SetPlayerLimit(int32 limit, bool needUpdate = false);
 
         /// \todo Actions on m_allowMovement still to be implemented
         /// Is movement allowed?

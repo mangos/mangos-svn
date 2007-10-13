@@ -46,7 +46,7 @@ void RealmList::Initialize(uint32 updateInterval)
     UpdateRealms(true);
 }
 
-void RealmList::UpdateRealm( uint32 ID, const char *name, const char *address, uint32 port, uint8 icon, uint8 color, uint8 timezone)
+void RealmList::UpdateRealm( uint32 ID, const char *name, const char *address, uint32 port, uint8 icon, uint8 color, uint8 timezone, AccountTypes allowedSecurityLevel)
 {
     ///- Create new if not exist or update existed
     Realm& realm = m_realms[name];
@@ -56,6 +56,7 @@ void RealmList::UpdateRealm( uint32 ID, const char *name, const char *address, u
     realm.icon      = icon;
     realm.color     = color;
     realm.timezone  = timezone;
+    realm.allowedSecurityLevel = allowedSecurityLevel;
 
     ///- Append port to IP address.
     std::string addr = address ? address : "";
@@ -83,7 +84,7 @@ void RealmList::UpdateRealms(bool init)
 {
     sLog.outDetail("Updating Realm List...");
 
-    QueryResult *result = dbRealmServer.Query( "SELECT `id`, `name`,`address`,`port`,`icon`,`color`,`timezone` FROM `realmlist` WHERE `color` != '3' ORDER BY `name`" );
+    QueryResult *result = dbRealmServer.Query( "SELECT `id`, `name`,`address`,`port`,`icon`,`color`,`timezone`,`allowedSecurityLevel` FROM `realmlist` WHERE `color` != '3' ORDER BY `name`" );
 
     ///- Circle through results and add them to the realm map
     if(result)
@@ -91,7 +92,10 @@ void RealmList::UpdateRealms(bool init)
         do
         {
             Field *fields = result->Fetch();
-            UpdateRealm(fields[0].GetUInt32(), fields[1].GetString(),fields[2].GetString(),fields[3].GetUInt32(),fields[4].GetUInt8(), fields[5].GetUInt8(), fields[6].GetUInt8());
+
+            uint8 allowedSecurityLevel = fields[7].GetUInt8();
+
+            UpdateRealm(fields[0].GetUInt32(), fields[1].GetString(),fields[2].GetString(),fields[3].GetUInt32(),fields[4].GetUInt8(), fields[5].GetUInt8(), fields[6].GetUInt8(), (allowedSecurityLevel <= SEC_ADMINISTRATOR ? AccountTypes(allowedSecurityLevel) : SEC_ADMINISTRATOR) );
             if(init)
                 sLog.outString("Added realm \"%s\".", fields[1].GetString());
         } while( result->NextRow() );

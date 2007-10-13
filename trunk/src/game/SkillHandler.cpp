@@ -36,7 +36,7 @@ void WorldSession::HandleLearnTalentOpcode( WorldPacket & recv_data )
     recv_data >> talent_id >> requested_rank;
 
     uint32 CurTalentPoints =  GetPlayer()->GetFreeTalentPoints();
-    ;
+
     if(CurTalentPoints == 0)
         return;
 

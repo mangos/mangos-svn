@@ -835,8 +835,8 @@ void CliPLimit(char *args,pPrintf zprintf)
             sWorld.SetPlayerLimit(-SEC_GAMEMASTER);
         else if(strncmp(param,"administrator",l) == 0 )
             sWorld.SetPlayerLimit(-SEC_ADMINISTRATOR);
-        else if(strncmp(param,"default",l) == 0 )
-            sWorld.SetPlayerLimit(DEFAULT_PLAYER_LIMIT);
+        else if(strncmp(param,"reset",l) == 0 )
+            sWorld.SetPlayerLimit(sConfig.GetIntDefault("PlayerLimit", DEFAULT_PLAYER_LIMIT));
         else
         {
             int val = atoi(param);
@@ -859,10 +859,10 @@ void CliPLimit(char *args,pPrintf zprintf)
     case SEC_MODERATOR:     secName = "Moderator";     break;
     case SEC_GAMEMASTER:    secName = "Gamemaster";    break;
     case SEC_ADMINISTRATOR: secName = "Administrator"; break;
-    default:                secName = "<???>";         break;
+    default:                secName = "<unknown>";     break;
     }
 
-    zprintf("Player limits: amount %u, min. security level %s.\r\n",pLimit,secName); 
+    zprintf("Player limits: amount %u, min. security level %s.\r\n",pLimit,secName);
 }
 
 /// @}

@@ -869,7 +869,7 @@ INSERT INTO `command` VALUES
 ('npcinfoset',3,'Syntax: .npcinfoset\r\n\r\nTODO: Write me.'),
 ('password',0,'Syntax: .password $old_password $new_password $new_password\r\n\r\nChange your account password.'),
 ('pinfo',2,'Syntax: .pinfo [$player_name] [rep]\r\n\r\nOutput account information for selected player or player find by $player_name. If \"rep\" parameter provided show reputation information for player.'),
-('plimit',3,'Syntax: .plimit [#num|-1|-2|-3|default|player|moderator|gamemaster|administrator]\r\n  Without arg show current player amount and security level limitations for login to server, with arg set player linit ($num > 0) or securiti limitation ($num < 0 or security leme name. With `default` arg set default for server player limit (100)'),
+('plimit',3,'Syntax: .plimit [#num|-1|-2|-3|reset|player|moderator|gamemaster|administrator]\r\n\r\nWithout arg show current player amount and security level limitations for login to server, with arg set player linit ($num > 0) or securiti limitation ($num < 0 or security leme name. With `reset` sets player limit to the one in the config file'),
 ('playsound',1,'Syntax: .playsound #soundid\r\n\r\nPlay sound with #soundid.\r\nSound will be play only for you. Other players do not hear this.\r\nWarning: client may have more 5000 sounds...'),
 ('recall',1,'Syntax: .recall [$playername]\r\n\r\nTeleport $playername or selected player to the place where he has been before last use of a teleportation command. If no $playername is entered and no player is selected, it will teleport you.'),
 ('reload',3,'Syntax: .reload table_name\r\n\r\nReload table `table_name` if reload support added for this table and this table can be _safe_ reloaded.'),

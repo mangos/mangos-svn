@@ -338,12 +338,28 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         return;
     }
 
+    ///- Check locked state for server
+    AccountTypes allowedAccountType = sWorld.GetPlayerSecurityLimit();
+    if( allowedAccountType > SEC_PLAYER && security < allowedAccountType) 
+    {
+        WorldPacket Packet(SMSG_AUTH_RESPONSE, 15);
+        Packet << uint8(AUTH_UNAVAILABLE); 
+        Packet << uint8(CHAR_LIST_FAILED);
+        Packet << uint8(0x73);
+        Packet << uint8(0);
+        Packet << uint8(0);
+        Packet << uint32(0);
+        Packet << uint8(0);
+        Packet << uint32(0);
+        SendPacket(&Packet);  
+        return;
+    }
+
     ///- Check that we do not exceed the maximum number of online players in the realm
     uint32 num = sWorld.GetSessionCount();
     uint32 pLimit = sWorld.GetPlayerAmountLimit();
-    AccountTypes allowedAccountType = sWorld.GetPlayerSecurityLimit();
-    
-    if( pLimit > 0 && num >= pLimit && security == SEC_PLAYER || security < allowedAccountType) 
+
+    if( pLimit > 0 && num >= pLimit && security == SEC_PLAYER) 
     {
         /// \todo Handle the waiting queue when the server is full
         SendAuthWaitQue(1);
