@@ -104,7 +104,7 @@ void Master::Run()
     t.setPriority ((ZThread::Priority )2);
 
     // set server online
-    loginDatabase.PExecute("UPDATE `realmlist` SET `color` = 0 WHERE `id` = '%d'",realmID);
+    loginDatabase.PExecute("UPDATE `realmlist` SET `color` = 0, `population` = 0 WHERE `id` = '%d'",realmID);
 
     if (sConfig.GetBoolDefault("Console.Enable", 1))
     {

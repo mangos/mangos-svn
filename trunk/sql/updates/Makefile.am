@@ -490,6 +490,7 @@ pkgdata_DATA = \
 	4594_item_template.sql \
 	4595_command.sql \
 	4595_spell_affect.sql \
+	4596_realmlist.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -960,4 +961,5 @@ EXTRA_DIST = \
 	4594_item_template.sql \
 	4595_command.sql \
 	4595_spell_affect.sql \
+	4596_realmlist.sql \
 	README

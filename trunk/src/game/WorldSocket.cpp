@@ -429,6 +429,16 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     if(sAddOnHandler.BuildAddonPacket(&recvPacket, &SendAddonPacked, recvPacket.rpos()))
         SendPacket(&SendAddonPacked);
 
+    // Updates the population
+    if (pLimit > 0)
+    {
+        float popu = sWorld.GetSessionCount();              //updated number of users on the server
+        popu /= pLimit;
+        popu *= 2;
+        loginDatabase.PExecute("UPDATE `realmlist` SET `population` = '%f' WHERE `id` = '%d'",popu,realmID);
+        sLog.outDetail( "Server Population (%f).",popu);
+    }
+
     return;
 }
 
