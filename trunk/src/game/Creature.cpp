@@ -1277,6 +1277,34 @@ bool Creature::LoadFromDB(uint32 guid, uint32 InstanceId)
         objmgr.SaveCreatureRespawnTime(m_DBTableGuid,GetInstanceId(),0);
     }
 
+    // Now add the auras, format "spellid effectindex spellid effectindex..."
+    Tokens auravals;
+    auravals = StrSplit(data->auras, " ");
+    if ( auravals.size()>0 && (auravals.size()%2)>0 )
+        sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) has wrong aura defined.",GetGUIDLow(),GetEntry());
+    else
+    {
+        for (int i=0;i<auravals.size()/2;i++)
+        {
+            uint32 spellId = (uint32)atoi(auravals[2*i+0].c_str());
+            uint32 effect  = (uint32)atoi(auravals[2*i+1].c_str());
+            if ( effect>2 )
+            {
+                sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) has wrong effect %u for spell %u.",GetGUIDLow(),GetEntry(),effect,spellId);
+                continue;
+            }
+            SpellEntry const *AdditionalSpellInfo = sSpellStore.LookupEntry(spellId);
+            if (!AdditionalSpellInfo)
+            {
+                sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) has wrong spell %u defined in Auras field.",GetGUIDLow(),GetEntry(),spellId);
+                continue;
+            }
+            Aura* AdditionalAura = new Aura(AdditionalSpellInfo, effect, NULL, this, this, 0);
+            AddAura(AdditionalAura);
+            sLog.outDebug("Spell: %u with Aura %u added to creature (GUIDLow: %u Entry: %u )", spellId, AdditionalSpellInfo->EffectApplyAuraName[0],GetGUIDLow(),GetEntry());
+        }
+    }
+
     // checked at creature_template loading
     m_defaultMovementType = MovementGeneratorType(data->movementType);
 
@@ -1588,9 +1616,7 @@ bool Creature::IsVisibleInGridForPlayer(Player* pl) const
     if(pl->isAlive() || pl->GetDeathTimer() > 0)
     {
         if( GetEntry() == VISUAL_WAYPOINT && !pl->isGameMaster() )
-        {
             return false;
-        }
         return isAlive() || m_deathTimer > 0;
     }
 
