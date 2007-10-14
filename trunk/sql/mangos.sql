@@ -768,7 +768,7 @@ INSERT INTO `command` VALUES
 ('unban',3,'Syntax is: unban <account|ip|character> $NameOrIp\r\nUnban account or IP.'),
 ('bank',3,'Syntax: .bank\r\n\r\nShow your bank inventory.'),
 ('cast',3,'Syntax: .cast #spellid\r\n  Cast #spellid to selected target. If no target selected cast to self.'),
-('castback',3,'Syntax: .castback #spellid\r\n  Selected target will cast #spellid to your character.');
+('castback',3,'Syntax: .castback #spellid\r\n  Selected target will cast #spellid to your character.'),
 ('changelevel',2,'Syntax: .changelevel #level\r\n\r\nChange the level of the selected creature to #level.\r\n\r\n#level may range from 1 to 63.'),
 ('commands',0,'Syntax: .commands\r\n\r\nDisplay a list of available commands for your account level.'),
 ('cooldown',3,'Syntax: .cooldown [#spell_id]\r\n\r\nRemove all (if spell_id not provided) or #spel_id spell cooldown from selected character or you (if no selection).'),
