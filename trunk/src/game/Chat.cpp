@@ -298,7 +298,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "additem",     SEC_ADMINISTRATOR, &ChatHandler::HandleAddItemCommand,          "",   NULL },
         { "additemset",  SEC_ADMINISTRATOR, &ChatHandler::HandleAddItemSetCommand,       "",   NULL },
         { "createguild", SEC_ADMINISTRATOR, &ChatHandler::HandleCreateGuildCommand,      "",   NULL },
-        { "showhonor",   SEC_PLAYER,        &ChatHandler::HandleShowHonor,               "",   NULL },
         { "update",      SEC_ADMINISTRATOR, &ChatHandler::HandleUpdate,                  "",   NULL },
         { "bank",        SEC_ADMINISTRATOR, &ChatHandler::HandleBankCommand,             "",   NULL },
         { "wchange",     SEC_ADMINISTRATOR, &ChatHandler::HandleChangeWeather,           "",   NULL },
