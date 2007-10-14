@@ -690,8 +690,7 @@ bool AuthSocket::_HandleRealmList()
         pkt << i->second.color;                            // if 2, then realm is offline
         pkt << i->first;
         pkt << i->second.address;
-        /// \todo Fix realm population
-        pkt << (float) 0.0;                                 //this is population 0.5 = low 1.0 = medium 2.0 high     (float)(maxplayers / players)*2
+        pkt << i->second.populationLevel;
         pkt << AmountOfCharacters;
         pkt << i->second.timezone;
         pkt << (uint8) 0x2C;                                // unk, may be realm number/id?

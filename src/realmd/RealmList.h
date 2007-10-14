@@ -36,6 +36,7 @@ struct Realm
     uint8 timezone;
     uint32 m_ID;
     AccountTypes allowedSecurityLevel;
+    float populationLevel;
 };
 
 /// Storage object for the list of realms on the server
@@ -56,7 +57,7 @@ class RealmList
         uint32 size() const { return m_realms.size(); }
     private:
         void UpdateRealms(bool init);
-        void UpdateRealm( uint32 ID, const char *name, const char *address, uint32 port, uint8 icon, uint8 color, uint8 timezone, AccountTypes allowedSecurityLevel);
+        void UpdateRealm( uint32 ID, const char *name, const char *address, uint32 port, uint8 icon, uint8 color, uint8 timezone, AccountTypes allowedSecurityLevel, float popu);
     private:
         RealmMap m_realms;                                  ///< Internal map of realms
         uint32   m_UpdateInterval;
