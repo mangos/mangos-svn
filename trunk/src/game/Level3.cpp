@@ -4287,3 +4287,60 @@ bool ChatHandler::HandlePLimitCommand(const char *args)
 
     return true;
 }
+
+bool ChatHandler::HandleCastCommand(const char* args)
+{
+    Unit* target = getSelectedUnit();
+
+    if(!target)
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        return true;
+    }
+
+    // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
+    char* cId = extractKeyFromLink((char*)args,"Hspell");
+    if(!cId)
+        return false;
+
+    uint32 spell = (uint32)atol((char*)cId);
+    if(!spell || !sSpellStore.LookupEntry(spell))
+        return false;
+
+    m_session->GetPlayer()->CastSpell(target,spell,false);
+
+    return true;
+}
+
+bool ChatHandler::HandleCastBackCommand(const char* args)
+{
+    Unit* caster = getSelectedUnit();
+
+    if(!caster)
+    {
+        SendSysMessage(LANG_SELECT_CHAR_OR_CREATURE);
+        return true;
+    }
+
+    // number or [name] Shift-click form |color|Hspell:spell_id|h[name]|h|r
+    char* cId = extractKeyFromLink((char*)args,"Hspell");
+    if(!cId)
+        return false;
+
+    uint32 spell = (uint32)atol((char*)cId);
+    if(!spell || !sSpellStore.LookupEntry(spell))
+        return false;
+
+    // update orientation at server
+    caster->SetOrientation(caster->GetAngle(m_session->GetPlayer()));
+
+    // and client
+    WorldPacket data;
+    caster->BuildHeartBeatMsg(&data);
+    caster->SendMessageToSet(&data,true);
+
+    caster->CastSpell(m_session->GetPlayer(),spell,false);
+
+    return true;
+}
+
