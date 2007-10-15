@@ -1067,11 +1067,23 @@ void ObjectMgr::LoadItemPrototypes()
             const_cast<ItemPrototype*>(proto)->RequiredSpell = 0;
         }
 
-        if(proto->RequiredReputationFaction && !sFactionStore.LookupEntry(proto->RequiredReputationFaction))
+        if(proto->RequiredReputationRank >= MAX_REPUTATION_RANK)
+            sLog.outErrorDb("Item (Entry: %u) have wrong reputation rank in RequiredReputationRank (%u), item can't be used.",i,proto->RequiredReputationRank);
+
+
+        if(proto->RequiredReputationFaction)
         {
-            sLog.outErrorDb("Item (Entry: %u) have wrong (non-existed) faction in RequiredReputationFaction (%u)",i,proto->RequiredReputationFaction);
-            const_cast<ItemPrototype*>(proto)->RequiredReputationFaction = 0;
+            if(!sFactionStore.LookupEntry(proto->RequiredReputationFaction))
+            {
+                sLog.outErrorDb("Item (Entry: %u) have wrong (non-existed) faction in RequiredReputationFaction (%u)",i,proto->RequiredReputationFaction);
+                const_cast<ItemPrototype*>(proto)->RequiredReputationFaction = 0;
+            }
+
+            if(proto->RequiredReputationRank == MIN_REPUTATION_RANK)
+                sLog.outErrorDb("Item (Entry: %u) have min. reputation rank in RequiredReputationRank (0) but RequiredReputationFaction > 0, faction setting useless.",i);
         }
+        else if(proto->RequiredReputationRank > MIN_REPUTATION_RANK)
+            sLog.outErrorDb("Item (Entry: %u) have RequiredReputationFaction ==0 but RequiredReputationRank > 0, rank setting useless.",i);
 
         for (int j = 0; j < 10; j++)
         {
