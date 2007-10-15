@@ -330,52 +330,19 @@ void Spell::EffectDummy(uint32 i)
     if(!unitTarget && !gameObjTarget && !itemTarget)
         return;
 
-    // Charge
-    if(m_spellInfo->SpellVisual == 867 && m_spellInfo->SpellIconID == 457)
-    {
-        int32 chargeBasePoints0 = m_currentBasePoints[i];
-        m_caster->CastCustomSpell(m_caster,34846,&chargeBasePoints0,NULL,NULL,true);
-
-        return;
-    }
-
-    // Judgement of command
-    if (m_spellInfo->SpellIconID==561 && m_spellInfo->SpellFamilyName==SPELLFAMILY_PALADIN)
-    {
-        if(!unitTarget)
-            return;
-
-        uint32 spell_id = m_currentBasePoints[i]+1;
-        SpellEntry const* spell_proto = sSpellStore.LookupEntry(spell_id);
-        if(!spell_proto)
-            return;
-
-        if( !unitTarget->hasUnitState(UNIT_STAT_STUNDED) && m_caster->GetTypeId()==TYPEID_PLAYER)
-        {
-            // decreased damage (/2) for non-stunned target.
-            SpellModifier *mod = new SpellModifier;
-            mod->op = SPELLMOD_DAMAGE;
-            mod->value = -50;
-            mod->type = SPELLMOD_PCT;
-            mod->spellId = 0;
-            mod->effectId = 0;
-            mod->lastAffected = 0;
-            mod->mask = 0x20800000000LL;
-            mod->charges = 0;
-
-            ((Player*)m_caster)->AddSpellMod(mod, true);
-            m_caster->CastSpell(unitTarget,spell_proto,true,NULL);
-            ((Player*)m_caster)->AddSpellMod(mod, false);   // mod deleted
-        }
-        else
-            m_caster->CastSpell(unitTarget,spell_proto,true,NULL);
-
-        return;
-    }
-
     // selection by spell family
     switch(m_spellInfo->SpellFamilyName)
     {
+        case SPELLFAMILY_WARRIOR:
+            // Charge
+            if(m_spellInfo->SpellFamilyFlags & 0x1 && m_spellInfo->SpellVisual == 867)
+            {
+                int32 chargeBasePoints0 = m_currentBasePoints[i];
+                m_caster->CastCustomSpell(m_caster,34846,&chargeBasePoints0,NULL,NULL,true);
+
+                return;
+            }
+            break;
         case SPELLFAMILY_HUNTER:
             // Steady Shot
             if(m_spellInfo->SpellFamilyFlags & 0x100000000LL)
@@ -398,6 +365,32 @@ void Spell::EffectDummy(uint32 i)
 
                 if(found)
                     m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell, true);
+                return;
+            }
+            //Focused Fire (flags have more spells but only this have dummy effect)
+            if (m_spellInfo->SpellIconID == 2221)
+            {
+                if(!unitTarget)
+                    return;
+
+                uint32 spell_id;
+
+                switch(m_spellInfo->Id)
+                {
+                case 35029: spell_id = 35060; break;    //Rank 1
+                case 35030: spell_id = 35061; break;    //Rank 2
+                default:
+                    sLog.outError("Spell::EffectDummy: Spell %u not handled in FF",m_spellInfo->Id);
+                    return;
+                }
+
+                /* FIX ME: must be applied as pet passive spell for _each_ pet after this talent learning
+                Pet* pet = unitTarget->GetPet();
+                if(!pet)
+                    return;
+
+                m_caster->CastSpell(pet, spell_id, true, 0);
+                */
                 return;
             }
             break;
@@ -427,6 +420,39 @@ void Spell::EffectDummy(uint32 i)
                     m_caster->CastSpell(unitTarget, heal, true, 0);
                 else
                     m_caster->CastSpell(unitTarget, hurt, true, 0);
+
+                return;
+            }
+            // Judgement of command
+            if (m_spellInfo->SpellIconID==561)
+            {
+                if(!unitTarget)
+                    return;
+
+                uint32 spell_id = m_currentBasePoints[i]+1;
+                SpellEntry const* spell_proto = sSpellStore.LookupEntry(spell_id);
+                if(!spell_proto)
+                    return;
+
+                if( !unitTarget->hasUnitState(UNIT_STAT_STUNDED) && m_caster->GetTypeId()==TYPEID_PLAYER)
+                {
+                    // decreased damage (/2) for non-stunned target.
+                    SpellModifier *mod = new SpellModifier;
+                    mod->op = SPELLMOD_DAMAGE;
+                    mod->value = -50;
+                    mod->type = SPELLMOD_PCT;
+                    mod->spellId = 0;
+                    mod->effectId = 0;
+                    mod->lastAffected = 0;
+                    mod->mask = 0x20800000000LL;
+                    mod->charges = 0;
+
+                    ((Player*)m_caster)->AddSpellMod(mod, true);
+                    m_caster->CastSpell(unitTarget,spell_proto,true,NULL);
+                    ((Player*)m_caster)->AddSpellMod(mod, false);   // mod deleted
+                }
+                else
+                    m_caster->CastSpell(unitTarget,spell_proto,true,NULL);
 
                 return;
             }
