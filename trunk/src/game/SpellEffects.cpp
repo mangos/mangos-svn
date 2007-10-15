@@ -180,7 +180,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectWeaponDmg,                                //121 SPELL_EFFECT_NORMALIZED_WEAPON_DMG
     &Spell::EffectNULL,                                     //122 SPELL_EFFECT_122                      silithist cap reward spell
     &Spell::EffectNULL,                                     //123 SPELL_EFFECT_123                      taxi/flight related
-    &Spell::EffectNULL,                                     //124 SPELL_EFFECT_124                      aggro redirect?
+    &Spell::EffectPlayerPull,                               //124 SPELL_EFFECT_PLAYER_PULL              opposite of knockback effect (pulls player twoard caster)
     &Spell::EffectReduceThreatPercent,                      //125 SPELL_EFFECT_REDUCE_THREAT_PERCENT
     &Spell::EffectNULL,                                     //126 SPELL_EFFECT_126                      spell steal effect?
     &Spell::EffectProspecting,                              //127 SPELL_EFFECT_PROSPECTING              Prospecting spell
@@ -3681,15 +3681,6 @@ void Spell::EffectKnockBack(uint32 i)
     if(unitTarget->GetTypeId()!=TYPEID_PLAYER)
         return;
 
-    float value = 0;
-    int32 basePoints = m_currentBasePoints[i];
-    int32 randomPoints = m_spellInfo->EffectDieSides[i];
-    if (randomPoints) value = basePoints + rand32(1, randomPoints);
-    else value = basePoints +1;
-
-    //Only allowed to knock ourselves straight up to prevent exploiting
-    if (unitTarget == m_caster)value = 0;
-
     float vsin = sin(m_caster->GetAngle(unitTarget));
     float vcos = cos(m_caster->GetAngle(unitTarget));
 
@@ -3698,8 +3689,31 @@ void Spell::EffectKnockBack(uint32 i)
     data << uint32(0);                                      //Sequence
     data << float(vcos);                                    //xdirection
     data << float(vsin);                                    //ydirection
-    data << float(value/10);                                //Horizontal speed
+    data << float(damage/10);                               //Horizontal speed
     data << float(m_spellInfo->EffectMiscValue[i])/-10;     //Z Movement speed
+
+    ((Player*)unitTarget)->SendMessageToSet(&data,true);
+}
+
+void Spell::EffectPlayerPull(uint32 i)
+{
+    if(!unitTarget || !m_caster)
+        return;
+
+    //Effect only works on players
+    if(unitTarget->GetTypeId()!=TYPEID_PLAYER)
+        return;
+
+    float vsin = sin(unitTarget->GetAngle(m_caster));
+    float vcos = cos(unitTarget->GetAngle(m_caster));
+
+    WorldPacket data(SMSG_MOVE_KNOCK_BACK, (8+4+4+4+4+4));
+    data.append(unitTarget->GetPackGUID());
+    data << uint32(0);                                                      //Sequence
+    data << float(vcos);                                                    //xdirection
+    data << float(vsin);                                                    //ydirection
+    data << float(damage ? damage : unitTarget->GetDistance2d(m_caster));   //Horizontal speed
+    data << float(m_spellInfo->EffectMiscValue[i])/-10;                     //Z Movement speed
 
     ((Player*)unitTarget)->SendMessageToSet(&data,true);
 }

@@ -1496,7 +1496,6 @@ bool Creature::IsImmunedToSpell(SpellEntry const* spellInfo) const
     if( isWorldBoss() && (
         (MECHANIC_CHARM         == spellInfo->Mechanic) ||
         (MECHANIC_CONFUSED      == spellInfo->Mechanic) ||
-        (MECHANIC_DISARM        == spellInfo->Mechanic) ||
         (MECHANIC_DISTRACT      == spellInfo->Mechanic) ||
         (MECHANIC_FEAR          == spellInfo->Mechanic) ||
         (MECHANIC_ROOT          == spellInfo->Mechanic) ||
