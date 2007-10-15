@@ -740,8 +740,13 @@ void Player::HandleSobering()
 void Player::SetDrunkValue(uint16 newDrunkValue)
 {
     m_drunk = newDrunkValue;
-    SetUInt32Value(PLAYER_BYTES_3,
-        (GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF0001) | (m_drunk & 0xFFFE));
+    SetUInt32Value(PLAYER_BYTES_3,(GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF0001) | (m_drunk & 0xFFFE));
+
+    // special drunk invisibility detection 
+    if(m_drunk)
+        m_detectInvisibilityMask |= (1<<6);
+    else
+        m_detectInvisibilityMask &= ~(1<<6);
 }
 
 void Player::Update( uint32 p_time )

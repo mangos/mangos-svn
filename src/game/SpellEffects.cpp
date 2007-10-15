@@ -1087,6 +1087,7 @@ void Spell::EffectApplyAura(uint32 i)
             case SPELL_AURA_PERIODIC_TRIGGER_SPELL:
             case SPELL_AURA_EMPATHY:
             case SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS:
+            case SPELL_AURA_MOD_INVISIBILITY_DETECTION:
                 break;
             case SPELL_AURA_MOD_STUN:
                 //I'm not sure, if all STUN-Auras prevent attack, therefore the query
@@ -1100,6 +1101,7 @@ void Spell::EffectApplyAura(uint32 i)
             default:
                 //If Aura is applied to monster then attack caster
                 attack = true;
+                break;
         }
         if(attack)
         {

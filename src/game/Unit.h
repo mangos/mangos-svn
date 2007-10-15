@@ -1034,9 +1034,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint64 m_TotemSlot[4];
         uint64 m_ObjectSlot[4];
         uint32 m_detectStealth;
-        uint32 m_detectInvisibility;
+        uint32 m_detectInvisibilityMask;
         uint32 m_stealthvalue;
-        uint32 m_invisibilityvalue;
+        uint32 m_invisibilityMask;
         uint32 m_ShapeShiftForm;
         uint32 m_form;
         int32 m_modHitChance;
