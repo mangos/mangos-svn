@@ -388,6 +388,17 @@ bool ChatHandler::HandleReloadSpellScriptsCommand(const char* arg)
     return true;
 }
 
+bool ChatHandler::HandleReloadGameGraveyardZoneCommand(const char* arg)
+{
+    sLog.outString( "Re-Loading Graveyard-zone links...");
+
+    objmgr.LoadGraveyardZones();
+
+    SendGlobalSysMessage("DB table `game_graveyard_zone` reloaded.");
+
+    return true;
+}
+
 bool ChatHandler::HandleLoadScriptsCommand(const char* args)
 {
     if(!LoadScriptingModule(args)) return true;
@@ -2579,23 +2590,11 @@ bool ChatHandler::HandleLinkGraveCommand(const char* args)
 
     Player* player = m_session->GetPlayer();
 
-    QueryResult *result = sDatabase.PQuery(
-        "SELECT `id` FROM `game_graveyard_zone` WHERE `id` = %u AND `ghost_map` = %u AND `ghost_zone` = '%u' AND (`faction` = %u OR `faction` = 0 )",
-        g_id,player->GetMapId(),player->GetZoneId(),g_team);
-
-    if(result)
-    {
-        delete result;
-
-        PSendSysMessage(LANG_COMMAND_GRAVEYARDALRLINKED, g_id,player->GetZoneId());
-    }
-    else
-    {
-        sDatabase.PExecuteLog("INSERT INTO `game_graveyard_zone` ( `id`,`ghost_map`,`ghost_zone`,`faction`) VALUES ('%u', '%u', '%u','%u')",
-            g_id,player->GetMapId(),player->GetZoneId(),g_team);
-
+    if(objmgr.AddGraveYardLink(g_id,player->GetZoneId(),g_team))
         PSendSysMessage(LANG_COMMAND_GRAVEYARDLINKED, g_id,player->GetZoneId());
-    }
+    else
+        PSendSysMessage(LANG_COMMAND_GRAVEYARDALRLINKED, g_id,player->GetZoneId());
+
     return true;
 }
 
@@ -2621,16 +2620,14 @@ bool ChatHandler::HandleNearGraveCommand(const char* args)
     {
         uint32 g_id = graveyard->ID;
 
-        QueryResult *result = sDatabase.PQuery("SELECT `faction` FROM `game_graveyard_zone` WHERE `id` = %u",g_id);
-        if (!result)
+        GraveYardData const* data = objmgr.FindGraveYardData(g_id,player->GetZoneId());
+        if (!data)
         {
             PSendSysMessage(LANG_COMMAND_GRAVEYARDERROR,g_id);
             return true;
         }
 
-        Field *fields = result->Fetch();
-        g_team = fields[0].GetUInt32();
-        delete result;
+        g_team = data->team;
 
         std::string team_name = LANG_COMMAND_GRAVEYARD_NOTEAM;
 

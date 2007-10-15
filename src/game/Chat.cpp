@@ -177,6 +177,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "creature_questrelation",      SEC_ADMINISTRATOR, &ChatHandler::HandleReloadCreatureQuestRelationsCommand,  "", NULL },
         { "disenchant_loot_template",    SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesDisenchantCommand, "", NULL },
         { "fishing_loot_template",       SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesFishingCommand,    "", NULL },
+        { "game_graveyard_zone",         SEC_ADMINISTRATOR, &ChatHandler::HandleReloadGameGraveyardZoneCommand,       "", NULL },
         { "gameobject_involvedrelation", SEC_ADMINISTRATOR, &ChatHandler::HandleReloadGOQuestInvRelationsCommand,     "", NULL },
         { "gameobject_questrelation",    SEC_ADMINISTRATOR, &ChatHandler::HandleReloadGOQuestRelationsCommand,        "", NULL },
         { "gameobject_loot_template",    SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesGameobjectCommand, "", NULL },

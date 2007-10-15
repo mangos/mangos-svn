@@ -565,12 +565,13 @@ void WorldSession::HandleAddDynamicTargetObsoleteOpcode( WorldPacket& recvPacket
     if(!pet->HasSpell(spellid) || IsPassiveSpell(spellid))
         return;
 
+    SpellCastTargets targets;
+    if(!targets.read(&recvPacket,pet))
+        return;
+
     pet->clearUnitState(UNIT_STAT_FOLLOW);
 
     Spell *spell = new Spell(pet, spellInfo, false, 0);
-
-    SpellCastTargets targets;
-    targets.read(&recvPacket,pet);
     spell->m_targets = targets;
 
     int16 result = spell->PetCanCast(NULL);

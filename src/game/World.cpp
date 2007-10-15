@@ -597,6 +597,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Tavern Area Triggers..." );    // must be after LoadAreaTriggers
     objmgr.LoadTavernAreaTriggers();
 
+    sLog.outString( "Loading Graveyard-zone links...");
+    objmgr.LoadGraveyardZones();
+
     sLog.outString( "Loading SpellAffect definitions..." );
     objmgr.LoadSpellAffects();
 

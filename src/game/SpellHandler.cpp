@@ -92,7 +92,8 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     }
 
     SpellCastTargets targets;
-    targets.read(&recvPacket, pUser);
+    if(!targets.read(&recvPacket, pUser))
+        return;
 
     //Note: If script stop casting it must send appropriate data to client to prevent stuck item in gray state.
     if(!Script->ItemUse(pUser,pItem,targets))
@@ -621,7 +622,8 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 
     // client provided targets
     SpellCastTargets targets;
-    targets.read(&recvPacket,_player);
+    if(!targets.read(&recvPacket,_player))
+        return;
 
     // auto-selection buff level base at target level (in spellInfo)
     if(!IsPassiveSpell(spellId) && targets.getUnitTarget())
