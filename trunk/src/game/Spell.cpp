@@ -129,7 +129,7 @@ void SpellCastTargets::Update(Unit* caster)
     }
 }
 
-void SpellCastTargets::read ( WorldPacket * data,Unit *caster )
+bool SpellCastTargets::read ( WorldPacket * data,Unit *caster )
 {
     *data >> m_targetMask;
 
@@ -140,7 +140,7 @@ void SpellCastTargets::read ( WorldPacket * data,Unit *caster )
         m_destZ = caster->GetPositionZ();
         m_unitTarget = caster;
         m_unitTargetGUID = caster->GetGUID();
-        return;
+        return true;
     }
 
     if(m_targetMask & TARGET_FLAG_UNIT)
@@ -153,10 +153,18 @@ void SpellCastTargets::read ( WorldPacket * data,Unit *caster )
         m_itemTargetGUID = readGUID(*data);
 
     if(m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
+    {
         *data >> m_srcX >> m_srcY >> m_srcZ;
+        if(!MaNGOS::IsValidMapCoord(m_srcX,m_srcY))
+            return false;
+    }
 
     if(m_targetMask & TARGET_FLAG_DEST_LOCATION)
+    {
         *data >> m_destX >> m_destY >> m_destZ;
+        if(!MaNGOS::IsValidMapCoord(m_destX,m_destY))
+            return false;
+    }
 
     if(m_targetMask & TARGET_FLAG_STRING)
         *data >> m_strTarget;
@@ -166,6 +174,7 @@ void SpellCastTargets::read ( WorldPacket * data,Unit *caster )
 
     // find real units/GOs
     Update(caster);
+    return true;
 }
 
 void SpellCastTargets::write ( WorldPacket * data, bool forceAppend)

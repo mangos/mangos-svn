@@ -3486,6 +3486,73 @@ void ObjectMgr::GetTransportPathNodes( uint32 path, TransportPath &pathnodes )
     }
 }
 
+void ObjectMgr::LoadGraveyardZones()
+{
+    mGraveYardMap.clear();                                  // need for reload case
+
+    QueryResult *result = sDatabase.Query("SELECT `id`,`ghost_zone`,`faction` FROM `game_graveyard_zone`");
+
+    uint32 count = 0;
+
+    if( !result )
+    {
+        barGoLink bar( 1 );
+        bar.step();
+
+        sLog.outString();
+        sLog.outString( ">> Loaded %u graveyard-zone links", count );
+        return;
+    }
+
+    barGoLink bar( result->GetRowCount() );
+
+    do
+    {
+        ++count;
+        bar.step();
+
+        Field *fields = result->Fetch();
+
+        uint32 safeLocId = fields[0].GetUInt32();
+        uint32 zoneId = fields[1].GetUInt32();
+        uint32 team   = fields[2].GetUInt32();
+
+        WorldSafeLocsEntry const* entry = sWorldSafeLocsStore.LookupEntry(safeLocId);
+        if(!entry)
+        {
+            sLog.outErrorDb("Table `game_graveyard_zone` have record for not existed graveyard (WorldSafeLocs.dbc id) %u, skipped.",safeLocId);
+            continue;
+        }
+
+        AreaTableEntry const *areaEntry = GetAreaEntryByAreaID(zoneId);
+        if(!areaEntry)
+        {
+            sLog.outErrorDb("Table `game_graveyard_zone` have record for not existed zone id (%u), skipped.",zoneId);
+            continue;
+        }
+
+        if(areaEntry->zone != 0)
+        {
+            sLog.outErrorDb("Table `game_graveyard_zone` have record subzone id (%u) instead zone, skipped.",zoneId);
+            continue;
+        }
+
+        if(team!=0 && team!=HORDE && team!=ALLIANCE)
+        {
+            sLog.outErrorDb("Table `game_graveyard_zone` have record for non player faction (%u), skipped.",team);
+            continue;
+        }
+
+        if(!AddGraveYardLink(safeLocId,zoneId,team,false))
+            sLog.outErrorDb("Table `game_graveyard_zone` have duplicate record for Garveyard (ID: %u) and Zone (ID: %u), skipped.",safeLocId,zoneId);
+    } while( result->NextRow() );
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString( ">> Loaded %u graveyard-zone links", count );
+}
+
 WorldSafeLocsEntry const *ObjectMgr::GetClosestGraveYard(float x, float y, float z, uint32 MapId, uint32 team)
 {
     // search for zone associated closest graveyard
@@ -3498,11 +3565,11 @@ WorldSafeLocsEntry const *ObjectMgr::GetClosestGraveYard(float x, float y, float
     //     then check `faction`
     //   if mapId != graveyard.mapId (ghost in instance) and search ANY graveyard associated
     //     then skip check `faction`
-    QueryResult *result = sDatabase.PQuery("SELECT `id`,`faction` FROM `game_graveyard_zone` WHERE  `ghost_map` = %u AND `ghost_zone` = %u", MapId, zoneId);
-
-    if(! result)
+    GraveYardMap::const_iterator graveLow  = mGraveYardMap.lower_bound(zoneId);
+    GraveYardMap::const_iterator graveUp   = mGraveYardMap.upper_bound(zoneId);
+    if(graveLow==graveUp)
     {
-        sLog.outErrorDb("Table `game_graveyard_zone` incomplete: Zone %u Map %u Team %u not have linked graveyard.",zoneId,MapId,team);
+        sLog.outErrorDb("Table `game_graveyard_zone` incomplete: Zone %u Team %u not have linked graveyard.",zoneId,team);
         return NULL;
     }
 
@@ -3511,16 +3578,14 @@ WorldSafeLocsEntry const *ObjectMgr::GetClosestGraveYard(float x, float y, float
     WorldSafeLocsEntry const* entryNear = NULL;
     WorldSafeLocsEntry const* entryFar = NULL;
 
-    do
+    for(GraveYardMap::const_iterator itr = graveLow; itr != graveUp; ++itr)
     {
-        Field *fields = result->Fetch();
-        uint32 g_id   = fields[0].GetUInt32();
-        uint32 g_team = fields[1].GetUInt32();
+        GraveYardData const& data = itr->second;
 
-        WorldSafeLocsEntry const* entry = sWorldSafeLocsStore.LookupEntry(g_id);
+        WorldSafeLocsEntry const* entry = sWorldSafeLocsStore.LookupEntry(data.safeLocId);
         if(!entry)
         {
-            sLog.outErrorDb("Table `game_graveyard_zone` have record for not existed graveyard (WorldSafeLocs.dbc id) %u, skipped.",g_id);
+            sLog.outErrorDb("Table `game_graveyard_zone` have record for not existed graveyard (WorldSafeLocs.dbc id) %u, skipped.",data.safeLocId);
             continue;
         }
 
@@ -3533,7 +3598,7 @@ WorldSafeLocsEntry const *ObjectMgr::GetClosestGraveYard(float x, float y, float
         }
 
         // skip enemy faction graveyard at same map (normal area, city, or battleground)
-        if(g_team != 0 && g_team != team)
+        if(data.team != 0 && data.team != team)
             continue;
 
         // find now nearest graveyard at same map
@@ -3552,14 +3617,50 @@ WorldSafeLocsEntry const *ObjectMgr::GetClosestGraveYard(float x, float y, float
             distNear = dist2;
             entryNear = entry;
         }
-    } while( result->NextRow() );
-
-    delete result;
+    }
 
     if(entryNear)
         return entryNear;
 
     return entryFar;
+}
+
+GraveYardData const* ObjectMgr::FindGraveYardData(uint32 id, uint32 zoneId)
+{
+    GraveYardMap::const_iterator graveLow  = mGraveYardMap.lower_bound(zoneId);
+    GraveYardMap::const_iterator graveUp   = mGraveYardMap.upper_bound(zoneId);
+
+    for(GraveYardMap::const_iterator itr = graveLow; itr != graveUp; ++itr)
+    {
+        if(itr->second.safeLocId==id)
+            return &itr->second;
+    }
+
+    return NULL;
+}
+
+
+bool ObjectMgr::AddGraveYardLink(uint32 id, uint32 zoneId, uint32 team, bool inDB)
+{
+
+    if(FindGraveYardData(id,zoneId))
+        return false;
+
+    // add link to loaded data
+    GraveYardData data;
+    data.safeLocId = id;
+    data.team = team;
+
+    mGraveYardMap.insert(GraveYardMap::value_type(zoneId,data));
+
+    // add link to DB
+    if(inDB)
+    {
+        sDatabase.PExecuteLog("INSERT INTO `game_graveyard_zone` ( `id`,`ghost_zone`,`faction`) "
+            "VALUES ('%u', '%u','%u')",id,zoneId,team);
+    }
+
+    return true;
 }
 
 void ObjectMgr::LoadAreaTriggers()

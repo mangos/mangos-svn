@@ -144,6 +144,7 @@ class ChatHandler
         bool HandleReloadCommandCommand(const char* args);
         bool HandleReloadCreatureQuestRelationsCommand(const char* args);
         bool HandleReloadCreatureQuestInvRelationsCommand(const char* args);
+        bool HandleReloadGameGraveyardZoneCommand(const char* args);
         bool HandleReloadGOQuestRelationsCommand(const char* args);
         bool HandleReloadGOQuestInvRelationsCommand(const char* args);
         bool HandleReloadLootTemplatesCreatureCommand(const char* args);

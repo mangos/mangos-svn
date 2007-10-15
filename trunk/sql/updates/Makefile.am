@@ -495,6 +495,7 @@ pkgdata_DATA = \
 	4603_spell_affect.sql \
 	4605_creature_addon.sql \
 	4605_creature_template_addon.sql \
+	4608_game_graveyard_zone.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -970,4 +971,5 @@ EXTRA_DIST = \
 	4603_spell_affect.sql \
 	4605_creature_addon.sql \
 	4605_creature_template_addon.sql \
+	4608_game_graveyard_zone.sql \
 	README

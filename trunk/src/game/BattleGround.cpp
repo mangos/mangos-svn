@@ -813,6 +813,7 @@ bool BattleGround::AddSpiritGuide(float x, float y, float z, float o, uint32 tea
     data.posX           = x;
     data.posY           = y;
     data.posZ           = z;
+    data.equipmentId    = 0;
     data.orientation    = o;
     data.spawntimesecs  = 0;
     data.spawndist      = 0;

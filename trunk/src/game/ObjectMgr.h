@@ -210,6 +210,13 @@ struct OpcodeHandler
 
 typedef HM_NAMESPACE::hash_map< uint16 , OpcodeHandler > OpcodeTableMap;
 
+struct GraveYardData
+{
+    uint32 safeLocId;
+    uint32 team;
+};
+typedef std::multimap<uint32,GraveYardData> GraveYardMap;
+
 class ObjectMgr
 {
     public:
@@ -347,6 +354,9 @@ class ObjectMgr
         GossipText *GetGossipText(uint32 Text_ID);
 
         WorldSafeLocsEntry const *GetClosestGraveYard(float x, float y, float z, uint32 MapId, uint32 team);
+        bool AddGraveYardLink(uint32 id, uint32 zone, uint32 team, bool inDB = true);
+        void LoadGraveyardZones();
+        GraveYardData const* FindGraveYardData(uint32 id, uint32 zone);
 
         AreaTrigger const* GetAreaTrigger(uint32 trigger) const
         {
@@ -700,7 +710,6 @@ class ObjectMgr
         {
             return m_ReservedNames.find(name) != m_ReservedNames.end();
         }
-
     protected:
         uint32 m_auctionid;
         uint32 m_mailid;
@@ -749,8 +758,9 @@ class ObjectMgr
 
         //character reserved names
         typedef std::set<std::string> ReservedNamesMap;
-        ReservedNamesMap  m_ReservedNames;
+        ReservedNamesMap    m_ReservedNames;
 
+        GraveYardMap        mGraveYardMap;
     private:
         void LoadScripts(ScriptMapMap& scripts, char const* tablename);
 

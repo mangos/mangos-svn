@@ -1570,9 +1570,9 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `game_graveyard_zone`;
 CREATE TABLE `game_graveyard_zone` (
   `id` int(11) unsigned NOT NULL default '0',
-  `ghost_map` int(11) unsigned NOT NULL default '0',
   `ghost_zone` int(11) unsigned NOT NULL default '0',
-  `faction` int(11) unsigned NOT NULL default '0'
+  `faction` int(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`id`,`ghost_zone`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Trigger System';
 
 --
