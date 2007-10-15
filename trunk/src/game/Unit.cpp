@@ -144,9 +144,9 @@ Unit::Unit( WorldObject *instantiator )
     m_Visibility = VISIBILITY_ON;
 
     m_detectStealth = 0;
-    m_detectInvisibility = 0;
+    m_detectInvisibilityMask = 0;
     m_stealthvalue = 0;
-    m_invisibilityvalue = 0;
+    m_invisibilityMask = 0;
     m_transform = 0;
     m_ShapeShiftForm = 0;
     m_canModifyStats = false;
@@ -3065,6 +3065,32 @@ bool Unit::AddAura(Aura *Aur)
         m_AuraModifiers[Aur->GetModifier()->m_auraname] += (Aur->GetModifier()->m_amount);
     }
 
+    // auras code that need applied _after_ aura add to list
+    switch(Aur->GetModifier()->m_auraname)
+    {
+        // invisibility code based at already added aura state in visibility update
+        case SPELL_AURA_MOD_INVISIBILITY:
+        {
+            // apply only if not in GM invisibility
+            if(GetVisibility()!=VISIBILITY_OFF)
+            {
+                // Aura not added yet but visibility code expect temporary add aura
+                SetVisibility(VISIBILITY_GROUP_NO_DETECT);
+                if(GetTypeId() == TYPEID_PLAYER)
+                    SendUpdateToPlayer((Player*)this);
+                SetVisibility(VISIBILITY_GROUP_INVISIBILITY);
+            }
+            break;
+        }
+        // invisibility detect code based at already added aura state in visibility update
+        case SPELL_AURA_MOD_INVISIBILITY_DETECTION:
+        {
+            if(GetTypeId()==TYPEID_PLAYER)
+                ObjectAccessor::UpdateVisibilityForPlayer((Player*)this);
+            break;
+        }
+    }
+
     return true;
 }
 
@@ -5773,18 +5799,72 @@ bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList) 
     if (m_Visibility == VISIBILITY_OFF)
         return false;
 
-    // Invisible units, always are visible for units under invisibility or unit that can detect this invisibility
-    if (m_Visibility == VISIBILITY_GROUP_INVISIBILITY)
+    // Invisible units, always are visible for units under same invisibility type
+    if(m_invisibilityMask & u->m_invisibilityMask)
+        return true;
+        
+    // Invisible units, always are visible for unit that can detect this invisibility (have appropriate level for detect)
+    if(uint32 mask = (m_invisibilityMask & u->m_detectInvisibilityMask))
     {
-        if(u->GetVisibility()== VISIBILITY_GROUP_INVISIBILITY || m_invisibilityvalue <= u->m_detectInvisibility)
-            return true;
+        for(uint32 i = 0; i < 10; ++i)
+        {
+            if(((1 << i) & mask)==0)
+                continue;
+
+            // find invisibility level
+            uint32 invLevel = 0;
+            Unit::AuraList const& iAuras = GetAurasByType(SPELL_AURA_MOD_INVISIBILITY);
+            for(Unit::AuraList::const_iterator itr = iAuras.begin(); itr != iAuras.end(); ++itr)
+                if(((*itr)->GetModifier()->m_miscvalue)==i && invLevel < (*itr)->GetModifier()->m_amount)
+                    invLevel = (*itr)->GetModifier()->m_amount;
+
+            // find invisibility detect level
+            uint32 detectLevel = 0;
+            Unit::AuraList const& dAuras = u->GetAurasByType(SPELL_AURA_MOD_INVISIBILITY_DETECTION);
+            for(Unit::AuraList::const_iterator itr = dAuras.begin(); itr != dAuras.end(); ++itr)
+                if(((*itr)->GetModifier()->m_miscvalue)==i && detectLevel < (*itr)->GetModifier()->m_amount)
+                    detectLevel = (*itr)->GetModifier()->m_amount;
+
+            if(i==6 && u->GetTypeId()==TYPEID_PLAYER)       // special drunk detection case
+            {
+                detectLevel = ((Player*)u)->GetDrunkValue();
+            }
+
+            if(invLevel <= detectLevel)
+                return true;
+        }
     }
 
     // Units that can detect invisibility always are visible for units that can be detected
-    if (u->GetVisibility()== VISIBILITY_GROUP_INVISIBILITY)
+    if(uint32 mask = (m_detectInvisibilityMask & u->m_invisibilityMask))
     {
-        if(m_detectInvisibility >= u->m_invisibilityvalue)
-            return true;
+        for(uint32 i = 0; i < 10; ++i)
+        {
+            if(((1 << i) & mask)==0)
+                continue;
+
+            // find invisibility level
+            uint32 invLevel = 0;
+            Unit::AuraList const& iAuras = u->GetAurasByType(SPELL_AURA_MOD_INVISIBILITY);
+            for(Unit::AuraList::const_iterator itr = iAuras.begin(); itr != iAuras.end(); ++itr)
+                if(((*itr)->GetModifier()->m_miscvalue)==i && invLevel < (*itr)->GetModifier()->m_amount)
+                    invLevel = (*itr)->GetModifier()->m_amount;
+
+            // find invisibility detect level
+            uint32 detectLevel = 0;
+            Unit::AuraList const& dAuras = GetAurasByType(SPELL_AURA_MOD_INVISIBILITY_DETECTION);
+            for(Unit::AuraList::const_iterator itr = dAuras.begin(); itr != dAuras.end(); ++itr)
+                if(((*itr)->GetModifier()->m_miscvalue)==i && detectLevel < (*itr)->GetModifier()->m_amount)
+                    detectLevel = (*itr)->GetModifier()->m_amount;
+
+            if(i==6 && GetTypeId()==TYPEID_PLAYER)          // special drunk detection case
+            {
+                detectLevel = ((Player*)this)->GetDrunkValue();
+            }
+
+            if(invLevel <= detectLevel)
+                return true;
+        }
     }
 
     // Stealth/invisible not hostile units, not visible (except Player-with-Player case)

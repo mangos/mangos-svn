@@ -2303,33 +2303,31 @@ void Aura::HandleInvisibility(bool Apply, bool Real)
 {
     if(Apply)
     {
-        m_target->m_invisibilityvalue = m_modifier.m_amount;
+        m_target->m_invisibilityMask |= (1 << m_modifier.m_miscvalue);
 
         // drop flag at invisible in bg
         if(Real && m_target->GetTypeId()==TYPEID_PLAYER && ((Player*)m_target)->InBattleGround())
             if(BattleGround *bg = sBattleGroundMgr.GetBattleGround(((Player*)m_target)->GetBattleGroundId()))
                 bg->HandleDropFlag((Player*)m_target);
 
-        // only at real aura add
-        if(Real)
-        {
-            // apply only if not in GM invisibility
-            if(m_target->GetVisibility()!=VISIBILITY_OFF)
-            {
-                m_target->SetVisibility(VISIBILITY_GROUP_NO_DETECT);
-                if(m_target->GetTypeId() == TYPEID_PLAYER)
-                    m_target->SendUpdateToPlayer((Player*)m_target);
-                m_target->SetVisibility(VISIBILITY_GROUP_INVISIBILITY);
-            }
-        }
+        // Real visibility update in Unit::_AddAura
     }
     else
     {
-        m_target->m_invisibilityvalue = 0;
-        //m_target->RemoveFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_FLAG_CREEP );
+        // recalculate value at modifier remove (current aura already removed)
+        m_target->m_invisibilityMask &= ~(1 << m_modifier.m_miscvalue);
+        Unit::AuraList const& auras = m_target->GetAurasByType(SPELL_AURA_MOD_INVISIBILITY);
+        for(Unit::AuraList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+        {
+            if((*itr)->GetModifier()->m_miscvalue==m_modifier.m_miscvalue)
+            {
+                m_target->m_invisibilityMask |= (1 << m_modifier.m_miscvalue);
+                break;
+            }
+        }
 
-        // only at real aura remove
-        if(Real)
+        // only at real aura remove and if not have different invisibility auras.
+        if(Real && m_target->m_invisibilityMask==0)
         {
             // apply only if not in GM invisibility
             if(m_target->GetVisibility()!=VISIBILITY_OFF)
@@ -2346,15 +2344,27 @@ void Aura::HandleInvisibilityDetect(bool Apply, bool Real)
 {
     if(Apply)
     {
-        m_target->m_detectInvisibility = m_modifier.m_amount;
+        m_target->m_detectInvisibilityMask |= (1 << m_modifier.m_miscvalue);
+
+        // Real visibility update in Unit::_AddAura
     }
     else
     {
-        m_target->m_detectInvisibility = 0;
-    }
+        // recalculate value at modifier remove (current aura already removed)
+        m_target->m_detectInvisibilityMask &= ~(1 << m_modifier.m_miscvalue);
+        Unit::AuraList const& auras = m_target->GetAurasByType(SPELL_AURA_MOD_INVISIBILITY_DETECTION);
+        for(Unit::AuraList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+        {
+            if((*itr)->GetModifier()->m_miscvalue==m_modifier.m_miscvalue)
+            {
+                m_target->m_detectInvisibilityMask |= (1 << m_modifier.m_miscvalue);
+                break;
+            }
+        }
 
-    if(Real && m_target->GetTypeId()==TYPEID_PLAYER)
-        ObjectAccessor::UpdateVisibilityForPlayer((Player*)m_target);
+        if(Real && m_target->GetTypeId()==TYPEID_PLAYER)
+            ObjectAccessor::UpdateVisibilityForPlayer((Player*)m_target);
+    }
 }
 
 void Aura::HandleAuraModRoot(bool apply, bool Real)
