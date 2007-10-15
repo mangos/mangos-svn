@@ -35,6 +35,7 @@
 #define LANG_GMS_ON_SRV                  "There are the following active GMs on this server:"
 #define LANG_GMS_NOT_LOGGED              "There are no GMs currently logged in on this server."
 #define LANG_YOU_IN_FLIGHT               "You are flying and can't do that."
+#define LANG_YOU_IN_BATTLEGROUND         "You are in BattleGround now and you can't do that, before you leave it."
 #define LANG_TARGET_IN_FLIGHT            "Target is flying you can't do that."
 #define LANG_CHAR_IN_FLIGHT              "%s are flying and your command failed."
 #define LANG_CHAR_NON_MOUNTED            "You are not mounted and can't dismount."
