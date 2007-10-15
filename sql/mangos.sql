@@ -1015,7 +1015,7 @@ CREATE TABLE `creature_addon` (
   `auralevels` int(11) unsigned NOT NULL default '0',
   `auraapplications` int(11) unsigned NOT NULL default '0',
   `aurastate` int(11) unsigned NOT NULL default '0',
-  UNIQUE KEY `guid` (`guid`)
+  PRIMARY KEY (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -1324,7 +1324,7 @@ CREATE TABLE `creature_template_addon` (
   `auralevels` int(11) unsigned NOT NULL default '0',
   `auraapplications` int(11) unsigned NOT NULL default '0',
   `aurastate` int(11) unsigned NOT NULL default '0',
-  UNIQUE KEY `entry` (`entry`)
+  PRIMARY KEY (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --

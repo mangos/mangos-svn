@@ -493,6 +493,8 @@ pkgdata_DATA = \
 	4597_realmlist.sql \
 	4599_command.sql \
 	4603_spell_affect.sql \
+	4605_creature_addon.sql \
+	4605_creature_template_addon.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -966,4 +968,6 @@ EXTRA_DIST = \
 	4597_realmlist.sql \
 	4599_command.sql \
 	4603_spell_affect.sql \
+	4605_creature_addon.sql \
+	4605_creature_template_addon.sql \
 	README
