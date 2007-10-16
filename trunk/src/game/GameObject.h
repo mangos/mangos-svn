@@ -156,7 +156,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         }
         void Respawn();
         bool isSpawned() const { 
-            return m_respawnDelayTime == 0 && m_spawnedByDefault || 
+            return m_respawnDelayTime == 0 || 
                 m_respawnTime > 0 && !m_spawnedByDefault || 
                 m_respawnTime == 0 && m_spawnedByDefault;
         }

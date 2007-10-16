@@ -3118,11 +3118,8 @@ void Spell::EffectDuel(uint32 i)
         delete pGameObj;
         return;
     }
-    pGameObj->SetFloatValue(OBJECT_FIELD_SCALE_X,1.0f);
 
-    pGameObj->SetUInt32Value(GAMEOBJECT_DISPLAYID, 787 );
     pGameObj->SetUInt32Value(GAMEOBJECT_FACTION, m_caster->getFaction() );
-    pGameObj->SetUInt32Value(GAMEOBJECT_TYPE_ID, GAMEOBJECT_TYPE_DUEL_ARBITER );
     pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel()+1 );
     int32 duration = GetDuration(m_spellInfo);
     pGameObj->SetRespawnTime(duration > 0 ? duration/1000 : 0);
