@@ -22,7 +22,7 @@ Version 0.8
  * localization support for data,
  * vmaps for line of sight handling,
  * build support for OpenBSD and FreeBSD,
- * Upgrade to client version 2.1.3 (build 6896).
+ * Upgrade to client version 2.1.3 (build 6898).
 
 Version 0.7, Codename "Eye of the Storm"
  * Full rewrite of the GNU autotools based build system, in order to
