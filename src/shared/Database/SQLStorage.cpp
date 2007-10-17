@@ -26,7 +26,7 @@ extern DatabasePostgre  sDatabase;
 extern DatabaseMysql  sDatabase;
 #endif
 
-const char CreatureInfofmt[]="iiissiiiiiiiiiififfiiiiiiiiiiiffiiiiiiiiiiiiiiiiiiisiiiiis";
+const char CreatureInfofmt[]="iiiiissiiiiiiiiiififfiiiiiiiiiiiffiiiiiiiiiiiiiiiiiiisiiiiis";
 const char CreatureDataAddonInfofmt[]="iiiiiiiiiii";
 const char CreatureModelfmt[]="iffii";
 const char CreatureInfoAddonInfofmt[]="iiiiiiiiiii";

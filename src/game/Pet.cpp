@@ -34,7 +34,7 @@ char const* petTypeSuffix[MAX_PET_TYPE] =
     "'s Minion",                                            // SUMMON_PET
     "'s Pet",                                               // HUNTER_PET
     "'s Guardian",                                          // GUARDIAN_PET
-    "'s Pet"                                                // MINI_PET
+    "'s Companion"                                          // MINI_PET
 };
 
 //numbers represent minutes * 100 while happy (you get 100 loyalty points per min while happy)
@@ -432,36 +432,6 @@ void Pet::SavePetToDB(PetSaveMode mode)
             sLog.outError("Unknown pet save/remove mode: %d",mode);
     }
 }
-
-/*void Pet::SendPetQuery()
-{
-    Unit *player = GetOwner();
-    if(player->GetTypeId() != TYPEID_PLAYER)
-        return;
-    char *subname = "Pet";
-    CreatureInfo *ci = objmgr.GetCreatureTemplate(GetEntry());
-
-    WorldPacket data( SMSG_CREATURE_QUERY_RESPONSE, 4+m_name.size()+1+3+strlen(subname)+1+4+4+4+4+4+4+4+2);
-    data << (uint32)GetEntry();
-    data << m_name.c_str();
-    data << uint8(0) << uint8(0) << uint8(0);
-    data << subname;
-
-    uint32 wdbFeild11=0,wdbFeild12=0;
-
-    data << ci->flag1;                                      //flags          wdbFeild7=wad flags1
-    data << uint32(ci->type);                               //creatureType   wdbFeild8
-    data << (uint32)ci->family;                             //family         wdbFeild9
-    data << (uint32)ci->rank;                               //rank           wdbFeild10
-    data << (uint32)wdbFeild11;                             //unknow         wdbFeild11
-    data << (uint32)wdbFeild12;                             //unknow         wdbFeild12
-    data << ci->DisplayID;                                  //DisplayID      wdbFeild13
-
-    data << (uint16)ci->civilian;                           //wdbFeild14
-
-    player->GetSession()->SendPacket( &data );
-}
-*/
 
 void Pet::setDeathState(DeathState s)                       // overwrite virtual Creature::setDeathState and Unit::setDeathState
 {

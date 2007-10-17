@@ -502,6 +502,7 @@ struct FriendInfo
 };
 
 typedef std::set<uint32> IgnoreList;
+typedef std::set<uint32> MuteList;
 typedef std::set<uint64> FriendList;
 
 typedef std::map<uint32, QuestStatusData> QuestStatusMap;
@@ -1900,6 +1901,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_usedTalentCount;
 
         IgnoreList m_ignorelist;
+        MuteList   m_mutelist;
         FriendList m_friendlist;
 
         // Groups

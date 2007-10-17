@@ -143,35 +143,19 @@ void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
 
     WorldPacket data( SMSG_CREATURE_QUERY_RESPONSE, 100 );  // guess size
     data << (uint32)entry;                                  // creature entry
-    if (unit)
-        data << ((unit->isPet()) ? unit->GetName() : Name); // creature name
-    else
-        data << Name;
-
+    data << Name;
     data << uint8(0) << uint8(0) << uint8(0);               // name2, name3, name4, always empty
-
-    if (unit)
-        data << ((unit->isPet()) ? "Pet" : SubName);        // subname
-    else
-        data << SubName;
-
+    data << SubName;
     data << ci->flag1;                                      // flags          wdbFeild7=wad flags1
-
-    if (unit)
-        data << (uint32)((unit->isPet()) ? 0 : ci->type);   // creatureType   wdbFeild8
-    else
-        data << (uint32) ci->type;
-
+    data << (uint32)ci->type;
     data << (uint32)ci->family;                             // family         wdbFeild9
-    data << (uint32)(unit && unit->isPet() ? 0 : ci->rank); // rank           wdbFeild10
+    data << (uint32)ci->rank;                               // rank           wdbFeild10
     data << uint32(0);                                      // unknown        wdbFeild11
-    data << uint32(0);                                      // unknown        wdbFeild12
-
-    if (unit)
-        data << unit->GetUInt32Value(UNIT_FIELD_DISPLAYID); //DisplayID      wdbFeild13
-    else
-        data << (uint32)ci->DisplayID_A;                    // Let's send only the default model
-
+    data << uint32(0);                                      // Id from CreatureSpellData.dbc    wdbFeild12
+    data << ci->DisplayID_A;                                // modelid_male1
+    data << ci->DisplayID_H;                                // modelid_female1 ?
+    data << ci->DisplayID_A2;                               // modelid_male2 ?
+    data << ci->DisplayID_H2;                               // modelid_femmale2 ?
     data << (float)1;                                       // unk
     data << (float)1;                                       // unk
     data << uint8(ci->civilian);

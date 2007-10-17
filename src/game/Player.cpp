@@ -1380,18 +1380,26 @@ void Player::_LoadIgnoreList(QueryResult *result)
 
 void Player::SendIgnorelist()
 {
-    if(m_ignorelist.empty())
+    if(m_ignorelist.empty() && m_mutelist.empty())
         return;
 
-    WorldPacket dataI(SMSG_IGNORE_LIST, (1+m_ignorelist.size()*8));
-    dataI << uint8(m_ignorelist.size());
+    WorldPacket data(SMSG_IGNORE_LIST, (1+m_ignorelist.size()*8+1+m_mutelist.size()*8));
+    data << uint8(m_ignorelist.size());
 
     for(IgnoreList::iterator iter = m_ignorelist.begin(); iter != m_ignorelist.end(); ++iter)
     {
-        dataI << uint64(MAKE_GUID(*iter,HIGHGUID_PLAYER));
+        data << uint64(MAKE_GUID(*iter,HIGHGUID_PLAYER));
     }
 
-    GetSession()->SendPacket( &dataI );
+    data << uint8(0); // 0 muted players for now
+    /*data << uint8(m_mutelist.size());
+
+    for(MuteList::iterator iter = m_mutelist.begin(); iter != m_mutelist.end(); ++iter)
+    {
+        data << uint64(MAKE_GUID(*iter,HIGHGUID_PLAYER));
+    }*/
+
+    GetSession()->SendPacket( &data );
     sLog.outDebug( "WORLD: Sent (SMSG_IGNORE_LIST)" );
 }
 

@@ -292,10 +292,10 @@ void LoadDBCStores(std::string dataPath)
         exit(1);
     }
 
-    // check at up-to-date DBC files (42781 is last added spell in 2.1.3)
-    if( !sSpellStore.LookupEntry(42781))
+    // check at up-to-date DBC files (44743 is last added spell in 2.2.2)
+    if( !sSpellStore.LookupEntry(44743))
     {
-        sLog.outError("\nYou have _outdated_ DBC files. Please exstact correct versions from current using client.");
+        sLog.outError("\nYou have _outdated_ DBC files. Please extract correct versions from current using client.");
         exit(1);
     }
 
@@ -440,7 +440,7 @@ bool CanCastWhileMounted(uint32 spellId)
     if(!spellInfo)
         return false;
 
-    return (spellInfo->Attributes == 151322624 && spellInfo->AttributesEx2 == 16 && spellInfo->AttributesExEx == 2097152) ||
+    return (spellInfo->Attributes == 0x9050000 && spellInfo->AttributesEx2 == 0x10 && spellInfo->AttributesExEx == 0x200000) ||
         (spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && spellInfo->SpellFamilyFlags == 0x800000);
 }
 
@@ -746,7 +746,7 @@ ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id)
     for(uint32 i = 0; i < sChatChannelsStore.nCount; ++i)
     {
         ChatChannelsEntry const* ch = sChatChannelsStore.LookupEntry(i);
-        if(ch && ch->ChannelID==channel_id)
+        if(ch && ch->ChannelID == channel_id)
             return ch;
     }
     return NULL;

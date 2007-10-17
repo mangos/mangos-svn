@@ -496,6 +496,7 @@ pkgdata_DATA = \
 	4605_creature_addon.sql \
 	4605_creature_template_addon.sql \
 	4608_game_graveyard_zone.sql \
+	4615_creature_template.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -972,4 +973,5 @@ EXTRA_DIST = \
 	4605_creature_addon.sql \
 	4605_creature_template_addon.sql \
 	4608_game_graveyard_zone.sql \
+	4615_creature_template.sql \
 	README

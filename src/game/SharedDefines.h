@@ -936,7 +936,8 @@ enum CreatureType
     CREATURE_TYPE_CRITTER          = 8,
     CREATURE_TYPE_MECHANICAL       = 9,
     CREATURE_TYPE_NOTSPECIFIED     = 10,
-    CREATURE_TYPE_TOTEM            = 11
+    CREATURE_TYPE_TOTEM            = 11,
+    CREATURE_TYPE_NON_COMBAT_PET   = 12
 };
 
 uint32 const CREATURE_TYPEMASK_HUMANOID_OR_UNDEAD = (1 << (CREATURE_TYPE_HUMANOID-1)) | (1 << (CREATURE_TYPE_UNDEAD-1));
@@ -981,7 +982,8 @@ enum CreatureEliteType
     CREATURE_ELITE_ELITE           = 1,
     CREATURE_ELITE_RAREELITE       = 2,
     CREATURE_ELITE_WORLDBOSS       = 3,
-    CREATURE_ELITE_RARE            = 4
+    CREATURE_ELITE_RARE            = 4,
+    CREATURE_UNKNOWN               = 5  // found in 2.2.3 for 2 mobs
 };
 
 
@@ -1036,7 +1038,8 @@ enum QuestSort
     QUEST_SORT_LUNAR_FESTIVAL      = 366,
     QUEST_SORT_REPUTATION          = 367,
     QUEST_SORT_INVASION            = 368,
-    QUEST_SORT_MIDSUMMER           = 369
+    QUEST_SORT_MIDSUMMER           = 369,
+    QUEST_SORT_BREWFEST            = 370
 };
 
 inline uint8 ClassByQuestSort(int32 QuestSort)
