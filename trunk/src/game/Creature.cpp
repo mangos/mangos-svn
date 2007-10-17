@@ -1113,7 +1113,10 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const 
     uint32 display_id;
     if (!data || data->displayid == 0)                      // use defaults from the template
         // DisplayID_A is used if no team is given
-        display_id = (team == HORDE) ? cinfo->DisplayID_H : cinfo->DisplayID_A;            
+        if (team == HORDE)
+            display_id = (cinfo->DisplayID_H2 != 0 && urand(0,1) == 0) ? cinfo->DisplayID_H2 : cinfo->DisplayID_H;
+        else
+            display_id = (cinfo->DisplayID_A2 != 0 && urand(0,1) == 0) ? cinfo->DisplayID_A2 : cinfo->DisplayID_A;
     else                                                    // overriden in creature data
         display_id = data->displayid;
 

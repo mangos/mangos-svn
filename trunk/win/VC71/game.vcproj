@@ -410,6 +410,9 @@
 				RelativePath="..\..\src\game\UpdateData.h">
 			</File>
 			<File
+				RelativePath="..\..\src\game\VoiceChatHandler.cpp">
+			</File>
+			<File
 				RelativePath="..\..\src\game\Weather.cpp">
 			</File>
 			<File

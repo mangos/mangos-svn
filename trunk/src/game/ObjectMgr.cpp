@@ -852,7 +852,7 @@ bool ObjectMgr::GetPlayerNameByGUID(const uint64 &guid, std::string &name) const
     // prevent DB access for online player
     if(Player* player = GetPlayer(guid))
     {
-        name  = player->GetName();
+        name = player->GetName();
         return true;
     }
 

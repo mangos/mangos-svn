@@ -968,28 +968,13 @@ enum OpCodes
     // 923
     // 924
     SMSG_SET_COMBO_POINTS                           = 925,  // set combo points
-    // 926
-    SMSG_UNKNOWN_927                                = 927,  // uint64 guid + unk's
+    SMSG_VOICE_SESSION                              = 926,
+    SMSG_UNKNOWN_927                                = 927,  // uint64 guid + uint32 + float?, received after leave voice channel
     // 928
     // 929
     // 930
-    SMSG_SET_AURA_MULTIPLY                          = 931,
-    /*
-    packed_guid
-    block (can repeat):
-    uint8 index may be it's aura slot? (increments)
-    uint32 spellid
-    uint32 duration1 (full?)
-    uint32 duration2 (remaining?)
-    */
-    SMSG_SET_AURA_SINGLE                            = 932,
-    /*
-    packed_guid
-    uint8 index may be it's aura slot? (increments)
-    uint32 spellid
-    uint32 duration1 (full?)
-    uint32 duration2 (remaining?)
-    */
+    SMSG_SET_AURA_MULTIPLY                          = 931,  // packed_guid + n * (uint8 slot + uint32 spellid + uint32 duration1 + uint32 duration2)
+    SMSG_SET_AURA_SINGLE                            = 932,  // packed_guid + uint8 slot + uint32 spellid + uint32 duration1 + uint32 duration2
     // 933
     SMSG_CAST_SUCCESS                               = 934,
     MSG_UNKNOWN_935                                 = 935,  // teleport/movement opcode
@@ -1000,8 +985,8 @@ enum OpCodes
     SMSG_UNKNOWN_940                                = 940,  // packed guid (received at spell cast)
     SMSG_UNKNOWN_941                                = 941,  // teleport/movement opcode
     SMSG_UNKNOWN_942                                = 942,  // Everyone is Ready! (message)
-    CMSG_UNKNOWN_943                                = 943,  // uint8, uint8
-    SMSG_UNKNOWN_944                                = 944,  // chat related (seen it when talk with GM)
+    CMSG_VOICE_SETTINGS                             = 943,  // uint8 isVoiceEnabled, uint8 isMicrophoneEnabled
+    SMSG_UNKNOWN_944                                = 944,  // Voice chat has been disabled by parental control
     // 945
     // 946
     // 947
@@ -1020,43 +1005,43 @@ enum OpCodes
     // 960
     // 961
     // 962
-    // 963
+    SMSG_DISCONNECT_CLIENT                          = 963,  // really??
     // 964
-    // 965
-    // 966
-    SMSG_UNKNOWN_967                                = 967,  // uint8, uint8
+    CMSG_COMPLAIN_CHAT                              = 965,  // some data
+    SMSG_COMPLAIN_CHAT_RESPONSE                     = 966,  // uint8(0)
+    SMSG_VOICE_SYSTEM_STATUS                        = 967,  // uint8, uint8
     // 968
     // 969
-    // 970
-    // 971
+    CMSG_CHANNEL_SILENT_VOICE                       = 970,
+    CMSG_CHANNEL_SILENT_ALL                         = 971,
     // 972
-    // 973
+    CMSG_CHANNEL_UNSILENT_ALL                       = 973,
     // 974
     // 975
-    CMSG_UNKNOWN_976                                = 976,  // string channel name
-    CMSG_UNKNOWN_977                                = 977,  // uint32, string
-    CMSG_UNKNOWN_978                                = 978,  // string channel name
-    SMSG_UNKNOWN_979                                = 979,  // string channel name, uint8, uint32
-    // 980
-    // 981
+    CMSG_CHANNEL_ROSTER_QUERY                       = 976,  // string channel name (channel list?)
+    CMSG_CHANNEL_VOICE_CHAT_QUERY                   = 977,  // uint32, string
+    CMSG_CHANNEL_INFO_QUERY                         = 978,  // string channel name
+    SMSG_CHANNEL_INFO_QUERY_RESPONSE                = 979,  // string channel name, uint8 flags, uint32 count
+    CMSG_CHANNEL_ENABLE_VOICE                       = 980,  // Enable Voice button in channel context menu
+    CMSG_CHANNEL_TURN_VOICE_ON_2                    = 981,  // ??
     // 982
     // 983
-    SMSG_UNKNOWN_984                                = 984,  // unk's + string channel name + uint64 guid
-    // 985
-    // 986
-    // 987
-    // 988
-    // 989
-    // 990
-    // 991
-    // 992
+    SMSG_CHANNEL_NOTIFY_AVAILABLE_VOICE_SESSION     = 984,  // 9 bytes unk's + string channel name + uint64 guid, received after join voice channel
+    CMSG_MUTE_PLAYER                                = 985,  // ??
+    CMSG_UNMUTE_PLAYER                              = 986,  // ??
+    CMSG_SILENCE_MEMBER                             = 987,  // ??
+    CMSG_UNSILENCE_MEMBER                           = 988,  // ??
+    // 989 A group leader has restored your voice privileges
+    // 990 Voice chat service restored!
+    // 991 Connection lost to voice chat service.
+    // 992 Cannot connect to voice chat service.
     // 993
     // 994
-    // 995
-    CMSG_UNKNOWN_996                                = 996,  // string channel name
-    SMSG_UNKNOWN_997                                = 997,  // uint64 guid + uint8 + uint8 + uint32 + string channel name
-    SMSG_UNKNOWN_998                                = 998,  // uint64 guid + uint8 + uint32 + string channel name
-    // 999
+    SMSG_UNKNOWN_995                                = 995,  // uint8(5) at teleport to battleground
+    CMSG_UNKNOWN_996                                = 996,  // string channel name (channel list?)
+    SMSG_PLAYER_JOINED_CHANNEL                      = 997,  // uint64 guid + uint8 flags + uint8 channel flags + uint32 channel type + string channel name
+    SMSG_PLAYER_LEFT_CHANNEL                        = 998,  // uint64 guid + uint8 flags + uint32 type + string channel name
+    SMSG_PLAYER_JOINED_CUSTOM_CHANNEL               = 999   // uint64 guid + uint8 flags + uint8 channel flags + uint32 channel type + string channe lname
 };
 
 //if you add new opcode .. Do NOT forget to change the following define MAX_OPCODE_ID and also add new opcode to table in opcodes.cpp
@@ -1081,7 +1066,14 @@ enum FriendsResult
     FRIEND_IGNORE_NOT_FOUND                       = 0x0D,
     FRIEND_IGNORE_ALREADY                         = 0x0E,
     FRIEND_IGNORE_ADDED                           = 0x0F,
-    FRIEND_IGNORE_REMOVED                         = 0x10
+    FRIEND_IGNORE_REMOVED                         = 0x10,
+    // 0x11
+    // 0x12
+    // 0x13
+    // 0x14
+    // 0x15
+    FRIEND_MUTE_ADDED                             = 0x16,
+    FRIEND_MUTE_REMOVED                           = 0x17
 };
 
 /// Non Player Character flags

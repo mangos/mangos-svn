@@ -145,7 +145,9 @@ struct CreatureInfo
 {
     uint32  Entry;
     uint32  DisplayID_A;
+    uint32  DisplayID_A2;
     uint32  DisplayID_H;
+    uint32  DisplayID_H2;
     char*   Name;
     char*   SubName;
     uint32  minlevel;

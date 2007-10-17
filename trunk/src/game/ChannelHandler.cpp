@@ -24,30 +24,34 @@ INSTANTIATE_SINGLETON_1( HordeChannelMgr );
 
 void WorldSession::HandleChannelJoin(WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket,1+1);
+    sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
+    recvPacket.hexlike();
+    CHECK_PACKET_SIZE(recvPacket, 1+1);
 
     uint32 channel_id;
-    uint8 unknown;
+    uint8 unknown1, unknown2;
     std::string channelname, pass;
 
-    recvPacket >> channel_id >> unknown;
+    recvPacket >> channel_id >> unknown1 >> unknown2;
     recvPacket >> channelname;
 
     // recheck
-    CHECK_PACKET_SIZE(recvPacket,(channelname.size()+1)+1);
+    CHECK_PACKET_SIZE(recvPacket, (channelname.size()+1)+1);
 
     recvPacket >> pass;
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
-        cMgr->GetJoinChannel(channelname,channel_id)->Join(_player->GetGUID(),pass.c_str());
+        cMgr->GetJoinChannel(channelname, channel_id)->Join(_player->GetGUID(), pass.c_str());
 }
 
 void WorldSession::HandleChannelLeave(WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket,1);
+    sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
+    recvPacket.hexlike();
+    CHECK_PACKET_SIZE(recvPacket, 1);
 
     uint32 unk;
     std::string channelname;
-    recvPacket >> unk;
+    recvPacket >> unk;                                      // channel id?
     recvPacket >> channelname;
 
     if(!channelname.length())
@@ -55,212 +59,274 @@ void WorldSession::HandleChannelLeave(WorldPacket& recvPacket)
 
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
     {
-        if(Channel *chn = cMgr->GetChannel(channelname,_player))
-            chn->Leave(_player->GetGUID(),true);
+        if(Channel *chn = cMgr->GetChannel(channelname, _player))
+            chn->Leave(_player->GetGUID(), true);
         cMgr->LeftChannel(channelname);
     }
 }
 
 void WorldSession::HandleChannelList(WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket,1);
+    sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
+    recvPacket.hexlike();
+    CHECK_PACKET_SIZE(recvPacket, 1);
 
     std::string channelname;
     recvPacket >> channelname;
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
-        if(Channel *chn = cMgr->GetChannel(channelname,_player))
+        if(Channel *chn = cMgr->GetChannel(channelname, _player))
             chn->List(_player->GetGUID());
 }
 
 void WorldSession::HandleChannelPassword(WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket,1+1);
+    sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
+    recvPacket.hexlike();
+    CHECK_PACKET_SIZE(recvPacket, 1+1);
 
     std::string channelname, pass;
     recvPacket >> channelname;
 
     // recheck
-    CHECK_PACKET_SIZE(recvPacket,(channelname.size()+1)+1);
+    CHECK_PACKET_SIZE(recvPacket, (channelname.size()+1)+1);
 
     recvPacket >> pass;
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
-        if(Channel *chn = cMgr->GetChannel(channelname,_player))
-            chn->Password(_player->GetGUID(),pass.c_str());
+        if(Channel *chn = cMgr->GetChannel(channelname, _player))
+            chn->Password(_player->GetGUID(), pass.c_str());
 }
 
 void WorldSession::HandleChannelSetOwner(WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket,1+1);
+    sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
+    recvPacket.hexlike();
+    CHECK_PACKET_SIZE(recvPacket, 1+1);
 
     std::string channelname, newp;
     recvPacket >> channelname;
 
     // recheck
-    CHECK_PACKET_SIZE(recvPacket,(channelname.size()+1)+1);
+    CHECK_PACKET_SIZE(recvPacket, (channelname.size()+1)+1);
 
     recvPacket >> newp;
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
-        if(Channel *chn = cMgr->GetChannel(channelname,_player))
-            chn->SetOwner(_player->GetGUID(),newp.c_str());
+        if(Channel *chn = cMgr->GetChannel(channelname, _player))
+            chn->SetOwner(_player->GetGUID(), newp.c_str());
 }
 
 void WorldSession::HandleChannelOwner(WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket,1);
+    sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
+    recvPacket.hexlike();
+    CHECK_PACKET_SIZE(recvPacket, 1);
 
     std::string channelname;
     recvPacket >> channelname;
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
-        if(Channel *chn = cMgr->GetChannel(channelname,_player))
+        if(Channel *chn = cMgr->GetChannel(channelname, _player))
             chn->SendWhoOwner(_player->GetGUID());
 }
 
 void WorldSession::HandleChannelModerator(WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket,1+1);
+    sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
+    recvPacket.hexlike();
+    CHECK_PACKET_SIZE(recvPacket, 1+1);
 
     std::string channelname, otp;
     recvPacket >> channelname;
 
     // recheck
-    CHECK_PACKET_SIZE(recvPacket,(channelname.size()+1)+1);
+    CHECK_PACKET_SIZE(recvPacket, (channelname.size()+1)+1);
 
     recvPacket >> otp;
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
-        if(Channel *chn = cMgr->GetChannel(channelname,_player))
-            chn->SetModerator(_player->GetGUID(),otp.c_str());
+        if(Channel *chn = cMgr->GetChannel(channelname, _player))
+            chn->SetModerator(_player->GetGUID(), otp.c_str());
 }
 
 void WorldSession::HandleChannelUnmoderator(WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket,1+1);
+    sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
+    recvPacket.hexlike();
+    CHECK_PACKET_SIZE(recvPacket, 1+1);
 
     std::string channelname, otp;
     recvPacket >> channelname;
 
     // recheck
-    CHECK_PACKET_SIZE(recvPacket,(channelname.size()+1)+1);
+    CHECK_PACKET_SIZE(recvPacket, (channelname.size()+1)+1);
 
     recvPacket >> otp;
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
-        if(Channel *chn = cMgr->GetChannel(channelname,_player))
-            chn->UnsetModerator(_player->GetGUID(),otp.c_str());
+        if(Channel *chn = cMgr->GetChannel(channelname, _player))
+            chn->UnsetModerator(_player->GetGUID(), otp.c_str());
 }
 
 void WorldSession::HandleChannelMute(WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket,1+1);
+    sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
+    recvPacket.hexlike();
+    CHECK_PACKET_SIZE(recvPacket, 1+1);
 
     std::string channelname, otp;
     recvPacket >> channelname;
 
     // recheck
-    CHECK_PACKET_SIZE(recvPacket,(channelname.size()+1)+1);
+    CHECK_PACKET_SIZE(recvPacket, (channelname.size()+1)+1);
 
     recvPacket >> otp;
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
-        if(Channel *chn = cMgr->GetChannel(channelname,_player))
-            chn->SetMute(_player->GetGUID(),otp.c_str());
+        if(Channel *chn = cMgr->GetChannel(channelname, _player))
+            chn->SetMute(_player->GetGUID(), otp.c_str());
 }
 
 void WorldSession::HandleChannelUnmute(WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket,1+1);
+    sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
+    recvPacket.hexlike();
+    CHECK_PACKET_SIZE(recvPacket, 1+1);
 
     std::string channelname, otp;
     recvPacket >> channelname;
 
     // recheck
-    CHECK_PACKET_SIZE(recvPacket,(channelname.size()+1)+1);
+    CHECK_PACKET_SIZE(recvPacket, (channelname.size()+1)+1);
 
     recvPacket >> otp;
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
-        if(Channel *chn = cMgr->GetChannel(channelname,_player))
-            chn->UnsetMute(_player->GetGUID(),otp.c_str());
+        if(Channel *chn = cMgr->GetChannel(channelname, _player))
+            chn->UnsetMute(_player->GetGUID(), otp.c_str());
 }
 
 void WorldSession::HandleChannelInvite(WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket,1+1);
+    sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
+    recvPacket.hexlike();
+    CHECK_PACKET_SIZE(recvPacket, 1+1);
 
     std::string channelname, otp;
     recvPacket >> channelname;
 
     // recheck
-    CHECK_PACKET_SIZE(recvPacket,(channelname.size()+1)+1);
+    CHECK_PACKET_SIZE(recvPacket, (channelname.size()+1)+1);
 
     recvPacket >> otp;
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
-        if(Channel *chn = cMgr->GetChannel(channelname,_player))
-            chn->Invite(_player->GetGUID(),otp.c_str());
+        if(Channel *chn = cMgr->GetChannel(channelname, _player))
+            chn->Invite(_player->GetGUID(), otp.c_str());
 }
 
 void WorldSession::HandleChannelKick(WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket,1+1);
+    sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
+    recvPacket.hexlike();
+    CHECK_PACKET_SIZE(recvPacket, 1+1);
 
     std::string channelname, otp;
     recvPacket >> channelname;
 
     // recheck
-    CHECK_PACKET_SIZE(recvPacket,(channelname.size()+1)+1);
+    CHECK_PACKET_SIZE(recvPacket, (channelname.size()+1)+1);
 
     recvPacket >> otp;
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
-        if(Channel *chn = cMgr->GetChannel(channelname,_player))
-            chn->Kick(_player->GetGUID(),otp.c_str());
+        if(Channel *chn = cMgr->GetChannel(channelname, _player))
+            chn->Kick(_player->GetGUID(), otp.c_str());
 }
 
 void WorldSession::HandleChannelBan(WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket,1+1);
+    sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
+    recvPacket.hexlike();
+    CHECK_PACKET_SIZE(recvPacket, 1+1);
 
     std::string channelname, otp;
     recvPacket >> channelname;
 
     // recheck
-    CHECK_PACKET_SIZE(recvPacket,(channelname.size()+1)+1);
+    CHECK_PACKET_SIZE(recvPacket, (channelname.size()+1)+1);
 
     recvPacket >> otp;
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
-        if(Channel *chn = cMgr->GetChannel(channelname,_player))
-            chn->Ban(_player->GetGUID(),otp.c_str());
+        if(Channel *chn = cMgr->GetChannel(channelname, _player))
+            chn->Ban(_player->GetGUID(), otp.c_str());
 }
 
 void WorldSession::HandleChannelUnban(WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket,1+1);
+    sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
+    recvPacket.hexlike();
+    CHECK_PACKET_SIZE(recvPacket, 1+1);
 
     std::string channelname, otp;
     recvPacket >> channelname;
 
     // recheck
-    CHECK_PACKET_SIZE(recvPacket,(channelname.size()+1)+1);
+    CHECK_PACKET_SIZE(recvPacket, (channelname.size()+1)+1);
 
     recvPacket >> otp;
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
-        if(Channel *chn = cMgr->GetChannel(channelname,_player))
-            chn->UnBan(_player->GetGUID(),otp.c_str());
+        if(Channel *chn = cMgr->GetChannel(channelname, _player))
+            chn->UnBan(_player->GetGUID(), otp.c_str());
 }
 
 void WorldSession::HandleChannelAnnounce(WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket,1);
+    sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
+    recvPacket.hexlike();
+    CHECK_PACKET_SIZE(recvPacket, 1);
 
     std::string channelname;
     recvPacket >> channelname;
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
-        if(Channel *chn = cMgr->GetChannel(channelname,_player))
+        if(Channel *chn = cMgr->GetChannel(channelname, _player))
             chn->Announce(_player->GetGUID());
 }
 
 void WorldSession::HandleChannelModerate(WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket,1);
+    sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
+    recvPacket.hexlike();
+    CHECK_PACKET_SIZE(recvPacket, 1);
 
     std::string channelname;
     recvPacket >> channelname;
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
-        if(Channel *chn = cMgr->GetChannel(channelname,_player))
+        if(Channel *chn = cMgr->GetChannel(channelname, _player))
             chn->Moderate(_player->GetGUID());
+}
+
+void WorldSession::HandleChannelRosterQuery(WorldPacket &recvPacket)
+{
+    sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
+    recvPacket.hexlike();
+    CHECK_PACKET_SIZE(recvPacket, 1);
+
+    std::string channelname;
+    recvPacket >> channelname;
+    if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
+        if(Channel *chn = cMgr->GetChannel(channelname, _player))
+            chn->List(_player->GetGUID());
+}
+
+void WorldSession::HandleChannelInfoQuery(WorldPacket &recvPacket)
+{
+    sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
+    recvPacket.hexlike();
+    CHECK_PACKET_SIZE(recvPacket, 1);
+
+    std::string channelname;
+    recvPacket >> channelname;
+    if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
+    {
+        if(Channel *chn = cMgr->GetChannel(channelname, _player))
+        {
+            WorldPacket data(SMSG_CHANNEL_INFO_QUERY_RESPONSE, chn->GetName().size()+1+1+4);
+            data << chn->GetName();
+            data << uint8(chn->GetFlags());
+            data << uint32(chn->GetNumPlayers());
+            SendPacket(&data);
+        }
+    }
 }

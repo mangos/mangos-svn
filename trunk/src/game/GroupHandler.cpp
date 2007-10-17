@@ -524,7 +524,7 @@ void WorldSession::HandleRaidReadyCheckOpcode( WorldPacket & recv_data )
     Group *group = GetPlayer()->GetGroup();
     if(!group) return;
 
-    if(recv_data.empty())                               // request
+    if(recv_data.empty())                                   // request
     {
         /** error handling **/
         if(!group->IsLeader(GetPlayer()->GetGUID()))

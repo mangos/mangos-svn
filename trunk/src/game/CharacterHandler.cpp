@@ -157,11 +157,11 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
         return;
     }
 
-    // prevent character creating Expancion race without Expancion account
+    // prevent character creating Expansion race without Expansion account
     if (!pTbc&&(race_>RACE_TROLL))
     {
         data << (uint8)CHAR_CREATE_EXPANSION;
-        sLog.outError("No Expaniton Account:[%d] but tried to Create TBC character",GetAccountId());
+        sLog.outError("No Expansion Account:[%d] but tried to Create TBC character",GetAccountId());
         SendPacket( &data );
         return;
     }
@@ -195,7 +195,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 
     if(objmgr.GetPlayerGUIDByName(name))
     {
-        data << (uint8)CHAR_CREATE_NAME_IN_USE;
+        data << (uint8)CHAR_CREATE_ERROR;
         SendPacket( &data );
         return;
     }
@@ -404,9 +404,10 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     pCurrChar->SendFriendlist();
     pCurrChar->SendIgnorelist();
 
-    // Activate Spam Reporting Future
-    data.Initialize(SMSG_ACTIVATE_SPAM_REPORTING, 1);
-    data << uint8(2);                                       // unknown thing
+    // added in 2.2.0
+    data.Initialize(SMSG_VOICE_SYSTEM_STATUS, 2);
+    data << uint8(2);                                       // unknown value
+    data << uint8(0);                                       // enable(1)/disable(0) voice chat interface in client
     SendPacket(&data);
 
     // Send MOTD
@@ -756,7 +757,7 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
     if(objmgr.GetPlayerGUIDByName(newname))                 // character with this name already exist
     {
         WorldPacket data(SMSG_CHAR_RENAME, 1);
-        data << (uint8)CHAR_CREATE_NAME_IN_USE;
+        data << (uint8)CHAR_CREATE_ERROR;
         SendPacket( &data );
         return;
     }
