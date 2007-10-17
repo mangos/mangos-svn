@@ -1,0 +1,64 @@
+# MaNGOS realmd configuration file
+ConfVersion=2007062001
+
+# Database connection settings for the realm server.
+# Default: hostname;port;username;password;database
+#          .;somenumber;username;password;database - use named pipes at Windows
+#                Named pipes: mySQL required adding "enable-named-pipe" to [mysqld] section my.ini
+#          .;/path/to/unix_socket;username;password;database - use Unix sockets at Unix/Linux
+#                Unix sockets: experimental, not tested
+LoginDatabaseInfo = "127.0.0.1;3306;mangos;mangos;realmd"
+
+# Logs directory setting.
+# Important: Logs dir must exists, or all logs be disable
+# Default: "" - no log directory prefix, if used log names isn't absolute path then logs will be stored in current directory for run program.
+LogsDir = ""
+
+# Settings for maximum database-ping interval (minutes between pings)
+MaxPingTime = 30
+
+# Default RealmServerPort
+RealmServerPort = 3724
+
+# Server console level of logging
+# 0 = Minimum; 1 = Error; 2 = Detail; 3 = Full/Debug
+# Default: 0
+LogLevel = 0
+
+# Logfile name 
+#    empty name disable creating log file: LogFile = 
+# Default: "Server.log" - not recommended.
+LogFile = "Realmd.log"
+
+# Logfile with timestamp of server start in name
+# Default: 0 - no timestamp in name
+#          1 - add timestamp in name in form Logname_YYYY-MM-DD_HH-MM-SS.Ext for Logname.Ext
+LogTimestamp = 0
+
+# Server file level of logging
+# 0 = Minimum; 1 = Error; 2 = Detail; 3 = Full/Debug
+# Default: 0
+LogFileLevel = 0
+
+# Color for messages (format "normal_color details_color debug_color error_color)
+# Colors: 0 - BLACK, 1 - RED, 2 - GREEN,  3 - BROWN, 4 - BLUE, 5 - MAGENTA, 6 -  CYAN, 7 - GREY, 
+#         8 - YELLOW, 9 - LRED, 10 - LGREEN, 11 - LBLUE, 12 - LMAGENTA, 13 - LCYAN, 14 - WHITE
+# Default: "" - none colors
+#          "13 7 11 9" - for example :)
+LogColors = ""
+
+# Used processors mask for multi-processors system (Used only at Windows)
+# Default: 0 (selected by OS)
+#          number (bitmask value of selected processors)
+UseProcessors = 0
+
+# Process proirity setting (Used only at Windows)
+#          0 (Normal)
+# Default: 1 (HIGH)
+ProcessPriority = 1
+
+
+# Realm list Update up delay (updated at realm list request if delay expired).
+#          0  (Disabled)
+# Default: 20 
+RealmsStateUpdateDelay = 20
