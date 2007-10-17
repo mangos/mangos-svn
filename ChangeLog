@@ -12,7 +12,7 @@ MaNGOS 0.8    (Oct 16, 2007) https://svn.mangosproject.org/trac/MaNGOS/milestone
  * Added: a new threat manager was introduced,
  * Added: log more GM activities,
  * Added: many new features for creatures and game objects working,
- * Added: support for client build 6896, aka version 2.1.3,
+ * Added: support for client build 6898, aka version 2.1.3,
  * Added: support for custom creature equipment and display,
  * Added: support for daily quests,
  * Added: support for different fishing loot in sub-zones,
