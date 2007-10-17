@@ -1,6 +1,23 @@
+MaNGOS 0.9    (??? ??? 2007) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.9
+
+ MaNGOS 0.9 - Codename "Flight Master" - adds further improvements to the
+ server core as well as to the majority of game classes and the game content
+ database.
+
+ ==== Game Features ====
+
+ ==== Server Features ====
+
+ ==== Statistics ====
+ * Fixed Bugs: ???
+ * Total number of changes: ???
+
+ The complete list of closed tickets can be found here:
+   https://svn.mangosproject.org/trac/MaNGOS/query?status=closed&milestone=0.9
+
 MaNGOS 0.8    (Oct 16, 2007) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.8
 
- MaNGOS 0.8  -adds further improvements to the
+ MaNGOS 0.8 - Codename "Innkeeper" - adds further improvements to the
  server core as well as to the majority of game classes and the game content
  database.
  
@@ -39,12 +56,12 @@ MaNGOS 0.8    (Oct 16, 2007) https://svn.mangosproject.org/trac/MaNGOS/milestone
  * Fixed: Numerous bug fixes to the core,
  * Improved: database queries adding performance boosts here and there,
 
+ ==== Statistics ====
  * Fixed Bugs: 528
  * Total number of changes: 558
 
  The complete list of closed tickets can be found here:
    https://svn.mangosproject.org/trac/MaNGOS/query?status=closed&milestone=0.8
-
 
 MaNGOS 0.7    (Jul 9, 2007) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.7
 
@@ -98,6 +115,7 @@ MaNGOS 0.7    (Jul 9, 2007) https://svn.mangosproject.org/trac/MaNGOS/milestone/
  * Fixed: many memory leaks and crases sources.
  * Added: DBC locale support that can be set from mangosd.conf.
 
+ ==== Statistics ====
  * Fixed Bugs: 390
  * Total number of changes: 923
 
@@ -140,6 +158,7 @@ MaNGOS 0.6    (Jan 29, 2007) https://svn.mangosproject.org/trac/MaNGOS/milestone
  * DB-based scripting support added for quest emote scripts and spell event scripts.
  * Many improvements in less client-server data amount transferring.
 
+ ==== Statistics ====
  * Fixed Bugs: 306
  * Total number of changes: 874
 
@@ -160,6 +179,7 @@ MaNGOS 0.5    (Sep 20, 2006) https://svn.mangosproject.org/trac/MaNGOS/milestone
  Feature-wise, support for pets, totems, more spells, talents, etc. have been
  added, as well as lots of quest related features.
 
+ ==== Statistics ====
  * Fixed Bugs: 544
  * Total number of changes: 1828.
 
@@ -290,6 +310,8 @@ MaNGOS 0.1    (Dec 04, 2005) https://svn.mangosproject.org/trac/MaNGOS/milestone
  === Server Features ===
  * Added CLI interface for server. Needs to be enabled on compile-time.
  * Reorganized Spell System, separated effects to a diferent file, for better fixing.
+
+ ==== Statistics ====
  * Fixed Bugs: #14, #17, #20, #22, #23, #24, #25, #26
  * Total number of changes: 193.
 
@@ -341,6 +363,8 @@ MaNGOS 0.0.2  (Oct 31, 2005) https://svn.mangosproject.org/trac/MaNGOS/milestone
  * Fixed ZThread build process.
  * Fixed segmentation fault on zone map test due to access of array out of bound. Also, change m_ZoneIDmap to use bitset instead of the 4 bytes bool.
  * Fixed memory leak problems. The creation of new TYPE[] must delete with [] for correctness otherwise n-1 members are leaked.
+
+ ==== Statistics ====
  * Fixed Bugs: #4, #7, #12, #13, #16, #18, #19
  * Total number of changes: 225.
 
@@ -370,6 +394,8 @@ MaNGOS 0.0.1  (Sept 13, 2005) https://svn.mangosproject.org/trac/MaNGOS/mileston
  * Added contrib/ subdirectory for third-party tools.
  * Applied MaNGOS code indention schema.
  * Initial code checked into repository.
+
+ ==== Statistics ====
  * Fixed Bugs: #2, #3, #9, #10, #11
  * Total number of changes: 53.
 

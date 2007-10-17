@@ -13,6 +13,10 @@ http://www.mangosproject.org/forum/
 Please submit bug reports at:
 https://svn.mangosproject.org/trac/MaNGOS/
 
+Version 0.9
+* Under discussion.
+* Upgrade to client version 2.2.3 (build 7359).
+
 Version 0.8
  * battleground support,
  * gender specific creatures,
