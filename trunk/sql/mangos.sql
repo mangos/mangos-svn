@@ -1237,7 +1237,9 @@ DROP TABLE IF EXISTS `creature_template`;
 CREATE TABLE `creature_template` (
   `entry` int(11) unsigned NOT NULL default '0',
   `modelid_A` int(11) unsigned NOT NULL default '0',
+  `modelid_A2` int(10) unsigned NOT NULL default '0',
   `modelid_H` int(11) unsigned NOT NULL default '0',
+  `modelid_H2` int(10) unsigned NOT NULL default '0',
   `name` char(100) NOT NULL default '0',
   `subname` char(100) default NULL,
   `minlevel` tinyint(3) unsigned default '1',
@@ -1303,7 +1305,7 @@ CREATE TABLE `creature_template` (
 LOCK TABLES `creature_template` WRITE;
 /*!40000 ALTER TABLE `creature_template` DISABLE KEYS */;
 INSERT INTO `creature_template` VALUES
-(1,10045,10045,'Waypoint (Only GM can see it)','Visual',1,1,64,64,0,0,0,35,35,0,0.91,0,14,15,0,100,2000,2200,4096,0,8,0,0,0,0,1.76,2.42,100,8,1,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,3,0,1,0,'');
+(1,10045,0,10045,0,'Waypoint (Only GM can see it)','Visual',1,1,64,64,0,0,0,35,35,0,0.91,0,14,15,0,100,2000,2200,4096,0,8,0,0,0,0,1.76,2.42,100,8,1,5242886,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,'',0,3,0,1,0,'');
 /*!40000 ALTER TABLE `creature_template` ENABLE KEYS */;
 UNLOCK TABLES;
 
