@@ -1160,12 +1160,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         MotionMaster* GetMotionMaster() { return &i_motionMaster; }
 
         bool IsStopped() const { return !(hasUnitState(UNIT_STAT_MOVING)); }
-        void StopMoving()
-        {
-            clearUnitState(UNIT_STAT_MOVING);
-            // send explicit stop packet
-            SendMonsterMove(GetPositionX(), GetPositionY(), GetPositionZ(),0,true,0);
-        }
+        void StopMoving();
 
         void setMoveRunFlag(bool f) { m_moveRun = f; }
         bool getMoveRunFlag() const { return m_moveRun; }
