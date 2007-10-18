@@ -161,7 +161,7 @@ void GameObject::Update(uint32 p_time)
     switch (m_lootState)
     {
         case GO_NOT_READY:
-            if (GetGoType()==17)
+            if (GetGoType()==GAMEOBJECT_TYPE_FISHINGNODE)
             {
                 // fishing code (bobber ready)
                 if( time(NULL) > m_respawnTime - FISHING_BOBBER_READY_TIME )

@@ -32,20 +32,49 @@
 
 bool ChatHandler::ShowHelpForCommand(ChatCommand *table, const char* cmd)
 {
-    for(uint32 i = 0; table[i].Name != NULL; i++)
+    for(uint32 i = 0; table[i].Name != NULL; ++i)
     {
         if(!hasStringAbbr(table[i].Name, cmd))
             continue;
 
-        if(m_session->GetSecurity() < table[i].SecurityLevel)
-            continue;
-
         if(table[i].ChildCommands != NULL)
         {
-            cmd = strtok(NULL, " ");
-            if(cmd && ShowHelpForCommand(table[i].ChildCommands, cmd))
+            char* subcmd = strtok(NULL, " ");
+            if(subcmd)
+            {
+                if(!ShowHelpForCommand(table[i].ChildCommands, subcmd))
+                    SendSysMessage(LANG_NO_SUBCMD);
+
                 return true;
+            }
+
+            // no help for command with subcommands, show list subcommands with permissions
+            if(table[i].Help== "")
+            {
+                std::string list;
+                for(uint32 j = 0; table[i].ChildCommands[j].Name != NULL; ++j)
+                    if(m_session->GetSecurity() >= table[i].ChildCommands[j].SecurityLevel)
+                        (list += "\r\n    ") += table[i].ChildCommands[j].Name;
+
+                if(list.empty())
+                    return false;
+
+                PSendSysMessage(LANG_SUBCMDS_LIST,cmd,list.c_str());
+                return true;
+            }
+
+            // if no permission show error
+            if(m_session->GetSecurity() < table[i].SecurityLevel)
+                return false;
+
+            // accessible command with subcommands with help
+            SendSysMultilineMessage(table[i].Help.c_str());
+            return true;
         }
+
+        // in case simple command skip to next if not permissions
+        if(m_session->GetSecurity() < table[i].SecurityLevel)
+            continue;
 
         if(table[i].Help == "")
         {

@@ -551,8 +551,10 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text)
             {
                 if(table[i].Help != "")
                     SendSysMultilineMessage(table[i].Help.c_str());
-                else
+                else if(table[i].Name != "")
                     SendSysMessage(LANG_NO_SUBCMD);
+                else
+                    SendSysMessage(LANG_CMD_SYNTAX);
             }
 
             return true;

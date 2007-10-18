@@ -96,7 +96,7 @@ void Creature::LoadTrainerSpells()
     m_trainer_type = 0;
 
     Field *fields;
-    QueryResult *result = sDatabase.PQuery("SELECT `spell`,`spellcost`,`reqskill`,`reqskillvalue`,`reqlevel` FROM `npc_trainer` WHERE `entry` = '%u'", GetCreatureInfo()->Entry);
+    QueryResult *result = sDatabase.PQuery("SELECT `spell`,`spellcost`,`reqskill`,`reqskillvalue`,`reqlevel` FROM `npc_trainer` WHERE `entry` = '%u'", GetEntry());
 
     if(!result) return;
 
@@ -109,19 +109,19 @@ void Creature::LoadTrainerSpells()
 
         if(!spellinfo)
         {
-            sLog.outErrorDb("Trainer (GUID: %u ID: %u ) have in list non existed spell %u",GetGUIDLow(),GetEntry(),spellid);
+            sLog.outErrorDb("Trainer (Entry: %u ) have in list non existed spell %u",GetGUIDLow(),GetEntry(),spellid);
             continue;
         }
 
         if(spellinfo->Effect[0]!=SPELL_EFFECT_LEARN_SPELL)
         {
-            sLog.outErrorDb("LoadTrainerSpells: Trainer(%u) has not learning spell(%u).", GetGUIDLow(), spellid);
+            sLog.outErrorDb("LoadTrainerSpells: Trainer (Entry: %u) has not learning spell(%u).", GetEntry(), spellid);
             continue;
         }
 
         if(!sSpellStore.LookupEntry(spellinfo->EffectTriggerSpell[0]))
         {
-            sLog.outError("LoadTrainerSpells: Trainer(%u) has learning spell(%u) without triggered spell (bad dbc?).", GetGUIDLow(), spellid);
+            sLog.outError("LoadTrainerSpells: Trainer (Entry: %u) has learning spell(%u) without triggered spell (bad dbc?).", GetEntry(), spellid);
             continue;
         }
 
