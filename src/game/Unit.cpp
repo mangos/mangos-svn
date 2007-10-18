@@ -7382,3 +7382,15 @@ void Unit::SendPetAIReaction(uint64 guid)
     ((Player*)owner)->GetSession()->SendPacket(&data);
 }
 ///----------End of Pet responses methods----------
+
+void Unit::StopMoving()
+{
+    clearUnitState(UNIT_STAT_MOVING);
+    // send explicit stop packet
+    SendMonsterMove(GetPositionX(), GetPositionY(), GetPositionZ(),0,true,0);
+
+    // update position and orientation;
+    WorldPacket data;
+    BuildHeartBeatMsg(&data);
+    SendMessageToSet(&data,false);
+}
