@@ -1143,7 +1143,7 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const 
     else if(data && data->equipmentId != -1)
     {                                                        // override, -1 means no equipment
         if(!LoadEquipment(data->equipmentId))
-            sLog.outErrorDb("Creature (Entry: %u) has equipment_id %u (override from creature data) not found in table `equipment`. ", data->id, data->equipmentId);
+            sLog.outErrorDb("Creature (GUID: %u Entry: %u) has equipment_id %u (override from creature data) not found in table `equipment`. ", guidlow, data->id, data->equipmentId);
     }
 
     SetName(GetCreatureInfo()->Name);
