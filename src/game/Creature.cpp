@@ -109,7 +109,7 @@ void Creature::LoadTrainerSpells()
 
         if(!spellinfo)
         {
-            sLog.outErrorDb("Trainer (Entry: %u ) have in list non existed spell %u",GetGUIDLow(),GetEntry(),spellid);
+            sLog.outErrorDb("Trainer (Entry: %u ) have in list non existed spell %u",GetEntry(),spellid);
             continue;
         }
 
