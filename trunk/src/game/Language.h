@@ -25,6 +25,7 @@
 #define LANG_NO_HELP_CMD                 "There is no help for that command"
 #define LANG_NO_CMD                      "There is no such command"
 #define LANG_NO_SUBCMD                   "There is no such subcommand"
+#define LANG_SUBCMDS_LIST                "Command %s have subcommands:%s"
 #define LANG_AVIABLE_CMD                 "Commands available to you:"
 #define LANG_CMD_SYNTAX                  "Incorrect syntax."
 #define LANG_ACCOUNT_LEVEL               "Your account level is: %i"
