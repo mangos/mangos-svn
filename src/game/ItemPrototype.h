@@ -82,13 +82,14 @@ enum ItemModType
 
 enum ItemSpelltriggerType
 {
-    ITEM_SPELLTRIGGER_ON_USE          = 0,
+    ITEM_SPELLTRIGGER_ON_USE          = 0,                  // use after equip cooldown
     ITEM_SPELLTRIGGER_ON_EQUIP        = 1,
     ITEM_SPELLTRIGGER_CHANCE_ON_HIT   = 2,
-    ITEM_SPELLTRIGGER_SOULSTONE       = 4
+    ITEM_SPELLTRIGGER_SOULSTONE       = 4,
+    ITEM_SPELLTRIGGER_ON_NO_DELAY_USE = 5                   // no equip cooldown
 };
 
-#define MAX_ITEM_SPELLTRIGGER           5
+#define MAX_ITEM_SPELLTRIGGER           6
 
 enum ItemBondingType
 {

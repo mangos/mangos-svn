@@ -112,7 +112,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
                 continue;
 
             // wrong triggering type
-            if( spellData.SpellTrigger != ITEM_SPELLTRIGGER_ON_USE )
+            if( spellData.SpellTrigger != ITEM_SPELLTRIGGER_ON_USE && spellData.SpellTrigger != ITEM_SPELLTRIGGER_ON_NO_DELAY_USE)
                 continue;
 
             SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellData.SpellId);

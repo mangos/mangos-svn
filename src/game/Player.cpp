@@ -15318,7 +15318,7 @@ void Player::ApplyEquipCooldown( Item * pItem )
         if( !spellData.SpellId )
             continue;
 
-        // wrong triggering type
+        // wrong triggering type (note: ITEM_SPELLTRIGGER_ON_NO_DELAY_USE not have cooldown)
         if( spellData.SpellTrigger != ITEM_SPELLTRIGGER_ON_USE )
             continue;
 
