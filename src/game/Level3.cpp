@@ -2590,10 +2590,26 @@ bool ChatHandler::HandleLinkGraveCommand(const char* args)
 
     Player* player = m_session->GetPlayer();
 
+    uint32 zoneId = player->GetZoneId();
+
+    AreaTableEntry const *areaEntry = GetAreaEntryByAreaID(zoneId);
+    if(!areaEntry || areaEntry->zone !=0 )
+    {
+        PSendSysMessage(LANG_COMMAND_GRAVEYARDWRONGZONE, g_id,zoneId);
+        return true;
+    }
+
+
+    if(graveyard->map_id != areaEntry->mapid && g_team != 0)
+    {
+        SendSysMessage(LANG_COMMAND_GRAVEYARDWRONGTEAM);
+        return true;
+    }
+
     if(objmgr.AddGraveYardLink(g_id,player->GetZoneId(),g_team))
-        PSendSysMessage(LANG_COMMAND_GRAVEYARDLINKED, g_id,player->GetZoneId());
+        PSendSysMessage(LANG_COMMAND_GRAVEYARDLINKED, g_id,zoneId);
     else
-        PSendSysMessage(LANG_COMMAND_GRAVEYARDALRLINKED, g_id,player->GetZoneId());
+        PSendSysMessage(LANG_COMMAND_GRAVEYARDALRLINKED, g_id,zoneId);
 
     return true;
 }

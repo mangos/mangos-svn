@@ -369,6 +369,8 @@
 #define LANG_COMMAND_GRAVEYARDNOEXIST    "Graveyard #%u doesn't exist."
 #define LANG_COMMAND_GRAVEYARDALRLINKED  "Graveyard #%u already linked to zone #%u (current)."
 #define LANG_COMMAND_GRAVEYARDLINKED     "Graveyard #%u linked to zone #%u (current)."
+#define LANG_COMMAND_GRAVEYARDWRONGZONE  "Graveyard #%u can't be linked to subzone or not existed zone #%u (internal error)."
+#define LANG_COMMAND_GRAVEYARDWRONGTEAM  "Graveyard can be linked to zone at another map only for all factions (no faction value)."
 #define LANG_COMMAND_GRAVEYARDERROR      "No faction in Graveyard with id= #%u , fix your DB"
 #define LANG_COMMAND_GRAVEYARD_NOTEAM    "invalid team, please fix database"
 #define LANG_COMMAND_GRAVEYARD_ANY       "any"
