@@ -1271,7 +1271,7 @@ bool Creature::LoadFromDB(uint32 guid, uint32 InstanceId)
         m_deathState = ALIVE;
     }
 
-    m_respawnTime  = objmgr.GetCreatureRespawnTime(stored_guid,InstanceId);
+    m_respawnTime  = objmgr.GetCreatureRespawnTime(m_DBTableGuid,GetInstanceId());
     if(m_respawnTime > time(NULL))                          // not ready to respawn
         m_deathState = DEAD;
     else if(m_respawnTime)                                  // respawn time set but expired

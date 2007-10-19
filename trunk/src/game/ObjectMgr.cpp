@@ -3577,6 +3577,12 @@ void ObjectMgr::LoadGraveyardZones()
             continue;
         }
 
+        if(entry->map_id != areaEntry->mapid && team != 0)
+        {
+            sLog.outErrorDb("Table `game_graveyard_zone` have record for ghost zone (%u) at map %u and graveyard (%u) at map %u for team %u, but in case different maps player faction setting ignored, use faction 0 instead.",zoneId,areaEntry->mapid, safeLocId, entry->map_id, team);
+            team = 0;
+        }
+
         if(!AddGraveYardLink(safeLocId,zoneId,team,false))
             sLog.outErrorDb("Table `game_graveyard_zone` have duplicate record for Garveyard (ID: %u) and Zone (ID: %u), skipped.",safeLocId,zoneId);
     } while( result->NextRow() );

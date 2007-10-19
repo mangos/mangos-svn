@@ -262,8 +262,13 @@ void GameEvent::ApplyNewEvent(uint16 event_id)
 
 void GameEvent::GameEventSpawn(int16 event_id)
 {
-    GuidList::iterator itr;
-    for (itr = mGameEventCreatureGuids[max_event_id + event_id].begin();itr != mGameEventCreatureGuids[max_event_id + event_id].end();++itr)
+    if(max_event_id + event_id >= mGameEventCreatureGuids.size())
+    {
+        sLog.outError("GameEvent::GameEventSpawn attempt access to out of range mGameEventCreatureGuids element %u (size: %u)",max_event_id + event_id,mGameEventCreatureGuids.size());
+        return;
+    }
+
+    for (GuidList::iterator itr = mGameEventCreatureGuids[max_event_id + event_id].begin();itr != mGameEventCreatureGuids[max_event_id + event_id].end();++itr)
     {
         // Add to correct cell
         CreatureData const* data = objmgr.GetCreatureData(*itr);
@@ -289,7 +294,14 @@ void GameEvent::GameEventSpawn(int16 event_id)
             }
         }
     }
-    for (itr = mGameEventGameobjectGuids[max_event_id + event_id].begin();itr != mGameEventGameobjectGuids[max_event_id + event_id].end();++itr)
+
+    if(max_event_id + event_id >= mGameEventGameobjectGuids.size())
+    {
+        sLog.outError("GameEvent::GameEventSpawn attempt access to out of range mGameEventGameobjectGuids element %u (size: %u)",max_event_id + event_id,mGameEventGameobjectGuids.size());
+        return;
+    }
+
+    for (GuidList::iterator itr = mGameEventGameobjectGuids[max_event_id + event_id].begin();itr != mGameEventGameobjectGuids[max_event_id + event_id].end();++itr)
     {
         // Add to correct cell
         GameObjectData const* data = objmgr.GetGOData(*itr);
@@ -319,8 +331,13 @@ void GameEvent::GameEventSpawn(int16 event_id)
 
 void GameEvent::GameEventUnspawn(int16 event_id)
 {
-    GuidList::iterator itr;
-    for (itr = mGameEventCreatureGuids[max_event_id + event_id].begin();itr != mGameEventCreatureGuids[event_id + max_event_id].end();++itr)
+    if(max_event_id + event_id >= mGameEventCreatureGuids.size())
+    {
+        sLog.outError("GameEvent::GameEventUnspawn attempt access to out of range mGameEventCreatureGuids element %u (size: %u)",max_event_id + event_id,mGameEventCreatureGuids.size());
+        return;
+    }
+
+    for (GuidList::iterator itr = mGameEventCreatureGuids[max_event_id + event_id].begin();itr != mGameEventCreatureGuids[event_id + max_event_id].end();++itr)
     {
         // Remove the creature from grid
         CreatureData const* data = objmgr.GetCreatureData(*itr);
@@ -335,7 +352,14 @@ void GameEvent::GameEventUnspawn(int16 event_id)
             ObjectAccessor::Instance().AddObjectToRemoveList(pCreature);
         }
     }
-    for (itr = mGameEventGameobjectGuids[max_event_id + event_id].begin();itr != mGameEventGameobjectGuids[max_event_id + event_id].end();++itr)
+
+    if(max_event_id + event_id >= mGameEventGameobjectGuids.size())
+    {
+        sLog.outError("GameEvent::GameEventUnspawn attempt access to out of range mGameEventGameobjectGuids element %u (size: %u)",max_event_id + event_id,mGameEventGameobjectGuids.size());
+        return;
+    }
+
+    for (GuidList::iterator itr = mGameEventGameobjectGuids[max_event_id + event_id].begin();itr != mGameEventGameobjectGuids[max_event_id + event_id].end();++itr)
     {
         // Remove the gameobject from grid
         GameObjectData const* data = objmgr.GetGOData(*itr);
