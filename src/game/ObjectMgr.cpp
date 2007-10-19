@@ -2161,14 +2161,31 @@ void ObjectMgr::LoadQuests()
                 {
                     sLog.outErrorDb("Quest %u has `ReqSourceId%d` = %u but `ReqSourceCount%d` = 0, quest can't be done.",
                         qinfo->GetQuestId(),j+1,id,j+1);
-                    qinfo->ReqSourceCount[j] = 0;           // prevent incorrect work of quest
+                    qinfo->ReqSourceId[j] = 0;           // prevent incorrect work of quest
+                }
+
+                if(!qinfo->ReqSourceRef[j])
+                {
+                    sLog.outErrorDb("Quest %u has `ReqSourceId%d` = %u but `ReqSourceRef%d` = 0, quest can't be done.",
+                        qinfo->GetQuestId(),j+1,id,j+1);
+                    qinfo->ReqSourceId[j] = 0;           // prevent incorrect work of quest
                 }
             }
-            else if(qinfo->ReqSourceCount[j]>0)
+            else
             {
-                sLog.outErrorDb("Quest %u has `ReqSourceId%d` = 0 but `ReqSourceCount%d` = %u.",
-                    qinfo->GetQuestId(),j+1,j+1,qinfo->ReqSourceCount[j]);
-                // no changes, quest ignore this data
+                if(qinfo->ReqSourceCount[j]>0)
+                {
+                    sLog.outErrorDb("Quest %u has `ReqSourceId%d` = 0 but `ReqSourceCount%d` = %u.",
+                        qinfo->GetQuestId(),j+1,j+1,qinfo->ReqSourceCount[j]);
+                    // no changes, quest ignore this data
+                }
+
+                if(qinfo->ReqSourceRef[j]>0)
+                {
+                    sLog.outErrorDb("Quest %u has `ReqSourceId%d` = 0 but `ReqSourceRef%d` = %u.",
+                        qinfo->GetQuestId(),j+1,j+1,qinfo->ReqSourceRef[j]);
+                    // no changes, quest ignore this data
+                }
             }
         }
 
@@ -2184,11 +2201,39 @@ void ObjectMgr::LoadQuests()
                     // no changes, quest can't be done for this requirement
                 }
                 else
-                if(qinfo->ReqSourceId[j] && !qinfo->ReqItemId[ref-1] && !qinfo->ReqSpell[ref-1])
+                if(!qinfo->ReqItemId[ref-1] && !qinfo->ReqSpell[ref-1])
                 {
                     sLog.outErrorDb("Quest %u has `ReqSourceRef%d` = %u but `ReqItemId%u` = 0 and `ReqSpellCast%u` = 0, quest can't be done.",
                         qinfo->GetQuestId(),j+1,ref,ref,ref);
                     // no changes, quest can't be done for this requirement
+                }
+                else if(qinfo->ReqItemId[ref-1] && qinfo->ReqSpell[ref-1])
+                {
+                    sLog.outErrorDb("Quest %u has `ReqItemId%u` = %u and `ReqSpellCast%u` = %u, quest can't have both fields <> 0, and can't be done.",
+                        qinfo->GetQuestId(),ref,qinfo->ReqItemId[ref-1],ref,qinfo->ReqSpell[ref-1]);
+                    // no changes, quest can't be done for this requirement
+                    qinfo->ReqSourceId[j] = 0;           // prevent incorrect work of quest
+                }
+            }
+        }
+
+        for(int j = 0; j < QUEST_OBJECTIVES_COUNT; ++j )
+        {
+            uint32 id = qinfo->ReqSpell[j];
+            if(id)
+            {
+                if(!sSpellStore.LookupEntry(id))
+                {
+                    sLog.outErrorDb("Quest %u has `ReqSpellCast%d` = %u but spell %u doesn't exist, quest can't be done.",
+                        qinfo->GetQuestId(),j+1,id,id);
+                    // no changes, quest can't be done for this requirement
+                }
+
+                if(!qinfo->ReqCreatureOrGOId[j])
+                {
+                    sLog.outErrorDb("Quest %u has `ReqSpellCast%d` = %u but `ReqCreatureOrGOId%d` = 0, quest can't be done.",
+                        qinfo->GetQuestId(),j+1,id,j+1);
+                    // no changes, quest can be incorrectly done, but we already report this
                 }
             }
         }
@@ -2196,7 +2241,7 @@ void ObjectMgr::LoadQuests()
         for(int j = 0; j < QUEST_OBJECTIVES_COUNT; ++j )
         {
             int32 id = qinfo->ReqCreatureOrGOId[j];
-            if(id < 0 && !sGOStorage.LookupEntry<GameObject>(-id))
+            if(id < 0 && !sGOStorage.LookupEntry<GameObjectInfo>(-id))
             {
                 sLog.outErrorDb("Quest %u has `ReqCreatureOrGOId%d` = %i but gameobject %u doesn't exist, quest can't be done.",
                     qinfo->GetQuestId(),j+1,id,uint32(-id));
@@ -2231,17 +2276,6 @@ void ObjectMgr::LoadQuests()
                 sLog.outErrorDb("Quest %u has `ReqCreatureOrGOId%d` = 0 but `ReqCreatureOrGOCount%d` = %u.",
                     qinfo->GetQuestId(),j+1,j+1,qinfo->ReqCreatureOrGOCount[j]);
                 // no changes, quest ignore this data
-            }
-        }
-
-        for(int j = 0; j < QUEST_OBJECTIVES_COUNT; ++j )
-        {
-            uint32 id = qinfo->ReqSpell[j];
-            if(id && !sSpellStore.LookupEntry(id))
-            {
-                sLog.outErrorDb("Quest %u has `ReqSpellCast%d` = %u but spell %u doesn't exist, quest can't be done.",
-                    qinfo->GetQuestId(),j+1,id,id);
-                // no changes, quest can't be done for this requirement
             }
         }
 

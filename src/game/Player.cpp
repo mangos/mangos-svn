@@ -11763,6 +11763,7 @@ bool Player::HasQuestForItem( uint32 itemid )
                 if (qinfo->ReqSourceId[j] == itemid && qinfo->ReqSourceRef[j] > 0 && qinfo->ReqSourceRef[j] <= QUEST_OBJECTIVES_COUNT)
                 {
                     uint32 idx = qinfo->ReqSourceRef[j]-1;
+
                     // total count of created ReqItems and SourceItems is less than ReqItemCount
                     if(qinfo->ReqItemId[idx] != 0 &&
                         qs.m_itemcount[idx] * qinfo->ReqSourceCount[j] + GetItemCount(itemid) + GetBankItemCount(itemid) < qinfo->ReqItemCount[idx] * qinfo->ReqSourceCount[j])
