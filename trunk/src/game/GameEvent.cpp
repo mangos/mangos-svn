@@ -140,9 +140,16 @@ void GameEvent::LoadFromDB()
 
             bar2.step();
 
-            uint32 guid = fields[0].GetUInt32();
+            uint32 guid     = fields[0].GetUInt32();
+            uint32 event_id = fields[1].GetInt16();
 
-            GuidList& crelist = mGameEventCreatureGuids[max_event_id + fields[1].GetInt16()];
+            if(max_event_id + event_id >= mGameEventCreatureGuids.size())
+            {
+                sLog.outErrorDb("`game_event_creature` game event id (%u) that out of range max event id in `game_event`",event_id);
+                continue;
+            }
+
+            GuidList& crelist = mGameEventCreatureGuids[max_event_id + event_id];
             crelist.push_back(guid);
 
         } while( result->NextRow() );
@@ -176,9 +183,17 @@ void GameEvent::LoadFromDB()
 
             bar3.step();
 
-            uint32 guid = fields[0].GetUInt32();
+            uint32 guid     = fields[0].GetUInt32();
+            uint32 event_id = fields[1].GetInt16();
 
-            GuidList& golist = mGameEventGameobjectGuids[max_event_id + fields[1].GetInt16()];
+            if(max_event_id + event_id >= mGameEventGameobjectGuids.size())
+            {
+                sLog.outErrorDb("`game_event_gameobject` game event id (%u) that out of range max event id in `game_event`",event_id);
+                continue;
+            }
+
+
+            GuidList& golist = mGameEventGameobjectGuids[max_event_id + event_id];
             golist.push_back(guid);
 
         } while( result->NextRow() );
