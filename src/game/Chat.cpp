@@ -567,7 +567,7 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text)
         // table[i].Name == "" is special case: send original command to handler
         if((this->*(table[i].Handler))(strlen(table[i].Name)!=0 ? text : oldtext))
         {
-            if(table[i].SecurityLevel > 0)
+            if(table[i].SecurityLevel > SEC_PLAYER)
             {
                 Player* p = m_session->GetPlayer();
                 uint64 sel_guid = p->GetSelection();
