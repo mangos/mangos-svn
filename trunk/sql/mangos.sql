@@ -297,8 +297,8 @@ CREATE TABLE `character` (
   `cinematic` tinyint(3) unsigned NOT NULL default '0',
   `totaltime` int(11) unsigned NOT NULL default '0',
   `leveltime` int(11) unsigned NOT NULL default '0',
-  `logout_time` int(11) NOT NULL default '0',
-  `is_logout_resting` tinyint(3) NOT NULL default '0',
+  `logout_time` int(11) unsigned NOT NULL default '0',
+  `is_logout_resting` tinyint(3) unsigned NOT NULL default '0',
   `rest_bonus` float NOT NULL default '0',
   `resettalents_cost` int(11) unsigned NOT NULL default '0',
   `resettalents_time` bigint(20) unsigned NOT NULL default '0',
@@ -479,9 +479,9 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `character_kill`;
 CREATE TABLE `character_kill` (
-  `guid` int(11) NOT NULL default '0',
-  `victim_guid` int(11) NOT NULL default '0',
-  `count` tinyint(3) NOT NULL default '0',
+  `guid` int(11) unsigned NOT NULL default '0',
+  `victim_guid` int(11) unsigned NOT NULL default '0',
+  `count` tinyint(3) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`,`victim_guid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 COMMENT='Kills Yesterday';
 
@@ -686,7 +686,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `character_ticket`;
 CREATE TABLE `character_ticket` (
-  `ticket_id` int(11) NOT NULL auto_increment,
+  `ticket_id` int(11) unsigned NOT NULL auto_increment,
   `guid` int(11) unsigned NOT NULL default '0',
   `ticket_text` text,
   `ticket_category` int(1) NOT NULL default '0',
@@ -1840,21 +1840,21 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `group`;
 CREATE TABLE `group` (
-  `leaderGuid` int(20) NOT NULL,
-  `mainTank` int(20) NOT NULL,
-  `mainAssistant` int(20) NOT NULL,
-  `lootMethod` tinyint(4) NOT NULL,
-  `looterGuid` int(20) NOT NULL,
-  `lootThreshold` tinyint(4) NOT NULL,
-  `icon1` bigint(20) NOT NULL,
-  `icon2` bigint(20) NOT NULL,
-  `icon3` bigint(20) NOT NULL,
-  `icon4` bigint(20) NOT NULL,
-  `icon5` bigint(20) NOT NULL,
-  `icon6` bigint(20) NOT NULL,
-  `icon7` bigint(20) NOT NULL,
-  `icon8` bigint(20) NOT NULL,
-  `isRaid` tinyint(1) NOT NULL,
+  `leaderGuid` int(11) unsigned NOT NULL,
+  `mainTank` int(11) unsigned NOT NULL,
+  `mainAssistant` int(11) unsigned NOT NULL,
+  `lootMethod` tinyint(4) unsigned NOT NULL,
+  `looterGuid` int(11) unsigned NOT NULL,
+  `lootThreshold` tinyint(4) unsigned NOT NULL,
+  `icon1` int(11) unsigned NOT NULL,
+  `icon2` int(11) unsigned NOT NULL,
+  `icon3` int(11) unsigned NOT NULL,
+  `icon4` int(11) unsigned NOT NULL,
+  `icon5` int(11) unsigned NOT NULL,
+  `icon6` int(11) unsigned NOT NULL,
+  `icon7` int(11) unsigned NOT NULL,
+  `icon8` int(11) unsigned NOT NULL,
+  `isRaid` tinyint(1) unsigned NOT NULL,
   PRIMARY KEY  (`leaderGuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Groups';
 
@@ -1873,10 +1873,10 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `group_member`;
 CREATE TABLE `group_member` (
-  `leaderGuid` int(20) NOT NULL,
-  `memberGuid` int(20) NOT NULL,
-  `assistant` tinyint(1) NOT NULL,
-  `subgroup` smallint(6) NOT NULL,
+  `leaderGuid` int(11) unsigned NOT NULL,
+  `memberGuid` int(11) unsigned NOT NULL,
+  `assistant` tinyint(1) unsigned NOT NULL,
+  `subgroup` smallint(6) unsigned NOT NULL,
   PRIMARY KEY  (`leaderGuid`,`memberGuid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Groups';
 
@@ -1925,7 +1925,7 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `guild_member`;
 CREATE TABLE `guild_member` (
   `guildid` int(6) unsigned NOT NULL default '0',
-  `guid` int(6) NOT NULL default '0',
+  `guid` int(11) unsigned NOT NULL default '0',
   `rank` tinyint(2) unsigned NOT NULL default '0',
   `Pnote` varchar(255) NOT NULL default '',
   `OFFnote` varchar(255) NOT NULL default ''
@@ -2348,7 +2348,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `item_text`;
 CREATE TABLE `item_text` (
-  `id` int(11) NOT NULL default '0',
+  `id` int(11) unsigned NOT NULL default '0',
   `text` longtext,
   PRIMARY KEY  (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Item System';
@@ -2739,11 +2739,11 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `npc_gossip`;
 CREATE TABLE `npc_gossip` (
-  `id` int(11) NOT NULL default '0',
-  `npc_guid` int(11) NOT NULL default '0',
-  `gossip_type` int(11) NOT NULL default '0',
-  `textid` int(30) NOT NULL default '0',
-  `option_count` int(30) default NULL,
+  `id` int(11) unsigned NOT NULL default '0',
+  `npc_guid` int(11) unsigned NOT NULL default '0',
+  `gossip_type` int(11) unsigned NOT NULL default '0',
+  `textid` int(11) unsigned NOT NULL default '0',
+  `option_count` int(11) unsigned default NULL,
   PRIMARY KEY  (`id`,`npc_guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -2807,7 +2807,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `npc_text`;
 CREATE TABLE `npc_text` (
-  `ID` int(11) NOT NULL default '0',
+  `ID` int(11) unsigned NOT NULL default '0',
   `text0_0` longtext,
   `text0_1` longtext,
   `lang0` bigint(20) unsigned NOT NULL default '0',
@@ -2906,9 +2906,9 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `npc_trainer`;
 CREATE TABLE `npc_trainer` (
-  `entry` int(11) NOT NULL default '0',
-  `spell` int(11) NOT NULL default '0',
-  `spellcost` int(11) default '0',
+  `entry` int(11) unsigned NOT NULL default '0',
+  `spell` int(11) unsigned NOT NULL default '0',
+  `spellcost` int(11) unsigned default '0',
   `reqskill` int(11) unsigned default '0',
   `reqskillvalue` int(11) unsigned default '0',
   `reqlevel` int(11) unsigned default '0',
@@ -2952,7 +2952,7 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `page_text`;
 CREATE TABLE `page_text` (
-  `entry` int(11) NOT NULL default '0',
+  `entry` int(11) unsigned NOT NULL default '0',
   `text` longtext,
   `next_page` bigint(20) unsigned NOT NULL default '0',
   PRIMARY KEY  (`entry`)
@@ -3027,9 +3027,9 @@ UNLOCK TABLES;
 
 DROP TABLE IF EXISTS `pet_name_generation`;
 CREATE TABLE `pet_name_generation` (
-  `id` int(11) NOT NULL auto_increment,
+  `id` int(11) unsigned NOT NULL auto_increment,
   `word` tinytext NOT NULL,
-  `entry` int(11) NOT NULL default '0',
+  `entry` int(11) unsigned NOT NULL default '0',
   `half` int(11) NOT NULL default '0',
   PRIMARY KEY  (`id`)
 ) ENGINE=MyISAM AUTO_INCREMENT=199 DEFAULT CHARSET=utf8;
@@ -10303,16 +10303,16 @@ CREATE TABLE `quest_template` (
   `PointX` float NOT NULL default '0',
   `PointY` float NOT NULL default '0',
   `PointOpt` int(2) unsigned NOT NULL default '0',
-  `DetailsEmote1` int(11) NOT NULL default '0',
-  `DetailsEmote2` int(11) NOT NULL default '0',
-  `DetailsEmote3` int(11) NOT NULL default '0',
-  `DetailsEmote4` int(11) NOT NULL default '0',
+  `DetailsEmote1` int(11) unsigned NOT NULL default '0',
+  `DetailsEmote2` int(11) unsigned NOT NULL default '0',
+  `DetailsEmote3` int(11) unsigned NOT NULL default '0',
+  `DetailsEmote4` int(11) unsigned NOT NULL default '0',
   `IncompleteEmote` int(11) unsigned NOT NULL default '0',
-  `CompleteEmote` int(11) unsigned NOT NULL default '1',
-  `OfferRewardEmote1` int(11) NOT NULL default '0',
-  `OfferRewardEmote2` int(11) NOT NULL default '0',
-  `OfferRewardEmote3` int(11) NOT NULL default '0',
-  `OfferRewardEmote4` int(11) NOT NULL default '0',
+  `CompleteEmote` int(11) unsigned NOT NULL default '0',
+  `OfferRewardEmote1` int(11) unsigned NOT NULL default '0',
+  `OfferRewardEmote2` int(11) unsigned NOT NULL default '0',
+  `OfferRewardEmote3` int(11) unsigned NOT NULL default '0',
+  `OfferRewardEmote4` int(11) unsigned NOT NULL default '0',
   `StartScript` int(11) unsigned NOT NULL default '0',
   `CompleteScript` int(11) unsigned NOT NULL default '0',
   `Repeatable` tinyint(1) unsigned NOT NULL default '0',
