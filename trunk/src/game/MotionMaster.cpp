@@ -128,7 +128,7 @@ MotionMaster::TargetedHome()
 
 void MotionMaster::Idle(void)
 {
-    if( !isStatic( top() ) )
+    if( empty() || !isStatic( top() ) )
         push( &si_idleMovement );
 }
 
