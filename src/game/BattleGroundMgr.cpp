@@ -327,12 +327,15 @@ void BattleGroundQueue::Update(uint32 bgTypeId, uint32 queue_id)
 bool BGQueueInviteEvent::Execute(uint64 /*e_time*/, uint32 p_time)
 {
     Player* plr = objmgr.GetPlayer( m_PlayerGuid );
+
+    // player logged off (we should do nothing, he is correctly removed from queue in another procedure)
     if (!plr)
-        // player logged off (we should do nothing, he is correctly removed from queue in another procedure)
         return true;
+
+    // player is already in battleground ... do nothing (battleground queue status is deleted when player is teleported to BG)
     if (plr->GetBattleGroundId() > 0)
-        // player is already in battleground ... do nothing (battleground queue status is deleted when player is teleported to BG)
         return true;
+
     BattleGround* bg = sBattleGroundMgr.GetBattleGround(m_BgInstanceGUID);
     if (bg)
     {
@@ -340,7 +343,9 @@ bool BGQueueInviteEvent::Execute(uint64 /*e_time*/, uint32 p_time)
         if (queueSlot < PLAYER_MAX_BATTLEGROUND_QUEUES) // player is in queue
         {
             // check if player is invited to this bg ... this check must be here, because when player leaves queue and joins another, it would cause a problems
-            if (sBattleGroundMgr.m_BattleGroundQueues[bg->GetTypeID()].m_QueuedPlayers[bg->GetQueueType()].find(m_PlayerGuid)->second.IsInvitedToBGInstanceGUID == m_BgInstanceGUID)
+            BattleGroundQueue::QueuedPlayersMap const& qpMap = sBattleGroundMgr.m_BattleGroundQueues[bg->GetTypeID()].m_QueuedPlayers[bg->GetQueueType()];
+            BattleGroundQueue::QueuedPlayersMap::const_iterator qItr = qpMap.find(m_PlayerGuid);
+            if (qItr != qpMap.end() && qItr->second.IsInvitedToBGInstanceGUID == m_BgInstanceGUID)
             {
                 WorldPacket data;
                 sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, bg, plr->GetTeam(), queueSlot, STATUS_WAIT_JOIN, BG_REMIND_INVITE_TIME, 0);

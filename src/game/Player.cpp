@@ -9993,7 +9993,7 @@ void Player::TradeCancel(bool sendback)
         WorldSession* ws = pTrader->GetSession();
         pTrader = NULL;
 
-        if(ws)
+        if(ws && !ws->PlayerLogout())
             ws->SendCancelTrade();
     }
     ClearTrade();
