@@ -974,4 +974,5 @@ EXTRA_DIST = \
 	4605_creature_template_addon.sql \
 	4608_game_graveyard_zone.sql \
 	4615_creature_template.sql \
+	4627_game_event_model_equip.sql \
 	README

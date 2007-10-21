@@ -922,7 +922,7 @@ void Creature::SetLootRecipient(Player *player)
 void Creature::SaveToDB()
 {
     // update in loaded data
-    CreatureData& data = objmgr.NewCreatureData(m_DBTableGuid);
+    CreatureData& data = objmgr.NewOrExistCreatureData(m_DBTableGuid);
 
     uint32 displayId = GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID);
 
@@ -1109,16 +1109,7 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const 
 
     m_regenHealth = (cinfo->RegenHealth != 0);
 
-    // Load creature model (display id)
-    uint32 display_id;
-    if (!data || data->displayid == 0)                      // use defaults from the template
-        // DisplayID_A is used if no team is given
-        if (team == HORDE)
-            display_id = (cinfo->DisplayID_H2 != 0 && urand(0,1) == 0) ? cinfo->DisplayID_H2 : cinfo->DisplayID_H;
-        else
-            display_id = (cinfo->DisplayID_A2 != 0 && urand(0,1) == 0) ? cinfo->DisplayID_A2 : cinfo->DisplayID_A;
-    else                                                    // overriden in creature data
-        display_id = data->displayid;
+    uint32 display_id = objmgr.ChooseDisplayId(team,cinfo,data);
 
     CreatureModelInfo const *minfo = objmgr.GetCreatureModelRandomGender(display_id);
     if (!minfo)
@@ -1133,6 +1124,9 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const 
     SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, display_id);
     SetUInt32Value(UNIT_FIELD_BYTES_2, 1);                  // let creature use equiped weapon in fight
     SetUInt32Value(UNIT_FIELD_BYTES_0, ( minfo->gender << 16 ));
+
+    SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,minfo->bounding_radius);
+    SetFloatValue(UNIT_FIELD_COMBATREACH,minfo->combat_reach );
 
     // Load creature equipment
     if(!data || data->equipmentId == 0)
@@ -1176,9 +1170,6 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const 
 
     CreatureDisplayInfoEntry const* ScaleEntry = sCreatureDisplayInfoStore.LookupEntry(display_id);
     SetFloatValue(OBJECT_FIELD_SCALE_X, ScaleEntry ? ScaleEntry->scale : 1);
-
-    SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,minfo->bounding_radius);
-    SetFloatValue(UNIT_FIELD_COMBATREACH,minfo->combat_reach );
 
     FactionTemplateEntry const* factionTemplate = sFactionTemplateStore.LookupEntry(cinfo->faction_A);
     if (factionTemplate)                                    // check and error show at loading templates
@@ -1315,10 +1306,22 @@ bool Creature::LoadFromDB(uint32 guid, uint32 InstanceId)
     return true;
 }
 
-bool Creature::LoadEquipment(uint32 equip_entry)
+bool Creature::LoadEquipment(uint32 equip_entry, bool force)
 {
     if(equip_entry == 0)
+    {
+        if (force)
+        {
+            for (uint8 i=0;i<3;i++)
+            {
+                SetUInt32Value( UNIT_VIRTUAL_ITEM_SLOT_DISPLAY + i, 0);
+                SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + (i * 2), 0);
+                SetUInt32Value( UNIT_VIRTUAL_ITEM_INFO + (i * 2) + 1, 0);
+            }
+            m_equipmentId = 0;
+        }
         return true;
+    }
 
     EquipmentInfo const *einfo = objmgr.GetEquipmentInfo(equip_entry);
     if (!einfo)
