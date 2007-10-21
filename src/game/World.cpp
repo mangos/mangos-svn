@@ -461,6 +461,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "WORLD: VMap data directory is: %svmaps",m_dataPath.c_str());
     sLog.outString( "WORLD: VMap config keys are: vmap.enableLOS, vmap.enableHeight, vmap.ignoreMapIds, vmap.ignoreSpellIds");
 
+    ///- Init highest guids before any table loading to prevent using not initialized guids in some code.
+    objmgr.SetHighestGuids();
+
     ///- Check the existence of the map files for all races' startup areas.
     if(   !MapManager::ExistMapAndVMap(0,-6240.32, 331.033)
         ||!MapManager::ExistMapAndVMap(0,-8949.95,-132.493)
@@ -640,8 +643,6 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "Loading ReservedNames..." );
     objmgr.LoadReservedPlayersNames();
-
-    objmgr.SetHighestGuids();
 
     ///- Handle outdated emails (delete/return)
     sLog.outString( "Returning old mails..." );
