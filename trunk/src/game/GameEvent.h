@@ -34,6 +34,14 @@ struct GameEventData
     std::string description;
 };
 
+struct ModelEquip
+{
+    uint32 modelid;
+    uint32 equipment_id;
+    uint32 modelid_prev;
+    uint32 equipement_id_prev;
+};
+
 class GameEvent
 {
     public:
@@ -53,11 +61,16 @@ class GameEvent
         void UnApplyEvent(uint16 event_id);
         void GameEventSpawn(int16 event_id);
         void GameEventUnspawn(int16 event_id);
+        void ChangeEquipOrModel(int16 event_id, bool activate);
         uint32 NextCheck(uint16 entry);
     protected:
         typedef std::vector<GameEventData> GameEventDataMap;
         typedef std::list<uint32> GuidList;
         typedef std::vector<GuidList> GameEventGuidMap;
+        typedef std::pair<uint32, ModelEquip> ModelEquipPair;
+        typedef std::list<ModelEquipPair> ModelEquipList;
+        typedef std::vector<ModelEquipList> GameEventModelEquipMap;
+        GameEventModelEquipMap mGameEventModelEquip;
         GameEventGuidMap  mGameEventCreatureGuids;
         GameEventGuidMap  mGameEventGameobjectGuids;
         GameEventDataMap  mGameEvent;

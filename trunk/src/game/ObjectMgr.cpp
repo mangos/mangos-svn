@@ -543,6 +543,22 @@ CreatureModelInfo const* ObjectMgr::GetCreatureModelInfo(uint32 modelid)
     return sCreatureModelStorage.LookupEntry<CreatureModelInfo>(modelid);
 }
 
+uint32 ObjectMgr::ChooseDisplayId(uint32 team, const CreatureInfo *cinfo, const CreatureData *data)
+{
+    // Load creature model (display id)
+    uint32 display_id;
+    if (!data || data->displayid == 0)                      // use defaults from the template
+        // DisplayID_A is used if no team is given
+        if (team == HORDE)
+            display_id = (cinfo->DisplayID_H2 != 0 && urand(0,1) == 0) ? cinfo->DisplayID_H2 : cinfo->DisplayID_H;
+        else
+            display_id = (cinfo->DisplayID_A2 != 0 && urand(0,1) == 0) ? cinfo->DisplayID_A2 : cinfo->DisplayID_A;
+    else                                                    // overriden in creature data
+        display_id = data->displayid;
+
+    return display_id;
+}
+
 CreatureModelInfo const* ObjectMgr::GetCreatureModelRandomGender(uint32 display_id)
 {
     CreatureModelInfo const *minfo = GetCreatureModelInfo(display_id);

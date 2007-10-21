@@ -263,6 +263,7 @@ class ObjectMgr
         CreatureInfo const *GetCreatureTemplate( uint32 id );
         CreatureModelInfo const *GetCreatureModelInfo( uint32 modelid );
         CreatureModelInfo const* GetCreatureModelRandomGender(uint32 display_id);
+        uint32 ChooseDisplayId(uint32 team, const CreatureInfo *cinfo, const CreatureData *data);
         EquipmentInfo const *GetEquipmentInfo( uint32 entry );
         static CreatureDataAddon const *GetCreatureAddon( uint32 lowguid )
         {
@@ -636,9 +637,8 @@ class ObjectMgr
             if(itr==mCreatureDataMap.end()) return NULL;
             return &itr->second;
         }
-        CreatureData& NewCreatureData(uint32 guid) { return mCreatureDataMap[guid]; }
+        CreatureData& NewOrExistCreatureData(uint32 guid) { return mCreatureDataMap[guid]; }
         void DeleteCreatureData(uint32 guid);
-
         CreatureLocale const* GetCreatureLocale(uint32 entry) const
         {
             CreatureLocaleMap::const_iterator itr = mCreatureLocaleMap.find(entry);

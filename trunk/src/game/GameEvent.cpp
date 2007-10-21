@@ -135,20 +135,20 @@ void GameEvent::LoadFromDB()
         barGoLink bar2( result->GetRowCount() );
         do
         {
-            count++;
             Field *fields = result->Fetch();
 
             bar2.step();
 
-            uint32 guid     = fields[0].GetUInt32();
-            uint32 event_id = fields[1].GetInt16();
+            uint32 guid    = fields[0].GetUInt32();
+            int16 event_id = fields[1].GetInt16();
 
             if(max_event_id + event_id >= mGameEventCreatureGuids.size())
             {
-                sLog.outErrorDb("`game_event_creature` game event id (%u) that out of range max event id in `game_event`",event_id);
+                sLog.outErrorDb("`game_event_creature` game event id (%i) that out of range max event id in `game_event`",event_id);
                 continue;
             }
 
+            count++;
             GuidList& crelist = mGameEventCreatureGuids[max_event_id + event_id];
             crelist.push_back(guid);
 
@@ -178,27 +178,76 @@ void GameEvent::LoadFromDB()
         barGoLink bar3( result->GetRowCount() );
         do
         {
-            count++;
             Field *fields = result->Fetch();
 
             bar3.step();
 
-            uint32 guid     = fields[0].GetUInt32();
-            uint32 event_id = fields[1].GetInt16();
+            uint32 guid    = fields[0].GetUInt32();
+            int16 event_id = fields[1].GetInt16();
 
             if(max_event_id + event_id >= mGameEventGameobjectGuids.size())
             {
-                sLog.outErrorDb("`game_event_gameobject` game event id (%u) that out of range max event id in `game_event`",event_id);
+                sLog.outErrorDb("`game_event_gameobject` game event id (%i) that out of range max event id in `game_event`",event_id);
                 continue;
             }
 
-
+            count++;
             GuidList& golist = mGameEventGameobjectGuids[max_event_id + event_id];
             golist.push_back(guid);
 
         } while( result->NextRow() );
         sLog.outString();
         sLog.outString( ">> Loaded %u gameobjects in game events", count );
+
+        delete result;
+    }
+
+    mGameEventModelEquip.resize(max_event_id + 1);
+    //                               0                 1                                2
+    result = sDatabase.Query("SELECT `creature`.`guid`,`game_event_model_equip`.`event`,`game_event_model_equip`.`modelid`,"
+    //   3
+        "`game_event_model_equip`.`equipment_id` "
+        "FROM `creature` JOIN `game_event_model_equip` ON `creature`.`guid`=`game_event_model_equip`.`guid`");
+
+    count = 0;
+    if( !result )
+    {
+        barGoLink bar3(1);
+        bar3.step();
+
+        sLog.outString();
+        sLog.outErrorDb(">> Loaded %u model/equipment changes in game events", count );
+    }
+    else
+    {
+
+        barGoLink bar3( result->GetRowCount() );
+        do
+        {
+            Field *fields = result->Fetch();
+
+            bar3.step();
+            uint32 guid     = fields[0].GetUInt32();
+            uint16 event_id = fields[1].GetUInt16();
+
+            if(event_id >= mGameEventModelEquip.size())
+            {
+                sLog.outErrorDb("`game_event_game_event_model_equip` game event id (%u) that out of range max event id in `game_event`",event_id);
+                continue;
+            }
+
+            count++;
+            ModelEquipList& equiplist = mGameEventModelEquip[event_id];
+            ModelEquip newModelEquipSet;
+            newModelEquipSet.modelid = fields[2].GetUInt32();
+            newModelEquipSet.equipment_id = fields[3].GetUInt32();
+            newModelEquipSet.equipement_id_prev = 0;
+            newModelEquipSet.modelid_prev = 0;
+            equiplist.push_back(std::pair<uint32, ModelEquip>(guid, newModelEquipSet));
+
+        } while( result->NextRow() );
+        sLog.outString();
+        sLog.outString( ">> Loaded %u model/equipment changes in game events", count );
 
         delete result;
     }
@@ -263,6 +312,8 @@ void GameEvent::UnApplyEvent(uint16 event_id)
     // spawn negative event tagget objects
     int16 event_nid = (-1) * event_id;
     GameEventSpawn(event_nid);
+    // restore equipment or model
+    ChangeEquipOrModel(event_id, false);
 }
 
 void GameEvent::ApplyNewEvent(uint16 event_id)
@@ -273,6 +324,8 @@ void GameEvent::ApplyNewEvent(uint16 event_id)
     // un-spawn negative event tagged objects
     int16 event_nid = (-1) * event_id;
     GameEventUnspawn(event_nid);
+    // Change equipement or model
+    ChangeEquipOrModel(event_id, true);
 }
 
 void GameEvent::GameEventSpawn(int16 event_id)
@@ -386,6 +439,81 @@ void GameEvent::GameEventUnspawn(int16 event_id)
         if (pGameobject)
         {
             ObjectAccessor::Instance().AddObjectToRemoveList(pGameobject);
+        }
+    }
+}
+
+void GameEvent::ChangeEquipOrModel(int16 event_id, bool activate)
+{
+    ModelEquipList::iterator itr;
+    for (itr = mGameEventModelEquip[event_id].begin();itr != mGameEventModelEquip[event_id].end();++itr)
+    {
+        // Update if spawned
+        Creature* pCreature;
+        pCreature = ObjectAccessor::Instance().GetObjectInWorld(MAKE_GUID(itr->first, HIGHGUID_UNIT), (Creature*)NULL);
+        if (pCreature)
+        {
+            if (activate)
+            {
+                itr->second.equipement_id_prev = pCreature->GetCurrentEquipmentId();
+                itr->second.modelid_prev = pCreature->GetCurrentModelId();
+                pCreature->LoadEquipment(itr->second.equipment_id, true);
+                if (itr->second.modelid >0 && itr->second.modelid_prev != itr->second.modelid)
+                {
+                    CreatureModelInfo const *minfo = objmgr.GetCreatureModelInfo(itr->second.modelid);
+                    if (minfo)
+                    {
+                        pCreature->SetUInt32Value(UNIT_FIELD_DISPLAYID, itr->second.modelid);
+                        pCreature->SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, itr->second.modelid);
+                        pCreature->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,minfo->bounding_radius);
+                        pCreature->SetFloatValue(UNIT_FIELD_COMBATREACH,minfo->combat_reach );
+                    }
+                }
+            }
+            else
+            {
+                pCreature->LoadEquipment(itr->second.equipement_id_prev, true);
+                if (itr->second.modelid_prev >0 && itr->second.modelid_prev != itr->second.modelid)
+                {
+                    CreatureModelInfo const *minfo = objmgr.GetCreatureModelInfo(itr->second.modelid_prev);
+                    if (minfo)
+                    {
+                        pCreature->SetUInt32Value(UNIT_FIELD_DISPLAYID,itr->second.modelid_prev);
+                        pCreature->SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, itr->second.modelid_prev);
+                        pCreature->SetFloatValue(UNIT_FIELD_BOUNDINGRADIUS,minfo->bounding_radius);
+                        pCreature->SetFloatValue(UNIT_FIELD_COMBATREACH,minfo->combat_reach );
+                    }
+                }
+            }
+        } 
+        else // If not spawned
+        {
+            CreatureData const* data = objmgr.GetCreatureData(itr->first);
+            if (data && activate)
+            {
+                CreatureInfo const *cinfo = objmgr.GetCreatureTemplate(data->id);
+                uint32 display_id = objmgr.ChooseDisplayId(0,cinfo,data);
+                CreatureModelInfo const *minfo = objmgr.GetCreatureModelRandomGender(display_id);
+                if (minfo)
+                    display_id = minfo->modelid;
+                if (data->equipmentId == 0)
+                    itr->second.equipement_id_prev = cinfo->equipmentId;
+                else if (data->equipmentId != -1)
+                    itr->second.equipement_id_prev = data->equipmentId;
+                itr->second.modelid_prev = display_id;
+            }
+        }
+        // now last step: put in data 
+        CreatureData& data2 = objmgr.NewOrExistCreatureData(itr->first); // just to have write access to it
+        if (activate)
+        {
+            data2.displayid = itr->second.modelid;
+            data2.equipmentId = itr->second.equipment_id;
+        }
+        else
+        {
+            data2.displayid = itr->second.modelid_prev;
+            data2.equipmentId = itr->second.equipement_id_prev;
         }
     }
 }

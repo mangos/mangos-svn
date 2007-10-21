@@ -806,7 +806,7 @@ bool BattleGround::AddSpiritGuide(float x, float y, float z, float o, uint32 tea
 
     uint32 guid = objmgr.GenerateLowGuid(HIGHGUID_UNIT);
 
-    CreatureData& data = objmgr.NewCreatureData(guid);
+    CreatureData& data = objmgr.NewOrExistCreatureData(guid);
 
     data.id             = entry;
     data.mapid          = GetMapId();
