@@ -178,7 +178,9 @@ QueryResult* DatabaseMysql::Query(const char *sql)
     {
         // guarded block for thread-safe mySQL request
         ZThread::Guard<ZThread::FastMutex> query_connection_guard(mMutex);
-
+#ifdef MANGOS_DEBUG
+        uint32 _s = ::GetTickCount();
+#endif
         if(mysql_query(mMysql, sql))
         {
             sLog.outErrorDb( "SQL: %s", sql );
@@ -187,7 +189,7 @@ QueryResult* DatabaseMysql::Query(const char *sql)
         }
         else
         {
-            DEBUG_LOG( "SQL: %s", sql );
+            DEBUG_LOG("[%u ms] SQL: %s", ::GetTickCount() - _s, sql );
         }
 
         result = mysql_store_result(mMysql);
@@ -244,7 +246,9 @@ bool DatabaseMysql::DirectExecute(const char* sql)
     {
         // guarded block for thread-safe mySQL request
         ZThread::Guard<ZThread::FastMutex> query_connection_guard(mMutex);
-
+#ifdef MANGOS_DEBUG
+        uint32 _s = ::GetTickCount();
+#endif
         if(mysql_query(mMysql, sql))
         {
             sLog.outErrorDb("SQL: %s", sql);
@@ -253,7 +257,7 @@ bool DatabaseMysql::DirectExecute(const char* sql)
         }
         else
         {
-            DEBUG_LOG("SQL: %s", sql);
+            DEBUG_LOG("[%u ms] SQL: %s", ::GetTickCount() - _s, sql );
         }
         // end guarded block
     }

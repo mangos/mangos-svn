@@ -105,7 +105,9 @@ QueryResult* DatabasePostgre::Query(const char *sql)
 
     // guarded block for thread-safe mySQL request
     ZThread::Guard<ZThread::FastMutex> query_connection_guard((ZThread::ThreadImpl::current()==tranThread?tranMutex:mMutex));
-
+#ifdef MANGOS_DEBUG
+        uint32 _s = ::GetTickCount();
+#endif
     // Send the query
     PGresult * result = PQexec(mPGconn, sql);
 
@@ -118,7 +120,7 @@ QueryResult* DatabasePostgre::Query(const char *sql)
     }
     else
     {
-        DEBUG_LOG( "SQL: %s", sql );
+        DEBUG_LOG("[%u ms] SQL: %s", ::GetTickCount() - _s, sql ); 
     }
 
     rowCount = PQntuples(result);
@@ -153,7 +155,9 @@ bool DatabasePostgre::Execute(const char *sql)
     {
         // guarded block for thread-safe mySQL request
         ZThread::Guard<ZThread::FastMutex> query_connection_guard((ZThread::ThreadImpl::current()==tranThread?tranMutex:mMutex));
-
+#ifdef MANGOS_DEBUG
+        uint32 _s = ::GetTickCount();
+#endif
         PGresult *res = PQexec(mPGconn, sql);
         if (PQresultStatus(res) != PGRES_COMMAND_OK)
         {
@@ -163,7 +167,7 @@ bool DatabasePostgre::Execute(const char *sql)
         }
         else
         {
-            DEBUG_LOG("SQL: %s", sql);
+            DEBUG_LOG("[%u ms] SQL: %s", _s = ::GetTickCount() - _s, sql );
         }
         PQclear(res);
 
