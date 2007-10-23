@@ -70,6 +70,9 @@ DatabaseMysql::~DatabaseMysql()
 
 bool DatabaseMysql::Initialize(const char *infoString)
 {
+
+    sLog.outString( "MySQL client library: %s\r\n", mysql_get_client_info());
+
     if(!Database::Initialize(infoString))
         return false;
 
@@ -106,7 +109,7 @@ bool DatabaseMysql::Initialize(const char *infoString)
         database = *iter++;
 
     mysql_options(mysqlInit,MYSQL_SET_CHARSET_NAME,"utf8");
-    #ifdef WIN32
+#ifdef WIN32
     if(host==".")                                           // named pipe use option (Windows)
     {
         unsigned int opt = MYSQL_PROTOCOL_PIPE;
@@ -119,7 +122,7 @@ bool DatabaseMysql::Initialize(const char *infoString)
         port = atoi(port_or_socket.c_str());
         unix_socket = 0;
     }
-    #else
+#else
     if(host==".")                                           // socket use option (Unix/Linux)
     {
         unsigned int opt = MYSQL_PROTOCOL_SOCKET;
@@ -133,15 +136,16 @@ bool DatabaseMysql::Initialize(const char *infoString)
         port = atoi(port_or_socket.c_str());
         unix_socket = 0;
     }
-    #endif
+#endif
 
     mMysql = mysql_real_connect(mysqlInit, host.c_str(), user.c_str(),
         password.c_str(), database.c_str(), port, unix_socket, 0);
 
     if (mMysql)
     {
-        sLog.outDetail( "Connected to MySQL database at %s\n",
+        sLog.outDetail( "Connected to MySQL database at %s\r\n",
             host.c_str());
+        sLog.outString( "MySQL server: %s \r\n", mysql_get_server_info( mMysql));
 
         /*----------SET AUTOCOMMIT OFF---------*/
         // It seems mysql 5.0.x have enabled this feature
