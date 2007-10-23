@@ -23,6 +23,7 @@
 #include "Log.h"
 #include "World.h"
 #include "Object.h"
+#include "Creature.h"
 #include "Player.h"
 #include "ObjectMgr.h"
 #include "WorldSession.h"
@@ -43,6 +44,8 @@
 #include "GridNotifiersImpl.h"
 
 #include "ObjectPosSelector.h"
+
+#include "TemporarySummon.h"
 
 uint32 GuidHigh2TypeId(uint32 guid_hi)
 {
@@ -775,12 +778,12 @@ void WorldObject::_Create( uint32 guidlow, uint32 guidhigh, uint32 mapid, float 
 
 uint32 WorldObject::GetZoneId() const
 {
-    return MapManager::Instance().GetMap(m_mapId, this)->GetZoneId(m_positionX,m_positionY);
+    return MapManager::Instance().GetBaseMap(m_mapId)->GetZoneId(m_positionX,m_positionY);
 }
 
 uint32 WorldObject::GetAreaId() const
 {
-    return MapManager::Instance().GetMap(m_mapId, this)->GetAreaId(m_positionX,m_positionY);
+    return MapManager::Instance().GetBaseMap(m_mapId)->GetAreaId(m_positionX,m_positionY);
 }
 
 InstanceData* WorldObject::GetInstanceData()
@@ -924,14 +927,14 @@ void WorldObject::GetRandomPoint( float x, float y, float z, float distance, flo
     rand_y = y + new_dist * sin(angle);
     rand_z = z;
 
-    _UpdatePositionZ(rand_x,rand_y,rand_z);                 // update to LOS height if available
+    UpdateGroundPositionZ(rand_x,rand_y,rand_z);                 // update to LOS height if available
 }
 
-void WorldObject::_UpdatePositionZ(float x, float y, float &z) const
+void WorldObject::UpdateGroundPositionZ(float x, float y, float &z) const
 {
     if(VMAP::VMapFactory::createOrGetVMapManager()->isHeightCalcEnabled())
     {
-        float new_z = MapManager::Instance().GetMap(GetMapId(), this)->GetHeight(x,y,z);
+        float new_z = MapManager::Instance().GetBaseMap(GetMapId())->GetHeight(x,y,z);
         if(new_z > VMAP_INVALID_HEIGHT)
             z = new_z+ 0.2f;                                // just to be sure that we are not a few pixel under the surface
     }
@@ -1062,6 +1065,40 @@ void WorldObject::SendObjectDeSpawnAnim(uint64 guid)
     SendMessageToSet(&data, true);
 }
 
+Map* WorldObject::GetMap() const
+{
+    return MapManager::Instance().GetMap(GetMapId(), this);
+}
+
+Map const* WorldObject::GetBaseMap() const
+{
+    return MapManager::Instance().GetBaseMap(GetMapId());
+}
+
+Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, float ang,TempSummonType spwtype,uint32 despwtime)
+{
+    TemporarySummon* pCreature = new TemporarySummon(this, GetGUID());
+
+    pCreature->SetInstanceId(GetInstanceId());
+    uint32 team = 0;
+    if (GetTypeId()==TYPEID_PLAYER)
+        if (((Player*)this)->GetTeam()==HORDE)
+            team = HORDE;
+        else if (((Player*)this)->GetTeam()==ALLIANCE)
+            team = ALLIANCE;
+
+    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), GetMapId(), x, y, z, ang, id, team))
+    {
+        delete pCreature;
+        return NULL;
+    }
+
+    pCreature->Summon(spwtype, despwtime);
+
+    //return the creature therewith the summoner has access to it
+    return pCreature;
+}
+
 namespace MaNGOS {
 
     class NearUsedPosDo
@@ -1157,7 +1194,7 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, 
     // if detection disabled, return first point
     if(!sWorld.getConfig(CONFIG_DETECT_POS_COLLISION))
     {
-        _UpdatePositionZ(x,y,z);                                // update to LOS height if available
+        UpdateGroundPositionZ(x,y,z);                                // update to LOS height if available
         return;
     }
 
@@ -1190,7 +1227,7 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, 
     // maybe can just place in primary position
     if( selector.CheckOriginal() )
     {
-        _UpdatePositionZ(x,y,z);                                // update to LOS height if available
+        UpdateGroundPositionZ(x,y,z);                                // update to LOS height if available
 
         if(IsWithinLOS(x,y,z))
             return;
@@ -1205,7 +1242,7 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, 
     {
         GetNearPoint2D(x,y,distance2d,absAngle+angle);
         z = GetPositionZ();
-        _UpdatePositionZ(x,y,z);                                // update to LOS height if available
+        UpdateGroundPositionZ(x,y,z);                                // update to LOS height if available
 
         if(IsWithinLOS(x,y,z))
             return;
@@ -1219,7 +1256,7 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, 
     {
         GetNearPoint2D(x,y,distance2d,absAngle+angle);
         z = GetPositionZ();
-        _UpdatePositionZ(x,y,z);                                // update to LOS height if available
+        UpdateGroundPositionZ(x,y,z);                                // update to LOS height if available
 
         if(IsWithinLOS(x,y,z))
             return;
@@ -1233,7 +1270,7 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, 
         x = first_x;
         y = first_y;
 
-        _UpdatePositionZ(x,y,z);                                // update to LOS height if available
+        UpdateGroundPositionZ(x,y,z);                                // update to LOS height if available
         return;
     }
 
@@ -1244,7 +1281,7 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, 
         {
             GetNearPoint2D(x,y,distance2d,absAngle+angle);
             z = GetPositionZ();
-            _UpdatePositionZ(x,y,z);                                // update to LOS height if available
+            UpdateGroundPositionZ(x,y,z);                                // update to LOS height if available
 
             if(IsWithinLOS(x,y,z))
                 return;
@@ -1259,7 +1296,7 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, 
     {
         GetNearPoint2D(x,y,distance2d,absAngle+angle);
         z = GetPositionZ();
-        _UpdatePositionZ(x,y,z);                                // update to LOS height if available
+        UpdateGroundPositionZ(x,y,z);                                // update to LOS height if available
 
         if(IsWithinLOS(x,y,z))
             return;
@@ -1269,5 +1306,5 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, 
     x = first_x;
     y = first_y;
 
-    _UpdatePositionZ(x,y,z);                                // update to LOS height if available
+    UpdateGroundPositionZ(x,y,z);                                // update to LOS height if available
 }

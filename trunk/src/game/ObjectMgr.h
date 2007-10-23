@@ -84,10 +84,6 @@ struct AreaTrigger
 {
     uint8  requiredLevel;
     uint32 requiredItem;
-    uint32 trigger_mapId;
-    float  trigger_X;
-    float  trigger_Y;
-    float  trigger_Z;
     uint32 target_mapId;
     float  target_X;
     float  target_Y;
@@ -452,7 +448,7 @@ class ObjectMgr
 
         void LoadGossipText();
 
-        void LoadAreaTriggers();
+        void LoadAreaTriggerTeleports();
         void LoadSpellAffects();
         void LoadQuestAreaTriggers();
         void LoadTavernAreaTriggers();

@@ -96,7 +96,7 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         typedef std::list<Player*> PlayerList;
 
         Map(uint32 id, time_t, uint32 aInstanceId);
-        virtual ~Map();                                     // Important! Else memleak at MapInstanced class destruction
+        virtual ~Map();
 
         void Add(Player *);
         bool AddInstanced(Player *);
@@ -157,25 +157,25 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         static void DeleteStateMachine();
 
                                                             // some calls like isInWater should not use vmaps due to processor power
-        float GetHeight(float x, float y, float z, bool pCheckVMap=true);
+        float GetHeight(float x, float y, float z, bool pCheckVMap=true) const;
         // return height of VMAP_INVALID_HEIGHT
-        float GetVMapHeight(float x, float y, float z);
-        bool IsInWater(float x, float y, float z);          // does not use z pos. This is for future use
+        float GetVMapHeight(float x, float y, float z) const;
+        bool IsInWater(float x, float y, float z) const;    // does not use z pos. This is for future use
 
-        uint16 GetAreaFlag(float x, float y );
-        uint8 GetTerrainType(float x, float y );
-        float GetWaterLevel(float x, float y );
-        bool IsUnderWater(float x, float y, float z);
+        uint16 GetAreaFlag(float x, float y ) const;
+        uint8 GetTerrainType(float x, float y ) const;
+        float GetWaterLevel(float x, float y ) const;
+        bool IsUnderWater(float x, float y, float z) const;
 
         static uint32 GetAreaId(uint16 areaflag);
         static uint32 GetZoneId(uint16 areaflag);
 
-        uint32 GetAreaId(float x, float y)
+        uint32 GetAreaId(float x, float y) const
         {
             return GetAreaId(GetAreaFlag(x,y));
         }
 
-        uint32 GetZoneId(float x, float y)
+        uint32 GetZoneId(float x, float y) const
         {
             return GetZoneId(GetAreaFlag(x,y));
         }
@@ -188,9 +188,9 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         bool CheckGridIntegrity(Creature* c, bool moved) const;
 
         std::string GetScript() { return i_script; }
-        InstanceData* GetInstanceData() const { return i_data; }
-        uint32 GetInstanceId() const { return i_InstanceId; }
-        bool NeedsReset() const { return Instanceable() && ( i_resetTime == 0 || i_resetTime <= time(NULL)); }
+        InstanceData* GetInstanceData() { return i_data; }
+        uint32 GetInstanceId() { return i_InstanceId; }
+        bool NeedsReset() { return Instanceable() && ( i_resetTime == 0 || i_resetTime <= time(NULL)); }
         uint32 GetPlayersCount() const { return i_Players.size(); }
         void Reset();
         bool CanEnter(Player* player) const;

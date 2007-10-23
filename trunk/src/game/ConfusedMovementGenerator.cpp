@@ -27,16 +27,13 @@ void
 ConfusedMovementGenerator<T>::Initialize(T &unit)
 {
     const float wander_distance=11;
-    float x,y,z,z2;
+    float x,y,z;
     x = unit.GetPositionX();
     y = unit.GetPositionY();
     z = unit.GetPositionZ();
     uint32 mapid=unit.GetMapId();
 
-    Map* map = MapManager::Instance().GetMap(mapid, &unit);
-    z2 = map->GetHeight(x,y,z);
-    if( fabs( z2 - z ) < 5 )
-        z = z2;
+    Map const* map = MapManager::Instance().GetBaseMap(mapid);
 
     i_nextMove = 1;
 
@@ -62,9 +59,7 @@ ConfusedMovementGenerator<T>::Initialize(T &unit)
             i_waypoints[idx][0] = idx > 0 ? i_waypoints[idx-1][0] : x;
             i_waypoints[idx][1] = idx > 0 ? i_waypoints[idx-1][1] : y;
         }
-        z2 = map->GetHeight(i_waypoints[idx][0],i_waypoints[idx][1],z);
-        if( fabs( z2 - z ) < 5 )
-            z = z2;
+        unit.UpdateGroundPositionZ(i_waypoints[idx][0],i_waypoints[idx][1],z);
         i_waypoints[idx][2] =  z;
     }
 

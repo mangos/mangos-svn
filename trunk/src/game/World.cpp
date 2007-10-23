@@ -592,12 +592,12 @@ void World::SetInitialWorldSettings()
     objmgr.LoadQuestRelations();                            // must be after quest load
 
     sLog.outString( "Loading AreaTrigger definitions..." );
-    objmgr.LoadAreaTriggers();                              // must be after item template load
+    objmgr.LoadAreaTriggerTeleports();                      // must be after item template load
 
     sLog.outString( "Loading Quest Area Triggers..." );
     objmgr.LoadQuestAreaTriggers();                         // must be after LoadQuests
 
-    sLog.outString( "Loading Tavern Area Triggers..." );    // must be after LoadAreaTriggers
+    sLog.outString( "Loading Tavern Area Triggers..." );
     objmgr.LoadTavernAreaTriggers();
 
     sLog.outString( "Loading Graveyard-zone links...");
@@ -1138,9 +1138,12 @@ void World::ScriptsProcess()
                     break;
                 }
 
-                if(!source->isType(TYPE_UNIT))              // must be any Unit (creature or player)
+
+                WorldObject* summoner = dynamic_cast<WorldObject*>(source);
+
+                if(!summoner)
                 {
-                    sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON call for non-unit (TypeId: %u), skipping.",source->GetTypeId());
+                    sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON call for non-WorldObject (TypeId: %u), skipping.",source->GetTypeId());
                     break;
                 }
 
@@ -1149,16 +1152,19 @@ void World::ScriptsProcess()
                 float z = step.script->z;
                 float o = step.script->o;
 
-                Creature* pCreature = ((Unit*)source)->SummonCreature(step.script->datalong, x, y, z, o,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,step.script->datalong2);
+                Creature* pCreature = summoner->SummonCreature(step.script->datalong, x, y, z, o,TEMPSUMMON_TIMED_OR_DEAD_DESPAWN,step.script->datalong2);
                 if (!pCreature)
                 {
                     sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON failed for creature (entry: %u).",step.script->datalong);
                     break;
                 }
 
-                if( pCreature->Attack((Unit *)source) )
+                // attack only creatures/players/pets
+                if(summoner->isType(TYPE_UNIT))
                 {
-                    pCreature->GetMotionMaster()->Mutate(new TargetedMovementGenerator<Creature>(*((Unit *)source)));
+                    Unit* unitSummoner = (Unit *)summoner;
+                    if( pCreature->Attack(unitSummoner) )
+                        pCreature->GetMotionMaster()->Mutate(new TargetedMovementGenerator<Creature>(*unitSummoner));
                 }
                 break;
             }

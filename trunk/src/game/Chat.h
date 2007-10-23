@@ -139,7 +139,7 @@ class ChatHandler
         bool HandleReloadAllSpellCommand(const char* args);
 
         bool HandleReloadAreaTriggerTavernCommand(const char* args);
-        bool HandleReloadAreaTriggerTemplateCommand(const char* args);
+        bool HandleReloadAreaTriggerTeleportCommand(const char* args);
         bool HandleReloadButtonScriptsCommand(const char* args);
         bool HandleReloadCommandCommand(const char* args);
         bool HandleReloadCreatureQuestRelationsCommand(const char* args);

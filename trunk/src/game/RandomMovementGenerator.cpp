@@ -41,7 +41,7 @@ RandomMovementGenerator<Creature>::Initialize(Creature &creature)
     creature.GetRespawnDist(wander_distance);
     uint32 mapid=creature.GetMapId();
 
-    Map* map = MapManager::Instance().GetMap(mapid, &creature);
+    Map const* map = MapManager::Instance().GetBaseMap(mapid);
     // Initialization is done in bulk. Don’t use vamps for that (4. parameter = false). It is too costly when entering a new map grid
     z2 = map->GetHeight(x,y,z, false);
     if( fabs( z2 - z ) < 5 )

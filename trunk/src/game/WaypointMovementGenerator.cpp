@@ -121,7 +121,7 @@ WaypointMovementGenerator<Creature>::LoadPath(Creature &c)
                 // prevent invalid coordinates using
                 MaNGOS::NormalizeMapCoord(i_path[count].x);
                 MaNGOS::NormalizeMapCoord(i_path[count].y);
-                i_path[count].z = MapManager::Instance ().GetMap(c.GetMapId(), &c)->GetHeight(i_path[count].x,i_path[count].y, i_path[count].z);
+                i_path[count].z = MapManager::Instance ().GetBaseMap(c.GetMapId())->GetHeight(i_path[count].x,i_path[count].y, i_path[count].z);
             }
             // to prevent a misbehaviour inside "update"
             // update is alway called with the next wp - but the wpSys needs the current

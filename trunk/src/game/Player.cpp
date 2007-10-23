@@ -685,7 +685,7 @@ void Player::HandleLava()
         {
             uint64 guid = GetGUID();
             uint32 damage = GetMaxHealth() / 3 + urand(0, getLevel()-1);
-            uint32 dmgZone = MapManager::Instance().GetMap(GetMapId(), this)->GetZoneId(GetPositionX(),GetPositionY());
+            uint32 dmgZone = GetZoneId();
 
             // Deal lava damage only in lava zones.
             switch(dmgZone)
@@ -1873,7 +1873,7 @@ bool Player::CanInteractWithNPCs(bool alive) const
 bool Player::IsUnderWater() const
 {
     return IsInWater() &&
-        GetPositionZ() < (MapManager::Instance().GetMap(GetMapId(), this)->GetWaterLevel(GetPositionX(),GetPositionY())-2);
+        GetPositionZ() < (MapManager::Instance().GetBaseMap(GetMapId())->GetWaterLevel(GetPositionX(),GetPositionY())-2);
 }
 
 void Player::SetInWater(bool apply)
@@ -4757,7 +4757,7 @@ void Player::CheckExploreSystem()
     if (isInFlight())
         return;
 
-    uint16 areaFlag=MapManager::Instance().GetMap(GetMapId(), this)->GetAreaFlag(GetPositionX(),GetPositionY());
+    uint16 areaFlag=MapManager::Instance().GetBaseMap(GetMapId())->GetAreaFlag(GetPositionX(),GetPositionY());
     if(areaFlag==0xffff)return;
     int offset = areaFlag / 32;
 

@@ -149,6 +149,7 @@ class DBCStorage
 };
 
 //extern DBCStorage <AreaTableEntry>            sAreaStore; -- accessed using 2 functions
+extern DBCStorage <AreaTriggerEntry>          sAreaTriggerStore;
 extern DBCStorage <BankBagSlotPricesEntry>    sBankBagSlotPricesStore;
 extern DBCStorage <BattlemasterListEntry>     sBattlemasterListStore;
 //extern DBCStorage <ChatChannelsEntry>         sChatChannelsStore; -- accessed using function, no usable index

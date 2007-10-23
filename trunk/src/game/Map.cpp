@@ -130,7 +130,7 @@ void Map::LoadMap(uint32 mapid, uint32 instanceid, int x,int y)
         if(GridMaps[x][y])
             return;
 
-        Map* baseMap = MapManager::Instance().GetBaseMap(mapid);
+        Map* baseMap = const_cast<Map*>(MapManager::Instance().GetBaseMap(mapid));
 
         // load gridmap for base map
         if (!baseMap->GridMaps[x][y])
@@ -1154,7 +1154,7 @@ void Map::UnloadAll()
     }
 }
 
-float Map::GetVMapHeight(float x, float y, float z)
+float Map::GetVMapHeight(float x, float y, float z) const
 {
     VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
 
@@ -1186,7 +1186,7 @@ float Map::GetVMapHeight(float x, float y, float z)
 
 }
 
-float Map::GetHeight(float x, float y, float z, bool pUseVmaps)
+float Map::GetHeight(float x, float y, float z, bool pUseVmaps) const
 {
     //local x,y coords
     float lx,ly;
@@ -1212,7 +1212,8 @@ float Map::GetHeight(float x, float y, float z, bool pUseVmaps)
     ly=MAP_RESOLUTION*(32 -y/SIZE_OF_GRIDS - gy);
     //DEBUG_LOG("my %d %d si %d %d",gx,gy,p.x_coord,p.y_coord);
 
-    EnsureGridCreated(GridPair(63-gx,63-gy));               // ensure GridMap is loaded
+    // ensure GridMap is loaded
+    const_cast<Map*>(this)->EnsureGridCreated(GridPair(63-gx,63-gy));
 
     VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
     if(vmgr->isHeightCalcEnabled())
@@ -1247,23 +1248,12 @@ float Map::GetHeight(float x, float y, float z, bool pUseVmaps)
     }
 }
 
-uint16 Map::GetAreaFlag(float x, float y )
+uint16 Map::GetAreaFlag(float x, float y ) const
 {
     //local x,y coords
     float lx,ly;
     int gx,gy;
     GridPair p = MaNGOS::ComputeGridPair(x, y);
-    //Note: p.x_coord = 63-gx...
-    /* method with no opt
-        x=32* SIZE_OF_GRIDS-x;
-        y=32* SIZE_OF_GRIDS-y;
-
-        gx=x/SIZE_OF_GRIDS ;//grid x
-        gy=y/SIZE_OF_GRIDS ;//grid y
-
-        lx= x*(MAP_RESOLUTION/SIZE_OF_GRIDS) - gx*MAP_RESOLUTION;
-        ly= y*(MAP_RESOLUTION/SIZE_OF_GRIDS) - gy*MAP_RESOLUTION;
-    */
 
     // half opt method
     gx=(int)(32-x/SIZE_OF_GRIDS) ;                          //grid x
@@ -1273,7 +1263,8 @@ uint16 Map::GetAreaFlag(float x, float y )
     ly=16*(32 -y/SIZE_OF_GRIDS - gy);
     //DEBUG_LOG("my %d %d si %d %d",gx,gy,p.x_coord,p.y_coord);
 
-    EnsureGridCreated(GridPair(63-gx,63-gy));               // ensure GridMap is loaded
+    // ensure GridMap is loaded
+    const_cast<Map*>(this)->EnsureGridCreated(GridPair(63-gx,63-gy));
 
     if(GridMaps[gx][gy])
         return GridMaps[gx][gy]->area_flag[(int)(lx)][(int)(ly)];
@@ -1282,23 +1273,11 @@ uint16 Map::GetAreaFlag(float x, float y )
         return GetAreaFlagByMapId(i_id);
 }
 
-uint8 Map::GetTerrainType(float x, float y )
+uint8 Map::GetTerrainType(float x, float y ) const
 {
     //local x,y coords
     float lx,ly;
     int gx,gy;
-    //GridPair p = MaNGOS::ComputeGridPair(x, y);
-    //Note: p.x_coord = 63-gx...
-    /* method with no opt
-        x=32* SIZE_OF_GRIDS-x;
-        y=32* SIZE_OF_GRIDS-y;
-
-        gx=x/SIZE_OF_GRIDS ;//grid x
-        gy=y/SIZE_OF_GRIDS ;//grid y
-
-        lx= x*(MAP_RESOLUTION/SIZE_OF_GRIDS) - gx*MAP_RESOLUTION;
-        ly= y*(MAP_RESOLUTION/SIZE_OF_GRIDS) - gy*MAP_RESOLUTION;
-    */
 
     // half opt method
     gx=(int)(32-x/SIZE_OF_GRIDS) ;                          //grid x
@@ -1307,7 +1286,8 @@ uint8 Map::GetTerrainType(float x, float y )
     lx=16*(32 -x/SIZE_OF_GRIDS - gx);
     ly=16*(32 -y/SIZE_OF_GRIDS - gy);
 
-    EnsureGridCreated(GridPair(63-gx,63-gy));               // ensure GridMap is loaded
+    // ensure GridMap is loaded
+    const_cast<Map*>(this)->EnsureGridCreated(GridPair(63-gx,63-gy));
 
     if(GridMaps[gx][gy])
         return GridMaps[gx][gy]->terrain_type[(int)(lx)][(int)(ly)];
@@ -1316,23 +1296,11 @@ uint8 Map::GetTerrainType(float x, float y )
 
 }
 
-float Map::GetWaterLevel(float x, float y )
+float Map::GetWaterLevel(float x, float y ) const
 {
     //local x,y coords
     float lx,ly;
     int gx,gy;
-    //GridPair p = MaNGOS::ComputeGridPair(x, y);
-    //Note: p.x_coord = 63-gx...
-    /* method with no opt
-        x=32* SIZE_OF_GRIDS-x;
-        y=32* SIZE_OF_GRIDS-y;
-
-        gx=x/SIZE_OF_GRIDS ;//grid x
-        gy=y/SIZE_OF_GRIDS ;//grid y
-
-        lx= x*(MAP_RESOLUTION/SIZE_OF_GRIDS) - gx*MAP_RESOLUTION;
-        ly= y*(MAP_RESOLUTION/SIZE_OF_GRIDS) - gy*MAP_RESOLUTION;
-    */
 
     // half opt method
     gx=(int)(32-x/SIZE_OF_GRIDS) ;                          //grid x
@@ -1341,7 +1309,8 @@ float Map::GetWaterLevel(float x, float y )
     lx=128*(32 -x/SIZE_OF_GRIDS - gx);
     ly=128*(32 -y/SIZE_OF_GRIDS - gy);
 
-    EnsureGridCreated(GridPair(63-gx,63-gy));               // ensure GridMap is loaded
+    // ensure GridMap is loaded
+    const_cast<Map*>(this)->EnsureGridCreated(GridPair(63-gx,63-gy));
 
     if(GridMaps[gx][gy])
         return GridMaps[gx][gy]->liquid_level[(int)(lx)][(int)(ly)];
@@ -1370,7 +1339,7 @@ uint32 Map::GetZoneId(uint16 areaflag)
         return 0;
 }
 
-bool Map::IsInWater(float x, float y, float pZ)
+bool Map::IsInWater(float x, float y, float pZ) const
 {
     // This method is called too often to use vamps for that (4. parameter = false).
     // The z pos is taken anyway for future use
@@ -1380,7 +1349,7 @@ bool Map::IsInWater(float x, float y, float pZ)
     return (z < (water_z-2)) && (flag & 0x01);
 }
 
-bool Map::IsUnderWater(float x, float y, float z)
+bool Map::IsUnderWater(float x, float y, float z) const
 {
     float water_z = GetWaterLevel(x,y);
     uint8 flag = GetTerrainType(x,y);
