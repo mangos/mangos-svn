@@ -3351,6 +3351,13 @@ void ObjectMgr::LoadQuestAreaTriggers()
         uint32 Trigger_ID = fields[0].GetUInt32();
         uint32 Quest_ID   = fields[1].GetUInt32();
 
+        AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(Trigger_ID);
+        if(!atEntry)
+        {
+            sLog.outErrorDb("Area trigger (ID:%u) not exist in `AreaTrigger.dbc`.",Trigger_ID);
+            continue;
+        }
+
         if(!mQuestTemplates[Quest_ID])
         {
             sLog.outErrorDb("Table `areatrigger_involvedrelation` have record (id: %u) for non-existed quest %u",Trigger_ID,Quest_ID);
@@ -3396,9 +3403,10 @@ void ObjectMgr::LoadTavernAreaTriggers()
 
         uint32 Trigger_ID      = fields[0].GetUInt32();
 
-        if(!GetAreaTrigger(Trigger_ID))
+        AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(Trigger_ID);
+        if(!atEntry)
         {
-            sLog.outErrorDb("Table `areatrigger_tavern` have record for non-existed area trigger %u",Trigger_ID);
+            sLog.outErrorDb("Area trigger (ID:%u) not exist in `AreaTrigger.dbc`.",Trigger_ID);
             continue;
         }
 
@@ -3719,14 +3727,14 @@ bool ObjectMgr::AddGraveYardLink(uint32 id, uint32 zoneId, uint32 team, bool inD
     return true;
 }
 
-void ObjectMgr::LoadAreaTriggers()
+void ObjectMgr::LoadAreaTriggerTeleports()
 {
     mAreaTriggers.clear();                                  // need for reload case
 
     uint32 count = 0;
 
-    //                                            0    1                2               3             4                    5                    6                    7            8                   9                   10                  11
-    QueryResult *result = sDatabase.Query("SELECT `id`,`required_level`,`required_item`,`trigger_map`,`trigger_position_x`,`trigger_position_y`,`trigger_position_z`,`target_map`,`target_position_x`,`target_position_y`,`target_position_z`,`target_orientation` FROM `areatrigger_template`");
+    //                                            0    1                2               3            4                   5                   6                    7
+    QueryResult *result = sDatabase.Query("SELECT `id`,`required_level`,`required_item`,`target_map`,`target_position_x`,`target_position_y`,`target_position_z`,`target_orientation` FROM `areatrigger_teleport`");
     if( !result )
     {
 
@@ -3735,7 +3743,7 @@ void ObjectMgr::LoadAreaTriggers()
         bar.step();
 
         sLog.outString();
-        sLog.outString( ">> Loaded %u area trigger definitions", count );
+        sLog.outString( ">> Loaded %u area trigger teleport definitions", count );
         return;
     }
 
@@ -3755,15 +3763,18 @@ void ObjectMgr::LoadAreaTriggers()
 
         at.requiredLevel      = fields[1].GetUInt8();
         at.requiredItem       = fields[2].GetUInt32();
-        at.trigger_mapId      = fields[3].GetUInt32();
-        at.trigger_X          = fields[4].GetFloat();
-        at.trigger_Y          = fields[5].GetFloat();
-        at.trigger_Z          = fields[6].GetFloat();
-        at.target_mapId       = fields[7].GetUInt32();
-        at.target_X           = fields[8].GetFloat();
-        at.target_Y           = fields[9].GetFloat();
-        at.target_Z           = fields[10].GetFloat();
-        at.target_Orientation = fields[11].GetFloat();
+        at.target_mapId       = fields[3].GetUInt32();
+        at.target_X           = fields[4].GetFloat();
+        at.target_Y           = fields[5].GetFloat();
+        at.target_Z           = fields[6].GetFloat();
+        at.target_Orientation = fields[7].GetFloat();
+
+        AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(Trigger_ID);
+        if(!atEntry)
+        {
+            sLog.outErrorDb("Area trigger (ID:%u) not exist in `AreaTrigger.dbc`.",Trigger_ID);
+            continue;
+        }
 
         if(at.requiredItem)
         {
@@ -3775,6 +3786,13 @@ void ObjectMgr::LoadAreaTriggers()
             }
         }
 
+        MapEntry const* mapEntry = sMapStore.LookupEntry(at.target_mapId);
+        if(!mapEntry)
+        {
+            sLog.outErrorDb("Area trigger (ID:%u) target map (ID: %u) not exist in `Map.dbc`.",Trigger_ID,at.target_mapId);
+            continue;
+        }
+
         mAreaTriggers[Trigger_ID] = at;
 
     } while( result->NextRow() );
@@ -3782,7 +3800,7 @@ void ObjectMgr::LoadAreaTriggers()
     delete result;
 
     sLog.outString();
-    sLog.outString( ">> Loaded %u area trigger definitions", count );
+    sLog.outString( ">> Loaded %u area trigger teleport definitions", count );
 }
 
 void ObjectMgr::LoadSpellAffects()

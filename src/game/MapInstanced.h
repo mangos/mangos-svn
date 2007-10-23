@@ -26,9 +26,7 @@ class MANGOS_DLL_DECL MapInstanced : public Map
     public:
 
         MapInstanced(uint32 id, time_t, uint32 aInstanceId);
-        ~MapInstanced()                                     // Important! Else memleak at class destruction
-        {
-        }
+        ~MapInstanced() {}
 
         virtual void Update(const uint32&);
         virtual void MoveAllCreaturesInMoveList();

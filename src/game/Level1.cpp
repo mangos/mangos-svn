@@ -253,11 +253,12 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
             return true;
         }
 
-        if (MapManager::Instance().GetMap(m_session->GetPlayer()->GetMapId(), m_session->GetPlayer())->Instanceable())
+        Map* pMap = MapManager::Instance().GetMap(m_session->GetPlayer()->GetMapId(),m_session->GetPlayer());
+
+        if(pMap->Instanceable())
         {
-            if ( (MapManager::Instance().GetMap(chr->GetMapId(), chr)->Instanceable()) &&
-                (MapManager::Instance().GetMap(chr->GetMapId(), chr)->GetInstanceId() !=
-                MapManager::Instance().GetMap(m_session->GetPlayer()->GetMapId(), m_session->GetPlayer())->GetInstanceId()) )
+            Map* cMap = MapManager::Instance().GetMap(chr->GetMapId(),chr);
+            if( cMap->Instanceable() && cMap->GetInstanceId() != pMap->GetInstanceId() )
             {
                 // cannot summon from instance to instance
                 PSendSysMessage(LANG_CANNOT_SUMMON_TO_INST,chr->GetName());
@@ -334,11 +335,11 @@ bool ChatHandler::HandleGonameCommand(const char* args)
     Player *chr = objmgr.GetPlayer(name.c_str());
     if (chr)
     {
-        if (MapManager::Instance().GetMap(chr->GetMapId(), chr)->Instanceable())
+        Map* cMap = MapManager::Instance().GetMap(chr->GetMapId(),chr);
+        if(cMap->Instanceable())
         {
-            if ( (MapManager::Instance().GetMap(_player->GetMapId(), _player)->Instanceable()) &&
-                (MapManager::Instance().GetMap(chr->GetMapId(), chr)->GetInstanceId() !=
-                MapManager::Instance().GetMap(_player->GetMapId(), _player)->GetInstanceId()) )
+            Map* pMap = MapManager::Instance().GetMap(_player->GetMapId(),_player);
+            if( pMap->Instanceable() && cMap->GetInstanceId() != pMap->GetInstanceId() )
             {
                 // cannot go from instance to instance
                 PSendSysMessage(LANG_CANNOT_GO_INST_INST,chr->GetName());
@@ -1928,7 +1929,7 @@ bool ChatHandler::HandleGroupgoCommand(const char* args)
         return true;
     }
 
-    Map* gmMap = MapManager::Instance().GetMap(m_session->GetPlayer()->GetMapId(), m_session->GetPlayer());
+    Map* gmMap = MapManager::Instance().GetMap(m_session->GetPlayer()->GetMapId(),m_session->GetPlayer());
     bool to_instance =  gmMap->Instanceable();
 
     // we are in instance, and can summon only player in our group with us as lead
@@ -1962,7 +1963,7 @@ bool ChatHandler::HandleGroupgoCommand(const char* args)
 
         if (to_instance)
         {
-            Map* plMap = MapManager::Instance().GetMap(pl->GetMapId(), pl);
+            Map* plMap = MapManager::Instance().GetMap(pl->GetMapId(),pl);
 
             if ( plMap->Instanceable() && plMap->GetInstanceId() != gmMap->GetInstanceId() )
             {
@@ -2029,7 +2030,7 @@ bool ChatHandler::HandleGoXYCommand(const char* args)
         return true;
     }
 
-    Map *map = MapManager::Instance().GetMap(mapid, _player);
+    Map const *map = MapManager::Instance().GetBaseMap(mapid);
     float z = std::max(map->GetHeight(x, y, 0), map->GetWaterLevel(x, y));
     _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
     _player->TeleportTo(mapid, x, y, z, _player->GetOrientation());
@@ -2074,7 +2075,6 @@ bool ChatHandler::HandleGoXYZCommand(const char* args)
         return true;
     }
 
-    Map *map = MapManager::Instance().GetMap(mapid, _player);
     _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
     _player->TeleportTo(mapid, x, y, z, _player->GetOrientation());
 
@@ -2117,7 +2117,7 @@ bool ChatHandler::HandleGoGridCommand(const char* args)
         return true;
     }
 
-    Map *map = MapManager::Instance().GetMap(mapid, _player);
+    Map const *map = MapManager::Instance().GetBaseMap(mapid);
     float z = std::max(map->GetHeight(x, y, 0), map->GetWaterLevel(x, y));
     _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
     _player->TeleportTo(mapid, x, y, z, _player->GetOrientation());

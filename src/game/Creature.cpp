@@ -734,7 +734,7 @@ void Creature::OnPoiSelect(Player* player, GossipOption const *gossip)
         QueryResult *result;
         Field *fields;
         uint32 mapid=GetMapId();
-        Map* map=MapManager::Instance().GetMap( mapid, this );
+        Map const* map=MapManager::Instance().GetBaseMap( mapid );
         uint16 areaflag=map->GetAreaFlag(GetPositionX(),GetPositionY());
         uint32 zoneid=map->GetZoneId(areaflag);
         std::string areaname= gossip->Option;
@@ -1679,9 +1679,7 @@ bool Creature::IsOutOfThreatArea(Unit* pVictim) const
         return true;
 
     // we not need get instance map, base map provide all info
-    Map* map = MapManager::Instance().GetBaseMap(GetMapId());
-
-    if(map->Instanceable())
+    if(MapManager::Instance().GetBaseMap(GetMapId())->Instanceable())
         return false;
 
     float rx,ry,rz;

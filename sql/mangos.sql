@@ -56,19 +56,15 @@ LOCK TABLES `areatrigger_tavern` WRITE;
 UNLOCK TABLES;
 
 --
--- Table structure for table `areatrigger_template`
+-- Table structure for table `areatrigger_teleport`
 --
 
-DROP TABLE IF EXISTS `areatrigger_template`;
-CREATE TABLE `areatrigger_template` (
+DROP TABLE IF EXISTS `areatrigger_teleport`;
+CREATE TABLE `areatrigger_teleport` (
   `id` int(11) unsigned NOT NULL default '0' COMMENT 'Identifier',
   `name` text,
   `required_level` tinyint(3) unsigned NOT NULL default '0',
   `required_item` int(11) unsigned NOT NULL default '0',
-  `trigger_map` int(11) unsigned NOT NULL default '0',
-  `trigger_position_x` float NOT NULL default '0',
-  `trigger_position_y` float NOT NULL default '0',
-  `trigger_position_z` float NOT NULL default '0',
   `target_map` int(11) unsigned NOT NULL default '0',
   `target_position_x` float NOT NULL default '0',
   `target_position_y` float NOT NULL default '0',
@@ -78,12 +74,12 @@ CREATE TABLE `areatrigger_template` (
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Trigger System';
 
 --
--- Dumping data for table `areatrigger_template`
+-- Dumping data for table `areatrigger_teleport`
 --
 
-LOCK TABLES `areatrigger_template` WRITE;
-/*!40000 ALTER TABLE `areatrigger_template` DISABLE KEYS */;
-/*!40000 ALTER TABLE `areatrigger_template` ENABLE KEYS */;
+LOCK TABLES `areatrigger_teleport` WRITE;
+/*!40000 ALTER TABLE `areatrigger_teleport` DISABLE KEYS */;
+/*!40000 ALTER TABLE `areatrigger_teleport` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --

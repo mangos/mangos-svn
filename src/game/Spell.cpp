@@ -2800,7 +2800,7 @@ uint8 Spell::CanCast()
                     return SPELL_FAILED_BAD_TARGETS;
 
                 // check if our map is instanceable
-                if( MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster)->Instanceable() && !m_caster->IsInMap(target) )
+                if( MapManager::Instance().GetBaseMap(m_caster->GetMapId())->Instanceable() && !m_caster->IsInMap(target) )
                     return SPELL_FAILED_TARGET_NOT_IN_INSTANCE;
 
                 break;
@@ -2812,7 +2812,7 @@ uint8 Spell::CanCast()
                 float fx = m_caster->GetPositionX() + dis * cos(m_caster->GetOrientation());
                 float fy = m_caster->GetPositionY() + dis * sin(m_caster->GetOrientation());
                 // teleport a bit above terrainlevel to avoid falling below it
-                float fz = MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster)->GetHeight(fx,fy,m_caster->GetPositionZ()) + 1.5;
+                float fz = MapManager::Instance().GetBaseMap(m_caster->GetMapId())->GetHeight(fx,fy,m_caster->GetPositionZ()) + 1.5;
                 float caster_pos_z = m_caster->GetPositionZ();
                 // Control the caster to not climb or drop when +-fz > 8
                 if(!(fz<=caster_pos_z+8 && fz>=caster_pos_z-8))

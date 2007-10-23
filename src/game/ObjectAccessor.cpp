@@ -546,11 +546,11 @@ ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid)
     // add bones to DB
     bones->SaveToDB();
 
+    Map* map = MapManager::Instance().GetMap(bones->GetMapId(), bones);
+
     // add bones in grid store if grid loaded where corpse placed
-    if(!MapManager::Instance().GetMap(bones->GetMapId(), bones)->IsRemovalGrid(bones->GetPositionX(),bones->GetPositionY()))
-    {
-        MapManager::Instance().GetMap(bones->GetMapId(), bones)->Add(bones);
-    }
+    if(!map->IsRemovalGrid(bones->GetPositionX(),bones->GetPositionY()))
+        map->Add(bones);
     // or prepare to delete at next tick if grid not loaded
     else
         bones->DeleteBonesFromWorld();

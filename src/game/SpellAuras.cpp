@@ -466,13 +466,13 @@ void Aura::Update(uint32 diff)
             float pos_x = m_target->GetPositionX();
             float pos_y = m_target->GetPositionY();
             uint32 mapid = m_target->GetMapId();
-            float pos_z = MapManager::Instance().GetMap(mapid, m_target)->GetHeight(pos_x,pos_y, m_target->GetPositionZ());
+            float pos_z = MapManager::Instance().GetBaseMap(mapid)->GetHeight(pos_x,pos_y, m_target->GetPositionZ());
             // Control the max Distance; 28 for temp.
             if(m_target->IsWithinDistInMap(caster, 28))
             {
                 float x = m_target->GetPositionX() - (speed*cosf(m_fearMoveAngle))/mod;
                 float y = m_target->GetPositionY() - (speed*sinf(m_fearMoveAngle))/mod;
-                float z = MapManager::Instance().GetMap(mapid, m_target)->GetHeight(x,y, m_target->GetPositionZ());
+                float z = MapManager::Instance().GetBaseMap(mapid)->GetHeight(x,y, m_target->GetPositionZ());
                 // Control the target to not climb or drop when dz > |x|,x = 1.3 for temp.
                 // fixed me if it needs checking when the position will be in water?
                                                             //+vmaps
@@ -488,7 +488,7 @@ void Aura::Update(uint32 diff)
                     m_fearMoveAngle += 120;
                     x = m_target->GetPositionX() + (speed*sinf(m_fearMoveAngle))/mod;
                     y = m_target->GetPositionY() + (speed*cosf(m_fearMoveAngle))/mod;
-                    z = MapManager::Instance().GetMap(mapid, m_target)->GetHeight(x,y, m_target->GetPositionZ());
+                    z = MapManager::Instance().GetBaseMap(mapid)->GetHeight(x,y, m_target->GetPositionZ());
                                                             //+vmaps
                     if((z<=pos_z+1.3 && z>=pos_z-1.3) && m_target->IsWithinLOS(x,y,z))
                     {

@@ -37,7 +37,6 @@
 #include "Pet.h"
 #include "Util.h"
 #include "Totem.h"
-#include "TemporarySummon.h"
 #include "BattleGroundMgr.h"
 #include "MovementGenerator.h"
 
@@ -2951,12 +2950,12 @@ bool Unit::isInAccessablePlaceFor(Creature const* c) const
 
 bool Unit::IsInWater() const
 {
-    return MapManager::Instance().GetMap(GetMapId(), this)->IsInWater(GetPositionX(),GetPositionY(), GetPositionZ());
+    return MapManager::Instance().GetBaseMap(GetMapId())->IsInWater(GetPositionX(),GetPositionY(), GetPositionZ());
 }
 
 bool Unit::IsUnderWater() const
 {
-    return MapManager::Instance().GetMap(GetMapId(), this)->IsUnderWater(GetPositionX(),GetPositionY(),GetPositionZ());
+    return MapManager::Instance().GetBaseMap(GetMapId())->IsUnderWater(GetPositionX(),GetPositionY(),GetPositionZ());
 }
 
 void Unit::DeMorph()
@@ -6554,30 +6553,6 @@ void Unit::ApplyDiminishingToDuration(DiminishingMechanics  mech, int32 &duratio
     }
 
     duration = int32(duration * mod);
-}
-
-Creature* Unit::SummonCreature(uint32 id, float x, float y, float z, float ang,TempSummonType spwtype,uint32 despwtime)
-{
-    TemporarySummon* pCreature = new TemporarySummon(this, GetGUID());
-
-    pCreature->SetInstanceId(GetInstanceId());
-    uint32 team = 0;
-    if (GetTypeId()==TYPEID_PLAYER)
-        if (((Player*)this)->GetTeam()==HORDE)
-            team = HORDE;
-        else if (((Player*)this)->GetTeam()==ALLIANCE)
-            team = ALLIANCE;
-
-    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), GetMapId(), x, y, z, ang, id, team))
-    {
-        delete pCreature;
-        return NULL;
-    }
-
-    pCreature->Summon(spwtype, despwtime);
-
-    //return the creature therewith the summoner has access to it
-    return pCreature;
 }
 
 Unit* Unit::GetUnit(WorldObject& object, uint64 guid)

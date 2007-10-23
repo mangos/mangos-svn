@@ -212,7 +212,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         if (fallTime > 1100 && !target->isDead() && !target->isGameMaster() &&
             !target->HasAuraType(SPELL_AURA_HOVER) && !target->HasAuraType(SPELL_AURA_FEATHER_FALL))
         {
-            Map *map = MapManager::Instance().GetMap(target->GetMapId(), target);
+            Map const *map = MapManager::Instance().GetBaseMap(target->GetMapId());
             float posz = map->GetWaterLevel(x,y);
             float fallperc = float(fallTime)*10/11000;
             uint32 damage = (uint32)(((fallperc*fallperc -1) / 9 * target->GetMaxHealth())*sWorld.getRate(RATE_DAMAGE_FALL));

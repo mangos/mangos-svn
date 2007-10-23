@@ -329,9 +329,9 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             {
                 case GO_CLOSED:                             // ready for loot
                 {
-                    // 1) skill must beb >= base_zone_skill
+                    // 1) skill must be >= base_zone_skill
                     // 2) if skill == base_zone_skill => 5% chance
-                    // 3) chance is liniar dependence from (base_zone_skill-skill)
+                    // 3) chance is linear dependence from (base_zone_skill-skill)
 
                     int32 skill = _player->GetSkillValue(SKILL_FISHING);
                     int32 zone_skill = _player->FishingMinSkillForCurrentZone();

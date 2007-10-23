@@ -858,6 +858,27 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         return;
     }
 
+    AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(Trigger_ID);
+    if(!atEntry)
+    {
+        sLog.outDebug("Player '%s' send unknown (by DBC) Area Trigger ID:%u",GetPlayer()->GetName(),Trigger_ID);
+        return;
+    }
+
+    if (GetPlayer()->GetMapId()!=atEntry->mapid)
+    {
+        sLog.outDebug("Player '%s' too far (trigger map: %u player map: %u), ignore Area Trigger ID: %u", GetPlayer()->GetName(), atEntry->mapid, GetPlayer()->GetMapId(), Trigger_ID);
+        return;
+    }
+
+    float dist = GetPlayer()->GetDistance(atEntry->x,atEntry->y,atEntry->z);
+
+    if (dist > atEntry->radius+5.0)
+    {
+        sLog.outDebug("Player '%s' too far (%u radius: %f distance: %f), ignore Area Trigger ID: %u", GetPlayer()->GetName(), atEntry->radius, dist, Trigger_ID);
+        return;
+    }
+
     uint32 quest_id = objmgr.GetQuestForAreaTrigger( Trigger_ID );
     if( quest_id && GetPlayer()->isAlive() && GetPlayer()->IsActiveQuest(quest_id) )
     {
@@ -872,26 +893,29 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         }
     }
 
-    AreaTrigger const* at = objmgr.GetAreaTrigger(Trigger_ID);
-
     if(objmgr.IsTavernAreaTrigger(Trigger_ID))
     {
+        // set resting flag we are in the inn
         GetPlayer()->SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
-
-        if(at)
-        {
-            GetPlayer()->InnEnter(time(NULL),at->trigger_mapId,at->trigger_X,at->trigger_Y,at->trigger_Z);
-            GetPlayer()->SetRestType(REST_TYPE_IN_TAVERN);
-        }
+        GetPlayer()->InnEnter(time(NULL), atEntry->mapid, atEntry->x, atEntry->y, atEntry->z);
+        GetPlayer()->SetRestType(REST_TYPE_IN_TAVERN);
+        return;
     }
-    else if(GetPlayer()->InBattleGround())
+
+    if(GetPlayer()->InBattleGround())
     {
         BattleGround* bg = sBattleGroundMgr.GetBattleGround(GetPlayer()->GetBattleGroundId());
         if(bg)
             if(bg->GetStatus() == STATUS_IN_PROGRESS)
                 bg->HandleAreaTrigger(GetPlayer(), Trigger_ID);
+
+        return;
     }
-    else if(at && at->IsTeleport())
+
+    // NULL if all values default (non teleport trigger)
+    AreaTrigger const* at = objmgr.GetAreaTrigger(Trigger_ID);
+
+    if(at && at->IsTeleport())
     {
         if(at->requiredItem)
         {

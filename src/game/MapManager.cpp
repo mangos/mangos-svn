@@ -57,7 +57,7 @@ MapManager::Initialize()
 }
 
 Map*
-MapManager::GetBaseMap(uint32 id)
+MapManager::_GetBaseMap(uint32 id)
 {
     Map *m = _findMap(id);
 
@@ -83,8 +83,7 @@ MapManager::GetBaseMap(uint32 id)
 
 Map* MapManager::GetMap(uint32 id, const WorldObject* obj)
 {
-    Map *m = NULL;
-    m = GetBaseMap(id);
+    Map *m = _GetBaseMap(id);
 
     if (m && obj && m->Instanceable()) m = ((MapInstanced*)m)->GetInstance(obj);
 
@@ -98,7 +97,7 @@ bool MapManager::CanPlayerEnter(uint32 mapid, Player* player)
 
 void MapManager::RemoveBonesFromMap(uint32 mapid, uint64 guid, float x, float y)
 {
-    bool remove_result = GetBaseMap(mapid)->RemoveBones(guid, x, y);
+    bool remove_result = _GetBaseMap(mapid)->RemoveBones(guid, x, y);
 
     if (!remove_result)
     {

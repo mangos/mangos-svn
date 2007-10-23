@@ -2204,8 +2204,6 @@ void Spell::EffectTeleUnitsFaceCaster(uint32 i)
     float fx,fy,fz;
     m_caster->GetClosePoint(fx,fy,fz,unitTarget->GetObjectSize() + dis);
 
-    // teleport a bit above terrain level to avoid falling below it
-    fz = MapManager::Instance ().GetMap(mapid, m_caster)->GetHeight(fx,fy,fz) + 1.5;
     if(unitTarget->GetTypeId() == TYPEID_PLAYER)
         ((Player*)unitTarget)->TeleportTo(mapid, fx, fy, fz, -m_caster->GetOrientation(), false);
     else
@@ -3488,8 +3486,9 @@ void Spell::EffectMomentMove(uint32 i)
         float ox,oy,oz;
         m_caster->GetPosition(ox,oy,oz);
         VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(mapid, ox,oy,oz+0.5, fx,fy,oz+0.5,fx,fy,fz, -0.5);
-        // teleport a bit above terrain level to avoid falling below it
-        fz = MapManager::Instance ().GetMap(mapid, m_caster)->GetHeight(fx,fy,fz) + 0.5;
+
+        unitTarget->UpdateGroundPositionZ(fx,fy,fz);
+
         if(unitTarget->GetTypeId() == TYPEID_PLAYER)
             ((Player*)unitTarget)->TeleportTo(mapid, fx, fy, fz, m_caster->GetOrientation(), false);
         else

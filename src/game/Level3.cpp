@@ -51,7 +51,7 @@ bool ChatHandler::HandleReloadCommand(const char* arg)
 
 bool ChatHandler::HandleReloadAllCommand(const char*)
 {
-    HandleReloadAreaTriggerTemplateCommand("");
+    HandleReloadAreaTriggerTeleportCommand("");
     //HandleReloadAreaTriggerTavernCommand(""); -- reloaded in HandleReloadAreaTriggerTavernCommand
     //HandleReloadQuestAreaTriggersCommand(""); -- reloaded in HandleReloadAllQuestCommand
 
@@ -66,7 +66,7 @@ bool ChatHandler::HandleReloadAllCommand(const char*)
 
 bool ChatHandler::HandleReloadAllAreaCommand(const char*)
 {
-    HandleReloadAreaTriggerTemplateCommand("");
+    HandleReloadAreaTriggerTeleportCommand("");
     //HandleReloadAreaTriggerTavernCommand(""); -- reloaded in HandleReloadAreaTriggerTavernCommand
     return true;
 }
@@ -122,18 +122,15 @@ bool ChatHandler::HandleReloadAreaTriggerTavernCommand(const char*)
 {
     sLog.outString( "Re-Loading Tavern Area Triggers..." );
     objmgr.LoadTavernAreaTriggers();
-    SendGlobalSysMessage("DB table `areatrigger_tavern` (quest area triggers) reloaded.");
+    SendGlobalSysMessage("DB table `areatrigger_tavern` reloaded.");
     return true;
 }
 
-bool ChatHandler::HandleReloadAreaTriggerTemplateCommand(const char*)
+bool ChatHandler::HandleReloadAreaTriggerTeleportCommand(const char*)
 {
-    sLog.outString( "Re-Loading AreaTrigger definitions..." );
-    objmgr.LoadAreaTriggers();
-    SendGlobalSysMessage("DB table `areatrigger_template` (area triggers definitions) reloaded.");
-
-    // must be reloaded after `areatrigger_template` reload
-    HandleReloadAreaTriggerTavernCommand("");
+    sLog.outString( "Re-Loading AreaTrigger teleport definitions..." );
+    objmgr.LoadAreaTriggerTeleports();
+    SendGlobalSysMessage("DB table `areatrigger_teleport` reloaded.");
     return true;
 }
 

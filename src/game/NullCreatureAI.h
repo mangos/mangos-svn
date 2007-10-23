@@ -28,6 +28,8 @@ class MANGOS_DLL_DECL NullCreatureAI : public CreatureAI
         NullCreatureAI(Creature &) {}
         NullCreatureAI() {}
 
+        ~NullCreatureAI();
+
         void MoveInLineOfSight(Unit *) {}
         void AttackStart(Unit *) {}
         void EnterEvadeMode() {}

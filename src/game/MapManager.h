@@ -36,11 +36,13 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
     public:
 
         Map* GetMap(uint32, const WorldObject* obj);
-        Map* GetBaseMap(uint32 id);
 
-        inline uint16 GetAreaFlag(uint32 mapid, float x, float y)
+        // only const version for outer users
+        Map const* GetBaseMap(uint32 id) const { return const_cast<MapManager*>(this)->_GetBaseMap(id); }
+
+        inline uint16 GetAreaFlag(uint32 mapid, float x, float y) const
         {
-            Map* m = GetBaseMap(mapid);
+            Map const* m = GetBaseMap(mapid);
             return m->GetAreaFlag(x, y);
         }
         inline uint32 GetAreaId(uint32 mapid, float x, float y) { return Map::GetAreaId(GetAreaFlag(mapid, x, y)); }
@@ -95,9 +97,10 @@ class MANGOS_DLL_DECL MapManager : public MaNGOS::Singleton<MapManager, MaNGOS::
         MapManager(const MapManager &);
         MapManager& operator=(const MapManager &);
 
-        Map* _findMap(uint32 id)
+        Map* _GetBaseMap(uint32 id);
+        Map* _findMap(uint32 id) const
         {
-            MapMapType::iterator iter = i_maps.find(id);
+            MapMapType::const_iterator iter = i_maps.find(id);
             return (iter == i_maps.end() ? NULL : iter->second);
         }
 

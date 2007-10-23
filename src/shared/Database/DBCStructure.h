@@ -53,6 +53,20 @@ struct AreaTableEntry
     uint32    team;                                         //28
 };
 
+struct AreaTriggerEntry
+{
+    uint32    id;                                           // 0
+    uint32    mapid;                                        // 1
+    float     x;                                            // 2
+    float     y;                                            // 3
+    float     z;                                            // 4
+    float     radius;                                       // 5
+    //float     dx;                                         // 6 unknown
+    //float     dy;                                         // 7 unknown
+    //float     dz;                                         // 8 unknown
+    //float     dorientation;                               // 9 unknown
+};
+
 struct BankBagSlotPricesEntry
 {
     uint32      ID;

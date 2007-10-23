@@ -65,11 +65,25 @@ enum TYPEID
 
 uint32 GuidHigh2TypeId(uint32 guid_hi);
 
+enum TempSummonType
+{
+    TEMPSUMMON_TIMED_OR_DEAD_DESPAWN       = 1,             // despawns after a specified time OR when the creature disappears
+    TEMPSUMMON_TIMED_OR_CORPSE_DESPAWN     = 2,             // despawns after a specified time OR when the creature dies
+    TEMPSUMMON_TIMED_DESPAWN               = 3,             // despawns after a specified time
+    TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT = 4,             // despawns after a specified time after the creature is out of combat
+    TEMPSUMMON_CORPSE_DESPAWN              = 5,             // despawns instantly after death
+    TEMPSUMMON_CORPSE_TIMED_DESPAWN        = 6,             // despawns after a specified time after death
+    TEMPSUMMON_DEAD_DESPAWN                = 7,             // despawns when the creature disappears
+    TEMPSUMMON_MANUAL_DESPAWN              = 8              // despawns when UnSummon() is called
+};
+
 class WorldPacket;
 class UpdateData;
 class ByteBuffer;
 class WorldSession;
+class Creature;
 class Player;
+class Map;
 class MapCell;
 class UpdateMask;
 class InstanceData;
@@ -272,6 +286,8 @@ class MANGOS_DLL_SPEC WorldObject : public Object
             return ( m_valuesCount > UNIT_FIELD_BOUNDINGRADIUS ) ? m_floatValues[UNIT_FIELD_BOUNDINGRADIUS] : 0.39f;
         }
         bool IsPositionValid() const;
+        void UpdateGroundPositionZ(float x, float y, float &z) const;
+
 
         void GetRandomPoint( float x, float y, float z, float distance, float &rand_x, float &rand_y, float &rand_z ) const;
 
@@ -328,11 +344,12 @@ class MANGOS_DLL_SPEC WorldObject : public Object
 
         // low level function for visibility change code, must be define in all main world object subclasses
         virtual bool isVisibleForInState(Player const* u, bool inVisibleList) const = 0;
+
+        Map      * GetMap() const;
+        Map const* GetBaseMap() const;
+        Creature* SummonCreature(uint32 id, float x, float y, float z, float ang,TempSummonType spwtype,uint32 despwtime);
     protected:
         explicit WorldObject( WorldObject *instantiator );
-
-        void _UpdatePositionZ(float x, float y, float &z) const;
-
         std::string m_name;
 
     private:

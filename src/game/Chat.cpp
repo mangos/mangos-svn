@@ -168,7 +168,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "all_spell",          SEC_ADMINISTRATOR, &ChatHandler::HandleReloadAllSpellCommand,            "", NULL },
 
         { "areatrigger_tavern",          SEC_ADMINISTRATOR, &ChatHandler::HandleReloadAreaTriggerTavernCommand,       "", NULL },
-        { "areatrigger_template",        SEC_ADMINISTRATOR, &ChatHandler::HandleReloadAreaTriggerTemplateCommand,     "", NULL },
+        { "areatrigger_teleport",        SEC_ADMINISTRATOR, &ChatHandler::HandleReloadAreaTriggerTeleportCommand,     "", NULL },
         { "areatrigger_involvedrelation",SEC_ADMINISTRATOR, &ChatHandler::HandleReloadQuestAreaTriggersCommand,       "", NULL },
         { "button_scripts",              SEC_ADMINISTRATOR, &ChatHandler::HandleReloadButtonScriptsCommand,           "", NULL },
         { "command",                     SEC_ADMINISTRATOR, &ChatHandler::HandleReloadCommandCommand,                 "", NULL },
