@@ -32,20 +32,18 @@
 #   include <sys/timeb.h>
 #endif
 
+#if PLATFORM == PLATFORM_WIN32
+inline uint32 getMSTime() { return GetTickCount(); }
+#else
 inline uint32 getMSTime()
 {
     uint32 time_in_ms = 0;
-    #if PLATFORM == PLATFORM_WIN32
-    time_in_ms = timeGetTime();
-    #else
     struct timeb tp;
     ftime(&tp);
-
     time_in_ms = tp.time * 1000 + tp.millitm;
-    #endif
-
     return time_in_ms;
 }
+#endif
 
 class IntervalTimer
 {
