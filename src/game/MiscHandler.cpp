@@ -873,7 +873,10 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
 
     float dist = GetPlayer()->GetDistance(atEntry->x,atEntry->y,atEntry->z);
 
-    if (dist > atEntry->radius+5.0)
+    // disable (use visibility distance) check if atEntry->dx != 0 (unknown formula for this case)
+    float max_dist = atEntry->dx==0 ? atEntry->radius+5.0 : MAX_VISIBILITY_DISTANCE;
+
+    if (dist > max_dist)
     {
         sLog.outDebug("Player '%s' too far (%u radius: %f distance: %f), ignore Area Trigger ID: %u", GetPlayer()->GetName(), atEntry->radius, dist, Trigger_ID);
         return;
@@ -915,7 +918,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     // NULL if all values default (non teleport trigger)
     AreaTrigger const* at = objmgr.GetAreaTrigger(Trigger_ID);
 
-    if(at && at->IsTeleport())
+    if(at)
     {
         if(at->requiredItem)
         {

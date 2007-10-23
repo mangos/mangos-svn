@@ -115,6 +115,7 @@ bool ChatHandler::HandleReloadAllSpellCommand(const char*)
     HandleReloadSpellLearnSpellCommand("a");
     HandleReloadSpellProcEventCommand("a");
     HandleReloadSpellScriptTargetCommand("a");
+    HandleReloadSpellTeleportCommand("a");
     return true;
 }
 
@@ -306,6 +307,14 @@ bool ChatHandler::HandleReloadSpellScriptTargetCommand(const char*)
     sLog.outString( "Re-Loading SpellsScriptTarget..." );
     objmgr.LoadSpellScriptTarget();
     SendGlobalSysMessage("DB table `spell_script_target` (spell targets selection in case specific creature/GO requirements.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadSpellTeleportCommand(const char*)
+{
+    sLog.outString( "Re-Loading Spell teleport coordinates..." );
+    objmgr.LoadSpellTeleports();
+    SendGlobalSysMessage("DB table `spell_teleport` reloaded.");
     return true;
 }
 

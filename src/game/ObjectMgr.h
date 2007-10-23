@@ -89,8 +89,15 @@ struct AreaTrigger
     float  target_Y;
     float  target_Z;
     float  target_Orientation;
+};
 
-    bool IsTeleport() const { return target_X != 0 || target_Y !=0 || target_Z !=0; }
+struct SpellTeleport
+{
+    uint32 target_mapId;
+    float  target_X;
+    float  target_Y;
+    float  target_Z;
+    float  target_Orientation;
 };
 
 typedef std::set<uint32> CellGuidSet;
@@ -226,6 +233,7 @@ class ObjectMgr
         typedef std::set< ArenaTeam * > ArenaTeamSet;
 
         typedef HM_NAMESPACE::hash_map<uint32, AreaTrigger> AreaTriggerMap;
+        typedef HM_NAMESPACE::hash_map<uint32, SpellTeleport> SpellTeleportMap;
 
         typedef HM_NAMESPACE::hash_map<uint32, ReputationOnKillEntry> RepOnKillMap;
 
@@ -363,6 +371,14 @@ class ObjectMgr
             return NULL;
         }
 
+        SpellTeleport const* GetSpellTeleport(uint32 spell_id) const
+        {
+            SpellTeleportMap::const_iterator itr = mSpellTeleports.find( spell_id );
+            if( itr != mSpellTeleports.end( ) )
+                return &itr->second;
+            return NULL;
+        }
+
         SpellAffection const* GetSpellAffection(uint16 spellId, uint8 effectId) const
         {
             SpellAffectMap::const_iterator itr = mSpellAffectMap.find((spellId<<8) + effectId);
@@ -438,8 +454,6 @@ class ObjectMgr
         void LoadGameObjectLocales();
         void LoadGameobjects();
         void LoadGameobjectRespawnTimes();
-        void LoadSpellProcEvents();
-        void LoadSpellThreats();
         void LoadItemPrototypes();
         void LoadItemLocales();
         void LoadQuestLocales();
@@ -449,9 +463,13 @@ class ObjectMgr
         void LoadGossipText();
 
         void LoadAreaTriggerTeleports();
-        void LoadSpellAffects();
         void LoadQuestAreaTriggers();
         void LoadTavernAreaTriggers();
+
+        void LoadSpellAffects();
+        void LoadSpellProcEvents();
+        void LoadSpellTeleports();
+        void LoadSpellThreats();
 
         void LoadItemTexts();
         void LoadPageTexts();
@@ -745,6 +763,7 @@ class ObjectMgr
         TavernAreaTriggerSet mTavernAreaTriggerSet;
         GossipTextMap       mGossipText;
         AreaTriggerMap      mAreaTriggers;
+        SpellTeleportMap    mSpellTeleports;
 
         RepOnKillMap        mRepOnKill;
 

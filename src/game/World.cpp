@@ -603,6 +603,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Graveyard-zone links...");
     objmgr.LoadGraveyardZones();
 
+    sLog.outString( "Loading Spell teleport coordinates..." );
+    objmgr.LoadSpellTeleports();
+
     sLog.outString( "Loading SpellAffect definitions..." );
     objmgr.LoadSpellAffects();
 
