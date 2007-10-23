@@ -1079,9 +1079,27 @@ void Spell::EffectTriggerSpell(uint32 i)
 
 void Spell::EffectTeleportUnits(uint32 i)
 {
-    if(!unitTarget)
+    if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
-    HandleTeleport(m_spellInfo->Id,unitTarget);
+
+    if(unitTarget ->isInFlight())
+        return;
+
+    // special case for homebind
+    if(m_spellInfo->Id == 8690 || m_spellInfo->Id == 556)
+    {
+        //homebind location is loaded always
+        ((Player*)unitTarget)->TeleportTo(((Player*)m_caster)->m_homebindMapId,((Player*)m_caster)->m_homebindX,((Player*)m_caster)->m_homebindY,((Player*)m_caster)->m_homebindZ,unitTarget->GetOrientation());
+        return;
+    }
+
+    SpellTeleport const* st = objmgr.GetSpellTeleport(m_spellInfo->Id);
+    if(!st)
+    {
+        sLog.outError( "SPELL: unknown Teleport coordinates for spell ID %u\n", m_spellInfo->Id );
+        return;
+    }
+    ((Player*)unitTarget)->TeleportTo(st->target_mapId,st->target_X,st->target_Y,st->target_Z,st->target_Orientation);
 }
 
 void Spell::EffectApplyAura(uint32 i)
@@ -3160,7 +3178,12 @@ void Spell::EffectStuck(uint32 i)
 
     sLog.outDebug("Spell Effect: Stuck");
     sLog.outDetail("Player %s (guid %u) used auto-unstuck future at map %u (%f, %f, %f)", m_caster->GetName(), m_caster->GetGUIDLow(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ());
-    HandleTeleport(m_spellInfo->Id, m_caster);
+
+    if(m_caster->isInFlight())
+        return;
+
+    //homebind location is loaded always
+    ((Player*)m_caster)->TeleportTo(((Player*)m_caster)->m_homebindMapId,((Player*)m_caster)->m_homebindX,((Player*)m_caster)->m_homebindY,((Player*)m_caster)->m_homebindZ,m_caster->GetOrientation());
 
     // from patch 2.0.12 Stuck spell trigger Hearthstone cooldown
     //((Player*)m_caster)->AddSpellCooldown(8690, time(NULL) + 3600); // add 1 hour cooldown to Hearthstone

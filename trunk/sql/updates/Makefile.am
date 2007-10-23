@@ -498,6 +498,8 @@ pkgdata_DATA = \
 	4608_game_graveyard_zone.sql \
 	4615_creature_template.sql \
 	4628.sql \
+	4632_areatrigger_teleport.sql \
+	4633_spell_teleport.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -977,4 +979,6 @@ EXTRA_DIST = \
 	4615_creature_template.sql \
 	4627_game_event_model_equip.sql \
 	4628.sql \
+	4632_areatrigger_teleport.sql \
+	4633_spell_teleport.sql \
 	README

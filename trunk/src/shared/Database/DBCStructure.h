@@ -61,7 +61,7 @@ struct AreaTriggerEntry
     float     y;                                            // 3
     float     z;                                            // 4
     float     radius;                                       // 5
-    //float     dx;                                         // 6 unknown
+    float     dx;                                           // 6 unknown (used for skip distance check based at radius if not null
     //float     dy;                                         // 7 unknown
     //float     dz;                                         // 8 unknown
     //float     dorientation;                               // 9 unknown

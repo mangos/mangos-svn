@@ -3395,48 +3395,6 @@ int32 Spell::CalculateDamage(uint8 i)
     return value;
 }
 
-void Spell::HandleTeleport(uint32 id, Unit* Target)
-{
-    if(!Target || Target->GetTypeId() != TYPEID_PLAYER)
-        return;
-
-    if(Target->isInFlight())
-        return;
-
-    if(m_spellInfo->Id == 8690 || m_spellInfo->Id == 556 || m_spellInfo->Id == 7355)
-    {
-        //old code, slow:
-        /*Field *fields;
-        QueryResult *result = sDatabase.PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", m_caster->GetGUIDLow());
-        if(!result)
-        {
-            sLog.outError( "SPELL: No homebind location set for %i\n", m_caster->GetGUIDLow());
-            return;
-        }
-        fields = result->Fetch();
-
-        uint32 TC_mapId = fields[0].GetUInt32();
-        float  TC_x = fields[2].GetFloat();
-        float  TC_y = fields[3].GetFloat();
-        float  TC_z = fields[4].GetFloat();
-
-        delete result;*/
-
-        //homebind location is loaded always
-        ((Player*)Target)->TeleportTo(((Player*)m_caster)->m_homebindMapId,((Player*)m_caster)->m_homebindX,((Player*)m_caster)->m_homebindY,((Player*)m_caster)->m_homebindZ,Target->GetOrientation());
-    }
-    else
-    {
-        AreaTrigger const* at = objmgr.GetAreaTrigger(id);
-        if(!at || !at->IsTeleport())
-        {
-            sLog.outError( "SPELL: unknown Teleport Coords ID %i\n", id );
-            return;
-        }
-        ((Player*)Target)->TeleportTo(at->target_mapId,at->target_X,at->target_Y,at->target_Z,at->target_Orientation);
-    }
-}
-
 void Spell::Delayed(int32 delaytime)
 {
     if(!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)

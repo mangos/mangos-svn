@@ -520,7 +520,6 @@ class Spell
         uint8 CheckRange();
         uint8 CheckMana(uint32 *mana);
         int32 CalculateDamage(uint8 i);
-        void HandleTeleport(uint32 id, Unit* Target);
         void Delayed(int32 delaytime);
         void DelayedChannel(int32 delaytime);
         void reflect(Unit *refunit);

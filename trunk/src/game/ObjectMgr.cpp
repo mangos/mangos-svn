@@ -3793,6 +3793,12 @@ void ObjectMgr::LoadAreaTriggerTeleports()
             continue;
         }
 
+        if(at.target_X==0 && at.target_Y==0 && at.target_Z==0)
+        {
+            sLog.outErrorDb("Area trigger (ID:%u) target coordinates not provided.",Trigger_ID);
+            continue;
+        }
+
         mAreaTriggers[Trigger_ID] = at;
 
     } while( result->NextRow() );
@@ -3801,6 +3807,91 @@ void ObjectMgr::LoadAreaTriggerTeleports()
 
     sLog.outString();
     sLog.outString( ">> Loaded %u area trigger teleport definitions", count );
+}
+
+void ObjectMgr::LoadSpellTeleports()
+{
+    mSpellTeleports.clear();                                // need for reload case
+
+    uint32 count = 0;
+
+    //                                            0    1            2                   3                   4                   5
+    QueryResult *result = sDatabase.Query("SELECT `id`,`target_map`,`target_position_x`,`target_position_y`,`target_position_z`,`target_orientation` FROM `spell_teleport`");
+    if( !result )
+    {
+
+        barGoLink bar( 1 );
+
+        bar.step();
+
+        sLog.outString();
+        sLog.outString( ">> Loaded %u spell teleport coordinates", count );
+        return;
+    }
+
+    barGoLink bar( result->GetRowCount() );
+
+    do
+    {
+        Field *fields = result->Fetch();
+
+        bar.step();
+
+        count++;
+
+        uint32 Spell_ID = fields[0].GetUInt32();
+
+        SpellTeleport st;
+
+        st.target_mapId       = fields[1].GetUInt32();
+        st.target_X           = fields[2].GetFloat();
+        st.target_Y           = fields[3].GetFloat();
+        st.target_Z           = fields[4].GetFloat();
+        st.target_Orientation = fields[5].GetFloat();
+
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(Spell_ID);
+        if(!spellInfo)
+        {
+            sLog.outErrorDb("Spell (ID:%u) listed in `spell_tepelort` not exist`.",Spell_ID);
+            continue;
+        }
+
+        bool found = false;
+        for(int i = 0; i < 3; ++i)
+        {
+            if( spellInfo->Effect[i]==SPELL_EFFECT_TELEPORT_UNITS )
+            {
+                found = true;
+                break;
+            }
+        }
+        if(!found)
+        {
+            sLog.outErrorDb("Spell (Id: %u) listed in `spell_teleport` not have effect SPELL_EFFECT_TELEPORT_UNITS (5).",Spell_ID);
+            continue;
+        }
+
+        MapEntry const* mapEntry = sMapStore.LookupEntry(st.target_mapId);
+        if(!mapEntry)
+        {
+            sLog.outErrorDb("Spell (ID:%u) teleport target map (ID: %u) not exist in `Map.dbc`.",Spell_ID,st.target_mapId);
+            continue;
+        }
+
+        if(st.target_X==0 && st.target_Y==0 && st.target_Z==0)
+        {
+            sLog.outErrorDb("Spell (ID:%u) teleport target coordinates not provided.",Spell_ID);
+            continue;
+        }
+
+        mSpellTeleports[Spell_ID] = st;
+
+    } while( result->NextRow() );
+
+    delete result;
+
+    sLog.outString();
+    sLog.outString( ">> Loaded %u spell teleport coordinates", count );
 }
 
 void ObjectMgr::LoadSpellAffects()
