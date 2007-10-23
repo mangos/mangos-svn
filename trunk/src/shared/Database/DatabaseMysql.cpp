@@ -25,6 +25,7 @@
 #include "DatabaseEnv.h"
 #include "Database/MySQLDelayThread.h"
 #include "Database/SqlOperations.h"
+#include "Timer.h"
 
 void DatabaseMysql::ThreadStart()
 {
@@ -179,7 +180,7 @@ QueryResult* DatabaseMysql::Query(const char *sql)
         // guarded block for thread-safe mySQL request
         ZThread::Guard<ZThread::FastMutex> query_connection_guard(mMutex);
 #ifdef MANGOS_DEBUG
-        uint32 _s = ::GetTickCount();
+        uint32 _s = getMSTime();
 #endif
         if(mysql_query(mMysql, sql))
         {
@@ -189,7 +190,9 @@ QueryResult* DatabaseMysql::Query(const char *sql)
         }
         else
         {
-            DEBUG_LOG("[%u ms] SQL: %s", ::GetTickCount() - _s, sql );
+#ifdef MANGOS_DEBUG
+            sLog.outDebug("[%u ms] SQL: %s", getMSTime() - _s, sql );
+#endif
         }
 
         result = mysql_store_result(mMysql);
@@ -247,7 +250,7 @@ bool DatabaseMysql::DirectExecute(const char* sql)
         // guarded block for thread-safe mySQL request
         ZThread::Guard<ZThread::FastMutex> query_connection_guard(mMutex);
 #ifdef MANGOS_DEBUG
-        uint32 _s = ::GetTickCount();
+        uint32 _s = getMSTime();
 #endif
         if(mysql_query(mMysql, sql))
         {
@@ -257,7 +260,9 @@ bool DatabaseMysql::DirectExecute(const char* sql)
         }
         else
         {
-            DEBUG_LOG("[%u ms] SQL: %s", ::GetTickCount() - _s, sql );
+#ifdef MANGOS_DEBUG
+            sLog.outDebug("[%u ms] SQL: %s", getMSTime() - _s, sql );
+#endif
         }
         // end guarded block
     }
