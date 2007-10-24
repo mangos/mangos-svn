@@ -92,6 +92,9 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             std::string msg = "";
             recv_data >> msg;
 
+            if(msg.empty())
+                break;
+
             if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
                 break;
 
@@ -109,6 +112,9 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             recv_data >> to;
             CHECK_PACKET_SIZE(recv_data,4+4+(to.size()+1)+1);
             recv_data >> msg;
+
+            if(msg.empty())
+                break;
 
             if(to.empty())
             {
@@ -150,6 +156,9 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             std::string msg = "";
             recv_data >> msg;
 
+            if(msg.empty())
+                break;
+
             if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
                 break;
 
@@ -166,6 +175,9 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
         {
             std::string msg = "";
             recv_data >> msg;
+
+            if(msg.empty())
+                break;
 
             if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
                 break;
@@ -184,6 +196,9 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             std::string msg = "";
             recv_data >> msg;
 
+            if(msg.empty())
+                break;
+
             if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
                 break;
 
@@ -199,6 +214,9 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
         {
             std::string msg="";
             recv_data >> msg;
+
+            if(msg.empty())
+                break;
 
             if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
                 break;
@@ -216,6 +234,9 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             std::string msg="";
             recv_data >> msg;
 
+            if(msg.empty())
+                break;
+
             if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
                 break;
 
@@ -232,6 +253,9 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             std::string msg="";
             recv_data >> msg;
 
+            if(msg.empty())
+                break;
+
             Group *group = GetPlayer()->GetGroup();
             if(!group || !group->isRaidGroup() || !group->IsLeader(GetPlayer()->GetGUID()))
                 return;
@@ -246,6 +270,9 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             std::string msg="";
             recv_data >> msg;
 
+            if(msg.empty())
+                break;
+
             Group *group = GetPlayer()->GetGroup();
             if(!group || !group->isRaidGroup())
                 return;
@@ -259,6 +286,9 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
         {
             std::string msg="";
             recv_data >> msg;
+
+            if(msg.empty())
+                break;
 
             Group *group = GetPlayer()->GetGroup();
             if(!group || !group->isRaidGroup() || !group->IsLeader(GetPlayer()->GetGUID()))
@@ -278,6 +308,9 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             CHECK_PACKET_SIZE(recv_data,4+4+(channel.size()+1)+1);
 
             recv_data >> msg;
+
+            if(msg.empty())
+                break;
 
             if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
             {
