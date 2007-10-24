@@ -653,6 +653,11 @@ void WorldSession::HandleTutorialFlag( WorldPacket & recv_data )
     recv_data >> iFlag;
 
     uint32 wInt = (iFlag / 32);
+    if (wInt >= 8)
+    {
+        //sLog.outError("CHEATER? Account:[%d] Guid[%u] tried to send wrong CMSG_TUTORIAL_FLAG", GetAccountId(),GetGUID());
+        return;
+    }
     uint32 rInt = (iFlag % 32);
 
     uint32 tutflag = GetPlayer()->GetTutorialInt( wInt );
