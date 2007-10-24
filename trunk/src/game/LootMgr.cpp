@@ -317,12 +317,14 @@ QuestItemList* FillQuestLoot(Player* player, Loot *loot)
 
 void Loot::NotifyItemRemoved(uint8 lootIndex)
 {
-    // notifiy all players that are looting this that the item was removed
+    // notify all players that are looting this that the item was removed
     // convert the index to the slot the player sees
-    Player* pl;
-    for(std::set<uint64>::iterator i = PlayersLooting.begin(); i != PlayersLooting.end(); ++i)
+    std::set<uint64>::iterator i_next; 
+    for(std::set<uint64>::iterator i = PlayersLooting.begin(); i != PlayersLooting.end(); i = i_next)
     {
-        if (pl = ObjectAccessor::Instance().FindPlayer(*i))
+        i_next = i;
+        ++i_next;
+        if(Player* pl = ObjectAccessor::Instance().FindPlayer(*i))
             pl->SendNotifyLootItemRemoved(lootIndex);
         else
             PlayersLooting.erase(i);
@@ -331,11 +333,13 @@ void Loot::NotifyItemRemoved(uint8 lootIndex)
 
 void Loot::NotifyMoneyRemoved()
 {
-    // notifiy all players that are looting this that the money was removed
-    Player* pl;
-    for(std::set<uint64>::iterator i = PlayersLooting.begin(); i != PlayersLooting.end(); ++i)
+    // notify all players that are looting this that the money was removed
+    std::set<uint64>::iterator i_next; 
+    for(std::set<uint64>::iterator i = PlayersLooting.begin(); i != PlayersLooting.end(); i = i_next)
     {
-        if (pl = ObjectAccessor::Instance().FindPlayer(*i))
+        i_next = i;
+        ++i_next;
+        if(Player* pl = ObjectAccessor::Instance().FindPlayer(*i))
             pl->SendNotifyLootMoneyRemoved();
         else
             PlayersLooting.erase(i);
@@ -349,23 +353,26 @@ void Loot::NotifyQuestItemRemoved(uint8 questIndex)
     // (other questitems can be looted by each group member)
     // bit inefficient but isnt called often
 
-    uint8 i;
-    Player* pl;
-    for(std::set<uint64>::iterator itr = PlayersLooting.begin(); itr != PlayersLooting.end(); ++itr)
+    std::set<uint64>::iterator i_next; 
+    for(std::set<uint64>::iterator i = PlayersLooting.begin(); i != PlayersLooting.end(); i = i_next)
     {
-        if (pl = ObjectAccessor::Instance().FindPlayer(*itr))
+        i_next = i;
+        ++i_next;
+        if(Player* pl = ObjectAccessor::Instance().FindPlayer(*i))
         {
             QuestItemMap::iterator pq = PlayerQuestItems.find(pl);
             if (pq != PlayerQuestItems.end() && pq->second)
             {
                 // find where/if the player has the given item in it's vector
                 QuestItemList& pql = *pq->second;
-                for (i = 0; i < pql.size(); i++)
-                    if (pql[i].index == questIndex)
+
+                uint8 j;
+                for (j = 0; j < pql.size(); ++j)
+                    if (pql[j].index == questIndex)
                         break;
 
-                if (i < pql.size())
-                    pl->SendNotifyLootItemRemoved(items.size()+i);
+                if (j < pql.size())
+                    pl->SendNotifyLootItemRemoved(items.size()+j);
             }
         }
         else
