@@ -288,7 +288,7 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
             chr->GetSession()->SendPacket( &data );
         }
 
-        chr->SetRecallPosition(chr->GetMapId(),chr->GetPositionX(),chr->GetPositionY(),chr->GetPositionZ(),chr->GetOrientation());
+        chr->SaveRecallPosition();
 
         // before GM
         float x,y,z;
@@ -388,7 +388,7 @@ bool ChatHandler::HandleGonameCommand(const char* args)
             chr->GetSession()->SendPacket(&data);
         }
 
-        _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
+        _player->SaveRecallPosition();
 
         // to point to see at target with same orientation
         float x,y,z;
@@ -407,7 +407,7 @@ bool ChatHandler::HandleGonameCommand(const char* args)
         uint32 map;
         if(Player::LoadPositionFromDB(map,x,y,z,o,guid))
         {
-            _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
+            _player->SaveRecallPosition();
             _player->TeleportTo(map, x, y, z,_player->GetOrientation());
             return true;
         }
@@ -1572,7 +1572,7 @@ bool ChatHandler::HandleTeleCommand(const char * args)
         return true;
     }
 
-    _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
+    _player->SaveRecallPosition();
 
     _player->TeleportTo(mapid, x, y, z, ort);
     return true;
@@ -1808,7 +1808,7 @@ bool ChatHandler::HandleNameTeleCommand(const char * args)
             chr->GetSession()->SendPacket( &data );
         }
 
-        chr->SetRecallPosition(chr->GetMapId(),chr->GetPositionX(),chr->GetPositionY(),chr->GetPositionZ(),chr->GetOrientation());
+        chr->SaveRecallPosition();
 
         chr->TeleportTo(mapid,x,y,z,chr->GetOrientation());
     }
@@ -1901,7 +1901,7 @@ bool ChatHandler::HandleGroupTeleCommand(const char * args)
             pl->GetSession()->SendPacket( &data );
         }
 
-        pl->SetRecallPosition(pl->GetMapId(),pl->GetPositionX(),pl->GetPositionY(),pl->GetPositionZ(),pl->GetOrientation());
+        pl->SaveRecallPosition();
         pl->TeleportTo(mapid, x, y, z, ort);
     }
 
@@ -1989,7 +1989,7 @@ bool ChatHandler::HandleGroupgoCommand(const char* args)
             pl->GetSession()->SendPacket( &data );
         }
 
-        pl->SetRecallPosition(pl->GetMapId(),pl->GetPositionX(),pl->GetPositionY(),pl->GetPositionZ(),pl->GetOrientation());
+        pl->SaveRecallPosition();
 
         // before GM
         float x,y,z;
@@ -2036,7 +2036,7 @@ bool ChatHandler::HandleGoXYCommand(const char* args)
 
     Map const *map = MapManager::Instance().GetBaseMap(mapid);
     float z = std::max(map->GetHeight(x, y, 0), map->GetWaterLevel(x, y));
-    _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
+    _player->SaveRecallPosition();
     _player->TeleportTo(mapid, x, y, z, _player->GetOrientation());
 
     return true;
@@ -2079,7 +2079,7 @@ bool ChatHandler::HandleGoXYZCommand(const char* args)
         return true;
     }
 
-    _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
+    _player->SaveRecallPosition();
     _player->TeleportTo(mapid, x, y, z, _player->GetOrientation());
 
     return true;
@@ -2123,7 +2123,7 @@ bool ChatHandler::HandleGoGridCommand(const char* args)
 
     Map const *map = MapManager::Instance().GetBaseMap(mapid);
     float z = std::max(map->GetHeight(x, y, 0), map->GetWaterLevel(x, y));
-    _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
+    _player->SaveRecallPosition();
     _player->TeleportTo(mapid, x, y, z, _player->GetOrientation());
 
     return true;

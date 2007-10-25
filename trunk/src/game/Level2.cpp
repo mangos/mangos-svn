@@ -288,9 +288,50 @@ bool ChatHandler::HandleGoObjectCommand(const char* args)
         return true;
     }
 
-    _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
+    _player->SaveRecallPosition();
 
     _player->TeleportTo(mapid, x, y, z, ort);
+    return true;
+}
+
+bool ChatHandler::HandleGoTriggerCommand(const char* args)
+{
+    Player* _player = m_session->GetPlayer();
+
+    if(_player->isInFlight())
+    {
+        SendSysMessage(LANG_YOU_IN_FLIGHT);
+        return true;
+    }
+
+    if (!*args)
+        return false;
+
+    char *atId = strtok((char*)args, " ");
+    if (!atId)
+        return false;
+
+    int32 i_atId = atoi(atId);
+
+    if(!i_atId)
+        return false;
+
+    AreaTriggerEntry const* at = sAreaTriggerStore.LookupEntry(i_atId);
+    if (!at)
+    {
+        PSendSysMessage(LANG_COMMAND_GOAREATRNOTFOUND,i_atId);
+        return true;
+    }
+
+    if(!MapManager::IsValidMapCoord(at->mapid,at->x,at->y))
+    {
+        PSendSysMessage(LANG_INVALID_TARGET_COORD,at->x,at->y,at->mapid);
+        return true;
+    }
+
+    _player->SaveRecallPosition();
+
+    _player->TeleportTo(at->mapid, at->x, at->y, at->z, _player->GetOrientation());
     return true;
 }
 
@@ -391,7 +432,7 @@ bool ChatHandler::HandleGoCreatureCommand(const char* args)
         return true;
     }
 
-    _player->SetRecallPosition(_player->GetMapId(),_player->GetPositionX(),_player->GetPositionY(),_player->GetPositionZ(),_player->GetOrientation());
+    _player->SaveRecallPosition();
 
     _player->TeleportTo(mapid, x, y, z, ort);
     return true;

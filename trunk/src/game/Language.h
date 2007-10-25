@@ -270,6 +270,7 @@
 #define LANG_VALUE_SAVED                 "Value saved."
 #define LANG_VALUE_SAVED_REJOIN          "Value saved, you may need to rejoin or clean your client cache."
 
+#define LANG_COMMAND_GOAREATRNOTFOUND    "Areatrigger ID %u not found!"
 #define LANG_INVALID_TARGET_COORD        "Target map or coordinates is invalid (X: %f Y: %f MapId: %u)"
 #define LANG_COMMAND_TARGETOBJNOTFOUND   "Nothing found!"
 #define LANG_COMMAND_GOOBJNOTFOUND       "Object not found!"

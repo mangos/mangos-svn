@@ -789,6 +789,7 @@ INSERT INTO `command` VALUES
 ('gogrid',1,'Syntax: .gogrid #gridX #gridY [#mapId]\n\nTeleport the gm to center of grid with provided indexes at map #mapId (or current map if it not provided).'),
 ('goobject',1,'Syntax: .goobject #object_guid\r\nTeleport your character to gameobject with guid #object_guid'),
 ('goname',1,'Syntax: .goname $charactername\r\n\r\nTeleport to the given character. Either specify the character name or click on the character\'s portrait, e.g. when you are in a group.'),
+('gotrigger',2,'Syntax: .gotrigger #trigger_id\r\n\r\nTeleport your character to areatrigger with id #trigger_id. Character will be teleported to trigger target if selected areatrigger is telporting trigger.'),
 ('goxy',1,'Syntax: .goxy #x #y [#mapid]\r\n\r\nTeleport player to point with (#x,#y) coordinates at ground(water) level at map #mapid or same map if #mapid not provided.'),
 ('goxyz',1,'Syntax: .goxyz #x #y #z [#mapid]\r\n\r\nTeleport player to point with (#x,#y,#z) coordinates at ground(water) level at map #mapid or same map if #mapid not provided.'),
 ('gps',1,'Syntax: .gps\r\n\r\nDisplay the position information for a selected character or creature. Position information includes X, Y, Z, and orientation, map Id and zone Id'),

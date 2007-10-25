@@ -665,17 +665,20 @@ Player* Group::GetMemberForXPAtKill(Player *member, Unit const* victim)
     return member;
 }
 
-uint32 Group::GetMemberCountForXPAtKill(Unit const* victim)
+void Group::GetDataForXPAtKill(Unit const* victim, uint32& count,uint32& sum_level, Player* & memeber_with_max_level)
 {
-    uint32 count = 0;
     for(GroupReference *itr = GetFirstMember(); itr != NULL; itr = itr->next())
     {
         Player* member = GetMemberForXPAtKill(itr->getSource(),victim);
 
         if(member)
+        {
             ++count;
+            sum_level += member->getLevel();
+            if(!memeber_with_max_level || memeber_with_max_level->getLevel() < member->getLevel())
+                memeber_with_max_level = member;
+        }
     }
-    return count;
 }
 
 /*void Group::SendInit(WorldSession *session)

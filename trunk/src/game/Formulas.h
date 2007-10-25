@@ -165,6 +165,31 @@ namespace MaNGOS
 
             return money;
         }
+        inline float xp_in_group_rate(uint32 count, bool isRaid)
+        {
+            if(isRaid)
+            {
+                // FIX ME: must apply decrease modifiers dependent from raid size
+                return 1.0;
+            }
+            else
+            {
+                switch(count)
+                {
+                case 0: 
+                case 1: 
+                case 2: 
+                    return 1.0;
+                case 3: 
+                    return 1.166;
+                case 4: 
+                    return 1.3;
+                case 5: 
+                default:
+                    return 1.4;
+                }
+            }
+        }
     }
 }
 #endif
