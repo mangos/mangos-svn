@@ -14983,7 +14983,7 @@ void Player::LeaveBattleground()
     {
         bg->RemovePlayerAtLeave(GetGUID(), true, true);
 
-        if(bg->GetStatus() == STATUS_IN_PROGRESS)
+        if(bg->GetStatus() == STATUS_IN_PROGRESS && sWorld.getConfig(CONFIG_BATTLEGROUND_CAST_DESERTER))
             CastSpell(this, 26013, true);                   // Deserter
     }
 }
