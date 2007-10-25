@@ -47,6 +47,8 @@ DBCStorage <DurabilityCostsEntry> sDurabilityCostsStore(DurabilityCostsfmt);
 
 DBCStorage <EmotesTextEntry> sEmotesTextStore(EmoteEntryfmt);
 
+typedef std::map<uint32,SimpleFactionsList> FactionTeamMap;
+static FactionTeamMap sFactionTeamMap;
 DBCStorage <FactionEntry> sFactionStore(FactionEntryfmt);
 DBCStorage <FactionTemplateEntry> sFactionTemplateStore(FactionTemplateEntryfmt);
 
@@ -171,6 +173,15 @@ void LoadDBCStores(std::string dataPath)
     LoadDBC(bar,bad_dbc_files,sDurabilityQualityStore,   dataPath+"dbc/DurabilityQuality.dbc");
     LoadDBC(bar,bad_dbc_files,sEmotesTextStore,          dataPath+"dbc/EmotesText.dbc");
     LoadDBC(bar,bad_dbc_files,sFactionStore,             dataPath+"dbc/Faction.dbc");
+    for (uint32 i=0;i<sFactionStore.nCount; ++i)
+    {
+        FactionEntry const * faction = sFactionStore.LookupEntry(i);
+        if (faction && faction->team)
+        {
+            SimpleFactionsList &flist = sFactionTeamMap[faction->team];
+            flist.push_back(i);
+        }   
+    }
     LoadDBC(bar,bad_dbc_files,sFactionTemplateStore,     dataPath+"dbc/FactionTemplate.dbc");
     LoadDBC(bar,bad_dbc_files,sGemPropertiesStore,       dataPath+"dbc/GemProperties.dbc");
     LoadDBC(bar,bad_dbc_files,sGtChanceToMeleeCritBaseStore,dataPath+"dbc/gtChanceToMeleeCritBase.dbc");
@@ -304,6 +315,14 @@ void LoadDBCStores(std::string dataPath)
     sLog.outString();
     sLog.outString( ">> Loaded %d data stores", DBCFilesCount );
     sLog.outString();
+}
+
+SimpleFactionsList const* GetFactionTeamList(uint32 faction)
+{
+    FactionTeamMap::const_iterator itr = sFactionTeamMap.find(faction);
+    if(itr==sFactionTeamMap.end())
+        return NULL;
+    return &itr->second;
 }
 
 float GetRadius(SpellRadiusEntry const *radius)

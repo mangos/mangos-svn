@@ -62,6 +62,9 @@ enum SpellFamilyNames
 #define SPELLFAMILYFLAG_ROGUE_FEINT      0x08000000
 #define SPELLFAMILYFLAG_ROGUE_KIDNEYSHOT 0x00200000
 
+typedef std::list<uint32> SimpleFactionsList;
+
+SimpleFactionsList const* GetFactionTeamList(uint32 faction);
 float GetRadius(SpellRadiusEntry const *radius);
 uint32 GetCastTime(SpellCastTimesEntry const*time);
 float GetMinRange(SpellRangeEntry const *range);
