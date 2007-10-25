@@ -226,7 +226,6 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
     GameObject *obj = ObjectAccessor::Instance().GetGameObject(*_player, guid);
 
     if(!obj) return;
-    // uint32 t = obj->GetUInt32Value(GAMEOBJECT_TYPE_ID);
     //obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
     //obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
 
@@ -238,8 +237,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
     if (Script->GOHello(_player, obj))
         return;
 
-    uint32 t = obj->GetUInt32Value(GAMEOBJECT_TYPE_ID);
-    switch(t)
+    switch(obj->GetGoType())
     {
         case GAMEOBJECT_TYPE_DOOR:                          //0
             obj->SetUInt32Value(GAMEOBJECT_FLAGS,33);
@@ -570,7 +568,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             }
             break;
         default:
-            sLog.outDebug("Unknown Object Type %u\n", obj->GetUInt32Value(GAMEOBJECT_TYPE_ID));
+            sLog.outDebug("Unknown Object Type %u\n", obj->GetGoType());
             break;
     }
 

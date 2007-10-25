@@ -29,6 +29,7 @@ struct ItemPrototype;
 struct AuctionEntry;
 
 class Creature;
+class Item;
 class Player;
 class WorldPacket;
 class WorldSocket;
@@ -135,6 +136,8 @@ class MANGOS_DLL_SPEC WorldSession
         //mail
                                                             //used with item_page table
         bool SendItemInfo( uint32 itemid, WorldPacket data );
+        static void SendReturnToSender(uint32 mailId, uint8 messageType, uint32 sender_acc, uint32 sender_guid, uint32 receiver_guid, std::string subject, uint32 itemTextId, uint32 itemGuid, uint32 item_template, uint32 money, uint32 COD, Item* pItem);
+
         //auction
         void SendAuctionHello( uint64 guid, Creature * unit );
         void SendAuctionCommandResult( uint32 auctionId, uint32 Action, uint32 ErrorCode, uint32 bidError = 0);

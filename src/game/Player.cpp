@@ -3232,6 +3232,46 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
     // remove signs from petitions (also remove petitions if owner);
     RemovePetitionsAndSigns(playerguid, 10);
 
+    // return back all mails with COD and Item
+    QueryResult *resultMail = sDatabase.PQuery("SELECT `id`,`sender`,`subject`,`itemTextId`,`item_guid`,`item_template` FROM `mail` WHERE `receiver`='%u' AND `item_guid`<>0 AND `cod`<>0", guid);
+    if(resultMail)
+    {
+        do
+        {
+            Field *fields = resultMail->Fetch();
+
+            uint32 mail_id       = fields[0].GetUInt32();
+            uint32 sender        = fields[1].GetUInt32();
+            std::string subject  = fields[2].GetCppString();
+            uint32 itemTextId    = fields[3].GetUInt32();
+            uint32 item_guid     = fields[4].GetUInt32();
+            uint32 item_template = fields[5].GetUInt32();
+
+            //we can return mail now
+            //so firstly delete the old one
+            sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", mail_id);
+
+            ItemPrototype const* itemProto = objmgr.GetItemPrototype(item_template);
+            if(!itemProto)
+                continue;
+
+            Item* pItem = NewItemOrBag(itemProto);
+            if(!pItem->LoadFromDB(item_guid,MAKE_GUID(guid,HIGHGUID_PLAYER)))
+            {
+                delete pItem;
+                continue;
+            }
+
+            uint64 rc_guid = MAKE_GUID(sender,HIGHGUID_PLAYER);
+            uint32 pl_account = objmgr.GetPlayerAccountIdByGUID(MAKE_GUID(guid,HIGHGUID_PLAYER));
+
+            WorldSession::SendReturnToSender(mail_id,0,pl_account,guid,rc_guid,subject,itemTextId,item_guid,item_template, 0,0,pItem);
+        }
+        while (resultMail->NextRow());
+
+        delete resultMail;
+    }
+
     // unsummon and delete for pets is not required: player deleted from CLI or character list with not loaded pet.
 
     // NOW we can finally clear other DB data related to character
