@@ -184,7 +184,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "item_loot_template",          SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesItemCommand,       "", NULL },
         { "pickpocketing_loot_template", SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesPickpocketingCommand,"",NULL},
         { "prospecting_loot_template",   SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesProspectingCommand,"", NULL },
-        { "prospecting_loot_template",   SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesProspectingCommand,"", NULL },
+        { "skinning_loot_template",      SEC_ADMINISTRATOR, &ChatHandler::HandleReloadLootTemplatesSkinningCommand,   "", NULL },
         { "quest_end_scripts",           SEC_ADMINISTRATOR, &ChatHandler::HandleReloadQuestEndScriptsCommand,         "", NULL },
         { "quest_start_scripts",         SEC_ADMINISTRATOR, &ChatHandler::HandleReloadQuestStartScriptsCommand,       "", NULL },
         { "quest_template",              SEC_ADMINISTRATOR, &ChatHandler::HandleReloadQuestTemplateCommand,           "", NULL },

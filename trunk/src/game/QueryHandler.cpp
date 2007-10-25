@@ -83,7 +83,7 @@ void WorldSession::HandleNameQueryOpcode( WorldPacket & recv_data )
         SendNameQueryOpcodeFromDB(guid);
 }
 
-void WorldSession::HandleQueryTimeOpcode( WorldPacket & recv_data )
+void WorldSession::HandleQueryTimeOpcode( WorldPacket & /*recv_data*/ )
 {
     WorldPacket data( SMSG_QUERY_TIME_RESPONSE, 4+4 );
     data << (uint32)time(NULL);
@@ -91,110 +91,99 @@ void WorldSession::HandleQueryTimeOpcode( WorldPacket & recv_data )
     SendPacket( &data );
 }
 
+/// Only _static_ data send in this packet !!!
 void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,4+8);
 
     uint32 entry;
-    uint64 guid;
-
     recv_data >> entry;
-    recv_data >> guid;
-
-    SendCreatureQuery(entry, guid);
-}
-
-void WorldSession::SendCreatureQuery( uint32 entry, uint64 guid )
-{
-    Creature *unit = ObjectAccessor::Instance().GetCreatureOrPet(*_player, guid);
-
-    if (unit == NULL)
-    {
-        sLog.outDebug( "WORLD: SendCreatureQuery - (%u) NO SUCH UNIT! (GUID: %u, ENTRY: %u)", uint32(GUID_LOPART(guid)), guid, entry );
-        //    return;
-    }
 
     CreatureInfo const *ci = objmgr.GetCreatureTemplate(entry);
-
-    if (!ci)
+    if (ci)
     {
-        sLog.outDebug( "WORLD: SendCreatureQuery - (%u) NO CREATUREINFO! (GUID: %u, ENTRY: %u)", uint32(GUID_LOPART(guid)), guid, entry );
-        return;
-    }
+        std::string Name, SubName;
+        Name = ci->Name;
+        SubName = ci->SubName;
 
-    std::string Name, SubName;
-    //CreatureInfo const *ci = unit->GetCreatureInfo();
-    Name = ci->Name;
-    SubName = ci->SubName;
-
-    if (GetSessionLanguage()>0)
-    {
-        CreatureLocale const *cl = objmgr.GetCreatureLocale(entry);
-        if (cl)
+        uint8 m_language = GetSessionLanguage();
+        if (m_language > 0)
         {
-            if (cl->Name[GetSessionLanguage()]!="") // default to english
-                Name = cl->Name[GetSessionLanguage()];
-            if (cl->SubName[GetSessionLanguage()]!="") // same
-                SubName = cl->SubName[GetSessionLanguage()];
+            CreatureLocale const *cl = objmgr.GetCreatureLocale(entry);
+            if (cl)
+            {
+                if (!cl->Name[m_language].empty())          // default to english
+                    Name = cl->Name[m_language];
+                if (!cl->SubName[m_language].empty())       // same
+                    SubName = cl->SubName[m_language];
+            }
         }
+
+        sLog.outDetail("WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u.", ci->Name, entry);
+
+                                                            // guess size
+        WorldPacket data( SMSG_CREATURE_QUERY_RESPONSE, 100 );
+        data << (uint32)entry;                              // creature entry
+        data << Name;
+        data << uint8(0) << uint8(0) << uint8(0);           // name2, name3, name4, always empty
+        data << SubName;
+        data << ci->flag1;                                  // flags          wdbFeild7=wad flags1
+        data << (uint32)ci->type;
+        data << (uint32)ci->family;                         // family         wdbFeild9
+        data << (uint32)ci->rank;                           // rank           wdbFeild10
+        data << uint32(0);                                  // unknown        wdbFeild11
+        data << uint32(0);                                  // Id from CreatureSpellData.dbc    wdbFeild12
+        data << ci->DisplayID_A;                            // modelid_male1
+        data << ci->DisplayID_H;                            // modelid_female1 ?
+        data << ci->DisplayID_A2;                           // modelid_male2 ?
+        data << ci->DisplayID_H2;                           // modelid_femmale2 ?
+        data << (float)1.0f;                                // unk
+        data << (float)1.0f;                                // unk
+        data << uint8(ci->civilian);
+        data << uint8(ci->RacialLeader);
+        SendPacket( &data );
+        sLog.outDetail( "WORLD: Sent SMSG_CREATURE_QUERY_RESPONSE " );
     }
-
-    sLog.outDetail("WORLD: CMSG_CREATURE_QUERY '%s' - Entry: %u - GUID: %u.", ci->Name, entry, guid);
-
-    WorldPacket data( SMSG_CREATURE_QUERY_RESPONSE, 100 );  // guess size
-    data << (uint32)entry;                                  // creature entry
-    data << Name;
-    data << uint8(0) << uint8(0) << uint8(0);               // name2, name3, name4, always empty
-    data << SubName;
-    data << ci->flag1;                                      // flags          wdbFeild7=wad flags1
-    data << (uint32)ci->type;
-    data << (uint32)ci->family;                             // family         wdbFeild9
-    data << (uint32)ci->rank;                               // rank           wdbFeild10
-    data << uint32(0);                                      // unknown        wdbFeild11
-    data << uint32(0);                                      // Id from CreatureSpellData.dbc    wdbFeild12
-    data << ci->DisplayID_A;                                // modelid_male1
-    data << ci->DisplayID_H;                                // modelid_female1 ?
-    data << ci->DisplayID_A2;                               // modelid_male2 ?
-    data << ci->DisplayID_H2;                               // modelid_femmale2 ?
-    data << (float)1;                                       // unk
-    data << (float)1;                                       // unk
-    data << uint8(ci->civilian);
-    data << uint8(ci->RacialLeader);
-    SendPacket( &data );
+    else
+    {    
+        uint64 guid;
+        recv_data >> guid;
+        
+        sLog.outDetail( "WORLD: CMSG_CREATURE_QUERY - (%u) NO CREATURE INFO! (GUID: %u, ENTRY: %u)", uint32(GUID_LOPART(guid)), guid, entry );
+        WorldPacket data( SMSG_CREATURE_QUERY_RESPONSE, 4 );
+        data << uint32(entry | 0x80000000);
+        SendPacket( &data );
+        sLog.outDetail( "WORLD: Sent SMSG_CREATURE_QUERY_RESPONSE " );
+    }
 }
 
+/// Only _static_ data send in this packet !!!
 void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,4+8);
 
     uint32 entryID;
-    uint64 guid;
-
     recv_data >> entryID;
-    recv_data >> guid;
 
-    std::string Name;
     const GameObjectInfo *info = objmgr.GetGameObjectInfo(entryID);
-                                                            // guess size
-    WorldPacket data ( SMSG_GAMEOBJECT_QUERY_RESPONSE, 150 );
-    if(!info)
+    if(info)
     {
-        sLog.outDebug( "WORLD: CMSG_GAMEOBJECT_QUERY - Missing game object info for entry %u", entryID);
-        data << uint32(entryID | 0x80000000);
-    }
-    else
-    {
+
+        std::string Name;
         Name = info->name;
-        if (GetSessionLanguage()>0)
+
+        uint8 m_language = GetSessionLanguage();
+        if (m_language > 0)
         {
             GameObjectLocale const *gl = objmgr.GetGameObjectLocale(entryID);
             if (gl)
             {
-                if (gl->Name[GetSessionLanguage()]!="") // default to english
-                    Name = gl->Name[GetSessionLanguage()];
+                if (!gl->Name[m_language].empty())          // default to english
+                    Name = gl->Name[m_language];
             }
         }
-        sLog.outDetail("WORLD: CMSG_GAMEOBJECT_QUERY '%s' - Entry: %u - GUID: %u.", info->name, entryID, guid);
+        sLog.outDetail("WORLD: CMSG_GAMEOBJECT_QUERY '%s' - Entry: %u. ", info->name, entryID);
+        WorldPacket data ( SMSG_GAMEOBJECT_QUERY_RESPONSE, 150 );
         data << entryID;
         data << (uint32)info->type;
         data << (uint32)info->displayId;
@@ -227,11 +216,24 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
         data << uint32(info->sound21);
         data << uint32(info->sound22);
         data << uint32(info->sound23);
+        SendPacket( &data );
+        sLog.outDetail( "WORLD: Sent CMSG_GAMEOBJECT_QUERY " );
     }
-    SendPacket( &data );
+    else
+    {
+
+        uint64 guid;
+        recv_data >> guid;
+
+        sLog.outDetail( "WORLD: CMSG_GAMEOBJECT_QUERY - (%u) Missing gameobject info for (GUID: %u, ENTRY: %u)", uint32(GUID_LOPART(guid)), guid, entryID );
+        WorldPacket data ( SMSG_GAMEOBJECT_QUERY_RESPONSE, 4 );
+        data << uint32(entryID | 0x80000000);
+        SendPacket( &data );
+        sLog.outDetail( "WORLD: Sent CMSG_GAMEOBJECT_QUERY " );
+    }
 }
 
-void WorldSession::HandleCorpseQueryOpcode(WorldPacket &recv_data)
+void WorldSession::HandleCorpseQueryOpcode(WorldPacket & /*recv_data*/)
 {
     sLog.outDetail("WORLD: Received MSG_CORPSE_QUERY");
 
@@ -279,7 +281,9 @@ void WorldSession::HandleNpcTextQueryOpcode( WorldPacket & recv_data )
         data << uint32( 0 );
         data << "Greetings $N";
         data << "Greetings $N";
-    } else {
+    }
+    else
+    {
         std::string Text_0[8], Text_1[8];
         for (int i=0;i<8;i++)
         {
@@ -287,17 +291,18 @@ void WorldSession::HandleNpcTextQueryOpcode( WorldPacket & recv_data )
             Text_1[i]=pGossip->Options[i].Text_1;
         }
 
-        if (GetSessionLanguage()>0)
+        uint8 m_language = GetSessionLanguage();
+        if (m_language > 0)
         {
             NpcTextLocale const *nl = objmgr.GetNpcTextLocale(textID);
             if (nl)
             {
                 for (int i=0;i<8;i++)
                 {
-                    if (nl->Text_0[i][GetSessionLanguage()]!="")
-                        Text_0[i]=nl->Text_0[i][GetSessionLanguage()];
-                    if (nl->Text_1[i][GetSessionLanguage()]!="")
-                        Text_1[i]=nl->Text_1[i][GetSessionLanguage()];
+                    if (!nl->Text_0[i][m_language].empty())
+                        Text_0[i]=nl->Text_0[i][m_language];
+                    if (!nl->Text_1[i][m_language].empty())
+                        Text_1[i]=nl->Text_1[i][m_language];
                 }
             }
         }
@@ -359,13 +364,14 @@ void WorldSession::HandlePageQueryOpcode( WorldPacket & recv_data )
         else
         {
             std::string Text = pPage->Text;
-            if (GetSessionLanguage()>0)
+            uint8 m_language = GetSessionLanguage();
+            if (m_language > 0)
             {
                 PageTextLocale const *pl = objmgr.GetPageTextLocale(pageID);
                 if (pl)
                 {
-                    if (pl->Text[GetSessionLanguage()]!="")
-                        Text = pl->Text[GetSessionLanguage()];
+                    if (!pl->Text[m_language].empty())
+                        Text = pl->Text[m_language];
                 }
             }
             data << Text;

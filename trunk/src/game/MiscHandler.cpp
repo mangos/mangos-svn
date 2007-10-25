@@ -872,7 +872,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
     }
 
     // delta is safe radius
-    const float delta = 5.0;
+    const float delta = 5.0f;
     // check if player in the range of areatrigger
     Player* pl = GetPlayer();
 

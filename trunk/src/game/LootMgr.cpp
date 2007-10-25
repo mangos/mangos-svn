@@ -106,7 +106,7 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
                 displayid = proto->DisplayInfoID;
 
                 // non-quest (maybe group) loot with low chance
-                if( chanceOrRef < 0.000001 && questchance <= 0 )
+                if( chanceOrRef < 0.000001f && questchance <= 0.0f )
                 {
                     ssNonLootableItems << "loot entry = " << entry << " item = " << item << " mincount = " << mincount << " maxcount = " << maxcount << " (no chance)\n";
                     continue;
@@ -163,7 +163,7 @@ struct HasChance
     explicit HasChance(LootStore* _store) : m_store(_store)
     {
         for (int i=0; i < MaxLootGroups; i++)
-            CumulativeChance[i] = 0.0;
+            CumulativeChance[i] = 0.0f;
     }
 
     LootStoreItem* operator() ( LootStoreItem& itm )
@@ -193,7 +193,7 @@ struct HasChance
         if (itm.chanceOrRef >= 0)
         {
             // Group of current loot - check for item chance in the group
-            if (CumulativeChance[GroupId] == 0.0)
+            if (CumulativeChance[GroupId] == 0.0f)
                 RolledChance[GroupId] = rand_chance();
             if (CumulativeChance[GroupId] >= RolledChance[GroupId])
                 // An item from the group already accepted
@@ -208,7 +208,7 @@ struct HasChance
         // Reference to a group of another loot
         int LootId = -int(itm.chanceOrRef);
         float Chance = rand_chance();
-        float CumulChance = 0.0;
+        float CumulChance = 0.0f;
 
         LootStore::iterator tab = m_store->find(LootId);
         if(tab==m_store->end())

@@ -184,39 +184,38 @@ void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
         _player->DestroyItem( bag, slot, true );
 }
 
+// Only _static_ data send in this packet !!!
 void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,4+4+4);
 
     //sLog.outDebug("WORLD: CMSG_ITEM_QUERY_SINGLE");
     uint32 item;
-    uint64 guid;
-    recv_data >> item >> guid;
+    recv_data >> item;
 
     sLog.outDetail("STORAGE: Item Query = %u", item);
 
     ItemPrototype const *pProto = objmgr.GetItemPrototype( item );
-
-    Item *pItem = _player->GetItemByGuid( guid );
-
-    WorldPacket data( SMSG_ITEM_QUERY_SINGLE_RESPONSE, 600);// guess size
-
     if( pProto )
     {
         std::string Name, Description;
         Name = pProto->Name1;
         Description = pProto->Description;
-        if (GetSessionLanguage()>0)
+
+        uint8 m_language = GetSessionLanguage();
+        if ( m_language > 0 )
         {
             ItemLocale const *il = objmgr.GetItemLocale(pProto->ItemId);
             if (il)
             {
-                if (il->Name[GetSessionLanguage()]!="") // default to english
-                    Name = il->Name[GetSessionLanguage()];
-                if (il->Description[GetSessionLanguage()]!="") // default to english
-                    Description = il->Description[GetSessionLanguage()];
+                if (!il->Name[m_language].empty())          // default to english
+                    Name = il->Name[m_language];
+                if (!il->Description[m_language].empty())   // default to english
+                    Description = il->Description[m_language];
             }
         }
+                                                            // guess size
+        WorldPacket data( SMSG_ITEM_QUERY_SINGLE_RESPONSE, 600);        
         data << pProto->ItemId;
         data << pProto->Class;
 
@@ -275,31 +274,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
             // send DBC data for cooldowns in same way as it used in Spell::SendSpellCooldown
             // use `item_template` or if not set then only use spell cooldowns
             SpellEntry const* spell = sSpellStore.LookupEntry(pProto->Spells[s].SpellId);
-            if(!spell)
-            {
-                data << uint32(0);
-                if (pItem)
-                {
-                    // SOCK_ENCHANTMENT_SLOT.. SOCK_ENCHANTMENT_SLOT+2 is gem sockets
-                    if ((s < 3) && (pItem->GetEnchantmentId(EnchantmentSlot(SOCK_ENCHANTMENT_SLOT+ s))))
-                    {
-                        data << uint32(1);
-                    }
-                    else
-                    {
-                        data <<uint32(0);
-                    }
-                }
-                else
-                {
-                    data << uint32(0);
-                }
-                data << uint32(0);
-                data << uint32(0);
-                data << uint32(0);
-                data << uint32(0);
-            }
-            else
+            if(spell)
             {
                 bool db_data = pProto->Spells[s].SpellCooldown > 0 || pProto->Spells[s].SpellCategoryCooldown > 0;
 
@@ -319,6 +294,15 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
                     data << uint32(spell->Category);
                     data << uint32(spell->CategoryRecoveryTime);
                 }
+            }
+            else
+            {
+                data << uint32(0);
+                data << uint32(0);
+                data << uint32(0);
+                data << uint32(0);
+                data << uint32(0);
+                data << uint32(0);
             }
         }
         data << pProto->Bonding;
@@ -349,19 +333,18 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         data << pProto->ExtendedCost;
         data << pProto->RequiredDisenchantSkill;
         data << pProto->ArmorDamageModifier;
+        SendPacket( &data );
     }
     else
     {
-        // this is not blizz like responce
-        // blizz responce: item | 0x80000000
-        data << item;
-        for(int a = 0; a < 18; a++)
-            data << uint64(0);
-        data << uint32(0);                                  // Added in 1.12.x client branch
+        uint64 guid;
+        recv_data >> guid;
+
+        sLog.outDetail( "WORLD: CMSG_ITEM_QUERY_SINGLE - (%u) NO item INFO! (GUID: %u, ENTRY: %u)", uint32(GUID_LOPART(guid)), guid, item );         
+        WorldPacket data( SMSG_ITEM_QUERY_SINGLE_RESPONSE, 4);
+        data << uint32(item | 0x80000000);
         SendPacket( &data );
-        return;
     }
-    SendPacket( &data );
 }
 
 void WorldSession::HandleReadItem( WorldPacket & recv_data )
@@ -828,13 +811,15 @@ void WorldSession::HandleItemNameQueryOpcode(WorldPacket & recv_data)
     {
         std::string Name;
         Name = pProto->Name1;
-        if (GetSessionLanguage()>0)
+
+        uint8 m_language = GetSessionLanguage();
+        if (m_language > 0)
         {
             ItemLocale const *il = objmgr.GetItemLocale(pProto->ItemId);
             if (il)
             {
-                if (il->Name[GetSessionLanguage()]!="") // default to english
-                    Name = il->Name[GetSessionLanguage()];
+                if (!il->Name[m_language].empty())          // default to english
+                    Name = il->Name[m_language];
             }
         }
                                                             // guess size
@@ -986,8 +971,8 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
     {
         // tried to put gem in socket where no socket exists / tried to put normal gem in meta socket
         // tried to put meta gem in normal socket
-        if( GemProps[i] && ( !itemTarget->GetProto()->Socket[i].Color || 
-            itemTarget->GetProto()->Socket[i].Color == SOCKET_COLOR_META && GemProps[i]->color != SOCKET_COLOR_META || 
+        if( GemProps[i] && ( !itemTarget->GetProto()->Socket[i].Color ||
+            itemTarget->GetProto()->Socket[i].Color == SOCKET_COLOR_META && GemProps[i]->color != SOCKET_COLOR_META ||
             itemTarget->GetProto()->Socket[i].Color != SOCKET_COLOR_META && GemProps[i]->color == SOCKET_COLOR_META ) )
             return;
     }

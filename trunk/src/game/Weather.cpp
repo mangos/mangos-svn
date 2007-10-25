@@ -80,7 +80,7 @@ bool Weather::ReGenerate()
     if (!m_weatherChances)
     {
         m_type = 0;
-        m_grade = 0.0;
+        m_grade = 0.0f;
         return false;
     }
 
@@ -111,7 +111,7 @@ bool Weather::ReGenerate()
     if ((u < 60) && (m_grade < 0.33333334f))                // Get fair
     {
         m_type = 0;
-        m_grade = 0.0;
+        m_grade = 0.0f;
     }
 
     if ((u < 60) && (m_type != 0))                          // Get better
@@ -178,20 +178,20 @@ bool Weather::ReGenerate()
 
     if (m_type == 0)
     {
-        m_grade = 0.0;
+        m_grade = 0.0f;
     }
     else if (u < 90)
     {
-        m_grade = rand_norm() * 0.3333;
+        m_grade = rand_norm() * 0.3333f;
     }
     else
     {
         // Severe change, but how severe?
         rnd = urand(0, 99);
         if (rnd < 50)
-            m_grade = rand_norm() * 0.3333 + 0.3334;
+            m_grade = rand_norm() * 0.3333f + 0.3334f;
         else
-            m_grade = rand_norm() * 0.3333 + 0.6667;
+            m_grade = rand_norm() * 0.3333f + 0.6667f;
     }
 
     // return true only in case weather changes
@@ -211,7 +211,7 @@ void Weather::SendFineWeatherUpdateToPlayer(Player *player)
 {
     WorldPacket data( SMSG_WEATHER, (4+4+4) );
 
-    data << (uint32)0 << (float)0.0 << (uint32)WEATHER_NOSOUND << uint8(0);
+    data << (uint32)0 << (float)0.0f << (uint32)WEATHER_NOSOUND << uint8(0);
     player->GetSession()->SendPacket( &data );
 }
 
@@ -225,9 +225,9 @@ bool Weather::UpdateWeather()
     ///- Send the weather packet to all players in this zone
     uint32 sound = GetSound();
     if (m_grade >= 1)
-        m_grade = 0.9999;
+        m_grade = 0.9999f;
     else if (m_grade < 0)
-        m_grade = 0.0001;
+        m_grade = 0.0001f;
 
     WorldPacket data( SMSG_WEATHER, (4+4+4) );
     data << (uint32)m_type << (float)m_grade << (uint32)sound << uint8(0);
