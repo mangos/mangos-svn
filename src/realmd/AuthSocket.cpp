@@ -309,7 +309,12 @@ void AuthSocket::_SetVSFields(std::string rI)
     x.SetBinary(sha.GetDigest(), sha.GetLength());
     v = g.ModExp(x, N);
     // No SQL injection (username escaped)
-    dbRealmServer.PExecute("UPDATE `account` SET `v` = '%s', `s` = '%s' WHERE UPPER(`username`)= UPPER('%s')",v.AsHexStr(),s.AsHexStr(), _safelogin.c_str() );
+    const char *v_hex, *s_hex;
+    v_hex = v.AsHexStr();
+    s_hex = s.AsHexStr();
+    dbRealmServer.PExecute("UPDATE `account` SET `v` = '%s', `s` = '%s' WHERE UPPER(`username`)= UPPER('%s')",v_hex,s_hex, _safelogin.c_str() );
+    OPENSSL_free((void*)v_hex);
+    OPENSSL_free((void*)s_hex);
 }
 
 /// Logon Challenge command handler
@@ -435,6 +440,10 @@ bool AuthSocket::_HandleLogonChallenge()
                         b.SetRand(19 * 8);
                         BigNumber gmod=g.ModExp(b, N);
                         B = ((v * 3) + gmod) % N;
+                        
+                        if (B.GetNumBytes() < 32)
+                            sLog.outDetail("Interesting, calculation of B in realmd is < 32.");
+                        
                         ASSERT(gmod.GetNumBytes() <= 32);
 
                         BigNumber unk3;
@@ -442,7 +451,7 @@ bool AuthSocket::_HandleLogonChallenge()
 
                         ///- Fill the response packet with the result
                         pkt << (uint8)REALM_AUTH_SUCCESS;
-                        pkt.append(B.AsByteArray(), 32);
+                        pkt.append(B.AsByteArray(), B.GetNumBytes());
                         pkt << (uint8)1;
                         pkt.append(g.AsByteArray(), 1);
                         pkt << (uint8)32;
@@ -456,7 +465,10 @@ bool AuthSocket::_HandleLogonChallenge()
 
                         QueryResult *localeresult = dbRealmServer.PQuery("SELECT `locale` FROM `localization` WHERE `string` = '%c%c'",ch->country[3],ch->country[2]);
                         if( localeresult )
+                        {
                             _localization=(*localeresult)[0].GetUInt8();
+                            delete localeresult;
+                        }
                         else
                             _localization=LOCALE_ENG; 
                         if (_localization>=MAX_LOCALE)
@@ -609,7 +621,9 @@ bool AuthSocket::_HandleLogonProof()
 
         ///- Update the sessionkey, last_ip and last login time in the account table for this account
         // No SQL injection (escaped user name) and IP address as received by socket
-        dbRealmServer.PExecute("UPDATE `account` SET `sessionkey` = '%s', `last_ip` = '%s', `last_login` = NOW(), `locale` = '%u' WHERE `username` = '%s'",K.AsHexStr(), GetRemoteAddress().c_str(),  _localization, _safelogin.c_str() );
+        const char* K_hex = K.AsHexStr();
+        dbRealmServer.PExecute("UPDATE `account` SET `sessionkey` = '%s', `last_ip` = '%s', `last_login` = NOW(), `locale` = '%u' WHERE `username` = '%s'", K_hex, GetRemoteAddress().c_str(),  _localization, _safelogin.c_str() );
+        OPENSSL_free((void*)K_hex);
 
         ///- Finish SRP6 and send the final result to the client
         sha.Initialize();
