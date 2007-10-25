@@ -151,30 +151,30 @@ uint32 Quest::XPValue( Player *pPlayer ) const
             uint32 qLevel = QuestLevel;
             float fullxp = 0;
             if (qLevel >= 15)
-                fullxp = RewXpOrMoney / 6.0;
+                fullxp = RewXpOrMoney / 6.0f;
             else if (qLevel == 14)
-                fullxp = RewXpOrMoney / 4.8;
+                fullxp = RewXpOrMoney / 4.8f;
             else if (qLevel == 13)
-                fullxp = RewXpOrMoney / 3.6;
+                fullxp = RewXpOrMoney / 3.6f;
             else if (qLevel == 12)
-                fullxp = RewXpOrMoney / 2.4;
+                fullxp = RewXpOrMoney / 2.4f;
             else if (qLevel == 11)
-                fullxp = RewXpOrMoney / 1.2;
+                fullxp = RewXpOrMoney / 1.2f;
             else if (qLevel > 0 && qLevel <= 10)
-                fullxp = RewXpOrMoney / 0.6;
+                fullxp = RewXpOrMoney / 0.6f;
 
             if( pLevel <= qLevel +  5 )
                 return (uint32)fullxp;
             else if( pLevel == qLevel +  6 )
-                return (uint32)(fullxp * 0.8);
+                return (uint32)(fullxp * 0.8f);
             else if( pLevel == qLevel +  7 )
-                return (uint32)(fullxp * 0.6);
+                return (uint32)(fullxp * 0.6f);
             else if( pLevel == qLevel +  8 )
-                return (uint32)(fullxp * 0.4);
+                return (uint32)(fullxp * 0.4f);
             else if( pLevel == qLevel +  9 )
-                return (uint32)(fullxp * 0.2);
+                return (uint32)(fullxp * 0.2f);
             else
-                return (uint32)(fullxp * 0.1);
+                return (uint32)(fullxp * 0.1f);
         }
     }
     return 0;

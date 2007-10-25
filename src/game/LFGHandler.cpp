@@ -111,7 +111,7 @@ static void AttemptAddMore(Player* _player)
     }
 }
 
-void WorldSession::HandleLfgAutoJoinOpcode( WorldPacket & recv_data )
+void WorldSession::HandleLfgAutoJoinOpcode( WorldPacket & /*recv_data*/ )
 {
     sLog.outDebug("CMSG_SET_LFG_AUTO_JOIN");
     LookingForGroup_auto_join = true;
@@ -122,13 +122,13 @@ void WorldSession::HandleLfgAutoJoinOpcode( WorldPacket & recv_data )
     AttemptJoin(_player);
 }
 
-void WorldSession::HandleLfgCancelAutoJoinOpcode( WorldPacket & recv_data )
+void WorldSession::HandleLfgCancelAutoJoinOpcode( WorldPacket & /*recv_data*/ )
 {
     sLog.outDebug("CMSG_UNSET_LFG_AUTO_JOIN");
     LookingForGroup_auto_join = false;
 }
 
-void WorldSession::HandleLfmAutoAddMembersOpcode( WorldPacket & recv_data )
+void WorldSession::HandleLfmAutoAddMembersOpcode( WorldPacket & /*recv_data*/ )
 {
     sLog.outDebug("CMSG_SET_LFM_AUTOADD");
     LookingForGroup_auto_add = true;
@@ -139,13 +139,13 @@ void WorldSession::HandleLfmAutoAddMembersOpcode( WorldPacket & recv_data )
     AttemptAddMore(_player);
 }
 
-void WorldSession::HandleLfmCancelAutoAddmembersOpcode( WorldPacket & recv_data )
+void WorldSession::HandleLfmCancelAutoAddmembersOpcode( WorldPacket & /*recv_data*/ )
 {
     sLog.outDebug("CMSG_UNSET_LFM_AUTOADD");
     LookingForGroup_auto_add = false;
 }
 
-void WorldSession::HandleLfgClearOpcode( WorldPacket & recv_data )
+void WorldSession::HandleLfgClearOpcode( WorldPacket & /*recv_data */ )
 {
     sLog.outDebug("CMSG_LOOKING_FOR_GROUP_CLEAR");
 
@@ -153,7 +153,7 @@ void WorldSession::HandleLfgClearOpcode( WorldPacket & recv_data )
         _player->m_lookingForGroup.slots[i].Clear();
 }
 
-void WorldSession::HandleLfmSetNoneOpcode( WorldPacket & recv_data )
+void WorldSession::HandleLfmSetNoneOpcode( WorldPacket & /*recv_data */)
 {
     sLog.outDebug("CMSG_SET_LOOKING_FOR_NONE");
 

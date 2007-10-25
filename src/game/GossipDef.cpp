@@ -136,13 +136,15 @@ void PlayerMenu::SendGossipMenu( uint32 TitleTextId, uint64 npcGUID )
         data << uint32( pQuestMenu->GetItem(iI).m_qIcon );
         data << uint32( pQuest ? pQuest->GetQuestLevel() : 0 );
         std::string Title = pQuest->GetTitle();
-        if (pSession->GetSessionLanguage()>0)
+
+        uint8 m_language = pSession->GetSessionLanguage();
+        if (m_language > 0)
         {
             QuestLocale const *ql = objmgr.GetQuestLocale(questID);
             if (ql)
             {
-                if (ql->Title[pSession->GetSessionLanguage()]!="")
-                    Title=ql->Title[pSession->GetSessionLanguage()];
+                if (!ql->Title[m_language].empty())
+                    Title=ql->Title[m_language];
             }
         }
         data << Title;
@@ -188,25 +190,27 @@ void PlayerMenu::SendTalking( uint32 textID )
         data << uint32( 0 );
         data << "Greetings $N";
         data << "Greetings $N";
-    } else {
+    }
+    else
+    {
         std::string Text_0[8],Text_1[8];
         for (int i=0;i<8;i++)
         {
             Text_0[i]=pGossip->Options[i].Text_0;
             Text_1[i]=pGossip->Options[i].Text_1;
         }
-
-        if (pSession->GetSessionLanguage()>0)
+        uint8 m_language = pSession->GetSessionLanguage();
+        if (m_language > 0)
         {
             NpcTextLocale const *nl = objmgr.GetNpcTextLocale(textID);
             if (nl)
             {
                 for (int i=0;i<8;i++)
                 {
-                    if (nl->Text_0[i][pSession->GetSessionLanguage()]!="")
-                        Text_0[i]=nl->Text_0[i][pSession->GetSessionLanguage()];
-                    if (nl->Text_1[i][pSession->GetSessionLanguage()]!="")
-                        Text_1[i]=nl->Text_1[i][pSession->GetSessionLanguage()];
+                    if (!nl->Text_0[i][m_language].empty())
+                        Text_0[i]=nl->Text_0[i][m_language];
+                    if (!nl->Text_1[i][m_language].empty())
+                        Text_1[i]=nl->Text_1[i][m_language];
                 }
             }
         }
@@ -220,7 +224,7 @@ void PlayerMenu::SendTalking( uint32 textID )
                 data << Text_0[i];
 
             if ( Text_1[i] == "" )
-                data << Text_0[i]; 
+                data << Text_0[i];
             else
                 data << Text_1[i];
 
@@ -343,17 +347,19 @@ void PlayerMenu::SendQuestGiverQuestDetails( Quest const *pQuest, uint64 npcGUID
     Details = pQuest->GetDetails();
     Objectives = pQuest->GetObjectives();
     EndText = pQuest->GetEndText();
-    if (pSession->GetSessionLanguage()>0)
+
+    uint8 m_language = pSession->GetSessionLanguage();
+    if (m_language > 0)
     {
         QuestLocale const *ql = objmgr.GetQuestLocale(pQuest->GetQuestId());
         if (ql)
         {
-            if (ql->Title[pSession->GetSessionLanguage()]!="")
-                Title=ql->Title[pSession->GetSessionLanguage()];
-            if (ql->Details[pSession->GetSessionLanguage()]!="")
-                Details=ql->Details[pSession->GetSessionLanguage()];
-            if (ql->Objectives[pSession->GetSessionLanguage()]!="")
-                Objectives=ql->Objectives[pSession->GetSessionLanguage()];
+            if (!ql->Title[m_language].empty())
+                Title=ql->Title[m_language];
+            if (!ql->Details[m_language].empty())
+                Details=ql->Details[m_language];
+            if (!ql->Objectives[m_language].empty())
+                Objectives=ql->Objectives[m_language];
         }
     }
 
@@ -436,20 +442,23 @@ void PlayerMenu::SendQuestQueryResponse( Quest const *pQuest )
     EndText = pQuest->GetEndText();
     for (int i=0;i<QUEST_OBJECTIVES_COUNT;i++)
         ObjectiveText[i]=pQuest->ObjectiveText[i];
-    if (pSession->GetSessionLanguage()>0)
+
+    uint8 m_language = pSession->GetSessionLanguage();
+    if ( m_language > 0)
     {
         QuestLocale const *ql = objmgr.GetQuestLocale(pQuest->GetQuestId());
         if (ql)
         {
-            if (ql->Title[pSession->GetSessionLanguage()]!="")
-                Title=ql->Title[pSession->GetSessionLanguage()];
-            if (ql->Details[pSession->GetSessionLanguage()]!="")
-                Details=ql->Details[pSession->GetSessionLanguage()];
-            if (ql->Objectives[pSession->GetSessionLanguage()]!="")
-                Objectives=ql->Objectives[pSession->GetSessionLanguage()];
+            if (!ql->Title[m_language].empty())
+                Title=ql->Title[m_language];
+            if (!ql->Details[m_language].empty())
+                Details=ql->Details[m_language];
+            if (!ql->Objectives[m_language].empty())
+                Objectives=ql->Objectives[m_language];
+
             for (int i=0;i<QUEST_OBJECTIVES_COUNT;i++)
-                if (ql->ObjectiveText[i][pSession->GetSessionLanguage()]!="")
-                    ObjectiveText[i]=ql->ObjectiveText[i][pSession->GetSessionLanguage()];
+                if (!ql->ObjectiveText[i][m_language].empty())
+                    ObjectiveText[i]=ql->ObjectiveText[i][m_language];
         }
     }
 
@@ -546,15 +555,17 @@ void PlayerMenu::SendQuestGiverOfferReward( Quest const* pQuest, uint64 npcGUID,
     std::string Title,OfferRewardText;
     Title = pQuest->GetTitle();
     OfferRewardText = pQuest->GetOfferRewardText();
-    if (pSession->GetSessionLanguage()>0)
+
+    uint8 m_language = pSession->GetSessionLanguage();
+    if (m_language>0)
     {
         QuestLocale const *ql = objmgr.GetQuestLocale(pQuest->GetQuestId());
         if (ql)
         {
-            if (ql->Title[pSession->GetSessionLanguage()]!="")
-                Title=ql->Title[pSession->GetSessionLanguage()];
-            if (ql->OfferRewardText[pSession->GetSessionLanguage()]!="")
-                OfferRewardText=ql->OfferRewardText[pSession->GetSessionLanguage()];
+            if (!ql->Title[m_language].empty())
+                Title=ql->Title[m_language];
+            if (!ql->OfferRewardText[m_language].empty())
+                OfferRewardText=ql->OfferRewardText[m_language];
         }
     }
 
@@ -657,15 +668,17 @@ void PlayerMenu::SendQuestGiverRequestItems( Quest const *pQuest, uint64 npcGUID
     std::string Title,RequestItemsText;
     Title = pQuest->GetTitle();
     RequestItemsText = pQuest->GetRequestItemsText();
-    if (pSession->GetSessionLanguage()>0)
+
+    uint8 m_language = pSession->GetSessionLanguage();
+    if ( m_language > 0 )
     {
         QuestLocale const *ql = objmgr.GetQuestLocale(pQuest->GetQuestId());
         if (ql)
         {
-            if (ql->Title[pSession->GetSessionLanguage()]!="")
-                Title=ql->Title[pSession->GetSessionLanguage()];
-            if (ql->RequestItemsText[pSession->GetSessionLanguage()]!="")
-                RequestItemsText=ql->RequestItemsText[pSession->GetSessionLanguage()];
+            if (!ql->Title[m_language].empty())
+                Title=ql->Title[m_language];
+            if (!ql->RequestItemsText[m_language].empty())
+                RequestItemsText=ql->RequestItemsText[m_language];
         }
     }
 

@@ -206,9 +206,9 @@ AuctionHouseObject * ObjectMgr::GetAuctionsMap( uint32 location )
 uint32 ObjectMgr::GetAuctionCut(uint32 location, uint32 highBid)
 {
     if (location == 7 && !sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_TRADE))
-        return (uint32) (0.15 * highBid * sWorld.getRate(RATE_AUCTION_CUT));
+        return (uint32) (0.15f * highBid * sWorld.getRate(RATE_AUCTION_CUT));
     else
-        return (uint32) (0.05 * highBid * sWorld.getRate(RATE_AUCTION_CUT));
+        return (uint32) (0.05f * highBid * sWorld.getRate(RATE_AUCTION_CUT));
 }
 
 uint32 ObjectMgr::GetAuctionDeposit(uint32 location, uint32 time, Item *pItem)

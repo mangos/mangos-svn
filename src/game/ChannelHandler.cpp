@@ -35,6 +35,9 @@ void WorldSession::HandleChannelJoin(WorldPacket& recvPacket)
     recvPacket >> channel_id >> unknown1 >> unknown2;
     recvPacket >> channelname;
 
+    if(channelname.empty())
+        return;
+
     // recheck
     CHECK_PACKET_SIZE(recvPacket, (channelname.size()+1)+1);
 
@@ -54,7 +57,7 @@ void WorldSession::HandleChannelLeave(WorldPacket& recvPacket)
     recvPacket >> unk;                                      // channel id?
     recvPacket >> channelname;
 
-    if(!channelname.length())
+    if(channelname.empty())
         return;
 
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
@@ -73,6 +76,7 @@ void WorldSession::HandleChannelList(WorldPacket& recvPacket)
 
     std::string channelname;
     recvPacket >> channelname;
+
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if(Channel *chn = cMgr->GetChannel(channelname, _player))
             chn->List(_player->GetGUID());
@@ -91,6 +95,7 @@ void WorldSession::HandleChannelPassword(WorldPacket& recvPacket)
     CHECK_PACKET_SIZE(recvPacket, (channelname.size()+1)+1);
 
     recvPacket >> pass;
+
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if(Channel *chn = cMgr->GetChannel(channelname, _player))
             chn->Password(_player->GetGUID(), pass.c_str());

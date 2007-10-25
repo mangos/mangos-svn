@@ -176,7 +176,7 @@ Unit::Unit( WorldObject *instantiator )
     m_modHitChance = 0;
     m_modSpellHitChance = 0;
     m_baseSpellCritChance = 5;
-    m_modResilience = 0.0;
+    m_modResilience = 0.0f;
     m_CombatTimer = 0;
     //m_victimThreat = 0.0f;
     for (int i = 0; i < MAX_SPELL_SCHOOL; ++i)
@@ -390,7 +390,7 @@ void Unit::RemoveSpellbyDamageTaken(uint32 auraType, uint32 damage)
 
     // The chance to dispell an aura depends on the damage taken with respect to the casters level.
     uint32 max_dmg = getLevel() > 8 ? 25 * getLevel() - 150 : 50;
-    float chance = float(damage) / max_dmg * 100.0;
+    float chance = float(damage) / max_dmg * 100.0f;
     if (roll_chance_f(chance))
         RemoveSpellsCausingAura(auraType);
 }
@@ -831,7 +831,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
             if (urand(0,300) == 10)
             {
                 DEBUG_LOG("HIT: We decrease durability with 5 percent");
-                ((Player*)pVictim)->DurabilityLossAll(0.05);
+                ((Player*)pVictim)->DurabilityLossAll(0.05f);
             }
         }
 
@@ -1550,18 +1550,18 @@ uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage)
     uint32 newdamage = 0;
     float armor = pVictim->GetArmor();
 
-    float tmpvalue = 0.0;
+    float tmpvalue = 0.0f;
     if(getLevel() <= 59)                                    //Level 1-59
-        tmpvalue = armor / (armor + 400.0 + 85.0 * getLevel());
+        tmpvalue = armor / (armor + 400.0f + 85.0f * getLevel());
     else if(getLevel() < 70)                                //Level 60-69
-        tmpvalue = armor / (armor - 22167.5 + 467.5 * getLevel());
+        tmpvalue = armor / (armor - 22167.5f + 467.5f * getLevel());
     else                                                    //Level 70+
-        tmpvalue = armor / (armor + 10557.5);
+        tmpvalue = armor / (armor + 10557.5f);
 
-    if(tmpvalue < 0.0)
-        tmpvalue = 0.0;
-    if(tmpvalue > 0.75)
-        tmpvalue = 0.75;
+    if(tmpvalue < 0.0f)
+        tmpvalue = 0.0f;
+    if(tmpvalue > 0.75f)
+        tmpvalue = 0.75f;
     newdamage = uint32(damage - (damage * tmpvalue));
 
     return (newdamage > 1) ? newdamage : 1;
@@ -1575,21 +1575,21 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType 
     // Magic damage, check for resists
     if (school != SPELL_SCHOOL_NORMAL)
     {
-        float tmpvalue2 = 0.0;
+        float tmpvalue2 = 0.0f;
         tmpvalue2 += (float)pVictim->GetResistance(SpellSchools(school));
         AuraList const& mModTargetRes = GetAurasByType(SPELL_AURA_MOD_TARGET_RESISTANCE);
         for(AuraList::const_iterator i = mModTargetRes.begin(); i != mModTargetRes.end(); ++i)
             if ((*i)->GetModifier()->m_miscvalue & int32(1 << school))
                 tmpvalue2 += (float)((*i)->GetModifier()->m_amount);
-        tmpvalue2 *= (float)(0.15 / getLevel());
-        if (tmpvalue2 < 0.0)
-            tmpvalue2 = 0.0;
-        if (tmpvalue2 > 0.75)
-            tmpvalue2 = 0.75;
+        tmpvalue2 *= (float)(0.15f / getLevel());
+        if (tmpvalue2 < 0.0f)
+            tmpvalue2 = 0.0f;
+        if (tmpvalue2 > 0.75f)
+            tmpvalue2 = 0.75f;
         uint32 ran = urand(0, 100);
         uint32 faq[4] = {24,6,4,6};
         uint8 m = 0;
-        float Binom = 0.0;
+        float Binom = 0.0f;
         for (uint8 i = 0; i < 4; i++)
         {
             Binom += 2400 *( powf(tmpvalue2, i) * powf( (1-tmpvalue2), (4-i)))/faq[i];
@@ -2369,8 +2369,8 @@ uint32 Unit::CalculateDamage (WeaponAttackType attType)
         std::swap(min_damage,max_damage);
     }
 
-    if(max_damage == 0.0)
-        max_damage = 5.0;
+    if(max_damage == 0.0f)
+        max_damage = 5.0f;
 
     return rand32((uint32)min_damage, (uint32)max_damage);
 }
@@ -4248,10 +4248,10 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
             switch (triggeredByAura->GetSpellProto()->Id)
             {
                 case 18096:
-                    chance = 13.0;
+                    chance = 13.0f;
                     break;
                 case 18073:
-                    chance = 26.0;
+                    chance = 26.0f;
                     break;
             }
             if (roll_chance_f(chance))
@@ -5198,7 +5198,7 @@ bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect, Unit
             crit_chance += (*i)->GetModifier()->m_amount;
     }
 
-    crit_chance = crit_chance > 0.0 ? crit_chance : 0.0;
+    crit_chance = crit_chance > 0.0f ? crit_chance : 0.0f;
     if (roll_chance_f(crit_chance))
     {
         int32 crit_bonus = *peffect / 2;

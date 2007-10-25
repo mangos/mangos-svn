@@ -1251,9 +1251,6 @@ bool ChatHandler::HandleNPCFlagCommand(const char* args)
 
     SendSysMessage(LANG_VALUE_SAVED_REJOIN);
 
-    uint32 entry = pCreature->GetUInt32Value( OBJECT_FIELD_ENTRY );
-    m_session->SendCreatureQuery( entry, pCreature->GetGUID() );
-
     return true;
 }
 

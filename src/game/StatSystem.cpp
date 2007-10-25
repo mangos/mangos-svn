@@ -301,13 +301,13 @@ void Player::UpdateBlockPercentage()
 {
     BaseModGroup modGroup = BLOCK_PERCENTAGE;
 
-    float chance = 5 - (getLevel()*5 - GetPureDefenseSkillValue()) * 0.04;
-    chance = chance < 0 ? 0 : chance;
+    float chance = 5 - (getLevel()*5 - GetPureDefenseSkillValue()) * 0.04f;
+    chance = chance < 0.0f ? 0.0f : chance;
 
     SetBaseModValue(BLOCK_PERCENTAGE, PCT_MOD, chance);
 
     float value  = GetBaseModValue(modGroup, FLAT_MOD) + chance;
-    value += float((GetDefenseSkillBonusValue())*0.04) + GetRatingBonusValue(PLAYER_FIELD_BLOCK_RATING);
+    value += float((GetDefenseSkillBonusValue())*0.04f) + GetRatingBonusValue(PLAYER_FIELD_BLOCK_RATING);
 
     SetStatFloatValue(PLAYER_BLOCK_PERCENTAGE, value);
 }
@@ -342,7 +342,7 @@ void Player::UpdateCritPercentage(WeaponAttackType attType)
 void Player::UpdateAllCritPercentages()
 {
     GtChanceToMeleeCritBaseEntry const * gtCritBase = sGtChanceToMeleeCritBaseStore.LookupEntry(getClass() - 1);
-    float base_crit = gtCritBase ? gtCritBase->base * 100 : 0;
+    float base_crit = gtCritBase ? gtCritBase->base * 100.0f : 0.0f;
 
     /*
     GtChanceToMeleeCritEntry     const * gtCritRate = sGtChanceToMeleeCritStore.LookupEntry((getClass() - 1) * 100 + getLevel() - 1);
@@ -386,7 +386,7 @@ void Player::UpdateParryPercentage()
 
     //pct mods for pct fields act like flat mods
     float value  = 5.0f + GetBaseModValue(modGroup, FLAT_MOD);
-    value += float(GetDefenseSkillBonusValue()*0.04) + GetRatingBonusValue(PLAYER_FIELD_PARRY_RATING);
+    value += float(GetDefenseSkillBonusValue()*0.04f) + GetRatingBonusValue(PLAYER_FIELD_PARRY_RATING);
 
     SetStatFloatValue(PLAYER_PARRY_PERCENTAGE, value);
 }
@@ -416,7 +416,7 @@ void Player::UpdateDodgePercentage()
 
     //pct mods for pct fields act like flat mods
     float value  = base_dodge + GetStat(STAT_AGILITY)/classrate;
-    value += float(GetDefenseSkillBonusValue()*0.04)+ GetBaseModValue(modGroup, FLAT_MOD);
+    value += float(GetDefenseSkillBonusValue()*0.04f)+ GetBaseModValue(modGroup, FLAT_MOD);
     value += GetRatingBonusValue(PLAYER_FIELD_DODGE_RATING);
 
     SetStatFloatValue(PLAYER_DODGE_PERCENTAGE, value);
@@ -746,9 +746,9 @@ void Pet::UpdateAttackPowerAndDamage(bool ranged)
     UnitMods unitMod = UNIT_MOD_ATTACK_POWER;
 
     if(GetEntry() == 416)                                   // imp's attack power
-        val = GetStat(STAT_STRENGTH) - 10.0;
+        val = GetStat(STAT_STRENGTH) - 10.0f;
     else
-        val = 2 * GetStat(STAT_STRENGTH) - 20.0;
+        val = 2 * GetStat(STAT_STRENGTH) - 20.0f;
 
     Unit* owner = GetOwner();
     if( owner )

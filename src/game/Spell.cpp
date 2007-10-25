@@ -1377,7 +1377,7 @@ void Spell::_handle_immediate_phase()
             m_needSpellLog = false;
 
         // initialize multipliers
-        m_damageMultipliers[j] = 1.0;
+        m_damageMultipliers[j] = 1.0f;
         m_applyMultiplier[j] =
             (m_spellInfo->EffectImplicitTargetA[j] == TARGET_CHAIN_DAMAGE || m_spellInfo->EffectImplicitTargetA[j] == TARGET_CHAIN_HEAL)
             && (m_spellInfo->EffectChainTarget[j] > 1);
@@ -3055,7 +3055,7 @@ uint8 Spell::CheckMana(uint32 *mana)
 
         uint32 healthCost;
 
-        healthCost = m_spellInfo->manaCost + int32(float(m_spellInfo->ManaCostPercentage)/100.0 * m_caster->GetCreateHealth());
+        healthCost = m_spellInfo->manaCost + int32(float(m_spellInfo->ManaCostPercentage)/100.0f * m_caster->GetCreateHealth());
 
         *mana = healthCost;
         if(currentHealth <= healthCost)
@@ -3079,9 +3079,9 @@ uint8 Spell::CheckMana(uint32 *mana)
     if(m_spellInfo->ManaCostPercentage)
     {
         if(powerType==POWER_MANA)
-            manaCost += float(m_spellInfo->ManaCostPercentage)/100.0 * m_caster->GetCreateMana();
+            manaCost += float(m_spellInfo->ManaCostPercentage)/100.0f * m_caster->GetCreateMana();
         else
-            manaCost += float(m_spellInfo->ManaCostPercentage)/100.0*m_caster->GetMaxPower(powerType);
+            manaCost += float(m_spellInfo->ManaCostPercentage)/100.0f * m_caster->GetMaxPower(powerType);
     }
 
     Unit::AuraList const& mPowerCostSchool = m_caster->GetAurasByType(SPELL_AURA_MOD_POWER_COST_SCHOOL);

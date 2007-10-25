@@ -23,7 +23,7 @@
 #include "MapManager.h"
 #include "DestinationHolderImp.h"
 
-#define SMALL_ALPHA 0.05
+#define SMALL_ALPHA 0.05f
 
 #include <cmath>
 /*

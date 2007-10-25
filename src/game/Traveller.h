@@ -49,7 +49,7 @@ struct MANGOS_DLL_DECL Traveller
     inline float GetPositionZ() const { return i_traveller.GetPositionZ(); }
     inline T& GetTraveller(void) { return i_traveller; }
 
-    float Speed(void) { assert(false); return 0.0; }
+    float Speed(void) { assert(false); return 0.0f; }
     void Relocation(float x, float y, float z, float orientation) {}
     void Relocation(float x, float y, float z) { Relocation(x, y, z, i_traveller.GetOrientation()); }
     void MoveTo(float x, float y, float z, uint32 t) {}

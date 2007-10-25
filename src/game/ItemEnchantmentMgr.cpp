@@ -66,7 +66,7 @@ void LoadRandomEnchantmentsTable()
             ench = fields[1].GetUInt32();
             chance = fields[2].GetFloat();
 
-            if (chance > 0.000001 && chance <= 100)
+            if (chance > 0.000001f && chance <= 100.0f)
                 RandomItemEnch[entry].push_back( EnchStoreItem(ench, chance) );
 
             count++;
@@ -201,5 +201,5 @@ uint32 GenerateEnchSuffixFactor(uint32 item_id)
         }
     }
 
-    return uint32(floor((suffixFactor*itemProto->ItemLevel) + 0.5 ));
+    return uint32(floor((suffixFactor*itemProto->ItemLevel) + 0.5f ));
 }

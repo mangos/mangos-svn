@@ -1710,7 +1710,7 @@ void Player::Regenerate(Powers power)
     else if (curValue == 0)
         return;
 
-    float addvalue = 0.0;
+    float addvalue = 0.0f;
 
     switch (power)
     {
@@ -1769,7 +1769,7 @@ void Player::Regenerate(Powers power)
     AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
     for(AuraList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
         if ((*i)->GetModifier()->m_miscvalue == power)
-            addvalue *= ((*i)->GetModifier()->m_amount + 100) / 100.0;
+            addvalue *= ((*i)->GetModifier()->m_amount + 100) / 100.0f;
 
     if (power != POWER_RAGE)
     {
@@ -1801,7 +1801,7 @@ void Player::RegenerateHealth()
 
     if( HealthIncreaseRate <= 0 ) HealthIncreaseRate = 1;
 
-    float addvalue = 0.0;
+    float addvalue = 0.0f;
 
     // normal regen case (maybe partly in combat case)
     if (!isInCombat() || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT) )
@@ -4000,12 +4000,12 @@ float Player::GetRatingCoefficient(uint16 index) const
     //Global formulas for all skills based on player level
     uint32 level = getLevel();
     if (level < 10)
-        modValue = 2.0 / 52.0;
+        modValue = 2.0f / 52.0f;
     else if (level < 60)
-        modValue = (level - 8.0) / 52.0;
+        modValue = (level - 8.0f) / 52.0f;
     else if (level < 70)
-        modValue = 82.0 / (262.0 - 3.0 * level);
-    else modValue = (level + 12.0) / 52.0;
+        modValue = 82.0f / (262.0f - 3.0f * level);
+    else modValue = (level + 12.0f) / 52.0f;
 
     switch(index)
     {
@@ -4069,7 +4069,7 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
     ApplyModUInt32Value(index, value, apply);
 
     float RatingCoeffecient = GetRatingCoefficient(index);
-    float RatingChange = 0.0;
+    float RatingChange = 0.0f;
 
     bool affectStats = CanModifyStats();
 
@@ -5400,7 +5400,7 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
             int32 v_rank =1;                                //need more info
 
             honor = ((f * diff_level * (190 + v_rank*10))/6);
-            honor *= ((float)k_level) / 70.0;               //factor of dependence on levels of the killer
+            honor *= ((float)k_level) / 70.0f;               //factor of dependence on levels of the killer
 
             uint8 limit = sWorld.getConfig(CONFIG_HONOR_KILL_LIMIT);
             if(limit)
@@ -10536,13 +10536,15 @@ void Player::SendPreparedQuest( uint64 guid )
                 title = gossiptext->Options[0].Text_0 == "" ? gossiptext->Options[0].Text_1 : gossiptext->Options[0].Text_0;
                 if( &title == NULL )
                     title = "";
-                if (GetSession()->GetSessionLanguage()>0)
+
+                uint8 m_language = GetSession()->GetSessionLanguage();
+                if (m_language > 0)
                 {
                     NpcTextLocale const *nl = objmgr.GetNpcTextLocale(textid);
                     if (nl)
                     {
-                        if (nl->Text_0[0][GetSession()->GetSessionLanguage()]!="" || nl->Text_1[0][GetSession()->GetSessionLanguage()]!="")
-                            title = nl->Text_0[0][GetSession()->GetSessionLanguage()]=="" ? nl->Text_1[0][GetSession()->GetSessionLanguage()] : nl->Text_0[0][GetSession()->GetSessionLanguage()];
+                        if (!nl->Text_0[0][m_language].empty() || !nl->Text_1[0][m_language].empty())
+                            title = !nl->Text_0[0][m_language].empty() ? nl->Text_1[0][m_language] : nl->Text_0[0][m_language];
                     }
                 }
             }

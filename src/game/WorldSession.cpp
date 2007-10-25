@@ -1005,7 +1005,7 @@ void WorldSession::HandleMoveFlyModeChangeAckOpcode( WorldPacket & recv_data )
     */
 }
 
-void WorldSession::HandleSelfResOpcode( WorldPacket & recv_data )
+void WorldSession::HandleSelfResOpcode( WorldPacket & /*recv_data*/ )
 {
     sLog.outDebug("WORLD: CMSG_SELF_RES");                  // empty opcode
 

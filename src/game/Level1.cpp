@@ -980,7 +980,7 @@ bool ChatHandler::HandleModifySwimCommand(const char* args)
 
     float Swim = (float)atof((char*)args);
 
-    if (Swim > 10 || Swim < 0.01)
+    if (Swim > 10 || Swim < 0.01f)
     {
         SendSysMessage(LANG_BAD_VALUE);
         return true;
@@ -1021,7 +1021,7 @@ bool ChatHandler::HandleModifyBWalkCommand(const char* args)
 
     float BSpeed = (float)atof((char*)args);
 
-    if (BSpeed > 10 || BSpeed < 0.1)
+    if (BSpeed > 10 || BSpeed < 0.1f)
     {
         SendSysMessage(LANG_BAD_VALUE);
         return true;
@@ -1062,7 +1062,7 @@ bool ChatHandler::HandleModifyFlyCommand(const char* args)
 
     float FSpeed = (float)atof((char*)args);
 
-    if (FSpeed > 10 || FSpeed < 0.1)
+    if (FSpeed > 10.0f || FSpeed < 0.1f)
     {
         SendSysMessage(LANG_BAD_VALUE);
         return true;
@@ -1096,7 +1096,7 @@ bool ChatHandler::HandleModifyScaleCommand(const char* args)
         return false;
 
     float Scale = (float)atof((char*)args);
-    if (Scale > 3 || Scale <= 0)
+    if (Scale > 3.0f || Scale <= 0.0f)
     {
         SendSysMessage(LANG_BAD_VALUE);
         return true;
@@ -2112,8 +2112,8 @@ bool ChatHandler::HandleGoGridCommand(const char* args)
     else mapid = _player->GetMapId();
 
     // center of grid
-    float x = (grid_x-CENTER_GRID_ID+0.5)*SIZE_OF_GRIDS;
-    float y = (grid_y-CENTER_GRID_ID+0.5)*SIZE_OF_GRIDS;
+    float x = (grid_x-CENTER_GRID_ID+0.5f)*SIZE_OF_GRIDS;
+    float y = (grid_y-CENTER_GRID_ID+0.5f)*SIZE_OF_GRIDS;
 
     if(!MapManager::IsValidMapCoord(mapid,x,y))
     {
