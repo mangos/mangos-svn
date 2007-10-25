@@ -500,6 +500,7 @@ pkgdata_DATA = \
 	4628.sql \
 	4632_areatrigger_teleport.sql \
 	4633_spell_teleport.sql \
+	4640_command.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -981,4 +982,5 @@ EXTRA_DIST = \
 	4628.sql \
 	4632_areatrigger_teleport.sql \
 	4633_spell_teleport.sql \
+	4640_command.sql \
 	README

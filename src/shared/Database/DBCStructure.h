@@ -61,10 +61,10 @@ struct AreaTriggerEntry
     float     y;                                            // 3
     float     z;                                            // 4
     float     radius;                                       // 5
-    float     dx;                                           // 6 unknown (used for skip distance check based at radius if not null
-    //float     dy;                                         // 7 unknown
-    //float     dz;                                         // 8 unknown
-    //float     dorientation;                               // 9 unknown
+    float     box_x;                                        // 6 extent x edge
+    float     box_y;                                        // 7 extent y edge
+    float     box_z;                                        // 8 extent z edge
+    float     box_orientation;                              // 9 extent rotation by about z axis
 };
 
 struct BankBagSlotPricesEntry

@@ -17,7 +17,7 @@
  */
 
 const char AreaTableEntryfmt[]="iiinixxxxxissssssssssssssssxixxxxxx";
-const char AreaTriggerEntryfmt[]="nifffffxxx";
+const char AreaTriggerEntryfmt[]="niffffffff";
 const char BankBagSlotPricesEntryfmt[]="ni";
 const char BattlemasterListEntryfmt[]="niiixxxxxiiiixxssssssssssssssssx";
                                                             // data not sorted (more compact store)

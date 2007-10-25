@@ -871,15 +871,42 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         return;
     }
 
-    float dist = GetPlayer()->GetDistance(atEntry->x,atEntry->y,atEntry->z);
+    // delta is safe radius
+    const float delta = 5.0;
+    // check if player in the range of areatrigger
+    Player* pl = GetPlayer();
 
-    // disable (use visibility distance) check if atEntry->dx != 0 (unknown formula for this case)
-    float max_dist = atEntry->dx==0 ? atEntry->radius+5.0 : MAX_VISIBILITY_DISTANCE;
-
-    if (dist > max_dist)
+    if (atEntry->radius > 0)
     {
-        sLog.outDebug("Player '%s' too far (%u radius: %f distance: %f), ignore Area Trigger ID: %u", GetPlayer()->GetName(), atEntry->radius, dist, Trigger_ID);
-        return;
+        // if we have radius check it
+        float dist = pl->GetDistance(atEntry->x,atEntry->y,atEntry->z);
+        if(dist > atEntry->radius + delta)
+        {
+            sLog.outDebug("Player '%s' too far (radius: %f distance: %f), ignore Area Trigger ID: %u",
+                pl->GetName(), atEntry->radius, dist, Trigger_ID);
+            return;
+        }
+    }
+    else
+    {
+        // we have only extent
+        float dx = pl->GetPositionX() - atEntry->x;
+        float dy = pl->GetPositionY() - atEntry->y;
+        float dz = pl->GetPositionZ() - atEntry->z;
+        double es = sin(atEntry->box_orientation);
+        double ec = cos(atEntry->box_orientation);
+        // calc rotated vector based on extent axis
+        double rotateDx = dx*ec - dy*es;
+        double rotateDy = dx*es + dy*ec;
+        
+        if( (fabs(rotateDx) > atEntry->box_x/2 + delta) ||
+            (fabs(rotateDy) > atEntry->box_y/2 + delta) ||
+            (fabs(dz) > atEntry->box_z/2 + delta) )
+        {
+            sLog.outDebug("Player '%s' too far (1/2 box X: %f 1/2 box Y: %u 1/2 box Z: %u rotate dX: %f rotate dY: %f dZ:%f), ignore Area Trigger ID: %u",
+                pl->GetName(), atEntry->box_x/2, atEntry->box_y/2, atEntry->box_z/2, rotateDx, rotateDy, dz, Trigger_ID);
+            return;
+        }
     }
 
     uint32 quest_id = objmgr.GetQuestForAreaTrigger( Trigger_ID );

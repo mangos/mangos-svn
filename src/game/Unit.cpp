@@ -672,17 +672,25 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
             if(player!=pVictim)
             {
                 // prepare data for near group iteration (PvP and !PvP cases
-                uint32 xp = PvP || IsNoDamageXPArea(player->GetAreaId()) ? 0 : MaNGOS::XP::Gain(player, pVictim);
+                uint32 xp = 0;
                 bool honored_kill = false;
 
                 Group *pGroup = player->GetGroup();
                 if(pGroup)
                 {
-                    uint32 count = pGroup->GetMemberCountForXPAtKill(pVictim);
-                    if(count)
+                    uint32 count = 0;
+                    uint32 sum_level = 0;
+                    Player* member_with_max_level = NULL;
+
+                    pGroup->GetDataForXPAtKill(pVictim,count,sum_level,member_with_max_level);
+
+                    if(member_with_max_level)
                     {
+                        xp = PvP || IsNoDamageXPArea(player->GetAreaId()) ? 0 : MaNGOS::XP::Gain(member_with_max_level, pVictim);
+
                         // skip in check PvP case (for speed, not used)
                         bool is_raid = PvP ? false : MapManager::Instance().GetBaseMap(player->GetMapId())->IsRaid() && pGroup->isRaidGroup();
+                        float group_rate = MaNGOS::XP::xp_in_group_rate(count,is_raid);
 
                         for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
                         {
@@ -697,8 +705,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
                             // xp and reputation only in !PvP case
                             if(!PvP)
                             {
-                                // FIXME: xp/count for all in group at this moment, must be level dependent
-                                float rate = 1.0f/count;
+                                float rate = group_rate * float(pGroupGuy->getLevel()) / sum_level;
 
                                 // if with raid in raid dungeon then all receive full reputation at kill
                                 pGroupGuy->RewardReputation(pVictim,is_raid ? 1.0f : rate);
@@ -720,6 +727,8 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
                 }
                 else                                        // if (!pGroup)
                 {
+                    xp = PvP || IsNoDamageXPArea(player->GetAreaId()) ? 0 : MaNGOS::XP::Gain(player, pVictim);
+
                     // honor can be in PvP and !PvP (racial leader) cases
                     if(player->RewardHonor(pVictim,1))
                         honored_kill = true;

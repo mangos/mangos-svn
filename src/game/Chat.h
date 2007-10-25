@@ -202,6 +202,7 @@ class ChatHandler
         bool HandleSpawnTimeCommand(const char* args);
         bool HandleGoCreatureCommand(const char* args);
         bool HandleGoObjectCommand(const char* args);
+        bool HandleGoTriggerCommand(const char* args);
         bool HandleTargetObjectCommand(const char* args);
         bool HandleDelObjectCommand(const char* args);
         bool HandleMoveCreatureCommand(const char* args);

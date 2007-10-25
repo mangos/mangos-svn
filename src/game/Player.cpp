@@ -4765,13 +4765,13 @@ bool Player::SetPosition(float x, float y, float z, float orientation, bool tele
     return true;
 }
 
-void Player::SetRecallPosition(uint32 map, float x, float y, float z, float o)
+void Player::SaveRecallPosition()
 {
-    m_recallMap = map;
-    m_recallX = x;
-    m_recallY = y;
-    m_recallZ = z;
-    m_recallO = o;
+    m_recallMap = GetMapId();
+    m_recallX = GetPositionX();
+    m_recallY = GetPositionY();
+    m_recallZ = GetPositionZ();
+    m_recallO = GetOrientation();
 }
 
 void Player::SendMessageToSet(WorldPacket *data, bool self)
@@ -12139,7 +12139,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 
     _LoadBoundInstances(holder->GetResult(2));
 
-    SetRecallPosition(GetMapId(),GetPositionX(),GetPositionY(),GetPositionZ(),GetOrientation());
+    SaveRecallPosition();
 
     if (transGUID != 0)
     {

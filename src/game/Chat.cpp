@@ -323,6 +323,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "textemote",   SEC_MODERATOR,     &ChatHandler::HandleTextEmoteCommand,        "",   NULL },
         { "gocreature",  SEC_GAMEMASTER,    &ChatHandler::HandleGoCreatureCommand,       "",   NULL },
         { "goobject",    SEC_GAMEMASTER,    &ChatHandler::HandleGoObjectCommand,         "",   NULL },
+        { "gotrigger",   SEC_GAMEMASTER,    &ChatHandler::HandleGoTriggerCommand,        "",   NULL },
         { "targetobject",SEC_GAMEMASTER,    &ChatHandler::HandleTargetObjectCommand,     "",   NULL },
         { "delobject",   SEC_GAMEMASTER,    &ChatHandler::HandleDelObjectCommand,        "",   NULL },
         { "turnobject",  SEC_GAMEMASTER,    &ChatHandler::HandleTurnObjectCommand,       "",   NULL },

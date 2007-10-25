@@ -672,7 +672,7 @@ void CliTele(char*command,pPrintf zprintf)
 
         zprintf(LANG_TELEPORTING_TO "\r\n",chr->GetName(),"", location.c_str());
 
-        chr->SetRecallPosition(chr->GetMapId(),chr->GetPositionX(),chr->GetPositionY(),chr->GetPositionZ(),chr->GetOrientation());
+        chr->SaveRecallPosition();
 
         chr->TeleportTo(mapid,x,y,z,chr->GetOrientation());
     }
