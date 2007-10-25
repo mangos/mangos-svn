@@ -64,19 +64,21 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     sLog.outDetail("Player %u is sending mail to %s with subject %s and body %s includes item %u, %u copper and %u COD copper with unk1 = %u, unk2 = %u",pl->GetGUIDLow(),receiver.c_str(),subject.c_str(),body.c_str(),GUID_LOPART(itemId),money,COD,unk1,unk2);
 
     uint64 rc = objmgr.GetPlayerGUIDByName(receiver);
+    if (!rc)
+    {
+        pl->SendMailResult(0, 0, MAIL_ERR_RECIPIENT_NOT_FOUND);
+        return;
+    }
+
     if(pl->GetGUID() == rc)
     {
         pl->SendMailResult(0, 0, MAIL_ERR_CANNOT_SEND_TO_SELF);
         return;
     }
+
     if (pl->GetMoney() < money + 30)
     {
         pl->SendMailResult(0, 0, MAIL_ERR_NOT_ENOUGH_MONEY);
-        return;
-    }
-    if (!rc)
-    {
-        pl->SendMailResult(0, 0, MAIL_ERR_RECIPIENT_NOT_FOUND);
         return;
     }
 
@@ -163,17 +165,19 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
         //item reminds in item_instance table already, used it in mail now
         pl->RemoveItem( (item_pos >> 8), (item_pos & 255), true );
-        pItem->RemoveFromUpdateQueueOf( pl );
+
+        sDatabase.BeginTransaction();
+        pItem->DeleteFromInventoryDB();                     //deletes item from character's inventory
+        pItem->SaveToDB();                                  // recursive and not have transaction guard into self
+        // owner in `data` will set at mail receive and item extracting
+        sDatabase.PExecute("UPDATE `item_instance` SET `owner_guid` = '%u' WHERE `guid`='%u'",GUID_LOPART(rc),pItem->GetGUIDLow());
+        sDatabase.CommitTransaction();
+
         if(pItem->IsInWorld())
         {
             pItem->RemoveFromWorld();
             pItem->DestroyForPlayer( pl );
         }
-
-        sDatabase.BeginTransaction();
-        pItem->DeleteFromInventoryDB();                     //deletes item from character's inventory
-        pItem->SaveToDB();                                  // recursive and not have transaction guard into self
-        sDatabase.CommitTransaction();
     }
     uint32 messagetype = MAIL_NORMAL;
     uint32 item_template = pItem ? pItem->GetEntry() : 0;   //item prototype
@@ -269,25 +273,57 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
         pl->RemoveMItem(m->item_guid);
     }
 
-    // If theres is an item, there is a one hour delivery delay.
-    time_t dtime = (pItem != 0) ? time(NULL) + sWorld.getConfig(CONFIG_MAIL_DELIVERY_DELAY) : time(NULL);
+    SendReturnToSender(messageID,0,GetAccountId(),m->receiver,m->sender,m->subject,m->itemTextId,m->item_guid,m->item_template, m->money,0,pItem);
 
-    time_t etime = dtime + 30*DAY;
-
-    Player *receiver = objmgr.GetPlayer((uint64)m->sender);
-    if(receiver)
-        receiver->CreateMail(messageID,0,m->receiver,m->subject,m->itemTextId,m->item_guid,m->item_template,etime, dtime, m->money,0,RETURNED_CHECKED,pItem);
-    else if ( pItem )
-        delete pItem;
-
-    std::string subject;
-    subject = m->subject;
-    sDatabase.escape_string(subject);                       //we cannot forget to delete COD, if returning mail with COD
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-        "VALUES ('%u', '0', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "', '" I64FMTD "', '%u', '0', '%d')",
-        messageID, m->receiver, m->sender, subject.c_str(), m->itemTextId, m->item_guid, m->item_template, (uint64)etime, (uint64)dtime, m->money,RETURNED_CHECKED);
     delete m;                                               //we can deallocate old mail
     pl->SendMailResult(mailId, MAIL_RETURNED_TO_SENDER, 0);
+}
+
+void WorldSession::SendReturnToSender(uint32 mailId, uint8 messageType, uint32 sender_acc, uint32 sender_guid, uint32 receiver_guid, std::string subject, uint32 itemTextId, uint32 itemGuid, uint32 item_template, uint32 money, uint32 COD, Item* pItem)
+{
+    Player *receiver = objmgr.GetPlayer(MAKE_GUID(receiver_guid,HIGHGUID_PLAYER));
+
+    uint32 rc_account = 0;
+    if(!receiver)
+        rc_account = objmgr.GetPlayerAccountIdByGUID(MAKE_GUID(receiver_guid,HIGHGUID_PLAYER));
+
+    if(receiver || rc_account)
+    {
+        bool needItemDelay = false;
+
+        if(pItem)
+        {
+            // if item send to character at another account, then apply item delivery delay
+            needItemDelay = sender_acc != rc_account;
+
+            // set owner to new receiver (to prevent delete item with sender char deleting)
+            sDatabase.BeginTransaction();
+            pItem->SaveToDB();                                  // recursive and not have transaction guard into self
+            // owner in `data` will set at mail receive and item extracting
+            sDatabase.PExecute("UPDATE `item_instance` SET `owner_guid` = '%u' WHERE `guid`='%u'",receiver_guid,pItem->GetGUIDLow());
+            sDatabase.CommitTransaction();
+        }
+
+        // If theres is an item, there is a one hour delivery delay.
+        time_t deliver_time = needItemDelay ? time(NULL) + sWorld.getConfig(CONFIG_MAIL_DELIVERY_DELAY) : time(NULL);
+
+        time_t expire_time = deliver_time + 30*DAY;
+
+        if(receiver)
+            receiver->CreateMail(mailId,0,sender_guid,subject,itemTextId,itemGuid,item_template,expire_time, deliver_time, money,0,RETURNED_CHECKED,pItem);
+        else if ( pItem )
+            delete pItem;
+
+        sDatabase.escape_string(subject);                       //we cannot forget to delete COD, if returning mail with COD
+        sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+            "VALUES ('%u', '0', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "', '" I64FMTD "', '%u', '0', '%d')",
+            mailId, sender_guid, receiver_guid, subject.c_str(), itemTextId, itemGuid, item_template, (uint64)expire_time, (uint64)deliver_time, money,RETURNED_CHECKED);
+    }
+    else if(pItem)
+    {
+        sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid`='%u'",pItem->GetGUIDLow());
+        delete pItem;
+    }
 }
 
 //called when player takes item attached in mail
@@ -326,28 +362,13 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
 
         if (m->COD > 0)                                     //if there is COD, take COD money from player and send them to sender by mail
         {
-            Player *receive = objmgr.GetPlayer(MAKE_GUID(m->sender,HIGHGUID_PLAYER));
+            uint64 sender_guid = MAKE_GUID(m->sender,HIGHGUID_PLAYER);
+            Player *receive = objmgr.GetPlayer(sender_guid);
 
-            // If theres is an item, there is a one hour delivery delay.
-            time_t dtime = (it != 0) ? time(NULL) + sWorld.getConfig(CONFIG_MAIL_DELIVERY_DELAY) : time(NULL);
-
-            time_t etime = dtime + (30 * DAY);
-            uint32 newMailId = objmgr.GenerateMailID();
-            if (receive)
-                receive->CreateMail(newMailId, 0, m->receiver, m->subject, 0, 0, 0, etime, dtime, m->COD, 0, COD_PAYMENT_CHECKED, NULL);
-
-            //escape apostrophes
-            std::string subject = m->subject;
-            sDatabase.escape_string(subject);
-            sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-                "VALUES ('%u', '0', '%u', '%u', '%s', '0', '0', '0', '" I64FMTD "', '" I64FMTD "', '%u', '0', '%d')",
-                newMailId, m->receiver, m->sender, subject.c_str(), (uint64)etime, (uint64)dtime, m->COD, COD_PAYMENT_CHECKED);
-
-            pl->ModifyMoney( -int32(m->COD) );
+            uint32 sender_accId = 0;
 
             if( GetSecurity() > SEC_PLAYER && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
             {
-                uint32 sender_accId = 0;
                 std::string sender_name;
                 if(receive)
                 {
@@ -356,7 +377,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
                 }
                 else
                 {
-                    uint64 sender_guid = MAKE_GUID(m->sender,HIGHGUID_PLAYER);
+                    // can be calculated early
                     sender_accId = objmgr.GetPlayerAccountIdByGUID(sender_guid);
 
                     if(!objmgr.GetPlayerNameByGUID(sender_guid,sender_name))
@@ -365,6 +386,30 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
                 sLog.outCommand("GM %s (Account: %u) receive mail item: %s (Entry: %u Count: %u) and send COD money: %u to player: %s (Account: %u)",
                     GetPlayerName(),GetAccountId(),it->GetProto()->Name1,it->GetEntry(),it->GetCount(),m->COD,sender_name.c_str(),sender_accId);
             }
+            else if(!receive)
+                sender_accId = objmgr.GetPlayerAccountIdByGUID(sender_guid);
+
+            // check player existanse
+            if(receive || sender_accId)
+            {
+                // If theres is an item, there is a one hour delivery delay.
+                time_t dtime = time(NULL);
+
+                time_t etime = dtime + (30 * DAY);
+                uint32 newMailId = objmgr.GenerateMailID();
+                if (receive)
+                    receive->CreateMail(newMailId, 0, m->receiver, m->subject, 0, 0, 0, etime, dtime, m->COD, 0, COD_PAYMENT_CHECKED, NULL);
+
+                //escape apostrophes
+                std::string subject = m->subject;
+                sDatabase.escape_string(subject);
+                sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+                    "VALUES ('%u', '0', '%u', '%u', '%s', '0', '0', '0', '" I64FMTD "', '" I64FMTD "', '%u', '0', '%d')",
+                    newMailId, m->receiver, m->sender, subject.c_str(), (uint64)etime, (uint64)dtime, m->COD, COD_PAYMENT_CHECKED);
+
+            }
+
+            pl->ModifyMoney( -int32(m->COD) );
         }
         m->COD = 0;
         m->state = MAIL_STATE_CHANGED;

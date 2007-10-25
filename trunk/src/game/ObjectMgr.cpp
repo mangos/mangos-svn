@@ -237,49 +237,35 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
     if(!pItem)
         return;
 
-    std::ostringstream msgAuctionWonSubject;
-    msgAuctionWonSubject << auction->item_template << ":0:" << AUCTION_WON;
-
-    std::ostringstream msgAuctionWonBody;
-    msgAuctionWonBody.width(16);
-    msgAuctionWonBody << std::right << std::hex << auction->owner;
-    msgAuctionWonBody << std::dec << ":" << auction->bid << ":" << auction->buyout;
-    sLog.outDebug( "AuctionWon body string : %s", msgAuctionWonBody.str().c_str() );
-
-    //prepare mail data... :
-    uint32 mailId = this->GenerateMailID();
-    uint32 itemTextId = this->CreateItemText( msgAuctionWonBody.str() );
-    time_t dtime = time(NULL);                              //Will always be instant when from Auction House.
-    time_t etime = dtime + (30 * DAY);
-
     uint64 bidder_guid = MAKE_GUID(auction->bidder,HIGHGUID_PLAYER);
     Player *bidder = objmgr.GetPlayer(bidder_guid);
+
+    uint32 bidder_accId = 0;
 
     // data for gm.log
     if( sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
     {
-        uint32 gm_accid = 0;
-        uint32 gm_security = 0;
-        std::string gm_name;
+        uint32 bidder_security = 0;
+        std::string bidder_name;
         if (bidder)
         {
-            gm_accid = bidder->GetSession()->GetAccountId();
-            gm_security = bidder->GetSession()->GetSecurity();
-            gm_name = bidder->GetName();
+            bidder_accId = bidder->GetSession()->GetAccountId();
+            bidder_security = bidder->GetSession()->GetSecurity();
+            bidder_name = bidder->GetName();
         }
         else
         {
-            gm_accid = GetPlayerAccountIdByGUID(bidder_guid);
-            gm_security = GetSecurityByAccount(gm_accid);
+            bidder_accId = GetPlayerAccountIdByGUID(bidder_guid);
+            bidder_security = GetSecurityByAccount(bidder_accId);
 
-            if(gm_security > SEC_PLAYER )                   // not do redundant DB requests
+            if(bidder_security > SEC_PLAYER )               // not do redundant DB requests
             {
-                if(!GetPlayerNameByGUID(bidder_guid,gm_name))
-                    gm_name = LANG_UNKNOWN;
+                if(!GetPlayerNameByGUID(bidder_guid,bidder_name))
+                    bidder_name = LANG_UNKNOWN;
             }
         }
 
-        if( gm_security > SEC_PLAYER )
+        if( bidder_security > SEC_PLAYER )
         {
             std::string owner_name;
             if(!GetPlayerNameByGUID(auction->owner,owner_name))
@@ -288,22 +274,55 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
             uint32 owner_accid = GetPlayerAccountIdByGUID(auction->owner);
 
             sLog.outCommand("GM %s (Account: %u) won item in auction: %s (Entry: %u Count: %u) and pay money: %u. Original owner %s (Account: %u)",
-                gm_name.c_str(),gm_accid,pItem->GetProto()->Name1,pItem->GetEntry(),pItem->GetCount(),auction->bid,owner_name.c_str(),owner_accid);
+                bidder_name.c_str(),bidder_accId,pItem->GetProto()->Name1,pItem->GetEntry(),pItem->GetCount(),auction->bid,owner_name.c_str(),owner_accid);
         }
     }
+    else if(!bidder)
+        bidder_accId = GetPlayerAccountIdByGUID(bidder_guid);
 
-    if (bidder)
+    // receiver exist
+    if(bidder || bidder_accId)
     {
-        bidder->GetSession()->SendAuctionBidderNotification( auction->location, auction->Id, bidder_guid, 0, 0, auction->item_template);
+        std::ostringstream msgAuctionWonSubject;
+        msgAuctionWonSubject << auction->item_template << ":0:" << AUCTION_WON;
 
-        bidder->CreateMail(mailId, MAIL_AUCTION, auction->location, msgAuctionWonSubject.str(), itemTextId, auction->item_guid, auction->item_template, etime, dtime, 0, 0, AUCTION_CHECKED, pItem);
+        std::ostringstream msgAuctionWonBody;
+        msgAuctionWonBody.width(16);
+        msgAuctionWonBody << std::right << std::hex << auction->owner;
+        msgAuctionWonBody << std::dec << ":" << auction->bid << ":" << auction->buyout;
+        sLog.outDebug( "AuctionWon body string : %s", msgAuctionWonBody.str().c_str() );
+
+        //prepare mail data... :
+        uint32 mailId = this->GenerateMailID();
+        uint32 itemTextId = this->CreateItemText( msgAuctionWonBody.str() );
+        time_t dtime = time(NULL);                              //Will always be instant when from Auction House.
+        time_t etime = dtime + (30 * DAY);
+
+
+        // set owner to bidder (to prevent delete item with sender char deleting)
+        // owner in `data` will set at mail receive and item extracting
+        sDatabase.PExecute("UPDATE `item_instance` SET `owner_guid` = '%u' WHERE `guid`='%u'",auction->bidder,pItem->GetGUIDLow());
+        sDatabase.CommitTransaction();
+
+        if (bidder)
+        {
+            bidder->GetSession()->SendAuctionBidderNotification( auction->location, auction->Id, bidder_guid, 0, 0, auction->item_template);
+
+            bidder->CreateMail(mailId, MAIL_AUCTION, auction->location, msgAuctionWonSubject.str(), itemTextId, auction->item_guid, auction->item_template, etime, dtime, 0, 0, AUCTION_CHECKED, pItem);
+        }
+        else
+            delete pItem;
+
+        sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+            "VALUES ('%u', '%d', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
+            mailId, MAIL_AUCTION, auction->location, auction->bidder, msgAuctionWonSubject.str().c_str(), itemTextId, auction->item_guid, auction->item_template, (uint64)etime,(uint64)dtime, AUCTION_CHECKED);
     }
+    // receiver not exist
     else
+    {
+        sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid`='%u'",pItem->GetGUIDLow());
         delete pItem;
-
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-        "VALUES ('%u', '%d', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
-        mailId, MAIL_AUCTION, auction->location, auction->bidder, msgAuctionWonSubject.str().c_str(), itemTextId, auction->item_guid, auction->item_template, (uint64)etime,(uint64)dtime, AUCTION_CHECKED);
+    }
 }
 
 //call this method to send mail to auctionowner, when auction is successful, it does not clear ram
@@ -313,48 +332,69 @@ void ObjectMgr::SendAuctionSuccessfulMail( AuctionEntry * auction )
     if(!pItem)
         return;
 
-    std::ostringstream msgAuctionSuccessfulSubject;
-    msgAuctionSuccessfulSubject << auction->item_template << ":0:" << AUCTION_SUCCESSFUL;
+    uint64 owner_guid = MAKE_GUID(auction->owner,HIGHGUID_PLAYER);
+    Player *owner = objmgr.GetPlayer(owner_guid);
 
-    std::ostringstream auctionSuccessfulBody;
-    uint32 auctionCut = this->GetAuctionCut(auction->location, auction->bid);
+    uint32 owner_accId = 0;
+    if(!owner)
+        owner_accId = GetPlayerAccountIdByGUID(owner_guid);
 
-    auctionSuccessfulBody.width(16);
-    auctionSuccessfulBody << std::right << std::hex << auction->bidder;
-    auctionSuccessfulBody << std::dec << ":" << auction->bid << ":0:";
-    auctionSuccessfulBody << auction->deposit << ":" << auctionCut;
-    sLog.outDebug("AuctionSuccessful body string : %s", auctionSuccessfulBody.str().c_str());
-
-    uint32 itemTextId = this->CreateItemText( auctionSuccessfulBody.str() );
-
-    uint32 mailId = this->GenerateMailID();
-    time_t dtime = time(NULL);                              //Instant because it's Auction House
-    time_t etime = dtime + (30 * DAY);
-    uint32 profit = auction->bid + auction->deposit - auctionCut;
-
-    Player *owner = objmgr.GetPlayer((uint64) auction->owner);
-    if (owner)
+    // owner exist
+    if(owner || owner_accId)
     {
-        //send auctionowner notification, bidder must be current!
-        owner->GetSession()->SendAuctionOwnerNotification( auction );
+        std::ostringstream msgAuctionSuccessfulSubject;
+        msgAuctionSuccessfulSubject << auction->item_template << ":0:" << AUCTION_SUCCESSFUL;
 
-        owner->CreateMail(mailId, MAIL_AUCTION, auction->location, msgAuctionSuccessfulSubject.str(), itemTextId, 0, 0, etime, dtime, profit, 0, AUCTION_CHECKED, NULL);
+        std::ostringstream auctionSuccessfulBody;
+        uint32 auctionCut = this->GetAuctionCut(auction->location, auction->bid);
+
+        auctionSuccessfulBody.width(16);
+        auctionSuccessfulBody << std::right << std::hex << auction->bidder;
+        auctionSuccessfulBody << std::dec << ":" << auction->bid << ":0:";
+        auctionSuccessfulBody << auction->deposit << ":" << auctionCut;
+        sLog.outDebug("AuctionSuccessful body string : %s", auctionSuccessfulBody.str().c_str());
+
+        uint32 itemTextId = this->CreateItemText( auctionSuccessfulBody.str() );
+
+        uint32 mailId = this->GenerateMailID();
+        time_t dtime = time(NULL);                              //Instant because it's Auction House
+        time_t etime = dtime + (30 * DAY);
+        uint32 profit = auction->bid + auction->deposit - auctionCut;
+
+        if (owner)
+        {
+            //send auctionowner notification, bidder must be current!
+            owner->GetSession()->SendAuctionOwnerNotification( auction );
+
+            owner->CreateMail(mailId, MAIL_AUCTION, auction->location, msgAuctionSuccessfulSubject.str(), itemTextId, 0, 0, etime, dtime, profit, 0, AUCTION_CHECKED, NULL);
+        }
+
+        sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+            "VALUES ('%u', '%d', '%u', '%u', '%s', '%u', '0', '0', '" I64FMTD "', '" I64FMTD "', '%u', '0', '%d')",
+            mailId, MAIL_AUCTION, auction->location, auction->owner, msgAuctionSuccessfulSubject.str().c_str(), itemTextId, (uint64)etime, (uint64)dtime, profit, AUCTION_CHECKED);
     }
-
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-        "VALUES ('%u', '%d', '%u', '%u', '%s', '%u', '0', '0', '" I64FMTD "', '" I64FMTD "', '%u', '0', '%d')",
-        mailId, MAIL_AUCTION, auction->location, auction->owner, msgAuctionSuccessfulSubject.str().c_str(), itemTextId, (uint64)etime, (uint64)dtime, profit, AUCTION_CHECKED);
 }
 
 //does not clear ram
 void ObjectMgr::SendAuctionExpiredMail( AuctionEntry * auction )
 {                                                           //return an item in auction to its owner by mail
     Item *pItem = objmgr.GetAItem(auction->item_guid);
-    if(pItem)
+    if(!pItem)
     {
+        sLog.outError("Auction item (GUID: %u) not found, and lost.",auction->item_guid);
+        return;
+    }
 
-        Player *seller = objmgr.GetPlayer((uint64)auction->owner);
+    uint64 owner_guid = MAKE_GUID(auction->owner,HIGHGUID_PLAYER);
+    Player *owner = objmgr.GetPlayer(owner_guid);
 
+    uint32 owner_accId = 0;
+    if(!owner)
+        owner_accId = GetPlayerAccountIdByGUID(owner_guid);
+
+    // owner exist
+    if(owner || owner_accId)
+    {
         uint32 messageId = objmgr.GenerateMailID();
         std::ostringstream subject;
         subject << auction->item_template << ":0:" << AUCTION_EXPIRED;
@@ -364,20 +404,22 @@ void ObjectMgr::SendAuctionExpiredMail( AuctionEntry * auction )
         sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
             "VALUES ('%u', '2', '%u', '%u', '%s', '0', '%u', '%u', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
             messageId, auction->location, auction->owner, subject.str().c_str(), auction->item_guid, auction->item_template, (uint64)etime, (uint64)dtime, NOT_READ);
-        if ( seller )
+        if ( owner )
         {
-            seller->GetSession()->SendAuctionOwnerNotification( auction );
+            owner->GetSession()->SendAuctionOwnerNotification( auction );
 
-            seller->CreateMail(messageId, MAIL_AUCTION, auction->location, subject.str(), 0, auction->item_guid, auction->item_template, etime,dtime,0,0,NOT_READ,pItem);
+            owner->CreateMail(messageId, MAIL_AUCTION, auction->location, subject.str(), 0, auction->item_guid, auction->item_template, etime,dtime,0,0,NOT_READ,pItem);
         }
         else
         {
             delete pItem;
         }
     }
+    // owner not found
     else
     {
-        sLog.outError("Auction item (GUID: %u) not found, and lost.",auction->item_guid);
+        sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid`='%u'",pItem->GetGUIDLow());
+        delete pItem;
     }
 }
 
@@ -2920,11 +2962,11 @@ void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
                     continue;
                 }
 
-                if( info->id==GAMEOBJECT_TYPE_FISHINGNODE || 
-                    info->id==GAMEOBJECT_TYPE_FISHINGNODE || 
-                    info->id==GAMEOBJECT_TYPE_DOOR        || 
-                    info->id==GAMEOBJECT_TYPE_BUTTON      || 
-                    info->id==GAMEOBJECT_TYPE_TRAP )
+                if( info->type==GAMEOBJECT_TYPE_FISHINGNODE || 
+                    info->type==GAMEOBJECT_TYPE_FISHINGNODE || 
+                    info->type==GAMEOBJECT_TYPE_DOOR        || 
+                    info->type==GAMEOBJECT_TYPE_BUTTON      || 
+                    info->type==GAMEOBJECT_TYPE_TRAP )
                 {
                     sLog.outErrorDb("Table `%s` have gameobject type (%u) unsupported by command SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id %u",tablename,info->id,tmp.id);
                     continue;
@@ -2947,7 +2989,7 @@ void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
                     continue;
                 }
 
-                if( info->id!=GAMEOBJECT_TYPE_DOOR)
+                if( info->type!=GAMEOBJECT_TYPE_DOOR)
                 {
                     sLog.outErrorDb("Table `%s` have gameobject type (%u) unsupported by command SCRIPT_COMMAND_OPEN_DOOR for script id %u",tablename,info->id,tmp.id);
                     continue;

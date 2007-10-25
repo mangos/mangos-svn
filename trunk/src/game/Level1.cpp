@@ -1706,6 +1706,10 @@ bool ChatHandler::HandleSendMailCommand(const char* args)
     normalizePlayerName(name);
 
     uint32 receiver_guid = objmgr.GetPlayerGUIDByName(name);
+
+    if(!receiver_guid)
+        return false;
+
     uint32 mailId = objmgr.GenerateMailID();
     uint32 sender_guid = m_session->GetPlayer()->GetGUID();
     time_t dtime = time(NULL);

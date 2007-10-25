@@ -282,11 +282,8 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult *result)
 
     if (delete_result) delete result;
 
-    if(owner_guid != 0 && GetOwnerGUID()!=owner_guid)
-    {
-        sLog.outError("Item::LoadFromDB: item: %u have in DB owner guid: %u. Updated to correct: %u",GetGUIDLow(),GUID_LOPART(GetOwnerGUID()), GUID_LOPART(owner_guid));
+    if(owner_guid != 0)
         SetOwnerGUID(owner_guid);
-    }
 
     return true;
 }
