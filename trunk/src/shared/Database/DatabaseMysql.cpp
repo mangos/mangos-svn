@@ -153,7 +153,7 @@ bool DatabaseMysql::Initialize(const char *infoString)
         // So better to turn this off
         if (!mysql_autocommit(mMysql, 0))
         {
-            sLog.outDetail("AUTOCOMMIT SUCCESSFULY SET TO 0");
+            sLog.outDetail("AUTOCOMMIT SUCCESSFULLY SET TO 0");
         }
         else
         {

@@ -52,7 +52,7 @@ class MANGOS_DLL_SPEC InstanceData
         //This is to prevent players from entering during boss encounters.
         virtual bool IsEncounterInProgress() const { return false; };
 
-        //Called when a player successfuly enters the instance.
+        //Called when a player successfully enters the instance.
         virtual void OnPlayerEnter(Player *) {}
 
         //Called when a gameobject is created

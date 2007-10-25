@@ -5158,7 +5158,7 @@ ReputationRank Player::GetBaseReputationRank(const FactionEntry *factionEntry) c
 
 bool Player::ModifyFactionReputation(uint32 FactionTemplateId, int32 DeltaReputation)
 {
-    FactionTemplateEntry const*factionTemplateEntry = sFactionTemplateStore.LookupEntry(FactionTemplateId);
+    FactionTemplateEntry const* factionTemplateEntry = sFactionTemplateStore.LookupEntry(FactionTemplateId);
 
     if(!factionTemplateEntry)
     {
@@ -5176,6 +5176,24 @@ bool Player::ModifyFactionReputation(uint32 FactionTemplateId, int32 DeltaReputa
 }
 
 bool Player::ModifyFactionReputation(FactionEntry const* factionEntry, int32 standing)
+{
+    SimpleFactionsList const* flist = GetFactionTeamList(factionEntry->ID);
+    if (flist)
+    {
+        bool res = false;
+        for (SimpleFactionsList::const_iterator itr = flist->begin();itr != flist->end();++itr)
+        {
+            FactionEntry const *factionEntryCalc = sFactionStore.LookupEntry(*itr);
+            if(factionEntryCalc)
+                res = ModifyOneFactionReputation(factionEntryCalc, standing);
+        }
+        return res;
+    }
+    else
+        return ModifyOneFactionReputation(factionEntry, standing);
+}
+
+bool Player::ModifyOneFactionReputation(FactionEntry const* factionEntry, int32 standing)
 {
     FactionsList::iterator itr = m_factions.find(factionEntry->reputationListID);
     if (itr != m_factions.end())
