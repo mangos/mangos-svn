@@ -331,6 +331,7 @@ void World::SetInitialWorldSettings()
     }
     m_configs[CONFIG_INSTANCE_IGNORE_LEVEL] = sConfig.GetBoolDefault("Instance.IgnoreLevel", 0);
     m_configs[CONFIG_INSTANCE_IGNORE_RAID]  = sConfig.GetBoolDefault("Instance.IgnoreRaid", 0);
+    m_configs[CONFIG_BATTLEGROUND_CAST_DESERTER] = sConfig.GetBoolDefault("Battleground.CastDeserter", 1);
 
     m_configs[CONFIG_MAX_PRIMARY_TRADE_SKILL] = sConfig.GetIntDefault("MaxPrimaryTradeSkill", 2);
     m_configs[CONFIG_MIN_PETITION_SIGNS] = sConfig.GetIntDefault("MinPetitionSigns", 9);

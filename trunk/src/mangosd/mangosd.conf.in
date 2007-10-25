@@ -153,6 +153,11 @@ MaxPlayerLevel = 70
 #          0 (false)
 ActivateWeather = 1
 
+# Cast or nor Deserter spell at player who leave battleground in progress
+# Default: 1 (true)
+#          0 (false)
+Battleground.CastDeserter = 1
+
 # Ignore level requirement to enter instance
 #          1 (true)
 # Default: 0 (false)
