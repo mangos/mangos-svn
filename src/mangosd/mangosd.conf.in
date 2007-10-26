@@ -145,7 +145,7 @@ PlayerLimit = 100
 
 # Max level that can reached by player for expirience (in range from 1 to 255).
 # Change not recommended
-# Default: 60
+# Default: 70
 MaxPlayerLevel = 70
 
 # Activate weather system
@@ -180,7 +180,7 @@ Quests.HighLevelHideDiff = 7
 
 # Max count that player can learn the primary trade skill.
 # Default: 2
-# Max : 9 
+# Max : 10
 MaxPrimaryTradeSkill = 2 
 
 # Min signatures count to creating guild (0..9).
