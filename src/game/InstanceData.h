@@ -43,7 +43,7 @@ class MANGOS_DLL_SPEC InstanceData
         virtual void Load(const char* /*data*/) {} 
 
         //When save is needed, this function generates the data
-        virtual const char* Save() { return NULL; }
+        virtual const char* Save() { return ""; }
 
         //Called every map update
         virtual void Update(uint32 /*diff*/) {}

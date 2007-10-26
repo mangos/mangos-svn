@@ -25,7 +25,7 @@
 MapInstanced::MapInstanced(uint32 id, time_t expiry, uint32 aInstanceId) : Map(id, expiry, 0)
 {
     // initialize instanced maps list
-    InstancedMaps.clear();
+    m_InstancedMaps.clear();
     // fill with zero
     memset(&GridMapReference, 0, MAX_NUMBER_OF_GRIDS*MAX_NUMBER_OF_GRIDS*sizeof(uint16));
 }
@@ -36,9 +36,9 @@ void MapInstanced::Update(const uint32& t)
     Map::Update(t);
 
     // update the instanced maps
-    HM_NAMESPACE::hash_map< uint32, Map* >::iterator i = InstancedMaps.begin();
+    HM_NAMESPACE::hash_map< uint32, Map* >::iterator i = m_InstancedMaps.begin();
 
-    while (i != InstancedMaps.end())
+    while (i != m_InstancedMaps.end())
     {
         if (i->second->NeedsReset())
         {
@@ -46,17 +46,18 @@ void MapInstanced::Update(const uint32& t)
             {
                 i->second->Reset();
                 // avoid doing ++ on invalid data
-                HM_NAMESPACE::hash_map< uint32, Map* >::iterator i_old = i;
+                InstancedMaps::iterator i_old = i;
                 ++i;
                 VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(i_old->second->GetId());
                 // erase map
                 delete i_old->second;
-                InstancedMaps.erase(i_old);
+                m_InstancedMaps.erase(i_old);
             }
             else
             {
                 // shift reset time of the map
                 i->second->InitResetTime();
+                ++i;
             }
         }
         else
@@ -71,7 +72,7 @@ void MapInstanced::Update(const uint32& t)
 
 void MapInstanced::MoveAllCreaturesInMoveList()
 {
-    for (HM_NAMESPACE::hash_map< uint32, Map* >::iterator i = InstancedMaps.begin(); i != InstancedMaps.end(); i++)
+    for (HM_NAMESPACE::hash_map< uint32, Map* >::iterator i = m_InstancedMaps.begin(); i != m_InstancedMaps.end(); i++)
     {
         i->second->MoveAllCreaturesInMoveList();
     }
@@ -81,7 +82,7 @@ bool MapInstanced::RemoveBones(uint64 guid, float x, float y)
 {
     bool remove_result = false;
 
-    for (HM_NAMESPACE::hash_map< uint32, Map* >::iterator i = InstancedMaps.begin(); i != InstancedMaps.end(); i++)
+    for (HM_NAMESPACE::hash_map< uint32, Map* >::iterator i = m_InstancedMaps.begin(); i != m_InstancedMaps.end(); i++)
     {
         remove_result = remove_result || i->second->RemoveBones(guid, x, y);
     }
@@ -92,14 +93,14 @@ bool MapInstanced::RemoveBones(uint64 guid, float x, float y)
 void MapInstanced::UnloadAll()
 {
     // Unload instanced maps
-    for (HM_NAMESPACE::hash_map< uint32, Map* >::iterator i = InstancedMaps.begin(); i != InstancedMaps.end(); i++)
+    for (HM_NAMESPACE::hash_map< uint32, Map* >::iterator i = m_InstancedMaps.begin(); i != m_InstancedMaps.end(); i++)
         i->second->UnloadAll();
 
     // Delete the maps only after everything is unloaded to prevent crashes
-    for (HM_NAMESPACE::hash_map< uint32, Map* >::iterator i = InstancedMaps.begin(); i != InstancedMaps.end(); i++)
+    for (HM_NAMESPACE::hash_map< uint32, Map* >::iterator i = m_InstancedMaps.begin(); i != m_InstancedMaps.end(); i++)
         delete i->second;
 
-    InstancedMaps.clear();
+    m_InstancedMaps.clear();
 
     // Unload own grids (just dummy(placeholder) grids, neccesary to unload GridMaps!)
     Map::UnloadAll();
@@ -305,7 +306,7 @@ void MapInstanced::CreateInstance(uint32 InstanceId, Map* &map)
             Guard guard(*this);
 
             map->Reset();
-            InstancedMaps.erase(InstanceId);
+            m_InstancedMaps.erase(InstanceId);
             VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(GetId());
             delete map;
             map = NULL;
@@ -319,7 +320,7 @@ void MapInstanced::CreateInstance(uint32 InstanceId, Map* &map)
         Guard guard(*this);
 
         map = new Map(GetId(), GetGridExpiry(), InstanceId);
-        InstancedMaps[InstanceId] = map;
+        m_InstancedMaps[InstanceId] = map;
     }
 }
 
