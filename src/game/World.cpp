@@ -1303,6 +1303,43 @@ void World::ScriptsProcess()
 
                 break;
             }
+            case SCRIPT_COMMAND_QUEST_EXPLORED:
+            {
+                if(!source)
+                {
+                    sLog.outError("SCRIPT_COMMAND_QUEST_EXPLORED call for NULL source.");
+                    break;
+                }
+
+                if(!target)
+                {
+                    sLog.outError("SCRIPT_COMMAND_QUEST_EXPLORED call for NULL target.");
+                    break;
+                }
+
+                if(source->GetTypeId()!=TYPEID_UNIT)
+                {
+                    sLog.outError("SCRIPT_COMMAND_QUEST_EXPLORED call for non-creature (TypeId: %u), skipping.",source->GetTypeId());
+                    break;
+                }
+
+                if(target->GetTypeId()!=TYPEID_PLAYER)
+                {
+                    sLog.outError("SCRIPT_COMMAND_QUEST_EXPLORED call for non-player(TypeId: %u), skipping.",target->GetTypeId());
+                    break;
+                }
+
+                // quest id and flags checked at script loading
+
+                if( ((Unit*)source)->isAlive() && 
+                    (step.script->datalong2==0 || ((Unit*)source)->IsWithinDistInMap((Unit*)target,float(step.script->datalong2))) )
+                    ((Player*)target)->AreaExplored(step.script->datalong);
+                else
+                    ((Player*)target)->FailQuest(step.script->datalong);
+
+                break;
+            }
+
             default:
                 sLog.outError("Unknown script command %u called.",step.script->command);
                 break;

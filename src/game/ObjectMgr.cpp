@@ -2996,6 +2996,41 @@ void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
                 }
                 break;
             }
+            case SCRIPT_COMMAND_QUEST_EXPLORED:
+            {
+                Quest const* quest = objmgr.GetQuestTemplate(tmp.datalong);
+                if(!quest)
+                {
+                    sLog.outErrorDb("Table `%s` have invalid quest (ID: %u) in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id %u",tablename,tmp.datalong,tmp.id);
+                    continue;
+                }
+
+                if((quest->GetSpecialFlags() & QUEST_SPECIAL_FLAGS_EXPLORATION)==0)
+                {
+                    sLog.outErrorDb("Table `%s` have quest (ID: %u) in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id %u, but this quest not have QUEST_SPECIAL_FLAGS_EXPLORATION (%u)",tablename,tmp.datalong,tmp.id,QUEST_SPECIAL_FLAGS_EXPLORATION);
+                    continue;
+                }
+
+                if(float(tmp.datalong2) > DEFAULT_VISIBILITY_DISTANCE)
+                {
+                    sLog.outErrorDb("Table `%s` have too large distance (%u) for exploring objective complete in `datalong2` in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id %u",tablename,tmp.datalong2,tmp.id);
+                    continue;
+                }
+
+                if(tmp.datalong2 && float(tmp.datalong2) > DEFAULT_VISIBILITY_DISTANCE)
+                {
+                    sLog.outErrorDb("Table `%s` have too large distance (%u) for exploring objective complete in `datalong2` in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id %u, max distance is %u or 0 for disable distance check",tablename,tmp.datalong2,tmp.id,uint32(DEFAULT_VISIBILITY_DISTANCE));
+                    continue;
+                }
+
+                if(tmp.datalong2 && float(tmp.datalong2) < INTERACTION_DISTANCE)
+                {
+                    sLog.outErrorDb("Table `%s` have too small distance (%u) for exploring objective complete in `datalong2` in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id %u, min distance is %u or 0 for disable distance check",tablename,tmp.datalong2,tmp.id,uint32(INTERACTION_DISTANCE));
+                    continue;
+                }
+
+                break;
+            }
         }
 
         if (scripts.find(tmp.id) == scripts.end())
