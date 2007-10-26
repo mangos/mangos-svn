@@ -253,7 +253,6 @@ Map::Map(uint32 id, time_t expiry, uint32 ainstanceId)
                 }
             }
             delete result;
-            if (i_resetTime == 0) InitResetTime();
         }
         else
         {
@@ -538,7 +537,8 @@ void Map::RemoveInstanced(Player *player)
 
 void Map::InitResetTime()
 {
-    if (Instanceable())
+    // for i_resetDelayTime==0 call single time for i_resetTime==0
+    if (Instanceable() && (i_resetDelayTime != 0 || i_resetTime == 0) )
     {
         i_resetTime = time(NULL) + i_resetDelayTime;        // only used for Instanceable() case
 
@@ -717,7 +717,13 @@ T* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl, T *fake)
 void Map::MessageBroadcast(Player *player, WorldPacket *msg, bool to_self, bool own_team_only)
 {
     CellPair p = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
-    assert( p.x_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP && p.y_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP );
+
+    if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
+    {
+        sLog.outError("Map::MessageBroadcast: Player (GUID: %u) have invalid coordinates X:%f Y:%f grid cell [%u:%u]", player->GetGUIDLow(), player->GetPositionX(), player->GetPositionY(), p.x_coord, p.y_coord);
+        return;
+    }
+
 
     Cell cell = RedZone::GetZone(p);
     cell.data.Part.reserved = ALL_DISTRICT;

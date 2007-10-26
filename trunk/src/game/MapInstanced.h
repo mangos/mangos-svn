@@ -47,13 +47,15 @@ class MANGOS_DLL_DECL MapInstanced : public Map
 
         void CreateInstance(uint32 InstanceId, Map* &map);
 
-        HM_NAMESPACE::hash_map< uint32, Map* > InstancedMaps;
+        typedef HM_NAMESPACE::hash_map< uint32, Map* > InstancedMaps;
+
+        InstancedMaps m_InstancedMaps;
 
         Map* _FindMap(uint32 InstanceId)
         {
-            HM_NAMESPACE::hash_map< uint32, Map* >::iterator i = InstancedMaps.find(InstanceId);
+            InstancedMaps::iterator i = m_InstancedMaps.find(InstanceId);
 
-            return(i == InstancedMaps.end() ? NULL : i->second);
+            return(i == m_InstancedMaps.end() ? NULL : i->second);
         }
 
         uint16 GridMapReference[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
