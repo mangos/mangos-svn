@@ -3894,7 +3894,7 @@ void ObjectMgr::LoadSpellTeleports()
         SpellEntry const* spellInfo = sSpellStore.LookupEntry(Spell_ID);
         if(!spellInfo)
         {
-            sLog.outErrorDb("Spell (ID:%u) listed in `spell_tepelort` not exist`.",Spell_ID);
+            sLog.outErrorDb("Spell (ID:%u) listed in `spell_teleport` not exist`.",Spell_ID);
             continue;
         }
 
