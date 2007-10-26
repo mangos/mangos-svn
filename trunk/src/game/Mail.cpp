@@ -163,22 +163,21 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
                 GetPlayerName(),GetAccountId(),pItem->GetProto()->Name1,pItem->GetEntry(),pItem->GetCount(),money,receiver.c_str(),rc_account);
         }
 
-        sDatabase.BeginTransaction();
-        pItem->DeleteFromInventoryDB();                     //deletes item from character's inventory
-        pItem->SaveToDB();                                  // recursive and not have transaction guard into self
-        sDatabase.CommitTransaction();
-
-        //item reminds in item_instance table already, used it in mail now
         pl->RemoveItem( (item_pos >> 8), (item_pos & 255), true );
         pItem->RemoveFromUpdateQueueOf( pl );
+        //item reminds in item_instance table already, used it in mail now
         if(pItem->IsInWorld())
         {
             pItem->RemoveFromWorld();
             pItem->DestroyForPlayer( pl );
         }
 
+        sDatabase.BeginTransaction();
+        pItem->DeleteFromInventoryDB();                     //deletes item from character's inventory
+        pItem->SaveToDB();                                  // recursive and not have transaction guard into self
         // owner in `data` will set at mail receive and item extracting
         sDatabase.PExecute("UPDATE `item_instance` SET `owner_guid` = '%u' WHERE `guid`='%u'",GUID_LOPART(rc),pItem->GetGUIDLow());
+        sDatabase.CommitTransaction();
     }
     uint32 messagetype = MAIL_NORMAL;
     uint32 item_template = pItem ? pItem->GetEntry() : 0;   //item prototype
