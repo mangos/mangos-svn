@@ -44,10 +44,47 @@ class LoginQueryHolder : public SqlQueryHolder
         uint64 m_guid;
     public:
         LoginQueryHolder(uint32 accountId, uint64 guid)
-            : m_accountId(accountId), m_guid(guid) {}
+            : m_accountId(accountId), m_guid(guid) { }
         uint64 GetGuid() const { return m_guid; }
         uint32 GetAccountId() const { return m_accountId; }
+        bool Initialize();
 };
+
+bool LoginQueryHolder::Initialize()
+{
+    SetSize(MAX_PLAYER_LOGIN_QUERY);
+
+    bool res = true;
+
+    // NOTE: all fields in `character` must be read to prevent lost character data at next save in case wrong DB structure.
+    // !!! NOTE: including unused `zone`,`online`
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADFROM,            "SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`at_login`,`zone`,`online`,`pending_honor`,`last_honor_date`,`last_kill_date` FROM `character` WHERE `guid` = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADGROUP,           "SELECT `leaderGuid` FROM `group_member` WHERE `memberGuid`='%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADBOUNDINSTANCES,  "SELECT `map`,`instance`,`leader` FROM `character_instance` WHERE `guid` = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADAURAS,           "SELECT `caster_guid`,`spell`,`effect_index`,`amount`,`maxduration`,`remaintime`,`remaincharges` FROM `character_aura` WHERE `guid` = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADSPELLS,          "SELECT `spell`,`slot`,`active` FROM `character_spell` WHERE `guid` = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADQUESTSTATUS,     "SELECT `quest`,`status`,`rewarded`,`explored`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4` FROM `character_queststatus` WHERE `guid` = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADDAILYQUESTSTATUS,"SELECT `quest`,`time` FROM `character_queststatus_daily` WHERE `guid` = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADTUTORIALS,       "SELECT `tut0`,`tut1`,`tut2`,`tut3`,`tut4`,`tut5`,`tut6`,`tut7` FROM `character_tutorial` WHERE `guid` = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADREPUTATION,      "SELECT `faction`,`standing`,`flags` FROM `character_reputation` WHERE `guid` = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADINVENTORY,       "SELECT `data`,`bag`,`slot`,`item`,`item_template` FROM `character_inventory` JOIN `item_instance` ON `character_inventory`.`item` = `item_instance`.`guid` WHERE `character_inventory`.`guid` = '%u' ORDER BY `bag`,`slot`", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADACTIONS,         "SELECT `button`,`action`,`type`,`misc` FROM `character_action` WHERE `guid` = '%u' ORDER BY `button`", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADMAILCOUNT,       "SELECT COUNT(id) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0 AND `deliver_time` <= '" I64FMTD "'", GUID_LOPART(m_guid),(uint64)time(NULL));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADMAILDATE,        "SELECT MIN(`deliver_time`) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADIGNORELIST,      "SELECT `friend` FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADFRIENDLIST,      "SELECT `friend` FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u' LIMIT 255", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADHOMEBIND,        "SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADSPELLCOOLDOWNS,  "SELECT `spell`,`item`,`time` FROM `character_spell_cooldown` WHERE `guid` = '%u'", GUID_LOPART(m_guid));
+
+    if(sWorld.getConfig(CONFIG_HONOR_KILL_LIMIT))
+        res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADHONOR,       "SELECT `victim_guid`,`count` FROM `character_kill` WHERE `guid`='%u'", GUID_LOPART(m_guid));
+    // in other case still be dummy query
+
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_LOADGUILD,           "SELECT `guildid`,`rank` FROM `guild_member` WHERE `guid` = '%u'", GUID_LOPART(m_guid));
+    res &= SetPQuery(PLAYER_LOGIN_QUERY_BROADCASTTOFRIENDLISTERS,"SELECT `guid` FROM `character_social` WHERE `flags` = 'FRIEND' AND `friend` = '%u'", GUID_LOPART(m_guid));
+
+    return res;
+}
 
 // don't call WorldSession directly
 // it may get deleted before the query callbacks get executed
@@ -318,53 +355,14 @@ void WorldSession::HandlePlayerLoginOpcode( WorldPacket & recv_data )
     recv_data >> playerGuid;
 
     LoginQueryHolder *holder = new LoginQueryHolder(GetAccountId(), playerGuid);
-    holder->Reserve(19);
+    if(!holder->Initialize())
+    {
+        delete holder;                                      // delete all unprocessed queries
+        m_playerLoading = false;
+        return;
+    }
 
-    // 0 - LoadFromDB in Player::LoadFromDB
-    holder->PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`at_login`,`zone`,`online`,`pending_honor`,`last_honor_date`,`last_kill_date` FROM `character` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
-    // 1 - _LoadGroup in Player::LoadFromDB
-    holder->PQuery("SELECT `leaderGuid` FROM `group_member` WHERE `memberGuid`='%u'", GUID_LOPART(playerGuid));
-    // 2 - _LoadBoundInstances in Player::LoadFromDB
-    holder->PQuery("SELECT `map`,`instance`,`leader` FROM `character_instance` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
-    // 3 - _LoadAuras in Player::LoadFromDB
-    holder->PQuery("SELECT `caster_guid`,`spell`,`effect_index`,`amount`,`maxduration`,`remaintime`,`remaincharges` FROM `character_aura` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
-    // 4 - _LoadSpells in Player::LoadFromDB
-    holder->PQuery("SELECT `spell`,`slot`,`active` FROM `character_spell` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
-    // 5 - _LoadQuestStatus in Player::LoadFromDB
-    holder->PQuery("SELECT `quest`,`status`,`rewarded`,`explored`,`timer`,`mobcount1`,`mobcount2`,`mobcount3`,`mobcount4`,`itemcount1`,`itemcount2`,`itemcount3`,`itemcount4` FROM `character_queststatus` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
-    // 6 - _LoadDailyQuestStatus in Player::LoadFromDB
-    holder->PQuery("SELECT `quest`,`time` FROM `character_queststatus_daily` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
-    // 7 - _LoadTutorials in Player::LoadFromDB
-    holder->PQuery("SELECT `tut0`,`tut1`,`tut2`,`tut3`,`tut4`,`tut5`,`tut6`,`tut7` FROM `character_tutorial` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
-    // 8 - _LoadReputation in Player::LoadFromDB
-    holder->PQuery("SELECT `faction`,`standing`,`flags` FROM `character_reputation` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
-    // 9 - _LoadInventory in Player::LoadFromDB
-    holder->PQuery("SELECT `data`,`bag`,`slot`,`item`,`item_template` FROM `character_inventory` JOIN `item_instance` ON `character_inventory`.`item` = `item_instance`.`guid` WHERE `character_inventory`.`guid` = '%u' ORDER BY `bag`,`slot`", GUID_LOPART(playerGuid));
-    // 10 - _LoadActions in Player::LoadFromDB
-    holder->PQuery("SELECT `button`,`action`,`type`,`misc` FROM `character_action` WHERE `guid` = '%u' ORDER BY `button`", GUID_LOPART(playerGuid));
-    // 11 - _LoadMailInit in Player::LoadFromDB
-    holder->PQuery("SELECT COUNT(id) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0 AND `deliver_time` <= '" I64FMTD "'", GUID_LOPART(playerGuid),(uint64)time(NULL));
-    // 12 - _LoadMailInit in Player::LoadFromDB
-    holder->PQuery("SELECT MIN(`deliver_time`) FROM `mail` WHERE `receiver` = '%u' AND `checked` = 0", GUID_LOPART(playerGuid));
-    // 13 - _LoadIgnoreList     in Player::LoadFromDB
-    holder->PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u'", GUID_LOPART(playerGuid));
-    // 14 - _LoadFriendList     in Player::LoadFromDB
-    holder->PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u' LIMIT 255", GUID_LOPART(playerGuid));
-    // 15 - _LoadHomeBind       in Player::LoadFromDB
-    holder->PQuery("SELECT `map`,`zone`,`position_x`,`position_y`,`position_z` FROM `character_homebind` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
-    // 16 - _LoadSpellCooldowns in Player::LoadFromDB
-    holder->PQuery("SELECT `spell`,`item`,`time` FROM `character_spell_cooldown` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
-    // 17 - _LoadHonor          in Player::LoadFromDB
-    if(sWorld.getConfig(CONFIG_HONOR_KILL_LIMIT))
-        holder->PQuery("SELECT `victim_guid`,`count` FROM `character_kill` WHERE `guid`='%u'", GUID_LOPART(playerGuid));
-    else
-        holder->DummyQuery();
-    // 18 - HandlePlayerLogin : guildid, rank in WorldSession::HandlePlayerLogin
-    holder->PQuery("SELECT `guildid`,`rank` FROM `guild_member` WHERE `guid` = '%u'", GUID_LOPART(playerGuid));
-    // 19 - BroadcastPacketToFriendListers in WorldSession::HandlePlayerLogin 
-    holder->PQuery("SELECT `guid` FROM `character_social` WHERE `flags` = 'FRIEND' AND `friend` = '%u'", GUID_LOPART(playerGuid));
-
-    sDatabase.DelayQueryHolder(&chrHandler, &CharacterHandler::HandlePlayerLoginCallback, (SqlQueryHolder*)holder);
+    sDatabase.DelayQueryHolder(&chrHandler, &CharacterHandler::HandlePlayerLoginCallback, holder);
 }
 
 void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
@@ -488,7 +486,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     }
 
     //QueryResult *result = sDatabase.PQuery("SELECT `guildid`,`rank` FROM `guild_member` WHERE `guid` = '%u'",pCurrChar->GetGUIDLow());
-    QueryResult *resultGuild = holder->GetResult(18);
+    QueryResult *resultGuild = holder->GetResult(PLAYER_LOGIN_QUERY_LOADGUILD);
 
     if(resultGuild)
     {
@@ -533,7 +531,7 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     data<<pCurrChar->GetAreaId();
     data<<pCurrChar->getLevel();
     data<<pCurrChar->getClass();
-    pCurrChar->BroadcastPacketToFriendListers(&data, true, holder->GetResult(19));
+    pCurrChar->BroadcastPacketToFriendListers(&data, true, holder->GetResult(PLAYER_LOGIN_QUERY_BROADCASTTOFRIENDLISTERS));
 
     // Place character in world (and load zone) before some object loading
     pCurrChar->LoadCorpse();

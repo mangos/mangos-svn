@@ -87,16 +87,32 @@ void SqlQueryHolder::Execute(MaNGOS::IQueryCallback * callback, SqlDelayThread *
     thread->Delay(holderEx);
 }
 
-bool SqlQueryHolder::Query(const char *sql)
+bool SqlQueryHolder::SetQuery(size_t index, const char *sql)
 {
+    if(m_queries.size() <= index)
+    {
+        sLog.outError("Query index (%u) out of range (size: %u) for query: %s",index,m_queries.size(),sql);
+        return false;
+    }
+
+    if(m_queries[index].first != NULL)
+    {
+        sLog.outError("Attempt assign query to holder index (%u) where other query stored (Old: [%s] New: [%s])",index,m_queries.size(),m_queries[index].first,sql);
+        return false;
+    }
+
     /// not executed yet, just stored (it's not called a holder for nothing)
-    m_queries.push_back(SqlResultPair(strdup(sql), NULL));
+    m_queries[index] = SqlResultPair(strdup(sql), NULL);
     return true;
 }
 
-bool SqlQueryHolder::PQuery(const char *format, ...)
+bool SqlQueryHolder::SetPQuery(size_t index, const char *format, ...)
 {
-    if(!format) return false;
+    if(!format)
+    {
+        sLog.outError("Query (index: %u) is empty.",index);
+        return false;
+    }
 
     va_list ap;
     char szQuery [MAX_QUERY_LEN];
@@ -110,13 +126,7 @@ bool SqlQueryHolder::PQuery(const char *format, ...)
         return false;
     }
 
-    return Query(szQuery);
-}
-
-void SqlQueryHolder::DummyQuery()
-{
-    /// a query for dummies, actually a placeholder for a query
-    m_queries.push_back(SqlResultPair(NULL, NULL));
+    return SetQuery(index,szQuery);
 }
 
 QueryResult* SqlQueryHolder::GetResult(size_t index)
@@ -158,10 +168,10 @@ SqlQueryHolder::~SqlQueryHolder()
     }
 }
 
-void SqlQueryHolder::Reserve(size_t size)
+void SqlQueryHolder::SetSize(size_t size)
 {
     /// to optimize push_back, reserve the number of queries about to be executed
-    m_queries.reserve(size);
+    m_queries.resize(size);
 }
 
 void SqlQueryHolderEx::Execute(Database *db)
