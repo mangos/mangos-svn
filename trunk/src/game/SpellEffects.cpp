@@ -3199,7 +3199,7 @@ void Spell::EffectSummonPlayer(uint32 i)
     if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    if(unitTarget->isInFlight())
+    if(unitTarget->isInFlight() || unitTarget->isInCombat() )
         return;
 
     //FIXME: must send accepting request for summon to target instead explicit teleportation
