@@ -2799,6 +2799,12 @@ uint8 Spell::CanCast()
                 if( !target || !target->IsInSameGroupWith((Player*)m_caster) )
                     return SPELL_FAILED_BAD_TARGETS;
 
+                if( target->isInFlight() )
+                    return SPELL_FAILED_FIZZLE;
+
+                if( target->isInCombat() )
+                    return SPELL_FAILED_TARGET_IN_COMBAT;
+
                 // check if our map is instanceable
                 if( MapManager::Instance().GetBaseMap(m_caster->GetMapId())->Instanceable() && !m_caster->IsInMap(target) )
                     return SPELL_FAILED_TARGET_NOT_IN_INSTANCE;
