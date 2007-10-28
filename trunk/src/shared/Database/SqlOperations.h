@@ -99,10 +99,9 @@ class SqlQueryHolder
     public:
         SqlQueryHolder() {}
         ~SqlQueryHolder();
-        bool Query(const char *sql);
-        bool PQuery(const char *format, ...) ATTR_PRINTF(2,3);
-        void DummyQuery();
-        void Reserve(size_t size);
+        bool SetQuery(size_t index, const char *sql);
+        bool SetPQuery(size_t index, const char *format, ...) ATTR_PRINTF(3,4);
+        void SetSize(size_t size);
         QueryResult* GetResult(size_t index);
         void SetResult(size_t index, QueryResult *result);
         void Execute(MaNGOS::IQueryCallback * callback, SqlDelayThread *thread, SqlResultQueue *queue);

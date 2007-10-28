@@ -745,6 +745,33 @@ enum RestType
     REST_TYPE_IN_CITY   = 2
 };
 
+// used at player loading query list prepering, and later result selection
+enum PlayerLoginQueryIndex
+{
+    PLAYER_LOGIN_QUERY_LOADFROM                 = 0,
+    PLAYER_LOGIN_QUERY_LOADGROUP                = 1,
+    PLAYER_LOGIN_QUERY_LOADBOUNDINSTANCES       = 2,
+    PLAYER_LOGIN_QUERY_LOADAURAS                = 3,
+    PLAYER_LOGIN_QUERY_LOADSPELLS               = 4,
+    PLAYER_LOGIN_QUERY_LOADQUESTSTATUS          = 5,
+    PLAYER_LOGIN_QUERY_LOADDAILYQUESTSTATUS     = 6,
+    PLAYER_LOGIN_QUERY_LOADTUTORIALS            = 7,
+    PLAYER_LOGIN_QUERY_LOADREPUTATION           = 8,
+    PLAYER_LOGIN_QUERY_LOADINVENTORY            = 9,
+    PLAYER_LOGIN_QUERY_LOADACTIONS              = 10,
+    PLAYER_LOGIN_QUERY_LOADMAILCOUNT            = 11,
+    PLAYER_LOGIN_QUERY_LOADMAILDATE             = 12,
+    PLAYER_LOGIN_QUERY_LOADIGNORELIST           = 13,
+    PLAYER_LOGIN_QUERY_LOADFRIENDLIST           = 14,
+    PLAYER_LOGIN_QUERY_LOADHOMEBIND             = 15,
+    PLAYER_LOGIN_QUERY_LOADSPELLCOOLDOWNS       = 16,
+    PLAYER_LOGIN_QUERY_LOADHONOR                = 17,
+    PLAYER_LOGIN_QUERY_LOADGUILD                = 18,
+    PLAYER_LOGIN_QUERY_BROADCASTTOFRIENDLISTERS = 19
+};
+
+#define MAX_PLAYER_LOGIN_QUERY                    20
+
 class MANGOS_DLL_SPEC Player : public Unit
 {
     friend class WorldSession;

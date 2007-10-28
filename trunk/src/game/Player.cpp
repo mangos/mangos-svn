@@ -12076,11 +12076,9 @@ float Player::GetFloatValueFromDB(uint16 index, uint64 guid)
 
 bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 {
-    // NOTE: all fields in `character` must be read to prevent lost character data at next save in case wrong DB structure.
-    // !!! NOTE: including unused `zone`,`online`
     ////                                             0      1         2      3      4      5       6            7            8            9     10            11         12          13          14          15           16            17                  18                  19                  20        21        22        23         24          25        26             27         [28]   [29]     30              31                32
     //QueryResult *result = sDatabase.PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`at_login`,`zone`,`online`,`pending_honor`,`last_honor_date`,`last_kill_date` FROM `character` WHERE `guid` = '%u'", guid);
-    QueryResult *result = holder->GetResult(0);
+    QueryResult *result = holder->GetResult(PLAYER_LOGIN_QUERY_LOADFROM);
 
     if(!result)
     {
@@ -12155,9 +12153,9 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     Relocate(fields[6].GetFloat(),fields[7].GetFloat(),fields[8].GetFloat(),fields[10].GetFloat());
     SetMapId(fields[9].GetUInt32());
 
-    _LoadGroup(holder->GetResult(1));
+    _LoadGroup(holder->GetResult(PLAYER_LOGIN_QUERY_LOADGROUP));
 
-    _LoadBoundInstances(holder->GetResult(2));
+    _LoadBoundInstances(holder->GetResult(PLAYER_LOGIN_QUERY_LOADBOUNDINSTANCES));
 
     SaveRecallPosition();
 
@@ -12294,40 +12292,41 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     //mails are loaded only when needed ;-) - when player in game click on mailbox.
     //_LoadMail();
 
-    _LoadAuras(holder->GetResult(3), time_diff);
+    _LoadAuras(holder->GetResult(PLAYER_LOGIN_QUERY_LOADAURAS), time_diff);
 
     // add ghost flag (must be after aura load: PLAYER_FLAGS_GHOST set in aura)
     if( HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST) )
         m_deathState = DEAD;
 
-    _LoadSpells(holder->GetResult(4), time_diff);
+    _LoadSpells(holder->GetResult(PLAYER_LOGIN_QUERY_LOADSPELLS), time_diff);
 
     // after spell load
     InitTalentForLevel();
 
-    _LoadQuestStatus(holder->GetResult(5));
-    _LoadDailyQuestStatus(holder->GetResult(6));
+    _LoadQuestStatus(holder->GetResult(PLAYER_LOGIN_QUERY_LOADQUESTSTATUS));
+    _LoadDailyQuestStatus(holder->GetResult(PLAYER_LOGIN_QUERY_LOADDAILYQUESTSTATUS));
 
-    _LoadTutorials(holder->GetResult(7));
+    _LoadTutorials(holder->GetResult(PLAYER_LOGIN_QUERY_LOADTUTORIALS));
 
-    _LoadReputation(holder->GetResult(8));                  // must be before inventory (some items required reputation check)
+    // must be before inventory (some items required reputation check)
+    _LoadReputation(holder->GetResult(PLAYER_LOGIN_QUERY_LOADREPUTATION));
 
-    _LoadInventory(holder->GetResult(9), time_diff);
+    _LoadInventory(holder->GetResult(PLAYER_LOGIN_QUERY_LOADINVENTORY), time_diff);
 
-    _LoadActions(holder->GetResult(10));
+    _LoadActions(holder->GetResult(PLAYER_LOGIN_QUERY_LOADACTIONS));
 
     // unread mails and next delivery time, actual mails not loaded
-    _LoadMailInit(holder->GetResult(11), holder->GetResult(12));
+    _LoadMailInit(holder->GetResult(PLAYER_LOGIN_QUERY_LOADMAILCOUNT), holder->GetResult(PLAYER_LOGIN_QUERY_LOADMAILDATE));
 
-    _LoadIgnoreList(holder->GetResult(13));
-    _LoadFriendList(holder->GetResult(14));
+    _LoadIgnoreList(holder->GetResult(PLAYER_LOGIN_QUERY_LOADIGNORELIST));
+    _LoadFriendList(holder->GetResult(PLAYER_LOGIN_QUERY_LOADFRIENDLIST));
 
-    if(!_LoadHomeBind(holder->GetResult(15)))
+    if(!_LoadHomeBind(holder->GetResult(PLAYER_LOGIN_QUERY_LOADHOMEBIND)))
         return false;
 
-    _LoadSpellCooldowns(holder->GetResult(16));
+    _LoadSpellCooldowns(holder->GetResult(PLAYER_LOGIN_QUERY_LOADSPELLCOOLDOWNS));
 
-    _LoadHonor(holder->GetResult(17));
+    _LoadHonor(holder->GetResult(PLAYER_LOGIN_QUERY_LOADHONOR));
 
     // Spell code allow apply any auras to dead character in load time in aura/spell/item loading
     // Do now before stats re-calculation cleanup for ghost state unexpected auras
