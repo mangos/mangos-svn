@@ -102,6 +102,10 @@ class MANGOS_DLL_SPEC GossipMenu
         void AddMenuItem(uint8 Icon, std::string Message, bool Coded = false);
         void AddMenuItem(uint8 Icon, std::string Message, uint32 dtSender, uint32 dtAction, bool Coded = false);
 
+        // for using from scripts, don't must be inlined
+        void AddMenuItem(uint8 Icon, char const* Message, bool Coded = false);
+        void AddMenuItem(uint8 Icon, char const* Message, uint32 dtSender, uint32 dtAction, bool Coded = false);
+
         unsigned int MenuItemCount()
         {
             return m_gItems.size();

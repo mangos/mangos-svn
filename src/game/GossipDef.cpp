@@ -54,6 +54,17 @@ void GossipMenu::AddMenuItem(uint8 Icon, std::string Message, bool Coded)
     AddMenuItem( Icon, Message, 0, 0, Coded);
 }
 
+void GossipMenu::AddMenuItem(uint8 Icon, char const* Message, bool Coded)
+{
+    AddMenuItem(Icon, std::string(Message ? Message : ""),Coded);
+}
+
+void GossipMenu::AddMenuItem(uint8 Icon, char const* Message, uint32 dtSender, uint32 dtAction, bool Coded)
+{
+    AddMenuItem(Icon, std::string(Message ? Message : ""), dtSender, dtAction, Coded);
+}
+
+
 uint32 GossipMenu::MenuItemSender( unsigned int ItemId )
 {
     if ( ItemId >= m_gItems.size() ) return 0;
@@ -94,12 +105,12 @@ void PlayerMenu::ClearMenus()
 
 uint32 PlayerMenu::GossipOptionSender( unsigned int Selection )
 {
-    return pGossipMenu->MenuItemSender( Selection + pQuestMenu->MenuItemCount() );
+    return pGossipMenu->MenuItemSender( Selection );
 }
 
 uint32 PlayerMenu::GossipOptionAction( unsigned int Selection )
 {
-    return pGossipMenu->MenuItemAction( Selection + pQuestMenu->MenuItemCount() );
+    return pGossipMenu->MenuItemAction( Selection );
 }
 
 void PlayerMenu::SendGossipMenu( uint32 TitleTextId, uint64 npcGUID )
