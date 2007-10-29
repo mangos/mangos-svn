@@ -62,6 +62,7 @@ class GameEvent
         void GameEventSpawn(int16 event_id);
         void GameEventUnspawn(int16 event_id);
         void ChangeEquipOrModel(int16 event_id, bool activate);
+        void UpdateEventQuests(uint16 event_id, bool Activate);
         uint32 NextCheck(uint16 entry);
     protected:
         typedef std::vector<GameEventData> GameEventDataMap;
@@ -70,6 +71,10 @@ class GameEvent
         typedef std::pair<uint32, ModelEquip> ModelEquipPair;
         typedef std::list<ModelEquipPair> ModelEquipList;
         typedef std::vector<ModelEquipList> GameEventModelEquipMap;
+        typedef std::pair<uint32, uint32> QuestRelation;
+        typedef std::list<QuestRelation> QuestRelList;
+        typedef std::vector<QuestRelList> GameEventQuestMap;
+        GameEventQuestMap mGameEventQuests;
         GameEventModelEquipMap mGameEventModelEquip;
         GameEventGuidMap  mGameEventCreatureGuids;
         GameEventGuidMap  mGameEventGameobjectGuids;

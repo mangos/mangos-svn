@@ -26,7 +26,7 @@ extern DatabasePostgre  sDatabase;
 extern DatabaseMysql  sDatabase;
 #endif
 
-const char CreatureInfofmt[]="iiiiissiiiiiiiiiififfiiiiiiiiiiiffiiiiiiiiiiiiiiiiiiisiiiiis";
+const char CreatureInfofmt[]="iiiiissiiiiiiiiiififfiiiiiiiiiiiffiiliiiiiiiiiiiiiiiisiillis";
 const char CreatureDataAddonInfofmt[]="iiiiiiiiiii";
 const char CreatureModelfmt[]="iffii";
 const char CreatureInfoAddonInfofmt[]="iiiiiiiiiii";
@@ -50,15 +50,18 @@ void SQLStorage::Free ()
 {
     uint32 offset=0;
     for(uint32 x=0;x<iNumFields;x++)
-        if(format[x]==FT_STRING)
-    {
-        for(uint32 y=0;y<MaxEntry;y++)
-            if(pIndex[y])
-                delete [] *(char**)((char*)(pIndex[y])+offset);
+        if (format[x]==FT_STRING)
+        {
+            for(uint32 y=0;y<MaxEntry;y++)
+                if(pIndex[y])
+                    delete [] *(char**)((char*)(pIndex[y])+offset);
 
-        offset+=sizeof(char*);
-
-    }else offset+=4;
+            offset+=sizeof(char*);
+        }
+        else if (format[x]==FT_LOGIC)
+            offset+=sizeof(bool);
+        else
+            offset+=4;
 
     delete [] pIndex;
     delete [] data;
@@ -108,16 +111,19 @@ void SQLStorage::Load ()
         exit(1);                                            // Stop server at loading broken or non-compatiable table.
     }
 
-    if(sizeof(char*)==sizeof(uint32))
+    if(sizeof(char*)==sizeof(uint32) && sizeof(bool)==sizeof(uint32))
         recordsize=4*iNumFields;
     else
     {
         //get struct size
         uint32 sc=0;
+        uint32 bo=0;
         for(uint32 x=0;x<iNumFields;x++)
             if(format[x]==FT_STRING)
                 sc++;
-        recordsize=(iNumFields-sc)*4+sc*sizeof(char*);
+            else if (format[x]==FT_LOGIC)
+                bo++;
+        recordsize=(iNumFields-sc-bo)*4+sc*sizeof(char*)+bo*sizeof(bool);
     }
 
     char** newIndex=new char*[maxi];
@@ -137,6 +143,10 @@ void SQLStorage::Load ()
         for(uint32 x=0;x<iNumFields;x++)
             switch(format[x])
             {
+                case FT_LOGIC:
+                    *((bool*)(&p[offset]))=(fields[x].GetUInt32()>0);
+                    offset+=sizeof(bool);
+                    break;
                 case FT_INT:
                     *((uint32*)(&p[offset]))=fields[x].GetUInt32();
                     offset+=sizeof(uint32);
