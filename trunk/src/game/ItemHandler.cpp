@@ -339,7 +339,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         uint64 guid;
         recv_data >> guid;
 
-        sLog.outDetail( "WORLD: CMSG_ITEM_QUERY_SINGLE - (%u) NO item INFO! (GUID: %u, ENTRY: %u)", uint32(GUID_LOPART(guid)), guid, item );         
+        sLog.outDetail( "WORLD: CMSG_ITEM_QUERY_SINGLE - NO item INFO! (GUID: %u, ENTRY: %u)", GUID_LOPART(guid), item );         
         WorldPacket data( SMSG_ITEM_QUERY_SINGLE_RESPONSE, 4);
         data << uint32(item | 0x80000000);
         SendPacket( &data );
