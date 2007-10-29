@@ -531,11 +531,11 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading Item Random Enchantments Table..." );
     LoadRandomEnchantmentsTable();
 
-    sLog.outString( "Loading Items..." );                   // must be after LoadRandomEnchantmentsTable
-    objmgr.LoadItemPrototypes();
-
     sLog.outString( "Loading Page Texts..." );
     objmgr.LoadPageTexts();
+
+    sLog.outString( "Loading Items..." );                   // must be after LoadRandomEnchantmentsTable and LoadPageTexts
+    objmgr.LoadItemPrototypes();
 
     sLog.outString( "Loading Item Texts..." );
     objmgr.LoadItemTexts();
