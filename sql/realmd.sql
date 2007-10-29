@@ -163,7 +163,7 @@ CREATE TABLE `realmlist` (
   `color` tinyint(3) unsigned NOT NULL default '2',
   `timezone` tinyint(3) unsigned NOT NULL default '0',
   `allowedSecurityLevel` TINYINT(3) UNSIGNED NOT NULL DEFAULT 0,
-  `population` float UNSIGNED NOT NULL DEFAULT 0.0,
+  `population` float(0) UNSIGNED NOT NULL DEFAULT 0.0,
   PRIMARY KEY  (`id`),
   UNIQUE KEY `idx_name` (`name`)
 ) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Realm System';
