@@ -724,6 +724,8 @@ class ObjectMgr
         {
             return m_ReservedNames.find(name) != m_ReservedNames.end();
         }
+
+        int GetIndexForLocale(LocaleConstant loc);
     protected:
         uint32 m_auctionid;
         uint32 m_mailid;
@@ -776,6 +778,10 @@ class ObjectMgr
         ReservedNamesMap    m_ReservedNames;
 
         GraveYardMap        mGraveYardMap;
+
+        typedef             std::vector<int> LocalToIndex;
+        LocalToIndex        m_LocalToIndex;
+        int GetOrNewIndexForLocale(LocaleConstant loc);
     private:
         void LoadScripts(ScriptMapMap& scripts, char const* tablename);
 

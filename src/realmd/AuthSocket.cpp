@@ -468,12 +468,14 @@ bool AuthSocket::_HandleLogonChallenge()
                         {
                             _localization=(*localeresult)[0].GetUInt8();
                             delete localeresult;
+
+                            if (_localization>=MAX_LOCALE)
+                                _localization=LOCALE_ENG;
                         }
                         else
                             _localization=LOCALE_ENG; 
-                        if (_localization>=MAX_LOCALE)
-                            _localization=LOCALE_ENG;
-                        sLog.outBasic("[AuthChallenge] acount %s is using '%c%c' locale (%u)", _login.c_str (), ch->country[3],ch->country[2], _localization);
+
+                        sLog.outBasic("[AuthChallenge] account %s is using '%c%c' locale (%u)", _login.c_str (), ch->country[3],ch->country[2], _localization);
                     }
                 }
                 delete result;

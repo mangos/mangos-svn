@@ -10533,18 +10533,35 @@ void Player::SendPreparedQuest( uint64 guid )
             else
             {
                 qe = gossiptext->Options[0].Emotes[0];
-                title = gossiptext->Options[0].Text_0 == "" ? gossiptext->Options[0].Text_1 : gossiptext->Options[0].Text_0;
-                if( &title == NULL )
-                    title = "";
 
-                uint8 m_language = GetSession()->GetSessionLanguage();
-                if (m_language > 0)
+                if(!gossiptext->Options[0].Text_0.empty())
                 {
-                    NpcTextLocale const *nl = objmgr.GetNpcTextLocale(textid);
-                    if (nl)
+                    title = gossiptext->Options[0].Text_0;
+
+                    int loc_idx = GetSession()->GetSessionLocaleIndex();
+                    if (loc_idx >= 0)
                     {
-                        if (!nl->Text_0[0][m_language].empty() || !nl->Text_1[0][m_language].empty())
-                            title = !nl->Text_0[0][m_language].empty() ? nl->Text_1[0][m_language] : nl->Text_0[0][m_language];
+                        NpcTextLocale const *nl = objmgr.GetNpcTextLocale(textid);
+                        if (nl)
+                        {
+                            if (nl->Text_0[0].size() > loc_idx && !nl->Text_0[0][loc_idx].empty())
+                                title = nl->Text_0[0][loc_idx];
+                        }
+                    }
+                }
+                else
+                {
+                    title = gossiptext->Options[0].Text_1;
+
+                    int loc_idx = GetSession()->GetSessionLocaleIndex();
+                    if (loc_idx >= 0)
+                    {
+                        NpcTextLocale const *nl = objmgr.GetNpcTextLocale(textid);
+                        if (nl)
+                        {
+                            if (nl->Text_1[0].size() > loc_idx && !nl->Text_1[0][loc_idx].empty())
+                                title = nl->Text_1[0][loc_idx];
+                        }
                     }
                 }
             }

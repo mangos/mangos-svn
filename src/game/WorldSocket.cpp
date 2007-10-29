@@ -249,7 +249,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     std::string safe_account=account;                       // Duplicate, else will screw the SHA hash verification below
     loginDatabase.escape_string(safe_account);
     //No SQL injection, username escaped.
-    //                                                 0    1         2            3         4         5           6    7    8     9   10
+    //                                                 0    1         2            3         4         5    6    7    8     9          10
     QueryResult *result = loginDatabase.PQuery("SELECT `id`,`gmlevel`,`sessionkey`,`last_ip`,`locked`, `I`, `v`, `s`, `tbc`,`mutetime`,`locale` FROM `account` WHERE `username` = '%s'", safe_account.c_str());
 
     ///- Stop if the account is not found
@@ -322,7 +322,11 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     security = fields[1].GetUInt16();
     K.SetHexStr(fields[2].GetString());
     time_t mutetime = time_t(fields[9].GetUInt64());
+    
     locale = fields[10].GetUInt8();
+    if (locale>=MAX_LOCALE)
+        locale=LOCALE_ENG;
+
     delete result;
 
     ///- Re-check account ban (same check as in realmd) /// TO DO: why on earth do 2 checks for same thing?
@@ -404,7 +408,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     SendPacket(&packet);
 
     ///- Create a new WorldSession for the player and add it to the World
-    _session = new WorldSession(id, this,security,tbc,mutetime,locale);
+    _session = new WorldSession(id, this,security,tbc,mutetime,LocaleConstant(locale));
     sWorld.AddSession(_session);
 
     if(sLog.IsOutDebug())                                   // optimize disabled debug output

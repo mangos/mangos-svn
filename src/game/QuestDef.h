@@ -129,14 +129,13 @@ enum __QuestSpecialFlags                                    //according to mango
 
 struct QuestLocale
 {
-    uint32 Entry;
-    std::string Title[8];
-    std::string Details[8];
-    std::string Objectives[8];
-    std::string OfferRewardText[8];
-    std::string RequestItemsText[8];
-    std::string EndText[8];
-    std::string ObjectiveText[QUEST_OBJECTIVES_COUNT][8];
+    std::vector<std::string> Title;
+    std::vector<std::string> Details;
+    std::vector<std::string> Objectives;
+    std::vector<std::string> OfferRewardText;
+    std::vector<std::string> RequestItemsText;
+    std::vector<std::string> EndText;
+    std::vector<std::string> ObjectiveText[QUEST_OBJECTIVES_COUNT];
 };
  
 // This Quest class provides a convenient way to access a few pretotaled (cached) quest details,

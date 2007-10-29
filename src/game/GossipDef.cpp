@@ -148,14 +148,14 @@ void PlayerMenu::SendGossipMenu( uint32 TitleTextId, uint64 npcGUID )
         data << uint32( pQuest ? pQuest->GetQuestLevel() : 0 );
         std::string Title = pQuest->GetTitle();
 
-        uint8 m_language = pSession->GetSessionLanguage();
-        if (m_language > 0)
+        int loc_idx = pSession->GetSessionLocaleIndex();
+        if (loc_idx >= 0)
         {
             QuestLocale const *ql = objmgr.GetQuestLocale(questID);
             if (ql)
             {
-                if (!ql->Title[m_language].empty())
-                    Title=ql->Title[m_language];
+                if (ql->Title.size() > loc_idx && !ql->Title[loc_idx].empty())
+                    Title=ql->Title[loc_idx];
             }
         }
         data << Title;
@@ -210,18 +210,18 @@ void PlayerMenu::SendTalking( uint32 textID )
             Text_0[i]=pGossip->Options[i].Text_0;
             Text_1[i]=pGossip->Options[i].Text_1;
         }
-        uint8 m_language = pSession->GetSessionLanguage();
-        if (m_language > 0)
+        int loc_idx = pSession->GetSessionLocaleIndex();
+        if (loc_idx >= 0)
         {
             NpcTextLocale const *nl = objmgr.GetNpcTextLocale(textID);
             if (nl)
             {
                 for (int i=0;i<8;i++)
                 {
-                    if (!nl->Text_0[i][m_language].empty())
-                        Text_0[i]=nl->Text_0[i][m_language];
-                    if (!nl->Text_1[i][m_language].empty())
-                        Text_1[i]=nl->Text_1[i][m_language];
+                    if (nl->Text_0[i].size() > loc_idx && !nl->Text_0[i][loc_idx].empty())
+                        Text_0[i]=nl->Text_0[i][loc_idx];
+                    if (nl->Text_1[i].size() > loc_idx && !nl->Text_1[i][loc_idx].empty())
+                        Text_1[i]=nl->Text_1[i][loc_idx];
                 }
             }
         }
@@ -353,24 +353,23 @@ void PlayerMenu::SendQuestGiverQuestDetails( Quest const *pQuest, uint64 npcGUID
 {
     WorldPacket data(SMSG_QUESTGIVER_QUEST_DETAILS, 100);   // guess size
 
-    std::string Title,Details,Objectives,EndText;
-    Title = pQuest->GetTitle();
-    Details = pQuest->GetDetails();
-    Objectives = pQuest->GetObjectives();
-    EndText = pQuest->GetEndText();
+    std::string Title      = pQuest->GetTitle();
+    std::string Details    = pQuest->GetDetails();
+    std::string Objectives = pQuest->GetObjectives();
+    std::string EndText    = pQuest->GetEndText();
 
-    uint8 m_language = pSession->GetSessionLanguage();
-    if (m_language > 0)
+    int loc_idx = pSession->GetSessionLocaleIndex();
+    if (loc_idx >= 0)
     {
         QuestLocale const *ql = objmgr.GetQuestLocale(pQuest->GetQuestId());
         if (ql)
         {
-            if (!ql->Title[m_language].empty())
-                Title=ql->Title[m_language];
-            if (!ql->Details[m_language].empty())
-                Details=ql->Details[m_language];
-            if (!ql->Objectives[m_language].empty())
-                Objectives=ql->Objectives[m_language];
+            if (ql->Title.size() > loc_idx && !ql->Title[loc_idx].empty())
+                Title=ql->Title[loc_idx];
+            if (ql->Details.size() > loc_idx && !ql->Details[loc_idx].empty())
+                Details=ql->Details[loc_idx];
+            if (ql->Objectives.size() > loc_idx && !ql->Objectives[loc_idx].empty())
+                Objectives=ql->Objectives[loc_idx];
         }
     }
 
@@ -454,22 +453,22 @@ void PlayerMenu::SendQuestQueryResponse( Quest const *pQuest )
     for (int i=0;i<QUEST_OBJECTIVES_COUNT;i++)
         ObjectiveText[i]=pQuest->ObjectiveText[i];
 
-    uint8 m_language = pSession->GetSessionLanguage();
-    if ( m_language > 0)
+    int loc_idx = pSession->GetSessionLocaleIndex();
+    if (loc_idx >= 0)
     {
         QuestLocale const *ql = objmgr.GetQuestLocale(pQuest->GetQuestId());
         if (ql)
         {
-            if (!ql->Title[m_language].empty())
-                Title=ql->Title[m_language];
-            if (!ql->Details[m_language].empty())
-                Details=ql->Details[m_language];
-            if (!ql->Objectives[m_language].empty())
-                Objectives=ql->Objectives[m_language];
+            if (ql->Title.size() > loc_idx && !ql->Title[loc_idx].empty())
+                Title=ql->Title[loc_idx];
+            if (ql->Details.size() > loc_idx && !ql->Details[loc_idx].empty())
+                Details=ql->Details[loc_idx];
+            if (ql->Objectives.size() > loc_idx && !ql->Objectives[loc_idx].empty())
+                Objectives=ql->Objectives[loc_idx];
 
             for (int i=0;i<QUEST_OBJECTIVES_COUNT;i++)
-                if (!ql->ObjectiveText[i][m_language].empty())
-                    ObjectiveText[i]=ql->ObjectiveText[i][m_language];
+                if (ql->ObjectiveText[i].size() > loc_idx && !ql->ObjectiveText[i][loc_idx].empty())
+                    ObjectiveText[i]=ql->ObjectiveText[i][loc_idx];
         }
     }
 
@@ -567,16 +566,16 @@ void PlayerMenu::SendQuestGiverOfferReward( Quest const* pQuest, uint64 npcGUID,
     Title = pQuest->GetTitle();
     OfferRewardText = pQuest->GetOfferRewardText();
 
-    uint8 m_language = pSession->GetSessionLanguage();
-    if (m_language>0)
+    int loc_idx = pSession->GetSessionLocaleIndex();
+    if (loc_idx >= 0)
     {
         QuestLocale const *ql = objmgr.GetQuestLocale(pQuest->GetQuestId());
         if (ql)
         {
-            if (!ql->Title[m_language].empty())
-                Title=ql->Title[m_language];
-            if (!ql->OfferRewardText[m_language].empty())
-                OfferRewardText=ql->OfferRewardText[m_language];
+            if (ql->Title.size() > loc_idx && !ql->Title[loc_idx].empty())
+                Title=ql->Title[loc_idx];
+            if (ql->OfferRewardText.size() > loc_idx && !ql->OfferRewardText[loc_idx].empty())
+                OfferRewardText=ql->OfferRewardText[loc_idx];
         }
     }
 
@@ -680,16 +679,16 @@ void PlayerMenu::SendQuestGiverRequestItems( Quest const *pQuest, uint64 npcGUID
     Title = pQuest->GetTitle();
     RequestItemsText = pQuest->GetRequestItemsText();
 
-    uint8 m_language = pSession->GetSessionLanguage();
-    if ( m_language > 0 )
+    int loc_idx = pSession->GetSessionLocaleIndex();
+    if (loc_idx >= 0)
     {
         QuestLocale const *ql = objmgr.GetQuestLocale(pQuest->GetQuestId());
         if (ql)
         {
-            if (!ql->Title[m_language].empty())
-                Title=ql->Title[m_language];
-            if (!ql->RequestItemsText[m_language].empty())
-                RequestItemsText=ql->RequestItemsText[m_language];
+            if (ql->Title.size() > loc_idx && !ql->Title[loc_idx].empty())
+                Title=ql->Title[loc_idx];
+            if (ql->RequestItemsText.size() > loc_idx && !ql->RequestItemsText[loc_idx].empty())
+                RequestItemsText=ql->RequestItemsText[loc_idx];
         }
     }
 

@@ -70,8 +70,7 @@ struct GameObjectInfo
 
 struct GameObjectLocale
 {
-    uint32 Entry;
-    std::string Name[8];
+    std::vector<std::string> Name;
 };
 
 // from `ganeobject`

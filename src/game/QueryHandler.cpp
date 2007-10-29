@@ -106,16 +106,16 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
         Name = ci->Name;
         SubName = ci->SubName;
 
-        uint8 m_language = GetSessionLanguage();
-        if (m_language > 0)
+        int loc_idx = GetSessionLocaleIndex();
+        if (loc_idx >= 0)
         {
             CreatureLocale const *cl = objmgr.GetCreatureLocale(entry);
             if (cl)
             {
-                if (!cl->Name[m_language].empty())          // default to english
-                    Name = cl->Name[m_language];
-                if (!cl->SubName[m_language].empty())       // same
-                    SubName = cl->SubName[m_language];
+                if (cl->Name.size() > loc_idx && !cl->Name[loc_idx].empty())
+                    Name = cl->Name[loc_idx];
+                if (cl->SubName.size() > loc_idx && !cl->SubName[loc_idx].empty())
+                    SubName = cl->SubName[loc_idx];
             }
         }
 
@@ -172,14 +172,14 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
         std::string Name;
         Name = info->name;
 
-        uint8 m_language = GetSessionLanguage();
-        if (m_language > 0)
+        int loc_idx = GetSessionLocaleIndex();
+        if (loc_idx >= 0)
         {
             GameObjectLocale const *gl = objmgr.GetGameObjectLocale(entryID);
             if (gl)
             {
-                if (!gl->Name[m_language].empty())          // default to english
-                    Name = gl->Name[m_language];
+                if (gl->Name.size() > loc_idx && !gl->Name[loc_idx].empty())
+                    Name = gl->Name[loc_idx];
             }
         }
         sLog.outDetail("WORLD: CMSG_GAMEOBJECT_QUERY '%s' - Entry: %u. ", info->name, entryID);
@@ -291,18 +291,18 @@ void WorldSession::HandleNpcTextQueryOpcode( WorldPacket & recv_data )
             Text_1[i]=pGossip->Options[i].Text_1;
         }
 
-        uint8 m_language = GetSessionLanguage();
-        if (m_language > 0)
+        int loc_idx = GetSessionLocaleIndex();
+        if (loc_idx >= 0)
         {
             NpcTextLocale const *nl = objmgr.GetNpcTextLocale(textID);
             if (nl)
             {
                 for (int i=0;i<8;i++)
                 {
-                    if (!nl->Text_0[i][m_language].empty())
-                        Text_0[i]=nl->Text_0[i][m_language];
-                    if (!nl->Text_1[i][m_language].empty())
-                        Text_1[i]=nl->Text_1[i][m_language];
+                    if (nl->Text_0[i].size() > loc_idx && !nl->Text_0[i][loc_idx].empty())
+                        Text_0[i]=nl->Text_0[i][loc_idx];
+                    if (nl->Text_1[i].size() > loc_idx && !nl->Text_1[i][loc_idx].empty())
+                        Text_1[i]=nl->Text_1[i][loc_idx];
                 }
             }
         }
@@ -364,16 +364,18 @@ void WorldSession::HandlePageQueryOpcode( WorldPacket & recv_data )
         else
         {
             std::string Text = pPage->Text;
-            uint8 m_language = GetSessionLanguage();
-            if (m_language > 0)
+
+            int loc_idx = GetSessionLocaleIndex();
+            if (loc_idx >= 0)
             {
                 PageTextLocale const *pl = objmgr.GetPageTextLocale(pageID);
                 if (pl)
                 {
-                    if (!pl->Text[m_language].empty())
-                        Text = pl->Text[m_language];
+                    if (pl->Text.size() > loc_idx && !pl->Text[loc_idx].empty())
+                        Text = pl->Text[loc_idx];
                 }
             }
+
             data << Text;
             data << uint32(pPage->Next_Page);
             pageID = pPage->Next_Page;
