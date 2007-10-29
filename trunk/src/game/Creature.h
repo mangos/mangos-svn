@@ -179,7 +179,7 @@ struct CreatureInfo
     float   maxrangedmg;
     uint32  rangedattackpower;
     uint32  type;
-    uint32  civilian;
+    bool    civilian;
     uint32  flag1;
     uint32  lootid;
     uint32  pickpocketLootId;
@@ -198,10 +198,10 @@ struct CreatureInfo
     uint32  maxgold;
     char const* AIName;
     uint32  MovementType;
-    uint32 InhabitType;
-    uint32 RacialLeader;
-    uint32 RegenHealth;
-    uint32 equipmentId;
+    uint32  InhabitType;
+    bool    RacialLeader;
+    bool    RegenHealth;
+    uint32  equipmentId;
     char const* ScriptName;
 };
 
@@ -321,8 +321,8 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool isPet() const { return m_isPet; }
         void SetRespawnCoord(float x, float y, float z) { respawn_cord[0] = x; respawn_cord[1] = y; respawn_cord[2] = z; }
         bool isTotem() const { return m_isTotem; }
-        bool isRacialLeader() const { return GetCreatureInfo()->RacialLeader != 0; }
-        bool isCivilian() const { return GetCreatureInfo()->civilian != 0; }
+        bool isRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
+        bool isCivilian() const { return GetCreatureInfo()->civilian; }
         bool isCanSwimOrFly() const { return GetCreatureInfo()->InhabitType & INHAVIT_WATER; }
         bool isCanWalkOrFly() const { return GetCreatureInfo()->InhabitType & INHAVIT_GROUND; }
         bool isCanTrainingOf(Player* player, bool msg) const;

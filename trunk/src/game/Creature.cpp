@@ -1107,7 +1107,7 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const 
         return false;
     }
 
-    m_regenHealth = (cinfo->RegenHealth != 0);
+    m_regenHealth = cinfo->RegenHealth;
 
     uint32 display_id = objmgr.ChooseDisplayId(team,cinfo,data);
 
@@ -1176,7 +1176,7 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const 
     {
         FactionEntry const* factionEntry = sFactionStore.LookupEntry(factionTemplate->faction);
         if (factionEntry)
-            if (cinfo->civilian != 1 && (factionEntry->team == ALLIANCE || factionEntry->team == HORDE))
+            if (!cinfo->civilian && (factionEntry->team == ALLIANCE || factionEntry->team == HORDE))
                 SetPvP(true);
     }
 

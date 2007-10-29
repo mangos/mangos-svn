@@ -1543,6 +1543,27 @@ LOCK TABLES `game_event_creature` WRITE;
 UNLOCK TABLES;
 
 --
+-- Table structure for table `game_event_creature_quest`
+--
+
+DROP TABLE IF EXISTS `game_event_creature_quest`;
+CREATE TABLE `game_event_creature_quest` (
+  `id` int(11) unsigned NOT NULL default '0',
+  `quest` int(11) unsigned NOT NULL default '0',
+  `event` mediumint(9) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`id`,`quest`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8;
+
+--
+-- Dumping data for table `game_event_creature_quest`
+--
+
+LOCK TABLES `game_event_creature_quest` WRITE;
+/*!40000 ALTER TABLE `game_event_creature_quest` DISABLE KEYS */;
+/*!40000 ALTER TABLE `game_event_creature_quest` ENABLE KEYS */;
+UNLOCK TABLES;
+
+--
 -- Table structure for table `game_event_gameobject`
 --
 

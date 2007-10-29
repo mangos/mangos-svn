@@ -127,7 +127,7 @@ void GameEvent::LoadFromDB()
         bar2.step();
 
         sLog.outString();
-        sLog.outErrorDb(">> Loaded %u creatures in game events", count );
+        sLog.outString(">> Loaded %u creatures in game events", count );
     }
     else
     {
@@ -144,7 +144,7 @@ void GameEvent::LoadFromDB()
 
             if(max_event_id + event_id >= mGameEventCreatureGuids.size())
             {
-                sLog.outErrorDb("`game_event_creature` game event id (%i) that out of range max event id in `game_event`",event_id);
+                sLog.outErrorDb("`game_event_creature` game event id (%i) is out of range compared to max event id in `game_event`",event_id);
                 continue;
             }
 
@@ -170,7 +170,7 @@ void GameEvent::LoadFromDB()
         bar3.step();
 
         sLog.outString();
-        sLog.outErrorDb(">> Loaded %u gameobjects in game events", count );
+        sLog.outString(">> Loaded %u gameobjects in game events", count );
     }
     else
     {
@@ -187,7 +187,7 @@ void GameEvent::LoadFromDB()
 
             if(max_event_id + event_id >= mGameEventGameobjectGuids.size())
             {
-                sLog.outErrorDb("`game_event_gameobject` game event id (%i) that out of range max event id in `game_event`",event_id);
+                sLog.outErrorDb("`game_event_gameobject` game event id (%i) is out of range compared to max event id in `game_event`",event_id);
                 continue;
             }
 
@@ -216,7 +216,7 @@ void GameEvent::LoadFromDB()
         bar3.step();
 
         sLog.outString();
-        sLog.outErrorDb(">> Loaded %u model/equipment changes in game events", count );
+        sLog.outString(">> Loaded %u model/equipment changes in game events", count );
     }
     else
     {
@@ -232,7 +232,7 @@ void GameEvent::LoadFromDB()
 
             if(event_id >= mGameEventModelEquip.size())
             {
-                sLog.outErrorDb("`game_event_game_event_model_equip` game event id (%u) that out of range max event id in `game_event`",event_id);
+                sLog.outErrorDb("`game_event_model_equip` game event id (%u) is out of range compared to max event id in `game_event`",event_id);
                 continue;
             }
 
@@ -248,6 +248,49 @@ void GameEvent::LoadFromDB()
         } while( result->NextRow() );
         sLog.outString();
         sLog.outString( ">> Loaded %u model/equipment changes in game events", count );
+
+        delete result;
+    }
+
+    mGameEventQuests.resize(max_event_id + 1);
+    //                               0    1       2
+    result = sDatabase.Query("SELECT `id`,`quest`,`event` FROM `game_event_creature_quest`");
+
+    count = 0;
+    if( !result )
+    {
+        barGoLink bar3(1);
+        bar3.step();
+
+        sLog.outString();
+        sLog.outString(">> Loaded %u quests additions in game events", count );
+    }
+    else
+    {
+
+        barGoLink bar3( result->GetRowCount() );
+        do
+        {
+            Field *fields = result->Fetch();
+
+            bar3.step();
+            uint32 id       = fields[0].GetUInt32();
+            uint32 quest    = fields[1].GetUInt32();
+            uint16 event_id = fields[2].GetUInt16();
+
+            if(event_id >= mGameEventQuests.size())
+            {
+                sLog.outErrorDb("`game_event_creature_quest` game event id (%u) is out of range compared to max event id in `game_event`",event_id);
+                continue;
+            }
+
+            count++;
+            QuestRelList& questlist = mGameEventQuests[event_id];
+            questlist.push_back(QuestRelation(id, quest));
+
+        } while( result->NextRow() );
+        sLog.outString();
+        sLog.outString( ">> Loaded %u quests additions in game events", count );
 
         delete result;
     }
@@ -314,6 +357,8 @@ void GameEvent::UnApplyEvent(uint16 event_id)
     GameEventSpawn(event_nid);
     // restore equipment or model
     ChangeEquipOrModel(event_id, false);
+    // Remove quests that are events only to non event npc
+    UpdateEventQuests(event_id, false);
 }
 
 void GameEvent::ApplyNewEvent(uint16 event_id)
@@ -326,6 +371,8 @@ void GameEvent::ApplyNewEvent(uint16 event_id)
     GameEventUnspawn(event_nid);
     // Change equipement or model
     ChangeEquipOrModel(event_id, true);
+    // Add quests that are events only to non event npc
+    UpdateEventQuests(event_id, true);
 }
 
 void GameEvent::GameEventSpawn(int16 event_id)
@@ -515,6 +562,29 @@ void GameEvent::ChangeEquipOrModel(int16 event_id, bool activate)
         {
             data2.displayid = itr->second.modelid_prev;
             data2.equipmentId = itr->second.equipement_id_prev;
+        }
+    }
+}
+
+void GameEvent::UpdateEventQuests(uint16 event_id, bool Activate)
+{
+    QuestRelList::iterator itr;
+    for (itr = mGameEventQuests[event_id].begin();itr != mGameEventQuests[event_id].end();++itr)
+    {
+        QuestRelations &CreatureQuestMap = objmgr.mCreatureQuestRelations;
+        if (Activate)                                       // Add the pair(id,quest) to the multimap
+            CreatureQuestMap.insert(QuestRelations::value_type(itr->first, itr->second));
+        else
+        {                                                   // Remove the pair(id,quest) from the multimap
+            QuestRelations::iterator qitr = CreatureQuestMap.find(itr->first);
+            if (qitr == CreatureQuestMap.end())
+                continue;
+            QuestRelations::iterator lastElement = CreatureQuestMap.upper_bound(itr->first);
+            for ( ;qitr != lastElement;++qitr)
+            {
+                if (qitr->second == itr->second)
+                    CreatureQuestMap.erase(qitr);
+            }
         }
     }
 }
