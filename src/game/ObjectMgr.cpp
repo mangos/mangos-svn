@@ -1198,6 +1198,9 @@ void ObjectMgr::LoadItemPrototypes()
         if(proto->Bonding >= MAX_BIND_TYPE)
             sLog.outErrorDb("Item (Entry: %u) have wrong Bonding value (%u)",i,proto->Bonding);
 
+        if(proto->PageText && !sPageTextStore.LookupEntry<PageText>(proto->PageText))
+            sLog.outErrorDb("Item (Entry: %u) have non-existed first page (Id:%u)", i,proto->PageText);
+
         if(proto->LockID && !sLockStore.LookupEntry(proto->LockID))
             sLog.outErrorDb("Item (Entry: %u) have wrong LockID (%u)",i,proto->LockID);
 
@@ -3228,6 +3231,17 @@ void ObjectMgr::LoadPageTexts()
     sPageTextStore.Load ();
     sLog.outString( ">> Loaded %u page texts", sPageTextStore.RecordCount );
     sLog.outString();
+
+    // check data correctness
+    for(uint32 i = 1; i < sPageTextStore.MaxEntry; ++i)
+    {
+        PageText const* page = sPageTextStore.LookupEntry<PageText>(i);
+        if(!page)
+            continue;
+
+        if(page->Next_Page && !sPageTextStore.LookupEntry<PageText>(page->Next_Page))
+            sLog.outErrorDb("Paget text (Id: %u) have non-existed next page (Id:%u)", i,page->Next_Page);
+    }
 }
 
 void ObjectMgr::LoadPageTextLocales()
