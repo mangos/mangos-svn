@@ -207,9 +207,8 @@ struct CreatureInfo
 
 struct CreatureLocale
 {
-    uint32 Entry;
-    std::string Name[8];
-    std::string SubName[8];
+    std::vector<std::string> Name;
+    std::vector<std::string> SubName;
 };
 
 struct EquipmentInfo

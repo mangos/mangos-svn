@@ -198,20 +198,19 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     ItemPrototype const *pProto = objmgr.GetItemPrototype( item );
     if( pProto )
     {
-        std::string Name, Description;
-        Name = pProto->Name1;
-        Description = pProto->Description;
+        std::string Name        = pProto->Name1;
+        std::string Description = pProto->Description;
 
-        uint8 m_language = GetSessionLanguage();
-        if ( m_language > 0 )
+        int loc_idx = GetSessionLocaleIndex();
+        if ( loc_idx >= 0 )
         {
             ItemLocale const *il = objmgr.GetItemLocale(pProto->ItemId);
             if (il)
             {
-                if (!il->Name[m_language].empty())          // default to english
-                    Name = il->Name[m_language];
-                if (!il->Description[m_language].empty())   // default to english
-                    Description = il->Description[m_language];
+                if (il->Name.size() > loc_idx && !il->Name[loc_idx].empty())
+                    Name = il->Name[loc_idx];
+                if (il->Description.size() > loc_idx && !il->Description[loc_idx].empty())
+                    Description = il->Description[loc_idx];
             }
         }
                                                             // guess size
@@ -812,14 +811,14 @@ void WorldSession::HandleItemNameQueryOpcode(WorldPacket & recv_data)
         std::string Name;
         Name = pProto->Name1;
 
-        uint8 m_language = GetSessionLanguage();
-        if (m_language > 0)
+        int loc_idx = GetSessionLocaleIndex();
+        if (loc_idx >= 0)
         {
             ItemLocale const *il = objmgr.GetItemLocale(pProto->ItemId);
             if (il)
             {
-                if (!il->Name[m_language].empty())          // default to english
-                    Name = il->Name[m_language];
+                if (il->Name.size() > loc_idx && !il->Name[loc_idx].empty())
+                    Name = il->Name[loc_idx];
             }
         }
                                                             // guess size

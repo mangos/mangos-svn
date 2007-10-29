@@ -430,19 +430,7 @@ CreatureInfo const* ObjectMgr::GetCreatureTemplate(uint32 id)
 
 void ObjectMgr::LoadCreatureLocales()
 {
-    const World::LocalizationMap *Locales = sWorld.GetSupportedLocals();
-
-    World::LocalizationMap::const_iterator itr = Locales->begin();
-    std::ostringstream ostr;
-    ostr << "`name_loc" << (int)*itr << "`,`subname_loc" << (int)*itr << "`";
-    itr++;
-    while (itr != Locales->end())
-    { 
-        ostr << ",`name_loc" << (int)*itr << "`,`subname_loc" << (int)*itr << "`";
-        itr++;
-    }
-
-    QueryResult *result = sDatabase.PQuery("SELECT `entry`,%s FROM `locales_creature`",ostr.str().c_str());
+    QueryResult *result = sDatabase.Query("SELECT `entry`,`name_loc1`,`subname_loc1`,`name_loc2`,`subname_loc2`,`name_loc3`,`subname_loc3`,`name_loc4`,`subname_loc4`,`name_loc5`,`subname_loc5`,`name_loc6`,`subname_loc6`,`name_loc7`,`subname_loc7` FROM `locales_creature`");
 
     if(!result)
     {
@@ -451,7 +439,7 @@ void ObjectMgr::LoadCreatureLocales()
         bar.step();
 
         sLog.outString("");
-        sLog.outErrorDb(">> Loaded 0 creature locale strings. DB table `locales_creature` is empty.");
+        sLog.outString(">> Loaded 0 creature locale strings. DB table `locales_creature` is empty.");
         return;
     }
 
@@ -465,14 +453,34 @@ void ObjectMgr::LoadCreatureLocales()
         uint32 entry = fields[0].GetUInt32();
 
         CreatureLocale& data = mCreatureLocaleMap[entry];
-        uint16 currentIndex=0;
-        for (itr = Locales->begin(); itr != Locales->end(); ++itr)
-        {
-            data.Name[*itr]   = fields[currentIndex*2+1].GetCppString();
-            data.SubName[*itr]= fields[currentIndex*2+2].GetCppString();
-            currentIndex++;
-        }
 
+        for(int i = 1; i < 8; ++i)
+        {
+            std::string str = fields[1+2*(i-1)].GetCppString();
+            if(!str.empty())
+            {
+                int idx = GetOrNewIndexForLocale(LocaleConstant(i));
+                if(idx >= 0)
+                {
+                    if(data.Name.size() <= idx)
+                        data.Name.resize(idx+1);
+
+                    data.Name[idx] = str;
+                }
+            }
+            str = fields[1+2*(i-1)+1].GetCppString();
+            if(!str.empty())
+            {
+                int idx = GetOrNewIndexForLocale(LocaleConstant(i));
+                if(idx >= 0)
+                {
+                    if(data.SubName.size() <= idx)
+                        data.SubName.resize(idx+1);
+
+                    data.SubName[idx] = str;
+                }
+            }
+        }
     } while (result->NextRow());
 
     delete result;
@@ -1026,19 +1034,7 @@ void ObjectMgr::LoadAuctions()
 
 void ObjectMgr::LoadItemLocales()
 {
-    const World::LocalizationMap *Locales = sWorld.GetSupportedLocals();
-
-    World::LocalizationMap::const_iterator itr = Locales->begin();
-    std::ostringstream ostr;
-    ostr << "`name_loc" << (int)*itr << "`,`description_loc" << (int)*itr << "`";
-    itr++;
-    while (itr != Locales->end())
-    { 
-        ostr << ",`name_loc" << (int)*itr << "`,`description_loc" << (int)*itr << "`";
-        itr++;
-    }
-
-    QueryResult *result = sDatabase.PQuery("SELECT `entry`,%s FROM `locales_item`",ostr.str().c_str());
+    QueryResult *result = sDatabase.Query("SELECT `entry`,`name_loc1`,`description_loc1`,`name_loc2`,`description_loc2`,`name_loc3`,`description_loc3`,`name_loc4`,`description_loc4`,`name_loc5`,`description_loc5`,`name_loc6`,`description_loc6`,`name_loc7`,`description_loc7` FROM `locales_item`");
 
     if(!result)
     {
@@ -1047,7 +1043,7 @@ void ObjectMgr::LoadItemLocales()
         bar.step();
 
         sLog.outString("");
-        sLog.outErrorDb(">> Loaded 0 Item locale strings. DB table `locales_item` is empty.");
+        sLog.outString(">> Loaded 0 Item locale strings. DB table `locales_item` is empty.");
         return;
     }
 
@@ -1061,12 +1057,34 @@ void ObjectMgr::LoadItemLocales()
         uint32 entry = fields[0].GetUInt32();
 
         ItemLocale& data = mItemLocaleMap[entry];
-        uint16 currentIndex=0;
-        for (itr = Locales->begin(); itr != Locales->end(); ++itr)
+
+        for(int i = 1; i < 8; ++i)
         {
-            data.Name[*itr]   = fields[currentIndex*2+1].GetCppString();
-            data.Description[*itr]= fields[currentIndex*2+2].GetCppString();
-            currentIndex++;
+            std::string str = fields[1+2*(i-1)].GetCppString();
+            if(!str.empty())
+            {
+                int idx = GetOrNewIndexForLocale(LocaleConstant(i));
+                if(idx >= 0)
+                {
+                    if(data.Name.size() <= idx)
+                        data.Name.resize(idx+1);
+
+                    data.Name[idx] = str;
+                }
+            }
+
+            str = fields[1+2*(i-1)+1].GetCppString();
+            if(!str.empty())
+            {
+                int idx = GetOrNewIndexForLocale(LocaleConstant(i));
+                if(idx >= 0)
+                {
+                    if(data.Description.size() <= idx)
+                        data.Description.resize(idx+1);
+
+                    data.Description[idx] = str;
+                }
+            }
         }
     } while (result->NextRow());
 
@@ -2463,24 +2481,16 @@ void ObjectMgr::LoadQuests()
 
 void ObjectMgr::LoadQuestLocales()
 {
-    const World::LocalizationMap *Locales = sWorld.GetSupportedLocals();
-
-    World::LocalizationMap::const_iterator itr = Locales->begin();
-    std::ostringstream ostr;
-    ostr << "`Title_loc" << (int)*itr << "`,`Details_loc" << (int)*itr << "`,`Objectives_loc" << (int)*itr;
-    ostr << "`,`OfferRewardText_loc" << (int)*itr << "`,`RequestItemsText_loc" << (int)*itr << "`,`EndText_loc" << (int)*itr;
-    ostr << "`,`ObjectiveText1_loc" << (int)*itr <<  "`,`ObjectiveText2_loc" << (int)*itr <<  "`,`ObjectiveText3_loc" << (int)*itr <<  "`,`ObjectiveText4_loc" << (int)*itr << "`";
-    
-    itr++;
-    while (itr != Locales->end())
-    { 
-        ostr << ",`Title_loc" << (int)*itr << "`,`Details_loc" << (int)*itr << "`,`Objectives_loc" << (int)*itr;
-        ostr << "`,`OfferRewardText_loc" << (int)*itr << "`,`RequestItemsText_loc" << (int)*itr << "`,`EndText_loc" << (int)*itr;
-        ostr << "`,`ObjectiveText1_loc" << (int)*itr <<  "`,`ObjectiveText2_loc" << (int)*itr <<  "`,`ObjectiveText3_loc" << (int)*itr <<  "`,`ObjectiveText4_loc" << (int)*itr << "`";
-        itr++;
-    }
-
-    QueryResult *result = sDatabase.PQuery("SELECT `entry`,%s FROM `locales_quest`",ostr.str().c_str());
+    QueryResult *result = sDatabase.Query("SELECT `entry`,"
+        "`Title_loc1`,`Details_loc1`,`Objectives_loc1`,`OfferRewardText_loc1`,`RequestItemsText_loc1`,`EndText_loc1`,`ObjectiveText1_loc1`,`ObjectiveText2_loc1`,`ObjectiveText3_loc1`,`ObjectiveText4_loc1`,"
+        "`Title_loc2`,`Details_loc2`,`Objectives_loc2`,`OfferRewardText_loc2`,`RequestItemsText_loc2`,`EndText_loc2`,`ObjectiveText1_loc2`,`ObjectiveText2_loc2`,`ObjectiveText3_loc2`,`ObjectiveText4_loc2`,"
+        "`Title_loc3`,`Details_loc3`,`Objectives_loc3`,`OfferRewardText_loc3`,`RequestItemsText_loc3`,`EndText_loc3`,`ObjectiveText1_loc3`,`ObjectiveText2_loc3`,`ObjectiveText3_loc3`,`ObjectiveText4_loc3`,"
+        "`Title_loc4`,`Details_loc4`,`Objectives_loc4`,`OfferRewardText_loc4`,`RequestItemsText_loc4`,`EndText_loc4`,`ObjectiveText1_loc4`,`ObjectiveText2_loc4`,`ObjectiveText3_loc4`,`ObjectiveText4_loc4`,"
+        "`Title_loc5`,`Details_loc5`,`Objectives_loc5`,`OfferRewardText_loc5`,`RequestItemsText_loc5`,`EndText_loc5`,`ObjectiveText1_loc5`,`ObjectiveText2_loc5`,`ObjectiveText3_loc5`,`ObjectiveText4_loc5`,"
+        "`Title_loc6`,`Details_loc6`,`Objectives_loc6`,`OfferRewardText_loc6`,`RequestItemsText_loc6`,`EndText_loc6`,`ObjectiveText1_loc6`,`ObjectiveText2_loc6`,`ObjectiveText3_loc6`,`ObjectiveText4_loc6`,"
+        "`Title_loc7`,`Details_loc7`,`Objectives_loc7`,`OfferRewardText_loc7`,`RequestItemsText_loc7`,`EndText_loc7`,`ObjectiveText1_loc7`,`ObjectiveText2_loc7`,`ObjectiveText3_loc7`,`ObjectiveText4_loc7`"
+        " FROM `locales_quest`"
+        );
 
     if(!result)
     {
@@ -2489,7 +2499,7 @@ void ObjectMgr::LoadQuestLocales()
         bar.step();
 
         sLog.outString("");
-        sLog.outErrorDb(">> Loaded 0 Quest locale strings. DB table `locales_quest` is empty.");
+        sLog.outString(">> Loaded 0 Quest locale strings. DB table `locales_quest` is empty.");
         return;
     }
 
@@ -2503,18 +2513,96 @@ void ObjectMgr::LoadQuestLocales()
         uint32 entry = fields[0].GetUInt32();
 
         QuestLocale& data = mQuestLocaleMap[entry];
-        uint16 currentIndex=0;
-        for (itr = Locales->begin(); itr != Locales->end(); ++itr)
+
+        for(int i = 1; i < 8; ++i)
         {
-            data.Title[*itr]            = fields[currentIndex*10+1].GetCppString();
-            data.Details[*itr]          = fields[currentIndex*10+2].GetCppString();
-            data.Objectives[*itr]       = fields[currentIndex*10+3].GetCppString();
-            data.OfferRewardText[*itr]  = fields[currentIndex*10+4].GetCppString();
-            data.RequestItemsText[*itr] = fields[currentIndex*10+5].GetCppString();
-            data.EndText[*itr]          = fields[currentIndex*10+2].GetCppString();
-            for (int i=0;i<4;i++)
-                data.ObjectiveText[i][*itr] = fields[currentIndex*10+6+i].GetCppString();
-            currentIndex++;
+            std::string str = fields[1+10*(i-1)].GetCppString();
+            if(!str.empty())
+            {
+                int idx = GetOrNewIndexForLocale(LocaleConstant(i));
+                if(idx >= 0)
+                {
+                    if(data.Title.size() <= idx)
+                        data.Title.resize(idx+1);
+
+                    data.Title[idx] = str;
+                }
+            }
+            str = fields[1+10*(i-1)+1].GetCppString();
+            if(!str.empty())
+            {
+                int idx = GetOrNewIndexForLocale(LocaleConstant(i));
+                if(idx >= 0)
+                {
+                    if(data.Details.size() <= idx)
+                        data.Details.resize(idx+1);
+
+                    data.Details[idx] = str;
+                }
+            }
+            str = fields[1+10*(i-1)+2].GetCppString();
+            if(!str.empty())
+            {
+                int idx = GetOrNewIndexForLocale(LocaleConstant(i));
+                if(idx >= 0)
+                {
+                    if(data.Objectives.size() <= idx)
+                        data.Objectives.resize(idx+1);
+
+                    data.Objectives[idx] = str;
+                }
+            }
+            str = fields[1+10*(i-1)+3].GetCppString();
+            if(!str.empty())
+            {
+                int idx = GetOrNewIndexForLocale(LocaleConstant(i));
+                if(idx >= 0)
+                {
+                    if(data.OfferRewardText.size() <= idx)
+                        data.OfferRewardText.resize(idx+1);
+
+                    data.OfferRewardText[idx] = str;
+                }
+            }
+            str = fields[1+10*(i-1)+4].GetCppString();
+            if(!str.empty())
+            {
+                int idx = GetOrNewIndexForLocale(LocaleConstant(i));
+                if(idx >= 0)
+                {
+                    if(data.RequestItemsText.size() <= idx)
+                        data.RequestItemsText.resize(idx+1);
+
+                    data.RequestItemsText[idx] = str;
+                }
+            }
+            str = fields[1+10*(i-1)+5].GetCppString();
+            if(!str.empty())
+            {
+                int idx = GetOrNewIndexForLocale(LocaleConstant(i));
+                if(idx >= 0)
+                {
+                    if(data.EndText.size() <= idx)
+                        data.EndText.resize(idx+1);
+
+                    data.EndText[idx] = str;
+                }
+            }
+            for(int k = 0; k < 4; ++k)
+            {
+                str = fields[1+10*(i-1)+6+k].GetCppString();
+                if(!str.empty())
+                {
+                    int idx = GetOrNewIndexForLocale(LocaleConstant(i));
+                    if(idx >= 0)
+                    {
+                        if(data.ObjectiveText[k].size() <= idx)
+                            data.ObjectiveText[k].resize(idx+1);
+
+                        data.ObjectiveText[k][idx] = str;
+                    }
+                }
+            }
         }
     } while (result->NextRow());
 
@@ -3144,19 +3232,7 @@ void ObjectMgr::LoadPageTexts()
 
 void ObjectMgr::LoadPageTextLocales()
 {
-    const World::LocalizationMap *Locales = sWorld.GetSupportedLocals();
-
-    World::LocalizationMap::const_iterator itr = Locales->begin();
-    std::ostringstream ostr;
-    ostr << "`text_loc" << (int)*itr << "`";
-    itr++;
-    while (itr != Locales->end())
-    { 
-        ostr << ",`text_loc" << (int)*itr << "`";
-        itr++;
-    }
-
-    QueryResult *result = sDatabase.PQuery("SELECT `entry`,%s FROM `locales_page_text`",ostr.str().c_str());
+    QueryResult *result = sDatabase.PQuery("SELECT `entry`,`text_loc1`,`text_loc2`,`text_loc3`,`text_loc4`,`text_loc5`,`text_loc6`,`text_loc7` FROM `locales_page_text`");
 
     if(!result)
     {
@@ -3165,7 +3241,7 @@ void ObjectMgr::LoadPageTextLocales()
         bar.step();
 
         sLog.outString("");
-        sLog.outErrorDb(">> Loaded 0 PageText locale strings. DB table `locales_page_text` is empty.");
+        sLog.outString(">> Loaded 0 PageText locale strings. DB table `locales_page_text` is empty.");
         return;
     }
 
@@ -3179,11 +3255,21 @@ void ObjectMgr::LoadPageTextLocales()
         uint32 entry = fields[0].GetUInt32();
 
         PageTextLocale& data = mPageTextLocaleMap[entry];
-        uint16 currentIndex=0;
-        for (itr = Locales->begin(); itr != Locales->end(); ++itr)
+
+        for(int i = 1; i < 8; ++i)
         {
-            data.Text[*itr]   = fields[currentIndex+1].GetCppString();
-            currentIndex++;
+            std::string str = fields[i].GetCppString();
+            if(str.empty())
+                continue;
+
+            int idx = GetOrNewIndexForLocale(LocaleConstant(i));
+            if(idx >= 0)
+            {
+                if(data.Text.size() <= idx)
+                    data.Text.resize(idx+1);
+
+                data.Text[idx] = str;
+            }
         }
 
     } while (result->NextRow());
@@ -3274,22 +3360,15 @@ void ObjectMgr::LoadGossipText()
 
 void ObjectMgr::LoadNpcTextLocales()
 {
-    const World::LocalizationMap *Locales = sWorld.GetSupportedLocals();
-
-    World::LocalizationMap::const_iterator itr = Locales->begin();
-    std::ostringstream ostr;
-    ostr << "`Text0_0_loc" << (int)*itr << "`,`Text0_1_loc" << (int)*itr << "`";
-    for (int i=1;i<8;i++)
-        ostr << ",`Text" << i << "_0_loc" << (int)*itr << "`,`Text" << i << "_1_loc" << (int)*itr << "`";
-    itr++;
-    while (itr != Locales->end())
-    {
-        for (int i=0;i<8;i++)
-            ostr << ",`Text" << i << "_0_loc" << (int)*itr << "`,`Text" << i << "_1_loc" << (int)*itr << "`";
-        itr++;
-    }
-
-    QueryResult *result = sDatabase.PQuery("SELECT `entry`,%s FROM `locales_npc_text`",ostr.str().c_str());
+    QueryResult *result = sDatabase.Query("SELECT `entry`,"
+        "`Text0_0_loc1`,`Text0_1_loc1`,`Text1_0_loc1`,`Text1_1_loc1`,`Text2_0_loc1`,`Text2_1_loc1`,`Text3_0_loc1`,`Text3_1_loc1`,`Text4_0_loc1`,`Text4_1_loc1`,`Text5_0_loc1`,`Text5_1_loc1`,`Text6_0_loc1`,`Text6_1_loc1`,`Text7_0_loc1`,`Text7_1_loc1`,"
+        "`Text0_0_loc2`,`Text0_1_loc2`,`Text1_0_loc2`,`Text1_1_loc2`,`Text2_0_loc2`,`Text2_1_loc2`,`Text3_0_loc2`,`Text3_1_loc1`,`Text4_0_loc2`,`Text4_1_loc2`,`Text5_0_loc2`,`Text5_1_loc2`,`Text6_0_loc2`,`Text6_1_loc2`,`Text7_0_loc2`,`Text7_1_loc2`,"
+        "`Text0_0_loc3`,`Text0_1_loc3`,`Text1_0_loc3`,`Text1_1_loc3`,`Text2_0_loc3`,`Text2_1_loc3`,`Text3_0_loc3`,`Text3_1_loc1`,`Text4_0_loc3`,`Text4_1_loc3`,`Text5_0_loc3`,`Text5_1_loc3`,`Text6_0_loc3`,`Text6_1_loc3`,`Text7_0_loc3`,`Text7_1_loc3`,"
+        "`Text0_0_loc4`,`Text0_1_loc4`,`Text1_0_loc4`,`Text1_1_loc4`,`Text2_0_loc4`,`Text2_1_loc4`,`Text3_0_loc4`,`Text3_1_loc1`,`Text4_0_loc4`,`Text4_1_loc4`,`Text5_0_loc4`,`Text5_1_loc4`,`Text6_0_loc4`,`Text6_1_loc4`,`Text7_0_loc4`,`Text7_1_loc4`,"
+        "`Text0_0_loc5`,`Text0_1_loc5`,`Text1_0_loc5`,`Text1_1_loc5`,`Text2_0_loc5`,`Text2_1_loc5`,`Text3_0_loc5`,`Text3_1_loc1`,`Text4_0_loc5`,`Text4_1_loc5`,`Text5_0_loc5`,`Text5_1_loc5`,`Text6_0_loc5`,`Text6_1_loc5`,`Text7_0_loc5`,`Text7_1_loc5`,"
+        "`Text0_0_loc6`,`Text0_1_loc6`,`Text1_0_loc6`,`Text1_1_loc6`,`Text2_0_loc6`,`Text2_1_loc6`,`Text3_0_loc6`,`Text3_1_loc1`,`Text4_0_loc6`,`Text4_1_loc6`,`Text5_0_loc6`,`Text5_1_loc6`,`Text6_0_loc6`,`Text6_1_loc6`,`Text7_0_loc6`,`Text7_1_loc6`,"
+        "`Text0_0_loc7`,`Text0_1_loc7`,`Text1_0_loc7`,`Text1_1_loc7`,`Text2_0_loc7`,`Text2_1_loc7`,`Text3_0_loc7`,`Text3_1_loc1`,`Text4_0_loc7`,`Text4_1_loc7`,`Text5_0_loc7`,`Text5_1_loc7`,`Text6_0_loc7`,`Text6_1_loc7`,`Text7_0_loc7`,`Text7_1_loc7` "
+        " FROM `locales_npc_text`");
 
     if(!result)
     {
@@ -3298,7 +3377,7 @@ void ObjectMgr::LoadNpcTextLocales()
         bar.step();
 
         sLog.outString("");
-        sLog.outErrorDb(">> Loaded 0 Quest locale strings. DB table `locales_npc_text` is empty.");
+        sLog.outString(">> Loaded 0 Quest locale strings. DB table `locales_npc_text` is empty.");
         return;
     }
 
@@ -3312,15 +3391,36 @@ void ObjectMgr::LoadNpcTextLocales()
         uint32 entry = fields[0].GetUInt32();
 
         NpcTextLocale& data = mNpcTextLocaleMap[entry];
-        uint16 currentIndex=0;
-        for (itr = Locales->begin(); itr != Locales->end(); ++itr)
+
+        for(int i=1; i<8; ++i)
         {
-            for (int i=0;i<8;i++)
+            for(int j=0; j<8; ++j)
             {
-                data.Text_0[i][*itr]         = fields[currentIndex*16+1+i*2].GetCppString();
-                data.Text_1[i][*itr]         = fields[currentIndex*16+2+i*2].GetCppString();
+                std::string str0 = fields[1+8*2*(i-1)+2*j].GetCppString();
+                if(!str0.empty())
+                {
+                    int idx = GetOrNewIndexForLocale(LocaleConstant(i));
+                    if(idx >= 0)
+                    {
+                        if(data.Text_0[j].size() <= idx)
+                            data.Text_0[j].resize(idx+1);
+
+                        data.Text_0[j][idx] = str0;
+                    }
+                }
+                std::string str1 = fields[1+8*2*(i-1)+2*j+1].GetCppString();
+                if(!str1.empty())
+                {
+                    int idx = GetOrNewIndexForLocale(LocaleConstant(i));
+                    if(idx >= 0)
+                    {
+                        if(data.Text_1[j].size() <= idx)
+                            data.Text_1[j].resize(idx+1);
+
+                        data.Text_1[j][idx] = str1;
+                    }
+                }
             }
-            currentIndex++;
         }
     } while (result->NextRow());
 
@@ -4267,19 +4367,7 @@ uint32 ObjectMgr::GenerateLowGuid(uint32 guidhigh)
 
 void ObjectMgr::LoadGameObjectLocales()
 {
-    const World::LocalizationMap *Locales = sWorld.GetSupportedLocals();
-
-    World::LocalizationMap::const_iterator itr = Locales->begin();
-    std::ostringstream ostr;
-    ostr << "`name_loc" << (int)*itr << "`";
-    itr++;
-    while (itr != Locales->end())
-    { 
-        ostr << ",`name_loc" << (int)*itr << "`";
-        itr++;
-    }
-
-    QueryResult *result = sDatabase.PQuery("SELECT `entry`,%s FROM `locales_gameobject`",ostr.str().c_str());
+    QueryResult *result = sDatabase.Query("SELECT `entry`,`name_loc1`,`name_loc2`,`name_loc3`,`name_loc4`,`name_loc5`,`name_loc6`,`name_loc7` FROM `locales_gameobject`");
 
     if(!result)
     {
@@ -4288,7 +4376,7 @@ void ObjectMgr::LoadGameObjectLocales()
         bar.step();
 
         sLog.outString("");
-        sLog.outErrorDb(">> Loaded 0 gameobject locale strings. DB table `locales_gameobject` is empty.");
+        sLog.outString(">> Loaded 0 gameobject locale strings. DB table `locales_gameobject` is empty.");
         return;
     }
 
@@ -4302,13 +4390,22 @@ void ObjectMgr::LoadGameObjectLocales()
         uint32 entry = fields[0].GetUInt32();
 
         GameObjectLocale& data = mGameObjectLocaleMap[entry];
-        uint16 currentIndex=0;
-        for (itr = Locales->begin(); itr != Locales->end(); ++itr)
-        {
-            data.Name[*itr]   = fields[currentIndex+1].GetCppString();
-            currentIndex++;
-        }
 
+        for(int i = 1; i < 8; ++i)
+        {
+            std::string str = fields[i].GetCppString();
+            if(!str.empty())
+            {
+                int idx = GetOrNewIndexForLocale(LocaleConstant(i));
+                if(idx >= 0)
+                {
+                    if(data.Name.size() <= idx)
+                        data.Name.resize(idx+1);
+
+                    data.Name[idx] = str;
+                }
+            }
+        }
     } while (result->NextRow());
 
     delete result;
@@ -5456,4 +5553,29 @@ void ObjectMgr::LoadReservedPlayersNames()
 
     sLog.outString();
     sLog.outString( ">> Loaded %u reserved player names", count );
+}
+
+int ObjectMgr::GetIndexForLocale( LocaleConstant loc )
+{
+    if(loc==LOCALE_ENG)
+        return -1;
+
+    for(size_t i=0;i < m_LocalToIndex.size(); ++i)
+        if(m_LocalToIndex[i]==loc)
+            return i;
+
+    return -1;
+}
+
+int ObjectMgr::GetOrNewIndexForLocale( LocaleConstant loc )
+{
+    if(loc==LOCALE_ENG)
+        return -1;
+
+    for(size_t i=0;i < m_LocalToIndex.size(); ++i)
+        if(m_LocalToIndex[i]==loc)
+            return i;
+
+    m_LocalToIndex.push_back(loc);
+    return m_LocalToIndex.size()-1;
 }

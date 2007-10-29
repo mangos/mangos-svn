@@ -34,12 +34,6 @@ struct PageText
     uint32 Next_Page;
 };
 
-struct PageTextLocale
-{
-    uint32 Entry;
-    std::string Text[8];
-};
-
 // GCC have alternative #pragma pack() syntax and old gcc version not support pack(pop), also any gcc version not support it at some paltform
 #if defined( __GNUC__ )
 #pragma pack()
@@ -68,11 +62,15 @@ struct GossipText
     GossipTextOption Options[8];
 };
 
+struct PageTextLocale
+{
+    std::vector<std::string> Text;
+};
+
 struct NpcTextLocale
 {
-    uint32 Entry;
-    std::string Text_0[8][8];
-    std::string Text_1[8][8];
+    std::vector<std::string> Text_0[8];
+    std::vector<std::string> Text_1[8];
 };
 
 #endif

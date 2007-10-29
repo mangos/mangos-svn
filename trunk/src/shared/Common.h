@@ -149,7 +149,7 @@ enum AccountTypes
     SEC_ADMINISTRATOR  = 3
 };
 
-enum LocalesConstants
+enum LocaleConstant
 {
     LOCALE_ENG = 0,
     LOCALE_FR  = 2,
