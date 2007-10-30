@@ -29,6 +29,7 @@
 
 #include <map>
 #include <set>
+#include <list>
 
 class Object;
 class WorldPacket;
@@ -40,6 +41,7 @@ struct ScriptInfo;
 class CliCommandHolder;
 class SqlResultQueue;
 class QueryResult;
+class WorldSocket;
 
 /// Timers for different object refresh rates
 enum WorldTimers
@@ -239,7 +241,8 @@ class World
         void AddSession(WorldSession *s);
         bool RemoveSession(uint32 id);
         /// Get the number of current active sessions
-        uint32 GetSessionCount() const { return m_sessions.size(); }
+        uint32 GetActiveAndQueuedSessionCount() const { return m_sessions.size(); }
+		uint32 GetActiveSessionCount() const { return m_sessions.size() - m_QueuedPlayer.size(); }
         /// Get the maximum number of parallel sessions on the server since last reboot
         uint32 GetMaxSessionCount() const { return m_maxSessionsCount; }
         Player* FindPlayerInZone(uint32 zone);
@@ -254,6 +257,13 @@ class World
 
         /// Set the active session server limit (or security level limitation)
         void SetPlayerLimit(int32 limit, bool needUpdate = false);
+
+		//player Queue
+		typedef std::list<WorldSocket*> Queue;
+		void AddQueuedPlayer(WorldSocket* Socket);
+		void RemoveQueuedPlayer(WorldSocket* Socket);
+		int32 GetQueuePos(WorldSocket* Socket);
+		uint32 GetQueueSize() const { return m_QueuedPlayer.size(); }
 
         /// \todo Actions on m_allowMovement still to be implemented
         /// Is movement allowed?
@@ -329,6 +339,7 @@ class World
         bool KickPlayer(std::string playerName);
         void KickAll();
         void KickAllLess(AccountTypes sec);
+        void KickAllQueued();
         uint8 BanAccount(std::string type, std::string nameOrIP, std::string duration, std::string reason, std::string author);
         bool RemoveBanAccount(std::string type, std::string nameOrIP);
 
@@ -400,6 +411,9 @@ class World
 
         // next daily quests reset time
         time_t m_NextDailyQuestReset;
+
+		//Player Queue
+		Queue m_QueuedPlayer;
 };
 
 extern uint32 realmID;

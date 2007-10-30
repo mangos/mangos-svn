@@ -143,14 +143,16 @@ class WorldSocket : public TcpSocket
         void OnDelete();
 
         void Update(time_t diff);
+		// Player Queue
+		void SendAuthWaitQue(uint32 position);
 
+        WorldSession* GetSession() const { return _session; }
     protected:
         void SendSinglePacket();
 
     protected:
         void _HandleAuthSession(WorldPacket& recvPacket);
         void _HandlePing(WorldPacket& recvPacket);
-        void SendAuthWaitQue(uint32 PlayersInQue);
 
     private:
         AuthCrypt _crypt;

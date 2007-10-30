@@ -194,6 +194,7 @@ void WorldSocket::CloseSocket()
 {
     ///- Set CloseAndDelete flag for TcpSocket class
     SetCloseAndDelete(true);
+
     ///- Set _session to NULL. Prevent crashes
     _session = NULL;
 }
@@ -211,6 +212,9 @@ void WorldSocket::OnDelete()
 
     ///- Remove the socket from the WorldSocketMgr list
     sWorldSocketMgr.RemoveSocket(this);
+
+    ///- Removes socket from player queue
+    sWorld.RemoveQueuedPlayer(this);
 }
 
 /// Handle the client authentication packet
@@ -352,18 +356,6 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
         return;
     }
 
-    ///- Check that we do not exceed the maximum number of online players in the realm
-    uint32 num = sWorld.GetSessionCount();
-    uint32 pLimit = sWorld.GetPlayerAmountLimit();
-
-    if( pLimit > 0 && num >= pLimit && security == SEC_PLAYER) 
-    {
-        /// \todo Handle the waiting queue when the server is full
-        SendAuthWaitQue(1);
-        sLog.outDetail( "SOCKET: Sent Auth Response (server queue)." );
-        return;
-    }
-
     ///- kick already loaded player with same account (if any) and remove session
     ///- if player is in loading and want to load again, return
     if(!sWorld.RemoveSession(id))
@@ -433,10 +425,24 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     if(sAddOnHandler.BuildAddonPacket(&recvPacket, &SendAddonPacked, recvPacket.rpos()))
         SendPacket(&SendAddonPacked);
 
+	///- Check that we do not exceed the maximum number of online players in the realm
+	uint32 Sessions  = sWorld.GetActiveAndQueuedSessionCount();
+    uint32 pLimit    = sWorld.GetPlayerAmountLimit();
+	uint32 QueueSize = sWorld.GetQueueSize();               //number of players in the queue
+	Sessions--;                                             //so we don't count the user trying to login as a session and queue the socket that we are using
+
+	if( pLimit >  0 && Sessions >= pLimit && security == SEC_PLAYER ) 
+    {
+		sWorld.AddQueuedPlayer(this);
+		SendAuthWaitQue(sWorld.GetQueuePos(this));
+		sLog.outDetail( "PlayerQueue: %s is in Queue Position (%u).",safe_account.c_str(),++QueueSize);
+		return;
+    }
+
     // Updates the population
     if (pLimit > 0)
     {
-        float popu = sWorld.GetSessionCount();              //updated number of users on the server
+        float popu = sWorld.GetActiveSessionCount();        //updated number of users on the server
         popu /= pLimit;
         popu *= 2;
         loginDatabase.PExecute("UPDATE `realmlist` SET `population` = '%f' WHERE `id` = '%d'",popu,realmID);
@@ -610,12 +616,21 @@ void WorldSocket::Update(time_t diff)
 }
 
 /// Handle the authentication waiting queue (to be completed)
-void WorldSocket::SendAuthWaitQue(uint32 PlayersInQue)
+void WorldSocket::SendAuthWaitQue(uint32 position)
 {
-    WorldPacket packet( SMSG_AUTH_RESPONSE, 5 );
-    packet << uint8( AUTH_WAIT_QUEUE );
-    packet << uint32 (PlayersInQue);                        //amount of players in queue
-    SendPacket(&packet);
+	if(position == 0)
+	{
+		WorldPacket packet( SMSG_AUTH_RESPONSE, 1 );
+		packet << uint8( AUTH_OK );
+		SendPacket(&packet);
+	}
+	else
+	{
+		WorldPacket packet( SMSG_AUTH_RESPONSE, 5 );
+		packet << uint8( AUTH_WAIT_QUEUE );
+		packet << uint32 (position);                              //amount of players in queue
+		SendPacket(&packet);
+	}
 }
 
 void WorldSocket::SizeError(WorldPacket const& packet, uint32 size) const

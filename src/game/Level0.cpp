@@ -157,7 +157,7 @@ bool ChatHandler::HandleStartCommand(const char* args)
 
 bool ChatHandler::HandleInfoCommand(const char* args)
 {
-    uint32 clientsNum = sWorld.GetSessionCount();
+    uint32 clientsNum = sWorld.GetActiveSessionCount();
     uint32 maxClientsNum = sWorld.GetMaxSessionCount();
     std::string str = secsToTimeString(sWorld.GetUptime());
 
