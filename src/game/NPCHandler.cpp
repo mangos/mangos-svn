@@ -257,7 +257,7 @@ void WorldSession::HandleGossipHelloOpcode( WorldPacket & recv_data )
     // If spiritguide, no need for gossip menu, just put player into resurrect queue
     if (unit->isSpiritGuide())
     {
-        BattleGround *bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundId());
+        BattleGround *bg = _player->GetBattleGround();
         if(bg)
         {
             bg->AddPlayerToResurrectQueue(unit->GetGUID(), _player->GetGUID());

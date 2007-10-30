@@ -1537,6 +1537,8 @@ class MANGOS_DLL_SPEC Player : public Unit
             return false;
         }
         uint32 GetBattleGroundId() const    { return m_bgBattleGroundID; }
+        BattleGround* GetBattleGround() const;
+
         uint32 GetBattleGroundQueueId(uint32 index) const { return m_bgBattleGroundQueueID[index]; }
         uint32 GetBattleGroundQueueIndex(uint32 queue_id) const
         {

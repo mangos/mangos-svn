@@ -25,7 +25,6 @@
 #include "Opcodes.h"
 #include "Spell.h"
 #include "SpellAuras.h"
-#include "BattleGroundMgr.h"
 #include "BattleGroundWS.h"
 #include "MapManager.h"
 #include "ScriptCalls.h"
@@ -444,7 +443,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                 !_player->HasStealthAura() &&               // not stealthed
                 !_player->HasInvisibilityAura())            // not invisible
             {
-                BattleGround *bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundId());
+                BattleGround *bg = _player->GetBattleGround();
                 if(!bg)
                     return;
                 // BG flag click
@@ -510,7 +509,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                 !_player->HasStealthAura() &&               // not stealthed
                 !_player->HasInvisibilityAura())            // not invisible
             {
-                BattleGround *bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundId());
+                BattleGround *bg = _player->GetBattleGround();
                 if(!bg)
                     return;
                 // BG flag dropped
@@ -681,7 +680,7 @@ void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
 
     if (spellId == 2584)    // Waiting to resurrect spell cancel, we must remove player from resurrect queue
     {
-        BattleGround *bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundId());
+        BattleGround *bg = _player->GetBattleGround();
         if(!bg)
             return;
         bg->RemovePlayerFromResurrectQueue(_player->GetGUID());

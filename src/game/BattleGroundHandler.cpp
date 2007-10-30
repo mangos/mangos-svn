@@ -197,7 +197,7 @@ void WorldSession::HandleBattleGroundPlayerPositionsOpcode( WorldPacket & /*recv
     if(!_player->InBattleGround())                          // can't be received if player not in battleground
         return;
 
-    BattleGround *bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundId());
+    BattleGround *bg = _player->GetBattleGround();
     if(!bg)
         return;
 
@@ -244,7 +244,7 @@ void WorldSession::HandleBattleGroundPVPlogdataOpcode( WorldPacket & /*recv_data
     if(!_player->InBattleGround())
         return;
 
-    BattleGround *bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundId());
+    BattleGround *bg = _player->GetBattleGround();
     if(!bg)
         return;
 
@@ -360,7 +360,7 @@ void WorldSession::HandleBattlefieldStatusOpcode( WorldPacket & /*recv_data*/ )
     // TODO: we must put player back to battleground in case disconnect (< 5 minutes offline time) or teleport player on login(!) from battleground map to entry point
     if(_player->InBattleGround())
     {
-        BattleGround *bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundId());
+        BattleGround *bg = _player->GetBattleGround();
         if(bg)
         {
             uint32 queueSlot = _player->GetBattleGroundQueueIndex(bg->GetTypeID());
@@ -415,7 +415,7 @@ void WorldSession::HandleAreaSpiritHealerQueryOpcode( WorldPacket & recv_data )
     if(!_player->InBattleGround())
         return;
 
-    BattleGround *bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundId());
+    BattleGround *bg = _player->GetBattleGround();
     if(!bg)
         return;
 
@@ -434,7 +434,7 @@ void WorldSession::HandleAreaSpiritHealerQueueOpcode( WorldPacket & recv_data )
     if(!_player->InBattleGround())
         return;
 
-    BattleGround *bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundId());
+    BattleGround *bg = _player->GetBattleGround();
     if(!bg)
         return;
 

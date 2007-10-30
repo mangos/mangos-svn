@@ -26,7 +26,7 @@
 #include "Player.h"
 #include "MapManager.h"
 #include "Transports.h"
-#include "BattleGroundMgr.h"
+#include "BattleGround.h"
 
 void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
 {
@@ -69,7 +69,7 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
 
     if(_player->InBattleGround())
     {
-        BattleGround *bg = sBattleGroundMgr.GetBattleGround(_player->GetBattleGroundId());
+        BattleGround *bg = _player->GetBattleGround();
         if(bg)
         {
             if(bg->GetMapId() == _player->GetMapId())       // we teleported to bg

@@ -15011,11 +15011,7 @@ void Player::ToggleMetaGemsActive(uint16 exceptslot, bool apply)
 
 void Player::LeaveBattleground()
 {
-    if(!InBattleGround())
-        return;
-
-    BattleGround *bg = sBattleGroundMgr.GetBattleGround(GetBattleGroundId());
-    if(bg)
+    if(BattleGround *bg = GetBattleGround())
     {
         bg->RemovePlayerAtLeave(GetGUID(), true, true);
 
@@ -15494,4 +15490,12 @@ void Player::ResetDailyQuestStatus()
     // DB data deleted in caller
     m_DailyQuestChanged = false;
     m_lastDailyQuestTime = 0;
+}
+
+BattleGround* Player::GetBattleGround() const
+{
+    if(GetBattleGroundId()==0)
+        return NULL;
+
+    return sBattleGroundMgr.GetBattleGround(GetBattleGroundId());
 }
