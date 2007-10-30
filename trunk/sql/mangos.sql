@@ -10227,7 +10227,7 @@ CREATE TABLE `quest_template` (
   `QuestLevel` int(11) unsigned NOT NULL default '0',
   `Type` int(11) unsigned NOT NULL default '0',
   `RequiredRaces` int(11) unsigned NOT NULL default '0',
-  `RequiredSkillValue` int(11) unsigned NOT NULL default '1',
+  `RequiredSkillValue` int(11) unsigned NOT NULL default '0',
   `RequiredMinRepFaction` int(10) unsigned NOT NULL default '0',
   `RequiredMinRepValue` int(10) NOT NULL default '0',
   `RequiredMaxRepFaction` int(10) unsigned NOT NULL default '0',

@@ -2126,12 +2126,44 @@ void ObjectMgr::LoadQuests()
             qinfo->SpecialFlags |= QUEST_SPECIAL_FLAGS_DAILY;
         }
 
-        if(qinfo->RequiredSkillValue && qinfo->RequiredSkillValue > sWorld.GetConfigMaxSkillValue())
+        // zone case
+        if( qinfo->ZoneOrSort > 0 )
         {
-            sLog.outErrorDb("Quest %u has `RequiredSkillValue` = %u but max possible skill is %u, quest can't be done.",
-                qinfo->GetQuestId(),qinfo->RequiredSkillValue,sWorld.GetConfigMaxSkillValue());
-            // no changes, quest can't be done for this requirement
+            if(!GetAreaEntryByAreaID(qinfo->ZoneOrSort))
+            {
+                sLog.outErrorDb("Quest %u has `ZoneOrSort` = %u (zone case) but zone with this id not exist.",
+                    qinfo->GetQuestId(),qinfo->ZoneOrSort);
+                // no changes, quest not dependent from this value but can have problems at client
+            }
         }
+
+        if( qinfo->RequiredSkillValue )
+        {
+            if( qinfo->RequiredSkillValue > sWorld.GetConfigMaxSkillValue() )
+            {
+                sLog.outErrorDb("Quest %u has `RequiredSkillValue` = %u but max possible skill is %u, quest can't be done.",
+                    qinfo->GetQuestId(),qinfo->RequiredSkillValue,sWorld.GetConfigMaxSkillValue());
+                // no changes, quest can't be done for this requirement
+            }
+
+            if( qinfo->ZoneOrSort >= 0 )
+            {
+                sLog.outErrorDb("Quest %u has `RequiredSkillValue` = %u but ZoneOrSort = %i (zone case), value ignored.",
+                    qinfo->GetQuestId(),qinfo->RequiredSkillValue,qinfo->ZoneOrSort);
+                // no changes, quest will ignore requirement
+            }
+            else
+            {
+                uint32 reqskill = SkillByQuestSort(-qinfo->ZoneOrSort);
+                if(!reqskill)
+                {
+                    sLog.outErrorDb("Quest %u has `RequiredSkillValue` = %u but ZoneOrSort = %i (non skill case), value ignored.",
+                        qinfo->GetQuestId(),qinfo->RequiredSkillValue,qinfo->ZoneOrSort);
+                    // no changes, quest will ignore requirement
+                }
+            }
+        }
+        // else Skill quests can have 0 skill level, this is ok
 
         if(qinfo->RequiredMinRepFaction && !sFactionStore.LookupEntry(qinfo->RequiredMinRepFaction))
         {
