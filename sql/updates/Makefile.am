@@ -502,6 +502,8 @@ pkgdata_DATA = \
 	4632_areatrigger_teleport.sql \
 	4633_spell_teleport.sql \
 	4640_command.sql \
+	4656_game_event_creature_quest.sql \
+	4657_quest_template.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -985,5 +987,6 @@ EXTRA_DIST = \
 	4633_spell_teleport.sql \
 	4640_command.sql \
 	4656_game_event_creature_quest.sql \
+	4657_quest_template.sql \
 	README
 
