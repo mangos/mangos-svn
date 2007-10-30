@@ -934,7 +934,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
 
     if(GetPlayer()->InBattleGround())
     {
-        BattleGround* bg = sBattleGroundMgr.GetBattleGround(GetPlayer()->GetBattleGroundId());
+        BattleGround* bg = GetPlayer()->GetBattleGround();
         if(bg)
             if(bg->GetStatus() == STATUS_IN_PROGRESS)
                 bg->HandleAreaTrigger(GetPlayer(), Trigger_ID);

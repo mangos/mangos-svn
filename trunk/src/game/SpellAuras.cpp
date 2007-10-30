@@ -1245,7 +1245,7 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
 
         // drop flag at mount in bg
         if(Real && m_target->GetTypeId()==TYPEID_PLAYER && ((Player*)m_target)->InBattleGround())
-            if(BattleGround *bg = sBattleGroundMgr.GetBattleGround(((Player*)m_target)->GetBattleGroundId()))
+            if(BattleGround *bg = ((Player*)m_target)->GetBattleGround())
                 bg->HandleDropFlag((Player*)m_target);
 
         uint32 team = 0;
@@ -2235,7 +2235,7 @@ void Aura::HandleModStealth(bool apply, bool Real)
 
         // drop flag at stealth in bg
         if(Real && m_target->GetTypeId()==TYPEID_PLAYER && ((Player*)m_target)->InBattleGround())
-            if(BattleGround *bg = sBattleGroundMgr.GetBattleGround(((Player*)m_target)->GetBattleGroundId()))
+            if(BattleGround *bg = ((Player*)m_target)->GetBattleGround())
                 bg->HandleDropFlag((Player*)m_target);
 
         // not apply flag for RACE_NIGHTELF stealth
@@ -2314,7 +2314,7 @@ void Aura::HandleInvisibility(bool Apply, bool Real)
 
         // drop flag at invisible in bg
         if(Real && m_target->GetTypeId()==TYPEID_PLAYER && ((Player*)m_target)->InBattleGround())
-            if(BattleGround *bg = sBattleGroundMgr.GetBattleGround(((Player*)m_target)->GetBattleGroundId()))
+            if(BattleGround *bg = ((Player*)m_target)->GetBattleGround())
                 bg->HandleDropFlag((Player*)m_target);
 
         // Real visibility update in Unit::_AddAura
@@ -2657,7 +2657,7 @@ void Aura::HandleAuraModEffectImmunity(bool apply, bool Real)
         {
             if(((Player*)m_target)->InBattleGround())
             {
-                BattleGround *bg = sBattleGroundMgr.GetBattleGround(((Player*)m_target)->GetBattleGroundId());
+                BattleGround *bg = ((Player*)m_target)->GetBattleGround();
                 if(bg)
                 {
                     switch(bg->GetTypeID())

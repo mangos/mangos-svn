@@ -1308,7 +1308,7 @@ void Spell::EffectSendEvent(uint32 i)
 {
     if (m_caster->GetTypeId() == TYPEID_PLAYER && ((Player*)m_caster)->InBattleGround())
     {
-        BattleGround* bg = sBattleGroundMgr.GetBattleGround(((Player *)m_caster)->GetBattleGroundId());
+        BattleGround* bg = ((Player *)m_caster)->GetBattleGround();
         if(bg && bg->GetStatus() == STATUS_IN_PROGRESS)
         {
             switch(m_spellInfo->Id)
@@ -1634,7 +1634,7 @@ void Spell::EffectOpenLock(uint32 i)
         if ((gameObjTarget->GetGOInfo()->id >= BG_AB_OBJECTID_BANNER_A) && (gameObjTarget->GetGOInfo()->id <= BG_AB_OBJECTID_BANNER_CONT_H) ||
             (gameObjTarget->GetGOInfo()->id >= BG_AB_OBJECTID_NODE_BANNER_0) && (gameObjTarget->GetGOInfo()->id <= BG_AB_OBJECTID_NODE_BANNER_4))
         {
-            BattleGround *bg = sBattleGroundMgr.GetBattleGround(player->GetBattleGroundId());
+            BattleGround *bg = player->GetBattleGround();
             if(!bg)
                 return;
             // check if it's correct bg

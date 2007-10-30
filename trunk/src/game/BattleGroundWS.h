@@ -19,7 +19,7 @@
 #ifndef __BATTLEGROUNDWS_H
 #define __BATTLEGROUNDWS_H
 
-class BattleGround;
+#include "BattleGround.h"
 
 #define BG_WS_MAX_TEAM_SCORE      3
 #define BG_WS_FLAG_RESPAWN_TIME   23000

@@ -37,7 +37,7 @@
 #include "Pet.h"
 #include "Util.h"
 #include "Totem.h"
-#include "BattleGroundMgr.h"
+#include "BattleGround.h"
 #include "MovementGenerator.h"
 
 #include <math.h>
@@ -534,8 +534,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
 
             if(killer)
             {
-                BattleGround *bg = sBattleGroundMgr.GetBattleGround(killed->GetBattleGroundId());
-                if(bg)
+                if(BattleGround *bg = killed->GetBattleGround())
                 {
                     bg->HandleKillPlayer(killed, killer);       // drop flags and etc
                     // add +1 deaths

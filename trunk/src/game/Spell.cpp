@@ -44,6 +44,7 @@
 #include "Tools.h"
 #include "LootMgr.h"
 #include "VMapFactory.h"
+#include "BattleGround.h"
 
 #define SPELL_CHANNEL_UPDATE_INTERVAL 1000
 
@@ -2823,6 +2824,12 @@ uint8 Spell::CanCast()
                 // Control the caster to not climb or drop when +-fz > 8
                 if(!(fz<=caster_pos_z+8 && fz>=caster_pos_z-8))
                     return SPELL_FAILED_TRY_AGAIN;
+
+                // not allow use this effect at battleground until battleground start
+                if(m_caster->GetTypeId()==TYPEID_PLAYER)
+                    if(BattleGround const *bg = ((Player*)m_caster)->GetBattleGround())
+                        if(bg->GetStatus() != STATUS_IN_PROGRESS)
+                            return SPELL_FAILED_TRY_AGAIN;
                 break;
             }
             default:break;
