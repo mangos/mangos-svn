@@ -2423,10 +2423,15 @@ uint8 Spell::CanCast()
     {
         if( m_spellInfo->EffectImplicitTargetA[j] == TARGET_SCRIPT || m_spellInfo->EffectImplicitTargetB[j] == TARGET_SCRIPT )
         {
-            bool okDoo;
-            for(SpellScriptTarget::const_iterator i_spellST = objmgr.mSpellScriptTarget.lower_bound(m_spellInfo->Id); i_spellST != objmgr.mSpellScriptTarget.upper_bound(m_spellInfo->Id); ++i_spellST)
+            bool okDoo = false;
+
+            SpellScriptTarget::const_iterator lower = objmgr.mSpellScriptTarget.lower_bound(m_spellInfo->Id);
+            SpellScriptTarget::const_iterator upper = objmgr.mSpellScriptTarget.upper_bound(m_spellInfo->Id);
+            if(lower==upper)
+                sLog.outErrorDb("Spell (ID: %u) have effect with EffectImplicitTargetA/EffectImplicitTargetB = %u (TARGET_SCRIPT), but not have records in `spell_target_script`",m_spellInfo->Id,TARGET_SCRIPT);
+
+            for(SpellScriptTarget::const_iterator i_spellST = lower; i_spellST != upper; ++i_spellST)
             {
-                okDoo = false;
                 switch(i_spellST->second.type)
                 {
                     case SPELL_TARGET_TYPE_CREATURE:
