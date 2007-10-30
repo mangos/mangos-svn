@@ -49,6 +49,7 @@
 #include "GlobalEvents.h"
 #include "GameEvent.h"
 #include "Database/DatabaseImpl.h"
+#include "WorldSocket.h"
 
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
@@ -176,6 +177,71 @@ void World::AddSession(WorldSession* s)
     // if session already exist, prepare to it deleting at next world update
     if(old)
         m_kicked_sessions.insert(old);
+}
+
+int32 World::GetQueuePos(WorldSocket* socket)
+{
+    uint32 position = 1;
+
+    for(Queue::iterator iter = m_QueuedPlayer.begin(); iter != m_QueuedPlayer.end(); ++iter, ++position)
+        if((*iter) == socket)
+            return position;
+
+    return 0;
+}
+
+void World::AddQueuedPlayer(WorldSocket* socket)
+{
+	m_QueuedPlayer.push_back(socket);
+}
+
+void World::RemoveQueuedPlayer(WorldSocket* socket)
+{
+    // sessions count including queued to remove (if removed_session set)
+    uint32 sessions = GetActiveSessionCount();
+
+    uint32 position = 1;
+    Queue::iterator iter = m_QueuedPlayer.begin();
+
+    // if session not queued then we need decrease sessions count (Remove socked callet before session removing from session list)
+    bool decrease_session = true;
+
+    // search socket to remove and count skipped positions
+    for(;iter != m_QueuedPlayer.end(); ++iter, ++position)
+    {
+        if(*iter==socket)
+        {
+            Queue::iterator iter2 = iter;
+            ++iter;
+            m_QueuedPlayer.erase(iter2);
+            decrease_session = false;                       // removing queued session
+            break;
+        }
+    }
+
+    // iter point to next socked after removed or end()
+    // position store position of removed socket and then new position next socket after removed
+
+    // decrease for case session queued for removing
+    if(decrease_session && sessions)
+        --sessions;
+
+    // accept first in queue
+	if( (!m_playerLimit || sessions < m_playerLimit) && !m_QueuedPlayer.empty() )
+	{
+	    WorldSocket * socket = m_QueuedPlayer.front();
+		socket->SendAuthWaitQue(0);
+		m_QueuedPlayer.pop_front();
+
+        // update iter to point first queued socket or end() if queue is empty now
+        iter = m_QueuedPlayer.begin();
+        position = 1;
+    }
+
+    // update position from iter to end()
+    // iter point to first not updated socket, position store new position
+    for(; iter != m_QueuedPlayer.end(); ++iter, ++position)
+        (*iter)->SendAuthWaitQue(position);
 }
 
 /// Find a Weather object by the given zoneid
@@ -1416,6 +1482,19 @@ void World::KickAllLess(AccountTypes sec)
             itr->second->KickPlayer();
 }
 
+/// Kick all queued players
+void World::KickAllQueued()
+{
+    // session not removed at kick and will removed in next update tick
+    for (Queue::iterator itr = m_QueuedPlayer.begin(); itr != m_QueuedPlayer.end(); ++itr)
+        if(WorldSession* session = (*itr)->GetSession())
+            session->KickPlayer();
+
+    m_QueuedPlayer.empty();
+}
+
+
+
 /// Kick (and save) the designated player
 bool World::KickPlayer(std::string playerName)
 {
@@ -1557,7 +1636,7 @@ void World::_UpdateGameTime()
         ///- ... and it is overdue, stop the world (set m_stopEvent)
         if( m_ShutdownTimer <= elapsed )
         {
-            if(!m_ShutdownIdleMode || GetSessionCount()==0)
+            if(!m_ShutdownIdleMode || GetActiveAndQueuedSessionCount()==0)
                 m_stopEvent = true;
             else
                 m_ShutdownTimer = 1;                        // minimum timer value to wait idle state
@@ -1580,7 +1659,7 @@ void World::ShutdownServ(uint32 time, bool idle)
     ///- If the shutdown time is 0, set m_stopEvent (except if shutdown is 'idle' with remaining sessions)
     if(time==0)
     {
-        if(!idle || GetSessionCount()==0)
+        if(!idle || GetActiveAndQueuedSessionCount()==0)
             m_stopEvent = true;
         else
             m_ShutdownTimer = 1;                            //So that the session count is re-evaluated at next world tick
