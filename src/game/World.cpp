@@ -641,6 +641,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading ReservedNames..." );
     objmgr.LoadReservedPlayersNames();
 
+    sLog.outString( "Loading InstanceTemplate" );
+    objmgr.LoadInstanceTemplate();
+
     ///- Handle outdated emails (delete/return)
     sLog.outString( "Returning old mails..." );
     objmgr.ReturnOrDeleteOldMails(false);

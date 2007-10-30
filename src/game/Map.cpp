@@ -208,9 +208,9 @@ void Map::DeleteStateMachine()
     delete si_GridStates[GRID_STATE_REMOVAL];
 }
 
-Map::Map(uint32 id, time_t expiry, uint32 ainstanceId) 
-  : i_id(id), i_gridExpiry(expiry), i_mapEntry (sMapStore.LookupEntry(id)), 
-  i_resetTime(0), i_resetDelayTime(0), i_InstanceId(ainstanceId), i_maxPlayers(0), i_data(NULL)
+Map::Map(uint32 id, time_t expiry, uint32 ainstanceId)
+: i_id(id), i_gridExpiry(expiry), i_mapEntry (sMapStore.LookupEntry(id)),
+i_resetTime(0), i_resetDelayTime(0), i_InstanceId(ainstanceId), i_maxPlayers(0), i_data(NULL)
 {
     for(unsigned int idx=0; idx < MAX_NUMBER_OF_GRIDS; ++idx)
     {
@@ -229,38 +229,43 @@ Map::Map(uint32 id, time_t expiry, uint32 ainstanceId)
     if (Instanceable())
     {
         sLog.outDetail("INSTANCEMAP: Loading instance template");
-        QueryResult* result = sDatabase.PQuery("SELECT `instance_template`.`maxplayers`, `instance_template`.`reset_delay`, `instance`.`resettime`, `instance_template`.`script`, `instance`.`data` FROM `instance_template` LEFT JOIN `instance` ON ((`instance_template`.`map` = `instance`.`map`) AND (`instance`.`id` = '%u')) WHERE `instance_template`.`map` = '%u'", i_InstanceId, id);
-        if (result)
+
+        InstanceTemplate const* mInstance = objmgr.GetInstanceTemplate(id);
+        if (mInstance)
         {
-            Field* fields = result->Fetch();
-            i_maxPlayers = fields[0].GetUInt32();
-            i_resetDelayTime = fields[1].GetUInt32();
-            i_resetTime = (time_t) fields[2].GetUInt64();
-            i_script = fields[3].GetCppString();
-            
-            if(i_InstanceId!=0)
+            i_maxPlayers = mInstance->maxPlayers;
+            i_resetDelayTime = mInstance->reset_delay;
+            i_script = mInstance->script;
+        }
+        else
+        {
+            i_maxPlayers = 0;
+            i_resetDelayTime = 0;
+             sLog.outErrorDb("Instance (Map: %u) not have records in `instance_template` in DB. Using default settings.",id);
+        }
+
+        if(i_InstanceId!=0)
+        {
+            QueryResult* result = sDatabase.PQuery("SELECT `resettime`, `data` FROM `instance` WHERE `map` = '%u' AND `id` = '%u'", id, i_InstanceId);
+            if (result)
             {
+                Field* fields = result->Fetch();
+                i_resetTime = (time_t) fields[0].GetUInt64();
+
                 i_data = Script->CreateInstanceData(this);
-            
+
                 if(i_data)
                 {
                     sLog.outDebug("New instance data, \"%s\" ,initialized!",i_script.c_str());
-                    const char* data = fields[4].GetString();
+                    const char* data = fields[1].GetString();
                     if(data)
                         i_data->Load(data);
                     else
                         i_data->Initialize();
                 }
+                delete result;
             }
-            delete result;
-        }
-        else
-        {
-            sLog.outErrorDb("Instance (Map: %u Id: %u) not have records in `instance_template` and `instance` in DB. Using default settings.",id,i_InstanceId);
-            i_maxPlayers = 0;
-            i_resetDelayTime = 0;
-            i_resetTime = (time_t)0;
-        }
+        }   
         if (i_resetTime == 0) InitResetTime();
     }
     else
@@ -724,7 +729,6 @@ void Map::MessageBroadcast(Player *player, WorldPacket *msg, bool to_self, bool 
         return;
     }
 
-
     Cell cell = RedZone::GetZone(p);
     cell.data.Part.reserved = ALL_DISTRICT;
 
@@ -770,7 +774,7 @@ void Map::Update(const uint32 &t_diff)
 {
     // Don't unload grids if it's battleground, since we may have manually added GOs,creatures, those doesn't load from DB at grid re-load !
     // This isn't really bother us, since as soon as we have instanced BG-s, the whole map unloads as the BG gets ended
-    if ((i_id == 489) || (i_id == 529))                // WSG, AB
+    if ((i_id == 489) || (i_id == 529))                     // WSG, AB
         return;
 
     for(unsigned int i=0; i < MAX_NUMBER_OF_GRIDS; ++i)
@@ -1079,7 +1083,7 @@ bool Map::CreatureRespawnRelocation(Creature *c)
     if(CreatureCellRelocation(c,resp_cell))
     {
         c->Relocate(resp_x, resp_y, resp_z, c->GetOrientation());
-        c->GetMotionMaster()->Initialize();                                 // prevent possible problems with default move generators
+        c->GetMotionMaster()->Initialize();                 // prevent possible problems with default move generators
         CreatureRelocationNotify(c,resp_cell,resp_cell.cellPair());
         return true;
     }

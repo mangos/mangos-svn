@@ -88,6 +88,33 @@ struct CreatureMover
     float x, y, z, ang;
 };
 
+// GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
+#if defined( __GNUC__ )
+#pragma pack(1)
+#else
+#pragma pack(push,1)
+#endif
+
+struct InstanceTemplate 
+{
+    uint32 map;
+    uint32 levelMin;
+    uint32 levelMax;
+    uint32 maxPlayers;
+    uint32 reset_delay;
+    float startLocX;
+    float startLocY;
+    float startLocZ;
+    float startLocO;
+    char const* script;
+};
+
+#if defined( __GNUC__ )
+#pragma pack()
+#else
+#pragma pack(pop)
+#endif
+
 typedef HM_NAMESPACE::hash_map<Creature*, CreatureMover> CreatureMoveList;
 
 class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mutex>

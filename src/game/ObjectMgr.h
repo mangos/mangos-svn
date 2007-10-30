@@ -34,6 +34,7 @@
 #include "Database/DatabaseEnv.h"
 #include "AuctionHouseObject.h"
 #include "Mail.h"
+#include "Map.h"
 #include "ObjectAccessor.h"
 #include "ObjectDefines.h"
 #include "Policies/Singleton.h"
@@ -51,6 +52,7 @@ extern SQLStorage sGOStorage;
 extern SQLStorage sPageTextStore;
 extern SQLStorage sItemStorage;
 extern SQLStorage sSpellThreatStore;
+extern SQLStorage sInstanceTemplate;
 
 class Group;
 class Guild;
@@ -278,8 +280,12 @@ class ObjectMgr
         {
             return sCreatureInfoAddonStorage.LookupEntry<CreatureDataAddon>(entry);
         }
-
         static ItemPrototype const* GetItemPrototype(uint32 id) { return sItemStorage.LookupEntry<ItemPrototype>(id); }
+
+        static InstanceTemplate const* GetInstanceTemplate(uint32 map)
+        { 
+            return sInstanceTemplate.LookupEntry<InstanceTemplate>(map);
+        }
 
         Item* GetAItem(uint32 id)
         {
@@ -459,6 +465,7 @@ class ObjectMgr
         void LoadQuestLocales();
         void LoadNpcTextLocales();
         void LoadPageTextLocales();
+        void LoadInstanceTemplate();
 
         void LoadGossipText();
 

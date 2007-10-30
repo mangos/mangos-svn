@@ -3326,6 +3326,14 @@ void ObjectMgr::LoadPageTextLocales()
     sLog.outString( ">> Loaded %u PageText locale strings", mPageTextLocaleMap.size() );
 }
 
+void ObjectMgr::LoadInstanceTemplate()
+{
+    sInstanceTemplate.Load();
+
+    sLog.outString( ">> Loaded %u Instance Template definitions", sInstanceTemplate.RecordCount );
+    sLog.outString();
+}
+
 void ObjectMgr::AddGossipText(GossipText *pGText)
 {
     ASSERT( pGText->Text_ID );
