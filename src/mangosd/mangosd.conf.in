@@ -184,10 +184,6 @@ MinPetitionSigns = 9
 # Default: 74
 MaxGroupXPDistance = 74
 
-# Max level different with creature for group member to get XP at creature death.
-# Default: 10
-MaxGroupXPLevelDiff = 10
-
 # Allow or not accounts to create characters in the 2 teams in any game type.
 # Default: 0 (Not allowed)
 #           1 (Allowed)

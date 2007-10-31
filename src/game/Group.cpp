@@ -648,18 +648,11 @@ void Group::SetTargetIcon(uint8 id, uint64 guid)
     BroadcastPacket(&data);
 }
 
-Player* Group::GetMemberForXPAtKill(uint64 guid, Unit const* victim)
-{
-    return GetMemberForXPAtKill(objmgr.GetPlayer(guid), victim);
-}
-
 Player* Group::GetMemberForXPAtKill(Player *member, Unit const* victim)
 {
     if(!member || !member->isAlive())
         return NULL;
     if(victim->GetDistanceSq(member) > sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
-        return NULL;
-    if(uint32(abs((int)member->getLevel() - (int)victim->getLevel())) > sWorld.getConfig(CONFIG_GROUP_XP_LEVELDIFF))
         return NULL;
 
     return member;

@@ -377,7 +377,6 @@ void World::SetInitialWorldSettings()
     m_configs[CONFIG_SOCKET_SELECTTIME] = sConfig.GetIntDefault("SocketSelectTime", DEFAULT_SOCKET_SELECT_TIME);
     m_configs[CONFIG_GROUP_XP_DISTANCE] = sConfig.GetIntDefault("MaxGroupXPDistance", 74);
     m_configs[CONFIG_GROUP_XP_DISTANCE] = m_configs[CONFIG_GROUP_XP_DISTANCE]*m_configs[CONFIG_GROUP_XP_DISTANCE];
-    m_configs[CONFIG_GROUP_XP_LEVELDIFF] = sConfig.GetIntDefault("MaxGroupXPLevelDiff", 10);
     /// \todo Add MonsterSight and GuarderSight (with meaning) in mangosd.conf or put them as define
     m_configs[CONFIG_SIGHT_MONSTER] = sConfig.GetIntDefault("MonsterSight", 400);
     m_configs[CONFIG_SIGHT_GUARDER] = sConfig.GetIntDefault("GuarderSight", 500);
@@ -1194,13 +1193,13 @@ void World::ScriptsProcess()
             {
                 if(!step.script->datalong)              // creature not specified
                 {
-                    sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON call for NULL creature.");
+                    sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON_CREATURE call for NULL creature.");
                     break;
                 }
 
                 if(!source)
                 {
-                    sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON call for NULL world object.");
+                    sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON_CREATURE call for NULL world object.");
                     break;
                 }
 
@@ -1209,7 +1208,7 @@ void World::ScriptsProcess()
 
                 if(!summoner)
                 {
-                    sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON call for non-WorldObject (TypeId: %u), skipping.",source->GetTypeId());
+                    sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON_CREATURE call for non-WorldObject (TypeId: %u), skipping.",source->GetTypeId());
                     break;
                 }
 
