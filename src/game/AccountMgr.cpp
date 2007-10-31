@@ -65,7 +65,7 @@ int AccountMgr::DeleteAccount(uint32 accid)
         return 1;                                           // account doesn't exist
     delete result;
 
-    result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account`='%d'",accid);
+    result = CharacterDatabase.PQuery("SELECT `guid` FROM `character` WHERE `account`='%d'",accid);
     if (result)
     {
         do
@@ -88,12 +88,12 @@ int AccountMgr::DeleteAccount(uint32 accid)
         delete result;
     }
 
-    sDatabase.BeginTransaction();
+    CharacterDatabase.BeginTransaction();
 
     bool res =  loginDatabase.PExecute("DELETE FROM `account` WHERE `id`='%d'", accid) &&
         loginDatabase.PExecute("DELETE FROM `realmcharacters` WHERE `acctid`='%d'", accid);
 
-    sDatabase.CommitTransaction();
+    CharacterDatabase.CommitTransaction();
 
     if(!res)
         return -1;                                          // unexpected error;

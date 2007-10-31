@@ -65,7 +65,7 @@ bool Guild::create(uint64 lGuid, std::string gname)
     GINFO = "";
     MOTD = "No message set.";
 
-    QueryResult *result = sDatabase.Query( "SELECT MAX(`guildid`) FROM `guild`" );
+    QueryResult *result = CharacterDatabase.Query( "SELECT MAX(`guildid`) FROM `guild`" );
     if( result )
     {
         Id = (*result)[0].GetUInt32()+1;
@@ -74,21 +74,21 @@ bool Guild::create(uint64 lGuid, std::string gname)
     else Id = 1;
 
     // gname already assigned to Guild::name, use it to encode string for DB
-    sDatabase.escape_string(gname);
+    CharacterDatabase.escape_string(gname);
 
     std::string dbGINFO = GINFO;
     std::string dbMOTD = MOTD;
-    sDatabase.escape_string(dbGINFO);
-    sDatabase.escape_string(dbMOTD);
+    CharacterDatabase.escape_string(dbGINFO);
+    CharacterDatabase.escape_string(dbMOTD);
 
-    sDatabase.BeginTransaction();
-    // sDatabase.PExecute("DELETE FROM `guild` WHERE `guildid`='%u'", Id); - MAX(`guildid`)+1 not exist
-    sDatabase.PExecute("DELETE FROM `guild_rank` WHERE `guildid`='%u'", Id);
-    sDatabase.PExecute("DELETE FROM `guild_member` WHERE `guildid`='%u'", Id);
-    sDatabase.PExecute("INSERT INTO `guild` (`guildid`,`name`,`leaderguid`,`info`,`MOTD`,`createdate`,`EmblemStyle`,`EmblemColor`,`BorderStyle`,`BorderColor`,`BackgroundColor`) "
+    CharacterDatabase.BeginTransaction();
+    // CharacterDatabase.PExecute("DELETE FROM `guild` WHERE `guildid`='%u'", Id); - MAX(`guildid`)+1 not exist
+    CharacterDatabase.PExecute("DELETE FROM `guild_rank` WHERE `guildid`='%u'", Id);
+    CharacterDatabase.PExecute("DELETE FROM `guild_member` WHERE `guildid`='%u'", Id);
+    CharacterDatabase.PExecute("INSERT INTO `guild` (`guildid`,`name`,`leaderguid`,`info`,`MOTD`,`createdate`,`EmblemStyle`,`EmblemColor`,`BorderStyle`,`BorderColor`,`BackgroundColor`) "
         "VALUES('%u','%s','%u', '%s', '%s', NOW(),'%u','%u','%u','%u','%u')",
         Id, gname.c_str(), GUID_LOPART(leaderGuid), dbGINFO.c_str(), dbMOTD.c_str(), EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor);
-    sDatabase.CommitTransaction();
+    CharacterDatabase.CommitTransaction();
 
     rname = "Guild Master";
     CreateRank(rname,GR_RIGHT_ALL);
@@ -126,10 +126,10 @@ bool Guild::AddMember(uint64 plGuid, uint32 plRank)
 
     std::string dbPnote = newmember.Pnote;
     std::string dbOFFnote = newmember.OFFnote;
-    sDatabase.escape_string(dbPnote);
-    sDatabase.escape_string(dbOFFnote);
+    CharacterDatabase.escape_string(dbPnote);
+    CharacterDatabase.escape_string(dbOFFnote);
 
-    sDatabase.PExecute("INSERT INTO `guild_member` (`guildid`,`guid`,`rank`,`Pnote`,`OFFnote`) VALUES ('%u', '%u', '%u','%s','%s')",
+    CharacterDatabase.PExecute("INSERT INTO `guild_member` (`guildid`,`guid`,`rank`,`Pnote`,`OFFnote`) VALUES ('%u', '%u', '%u','%s','%s')",
         Id, GUID_LOPART(newmember.guid), newmember.RankId, dbPnote.c_str(), dbOFFnote.c_str());
 
     Player* pl = objmgr.GetPlayer(plGuid);
@@ -152,8 +152,8 @@ void Guild::SetMOTD(std::string motd)
     MOTD = motd;
 
     // motd now can be used for encoding to DB
-    sDatabase.escape_string(motd);
-    sDatabase.PExecute("UPDATE `guild` SET `MOTD`='%s' WHERE `guildid`='%u'", motd.c_str(), Id);
+    CharacterDatabase.escape_string(motd);
+    CharacterDatabase.PExecute("UPDATE `guild` SET `MOTD`='%s' WHERE `guildid`='%u'", motd.c_str(), Id);
 }
 
 void Guild::SetGINFO(std::string ginfo)
@@ -161,8 +161,8 @@ void Guild::SetGINFO(std::string ginfo)
     GINFO = ginfo;
 
     // ginfo now can be used for encoding to DB
-    sDatabase.escape_string(ginfo);
-    sDatabase.PExecute("UPDATE `guild` SET `info`='%s' WHERE `guildid`='%u'", ginfo.c_str(), Id);
+    CharacterDatabase.escape_string(ginfo);
+    CharacterDatabase.PExecute("UPDATE `guild` SET `info`='%s' WHERE `guildid`='%u'", ginfo.c_str(), Id);
 }
 
 bool Guild::LoadGuildFromDB(uint32 GuildId)
@@ -173,7 +173,7 @@ bool Guild::LoadGuildFromDB(uint32 GuildId)
     if(!LoadMembersFromDB(GuildId))
         return false;
 
-    QueryResult *result = sDatabase.PQuery("SELECT `guildid`,`name`,`leaderguid`,`EmblemStyle`,`EmblemColor`,`BorderStyle`,`BorderColor`,`BackgroundColor`,`info`,`MOTD`,`createdate` FROM `guild` WHERE `guildid` = '%u'", GuildId);
+    QueryResult *result = CharacterDatabase.PQuery("SELECT `guildid`,`name`,`leaderguid`,`EmblemStyle`,`EmblemColor`,`BorderStyle`,`BorderColor`,`BackgroundColor`,`info`,`MOTD`,`createdate` FROM `guild` WHERE `guildid` = '%u'", GuildId);
 
     if(!result)
         return false;
@@ -217,7 +217,7 @@ bool Guild::LoadGuildFromDB(uint32 GuildId)
 bool Guild::LoadRanksFromDB(uint32 GuildId)
 {
     Field *fields;
-    QueryResult *result = sDatabase.PQuery("SELECT `rname`,`rights` FROM `guild_rank` WHERE `guildid` = '%u' ORDER BY `rid` ASC", GuildId);
+    QueryResult *result = CharacterDatabase.PQuery("SELECT `rname`,`rights` FROM `guild_rank` WHERE `guildid` = '%u' ORDER BY `rid` ASC", GuildId);
 
     if(!result)
         return false;
@@ -235,7 +235,7 @@ bool Guild::LoadRanksFromDB(uint32 GuildId)
 
 bool Guild::LoadMembersFromDB(uint32 GuildId)
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`rank`,`Pnote`,`OFFnote` FROM `guild_member` WHERE `guildid` = '%u'", GuildId);
+    QueryResult *result = CharacterDatabase.PQuery("SELECT `guid`,`rank`,`Pnote`,`OFFnote` FROM `guild_member` WHERE `guildid` = '%u'", GuildId);
 
     if(!result)
         return false;
@@ -291,7 +291,7 @@ bool Guild::FillPlayerData(uint64 guid, MemberSlot* memslot)
         }
         plZone = Player::GetZoneIdFromDB(guid);
 
-        QueryResult *result = sDatabase.PQuery("SELECT `class` FROM `character` WHERE `guid`='%u'", GUID_LOPART(guid));
+        QueryResult *result = CharacterDatabase.PQuery("SELECT `class` FROM `character` WHERE `guid`='%u'", GUID_LOPART(guid));
         if(!result)
             return false;
         plClass = (*result)[0].GetUInt32();
@@ -336,7 +336,7 @@ void Guild::SetLeader(uint64 guid)
     leaderGuid = guid;
     this->ChangeRank(guid, GR_GUILDMASTER);
 
-    sDatabase.PExecute("UPDATE `guild` SET `leaderguid`='%u' WHERE `guildid`='%u'", GUID_LOPART(guid), Id);
+    CharacterDatabase.PExecute("UPDATE `guild` SET `leaderguid`='%u' WHERE `guildid`='%u'", GUID_LOPART(guid), Id);
 }
 
 void Guild::DelMember(uint64 guid, bool isDisbanding)
@@ -345,7 +345,7 @@ void Guild::DelMember(uint64 guid, bool isDisbanding)
     {
         std::ostringstream ss;
         ss<<"SELECT `guid` FROM `guild_member` WHERE `guildid`='"<<Id<<"' AND `guid`!='"<<this->leaderGuid<<"' ORDER BY `rank` ASC LIMIT 1";
-        QueryResult *result = sDatabase.Query( ss.str().c_str() );
+        QueryResult *result = CharacterDatabase.Query( ss.str().c_str() );
         if( result )
         {
             uint64 newLeaderGUID;
@@ -417,7 +417,7 @@ void Guild::DelMember(uint64 guid, bool isDisbanding)
         Player::SetUInt32ValueInDB(PLAYER_GUILDRANK, GR_GUILDMASTER, guid);
     }
 
-    sDatabase.PExecute("DELETE FROM `guild_member` WHERE `guid` = '%u'", GUID_LOPART(guid));
+    CharacterDatabase.PExecute("DELETE FROM `guild_member` WHERE `guid` = '%u'", GUID_LOPART(guid));
 }
 
 void Guild::ChangeRank(uint64 guid, uint32 newRank)
@@ -435,7 +435,7 @@ void Guild::ChangeRank(uint64 guid, uint32 newRank)
     else
         Player::SetUInt32ValueInDB(PLAYER_GUILDRANK, newRank, guid);
 
-    sDatabase.PExecute( "UPDATE `guild_member` SET `rank`='%u' WHERE `guid`='%u'", newRank, GUID_LOPART(guid) );
+    CharacterDatabase.PExecute( "UPDATE `guild_member` SET `rank`='%u' WHERE `guid`='%u'", newRank, GUID_LOPART(guid) );
 }
 
 void Guild::SetPNOTE(uint64 guid,std::string pnote)
@@ -448,8 +448,8 @@ void Guild::SetPNOTE(uint64 guid,std::string pnote)
             itr->Pnote = pnote;
 
             // pnote now can be used for encoding to DB
-            sDatabase.escape_string(pnote);
-            sDatabase.PExecute("UPDATE `guild_member` SET `Pnote` = '%s' WHERE `guid` = '%u'", pnote.c_str(), GUID_LOPART(itr->guid));
+            CharacterDatabase.escape_string(pnote);
+            CharacterDatabase.PExecute("UPDATE `guild_member` SET `Pnote` = '%s' WHERE `guid` = '%u'", pnote.c_str(), GUID_LOPART(itr->guid));
             break;
         }
     }
@@ -464,8 +464,8 @@ void Guild::SetOFFNOTE(uint64 guid,std::string offnote)
         {
             itr->OFFnote = offnote;
             // offnote now can be used for encoding to DB
-            sDatabase.escape_string(offnote);
-            sDatabase.PExecute("UPDATE `guild_member` SET `OFFnote` = '%s' WHERE `guid` = '%u'", offnote.c_str(), GUID_LOPART(itr->guid));
+            CharacterDatabase.escape_string(offnote);
+            CharacterDatabase.PExecute("UPDATE `guild_member` SET `OFFnote` = '%s' WHERE `guid` = '%u'", offnote.c_str(), GUID_LOPART(itr->guid));
             break;
         }
     }
@@ -530,7 +530,7 @@ void Guild::CreateRank(std::string name_,uint32 rights)
 
     uint32 rank;
 
-    QueryResult *result = sDatabase.PQuery( "SELECT MAX(`rid`) FROM `guild_rank` WHERE `guildid`='%u'",Id);
+    QueryResult *result = CharacterDatabase.PQuery( "SELECT MAX(`rid`) FROM `guild_rank` WHERE `guildid`='%u'",Id);
     if( result )
     {
         rank = (*result)[0].GetUInt32();                    // rank always = rid-1
@@ -542,8 +542,8 @@ void Guild::CreateRank(std::string name_,uint32 rights)
     AddRank(name_,rights);
 
     // name now can be used for encoding to DB
-    sDatabase.escape_string(name_);
-    sDatabase.PExecute( "INSERT INTO `guild_rank` (`guildid`,`rid`,`rname`,`rights`) VALUES ('%u', '%u', '%s', '%u')", Id, (rank+1), name_.c_str(), rights );
+    CharacterDatabase.escape_string(name_);
+    CharacterDatabase.PExecute( "INSERT INTO `guild_rank` (`guildid`,`rid`,`rname`,`rights`) VALUES ('%u', '%u', '%s', '%u')", Id, (rank+1), name_.c_str(), rights );
 }
 
 void Guild::AddRank(std::string name_,uint32 rights)
@@ -557,7 +557,7 @@ void Guild::DelRank()
         return;
 
     uint32 rank = m_ranks.size()-1;
-    sDatabase.PExecute("DELETE FROM `guild_rank` WHERE `rid`>='%u' AND `guildid`='%u'", (rank+1), Id);
+    CharacterDatabase.PExecute("DELETE FROM `guild_rank` WHERE `rid`>='%u' AND `guildid`='%u'", (rank+1), Id);
 
     m_ranks.pop_back();
 }
@@ -586,8 +586,8 @@ void Guild::SetRankName(uint32 rankId, std::string name_)
     m_ranks[rankId].name = name_;
 
     // name now can be used for encoding to DB
-    sDatabase.escape_string(name_);
-    sDatabase.PExecute("UPDATE `guild_rank` SET `rname`='%s' WHERE `rid`='%u' AND `guildid`='%u'", name_.c_str(), (rankId+1), Id);
+    CharacterDatabase.escape_string(name_);
+    CharacterDatabase.PExecute("UPDATE `guild_rank` SET `rname`='%s' WHERE `rid`='%u' AND `guildid`='%u'", name_.c_str(), (rankId+1), Id);
 }
 
 void Guild::SetRankRights(uint32 rankId, uint32 rights)
@@ -597,7 +597,7 @@ void Guild::SetRankRights(uint32 rankId, uint32 rights)
 
     m_ranks[rankId].rights = rights;
 
-    sDatabase.PExecute("UPDATE `guild_rank` SET `rights`='%u' WHERE `rid`='%u' AND `guildid`='%u'", rights, (rankId+1), Id);
+    CharacterDatabase.PExecute("UPDATE `guild_rank` SET `rights`='%u' WHERE `rid`='%u' AND `guildid`='%u'", rights, (rankId+1), Id);
 }
 
 void Guild::Disband()
@@ -621,10 +621,10 @@ void Guild::Disband()
         this->DelMember(memberGuids[j], true);
     delete[] memberGuids;
 
-    sDatabase.BeginTransaction();
-    sDatabase.PExecute("DELETE FROM `guild` WHERE `guildid` = '%u'",Id);
-    sDatabase.PExecute("DELETE FROM `guild_rank` WHERE `guildid` = '%u'",Id);
-    sDatabase.CommitTransaction();
+    CharacterDatabase.BeginTransaction();
+    CharacterDatabase.PExecute("DELETE FROM `guild` WHERE `guildid` = '%u'",Id);
+    CharacterDatabase.PExecute("DELETE FROM `guild_rank` WHERE `guildid` = '%u'",Id);
+    CharacterDatabase.CommitTransaction();
     objmgr.RemoveGuild(this);
 }
 
@@ -660,7 +660,7 @@ void Guild::Roster(WorldSession *session)
         else
         {
             uint64 logout_time = 0;
-            QueryResult *result = sDatabase.PQuery("SELECT `logout_time` FROM `character` WHERE `guid`='%u'", GUID_LOPART(itr->guid));
+            QueryResult *result = CharacterDatabase.PQuery("SELECT `logout_time` FROM `character` WHERE `guid`='%u'", GUID_LOPART(itr->guid));
             if(result)
             {
                 logout_time = (*result)[0].GetUInt64();
@@ -717,5 +717,5 @@ void Guild::SetEmblem(uint32 emblemStyle, uint32 emblemColor, uint32 borderStyle
     this->BorderColor = borderColor;
     this->BackgroundColor = backgroundColor;
 
-    sDatabase.PExecute("UPDATE `guild` SET EmblemStyle=%u, EmblemColor=%u, BorderStyle=%u, BorderColor=%u, BackgroundColor=%u WHERE guildid = %u", EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor, Id);
+    CharacterDatabase.PExecute("UPDATE `guild` SET EmblemStyle=%u, EmblemColor=%u, BorderStyle=%u, BorderColor=%u, BackgroundColor=%u WHERE guildid = %u", EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor, Id);
 }

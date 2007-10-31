@@ -34,7 +34,7 @@ static void CorpsesErase(CorpseType type,uint32 delay)
 {
     ///- Get the list of eligible corpses/bones to be removed
     //No SQL injection (uint32 and enum)
-    QueryResult *result = sDatabase.PQuery("SELECT `guid`,`position_x`,`position_y`,`map`,`player` FROM `corpse` WHERE UNIX_TIMESTAMP()-UNIX_TIMESTAMP(`time`) > '%u' AND `bones_flag` = '%u'",delay,type );
+    QueryResult *result = CharacterDatabase.PQuery("SELECT `guid`,`position_x`,`position_y`,`map`,`player` FROM `corpse` WHERE UNIX_TIMESTAMP()-UNIX_TIMESTAMP(`time`) > '%u' AND `bones_flag` = '%u'",delay,type );
 
     if(result)
     {
@@ -57,7 +57,7 @@ static void CorpsesErase(CorpseType type,uint32 delay)
                 if(!ObjectAccessor::Instance().ConvertCorpseForPlayer(player_guid))
                 {
                     sLog.outDebug("Corpse %u not found in world. Delete from DB.",guidlow);
-                    sDatabase.PExecute("DELETE FROM `corpse` WHERE `guid` = '%u'",guidlow);
+                    CharacterDatabase.PExecute("DELETE FROM `corpse` WHERE `guid` = '%u'",guidlow);
                 }
             }
             else
@@ -66,7 +66,7 @@ static void CorpsesErase(CorpseType type,uint32 delay)
                 MapManager::Instance().RemoveBonesFromMap(mapid, guid, positionX, positionY);
 
                 ///- remove bones from the database
-                sDatabase.PExecute("DELETE FROM `corpse` WHERE `guid` = '%u'",guidlow);
+                CharacterDatabase.PExecute("DELETE FROM `corpse` WHERE `guid` = '%u'",guidlow);
             }
         } while (result->NextRow());
 

@@ -28,8 +28,9 @@ LogsDir = ""
 #                Named pipes: mySQL required adding "enable-named-pipe" to [mysqld] section my.ini
 #          .;/path/to/unix_socket;username;password;database - use Unix sockets at Unix/Linux
 #                Unix sockets: experimental, not tested
-LoginDatabaseInfo = "127.0.0.1;3306;mangos;mangos;realmd"
-WorldDatabaseInfo = "127.0.0.1;3306;mangos;mangos;mangos"
+LoginDatabaseInfo     = "127.0.0.1;3306;mangos;mangos;realmd"
+WorldDatabaseInfo     = "127.0.0.1;3306;mangos;mangos;mangos"
+CharacterDatabaseInfo = "127.0.0.1;3306;mangos;mangos;characters"
 
 # Settings for maximum database-ping interval (minutes between pings)
 MaxPingTime = 30

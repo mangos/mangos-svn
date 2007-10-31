@@ -131,18 +131,18 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
 
     if(petnumber)
         // known petnumber entry           0    1       2       3         4       5     6            7            8              9               10        11           12     13     14        15          16        17             18        19              20         21                  22                  23               24
-        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`Reactstate`,`Commandstate`,`loyaltypoints`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`,`curhappiness`,`ABData`,`TeachSpelldata`,`savetime`,`resettalents_cost`,`resettalents_time`,`CreatedBySpell`,`PetType` FROM `character_pet` WHERE `owner` = '%u' AND `id` = '%u'",ownerid, petnumber);
+        result = CharacterDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`Reactstate`,`Commandstate`,`loyaltypoints`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`,`curhappiness`,`ABData`,`TeachSpelldata`,`savetime`,`resettalents_cost`,`resettalents_time`,`CreatedBySpell`,`PetType` FROM `character_pet` WHERE `owner` = '%u' AND `id` = '%u'",ownerid, petnumber);
     else if(current)
         // current pet (slot 0)            0    1       2       3         4       5     6            7            8              9               10        11           12     13     14        15          16        17             18        19              20         21                  22                  23               24
-        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`Reactstate`,`Commandstate`,`loyaltypoints`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`,`curhappiness`,`ABData`,`TeachSpelldata`,`savetime`,`resettalents_cost`,`resettalents_time`,`CreatedBySpell`,`PetType` FROM `character_pet` WHERE `owner` = '%u' AND `slot` = '0'",ownerid );
+        result = CharacterDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`Reactstate`,`Commandstate`,`loyaltypoints`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`,`curhappiness`,`ABData`,`TeachSpelldata`,`savetime`,`resettalents_cost`,`resettalents_time`,`CreatedBySpell`,`PetType` FROM `character_pet` WHERE `owner` = '%u' AND `slot` = '0'",ownerid );
     else if(petentry)
         // known petentry entry (unique for summoned pet, but non unique for hunter pet (only from current or not stabled pets)
         //                                 0    1       2       3         4       5     6            7            8              9               10        11           12     13     14        15          16        17             18        19              20         21                  22                  23               24
-        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`Reactstate`,`Commandstate`,`loyaltypoints`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`,`curhappiness`,`ABData`,`TeachSpelldata`,`savetime`,`resettalents_cost`,`resettalents_time`,`CreatedBySpell`,`PetType` FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u' AND (`slot` = '0' OR `slot` = '3') ",ownerid, petentry );
+        result = CharacterDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`Reactstate`,`Commandstate`,`loyaltypoints`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`,`curhappiness`,`ABData`,`TeachSpelldata`,`savetime`,`resettalents_cost`,`resettalents_time`,`CreatedBySpell`,`PetType` FROM `character_pet` WHERE `owner` = '%u' AND `entry` = '%u' AND (`slot` = '0' OR `slot` = '3') ",ownerid, petentry );
     else
         // any current or other non-stabled pet (for hunter "call pet")
         //                                 0    1       2       3         4       5     6            7            8              9               10        11           12     13     14        15          16        17             18        19              20         21                  22                  23               24
-        result = sDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`Reactstate`,`Commandstate`,`loyaltypoints`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`,`curhappiness`,`ABData`,`TeachSpelldata`,`savetime`,`resettalents_cost`,`resettalents_time`,`CreatedBySpell`,`PetType` FROM `character_pet` WHERE `owner` = '%u' AND (`slot` = '0' OR `slot` = '3') ",ownerid);
+        result = CharacterDatabase.PQuery("SELECT `id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`Reactstate`,`Commandstate`,`loyaltypoints`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`,`curhappiness`,`ABData`,`TeachSpelldata`,`savetime`,`resettalents_cost`,`resettalents_time`,`CreatedBySpell`,`PetType` FROM `character_pet` WHERE `owner` = '%u' AND (`slot` = '0' OR `slot` = '3') ",ownerid);
 
     if(!result)
         return false;
@@ -240,10 +240,10 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     // set current pet as current
     if(fields[12].GetUInt32() != 0)
     {
-        sDatabase.BeginTransaction();
-        sDatabase.PExecute("UPDATE `character_pet` SET `slot` = '3' WHERE `owner` = '%u' AND `slot` = '0' AND `id` <> '%u'",ownerid, m_charmInfo->GetPetNumber());
-        sDatabase.PExecute("UPDATE `character_pet` SET `slot` = '0' WHERE `owner` = '%u' AND `id` = '%u'",ownerid, m_charmInfo->GetPetNumber());
-        sDatabase.CommitTransaction();
+        CharacterDatabase.BeginTransaction();
+        CharacterDatabase.PExecute("UPDATE `character_pet` SET `slot` = '3' WHERE `owner` = '%u' AND `slot` = '0' AND `id` <> '%u'",ownerid, m_charmInfo->GetPetNumber());
+        CharacterDatabase.PExecute("UPDATE `character_pet` SET `slot` = '0' WHERE `owner` = '%u' AND `id` = '%u'",ownerid, m_charmInfo->GetPetNumber());
+        CharacterDatabase.CommitTransaction();
     }
 
     //init AB
@@ -359,18 +359,18 @@ void Pet::SavePetToDB(PetSaveMode mode)
 
             uint32 owner = GUID_LOPART(GetOwnerGUID());
             std::string name = m_name;
-            sDatabase.escape_string(name);
-            sDatabase.BeginTransaction();
+            CharacterDatabase.escape_string(name);
+            CharacterDatabase.BeginTransaction();
             // remove current data
-            sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `id` = '%u'", owner,m_charmInfo->GetPetNumber() );
+            CharacterDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `id` = '%u'", owner,m_charmInfo->GetPetNumber() );
 
             // prevent duplicate using slot (except PET_SAVE_NOT_IN_SLOT)
             if(mode!=PET_SAVE_NOT_IN_SLOT)
-                sDatabase.PExecute("UPDATE `character_pet` SET `slot` = 3 WHERE `owner` = '%u' AND `slot` = '%u'", owner, uint32(mode) );
+                CharacterDatabase.PExecute("UPDATE `character_pet` SET `slot` = 3 WHERE `owner` = '%u' AND `slot` = '%u'", owner, uint32(mode) );
 
             // prevent existence another hunter pet in PET_SAVE_AS_CURRENT and PET_SAVE_NOT_IN_SLOT
             if(getPetType()==HUNTER_PET && (mode==PET_SAVE_AS_CURRENT||mode==PET_SAVE_NOT_IN_SLOT))
-                sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND (`slot` = '0' OR `slot` = '3')", owner );
+                CharacterDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND (`slot` = '0' OR `slot` = '3')", owner );
             // save pet
             std::ostringstream ss;
             ss  << "INSERT INTO `character_pet` (`id`,`entry`,`owner`,`modelid`,`level`,`exp`,`nextlvlexp`,`Reactstate`,`Commandstate`,`loyaltypoints`,`loyalty`,`trainpoint`,`slot`,`name`,`renamed`,`curhealth`,`curmana`,`curhappiness`,`ABData`,`TeachSpelldata`,`savetime`,`resettalents_cost`,`resettalents_time`,`CreatedBySpell`,`PetType`) "
@@ -413,19 +413,19 @@ void Pet::SavePetToDB(PetSaveMode mode)
                 << GetUInt32Value(UNIT_CREATED_BY_SPELL) << ", "
                 << uint32(getPetType()) << ")";
 
-            sDatabase.Execute( ss.str().c_str() );
+            CharacterDatabase.Execute( ss.str().c_str() );
 
-            sDatabase.CommitTransaction();
+            CharacterDatabase.CommitTransaction();
             break;
         }
         case PET_SAVE_AS_DELETED:
         {
             RemoveAllAuras();
             uint32 owner = GUID_LOPART(GetOwnerGUID());
-            sDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `id` = '%u'", owner,m_charmInfo->GetPetNumber());
-            sDatabase.PExecute("DELETE FROM `pet_aura` WHERE `guid` = '%u'", m_charmInfo->GetPetNumber());
-            sDatabase.PExecute("DELETE FROM `pet_spell` WHERE `guid` = '%u'", m_charmInfo->GetPetNumber());
-            sDatabase.PExecute("DELETE FROM `pet_spell_cooldown` WHERE `guid` = '%u'", m_charmInfo->GetPetNumber());
+            CharacterDatabase.PExecute("DELETE FROM `character_pet` WHERE `owner` = '%u' AND `id` = '%u'", owner,m_charmInfo->GetPetNumber());
+            CharacterDatabase.PExecute("DELETE FROM `pet_aura` WHERE `guid` = '%u'", m_charmInfo->GetPetNumber());
+            CharacterDatabase.PExecute("DELETE FROM `pet_spell` WHERE `guid` = '%u'", m_charmInfo->GetPetNumber());
+            CharacterDatabase.PExecute("DELETE FROM `pet_spell_cooldown` WHERE `guid` = '%u'", m_charmInfo->GetPetNumber());
             break;
         }
         default:
@@ -1086,7 +1086,7 @@ void Pet::_LoadSpellCooldowns()
     m_CreatureSpellCooldowns.clear();
     m_CreatureCategoryCooldowns.clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT `spell`,`time` FROM `pet_spell_cooldown` WHERE `guid` = '%u'",m_charmInfo->GetPetNumber());
+    QueryResult *result = CharacterDatabase.PQuery("SELECT `spell`,`time` FROM `pet_spell_cooldown` WHERE `guid` = '%u'",m_charmInfo->GetPetNumber());
 
     if(result)
     {
@@ -1133,7 +1133,7 @@ void Pet::_LoadSpellCooldowns()
 
 void Pet::_SaveSpellCooldowns()
 {
-    sDatabase.PExecute("DELETE FROM `pet_spell_cooldown` WHERE `guid` = '%u'", m_charmInfo->GetPetNumber());
+    CharacterDatabase.PExecute("DELETE FROM `pet_spell_cooldown` WHERE `guid` = '%u'", m_charmInfo->GetPetNumber());
 
     time_t curTime = time(NULL);
 
@@ -1144,7 +1144,7 @@ void Pet::_SaveSpellCooldowns()
             m_CreatureSpellCooldowns.erase(itr++);
         else
         {
-            sDatabase.PExecute("INSERT INTO `pet_spell_cooldown` (`guid`,`spell`,`time`) VALUES ('%u', '%u', '" I64FMTD "')", m_charmInfo->GetPetNumber(), itr->first, uint64(itr->second));
+            CharacterDatabase.PExecute("INSERT INTO `pet_spell_cooldown` (`guid`,`spell`,`time`) VALUES ('%u', '%u', '" I64FMTD "')", m_charmInfo->GetPetNumber(), itr->first, uint64(itr->second));
             ++itr;
         }
     }
@@ -1156,7 +1156,7 @@ void Pet::_LoadSpells(uint32 timediff)
         delete itr->second;
     m_spells.clear();
 
-    QueryResult *result = sDatabase.PQuery("SELECT `spell`,`slot`,`active` FROM `pet_spell` WHERE `guid` = '%u'",m_charmInfo->GetPetNumber());
+    QueryResult *result = CharacterDatabase.PQuery("SELECT `spell`,`slot`,`active` FROM `pet_spell` WHERE `guid` = '%u'",m_charmInfo->GetPetNumber());
 
     if(result)
     {
@@ -1178,9 +1178,9 @@ void Pet::_SaveSpells()
     {
         next++;
         if (itr->second->state == PETSPELL_REMOVED || itr->second->state == PETSPELL_CHANGED)
-            sDatabase.PExecute("DELETE FROM `pet_spell` WHERE `guid` = '%u' and `spell` = '%u'", m_charmInfo->GetPetNumber(), itr->first);
+            CharacterDatabase.PExecute("DELETE FROM `pet_spell` WHERE `guid` = '%u' and `spell` = '%u'", m_charmInfo->GetPetNumber(), itr->first);
         if (itr->second->state == PETSPELL_NEW || itr->second->state == PETSPELL_CHANGED)
-            sDatabase.PExecute("INSERT INTO `pet_spell` (`guid`,`spell`,`slot`,`active`) VALUES ('%u', '%u', '%u','%u')", m_charmInfo->GetPetNumber(), itr->first, itr->second->slotId,itr->second->active);
+            CharacterDatabase.PExecute("INSERT INTO `pet_spell` (`guid`,`spell`,`slot`,`active`) VALUES ('%u', '%u', '%u','%u')", m_charmInfo->GetPetNumber(), itr->first, itr->second->slotId,itr->second->active);
 
         if (itr->second->state == PETSPELL_REMOVED)
             _removeSpell(itr->first);
@@ -1200,7 +1200,7 @@ void Pet::_LoadAuras(uint32 timediff)
     for(uint8 j = 0; j < 6; j++)
         SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + j), 0);
 
-    QueryResult *result = sDatabase.PQuery("SELECT `caster_guid`,`spell`,`effect_index`,`amount`,`maxduration`,`remaintime`,`remaincharges` FROM `pet_aura` WHERE `guid` = '%u'",m_charmInfo->GetPetNumber());
+    QueryResult *result = CharacterDatabase.PQuery("SELECT `caster_guid`,`spell`,`effect_index`,`amount`,`maxduration`,`remaintime`,`remaincharges` FROM `pet_aura` WHERE `guid` = '%u'",m_charmInfo->GetPetNumber());
 
     if(result)
     {
@@ -1264,7 +1264,7 @@ void Pet::_LoadAuras(uint32 timediff)
 
 void Pet::_SaveAuras()
 {
-    sDatabase.PExecute("DELETE FROM `pet_aura` WHERE `guid` = '%u'",m_charmInfo->GetPetNumber());
+    CharacterDatabase.PExecute("DELETE FROM `pet_aura` WHERE `guid` = '%u'",m_charmInfo->GetPetNumber());
 
     AuraMap const& auras = GetAuras();
     for(AuraMap::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
@@ -1277,7 +1277,7 @@ void Pet::_SaveAuras()
                 break;
 
         if (i == 3 && !itr->second->IsPassive())
-            sDatabase.PExecute("INSERT INTO `pet_aura` (`guid`,`caster_guid`,`spell`,`effect_index`,`amount`,`maxduration`,`remaintime`,`remaincharges`) "
+            CharacterDatabase.PExecute("INSERT INTO `pet_aura` (`guid`,`caster_guid`,`spell`,`effect_index`,`amount`,`maxduration`,`remaintime`,`remaincharges`) "
                 "VALUES ('%u', '" I64FMTD "', '%u', '%u', '%d', '%d', '%d', '%d')",
                 m_charmInfo->GetPetNumber(), itr->second->GetCasterGUID(),(uint32)(*itr).second->GetId(), (uint32)(*itr).second->GetEffIndex(),(*itr).second->GetModifier()->m_amount,int((*itr).second->GetAuraMaxDuration()),int((*itr).second->GetAuraDuration()),int((*itr).second->m_procCharges));
     }
@@ -1292,7 +1292,7 @@ bool Pet::addSpell(uint16 spell_id, uint16 active, PetSpellState state, uint16 s
         if(state == PETSPELL_UNCHANGED)                     // spell load case
         {
             sLog.outError("Pet::addSpell: Non-existed in SpellStore spell #%u request, deleting for all pets in `pet_spell`.",spell_id);
-            sDatabase.PExecute("DELETE FROM `pet_spell` WHERE `spell` = '%u'",spell_id);
+            CharacterDatabase.PExecute("DELETE FROM `pet_spell` WHERE `spell` = '%u'",spell_id);
         }
         else
             sLog.outError("Pet::addSpell: Non-existed in SpellStore spell #%u request.",spell_id);

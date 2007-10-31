@@ -72,7 +72,7 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
     sLog.outString( "%s :", tablename);
 
     //                                             0        1       2              3                     4           5           6
-    QueryResult *result = sDatabase.PQuery("SELECT `entry`, `item`, `ChanceOrRef`, `QuestChanceOrGroup`, `mincount`, `maxcount`, `quest_freeforall` FROM `%s`",tablename);
+    QueryResult *result = WorldDatabase.PQuery("SELECT `entry`, `item`, `ChanceOrRef`, `QuestChanceOrGroup`, `mincount`, `maxcount`, `quest_freeforall` FROM `%s`",tablename);
 
     if (result)
     {

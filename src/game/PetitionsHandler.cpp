@@ -188,13 +188,13 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
     charter->SetState(ITEM_CHANGED, _player);
     _player->SendNewItem(charter, 1, true, false);
 
-    sDatabase.escape_string(name);
-    sDatabase.BeginTransaction();
-    sDatabase.PExecute("DELETE FROM `petition` WHERE `ownerguid` = '%u' OR `petitionguid` = '%u' and `type` = '%u'", _player->GetGUIDLow(), charter->GetGUIDLow(),type);
-    sDatabase.PExecute("DELETE FROM `petition_sign` WHERE `ownerguid` = '%u' or `petitionguid` = '%u'", _player->GetGUIDLow(), charter->GetGUIDLow());
-    sDatabase.PExecute("INSERT INTO `petition` (`ownerguid`, `petitionguid`, `name`, `type`) VALUES ('%u', '%u', '%s', '%u')",
+    CharacterDatabase.escape_string(name);
+    CharacterDatabase.BeginTransaction();
+    CharacterDatabase.PExecute("DELETE FROM `petition` WHERE `ownerguid` = '%u' OR `petitionguid` = '%u' and `type` = '%u'", _player->GetGUIDLow(), charter->GetGUIDLow(),type);
+    CharacterDatabase.PExecute("DELETE FROM `petition_sign` WHERE `ownerguid` = '%u' or `petitionguid` = '%u'", _player->GetGUIDLow(), charter->GetGUIDLow());
+    CharacterDatabase.PExecute("INSERT INTO `petition` (`ownerguid`, `petitionguid`, `name`, `type`) VALUES ('%u', '%u', '%s', '%u')",
         _player->GetGUIDLow(), charter->GetGUIDLow(), name.c_str(), type);
-    sDatabase.CommitTransaction();
+    CharacterDatabase.CommitTransaction();
 }
 
 void WorldSession::HandlePetitionShowSignOpcode(WorldPacket & recv_data)
@@ -215,7 +215,7 @@ void WorldSession::HandlePetitionShowSignOpcode(WorldPacket & recv_data)
     // solve (possible) some strange compile problems with explicit use GUID_LOPART(petitionguid) at some GCC versions (wrong code optimization in compiler?)
     uint32 petitionguid_low = GUID_LOPART(petitionguid);
 
-    QueryResult *result = sDatabase.PQuery("SELECT `petitionguid` FROM `petition` WHERE `petitionguid` = '%u'", petitionguid_low);
+    QueryResult *result = CharacterDatabase.PQuery("SELECT `petitionguid` FROM `petition` WHERE `petitionguid` = '%u'", petitionguid_low);
     if(!result)
     {
         sLog.outError("any petition on server...");
@@ -224,7 +224,7 @@ void WorldSession::HandlePetitionShowSignOpcode(WorldPacket & recv_data)
 
     delete result;
 
-    result = sDatabase.PQuery("SELECT `playerguid` FROM `petition_sign` WHERE `petitionguid` = '%u'", petitionguid_low);
+    result = CharacterDatabase.PQuery("SELECT `playerguid` FROM `petition_sign` WHERE `petitionguid` = '%u'", petitionguid_low);
 
     // result==NULL also correct in case no sign yet
     if(result)
@@ -275,7 +275,7 @@ void WorldSession::SendPetitionQueryOpcode(uint64 petitionguid)
     std::string name = "NO_NAME_FOR_GUID";
     uint8 signs = 0;
 
-    QueryResult *result = sDatabase.PQuery(
+    QueryResult *result = CharacterDatabase.PQuery(
         "SELECT `ownerguid`, `name`, "
         "  (SELECT COUNT(`playerguid`) FROM `petition_sign` WHERE `petition_sign`.`petitionguid` = '%u') AS signs "
         "FROM `petition` WHERE `petitionguid` = '%u'", GUID_LOPART(petitionguid), GUID_LOPART(petitionguid));
@@ -294,7 +294,7 @@ void WorldSession::SendPetitionQueryOpcode(uint64 petitionguid)
         return;
     }
 
-    QueryResult *result2 = sDatabase.PQuery("SELECT `type` FROM `petition` WHERE `petitionguid` = '%u'", GUID_LOPART(petitionguid));
+    QueryResult *result2 = CharacterDatabase.PQuery("SELECT `type` FROM `petition` WHERE `petitionguid` = '%u'", GUID_LOPART(petitionguid));
 
     if(result2)
     {
@@ -358,7 +358,7 @@ void WorldSession::HandlePetitionRenameOpcode(WorldPacket & recv_data)
     if(!item)
         return;
 
-    QueryResult *result2 = sDatabase.PQuery("SELECT `type` FROM `petition` WHERE `petitionguid` = '%u'", GUID_LOPART(petitionguid));
+    QueryResult *result2 = CharacterDatabase.PQuery("SELECT `type` FROM `petition` WHERE `petitionguid` = '%u'", GUID_LOPART(petitionguid));
 
     if(result2)
     {
@@ -390,8 +390,8 @@ void WorldSession::HandlePetitionRenameOpcode(WorldPacket & recv_data)
     }
 
     std::string db_newname = newname;
-    sDatabase.escape_string(db_newname);
-    sDatabase.PExecute("UPDATE `petition` SET `name` = '%s' WHERE `petitionguid` = '%u'",
+    CharacterDatabase.escape_string(db_newname);
+    CharacterDatabase.PExecute("UPDATE `petition` SET `name` = '%s' WHERE `petitionguid` = '%u'",
         db_newname.c_str(), GUID_LOPART(petitionguid));
 
     sLog.outDebug("Petition (GUID: %u) renamed to '%s'", GUID_LOPART(petitionguid), newname.c_str());
@@ -418,7 +418,7 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket & recv_data)
 
     uint8 signs = 0;
 
-    QueryResult *result = sDatabase.PQuery(
+    QueryResult *result = CharacterDatabase.PQuery(
         "SELECT `ownerguid`, "
         "  (SELECT COUNT(`playerguid`) FROM `petition_sign` WHERE `petition_sign`.`petitionguid` = '%u') AS signs "
         "FROM `petition` WHERE `petitionguid` = '%u'", GUID_LOPART(petitionguid), GUID_LOPART(petitionguid));
@@ -443,7 +443,7 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket & recv_data)
     if(!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD) && GetPlayer()->GetTeam() != objmgr.GetPlayerTeamByGUID(ownerguid))
         return;
 
-    QueryResult *result2 = sDatabase.PQuery("SELECT `type` FROM `petition` WHERE `petitionguid` = '%u'", GUID_LOPART(petitionguid));
+    QueryResult *result2 = CharacterDatabase.PQuery("SELECT `type` FROM `petition` WHERE `petitionguid` = '%u'", GUID_LOPART(petitionguid));
 
     if(result2)
     {
@@ -463,7 +463,7 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket & recv_data)
 
     //client doesn't allow to sign petition two times by one character, but not check sign by another character from same account
     //not allow sign another player from already sign player account
-    result = sDatabase.PQuery("SELECT `playerguid` FROM `petition_sign` WHERE `player_account` = '%u'", GetAccountId());
+    result = CharacterDatabase.PQuery("SELECT `playerguid` FROM `petition_sign` WHERE `player_account` = '%u'", GetAccountId());
 
     if(result)
     {
@@ -482,7 +482,7 @@ void WorldSession::HandlePetitionSignOpcode(WorldPacket & recv_data)
         return;
     }
 
-    sDatabase.PExecute("INSERT INTO `petition_sign` (`ownerguid`,`petitionguid`, `playerguid`, `player_account`) VALUES ('%u', '%u', '%u','%u')", GUID_LOPART(ownerguid),GUID_LOPART(petitionguid), plguidlo,GetAccountId());
+    CharacterDatabase.PExecute("INSERT INTO `petition_sign` (`ownerguid`,`petitionguid`, `playerguid`, `player_account`) VALUES ('%u', '%u', '%u','%u')", GUID_LOPART(ownerguid),GUID_LOPART(petitionguid), plguidlo,GetAccountId());
 
     sLog.outDebug("PETITION SIGN: GUID %u by player: %s (GUID: %u Account: %u)", GUID_LOPART(petitionguid), _player->GetName(),plguidlo,GetAccountId());
 
@@ -516,7 +516,7 @@ void WorldSession::HandlePetitionDeclineOpcode(WorldPacket & recv_data)
     recv_data >> petitionguid;                              // petition guid
     sLog.outDebug("Petition %u declined by %u", GUID_LOPART(petitionguid), _player->GetGUIDLow());
 
-    QueryResult *result = sDatabase.PQuery("SELECT `ownerguid` FROM `petition` WHERE `petitionguid` = '%u'", GUID_LOPART(petitionguid));
+    QueryResult *result = CharacterDatabase.PQuery("SELECT `ownerguid` FROM `petition` WHERE `petitionguid` = '%u'", GUID_LOPART(petitionguid));
     if(!result)
         return;
 
@@ -557,7 +557,7 @@ void WorldSession::HandleOfferPetitionOpcode(WorldPacket & recv_data)
     if (!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD) && GetPlayer()->GetTeam() != player->GetTeam() )
         return;
 
-    QueryResult *result = sDatabase.PQuery("SELECT `petitionguid` FROM `petition` WHERE `petitionguid` = '%u'", GUID_LOPART(petitionguid));
+    QueryResult *result = CharacterDatabase.PQuery("SELECT `petitionguid` FROM `petition` WHERE `petitionguid` = '%u'", GUID_LOPART(petitionguid));
     if(!result)
     {
         sLog.outError("any petition on server...");
@@ -566,7 +566,7 @@ void WorldSession::HandleOfferPetitionOpcode(WorldPacket & recv_data)
 
     delete result;
 
-    result = sDatabase.PQuery("SELECT `playerguid` FROM `petition_sign` WHERE `petitionguid` = '%u'", GUID_LOPART(petitionguid));
+    result = CharacterDatabase.PQuery("SELECT `playerguid` FROM `petition_sign` WHERE `petitionguid` = '%u'", GUID_LOPART(petitionguid));
     // result==NULL also correct charter without signs
     if(result)
         signs = result->GetRowCount();
@@ -611,7 +611,7 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
     sLog.outDebug("Petition %u turned in by %u", GUID_LOPART(petitionguid), _player->GetGUIDLow());
 
     // data
-    QueryResult *result = sDatabase.PQuery("SELECT `ownerguid`, `name`, `type` FROM `petition` WHERE `petitionguid` = '%u'", GUID_LOPART(petitionguid));
+    QueryResult *result = CharacterDatabase.PQuery("SELECT `ownerguid`, `name`, `type` FROM `petition` WHERE `petitionguid` = '%u'", GUID_LOPART(petitionguid));
     if(result)
     {
         Field *fields = result->Fetch();
@@ -656,7 +656,7 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
 
     // signs
     uint8 signs;
-    result = sDatabase.PQuery("SELECT `playerguid` FROM `petition_sign` WHERE `petitionguid` = '%u'", GUID_LOPART(petitionguid));
+    result = CharacterDatabase.PQuery("SELECT `playerguid` FROM `petition_sign` WHERE `petitionguid` = '%u'", GUID_LOPART(petitionguid));
     if(result)
         signs = result->GetRowCount();
     else
@@ -761,10 +761,10 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
 
     delete result;
 
-    sDatabase.BeginTransaction();
-    sDatabase.PExecute("DELETE FROM `petition` WHERE `petitionguid` = '%u'", GUID_LOPART(petitionguid));
-    sDatabase.PExecute("DELETE FROM `petition_sign` WHERE `petitionguid` = '%u'", GUID_LOPART(petitionguid));
-    sDatabase.CommitTransaction();
+    CharacterDatabase.BeginTransaction();
+    CharacterDatabase.PExecute("DELETE FROM `petition` WHERE `petitionguid` = '%u'", GUID_LOPART(petitionguid));
+    CharacterDatabase.PExecute("DELETE FROM `petition_sign` WHERE `petitionguid` = '%u'", GUID_LOPART(petitionguid));
+    CharacterDatabase.CommitTransaction();
 
     // created
     sLog.outDebug("TURN IN PETITION GUID %u", GUID_LOPART(petitionguid));

@@ -253,7 +253,7 @@ void CliShutdown(char* command,pPrintf zprintf)
 void CliInfo(char*,pPrintf zprintf)
 {
     ///- Get the list of accounts ID logged to the realm
-    QueryResult *resultDB = sDatabase.Query("SELECT `name`,`account` FROM `character` WHERE `online` > 0");
+    QueryResult *resultDB = CharacterDatabase.Query("SELECT `name`,`account` FROM `character` WHERE `online` > 0");
 
     if (!resultDB)
     {
@@ -632,8 +632,8 @@ void CliTele(char*command,pPrintf zprintf)
 
     std::string location = locName;
 
-    sDatabase.escape_string(location);
-    QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `game_tele` WHERE `name` = '%s'",location.c_str());
+    WorldDatabase.escape_string(location);
+    QueryResult *result = WorldDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `game_tele` WHERE `name` = '%s'",location.c_str());
     if (!result)
     {
         zprintf(LANG_COMMAND_TELE_NOTFOUND "\r\n");
@@ -886,7 +886,7 @@ int kb_hit_return()
 void CliRunnable::run()
 {
     ///- Init new SQL thread for the world database (one connection call enough)
-    sDatabase.ThreadStart();                                // let thread do safe mySQL requests
+    WorldDatabase.ThreadStart();                                // let thread do safe mySQL requests
 
     char commandbuf[256];
 
@@ -934,5 +934,5 @@ void CliRunnable::run()
     }
 
     ///- End the database thread
-    sDatabase.ThreadEnd();                                  // free mySQL thread resources
+    WorldDatabase.ThreadEnd();                                  // free mySQL thread resources
 }

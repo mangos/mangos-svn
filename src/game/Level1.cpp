@@ -236,7 +236,7 @@ bool ChatHandler::HandleNamegoCommand(const char* args)
 
     std::string name = args;
     normalizePlayerName(name);
-    //sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
+    //WorldDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
 
     Player *chr = objmgr.GetPlayer(name.c_str());
     if (chr)
@@ -330,7 +330,7 @@ bool ChatHandler::HandleGonameCommand(const char* args)
 
     std::string name = args;
     normalizePlayerName(name);
-    //sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
+    //WorldDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
 
     Player *chr = objmgr.GetPlayer(name.c_str());
     if (chr)
@@ -442,7 +442,7 @@ bool ChatHandler::HandleRecallCommand(const char* args)
     {
         std::string name = args;
         normalizePlayerName(name);
-        //sDatabase.escape_string(name);                      // prevent SQL injection - normal name don't must changed by this call
+        //WorldDatabase.escape_string(name);                      // prevent SQL injection - normal name don't must changed by this call
 
         chr = objmgr.GetPlayer(name.c_str());
 
@@ -1550,9 +1550,9 @@ bool ChatHandler::HandleTeleCommand(const char * args)
         return false;
 
     std::string name = cId;
-    sDatabase.escape_string(name);
+    WorldDatabase.escape_string(name);
 
-    QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `game_tele` WHERE `name` = '%s'",name.c_str());
+    QueryResult *result = WorldDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `game_tele` WHERE `name` = '%s'",name.c_str());
     if (!result)
     {
         SendSysMessage(LANG_COMMAND_TELE_NOTFOUND);
@@ -1591,8 +1591,8 @@ bool ChatHandler::HandleLookupTeleCommand(const char * args)
         return false;
 
     std::string namepart = str;
-    sDatabase.escape_string(namepart);
-    QueryResult *result = sDatabase.PQuery("SELECT `name` FROM `game_tele` WHERE `name` LIKE '%%%s%%'",namepart.c_str());
+    WorldDatabase.escape_string(namepart);
+    QueryResult *result = WorldDatabase.PQuery("SELECT `name` FROM `game_tele` WHERE `name` LIKE '%%%s%%'",namepart.c_str());
     if (!result)
     {
         SendSysMessage(LANG_COMMAND_TELE_NOREQUEST);
@@ -1725,8 +1725,8 @@ bool ChatHandler::HandleSendMailCommand(const char* args)
     if(receiver)
         receiver->CreateMail(mailId,messagetype,sender_guid,subject.c_str(),itemTextId,0,0,(uint64)etime,(uint64)dtime,0,0,0,0);
 
-    sDatabase.escape_string(subject);
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+    CharacterDatabase.escape_string(subject);
+    CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
         "VALUES ('%u', '%u', '%u', '%u', '%s', '%u', '0', '0', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
         mailId, messagetype, sender_guid, receiver_guid, subject.c_str(), itemTextId, (uint64)etime, (uint64)dtime, NOT_READ);
 
@@ -1759,8 +1759,8 @@ bool ChatHandler::HandleNameTeleCommand(const char * args)
 
     normalizePlayerName(name);
 
-    sDatabase.escape_string(location);
-    QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `game_tele` WHERE `name` = '%s'",location.c_str());
+    WorldDatabase.escape_string(location);
+    QueryResult *result = WorldDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `game_tele` WHERE `name` = '%s'",location.c_str());
     if (!result)
     {
         SendSysMessage(LANG_COMMAND_TELE_NOTFOUND);
@@ -1842,8 +1842,8 @@ bool ChatHandler::HandleGroupTeleCommand(const char * args)
 
     std::string location = cId;
 
-    sDatabase.escape_string(location);
-    QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `game_tele` WHERE `name` = '%s'",location.c_str());
+    WorldDatabase.escape_string(location);
+    QueryResult *result = WorldDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `game_tele` WHERE `name` = '%s'",location.c_str());
     if (!result)
     {
         SendSysMessage(LANG_COMMAND_TELE_NOTFOUND);
@@ -1916,7 +1916,7 @@ bool ChatHandler::HandleGroupgoCommand(const char* args)
 
     std::string name = args;
     normalizePlayerName(name);
-    //sDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
+    //WorldDatabase.escape_string(name);                          // prevent SQL injection - normal name don't must changed by this call
 
     Player *player = objmgr.GetPlayer(name.c_str());
     if (!player)

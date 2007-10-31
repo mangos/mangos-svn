@@ -504,6 +504,7 @@ pkgdata_DATA = \
 	4640_command.sql \
 	4656_game_event_creature_quest.sql \
 	4657_quest_template.sql \
+	4664.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -988,5 +989,6 @@ EXTRA_DIST = \
 	4640_command.sql \
 	4656_game_event_creature_quest.sql \
 	4657_quest_template.sql \
+    4664.sql \
 	README
 

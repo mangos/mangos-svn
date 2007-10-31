@@ -39,7 +39,7 @@
 void WorldRunnable::run()
 {
     ///- Init new SQL thread for the world database
-    sDatabase.ThreadStart();                                // let thread do safe mySQL requests (one connection call enough)
+    WorldDatabase.ThreadStart();                                // let thread do safe mySQL requests (one connection call enough)
     sWorld.InitResultQueue();
 
     uint32 realCurrTime = 0;
@@ -81,5 +81,5 @@ void WorldRunnable::run()
     MapManager::Instance().UnloadAll();                     // unload all grids (including locked in memory)
 
     ///- End the database thread
-    sDatabase.ThreadEnd();                                  // free mySQL thread resources
+    WorldDatabase.ThreadEnd();                                  // free mySQL thread resources
 }
