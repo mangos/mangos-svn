@@ -16,11 +16,14 @@ File names are divided into two parts. First part is the revision that will be
 compatible with database after apply update. The second part of the name, 
 is the table that needs and update or has been added. See an example below:
 
-         1123_character_spell.sql
-         |                  |
-         |                  |
-         |                  The table character_spell
-         |                  will need an update.
+         1123_characters_character_spell.sql
+         |    |          |
+         |    |          |
+         |    |          The table character_spell
+         |    |          will need an update.
+         |    |
+         |    Name of affected DB (default recommended name)
+         |    Can be: characters, mangos, realmd
          |
          MaNGOS revision older 1123 will need this update.
          After appling this update DB compatiable with revision 1122
