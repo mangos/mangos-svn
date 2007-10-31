@@ -1809,6 +1809,7 @@ void World::InitDailyQuestResetTime()
         Field *fields = result->Fetch();
 
         mostRecentQuestTime = (time_t)fields[0].GetUInt64();
+        delete result;
     }
     else
         mostRecentQuestTime = 0;
