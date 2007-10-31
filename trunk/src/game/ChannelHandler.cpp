@@ -79,7 +79,7 @@ void WorldSession::HandleChannelList(WorldPacket& recvPacket)
 
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if(Channel *chn = cMgr->GetChannel(channelname, _player))
-            chn->List(_player->GetGUID());
+            chn->List(_player);
 }
 
 void WorldSession::HandleChannelPassword(WorldPacket& recvPacket)
@@ -312,7 +312,7 @@ void WorldSession::HandleChannelRosterQuery(WorldPacket &recvPacket)
     recvPacket >> channelname;
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
         if(Channel *chn = cMgr->GetChannel(channelname, _player))
-            chn->List(_player->GetGUID());
+            chn->List(_player);
 }
 
 void WorldSession::HandleChannelInfoQuery(WorldPacket &recvPacket)
