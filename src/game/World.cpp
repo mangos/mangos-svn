@@ -1200,7 +1200,7 @@ void World::ScriptsProcess()
 
                 if(!source)
                 {
-                    sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON call for NULL unit.");
+                    sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON call for NULL world object.");
                     break;
                 }
 
@@ -1245,31 +1245,32 @@ void World::ScriptsProcess()
 
                 if(!source)
                 {
-                    sLog.outError("SCRIPT_COMMAND_RESPAWN_GAMEOBJECT call for NULL unit.");
+                    sLog.outError("SCRIPT_COMMAND_RESPAWN_GAMEOBJECT call for NULL world object.");
                     break;
                 }
 
-                if(!source->isType(TYPE_UNIT))              // must be any Unit (creature or player)
+
+                WorldObject* summoner = dynamic_cast<WorldObject*>(source);
+
+                if(!summoner)
                 {
-                    sLog.outError("SCRIPT_COMMAND_RESPAWN_GAMEOBJECT call for non-unit (TypeId: %u), skipping.",source->GetTypeId());
+                    sLog.outError("SCRIPT_COMMAND_RESPAWN_GAMEOBJECT call for non-WorldObject (TypeId: %u), skipping.",source->GetTypeId());
                     break;
                 }
-
-                Unit* caster = (Unit*)source;
 
                 GameObject *go = NULL;
                 int32 time_to_despawn = step.script->datalong2<5 ? 5 : (int32)step.script->datalong2;
 
-                CellPair p(MaNGOS::ComputeCellPair(caster->GetPositionX(), caster->GetPositionY()));
+                CellPair p(MaNGOS::ComputeCellPair(summoner->GetPositionX(), summoner->GetPositionY()));
                 Cell cell = RedZone::GetZone(p);
                 cell.data.Part.reserved = ALL_DISTRICT;
 
-                MaNGOS::GameObjectWithDbGUIDCheck go_check(*caster,step.script->datalong);
+                MaNGOS::GameObjectWithDbGUIDCheck go_check(*summoner,step.script->datalong);
                 MaNGOS::GameObjectSearcher<MaNGOS::GameObjectWithDbGUIDCheck> checker(go,go_check);
 
                 TypeContainerVisitor<MaNGOS::GameObjectSearcher<MaNGOS::GameObjectWithDbGUIDCheck>, GridTypeMapContainer > object_checker(checker);
                 CellLock<GridReadGuard> cell_lock(cell, p);
-                cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(caster->GetMapId(), (Unit*)source));
+                cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(summoner->GetMapId(), summoner));
 
                 if ( !go )
                 {
