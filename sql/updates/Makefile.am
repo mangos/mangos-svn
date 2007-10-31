@@ -989,6 +989,6 @@ EXTRA_DIST = \
 	4640_command.sql \
 	4656_game_event_creature_quest.sql \
 	4657_quest_template.sql \
-    4664.sql \
+	4664.sql \
 	README
 

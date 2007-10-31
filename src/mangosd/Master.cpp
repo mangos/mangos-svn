@@ -293,15 +293,15 @@ bool Master::_StartDB()
 
     if(!sConfig.GetString("CharacterDatabaseInfo", &dbstring))
     {
-        sLog.outError("Database not specified in configuration file");
+        sLog.outError("Character Database not specified in configuration file");
         return false;
     }
     sLog.outString("Character Database: %s", dbstring.c_str());
 
-    ///- Initialise the world database
+    ///- Initialise the Character database
     if(!CharacterDatabase.Initialize(dbstring.c_str()))
     {
-        sLog.outError("Cannot connect to world database %s",dbstring.c_str());
+        sLog.outError("Cannot connect to Character database %s",dbstring.c_str());
         return false;
     }
 
