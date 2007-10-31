@@ -373,8 +373,10 @@ void Channel::SendWhoOwner(uint64 p)
     }
 }
 
-void Channel::List(uint64 p)
+void Channel::List(Player* player)
 {
+    uint64 p = player->GetGUID();
+
     if(!IsOn(p))
     {
         WorldPacket data;
@@ -387,13 +389,25 @@ void Channel::List(uint64 p)
         data << uint8(1);                                   // channel type?
         data << GetName();                                  // channel name
         data << uint8(GetFlags());                          // channel flags?
-        data << uint32(players.size());
 
+        size_t pos = data.wpos();
+        data << uint32(0);                                  // size of list, placeholder
+
+        uint32 count  = 0;
         for(PlayerList::iterator i = players.begin(); i != players.end(); ++i)
         {
-            data << uint64(i->first);
-            data << uint8(i->second.flags);                 // flags seems to be changed...
+            Player *plr = objmgr.GetPlayer(i->first);
+
+            if( plr &&  plr->IsVisibleGloballyFor(player) )
+            {
+                data << uint64(i->first);
+                data << uint8(i->second.flags);                 // flags seems to be changed...
+                ++count;
+            }
         }
+
+        data.put<uint32>(pos,count);
+
         SendToOne(&data, p);
     }
 }
