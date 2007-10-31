@@ -301,8 +301,8 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
 
         // set owner to bidder (to prevent delete item with sender char deleting)
         // owner in `data` will set at mail receive and item extracting
-        sDatabase.PExecute("UPDATE `item_instance` SET `owner_guid` = '%u' WHERE `guid`='%u'",auction->bidder,pItem->GetGUIDLow());
-        sDatabase.CommitTransaction();
+        CharacterDatabase.PExecute("UPDATE `item_instance` SET `owner_guid` = '%u' WHERE `guid`='%u'",auction->bidder,pItem->GetGUIDLow());
+        CharacterDatabase.CommitTransaction();
 
         if (bidder)
         {
@@ -313,14 +313,14 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
         else
             delete pItem;
 
-        sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+        CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
             "VALUES ('%u', '%d', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
             mailId, MAIL_AUCTION, auction->location, auction->bidder, msgAuctionWonSubject.str().c_str(), itemTextId, auction->item_guid, auction->item_template, (uint64)etime,(uint64)dtime, AUCTION_CHECKED);
     }
     // receiver not exist
     else
     {
-        sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid`='%u'",pItem->GetGUIDLow());
+        CharacterDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid`='%u'",pItem->GetGUIDLow());
         delete pItem;
     }
 }
@@ -369,7 +369,7 @@ void ObjectMgr::SendAuctionSuccessfulMail( AuctionEntry * auction )
             owner->CreateMail(mailId, MAIL_AUCTION, auction->location, msgAuctionSuccessfulSubject.str(), itemTextId, 0, 0, etime, dtime, profit, 0, AUCTION_CHECKED, NULL);
         }
 
-        sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+        CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
             "VALUES ('%u', '%d', '%u', '%u', '%s', '%u', '0', '0', '" I64FMTD "', '" I64FMTD "', '%u', '0', '%d')",
             mailId, MAIL_AUCTION, auction->location, auction->owner, msgAuctionSuccessfulSubject.str().c_str(), itemTextId, (uint64)etime, (uint64)dtime, profit, AUCTION_CHECKED);
     }
@@ -401,7 +401,7 @@ void ObjectMgr::SendAuctionExpiredMail( AuctionEntry * auction )
         time_t dtime = time(NULL);                          //Instant since it's Auction House
         time_t etime = dtime + 30 * DAY;
 
-        sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+        CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
             "VALUES ('%u', '2', '%u', '%u', '%s', '0', '%u', '%u', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
             messageId, auction->location, auction->owner, subject.str().c_str(), auction->item_guid, auction->item_template, (uint64)etime, (uint64)dtime, NOT_READ);
         if ( owner )
@@ -418,7 +418,7 @@ void ObjectMgr::SendAuctionExpiredMail( AuctionEntry * auction )
     // owner not found
     else
     {
-        sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid`='%u'",pItem->GetGUIDLow());
+        CharacterDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid`='%u'",pItem->GetGUIDLow());
         delete pItem;
     }
 }
@@ -430,7 +430,7 @@ CreatureInfo const* ObjectMgr::GetCreatureTemplate(uint32 id)
 
 void ObjectMgr::LoadCreatureLocales()
 {
-    QueryResult *result = sDatabase.Query("SELECT `entry`,`name_loc1`,`subname_loc1`,`name_loc2`,`subname_loc2`,`name_loc3`,`subname_loc3`,`name_loc4`,`subname_loc4`,`name_loc5`,`subname_loc5`,`name_loc6`,`subname_loc6`,`name_loc7`,`subname_loc7` FROM `locales_creature`");
+    QueryResult *result = WorldDatabase.Query("SELECT `entry`,`name_loc1`,`subname_loc1`,`name_loc2`,`subname_loc2`,`name_loc3`,`subname_loc3`,`name_loc4`,`subname_loc4`,`name_loc5`,`subname_loc5`,`name_loc6`,`subname_loc6`,`name_loc7`,`subname_loc7` FROM `locales_creature`");
 
     if(!result)
     {
@@ -643,7 +643,7 @@ void ObjectMgr::LoadCreatures()
 {
     uint32 count = 0;
     //                                                       0      1    2     3
-    QueryResult *result = sDatabase.Query("SELECT `creature`.`guid`,`id`,`map`,`modelid`,"
+    QueryResult *result = WorldDatabase.Query("SELECT `creature`.`guid`,`id`,`map`,`modelid`,"
     //    4             5            6            7            8             9               10          11
         "`equipment_id`,`position_x`,`position_y`,`position_z`,`orientation`,`spawntimesecs`,`spawndist`,`currentwaypoint`,"
     //   12                 13                 14                 15                  16          17        18           19             20      21
@@ -729,7 +729,7 @@ void ObjectMgr::LoadGameobjects()
     uint32 count = 0;
 
     //                                                         0      1    2     3            4            5            6
-    QueryResult *result = sDatabase.Query("SELECT `gameobject`.`guid`,`id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,"
+    QueryResult *result = WorldDatabase.Query("SELECT `gameobject`.`guid`,`id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,"
     //   7           8           9           10          11     12              13             14         15
         "`rotation0`,`rotation1`,`rotation2`,`rotation3`,`loot`,`spawntimesecs`,`animprogress`,`dynflags`,`event` "
         "FROM `gameobject` LEFT OUTER JOIN `game_event_gameobject` ON `gameobject`.`guid`=`game_event_gameobject`.`guid`");
@@ -805,11 +805,11 @@ void ObjectMgr::RemoveGameobjectFromGrid(uint32 guid, GameObjectData const* data
 void ObjectMgr::LoadCreatureRespawnTimes()
 {
     // remove outdated data
-    sDatabase.Execute("DELETE FROM `creature_respawn` WHERE `respawntime` <= UNIX_TIMESTAMP(NOW())");
+    WorldDatabase.Execute("DELETE FROM `creature_respawn` WHERE `respawntime` <= UNIX_TIMESTAMP(NOW())");
 
     uint32 count = 0;
 
-    QueryResult *result = sDatabase.Query("SELECT `guid`,`respawntime`,`instance` FROM `creature_respawn`");
+    QueryResult *result = WorldDatabase.Query("SELECT `guid`,`respawntime`,`instance` FROM `creature_respawn`");
 
     if(!result)
     {
@@ -847,11 +847,11 @@ void ObjectMgr::LoadCreatureRespawnTimes()
 void ObjectMgr::LoadGameobjectRespawnTimes()
 {
     // remove outdated data
-    sDatabase.Execute("DELETE FROM `gameobject_respawn` WHERE `respawntime` <= UNIX_TIMESTAMP(NOW())");
+    WorldDatabase.Execute("DELETE FROM `gameobject_respawn` WHERE `respawntime` <= UNIX_TIMESTAMP(NOW())");
 
     uint32 count = 0;
 
-    QueryResult *result = sDatabase.Query("SELECT `guid`,`respawntime`,`instance` FROM `gameobject_respawn`");
+    QueryResult *result = WorldDatabase.Query("SELECT `guid`,`respawntime`,`instance` FROM `gameobject_respawn`");
 
     if(!result)
     {
@@ -899,10 +899,10 @@ uint64 ObjectMgr::GetPlayerGUIDByName(std::string name) const
 {
     uint64 guid = 0;
 
-    sDatabase.escape_string(name);
+    CharacterDatabase.escape_string(name);
 
     // Player name safe to sending to DB (checked at login) and this function using
-    QueryResult *result = sDatabase.PQuery("SELECT `guid` FROM `character` WHERE `name` = '%s'", name.c_str());
+    QueryResult *result = CharacterDatabase.PQuery("SELECT `guid` FROM `character` WHERE `name` = '%s'", name.c_str());
     if(result)
     {
         guid = MAKE_GUID((*result)[0].GetUInt32(),HIGHGUID_PLAYER);
@@ -922,7 +922,7 @@ bool ObjectMgr::GetPlayerNameByGUID(const uint64 &guid, std::string &name) const
         return true;
     }
 
-    QueryResult *result = sDatabase.PQuery("SELECT `name` FROM `character` WHERE `guid` = '%u'", GUID_LOPART(guid));
+    QueryResult *result = CharacterDatabase.PQuery("SELECT `name` FROM `character` WHERE `guid` = '%u'", GUID_LOPART(guid));
 
     if(result)
     {
@@ -936,7 +936,7 @@ bool ObjectMgr::GetPlayerNameByGUID(const uint64 &guid, std::string &name) const
 
 uint32 ObjectMgr::GetPlayerTeamByGUID(const uint64 &guid) const
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `race` FROM `character` WHERE `guid` = '%u'", GUID_LOPART(guid));
+    QueryResult *result = CharacterDatabase.PQuery("SELECT `race` FROM `character` WHERE `guid` = '%u'", GUID_LOPART(guid));
 
     if(result)
     {
@@ -950,7 +950,7 @@ uint32 ObjectMgr::GetPlayerTeamByGUID(const uint64 &guid) const
 
 uint32 ObjectMgr::GetPlayerAccountIdByGUID(const uint64 &guid) const
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `account` FROM `character` WHERE `guid` = '%u'", GUID_LOPART(guid));
+    QueryResult *result = CharacterDatabase.PQuery("SELECT `account` FROM `character` WHERE `guid` = '%u'", GUID_LOPART(guid));
     if(result)
     {
         uint32 acc = (*result)[0].GetUInt32();
@@ -976,7 +976,7 @@ uint32 ObjectMgr::GetSecurityByAccount(uint32 acc_id) const
 
 void ObjectMgr::LoadAuctions()
 {
-    QueryResult *result = sDatabase.Query("SELECT COUNT(*) FROM `auctionhouse`");
+    QueryResult *result = CharacterDatabase.Query("SELECT COUNT(*) FROM `auctionhouse`");
 
     Field *fields = result->Fetch();
     uint32 AuctionCount=fields[0].GetUInt32();
@@ -985,7 +985,7 @@ void ObjectMgr::LoadAuctions()
     if(!AuctionCount)
         return;
 
-    result = sDatabase.Query( "SELECT `id`,`auctioneerguid`,`itemguid`,`item_template`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`startbid`,`deposit`,`location` FROM `auctionhouse`" );
+    result = CharacterDatabase.Query( "SELECT `id`,`auctioneerguid`,`itemguid`,`item_template`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`startbid`,`deposit`,`location` FROM `auctionhouse`" );
 
     if( !result )
         return;
@@ -1020,7 +1020,7 @@ void ObjectMgr::LoadAuctions()
         }
         else
         {
-            sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",aItem->Id);
+            CharacterDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",aItem->Id);
             sLog.outError("Auction %u have not existing item : %u", aItem->Id, aItem->item_guid);
             delete aItem;
         }
@@ -1034,7 +1034,7 @@ void ObjectMgr::LoadAuctions()
 
 void ObjectMgr::LoadItemLocales()
 {
-    QueryResult *result = sDatabase.Query("SELECT `entry`,`name_loc1`,`description_loc1`,`name_loc2`,`description_loc2`,`name_loc3`,`description_loc3`,`name_loc4`,`description_loc4`,`name_loc5`,`description_loc5`,`name_loc6`,`description_loc6`,`name_loc7`,`description_loc7` FROM `locales_item`");
+    QueryResult *result = WorldDatabase.Query("SELECT `entry`,`name_loc1`,`description_loc1`,`name_loc2`,`description_loc2`,`name_loc3`,`description_loc3`,`name_loc4`,`description_loc4`,`name_loc5`,`description_loc5`,`name_loc6`,`description_loc6`,`name_loc7`,`description_loc7` FROM `locales_item`");
 
     if(!result)
     {
@@ -1268,7 +1268,7 @@ void ObjectMgr::LoadItemPrototypes()
 
 void ObjectMgr::LoadAuctionItems()
 {
-    QueryResult *result = sDatabase.Query( "SELECT `itemguid`,`item_template` FROM `auctionhouse`" );
+    QueryResult *result = CharacterDatabase.Query( "SELECT `itemguid`,`item_template` FROM `auctionhouse`" );
 
     if( !result )
         return;
@@ -1318,7 +1318,7 @@ void ObjectMgr::LoadPetLevelInfo()
     // Loading levels data
     {
         //                                              0               1       2    3      4     5     6     7     8     9
-        QueryResult *result  = sDatabase.Query("SELECT `creature_entry`,`level`,`hp`,`mana`,`str`,`agi`,`sta`,`int`,`spi`,`armor` FROM `pet_levelstats`");
+        QueryResult *result  = WorldDatabase.Query("SELECT `creature_entry`,`level`,`hp`,`mana`,`str`,`agi`,`sta`,`int`,`spi`,`armor` FROM `pet_levelstats`");
 
         uint32 count = 0;
 
@@ -1436,7 +1436,7 @@ void ObjectMgr::LoadPlayerInfo()
     // Load playercreate
     {
         //                                              0      1       2     3      4            5            6
-        QueryResult *result = sDatabase.Query("SELECT `race`,`class`,`map`,`zone`,`position_x`,`position_y`,`position_z` FROM `playercreateinfo`");
+        QueryResult *result = WorldDatabase.Query("SELECT `race`,`class`,`map`,`zone`,`position_x`,`position_y`,`position_z` FROM `playercreateinfo`");
 
         uint32 count = 0;
 
@@ -1499,7 +1499,7 @@ void ObjectMgr::LoadPlayerInfo()
     // Load playercreate items
     {
         //                                            0      1       2        3
-        QueryResult *result = sDatabase.Query("SELECT `race`,`class`,`itemid`,`amount` FROM `playercreateinfo_item`");
+        QueryResult *result = WorldDatabase.Query("SELECT `race`,`class`,`itemid`,`amount` FROM `playercreateinfo_item`");
 
         uint32 count = 0;
 
@@ -1552,7 +1552,7 @@ void ObjectMgr::LoadPlayerInfo()
     // Load playercreate spells
     {
         //                                            0      1       2       3
-        QueryResult *result = sDatabase.Query("SELECT `race`,`class`,`Spell`,`Active` FROM `playercreateinfo_spell`");
+        QueryResult *result = WorldDatabase.Query("SELECT `race`,`class`,`Spell`,`Active` FROM `playercreateinfo_spell`");
 
         uint32 count = 0;
 
@@ -1604,7 +1604,7 @@ void ObjectMgr::LoadPlayerInfo()
     // Load playercreate skills
     {
         //                                            0      1       2
-        QueryResult *result = sDatabase.Query("SELECT `race`,`class`,`Skill` FROM `playercreateinfo_skill`");
+        QueryResult *result = WorldDatabase.Query("SELECT `race`,`class`,`Skill` FROM `playercreateinfo_skill`");
 
         uint32 count = 0;
 
@@ -1659,7 +1659,7 @@ void ObjectMgr::LoadPlayerInfo()
     // Load playercreate actions
     {
         //                                                    0      1       2        3        4      5
-        QueryResult *result = sDatabase.Query("SELECT `race`,`class`,`button`,`action`,`type`,`misc` FROM `playercreateinfo_action`");
+        QueryResult *result = WorldDatabase.Query("SELECT `race`,`class`,`button`,`action`,`type`,`misc` FROM `playercreateinfo_action`");
 
         uint32 count = 0;
 
@@ -1714,7 +1714,7 @@ void ObjectMgr::LoadPlayerInfo()
     // Loading levels data
     {
         //                                              0      1       2       3    4      5     6     7     8     9
-        QueryResult *result  = sDatabase.Query("SELECT `race`,`class`,`level`,`hp`,`mana`,`str`,`agi`,`sta`,`int`,`spi` FROM `player_levelstats`");
+        QueryResult *result  = WorldDatabase.Query("SELECT `race`,`class`,`level`,`hp`,`mana`,`str`,`agi`,`sta`,`int`,`spi` FROM `player_levelstats`");
 
         uint32 count = 0;
 
@@ -1924,7 +1924,7 @@ void ObjectMgr::LoadGuilds()
     Guild *newguild;
     uint32 count = 0;
 
-    QueryResult *result = sDatabase.Query( "SELECT `guildid` FROM `guild`" );
+    QueryResult *result = CharacterDatabase.Query( "SELECT `guildid` FROM `guild`" );
 
     if( !result )
     {
@@ -1968,7 +1968,7 @@ void ObjectMgr::LoadArenaTeams()
 {
     uint32 count = 0;
 
-    QueryResult *result = sDatabase.Query( "SELECT `arenateamid` FROM `arena_team`" );
+    QueryResult *result = CharacterDatabase.Query( "SELECT `arenateamid` FROM `arena_team`" );
 
     if( !result )
     {
@@ -2011,7 +2011,7 @@ void ObjectMgr::LoadGroups()
     Group *group;
     uint32 count = 0;
 
-    QueryResult *result = sDatabase.Query( "SELECT `leaderGuid` FROM `group`" );
+    QueryResult *result = CharacterDatabase.Query( "SELECT `leaderGuid` FROM `group`" );
 
     if( !result )
     {
@@ -2058,7 +2058,7 @@ void ObjectMgr::LoadQuests()
     mExclusiveQuestGroups.clear();
 
     //                                            0       1            2          3            4
-    QueryResult *result = sDatabase.Query("SELECT `entry`,`ZoneOrSort`,`MinLevel`,`QuestLevel`,`Type`,"
+    QueryResult *result = WorldDatabase.Query("SELECT `entry`,`ZoneOrSort`,`MinLevel`,`QuestLevel`,`Type`,"
     //   5               6                    7                       8                     9                       10                    11                 12
         "`RequiredRaces`,`RequiredSkillValue`,`RequiredMinRepFaction`,`RequiredMinRepValue`,`RequiredMaxRepFaction`,`RequiredMaxRepValue`,`SuggestedPlayers`,`LimitTime`,"
     //   13             14            15            16               17                 18          19             20
@@ -2516,7 +2516,7 @@ void ObjectMgr::LoadQuests()
 
 void ObjectMgr::LoadQuestLocales()
 {
-    QueryResult *result = sDatabase.Query("SELECT `entry`,"
+    QueryResult *result = WorldDatabase.Query("SELECT `entry`,"
         "`Title_loc1`,`Details_loc1`,`Objectives_loc1`,`OfferRewardText_loc1`,`RequestItemsText_loc1`,`EndText_loc1`,`ObjectiveText1_loc1`,`ObjectiveText2_loc1`,`ObjectiveText3_loc1`,`ObjectiveText4_loc1`,"
         "`Title_loc2`,`Details_loc2`,`Objectives_loc2`,`OfferRewardText_loc2`,`RequestItemsText_loc2`,`EndText_loc2`,`ObjectiveText1_loc2`,`ObjectiveText2_loc2`,`ObjectiveText3_loc2`,`ObjectiveText4_loc2`,"
         "`Title_loc3`,`Details_loc3`,`Objectives_loc3`,`OfferRewardText_loc3`,`RequestItemsText_loc3`,`EndText_loc3`,`ObjectiveText1_loc3`,`ObjectiveText2_loc3`,`ObjectiveText3_loc3`,`ObjectiveText4_loc3`,"
@@ -2651,7 +2651,7 @@ void ObjectMgr::LoadSpellChains()
 {
     mSpellChains.clear();                                   // need for reload case
 
-    QueryResult *result = sDatabase.PQuery("SELECT `spell_id`, `prev_spell`, `first_spell`, `rank` FROM `spell_chain`");
+    QueryResult *result = WorldDatabase.PQuery("SELECT `spell_id`, `prev_spell`, `first_spell`, `rank` FROM `spell_chain`");
     if(result == NULL)
     {
         barGoLink bar( 1 );
@@ -2744,7 +2744,7 @@ void ObjectMgr::LoadSpellLearnSkills()
 {
     mSpellLearnSkills.clear();                              // need for reload case
 
-    QueryResult *result = sDatabase.PQuery("SELECT `entry`, `SkillID`, `Value`, `MaxValue` FROM `spell_learn_skill`");
+    QueryResult *result = WorldDatabase.PQuery("SELECT `entry`, `SkillID`, `Value`, `MaxValue` FROM `spell_learn_skill`");
     if(!result)
     {
         barGoLink bar( 1 );
@@ -2838,7 +2838,7 @@ void ObjectMgr::LoadSpellLearnSpells()
 {
     mSpellLearnSpells.clear();                              // need for reload case
 
-    QueryResult *result = sDatabase.PQuery("SELECT `entry`, `SpellID`,`IfNoSpell` FROM `spell_learn_spell`");
+    QueryResult *result = WorldDatabase.PQuery("SELECT `entry`, `SpellID`,`IfNoSpell` FROM `spell_learn_spell`");
     if(!result)
     {
         barGoLink bar( 1 );
@@ -2938,7 +2938,7 @@ void ObjectMgr::LoadSpellLearnSpells()
 
 void ObjectMgr::LoadPetCreateSpells()
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `entry`, `Spell1`, `Spell2`, `Spell3`, `Spell4`,`FamilyPassive` FROM `petcreateinfo_spell`");
+    QueryResult *result = WorldDatabase.PQuery("SELECT `entry`, `Spell1`, `Spell2`, `Spell3`, `Spell4`,`FamilyPassive` FROM `petcreateinfo_spell`");
     if(!result)
     {
         barGoLink bar( 1 );
@@ -3001,7 +3001,7 @@ void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
 
     scripts.clear();                                        // need for reload support
 
-    QueryResult *result = sDatabase.PQuery( "SELECT `id`,`delay`,`command`,`datalong`,`datalong2`,`datatext`, `x`, `y`, `z`, `o` FROM `%s`", tablename );
+    QueryResult *result = WorldDatabase.PQuery( "SELECT `id`,`delay`,`command`,`datalong`,`datalong2`,`datatext`, `x`, `y`, `z`, `o` FROM `%s`", tablename );
 
     uint32 count = 0;
 
@@ -3223,7 +3223,7 @@ void ObjectMgr::LoadSpellScripts()
 
 void ObjectMgr::LoadItemTexts()
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `id`, `text` FROM `item_text`");
+    QueryResult *result = CharacterDatabase.PQuery("SELECT `id`, `text` FROM `item_text`");
 
     uint32 count = 0;
 
@@ -3278,7 +3278,7 @@ void ObjectMgr::LoadPageTexts()
 
 void ObjectMgr::LoadPageTextLocales()
 {
-    QueryResult *result = sDatabase.PQuery("SELECT `entry`,`text_loc1`,`text_loc2`,`text_loc3`,`text_loc4`,`text_loc5`,`text_loc6`,`text_loc7` FROM `locales_page_text`");
+    QueryResult *result = WorldDatabase.PQuery("SELECT `entry`,`text_loc1`,`text_loc2`,`text_loc3`,`text_loc4`,`text_loc5`,`text_loc6`,`text_loc7` FROM `locales_page_text`");
 
     if(!result)
     {
@@ -3355,7 +3355,7 @@ GossipText *ObjectMgr::GetGossipText(uint32 Text_ID)
 void ObjectMgr::LoadGossipText()
 {
     GossipText *pGText;
-    QueryResult *result = sDatabase.Query( "SELECT * FROM `npc_text`" );
+    QueryResult *result = WorldDatabase.Query( "SELECT * FROM `npc_text`" );
 
     int count = 0;
     if( !result )
@@ -3414,7 +3414,7 @@ void ObjectMgr::LoadGossipText()
 
 void ObjectMgr::LoadNpcTextLocales()
 {
-    QueryResult *result = sDatabase.Query("SELECT `entry`,"
+    QueryResult *result = WorldDatabase.Query("SELECT `entry`,"
         "`Text0_0_loc1`,`Text0_1_loc1`,`Text1_0_loc1`,`Text1_1_loc1`,`Text2_0_loc1`,`Text2_1_loc1`,`Text3_0_loc1`,`Text3_1_loc1`,`Text4_0_loc1`,`Text4_1_loc1`,`Text5_0_loc1`,`Text5_1_loc1`,`Text6_0_loc1`,`Text6_1_loc1`,`Text7_0_loc1`,`Text7_1_loc1`,"
         "`Text0_0_loc2`,`Text0_1_loc2`,`Text1_0_loc2`,`Text1_1_loc2`,`Text2_0_loc2`,`Text2_1_loc2`,`Text3_0_loc2`,`Text3_1_loc1`,`Text4_0_loc2`,`Text4_1_loc2`,`Text5_0_loc2`,`Text5_1_loc2`,`Text6_0_loc2`,`Text6_1_loc2`,`Text7_0_loc2`,`Text7_1_loc2`,"
         "`Text0_0_loc3`,`Text0_1_loc3`,`Text1_0_loc3`,`Text1_1_loc3`,`Text2_0_loc3`,`Text2_1_loc3`,`Text3_0_loc3`,`Text3_1_loc1`,`Text4_0_loc3`,`Text4_1_loc3`,`Text5_0_loc3`,`Text5_1_loc3`,`Text6_0_loc3`,`Text6_1_loc3`,`Text7_0_loc3`,`Text7_1_loc3`,"
@@ -3491,8 +3491,8 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
     sLog.outDebug("Returning mails current time: hour: %d, minute: %d, second: %d ", localtime(&basetime)->tm_hour, localtime(&basetime)->tm_min, localtime(&basetime)->tm_sec);
     //delete all old mails without item and without body immediately, if starting server
     if (!serverUp)
-        sDatabase.PExecute("DELETE FROM `mail` WHERE `expire_time` < '" I64FMTD "' AND `item_guid` = '0' AND `itemTextId` = 0", (uint64)basetime);
-    QueryResult* result = sDatabase.PQuery("SELECT `id`,`messageType`,`sender`,`receiver`,`itemTextId`,`item_guid`,`expire_time`,`cod`,`checked` FROM `mail` WHERE `expire_time` < '" I64FMTD "'", (uint64)basetime);
+        CharacterDatabase.PExecute("DELETE FROM `mail` WHERE `expire_time` < '" I64FMTD "' AND `item_guid` = '0' AND `itemTextId` = 0", (uint64)basetime);
+    QueryResult* result = CharacterDatabase.PQuery("SELECT `id`,`messageType`,`sender`,`receiver`,`itemTextId`,`item_guid`,`expire_time`,`cod`,`checked` FROM `mail` WHERE `expire_time` < '" I64FMTD "'", (uint64)basetime);
     if ( !result )
         return;                                             // any mails need to be returned or deleted
     Field *fields;
@@ -3529,7 +3529,7 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
             if (m->checked < 4)
             {
                 //mail will be returned:
-                sDatabase.PExecute("UPDATE `mail` SET `sender` = '%u', `receiver` = '%u', `expire_time` = '" I64FMTD "', `deliver_time` = '" I64FMTD "',`cod` = '0', `checked` = '16' WHERE `id` = '%u'", m->receiver, m->sender, (uint64)(basetime + 30*DAY), (uint64)basetime, m->messageID);
+                CharacterDatabase.PExecute("UPDATE `mail` SET `sender` = '%u', `receiver` = '%u', `expire_time` = '" I64FMTD "', `deliver_time` = '" I64FMTD "',`cod` = '0', `checked` = '16' WHERE `id` = '%u'", m->receiver, m->sender, (uint64)(basetime + 30*DAY), (uint64)basetime, m->messageID);
                 delete m;
                 continue;
             }
@@ -3537,16 +3537,16 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
             {
                 //deleteitem = true;
                 //delitems << m->item_guid << ", ";
-                sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", m->item_guid);
+                CharacterDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", m->item_guid);
             }
         }
         if (m->itemTextId)
         {
-            sDatabase.PExecute("DELETE FROM `item_text` WHERE `id` = '%u'", m->itemTextId);
+            CharacterDatabase.PExecute("DELETE FROM `item_text` WHERE `id` = '%u'", m->itemTextId);
         }
         //deletemail = true;
         //delmails << m->messageID << ", ";
-        sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", m->messageID);
+        CharacterDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", m->messageID);
         delete m;
     } while (result->NextRow());
     delete result;
@@ -3556,7 +3556,7 @@ void ObjectMgr::LoadQuestAreaTriggers()
 {
     mQuestAreaTriggerMap.clear();                           // need for reload case
 
-    QueryResult *result = sDatabase.Query( "SELECT `id`,`quest` FROM `areatrigger_involvedrelation`" );
+    QueryResult *result = WorldDatabase.Query( "SELECT `id`,`quest` FROM `areatrigger_involvedrelation`" );
 
     uint32 count = 0;
 
@@ -3609,7 +3609,7 @@ void ObjectMgr::LoadTavernAreaTriggers()
 {
     mTavernAreaTriggerSet.clear();                          // need for reload case
 
-    QueryResult *result = sDatabase.Query("SELECT `id` FROM `areatrigger_tavern`");
+    QueryResult *result = WorldDatabase.Query("SELECT `id` FROM `areatrigger_tavern`");
 
     uint32 count = 0;
 
@@ -3779,7 +3779,7 @@ void ObjectMgr::LoadGraveyardZones()
 {
     mGraveYardMap.clear();                                  // need for reload case
 
-    QueryResult *result = sDatabase.Query("SELECT `id`,`ghost_zone`,`faction` FROM `game_graveyard_zone`");
+    QueryResult *result = WorldDatabase.Query("SELECT `id`,`ghost_zone`,`faction` FROM `game_graveyard_zone`");
 
     uint32 count = 0;
 
@@ -3951,7 +3951,7 @@ bool ObjectMgr::AddGraveYardLink(uint32 id, uint32 zoneId, uint32 team, bool inD
     // add link to DB
     if(inDB)
     {
-        sDatabase.PExecuteLog("INSERT INTO `game_graveyard_zone` ( `id`,`ghost_zone`,`faction`) "
+        WorldDatabase.PExecuteLog("INSERT INTO `game_graveyard_zone` ( `id`,`ghost_zone`,`faction`) "
             "VALUES ('%u', '%u','%u')",id,zoneId,team);
     }
 
@@ -3965,7 +3965,7 @@ void ObjectMgr::LoadAreaTriggerTeleports()
     uint32 count = 0;
 
     //                                            0    1                2               3            4                   5                   6                    7
-    QueryResult *result = sDatabase.Query("SELECT `id`,`required_level`,`required_item`,`target_map`,`target_position_x`,`target_position_y`,`target_position_z`,`target_orientation` FROM `areatrigger_teleport`");
+    QueryResult *result = WorldDatabase.Query("SELECT `id`,`required_level`,`required_item`,`target_map`,`target_position_x`,`target_position_y`,`target_position_z`,`target_orientation` FROM `areatrigger_teleport`");
     if( !result )
     {
 
@@ -4047,7 +4047,7 @@ void ObjectMgr::LoadSpellTeleports()
     uint32 count = 0;
 
     //                                            0    1            2                   3                   4                   5
-    QueryResult *result = sDatabase.Query("SELECT `id`,`target_map`,`target_position_x`,`target_position_y`,`target_position_z`,`target_orientation` FROM `spell_teleport`");
+    QueryResult *result = WorldDatabase.Query("SELECT `id`,`target_map`,`target_position_x`,`target_position_y`,`target_position_z`,`target_orientation` FROM `spell_teleport`");
     if( !result )
     {
 
@@ -4132,7 +4132,7 @@ void ObjectMgr::LoadSpellAffects()
     uint32 count = 0;
 
     //                                            0        1          2         3            4          5         6             7                 8
-    QueryResult *result = sDatabase.Query("SELECT `entry`,`effectId`,`SpellId`,`SchoolMask`,`Category`,`SkillID`,`SpellFamily`,`SpellFamilyMask`,`Charges` FROM `spell_affect`");
+    QueryResult *result = WorldDatabase.Query("SELECT `entry`,`effectId`,`SpellId`,`SchoolMask`,`Category`,`SkillID`,`SpellFamily`,`SpellFamilyMask`,`Charges` FROM `spell_affect`");
     if( !result )
     {
 
@@ -4223,7 +4223,7 @@ void ObjectMgr::LoadSpellProcEvents()
     uint32 count = 0;
 
     //                                            0       1            2          3         4          5      6                 7           8
-    QueryResult *result = sDatabase.Query("SELECT `entry`,`SchoolMask`,`Category`,`SkillID`,`SpellFamilyName`,`SpellFamilyMask`,`procFlags`,`ppmRate` FROM `spell_proc_event`");
+    QueryResult *result = WorldDatabase.Query("SELECT `entry`,`SchoolMask`,`Category`,`SkillID`,`SpellFamilyName`,`SpellFamilyMask`,`procFlags`,`ppmRate` FROM `spell_proc_event`");
     if( !result )
     {
 
@@ -4301,7 +4301,7 @@ bool ObjectMgr::IsSpellProcEventCanTriggeredBy( SpellProcEventEntry const * spel
 
 void ObjectMgr::SetHighestGuids()
 {
-    QueryResult *result = sDatabase.Query( "SELECT MAX(`guid`) FROM `character`" );
+    QueryResult *result = CharacterDatabase.Query( "SELECT MAX(`guid`) FROM `character`" );
     if( result )
     {
         m_hiCharGuid = (*result)[0].GetUInt32()+1;
@@ -4309,7 +4309,7 @@ void ObjectMgr::SetHighestGuids()
         delete result;
     }
 
-    result = sDatabase.Query( "SELECT MAX(`guid`) FROM `creature`" );
+    result = WorldDatabase.Query( "SELECT MAX(`guid`) FROM `creature`" );
     if( result )
     {
         m_hiCreatureGuid = (*result)[0].GetUInt32()+1;
@@ -4317,7 +4317,7 @@ void ObjectMgr::SetHighestGuids()
         delete result;
     }
 
-    result = sDatabase.Query( "SELECT MAX(`guid`) FROM `item_instance`" );
+    result = CharacterDatabase.Query( "SELECT MAX(`guid`) FROM `item_instance`" );
     if( result )
     {
         m_hiItemGuid = (*result)[0].GetUInt32()+1;
@@ -4325,7 +4325,7 @@ void ObjectMgr::SetHighestGuids()
         delete result;
     }
 
-    result = sDatabase.Query("SELECT MAX(`guid`) FROM `gameobject`" );
+    result = WorldDatabase.Query("SELECT MAX(`guid`) FROM `gameobject`" );
     if( result )
     {
         m_hiGoGuid = (*result)[0].GetUInt32()+1;
@@ -4333,7 +4333,7 @@ void ObjectMgr::SetHighestGuids()
         delete result;
     }
 
-    result = sDatabase.Query("SELECT MAX(`id`) FROM `auctionhouse`" );
+    result = CharacterDatabase.Query("SELECT MAX(`id`) FROM `auctionhouse`" );
     if( result )
     {
         m_auctionid = (*result)[0].GetUInt32()+1;
@@ -4344,7 +4344,7 @@ void ObjectMgr::SetHighestGuids()
     {
         m_auctionid = 0;
     }
-    result = sDatabase.Query( "SELECT MAX(`id`) FROM `mail`" );
+    result = CharacterDatabase.Query( "SELECT MAX(`id`) FROM `mail`" );
     if( result )
     {
         m_mailid = (*result)[0].GetUInt32()+1;
@@ -4355,7 +4355,7 @@ void ObjectMgr::SetHighestGuids()
     {
         m_mailid = 0;
     }
-    result = sDatabase.Query( "SELECT MAX(`id`) FROM `item_text`" );
+    result = CharacterDatabase.Query( "SELECT MAX(`id`) FROM `item_text`" );
     if( result )
     {
         m_ItemTextId = (*result)[0].GetUInt32();
@@ -4365,7 +4365,7 @@ void ObjectMgr::SetHighestGuids()
     else
         m_ItemTextId = 0;
 
-    result = sDatabase.Query( "SELECT MAX(`guid`) FROM `corpse`" );
+    result = CharacterDatabase.Query( "SELECT MAX(`guid`) FROM `corpse`" );
     if( result )
     {
         m_hiCorpseGuid = (*result)[0].GetUInt32()+1;
@@ -4395,11 +4395,11 @@ uint32 ObjectMgr::CreateItemText(std::string text)
     //insert new itempage to container
     mItemTexts[ newItemTextId ] = text;
     //save new itempage
-    sDatabase.escape_string(text);
+    CharacterDatabase.escape_string(text);
     //any Delete query needed, itemTextId is maximum of all ids
     std::ostringstream query;
     query << "INSERT INTO `item_text` (`id`,`text`) VALUES ( '" << newItemTextId << "', '" << text << "')";
-    sDatabase.Execute(query.str().c_str());                 //needs to be run this way, because mail body may be more than 1024 characters
+    CharacterDatabase.Execute(query.str().c_str());                 //needs to be run this way, because mail body may be more than 1024 characters
     return newItemTextId;
 }
 
@@ -4421,7 +4421,7 @@ uint32 ObjectMgr::GenerateLowGuid(uint32 guidhigh)
 
 void ObjectMgr::LoadGameObjectLocales()
 {
-    QueryResult *result = sDatabase.Query("SELECT `entry`,`name_loc1`,`name_loc2`,`name_loc3`,`name_loc4`,`name_loc5`,`name_loc6`,`name_loc7` FROM `locales_gameobject`");
+    QueryResult *result = WorldDatabase.Query("SELECT `entry`,`name_loc1`,`name_loc2`,`name_loc3`,`name_loc4`,`name_loc5`,`name_loc6`,`name_loc7` FROM `locales_gameobject`");
 
     if(!result)
     {
@@ -4479,7 +4479,7 @@ void ObjectMgr::LoadGameobjectInfo()
 void ObjectMgr::LoadExplorationBaseXP()
 {
     uint32 count = 0;
-    QueryResult *result = sDatabase.Query("SELECT `level`,`basexp` FROM `exploration_basexp`");
+    QueryResult *result = WorldDatabase.Query("SELECT `level`,`basexp` FROM `exploration_basexp`");
 
     if( !result )
     {
@@ -4520,7 +4520,7 @@ uint32 ObjectMgr::GetBaseXP(uint32 level)
 void ObjectMgr::LoadPetNames()
 {
     uint32 count = 0;
-    QueryResult *result = sDatabase.Query("SELECT `word`,`entry`,`half` FROM `pet_name_generation`");
+    QueryResult *result = WorldDatabase.Query("SELECT `word`,`entry`,`half` FROM `pet_name_generation`");
 
     if( !result )
     {
@@ -4558,7 +4558,7 @@ void ObjectMgr::LoadPetNames()
 
 void ObjectMgr::LoadPetNumber()
 {
-    QueryResult* result = sDatabase.Query("SELECT MAX(`id`) FROM `character_pet`");
+    QueryResult* result = CharacterDatabase.Query("SELECT MAX(`id`) FROM `character_pet`");
     if(result)
     {
         Field *fields = result->Fetch();
@@ -4626,7 +4626,7 @@ void ObjectMgr::LoadCorpses()
 {
     uint32 count = 0;
     //                                             0            1            2            3             4     5      6            7          8        9
-    QueryResult *result = sDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map`,`data`,`bones_flag`,`instance`,`player`,`guid` FROM `corpse` WHERE `bones_flag` = 0");
+    QueryResult *result = CharacterDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map`,`data`,`bones_flag`,`instance`,`player`,`guid` FROM `corpse` WHERE `bones_flag` = 0");
 
     if( !result )
     {
@@ -4761,7 +4761,7 @@ void ObjectMgr::LoadReputationOnKill()
     uint32 count = 0;
 
     //                                             0             1                      2
-    QueryResult *result = sDatabase.Query("SELECT `creature_id`,`RewOnKillRepFaction1`,`RewOnKillRepFaction2`,"
+    QueryResult *result = WorldDatabase.Query("SELECT `creature_id`,`RewOnKillRepFaction1`,`RewOnKillRepFaction2`,"
     //3              4              5                    6              7              8                   9
         "`IsTeamAward1`,`MaxStanding1`,`RewOnKillRepValue1`,`IsTeamAward2`,`MaxStanding2`,`RewOnKillRepValue2`,`TeamDependent` "
         "FROM `creature_onkill_reputation`");
@@ -4841,7 +4841,7 @@ void ObjectMgr::CleanupInstances()
     std::set< uint32 > InstanceSet;
 
     // creature_respawn
-    result = sDatabase.PQuery("SELECT DISTINCT(`instance`) FROM `creature_respawn` WHERE `instance` <> 0");
+    result = WorldDatabase.PQuery("SELECT DISTINCT(`instance`) FROM `creature_respawn` WHERE `instance` <> 0");
     if( result )
     {
         do
@@ -4854,7 +4854,7 @@ void ObjectMgr::CleanupInstances()
     }
 
     // gameobject_respawn
-    result = sDatabase.PQuery("SELECT DISTINCT(`instance`) FROM `gameobject_respawn` WHERE `instance` <> 0");
+    result = WorldDatabase.PQuery("SELECT DISTINCT(`instance`) FROM `gameobject_respawn` WHERE `instance` <> 0");
     if( result )
     {
         do
@@ -4867,7 +4867,7 @@ void ObjectMgr::CleanupInstances()
     }
 
     // character_instance
-    result = sDatabase.PQuery("SELECT DISTINCT(`instance`) FROM `character_instance`");
+    result = CharacterDatabase.PQuery("SELECT DISTINCT(`instance`) FROM `character_instance`");
     if( result )
     {
         do
@@ -4880,7 +4880,7 @@ void ObjectMgr::CleanupInstances()
     }
 
     // instance
-    result = sDatabase.PQuery("SELECT `id` FROM `instance`");
+    result = CharacterDatabase.PQuery("SELECT `id` FROM `instance`");
     if( result )
     {
         do
@@ -4896,7 +4896,7 @@ void ObjectMgr::CleanupInstances()
     // instances considered valid:
     //   1) reset time > current time
     //   2) bound to at least one character (id is found in `character_instance` table)
-    result = sDatabase.PQuery("SELECT DISTINCT(`instance`.`id`) AS `id` FROM `instance` LEFT JOIN `character_instance` ON (`character_instance`.`instance` = `instance`.`id`) WHERE (`instance`.`id` = `character_instance`.`instance`) AND (`instance`.`resettime` > " I64FMTD ")", (uint64)time(NULL));
+    result = CharacterDatabase.PQuery("SELECT DISTINCT(`instance`.`id`) AS `id` FROM `instance` LEFT JOIN `character_instance` ON (`character_instance`.`instance` = `instance`.`id`) WHERE (`instance`.`id` = `character_instance`.`instance`) AND (`instance`.`resettime` > " I64FMTD ")", (uint64)time(NULL));
     if( result )
     {
         do
@@ -4920,10 +4920,10 @@ void ObjectMgr::CleanupInstances()
     // remove all old instances from tables
     for (std::set< uint32 >::iterator i = InstanceSet.begin(); i != InstanceSet.end(); i++)
     {
-        sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `instance` = '%u'", *i);
-        sDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `instance` = '%u'", *i);
-        sDatabase.PExecute("DELETE FROM `corpse` WHERE `instance` = '%u'", *i);
-        sDatabase.PExecute("DELETE FROM `instance` WHERE `id` = '%u'", *i);
+        WorldDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `instance` = '%u'", *i);
+        WorldDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `instance` = '%u'", *i);
+        CharacterDatabase.PExecute("DELETE FROM `corpse` WHERE `instance` = '%u'", *i);
+        CharacterDatabase.PExecute("DELETE FROM `instance` WHERE `id` = '%u'", *i);
 
         bar.step();
     }
@@ -4940,7 +4940,7 @@ void ObjectMgr::PackInstances()
     std::set< uint32 > InstanceSet;
 
     // the check in query allows us to prevent table destruction in case of a bug we must never encounter
-    QueryResult *result = sDatabase.PQuery("SELECT DISTINCT(`instance`) FROM `character_instance` WHERE `instance` <> 0");
+    QueryResult *result = CharacterDatabase.PQuery("SELECT DISTINCT(`instance`) FROM `character_instance` WHERE `instance` <> 0");
     if( result )
     {
         do
@@ -4963,11 +4963,11 @@ void ObjectMgr::PackInstances()
         if (*i != InstanceNumber)
         {
             // remap instance id
-            sDatabase.PExecute("UPDATE `creature_respawn` SET `instance` = '%u' WHERE `instance` = '%u'", InstanceNumber, *i);
-            sDatabase.PExecute("UPDATE `gameobject_respawn` SET `instance` = '%u' WHERE `instance` = '%u'", InstanceNumber, *i);
-            sDatabase.PExecute("UPDATE `corpse` SET `instance` = '%u' WHERE `instance` = '%u'", InstanceNumber, *i);
-            sDatabase.PExecute("UPDATE `character_instance` SET `instance` = '%u' WHERE `instance` = '%u'", InstanceNumber, *i);
-            sDatabase.PExecute("UPDATE `instance` SET `id` = '%u' WHERE `id` = '%u'", InstanceNumber, *i);
+            WorldDatabase.PExecute("UPDATE `creature_respawn` SET `instance` = '%u' WHERE `instance` = '%u'", InstanceNumber, *i);
+            WorldDatabase.PExecute("UPDATE `gameobject_respawn` SET `instance` = '%u' WHERE `instance` = '%u'", InstanceNumber, *i);
+            CharacterDatabase.PExecute("UPDATE `corpse` SET `instance` = '%u' WHERE `instance` = '%u'", InstanceNumber, *i);
+            CharacterDatabase.PExecute("UPDATE `character_instance` SET `instance` = '%u' WHERE `instance` = '%u'", InstanceNumber, *i);
+            CharacterDatabase.PExecute("UPDATE `instance` SET `id` = '%u' WHERE `id` = '%u'", InstanceNumber, *i);
         }
 
         InstanceNumber++;
@@ -4983,7 +4983,7 @@ void ObjectMgr::LoadWeatherZoneChances()
     uint32 count = 0;
 
     //                                             0      1                    2                    3                     4                    5                    6                     7                  8                  9                   10                   11                   12
-    QueryResult *result = sDatabase.Query("SELECT `zone`,`spring_rain_chance`,`spring_snow_chance`,`spring_storm_chance`,`summer_rain_chance`,`summer_snow_chance`,`summer_storm_chance`,`fall_rain_chance`,`fall_snow_chance`,`fall_storm_chance`,`winter_rain_chance`,`winter_snow_chance`,`winter_storm_chance` FROM `game_weather`");
+    QueryResult *result = WorldDatabase.Query("SELECT `zone`,`spring_rain_chance`,`spring_snow_chance`,`spring_storm_chance`,`summer_rain_chance`,`summer_snow_chance`,`summer_storm_chance`,`fall_rain_chance`,`fall_snow_chance`,`fall_storm_chance`,`winter_rain_chance`,`winter_snow_chance`,`winter_storm_chance` FROM `game_weather`");
 
     if(!result)
     {
@@ -5044,9 +5044,9 @@ void ObjectMgr::LoadWeatherZoneChances()
 void ObjectMgr::SaveCreatureRespawnTime(uint32 loguid, uint32 instance, time_t t)
 {
     mCreatureRespawnTimes[MAKE_GUID(loguid,instance)] = t;
-    sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", loguid, instance);
+    WorldDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", loguid, instance);
     if(t)
-        sDatabase.PExecute("INSERT INTO `creature_respawn` VALUES ( '%u', '" I64FMTD "', '%u' )", loguid, uint64(t), instance);
+        WorldDatabase.PExecute("INSERT INTO `creature_respawn` VALUES ( '%u', '" I64FMTD "', '%u' )", loguid, uint64(t), instance);
 }
 
 void ObjectMgr::DeleteCreatureData(uint32 guid)
@@ -5068,9 +5068,9 @@ void ObjectMgr::DeleteCreatureData(uint32 guid)
 void ObjectMgr::SaveGORespawnTime(uint32 loguid, uint32 instance, time_t t)
 {
     mGORespawnTimes[MAKE_GUID(loguid,instance)] = t;
-    sDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", loguid, instance);
+    WorldDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `guid` = '%u' AND `instance` = '%u'", loguid, instance);
     if(t)
-        sDatabase.PExecute("INSERT INTO `gameobject_respawn` VALUES ( '%u', '" I64FMTD "', '%u' )", loguid, uint64(t), instance);
+        WorldDatabase.PExecute("INSERT INTO `gameobject_respawn` VALUES ( '%u', '" I64FMTD "', '%u' )", loguid, uint64(t), instance);
 }
 
 void ObjectMgr::DeleteRespawnTimeForInstance(uint32 instance)
@@ -5095,8 +5095,8 @@ void ObjectMgr::DeleteRespawnTimeForInstance(uint32 instance)
             mCreatureRespawnTimes.erase(itr);
     }
 
-    sDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `instance` = '%u'", instance);
-    sDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `instance` = '%u'", instance);
+    WorldDatabase.PExecute("DELETE FROM `creature_respawn` WHERE `instance` = '%u'", instance);
+    WorldDatabase.PExecute("DELETE FROM `gameobject_respawn` WHERE `instance` = '%u'", instance);
 }
 
 void ObjectMgr::DeleteGOData(uint32 guid)
@@ -5133,7 +5133,7 @@ void ObjectMgr::LoadQuestRelationsHelper(QuestRelations& map,char const* table)
 
     uint32 count = 0;
 
-    QueryResult *result = sDatabase.PQuery("SELECT `id`,`quest` FROM `%s`",table);
+    QueryResult *result = WorldDatabase.PQuery("SELECT `id`,`quest` FROM `%s`",table);
 
     if(!result)
     {
@@ -5179,7 +5179,7 @@ void ObjectMgr::LoadSpellScriptTarget()
 
     uint32 count = 0;
 
-    QueryResult *result = sDatabase.Query("SELECT `entry`,`type`,`targetEntry` FROM `spell_script_target`");
+    QueryResult *result = WorldDatabase.Query("SELECT `entry`,`type`,`targetEntry` FROM `spell_script_target`");
 
     if(!result)
     {
@@ -5312,7 +5312,7 @@ std::string CreateDumpString(char const* tableName, QueryResult *result)
         else ss << ", '";
 
         std::string s = fields[i].GetCppString();
-        sDatabase.escape_string(s);
+        CharacterDatabase.escape_string(s);
         ss << s;
 
         ss << "'";
@@ -5324,7 +5324,7 @@ std::string CreateDumpString(char const* tableName, QueryResult *result)
 bool DumpPlayerTable(FILE *file, uint32 guid, char const*tableFrom, char const*tableTo, uint8 type = 0)
 {
     if (!file || !tableFrom || !tableTo) return false;
-    QueryResult *result = sDatabase.PQuery("SELECT * FROM `%s` WHERE `%s` = '%d'", tableFrom, type != 3 ? "guid" : "owner_guid", guid);
+    QueryResult *result = CharacterDatabase.PQuery("SELECT * FROM `%s` WHERE `%s` = '%d'", tableFrom, type != 3 ? "guid" : "owner_guid", guid);
     if (!result) return false;
     do
     {
@@ -5451,7 +5451,7 @@ bool changetokItem(std::string &str, int n, std::map<uint32, uint32> &items, uin
     return changetoknth(str, n, chritem, false, nonzero);
 }
 
-#define ROLLBACK {sDatabase.RollbackTransaction(); fclose(fin); return false;}
+#define ROLLBACK {CharacterDatabase.RollbackTransaction(); fclose(fin); return false;}
 
 extern std::string notAllowedChars;
 
@@ -5467,7 +5467,7 @@ bool ObjectMgr::LoadPlayerDump(std::string file, uint32 account, std::string nam
     bool incHighest = true;
     if(guid != 0 && guid < m_hiCharGuid)
     {
-        result = sDatabase.PQuery("SELECT * FROM `character` WHERE `guid` = '%d'", guid);
+        result = CharacterDatabase.PQuery("SELECT * FROM `character` WHERE `guid` = '%d'", guid);
         if (result)
         {
             guid = m_hiCharGuid;                            // use first free if exists
@@ -5480,9 +5480,9 @@ bool ObjectMgr::LoadPlayerDump(std::string file, uint32 account, std::string nam
     // normalize the name if specified and check if it exists
     if(name != "" && name.find_first_of(notAllowedChars) == name.npos)
     {
-        sDatabase.escape_string(name);
+        CharacterDatabase.escape_string(name);
         normalizePlayerName(name);
-        result = sDatabase.PQuery("SELECT * FROM `character` WHERE `name` = '%s'", name.c_str());
+        result = CharacterDatabase.PQuery("SELECT * FROM `character` WHERE `name` = '%s'", name.c_str());
         if (result)
         {
             name = "";                                      // use the one from the dump
@@ -5497,7 +5497,7 @@ bool ObjectMgr::LoadPlayerDump(std::string file, uint32 account, std::string nam
     std::map<uint32, uint32> items;
     char buf[32000] = "";
 
-    sDatabase.BeginTransaction();
+    CharacterDatabase.BeginTransaction();
     while(!feof(fin))
     {
         if(!fgets(buf, 32000, fin))
@@ -5536,7 +5536,7 @@ bool ObjectMgr::LoadPlayerDump(std::string file, uint32 account, std::string nam
             {
                 // check if the original name already exists
                 name = getnth(line, 4);
-                result = sDatabase.PQuery("SELECT * FROM `character` WHERE `name` = '%s'", name.c_str());
+                result = CharacterDatabase.PQuery("SELECT * FROM `character` WHERE `name` = '%s'", name.c_str());
                 if (result)
                 {
                     delete result;
@@ -5562,9 +5562,9 @@ bool ObjectMgr::LoadPlayerDump(std::string file, uint32 account, std::string nam
             if(!changenth(line, 3, vals.c_str())) ROLLBACK;
         }
 
-        if(!sDatabase.Execute(line.c_str())) ROLLBACK;
+        if(!CharacterDatabase.Execute(line.c_str())) ROLLBACK;
     }
-    sDatabase.CommitTransaction();
+    CharacterDatabase.CommitTransaction();
     m_hiItemGuid += items.size();
     if(incHighest) m_hiCharGuid++;
     fclose(fin);
@@ -5575,7 +5575,7 @@ void ObjectMgr::LoadReservedPlayersNames()
 {
     m_ReservedNames.clear();                                // need for reload case
 
-    QueryResult *result = sDatabase.PQuery("SELECT `name` FROM `reserved_name`");
+    QueryResult *result = WorldDatabase.PQuery("SELECT `name` FROM `reserved_name`");
 
     uint32 count = 0;
 

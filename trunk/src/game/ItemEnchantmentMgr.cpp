@@ -51,7 +51,7 @@ void LoadRandomEnchantmentsTable()
     float chance;
     uint32 count = 0;
 
-    QueryResult *result = sDatabase.Query("SELECT `entry`, `ench`, `chance` FROM `item_enchantment_template`");
+    QueryResult *result = WorldDatabase.Query("SELECT `entry`, `ench`, `chance` FROM `item_enchantment_template`");
 
     if (result)
     {

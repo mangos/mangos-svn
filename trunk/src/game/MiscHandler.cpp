@@ -315,7 +315,7 @@ void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & /*recv_data*/ )
     Field *fields;
     guid = GetPlayer()->GetGUID();
 
-    QueryResult *result = sDatabase.PQuery("SELECT COUNT(`ticket_id`) FROM `character_ticket` WHERE `guid` = '%u'", GUID_LOPART(guid));
+    QueryResult *result = CharacterDatabase.PQuery("SELECT COUNT(`ticket_id`) FROM `character_ticket` WHERE `guid` = '%u'", GUID_LOPART(guid));
 
     if (result)
     {
@@ -326,7 +326,7 @@ void WorldSession::HandleGMTicketGetTicketOpcode( WorldPacket & /*recv_data*/ )
 
         if ( cnt > 0 )
         {
-            QueryResult *result2 = sDatabase.PQuery("SELECT `ticket_text` FROM `character_ticket` WHERE `guid` = '%u'", GUID_LOPART(guid));
+            QueryResult *result2 = CharacterDatabase.PQuery("SELECT `ticket_text` FROM `character_ticket` WHERE `guid` = '%u'", GUID_LOPART(guid));
             if(result2)
             {
                 Field *fields2 = result2->Fetch();
@@ -346,15 +346,15 @@ void WorldSession::HandleGMTicketUpdateTextOpcode( WorldPacket & recv_data )
     recv_data >> unk;
     recv_data >> ticketText;
 
-    sDatabase.escape_string(ticketText);
-    sDatabase.PExecute("UPDATE `character_ticket` SET `ticket_text` = '%s' WHERE `guid` = '%u'", ticketText.c_str(), _player->GetGUIDLow());
+    CharacterDatabase.escape_string(ticketText);
+    CharacterDatabase.PExecute("UPDATE `character_ticket` SET `ticket_text` = '%s' WHERE `guid` = '%u'", ticketText.c_str(), _player->GetGUIDLow());
 }
 
 void WorldSession::HandleGMTicketDeleteOpcode( WorldPacket & /*recv_data*/ )
 {
     uint32 guid = GetPlayer()->GetGUIDLow();
 
-    sDatabase.PExecute("DELETE FROM `character_ticket` WHERE `guid` = '%u' LIMIT 1",guid);
+    CharacterDatabase.PExecute("DELETE FROM `character_ticket` WHERE `guid` = '%u' LIMIT 1",guid);
 
     WorldPacket data( SMSG_GMTICKET_DELETETICKET, 8 );
     data << uint32(9);
@@ -378,9 +378,9 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
 
     sLog.outDebug("TicketCreate: category %u, map %u, x %f, y %f, z %f, text %s, unk_text %s", category, map, x, y, z, ticketText.c_str(), unk_text.c_str());
 
-    sDatabase.escape_string(ticketText);
+    CharacterDatabase.escape_string(ticketText);
 
-    QueryResult *result = sDatabase.PQuery("SELECT COUNT(*) FROM `character_ticket` WHERE `guid` = '%u'", _player->GetGUIDLow());
+    QueryResult *result = CharacterDatabase.PQuery("SELECT COUNT(*) FROM `character_ticket` WHERE `guid` = '%u'", _player->GetGUIDLow());
 
     if (result)
     {
@@ -397,7 +397,7 @@ void WorldSession::HandleGMTicketCreateOpcode( WorldPacket & recv_data )
         }
         else
         {
-            sDatabase.PExecute("INSERT INTO `character_ticket` (`guid`,`ticket_text`,`ticket_category`) VALUES ('%u', '%s', '%u')", _player->GetGUIDLow(), ticketText.c_str(), category);
+            CharacterDatabase.PExecute("INSERT INTO `character_ticket` (`guid`,`ticket_text`,`ticket_category`) VALUES ('%u', '%s', '%u')", _player->GetGUIDLow(), ticketText.c_str(), category);
 
             WorldPacket data( SMSG_QUERY_TIME_RESPONSE, 4+4 );
             data << (uint32)time(NULL);
@@ -562,7 +562,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
         return;
 
     normalizePlayerName(friendName);
-    sDatabase.escape_string(friendName);                    // prevent SQL injection - normal name don't must changed by this call
+    CharacterDatabase.escape_string(friendName);                    // prevent SQL injection - normal name don't must changed by this call
 
     sLog.outDetail( "WORLD: %s asked to add friend : '%s'",
         GetPlayer()->GetName(), friendName.c_str() );
@@ -660,7 +660,7 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
         return;
 
     normalizePlayerName(IgnoreName);
-    sDatabase.escape_string(IgnoreName);                    // prevent SQL injection - normal name don't must changed by this call
+    CharacterDatabase.escape_string(IgnoreName);                    // prevent SQL injection - normal name don't must changed by this call
 
     sLog.outDetail( "WORLD: %s asked to Ignore: '%s'",
         GetPlayer()->GetName(), IgnoreName.c_str() );
@@ -751,9 +751,9 @@ void WorldSession::HandleBugOpcode( WorldPacket & recv_data )
     sLog.outDebug( type.c_str( ) );
     sLog.outDebug( content.c_str( ) );
 
-    sDatabase.escape_string(type);
-    sDatabase.escape_string(content);
-    sDatabase.PExecute ("INSERT INTO `bugreport` (`type`,`content`) VALUES('%s', '%s')", type.c_str( ), content.c_str( ));
+    CharacterDatabase.escape_string(type);
+    CharacterDatabase.escape_string(content);
+    CharacterDatabase.PExecute ("INSERT INTO `bugreport` (`type`,`content`) VALUES('%s', '%s')", type.c_str( ), content.c_str( ));
 }
 
 void WorldSession::HandleCorpseReclaimOpcode(WorldPacket &recv_data)

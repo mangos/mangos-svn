@@ -551,7 +551,7 @@ void World::SetInitialWorldSettings()
     loginDatabase.PExecute("UPDATE `realmlist` SET `icon` = %u WHERE `id` = '%d'", m_configs[CONFIG_GAME_TYPE],realmID);
 
     ///- Remove the bones after a restart
-    sDatabase.PExecute("DELETE FROM `corpse` WHERE `bones_flag` = '1'");
+    CharacterDatabase.PExecute("DELETE FROM `corpse` WHERE `bones_flag` = '1'");
 
     ///- Load the DBC files
     sLog.outString("Initialize data stores...");
@@ -738,7 +738,7 @@ void World::SetInitialWorldSettings()
     sprintf( isoDate, "%04d-%02d-%02d %02d:%02d:%02d",
         local.tm_year+1900, local.tm_mon+1, local.tm_mday, local.tm_hour, local.tm_min, local.tm_sec);
 
-    sDatabase.PExecute("insert into `uptime` (`startstring`, `starttime`, `uptime`) VALUES('%s', %ld, 0)", isoDate, m_startTime );
+    WorldDatabase.PExecute("insert into `uptime` (`startstring`, `starttime`, `uptime`) VALUES('%s', %ld, 0)", isoDate, m_startTime );
 
     m_timers[WUPDATE_OBJECTS].SetInterval(0);
     m_timers[WUPDATE_SESSIONS].SetInterval(0);
@@ -885,7 +885,7 @@ void World::Update(time_t diff)
 
                     ///- In any case clear the auction
                     //No SQL injection (Id is integer)
-                    sDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",itr->second->Id);
+                    CharacterDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",itr->second->Id);
                     objmgr.RemoveAItem(itr->second->item_guid);
                     delete itr->second;
                     AuctionMap->RemoveAuction(itr->first);
@@ -929,7 +929,7 @@ void World::Update(time_t diff)
         uint32 tmpDiff = (m_gameTime - m_startTime);
 
         m_timers[WUPDATE_UPTIME].Reset();
-        sDatabase.PExecute("update `uptime` set `uptime` = %d where `starttime` = %ld", tmpDiff, m_startTime);
+        WorldDatabase.PExecute("update `uptime` set `uptime` = %d where `starttime` = %ld", tmpDiff, m_startTime);
     }
 
     /// <li> Handle all other objects
@@ -1548,7 +1548,7 @@ uint8 World::BanAccount(std::string type, std::string nameOrIP, std::string dura
     else if(type=="character")
     {
         //No SQL injection as string is escaped
-        resultAccounts = sDatabase.PQuery("SELECT `account` FROM `character` WHERE `name` = '%s'",nameOrIP.c_str());
+        resultAccounts = CharacterDatabase.PQuery("SELECT `account` FROM `character` WHERE `name` = '%s'",nameOrIP.c_str());
     }
     else
         return BAN_SYNTAX_ERROR;                            //Syntax problem
@@ -1607,7 +1607,7 @@ bool World::RemoveBanAccount(std::string type, std::string nameOrIP)
         {
             normalizePlayerName(nameOrIP);
             //NO SQL injection as name is escaped
-            QueryResult *resultAccounts = sDatabase.PQuery("SELECT `account` FROM `character` WHERE `name` = '%s'",nameOrIP.c_str());
+            QueryResult *resultAccounts = CharacterDatabase.PQuery("SELECT `account` FROM `character` WHERE `name` = '%s'",nameOrIP.c_str());
             if(!resultAccounts)
                 return false;
             Field* fieldsAccount = resultAccounts->Fetch();
@@ -1774,7 +1774,7 @@ void World::ProcessCliCommands()
 void World::InitResultQueue()
 {
     m_resultQueue = new SqlResultQueue;
-    sDatabase.SetResultQueue(m_resultQueue);
+    CharacterDatabase.SetResultQueue(m_resultQueue);
 }
 
 void World::UpdateResultQueue()
@@ -1784,7 +1784,7 @@ void World::UpdateResultQueue()
 
 void World::UpdateRealmCharCount(uint32 accountId)
 {
-    sDatabase.AsyncPQuery(this, &World::_UpdateRealmCharCount, accountId,
+    CharacterDatabase.AsyncPQuery(this, &World::_UpdateRealmCharCount, accountId,
         "SELECT COUNT(guid) FROM `character` WHERE `account` = '%u'", accountId);
 }
 
@@ -1803,7 +1803,7 @@ void World::InitDailyQuestResetTime()
 {
     time_t mostRecentQuestTime;
 
-    QueryResult* result = sDatabase.Query("SELECT MAX(`time`) FROM `character_queststatus_daily`");
+    QueryResult* result = CharacterDatabase.Query("SELECT MAX(`time`) FROM `character_queststatus_daily`");
     if(result)
     {
         Field *fields = result->Fetch();
@@ -1841,7 +1841,7 @@ void World::InitDailyQuestResetTime()
 void World::ResetDailyQuests()
 {
     sLog.outDetail("Daily quests reset for all characters.");
-    sDatabase.Execute("DELETE FROM `character_queststatus_daily`");
+    CharacterDatabase.Execute("DELETE FROM `character_queststatus_daily`");
     for(SessionMap::iterator itr = m_sessions.begin(); itr != m_sessions.end(); ++itr)
         if(itr->second->GetPlayer())
             itr->second->GetPlayer()->ResetDailyQuestStatus();

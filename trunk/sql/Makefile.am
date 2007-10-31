@@ -1,4 +1,4 @@
-# Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
+# Copyright (C) 2005,2006,2007 world <http://www.worldproject.org/>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,13 +28,15 @@ pkgdatadir = $(datadir)/mangos/sql
 pkgdata_DATA = \
 	mangos.sql \
 	realmd.sql \
+	characters.sql \
 	create_mysql.sql \
 	drop_mysql.sql
 
 ## Additional files to include when running 'make dist'
-#  SQL files for MaNGOS database
+#  SQL files for world database
 EXTRA_DIST = \
 	create_mysql.sql \
 	drop_mysql.sql \
+	characters.sql \
 	mangos.sql \
 	realmd.sql

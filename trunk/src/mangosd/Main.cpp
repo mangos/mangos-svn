@@ -28,10 +28,12 @@
 #include "SystemConfig.h"
 
 #ifdef DO_POSTGRESQL
-DatabasePostgre sDatabase;                                  ///< Accessor to the mangos server database
+DatabasePostgre WorldDatabase;                                  ///< Accessor to the mangos server database
+DatabasePostgre CharacterDatabase;                                  ///< Accessor to the mangos server database
 DatabasePostgre loginDatabase;                              ///< Accessor to the realm/login database
 #else
-DatabaseMysql sDatabase;                                    ///< Accessor to the mangos server database
+DatabaseMysql WorldDatabase;                                    ///< Accessor to the world database
+DatabaseMysql CharacterDatabase;                              ///< Accessor to the character database
 DatabaseMysql loginDatabase;                                ///< Accessor to the realm/login database
 #endif
 

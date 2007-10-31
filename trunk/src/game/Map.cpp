@@ -246,7 +246,7 @@ i_resetTime(0), i_resetDelayTime(0), i_InstanceId(ainstanceId), i_maxPlayers(0),
 
         if(i_InstanceId!=0)
         {
-            QueryResult* result = sDatabase.PQuery("SELECT `resettime`, `data` FROM `instance` WHERE `map` = '%u' AND `id` = '%u'", id, i_InstanceId);
+            QueryResult* result = CharacterDatabase.PQuery("SELECT `resettime`, `data` FROM `instance` WHERE `map` = '%u' AND `id` = '%u'", id, i_InstanceId);
             if (result)
             {
                 Field* fields = result->Fetch();
@@ -550,10 +550,10 @@ void Map::InitResetTime()
         if(GetInstanceId())
         {
             const char* instance_data = i_data ? i_data->Save() : "";
-            sDatabase.BeginTransaction();
-            sDatabase.PExecute("DELETE FROM `instance` WHERE `id` = '%u'", GetInstanceId());
-            sDatabase.PExecute("INSERT INTO `instance` VALUES ('%u', '%u', '" I64FMTD "','%s')", GetInstanceId(), i_id, (uint64)this->i_resetTime, instance_data);
-            sDatabase.CommitTransaction();
+            CharacterDatabase.BeginTransaction();
+            CharacterDatabase.PExecute("DELETE FROM `instance` WHERE `id` = '%u'", GetInstanceId());
+            CharacterDatabase.PExecute("INSERT INTO `instance` VALUES ('%u', '%u', '" I64FMTD "','%s')", GetInstanceId(), i_id, (uint64)this->i_resetTime, instance_data);
+            CharacterDatabase.CommitTransaction();
         }
     }
 }

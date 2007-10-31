@@ -445,10 +445,10 @@ void GameObject::SaveToDB()
         << GetUInt32Value (GAMEOBJECT_ANIMPROGRESS) << ", "
         << GetUInt32Value (GAMEOBJECT_DYN_FLAGS) << ")";;
 
-    sDatabase.BeginTransaction();
-    sDatabase.PExecuteLog("DELETE FROM `gameobject` WHERE `guid` = '%u'", m_DBTableGuid);
-    sDatabase.PExecuteLog( ss.str( ).c_str( ) );
-    sDatabase.CommitTransaction();
+    WorldDatabase.BeginTransaction();
+    WorldDatabase.PExecuteLog("DELETE FROM `gameobject` WHERE `guid` = '%u'", m_DBTableGuid);
+    WorldDatabase.PExecuteLog( ss.str( ).c_str( ) );
+    WorldDatabase.CommitTransaction();
 }
 
 bool GameObject::LoadFromDB(uint32 guid, uint32 InstanceId)
@@ -512,7 +512,7 @@ void GameObject::DeleteFromDB()
 {
     objmgr.SaveGORespawnTime(m_DBTableGuid,GetInstanceId(),0);
     objmgr.DeleteGOData(m_DBTableGuid);
-    sDatabase.PExecute("DELETE FROM `gameobject` WHERE `guid` = '%u'", m_DBTableGuid);
+    WorldDatabase.PExecute("DELETE FROM `gameobject` WHERE `guid` = '%u'", m_DBTableGuid);
 }
 
 GameObjectInfo const *GameObject::GetGOInfo() const

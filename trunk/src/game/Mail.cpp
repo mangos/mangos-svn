@@ -57,7 +57,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     if (receiver.empty())
         return;
     normalizePlayerName(receiver);
-    //sDatabase.escape_string(receiver);                      // prevent SQL injection
+    //CharacterDatabase.escape_string(receiver);                      // prevent SQL injection
 
     Player* pl = _player;
 
@@ -95,7 +95,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     else
     {
         rc_team = objmgr.GetPlayerTeamByGUID(rc);
-        QueryResult* result = sDatabase.PQuery("SELECT COUNT(*) FROM `mail` WHERE `receiver` = '%u'", GUID_LOPART(rc));
+        QueryResult* result = CharacterDatabase.PQuery("SELECT COUNT(*) FROM `mail` WHERE `receiver` = '%u'", GUID_LOPART(rc));
         if(result)
         {
             Field *fields = result->Fetch();
@@ -172,12 +172,12 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
             pItem->DestroyForPlayer( pl );
         }
 
-        sDatabase.BeginTransaction();
+        CharacterDatabase.BeginTransaction();
         pItem->DeleteFromInventoryDB();                     //deletes item from character's inventory
         pItem->SaveToDB();                                  // recursive and not have transaction guard into self
         // owner in `data` will set at mail receive and item extracting
-        sDatabase.PExecute("UPDATE `item_instance` SET `owner_guid` = '%u' WHERE `guid`='%u'",GUID_LOPART(rc),pItem->GetGUIDLow());
-        sDatabase.CommitTransaction();
+        CharacterDatabase.PExecute("UPDATE `item_instance` SET `owner_guid` = '%u' WHERE `guid`='%u'",GUID_LOPART(rc),pItem->GetGUIDLow());
+        CharacterDatabase.CommitTransaction();
     }
     uint32 messagetype = MAIL_NORMAL;
     uint32 item_template = pItem ? pItem->GetEntry() : 0;   //item prototype
@@ -195,14 +195,14 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     else if (pItem)
         delete pItem;                                       //item is sent, but receiver isn't online .. so remove it from RAM
     // backslash all '
-    sDatabase.escape_string(subject);
-    //not needed : sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mID);
-    sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+    CharacterDatabase.escape_string(subject);
+    //not needed : CharacterDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mID);
+    CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
         "VALUES ('%u', '%u', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "','" I64FMTD "', '%u', '%u', '%d')",
         mailId, messagetype, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), itemTextId, GUID_LOPART(itemId), item_template, (uint64)etime, (uint64)dtime, money, COD, NOT_READ);
-    sDatabase.BeginTransaction();
+    CharacterDatabase.BeginTransaction();
     pl->SaveInventoryAndGoldToDB();
-    sDatabase.CommitTransaction();
+    CharacterDatabase.CommitTransaction();
 }
 
 //called when mail is read
@@ -261,7 +261,7 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
     }
     //we can return mail now
     //so firstly delete the old one
-    sDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", mailId);
+    CharacterDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", mailId);
     pl->RemoveMail(mailId);
 
     uint32 messageID = objmgr.GenerateMailID();
@@ -297,11 +297,11 @@ void WorldSession::SendReturnToSender(uint32 mailId, uint8 messageType, uint32 s
             needItemDelay = sender_acc != rc_account;
 
             // set owner to new receiver (to prevent delete item with sender char deleting)
-            sDatabase.BeginTransaction();
+            CharacterDatabase.BeginTransaction();
             pItem->SaveToDB();                                  // recursive and not have transaction guard into self
             // owner in `data` will set at mail receive and item extracting
-            sDatabase.PExecute("UPDATE `item_instance` SET `owner_guid` = '%u' WHERE `guid`='%u'",receiver_guid,pItem->GetGUIDLow());
-            sDatabase.CommitTransaction();
+            CharacterDatabase.PExecute("UPDATE `item_instance` SET `owner_guid` = '%u' WHERE `guid`='%u'",receiver_guid,pItem->GetGUIDLow());
+            CharacterDatabase.CommitTransaction();
         }
 
         // If theres is an item, there is a one hour delivery delay.
@@ -314,14 +314,14 @@ void WorldSession::SendReturnToSender(uint32 mailId, uint8 messageType, uint32 s
         else if ( pItem )
             delete pItem;
 
-        sDatabase.escape_string(subject);                       //we cannot forget to delete COD, if returning mail with COD
-        sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+        CharacterDatabase.escape_string(subject);                       //we cannot forget to delete COD, if returning mail with COD
+        CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
             "VALUES ('%u', '0', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "', '" I64FMTD "', '%u', '0', '%d')",
             mailId, sender_guid, receiver_guid, subject.c_str(), itemTextId, itemGuid, item_template, (uint64)expire_time, (uint64)deliver_time, money,RETURNED_CHECKED);
     }
     else if(pItem)
     {
-        sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid`='%u'",pItem->GetGUIDLow());
+        CharacterDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid`='%u'",pItem->GetGUIDLow());
         delete pItem;
     }
 }
@@ -402,8 +402,8 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
 
                 //escape apostrophes
                 std::string subject = m->subject;
-                sDatabase.escape_string(subject);
-                sDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+                CharacterDatabase.escape_string(subject);
+                CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
                     "VALUES ('%u', '0', '%u', '%u', '%s', '0', '0', '0', '" I64FMTD "', '" I64FMTD "', '%u', '0', '%d')",
                     newMailId, m->receiver, m->sender, subject.c_str(), (uint64)etime, (uint64)dtime, m->COD, COD_PAYMENT_CHECKED);
 
@@ -425,10 +425,10 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
             it->SetState(ITEM_NEW, pl);
         pl->ItemAddedQuestCheck(it2->GetEntry(),it2->GetCount());
 
-        sDatabase.BeginTransaction();
+        CharacterDatabase.BeginTransaction();
         pl->SaveInventoryAndGoldToDB();
         pl->_SaveMail();
-        sDatabase.CommitTransaction();
+        CharacterDatabase.CommitTransaction();
 
         pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_OK);
     }
@@ -461,10 +461,10 @@ void WorldSession::HandleTakeMoney(WorldPacket & recv_data )
     pl->m_mailsUpdated = true;
 
     // save money and mail to prevent cheating
-    sDatabase.BeginTransaction();
+    CharacterDatabase.BeginTransaction();
     pl->SetUInt32ValueInDB(PLAYER_FIELD_COINAGE,pl->GetMoney(),pl->GetGUID());
     pl->_SaveMail();
-    sDatabase.CommitTransaction();
+    CharacterDatabase.CommitTransaction();
 }
 
 //called when player lists his received mails

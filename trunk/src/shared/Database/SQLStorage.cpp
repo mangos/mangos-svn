@@ -21,9 +21,9 @@
 #include "Log.h"
 
 #ifdef DO_POSTGRESQL
-extern DatabasePostgre  sDatabase;
+extern DatabasePostgre  WorldDatabase;
 #else
-extern DatabaseMysql  sDatabase;
+extern DatabaseMysql  WorldDatabase;
 #endif
 
 const char CreatureInfofmt[]="iiiiissiiiiiiiiiififfiiiiiiiiiiiffiiliiiiiiiiiiiiiiiisiillis";
@@ -73,7 +73,7 @@ void SQLStorage::Load ()
 {
     uint32 maxi;
     Field *fields;
-    QueryResult *result  = sDatabase.PQuery("SELECT MAX(`%s`) FROM `%s`",entry_field,table);
+    QueryResult *result  = WorldDatabase.PQuery("SELECT MAX(`%s`) FROM `%s`",entry_field,table);
     if(!result)
     {
         sLog.outError("Error loading `%s` table (not exist?)\n",table);
@@ -83,7 +83,7 @@ void SQLStorage::Load ()
     maxi= (*result)[0].GetUInt32()+1;
     delete result;
 
-    result = sDatabase.PQuery("SELECT COUNT(*) FROM `%s`",table);
+    result = WorldDatabase.PQuery("SELECT COUNT(*) FROM `%s`",table);
     if(result)
     {
         fields = result->Fetch();
@@ -93,7 +93,7 @@ void SQLStorage::Load ()
     else
         RecordCount = 0;
 
-    result = sDatabase.PQuery("SELECT * FROM `%s`",table);
+    result = WorldDatabase.PQuery("SELECT * FROM `%s`",table);
 
     if(!result)
     {

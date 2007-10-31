@@ -31,7 +31,8 @@
 #include "Database/QueryResultPostgre.h"
 #include "Database/Database.h"
 #include "Database/DatabasePostgre.h"
-extern DatabasePostgre sDatabase;
+extern DatabasePostgre WorldDatabase;
+extern DatabasePostgre CharacterDatabase;
 extern DatabasePostgre loginDatabase;
 #else
 #include "Database/QueryResultMysql.h"
@@ -39,7 +40,8 @@ extern DatabasePostgre loginDatabase;
 #include "Database/Database.h"
 #include "Database/DatabaseMysql.h"
 #include "Database/DatabaseSqlite.h"
-extern DatabaseMysql sDatabase;
+extern DatabaseMysql WorldDatabase;
+extern DatabaseMysql CharacterDatabase;
 extern DatabaseMysql loginDatabase;
 #endif
 #endif

@@ -47,7 +47,7 @@ WaypointMovementGenerator<Creature>::LoadPath(Creature &c)
     QueryResult *result = NULL;
     sLog.outDebug("DEBUG: WaypointMovementGenerator::_load: GUID - %d", c.GetGUIDLow());
     // Identify by GUID
-    result = sDatabase.PQuery("SELECT `position_x`, `position_y`, `position_z`, `orientation`, `model1`, `model2`, `waittime`, `emote`, `spell`, `text1`, `text2`, `text3`, `text4`, `text5`, `aiscript` FROM `creature_movement` WHERE `id` = '%u' ORDER BY `point`", c.GetDBTableGUIDLow());
+    result = WorldDatabase.PQuery("SELECT `position_x`, `position_y`, `position_z`, `orientation`, `model1`, `model2`, `waittime`, `emote`, `spell`, `text1`, `text2`, `text3`, `text4`, `text5`, `aiscript` FROM `creature_movement` WHERE `id` = '%u' ORDER BY `point`", c.GetDBTableGUIDLow());
     /*
     if( result ) {
     sLog.outDebug("DEBUG: Number of hits: %d", result->GetRowCount());
@@ -157,7 +157,7 @@ WaypointMovementGenerator<Creature>::ClearWaypoints()
 void
 WaypointMovementGenerator<Creature>::Initialize()
 {
-    QueryResult *result = sDatabase.Query("SELECT distinct(`id`) as uniqueid FROM `creature_movement`");
+    QueryResult *result = WorldDatabase.Query("SELECT distinct(`id`) as uniqueid FROM `creature_movement`");
 
     if( result )
     {

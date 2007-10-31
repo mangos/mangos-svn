@@ -323,10 +323,10 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
         _player->pTrader->ClearTrade();
 
         // desynchronized with the other saves here (SaveInventoryAndGoldToDB() not have own transaction guards)
-        sDatabase.BeginTransaction();
+        CharacterDatabase.BeginTransaction();
         _player->SaveInventoryAndGoldToDB();
         _player->pTrader->SaveInventoryAndGoldToDB();
-        sDatabase.CommitTransaction();
+        CharacterDatabase.CommitTransaction();
 
         _player->pTrader->GetSession()->SendTradeStatus(TRADE_STATUS_TRADE_COMPLETE);
         SendTradeStatus(TRADE_STATUS_TRADE_COMPLETE);

@@ -197,7 +197,7 @@ void Item::SaveToDB()
             uint32 Rows=0;
 
             // it's better than rebuilding indexes multiple times
-            QueryResult *result = sDatabase.PQuery("select count(*) as r from `item_instance` where `guid` = '%u'", guid);
+            QueryResult *result = CharacterDatabase.PQuery("select count(*) as r from `item_instance` where `guid` = '%u'", guid);
             if(result)
             {
                 Rows = result->Fetch()[0].GetUInt32();
@@ -214,7 +214,7 @@ void Item::SaveToDB()
                     ss << GetUInt32Value(i) << " ";
                 ss << "' )";
 
-                sDatabase.Execute( ss.str().c_str() );
+                CharacterDatabase.Execute( ss.str().c_str() );
             } else
             {
                 std::ostringstream ss;
@@ -222,7 +222,7 @@ void Item::SaveToDB()
                 for(uint16 i = 0; i < m_valuesCount; i++ )
                     ss << GetUInt32Value(i) << " ";
                 ss << "' WHERE `guid` = '" << guid << "'";
-                sDatabase.Execute( ss.str().c_str() );
+                CharacterDatabase.Execute( ss.str().c_str() );
             };
         } break;
         case ITEM_CHANGED:
@@ -233,18 +233,18 @@ void Item::SaveToDB()
                 ss << GetUInt32Value(i) << " ";
             ss << "', `owner_guid` = '" << GUID_LOPART(GetOwnerGUID()) << "' WHERE `guid` = '" << guid << "'";
 
-            sDatabase.Execute( ss.str().c_str() );
+            CharacterDatabase.Execute( ss.str().c_str() );
 
             if(HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_WRAPPED))
-                sDatabase.PExecute("UPDATE `character_gifts` SET `guid` = '%u' WHERE `item_guid` = '%u'", GUID_LOPART(GetOwnerGUID()),GetGUIDLow());
+                CharacterDatabase.PExecute("UPDATE `character_gifts` SET `guid` = '%u' WHERE `item_guid` = '%u'", GUID_LOPART(GetOwnerGUID()),GetGUIDLow());
         } break;
         case ITEM_REMOVED:
         {
             if (GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID) > 0 )
-                sDatabase.PExecute("DELETE FROM `item_text` WHERE `id` = '%u'", GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID));
-            sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", guid);
+                CharacterDatabase.PExecute("DELETE FROM `item_text` WHERE `id` = '%u'", GetUInt32Value(ITEM_FIELD_ITEM_TEXT_ID));
+            CharacterDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", guid);
             if(HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_WRAPPED))
-                sDatabase.PExecute("DELETE FROM `character_gifts` WHERE `item_guid` = '%u'", GetGUIDLow());
+                CharacterDatabase.PExecute("DELETE FROM `character_gifts` WHERE `item_guid` = '%u'", GetGUIDLow());
             delete this;
             return;
         }
@@ -259,7 +259,7 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult *result)
     bool delete_result = false;
     if(!result)
     {
-        result = sDatabase.PQuery("SELECT `data` FROM `item_instance` WHERE `guid` = '%u'", guid);
+        result = CharacterDatabase.PQuery("SELECT `data` FROM `item_instance` WHERE `guid` = '%u'", guid);
         delete_result = true;
     }
 
@@ -290,12 +290,12 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult *result)
 
 void Item::DeleteFromDB()
 {
-    sDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'",GetGUIDLow());
+    CharacterDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'",GetGUIDLow());
 }
 
 void Item::DeleteFromInventoryDB()
 {
-    sDatabase.PExecute("DELETE FROM `character_inventory` WHERE `item` = '%u'",GetGUIDLow());
+    CharacterDatabase.PExecute("DELETE FROM `character_inventory` WHERE `item` = '%u'",GetGUIDLow());
 }
 
 ItemPrototype const *Item::GetProto() const

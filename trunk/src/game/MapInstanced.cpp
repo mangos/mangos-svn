@@ -218,7 +218,7 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
             // the aforementioned "very special" case of leader being not online
             sLog.outDebug("MAPINSTANCED: Instantiating map for player '%s' (group leader is not online, querying DB)", player->GetName());
             instantiator_id = GUID_LOPART(player->GetGroup()->GetLeaderGUID());
-            QueryResult* result = sDatabase.PQuery("SELECT `instance` FROM `character_instance` WHERE (`guid` = '%u') AND (`map` = '%u') AND (`leader` = '%u')", instantiator_id, GetId(), instantiator_id);
+            QueryResult* result = CharacterDatabase.PQuery("SELECT `instance` FROM `character_instance` WHERE (`guid` = '%u') AND (`map` = '%u') AND (`leader` = '%u')", instantiator_id, GetId(), instantiator_id);
             if (result)
             {
                 // the instantiator has his instance bound
@@ -250,41 +250,41 @@ Map* MapInstanced::GetInstance(const WorldObject* obj)
         // bind instance to instantiator (only if needed)
         if (!instantiator_bound)
         {
-            sDatabase.BeginTransaction();
+            CharacterDatabase.BeginTransaction();
             if (instantiator_online)
             {
                 // player online, normal bind
                 instantiator->m_BoundInstances[GetId()] = std::pair< uint32, uint32 >(InstanceId, instantiator_id);
-                sDatabase.PExecute("DELETE FROM `character_instance` WHERE (`guid` = '%u') AND (`map` = '%u')", instantiator_id, GetId());
-                sDatabase.PExecute("INSERT INTO `character_instance` VALUES ('%u', '%u', '%u', '%u')", instantiator_id, GetId(), InstanceId, instantiator_id);
+                CharacterDatabase.PExecute("DELETE FROM `character_instance` WHERE (`guid` = '%u') AND (`map` = '%u')", instantiator_id, GetId());
+                CharacterDatabase.PExecute("INSERT INTO `character_instance` VALUES ('%u', '%u', '%u', '%u')", instantiator_id, GetId(), InstanceId, instantiator_id);
             }
             else
             {
                 // the aforementioned "very special" case of leader being not online
-                sDatabase.PExecute("DELETE FROM `character_instance` WHERE (`guid` = '%u') AND (`map` = '%u')", GUID_LOPART(player->GetGroup()->GetLeaderGUID()), GetId());
-                sDatabase.PExecute("INSERT INTO `character_instance` VALUES ('%u', '%u', '%u', '%u')", GUID_LOPART(player->GetGroup()->GetLeaderGUID()), GetId(), InstanceId, GUID_LOPART(player->GetGroup()->GetLeaderGUID()));
+                CharacterDatabase.PExecute("DELETE FROM `character_instance` WHERE (`guid` = '%u') AND (`map` = '%u')", GUID_LOPART(player->GetGroup()->GetLeaderGUID()), GetId());
+                CharacterDatabase.PExecute("INSERT INTO `character_instance` VALUES ('%u', '%u', '%u', '%u')", GUID_LOPART(player->GetGroup()->GetLeaderGUID()), GetId(), InstanceId, GUID_LOPART(player->GetGroup()->GetLeaderGUID()));
             }
-            sDatabase.CommitTransaction();
+            CharacterDatabase.CommitTransaction();
         }
 
         // bind instance to player (avoid duplicate binding)
         if (instantiator != player)
         {
-            sDatabase.BeginTransaction();
+            CharacterDatabase.BeginTransaction();
             if (instantiator_online)
             {
                 player->m_BoundInstances[GetId()] = std::pair< uint32, uint32 >(InstanceId, instantiator_id);
-                sDatabase.PExecute("DELETE FROM `character_instance` WHERE (`guid` = '%u') AND (`map` = '%u')", player->GetGUIDLow(), GetId());
-                sDatabase.PExecute("INSERT INTO `character_instance` VALUES ('%u', '%u', '%u', '%u')", player->GetGUIDLow(), GetId(), InstanceId, instantiator_id);
+                CharacterDatabase.PExecute("DELETE FROM `character_instance` WHERE (`guid` = '%u') AND (`map` = '%u')", player->GetGUIDLow(), GetId());
+                CharacterDatabase.PExecute("INSERT INTO `character_instance` VALUES ('%u', '%u', '%u', '%u')", player->GetGUIDLow(), GetId(), InstanceId, instantiator_id);
             }
             else
             {
                 // the aforementioned "very special" case of leader being not online
                 player->m_BoundInstances[GetId()] = std::pair< uint32, uint32 >(InstanceId, GUID_LOPART(player->GetGroup()->GetLeaderGUID()));
-                sDatabase.PExecute("DELETE FROM `character_instance` WHERE (`guid` = '%u') AND (`map` = '%u')", player->GetGUIDLow(), GetId());
-                sDatabase.PExecute("INSERT INTO `character_instance` VALUES ('%u', '%u', '%u', '%u')", player->GetGUIDLow(), GetId(), InstanceId, GUID_LOPART(player->GetGroup()->GetLeaderGUID()));
+                CharacterDatabase.PExecute("DELETE FROM `character_instance` WHERE (`guid` = '%u') AND (`map` = '%u')", player->GetGUIDLow(), GetId());
+                CharacterDatabase.PExecute("INSERT INTO `character_instance` VALUES ('%u', '%u', '%u', '%u')", player->GetGUIDLow(), GetId(), InstanceId, GUID_LOPART(player->GetGroup()->GetLeaderGUID()));
             }
-            sDatabase.CommitTransaction();
+            CharacterDatabase.CommitTransaction();
         }
     }
 
@@ -338,7 +338,7 @@ bool MapInstanced::IsValidInstance(uint32 InstanceId)
     }
 
     // verify, if the map theoretically exists but not loaded
-    QueryResult* result = sDatabase.PQuery("SELECT '1' FROM `instance` WHERE (`id` = '%u') AND (`map` = '%u') AND (`resettime` > " I64FMTD ")", InstanceId, GetId(), (uint64)time(NULL));
+    QueryResult* result = CharacterDatabase.PQuery("SELECT '1' FROM `instance` WHERE (`id` = '%u') AND (`map` = '%u') AND (`resettime` > " I64FMTD ")", InstanceId, GetId(), (uint64)time(NULL));
     if (result)
     {
         delete result;

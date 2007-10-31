@@ -199,8 +199,9 @@ void Master::Run()
         {
             loopCounter = 0;
             sLog.outDetail("Ping MySQL to keep connection alive");
-            delete sDatabase.Query("SELECT 1 FROM `command` LIMIT 1");
+            delete WorldDatabase.Query("SELECT 1 FROM `command` LIMIT 1");
             delete loginDatabase.Query("SELECT 1 FROM `realmlist` LIMIT 1");
+            delete CharacterDatabase.Query("SELECT 1 FROM `bugreport` LIMIT 1");
         }
     }
 
@@ -218,7 +219,8 @@ void Master::Run()
     clearOnlineAccounts();
 
     ///- Wait for delay threads to end
-    sDatabase.HaltDelayThread();
+    CharacterDatabase.HaltDelayThread();
+    WorldDatabase.HaltDelayThread();
     loginDatabase.HaltDelayThread();
 
     sLog.outString( "Halting process..." );
@@ -283,7 +285,21 @@ bool Master::_StartDB()
     sLog.outString("World Database: %s", dbstring.c_str());
 
     ///- Initialise the world database
-    if(!sDatabase.Initialize(dbstring.c_str()))
+    if(!WorldDatabase.Initialize(dbstring.c_str()))
+    {
+        sLog.outError("Cannot connect to world database %s",dbstring.c_str());
+        return false;
+    }
+
+    if(!sConfig.GetString("CharacterDatabaseInfo", &dbstring))
+    {
+        sLog.outError("Database not specified in configuration file");
+        return false;
+    }
+    sLog.outString("Character Database: %s", dbstring.c_str());
+
+    ///- Initialise the world database
+    if(!CharacterDatabase.Initialize(dbstring.c_str()))
     {
         sLog.outError("Cannot connect to world database %s",dbstring.c_str());
         return false;
@@ -316,7 +332,7 @@ bool Master::_StartDB()
     ///- Clean the database before starting
     clearOnlineAccounts();
 
-    QueryResult* result = sDatabase.Query("SELECT `version` FROM `db_version` LIMIT 1");
+    QueryResult* result = WorldDatabase.Query("SELECT `version` FROM `db_version` LIMIT 1");
     if(result)
     {
         Field* fields = result->Fetch();
@@ -340,7 +356,7 @@ void Master::clearOnlineAccounts()
         "WHERE `account`.`online` > 0 AND `account`.`id` = `realmcharacters`.`acctid` "
         "  AND `realmcharacters`.`realmid` = '%d'",realmID);
 
-    sDatabase.Execute("UPDATE `character` SET `online` = 0");
+    CharacterDatabase.Execute("UPDATE `character` SET `online` = 0");
 }
 
 /// Handle termination signals

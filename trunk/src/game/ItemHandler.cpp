@@ -904,8 +904,8 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
         return;
     }
 
-    sDatabase.BeginTransaction();
-    sDatabase.PExecute("INSERT INTO `character_gifts` VALUES ('%u', '%u', '%u', '%u')", GUID_LOPART(item->GetOwnerGUID()), item->GetGUIDLow(), item->GetEntry(), item->GetUInt32Value(ITEM_FIELD_FLAGS));
+    CharacterDatabase.BeginTransaction();
+    CharacterDatabase.PExecute("INSERT INTO `character_gifts` VALUES ('%u', '%u', '%u', '%u')", GUID_LOPART(item->GetOwnerGUID()), item->GetGUIDLow(), item->GetEntry(), item->GetUInt32Value(ITEM_FIELD_FLAGS));
     item->SetUInt32Value(OBJECT_FIELD_ENTRY, gift->GetUInt32Value(OBJECT_FIELD_ENTRY));
 
     switch (item->GetEntry())
@@ -923,7 +923,7 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
 
     if(item->GetState()==ITEM_NEW)                          // save new item, to have alway for `character_gifts` record in `item_template`
         item->SaveToDB();
-    sDatabase.CommitTransaction();
+    CharacterDatabase.CommitTransaction();
 
     uint32 count = 1;
     _player->DestroyItemCount(gift, count, true);
