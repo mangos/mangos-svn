@@ -175,7 +175,6 @@ CREATE TABLE `character` (
   `zone` int(11) unsigned NOT NULL default '0',
   `last_honor_date` int(11) unsigned NOT NULL default '0',
   `pending_honor` float NOT NULL default '0',
-  `pending_kills` int(11) NOT NULL default '0',
   `last_kill_date` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`),
   KEY `idx_account` (`account`),

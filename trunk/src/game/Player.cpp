@@ -12093,7 +12093,7 @@ float Player::GetFloatValueFromDB(uint16 index, uint64 guid)
 
 bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 {
-    ////                                             0      1         2      3      4      5       6            7            8            9     10            11         12          13          14          15           16            17                  18                  19                  20        21        22        23         24          25        26             27         [28]   [29]     30              31                32
+    ////                                                     0      1         2      3      4      5       6            7            8            9     10            11         12          13          14          15           16            17                  18                  19                  20        21        22        23         24          25        26             27         [28]   [29]     30              31                32
     //QueryResult *result = CharacterDatabase.PQuery("SELECT `guid`,`account`,`data`,`name`,`race`,`class`,`position_x`,`position_y`,`position_z`,`map`,`orientation`,`taximask`,`cinematic`,`totaltime`,`leveltime`,`rest_bonus`,`logout_time`,`is_logout_resting`,`resettalents_cost`,`resettalents_time`,`trans_x`,`trans_y`,`trans_z`,`trans_o`, `transguid`,`gmstate`,`stable_slots`,`at_login`,`zone`,`online`,`pending_honor`,`last_honor_date`,`last_kill_date` FROM `character` WHERE `guid` = '%u'", guid);
     QueryResult *result = holder->GetResult(PLAYER_LOGIN_QUERY_LOADFROM);
 
