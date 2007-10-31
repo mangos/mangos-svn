@@ -1,4 +1,4 @@
-# Copyright (C) 2005,2006,2007 world <http://www.worldproject.org/>
+# Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -33,7 +33,7 @@ pkgdata_DATA = \
 	drop_mysql.sql
 
 ## Additional files to include when running 'make dist'
-#  SQL files for world database
+#  SQL files for MaNGOS database
 EXTRA_DIST = \
 	create_mysql.sql \
 	drop_mysql.sql \
