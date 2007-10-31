@@ -1,5 +1,5 @@
 # MaNGOS Configuration file
-ConfVersion=2007071001
+ConfVersion=2007103101
 
 # RealmID must match the realmlist
 RealmID = 1
