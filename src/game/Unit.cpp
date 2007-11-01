@@ -1978,6 +1978,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
 
     if (*absorbDamage) *hitInfo |= HITINFO_ABSORB;
     if (*resistDamage) *hitInfo |= HITINFO_RESIST;
+
     cleanDamage->damage += *blocked_amount;
 
     if (*damage <= *absorbDamage + *resistDamage + *blocked_amount)
@@ -2116,8 +2117,6 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool is
     }
 
     DoAttackDamage (pVictim, &damage, &cleanDamage, &blocked_dmg, meleeSchool, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType);
-
-    cleanDamage.damage += blocked_dmg;
 
     if (hitInfo & HITINFO_MISS)
         //send miss
