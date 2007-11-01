@@ -124,7 +124,7 @@ void LoadSkillDiscoveryTable()
     else
     {
         sLog.outString();
-        sLog.outErrorDb( ">> Loaded 0 skill discovery definitions. DB table `skill_discovery_template` is empty." );
+        sLog.outString( ">> Loaded 0 skill discovery definitions. DB table `skill_discovery_template` is empty." );
     }
 }
 
@@ -142,7 +142,7 @@ uint32 GetSkillDiscoverySpell(uint32 skillId, uint32 spellId, Player* player)
                 return item_iter->spellId;
         }
 
-        return NULL;
+        return 0;
     }
 
     // check skill line case
@@ -156,8 +156,8 @@ uint32 GetSkillDiscoverySpell(uint32 skillId, uint32 spellId, Player* player)
                 return item_iter->spellId;
         }
 
-        return NULL;
+        return 0;
     }
 
-    return NULL;
+    return 0;
 }
