@@ -2998,13 +2998,24 @@ void Spell::EffectScriptEffect(uint32 i)
         // Orb teleport spells
         case 35376:
         case 35727:
+        case 25140:
+        case 29129:
+        case 29128:
+        case 25143:
+        case 25652:
+        case 25650:
         {
             uint32 spellid;
             switch(m_spellInfo->Id)
             {
                 case 35376: spellid =  25649; break;
                 case 35727: spellid =  35730; break;
-                // FIXME: exist 6 more similar scripting teleports
+                case 25140: spellid =  32571; break;
+                case 29129: spellid =  32569; break;
+                case 29128: spellid =  32568; break;
+                case 25143: spellid =  32572; break;
+                case 25652: spellid =  30141; break;
+                case 25650: spellid =  30140; break;
                 default:
                     return;
             }
