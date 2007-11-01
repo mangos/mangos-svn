@@ -1302,7 +1302,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
                 pdamage = SpellDamageBonus(pVictim,spellProto,pdamage,DOT);
             }
             else
-                pdamage = GetHealth()*(100+mod->m_amount)/100;
+                pdamage = uint32(GetMaxHealth()*mod->m_amount/100);
 
             sLog.outDetail("PeriodicAuraLog: %u (TypeId: %u) attacked %u (TypeId: %u) for %u dmg inflicted by %u abs is %u",
                 GetGUIDLow(), GetTypeId(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), pdamage, spellProto->Id,absorb);
