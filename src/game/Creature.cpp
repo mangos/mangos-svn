@@ -839,7 +839,7 @@ std::string Creature::GetGossipTitle(uint8 type,uint32 id)
         if(i->Id==id && i->NpcFlag==(uint32)type)
             return i->Option;
     }
-    return NULL;
+    return "";
 }
 
 GossipOption const* Creature::GetGossipOption( uint32 id ) const
