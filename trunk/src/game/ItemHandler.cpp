@@ -299,9 +299,9 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
                 data << uint32(0);
                 data << uint32(0);
                 data << uint32(0);
+                data << uint32(-1);
                 data << uint32(0);
-                data << uint32(0);
-                data << uint32(0);
+                data << uint32(-1);
             }
         }
         data << pProto->Bonding;
