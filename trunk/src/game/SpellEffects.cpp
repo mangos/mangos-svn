@@ -2799,7 +2799,6 @@ void Spell::EffectWeaponDmg(uint32 i)
 
     if (eff_damage > (absorbed_dmg + resisted_dmg + blocked_dmg))
     {
-        cleanDamage.damage += (blocked_dmg);
         eff_damage -= (absorbed_dmg + resisted_dmg + blocked_dmg);
     }
     else
