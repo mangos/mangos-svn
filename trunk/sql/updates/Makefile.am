@@ -506,6 +506,7 @@ pkgdata_DATA = \
 	4657_quest_template.sql \
 	4664.sql \
 	4667_characters_character.sql \
+	4674_mangos_skill_discovery_template.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -992,5 +993,6 @@ EXTRA_DIST = \
 	4657_quest_template.sql \
 	4664.sql \
 	4667_characters_character.sql \
+	4674_mangos_skill_discovery_template.sql \
 	README
 

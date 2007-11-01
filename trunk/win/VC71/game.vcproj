@@ -368,6 +368,12 @@
 				RelativePath="..\..\src\game\ScriptCalls.h">
 			</File>
 			<File
+				RelativePath="..\..\src\game\SkillDiscovery.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\SkillDiscovery.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\SkillHandler.cpp">
 			</File>
 			<File

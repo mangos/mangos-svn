@@ -9327,6 +9327,26 @@ CREATE TABLE `reserved_name` (
 
 
 --
+-- Definition of table `skill_discovery_template`
+--
+
+DROP TABLE IF EXISTS `skill_discovery_template`;
+CREATE TABLE `skill_discovery_template` (
+  `spellId` int(11) unsigned NOT NULL default '0' COMMENT 'SpellId of the discoverable spell',
+  `reqSpell` int(11) unsigned NOT NULL default '0' COMMENT 'spell requirement',
+  `chance` float NOT NULL default '0' COMMENT 'chance to discover',
+  PRIMARY KEY  (`spellId`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Skill Discovery System';
+
+--
+-- Dumping data for table `skill_discovery_template`
+--
+
+/*!40000 ALTER TABLE `skill_discovery_template` DISABLE KEYS */;
+/*!40000 ALTER TABLE `skill_discovery_template` ENABLE KEYS */;
+
+
+--
 -- Definition of table `skinning_loot_template`
 --
 
