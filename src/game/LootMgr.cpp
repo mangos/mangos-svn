@@ -112,14 +112,7 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
                     continue;
                 }
             }
-            else
-            {
-                if(item!=0)
-                {
-                    ssNonLootableItems << "loot entry = " << entry << " item = " << item << " chanceOrRef = " << chanceOrRef << " maxcount = " << maxcount << " (item must be =0 in case chanceOrRef < 0)\n";
-                    continue;
-                }
-            }
+            // in case chanceOrRef < 0 item is loot ref slot index in fact that allow have more one refs in loot
 
             lootstore[entry].push_back( LootStoreItem(item, displayid, chanceOrRef, questchance,is_ffa,mincount,maxcount) );
 
