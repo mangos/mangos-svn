@@ -1978,7 +1978,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
 
     if (*absorbDamage) *hitInfo |= HITINFO_ABSORB;
     if (*resistDamage) *hitInfo |= HITINFO_RESIST;
-    cleanDamage += *blocked_amount;
+    cleanDamage->damage += *blocked_amount;
 
     if (*damage <= *absorbDamage + *resistDamage + *blocked_amount)
     {
