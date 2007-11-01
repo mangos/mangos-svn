@@ -27,6 +27,7 @@
 #include "WorldSession.h"
 #include "UpdateMask.h"
 #include "Player.h"
+#include "SkillDiscovery.h"
 #include "QuestDef.h"
 #include "GossipDef.h"
 #include "UpdateData.h"
@@ -4272,6 +4273,14 @@ bool Player::UpdateCraftSkill(uint32 spellid)
     if ( !SkillId ) return false;
 
     uint32 SkillValue = GetPureSkillValue(SkillId);
+
+    // Alchemy Discoveries here
+    SpellEntry const* spellEntry = sSpellStore.LookupEntry(spellid);
+    if(spellEntry && spellEntry->Mechanic==MECHANIC_DISCOVERY)
+    {
+        if(uint32 discoveredSpell = GetSkillDiscoverySpell(pAbility->skillId, spellid, this))
+            learnSpell(discoveredSpell);
+    }
 
     return UpdateSkillPro(pAbility->skillId, SkillGainChance(SkillValue,
         pAbility->max_value,

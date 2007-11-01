@@ -38,6 +38,7 @@
 #include "CellImpl.h"
 #include "Weather.h"
 #include "TargetedMovementGenerator.h"
+#include "SkillDiscovery.h"
 #include "SystemConfig.h"
 #include "Config/ConfigEnv.h"
 
@@ -109,6 +110,7 @@ bool ChatHandler::HandleReloadAllScriptsCommand(const char*)
 
 bool ChatHandler::HandleReloadAllSpellCommand(const char*)
 {
+    HandleReloadSkillDiscoveryTemplateCommand("a");
     HandleReloadSpellAffectCommand("a");
     HandleReloadSpellChainCommand("a");
     HandleReloadSpellLearnSkillCommand("a");
@@ -261,6 +263,16 @@ bool ChatHandler::HandleReloadReservedNameCommand(const char*)
     SendGlobalSysMessage("DB table `reserved_name` (player reserved names) reloaded.");
     return true;
 }
+
+bool ChatHandler::HandleReloadSkillDiscoveryTemplateCommand(const char* args)
+{
+    sLog.outString( "Re-Loading Skill Discovery Table..." );
+    LoadSkillDiscoveryTable();
+    SendGlobalSysMessage("DB table `skill_discovery_template` (recipes discovered at crafting) reloaded.");
+    return true;
+}
+
+
 
 bool ChatHandler::HandleReloadSpellAffectCommand(const char*)
 {
