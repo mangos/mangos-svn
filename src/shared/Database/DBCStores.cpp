@@ -195,7 +195,7 @@ void LoadDBCStores(std::string dataPath)
     LoadDBC(bar,bad_dbc_files,sMapStore,                 dataPath+"dbc/Map.dbc");
 
     // must be after sAreaStore and sMapStore loading
-    for(uint32 i = 1; i < sAreaStore.nCount; ++i)
+    for(uint32 i = 0; i < sAreaStore.nCount; ++i)           // areaflag numbered from 0
     {
         if(AreaTableEntry const* area = sAreaStore.LookupEntry(i))
         {
