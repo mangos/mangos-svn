@@ -188,35 +188,23 @@ bool ChatHandler::HandleTargetObjectCommand(const char* args)
     else
     {
         std::ostringstream eventFilter;
-        std::ostringstream eventFilter2;
-        bool initString = false;
-        eventFilter  << " AND (`event` IS NULL OR ";
-        eventFilter2 << " AND (`event` IS NULL OR (";
+        bool initString = true;
 
         for (GameEvent::ActiveEvents::const_iterator itr = ActiveEventsList->begin(); itr != ActiveEventsList->end(); ++itr)
         {
             if (initString)
             {
-                eventFilter  << " OR ";
-                eventFilter2 << " AND ";
+                eventFilter  <<  " AND (`event` IS NULL OR `event` IN (" <<*itr;
+                initString =false;
             }
-            eventFilter  << "`event`="   << *itr;
-            eventFilter2 << "`event`<>-" << *itr;
-            initString = true;
+            else
+                eventFilter << "," << *itr;
         }
 
-        if (initString)
-        {
-            eventFilter  << ")";
-            eventFilter2 << "))";
-        }
-        else
-        {
-            eventFilter.clear();
-            eventFilter2.clear();
-        }
+        if (!initString)
+            eventFilter << "))";
 
-        result = WorldDatabase.PQuery("SELECT `gameobject`.`guid`, `id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, (POW(`position_x` - %f, 2) + POW(`position_y` - %f, 2) + POW(`position_z` - %f, 2)) as `order` FROM `gameobject` LEFT OUTER JOIN `game_event_gameobject` on `gameobject`.`guid`=`game_event_gameobject`.`guid` WHERE `map` = '%i' %s %s ORDER BY `order` ASC LIMIT 1", m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetMapId(),eventFilter.str().c_str(),eventFilter2.str().c_str());
+        result = WorldDatabase.PQuery("SELECT `gameobject`.`guid`, `id`, `position_x`, `position_y`, `position_z`, `orientation`, `map`, (POW(`position_x` - %f, 2) + POW(`position_y` - %f, 2) + POW(`position_z` - %f, 2)) as `order` FROM `gameobject` LEFT OUTER JOIN `game_event_gameobject` on `gameobject`.`guid`=`game_event_gameobject`.`guid` WHERE `map` = '%i' %s ORDER BY `order` ASC LIMIT 1", m_session->GetPlayer()->GetPositionX(), m_session->GetPlayer()->GetPositionY(), m_session->GetPlayer()->GetPositionZ(), m_session->GetPlayer()->GetMapId(),eventFilter.str().c_str());
     }
 
     if (!result)
