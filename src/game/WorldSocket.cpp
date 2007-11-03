@@ -425,18 +425,18 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     if(sAddOnHandler.BuildAddonPacket(&recvPacket, &SendAddonPacked, recvPacket.rpos()))
         SendPacket(&SendAddonPacked);
 
-	///- Check that we do not exceed the maximum number of online players in the realm
-	uint32 Sessions  = sWorld.GetActiveAndQueuedSessionCount();
+    ///- Check that we do not exceed the maximum number of online players in the realm
+    uint32 Sessions  = sWorld.GetActiveAndQueuedSessionCount();
     uint32 pLimit    = sWorld.GetPlayerAmountLimit();
-	uint32 QueueSize = sWorld.GetQueueSize();               //number of players in the queue
-	Sessions--;                                             //so we don't count the user trying to login as a session and queue the socket that we are using
+    uint32 QueueSize = sWorld.GetQueueSize();               //number of players in the queue
+    Sessions--;                                             //so we don't count the user trying to login as a session and queue the socket that we are using
 
-	if( pLimit >  0 && Sessions >= pLimit && security == SEC_PLAYER ) 
+    if( pLimit >  0 && Sessions >= pLimit && security == SEC_PLAYER ) 
     {
-		sWorld.AddQueuedPlayer(this);
-		SendAuthWaitQue(sWorld.GetQueuePos(this));
-		sLog.outDetail( "PlayerQueue: %s is in Queue Position (%u).",safe_account.c_str(),++QueueSize);
-		return;
+        sWorld.AddQueuedPlayer(this);
+        SendAuthWaitQue(sWorld.GetQueuePos(this));
+        sLog.outDetail( "PlayerQueue: %s is in Queue Position (%u).",safe_account.c_str(),++QueueSize);
+        return;
     }
 
     // Updates the population
@@ -618,19 +618,19 @@ void WorldSocket::Update(time_t diff)
 /// Handle the authentication waiting queue (to be completed)
 void WorldSocket::SendAuthWaitQue(uint32 position)
 {
-	if(position == 0)
-	{
-		WorldPacket packet( SMSG_AUTH_RESPONSE, 1 );
-		packet << uint8( AUTH_OK );
-		SendPacket(&packet);
-	}
-	else
-	{
-		WorldPacket packet( SMSG_AUTH_RESPONSE, 5 );
-		packet << uint8( AUTH_WAIT_QUEUE );
-		packet << uint32 (position);                              //amount of players in queue
-		SendPacket(&packet);
-	}
+    if(position == 0)
+    {
+        WorldPacket packet( SMSG_AUTH_RESPONSE, 1 );
+        packet << uint8( AUTH_OK );
+        SendPacket(&packet);
+    }
+    else
+    {
+        WorldPacket packet( SMSG_AUTH_RESPONSE, 5 );
+        packet << uint8( AUTH_WAIT_QUEUE );
+        packet << uint32 (position);                              //amount of players in queue
+        SendPacket(&packet);
+    }
 }
 
 void WorldSocket::SizeError(WorldPacket const& packet, uint32 size) const

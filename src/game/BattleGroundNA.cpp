@@ -68,9 +68,9 @@ void BattleGroundNA::Update(time_t diff)
         {
             for(uint32 i = BG_NA_OBJECT_DOOR_1; i <= BG_NA_OBJECT_DOOR_2; i++)
             {
-                SpawnBGObject(i, RESPAWN_ONE_DAY);
+                DoorOpen(i);
             }
-            sLog.outDebug("Doors despawned...");
+            sLog.outDebug("Doors opened...");
 
             WorldPacket data;
             const char *message = LANG_ARENA_BEGUN;

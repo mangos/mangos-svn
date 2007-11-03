@@ -30,8 +30,8 @@
 #define SOUND_ALLIANCE_WINS         8455
 #define SOUND_BG_START              3439
 //TODO move these constant definitions to BG subclass
-#define ITEM_WSG_MARK_LOSER         24950
-#define ITEM_WSG_MARK_WINNER        24951
+#define ITEM_WS_MARK_LOSER         24950
+#define ITEM_WS_MARK_WINNER        24951
 #define ITEM_AB_MARK_LOSER          24952
 #define ITEM_AB_MARK_WINNER         24953
 #define ITEM_AV_MARK_LOSER          24954
@@ -116,6 +116,13 @@ enum BattleGroundType
 {
     TYPE_BATTLEGROUND     = 3,
     TYPE_ARENA            = 4
+};
+
+enum BattleGroundWinner
+{
+    WINNER_HORDE            = 0,
+    WINNER_ALLIANCE         = 1,
+    WINNER_NONE             = 2
 };
 
 class BattleGroundScore
@@ -255,6 +262,8 @@ class BattleGround
         void PlaySoundToTeam(uint32 SoundID, uint32 TeamID);
         void PlaySoundToAll(uint32 SoundID);
         void CastSpellOnTeam(uint32 SpellID, uint32 TeamID);
+        void RewardHonorToTeam(uint32 Honor, uint32 TeamID);
+        void RewardReputationToTeam(uint32 faction_id, uint32 Reputation, uint32 TeamID);
         void UpdateWorldState(uint32 Field, uint32 Value);
         void EndBattleGround(uint32 winner);
         void BlockMovement(Player *plr);
@@ -266,6 +275,8 @@ class BattleGround
         bool AddObject(uint32 type, uint32 entry, float x, float y, float z, float o, float rotation0,  float rotation1,  float rotation2,  float rotation3, uint32 respawntime = 0);
         bool AddSpiritGuide(float x, float y, float z, float o, uint32 team);
 
+        void DoorOpen(uint32 type);
+
         /* Raid Group */
         Group *GetBgRaid(uint32 TeamID) const { return TeamID == ALLIANCE ? m_raids[0] : m_raids[1]; }
         void SetBgRaid(uint32 TeamID, Group *bg_raid)
@@ -276,7 +287,7 @@ class BattleGround
             old_raid = bg_raid;
         }
 
-        void UpdatePlayerScore(Player *Source, uint32 type, uint32 value);
+        virtual void UpdatePlayerScore(Player *Source, uint32 type, uint32 value);
 
         uint8 GetTeamIndexByTeamId(uint32 Team) const { return Team == ALLIANCE ? 0 : 1; }
         uint32 GetPlayersCountByTeam(uint32 Team) const { return m_PlayersCount[GetTeamIndexByTeamId(Team)]; }

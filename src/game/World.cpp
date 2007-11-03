@@ -193,7 +193,7 @@ int32 World::GetQueuePos(WorldSocket* socket)
 
 void World::AddQueuedPlayer(WorldSocket* socket)
 {
-	m_QueuedPlayer.push_back(socket);
+    m_QueuedPlayer.push_back(socket);
 }
 
 void World::RemoveQueuedPlayer(WorldSocket* socket)
@@ -228,11 +228,11 @@ void World::RemoveQueuedPlayer(WorldSocket* socket)
         --sessions;
 
     // accept first in queue
-	if( (!m_playerLimit || sessions < m_playerLimit) && !m_QueuedPlayer.empty() )
-	{
-	    WorldSocket * socket = m_QueuedPlayer.front();
-		socket->SendAuthWaitQue(0);
-		m_QueuedPlayer.pop_front();
+    if( (!m_playerLimit || sessions < m_playerLimit) && !m_QueuedPlayer.empty() )
+    {
+        WorldSocket * socket = m_QueuedPlayer.front();
+        socket->SendAuthWaitQue(0);
+        m_QueuedPlayer.pop_front();
 
         // update iter to point first queued socket or end() if queue is empty now
         iter = m_QueuedPlayer.begin();

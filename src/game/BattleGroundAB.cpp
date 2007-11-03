@@ -659,7 +659,7 @@ void BattleGroundAB::Reset()
     m_events = 0;
     m_buffchecktimer = 0;
 
-    SetWinner(2);
+    SetWinner(WINNER_NONE);
     SetStatus(STATUS_WAIT_QUEUE);
     SetStartTime(0);
     SetEndTime(0);
