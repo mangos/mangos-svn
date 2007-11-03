@@ -394,10 +394,10 @@ void GameObject::getFishLoot(Loot *fishloot)
 
     // if subzone loot exist use it
     if(LootTemplates_Fishing.find(subzone) != LootTemplates_Fishing.end())
-        FillLoot(fishloot, subzone, LootTemplates_Fishing);
+        FillLoot(fishloot, subzone, LootTemplates_Fishing, NULL);
     // else use zone loot
     else
-        FillLoot(fishloot, GetZoneId(), LootTemplates_Fishing);
+        FillLoot(fishloot, GetZoneId(), LootTemplates_Fishing, NULL);
 }
 
 void GameObject::SaveToDB()

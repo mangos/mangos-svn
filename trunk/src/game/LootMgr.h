@@ -57,6 +57,20 @@ enum PermissionTypes
     NONE_PERMISSION   = 3
 };
 
+enum AdditionalLootCondition
+{   //QuestFFAorLootCondition < 0 (negative) condition_value1 condition_value2
+    CONDITION_NONE                  = 0,    // 0 0
+    CONDITION_AURA                  = 1,    // spell_id effindex
+    CONDITION_ITEM                  = 2,    // item_id count
+    CONDITION_ITEM_EQUIPPED         = 3,    // item_id 0
+    CONDITION_ZONEID                = 4,    // zone_id 0
+    CONDITION_REPUTATION_RANK       = 5,    // faction_id min_rank
+    CONDITION_DUNGEON_DIFFICULTY    = 6,    // enum DungeonDifficulties 0
+    CONDITION_TEAM                  = 7     // player_team 0
+                                            // 469 - Alliance 67 - Horde
+};
+
+
 class Player;
 
 struct LootStoreItem
@@ -67,13 +81,15 @@ struct LootStoreItem
     int32   questChanceOrGroup;
     uint8   mincount;
     uint8   maxcount;
-    bool    is_ffa;                                         // free for all
+    int8 ffa_or_condition; // free for all or additional loot condition
+    uint32 cond_value1;
+    uint32 cond_value2;
 
     LootStoreItem()
-        : itemid(0), displayid(0), chanceOrRef(0), questChanceOrGroup(0), mincount(1), maxcount(1), is_ffa(true) {}
+        : itemid(0), displayid(0), chanceOrRef(0), questChanceOrGroup(0), mincount(1), maxcount(1), ffa_or_condition(1), cond_value1(0), cond_value2(0) {}
 
-    LootStoreItem(uint32 _itemid, uint32 _displayid, float _chanceOrRef, int32 _questChanceOrGroup, bool _isffa = true, uint8 _mincount = 1, uint8 _maxcount = 1)
-        : itemid(_itemid), displayid(_displayid), chanceOrRef(_chanceOrRef), questChanceOrGroup(_questChanceOrGroup), mincount(_mincount), maxcount(_maxcount), is_ffa(_isffa) {}
+    LootStoreItem(uint32 _itemid, uint32 _displayid, float _chanceOrRef, int32 _questChanceOrGroup, int8 _ffa_or_condition = 1, uint32 _cond_value1 = 0, uint32 _cond_value2 = 0, uint8 _mincount = 1, uint8 _maxcount = 1)
+        : itemid(_itemid), displayid(_displayid), chanceOrRef(_chanceOrRef), questChanceOrGroup(_questChanceOrGroup), mincount(_mincount), maxcount(_maxcount), ffa_or_condition(_ffa_or_condition), cond_value1(_cond_value1), cond_value2(_cond_value2) {}
 
     int32 GetGroupId() const { return -questChanceOrGroup -1; }
 };
@@ -87,16 +103,16 @@ struct LootItem
     uint8   count      : 8;                                 // allow compiler pack structure
     bool    is_looted  : 1;
     bool    is_blocked : 1;
-    bool    is_ffa     : 1;                                 // free for all
+    uint8 ffa_or_condition : 1;
 
     LootItem()
-        : itemid(0), displayid(0), randomSuffix(0), randomPropertyId(0), count(1), is_looted(true), is_blocked(false), is_ffa(true) {}
+        : itemid(0), displayid(0), randomSuffix(0), randomPropertyId(0), count(1), is_looted(true), is_blocked(false), ffa_or_condition(1) {}
 
-    LootItem(uint32 _itemid, uint32 _displayid, uint32 _randomSuffix, int32 _randomProp, bool _isffa, uint8 _count = 1)
-        : itemid(_itemid), displayid(_displayid), randomSuffix(_randomSuffix), randomPropertyId(_randomProp), count(_count), is_looted(false), is_blocked(false), is_ffa(_isffa) {}
+    LootItem(uint32 _itemid, uint32 _displayid, uint32 _randomSuffix, int32 _randomProp, uint8 _ffa_or_condition, uint8 _count = 1)
+        : itemid(_itemid), displayid(_displayid), randomSuffix(_randomSuffix), randomPropertyId(_randomProp), count(_count), is_looted(false), is_blocked(false), ffa_or_condition(_ffa_or_condition) {}
 
     LootItem(LootStoreItem const& li,uint8 _count, uint32 _randomSuffix = 0, int32 _randomProp = 0)
-        : itemid(li.itemid), displayid(li.displayid), randomSuffix(_randomSuffix), randomPropertyId(_randomProp), count(_count), is_looted(false), is_blocked(false), is_ffa(li.is_ffa) {}
+        : itemid(li.itemid), displayid(li.displayid), randomSuffix(_randomSuffix), randomPropertyId(_randomProp), count(_count), is_looted(false), is_blocked(false), ffa_or_condition(li.ffa_or_condition) {}
 
     static bool looted(LootItem &itm) { return itm.is_looted; }
     static bool not_looted(LootItem &itm) { return !itm.is_looted; }
@@ -171,7 +187,7 @@ extern LootStore LootTemplates_Disenchant;
 extern LootStore LootTemplates_Prospecting;
 
 QuestItemList* FillQuestLoot(Player* player, Loot *loot);
-void FillLoot(Loot *loot, uint32 loot_id, LootStore& store);
+void FillLoot(Loot* loot, uint32 loot_id, LootStore& store, Player* loot_owner);
 void LoadLootTables();
 void LoadLootTable(LootStore& lootstore,char const* tablename);
 

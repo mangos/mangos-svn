@@ -6492,7 +6492,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             {
                 sLog.outDebug("       if(lootid)");
                 loot->clear();
-                FillLoot(loot, lootid, LootTemplates_Gameobject);
+                FillLoot(loot, lootid, LootTemplates_Gameobject, this);
             }
 
             if(loot_type == LOOT_FISHING)
@@ -6519,7 +6519,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             {
                 item->m_lootGenerated = true;
                 loot->clear();
-                FillLoot(loot, item->GetProto()->DisenchantID, LootTemplates_Disenchant);
+                FillLoot(loot, item->GetProto()->DisenchantID, LootTemplates_Disenchant, this);
             }
         }
         else if(loot_type == LOOT_PROSPECTING)
@@ -6530,7 +6530,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             {
                 item->m_lootGenerated = true;
                 loot->clear();
-                FillLoot(loot, item->GetEntry(), LootTemplates_Prospecting);
+                FillLoot(loot, item->GetEntry(), LootTemplates_Prospecting, this);
             }
         }
         else
@@ -6541,7 +6541,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             {
                 item->m_lootGenerated = true;
                 loot->clear();
-                FillLoot(loot, item->GetEntry(), LootTemplates_Item);
+                FillLoot(loot, item->GetEntry(), LootTemplates_Item, this);
 
                 loot->generateMoneyLoot(item->GetProto()->MinMoneyLoot,item->GetProto()->MaxMoneyLoot);
             }
@@ -6604,7 +6604,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 if (!creature->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR) && lootid)
                 {
                     loot->clear();
-                    FillLoot(loot, lootid, LootTemplates_Pickpocketing);
+                    FillLoot(loot, lootid, LootTemplates_Pickpocketing, this);
                 }
                 // Generate extra money for pick pocket loot
                 const uint32 a = urand(0, creature->getLevel()/2);
@@ -6636,7 +6636,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 if (!creature->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR) && lootid)
                 {
                     loot->clear();
-                    FillLoot(loot, lootid, LootTemplates_Creature);
+                    FillLoot(loot, lootid, LootTemplates_Creature, this);
                 }
 
                 loot->generateMoneyLoot(creature->GetCreatureInfo()->mingold,creature->GetCreatureInfo()->maxgold);
@@ -6672,7 +6672,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             if (loot_type == LOOT_SKINNING)
             {
                 loot->clear();
-                FillLoot(loot, creature->GetCreatureInfo()->SkinLootId, LootTemplates_Skinning);
+                FillLoot(loot, creature->GetCreatureInfo()->SkinLootId, LootTemplates_Skinning, this);
             }
 
             if (!GetGroup() && recipient == this)
@@ -7792,6 +7792,18 @@ bool Player::HasItemCount( uint32 item, uint32 count ) const
                 }
             }
         }
+    }
+    return false;
+}
+
+bool Player::HasItemEquipped( uint32 item ) const
+{
+    Item *pItem;
+    for(int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
+    {
+        pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pItem && pItem->GetEntry() == item )
+            return true;
     }
     return false;
 }
