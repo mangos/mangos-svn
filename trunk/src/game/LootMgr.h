@@ -80,9 +80,9 @@ struct LootStoreItem
     int32   questChanceOrGroup;
     uint8   mincount;
     uint8   maxcount;
-    int8 ffa_or_condition; // free for all or additional loot condition
-    uint32 cond_value1;
-    uint32 cond_value2;
+    int8    ffa_or_condition; // free for all or additional loot condition
+    uint32  cond_value1;
+    uint32  cond_value2;
 
     LootStoreItem()
         : itemid(0), displayid(0), chanceOrRef(0), questChanceOrGroup(0), mincount(1), maxcount(1), ffa_or_condition(1), cond_value1(0), cond_value2(0) {}
@@ -99,19 +99,19 @@ struct LootItem
     uint32  displayid;
     uint32  randomSuffix;
     int32   randomPropertyId;
-    uint8   count      : 8;                                 // allow compiler pack structure
-    bool    is_looted  : 1;
-    bool    is_blocked : 1;
-    uint8 ffa_or_condition : 1;
+    uint8   count            : 8;                           // allow compiler pack structure
+    int8    ffa_or_condition : 8;
+    bool    is_looted        : 1;
+    bool    is_blocked       : 1;
 
     LootItem()
-        : itemid(0), displayid(0), randomSuffix(0), randomPropertyId(0), count(1), is_looted(true), is_blocked(false), ffa_or_condition(1) {}
+        : itemid(0), displayid(0), randomSuffix(0), randomPropertyId(0), count(1), ffa_or_condition(1), is_looted(true), is_blocked(false) {}
 
-    LootItem(uint32 _itemid, uint32 _displayid, uint32 _randomSuffix, int32 _randomProp, uint8 _ffa_or_condition, uint8 _count = 1)
-        : itemid(_itemid), displayid(_displayid), randomSuffix(_randomSuffix), randomPropertyId(_randomProp), count(_count), is_looted(false), is_blocked(false), ffa_or_condition(_ffa_or_condition) {}
+    LootItem(uint32 _itemid, uint32 _displayid, uint32 _randomSuffix, int32 _randomProp, int8 _ffa_or_condition, uint8 _count = 1)
+        : itemid(_itemid), displayid(_displayid), randomSuffix(_randomSuffix), randomPropertyId(_randomProp), count(_count), ffa_or_condition(_ffa_or_condition), is_looted(false), is_blocked(false) {}
 
     LootItem(LootStoreItem const& li,uint8 _count, uint32 _randomSuffix = 0, int32 _randomProp = 0)
-        : itemid(li.itemid), displayid(li.displayid), randomSuffix(_randomSuffix), randomPropertyId(_randomProp), count(_count), is_looted(false), is_blocked(false), ffa_or_condition(li.ffa_or_condition) {}
+        : itemid(li.itemid), displayid(li.displayid), randomSuffix(_randomSuffix), randomPropertyId(_randomProp), count(_count), ffa_or_condition(li.ffa_or_condition), is_looted(false), is_blocked(false) {}
 
     static bool looted(LootItem &itm) { return itm.is_looted; }
     static bool not_looted(LootItem &itm) { return !itm.is_looted; }
