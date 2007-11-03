@@ -123,7 +123,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         if (qitem)
         {
             qitem->is_looted = true;
-            if (!item->is_ffa || loot->PlayerQuestItems.size() == 1)
+            if (!item->ffa_or_condition || loot->PlayerQuestItems.size() == 1)
                 player->SendNotifyLootItemRemoved(loot->items.size() + lootSlot);
             else
                 loot->NotifyQuestItemRemoved(qitem->index);
@@ -131,7 +131,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         else
             loot->NotifyItemRemoved(lootSlot);
 
-        //if (item->is_ffa) item->is_looted = true;
+        //if (item->ffa_or_condition) item->is_looted = true;
         item->is_looted = true;
         loot->unlootedCount--;
 

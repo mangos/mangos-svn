@@ -462,8 +462,10 @@ CREATE TABLE `creature_loot_template` (
   `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
   `mincount` tinyint(3) unsigned NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `quest_freeforall` tinyint(3) unsigned NOT NULL default '1',
-  PRIMARY KEY  (`entry`,`item`)
+  `QuestFFAorLootCondition` tinyint(3) unsigned NOT NULL default '1',
+  `condition_value1` int(11) unsigned NOT NULL default '0',
+  `condition_value2` int(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`entry`, `item`, `condition_value1`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
 --
@@ -717,8 +719,10 @@ CREATE TABLE `disenchant_loot_template` (
   `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
   `mincount` tinyint(3) unsigned NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `quest_freeforall` tinyint(3) unsigned NOT NULL default '1',
-  PRIMARY KEY  (`entry`,`item`)
+  `QuestFFAorLootCondition` tinyint(3) unsigned NOT NULL default '1',
+  `condition_value1` int(11) unsigned NOT NULL default '0',
+  `condition_value2` int(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`entry`, `item`, `condition_value1`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
 --
@@ -832,8 +836,10 @@ CREATE TABLE `fishing_loot_template` (
   `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
   `mincount` tinyint(3) unsigned NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `quest_freeforall` tinyint(3) unsigned NOT NULL default '1',
-  PRIMARY KEY  (`entry`,`item`)
+  `QuestFFAorLootCondition` tinyint(3) unsigned NOT NULL default '1',
+  `condition_value1` int(11) unsigned NOT NULL default '0',
+  `condition_value2` int(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`entry`, `item`, `condition_value1`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
 --
@@ -1083,8 +1089,10 @@ CREATE TABLE `gameobject_loot_template` (
   `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
   `mincount` tinyint(3) unsigned NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `quest_freeforall` tinyint(3) unsigned NOT NULL default '1',
-  PRIMARY KEY  (`entry`,`item`)
+  `QuestFFAorLootCondition` tinyint(3) unsigned NOT NULL default '1',
+  `condition_value1` int(11) unsigned NOT NULL default '0',
+  `condition_value2` int(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`entry`, `item`, `condition_value1`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
 --
@@ -1270,8 +1278,10 @@ CREATE TABLE `item_loot_template` (
   `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
   `mincount` tinyint(3) unsigned NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `quest_freeforall` tinyint(3) unsigned NOT NULL default '1',
-  PRIMARY KEY  (`entry`,`item`)
+  `QuestFFAorLootCondition` tinyint(3) unsigned NOT NULL default '1',
+  `condition_value1` int(11) unsigned NOT NULL default '0',
+  `condition_value2` int(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`entry`, `item`, `condition_value1`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
 --
@@ -2356,8 +2366,10 @@ CREATE TABLE `pickpocketing_loot_template` (
   `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
   `mincount` tinyint(3) unsigned NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `quest_freeforall` tinyint(3) unsigned NOT NULL default '1',
-  PRIMARY KEY  (`entry`,`item`)
+  `QuestFFAorLootCondition` tinyint(3) unsigned NOT NULL default '1',
+  `condition_value1` int(11) unsigned NOT NULL default '0',
+  `condition_value2` int(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`entry`, `item`, `condition_value1`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
 --
@@ -9114,8 +9126,10 @@ CREATE TABLE `prospecting_loot_template` (
   `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
   `mincount` tinyint(3) unsigned NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `quest_freeforall` tinyint(3) unsigned NOT NULL default '1',
-  PRIMARY KEY  (`entry`,`item`)
+  `QuestFFAorLootCondition` tinyint(3) unsigned NOT NULL default '1',
+  `condition_value1` int(11) unsigned NOT NULL default '0',
+  `condition_value2` int(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`entry`, `item`, `condition_value1`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
 --
@@ -9358,8 +9372,10 @@ CREATE TABLE `skinning_loot_template` (
   `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
   `mincount` tinyint(3) unsigned NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `quest_freeforall` tinyint(3) unsigned NOT NULL default '1',
-  PRIMARY KEY  (`entry`,`item`)
+  `QuestFFAorLootCondition` tinyint(3) unsigned NOT NULL default '1',
+  `condition_value1` int(11) unsigned NOT NULL default '0',
+  `condition_value2` int(11) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`entry`, `item`, `condition_value1`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Loot System';
 
 --

@@ -65,14 +65,16 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
     float chanceOrRef;
     int32 questchance;
     uint32 count = 0;
-    bool is_ffa = true;
+    int32 ffa_or_condition = 0;
+    uint32 cond_value1 = 0;
+    uint32 cond_value2 = 0;
 
     lootstore.clear();                                      // need for reload
 
     sLog.outString( "%s :", tablename);
 
-    //                                             0        1       2              3                     4           5           6
-    QueryResult *result = WorldDatabase.PQuery("SELECT `entry`, `item`, `ChanceOrRef`, `QuestChanceOrGroup`, `mincount`, `maxcount`, `quest_freeforall` FROM `%s`",tablename);
+    //                                                 0        1       2              3                     4           5           6                          7                   8
+    QueryResult *result = WorldDatabase.PQuery("SELECT `entry`, `item`, `ChanceOrRef`, `QuestChanceOrGroup`, `mincount`, `maxcount`, `QuestFFAorLootCondition`, `condition_value1`, `condition_value2` FROM `%s`",tablename);
 
     if (result)
     {
@@ -91,7 +93,9 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
             questchance = int32(fields[3].GetUInt32());
             mincount = fields[4].GetUInt32();
             maxcount = fields[5].GetUInt32();
-            is_ffa = fields[6].GetBool();
+            ffa_or_condition = int32(fields[6].GetUInt32());
+            cond_value1 = fields[7].GetUInt32();
+            cond_value2 = fields[8].GetUInt32();
 
             if( chanceOrRef >= 0 )                          // chance
             {
@@ -114,7 +118,72 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
             }
             // in case chanceOrRef < 0 item is loot ref slot index in fact that allow have more one refs in loot
 
-            lootstore[entry].push_back( LootStoreItem(item, displayid, chanceOrRef, questchance,is_ffa,mincount,maxcount) );
+            switch (abs(ffa_or_condition))
+            {
+                case CONDITION_AURA:
+                {
+                    // TODO: add some check for aura
+                    break;
+                }
+                case CONDITION_ITEM:
+                {
+                    ItemPrototype const *proto = objmgr.GetItemPrototype(cond_value1);
+                    if(!proto)
+                    {
+                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from creature (entry: %d) requires to have non existing item to be dropped (entry: %d)!", tablename, item, entry, cond_value1);
+                        continue;
+                    }
+                    break;
+                }
+                case CONDITION_ITEM_EQUIPPED:
+                {
+                    ItemPrototype const *proto = objmgr.GetItemPrototype(cond_value1);
+                    if(!proto)
+                    {
+                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from creature (entry: %d) requires non existing item equipped to be dropped! (entry: %d)", tablename, item, entry, cond_value1);
+                        continue;
+                    }
+                    if (cond_value2)
+                    {
+                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from creature (entry: %d) requires item equipped, but item count is set (setting it to 0)", tablename, item, entry);
+                        cond_value2 = 0;
+                    }
+                    break;
+                }
+                case CONDITION_ZONEID:
+                {
+                    // TODO: add some check for zone
+                    break;
+                }
+                case CONDITION_REPUTATION_RANK:
+                {
+                    FactionEntry const* factionEntry = sFactionStore.LookupEntry(cond_value1);
+                    if(!factionEntry)
+                    {
+                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from creature (entry: %d) has set non existing faction reputation requirement!", tablename, item, entry);
+                        continue;
+                    }
+                    break;
+                }
+                case CONDITION_DUNGEON_DIFFICULTY:
+                {
+                    if (cond_value1 > 1)
+                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from creature (entry: %d) has set non existing dungeon difficulty!", tablename, item, entry);
+                    break;
+                }
+                case CONDITION_TEAM:
+                {
+                    if (cond_value1 != ALLIANCE && cond_value1 != HORDE)
+                    {
+                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from creature (entry: %d) has set team drop condition to nonexisting team!", tablename, item, entry);
+                        continue;
+                    }
+                    break;
+                }
+            }
+
+            lootstore[entry].push_back( LootStoreItem(item, displayid, chanceOrRef, questchance, ffa_or_condition, cond_value1, cond_value2, mincount, maxcount) );
+
 
             count++;
         } while (result->NextRow());
@@ -150,10 +219,11 @@ void LoadLootTables()
 struct HasChance
 {
     LootStore* m_store;
+    Player* owner;
     float RolledChance[MaxLootGroups];
     float CumulativeChance[MaxLootGroups];
 
-    explicit HasChance(LootStore* _store) : m_store(_store)
+    explicit HasChance(LootStore* _store, Player* _owner) : m_store(_store), owner(_owner)
     {
         for (int i=0; i < MaxLootGroups; i++)
             CumulativeChance[i] = 0.0f;
@@ -170,8 +240,78 @@ struct HasChance
         {
             // reference non group loot ( itm.chanceOrRef < 0) handled separatly
             if ( itm.chanceOrRef > 0 && roll_chance_f(itm.chanceOrRef * sWorld.getRate(RATE_DROP_ITEMS)) )
-                return &itm;
-            return NULL;
+            {
+                //(QuestFFAorLootCondition < 0) -> item has aditional loot condition
+                if( owner && itm.ffa_or_condition < 0 )
+                {
+                    switch (abs(itm.ffa_or_condition))
+                    {
+                    case CONDITION_AURA:
+                    {
+                        if(owner->HasAura(itm.cond_value1, itm.cond_value2))
+                            return &itm;
+                        else
+                            return NULL;
+                        break;
+                    }
+                    case CONDITION_ITEM:
+                    {
+                        if(owner->HasItemCount(itm.cond_value1,itm.cond_value2))
+                            return &itm;
+                        else
+                            return NULL;
+                        break;
+                    }
+                    case CONDITION_ITEM_EQUIPPED:
+                    {
+                        if(owner->HasItemEquipped(itm.cond_value1))
+                            return &itm;
+                        else
+                            return NULL;
+                        break;
+                    }
+                    case CONDITION_ZONEID:
+                    {
+                        if(owner->GetZoneId() == itm.cond_value1)
+                            return &itm;
+                        else
+                            return NULL;
+                        break;
+                    }
+                    case CONDITION_REPUTATION_RANK:
+                    {
+                        if(owner->GetBaseReputationRank(sFactionStore.LookupEntry(itm.cond_value1)) >= itm.cond_value2)
+                            return &itm;
+                        else
+                            return NULL;
+                        break;
+                    }
+                    case CONDITION_DUNGEON_DIFFICULTY:
+                    {
+                        if(owner->GetDungeonDifficulty() == itm.cond_value1)
+                            return &itm;
+                        else
+                            return NULL;
+                        break;
+                    }
+                    case CONDITION_TEAM:
+                    {
+                        if(owner->GetTeam() == itm.cond_value1)
+                            return &itm;
+                        else
+                            return NULL;
+                        break;
+                    }
+                    default:
+                        return NULL;
+                    }
+                }
+                else
+                {
+                    return &itm;
+                }
+             }
+             return NULL;
         }
 
         // Grouped loot
@@ -229,7 +369,7 @@ struct HasQuestChance
     inline bool operator() ( LootStoreItem &itm )   { return roll_chance_i(itm.questChanceOrGroup); }
 };
 
-void FillLoot(Loot *loot, uint32 loot_id, LootStore& store)
+void FillLoot(Loot* loot, uint32 loot_id, LootStore& store, Player* loot_owner)
 {
     LootStore::iterator tab = store.find(loot_id);
 
@@ -243,7 +383,7 @@ void FillLoot(Loot *loot, uint32 loot_id, LootStore& store)
     loot->quest_items.reserve(min(tab->second.size(),MAX_NR_QUEST_ITEMS));
 
     // fill loot with all normal and quest items that have a chance
-    HasChance      hasChance(&store);
+    HasChance      hasChance(&store, loot_owner);
     HasQuestChance hasQuestChance;
 
     for(LootStoreItemList::iterator item_iter = tab->second.begin(); item_iter != tab->second.end(); ++item_iter)
@@ -263,7 +403,7 @@ void FillLoot(Loot *loot, uint32 loot_id, LootStore& store)
                 // Reference to another loot
                 int LootId = -int(item_iter->chanceOrRef);
 
-                FillLoot(loot,LootId,store);
+                FillLoot(loot,LootId,store,loot_owner);
                 continue;
             }
 
@@ -292,7 +432,7 @@ QuestItemList* FillQuestLoot(Player* player, Loot *loot)
             ql->push_back(QuestItem(i));
             // questitems get blocked when they first apper in a
             // player's quest vector
-            if (!item.is_ffa || !item.is_blocked) loot->unlootedCount++;
+            if (!item.ffa_or_condition || !item.is_blocked) loot->unlootedCount++;
             item.is_blocked = true;
             if (loot->items.size() + ql->size() == MAX_NR_LOOT_ITEMS) break;
         }
