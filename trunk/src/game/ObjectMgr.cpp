@@ -4407,15 +4407,59 @@ uint32 ObjectMgr::GenerateLowGuid(uint32 guidhigh)
 {
     switch(guidhigh)
     {
-        case HIGHGUID_ITEM          : return ++m_hiItemGuid;
-        case HIGHGUID_UNIT          : return ++m_hiCreatureGuid;
-        case HIGHGUID_PLAYER        : return ++m_hiCharGuid;
-        case HIGHGUID_GAMEOBJECT    : return ++m_hiGoGuid;
-        case HIGHGUID_CORPSE        : return ++m_hiCorpseGuid;
-        case HIGHGUID_DYNAMICOBJECT : return ++m_hiDoGuid;
-        default                     : ASSERT(0);
+        case HIGHGUID_ITEM:
+            ++m_hiItemGuid;
+            if(m_hiItemGuid==0xFFFFFFFF)
+            {
+                sLog.outError("Item guids overflow. Can't continue work. Shutdown server. ");
+                sWorld.m_stopEvent = true;
+            }
+            return m_hiItemGuid;
+        case HIGHGUID_UNIT:
+            ++m_hiCreatureGuid;
+            if(m_hiCreatureGuid==0xFFFFFFFF)
+            {
+                sLog.outError("Creature guids overflow. Can't continue work. Shutdown server. ");
+                sWorld.m_stopEvent = true;
+            }
+            return m_hiCreatureGuid;
+        case HIGHGUID_PLAYER:
+            ++m_hiCharGuid;
+            if(m_hiCharGuid==0xFFFFFFFF)
+            {
+                sLog.outError("Players guids overflow. Can't continue work. Shutdown server. ");
+                sWorld.m_stopEvent = true;
+            }
+            return m_hiCharGuid;
+        case HIGHGUID_GAMEOBJECT:
+            ++m_hiGoGuid;
+            if(m_hiGoGuid==0xFFFFFFFF)
+            {
+                sLog.outError("Gameobject guids overflow. Can't continue work. Shutdown server. ");
+                sWorld.m_stopEvent = true;
+            }
+            return m_hiGoGuid;
+        case HIGHGUID_CORPSE:
+            ++m_hiCorpseGuid;
+            if(m_hiCorpseGuid==0xFFFFFFFF)
+            {
+                sLog.outError("Corpse guids overflow. Can't continue work. Shutdown server. ");
+                sWorld.m_stopEvent = true;
+            }
+            return m_hiCorpseGuid;
+        case HIGHGUID_DYNAMICOBJECT:
+            ++m_hiDoGuid;
+            if(m_hiDoGuid==0xFFFFFFFF)
+            {
+                sLog.outError("DynamicObject guids overflow. Can't continue work. Shutdown server. ");
+                sWorld.m_stopEvent = true;
+            }
+            return m_hiDoGuid;
+        default:
+            ASSERT(0);
     }
 
+    ASSERT(0);
     return 0;
 }
 

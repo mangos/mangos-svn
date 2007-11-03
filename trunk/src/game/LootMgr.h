@@ -65,8 +65,7 @@ enum AdditionalLootCondition
     CONDITION_ITEM_EQUIPPED         = 3,    // item_id 0
     CONDITION_ZONEID                = 4,    // zone_id 0
     CONDITION_REPUTATION_RANK       = 5,    // faction_id min_rank
-    CONDITION_DUNGEON_DIFFICULTY    = 6,    // enum DungeonDifficulties 0
-    CONDITION_TEAM                  = 7     // player_team 0
+    CONDITION_TEAM                  = 6     // player_team 0
                                             // 469 - Alliance 67 - Horde
 };
 

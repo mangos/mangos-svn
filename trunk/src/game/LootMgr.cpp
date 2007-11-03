@@ -118,67 +118,84 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
             }
             // in case chanceOrRef < 0 item is loot ref slot index in fact that allow have more one refs in loot
 
-            switch (abs(ffa_or_condition))
+            if(ffa_or_condition < 0)
             {
+                switch ((-1)*ffa_or_condition)
+                {
                 case CONDITION_AURA:
-                {
-                    // TODO: add some check for aura
-                    break;
-                }
+                    {
+                        if(!sSpellStore.LookupEntry(cond_value1))
+                        {
+                            sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) requires to have non existing spell (Id: %d) in aura condition!", tablename, item, entry, cond_value1);
+                            continue;
+                        }
+                        if(cond_value2 > 2)
+                        {
+                            sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) requires to have non existing effect index (%u) in aura condition (must be 0..2)!", tablename, item, entry, cond_value2);
+                            continue;
+                        }
+                        break;
+                    }
                 case CONDITION_ITEM:
-                {
-                    ItemPrototype const *proto = objmgr.GetItemPrototype(cond_value1);
-                    if(!proto)
                     {
-                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from creature (entry: %d) requires to have non existing item to be dropped (entry: %d)!", tablename, item, entry, cond_value1);
-                        continue;
+                        ItemPrototype const *proto = objmgr.GetItemPrototype(cond_value1);
+                        if(!proto)
+                        {
+                            sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) requires to have non existing item to be dropped (entry: %d)!", tablename, item, entry, cond_value1);
+                            continue;
+                        }
+                        break;
                     }
-                    break;
-                }
                 case CONDITION_ITEM_EQUIPPED:
-                {
-                    ItemPrototype const *proto = objmgr.GetItemPrototype(cond_value1);
-                    if(!proto)
                     {
-                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from creature (entry: %d) requires non existing item equipped to be dropped! (entry: %d)", tablename, item, entry, cond_value1);
-                        continue;
+                        ItemPrototype const *proto = objmgr.GetItemPrototype(cond_value1);
+                        if(!proto)
+                        {
+                            sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) requires non existing item (entry: %d) equipped to be dropped!", tablename, item, entry, cond_value1);
+                            continue;
+                        }
+                        if (cond_value2)
+                        {
+                            sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) requires item equipped, but item count is set (setting it to 0)", tablename, item, entry);
+                            cond_value2 = 0;
+                        }
+                        break;
                     }
-                    if (cond_value2)
-                    {
-                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from creature (entry: %d) requires item equipped, but item count is set (setting it to 0)", tablename, item, entry);
-                        cond_value2 = 0;
-                    }
-                    break;
-                }
                 case CONDITION_ZONEID:
-                {
-                    // TODO: add some check for zone
-                    break;
-                }
+                    {
+                        AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(cond_value1);
+                        if(!areaEntry)
+                        {
+                            sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) has set non existing area (%u) requirement!", tablename, item, entry,cond_value1);
+                            continue;
+                        }
+
+                        if(areaEntry->zone!=0)
+                        {
+                            sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) has set to subzone (%u) instead zone requirement!", tablename, item, entry,cond_value1);
+                            continue;
+                        }
+                        break;
+                    }
                 case CONDITION_REPUTATION_RANK:
-                {
-                    FactionEntry const* factionEntry = sFactionStore.LookupEntry(cond_value1);
-                    if(!factionEntry)
                     {
-                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from creature (entry: %d) has set non existing faction reputation requirement!", tablename, item, entry);
-                        continue;
+                        FactionEntry const* factionEntry = sFactionStore.LookupEntry(cond_value1);
+                        if(!factionEntry)
+                        {
+                            sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) has set non existing faction (%u), reputation requirement!", tablename, item, entry, cond_value1);
+                            continue;
+                        }
+                        break;
                     }
-                    break;
-                }
-                case CONDITION_DUNGEON_DIFFICULTY:
-                {
-                    if (cond_value1 > 1)
-                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from creature (entry: %d) has set non existing dungeon difficulty!", tablename, item, entry);
-                    break;
-                }
                 case CONDITION_TEAM:
-                {
-                    if (cond_value1 != ALLIANCE && cond_value1 != HORDE)
                     {
-                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from creature (entry: %d) has set team drop condition to nonexisting team!", tablename, item, entry);
-                        continue;
+                        if (cond_value1 != ALLIANCE && cond_value1 != HORDE)
+                        {
+                            sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) has set team drop condition to non-existing team!", tablename, item, entry);
+                            continue;
+                        }
+                        break;
                     }
-                    break;
                 }
             }
 
@@ -280,15 +297,8 @@ struct HasChance
                     }
                     case CONDITION_REPUTATION_RANK:
                     {
-                        if(owner->GetBaseReputationRank(sFactionStore.LookupEntry(itm.cond_value1)) >= itm.cond_value2)
-                            return &itm;
-                        else
-                            return NULL;
-                        break;
-                    }
-                    case CONDITION_DUNGEON_DIFFICULTY:
-                    {
-                        if(owner->GetDungeonDifficulty() == itm.cond_value1)
+                        FactionEntry const* faction = sFactionStore.LookupEntry(itm.cond_value1);
+                        if(faction && owner->GetReputationRank(faction) >= itm.cond_value2)
                             return &itm;
                         else
                             return NULL;
