@@ -11,7 +11,41 @@ MPQArchive::MPQArchive(const char* filename)
 	int result = libmpq_archive_open(&mpq_a, (unsigned char*)filename);
     printf("Opening %s\n", filename);
 	if(result) {
-		printf("Error opening archive %s\n", filename);
+		switch(result) {
+			case LIBMPQ_EFILE :                   /* error on file operation */
+				printf("Error opening archive '%s': File operation Error\n", filename);
+				break;
+			case LIBMPQ_EFILE_FORMAT :            /* bad file format */
+				printf("Error opening archive '%s': Bad file format\n", filename);
+				break;
+			case LIBMPQ_EFILE_CORRUPT :           /* file corrupt */
+				printf("Error opening archive '%s': File corrupt\n", filename);
+				break;
+			case LIBMPQ_EFILE_NOT_FOUND :         /* file in archive not found */
+				printf("Error opening archive '%s': File in archive not found\n", filename);
+				break;
+			case LIBMPQ_EFILE_READ :              /* Read error in archive */
+				printf("Error opening archive '%s': Read error in archive\n", filename);
+				break;
+			case LIBMPQ_EALLOCMEM :               /* maybe not enough memory? :) */
+				printf("Error opening archive '%s': Maybe not enough memory\n", filename);
+				break;
+			case LIBMPQ_EFREEMEM :                /* can not free memory */
+				printf("Error opening archive '%s': Cannot free memory\n", filename);
+				break;
+			case LIBMPQ_EINV_RANGE :              /* Given filenumber is out of range */
+				printf("Error opening archive '%s': Given filenumber is out of range\n", filename);
+				break;
+			case LIBMPQ_EHASHTABLE :              /* error in reading hashtable */
+				printf("Error opening archive '%s': Error in reading hashtable\n", filename);
+				break;
+			case LIBMPQ_EBLOCKTABLE :             /* error in reading blocktable */
+				printf("Error opening archive '%s': Error in reading blocktable\n", filename);
+				break;
+            default:
+                printf("Error opening archive '%s': Unknown error\n", filename);
+                break;
+		}
 		return;
 	}
 	gOpenArchives.push_back(this); //&mpq_a);
