@@ -1645,7 +1645,7 @@ bool ChatHandler::HandleDelTicketCommand(const char *args)
     // delticket #num
     if(num > 0)
     {
-        QueryResult *result = CharacterDatabase.PQuery("SELECT `ticket_id`,`guid` FROM `character_ticket` LIMIT '%i'",num);
+        QueryResult *result = CharacterDatabase.PQuery("SELECT `ticket_id`,`guid` FROM `character_ticket` LIMIT %i",num);
 
         if(!result || uint64(num) > result->GetRowCount())
         {
