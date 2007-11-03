@@ -1020,8 +1020,8 @@ void Spell::EffectDummy(uint32 i)
             return;
         }
 
-        //Training Lesson
-        case 23357:
+        //Taming Lesson
+        case 23356:
         {
             if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                 return;
@@ -1029,6 +1029,19 @@ void Spell::EffectDummy(uint32 i)
             Player* _player = (Player*)unitTarget;
             _player->learnSpell(1515);                      // Tame Pet
             _player->learnSpell(883);                       // Call Pet
+            _player->learnSpell(2641);                      // Dismiss Pet
+            return;
+        }
+        
+        //Training Lesson
+        case 23357:
+        {
+            if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            Player* _player = (Player*)unitTarget;
+            _player->learnSpell(5149);                      // Beast Training
+            _player->learnSpell(982);                       // Revive Pet
             _player->learnSpell(6991);                      // Feed Pet
             return;
         }
