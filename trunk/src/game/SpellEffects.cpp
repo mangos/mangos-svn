@@ -1026,10 +1026,7 @@ void Spell::EffectDummy(uint32 i)
             if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                 return;
 
-            Player* _player = (Player*)unitTarget;
-            _player->learnSpell(1515);                      // Tame Pet
-            _player->learnSpell(883);                       // Call Pet
-            _player->learnSpell(2641);                      // Dismiss Pet
+            m_caster->CastSpell(unitTarget,1579,true);      // Tame Beast 3 spell learning
             return;
         }
         
@@ -1039,10 +1036,7 @@ void Spell::EffectDummy(uint32 i)
             if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
                 return;
 
-            Player* _player = (Player*)unitTarget;
-            _player->learnSpell(5149);                      // Beast Training
-            _player->learnSpell(982);                       // Revive Pet
-            _player->learnSpell(6991);                      // Feed Pet
+            m_caster->CastSpell(unitTarget,5300,true);      // Beast Training 3 spell learning
             return;
         }
 
