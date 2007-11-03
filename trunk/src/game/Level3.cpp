@@ -2636,11 +2636,13 @@ bool ChatHandler::HandleNearGraveCommand(const char* args)
 {
     uint32 g_team;
 
+    size_t argslen = strlen(args);
+
     if(!*args)
         g_team = 0;
-    else if (strncmp((char*)args,"horde",6)==0)
+    else if (strncmp((char*)args,"horde",argslen)==0)
         g_team = HORDE;
-    else if (strncmp((char*)args,"alliance",9)==0)
+    else if (strncmp((char*)args,"alliance",argslen)==0)
         g_team = ALLIANCE;
     else
         return false;
@@ -2648,7 +2650,7 @@ bool ChatHandler::HandleNearGraveCommand(const char* args)
     Player* player = m_session->GetPlayer();
 
     WorldSafeLocsEntry const* graveyard = objmgr.GetClosestGraveYard(
-        player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(),player->GetMapId(),player->GetTeam());
+        player->GetPositionX(), player->GetPositionY(), player->GetPositionZ(),player->GetMapId(),g_team);
 
     if(graveyard)
     {
