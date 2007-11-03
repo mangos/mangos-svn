@@ -199,7 +199,7 @@ void BattleGround::Update(time_t diff)
             /*
             SetStatus(STATUS_WAIT_QUEUE);
             SetQueueType(MAX_BATTLEGROUND_QUEUES);
-            SetWinner(2);
+            SetWinner(WINNER_NONE);
 
             //and following code ... WTF?
             if(isArena())
@@ -301,6 +301,45 @@ void BattleGround::CastSpellOnTeam(uint32 SpellID, uint32 TeamID)
     }
 }
 
+void BattleGround::RewardHonorToTeam(uint32 Honor, uint32 TeamID)
+{
+    for(std::map<uint64, BattleGroundPlayer>::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+    {
+        Player *plr = objmgr.GetPlayer(itr->first);
+
+        if(!plr)
+        {
+            sLog.outError("Player " I64FMTD " not found!", itr->first);
+            continue;
+        }
+
+        if(plr->GetTeam() == TeamID)
+            UpdatePlayerScore(plr, SCORE_BONUS_HONOR, Honor);
+    }
+}
+
+void BattleGround::RewardReputationToTeam(uint32 faction_id, uint32 Reputation, uint32 TeamID)
+{
+    FactionEntry const* factionEntry = sFactionStore.LookupEntry(faction_id);
+
+    if(!factionEntry)
+        return;
+
+    for(std::map<uint64, BattleGroundPlayer>::iterator itr = m_Players.begin(); itr != m_Players.end(); ++itr)
+    {
+        Player *plr = objmgr.GetPlayer(itr->first);
+
+        if(!plr)
+        {
+            sLog.outError("Player " I64FMTD " not found!", itr->first);
+            continue;
+        }
+
+        if(plr->GetTeam() == TeamID)
+            plr->ModifyFactionReputation(factionEntry,Reputation);
+    }
+}
+
 void BattleGround::UpdateWorldState(uint32 Field, uint32 Value)
 {
     WorldPacket data;
@@ -320,7 +359,7 @@ void BattleGround::EndBattleGround(uint32 winner)
 
         PlaySoundToAll(SOUND_ALLIANCE_WINS);                // alliance wins sound...
 
-        SetWinner(1);
+        SetWinner(WINNER_ALLIANCE);
     }
     else
     {
@@ -328,7 +367,7 @@ void BattleGround::EndBattleGround(uint32 winner)
 
         PlaySoundToAll(SOUND_HORDE_WINS);                   // horde wins sound...
 
-        SetWinner(0);
+        SetWinner(WINNER_HORDE);
     }
 
     SetStatus(STATUS_WAIT_LEAVE);
@@ -351,14 +390,6 @@ void BattleGround::EndBattleGround(uint32 winner)
             plr->SpawnCorpseBones();
         }
 
-        BlockMovement(plr);
-
-        sBattleGroundMgr.BuildPvpLogDataPacket(&data, this);
-        plr->GetSession()->SendPacket(&data);
-
-        sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), plr->GetBattleGroundQueueIndex(m_TypeID), STATUS_IN_PROGRESS, TIME_TO_AUTOREMOVE, GetStartTime());
-        plr->GetSession()->SendPacket(&data);
-
         if(plr->GetTeam() == winner)
         {
             if(!Source)
@@ -369,12 +400,13 @@ void BattleGround::EndBattleGround(uint32 winner)
                     mark = ITEM_AV_MARK_WINNER;
                     break;
                 case BATTLEGROUND_WS:
-                    mark = ITEM_WSG_MARK_WINNER;
+                    mark = ITEM_WS_MARK_WINNER;
                     break;
                 case BATTLEGROUND_AB:
                     mark = ITEM_AB_MARK_WINNER;
                     break;
             }
+            UpdatePlayerScore(plr, SCORE_BONUS_HONOR, 20);
         }
         else
         {
@@ -384,22 +416,39 @@ void BattleGround::EndBattleGround(uint32 winner)
                     mark = ITEM_AV_MARK_LOSER;
                     break;
                 case BATTLEGROUND_WS:
-                    mark = ITEM_WSG_MARK_LOSER;
+                    mark = ITEM_WS_MARK_LOSER;
                     break;
                 case BATTLEGROUND_AB:
                     mark = ITEM_AB_MARK_LOSER;
                     break;
             }
         }
+
         if(mark)
         {
             plr->CastSpell(plr, mark, true);
         }
+
+        std::map<uint64, BattleGroundScore*>::iterator itr1 = m_PlayerScores.find(plr->GetGUID());
+
+        if(!(itr1 == m_PlayerScores.end()))
+        {
+            if(itr1->second->BonusHonor)
+                plr->RewardHonor(NULL, 1, itr1->second->BonusHonor);
+        }
+
+        BlockMovement(plr);
+
+        sBattleGroundMgr.BuildPvpLogDataPacket(&data, this);
+        plr->GetSession()->SendPacket(&data);
+
+        sBattleGroundMgr.BuildBattleGroundStatusPacket(&data, this, plr->GetTeam(), plr->GetBattleGroundQueueIndex(m_TypeID), STATUS_IN_PROGRESS, TIME_TO_AUTOREMOVE, GetStartTime());
+        plr->GetSession()->SendPacket(&data);
     }
 
     if(Source)
     {
-        sChatHandler.FillMessageData(&data, Source->GetSession(), CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_UNIVERSAL, NULL, Source->GetGUID(), winmsg, NULL);
+        sChatHandler.FillMessageData(&data, Source->GetSession(), CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_GLOBAL, NULL, Source->GetGUID(), winmsg, NULL);
         SendPacketToAll(&data);
     }
 }
@@ -518,7 +567,7 @@ void BattleGround::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
         // all this code should be moved to virtual void Reset()  - which should be implemented
         SetStatus(STATUS_WAIT_QUEUE);
         SetQueueType(MAX_BATTLEGROUND_QUEUES);
-        SetWinner(2);
+        SetWinner(WINNER_NONE);
 
         if (m_InvitedAlliance > 0 || m_InvitedHorde > 0)
             sLog.outError("BattleGround system ERROR: bad counter, m_InvitedAlliance: %d, m_InvitedHorde: %d", m_InvitedAlliance, m_InvitedHorde);
@@ -526,21 +575,10 @@ void BattleGround::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
         m_InvitedAlliance = 0;
         m_InvitedHorde = 0;
 
-        //WTF? :
-        /*
-        if(isArena())
-        {
-            BattleGround *bg = sBattleGroundMgr.GetBattleGround(BATTLEGROUND_AA);
-            if(!bg)
-                return;
-
-            bg->SetStatus(STATUS_WAIT_QUEUE);
-        }*/
-
         m_Players.clear();
         m_PlayerScores.clear();
 
-        //this code is used to despawn objects in WSG? or in all BGs???
+        //this code is used to despawn objects in WS? or in all BGs???
         for(uint32 i = 0; i < m_bgobjects.size(); i++)
         {
             SpawnBGObject(i, RESPAWN_ONE_DAY);
@@ -669,9 +707,12 @@ void BattleGround::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
         case SCORE_KILLS:                                   // Killing blows
             itr->second->KillingBlows += value;
             break;
+        case SCORE_DEATHS:                                  // deaths
+            itr->second->Deaths += value;
+            break;
         case SCORE_DAMAGE_DONE:                             // Damage Done
             itr->second->DamageDone += value;
-             break;
+            break;
         case SCORE_HEALING_DONE:                            // Healing Done
             itr->second->HealingDone += value;
             break;
@@ -680,9 +721,6 @@ void BattleGround::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
             break;
         case SCORE_HONORABLE_KILLS:                         // Honorable kills
             itr->second->HonorableKills += value;
-            break;
-        case SCORE_DEATHS:                                  // Deaths
-            itr->second->Deaths += value;
             break;
         default:
             sLog.outDebug("Unknown player score type %u", type);
@@ -753,12 +791,27 @@ bool BattleGround::AddObject(uint32 type, uint32 entry, float x, float y, float 
     data.lootid         = 0;
     data.spawntimesecs  = spawntime;
     data.animprogress   = 100;
-    data.dynflags       = 0;
+    data.dynflags       = 1;            //there was 0, i have no idea why we should change it
     objmgr.AddGameobjectToGrid(guid, &data);
 
     m_bgobjects[type] = MAKE_GUID(guid, HIGHGUID_GAMEOBJECT);
 
     return true;
+}
+
+void BattleGround::DoorOpen(uint32 type)
+{
+    GameObject *obj = HashMapHolder<GameObject>::Find(m_bgobjects[type]);
+    if(obj)
+    {
+        obj->SetUInt32Value(GAMEOBJECT_FLAGS,33);
+        obj->SetUInt32Value(GAMEOBJECT_STATE,0);
+        //obj->SetLootState(GO_CLOSED);
+    }
+    else
+    {
+        sLog.outError("Object not found");
+    }
 }
 
 void BattleGround::SpawnBGObject(uint32 type, uint32 respawntime)

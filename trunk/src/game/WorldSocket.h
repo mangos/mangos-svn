@@ -143,8 +143,8 @@ class WorldSocket : public TcpSocket
         void OnDelete();
 
         void Update(time_t diff);
-		// Player Queue
-		void SendAuthWaitQue(uint32 position);
+        // Player Queue
+        void SendAuthWaitQue(uint32 position);
 
         WorldSession* GetSession() const { return _session; }
     protected:

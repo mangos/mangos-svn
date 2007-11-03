@@ -241,7 +241,7 @@ class World
         bool RemoveSession(uint32 id);
         /// Get the number of current active sessions
         uint32 GetActiveAndQueuedSessionCount() const { return m_sessions.size(); }
-		uint32 GetActiveSessionCount() const { return m_sessions.size() - m_QueuedPlayer.size(); }
+        uint32 GetActiveSessionCount() const { return m_sessions.size() - m_QueuedPlayer.size(); }
         /// Get the maximum number of parallel sessions on the server since last reboot
         uint32 GetMaxSessionCount() const { return m_maxSessionsCount; }
         Player* FindPlayerInZone(uint32 zone);
@@ -257,12 +257,12 @@ class World
         /// Set the active session server limit (or security level limitation)
         void SetPlayerLimit(int32 limit, bool needUpdate = false);
 
-		//player Queue
-		typedef std::list<WorldSocket*> Queue;
-		void AddQueuedPlayer(WorldSocket* Socket);
-		void RemoveQueuedPlayer(WorldSocket* Socket);
-		int32 GetQueuePos(WorldSocket* Socket);
-		uint32 GetQueueSize() const { return m_QueuedPlayer.size(); }
+        //player Queue
+        typedef std::list<WorldSocket*> Queue;
+        void AddQueuedPlayer(WorldSocket* Socket);
+        void RemoveQueuedPlayer(WorldSocket* Socket);
+        int32 GetQueuePos(WorldSocket* Socket);
+        uint32 GetQueueSize() const { return m_QueuedPlayer.size(); }
 
         /// \todo Actions on m_allowMovement still to be implemented
         /// Is movement allowed?
@@ -411,8 +411,8 @@ class World
         // next daily quests reset time
         time_t m_NextDailyQuestReset;
 
-		//Player Queue
-		Queue m_QueuedPlayer;
+        //Player Queue
+        Queue m_QueuedPlayer;
 };
 
 extern uint32 realmID;

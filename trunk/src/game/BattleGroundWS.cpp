@@ -65,9 +65,18 @@ void BattleGroundWS::Update(time_t diff)
     }
 
     // after bg start and doors spawn we get there
-    if((GetStatus() == STATUS_WAIT_JOIN) && isDoorsSpawned() /*only FOR DEBUG commented : && GetPlayersSize() > GetMinPlayers()*/ )
+    if((GetStatus() == STATUS_WAIT_JOIN) && isDoorsSpawned())
     {
         ModifyStartDelayTime(diff);
+
+        if(GetStartDelayTime() <= START_DELAY2 && !IsInformed1)
+        {
+            WorldPacket data;
+            const char *message = LANG_BG_WS_HALF_MINUTE;
+            sChatHandler.FillMessageData(&data, NULL, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_UNIVERSAL, NULL, 0, message, NULL);
+            SendPacketToAll(&data);
+            IsInformed1 = true;
+        }
 
         // delay expired (1 minute)
         if(GetStartDelayTime() < 0)
@@ -176,6 +185,8 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
             AddPoint(ALLIANCE, 1);
         PlaySoundToAll(8173);
         SpawnBGObject(BG_WS_OBJECT_H_FLAG, BG_WS_FLAG_RESPAWN_TIME/1000);
+        RewardReputationToTeam(890, 35, ALLIANCE);          // +35 reputation
+        RewardHonorToTeam(40, ALLIANCE);                    // +40 bonushonor
     }
     else
     {
@@ -188,6 +199,8 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
             AddPoint(HORDE, 1);
         PlaySoundToAll(8213);
         SpawnBGObject(BG_WS_OBJECT_A_FLAG, BG_WS_FLAG_RESPAWN_TIME/1000);
+        RewardReputationToTeam(889, 35, HORDE);             // +35 reputation
+        RewardHonorToTeam(40, HORDE);                       // +40 bonushonor
     }
 
     WorldPacket data;
@@ -532,7 +545,7 @@ void BattleGroundWS::Reset()
     m_TeamScores[0]     = 0;
     m_TeamScores[1]     = 0;
 
-    SetWinner(2);
+    SetWinner(WINNER_NONE);
     SetStatus(STATUS_WAIT_QUEUE);
     SetStartTime(0);
     SetEndTime(0);
@@ -544,9 +557,6 @@ void BattleGroundWS::HandleKillPlayer(Player *player, Player *killer)
     if(GetStatus() != STATUS_IN_PROGRESS)
         return;
 
-    // i have no idea, why on earth we call this
-    // i made a small change but i commented it, because i'm not sure if it is correct :
-    //this->AddPlayerToResurrectQueue(0, player->GetGUID()); in spite of :
     EventPlayerDroppedFlag(player);
 }
 
@@ -556,4 +566,26 @@ void BattleGroundWS::HandleDropFlag(Player *player)
         return;
 
     EventPlayerDroppedFlag(player);
+}
+
+void BattleGroundWS::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
+{
+
+    std::map<uint64, BattleGroundScore*>::iterator itr = m_PlayerScores.find(Source->GetGUID());
+
+    if(itr == m_PlayerScores.end())                         // player not found
+        return;
+
+    switch(type)
+    {
+        case SCORE_FLAG_CAPTURES:                           // flags captured
+            ((BattleGroundWGScore*)itr->second)->FlagCaptures += value;
+            break;
+        case SCORE_FLAG_RETURNS:                            // flags returned
+            ((BattleGroundWGScore*)itr->second)->FlagReturns += value;
+            break;
+        default:
+            BattleGround::UpdatePlayerScore(Source, type, value);
+            break;
+    }
 }

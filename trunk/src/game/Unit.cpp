@@ -516,6 +516,22 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
         }
     }
 
+    if(pVictim->GetTypeId() == TYPEID_PLAYER && GetTypeId() == TYPEID_PLAYER)
+    {
+        if((((Player*)pVictim)->InBattleGround()))
+        {
+            Player *killer = ((Player*)this);
+            if(killer->InBattleGround() && killer != ((Player*)pVictim))
+            {
+                BattleGround *bg = sBattleGroundMgr.GetBattleGround(killer->GetBattleGroundId());
+                if(bg)
+                {
+                    bg->UpdatePlayerScore(killer, SCORE_DAMAGE_DONE, damage);
+                }
+            }
+        }
+    }
+
     if (health <= damage)
     {
         // battleground things

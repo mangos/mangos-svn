@@ -589,7 +589,7 @@ void BattleGroundMgr::BuildGroupJoinedBattlegroundPacket(WorldPacket *data, uint
     /*bgTypeId is:
     0 - Your group has joined a battleground queue, but you are not iligible
     1 - Your group has joined the queue for AV
-    2 - Your group has joined the queue for WSG
+    2 - Your group has joined the queue for WS
     3 - Your group has joined the queue for AB
     4 - Your group has joined the queue for NA
     5 - Your group has joined the queue for BE Arena

@@ -453,7 +453,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                 // 15003
                 // 15004
                 // 15005
-                // WSG:
+                // WS:
                 // 179830 - Silverwing Flag
                 // 179831 - Warsong Flag
                 // EotS:
@@ -513,7 +513,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                 if(!bg)
                     return;
                 // BG flag dropped
-                // WSG:
+                // WS:
                 // 179785 - Silverwing Flag
                 // 179786 - Warsong Flag
                 // EotS:

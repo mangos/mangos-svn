@@ -38,7 +38,7 @@ void WorldSession::HandleBattleGroundHelloOpcode( WorldPacket & recv_data )
     recv_data >> guid;
     sLog.outDebug( "WORLD: Recvd CMSG_BATTLEMASTER_HELLO Message from: " I64FMT, guid);
 
-    uint32 bgid = 2;                                        // WSG
+    uint32 bgid = 2;                                        // WS
 
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
     if(!unit)
@@ -54,7 +54,7 @@ void WorldSession::HandleBattleGroundHelloOpcode( WorldPacket & recv_data )
         case 1216:
             bgid = 1;
             break;
-            // WSG Battlemaster
+            // WS Battlemaster
         case 1641:
         case 1514:
             bgid = 2;

@@ -120,6 +120,7 @@ class BattleGroundWS : public BattleGround
 
         void UpdateFlagState(uint32 team, uint32 value);
         void UpdateTeamScore(uint32 team);
+        void UpdatePlayerScore(Player *Source, uint32 type, uint32 value);
 
         /* Scorekeeping */
         uint32 GetTeamScore(uint32 TeamID) const { return m_TeamScores[GetTeamIndexByTeamId(TeamID)]; }
@@ -132,5 +133,6 @@ class BattleGroundWS : public BattleGround
         uint8 m_FlagState[2];                               // for checking flag state
         uint32 m_TeamScores[2];
         int32 m_FlagsTimer[2];
+        bool IsInformed1;
 };
 #endif
