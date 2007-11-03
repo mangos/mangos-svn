@@ -2519,10 +2519,12 @@ uint8 Spell::CanCast()
     //Check if the spell grants school or mechanic immunity.
     //We use bitmasks so the loop is done only once and not on every aura check below.
     for(int i = 0;i < 3; i ++)
+    {
         if(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_SCHOOL_IMMUNITY)
             school_immune |= m_spellInfo->EffectMiscValue[i];
-    else if(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MECHANIC_IMMUNITY)
-        mechanic_immune |= 1 << m_spellInfo->EffectMiscValue[i];
+        else if(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MECHANIC_IMMUNITY)
+            mechanic_immune |= 1 << m_spellInfo->EffectMiscValue[i];
+    }
 
     //Check whether the cast should be prevented by any state you might have.
     uint8 prevented_reason = 0;
@@ -3538,8 +3540,8 @@ bool Spell::CheckTargetCreatureType(Unit* target) const
         spellCreatureTargetMask = 0x7FF;
     }
 
-    // Dismiss Pet
-    if(m_spellInfo->Id == 2641)
+    // Dismiss Pet and Taming Lesson skipped
+    if(m_spellInfo->Id == 2641 || m_spellInfo->Id == 23356)
         spellCreatureTargetMask =  0;
 
     if (spellCreatureTargetMask)
