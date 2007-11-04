@@ -462,7 +462,8 @@ CREATE TABLE `creature_loot_template` (
   `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
   `mincount` tinyint(3) unsigned NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `QuestFFAorLootCondition` tinyint(3) unsigned NOT NULL default '1',
+  `freeforall` tinyint(1) unsigned NOT NULL default '0',
+  `lootcondition` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `condition_value1` int(11) unsigned NOT NULL default '0',
   `condition_value2` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY(`entry`, `item`)
@@ -719,7 +720,8 @@ CREATE TABLE `disenchant_loot_template` (
   `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
   `mincount` tinyint(3) unsigned NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `QuestFFAorLootCondition` tinyint(3) unsigned NOT NULL default '1',
+  `freeforall` tinyint(1) unsigned NOT NULL default '0',
+  `lootcondition` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `condition_value1` int(11) unsigned NOT NULL default '0',
   `condition_value2` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY(`entry`, `item`)
@@ -836,7 +838,8 @@ CREATE TABLE `fishing_loot_template` (
   `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
   `mincount` tinyint(3) unsigned NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `QuestFFAorLootCondition` tinyint(3) unsigned NOT NULL default '1',
+  `freeforall` tinyint(1) unsigned NOT NULL default '0',
+  `lootcondition` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `condition_value1` int(11) unsigned NOT NULL default '0',
   `condition_value2` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY(`entry`, `item`)
@@ -1089,7 +1092,8 @@ CREATE TABLE `gameobject_loot_template` (
   `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
   `mincount` tinyint(3) unsigned NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `QuestFFAorLootCondition` tinyint(3) unsigned NOT NULL default '1',
+  `freeforall` tinyint(1) unsigned NOT NULL default '0',
+  `lootcondition` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `condition_value1` int(11) unsigned NOT NULL default '0',
   `condition_value2` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY(`entry`, `item`)
@@ -1278,7 +1282,8 @@ CREATE TABLE `item_loot_template` (
   `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
   `mincount` tinyint(3) unsigned NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `QuestFFAorLootCondition` tinyint(3) unsigned NOT NULL default '1',
+  `freeforall` tinyint(1) unsigned NOT NULL default '0',
+  `lootcondition` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `condition_value1` int(11) unsigned NOT NULL default '0',
   `condition_value2` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY(`entry`, `item`)
@@ -2366,7 +2371,8 @@ CREATE TABLE `pickpocketing_loot_template` (
   `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
   `mincount` tinyint(3) unsigned NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `QuestFFAorLootCondition` tinyint(3) unsigned NOT NULL default '1',
+  `freeforall` tinyint(1) unsigned NOT NULL default '0',
+  `lootcondition` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `condition_value1` int(11) unsigned NOT NULL default '0',
   `condition_value2` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY(`entry`, `item`)
@@ -9126,7 +9132,8 @@ CREATE TABLE `prospecting_loot_template` (
   `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
   `mincount` tinyint(3) unsigned NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `QuestFFAorLootCondition` tinyint(3) unsigned NOT NULL default '1',
+  `freeforall` tinyint(1) unsigned NOT NULL default '0',
+  `lootcondition` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `condition_value1` int(11) unsigned NOT NULL default '0',
   `condition_value2` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY(`entry`, `item`)
@@ -9372,7 +9379,8 @@ CREATE TABLE `skinning_loot_template` (
   `QuestChanceOrGroup` tinyint(3) NOT NULL default '0',
   `mincount` tinyint(3) unsigned NOT NULL default '1',
   `maxcount` tinyint(3) unsigned NOT NULL default '1',
-  `QuestFFAorLootCondition` tinyint(3) unsigned NOT NULL default '1',
+  `freeforall` tinyint(1) unsigned NOT NULL default '0',
+  `lootcondition` tinyint(3) unsigned NOT NULL DEFAULT '0',
   `condition_value1` int(11) unsigned NOT NULL default '0',
   `condition_value2` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY(`entry`, `item`)

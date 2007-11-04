@@ -6636,7 +6636,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
                 if (!creature->HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_VENDOR) && lootid)
                 {
                     loot->clear();
-                    FillLoot(loot, lootid, LootTemplates_Creature, this);
+                    FillLoot(loot, lootid, LootTemplates_Creature, recipient);
                 }
 
                 loot->generateMoneyLoot(creature->GetCreatureInfo()->mingold,creature->GetCreatureInfo()->maxgold);
@@ -6708,6 +6708,27 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             q_list = itr->second;
     }
 
+    QuestItemList *ffa_list = 0;
+    if (permission != NONE_PERMISSION)
+    {
+        QuestItemMap::iterator itr = loot->PlayerFFAItems.find(this);
+        if (itr == loot->PlayerFFAItems.end())
+            ffa_list = FillFFALoot(this, loot);
+        else
+            ffa_list = itr->second;
+    }
+
+    QuestItemList *conditional_list = 0;
+    if (permission != NONE_PERMISSION)
+    {
+        QuestItemMap::iterator itr = loot->PlayerNonQuestNonFFAConditionalItems.find(this);
+        if (itr == loot->PlayerNonQuestNonFFAConditionalItems.end())
+            conditional_list = FillFFALoot(this, loot);
+        else
+            conditional_list = itr->second;
+    }
+
+
     // LOOT_PICKPOCKETING, LOOT_PROSPECTING, LOOT_DISENCHANTING and LOOT_INSIGNIA unsupported by client, sending LOOT_SKINNING instead
     if(loot_type == LOOT_PICKPOCKETING || loot_type == LOOT_DISENCHANTING || loot_type == LOOT_PROSPECTING || loot_type == LOOT_INSIGNIA)
         loot_type = LOOT_SKINNING;
@@ -6716,7 +6737,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
 
     data << guid;
     data << uint8(loot_type);
-    data << LootView(*loot, q_list, permission);
+    data << LootView(*loot, q_list, ffa_list, conditional_list, this, permission);
 
     SendDirectMessage(&data);
 
