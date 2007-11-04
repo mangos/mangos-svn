@@ -83,6 +83,8 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
 
     LootItem *item = NULL;
     QuestItem *qitem = NULL;
+    QuestItem *ffaitem = NULL;
+    QuestItem *conditem = NULL;
     bool is_looted = true;
     if (lootSlot >= loot->items.size())
     {
@@ -99,6 +101,34 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
     {
         item = &loot->items[lootSlot];
         is_looted = item->is_looted;
+        if(item->freeforall)
+        {
+            QuestItemMap::iterator itr = loot->PlayerFFAItems.find(player);
+            if (itr != loot->PlayerFFAItems.end())
+            {
+                for(QuestItemList::iterator iter=itr->second->begin(); iter!= itr->second->end(); ++iter)
+                if(iter->index==lootSlot)
+                {
+                    ffaitem = (QuestItem*)&(*iter);
+                    is_looted = ffaitem->is_looted;
+                    break;
+                }
+            }
+        }
+        else if(item->condition)
+        {
+            QuestItemMap::iterator itr = loot->PlayerNonQuestNonFFAConditionalItems.find(player);
+            if (itr != loot->PlayerNonQuestNonFFAConditionalItems.end())
+            {
+                for(QuestItemList::iterator iter=itr->second->begin(); iter!= itr->second->end(); ++iter)
+                if(iter->index==lootSlot)
+                {
+                    conditem = (QuestItem*)&(*iter);
+                    is_looted = conditem->is_looted;
+                    break;
+                }
+            }
+        }
     }
 
     if ((item == NULL) || is_looted)
@@ -123,16 +153,31 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         if (qitem)
         {
             qitem->is_looted = true;
-            if (!item->ffa_or_condition || loot->PlayerQuestItems.size() == 1)
+            if (item->freeforall || loot->PlayerQuestItems.size() == 1) //freeforall is 1 if everyone's supposed to get the quest item.
                 player->SendNotifyLootItemRemoved(loot->items.size() + lootSlot);
             else
                 loot->NotifyQuestItemRemoved(qitem->index);
         }
         else
-            loot->NotifyItemRemoved(lootSlot);
+        {
+            if (ffaitem)
+            {
+                ffaitem->is_looted=true;
+                player->SendNotifyLootItemRemoved(lootSlot);
+            }
+            else if (conditem)
+            {
+                conditem->is_looted=true;
+                player->SendNotifyLootItemRemoved(lootSlot);
+            }
+            else
+                loot->NotifyItemRemoved(lootSlot);
+        }
 
-        //if (item->ffa_or_condition) item->is_looted = true;
-        item->is_looted = true;
+        //if only one person is supposed to loot the item, then set it to looted
+        if (!item->freeforall) 
+            item->is_looted = true;
+
         loot->unlootedCount--;
 
         player->SendNewItem(newitem, uint32(item->count), false, false, true);

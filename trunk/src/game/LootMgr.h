@@ -78,17 +78,18 @@ struct LootStoreItem
     uint32  displayid;
     float   chanceOrRef;
     int32   questChanceOrGroup;
-    uint8   mincount;
-    uint8   maxcount;
-    int8    ffa_or_condition; // free for all or additional loot condition
+    uint8   mincount    :8;
+    uint8   maxcount    :8;
+    bool    freeforall  :8;                                 // free for all (clone for all lotters)
+    uint8   condition   :8;                                 // additional loot condition
     uint32  cond_value1;
     uint32  cond_value2;
 
     LootStoreItem()
-        : itemid(0), displayid(0), chanceOrRef(0), questChanceOrGroup(0), mincount(1), maxcount(1), ffa_or_condition(1), cond_value1(0), cond_value2(0) {}
+        : itemid(0), displayid(0), chanceOrRef(0), questChanceOrGroup(0), mincount(1), maxcount(1), freeforall(false), condition(0), cond_value1(0), cond_value2(0) {}
 
-    LootStoreItem(uint32 _itemid, uint32 _displayid, float _chanceOrRef, int32 _questChanceOrGroup, int8 _ffa_or_condition = 1, uint32 _cond_value1 = 0, uint32 _cond_value2 = 0, uint8 _mincount = 1, uint8 _maxcount = 1)
-        : itemid(_itemid), displayid(_displayid), chanceOrRef(_chanceOrRef), questChanceOrGroup(_questChanceOrGroup), mincount(_mincount), maxcount(_maxcount), ffa_or_condition(_ffa_or_condition), cond_value1(_cond_value1), cond_value2(_cond_value2) {}
+    LootStoreItem(uint32 _itemid, uint32 _displayid, float _chanceOrRef, int32 _questChanceOrGroup, bool _freeforall = false, uint8 _condition = 0, uint32 _cond_value1 = 0, uint32 _cond_value2 = 0, uint8 _mincount = 1, uint8 _maxcount = 1)
+        : itemid(_itemid), displayid(_displayid), chanceOrRef(_chanceOrRef), questChanceOrGroup(_questChanceOrGroup), mincount(_mincount), maxcount(_maxcount), freeforall(_freeforall), condition(_condition), cond_value1(_cond_value1), cond_value2(_cond_value2) {}
 
     int32 GetGroupId() const { return -questChanceOrGroup -1; }
 };
@@ -99,19 +100,29 @@ struct LootItem
     uint32  displayid;
     uint32  randomSuffix;
     int32   randomPropertyId;
-    uint8   count            : 8;                           // allow compiler pack structure
-    int8    ffa_or_condition : 8;
-    bool    is_looted        : 1;
-    bool    is_blocked       : 1;
+    uint32  cond_value1;
+    uint32  cond_value2;
+    uint8   condition         : 8;                          // allow compiler pack structure
+    uint8   count             : 8;
+    bool    is_looted         : 1;
+    bool    is_blocked        : 1;
+    bool    freeforall        : 1;                          // free for all
+    bool    is_underthreshold : 1;
 
     LootItem()
-        : itemid(0), displayid(0), randomSuffix(0), randomPropertyId(0), count(1), ffa_or_condition(1), is_looted(true), is_blocked(false) {}
+        : itemid(0), displayid(0), randomSuffix(0), randomPropertyId(0), 
+        cond_value1(0), cond_value2(0), condition(0), count(1), 
+        is_looted(true), is_blocked(false), freeforall(false), is_underthreshold(false) {}
 
-    LootItem(uint32 _itemid, uint32 _displayid, uint32 _randomSuffix, int32 _randomProp, int8 _ffa_or_condition, uint8 _count = 1)
-        : itemid(_itemid), displayid(_displayid), randomSuffix(_randomSuffix), randomPropertyId(_randomProp), count(_count), ffa_or_condition(_ffa_or_condition), is_looted(false), is_blocked(false) {}
+    LootItem(uint32 _itemid, uint32 _displayid, uint32 _randomSuffix, int32 _randomProp, bool _freeforall, uint8 _condition, uint32 _cond_value1, uint32 _cond_value2, uint8 _count = 1)
+        : itemid(_itemid), displayid(_displayid), randomSuffix(_randomSuffix), randomPropertyId(_randomProp), 
+        cond_value1(_cond_value1), cond_value2(_cond_value2), condition(_condition), count(_count), 
+        is_looted(false), is_blocked(false), freeforall(_freeforall), is_underthreshold(false) {}
 
     LootItem(LootStoreItem const& li,uint8 _count, uint32 _randomSuffix = 0, int32 _randomProp = 0)
-        : itemid(li.itemid), displayid(li.displayid), randomSuffix(_randomSuffix), randomPropertyId(_randomProp), count(_count), ffa_or_condition(li.ffa_or_condition), is_looted(false), is_blocked(false) {}
+        : itemid(li.itemid), displayid(li.displayid), randomSuffix(_randomSuffix), randomPropertyId(_randomProp), 
+        cond_value1(li.cond_value1), cond_value2(li.cond_value2), condition(li.condition), count(_count), 
+        is_looted(false), is_blocked(false), freeforall(li.freeforall), is_underthreshold(false) {}
 
     static bool looted(LootItem &itm) { return itm.is_looted; }
     static bool not_looted(LootItem &itm) { return !itm.is_looted; }
@@ -138,6 +149,8 @@ struct Loot
 {
     std::set<uint64> PlayersLooting;
     QuestItemMap PlayerQuestItems;
+    QuestItemMap PlayerFFAItems;
+    QuestItemMap PlayerNonQuestNonFFAConditionalItems;
     std::vector<LootItem> items;
     std::vector<LootItem> quest_items;
     uint32 gold;
@@ -153,6 +166,8 @@ struct Loot
         for (QuestItemMap::iterator itr = PlayerQuestItems.begin(); itr != PlayerQuestItems.end(); ++itr)
             delete itr->second;
         PlayerQuestItems.clear();
+        PlayerFFAItems.clear();
+        PlayerNonQuestNonFFAConditionalItems.clear();
         quest_items.clear();
     }
 
@@ -171,9 +186,12 @@ struct LootView
 {
     Loot &loot;
     QuestItemList *qlist;
+    QuestItemList *ffalist;
+    QuestItemList *conditionallist;
+    Player *viewer;
     PermissionTypes permission;
-    LootView(Loot &_loot, QuestItemList *_qlist, PermissionTypes _permission = ALL_PERMISSION)
-        : loot(_loot), qlist(_qlist), permission(_permission) {}
+    LootView(Loot &_loot, QuestItemList *_qlist, QuestItemList *_ffalist, QuestItemList *_conditionallist, Player *_viewer,PermissionTypes _permission = ALL_PERMISSION)
+        : loot(_loot), qlist(_qlist), ffalist(_ffalist), conditionallist(_conditionallist), viewer(_viewer), permission(_permission) {}
 };
 
 extern LootStore LootTemplates_Creature;
@@ -185,8 +203,12 @@ extern LootStore LootTemplates_Skinning;
 extern LootStore LootTemplates_Disenchant;
 extern LootStore LootTemplates_Prospecting;
 
+bool MeetsConditions(Player * player, LootItem * item);
+
+QuestItemList* FillFFALoot(Player* player, Loot *loot);
 QuestItemList* FillQuestLoot(Player* player, Loot *loot);
-void FillLoot(Loot* loot, uint32 loot_id, LootStore& store, Player* loot_owner);
+QuestItemList* FillNonQuestNonFFAConditionalLoot(Player* player, Loot *loot);
+void FillLoot(Loot *loot, uint32 loot_id, LootStore& store, Player* loot_owner, bool referenced = false);
 void LoadLootTables();
 void LoadLootTable(LootStore& lootstore,char const* tablename);
 

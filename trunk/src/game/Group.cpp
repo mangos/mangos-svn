@@ -380,7 +380,7 @@ void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
     Player *player = objmgr.GetPlayer(playerGUID);
     Group *group = player->GetGroup();
 
-    for (i=loot->items.begin(); i != loot->items.end(); i++, itemSlot++)
+    for (i=loot->items.begin(); i != loot->items.end(); ++i, ++itemSlot)
     {
         item = objmgr.GetItemPrototype(i->itemid);
         if (!item)
@@ -388,7 +388,9 @@ void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
             //sLog.outDebug("Group::GroupLoot: missing item prototype for item with id: %d", i->itemid);
             continue;
         }
-        if (item->Quality >= uint32(m_lootThreshold))
+
+        //roll for over-threshold item if it's one-player loot
+        if (item->Quality >= uint32(m_lootThreshold) && !i->freeforall)
         {
             Roll r;
             uint32 newitemGUID = objmgr.GenerateLowGuid(HIGHGUID_ITEM);
@@ -403,11 +405,13 @@ void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
                 Player *member = itr->getSource();
                 if(!member || !member->GetSession())
                     continue;
-
-                if (member->GetDistance2dSq(creature) < sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
+                if ( MeetsConditions(member, &*i) )
                 {
-                    r.playerVote[member->GetGUID()] = NOT_EMITED_YET;
-                    r.totalPlayersRolling++;
+                    if (member->GetDistance2dSq(creature) < sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
+                    {
+                        r.playerVote[member->GetGUID()] = NOT_EMITED_YET;
+                        r.totalPlayersRolling++;
+                    }
                 }
             }
 
@@ -422,6 +426,9 @@ void Group::GroupLoot(uint64 playerGUID, Loot *loot, Creature *creature)
 
             RollId.push_back(r);
         }
+        else
+            i->is_underthreshold=1;
+
     }
 }
 
@@ -433,10 +440,12 @@ void Group::NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature)
     Player *player = objmgr.GetPlayer(playerGUID);
     Group *group = player->GetGroup();
 
-    for (i=loot->items.begin(); i != loot->items.end(); i++)
+    for (i=loot->items.begin(); i != loot->items.end(); ++i, ++itemSlot)
     {
         item = objmgr.GetItemPrototype(i->itemid);
-        if (item->Quality >= uint32(m_lootThreshold))
+
+        //only roll for one-player items, not for ones everyone can get
+        if (item->Quality >= uint32(m_lootThreshold) && !i->freeforall)
         {
             Roll r;
             uint32 newitemGUID = objmgr.GenerateLowGuid(HIGHGUID_ITEM);
@@ -451,7 +460,7 @@ void Group::NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature)
                 if(!playerToRoll || !playerToRoll->GetSession())
                     continue;
 
-                if (playerToRoll->CanUseItem(item))
+                if (playerToRoll->CanUseItem(item) && MeetsConditions(playerToRoll, &*i) )
                 {
                     if (playerToRoll->GetDistance2dSq(creature) < sWorld.getConfig(CONFIG_GROUP_XP_DISTANCE))
                     {
@@ -473,8 +482,8 @@ void Group::NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature)
                 RollId.push_back(r);
             }
         }
-
-        itemSlot++;
+        else
+            i->is_underthreshold=1;
     }
 }
 
@@ -571,6 +580,7 @@ void Group::CountTheRoll(Rolls::iterator roll, uint32 NumberOfPlayers)
                 {
                     item->is_looted = true;
                     roll->loot->NotifyItemRemoved(roll->itemSlot);
+                    roll->loot->unlootedCount--;
                     player->StoreNewItem( dest, roll->itemid, item->count, true, item->randomPropertyId);
                 }
                 else
@@ -615,6 +625,7 @@ void Group::CountTheRoll(Rolls::iterator roll, uint32 NumberOfPlayers)
                 {
                     item->is_looted = true;
                     roll->loot->NotifyItemRemoved(roll->itemSlot);
+                    roll->loot->unlootedCount--;
                     player->StoreNewItem( dest, roll->itemid, item->count, true, item->randomPropertyId);
                 }
                 else

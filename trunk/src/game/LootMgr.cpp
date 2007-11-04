@@ -65,7 +65,8 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
     float chanceOrRef;
     int32 questchance;
     uint32 count = 0;
-    int32 ffa_or_condition = 0;
+    bool freeforall = true;
+    uint32 condition = 0;
     uint32 cond_value1 = 0;
     uint32 cond_value2 = 0;
 
@@ -74,7 +75,7 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
     sLog.outString( "%s :", tablename);
 
     //                                                 0        1       2              3                     4           5           6                          7                   8
-    QueryResult *result = WorldDatabase.PQuery("SELECT `entry`, `item`, `ChanceOrRef`, `QuestChanceOrGroup`, `mincount`, `maxcount`, `QuestFFAorLootCondition`, `condition_value1`, `condition_value2` FROM `%s`",tablename);
+    QueryResult *result = WorldDatabase.PQuery("SELECT `entry`, `item`, `ChanceOrRef`, `QuestChanceOrGroup`, `mincount`, `maxcount`, `freeforall`, `lootcondition`, `condition_value1`, `condition_value2` FROM `%s`",tablename);
 
     if (result)
     {
@@ -93,9 +94,10 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
             questchance = int32(fields[3].GetUInt32());
             mincount = fields[4].GetUInt32();
             maxcount = fields[5].GetUInt32();
-            ffa_or_condition = int32(fields[6].GetUInt32());
-            cond_value1 = fields[7].GetUInt32();
-            cond_value2 = fields[8].GetUInt32();
+            freeforall = fields[6].GetBool();
+            condition = fields[7].GetUInt32();
+            cond_value1 = fields[8].GetUInt32();
+            cond_value2 = fields[9].GetUInt32();
 
             if( chanceOrRef >= 0 )                          // chance
             {
@@ -118,10 +120,8 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
             }
             // in case chanceOrRef < 0 item is loot ref slot index in fact that allow have more one refs in loot
 
-            if(ffa_or_condition < 0)
+            switch (condition)
             {
-                switch ((-1)*ffa_or_condition)
-                {
                 case CONDITION_AURA:
                     {
                         if(!sSpellStore.LookupEntry(cond_value1))
@@ -196,10 +196,9 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
                         }
                         break;
                     }
-                }
             }
 
-            lootstore[entry].push_back( LootStoreItem(item, displayid, chanceOrRef, questchance, ffa_or_condition, cond_value1, cond_value2, mincount, maxcount) );
+            lootstore[entry].push_back( LootStoreItem(item, displayid, chanceOrRef, questchance, freeforall, condition, cond_value1, cond_value2, mincount, maxcount) );
 
 
             count++;
@@ -236,11 +235,10 @@ void LoadLootTables()
 struct HasChance
 {
     LootStore* m_store;
-    Player* owner;
     float RolledChance[MaxLootGroups];
     float CumulativeChance[MaxLootGroups];
 
-    explicit HasChance(LootStore* _store, Player* _owner) : m_store(_store), owner(_owner)
+    explicit HasChance(LootStore* _store) : m_store(_store)
     {
         for (int i=0; i < MaxLootGroups; i++)
             CumulativeChance[i] = 0.0f;
@@ -257,71 +255,8 @@ struct HasChance
         {
             // reference non group loot ( itm.chanceOrRef < 0) handled separatly
             if ( itm.chanceOrRef > 0 && roll_chance_f(itm.chanceOrRef * sWorld.getRate(RATE_DROP_ITEMS)) )
-            {
-                //(QuestFFAorLootCondition < 0) -> item has aditional loot condition
-                if( owner && itm.ffa_or_condition < 0 )
-                {
-                    switch (abs(itm.ffa_or_condition))
-                    {
-                    case CONDITION_AURA:
-                    {
-                        if(owner->HasAura(itm.cond_value1, itm.cond_value2))
-                            return &itm;
-                        else
-                            return NULL;
-                        break;
-                    }
-                    case CONDITION_ITEM:
-                    {
-                        if(owner->HasItemCount(itm.cond_value1,itm.cond_value2))
-                            return &itm;
-                        else
-                            return NULL;
-                        break;
-                    }
-                    case CONDITION_ITEM_EQUIPPED:
-                    {
-                        if(owner->HasItemEquipped(itm.cond_value1))
-                            return &itm;
-                        else
-                            return NULL;
-                        break;
-                    }
-                    case CONDITION_ZONEID:
-                    {
-                        if(owner->GetZoneId() == itm.cond_value1)
-                            return &itm;
-                        else
-                            return NULL;
-                        break;
-                    }
-                    case CONDITION_REPUTATION_RANK:
-                    {
-                        FactionEntry const* faction = sFactionStore.LookupEntry(itm.cond_value1);
-                        if(faction && owner->GetReputationRank(faction) >= itm.cond_value2)
-                            return &itm;
-                        else
-                            return NULL;
-                        break;
-                    }
-                    case CONDITION_TEAM:
-                    {
-                        if(owner->GetTeam() == itm.cond_value1)
-                            return &itm;
-                        else
-                            return NULL;
-                        break;
-                    }
-                    default:
-                        return NULL;
-                    }
-                }
-                else
-                {
-                    return &itm;
-                }
-             }
-             return NULL;
+                return &itm;
+            return NULL;
         }
 
         // Grouped loot
@@ -379,7 +314,7 @@ struct HasQuestChance
     inline bool operator() ( LootStoreItem &itm )   { return roll_chance_i(itm.questChanceOrGroup); }
 };
 
-void FillLoot(Loot* loot, uint32 loot_id, LootStore& store, Player* loot_owner)
+void FillLoot(Loot* loot, uint32 loot_id, LootStore& store, Player* loot_owner, bool referenced)
 {
     LootStore::iterator tab = store.find(loot_id);
 
@@ -393,7 +328,7 @@ void FillLoot(Loot* loot, uint32 loot_id, LootStore& store, Player* loot_owner)
     loot->quest_items.reserve(min(tab->second.size(),MAX_NR_QUEST_ITEMS));
 
     // fill loot with all normal and quest items that have a chance
-    HasChance      hasChance(&store, loot_owner);
+    HasChance      hasChance(&store);
     HasQuestChance hasQuestChance;
 
     for(LootStoreItemList::iterator item_iter = tab->second.begin(); item_iter != tab->second.end(); ++item_iter)
@@ -413,20 +348,110 @@ void FillLoot(Loot* loot, uint32 loot_id, LootStore& store, Player* loot_owner)
                 // Reference to another loot
                 int LootId = -int(item_iter->chanceOrRef);
 
-                FillLoot(loot,LootId,store,loot_owner);
+                FillLoot(loot,LootId,store,loot_owner,true);
                 continue;
             }
 
             LootStoreItem* LootedItem = hasChance(*item_iter);
             if ( LootedItem )
+            {
                 loot->items.push_back(
                     LootItem(*LootedItem, urand(LootedItem->mincount, LootedItem->maxcount),
                     GenerateEnchSuffixFactor(LootedItem->itemid),
                     Item::GenerateItemRandomPropertyId(LootedItem->itemid))
                     );
+
+                // non-conditional one-player only items are counted here, 
+                // free for all items are counted in FillFFALoot(), 
+                // non-ffa conditionals are counted in FillNonQuestNonFFAConditionalLoot()
+                if( ! LootedItem->freeforall && ! LootedItem->condition)
+                    loot->unlootedCount++;
+            }
         }
     }
-    loot->unlootedCount = loot->items.size();
+
+    if(referenced)
+        return;
+    if(!loot_owner)
+        return;
+    Group * pGroup=loot_owner->GetGroup();
+    if(!pGroup)
+        return;
+    for(GroupReference *itr = pGroup->GetFirstMember(); itr != NULL; itr = itr->next())
+    {
+        //fill the quest item map for every player in the recipient's group
+        Player* pl = itr->getSource();
+        if(!pl)
+            continue;
+        QuestItemMap::iterator qmapitr = loot->PlayerQuestItems.find(pl);
+        if (qmapitr == loot->PlayerQuestItems.end())
+        {
+            FillQuestLoot(pl, loot);
+        }
+        qmapitr = loot->PlayerFFAItems.find(pl);
+        if (qmapitr == loot->PlayerFFAItems.end())
+        {
+            FillFFALoot(pl, loot);
+        }
+        qmapitr = loot->PlayerNonQuestNonFFAConditionalItems.find(pl);
+        if (qmapitr == loot->PlayerNonQuestNonFFAConditionalItems.end())
+        {
+            FillNonQuestNonFFAConditionalLoot(pl, loot);
+        }
+    }
+}
+
+bool MeetsConditions(Player * owner, LootItem * itm)
+{
+    if( owner && itm->condition > 0 )
+    {
+        switch (itm->condition)
+        {
+            case CONDITION_AURA:
+                return owner->HasAura(itm->cond_value1, itm->cond_value2);
+            case CONDITION_ITEM:
+                return owner->HasItemCount(itm->cond_value1,itm->cond_value2);
+            case CONDITION_ITEM_EQUIPPED:
+                return owner->HasItemEquipped(itm->cond_value1);
+            case CONDITION_ZONEID:
+                return owner->GetZoneId() == itm->cond_value1;
+            case CONDITION_REPUTATION_RANK:
+            {
+                FactionEntry const* faction = sFactionStore.LookupEntry(itm->cond_value1);
+                return faction && owner->GetReputationRank(faction) >= itm->cond_value2;
+            }
+            case CONDITION_TEAM:
+                return owner->GetTeam() == itm->cond_value1;
+            default:
+                return false;
+        }
+    }
+    else if (owner)
+        return true;    //empty condition, return true
+    return false;       //player not present, return false
+}
+
+QuestItemList* FillFFALoot(Player* player, Loot *loot)
+{
+    QuestItemList *ql = new QuestItemList();
+
+    for(uint8 i = 0; i < loot->items.size(); i++)
+    {
+        LootItem &item = loot->items[i];
+        if(!item.is_looted && item.freeforall && MeetsConditions(player, &item))
+        {
+            ql->push_back(QuestItem(i));
+            loot->unlootedCount++;
+        }
+    }
+    if (ql->empty())
+    {
+        delete ql;
+        return NULL;
+    }
+
+    loot->PlayerFFAItems[player] = ql;
+    return ql;
 }
 
 QuestItemList* FillQuestLoot(Player* player, Loot *loot)
@@ -437,17 +462,23 @@ QuestItemList* FillQuestLoot(Player* player, Loot *loot)
     for(uint8 i = 0; i < loot->quest_items.size(); i++)
     {
         LootItem &item = loot->quest_items[i];
-        if(!item.is_looted && player->HasQuestForItem(item.itemid))
+        if(!item.is_looted && player->HasQuestForItem(item.itemid) && MeetsConditions(player, &item))
         {
             ql->push_back(QuestItem(i));
+
             // questitems get blocked when they first apper in a
             // player's quest vector
-            if (!item.ffa_or_condition || !item.is_blocked) loot->unlootedCount++;
+            //
+            // increase once if one looter only, looter-times if free for all
+            if (item.freeforall || !item.is_blocked)
+                loot->unlootedCount++;
+
             item.is_blocked = true;
-            if (loot->items.size() + ql->size() == MAX_NR_LOOT_ITEMS) break;
+
+            if (loot->items.size() + ql->size() == MAX_NR_LOOT_ITEMS)
+                break;
         }
     }
-
     if (ql->empty())
     {
         delete ql;
@@ -455,6 +486,29 @@ QuestItemList* FillQuestLoot(Player* player, Loot *loot)
     }
 
     loot->PlayerQuestItems[player] = ql;
+    return ql;
+}
+
+QuestItemList* FillNonQuestNonFFAConditionalLoot(Player* player, Loot *loot)
+{
+    QuestItemList *ql = new QuestItemList();
+
+    for(uint8 i = 0; i < loot->items.size(); i++)
+    {
+        LootItem &item = loot->items[i];
+        if(!item.is_looted && !item.freeforall && item.condition && MeetsConditions(player, &item))
+        {
+            ql->push_back(QuestItem(i));
+            loot->unlootedCount++;
+        }
+    }
+    if (ql->empty())
+    {
+        delete ql;
+        return NULL;
+    }
+
+    loot->PlayerNonQuestNonFFAConditionalItems[player] = ql;
     return ql;
 }
 
@@ -559,7 +613,7 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
 
     if (lv.qlist)
     {
-        for (uint8 i = 0; i < lv.qlist->size(); i++)
+        for (uint8 i = 0; i < lv.qlist->size(); ++i)
             if (!lv.qlist->at(i).is_looted) itemsShown++;
     }
 
@@ -573,28 +627,31 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
         }
         case GROUP_PERMISSION:
         {
-            // You are not the items propietary, so you can only see
-            // blocked rolled items and questitems
-            b << uint32(0);                                 //gold
-            for (uint8 i = 0; i < l.items.size(); i++)
-                if (!l.items[i].is_looted && l.items[i].is_blocked) itemsShown++;
-            b << itemsShown;
+            // You are not the items proprietary, so you can only see
+            // blocked rolled items and quest items, and !ffa items (still needs work I'm afraid) /
+            //group loot fix: you can see gold, and items set to underthreshold
+            b << l.gold;                                    //gold
+            for (uint8 i = 0; i < l.items.size(); ++i)
+                if (!l.items[i].is_looted && (l.items[i].is_blocked || l.items[i].is_underthreshold || l.items[i].freeforall) && (!l.items[i].condition || MeetsConditions(lv.viewer, &l.items[i]))) 
+                    itemsShown++;
+            b << itemsShown;                                //send the number of items shown
 
-            for (uint8 i = 0; i < l.items.size(); i++)
-                if (!l.items[i].is_looted && l.items[i].is_blocked)
-                    b << uint8(i) << l.items[i];
+            for (uint8 i = 0; i < l.items.size(); ++i)
+                if (!l.items[i].is_looted && (l.items[i].is_blocked || l.items[i].is_underthreshold) && !l.items[i].freeforall && (!l.items[i].condition))
+                    b << uint8(i) << l.items[i];            //send the index and the item if it's not looted, and blocked or under threshold, free for all items will be sent later, only one-player loots here
         }
         break;
         default:
         {
             b << l.gold;
-            for (uint8 i = 0; i < l.items.size(); i++)
-                if (!l.items[i].is_looted) itemsShown++;
+            for (uint8 i = 0; i < l.items.size(); ++i)
+                if (!l.items[i].is_looted && (!l.items[i].condition || MeetsConditions(lv.viewer, &l.items[i])))
+                    itemsShown++;
             b << itemsShown;
 
-            for (uint8 i = 0; i < l.items.size(); i++)
-                if (!l.items[i].is_looted)
-                    b << uint8(i) << l.items[i];
+            for (uint8 i = 0; i < l.items.size(); ++i)
+                if (!l.items[i].is_looted && !l.items[i].freeforall && !l.items[i].condition)
+                    b << uint8(i) << l.items[i];            //only send one-player loot items now, free for all will be sent later
         }
     }
 
@@ -605,6 +662,26 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
             LootItem &item = l.quest_items[i->index];
             if (!i->is_looted && !item.is_looted)
                 b << uint8(l.items.size() + (i - lv.qlist->begin())) << item;
+        }
+    }
+
+    if (lv.ffalist)
+    {
+        for (QuestItemList::iterator i = lv.ffalist->begin() ; i != lv.ffalist->end(); ++i)
+        {
+            LootItem &item = l.items[i->index];
+            if (!i->is_looted && !item.is_looted)
+                b << uint8(i->index) << item;
+        }
+    }
+
+    if (lv.conditionallist)
+    {
+        for (QuestItemList::iterator i = lv.conditionallist->begin() ; i != lv.conditionallist->end(); ++i)
+        {
+            LootItem &item = l.items[i->index];
+            if (!i->is_looted && !item.is_looted)
+                b << uint8(i->index) << item;
         }
     }
 
