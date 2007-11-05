@@ -727,15 +727,9 @@ void Player::HandleLava()
 void Player::HandleSobering()
 {
     m_drunkTimer = 0;
-    if (m_drunk <= (0xFFFF / 30))
-    {
-        m_drunk = 0;
-    }
-    else
-    {
-        m_drunk -= (0xFFFF / 30);
-    }
-    SetUInt32Value(PLAYER_BYTES_3, (GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF0001) | (m_drunk & 0xFFFE));
+
+    uint32 drunk = (m_drunk <= (0xFFFF / 30)) ? 0 : (m_drunk - (0xFFFF / 30));
+    SetDrunkValue(drunk);
 }
 
 void Player::SetDrunkValue(uint16 newDrunkValue)
@@ -6723,7 +6717,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     {
         QuestItemMap::iterator itr = loot->PlayerNonQuestNonFFAConditionalItems.find(this);
         if (itr == loot->PlayerNonQuestNonFFAConditionalItems.end())
-            conditional_list = FillFFALoot(this, loot);
+            conditional_list = FillNonQuestNonFFAConditionalLoot(this, loot);
         else
             conditional_list = itr->second;
     }
@@ -12183,7 +12177,8 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
         }
     }
 
-    m_drunk = GetUInt32Value(PLAYER_BYTES_3) & 0xFFFE;
+    // set value, including drunk invisibility detection
+    SetDrunkValue(GetUInt32Value(PLAYER_BYTES_3) & 0xFFFE);
 
     m_name = fields[3].GetCppString();
 
