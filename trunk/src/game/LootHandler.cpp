@@ -162,16 +162,17 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         {
             if (ffaitem)
             {
+                //freeforall case, notify only one player of the removal
                 ffaitem->is_looted=true;
                 player->SendNotifyLootItemRemoved(lootSlot);
             }
-            else if (conditem)
-            {
-                conditem->is_looted=true;
-                player->SendNotifyLootItemRemoved(lootSlot);
-            }
             else
+            {
+                //not freeforall, notify everyone
+                if(conditem)
+                    conditem->is_looted=true;
                 loot->NotifyItemRemoved(lootSlot);
+            }
         }
 
         //if only one person is supposed to loot the item, then set it to looted
