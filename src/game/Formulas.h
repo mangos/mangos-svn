@@ -20,7 +20,6 @@
 #define MANGOS_FORMULAS_H
 
 #include "World.h"
-#include "Database/DatabaseEnv.h"
 
 namespace MaNGOS
 {

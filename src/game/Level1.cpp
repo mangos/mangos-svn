@@ -980,7 +980,7 @@ bool ChatHandler::HandleModifySwimCommand(const char* args)
 
     float Swim = (float)atof((char*)args);
 
-    if (Swim > 10 || Swim < 0.01f)
+    if (Swim > 10.0f || Swim < 0.01f)
     {
         SendSysMessage(LANG_BAD_VALUE);
         return true;
@@ -1021,7 +1021,7 @@ bool ChatHandler::HandleModifyBWalkCommand(const char* args)
 
     float BSpeed = (float)atof((char*)args);
 
-    if (BSpeed > 10 || BSpeed < 0.1f)
+    if (BSpeed > 10.0f || BSpeed < 0.1f)
     {
         SendSysMessage(LANG_BAD_VALUE);
         return true;

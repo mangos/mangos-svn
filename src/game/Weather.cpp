@@ -135,7 +135,7 @@ bool Weather::ReGenerate()
 
         if (m_grade < 0.33333334f)
         {
-            m_grade = 0.9999;                               // go nuts
+            m_grade = 0.9999f;                               // go nuts
             return true;
         }
         else
@@ -146,7 +146,7 @@ bool Weather::ReGenerate()
                 uint32 rnd = urand(0,99);
                 if (rnd < 50)
                 {
-                    m_grade -= 0.6666667;
+                    m_grade -= 0.6666667f;
                     return true;
                 }
             }
