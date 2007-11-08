@@ -5962,9 +5962,9 @@ bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList) 
         return IsVisible;
     }
 
-    float modifier = 1;                                     // 100 pct
-    float pvpMultiplier = 0;
-    float distanceFormula = 0;
+    float modifier = 1.0f;                                     // 100 pct
+    float pvpMultiplier = 0.0f;
+    float distanceFormula = 0.0f;
     int32 rank = 0;
     //This allows to check talent tree and will add addition stealth dependant on used points)
     uint32 stealthMod = GetTotalAuraModifier(SPELL_AURA_MOD_STEALTH_LEVEL);
@@ -5986,10 +5986,10 @@ bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList) 
     // Original probability values
     // removed level of mob in calculation as it should not affect the detection, it is mainly dependant on level difference
                                                             //at this distance, the detector has to be a 15% prob of detect
-    float averageDist = 1 - 0.11016949 * x + 0.00301637 * x * x;
-    if (averageDist < 1) averageDist = 1;
+    float averageDist = 1.0f - 0.11016949f * x + 0.00301637f * x * x;
+    if (averageDist < 1.0f) averageDist = 1.0f;
 
-    float prob = 0;
+    float prob = 0.0f;
     if (distance > averageDist)
                                                             //prob between 10% and 0%
         prob = (averageDist - 200 + 9 * distance) / (averageDist - 20);
@@ -5998,9 +5998,9 @@ bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList) 
 
     // If is not in front, probability floor
     if (!isInFront)
-        prob = prob / 100;
-    if (prob < 0.1)
-        prob = 0.1;
+        prob = prob / 100.0f;
+    if (prob < 0.1f)
+        prob = 0.1f;
 
     // Mob rank affects modifier
     modifier = rank <= 4 ? 1 + rank * 0.2f : 1;
@@ -6045,7 +6045,7 @@ bool Unit::isVisibleForOrDetect(Unit const* u, bool detect, bool inVisibleList) 
         // PVE stealth handler
         // Distance of approch player stays stealth 100% is dependant of level. No probabiliy or detection is rolled
         // This establishes a buffer zone in between mob start to see you and mob start to roll probabilities or detect you
-        if ((distance < 100) && (distance > ((distanceFormula * 2) * modifier)) && (distance > 0.24f))
+        if ((distance < 100.0f) && (distance > ((distanceFormula * 2) * modifier)) && (distance > 0.24f))
         {
             IsVisible=false;
             return IsVisible;

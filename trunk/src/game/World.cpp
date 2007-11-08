@@ -532,15 +532,15 @@ void World::SetInitialWorldSettings()
     objmgr.SetHighestGuids();
 
     ///- Check the existence of the map files for all races' startup areas.
-    if(   !MapManager::ExistMapAndVMap(0,-6240.32, 331.033)
-        ||!MapManager::ExistMapAndVMap(0,-8949.95,-132.493)
-        ||!MapManager::ExistMapAndVMap(0,-8949.95,-132.493)
-        ||!MapManager::ExistMapAndVMap(1,-618.518,-4251.67)
-        ||!MapManager::ExistMapAndVMap(0, 1676.35, 1677.45)
-        ||!MapManager::ExistMapAndVMap(1, 10311.3, 832.463)
-        ||!MapManager::ExistMapAndVMap(1,-2917.58,-257.98)
+    if(   !MapManager::ExistMapAndVMap(0,-6240.32f, 331.033f)
+        ||!MapManager::ExistMapAndVMap(0,-8949.95f,-132.493f)
+        ||!MapManager::ExistMapAndVMap(0,-8949.95f,-132.493f)
+        ||!MapManager::ExistMapAndVMap(1,-618.518f,-4251.67f)
+        ||!MapManager::ExistMapAndVMap(0, 1676.35f, 1677.45f)
+        ||!MapManager::ExistMapAndVMap(1, 10311.3f, 832.463f)
+        ||!MapManager::ExistMapAndVMap(1,-2917.58f,-257.98f)
         ||m_configs[CONFIG_EXPANSION] && (
-        !MapManager::ExistMapAndVMap(530,10349.6,-6357.29) || !MapManager::ExistMapAndVMap(530,-3961.64,-13931.2) ) )
+        !MapManager::ExistMapAndVMap(530,10349.6f,-6357.29f) || !MapManager::ExistMapAndVMap(530,-3961.64f,-13931.2f) ) )
     {
         sLog.outError("Correct *.map files not found in path '%smaps' or *.vmap/*vmdir files in '%svmaps'. Please place *.map/*.vmap/*.vmdir files in appropriate directories or correct the DataDir value in the mangosd.conf file.",m_dataPath.c_str(),m_dataPath.c_str());
         exit(1);

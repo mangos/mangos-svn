@@ -26,7 +26,9 @@
 #   include <mmsystem.h>
 #   include <time.h>
 #else
-# if defined(__FreeBSD__) || defined(__APPLE_CC__)
+# if defined(__FreeBSD__) || defined(__OpenBSD__)
+#   include <sys/time.h>
+# elif defined(__APPLE_CC__)
 #   include <time.h>
 # endif
 #   include <sys/timeb.h>
@@ -37,11 +39,9 @@ inline uint32 getMSTime() { return GetTickCount(); }
 #else
 inline uint32 getMSTime()
 {
-    uint32 time_in_ms = 0;
-    struct timeb tp;
-    ftime(&tp);
-    time_in_ms = tp.time * 1000 + tp.millitm;
-    return time_in_ms;
+    struct timeval tv;
+    gettimeofday(&tv, (struct timezone*) NULL);
+    return tv.tv_sec * 1000 + tv.tv_usec / 1000;
 }
 #endif
 
