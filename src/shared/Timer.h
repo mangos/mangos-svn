@@ -39,7 +39,8 @@ inline uint32 getMSTime() { return GetTickCount(); }
 inline uint32 getMSTime()
 {
     struct timeval tv;
-    gettimeofday(&tv, (struct timezone*) NULL);
+    struct timezone tz;
+    gettimeofday( &tv, &tz );
     return (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
 }
 #endif
