@@ -26,11 +26,10 @@
 #   include <mmsystem.h>
 #   include <time.h>
 #else
-# if defined(__FreeBSD__) || defined(__OpenBSD__)
-#   include <sys/time.h>
-# elif defined(__APPLE_CC__)
+# if defined(__APPLE_CC__)
 #   include <time.h>
 # endif
+#   include <sys/time.h>
 #   include <sys/timeb.h>
 #endif
 
@@ -41,7 +40,7 @@ inline uint32 getMSTime()
 {
     struct timeval tv;
     gettimeofday(&tv, (struct timezone*) NULL);
-    return tv.tv_sec * 1000 + tv.tv_usec / 1000;
+    return (tv.tv_sec * 1000) + (tv.tv_usec / 1000);
 }
 #endif
 
