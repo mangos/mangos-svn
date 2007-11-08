@@ -311,10 +311,11 @@ void Creature::RegenerateHealth()
 
 void Creature::AIM_Initialize()
 {
+    CreatureAI * oldAI = i_AI;
     i_motionMaster.Initialize();
-    if (i_AI)
-        delete i_AI;
     i_AI = FactorySelector::selectAI(this);
+    if (oldAI)
+        delete oldAI;
 }
 
 bool Creature::Create (uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 Entry, uint32 team, const CreatureData *data)
