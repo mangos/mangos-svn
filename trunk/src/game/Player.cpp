@@ -15536,3 +15536,23 @@ BattleGround* Player::GetBattleGround() const
 
     return sBattleGroundMgr.GetBattleGround(GetBattleGroundId());
 }
+
+uint32 Player::GetBattleGroundQueueIdFromLevel() const
+{
+    // this code isn't fastest, but it returns 6 when level isn't in normal range
+    uint32 level = getLevel();
+    if(level >= 10 && level <= 19)
+        return 0;
+    else if(level >= 20 && level <= 29)
+        return 1;
+    else if(level >= 30 && level <= 39)
+        return 2;
+    else if(level >= 40 && level <= 49)
+        return 3;
+    else if(level >= 50 && level <= 59)
+        return 4;
+    else if(level >= 60 && level <= 69)
+        return 5;
+    else
+        return 6;
+}

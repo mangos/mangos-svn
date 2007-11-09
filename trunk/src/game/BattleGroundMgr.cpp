@@ -61,7 +61,7 @@ BattleGroundQueue::~BattleGroundQueue()
 
 void BattleGroundQueue::AddPlayer(Player *plr, uint32 bgTypeId)
 {
-    uint32 queue_id = GetQueueIdByPlayerLevel(plr->getLevel());
+    uint32 queue_id = plr->GetBattleGroundQueueIdFromLevel();
 
     //if player isn't in queue, he is added, if already is, then values are overwritten, no memory leak
     PlayerQueueInfo& info = m_QueuedPlayers[queue_id][plr->GetGUID()];
@@ -111,7 +111,7 @@ void BattleGroundQueue::RemovePlayer(uint64 guid, bool decreaseInvitedCount)
     }
     else
     {                                                       //player is online, we have his level, so we can find exact queue from his level
-        queue_id = GetQueueIdByPlayerLevel(plr->getLevel());
+        queue_id = plr->GetBattleGroundQueueIdFromLevel();
         itr = m_QueuedPlayers[queue_id].find(guid);
         IsSet = true;
     }
@@ -142,35 +142,19 @@ void BattleGroundQueue::RemovePlayer(uint64 guid, bool decreaseInvitedCount)
     }
 }
 
-uint32 BattleGroundQueue::GetQueueIdByPlayerLevel(uint32 level)
-{
-    /* old code :
-    if(level >= 10 && level <= 19)
-        return 0;
-    else if(level >= 20 && level <= 29)
-        return 1;
-    else if(level >= 30 && level <= 39)
-        return 2;
-    else if(level >= 40 && level <= 49)
-        return 3;
-    else if(level >= 50 && level <= 59)
-        return 4;
-    else if(level >= 60 && level <= 69)
-        return 5;
-    else
-        return 6;*/
-    if(level <= 19)
-        return 0;
-    level -= 10;
-    return (level / 10);
-}
-
 /*
 this method is called when player is inserted, or removed from BG Queue - there is only one player's status changed, so we don't use while(true) cycles to invite whole queue
 add method calls this by itself, the remove method could works in other way, so you have to call this method from other code after calling remove method
 */
 void BattleGroundQueue::Update(uint32 bgTypeId, uint32 queue_id)
 {
+    if (queue_id >= MAX_BATTLEGROUND_QUEUES)
+    {
+        //this is error, that caused crashes (not in , but now it shouldn't)
+        sLog.outError("BattleGroundQueue::Update() called for non existing queue type - this can cause crash, pls report problem, if this is the last line of error log before crash");
+        return;
+    }
+
     //if no players in queue ... do nothing
     if (this->m_QueuedPlayers[queue_id].Alliance == 0 && this->m_QueuedPlayers[queue_id].Horde == 0)
         return;
@@ -343,7 +327,7 @@ bool BGQueueInviteEvent::Execute(uint64 /*e_time*/, uint32 p_time)
         if (queueSlot < PLAYER_MAX_BATTLEGROUND_QUEUES) // player is in queue
         {
             // check if player is invited to this bg ... this check must be here, because when player leaves queue and joins another, it would cause a problems
-            BattleGroundQueue::QueuedPlayersMap const& qpMap = sBattleGroundMgr.m_BattleGroundQueues[bg->GetTypeID()].m_QueuedPlayers[bg->GetQueueType()];
+            BattleGroundQueue::QueuedPlayersMap const& qpMap = sBattleGroundMgr.m_BattleGroundQueues[bg->GetTypeID()].m_QueuedPlayers[plr->GetBattleGroundQueueIdFromLevel()];
             BattleGroundQueue::QueuedPlayersMap::const_iterator qItr = qpMap.find(m_PlayerGuid);
             if (qItr != qpMap.end() && qItr->second.IsInvitedToBGInstanceGUID == m_BgInstanceGUID)
             {
@@ -379,7 +363,7 @@ bool BGQueueRemoveEvent::Execute(uint64 /*e_time*/, uint32 /*p_time*/)
         if (queueSlot < PLAYER_MAX_BATTLEGROUND_QUEUES) // player is in queue
         {
             // check if player is invited to this bg ... this check must be here, because when player leaves queue and joins another, it would cause a problems
-            if (sBattleGroundMgr.m_BattleGroundQueues[bg->GetTypeID()].m_QueuedPlayers[bg->GetQueueType()].find(m_PlayerGuid)->second.IsInvitedToBGInstanceGUID == m_BgInstanceGUID)
+            if (sBattleGroundMgr.m_BattleGroundQueues[bg->GetTypeID()].m_QueuedPlayers[plr->GetBattleGroundQueueIdFromLevel()].find(m_PlayerGuid)->second.IsInvitedToBGInstanceGUID == m_BgInstanceGUID)
             {
                 plr->RemoveBattleGroundQueueId(bg->GetTypeID());
                 sBattleGroundMgr.m_BattleGroundQueues[bg->GetTypeID()].RemovePlayer(m_PlayerGuid, true);
