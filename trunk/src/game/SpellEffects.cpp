@@ -1050,6 +1050,41 @@ void Spell::EffectDummy(uint32 i)
             m_caster->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
             return;
         }
+
+        // Deviate Fish
+        case 8063:
+        {
+            if(m_caster->GetTypeId() != TYPEID_PLAYER)
+                return;
+            
+            uint32 spell_id = 0;
+            switch(urand(1,5))
+            {
+                case 1: spell_id = 8064; break; // Sleepy
+                case 2: spell_id = 8065; break; // Invigorate
+                case 3: spell_id = 8066; break; // Shrink
+                case 4: spell_id = 8067; break; // Party Time!
+                case 5: spell_id = 8068; break; // Healthy Spirit
+            }
+            m_caster->CastSpell(m_caster,spell_id,true,NULL);
+            return;
+        }
+
+        // Savory Deviate Delight
+        case 8213:
+        {
+            if(m_caster->GetTypeId() != TYPEID_PLAYER)
+                return;
+            
+            uint32 spell_id = 0;
+            switch(urand(1,2))
+            {
+                case 1: spell_id = (m_caster->getGender() == GENDER_MALE ? 8219 : 8220); break; // Flip Out - ninja
+                case 2: spell_id = (m_caster->getGender() == GENDER_MALE ? 8221 : 8222); break; // Yaaarrrr - pirate
+            }
+            m_caster->CastSpell(m_caster,spell_id,true,NULL);
+            return;
+        }
     }
 }
 
