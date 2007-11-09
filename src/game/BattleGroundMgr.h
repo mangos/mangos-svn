@@ -77,8 +77,6 @@ class BattleGroundQueue
         void AddPlayer(Player *plr, uint32 bgTypeId);
         void RemovePlayer(uint64 guid, bool decreaseInvitedCount);
 
-        uint32 GetQueueIdByPlayerLevel(uint32 level);
-
         typedef bgqueue<uint64, PlayerQueueInfo> QueuedPlayersMap;
         QueuedPlayersMap m_QueuedPlayers[MAX_BATTLEGROUND_QUEUES];
         typedef std::list<uint64> PlayerGuidsSortedByTimeQueue;
