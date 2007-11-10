@@ -36,6 +36,7 @@
 #include "SpellAuras.h"
 #include "WaypointMovementGenerator.h"
 #include "InstanceData.h"
+#include "BattleGround.h"
 
 // apply implementation of the singletons
 #include "Policies/SingletonImp.h"
@@ -497,6 +498,35 @@ bool Creature::isCanTrainingOf(Player* pPlayer, bool msg) const
     return true;
 }
 
+bool Creature::isCanIneractWithBattleMaster(Player* pPlayer, bool msg) const
+{
+    if(!isBattleMaster())
+        return false;
+
+    uint32 bgTypeId = objmgr.GetBattleMasterBG(GetEntry());
+    if(!msg)
+        return pPlayer->GetBGAccessByLevel(bgTypeId);
+
+    if(!pPlayer->GetBGAccessByLevel(bgTypeId))
+    {
+        pPlayer->PlayerTalkClass->ClearMenus();
+        switch(bgTypeId)
+        {
+            case BATTLEGROUND_AV:  pPlayer->PlayerTalkClass->SendGossipMenu(7616,GetGUID()); break;
+            case BATTLEGROUND_WS:  pPlayer->PlayerTalkClass->SendGossipMenu(7599,GetGUID()); break;
+            case BATTLEGROUND_AB:  pPlayer->PlayerTalkClass->SendGossipMenu(7642,GetGUID()); break;
+            case BATTLEGROUND_EY:
+            case BATTLEGROUND_NA:
+            case BATTLEGROUND_BE:
+            case BATTLEGROUND_AA:
+            case BATTLEGROUND_RL:  pPlayer->PlayerTalkClass->SendGossipMenu(10024,GetGUID()); break;
+                break;
+        }
+        return false;
+    }
+    return true;
+}
+
 bool Creature::isCanTrainingAndResetTalentsOf(Player* pPlayer) const
 {
     return pPlayer->getLevel() >= 10
@@ -574,13 +604,17 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
                     case GOSSIP_OPTION_TAXIVENDOR:
                         if ( pPlayer->GetSession()->SendLearnNewTaxiNode(GetGUID()) )
                             return;
+                        break;
+                    case GOSSIP_OPTION_BATTLEFIELD:
+                        if(!isCanIneractWithBattleMaster(pPlayer,false))
+                            cantalking=false;
+                        break;
                     case GOSSIP_OPTION_SPIRITGUIDE:
                     case GOSSIP_OPTION_INNKEEPER:
                     case GOSSIP_OPTION_BANKER:
                     case GOSSIP_OPTION_PETITIONER:
                     case GOSSIP_OPTION_STABLEPET:
                     case GOSSIP_OPTION_TABARDDESIGNER:
-                    case GOSSIP_OPTION_BATTLEFIELD:
                     case GOSSIP_OPTION_AUCTIONEER:
                         break;                              // no checks
                     default:
@@ -597,10 +631,18 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
         }
     }
 
-    if(pm->GetGossipMenu()->MenuItemCount()==0 && HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_TRAINER) && !pm->GetQuestMenu()->MenuItemCount())
+    ///some gossips aren't handled in normal way ... so we need to do it this way .. TODO: handle it in normal way ;-)
+    if(pm->GetGossipMenu()->MenuItemCount()==0 && !pm->GetQuestMenu()->MenuItemCount())
     {
-        LoadTrainerSpells();                                // Lazy loading at first access
-        isCanTrainingOf(pPlayer,true);                      // output error message if need
+        if(HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_TRAINER))
+        {
+            LoadTrainerSpells();                                // Lazy loading at first access
+            isCanTrainingOf(pPlayer,true);                      // output error message if need
+        }
+        if(HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_BATTLEFIELDPERSON))
+        {
+            isCanIneractWithBattleMaster(pPlayer,true);         // output error message if need
+        }
     }
 
     /*
@@ -718,6 +760,12 @@ void Creature::OnGossipSelect(Player* player, uint32 option)
             prepareGossipMenu( player,gossip->Id );
             sendPreparedGossip( player );
             break;
+        case GOSSIP_OPTION_BATTLEFIELD:
+        {
+            uint32 bgTypeId = objmgr.GetBattleMasterBG(GetEntry());
+            player->GetSession()->SendBattlegGroundList( GetGUID(), bgTypeId );
+            break;
+        }
         default:
             OnPoiSelect( player, gossip );
             break;

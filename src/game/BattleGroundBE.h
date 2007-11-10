@@ -36,7 +36,6 @@ class BattleGroundBEScore : public BattleGroundScore
     public:
         BattleGroundBEScore() {};
         virtual ~BattleGroundBEScore() {};
-        //TODO fix me
 };
 
 class BattleGroundBE : public BattleGround
@@ -55,6 +54,9 @@ class BattleGroundBE : public BattleGround
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         bool SetupBattleGround();
         void HandleKillPlayer(Player* player, Player *killer);
+
+        /* Scorekeeping */
+        void UpdatePlayerScore(Player *Source, uint32 type, uint32 value);
 
     private:
         uint32 m_TeamKills[2];                              // count of kills for each team

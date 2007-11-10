@@ -24,7 +24,7 @@ class BattleGround;
 class BattleGroundAVScore : public BattleGroundScore
 {
     public:
-        BattleGroundAVScore() : GraveyardsAssaulted(0), GraveyardsDefended(0), TowersAssaulted(0), TowersDefended(0), MinesCaptured(0), LeadersKilled(0) {};
+        BattleGroundAVScore() : GraveyardsAssaulted(0), GraveyardsDefended(0), TowersAssaulted(0), TowersDefended(0), MinesCaptured(0), LeadersKilled(0), SecondaryObjectives(0) {};
         virtual ~BattleGroundAVScore() {};
         uint32 GraveyardsAssaulted;
         uint32 GraveyardsDefended;
@@ -32,6 +32,7 @@ class BattleGroundAVScore : public BattleGroundScore
         uint32 TowersDefended;
         uint32 MinesCaptured;
         uint32 LeadersKilled;
+        uint32 SecondaryObjectives;
 };
 
 class BattleGroundAV : public BattleGround
@@ -49,6 +50,9 @@ class BattleGroundAV : public BattleGround
         void RemovePlayer(Player *plr,uint64 guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         //bool SetupBattleGround();
+
+        /* Scorekeeping */
+        void UpdatePlayerScore(Player *Source, uint32 type, uint32 value);
 
     private:
 };

@@ -1597,6 +1597,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void LeaveBattleground();
         bool CanJoinToBattleground() const;
 
+        bool GetBGAccessByLevel(uint32 bgTypeId) const;
+
         /*********************************************************/
         /***                    REST SYSTEM                    ***/
         /*********************************************************/

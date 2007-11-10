@@ -696,7 +696,7 @@ bool BattleGround::HasFreeSlots() const
 
 void BattleGround::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
 {
-    //this procedure should be moved to bg subclass code to update special properties of a score
+    //this procedure is called from virtual function implemented in bg subclass
     std::map<uint64, BattleGroundScore*>::iterator itr = m_PlayerScores.find(Source->GetGUID());
 
     if(itr == m_PlayerScores.end())                         // player not found...
@@ -704,23 +704,24 @@ void BattleGround::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
 
     switch(type)
     {
-        case SCORE_KILLS:                                   // Killing blows
+        case SCORE_KILLING_BLOWS:                           // Killing blows
             itr->second->KillingBlows += value;
             break;
-        case SCORE_DEATHS:                                  // deaths
+        case SCORE_DEATHS:                                  // Deaths
             itr->second->Deaths += value;
             break;
+        case SCORE_HONORABLE_KILLS:                         // Honorable kills
+            itr->second->HonorableKills += value;
+            break;
+        case SCORE_BONUS_HONOR:                             // Honor bonus
+            itr->second->BonusHonor += value;
+            break;
+            //used only in EY, but in MSG_PVP_LOG_DATA opcode
         case SCORE_DAMAGE_DONE:                             // Damage Done
             itr->second->DamageDone += value;
             break;
         case SCORE_HEALING_DONE:                            // Healing Done
             itr->second->HealingDone += value;
-            break;
-        case SCORE_BONUS_HONOR:                             // Honor bonus
-            itr->second->BonusHonor += value;
-            break;
-        case SCORE_HONORABLE_KILLS:                         // Honorable kills
-            itr->second->HonorableKills += value;
             break;
         default:
             sLog.outDebug("Unknown player score type %u", type);
@@ -841,7 +842,45 @@ void BattleGround::SpawnBGObject(uint32 type, uint32 respawntime)
     }
 }
 
-bool BattleGround::AddSpiritGuide(float x, float y, float z, float o, uint32 team)
+Creature* BattleGround::AddCreature(uint32 entry, uint32 type, uint32 teamval, float x, float y, float z, float o)
+{
+    CreatureInfo const* cinfo = objmgr.GetCreatureTemplate(entry);
+    if(!cinfo)
+    {
+        sLog.outErrorDb("Creature template %u not found. BattleGround not created!", entry);
+        return NULL;
+    }
+
+    Creature* pCreature = new Creature(NULL);
+    if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), GetMapId(), x, y, z, o, entry, teamval))
+    {
+        sLog.outError("Can't create creature entry: %u",entry);
+        delete pCreature;
+        return NULL;
+    }
+
+    //pCreature->SetDungeonDifficulty(0);
+    MapManager::Instance().GetMap(pCreature->GetMapId(), pCreature)->Add(pCreature);
+    m_bgcreatures[type] = pCreature->GetGUID();
+    return  pCreature;
+}
+
+bool BattleGround::DelCreature(uint32 type)
+{
+    Creature *cr = HashMapHolder<Creature>::Find(m_bgcreatures[type]);
+    if(!cr)
+    {
+        sLog.outError("Can't find creature guid: %u",m_bgcreatures[type]);
+        return false;
+    }
+    cr->CombatStop(true);
+    cr->CleanupsBeforeDelete();
+    ObjectAccessor::Instance().AddObjectToRemoveList(cr);
+    m_bgcreatures[type] = 0;
+    return true;
+}
+
+bool BattleGround::AddSpiritGuide(uint32 type, float x, float y, float z, float o, uint32 team)
 {
     uint32 entry = 0;
 
@@ -850,17 +889,27 @@ bool BattleGround::AddSpiritGuide(float x, float y, float z, float o, uint32 tea
     else
         entry = 13117;
 
-    CreatureInfo const* cinfo = objmgr.GetCreatureTemplate(entry);
-    if(!cinfo)
+    Creature* pCreature = AddCreature(entry,type,team,x,y,z,o);
+    if(!pCreature)
     {
-        sLog.outErrorDb("Creature template %u not found. BattleGround not created!", entry);
+        sLog.outError("Can't create Spirit guide. BattleGround not created!");
         return false;
     }
 
-    uint32 guid = objmgr.GenerateLowGuid(HIGHGUID_UNIT);
+    pCreature->setDeathState(DEAD);
 
-    CreatureData& data = objmgr.NewOrExistCreatureData(guid);
+    pCreature->SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT, pCreature->GetGUID());
+    // aura
+    pCreature->SetUInt32Value(UNIT_FIELD_AURA, SPELL_SPIRIT_HEAL_CHANNEL);
+    pCreature->SetUInt32Value(UNIT_FIELD_AURAFLAGS, 0x00000009);
+    pCreature->SetUInt32Value(UNIT_FIELD_AURALEVELS, 0x0000003C);
+    pCreature->SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS, 0x000000FF);
+    // casting visual effect
+    pCreature->SetUInt32Value(UNIT_CHANNEL_SPELL, SPELL_SPIRIT_HEAL_CHANNEL);
+    // correct cast speed
+    pCreature->SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
 
+    /* old code , not used:
     data.id             = entry;
     data.mapid          = GetMapId();
     data.posX           = x;
@@ -884,7 +933,6 @@ bool BattleGround::AddSpiritGuide(float x, float y, float z, float o, uint32 tea
 
     m_SpiritGuides.push_back(MAKE_GUID(guid, HIGHGUID_UNIT));
     /*
-        // set some fields to off like values
         pCreature->SetUInt64Value(UNIT_FIELD_CHANNEL_OBJECT, pCreature->GetGUID());
         // aura
         pCreature->SetUInt32Value(UNIT_FIELD_AURA, SPELL_SPIRIT_HEAL_CHANNEL);

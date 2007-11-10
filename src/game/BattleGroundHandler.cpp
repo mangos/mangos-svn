@@ -38,8 +38,6 @@ void WorldSession::HandleBattleGroundHelloOpcode( WorldPacket & recv_data )
     recv_data >> guid;
     sLog.outDebug( "WORLD: Recvd CMSG_BATTLEMASTER_HELLO Message from: " I64FMT, guid);
 
-    uint32 bgid = 2;                                        // WS
-
     Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
     if(!unit)
         return;
@@ -47,47 +45,22 @@ void WorldSession::HandleBattleGroundHelloOpcode( WorldPacket & recv_data )
     if(!unit->isBattleMaster())                             // it's not battlemaster
         return;
 
-    switch(unit->GetCreatureInfo()->faction_A)
-    {
-        // AV Battlemaster
-        case 1214:
-        case 1216:
-            bgid = 1;
-            break;
-            // WS Battlemaster
-        case 1641:
-        case 1514:
-            bgid = 2;
-            break;
-            // AB Battlemaster
-        case 1577:
-        case 412:
-            bgid = 3;
-            break;
-            // todo: add more...
-    }
+    uint32 bgTypeId = objmgr.GetBattleMasterBG(unit->GetEntry());
 
-    if(!strcmp(unit->GetCreatureInfo()->SubName, "Arena Battlemaster"))
-    {
-        bgid = 6;                                           // all arenas
-    }
-
-    uint32 PlayerLevel = _player->getLevel();
-
-    BattlemasterListEntry const* bl = sBattlemasterListStore.LookupEntry(bgid);
-
-    if(!bl)
-        return;
-
-    if(PlayerLevel < bl->minlvl || PlayerLevel > bl->maxlvl)
+    if(!_player->GetBGAccessByLevel(bgTypeId))
     {
                                                             // temp, must be gossip message...
         SendNotification("You don't meet Battleground level requirements");
         return;
     }
 
+    SendBattlegGroundList(guid, bgTypeId);
+}
+
+void WorldSession::SendBattlegGroundList( uint64 guid, uint32 bgTypeId )
+{
     WorldPacket data;
-    sBattleGroundMgr.BuildBattleGroundListPacket(&data, guid, _player, bgid);
+    sBattleGroundMgr.BuildBattleGroundListPacket(&data, guid, _player, bgTypeId);
     SendPacket( &data );
 }
 
@@ -342,10 +315,10 @@ void WorldSession::HandleBattleGroundLeaveOpcode( WorldPacket & /*recv_data*/ )
     sLog.outDebug( "WORLD: Recvd CMSG_LEAVE_BATTLEFIELD Message");
 
     //uint8 unk1, unk2;
-    //uint32 bgid;                                            // id from DBC
+    //uint32 bgTypeId;                                        // id from DBC
     //uint16 unk3;
 
-    //recv_data >> unk1 >> unk2 >> bgid >> unk3; - no used currently
+    //recv_data >> unk1 >> unk2 >> bgTypeId >> unk3; - no used currently
 
     _player->LeaveBattleground();
 }

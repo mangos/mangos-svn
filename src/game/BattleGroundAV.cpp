@@ -82,3 +82,40 @@ void BattleGroundAV::HandleAreaTrigger(Player *Source, uint32 Trigger)
     if(SpellId)
         Source->CastSpell(Source, SpellId, true);
 }
+
+void BattleGroundAV::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
+{
+
+    std::map<uint64, BattleGroundScore*>::iterator itr = m_PlayerScores.find(Source->GetGUID());
+
+    if(itr == m_PlayerScores.end())                         // player not found...
+        return;
+
+    switch(type)
+    {
+        case SCORE_GRAVEYARDS_ASSAULTED:
+            ((BattleGroundAVScore*)itr->second)->GraveyardsAssaulted += value;
+            break;
+        case SCORE_GRAVEYARDS_DEFENDED:
+            ((BattleGroundAVScore*)itr->second)->GraveyardsDefended += value;
+            break;
+        case SCORE_TOWERS_ASSAULTED:
+            ((BattleGroundAVScore*)itr->second)->TowersAssaulted += value;
+            break;
+        case SCORE_TOWERS_DEFENDED:
+            ((BattleGroundAVScore*)itr->second)->TowersDefended += value;
+            break;
+        case SCORE_MINES_CAPTURED:
+            ((BattleGroundAVScore*)itr->second)->MinesCaptured += value;
+            break;
+        case SCORE_LEADERS_KILLED:
+            ((BattleGroundAVScore*)itr->second)->LeadersKilled += value;
+            break;
+        case SCORE_SECONDARY_OBJECTIVES:
+            ((BattleGroundAVScore*)itr->second)->SecondaryObjectives += value;
+            break;
+        default:
+            BattleGround::UpdatePlayerScore(Source,type,value);
+            break;
+    }
+}

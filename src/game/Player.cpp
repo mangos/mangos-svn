@@ -3723,16 +3723,13 @@ void Player::RepopAtGraveyard()
     }
 
     WorldSafeLocsEntry const *ClosestGrave = NULL;
- 
-    // Special handle for battleground maps
-    if (GetMapId() == 529)        // AB
-    {
-        BattleGround *bg = sBattleGroundMgr.GetBattleGround(GetBattleGroundId());
-        if (bg && (bg->GetTypeID() == BATTLEGROUND_AB))
-            ClosestGrave = ((BattleGroundAB*)bg)->SelectGraveYard(this);
-    }
 
-    if (!ClosestGrave)
+    // Special handle for battleground maps
+    BattleGround *bg = sBattleGroundMgr.GetBattleGround(GetBattleGroundId());
+
+    if(bg && bg->GetTypeID() == BATTLEGROUND_AB)
+        ClosestGrave = ((BattleGroundAB*)bg)->SelectGraveYard(this);
+    else
         ClosestGrave = objmgr.GetClosestGraveYard( GetPositionX(), GetPositionY(), GetPositionZ(), GetMapId(), GetTeam() );
 
     if(ClosestGrave)
@@ -15535,6 +15532,18 @@ BattleGround* Player::GetBattleGround() const
         return NULL;
 
     return sBattleGroundMgr.GetBattleGround(GetBattleGroundId());
+}
+
+bool Player::GetBGAccessByLevel(uint32 bgTypeId) const
+{
+    BattleGround *bg = sBattleGroundMgr.GetBattleGround(bgTypeId);
+    if(!bg)
+        return false;
+
+    if(getLevel() < bg->GetMinLevel() || getLevel() > bg->GetMaxLevel())
+        return false;
+
+    return true;
 }
 
 uint32 Player::GetBattleGroundQueueIdFromLevel() const

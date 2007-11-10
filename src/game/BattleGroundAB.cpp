@@ -21,12 +21,10 @@
 #include "BattleGround.h"
 #include "BattleGroundAB.h"
 #include "Creature.h"
+#include "Chat.h"
 #include "ObjectMgr.h"
 #include "MapManager.h"
 #include "Language.h"
-#include "Chat.h"
-#include "Util.h"
-
 
 BattleGroundAB::BattleGroundAB()
 {
@@ -702,3 +700,26 @@ WorldSafeLocsEntry const* BattleGroundAB::SelectGraveYard(Player* player)
 
     return good_entry;
 }
+
+void BattleGroundAB::UpdatePlayerScore(Player* Source, uint32 type, uint32 value)
+{
+
+    std::map<uint64, BattleGroundScore*>::iterator itr = m_PlayerScores.find(Source->GetGUID());
+
+    if(itr == m_PlayerScores.end())                         // player not found...
+        return;
+
+    switch(type)
+    {
+        case SCORE_BASES_ASSAULTED:
+            ((BattleGroundABScore*)itr->second)->BasesAssaulted += value;
+            break;
+        case SCORE_BASES_DEFENDED:
+            ((BattleGroundABScore*)itr->second)->BasesDefended += value;
+            break;
+        default:
+            BattleGround::UpdatePlayerScore(Source,type,value);
+            break;
+    }
+}
+

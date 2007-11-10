@@ -29,6 +29,7 @@
 BattleGroundWS::BattleGroundWS()
 {
     m_bgobjects.resize(BG_WS_OBJECT_MAX);
+    m_bgcreatures.resize(BG_CREATURES_MAX_WS);
     Reset();
 }
 
@@ -95,7 +96,7 @@ void BattleGroundWS::Update(time_t diff)
 
             WorldPacket data;
             const char *message = LANG_BG_WS_BEGIN;
-            sChatHandler.FillMessageData(&data, NULL, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_UNIVERSAL, NULL, 0, message, NULL);
+            sChatHandler.FillMessageData(&data, NULL, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_GLOBAL, NULL, 0, message, NULL);
             SendPacketToAll(&data);
 
             PlaySoundToAll(SOUND_BG_START);
@@ -209,7 +210,7 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
 
     UpdateFlagState(Source->GetTeam(), 1);                  // flag state none
     UpdateTeamScore(Source->GetTeam());
-    UpdatePlayerScore(Source, SCORE_KILLS, 3);              // +3 kills for flag capture...
+    UpdatePlayerScore(Source, SCORE_KILLING_BLOWS, 3);      // +3 kills for flag capture...
     UpdatePlayerScore(Source, SCORE_FLAG_CAPTURES, 1);      // +1 flag captures...
 
     if(GetTeamScore(ALLIANCE) == BG_WS_MAX_TEAM_SCORE)
@@ -479,9 +480,9 @@ void BattleGroundWS::HandleAreaTrigger(Player *Source, uint32 Trigger)
 bool BattleGroundWS::SetupBattleGround()
 {
     // flags
-    if(!AddObject(BG_WS_OBJECT_A_FLAG, 179830, 1540.423, 1481.325, 351.8284, 3.089233, 0, 0, 0.9996573, 0.02617699, BG_WS_FLAG_RESPAWN_TIME/1000))
+    if(!AddObject(BG_WS_OBJECT_A_FLAG, BG_OBJECT_A_FLAG_WS_ENTRY, 1540.423, 1481.325, 351.8284, 3.089233, 0, 0, 0.9996573, 0.02617699, BG_WS_FLAG_RESPAWN_TIME/1000))
         return false;
-    if(!AddObject(BG_WS_OBJECT_H_FLAG, 179831, 916.0226, 1434.405, 345.413, 0.01745329, 0, 0, 0.008726535, 0.9999619, BG_WS_FLAG_RESPAWN_TIME/1000))
+    if(!AddObject(BG_WS_OBJECT_H_FLAG, BG_OBJECT_H_FLAG_WS_ENTRY, 916.0226, 1434.405, 345.413, 0.01745329, 0, 0, 0.008726535, 0.9999619, BG_WS_FLAG_RESPAWN_TIME/1000))
         return false;
     // buffs
     if(!AddObject(BG_WS_OBJECT_SPEEDBUFF_1, 179871, 1449.93, 1470.71, 342.6346, -1.64061, 0, 0, 0.7313537, -0.6819983, BUFF_RESPAWN_TIME))
@@ -497,41 +498,43 @@ bool BattleGroundWS::SetupBattleGround()
     if(!AddObject(BG_WS_OBJECT_BERSERKBUFF_2, 179907, 1139.688, 1560.288, 306.8432, -2.443461, 0, 0, 0.9396926, -0.3420201, BUFF_RESPAWN_TIME))
         return false;
     // alliance gates
-    if(!AddObject(BG_WS_OBJECT_DOOR_A_1, 179918, 1503.335, 1493.466, 352.1888, 3.115414, 0, 0, 0.9999143, 0.01308903, 0))
+    if(!AddObject(BG_WS_OBJECT_DOOR_A_1, BG_OBJECT_DOOR_A_1_WS_ENTRY, 1503.335, 1493.466, 352.1888, 3.115414, 0, 0, 0.9999143, 0.01308903, RESPAWN_IMMEDIATELY))
         return false;
-    if(!AddObject(BG_WS_OBJECT_DOOR_A_2, 179919, 1492.478, 1457.912, 342.9689, 3.115414, 0, 0, 0.9999143, 0.01308903, 0))
+    if(!AddObject(BG_WS_OBJECT_DOOR_A_2, BG_OBJECT_DOOR_A_2_WS_ENTRY, 1492.478, 1457.912, 342.9689, 3.115414, 0, 0, 0.9999143, 0.01308903, RESPAWN_IMMEDIATELY))
         return false;
-    if(!AddObject(BG_WS_OBJECT_DOOR_A_3, 179920, 1468.503, 1494.357, 351.8618, 3.115414, 0, 0, 0.9999143, 0.01308903, 0))
+    if(!AddObject(BG_WS_OBJECT_DOOR_A_3, BG_OBJECT_DOOR_A_3_WS_ENTRY, 1468.503, 1494.357, 351.8618, 3.115414, 0, 0, 0.9999143, 0.01308903, RESPAWN_IMMEDIATELY))
         return false;
-    if(!AddObject(BG_WS_OBJECT_DOOR_A_4, 179921, 1471.555, 1458.778, 362.6332, 3.115414, 0, 0, 0.9999143, 0.01308903, 0))
+    if(!AddObject(BG_WS_OBJECT_DOOR_A_4, BG_OBJECT_DOOR_A_4_WS_ENTRY, 1471.555, 1458.778, 362.6332, 3.115414, 0, 0, 0.9999143, 0.01308903, RESPAWN_IMMEDIATELY))
         return false;
-    if(!AddObject(BG_WS_OBJECT_DOOR_A_5, 180322, 1492.347, 1458.34, 342.3712, -0.03490669, 0, 0, 0.01745246, -0.9998477, 0))
+    if(!AddObject(BG_WS_OBJECT_DOOR_A_5, BG_OBJECT_DOOR_A_5_WS_ENTRY, 1492.347, 1458.34, 342.3712, -0.03490669, 0, 0, 0.01745246, -0.9998477, RESPAWN_IMMEDIATELY))
         return false;
-    if(!AddObject(BG_WS_OBJECT_DOOR_A_6, 180322, 1503.466, 1493.367, 351.7352, -0.03490669, 0, 0, 0.01745246, -0.9998477, 0))
+    if(!AddObject(BG_WS_OBJECT_DOOR_A_6, BG_OBJECT_DOOR_A_6_WS_ENTRY, 1503.466, 1493.367, 351.7352, -0.03490669, 0, 0, 0.01745246, -0.9998477, RESPAWN_IMMEDIATELY))
         return false;
     // horde gates
-    if(!AddObject(BG_WS_OBJECT_DOOR_H_1, 179916, 949.1663, 1423.772, 345.6241, -0.5756807, -0.01673368, -0.004956111, -0.2839723, 0.9586737, 0))
+    if(!AddObject(BG_WS_OBJECT_DOOR_H_1, BG_OBJECT_DOOR_H_1_WS_ENTRY, 949.1663, 1423.772, 345.6241, -0.5756807, -0.01673368, -0.004956111, -0.2839723, 0.9586737, RESPAWN_IMMEDIATELY))
         return false;
-    if(!AddObject(BG_WS_OBJECT_DOOR_H_2, 179917, 953.0507, 1459.842, 340.6526, -1.99662, -0.1971825, 0.1575096, -0.8239487, 0.5073641, 0))
+    if(!AddObject(BG_WS_OBJECT_DOOR_H_2, BG_OBJECT_DOOR_H_2_WS_ENTRY, 953.0507, 1459.842, 340.6526, -1.99662, -0.1971825, 0.1575096, -0.8239487, 0.5073641, RESPAWN_IMMEDIATELY))
         return false;
-    if(!AddObject(BG_WS_OBJECT_DOOR_H_3, 180322, 949.9523, 1422.751, 344.9273, 0, 0, 0, 0, 1, 0))
+    if(!AddObject(BG_WS_OBJECT_DOOR_H_3, BG_OBJECT_DOOR_H_3_WS_ENTRY, 949.9523, 1422.751, 344.9273, 0, 0, 0, 0, 1, RESPAWN_IMMEDIATELY))
         return false;
-    if(!AddObject(BG_WS_OBJECT_DOOR_H_4, 180322, 950.7952, 1459.583, 342.1523, 0.05235988, 0, 0, 0.02617695, 0.9996573, 0))
+    if(!AddObject(BG_WS_OBJECT_DOOR_H_4, BG_OBJECT_DOOR_H_4_WS_ENTRY, 950.7952, 1459.583, 342.1523, 0.05235988, 0, 0, 0.02617695, 0.9996573, RESPAWN_IMMEDIATELY))
         return false;
 
-    WorldSafeLocsEntry const *sg = sWorldSafeLocsStore.LookupEntry(771);
-    if(!sg || !AddSpiritGuide(sg->x, sg->y, sg->z, 3.124139, ALLIANCE))
+    WorldSafeLocsEntry const *sg = sWorldSafeLocsStore.LookupEntry(WS_GRAVEYARD_MAIN_ALLIANCE);
+    if(!sg || !AddSpiritGuide(WS_SPIRIT_MAIN_ALLIANCE, sg->x, sg->y, sg->z, 3.124139, ALLIANCE))
     {
         sLog.outErrorDb("Failed to spawn spirit guide! BattleGround not created!");
         return false;
     }
 
-    sg = sWorldSafeLocsStore.LookupEntry(772);
-    if(!sg || !AddSpiritGuide(sg->x, sg->y, sg->z, 3.193953, HORDE))
+    sg = sWorldSafeLocsStore.LookupEntry(WS_GRAVEYARD_MAIN_HORDE);
+    if(!sg || !AddSpiritGuide(WS_SPIRIT_MAIN_HORDE, sg->x, sg->y, sg->z, 3.193953, HORDE))
     {
         sLog.outErrorDb("Failed to spawn spirit guide! BattleGround not created!");
         return false;
     }
+
+    sLog.outDebug("Sirit guides spawned...");
 
     return true;
 }
@@ -550,6 +553,11 @@ void BattleGroundWS::Reset()
     SetStartTime(0);
     SetEndTime(0);
     SetLastResurrectTime(0);
+    if(m_bgcreatures[WS_SPIRIT_MAIN_ALLIANCE])
+        DelCreature(WS_SPIRIT_MAIN_ALLIANCE);
+
+    if(m_bgcreatures[WS_SPIRIT_MAIN_HORDE])
+        DelCreature(WS_SPIRIT_MAIN_HORDE);
 }
 
 void BattleGroundWS::HandleKillPlayer(Player *player, Player *killer)

@@ -441,7 +441,8 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             if(_player->InBattleGround() &&                 // in battleground
                 !_player->IsMounted() &&                    // not mounted
                 !_player->HasStealthAura() &&               // not stealthed
-                !_player->HasInvisibilityAura())            // not invisible
+                !_player->HasInvisibilityAura() &&          // not invisible
+                _player->isAlive())                         // live player
             {
                 BattleGround *bg = _player->GetBattleGround();
                 if(!bg)
@@ -507,7 +508,8 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             if(_player->InBattleGround() &&                 // in battleground
                 !_player->IsMounted() &&                    // not mounted
                 !_player->HasStealthAura() &&               // not stealthed
-                !_player->HasInvisibilityAura())            // not invisible
+                !_player->HasInvisibilityAura() &&          // not invisible
+                _player->isAlive())                         // live player
             {
                 BattleGround *bg = _player->GetBattleGround();
                 if(!bg)
