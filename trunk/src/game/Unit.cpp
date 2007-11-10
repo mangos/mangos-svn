@@ -1254,7 +1254,7 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, 
         DealDamage(pVictim, (damage-absorb-resist), &cleanDamage, SPELL_DIRECT_DAMAGE, SpellSchools(spellInfo->School), spellInfo, 0, true);
 
         // Shadow Word: Death - deals damage equal to damage done to caster if victim is not killed
-         if ( this != pVictim && pVictim->isAlive() spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST && spellInfo->SpellIconID == 1980 && (damage-absorb-resist) > 0)
+         if ( this != pVictim && pVictim->isAlive() && spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST && spellInfo->SpellIconID == 1980 && (damage-absorb-resist) > 0)
              SpellNonMeleeDamageLog( this, spellID, (damage-absorb-resist), isTriggeredSpell, false);
  
         // Procflags
