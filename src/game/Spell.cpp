@@ -938,7 +938,7 @@ void Spell::prepare(SpellCastTargets * targets)
     SpellEvent* Event = new SpellEvent(this);
     m_caster->m_Events.AddEvent(Event, m_caster->m_Events.CalculateTime(1));
 
-    uint8 result = CanCast();
+    uint8 result = CanCast(true);
     if(result != 0)
     {
         if(m_triggeredByAura)
@@ -1043,7 +1043,7 @@ void Spell::cast(bool skipCheck)
     // triggered cast called from Spell::prepare where it was already checked
     if(!skipCheck)
     {
-        castResult = CanCast();
+        castResult = CanCast(false);
         if(castResult != 0)
         {
             SendCastResult(castResult);
@@ -2294,7 +2294,7 @@ void Spell::TriggerSpell()
     }
 }
 
-uint8 Spell::CanCast()
+uint8 Spell::CanCast(bool strict)
 {
     // check cooldowns to prevent cheating
     if(m_caster->GetTypeId()==TYPEID_PLAYER && ((Player*)m_caster)->HasSpellCooldown(m_spellInfo->Id))
@@ -2504,7 +2504,7 @@ uint8 Spell::CanCast()
         }
     }
 
-    if(uint8 castResult = CheckRange())
+    if(uint8 castResult = CheckRange(strict))
         return castResult;
 
     {
@@ -2990,7 +2990,7 @@ int16 Spell::PetCanCast(Unit* target)
             return SPELL_FAILED_NOT_READY;
     }
 
-    uint16 result = CanCast();
+    uint16 result = CanCast(true);
     if(result != 0)
         return result;
     else
@@ -3024,13 +3024,21 @@ bool Spell::CanAutoCast(Unit* target)
     return false;                                           //target invalid
 }
 
-uint8 Spell::CheckRange()
+uint8 Spell::CheckRange(bool strict)
 {
+
+    float range_mod;
+
     // self cast doesnt need range checking -- also for Starshards fix
     if (m_spellInfo->rangeIndex == 1) return 0;
 
+    if (strict)              //add radius of caster
+        range_mod = 1.25;
+    else                     //add radius of caster and ~5 yds "give"
+        range_mod = 6.25;
+
     SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
-    float max_range = GetMaxRange(srange);
+    float max_range = GetMaxRange(srange) + range_mod;
     float min_range = GetMinRange(srange);
 
     if(Player* modOwner = m_caster->GetSpellModOwner())
