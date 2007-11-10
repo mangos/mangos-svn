@@ -236,6 +236,12 @@ i_resetTime(0), i_resetDelayTime(0), i_InstanceId(ainstanceId), i_maxPlayers(0),
             i_maxPlayers = mInstance->maxPlayers;
             i_resetDelayTime = mInstance->reset_delay;
             i_script = mInstance->script;
+            i_data = Script->CreateInstanceData(this);
+            if(i_data)
+            {
+                sLog.outDebug("New instance data, \"%s\" ,initialized!",i_script.c_str());
+                i_data->Initialize();
+            }
         }
         else
         {
@@ -252,20 +258,18 @@ i_resetTime(0), i_resetDelayTime(0), i_InstanceId(ainstanceId), i_maxPlayers(0),
                 Field* fields = result->Fetch();
                 i_resetTime = (time_t) fields[0].GetUInt64();
 
-                i_data = Script->CreateInstanceData(this);
-
-                if(i_data)
+                
+                const char* data = fields[1].GetString();
+                if(data && i_data)
                 {
-                    sLog.outDebug("New instance data, \"%s\" ,initialized!",i_script.c_str());
-                    const char* data = fields[1].GetString();
-                    if(data)
-                        i_data->Load(data);
-                    else
-                        i_data->Initialize();
+                    sLog.outDebug("Loading instance data for `%s` with id %u", i_script.c_str(), i_InstanceId);
+                    i_data->Load(data);
                 }
-                delete result;
+                        
             }
-        }   
+            delete result;
+        }
+           
         if (i_resetTime == 0) InitResetTime();
     }
     else

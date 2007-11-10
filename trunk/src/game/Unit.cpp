@@ -2745,7 +2745,7 @@ void Unit::_UpdateAutoRepeatSpell( uint32 time )
     else if(m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->getState() == SPELL_STATE_IDLE && isAttackReady(RANGED_ATTACK) )
     {
         // check if we can cast
-        if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->CanCast() == 0)
+        if (m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->CanCast(true) == 0)
         {
             // check movement in player case
             if(GetTypeId() == TYPEID_PLAYER && ((Player*)this)->isMoving())
@@ -2757,7 +2757,7 @@ void Unit::_UpdateAutoRepeatSpell( uint32 time )
             }
             else
                 // recheck range and req. items (ammo and gun, etc)
-            if(m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->CheckRange() == 0 && m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->CheckItems() == 0 )
+            if(m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->CheckRange(true) == 0 && m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->CheckItems() == 0 )
             {
                 // check, if we are casting melee spell (it blocks autorepeat)
                 if ( ! (m_currentSpells[CURRENT_MELEE_SPELL] &&
@@ -2986,6 +2986,16 @@ bool Unit::IsUnderWater() const
 void Unit::DeMorph()
 {
     SetUInt32Value(UNIT_FIELD_DISPLAYID, GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
+}
+
+float Unit::GetTotalAuraModifier(float ModifierID, float Power) const
+{
+    float modifier = 0;
+    AuraList const& mTotalAuraList = GetAurasByType(ModifierID);
+    for(AuraList::const_iterator i = mTotalAuraList.begin();i != mTotalAuraList.end(); ++i)
+        if ((*i)->GetModifier()->m_miscvalue == Power)
+            modifier += (*i)->GetModifier()->m_amount;
+    return modifier;
 }
 
 long Unit::GetTotalAuraModifier(uint32 ModifierID) const

@@ -47,29 +47,31 @@ bool Player::UpdateStats(Stats stat)
 
     switch(stat)
     {
-        case STAT_STRENGTH:
+    case STAT_STRENGTH:
+        UpdateAttackPowerAndDamage();
+        break;
+    case STAT_AGILITY:
+        UpdateArmor();
+        UpdateAttackPowerAndDamage(true);
+        if(getClass() == CLASS_ROGUE || getClass() == CLASS_HUNTER)
             UpdateAttackPowerAndDamage();
-            break;
-        case STAT_AGILITY:
-            UpdateArmor();
-            UpdateAttackPowerAndDamage(true);
-            if(getClass() == CLASS_ROGUE || getClass() == CLASS_HUNTER)
-                UpdateAttackPowerAndDamage();
 
-            UpdateAllCritPercentages();
-            UpdateDodgePercentage();
-            break;
+        UpdateAllCritPercentages();
+        UpdateDodgePercentage();
+        break;
 
-        case STAT_STAMINA:   UpdateMaxHealth(); break;
-        case STAT_INTELLECT:
-            UpdateMaxPower(POWER_MANA);
-            UpdateAllSpellCritChances();
-            break;
+    case STAT_STAMINA:   UpdateMaxHealth(); break;
+    case STAT_INTELLECT:
+        UpdateMaxPower(POWER_MANA);
+        UpdateAllSpellCritChances();
+        break;
 
-        case STAT_SPIRIT:                       break;
+    case STAT_SPIRIT:                       
+        UpdateManaRegen();
+        break;
 
-        default:
-            break;
+    default:
+        break;
     }
 
     return true;
@@ -500,6 +502,30 @@ void Player::UpdateAllSpellCritChances()
         UpdateSpellCritChance(i);
 }
 
+void Player::UpdateManaRegen()
+{
+    uint8 PlayerClass = getClass();
+    float Spirit = GetStat(STAT_SPIRIT);
+    uint32 Intellect = GetStat(STAT_INTELLECT);
+    float SpiritBasedRegen = 0;
+    switch (PlayerClass)
+    {
+        // Mana gained from Spirit PER SECOND not PER TICK
+    case CLASS_DRUID:   SpiritBasedRegen = ((Spirit/5 + 15)/2);       break;
+    case CLASS_HUNTER:  SpiritBasedRegen = ((Spirit/5 + 15)/2);       break;
+    case CLASS_MAGE:    SpiritBasedRegen = ((Spirit/4 + 12.5)/2);     break;
+    case CLASS_PALADIN: SpiritBasedRegen = ((Spirit/5 + 15)/2);       break;
+    case CLASS_PRIEST:  SpiritBasedRegen = ((Spirit/4 + 12.5)/2);     break;
+    case CLASS_SHAMAN:  SpiritBasedRegen = ((Spirit/5 + 17)/2);       break;
+    case CLASS_WARLOCK: SpiritBasedRegen = ((Spirit/5 + 15)/2);       break;
+    }
+    float Mp5 = (GetTotalAuraModifier(SPELL_AURA_MOD_POWER_REGEN, POWER_MANA)/5.00f) + (GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN) * Intellect / 500.0f);
+    float modManaRegenInterrupt = (float(GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN_INTERRUPT))/100.00f);
+    SetStatFloatValue(PLAYER_FIELD_MOD_MANA_REGEN_INTERRUPT,(Mp5 + (SpiritBasedRegen * modManaRegenInterrupt)));
+    SpiritBasedRegen += Mp5;
+    SetStatFloatValue(PLAYER_FIELD_MOD_MANA_REGEN, SpiritBasedRegen);
+
+}
 void Player::_ApplyAllStatBonuses()
 {
     SetCanModifyStats(false);
@@ -510,6 +536,7 @@ void Player::_ApplyAllStatBonuses()
     SetCanModifyStats(true);
 
     UpdateAllStats();
+    UpdateManaRegen();
 }
 
 void Player::_RemoveAllStatBonuses()
@@ -758,7 +785,7 @@ void Pet::UpdateAttackPowerAndDamage(bool ranged)
             bonusAP = owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.22f;
             SetBonusDamage( int32(owner->GetTotalAttackPowerValue(RANGED_ATTACK) * 0.125f));
         }
-                                                            //demons benefit from warlocks shadow or fire damage
+        //demons benefit from warlocks shadow or fire damage
         else if(getPetType() == SUMMON_PET && owner->getClass() == CLASS_WARLOCK)
         {
             uint32 fire, shadow, maximum;
@@ -770,7 +797,7 @@ void Pet::UpdateAttackPowerAndDamage(bool ranged)
             SetBonusDamage( int32(maximum * 0.15f));
             bonusAP = maximum * 0.57f;
         }
-                                                            //water elementals benefit from mage's frost damage
+        //water elementals benefit from mage's frost damage
         else if(getPetType() == SUMMON_PET && owner->getClass() == CLASS_MAGE)
         {
             uint32 frost = owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FROST) - owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_NEG + SPELL_SCHOOL_FROST);
@@ -787,11 +814,11 @@ void Pet::UpdateAttackPowerAndDamage(bool ranged)
     float attPowerMod = GetModifierValue(unitMod, TOTAL_VALUE);
     float attPowerMultiplier = GetModifierValue(unitMod, TOTAL_PCT) - 1.0f;
 
-                                                            //UNIT_FIELD_(RANGED)_ATTACK_POWER field
+    //UNIT_FIELD_(RANGED)_ATTACK_POWER field
     SetUInt32Value(UNIT_FIELD_ATTACK_POWER, (uint32)base_attPower);
-                                                            //UNIT_FIELD_(RANGED)_ATTACK_POWER_MODS field
+    //UNIT_FIELD_(RANGED)_ATTACK_POWER_MODS field
     SetUInt32Value(UNIT_FIELD_ATTACK_POWER_MODS, (uint32)attPowerMod);
-                                                            //UNIT_FIELD_(RANGED)_ATTACK_POWER_MULTIPLIER field
+    //UNIT_FIELD_(RANGED)_ATTACK_POWER_MULTIPLIER field
     SetFloatValue(UNIT_FIELD_ATTACK_POWER_MULTIPLIER, attPowerMultiplier);
 
     //automatically update weapon damage after attack power modification

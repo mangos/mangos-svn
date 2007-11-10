@@ -183,7 +183,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //131 SPELL_AURA_MOD_CREATURE_RANGED_ATTACK_POWER
     &Aura::HandleAuraModIncreaseEnergyPercent,              //132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT
     &Aura::HandleAuraModIncreaseHealthPercent,              //133 SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT
-    &Aura::HandleNoImmediateEffect,                         //134 SPELL_AURA_MOD_MANA_REGEN_INTERRUPT
+    &Aura::HandleAuraModRegenInterrupt,                     //134 SPELL_AURA_MOD_MANA_REGEN_INTERRUPT
     &Aura::HandleModHealingDone,                            //135 SPELL_AURA_MOD_HEALING_DONE
     &Aura::HandleAuraHealingPct,                            //136 SPELL_AURA_MOD_HEALING_DONE_PERCENT   implemented in Unit::SpellHealingBonus
     &Aura::HandleModTotalPercentStat,                       //137 SPELL_AURA_MOD_TOTAL_STAT_PERCENTAGE
@@ -243,8 +243,8 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //191 SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED
     &Aura::HandleNULL,                                      //192 SPELL_AURA_HASTE_MELEE
     &Aura::HandleModCombatSpeedPct,                         //193 SPELL_AURA_MELEE_SLOW (in fact combat (any type attack) speed pct)
-    &Aura::HandleNoImmediateEffect,                         //194 SPELL_AURA_MOD_SPELL_DAMAGE_OF_INTELLECT  implemented in Unit::SpellDamageBonus
-    &Aura::HandleNoImmediateEffect,                         //195 SPELL_AURA_MOD_SPELL_HEALING_OF_INTELLECT implemented in Unit::SpellHealingBonus
+    &Aura::HandleModSpellDamagePercent,                     //194 SPELL_AURA_MOD_SPELL_DAMAGE_OF_INTELLECT  implemented in Unit::SpellDamageBonus
+    &Aura::HandleModSpellHealingPercent,                    //195 SPELL_AURA_MOD_SPELL_HEALING_OF_INTELLECT implemented in Unit::SpellHealingBonu
     &Aura::HandleNULL,                                      //196
     &Aura::HandleNoImmediateEffect,                         //197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE implemented in Unit::SpellCriticalBonus Unit::RollMeleeOutcomeAgainst Unit::RollPhysicalOutcomeAgainst
     &Aura::HandleNULL,                                      //198 SPELL_AURA_MOD_ALL_WEAPON_SKILLS
@@ -416,7 +416,6 @@ Unit *caster, Item* castItem) : Aura(spellproto, eff, currentBasePoints, target,
 PersistentAreaAura::~PersistentAreaAura()
 {
 }
-
 Unit* Aura::GetCaster() const
 {
     if(m_caster_guid==m_target->GetGUID())
@@ -3033,6 +3032,23 @@ void Aura::HandleModPercentStat(bool apply, bool Real)
     }
 }
 
+ 
+void Aura::HandleModSpellHealingPercent(bool apply, bool Real)
+{
+    //For ClientSide Display
+    if(m_target->GetTypeId() == TYPEID_PLAYER)
+        m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_HEALING_DONE_POS, int32((m_modifier.m_amount/100.00f * m_target->GetStat(STAT_INTELLECT))),apply);		
+ 
+}
+void Aura::HandleModSpellDamagePercent(bool apply, bool Real)
+{
+    //For ClientSide Display
+    if(m_target->GetTypeId() == TYPEID_PLAYER)
+        for(int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; i++)
+             {
+                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+i, int32((m_modifier.m_amount/100.00f * m_target->GetStat(STAT_INTELLECT))),apply);	
+             }		
+}
 void Aura::HandleModHealingDone(bool apply, bool Real)
 {
     // implemented in Unit::SpellHealingBonus
@@ -3155,6 +3171,7 @@ void Aura::HandleModRegen(bool apply, bool Real)            // eating
 
 void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
 {
+    ((Player*)m_target)->UpdateManaRegen();
     if ((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) && apply)
     {
         m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);
@@ -3164,7 +3181,7 @@ void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
 
     if(apply && m_periodicTimer <= 0)
     {
-        m_periodicTimer += 5000;
+        m_periodicTimer += 2000;
 
         Powers pt = m_target->getPowerType();
         if(int32(pt) != m_modifier.m_miscvalue)
@@ -3184,42 +3201,19 @@ void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
         // Prevent rage regeneration in combat with rage loss slowdown warrior talent and 0<->1 switching range out combat.
         if( !(pt == POWER_RAGE && (m_target->isInCombat() || m_target->GetPower(POWER_RAGE) == 0)) )
         {
-            int32 gain = m_target->ModifyPower(pt, m_modifier.m_amount);
-            Unit *caster = GetCaster();
-            if (caster && pt == POWER_MANA)
-            {
-                SpellEntry const *spellProto = GetSpellProto();
-                if (spellProto)
-                    m_target->getHostilRefManager().threatAssist(caster, float(gain) * 0.5f, spellProto);
-            }
+            if(pt != POWER_MANA)
+            uint32 gain = m_target->ModifyPower(pt, m_modifier.m_amount*2/5);			
         }
     }
-
     m_isPeriodic = apply;
 }
 
 void Aura::HandleModManaRegen(bool apply, bool Real)
 {
-    if(apply && m_periodicTimer <= 0)
-    {
-        m_periodicTimer += 5000;
-
-        Powers pt = m_target->getPowerType();
-        if(int32(pt) != POWER_MANA)
-            return;
-
-        int32 gain = m_target->ModifyPower(POWER_MANA, int32(m_modifier.m_amount * m_target->GetStat(Stats(m_modifier.m_miscvalue)) / 100.0f));
-
-        Unit *caster = GetCaster();
-        if (caster)
-        {
-            SpellEntry const *spellProto = GetSpellProto();
-            if (spellProto)
-                m_target->getHostilRefManager().threatAssist(caster, float(gain) * 0.5f, spellProto);
-        }
-    }
-
-    m_isPeriodic = apply;
+    //Already calculated in Player::UpdateManaRegen()
+    //Note to whoever wrote the old definition, an increase in regen does NOT cause threat.
+    ((Player*)m_target)->UpdateManaRegen();
+    
 }
 
 void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
@@ -3304,6 +3298,12 @@ void Aura::HandleAuraModBlockPercent(bool apply, bool Real)
     //sLog.outError("BONUS BLOCK CHANCE: + %f", float(m_modifier.m_amount));
 }
 
+void Aura::HandleAuraModRegenInterrupt(bool apply, bool Real)
+{
+    if(m_target->GetTypeId()!=TYPEID_PLAYER)
+        return;
+    ((Player*)m_target)->UpdateManaRegen();
+}
 void Aura::HandleAuraModCritPercent(bool apply, bool Real)
 {
     if(m_target->GetTypeId()!=TYPEID_PLAYER)

@@ -1015,6 +1015,7 @@ void Player::Update( uint32 p_time )
     }
     UpdateEnchantTime(p_time);
     UpdateHomebindTime(p_time);
+    UpdateManaRegen();
 
     // group update
     SendUpdateToOutOfRangeGroupMembers();
@@ -1696,57 +1697,24 @@ void Player::Regenerate(Powers power)
 {
     uint32 curValue = GetPower(power);
     uint32 maxValue = GetMaxPower(power);
+    uint32 Intellect = GetStat(STAT_INTELLECT);
 
-    if(power != POWER_RAGE)
-    {
-        if (curValue >= maxValue)
-            return;
-    }
-    else if (curValue == 0)
-        return;
 
     float addvalue = 0.0f;
-
+    uint32 msecSinceLastCast ((uint32)getMSTime() - m_lastManaUse);
     switch (power)
     {
         case POWER_MANA:
         {
-            float Spirit = GetStat(STAT_SPIRIT);
-            uint8 Class = getClass();
-
             float ManaIncreaseRate = sWorld.getRate(RATE_POWER_MANA);
-            if( ManaIncreaseRate <= 0 ) ManaIncreaseRate = 1;
-            // If < 5s after previous cast which used mana, no regeneration unless
-            // we happen to have a modifier that adds it back
-            // If > 5s, get portion between the 5s and now, up to a maximum of 2s worth
-            uint32 msecSinceLastCast;
-            msecSinceLastCast = ((uint32)getMSTime() - m_lastManaUse);
-            if (msecSinceLastCast < 7000)
+            if (msecSinceLastCast < 5000)
+                // Mangos Updates Mana in intervals of 2s, which is correct
+                addvalue = GetFloatValue(PLAYER_FIELD_MOD_MANA_REGEN_INTERRUPT) *  ManaIncreaseRate * 2.00f;
+            else
             {
-                long regenInterrupt = GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN_INTERRUPT);
-                if (msecSinceLastCast < 5000)
-                {
-                    ManaIncreaseRate *= (float)regenInterrupt / 100;
-                }
-                else
-                {
-                    ManaIncreaseRate =  (((1 - (float)(msecSinceLastCast - 5000)/2000)) * regenInterrupt)
-                        + (((float)(msecSinceLastCast - 5000)/2000) * ManaIncreaseRate * 100);
-                    ManaIncreaseRate /= 100;
-                }
+                addvalue = GetFloatValue(PLAYER_FIELD_MOD_MANA_REGEN)* ManaIncreaseRate * 2.00f;   	
             }
-
-            switch (Class)
-            {
-                case CLASS_DRUID:   addvalue = (Spirit/5 + 15)   * ManaIncreaseRate; break;
-                case CLASS_HUNTER:  addvalue = (Spirit/5 + 15)   * ManaIncreaseRate; break;
-                case CLASS_MAGE:    addvalue = (Spirit/4 + 12.5) * ManaIncreaseRate; break;
-                case CLASS_PALADIN: addvalue = (Spirit/5 + 15)   * ManaIncreaseRate; break;
-                case CLASS_PRIEST:  addvalue = (Spirit/4 + 12.5) * ManaIncreaseRate; break;
-                case CLASS_SHAMAN:  addvalue = (Spirit/5 + 17)   * ManaIncreaseRate; break;
-                case CLASS_WARLOCK: addvalue = (Spirit/5 + 15)   * ManaIncreaseRate; break;
-            }
-        }   break;
+        }    break;
         case POWER_RAGE:                                    // Regenerate rage
         {
             float RageDecreaseRate = sWorld.getRate(RATE_POWER_RAGE_LOSS);
@@ -1760,12 +1728,13 @@ void Player::Regenerate(Powers power)
         case POWER_HAPPINESS:
             break;
     }
-
-    AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
-    for(AuraList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
-        if ((*i)->GetModifier()->m_miscvalue == power)
-            addvalue *= ((*i)->GetModifier()->m_amount + 100) / 100.0f;
-
+    if(!((msecSinceLastCast < 5000) && (power == POWER_MANA)))
+    {
+        AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
+        for(AuraList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
+            if ((*i)->GetModifier()->m_miscvalue == power)
+                addvalue *= ((*i)->GetModifier()->m_amount + 100) / 100.0;
+    }
     if (power != POWER_RAGE)
     {
         curValue += uint32(addvalue);
@@ -12420,7 +12389,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
         Unmount();
         RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
     }
-
+    UpdateManaRegen();
     m_Loaded = true;
 
     return true;

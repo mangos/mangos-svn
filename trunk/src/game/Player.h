@@ -1345,6 +1345,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void UpdateParryPercentage();
         void UpdateDodgePercentage();
         void UpdateAllSpellCritChances();
+        void UpdateManaRegen();
         void UpdateSpellCritChance(uint32 school);
         uint32 GetSpellSchoolByBaseGroup(BaseModGroup baseGroup) const;
 

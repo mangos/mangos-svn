@@ -502,7 +502,7 @@ class Spell
         void TakeReagents();
         void TakeCastItem();
         void TriggerSpell();
-        uint8 CanCast();
+        uint8 CanCast(bool strict);
         int16 PetCanCast(Unit* target);
         bool CanAutoCast(Unit* target);
 
@@ -517,7 +517,7 @@ class Spell
         void _handle_finish_phase();
 
         uint8 CheckItems();
-        uint8 CheckRange();
+        uint8 CheckRange(bool strict);
         uint8 CheckMana(uint32 *mana);
         int32 CalculateDamage(uint8 i);
         void Delayed(int32 delaytime);

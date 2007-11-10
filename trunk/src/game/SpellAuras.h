@@ -96,6 +96,7 @@ class Aura
         void HandleAuraModIncreaseSpeedAlways(bool Apply, bool Real);
         void HandleAuraModIncreaseEnergyPercent(bool Apply, bool Real);
         void HandleAuraModIncreaseHealthPercent(bool Apply, bool Real);
+        void HandleAuraModRegenInterrupt(bool Apply, bool Real);
         void HandleHaste(bool Apply, bool Real);
         void HandlePeriodicTriggerSpell(bool Apply, bool Real);
         void HandlePeriodicEnergize(bool Apply, bool Real);
@@ -182,6 +183,8 @@ class Aura
         void HandleShieldBlockValue(bool apply, bool Real);
         void HandleModSpellCritChanceShool(bool apply, bool Real);
         void HandleAuraRetainComboPoints(bool apply, bool Real);
+        void HandleModSpellDamagePercent(bool apply, bool Real);
+        void HandleModSpellHealingPercent(bool apply, bool Real);
 
         Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
         virtual ~Aura();
