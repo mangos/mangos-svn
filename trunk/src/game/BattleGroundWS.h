@@ -44,11 +44,10 @@
 class BattleGroundWGScore : public BattleGroundScore
 {
     public:
-        BattleGroundWGScore() : FlagCaptures(0), FlagReturns(0), Unk2(0) {};
+        BattleGroundWGScore() : FlagCaptures(0), FlagReturns(0) {};
         virtual ~BattleGroundWGScore() {};
         uint32 FlagCaptures;
         uint32 FlagReturns;
-        uint32 Unk2;                    //i have no idea what is this
 };
 
 enum BG_WS_ObjectTypes
@@ -74,12 +73,42 @@ enum BG_WS_ObjectTypes
     BG_WS_OBJECT_MAX           = 18
 };
 
+enum BG_WS_ObjectEntry
+{
+    BG_OBJECT_DOOR_A_1_WS_ENTRY          = 179918,
+    BG_OBJECT_DOOR_A_2_WS_ENTRY          = 179919,
+    BG_OBJECT_DOOR_A_3_WS_ENTRY          = 179920,
+    BG_OBJECT_DOOR_A_4_WS_ENTRY          = 179921,
+    BG_OBJECT_DOOR_A_5_WS_ENTRY          = 180322,
+    BG_OBJECT_DOOR_A_6_WS_ENTRY          = 180322,
+    BG_OBJECT_DOOR_H_1_WS_ENTRY          = 179916,
+    BG_OBJECT_DOOR_H_2_WS_ENTRY          = 179917,
+    BG_OBJECT_DOOR_H_3_WS_ENTRY          = 180322,
+    BG_OBJECT_DOOR_H_4_WS_ENTRY          = 180322,
+    BG_OBJECT_A_FLAG_WS_ENTRY            = 179830,
+    BG_OBJECT_H_FLAG_WS_ENTRY            = 179831
+};
+
 enum BG_WS_FlagState
 {
     BG_WS_FLAG_STATE_ON_BASE      = 0,
     BG_WS_FLAG_STATE_WAIT_RESPAWN = 1,
     BG_WS_FLAG_STATE_ON_PLAYER    = 2,
     BG_WS_FLAG_STATE_ON_GROUND    = 3
+};
+
+enum BattleGroundGaveyardsWS
+{
+    WS_GRAVEYARD_MAIN_ALLIANCE   = 771,
+    WS_GRAVEYARD_MAIN_HORDE      = 772
+};
+
+enum WSBattleGroundCreaturesTypes
+{
+    WS_SPIRIT_MAIN_ALLIANCE   = 0,
+    WS_SPIRIT_MAIN_HORDE      = 1,
+
+    BG_CREATURES_MAX_WS       = 2
 };
 
 class BattleGroundWS : public BattleGround

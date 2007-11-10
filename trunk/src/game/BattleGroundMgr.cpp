@@ -413,8 +413,8 @@ void BattleGroundMgr::BuildBattleGroundStatusPacket(WorldPacket *data, BattleGro
     {
         data->Initialize(SMSG_BATTLEFIELD_STATUS, 4*3);
         *data << uint32(QueueSlot);                         // queue id (0...2)
-        *data << uint32(0);
-        *data << uint32(0);
+        *data << uint32(1);
+        *data << uint32(2);
         return;
     }
 
@@ -424,19 +424,28 @@ void BattleGroundMgr::BuildBattleGroundStatusPacket(WorldPacket *data, BattleGro
     switch(bg->GetTypeID())                                 // value depends on bg id
     {
         case BATTLEGROUND_AV:
-            *data << uint8(0);// 1
+            *data << uint8(1);
             break;
         case BATTLEGROUND_WS:
-            *data << uint8(2);// 6, but also 2 !
+            *data << uint8(2);
             break;
         case BATTLEGROUND_AB:
-            *data << uint8(1);// 5
+            *data << uint8(3);
             break;
         case BATTLEGROUND_NA:
+            *data << uint8(4);
+            break;
         case BATTLEGROUND_BE:
-        case BATTLEGROUND_AA:
-        case BATTLEGROUND_RL:
             *data << uint8(5);
+            break;
+        case BATTLEGROUND_AA:
+            *data << uint8(6);
+            break;
+        case BATTLEGROUND_EY:
+            *data << uint8(7);
+            break;
+        case BATTLEGROUND_RL:
+            *data << uint8(8);
             break;
         default:                                            // unknown
             *data << uint8(0);
@@ -504,17 +513,17 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
         *data << uint8(0);                                  // bg in progress
     }
 
-    *data << uint32(bg->GetPlayerScoresSize());
+    *data << (int32)(bg->GetPlayerScoresSize());
 
     for(std::map<uint64, BattleGroundScore*>::const_iterator itr = bg->GetPlayerScoresBegin(); itr != bg->GetPlayerScoresEnd(); ++itr)
     {
         *data << (uint64)itr->first;
-        *data << (uint32)itr->second->KillingBlows;
+        *data << (int32)itr->second->KillingBlows;
         if(type == 0)
         {
-            *data << (uint32)itr->second->BonusHonor;
-            *data << (uint32)itr->second->HonorableKills;
-            *data << (uint32)itr->second->Deaths;
+            *data << (int32)itr->second->HonorableKills;
+            *data << (int32)itr->second->Deaths;
+            *data << (int32)(itr->second->BonusHonor*10);
         }
         else
         {
@@ -532,37 +541,37 @@ void BattleGroundMgr::BuildPvpLogDataPacket(WorldPacket *data, BattleGround *bg)
             else
                 *data << uint8(0);
         }
-        *data << (uint32)itr->second->HealingDone;
-        *data << (uint32)itr->second->DamageDone;
-        switch(bg->GetTypeID())                                 // battleground specific things
+        *data << (int32)itr->second->DamageDone;             // damage done
+        *data << (int32)itr->second->HealingDone;            // healing done
+        switch(bg->GetTypeID())                              // battleground specific things
         {
             case BATTLEGROUND_AV:
-                *data << (uint32)0x00000005;                // count of next fields
-                *data << (uint32)((BattleGroundAVScore*)(itr->second))->GraveyardsAssaulted;  // not implemented yet!
-                *data << (uint32)((BattleGroundAVScore*)(itr->second))->GraveyardsDefended;   // not implemented yet!
-                *data << (uint32)((BattleGroundAVScore*)(itr->second))->TowersAssaulted;      // not implemented yet!
-                *data << (uint32)((BattleGroundAVScore*)(itr->second))->TowersDefended;       // not implemented yet!
-                *data << (uint32)((BattleGroundAVScore*)(itr->second))->MinesCaptured;        // not implemented yet!
+                *data << (uint32)0x00000005;                 // count of next fields
+                *data << (uint32)((BattleGroundAVScore*)itr->second)->GraveyardsAssaulted;  // GraveyardsAssaulted
+                *data << (uint32)((BattleGroundAVScore*)itr->second)->GraveyardsDefended;   // GraveyardsDefended
+                *data << (uint32)((BattleGroundAVScore*)itr->second)->TowersAssaulted;      // TowersAssaulted
+                *data << (uint32)((BattleGroundAVScore*)itr->second)->TowersDefended;       // TowersDefended
+                *data << (uint32)((BattleGroundAVScore*)itr->second)->MinesCaptured;        // MinesCaptured
                 break;
             case BATTLEGROUND_WS:
-                *data << (uint32)0x00000002;                // count of next fields
-                *data << (uint32)((BattleGroundWGScore*)(itr->second))->FlagCaptures;  // flag captures
-                *data << (uint32)((BattleGroundWGScore*)(itr->second))->FlagReturns;   // flag returns
+                *data << (uint32)0x00000002;                 // count of next fields
+                *data << (uint32)((BattleGroundWGScore*)itr->second)->FlagCaptures;         // flag captures
+                *data << (uint32)((BattleGroundWGScore*)itr->second)->FlagReturns;          // flag returns
                 break;
             case BATTLEGROUND_AB:
-                *data << (uint32)0x00000002;                // count of next fields
-                *data << (uint32)((BattleGroundABScore*)(itr->second))->BasesAssaulted;       // not implemented yet!
-                *data << (uint32)((BattleGroundABScore*)(itr->second))->BasesDefended;        // not implemented yet!
+                *data << (uint32)0x00000002;                 // count of next fields
+                *data << (uint32)((BattleGroundABScore*)itr->second)->BasesAssaulted;       // bases asssulted
+                *data << (uint32)((BattleGroundABScore*)itr->second)->BasesDefended;        // bases defended
                 break;
             case BATTLEGROUND_NA:
             case BATTLEGROUND_BE:
             case BATTLEGROUND_AA:
             case BATTLEGROUND_RL:
-                *data << (uint32)0;                         // 0
+                *data << (int32)0;                         // 0
                 break;
             default:
                 sLog.outDebug("Unhandled MSG_PVP_LOG_DATA for BG id %u", bg->GetTypeID());
-                *data << (uint32)0;
+                *data << (int32)0;
                 break;
         }
     }

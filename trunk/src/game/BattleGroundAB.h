@@ -20,75 +20,95 @@
 
 class BattleGround;
 
-// opcodes - was a pleasure to collect from hex dumps :D
-#define BG_AB_OP_OCCUPIED_BASES_HORDE     1778
-#define BG_AB_OP_OCCUPIED_BASES_ALLY     1779
+enum BG_AB_Oocodes
+{
+    BG_AB_OP_OCCUPIED_BASES_HORDE       = 1778,
+    BG_AB_OP_OCCUPIED_BASES_ALLY        = 1779
+};
 
-#define BG_AB_OP_RESOURCES_ALLY             1776
-#define BG_AB_OP_RESOURCES_HORDE         1777
-#define BG_AB_OP_RESOURCES_MAX             1780
-#define BG_AB_OP_RESOURCES_WARNING       1955
+enum BG_AB_ResourcesTypes
+{
+    BG_AB_OP_RESOURCES_ALLY             = 1776,
+    BG_AB_OP_RESOURCES_HORDE            = 1777,
+    BG_AB_OP_RESOURCES_MAX              = 1780,
+    BG_AB_OP_RESOURCES_WARNING          = 1955
+};
 
 const uint32 BG_AB_OP_NODESTATES[5] =    {1767, 1782, 1772, 1792, 1787};
 
-const uint32 BG_AB_OP_NODEICONS[5] =     {1842, 1846, 1845, 1844, 1843};
-
-/* Object id templates from DB */
-#define BG_AB_OBJECTID_AURA_A            180100
-#define BG_AB_OBJECTID_AURA_H            180101
-#define BG_AB_OBJECTID_AURA_C            180102
-
-#define BG_AB_OBJECTID_BANNER_A          180058
-#define BG_AB_OBJECTID_BANNER_CONT_A     180059
-#define BG_AB_OBJECTID_BANNER_H          180060
-#define BG_AB_OBJECTID_BANNER_CONT_H     180061
+const uint32 BG_AB_OP_NODEICONS[5]  =    {1842, 1846, 1845, 1844, 1843};
 
 /* Note: code uses that these IDs follow each other */
-#define BG_AB_OBJECTID_NODE_BANNER_0     180087        // Stables banner,and so on
-#define BG_AB_OBJECTID_NODE_BANNER_1     180088
-#define BG_AB_OBJECTID_NODE_BANNER_2     180089
-#define BG_AB_OBJECTID_NODE_BANNER_3     180090
-#define BG_AB_OBJECTID_NODE_BANNER_4     180091
-
-#define BG_AB_OBJECTID_GATE_A            180255
-#define BG_AB_OBJECTID_GATE_H            180256
+enum BG_AB_NodeObjectId
+{
+    BG_AB_OBJECTID_NODE_BANNER_0    = 180087,       // Stables banner,and so on
+    BG_AB_OBJECTID_NODE_BANNER_1    = 180088,
+    BG_AB_OBJECTID_NODE_BANNER_2    = 180089,
+    BG_AB_OBJECTID_NODE_BANNER_3    = 180090,
+    BG_AB_OBJECTID_NODE_BANNER_4    = 180091
+};
 
 enum BG_AB_ObjectType
 {
     // for all 5 node points 8*5=40 objects
-    BG_AB_OBJECT_BANNER_NEUTRAL = 0,
-    BG_AB_OBJECT_BANNER_CONT_A  = 1,
-    BG_AB_OBJECT_BANNER_CONT_H  = 2,
-    BG_AB_OBJECT_BANNER_ALLY    = 3,
-    BG_AB_OBJECT_BANNER_HORDE   = 4,
-    BG_AB_OBJECT_AURA_ALLY      = 5,
-    BG_AB_OBJECT_AURA_HORDE     = 6,
-    BG_AB_OBJECT_AURA_CONTESTED = 7,
+    BG_AB_OBJECT_BANNER_NEUTRAL     = 0,
+    BG_AB_OBJECT_BANNER_CONT_A      = 1,
+    BG_AB_OBJECT_BANNER_CONT_H      = 2,
+    BG_AB_OBJECT_BANNER_ALLY        = 3,
+    BG_AB_OBJECT_BANNER_HORDE       = 4,
+    BG_AB_OBJECT_AURA_ALLY          = 5,
+    BG_AB_OBJECT_AURA_HORDE         = 6,
+    BG_AB_OBJECT_AURA_CONTESTED     = 7,
 
-    BG_AB_OBJECT_GATE_A         = 40,
-    BG_AB_OBJECT_GATE_H         = 41,
+    BG_AB_OBJECT_GATE_A             = 40,
+    BG_AB_OBJECT_GATE_H             = 41,
 
-    BG_AB_OBJECT_MAX            = 42
+    BG_AB_OBJECT_MAX                = 42,
+
+    BG_AB_CREATURES_MAX             = 7
 };
 
-#define BG_AB_BUFFOBJECTID_SPEEDBUFF     179871
-#define BG_AB_BUFFOBJECTID_REGENBUFF     179904
-#define BG_AB_BUFFOBJECTID_BERSERKERBUFF 179905
+/* Object id templates from DB */
+enum BG_AB_ObjectTypes
+{
+    BG_AB_BUFFSPELLID_SPEEDBUFF         = 23451,
+    BG_AB_BUFFSPELLID_REGENBUFF         = 23493,
+    BG_AB_BUFFSPELLID_BERSERKERBUFF     = 23505,
 
-#define BG_AB_BUFFSPELLID_SPEEDBUFF      23451
-#define BG_AB_BUFFSPELLID_REGENBUFF      23493
-#define BG_AB_BUFFSPELLID_BERSERKERBUFF  23505
+    BG_AB_BUFFOBJECTID_SPEEDBUFF        = 179871,
+    BG_AB_BUFFOBJECTID_REGENBUFF        = 179904,
+    BG_AB_BUFFOBJECTID_BERSERKERBUFF    = 179905,
 
-#define BG_AB_BUFF_RESPAWN_TIME          180000
-#define BG_AB_BUFFCHECK_TIME             1000    // How often do we check every player's distance to every spawned buff object ?
-#define BG_AB_MAX_TEAM_SCORE             2000
-#define BG_AB_WARNING_SCORE              1800
+    BG_AB_OBJECTID_BANNER_A             = 180058,
+    BG_AB_OBJECTID_BANNER_CONT_A        = 180059,
+    BG_AB_OBJECTID_BANNER_H             = 180060,
+    BG_AB_OBJECTID_BANNER_CONT_H        = 180061,
+
+    BG_AB_OBJECTID_AURA_A               = 180100,
+    BG_AB_OBJECTID_AURA_H               = 180101,
+    BG_AB_OBJECTID_AURA_C               = 180102,
+
+    BG_AB_OBJECTID_GATE_A               = 180255,
+    BG_AB_OBJECTID_GATE_H               = 180256
+};
+
+enum BG_AB_Timers
+{
+    BG_AB_BUFF_RESPAWN_TIME             = 180000,
+    BG_AB_BUFFCHECK_TIME                = 1000    // How often do we check every player's distance to every spawned buff object ?
+};
+
+enum BG_AB_Score
+{
+    BG_AB_MAX_TEAM_SCORE                = 2000,
+    BG_AB_WARNING_SCORE                 = 1800
+};
 
 enum BG_AB_BuffObjectType
 {
-    BG_AB_OBJECT_SPEEDBUFF    = 0,
-    BG_AB_OBJECT_REGENBUFF    = 1,
-    BG_AB_OBJECT_BERSERKERBUFF= 2,
+    BG_AB_OBJECT_SPEEDBUFF              = 0,
+    BG_AB_OBJECT_REGENBUFF              = 1,
+    BG_AB_OBJECT_BERSERKERBUFF          = 2
 };
 
 // buff objectid, spellid
@@ -98,11 +118,11 @@ const uint32 BG_AB_BuffObjects[3][2] = { {179871, 23451}, {179904, 23493}, {1799
 /* do NOT change the order, else wrong behaviour */
 enum BG_AB_BattleGroundNodes
 {
-    BG_AB_NODE_STABLES      = 0,
-    BG_AB_NODE_BLACKSMITH   = 1,
-    BG_AB_NODE_FARM         = 2,
-    BG_AB_NODE_LUMBER_MILL  = 3,
-    BG_AB_NODE_GOLD_MINE    = 4
+    BG_AB_NODE_STABLES          = 0,
+    BG_AB_NODE_BLACKSMITH       = 1,
+    BG_AB_NODE_FARM             = 2,
+    BG_AB_NODE_LUMBER_MILL      = 3,
+    BG_AB_NODE_GOLD_MINE        = 4
 };
 
 // x, y, z, o
@@ -144,7 +164,7 @@ const float BG_AB_SpiritGuidePos[7][4] = {
     {714.61f, 646.15f, -10.87f, 4.34f} };    // and horde starting base
 
 // Alliance spirit guide, Horde spirit guide from DB
-const uint32 BG_AB_SpiritGuideId[2] = {13116, 13117};
+const uint32 BG_AB_SpiritGuideId[2]     = {13116, 13117};
 const uint32 BG_AB_SpiritGuideTeamId[2] = { ALLIANCE, HORDE };
 
 struct BG_AB_BuffObjectInfo
@@ -183,6 +203,9 @@ class BattleGroundAB : public BattleGround
         void RemovePlayer(Player *plr,uint64 guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         bool SetupBattleGround();
+
+        /* Scorekeeping */
+        void UpdatePlayerScore(Player *Source, uint32 type, uint32 value);
         void Reset();
 
         /* Nodes occupying */

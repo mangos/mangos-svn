@@ -94,15 +94,28 @@ enum BattleGroundTypeId
 
 enum ScoreType
 {
-    SCORE_KILLS             = 1,
-    SCORE_FLAG_CAPTURES     = 2,
-    SCORE_FLAG_RETURNS      = 3,
-    SCORE_DEATHS            = 4,
-    SCORE_DAMAGE_DONE       = 5,
-    SCORE_HEALING_DONE      = 6,
-    SCORE_BONUS_HONOR       = 7,
-    SCORE_HONORABLE_KILLS   = 8
-    // TODO: Add more
+    SCORE_KILLING_BLOWS         = 1,
+    SCORE_DEATHS                = 2,
+    SCORE_HONORABLE_KILLS       = 3,
+    SCORE_BONUS_HONOR           = 4,
+    //EY, but in MSG_PVP_LOG_DATA opcode!
+    SCORE_DAMAGE_DONE           = 5,
+    SCORE_HEALING_DONE          = 6,
+    //WS
+    SCORE_FLAG_CAPTURES         = 7,
+    SCORE_FLAG_RETURNS          = 8,
+    //AB
+    SCORE_BASES_ASSAULTED       = 9,
+    SCORE_BASES_DEFENDED        = 10,
+    //AV
+    SCORE_GRAVEYARDS_ASSAULTED  = 11,
+    SCORE_GRAVEYARDS_DEFENDED   = 12,
+    SCORE_TOWERS_ASSAULTED      = 13,
+    SCORE_TOWERS_DEFENDED       = 14,
+    SCORE_MINES_CAPTURED        = 15,
+    SCORE_LEADERS_KILLED        = 16,
+    SCORE_SECONDARY_OBJECTIVES  = 17
+    // TODO : implement them
 };
 
 enum ArenaType
@@ -131,11 +144,11 @@ class BattleGroundScore
         BattleGroundScore() : KillingBlows(0), HonorableKills(0), Deaths(0), DamageDone(0), HealingDone(0), BonusHonor(0) {};
         virtual ~BattleGroundScore() {};    //virtual destructor is used when deleting score from scores map
         uint32 KillingBlows;
-        uint32 HonorableKills;
         uint32 Deaths;
+        uint32 HonorableKills;
+        uint32 BonusHonor;
         uint32 DamageDone;
         uint32 HealingDone;
-        uint32 BonusHonor;
 };
 
 /*
@@ -268,12 +281,15 @@ class BattleGround
         void EndBattleGround(uint32 winner);
         void BlockMovement(Player *plr);
 
-        std::list<uint64> m_SpiritGuides;
         typedef std::vector<uint64> BGObjects;
+        typedef std::vector<uint64> BGCreatures;
         BGObjects m_bgobjects;
+        BGCreatures m_bgcreatures;
         void SpawnBGObject(uint32 type, uint32 respawntime);
         bool AddObject(uint32 type, uint32 entry, float x, float y, float z, float o, float rotation0,  float rotation1,  float rotation2,  float rotation3, uint32 respawntime = 0);
-        bool AddSpiritGuide(float x, float y, float z, float o, uint32 team);
+        Creature* AddCreature(uint32 entry, uint32 type, uint32 teamval, float x, float y, float z, float o);
+        bool DelCreature(uint32 type);
+        bool AddSpiritGuide(uint32 type, float x, float y, float z, float o, uint32 team);
 
         void DoorOpen(uint32 type);
 

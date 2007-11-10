@@ -323,9 +323,11 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool isTotem() const { return m_isTotem; }
         bool isRacialLeader() const { return GetCreatureInfo()->RacialLeader; }
         bool isCivilian() const { return GetCreatureInfo()->civilian; }
+        ///// TODO RENAME THIS!!!!!
         bool isCanSwimOrFly() const { return GetCreatureInfo()->InhabitType & INHAVIT_WATER; }
         bool isCanWalkOrFly() const { return GetCreatureInfo()->InhabitType & INHAVIT_GROUND; }
         bool isCanTrainingOf(Player* player, bool msg) const;
+        bool isCanIneractWithBattleMaster(Player* player, bool msg) const;
         bool isCanTrainingAndResetTalentsOf(Player* pPlayer) const;
         bool IsOutOfThreatArea(Unit* pVictim) const;
         bool IsImmunedToSpell(SpellEntry const* spellInfo) const;

@@ -552,7 +552,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
                     bg->UpdatePlayerScore(killed, SCORE_DEATHS, 1);
                     if(killer)
                         // add +1 kills
-                        bg->UpdatePlayerScore(killer, SCORE_KILLS, 1);
+                        bg->UpdatePlayerScore(killer, SCORE_HONORABLE_KILLS, 1);
                     // to be able to remove insignia
                     killed->SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_SKINNABLE );
                 }
