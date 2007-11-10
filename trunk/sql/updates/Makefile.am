@@ -510,6 +510,7 @@ pkgdata_DATA = \
 	4679_mangos_spell_proc_event.sql \
 	4687_mangos_loot_template.sql \
 	4695_mangos_loot_template.sql \
+	4704_mangos_battlemaster_entry.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -1000,5 +1001,6 @@ EXTRA_DIST = \
 	4679_mangos_spell_proc_event.sql \
 	4687_mangos_loot_template.sql \
 	4695_mangos_loot_template.sql \
+	4704_mangos_battlemaster_entry.sql \
 	README
 
