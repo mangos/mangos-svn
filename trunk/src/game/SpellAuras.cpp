@@ -3213,7 +3213,7 @@ void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
 
 void Aura::HandleModManaRegen(bool apply, bool Real)
 {
-    if (m_target->GetTypeId != TYPEID_PLAYER)
+    if (m_target->GetTypeId() != TYPEID_PLAYER)
         return;
     //Already calculated in Player::UpdateManaRegen()
     //Note: an increase in regen does NOT cause threat.
