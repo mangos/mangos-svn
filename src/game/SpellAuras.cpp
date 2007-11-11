@@ -3174,7 +3174,8 @@ void Aura::HandleModRegen(bool apply, bool Real)            // eating
 
 void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
 {
-    ((Player*)m_target)->UpdateManaRegen();
+    if (m_target->GetTypeId() == TYPEID_PLAYER)
+        ((Player*)m_target)->UpdateManaRegen();
     if ((GetSpellProto()->AuraInterruptFlags & AURA_INTERRUPT_FLAG_NOT_SEATED) && apply)
     {
         m_target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);
