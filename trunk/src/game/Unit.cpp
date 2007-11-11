@@ -2988,16 +2988,6 @@ void Unit::DeMorph()
     SetUInt32Value(UNIT_FIELD_DISPLAYID, GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
 }
 
-float Unit::GetTotalAuraModifier(float ModifierID, float Power) const
-{
-    float modifier = 0;
-    AuraList const& mTotalAuraList = GetAurasByType(ModifierID);
-    for(AuraList::const_iterator i = mTotalAuraList.begin();i != mTotalAuraList.end(); ++i)
-        if ((*i)->GetModifier()->m_miscvalue == Power)
-            modifier += (*i)->GetModifier()->m_amount;
-    return modifier;
-}
-
 long Unit::GetTotalAuraModifier(uint32 ModifierID) const
 {
     uint32 modifier = 0;

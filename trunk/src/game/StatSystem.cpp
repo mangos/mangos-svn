@@ -21,6 +21,7 @@
 #include "Pet.h"
 #include "Creature.h"
 #include "SharedDefines.h"
+#include "SpellAuras.h"
 
 /*#######################################
 ########                         ########
@@ -511,15 +512,24 @@ void Player::UpdateManaRegen()
     switch (PlayerClass)
     {
         // Mana gained from Spirit PER SECOND not PER TICK
-    case CLASS_DRUID:   SpiritBasedRegen = ((Spirit/5 + 15)/2);       break;
-    case CLASS_HUNTER:  SpiritBasedRegen = ((Spirit/5 + 15)/2);       break;
-    case CLASS_MAGE:    SpiritBasedRegen = ((Spirit/4 + 12.5)/2);     break;
-    case CLASS_PALADIN: SpiritBasedRegen = ((Spirit/5 + 15)/2);       break;
-    case CLASS_PRIEST:  SpiritBasedRegen = ((Spirit/4 + 12.5)/2);     break;
-    case CLASS_SHAMAN:  SpiritBasedRegen = ((Spirit/5 + 17)/2);       break;
-    case CLASS_WARLOCK: SpiritBasedRegen = ((Spirit/5 + 15)/2);       break;
+        case CLASS_DRUID:   SpiritBasedRegen = ((Spirit/5 + 15)/2);       break;
+        case CLASS_HUNTER:  SpiritBasedRegen = ((Spirit/5 + 15)/2);       break;
+        case CLASS_MAGE:    SpiritBasedRegen = ((Spirit/4 + 12.5)/2);     break;
+        case CLASS_PALADIN: SpiritBasedRegen = ((Spirit/5 + 15)/2);       break;
+        case CLASS_PRIEST:  SpiritBasedRegen = ((Spirit/4 + 12.5)/2);     break;
+        case CLASS_SHAMAN:  SpiritBasedRegen = ((Spirit/5 + 17)/2);       break;
+        case CLASS_WARLOCK: SpiritBasedRegen = ((Spirit/5 + 15)/2);       break;
     }
-    float Mp5 = (GetTotalAuraModifier(SPELL_AURA_MOD_POWER_REGEN, POWER_MANA)/5.00f) + (GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN) * Intellect / 500.0f);
+
+    float power_regen_mod = 0;
+    AuraList const& ModPowerRegenAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN);
+    for(AuraList::const_iterator i = ModPowerRegenAuras.begin();i != ModPowerRegenAuras.end(); ++i)
+        if ((*i)->GetModifier()->m_miscvalue == POWER_MANA)
+            power_regen_mod += (*i)->GetModifier()->m_amount;
+
+    float Mp5 = power_regen_mod/5.00f + (GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN) * Intellect / 500.0f);
+
+
     float modManaRegenInterrupt = (float(GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN_INTERRUPT))/100.00f);
     SetStatFloatValue(PLAYER_FIELD_MOD_MANA_REGEN_INTERRUPT,(Mp5 + (SpiritBasedRegen * modManaRegenInterrupt)));
     SpiritBasedRegen += Mp5;

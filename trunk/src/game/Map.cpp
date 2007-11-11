@@ -265,9 +265,9 @@ i_resetTime(0), i_resetDelayTime(0), i_InstanceId(ainstanceId), i_maxPlayers(0),
                     sLog.outDebug("Loading instance data for `%s` with id %u", i_script.c_str(), i_InstanceId);
                     i_data->Load(data);
                 }
-                        
+
+                delete result;
             }
-            delete result;
         }
            
         if (i_resetTime == 0) InitResetTime();
