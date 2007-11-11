@@ -1701,7 +1701,8 @@ void Player::Regenerate(Powers power)
 
 
     float addvalue = 0.0f;
-    uint32 msecSinceLastCast ((uint32)getMSTime() - m_lastManaUse);
+    uint32 msecSinceLastCast = (uint32)getMSTime() - m_lastManaUse;
+
     switch (power)
     {
         case POWER_MANA:
@@ -1714,7 +1715,7 @@ void Player::Regenerate(Powers power)
             {
                 addvalue = GetFloatValue(PLAYER_FIELD_MOD_MANA_REGEN)* ManaIncreaseRate * 2.00f;   	
             }
-        }    break;
+        }   break;
         case POWER_RAGE:                                    // Regenerate rage
         {
             float RageDecreaseRate = sWorld.getRate(RATE_POWER_RAGE_LOSS);
@@ -1728,13 +1729,15 @@ void Player::Regenerate(Powers power)
         case POWER_HAPPINESS:
             break;
     }
-    if(!((msecSinceLastCast < 5000) && (power == POWER_MANA)))
+
+    if(!(msecSinceLastCast < 5000 && power == POWER_MANA))
     {
         AuraList const& ModPowerRegenPCTAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN_PERCENT);
         for(AuraList::const_iterator i = ModPowerRegenPCTAuras.begin(); i != ModPowerRegenPCTAuras.end(); ++i)
             if ((*i)->GetModifier()->m_miscvalue == power)
                 addvalue *= ((*i)->GetModifier()->m_amount + 100) / 100.0;
     }
+
     if (power != POWER_RAGE)
     {
         curValue += uint32(addvalue);

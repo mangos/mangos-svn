@@ -3032,22 +3032,25 @@ void Aura::HandleModPercentStat(bool apply, bool Real)
     }
 }
 
- 
 void Aura::HandleModSpellHealingPercent(bool apply, bool Real)
 {
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
     //For ClientSide Display
-    if(m_target->GetTypeId() == TYPEID_PLAYER)
-        m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_HEALING_DONE_POS, int32((m_modifier.m_amount/100.00f * m_target->GetStat(STAT_INTELLECT))),apply);		
- 
+    m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_HEALING_DONE_POS, int32((m_modifier.m_amount/100.00f * m_target->GetStat(STAT_INTELLECT))),apply);		
 }
+
 void Aura::HandleModSpellDamagePercent(bool apply, bool Real)
 {
+    if(m_target->GetTypeId() != TYPEID_PLAYER)
+        return;
+
     //For ClientSide Display
-    if(m_target->GetTypeId() == TYPEID_PLAYER)
-        for(int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; i++)
-             {
-                m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+i, int32((m_modifier.m_amount/100.00f * m_target->GetStat(STAT_INTELLECT))),apply);	
-             }		
+    for(int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
+    {
+        m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+i, int32((m_modifier.m_amount/100.00f * m_target->GetStat(STAT_INTELLECT))),apply);	
+    }		
 }
 void Aura::HandleModHealingDone(bool apply, bool Real)
 {
@@ -3202,7 +3205,7 @@ void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
         if( !(pt == POWER_RAGE && (m_target->isInCombat() || m_target->GetPower(POWER_RAGE) == 0)) )
         {
             if(pt != POWER_MANA)
-            uint32 gain = m_target->ModifyPower(pt, m_modifier.m_amount*2/5);			
+                m_target->ModifyPower(pt, m_modifier.m_amount*2/5);			
         }
     }
     m_isPeriodic = apply;
@@ -3211,7 +3214,7 @@ void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
 void Aura::HandleModManaRegen(bool apply, bool Real)
 {
     //Already calculated in Player::UpdateManaRegen()
-    //Note to whoever wrote the old definition, an increase in regen does NOT cause threat.
+    //Note: an increase in regen does NOT cause threat.
     ((Player*)m_target)->UpdateManaRegen();
     
 }
