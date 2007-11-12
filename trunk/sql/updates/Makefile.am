@@ -511,6 +511,7 @@ pkgdata_DATA = \
 	4687_mangos_loot_template.sql \
 	4695_mangos_loot_template.sql \
 	4704_mangos_battlemaster_entry.sql \
+	4714_mangos_spell_threat.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -1002,5 +1003,6 @@ EXTRA_DIST = \
 	4687_mangos_loot_template.sql \
 	4695_mangos_loot_template.sql \
 	4704_mangos_battlemaster_entry.sql \
+	4714_mangos_spell_threat.sql \
 	README
 
