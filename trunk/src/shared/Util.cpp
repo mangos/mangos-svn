@@ -40,6 +40,17 @@ Tokens StrSplit(const std::string &src, const std::string &sep)
     return r;
 }
 
+void stripLineInvisibleChars(std::string &str)
+{
+    static char const * invChars = " \t\7";
+
+    size_t pos = str.find_first_not_of(invChars);
+    if(pos==std::string::npos)
+        return;
+
+    str.erase(0,pos);
+}
+
 std::string secsToTimeString(uint32 timeInSecs, bool shortText, bool hoursOnly)
 {
     uint32 secs    = timeInSecs % MINUTE;
