@@ -98,6 +98,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
                 break;
 
+            stripLineInvisibleChars(msg);
+            if(msg.empty())
+                break;
+
             if(type == CHAT_MSG_SAY)
                 GetPlayer()->Say(msg, lang);
             else if(type == CHAT_MSG_EMOTE)
@@ -113,6 +117,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             CHECK_PACKET_SIZE(recv_data,4+4+(to.size()+1)+1);
             recv_data >> msg;
 
+            stripLineInvisibleChars(msg);
             if(msg.empty())
                 break;
 
@@ -135,6 +140,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 SendPacket(&data);
                 return;
             }
+
             if (!sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_INTERACTION_CHAT) && tSecurity == SEC_PLAYER && pSecurity == SEC_PLAYER )
             {
                 uint32 sidea = GetPlayer()->GetTeam();
@@ -162,6 +168,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
                 break;
 
+            stripLineInvisibleChars(msg);
+            if(msg.empty())
+                break;
+
             Group *group = GetPlayer()->GetGroup();
             if(!group)
                 return;
@@ -180,6 +190,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 break;
 
             if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
+                break;
+
+            stripLineInvisibleChars(msg);
+            if(msg.empty())
                 break;
 
             if (GetPlayer()->GetGuildId())
@@ -202,6 +216,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
                 break;
 
+            stripLineInvisibleChars(msg);
+            if(msg.empty())
+                break;
+
             if (GetPlayer()->GetGuildId())
             {
                 Guild *guild = objmgr.GetGuildById(GetPlayer()->GetGuildId());
@@ -219,6 +237,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 break;
 
             if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
+                break;
+
+            stripLineInvisibleChars(msg);
+            if(msg.empty())
                 break;
 
             Group *group = GetPlayer()->GetGroup();
@@ -240,6 +262,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
                 break;
 
+            stripLineInvisibleChars(msg);
+            if(msg.empty())
+                break;
+
             Group *group = GetPlayer()->GetGroup();
             if(!group || !group->isRaidGroup() || !group->IsLeader(GetPlayer()->GetGUID()))
                 return;
@@ -253,6 +279,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             std::string msg="";
             recv_data >> msg;
 
+            stripLineInvisibleChars(msg);
             if(msg.empty())
                 break;
 
@@ -270,6 +297,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             std::string msg="";
             recv_data >> msg;
 
+            stripLineInvisibleChars(msg);
             if(msg.empty())
                 break;
 
@@ -287,6 +315,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             std::string msg="";
             recv_data >> msg;
 
+            stripLineInvisibleChars(msg);
             if(msg.empty())
                 break;
 
@@ -309,6 +338,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
             recv_data >> msg;
 
+            stripLineInvisibleChars(msg);
             if(msg.empty())
                 break;
 

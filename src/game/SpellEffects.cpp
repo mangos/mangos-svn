@@ -300,7 +300,7 @@ void Spell::EffectSchoolDMG(uint32 i)
             case SPELLFAMILY_PALADIN:
             {
                 //Judgement of Vengeance
-                if(m_spellInfo->SpellFamilyFlags & 0x800000000LL)
+                if((m_spellInfo->SpellFamilyFlags & 0x800000000LL) && m_spellInfo->SpellIconID==2040)
                 {
                     uint32 stacks = 0;
                     Unit::AuraList auras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
