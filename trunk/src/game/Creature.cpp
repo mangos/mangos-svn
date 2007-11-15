@@ -1163,7 +1163,7 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const 
     CreatureModelInfo const *minfo = objmgr.GetCreatureModelRandomGender(display_id);
     if (!minfo)
     {
-        sLog.outErrorDb("Creature (Entry: %u) has model %u not found in table `creature_model_based_info`, can't load. ", Entry, display_id);
+        sLog.outErrorDb("Creature (Entry: %u) has model %u not found in table `creature_model_info`, can't load. ", Entry, display_id);
         return false;
     }
     else

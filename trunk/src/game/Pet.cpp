@@ -1577,7 +1577,7 @@ bool Pet::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float 
     CreatureModelInfo const *minfo = objmgr.GetCreatureModelRandomGender(cinfo->DisplayID_A);
     if(!minfo)
     {
-        sLog.outErrorDb("Creature (Entry: %u) has model %u not found in table `creature_model_based_info`, can't load.", Entry, cinfo->DisplayID_A);
+        sLog.outErrorDb("Creature (Entry: %u) has model %u not found in table `creature_model_info`, can't load.", Entry, cinfo->DisplayID_A);
         return false;
     }
 

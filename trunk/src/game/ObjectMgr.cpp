@@ -621,7 +621,7 @@ CreatureModelInfo const* ObjectMgr::GetCreatureModelRandomGender(uint32 display_
         CreatureModelInfo const *minfo_tmp = GetCreatureModelInfo(minfo->modelid_other_gender);
         if(!minfo_tmp)
         {
-            sLog.outErrorDb("Model (Entry: %u) has modelid_other_gender %u not found in table `creature_model_based_info`. ", minfo->modelid, minfo->modelid_other_gender);
+            sLog.outErrorDb("Model (Entry: %u) has modelid_other_gender %u not found in table `creature_model_info`. ", minfo->modelid, minfo->modelid_other_gender);
             return minfo;                                   // not fatal, just use the previous one
         }
         else
@@ -2368,9 +2368,9 @@ void ObjectMgr::LoadQuests()
 
             if(id)
             {
-                if((qinfo->SpecialFlags & QUEST_SPECIAL_FLAGS_KILL_OR_CAST)==0)
+                if((qinfo->SpecialFlags & (QUEST_SPECIAL_FLAGS_KILL_OR_CAST | QUEST_SPECIAL_FLAGS_SPEAKTO))==0)
                 {
-                    sLog.outErrorDb("Quest %u has `ReqCreatureOrGOId%d` = %u but `SpecialFlags` not have set killOrCast flag bit, quest can be done without creature/go kill/cast!",
+                    sLog.outErrorDb("Quest %u has `ReqCreatureOrGOId%d` = %u but `SpecialFlags` not have set killOrCast flag bit or TalkTo, quest can be done without creature/go kill/cast/talkTo!",
                         qinfo->GetQuestId(),j+1,id);
                     // no changes, quest can be incorrectly done, but we already report this
                 }
@@ -3729,7 +3729,7 @@ uint16 ObjectMgr::GetTaxiMount( uint32 id, uint32 team )
     CreatureModelInfo const *minfo = objmgr.GetCreatureModelInfo(mount_id);
     if(!minfo)
     {
-        sLog.outErrorDb("Creature (Entry: %u) has model %u not found in table `creature_model_based_info`, can't load. ",id,mount_id);
+        sLog.outErrorDb("Creature (Entry: %u) has model %u not found in table `creature_model_info`, can't load. ",id,mount_id);
         return false;
     }
     if(minfo->modelid_other_gender!=0)
