@@ -443,6 +443,8 @@ void BattleGroundAB::_NodeOccupied(uint8 node)
     if (!m_spiritGuides[node]->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), 529, BG_AB_SpiritGuidePos[node][0], BG_AB_SpiritGuidePos[node][1], BG_AB_SpiritGuidePos[node][2], BG_AB_SpiritGuidePos[node][3], (node>4)?BG_AB_SpiritGuideId[node-5]:BG_AB_SpiritGuideId[m_Nodes[node]-3], (node>4)?BG_AB_SpiritGuideTeamId[node-5]:BG_AB_SpiritGuideTeamId[m_Nodes[node]-3]))
         ASSERT(0);
     m_spiritGuides[node]->setDeathState(DEAD);
+    m_spiritGuides[node]->AIM_Initialize();
+
     MapManager::Instance().GetMap(529, m_spiritGuides[node])->Add(m_spiritGuides[node]);
     m_spiritGuides[node]->CastSpell(m_spiritGuides[node], SPELL_SPIRIT_HEAL_CHANNEL, true);
 }
