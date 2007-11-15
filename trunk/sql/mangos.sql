@@ -572,6 +572,23 @@ CREATE TABLE `creature_onkill_reputation` (
 /*!40000 ALTER TABLE `creature_onkill_reputation` DISABLE KEYS */;
 /*!40000 ALTER TABLE `creature_onkill_reputation` ENABLE KEYS */;
 
+--
+-- Definition of table `creature_questrelation`
+--
+
+DROP TABLE IF EXISTS `creature_questrelation`;
+CREATE TABLE `creature_questrelation` (
+ `id` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Identifier',
+ `quest` int(10) unsigned NOT NULL DEFAULT '0' COMMENT 'Quest Identifier',
+ PRIMARY KEY (`id`,`quest`)
+) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Creature System';
+
+--
+-- Dumping data for table `creature_questrelation`
+--
+
+/*!40000 ALTER TABLE `creature_questrelation` DISABLE KEYS */;
+/*!40000 ALTER TABLE `creature_questrelation` ENABLE KEYS */;
 
 --
 -- Definition of table `creature_respawn`
