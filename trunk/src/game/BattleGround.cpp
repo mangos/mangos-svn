@@ -859,6 +859,8 @@ Creature* BattleGround::AddCreature(uint32 entry, uint32 type, uint32 teamval, f
         return NULL;
     }
 
+    pCreature->AIM_Initialize();
+
     //pCreature->SetDungeonDifficulty(0);
     MapManager::Instance().GetMap(pCreature->GetMapId(), pCreature)->Add(pCreature);
     m_bgcreatures[type] = pCreature->GetGUID();
