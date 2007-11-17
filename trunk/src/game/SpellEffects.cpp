@@ -1085,6 +1085,18 @@ void Spell::EffectDummy(uint32 i)
             m_caster->CastSpell(m_caster,spell_id,true,NULL);
             return;
         }
+        
+        //Mana-Tide Totem effect
+        case 39610:
+        {
+            if(!unitTarget || unitTarget->getPowerType() != POWER_MANA || !m_triggeredByAura)
+                return;
+
+            //regen 6% of Total Mana Every 3 secs (-1 stored)
+            int32 EffectBasePoints0 = unitTarget->GetMaxPower(POWER_MANA)  * m_triggeredByAura->GetModifier()->m_amount / 100 -1;
+            m_caster->CastCustomSpell(unitTarget,39609,&EffectBasePoints0,NULL,NULL,true,NULL,m_triggeredByAura,m_originalCasterGUID);            
+            return;
+        }
     }
 }
 
