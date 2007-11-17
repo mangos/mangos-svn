@@ -506,6 +506,9 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
             if (spellInfo->SpellFamilyFlags & 0x12040000)
                 return SPELL_MAGE_ARMOR;
 
+            if ((spellInfo->SpellFamilyFlags & 0x1000000) && spellInfo->EffectApplyAuraName[0]==5 /*SPELL_AURA_MOD_CONFUSE*/)
+                return SPELL_MAGE_POLYMORPH;
+
             break;
         }
         case SPELLFAMILY_SHAMAN:
@@ -564,6 +567,7 @@ bool IsSpellSingleEffectPerCaster(uint32 spellId)
         case SPELL_WARLOCK_ARMOR:
         case SPELL_MAGE_ARMOR:
         case SPELL_ELEMENTAL_SHIELD:
+        case SPELL_MAGE_POLYMORPH:
             return true;
         default:
             return false;
@@ -700,7 +704,7 @@ bool IsPositiveSpell(uint32 spellId)
     return true;
 }
 
-bool IsSingleTarget(uint32 spellId)
+bool IsSingleTargetSpell(uint32 spellId)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
     if (!spellInfo) return false;
@@ -727,6 +731,26 @@ bool IsSingleTarget(uint32 spellId)
         ) return true;
     // all other single target spells have if it has Attributes
     //if ( spellInfo->Attributes & (1<<30) ) return true;
+    return false;
+}
+
+bool IsSingleTargetSpells(SpellEntry const *spellInfo1, SpellEntry const *spellInfo2)
+{
+    // similar spell
+    // FIX ME: this is not very good check for this
+    if( spellInfo1->Category       == spellInfo2->Category     &&
+        spellInfo1->SpellIconID    == spellInfo2->SpellIconID  &&
+        spellInfo1->SpellVisual    == spellInfo2->SpellVisual  &&
+        spellInfo1->Attributes     == spellInfo2->Attributes   &&
+        spellInfo1->AttributesEx   == spellInfo2->AttributesEx &&
+        spellInfo1->AttributesExEx == spellInfo2->AttributesExEx )
+        return true;
+
+    // polymorph have different data for first check
+    SpellSpecific spec1 = GetSpellSpecific(spellInfo1->Id);
+    if(spec1==SPELL_MAGE_POLYMORPH && GetSpellSpecific(spellInfo2->Id) == SPELL_MAGE_POLYMORPH)
+        return true;
+
     return false;
 }
 

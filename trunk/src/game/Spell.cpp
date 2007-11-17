@@ -3054,7 +3054,7 @@ uint8 Spell::CheckRange(bool strict)
         if(dist < min_range * min_range)
             return SPELL_FAILED_TOO_CLOSE;
         if( !m_IsTriggeredSpell && !m_caster->isInFront( target, max_range) )
-            if (m_rangedShoot || !IsPositiveSpell(m_spellInfo->Id) && casttime != 0 && !IsSingleTarget(m_spellInfo->Id))
+            if (m_rangedShoot || !IsPositiveSpell(m_spellInfo->Id) && casttime != 0 && !IsSingleTargetSpell(m_spellInfo->Id))
                 return SPELL_FAILED_UNIT_NOT_INFRONT;
     }
 
