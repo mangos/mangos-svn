@@ -583,6 +583,8 @@ void WorldSession::SendListInventory( uint64 vendorguid )
     data << vendorguid;
     data << numitems;
 
+    float discountMod = _player->GetReputationPriceDiscount(pCreature);
+
     ItemPrototype const *pProto;
     for(int i = 0; i < numitems; i++ )
     {
@@ -609,11 +611,10 @@ void WorldSession::SendListInventory( uint64 vendorguid )
                 data << pProto->DisplayInfoID;
                 data << uint32(crItem->maxcount <= 0 ? 0xFFFFFFFF : crItem->count);
 
-                // 10% reputation discount
                 uint32 price = pProto->BuyPrice;
-                FactionTemplateEntry const* vendor_faction = pCreature->getFactionTemplateEntry();
-                if (vendor_faction && _player->GetReputationRank(vendor_faction->faction) >= REP_HONORED)
-                    price = 9 * price / 10;
+
+                // reputation discount
+                price = uint32(pProto->BuyPrice * discountMod);
 
                 data << price;
                 data << pProto->MaxDurability;

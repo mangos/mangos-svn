@@ -222,8 +222,12 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         void Reset();
         bool CanEnter(Player* player) const;
         const char* GetMapName() const;
+
         bool Instanceable() const { return(i_mapEntry && ((i_mapEntry->map_type == MAP_INSTANCE) || (i_mapEntry->map_type == MAP_RAID))); }
+        // NOTE: this duplicate of Instanceable(), but Instanceable() can be changed when BG also will be instanceable
+        bool IsDangeon() const { return(i_mapEntry && ((i_mapEntry->map_type == MAP_INSTANCE) || (i_mapEntry->map_type == MAP_RAID))); }
         bool IsRaid() const { return(i_mapEntry && (i_mapEntry->map_type == MAP_RAID)); }
+
         virtual bool RemoveBones(uint64 guid, float x, float y);
         void InitResetTime();
 

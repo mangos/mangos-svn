@@ -3602,21 +3602,21 @@ void Player::DurabilityPointsLoss(uint8 equip_pos, uint32 points)
     m_items[equip_pos]->SetState(ITEM_CHANGED, this);
 }
 
-void Player::DurabilityRepairAll(bool cost, bool discount)
+void Player::DurabilityRepairAll(bool cost, float discountMod)
 {
     // equipped, backpack, bags itself
     for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
-        DurabilityRepair(( (INVENTORY_SLOT_BAG_0 << 8) | i ),cost,discount);
+        DurabilityRepair(( (INVENTORY_SLOT_BAG_0 << 8) | i ),cost,discountMod);
 
     // bank, buyback and keys not repaired
 
     // items in inventory bags
     for(int j = INVENTORY_SLOT_BAG_START; j < INVENTORY_SLOT_BAG_END; j++)
         for(int i = 0; i < MAX_BAG_SIZE; i++)
-            DurabilityRepair(( (j << 8) | i ),cost,discount);
+            DurabilityRepair(( (j << 8) | i ),cost,discountMod);
 }
 
-void Player::DurabilityRepair(uint16 pos, bool cost, bool discount)
+void Player::DurabilityRepair(uint16 pos, bool cost, float discountMod)
 {
     Item* item = GetItemByPos(pos);
 
@@ -3660,11 +3660,10 @@ void Player::DurabilityRepair(uint16 pos, bool cost, bool discount)
             uint32 dmultiplier = dcost->multiplier[ItemSubClassToDurabilityMultiplierId(ditemProto->Class,ditemProto->SubClass)];
             uint32 costs = uint32(LostDurability*dmultiplier*double(dQualitymodEntry->quality_mod));
 
-            if(discount)
-                costs = 9 * costs / 10;
+            costs = uint32(costs * discountMod);
 
             if (costs==0)                                   //fix for ITEM_QUALITY_ARTIFACT
-                costs=1;
+                costs= 1;
 
             if (GetMoney() < costs)
             {
@@ -5193,20 +5192,11 @@ bool Player::ModifyOneFactionReputation(FactionEntry const* factionEntry, int32 
 }
 
 //Calculate total reputation percent player gain with quest/creature level
-int32 Player::CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep)
+int32 Player::CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep, bool for_quest)
 {
-    int32 Factor;
-    int32 dif = int32(getLevel()) - creatureOrQuestLevel;
-
-    // This part is before_2.01_like
-    if (dif <= 5)
-        Factor = 5;                                         // 100%
-    else if (dif >= 10)
-        Factor = 1;                                         // 20%
-    else
-        Factor = (10-dif);                                  // 20%...100% with step 20%
-
-    int32 percent = Factor*20;
+    // for grey creature kill received 20%, in other case 100.
+    int32 percent = (!for_quest && (creatureOrQuestLevel <= MaNGOS::XP::GetGrayLevel(getLevel()))) ? 20 : 100;
+    
     int32 repMod = 0;
 
     AuraList const& mReputationGain = GetAurasByType(SPELL_AURA_MOD_REPUTATION_GAIN);
@@ -5234,7 +5224,7 @@ void Player::RewardReputation(Unit *pVictim, float rate)
 
     if(Rep->repfaction1 && (!Rep->team_dependent || GetTeam()==ALLIANCE))
     {
-        int32 donerep1 = CalculateReputationGain(pVictim->getLevel(),Rep->repvalue1);
+        int32 donerep1 = CalculateReputationGain(pVictim->getLevel(),Rep->repvalue1,false);
         donerep1 = int32(donerep1*rate);
         FactionEntry const *factionEntry1 = sFactionStore.LookupEntry(Rep->repfaction1);
         uint32 current_reputation_rank1 = GetReputationRank(factionEntry1);
@@ -5252,7 +5242,7 @@ void Player::RewardReputation(Unit *pVictim, float rate)
 
     if(Rep->repfaction2 && (!Rep->team_dependent || GetTeam()==HORDE))
     {
-        int32 donerep2 = CalculateReputationGain(pVictim->getLevel(),Rep->repvalue2);
+        int32 donerep2 = CalculateReputationGain(pVictim->getLevel(),Rep->repvalue2,false);
         donerep2 = int32(donerep2*rate);
         FactionEntry const *factionEntry2 = sFactionStore.LookupEntry(Rep->repfaction2);
         uint32 current_reputation_rank2 = GetReputationRank(factionEntry2);
@@ -5272,12 +5262,12 @@ void Player::RewardReputation(Unit *pVictim, float rate)
 //Calculate how many reputation points player gain with the quest
 void Player::RewardReputation(Quest const *pQuest)
 {
-    // quest reputation reward/losts
+    // quest reputation reward/loss
     for(int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)
     {
         if(pQuest->RewRepFaction[i] && pQuest->RewRepValue[i] )
         {
-            int32 rep = CalculateReputationGain(pQuest->GetQuestLevel(),pQuest->RewRepValue[i]);
+            int32 rep = CalculateReputationGain(pQuest->GetQuestLevel(),pQuest->RewRepValue[i],true);
             FactionEntry const* factionEntry = sFactionStore.LookupEntry(pQuest->RewRepFaction[i]);
             if(factionEntry)
                 ModifyFactionReputation(factionEntry, rep);
@@ -14652,11 +14642,10 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
             }
         }
 
-        // 10% reputation discount
+        // reputation discount
         uint32 price  = pProto->BuyPrice * count;
-        FactionTemplateEntry const* vendor_faction = pCreature->getFactionTemplateEntry();
-        if (vendor_faction && GetReputationRank(vendor_faction->faction) >= REP_HONORED)
-            price = 9 * price / 10;
+
+        price = uint32(price * GetReputationPriceDiscount(pCreature));
 
         if( GetMoney() < price )
         {
@@ -15536,4 +15525,17 @@ uint32 Player::GetBattleGroundQueueIdFromLevel() const
         return 5;
     else
         return 6;
+}
+
+float Player::GetReputationPriceDiscount( Creature const* pCreature ) const
+{
+    FactionTemplateEntry const* vendor_faction = pCreature->getFactionTemplateEntry();
+    if(!vendor_faction)
+        return 1.0f;
+
+    ReputationRank rank = GetReputationRank(vendor_faction->faction);
+    if(rank <= REP_NEUTRAL)
+        return 1.0f;
+
+    return 1.0f - 0.05f* (rank - REP_NEUTRAL);
 }
