@@ -232,7 +232,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 
     if(objmgr.GetPlayerGUIDByName(name))
     {
-        data << (uint8)CHAR_CREATE_ERROR;
+        data << (uint8)CHAR_CREATE_NAME_IN_USE;
         SendPacket( &data );
         return;
     }
@@ -243,14 +243,14 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     {
         Field *fields=result->Fetch();
         charcount = fields[0].GetUInt8();
+        delete result;
+
         if (charcount >= 10)
         {
             data << (uint8)CHAR_CREATE_ACCOUNT_LIMIT;
             SendPacket( &data );
-            delete result;
             return;
         }
-        delete result;
     }
 
     bool AllowTwoSideAccounts = sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_ACCOUNTS);
