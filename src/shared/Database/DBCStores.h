@@ -36,7 +36,8 @@ enum SpellSpecific
     SPELL_TRACKER = 7,
     SPELL_WARLOCK_ARMOR = 8,
     SPELL_MAGE_ARMOR = 9,
-    SPELL_ELEMENTAL_SHIELD = 10
+    SPELL_ELEMENTAL_SHIELD = 10,
+    SPELL_MAGE_POLYMORPH = 11
 };
 
 enum SpellFamilyNames
@@ -86,7 +87,9 @@ bool IsPositiveSpell(uint32 spellId);
 bool IsPositiveEffect(uint32 spellId, uint32 effIndex);
 bool IsPositiveTarget(uint32 targetA, uint32 targetB);
 
-bool IsSingleTarget(uint32 spellId);
+bool IsSingleTargetSpell(uint32 spellId);
+bool IsSingleTargetSpells(SpellEntry const *spellInfo1, SpellEntry const *spellInfo2);
+
 AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id);
 AreaTableEntry const* GetAreaEntryByAreaFlag(uint32 area_flag);
 uint32 GetAreaFlagByMapId(uint32 mapid);

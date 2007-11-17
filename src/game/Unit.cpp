@@ -3046,7 +3046,7 @@ bool Unit::AddAura(Aura *Aur)
     }
 
     // update single target auras list (before aura add to aura list, to prevent unexpected remove recently added aura)
-    if (IsSingleTarget(Aur->GetId()) && Aur->GetTarget() && Aur->GetSpellProto())
+    if (IsSingleTargetSpell(Aur->GetId()) && Aur->GetTarget() && Aur->GetSpellProto())
     {
         if(Unit* caster = Aur->GetCaster())
         {
@@ -3056,13 +3056,8 @@ bool Unit::AddAura(Aura *Aur)
             {
                 next = itr;
                 next++;
-                if ((*itr)->GetTarget() != Aur->GetTarget() &&
-                    (*itr)->GetSpellProto()->Category == Aur->GetSpellProto()->Category &&
-                    (*itr)->GetSpellProto()->SpellIconID == Aur->GetSpellProto()->SpellIconID &&
-                    (*itr)->GetSpellProto()->SpellVisual == Aur->GetSpellProto()->SpellVisual &&
-                    (*itr)->GetSpellProto()->Attributes == Aur->GetSpellProto()->Attributes &&
-                    (*itr)->GetSpellProto()->AttributesEx == Aur->GetSpellProto()->AttributesEx &&
-                    (*itr)->GetSpellProto()->AttributesExEx == Aur->GetSpellProto()->AttributesExEx)
+                if( (*itr)->GetTarget() != Aur->GetTarget() && 
+                    IsSingleTargetSpells((*itr)->GetSpellProto(),Aur->GetSpellProto()) )
                 {
                     (*itr)->GetTarget()->RemoveAura((*itr)->GetId(), (*itr)->GetEffIndex());
                     if(scAuras.empty())
@@ -3343,7 +3338,7 @@ void Unit::RemoveAurasDueToItem(Item* castItem)
 
 void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
 {
-    if (IsSingleTarget((*i).second->GetId()))
+    if (IsSingleTargetSpell((*i).second->GetId()))
     {
         if(Unit* caster = (*i).second->GetCaster())
         {
