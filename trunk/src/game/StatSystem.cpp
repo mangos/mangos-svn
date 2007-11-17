@@ -275,7 +275,7 @@ void Player::UpdateDamagePhysical(WeaponAttackType attType)
     float weapon_mindamage = GetWeaponDamageRange(attType, MINDAMAGE);
     float weapon_maxdamage = GetWeaponDamageRange(attType, MAXDAMAGE);
 
-    if(!IsUseEquipedWeapon())                               //check if player is druid and in cat or bear forms
+    if(!IsUseEquipedWeapon(attType==BASE_ATTACK))           //check if player is druid and in cat or bear forms
     {
         weapon_mindamage = 0.9 * GetTotalAuraModValue(attPower)/ 14.0f * att_speed;
         weapon_maxdamage = 1.1 * GetTotalAuraModValue(attPower)/ 14.0f * att_speed;

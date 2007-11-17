@@ -4337,7 +4337,7 @@ void Player::UpdateWeaponSkill (WeaponAttackType attType)
         {
             Item *tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
 
-            if (!tmpitem || tmpitem->IsBroken() || !IsUseEquipedWeapon())
+            if (!tmpitem || tmpitem->IsBroken() || !IsUseEquipedWeapon(true))
                 UpdateSkill(SKILL_UNARMED);
             else if(tmpitem->GetProto()->SubClass != ITEM_SUBCLASS_WEAPON_FISHING_POLE)
                 UpdateSkill(tmpitem->GetSkill());
@@ -4347,14 +4347,14 @@ void Player::UpdateWeaponSkill (WeaponAttackType attType)
         {
             Item *tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
 
-            if (tmpitem && tmpitem->GetProto()->Class == ITEM_CLASS_WEAPON && !tmpitem->IsBroken() && IsUseEquipedWeapon())
+            if (tmpitem && tmpitem->GetProto()->Class == ITEM_CLASS_WEAPON && !tmpitem->IsBroken() && IsUseEquipedWeapon(false))
                 UpdateSkill(tmpitem->GetSkill());
         };break;
         case RANGED_ATTACK:
         {
             Item* tmpitem = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
 
-            if (tmpitem && tmpitem->GetProto()->Class == ITEM_CLASS_WEAPON && !tmpitem->IsBroken() && IsUseEquipedWeapon())
+            if (tmpitem && tmpitem->GetProto()->Class == ITEM_CLASS_WEAPON && !tmpitem->IsBroken() && IsUseEquipedWeapon(false))
                 UpdateSkill(tmpitem->GetSkill());
         };break;
     }
@@ -6016,7 +6016,7 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
         //sLog.outError("applying maxdam: assigning %f to weapon maxdamage, now is: %f", damage, GetWeaponDamageRange(attType, MAXDAMAGE));
     }
 
-    if(!IsUseEquipedWeapon())
+    if(!IsUseEquipedWeapon(slot==EQUIPMENT_SLOT_MAINHAND))
         return;
 
     if (proto->Delay)
@@ -7229,16 +7229,16 @@ void Player::SetSheath( uint32 sheathed )
         case 1:                                             // prepeared melee weapon
         {
             item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-            SetVirtualItemSlot(0,item && !item->IsBroken() && IsUseEquipedWeapon() ? item : NULL);
+            SetVirtualItemSlot(0,item && !item->IsBroken() && IsUseEquipedWeapon(true) ? item : NULL);
             item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
-            SetVirtualItemSlot(1,item && !item->IsBroken() && IsUseEquipedWeapon() ? item : NULL);
+            SetVirtualItemSlot(1,item && !item->IsBroken() && IsUseEquipedWeapon(false) ? item : NULL);
             SetVirtualItemSlot(2,NULL);
         };  break;
         case 2:                                             // prepeared ranged weapon
             SetVirtualItemSlot(0,NULL);
             SetVirtualItemSlot(1,NULL);
             item = GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_RANGED);
-            SetVirtualItemSlot(2,item && !item->IsBroken() && IsUseEquipedWeapon() ? item : NULL);
+            SetVirtualItemSlot(2,item && !item->IsBroken() && IsUseEquipedWeapon(false) ? item : NULL);
             break;
         default:
             SetVirtualItemSlot(0,NULL);

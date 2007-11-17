@@ -2527,13 +2527,13 @@ float Unit::GetUnitParryChance() const
     if(GetTypeId() == TYPEID_PLAYER)
     {
         Player const* player = (Player const*)this;
-        if(player->CanParry() && player->IsUseEquipedWeapon() )
+        if(player->CanParry() )
         {
             Item *tmpitem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
-            if(!tmpitem || tmpitem->IsBroken())
+            if(!tmpitem || tmpitem->IsBroken() || !player->IsUseEquipedWeapon(true))
                 tmpitem = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
 
-            if(tmpitem && !tmpitem->IsBroken() && (
+            if(tmpitem && !tmpitem->IsBroken() && player->IsUseEquipedWeapon(tmpitem->GetSlot()==EQUIPMENT_SLOT_MAINHAND) && (
                 tmpitem->GetProto()->InventoryType == INVTYPE_WEAPON ||
                 tmpitem->GetProto()->InventoryType == INVTYPE_WEAPONOFFHAND ||
                 tmpitem->GetProto()->InventoryType == INVTYPE_WEAPONMAINHAND ||
@@ -2585,11 +2585,11 @@ uint16 Unit::GetWeaponSkillValue (WeaponAttackType attType) const
         Item    *item = ((Player*)this)->GetItemByPos (INVENTORY_SLOT_BAG_0, slot);
 
         if(slot != EQUIPMENT_SLOT_MAINHAND && (!item || item->IsBroken() ||
-            item->GetProto()->Class != ITEM_CLASS_WEAPON || !((Player*)this)->IsUseEquipedWeapon() ))
+            item->GetProto()->Class != ITEM_CLASS_WEAPON || !((Player*)this)->IsUseEquipedWeapon(false) ))
             return 0;
 
         // in range
-        uint32  skill = item && !item->IsBroken() && ((Player*)this)->IsUseEquipedWeapon()
+        uint32  skill = item && !item->IsBroken() && ((Player*)this)->IsUseEquipedWeapon(attType==BASE_ATTACK)
             ? item->GetSkill() : SKILL_UNARMED;
         return ((Player*)this)->GetSkillValue (skill);
     }
@@ -2613,11 +2613,11 @@ uint16 Unit::GetPureWeaponSkillValue (WeaponAttackType attType) const
         Item    *item = ((Player*)this)->GetItemByPos (INVENTORY_SLOT_BAG_0, slot);
 
         if(slot != EQUIPMENT_SLOT_MAINHAND && (!item || item->IsBroken() ||
-            item->GetProto()->Class != ITEM_CLASS_WEAPON || !((Player*)this)->IsUseEquipedWeapon() ))
+            item->GetProto()->Class != ITEM_CLASS_WEAPON || !((Player*)this)->IsUseEquipedWeapon(false) ))
             return 0;
 
         // in range
-        uint32  skill = item && !item->IsBroken() && ((Player*)this)->IsUseEquipedWeapon()
+        uint32  skill = item && !item->IsBroken() && ((Player*)this)->IsUseEquipedWeapon(attType==BASE_ATTACK)
             ? item->GetSkill() : SKILL_UNARMED;
         return ((Player*)this)->GetPureSkillValue (skill);
     }
@@ -7145,7 +7145,7 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                 continue;
 
             // Check if current equipment allows aura to proc
-            if(!isVictim && GetTypeId() == TYPEID_PLAYER && ((Player*)this)->IsUseEquipedWeapon())
+            if(!isVictim && GetTypeId() == TYPEID_PLAYER && ((Player*)this)->IsUseEquipedWeapon(attType==BASE_ATTACK))
             {
                 if(spellProto->EquippedItemClass == ITEM_CLASS_WEAPON)
                 {
