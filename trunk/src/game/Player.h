@@ -970,6 +970,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SendNewItem( Item *item, uint32 count, bool received, bool created, bool broadcast = false );
         void BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint64 bagguid, uint8 slot);
 
+        float GetReputationPriceDiscount( Creature const* pCreature ) const;
         Player* GetTrader() const { return pTrader; }
         void ClearTrade();
         void TradeCancel(bool sendback);
@@ -1392,8 +1393,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void DurabilityLossAll(double percent);
         void DurabilityLoss(uint8 equip_pos, double percent);
         void DurabilityPointsLoss(uint8 equip_pos, uint32 points);
-        void DurabilityRepairAll(bool cost, bool discount);
-        void DurabilityRepair(uint16 pos, bool cost, bool discount);
+        void DurabilityRepairAll(bool cost, float discountMod);
+        void DurabilityRepair(uint16 pos, bool cost, float discountMod);
         void RepopAtGraveyard();
 
         void SetMovement(uint8 pType);
@@ -1444,7 +1445,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool ModifyFactionReputation(uint32 FactionTemplateId, int32 DeltaReputation);
         bool ModifyFactionReputation(FactionEntry const* factionEntry, int32 standing);
         bool ModifyOneFactionReputation(FactionEntry const* factionEntry, int32 standing);
-        int32 CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep);
+        int32 CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep, bool for_quest);
         void RewardReputation(Unit *pVictim, float rate);
         void RewardReputation(Quest const *pQuest);
         void SetInitialFactions();
