@@ -345,8 +345,8 @@ void Spell::FillTargetMap()
             SetTargetMap(i,m_spellInfo->EffectImplicitTargetB[i],tmpUnitMap);
         }
 
-        if( (m_spellInfo->EffectImplicitTargetA[i]==0 || m_spellInfo->EffectImplicitTargetA[i]==18) &&
-            (m_spellInfo->EffectImplicitTargetB[i]==0 || m_spellInfo->EffectImplicitTargetB[i]==18) )
+        if( (m_spellInfo->EffectImplicitTargetA[i]==0 || m_spellInfo->EffectImplicitTargetA[i]==TARGET_EFFECT_SELECT) &&
+            (m_spellInfo->EffectImplicitTargetB[i]==0 || m_spellInfo->EffectImplicitTargetB[i]==TARGET_EFFECT_SELECT) )
         {
             // add here custom effects that need default target.
             // FOR EVERY TARGET TYPE THERE IS A DIFFERENT FILL!!
@@ -394,6 +394,7 @@ void Spell::FillTargetMap()
                 case SPELL_EFFECT_ADD_FARSIGHT:
                 case SPELL_EFFECT_DESTROY_ALL_TOTEMS:
                 case SPELL_EFFECT_SUMMON_DEMON:
+                case SPELL_EFFECT_TRANS_DOOR:
                     tmpUnitMap.push_back(m_caster);
                     break;
                 case SPELL_EFFECT_LEARN_PET_SPELL:
