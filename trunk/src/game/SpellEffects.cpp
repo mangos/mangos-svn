@@ -337,9 +337,8 @@ void Spell::EffectDummy(uint32 i)
             // Charge
             if(m_spellInfo->SpellFamilyFlags & 0x1 && m_spellInfo->SpellVisual == 867)
             {
-                int32 chargeBasePoints0 = m_currentBasePoints[i];
+                int32 chargeBasePoints0 = damage-1;         //34846 have EffBaseDice=1
                 m_caster->CastCustomSpell(m_caster,34846,&chargeBasePoints0,NULL,NULL,true);
-
                 return;
             }
             break;
