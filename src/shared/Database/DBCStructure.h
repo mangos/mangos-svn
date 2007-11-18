@@ -334,23 +334,31 @@ inline bool IsExpansionMap(MapEntry const* map)
 
 struct SkillLineEntry
 {
-    uint32    id;
-    uint32    categoryId;
-    char*     name[8];
-    char*     description[8];
-    uint32    spellIcon;
+    uint32    id;                                           // 0 
+    uint32    categoryId;                                   // 1
+                                                            // 2 unknow, not used
+    char*     name[16];                                     // 3-18
+                                                            // 19 string flags, not used
+    //char*     description[16];                            // 20-35, not used
+                                                            // 36 string flags, not used
+    uint32    spellIcon;                                    // 37
 };
 
 struct SkillLineAbilityEntry
 {
-    uint32    id;
-    uint32    skillId;
-    uint32    spellId;
-    uint32    req_skill_value;                              //for trade skill.not for training.
-    uint32    forward_spellid;
-    uint32    max_value;
-    uint32    min_value;
-    uint32    reqtrainpoints;
+    uint32    id;                                           // 0
+    uint32    skillId;                                      // 1
+    uint32    spellId;                                      // 2 INDEX
+    uint32    racemask;                                     // 3 
+    uint32    classmask;                                    // 4
+                                                            // 5-6, unknown, always 0
+    uint32    req_skill_value;                              // 7 for trade skill.not for training.
+    uint32    forward_spellid;                              // 8
+                                                            // 9
+    uint32    max_value;                                    //10
+    uint32    min_value;                                    //11
+                                                            //12-13, unknown, always 0
+    uint32    reqtrainpoints;                               //14
 };
 
 struct SpellEntry
