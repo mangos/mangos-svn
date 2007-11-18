@@ -6321,7 +6321,8 @@ bool Unit::SelectHostilTarget()
 
     if(target)
     {
-        SetInFront(target);
+        if(!hasUnitState(UNIT_STAT_STUNDED))
+            SetInFront(target);
         ((Creature*)this)->AI()->AttackStart(target);
         return true;
     }
