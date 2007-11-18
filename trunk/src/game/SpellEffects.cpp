@@ -3170,7 +3170,7 @@ void Spell::EffectAddComboPoints(uint32 i)
     if(m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    if(damage < 0)
+    if(damage <= 0)
         return;
 
     ((Player*)m_caster)->AddComboPoints(unitTarget->GetGUID(), damage);
