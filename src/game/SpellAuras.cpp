@@ -2165,9 +2165,11 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
             if(GetSpellProto()->Mechanic == MECHANIC_KNOCKOUT)
                 caster->AttackStop();
 
-            //Save last orientation (maybe must be current attacking target?)
-            m_target->SetOrientation(m_target->GetAngle(caster));
         }
+
+        //Save last orientation
+        if( m_target->getVictim() )
+            m_target->SetOrientation(m_target->GetAngle(m_target->getVictim()));
 
         // Creature specific
         if(m_target->GetTypeId() != TYPEID_PLAYER)
@@ -2190,8 +2192,8 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         m_target->clearUnitState(UNIT_STAT_STUNDED);
         m_target->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
 
-        if(caster && m_target->isAlive())
-            m_target->SetUInt64Value (UNIT_FIELD_TARGET,GetCasterGUID());
+        if(m_target->getVictim() && m_target->isAlive())
+            m_target->SetUInt64Value (UNIT_FIELD_TARGET,m_target->getVictim()->GetGUID() );
 
         WorldPacket data(SMSG_FORCE_MOVE_UNROOT, 8+4);
         data.append(m_target->GetPackGUID());
@@ -2389,8 +2391,8 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
         m_target->SetFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
 
         //Save last orientation
-        if (caster)
-            m_target->SetOrientation(m_target->GetAngle(caster));
+        if( m_target->getVictim() )
+            m_target->SetOrientation(m_target->GetAngle(m_target->getVictim()));
 
         if(m_target->GetTypeId() == TYPEID_PLAYER)
         {
@@ -2411,8 +2413,9 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
         m_target->clearUnitState(UNIT_STAT_ROOT);
                                                             // probably wrong
         m_target->RemoveFlag(UNIT_FIELD_FLAGS,(apply_stat<<16));
-        if(caster && m_target->isAlive())                   // set creature facing on root effect if alive
-            m_target->SetUInt64Value (UNIT_FIELD_TARGET,GetCasterGUID());
+
+        if(m_target->getVictim() && m_target->isAlive())
+            m_target->SetUInt64Value (UNIT_FIELD_TARGET,m_target->getVictim()->GetGUID() );
 
         if(m_target->GetTypeId() == TYPEID_PLAYER)
         {
