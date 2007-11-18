@@ -2429,29 +2429,19 @@ void Spell::EffectEnchantItemTmp(uint32 i)
     {
         // rogue family enchantments always 30 min (some have spell damage=0, but some have wrong data in EffBasePoints)
         if(m_spellInfo->SpellFamilyName==SPELLFAMILY_ROGUE)
-            duration = 1800;
+            duration = 1800;                                // 30 mins
+        // some fishing pole bonuses
+        else if(m_spellInfo->SpellVisual==563)
+            duration = 600;                                 // 10 mins
+        // some explicit spell ids checks
+        else if(m_spellInfo->Id==3594 || m_spellInfo->Id==6650)
+            duration = 1800;                                // 30 mins
         // spell damage based data if provided
         else if(damage > 1)
             duration = damage;
-        // explicit selection based at spell ids
+        // default case
         else
-        {
-            switch(m_spellInfo->Id)
-            {
-                // 30 min case
-                case 6650: case 3594:
-                    duration = 1800;
-                    break;
-                // 10 min case
-                case 8089: case 8090: case 8532: case 8088: case 9092: case 8087:
-                    duration = 600;
-                    break;
-                // 5 min case
-                default:
-                    duration = 300;
-                    break;
-            }
-        }
+            duration = 300;                                 // 5 mins
     }
 
     // item can be in trade slot and have owner diff. from caster

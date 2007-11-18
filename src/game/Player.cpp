@@ -6203,9 +6203,9 @@ void Player::CastItemCombatSpell(Item *item,Unit* Target, WeaponAttackType attTy
             if (roll_chance_f(chance))
             {
                 if(IsPositiveSpell(pEnchant->spellid[s]))
-                    CastSpell(this, pEnchant->spellid[s], true);
+                    CastSpell(this, pEnchant->spellid[s], true, item);
                 else
-                    CastSpell(Target, pEnchant->spellid[s], true);
+                    CastSpell(Target, pEnchant->spellid[s], true, item);
             }
         }
     }
