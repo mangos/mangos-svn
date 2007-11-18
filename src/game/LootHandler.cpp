@@ -89,7 +89,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
     if (lootSlot >= loot->items.size())
     {
         lootSlot -= loot->items.size();
-        QuestItemMap::iterator itr = loot->PlayerQuestItems.find(player);
+        QuestItemMap::iterator itr = loot->PlayerQuestItems.find(player->GetGUIDLow());
         if (itr != loot->PlayerQuestItems.end() && lootSlot < itr->second->size())
         {
             qitem = &itr->second->at(lootSlot);
@@ -103,7 +103,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         is_looted = item->is_looted;
         if(item->freeforall)
         {
-            QuestItemMap::iterator itr = loot->PlayerFFAItems.find(player);
+            QuestItemMap::iterator itr = loot->PlayerFFAItems.find(player->GetGUIDLow());
             if (itr != loot->PlayerFFAItems.end())
             {
                 for(QuestItemList::iterator iter=itr->second->begin(); iter!= itr->second->end(); ++iter)
@@ -117,7 +117,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         }
         else if(item->condition)
         {
-            QuestItemMap::iterator itr = loot->PlayerNonQuestNonFFAConditionalItems.find(player);
+            QuestItemMap::iterator itr = loot->PlayerNonQuestNonFFAConditionalItems.find(player->GetGUIDLow());
             if (itr != loot->PlayerNonQuestNonFFAConditionalItems.end())
             {
                 for(QuestItemList::iterator iter=itr->second->begin(); iter!= itr->second->end(); ++iter)

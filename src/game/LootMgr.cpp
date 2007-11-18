@@ -383,17 +383,18 @@ void FillLoot(Loot* loot, uint32 loot_id, LootStore& store, Player* loot_owner, 
         Player* pl = itr->getSource();
         if(!pl)
             continue;
-        QuestItemMap::iterator qmapitr = loot->PlayerQuestItems.find(pl);
+        uint32 plguid = pl->GetGUIDLow();
+        QuestItemMap::iterator qmapitr = loot->PlayerQuestItems.find(plguid);
         if (qmapitr == loot->PlayerQuestItems.end())
         {
             FillQuestLoot(pl, loot);
         }
-        qmapitr = loot->PlayerFFAItems.find(pl);
+        qmapitr = loot->PlayerFFAItems.find(plguid);
         if (qmapitr == loot->PlayerFFAItems.end())
         {
             FillFFALoot(pl, loot);
         }
-        qmapitr = loot->PlayerNonQuestNonFFAConditionalItems.find(pl);
+        qmapitr = loot->PlayerNonQuestNonFFAConditionalItems.find(plguid);
         if (qmapitr == loot->PlayerNonQuestNonFFAConditionalItems.end())
         {
             FillNonQuestNonFFAConditionalLoot(pl, loot);
@@ -450,7 +451,7 @@ QuestItemList* FillFFALoot(Player* player, Loot *loot)
         return NULL;
     }
 
-    loot->PlayerFFAItems[player] = ql;
+    loot->PlayerFFAItems[player->GetGUIDLow()] = ql;
     return ql;
 }
 
@@ -485,7 +486,7 @@ QuestItemList* FillQuestLoot(Player* player, Loot *loot)
         return NULL;
     }
 
-    loot->PlayerQuestItems[player] = ql;
+    loot->PlayerQuestItems[player->GetGUIDLow()] = ql;
     return ql;
 }
 
@@ -499,7 +500,11 @@ QuestItemList* FillNonQuestNonFFAConditionalLoot(Player* player, Loot *loot)
         if(!item.is_looted && !item.freeforall && item.condition && MeetsConditions(player, &item))
         {
             ql->push_back(QuestItem(i));
-            loot->unlootedCount++;
+            if(!item.is_counted)
+            {
+                loot->unlootedCount++;
+                item.is_counted=true;
+            }
         }
     }
     if (ql->empty())
@@ -508,7 +513,7 @@ QuestItemList* FillNonQuestNonFFAConditionalLoot(Player* player, Loot *loot)
         return NULL;
     }
 
-    loot->PlayerNonQuestNonFFAConditionalItems[player] = ql;
+    loot->PlayerNonQuestNonFFAConditionalItems[player->GetGUIDLow()] = ql;
     return ql;
 }
 
@@ -557,7 +562,7 @@ void Loot::NotifyQuestItemRemoved(uint8 questIndex)
         ++i_next;
         if(Player* pl = ObjectAccessor::Instance().FindPlayer(*i))
         {
-            QuestItemMap::iterator pq = PlayerQuestItems.find(pl);
+            QuestItemMap::iterator pq = PlayerQuestItems.find(pl->GetGUIDLow());
             if (pq != PlayerQuestItems.end() && pq->second)
             {
                 // find where/if the player has the given item in it's vector

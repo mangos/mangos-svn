@@ -108,21 +108,22 @@ struct LootItem
     bool    is_blocked        : 1;
     bool    freeforall        : 1;                          // free for all
     bool    is_underthreshold : 1;
+    bool    is_counted        : 1;
 
     LootItem()
         : itemid(0), displayid(0), randomSuffix(0), randomPropertyId(0), 
         cond_value1(0), cond_value2(0), condition(0), count(1), 
-        is_looted(true), is_blocked(false), freeforall(false), is_underthreshold(false) {}
+        is_looted(true), is_blocked(false), freeforall(false), is_underthreshold(false), is_counted(false) {}
 
     LootItem(uint32 _itemid, uint32 _displayid, uint32 _randomSuffix, int32 _randomProp, bool _freeforall, uint8 _condition, uint32 _cond_value1, uint32 _cond_value2, uint8 _count = 1)
         : itemid(_itemid), displayid(_displayid), randomSuffix(_randomSuffix), randomPropertyId(_randomProp), 
         cond_value1(_cond_value1), cond_value2(_cond_value2), condition(_condition), count(_count), 
-        is_looted(false), is_blocked(false), freeforall(_freeforall), is_underthreshold(false) {}
+        is_looted(false), is_blocked(false), freeforall(_freeforall), is_underthreshold(false), is_counted(false) {}
 
     LootItem(LootStoreItem const& li,uint8 _count, uint32 _randomSuffix = 0, int32 _randomProp = 0)
         : itemid(li.itemid), displayid(li.displayid), randomSuffix(_randomSuffix), randomPropertyId(_randomProp), 
         cond_value1(li.cond_value1), cond_value2(li.cond_value2), condition(li.condition), count(_count), 
-        is_looted(false), is_blocked(false), freeforall(li.freeforall), is_underthreshold(false) {}
+        is_looted(false), is_blocked(false), freeforall(li.freeforall), is_underthreshold(false), is_counted(false) {}
 
     static bool looted(LootItem &itm) { return itm.is_looted; }
     static bool not_looted(LootItem &itm) { return !itm.is_looted; }
@@ -141,7 +142,7 @@ struct QuestItem
 };
 
 typedef std::vector<QuestItem> QuestItemList;
-typedef std::map<Player *, QuestItemList *> QuestItemMap;
+typedef std::map<uint32, QuestItemList *> QuestItemMap;
 typedef std::vector<LootStoreItem> LootStoreItemList;
 typedef HM_NAMESPACE::hash_map<uint32, LootStoreItemList > LootStore;
 
