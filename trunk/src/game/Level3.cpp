@@ -188,7 +188,7 @@ bool ChatHandler::HandleReloadQuestTemplateCommand(const char*)
 {
     sLog.outString( "Re-Loading Quest Templates..." );
     objmgr.LoadQuests();
-    SendGlobalSysMessage("DB table `quest_templatea` (quest definitions) reloaded.");
+    SendGlobalSysMessage("DB table `quest_template` (quest definitions) reloaded.");
     return true;
 }
 
@@ -4376,4 +4376,5 @@ bool ChatHandler::HandleCastBackCommand(const char* args)
 
     return true;
 }
+
 

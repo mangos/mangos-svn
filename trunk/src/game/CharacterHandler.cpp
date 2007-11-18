@@ -305,7 +305,9 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
     data << (uint8)CHAR_CREATE_SUCCESS;
     SendPacket( &data );
 
-    sLog.outBasic("Account: %d Create New Character:[%s]",GetAccountId(),name.c_str());
+    std::string IP_str = _socket->GetRemoteAddress().c_str();
+    sLog.outBasic("Account: %d (IP: %s) Create Character:[%s]",GetAccountId(),IP_str.c_str(),name.c_str());
+    sLog.outChar("Account: %d (IP: %s) Create Character:[%s]",GetAccountId(),IP_str.c_str(),name.c_str());
 }
 
 void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
@@ -335,7 +337,15 @@ void WorldSession::HandleCharDeleteOpcode( WorldPacket & recv_data )
     if(accountId != GetAccountId())
         return;
 
-    sLog.outBasic("Account: %d Delete Character:[%s] (guid:%u)",GetAccountId(),name.c_str(),GUID_LOPART(guid));
+    std::string IP_str = _socket->GetRemoteAddress().c_str();
+    sLog.outBasic("Account: %d (IP: %s) Delete Character:[%s] (guid:%u)",GetAccountId(),IP_str.c_str(),name.c_str(),GUID_LOPART(guid));
+    sLog.outChar("Account: %d (IP: %s) Delete Character:[%s] (guid: %u)",GetAccountId(),IP_str.c_str(),name.c_str(),GUID_LOPART(guid));
+    if(sLog.IsOutCharDump())                                // optimize GetPlayerDump call
+    {
+        std::string dump = objmgr.GetPlayerDump(GUID_LOPART(guid));
+        sLog.outCharDump(dump.c_str(),GetAccountId(),GUID_LOPART(guid),name.c_str());
+    }
+
     Player::DeleteFromDB(guid, GetAccountId());
 
     WorldPacket data(SMSG_CHAR_DELETE, 1);
@@ -587,6 +597,9 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
 
     if(pCurrChar->isGameMaster())
         SendNotification("GM mode is ON");
+
+    std::string IP_str = _socket->GetRemoteAddress().c_str();
+    sLog.outChar("Account: %d (IP: %s) Login Character:[%s] (guid:%u)",GetAccountId(),IP_str.c_str(),pCurrChar->GetName() ,pCurrChar->GetGUID());
     m_playerLoading = false;
     delete holder;
 }
@@ -776,6 +789,8 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
     CharacterDatabase.escape_string(newname);
     CharacterDatabase.PExecute("UPDATE `character` set `name` = '%s', `at_login` = `at_login` & ~ '%u' WHERE `guid` ='%u'", newname.c_str(), uint32(AT_LOGIN_RENAME),GUID_LOPART(guid));
 
+    std::string IP_str = _socket->GetRemoteAddress().c_str();
+    sLog.outChar("Account: %d (IP: %s) Character:[%s] (guid:%u) Changed name to: %p",GetAccountId(),IP_str.c_str(),oldname.c_str(),GUID_LOPART(guid),newname.c_str());
     WorldPacket data(SMSG_CHAR_RENAME,1+8+(newname.size()+1));
     data << (uint8)RESPONSE_SUCCESS;
     data << guid;

@@ -56,7 +56,7 @@ const int Color_count = int(WHITE)+1;
 class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThread::FastMutex> >
 {
     friend class MaNGOS::OperatorNew<Log>;
-    Log() : raLogfile(NULL), logfile(NULL), gmLogfile(NULL), dberLogfile(NULL), m_colored(false) { Initialize(); }
+    Log() : raLogfile(NULL), logfile(NULL), gmLogfile(NULL), charLogfile(NULL), dberLogfile(NULL), m_colored(false) { Initialize(); }
     ~Log()
     {
         if( logfile != NULL )
@@ -66,6 +66,10 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
         if( gmLogfile != NULL )
             fclose(gmLogfile);
         gmLogfile = NULL;
+
+        if (charLogfile != NULL)
+            fclose(charLogfile);
+        charLogfile = NULL;
 
         if( dberLogfile != NULL )
             fclose(dberLogfile);
@@ -98,6 +102,9 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
                                                             // any log level
         void outErrorDb( const char * str, ... )     ATTR_PRINTF(2,3);
                                                             // any log level
+        void outChar( const char * str, ... )        ATTR_PRINTF(2,3);
+                                                            // any log level
+        void outCharDump( const char * str, uint32 account_id, uint32 guid, const char * name );
         void outRALog( const char * str, ... )       ATTR_PRINTF(2,3);
         void SetLogLevel(char * Level);
         void SetLogFileLevel(char * Level);
@@ -107,17 +114,24 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
         std::string GetTimestampStr() const;
         uint32 getLogFilter() const { return m_logFilter; }
         bool IsOutDebug() const { return m_logLevel > 2 || m_logFileLevel > 2 && logfile; }
+        bool IsOutCharDump() const { return m_charLog_Dump; }
     private:
         FILE* raLogfile;
         FILE* logfile;
         FILE* gmLogfile;
+        FILE* charLogfile;
         FILE* dberLogfile;
 
+        // log/console control
         uint32 m_logLevel;
         uint32 m_logFileLevel;
         bool m_colored;
         Color m_colors[4];
         uint32 m_logFilter;
+
+        // char log control
+        bool m_charLog_Dump;
+
 };
 
 #define sLog MaNGOS::Singleton<Log>::Instance()

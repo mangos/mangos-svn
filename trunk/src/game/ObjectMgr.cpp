@@ -5366,32 +5366,42 @@ std::string CreateDumpString(char const* tableName, QueryResult *result)
     return ss.str();
 }
 
-bool DumpPlayerTable(FILE *file, uint32 guid, char const*tableFrom, char const*tableTo, uint8 type = 0)
+bool DumpPlayerTable(std::string& dump, uint32 guid, char const*tableFrom, char const*tableTo, uint8 type = 0)
 {
-    if (!file || !tableFrom || !tableTo) return false;
+    if (!tableFrom || !tableTo) return false;
     QueryResult *result = CharacterDatabase.PQuery("SELECT * FROM `%s` WHERE `%s` = '%d'", tableFrom, type != 3 ? "guid" : "owner_guid", guid);
     if (!result) return false;
     do
     {
-        std::string dump = CreateDumpString(tableTo, result);
-        fprintf(file, "%s\n", dump.c_str());
+        dump += CreateDumpString(tableTo, result);
+        dump += "\n";
     }
     while (result->NextRow());
     delete result;
     return true;
 }
 
+std::string ObjectMgr::GetPlayerDump(uint32 guid)
+{
+    std::string dump;
+    for(int i = 0; i < DUMP_TABLE_COUNT; i++)
+        DumpPlayerTable(dump, guid, dumpTables[i].name, dumpTables[i].name, dumpTables[i].type);
+
+    // TODO: Add pets/instance/group/gifts..
+    // TODO: Add a dump level option to skip some non-important tables
+
+    return dump;
+}
+
+
 bool ObjectMgr::WritePlayerDump(std::string file, uint32 guid)
 {
     FILE *fout = fopen(file.c_str(), "w");
     if (!fout) { sLog.outError("Failed to open file!\r\n"); return false; }
 
-    for(int i = 0; i < DUMP_TABLE_COUNT; i++)
-        DumpPlayerTable(fout, guid, dumpTables[i].name, dumpTables[i].name, dumpTables[i].type);
+    std::string dump = GetPlayerDump(guid);
 
-    // TODO: Add pets/instance/group/gifts..
-    // TODO: Add a dump level option to skip some non-important tables
-
+    fprintf(fout,"%s\n",dump.c_str());
     fclose(fout);
     return true;
 }
