@@ -105,6 +105,23 @@ WorldLogFile = "world.log"
 # Default: ""
 DBErrorLogFile = "DBErrors.log"
 
+# Character operations logfile name
+#    empty name disable creating log file: CharLogFile = 
+# Default: ""
+CharLogFile = "Char.log"
+
+# Logfile with timestamp of server start in name
+# Default: 0 - no timestamp in name
+#          1 - add timestamp in name in form Logname_YYYY-MM-DD_HH-MM-SS.Ext for Logname.Ext
+CharLogTimestamp = 0
+
+# Write character dump before deleting in Char.log
+# CharLogDump: 0 (default) - not include dumping chars to log
+#              1           - include dumping chars to log 
+#                            (for restore cut charcter data from log starting from line == START DUMP == to line == END DUMP == (without its) 
+#                            in file and load it using loadpdump command)
+CharLogDump = 0
+
 # Log file of gm commands
 # Default: "" (Disable)
 GmLogFile = ""

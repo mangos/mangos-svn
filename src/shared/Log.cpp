@@ -185,7 +185,7 @@ void Log::Initialize()
     {
         if(sConfig.GetIntDefault("LogTimestamp",0))
         {
-            std::string logTimestamp = sConfig.GetIntDefault("LogTimestamp",0) ? GetTimestampStr() : "";
+            std::string logTimestamp = GetTimestampStr();
             logTimestamp.insert(0,"_");
             size_t dot_pos = logfn.find_last_of(".");
             if(dot_pos!=logfn.npos)
@@ -201,6 +201,22 @@ void Log::Initialize()
     if(gmlogname!="")
     {
         gmLogfile = fopen((logsDir+gmlogname).c_str(), "a");
+    }
+
+    std::string charlogname = sConfig.GetStringDefault("CharLogFile", "");
+    if(charlogname!="")
+    {
+        if(sConfig.GetIntDefault("CharLogTimestamp",0))
+        {
+            std::string charLogTimestamp = GetTimestampStr();
+            charLogTimestamp.insert(0,"_");
+            size_t dot_pos = charlogname.find_last_of(".");
+            if(dot_pos!=charlogname.npos)
+                charlogname.insert(dot_pos,charLogTimestamp);
+            else
+                charlogname += charLogTimestamp;
+        }
+        charLogfile = fopen((logsDir+charlogname).c_str(), "a");
     }
 
     std::string dberlogname = sConfig.GetStringDefault("DBErrorLogFile", "");
@@ -225,6 +241,8 @@ void Log::Initialize()
         m_logFilter |= LOG_FILTER_CREATURE_MOVES;
     if(sConfig.GetIntDefault("LogFilter_VisibilityChanges", 0)!=0)
         m_logFilter |= LOG_FILTER_VISIBILITY_CHANGES;
+
+    m_charLog_Dump = sConfig.GetIntDefault("CharLogDump", 0) != 0;
 }
 
 void Log::outTimestamp(FILE* file)
@@ -544,6 +562,32 @@ void Log::outCommand( const char * str, ... )
     fflush(stdout);
 }
 
+void Log::outChar(const char * str, ... )
+{
+
+    if(!str) return;
+
+    if(charLogfile)
+    {
+        va_list ap;
+        outTimestamp(charLogfile);
+        va_start(ap, str);
+        vfprintf(charLogfile, str, ap);
+        fprintf(charLogfile, "\n" );
+        va_end(ap);
+        fflush(charLogfile);
+    }
+}
+
+void Log::outCharDump( const char * str, uint32 account_id, uint32 guid, const char * name )
+{
+    if(charLogfile)
+    {
+        fprintf(charLogfile, "== START DUMP == (account: %u guid: %u name: %s )\n%s\n== END DUMP ==\n",account_id,guid,name,str );
+        fflush(charLogfile);
+    }
+}
+
 void Log::outMenu( const char * str, ... )
 {
     if( !str ) return;
@@ -565,6 +609,22 @@ void Log::outMenu( const char * str, ... )
         fprintf(logfile, "\n" );
         va_end(ap);
         fflush(logfile);
+    }
+    fflush(stdout);
+}
+
+void Log::outRALog(    const char * str, ... )
+{
+    if( !str ) return;
+    va_list ap;
+    if (raLogfile)
+    {
+        outTimestamp(raLogfile);
+        va_start(ap, str);
+        vfprintf(raLogfile, str, ap);
+        fprintf(raLogfile, "\n" );
+        va_end(ap);
+        fflush(raLogfile);
     }
     fflush(stdout);
 }
@@ -593,20 +653,4 @@ void error_log(const char * str, ...)
     va_end(ap);
 
     MaNGOS::Singleton<Log>::Instance().outError(buf);
-}
-
-void Log::outRALog(    const char * str, ... )
-{
-    if( !str ) return;
-    va_list ap;
-    if (raLogfile)
-    {
-        outTimestamp(raLogfile);
-        va_start(ap, str);
-        vfprintf(raLogfile, str, ap);
-        fprintf(raLogfile, "\n" );
-        va_end(ap);
-        fflush(raLogfile);
-    }
-    fflush(stdout);
 }
