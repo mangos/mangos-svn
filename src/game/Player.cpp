@@ -14367,8 +14367,6 @@ void Player::HandleStealthedUnitsDetection()
 
 bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes)
 {
-    ClearTaxiDestinations();
-
     if(nodes.size() < 2)
         return false;
 
@@ -14426,6 +14424,15 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes)
         return false;
     }
 
+    // Prepare to flight start now
+
+    // stop combat at start taxi flight if any
+    CombatStop(true);
+
+    // clean not finished taxi path if any
+    ClearTaxiDestinations();
+
+    // fill destinations path
     uint32 sourcepath = 0;
     uint32 totalcost = 0;
 
@@ -14473,7 +14480,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes)
         return false;
     }
 
-    // Save before flight (player must loaded in start taxinode is disconnected at flight,etc)
+    // Save before flight (player must loaded in start taxinode if disconnected at flight,etc)
     SaveToDB();
 
     //Checks and preparations done, DO FLIGHT
