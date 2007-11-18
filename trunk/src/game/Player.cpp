@@ -6654,7 +6654,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     QuestItemList *q_list = 0;
     if (permission != NONE_PERMISSION)
     {
-        QuestItemMap::iterator itr = loot->PlayerQuestItems.find(this);
+        QuestItemMap::iterator itr = loot->PlayerQuestItems.find(GetGUIDLow());
         if (itr == loot->PlayerQuestItems.end())
             q_list = FillQuestLoot(this, loot);
         else
@@ -6664,7 +6664,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     QuestItemList *ffa_list = 0;
     if (permission != NONE_PERMISSION)
     {
-        QuestItemMap::iterator itr = loot->PlayerFFAItems.find(this);
+        QuestItemMap::iterator itr = loot->PlayerFFAItems.find(GetGUIDLow());
         if (itr == loot->PlayerFFAItems.end())
             ffa_list = FillFFALoot(this, loot);
         else
@@ -6674,7 +6674,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     QuestItemList *conditional_list = 0;
     if (permission != NONE_PERMISSION)
     {
-        QuestItemMap::iterator itr = loot->PlayerNonQuestNonFFAConditionalItems.find(this);
+        QuestItemMap::iterator itr = loot->PlayerNonQuestNonFFAConditionalItems.find(GetGUIDLow());
         if (itr == loot->PlayerNonQuestNonFFAConditionalItems.end())
             conditional_list = FillNonQuestNonFFAConditionalLoot(this, loot);
         else
