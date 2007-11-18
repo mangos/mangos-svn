@@ -1374,6 +1374,9 @@ bool ChatHandler::HandleLearnAllMySpellsCommand(const char* args)
             return true;
     }
 
+    uint32 racemask  = m_session->GetPlayer()->getRaceMask();
+    uint32 classmask = m_session->GetPlayer()->getClassMask();
+
     for (uint32 i = 0; i < sSpellStore.GetNumRows(); i++)
     {
         SpellEntry const *spellInfo = sSpellStore.LookupEntry(i);
@@ -1382,6 +1385,14 @@ bool ChatHandler::HandleLearnAllMySpellsCommand(const char* args)
 
         SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(spellInfo->Id);
         if(!skillLine)
+            continue;
+
+        // skip wrong race skills
+        if( skillLine->racemask && (skillLine->racemask & racemask) == 0)
+            continue;
+
+        // skip wrong class skills
+        if( skillLine->classmask && (skillLine->classmask & classmask) == 0)
             continue;
 
         // skip other spell families
@@ -1476,20 +1487,33 @@ bool ChatHandler::HandleLearnAllLangCommand(const char* args)
 
 bool ChatHandler::HandleLearnAllCraftsCommand(const char* args)
 {
+    uint32 classmask = m_session->GetPlayer()->getClassMask();
+
     for (uint32 i = 0; i < sSkillLineStore.GetNumRows(); ++i)
     {
         SkillLineEntry const *skillInfo = sSkillLineStore.LookupEntry(i);
         if( !skillInfo )
             continue;
 
-        if (skillInfo->categoryId == SKILL_CATEGORY_PROFESSION || skillInfo->categoryId == SKILL_CATEGORY_SECONDARY)
-            for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
+        if( skillInfo->categoryId == SKILL_CATEGORY_PROFESSION || skillInfo->categoryId == SKILL_CATEGORY_SECONDARY )
         {
-            SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(j);
-            if( !skillLine )
-                continue;
-            if( skillLine->skillId == i && !skillLine->forward_spellid )
-                m_session->GetPlayer()->learnSpell((uint16)skillLine->spellId);
+            for (uint32 j = 0; j < sSkillLineAbilityStore.GetNumRows(); ++j)
+            {
+                SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(j);
+                if( !skillLine )
+                    continue;
+
+                // skip racial skills
+                if( skillLine->racemask != 0 )
+                    continue;
+
+                // skip wrong class skills
+                if( skillLine->classmask && (skillLine->classmask & classmask) == 0)
+                    continue;
+
+                if( skillLine->skillId == i && !skillLine->forward_spellid )
+                    m_session->GetPlayer()->learnSpell((uint16)skillLine->spellId);
+            }
         }
     }
 
