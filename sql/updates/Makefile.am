@@ -513,6 +513,7 @@ pkgdata_DATA = \
 	4704_mangos_battlemaster_entry.sql \
 	4714_mangos_spell_threat.sql \
 	4718_mangos_uptime.sql \
+	4737_mangos_command.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -1006,5 +1007,6 @@ EXTRA_DIST = \
 	4704_mangos_battlemaster_entry.sql \
 	4714_mangos_spell_threat.sql \
 	4718_mangos_uptime.sql \
+	4737_mangos_command.sql \
 	README
 
