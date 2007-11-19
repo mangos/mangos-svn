@@ -210,8 +210,23 @@ ChatCommand * ChatHandler::getCommandTable()
         { "flushkills",     SEC_GAMEMASTER,     &ChatHandler::HandleHonorFlushKillsCommand,     "", NULL },
         { "update",         SEC_GAMEMASTER,     &ChatHandler::HandleUpdateHonorFieldsCommand,   "", NULL },
 
-        { NULL,             0,                  NULL,                                           "",   NULL }
+        { NULL,             0,                  NULL,                                           "", NULL }
     };
+
+    static ChatCommand lookupCommandTable[] =
+    {
+        { "item",           SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupItemCommand,          "", NULL },
+        { "itemset",        SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupItemSetCommand,       "", NULL },
+        { "skill",          SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupSkillCommand,         "", NULL },
+        { "spell",          SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupSpellCommand,         "", NULL },
+        { "quest",          SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupQuestCommand,         "", NULL },
+        { "creature",       SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupCreatureCommand,      "", NULL },
+        { "object",         SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupObjectCommand,        "", NULL },
+        { "tele",           SEC_MODERATOR,      &ChatHandler::HandleLookupTeleCommand,          "", NULL },
+
+        { NULL,             0,                  NULL,                                           "", NULL }
+    };
+
 
     static ChatCommand resetCommandTable[] =
     {
@@ -221,7 +236,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "stats",          SEC_ADMINISTRATOR,  &ChatHandler::HandleResetStatsCommand,          "", NULL },
         { "talents",        SEC_ADMINISTRATOR,  &ChatHandler::HandleResetTalentsCommand,        "", NULL },
 
-        { NULL,             0,                  NULL,                                           "",   NULL }
+        { NULL,             0,                  NULL,                                           "", NULL }
     };
 
     static ChatCommand commandTable[] =
@@ -305,9 +320,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "bank",        SEC_ADMINISTRATOR, &ChatHandler::HandleBankCommand,             "",   NULL },
         { "wchange",     SEC_ADMINISTRATOR, &ChatHandler::HandleChangeWeather,           "",   NULL },
         { "reload",      SEC_ADMINISTRATOR, NULL,                                        "",   reloadCommandTable },
-        { "loadscripts", SEC_ADMINISTRATOR, &ChatHandler::HandleLoadScriptsCommand,      "",   NULL },
         { "tele",        SEC_MODERATOR,     &ChatHandler::HandleTeleCommand,             "",   NULL },
-        { "lookuptele",  SEC_MODERATOR,     &ChatHandler::HandleLookupTeleCommand,       "",   NULL },
         { "addtele",     SEC_ADMINISTRATOR, &ChatHandler::HandleAddTeleCommand,          "",   NULL },
         { "deltele",     SEC_ADMINISTRATOR, &ChatHandler::HandleDelTeleCommand,          "",   NULL },
         { "listauras",   SEC_ADMINISTRATOR, &ChatHandler::HandleListAurasCommand,        "",   NULL },
@@ -339,13 +352,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "listcreature",SEC_ADMINISTRATOR, &ChatHandler::HandleListCreatureCommand,     "",   NULL },
         { "listitem",    SEC_ADMINISTRATOR, &ChatHandler::HandleListItemCommand,         "",   NULL },
         { "listobject",  SEC_ADMINISTRATOR, &ChatHandler::HandleListObjectCommand,       "",   NULL },
-        { "lookupitem",  SEC_ADMINISTRATOR, &ChatHandler::HandleLookupItemCommand,       "",   NULL },
-        { "lookupitemset",SEC_ADMINISTRATOR,&ChatHandler::HandleLookupItemSetCommand,    "",   NULL },
-        { "lookupskill", SEC_ADMINISTRATOR, &ChatHandler::HandleLookupSkillCommand,      "",   NULL },
-        { "lookupspell", SEC_ADMINISTRATOR, &ChatHandler::HandleLookupSpellCommand,      "",   NULL },
-        { "lookupquest", SEC_ADMINISTRATOR, &ChatHandler::HandleLookupQuestCommand,      "",   NULL },
-        { "lookupcreature",SEC_ADMINISTRATOR,&ChatHandler::HandleLookupCreatureCommand,  "",   NULL },
-        { "lookupobject",SEC_ADMINISTRATOR, &ChatHandler::HandleLookupObjectCommand,     "",   NULL },
+        { "lookup",      SEC_ADMINISTRATOR, NULL,                                        "",   lookupCommandTable },
         { "money",       SEC_MODERATOR,     &ChatHandler::HandleModifyMoneyCommand,      "",   NULL },
         { "titles",      SEC_MODERATOR,     &ChatHandler::HandleModifyKnownTitlesCommand, "",   NULL },
         { "speed",       SEC_MODERATOR,     &ChatHandler::HandleModifySpeedCommand,      "",   NULL },
@@ -367,6 +374,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "rename",      SEC_GAMEMASTER,    &ChatHandler::HandleRenameCommand,           "",   NULL },
         { "nametele",    SEC_MODERATOR,     &ChatHandler::HandleNameTeleCommand,         "",   NULL },
         { "grouptele",   SEC_MODERATOR,     &ChatHandler::HandleGroupTeleCommand,        "",   NULL },
+        { "loadscripts", SEC_ADMINISTRATOR, &ChatHandler::HandleLoadScriptsCommand,      "",   NULL },
         { "loadpdump",   SEC_ADMINISTRATOR, &ChatHandler::HandleLoadPDumpCommand,        "",   NULL },
         { "writepdump",  SEC_ADMINISTRATOR, &ChatHandler::HandleWritePDumpCommand,       "",   NULL },
         { "mute",        SEC_GAMEMASTER,    &ChatHandler::HandleMuteCommand,             "",   NULL },

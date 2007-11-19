@@ -2284,7 +2284,7 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
         char const* statusStr = "";
         if(status == QUEST_STATUS_COMPLETE)
         {
-            if(m_session->GetPlayer()->GetQuestRewardStatus(id))
+            if(target->GetQuestRewardStatus(id))
                 statusStr = LANG_COMMAND_QUEST_REWARDED;
             else
                 statusStr = LANG_COMMAND_QUEST_COMPLETE;
