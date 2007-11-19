@@ -264,7 +264,7 @@ void Spell::EffectSchoolDMG(uint32 i)
                 else if(m_spellInfo->SpellFamilyFlags & 0x10000000000LL)
                 {
                     damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.45);
-                    m_caster->ModifyAuraState(AURA_STATE_VICTORY_RUSH, false);
+                    m_caster->ModifyAuraState(AURA_STATE_WARRIOR_VICTORY_RUSH, false);
                 }
                 break;
             }
@@ -312,6 +312,18 @@ void Spell::EffectSchoolDMG(uint32 i)
                         damage = -1;
                     else
                         damage *= stacks;
+                }
+                break;
+            }
+            case SPELLFAMILY_ROGUE:
+            {
+                // Envenom
+                if((m_spellInfo->SpellFamilyFlags & 0x800000000LL) && m_caster->GetTypeId()==TYPEID_PLAYER)
+                {
+                    uint8 combo = ((Player*)m_caster)->GetComboPoints();
+                    damage *= combo;
+                    damage += uint32(((Player*)m_caster)->GetTotalAttackPowerValue(BASE_ATTACK) * 0.03f * combo);
+                    ((Player*)m_caster)->ClearComboPoints();
                 }
                 break;
             }
@@ -610,6 +622,33 @@ void Spell::EffectDummy(uint32 i)
             int32 basePoints0 = damage+int32(m_caster->GetPower(POWER_RAGE) * m_spellInfo->DmgMultiplier[i])-1;
             m_caster->CastCustomSpell(unitTarget, 20647, &basePoints0, NULL, NULL, true, 0);
             m_caster->SetPower(POWER_RAGE,0);
+            return;
+        }
+
+        // Kill command
+        case 2226:
+        {
+            if(m_caster->getClass()!=CLASS_HUNTER)
+                return;
+
+            // clear hunter crit aura state
+            m_caster->ModifyAuraState(AURA_STATE_HUNTER_CRIT_STRIKE,false);
+
+            // additional damage from pet to pet target
+            Pet* pet = m_caster->GetPet();
+            if(!pet || !pet->getVictim())
+                return;
+
+            uint32 spell_id = 0;
+            switch (m_spellInfo->Id)
+            {
+                case 34026: spell_id = 34027; break;        // rank 1
+                default:
+                    sLog.outError("Spell::EffectDummy: Spell %u not handled in KC",m_spellInfo->Id);
+                    return;
+            }
+
+            pet->CastSpell(pet->getVictim(), spell_id, true);
             return;
         }
     }

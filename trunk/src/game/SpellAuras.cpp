@@ -1195,8 +1195,8 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
     }
 
     // Victorious
-    if(GetId()==32216)
-        m_target->ModifyAuraState(AURA_STATE_VICTORY_RUSH, apply);
+    if(GetId()==32216 && m_target->getClass()==CLASS_WARRIOR)
+        m_target->ModifyAuraState(AURA_STATE_WARRIOR_VICTORY_RUSH, apply);
 
     if(!apply)
     {
@@ -2846,6 +2846,32 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
         m_periodicTimer += m_modifier.periodictime;
 
     m_isPeriodic = apply;
+
+    // Deadly poison aura state
+    if(Real && m_spellProto->SpellFamilyName==SPELLFAMILY_ROGUE && (m_spellProto->SpellFamilyFlags & 0x10000) && m_spellProto->SpellVisual==5100)
+    {
+        if(apply)
+            m_target->ModifyAuraState(AURA_STATE_DEADLY_POISON,true);
+        else
+        {
+            // current aura already removed, search present of another
+            bool found = false;
+            Unit::AuraList auras = m_target->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
+            for(Unit::AuraList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
+            {
+                SpellEntry const* itr_spell = (*itr)->GetSpellProto();
+                if(itr_spell && itr_spell->SpellFamilyName==SPELLFAMILY_ROGUE && (itr_spell->SpellFamilyFlags & 0x10000) && itr_spell->SpellVisual==5100)
+                {
+                    found = true;
+                    break;
+                }
+            }
+
+            // this has been last deadly poison aura
+            if(!found)
+                m_target->ModifyAuraState(AURA_STATE_DEADLY_POISON,false);
+        }
+    }
 }
 
 void Aura::HandlePeriodicDamagePCT(bool apply, bool Real)

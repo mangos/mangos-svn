@@ -1503,7 +1503,7 @@ void Spell::SendSpellCooldown()
         catrec = m_spellInfo->CategoryRecoveryTime;
     }
 
-    // shoot spells used equiped item cooldown values already assigned in GetAttackTime(RANGED_ATTACK)
+    // shoot spells used equipped item cooldown values already assigned in GetAttackTime(RANGED_ATTACK)
     if (!rec && !catrec && (cat == 76 || cat == 351))
         rec = _player->GetAttackTime(RANGED_ATTACK);
 
@@ -1530,15 +1530,17 @@ void Spell::SendSpellCooldown()
     if (rec > 0)
     {
         // only send if different from client known cooldown
+        /*
         if(m_spellInfo->RecoveryTime != uint32(rec))
         {
-            /*WorldPacket data(SMSG_SPELL_COOLDOWN, (8+1+4+4));
+            WorldPacket data(SMSG_SPELL_COOLDOWN, (8+1+4+4));
             data << m_caster->GetGUID();
             data << uint8(0x0);
             data << uint32(m_spellInfo->Id);
             data << uint32(rec);
-            _player->GetSession()->SendPacket(&data);*/
+            _player->GetSession()->SendPacket(&data);
         }
+        */
         if(m_CastItem)
             _player->AddSpellCooldown(m_spellInfo->Id, m_CastItem->GetEntry(), recTime);
         else
@@ -1547,15 +1549,17 @@ void Spell::SendSpellCooldown()
     else
     {
         // only send if different from client known cooldown
+        /*
         if(m_spellInfo->RecoveryTime && m_spellInfo->RecoveryTime != uint32(catrec) || m_spellInfo->CategoryRecoveryTime != uint32(catrec))
         {
-            /*WorldPacket data(SMSG_SPELL_COOLDOWN, (8+1+4+4));
+            WorldPacket data(SMSG_SPELL_COOLDOWN, (8+1+4+4));
             data << m_caster->GetGUID();
             data << uint8(0x0);
             data << uint32(m_spellInfo->Id);
             data << uint32(catrec);
-            _player->GetSession()->SendPacket(&data);*/
+            _player->GetSession()->SendPacket(&data);
         }
+        */
         if(m_CastItem)
             _player->AddSpellCooldown(m_spellInfo->Id, m_CastItem->GetEntry(), catrecTime);
         else
@@ -1573,15 +1577,17 @@ void Spell::SendSpellCooldown()
                     continue;
 
                 // only send if different from client known cooldown
+                /*
                 if(cat != m_spellInfo->Category || m_spellInfo->CategoryRecoveryTime != uint32(catrec))
                 {
-                    /*WorldPacket data(SMSG_SPELL_COOLDOWN, (8+1+4+4));
+                    WorldPacket data(SMSG_SPELL_COOLDOWN, (8+1+4+4));
                     data << m_caster->GetGUID();
                     data << uint8(0x0);
                     data << uint32(*i_scset);
                     data << uint32(catrec);
-                    _player->GetSession()->SendPacket(&data);*/
+                    _player->GetSession()->SendPacket(&data);
                 }
+                */
                 if(m_CastItem)
                     _player->AddSpellCooldown(*i_scset, m_CastItem->GetEntry(), catrecTime);
                 else

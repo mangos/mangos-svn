@@ -260,9 +260,9 @@ void Unit::Update( uint32 p_time )
     {
         setAttackTimer(BASE_ATTACK, (p_time >= base_att ? 0 : base_att - p_time) );
     }
-    if(GetHealth() < GetMaxHealth()*0.2)
-        ModifyAuraState(AURA_STATE_HEALTHLESS, true);
-    else ModifyAuraState(AURA_STATE_HEALTHLESS, false);
+
+    ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, GetHealth() < GetMaxHealth()*0.20f);
+    ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, GetHealth() < GetMaxHealth()*0.35f);
 
     i_motionMaster.UpdateMotion(p_time);
 }
@@ -1110,7 +1110,11 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
 
                     // Set parry flags
                     pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
-                    pVictim->ModifyAuraState(AURA_STATE_PARRY, true);
+
+                    if (pVictim->getClass() == CLASS_HUNTER)// hunter parry case
+                        pVictim->ModifyAuraState(AURA_STATE_HUNTER_PARRY,true);
+                    else
+                        pVictim->ModifyAuraState(AURA_STATE_DEFENSE, true);
                     break;
                 }
                 case MELEE_HIT_DODGE:
@@ -1695,9 +1699,15 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType 
 
 void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDamage, uint32 *blocked_amount, SpellSchools damageType, uint32 *hitInfo, VictimState *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType, SpellEntry const *spellCasted, bool isTriggeredSpell)
 {
-    pVictim->ModifyAuraState(AURA_STATE_PARRY, false);
     pVictim->ModifyAuraState(AURA_STATE_DEFENSE, false);
     ModifyAuraState(AURA_STATE_CRIT, false);
+
+    if(getClass()==CLASS_HUNTER)
+        ModifyAuraState(AURA_STATE_HUNTER_CRIT_STRIKE, false);
+
+    if(pVictim->getClass()==CLASS_HUNTER)
+        pVictim->ModifyAuraState(AURA_STATE_HUNTER_PARRY, false);
+
 
     MeleeHitOutcome outcome;
 
@@ -1816,6 +1826,9 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
 
             ModifyAuraState(AURA_STATE_CRIT, true);
 
+            if(getClass()==CLASS_HUNTER)
+                ModifyAuraState(AURA_STATE_HUNTER_CRIT_STRIKE, true);
+
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_WOUNDCRITICAL);
             break;
 
@@ -1874,8 +1887,10 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
                 ((Player*)pVictim)->UpdateDefense();
 
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
-            pVictim->ModifyAuraState(AURA_STATE_PARRY,true);
-            if (pVictim->getClass() != CLASS_HUNTER)        // Mongoose Bite
+
+            if (pVictim->getClass() == CLASS_HUNTER)
+                pVictim->ModifyAuraState(AURA_STATE_HUNTER_PARRY,true);
+            else
                 pVictim->ModifyAuraState(AURA_STATE_DEFENSE, true);
 
             CastMeleeProcDamageAndSpell(pVictim, 0, attType, outcome, spellCasted, isTriggeredSpell);
