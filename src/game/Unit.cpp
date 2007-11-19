@@ -3527,59 +3527,6 @@ void Unit::_ApplyAllAuraMods()
     }
 }
 
-// TODO: FIX-ME!!!
-/*void Unit::_UpdateAura()
-{
-if(GetTypeId() != TYPEID_PLAYER || !m_Auras)
-return;
-
-Player* pThis = (Player*)this;
-
-Player* pGroupGuy;
-Group* pGroup;
-
-pGroup = objmgr.GetGroupByLeader(pThis->GetGroupLeader());
-
-if(!SetAffDuration(m_Auras->GetId(),this,6000))
-AddAura(m_Auras);
-
-if(!pGroup)
-return;
-else
-{
-for(uint32 i=0;i<pGroup->GetMembersCount();i++)
-{
-pGroupGuy = ObjectAccessor::Instance().FindPlayer(pGroup->GetMemberGUID(i));
-
-if(!pGroupGuy)
-continue;
-if(pGroupGuy->GetGUID() == GetGUID())
-continue;
-if(sqrt(
-(GetPositionX()-pGroupGuy->GetPositionX())*(GetPositionX()-pGroupGuy->GetPositionX())
-+(GetPositionY()-pGroupGuy->GetPositionY())*(GetPositionY()-pGroupGuy->GetPositionY())
-+(GetPositionZ()-pGroupGuy->GetPositionZ())*(GetPositionZ()-pGroupGuy->GetPositionZ())
-) <=30)
-{
-if(!pGroupGuy->SetAffDuration(m_Auras->GetId(),this,6000))
-pGroupGuy->AddAura(m_Auras);
-}
-else
-{
-if(m_removeAuraTimer == 0)
-{
-printf("remove aura from %u\n", pGroupGuy->GetGUID());
-pGroupGuy->RemoveAura(m_Auras->GetId());
-}
-}
-}
-}
-if(m_removeAuraTimer > 0)
-m_removeAuraTimer -= 1;
-else
-m_removeAuraTimer = 4;
-}*/
-
 Aura* Unit::GetAura(uint32 spellId, uint32 effindex)
 {
     AuraMap::iterator iter = m_Auras.find(spellEffectPair(spellId, effindex));
@@ -6201,6 +6148,9 @@ void Unit::setDeathState(DeathState s)
     {
         RemoveAllAurasOnDeath();
         UnsummonAllTotems();
+
+        ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
+        ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
     }
     if (m_deathState != ALIVE && s == ALIVE)
     {
