@@ -1169,10 +1169,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         void _UpdateAutoRepeatSpell(uint32 time);
         bool m_AutoRepeatFirstCast;
-        //void _UpdateAura();
-
-        //Aura* m_aura;
-        //uint32 m_auraCheck, m_removeAuraTimer;
 
         uint32 m_attackTimer[3];
 
