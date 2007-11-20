@@ -1007,8 +1007,7 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
         case SPELL_SCHOOL_NORMAL:
         {
             // Calculate physical outcome
-            MeleeHitOutcome outcome;
-            outcome = RollPhysicalOutcomeAgainst(pVictim, BASE_ATTACK, spellInfo);
+            MeleeHitOutcome outcome = RollPhysicalOutcomeAgainst(pVictim, BASE_ATTACK, spellInfo);
 
             //Used to store the Hit Outcome
             cleanDamage->hitOutCome = outcome;
@@ -1187,8 +1186,24 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
             *damage = SpellDamageBonus(pVictim, spellInfo, *damage, SPELL_DIRECT_DAMAGE);
 
             // Calculate critical bonus
-            *crit = SpellCriticalBonus(spellInfo, (int32*)damage, pVictim);
-            cleanDamage->hitOutCome = MELEE_HIT_CRIT;
+            if(spellInfo->DmgClass==SPELL_DAMAGE_CLASS_MELEE)
+            {
+                // Calculate physical outcome
+                if(RollPhysicalOutcomeAgainst(pVictim, BASE_ATTACK, spellInfo) == MELEE_HIT_CRIT)
+                {
+                    *crit = true;
+                    *damage *= 2;
+                    // Resilience - reduce crit damage by 2x%
+                    uint32 resilienceReduction = uint32(pVictim->m_modResilience * 2/100 * (*damage));
+                    cleanDamage->damage += resilienceReduction;
+                    *damage -=  resilienceReduction;
+                }
+            }
+            else
+                *crit = SpellCriticalBonus(spellInfo, damage, pVictim);
+
+            if(*crit)
+                cleanDamage->hitOutCome = MELEE_HIT_CRIT;
 
             // spell proc all magic damage==0 case in this function
             if(damage <= 0)
@@ -1259,8 +1274,8 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, 
         DealDamage(pVictim, (damage-absorb-resist), &cleanDamage, SPELL_DIRECT_DAMAGE, SpellSchools(spellInfo->School), spellInfo, 0, true);
 
         // Shadow Word: Death - deals damage equal to damage done to caster if victim is not killed
-         if ( this != pVictim && pVictim->isAlive() && spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST && spellInfo->SpellIconID == 1980 && (damage-absorb-resist) > 0)
-             SpellNonMeleeDamageLog( this, spellID, (damage-absorb-resist), isTriggeredSpell, false);
+        if( this != pVictim && pVictim->isAlive() && spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST && spellInfo->SpellIconID == 1980 && (damage-absorb-resist) > 0 )
+            SpellNonMeleeDamageLog( this, spellID, (damage-absorb-resist), isTriggeredSpell, false);
  
         // Procflags
         uint32 procAttacker = PROC_FLAG_HIT_SPELL;
@@ -5113,7 +5128,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     return tmpDamage > 0 ? uint32(tmpDamage) : 0;
 }
 
-bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect, Unit *pVictim)
+bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, uint32 *damage, Unit *pVictim)
 {
     // Chance to crit is computed from INT and LEVEL as follows:
     //   chance = base + INT / (rate0 + rate1 * LEVEL)
@@ -5182,16 +5197,20 @@ bool Unit::SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect, Unit
     crit_chance = crit_chance > 0.0f ? crit_chance : 0.0f;
     if (roll_chance_f(crit_chance))
     {
-        int32 crit_bonus = *peffect / 2;
+        int32 crit_bonus = *damage / 2;
 
         // adds additional damage to crit_bonus (from talents)
         if(Player* modOwner = GetSpellModOwner())
             modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_CRIT_DAMAGE_BONUS, crit_bonus);
 
-        *peffect += crit_bonus;
+        if(crit_bonus> 0)
+            *damage += crit_bonus;
+
         // Resilience - reduce crit damage by 2x%
         if (pVictim)
-            *peffect -= int32(pVictim->m_modResilience * 2/100 * (*peffect));
+        {
+            *damage -= uint32(pVictim->m_modResilience * 2/100 * (*damage));
+        }
 
         return true;
     }

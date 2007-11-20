@@ -1117,7 +1117,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void UnsummonAllTotems();
         uint32 SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint32 damage, DamageEffectType damagetype);
         uint32 SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, DamageEffectType damagetype, Unit *pVictim);
-        bool SpellCriticalBonus(SpellEntry const *spellProto, int32 *peffect, Unit *pVictim);
+        bool SpellCriticalBonus(SpellEntry const *spellProto, uint32 *damage, Unit *pVictim);
         void MeleeDamageBonus(Unit *pVictim, uint32 *damage, WeaponAttackType attType);
         void ApplySpellImmune(uint32 spellId, uint32 op, uint32 type, bool apply);
         virtual bool IsImmunedToSpell(SpellEntry const* spellInfo) const;

@@ -1530,12 +1530,12 @@ void Spell::EffectHeal( uint32 i )
             }
         }
 
-        int32 addhealth = m_caster->SpellHealingBonus(m_spellInfo, uint32(damage),HEAL, unitTarget);
+        uint32 addhealth = m_caster->SpellHealingBonus(m_spellInfo, uint32(damage),HEAL, unitTarget);
         bool crit = m_caster->SpellCriticalBonus(m_spellInfo, &addhealth, NULL);
         if(unitTarget->GetTypeId() == TYPEID_PLAYER)
             m_caster->SendHealSpellOnPlayer(unitTarget, m_spellInfo->Id, addhealth, crit);
 
-        int32 gain = unitTarget->ModifyHealth( addhealth );
+        int32 gain = unitTarget->ModifyHealth( int32(addhealth) );
         unitTarget->getHostilRefManager().threatAssist(m_caster, float(gain) * 0.5f, m_spellInfo);
 
         uint32 procHealer = PROC_FLAG_HEAL;
