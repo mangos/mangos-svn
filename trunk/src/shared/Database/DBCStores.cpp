@@ -588,7 +588,7 @@ bool IsPositiveTarget(uint32 targetA, uint32 targetB)
         case 53:                                            //TARGET_CURRENT_SELECTED_ENEMY
             return false;
         case 22:                                            //TARGET_ALL_AROUND_CASTER
-            return (targetB == 33 /*TARGET_ALL_PARTY*/ || targetB == 30 /*TARGET_ALL_FREANDLY_UNITS_AROUND_CASTER*/);
+            return (targetB == 33 /*TARGET_ALL_PARTY*/ || targetB == 30 /*TARGET_ALL_FRIENDLY_UNITS_AROUND_CASTER*/);
         default:
             break;
     }

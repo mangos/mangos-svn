@@ -335,7 +335,7 @@ void Spell::FillTargetMap()
         // TargetA/TargetB dependent from each other, we not switch to full support this dependences
         // but need it support inn some know cases
         if( m_spellInfo->EffectImplicitTargetA[i]==TARGET_ALL_AROUND_CASTER &&
-            (m_spellInfo->EffectImplicitTargetB[i]==TARGET_ALL_PARTY || m_spellInfo->EffectImplicitTargetB[i]==TARGET_ALL_FREANDLY_UNITS_AROUND_CASTER) )
+            (m_spellInfo->EffectImplicitTargetB[i]==TARGET_ALL_PARTY || m_spellInfo->EffectImplicitTargetB[i]==TARGET_ALL_FRIENDLY_UNITS_AROUND_CASTER) )
         {
             SetTargetMap(i,m_spellInfo->EffectImplicitTargetB[i],tmpUnitMap);
         }
@@ -686,7 +686,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             cell_lock->Visit(cell_lock, world_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
             cell_lock->Visit(cell_lock, grid_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
         }break;
-        case TARGET_ALL_FREANDLY_UNITS_AROUND_CASTER:
+        case TARGET_ALL_FRIENDLY_UNITS_AROUND_CASTER:
         {
             CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
             Cell cell = RedZone::GetZone(p);
