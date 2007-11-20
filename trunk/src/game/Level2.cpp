@@ -262,20 +262,32 @@ bool ChatHandler::HandleGoObjectCommand(const char* args)
     if(!guid)
         return false;
 
-    QueryResult *result = WorldDatabase.PQuery("SELECT `position_x`,`position_y`,`position_z`,`orientation`,`map` FROM `gameobject` WHERE `guid` = '%i'",guid);
-    if (!result)
+    float x, y, z, ort;
+    int mapid;
+
+    // by DB guid
+    if (GameObjectData const* go_data = objmgr.GetGOData(guid))
+    {
+        x = go_data->posX;
+        y = go_data->posY;
+        z = go_data->posZ;
+        ort = go_data->orientation;
+        mapid = go_data->mapid;
+    }
+    // by in game guid
+    else if(GameObject* go = ObjectAccessor::Instance().GetGameObject(*m_session->GetPlayer(), MAKE_GUID(guid, HIGHGUID_GAMEOBJECT)))
+    {
+        x = go->GetPositionX();
+        y = go->GetPositionY();
+        z = go->GetPositionZ();
+        ort = go->GetOrientation();
+        mapid = go->GetMapId();
+    }
+    else
     {
         SendSysMessage(LANG_COMMAND_GOOBJNOTFOUND);
         return true;
     }
-
-    Field *fields = result->Fetch();
-    float x = fields[0].GetFloat();
-    float y = fields[1].GetFloat();
-    float z = fields[2].GetFloat();
-    float ort = fields[3].GetFloat();
-    int mapid = fields[4].GetUInt16();
-    delete result;
 
     if(!MapManager::IsValidMapCoord(mapid,x,y))
     {
@@ -641,7 +653,7 @@ bool ChatHandler::HandleDelObjectCommand(const char* args)
     if(!lowguid)
         return false;
 
-    GameObject* obj = ObjectAccessor::Instance().GetGameObject(*m_session->GetPlayer(), MAKE_GUID(lowguid, HIGHGUID_GAMEOBJECT));
+    GameObject* obj = GetObjectGlobalyWithGuidOrNearWithDbGuid(lowguid);
 
     if(!obj)
     {
@@ -680,8 +692,10 @@ bool ChatHandler::HandleTurnObjectCommand(const char* args)
         return false;
 
     uint32 lowguid = atoi(cId);
+    if(!lowguid)
+        return false;
 
-    GameObject* obj = ObjectAccessor::Instance().GetGameObject(*m_session->GetPlayer(), MAKE_GUID(lowguid, HIGHGUID_GAMEOBJECT));
+    GameObject* obj = GetObjectGlobalyWithGuidOrNearWithDbGuid(lowguid);
 
     if(!obj)
     {
@@ -801,8 +815,10 @@ bool ChatHandler::HandleMoveObjectCommand(const char* args)
         return false;
 
     uint32 lowguid = atoi(cId);
+    if(!lowguid)
+        return false;
 
-    GameObject* obj = ObjectAccessor::Instance().GetGameObject(*m_session->GetPlayer(), MAKE_GUID(lowguid, HIGHGUID_GAMEOBJECT));
+    GameObject* obj = GetObjectGlobalyWithGuidOrNearWithDbGuid(lowguid);
 
     if(!obj)
     {
