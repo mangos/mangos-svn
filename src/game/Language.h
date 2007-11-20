@@ -531,8 +531,6 @@
 #define LANG_INVISIBLE_INVISIBLE         "You are now invisible."
 #define LANG_INVISIBLE_VISIBLE           "You are now visible."
 
-#define LANG_BG_WS_CAPTURED_HF           "$n captured the Horde flag!"
-#define LANG_BG_WS_CAPTURED_AF           "$n captured the Alliance flag!"
 #define LANG_BG_A_WINS                   "The Alliance wins!"
 #define LANG_BG_H_WINS                   "The Horde wins!"
 #define LANG_BG_WS_ONE_MINUTE            "The battle for Warsong Gulch begins in 1 minute."
