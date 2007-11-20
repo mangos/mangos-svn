@@ -2856,7 +2856,7 @@ void Aura::HandlePeriodicDamage(bool apply, bool Real)
         {
             // current aura already removed, search present of another
             bool found = false;
-            Unit::AuraList auras = m_target->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
+            Unit::AuraList const& auras = m_target->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
             for(Unit::AuraList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
             {
                 SpellEntry const* itr_spell = (*itr)->GetSpellProto();
