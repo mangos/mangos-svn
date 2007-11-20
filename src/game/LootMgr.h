@@ -174,7 +174,11 @@ struct Loot
         PlayerQuestItems.clear();
         PlayerFFAItems.clear();
         PlayerNonQuestNonFFAConditionalItems.clear();
+
+        items.clear();
         quest_items.clear();
+        gold = 0;
+        unlootedCount = 0;
     }
 
     bool empty() const { return items.empty() && gold == 0; }

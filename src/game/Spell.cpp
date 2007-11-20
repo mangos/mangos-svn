@@ -2347,7 +2347,12 @@ uint8 Spell::CanCast(bool strict)
             {
                 target = m_caster->GetPet();
                 if(!target)
-                    return SPELL_FAILED_NO_PET;
+                {
+                    if(m_triggeredByAura)                          // not report pet not existence for triggered spells
+                        return SPELL_FAILED_DONT_REPORT;
+                    else
+                        return SPELL_FAILED_NO_PET;
+                }
                 break;
             }
         }
