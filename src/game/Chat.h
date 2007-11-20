@@ -329,6 +329,8 @@ class ChatHandler
         Unit*     getSelectedUnit();
         char*     extractKeyFromLink(char* text, char const* linkType);
 
+        GameObject* GetObjectGlobalyWithGuidOrNearWithDbGuid(uint32 lowguid);
+
         WorldSession *m_session;
 
         // Utility methods for commands

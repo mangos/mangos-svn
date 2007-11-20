@@ -31,6 +31,9 @@
 #include "MapManager.h"
 #include "Policies/SingletonImp.h"
 
+#include "RedZoneDistrict.h"
+#include "GridNotifiersImpl.h"
+
 bool ChatHandler::load_command_table = true;
 
 LanguageDesc lang_description[LANGUAGES_COUNT] =
@@ -813,4 +816,28 @@ char const *fmtstring( char const *format, ... )
     index += len + 1;
 
     return buf;
+}
+
+GameObject* ChatHandler::GetObjectGlobalyWithGuidOrNearWithDbGuid(uint32 lowguid)
+{
+    Player* pl = m_session->GetPlayer();
+
+    GameObject* obj = ObjectAccessor::Instance().GetGameObject(*pl, MAKE_GUID(lowguid, HIGHGUID_GAMEOBJECT));
+
+    if(!obj && objmgr.GetGOData(lowguid))                   // guid is DB guid of object
+    {
+        // search near player then
+        CellPair p(MaNGOS::ComputeCellPair(pl->GetPositionX(), pl->GetPositionY()));
+        Cell cell = RedZone::GetZone(p);
+        cell.data.Part.reserved = ALL_DISTRICT;
+
+        MaNGOS::GameObjectWithDbGUIDCheck go_check(*pl,lowguid);
+        MaNGOS::GameObjectSearcher<MaNGOS::GameObjectWithDbGUIDCheck> checker(obj,go_check);
+
+        TypeContainerVisitor<MaNGOS::GameObjectSearcher<MaNGOS::GameObjectWithDbGUIDCheck>, GridTypeMapContainer > object_checker(checker);
+        CellLock<GridReadGuard> cell_lock(cell, p);
+        cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(pl->GetMapId(), pl));
+    }
+
+    return obj;
 }
