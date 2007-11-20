@@ -303,8 +303,8 @@ void Spell::EffectSchoolDMG(uint32 i)
                 if((m_spellInfo->SpellFamilyFlags & 0x800000000LL) && m_spellInfo->SpellIconID==2040)
                 {
                     uint32 stacks = 0;
-                    Unit::AuraList auras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
-                    for(Unit::AuraList::iterator itr = auras.begin(); itr!=auras.end(); itr++)
+                    Unit::AuraList const& auras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
+                    for(Unit::AuraList::const_iterator itr = auras.begin(); itr!=auras.end(); ++itr)
                         if((*itr)->GetId() == 31803)
                             stacks++;
                     if(!stacks)
@@ -320,9 +320,34 @@ void Spell::EffectSchoolDMG(uint32 i)
                 // Envenom
                 if((m_spellInfo->SpellFamilyFlags & 0x800000000LL) && m_caster->GetTypeId()==TYPEID_PLAYER)
                 {
-                    uint8 combo = ((Player*)m_caster)->GetComboPoints();
-                    damage *= combo;
-                    damage += uint32(((Player*)m_caster)->GetTotalAttackPowerValue(BASE_ATTACK) * 0.03f * combo);
+                    // consume from stack dozes not more that have combo-points
+                    uint32 combo = ((Player*)m_caster)->GetComboPoints();
+
+                    // count consumed deadly poison doses at target
+                    uint32 doses = 0;
+
+                    // remove consumed poison doses
+                    Unit::AuraList const& auras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
+                    for(Unit::AuraList::const_iterator itr = auras.begin(); itr!=auras.end() && combo;)
+                    {
+                        // Deadly poison 
+                        if((*itr)->GetSpellProto()->SpellFamilyName==SPELLFAMILY_ROGUE && ((*itr)->GetSpellProto()->SpellFamilyFlags & 0x10000) && (*itr)->GetSpellProto()->SpellVisual==5100)
+                        {
+                            --combo;
+                            ++doses;
+
+                            unitTarget->RemoveSingleAuraFromStack((*itr)->GetId(), (*itr)->GetEffIndex());
+
+                            itr = auras.begin();
+                        }
+                        else
+                            ++itr;
+                    }
+
+                    damage *= doses;
+                    damage += uint32(((Player*)m_caster)->GetTotalAttackPowerValue(BASE_ATTACK) * 0.03f * doses);
+
+                    // always lost all combo-points independent from used dozes
                     ((Player*)m_caster)->ClearComboPoints();
                 }
                 break;
@@ -2828,8 +2853,8 @@ void Spell::EffectWeaponDmg(uint32 i)
         }
 
         uint32 sunder_stacks = 0;
-        Unit::AuraList list = unitTarget->GetAurasByType(SPELL_AURA_MOD_RESISTANCE);
-        for(Unit::AuraList::iterator itr=list.begin();itr!=list.end();itr++)
+        Unit::AuraList const& list = unitTarget->GetAurasByType(SPELL_AURA_MOD_RESISTANCE);
+        for(Unit::AuraList::const_iterator itr=list.begin();itr!=list.end();++itr)
         {
             SpellEntry const *proto = (*itr)->GetSpellProto();
             if(proto->SpellVisual == 406 && proto->SpellIconID == 565)
@@ -3291,24 +3316,25 @@ void Spell::EffectDuel(uint32 i)
 
 void Spell::EffectStuck(uint32 i)
 {
-    if(!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
+    if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    sLog.outDebug("Spell Effect: Stuck");
-    sLog.outDetail("Player %s (guid %u) used auto-unstuck future at map %u (%f, %f, %f)", m_caster->GetName(), m_caster->GetGUIDLow(), m_caster->GetMapId(), m_caster->GetPositionX(), m_caster->GetPositionY(), m_caster->GetPositionZ());
+    Player* pTarget = (Player*)unitTarget;
 
-    if(m_caster->isInFlight())
+    sLog.outDebug("Spell Effect: Stuck");
+    sLog.outDetail("Player %s (guid %u) used auto-unstuck future at map %u (%f, %f, %f)", pTarget->GetName(), pTarget->GetGUIDLow(), m_caster->GetMapId(), m_caster->GetPositionX(), pTarget->GetPositionY(), pTarget->GetPositionZ());
+
+    if(pTarget->isInFlight())
         return;
 
     //homebind location is loaded always
-    ((Player*)m_caster)->TeleportTo(((Player*)m_caster)->m_homebindMapId,((Player*)m_caster)->m_homebindX,((Player*)m_caster)->m_homebindY,((Player*)m_caster)->m_homebindZ,m_caster->GetOrientation());
+    pTarget->TeleportTo(pTarget->m_homebindMapId,pTarget->m_homebindX,pTarget->m_homebindY,pTarget->m_homebindZ,pTarget->GetOrientation());
 
-    // from patch 2.0.12 Stuck spell trigger Hearthstone cooldown
-    //((Player*)m_caster)->AddSpellCooldown(8690, time(NULL) + 3600); // add 1 hour cooldown to Hearthstone
+    // Stuck spell trigger Hearthstone cooldown
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(8690);
     if(!spellInfo)
         return;
-    Spell spell(m_caster,spellInfo,true,0);
+    Spell spell(pTarget,spellInfo,true,0);
     spell.SendSpellCooldown();
 }
 

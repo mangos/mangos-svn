@@ -3335,6 +3335,13 @@ void Unit::RemoveAura(uint32 spellId, uint32 effindex)
         RemoveAura(iter);
 }
 
+void Unit::RemoveSingleAuraFromStack(uint32 spellId, uint32 effindex)
+{
+    AuraMap::iterator iter = m_Auras.find(spellEffectPair(spellId, effindex));
+    if(iter != m_Auras.end())
+        RemoveAura(iter);
+}
+
 void Unit::RemoveAurasDueToSpell(uint32 spellId)
 {
     for (int i = 0; i < 3; ++i)
