@@ -4104,7 +4104,7 @@ void Aura::HandleAuraRetainComboPoints(bool apply, bool Real)
 
 void Aura::HandleModUnattackable( bool Apply, bool Real )
 {
-    if(Apply)
+    if(Real && Apply)
         m_target->CombatStop(true);
 
     m_target->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE,Apply);
