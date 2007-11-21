@@ -594,52 +594,52 @@ void* System::alignedMalloc(size_t bytes, size_t alignment) {
 
     // Pad the allocation size with the alignment size and the
     // size of the redirect pointer.
-    size_t totalBytes = bytes + alignment + sizeof(void*);
+    size_t totalBytes = bytes + alignment + sizeof(intptr_t);
 
-    size_t truePtr = (size_t)System::malloc(totalBytes);
+    void* truePtr = System::malloc(totalBytes);
 
-    if (truePtr == 0) {
+    if (!truePtr) {
         // malloc returned NULL
         return NULL;
     }
 
-    debugAssert(isValidHeapPointer((void*)truePtr));
+    debugAssert(isValidHeapPointer(truePtr));
     #ifdef G3D_WIN32
     // The blocks we return will not be valid Win32 debug heap
     // pointers because they are offset 
-    //  debugAssert(_CrtIsValidPointer((void*)truePtr, totalBytes, TRUE) );
+    //  debugAssert(_CrtIsValidPointer(truePtr, totalBytes, TRUE) );
     #endif
 
     // The return pointer will be the next aligned location (we must at least
     // leave space for the redirect pointer, however).
-    size_t  alignedPtr = truePtr + sizeof(void*);
+    char* alignedPtr = ((char*)truePtr)+ sizeof(intptr_t);
 
 #if 0
     // 2^n - 1 has the form 1111... in binary.
     uint32 bitMask = (alignment - 1);
 
     // Advance forward until we reach an aligned location.
-    while ((alignedPtr & bitMask) != 0) {
+    while ((((intptr_t)alignedPtr) & bitMask) != 0) {
         alignedPtr += sizeof(void*);
     }
 #else
-    alignedPtr += alignment - (alignedPtr & (alignment - 1));
-    // assert(alignedPtr - truePtr + bytes <= totalBytes);
+    alignedPtr += alignment - (((intptr_t)alignedPtr) & (alignment - 1));
+    // assert((alignedPtr - truePtr) + bytes <= totalBytes);
 #endif
 
-    debugAssert(alignedPtr - truePtr + bytes <= totalBytes);
+    debugAssert((alignedPtr - truePtr) + bytes <= totalBytes);
 
     // Immediately before the aligned location, write the true array location
     // so that we can free it correctly.
-    size_t* redirectPtr = (size_t *)(alignedPtr - sizeof(void *));
-    redirectPtr[0] = truePtr;
+    intptr_t* redirectPtr = (intptr_t*)(alignedPtr - sizeof(intptr_t));
+    redirectPtr[0] = (intptr_t)truePtr;
 
-    debugAssert(isValidHeapPointer((void*)truePtr));
+    debugAssert(isValidHeapPointer(truePtr));
 
     #ifdef G3D_WIN32
-        debugAssert( _CrtIsValidPointer((void*)alignedPtr, bytes, TRUE) );
+        debugAssert( _CrtIsValidPointer(alignedPtr, bytes, TRUE) );
     #endif
-    return (void *)alignedPtr;
+    return (void*)alignedPtr;
 }
 
 
@@ -648,17 +648,17 @@ void System::alignedFree(void* _ptr) {
         return;
     }
 
-    size_t alignedPtr = (size_t)_ptr;
+    char* alignedPtr = (char*)_ptr;
 
     // Back up one word from the pointer the user passed in.
     // We now have a pointer to a pointer to the true start
     // of the memory block.
-    size_t* redirectPtr = (size_t*)(alignedPtr - sizeof(void *));
+    intptr_t* redirectPtr = (intptr_t*)(alignedPtr - sizeof(intptr_t));
 
     // Dereference that pointer so that ptr = true start
-    void* truePtr = (void*)redirectPtr[0];
+    void* truePtr = (void*)(redirectPtr[0]);
 
-    debugAssert(isValidHeapPointer((void*)truePtr));
+    debugAssert(isValidHeapPointer(truePtr));
     System::free(truePtr);
 }
 
