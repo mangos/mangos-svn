@@ -1930,7 +1930,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
             return;
 
         case MELEE_HIT_BLOCK:
-            *blocked_amount = uint32(pVictim->GetShieldBlockValue() + (pVictim->GetStat(STAT_STRENGTH) / 20.0f) -1);
+            *blocked_amount = pVictim->GetShieldBlockValue();
 
             if (pVictim->GetUnitBlockChance())
                 pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYSHIELD);
