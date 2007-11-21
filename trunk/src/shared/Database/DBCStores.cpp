@@ -513,9 +513,8 @@ SpellSpecific GetSpellSpecific(uint32 spellId)
         }
         case SPELLFAMILY_SHAMAN:
         {
-            // family flags 10 (Lightning), 42 (Earth)
-            // todo: add Water (has no SpellFamilyName/SpellFamilyFlag)
-            if (spellInfo->SpellFamilyFlags & 0x40000000400LL)
+            // family flags 10 (Lightning), 42 (Earth), 37 (Water)
+            if (spellInfo->SpellFamilyFlags & 0x42000000400LL)
                 return SPELL_ELEMENTAL_SHIELD;
 
             break;
