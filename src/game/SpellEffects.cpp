@@ -260,6 +260,9 @@ void Spell::EffectSchoolDMG(uint32 i)
                 // Bloodthirst
                 if((m_spellInfo->SpellFamilyFlags & 0x2000000) && m_spellInfo->SpellVisual == 372)
                     return EffectWeaponDmg(i);
+                // Shield Slam
+                else if(m_spellInfo->SpellFamilyFlags & 0x100000000LL)
+                    damage += int32(m_caster->GetShieldBlockValue());
                 // Victory Rush
                 else if(m_spellInfo->SpellFamilyFlags & 0x10000000000LL)
                 {
