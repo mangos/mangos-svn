@@ -3079,25 +3079,32 @@ bool Unit::AddAura(Aura *Aur)
     // update single target auras list (before aura add to aura list, to prevent unexpected remove recently added aura)
     if (IsSingleTargetSpell(Aur->GetId()) && Aur->GetTarget() && Aur->GetSpellProto())
     {
-        if(Unit* caster = Aur->GetCaster())
+        // caster pointer can be deleted in time aura remove, find it by guid at each iteration
+        for(;;)
         {
+            Unit* caster = Aur->GetCaster();
+            if(!caster)                                     // caster deleted and not required adding scAura
+                break;
+
+            bool restart = false;
             AuraList& scAuras = caster->GetSingleCastAuras();
-            AuraList::iterator itr, next;
-            for (itr = scAuras.begin(); itr != scAuras.end(); itr = next)
+            for(AuraList::iterator itr = scAuras.begin(); itr != scAuras.end(); ++itr)
             {
-                next = itr;
-                next++;
                 if( (*itr)->GetTarget() != Aur->GetTarget() && 
                     IsSingleTargetSpells((*itr)->GetSpellProto(),Aur->GetSpellProto()) )
                 {
                     (*itr)->GetTarget()->RemoveAura((*itr)->GetId(), (*itr)->GetEffIndex());
-                    if(scAuras.empty())
-                        break;
-                    else
-                        next = scAuras.begin();
+                    restart = true;
+                    break;
                 }
             }
-            scAuras.push_back(Aur);
+
+            if(!restart)
+            {
+                // done
+                scAuras.push_back(Aur);
+                break;
+            }
         }
     }
 

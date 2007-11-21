@@ -1440,7 +1440,7 @@ void Spell::_handle_unit_phase(const uint64 targetGUID, const uint32 effectNumbe
     }
 
     // if reflection is pending and unit is new, add it
-    if (m_canReflect && (reflectTargets->count(targetGUID) == 0))
+    if (m_canReflect)
         reflectTargets->insert(targetGUID);
 }
 
