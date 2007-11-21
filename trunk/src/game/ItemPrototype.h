@@ -109,6 +109,7 @@ enum ITEM_FLAGS
 {
     ITEM_FLAGS_BINDED                           = 1,
     ITEM_FLAGS_CONJURED                         = 2,
+    ITEM_FLAGS_OPENABLE                         = 4,
     ITEM_FLAGS_WRAPPED                          = 8
 };
 

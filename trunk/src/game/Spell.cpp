@@ -2758,42 +2758,82 @@ uint8 Spell::CanCast(bool strict)
             }
             case SPELL_EFFECT_OPEN_LOCK:
             {
-                if (m_spellInfo->EffectImplicitTargetA[i] != TARGET_GAMEOBJECT)
+                if( m_spellInfo->EffectImplicitTargetA[i] != TARGET_GAMEOBJECT && 
+                    m_spellInfo->EffectImplicitTargetA[i] != TARGET_GAMEOBJECT_ITEM )
                     break;
-                if (m_caster->GetTypeId() != TYPEID_PLAYER || !m_targets.getGOTarget())
+
+                if( m_caster->GetTypeId() != TYPEID_PLAYER  // only players can open locks, gather etc.
+                    // we need a go target in case of TARGET_GAMEOBJECT
+                    || m_spellInfo->EffectImplicitTargetA[i] == TARGET_GAMEOBJECT && !m_targets.getGOTarget()
+                    // we need a go target, or an openable item target in case of TARGET_GAMEOBJECT_ITEM
+                    || m_spellInfo->EffectImplicitTargetA[i] == TARGET_GAMEOBJECT_ITEM && !m_targets.getGOTarget() &&
+                    (!m_targets.getItemTarget() || !(m_targets.getItemTarget()->GetProto()->Flags & ITEM_FLAGS_OPENABLE)) )
                     return SPELL_FAILED_BAD_TARGETS;
 
                 // chance for fail at orange mining/herb/LockPicking gathering attempt
-                if (m_targets.getGOTarget()->GetGoType() == GAMEOBJECT_TYPE_CHEST && (m_selfContainer && (*m_selfContainer) == this))
+                if (!m_selfContainer || ((*m_selfContainer) != this))
+                    break;
+
+                // get the skill value of the player
+                int32 SkillValue;
+                if (m_spellInfo->EffectMiscValue[i] == LOCKTYPE_HERBALISM)
+                    SkillValue = ((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM);
+                else if (m_spellInfo->EffectMiscValue[i] == LOCKTYPE_MINING)
+                    SkillValue = ((Player*)m_caster)->GetSkillValue(SKILL_MINING);
+                else if (m_spellInfo->EffectMiscValue[i] == LOCKTYPE_PICKLOCK)
+                    SkillValue = ((Player*)m_caster)->GetSkillValue(SKILL_LOCKPICKING);
+                else
+                    break;
+
+                // castitem check: rogue using skeleton keys. the skill values should not be added in this case.
+                if(m_CastItem)
+                    SkillValue = 0;
+
+                // add the damage modifier from the spell casted (cheat lock / skeleton key etc.) (use m_currentBasePoints, CalculateDamage returns wrong value)
+                SkillValue += m_currentBasePoints[i]+1;
+
+                // get the lock entry
+                LockEntry const *lockInfo = NULL;
+                if (GameObject* go=m_targets.getGOTarget())
                 {
-                    int32 SkillValue;
-                    if (m_spellInfo->EffectMiscValue[i] == LOCKTYPE_HERBALISM)
-                        SkillValue = ((Player*)m_caster)->GetSkillValue(SKILL_HERBALISM);
-                    else if (m_spellInfo->EffectMiscValue[i] == LOCKTYPE_MINING)
-                        SkillValue = ((Player*)m_caster)->GetSkillValue(SKILL_MINING);
-                    else if (m_spellInfo->EffectMiscValue[i] == LOCKTYPE_PICKLOCK)
-                        SkillValue = ((Player*)m_caster)->GetSkillValue(SKILL_LOCKPICKING);
-                    else
-                        break;
-
-                    int32 ReqValue;
-                    LockEntry const *lockInfo = sLockStore.LookupEntry(m_targets.getGOTarget()->GetGOInfo()->sound0);
-                    if (lockInfo)
+                    switch(go->GetGoType())
                     {
-                        if (m_spellInfo->EffectMiscValue[i] == LOCKTYPE_PICKLOCK)
-                            ReqValue = lockInfo->requiredlockskill;
-                        else
-                            ReqValue = lockInfo->requiredminingskill;
+                    case GAMEOBJECT_TYPE_CHEST:
+                        lockInfo = sLockStore.LookupEntry(go->GetGOInfo()->sound0); break;
+                    case GAMEOBJECT_TYPE_DOOR:
+                        lockInfo = sLockStore.LookupEntry(go->GetGOInfo()->sound1); break;
                     }
-                    else
-                        break;
-
-                    if (ReqValue > SkillValue)
-                        return SPELL_FAILED_LOW_CASTLEVEL;
-
-                    if (ReqValue > irand(SkillValue-25, SkillValue+37))
-                        return SPELL_FAILED_TRY_AGAIN;
                 }
+                else if(Item* itm=m_targets.getItemTarget())
+                    lockInfo = sLockStore.LookupEntry(itm->GetProto()->LockID);
+
+
+                // get the required lock value
+                int32 ReqValue=0;
+                if (lockInfo)
+                {
+                    // check for lock - key pair
+                    for(int it = 0; it < 5; ++it)
+                        // type==1 This means lockInfo->key[i] is an item
+                        if(lockInfo->type[it]==1 && lockInfo->key[it] && m_CastItem && m_CastItem->GetEntry()==lockInfo->key[it])
+                            // if so, we're good to go
+                            break;
+                    if (m_spellInfo->EffectMiscValue[i] == LOCKTYPE_PICKLOCK)
+                        ReqValue = lockInfo->requiredlockskill;
+                    else
+                        ReqValue = lockInfo->requiredminingskill;
+                }
+                else
+                    break;
+
+                // skill doesn't meet the required value
+                if (ReqValue > SkillValue)
+                    return SPELL_FAILED_LOW_CASTLEVEL;
+
+                // chance for failure in orange gather / lockpick
+                if (ReqValue > irand(SkillValue-25, SkillValue+37))
+                    return SPELL_FAILED_TRY_AGAIN;
+
                 break;
             }
             case SPELL_EFFECT_SUMMON_DEAD_PET:
