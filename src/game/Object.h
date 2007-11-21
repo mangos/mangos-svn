@@ -127,6 +127,12 @@ class MANGOS_DLL_SPEC Object
 
         virtual void DestroyForPlayer( Player *target ) const;
 
+        const int32& GetInt32Value( uint16 index ) const
+        {
+            ASSERT( index < m_valuesCount || PrintIndexError( index , false) );
+            return m_int32Values[ index ];
+        }
+
         const uint32& GetUInt32Value( uint16 index ) const
         {
             ASSERT( index < m_valuesCount || PrintIndexError( index , false) );
@@ -145,6 +151,7 @@ class MANGOS_DLL_SPEC Object
             return m_floatValues[ index ];
         }
 
+        void SetInt32Value(  uint16 index,        int32  value );
         void SetUInt32Value( uint16 index,       uint32  value );
         void SetUInt64Value( uint16 index, const uint64 &value );
         void SetFloatValue(  uint16 index,       float   value );
@@ -154,7 +161,8 @@ class MANGOS_DLL_SPEC Object
         void ApplyModUInt32Value(uint16 index, int32 val, bool apply);
         void ApplyModInt32Value(uint16 index, int32 val, bool apply);
         void ApplyModUInt64Value(uint16 index, int32 val, bool apply);
-        void ApplyModFloatValue( uint16 index, float val, bool apply);
+        void ApplyModPositiveFloatValue( uint16 index, float val, bool apply);
+        void ApplyModSignedFloatValue( uint16 index, float val, bool apply);
 
         void ApplyPercentModFloatValue(uint16 index, float val, bool apply)
         {
@@ -216,6 +224,7 @@ class MANGOS_DLL_SPEC Object
 
         union
         {
+            int32  *m_int32Values;
             uint32 *m_uint32Values;
             float *m_floatValues;
         };

@@ -4008,14 +4008,25 @@ void Spell::EffectReduceThreatPercent(uint32 i)
 
 void Spell::EffectTransmitted(uint32 i)
 {
-    float min_dis = GetMinRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
-    float max_dis = GetMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
-    float dis = rand_norm() * (max_dis - min_dis) + min_dis;
+    float fx,fy,fz;
+
+    if(m_targets.m_targetMask & TARGET_FLAG_DEST_LOCATION)
+    {
+        fx = m_targets.m_destX;
+        fy = m_targets.m_destY;
+        fz = m_targets.m_destZ;
+    }
+    else
+    {
+        float min_dis = GetMinRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
+        float max_dis = GetMaxRange(sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex));
+        float dis = rand_norm() * (max_dis - min_dis) + min_dis;
+
+        m_caster->GetClosePoint(fx,fy,fz,dis);
+    }
+
     uint32 cMap = m_caster->GetMapId();
     uint32 name_id = m_spellInfo->EffectMiscValue[i];
-
-    float fx,fy,fz;
-    m_caster->GetClosePoint(fx,fy,fz,dis);
 
     if(name_id==35591)
     {

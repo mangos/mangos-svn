@@ -2230,9 +2230,11 @@ void Player::InitStatsForLevel(bool reapplyMods)
     }
 
     SetUInt32Value(PLAYER_FIELD_MOD_TARGET_RESISTANCE,0);
-
-    SetFloatValue(UNIT_FIELD_POWER_COST_MODIFIER,0);
-
+    for(int i = 0; i < MAX_SPELL_SCHOOL; ++i)
+    {
+        SetFloatValue(UNIT_FIELD_POWER_COST_MODIFIER+i,0);
+        SetFloatValue(UNIT_FIELD_POWER_COST_MULTIPLIER+i,0);
+    }
     InitDataForForm();
 
     // save new stats

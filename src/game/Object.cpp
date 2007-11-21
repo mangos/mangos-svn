@@ -594,6 +594,25 @@ void Object::_SetCreateBits(UpdateMask *updateMask, Player *target) const
     }
 }
 
+void Object::SetInt32Value( uint16 index, int32 value )
+{
+    ASSERT( index < m_valuesCount || PrintIndexError( index , true ) );
+
+    if(m_int32Values[ index ] != value)
+    {
+        m_int32Values[ index ] = value;
+
+        if(m_inWorld)
+        {
+            if(!m_objectUpdated)
+            {
+                ObjectAccessor::Instance().AddUpdateObject(this);
+                m_objectUpdated = true;
+            }
+        }
+    }
+}
+
 void Object::SetUInt32Value( uint16 index, uint32 value )
 {
     ASSERT( index < m_valuesCount || PrintIndexError( index , true ) );
@@ -678,12 +697,19 @@ void Object::ApplyModUInt32Value(uint16 index, int32 val, bool apply)
 
 void Object::ApplyModInt32Value(uint16 index, int32 val, bool apply)
 {
-    int32 cur = GetUInt32Value(index);
+    int32 cur = GetInt32Value(index);
     cur += (apply ? val : -val);
-    SetUInt32Value(index,cur);
+    SetInt32Value(index,cur);
 }
 
-void Object::ApplyModFloatValue(uint16 index, float  val, bool apply)
+void Object::ApplyModSignedFloatValue(uint16 index, float  val, bool apply)
+{
+    float cur = GetFloatValue(index);
+    cur += (apply ? val : -val);
+    SetFloatValue(index,cur);
+}
+
+void Object::ApplyModPositiveFloatValue(uint16 index, float  val, bool apply)
 {
     float cur = GetFloatValue(index);
     cur += (apply ? val : -val);
