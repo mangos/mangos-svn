@@ -3390,8 +3390,6 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
             AuraList& scAuras = caster->GetSingleCastAuras();
             scAuras.remove((*i).second);
         }
-        else
-            sLog.outError("Unit::RemoveAura: cannot remove the single cast aura (SpellId: %u Effect: %u) from the caster, potential crash!",(*i).second->GetId(),(*i).second->GetEffIndex());
     }
     // remove aura from party members when the caster turns off the aura
     if((*i).second->IsAreaAura())
