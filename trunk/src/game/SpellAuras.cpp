@@ -121,8 +121,8 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNoImmediateEffect,                         // 69 SPELL_AURA_SCHOOL_ABSORB implemented in Unit::CalcAbsorbResist
     &Aura::HandleNULL,                                      // 70 SPELL_AURA_EXTRA_ATTACKS      Useless
     &Aura::HandleModSpellCritChanceShool,                   // 71 SPELL_AURA_MOD_SPELL_CRIT_CHANCE_SCHOOL
-    &Aura::HandleModPowerCost,                              // 72 SPELL_AURA_MOD_POWER_COST
-    &Aura::HandleNoImmediateEffect,                         // 73 SPELL_AURA_MOD_POWER_COST_SCHOOL
+    &Aura::HandleModPowerCostPCT,                           // 72 SPELL_AURA_MOD_POWER_COST_SCHOOL_PCT
+    &Aura::HandleModPowerCost,                              // 73 SPELL_AURA_MOD_POWER_COST_SCHOOL
     &Aura::HandleNoImmediateEffect,                         // 74 SPELL_AURA_REFLECT_SPELLS_SCHOOL
     &Aura::HandleNoImmediateEffect,                         // 75 SPELL_AURA_MOD_LANGUAGE
     &Aura::HandleFarSight,                                  // 76 SPELL_AURA_FAR_SIGHT
@@ -3663,23 +3663,19 @@ void Aura::HandleModOffhandDamagePercent(bool apply, bool Real)
 /***        POWER COST        ***/
 /********************************/
 
+void Aura::HandleModPowerCostPCT(bool apply, bool Real)
+{
+    float amount = m_modifier.m_amount/100.0f;
+    for(int i = 0; i < MAX_SPELL_SCHOOL; ++i)
+        if(m_modifier.m_miscvalue & 1<<i)
+            m_target->ApplyModSignedFloatValue(UNIT_FIELD_POWER_COST_MULTIPLIER+i,amount,apply);
+}
+
 void Aura::HandleModPowerCost(bool apply, bool Real)
 {
-    //UNIT_FIELD_POWER_COST_MULTIPLIER = multiplier - 1
-    float val = m_target->GetFloatValue(UNIT_FIELD_POWER_COST_MODIFIER) + 1.0f;
-
-    if(val || apply)
-        ApplyPercentModFloatVar(val,m_modifier.m_amount,apply);
-    else
-    {
-        // recalculate value in case val==0 (-100 percent applied) at modifier remove (current aura already removed)
-        val = 1.0f;
-        Unit::AuraList const& auras = m_target->GetAurasByType(SPELL_AURA_MOD_POWER_COST);
-        for(Unit::AuraList::const_iterator itr = auras.begin(); itr != auras.end(); ++itr)
-            ApplyPercentModFloatVar(val,(*itr)->GetModifier()->m_amount,true);
-    }
-
-    m_target->SetFloatValue(UNIT_FIELD_POWER_COST_MODIFIER,val - 1.0f);
+    for(int i = 0; i < MAX_SPELL_SCHOOL; ++i)
+        if(m_modifier.m_miscvalue & 1<<i)
+            m_target->ApplyModInt32Value(UNIT_FIELD_POWER_COST_MODIFIER+i,m_modifier.m_amount,apply);
 }
 
 /*********************************************************/

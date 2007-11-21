@@ -239,8 +239,8 @@ class MANGOS_DLL_SPEC Item : public Object
         uint32 GetEnchantmentCharges(EnchantmentSlot slot) const { return GetUInt32Value(ITEM_FIELD_ENCHANTMENT + slot*3 + ENCHANTMENT_CHARGES_OFFSET);}
 
         // spell charges (signed but stored as unsigned)
-        int32 GetSpellCharges(uint8 index/*0..5*/ = 0) const { return int32(GetUInt32Value(ITEM_FIELD_SPELL_CHARGES + index)); }
-        void  SetSpellCharges(uint8 index/*0..5*/, int32 value) { SetUInt32Value(ITEM_FIELD_SPELL_CHARGES + index,uint32(value)); }
+        int32 GetSpellCharges(uint8 index/*0..5*/ = 0) const { return GetInt32Value(ITEM_FIELD_SPELL_CHARGES + index); }
+        void  SetSpellCharges(uint8 index/*0..5*/, int32 value) { SetInt32Value(ITEM_FIELD_SPELL_CHARGES + index,value); }
 
         Loot loot;
         bool m_lootGenerated;

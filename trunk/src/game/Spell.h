@@ -89,6 +89,7 @@ enum Targets
     TARGET_TOTEM_FIRE                  = 44,
     TARGET_CHAIN_HEAL                  = 45,
     TARGET_DYNAMIC_OBJECT              = 47,
+    TARGET_AREAEFFECT_CUSTOM_2         = 52,
     TARGET_CURRENT_SELECTED_ENEMY      = 53,
     TARGET_SINGLE_FRIEND_2             = 57,
     TARGET_AREAEFFECT_PARTY_AND_CLASS  = 61,

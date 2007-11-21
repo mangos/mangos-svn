@@ -542,6 +542,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
         case TARGET_SELF:
         case TARGET_DYNAMIC_OBJECT:
         case TARGET_AREAEFFECT_CUSTOM:
+        case TARGET_AREAEFFECT_CUSTOM_2:
         {
             TagUnitMap.push_back(m_caster);
             break;
@@ -3179,17 +3180,12 @@ uint8 Spell::CheckMana(uint32 *mana)
         else
             manaCost += float(m_spellInfo->ManaCostPercentage)/100.0f * m_caster->GetMaxPower(powerType);
     }
-
-    Unit::AuraList const& mPowerCostSchool = m_caster->GetAurasByType(SPELL_AURA_MOD_POWER_COST_SCHOOL);
-    for(Unit::AuraList::const_iterator i = mPowerCostSchool.begin(); i != mPowerCostSchool.end(); ++i)
-        if((*i)->GetModifier()->m_miscvalue & int32(1 << m_spellInfo->School))
-            manaCost += (*i)->GetModifier()->m_amount;
+    manaCost+= m_caster->GetInt32Value(UNIT_FIELD_POWER_COST_MODIFIER+m_spellInfo->School);
 
     if(Player* modOwner = m_caster->GetSpellModOwner())
         modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COST, manaCost);
 
-    manaCost *= (1.0f + m_caster->GetFloatValue(UNIT_FIELD_POWER_COST_MODIFIER));
-
+    manaCost*= (1.0f+m_caster->GetFloatValue(UNIT_FIELD_POWER_COST_MULTIPLIER+m_spellInfo->School));
     if (manaCost < 0)
         manaCost = 0;
 

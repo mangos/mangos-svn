@@ -988,13 +988,13 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         float GetResistanceBuffMods(SpellSchools school, bool positive) const { return GetFloatValue(positive ? UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE+school ); }
         void SetResistanceBuffMods(SpellSchools school, bool positive, float val) { SetFloatValue(positive ? UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE+school,val); }
-        void ApplyResistanceBuffModsMod(SpellSchools school, bool positive, float val, bool apply) { ApplyModFloatValue(positive ? UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE+school, val, apply); }
+        void ApplyResistanceBuffModsMod(SpellSchools school, bool positive, float val, bool apply) { ApplyModPositiveFloatValue(positive ? UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE+school, val, apply); }
         void ApplyResistanceBuffModsPercentMod(SpellSchools school, bool positive, float val, bool apply) { ApplyPercentModFloatValue(positive ? UNIT_FIELD_RESISTANCEBUFFMODSPOSITIVE+school : UNIT_FIELD_RESISTANCEBUFFMODSNEGATIVE+school, val, apply); }
         void SetPosStat(Stats stat, float val) { SetFloatValue(UNIT_FIELD_POSSTAT0+stat, val); }
-        void ApplyPosStatMod(Stats stat, float val, bool apply) { ApplyModFloatValue(UNIT_FIELD_POSSTAT0+stat, val, apply); }
+        void ApplyPosStatMod(Stats stat, float val, bool apply) { ApplyModPositiveFloatValue(UNIT_FIELD_POSSTAT0+stat, val, apply); }
         void ApplyPosStatPercentMod(Stats stat, float val, bool apply) { ApplyPercentModFloatValue(UNIT_FIELD_POSSTAT0+stat, val, apply); }
         void SetNegStat(Stats stat, float val) { SetFloatValue(UNIT_FIELD_NEGSTAT0+stat, val); }
-        void ApplyNegStatMod(Stats stat, float val, bool apply) { ApplyModFloatValue(UNIT_FIELD_NEGSTAT0+stat, val, apply); }
+        void ApplyNegStatMod(Stats stat, float val, bool apply) { ApplyModPositiveFloatValue(UNIT_FIELD_NEGSTAT0+stat, val, apply); }
         void ApplyNegStatPercentMod(Stats stat, float val, bool apply) { ApplyPercentModFloatValue(UNIT_FIELD_NEGSTAT0+stat, val, apply); }
         void SetCreateStat(Stats stat, float val) { m_createStats[stat] = val; }
         void SetCreateHealth(uint32 val) { SetUInt32Value(UNIT_FIELD_BASE_HEALTH, val); }
