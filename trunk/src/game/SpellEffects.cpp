@@ -1538,6 +1538,10 @@ void Spell::EffectHeal( uint32 i )
         int32 gain = unitTarget->ModifyHealth( int32(addhealth) );
         unitTarget->getHostilRefManager().threatAssist(m_caster, float(gain) * 0.5f, m_spellInfo);
 
+        if(m_caster->GetTypeId()==TYPEID_PLAYER)
+            if(BattleGround *bg = ((Player*)m_caster)->GetBattleGround())
+                bg->UpdatePlayerScore(((Player*)m_caster), SCORE_HEALING_DONE, gain);
+
         uint32 procHealer = PROC_FLAG_HEAL;
         if (crit)
             procHealer |= PROC_FLAG_CRIT_HEAL;
