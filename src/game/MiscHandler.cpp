@@ -516,9 +516,7 @@ void WorldSession::HandleStandStateChangeOpcode( WorldPacket & recv_data )
         bytes1 |=animstate;
         _player->SetUInt32Value(UNIT_FIELD_BYTES_1 , bytes1);
 
-        if (animstate != PLAYER_STATE_SIT_CHAIR && animstate != PLAYER_STATE_SIT_LOW_CHAIR && animstate != PLAYER_STATE_SIT_MEDIUM_CHAIR &&
-            animstate != PLAYER_STATE_SIT_HIGH_CHAIR && animstate != PLAYER_STATE_SIT && animstate != PLAYER_STATE_SLEEP &&
-            animstate != PLAYER_STATE_KNEEL)
+        if (_player->IsStandState())
         {
             // cancel drinking / eating
             Unit::AuraMap& p_auras = _player->GetAuras();
