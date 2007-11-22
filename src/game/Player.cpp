@@ -14572,8 +14572,13 @@ void Player::InitDataForForm()
 
 void Player::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply)
 {
-    if(forced)
-        ++m_forced_speed_changes[mtype];                    // register forced speed changes for WorldSession::HandleForceSpeedChangeAck
+    // register forced speed changes for WorldSession::HandleForceSpeedChangeAck
+    // and do it only for real sent packets
+    if( forced && (
+        mtype == MOVE_MOUNTED &&  ((Player*)this)->IsMounted() ||
+        mtype == MOVE_RUN     && !((Player*)this)->IsMounted() ) )
+        ++m_forced_speed_changes[mtype];
+
     Unit::ApplySpeedMod(mtype,rate,forced,apply);
 }
 

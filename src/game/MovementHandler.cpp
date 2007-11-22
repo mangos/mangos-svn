@@ -325,13 +325,15 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
 
     UnitMoveType move_type;
 
-    static char const* move_type_name[MAX_MOVE_TYPE] = {  "Walk", "Run", "Walkback", "Swim", "Swimback", "Turn", "Fly", "Flyback" };
+    static char const* move_type_name[MAX_MOVE_TYPE] = {  "Walk", "Run", "Walkback", "Swim", "Swimback", "Turn", "Fly", "Flyback", "Mounted" };
 
     uint16 opcode = recv_data.GetOpcode();
     switch(opcode)
     {
         case CMSG_FORCE_WALK_SPEED_CHANGE_ACK:      move_type = MOVE_WALK;     break;
-        case CMSG_FORCE_RUN_SPEED_CHANGE_ACK:       move_type = MOVE_RUN;      break;
+        case CMSG_FORCE_RUN_SPEED_CHANGE_ACK:       
+                          if (_player->IsMounted()) move_type = MOVE_MOUNTED;
+                          else                      move_type = MOVE_RUN;      break;
         case CMSG_FORCE_RUN_BACK_SPEED_CHANGE_ACK:  move_type = MOVE_WALKBACK; break;
         case CMSG_FORCE_SWIM_SPEED_CHANGE_ACK:      move_type = MOVE_SWIM;     break;
         case CMSG_FORCE_SWIM_BACK_SPEED_CHANGE_ACK: move_type = MOVE_SWIMBACK; break;
