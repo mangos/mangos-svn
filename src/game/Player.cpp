@@ -14576,7 +14576,8 @@ void Player::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool app
     // and do it only for real sent packets
     if( forced && (
         mtype == MOVE_MOUNTED &&  ((Player*)this)->IsMounted() ||
-        mtype == MOVE_RUN     && !((Player*)this)->IsMounted() ) )
+        mtype == MOVE_RUN     && !((Player*)this)->IsMounted() || 
+        mtype != MOVE_RUN && mtype != MOVE_MOUNTED ) )
         ++m_forced_speed_changes[mtype];
 
     Unit::ApplySpeedMod(mtype,rate,forced,apply);
