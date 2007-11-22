@@ -4144,7 +4144,27 @@ void Aura::HandleSpiritOfRedemption( bool apply, bool Real )
 {
     if(!Real)
         return;
+
+    // prepare spirit state
+    if(apply)
+    {
+        if(m_target->GetTypeId()==TYPEID_PLAYER)
+        {
+            // disable breath/etc timers
+            ((Player*)m_target)->StopMirrorTimers();
+
+            // set stand state (expected in this form)
+            if(!m_target->IsStandState())
+            {
+                m_target->RemoveFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT);
+                ((Player*)m_target)->SetStandState(PLAYER_STATE_NONE);
+            }
+
+        }
+
+        m_target->SetHealth(1);
+    }
     // die at aura end
-    if(!apply)
+    else
         m_target->DealDamage(m_target, m_target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_NORMAL, GetSpellProto(), 0, false);
 }

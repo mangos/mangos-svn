@@ -15260,7 +15260,7 @@ void Player::ClearComboPoints()
 void Player::SetStandState(uint8 state)
 {
     WorldPacket data(SMSG_STANDSTATE_CHANGE_ACK, 1);
-    data << state;
+    data << (uint8)state;
     GetSession()->SendPacket(&data);
 }
 

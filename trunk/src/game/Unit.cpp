@@ -569,7 +569,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
         // if talent known but not triggered (check priest class for speedup check)
         Aura* spiritOfRedemtionTalentReady = NULL;
         if( (!spellProto || spellProto->Id != 27795 ) &&    // not called from SPELL_AURA_SPIRIT_OF_REDEMPTION
-            pVictim->getClass()==CLASS_PRIEST )             // speedup check
+            pVictim->GetTypeId()==TYPEID_PLAYER && pVictim->getClass()==CLASS_PRIEST )                                                           
         {
             AuraList const& vDummyAuras = pVictim->GetAurasByType(SPELL_AURA_DUMMY);
             for(AuraList::const_iterator itr = vDummyAuras.begin(); itr != vDummyAuras.end(); ++itr)
@@ -590,9 +590,11 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
 
         if(spiritOfRedemtionTalentReady)
         {
+            //Remove all expected to remove at death auras (most important negative case like DoT or periodic triggers)
+            pVictim->RemoveAllAurasOnDeath();
+
             // FORM_SPIRITOFREDEMPTION and related auras
             pVictim->CastSpell(pVictim,27827,true,NULL,spiritOfRedemtionTalentReady);
-            pVictim->SetHealth(1);
         }
         else
             pVictim->SetHealth(0);
@@ -2288,12 +2290,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     }
 
     // always crit against a sitting target (except 0 crit chance)
-    if( (pVictim->GetTypeId() == TYPEID_PLAYER) && crit_chance > 0 &&
-        (((Player*)pVictim)->getStandState() & (PLAYER_STATE_SLEEP | PLAYER_STATE_SIT
-        | PLAYER_STATE_SIT_CHAIR
-        | PLAYER_STATE_SIT_LOW_CHAIR
-        | PLAYER_STATE_SIT_MEDIUM_CHAIR
-        | PLAYER_STATE_SIT_HIGH_CHAIR)))
+    if( pVictim->GetTypeId() == TYPEID_PLAYER && crit_chance > 0 && !pVictim->IsStandState() )
     {
         DEBUG_LOG ("RollMeleeOutcomeAgainst: CRIT (sitting victim)");
         return MELEE_HIT_CRIT;
@@ -7403,4 +7400,13 @@ void Unit::StopMoving()
     WorldPacket data;
     BuildHeartBeatMsg(&data);
     SendMessageToSet(&data,false);
+}
+
+bool Unit::IsStandState() const
+{
+    uint8 s = getStandState();
+    return s != PLAYER_STATE_SIT_CHAIR && s != PLAYER_STATE_SIT_LOW_CHAIR && 
+        s != PLAYER_STATE_SIT_MEDIUM_CHAIR && s != PLAYER_STATE_SIT_HIGH_CHAIR && 
+        s != PLAYER_STATE_SIT && s != PLAYER_STATE_SLEEP &&
+        s != PLAYER_STATE_KNEEL;
 }
