@@ -1400,8 +1400,15 @@ class MANGOS_DLL_SPEC Player : public Unit
         void DurabilityRepairAll(bool cost, float discountMod);
         void DurabilityRepair(uint16 pos, bool cost, float discountMod);
         void RepopAtGraveyard();
+        void StopMirrorTimers()
+        {
+            StopMirrorTimer(FATIGUE_TIMER);
+            StopMirrorTimer(BREATH_TIMER);
+            StopMirrorTimer(FIRE_TIMER);
+        }
 
-        void SetMovement(uint8 pType);
+
+        void SetMovement(PlayerMovementType pType);
 
         void JoinedChannel(Channel *c);
         void LeftChannel(Channel *c);

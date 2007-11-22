@@ -366,18 +366,6 @@ enum SpellEffects
     TOTAL_SPELL_EFFECTS                    = 144
 };
 
-enum CharacterStates
-{
-    STATE_SITTING                          = 1,
-    STATE_SITTINGCHAIR                     = 2,
-    STATE_SLEEPING                         = 3,
-    STATE_SITTINGCHAIRLOW                  = 4,
-    STATE_SITTINGCHAIRMEDIUM               = 5,
-    STATE_SITTINGCHAIRHIGH                 = 6,
-    STATE_DEAD                             = 7,
-    STATE_KNEEL                            = 8
-};
-
 enum GameobjectTypes
 {
     GAMEOBJECT_TYPE_DOOR                   = 0,

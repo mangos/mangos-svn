@@ -1795,18 +1795,8 @@ void Player::RegenerateHealth()
         else if(HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT))
             addvalue *= m_AuraModifiers[SPELL_AURA_MOD_REGEN_DURING_COMBAT] / 100.0f;
 
-        switch (getStandState())
-        {
-            case PLAYER_STATE_SIT_CHAIR:
-            case PLAYER_STATE_SIT_LOW_CHAIR:
-            case PLAYER_STATE_SIT_MEDIUM_CHAIR:
-            case PLAYER_STATE_SIT_HIGH_CHAIR:
-            case PLAYER_STATE_SIT:
-            case PLAYER_STATE_SLEEP:
-            case PLAYER_STATE_KNEEL:
-                addvalue *= 1.5; break;
-        }
-
+        if(!IsStandState())
+            addvalue *= 1.5;
     }
 
     // always regeneration bonus (including combat)
@@ -3269,7 +3259,7 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
     if(updateRealmChars) sWorld.UpdateRealmCharCount(accountId);
 }
 
-void Player::SetMovement(uint8 pType)
+void Player::SetMovement(PlayerMovementType pType)
 {
     WorldPacket data;
     switch(pType)
@@ -3349,9 +3339,7 @@ void Player::BuildPlayerRepop()
     data << uint8(0x28) << uint32(0);
     GetSession()->SendPacket( &data );
 
-    StopMirrorTimer(FATIGUE_TIMER);                         //disable timers(bars)
-    StopMirrorTimer(BREATH_TIMER);
-    StopMirrorTimer(FIRE_TIMER);
+    StopMirrorTimers();                                     //disable timers(bars)
 
     //SetUInt32Value(UNIT_FIELD_AURA + 32, 8326);           // set ghost form
     //SetUInt32Value(UNIT_FIELD_AURA + 33, 20584);          //!dono
@@ -3469,9 +3457,7 @@ void Player::KillPlayer()
 {
     SetMovement(MOVE_ROOT);
 
-    StopMirrorTimer(FATIGUE_TIMER);                         //disable timers(bars)
-    StopMirrorTimer(BREATH_TIMER);
-    StopMirrorTimer(FIRE_TIMER);
+    StopMirrorTimers();                                     //disable timers(bars)
 
     setDeathState(CORPSE);
     //SetFlag( UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_IN_PVP );
@@ -14573,12 +14559,15 @@ void Player::InitDataForForm()
 void Player::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply)
 {
     // register forced speed changes for WorldSession::HandleForceSpeedChangeAck
-    // and do it only for real sent packets
-    if( forced && (
-        mtype == MOVE_MOUNTED &&  ((Player*)this)->IsMounted() ||
-        mtype == MOVE_RUN     && !((Player*)this)->IsMounted() || 
-        mtype != MOVE_RUN && mtype != MOVE_MOUNTED ) )
-        ++m_forced_speed_changes[mtype];
+    // and do it only for real sent packets and use run for run/mounted as client expected
+    if( forced )
+    {
+        if( mtype == MOVE_MOUNTED &&  ((Player*)this)->IsMounted() ||
+            mtype == MOVE_RUN     && !((Player*)this)->IsMounted() ) 
+            ++m_forced_speed_changes[MOVE_RUN];
+        else if(mtype != MOVE_RUN && mtype != MOVE_MOUNTED )
+            ++m_forced_speed_changes[mtype];
+    }
 
     Unit::ApplySpeedMod(mtype,rate,forced,apply);
 }
