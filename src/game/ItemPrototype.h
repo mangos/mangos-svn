@@ -37,10 +37,10 @@
 #define    ITEM_SUFFIXFACTOR_BACK_MOD           0.26
 #define    ITEM_SUFFIXFACTOR_2HAND_MOD          0.46
 #define    ITEM_SUFFIXFACTOR_MAIN_HAND_MOD      0.19
-#define    ITEM_SUFFIXFACTOR_ONE_HAND_MOD        0.19
+#define    ITEM_SUFFIXFACTOR_ONE_HAND_MOD       0.19
 #define    ITEM_SUFFIXFACTOR_OFF_HAND_MOD       0.26
 
-#define    ITEM_SUFFIXFACTOR_RARE_MOD            1.24
+#define    ITEM_SUFFIXFACTOR_RARE_MOD           1.24
 
 enum ItemModType
 {
