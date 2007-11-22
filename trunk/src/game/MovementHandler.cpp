@@ -323,33 +323,38 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
     recv_data >> newspeed;
     /*----------------*/
 
+    // client ACK send one packet for mounted/run case and need skip all except last from its
+    // in other cases anti-cheat check can be fail in false case
     UnitMoveType move_type;
+    UnitMoveType force_move_type;
 
     static char const* move_type_name[MAX_MOVE_TYPE] = {  "Walk", "Run", "Walkback", "Swim", "Swimback", "Turn", "Fly", "Flyback", "Mounted" };
 
     uint16 opcode = recv_data.GetOpcode();
     switch(opcode)
     {
-        case CMSG_FORCE_WALK_SPEED_CHANGE_ACK:      move_type = MOVE_WALK;     break;
+        case CMSG_FORCE_WALK_SPEED_CHANGE_ACK:      move_type = MOVE_WALK;     force_move_type = MOVE_WALK;     break;
         case CMSG_FORCE_RUN_SPEED_CHANGE_ACK:       
-                          if (_player->IsMounted()) move_type = MOVE_MOUNTED;
-                          else                      move_type = MOVE_RUN;      break;
-        case CMSG_FORCE_RUN_BACK_SPEED_CHANGE_ACK:  move_type = MOVE_WALKBACK; break;
-        case CMSG_FORCE_SWIM_SPEED_CHANGE_ACK:      move_type = MOVE_SWIM;     break;
-        case CMSG_FORCE_SWIM_BACK_SPEED_CHANGE_ACK: move_type = MOVE_SWIMBACK; break;
-        case CMSG_FORCE_TURN_RATE_CHANGE_ACK:       move_type = MOVE_TURN;     break;
-        case CMSG_FORCE_FLY_SPEED_CHANGE_ACK:       move_type = MOVE_FLY;      break;
-        case CMSG_FORCE_FLY_BACK_SPEED_CHANGE_ACK:  move_type = MOVE_FLYBACK;  break;
+            if (_player->IsMounted())               move_type = MOVE_MOUNTED; 
+            else                                    move_type = MOVE_RUN;
+                                                                               force_move_type = MOVE_RUN;      break;
+        case CMSG_FORCE_RUN_BACK_SPEED_CHANGE_ACK:  move_type = MOVE_WALKBACK; force_move_type = MOVE_WALKBACK; break;
+        case CMSG_FORCE_SWIM_SPEED_CHANGE_ACK:      move_type = MOVE_SWIM;     force_move_type = MOVE_SWIM;     break;
+        case CMSG_FORCE_SWIM_BACK_SPEED_CHANGE_ACK: move_type = MOVE_SWIMBACK; force_move_type = MOVE_SWIMBACK; break;
+        case CMSG_FORCE_TURN_RATE_CHANGE_ACK:       move_type = MOVE_TURN;     force_move_type = MOVE_TURN;     break;
+        case CMSG_FORCE_FLY_SPEED_CHANGE_ACK:       move_type = MOVE_FLY;      force_move_type = MOVE_FLY;      break;
+        case CMSG_FORCE_FLY_BACK_SPEED_CHANGE_ACK:  move_type = MOVE_FLYBACK;  force_move_type = MOVE_FLYBACK;  break;
         default:
             sLog.outError("WorldSession::HandleForceSpeedChangeAck: Unknown move type opcode: %u",opcode);
             return;
     }
 
     // skip all forced speed changes except last and unexpected
-    if(_player->m_forced_speed_changes[move_type] > 0)
+    // in run/mounted case used one ACK and it must be skipped.m_forced_speed_changes[MOVE_RUN} store both.
+    if(_player->m_forced_speed_changes[force_move_type] > 0)
     {
-        --_player->m_forced_speed_changes[move_type];
-        if(_player->m_forced_speed_changes[move_type] > 0)
+        --_player->m_forced_speed_changes[force_move_type];
+        if(_player->m_forced_speed_changes[force_move_type] > 0)
             return;
     }
 
