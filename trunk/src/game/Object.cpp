@@ -373,7 +373,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
         }*/
 
         *data << ((Unit*)this)->GetSpeed( MOVE_WALK );
-        *data << ((Unit*)this)->GetSpeed( MOVE_RUN );
+        *data << ( ((Unit*)this)->IsMounted() ? ((Unit*)this)->GetSpeed( MOVE_MOUNTED ) : ((Unit*)this)->GetSpeed( MOVE_RUN ) );
         *data << ((Unit*)this)->GetSpeed( MOVE_SWIMBACK );
         *data << ((Unit*)this)->GetSpeed( MOVE_SWIM );
         *data << ((Unit*)this)->GetSpeed( MOVE_WALKBACK );

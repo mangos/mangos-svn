@@ -179,7 +179,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNoImmediateEffect,                         //127 SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS
     &Aura::HandleModPossessPet,                             //128 SPELL_AURA_MOD_POSSESS_PET
     &Aura::HandleAuraModIncreaseSpeedAlways,                //129 SPELL_AURA_MOD_INCREASE_SPEED_ALWAYS
-    &Aura::HandleNULL,                                      //130 SPELL_AURA_MOD_MOUNTED_SPEED_ALWAYS
+    &Aura::HandleAuraModIncreaseMountedSpeedAlways,         //130 SPELL_AURA_MOD_MOUNTED_SPEED_ALWAYS
     &Aura::HandleNULL,                                      //131 SPELL_AURA_MOD_CREATURE_RANGED_ATTACK_POWER
     &Aura::HandleAuraModIncreaseEnergyPercent,              //132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT
     &Aura::HandleAuraModIncreaseHealthPercent,              //133 SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT
@@ -221,7 +221,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //169 SPELL_AURA_MOD_CRIT_PERCENT_VERSUS
     &Aura::HandleNULL,                                      //170 SPELL_AURA_DETECT_AMORE       only for Detect Amore spell
     &Aura::HandleNULL,                                      //171 SPELL_AURA_MOD_PARTY_SPEED    unused
-    &Aura::HandleNULL,                                      //172 SPELL_AURA_MOD_PARTY_SPEED_MOUNTED
+    &Aura::HandleAuraModIncreaseMountedSpeed,               //172 SPELL_AURA_MOD_PARTY_SPEED_MOUNTED
     &Aura::HandleNULL,                                      //173 SPELL_AURA_ALLOW_CHAMPION_SPELLS  only for Proclaim Champion spell
     &Aura::HandleNoImmediateEffect,                         //174 SPELL_AURA_MOD_SPELL_DAMAGE_OF_SPIRIT     implemented in Unit::SpellDamageBonus
     &Aura::HandleNoImmediateEffect,                         //175 SPELL_AURA_MOD_SPELL_HEALING_OF_SPIRIT    implemented in Unit::SpellHealingBonus
@@ -258,7 +258,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //206 SPELL_AURA_MOD_SPEED_MOUNTED
     &Aura::HandleAuraModSpeedMountedFlight,                 //207 SPELL_AURA_MOD_SPEED_MOUNTED_FLIGHT
     &Aura::HandleAuraModSpeedFlight,                        //208 SPELL_AURA_MOD_SPEED_FLIGHT, used only in spell: Flight Form (Passive)
-    &Aura::HandleNULL,                                      //209
+    &Aura::HandleAuraModSpeedFlightAlways,                  //209 SPELL_AURA_MOD_SPEED_FLIGHT_ALWAYS
     &Aura::HandleNULL,                                      //210
     &Aura::HandleNULL,                                      //211
     &Aura::HandleNULL,                                      //212 SPELL_AURA_MOD_RANGED_ATTACK_POWER_OF_INTELLECT
@@ -2565,21 +2565,38 @@ void Aura::HandleAuraModIncreaseSpeed(bool apply, bool Real)
     sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
 }
 
+void Aura::HandleAuraModIncreaseMountedSpeedAlways(bool apply, bool Real)
+{
+    // all applied/removed only at real aura add/remove
+    if(!Real)
+        return;
+
+    sLog.outDebug("HandleAuraModIncreaseMountedSpeedAlways: Current Speed:%f \tmodify percent:%f", m_target->GetSpeed(MOVE_MOUNTED),(float)m_modifier.m_amount);
+    if(m_modifier.m_amount<=1)
+        return;
+
+    float rate = (100.0f + m_modifier.m_amount)/100.0f;
+
+    m_target->ApplySpeedMod(MOVE_MOUNTED, rate, false, apply );
+
+    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_MOUNTED));
+}
+
 void Aura::HandleAuraModIncreaseMountedSpeed(bool apply, bool Real)
 {
     // all applied/removed only at real aura add/remove
     if(!Real)
         return;
 
-    sLog.outDebug("HandleAuraModIncreaseMountedSpeed: Current Speed:%f \tmodify percent:%f", m_target->GetSpeed(MOVE_RUN),(float)m_modifier.m_amount);
+    sLog.outDebug("HandleAuraModIncreaseMountedSpeed: Current Speed:%f \tmodify percent:%f", m_target->GetSpeed(MOVE_MOUNTED),(float)m_modifier.m_amount);
     if(m_modifier.m_amount<=1)
         return;
 
     float rate = (100.0f + m_modifier.m_amount)/100.0f;
 
-    m_target->ApplySpeedMod(MOVE_RUN, rate, true, apply );
+    m_target->ApplySpeedMod(MOVE_MOUNTED, rate, true, apply );
 
-    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
+    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_MOUNTED));
 }
 
 void Aura::HandleAuraModDecreaseSpeed(bool apply, bool Real)
@@ -2594,12 +2611,14 @@ void Aura::HandleAuraModDecreaseSpeed(bool apply, bool Real)
         float rate = (100.0f + m_modifier.m_amount)/100.0f;
 
         m_target->ApplySpeedMod(MOVE_RUN, rate, true, apply );
+        m_target->ApplySpeedMod(MOVE_MOUNTED, rate, true, apply );
     }
     else
     {                                                       //for old spell dbc
         float rate = m_modifier.m_amount / 100.0f;
 
         m_target->ApplySpeedMod(MOVE_RUN, rate, true, apply );
+        m_target->ApplySpeedMod(MOVE_MOUNTED, rate, true, apply );
     }
     sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_RUN));
 }
@@ -3979,7 +3998,22 @@ void Aura::HandleAuraModSpeedFlight(bool apply, bool Real)
 
     sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_FLY));
 }
+void Aura::HandleAuraModSpeedFlightAlways(bool apply, bool Real)
+{
+    // all applied/removed only at real aura add/remove
+    if(!Real)
+        return;
 
+    sLog.outDebug("HandleAuraModSpeedFlightAlways: Current Speed:%f \tmodify percent:%f", m_target->GetSpeed(MOVE_FLY),(float)m_modifier.m_amount);
+    if(m_modifier.m_amount<=1)
+        return;
+
+    float rate = (100.0f + m_modifier.m_amount)/100.0f;
+
+    m_target->ApplySpeedMod(MOVE_FLY, rate, true, apply );
+
+    sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_FLY));
+}
 void Aura::HandleModRating(bool apply, bool Real)
 {
     if(m_target->GetTypeId() == TYPEID_PLAYER)

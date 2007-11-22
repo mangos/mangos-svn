@@ -51,7 +51,8 @@ float baseMoveSpeed[MAX_MOVE_TYPE] =
     4.5f,                                                   // MOVE_SWIMBACK
     3.141594f,                                              // MOVE_TURN
     7.0f,                                                   // MOVE_FLY
-    4.5f                                                    // MOVE_FLYBACK
+    4.5f,                                                   // MOVE_FLYBACK
+    7.0f                                                    // MOVE_MOUNTED
 };
 
 // auraTypes contains auras capable of proc'ing for attacker
@@ -5596,6 +5597,8 @@ void Unit::Mount(uint32 mount, bool taxi)
         else
             ((Player*)this)->SetOldPetNumber(0);
     }
+
+    ApplySpeedMod(MOVE_MOUNTED, 1.0f, true, true);          //Send Client mounted Speed 
 }
 
 void Unit::Unmount()
@@ -5614,6 +5617,8 @@ void Unit::Unmount()
 
         ((Player*)this)->SetOldPetNumber(0);
     }
+
+    ApplySpeedMod(MOVE_RUN, 1.0f, true, true);              //Send Client run speed 
 }
 
 void Unit::SetInCombat()
@@ -6110,12 +6115,25 @@ void Unit::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply
     else
         m_speed_rate[mtype] /= rate;
 
+    // Send speed change packet only for player
+    if (GetTypeId()!=TYPEID_PLAYER)
+        return;
+
+    // Not send speed change if MOVE_MOUNTED and not mounted
+    if (mtype == MOVE_MOUNTED && !((Player*)this)->IsMounted())
+        return; 
+
+    // Not send speed change if MOVE_RUN and mounted
+    if (mtype == MOVE_RUN     &&  ((Player*)this)->IsMounted())
+        return;
+
     switch(mtype)
     {
         case MOVE_WALK:
             if(forced) { data.Initialize(SMSG_FORCE_WALK_SPEED_CHANGE, 16); }
             else { data.Initialize(MSG_MOVE_SET_WALK_SPEED, 16); }
             break;
+        case MOVE_MOUNTED:
         case MOVE_RUN:
             if(forced) { data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE, 16); }
             else { data.Initialize(MSG_MOVE_SET_RUN_SPEED, 16); }
@@ -6146,15 +6164,14 @@ void Unit::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply
             sLog.outError("Unit::SetSpeed: Unsupported move type (%d), data not sent to client.",mtype);
             return;
     }
-
     data.append(GetPackGUID());
     data << (uint32)0;
-    if (mtype == MOVE_RUN) data << uint8(0);                // new 2.1.0
+    if (mtype == MOVE_RUN || mtype == MOVE_MOUNTED) data << uint8(0);   // new 2.1.0
     data << float(GetSpeed(mtype));
     SendMessageToSet( &data, true );
 
     if(Pet* pet = GetPet())
-        pet->SetSpeed(mtype,m_speed_rate[mtype],forced);
+        pet->SetSpeed(mtype==MOVE_MOUNTED ? MOVE_RUN : mtype,m_speed_rate[mtype],forced);
 }
 
 void Unit::SetHover(bool on)

@@ -115,6 +115,7 @@ class Aura
         void HandleAuraModStat(bool Apply, bool Real);
         void HandleAuraModIncreaseSpeed(bool Apply, bool Real);
         void HandleAuraModIncreaseMountedSpeed(bool Apply, bool Real);
+        void HandleAuraModIncreaseMountedSpeedAlways(bool apply, bool Real);
         void HandleAuraModDecreaseSpeed(bool Apply, bool Real);
         void HandleAuraModIncreaseHealth(bool Apply, bool Real);
         void HandleAuraModIncreaseEnergy(bool Apply, bool Real);
@@ -173,6 +174,7 @@ class Aura
         void HandleAuraAllowFlight(bool Apply, bool Real);
         void HandleAuraModSpeedMountedFlight(bool Apply, bool Real);
         void HandleAuraModSpeedFlight(bool Apply, bool Real);
+        void HandleAuraModSpeedFlightAlways(bool apply, bool Real);
         void HandleModRating(bool apply, bool Real);
         void HandleModTargetResistance(bool apply, bool Real);
         void HandleAuraModAttackPowerPercent(bool apply, bool Real);
