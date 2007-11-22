@@ -603,6 +603,7 @@ void WorldSession::LogoutPlayer(bool Save)
         {
             _player->CombatStop(true);
             _player->getHostilRefManager().setOnlineOfflineState(false);
+            _player->RemoveAllAurasOnDeath();
             _player->KillPlayer();
             _player->BuildPlayerRepop();
 
@@ -623,6 +624,13 @@ void WorldSession::LogoutPlayer(bool Save)
             // give honor to all attackers from set like group case
             for(std::set<Player*>::const_iterator itr = aset.begin(); itr != aset.end(); ++itr)
                 (*itr)->RewardHonor(_player,aset.size());
+        }
+        else if(_player->HasAuraType(SPELL_AURA_SPIRIT_OF_REDEMPTION))
+        {
+            // this will kill character by SPELL_AURA_SPIRIT_OF_REDEMPTION
+            _player->RemoveSpellsCausingAura(SPELL_AURA_MOD_SHAPESHIFT);
+            _player->KillPlayer();
+            _player->BuildPlayerRepop();
         }
 
         ///- Remove player from battleground (teleport to entrance)
