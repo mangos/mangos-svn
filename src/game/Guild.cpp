@@ -633,14 +633,30 @@ void Guild::Roster(WorldSession *session)
     Player *pl;
 
                                                             // we can only guess size
-    WorldPacket data(SMSG_GUILD_ROSTER, (4+MOTD.length()+1+GINFO.length()+1+4+m_ranks.size()*4+members.size()*50));
+    WorldPacket data(SMSG_GUILD_ROSTER, (4+MOTD.length()+1+GINFO.length()+1+6*8+m_ranks.size()*4+members.size()*50));
     data << (uint32)members.size();
     data << MOTD;
     data << GINFO;
 
     data << (uint32)m_ranks.size();
     for (RankList::iterator ritr = m_ranks.begin(); ritr != m_ranks.end();++ritr)
+    {
+        
         data << ritr->rights;
+        data << uint32(0);                                  //count of: withdraw gold(gold/day) Note: in game set gold, in packet set bronze.
+        data << uint32(0);                                  //flags:    view tabs = 0x01, deposit items =0x02  
+        data << uint32(0);                                  //count of: withdraw intems(stack/day)
+        data << uint32(0);                                  //rights4
+        data << uint32(0);                                  //rights5
+        data << uint32(0);                                  //rights6
+        data << uint32(0);                                  //rights7
+        data << uint32(0);                                  //rights8
+        data << uint32(0);                                  //rights9
+        data << uint32(0);                                  //rights10
+        data << uint32(0);                                  //rights11
+        data << uint32(0);                                  //rights12
+        data << uint32(0);                                  //rights13
+    }
 
     for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
     {
@@ -695,7 +711,7 @@ void Guild::Query(WorldSession *session)
         if(i < m_ranks.size())
             data << m_ranks[i].name;
         else
-            data << "Unused";
+            data << (uint8)0;                               // null string
     }
 
     data << uint32(EmblemStyle);
