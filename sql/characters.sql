@@ -106,7 +106,8 @@ CREATE TABLE `auctionhouse` (
   `startbid` int(11) NOT NULL default '0',
   `deposit` int(11) NOT NULL default '0',
   `location` tinyint(3) unsigned NOT NULL default '3',
-  PRIMARY KEY  (`id`)
+  PRIMARY KEY  (`id`),
+  UNIQUE KEY `item_guid` (`itemguid`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
 --
