@@ -2276,7 +2276,7 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
     do
     {
         Field *fields = result->Fetch();
-        uint16 id = fields[0].GetUInt16();
+        uint32 id = fields[0].GetUInt32();
         std::string name = fields[1].GetCppString();
 
         QuestStatus status = target->GetQuestStatus(id);
@@ -2317,7 +2317,7 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
     do
     {
         Field *fields = result->Fetch();
-        uint16 id = fields[0].GetUInt16();
+        uint32 id = fields[0].GetUInt32();
         std::string name = fields[1].GetCppString();
         PSendSysMessage(LANG_CREATURE_ENTRY_LIST,id,id,name.c_str());
     } while (result->NextRow());
