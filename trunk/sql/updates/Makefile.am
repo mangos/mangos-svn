@@ -514,6 +514,7 @@ pkgdata_DATA = \
 	4714_mangos_spell_threat.sql \
 	4718_mangos_uptime.sql \
 	4737_mangos_command.sql \
+	4764_characters_auctionhouse.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -1008,5 +1009,6 @@ EXTRA_DIST = \
 	4714_mangos_spell_threat.sql \
 	4718_mangos_uptime.sql \
 	4737_mangos_command.sql \
+	4764_characters_auctionhouse.sql \
 	README
 
