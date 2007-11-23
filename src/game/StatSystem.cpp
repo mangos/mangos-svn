@@ -507,7 +507,7 @@ void Player::UpdateManaRegen()
 {
     uint8 PlayerClass = getClass();
     float Spirit = GetStat(STAT_SPIRIT);
-    uint32 Intellect = GetStat(STAT_INTELLECT);
+    float Intellect = GetStat(STAT_INTELLECT);
     float SpiritBasedRegen = 0;
     switch (PlayerClass)
     {

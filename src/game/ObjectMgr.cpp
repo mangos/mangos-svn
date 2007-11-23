@@ -2236,7 +2236,7 @@ void ObjectMgr::LoadQuests()
 
                 if((qinfo->SpecialFlags & QUEST_SPECIAL_FLAGS_DELIVER)==0)
                 {
-                    sLog.outErrorDb("Quest %u has `ReqItemId%d` = %u but `SpecialFlags` doest not have delivery type bit set, quest can be done without item delivery!",
+                    sLog.outErrorDb("Quest %u has `ReqItemId%d` = %u but `SpecialFlags` does not have delivery type bit set, quest can be done without item delivery!",
                         qinfo->GetQuestId(),j+1,id);
                     qinfo->ReqItemCount[j] = 0;             // prevent incorrect work of quest
                 }

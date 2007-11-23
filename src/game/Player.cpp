@@ -1697,8 +1697,6 @@ void Player::Regenerate(Powers power)
 {
     uint32 curValue = GetPower(power);
     uint32 maxValue = GetMaxPower(power);
-    uint32 Intellect = GetStat(STAT_INTELLECT);
-
 
     float addvalue = 0.0f;
     uint32 msecSinceLastCast = (uint32)getMSTime() - m_lastManaUse;
