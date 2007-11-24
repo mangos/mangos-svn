@@ -161,6 +161,21 @@ void LoadDBCStores(std::string dataPath)
     StoreProblemList bad_dbc_files;
 
     LoadDBC(bar,bad_dbc_files,sAreaStore,                dataPath+"dbc/AreaTable.dbc");
+
+    // must be after sAreaStore loading
+    for(uint32 i = 0; i < sAreaStore.nCount; ++i)           // areaflag numbered from 0
+    {
+        if(AreaTableEntry const* area = sAreaStore.LookupEntry(i))
+        {
+            // fill AreaId->DBC records
+            sAreaFlagByAreaID.insert(AreaFlagByAreaID::value_type(area->ID,area->exploreFlag));
+
+            // fill MapId->DBC records ( skip sub zones and continents )
+            if(area->zone==0 && area->mapid != 0 && area->mapid != 1 && area->mapid != 530 )
+                sAreaFlagByMapID.insert(AreaFlagByMapID::value_type(area->mapid,area->exploreFlag));
+        }
+    }
+
     LoadDBC(bar,bad_dbc_files,sAreaTriggerStore,         dataPath+"dbc/AreaTrigger.dbc");
     LoadDBC(bar,bad_dbc_files,sBankBagSlotPricesStore,   dataPath+"dbc/BankBagSlotPrices.dbc");
     LoadDBC(bar,bad_dbc_files,sBattlemasterListStore,    dataPath+"dbc/BattlemasterList.dbc");
@@ -193,27 +208,6 @@ void LoadDBCStores(std::string dataPath)
     LoadDBC(bar,bad_dbc_files,sItemSetStore,             dataPath+"dbc/ItemSet.dbc");
     LoadDBC(bar,bad_dbc_files,sLockStore,                dataPath+"dbc/Lock.dbc");
     LoadDBC(bar,bad_dbc_files,sMapStore,                 dataPath+"dbc/Map.dbc");
-
-    // must be after sAreaStore and sMapStore loading
-    for(uint32 i = 0; i < sAreaStore.nCount; ++i)           // areaflag numbered from 0
-    {
-        if(AreaTableEntry const* area = sAreaStore.LookupEntry(i))
-        {
-            // fill AreaId->DBC records
-            sAreaFlagByAreaID.insert(AreaFlagByAreaID::value_type(area->ID,area->exploreFlag));
-
-            // fill MapId->DBC records
-            if(area->zone==0)                               // not sub-zone
-            {
-                MapEntry const* mapEntry = sMapStore.LookupEntry(area->mapid);
-                if(mapEntry && mapEntry->map_type != 0 /*MAP_COMMON*/)
-                {
-                    sAreaFlagByMapID.insert(AreaFlagByMapID::value_type(area->mapid,area->exploreFlag));
-                }
-            }
-        }
-    }
-
     LoadDBC(bar,bad_dbc_files,sSkillLineStore,           dataPath+"dbc/SkillLine.dbc");
     LoadDBC(bar,bad_dbc_files,sSkillLineAbilityStore,    dataPath+"dbc/SkillLineAbility.dbc");
     LoadDBC(bar,bad_dbc_files,sSpellStore,               dataPath+"dbc/Spell.dbc");
