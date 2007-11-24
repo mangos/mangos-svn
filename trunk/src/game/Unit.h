@@ -1115,7 +1115,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void RemoveGameObject(uint32 spellid, bool del);
         DynamicObject *GetDynObject(uint32 spellId, uint32 effIndex);
         uint32 CalculateDamage(WeaponAttackType attType);
-        void ModifyAuraState(uint32 flag, bool apply);
+        void ModifyAuraState(AuraState flag, bool apply);
+        bool HasAuraState(AuraState flag) const { return HasFlag(UNIT_FIELD_AURASTATE, 1<<(flag-1)); }
         void UnsummonAllTotems();
         uint32 SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint32 damage, DamageEffectType damagetype);
         uint32 SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, DamageEffectType damagetype, Unit *pVictim);
