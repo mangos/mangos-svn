@@ -227,12 +227,48 @@ struct GemPropertiesEntry
     uint32      color;
 };
 
+#define GT_MAX_LEVEL    100
+struct GtCombatRatingsEntry
+{
+    float    ratio;
+};
+
 struct GtChanceToMeleeCritBaseEntry
 {
     float    base;
 };
 
 struct GtChanceToMeleeCritEntry
+{
+    float    ratio;
+};
+
+struct GtChanceToSpellCritBaseEntry
+{
+    float    base;
+};
+
+struct GtChanceToSpellCritEntry
+{
+    float    ratio;
+};
+
+struct GtOCTRegenHPEntry
+{
+    float    ratio;
+};
+
+struct GtOCTRegenMPEntry
+{
+    float    ratio;
+};
+
+struct GtRegenHPPerSptEntry
+{
+    float    ratio;
+};
+
+struct GtRegenMPPerSptEntry
 {
     float    ratio;
 };

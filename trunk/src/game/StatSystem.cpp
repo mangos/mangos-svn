@@ -344,35 +344,7 @@ void Player::UpdateCritPercentage(WeaponAttackType attType)
 
 void Player::UpdateAllCritPercentages()
 {
-    GtChanceToMeleeCritBaseEntry const * gtCritBase = sGtChanceToMeleeCritBaseStore.LookupEntry(getClass() - 1);
-    float base_crit = gtCritBase ? gtCritBase->base * 100.0f : 0.0f;
-
-    /*
-    GtChanceToMeleeCritEntry     const * gtCritRate = sGtChanceToMeleeCritStore.LookupEntry((getClass() - 1) * 100 + getLevel() - 1);
-
-    // values in sGtChanceToMeleeCritStore only until 100 level with 0 values - better use last level (70) at 2.1.3 for overflow level
-    float rate_value = gtCritRate ? gtCritRate->ratio * 100 : sGtChanceToMeleeCritStore.LookupEntry((getClass() - 1) * 100 + 70 - 1)->ratio * 100;
-
-    float value = base_crit + GetStat(STAT_AGILITY) * (0.04 + rate_value);
-    */
-
-    // temporary used old code until finding correct formula for GtChanceToMeleeCritEntry
-    float classrate = 20.0f;
-
-    switch(getClass())
-    {
-        case CLASS_WARRIOR: classrate = getLevel() > 60 ? 25 : 20; break;
-        case CLASS_PALADIN: classrate = getLevel() > 60 ? 25 : 20; break;
-        case CLASS_HUNTER:  classrate = getLevel() > 60 ? 40 : 33; break;
-        case CLASS_ROGUE:   classrate = getLevel() > 60 ? 40 : 29; break;
-        case CLASS_PRIEST:  classrate = getLevel() > 60 ? 25 : 20; break;
-        case CLASS_SHAMAN:  classrate = getLevel() > 60 ? 25 : 20; break;
-        case CLASS_MAGE:    classrate = getLevel() > 60 ? 25 : 20; break;
-        case CLASS_WARLOCK: classrate = getLevel() > 60 ? 25 : 20; break;
-        case CLASS_DRUID:   classrate = getLevel() > 60 ? 24.46f : 20; break;
-    }
-
-    float value = base_crit + GetStat(STAT_AGILITY) / classrate;
+    float value = GetMeleeCritFromAgility();
 
     SetBaseModValue(CRIT_PERCENTAGE, PCT_MOD, value);
     SetBaseModValue(OFFHAND_CRIT_PERCENTAGE, PCT_MOD, value);
@@ -445,60 +417,9 @@ void Player::UpdateSpellCritChance(uint32 school)
 
 void Player::UpdateAllSpellCritChances()
 {
-    uint32 playerClass = getClass();
-
-    static const struct
-    {
-        float base;
-        float rate0, rate1;
-    }
-    crit_data[MAX_CLASSES] =
-    {
-        {                                                   //  0: unused
-            0,0,10
-        },
-        {                                                   //  1: warrior
-            0,0,10
-        },
-        {                                                   //  2: paladin
-            3.70,14.77,0.65
-        },
-        {                                                   //  3: hunter
-            0,0,10
-        },
-        {                                                   //  4: rogue
-            0,0,10
-        },
-        {                                                   //  5: priest
-            2.97,10.03,0.82
-        },
-        {                                                   //  6: unused
-            0,0,10
-        },
-        {                                                   //  7: shaman
-            3.54,11.51,0.80
-        },
-        {                                                   //  8: mage
-            3.70,14.77,0.65
-        },
-        {                                                   //  9: warlock
-            3.18,11.30,0.82
-        },
-        {                                                   // 10: unused
-            0,0,10
-        },
-        {                                                   // 11: druid
-            3.33,12.41,0.79
-        }
-    };
-
-    float crit_ratio = crit_data[playerClass].rate0 + crit_data[playerClass].rate1 * getLevel();
-    float base_value = 5 + GetStat(STAT_INTELLECT) / crit_ratio;
-
+    float base_value = GetSpellCritFromIntellect();
     SetBaseModValue(SPELL_CRIT_PERCENTAGE, PCT_MOD, base_value);
-
     SetStatFloatValue(PLAYER_SPELL_CRIT_PERCENTAGE1, base_value);
-
     for (int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; i++)
         UpdateSpellCritChance(i);
 }
@@ -508,19 +429,7 @@ void Player::UpdateManaRegen()
     uint8 PlayerClass = getClass();
     float Spirit = GetStat(STAT_SPIRIT);
     float Intellect = GetStat(STAT_INTELLECT);
-    float SpiritBasedRegen = 0;
-    switch (PlayerClass)
-    {
-        // Mana gained from Spirit PER SECOND not PER TICK
-        case CLASS_DRUID:   SpiritBasedRegen = ((Spirit/5 + 15)/2);       break;
-        case CLASS_HUNTER:  SpiritBasedRegen = ((Spirit/5 + 15)/2);       break;
-        case CLASS_MAGE:    SpiritBasedRegen = ((Spirit/4 + 12.5)/2);     break;
-        case CLASS_PALADIN: SpiritBasedRegen = ((Spirit/5 + 15)/2);       break;
-        case CLASS_PRIEST:  SpiritBasedRegen = ((Spirit/4 + 12.5)/2);     break;
-        case CLASS_SHAMAN:  SpiritBasedRegen = ((Spirit/5 + 17)/2);       break;
-        case CLASS_WARLOCK: SpiritBasedRegen = ((Spirit/5 + 15)/2);       break;
-    }
-
+    float SpiritBasedRegen = OCTRegenMPPerSpirit();
     float power_regen_mod = 0;
     AuraList const& ModPowerRegenAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN);
     for(AuraList::const_iterator i = ModPowerRegenAuras.begin();i != ModPowerRegenAuras.end(); ++i)

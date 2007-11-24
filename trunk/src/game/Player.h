@@ -1342,6 +1342,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint16 GetDefenseSkillBonusValue() const;
         void UpdateDefenseBonusesMod();
         void ApplyRatingMod(uint16 index, int32 value, bool apply);
+        float GetMeleeCritFromAgility();
+        float GetSpellCritFromIntellect();
+        float OCTRegenHPPerSpirit();
+        float OCTRegenMPPerSpirit();
         float GetRatingCoefficient(uint16 index) const;
         float GetRatingBonusValue(uint16 index) const;
         void UpdateBlockPercentage();

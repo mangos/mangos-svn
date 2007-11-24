@@ -170,8 +170,17 @@ extern DBCStorage <EmotesTextEntry>           sEmotesTextStore;
 extern DBCStorage <FactionEntry>              sFactionStore;
 extern DBCStorage <FactionTemplateEntry>      sFactionTemplateStore;
 extern DBCStorage <GemPropertiesEntry>        sGemPropertiesStore;
+
+extern DBCStorage <GtCombatRatingsEntry>         sGtCombatRatingsStore;
 extern DBCStorage <GtChanceToMeleeCritBaseEntry> sGtChanceToMeleeCritBaseStore;
-//extern DBCStorage <GtChanceToMeleeCritEntry>  sGtChanceToMeleeCritStore;
+extern DBCStorage <GtChanceToMeleeCritEntry>     sGtChanceToMeleeCritStore;
+extern DBCStorage <GtChanceToSpellCritBaseEntry> sGtChanceToSpellCritBaseStore;
+extern DBCStorage <GtChanceToSpellCritEntry>     sGtChanceToSpellCritStore;
+extern DBCStorage <GtOCTRegenHPEntry>            sGtOCTRegenHPStore;
+extern DBCStorage <GtOCTRegenMPEntry>            sGtOCTRegenMPStore;
+extern DBCStorage <GtRegenHPPerSptEntry>         sGtRegenHPPerSptStore;
+extern DBCStorage <GtRegenMPPerSptEntry>         sGtRegenMPPerSptStore;
+
 //extern DBCStorage <ItemDisplayInfoEntry>      sItemDisplayInfoStore; -- not used currently
 extern DBCStorage <ItemExtendedCostEntry>     sItemExtendedCostStore;
 extern DBCStorage <ItemRandomPropertiesEntry> sItemRandomPropertiesStore;
