@@ -1771,19 +1771,7 @@ void Player::RegenerateHealth()
     // normal regen case (maybe partly in combat case)
     if (!isInCombat() || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT) )
     {
-        switch (Class)
-        {
-            case CLASS_DRUID:   addvalue = (Spirit*0.11 + 1)   * HealthIncreaseRate; break;
-            case CLASS_HUNTER:  addvalue = (Spirit*0.43 - 5.5) * HealthIncreaseRate; break;
-            case CLASS_MAGE:    addvalue = (Spirit*0.11 + 1)   * HealthIncreaseRate; break;
-            case CLASS_PALADIN: addvalue = (Spirit*0.25)       * HealthIncreaseRate; break;
-            case CLASS_PRIEST:  addvalue = (Spirit*0.15 + 1.4) * HealthIncreaseRate; break;
-            case CLASS_ROGUE:   addvalue = (Spirit*0.84 - 13)  * HealthIncreaseRate; break;
-            case CLASS_SHAMAN:  addvalue = (Spirit*0.28 - 3.6) * HealthIncreaseRate; break;
-            case CLASS_WARLOCK: addvalue = (Spirit*0.12 + 1.5) * HealthIncreaseRate; break;
-            case CLASS_WARRIOR: addvalue = (Spirit*1.26 - 22.6)* HealthIncreaseRate; break;
-        }
-
+        addvalue = OCTRegenHPPerSpirit()* HealthIncreaseRate;
         if (!isInCombat())
         {
             AuraList const& mModHealthRegenPct = GetAurasByType(SPELL_AURA_MOD_HEALTH_REGEN_PERCENT);
@@ -3941,69 +3929,50 @@ uint32 Player::GetSpellSchoolByBaseGroup(BaseModGroup baseGroup) const
     return school;
 }
 
+float Player::GetMeleeCritFromAgility()
+{
+    uint32 level = getLevel();
+    uint32 pclass = getClass();
+
+    if (level>GT_MAX_LEVEL) level = GT_MAX_LEVEL;
+
+    GtChanceToMeleeCritBaseEntry const *critBase  = sGtChanceToMeleeCritBaseStore.LookupEntry(pclass-1);
+    GtChanceToMeleeCritEntry     const *critRatio = sGtChanceToMeleeCritStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
+    if (critBase==NULL || critRatio==NULL)
+        return 0.0f;
+
+    float crit=critBase->base + GetStat(STAT_AGILITY)*critRatio->ratio;
+    return crit*100.0f;
+}
+
+float Player::GetSpellCritFromIntellect()
+{
+    uint32 level = getLevel();
+    uint32 pclass = getClass();
+
+    if (level>GT_MAX_LEVEL) level = GT_MAX_LEVEL;
+
+    GtChanceToSpellCritBaseEntry const *critBase  = sGtChanceToSpellCritBaseStore.LookupEntry(pclass-1);
+    GtChanceToSpellCritEntry     const *critRatio = sGtChanceToSpellCritStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
+    if (critBase==NULL || critRatio==NULL)
+        return 0.0f;
+
+    float crit=critBase->base + GetStat(STAT_INTELLECT)*critRatio->ratio;
+    return crit*100.0f;
+}
+
 float Player::GetRatingCoefficient(uint16 index) const
 {
-    float modValue = 0.0f;
-    float RatingCoefficient = 1.0f;
-
-    //Global formulas for all skills based on player level
     uint32 level = getLevel();
-    if (level < 10)
-        modValue = 2.0f / 52.0f;
-    else if (level < 60)
-        modValue = (level - 8.0f) / 52.0f;
-    else if (level < 70)
-        modValue = 82.0f / (262.0f - 3.0f * level);
-    else modValue = (level + 12.0f) / 52.0f;
+    uint32 CR_Id = index - PLAYER_FIELD_COMBAT_RATING_1;  
 
-    switch(index)
-    {
-        case PLAYER_FIELD_MELEE_WEAPON_SKILL_RATING:
-        case PLAYER_FIELD_OFFHAND_WEAPON_SKILL_RATING:
-                                                            //Weapon skill: 2.5
-        case PLAYER_FIELD_RANGED_WEAPON_SKILL_RATING:  RatingCoefficient = 2.5 * modValue;      break;
-                                                            //Defense: 1.5
-        case PLAYER_FIELD_DEFENCE_RATING:              RatingCoefficient = 1.5 * modValue;      break;
-                                                            //Dodge: 12
-        case PLAYER_FIELD_DODGE_RATING:                RatingCoefficient = 12.0 * modValue;     break;
-                                                            //Dodge: 12
-        case PLAYER_FIELD_PARRY_RATING:                RatingCoefficient = 20.0 * modValue;     break;
-                                                            //Block: 5
-        case PLAYER_FIELD_BLOCK_RATING:                RatingCoefficient = 5.0 * modValue;      break;
-                                                            //Hit (melee): 10
-        case PLAYER_FIELD_MELEE_HIT_RATING:            RatingCoefficient = 10.0 * modValue;     break;
-                                                            //Hit (melee): 10
-        case PLAYER_FIELD_RANGED_HIT_RATING:           RatingCoefficient = 10.0 * modValue;     break;
-                                                            //Hit (spells): 8
-        case PLAYER_FIELD_SPELL_HIT_RATING:            RatingCoefficient = 8.0 * modValue;      break;
-                                                            //Crit (melee and spells): 14
-        case PLAYER_FIELD_MELEE_CRIT_RATING:           RatingCoefficient = 14.0 * modValue;     break;
-                                                            //Crit (melee and spells): 14
-        case PLAYER_FIELD_RANGED_CRIT_RATING:          RatingCoefficient = 14.0 * modValue;     break;
-                                                            //Crit (melee and spells): 14
-        case PLAYER_FIELD_SPELL_CRIT_RATING:           RatingCoefficient = 14.0 * modValue;     break;
-                                                            //Haste: 6.67
-        case PLAYER_FIELD_MELEE_HASTE_RATING:          RatingCoefficient = 6.66667f * modValue; break;
-                                                            //Haste: 6.67
-        case PLAYER_FIELD_RANGED_HASTE_RATING:         RatingCoefficient = 6.66667f * modValue; break;
-                                                            //Haste: 6.67
-        case PLAYER_FIELD_SPELL_HASTE_RATING:          RatingCoefficient = 6.66667f * modValue; break;
-                                                            //Hit (melee): 10
-        case PLAYER_FIELD_HIT_RATING:                  RatingCoefficient = 10.0 * modValue;     break;
-                                                            //Crit (melee and spells): 14
-        case PLAYER_FIELD_CRIT_RATING:                 RatingCoefficient = 14.0 * modValue;     break;
-        /*
-        case PLAYER_FIELD_HIT_AVOIDANCE_RATING:                                                 break;
-        case PLAYER_FIELD_CRIT_AVOIDANCE_RATING:                                                break;
-        */
-                                                            //Resilience: 25
-        case PLAYER_FIELD_RESILIENCE_RATING:           RatingCoefficient = 25.0 * modValue;     break;
+    if (level>GT_MAX_LEVEL) level = GT_MAX_LEVEL;
 
-        default:
-            break;
-    }
+    GtCombatRatingsEntry const *Rating = sGtCombatRatingsStore.LookupEntry(CR_Id*GT_MAX_LEVEL+level-1);
+    if (Rating == NULL)
+        return 1.0f;                                        // By default use minimum coefficient (not must be called)
 
-    return RatingCoefficient;
+    return Rating->ratio;
 }
 
 float Player::GetRatingBonusValue(uint16 index) const
@@ -4011,6 +3980,48 @@ float Player::GetRatingBonusValue(uint16 index) const
     float value = float(GetUInt32Value(index)) / GetRatingCoefficient(index);
 
     return value;
+}
+
+float Player::OCTRegenHPPerSpirit()
+{
+    uint32 level = getLevel();
+    uint32 pclass = getClass();
+
+    if (level>GT_MAX_LEVEL) level = GT_MAX_LEVEL;
+
+    GtOCTRegenHPEntry     const *baseRatio = sGtOCTRegenHPStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
+    GtRegenHPPerSptEntry  const *moreRatio = sGtRegenHPPerSptStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
+    if (baseRatio==NULL || moreRatio==NULL)
+        return 0.0f;
+
+    // Formula from PaperDollFrame script
+    float spirit = GetStat(STAT_SPIRIT);
+    float baseSpirit = spirit;
+    if (baseSpirit>50) baseSpirit = 50;
+    float moreSpirit = spirit - baseSpirit;
+    float regen = baseSpirit * baseRatio->ratio + moreSpirit * moreRatio->ratio;
+    return regen;
+}
+
+float Player::OCTRegenMPPerSpirit()
+{
+    uint32 level = getLevel();
+    uint32 pclass = getClass();
+
+    if (level>GT_MAX_LEVEL) level = GT_MAX_LEVEL;
+
+    GtOCTRegenMPEntry     const *baseRatio = sGtOCTRegenMPStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
+    GtRegenMPPerSptEntry  const *moreRatio = sGtRegenMPPerSptStore.LookupEntry((pclass-1)*GT_MAX_LEVEL + level-1);
+    if (baseRatio==NULL || moreRatio==NULL)
+        return 0.0f;
+
+    // Formula get from PaperDollFrame script
+    float spirit = GetStat(STAT_SPIRIT);
+    float baseSpirit = spirit;
+    if (baseSpirit>50) baseSpirit = 50;
+    float moreSpirit = spirit - baseSpirit;
+    float regen = baseSpirit * baseRatio->ratio + moreSpirit * moreRatio->ratio;
+    return regen;
 }
 
 void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
