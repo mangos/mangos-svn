@@ -311,11 +311,11 @@ struct MapEntry
                                                             //21-23 unused (something PvPZone related - levels?)
                                                             //24-27
     //char*     hordeIntro                                  //28-43 text for PvP Zones
-    //uint32    flags;                                      //44 intro text flags, used in hack way to detect expansion maps
+                                                            //44 intro text flags
     //char*     allianceIntro                               //45-60 text for PvP Zones
                                                             //46 intro text flags
                                                             //47-65 not used
-    //chat*     unknownText1                                //66-81 unknown empty text fields
+    //chat*     unknownText1                                //66-81 unknown empty text fields, possible normal Intro text.
                                                             //82 text flags
     //chat*     heroicIntroText                             //83-98 heroic mode requirement text
                                                             //99 text flags
