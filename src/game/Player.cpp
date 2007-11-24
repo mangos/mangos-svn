@@ -2532,7 +2532,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
             (spell_id == 33948 && m_form == FORM_FLIGHT) ||
             (spell_id == 40121 && m_form == FORM_SWIFT_FLIGHT) )
                                                             //Check CasterAuraStates
-            if (!spellInfo->CasterAuraState || HasFlag(UNIT_FIELD_AURASTATE, (1<<(spellInfo->CasterAuraState-1))))
+            if (!spellInfo->CasterAuraState || HasAuraState(AuraState(spellInfo->CasterAuraState)))
                 CastSpell(this, spell_id, true);
     }
 

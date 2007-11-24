@@ -4823,7 +4823,7 @@ void Unit::RemoveAllAttackers()
     }
 }
 
-void Unit::ModifyAuraState(uint32 flag, bool apply)
+void Unit::ModifyAuraState(AuraState flag, bool apply)
 {
     if (apply)
     {
@@ -5082,6 +5082,19 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     for(AuraList::const_iterator i = mModDamagePercentTaken.begin(); i != mModDamagePercentTaken.end(); ++i)
         if( ((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellProto->School)) != 0 )
             TakenTotalMod *= ((*i)->GetModifier()->m_amount+100.0f)/100.0f;
+
+    // .. taken pct: scripted (increases damage of * against targets *) 
+    AuraList const& mOverrideClassScript = GetAurasByType(SPELL_AURA_OVERRIDE_CLASS_SCRIPTS);
+    for(AuraList::const_iterator i = mOverrideClassScript.begin(); i != mOverrideClassScript.end(); ++i)
+    {
+        switch((*i)->GetModifier()->m_miscvalue)
+        {
+            //Molten Fury
+            case 4920: case 4919:
+                if(pVictim->HasAuraState(AURA_STATE_HEALTHLESS_20_PERCENT))
+                    TakenTotalMod *= (100.0f+(*i)->GetModifier()->m_amount)/100.0f; break;
+        }
+    }
 
     // Exceptions
     // Lifetap
