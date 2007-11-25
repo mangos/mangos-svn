@@ -232,6 +232,11 @@ void Creature::Update(uint32 diff)
         {
             Unit::Update( diff );
 
+            // creature can be dead after Unit::Update call
+            // CORPSE/DEAD state will processed at next tick (in other case death timer will be updated unexpectedly)
+            if(!isAlive())
+                break;
+
             if(!IsInEvadeMode())
                 i_AI->UpdateAI(diff);
 
@@ -284,10 +289,15 @@ void Creature::RegenerateHealth()
 {
     if (!isRegeneratingHealth())
         return;
+
     uint32 curValue = GetHealth();
     uint32 maxValue = GetMaxHealth();
 
-    if (curValue >= maxValue) return;
+    if (curValue >= maxValue)
+        return;
+
+    if (curValue <= 0)
+        return;
 
     float HealthIncreaseRate = sWorld.getRate(RATE_HEALTH);
 
