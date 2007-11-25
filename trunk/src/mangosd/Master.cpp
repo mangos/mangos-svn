@@ -124,9 +124,11 @@ void Master::Run()
         else if (RAListenSocket.Bind(raip, raport))
             sLog.outError( "MaNGOS RA can not bind to port %d on %s", raport, stringip.c_str());
         else
+        {
             h.Add(&RAListenSocket);
 
-        sLog.outString("Starting Remote access listner on port %d on %s", raport, stringip.c_str());
+            sLog.outString("Starting Remote access listner on port %d on %s", raport, stringip.c_str());
+        }
     }
 
     ///- Handle affinity for multiple processors and process priority on Windows
