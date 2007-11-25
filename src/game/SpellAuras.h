@@ -31,7 +31,7 @@ struct DamageManaShield
 
 struct Modifier
 {
-    uint8 m_auraname;
+    AuraType m_auraname;
     int32 m_amount;
     int32 m_miscvalue;
     uint32 m_miscvalue2;
@@ -192,7 +192,7 @@ class Aura
         Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
         virtual ~Aura();
 
-        void SetModifier(uint8 t, int32 a, uint32 pt, int32 miscValue, uint32 miscValue2);
+        void SetModifier(AuraType t, int32 a, uint32 pt, int32 miscValue, uint32 miscValue2);
         Modifier* GetModifier() {return &m_modifier;}
 
         SpellEntry const* GetSpellProto() const { return m_spellProto; }

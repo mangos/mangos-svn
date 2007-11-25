@@ -47,10 +47,11 @@ class UpdateMask;
 
 typedef std::deque<Mail*> PlayerMails;
 
+// Note: SPELLMOD_* values is aura types in fact
 enum SpellModType
 {
-    SPELLMOD_FLAT         = 107,
-    SPELLMOD_PCT          = 108
+    SPELLMOD_FLAT         = 107,                            // SPELL_AURA_ADD_FLAT_MODIFIER
+    SPELLMOD_PCT          = 108                             // SPELL_AURA_ADD_PCT_MODIFIER
 };
 
 enum PlayerSpellState
@@ -63,18 +64,18 @@ enum PlayerSpellState
 
 struct PlayerSpell
 {
-    uint16 slotId;
-    uint8 active;
-    PlayerSpellState state;
+    uint16 slotId          : 16;
+    uint8 active           : 8;
+    PlayerSpellState state : 8;
 };
 
 struct SpellModifier
 {
-    uint8 op;
-    uint8 type;
+    SpellModOp   op   : 8;
+    SpellModType type : 8;
+    int16 charges     : 16;
     int32 value;
     uint64 mask;
-    int16 charges;
     uint32 spellId;
     uint32 effectId;
     uint32 lastAffected;

@@ -14200,7 +14200,7 @@ void Player::RemoveSpellMods(uint32 spellId)
     if(!spellId || (m_SpellModRemoveCount == 0))
         return;
 
-    for(int i=0;i<SPELLMOD_COUNT;++i)
+    for(int i=0;i<MAX_SPELLMOD;++i)
         for (SpellModList::iterator itr = m_spellMods[i].begin(), next; itr != m_spellMods[i].end(); itr = next)
     {
         next = itr;
@@ -15333,13 +15333,13 @@ void Player::SendInitialPacketsAfterAddToMap()
     // set some aura effects that send packet to player client after add player to map
     // SendMessageToSet not send it to player not it map, only for aura that not changed anything at re-apply
     // same auras state lost at far teleport, send it one more time in this case also
-    static const uint32 auratypes[] =
+    static const AuraType auratypes[] =
     {
         SPELL_AURA_MOD_FEAR,     SPELL_AURA_TRANSFORM, SPELL_AURA_WATER_WALK,
         SPELL_AURA_FEATHER_FALL, SPELL_AURA_HOVER,     SPELL_AURA_SAFE_FALL,
-        SPELL_AURA_FLY,          0
+        SPELL_AURA_FLY,          SPELL_AURA_NONE
     };
-    for(uint32 const* itr = &auratypes[0]; itr && itr[0] !=0; ++itr)
+    for(AuraType const* itr = &auratypes[0]; itr && itr[0] != SPELL_AURA_NONE; ++itr)
     {
         Unit::AuraList const& auraList = GetAurasByType(*itr);
         if(!auraList.empty())

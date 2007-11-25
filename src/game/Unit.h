@@ -102,7 +102,7 @@ enum SpellModOp
     SPELLMOD_RESIST_DISPEL_CHANCE = 28
 };
 
-#define SPELLMOD_COUNT 32
+#define MAX_SPELLMOD 32
 
 #define BASE_MINDAMAGE 1.0f
 #define BASE_MAXDAMAGE 2.0f
@@ -693,7 +693,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         typedef std::multimap< spellEffectPair, Aura*> AuraMap;
         typedef std::list<Aura *> AuraList;
         typedef std::list<DiminishingReturn> Diminishing;
-        typedef std::set<uint32> AuraTypeSet;
+        typedef std::set<AuraType> AuraTypeSet;
 
         virtual ~Unit ( );
 
@@ -902,7 +902,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool isAttacking() const { return hasUnitState(UNIT_STAT_ATTACKING); }
         bool isAttacked()  const { return hasUnitState(UNIT_STAT_ATTACK_BY); }
 
-        bool HasAuraType(uint32 auraType) const;
+        bool HasAuraType(AuraType auraType) const;
         bool HasAura(uint32 spellId, uint32 effIndex) const
             { return m_Auras.find(spellEffectPair(spellId, effIndex)) != m_Auras.end(); }
         
@@ -915,7 +915,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         bool isFrozen() const;
 
-        void RemoveSpellbyDamageTaken(uint32 auraType, uint32 damage);
+        void RemoveSpellbyDamageTaken(AuraType auraType, uint32 damage);
 
         bool isTargetableForAttack() const;
         virtual bool IsInWater() const;
@@ -976,7 +976,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void RemoveSingleAuraFromStack(uint32 spellId, uint32 effindex);
         void RemoveAurasDueToSpell(uint32 spellId);
         void RemoveAurasDueToItem(Item* castItem);
-        void RemoveSpellsCausingAura(uint32 auraType);
+        void RemoveSpellsCausingAura(AuraType auraType);
         void RemoveRankAurasDueToSpell(uint32 spellId);
         bool RemoveNoStackAurasDueToAura(Aura *Aur);
         void RemoveAreaAurasByOthers(uint64 guid = 0);
@@ -1100,9 +1100,9 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         Aura* GetAura(uint32 spellId, uint32 effindex);
         AuraMap& GetAuras( ) {return m_Auras;}
-        AuraList const& GetAurasByType(uint8 type) const { return m_modAuras[type]; }
+        AuraList const& GetAurasByType(AuraType type) const { return m_modAuras[type]; }
         void ApplyAuraProcTriggerDamage(Aura* aura, bool apply);
-        long GetTotalAuraModifier(uint32 ModifierID) const;
+        long GetTotalAuraModifier(AuraType auratype) const;
         void SendMoveToPacket(float x, float y, float z, bool run, uint32 transitTime = 0);
         void setTransForm(uint32 spellid) { m_transform = spellid;}
         uint32 getTransForm() { return m_transform;}
