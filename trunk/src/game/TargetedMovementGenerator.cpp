@@ -46,7 +46,7 @@ TargetedMovementGenerator<T>::_setTargetLocation(T &owner)
     if( !&i_target || !&owner )
         return;
 
-    if( owner.hasUnitState(UNIT_STAT_ROOT) || owner.hasUnitState(UNIT_STAT_STUNDED) )
+    if( owner.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNDED) )
         return;
 
     // prevent redundant micro-movement for pets, other followers.
@@ -101,7 +101,7 @@ TargetedMovementGenerator<T>::Update(T &owner, const uint32 & time_diff)
     }
     if( !&owner || !owner.isAlive() || !&i_target )
         return true;
-    if( owner.hasUnitState(UNIT_STAT_ROOT) || owner.hasUnitState(UNIT_STAT_STUNDED) || owner.hasUnitState(UNIT_STAT_FLEEING))
+    if( owner.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNDED | UNIT_STAT_FLEEING) )
         return true;
     if( !owner.isInCombat() && !owner.hasUnitState(UNIT_STAT_FOLLOW) )
     {

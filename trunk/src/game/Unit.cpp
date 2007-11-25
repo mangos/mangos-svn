@@ -358,7 +358,7 @@ bool Unit::canReachWithAttack(Unit *pVictim) const
     return IsWithinDistInMap(pVictim, reach);
 }
 
-void Unit::RemoveSpellsCausingAura(uint32 auraType)
+void Unit::RemoveSpellsCausingAura(AuraType auraType)
 {
     if (auraType >= TOTAL_AURAS) return;
     AuraList::iterator iter, next;
@@ -378,13 +378,13 @@ void Unit::RemoveSpellsCausingAura(uint32 auraType)
     }
 }
 
-bool Unit::HasAuraType(uint32 auraType) const
+bool Unit::HasAuraType(AuraType auraType) const
 {
     return (!m_modAuras[auraType].empty());
 }
 
 /* Called by DealDamage for auras that have a chance to be dispelled on damage taken. */
-void Unit::RemoveSpellbyDamageTaken(uint32 auraType, uint32 damage)
+void Unit::RemoveSpellbyDamageTaken(AuraType auraType, uint32 damage)
 {
     if(!HasAuraType(auraType))
         return;
@@ -3017,11 +3017,11 @@ void Unit::DeMorph()
     SetUInt32Value(UNIT_FIELD_DISPLAYID, GetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID));
 }
 
-long Unit::GetTotalAuraModifier(uint32 ModifierID) const
+long Unit::GetTotalAuraModifier(AuraType auratype) const
 {
     uint32 modifier = 0;
 
-    AuraList const& mTotalAuraList = GetAurasByType(ModifierID);
+    AuraList const& mTotalAuraList = GetAurasByType(auratype);
     for(AuraList::const_iterator i = mTotalAuraList.begin();i != mTotalAuraList.end(); ++i)
         modifier += (*i)->GetModifier()->m_amount;
 
@@ -4715,6 +4715,10 @@ bool Unit::Attack(Unit *victim, bool playerMeleeAttack)
             return false;
     }
 
+    // remove SPELL_AURA_MOD_UNATTACKABLE at attack (in case non-interruptible spells stun aura applied also that not let attack)
+    if(HasAuraType(SPELL_AURA_MOD_UNATTACKABLE))
+        RemoveSpellsCausingAura(SPELL_AURA_MOD_UNATTACKABLE);
+
     if (m_attacking)
     {
         if (m_attacking == victim)
@@ -5097,26 +5101,33 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     }
 
     // Exceptions
-    // Lifetap
-    if(spellProto->SpellVisual == 1225 && spellProto->SpellIconID == 208)
+    switch(spellProto->SpellFamilyName)
     {
-        CastingTime = 2800;                                 // 80% from +shadow damage
-        DoneTotalMod = 1.0f;
-        TakenTotalMod = 1.0f;
-    }
-    // Dark Pact
-    if(spellProto->SpellVisual == 827 && spellProto->SpellIconID == 154 && GetPet())
-    {
-        CastingTime = 3360;                                 // 96% from +shadow damage
-        DoneTotalMod = 1.0f;
-        TakenTotalMod = 1.0f;
-    }
-    // Ice Lance
-    if(spellProto->Id == 30455)
-    {
-        CastingTime /= 3;                                   // applied 1/3 bonuses in case generic target
-        if(pVictim->isFrozen())                             // and compensate this for frozen target.
-            TakenTotalMod *= 3.0f;
+        case SPELLFAMILY_WARLOCK:
+            // Life Tap
+            if((spellProto->SpellFamilyFlags & 0x40000LL) && spellProto->SpellIconID == 208)
+            {
+                CastingTime = 2800;                         // 80% from +shadow damage
+                DoneTotalMod = 1.0f;
+                TakenTotalMod = 1.0f;
+            }
+            // Dark Pact
+            else if((spellProto->SpellFamilyFlags & 0x80000000LL) && spellProto->SpellIconID == 154 && GetPetGUID())
+            {
+                CastingTime = 3360;                         // 96% from +shadow damage
+                DoneTotalMod = 1.0f;
+                TakenTotalMod = 1.0f;
+            }
+            break;
+        case SPELLFAMILY_MAGE:
+            // Ice Lance
+            if((spellProto->SpellFamilyFlags & 0x20000LL) && spellProto->SpellIconID == 186)
+            {
+                CastingTime /= 3;                           // applied 1/3 bonuses in case generic target
+                if(pVictim->isFrozen())                     // and compensate this for frozen target.
+                    TakenTotalMod *= 3.0f;
+            }
+            break;
     }
 
     // Level Factor
@@ -6564,7 +6575,7 @@ DiminishingMechanics Unit::Mechanic2DiminishingMechanics(uint32 mech)
 
 void Unit::ApplyDiminishingToDuration(DiminishingMechanics  mech, int32 &duration,Unit* caster)
 {
-    if(duration == -1 || mech == DIMINISHING_NONE)
+    if(duration == -1 || mech == DIMINISHING_NONE || caster->IsFriendlyTo(this) )
         return;
 
     // Duration of crowd control abilities on pvp target is limited by 10 sec. (2.2.0)
@@ -7152,7 +7163,7 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
             if(!spellProcEvent)
             {
                 // used to prevent spam in log about same non-handled spells
-                static Unit::AuraTypeSet nonHandledSpellProcSet;
+                static std::set<uint32> nonHandledSpellProcSet;
 
                 if(spellProto->procFlags != 0 && nonHandledSpellProcSet.find(spellProto->Id)==nonHandledSpellProcSet.end())
                 {

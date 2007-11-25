@@ -370,7 +370,7 @@ m_periodicTimer(0), m_PeriodicEventId(0), m_updated(false), m_removeOnDeath(fals
     sLog.outDebug("Aura: construct Spellid : %u, Aura : %u Duration : %d Target : %d Damage : %d", m_spellProto->Id, m_spellProto->EffectApplyAuraName[eff], m_maxduration, m_spellProto->EffectImplicitTargetA[eff],damage);
 
     m_effIndex = eff;
-    SetModifier(m_spellProto->EffectApplyAuraName[eff], damage, m_spellProto->EffectAmplitude[eff], m_spellProto->EffectMiscValue[eff], type);
+    SetModifier(AuraType(m_spellProto->EffectApplyAuraName[eff]), damage, m_spellProto->EffectAmplitude[eff], m_spellProto->EffectMiscValue[eff], type);
 
     //(spellproto->AttributesEx3 & 0x100000) all death persistent spells have this flag
     m_isDeathPersist = (m_spellProto->AttributesEx3 & 0x100000) != 0;
@@ -424,7 +424,7 @@ Unit* Aura::GetCaster() const
     return ObjectAccessor::Instance().GetUnit(*m_target,m_caster_guid);
 }
 
-void Aura::SetModifier(uint8 t, int32 a, uint32 pt, int32 miscValue, uint32 miscValue2)
+void Aura::SetModifier(AuraType t, int32 a, uint32 pt, int32 miscValue, uint32 miscValue2)
 {
     m_modifier.m_auraname = t;
     m_modifier.m_amount   = a;
@@ -667,8 +667,7 @@ void PersistentAreaAura::Update(uint32 diff)
 
 void Aura::ApplyModifier(bool apply, bool Real)
 {
-    uint8 aura = 0;
-    aura = m_modifier.m_auraname;
+    AuraType aura = m_modifier.m_auraname;
 
     if(aura<TOTAL_AURAS)
         (*this.*AuraHandler [aura])(apply,Real);
@@ -957,15 +956,15 @@ void Aura::HandleAddModifier(bool apply, bool Real)
     SpellEntry const *spellInfo = GetSpellProto();
     if(!spellInfo) return;
 
-    if(m_modifier.m_miscvalue >= SPELLMOD_COUNT)
+    if(m_modifier.m_miscvalue >= MAX_SPELLMOD)
         return;
 
     if (apply)
     {
         SpellModifier *mod = new SpellModifier;
-        mod->op = m_modifier.m_miscvalue;
+        mod->op = SpellModOp(m_modifier.m_miscvalue);
         mod->value = m_modifier.m_amount;
-        mod->type = m_modifier.m_auraname;
+        mod->type = SpellModType(m_modifier.m_auraname);    // SpellModType value == spell aura types 
         mod->spellId = m_spellId;
         mod->effectId = m_effIndex;
         mod->lastAffected = 0;
@@ -1116,7 +1115,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
             SpellModifier *mod = new SpellModifier;
             mod->op = SPELLMOD_DAMAGE;
             mod->value = m_modifier.m_amount;
-            mod->type = SPELL_AURA_ADD_PCT_MODIFIER;
+            mod->type = SPELLMOD_PCT;
             mod->spellId = m_spellId;
             mod->effectId = m_effIndex;
             mod->lastAffected = 0;
