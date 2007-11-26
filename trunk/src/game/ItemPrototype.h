@@ -216,7 +216,8 @@ enum ItemSubclassConsumable
     ITEM_SUBCLASS_COMBAT_EFFECT                 = 7
 };
 
-#define MAX_ITEM_SUBCLASS_CONSUMABLE              8
+//  custom subclasses not use now (until 2.3.0 where used new not custom subclasses)
+#define MAX_ITEM_SUBCLASS_CONSUMABLE              1
 
 enum ItemSubclassContainer
 {
