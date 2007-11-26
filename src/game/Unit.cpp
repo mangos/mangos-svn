@@ -454,6 +454,11 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
             CreatureInfo const* cInfo = ((Creature*)pVictim)->GetCreatureInfo();
             if(cInfo && cInfo->lootid)
                 pVictim->SetUInt32Value(UNIT_DYNAMIC_FLAGS, UNIT_DYNFLAG_LOOTABLE);
+
+            // some critters required for quests
+            if(GetTypeId() == TYPEID_PLAYER)
+                ((Player*)this)->KilledMonster(pVictim->GetEntry(),pVictim->GetGUID());
+
             return;
         }
 
