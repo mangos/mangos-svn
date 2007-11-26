@@ -1054,12 +1054,6 @@ bool Pet::HaveInDiet(ItemPrototype const* item) const
     if(!cFamily)
         return false;
 
-    // all (?) pet food is in trade goods or consumable class
-    if( item->Class != ITEM_CLASS_TRADE_GOODS && item->Class != ITEM_CLASS_CONSUMABLE ||
-        item->Class == ITEM_CLASS_TRADE_GOODS && item->SubClass != ITEM_SUBCLASS_TRADE_GOODS ||
-        item->Class == ITEM_CLASS_CONSUMABLE  && item->SubClass != 0 && item->SubClass != ITEM_SUBCLASS_FOOD )
-        return false;
-
     uint32 diet = cFamily->petFoodMask;
     uint32 FoodMask = 1 << (item->FoodType-1);
     return diet & FoodMask;  
