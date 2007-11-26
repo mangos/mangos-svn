@@ -217,10 +217,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         WorldPacket data( SMSG_ITEM_QUERY_SINGLE_RESPONSE, 600);        
         data << pProto->ItemId;
         data << pProto->Class;
-
-        // client known only 0 subclass (and 1-2 obsolete subclasses)
-        data << uint32(pProto->Class==ITEM_CLASS_CONSUMABLE ? 0 : pProto->SubClass);
-
+        data << pProto->SubClass;
         data << uint32(-1);                                 // new 2.0.3, not exist in wdb cache?
         data << Name;
         data << uint8(0x00);                                //pProto->Name2; // blizz not send name there, just uint8(0x00); <-- \0 = empty string = empty name...
