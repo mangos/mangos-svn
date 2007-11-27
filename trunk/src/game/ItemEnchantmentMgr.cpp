@@ -69,7 +69,7 @@ void LoadRandomEnchantmentsTable()
             if (chance > 0.000001f && chance <= 100.0f)
                 RandomItemEnch[entry].push_back( EnchStoreItem(ench, chance) );
 
-            count++;
+            ++count;
         } while (result->NextRow());
 
         delete result;

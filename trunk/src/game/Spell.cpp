@@ -972,7 +972,10 @@ void Spell::prepare(SpellCastTargets * targets)
     // stealth must be removed at cast starting (at show channel bar)
     // skip triggered spell (item equip spell casting and other not explicit character casts/item uses)
     if ( !m_IsTriggeredSpell && !CanUsedWhileStealthed(m_spellInfo->Id) )
+    {
         m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+        m_caster->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+    }
 
     // do first cast of autorepeat spell with recovery time delay (like after any autocast)
     if(IsAutoRepeat())
@@ -1546,18 +1549,6 @@ void Spell::SendSpellCooldown()
     // self spell cooldown
     if (rec > 0)
     {
-        // only send if different from client known cooldown
-        /*
-        if(m_spellInfo->RecoveryTime != uint32(rec))
-        {
-            WorldPacket data(SMSG_SPELL_COOLDOWN, (8+1+4+4));
-            data << m_caster->GetGUID();
-            data << uint8(0x0);
-            data << uint32(m_spellInfo->Id);
-            data << uint32(rec);
-            _player->GetSession()->SendPacket(&data);
-        }
-        */
         if(m_CastItem)
             _player->AddSpellCooldown(m_spellInfo->Id, m_CastItem->GetEntry(), recTime);
         else
@@ -1565,18 +1556,6 @@ void Spell::SendSpellCooldown()
     }
     else
     {
-        // only send if different from client known cooldown
-        /*
-        if(m_spellInfo->RecoveryTime && m_spellInfo->RecoveryTime != uint32(catrec) || m_spellInfo->CategoryRecoveryTime != uint32(catrec))
-        {
-            WorldPacket data(SMSG_SPELL_COOLDOWN, (8+1+4+4));
-            data << m_caster->GetGUID();
-            data << uint8(0x0);
-            data << uint32(m_spellInfo->Id);
-            data << uint32(catrec);
-            _player->GetSession()->SendPacket(&data);
-        }
-        */
         if(m_CastItem)
             _player->AddSpellCooldown(m_spellInfo->Id, m_CastItem->GetEntry(), catrecTime);
         else
