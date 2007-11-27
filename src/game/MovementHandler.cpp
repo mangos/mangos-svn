@@ -248,6 +248,9 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
     GetPlayer()->SetPosition(x, y, z, orientation);
     GetPlayer()->SetMovementFlags(flags);
+
+    if(GetPlayer()->isMoving())
+        GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
 }
 
 void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)

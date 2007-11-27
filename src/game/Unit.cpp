@@ -411,12 +411,12 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
     }
 
     // remove affects at any damage (including 0 damage)
-    RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
-    RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
-
-    // remove death simulation at damage
-    if(hasUnitState(UNIT_STAT_DIED))
+    if( damagetype != DOT)
+    {
+        RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+        RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
         RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+    }
 
     //Script Event damage Deal
     if( GetTypeId()== TYPEID_UNIT && ((Creature *)this)->AI())

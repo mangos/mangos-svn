@@ -2091,7 +2091,7 @@ void Aura::HandleFeignDeath(bool Apply, bool Real)
     if(!Real)
         return;
 
-    if(!m_target || m_target->GetTypeId() == TYPEID_UNIT)
+    if(!m_target || m_target->GetTypeId() != TYPEID_PLAYER)
         return;
 
     if( Apply )
@@ -2112,6 +2112,15 @@ void Aura::HandleFeignDeath(bool Apply, bool Real)
         m_target->CombatStop();
         m_target->InterruptNonMeleeSpells(true);
         m_target->getHostilRefManager().deleteReferences();
+
+        // send cooldown explicitly
+        WorldPacket data(SMSG_SPELL_COOLDOWN, 8+8);
+        data << m_target->GetGUID();
+        data << uint8(0x0);
+        data << uint32(GetSpellProto()->Id);
+        data << uint32((GetSpellProto()->RecoveryTime > GetSpellProto()->CategoryRecoveryTime) ? GetSpellProto()->RecoveryTime : GetSpellProto()->CategoryRecoveryTime);
+        ((Player*)m_target)->GetSession()->SendPacket(&data);
+
     }
     else
     {
@@ -2156,6 +2165,7 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
     {
         m_target->addUnitState(UNIT_STAT_STUNDED);
         m_target->SetUInt64Value (UNIT_FIELD_TARGET, 0);
+
         m_target->SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE);
 
         if (caster)
@@ -2198,6 +2208,8 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         data.append(m_target->GetPackGUID());
         data << uint32(0);
         m_target->SendMessageToSet(&data,true);
+
+        // Wyvern Sting
         if (GetSpellProto()->SpellFamilyName == SPELLFAMILY_HUNTER && GetSpellProto()->SpellIconID == 1721)
         {
             if( !caster || caster->GetTypeId()!=TYPEID_PLAYER )
