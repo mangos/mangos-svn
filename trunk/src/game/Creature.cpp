@@ -249,10 +249,12 @@ void Creature::Update(uint32 diff)
             }
             if (m_regenTimer != 0)
                 break;
-            if (!isInCombat())
+
+            if (!isInCombat() || IsPolymorphed())
             {
                 RegenerateHealth();
-                RegenerateMana();
+                if (!isInCombat())
+                    RegenerateMana();
             }
             m_regenTimer = 2000;
             break;
@@ -294,9 +296,6 @@ void Creature::RegenerateHealth()
     uint32 maxValue = GetMaxHealth();
 
     if (curValue >= maxValue)
-        return;
-
-    if (curValue <= 0)
         return;
 
     float HealthIncreaseRate = sWorld.getRate(RATE_HEALTH);

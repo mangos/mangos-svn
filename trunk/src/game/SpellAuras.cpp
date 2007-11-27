@@ -1579,6 +1579,11 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
         m_target->setTransForm(0);
     }
 
+    // for players, start regeneration after 1s (in polymorph fast regeneration case)
+    if(m_target->GetTypeId() == TYPEID_PLAYER)
+        if (m_target->IsPolymorphed())
+            ((Player*)m_target)->setRegenTimer(1000);
+
     Unit* caster = GetCaster();
 
     if(caster && caster->GetTypeId() == TYPEID_PLAYER)

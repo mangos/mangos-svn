@@ -828,11 +828,9 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
             Attack(pVictim,(damagetype == DIRECT_DAMAGE));
         }
 
+        // polymorphed and other negative transformed cases
         if(pVictim->getTransForm() && pVictim->hasUnitState(UNIT_STAT_CONFUSED))
-        {
             pVictim->RemoveAurasDueToSpell(pVictim->getTransForm());
-            pVictim->setTransForm(0);
-        }
 
         if (pVictim->GetTypeId() != TYPEID_PLAYER)
         {
@@ -7438,4 +7436,9 @@ bool Unit::IsStandState() const
         s != PLAYER_STATE_SIT_MEDIUM_CHAIR && s != PLAYER_STATE_SIT_HIGH_CHAIR && 
         s != PLAYER_STATE_SIT && s != PLAYER_STATE_SLEEP &&
         s != PLAYER_STATE_KNEEL;
+}
+
+bool Unit::IsPolymorphed() const
+{
+    return GetSpellSpecific(getTransForm())==SPELL_MAGE_POLYMORPH;
 }

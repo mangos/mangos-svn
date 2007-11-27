@@ -912,6 +912,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool HasInvisibilityAura() const { return HasAuraType(SPELL_AURA_MOD_INVISIBILITY); }
         bool isFeared()  const { return HasAuraType(SPELL_AURA_MOD_FEAR); }
         bool isInRoots() const { return HasAuraType(SPELL_AURA_MOD_ROOT); }
+        bool IsPolymorphed() const;
 
         bool isFrozen() const;
 
@@ -1105,7 +1106,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         long GetTotalAuraModifier(AuraType auratype) const;
         void SendMoveToPacket(float x, float y, float z, bool run, uint32 transitTime = 0);
         void setTransForm(uint32 spellid) { m_transform = spellid;}
-        uint32 getTransForm() { return m_transform;}
+        uint32 getTransForm() const { return m_transform;}
         void AddDynObject(DynamicObject* dynObj);
         void RemoveDynObject(uint32 spellid);
         void RemoveDynObjectWithGUID(uint64 guid) { m_dynObjGUIDs.remove(guid); }

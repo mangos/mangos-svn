@@ -1680,7 +1680,8 @@ void Player::RegenerateAll()
     uint32 regenDelay = 2000;
 
     // Not in combat or they have regeneration
-    if (!isInCombat() || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT) || HasAuraType(SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT) )
+    if( !isInCombat() || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT) || 
+        HasAuraType(SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT) || IsPolymorphed() )
     {
         RegenerateHealth();
         if (!isInCombat())
@@ -1768,8 +1769,11 @@ void Player::RegenerateHealth()
 
     float addvalue = 0.0f;
 
+    // polymorphed case 
+    if ( IsPolymorphed() )
+        addvalue = GetMaxHealth()/3;
     // normal regen case (maybe partly in combat case)
-    if (!isInCombat() || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT) )
+    else if (!isInCombat() || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT) )
     {
         addvalue = OCTRegenHPPerSpirit()* HealthIncreaseRate;
         if (!isInCombat())
