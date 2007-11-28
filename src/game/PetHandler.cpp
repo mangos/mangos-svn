@@ -102,7 +102,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     if( GetPlayer()->IsFriendlyTo(TargetUnit))
                         return;
 
-                    if(pet->getVictim() && TargetUnit!=pet->getVictim())
+                    if(pet->getVictim())
                         pet->AttackStop();
 
                     if(pet->GetTypeId() != TYPEID_PLAYER)
@@ -219,7 +219,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                 if( unit_target && !GetPlayer()->IsFriendlyTo(unit_target) && !pet->HasAuraType(SPELL_AURA_MOD_POSSESS))
                 {
                     pet->clearUnitState(UNIT_STAT_FOLLOW);
-                    if(unit_target!=pet->getVictim())
+                    if(pet->getVictim())
                         pet->AttackStop();
                     pet->GetMotionMaster()->Clear();
                     if (((Creature*)pet)->AI())
