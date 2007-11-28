@@ -13631,7 +13631,7 @@ bool Player::CanSpeak() const
 /***              LOW LEVEL FUNCTIONS:Notifiers        ***/
 /*********************************************************/
 
-inline void Player::SendAttackSwingNotInRange()
+void Player::SendAttackSwingNotInRange()
 {
     WorldPacket data(SMSG_ATTACKSWING_NOTINRANGE, 0);
     GetSession()->SendPacket( &data );
@@ -13694,31 +13694,31 @@ void Player::SetFloatValueInDB(uint16 index, float value, uint64 guid)
     Player::SetUInt32ValueInDB(index, temp, guid);
 }
 
-inline void Player::SendAttackSwingNotStanding()
+void Player::SendAttackSwingNotStanding()
 {
     WorldPacket data(SMSG_ATTACKSWING_NOTSTANDING, 0);
     GetSession()->SendPacket( &data );
 }
 
-inline void Player::SendAttackSwingDeadTarget()
+void Player::SendAttackSwingDeadTarget()
 {
     WorldPacket data(SMSG_ATTACKSWING_DEADTARGET, 0);
     GetSession()->SendPacket( &data );
 }
 
-inline void Player::SendAttackSwingCantAttack()
+void Player::SendAttackSwingCantAttack()
 {
     WorldPacket data(SMSG_ATTACKSWING_CANT_ATTACK, 0);
     GetSession()->SendPacket( &data );
 }
 
-inline void Player::SendAttackSwingCancelAttack()
+void Player::SendAttackSwingCancelAttack()
 {
     WorldPacket data(SMSG_CANCEL_COMBAT, 0);
     GetSession()->SendPacket( &data );
 }
 
-inline void Player::SendAttackSwingBadFacingAttack()
+void Player::SendAttackSwingBadFacingAttack()
 {
     WorldPacket data(SMSG_ATTACKSWING_BADFACING, 0);
     GetSession()->SendPacket( &data );
