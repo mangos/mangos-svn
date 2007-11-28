@@ -171,7 +171,7 @@ CREATE TABLE `command` (
 /*!40000 ALTER TABLE `command` DISABLE KEYS */;
 INSERT INTO `command` (`name`,`security`,`help`) VALUES 
  ('acct',0,'Syntax: .acct\r\n\r\nDisplay the access level of your account.'),
- ('addgo',2,'Syntax: .addgo #id <lootID> <spawntimeSecs>\r\n\r\nAdd a game object from game object templates to the world at your current location using the #id.\r\nlootID specifies the loot-template to be used and spawntimesecs sets the spawntime, both are optional.\r\n\r\nNote: this is a copy of .gameobject.'),
+ ('addgo',2,'Syntax: .addgo #id <spawntimeSecs>\r\n\r\nAdd a game object from game object templates to the world at your current location using the #id.\r\nspawntimesecs sets the spawntime, it is optional.\r\n\r\nNote: this is a copy of .gameobject.'),
  ('additem',3,'Syntax: .additem #itemid/[#itemname]/#shift-click-item-link #itemcount\r\n\r\nAdds the specified number of items of id #itemid (or exact (!) name $itemname in brackets, or link created by shift-click at item in inventory or recipe) to your or selected character inventory. If #itemcount is omitted, only one item will be added.\r\n.'),
  ('additemset',3,'Syntax: .additemset #itemsetid\r\n\r\nAdd items from itemset of id #itemsetid to your or selected character inventory. Will add by one example each item from itemset.'),
  ('addmove',2,'Syntax: .addmove #creature_guid [#waittime]\r\n\r\nAdd your current location as a waypoint for creature with guid #creature_guid. And optional add wait time.'),
@@ -1075,7 +1075,6 @@ CREATE TABLE `gameobject` (
   `rotation1` float NOT NULL default '0',
   `rotation2` float NOT NULL default '0',
   `rotation3` float NOT NULL default '0',
-  `loot` int(11) unsigned NOT NULL default '0',
   `spawntimesecs` int(11) NOT NULL default '0',
   `animprogress` int(11) unsigned NOT NULL default '0',
   `dynflags` int(11) unsigned NOT NULL default '0',

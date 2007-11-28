@@ -516,6 +516,7 @@ pkgdata_DATA = \
 	4737_mangos_command.sql \
 	4764_characters_auctionhouse.sql \
 	4772_mangos_item_template.sql \
+	4781_mangos_gameobject_loot_template.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -1012,5 +1013,6 @@ EXTRA_DIST = \
 	4737_mangos_command.sql \
 	4764_characters_auctionhouse.sql \
 	4772_mangos_item_template.sql \
+	4781_mangos_gameobject_loot_template.sql \
 	README
 

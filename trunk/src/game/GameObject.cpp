@@ -48,7 +48,6 @@ GameObject::GameObject( WorldObject *instantiator ) : WorldObject( instantiator 
     m_spawnedByDefault = true;
     m_usetimes = 0;
     m_spellId = 0;
-    lootid=0;
 }
 
 GameObject::~GameObject()
@@ -421,7 +420,6 @@ void GameObject::SaveToDB()
     data.rotation1 = GetFloatValue(GAMEOBJECT_ROTATION+1);
     data.rotation2 = GetFloatValue(GAMEOBJECT_ROTATION+2);
     data.rotation3 = GetFloatValue(GAMEOBJECT_ROTATION+3);
-    data.lootid = lootid;
     data.spawntimesecs = m_spawnedByDefault ? m_respawnDelayTime : -(int32)m_respawnDelayTime;
     data.animprogress = GetUInt32Value (GAMEOBJECT_ANIMPROGRESS);
     data.dynflags = GetUInt32Value (GAMEOBJECT_DYN_FLAGS);
@@ -440,7 +438,6 @@ void GameObject::SaveToDB()
         << GetFloatValue(GAMEOBJECT_ROTATION+1) << ", "
         << GetFloatValue(GAMEOBJECT_ROTATION+2) << ", "
         << GetFloatValue(GAMEOBJECT_ROTATION+3) << ", "
-        << lootid <<", "
         << m_respawnDelayTime << ", "
         << GetUInt32Value (GAMEOBJECT_ANIMPROGRESS) << ", "
         << GetUInt32Value (GAMEOBJECT_DYN_FLAGS) << ")";;
@@ -485,7 +482,6 @@ bool GameObject::LoadFromDB(uint32 guid, uint32 InstanceId)
 
     m_DBTableGuid = stored_guid;
 
-    lootid=data->lootid;
     if(data->spawntimesecs >= 0)
     {
         m_spawnedByDefault = true;
@@ -518,6 +514,15 @@ void GameObject::DeleteFromDB()
 GameObjectInfo const *GameObject::GetGOInfo() const
 {
     return objmgr.GetGameObjectInfo(GetUInt32Value (OBJECT_FIELD_ENTRY));
+}
+
+uint32 GameObject::GetLootId()
+{
+    GameObjectInfo const* Ginfo = GetGOInfo();
+    if (Ginfo && (Ginfo->type== GAMEOBJECT_TYPE_CHEST || Ginfo->type==GAMEOBJECT_TYPE_FISHINGHOLE ))
+        return Ginfo->sound1;
+    else
+        return 0;
 }
 
 /*********************************************************/
