@@ -7700,6 +7700,13 @@ bool Player::IsEquipmentPos( uint8 bag, uint8 slot )
     return false;
 }
 
+bool Player::IsBankBagPos( uint8 bag, uint8 slot )
+{
+    if( bag == INVENTORY_SLOT_BAG_0 && ( slot >= BANK_SLOT_BAG_START && slot < BANK_SLOT_BAG_END ) )
+        return true;
+    return false;
+}
+
 bool Player::IsBankPos( uint8 bag, uint8 slot )
 {
     if( bag == INVENTORY_SLOT_BAG_0 && ( slot >= BANK_SLOT_ITEM_START && slot < BANK_SLOT_ITEM_END ) )
@@ -8967,11 +8974,13 @@ Item* Player::StoreItem( uint16 pos, Item *pItem, bool update )
 {
     if( pItem )
     {
-        if( pItem->GetProto()->Bonding == BIND_WHEN_PICKED_UP || pItem->GetProto()->Class == ITEM_CLASS_QUEST)
-            pItem->SetBinding( true );
-
         uint8 bag = pos >> 8;
         uint8 slot = pos & 255;
+
+        if( pItem->GetProto()->Class == ITEM_CLASS_QUEST ||
+            pItem->GetProto()->Bonding == BIND_WHEN_PICKED_UP ||
+            pItem->GetProto()->Bonding == BIND_WHEN_EQUIPED && IsBankBagPos(bag,slot) )
+            pItem->SetBinding( true );
 
         sLog.outDebug( "STORAGE: StoreItem bag = %u, slot = %u, item = %u, count = %u", bag, slot, pItem->GetEntry(), pItem->GetCount());
 

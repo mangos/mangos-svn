@@ -918,6 +918,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         static bool IsBagPos( uint16 pos );
         static bool IsBankPos( uint16 pos ) { return IsBankPos(pos >> 8,pos & 255); }
         static bool IsBankPos( uint8 bag, uint8 slot );
+        static bool IsBankBagPos( uint8 bag, uint8 slot );
         static bool IsWeaponSlot( uint8 slot ) { return slot==EQUIPMENT_SLOT_MAINHAND || slot==EQUIPMENT_SLOT_OFFHAND || slot==EQUIPMENT_SLOT_RANGED; }
         bool HasBankBagSlot( uint8 slot ) const;
         bool HasItemCount( uint32 item, uint32 count ) const;
