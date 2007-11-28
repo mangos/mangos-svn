@@ -263,14 +263,10 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             info = obj->GetGOInfo();
             if(info)
             {
-                spellId = info->sound0;
-                //guid=GetPlayer()->GetGUID();
-
+                //spellId = info->sound0;                   // this is not a spell or offset
                 _player->TeleportTo(obj->GetMapId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation(),false,false);
-                                                            //offset 3 is related to the DB
-                _player->SetUInt32Value(UNIT_FIELD_BYTES_1, _player->GetUInt32Value(UNIT_FIELD_BYTES_1) | (3 + spellId) );
-                _player->SetStandState(spellId + 3);
-
+                _player->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT_LOW_CHAIR); // Using (3 + spellId) was wrong, this is a number of slot for chair/bench, not offset
+                _player->SetStandState(PLAYER_STATE_SIT_LOW_CHAIR);
                 return;
             }
             break;
