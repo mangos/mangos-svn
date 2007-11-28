@@ -86,7 +86,6 @@ struct GameObjectData
     float rotation1;
     float rotation2;
     float rotation3;
-    uint32 lootid;
     int32  spawntimesecs;
     uint32 animprogress;
     uint32 dynflags;
@@ -148,6 +147,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         bool LoadFromDB(uint32 guid, uint32 InstanceId);
         void DeleteFromDB();
         void SetLootState(LootState s) { m_lootState = s; }
+        uint32 GetLootId();
         void SetRespawnTime(int32 respawn)
         {
             m_respawnTime = respawn > 0 ? time(NULL) + respawn : 0;
@@ -185,7 +185,6 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void SaveRespawnTime();
 
         Loot        loot;
-        uint32      lootid;
 
         bool hasQuest(uint32 quest_id) const;
         bool hasInvolvedQuest(uint32 quest_id) const;

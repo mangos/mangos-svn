@@ -730,8 +730,8 @@ void ObjectMgr::LoadGameobjects()
 
     //                                                         0      1    2     3            4            5            6
     QueryResult *result = WorldDatabase.Query("SELECT `gameobject`.`guid`,`id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,"
-    //   7           8           9           10          11     12              13             14         15
-        "`rotation0`,`rotation1`,`rotation2`,`rotation3`,`loot`,`spawntimesecs`,`animprogress`,`dynflags`,`event` "
+    //   7           8           9           10          11               12             13        14
+        "`rotation0`,`rotation1`,`rotation2`,`rotation3`,`spawntimesecs`,`animprogress`,`dynflags`,`event` "
         "FROM `gameobject` LEFT OUTER JOIN `game_event_gameobject` ON `gameobject`.`guid`=`game_event_gameobject`.`guid`");
 
     if(!result)
@@ -766,11 +766,10 @@ void ObjectMgr::LoadGameobjects()
         data.rotation1      = fields[ 8].GetFloat();
         data.rotation2      = fields[ 9].GetFloat();
         data.rotation3      = fields[10].GetFloat();
-        data.lootid         = fields[11].GetUInt32();
-        data.spawntimesecs  = fields[12].GetInt32();
-        data.animprogress   = fields[13].GetUInt32();
-        data.dynflags       = fields[14].GetUInt32();
-        int16 gameEvent     = fields[15].GetInt16();
+        data.spawntimesecs  = fields[11].GetInt32();
+        data.animprogress   = fields[12].GetUInt32();
+        data.dynflags       = fields[13].GetUInt32();
+        int16 gameEvent     = fields[14].GetInt16();
 
         if (gameEvent==0)                                   // if not this is to be managed by GameEvent System
             AddGameobjectToGrid(guid, &data);

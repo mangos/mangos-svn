@@ -789,7 +789,6 @@ bool BattleGround::AddObject(uint32 type, uint32 entry, float x, float y, float 
     data.rotation1      = rotation1;
     data.rotation2      = rotation2;
     data.rotation3      = rotation3;
-    data.lootid         = 0;
     data.spawntimesecs  = spawntime;
     data.animprogress   = 100;
     data.dynflags       = 1;            //there was 0, i have no idea why we should change it

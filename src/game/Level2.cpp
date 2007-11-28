@@ -3046,7 +3046,6 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
     if(!id)
         return false;
 
-    char* lootID = strtok(NULL, " ");
     char* spawntimeSecs = strtok(NULL, " ");
 
     const GameObjectInfo *goI = objmgr.GetGameObjectInfo(id);
@@ -3078,13 +3077,6 @@ bool ChatHandler::HandleGameObjectCommand(const char* args)
     pGameObj->SetMapId(chr->GetMapId());
     //pGameObj->SetNameId(id);
     sLog.outDebug(LANG_GAMEOBJECT_CURRENT, goI->name, lowGUID, x, y, z, o);
-
-    if( lootID )
-    {
-        uint32 value = atoi((char*)lootID);
-        pGameObj->lootid = value;
-        //sLog.outDebug("*** LOOT: %d", value);
-    }
 
     if( spawntimeSecs )
     {
