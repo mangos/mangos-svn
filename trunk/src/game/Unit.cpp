@@ -410,14 +410,18 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
             return;
     }
 
-    // remove affects at any damage (including 0 damage)
-    RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+    // remove affects from victim (including from 0 damage and DoTs)
+    if(pVictim != this)
+        pVictim->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
 
-    // remove affects at any non-DoT damage (including 0 damage)
+    // remove affects from attacker at any non-DoT damage (including 0 damage)
     if( damagetype != DOT)
     {
-        RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
+        RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
         RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);
+
+        if(pVictim != this)
+            RemoveSpellsCausingAura(SPELL_AURA_MOD_INVISIBILITY);
     }
 
     //Script Event damage Deal

@@ -2116,6 +2116,7 @@ void Aura::HandleFeignDeath(bool Apply, bool Real)
         m_target->addUnitState(UNIT_STAT_DIED);
         m_target->CombatStop();
         m_target->InterruptNonMeleeSpells(true);
+        ((Player*)m_target)->SendAttackSwingCancelAttack(); // melee and ranged forced attack cancel
         m_target->getHostilRefManager().deleteReferences();
 
         // send cooldown explicitly

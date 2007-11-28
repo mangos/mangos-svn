@@ -1258,10 +1258,6 @@ void Spell::EffectApplyAura(uint32 i)
                 if(!(spellEntry->SpellFamilyName == SPELLFAMILY_ROGUE && spellEntry->SpellFamilyFlags & SPELLFAMILYFLAG_ROGUE_SAP))
                     attack=true;
                 break;
-            case SPELL_AURA_FEIGN_DEATH:
-                // Feign death breaks Auto Shot at caster
-                m_caster->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
-                break;
             default:
                 //If Aura is applied to monster then attack caster
                 attack = true;
