@@ -43,3 +43,15 @@ EXTRA_DIST += \
 	win/VC80/zlib.vcproj \
 	win/VC80/g3dlite.vcproj \
 	win/VC80/zthread.vcproj
+
+# Win32 project workspace for Visual Studio .NET 2008
+EXTRA_DIST += \
+	win/mangosdVC90.sln \
+	win/VC90/framework.vcproj \
+	win/VC90/game.vcproj \
+	win/VC90/mangosd.vcproj \
+	win/VC90/realmd.vcproj \
+	win/VC90/shared.vcproj \
+	win/VC90/zlib.vcproj \
+	win/VC90/g3dlite.vcproj \
+	win/VC90/zthread.vcproj
