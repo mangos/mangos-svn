@@ -4087,6 +4087,7 @@ void Spell::EffectTransmitted(uint32 i)
         {
             int32 duration = GetDuration(m_spellInfo);
             pGameObj->SetRespawnTime(duration > 0 ? duration/1000 : 0);
+            break;
         }
     }
 

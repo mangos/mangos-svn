@@ -741,7 +741,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
                                 uint32 itr_xp = uint32(xp*rate);
 
                                 pGroupGuy->GiveXP(itr_xp, pVictim);
-                                if(Pet* pet = player->GetPet())
+                                if(Pet* pet = pGroupGuy->GetPet())
                                 {
                                     pet->GivePetXP(itr_xp/2);
                                 }
