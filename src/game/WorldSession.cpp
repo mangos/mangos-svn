@@ -719,7 +719,7 @@ void WorldSession::LogoutPlayer(bool Save)
         _player->TradeCancel(false);
 
         delete _player;
-        _player = 0;
+        _player = NULL;
 
         ///- Send the 'logout complete' packet to the client
         data.Initialize( SMSG_LOGOUT_COMPLETE, 0 );
