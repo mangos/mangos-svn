@@ -2871,7 +2871,7 @@ void Aura::HandlePeriodicHeal(bool apply, bool Real)
     m_isPeriodic = apply;
 
     // only at real apply
-    if (Real && apply && GetSpellProto()->Mechanic == 16)
+    if (Real && apply && GetSpellProto()->Mechanic == MECHANIC_BANDAGE)
     {
         m_target->CastSpell(m_target,11196,true,NULL,this);
     }
