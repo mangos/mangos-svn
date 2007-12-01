@@ -69,10 +69,10 @@ void MapManager::LoadTransports()
 
         std::set<uint32> mapsUsed;
 
-        if(!t->GenerateWaypoints(goinfo->sound0, mapsUsed))
+        if(!t->GenerateWaypoints(goinfo->data0, mapsUsed))
             // skip transports with empty waypoints list
         {
-            sLog.outErrorDb("Transport (path id %u) path size = 0. Transport ignored, check DBC files or transport GO sound0 field.",goinfo->sound0);
+            sLog.outErrorDb("Transport (path id %u) path size = 0. Transport ignored, check DBC files or transport GO data0 field.",goinfo->data0);
             delete t;
             continue;
         }

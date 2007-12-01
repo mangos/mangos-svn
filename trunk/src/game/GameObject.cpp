@@ -251,7 +251,7 @@ void GameObject::Update(uint32 p_time)
             break;
 
         case GO_LOOTED:
-            uint32 spellId = GetGOInfo()->sound10;
+            uint32 spellId = GetGOInfo()->data10;
             //if Gamebject should cast spell, then this, but some GOs (type = 10) should be destroyed
             if (GetGoType() == GAMEOBJECT_TYPE_GOOBER && spellId)
             {
@@ -341,7 +341,7 @@ void GameObject::Update(uint32 p_time)
 
         if (ok)
         {
-            owner->CastSpell(ok, GetGOInfo()->sound3, true);
+            owner->CastSpell(ok, GetGOInfo()->data3, true);
             m_respawnTime = 0;                              // to prevent save respawn timer
             Delete();
         }
@@ -520,7 +520,7 @@ uint32 GameObject::GetLootId()
 {
     GameObjectInfo const* Ginfo = GetGOInfo();
     if (Ginfo && (Ginfo->type== GAMEOBJECT_TYPE_CHEST || Ginfo->type==GAMEOBJECT_TYPE_FISHINGHOLE ))
-        return Ginfo->sound1;
+        return Ginfo->data1;
     else
         return 0;
 }

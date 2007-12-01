@@ -2779,9 +2779,9 @@ uint8 Spell::CanCast(bool strict)
                     switch(go->GetGoType())
                     {
                     case GAMEOBJECT_TYPE_CHEST:
-                        lockInfo = sLockStore.LookupEntry(go->GetGOInfo()->sound0); break;
+                        lockInfo = sLockStore.LookupEntry(go->GetGOInfo()->data0); break;
                     case GAMEOBJECT_TYPE_DOOR:
-                        lockInfo = sLockStore.LookupEntry(go->GetGOInfo()->sound1); break;
+                        lockInfo = sLockStore.LookupEntry(go->GetGOInfo()->data1); break;
                     }
                 }
                 else if(Item* itm=m_targets.getItemTarget())

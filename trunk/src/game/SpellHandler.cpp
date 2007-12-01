@@ -263,7 +263,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             info = obj->GetGOInfo();
             if(info)
             {
-                //spellId = info->sound0;                   // this is not a spell or offset
+                //spellId = info->data0;                   // this is not a spell or offset
                 _player->TeleportTo(obj->GetMapId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation(),false,false);
                 _player->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT_LOW_CHAIR); // Using (3 + spellId) was wrong, this is a number of slot for chair/bench, not offset
                 _player->SetStandState(PLAYER_STATE_SIT_LOW_CHAIR);
@@ -274,7 +274,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
         //big gun, its a spell/aura
         case GAMEOBJECT_TYPE_GOOBER:                        //10
             info = obj->GetGOInfo();
-            spellId = info ? info->sound10 : 0;
+            spellId = info ? info->data10 : 0;
             break;
 
         case GAMEOBJECT_TYPE_SPELLCASTER:                   //22
@@ -284,9 +284,9 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             info = obj->GetGOInfo();
             if(info)
             {
-                spellId = info->sound0;
+                spellId = info->data0;
                 if (spellId == 0)
-                    spellId = info->sound3;
+                    spellId = info->data3;
 
                 //guid=_player->GetGUID();
             }
@@ -296,7 +296,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             info = obj->GetGOInfo();
             if(info)
             {
-                uint32 cinematic_id = info->sound1;
+                uint32 cinematic_id = info->data1;
                 if(cinematic_id)
                 {
                     WorldPacket data(SMSG_TRIGGER_CINEMATIC, 4);
@@ -384,7 +384,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             obj->AddUse(GetPlayer());
 
             // must 2 group members use GO, or only 1 when it is meeting stone summon
-            if(obj->GetUniqueUseCount() < (info->sound0 == 2 ? 1 : 2))
+            if(obj->GetUniqueUseCount() < (info->data0 == 2 ? 1 : 2))
                 return;
 
             // in case summoning ritual caster is GO creator
@@ -393,7 +393,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             if(!caster->m_currentSpells[CURRENT_CHANNELED_SPELL])
                 return;
 
-            spellId = info->sound1;
+            spellId = info->data1;
 
             // finish spell
             caster->m_currentSpells[CURRENT_CHANNELED_SPELL]->SendChannelUpdate(0);
@@ -417,10 +417,10 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 
             //required lvl checks!
             uint8 level = _player->getLevel();
-            if (level < info->sound0 || level > info->sound1)
+            if (level < info->data0 || level > info->data1)
                 return;
             level = targetPlayer->getLevel();
-            if (level < info->sound0 || level > info->sound1)
+            if (level < info->data0 || level > info->data1)
                 return;
 
             spellId = 23598;

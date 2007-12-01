@@ -304,8 +304,8 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
             // GO is mineral vein? so it is not removed after its looted
             if(go->GetGoType() == GAMEOBJECT_TYPE_CHEST)
             {
-                uint32 go_min = go->GetGOInfo()->sound4;
-                uint32 go_max = go->GetGOInfo()->sound5;
+                uint32 go_min = go->GetGOInfo()->data4;
+                uint32 go_max = go->GetGOInfo()->data5;
 
                 // only vein pass this check
                 if(go_min != 0 && go_max > go_min)
@@ -324,7 +324,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
                             float chance_rate = sWorld.getRate(RATE_MINING_NEXT);
 
                             int32 ReqValue = 175;
-                            LockEntry const *lockInfo = sLockStore.LookupEntry(go->GetGOInfo()->sound0);
+                            LockEntry const *lockInfo = sLockStore.LookupEntry(go->GetGOInfo()->data0);
                             if(lockInfo)
                                 ReqValue = lockInfo->requiredminingskill;
                             float skill = float(player->GetSkillValue(SKILL_MINING))/(ReqValue+25);
