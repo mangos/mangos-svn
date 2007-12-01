@@ -1720,8 +1720,8 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
                 // cast goober spell
                 gameObjTarget->AddUse(player);
                 gameObjTarget->SetLootState(GO_LOOTED);
-                if (gameObjTarget->GetGOInfo()->sound1)     ///Gameobject is required to be destroyed for quest entry = sound1
-                    if (player->GetQuestStatus(gameObjTarget->GetGOInfo()->sound1) != QUEST_STATUS_NONE)
+                if (gameObjTarget->GetGOInfo()->data1)     ///Gameobject is required to be destroyed for quest entry = data1
+                    if (player->GetQuestStatus(gameObjTarget->GetGOInfo()->data1) != QUEST_STATUS_NONE)
                         //this condition is useless, but it's used here only for optimalization
                         player->CastedCreatureOrGO(gameObjTarget->GetEntry(), gameObjTarget->GetGUID(), 0);
 
@@ -1763,7 +1763,7 @@ void Spell::EffectOpenLock(uint32 i)
             ((BattleGroundAB*)bg)->ClickBanner(player);
             return;
         }
-        lockId = gameObjTarget->GetGOInfo()->sound0;
+        lockId = gameObjTarget->GetGOInfo()->data0;
         guid = gameObjTarget->GetGUID();
     }
     else if(itemTarget)

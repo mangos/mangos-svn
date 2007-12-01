@@ -414,10 +414,10 @@ namespace MaNGOS
             GameObjectFocusCheck(Unit const* unit,uint32 focusId) : i_unit(unit), i_focusId(focusId) {}
             bool operator()(GameObject* go) const
             {
-                if(go->GetGOInfo()->type != GAMEOBJECT_TYPE_SPELL_FOCUS || go->GetGOInfo()->sound0 != i_focusId)
+                if(go->GetGOInfo()->type != GAMEOBJECT_TYPE_SPELL_FOCUS || go->GetGOInfo()->data0 != i_focusId)
                     return false;
 
-                float dist = go->GetGOInfo()->sound1;
+                float dist = go->GetGOInfo()->data1;
 
                 return go->IsWithinDistInMap(i_unit, dist);
             }
@@ -479,6 +479,22 @@ namespace MaNGOS
         private:
             WorldObject const* i_obj;
             Unit const* i_funit;
+            float i_range;
+    };
+
+    class AnyUnitInObjectRangeCheck
+    {
+        public:
+            AnyUnitInObjectRangeCheck(WorldObject const* obj, float range) : i_obj(obj), i_range(range) {}
+            bool operator()(Unit* u)
+            {
+                if(u->isAlive() && i_obj->IsWithinDistInMap(u, i_range))
+                    return true;
+
+                return false;
+            }
+        private:
+            WorldObject const* i_obj;
             float i_range;
     };
 

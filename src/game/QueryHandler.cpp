@@ -192,30 +192,30 @@ void WorldSession::HandleGameObjectQueryOpcode( WorldPacket & recv_data )
         data << uint8(0);                                   // 2.0.3, string
         data << uint8(0);                                   // 2.0.3, string
         data << uint8(0);                                   // 2.0.3, probably string
-        data << uint32(info->sound0);
-        data << uint32(info->sound1);
-        data << uint32(info->sound2);
-        data << uint32(info->sound3);
-        data << uint32(info->sound4);
-        data << uint32(info->sound5);
-        data << uint32(info->sound6);
-        data << uint32(info->sound7);
-        data << uint32(info->sound8);
-        data << uint32(info->sound9);
-        data << uint32(info->sound10);
-        data << uint32(info->sound11);
-        data << uint32(info->sound12);
-        data << uint32(info->sound13);
-        data << uint32(info->sound14);
-        data << uint32(info->sound15);
-        data << uint32(info->sound16);
-        data << uint32(info->sound17);
-        data << uint32(info->sound18);
-        data << uint32(info->sound19);
-        data << uint32(info->sound20);
-        data << uint32(info->sound21);
-        data << uint32(info->sound22);
-        data << uint32(info->sound23);
+        data << uint32(info->data0);
+        data << uint32(info->data1);
+        data << uint32(info->data2);
+        data << uint32(info->data3);
+        data << uint32(info->data4);
+        data << uint32(info->data5);
+        data << uint32(info->data6);
+        data << uint32(info->data7);
+        data << uint32(info->data8);
+        data << uint32(info->data9);
+        data << uint32(info->data10);
+        data << uint32(info->data11);
+        data << uint32(info->data12);
+        data << uint32(info->data13);
+        data << uint32(info->data14);
+        data << uint32(info->data15);
+        data << uint32(info->data16);
+        data << uint32(info->data17);
+        data << uint32(info->data18);
+        data << uint32(info->data19);
+        data << uint32(info->data20);
+        data << uint32(info->data21);
+        data << uint32(info->data22);
+        data << uint32(info->data23);
         SendPacket( &data );
         sLog.outDetail( "WORLD: Sent CMSG_GAMEOBJECT_QUERY " );
     }

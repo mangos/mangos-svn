@@ -161,7 +161,7 @@ void BattleGroundRL::HandleAreaTrigger(Player *Source, uint32 Trigger)
                 return;                                     // buff not spawned yet
             obj->SetRespawnTime(BUFF_RESPAWN_TIME);
             obj->SetLootState(GO_LOOTED);
-            SpellId = obj->GetGOInfo()->sound3;
+            SpellId = obj->GetGOInfo()->data3;
             if(SpellId)
                 Source->CastSpell(Source, SpellId, true);
         }
