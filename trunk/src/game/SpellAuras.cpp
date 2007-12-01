@@ -2079,7 +2079,8 @@ void Aura::HandleModFear(bool Apply, bool Real)
                 // attack caster if can
                 Unit* caster = GetCaster();
                 if(caster && caster != m_target->getVictim())
-                    ((Creature*)m_target)->AI()->AttackStart(caster);
+                    if (((Creature*)m_target)->AI())
+                        ((Creature*)m_target)->AI()->AttackStart(caster);
             }
 
             // what is this for ? (doesn't work anyway)
