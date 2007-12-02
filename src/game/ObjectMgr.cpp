@@ -4728,6 +4728,10 @@ bool ObjectMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2)
     if(spellInfo_2->SpellFamilyFlags == 2048)
         return false;
 
+    // One more hack (Resurrection sickness)
+    if(spellInfo_2->Id==15007)
+        return false;
+
     // Paladin Seals
     if( IsSealSpell(spellId_1) && IsSealSpell(spellId_2) )
         return true;
