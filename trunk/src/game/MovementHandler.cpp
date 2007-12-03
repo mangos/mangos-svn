@@ -55,6 +55,11 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
     MapManager::Instance().GetMap(GetPlayer()->GetMapId(), GetPlayer())->Add(GetPlayer());
     GetPlayer()->SendInitialPacketsAfterAddToMap();
 
+    // some items limited to specific map (delete only for alive player to allow back in ghost mode)
+    // if player resurrected at teleport this will be applied in resurrect code
+    if(_player->isAlive())
+        _player->DestroyMapLimitedItem( true );
+
     // resurrect character at enter into instance where his corpse exist after add to map
     Corpse *corpse = GetPlayer()->GetCorpse();
     if (corpse && corpse->GetType() == CORPSE_RESURRECTABLE && corpse->GetMapId() == GetPlayer()->GetMapId())
