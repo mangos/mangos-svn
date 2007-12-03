@@ -5234,7 +5234,7 @@ void Player::RewardReputation(Unit *pVictim, float rate)
             ModifyFactionReputation(factionEntry1, donerep1);
 
         // Wiki: Team factions value divided by 2
-        if(Rep->is_teamaward1 != 0)
+        if(Rep->is_teamaward1)
         {
             FactionEntry const *team1_factionEntry = sFactionStore.LookupEntry(factionEntry1->team);
             if(team1_factionEntry)
@@ -5252,7 +5252,7 @@ void Player::RewardReputation(Unit *pVictim, float rate)
             ModifyFactionReputation(factionEntry2, donerep2);
 
         // Wiki: Team factions value divided by 2
-        if(Rep->is_teamaward2 != 0)
+        if(Rep->is_teamaward2)
         {
             FactionEntry const *team2_factionEntry = sFactionStore.LookupEntry(factionEntry2->team);
             if(team2_factionEntry)

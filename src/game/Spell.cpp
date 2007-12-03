@@ -322,8 +322,12 @@ void Spell::FillTargetMap()
     for(uint32 i=0;i<3;i++)
     {
         // not call for empty effect.
-        // Also some spells use not used effect targets for store targets for dummy effect in triggred spells
+        // Also some spells use not used effect targets for store targets for dummy effect in triggered spells
         if(m_spellInfo->Effect[i]==0)
+            continue;
+
+        // targets for TARGET_SCRIPT filled in Spell::canCast call
+        if( m_spellInfo->EffectImplicitTargetA[i] == TARGET_SCRIPT || m_spellInfo->EffectImplicitTargetB[i] == TARGET_SCRIPT )
             continue;
 
         m_targetGameobjectGUIDs[i].clear();

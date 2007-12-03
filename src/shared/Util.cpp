@@ -42,13 +42,33 @@ Tokens StrSplit(const std::string &src, const std::string &sep)
 
 void stripLineInvisibleChars(std::string &str)
 {
-    static char const * invChars = " \t\7";
+    static std::string invChars = " \t\7";
 
-    size_t pos = str.find_first_not_of(invChars);
-    if(pos==std::string::npos)
-        return;
+    size_t wpos = 0;
 
-    str.erase(0,pos);
+    bool space = false;
+    for(size_t pos = 0; pos < str.size(); ++pos)
+    {
+        if(invChars.find(str[pos])!=std::string::npos)
+        {
+            if(!space)
+            {
+                str[wpos++] = ' ';
+                space = true;
+            }
+        }
+        else
+        {
+            if(wpos!=pos)
+                str[wpos++] = str[pos];
+            else
+                ++wpos;
+            space = false;
+        }
+    }
+
+    if(wpos < str.size())
+        str.erase(wpos,str.size());
 }
 
 std::string secsToTimeString(uint32 timeInSecs, bool shortText, bool hoursOnly)
