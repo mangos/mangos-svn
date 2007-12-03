@@ -3416,6 +3416,9 @@ void Player::ResurrectPlayer(float restore_percent, bool updateToWorld)
     if(updateToWorld)
         MapManager::Instance().GetMap(GetMapId(), this)->Add(this);
 
+    // some items limited to specific map
+    DestroyMapLimitedItem( true );
+
     // set resurrection sickness if not expired
     if(!m_resurrectingSicknessExpire)
         return;
@@ -9534,6 +9537,68 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update, bool uneq
     }
 }
 
+void Player::DestroyMapLimitedItem( bool update )
+{
+    sLog.outDebug( "STORAGE: DestroyMapLimitedItem in map %u", GetMapId());
+
+    // in inventory
+    for(int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
+    {
+        Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pItem )
+        {
+            ItemPrototype const* proto = pItem->GetProto();
+            if( proto && proto->Map && proto->Map != GetMapId() )
+                DestroyItem( INVENTORY_SLOT_BAG_0, i, update);
+        }
+    }
+    for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
+    {
+        Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pItem )
+        {
+            ItemPrototype const* proto = pItem->GetProto();
+            if( proto && proto->Map && proto->Map != GetMapId() )
+                DestroyItem( INVENTORY_SLOT_BAG_0, i, update);
+        }
+    }
+
+    // in inventory bags
+    for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
+    {
+        Bag* pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pBag )
+        {
+            ItemPrototype const *pBagProto = pBag->GetProto();
+            if( pBagProto )
+            {
+                for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
+                {
+                    Item* pItem = pBag->GetItemByPos(j);
+                    if( pItem )
+                    {
+                        ItemPrototype const* proto = pItem->GetProto();
+                        if( proto && proto->Map && proto->Map != GetMapId() )
+                            DestroyItem( i, j, update);
+                    }
+                }
+            }
+        }
+    }
+
+    // in equipment and bag list
+    for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_BAG_END; i++)
+    {
+        Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+        if( pItem )
+        {
+            ItemPrototype const* proto = pItem->GetProto();
+            if( proto && proto->Map && proto->Map != GetMapId() )
+                DestroyItem( INVENTORY_SLOT_BAG_0, i, update);
+        }
+    }
+}
+
 void Player::DestroyItemCount( Item* pItem, uint32 &count, bool update )
 {
     if(!pItem)
@@ -12626,6 +12691,15 @@ void Player::_LoadInventory(QueryResult *result, uint32 timediff)
             if(!item->LoadFromDB(item_guid, GetGUID(), result))
             {
                 delete item;
+                continue;
+            }
+
+            // not allow have in alive state item limited to another map
+            if(isAlive() && proto->Map && proto->Map!=GetMapId())
+            {
+                CharacterDatabase.PExecute("DELETE FROM `character_inventory` WHERE `item` = '%u'", item_guid);
+                item->FSetState(ITEM_REMOVED);
+                item->SaveToDB();                           // it also deletes item object !
                 continue;
             }
 
