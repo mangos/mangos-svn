@@ -4370,11 +4370,8 @@ void Player::UpdateCombatSkills(Unit *pVictim, WeaponAttackType attType, MeleeHi
     switch(outcome)
     {
         case MELEE_HIT_CRIT:
-            return;
         case MELEE_HIT_DODGE:
-            return;
         case MELEE_HIT_PARRY:
-            return;
         case MELEE_HIT_BLOCK:
             return;
 
