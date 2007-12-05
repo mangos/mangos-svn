@@ -17,43 +17,21 @@
 ## Process this file with automake to produce Makefile.in
 
 ## Sub-directories to parse
-SUBDIRS = Auth Config Database Network vmap
 
 ## CPP flags for includes, defines, etc.
-AM_CPPFLAGS = $(MYSQL_INCLUDES) $(POSTGRE_INCLUDES) -I$(top_builddir)/src/shared -I$(srcdir) -I$(srcdir)/../../dep/include -I$(srcdir)/../framework -I$(srcdir)/../shared -I$(srcdir)/../../dep/include/g3dlite
-## AM_CPPFLAGS += -I$(srcdir)/../game -I$(srcdir)/../realmd
+AM_CPPFLAGS = $(MYSQL_INCLUDES) $(POSTGRE_INCLUDES) -I$(top_builddir)/src/shared -I$(srcdir) -I$(srcdir)/../../../dep/include -I$(srcdir)/../../framework -I$(srcdir)/../shared -I$(srcdir)/../../../dep/include/g3dlite
 
 ## Build MaNGOS shared library and its parts as convenience library.
 #  All libraries will be convenience libraries. Might be changed to shared
 #  later.
-noinst_LIBRARIES = libmangosshared.a
+noinst_LIBRARIES = libmangosauth.a
 
-#  libmangosshared library will later be reused by ...
-libmangosshared_a_SOURCES = \
-	Base.cpp \
-	Base.h \
-	ByteBuffer.h \
-	Common.h \
-	Errors.h \
-	Log.cpp \
-	Log.h \
-	MemoryLeaks.cpp \
-	MemoryLeaks.h \
-	Mthread.cpp \
-	Mthread.h \
-	ProgressBar.cpp \
-	ProgressBar.h \
-	Timer.h \
-	Util.cpp \
-	Util.h \
-	WorldPacket.h
-
-## Additional files to include when running 'make dist'
-#  Disabled packet logger
-EXTRA_DIST = \
-	PacketLog.cpp \
-	PacketLog.h
-
-# System configuration
-EXTRA_DIST += \
-	SystemConfig.h
+libmangosauth_a_SOURCES = \
+	AuthCrypt.cpp \
+	AuthCrypt.h \
+	BigNumber.cpp \
+	BigNumber.h \
+	Sha1.cpp \
+	Sha1.h \
+	md5.c \
+	md5.h

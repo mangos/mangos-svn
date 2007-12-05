@@ -17,43 +17,45 @@
 ## Process this file with automake to produce Makefile.in
 
 ## Sub-directories to parse
-SUBDIRS = Auth Config Database Network vmap
 
 ## CPP flags for includes, defines, etc.
-AM_CPPFLAGS = $(MYSQL_INCLUDES) $(POSTGRE_INCLUDES) -I$(top_builddir)/src/shared -I$(srcdir) -I$(srcdir)/../../dep/include -I$(srcdir)/../framework -I$(srcdir)/../shared -I$(srcdir)/../../dep/include/g3dlite
-## AM_CPPFLAGS += -I$(srcdir)/../game -I$(srcdir)/../realmd
+AM_CPPFLAGS = $(MYSQL_INCLUDES) $(POSTGRE_INCLUDES) -I$(top_builddir)/src/shared -I$(srcdir) -I$(srcdir)/../../../dep/include -I$(srcdir)/../../framework -I$(srcdir)/../shared -I$(srcdir)/../../../dep/include/g3dlite
 
 ## Build MaNGOS shared library and its parts as convenience library.
 #  All libraries will be convenience libraries. Might be changed to shared
 #  later.
-noinst_LIBRARIES = libmangosshared.a
+noinst_LIBRARIES = libmangosdatabase.a
 
-#  libmangosshared library will later be reused by ...
-libmangosshared_a_SOURCES = \
-	Base.cpp \
-	Base.h \
-	ByteBuffer.h \
-	Common.h \
-	Errors.h \
-	Log.cpp \
-	Log.h \
-	MemoryLeaks.cpp \
-	MemoryLeaks.h \
-	Mthread.cpp \
-	Mthread.h \
-	ProgressBar.cpp \
-	ProgressBar.h \
-	Timer.h \
-	Util.cpp \
-	Util.h \
-	WorldPacket.h
-
-## Additional files to include when running 'make dist'
-#  Disabled packet logger
-EXTRA_DIST = \
-	PacketLog.cpp \
-	PacketLog.h
-
-# System configuration
-EXTRA_DIST += \
-	SystemConfig.h
+libmangosdatabase_a_SOURCES = \
+	DBCStores.cpp \
+	DBCStores.h \
+	DBCStructure.h \
+	DBCfmt.cpp \
+	Database.cpp \
+	Database.h \
+	DatabaseEnv.h \
+	DatabaseImpl.h \
+	DatabaseMysql.cpp \
+	DatabasePostgre.cpp \
+	DatabaseMysql.h \
+	DatabasePostgre.h \
+	DatabaseSqlite.cpp \
+	DatabaseSqlite.h \
+	Field.cpp \
+	Field.h \
+	MySQLDelayThread.h \
+	QueryResult.h \
+	QueryResultMysql.cpp \
+	QueryResultMysql.h \
+	QueryResultPostgre.cpp \
+	QueryResultPostgre.h \
+	QueryResultSqlite.cpp \
+	QueryResultSqlite.h \
+	SQLStorage.cpp \
+	SQLStorage.h \
+	SqlDelayThread.cpp \
+	SqlDelayThread.h \
+	SqlOperations.cpp \
+	SqlOperations.h \
+	dbcfile.cpp \
+	dbcfile.h

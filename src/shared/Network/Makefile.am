@@ -17,43 +17,56 @@
 ## Process this file with automake to produce Makefile.in
 
 ## Sub-directories to parse
-SUBDIRS = Auth Config Database Network vmap
 
 ## CPP flags for includes, defines, etc.
-AM_CPPFLAGS = $(MYSQL_INCLUDES) $(POSTGRE_INCLUDES) -I$(top_builddir)/src/shared -I$(srcdir) -I$(srcdir)/../../dep/include -I$(srcdir)/../framework -I$(srcdir)/../shared -I$(srcdir)/../../dep/include/g3dlite
-## AM_CPPFLAGS += -I$(srcdir)/../game -I$(srcdir)/../realmd
+AM_CPPFLAGS = $(MYSQL_INCLUDES) $(POSTGRE_INCLUDES) -I$(top_builddir)/src/shared -I$(srcdir) -I$(srcdir)/../../../dep/include -I$(srcdir)/../../framework -I$(srcdir)/../shared -I$(srcdir)/../../../dep/include/g3dlite
 
 ## Build MaNGOS shared library and its parts as convenience library.
 #  All libraries will be convenience libraries. Might be changed to shared
 #  later.
-noinst_LIBRARIES = libmangosshared.a
+noinst_LIBRARIES = libmangosnetwork.a
 
-#  libmangosshared library will later be reused by ...
-libmangosshared_a_SOURCES = \
-	Base.cpp \
-	Base.h \
-	ByteBuffer.h \
-	Common.h \
-	Errors.h \
-	Log.cpp \
-	Log.h \
-	MemoryLeaks.cpp \
-	MemoryLeaks.h \
-	Mthread.cpp \
-	Mthread.h \
-	ProgressBar.cpp \
-	ProgressBar.h \
-	Timer.h \
-	Util.cpp \
-	Util.h \
-	WorldPacket.h
-
-## Additional files to include when running 'make dist'
-#  Disabled packet logger
-EXTRA_DIST = \
-	PacketLog.cpp \
-	PacketLog.h
-
-# System configuration
-EXTRA_DIST += \
-	SystemConfig.h
+libmangosnetwork_a_SOURCES = \
+	Base64.cpp \
+	Base64.h \
+	CircularBuffer.cpp \
+	CircularBuffer.h \
+	IFile.h \
+	ISocketHandler.cpp \
+	ISocketHandler.h \
+	Ipv4Address.cpp \
+	Ipv4Address.h \
+	Ipv6Address.cpp \
+	Ipv6Address.h \
+	ListenSocket.h \
+	Mutex.cpp \
+	Mutex.h \
+	Parse.cpp \
+	Parse.h \
+	RandomNumber.cpp \
+	RandomNumber.h \
+	ResolvServer.cpp \
+	ResolvServer.h \
+	ResolvSocket.cpp \
+	ResolvSocket.h \
+	SctpSocket.h \
+	Socket.cpp \
+	Socket.h \
+	SocketAddress.h \
+	SocketHandler.cpp \
+	SocketHandler.h \
+	StdLog.h \
+	StdoutLog.cpp \
+	StdoutLog.h \
+	TcpSocket.cpp \
+	TcpSocket.h \
+	Thread.cpp \
+	Thread.h \
+	UdpSocket.cpp \
+	UdpSocket.h \
+	Uid.h \
+	Utility.cpp \
+	Utility.h \
+	socket_include.cpp \
+	socket_include.h \
+	sockets-config.h
