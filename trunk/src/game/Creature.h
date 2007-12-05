@@ -241,7 +241,6 @@ struct CreatureData
     uint32 curmana;
     uint8 deathState;
     uint8 movementType;
-    std::string auras;
 };
 
 // from `creature_addon` table
@@ -253,11 +252,7 @@ struct CreatureDataAddon
     uint32 bytes1;
     uint32 bytes2;
     uint32 emote;
-    uint32 aura;
-    uint32 auraflags;
-    uint32 auralevels;
-    uint32 auraapplications;
-    uint32 aurastate;
+    char* auras;
 };
 
 struct CreatureModelInfo
