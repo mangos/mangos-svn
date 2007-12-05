@@ -52,7 +52,7 @@
 				ObjectFile=".\g3dlite__$(PlatformName)_$(ConfigurationName)\"
 				ProgramDataBaseFileName=".\g3dlite__$(PlatformName)_$(ConfigurationName)\"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
+				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="4"
 			/>
 			<Tool
@@ -118,7 +118,7 @@
 				ObjectFile=".\g3dlite__$(PlatformName)_$(ConfigurationName)\"
 				ProgramDataBaseFileName=".\g3dlite__$(PlatformName)_$(ConfigurationName)\"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
+				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool

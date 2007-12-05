@@ -49,7 +49,7 @@
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile=".\zthread__$(PlatformName)_$(ConfigurationName)\zthread.pch"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
+				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
@@ -113,7 +113,7 @@
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile=".\zthread__$(PlatformName)_$(ConfigurationName)\zthread.pch"
 				WarningLevel="3"
-				Detect64BitPortabilityProblems="true"
+				Detect64BitPortabilityProblems="false"
 				DebugInformationFormat="3"
 			/>
 			<Tool
