@@ -345,7 +345,7 @@ enum SpellEffects
     SPELL_EFFECT_123                       = 123,
     SPELL_EFFECT_PLAYER_PULL               = 124,
     SPELL_EFFECT_REDUCE_THREAT_PERCENT     = 125,
-    SPELL_EFFECT_126                       = 126,
+    SPELL_EFFECT_STEAL_BENEFICIAL_BUFF     = 126,
     SPELL_EFFECT_PROSPECTING               = 127,
     SPELL_EFFECT_APPLY_AURA_NEW2           = 128,
     SPELL_EFFECT_129                       = 129,

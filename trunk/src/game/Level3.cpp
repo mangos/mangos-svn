@@ -1592,8 +1592,11 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
 
     int32 count = 1;
 
-    if (ccount) { count = atol(ccount); }
-    if (count < 1) { count = 1; }
+    if (ccount)
+        count = strtol(ccount, NULL, 10);
+
+    if (count == 0)
+        count = 1;
 
     Player* pl = m_session->GetPlayer();
     Player* plTarget = getSelectedPlayer();
@@ -1609,6 +1612,16 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
         return true;
     }
 
+    //Subtract
+    if (count < 0)
+    {
+        plTarget->RemoveItemCount(itemId, ((signed) -count), true);
+        PSendSysMessage("Attempted to remove %i amount of %i from target",(signed)-count, itemId);
+        return true;
+    }
+
+
+    //Adding items
     uint32 countForStore = count;
 
     // item used in local operations and in add item notifier
