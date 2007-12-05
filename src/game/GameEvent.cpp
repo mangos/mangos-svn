@@ -583,7 +583,10 @@ void GameEvent::UpdateEventQuests(uint16 event_id, bool Activate)
             for ( ;qitr != lastElement;++qitr)
             {
                 if (qitr->second == itr->second)
-                    CreatureQuestMap.erase(qitr);
+                {
+                    CreatureQuestMap.erase(qitr);           // iterator is now no more valid
+                    break;                                  // but we can exit loop since the element is found
+                }
             }
         }
     }
