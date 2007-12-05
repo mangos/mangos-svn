@@ -25,6 +25,11 @@ RealmServerPort = 3724
 # Default: 0
 LogLevel = 0
 
+# Include time in server console output [hh:mm:ss]
+# Default: 0 (no time)
+#          1 (print time)
+LogTime = 0
+
 # Logfile name 
 #    empty name disable creating log file: LogFile = 
 # Default: "Server.log" - not recommended.
