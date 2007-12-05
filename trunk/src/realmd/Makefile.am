@@ -30,7 +30,7 @@ mangos_realmd_SOURCES = \
 	RealmList.h
 
 ## Link realm list daemon against the shared library
-mangos_realmd_LDADD = ../shared/libmangosdatabase.a ../shared/libmangosconfig.a ../shared/libmangosauth.a ../shared/libmangosshared.a ../shared/libmangosnetwork.a ../framework/libmangosframework.a ../../dep/src/zthread/libZThread.la
+mangos_realmd_LDADD = ../shared/Database/libmangosdatabase.a ../shared/Config/libmangosconfig.a ../shared/Auth/libmangosauth.a ../shared/libmangosshared.a ../shared/Network/libmangosnetwork.a ../framework/libmangosframework.a ../../dep/src/zthread/libZThread.la
 mangos_realmd_LDFLAGS = -L../../dep/src/zthread $(MYSQL_LIBS) $(POSTGRE_LIBS) -L$(libdir) $(ZLIB) $(COMPATLIB) $(SSLLIB)
 
 ## Additional files to include when running 'make dist'

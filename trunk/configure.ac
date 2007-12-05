@@ -216,6 +216,11 @@ AC_CONFIG_FILES([
    src/Makefile
    src/framework/Makefile
    src/shared/Makefile
+   src/shared/Auth/Makefile
+   src/shared/Config/Makefile
+   src/shared/Database/Makefile
+   src/shared/Network/Makefile
+   src/shared/vmap/Makefile
    src/shared/SystemConfig.h
    src/game/Makefile
    src/realmd/Makefile
