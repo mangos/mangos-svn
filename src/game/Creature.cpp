@@ -1024,7 +1024,6 @@ void Creature::SaveToDB()
     data.curmana = GetPower(POWER_MANA);
     data.deathState = m_deathState;
     data.movementType = GetDefaultMovementType();
-    data.auras = "";
 
     // updated in DB
     WorldDatabase.BeginTransaction();
@@ -1052,8 +1051,7 @@ void Creature::SaveToDB()
         << GetHealth() << ","                               //curhealth
         << GetPower(POWER_MANA) << ","                      //curmana
         << (uint32)(m_deathState) << ","                    //DeathState (0 or 65)
-        << GetDefaultMovementType() << ","                  // default movement generator type
-        << "'')";                                           // should save auras
+        << GetDefaultMovementType() << ")";                 // default movement generator type
 
     WorldDatabase.PExecuteLog( ss.str( ).c_str( ) );
 
@@ -1327,34 +1325,6 @@ bool Creature::LoadFromDB(uint32 guid, uint32 InstanceId)
     {
         m_respawnTime = 0;
         objmgr.SaveCreatureRespawnTime(m_DBTableGuid,GetInstanceId(),0);
-    }
-
-    // Now add the auras, format "spellid effectindex spellid effectindex..."
-    Tokens auravals;
-    auravals = StrSplit(data->auras, " ");
-    if ( auravals.size()>0 && (auravals.size()%2)>0 )
-        sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) has wrong aura defined.",GetGUIDLow(),GetEntry());
-    else
-    {
-        for (int i=0;i<auravals.size()/2;i++)
-        {
-            uint32 spellId = (uint32)atoi(auravals[2*i+0].c_str());
-            uint32 effect  = (uint32)atoi(auravals[2*i+1].c_str());
-            if ( effect>2 )
-            {
-                sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) has wrong effect %u for spell %u.",GetGUIDLow(),GetEntry(),effect,spellId);
-                continue;
-            }
-            SpellEntry const *AdditionalSpellInfo = sSpellStore.LookupEntry(spellId);
-            if (!AdditionalSpellInfo)
-            {
-                sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) has wrong spell %u defined in Auras field.",GetGUIDLow(),GetEntry(),spellId);
-                continue;
-            }
-            Aura* AdditionalAura = new Aura(AdditionalSpellInfo, effect, NULL, this, this, 0);
-            AddAura(AdditionalAura);
-            sLog.outDebug("Spell: %u with Aura %u added to creature (GUIDLow: %u Entry: %u )", spellId, AdditionalSpellInfo->EffectApplyAuraName[0],GetGUIDLow(),GetEntry());
-        }
     }
 
     // checked at creature_template loading
@@ -1778,21 +1748,34 @@ bool Creature::LoadCreaturesAddon()
     if (cainfo->emote != 0)
         SetUInt32Value(UNIT_NPC_EMOTESTATE, cainfo->emote);
 
-    if (cainfo->aura != 0)
-        SetUInt32Value(UNIT_FIELD_AURA, cainfo->aura);
-
-    if (cainfo->auraflags != 0)
-        SetUInt32Value(UNIT_FIELD_AURAFLAGS, cainfo->auraflags);
-
-    if (cainfo->auralevels != 0)
-        SetUInt32Value(UNIT_FIELD_AURALEVELS, cainfo->auralevels);
-
-    if (cainfo->auraapplications != 0)
-        SetUInt32Value(UNIT_FIELD_AURAAPPLICATIONS, cainfo->auraapplications);
-
-    if (cainfo->aurastate != 0)
-        SetUInt32Value(UNIT_FIELD_AURASTATE, cainfo->aurastate);
-
+    // Now add the auras, format "spellid effectindex spellid effectindex..."
+    std::string auras = cainfo->auras;
+    Tokens auravals;
+    auravals = StrSplit(auras, " ");
+    if ( auravals.size()>0 && (auravals.size()%2)>0 )
+        sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) has wrong aura defined.",GetGUIDLow(),GetEntry());
+    else
+    {
+        for (int i=0;i<auravals.size()/2;i++)
+        {
+            uint32 spellId = (uint32)atoi(auravals[2*i+0].c_str());
+            uint32 effect  = (uint32)atoi(auravals[2*i+1].c_str());
+            if ( effect>2 )
+            {
+                sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) has wrong effect %u for spell %u.",GetGUIDLow(),GetEntry(),effect,spellId);
+                continue;
+            }
+            SpellEntry const *AdditionalSpellInfo = sSpellStore.LookupEntry(spellId);
+            if (!AdditionalSpellInfo)
+            {
+                sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) has wrong spell %u defined in Auras field.",GetGUIDLow(),GetEntry(),spellId);
+                continue;
+            }
+            Aura* AdditionalAura = new Aura(AdditionalSpellInfo, effect, NULL, this, this, 0);
+            AddAura(AdditionalAura);
+            sLog.outDebug("Spell: %u with Aura %u added to creature (GUIDLow: %u Entry: %u )", spellId, AdditionalSpellInfo->EffectApplyAuraName[0],GetGUIDLow(),GetEntry());
+        }
+    }
     return true;
 }
 
