@@ -110,6 +110,7 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
         void SetLogFileLevel(char * Level);
         void SetColor(bool stdout_stream, Color color);
         void ResetColor(bool stdout_stream);
+        void outTime();
         void outTimestamp(FILE* file);
         std::string GetTimestampStr() const;
         uint32 getLogFilter() const { return m_logFilter; }
@@ -126,6 +127,7 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
         uint32 m_logLevel;
         uint32 m_logFileLevel;
         bool m_colored;
+        bool m_includeTime;
         Color m_colors[4];
         uint32 m_logFilter;
 
