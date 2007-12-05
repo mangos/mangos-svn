@@ -1544,7 +1544,6 @@ bool Creature::IsImmunedToSpell(SpellEntry const* spellInfo) const
         (MECHANIC_SHACKLE       == spellInfo->Mechanic) ||
         (MECHANIC_TURN          == spellInfo->Mechanic) ||
         (MECHANIC_HORROR        == spellInfo->Mechanic) ||
-        (MECHANIC_INTERRUPT     == spellInfo->Mechanic) ||
         (MECHANIC_DAZE          == spellInfo->Mechanic) )) 
         return true;
 

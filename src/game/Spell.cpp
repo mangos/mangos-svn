@@ -2537,6 +2537,8 @@ uint8 Spell::CanCast(bool strict)
         else if(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MECHANIC_IMMUNITY)
             mechanic_immune |= 1 << m_spellInfo->EffectMiscValue[i];
     }
+    //immune movement impairement and loss of control
+    if(m_spellInfo->Id==(uint32)42292)mechanic_immune=0x9967da6;
 
     //Check whether the cast should be prevented by any state you might have.
     uint8 prevented_reason = 0;

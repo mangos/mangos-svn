@@ -182,7 +182,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //123 SPELL_EFFECT_123                      taxi/flight related
     &Spell::EffectPlayerPull,                               //124 SPELL_EFFECT_PLAYER_PULL              opposite of knockback effect (pulls player twoard caster)
     &Spell::EffectReduceThreatPercent,                      //125 SPELL_EFFECT_REDUCE_THREAT_PERCENT
-    &Spell::EffectNULL,                                     //126 SPELL_EFFECT_126                      spell steal effect?
+    &Spell::EffectStealBeneficialBuff,                      //126 SPELL_EFFECT_STEAL_BENEFICIAL_BUFF    spell steal effect?
     &Spell::EffectProspecting,                              //127 SPELL_EFFECT_PROSPECTING              Prospecting spell
     &Spell::EffectApplyAura,                                //128 SPELL_EFFECT_APPLY_AURA_NEW2          probably apply aura again
     &Spell::EffectNULL,                                     //129 SPELL_EFFECT_129 probably apply aura again
@@ -4199,4 +4199,68 @@ void Spell::EffectSkinPlayerCorpse(uint32 i)
         return;
 
     ((Player*)unitTarget)->RemovedInsignia( (Player*)m_caster );
+}
+
+void Spell::EffectStealBeneficialBuff(uint32 i)
+{
+    sLog.outDebug("Effect: StealBeneficialBuff");
+
+    // get the auras of the target
+    Unit::AuraMap& Auras = unitTarget->GetAuras();
+
+    // random buff to steal
+    int remove_prev_positive = irand(0, Auras.size());
+    int cnt = 0;
+
+    // id of the spell we'll steal
+    uint32 spellId = NULL;
+    for(Unit::AuraMap::iterator iter = Auras.begin(); iter != Auras.end(); ++iter)
+    {
+        if( iter->second->IsPositive()          //only steel positive spell
+            && !iter->second->IsPassive()       //don't steal passive abilities
+            && !iter->second->IsPersistent()    //don't steal persistent auras
+            && (iter->second->GetSpellProto()->Dispel == m_spellInfo->Dispel)  //only steal magic effects
+            )
+            spellId = iter->first.first;    // store the id of the last stealable spell
+        
+        if( (cnt > remove_prev_positive) && spellId )
+            break;                          // exit the loop if found a stealable spell and it's the random spell we chose
+        
+        ++cnt;                              // helper for the random selection
+    }
+
+    // we found a stealable buff
+    if(spellId)
+    {
+        int32 dur = 120000; //GetDuration(m_spellInfo); //I couldn't find this info in dbc, so hardcode the 2 minutes
+        
+        // go through all the effects of the spell
+        for(int i=0; i<3; ++i)
+        {
+            // get the corresponding aura from the victim
+            Aura * aur = unitTarget->GetAura(spellId, i);
+
+            if(!aur)
+                continue;
+            
+            // we have to check against the (remaining) duration on the victim
+            int32 dur1 = aur->GetAuraDuration();
+            
+            // construct the new aura for the attacker
+            Aura * new_aur = new Aura(aur->GetSpellProto(), i, NULL, m_caster);
+            
+            if(!new_aur)
+                continue;
+            
+            // set its duration and maximum duration
+            new_aur->SetAuraMaxDuration( dur > dur1 ? dur1 : dur );
+            new_aur->SetAuraDuration( dur > dur1 ? dur1 : dur );
+            
+            // add the new aura
+            m_caster->AddAura(new_aur);
+        }
+        
+        // remove the auras caused by the stolen spell from the victim
+        unitTarget->RemoveAurasDueToSpell(spellId);
+    }
 }
