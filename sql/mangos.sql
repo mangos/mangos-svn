@@ -374,7 +374,6 @@ CREATE TABLE `creature` (
   `curmana` int(11) unsigned NOT NULL default '0',
   `DeathState` tinyint(3) unsigned NOT NULL default '0',
   `MovementType` tinyint(3) unsigned NOT NULL default '0',
-  `auras` longtext,
   PRIMARY KEY  (`guid`),
   KEY `idx_map` (`map`),
   KEY `index_id` (`id`)
@@ -400,11 +399,7 @@ CREATE TABLE `creature_addon` (
   `bytes1` int(11) unsigned NOT NULL default '0',
   `bytes2` int(11) unsigned NOT NULL default '0',
   `emote` int(11) unsigned NOT NULL default '0',
-  `aura` int(11) unsigned NOT NULL default '0',
-  `auraflags` int(11) unsigned NOT NULL default '0',
-  `auralevels` int(11) unsigned NOT NULL default '0',
-  `auraapplications` int(11) unsigned NOT NULL default '0',
-  `aurastate` int(11) unsigned NOT NULL default '0',
+  `auras` text,
   PRIMARY KEY  (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
@@ -702,11 +697,7 @@ CREATE TABLE `creature_template_addon` (
   `bytes1` int(11) unsigned NOT NULL default '0',
   `bytes2` int(11) unsigned NOT NULL default '0',
   `emote` int(11) unsigned NOT NULL default '0',
-  `aura` int(11) unsigned NOT NULL default '0',
-  `auraflags` int(11) unsigned NOT NULL default '0',
-  `auralevels` int(11) unsigned NOT NULL default '0',
-  `auraapplications` int(11) unsigned NOT NULL default '0',
-  `aurastate` int(11) unsigned NOT NULL default '0',
+  `auras` text,
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
