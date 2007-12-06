@@ -1727,6 +1727,9 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType 
 void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDamage, uint32 *blocked_amount, SpellSchools damageType, uint32 *hitInfo, VictimState *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType, SpellEntry const *spellCasted, bool isTriggeredSpell)
 {
     pVictim->ModifyAuraState(AURA_STATE_DEFENSE, false);
+    if(getClass() == CLASS_WARRIOR && GetTypeId() == TYPEID_PLAYER) 
+        ((Player*)this)->ClearComboPoints();
+
     ModifyAuraState(AURA_STATE_CRIT, false);
 
     if(getClass()==CLASS_HUNTER)
@@ -1937,6 +1940,10 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
 
             if (pVictim->getClass() != CLASS_ROGUE)         // Riposte
                 pVictim->ModifyAuraState(AURA_STATE_DEFENSE, true);
+
+            // Overpower
+            if (GetTypeId() == TYPEID_PLAYER && getClass() == CLASS_WARRIOR)
+                ((Player*)this)->AddComboPoints(pVictim, 1);
 
             CastMeleeProcDamageAndSpell(pVictim, 0, attType, outcome, spellCasted, isTriggeredSpell);
             return;
@@ -3396,6 +3403,10 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
         {
             AuraList& scAuras = caster->GetSingleCastAuras();
             scAuras.remove((*i).second);
+        }
+        else
+        {
+            sLog.outError("Couldn't find the caster of the single target aura, may crash later!");
         }
     }
     // remove aura from party members when the caster turns off the aura
@@ -6454,7 +6465,11 @@ void Unit::CalculateSpellDamageAndDuration(int32* damage, int32* duration, Spell
                 modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_DOT, value);
 
             modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_DAMAGE, value);
-        } 
+        }
+
+        // overpower
+        if(spellProto->SpellFamilyName == SPELLFAMILY_WARRIOR && spellProto->SpellFamilyFlags == 0x4)
+            needClearCombo = true;
 
         *damage = value;
     }

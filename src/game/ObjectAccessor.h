@@ -95,6 +95,15 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
             return HashMapHolder<T>::Find(guid);
         }
 
+        static Unit* GetObjectInWorld(uint64 guid, Unit* /*fake*/)
+        {
+            Unit *u = (Unit*)HashMapHolder<Player>::Find(guid);
+            if(u) return u;
+            u = (Unit*)HashMapHolder<Creature>::Find(guid);
+            if(u) return u;
+            return (Unit*)HashMapHolder<Pet>::Find(guid);
+        }
+
         template<class T> static T* GetObjectInWorld(uint32 mapid, float x, float y, uint64 guid, T* /*fake*/)
         {
             T* obj = HashMapHolder<T>::Find(guid);
