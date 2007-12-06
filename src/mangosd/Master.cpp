@@ -172,7 +172,8 @@ void Master::Run()
 
         uint32 Prio = sConfig.GetIntDefault("ProcessPriority", 0);
 
-        if(Prio && (m_ServiceStatus == -1)/* need set to default process priority class in service mode*/)
+//        if(Prio && (m_ServiceStatus == -1)/* need set to default process priority class in service mode*/)
+        if(Prio)
         {
             if(SetPriorityClass(hProcess,HIGH_PRIORITY_CLASS))
                 sLog.outString("mangosd process priority class set to HIGH");
