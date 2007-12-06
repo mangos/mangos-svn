@@ -1036,6 +1036,9 @@ void Player::setDeathState(DeathState s)
 
     if(s == JUST_DIED && cur)
     {
+        // lost combo points at any target (targeted combo points clear in Unit::setDeathState)
+        ClearComboPoints();
+
         // remove resurrection sickness before other mods to prevent incorrect stats calculation
         RemoveAurasDueToSpell(SPELL_PASSIVE_RESURRECTION_SICKNESS);
         // remove form before other mods to prevent incorrect stats calculation
@@ -1243,7 +1246,7 @@ uint8 Player::chatTag()
 
 void Player::GetFriendInfo(uint64 friendGUID, FriendInfo &friendInfo)
 {
-    Player *pFriend = ObjectAccessor::Instance().FindPlayer(friendGUID);
+    Player *pFriend = ObjectAccessor::FindPlayer(friendGUID);
 
     uint32 team = GetTeam();
     uint32 security = GetSession()->GetSecurity();
@@ -1469,7 +1472,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     // ObjectAccessor won't find the flag.
     if (duel && this->GetMapId()!=mapid)
     {
-        GameObject* obj = ObjectAccessor::Instance().GetGameObject(*this, GetUInt64Value(PLAYER_DUEL_ARBITER));
+        GameObject* obj = ObjectAccessor::GetGameObject(*this, GetUInt64Value(PLAYER_DUEL_ARBITER));
         if (obj)
             DuelComplete(2);
     }
@@ -3794,7 +3797,7 @@ void Player::BroadcastPacketToFriendListers(WorldPacket *packet, bool extern_res
     do
     {
         Field *fields = result->Fetch();
-        Player *pFriend = ObjectAccessor::Instance().FindPlayer(fields[0].GetUInt64());
+        Player *pFriend = ObjectAccessor::FindPlayer(fields[0].GetUInt64());
 
         // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
         // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
@@ -5627,7 +5630,7 @@ void Player::CheckDuelDistance(time_t currTime)
     if(!duel) return;
 
     uint64 duelFlagGUID = GetUInt64Value(PLAYER_DUEL_ARBITER);
-    GameObject* obj = ObjectAccessor::Instance().GetGameObject(*this, duelFlagGUID);
+    GameObject* obj = ObjectAccessor::GetGameObject(*this, duelFlagGUID);
     if(!obj)
         return;
 
@@ -5695,7 +5698,7 @@ void Player::DuelComplete(uint8 type)
     duel->opponent->GetSession()->SendPacket(&data);*/
 
     //Remove Duel Flag object
-    GameObject* obj = ObjectAccessor::Instance().GetGameObject(*this, GetUInt64Value(PLAYER_DUEL_ARBITER));
+    GameObject* obj = ObjectAccessor::GetGameObject(*this, GetUInt64Value(PLAYER_DUEL_ARBITER));
     if(obj)
         duel->initiator->RemoveGameObject(obj,true);
 
@@ -5720,6 +5723,18 @@ void Player::DuelComplete(uint8 type)
     }
     for(size_t i=0; i<auras2remove.size(); i++)
         RemoveAurasDueToSpell(auras2remove[i]);
+
+    // cleanup combo points
+    if(GetComboTarget()==duel->opponent->GetGUID())
+        ClearComboPoints();
+    else if(GetComboTarget()==duel->opponent->GetPetGUID())
+        ClearComboPoints();
+
+    if(duel->opponent->GetComboTarget()==GetGUID())
+        duel->opponent->ClearComboPoints();
+    else if(duel->opponent->GetComboTarget()==GetPetGUID())
+        duel->opponent->ClearComboPoints();
+
 
     //cleanups
     SetUInt64Value(PLAYER_DUEL_ARBITER, 0);
@@ -6428,7 +6443,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     {
         sLog.outDebug("       IS_GAMEOBJECT_GUID(guid)");
         GameObject *go =
-            ObjectAccessor::Instance().GetGameObject(*this, guid);
+            ObjectAccessor::GetGameObject(*this, guid);
 
         // not check distance for GO in case owned GO (fishing bobber case, for example)
         if (!go || (loot_type != LOOT_FISHING || go->GetOwnerGUID() != GetGUID()) && !go->IsWithinDistInMap(this,INTERACTION_DISTANCE))
@@ -6504,7 +6519,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     }
     else if (IS_CORPSE_GUID(guid))        // remove insignia
     {
-        Corpse *bones = ObjectAccessor::Instance().GetCorpse(*this, guid);
+        Corpse *bones = ObjectAccessor::GetCorpse(*this, guid);
 
         if (!bones || !((loot_type == LOOT_CORPSE) || (loot_type == LOOT_INSIGNIA)) || (bones->GetType() != CORPSE_BONES) )
         {
@@ -6529,8 +6544,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
     }
     else
     {
-        Creature *creature =
-            ObjectAccessor::Instance().GetCreature(*this, guid);
+        Creature *creature = ObjectAccessor::GetCreature(*this, guid);
 
         // must be in range and creature must be alive for pickpocket and must be dead for another loot
         if (!creature || creature->isAlive()!=(loot_type == LOOT_PICKPOCKETING) || !creature->IsWithinDistInMap(this,INTERACTION_DISTANCE))
@@ -10506,7 +10520,7 @@ void Player::PrepareQuestMenu( uint64 guid )
     Object *pObject;
     QuestRelations* pObjectQR;
     QuestRelations* pObjectQIR;
-    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*this, guid);
+    Creature *pCreature = ObjectAccessor::GetCreature(*this, guid);
     if( pCreature )
     {
         pObject = (Object*)pCreature;
@@ -10515,7 +10529,7 @@ void Player::PrepareQuestMenu( uint64 guid )
     }
     else
     {
-        GameObject *pGameObject = ObjectAccessor::Instance().GetGameObject(*this, guid);
+        GameObject *pGameObject = ObjectAccessor::GetGameObject(*this, guid);
         if( pGameObject )
         {
             pObject = (Object*)pGameObject;
@@ -10587,7 +10601,7 @@ void Player::SendPreparedQuest( uint64 guid )
         qe._Delay = 0;
         qe._Emote = 0;
         std::string title = "";
-        Creature *pCreature = ObjectAccessor::Instance().GetCreature(*this, guid);
+        Creature *pCreature = ObjectAccessor::GetCreature(*this, guid);
         if( pCreature )
         {
             uint32 textid = pCreature->GetNpcTextId();
@@ -10651,7 +10665,7 @@ Quest const * Player::GetNextQuest( uint64 guid, Quest const *pQuest )
     QuestRelations* pObjectQR;
     QuestRelations* pObjectQIR;
 
-    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*this, guid);
+    Creature *pCreature = ObjectAccessor::GetCreature(*this, guid);
     if( pCreature )
     {
         pObject = (Object*)pCreature;
@@ -10660,7 +10674,7 @@ Quest const * Player::GetNextQuest( uint64 guid, Quest const *pQuest )
     }
     else
     {
-        GameObject *pGameObject = ObjectAccessor::Instance().GetGameObject(*this, guid);
+        GameObject *pGameObject = ObjectAccessor::GetGameObject(*this, guid);
         if( pGameObject )
         {
             pObject = (Object*)pGameObject;
@@ -14677,7 +14691,7 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
     ItemPrototype const *pProto = objmgr.GetItemPrototype( item );
     if( pProto )
     {
-        Creature *pCreature = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*this, vendorguid,UNIT_NPC_FLAG_VENDOR);
+        Creature *pCreature = ObjectAccessor::GetNPCIfCanInteractWith(*this, vendorguid,UNIT_NPC_FLAG_VENDOR);
         if (!pCreature)
         {
             sLog.outDebug( "WORLD: BuyItemFromVendor - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(vendorguid)) );
@@ -15302,7 +15316,7 @@ void Player::InitPrimaryProffesions()
 
 void Player::SendComboPoints()
 {
-    Unit *combotarget = ObjectAccessor::Instance().GetUnit(*this, m_comboTarget);
+    Unit *combotarget = ObjectAccessor::GetUnit(*this, m_comboTarget);
     if (combotarget)
     {
         WorldPacket data(SMSG_SET_COMBO_POINTS, combotarget->GetPackGUID().size()+1);
@@ -15312,7 +15326,7 @@ void Player::SendComboPoints()
     }
 }
 
-void Player::AddComboPoints(uint64 target, int8 count)
+void Player::AddComboPoints(Unit* target, int8 count)
 {
     if(!count)
         return;
@@ -15320,14 +15334,20 @@ void Player::AddComboPoints(uint64 target, int8 count)
     // without combo points lost (duration checked in aura)
     RemoveSpellsCausingAura(SPELL_AURA_RETAIN_COMBO_POINTS);
 
-    if(target == m_comboTarget)
+    if(target->GetGUID() == m_comboTarget)
     {
         m_comboPoints += count;
     }
     else
     {
-        m_comboTarget = target;
+        if(m_comboTarget)
+            if(Unit* target = ObjectAccessor::GetUnit(*this,m_comboTarget))
+                target->RemoveComboPointHolder(GetGUIDLow());
+
+        m_comboTarget = target->GetGUID();
         m_comboPoints = count;
+
+        target->AddComboPointHolder(GetGUIDLow());
     }
 
     if (m_comboPoints > 5) m_comboPoints = 5;
@@ -15347,6 +15367,9 @@ void Player::ClearComboPoints()
     m_comboPoints = 0;
 
     SendComboPoints();
+
+    if(Unit* target = ObjectAccessor::GetUnit(*this,m_comboTarget))
+        target->RemoveComboPointHolder(GetGUIDLow());
 
     m_comboTarget = 0;
 }

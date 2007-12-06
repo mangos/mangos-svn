@@ -1367,7 +1367,7 @@ void Spell::EffectApplyAura(uint32 i)
         if (!spellInfo) return;
         if (m_caster->GetTypeId() == TYPEID_PLAYER && spellInfo->EffectImplicitTargetA[0] == TARGET_SINGLE_ENEMY)
         {
-            Unit *target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
+            Unit *target = ObjectAccessor::GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
             if (target)
             {
                 if (!m_caster->IsFriendlyTo(target))
@@ -2074,7 +2074,7 @@ void Spell::EffectDispel(uint32 i)                          // PBW
         {
             for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[i].begin();iunit != m_targetUnitGUIDs[i].end();++iunit)
             {
-                Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
+                Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::GetUnit(*m_caster,*iunit);
                 if(unit && unit->isAlive() && (unit->GetTypeId() == TYPEID_PLAYER || unit->GetTypeId() == TYPEID_UNIT))
                 {
                     unit->RemoveFirstAuraByDispel(m_spellInfo->EffectMiscValue[i], m_caster);
@@ -3240,7 +3240,7 @@ void Spell::EffectAddComboPoints(uint32 i)
     if(damage <= 0)
         return;
 
-    ((Player*)m_caster)->AddComboPoints(unitTarget->GetGUID(), damage);
+    ((Player*)m_caster)->AddComboPoints(unitTarget, damage);
 }
 
 void Spell::EffectDuel(uint32 i)
@@ -3391,7 +3391,7 @@ void Spell::EffectSummonTotem(uint32 i)
         uint64 guid = m_caster->m_TotemSlot[slot];
         if(guid != 0)
         {
-            Creature *OldTotem = ObjectAccessor::Instance().GetCreature(*m_caster, guid);
+            Creature *OldTotem = ObjectAccessor::GetCreature(*m_caster, guid);
             if(OldTotem && OldTotem->isTotem())
                 ((Totem*)OldTotem)->UnSummon();
         }
@@ -3564,7 +3564,7 @@ void Spell::EffectSummonObject(uint32 i)
     {
         GameObject* obj = NULL;
         if( m_caster )
-            obj = ObjectAccessor::Instance().GetGameObject(*m_caster, guid);
+            obj = ObjectAccessor::GetGameObject(*m_caster, guid);
 
         if(obj) obj->Delete();
         m_caster->m_ObjectSlot[slot] = 0;
@@ -3940,7 +3940,7 @@ void Spell::EffectDestroyAllTotems(uint32 i)
         if(!m_caster->m_TotemSlot[slot])
             continue;
 
-        Creature* totem = ObjectAccessor::Instance().GetCreature(*m_caster,m_caster->m_TotemSlot[slot]);
+        Creature* totem = ObjectAccessor::GetCreature(*m_caster,m_caster->m_TotemSlot[slot]);
         if(totem && totem->isTotem())
         {
             uint32 spell_id = totem->GetUInt32Value(UNIT_CREATED_BY_SPELL);
@@ -4208,31 +4208,53 @@ void Spell::EffectStealBeneficialBuff(uint32 i)
     // get the auras of the target
     Unit::AuraMap& Auras = unitTarget->GetAuras();
 
-    // random buff to steal
-    int remove_prev_positive = irand(0, Auras.size());
-    int cnt = 0;
-
-    // id of the spell we'll steal
-    uint32 spellId = NULL;
+    // count possible for steal auras
+    uint32 count = 0;
     for(Unit::AuraMap::iterator iter = Auras.begin(); iter != Auras.end(); ++iter)
     {
-        if( iter->second->IsPositive()          //only steel positive spell
-            && !iter->second->IsPassive()       //don't steal passive abilities
-            && !iter->second->IsPersistent()    //don't steal persistent auras
-            && (iter->second->GetSpellProto()->Dispel == m_spellInfo->Dispel)  //only steal magic effects
-            )
-            spellId = iter->first.first;    // store the id of the last stealable spell
-        
-        if( (cnt > remove_prev_positive) && spellId )
-            break;                          // exit the loop if found a stealable spell and it's the random spell we chose
-        
-        ++cnt;                              // helper for the random selection
+        if( iter->second->IsPositive() &&                   //only steel positive spell
+            !iter->second->IsPassive() &&                   //don't steal passive abilities
+            !iter->second->IsPersistent() &&                //don't steal persistent auras
+            iter->second->GetSpellProto()->Dispel == m_spellInfo->Dispel ) 
+                                                            //only steal magic effects
+            ++count;
+    }
+
+    // not found any?
+    if(!count)
+        return;
+
+    // random buff to steal
+    uint32 remove_prev_positive = urand(0, count-1);
+
+    // id of the spell we'll steal
+    uint32 spellId = 0;
+
+    // select aura by index
+    count = 0;
+    for(Unit::AuraMap::iterator iter = Auras.begin(); iter != Auras.end(); ++iter)
+    {
+        if( iter->second->IsPositive() &&                   //only steel positive spell
+            !iter->second->IsPassive() &&                   //don't steal passive abilities
+            !iter->second->IsPersistent() &&                //don't steal persistent auras
+            iter->second->GetSpellProto()->Dispel == m_spellInfo->Dispel )
+                                                            //only steal magic effects
+        {
+            if(count==remove_prev_positive)
+            {
+                spellId = iter->first.first;    // store the id of the last stealable spell
+                break;
+            }
+
+            ++count;
+        }
     }
 
     // we found a stealable buff
     if(spellId)
     {
-        int32 dur = 120000; //GetDuration(m_spellInfo); //I couldn't find this info in dbc, so hardcode the 2 minutes
+        // max duration 2 minutes (in msecs)
+        const int32 max_dur = 2*MINUTE*1000;
         
         // go through all the effects of the spell
         for(int i=0; i<3; ++i)
@@ -4244,17 +4266,18 @@ void Spell::EffectStealBeneficialBuff(uint32 i)
                 continue;
             
             // we have to check against the (remaining) duration on the victim
-            int32 dur1 = aur->GetAuraDuration();
+            int32 dur        = aur->GetAuraDuration();
+            int32 basePoints = aur->GetBasePoints();
             
             // construct the new aura for the attacker
-            Aura * new_aur = new Aura(aur->GetSpellProto(), i, NULL, m_caster);
+            Aura * new_aur = new Aura(aur->GetSpellProto(), i, &basePoints, m_caster);
             
             if(!new_aur)
                 continue;
             
             // set its duration and maximum duration
-            new_aur->SetAuraMaxDuration( dur > dur1 ? dur1 : dur );
-            new_aur->SetAuraDuration( dur > dur1 ? dur1 : dur );
+            new_aur->SetAuraMaxDuration( max_dur > dur ? dur : max_dur );
+            new_aur->SetAuraDuration( max_dur > dur ? dur : max_dur );
             
             // add the new aura
             m_caster->AddAura(new_aur);

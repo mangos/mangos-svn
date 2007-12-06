@@ -421,7 +421,7 @@ Unit* Aura::GetCaster() const
     if(m_caster_guid==m_target->GetGUID())
         return m_target;
 
-    return ObjectAccessor::Instance().GetUnit(*m_target,m_caster_guid);
+    return ObjectAccessor::GetUnit(*m_target,m_caster_guid);
 }
 
 void Aura::SetModifier(AuraType t, int32 a, uint32 pt, int32 miscValue, uint32 miscValue2)
@@ -1026,7 +1026,7 @@ void Aura::TriggerSpell()
             // TODO: currently this used as hack for Tame beast triggered spell,
             // BUT this can be correct way to provide target for ALL this function calls
             // in case m_target==caster (or GetSpellProto()->EffectImplicitTargetA[m_effIndex]==TARGET_SELF )
-            target = ObjectAccessor::Instance().GetUnit(*m_target, m_target->GetUInt64Value(UNIT_FIELD_TARGET));
+            target = ObjectAccessor::GetUnit(*m_target, m_target->GetUInt64Value(UNIT_FIELD_TARGET));
             break;
         }
         case 1010:                                          // Curse of Idiocy
@@ -1109,7 +1109,7 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         if(apply)
         {
             // 1 combo
-            ((Player*)caster)->AddComboPoints(m_target->GetGUID(),1);
+            ((Player*)caster)->AddComboPoints(m_target,1);
 
             // damage%
             SpellModifier *mod = new SpellModifier;
@@ -4150,8 +4150,9 @@ void Aura::HandleAuraRetainComboPoints(bool apply, bool Real)
 
     // combo points was added in SPELL_EFFECT_ADD_COMBO_POINTS handler
     // remove only if aura expire by time (in case combo points amount change aura removed without combo points lost)
-    if( !apply && Real && m_duration==0 )
-        target->AddComboPoints(target->GetSelection(), -m_modifier.m_amount);
+    if( !apply && Real && m_duration==0 && target->GetComboTarget())
+        if(Unit* unit = ObjectAccessor::GetUnit(*m_target,target->GetComboTarget()))
+            target->AddComboPoints(unit, -m_modifier.m_amount);
 }
 
 void Aura::HandleModUnattackable( bool Apply, bool Real )
