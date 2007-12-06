@@ -822,22 +822,19 @@ void BattleGroundMgr::BuildBattleGroundListPacket(WorldPacket *data, uint64 guid
     {
         *data << uint8(0x00);                               // unk
 
-        std::list<uint32> SendList;
+        size_t count_pos = data->wpos();
+        uint32 count = 0;
+        *data << uint32(0x00);                              // number of bg instances
+
         for(std::map<uint32, BattleGround*>::iterator itr = m_BattleGrounds.begin(); itr != m_BattleGrounds.end(); ++itr)
         {
             if(itr->second->GetTypeID() == bgTypeId && (PlayerLevel >= itr->second->GetMinLevel()) && (PlayerLevel <= itr->second->GetMaxLevel()))
             {
-                SendList.push_back(itr->second->GetInstanceID());
+                *data << uint32(itr->second->GetInstanceID());
+                count++;
             }
         }
-
-        *data << uint32(SendList.size());                   // number of bg instances
-
-        for(std::list<uint32>::iterator i = SendList.begin(); i != SendList.end(); ++i)
-        {
-            *data << uint32(*i);                            // bg instance id
-        }
-        SendList.clear();
+        data->put<uint32>( count_pos , count);
     }
 }
 

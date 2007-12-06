@@ -24,6 +24,7 @@
 #include "../src/zthread/ThreadImpl.h"
 #include "DatabaseEnv.h"
 #include "Database/SqlOperations.h"
+#include "Timer.h"
 
 using namespace std;
 
