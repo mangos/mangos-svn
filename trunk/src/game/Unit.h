@@ -694,6 +694,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         typedef std::list<Aura *> AuraList;
         typedef std::list<DiminishingReturn> Diminishing;
         typedef std::set<AuraType> AuraTypeSet;
+        typedef std::set<uint32> ComboPointHolderSet;
 
         virtual ~Unit ( );
 
@@ -1158,6 +1159,10 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void setMoveRunFlag(bool f) { m_moveRun = f; }
         bool getMoveRunFlag() const { return m_moveRun; }
 
+        void AddComboPointHolder(uint32 lowguid) { m_ComboPointHolders.insert(lowguid); }
+        void RemoveComboPointHolder(uint32 lowguid) { m_ComboPointHolders.erase(lowguid); }
+        void ClearComboPointHolders();
+
         ///----------Pet responses methods-----------------
         void SendPetCastFail(uint32 spellid, uint8 msg);
         void SendPetActionFeedback (uint8 msg);
@@ -1232,5 +1237,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         HostilRefManager m_HostilRefManager;
 
         FollowerRefManager m_FollowingRefManager;
+
+        ComboPointHolderSet m_ComboPointHolders;
 };
 #endif

@@ -1153,7 +1153,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint8 GetComboPoints() { return m_comboPoints; }
         uint64 GetComboTarget() { return m_comboTarget; }
 
-        void AddComboPoints(uint64 target, int8 count);
+        void AddComboPoints(Unit* target, int8 count);
         void ClearComboPoints();
         void SendComboPoints();
 

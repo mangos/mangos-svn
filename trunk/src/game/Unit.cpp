@@ -219,7 +219,7 @@ void Unit::RemoveAllDynObjects()
 {
     while(!m_dynObjGUIDs.empty())
     {
-        DynamicObject* dynObj = ObjectAccessor::Instance().GetDynamicObject(*this,*m_dynObjGUIDs.begin());
+        DynamicObject* dynObj = ObjectAccessor::GetDynamicObject(*this,*m_dynObjGUIDs.begin());
         if(dynObj)
             dynObj->Delete();
         m_dynObjGUIDs.erase(m_dynObjGUIDs.begin());
@@ -3580,7 +3580,7 @@ void Unit::RemoveDynObject(uint32 spellid)
         return;
     for (DynObjectGUIDs::iterator i = m_dynObjGUIDs.begin(); i != m_dynObjGUIDs.end();)
     {
-        DynamicObject* dynObj = ObjectAccessor::Instance().GetDynamicObject(*this,*m_dynObjGUIDs.begin());
+        DynamicObject* dynObj = ObjectAccessor::GetDynamicObject(*this,*m_dynObjGUIDs.begin());
         if(!dynObj)
         {
             i = m_dynObjGUIDs.erase(i);
@@ -3599,7 +3599,7 @@ DynamicObject * Unit::GetDynObject(uint32 spellId, uint32 effIndex)
 {
     for (DynObjectGUIDs::iterator i = m_dynObjGUIDs.begin(); i != m_dynObjGUIDs.end();)
     {
-        DynamicObject* dynObj = ObjectAccessor::Instance().GetDynamicObject(*this,*m_dynObjGUIDs.begin());
+        DynamicObject* dynObj = ObjectAccessor::GetDynamicObject(*this,*m_dynObjGUIDs.begin());
         if(!dynObj)
         {
             i = m_dynObjGUIDs.erase(i);
@@ -4814,7 +4814,7 @@ bool Unit::isAttackingPlayer() const
     {
         if(m_TotemSlot[i])
         {
-            Creature *totem = ObjectAccessor::Instance().GetCreature(*this, m_TotemSlot[i]);
+            Creature *totem = ObjectAccessor::GetCreature(*this, m_TotemSlot[i]);
             if(totem && totem->isAttackingPlayer())
                 return true;
         }
@@ -4890,7 +4890,7 @@ Unit *Unit::GetOwner() const
     uint64 ownerid = GetOwnerGUID();
     if(!ownerid)
         return NULL;
-    return ObjectAccessor::Instance().GetUnit(*this, ownerid);
+    return ObjectAccessor::GetUnit(*this, ownerid);
 }
 
 Unit *Unit::GetCharmer() const
@@ -4898,7 +4898,7 @@ Unit *Unit::GetCharmer() const
     uint64 charmerid = GetCharmerGUID();
     if(!charmerid)
         return NULL;
-    return ObjectAccessor::Instance().GetUnit(*this, charmerid);
+    return ObjectAccessor::GetUnit(*this, charmerid);
 }
 
 Pet* Unit::GetPet() const
@@ -4906,7 +4906,7 @@ Pet* Unit::GetPet() const
     uint64 pet_guid = GetPetGUID();
     if(pet_guid)
     {
-        Pet* pet = ObjectAccessor::Instance().GetPet(pet_guid);
+        Pet* pet = ObjectAccessor::GetPet(pet_guid);
         if(!pet)
         {
             sLog.outError("Unit::GetPet: Pet %u not exist.",GUID_LOPART(pet_guid));
@@ -4924,7 +4924,7 @@ Unit* Unit::GetCharm() const
     uint64 charm_guid = GetCharmGUID();
     if(charm_guid)
     {
-        Unit* pet = ObjectAccessor::Instance().GetUnit(*this, charm_guid);
+        Unit* pet = ObjectAccessor::GetUnit(*this, charm_guid);
         if(!pet)
         {
             sLog.outError("Unit::GetCharm: Charmed creature %u not exist.",GUID_LOPART(charm_guid));
@@ -4961,7 +4961,7 @@ void Unit::UnsummonAllTotems()
         if(!m_TotemSlot[i])
             continue;
 
-        Creature *OldTotem = ObjectAccessor::Instance().GetCreature(*this, m_TotemSlot[i]);
+        Creature *OldTotem = ObjectAccessor::GetCreature(*this, m_TotemSlot[i]);
         if (OldTotem && OldTotem->isTotem())
             ((Totem*)OldTotem)->UnSummon();
     }
@@ -5671,10 +5671,6 @@ void Unit::ClearInCombat(bool force)
 
     if(isCharmed() || (GetTypeId()!=TYPEID_PLAYER && ((Creature*)this)->isPet()))
         RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
-
-    // remove combo points
-    if(GetTypeId()==TYPEID_PLAYER)
-        ((Player*)this)->ClearComboPoints();
 }
 
 bool Unit::isTargetableForAttack() const
@@ -6217,6 +6213,7 @@ void Unit::setDeathState(DeathState s)
     if (s != ALIVE)
     {
         CombatStop(true);
+        ClearComboPointHolders();                           // any combo points pointed to unit lost at it death
 
         if(IsNonMeleeSpellCasted(false))
             InterruptNonMeleeSpells(false);
@@ -6622,7 +6619,7 @@ void Unit::ApplyDiminishingToDuration(DiminishingMechanics  mech, int32 &duratio
 
 Unit* Unit::GetUnit(WorldObject& object, uint64 guid)
 {
-    return ObjectAccessor::Instance().GetUnit(object,guid);
+    return ObjectAccessor::GetUnit(object,guid);
 }
 
 bool Unit::isVisibleForInState( Player const* u, bool inVisibleList ) const
@@ -6969,6 +6966,7 @@ void Unit::CleanupsBeforeDelete()
         InterruptNonMeleeSpells(true);
         m_Events.KillAllEvents();
         CombatStop(true);
+        ClearComboPointHolders();
         DeleteThreatList();
         getHostilRefManager().setOnlineOfflineState(false);
         RemoveAllAuras();
@@ -7447,4 +7445,18 @@ bool Unit::IsStandState() const
 bool Unit::IsPolymorphed() const
 {
     return GetSpellSpecific(getTransForm())==SPELL_MAGE_POLYMORPH;
+}
+
+void Unit::ClearComboPointHolders()
+{
+    while(!m_ComboPointHolders.empty())
+    {
+        uint32 lowguid = *m_ComboPointHolders.begin();
+
+        Player* plr = objmgr.GetPlayer(MAKE_GUID(lowguid,HIGHGUID_PLAYER));
+        if(plr && plr->GetComboTarget()==GetGUID())         // recheck for safe
+            plr->ClearComboPoints();                        // remove also guid from m_ComboPointHolders;
+        else
+            m_ComboPointHolders.erase(lowguid);             // or remove manually
+    }
 }
