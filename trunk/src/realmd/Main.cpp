@@ -30,6 +30,20 @@
 #include "AuthSocket.h"
 #include "SystemConfig.h"
 
+#ifdef WIN32
+#include "ServiceWin32.h"
+char serviceName[] = "realmd";
+char serviceLongName[] = "MaNGOS realmd service";
+char serviceDescription[] = "Massive Network Game Object Server";
+/*
+ * -1 - not in service mode
+ *  0 - stopped
+ *  1 - running
+ *  2 - paused
+ */
+int m_ServiceStatus = -1;
+#endif
+
 bool StartDB(std::string &dbstring);
 void UnhookSignals();
 void HookSignals();
@@ -46,11 +60,19 @@ DatabaseMysql dbRealmServer;                                ///< Accessor to the
 /// Print out the usage string for this program on the console.
 void usage(const char *prog)
 {
-    sLog.outString("Usage: \n %s [-c config_file]",prog);
+    sLog.outString("Usage: \n %s [<options>]\n"
+        "    -c config_file           use config_file as configuration file\n\r"
+        #ifdef WIN32
+        "    Running as service functions:\n\r"
+        "    --service                run as service\n\r"
+        "    -s install               install service\n\r"
+        "    -s uninstall             uninstall service\n\r"
+        #endif
+        ,prog);
 }
 
 /// Launch the realm server
-int main(int argc, char **argv)
+extern int main(int argc, char **argv)
 {
     ///- Command line parsing to get the configuration file name
     char const* cfg_file = _REALMD_CONFIG;
@@ -68,12 +90,44 @@ int main(int argc, char **argv)
             else
                 cfg_file = argv[c];
         }
-        else
+
+        #ifdef WIN32
+        ////////////
+        //Services//
+        ////////////
+        if( strcmp(argv[c],"-s") == 0)
         {
-            sLog.outError("Runtime-Error: unsupported option %s",argv[c]);
-            usage(argv[0]);
-            return 1;
+            if( ++c >= argc )
+            {
+                sLog.outError("Runtime-Error: -s option requires an input argument");
+                usage(argv[0]);
+                return 1;
+            }
+            if( strcmp(argv[c],"install") == 0)
+            {
+                if (WinServiceInstall())
+                    sLog.outString("Installing service");
+                return 1;
+            }
+            else if( strcmp(argv[c],"uninstall") == 0)
+            {
+                if(WinServiceUninstall())
+                    sLog.outString("Uninstalling service");
+                return 1;
+            }
+            else
+            {
+                sLog.outError("Runtime-Error: unsupported option %s",argv[c]);
+                usage(argv[0]);
+                return 1;
+            }
         }
+        if( strcmp(argv[c],"--service") == 0)
+        {
+            WinServiceRun();
+        }
+        ////
+        #endif
         ++c;
     }
 
@@ -179,6 +233,7 @@ int main(int argc, char **argv)
     ///- Wait for termination signal
     while (!stopEvent)
     {
+
         h.Select(0, 100000);
 
         if( (++loopCounter) == numLoops )
@@ -187,6 +242,10 @@ int main(int argc, char **argv)
             sLog.outDetail("Ping MySQL to keep connection alive");
             delete dbRealmServer.Query("SELECT 1 FROM `realmlist` LIMIT 1");
         }
+#ifdef WIN32
+	    if (m_ServiceStatus == 0) stopEvent = true;
+	    while (m_ServiceStatus == 2) Sleep(1000);
+#endif        
     }
 
     ///- Wait for the delay thread to exit

@@ -27,6 +27,20 @@
 #include "Master.h"
 #include "SystemConfig.h"
 
+#ifdef WIN32
+#include "ServiceWin32.h"
+char serviceName[] = "mangosd";
+char serviceLongName[] = "MaNGOS world service";
+char serviceDescription[] = "Massive Network Game Object Server";
+/*
+ * -1 - not in service mode
+ *  0 - stopped
+ *  1 - running
+ *  2 - paused
+ */
+int m_ServiceStatus = -1;
+#endif
+
 #ifdef DO_POSTGRESQL
 DatabasePostgre WorldDatabase;                              ///< Accessor to the world database
 DatabasePostgre CharacterDatabase;                          ///< Accessor to the character database
@@ -42,11 +56,19 @@ uint32 realmID;                                             ///< Id of the realm
 /// Print out the usage string for this program on the console.
 void usage(const char *prog)
 {
-    sLog.outString("Usage: \n %s [-c config_file]",prog);
+    sLog.outString("Usage: \n %s [<options>]\n"
+        "    -c config_file           use config_file as configuration file\n\r"
+        #ifdef WIN32
+        "    Running as service functions:\n\r"
+        "    --service                run as service\n\r"
+        "    -s install               install service\n\r"
+        "    -s uninstall             uninstall service\n\r"
+        #endif
+        ,prog);
 }
 
 /// Launch the mangos server
-int main(int argc, char **argv)
+extern int main(int argc, char **argv)
 {
     // - Construct Memory Manager Instance
     MaNGOS::Singleton<MemoryManager>::Instance();
@@ -69,12 +91,44 @@ int main(int argc, char **argv)
             else
                 cfg_file = argv[c];
         }
-        else
+
+        #ifdef WIN32
+        ////////////
+        //Services//
+        ////////////
+        if( strcmp(argv[c],"-s") == 0)
         {
-            sLog.outError("Runtime-Error: unsupported option %s",argv[c]);
-            usage(argv[0]);
-            return 1;
+            if( ++c >= argc )
+            {
+                sLog.outError("Runtime-Error: -s option requires an input argument");
+                usage(argv[0]);
+                return 1;
+            }
+            if( strcmp(argv[c],"install") == 0)
+            {
+                if (WinServiceInstall())
+                    sLog.outString("Installing service");
+                return 1;
+            }
+            else if( strcmp(argv[c],"uninstall") == 0)
+            {
+                if(WinServiceUninstall())
+                    sLog.outString("Uninstalling service");
+                return 1;
+            }
+            else
+            {
+                sLog.outError("Runtime-Error: unsupported option %s",argv[c]);
+                usage(argv[0]);
+                return 1;
+            }
         }
+        if( strcmp(argv[c],"--service") == 0)
+        {
+            WinServiceRun();
+        }
+        ////
+        #endif
         ++c;
     }
 
