@@ -144,7 +144,7 @@ Unit *Totem::GetOwner()
     uint64 ownerid = GetOwnerGUID();
     if(!ownerid)
         return NULL;
-    return ObjectAccessor::Instance().GetUnit(*this, ownerid);
+    return ObjectAccessor::GetUnit(*this, ownerid);
 }
 
 void Totem::SetTypeBySummonSpell(SpellEntry const * spellProto)

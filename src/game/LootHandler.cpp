@@ -42,7 +42,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
     if (IS_GAMEOBJECT_GUID(lguid))
     {
         GameObject *go =
-            ObjectAccessor::Instance().GetGameObject(*player, lguid);
+            ObjectAccessor::GetGameObject(*player, lguid);
 
         // not check distance for GO in case owned GO (fishing bobber case, for example)
         if (!go || go->GetOwnerGUID() != _player->GetGUID() && !go->IsWithinDistInMap(_player,INTERACTION_DISTANCE))
@@ -68,7 +68,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
     else
     {
         Creature* pCreature =
-            ObjectAccessor::Instance().GetCreature(*player, lguid);
+            ObjectAccessor::GetCreature(*player, lguid);
 
         bool ok_loot = pCreature && pCreature->isAlive() == (player->getClass()==CLASS_ROGUE && pCreature->lootForPickPocketed);
 
@@ -197,7 +197,7 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
 
     if( IS_GAMEOBJECT_GUID( guid ) )
     {
-        GameObject *pGameObject = ObjectAccessor::Instance().GetGameObject(*GetPlayer(), guid);
+        GameObject *pGameObject = ObjectAccessor::GetGameObject(*GetPlayer(), guid);
 
         // not check distance for GO in case owned GO (fishing bobber case, for example)
         if( pGameObject && (pGameObject->GetOwnerGUID()==_player->GetGUID() || pGameObject->IsWithinDistInMap(_player,INTERACTION_DISTANCE)) )
@@ -205,14 +205,14 @@ void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
     }
     else if( IS_CORPSE_GUID( guid ) )    // remove insignia ONLY in BG
     {
-        Corpse *bones = ObjectAccessor::Instance().GetCorpse(*GetPlayer(), guid);
+        Corpse *bones = ObjectAccessor::GetCorpse(*GetPlayer(), guid);
 
         if (bones && bones->IsWithinDistInMap(_player,INTERACTION_DISTANCE) )
             pLoot = &bones->loot;
     }
     else
     {
-        Creature* pCreature = ObjectAccessor::Instance().GetCreature(*GetPlayer(), guid);
+        Creature* pCreature = ObjectAccessor::GetCreature(*GetPlayer(), guid);
 
         bool ok_loot = pCreature && pCreature->isAlive() == (player->getClass()==CLASS_ROGUE && pCreature->lootForPickPocketed);
 
@@ -283,7 +283,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
     if (IS_GAMEOBJECT_GUID(lguid))
     {
         GameObject *go =
-            ObjectAccessor::Instance().GetGameObject(*player, lguid);
+            ObjectAccessor::GetGameObject(*player, lguid);
 
         // not check distance for GO in case owned GO (fishing bobber case, for example)
         if (!go || go->GetOwnerGUID() != _player->GetGUID() && !go->IsWithinDistInMap(_player,INTERACTION_DISTANCE))
@@ -356,7 +356,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
     }
     else if (IS_CORPSE_GUID(lguid))        // ONLY remove insignia at BG
     {
-        Corpse *corpse = ObjectAccessor::Instance().GetCorpse(*player, lguid);
+        Corpse *corpse = ObjectAccessor::GetCorpse(*player, lguid);
         if (!corpse)
             return;
 
@@ -391,8 +391,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
     }
     else
     {
-        Creature* pCreature =
-            ObjectAccessor::Instance().GetCreature(*player, lguid);
+        Creature* pCreature = ObjectAccessor::GetCreature(*player, lguid);
 
         bool ok_loot = pCreature && pCreature->isAlive() == (player->getClass()==CLASS_ROGUE && pCreature->lootForPickPocketed);
         if ( !ok_loot || !pCreature->IsWithinDistInMap(_player,INTERACTION_DISTANCE) )

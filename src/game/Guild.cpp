@@ -322,7 +322,7 @@ void Guild::LoadPlayerStatsByGuid(uint64 guid)
     {
         if (itr->guid == guid)
         {
-            pl = ObjectAccessor::Instance().FindPlayer(itr->guid);
+            pl = ObjectAccessor::FindPlayer(itr->guid);
             if(!pl)break;
             itr->name  = pl->GetName();
             itr->level = pl->getLevel();
@@ -483,7 +483,7 @@ void Guild::BroadcastToGuild(WorldSession *session, std::string msg, uint32 lang
             WorldPacket data;
             sChatHandler.FillMessageData(&data, session, CHAT_MSG_GUILD, language, NULL, 0, msg.c_str());
 
-            pl = ObjectAccessor::Instance().FindPlayer(itr->guid);
+            pl = ObjectAccessor::FindPlayer(itr->guid);
 
             if (pl && pl->GetSession() && HasRankRight(pl->GetRank(),GR_RIGHT_GCHATLISTEN) && !pl->HasInIgnoreList(session->GetPlayer()->GetGUID()) )
                 pl->GetSession()->SendPacket(&data);
@@ -503,7 +503,7 @@ void Guild::BroadcastToOfficers(WorldSession *session, std::string msg, uint32 l
             WorldPacket data;
             sChatHandler.FillMessageData(&data, session, CHAT_MSG_OFFICER, language, NULL, 0, msg.c_str());
 
-            pl = ObjectAccessor::Instance().FindPlayer(itr->guid);
+            pl = ObjectAccessor::FindPlayer(itr->guid);
 
             if (pl && pl->GetSession() && HasRankRight(pl->GetRank(),GR_RIGHT_OFFCHATLISTEN) && !pl->HasInIgnoreList(session->GetPlayer()->GetGUID()))
                 pl->GetSession()->SendPacket(&data);
@@ -517,7 +517,7 @@ void Guild::BroadcastPacket(WorldPacket *packet)
 
     for (itr = members.begin(); itr != members.end(); itr++)
     {
-        Player *player = ObjectAccessor::Instance().FindPlayer(itr->guid);
+        Player *player = ObjectAccessor::FindPlayer(itr->guid);
         if(player)
             player->GetSession()->SendPacket(packet);
     }
@@ -644,7 +644,7 @@ void Guild::Roster(WorldSession *session)
 
     for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
     {
-        pl = ObjectAccessor::Instance().FindPlayer(itr->guid);
+        pl = ObjectAccessor::FindPlayer(itr->guid);
         if (pl)
         {
             data << pl->GetGUID();

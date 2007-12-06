@@ -38,7 +38,7 @@ void WorldSession::HandleBattleGroundHelloOpcode( WorldPacket & recv_data )
     recv_data >> guid;
     sLog.outDebug( "WORLD: Recvd CMSG_BATTLEMASTER_HELLO Message from: " I64FMT, guid);
 
-    Creature *unit = ObjectAccessor::Instance().GetCreature(*_player, guid);
+    Creature *unit = ObjectAccessor::GetCreature(*_player, guid);
     if(!unit)
         return;
 

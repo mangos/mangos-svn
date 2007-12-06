@@ -475,7 +475,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
     uint64 mailbox;
     recv_data >> mailbox;
 
-    //GameObject* obj = ObjectAccessor::Instance().GetGameObject(_player, mailbox);
+    //GameObject* obj = ObjectAccessor::GetGameObject(_player, mailbox);
     //if(!obj || !obj->IsMailBox())
     //    return;
 

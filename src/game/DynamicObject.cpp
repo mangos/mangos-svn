@@ -83,7 +83,7 @@ bool DynamicObject::Create( uint32 guidlow, Unit *caster, uint32 spellId, uint32
 Unit* DynamicObject::GetCaster() const
 {
     // can be not found in some cases
-    return ObjectAccessor::Instance().GetUnit(*this,m_casterGuid);
+    return ObjectAccessor::GetUnit(*this,m_casterGuid);
 }
 
 void DynamicObject::Update(uint32 p_time)

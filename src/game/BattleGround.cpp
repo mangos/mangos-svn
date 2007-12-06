@@ -153,7 +153,7 @@ void BattleGround::Update(time_t diff)
 
                     if (!sh)
                     {
-                        sh = ObjectAccessor::Instance().GetCreature(*plr, itr->first);
+                        sh = ObjectAccessor::GetCreature(*plr, itr->first);
                         // only for visual effect
                         if (sh)
                             sh->CastSpell(sh, SPELL_SPIRIT_HEAL, true);   // Spirit Heal, effect 117

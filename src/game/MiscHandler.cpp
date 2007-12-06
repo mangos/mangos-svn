@@ -472,7 +472,7 @@ void WorldSession::HandleSetTargetOpcode( WorldPacket & recv_data )
     _player->SetTarget(guid);
 
     // update reputation list if need
-    Unit* unit = ObjectAccessor::Instance().GetUnit(*_player, guid );
+    Unit* unit = ObjectAccessor::GetUnit(*_player, guid );
     if(!unit)
         return;
 
@@ -492,7 +492,7 @@ void WorldSession::HandleSetSelectionOpcode( WorldPacket & recv_data )
     _player->SetSelection(guid);
 
     // update reputation list if need
-    Unit* unit = ObjectAccessor::Instance().GetUnit(*_player, guid );
+    Unit* unit = ObjectAccessor::GetUnit(*_player, guid );
     if(!unit)
         return;
 
@@ -569,7 +569,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
 
     if(friendGuid)
     {
-        pFriend = ObjectAccessor::Instance().FindPlayer(friendGuid);
+        pFriend = ObjectAccessor::FindPlayer(friendGuid);
         if(pFriend==GetPlayer())
             friendResult = FRIEND_SELF;
         else if(GetPlayer()->GetTeam()!=objmgr.GetPlayerTeamByGUID(friendGuid))

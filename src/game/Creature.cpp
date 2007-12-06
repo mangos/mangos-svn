@@ -965,7 +965,7 @@ void Creature::AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool 
 Player *Creature::GetLootRecipient() const
 {
     if (!m_lootRecipient) return NULL;
-    else return ObjectAccessor::Instance().FindPlayer(m_lootRecipient);
+    else return ObjectAccessor::FindPlayer(m_lootRecipient);
 }
 
 void Creature::SetLootRecipient(Player *player)

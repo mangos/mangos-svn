@@ -96,7 +96,7 @@ ReactorAI::EnterEvadeMode()
         return;
     }
 
-    Unit* victim = ObjectAccessor::Instance().GetUnit(i_creature, i_victimGuid );
+    Unit* victim = ObjectAccessor::GetUnit(i_creature, i_victimGuid );
 
     if( !victim  )
     {

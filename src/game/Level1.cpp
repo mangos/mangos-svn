@@ -37,7 +37,7 @@
 bool ChatHandler::HandleSayCommand(const char* args)
 {
     uint64 guid = m_session->GetPlayer()->GetSelection();
-    Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
+    Creature* pCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(), guid);
 
     if(!pCreature)
     {
@@ -53,7 +53,7 @@ bool ChatHandler::HandleSayCommand(const char* args)
 bool ChatHandler::HandleYellCommand(const char* args)
 {
     uint64 guid = m_session->GetPlayer()->GetSelection();
-    Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
+    Creature* pCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(), guid);
 
     if(!pCreature)
     {
@@ -91,7 +91,7 @@ bool ChatHandler::HandleNpcWhisperCommand(const char* args)
     char* text = strtok(NULL, "");
 
     uint64 guid = m_session->GetPlayer()->GetSelection();  
-    Creature* pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
+    Creature* pCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(), guid);
 
     if(!pCreature || !receiver || !text)
     {

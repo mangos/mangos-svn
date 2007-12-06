@@ -402,7 +402,7 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
 
     recvPacket >> ID;
 
-    Player* pOther = ObjectAccessor::Instance().FindPlayer( ID );
+    Player* pOther = ObjectAccessor::FindPlayer( ID );
 
     if( !pOther )
     {
