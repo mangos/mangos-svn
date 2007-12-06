@@ -421,7 +421,9 @@ Unit* Aura::GetCaster() const
     if(m_caster_guid==m_target->GetGUID())
         return m_target;
 
-    return ObjectAccessor::GetUnit(*m_target,m_caster_guid);
+    //return ObjectAccessor::GetUnit(*m_target,m_caster_guid);
+    //must return caster even if it's in another grid/map
+    return ObjectAccessor::GetObjectInWorld(m_caster_guid, (Unit*)NULL);
 }
 
 void Aura::SetModifier(AuraType t, int32 a, uint32 pt, int32 miscValue, uint32 miscValue2)
