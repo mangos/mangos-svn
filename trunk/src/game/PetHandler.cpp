@@ -45,7 +45,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
     recv_data >> guid2;                                     //tag guid
 
     // used also for charmed creature
-    Unit* pet= ObjectAccessor::Instance().GetUnit(*_player,guid1);
+    Unit* pet= ObjectAccessor::GetUnit(*_player,guid1);
     sLog.outDetail( "HandlePetAction.Pet %u flag is %u, spellid is %u, target %u.\n", uint32(GUID_LOPART(guid1)), flag, spellid, uint32(GUID_LOPART(guid2)) );
     if(!pet)
     {
@@ -95,7 +95,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
                     // only place where pet can be player
                     pet->clearUnitState(UNIT_STAT_FOLLOW);
                     uint64 selguid = _player->GetSelection();
-                    Unit *TargetUnit = ObjectAccessor::Instance().GetUnit(*_player, selguid);
+                    Unit *TargetUnit = ObjectAccessor::GetUnit(*_player, selguid);
                     if(TargetUnit == NULL) return;
 
                     // not let attack friendly units.
@@ -160,7 +160,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
         {
             Unit* unit_target;
             if(guid2)
-                unit_target = ObjectAccessor::Instance().GetUnit(*_player,guid2);
+                unit_target = ObjectAccessor::GetUnit(*_player,guid2);
             else
                 unit_target = NULL;
 
@@ -278,7 +278,7 @@ void WorldSession::HandlePetNameQuery( WorldPacket & recv_data )
 
 void WorldSession::SendPetNameQuery( uint64 petguid, uint32 petnumber)
 {
-    Creature* pet = ObjectAccessor::Instance().GetCreatureOrPet(*_player, petguid);
+    Creature* pet = ObjectAccessor::GetCreatureOrPet(*_player, petguid);
     if(!pet || !pet->GetCharmInfo() || pet->GetCharmInfo()->GetPetNumber() != petnumber)
         return;
 
@@ -307,10 +307,10 @@ void WorldSession::HandlePetSetAction( WorldPacket & recv_data )
 
     // FIXME: charmed case
     //Pet* pet = ObjectAccessor::Instance().GetPet(petguid);
-    if(ObjectAccessor::Instance().FindPlayer(petguid))
+    if(ObjectAccessor::FindPlayer(petguid))
         return;
 
-    Creature* pet = ObjectAccessor::Instance().GetCreatureOrPet(*_player, petguid);
+    Creature* pet = ObjectAccessor::GetCreatureOrPet(*_player, petguid);
 
     if(!pet || (pet != _player->GetPet() && pet != _player->GetCharm()))
     {
@@ -373,7 +373,7 @@ void WorldSession::HandlePetRename( WorldPacket & recv_data )
     recv_data >> petguid;
     recv_data >> name;
 
-    Pet* pet = ObjectAccessor::Instance().GetPet(petguid);
+    Pet* pet = ObjectAccessor::GetPet(petguid);
                                                             // check it!
     if(!pet || !pet->isPet() || ((Pet*)pet)->getPetType()!= HUNTER_PET || (pet->GetUInt32Value(UNIT_FIELD_BYTES_2) >> 16) != 3 || pet->GetOwnerGUID() != _player->GetGUID() || !pet->GetCharmInfo())
         return;
@@ -398,7 +398,7 @@ void WorldSession::HandlePetAbandon( WorldPacket & recv_data )
     sLog.outDetail( "HandlePetAbandon. CMSG_PET_ABANDON pet guid is %u", GUID_LOPART(guid) );
 
     // pet/charmed
-    Creature* pet=ObjectAccessor::Instance().GetCreatureOrPet(*_player, guid);
+    Creature* pet=ObjectAccessor::GetCreatureOrPet(*_player, guid);
     if(pet)
     {
         if(pet->isPet())
@@ -494,10 +494,10 @@ void WorldSession::HandlePetSpellAutocastOpcode( WorldPacket& recvPacket )
     if(!_player->GetPet() && !_player->GetCharm())
         return;
 
-    if(ObjectAccessor::Instance().FindPlayer(guid))
+    if(ObjectAccessor::FindPlayer(guid))
         return;
 
-    Creature* pet=ObjectAccessor::Instance().GetCreatureOrPet(*_player,guid);
+    Creature* pet=ObjectAccessor::GetCreatureOrPet(*_player,guid);
 
     if(!pet || (pet != _player->GetPet() && pet != _player->GetCharm()))
     {
@@ -543,10 +543,10 @@ void WorldSession::HandleAddDynamicTargetObsoleteOpcode( WorldPacket& recvPacket
     if(!_player->GetPet() && !_player->GetCharm())
         return;
 
-    if(ObjectAccessor::Instance().FindPlayer(guid))
+    if(ObjectAccessor::FindPlayer(guid))
         return;
 
-    Creature* pet=ObjectAccessor::Instance().GetCreatureOrPet(*_player,guid);
+    Creature* pet=ObjectAccessor::GetCreatureOrPet(*_player,guid);
 
     if(!pet || (pet != _player->GetPet() && pet!= _player->GetCharm()))
     {

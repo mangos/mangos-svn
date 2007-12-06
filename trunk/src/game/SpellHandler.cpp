@@ -217,7 +217,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
     recv_data >> guid;
 
     sLog.outDebug( "WORLD: Recvd CMSG_GAMEOBJ_USE Message [guid=%u]", guid);
-    GameObject *obj = ObjectAccessor::Instance().GetGameObject(*_player, guid);
+    GameObject *obj = ObjectAccessor::GetGameObject(*_player, guid);
 
     if(!obj) return;
     //obj->SetUInt32Value(GAMEOBJECT_FLAGS,2);
@@ -409,7 +409,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
         {
             info = obj->GetGOInfo();
 
-            Player* targetPlayer = ObjectAccessor::Instance().FindPlayer(((Player*)spellCaster)->GetSelection());
+            Player* targetPlayer = ObjectAccessor::FindPlayer(((Player*)spellCaster)->GetSelection());
 
             // accept only use by player from same group for caster except caster itself
             if(!targetPlayer || targetPlayer == GetPlayer() || !targetPlayer->IsInSameGroupWith(GetPlayer()))
@@ -698,7 +698,7 @@ void WorldSession::HandlePetCancelAuraOpcode( WorldPacket& recvPacket)
         return;
     }
 
-    Creature* pet=ObjectAccessor::Instance().GetCreatureOrPet(*_player,guid);
+    Creature* pet=ObjectAccessor::GetCreatureOrPet(*_player,guid);
 
     if(!pet)
     {

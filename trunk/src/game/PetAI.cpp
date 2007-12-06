@@ -101,7 +101,7 @@ void PetAI::_stopAttack()
     if( !i_victimGuid )
         return;
 
-    Unit* victim = ObjectAccessor::Instance().GetUnit(i_pet, i_victimGuid );
+    Unit* victim = ObjectAccessor::GetUnit(i_pet, i_victimGuid );
 
     if ( !victim )
         return;
@@ -249,7 +249,7 @@ void PetAI::UpdateAI(const uint32 diff)
             spell->m_targets = NULLtargets;
             for(std::set<uint64>::iterator tar = m_AllySet.begin(); tar != m_AllySet.end(); ++tar)
             {
-                Unit* Target = ObjectAccessor::Instance().GetUnit(i_pet,*tar);
+                Unit* Target = ObjectAccessor::GetUnit(i_pet,*tar);
 
                 //only buff targets that are in combat, unless the spell can only be cast while out of combat
                 if(!Target || (!Target->isInCombat() && !IsNonCombatSpell(spellID)))

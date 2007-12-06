@@ -117,7 +117,7 @@ void HostilReference::updateOnlineStatus()
 
     if(!isValid())
     {
-        Unit* target = ObjectAccessor::Instance().GetUnit(*getSourceUnit(), getUnitGuid());
+        Unit* target = ObjectAccessor::GetUnit(*getSourceUnit(), getUnitGuid());
         if(target)
             link(target, getSource());
     }

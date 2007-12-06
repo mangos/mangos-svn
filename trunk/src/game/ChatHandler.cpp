@@ -396,7 +396,7 @@ void WorldSession::HandleTextEmoteOpcode( WorldPacket & recv_data )
     const char *nam = 0;
     uint32 namlen = 1;
 
-    Unit* unit = ObjectAccessor::Instance().GetUnit(*_player, guid);
+    Unit* unit = ObjectAccessor::GetUnit(*_player, guid);
     Creature *pCreature = dynamic_cast<Creature *>(unit);
     if( pCreature != NULL )
     {

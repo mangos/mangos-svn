@@ -2446,7 +2446,7 @@ bool ChatHandler::HandleAddWeaponCommand(const char* args)
         return true;
     }
 
-    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*m_session->GetPlayer(), guid);
+    Creature *pCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(), guid);
 
     if(!pCreature)
     {

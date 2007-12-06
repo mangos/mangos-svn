@@ -743,12 +743,12 @@ Unit* ChatHandler::getSelectedUnit()
     if (guid == 0)
         return m_session->GetPlayer();
 
-    return ObjectAccessor::Instance().GetUnit(*m_session->GetPlayer(),guid);
+    return ObjectAccessor::GetUnit(*m_session->GetPlayer(),guid);
 }
 
 Creature* ChatHandler::getSelectedCreature()
 {
-    return ObjectAccessor::Instance().GetCreatureOrPet(*m_session->GetPlayer(),m_session->GetPlayer()->GetSelection());
+    return ObjectAccessor::GetCreatureOrPet(*m_session->GetPlayer(),m_session->GetPlayer()->GetSelection());
 }
 
 char*     ChatHandler::extractKeyFromLink(char* text, char const* linkType)
@@ -822,7 +822,7 @@ GameObject* ChatHandler::GetObjectGlobalyWithGuidOrNearWithDbGuid(uint32 lowguid
 {
     Player* pl = m_session->GetPlayer();
 
-    GameObject* obj = ObjectAccessor::Instance().GetGameObject(*pl, MAKE_GUID(lowguid, HIGHGUID_GAMEOBJECT));
+    GameObject* obj = ObjectAccessor::GetGameObject(*pl, MAKE_GUID(lowguid, HIGHGUID_GAMEOBJECT));
 
     if(!obj && objmgr.GetGOData(lowguid))                   // guid is DB guid of object
     {

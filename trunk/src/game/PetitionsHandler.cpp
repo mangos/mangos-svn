@@ -83,7 +83,7 @@ void WorldSession::HandlePetitionBuyOpcode(WorldPacket & recv_data)
     sLog.outDebug("Petitioner with GUID %u tried sell petition: name %s", GUID_LOPART(guidNPC), name.c_str());
 
     // prevent cheating
-    Creature *pCreature = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guidNPC,UNIT_NPC_FLAG_PETITIONER);
+    Creature *pCreature = ObjectAccessor::GetNPCIfCanInteractWith(*_player, guidNPC,UNIT_NPC_FLAG_PETITIONER);
     if (!pCreature)
     {
         sLog.outDebug("WORLD: HandlePetitionBuyOpcode - Unit (GUID: %u) not found or you can't interact with him.", GUID_LOPART(guidNPC));
@@ -549,7 +549,7 @@ void WorldSession::HandleOfferPetitionOpcode(WorldPacket & recv_data)
     recv_data >> plguid;                                    // player guid
     sLog.outDebug("OFFER PETITION: type %u, GUID1 %u, to player id: %u", petitiontype, GUID_LOPART(petitionguid), GUID_LOPART(plguid));
 
-    player = ObjectAccessor::Instance().FindPlayer(plguid);
+    player = ObjectAccessor::FindPlayer(plguid);
     if(!player || player->HasInIgnoreList(GetPlayer()->GetGUID()))
         return;
 
@@ -789,7 +789,7 @@ void WorldSession::HandlePetitionShowListOpcode(WorldPacket & recv_data)
 
 void WorldSession::SendPetitionShowList(uint64 guid)
 {
-    Creature *pCreature = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid, UNIT_NPC_FLAG_PETITIONER);
+    Creature *pCreature = ObjectAccessor::GetNPCIfCanInteractWith(*_player, guid, UNIT_NPC_FLAG_PETITIONER);
     if (!pCreature)
     {
         sLog.outDebug("WORLD: HandlePetitionShowListOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)));

@@ -172,7 +172,7 @@ void TemporarySummon::UnSummon()
     ObjectAccessor::Instance().AddObjectToRemoveList(this);
 
     Unit* sum;
-    if (m_summoner && (sum = ObjectAccessor::Instance().GetUnit(*this, m_summoner)) && sum->GetTypeId() == TYPEID_UNIT && ((Creature*)sum)->AI())
+    if (m_summoner && (sum = ObjectAccessor::GetUnit(*this, m_summoner)) && sum->GetTypeId() == TYPEID_UNIT && ((Creature*)sum)->AI())
     {
         ((Creature*)sum)->AI()->SummonedCreatureDespawn(this);
     }

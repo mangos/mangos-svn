@@ -39,7 +39,7 @@ void WorldSession::HandleQuestgiverStatusQueryOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Received CMSG_QUESTGIVER_STATUS_QUERY npc = %u",uint32(GUID_LOPART(guid)) );
 
-    Creature *pCreature = ObjectAccessor::Instance().GetCreature(*_player, guid);
+    Creature *pCreature = ObjectAccessor::GetCreature(*_player, guid);
     if ( pCreature )
     {
         uint32 questStatus = DIALOG_STATUS_NONE;
@@ -66,7 +66,7 @@ void WorldSession::HandleQuestgiverHelloOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Received CMSG_QUESTGIVER_HELLO npc = %u",guid );
 
-    Creature *pCreature = ObjectAccessor::Instance().GetNPCIfCanInteractWith(*_player, guid,UNIT_NPC_FLAG_NONE);
+    Creature *pCreature = ObjectAccessor::GetNPCIfCanInteractWith(*_player, guid,UNIT_NPC_FLAG_NONE);
     if (!pCreature)
     {
         sLog.outDebug( "WORLD: HandleQuestgiverHelloOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );
@@ -93,7 +93,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 
     sLog.outDebug( "WORLD: Received CMSG_QUESTGIVER_ACCEPT_QUEST npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest );
 
-    Object* pObject = ObjectAccessor::Instance().GetObjectByTypeMask(*_player, guid,TYPE_UNIT|TYPE_GAMEOBJECT|TYPE_ITEM|TYPE_PLAYER);
+    Object* pObject = ObjectAccessor::GetObjectByTypeMask(*_player, guid,TYPE_UNIT|TYPE_GAMEOBJECT|TYPE_ITEM|TYPE_PLAYER);
 
     // no or incorrect quest giver
     if(!pObject
@@ -119,7 +119,7 @@ void WorldSession::HandleQuestgiverAcceptQuestOpcode( WorldPacket & recv_data )
 
         if( _player->GetDivider() != 0 )
         {
-            Player *pPlayer = ObjectAccessor::Instance().FindPlayer( _player->GetDivider() );
+            Player *pPlayer = ObjectAccessor::FindPlayer( _player->GetDivider() );
             if( pPlayer )
             {
                 pPlayer->SendPushToPartyResponse( _player, QUEST_PARTY_MSG_ACCEPT_QUEST );
@@ -186,7 +186,7 @@ void WorldSession::HandleQuestgiverQuestQueryOpcode( WorldPacket & recv_data )
     sLog.outDebug( "WORLD: Received CMSG_QUESTGIVER_QUERY_QUEST npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest );
 
     // Verify that the guid is valid and is a questgiver or involved in the requested quest
-    Object* pObject = ObjectAccessor::Instance().GetObjectByTypeMask(*_player, guid,TYPE_UNIT|TYPE_GAMEOBJECT|TYPE_ITEM);
+    Object* pObject = ObjectAccessor::GetObjectByTypeMask(*_player, guid,TYPE_UNIT|TYPE_GAMEOBJECT|TYPE_ITEM);
     if(!pObject||!pObject->hasQuest(quest) && !pObject->hasInvolvedQuest(quest))
     {
         _player->PlayerTalkClass->CloseGossip();
@@ -228,7 +228,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
 
     sLog.outDetail( "WORLD: Received CMSG_QUESTGIVER_CHOOSE_REWARD npc = %u, quest = %u, reward = %u",uint32(GUID_LOPART(guid)),quest,reward );
 
-    Object* pObject = ObjectAccessor::Instance().GetObjectByTypeMask(*_player, guid,TYPE_UNIT|TYPE_GAMEOBJECT);
+    Object* pObject = ObjectAccessor::GetObjectByTypeMask(*_player, guid,TYPE_UNIT|TYPE_GAMEOBJECT);
     if(!pObject)
         return;
 
@@ -280,7 +280,7 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
 
     sLog.outDetail( "WORLD: Received CMSG_QUESTGIVER_REQUEST_REWARD npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest );
 
-    Object* pObject = ObjectAccessor::Instance().GetObjectByTypeMask(*_player, guid,TYPE_UNIT|TYPE_GAMEOBJECT);
+    Object* pObject = ObjectAccessor::GetObjectByTypeMask(*_player, guid,TYPE_UNIT|TYPE_GAMEOBJECT);
     if(!pObject||!pObject->hasInvolvedQuest(quest))
         return;
 
@@ -474,7 +474,7 @@ void WorldSession::HandleQuestPushResult(WorldPacket& recvPacket)
 
     if( _player->GetDivider() != 0 )
     {
-        Player *pPlayer = ObjectAccessor::Instance().FindPlayer( _player->GetDivider() );
+        Player *pPlayer = ObjectAccessor::FindPlayer( _player->GetDivider() );
         if( pPlayer )
         {
             WorldPacket data( MSG_QUEST_PUSH_RESULT, (8+4+1) );

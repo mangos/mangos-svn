@@ -58,7 +58,7 @@ GameObject::~GameObject()
         uint64 owner_guid = GetOwnerGUID();
         if(owner_guid)
         {
-            Unit* owner = ObjectAccessor::Instance().GetUnit(*this,owner_guid);
+            Unit* owner = ObjectAccessor::GetUnit(*this,owner_guid);
             if(owner)
                 owner->RemoveGameObject(this,false);
             else if(GUID_HIPART(owner_guid)!=HIGHGUID_PLAYER)
@@ -560,7 +560,7 @@ bool GameObject::IsTransport() const
 
 Unit* GameObject::GetOwner() const
 {
-    return ObjectAccessor::Instance().GetUnit(*this, GetOwnerGUID());
+    return ObjectAccessor::GetUnit(*this, GetOwnerGUID());
 }
 
 void GameObject::SaveRespawnTime()

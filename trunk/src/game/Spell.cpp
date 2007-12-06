@@ -111,9 +111,9 @@ void SpellCastTargets::setItemTarget(Item* item)
 
 void SpellCastTargets::Update(Unit* caster)
 {
-    m_GOTarget   = m_GOTargetGUID ? ObjectAccessor::Instance().GetGameObject(*caster,m_GOTargetGUID) : NULL;
+    m_GOTarget   = m_GOTargetGUID ? ObjectAccessor::GetGameObject(*caster,m_GOTargetGUID) : NULL;
     m_unitTarget = m_unitTargetGUID ?
-        ( m_unitTargetGUID==caster->GetGUID() ? caster : ObjectAccessor::Instance().GetUnit(*caster, m_unitTargetGUID) ) :
+        ( m_unitTargetGUID==caster->GetGUID() ? caster : ObjectAccessor::GetUnit(*caster, m_unitTargetGUID) ) :
     NULL;
 
     m_itemTarget = NULL;
@@ -241,7 +241,7 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur, u
     if(m_originalCasterGUID==m_caster->GetGUID())
         m_originalCaster = m_caster;
     else
-        m_originalCaster = ObjectAccessor::Instance().GetUnit(*m_caster,m_originalCasterGUID);
+        m_originalCaster = ObjectAccessor::GetUnit(*m_caster,m_originalCasterGUID);
 
     for(int i=0; i <3; ++i)
         m_currentBasePoints[i] = m_spellInfo->EffectBasePoints[i];
@@ -381,10 +381,10 @@ void Spell::FillTargetMap()
                         tmpUnitMap.push_back(m_targets.getUnitTarget());
                     if(m_targets.getCorpseTargetGUID())
                     {
-                        Corpse *corpse = ObjectAccessor::Instance().GetCorpse(*m_caster,m_targets.getCorpseTargetGUID());
+                        Corpse *corpse = ObjectAccessor::GetCorpse(*m_caster,m_targets.getCorpseTargetGUID());
                         if(corpse)
                         {
-                            Player* owner = ObjectAccessor::Instance().FindPlayer(corpse->GetOwnerGUID());
+                            Player* owner = ObjectAccessor::FindPlayer(corpse->GetOwnerGUID());
                             if(owner)
                                 tmpUnitMap.push_back(owner);
                         }
@@ -425,10 +425,10 @@ void Spell::FillTargetMap()
                     }
                     else if (m_targets.getCorpseTargetGUID())
                     {
-                        Corpse *corpse = ObjectAccessor::Instance().GetCorpse(*m_caster,m_targets.getCorpseTargetGUID());
+                        Corpse *corpse = ObjectAccessor::GetCorpse(*m_caster,m_targets.getCorpseTargetGUID());
                         if(corpse)
                         {
-                            Player* owner = ObjectAccessor::Instance().FindPlayer(corpse->GetOwnerGUID());
+                            Player* owner = ObjectAccessor::FindPlayer(corpse->GetOwnerGUID());
                             if(owner)
                                 tmpUnitMap.push_back(owner);
                         }
@@ -1017,7 +1017,7 @@ void Spell::cancel()
                 for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[j].begin();iunit != m_targetUnitGUIDs[j].end();++iunit)
                 {
                     // check m_caster->GetGUID() let load auras at login and speedup most often case
-                    Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
+                    Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::GetUnit(*m_caster,*iunit);
                     if (unit && unit->isAlive())
                         unit->RemoveAurasDueToSpell(m_spellInfo->Id);
                 }
@@ -1172,7 +1172,7 @@ void Spell::cast(bool skipCheck)
                     }
                     else
                     {
-                        Unit* unit = m_caster->GetGUID()==targetGUID ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,targetGUID);
+                        Unit* unit = m_caster->GetGUID()==targetGUID ? m_caster : ObjectAccessor::GetUnit(*m_caster,targetGUID);
                         if(unit)
                         {
                             // cool, unit is present, calculate interval
@@ -1212,7 +1212,7 @@ void Spell::cast(bool skipCheck)
                     }
                     else
                     {
-                        GameObject* go = ObjectAccessor::Instance().GetGameObject(*m_caster,targetGUID);
+                        GameObject* go = ObjectAccessor::GetGameObject(*m_caster,targetGUID);
                         if(go)
                         {
                             // cool, unit is present, calculate interval
@@ -1260,7 +1260,7 @@ void Spell::handle_immediate()
         for (std::list<uint64>::iterator itr = m_targetUnitGUIDs[j].begin(); itr != m_targetUnitGUIDs[j].end();)
         {
             // check m_caster->GetGUID() let load auras at login and speedup most often case
-            Unit* unit = m_caster->GetGUID()==*itr ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,*itr);
+            Unit* unit = m_caster->GetGUID()==*itr ? m_caster : ObjectAccessor::GetUnit(*m_caster,*itr);
             if(!unit || !CheckTarget(unit, j, true ))
                 itr = m_targetUnitGUIDs[j].erase(itr);
             else
@@ -1314,7 +1314,7 @@ uint64 Spell::handle_delayed(uint64 t_offset)
             ++itr;
 
             // check m_caster->GetGUID() let load auras at login and speedup most often case
-            Unit* unit = m_caster->GetGUID()==itr2->second ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,itr2->second);
+            Unit* unit = m_caster->GetGUID()==itr2->second ? m_caster : ObjectAccessor::GetUnit(*m_caster,itr2->second);
             if(!unit || !CheckTarget(unit, j, true ))
                 m_unitsHitList[j].erase(itr2);
         }
@@ -1428,7 +1428,7 @@ void Spell::_handle_immediate_phase()
 void Spell::_handle_unit_phase(const uint64 targetGUID, const uint32 effectNumber, std::set<uint64>* reflectTargets)
 {
     // check m_caster->GetGUID() let load auras at login and speedup most often case
-    Unit* unit = m_caster->GetGUID()==targetGUID ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,targetGUID);
+    Unit* unit = m_caster->GetGUID()==targetGUID ? m_caster : ObjectAccessor::GetUnit(*m_caster,targetGUID);
     if(unit)
     {
         HandleEffects(unit,NULL,NULL,effectNumber,m_damageMultipliers[effectNumber]);
@@ -1441,7 +1441,7 @@ void Spell::_handle_unit_phase(const uint64 targetGUID, const uint32 effectNumbe
         // then re-find it in grids if this creature
         if(GUID_HIPART(targetGUID)==HIGHGUID_UNIT)
         {
-            Creature* creature = m_caster->GetGUID()==targetGUID ? (Creature*)m_caster : ObjectAccessor::Instance().GetCreature(*m_caster,targetGUID);
+            Creature* creature = m_caster->GetGUID()==targetGUID ? (Creature*)m_caster : ObjectAccessor::GetCreature(*m_caster,targetGUID);
             if( creature && creature->AI() )
                 creature->AI()->SpellHit(m_caster,m_spellInfo);
         }
@@ -1454,7 +1454,7 @@ void Spell::_handle_unit_phase(const uint64 targetGUID, const uint32 effectNumbe
 
 void Spell::_handle_go_phase(const uint64 targetGUID, const uint32 effectNumber)
 {
-    GameObject* go = ObjectAccessor::Instance().GetGameObject(*m_caster,targetGUID);
+    GameObject* go = ObjectAccessor::GetGameObject(*m_caster,targetGUID);
     if(go)
         HandleEffects(NULL,NULL,go,effectNumber);
 }
@@ -1465,7 +1465,7 @@ void Spell::_handle_reflection_phase(std::set<uint64> *reflectTargets)
     for (std::set<uint64>::iterator ritr = reflectTargets->begin(); ritr != reflectTargets->end(); ++ritr)
     {
         // check m_caster->GetGUID() let load auras at login and speedup most often case
-        Unit* unit = m_caster->GetGUID()==*ritr ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,*ritr);
+        Unit* unit = m_caster->GetGUID()==*ritr ? m_caster : ObjectAccessor::GetUnit(*m_caster,*ritr);
         if(unit)
             reflect(unit);
     }
@@ -1679,7 +1679,7 @@ void Spell::update(uint32 difftime)
                         for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[i].begin();iunit != m_targetUnitGUIDs[i].end();++iunit)
                         {
                             // check m_caster->GetGUID() let load auras at login and speedup most often case
-                            Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
+                            Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::GetUnit(*m_caster,*iunit);
                             if(unit && unit->isAlive())
                             {
                                 targetLeft = true;
@@ -1761,7 +1761,7 @@ void Spell::finish(bool ok)
         {
             // Some Script Spell Destroy the target or something and the target is always the player
             // then re-find it in grids if this creature
-            Creature* creature = m_caster->GetGUID()==m_targets.getUnitTargetGUID() ? (Creature*)m_caster : ObjectAccessor::Instance().GetCreature(*m_caster,m_targets.getUnitTargetGUID());
+            Creature* creature = m_caster->GetGUID()==m_targets.getUnitTargetGUID() ? (Creature*)m_caster : ObjectAccessor::GetCreature(*m_caster,m_targets.getUnitTargetGUID());
             if( creature )
                 ((Player*)m_caster)->CastedCreatureOrGO(creature->GetEntry(),creature->GetGUID(),m_spellInfo->Id);
         }
@@ -1784,7 +1784,7 @@ void Spell::finish(bool ok)
             for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[(*i)->GetEffIndex()].begin();iunit != m_targetUnitGUIDs[(*i)->GetEffIndex()].end();++iunit)
             {
         // check m_caster->GetGUID() let load auras at login and speedup most often case
-                Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
+                Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::GetUnit(*m_caster,*iunit);
                 if (unit && unit->isAlive() && roll_chance_f((*i)->GetModifier()->m_amount))
                     m_caster->CastSpell(unit,(*i)->GetSpellProto()->EffectTriggerSpell[(*i)->GetEffIndex()],true,NULL,(*i));
             }
@@ -1970,7 +1970,7 @@ void Spell::writeSpellGoTargets( WorldPacket * data )
             if(add)
             {
                 // check m_caster->GetGUID() let load auras at login and speedup most often case
-                Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
+                Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::GetUnit(*m_caster,*iunit);
                 if(unit)
                     UniqueTargets.push_back(unit);
             }
@@ -1990,7 +1990,7 @@ void Spell::writeSpellGoTargets( WorldPacket * data )
             }
             if(add)
             {
-                GameObject* go = ObjectAccessor::Instance().GetGameObject(*m_caster,*igo);
+                GameObject* go = ObjectAccessor::GetGameObject(*m_caster,*igo);
                 if(go)
                     UniqueGOsTargets.push_back(go);
             }
@@ -2077,7 +2077,7 @@ void Spell::SendChannelStart(uint32 duration)
     if (m_caster->GetTypeId() == TYPEID_PLAYER)
     {
 
-        target = ObjectAccessor::Instance().GetUnit(*m_caster, ((Player *)m_caster)->GetSelection());
+        target = ObjectAccessor::GetUnit(*m_caster, ((Player *)m_caster)->GetSelection());
 
         WorldPacket data( MSG_CHANNEL_START, (8+4+4) );
         data.append(m_caster->GetPackGUID());
@@ -3527,7 +3527,7 @@ void Spell::DelayedChannel(int32 delaytime)
         for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[j].begin();iunit != m_targetUnitGUIDs[j].end();++iunit)
         {
             // check m_caster->GetGUID() let load auras at login and speedup most often case
-            Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::Instance().GetUnit(*m_caster,*iunit);
+            Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::GetUnit(*m_caster,*iunit);
             if (unit)
                 unit->DelayAura(m_spellInfo->Id, j, appliedDelayTime);
         }
@@ -3573,7 +3573,7 @@ void Spell::UpdatePointers()
     if(m_originalCasterGUID==m_caster->GetGUID())
         m_originalCaster = m_caster;
     else
-        m_originalCaster = ObjectAccessor::Instance().GetUnit(*m_caster,m_originalCasterGUID);
+        m_originalCaster = ObjectAccessor::GetUnit(*m_caster,m_originalCasterGUID);
 
     m_targets.Update(m_caster);
 }

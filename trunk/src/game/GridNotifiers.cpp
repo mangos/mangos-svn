@@ -122,7 +122,7 @@ VisibleNotifier::Notify()
             if(GUID_HIPART(*iter)!=HIGHGUID_PLAYER)
                 continue;
 
-            Player* plr = ObjectAccessor::Instance().GetPlayer(i_player,*iter);
+            Player* plr = ObjectAccessor::GetPlayer(i_player,*iter);
             if(plr)
                 plr->UpdateVisibilityOf(&i_player);
         }
