@@ -56,4 +56,6 @@ EXTRA_DIST = \
 
 # System configuration
 EXTRA_DIST += \
-	SystemConfig.h
+	SystemConfig.h \
+	ServiceWin32.cpp \
+	ServiceWin32.h

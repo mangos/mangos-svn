@@ -43,6 +43,11 @@
 #include "Network/Parse.h"
 #include "Network/Socket.h"
 
+#ifdef WIN32
+#include "ServiceWin32.h"
+extern int m_ServiceStatus;
+#endif
+
 /// \todo Warning disabling not useful under VC++2005. Can somebody say on which compiler it is useful?
 #pragma warning(disable:4305)
 
@@ -106,7 +111,11 @@ void Master::Run()
     // set server online
     loginDatabase.PExecute("UPDATE `realmlist` SET `color` = 0, `population` = 0 WHERE `id` = '%d'",realmID);
 
+#ifdef WIN32
+    if (sConfig.GetBoolDefault("Console.Enable", 1) && (m_ServiceStatus == -1)/* need disable console in service mode*/)
+#else
     if (sConfig.GetBoolDefault("Console.Enable", 1))
+#endif
     {
         ///- Launch CliRunnable thread
         ZThread::Thread td1(new CliRunnable);
@@ -163,7 +172,7 @@ void Master::Run()
 
         uint32 Prio = sConfig.GetIntDefault("ProcessPriority", 0);
 
-        if(Prio)
+        if(Prio && (m_ServiceStatus == -1)/* need set to default process priority class in service mode*/)
         {
             if(SetPriorityClass(hProcess,HIGH_PRIORITY_CLASS))
                 sLog.outString("mangosd process priority class set to HIGH");
@@ -186,7 +195,10 @@ void Master::Run()
     ///- Wait for termination signal
     while (!World::m_stopEvent)
     {
-
+#ifdef WIN32
+        if (m_ServiceStatus == 0) World::m_stopEvent = true;
+        while (m_ServiceStatus == 2) Sleep(1000);
+#endif        
         if (realPrevTime > realCurrTime)
             realPrevTime = 0;
 
