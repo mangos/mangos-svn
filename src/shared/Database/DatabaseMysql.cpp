@@ -71,8 +71,6 @@ DatabaseMysql::~DatabaseMysql()
 bool DatabaseMysql::Initialize(const char *infoString)
 {
 
-    sLog.outString( "MySQL client library: %s\r\n", mysql_get_client_info());
-
     if(!Database::Initialize(infoString))
         return false;
 
@@ -145,7 +143,8 @@ bool DatabaseMysql::Initialize(const char *infoString)
     {
         sLog.outDetail( "Connected to MySQL database at %s\r\n",
             host.c_str());
-        sLog.outString( "MySQL server: %s \r\n", mysql_get_server_info( mMysql));
+        sLog.outString( "MySQL client library: %s", mysql_get_client_info());
+        sLog.outString( "MySQL server ver: %s ", mysql_get_server_info( mMysql));
 
         /*----------SET AUTOCOMMIT OFF---------*/
         // It seems mysql 5.0.x have enabled this feature
