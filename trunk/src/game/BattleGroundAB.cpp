@@ -462,7 +462,7 @@ void BattleGroundAB::_NodeDeOccupied(uint8 node)
             plr = objmgr.GetPlayer(*ghost_list.begin());
             if (!plr)
                 continue;
-            if (ClosestGrave == NULL)
+            if (!ClosestGrave)
                 ClosestGrave = SelectGraveYard(plr);
 
             plr->TeleportTo(529, ClosestGrave->x, ClosestGrave->y, ClosestGrave->z, plr->GetOrientation());
@@ -678,7 +678,7 @@ WorldSafeLocsEntry const* BattleGroundAB::SelectGraveYard(Player* player)
 
     WorldSafeLocsEntry const* good_entry = NULL;
     // If so, select the closest node to place ghost on
-    if (nodes.size() > 0)
+    if (!nodes.empty())
     {
         float x = player->GetPositionX();
         float y = player->GetPositionY();    // let alone z coordinate...
@@ -686,6 +686,7 @@ WorldSafeLocsEntry const* BattleGroundAB::SelectGraveYard(Player* player)
         for (uint8 i = 0; i < nodes.size(); ++i)
         {
             WorldSafeLocsEntry const*entry = sWorldSafeLocsStore.LookupEntry( BG_AB_GraveyardIds[nodes[i]] );
+            if(!entry) continue;
             float dist = (entry->x - x)*(entry->x - x)+(entry->y - y)*(entry->y - y);
             if (mindist > dist)
             {
@@ -694,10 +695,9 @@ WorldSafeLocsEntry const* BattleGroundAB::SelectGraveYard(Player* player)
             }
         }
         nodes.clear();
-        ASSERT(good_entry);
     }
     // If not, place ghost on starting location
-    else
+    if(!good_entry)
         good_entry = sWorldSafeLocsStore.LookupEntry( BG_AB_GraveyardIds[teamIndex+5] );
 
     return good_entry;
