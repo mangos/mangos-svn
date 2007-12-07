@@ -1748,17 +1748,31 @@ bool Creature::LoadCreaturesAddon()
         SetUInt32Value(UNIT_NPC_EMOTESTATE, cainfo->emote);
 
     // Now add the auras, format "spellid effectindex spellid effectindex..."
-    std::string auras = cainfo->auras;
-    Tokens auravals;
-    auravals = StrSplit(auras, " ");
-    if ( auravals.size()>0 && (auravals.size()%2)>0 )
+    char *p,*s;
+    int val[21],i=0;
+    s=p=cainfo->auras;
+    while (p[0]!=0)
+    {
+        p++;
+        if (p[0]==' ')
+        {
+            val[i++]=atoi(s);
+            p[0]=0;
+            s=++p;
+        }
+        if (i>19)
+            break;
+    }
+    if (p!=s)
+        val[i++]=atoi(s);
+    if (i%2)
         sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) has wrong aura defined.",GetGUIDLow(),GetEntry());
     else
     {
-        for (int i=0;i<auravals.size()/2;i++)
+        for (int j=0;j<i/2;j++)
         {
-            uint32 spellId = (uint32)atoi(auravals[2*i+0].c_str());
-            uint32 effect  = (uint32)atoi(auravals[2*i+1].c_str());
+            uint32 spellId = (uint32)val[2*j+0];
+            uint32 effect  = (uint32)val[2*j+1];
             if ( effect>2 )
             {
                 sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) has wrong effect %u for spell %u.",GetGUIDLow(),GetEntry(),effect,spellId);
