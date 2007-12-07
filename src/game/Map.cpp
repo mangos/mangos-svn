@@ -1251,6 +1251,9 @@ float Map::GetHeight(float x, float y, float z, bool pUseVmaps) const
                 mapHeightFound = true;
             }
         }
+        else if(!mapHeightFound)
+            height = z;
+
         return height;
     }
     else
@@ -1258,7 +1261,7 @@ float Map::GetHeight(float x, float y, float z, bool pUseVmaps) const
         if(GridMaps[gx][gy])
             return GridMaps[gx][gy]->Z[(int)(lx)][(int)(ly)];
         else
-            return 0;
+            return z;
     }
 }
 
