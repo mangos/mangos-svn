@@ -42,7 +42,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="zthread.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
+				AdditionalDependencies="zthread.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib"
 				OutputFile="..\..\bin\release\realmd.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
@@ -104,7 +104,7 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="zthread.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib"
+				AdditionalDependencies="zthread.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib"
 				OutputFile="..\..\bin\debug\realmd.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
