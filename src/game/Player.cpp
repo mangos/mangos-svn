@@ -1002,7 +1002,8 @@ void Player::Update( uint32 p_time )
             HandleSobering();
     }
 
-    if(m_deathTimer > 0)
+    // not auto-free ghost from body in instances
+    if(m_deathTimer > 0  && !GetBaseMap()->Instanceable())
     {
         if(p_time >= m_deathTimer)
         {
@@ -1013,6 +1014,7 @@ void Player::Update( uint32 p_time )
         else
             m_deathTimer -= p_time;
     }
+
     UpdateEnchantTime(p_time);
     UpdateHomebindTime(p_time);
     UpdateManaRegen();
