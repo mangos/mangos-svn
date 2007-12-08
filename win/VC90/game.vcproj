@@ -399,10 +399,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\src\game\IVMapManager.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\src\game\LFGHandler.cpp"
 				>
 			</File>
