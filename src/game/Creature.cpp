@@ -1757,7 +1757,6 @@ bool Creature::LoadCreaturesAddon()
         if (p[0]==' ')
         {
             val[i++]=atoi(s);
-            p[0]=0;
             s=++p;
         }
         if (i>19)

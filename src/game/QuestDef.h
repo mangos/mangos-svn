@@ -109,22 +109,31 @@ enum __QuestGiverStatus
     DIALOG_STATUS_REWARD                   = 7,             // yellow dot on minimap
 };
 
-enum __QuestSpecialFlags                                    //according to mangos-db-11-02-2006-for_1_9_x;
+enum __QuestFlags
 {
-    QUEST_SPECIAL_FLAGS_NONE          = 0,
-    QUEST_SPECIAL_FLAGS_DELIVER       = 1,
-    QUEST_SPECIAL_FLAGS_EXPLORATION   = 2,
-    QUEST_SPECIAL_FLAGS_SPEAKTO       = 4,
-    QUEST_SPECIAL_FLAGS_KILL_OR_CAST  = 8,
-    QUEST_SPECIAL_FLAGS_TIMED         = 16,
-    //QUEST_SPECIAL_FLAGS_REPEATABLE    = 32,               // meaning of flag 32 unknown
-    QUEST_SPECIAL_FLAGS_REPUTATION    = 64,
-    //QUEST_SPECIAL_FLAGS_UNK1          = 128,              // unknown tbc
-    //QUEST_SPECIAL_FLAGS_UNK2          = 256,              // unknown tbc, bring items?
-    //QUEST_SPECIAL_FLAGS_UNK3          = 512,              // unknown tbc
-    //QUEST_SPECIAL_FLAGS_UNK4          = 1024,             // unknown tbc
-    //QUEST_SPECIAL_FLAGS_UNK5          = 2048,             // unknown tbc
-    QUEST_SPECIAL_FLAGS_DAILY         = 4096
+    QUEST_SPECIAL_FLAGS_NONE           = 0,
+    QUEST_SPECIAL_FLAGS_STAY_ALIVE     = 1,
+    QUEST_SPECIAL_FLAGS_EVENT          = 2,
+    QUEST_SPECIAL_FLAGS_EXPLORATION    = 4,
+    QUEST_SPECIAL_FLAGS_UNK1           = 8,
+    //QUEST_SPECIAL_FLAGS_NONE2          = 16,              // Not used
+    QUEST_SPECIAL_FLAGS_EPIC           = 32,                // Not sure
+    QUEST_SPECIAL_FLAGS_RAID           = 64,
+    QUEST_SPECIAL_FLAGS_TBC            = 128,               // Available if TBC expension enabled only
+    QUEST_SPECIAL_FLAGS_UNK2           = 256,               // _DELIVER_MORE Quest needs more than normal _q-item_ drops from mobs
+    QUEST_SPECIAL_FLAGS_UNK3           = 512,               // _REWARD_OUTSIDE Item rewards not given like in normal quests, Given somehow outside the quest or created by spell
+    QUEST_SPECIAL_FLAGS_UNK4           = 1024,              // unknown tbc
+    QUEST_SPECIAL_FLAGS_TBC_RACES      = 2048,              // Bloodelf/draenei starting zone quests
+    QUEST_SPECIAL_FLAGS_DAILY          = 4096,
+
+    // Mangos flags for internal use only
+    QUEST_MANGOS_FLAGS_REPEATABLE      = 0x010000,
+    QUEST_MANGOS_FLAGS_NONE            = 0x020000,
+    QUEST_MANGOS_FLAGS_DELIVER         = 0x040000,
+    QUEST_MANGOS_FLAGS_EXPLORATION     = 0x080000,
+    QUEST_MANGOS_FLAGS_SPEAKTO         = 0x100000,
+    QUEST_MANGOS_FLAGS_KILL_OR_CAST    = 0x200000,
+    QUEST_MANGOS_FLAGS_TIMED           = 0x400000 
 };
 
 struct QuestLocale
@@ -148,7 +157,8 @@ class Quest
         Quest(Field * questRecord);
         uint32 XPValue( Player *pPlayer ) const;
 
-        bool HasSpecialFlag( uint32 flag ) const { return (SpecialFlags & flag ) != 0; }
+        bool HasFlag( uint32 flag ) const { return ( QuestFlags & flag ) != 0; }
+        void SetFlag( uint32 flag ) { QuestFlags |= flag; }
 
         // table data accessors:
         uint32 GetQuestId() const { return QuestId; }
@@ -187,10 +197,10 @@ class Quest
         uint32 GetCompleteEmote() const { return CompleteEmote; }
         uint32 GetQuestStartScript() const { return QuestStartScript; }
         uint32 GetQuestCompleteScript() const { return QuestCompleteScript; }
-        bool   IsRepeatable() const { return bool(Repeatable); }
+        bool   IsRepeatable() const { return QuestFlags & QUEST_MANGOS_FLAGS_REPEATABLE; }
         bool   IsAutoComplete() const { return Objectives.empty(); }
-        uint32 GetSpecialFlags() const { return SpecialFlags; }
-        bool   IsDaily() const { return SpecialFlags & QUEST_SPECIAL_FLAGS_DAILY; }
+        uint32 GetFlags() const { return QuestFlags; }
+        bool   IsDaily() const { return QuestFlags & QUEST_SPECIAL_FLAGS_DAILY; }
 
         // multiple values
         std::string ObjectiveText[QUEST_OBJECTIVES_COUNT];
@@ -243,7 +253,7 @@ class Quest
         int32  RequiredMaxRepValue;
         uint32 SuggestedPlayers;
         uint32 LimitTime;
-        uint32 SpecialFlags;
+        uint32 QuestFlags;
         int32  PrevQuestId;
         int32  NextQuestId;
         int32  ExclusiveGroup;
@@ -268,7 +278,6 @@ class Quest
         uint32 CompleteEmote;
         uint32 QuestStartScript;
         uint32 QuestCompleteScript;
-        uint32 Repeatable;
 };
 
 enum QuestUpdateState

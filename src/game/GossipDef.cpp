@@ -512,7 +512,7 @@ void PlayerMenu::SendQuestQueryResponse( Quest const *pQuest )
 
     data << uint32(pQuest->GetRewSpell());                  // spellid, The following spell will be casted on you spell_name
     data << uint32(pQuest->GetSrcItemId());
-    data << uint32(pQuest->GetSpecialFlags());
+    data << uint32(pQuest->GetFlags() & 0xFFFF);
 
     int iI;
 

@@ -34,7 +34,7 @@ Quest::Quest(Field * questRecord)
     RequiredMaxRepValue = questRecord[10].GetInt32();
     SuggestedPlayers = questRecord[11].GetUInt32();
     LimitTime = questRecord[12].GetUInt32();
-    SpecialFlags = questRecord[13].GetUInt32();
+    QuestFlags = questRecord[13].GetUInt32() & 0xFFFF;
     PrevQuestId = questRecord[14].GetInt32();
     NextQuestId = questRecord[15].GetInt32();
     ExclusiveGroup = questRecord[16].GetInt32();
@@ -113,7 +113,8 @@ Quest::Quest(Field * questRecord)
 
     QuestStartScript = questRecord[110].GetUInt32();
     QuestCompleteScript = questRecord[111].GetUInt32();
-    Repeatable = questRecord[112].GetUInt32();
+    if (questRecord[112].GetUInt32())
+        SetFlag(QUEST_MANGOS_FLAGS_REPEATABLE);
 
     m_reqitemscount = 0;
     m_reqCreatureOrGOcount = 0;
