@@ -551,6 +551,66 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             TagUnitMap.push_back(m_caster);
             break;
         }
+        case TARGET_RANDOM_ENEMY_CHAIN_IN_AREA:
+        {
+            m_targets.m_targetMask = 0;
+            unMaxTargets = m_spellInfo->EffectChainTarget[i];
+            uint32 max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS ;
+
+            CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+            Cell cell = RedZone::GetZone(p);
+            cell.data.Part.reserved = ALL_DISTRICT;
+            cell.SetNoCreate();
+
+            std::list<Unit *> tempUnitMap;
+            MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(m_caster, m_caster, max_range);
+            MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(tempUnitMap, u_check);
+
+            TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
+            TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
+
+            CellLock<GridReadGuard> cell_lock(cell, p);
+            cell_lock->Visit(cell_lock, world_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+            cell_lock->Visit(cell_lock, grid_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+
+            if(!tempUnitMap.size())
+                break;
+
+            tempUnitMap.sort(TargetDistanceOrder(m_caster));
+
+            //Now to get us a random target that's in the initial range of the spell
+            uint32 t = 1;
+            std::list<Unit *>::iterator itr = tempUnitMap.begin();
+            while((*itr)->GetDistanceSq(m_caster) < radius * radius && itr!= tempUnitMap.end())
+                t++ , itr++;
+
+            itr = tempUnitMap.begin();
+            std::advance(itr, rand()%t);
+            Unit *pUnitTarget = *itr;
+            TagUnitMap.push_back(pUnitTarget);
+
+            tempUnitMap.erase(itr);
+
+            tempUnitMap.sort(TargetDistanceOrder(pUnitTarget));
+
+            t = unMaxTargets - 1;
+            Unit *prev = pUnitTarget;
+
+            while(t && tempUnitMap.size() )
+            {
+                Unit *next = *tempUnitMap.begin();
+                        
+                if(prev->GetDistanceSq(next) > CHAIN_SPELL_JUMP_RADIUS * CHAIN_SPELL_JUMP_RADIUS)
+                    break;
+
+                prev = next;
+                TagUnitMap.push_back(next);
+                tempUnitMap.erase(tempUnitMap.begin());
+                tempUnitMap.sort(TargetDistanceOrder(next));
+
+                t--;
+            }
+        }break;
         case TARGET_PET:
         {
             Pet* tmpUnit = m_caster->GetPet();
@@ -572,7 +632,10 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                 if(!pUnitTarget)
                     break;
 
+
                 unMaxTargets = m_spellInfo->EffectChainTarget[i];
+                uint32 max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS ;
+
                 CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
                 Cell cell = RedZone::GetZone(p);
                 cell.data.Part.reserved = ALL_DISTRICT;
@@ -581,8 +644,9 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                 Unit* originalCaster = GetOriginalCaster();
                 if(originalCaster)
                 {
-                    MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(pUnitTarget, originalCaster, radius ? radius : 5);
-                    MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(TagUnitMap, u_check);
+                    std::list<Unit *> tempUnitMap;
+                    MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(pUnitTarget, originalCaster, max_range);
+                    MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(tempUnitMap, u_check);
 
                     TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
                     TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
@@ -591,21 +655,33 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                     cell_lock->Visit(cell_lock, world_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
                     cell_lock->Visit(cell_lock, grid_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
 
-                    // sort TagUnitMap  and then cut down to size
-                    TagUnitMap.sort(TargetDistanceOrder(pUnitTarget));
+                    
+                    tempUnitMap.sort(TargetDistanceOrder(pUnitTarget));
+                    
+                    if(!tempUnitMap.size())
+                        break;
 
-                    // special test to exclude all totems except one selected
-                    Unit* selectedTotem = (pUnitTarget && pUnitTarget->GetTypeId()==TYPEID_UNIT && ((Creature*)pUnitTarget)->isTotem()) ? pUnitTarget : NULL;
-                    for(std::list<Unit*>::iterator itr = TagUnitMap.begin(); itr != TagUnitMap.end();)
+                    if(*tempUnitMap.begin() == pUnitTarget)
+                        tempUnitMap.erase(tempUnitMap.begin());
+
+                    TagUnitMap.push_back(pUnitTarget);
+                    uint32 t = unMaxTargets - 1;
+                    Unit *prev = pUnitTarget;
+
+                    while(t && tempUnitMap.size() )
                     {
-                        if((*itr)!=selectedTotem && (*itr)->GetTypeId()==TYPEID_UNIT && ((Creature*)(*itr))->isTotem())
-                            itr = TagUnitMap.erase(itr);
-                        else
-                            ++itr;
-                    }
+                        Unit *next = *tempUnitMap.begin();
+                        
+                        if(prev->GetDistanceSq(next) > CHAIN_SPELL_JUMP_RADIUS * CHAIN_SPELL_JUMP_RADIUS)
+                            break;
 
-                    if (TagUnitMap.size() > unMaxTargets)
-                        TagUnitMap.resize(unMaxTargets);
+                        prev = next;
+                        TagUnitMap.push_back(next);
+                        tempUnitMap.erase(tempUnitMap.begin());
+                        tempUnitMap.sort(TargetDistanceOrder(next));
+
+                        t--;
+                    }
                 }
             }
         }break;
@@ -846,12 +922,16 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             else
             {
                 unMaxTargets = m_spellInfo->EffectChainTarget[i];
+                uint32 max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS ;
+                    
+                std::list<Unit *> tempUnitMap;
+
                 CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
                 Cell cell = RedZone::GetZone(p);
                 cell.data.Part.reserved = ALL_DISTRICT;
                 cell.SetNoCreate();
 
-                MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, radius, PUSH_SELF_CENTER, SPELL_TARGETS_FRIENDLY);
+                MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, tempUnitMap, max_range, PUSH_SELF_CENTER, SPELL_TARGETS_FRIENDLY);
 
                 TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > world_object_notifier(notifier);
                 TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer >  grid_object_notifier(notifier);
@@ -860,12 +940,33 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                 cell_lock->Visit(cell_lock, world_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
                 cell_lock->Visit(cell_lock, grid_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
 
-                // sort TagUnitMap  and then cut down to size
-                TagUnitMap.sort(ChainHealingOrder(pUnitTarget));
-                if (TagUnitMap.size() > unMaxTargets)
-                    TagUnitMap.resize(unMaxTargets);
-                TagUnitMap.remove_if(ChainHealingFullHealth(pUnitTarget));
-            }
+                tempUnitMap.sort(TargetDistanceOrder(pUnitTarget));
+                    
+                if(!tempUnitMap.size())
+                    break;
+
+                if(*tempUnitMap.begin() == pUnitTarget)
+                    tempUnitMap.erase(tempUnitMap.begin());
+
+                TagUnitMap.push_back(pUnitTarget);
+                uint32 t = unMaxTargets - 1;
+                Unit *prev = pUnitTarget;
+
+                while(t && tempUnitMap.size() )
+                {
+                    Unit *next = *tempUnitMap.begin();
+                        
+                    if(prev->GetDistanceSq(next) > CHAIN_SPELL_JUMP_RADIUS * CHAIN_SPELL_JUMP_RADIUS)
+                        break;
+
+                    prev = next;
+                    TagUnitMap.push_back(next);
+                    tempUnitMap.erase(tempUnitMap.begin());
+                    tempUnitMap.sort(TargetDistanceOrder(next));
+
+                    t--;
+                }
+           }
         }break;
         case TARGET_CURRENT_SELECTED_ENEMY:
         {

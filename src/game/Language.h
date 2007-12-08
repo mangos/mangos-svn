@@ -426,6 +426,7 @@
                                                             //log
 #define LANG_ADDITEM                     "Command : Additem, itemId = %i, amount = %i"
 #define LANG_ADDITEMSET                  "Command : Additemset, itemsetId = %i"
+#define LANG_REMOVEITEM                  "Removed itemID = %i, amount = %i from %s"
 #define LANG_ITEM_CANNOT_CREATE          "Cannot create item '%i' (amount: %i)"
 #define LANG_INSERT_GUILD_NAME           "You need to provide a guild name!"
 #define LANG_PLAYER_NOT_FOUND            "Player not found!"

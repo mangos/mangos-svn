@@ -1408,4 +1408,6 @@ enum PetDiet
 
 #define MAX_PET_DIET 9
 
+#define CHAIN_SPELL_JUMP_RADIUS 10
+
 #endif
