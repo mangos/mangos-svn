@@ -2059,8 +2059,8 @@ void ObjectMgr::LoadQuests()
     QueryResult *result = WorldDatabase.Query("SELECT `entry`,`ZoneOrSort`,`MinLevel`,`QuestLevel`,`Type`,"
     //   5               6                    7                       8                     9                       10                    11                 12
         "`RequiredRaces`,`RequiredSkillValue`,`RequiredMinRepFaction`,`RequiredMinRepValue`,`RequiredMaxRepFaction`,`RequiredMaxRepValue`,`SuggestedPlayers`,`LimitTime`,"
-    //   13             14            15            16               17                 18          19             20
-        "`SpecialFlags`,`PrevQuestId`,`NextQuestId`,`ExclusiveGroup`,`NextQuestInChain`,`SrcItemId`,`SrcItemCount`,`SrcSpell`,"
+    //   13           14            15            16               17                 18          19             20
+        "`QuestFlags`,`PrevQuestId`,`NextQuestId`,`ExclusiveGroup`,`NextQuestInChain`,`SrcItemId`,`SrcItemCount`,`SrcSpell`,"
     //   21      22        23           24                25                 26        27               28               29               30
         "`Title`,`Details`,`Objectives`,`OfferRewardText`,`RequestItemsText`,`EndText`,`ObjectiveText1`,`ObjectiveText2`,`ObjectiveText3`,`ObjectiveText4`,"
     //   31           32           33           34           35              36              37              38
@@ -2117,11 +2117,11 @@ void ObjectMgr::LoadQuests()
 
         // additional quest integrity checks (GO, creature_template and item_template must be loaded already)
 
-        if(qinfo->Type == QUEST_TYPE_DAILY && (qinfo->GetSpecialFlags() & QUEST_SPECIAL_FLAGS_DAILY) == 0)
+        if(qinfo->Type == QUEST_TYPE_DAILY && (qinfo->GetFlags() & QUEST_SPECIAL_FLAGS_DAILY) == 0)
         {
             sLog.outErrorDb("Quest %u has `Type` = %u (QUEST_TYPE_DAILY) but does not have `SpecialFlags` set with mask %u (QUEST_SPECIAL_FLAGS_DAILY).",
                 qinfo->GetQuestId(),qinfo->Type,QUEST_SPECIAL_FLAGS_DAILY);
-            qinfo->SpecialFlags |= QUEST_SPECIAL_FLAGS_DAILY;
+            qinfo->QuestFlags |= QUEST_SPECIAL_FLAGS_DAILY;
         }
 
         // zone case
@@ -2232,12 +2232,7 @@ void ObjectMgr::LoadQuests()
                     // no changes, quest can't be done for this requirement
                 }
 
-                if((qinfo->SpecialFlags & QUEST_SPECIAL_FLAGS_DELIVER)==0)
-                {
-                    sLog.outErrorDb("Quest %u has `ReqItemId%d` = %u but `SpecialFlags` does not have delivery type bit set, quest can be done without item delivery!",
-                        qinfo->GetQuestId(),j+1,id);
-                    qinfo->ReqItemCount[j] = 0;             // prevent incorrect work of quest
-                }
+                qinfo->SetFlag(QUEST_MANGOS_FLAGS_DELIVER);
 
                 if(!sItemStorage.LookupEntry<ItemPrototype>(id))
                 {
@@ -2366,12 +2361,9 @@ void ObjectMgr::LoadQuests()
 
             if(id)
             {
-                if((qinfo->SpecialFlags & (QUEST_SPECIAL_FLAGS_KILL_OR_CAST | QUEST_SPECIAL_FLAGS_SPEAKTO))==0)
-                {
-                    sLog.outErrorDb("Quest %u has `ReqCreatureOrGOId%d` = %u but `SpecialFlags` not does not have killOrCast or TalkTo bit set, quest can be done without creature/go kill/cast/talkTo!",
-                        qinfo->GetQuestId(),j+1,id);
-                    // no changes, quest can be incorrectly done, but we already report this
-                }
+                // In fact SpeakTo and Kill are quite same: either you can speak to mob:SpeakTo or you can't:Kill/Cast
+                
+                qinfo->SetFlag(QUEST_MANGOS_FLAGS_KILL_OR_CAST | QUEST_MANGOS_FLAGS_SPEAKTO);
 
                 if(!qinfo->ReqCreatureOrGOCount[j])
                 {
@@ -2506,6 +2498,8 @@ void ObjectMgr::LoadQuests()
 
         if(qinfo->ExclusiveGroup)
             mExclusiveQuestGroups.insert(std::pair<int32, uint32>(qinfo->ExclusiveGroup, qinfo->GetQuestId()));
+        if(qinfo->LimitTime)
+            qinfo->SetFlag(QUEST_MANGOS_FLAGS_TIMED);
     }
 
     sLog.outString();
@@ -3126,11 +3120,7 @@ void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
                     continue;
                 }
 
-                if((quest->GetSpecialFlags() & QUEST_SPECIAL_FLAGS_EXPLORATION)==0)
-                {
-                    sLog.outErrorDb("Table `%s` has quest (ID: %u) in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id %u, but this quest not have QUEST_SPECIAL_FLAGS_EXPLORATION (%u)",tablename,tmp.datalong,tmp.id,QUEST_SPECIAL_FLAGS_EXPLORATION);
-                    continue;
-                }
+                SetQuestFlag(tmp.datalong, QUEST_MANGOS_FLAGS_EXPLORATION);
 
                 if(float(tmp.datalong2) > DEFAULT_VISIBILITY_DISTANCE)
                 {
@@ -3594,6 +3584,7 @@ void ObjectMgr::LoadQuestAreaTriggers()
         }
 
         mQuestAreaTriggerMap[Trigger_ID] = Quest_ID;
+        SetQuestFlag(Quest_ID, QUEST_MANGOS_FLAGS_EXPLORATION);
 
     } while( result->NextRow() );
 

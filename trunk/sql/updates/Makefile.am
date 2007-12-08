@@ -520,6 +520,7 @@ pkgdata_DATA = \
 	4788_mangos_gameobject_template.sql \
 	4793_mangos_spell_affect.sql \
 	4799_mangos_creature_addon.sql \
+	4815_mangos_quest_template.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -1020,5 +1021,6 @@ EXTRA_DIST = \
 	4788_mangos_gameobject_template.sql \
 	4793_mangos_spell_affect.sql \
 	4799_mangos_creature_addon.sql \
+	4815_mangos_quest_template.sql \
 	README
 

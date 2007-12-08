@@ -10765,7 +10765,7 @@ bool Player::CanCompleteQuest( uint32 quest_id )
         if ( mQuestStatus[quest_id].m_status == QUEST_STATUS_INCOMPLETE )
         {
 
-            if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
+            if ( qInfo->HasFlag( QUEST_MANGOS_FLAGS_DELIVER ) )
             {
                 for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
                 {
@@ -10774,7 +10774,7 @@ bool Player::CanCompleteQuest( uint32 quest_id )
                 }
             }
 
-            if ( qInfo->HasSpecialFlag(QUEST_SPECIAL_FLAGS_KILL_OR_CAST | QUEST_SPECIAL_FLAGS_SPEAKTO) )
+            if ( qInfo->HasFlag(QUEST_MANGOS_FLAGS_KILL_OR_CAST | QUEST_MANGOS_FLAGS_SPEAKTO) )
             {
                 for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
                 {
@@ -10786,10 +10786,10 @@ bool Player::CanCompleteQuest( uint32 quest_id )
                 }
             }
 
-            if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_EXPLORATION ) && !mQuestStatus[quest_id].m_explored )
+            if ( qInfo->HasFlag( QUEST_MANGOS_FLAGS_EXPLORATION ) && !mQuestStatus[quest_id].m_explored )
                 return false;
 
-            if ( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) && mQuestStatus[quest_id].m_timer == 0 )
+            if ( qInfo->HasFlag( QUEST_MANGOS_FLAGS_TIMED ) && mQuestStatus[quest_id].m_timer == 0 )
                 return false;
 
             if ( qInfo->GetRewOrReqMoney() < 0 )
@@ -10797,7 +10797,6 @@ bool Player::CanCompleteQuest( uint32 quest_id )
                 if ( GetMoney() < uint32(-qInfo->GetRewOrReqMoney()) )
                     return false;
             }
-
             return true;
         }
     }
@@ -10812,7 +10811,7 @@ bool Player::CanCompleteRepeatableQuest( Quest const *pQuest )
     if( !CanTakeQuest(pQuest, false) )
         return false;
 
-    if (pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER) )
+    if (pQuest->HasFlag( QUEST_MANGOS_FLAGS_DELIVER) )
         for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
             if( pQuest->ReqItemId[i] && pQuest->ReqItemCount[i] && !HasItemCount(pQuest->ReqItemId[i],pQuest->ReqItemCount[i]) )
                 return false;
@@ -10838,7 +10837,7 @@ bool Player::CanRewardQuest( Quest const *pQuest, bool msg )
         return false;
 
     // prevent receive reward with quest items in bank
-    if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
+    if ( pQuest->HasFlag( QUEST_MANGOS_FLAGS_DELIVER ) )
     {
         for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
         {
@@ -10928,13 +10927,13 @@ void Player::AddQuest( Quest const *pQuest, Object *questGiver )
 
     questStatusData.uState = uState;                    // mark quest as new or changed
 
-    if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
+    if ( pQuest->HasFlag( QUEST_MANGOS_FLAGS_DELIVER ) )
     {
         for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
             questStatusData.m_itemcount[i] = 0;
     }
 
-    if ( pQuest->HasSpecialFlag(QUEST_SPECIAL_FLAGS_KILL_OR_CAST | QUEST_SPECIAL_FLAGS_SPEAKTO) )
+    if ( pQuest->HasFlag(QUEST_MANGOS_FLAGS_KILL_OR_CAST | QUEST_MANGOS_FLAGS_SPEAKTO) )
     {
         for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
             questStatusData.m_creatureOrGOcount[i] = 0;
@@ -10946,7 +10945,7 @@ void Player::AddQuest( Quest const *pQuest, Object *questGiver )
     SetUInt32Value(log_slot + 0, quest_id);
     SetUInt32Value(log_slot + 1, 0);
 
-    if( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) )
+    if( pQuest->HasFlag( QUEST_MANGOS_FLAGS_TIMED ) )
     {
         uint32 limittime = pQuest->GetLimitTime();
         AddTimedQuest( quest_id );
@@ -11327,7 +11326,7 @@ bool Player::SatisfyQuestStatus( Quest const* qInfo, bool msg )
 
 bool Player::SatisfyQuestTimed( Quest const* qInfo, bool msg )
 {
-    if ( (find(m_timedquests.begin(), m_timedquests.end(), qInfo->GetQuestId()) != m_timedquests.end()) && qInfo->HasSpecialFlag(QUEST_SPECIAL_FLAGS_TIMED) )
+    if ( (find(m_timedquests.begin(), m_timedquests.end(), qInfo->GetQuestId()) != m_timedquests.end()) && qInfo->HasFlag(QUEST_MANGOS_FLAGS_TIMED) )
     {
         if( msg )
             SendCanTakeQuestResponse( INVALIDREASON_HAVE_TIMED_QUEST );
@@ -11538,7 +11537,7 @@ void Player::SetQuestStatus( uint32 quest_id, QuestStatus status )
     {
         if( status == QUEST_STATUS_NONE || status == QUEST_STATUS_INCOMPLETE || status == QUEST_STATUS_COMPLETE )
         {
-            if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) )
+            if( qInfo->HasFlag( QUEST_MANGOS_FLAGS_TIMED ) )
                 m_timedquests.erase(qInfo->GetQuestId());
         }
 
@@ -11573,7 +11572,7 @@ uint32 Player::GetReqKillOrCastCurrentCount(uint32 quest_id, uint32 entry)
 
 void Player::AdjustQuestReqItemCount( Quest const* pQuest )
 {
-    if ( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
+    if ( pQuest->HasFlag( QUEST_MANGOS_FLAGS_DELIVER ) )
     {
         for(int i = 0; i < QUEST_OBJECTIVES_COUNT; i++)
         {
@@ -11627,7 +11626,7 @@ void Player::ItemAddedQuestCheck( uint32 entry, uint32 count )
         if ( questid != 0 && mQuestStatus[questid].m_status == QUEST_STATUS_INCOMPLETE )
         {
             Quest const* qInfo = objmgr.GetQuestTemplate(questid);
-            if( qInfo && qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
+            if( qInfo && qInfo->HasFlag( QUEST_MANGOS_FLAGS_DELIVER ) )
             {
                 for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
                 {
@@ -11667,7 +11666,7 @@ void Player::ItemRemovedQuestCheck( uint32 entry, uint32 count )
         Quest const* qInfo = objmgr.GetQuestTemplate(questid);
         if ( qInfo )
         {
-            if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_DELIVER ) )
+            if( qInfo->HasFlag( QUEST_MANGOS_FLAGS_DELIVER ) )
             {
                 for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
                 {
@@ -11713,7 +11712,7 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
         // just if !ingroup || !noraidgroup || raidgroup
         if ( qInfo && mQuestStatus[questid].m_status == QUEST_STATUS_INCOMPLETE && (!GetGroup() || !GetGroup()->isRaidGroup() || qInfo->GetType() == QUEST_TYPE_RAID))
         {
-            if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL_OR_CAST) )
+            if( qInfo->HasFlag( QUEST_MANGOS_FLAGS_KILL_OR_CAST) )
             {
                 for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
                 {
@@ -11766,7 +11765,7 @@ void Player::CastedCreatureOrGO( uint32 entry, uint64 guid, uint32 spell_id )
         Quest const* qInfo = objmgr.GetQuestTemplate(questid);
         if ( qInfo && mQuestStatus[questid].m_status == QUEST_STATUS_INCOMPLETE )
         {
-            if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_KILL_OR_CAST ) )
+            if( qInfo->HasFlag( QUEST_MANGOS_FLAGS_KILL_OR_CAST ) )
             {
                 for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
                 {
@@ -11829,7 +11828,7 @@ void Player::TalkedToCreature( uint32 entry, uint64 guid )
         Quest const* qInfo = objmgr.GetQuestTemplate(questid);
         if ( qInfo && mQuestStatus[questid].m_status == QUEST_STATUS_INCOMPLETE )
         {
-            if( qInfo->HasSpecialFlag( QUEST_SPECIAL_FLAGS_SPEAKTO ) )
+            if( qInfo->HasFlag( QUEST_MANGOS_FLAGS_KILL_OR_CAST | QUEST_MANGOS_FLAGS_SPEAKTO ) )
             {
                 for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
                 {
@@ -12909,7 +12908,7 @@ void Player::_LoadQuestStatus(QueryResult *result)
 
                 time_t quest_time = time_t(fields[4].GetUInt64());
 
-                if( pQuest->HasSpecialFlag( QUEST_SPECIAL_FLAGS_TIMED ) && !GetQuestRewardStatus(quest_id) &&  questStatusData.m_status != QUEST_STATUS_NONE )
+                if( pQuest->HasFlag( QUEST_MANGOS_FLAGS_TIMED ) && !GetQuestRewardStatus(quest_id) &&  questStatusData.m_status != QUEST_STATUS_NONE )
                 {
                     AddTimedQuest( quest_id );
 

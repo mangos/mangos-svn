@@ -9237,7 +9237,7 @@ CREATE TABLE `quest_template` (
   `RequiredMaxRepValue` int(10) NOT NULL default '0',
   `SuggestedPlayers` int(11) unsigned NOT NULL default '0',
   `LimitTime` int(11) unsigned NOT NULL default '0',
-  `SpecialFlags` int(11) unsigned NOT NULL default '0',
+  `QuestFlags` int(11) unsigned NOT NULL default '0',
   `PrevQuestId` int(11) NOT NULL default '0',
   `NextQuestId` int(11) NOT NULL default '0',
   `ExclusiveGroup` int(11) NOT NULL default '0',
