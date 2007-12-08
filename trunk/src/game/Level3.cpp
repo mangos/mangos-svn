@@ -1616,7 +1616,7 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
     if (count < 0)
     {
         plTarget->RemoveItemCount(itemId, -count, true);
-        PSendSysMessage("Attempted to remove %i amount of %i from target",-count, itemId);
+        PSendSysMessage(LANG_REMOVEITEM, itemId, -count, plTarget->GetName());
         return true;
     }
 
