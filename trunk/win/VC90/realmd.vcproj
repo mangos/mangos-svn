@@ -57,6 +57,7 @@
 				WarningLevel="3"
 				SuppressStartupBanner="true"
 				Detect64BitPortabilityProblems="false"
+				DebugInformationFormat="3"
 				CompileAs="0"
 			/>
 			<Tool
@@ -73,12 +74,15 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="zthread.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib"
+				AdditionalDependencies="zthread.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib dbghelp.lib"
 				OutputFile="..\..\bin\release\realmd.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\dep\lib\release;.\zthread__$(PlatformName)_$(ConfigurationName)"
-				ProgramDatabaseFile=".\realmd__$(PlatformName)_$(ConfigurationName)\realmd.pdb"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="..\..\bin\$(ConfigurationName)\realmd.pdb"
+				GenerateMapFile="true"
+				MapFileName="..\..\bin\$(ConfigurationName)\realmd.map"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				DataExecutionPrevention="0"
@@ -164,13 +168,15 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="zthread.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib"
+				AdditionalDependencies="zthread.lib libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib dbghelp.lib"
 				OutputFile="..\..\bin\debug\realmd.exe"
 				LinkIncremental="2"
 				SuppressStartupBanner="true"
 				AdditionalLibraryDirectories="..\..\dep\lib\debug;.\zthread__$(PlatformName)_$(ConfigurationName)"
 				GenerateDebugInformation="true"
-				ProgramDatabaseFile=".\realmd__$(PlatformName)_$(ConfigurationName)\realmd.pdb"
+				ProgramDatabaseFile="..\..\bin\$(ConfigurationName)\realmd.pdb"
+				GenerateMapFile="true"
+				MapFileName="..\..\bin\$(ConfigurationName)\realmd.map"
 				SubSystem="1"
 				RandomizedBaseAddress="1"
 				FixedBaseAddress="1"
@@ -220,6 +226,14 @@
 		</File>
 		<File
 			RelativePath="..\..\src\realmd\RealmList.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\shared\WheatyExceptionReport.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\shared\WheatyExceptionReport.h"
 			>
 		</File>
 	</Files>

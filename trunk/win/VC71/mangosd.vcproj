@@ -35,18 +35,22 @@
 				WarningLevel="3"
 				SuppressStartupBanner="TRUE"
 				Detect64BitPortabilityProblems="TRUE"
+				DebugInformationFormat="3"
 				CompileAs="0"/>
 			<Tool
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib"
+				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib dbghelp.lib"
 				OutputFile="..\..\bin\release\mangosd.exe"
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\dep\lib\release"
-				ProgramDatabaseFile=".\mangosd__$(PlatformName)_$(ConfigurationName)\mangosd.pdb"
+				GenerateDebugInformation="true"
+				ProgramDatabaseFile="..\..\bin\$(ConfigurationName)\mangosd.pdb"
+				GenerateMapFile="true"
+				MapFileName="..\..\bin\$(ConfigurationName)\mangosd.map"
 				SubSystem="1"
 				ImportLibrary="$(OutDir)\mangosd.lib"
 			/>
@@ -106,15 +110,18 @@
 			<Tool
 				Name="VCLinkerTool"
 				AdditionalOptions="/MACHINE:I386"
-				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib"
+				AdditionalDependencies="libmySQL.lib libeay32.lib ws2_32.lib winmm.lib odbc32.lib odbccp32.lib advapi32.lib dbghelp.lib"
 				OutputFile="..\..\bin\debug\mangosd.exe"
 				Version=""
 				LinkIncremental="2"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\dep\lib\debug"
 				GenerateDebugInformation="TRUE"
-				ProgramDatabaseFile=".\mangosd__$(PlatformName)_$(ConfigurationName)\mangosd.pdb"
-				SubSystem="1"
+				ProgramDatabaseFile="..\..\bin\$(ConfigurationName)\mangosd.pdb"
+				GenerateMapFile="true"
+				MapFileName="..\..\bin\$(ConfigurationName)\mangosd.map"
+ 				SubSystem="1"
+				LinkTimeCodeGeneration="0" 
 				ImportLibrary="$(OutDir)/mangosd.lib"
 				FixedBaseAddress="1"
 			/>
@@ -205,6 +212,14 @@
 		</File>
 		<File
 			RelativePath="..\..\src\mangosd\RASocket.h"
+			>
+		</File>
+ 		<File
+			RelativePath="..\..\src\shared\WheatyExceptionReport.cpp"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\shared\WheatyExceptionReport.h"
 			>
 		</File>
 		<File

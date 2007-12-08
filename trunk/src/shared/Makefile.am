@@ -56,6 +56,11 @@ EXTRA_DIST = \
 
 # System configuration
 EXTRA_DIST += \
-	SystemConfig.h \
+	SystemConfig.h
+
+# System Win32 files
+EXTRA_DIST += \	
 	ServiceWin32.cpp \
-	ServiceWin32.h
+	ServiceWin32.h \
+	WheatyExceptionReport.cpp \
+	WheatyExceptionReport.h
