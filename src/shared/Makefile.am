@@ -59,7 +59,7 @@ EXTRA_DIST += \
 	SystemConfig.h
 
 # System Win32 files
-EXTRA_DIST += \	
+EXTRA_DIST += \
 	ServiceWin32.cpp \
 	ServiceWin32.h \
 	WheatyExceptionReport.cpp \
