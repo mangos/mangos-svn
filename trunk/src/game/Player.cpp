@@ -10128,17 +10128,22 @@ void Player::TradeCancel(bool sendback)
 {
     if(pTrader)
     {
-        // prevent loop cancel message (already processed)
-        if(!sendback)
-            pTrader->pTrader = NULL;
-
-        WorldSession* ws = pTrader->GetSession();
-        pTrader = NULL;
-
-        if(ws && !ws->PlayerLogout())
+        // send yellow "Trade cancelled" message to both traders
+        WorldSession* ws;
+        ws = GetSession();
+        if(sendback)
             ws->SendCancelTrade();
+        ws = pTrader->GetSession();
+        if(!ws->PlayerLogout())
+            ws->SendCancelTrade();
+
+        // cleanup
+        ClearTrade();
+        pTrader->ClearTrade();
+        // prevent loss of reference
+        pTrader->pTrader = NULL;
+        pTrader = NULL;
     }
-    ClearTrade();
 }
 
 void Player::UpdateEnchantTime(uint32 time)
