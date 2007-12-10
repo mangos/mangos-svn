@@ -312,13 +312,14 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         const char* GetName() const { return m_name.c_str(); }
         void SetName(std::string newname) { m_name=newname; }
 
-        float GetDistanceSq( const WorldObject* obj ) const { float d = GetDistance(obj); return d*d; }
-        float GetDistanceSq(const float x, const float y, const float z) const { float d = GetDistance(x,y,z); return d*d; }
-        float GetDistance( const WorldObject* obj ) const;
-        float GetDistance(const float x, const float y, const float z) const;
-        float GetDistance2dSq( const WorldObject* obj ) const { float d = GetDistance2d(obj); return d*d; }
-        float GetDistance2d(const WorldObject* obj) const;
-        float GetDistance2d(const float x, const float y) const;
+        float GetDistanceSq( const WorldObject* obj ) const;
+        float GetDistanceSq(const float x, const float y, const float z) const;
+        float GetDistance( const WorldObject* obj ) const { float d = GetDistanceSq(obj); return sqrt(d); }
+        float GetDistance(const float x, const float y, const float z) const { float d = GetDistanceSq(x, y, z); return sqrt(d); }
+        float GetDistance2dSq( const WorldObject* obj ) const;
+        float GetDistance2dSq(const float x, const float y) const;
+        float GetDistance2d(const WorldObject* obj) const { float d = GetDistance2dSq(obj); return sqrt(d); }
+        float GetDistance2d(const float x, const float y) const { float d = GetDistance2dSq(x, y); return sqrt(d); }
         float GetDistanceZ(const WorldObject* obj) const;
         bool IsInMap(const WorldObject* obj) const { return GetMapId()==obj->GetMapId() && GetInstanceId()==obj->GetInstanceId(); }
         bool IsWithinDistInMap(const WorldObject* obj, const float dist2compare) const;
