@@ -555,7 +555,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
         {
             m_targets.m_targetMask = 0;
             unMaxTargets = m_spellInfo->EffectChainTarget[i];
-            uint32 max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS ;
+            float max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
 
             CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
             Cell cell = RedZone::GetZone(p);
@@ -563,17 +563,20 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             cell.SetNoCreate();
 
             std::list<Unit *> tempUnitMap;
-            MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(m_caster, m_caster, max_range);
-            MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(tempUnitMap, u_check);
 
-            TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
-            TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
+			{
+				MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(m_caster, m_caster, max_range);
+				MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(tempUnitMap, u_check);
 
-            CellLock<GridReadGuard> cell_lock(cell, p);
-            cell_lock->Visit(cell_lock, world_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
-            cell_lock->Visit(cell_lock, grid_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+				TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
+				TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
 
-            if(!tempUnitMap.size())
+	            CellLock<GridReadGuard> cell_lock(cell, p);
+		        cell_lock->Visit(cell_lock, world_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+			    cell_lock->Visit(cell_lock, grid_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+			}
+
+            if(tempUnitMap.empty())
                 break;
 
             tempUnitMap.sort(TargetDistanceOrder(m_caster));
@@ -581,8 +584,8 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             //Now to get us a random target that's in the initial range of the spell
             uint32 t = 1;
             std::list<Unit *>::iterator itr = tempUnitMap.begin();
-            while((*itr)->GetDistanceSq(m_caster) < radius * radius && itr!= tempUnitMap.end())
-                t++ , itr++;
+            while(itr!= tempUnitMap.end() && (*itr)->GetDistanceSq(m_caster) < radius * radius)
+                ++t, ++itr;
 
             itr = tempUnitMap.begin();
             std::advance(itr, rand()%t);
@@ -596,7 +599,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             t = unMaxTargets - 1;
             Unit *prev = pUnitTarget;
 
-            while(t && tempUnitMap.size() )
+            while(t && !tempUnitMap.empty() )
             {
                 Unit *next = *tempUnitMap.begin();
                         
@@ -608,7 +611,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                 tempUnitMap.erase(tempUnitMap.begin());
                 tempUnitMap.sort(TargetDistanceOrder(next));
 
-                t--;
+                --t;
             }
         }break;
         case TARGET_PET:
@@ -634,7 +637,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
 
 
                 unMaxTargets = m_spellInfo->EffectChainTarget[i];
-                uint32 max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS ;
+                float max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
 
                 CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
                 Cell cell = RedZone::GetZone(p);
@@ -645,20 +648,22 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                 if(originalCaster)
                 {
                     std::list<Unit *> tempUnitMap;
-                    MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(pUnitTarget, originalCaster, max_range);
-                    MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(tempUnitMap, u_check);
 
-                    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
-                    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
+					{
+						MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(pUnitTarget, originalCaster, max_range);
+						MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(tempUnitMap, u_check);
 
-                    CellLock<GridReadGuard> cell_lock(cell, p);
-                    cell_lock->Visit(cell_lock, world_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
-                    cell_lock->Visit(cell_lock, grid_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+						TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
+						TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
 
+						CellLock<GridReadGuard> cell_lock(cell, p);
+						cell_lock->Visit(cell_lock, world_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+						cell_lock->Visit(cell_lock, grid_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+					}
                     
                     tempUnitMap.sort(TargetDistanceOrder(pUnitTarget));
                     
-                    if(!tempUnitMap.size())
+                    if(tempUnitMap.empty())
                         break;
 
                     if(*tempUnitMap.begin() == pUnitTarget)
@@ -668,7 +673,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                     uint32 t = unMaxTargets - 1;
                     Unit *prev = pUnitTarget;
 
-                    while(t && tempUnitMap.size() )
+                    while(t && !tempUnitMap.empty() )
                     {
                         Unit *next = *tempUnitMap.begin();
                         
@@ -680,7 +685,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                         tempUnitMap.erase(tempUnitMap.begin());
                         tempUnitMap.sort(TargetDistanceOrder(next));
 
-                        t--;
+                        --t;
                     }
                 }
             }
@@ -922,7 +927,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             else
             {
                 unMaxTargets = m_spellInfo->EffectChainTarget[i];
-                uint32 max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS ;
+                float max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
                     
                 std::list<Unit *> tempUnitMap;
 
@@ -942,7 +947,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
 
                 tempUnitMap.sort(TargetDistanceOrder(pUnitTarget));
                     
-                if(!tempUnitMap.size())
+                if(tempUnitMap.empty())
                     break;
 
                 if(*tempUnitMap.begin() == pUnitTarget)
@@ -952,7 +957,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                 uint32 t = unMaxTargets - 1;
                 Unit *prev = pUnitTarget;
 
-                while(t && tempUnitMap.size() )
+                while(t && !tempUnitMap.empty() )
                 {
                     Unit *next = *tempUnitMap.begin();
                         
@@ -964,7 +969,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                     tempUnitMap.erase(tempUnitMap.begin());
                     tempUnitMap.sort(TargetDistanceOrder(next));
 
-                    t--;
+                    --t;
                 }
            }
         }break;
