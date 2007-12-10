@@ -386,6 +386,11 @@ SkillChance.Grey   = 0
 SkillChance.MiningSteps   = 75
 SkillChance.SkinningSteps = 75
 
+#For prospecting skillup not possible by default, but can be allowed as custom setting
+# Default: 0 - no skilups
+#          1 - skilups possible
+SkillChance.Prospecting = 0
+
 #Aggro radius percent or off.
 #          0   - off (0%)
 # Default: 1   - 100% 

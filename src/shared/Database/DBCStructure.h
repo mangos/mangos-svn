@@ -170,6 +170,8 @@ struct FactionEntry
     uint32      team;                                       //18
     char*       name[16];                                   //19-34
                                                             //35 string flags, unused
+    //char*     description[16];                            //36-51 unused
+                                                            //52 string flags, unused
 };
 
 enum FactionMasks

@@ -4119,9 +4119,12 @@ void Spell::EffectProspecting(uint32 i)
     if(itemTarget->GetCount() < 5)
         return;
 
-    uint32 SkillValue = p_caster->GetPureSkillValue(SKILL_JEWELCRAFTING);
-    uint32 reqSkillValue = itemTarget->GetProto()->RequiredSkillRank;
-    p_caster->UpdateGatherSkill(SKILL_JEWELCRAFTING, SkillValue, reqSkillValue);
+    if( sWorld.getConfig(CONFIG_SKILL_PROSPECTING))
+    {
+        uint32 SkillValue = p_caster->GetPureSkillValue(SKILL_JEWELCRAFTING);
+        uint32 reqSkillValue = itemTarget->GetProto()->RequiredSkillRank;
+        p_caster->UpdateGatherSkill(SKILL_JEWELCRAFTING, SkillValue, reqSkillValue);
+    }
 
     ((Player*)m_caster)->SendLoot(itemTarget->GetGUID(), LOOT_PROSPECTING);
 }
