@@ -73,6 +73,7 @@ class MANGOS_DLL_SPEC MotionMaster : private std::stack<MovementGenerator *>
 
         void Mutate(MovementGenerator *m);
 
+        void propagateSpeedChange();
     private:
         Unit *i_owner;
 };

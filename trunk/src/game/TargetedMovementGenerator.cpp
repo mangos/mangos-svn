@@ -142,8 +142,9 @@ TargetedMovementGenerator<T>::Update(T &owner, const uint32 & time_diff)
         else if ( !i_angle && !owner.HasInArc( 0.01f, i_target.getTarget() ) )
             owner.SetInFront(i_target.getTarget());
 
-        if( !owner.IsStopped() && i_destinationHolder.HasArrived())
+        if(( owner.IsStopped() && !i_destinationHolder.HasArrived() ) || i_recalculateTravel )
         {
+            i_recalculateTravel = false;
             //Angle update will take place into owner.StopMoving()
             owner.SetInFront(i_target.getTarget());
 

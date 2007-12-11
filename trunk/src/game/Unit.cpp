@@ -6157,6 +6157,7 @@ void Unit::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply
         m_speed_rate[mtype] *= rate;
     else
         m_speed_rate[mtype] /= rate;
+    propagateSpeedChange();
 
     // Send speed change packet only for player
     if (GetTypeId()!=TYPEID_PLAYER)
