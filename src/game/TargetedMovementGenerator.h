@@ -40,9 +40,9 @@ class MANGOS_DLL_SPEC TargetedMovementGenerator
     public:
 
         TargetedMovementGenerator(Unit &target)
-            : TargetedMovementGeneratorBase(target), i_offset(0), i_angle(0) {}
+            : TargetedMovementGeneratorBase(target), i_offset(0), i_angle(0), i_recalculateTravel(false) {}
         TargetedMovementGenerator(Unit &target, float offset, float angle)
-            : TargetedMovementGeneratorBase(target), i_offset(offset), i_angle(angle) {}
+            : TargetedMovementGeneratorBase(target), i_offset(offset), i_angle(angle), i_recalculateTravel(false) {}
         ~TargetedMovementGenerator() {}
 
         void Initialize(T &);
@@ -58,6 +58,8 @@ class MANGOS_DLL_SPEC TargetedMovementGenerator
             i_destinationHolder.GetDestination(x,y,z);
             return true;
         }
+
+        void unitSpeedChanged() { i_recalculateTravel=true; }
     private:
 
         void _setTargetLocation(T &);
@@ -65,5 +67,6 @@ class MANGOS_DLL_SPEC TargetedMovementGenerator
         float i_offset;
         float i_angle;
         DestinationHolder< Traveller<T> > i_destinationHolder;
+        bool i_recalculateTravel;
 };
 #endif

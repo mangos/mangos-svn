@@ -140,3 +140,12 @@ void MotionMaster::Mutate(MovementGenerator *m)
     m->Initialize(*i_owner);
     push(m);
 }
+
+void MotionMaster::propagateSpeedChange()
+{
+        Impl::container_type::iterator it = Impl::c.begin();
+        for ( ;it != end(); ++it)
+        {
+            (*it)->unitSpeedChanged();
+        }
+}

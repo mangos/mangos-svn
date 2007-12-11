@@ -40,6 +40,8 @@ class MANGOS_DLL_SPEC MovementGenerator
         virtual bool Update(Unit &, const uint32 &time_diff) = 0;
 
         virtual MovementGeneratorType GetMovementGeneratorType() = 0;
+
+        virtual void unitSpeedChanged() { }
 };
 
 template<class T, class D>

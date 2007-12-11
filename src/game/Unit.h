@@ -1172,6 +1172,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void SendPetAIReaction(uint64 guid);
         ///----------End of Pet responses methods----------
 
+        void propagateSpeedChange() { GetMotionMaster()->propagateSpeedChange(); }
     protected:
         explicit Unit ( WorldObject *instantiator );
 
