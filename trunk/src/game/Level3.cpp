@@ -1374,25 +1374,14 @@ bool ChatHandler::HandleLearnAllMySpellsCommand(const char* args)
             return true;
     }
 
-    uint32 racemask  = m_session->GetPlayer()->getRaceMask();
-    uint32 classmask = m_session->GetPlayer()->getClassMask();
-
     for (uint32 i = 0; i < sSpellStore.GetNumRows(); i++)
     {
         SpellEntry const *spellInfo = sSpellStore.LookupEntry(i);
         if(!spellInfo)
             continue;
 
-        SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(spellInfo->Id);
-        if(!skillLine)
-            continue;
-
-        // skip wrong race skills
-        if( skillLine->racemask && (skillLine->racemask & racemask) == 0)
-            continue;
-
-        // skip wrong class skills
-        if( skillLine->classmask && (skillLine->classmask & classmask) == 0)
+        // skip wrong class/race skills
+        if(!m_session->GetPlayer()->IsSpellFitByClassAndRace(spellInfo->Id))
             continue;
 
         // skip other spell families

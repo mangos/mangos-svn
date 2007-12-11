@@ -3112,7 +3112,7 @@ bool Player::HasSpell(uint32 spell) const
     return (itr != m_spells.end() && itr->second->state != PLAYERSPELL_REMOVED);
 }
 
-TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell)
+TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell) const
 {
     if (!trainer_spell)
         return TRAINER_SPELL_RED;
@@ -3127,6 +3127,10 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
     // known spell
     if(HasSpell(learned_spell_id))
         return TRAINER_SPELL_GRAY;
+
+    // check race/class requirement
+    if(!IsSpellFitByClassAndRace(spellInfo->Id))
+        return TRAINER_SPELL_RED;
 
     // check level requirement
     if(getLevel() < ( trainer_spell->reqlevel ? trainer_spell->reqlevel : spellInfo->spellLevel))
@@ -15656,4 +15660,24 @@ float Player::GetReputationPriceDiscount( Creature const* pCreature ) const
         return 1.0f;
 
     return 1.0f - 0.05f* (rank - REP_NEUTRAL);
+}
+
+bool Player::IsSpellFitByClassAndRace( uint32 spell_id ) const
+{
+    uint32 racemask  = getRaceMask();
+    uint32 classmask = getClassMask();
+
+    SkillLineAbilityEntry const *skillLine = sSkillLineAbilityStore.LookupEntry(spell_id);
+    if(!skillLine)
+        return false;
+
+    // skip wrong race skills
+    if( skillLine->racemask && (skillLine->racemask & racemask) == 0)
+        return false;
+
+    // skip wrong class skills
+    if( skillLine->classmask && (skillLine->classmask & classmask) == 0)
+        return false;
+
+    return true;
 }

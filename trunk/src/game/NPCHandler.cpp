@@ -135,10 +135,19 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
 
     WorldPacket data( SMSG_TRAINER_LIST, 8+4+4+trainer_spells.size()*38 + strTitle.size()+1);
     data << guid;
-    data << uint32(unit->GetTrainerType()) << uint32(trainer_spells.size());
+    data << uint32(unit->GetTrainerType());
 
+    size_t count_pos = data.wpos();
+    data << uint32(trainer_spells.size());
+
+    uint32 count = 0;
     for(Creature::SpellsList::const_iterator itr = trainer_spells.begin(); itr != trainer_spells.end(); ++itr)
     {
+        if(!_player->IsSpellFitByClassAndRace(itr->spell->EffectTriggerSpell[0]))
+            continue;
+
+        ++count;
+
         bool primary_prof_first_rank = objmgr.IsPrimaryProfessionFirstRankSpell(itr->spell->EffectTriggerSpell[0]);
 
         data << uint32(itr->spell->Id);
@@ -156,6 +165,8 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
     }
 
     data << strTitle;
+
+    data.put<uint32>(count_pos,count);
     SendPacket( &data );
 }
 
