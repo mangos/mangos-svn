@@ -521,7 +521,6 @@ struct SpellFocusObjectEntry
 // stored in SQL table
 struct SpellProcEventEntry
 {
-    uint32      spellId;                                    // obviously, id of spell capable to proc on event
     uint32      schoolMask;                                 // if nonzero - bit mask for matching proc condition based on spell candidate's school: Fire=2, Mask=1<<(2-1)=2
     uint32      category;                                   // if nonzero - match proc condition based on candidate spell's category
     uint32      skillId;                                    // if nonzero - for matching proc condition based on candidate spell's skillId from SkillLineAbility.dbc (Shadow Bolt = Destruction)
