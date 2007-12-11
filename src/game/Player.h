@@ -1212,7 +1212,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void CharmSpellInitialize();
         void PossessSpellInitialize();
         bool HasSpell(uint32 spell) const;
-        TrainerSpellState GetTrainerSpellState(TrainerSpell const* trainer_spell);
+        TrainerSpellState GetTrainerSpellState(TrainerSpell const* trainer_spell) const;
+        bool IsSpellFitByClassAndRace( uint32 spell_id ) const;
+
         void SendProficiency(uint8 pr1, uint32 pr2);
         void SendInitialSpells();
         bool addSpell(uint16 spell_id,uint8 active, PlayerSpellState state = PLAYERSPELL_NEW, uint16 slot_id=0xffff);
