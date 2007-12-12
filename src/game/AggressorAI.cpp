@@ -45,16 +45,21 @@ AggressorAI::AggressorAI(Creature &c) : i_creature(c), i_victimGuid(0), i_state(
 void
 AggressorAI::MoveInLineOfSight(Unit *u)
 {
+    if( i_creature.GetDistanceZ(u) > CREATURE_Z_ATTACK_RANGE ) 
+        return;
     if( !i_creature.getVictim() && !i_creature.hasUnitState(UNIT_STAT_STUNDED) && u->isTargetableForAttack() &&
         ( i_creature.IsHostileTo( u ) /*|| u->getVictim() && i_creature.IsFriendlyTo( u->getVictim() )*/ ) &&
         u->isInAccessablePlaceFor(&i_creature) )
     {
         float attackRadius = i_creature.GetAttackDistance(u);
-        if(i_creature.IsWithinDistInMap(u, attackRadius) && i_creature.GetDistanceZ(u) <= CREATURE_Z_ATTACK_RANGE)
+        if(i_creature.IsWithinDistInMap(u, attackRadius))
         {
-            if(!i_creature.IsWithinLOSInMap(u)) return;
-            AttackStart(u);
-            u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+            // Check first that object is in an angle in front of this one before LoS check
+            if( i_creature.HasInArc(M_PI/2.0f, u) && i_creature.IsWithinLOSInMap(u) )
+            {
+                AttackStart(u);
+                u->RemoveSpellsCausingAura(SPELL_AURA_MOD_STEALTH);
+            }
         }
     }
 }

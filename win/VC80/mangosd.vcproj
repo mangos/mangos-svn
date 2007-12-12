@@ -48,6 +48,7 @@
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
+				EnableEnhancedInstructionSet="1"
 				RuntimeTypeInfo="true"
 				PrecompiledHeaderFile=".\mangosd__$(PlatformName)_$(ConfigurationName)\mangosd.pch"
 				AssemblerListingLocation=".\mangosd__$(PlatformName)_$(ConfigurationName)\"

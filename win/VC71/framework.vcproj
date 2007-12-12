@@ -79,6 +79,7 @@
 				MinimalRebuild="FALSE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
+				EnableEnhancedInstructionSet="1"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderFile=".\framework__$(PlatformName)_$(ConfigurationName)\framework.pch"

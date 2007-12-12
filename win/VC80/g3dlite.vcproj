@@ -112,6 +112,7 @@
 				AdditionalIncludeDirectories="..\..\dep\include\g3dlite"
 				PreprocessorDefinitions="WIN32;NDEBUG;_CONSOLE"
 				RuntimeLibrary="0"
+				EnableEnhancedInstructionSet="1"
 				UsePrecompiledHeader="0"
 				AssemblerListingLocation=".\g3dlite__$(PlatformName)_$(ConfigurationName)\"
 				ObjectFile=".\g3dlite__$(PlatformName)_$(ConfigurationName)\"
