@@ -26,6 +26,7 @@
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
+				EnableEnhancedInstructionSet="1"
 				RuntimeTypeInfo="TRUE"
 				UsePrecompiledHeader="2"
 				PrecompiledHeaderFile=".\shared__$(PlatformName)_$(ConfigurationName)\shared.pch"
@@ -548,13 +549,11 @@
 			RelativePath="..\..\src\shared\Common.h">
 		</File>
 		<File
-			RelativePath="..\..\src\shared\ServiceWin32.cpp"
-			>
+			RelativePath="..\..\src\shared\ServiceWin32.cpp">
 		</File>
 		<File
-			RelativePath="..\..\src\shared\ServiceWin32.h"
-			>
-		</File>		
+			RelativePath="..\..\src\shared\ServiceWin32.h">
+		</File>
 		<File
 			RelativePath="..\..\src\shared\SystemConfig.h.in">
 			<FileConfiguration

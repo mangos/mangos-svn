@@ -49,6 +49,7 @@
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
+				EnableEnhancedInstructionSet="1"
 				RuntimeTypeInfo="true"
 				PrecompiledHeaderFile=".\realmd__$(PlatformName)_$(ConfigurationName)\realmd.pch"
 				AssemblerListingLocation=".\realmd__$(PlatformName)_$(ConfigurationName)\"

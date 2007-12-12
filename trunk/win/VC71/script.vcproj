@@ -74,6 +74,7 @@
 				AdditionalIncludeDirectories="..\..\src\shared;..\..\src\framework;..\..\dep\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_WINDOWS;_USRDLL;SCRIPT"
 				RuntimeLibrary="0"
+				EnableEnhancedInstructionSet="1"
 				UsePrecompiledHeader="2"
 				WarningLevel="3"
 				Detect64BitPortabilityProblems="TRUE"
@@ -120,44 +121,34 @@
 		<Filter
 			Name="Source Files"
 			Filter="cpp;c;cxx;def;odl;idl;hpj;bat;asm;asmx"
-			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}"
-			>
+			UniqueIdentifier="{4FC737F1-C7A5-4376-A066-2A32D752A2FF}">
 			<File
-				RelativePath="..\..\src\bindings\universal\ScriptMgr.cpp"
-				>
+				RelativePath="..\..\src\bindings\universal\ScriptMgr.cpp">
 			</File>
 			<File
-				RelativePath="..\..\src\bindings\universal\system.cpp"
-				>
+				RelativePath="..\..\src\bindings\universal\system.cpp">
 			</File>
 			<Filter
-				Name="Scripts"
-				>
+				Name="Scripts">
 				<File
-					RelativePath="..\..\src\bindings\universal\Scripts\sc_default.cpp"
-					>
+					RelativePath="..\..\src\bindings\universal\Scripts\sc_default.cpp">
 				</File>
 			</Filter>
 		</Filter>
 		<Filter
 			Name="Header Files"
 			Filter="h;hpp;hxx;hm;inl;inc;xsd"
-			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}"
-			>
+			UniqueIdentifier="{93995380-89BD-4b04-88EB-625FBE52EBFB}">
 			<File
-				RelativePath="..\..\src\bindings\universal\config.h"
-				>
+				RelativePath="..\..\src\bindings\universal\config.h">
 			</File>
 			<File
-				RelativePath="..\..\src\bindings\universal\ScriptMgr.h"
-				>
+				RelativePath="..\..\src\bindings\universal\ScriptMgr.h">
 			</File>
 			<Filter
-				Name="Scripts"
-				>
+				Name="Scripts">
 				<File
-					RelativePath="..\..\src\bindings\universal\Scripts\sc_defines.h"
-					>
+					RelativePath="..\..\src\bindings\universal\Scripts\sc_defines.h">
 				</File>
 			</Filter>
 		</Filter>

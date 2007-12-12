@@ -108,6 +108,7 @@
 				AdditionalIncludeDirectories="..\..\dep\include"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE"
 				RuntimeLibrary="0"
+				EnableEnhancedInstructionSet="1"
 				RuntimeTypeInfo="true"
 				UsePrecompiledHeader="0"
 				PrecompiledHeaderFile=".\zthread__$(PlatformName)_$(ConfigurationName)\zthread.pch"

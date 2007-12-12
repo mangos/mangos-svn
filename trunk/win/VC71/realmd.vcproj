@@ -28,6 +28,7 @@
 				StringPooling="TRUE"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="TRUE"
+				EnableEnhancedInstructionSet="1"
 				RuntimeTypeInfo="TRUE"
 				PrecompiledHeaderFile=".\realmd__$(PlatformName)_$(ConfigurationName)\realmd.pch"
 				AssemblerListingLocation=".\realmd__$(PlatformName)_$(ConfigurationName)\"
@@ -48,9 +49,9 @@
 				LinkIncremental="1"
 				SuppressStartupBanner="TRUE"
 				AdditionalLibraryDirectories="..\..\dep\lib\release;.\zthread__$(PlatformName)_$(ConfigurationName)"
-				GenerateDebugInformation="true"
+				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="..\..\bin\$(ConfigurationName)\realmd.pdb"
-				GenerateMapFile="true"
+				GenerateMapFile="TRUE"
 				MapFileName="..\..\bin\$(ConfigurationName)\realmd.map"
 				SubSystem="1"/>
 			<Tool
@@ -115,7 +116,7 @@
 				AdditionalLibraryDirectories="..\..\dep\lib\debug;.\zthread__$(PlatformName)_$(ConfigurationName)"
 				GenerateDebugInformation="TRUE"
 				ProgramDatabaseFile="..\..\bin\$(ConfigurationName)\realmd.pdb"
-				GenerateMapFile="true"
+				GenerateMapFile="TRUE"
 				MapFileName="..\..\bin\$(ConfigurationName)\realmd.map"
 				SubSystem="1"
 				FixedBaseAddress="1"/>
@@ -148,32 +149,25 @@
 	</References>
 	<Files>
 		<File
-			RelativePath="..\..\src\realmd\AuthSocket.cpp"
-			>
+			RelativePath="..\..\src\realmd\AuthSocket.cpp">
 		</File>
 		<File
-			RelativePath="..\..\src\realmd\AuthSocket.h"
-			>
+			RelativePath="..\..\src\realmd\AuthSocket.h">
 		</File>
 		<File
-			RelativePath="..\..\src\realmd\Main.cpp"
-			>
+			RelativePath="..\..\src\realmd\Main.cpp">
 		</File>
 		<File
-			RelativePath="..\..\src\realmd\RealmList.cpp"
-			>
+			RelativePath="..\..\src\realmd\RealmList.cpp">
 		</File>
 		<File
-			RelativePath="..\..\src\realmd\RealmList.h"
-			>
+			RelativePath="..\..\src\realmd\RealmList.h">
 		</File>
 		<File
-			RelativePath="..\..\src\shared\WheatyExceptionReport.cpp"
-			>
+			RelativePath="..\..\src\shared\WheatyExceptionReport.cpp">
 		</File>
 		<File
-			RelativePath="..\..\src\shared\WheatyExceptionReport.h"
-			>
+			RelativePath="..\..\src\shared\WheatyExceptionReport.h">
 		</File>
 	</Files>
 	<Globals>
