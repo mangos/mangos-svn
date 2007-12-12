@@ -727,7 +727,7 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
         for(uint8 i = 0; i < signs; ++i)
         {
             Field* fields = result->Fetch();
-            guild->AddMember(fields[0].GetUInt64(), (uint32)GR_INITIATE);
+            guild->AddMember(fields[0].GetUInt64(), guild->GetLowestRank());
             result->NextRow();
         }
     }

@@ -24,10 +24,10 @@
 enum GuildDefaultRanks
 {
     GR_GUILDMASTER  = 0,
-    GR_OFFICER      = 1,
-    GR_VETERAN      = 2,
-    GR_MEMBER       = 3,
-    GR_INITIATE     = 4,
+    GR_OFFICER      = 1,                                  
+    //GR_VETERAN      = 2, -- not used anywhere and possible incorrect in modified rank list
+    //GR_MEMBER       = 3,
+    //GR_INITIATE     = 4, -- use Guild::GetLowestRank() instead for lowest rank
 };
 
 enum GuildRankRights
@@ -153,9 +153,10 @@ class Guild
         uint32 GetBackgroundColor(){ return BackgroundColor; }
 
         void SetLeader(uint64 guid);
-        bool AddMember(uint64 plGuid, uint32 plRank=(uint32)GR_INITIATE);
+        bool AddMember(uint64 plGuid, uint32 plRank);
         void ChangeRank(uint64 guid, uint32 newRank);
         void DelMember(uint64 guid, bool isDisbanding=false);
+        uint32 GetLowestRank() const { return GetNrRanks()-1; }
 
         void SetMOTD(std::string motd);
         void SetGINFO(std::string ginfo);
