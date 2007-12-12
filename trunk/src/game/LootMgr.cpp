@@ -230,18 +230,24 @@ void LoadLootTables()
     LoadLootTable(LootTemplates_Prospecting,  "prospecting_loot_template");
 }
 
-#define MaxLootGroups 8
-
 struct HasChance
 {
+    struct GroupChance
+    {
+        GroupChance() : rolled(0.0f), cumulative(0.0f) {}
+
+        float rolled;
+        float cumulative;
+    };
+
+    typedef std::vector<GroupChance> GroupChances;
+
     LootStore* m_store;
-    float RolledChance[MaxLootGroups];
-    float CumulativeChance[MaxLootGroups];
+
+    GroupChances groupChance;
 
     explicit HasChance(LootStore* _store) : m_store(_store)
     {
-        for (int i=0; i < MaxLootGroups; i++)
-            CumulativeChance[i] = 0.0f;
     }
 
     LootStoreItem* operator() ( LootStoreItem& itm )
@@ -262,7 +268,7 @@ struct HasChance
         // Grouped loot
         int32 GroupId = itm.GetGroupId();
 
-        if (GroupId < 0 || GroupId >=  MaxLootGroups)
+        if (GroupId < 0)
         {
             sLog.outErrorDb("HasChance: wrong loot group in DB (%i) for item %u", itm.questChanceOrGroup,itm.itemid);
             return NULL;
@@ -271,14 +277,19 @@ struct HasChance
         if (itm.chanceOrRef >= 0)
         {
             // Group of current loot - check for item chance in the group
-            if (CumulativeChance[GroupId] == 0.0f)
-                RolledChance[GroupId] = rand_chance();
-            if (CumulativeChance[GroupId] >= RolledChance[GroupId])
+            if(groupChance.size() <= GroupId)
+                groupChance.resize(GroupId+1);
+
+            GroupChance & gChance = groupChance[GroupId];
+
+            if (gChance.cumulative == 0.0f)
+                gChance.rolled = rand_chance();
+            if (gChance.cumulative >= gChance.rolled)
                 // An item from the group already accepted
                 return NULL;
 
-            CumulativeChance[GroupId] += itm.chanceOrRef;
-            if (CumulativeChance[GroupId] >= RolledChance[GroupId])
+            gChance.cumulative += itm.chanceOrRef;
+            if (gChance.cumulative >= gChance.rolled)
                 return &itm;
             return NULL;
         }
