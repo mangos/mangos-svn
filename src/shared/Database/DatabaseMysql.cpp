@@ -146,18 +146,18 @@ bool DatabaseMysql::Initialize(const char *infoString)
         sLog.outString( "MySQL client library: %s", mysql_get_client_info());
         sLog.outString( "MySQL server ver: %s ", mysql_get_server_info( mMysql));
 
-        /*----------SET AUTOCOMMIT OFF---------*/
+        /*----------SET AUTOCOMMIT ON---------*/
         // It seems mysql 5.0.x have enabled this feature
         // by default. In crash case you can lose data!!!
         // So better to turn this off
-        if (!mysql_autocommit(mMysql, 0))
-        {
-            sLog.outDetail("AUTOCOMMIT SUCCESSFULLY SET TO 0");
-        }
+        // ---
+        // This is wrong since mangos use transactions,
+        // autocommit is turned of during it.
+        // Setting it to on makes atomic updates work
+        if (!mysql_autocommit(mMysql, 1))
+            sLog.outDetail("AUTOCOMMIT SUCCESSFULLY SET TO 1");
         else
-        {
-            sLog.outDetail("AUTOCOMMIT NOT SET TO 0");
-        }
+            sLog.outDetail("AUTOCOMMIT NOT SET TO 1");
         /*-------------------------------------*/
         return true;
     }
