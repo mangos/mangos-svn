@@ -752,3 +752,9 @@ uint8 Item::GetGemCountWithID(uint32 GemID) const
     }
     return count;
 }
+
+bool Item::IsLimitedToAnotherMapOrZone( uint32 cur_mapId, uint32 cur_zoneId) const
+{
+    ItemPrototype const* proto = GetProto();
+    return proto && (proto->Map && proto->Map != cur_mapId || proto->Area && proto->Area != cur_zoneId );
+}

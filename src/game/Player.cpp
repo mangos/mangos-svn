@@ -3426,7 +3426,7 @@ void Player::ResurrectPlayer(float restore_percent, bool updateToWorld)
         MapManager::Instance().GetMap(GetMapId(), this)->Add(this);
 
     // some items limited to specific map
-    DestroyMapLimitedItem( true );
+    DestroyZoneLimitedItem( true, GetZoneId());
 
     // set resurrection sickness if not expired
     if(!m_resurrectingSicknessExpire)
@@ -3737,12 +3737,12 @@ void Player::CleanupChannels()
     sLog.outDebug("Player: channels cleaned up!");
 }
 
-void Player::UpdateLocalChannels()
+void Player::UpdateLocalChannels(uint32 newZone )
 {
     if(m_channels.empty())
         return;
 
-    AreaTableEntry const* current_zone = GetAreaEntryByAreaID(GetZoneId());
+    AreaTableEntry const* current_zone = GetAreaEntryByAreaID(newZone);
     if(!current_zone)
         return;
 
@@ -3789,7 +3789,7 @@ void Player::UpdateLocalChannels()
 void Player::BroadcastPacketToFriendListers(WorldPacket *packet, bool extern_result, QueryResult *result)
 {
     /// this is sent out to those that have the player in their friendlist
-    /// (not necesarily those that are in the player's friendlist)
+    /// (not necessarily those that are in the player's friendlist)
     if(!extern_result)
         result = CharacterDatabase.PQuery("SELECT `guid` FROM `character_social` WHERE `flags` = 'FRIEND' AND `friend` = '%u'", GetGUIDLow());
 
@@ -5615,7 +5615,7 @@ void Player::UpdateZone(uint32 newZone)
     // remove auras from spells with area limitations
     for(AuraMap::iterator iter = m_Auras.begin(); iter != m_Auras.end();)
     {
-        if(iter->second->GetSpellProto()->AreaId && iter->second->GetSpellProto()->AreaId != GetZoneId())
+        if(iter->second->GetSpellProto()->AreaId && iter->second->GetSpellProto()->AreaId != newZone)
         {
             RemoveAura(iter);
         }
@@ -5623,8 +5623,13 @@ void Player::UpdateZone(uint32 newZone)
             ++iter;
     }
 
+    // remove items with area/map limitations (delete only for alive player to allow back in ghost mode)
+    // if player resurrected at teleport this will be applied in resurrect code
+    if(isAlive())
+        DestroyZoneLimitedItem( true, newZone );
+
     // recent client version not send leave/join channel packets for built-in local channels
-    UpdateLocalChannels();
+    UpdateLocalChannels( newZone );
 
     // group update
     SetGroupUpdateFlag(GROUP_UPDATE_FLAG_ZONE);
@@ -9554,30 +9559,22 @@ void Player::DestroyItemCount( uint32 item, uint32 count, bool update, bool uneq
     }
 }
 
-void Player::DestroyMapLimitedItem( bool update )
+void Player::DestroyZoneLimitedItem( bool update, uint32 new_zone )
 {
-    sLog.outDebug( "STORAGE: DestroyMapLimitedItem in map %u", GetMapId());
+    sLog.outDebug( "STORAGE: DestroyZoneLimitedItem in map %u and area %u", GetMapId(), new_zone );
 
     // in inventory
     for(int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
     {
         Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-        if( pItem )
-        {
-            ItemPrototype const* proto = pItem->GetProto();
-            if( proto && proto->Map && proto->Map != GetMapId() )
-                DestroyItem( INVENTORY_SLOT_BAG_0, i, update);
-        }
+        if( pItem && pItem->IsLimitedToAnotherMapOrZone(GetMapId(),new_zone) )
+            DestroyItem( INVENTORY_SLOT_BAG_0, i, update);
     }
     for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
     {
         Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-        if( pItem )
-        {
-            ItemPrototype const* proto = pItem->GetProto();
-            if( proto && proto->Map && proto->Map != GetMapId() )
-                DestroyItem( INVENTORY_SLOT_BAG_0, i, update);
-        }
+        if( pItem && pItem->IsLimitedToAnotherMapOrZone(GetMapId(),new_zone) )
+            DestroyItem( INVENTORY_SLOT_BAG_0, i, update);
     }
 
     // in inventory bags
@@ -9592,12 +9589,8 @@ void Player::DestroyMapLimitedItem( bool update )
                 for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                 {
                     Item* pItem = pBag->GetItemByPos(j);
-                    if( pItem )
-                    {
-                        ItemPrototype const* proto = pItem->GetProto();
-                        if( proto && proto->Map && proto->Map != GetMapId() )
-                            DestroyItem( i, j, update);
-                    }
+                    if( pItem && pItem->IsLimitedToAnotherMapOrZone(GetMapId(),new_zone) )
+                        DestroyItem( i, j, update);
                 }
             }
         }
@@ -9607,12 +9600,8 @@ void Player::DestroyMapLimitedItem( bool update )
     for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_BAG_END; i++)
     {
         Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-        if( pItem )
-        {
-            ItemPrototype const* proto = pItem->GetProto();
-            if( proto && proto->Map && proto->Map != GetMapId() )
-                DestroyItem( INVENTORY_SLOT_BAG_0, i, update);
-        }
+        if( pItem && pItem->IsLimitedToAnotherMapOrZone(GetMapId(),new_zone) )
+            DestroyItem( INVENTORY_SLOT_BAG_0, i, update);
     }
 }
 
@@ -12687,6 +12676,8 @@ void Player::_LoadInventory(QueryResult *result, uint32 timediff)
     //NOTE2: the "order by `slot`" is needed becaue mainhand weapons are (wrongly?)
     //expected to be equipped before offhand items (TODO: fixme)
 
+    uint32 zone = GetZoneId();
+
     if (result)
     {
         // prevent items from being added to the queue when stored
@@ -12715,8 +12706,8 @@ void Player::_LoadInventory(QueryResult *result, uint32 timediff)
                 continue;
             }
 
-            // not allow have in alive state item limited to another map
-            if(isAlive() && proto->Map && proto->Map!=GetMapId())
+            // not allow have in alive state item limited to another map/zone
+            if(isAlive() && item->IsLimitedToAnotherMapOrZone(GetMapId(),zone) )
             {
                 CharacterDatabase.PExecute("DELETE FROM `character_inventory` WHERE `item` = '%u'", item_guid);
                 item->FSetState(ITEM_REMOVED);
