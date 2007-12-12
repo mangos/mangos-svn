@@ -115,7 +115,7 @@
 
 // level 1 chat
 #define LANG_GLOBAL_NOTIFY               "Global notify:\n"
-#define LANG_MAP_POSITION                "Map: %u Zone: %u Area: %u\nX: %f Y: %f Z: %f Orientation: %f grid[%u,%u]cell[%u,%u]\nInstanceID: %u"
+#define LANG_MAP_POSITION                "Map: %u (%s) Zone: %u (%s) Area: %u (%s)\nX: %f Y: %f Z: %f Orientation: %f grid[%u,%u]cell[%u,%u] InstanceID: %u\n ZoneX: %f ZoneY: %f"
 #define LANG_IS_TELEPORTED               "%s is already being teleported."
 #define LANG_CANNOT_SUMMON_TO_INST       "You can summon a player to your instance only if he is in your party with you as leader."
 #define LANG_CANNOT_GO_TO_INST_PARTY     "You cannot go to the player's instance because you are in a party now."
@@ -272,6 +272,8 @@
 
 #define LANG_COMMAND_GOAREATRNOTFOUND    "Areatrigger ID %u not found!"
 #define LANG_INVALID_TARGET_COORD        "Target map or coordinates is invalid (X: %f Y: %f MapId: %u)"
+#define LANG_INVALID_ZONE_COORD          "Zone coordinates is invalid (X: %f Y: %f AreaId: %u)"
+#define LANG_INVALID_ZONE_MAP            "Zone %u (%s) is part of instanceable map %u (%s)"
 #define LANG_COMMAND_TARGETOBJNOTFOUND   "Nothing found!"
 #define LANG_COMMAND_GOOBJNOTFOUND       "Object not found!"
 #define LANG_COMMAND_GOCREATNOTFOUND     "Creature not found!"
@@ -361,6 +363,7 @@
 #define LANG_COMMAND_LISTOBJMESSAGE      "Found gameobjects %u: %u "
 #define LANG_COMMAND_INVALIDCREATUREID   "Invalid creature id: %u"
 #define LANG_COMMAND_LISTCREATUREMESSAGE "Found creatures %u: %u "
+#define LANG_COMMAND_NOAREAFOUND         "No area found!"
 #define LANG_COMMAND_NOITEMSETFOUND      "No item sets found!"
 #define LANG_COMMAND_NOSKILLFOUND        "No skills found!"
 #define LANG_COMMAND_NOSPELLFOUND        "No spells found!"

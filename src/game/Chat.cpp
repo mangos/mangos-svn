@@ -218,6 +218,7 @@ ChatCommand * ChatHandler::getCommandTable()
 
     static ChatCommand lookupCommandTable[] =
     {
+        { "area",           SEC_MODERATOR,      &ChatHandler::HandleLookupAreaCommand,          "", NULL },
         { "item",           SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupItemCommand,          "", NULL },
         { "itemset",        SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupItemSetCommand,       "", NULL },
         { "skill",          SEC_ADMINISTRATOR,  &ChatHandler::HandleLookupSkillCommand,         "", NULL },
@@ -253,6 +254,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "go",          SEC_MODERATOR,     &ChatHandler::HandleGoXYZCommand,            "",   NULL },
         { "goxy",        SEC_MODERATOR,     &ChatHandler::HandleGoXYCommand,             "",   NULL },
         { "goxyz",       SEC_MODERATOR,     &ChatHandler::HandleGoXYZCommand,            "",   NULL },
+        { "gozonexy",    SEC_MODERATOR,     &ChatHandler::HandleGoZoneXYCommand,         "",   NULL },
         { "goname",      SEC_MODERATOR,     &ChatHandler::HandleGonameCommand,           "",   NULL },
         { "namego",      SEC_MODERATOR,     &ChatHandler::HandleNamegoCommand,           "",   NULL },
         { "groupgo",     SEC_MODERATOR,     &ChatHandler::HandleGroupgoCommand,          "",   NULL },
@@ -754,7 +756,14 @@ Creature* ChatHandler::getSelectedCreature()
 char*     ChatHandler::extractKeyFromLink(char* text, char const* linkType)
 {
     // skip empty
-    if(!text && !*text)
+    if(!text)
+        return NULL;
+
+    // skip speces
+    while(*text==' '||*text=='\t'||*text=='\b')
+        ++text;
+
+    if(!*text)
         return NULL;
 
     // return non link case
