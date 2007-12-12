@@ -384,7 +384,7 @@ struct SkillLineEntry
 
 struct SkillLineAbilityEntry
 {
-    uint32    id;                                           // 0
+    //uint32    id;                                         // 0, unused
     uint32    skillId;                                      // 1
     uint32    spellId;                                      // 2 INDEX
     uint32    racemask;                                     // 3 
@@ -653,13 +653,28 @@ struct TotemCategoryEntry
     uint32    categoryMask;                                 //19 (compatibility mask for same type: different for totems, compatible from high to low for rods)
 };
 
+struct WorldMapAreaEntry
+{
+	//uint32    ID;											// 0
+	//uint32    map_id;										// 1
+	uint32    area_id;										// 2 index (continent 0 areas ignored)
+	//char*   internal_name									// 3
+	float     y1;											// 4
+	float     y2;											// 5
+	float     x1;											// 6
+	float     x2;											// 7
+	//int32   virtual_map_id;								// 8 -1 (map_id have correct map) other: virtual map where zone show (map_id - where zone in fact internally)
+};
+
 struct WorldSafeLocsEntry
 {
-    uint32    ID;
-    uint32    map_id;
-    float     x;
-    float     y;
-    float     z;
+    uint32    ID;											// 0
+    uint32    map_id;										// 1
+    float     x;											// 2
+    float     y;											// 3
+    float     z;											// 4
+	//char*   name[16]										// 5-20 name, unused
+															// 21 name flags, unused
 };
 
 // GCC have alternative #pragma pack() syntax and old gcc version not support pack(pop), also any gcc version not support it at some paltform

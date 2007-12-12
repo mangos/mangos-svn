@@ -122,6 +122,7 @@ static DBCStorage <TaxiPathNodeEntry> sTaxiPathNodeStore(TaxiPathNodeEntryfmt);
 
 DBCStorage <TotemCategoryEntry> sTotemCategoryStore(TotemCategoryEntryfmt);
 
+DBCStorage <WorldMapAreaEntry>  sWorldMapAreaStore(WorldMapAreaEntryfmt);
 DBCStorage <WorldSafeLocsEntry> sWorldSafeLocsStore(WorldSafeLocsEntryfmt);
 
 typedef std::list<std::string> StoreProblemList;
@@ -162,7 +163,7 @@ void LoadDBCStores(std::string dataPath)
 {
     std::string tmpPath="";
 
-    const uint32 DBCFilesCount = 47;
+    const uint32 DBCFilesCount = 48;
 
     barGoLink bar( DBCFilesCount );
 
@@ -300,6 +301,7 @@ void LoadDBCStores(std::string dataPath)
     sTaxiPathNodeStore.Clear();
 
     LoadDBC(bar,bad_dbc_files,sTotemCategoryStore,       dataPath+"dbc/TotemCategory.dbc");
+    LoadDBC(bar,bad_dbc_files,sWorldMapAreaStore,        dataPath+"dbc/WorldMapArea.dbc");
     LoadDBC(bar,bad_dbc_files,sWorldSafeLocsStore,       dataPath+"dbc/WorldSafeLocs.dbc");
 
     // error checks
@@ -829,6 +831,43 @@ bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredT
 
     return (itemEntry->categoryMask & reqEntry->categoryMask)==reqEntry->categoryMask;
 }
+
+//FIXME: move this and other game dependent code to game directory
+#define MAX_NUMBER_OF_GRIDS      64
+#define SIZE_OF_GRIDS            533.33333f
+#define MAP_SIZE                (SIZE_OF_GRIDS*MAX_NUMBER_OF_GRIDS)
+#define MAP_HALFSIZE            (MAP_SIZE/2)
+
+void Zone2MapCoordinates(float& x,float& y,uint32 zone)
+{
+    WorldMapAreaEntry const* maEntry = sWorldMapAreaStore.LookupEntry(zone);
+
+    // if not listed then map coordinates (instance)
+    if(!maEntry)
+        return;
+
+    std::swap(x,y);                                         // at client map coords swapped
+    x = x*((maEntry->x2-maEntry->x1)/100)+maEntry->x1;
+    y = y*((maEntry->y2-maEntry->y1)/100)+maEntry->y1;   // client y coord from top to down
+}
+
+void Map2ZoneCoordinates(float& x,float& y,uint32 zone)
+{
+    WorldMapAreaEntry const* maEntry = sWorldMapAreaStore.LookupEntry(zone);
+
+    // if not listed then map coordinates (instance)
+    if(!maEntry)
+        return;
+
+    x = (x-maEntry->x1)/((maEntry->x2-maEntry->x1)/100);
+    y = (y-maEntry->y1)/((maEntry->y2-maEntry->y1)/100);   // client y coord from top to down
+    std::swap(x,y);                                         // client have map coords swapped
+}
+#undef MAX_NUMBER_OF_GRIDS
+#undef SIZE_OF_GRIDS
+#undef MAP_SIZE
+#undef MAP_HALFSIZE
+
 
 // script support functions
 MANGOS_DLL_SPEC DBCStorage <SpellEntry>      const* GetSpellStore()      { return &sSpellStore;      }

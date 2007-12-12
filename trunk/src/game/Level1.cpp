@@ -216,14 +216,34 @@ bool ChatHandler::HandleGPSCommand(const char* args)
     CellPair cell_val = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
     Cell cell = RedZone::GetZone(cell_val);
 
+    uint32 zone_id = obj->GetZoneId();
+    uint32 area_id = obj->GetAreaId();
+
+    MapEntry const* mapEntry = sMapStore.LookupEntry(obj->GetMapId());
+    AreaTableEntry const* zoneEntry = GetAreaEntryByAreaID(zone_id);
+    AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(area_id);
+
+    float zone_x = obj->GetPositionX();
+    float zone_y = obj->GetPositionY();
+
+    Map2ZoneCoordinates(zone_x,zone_y,zone_id);
+
     PSendSysMultilineMessage(LANG_MAP_POSITION,
-        obj->GetMapId(), obj->GetZoneId(), obj->GetAreaId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
-        obj->GetOrientation(),cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY(),obj->GetInstanceId());
+        obj->GetMapId(), (mapEntry ? mapEntry->name[sWorld.GetDBClang()] : "<unknown>" ), 
+        zone_id, (zoneEntry ? zoneEntry->area_name[sWorld.GetDBClang()] : "<unknown>" ), 
+        area_id, (areaEntry ? areaEntry->area_name[sWorld.GetDBClang()] : "<unknown>" ), 
+        obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
+        obj->GetOrientation(),cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY(),obj->GetInstanceId(),
+        zone_x,zone_y );
 
     sLog.outDebug("Player %s GPS call %s %u " LANG_MAP_POSITION, m_session->GetPlayer()->GetName(),
         (obj->GetTypeId() == TYPEID_PLAYER ? "player" : "creature"), obj->GetGUIDLow(),
-        obj->GetMapId(), obj->GetZoneId(), obj->GetAreaId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
-        obj->GetOrientation(), cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY(),obj->GetInstanceId());
+        obj->GetMapId(), (mapEntry ? mapEntry->name[sWorld.GetDBClang()] : "<unknown>" ), 
+        zone_id, (zoneEntry ? zoneEntry->area_name[sWorld.GetDBClang()] : "<unknown>" ), 
+        area_id, (areaEntry ? areaEntry->area_name[sWorld.GetDBClang()] : "<unknown>" ), 
+        obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
+        obj->GetOrientation(), cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY(),obj->GetInstanceId(),
+        zone_x,zone_y );
 
     return true;
 }
@@ -1579,6 +1599,46 @@ bool ChatHandler::HandleTeleCommand(const char * args)
     return true;
 }
 
+bool ChatHandler::HandleLookupAreaCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+    std::string namepart = args;
+    uint32 counter = 0;                                     // Counter for figure out that we found smth.
+
+    // Search in AreaTable.dbc
+    for (uint32 areaflag = 0; areaflag < sAreaStore.GetNumRows(); ++areaflag)
+    {
+        AreaTableEntry const *areaEntry = sAreaStore.LookupEntry(areaflag);
+        if(areaEntry)
+        {
+            // name - is first name field from dbc (English localized)
+            std::string name = areaEntry->area_name[sWorld.GetDBClang()];
+
+            // converting SpellName to lower case
+            std::transform( name.begin(), name.end(), name.begin(), ::tolower );
+
+            // converting string that we try to find to lower case
+            std::transform( namepart.begin(), namepart.end(), namepart.begin(), ::tolower );
+
+            if (name.find(namepart) != std::string::npos)
+            {
+                // send area in "id - [name]" format
+                std::ostringstream ss;
+                ss << areaEntry->ID << " - |cffffffff|Harea:" << areaEntry->ID << "|h[" << areaEntry->area_name[sWorld.GetDBClang()] << "]|h|r";
+
+                SendSysMessage(ss.str().c_str());
+
+                ++counter;
+            }
+        }
+    }
+    if (counter == 0)                                       // if counter == 0 then we found nth
+        SendSysMessage(LANG_COMMAND_NOAREAFOUND);
+    return true;
+}
+
 //Find tele in game_tele order by name
 bool ChatHandler::HandleLookupTeleCommand(const char * args)
 {
@@ -2082,6 +2142,67 @@ bool ChatHandler::HandleGoXYZCommand(const char* args)
 
     _player->SaveRecallPosition();
     _player->TeleportTo(mapid, x, y, z, _player->GetOrientation());
+
+    return true;
+}
+
+//teleport at coordinates
+bool ChatHandler::HandleGoZoneXYCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+    Player* _player = m_session->GetPlayer();
+
+    if(_player->isInFlight())
+    {
+        SendSysMessage(LANG_YOU_IN_FLIGHT);
+        return true;
+    }
+
+    char* px = strtok((char*)args, " ");
+    char* py = strtok(NULL, " ");
+    char* tail = strtok(NULL,"");
+
+    char* cAreaId = extractKeyFromLink(tail,"Harea");    // string or [name] Shift-click form |color|Harea:area_id|h[name]|h|r
+
+    if (!px || !py)
+        return false;
+
+    float x = (float)atof(px);
+    float y = (float)atof(py);
+    uint32 areaid = cAreaId ? (uint32)atoi(cAreaId) : _player->GetZoneId();
+
+    AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(areaid);
+
+    if( x<0 || x>100 || y<0 || y>100 || !areaEntry )
+    {
+        PSendSysMessage(LANG_INVALID_ZONE_COORD,x,y,areaid);
+        return true;
+    }
+
+    // update to parent zone if exist (client map show only zones without parents)
+    AreaTableEntry const* zoneEntry = areaEntry->zone ? GetAreaEntryByAreaID(areaEntry->zone) : areaEntry;
+
+    Map const *map = MapManager::Instance().GetBaseMap(zoneEntry->mapid);
+
+    if(map->Instanceable())
+    {
+        PSendSysMessage(LANG_INVALID_ZONE_MAP,areaEntry->ID,areaEntry->area_name[sWorld.GetDBClang()],map->GetId(),map->GetMapName());
+        return true;
+    }
+
+    Zone2MapCoordinates(x,y,zoneEntry->ID);
+
+    if(!MapManager::IsValidMapCoord(zoneEntry->mapid,x,y))
+    {
+        PSendSysMessage(LANG_INVALID_TARGET_COORD,x,y,zoneEntry->mapid);
+        return true;
+    }
+
+    float z = std::max(map->GetHeight(x, y, 0), map->GetWaterLevel(x, y));
+    _player->SaveRecallPosition();
+    _player->TeleportTo(zoneEntry->mapid, x, y, z, _player->GetOrientation());
 
     return true;
 }

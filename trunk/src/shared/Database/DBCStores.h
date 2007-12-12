@@ -99,6 +99,9 @@ ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id);
 
 bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredTotemCategoryId);
 
+void Zone2MapCoordinates(float& x,float& y,uint32 zone);
+void Map2ZoneCoordinates(float& x,float& y,uint32 zone);
+
 template<class T>
 class DBCStorage
 {
@@ -154,7 +157,7 @@ class DBCStorage
         DBCFile * dbc;
 };
 
-//extern DBCStorage <AreaTableEntry>            sAreaStore; -- accessed using 2 functions
+extern DBCStorage <AreaTableEntry>            sAreaStore; // recommend access using functions
 extern DBCStorage <AreaTriggerEntry>          sAreaTriggerStore;
 extern DBCStorage <BankBagSlotPricesEntry>    sBankBagSlotPricesStore;
 extern DBCStorage <BattlemasterListEntry>     sBattlemasterListStore;
@@ -206,6 +209,7 @@ extern TaxiMask                               sTaxiNodesMask;
 extern TaxiPathSetBySource                    sTaxiPathSetBySource;
 extern TaxiPathNodesByPath                    sTaxiPathNodesByPath;
 extern DBCStorage <TotemCategoryEntry>        sTotemCategoryStore;
+//extern DBCStorage <WorldMapAreaEntry>         sWorldMapAreaStore; -- use Zone2MapCoordinates and Map2ZoneCoordinates
 extern DBCStorage <WorldSafeLocsEntry>        sWorldSafeLocsStore;
 
 void LoadDBCStores(std::string dataPath);
