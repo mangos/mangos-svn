@@ -16,10 +16,12 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#if !defined (CONFIG_H)
+#ifndef CONFIG_H
 #define CONFIG_H
 
 #include <Policies/Singleton.h>
+
+class DOTCONFDocument;
 
 class Config 
 {
@@ -46,4 +48,5 @@ class Config
 };
 
 #define sConfig MaNGOS::Singleton<Config>::Instance()
+
 #endif
