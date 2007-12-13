@@ -1747,45 +1747,19 @@ bool Creature::LoadCreaturesAddon()
     if (cainfo->emote != 0)
         SetUInt32Value(UNIT_NPC_EMOTESTATE, cainfo->emote);
 
-    // Now add the auras, format "spellid effectindex spellid effectindex..."
-    char *p,*s;
-    int val[21],i=0;
-    s=p=cainfo->auras;
-    while (p[0]!=0)
+    if(cainfo->auras)
     {
-        p++;
-        if (p[0]==' ')
+        for (CreatureDataAddonAura const* cAura = cainfo->auras; cAura->spell_id; ++cAura)
         {
-            val[i++]=atoi(s);
-            s=++p;
-        }
-        if (i>19)
-            break;
-    }
-    if (p!=s)
-        val[i++]=atoi(s);
-    if (i%2)
-        sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) has wrong aura defined.",GetGUIDLow(),GetEntry());
-    else
-    {
-        for (int j=0;j<i/2;j++)
-        {
-            uint32 spellId = (uint32)val[2*j+0];
-            uint32 effect  = (uint32)val[2*j+1];
-            if ( effect>2 )
-            {
-                sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) has wrong effect %u for spell %u.",GetGUIDLow(),GetEntry(),effect,spellId);
-                continue;
-            }
-            SpellEntry const *AdditionalSpellInfo = sSpellStore.LookupEntry(spellId);
+            SpellEntry const *AdditionalSpellInfo = sSpellStore.LookupEntry(cAura->spell_id);
             if (!AdditionalSpellInfo)
             {
-                sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) has wrong spell %u defined in Auras field.",GetGUIDLow(),GetEntry(),spellId);
+                sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) has wrong spell %u defined in Auras field.",GetGUIDLow(),GetEntry(),cAura->spell_id);
                 continue;
             }
-            Aura* AdditionalAura = new Aura(AdditionalSpellInfo, effect, NULL, this, this, 0);
+            Aura* AdditionalAura = new Aura(AdditionalSpellInfo, cAura->effect_idx, NULL, this, this, 0);
             AddAura(AdditionalAura);
-            sLog.outDebug("Spell: %u with Aura %u added to creature (GUIDLow: %u Entry: %u )", spellId, AdditionalSpellInfo->EffectApplyAuraName[0],GetGUIDLow(),GetEntry());
+            sLog.outDebug("Spell: %u with Aura %u added to creature (GUIDLow: %u Entry: %u )", cAura->spell_id, AdditionalSpellInfo->EffectApplyAuraName[0],GetGUIDLow(),GetEntry());
         }
     }
     return true;

@@ -243,6 +243,12 @@ struct CreatureData
     uint8 movementType;
 };
 
+struct CreatureDataAddonAura
+{
+    uint16 spell_id;
+    uint8 effect_idx;
+};
+
 // from `creature_addon` table
 struct CreatureDataAddon
 {
@@ -252,7 +258,7 @@ struct CreatureDataAddon
     uint32 bytes1;
     uint32 bytes2;
     uint32 emote;
-    char* auras;
+    CreatureDataAddonAura const* auras;                     // loaded as char* "spell1 eff1 spell2 eff2 ... "
 };
 
 struct CreatureModelInfo
