@@ -524,6 +524,8 @@ class Spell
         uint8 CheckItems();
         uint8 CheckRange(bool strict);
         uint8 CheckMana(uint32 *mana);
+        uint8 CheckCasterAuars() const;
+
         int32 CalculateDamage(uint8 i);
         void Delayed(int32 delaytime);
         void DelayedChannel(int32 delaytime);
