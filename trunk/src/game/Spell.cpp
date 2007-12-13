@@ -2631,74 +2631,8 @@ uint8 Spell::CanCast(bool strict)
             return castResult;
     }
 
-    uint8 school_immune = 0;
-    uint32 mechanic_immune = 0;
-
-    //Check if the spell grants school or mechanic immunity.
-    //We use bitmasks so the loop is done only once and not on every aura check below.
-    for(int i = 0;i < 3; i ++)
-    {
-        if(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_SCHOOL_IMMUNITY)
-            school_immune |= m_spellInfo->EffectMiscValue[i];
-        else if(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MECHANIC_IMMUNITY)
-            mechanic_immune |= 1 << m_spellInfo->EffectMiscValue[i];
-    }
-    //immune movement impairement and loss of control
-    if(m_spellInfo->Id==(uint32)42292)mechanic_immune=0x9967da6;
-
-    //Check whether the cast should be prevented by any state you might have.
-    uint8 prevented_reason = 0;
-    if(m_caster->hasUnitState(UNIT_STAT_STUNDED))
-        prevented_reason = SPELL_FAILED_STUNNED;
-    else if(m_caster->hasUnitState(UNIT_STAT_CONFUSED))
-        prevented_reason = SPELL_FAILED_CONFUSED;
-    else if(m_caster->hasUnitState(UNIT_STAT_FLEEING))
-        prevented_reason = SPELL_FAILED_FLEEING;
-    else if(m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED) && m_spellInfo->School != SPELL_SCHOOL_NORMAL)
-        prevented_reason = SPELL_FAILED_SILENCED;
-    else if(m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED) && m_spellInfo->School == SPELL_SCHOOL_NORMAL && !m_triggeredByAura)
-        prevented_reason = SPELL_FAILED_PACIFIED;
-
-    if(prevented_reason)
-    {
-        if(school_immune || mechanic_immune)
-        {
-            //Checking auras is needed now, because you are prevented by some state but the spell grants immunity.
-            Unit::AuraMap auras = m_caster->GetAuras();
-            for(Unit::AuraMap::iterator itr = auras.begin(); itr != auras.end(); itr++)
-            {
-                if(itr->second)
-                {
-                    if( ((1 << itr->second->GetSpellProto()->School) & school_immune) ||
-                        ((1 << itr->second->GetSpellProto()->Mechanic) & mechanic_immune) )
-                        continue;
-
-                    //Make a second check for spell failed so the right SPELL_FAILED message is returned.
-                    //That is needed when your casting is prevented by multiple states and you are only immune to some of them.
-                    switch(itr->second->GetModifier()->m_auraname)
-                    {
-                        case SPELL_AURA_MOD_STUN:
-                            return SPELL_FAILED_STUNNED;
-                        case SPELL_AURA_MOD_CONFUSE:
-                            return SPELL_FAILED_CONFUSED;
-                        case SPELL_AURA_MOD_FEAR:
-                            return SPELL_FAILED_FLEEING;
-                        case SPELL_AURA_MOD_SILENCE:
-                            if(m_spellInfo->School != SPELL_SCHOOL_NORMAL)
-                                return SPELL_FAILED_SILENCED;
-                            break;
-                        case SPELL_AURA_MOD_PACIFY:
-                            if(m_spellInfo->School == SPELL_SCHOOL_NORMAL)
-                                return SPELL_FAILED_PACIFIED;
-                            break;
-                    }
-                }
-            }
-        }
-        //You are prevented from casting and the spell casted does not grant immunity. Return a failed error.
-        else
-            return prevented_reason;
-    }
+    if(uint8 castResult = CheckCasterAuars())
+        return castResult;
 
     for (int i = 0; i < 3; i++)
     {
@@ -3155,6 +3089,85 @@ int16 Spell::PetCanCast(Unit* target)
         return result;
     else
         return -1;                                          //this allows to check spell fail 0, in combat
+}
+
+uint8 Spell::CheckCasterAuars() const
+{
+    // Flag drop spells totally immuned to caster auras
+    // FIXME: find more nice check for all totally immuned spells
+    if(m_spellInfo->Id==23336 || m_spellInfo->Id==23334 || m_spellInfo->Id==34991)
+        return 0;
+
+    uint8 school_immune = 0;
+    uint32 mechanic_immune = 0;
+
+    //Check if the spell grants school or mechanic immunity.
+    //We use bitmasks so the loop is done only once and not on every aura check below.
+    for(int i = 0;i < 3; i ++)
+    {
+        if(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_SCHOOL_IMMUNITY)
+            school_immune |= m_spellInfo->EffectMiscValue[i];
+        else if(m_spellInfo->EffectApplyAuraName[i] == SPELL_AURA_MECHANIC_IMMUNITY)
+            mechanic_immune |= 1 << m_spellInfo->EffectMiscValue[i];
+    }
+    //immune movement impairement and loss of control
+    if(m_spellInfo->Id==(uint32)42292)mechanic_immune=0x9967da6;
+
+    //Check whether the cast should be prevented by any state you might have.
+    uint8 prevented_reason = 0;
+    if(m_caster->hasUnitState(UNIT_STAT_STUNDED))
+        prevented_reason = SPELL_FAILED_STUNNED;
+    else if(m_caster->hasUnitState(UNIT_STAT_CONFUSED))
+        prevented_reason = SPELL_FAILED_CONFUSED;
+    else if(m_caster->hasUnitState(UNIT_STAT_FLEEING))
+        prevented_reason = SPELL_FAILED_FLEEING;
+    else if(m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED) && m_spellInfo->School != SPELL_SCHOOL_NORMAL)
+        prevented_reason = SPELL_FAILED_SILENCED;
+    else if(m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED) && m_spellInfo->School == SPELL_SCHOOL_NORMAL && !m_triggeredByAura)
+        prevented_reason = SPELL_FAILED_PACIFIED;
+
+    // Attr must make flag drop spell totally immuned from all effects
+    if(prevented_reason)
+    {
+        if(school_immune || mechanic_immune)
+        {
+            //Checking auras is needed now, because you are prevented by some state but the spell grants immunity.
+            Unit::AuraMap auras = m_caster->GetAuras();
+            for(Unit::AuraMap::iterator itr = auras.begin(); itr != auras.end(); itr++)
+            {
+                if(itr->second)
+                {
+                    if( ((1 << itr->second->GetSpellProto()->School) & school_immune) ||
+                        ((1 << itr->second->GetSpellProto()->Mechanic) & mechanic_immune) )
+                        continue;
+
+                    //Make a second check for spell failed so the right SPELL_FAILED message is returned.
+                    //That is needed when your casting is prevented by multiple states and you are only immune to some of them.
+                    switch(itr->second->GetModifier()->m_auraname)
+                    {
+                    case SPELL_AURA_MOD_STUN:
+                        return SPELL_FAILED_STUNNED;
+                    case SPELL_AURA_MOD_CONFUSE:
+                        return SPELL_FAILED_CONFUSED;
+                    case SPELL_AURA_MOD_FEAR:
+                        return SPELL_FAILED_FLEEING;
+                    case SPELL_AURA_MOD_SILENCE:
+                        if(m_spellInfo->School != SPELL_SCHOOL_NORMAL)
+                            return SPELL_FAILED_SILENCED;
+                        break;
+                    case SPELL_AURA_MOD_PACIFY:
+                        if(m_spellInfo->School == SPELL_SCHOOL_NORMAL)
+                            return SPELL_FAILED_PACIFIED;
+                        break;
+                    }
+                }
+            }
+        }
+        //You are prevented from casting and the spell casted does not grant immunity. Return a failed error.
+        else
+            return prevented_reason;
+    }
+    return 0;                                               // all ok
 }
 
 bool Spell::CanAutoCast(Unit* target)
