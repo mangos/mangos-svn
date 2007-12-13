@@ -810,6 +810,7 @@ class ObjectMgr
         int GetOrNewIndexForLocale(LocaleConstant loc);
     private:
         void LoadScripts(ScriptMapMap& scripts, char const* tablename);
+        void ConvertCreatureAddonAuras(CreatureDataAddon* addon, char const* table, char const* guidEntryStr);
 
         typedef std::map<uint32,PetLevelInfo*> PetLevelInfoMap;
         // PetLevelInfoMap[creature_id][level]

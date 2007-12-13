@@ -540,6 +540,81 @@ void ObjectMgr::LoadCreatureTemplates()
     }
 }
 
+void ObjectMgr::ConvertCreatureAddonAuras(CreatureDataAddon* addon, char const* table, char const* guidEntryStr)
+{
+    // Now add the auras, format "spellid effectindex spellid effectindex..."
+    char *p,*s;
+    std::vector<int> val;
+    s=p=(char*)reinterpret_cast<char const*>(addon->auras);
+    if(!p)
+    {
+        while (p[0]!=0)
+        {
+            p++;
+            if (p[0]==' ')
+            {
+                val.push_back(atoi(s));
+                s=++p;
+            }
+        }
+        if (p!=s)
+            val.push_back(atoi(s));
+
+        // free char* loaded memory
+        delete[] (char*)reinterpret_cast<char const*>(addon->auras);
+
+        // wrong list
+        if (val.size()%2)
+        {
+            addon->auras = NULL;
+            sLog.outErrorDb("Creature (%s: %u) has wrong `auras` data in `%s`.",guidEntryStr,addon->guidOrEntry,table);
+            return;
+        }
+    }
+
+    // empty list
+    if(val.empty())
+    {
+        addon->auras = NULL;
+        return;
+    }
+
+    // replace by new strucutres array
+    const_cast<CreatureDataAddonAura*&>(addon->auras) = new CreatureDataAddonAura[val.size()/2+1];
+
+    int i=0;
+    for(int j=0;j<val.size()/2;++j)
+    {
+        CreatureDataAddonAura& cAura = const_cast<CreatureDataAddonAura&>(addon->auras[i]);
+        cAura.spell_id = (uint32)val[2*j+0];
+        cAura.effect_idx  = (uint32)val[2*j+1];
+        if ( cAura.effect_idx > 2 )
+        {
+            sLog.outErrorDb("Creature (%s: %u) has wrong effect %u for spell %u in `auras` field in`%s`.",guidEntryStr,addon->guidOrEntry,cAura.effect_idx,cAura.spell_id,table);
+            continue;
+        }
+        SpellEntry const *AdditionalSpellInfo = sSpellStore.LookupEntry(cAura.spell_id);
+        if (!AdditionalSpellInfo)
+        {
+            sLog.outErrorDb("Creature (%s: %u) has wrong spell %u defined in `auras` field in `%s`.",guidEntryStr,addon->guidOrEntry,cAura.spell_id,table);
+            continue;
+        }
+
+        if (!AdditionalSpellInfo->Effect[cAura.effect_idx] || !AdditionalSpellInfo->EffectApplyAuraName[cAura.effect_idx])
+        {
+            sLog.outErrorDb("Creature (%s: %u) has not aura effect %u of spell %u defined in `auras` field in `%s`.",guidEntryStr,addon->guidOrEntry,cAura.effect_idx,cAura.spell_id,table);
+            continue;
+        }
+
+        ++i;
+    }
+
+    // fill terminator element (after last added)
+    CreatureDataAddonAura& endAura = const_cast<CreatureDataAddonAura&>(addon->auras[i]);
+    endAura.spell_id   = 0;
+    endAura.effect_idx = 0;
+}
+
 void ObjectMgr::LoadCreatureAddons()
 {
     sCreatureInfoAddonStorage.Load();
@@ -547,12 +622,14 @@ void ObjectMgr::LoadCreatureAddons()
     sLog.outString( ">> Loaded %u creature template addons", sCreatureInfoAddonStorage.RecordCount );
     sLog.outString();
 
-    // check data correctness
+    // check data correctness and convert 'auras'
     for(uint32 i = 1; i < sCreatureInfoAddonStorage.MaxEntry; ++i)
     {
         CreatureDataAddon const* addon = sCreatureInfoAddonStorage.LookupEntry<CreatureDataAddon>(i);
         if(!addon)
             continue;
+
+        ConvertCreatureAddonAuras(const_cast<CreatureDataAddon*>(addon), "creature_template_addon", "Entry");
 
         if(!sCreatureStorage.LookupEntry<CreatureInfo>(addon->guidOrEntry))
             sLog.outErrorDb("Creature (Entry: %u) does not exist but has a record in `creature_template_addon`",addon->guidOrEntry);
@@ -563,12 +640,14 @@ void ObjectMgr::LoadCreatureAddons()
     sLog.outString( ">> Loaded %u creature addons", sCreatureDataAddonStorage.RecordCount );
     sLog.outString();
 
-    // check data correctness
+    // check data correctness and convert 'auras'
     for(uint32 i = 1; i < sCreatureDataAddonStorage.MaxEntry; ++i)
     {
         CreatureDataAddon const* addon = sCreatureDataAddonStorage.LookupEntry<CreatureDataAddon>(i);
         if(!addon)
             continue;
+
+        ConvertCreatureAddonAuras(const_cast<CreatureDataAddon*>(addon), "creature_addon", "GUIDLow");
 
         if(mCreatureDataMap.find(addon->guidOrEntry)==mCreatureDataMap.end())
             sLog.outErrorDb("Creature (GUID: %u) does not exist but has a record in `creature_addon`",addon->guidOrEntry);
