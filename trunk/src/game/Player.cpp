@@ -10783,7 +10783,7 @@ bool Player::CanCompleteQuest( uint32 quest_id )
                 }
             }
 
-            if ( qInfo->HasFlag( QUEST_MANGOS_FLAGS_EXPLORATION ) && !mQuestStatus[quest_id].m_explored )
+            if ( qInfo->HasFlag( QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT ) && !mQuestStatus[quest_id].m_explored )
                 return false;
 
             if ( qInfo->HasFlag( QUEST_MANGOS_FLAGS_TIMED ) && mQuestStatus[quest_id].m_timer == 0 )

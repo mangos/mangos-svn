@@ -111,29 +111,29 @@ enum __QuestGiverStatus
 
 enum __QuestFlags
 {
-    QUEST_SPECIAL_FLAGS_NONE           = 0,
-    QUEST_SPECIAL_FLAGS_STAY_ALIVE     = 1,
-    QUEST_SPECIAL_FLAGS_EVENT          = 2,
-    QUEST_SPECIAL_FLAGS_EXPLORATION    = 4,
-    QUEST_SPECIAL_FLAGS_UNK1           = 8,
-    //QUEST_SPECIAL_FLAGS_NONE2          = 16,              // Not used
-    QUEST_SPECIAL_FLAGS_EPIC           = 32,                // Not sure
-    QUEST_SPECIAL_FLAGS_RAID           = 64,
-    QUEST_SPECIAL_FLAGS_TBC            = 128,               // Available if TBC expension enabled only
-    QUEST_SPECIAL_FLAGS_UNK2           = 256,               // _DELIVER_MORE Quest needs more than normal _q-item_ drops from mobs
-    QUEST_SPECIAL_FLAGS_UNK3           = 512,               // _REWARD_OUTSIDE Item rewards not given like in normal quests, Given somehow outside the quest or created by spell
-    QUEST_SPECIAL_FLAGS_UNK4           = 1024,              // unknown tbc
-    QUEST_SPECIAL_FLAGS_TBC_RACES      = 2048,              // Bloodelf/draenei starting zone quests
-    QUEST_SPECIAL_FLAGS_DAILY          = 4096,
+    QUEST_SPECIAL_FLAGS_STAY_ALIVE     = 1,                 // Not used currently
+    QUEST_SPECIAL_FLAGS_EVENT          = 2,                 // Not used currently
+    QUEST_SPECIAL_FLAGS_EXPLORATION    = 4,                 // Not used currently
+    QUEST_SPECIAL_FLAGS_UNK1           = 8,                 // Not used currently
+    //QUEST_SPECIAL_FLAGS_NONE2          = 16,              // Not used currently
+    QUEST_SPECIAL_FLAGS_EPIC           = 32,                // Not used currently: Unsure of content
+    QUEST_SPECIAL_FLAGS_RAID           = 64,                // Not used currently
+    QUEST_SPECIAL_FLAGS_TBC            = 128,               // Not used currently: Available if TBC expension enabled only
+    QUEST_SPECIAL_FLAGS_UNK2           = 256,               // Not used currently: _DELIVER_MORE Quest needs more than normal _q-item_ drops from mobs
+    QUEST_SPECIAL_FLAGS_UNK3           = 512,               // Not used currently: _REWARD_OUTSIDE Item rewards not given like in normal quests, Given somehow outside the quest or created by spell
+    QUEST_SPECIAL_FLAGS_UNK4           = 1024,              // Not used currently: Unknown tbc flag
+    QUEST_SPECIAL_FLAGS_TBC_RACES      = 2048,              // Not used currently: Bloodelf/draenei starting zone quests
+    QUEST_SPECIAL_FLAGS_DAILY          = 4096,              // Used to know quest is Daily one
 
     // Mangos flags for internal use only
-    QUEST_MANGOS_FLAGS_REPEATABLE      = 0x010000,
-    QUEST_MANGOS_FLAGS_NONE            = 0x020000,
-    QUEST_MANGOS_FLAGS_DELIVER         = 0x040000,
-    QUEST_MANGOS_FLAGS_EXPLORATION     = 0x080000,
-    QUEST_MANGOS_FLAGS_SPEAKTO         = 0x100000,
-    QUEST_MANGOS_FLAGS_KILL_OR_CAST    = 0x200000,
-    QUEST_MANGOS_FLAGS_TIMED           = 0x400000 
+    QUEST_MANGOS_FLAGS_REPEATABLE           = 0x010000,     // Set by 1 in SpecialFlags from DB
+    QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT = 0x020000,     // Set by 2 in SpecialFlags from DB or computed when possible
+    QUEST_MANGOS_FLAGS_DB_ALLOWED = 0xFFFF | QUEST_MANGOS_FLAGS_REPEATABLE | QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT,
+                                                            // Used to check integrity of SpecialFlag value and correct if necessary
+    QUEST_MANGOS_FLAGS_DELIVER              = 0x040000,     // Internal flag computed only
+    QUEST_MANGOS_FLAGS_SPEAKTO              = 0x080000,     // Internal flag computed only
+    QUEST_MANGOS_FLAGS_KILL_OR_CAST         = 0x100000,     // Internal flag computed only
+    QUEST_MANGOS_FLAGS_TIMED                = 0x200000,     // Internal flag computed only
 };
 
 struct QuestLocale

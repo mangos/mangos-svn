@@ -9239,7 +9239,8 @@ CREATE TABLE `quest_template` (
   `RequiredMaxRepValue` int(10) NOT NULL default '0',
   `SuggestedPlayers` int(11) unsigned NOT NULL default '0',
   `LimitTime` int(11) unsigned NOT NULL default '0',
-  `QuestFlags` int(11) unsigned NOT NULL default '0',
+  `QuestFlags` smallint(5) unsigned NOT NULL default '0',
+  `SpecialFlags` tinyint(1) unsigned NOT NULL default '0',
   `PrevQuestId` int(11) NOT NULL default '0',
   `NextQuestId` int(11) NOT NULL default '0',
   `ExclusiveGroup` int(11) NOT NULL default '0',
@@ -9338,7 +9339,6 @@ CREATE TABLE `quest_template` (
   `OfferRewardEmote4` int(11) unsigned NOT NULL default '0',
   `StartScript` int(11) unsigned NOT NULL default '0',
   `CompleteScript` int(11) unsigned NOT NULL default '0',
-  `Repeatable` tinyint(1) unsigned NOT NULL default '0',
   PRIMARY KEY  (`entry`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 COMMENT='Quest System';
 

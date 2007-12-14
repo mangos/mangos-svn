@@ -2138,30 +2138,30 @@ void ObjectMgr::LoadQuests()
     QueryResult *result = WorldDatabase.Query("SELECT `entry`,`ZoneOrSort`,`MinLevel`,`QuestLevel`,`Type`,"
     //   5               6                    7                       8                     9                       10                    11                 12
         "`RequiredRaces`,`RequiredSkillValue`,`RequiredMinRepFaction`,`RequiredMinRepValue`,`RequiredMaxRepFaction`,`RequiredMaxRepValue`,`SuggestedPlayers`,`LimitTime`,"
-    //   13           14            15            16               17                 18          19             20
-        "`QuestFlags`,`PrevQuestId`,`NextQuestId`,`ExclusiveGroup`,`NextQuestInChain`,`SrcItemId`,`SrcItemCount`,`SrcSpell`,"
-    //   21      22        23           24                25                 26        27               28               29               30
+    //   13           14             15            16               17                 18          19             20            21
+        "`QuestFlags`,`SpecialFlags`,`PrevQuestId`,`NextQuestId`,`ExclusiveGroup`,`NextQuestInChain`,`SrcItemId`,`SrcItemCount`,`SrcSpell`,"
+    //   22      23        24           25                26                 27        28               29               30               31
         "`Title`,`Details`,`Objectives`,`OfferRewardText`,`RequestItemsText`,`EndText`,`ObjectiveText1`,`ObjectiveText2`,`ObjectiveText3`,`ObjectiveText4`,"
-    //   31           32           33           34           35              36              37              38
+    //   32           33           34           35           36              37              38              39
         "`ReqItemId1`,`ReqItemId2`,`ReqItemId3`,`ReqItemId4`,`ReqItemCount1`,`ReqItemCount2`,`ReqItemCount3`,`ReqItemCount4`,"
-    //   39             40             41             42             43                44                45                46                47              48              49              50
+    //   40             41             42             43             44                45                46                47                48              49              50              51
         "`ReqSourceId1`,`ReqSourceId2`,`ReqSourceId3`,`ReqSourceId4`,`ReqSourceCount1`,`ReqSourceCount2`,`ReqSourceCount3`,`ReqSourceCount4`,`ReqSourceRef1`,`ReqSourceRef2`,`ReqSourceRef3`,`ReqSourceRef4`,"
-    //   51                   52                   53                   54                   55                      56                      57                      58
+    //   52                   53                   54                   55                   56                      57                      58                      59
         "`ReqCreatureOrGOId1`,`ReqCreatureOrGOId2`,`ReqCreatureOrGOId3`,`ReqCreatureOrGOId4`,`ReqCreatureOrGOCount1`,`ReqCreatureOrGOCount2`,`ReqCreatureOrGOCount3`,`ReqCreatureOrGOCount4`,"
-    //   59              60              61              62
+    //   60              61              62              63
         "`ReqSpellCast1`,`ReqSpellCast2`,`ReqSpellCast3`,`ReqSpellCast4`,"
-    //   63                 64                 65                 66                 67                 68
+    //   64                 65                 66                 67                 68                 69
         "`RewChoiceItemId1`,`RewChoiceItemId2`,`RewChoiceItemId3`,`RewChoiceItemId4`,`RewChoiceItemId5`,`RewChoiceItemId6`,"
-    //   69                    70                    71                    72                    73                    74
+    //   70                    71                    72                    73                    74                    75
         "`RewChoiceItemCount1`,`RewChoiceItemCount2`,`RewChoiceItemCount3`,`RewChoiceItemCount4`,`RewChoiceItemCount5`,`RewChoiceItemCount6`,"
-    //   75           76           77           78           79              80              81              82
+    //   76           77           78           79           80              81              82              83
         "`RewItemId1`,`RewItemId2`,`RewItemId3`,`RewItemId4`,`RewItemCount1`,`RewItemCount2`,`RewItemCount3`,`RewItemCount4`,"
-    //   83               84               85               86               87               88             89             90             91             92
+    //   84               85               86               87               88               89             90             91             92             93
         "`RewRepFaction1`,`RewRepFaction2`,`RewRepFaction3`,`RewRepFaction4`,`RewRepFaction5`,`RewRepValue1`,`RewRepValue2`,`RewRepValue3`,`RewRepValue4`,`RewRepValue5`,"
-    //   93              94             95         96           97       98       99         100              101            102             103
+    //   94              95             96         97           98       99       100        101              102            103             104
         "`RewOrReqMoney`,`RewXpOrMoney`,`RewSpell`,`PointMapId`,`PointX`,`PointY`,`PointOpt`,`DetailsEmote1`,`DetailsEmote2`,`DetailsEmote3`,`DetailsEmote4`,"
-    //   104               105             106                 107                 108                 109                 110           111              112
-        "`IncompleteEmote`,`CompleteEmote`,`OfferRewardEmote1`,`OfferRewardEmote2`,`OfferRewardEmote3`,`OfferRewardEmote4`,`StartScript`,`CompleteScript`,`Repeatable`"
+    //   105               106             107                 108                 109                 110                 111           112
+        "`IncompleteEmote`,`CompleteEmote`,`OfferRewardEmote1`,`OfferRewardEmote2`,`OfferRewardEmote3`,`OfferRewardEmote4`,`StartScript`,`CompleteScript`"
         " FROM `quest_template`");
     if(result == NULL)
     {
@@ -2195,6 +2195,13 @@ void ObjectMgr::LoadQuests()
         Quest * qinfo = iter->second;
 
         // additional quest integrity checks (GO, creature_template and item_template must be loaded already)
+
+        if (qinfo->QuestFlags & ~QUEST_MANGOS_FLAGS_DB_ALLOWED)
+        { 
+            sLog.outErrorDb("Quest %u has `QuestFlags` = %u > max allowed value. Correct `SpecialFlags` to value <= %u",
+                 qinfo->GetQuestId(),qinfo->QuestFlags,QUEST_MANGOS_FLAGS_DB_ALLOWED >> 16);
+            qinfo->QuestFlags &= QUEST_MANGOS_FLAGS_DB_ALLOWED;
+        }
 
         if(qinfo->Type == QUEST_TYPE_DAILY && (qinfo->GetFlags() & QUEST_SPECIAL_FLAGS_DAILY) == 0)
         {
@@ -3199,7 +3206,7 @@ void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
                     continue;
                 }
 
-                SetQuestFlag(tmp.datalong, QUEST_MANGOS_FLAGS_EXPLORATION);
+                SetQuestFlag(tmp.datalong, QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT);
 
                 if(float(tmp.datalong2) > DEFAULT_VISIBILITY_DISTANCE)
                 {
@@ -3663,7 +3670,7 @@ void ObjectMgr::LoadQuestAreaTriggers()
         }
 
         mQuestAreaTriggerMap[Trigger_ID] = Quest_ID;
-        SetQuestFlag(Quest_ID, QUEST_MANGOS_FLAGS_EXPLORATION);
+        SetQuestFlag(Quest_ID, QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT);
 
     } while( result->NextRow() );
 
