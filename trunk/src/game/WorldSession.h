@@ -25,6 +25,7 @@
 
 #include "Common.h"
 
+struct MailItemsInfo;
 struct ItemPrototype;
 struct AuctionEntry;
 
@@ -57,7 +58,8 @@ enum PartyResult
     PARTY_RESULT_YOU_NOT_IN_GROUP     = 6,
     PARTY_RESULT_YOU_NOT_LEADER       = 7,
     PARTY_RESULT_TARGET_UNFRIENDLY    = 8,
-    PARTY_RESULT_TARGET_IGNORE_YOU    = 9
+    PARTY_RESULT_TARGET_IGNORE_YOU    = 9,
+    PARTY_RESULT_INVITE_RESTRICTED    = 13
 };
 
 /// Player session in the World
@@ -137,7 +139,7 @@ class MANGOS_DLL_SPEC WorldSession
         //mail
                                                             //used with item_page table
         bool SendItemInfo( uint32 itemid, WorldPacket data );
-        static void SendReturnToSender(uint32 mailId, uint8 messageType, uint32 sender_acc, uint32 sender_guid, uint32 receiver_guid, std::string subject, uint32 itemTextId, uint32 itemGuid, uint32 item_template, uint32 money, uint32 COD, Item* pItem);
+        static void SendReturnToSender(uint32 mailId, uint8 messageType, uint32 sender_acc, uint32 sender_guid, uint32 receiver_guid, std::string subject, uint32 itemTextId, MailItemsInfo *mi, uint32 money, uint32 COD);
 
         //auction
         void SendAuctionHello( uint64 guid, Creature * unit );
@@ -321,6 +323,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleGuildAcceptOpcode(WorldPacket& recvPacket);
         void HandleGuildDeclineOpcode(WorldPacket& recvPacket);
         void HandleGuildInfoOpcode(WorldPacket& recvPacket);
+        void HandleGuildEventLogOpcode(WorldPacket& recvPacket);
         void HandleGuildRosterOpcode(WorldPacket& recvPacket);
         void HandleGuildPromoteOpcode(WorldPacket& recvPacket);
         void HandleGuildDemoteOpcode(WorldPacket& recvPacket);
@@ -470,6 +473,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleChannelModerate(WorldPacket& recvPacket);
         void HandleChannelRosterQuery(WorldPacket& recvPacket);
         void HandleChannelInfoQuery(WorldPacket& recvPacket);
+        void HandleChannelJoinNotify(WorldPacket& recvPacket);
 
         void HandleCompleteCinema(WorldPacket& recvPacket);
         void HandleNextCinematicCamera(WorldPacket& recvPacket);
@@ -545,7 +549,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleAreaSpiritHealerQueueOpcode(WorldPacket& recv_data);
         void HandleDismountOpcode(WorldPacket& recv_data);
         void HandleSelfResOpcode(WorldPacket& recv_data);
-        void HandleReportSpamOpcode(WorldPacket& recv_data);
+        void HandleComplaintChatOpcode(WorldPacket& recv_data);
         void HandleRequestPetInfoOpcode(WorldPacket& recv_data);
 
         // Socket gem
@@ -556,6 +560,10 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleChannelEnableVoiceOpcode(WorldPacket & recv_data);
         void HandleVoiceSettingsOpcode(WorldPacket& recv_data);
         void HandleChannelVoiceChatQuery(WorldPacket& recv_data);
+
+        // unknown
+        void Handle1020(WorldPacket& recv_data);
+        void Handle1021(WorldPacket& recv_data);
 
     private:
         Player *_player;

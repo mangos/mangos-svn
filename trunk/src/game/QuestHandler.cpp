@@ -226,7 +226,7 @@ void WorldSession::HandleQuestgiverChooseRewardOpcode( WorldPacket & recv_data )
     if(!GetPlayer()->isAlive())
         return;
 
-    sLog.outDetail( "WORLD: Received CMSG_QUESTGIVER_CHOOSE_REWARD npc = %u, quest = %u, reward = %u",uint32(GUID_LOPART(guid)),quest,reward );
+    sLog.outDebug(  "WORLD: Received CMSG_QUESTGIVER_CHOOSE_REWARD npc = %u, quest = %u, reward = %u",uint32(GUID_LOPART(guid)),quest,reward );
 
     Object* pObject = ObjectAccessor::GetObjectByTypeMask(*_player, guid,TYPE_UNIT|TYPE_GAMEOBJECT);
     if(!pObject)
@@ -278,7 +278,7 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
     if(!GetPlayer()->isAlive())
         return;
 
-    sLog.outDetail( "WORLD: Received CMSG_QUESTGIVER_REQUEST_REWARD npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest );
+    sLog.outDebug(  "WORLD: Received CMSG_QUESTGIVER_REQUEST_REWARD npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest );
 
     Object* pObject = ObjectAccessor::GetObjectByTypeMask(*_player, guid,TYPE_UNIT|TYPE_GAMEOBJECT);
     if(!pObject||!pObject->hasInvolvedQuest(quest))
@@ -294,7 +294,7 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
 
 void WorldSession::HandleQuestgiverCancel(WorldPacket& recv_data )
 {
-    sLog.outDetail( "WORLD: Received CMSG_QUESTGIVER_CANCEL" );
+    sLog.outDebug(  "WORLD: Received CMSG_QUESTGIVER_CANCEL" );
 
     _player->PlayerTalkClass->CloseGossip();
 }
@@ -309,7 +309,7 @@ void WorldSession::HandleQuestLogSwapQuest(WorldPacket& recv_data )
     if(slot1 == slot2 || slot1 >= MAX_QUEST_LOG_SIZE || slot2 >= MAX_QUEST_LOG_SIZE)
         return;
 
-    sLog.outDetail( "WORLD: Received CMSG_QUESTLOG_SWAP_QUEST slot 1 = %u, slot 2 = %u",slot1,slot2 );
+    sLog.outDebug(  "WORLD: Received CMSG_QUESTLOG_SWAP_QUEST slot 1 = %u, slot 2 = %u",slot1,slot2 );
 
     uint32 temp1;
     uint32 temp2;
@@ -331,7 +331,7 @@ void WorldSession::HandleQuestLogRemoveQuest(WorldPacket& recv_data)
     uint32 quest;
     recv_data >> slot;
 
-    sLog.outDetail( "WORLD: Received CMSG_QUESTLOG_REMOVE_QUEST slot = %u",slot );
+    sLog.outDebug(  "WORLD: Received CMSG_QUESTLOG_REMOVE_QUEST slot = %u",slot );
 
     if( slot < MAX_QUEST_LOG_SIZE )
     {
@@ -357,7 +357,7 @@ void WorldSession::HandleQuestConfirmAccept(WorldPacket& recv_data)
     uint32 quest;
     recv_data >> quest;
 
-    sLog.outDetail( "WORLD: Received CMSG_QUEST_CONFIRM_ACCEPT quest = %u",quest );
+    sLog.outDebug(  "WORLD: Received CMSG_QUEST_CONFIRM_ACCEPT quest = %u",quest );
 }
 
 void WorldSession::HandleQuestComplete(WorldPacket& recv_data)
@@ -371,7 +371,7 @@ void WorldSession::HandleQuestComplete(WorldPacket& recv_data)
     if(!GetPlayer()->isAlive())
         return;
 
-    sLog.outDetail( "WORLD: Received CMSG_QUESTGIVER_COMPLETE_QUEST npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest );
+    sLog.outDebug(  "WORLD: Received CMSG_QUESTGIVER_COMPLETE_QUEST npc = %u, quest = %u",uint32(GUID_LOPART(guid)),quest );
 
     Quest const *pQuest = objmgr.GetQuestTemplate(quest);
     if( pQuest )
@@ -390,7 +390,7 @@ void WorldSession::HandleQuestComplete(WorldPacket& recv_data)
 
 void WorldSession::HandleQuestAutoLaunch(WorldPacket& recvPacket)
 {
-    sLog.outDetail( "WORLD: Received CMSG_QUESTGIVER_QUEST_AUTOLAUNCH (Send your log to anakin if you see this message)" );
+    sLog.outDebug(  "WORLD: Received CMSG_QUESTGIVER_QUEST_AUTOLAUNCH (Send your log to anakin if you see this message)" );
 }
 
 void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
@@ -400,7 +400,7 @@ void WorldSession::HandleQuestPushToParty(WorldPacket& recvPacket)
     uint32 quest;
     recvPacket >> quest;
 
-    sLog.outDetail( "WORLD: Received CMSG_PUSHQUESTTOPARTY quest = %u", quest );
+    sLog.outDebug(  "WORLD: Received CMSG_PUSHQUESTTOPARTY quest = %u", quest );
 
     Quest const *pQuest = objmgr.GetQuestTemplate(quest);
     if( pQuest )
@@ -470,7 +470,7 @@ void WorldSession::HandleQuestPushResult(WorldPacket& recvPacket)
     uint8 msg;
     recvPacket >> guid >> msg;
 
-    sLog.outDetail( "WORLD: Received MSG_QUEST_PUSH_RESULT " );
+    sLog.outDebug(  "WORLD: Received MSG_QUEST_PUSH_RESULT " );
 
     if( _player->GetDivider() != 0 )
     {

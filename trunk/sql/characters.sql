@@ -803,8 +803,7 @@ CREATE TABLE `mail` (
   `receiver` int(11) unsigned NOT NULL default '0' COMMENT 'Character Global Unique Identifier',
   `subject` longtext,
   `itemTextId` int(11) unsigned NOT NULL default '0',
-  `item_guid` int(11) unsigned NOT NULL default '0' COMMENT 'Mail Item Global Unique Identifier',
-  `item_template` int(11) unsigned NOT NULL default '0' COMMENT 'Item Identifier',
+  `has_items` tinyint(3) unsigned NOT NULL default '0',
   `expire_time` bigint(40) NOT NULL default '0',
   `deliver_time` bigint(40) NOT NULL default '0',
   `money` int(11) unsigned NOT NULL default '0',
@@ -821,6 +820,24 @@ CREATE TABLE `mail` (
 /*!40000 ALTER TABLE `mail` DISABLE KEYS */;
 /*!40000 ALTER TABLE `mail` ENABLE KEYS */;
 
+--
+-- Definition of table `mail_items`
+--
+
+DROP TABLE IF EXISTS `mail_items`;
+CREATE TABLE `mail_items` (
+  `mail_id` int(11) NOT NULL default '0',
+  `item_guid` int(11) NOT NULL default '0',
+  `item_template` int(11) NOT NULL default '0',
+  PRIMARY KEY  (`mail_id`,`item_guid`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC;
+
+--
+-- Dumping data for table `mail_items`
+--
+
+/*!40000 ALTER TABLE `mail_items` DISABLE KEYS */;
+/*!40000 ALTER TABLE `mail_items` ENABLE KEYS */;
 
 --
 -- Definition of table `pet_aura`

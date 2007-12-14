@@ -87,7 +87,7 @@ void WorldSession::HandleTaxiQueryAvailableNodesOpcode( WorldPacket & recv_data 
     recv_data >> guid;
 
     // cheating checks
-    Creature *unit = ObjectAccessor::GetNPCIfCanInteractWith(*_player, guid,UNIT_NPC_FLAG_TAXIVENDOR);
+    Creature *unit = ObjectAccessor::GetNPCIfCanInteractWith(*_player, guid, UNIT_NPC_FLAG_FLIGHTMASTER);
     if (!unit)
     {
         sLog.outDebug( "WORLD: HandleTaxiQueryAvailableNodesOpcode - Unit (GUID: %u) not found or you can't interact with him.", uint32(GUID_LOPART(guid)) );

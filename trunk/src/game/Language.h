@@ -450,7 +450,7 @@
 #define LANG_ITEMLIST_AUCTION            "%d - owner: %s (guid: %u account: %u ) %s"
 
 #define LANG_WRONG_LINK_TYPE             "Wrong link type!"
-#define LANG_ITEM_LIST                   "%d - |cffffffff|Hitem:%d:0:0:0|h[%s]|h|r "
+#define LANG_ITEM_LIST                   "%d - |cffffffff|Hitem:%d:0:0:0:0:0:0:0|h[%s]|h|r "
 #define LANG_QUEST_LIST                  "%d - |cffffffff|Hquest:%d|h[%s]|h|r "
 #define LANG_CREATURE_ENTRY_LIST         "%d - |cffffffff|Hcreature_entry:%d|h[%s]|h|r "
 #define LANG_CREATURE_LIST               "%d - |cffffffff|Hcreature:%d|h[%s X:%f Y:%f Z:%f MapId:%d]|h|r "

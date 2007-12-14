@@ -55,6 +55,7 @@ enum SpellCastTargetFlags
     TARGET_FLAG_OBJECT           = 0x0800,
     TARGET_FLAG_TRADE_ITEM       = 0x1000,
     TARGET_FLAG_STRING           = 0x2000,
+    TARGET_FLAG_UNK1             = 0x4000,                  // uint8(0) + 3 x float
     TARGET_FLAG_CORPSE           = 0x8000
 };
 
@@ -133,7 +134,12 @@ enum Rating
     SPELL_RATING_MELEE_CRIT_HIT             = 0x0000100,    // 8
     SPELL_RATING_RANGED_CRIT_HIT            = 0x0000200,    // 9
     SPELL_RATING_SPELL_CRIT_HIT             = 0x0000400,    // 10
-    //more ratings here?
+    //SPELL_RATING_MELEE_HIT_TAKEN            = 0x0000800,    // 11
+    //SPELL_RATING_RANGED_HIT_TAKEN           = 0x0001000,    // 12
+    //SPELL_RATING_SPELL_HIT_TAKEN            = 0x0002000,    // 13
+    //SPELL_RATING_MELEE_CRIT_TAKEN           = 0x0004000,    // 14
+    //SPELL_RATING_RANGED_CRIT_TAKEN          = 0x0008000,    // 15
+    //SPELL_RATING_SPELL_CRIT_TAKEN           = 0x0010000,    // 16
     SPELL_RATING_MELEE_HASTE                = 0x0020000,    // 17
     SPELL_RATING_RANGED_HASTE               = 0x0040000,    // 18
     SPELL_RATING_SPELL_HASTE                = 0x0080000,    // 19
@@ -142,7 +148,7 @@ enum Rating
     SPELL_RATING_HIT_AVOIDANCE              = 0x0400000,    // 22
     SPELL_RATING_CRIT_AVOIDANCE             = 0x0800000,    // 23
     SPELL_RATING_RESILIENCE                 = 0x1000000     // 24
-
+    //SPELL_RATING_EXPERTISE
 };
 
 bool IsQuestTameSpell(uint32 spellId);
@@ -397,7 +403,13 @@ enum SpellFailedReason
     SPELL_FAILED_NOT_ON_MOUNTED               = 0x99,
     SPELL_FAILED_TOO_SHALLOW                  = 0x9A,
     SPELL_FAILED_TARGET_NOT_IN_SANCTUARY      = 0x9B,
-    SPELL_FAILED_UNKNOWN                      = 0x9C
+    SPELL_FAILED_TARGET_IS_TRIVIAL            = 0x9C,
+    SPELL_FAILED_BM_OR_INVISGOD               = 0x9D,
+    SPELL_FAILED_EXPERT_RIDING_REQUIREMENT    = 0x9E,
+    SPELL_FAILED_ARTISAN_RIDING_REQUIREMENT   = 0x9F,
+    SPELL_FAILED_NOT_IDLE                     = 0xA0,
+    SPELL_FAILED_NOT_INACTIVE                 = 0xA1,
+    SPELL_FAILED_UNKNOWN                      = 0xA2
 };
 
 #define SPELL_SPELL_CHANNEL_UPDATE_INTERVAL 1000

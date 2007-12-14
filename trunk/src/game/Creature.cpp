@@ -648,7 +648,7 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
             LoadTrainerSpells();                                // Lazy loading at first access
             isCanTrainingOf(pPlayer,true);                      // output error message if need
         }
-        if(HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_BATTLEFIELDPERSON))
+        if(HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_BATTLEMASTER))
         {
             isCanIneractWithBattleMaster(pPlayer,true);         // output error message if need
         }

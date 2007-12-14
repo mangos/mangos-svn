@@ -1861,7 +1861,7 @@ bool ChatHandler::HandleListItemCommand(const char* args)
 
     // mail case
     uint32 mail_count = 0;
-    result=CharacterDatabase.PQuery("SELECT COUNT(`item_template`) FROM `mail` WHERE `item_template`='%u'",item_id);
+    result=CharacterDatabase.PQuery("SELECT COUNT(`item_template`) FROM `mail_items` WHERE `item_template`='%u'", item_id);
     if(result)
     {
         mail_count = (*result)[0].GetUInt32();
@@ -1871,10 +1871,10 @@ bool ChatHandler::HandleListItemCommand(const char* args)
     if(count > 0)
     {
         result=CharacterDatabase.PQuery(
-        //             0                  1               2                   3                  4               5                  6
-            "SELECT `mail`.`item_guid`,`mail`.`sender`,`mail`.`receiver`,`char_s`.`account`,`char_s`.`name`,`char_r`.`account`,`char_r`.`name` "
-            "FROM `mail`,`character` as `char_s`,`character` as `char_r` "
-            "WHERE `mail`.`item_template`='%u' AND `char_s`.`guid` = `mail`.`sender` AND `char_r`.`guid` = `mail`.`receiver` LIMIT %u",
+            //             0                  1               2                   3                  4               5                  6            
+            "SELECT `mail_items`.`item_guid`,`mail`.`sender`,`mail`.`receiver`,`char_s`.`account`,`char_s`.`name`,`char_r`.`account`,`char_r`.`name` "            
+            "FROM `mail`,`mail_items`,`character` as `char_s`,`character` as `char_r` "
+            "WHERE `mail_items`.`item_template`='%u' AND `char_s`.`guid` = `mail`.`sender` AND `char_r`.`guid` = `mail`.`receiver` AND `mail`.`id`=`mail_items`.`mail_id` LIMIT %u",
             item_id,uint32(count));
     }
     else
@@ -3395,7 +3395,7 @@ bool ChatHandler::HandleResetHonorCommand (const char * args)
     }
 
     player->SetUInt32Value(PLAYER_FIELD_KILLS, 0);
-    player->SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 0);
+    player->SetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS, 0);
     player->SetUInt32Value(PLAYER_FIELD_HONOR_CURRENCY, 0);
     player->SetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION, 0);
     player->SetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION, 0);
@@ -4097,23 +4097,35 @@ bool ChatHandler::HandleSendOpcodeCommand(const char* args)
     char* val1 = strtok(NULL, " ");
     if(!val1)
         return false;
-    char* val2 = strtok(NULL, " ");
+    /*char* val2 = strtok(NULL, " ");
     if(!val2)
         return false;
     char* val3 = strtok(NULL, " ");
     if(!val3)
-        return false;
+        return false;*/
 
     uint16 opcode = atoi(op);
     uint32 value1 = atoi(val1);
-    uint32 value2 = atoi(val2);
-    uint32 value3 = atoi(val3);
+    //uint32 value2 = atoi(val2);
+    //uint32 value3 = atoi(val3);
 
-    WorldPacket data(opcode, 20);
+    //((Player*)unit)->GetSession()->SendGuildCommandResult(opcode, "test!", value1);
+
+    WorldPacket data(SMSG_GUILD_EVENT, 20);
+    data << uint8(opcode);
+    data << uint8(value1);
+    for(uint8 i = 0; i < value1; ++i)
+    {
+        std::string str = "test!";
+        data << str;
+    }
+    ((Player*)unit)->GetSession()->SendPacket(&data);
+
+    /*WorldPacket data(opcode, 20);
     data << uint32(value1);
     data << uint32(value2);
     data << uint32(value3);
-    ((Player*)unit)->GetSession()->SendPacket(&data);
+    ((Player*)unit)->GetSession()->SendPacket(&data);*/
     /*data.append(unit->GetPackGUID());
     data << urand(0, 1024);
     data << urand(0, 1024);

@@ -363,7 +363,13 @@ enum SpellEffects
     SPELL_EFFECT_141                       = 141,
     SPELL_EFFECT_142                       = 142,
     SPELL_EFFECT_143                       = 143,
-    TOTAL_SPELL_EFFECTS                    = 144
+    SPELL_EFFECT_144                       = 144,
+    SPELL_EFFECT_145                       = 145,
+    SPELL_EFFECT_146                       = 146,
+    SPELL_EFFECT_147                       = 147,
+    SPELL_EFFECT_148                       = 148,
+    SPELL_EFFECT_149                       = 149,
+    TOTAL_SPELL_EFFECTS                    = 150
 };
 
 enum GameobjectTypes
@@ -400,7 +406,10 @@ enum GameobjectTypes
     GAMEOBJECT_TYPE_CAPTURE_POINT          = 29,
     GAMEOBJECT_TYPE_AURA_GENERATOR         = 30,
     GAMEOBJECT_TYPE_DUNGEON_DIFFICULTY     = 31,
-    MAX_GAMEOBJECT_TYPE                    = 32             // sending to client this or greater value can crash client.
+    GAMEOBJECT_TYPE_DO_NOT_USE_YET         = 32,
+    GAMEOBJECT_TYPE_DESTRUCTIBLE_BUILDING  = 33,
+    GAMEOBJECT_TYPE_GUILD_BANK             = 34,
+    MAX_GAMEOBJECT_TYPE                    = 35             // sending to client this or greater value can crash client.
 };
 
 enum TextEmotes
@@ -663,7 +672,28 @@ enum Emote
     EMOTE_ONESHOT_ATTACKOFFPIERCE      = 390,
     EMOTE_STATE_ROAR                   = 391,
     EMOTE_STATE_LAUGH                  = 392,
-    EMOTE_ONESHOT_CREATURE_SPECIAL     = 393
+    EMOTE_ONESHOT_CREATURE_SPECIAL     = 393,
+    EMOTE_ONESHOT_JUMPLANDRUN          = 394,
+    EMOTE_ONESHOT_JUMPEND              = 395,
+    EMOTE_ONESHOT_TALK_NOSHEATHE       = 396,
+    EMOTE_ONESHOT_POINT_NOSHEATHE      = 397,
+    EMOTE_STATE_CANNIBALIZE            = 398,
+    EMOTE_ONESHOT_JUMPSTART            = 399,
+    EMOTE_STATE_DANCESPECIAL           = 400,
+    EMOTE_ONESHOT_DANCESPECIAL         = 401,
+    EMOTE_ONESHOT_CUSTOMSPELL01        = 402,
+    EMOTE_ONESHOT_CUSTOMSPELL02        = 403,
+    EMOTE_ONESHOT_CUSTOMSPELL03        = 404,
+    EMOTE_ONESHOT_CUSTOMSPELL04        = 405,
+    EMOTE_ONESHOT_CUSTOMSPELL05        = 406,
+    EMOTE_ONESHOT_CUSTOMSPELL06        = 407,
+    EMOTE_ONESHOT_CUSTOMSPELL07        = 408,
+    EMOTE_ONESHOT_CUSTOMSPELL08        = 409,
+    EMOTE_ONESHOT_CUSTOMSPELL09        = 410,
+    EMOTE_ONESHOT_CUSTOMSPELL10        = 411,
+    EMOTE_STATE_EXCLAIM                = 412,
+    EMOTE_STATE_SIT_CHAIR_MED          = 415,
+    EMOTE_STATE_SPELLEFFECT_HOLD       = 422
 };
 
 enum Anim
@@ -961,7 +991,8 @@ enum CreatureFamily
     CREATURE_FAMILY_WARP_STALKER   = 32,
     CREATURE_FAMILY_SPOREBAT       = 33,
     CREATURE_FAMILY_NETHER_RAY     = 34,
-    CREATURE_FAMILY_SERPENT        = 35
+    CREATURE_FAMILY_SERPENT        = 35,
+    CREATURE_FAMILY_SEA_LION       = 36
 };
 
 enum CreatureEliteType
@@ -1223,13 +1254,14 @@ inline uint32 SkillByQuestSort(int32 QuestSort)
 
 enum SkillCategory
 {
-    SKILL_CATEGORY_ATTRIBUTES =  5,
-    SKILL_CATEGORY_WEAPON     =  6,
-    SKILL_CATEGORY_CLASS      =  7,
-    SKILL_CATEGORY_ARMOR      =  8,
-    SKILL_CATEGORY_SECONDARY  =  9,                         // secondary professions
-    SKILL_CATEGORY_LANGUAGES  = 10,
-    SKILL_CATEGORY_PROFESSION = 11                          // primary professions
+    SKILL_CATEGORY_ATTRIBUTES    =  5,
+    SKILL_CATEGORY_WEAPON        =  6,
+    SKILL_CATEGORY_CLASS         =  7,
+    SKILL_CATEGORY_ARMOR         =  8,
+    SKILL_CATEGORY_SECONDARY     =  9,                         // secondary professions
+    SKILL_CATEGORY_LANGUAGES     = 10,
+    SKILL_CATEGORY_PROFESSION    = 11,                          // primary professions
+    SKILL_CATEGORY_NOT_DISPLAYED = 12
 };
 
 enum TotemCategory

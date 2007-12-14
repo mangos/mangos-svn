@@ -187,22 +187,28 @@ void SpellCastTargets::write ( WorldPacket * data, bool forceAppend)
      *data << (m_unitTarget ? m_unitTarget->GetGUID(): (uint64)0);*/
 
     if(m_targetMask & TARGET_FLAG_UNIT)
+    {
         if(m_unitTarget)
             data->append(m_unitTarget->GetPackGUID());
-    else
-        *data << (uint8)0;
+        else
+            *data << (uint8)0;
+    }
 
     if(m_targetMask & TARGET_FLAG_OBJECT)
+    {
         if(m_GOTarget)
             data->append(m_GOTarget->GetPackGUID());
-    else
-        *data << (uint8)0;
+        else
+            *data << (uint8)0;
+    }
 
     if(m_targetMask & TARGET_FLAG_ITEM)
+    {
         if(m_itemTarget)
             data->append(m_itemTarget->GetPackGUID());
-    else
-        *data << (uint8)0;
+        else
+            *data << (uint8)0;
+    }
 
     if(m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
         *data << m_srcX << m_srcY << m_srcZ;
@@ -1968,15 +1974,16 @@ void Spell::SendSpellStart()
 
     data.append(m_caster->GetPackGUID());
     data << uint32(m_spellInfo->Id);
+    data << uint8(0);                           // unk 2.3.0
     data << uint16(m_castFlags);
     data << uint32(m_timer);
 
     data << uint16(m_targets.m_targetMask);
     m_targets.write( &data );
+
     if( m_castFlags & CAST_FLAG_AMMO )
-    {
         writeAmmoToPacket(&data);
-    }
+
     m_caster->SendMessageToSet(&data, true);
 }
 
@@ -2010,10 +2017,9 @@ void Spell::SendSpellGo()
 
     data << m_targets.m_targetMask;
     m_targets.write( &data, true );
+
     if( m_castFlags & CAST_FLAG_AMMO )
-    {
         writeAmmoToPacket(&data);
-    }
 
     m_caster->SendMessageToSet(&data, true);
 }

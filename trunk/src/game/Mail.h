@@ -57,9 +57,9 @@ enum MailMessageType
 {
     MAIL_NORMAL         = 0,
     MAIL_AUCTION        = 2,
-    //MAIL_CREATURE       = 3,    // client send CMSG_CREATURE_QUERY on this mailmessagetype
-    //MAIL_GAMEOBJECT     = 4,    // client send CMSG_GAMEOBJECT_QUERY on this mailmessagetype
-    //MAIL_ITEM           = 5,    // client send CMSG_ITEM_QUERY on this mailmessagetype
+    MAIL_CREATURE       = 3,    // client send CMSG_CREATURE_QUERY on this mailmessagetype
+    MAIL_GAMEOBJECT     = 4,    // client send CMSG_GAMEOBJECT_QUERY on this mailmessagetype
+    MAIL_ITEM           = 5,    // client send CMSG_ITEM_QUERY on this mailmessagetype
     MAIL_GM             = 6                                 // custom type, don't use it as real mailmessagetype for sending to client (use MAIL_NORMAL instead)
 };
 
@@ -80,6 +80,23 @@ enum MailAuctionAnswers
     AUCTION_CANCELED            = 5
 };
 
+// gathered from Stationery.dbc
+enum MailStationery
+{
+    MAIL_STATIONERY_UNKNOWN = 0x01,
+    MAIL_STATIONERY_NORMAL  = 0x29,
+    MAIL_STATIONERY_GM      = 0x3D,
+    MAIL_STATIONERY_AUCTION = 0x3E,
+    MAIL_STATIONERY_VAL     = 0x40,
+    MAIL_STATIONERY_CHR     = 0x41
+};
+
+struct MailItemInfo
+{
+    uint32 item_guid;
+    uint32 item_template;
+};
+
 struct Mail
 {
     uint32 messageID;
@@ -88,13 +105,61 @@ struct Mail
     uint32 receiver;
     std::string subject;
     uint32 itemTextId;
-    uint32 item_guid;
-    uint32 item_template;
+    std::vector<MailItemInfo> items;
+    std::vector<uint32> removedItems;
     time_t expire_time;
     time_t deliver_time;
     uint32 money;
     uint32 COD;
     uint32 checked;
     Mail_state state;
+
+    void AddItem(uint32 itemId, uint32 item_template)
+    {
+        MailItemInfo mii;
+        mii.item_guid = itemId;
+        mii.item_template = item_template;
+        items.push_back(mii);
+    }
+
+    bool RemoveItem(uint32 itemId)
+    {
+        for(std::vector<MailItemInfo>::iterator itr = items.begin(); itr != items.end(); ++itr)
+        {
+            if(itr->item_guid == itemId)
+            {
+                items.erase(itr);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool HasItems() { return items.empty() ? false : true; }
+};
+
+struct MailItemsInfo
+{
+    uint8 items_count;                                  // item's count
+    uint8 item_slot[12];                                // slot in mail
+    uint16 item_pos[12];                                // inventory pos
+    uint64 item_guid[12];                               // item guid
+    uint32 item_template[12];                           // item entry
+    Item *items[12];                                    // item pointer
+
+    MailItemsInfo()
+    {
+        items_count = 0;
+    }
+
+    void AddItem(uint32 guid, uint32 _template, Item *item, uint8 slot = 0, uint16 pos = 0)
+    {
+        item_slot[items_count] = slot;
+        item_pos[items_count] = pos;
+        item_guid[items_count] = guid;
+        item_template[items_count] = _template;
+        items[items_count] = item;
+        items_count++;
+    }
 };
 #endif

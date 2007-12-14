@@ -33,14 +33,16 @@
 void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 {
     // TODO: add targets.read() check
-    CHECK_PACKET_SIZE(recvPacket,1+1+1);
+    CHECK_PACKET_SIZE(recvPacket,1+1+2);
 
     sLog.outDetail("WORLD: CMSG_USE_ITEM packet, data length = %i",recvPacket.size());
 
     Player* pUser = _player;
-    uint8 bagIndex, slot, tmp3;
+   
+    uint8 bagIndex, slot;
+    uint16 tmp2;
 
-    recvPacket >> bagIndex >> slot >> tmp3;
+    recvPacket >> bagIndex >> slot >> tmp2;
 
     Item *pItem = pUser->GetItemByPos(bagIndex, slot);
     if(!pItem)
@@ -586,11 +588,12 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket,4+2);
+    CHECK_PACKET_SIZE(recvPacket,4+1+2);
 
     uint32 spellId;
-
+    uint8  unk;
     recvPacket >> spellId;
+    recvPacket >> unk;
 
     sLog.outDetail("WORLD: got cast spell packet, spellId - %i, data length = %i",
         spellId, recvPacket.size());

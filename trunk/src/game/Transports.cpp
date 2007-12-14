@@ -142,7 +142,7 @@ bool Transport::Create(uint32 guidlow, uint32 displayId, uint32 mapid, float x, 
         return false;
     }
 
-    Object::_Create(guidlow, HIGHGUID_TRANSPORT);
+    Object::_Create(guidlow, HIGHGUID_MO_TRANSPORT);
 
     GameObjectInfo const* goinfo = objmgr.GetGameObjectInfo(guidlow);
 
@@ -158,15 +158,16 @@ bool Transport::Create(uint32 guidlow, uint32 displayId, uint32 mapid, float x, 
     SetUInt32Value(GAMEOBJECT_FLAGS, goinfo->flags);
     m_flags = goinfo->flags;
 
-    SetUInt32Value (OBJECT_FIELD_ENTRY, goinfo->id);
+    SetUInt32Value(OBJECT_FIELD_ENTRY, goinfo->id);
 
-    SetUInt32Value (GAMEOBJECT_DISPLAYID, goinfo->displayId);
+    SetUInt32Value(GAMEOBJECT_DISPLAYID, goinfo->displayId);
 
-    SetUInt32Value (GAMEOBJECT_STATE, 1);
-    SetUInt32Value (GAMEOBJECT_TYPE_ID, goinfo->type);
+    SetUInt32Value(GAMEOBJECT_STATE, 1);
+    SetUInt32Value(GAMEOBJECT_TYPE_ID, goinfo->type);
 
-    SetUInt32Value (GAMEOBJECT_ANIMPROGRESS, animprogress);
-    SetUInt32Value (GAMEOBJECT_DYN_FLAGS, dynflags);
+    SetUInt32Value(GAMEOBJECT_ANIMPROGRESS, animprogress);
+    if(dynflags)
+        SetUInt32Value(GAMEOBJECT_DYN_FLAGS, dynflags);
 
     return true;
 }

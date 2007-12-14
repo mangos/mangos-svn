@@ -253,7 +253,7 @@ void PlayerMenu::SendTalking( uint32 textID )
     }
     pSession->SendPacket( &data );
 
-    sLog.outDetail( "WORLD: Sent SMSG_NPC_TEXT_UPDATE " );
+    sLog.outDebug(  "WORLD: Sent SMSG_NPC_TEXT_UPDATE " );
 }
 
 void PlayerMenu::SendTalking( char const * title, char const * text )
@@ -266,7 +266,7 @@ void PlayerMenu::SendTalking( char const * title, char const * text )
 
     pSession->SendPacket( &data );
 
-    sLog.outDetail( "WORLD: Sent SMSG_NPC_TEXT_UPDATE " );
+    sLog.outDebug(  "WORLD: Sent SMSG_NPC_TEXT_UPDATE " );
 }
 
 /*********************************************************/
@@ -430,7 +430,7 @@ void PlayerMenu::SendQuestGiverQuestDetails( Quest const *pQuest, uint64 npcGUID
         data << uint32(0);                                  // reward spell
 
     data << uint32(pQuest->GetRewSpell());                  // cast spell
-
+    data << uint32(0);                                      // unk 2.3.0,  Honor points
     data << uint32(QUEST_EMOTE_COUNT);
     for (uint32 i=0; i < QUEST_EMOTE_COUNT; i++)
     {
@@ -511,6 +511,7 @@ void PlayerMenu::SendQuestQueryResponse( Quest const *pQuest )
         data << uint32(0);
 
     data << uint32(pQuest->GetRewSpell());                  // spellid, The following spell will be casted on you spell_name
+    data << uint32(0);                                      // unk 2.3.0, Honor points
     data << uint32(pQuest->GetSrcItemId());
     data << uint32(pQuest->GetFlags() & 0xFFFF);
 
@@ -635,6 +636,7 @@ void PlayerMenu::SendQuestGiverOfferReward( Quest const* pQuest, uint64 npcGUID,
     }
 
     data << uint32(pQuest->GetRewOrReqMoney());
+    data << uint32(0x00);                                   // new 2.3.0. Honor points
     data << uint32(0x08);
 
     // check if RewSpell is teaching another spell
@@ -656,7 +658,7 @@ void PlayerMenu::SendQuestGiverOfferReward( Quest const* pQuest, uint64 npcGUID,
     }
     else
         data << uint32(0);
-
+                                 
     data << uint32(0x00);                                   // new 2.0.3
 
     pSession->SendPacket( &data );

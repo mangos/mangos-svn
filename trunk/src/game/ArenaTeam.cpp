@@ -129,16 +129,16 @@ bool ArenaTeam::AddMember(uint64 PlayerGuid)
     }
     else
     {
-        Player::SetUInt32ValueInDB(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (GetSlot() * 5), Id, PlayerGuid);
+        Player::SetUInt32ValueInDB(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (GetSlot() * 6), Id, PlayerGuid);
     }
 
     // hide promote/remove buttons
     if(CaptainGuid != PlayerGuid)
     {
         if(pl)
-            pl->SetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + 1 + (GetSlot() * 5), 1);
+            pl->SetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + 1 + (GetSlot() * 6), 1);
         else
-            Player::SetUInt32ValueInDB(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + 1 + (GetSlot() * 5), 1, PlayerGuid);
+            Player::SetUInt32ValueInDB(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + 1 + (GetSlot() * 6), 1, PlayerGuid);
     }
     return true;
 }
@@ -232,9 +232,9 @@ void ArenaTeam::SetCaptain(uint64 guid)
     // disable remove/promote buttons
     Player *oldcaptain = objmgr.GetPlayer(GetCaptain());
     if(oldcaptain)
-        oldcaptain->SetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + 1 + (GetSlot() * 5), 1);
+        oldcaptain->SetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + 1 + (GetSlot() * 6), 1);
     else
-        Player::SetUInt32ValueInDB(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + 1 + (GetSlot() * 5), 1, GetCaptain());
+        Player::SetUInt32ValueInDB(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + 1 + (GetSlot() * 6), 1, GetCaptain());
 
     // set new captain
     CaptainGuid = guid;
@@ -245,9 +245,9 @@ void ArenaTeam::SetCaptain(uint64 guid)
     // enable remove/promote buttons
     Player *newcaptain = objmgr.GetPlayer(guid);
     if(newcaptain)
-        newcaptain->SetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + 1 + (GetSlot() * 5), 0);
+        newcaptain->SetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + 1 + (GetSlot() * 6), 0);
     else
-        Player::SetUInt32ValueInDB(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + 1 + (GetSlot() * 5), 0, guid);
+        Player::SetUInt32ValueInDB(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + 1 + (GetSlot() * 6), 0, guid);
 }
 
 void ArenaTeam::DelMember(uint64 guid)
@@ -270,7 +270,7 @@ void ArenaTeam::DelMember(uint64 guid)
     }
     else
     {
-        Player::SetUInt32ValueInDB(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (GetSlot() * 5), 0, guid);
+        Player::SetUInt32ValueInDB(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (GetSlot() * 6), 0, guid);
     }
 
     CharacterDatabase.PExecute("DELETE FROM `arena_team_member` WHERE `guid` = '%u'", GUID_LOPART(guid));

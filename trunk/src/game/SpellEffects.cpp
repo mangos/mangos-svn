@@ -200,6 +200,13 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //141 SPELL_EFFECT_141
     &Spell::EffectNULL,                                     //142 SPELL_EFFECT_142
     &Spell::EffectNULL,                                     //143 SPELL_EFFECT_143 probably apply aura again :)
+    &Spell::EffectNULL,                                     //144 SPELL_EFFECT_144
+    &Spell::EffectNULL,                                     //145 SPELL_EFFECT_145
+    &Spell::EffectNULL,                                     //146 SPELL_EFFECT_146
+    &Spell::EffectNULL,                                     //147 SPELL_EFFECT_147
+    &Spell::EffectNULL,                                     //148 SPELL_EFFECT_148
+    &Spell::EffectNULL,                                     //149 SPELL_EFFECT_149                                                        
+
 };
 
 void Spell::EffectNULL(uint32 i)
