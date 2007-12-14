@@ -13,9 +13,18 @@ http://www.mangosproject.org/forum/
 Please submit bug reports at:
 https://svn.mangosproject.org/trac/MaNGOS/
 
+Version 0.10
+ * Under discussion.
+
 Version 0.9
-* Under discussion.
-* Upgrade to client version 2.2.3 (build 7359).
+ * recipes discovery system support,
+ * more auras, effects, spells, and talents working,
+ * players queue at login support,
+ * mangosd/realmd as Windows services support,
+ * autogeneration mangosd/realmd crash reports (Windows only),
+ * Visual Studio 2008 Express and Pro support,
+ * division Mangos DataBase to MangosDB(WorldDB) and CharactersDB.
+ * Upgrade to client version 2.2.3 (build 7359).
 
 Version 0.8
  * battleground support,
