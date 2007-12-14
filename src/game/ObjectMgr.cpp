@@ -4719,6 +4719,10 @@ bool ObjectMgr::IsRankSpellDueToSpell(SpellEntry const *spellInfo_1,uint32 spell
 
 bool ObjectMgr::canStackSpellRanks(SpellEntry const *spellInfo,SpellEntry const *spellInfo2)
 {
+    // Riding not listed in spellbook and not stacked but have ranks and don't must replace ranks at learning
+    if(spellInfo->Attributes == 0x10000D0)
+        return true;
+
     if(spellInfo->powerType == 0)
     {
         if(spellInfo->manaCost > 0 && spellInfo->manaCost != spellInfo2->manaCost)
@@ -4730,6 +4734,8 @@ bool ObjectMgr::canStackSpellRanks(SpellEntry const *spellInfo,SpellEntry const 
         if(spellInfo->manaPerSecond > 0 && spellInfo->manaPerSecond != spellInfo2->manaPerSecond)
             return true;
         if(spellInfo->manaPerSecondPerLevel > 0 && spellInfo->manaPerSecondPerLevel != spellInfo2->manaPerSecondPerLevel)
+            return true;
+        if(spellInfo->Reagent[0] != 0 && spellInfo->Reagent[0] != spellInfo2->Reagent[0])
             return true;
     }
     return false;

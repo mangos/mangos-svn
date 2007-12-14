@@ -2456,7 +2456,6 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
     // replace spells in action bars and spellbook to bigger rank if only one spell rank must be accessible
     if(newspell->active && objmgr.GetSpellRank(spellInfo->Id) != 0)
     {
-        PlayerSpellMap::iterator itr;
         for( PlayerSpellMap::iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr )
         {
             if(itr->second->state == PLAYERSPELL_REMOVED) continue;

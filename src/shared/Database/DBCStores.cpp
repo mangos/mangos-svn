@@ -624,70 +624,69 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
             return false;
     }
 
-    // non-positive targets
-    if(!IsPositiveTarget(spellproto->EffectImplicitTargetA[effIndex],spellproto->EffectImplicitTargetB[effIndex]))
-        return false;
-
-    // AttributesEx check
-    if(spellproto->AttributesEx & (1<<7))
-        return false;
-
-    // non-positive aura use
-    if( spellproto->Effect[effIndex]==6 /*SPELL_EFFECT_APPLY_AURA*/ ||
-        spellproto->Effect[effIndex]==128 /*SPELL_EFFECT_APPLY_AURA_NEW2*/ )
+    switch(spellproto->Effect[effIndex])
     {
-        switch(spellproto->EffectApplyAuraName[effIndex])
+        // always positive effects (check before target checks that provided non-positive result in some case for positive effects)
+        case 36 /*SPELL_EFFECT_LEARN_SPELL*/:
+        case 44 /*SPELL_EFFECT_SKILL_STEP*/:
+            return true;
+
+        // non-positive aura use
+        case 6 /*SPELL_EFFECT_APPLY_AURA*/:
+        case 128 /*SPELL_EFFECT_APPLY_AURA_NEW2*/:
         {
-            case  4 /*SPELL_AURA_DUMMY             */:
+            switch(spellproto->EffectApplyAuraName[effIndex])
             {
-                // dummy aura can be positive or negative dependent from casted spell
-                switch(spellproto->Id)
+                case  4 /*SPELL_AURA_DUMMY             */:
                 {
+                    // dummy aura can be positive or negative dependent from casted spell
+                    switch(spellproto->Id)
+                    {
                     case 13139:                             // net-o-matic special effect
                         return false;
                     default:
                         break;
-                }
-            }   break;
-            case 23 /*SPELL_AURA_PERIODIC_TRIGGER_SPELL*/:
-                if(spellId != spellproto->EffectTriggerSpell[effIndex])
-                {
-                    uint32 spellTriggeredId = spellproto->EffectTriggerSpell[effIndex];
-                    SpellEntry const *spellTriggeredProto = sSpellStore.LookupEntry(spellTriggeredId);
-
-                    if(spellTriggeredProto)
+                    }
+                }   break;
+                case 23 /*SPELL_AURA_PERIODIC_TRIGGER_SPELL*/:
+                    if(spellId != spellproto->EffectTriggerSpell[effIndex])
                     {
-                        // non-positive targets of main spell return early
-                        for(int i = 0; i < 3; ++i)
+                        uint32 spellTriggeredId = spellproto->EffectTriggerSpell[effIndex];
+                        SpellEntry const *spellTriggeredProto = sSpellStore.LookupEntry(spellTriggeredId);
+
+                        if(spellTriggeredProto)
                         {
-                            // if non-positive trigger cast targeted to positive target this main cast is non-positive
-                            // this will place this spell auras as debuffs
-                            if(IsPositiveTarget(spellTriggeredProto->EffectImplicitTargetA[effIndex],spellTriggeredProto->EffectImplicitTargetB[effIndex]) && !IsPositiveEffect(spellTriggeredId,i))
-                                return false;
+                            // non-positive targets of main spell return early
+                            for(int i = 0; i < 3; ++i)
+                            {
+                                // if non-positive trigger cast targeted to positive target this main cast is non-positive
+                                // this will place this spell auras as debuffs
+                                if(IsPositiveTarget(spellTriggeredProto->EffectImplicitTargetA[effIndex],spellTriggeredProto->EffectImplicitTargetB[effIndex]) && !IsPositiveEffect(spellTriggeredId,i))
+                                    return false;
+                            }
                         }
                     }
-                }
-                break;
-            case 42 /*SPELL_AURA_PROC_TRIGGER_SPELL*/:
-                // many positive auras have negative triggered spells at damage for example and this not make it negative (it can be canceled for example)
-                break;
-            case 26 /*SPELL_AURA_MOD_ROOT          */:
-            case 27 /*SPELL_AURA_MOD_SILENCE       */:
-            case 95 /*SPELL_AURA_GHOST*/:
-                return false;
-            case 33 /*SPELL_AURA_MOD_DECREASE_SPEED*/:      // used in positive spells also
-            // part of positive spell if casted at self
-            if(spellproto->EffectImplicitTargetA[effIndex] != 1/*TARGET_SELF*/)
-                return false;
-            // but not this if this first effect (don't found batter check)
-            if(spellproto->Attributes & 0x4000000 && effIndex==0)
-                return false;
-            break;
-            case 77 /*SPELL_AURA_MECHANIC_IMMUNITY*/:
-            {
-                // non-positive immunities
-                switch(spellproto->EffectMiscValue[effIndex])
+                    break;
+                case 42 /*SPELL_AURA_PROC_TRIGGER_SPELL*/:
+                    // many positive auras have negative triggered spells at damage for example and this not make it negative (it can be canceled for example)
+                    break;
+                case 26 /*SPELL_AURA_MOD_ROOT          */:
+                case 27 /*SPELL_AURA_MOD_SILENCE       */:
+                case 95 /*SPELL_AURA_GHOST*/:
+                    return false;
+                case 33 /*SPELL_AURA_MOD_DECREASE_SPEED*/:      // used in positive spells also
+                    // part of positive spell if casted at self
+                    if(spellproto->EffectImplicitTargetA[effIndex] != 1/*TARGET_SELF*/)
+                        return false;
+                    // but not this if this first effect (don't found batter check)
+                    if(spellproto->Attributes & 0x4000000 && effIndex==0)
+                        return false;
+                    break;
+                case 77 /*SPELL_AURA_MECHANIC_IMMUNITY*/:
                 {
+                    // non-positive immunities
+                    switch(spellproto->EffectMiscValue[effIndex])
+                    {
                     case 16 /*MECHANIC_HEAL           */:
                     case 19 /*MECHANIC_SHIELDED       */:
                     case 21 /*MECHANIC_MOUNT          */:
@@ -695,12 +694,24 @@ bool IsPositiveEffect(uint32 spellId, uint32 effIndex)
                         return false;
                     default:
                         break;
-                }
-            } break;
-            default:
-                break;
+                    }
+                }   break;
+                default:
+                    break;
+            }
+            break;
         }
+        default:
+            break;
     }
+
+    // non-positive targets
+    if(!IsPositiveTarget(spellproto->EffectImplicitTargetA[effIndex],spellproto->EffectImplicitTargetB[effIndex]))
+        return false;
+
+    // AttributesEx check
+    if(spellproto->AttributesEx & (1<<7))
+        return false;
 
     // ok, positive
     return true;
