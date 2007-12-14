@@ -109,7 +109,7 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
 
 void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data, 4+4+4+4+4+4);
+    CHECK_PACKET_SIZE(recv_data, 4+1+4+4+4+4+4);
 
     if(GetPlayer()->GetDontMove())
         return;
@@ -124,8 +124,9 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     float  s_angle;
     float  j_unk1, j_sinAngle, j_cosAngle, j_xyspeed;
     float  u_unk1;
+    uint8 unk;
 
-    recv_data >> flags >> time;
+    recv_data >> flags >> unk >> time;
     recv_data >> x >> y >> z >> orientation;
     if(flags & MOVEMENTFLAG_ONTRANSPORT)                    // and if opcode 909?
     {
@@ -135,7 +136,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         recv_data >> t_GUID;
         recv_data >> t_x >> t_y >> t_z >> t_o >> t_time;
     }
-    if(flags & MOVEMENTFLAG_SWIMMING)
+    if(flags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_UNK5))
     {
         // recheck
         CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4);
@@ -240,7 +241,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     /*----------------------*/
 
     /* process position-change */
-    recv_data.put<uint32>(4, getMSTime());
+    recv_data.put<uint32>(5, getMSTime());                  // offset flags(4) + unk(1)
     WorldPacket data(recv_data.GetOpcode(), (GetPlayer()->GetPackGUID().size()+recv_data.size()));
     data.append(GetPlayer()->GetPackGUID());
     data.append(recv_data.contents(), recv_data.size());
@@ -255,10 +256,11 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
 void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
 {
-    CHECK_PACKET_SIZE(recv_data, 8+4+4+4+4+4+4+4);
+    CHECK_PACKET_SIZE(recv_data, 8+4+4+1+4+4+4+4+4);
 
     /* extract packet */
     uint64 guid;
+    uint8  unkB;
     uint32 unk1, flags, time, fallTime;
     float x, y, z, orientation;
 
@@ -279,7 +281,7 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
     // continue parse packet
 
     recv_data >> unk1;
-    recv_data >> flags >> time;
+    recv_data >> flags >> unkB >> time;
     recv_data >> x >> y >> z >> orientation;
     if (flags & MOVEMENTFLAG_ONTRANSPORT)
     {
@@ -289,7 +291,7 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
         recv_data >> t_GUID;
         recv_data >> t_x >> t_y >> t_z >> t_o >> t_time;
     }
-    if (flags & MOVEMENTFLAG_SWIMMING)
+    if (flags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_UNK5))
     {
         // recheck
         CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4);

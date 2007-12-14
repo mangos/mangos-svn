@@ -59,7 +59,7 @@ uint32 GuidHigh2TypeId(uint32 guid_hi)
         case HIGHGUID_DYNAMICOBJECT:return TYPEID_DYNAMICOBJECT;
         case HIGHGUID_CORPSE:       return TYPEID_CORPSE;
         case HIGHGUID_PLAYER_CORPSE:return 10;              // unknown
-        case HIGHGUID_TRANSPORT:    return TYPEID_GAMEOBJECT;
+        case HIGHGUID_MO_TRANSPORT: return TYPEID_GAMEOBJECT;
     }
     return 10;                                              // unknown
 }
@@ -315,6 +315,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
         }
 
         *data << flags2;                                    // movement flags
+        *data << uint8(0);                                  // unk 2.3.0
         *data << getMSTime();                               // this appears to be time in ms but can be any thing (mask, flags)
     }
 
@@ -388,15 +389,15 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
                 sLog.outDebug("_BuildMovementUpdate: MOVEMENTFLAG_SPLINE2 but not in flight");
                 return;
             }
-            
+
             WPAssert(!((Player*)this)->GetMotionMaster()->empty() && ((Player*)this)->GetMotionMaster()->top()->GetMovementGeneratorType() == FLIGHT_MOTION_TYPE);
 
             FlightPathMovementGenerator *fmg = (FlightPathMovementGenerator*)(((Player*)this)->GetMotionMaster()->top());
 
             uint32 flags3 = 0x00000300;
 
-            *data << flags3;                                // splines flag?
-
+            *data << uint32(flags3);                        // splines flag?
+            /* unused currently
             if(flags3 & 0x10000)                            // probably x,y,z coords there
             {
                 *data << (float)0;
@@ -413,7 +414,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
             {
                 *data << (float)0;
             }
-
+            */
             Path &path = fmg->GetPath();
 
             float x, y, z;
@@ -458,12 +459,47 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
 
     if(flags & UPDATEFLAG_ALL)                              // 0x10
     {
-        *data << uint32(0);                                 // unk, probably timestamp
+        switch(GetTypeId())
+        {
+            case TYPEID_OBJECT:
+            case TYPEID_ITEM:
+            case TYPEID_CONTAINER:
+            case TYPEID_GAMEOBJECT:
+            case TYPEID_DYNAMICOBJECT:
+            case TYPEID_CORPSE:
+                *data << uint32(GetGUIDLow());              // GetGUIDLow()
+                break;
+            case TYPEID_UNIT:
+                *data << uint32(0x0000000B);                // unk, can be 0xB or 0xC
+                break;
+            case TYPEID_PLAYER:
+                if(flags & UPDATEFLAG_SELF)
+                    *data << uint32(0x00000015);            // unk, can be 0x15 or 0x22
+                else
+                    *data << uint32(0x00000008);            // unk, can be 0x7 or 0x8
+                break;
+            default:
+                *data << uint32(0x00000000);                // unk
+                break;
+        }
     }
 
     if(flags & UPDATEFLAG_HIGHGUID)                         // 0x8
     {
-        *data << uint32(0);                                 // unk, probably timestamp
+        switch(GetTypeId())
+        {
+            case TYPEID_OBJECT:
+            case TYPEID_ITEM:
+            case TYPEID_CONTAINER:
+            case TYPEID_GAMEOBJECT:
+            case TYPEID_DYNAMICOBJECT:
+            case TYPEID_CORPSE:
+                *data << uint32(GetGUIDHigh());             // GetGUIDHigh()
+                break;
+            default:
+                *data << uint32(0x00000000);                // unk
+                break;
+        }
     }
 
     /*if(flags & UPDATEFLAG_FULLGUID)       // 0x4
@@ -473,7 +509,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
 
     if(flags & UPDATEFLAG_TRANSPORT)                        // 0x2
     {
-        *data << getMSTime();                               // ms time
+        *data << uint32(getMSTime());                       // ms time
     }
 }
 
@@ -1050,6 +1086,7 @@ void WorldObject::BuildHeartBeatMsg(WorldPacket *data) const
 
     data->append(GetPackGUID());
     *data << uint32(0);                                     // movement flags?
+    *data << uint8(0);                                      // 2.3.0
     *data << getMSTime();                                   // time
     *data << m_positionX;
     *data << m_positionY;
@@ -1064,6 +1101,7 @@ void WorldObject::BuildTeleportAckMsg(WorldPacket *data, float x, float y, float
     data->append(GetPackGUID());
     *data << uint32(0);                                     // this value increments every time
     *data << uint32(0);                                     // movement flags?
+    *data << uint8(0);                                      // 2.3.0
     *data << getMSTime();                                   // time
     *data << x;
     *data << y;

@@ -6151,8 +6151,6 @@ void Unit::SetSpeed(UnitMoveType mtype, float rate, bool forced)
 
 void Unit::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply)
 {
-    WorldPacket data;
-
     if(apply)
         m_speed_rate[mtype] *= rate;
     else
@@ -6171,49 +6169,90 @@ void Unit::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply
     if (mtype == MOVE_RUN     &&  ((Player*)this)->IsMounted())
         return;
 
-    switch(mtype)
+    WorldPacket data;
+    if(!forced)
     {
-        case MOVE_WALK:
-            if(forced) { data.Initialize(SMSG_FORCE_WALK_SPEED_CHANGE, 16); }
-            else { data.Initialize(MSG_MOVE_SET_WALK_SPEED, 16); }
-            break;
-        case MOVE_MOUNTED:
-        case MOVE_RUN:
-            if(forced) { data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE, 16); }
-            else { data.Initialize(MSG_MOVE_SET_RUN_SPEED, 16); }
-            break;
-        case MOVE_WALKBACK:
-            if(forced) { data.Initialize(SMSG_FORCE_RUN_BACK_SPEED_CHANGE, 16); }
-            else { data.Initialize(MSG_MOVE_SET_RUN_BACK_SPEED, 16); }
-            break;
-        case MOVE_SWIM:
-            if(forced) { data.Initialize(SMSG_FORCE_SWIM_SPEED_CHANGE, 16); }
-            else { data.Initialize(MSG_MOVE_SET_SWIM_SPEED, 16); }
-            break;
-        case MOVE_SWIMBACK:
-            if(forced) { data.Initialize(SMSG_FORCE_SWIM_BACK_SPEED_CHANGE, 16); }
-            else { data.Initialize(MSG_MOVE_SET_SWIM_BACK_SPEED, 16); }
-            break;
-        case MOVE_TURN:
-            if(forced) { data.Initialize(SMSG_FORCE_TURN_RATE_CHANGE, 16); }
-            else { data.Initialize(MSG_MOVE_SET_TURN_RATE, 16); }
-            break;
-        case MOVE_FLY:
-            if(forced) { data.Initialize(SMSG_FORCE_FLY_SPEED_CHANGE, 16); }
-            else { data.Initialize(SMSG_MOVE_SET_FLY_SPEED, 16); }
-            break;
-        case MOVE_FLYBACK:
-            break;
-        default:
-            sLog.outError("Unit::SetSpeed: Unsupported move type (%d), data not sent to client.",mtype);
-            return;
+        switch(mtype)
+        {
+           case MOVE_WALK:
+                data.Initialize(MSG_MOVE_SET_WALK_SPEED, 8+4+1+4+4+4+4+4+4+4);
+                break;
+            case MOVE_MOUNTED:
+            case MOVE_RUN:
+                data.Initialize(MSG_MOVE_SET_RUN_SPEED, 8+4+1+4+4+4+4+4+4+4);
+                break;
+            case MOVE_WALKBACK:
+                data.Initialize(MSG_MOVE_SET_RUN_BACK_SPEED, 8+4+1+4+4+4+4+4+4+4);
+                break;
+            case MOVE_SWIM:
+                data.Initialize(MSG_MOVE_SET_SWIM_SPEED, 8+4+1+4+4+4+4+4+4+4);
+                break;
+            case MOVE_SWIMBACK:
+                data.Initialize(MSG_MOVE_SET_SWIM_BACK_SPEED, 8+4+1+4+4+4+4+4+4+4);
+                break;
+            case MOVE_TURN:
+                data.Initialize(MSG_MOVE_SET_TURN_RATE, 8+4+1+4+4+4+4+4+4+4);
+                break;
+            case MOVE_FLY:
+                data.Initialize(SMSG_MOVE_SET_FLY_SPEED, 8+4+1+4+4+4+4+4+4+4);
+                break;
+            case MOVE_FLYBACK:
+                break;
+            default:
+                sLog.outError("Unit::SetSpeed: Unsupported move type (%d), data not sent to client.",mtype);
+                return;
+        }
+        
+        data.append(GetPackGUID());
+        data << uint32(0);                                  //movement flags
+        data << uint8(0);                                   //unk
+        data << uint32(getMSTime());
+        data << float(GetPositionX());
+        data << float(GetPositionY());
+        data << float(GetPositionZ());
+        data << float(GetOrientation());
+        data << uint32(0);                                  //flag unk  
+        data << float(GetSpeed(mtype));
+        SendMessageToSet( &data, true );
     }
-    data.append(GetPackGUID());
-    data << (uint32)0;
-    if (mtype == MOVE_RUN || mtype == MOVE_MOUNTED) data << uint8(0);   // new 2.1.0
-    data << float(GetSpeed(mtype));
-    SendMessageToSet( &data, true );
-
+    else
+    {
+        switch(mtype)
+        {
+            case MOVE_WALK:
+                data.Initialize(SMSG_FORCE_WALK_SPEED_CHANGE, 16);
+                break;
+            case MOVE_MOUNTED:
+            case MOVE_RUN:
+                data.Initialize(SMSG_FORCE_RUN_SPEED_CHANGE, 17);
+                break;
+            case MOVE_WALKBACK:
+                data.Initialize(SMSG_FORCE_RUN_BACK_SPEED_CHANGE, 16);
+                break;
+            case MOVE_SWIM:
+                data.Initialize(SMSG_FORCE_SWIM_SPEED_CHANGE, 16);
+                break;
+            case MOVE_SWIMBACK:
+                data.Initialize(SMSG_FORCE_SWIM_BACK_SPEED_CHANGE, 16);
+                break;
+            case MOVE_TURN:
+                data.Initialize(SMSG_FORCE_TURN_RATE_CHANGE, 16);
+                break;
+            case MOVE_FLY:
+                data.Initialize(SMSG_FORCE_FLY_SPEED_CHANGE, 16);
+                break;
+            case MOVE_FLYBACK:
+                break;
+            default:
+                sLog.outError("Unit::SetSpeed: Unsupported move type (%d), data not sent to client.",mtype);
+                return;
+        }
+        data.append(GetPackGUID());
+        data << (uint32)0;
+        if (mtype == MOVE_RUN || mtype == MOVE_MOUNTED) data << uint8(0);   // new 2.1.0
+        data << float(GetSpeed(mtype));
+        SendMessageToSet( &data, true );
+    }
     if(Pet* pet = GetPet())
         pet->SetSpeed(mtype==MOVE_MOUNTED ? MOVE_RUN : mtype,m_speed_rate[mtype],forced);
 }
@@ -7396,7 +7435,7 @@ void Unit::SendPetTalk (uint32 pettalk)
     if(!owner || owner->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    WorldPacket data(SMSG_AI_UNKNOWN, 8+4);
+    WorldPacket data(SMSG_PET_ACTION_SOUND, 8+4);
     data << uint64(GetGUID());
     data << uint32(pettalk);
     ((Player*)owner)->GetSession()->SendPacket(&data);
@@ -7409,7 +7448,7 @@ void Unit::SendPetSpellCooldown (uint32 spellid, time_t cooltime)
         return;
 
     WorldPacket data(SMSG_SPELL_COOLDOWN, 8+8);
-    data << GetGUID();
+    data << uint64(GetGUID());
     data << uint8(0x0);
     data << uint32(spellid);
     data << uint32(cooltime);
@@ -7424,8 +7463,8 @@ void Unit::SendPetClearCooldown (uint32 spellid)
         return;
 
     WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8+4));
-    data << spellid;
-    data << GetGUID();
+    data << uint32(spellid);
+    data << uint64(GetGUID());
     data << uint32(0);
 
     ((Player*)owner)->GetSession()->SendPacket(&data);
@@ -7438,7 +7477,7 @@ void Unit::SendPetAIReaction(uint64 guid)
         return;
 
     WorldPacket data(SMSG_AI_REACTION, 12);
-    data << guid << uint32(00000002);
+    data << uint64(guid) << uint32(00000002);
     ((Player*)owner)->GetSession()->SendPacket(&data);
 }
 ///----------End of Pet responses methods----------

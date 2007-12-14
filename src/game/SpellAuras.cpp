@@ -290,7 +290,14 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //238
     &Aura::HandleNULL,                                      //239
     &Aura::HandleNULL,                                      //240
-    &Aura::HandleNULL                                       //241
+    &Aura::HandleNULL,                                      //241
+    &Aura::HandleNULL,                                      //242
+    &Aura::HandleNULL,                                      //243
+    &Aura::HandleNULL,                                      //244
+    &Aura::HandleNULL,                                      //245
+    &Aura::HandleNULL,                                      //246
+    &Aura::HandleNULL,                                      //247
+    &Aura::HandleNULL                                       //248
 };
 
 Aura::Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster, Item* castItem) :
@@ -779,12 +786,16 @@ void Aura::_AddAura()
             {
                 m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURA + slot), GetId());
 
-                uint8 flagslot = slot >> 3;
+                uint8 flagslot = slot >> 2;
                 uint32 value = m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot));
 
-                uint8 value1 = (slot & 7) << 2;
-                value |= ((uint32)AFLAG_SET << value1);
-
+                uint8 value1 = (slot & 3) << 3;
+                
+                value &= ~((uint32)AFLAG_MASK << value1);
+                if (IsPositive())
+                    value |= ((uint32)AFLAG_POSITIVE << value1);
+                else
+                    value |= ((uint32)AFLAG_NEGATIVE << value1);
                 m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot), value);
             }
 
@@ -862,13 +873,12 @@ void Aura::_RemoveAura()
     {
         m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURA + slot), 0);
 
-        uint8 flagslot = slot >> 3;
+        uint8 flagslot = slot >> 2;
 
         uint32 value = m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot));
 
-        uint8 aurapos = (slot & 7) << 2;
-        uint32 value1 = ~( AFLAG_SET << aurapos );
-        value &= value1;
+        uint8 aurapos = (slot & 3) << 3;
+        value &= ~((uint32)AFLAG_MASK << aurapos );
 
         m_target->SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot), value);
         if( IsSealSpell(GetId()) )

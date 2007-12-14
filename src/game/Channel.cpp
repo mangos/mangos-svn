@@ -32,13 +32,13 @@ Channel::Channel(std::string name, uint32 channel_id)
 
         m_flags |= CHANNEL_FLAG_GENERAL;                    // for all built-in channels
 
-        if(ch->flags & 0x08)                                // for trade channel
+        if(ch->flags & CHANNEL_DBC_FLAG_TRADE)              // for trade channel
             m_flags |= CHANNEL_FLAG_TRADE;
 
-        if(ch->flags & 0x20)                                // for city only channels
+        if(ch->flags & CHANNEL_DBC_FLAG_CITY_ONLY2)         // for city only channels
             m_flags |= CHANNEL_FLAG_CITY;
 
-        if(ch->flags & 0x40000)                             // for LFG channel
+        if(ch->flags & CHANNEL_DBC_FLAG_LFG)                // for LFG channel
             m_flags |= CHANNEL_FLAG_LFG;
         else                                                // for all other channels
             m_flags |= CHANNEL_FLAG_NOT_LFG;
@@ -70,15 +70,22 @@ void Channel::Join(uint64 p, const char *pass)
         MakeWrongPassword(&data);
         SendToOne(&data, p);
     }
+    else if(HasFlag(CHANNEL_FLAG_LFG))
+    {
+        MakeNotInLfg(&data);
+        SendToOne(&data, p);
+    }
     else
     {
-        PlayerInfo pinfo;
-        pinfo.player = p;
-        pinfo.flags = 0;
-
         Player *plr = objmgr.GetPlayer(p);
+
         if(plr)
+        {
+            if(plr->GetGuildId() && (GetFlags() == 0x38))
+                return;
+
             plr->JoinedChannel(this);
+        }
 
         if(m_announce)
         {
@@ -87,10 +94,16 @@ void Channel::Join(uint64 p, const char *pass)
         }
 
         data.clear();
+
+        PlayerInfo pinfo;
+        pinfo.player = p;
+        pinfo.flags = 0;
         players[p] = pinfo;
 
         MakeYouJoined(&data);
         SendToOne(&data, p);
+
+        JoinNotify(p);
 
         // if no owner first logged will become
         if(!IsConstant() && !m_ownerGUID)
@@ -134,6 +147,8 @@ void Channel::Leave(uint64 p, bool send)
             MakeLeft(&data, p);
             SendToAll(&data);
         }
+
+        LeaveNotify(p);
 
         if(changeowner)
         {
@@ -836,4 +851,31 @@ void Channel::MakeVoiceOff(WorldPacket *data, uint64 guid)
 {
     MakeNotifyPacket(data, CHAT_VOICE_OFF_NOTICE);
     *data << uint64(guid);
+}
+
+void Channel::JoinNotify(uint64 guid)
+{
+    WorldPacket data;
+
+    if(IsConstant())
+        data.Initialize(SMSG_PLAYER_JOINED_CHANNEL, 8+1+1+4+GetName().size()+1);
+    else
+        data.Initialize(SMSG_PLAYER_JOINED_CUSTOM_CHANNEL, 8+1+1+4+GetName().size()+1);
+
+    data << uint64(guid);
+    data << uint8(GetPlayerFlags(guid));
+    data << uint8(GetFlags());
+    data << uint32(GetNumPlayers());
+    data << GetName();
+    SendToAll(&data);
+}
+
+void Channel::LeaveNotify(uint64 guid)
+{
+    WorldPacket data(SMSG_PLAYER_LEFT_CHANNEL, 8+1+4+GetName().size()+1);
+    data << uint64(guid);
+    data << uint8(GetFlags());
+    data << uint32(GetNumPlayers());
+    data << GetName();
+    SendToAll(&data);
 }

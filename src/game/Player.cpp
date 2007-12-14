@@ -417,7 +417,7 @@ bool Player::Create( uint32 guidlow, WorldPacket& data )
     SetUInt32Value( PLAYER__FIELD_KNOWN_TITLES, 0 );        // 0=disabled
     SetUInt32Value( PLAYER_CHOSEN_TITLE, 0 );
     SetUInt32Value( PLAYER_FIELD_KILLS, 0 );
-    SetUInt32Value( PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 0 );
+    SetUInt32Value( PLAYER_FIELD_LIFETIME_HONORBALE_KILLS, 0 );
     SetUInt32Value( PLAYER_FIELD_TODAY_CONTRIBUTION, 0 );
     SetUInt32Value( PLAYER_FIELD_YESTERDAY_CONTRIBUTION, 0 );
 
@@ -2333,7 +2333,7 @@ void Player::RemoveMail(uint32 id)
 }
 
 //call this function when mail receiver is online
-void Player::CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::string subject, uint32 itemTextId, uint32 itemGuid, uint32 item_template, time_t expire_time, time_t deliver_time, uint32 money, uint32 COD, uint32 checked, Item* pItem)
+void Player::CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::string subject, uint32 itemTextId, MailItemsInfo *mi, time_t expire_time, time_t deliver_time, uint32 money, uint32 COD, uint32 checked)
 {
     if(deliver_time <= time(NULL))                          // ready now
     {
@@ -2348,8 +2348,9 @@ void Player::CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::st
 
     if ( !m_mailsLoaded )
     {
-        if ( pItem )
-            delete pItem;
+        for(uint8 i = 0; i < mi->items_count; ++i)
+            if ( mi->items[i] )
+                delete mi->items[i];
         return;
     }
     Mail * m = new Mail;
@@ -2359,8 +2360,10 @@ void Player::CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::st
     m->receiver = this->GetGUIDLow();
     m->subject = subject;
     m->itemTextId = itemTextId;
-    m->item_guid = itemGuid;
-    m->item_template = item_template;
+
+    for(uint8 i = 0; i < mi->items_count; ++i)
+        m->AddItem(GUID_LOPART(mi->item_guid[i]), mi->item_template[i]);
+
     m->expire_time = expire_time;
     m->deliver_time = deliver_time;
     m->money = money;
@@ -2369,16 +2372,23 @@ void Player::CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::st
     m->state = MAIL_STATE_UNCHANGED;
 
     m_mail.push_front(m);                                   //to insert new mail to beginning of maillist
-    if ( pItem )
-        AddMItem(pItem);
+    if(m->HasItems())
+        for(uint8 i = 0; i < m->items.size(); ++i)
+            if(mi->items[i])
+                AddMItem(mi->items[i]);
 }
 
-void Player::SendMailResult(uint32 mailId, uint32 mailAction, uint32 mailError, uint32 equipError)
+void Player::SendMailResult(uint32 mailId, uint32 mailAction, uint32 mailError, uint32 equipError, uint32 item_guid, uint32 item_count)
 {
     WorldPacket data(SMSG_SEND_MAIL_RESULT, (12));
     data << (uint32) mailId;
     data << (uint32) mailAction;
     data << (uint32) mailError;
+    if(mailAction == MAIL_ITEM_TAKEN)
+    {
+        data << (uint32) item_guid;                         // item guid low?
+        data << (uint32) item_count;                        // item count?
+    }
     if (equipError)
         data << (uint32) equipError;
     GetSession()->SendPacket(&data);
@@ -3191,7 +3201,7 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
     RemovePetitionsAndSigns(playerguid, 10);
 
     // return back all mails with COD and Item
-    QueryResult *resultMail = CharacterDatabase.PQuery("SELECT `id`,`sender`,`subject`,`itemTextId`,`item_guid`,`item_template` FROM `mail` WHERE `receiver`='%u' AND `item_guid`<>0 AND `cod`<>0", guid);
+    QueryResult *resultMail = CharacterDatabase.PQuery("SELECT `id`,`sender`,`subject`,`itemTextId`,`has_items` FROM `mail` WHERE `receiver`='%u' AND `has_items`<>0 AND `cod`<>0", guid);
     if(resultMail)
     {
         do
@@ -3202,28 +3212,50 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
             uint32 sender        = fields[1].GetUInt32();
             std::string subject  = fields[2].GetCppString();
             uint32 itemTextId    = fields[3].GetUInt32();
-            uint32 item_guid     = fields[4].GetUInt32();
-            uint32 item_template = fields[5].GetUInt32();
+            bool has_items       = fields[4].GetBool();
 
             //we can return mail now
             //so firstly delete the old one
             CharacterDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", mail_id);
 
-            ItemPrototype const* itemProto = objmgr.GetItemPrototype(item_template);
-            if(!itemProto)
-                continue;
-
-            Item* pItem = NewItemOrBag(itemProto);
-            if(!pItem->LoadFromDB(item_guid,MAKE_GUID(guid,HIGHGUID_PLAYER)))
+            MailItemsInfo mi;
+            if(has_items)
             {
-                delete pItem;
-                continue;
+                QueryResult *resultItems = CharacterDatabase.PQuery("SELECT `item_guid`,`item_template` FROM `mail_items` WHERE `mail_id`='%u'", mail_id);
+                if(resultItems)
+                {
+                    do
+                    {
+                        Field *fields2 = resultItems->Fetch();
+
+                        uint32 item_guid = fields2[0].GetUInt32();
+                        uint32 item_template = fields2[1].GetUInt32();
+
+                        ItemPrototype const* itemProto = objmgr.GetItemPrototype(item_template);
+                        if(!itemProto)
+                            continue;
+
+                        Item* pItem = NewItemOrBag(itemProto);
+                        if(!pItem->LoadFromDB(item_guid,MAKE_GUID(guid, HIGHGUID_PLAYER)))
+                        {
+                            delete pItem;
+                            continue;
+                        }
+
+                        mi.AddItem(item_guid, item_template, pItem);
+                    }
+                    while (resultItems->NextRow());
+
+                    delete resultItems;
+                }
             }
 
-            uint64 rc_guid = MAKE_GUID(sender,HIGHGUID_PLAYER);
-            uint32 pl_account = objmgr.GetPlayerAccountIdByGUID(MAKE_GUID(guid,HIGHGUID_PLAYER));
+            CharacterDatabase.PExecute("DELETE FROM `mail_items` WHERE `mail_id` = '%u'", mail_id);
 
-            WorldSession::SendReturnToSender(mail_id,0,pl_account,guid,rc_guid,subject,itemTextId,item_guid,item_template, 0,0,pItem);
+            uint64 rc_guid = MAKE_GUID(sender, HIGHGUID_PLAYER);
+            uint32 pl_account = objmgr.GetPlayerAccountIdByGUID(MAKE_GUID(guid, HIGHGUID_PLAYER));
+
+            WorldSession::SendReturnToSender(mail_id, 0, pl_account, guid, rc_guid, subject, itemTextId, &mi, 0, 0);
         }
         while (resultMail->NextRow());
 
@@ -4621,8 +4653,8 @@ void Player::SendInitialActionButtons()
 {
     sLog.outDetail( "Initializing Action Buttons for '%u'", GetGUIDLow() );
 
-    WorldPacket data(SMSG_ACTION_BUTTONS, (120*4));
-    for(int button = 0; button < 120; ++button)
+    WorldPacket data(SMSG_ACTION_BUTTONS, (MAX_ACTION_BUTTONS*4));
+    for(int button = 0; button < MAX_ACTION_BUTTONS; ++button)
     {
         ActionButtonList::const_iterator itr = m_actionButtons.find(button);
         if(itr != m_actionButtons.end() && itr->second.uState != ACTIONBUTTON_DELETED)
@@ -4643,7 +4675,7 @@ void Player::SendInitialActionButtons()
 
 void Player::addActionButton(const uint8 button, const uint16 action, const uint8 type, const uint8 misc)
 {
-    if(button >= 120)
+    if(button >= MAX_ACTION_BUTTONS)
     {
         sLog.outError( "Action %u not added into button %u for player %s: button must be < 120", action, button, GetName() );
         return;
@@ -4877,7 +4909,7 @@ void Player::setFactionForRace(uint8 race)
 
 void Player::UpdateReputation() const
 {
-    sLog.outDebug( "WORLD: Player::UpdateReputation" );
+    sLog.outDetail( "WORLD: Player::UpdateReputation" );
 
     for(FactionsList::const_iterator itr = m_factions.begin(); itr != m_factions.end(); ++itr)
     {
@@ -5394,7 +5426,7 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
             // count the number of playerkills in one day
             ApplyModUInt32Value(PLAYER_FIELD_KILLS, 1, true);
             // and those in a lifetime
-            ApplyModUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS, 1, true);
+            ApplyModUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS, 1, true);
 
             m_lastKillDate = now;
             m_saveKills = true;
@@ -5956,6 +5988,9 @@ void Player::_ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply)
                 ApplyRatingMod(PLAYER_FIELD_MELEE_HASTE_RATING, int32(val), apply);
                 ApplyRatingMod(PLAYER_FIELD_RANGED_HASTE_RATING, int32(val), apply);
                 ApplyRatingMod(PLAYER_FIELD_SPELL_HASTE_RATING, int32(val), apply);
+                break;
+            case ITEM_MOD_EXPERTISE_RATING:
+                ApplyRatingMod(PLAYER_FIELD_EXPERTISE_RATING, int32(val), apply);
                 break;
         }
         //sLog.outDebug("%s %s: \t\t%u", applystr.c_str(), typestr.c_str(), val);
@@ -10073,7 +10108,7 @@ void Player::RemoveItemFromBuyBackSlot( uint32 slot, bool del )
 
 void Player::SendEquipError( uint8 msg, Item* pItem, Item *pItem2 )
 {
-    sLog.outDetail( "WORLD: Sent SMSG_INVENTORY_CHANGE_FAILURE" );
+    sLog.outDebug(  "WORLD: Sent SMSG_INVENTORY_CHANGE_FAILURE" );
     WorldPacket data( SMSG_INVENTORY_CHANGE_FAILURE, ((msg == EQUIP_ERR_CANT_EQUIP_LEVEL_I)?22:18) );
     data << msg;
     if( msg == EQUIP_ERR_CANT_EQUIP_LEVEL_I )
@@ -10086,7 +10121,7 @@ void Player::SendEquipError( uint8 msg, Item* pItem, Item *pItem2 )
 
 void Player::SendBuyError( uint8 msg, Creature* pCreature, uint32 item, uint32 param )
 {
-    sLog.outDetail( "WORLD: Sent SMSG_BUY_FAILED" );
+    sLog.outDebug(  "WORLD: Sent SMSG_BUY_FAILED" );
     WorldPacket data( SMSG_BUY_FAILED, (8+4+4+1) );
     data << (pCreature ? pCreature->GetGUID() : uint64(0));
     data << item;
@@ -10098,7 +10133,7 @@ void Player::SendBuyError( uint8 msg, Creature* pCreature, uint32 item, uint32 p
 
 void Player::SendSellError( uint8 msg, Creature* pCreature, uint64 guid, uint32 param )
 {
-    sLog.outDetail( "WORLD: Sent SMSG_SELL_ITEM" );
+    sLog.outDebug(  "WORLD: Sent SMSG_SELL_ITEM" );
     WorldPacket data( SMSG_SELL_ITEM, (8+4+4+1) );          // last check 2.0.10
     data << (pCreature ? pCreature->GetGUID() : uint64(0));
     data << guid;
@@ -11269,7 +11304,7 @@ bool Player::SatisfyQuestRace( Quest const* qInfo, bool msg )
     if( (reqraces & getRaceMask()) == 0 )
     {
         if( msg )
-            SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_RACE );
+            SendCanTakeQuestResponse( INVALIDREASON_QUEST_FAILED_WRONG_RACE );
         return false;
     }
     return true;
@@ -11315,7 +11350,7 @@ bool Player::SatisfyQuestStatus( Quest const* qInfo, bool msg )
     if  ( itr != mQuestStatus.end() && itr->second.m_status != QUEST_STATUS_NONE )
     {
         if( msg )
-            SendCanTakeQuestResponse( INVALIDREASON_HAVE_QUEST );
+            SendCanTakeQuestResponse( INVALIDREASON_QUEST_ALREADY_ON );
         return false;
     }
     return true;
@@ -11326,7 +11361,7 @@ bool Player::SatisfyQuestTimed( Quest const* qInfo, bool msg )
     if ( (find(m_timedquests.begin(), m_timedquests.end(), qInfo->GetQuestId()) != m_timedquests.end()) && qInfo->HasFlag(QUEST_MANGOS_FLAGS_TIMED) )
     {
         if( msg )
-            SendCanTakeQuestResponse( INVALIDREASON_HAVE_TIMED_QUEST );
+            SendCanTakeQuestResponse( INVALIDREASON_QUEST_ONLY_ONE_TIMED );
         return false;
     }
     return true;
@@ -11427,7 +11462,7 @@ bool Player::SatisfyQuestDay( Quest const* qInfo, bool msg )
     if(!have_slot)
     {
         if( msg )
-            SendCanTakeQuestResponse( INVALIDREASON_HAVE_10_DAILY_QUESTS );
+            SendCanTakeQuestResponse( INVALIDREASON_DAILY_QUESTS_REMAINING );
         return false;
     }
 
@@ -11966,6 +12001,7 @@ void Player::SendQuestReward( Quest const *pQuest, uint32 XP, Object * questGive
         data << uint32(0);
         data << uint32(pQuest->GetRewOrReqMoney() + XP);
     }
+    data << uint32(0);                                      //new 2.3.0, HonorPoints?
     data << uint32( pQuest->GetRewItemsCount() );
 
     for (uint32 i = 0; i < pQuest->GetRewItemsCount(); ++i)
@@ -11973,7 +12009,7 @@ void Player::SendQuestReward( Quest const *pQuest, uint32 XP, Object * questGive
         if ( pQuest->RewItemId[i] > 0 )
             data << pQuest->RewItemId[i] << pQuest->RewItemCount[i];
     }
-
+    data << uint32(0);
     GetSession()->SendPacket( &data );
 
     if (pQuest->GetQuestCompleteScript() != 0)
@@ -12787,23 +12823,40 @@ void Player::_LoadInventory(QueryResult *result, uint32 timediff)
 }
 
 // load mailed item which should receive current player
-void Player::_LoadMailedItem(uint32 item_guid, uint32 item_template)
+void Player::_LoadMailedItems(Mail *mail)
 {
-    ItemPrototype const *proto = objmgr.GetItemPrototype(item_template);
+    QueryResult* result = CharacterDatabase.PQuery("SELECT `item_guid`, `item_template` FROM `mail_items` WHERE `mail_id`='%u'", mail->messageID);
+    if(!result)
+        return;
 
-    if(!proto)
+    Field *fields;
+
+    do
     {
-        sLog.outError( "Player %u have unknown item_template (ProtoType) in mailed items(GUID: %u template: %u) in mail, skipped.", GetGUIDLow(), item_guid, item_template);
-        return;
-    }
-    Item *item = NewItemOrBag(proto);
-    if(!item->LoadFromDB(item_guid, 0))
-    {
-        sLog.outError( "Player::_LoadMailedItems - Mailed Item doesn't exist!!!! - item guid: %u", item_guid);
-        delete item;
-        return;
-    }
-    AddMItem(item);
+        fields = result->Fetch();
+        uint32 item_guid = fields[0].GetUInt32();
+        uint32 item_template = fields[1].GetUInt32();
+
+        mail->AddItem(item_guid, item_template);
+
+        ItemPrototype const *proto = objmgr.GetItemPrototype(item_template);
+
+        if(!proto)
+        {
+            sLog.outError( "Player %u have unknown item_template (ProtoType) in mailed items(GUID: %u template: %u) in mail, skipped.", GetGUIDLow(), item_guid, item_template);
+            continue;
+        }
+        Item *item = NewItemOrBag(proto);
+        if(!item->LoadFromDB(item_guid, 0))
+        {
+            sLog.outError( "Player::_LoadMailedItems - Mailed Item doesn't exist!!!! - item guid: %u", item_guid);
+            delete item;
+            continue;
+        }
+        AddMItem(item);
+    } while (result->NextRow());
+
+    delete result;
 }
 
 void Player::_LoadMailInit(QueryResult *resultUnread, QueryResult *resultDelivery)
@@ -12831,7 +12884,7 @@ void Player::_LoadMail()
 {
     m_mail.clear();
     //mails are in right order
-    QueryResult *result = CharacterDatabase.PQuery("SELECT `id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked` FROM `mail` WHERE `receiver` = '%u' ORDER BY `id` DESC",GetGUIDLow());
+    QueryResult *result = CharacterDatabase.PQuery("SELECT `id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked` FROM `mail` WHERE `receiver` = '%u' ORDER BY `id` DESC",GetGUIDLow());
     if(result)
     {
         do
@@ -12844,17 +12897,16 @@ void Player::_LoadMail()
             m->receiver = fields[3].GetUInt32();
             m->subject = fields[4].GetCppString();
             m->itemTextId = fields[5].GetUInt32();
-            m->item_guid = fields[6].GetUInt32();
-            m->item_template = fields[7].GetUInt32();
-            m->expire_time = (time_t)fields[8].GetUInt64();
-            m->deliver_time = (time_t)fields[9].GetUInt64();
-            m->money = fields[10].GetUInt32();
-            m->COD = fields[11].GetUInt32();
-            m->checked = fields[12].GetUInt32();
+            bool has_items = fields[6].GetBool();
+            m->expire_time = (time_t)fields[7].GetUInt64();
+            m->deliver_time = (time_t)fields[8].GetUInt64();
+            m->money = fields[9].GetUInt32();
+            m->COD = fields[10].GetUInt32();
+            m->checked = fields[11].GetUInt32();
             m->state = MAIL_STATE_UNCHANGED;
 
-            if (m->item_guid)
-                _LoadMailedItem(m->item_guid, m->item_template);
+            if (has_items)
+                _LoadMailedItems(m);
 
             m_mail.push_back(m);
         } while( result->NextRow() );
@@ -13499,19 +13551,25 @@ void Player::_SaveMail()
         Mail *m = (*itr);
         if (m->state == MAIL_STATE_CHANGED)
         {
-            CharacterDatabase.PExecute("UPDATE `mail` SET `itemTextId` = '%u',`item_guid` = '%u',`item_template` = '%u',`expire_time` = '" I64FMTD "', `deliver_time` = '" I64FMTD "',`money` = '%u',`cod` = '%u',`checked` = '%u' WHERE `id` = '%u'",
-                m->itemTextId, m->item_guid, m->item_template, (uint64)m->expire_time, (uint64)m->deliver_time, m->money, m->COD, m->checked, m->messageID);
+            CharacterDatabase.PExecute("UPDATE `mail` SET `itemTextId` = '%u',`has_items` = '%u',`expire_time` = '" I64FMTD "', `deliver_time` = '" I64FMTD "',`money` = '%u',`cod` = '%u',`checked` = '%u' WHERE `id` = '%u'",
+                m->itemTextId, m->items.size() ? 1 : 0, (uint64)m->expire_time, (uint64)m->deliver_time, m->money, m->COD, m->checked, m->messageID);
+            if(m->removedItems.size())
+            {
+                for(std::vector<uint32>::iterator itr2 = m->removedItems.begin(); itr2 != m->removedItems.end(); ++itr2)
+                    CharacterDatabase.PExecute("DELETE FROM `mail_items` WHERE `item_guid` = '%u'", itr2);
+                m->removedItems.clear();
+            }
             m->state = MAIL_STATE_UNCHANGED;
         }
         else if (m->state == MAIL_STATE_DELETED)
         {
-            if (m->item_guid)
-                CharacterDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", m->item_guid);
+            if (m->HasItems())
+                for(std::vector<MailItemInfo>::iterator itr2 = m->items.begin(); itr2 != m->items.end(); ++itr2)
+                    CharacterDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", itr2->item_guid);
             if (m->itemTextId)
-            {
                 CharacterDatabase.PExecute("DELETE FROM `item_text` WHERE `id` = '%u'", m->itemTextId);
-            }
             CharacterDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", m->messageID);
+            CharacterDatabase.PExecute("DELETE FROM `mail_items` WHERE `mail_id` = '%u'", m->messageID);
         }
     }
     //deallocate deleted mails...

@@ -1784,11 +1784,14 @@ bool ChatHandler::HandleSendMailCommand(const char* args)
 
     Player *receiver = objmgr.GetPlayer((uint32) receiver_guid);
     if(receiver)
-        receiver->CreateMail(mailId,messagetype,sender_guid,subject.c_str(),itemTextId,0,0,(uint64)etime,(uint64)dtime,0,0,0,0);
+    {
+        MailItemsInfo mi;
+        receiver->CreateMail(mailId, messagetype, sender_guid, subject.c_str(), itemTextId, &mi, (uint64)etime, (uint64)dtime, 0, 0, 0);
+    }
 
     CharacterDatabase.escape_string(subject);
-    CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-        "VALUES ('%u', '%u', '%u', '%u', '%s', '%u', '0', '0', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
+    CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+        "VALUES ('%u', '%u', '%u', '%u', '%s', '%u', '0', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
         mailId, messagetype, sender_guid, receiver_guid, subject.c_str(), itemTextId, (uint64)etime, (uint64)dtime, NOT_READ);
 
     PSendSysMessage(LANG_MAIL_SENT, name.c_str());

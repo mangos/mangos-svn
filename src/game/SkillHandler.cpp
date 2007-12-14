@@ -166,7 +166,8 @@ void WorldSession::HandleTalentWipeOpcode( WorldPacket & recv_data )
     WorldPacket data(SMSG_SPELL_START, (2+2+2+4+2+8+8));
     data.append(_player->GetPackGUID());
     data.append(unit->GetPackGUID());
-    data << uint16(14867) << uint16(0x00) << uint16(0x0F) << uint32(0x00)<< uint16(0x00);
+    data << uint16(14867) << uint8(0);
+    data << uint16(0x00) << uint16(0x0F) << uint32(0x00)<< uint16(0x00);
     SendPacket( &data );
 
     data.Initialize(SMSG_SPELL_GO, (2+2+1+1+1+8+4+2+2+8+8));

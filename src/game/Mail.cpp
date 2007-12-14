@@ -31,37 +31,57 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,8+1+1+1+4+4+8+4+4);
 
-    uint64 mailbox,itemId;
-    std::string receiver,subject,body;
-    uint32 unk1,unk2,money,COD,mailId;
+    uint64 mailbox;
+    std::string receiver, subject, body;
+    uint32 unk1, unk2, unk3, unk4, money, COD, mailId;
+    uint8 unk5;
     recv_data >> mailbox;
     recv_data >> receiver;
 
     // recheck
-    CHECK_PACKET_SIZE(recv_data,8+(receiver.size()+1)+1+1+4+4+8+4+4);
+    CHECK_PACKET_SIZE(recv_data, 8+(receiver.size()+1)+1+1+4+4+8+4+4);
 
     recv_data >> subject;
 
     // recheck
-    CHECK_PACKET_SIZE(recv_data,8+(receiver.size()+1)+(subject.size()+1)+1+4+4+8+4+4);
+    CHECK_PACKET_SIZE(recv_data, 8+(receiver.size()+1)+(subject.size()+1)+1+4+4+8+4+4);
 
     recv_data >> body;
 
     // recheck
-    CHECK_PACKET_SIZE(recv_data,8+(receiver.size()+1)+(subject.size()+1)+(body.size()+1)+4+4+8+4+4);
+    CHECK_PACKET_SIZE(recv_data, 8+(receiver.size()+1)+(subject.size()+1)+(body.size()+1)+4+4+8+4+4);
 
-    recv_data >> unk1 >> unk2;                              // 0x29 and 0x00
-    recv_data >> itemId;
-    recv_data >> money >> COD;                              //then there are two (uint32) 0;
+    recv_data >> unk1;                                      // stationery?
+    recv_data >> unk2;                                      // 0x00000000
+
+    MailItemsInfo mi;
+
+    recv_data >> mi.items_count;                            // attached items count
+
+    if(mi.items_count > 12)                                 // client limit
+        return;
+
+    if(mi.items_count)
+    {
+        for(uint8 i = 0; i < mi.items_count; ++i)
+        {
+            recv_data >> mi.item_slot[i];
+            recv_data >> mi.item_guid[i];
+        }
+    }
+
+    recv_data >> money >> COD;                              // then there are two (uint32) 0;
+    recv_data >> unk3 >> unk4 >> unk5;                      // unknown 2.3.0 (zero's)
 
     if (receiver.empty())
         return;
+
     normalizePlayerName(receiver);
-    //CharacterDatabase.escape_string(receiver);                      // prevent SQL injection
+    //CharacterDatabase.escape_string(receiver);            // prevent SQL injection
 
     Player* pl = _player;
 
-    sLog.outDetail("Player %u is sending mail to %s with subject %s and body %s includes item %u, %u copper and %u COD copper with unk1 = %u, unk2 = %u",pl->GetGUIDLow(),receiver.c_str(),subject.c_str(),body.c_str(),GUID_LOPART(itemId),money,COD,unk1,unk2);
+    sLog.outDetail("Player %u is sending mail to %s with subject %s and body %s includes %u items, %u copper and %u COD copper with unk1 = %u, unk2 = %u", pl->GetGUIDLow(), receiver.c_str(), subject.c_str(), body.c_str(), mi.items_count, money, COD, unk1, unk2);
 
     uint64 rc = objmgr.GetPlayerGUIDByName(receiver);
     if (!rc)
@@ -76,7 +96,11 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         return;
     }
 
-    if (pl->GetMoney() < money + 30)
+    uint32 reqmoney = money + 30;
+    if (mi.items_count)
+        reqmoney = money + (30 * mi.items_count);
+
+    if (pl->GetMoney() < reqmoney)
     {
         pl->SendMailResult(0, 0, MAIL_ERR_NOT_ENOUGH_MONEY);
         return;
@@ -116,22 +140,23 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         return;
     }
 
-    uint16 item_pos;
-    Item *pItem = 0;
-    if (itemId)
+    if (mi.items_count)
     {
-        item_pos = pl->GetPosByGuid(itemId);
-        pItem = pl->GetItemByPos( item_pos );
-        // prevent sending bag with items (cheat: can be placed in bag after adding equipped empty bag to mail)
-        if(!pItem || !pItem->CanBeTraded())
+        for(uint8 i = 0; i < mi.items_count; ++i)
         {
-            pl->SendMailResult(0, 0, MAIL_ERR_INTERNAL_ERROR);
-            return;
-        }
-        if (pItem->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_CONJURED))
-        {
-            pl->SendMailResult(0, 0, MAIL_ERR_INTERNAL_ERROR);
-            return;
+            mi.item_pos[i] = pl->GetPosByGuid(mi.item_guid[i]);
+            mi.items[i] = pl->GetItemByPos(mi.item_pos[i]);
+            // prevent sending bag with items (cheat: can be placed in bag after adding equipped empty bag to mail)
+            if(!mi.items[i] || !mi.items[i]->CanBeTraded())
+            {
+                pl->SendMailResult(0, 0, MAIL_ERR_INTERNAL_ERROR);
+                return;
+            }
+            if (mi.items[i]->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_CONJURED))
+            {
+                pl->SendMailResult(0, 0, MAIL_ERR_INTERNAL_ERROR);
+                return;
+            }
         }
     }
     pl->SendMailResult(0, 0, MAIL_OK);
@@ -142,11 +167,11 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         itemTextId = objmgr.CreateItemText( body );
     }
 
-    pl->ModifyMoney( -int32(30 + money) );
+    pl->ModifyMoney( -int32(reqmoney) );
 
     bool needItemDelay = false;
 
-    if (pItem)
+    if (mi.items_count)
     {
         uint32 rc_account = 0;
         if(receive)
@@ -154,33 +179,42 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         else
             rc_account = objmgr.GetPlayerAccountIdByGUID(rc);
 
+        for(uint8 i = 0; i < mi.items_count; ++i)
+        {
+            if(!mi.items[i])
+                continue;
+
+            mi.item_template[i] = mi.items[i] ? mi.items[i]->GetEntry() : 0;
+
+            if( GetSecurity() > SEC_PLAYER && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
+            {
+                sLog.outCommand("GM %s (Account: %u) mail item: %s (Entry: %u Count: %u) and money: %u to player: %s (Account: %u)",
+                    GetPlayerName(), GetAccountId(), mi.items[i]->GetProto()->Name1, mi.items[i]->GetEntry(), mi.items[i]->GetCount(), money, receiver.c_str(), rc_account);
+            }
+
+            pl->RemoveItem( (mi.item_pos[i] >> 8), (mi.item_pos[i] & 255), true );
+            mi.items[i]->RemoveFromUpdateQueueOf( pl );
+            //item reminds in item_instance table already, used it in mail now
+            if(mi.items[i]->IsInWorld())
+            {
+                mi.items[i]->RemoveFromWorld();
+                mi.items[i]->DestroyForPlayer( pl );
+            }
+
+            CharacterDatabase.BeginTransaction();
+            mi.items[i]->DeleteFromInventoryDB();          //deletes item from character's inventory
+            mi.items[i]->SaveToDB();                       // recursive and not have transaction guard into self
+            // owner in `data` will set at mail receive and item extracting
+            CharacterDatabase.PExecute("UPDATE `item_instance` SET `owner_guid` = '%u' WHERE `guid`='%u'", GUID_LOPART(rc), mi.items[i]->GetGUIDLow());
+            CharacterDatabase.CommitTransaction();
+        }
+
         // if item send to character at another account, then apply item delivery delay
         needItemDelay = pl->GetSession()->GetAccountId() != rc_account;
-
-        if( GetSecurity() > SEC_PLAYER && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
-        {
-            sLog.outCommand("GM %s (Account: %u) mail item: %s (Entry: %u Count: %u) and money: %u to player: %s (Account: %u)",
-                GetPlayerName(),GetAccountId(),pItem->GetProto()->Name1,pItem->GetEntry(),pItem->GetCount(),money,receiver.c_str(),rc_account);
-        }
-
-        pl->RemoveItem( (item_pos >> 8), (item_pos & 255), true );
-        pItem->RemoveFromUpdateQueueOf( pl );
-        //item reminds in item_instance table already, used it in mail now
-        if(pItem->IsInWorld())
-        {
-            pItem->RemoveFromWorld();
-            pItem->DestroyForPlayer( pl );
-        }
-
-        CharacterDatabase.BeginTransaction();
-        pItem->DeleteFromInventoryDB();                     //deletes item from character's inventory
-        pItem->SaveToDB();                                  // recursive and not have transaction guard into self
-        // owner in `data` will set at mail receive and item extracting
-        CharacterDatabase.PExecute("UPDATE `item_instance` SET `owner_guid` = '%u' WHERE `guid`='%u'",GUID_LOPART(rc),pItem->GetGUIDLow());
-        CharacterDatabase.CommitTransaction();
     }
+
     uint32 messagetype = MAIL_NORMAL;
-    uint32 item_template = pItem ? pItem->GetEntry() : 0;   //item prototype
+
     mailId = objmgr.GenerateMailID();
 
     // If theres is an item, there is a one hour delivery delay if sent to another account's character.
@@ -189,17 +223,22 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     time_t etime = dtime + DAY * ((COD > 0)? 3 : 30);       //time if COD 3 days, if no COD 30 days
 
     if (receive)
-    {
-        receive->CreateMail(mailId, messagetype, pl->GetGUIDLow(), subject, itemTextId, GUID_LOPART(itemId), item_template, etime, dtime, money, COD, NOT_READ, pItem);
-    }
-    else if (pItem)
-        delete pItem;                                       //item is sent, but receiver isn't online .. so remove it from RAM
+        receive->CreateMail(mailId, messagetype, pl->GetGUIDLow(), subject, itemTextId, &mi, etime, dtime, money, COD, NOT_READ);
+    else
+        for(uint8 i = 0; i < mi.items_count; ++i)
+            if (mi.items[i])
+                delete mi.items[i];                        //item is sent, but receiver isn't online .. so remove it from RAM
+
     // backslash all '
     CharacterDatabase.escape_string(subject);
     //not needed : CharacterDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mID);
-    CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-        "VALUES ('%u', '%u', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "','" I64FMTD "', '%u', '%u', '%d')",
-        mailId, messagetype, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), itemTextId, GUID_LOPART(itemId), item_template, (uint64)etime, (uint64)dtime, money, COD, NOT_READ);
+    CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+        "VALUES ('%u', '%u', '%u', '%u', '%s', '%u', '%u', '" I64FMTD "','" I64FMTD "', '%u', '%u', '%d')",
+        mailId, messagetype, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), itemTextId, mi.items_count ? 1 : 0, (uint64)etime, (uint64)dtime, money, COD, NOT_READ);
+
+    for(uint8 i = 0; i < mi.items_count; ++i)
+        CharacterDatabase.PExecute("INSERT INTO `mail_items` (`mail_id`,`item_guid`,`item_template`) VALUES ('%u', '%u', '%u')", mailId, GUID_LOPART(mi.item_guid[i]), mi.item_template[i]);
+
     CharacterDatabase.BeginTransaction();
     pl->SaveInventoryAndGoldToDB();
     CharacterDatabase.CommitTransaction();
@@ -261,46 +300,63 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
     }
     //we can return mail now
     //so firstly delete the old one
+    CharacterDatabase.BeginTransaction();
     CharacterDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", mailId);
+    CharacterDatabase.PExecute("DELETE FROM `mail_items` WHERE `mail_id` = '%u'", mailId); // needed?
+    CharacterDatabase.CommitTransaction();
     pl->RemoveMail(mailId);
 
     uint32 messageID = objmgr.GenerateMailID();
 
-    Item *pItem = NULL;
-    if (m->item_guid)
+    MailItemsInfo mi;
+
+    if(m->HasItems())
     {
-        pItem = pl->GetMItem(m->item_guid);
-        pl->RemoveMItem(m->item_guid);
+        for(std::vector<MailItemInfo>::iterator itr2 = m->items.begin(); itr2 != m->items.end(); ++itr2)
+        {
+            Item *item = pl->GetMItem(itr2->item_guid);
+            if(item)
+                mi.AddItem(item->GetGUIDLow(), item->GetEntry(), item);
+            else
+            {
+                //WTF?
+            }
+
+            pl->RemoveMItem(itr2->item_guid);
+        }
     }
 
-    SendReturnToSender(messageID,0,GetAccountId(),m->receiver,m->sender,m->subject,m->itemTextId,m->item_guid,m->item_template, m->money,0,pItem);
+    SendReturnToSender(messageID, 0, GetAccountId(), m->receiver, m->sender, m->subject, m->itemTextId, &mi, m->money, 0);
 
     delete m;                                               //we can deallocate old mail
     pl->SendMailResult(mailId, MAIL_RETURNED_TO_SENDER, 0);
 }
 
-void WorldSession::SendReturnToSender(uint32 mailId, uint8 messageType, uint32 sender_acc, uint32 sender_guid, uint32 receiver_guid, std::string subject, uint32 itemTextId, uint32 itemGuid, uint32 item_template, uint32 money, uint32 COD, Item* pItem)
+void WorldSession::SendReturnToSender(uint32 mailId, uint8 messageType, uint32 sender_acc, uint32 sender_guid, uint32 receiver_guid, std::string subject, uint32 itemTextId, MailItemsInfo *mi, uint32 money, uint32 COD)
 {
-    Player *receiver = objmgr.GetPlayer(MAKE_GUID(receiver_guid,HIGHGUID_PLAYER));
+    Player *receiver = objmgr.GetPlayer(MAKE_GUID(receiver_guid, HIGHGUID_PLAYER));
 
     uint32 rc_account = 0;
     if(!receiver)
-        rc_account = objmgr.GetPlayerAccountIdByGUID(MAKE_GUID(receiver_guid,HIGHGUID_PLAYER));
+        rc_account = objmgr.GetPlayerAccountIdByGUID(MAKE_GUID(receiver_guid, HIGHGUID_PLAYER));
 
     if(receiver || rc_account)
     {
         bool needItemDelay = false;
 
-        if(pItem)
+        if(mi->items_count)
         {
             // if item send to character at another account, then apply item delivery delay
             needItemDelay = sender_acc != rc_account;
 
             // set owner to new receiver (to prevent delete item with sender char deleting)
             CharacterDatabase.BeginTransaction();
-            pItem->SaveToDB();                                  // recursive and not have transaction guard into self
-            // owner in `data` will set at mail receive and item extracting
-            CharacterDatabase.PExecute("UPDATE `item_instance` SET `owner_guid` = '%u' WHERE `guid`='%u'",receiver_guid,pItem->GetGUIDLow());
+            for(uint8 i = 0; i < mi->items_count; ++i)
+            {
+                mi->items[i]->SaveToDB();                       // recursive and not have transaction guard into self
+                // owner in `data` will set at mail receive and item extracting
+                CharacterDatabase.PExecute("UPDATE `item_instance` SET `owner_guid` = '%u' WHERE `guid`='%u'", receiver_guid, mi->items[i]->GetGUIDLow());
+            }
             CharacterDatabase.CommitTransaction();
         }
 
@@ -310,32 +366,49 @@ void WorldSession::SendReturnToSender(uint32 mailId, uint8 messageType, uint32 s
         time_t expire_time = deliver_time + 30*DAY;
 
         if(receiver)
-            receiver->CreateMail(mailId,0,sender_guid,subject,itemTextId,itemGuid,item_template,expire_time, deliver_time, money,0,RETURNED_CHECKED,pItem);
-        else if ( pItem )
-            delete pItem;
+        {
+            receiver->CreateMail(mailId, 0, sender_guid, subject, itemTextId, mi, expire_time, deliver_time, money, 0, RETURNED_CHECKED);
+        }
+        else
+        {
+            if (mi->items_count)
+                for(uint8 i = 0; i < mi->items_count; ++i)
+                    delete mi->items[i];
+        }
 
         CharacterDatabase.escape_string(subject);                       //we cannot forget to delete COD, if returning mail with COD
-        CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-            "VALUES ('%u', '0', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "', '" I64FMTD "', '%u', '0', '%d')",
-            mailId, sender_guid, receiver_guid, subject.c_str(), itemTextId, itemGuid, item_template, (uint64)expire_time, (uint64)deliver_time, money,RETURNED_CHECKED);
+        CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+            "VALUES ('%u', '0', '%u', '%u', '%s', '%u', '%u', '" I64FMTD "', '" I64FMTD "', '%u', '0', '%d')",
+            mailId, sender_guid, receiver_guid, subject.c_str(), itemTextId, mi->items_count ? 1 : 0, (uint64)expire_time, (uint64)deliver_time, money,RETURNED_CHECKED);
+
+        for(uint8 i = 0; i < mi->items_count; ++i)
+            CharacterDatabase.PExecute("INSERT INTO `mail_items` (`mail_id`,`item_guid`,`item_template`) VALUES ('%u', '%u', '%u')", mailId, GUID_LOPART(mi->item_guid[i]), mi->item_template[i]);
     }
-    else if(pItem)
+    else
     {
-        CharacterDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid`='%u'",pItem->GetGUIDLow());
-        delete pItem;
+        if(mi->items_count)
+        {
+            for(uint8 i = 0; i < mi->items_count; ++i)
+            {
+                CharacterDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid`='%u'", mi->items[i]->GetGUIDLow());
+                delete mi->items[i];
+            }
+        }
     }
 }
 
 //called when player takes item attached in mail
 void WorldSession::HandleTakeItem(WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data,8+4);
+    CHECK_PACKET_SIZE(recv_data,8+4+4);
 
     uint64 mailbox;
     uint32 mailId;
+    uint32 itemId;
     uint16 dest;
     recv_data >> mailbox;
     recv_data >> mailId;
+    recv_data >> itemId; // item guid low?
     Player* pl = _player;
 
     Mail* m = pl->GetMail(mailId);
@@ -352,17 +425,17 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
         return;
     }
 
-    Item *it = pl->GetMItem(m->item_guid);
+    Item *it = pl->GetMItem(itemId);
 
     uint8 msg = _player->CanStoreItem( NULL_BAG, NULL_SLOT, dest, it, false );
     if( msg == EQUIP_ERR_OK )
     {
-        m->item_guid = 0;
-        m->item_template = 0;
+        m->RemoveItem(itemId);
+        m->removedItems.push_back(itemId);
 
         if (m->COD > 0)                                     //if there is COD, take COD money from player and send them to sender by mail
         {
-            uint64 sender_guid = MAKE_GUID(m->sender,HIGHGUID_PLAYER);
+            uint64 sender_guid = MAKE_GUID(m->sender, HIGHGUID_PLAYER);
             Player *receive = objmgr.GetPlayer(sender_guid);
 
             uint32 sender_accId = 0;
@@ -398,15 +471,17 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
                 time_t etime = dtime + (30 * DAY);
                 uint32 newMailId = objmgr.GenerateMailID();
                 if (receive)
-                    receive->CreateMail(newMailId, 0, m->receiver, m->subject, 0, 0, 0, etime, dtime, m->COD, 0, COD_PAYMENT_CHECKED, NULL);
+                {
+                    MailItemsInfo mi;
+                    receive->CreateMail(newMailId, 0, m->receiver, m->subject, 0, &mi, etime, dtime, m->COD, 0, COD_PAYMENT_CHECKED);
+                }
 
                 //escape apostrophes
                 std::string subject = m->subject;
                 CharacterDatabase.escape_string(subject);
-                CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-                    "VALUES ('%u', '0', '%u', '%u', '%s', '0', '0', '0', '" I64FMTD "', '" I64FMTD "', '%u', '0', '%d')",
+                CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+                    "VALUES ('%u', '0', '%u', '%u', '%s', '0', '0', '" I64FMTD "', '" I64FMTD "', '%u', '0', '%d')",
                     newMailId, m->receiver, m->sender, subject.c_str(), (uint64)etime, (uint64)dtime, m->COD, COD_PAYMENT_CHECKED);
-
             }
 
             pl->ModifyMoney( -int32(m->COD) );
@@ -430,7 +505,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
         pl->_SaveMail();
         CharacterDatabase.CommitTransaction();
 
-        pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_OK);
+        pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_OK, 0, itemId, it2->GetCount());
     }
     else
         pl->SendMailResult(mailId, MAIL_ITEM_TAKEN, MAIL_ERR_BAG_FULL, msg);
@@ -495,91 +570,100 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
     for (itr = pl->GetmailBegin(); itr != pl->GetmailEnd() && mails_count < 217; itr++)
     {
         // skip deleted or not delivered (deliver delay not expired) mails
-        if ((*itr)->state == MAIL_STATE_DELETED || (*itr)->item_guid != 0 && cur_time < (*itr)->deliver_time)
+        if ((*itr)->state == MAIL_STATE_DELETED || (*itr)->HasItems() && cur_time < (*itr)->deliver_time)
             continue;
 
         mails_count++;
+        data << (uint16) 0x0040;                            // unknown 2.3.0, different values
         data << (uint32) (*itr)->messageID;                 // Message ID
 
-        if((*itr)->messageType == MAIL_GM)
+        if((*itr)->messageType == MAIL_GM)                  // not send custom message type to client
             data << (uint8) 0;
         else
             data << (uint8) (*itr)->messageType;            // Message Type, once = 3
 
-        if((*itr)->messageType == MAIL_AUCTION)
-            data << uint32(2);                              // probably auctionhouse id(2==alliance?)
-        /*else if((*itr)->messageType == MAIL_CREATURE)
-            data << uint32(0);                              // creature entry
-        else if((*itr)->messageType == MAIL_GAMEOBJECT)
-            data << uint32(0);                              // gameobject entry
-        else if((*itr)->messageType == MAIL_ITEM)
-            data << uint32(0);                              // item entry*/
-        else
-            data << (*itr)->sender;                         // SenderID
+        switch((*itr)->messageType)
+        {
+            case MAIL_NORMAL:
+            case MAIL_GM:
+                data << (uint64) (*itr)->sender;            // sender guid
+                break;
+            case MAIL_CREATURE:
+            case MAIL_GAMEOBJECT:
+            case MAIL_ITEM:
+                data << (uint32) 0;                         // creature/gameobject/item entry
+                break;
+            case MAIL_AUCTION:
+                data << (uint32) 2;                         // auctionhouse id(2==alliance?)
+                break;
+        }
 
-        if ((*itr)->messageType == MAIL_NORMAL || (*itr)->messageType == MAIL_GM)
-            data << (uint32) 0;                             // HIGHGUID_PLAYER
-
-        data << (*itr)->subject.c_str();                    // Subject string - once 00, when mail type = 3
+        data << (uint32) (*itr)->COD;                       // COD
         data << (uint32) (*itr)->itemTextId;                // sure about this
+        data << (uint32) 0;                                 // unknown
+
+        // stationery (Stationery.dbc)
+        switch((*itr)->messageType)
+        {
+            case MAIL_GM:
+                data << (uint32) MAIL_STATIONERY_GM;        // customer support mail
+                break;
+            case MAIL_AUCTION:
+                data << (uint32) MAIL_STATIONERY_AUCTION;   // auction mail
+                break;
+            default:
+                data << (uint32) MAIL_STATIONERY_NORMAL;    // normal mail
+                break;
+        }
+
+        data << (uint32) (*itr)->money;                     // Gold
+        data << (uint32) 0x04;                              // unknown, 0x4 - auction, 0x10 - normal
+        data << (float)  ((*itr)->expire_time-time(NULL))/DAY;// Time
         data << (uint32) 0;                                 // Constant, unknown
+        data << (*itr)->subject;                            // Subject string - once 00, when mail type = 3
 
-        if ((*itr)->messageType == MAIL_NORMAL)
-            data << (uint32) 0x29;                          // normal mail
-        else if((*itr)->messageType == MAIL_GM)
-            data << (uint32) 0x3D;                          // customer support mail
-        else
-            data << (uint32) 0x3E;                          // auction mail
-        // 0x40 - valentine mail?
+        uint8 item_count = (*itr)->items.size();            // max count is 12
 
-        uint8 icount = 1;
-        Item* it = NULL;
-        if ((*itr)->item_guid != 0)
+        if(item_count)
         {
-            if(it = pl->GetMItem((*itr)->item_guid))
+            data << (uint8) item_count;
+            Mail *m = (*itr);
+            uint8 i = 0;
+            for(std::vector<MailItemInfo>::iterator itr2 = m->items.begin(); itr2 != m->items.end(); ++itr2)
             {
-                                                            //item prototype
-                data << it->GetUInt32Value(OBJECT_FIELD_ENTRY);
-                icount = it->GetCount();
-            }
-            else
-            {
-                sLog.outError("Mail to %s marked as having item (mail item idx: %u), but item not found.",pl->GetName(),(*itr)->item_guid);
-                data << (uint32) 0;
+                Item *item = pl->GetMItem(itr2->item_guid);
+                // item index (0-6?)
+                data << (uint8)  i;
+                // item guid low?
+                data << (uint32) (item ? item->GetGUIDLow() : 0);
+                // entry
+                data << (uint32) (item ? item->GetEntry() : 0);
+                for(uint8 j = 0; j < 6; ++j)
+                {
+                    // unsure
+                    data << (uint32) (item ? item->GetEnchantmentCharges((EnchantmentSlot)j) : 0);
+                    // unsure
+                    data << (uint32) (item ? item->GetEnchantmentDuration((EnchantmentSlot)j) : 0);
+                    // unsure
+                    data << (uint32) (item ? item->GetEnchantmentId((EnchantmentSlot)j) : 0);
+                }
+                // can be negative
+                data << (uint32) (item ? item->GetItemRandomPropertyId() : 0);
+                // unk
+                data << (uint32) (item ? item->GetItemSuffixFactor() : 0);
+                // stack count
+                data << (uint8)  (item ? item->GetCount() : 0);
+                // charges
+                data << (uint32) (item ? item->GetSpellCharges() : 0);
+                // durability
+                data << (uint32) (item ? item->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) : 0);
+                // durability
+                data << (uint32) (item ? item->GetUInt32Value(ITEM_FIELD_DURABILITY) : 0);
+                i++;
             }
         }
         else
-            data << (uint32) 0;                             // Any item attached
-
-        // ?? strange code: maybe 6 * (enchant_id,duration,charges) from BONUS_ENCHANTMENT_SLOT to PERM_ENCHANTMENT_SLOT
-        // in reversed order and reversed field order in enchantment
-        for(uint8 i = 0; i < 5; i++)                        // new 2.0.1
-        {
-            data << (uint32) 0;
-            data << getMSTime();                            //enchantment apply time?
-            data << (uint32) 0;
-        }
-
-        // last (5) currently know only iteration
-        data << (uint32) 0;
-        data << getMSTime();                                //enchantment apply time?
-        data << (uint32) (it ? it->GetEnchantmentId(PERM_ENCHANTMENT_SLOT) : 0);
-
-        data << (uint32) (it ? it->GetItemRandomPropertyId() : 0);
-        data << (uint32) (it ? it->GetItemSuffixFactor() : 0);
-
-        data << (uint8)  icount;                            // Attached item stack count
-        int32  charges = (it) ? it->GetSpellCharges() : 0;
-        uint32 maxDurability = (it) ? it->GetUInt32Value(ITEM_FIELD_MAXDURABILITY) : 0;
-        uint32 curDurability = (it) ? it->GetUInt32Value(ITEM_FIELD_DURABILITY) : 0;
-        data << uint32(charges);                            // item charges (stored as unit32 but is int32 by content)
-        data << uint32(maxDurability);                      // MaxDurability
-        data << uint32(curDurability);                      // Durability
-        data << uint32((*itr)->money);                      // Gold
-        data << uint32((*itr)->COD);                        // COD
-        data << uint32((*itr)->checked);                    // checked
-        data << (float)((*itr)->expire_time-time(NULL))/DAY;// Time
-        data << (uint32) 0;                                 // Constant, something like end..
+            data << (uint8) 0;
     }
     data.put<uint8>(0, mails_count);
     SendPacket(&data);
@@ -662,17 +746,59 @@ void WorldSession::HandleMailCreateTextItem(WorldPacket & recv_data )
 //TODO Fix me! ... this void has probably bad condition, but good data are sent
 void WorldSession::HandleMsgQueryNextMailtime(WorldPacket & recv_data )
 {
-    WorldPacket data(MSG_QUERY_NEXT_MAIL_TIME,4);
+    WorldPacket data(MSG_QUERY_NEXT_MAIL_TIME, 8);
+
+    if(!_player->m_mailsLoaded)
+        _player->_LoadMail();
+
     if( _player->unReadMails > 0 )
     {
-        data << (uint32) 0;
+        data << (uint32) 0;                                 // 0
+        data << (uint32) 0;                                 // count
+        uint32 count = 0;
+        for(PlayerMails::iterator itr = _player->GetmailBegin(); itr != _player->GetmailEnd(); ++itr)
+        {
+            Mail *m = (*itr);
+            // not checked yet, already must be delivered
+            if((m->checked = NOT_READ) && (m->deliver_time <= time(NULL)))
+            {
+                count++;
+
+                if(count > 2)
+                {
+                    count = 2;
+                    break;
+                }
+
+                data << (uint64) m->sender;                 // sender guid
+
+                switch(m->messageType)
+                {
+                    case MAIL_GM:
+                        data << (uint32) 0;
+                        data << (uint32) 0;
+                        data << (uint32) MAIL_STATIONERY_GM;
+                        break;
+                    case MAIL_AUCTION:
+                        data << (uint32) 2;
+                        data << (uint32) 2;
+                        data << (uint32) MAIL_STATIONERY_AUCTION;
+                        break;
+                    default:
+                        data << (uint32) 0;
+                        data << (uint32) 0;
+                        data << (uint32) MAIL_STATIONERY_NORMAL;
+                        break;
+                }
+                data << (uint32) 0xC6000000;                // unk, time or something
+            }
+        }
+        data.put<uint32>(4, count);
     }
     else
     {
-        data << (uint8) 0x00;
-        data << (uint8) 0xC0;
-        data << (uint8) 0xA8;
-        data << (uint8) 0xC7;
+        data << (uint32) 0xC7A8C000;
+        data << (uint32) 0x00000000;
     }
     SendPacket(&data);
 }

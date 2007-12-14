@@ -562,7 +562,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
     normalizePlayerName(friendName);
     CharacterDatabase.escape_string(friendName);                    // prevent SQL injection - normal name don't must changed by this call
 
-    sLog.outDetail( "WORLD: %s asked to add friend : '%s'",
+    sLog.outDebug(  "WORLD: %s asked to add friend : '%s'",
         GetPlayer()->GetName(), friendName.c_str() );
 
     friendGuid = objmgr.GetPlayerGUIDByName(friendName);
@@ -595,23 +595,23 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
         if(!GetPlayer()->AddToFriendList(friendGuid, friendName))
         {
             friendResult = FRIEND_LIST_FULL;
-            sLog.outDetail( "WORLD: %s's friend list is full.", GetPlayer()->GetName());
+            sLog.outDebug(  "WORLD: %s's friend list is full.", GetPlayer()->GetName());
         }
 
-        sLog.outDetail( "WORLD: %s Guid found '%u' area:%u Level:%u Class:%u. ",
+        sLog.outDebug(  "WORLD: %s Guid found '%u' area:%u Level:%u Class:%u. ",
             friendName.c_str(), GUID_LOPART(friendGuid), friendArea, friendLevel, friendClass);
     }
     else if(friendResult==FRIEND_ALREADY)
     {
-        sLog.outDetail( "WORLD: %s Guid Already a Friend. ", friendName.c_str() );
+        sLog.outDebug(  "WORLD: %s Guid Already a Friend. ", friendName.c_str() );
     }
     else if(friendResult==FRIEND_SELF)
     {
-        sLog.outDetail( "WORLD: %s Guid can't add himself. ", friendName.c_str() );
+        sLog.outDebug(  "WORLD: %s Guid can't add himself. ", friendName.c_str() );
     }
     else
     {
-        sLog.outDetail( "WORLD: %s Guid not found. ", friendName.c_str() );
+        sLog.outDebug(  "WORLD: %s Guid not found. ", friendName.c_str() );
     }
 
     data << (uint8)friendResult << (uint64)friendGuid << (uint8)0;
@@ -660,7 +660,7 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
     normalizePlayerName(IgnoreName);
     CharacterDatabase.escape_string(IgnoreName);                    // prevent SQL injection - normal name don't must changed by this call
 
-    sLog.outDetail( "WORLD: %s asked to Ignore: '%s'",
+    sLog.outDebug(  "WORLD: %s asked to Ignore: '%s'",
         GetPlayer()->GetName(), IgnoreName.c_str() );
 
     IgnoreGuid = objmgr.GetPlayerGUIDByName(IgnoreName);
@@ -686,15 +686,15 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
     }
     else if(ignoreResult==FRIEND_IGNORE_ALREADY)
     {
-        sLog.outDetail( "WORLD: %s Guid Already Ignored. ", IgnoreName.c_str() );
+        sLog.outDebug(  "WORLD: %s Guid Already Ignored. ", IgnoreName.c_str() );
     }
     else if(ignoreResult==FRIEND_IGNORE_SELF)
     {
-        sLog.outDetail( "WORLD: %s Guid can't add himself. ", IgnoreName.c_str() );
+        sLog.outDebug(  "WORLD: %s Guid can't add himself. ", IgnoreName.c_str() );
     }
     else
     {
-        sLog.outDetail( "WORLD: %s Guid not found. ", IgnoreName.c_str() );
+        sLog.outDebug(  "WORLD: %s Guid not found. ", IgnoreName.c_str() );
     }
 
     data << (uint8)ignoreResult << (uint64)IgnoreGuid;
@@ -990,7 +990,7 @@ void WorldSession::HandleSetActionButtonOpcode(WorldPacket& recv_data)
 {
     CHECK_PACKET_SIZE(recv_data,1+2+1+1);
 
-    sLog.outDetail( "WORLD: Received CMSG_SET_ACTION_BUTTON" );
+    sLog.outDebug(  "WORLD: Received CMSG_SET_ACTION_BUTTON" );
     uint8 button, misc, type;
     uint16 action;
     recv_data >> button >> action >> misc >> type;
@@ -1180,18 +1180,88 @@ void WorldSession::HandlePlayedTime(WorldPacket& /*recv_data*/)
 
 void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
 {
-    CHECK_PACKET_SIZE(recv_data,8);
+    CHECK_PACKET_SIZE(recv_data, 8);
 
     uint64 guid;
     recv_data >> guid;
-    DEBUG_LOG("Inspected guid is " I64FMTD,guid);
+    DEBUG_LOG("Inspected guid is " I64FMTD, guid);
 
     if( _player != 0 )
         _player->SetSelection(guid);
 
-    WorldPacket data( SMSG_INSPECT, 8 );
+    Player *plr = objmgr.GetPlayer(guid);
+    if(!plr)    // wrong player
+        return;
+
+    /*WorldPacket data(SMSG_INSPECT, 8); // not used in 2.3.0
     data << guid;
-    SendPacket(&data);
+    SendPacket(&data);*/
+    /*uint32 talent_points = 0x3D;
+    WorldPacket data(SMSG_INSPECT_TALENTS, 4+talent_points);
+    data << uint32(talent_points);
+
+    for(uint32 i = 0; i < talent_points; ++i)
+        data << uint8(0);
+    //plr->GetSpellMap()
+
+    uint32 talenttabids[3] = { 0, 0, 0 }; // all players have 3 talent tabs
+    uint8 j = 0;
+    for(uint32 i = 0; i < sTalentTabStore.GetNumRows(); ++i)
+    {
+        if(j > 2)
+            break;
+
+        const TalentTabEntry tmpTab = sTalentTabStore.LookupEntry(i);
+        if(tmpTab)
+        {
+            if(plr->getClassMask() & tmpTab.ClassMask)
+            {
+                talenttabids[j] = tmpTab.TalentTabID;
+                ++j;
+            }
+        }
+    }
+
+    uint32 curtalent_slot = 0;
+    for(uint32 i = 0; i < 3; ++i)
+    {
+        uint32 tabid = talenttabids[i];
+        uint8 mask = 0;
+        for(uint32 t = 0; t < sTalentStore.GetNumRows(); ++t)
+        {
+            const TalentEntry tmpTalent = sTalentStore.LookupEntry(t);
+            if(tmpTalent)
+            {
+                if(tmpTalent.TalentTab == tabid)
+                {
+                    curtalent_slot = 4 * tmpTalent.Row + tmpTalent.Col;
+                    // get talent rank
+                    uint32 curtalent_maxrank = 0;
+                    for(uint32 k = 0; k < 5; ++k)
+                    {
+                        if(tmpTalent.RankID[k])
+                        {
+                            mask = 1 << k;
+                            curtalent_maxrank = k;
+                            if(plr->HasSpell(tmpTalent.RankID[k]))
+                            {
+                                //tmpTalent.
+                            }
+                        }
+                        else
+                        {
+                            if(k > 0)
+                            {
+                                uint32 spell = tmpTalent.RankID[k-1];
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    SendPacket(&data);*/
 }
 
 void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
@@ -1215,7 +1285,7 @@ void WorldSession::HandleInspectHonorStatsOpcode(WorldPacket& recv_data)
     data << player->GetUInt32Value(PLAYER_FIELD_KILLS);
     data << player->GetUInt32Value(PLAYER_FIELD_TODAY_CONTRIBUTION);
     data << player->GetUInt32Value(PLAYER_FIELD_YESTERDAY_CONTRIBUTION);
-    data << player->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORABLE_KILLS);
+    data << player->GetUInt32Value(PLAYER_FIELD_LIFETIME_HONORBALE_KILLS);
     SendPacket(&data);
 }
 

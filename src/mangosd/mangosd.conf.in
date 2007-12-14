@@ -431,7 +431,7 @@ MaxOverspeedPings = 2
 # Unload grids (if you have lot memory you can disable it to speed up player move to new grids second time)
 #          0 (not unload grids)
 # Default: 1 (unload grids)
-GridUnload = 1;
+GridUnload = 1
 
 # All times are in milliseconds.
 

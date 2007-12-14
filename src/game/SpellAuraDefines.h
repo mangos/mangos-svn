@@ -23,8 +23,9 @@
 
 enum AURA_FLAGS
 {
-    AFLAG_EMPTY             = 0x0,
-    AFLAG_SET               = 0x9
+    AFLAG_NEGATIVE          = 0x09,
+    AFLAG_POSITIVE          = 0x1F,
+    AFLAG_MASK              = 0xFF
 };
 
 //m_schoolAbsorb
@@ -278,6 +279,13 @@ enum AuraType
     SPELL_AURA_239 = 239,
     SPELL_AURA_240 = 240,
     SPELL_AURA_241 = 241,
-    TOTAL_AURAS=242
+    SPELL_AURA_242 = 242,
+    SPELL_AURA_243 = 243,
+    SPELL_AURA_244 = 244,
+    SPELL_AURA_245 = 245,
+    SPELL_AURA_246 = 246,
+    SPELL_AURA_247 = 247,
+    SPELL_AURA_248 = 248,
+    TOTAL_AURAS=249
 };
 #endif

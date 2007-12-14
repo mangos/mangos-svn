@@ -75,10 +75,11 @@ enum ItemModType
     ITEM_MOD_HIT_TAKEN_RATING         = 33,
     ITEM_MOD_CRIT_TAKEN_RATING        = 34,
     ITEM_MOD_RESILIENCE_RATING        = 35,
-    ITEM_MOD_HASTE_RATING             = 36
+    ITEM_MOD_HASTE_RATING             = 36,
+    ITEM_MOD_EXPERTISE_RATING         = 37
 };
 
-#define MAX_ITEM_MOD                    37
+#define MAX_ITEM_MOD                    38
 
 enum ItemSpelltriggerType
 {
@@ -119,7 +120,7 @@ enum BAG_FAMILY
     BAG_FAMILY_ARROWS                           = 1,
     BAG_FAMILY_BULLETS                          = 2,
     BAG_FAMILY_SOUL_SHARDS                      = 3,
-    //BAG_FAMILY_UNK1                           = 4,
+    BAG_FAMILY_LEATHERWORKING_SUPP              = 4,
     //BAG_FAMILY_UNK1                           = 5,
     BAG_FAMILY_HERBS                            = 6,
     BAG_FAMILY_ENCHANTING_SUPP                  = 7,
@@ -197,27 +198,25 @@ enum ItemClass
     ITEM_CLASS_QUEST                            = 12,
     ITEM_CLASS_KEY                              = 13,
     ITEM_CLASS_PERMANENT                        = 14,
-    ITEM_CLASS_MISC                             = 15
+    ITEM_CLASS_JUNK                             = 15
 };
 
 #define MAX_ITEM_CLASS                            16
 
-// Client understand only 0 subclass for ITEM_CLASS_CONSUMABLE
-// but this value used in code as implementation workaround
 enum ItemSubclassConsumable
 {
     ITEM_SUBCLASS_CONSUMABLE                    = 0,
-    ITEM_SUBCLASS_FOOD                          = 1,        // Cheese/Bread(OBSOLETE)
-    ITEM_SUBCLASS_LIQUID                        = 2,        // Liquid(OBSOLETE)
-    ITEM_SUBCLASS_POTION                        = 3,
+    ITEM_SUBCLASS_POTION                        = 1,
+    ITEM_SUBCLASS_ELIXIR                        = 2,
+    ITEM_SUBCLASS_FLASK                         = 3,
     ITEM_SUBCLASS_SCROLL                        = 4,
-    ITEM_SUBCLASS_BANDAGE                       = 5,
-    ITEM_SUBCLASS_HEALTHSTONE                   = 6,
-    ITEM_SUBCLASS_COMBAT_EFFECT                 = 7
+    ITEM_SUBCLASS_FOOD                          = 5,
+    ITEM_SUBCLASS_ITEM_ENHANCEMENT              = 6,
+    ITEM_SUBCLASS_BANDAGE                       = 7,
+    ITEM_SUBCLASS_CONSUMABLE_OTHER              = 8
 };
 
-//  custom subclasses not use now (until 2.3.0 where used new not custom subclasses)
-#define MAX_ITEM_SUBCLASS_CONSUMABLE              1
+#define MAX_ITEM_SUBCLASS_CONSUMABLE              9
 
 enum ItemSubclassContainer
 {
@@ -227,10 +226,11 @@ enum ItemSubclassContainer
     ITEM_SUBCLASS_ENCHANTING_CONTAINER          = 3,
     ITEM_SUBCLASS_ENGINEERING_CONTAINER         = 4,
     ITEM_SUBCLASS_GEM_CONTAINER                 = 5,
-    ITEM_SUBCLASS_MINING_CONTAINER              = 6
+    ITEM_SUBCLASS_MINING_CONTAINER              = 6,
+    ITEM_SUBCLASS_LEATHERWORKING_CONTAINER      = 7
 };
 
-#define MAX_ITEM_SUBCLASS_CONTAINER               7
+#define MAX_ITEM_SUBCLASS_CONTAINER               8
 
 enum ItemSubclassWeapon
 {
@@ -314,10 +314,18 @@ enum ItemSubclassTradeGoods
     ITEM_SUBCLASS_PARTS                         = 1,
     ITEM_SUBCLASS_EXPLOSIVES                    = 2,
     ITEM_SUBCLASS_DEVICES                       = 3,
-    ITEM_SUBCLASS_GEMS                          = 4
+    ITEM_SUBCLASS_JAWERCRAFTING                 = 4,
+    ITEM_SUBCLASS_CLOTH                         = 5,
+    ITEM_SUBCLASS_LEATHER                       = 6,
+    ITEM_SUBCLASS_METAL_STONE                   = 7,
+    ITEM_SUBCLASS_MEAT                          = 8,
+    ITEM_SUBCLASS_HERB                          = 9,
+    ITEM_SUBCLASS_ELEMENTAZL                    = 10,
+    ITEM_SUBCLASS_TRADE_GOODS_OTHER             = 11,
+    ITEM_SUBCLASS_ENCHANTING                    = 12
 };
 
-#define MAX_ITEM_SUBCLASS_TRADE_GOODS             5
+#define MAX_ITEM_SUBCLASS_TRADE_GOODS             13
 
 enum ItemSubclassGeneric
 {
@@ -382,12 +390,16 @@ enum ItemSubclassPermanent
 
 #define MAX_ITEM_SUBCLASS_PERMANENT               1
 
-enum ItemSubclassMisc
+enum ItemSubclassJunk
 {
-    ITEM_SUBCLASS_MISC                          = 0
+    ITEM_SUBCLASS_JUNK                          = 0,
+    ITEM_SUBCLASS_JUNK_REAGENT                  = 1,
+    ITEM_SUBCLASS_JUNK_PET                      = 2,
+    ITEM_SUBCLASS_JUNK_HOLIDAY                  = 3,
+    ITEM_SUBCLASS_JUNK_OTHER                    = 4
 };
 
-#define MAX_ITEM_SUBCLASS_MISC                    1
+#define MAX_ITEM_SUBCLASS_JUNK                    5
 
 const uint32 MaxItemSubclassValues[MAX_ITEM_CLASS] = {
     MAX_ITEM_SUBCLASS_CONSUMABLE,
@@ -405,7 +417,7 @@ const uint32 MaxItemSubclassValues[MAX_ITEM_CLASS] = {
     MAX_ITEM_SUBCLASS_QUEST,
     MAX_ITEM_SUBCLASS_KEY,
     MAX_ITEM_SUBCLASS_PERMANENT,
-    MAX_ITEM_SUBCLASS_MISC
+    MAX_ITEM_SUBCLASS_JUNK
 };
 
 inline uint8 ItemSubClassToDurabilityMultiplierId(uint32 ItemClass, uint32 ItemSubClass)
@@ -418,7 +430,7 @@ inline uint8 ItemSubClassToDurabilityMultiplierId(uint32 ItemClass, uint32 ItemS
     return 0;
 }
 
-// GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some paltform
+// GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
 #if defined( __GNUC__ )
 #pragma pack(1)
 #else
@@ -429,7 +441,7 @@ struct _Damage
 {
     float DamageMin;
     float DamageMax;
-    uint32 DamageType;
+    uint32 DamageType;                                      // id from Resistances.dbc
 
 };
 
@@ -441,12 +453,12 @@ struct _ItemStat
 };
 struct _Spell
 {
-    uint32 SpellId;
+    uint32 SpellId;                                         // id from Spell.dbc
     uint32 SpellTrigger;
     int32  SpellCharges;
     float  SpellPPMRate;
     int32  SpellCooldown;
-    uint32 SpellCategory;
+    uint32 SpellCategory;                                   // id from SpellCategory.dbc
     int32  SpellCategoryCooldown;
 
 };
@@ -460,11 +472,11 @@ struct _Socket
 struct ItemPrototype
 {
     uint32 ItemId;
-    uint32 Class;
-    uint32 SubClass;
+    uint32 Class;                                           // id from ItemClass.dbc
+    uint32 SubClass;                                        // id from ItemSubClass.dbc
     uint32 Unk0;
     char* Name1;
-    uint32 DisplayInfoID;
+    uint32 DisplayInfoID;                                   // id from ItemDisplayInfo.dbc
     uint32 Quality;
     uint32 Flags;
     uint32 BuyCount;
@@ -475,12 +487,12 @@ struct ItemPrototype
     uint32 AllowableRace;
     uint32 ItemLevel;
     uint32 RequiredLevel;
-    uint32 RequiredSkill;
+    uint32 RequiredSkill;                                   // id from SkillLine.dbc
     uint32 RequiredSkillRank;
-    uint32 RequiredSpell;
+    uint32 RequiredSpell;                                   // id from Spell.dbc
     uint32 RequiredHonorRank;
     uint32 RequiredCityRank;
-    uint32 RequiredReputationFaction;
+    uint32 RequiredReputationFaction;                       // id from Faction.dbc
     uint32 RequiredReputationRank;
     uint32 MaxCount;
     uint32 Stackable;
@@ -504,23 +516,24 @@ struct ItemPrototype
     uint32 PageText;
     uint32 LanguageID;
     uint32 PageMaterial;
-    uint32 StartQuest;
+    uint32 StartQuest;                                      // id from QuestCache.wdb 
     uint32 LockID;
-    uint32 Material;
+    uint32 Material;                                        // id from Material.dbc
     uint32 Sheath;
-    uint32 RandomProperty;
-    uint32 RandomSuffix;
+    uint32 RandomProperty;                                  // id from ItemRandomProperties.dbc
+    uint32 RandomSuffix;                                    // id from ItemRandomSuffix.dbc
     uint32 Block;
-    uint32 ItemSet;
+    uint32 ItemSet;                                         // id from ItemSet.dbc
     uint32 MaxDurability;
-    uint32 Area;
-    uint32 Map;
-    uint32 BagFamily;
-    uint32 TotemCategory;
+    uint32 Area;                                            // id from AreaTable.dbc
+    uint32 Map;                                             // id from Map.dbc
+    uint32 BagFamily;                                       // id from ItemBagFamily.dbc
+    uint32 TotemCategory;                                   // id from TotemCategory.dbc
     _Socket Socket[3];
-    uint32 socketBonus;
-    uint32 GemProperties;
-    uint32 ExtendedCost;
+    uint32 socketBonus;                                     // id from SpellItemEnchantment.dbc
+    uint32 GemProperties;                                   // id from GemProperties.dbc
+    uint32 ExtendedCost;                                    // id from ItemExtendedCost.dbc
+    uint32 RequiredArenaRank;
     uint32 RequiredDisenchantSkill;
     float  ArmorDamageModifier;
     char* ScriptName;
@@ -536,7 +549,7 @@ struct ItemLocale
     std::vector<std::string> Description;
 };
 
-// GCC have alternative #pragma pack() syntax and old gcc version not support pack(pop), also any gcc version not support it at some paltform
+// GCC have alternative #pragma pack() syntax and old gcc version not support pack(pop), also any gcc version not support it at some platform
 #if defined( __GNUC__ )
 #pragma pack()
 #else

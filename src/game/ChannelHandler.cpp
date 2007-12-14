@@ -43,7 +43,8 @@ void WorldSession::HandleChannelJoin(WorldPacket& recvPacket)
 
     recvPacket >> pass;
     if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
-        cMgr->GetJoinChannel(channelname, channel_id)->Join(_player->GetGUID(), pass.c_str());
+        if(Channel *chn = cMgr->GetJoinChannel(channelname, channel_id))
+            chn->Join(_player->GetGUID(), pass.c_str());
 }
 
 void WorldSession::HandleChannelLeave(WorldPacket& recvPacket)
@@ -334,4 +335,17 @@ void WorldSession::HandleChannelInfoQuery(WorldPacket &recvPacket)
             SendPacket(&data);
         }
     }
+}
+
+void WorldSession::HandleChannelJoinNotify(WorldPacket &recvPacket)
+{
+    sLog.outDebug("Opcode %u", recvPacket.GetOpcode());
+    recvPacket.hexlike();
+    CHECK_PACKET_SIZE(recvPacket, 1);
+
+    std::string channelname;
+    recvPacket >> channelname;
+    /*if(ChannelMgr* cMgr = channelMgr(_player->GetTeam()))
+        if(Channel *chn = cMgr->GetChannel(channelname, _player))
+            chn->JoinNotify(_player->GetGUID());*/
 }

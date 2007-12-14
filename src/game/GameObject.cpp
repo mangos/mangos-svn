@@ -151,7 +151,7 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
 
 void GameObject::Update(uint32 p_time)
 {
-    if (GUID_HIPART(GetGUID()) == HIGHGUID_TRANSPORT)
+    if (GUID_HIPART(GetGUID()) == HIGHGUID_MO_TRANSPORT)
     {
         //((Transport*)this)->Update(p_time);
         return;

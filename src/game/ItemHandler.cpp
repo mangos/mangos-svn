@@ -187,7 +187,7 @@ void WorldSession::HandleDestroyItemOpcode( WorldPacket & recv_data )
 // Only _static_ data send in this packet !!!
 void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data,4+4+4);
+    CHECK_PACKET_SIZE(recv_data, 4);
 
     //sLog.outDebug("WORLD: CMSG_ITEM_QUERY_SINGLE");
     uint32 item;
@@ -327,16 +327,14 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
         data << pProto->socketBonus;
         data << pProto->GemProperties;
         data << pProto->ExtendedCost;
+        data << pProto->RequiredArenaRank;
         data << pProto->RequiredDisenchantSkill;
         data << pProto->ArmorDamageModifier;
         SendPacket( &data );
     }
     else
     {
-        uint64 guid;
-        recv_data >> guid;
-
-        sLog.outDetail( "WORLD: CMSG_ITEM_QUERY_SINGLE - NO item INFO! (GUID: %u, ENTRY: %u)", GUID_LOPART(guid), item );         
+        sLog.outDebug(  "WORLD: CMSG_ITEM_QUERY_SINGLE - NO item INFO! (ENTRY: %u)", item );         
         WorldPacket data( SMSG_ITEM_QUERY_SINGLE_RESPONSE, 4);
         data << uint32(item | 0x80000000);
         SendPacket( &data );
@@ -382,7 +380,7 @@ void WorldSession::HandlePageQuerySkippedOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,4+4+4);
 
-    sLog.outDetail( "WORLD: Received CMSG_PAGE_TEXT_QUERY" );
+    sLog.outDebug(  "WORLD: Received CMSG_PAGE_TEXT_QUERY" );
 
     uint32 itemid, guidlow, guidhigh;
 
@@ -395,7 +393,7 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,8+8+1);
 
-    sLog.outDetail( "WORLD: Received CMSG_SELL_ITEM" );
+    sLog.outDebug(  "WORLD: Received CMSG_SELL_ITEM" );
     uint64 vendorguid, itemguid;
     uint8 count;
 
@@ -472,7 +470,7 @@ void WorldSession::HandleBuybackItem(WorldPacket & recv_data)
 {
     CHECK_PACKET_SIZE(recv_data,8+4);
 
-    sLog.outDetail( "WORLD: Received CMSG_BUYBACK_ITEM" );
+    sLog.outDebug(  "WORLD: Received CMSG_BUYBACK_ITEM" );
     uint64 vendorguid;
     uint32 slot;
 
@@ -516,7 +514,7 @@ void WorldSession::HandleBuyItemInSlotOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,8+4+8+1+1);
 
-    sLog.outDetail( "WORLD: Received CMSG_BUY_ITEM_IN_SLOT" );
+    sLog.outDebug(  "WORLD: Received CMSG_BUY_ITEM_IN_SLOT" );
     uint64 vendorguid, bagguid;
     uint32 item;
     uint8 slot, count;
@@ -530,7 +528,7 @@ void WorldSession::HandleBuyItemOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data,8+4+1+1);
 
-    sLog.outDetail( "WORLD: Received CMSG_BUY_ITEM" );
+    sLog.outDebug(  "WORLD: Received CMSG_BUY_ITEM" );
     uint64 vendorguid;
     uint32 item;
     uint8 count, unk1;
@@ -551,14 +549,14 @@ void WorldSession::HandleListInventoryOpcode( WorldPacket & recv_data )
     if(!GetPlayer()->isAlive())
         return;
 
-    sLog.outDetail( "WORLD: Recvd CMSG_LIST_INVENTORY" );
+    sLog.outDebug(  "WORLD: Recvd CMSG_LIST_INVENTORY" );
 
     SendListInventory( guid );
 }
 
 void WorldSession::SendListInventory( uint64 vendorguid )
 {
-    sLog.outDetail( "WORLD: Sent SMSG_LIST_INVENTORY" );
+    sLog.outDebug(  "WORLD: Sent SMSG_LIST_INVENTORY" );
 
     Creature *pCreature = ObjectAccessor::GetNPCIfCanInteractWith(*_player, vendorguid,UNIT_NPC_FLAG_VENDOR);
     if (!pCreature)

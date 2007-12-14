@@ -308,19 +308,22 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
         {
             bidder->GetSession()->SendAuctionBidderNotification( auction->location, auction->Id, bidder_guid, 0, 0, auction->item_template);
 
-            bidder->CreateMail(mailId, MAIL_AUCTION, auction->location, msgAuctionWonSubject.str(), itemTextId, auction->item_guid, auction->item_template, etime, dtime, 0, 0, AUCTION_CHECKED, pItem);
+            MailItemsInfo mi;
+            mi.AddItem(auction->item_guid, auction->item_template, pItem);
+            bidder->CreateMail(mailId, MAIL_AUCTION, auction->location, msgAuctionWonSubject.str(), itemTextId, &mi, etime, dtime, 0, 0, AUCTION_CHECKED);
         }
         else
             delete pItem;
 
-        CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-            "VALUES ('%u', '%d', '%u', '%u', '%s', '%u', '%u', '%u', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
-            mailId, MAIL_AUCTION, auction->location, auction->bidder, msgAuctionWonSubject.str().c_str(), itemTextId, auction->item_guid, auction->item_template, (uint64)etime,(uint64)dtime, AUCTION_CHECKED);
+        CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+            "VALUES ('%u', '%d', '%u', '%u', '%s', '%u', '1', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
+            mailId, MAIL_AUCTION, auction->location, auction->bidder, msgAuctionWonSubject.str().c_str(), itemTextId, (uint64)etime, (uint64)dtime, AUCTION_CHECKED);
+        CharacterDatabase.PExecute("INSERT INTO `mail_items` (`mail_id`,`item_guid`,`item_template`) VALUES ('%u', '%u', '%u')", mailId, auction->item_guid, auction->item_template);
     }
     // receiver not exist
     else
     {
-        CharacterDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid`='%u'",pItem->GetGUIDLow());
+        CharacterDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid`='%u'", pItem->GetGUIDLow());
         delete pItem;
     }
 }
@@ -366,11 +369,12 @@ void ObjectMgr::SendAuctionSuccessfulMail( AuctionEntry * auction )
             //send auctionowner notification, bidder must be current!
             owner->GetSession()->SendAuctionOwnerNotification( auction );
 
-            owner->CreateMail(mailId, MAIL_AUCTION, auction->location, msgAuctionSuccessfulSubject.str(), itemTextId, 0, 0, etime, dtime, profit, 0, AUCTION_CHECKED, NULL);
+            MailItemsInfo mi;
+            owner->CreateMail(mailId, MAIL_AUCTION, auction->location, msgAuctionSuccessfulSubject.str(), itemTextId, &mi, etime, dtime, profit, 0, AUCTION_CHECKED);
         }
 
-        CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-            "VALUES ('%u', '%d', '%u', '%u', '%s', '%u', '0', '0', '" I64FMTD "', '" I64FMTD "', '%u', '0', '%d')",
+        CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+            "VALUES ('%u', '%d', '%u', '%u', '%s', '%u', '0', '" I64FMTD "', '" I64FMTD "', '%u', '0', '%d')",
             mailId, MAIL_AUCTION, auction->location, auction->owner, msgAuctionSuccessfulSubject.str().c_str(), itemTextId, (uint64)etime, (uint64)dtime, profit, AUCTION_CHECKED);
     }
 }
@@ -401,14 +405,17 @@ void ObjectMgr::SendAuctionExpiredMail( AuctionEntry * auction )
         time_t dtime = time(NULL);                          //Instant since it's Auction House
         time_t etime = dtime + 30 * DAY;
 
-        CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-            "VALUES ('%u', '2', '%u', '%u', '%s', '0', '%u', '%u', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
-            messageId, auction->location, auction->owner, subject.str().c_str(), auction->item_guid, auction->item_template, (uint64)etime, (uint64)dtime, NOT_READ);
+        CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+            "VALUES ('%u', '2', '%u', '%u', '%s', '0', '1', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
+            messageId, auction->location, auction->owner, subject.str().c_str(), (uint64)etime, (uint64)dtime, NOT_READ);
+        CharacterDatabase.PExecute("INSERT INTO `mail_items` (`mail_id`,`item_guid`,`item_template`) VALUES ('%u', '%u', '%u')", messageId, auction->item_guid, auction->item_template);
         if ( owner )
         {
             owner->GetSession()->SendAuctionOwnerNotification( auction );
 
-            owner->CreateMail(messageId, MAIL_AUCTION, auction->location, subject.str(), 0, auction->item_guid, auction->item_template, etime,dtime,0,0,NOT_READ,pItem);
+            MailItemsInfo mi;
+            mi.AddItem(auction->item_guid, auction->item_template, pItem);
+            owner->CreateMail(messageId, MAIL_AUCTION, auction->location, subject.str(), 0, &mi, etime, dtime, 0, 0, NOT_READ);
         }
         else
         {
@@ -1187,7 +1194,7 @@ void ObjectMgr::LoadItemPrototypes()
         if(proto->Class >= MAX_ITEM_CLASS)
         {
             sLog.outErrorDb("Item (Entry: %u) has wrong Class value (%u)",i,proto->Class);
-            const_cast<ItemPrototype*>(proto)->Class = ITEM_CLASS_MISC;
+            const_cast<ItemPrototype*>(proto)->Class = ITEM_CLASS_JUNK;
         }
 
         if(proto->SubClass >= MaxItemSubclassValues[proto->Class])
@@ -3565,8 +3572,8 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
     sLog.outDebug("Returning mails current time: hour: %d, minute: %d, second: %d ", localtime(&basetime)->tm_hour, localtime(&basetime)->tm_min, localtime(&basetime)->tm_sec);
     //delete all old mails without item and without body immediately, if starting server
     if (!serverUp)
-        CharacterDatabase.PExecute("DELETE FROM `mail` WHERE `expire_time` < '" I64FMTD "' AND `item_guid` = '0' AND `itemTextId` = 0", (uint64)basetime);
-    QueryResult* result = CharacterDatabase.PQuery("SELECT `id`,`messageType`,`sender`,`receiver`,`itemTextId`,`item_guid`,`expire_time`,`cod`,`checked` FROM `mail` WHERE `expire_time` < '" I64FMTD "'", (uint64)basetime);
+        CharacterDatabase.PExecute("DELETE FROM `mail` WHERE `expire_time` < '" I64FMTD "' AND `has_items` = '0' AND `itemTextId` = 0", (uint64)basetime);
+    QueryResult* result = CharacterDatabase.PQuery("SELECT `id`,`messageType`,`sender`,`receiver`,`itemTextId`,`has_items`,`expire_time`,`cod`,`checked` FROM `mail` WHERE `expire_time` < '" I64FMTD "'", (uint64)basetime);
     if ( !result )
         return;                                             // any mails need to be returned or deleted
     Field *fields;
@@ -3583,7 +3590,7 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
         m->sender = fields[2].GetUInt32();
         m->receiver = fields[3].GetUInt32();
         m->itemTextId = fields[4].GetUInt32();
-        m->item_guid = fields[5].GetUInt32();
+        bool has_items = fields[5].GetBool();
         m->expire_time = (time_t)fields[6].GetUInt64();
         m->deliver_time = 0;
         m->COD = fields[7].GetUInt32();
@@ -3598,8 +3605,25 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
             continue;
         }
         //delete or return mail:
-        if (m->item_guid)
+        if (has_items)
         {
+            QueryResult *resultItems = CharacterDatabase.PQuery("SELECT `item_guid`,`item_template` FROM `mail_items` WHERE `mail_id`='%u'", m->messageID);
+            if(resultItems)
+            {
+                do
+                {
+                    Field *fields2 = resultItems->Fetch();
+
+                    uint32 item_guid = fields2[0].GetUInt32();
+                    uint32 item_template = fields2[1].GetUInt32();
+
+                    m->AddItem(item_guid, item_template);
+                }
+                while (resultItems->NextRow());
+
+                delete resultItems;
+            }
+
             if (m->checked < 4)
             {
                 //mail will be returned:
@@ -3611,7 +3635,8 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
             {
                 //deleteitem = true;
                 //delitems << m->item_guid << ", ";
-                CharacterDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", m->item_guid);
+                for(std::vector<MailItemInfo>::iterator itr2 = m->items.begin(); itr2 != m->items.end(); ++itr2)
+                    CharacterDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid` = '%u'", itr2->item_guid);
             }
         }
         if (m->itemTextId)

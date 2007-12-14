@@ -214,7 +214,7 @@ void WorldSession::HandleGuildRemoveOpcode(WorldPacket& recvPacket)
 
     WorldPacket data(SMSG_GUILD_EVENT, (2+20));             // guess size
     data << (uint8)GE_REMOVED;
-    data << (uint8)2;
+    data << (uint8)2;                                       // strings count
     data << plName;
     data << GetPlayer()->GetName();
     guild->BroadcastPacket(&data);
@@ -740,12 +740,13 @@ void WorldSession::HandleGuildSetOfficerNoteOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildRankOpcode(WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket, 4+4+1);
+    CHECK_PACKET_SIZE(recvPacket, 4+4+1+4*13);
+    //recvPacket.hexlike();
 
     Guild *guild;
     std::string rankname;
     uint32 rankId;
-    uint32 rights;
+    uint32 rights[14];
 
     //sLog.outDebug("WORLD: Received CMSG_GUILD_RANK");
 
@@ -763,13 +764,15 @@ void WorldSession::HandleGuildRankOpcode(WorldPacket& recvPacket)
     }
 
     recvPacket >> rankId;
-    recvPacket >> rights;
+    recvPacket >> rights[0];
     recvPacket >> rankname;
+    for(uint8 i = 1; i < 14; ++i)
+        recvPacket >> rights[i];
 
-    sLog.outDebug("WORLD: Changed RankName to %s , Rights to 0x%.4X",rankname.c_str(), rights);
+    sLog.outDebug("WORLD: Changed RankName to %s , Rights to 0x%.4X", rankname.c_str(), rights[0]);
 
     guild->SetRankName(rankId, rankname);
-    guild->SetRankRights(rankId, rights);
+    guild->SetRankRights(rankId, rights[0]);
 
     guild->Query(this);
     guild->Roster(this);
@@ -927,4 +930,41 @@ void WorldSession::HandleGuildSaveEmblemOpcode(WorldPacket& recvPacket)
     SendPacket( &data );
 
     guild->Query(this);
+}
+
+void WorldSession::HandleGuildEventLogOpcode(WorldPacket& recvPacket)
+{
+    sLog.outDebug("WORLD: Received MSG_GUILD_EVENT_LOG");    // empty
+    recvPacket.hexlike();
+
+    uint8 count = 0;
+    WorldPacket data(MSG_GUILD_EVENT_LOG, 0);
+    data << uint8(count);       // count
+    for(uint8 i = 0; i < count; ++i)
+    {
+        uint8 type = 0;
+        switch(type)
+        {
+            case 1:
+                data << uint64(0);  // guid
+                data << uint64(0);  // guid
+                data << uint32(0);  // time
+                break;
+            case 2:
+                data << uint64(0);  // guid
+                data << uint32(0);  // time
+                break;
+            case 3:
+                data << uint64(0);  // guid
+                data << uint64(0);  // guid
+                data << uint8(0);   // unk
+                data << uint32(0);  // time
+                break;
+            case 6:
+                data << uint64(0);  // guid
+                data << uint32(0);  // time
+                break;
+        }
+    }
+    SendPacket(&data);
 }

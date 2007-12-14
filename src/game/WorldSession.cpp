@@ -235,6 +235,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_GUILD_DEL_RANK ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildDelRankOpcode            );
     objmgr.opcodeTable[ CMSG_GUILD_CHANGEINFO ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildChangeInfoOpcode         );
     objmgr.opcodeTable[ MSG_SAVE_GUILD_EMBLEM ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildSaveEmblemOpcode         );
+    objmgr.opcodeTable[ MSG_GUILD_EVENT_LOG ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildEventLogOpcode           );
 
     objmgr.opcodeTable[ CMSG_TAXINODE_STATUS_QUERY ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleTaxiNodeStatusQueryOpcode     );
     objmgr.opcodeTable[ CMSG_TAXIQUERYAVAILABLENODES ]          = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleTaxiQueryAvailableNodesOpcode );
@@ -355,6 +356,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_CHANNEL_MODERATE ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleChannelModerate               );
     objmgr.opcodeTable[ CMSG_CHANNEL_ROSTER_QUERY ]             = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleChannelRosterQuery            );
     objmgr.opcodeTable[ CMSG_CHANNEL_INFO_QUERY ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleChannelInfoQuery              );
+    objmgr.opcodeTable[ CMSG_CHANNEL_WATCH ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleChannelJoinNotify             );
 
     objmgr.opcodeTable[ CMSG_GET_MAIL_LIST ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGetMail                       );
     objmgr.opcodeTable[ CMSG_ITEM_TEXT_QUERY ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleItemTextQuery                 );
@@ -433,29 +435,31 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_SET_COMMENTARY ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleLfgSetCommentOpcode           );
     objmgr.opcodeTable[ CMSG_CHOOSE_TITLE ]                     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleChooseTitleOpcode             );
     objmgr.opcodeTable[ MSG_INSPECT_ARENA_STATS ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleInspectArenaStatsOpcode       );
-    objmgr.opcodeTable[ CMSG_REALM_STATE_REQUEST ]              = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandleRealmStateRequestOpcode       );
+    objmgr.opcodeTable[ CMSG_REALM_SPLIT_INFO_REQUEST ]         = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandleRealmStateRequestOpcode       );
     objmgr.opcodeTable[ CMSG_ALLOW_MOVE_ACK ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAllowMoveAckOpcode            );
     objmgr.opcodeTable[ CMSG_WHOIS ]                            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleWhoisOpcode                   );
     objmgr.opcodeTable[ CMSG_RESET_INSTANCES ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleResetInstancesOpcode          );
     objmgr.opcodeTable[ CMSG_ARENA_TEAM_ROSTER ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamRosterOpcode         );
-    objmgr.opcodeTable[ CMSG_ARENA_TEAM_ADD_MEMBER ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamAddMemberOpcode      );
-    objmgr.opcodeTable[ CMSG_ARENA_TEAM_INVITE_ACCEPT ]         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamInviteAcceptOpcode   );
-    objmgr.opcodeTable[ CMSG_ARENA_TEAM_INVITE_DECLINE ]        = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamInviteDeclineOpcode  );
+    objmgr.opcodeTable[ CMSG_ARENA_TEAM_INVITE_BYNAME ]         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamAddMemberOpcode      );
+    objmgr.opcodeTable[ CMSG_ARENA_TEAM_ACCEPT ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamInviteAcceptOpcode   );
+    objmgr.opcodeTable[ CMSG_ARENA_TEAM_DECLINE ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamInviteDeclineOpcode  );
     objmgr.opcodeTable[ CMSG_ARENA_TEAM_LEAVE ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamLeaveOpcode          );
-    objmgr.opcodeTable[ CMSG_ARENA_TEAM_REMOVE_FROM_TEAM ]      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamRemoveFromTeamOpcode );
+    objmgr.opcodeTable[ CMSG_ARENA_TEAM_UNINVITE_BYNAME ]       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamRemoveFromTeamOpcode );
     objmgr.opcodeTable[ CMSG_ARENA_TEAM_DISBAND ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamDisbandOpcode        );
-    objmgr.opcodeTable[ CMSG_ARENA_TEAM_PROMOTE_TO_CAPTAIN ]    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamPromoteToCaptainOpcode );
+    objmgr.opcodeTable[ CMSG_ARENA_TEAM_SET_LEADER_BYNAME ]     = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleArenaTeamPromoteToCaptainOpcode );
     objmgr.opcodeTable[ CMSG_AREA_SPIRIT_HEALER_QUERY ]         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAreaSpiritHealerQueryOpcode   );
     objmgr.opcodeTable[ CMSG_AREA_SPIRIT_HEALER_QUEUE ]         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAreaSpiritHealerQueueOpcode   );
     objmgr.opcodeTable[ CMSG_DISMOUNT ]                         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleDismountOpcode                );
     objmgr.opcodeTable[ CMSG_SELF_RES ]                         = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSelfResOpcode                 );
     objmgr.opcodeTable[ CMSG_SOCKET_ITEM ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSocketOpcode                  );
     objmgr.opcodeTable[ CMSG_CANCEL_TEMP_ITEM_ENCHANTMENT]      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleCancelTempItemEnchantmentOpcode);
-    objmgr.opcodeTable[ CMSG_REPORT_SPAM ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleReportSpamOpcode              );
+    objmgr.opcodeTable[ CMSG_COMPLAINT_CHAT ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleComplaintChatOpcode           );
 
-    objmgr.opcodeTable[ CMSG_CHANNEL_ENABLE_VOICE ]             = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleChannelEnableVoiceOpcode      );
+    objmgr.opcodeTable[ CMSG_CHANNEL_VOICE_ON ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleChannelEnableVoiceOpcode      );
     objmgr.opcodeTable[ CMSG_CHANNEL_VOICE_CHAT_QUERY ]         = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandleChannelVoiceChatQuery         );
     objmgr.opcodeTable[ CMSG_VOICE_SETTINGS ]                   = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandleVoiceSettingsOpcode           );
+    objmgr.opcodeTable[ MSG_UNKNOWN_1020 ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::Handle1020                          );
+    objmgr.opcodeTable[ MSG_UNKNOWN_1021 ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::Handle1021                          );
 }
 
 void WorldSession::SizeError(WorldPacket const& packet, uint32 size) const
@@ -855,13 +859,13 @@ void WorldSession::HandleRealmStateRequestOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data, 4);
 
-    sLog.outDebug("CMSG_REALM_STATE_REQUEST");
+    sLog.outDebug("CMSG_REALM_SPLIT_INFO_REQUEST");
 
     uint32 unk;
     std::string split_date = "01/01/01";
     recv_data >> unk;
 
-    WorldPacket data(SMSG_REALM_STATE_RESPONSE, 4+4+split_date.size()+1);
+    WorldPacket data(SMSG_REALM_SPLIT_INFO_RESPONSE, 4+4+split_date.size()+1);
     data << unk;
     data << uint32(0x00000000);                             // realm split state
     // split states:
@@ -870,7 +874,7 @@ void WorldSession::HandleRealmStateRequestOpcode( WorldPacket & recv_data )
     // 0x2 realm split pending
     data << split_date;
     SendPacket(&data);
-    sLog.outDebug("response sent %u", unk);
+    //sLog.outDebug("response sent %u", unk);
 }
 
 void WorldSession::HandleAllowMoveAckOpcode( WorldPacket & recv_data )
@@ -1027,10 +1031,10 @@ void WorldSession::HandleSelfResOpcode( WorldPacket & /*recv_data*/ )
     }
 }
 
-void WorldSession::HandleReportSpamOpcode( WorldPacket & recv_data )
+void WorldSession::HandleComplaintChatOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data, 1+8);
-    sLog.outDebug("WORLD: CMSG_REPORT_SPAM");
+    sLog.outDebug("WORLD: CMSG_COMPLAINT_CHAT");
     recv_data.hexlike();
 
     uint8 spam_type;                                        // 0 - mail, 1 - chat
@@ -1061,15 +1065,40 @@ void WorldSession::HandleReportSpamOpcode( WorldPacket & recv_data )
     // if it's mail spam - ALL mails from this spammer automatically removed by client
 
     // Complaint Received message
-    WorldPacket data(SMSG_REPORT_SPAM_RESPONSE, 1);
+    WorldPacket data(SMSG_COMPLAINT_ADDED, 1);
     data << uint8(0);
     SendPacket(&data);
 
-    sLog.outDebug("REPORT SPAM: type %u, guid %u, unk2 %u, unk3, %u, unk4 %u, unk5 %u, message %s", spam_type, GUID_LOPART(spammer_guid), unk1, unk2, unk3, unk4, description.c_str());
+    sLog.outDebug("REPORT SPAM: type %u, guid %u, unk1 %u, unk2 %u, unk3 %u, unk4 %u, message %s", spam_type, GUID_LOPART(spammer_guid), unk1, unk2, unk3, unk4, description.c_str());
 }
 
 void WorldSession::HandleRequestPetInfoOpcode( WorldPacket & recv_data )
 {
     sLog.outDebug("WORLD: CMSG_REQUEST_PET_INFO");
     recv_data.hexlike();
+}
+
+void WorldSession::Handle1020( WorldPacket & recv_data )
+{
+    sLog.outDebug("WORLD: MSG_UNKNOWN_1020");
+    recv_data.hexlike();
+
+    WorldPacket data(MSG_UNKNOWN_1020, 4*15+1);
+    data << uint32(0);      // 0
+    data << uint32(0);      // rights
+    data << uint32(0);
+    data << uint8(0);       // 2 (tabs count?)
+    for(uint8 i = 0; i < 12; ++i)
+        data << uint32(0);  // tab permissions
+    SendPacket(&data);
+}
+
+void WorldSession::Handle1021( WorldPacket & recv_data )
+{
+    sLog.outDebug("WORLD: MSG_UNKNOWN_1021");
+    recv_data.hexlike();
+
+    WorldPacket data(MSG_UNKNOWN_1021, 4);
+    data << uint32(0);      // ??
+    SendPacket(&data);
 }

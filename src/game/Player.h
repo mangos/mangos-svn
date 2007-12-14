@@ -37,6 +37,7 @@
 #include<vector>
 
 struct Mail;
+struct MailItemsInfo;
 class Channel;
 class DynamicObject;
 class Creature;
@@ -125,6 +126,8 @@ enum ActionButtonType
     ACTION_BUTTON_CMACRO= 65,
     ACTION_BUTTON_ITEM  = 128
 };
+
+#define  MAX_ACTION_BUTTONS 132                             //checked in 2.3.0
 
 typedef std::map<uint8,ActionButton> ActionButtonList;
 
@@ -696,15 +699,15 @@ enum MovementFlags
     MOVEMENTFLAG_ONTRANSPORT    = 0x00000200,
     // 0x400
     MOVEMENTFLAG_FLY_UNK1       = 0x00000800,
-    MOVEMENTFLAG_UNK4           = 0x00001000,               // can't move, only rotate(turn) around, rooted?
-    MOVEMENTFLAG_JUMPING        = 0x00002000,
+    MOVEMENTFLAG_JUMPING        = 0x00001000,
+    MOVEMENTFLAG_UNK4           = 0x00002000,
     MOVEMENTFLAG_FALLING        = 0x00004000,
     // 0x8000, 0x10000, 0x20000, 0x40000, 0x80000, 0x100000
     MOVEMENTFLAG_SWIMMING       = 0x00200000,               // appears with fly flag also
     MOVEMENTFLAG_FLY_UP         = 0x00400000,
     MOVEMENTFLAG_CAN_FLY        = 0x00800000,
     MOVEMENTFLAG_FLYING         = 0x01000000,
-    // 0x2000000
+    MOVEMENTFLAG_UNK5           = 0x02000000,
     MOVEMENTFLAG_SPLINE         = 0x04000000,               // probably wrong name
     MOVEMENTFLAG_SPLINE2        = 0x08000000,
     MOVEMENTFLAG_WATERWALKING   = 0x10000000,
@@ -1157,8 +1160,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void ClearComboPoints();
         void SendComboPoints();
 
-        void CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::string subject, uint32 itemTextId, uint32 itemGuid, uint32 item_template, time_t expire_time,time_t delivery_time, uint32 money, uint32 COD, uint32 checked, Item* pItem);
-        void SendMailResult(uint32 mailId, uint32 mailAction, uint32 mailError, uint32 equipError = 0);
+        void CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::string subject, uint32 itemTextId, MailItemsInfo *mi, time_t expire_time, time_t delivery_time, uint32 money, uint32 COD, uint32 checked);
+        void SendMailResult(uint32 mailId, uint32 mailAction, uint32 mailError, uint32 equipError = 0, uint32 item_guid = 0, uint32 item_count = 0);
         void SendNewMail();
         void UpdateNextMailTimeAndUnreads();
 
@@ -1315,10 +1318,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         // Arena Team
         void SetInArenaTeam(uint32 ArenaTeamId, uint8 slot)
         {
-            SetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot * 5), ArenaTeamId);
-            SetUInt32ValueInDB(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot * 5), ArenaTeamId, this->GetGUID());
+            SetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot * 6), ArenaTeamId);
+            SetUInt32ValueInDB(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot * 6), ArenaTeamId, this->GetGUID());
         }
-        uint32 GetArenaTeamId(uint8 slot) { return GetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot * 5)); }
+        uint32 GetArenaTeamId(uint8 slot) { return GetUInt32Value(PLAYER_FIELD_ARENA_TEAM_INFO_1_1 + (slot * 6)); }
         static uint32 GetArenaTeamIdFromDB(uint64 guid, uint8 slot);
         void SetArenaTeamIdInvited(uint32 ArenaTeamId) { m_ArenaTeamIdInvited = ArenaTeamId; }
         uint32 GetArenaTeamIdInvited() { return m_ArenaTeamIdInvited; }
@@ -1782,7 +1785,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadInventory(QueryResult *result, uint32 timediff);
         void _LoadMailInit(QueryResult *resultUnread, QueryResult *resultDelivery);
         void _LoadMail();
-        void _LoadMailedItem(uint32 item_guid, uint32 item_template);
+        void _LoadMailedItems(Mail *mail);
         void _LoadQuestStatus(QueryResult *result);
         void _LoadDailyQuestStatus(QueryResult *result);
         void _LoadGroup(QueryResult *result);

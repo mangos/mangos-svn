@@ -173,11 +173,12 @@ void WorldSession::SendAuctionOutbiddedMail(AuctionEntry *auction, uint32 newPri
         if (oldBidder)
         {
             oldBidder->GetSession()->SendAuctionBidderNotification( auction->location, auction->Id, _player->GetGUID(), newPrice, objmgr.GetAuctionOutBid(auction->bid), auction->item_template);
-            oldBidder->CreateMail(mailId, MAIL_AUCTION, auction->location, msgAuctionOutbiddedSubject.str(), 0, 0, 0, etime,dtime, auction->bid, 0, NOT_READ, NULL);
+            MailItemsInfo mi;
+            oldBidder->CreateMail(mailId, MAIL_AUCTION, auction->location, msgAuctionOutbiddedSubject.str(), 0, &mi, etime,dtime, auction->bid, 0, NOT_READ);
         }
 
-        CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-            "VALUES ('%u', '%d', '%u', '%u', '%s', '0', '0', '0', '" I64FMTD "','" I64FMTD "', '%u', '0', '%d')",
+        CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+            "VALUES ('%u', '%d', '%u', '%u', '%s', '0', '0', '" I64FMTD "','" I64FMTD "', '%u', '0', '%d')",
             mailId, MAIL_AUCTION, auction->location, auction->bidder, msgAuctionOutbiddedSubject.str().c_str(), (uint64)etime, (uint64)dtime, auction->bid, NOT_READ);
     }
 }
@@ -205,11 +206,12 @@ void WorldSession::SendAuctionCancelledToBidderMail( AuctionEntry* auction )
         if (bidder)
         {
             // unknown : bidder->GetSession()->SendAuctionBidderNotification( auction->location, auction->Id, _player->GetGUID(), newPrice, newPrice - auction->bid, auction->item_template);
-            bidder->CreateMail(mailId, MAIL_AUCTION, auction->location, msgAuctionCancelledSubject.str(), 0, 0, 0, etime,dtime, auction->bid, 0, NOT_READ, NULL);
+            MailItemsInfo mi;
+            bidder->CreateMail(mailId, MAIL_AUCTION, auction->location, msgAuctionCancelledSubject.str(), 0, &mi, etime,dtime, auction->bid, 0, NOT_READ);
         }
 
-        CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-            "VALUES ('%u', '%d', '%u', '%u', '%s', '0', '0', '0', '" I64FMTD "','" I64FMTD "', '%u', '0', '%d')",
+        CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+            "VALUES ('%u', '%d', '%u', '%u', '%s', '0', '0', '" I64FMTD "','" I64FMTD "', '%u', '0', '%d')",
             mailId, MAIL_AUCTION, auction->location, auction->bidder, msgAuctionCancelledSubject.str().c_str(), (uint64)etime, (uint64)dtime, auction->bid, NOT_READ);
     }
 }
@@ -476,11 +478,13 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
             time_t dtime = time(NULL);                      //Instant since it's Auction House
             time_t etime = dtime + (30 * DAY);
 
-            pl->CreateMail( messageID, MAIL_AUCTION, auction->location, msgAuctionCanceledOwner.str(), 0, auction->item_guid, auction->item_template, etime,dtime, 0, 0, 0, pItem);
-            CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`item_guid`,`item_template`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-                "VALUES ('%u', '%d', '%u', '%u', '%s', '0', '%u', '%u', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
-                messageID, MAIL_AUCTION, auction->location , pl->GetGUIDLow() , msgAuctionCanceledOwner.str().c_str(), auction->item_guid, auction->item_template, (uint64)etime, (uint64)dtime, NOT_READ);
-
+            MailItemsInfo mi;
+            mi.AddItem(auction->item_guid, auction->item_template, pItem);
+            pl->CreateMail( messageID, MAIL_AUCTION, auction->location, msgAuctionCanceledOwner.str(), 0, &mi, etime, dtime, 0, 0, 0);
+            CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+                "VALUES ('%u', '%d', '%u', '%u', '%s', '0', '1', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
+                messageID, MAIL_AUCTION, auction->location , pl->GetGUIDLow() , msgAuctionCanceledOwner.str().c_str(), (uint64)etime, (uint64)dtime, NOT_READ);
+            CharacterDatabase.PExecute("INSERT INTO `mail_items` (`mail_id`,`item_guid`,`item_template`) VALUES ('%u', '%u', '%u')", messageID, auction->item_guid, auction->item_template);
         }
         else
         {
@@ -568,6 +572,7 @@ void WorldSession::HandleAuctionListBidderItems( WorldPacket & recv_data )
     }
     data.put( 0, count );                                   // add count to placeholder
     data << totalcount;
+    data << (uint32)300;                                    //unk 2.3.0
     SendPacket(&data);
 }
 
@@ -695,5 +700,6 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
     }
     data.put<uint32>(0, count);
     data << (uint32) totalcount;
+    data << (uint32) 300;                                   // unk 2.3.0 const?
     SendPacket(&data);
 }
