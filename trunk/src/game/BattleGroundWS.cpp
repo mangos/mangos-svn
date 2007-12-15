@@ -59,10 +59,7 @@ void BattleGroundWS::Update(time_t diff)
         SetDoorsSpawned(true);
         SetStartDelayTime(START_DELAY1);
 
-        WorldPacket data;
-        const char *message = LANG_BG_WS_ONE_MINUTE;
-        sChatHandler.FillMessageData(&data, NULL, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_UNIVERSAL, NULL, 0, message, NULL);
-        SendPacketToAll(&data);
+        SendMessageToAll(LANG_BG_WS_ONE_MINUTE);
     }
 
     // after bg start and doors spawn we get there
@@ -72,10 +69,7 @@ void BattleGroundWS::Update(time_t diff)
 
         if(GetStartDelayTime() <= START_DELAY2 && !IsInformed1)
         {
-            WorldPacket data;
-            const char *message = LANG_BG_WS_HALF_MINUTE;
-            sChatHandler.FillMessageData(&data, NULL, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_UNIVERSAL, NULL, 0, message, NULL);
-            SendPacketToAll(&data);
+            SendMessageToAll(LANG_BG_WS_HALF_MINUTE);
             IsInformed1 = true;
         }
 
@@ -94,10 +88,7 @@ void BattleGroundWS::Update(time_t diff)
             }
             sLog.outDebug("Objects spawned...");
 
-            WorldPacket data;
-            const char *message = LANG_BG_WS_BEGIN;
-            sChatHandler.FillMessageData(&data, NULL, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_GLOBAL, NULL, 0, message, NULL);
-            SendPacketToAll(&data);
+            SendMessageToAll(LANG_BG_WS_BEGIN);
 
             PlaySoundToAll(SOUND_BG_START);
 
@@ -157,11 +148,7 @@ void BattleGroundWS::RespawnFlag(uint32 Team, bool captured)
 
     if(captured)
     {
-        WorldPacket data;
-        const char *message = LANG_BG_WS_F_PLACED;
-        sChatHandler.FillMessageData(&data, NULL, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_UNIVERSAL, NULL, 0, message, NULL);
-        SendPacketToAll(&data);
-
+        SendMessageToAll(LANG_BG_WS_F_PLACED);
         PlaySoundToAll(8232);                               // flags respawned sound...
     }
 }
@@ -205,7 +192,7 @@ void BattleGroundWS::EventPlayerCapturedFlag(Player *Source)
     }
 
     WorldPacket data;
-    sChatHandler.FillMessageData(&data, Source->GetSession(), type, LANG_UNIVERSAL, NULL, Source->GetGUID(), message, NULL);
+    ChatHandler::FillMessageData(&data, Source->GetSession(), type, LANG_UNIVERSAL, NULL, Source->GetGUID(), message, NULL);
     SendPacketToAll(&data);
 
     UpdateFlagState(Source->GetTeam(), 1);                  // flag state none
@@ -281,7 +268,7 @@ void BattleGroundWS::EventPlayerDroppedFlag(Player *Source)
     if (set)
     {
         WorldPacket data;
-        sChatHandler.FillMessageData(&data, Source->GetSession(), type, LANG_UNIVERSAL, NULL, Source->GetGUID(), message, NULL);
+        ChatHandler::FillMessageData(&data, Source->GetSession(), type, LANG_UNIVERSAL, NULL, Source->GetGUID(), message, NULL);
         SendPacketToAll(&data);
 
         if(Source->GetTeam() == ALLIANCE)
@@ -320,7 +307,7 @@ void BattleGroundWS::EventPlayerReturnedFlag(Player *Source)
     UpdatePlayerScore(Source, SCORE_FLAG_RETURNS, 1);       // +1 to flag returns...
 
     WorldPacket data;
-    sChatHandler.FillMessageData(&data, Source->GetSession(), type, LANG_UNIVERSAL, NULL, Source->GetGUID(), message, NULL);
+    ChatHandler::FillMessageData(&data, Source->GetSession(), type, LANG_UNIVERSAL, NULL, Source->GetGUID(), message, NULL);
     SendPacketToAll(&data);
 }
 
@@ -352,7 +339,7 @@ void BattleGroundWS::EventPlayerPickedUpFlag(Player *Source)
     }
 
     WorldPacket data;
-    sChatHandler.FillMessageData(&data, Source->GetSession(), type, LANG_UNIVERSAL, NULL, Source->GetGUID(), message, NULL);
+    ChatHandler::FillMessageData(&data, Source->GetSession(), type, LANG_UNIVERSAL, NULL, Source->GetGUID(), message, NULL);
     SendPacketToAll(&data);
 
     UpdateFlagState(Source->GetTeam(), 2);

@@ -29,7 +29,6 @@
 #include "UpdateMask.h"
 #include "Chat.h"
 #include "MapManager.h"
-#include "Policies/SingletonImp.h"
 
 #include "RedZoneDistrict.h"
 #include "GridNotifiersImpl.h"
@@ -88,18 +87,6 @@ LanguageDesc const* GetLanguageDescBySkill(uint32 skill_id)
     }
 
     return NULL;
-}
-
-INSTANTIATE_SINGLETON_1( ChatHandler );
-
-ChatHandler::ChatHandler()
-{
-
-}
-
-ChatHandler::~ChatHandler()
-{
-
 }
 
 ChatCommand * ChatHandler::getCommandTable()
@@ -452,7 +439,7 @@ bool ChatHandler::hasStringAbbr(const char* s1, const char* s2)
     }
 }
 
-void ChatHandler::SendSysMultilineMessage(WorldSession* session, const char *str)
+void ChatHandler::SendSysMultilineMessage(const char *str)
 {
     char buf[256];
     WorldPacket data;
@@ -475,46 +462,26 @@ void ChatHandler::SendSysMultilineMessage(WorldSession* session, const char *str
             pos = strchr(line, '\n');
         }
 
-        FillSystemMessageData(&data, session, buf);
-        session->SendPacket(&data);
+        FillSystemMessageData(&data, buf);
+        m_session->SendPacket(&data);
     }
 
-    FillSystemMessageData(&data, session, line);
-    session->SendPacket(&data);
+    FillSystemMessageData(&data, line);
+    m_session->SendPacket(&data);
 }
 
 void ChatHandler::SendGlobalSysMessage(const char *str)
 {
     WorldPacket data;
-    FillSystemMessageData(&data, m_session, str);
+    FillSystemMessageData(&data, str);
     sWorld.SendGlobalMessage(&data);
 }
 
-void ChatHandler::SendSysMessage(WorldSession* session, const char *str)
+void ChatHandler::SendSysMessage(const char *str)
 {
     WorldPacket data;
-    FillSystemMessageData(&data, session, str);
-    session->SendPacket(&data);
-}
-
-void ChatHandler::PSendSysMultilineMessage(WorldSession* session, const char *format, ...)
-{
-    va_list ap;
-    char str [1024];
-    va_start(ap, format);
-    vsnprintf(str,1024,format, ap );
-    va_end(ap);
-    SendSysMultilineMessage(session,str);
-}
-
-void ChatHandler::PSendSysMessage(WorldSession* session, const char *format, ...)
-{
-    va_list ap;
-    char str [1024];
-    va_start(ap, format);
-    vsnprintf(str,1024,format, ap );
-    va_end(ap);
-    SendSysMessage(session,str);
+    FillSystemMessageData(&data, str);
+    m_session->SendPacket(&data);
 }
 
 void ChatHandler::PSendSysMultilineMessage(const char *format, ...)
@@ -524,7 +491,7 @@ void ChatHandler::PSendSysMultilineMessage(const char *format, ...)
     va_start(ap, format);
     vsnprintf(str,1024,format, ap );
     va_end(ap);
-    SendSysMultilineMessage(m_session,str);
+    SendSysMultilineMessage(str);
 }
 
 void ChatHandler::PSendSysMessage(const char *format, ...)
@@ -534,7 +501,7 @@ void ChatHandler::PSendSysMessage(const char *format, ...)
     va_start(ap, format);
     vsnprintf(str,1024,format, ap );
     va_end(ap);
-    SendSysMessage(m_session,str);
+    SendSysMessage(str);
 }
 
 bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text)
@@ -607,10 +574,8 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text)
     return false;
 }
 
-int ChatHandler::ParseCommands(const char* text, WorldSession *session)
+int ChatHandler::ParseCommands(const char* text)
 {
-    m_session = session;
-
     ASSERT(text);
     ASSERT(*text);
 
@@ -631,11 +596,8 @@ int ChatHandler::ParseCommands(const char* text, WorldSession *session)
     text++;
 
     if(!ExecuteCommandInTable(getCommandTable(), text))
-    {
-        WorldPacket data;
-        FillSystemMessageData(&data, m_session, "There is no such command.");
-        m_session->SendPacket(&data);
-    }
+        SendSysMessage("There is no such command.");
+
     return 1;
 }
 

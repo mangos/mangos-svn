@@ -21,7 +21,6 @@
 #include "BattleGround.h"
 #include "BattleGroundNA.h"
 #include "Creature.h"
-#include "Chat.h"
 #include "ObjectMgr.h"
 #include "MapManager.h"
 #include "Language.h"
@@ -52,10 +51,7 @@ void BattleGroundNA::Update(time_t diff)
         SetDoorsSpawned(true);
         SetStartDelayTime(START_DELAY1);
 
-        WorldPacket data;
-        const char *message = LANG_ARENA_ONE_MINUTE;
-        sChatHandler.FillMessageData(&data, NULL, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_UNIVERSAL, NULL, 0, message, NULL);
-        SendPacketToAll(&data);
+        SendMessageToAll(LANG_ARENA_ONE_MINUTE);
     }
 
     // after bg start and doors spawn we get there
@@ -72,10 +68,7 @@ void BattleGroundNA::Update(time_t diff)
             }
             sLog.outDebug("Doors opened...");
 
-            WorldPacket data;
-            const char *message = LANG_ARENA_BEGUN;
-            sChatHandler.FillMessageData(&data, NULL, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_UNIVERSAL, NULL, 0, message, NULL);
-            SendPacketToAll(&data);
+            SendMessageToAll(LANG_ARENA_BEGUN);
 
             SetStatus(STATUS_IN_PROGRESS);
 

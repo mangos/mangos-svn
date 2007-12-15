@@ -280,6 +280,7 @@ class ObjectMgr
         {
             return sCreatureInfoAddonStorage.LookupEntry<CreatureDataAddon>(entry);
         }
+
         static ItemPrototype const* GetItemPrototype(uint32 id) { return sItemStorage.LookupEntry<ItemPrototype>(id); }
 
         static InstanceTemplate const* GetInstanceTemplate(uint32 map)
@@ -418,6 +419,8 @@ class ObjectMgr
         }
 
         static bool IsSpellProcEventCanTriggeredBy( SpellProcEventEntry const * spellProcEvent, SpellEntry const * procSpell, uint32 procFlags );
+
+        static bool IsSpellValid(SpellEntry const * spellInfo, Player* pl = NULL);
 
         ReputationOnKillEntry const* GetReputationOnKilEntry(uint32 id) const
         {

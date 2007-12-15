@@ -94,7 +94,7 @@ bool ChatHandler::HandleMuteCommand(const char* args)
     loginDatabase.PExecute("UPDATE `account` SET `mutetime` = " I64FMTD " WHERE `id` = '%u'",uint64(mutetime), account_id );
 
     if(chr)
-        PSendSysMessage(chr->GetSession(), LANG_YOUR_CHAT_DISABLED, notspeaktime);
+        ChatHandler(chr).PSendSysMessage(LANG_YOUR_CHAT_DISABLED, notspeaktime);
 
     PSendSysMessage(LANG_YOU_DISABLE_CHAT, cname.c_str(), notspeaktime);
 
@@ -158,7 +158,7 @@ bool ChatHandler::HandleUnmuteCommand(const char* args)
     loginDatabase.PExecute("UPDATE `account` SET `mutetime` = '0' WHERE `id` = '%u'", account_id );
 
     if(chr)
-        PSendSysMessage(chr->GetSession(), LANG_YOUR_CHAT_ENABLED);
+        ChatHandler(chr).PSendSysMessage(LANG_YOUR_CHAT_ENABLED);
 
     PSendSysMessage(LANG_YOU_ENABLE_CHAT, cname.c_str());
     return true;

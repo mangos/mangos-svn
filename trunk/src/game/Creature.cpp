@@ -126,6 +126,12 @@ void Creature::LoadTrainerSpells()
             continue;
         }
 
+        if(!ObjectMgr::IsSpellValid(spellinfo))
+        {
+            sLog.outError("LoadTrainerSpells: Trainer (Entry: %u) has broken learning spell %u.", GetEntry(), spellid);
+            continue;
+        }
+
         if(ObjectMgr::IsProfessionSpell(spellinfo->EffectTriggerSpell[0]))
             m_trainer_type = 2;
 

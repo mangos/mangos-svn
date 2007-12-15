@@ -500,7 +500,7 @@ bool ChatHandler::HandleSecurityCommand(const char* args)
             WorldPacket data;
             char buf[256];
             sprintf((char*)buf,LANG_YOURS_SECURITY_CHANGED, m_session->GetPlayer()->GetName(), gm);
-            FillSystemMessageData(&data, m_session, buf);
+            FillSystemMessageData(&data, buf);
             targetPlayer->GetSession()->SendPacket(&data);
         }
 
@@ -1297,19 +1297,21 @@ bool ChatHandler::HandleLearnAllCommand(const char* args)
     };
 
     int loop = 0;
-
-    while (strcmp(allSpellList[loop], "0"))
+    while(strcmp(allSpellList[loop], "0"))
     {
-        uint32 spell = atol((char*)allSpellList[loop]);
+        uint32 spell = atol((char*)allSpellList[loop++]);
 
         if (m_session->GetPlayer()->HasSpell(spell))
+            continue;
+
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell);
+        if(!spellInfo || !ObjectMgr::IsSpellValid(spellInfo,m_session->GetPlayer()))
         {
-            loop++;
+            PSendSysMessage(LANG_COMMAND_SPELL_BROKEN,spell);
             continue;
         }
-        m_session->GetPlayer()->learnSpell((uint16)spell);
 
-        loop++;
+        m_session->GetPlayer()->learnSpell((uint16)spell);
     }
 
     SendSysMessage(LANG_COMMAND_LEARN_MANY_SPELLS);
@@ -1341,6 +1343,13 @@ bool ChatHandler::HandleLearnAllGMCommand(const char* args)
     while( strcmp(gmSpellList[gmSpellIter], "0") )
     {
         uint32 spell = atol((char*)gmSpellList[gmSpellIter++]);
+
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell);
+        if(!spellInfo || !ObjectMgr::IsSpellValid(spellInfo,m_session->GetPlayer()))
+        {
+            PSendSysMessage(LANG_COMMAND_SPELL_BROKEN,spell);
+            continue;
+        }
 
         m_session->GetPlayer()->learnSpell((uint16)spell);
     }
@@ -1393,6 +1402,10 @@ bool ChatHandler::HandleLearnAllMySpellsCommand(const char* args)
         // skip spells with first rank learned as talent (and all talents then also)
         uint32 first_rank = objmgr.GetFirstSpellInChain(spellInfo->Id);
         if(GetTalentSpellCost(first_rank) > 0 )
+            continue;
+
+        // skip broken spells
+        if(!ObjectMgr::IsSpellValid(spellInfo,m_session->GetPlayer()))
             continue;
 
         m_session->GetPlayer()->learnSpell(i);
@@ -1450,12 +1463,20 @@ bool ChatHandler::HandleLearnAllMyTalentsCommand(const char* args)
             player->removeSpell(lowspellid);
         }
 
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellid);
+        if(!spellInfo || !ObjectMgr::IsSpellValid(spellInfo,m_session->GetPlayer()))
+            continue;
+
         // learn highest rank of talent
         player->learnSpell(spellid);
 
         // and learn all non-talent spell ranks
         for(uint32 cur_id = last_spell_id; cur_id != spellid && cur_id != 0; cur_id = objmgr.GetPrevSpellInChain(cur_id))
         {
+            SpellEntry const* spellInfo2 = sSpellStore.LookupEntry(cur_id);
+            if(!spellInfo2 || !ObjectMgr::IsSpellValid(spellInfo2,m_session->GetPlayer()))
+                continue;
+
             player->learnSpell(cur_id);
         }
     }
@@ -1500,8 +1521,14 @@ bool ChatHandler::HandleLearnAllCraftsCommand(const char* args)
                 if( skillLine->classmask && (skillLine->classmask & classmask) == 0)
                     continue;
 
-                if( skillLine->skillId == i && !skillLine->forward_spellid )
-                    m_session->GetPlayer()->learnSpell((uint16)skillLine->spellId);
+                if( skillLine->skillId != i || skillLine->forward_spellid )
+                    continue;
+
+                SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->spellId);
+                if(!spellInfo || !ObjectMgr::IsSpellValid(spellInfo,m_session->GetPlayer()))
+                    continue;
+
+                m_session->GetPlayer()->learnSpell(skillLine->spellId);
             }
         }
     }
@@ -1537,6 +1564,14 @@ bool ChatHandler::HandleLearnCommand(const char* args)
             PSendSysMessage(LANG_TARGET_KNOWN_SPELL,targetPlayer->GetName());
         return true;
     }
+
+    SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell);
+    if(!spellInfo || !ObjectMgr::IsSpellValid(spellInfo,m_session->GetPlayer()))
+    {
+        PSendSysMessage(LANG_COMMAND_SPELL_BROKEN,spell);
+        return true;
+    }
+
     targetPlayer->learnSpell((uint16)spell);
 
     return true;
@@ -2844,7 +2879,7 @@ bool ChatHandler::HandleExploreCheatCommand(const char* args)
     }
 
     WorldPacket data;
-    FillSystemMessageData(&data, m_session, buf);
+    FillSystemMessageData(&data, buf);
     chr->GetSession()->SendPacket(&data);
 
     for (uint8 i=0; i<64; i++)
@@ -2950,18 +2985,14 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
         chr->InitTalentForLevel();
         chr->SetUInt32Value(PLAYER_XP,0);
 
-        WorldPacket data;
-
         if(oldlevel == newlevel)
-            FillSystemMessageData(&data, chr->GetSession(), LANG_YOURS_LEVEL_PROGRESS_RESET);
+            ChatHandler(chr).SendSysMessage(LANG_YOURS_LEVEL_PROGRESS_RESET);
         else
         if(oldlevel < newlevel)
-            FillSystemMessageData(&data, chr->GetSession(), fmtstring(LANG_YOURS_LEVEL_UP,newlevel-oldlevel));
+            ChatHandler(chr).PSendSysMessage(LANG_YOURS_LEVEL_UP,newlevel-oldlevel);
         else
         if(oldlevel > newlevel)
-            FillSystemMessageData(&data, chr->GetSession(), fmtstring(LANG_YOURS_LEVEL_DOWN,newlevel-oldlevel));
-
-        chr->GetSession()->SendPacket( &data );
+            ChatHandler(chr).PSendSysMessage(LANG_YOURS_LEVEL_DOWN,newlevel-oldlevel);
     }
     else
     {
@@ -3566,9 +3597,7 @@ bool ChatHandler::HandleResetSpellsCommand(const char * args)
     {
         player->resetSpells();
 
-        WorldPacket data;
-        FillSystemMessageData(&data, player->GetSession(), LANG_RESET_SPELLS);
-        player->GetSession()->SendPacket( &data );
+        ChatHandler(player).SendSysMessage(LANG_RESET_SPELLS);
 
         if(m_session->GetPlayer()!=player)
             PSendSysMessage(LANG_RESET_SPELLS_ONLINE,player->GetName());
@@ -3608,9 +3637,7 @@ bool ChatHandler::HandleResetTalentsCommand(const char * args)
     {
         player->resetTalents(true);
 
-        WorldPacket data;
-        FillSystemMessageData(&data, player->GetSession(), LANG_RESET_TALENTS);
-        player->GetSession()->SendPacket( &data );
+        ChatHandler(player).SendSysMessage(LANG_RESET_TALENTS);
 
         if(m_session->GetPlayer()!=player)
             PSendSysMessage(LANG_RESET_TALENTS_ONLINE,player->GetName());
@@ -4361,6 +4388,9 @@ bool ChatHandler::HandlePLimitCommand(const char *args)
 
 bool ChatHandler::HandleCastCommand(const char* args)
 {
+    if(!*args)
+        return false;
+
     Unit* target = getSelectedUnit();
 
     if(!target)
@@ -4375,8 +4405,18 @@ bool ChatHandler::HandleCastCommand(const char* args)
         return false;
 
     uint32 spell = (uint32)atol((char*)cId);
-    if(!spell || !sSpellStore.LookupEntry(spell))
+    if(!spell)
         return false;
+
+    SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell);
+    if(!spellInfo)
+        return false;
+
+    if(!ObjectMgr::IsSpellValid(spellInfo,m_session->GetPlayer()))
+    {
+        PSendSysMessage(LANG_COMMAND_SPELL_BROKEN,spell);
+        return true;
+    }
 
     m_session->GetPlayer()->CastSpell(target,spell,false);
 

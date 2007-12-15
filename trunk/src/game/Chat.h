@@ -20,7 +20,6 @@
 #define MANGOSSERVER_CHAT_H
 
 #include "SharedDefines.h"
-#include "Policies/Singleton.h"
 
 class ChatHandler;
 class WorldSession;
@@ -54,28 +53,31 @@ class ChatCommand
 class ChatHandler
 {
     public:
-        ChatHandler();
-        ~ChatHandler();
+        explicit ChatHandler(WorldSession* session) : m_session(session) {}
+        explicit ChatHandler(Player* player) : m_session(player->GetSession()) {}
+        ~ChatHandler() {}
 
-        static void FillMessageData( WorldPacket *data, WorldSession* session, uint8 type, uint32 language, const char* channelName, uint64 target_guid, const char* message, Unit *speaker = NULL);
-        static void FillSystemMessageData( WorldPacket *data, WorldSession* session, const char* message )
+        static void FillMessageData( WorldPacket *data, WorldSession* session, uint8 type, uint32 language, const char *channelName, uint64 target_guid, const char *message, Unit *speaker);
+
+        void FillMessageData( WorldPacket *data, uint8 type, uint32 language, uint64 target_guid, const char* message)
         {
-            FillMessageData( data, session, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, 0, message );
+            FillMessageData( data, m_session, type, language, NULL, target_guid, message, NULL);
         }
 
-        static void SendSysMessage(         WorldSession* session, const char *str);
-        static void SendSysMultilineMessage(WorldSession* session, const char *str);
-        static void PSendSysMessage(         WorldSession* session, const char *format, ...) ATTR_PRINTF(2,3);
-        static void PSendSysMultilineMessage(WorldSession* session, const char *format, ...) ATTR_PRINTF(2,3);
+        void FillSystemMessageData( WorldPacket *data, const char* message )
+        {
+            FillMessageData( data, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, 0, message );
+        }
 
-        int ParseCommands(const char* text, WorldSession *session);
+        void SendSysMessage(          const char *str);
+        void SendSysMultilineMessage( const char *str);
+        void PSendSysMessage(         const char *format, ...) ATTR_PRINTF(1,2);
+        void PSendSysMultilineMessage(const char *format, ...) ATTR_PRINTF(1,2);
+
+        int ParseCommands(const char* text);
 
     protected:
         bool hasStringAbbr(const char* s1, const char* s2);
-        void SendSysMessage(const char *str) { SendSysMessage(m_session,str); }
-        void SendSysMultilineMessage(const char *str) { SendSysMultilineMessage(m_session,str); }
-        void PSendSysMessage(const char *format, ...) ATTR_PRINTF(2,3);
-        void PSendSysMultilineMessage(const char *format, ...) ATTR_PRINTF(2,3);
         void SendGlobalSysMessage(const char *str);
 
         bool ExecuteCommandInTable(ChatCommand *table, const char* text);
@@ -333,7 +335,7 @@ class ChatHandler
 
         GameObject* GetObjectGlobalyWithGuidOrNearWithDbGuid(uint32 lowguid);
 
-        WorldSession *m_session;
+        WorldSession * m_session;
 
         // Utility methods for commands
         void ShowTicket(uint64 guid, uint32 category, char const* text);
@@ -343,7 +345,6 @@ class ChatHandler
         static bool load_command_table;
 };
 
-#define sChatHandler MaNGOS::Singleton<ChatHandler>::Instance()
 #endif
 
 char const *fmtstring( char const *format, ... );

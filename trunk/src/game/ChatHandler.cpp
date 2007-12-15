@@ -95,7 +95,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if(msg.empty())
                 break;
 
-            if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
+            if (ChatHandler(this).ParseCommands(msg.c_str()) > 0)
                 break;
 
             stripLineInvisibleChars(msg);
@@ -165,7 +165,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if(msg.empty())
                 break;
 
-            if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
+            if (ChatHandler(this).ParseCommands(msg.c_str()) > 0)
                 break;
 
             stripLineInvisibleChars(msg);
@@ -177,7 +177,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 return;
 
             WorldPacket data;
-            sChatHandler.FillMessageData(&data, this, CHAT_MSG_PARTY, lang, NULL, 0, msg.c_str());
+            ChatHandler::FillMessageData(&data, this, CHAT_MSG_PARTY, lang, NULL, 0, msg.c_str(),NULL);
             group->BroadcastPacket(&data, group->GetMemberGroup(GetPlayer()->GetGUID()));
         }
         break;
@@ -189,7 +189,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if(msg.empty())
                 break;
 
-            if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
+            if (ChatHandler(this).ParseCommands(msg.c_str()) > 0)
                 break;
 
             stripLineInvisibleChars(msg);
@@ -213,7 +213,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if(msg.empty())
                 break;
 
-            if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
+            if (ChatHandler(this).ParseCommands(msg.c_str()) > 0)
                 break;
 
             stripLineInvisibleChars(msg);
@@ -236,7 +236,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if(msg.empty())
                 break;
 
-            if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
+            if (ChatHandler(this).ParseCommands(msg.c_str()) > 0)
                 break;
 
             stripLineInvisibleChars(msg);
@@ -248,7 +248,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 return;
 
             WorldPacket data;
-            sChatHandler.FillMessageData(&data, this, CHAT_MSG_RAID, lang, "", 0, msg.c_str());
+            ChatHandler::FillMessageData(&data, this, CHAT_MSG_RAID, lang, "", 0, msg.c_str(),NULL);
             group->BroadcastPacket(&data);
         } break;
         case CHAT_MSG_RAID_LEADER:
@@ -259,7 +259,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if(msg.empty())
                 break;
 
-            if (sChatHandler.ParseCommands(msg.c_str(), this) > 0)
+            if (ChatHandler(this).ParseCommands(msg.c_str()) > 0)
                 break;
 
             stripLineInvisibleChars(msg);
@@ -271,7 +271,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 return;
 
             WorldPacket data;
-            sChatHandler.FillMessageData(&data, this, CHAT_MSG_RAID_LEADER, lang, "", 0, msg.c_str());
+            ChatHandler::FillMessageData(&data, this, CHAT_MSG_RAID_LEADER, lang, "", 0, msg.c_str(),NULL);
             group->BroadcastPacket(&data);
         } break;
         case CHAT_MSG_RAID_WARNING:
@@ -288,7 +288,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 return;
 
             WorldPacket data;
-            sChatHandler.FillMessageData(&data, this, CHAT_MSG_RAID_WARNING, lang, "", 0, msg.c_str());
+            ChatHandler::FillMessageData(&data, this, CHAT_MSG_RAID_WARNING, lang, "", 0, msg.c_str(),NULL);
             group->BroadcastPacket(&data);
         } break;
 
@@ -306,7 +306,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 return;
 
             WorldPacket data;
-            sChatHandler.FillMessageData(&data, this, CHAT_MSG_BATTLEGROUND, lang, "", 0, msg.c_str());
+            ChatHandler::FillMessageData(&data, this, CHAT_MSG_BATTLEGROUND, lang, "", 0, msg.c_str(),NULL);
             group->BroadcastPacket(&data);
         } break;
 
@@ -324,7 +324,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 return;
 
             WorldPacket data;
-            sChatHandler.FillMessageData(&data, this, CHAT_MSG_BATTLEGROUND_LEADER, lang, "", 0, msg.c_str());
+            ChatHandler::FillMessageData(&data, this, CHAT_MSG_BATTLEGROUND_LEADER, lang, "", 0, msg.c_str(),NULL);
             group->BroadcastPacket(&data);
         } break;
 
@@ -470,6 +470,6 @@ void WorldSession::HandleChatIgnoredOpcode(WorldPacket& recv_data )
         return;
 
     WorldPacket data;
-    sChatHandler.FillMessageData(&data, this, CHAT_MSG_IGNORED, LANG_UNIVERSAL, NULL, GetPlayer()->GetGUID(), GetPlayer()->GetName());
+    ChatHandler::FillMessageData(&data, this, CHAT_MSG_IGNORED, LANG_UNIVERSAL, NULL, GetPlayer()->GetGUID(), GetPlayer()->GetName(),NULL);
     player->GetSession()->SendPacket(&data);
 }

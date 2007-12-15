@@ -411,6 +411,8 @@
 #define LANG_COMMAND_EXPORT_SUCCESS      "Character dumped successfully!"
 #define LANG_COMMAND_EXPORT_FAILED       "Character dump failed!"
 
+#define LANG_COMMAND_SPELL_BROKEN        "Spell %u broken and not allowed to cast or learn!"
+
 //log
 #define LANG_SPAWNING_SPIRIT_HEAL        "Spawning spirit healers\n"
 #define LANG_NO_SPIRIT_HEAL_DB           "No spirit healers in database, exiting."

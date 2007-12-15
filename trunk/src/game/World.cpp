@@ -1444,7 +1444,7 @@ void World::SendGlobalMessage(WorldPacket *packet, WorldSession *self, uint32 te
 void World::SendWorldText(const char* text, WorldSession *self)
 {
     WorldPacket data;
-    sChatHandler.FillSystemMessageData(&data, 0, text);
+    ChatHandler::FillMessageData(&data, NULL, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, 0, text, NULL);
     SendGlobalMessage(&data, self);
 }
 
@@ -1470,7 +1470,7 @@ void World::SendZoneMessage(uint32 zone, WorldPacket *packet, WorldSession *self
 void World::SendZoneText(uint32 zone, const char* text, WorldSession *self, uint32 team)
 {
     WorldPacket data;
-    sChatHandler.FillSystemMessageData(&data, 0, text);
+    ChatHandler::FillMessageData(&data, NULL, CHAT_MSG_SYSTEM, LANG_UNIVERSAL, NULL, 0, text, NULL);
     SendZoneMessage(zone, &data, self,team);
 }
 
