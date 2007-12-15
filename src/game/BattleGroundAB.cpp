@@ -62,28 +62,19 @@ void BattleGroundAB::Update(time_t diff)
         else if (GetStartDelayTime() <= 60000 && !(m_events & 0x04))
         {
             m_events |= 0x04;
-            // Message to chatlog
-            WorldPacket data;
-            sChatHandler.FillMessageData(&data, NULL, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_UNIVERSAL, NULL, 0, LANG_BG_AB_ONEMINTOSTART, NULL);
-            SendPacketToAll(&data);
+            SendMessageToAll(LANG_BG_AB_ONEMINTOSTART);
         }
         // After 1,5 minute, warning is signalled
         else if (GetStartDelayTime() <= 30000 && !(m_events & 0x08))
         {
             m_events |= 0x08;
-            // Message to chatlog
-            WorldPacket data;
-            sChatHandler.FillMessageData(&data, NULL, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_UNIVERSAL, NULL, 0, LANG_BG_AB_HALFMINTOSTART, NULL);
-            SendPacketToAll(&data);
+            SendMessageToAll(LANG_BG_AB_HALFMINTOSTART);
         }
         // After 2 minutes, gates OPEN ! x)
         else if (GetStartDelayTime() <= 0 && !(m_events & 0x10))
         {
             m_events |= 0x10;
-            // Message to chatlog
-            WorldPacket data;
-            sChatHandler.FillMessageData(&data, NULL, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_UNIVERSAL, NULL, 0, LANG_BG_AB_STARTED, NULL);
-            SendPacketToAll(&data);
+            SendMessageToAll(LANG_BG_AB_STARTED);
 
             // Neutral banners
             for (int banner = BG_AB_OBJECT_BANNER_NEUTRAL, i = 0; i < 5; banner += 8, ++i)
@@ -135,7 +126,7 @@ void BattleGroundAB::Update(time_t diff)
                     uint8 type = (teamIndex == 0) ? CHAT_MSG_BG_SYSTEM_ALLIANCE : CHAT_MSG_BG_SYSTEM_HORDE;
                     sprintf(buf, LANG_BG_AB_NODE_TAKEN, (teamIndex == 0) ? LANG_BG_AB_ALLY : LANG_BG_AB_HORDE, _GetNodeName(node));
                     WorldPacket data;
-                    sChatHandler.FillMessageData(&data, NULL, type, LANG_UNIVERSAL, NULL, 0, buf, NULL);
+                    ChatHandler::FillMessageData(&data, NULL, type, LANG_UNIVERSAL, NULL, 0, buf, NULL);
                     SendPacketToAll(&data);
                 }
 
@@ -572,13 +563,13 @@ void BattleGroundAB::ClickBanner(Player *source)
     }
 
     WorldPacket data;
-    sChatHandler.FillMessageData(&data, source->GetSession(), type, LANG_UNIVERSAL, NULL, source->GetGUID(), buf, NULL);
+    ChatHandler::FillMessageData(&data, source->GetSession(), type, LANG_UNIVERSAL, NULL, source->GetGUID(), buf, NULL);
     SendPacketToAll(&data);
     // If node is occupied again, send "XY has taken the XY" msg.
     if (m_Nodes[node] > 2)
     {
         sprintf(buf, LANG_BG_AB_NODE_TAKEN, (teamIndex == 0) ? LANG_BG_AB_ALLY : LANG_BG_AB_HORDE, _GetNodeName(node));
-        sChatHandler.FillMessageData(&data, NULL, type, LANG_UNIVERSAL, NULL, 0, buf, NULL);
+        ChatHandler::FillMessageData(&data, NULL, type, LANG_UNIVERSAL, NULL, 0, buf, NULL);
         SendPacketToAll(&data);
     }    
 }

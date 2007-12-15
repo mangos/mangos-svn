@@ -448,7 +448,7 @@ void BattleGround::EndBattleGround(uint32 winner)
 
     if(Source)
     {
-        sChatHandler.FillMessageData(&data, Source->GetSession(), CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_GLOBAL, NULL, Source->GetGUID(), winmsg, NULL);
+        ChatHandler(Source).FillMessageData(&data, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_GLOBAL, Source->GetGUID(), winmsg);
         SendPacketToAll(&data);
     }
 }
@@ -946,4 +946,11 @@ bool BattleGround::AddSpiritGuide(uint32 type, float x, float y, float z, float 
         pCreature->SetFloatValue(UNIT_MOD_CAST_SPEED, 1.0f);
     */
     return true;
+}
+
+void BattleGround::SendMessageToAll(char const* text)
+{
+    WorldPacket data;
+    ChatHandler::FillMessageData(&data, NULL, CHAT_MSG_BG_SYSTEM_NEUTRAL, LANG_UNIVERSAL, NULL, 0, text, NULL);
+    SendPacketToAll(&data);
 }

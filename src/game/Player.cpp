@@ -2438,6 +2438,20 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
         return false;
     }
 
+    if(!ObjectMgr::IsSpellValid(spellInfo))
+    {
+        // do character spell book cleanup (all characters)
+        if(state == PLAYERSPELL_UNCHANGED)                  // spell load case
+        {
+            sLog.outError("Player::addSpell: Depricated spell #%u request, deleting for all characters in `character_spell`.",spell_id);
+            CharacterDatabase.PExecute("DELETE FROM `character_spell` WHERE `spell` = '%u'",spell_id);
+        }
+        else
+            sLog.outError("Player::addSpell: Depricated spell #%u request.",spell_id);
+
+        return false;
+    }
+
     PlayerSpellMap::iterator itr = m_spells.find(spell_id);
     if (itr != m_spells.end())
     {
@@ -13509,7 +13523,7 @@ void Player::_SaveInventory()
     if (error)
     {
         sLog.outError("Player::_SaveInventory - one or more errors occurred save aborted!");
-        sChatHandler.SendSysMessage(GetSession(), LANG_ITEM_SAVE_FAILED);
+        ChatHandler(this).SendSysMessage(LANG_ITEM_SAVE_FAILED);
         return;
     }
 
@@ -13572,23 +13586,21 @@ void Player::_SaveMail()
             CharacterDatabase.PExecute("DELETE FROM `mail_items` WHERE `mail_id` = '%u'", m->messageID);
         }
     }
+
     //deallocate deleted mails...
-    bool continueDeleting = true;
-    while ( continueDeleting )
+    for (PlayerMails::iterator itr = m_mail.begin(); itr != m_mail.end(); )
     {
-        continueDeleting = false;
-        for (PlayerMails::iterator itr = m_mail.begin(); itr != m_mail.end(); itr++)
+        if ((*itr)->state == MAIL_STATE_DELETED)
         {
-            if ((*itr)->state == MAIL_STATE_DELETED)
-            {
-                Mail* m = *itr;
-                m_mail.erase(itr);
-                continueDeleting = true;
-                delete m;
-                break;                                      //break only from for cycle
-            }
+            Mail* m = *itr;
+            m_mail.erase(itr);
+            delete m;
+            itr = m_mail.begin();
         }
+        else
+            ++itr;
     }
+
     m_mailsUpdated = false;
 }
 
@@ -14095,7 +14107,7 @@ void Player::Whisper(const uint64 receiver, const std::string text, uint32 langu
     if(!isAcceptWhispers())
     {
         SetAcceptWhispers(true);
-        sChatHandler.SendSysMessage(GetSession(), LANG_COMMAND_WHISPERON);
+        ChatHandler(this).SendSysMessage(LANG_COMMAND_WHISPERON);
     }
 }
 

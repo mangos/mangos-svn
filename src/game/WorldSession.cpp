@@ -976,13 +976,13 @@ void WorldSession::HandleDismountOpcode( WorldPacket & recv_data )
     //If player is not mounted, so go out :)
     if (!_player->IsMounted())                              // not blizz like; no any messages on blizz
     {
-        sChatHandler.SendSysMessage(this, LANG_CHAR_NON_MOUNTED);
+        ChatHandler(this).SendSysMessage(LANG_CHAR_NON_MOUNTED);
         return;
     }
 
     if(_player->isInFlight())                               // not blizz like; no any messages on blizz
     {
-        sChatHandler.SendSysMessage(this, LANG_YOU_IN_FLIGHT);
+        ChatHandler(this).SendSysMessage(LANG_YOU_IN_FLIGHT);
         return;
     }
 

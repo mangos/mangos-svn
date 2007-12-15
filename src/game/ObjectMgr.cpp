@@ -35,6 +35,7 @@
 #include "Language.h"
 #include "GameEvent.h"
 #include "Spell.h"
+#include "Chat.h"
 
 INSTANTIATE_SINGLETON_1(ObjectMgr);
 
@@ -328,7 +329,7 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
     }
 }
 
-//call this method to send mail to auctionowner, when auction is successful, it does not clear ram
+//call this method to send mail to auction owner, when auction is successful, it does not clear ram
 void ObjectMgr::SendAuctionSuccessfulMail( AuctionEntry * auction )
 {
     Item *pItem = objmgr.GetAItem(auction->item_guid);
@@ -366,7 +367,7 @@ void ObjectMgr::SendAuctionSuccessfulMail( AuctionEntry * auction )
 
         if (owner)
         {
-            //send auctionowner notification, bidder must be current!
+            //send auction owner notification, bidder must be current!
             owner->GetSession()->SendAuctionOwnerNotification( auction );
 
             MailItemsInfo mi;
@@ -1272,10 +1273,22 @@ void ObjectMgr::LoadItemPrototypes()
                 const_cast<ItemPrototype*>(proto)->Spells[j].SpellId = 0;
                 const_cast<ItemPrototype*>(proto)->Spells[j].SpellTrigger = ITEM_SPELLTRIGGER_ON_USE;
             }
-            else if(proto->Spells[j].SpellId && !sSpellStore.LookupEntry(proto->Spells[j].SpellId))
+            else if(proto->Spells[j].SpellId)
             {
-                sLog.outErrorDb("Item (Entry: %u) has wrong (not existing) spell in spellid_%d (%u)",i,j+1,proto->Spells[j].SpellId);
-                const_cast<ItemPrototype*>(proto)->Spells[j].SpellId = 0;
+                SpellEntry const* spellInfo = sSpellStore.LookupEntry(proto->Spells[j].SpellId);
+                if(!spellInfo)
+                {
+                    sLog.outErrorDb("Item (Entry: %u) has wrong (not existing) spell in spellid_%d (%u)",i,j+1,proto->Spells[j].SpellId);
+                    const_cast<ItemPrototype*>(proto)->Spells[j].SpellId = 0;
+                }
+                else
+                {
+                    if(!IsSpellValid(spellInfo))
+                    {
+                        sLog.outErrorDb("Item (Entry: %u) has broken spell in spellid_%d (%u)",i,j+1,proto->Spells[j].SpellId);
+                        const_cast<ItemPrototype*>(proto)->Spells[j].SpellId = 0;
+                    }
+                }
             }
         }
 
@@ -2306,11 +2319,21 @@ void ObjectMgr::LoadQuests()
             qinfo->SrcItemCount=0;                              // no quest work changes in fact
         }
 
-        if(qinfo->SrcSpell && !sSpellStore.LookupEntry(qinfo->SrcSpell))
+        if(qinfo->SrcSpell)
         {
-            sLog.outErrorDb("Quest %u has `SrcSpell` = %u but spell %u doesn't exist, quest can't be done.",
-                qinfo->GetQuestId(),qinfo->SrcSpell,qinfo->SrcSpell);
-            qinfo->SrcSpell = 0;                            // quest can't be done for this requirement
+            SpellEntry const* spellInfo = sSpellStore.LookupEntry(qinfo->SrcSpell);
+            if(!spellInfo)
+            {
+                sLog.outErrorDb("Quest %u has `SrcSpell` = %u but spell %u doesn't exist, quest can't be done.",
+                    qinfo->GetQuestId(),qinfo->SrcSpell,qinfo->SrcSpell);
+                qinfo->SrcSpell = 0;                        // quest can't be done for this requirement
+            }
+            else if(!IsSpellValid(spellInfo))
+            {
+                sLog.outErrorDb("Quest %u has `SrcSpell` = %u but spell %u is broken, quest can't be done.",
+                    qinfo->GetQuestId(),qinfo->SrcSpell,qinfo->SrcSpell);
+                qinfo->SrcSpell = 0;                        // quest can't be done for this requirement
+            }
         }
 
         for(int j = 0; j < QUEST_OBJECTIVES_COUNT; ++j )
@@ -2553,11 +2576,24 @@ void ObjectMgr::LoadQuests()
             }
         }
 
-        if(qinfo->RewSpell && !sSpellStore.LookupEntry(qinfo->RewSpell))
+        if(qinfo->RewSpell)
         {
-            sLog.outErrorDb("Quest %u has `RewSpell` = %u but spell %u does not exist, quest will not have a spell reward.",
-                qinfo->GetQuestId(),qinfo->RewSpell,qinfo->RewSpell);
-            qinfo->RewSpell = 0;                            // quest will not reward this
+            SpellEntry const* spellInfo = sSpellStore.LookupEntry(qinfo->RewSpell);
+
+            if(!spellInfo)
+            {
+                sLog.outErrorDb("Quest %u has `RewSpell` = %u but spell %u does not exist, quest will not have a spell reward.",
+                    qinfo->GetQuestId(),qinfo->RewSpell,qinfo->RewSpell);
+                qinfo->RewSpell = 0;                        // quest will not reward this
+            }
+
+            else if(!IsSpellValid(spellInfo))
+            {
+                sLog.outErrorDb("Quest %u has `RewSpell` = %u but spell %u is broken, quest can't be done.",
+                    qinfo->GetQuestId(),qinfo->RewSpell,qinfo->RewSpell);
+                qinfo->RewSpell = 0;                        // quest will not reward this
+            }
+
         }
 
         if(qinfo->NextQuestInChain)
@@ -5837,4 +5873,51 @@ void ObjectMgr::LoadBattleMastersEntry()
 
     sLog.outString();
     sLog.outString( ">> Loaded %u battlemaster entries", count );
+}
+
+/// Some checks for spells, to prevent adding depricated/broken spells for trainers, spell book, etc
+bool ObjectMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl)
+{
+    // not exist
+    if(!spellInfo)
+        return false;
+
+    // check effects
+    for(int i=0; i<3; ++i)
+    {
+        switch(spellInfo->Effect[i])
+        {
+            case 0:
+                continue;
+
+            // craft spell for crafting non-existed item (break client recipes list show)
+            case SPELL_EFFECT_CREATE_ITEM:
+            {
+                if(!GetItemPrototype( spellInfo->EffectItemType[i] ))
+                {
+                    if(pl)
+                        ChatHandler(pl).PSendSysMessage("Craft spell %u create not-exist in DB item (Entry: %u)",spellInfo->Id,spellInfo->EffectItemType[i]);
+                    else
+                        sLog.outErrorDb("Craft spell %u create not-exist in DB item (Entry: %u)",spellInfo->Id,spellInfo->EffectItemType[i]);
+                    return false;
+                }
+                break;
+            }
+            case SPELL_EFFECT_LEARN_SPELL:
+            {
+                SpellEntry const* spellInfo2 = sSpellStore.LookupEntry(spellInfo->EffectTriggerSpell[0]);
+                if( !IsSpellValid(spellInfo2,pl) )
+                {
+                    if(pl)
+                        ChatHandler(pl).PSendSysMessage("Spell %u learn to broken spell %u",spellInfo->Id,spellInfo->EffectTriggerSpell[0]);
+                    else
+                        sLog.outErrorDb("Spell %u learn to invalid spell %u",spellInfo->Id,spellInfo->EffectTriggerSpell[0]);
+                    return false;
+                }
+                break;
+            }
+        }
+    }
+
+    return true;
 }

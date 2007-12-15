@@ -281,6 +281,8 @@ class BattleGround
         void EndBattleGround(uint32 winner);
         void BlockMovement(Player *plr);
 
+        void SendMessageToAll(char const* text);
+
         typedef std::vector<uint64> BGObjects;
         typedef std::vector<uint64> BGCreatures;
         BGObjects m_bgobjects;
