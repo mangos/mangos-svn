@@ -13556,7 +13556,7 @@ void Player::_SaveMail()
             if(m->removedItems.size())
             {
                 for(std::vector<uint32>::iterator itr2 = m->removedItems.begin(); itr2 != m->removedItems.end(); ++itr2)
-                    CharacterDatabase.PExecute("DELETE FROM `mail_items` WHERE `item_guid` = '%u'", itr2);
+                    CharacterDatabase.PExecute("DELETE FROM `mail_items` WHERE `item_guid` = '%u'", *itr2);
                 m->removedItems.clear();
             }
             m->state = MAIL_STATE_UNCHANGED;
