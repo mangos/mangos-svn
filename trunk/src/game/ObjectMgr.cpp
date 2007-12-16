@@ -5577,25 +5577,36 @@ bool findnth(std::string &str, int n, std::string::size_type &s, std::string::si
 
 std::string gettablename(std::string &str)
 {
-    std::string::size_type s = 13, e = str.find('`', s);
-    if (e == std::string::npos) return "";
+    std::string::size_type s = 13;
+    std::string::size_type e = str.find('`', s);
+    if (e == std::string::npos)
+        return "";
+
     return str.substr(s, e-s);
 }
 
 bool changenth(std::string &str, int n, const char *with, bool insert = false, bool nonzero = false)
 {
     std::string::size_type s, e;
-    if(!findnth(str,n,s,e)) return false;
-    if(nonzero && str.substr(s,e-s) == "0") return true;    // not an error
-    if(!insert) str.replace(s,e-s, with);
-    else str.insert(s, with);
+    if(!findnth(str,n,s,e))
+        return false;
+
+    if(nonzero && str.substr(s,e-s) == "0")
+        return true;                                        // not an error
+    if(!insert)
+        str.replace(s,e-s, with);
+    else
+        str.insert(s, with);
+
     return true;
 }
 
 std::string getnth(std::string &str, int n)
 {
     std::string::size_type s, e;
-    if(!findnth(str,n,s,e)) return "";
+    if(!findnth(str,n,s,e))
+        return "";
+
     return str.substr(s, e-s);
 }
 
@@ -5604,31 +5615,43 @@ bool findtoknth(std::string &str, int n, std::string::size_type &s, std::string:
     int i; s = e = 0;
     std::string::size_type size = str.size();
     for(i = 1; s < size && i < n; s++) if(str[s] == ' ') i++;
-    if (i < n) return false;
+    if (i < n)
+        return false;
+
     e = str.find(' ', s);
+
     return e != std::string::npos;
 }
 
 std::string gettoknth(std::string &str, int n)
 {
     std::string::size_type s = 0, e = 0;
-    if(!findtoknth(str, n, s, e)) return "";
+    if(!findtoknth(str, n, s, e))
+        return "";
+
     return str.substr(s, e-s);
 }
 
 bool changetoknth(std::string &str, int n, const char *with, bool insert = false, bool nonzero = false)
 {
     std::string::size_type s = 0, e = 0;
-    if(!findtoknth(str, n, s, e)) return false;
-    if(nonzero && str.substr(s,e-s) == "0") return true;    // not an error
-    if(!insert) str.replace(s, e-s, with);
-    else str.insert(s, with);
+    if(!findtoknth(str, n, s, e))
+        return false;
+    if(nonzero && str.substr(s,e-s) == "0")
+        return true;                                        // not an error
+    if(!insert)
+        str.replace(s, e-s, with);
+    else
+        str.insert(s, with);
+
     return true;
 }
 
 uint32 registerItem(uint32 oldGuid, std::map<uint32, uint32> &items, uint32 hiGuid)
 {
-    if(items[oldGuid] == 0) items[oldGuid] = hiGuid + items.size();
+    if(items[oldGuid] == 0)
+        items[oldGuid] = hiGuid + items.size();
+
     return items[oldGuid];
 }
 
@@ -5636,9 +5659,12 @@ bool changeItem(std::string &str, int n, std::map<uint32, uint32> &items, uint32
 {
     char chritem[20];
     uint32 oldGuid = atoi(getnth(str, n).c_str());
-    if (nonzero && oldGuid == 0) return true;               // not an error
+    if (nonzero && oldGuid == 0)
+        return true;                                        // not an error
+
     uint32 newGuid = registerItem(oldGuid, items, hiGuid);
     snprintf(chritem, 20, "%d", newGuid);
+
     return changenth(str, n, chritem, false, nonzero);
 }
 
@@ -5646,9 +5672,12 @@ bool changetokItem(std::string &str, int n, std::map<uint32, uint32> &items, uin
 {
     char chritem[20];
     uint32 oldGuid = atoi(gettoknth(str, n).c_str());
-    if (nonzero && oldGuid == 0) return true;               // not an error
+    if (nonzero && oldGuid == 0)
+        return true;                                        // not an error
+
     uint32 newGuid = registerItem(oldGuid, items, hiGuid);
     snprintf(chritem, 20, "%d", newGuid);
+
     return changetoknth(str, n, chritem, false, nonzero);
 }
 
@@ -5710,12 +5739,29 @@ bool ObjectMgr::LoadPlayerDump(std::string file, uint32 account, std::string nam
 
         std::string line; line.assign(buf);
 
+        // skip empty strings
+        if(line.find_first_not_of(" \t\n\r\7")==std::string::npos)
+            continue;
+
         // determine table name and load type
         std::string tn = gettablename(line);
+        if(tn.empty())
+        {
+            sLog.outError("LoadPlayerDump: Can't extract table name from line: '%s'!", line.c_str());
+            ROLLBACK;
+        }
+
         uint8 type, i;
         for(i = 0; i < DUMP_TABLE_COUNT; i++)
-            if (tn == dumpTables[i].name) { type = dumpTables[i].type; break; }
-            if (i == DUMP_TABLE_COUNT)
+        {
+            if (tn == dumpTables[i].name)
+            {
+                type = dumpTables[i].type; 
+                break;
+            }
+        }
+
+        if (i == DUMP_TABLE_COUNT)
         {
             sLog.outError("LoadPlayerDump: Unknown table: '%s'!", tn.c_str());
             ROLLBACK;
