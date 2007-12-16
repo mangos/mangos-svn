@@ -19,18 +19,28 @@
 #include "Tools.h"
 
 // THIS CAN BE A LOT FASTER
-uint64 readGUID(WorldPacket &data)
+bool readGUID(WorldPacket & data, uint64& guid)
 {
+    if(data.rpos()+1 > data.size())
+        return false;
+
     uint8 guidmark=0;
     uint8 bit;
     uint8 shiftdata=0x1;
-    uint64 Temp=0,guid=0;
+    uint64 Temp=0;
+    
+    guid = 0;
+
     data >> guidmark;
     for(int i=0;i<8;i++)
     {
         if(guidmark & shiftdata)
         {
             Temp = 0;
+
+            if(data.rpos()+1 > data.size())
+                return false;
+
             data >> bit;
             Temp = bit;
             Temp <<= i*8;
@@ -39,7 +49,7 @@ uint64 readGUID(WorldPacket &data)
         shiftdata=shiftdata<<1;
     }
 
-    return guid;
+    return true;
 }
 
 void  writeGUID(WorldPacket & data, uint64 & guid)
