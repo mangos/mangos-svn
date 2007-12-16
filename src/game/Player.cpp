@@ -4129,17 +4129,17 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
         case PLAYER_FIELD_MELEE_HIT_RATING:
             //Hit (melee): 10
             RatingChange = value/ RatingCoeffecient;
-            m_modHitChance += apply?int32(RatingChange):-int32(RatingChange);
+            m_modHitChance += apply ? RatingChange : -RatingChange;
             break;
         case PLAYER_FIELD_RANGED_HIT_RATING:
             //Hit (melee): 10
             RatingChange = value/ RatingCoeffecient;
-            m_modHitChance += apply?int32(RatingChange):-int32(RatingChange);
+            m_modHitChance += apply ? RatingChange : -RatingChange;
             break;
         case PLAYER_FIELD_SPELL_HIT_RATING:
             //Hit (spells): 8
             RatingChange = value/ RatingCoeffecient;
-            m_modSpellHitChance += apply?int32(RatingChange):-int32(RatingChange);
+            m_modSpellHitChance += apply ? RatingChange : -RatingChange;
             break;
         case PLAYER_FIELD_MELEE_CRIT_RATING:
             if(affectStats)
@@ -4182,7 +4182,7 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
             RatingChange = value/ RatingCoeffecient;
             ApplyModUInt32Value(PLAYER_FIELD_MELEE_HIT_RATING, value, apply);
             ApplyModUInt32Value(PLAYER_FIELD_RANGED_HIT_RATING, value, apply);
-            m_modHitChance += apply ? int32(RatingChange) : -int32(RatingChange);
+            m_modHitChance += apply ? RatingChange : -RatingChange;
             break;
         case PLAYER_FIELD_CRIT_RATING:
             ApplyModUInt32Value(PLAYER_FIELD_MELEE_CRIT_RATING, value, apply);
