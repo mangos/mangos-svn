@@ -71,8 +71,8 @@ class ChatHandler
 
         void SendSysMessage(          const char *str);
         void SendSysMultilineMessage( const char *str);
-        void PSendSysMessage(         const char *format, ...) ATTR_PRINTF(1,2);
-        void PSendSysMultilineMessage(const char *format, ...) ATTR_PRINTF(1,2);
+        void PSendSysMessage(         const char *format, ...) ATTR_PRINTF(2,3);
+        void PSendSysMultilineMessage(const char *format, ...) ATTR_PRINTF(2,3);
 
         int ParseCommands(const char* text);
 
