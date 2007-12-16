@@ -21,6 +21,6 @@
 #include "Common.h"
 #include "WorldPacket.h"
 
-uint64  readGUID(WorldPacket & data);
+bool readGUID(WorldPacket & data, uint64& guid);
 void    writeGUID(WorldPacket & data, uint64 & guid);
 #endif

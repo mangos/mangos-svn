@@ -132,6 +132,9 @@ void SpellCastTargets::Update(Unit* caster)
 
 bool SpellCastTargets::read ( WorldPacket * data,Unit *caster )
 {
+    if(data->rpos()+2 > data->size())
+        return false;
+
     *data >> m_targetMask;
 
     if(m_targetMask == TARGET_FLAG_SELF)
@@ -145,16 +148,22 @@ bool SpellCastTargets::read ( WorldPacket * data,Unit *caster )
     }
 
     if(m_targetMask & TARGET_FLAG_UNIT)
-        m_unitTargetGUID = readGUID(*data);
+        if(!readGUID(*data,m_unitTargetGUID))
+            return false;
 
     if(m_targetMask & TARGET_FLAG_OBJECT)
-        m_GOTargetGUID = readGUID(*data);
+        if(!readGUID(*data,m_GOTargetGUID))
+            return false;
 
     if((m_targetMask & (TARGET_FLAG_ITEM | TARGET_FLAG_TRADE_ITEM)) && caster->GetTypeId() == TYPEID_PLAYER)
-        m_itemTargetGUID = readGUID(*data);
+        if(!readGUID(*data,m_itemTargetGUID))
+            return false;
 
     if(m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
     {
+        if(data->rpos()+4+4+4 > data->size())
+            return false;
+
         *data >> m_srcX >> m_srcY >> m_srcZ;
         if(!MaNGOS::IsValidMapCoord(m_srcX,m_srcY))
             return false;
@@ -162,16 +171,25 @@ bool SpellCastTargets::read ( WorldPacket * data,Unit *caster )
 
     if(m_targetMask & TARGET_FLAG_DEST_LOCATION)
     {
+        if(data->rpos()+4+4+4 > data->size())
+            return false;
+
         *data >> m_destX >> m_destY >> m_destZ;
         if(!MaNGOS::IsValidMapCoord(m_destX,m_destY))
             return false;
     }
 
     if(m_targetMask & TARGET_FLAG_STRING)
+    {
+        if(data->rpos()+1 > data->size())
+            return false;
+
         *data >> m_strTarget;
+    }
 
     if((m_targetMask & TARGET_FLAG_CORPSE) || (m_targetMask & TARGET_FLAG_PVP_CORPSE))
-        m_CorpseTargetGUID = readGUID(*data);
+        if(!readGUID(*data,m_CorpseTargetGUID))
+            return false;
 
     // find real units/GOs
     Update(caster);
