@@ -283,7 +283,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //231
     &Aura::HandleNULL,                                      //232
     &Aura::HandleNULL,                                      //233
-    &Aura::HandleNULL,                                      //234 SPELL_AURA_SILENCE_RESISTANCE
+    &Aura::HandleNoImmediateEffect,                         //234 SPELL_AURA_MECHANIC_DURATION_MOD imlement in Unit::CalculateSpellDamageAndDuration
     &Aura::HandleNULL,                                      //235
     &Aura::HandleNULL,                                      //236
     &Aura::HandleNULL,                                      //237
