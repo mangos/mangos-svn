@@ -420,7 +420,7 @@ class ObjectMgr
 
         static bool IsSpellProcEventCanTriggeredBy( SpellProcEventEntry const * spellProcEvent, SpellEntry const * procSpell, uint32 procFlags );
 
-        static bool IsSpellValid(SpellEntry const * spellInfo, Player* pl = NULL);
+        static bool IsSpellValid(SpellEntry const * spellInfo, Player* pl = NULL, bool msg = true);
 
         ReputationOnKillEntry const* GetReputationOnKilEntry(uint32 id) const
         {
