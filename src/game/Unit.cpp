@@ -6538,8 +6538,16 @@ void Unit::CalculateSpellDamageAndDuration(int32* damage, int32* duration, Spell
         }
         else
             *duration = minduration;
+        
+        int32 durationMod = 0;
+        AuraList const& mMechanicMod = GetAurasByType(SPELL_AURA_MECHANIC_DURATION_MOD);
+        for(AuraList::const_iterator i = mMechanicMod.begin();i != mMechanicMod.end(); ++i)
+            if((*i)->GetModifier()->m_miscvalue == int32(spellProto->Mechanic))
+                durationMod+= (*i)->GetModifier()->m_amount;
+        *duration = *duration * (100+durationMod) /100; 
+        if (*duration < 0) *duration = 0;
     }
-
+  
     if(unitPlayer && needClearCombo)
         unitPlayer->ClearComboPoints();
 }
