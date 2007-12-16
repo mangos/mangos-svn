@@ -1033,8 +1033,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         uint32 m_invisibilityMask;
         uint32 m_ShapeShiftForm;
         uint32 m_form;
-        int32 m_modHitChance;
-        int32 m_modSpellHitChance;
+        float m_modHitChance;
+        float m_modSpellHitChance;
         int32 m_baseSpellCritChance;
         float m_modResilience;
         float m_threatModifier[MAX_SPELL_SCHOOL];

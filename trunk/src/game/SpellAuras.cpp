@@ -3430,12 +3430,12 @@ void Aura::HandleAuraModCritPercent(bool apply, bool Real)
 
 void Aura::HandleModHitChance(bool Apply, bool Real)
 {
-    m_target->m_modHitChance += Apply?m_modifier.m_amount:(-m_modifier.m_amount);
+    m_target->m_modHitChance += Apply ? m_modifier.m_amount : (-m_modifier.m_amount);
 }
 
 void Aura::HandleModSpellHitChance(bool Apply, bool Real)
 {
-    m_target->m_modSpellHitChance += Apply?m_modifier.m_amount:(-m_modifier.m_amount);
+    m_target->m_modSpellHitChance += Apply ? m_modifier.m_amount: (-m_modifier.m_amount);
 }
 
 void Aura::HandleModSpellCritChance(bool Apply, bool Real)

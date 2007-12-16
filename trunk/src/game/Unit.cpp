@@ -174,8 +174,8 @@ Unit::Unit( WorldObject *instantiator )
         m_createStats[i] = 0.0f;
 
     m_attacking = NULL;
-    m_modHitChance = 0;
-    m_modSpellHitChance = 0;
+    m_modHitChance = 0.0f;
+    m_modSpellHitChance = 0.0f;
     m_baseSpellCritChance = 5;
     m_modResilience = 0.0f;
     m_CombatTimer = 0;
@@ -2252,9 +2252,9 @@ MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (Unit const *pVictim, WeaponAtt
     if(Player* modOwner = GetSpellModOwner())
         modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_CRITICAL_CHANCE, crit_chance);
 
-    DEBUG_LOG("PHYSICAL OUTCOME: hit %u crit %f miss %u",m_modHitChance,crit_chance,miss_chance);
+    DEBUG_LOG("PHYSICAL OUTCOME: hit %f crit %f miss %u",m_modHitChance,crit_chance,miss_chance);
 
-    return RollMeleeOutcomeAgainst(pVictim, attType, int32(crit_chance * 100 ), miss_chance, m_modHitChance);
+    return RollMeleeOutcomeAgainst(pVictim, attType, int32(crit_chance * 100 ), miss_chance, int32(m_modHitChance));
 }
 
 MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType) const
@@ -2273,8 +2273,8 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
         crit_chance += (*i)->GetModifier()->m_amount;
 
     // Useful if want to specify crit & miss chances for melee, else it could be removed
-    DEBUG_LOG("MELEE OUTCOME: hit %u crit %u miss %u", m_modHitChance,crit_chance,miss_chance);
-    return RollMeleeOutcomeAgainst(pVictim, attType, int32(crit_chance * 100 ), miss_chance, m_modHitChance);
+    DEBUG_LOG("MELEE OUTCOME: hit %f crit %u miss %u", m_modHitChance,crit_chance,miss_chance);
+    return RollMeleeOutcomeAgainst(pVictim, attType, int32(crit_chance * 100 ), miss_chance, int32(m_modHitChance));
 }
 
 MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttackType attType, int32 crit_chance, int32 miss_chance, int32 hit_chance) const
@@ -2489,7 +2489,7 @@ uint32 Unit::SpellMissChanceCalc(Unit *pVictim) const
     if(leveldif < 0)
         leveldif = 0;
 
-    int32 misschance = 400 - m_modSpellHitChance*100;
+    int32 misschance = 400 - int32(m_modSpellHitChance*100);
     if(leveldif < 3)
         misschance += leveldif * 100;
     else
@@ -2539,9 +2539,9 @@ int32 Unit::MeleeMissChanceCalc(const Unit *pVictim) const
         leveldif = 0;
 
     if(leveldif < 3)
-        misschance += leveldif * 100 - m_modHitChance*100;
+        misschance += leveldif * 100 - int32(m_modHitChance*100);
     else
-        misschance += (leveldif - 2) * chance - m_modHitChance*100;
+        misschance += (leveldif - 2) * chance - int32(m_modHitChance*100);
 
     return misschance > 6000 ? 6000 : misschance;
 }
