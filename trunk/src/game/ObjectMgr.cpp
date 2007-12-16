@@ -5876,7 +5876,7 @@ void ObjectMgr::LoadBattleMastersEntry()
 }
 
 /// Some checks for spells, to prevent adding depricated/broken spells for trainers, spell book, etc
-bool ObjectMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl)
+bool ObjectMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl, bool msg)
 {
     // not exist
     if(!spellInfo)
@@ -5895,10 +5895,13 @@ bool ObjectMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl)
             {
                 if(!GetItemPrototype( spellInfo->EffectItemType[i] ))
                 {
-                    if(pl)
-                        ChatHandler(pl).PSendSysMessage("Craft spell %u create not-exist in DB item (Entry: %u)",spellInfo->Id,spellInfo->EffectItemType[i]);
-                    else
-                        sLog.outErrorDb("Craft spell %u create not-exist in DB item (Entry: %u)",spellInfo->Id,spellInfo->EffectItemType[i]);
+                    if(msg)
+                    {
+                        if(pl)
+                            ChatHandler(pl).PSendSysMessage("Craft spell %u create not-exist in DB item (Entry: %u) and then...",spellInfo->Id,spellInfo->EffectItemType[i]);
+                        else
+                            sLog.outErrorDb("Craft spell %u create not-exist in DB item (Entry: %u) and then...",spellInfo->Id,spellInfo->EffectItemType[i]);
+                    }
                     return false;
                 }
                 break;
@@ -5906,12 +5909,15 @@ bool ObjectMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl)
             case SPELL_EFFECT_LEARN_SPELL:
             {
                 SpellEntry const* spellInfo2 = sSpellStore.LookupEntry(spellInfo->EffectTriggerSpell[0]);
-                if( !IsSpellValid(spellInfo2,pl) )
+                if( !IsSpellValid(spellInfo2,pl,msg) )
                 {
-                    if(pl)
-                        ChatHandler(pl).PSendSysMessage("Spell %u learn to broken spell %u",spellInfo->Id,spellInfo->EffectTriggerSpell[0]);
-                    else
-                        sLog.outErrorDb("Spell %u learn to invalid spell %u",spellInfo->Id,spellInfo->EffectTriggerSpell[0]);
+                    if(msg)
+                    {
+                        if(pl)
+                            ChatHandler(pl).PSendSysMessage("Spell %u learn to broken spell %u, and then",spellInfo->Id,spellInfo->EffectTriggerSpell[0]);
+                        else
+                            sLog.outErrorDb("Spell %u learn to invalid spell %u, and then",spellInfo->Id,spellInfo->EffectTriggerSpell[0]);
+                    }
                     return false;
                 }
                 break;

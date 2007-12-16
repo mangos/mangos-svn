@@ -1605,6 +1605,12 @@ uint32 Unit::CalcArmorReducedDamage(Unit* pVictim, const uint32 damage)
     uint32 newdamage = 0;
     float armor = pVictim->GetArmor();
 
+    AuraList const& mModTargetRes = GetAurasByType(SPELL_AURA_MOD_TARGET_RESISTANCE);
+    for(AuraList::const_iterator i = mModTargetRes.begin(); i != mModTargetRes.end(); ++i)
+        if ((*i)->GetModifier()->m_miscvalue & int32(1 << SPELL_SCHOOL_NORMAL))
+            armor += float((*i)->GetModifier()->m_amount);
+    if (armor<0.0f) armor=0.0f;
+
     float tmpvalue = 0.0f;
     if(getLevel() <= 59)                                    //Level 1-59
         tmpvalue = armor / (armor + 400.0f + 85.0f * getLevel());

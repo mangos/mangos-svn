@@ -1405,7 +1405,7 @@ bool ChatHandler::HandleLearnAllMySpellsCommand(const char* args)
             continue;
 
         // skip broken spells
-        if(!ObjectMgr::IsSpellValid(spellInfo,m_session->GetPlayer()))
+        if(!ObjectMgr::IsSpellValid(spellInfo,m_session->GetPlayer(),false))
             continue;
 
         m_session->GetPlayer()->learnSpell(i);
@@ -1464,7 +1464,7 @@ bool ChatHandler::HandleLearnAllMyTalentsCommand(const char* args)
         }
 
         SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellid);
-        if(!spellInfo || !ObjectMgr::IsSpellValid(spellInfo,m_session->GetPlayer()))
+        if(!spellInfo || !ObjectMgr::IsSpellValid(spellInfo,m_session->GetPlayer(),false))
             continue;
 
         // learn highest rank of talent
@@ -1474,7 +1474,7 @@ bool ChatHandler::HandleLearnAllMyTalentsCommand(const char* args)
         for(uint32 cur_id = last_spell_id; cur_id != spellid && cur_id != 0; cur_id = objmgr.GetPrevSpellInChain(cur_id))
         {
             SpellEntry const* spellInfo2 = sSpellStore.LookupEntry(cur_id);
-            if(!spellInfo2 || !ObjectMgr::IsSpellValid(spellInfo2,m_session->GetPlayer()))
+            if(!spellInfo2 || !ObjectMgr::IsSpellValid(spellInfo2,m_session->GetPlayer(),false))
                 continue;
 
             player->learnSpell(cur_id);
@@ -1525,7 +1525,7 @@ bool ChatHandler::HandleLearnAllCraftsCommand(const char* args)
                     continue;
 
                 SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->spellId);
-                if(!spellInfo || !ObjectMgr::IsSpellValid(spellInfo,m_session->GetPlayer()))
+                if(!spellInfo || !ObjectMgr::IsSpellValid(spellInfo,m_session->GetPlayer(),false))
                     continue;
 
                 m_session->GetPlayer()->learnSpell(skillLine->spellId);

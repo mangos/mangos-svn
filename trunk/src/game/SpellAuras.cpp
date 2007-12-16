@@ -2965,7 +2965,7 @@ void Aura::HandleAuraModResistanceExclusive(bool apply, bool Real)
 {
     if(m_modifier.m_miscvalue < IMMUNE_SCHOOL_PHYSICAL || m_modifier.m_miscvalue > 127)
     {
-        sLog.outError("WARNING: Misc Value for SPELL_AURA_MOD_BASE_RESISTANCE_PCT not valid");
+        sLog.outError("WARNING: Misc Value for SPELL_AURA_MOD_RESISTANCE_EXCLUS not valid");
         return;
     }
 
@@ -4127,7 +4127,7 @@ void Aura::HandleModRating(bool apply, bool Real)
 
 void Aura::HandleModTargetResistance(bool apply, bool Real)
 {
-    // applied to damage as HandleNoImmediateEffect in Unit::CalcAbsorbResist
+    // applied to damage as HandleNoImmediateEffect in Unit::CalcAbsorbResist and Unit::CalcArmorReducedDamage
 
     // show as spell penetration only full spell penetration bonuses (all resistances except armor and holy
     if (m_target->GetTypeId() == TYPEID_PLAYER && (m_modifier.m_miscvalue & 124)==124)
