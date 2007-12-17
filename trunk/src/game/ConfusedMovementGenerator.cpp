@@ -114,7 +114,7 @@ ConfusedMovementGenerator<T>::Update(T &unit, const uint32 &diff)
                 unit.StopMoving();
 
                 i_nextMove = urand(1,MAX_CONF_WAYPOINTS);
-                i_nextMoveTime.Reset(urand(0, 1500-1));         // TODO: check the minimum reset time, should be probably higher
+                i_nextMoveTime.Reset(urand(0, 1500-1));     // TODO: check the minimum reset time, should be probably higher
             }
         }
     }

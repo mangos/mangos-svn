@@ -745,7 +745,7 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
     }
 
     // prevent character rename to invalid name
-    if(newname.empty())                                 // checked by client
+    if(newname.empty())                                     // checked by client
     {
         WorldPacket data(SMSG_CHAR_RENAME, 1);
         data << (uint8)CHAR_NAME_NO_NAME;

@@ -594,7 +594,7 @@ ObjectAccessor::Update(const uint32  &diff)
             map = MapManager::Instance().GetMap((*iter).first, player);
 
             CellPair standing_cell(MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY()));
-            
+
             // Check for correctness of standing_cell, it also avoids problems with update_cell
             if (standing_cell.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || standing_cell.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP)
                 continue;

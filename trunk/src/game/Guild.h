@@ -24,7 +24,7 @@
 enum GuildDefaultRanks
 {
     GR_GUILDMASTER  = 0,
-    GR_OFFICER      = 1,                                  
+    GR_OFFICER      = 1,
     //GR_VETERAN      = 2, -- not used anywhere and possible incorrect in modified rank list
     //GR_MEMBER       = 3,
     //GR_INITIATE     = 4, -- use Guild::GetLowestRank() instead for lowest rank
@@ -56,7 +56,7 @@ enum Typecommand
     GUILD_QUIT_S    = 0x03,
     GUILD_FOUNDER_S = 0x0E,
     GUILD_UNK1      = 0x10,
-    GUILD_UNK2      = 0x15,             // guild bank?
+    GUILD_UNK2      = 0x15,                                 // guild bank?
     GUILD_UNK3      = 0x16
 };
 
@@ -100,11 +100,11 @@ enum GuildEvents
     GE_LEADER_CHANGED   = 0x07,
     GE_DISBANDED        = 0x08,
     GE_TABARDCHANGE     = 0x09,
-    GE_UNK1             = 0x0A, // string, string
+    GE_UNK1             = 0x0A,                             // string, string
     GE_SIGNED_ON        = 0x0C,
     GE_SIGNED_OFF       = 0x0D,
     GE_UNK2             = 0x0E,
-    GE_UNK3             = 0x11, // string 0000000000002710 is 1 gold
+    GE_UNK3             = 0x11,                             // string 0000000000002710 is 1 gold
     GE_UNK4             = 0x15,
     GE_UNK5             = 0x19
 };

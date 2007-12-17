@@ -28,7 +28,7 @@
 #include <set>
 #include <string>
 
-#define CONTACT_DISTANCE            0.5
+#define CONTACT_DISTANCE            0.5f
 #define INTERACTION_DISTANCE        5
 #define ATTACK_DISTANCE                 5
 #define DETECT_DISTANCE             20                      // max distance to successful detect stealthed unit
@@ -296,7 +296,6 @@ class MANGOS_DLL_SPEC WorldObject : public Object
         }
         bool IsPositionValid() const;
         void UpdateGroundPositionZ(float x, float y, float &z) const;
-
 
         void GetRandomPoint( float x, float y, float z, float distance, float &rand_x, float &rand_y, float &rand_z ) const;
 

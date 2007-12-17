@@ -16,7 +16,6 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
 #include "ObjectMgr.h"
@@ -89,7 +88,7 @@ void LoadSkillDiscoveryTable()
             else if( reqSkillOrSpell == 0 )                 // skill case
             {
                 SkillLineAbilityEntry const *pAbility = sSkillLineAbilityStore.LookupEntry(spellId);
-                if ( pAbility ) 
+                if ( pAbility )
                     reqSkillOrSpell = -int32(pAbility->skillId);
                 else
                 {
@@ -103,7 +102,7 @@ void LoadSkillDiscoveryTable()
                 continue;
             }
 
-            if( chance <= 0 )                          // chance
+            if( chance <= 0 )                               // chance
             {
                 ssNonDiscoverableEntries << "spellId = " << spellId << " reqSkillOrSpell = " << reqSkillOrSpell << " chance = " << chance << "\n";
                 continue;

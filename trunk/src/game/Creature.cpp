@@ -535,7 +535,7 @@ bool Creature::isCanIneractWithBattleMaster(Player* pPlayer, bool msg) const
             case BATTLEGROUND_BE:
             case BATTLEGROUND_AA:
             case BATTLEGROUND_RL:  pPlayer->PlayerTalkClass->SendGossipMenu(10024,GetGUID()); break;
-                break;
+            break;
         }
         return false;
     }
@@ -651,12 +651,12 @@ void Creature::prepareGossipMenu( Player *pPlayer,uint32 gossipid )
     {
         if(HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_TRAINER))
         {
-            LoadTrainerSpells();                                // Lazy loading at first access
-            isCanTrainingOf(pPlayer,true);                      // output error message if need
+            LoadTrainerSpells();                            // Lazy loading at first access
+            isCanTrainingOf(pPlayer,true);                  // output error message if need
         }
         if(HasFlag(UNIT_NPC_FLAGS,UNIT_NPC_FLAG_BATTLEMASTER))
         {
-            isCanIneractWithBattleMaster(pPlayer,true);         // output error message if need
+            isCanIneractWithBattleMaster(pPlayer,true);     // output error message if need
         }
     }
 
@@ -1197,7 +1197,7 @@ bool Creature::CreateFromProto(uint32 guidlow, uint32 Entry, uint32 team, const 
             sLog.outErrorDb("Creature (Entry: %u) has equipment_id %u (default from creature template) not found in table `creature_equip_template`.", Entry, cinfo->equipmentId);
     }
     else if(data && data->equipmentId != -1)
-    {                                                        // override, -1 means no equipment
+    {                                                       // override, -1 means no equipment
         if(!LoadEquipment(data->equipmentId))
             sLog.outErrorDb("Creature (GUID: %u Entry: %u) has equipment_id %u (override from creature data) not found in table `equipment`. ", guidlow, data->id, data->equipmentId);
     }
@@ -1550,7 +1550,7 @@ bool Creature::IsImmunedToSpell(SpellEntry const* spellInfo) const
         (MECHANIC_SHACKLE       == spellInfo->Mechanic) ||
         (MECHANIC_TURN          == spellInfo->Mechanic) ||
         (MECHANIC_HORROR        == spellInfo->Mechanic) ||
-        (MECHANIC_DAZE          == spellInfo->Mechanic) )) 
+        (MECHANIC_DAZE          == spellInfo->Mechanic) ))
         return true;
 
     return Unit::IsImmunedToSpell(spellInfo);
@@ -1730,7 +1730,6 @@ CreatureDataAddon const* Creature::GetCreatureAddon() const
     return ObjectMgr::GetCreatureTemplateAddon(GetEntry());
 }
 
-
 //creature_addon table
 bool Creature::LoadCreaturesAddon()
 {
@@ -1834,5 +1833,5 @@ bool Creature::HasSpell(uint32 spellID) const
     for(i = 0; i < CREATURE_MAX_SPELLS; ++i)
         if(spellID == m_spells[i])
             break;
-    return i < CREATURE_MAX_SPELLS;                     //broke before end of iteration of known spells
+    return i < CREATURE_MAX_SPELLS;                         //broke before end of iteration of known spells
 }

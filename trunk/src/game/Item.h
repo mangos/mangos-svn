@@ -114,7 +114,7 @@ enum InventoryChangeFailure
     EQUIP_ERR_ITEM_MAX_COUNT_EQUIPPED_SOCKETED   = 75,
     EQUIP_ERR_ITEM_UNIQUE_EQUIPPABLE_SOCKETED    = 76,
     EQUIP_ERR_TOO_MUCH_GOLD                      = 77,
-    EQUIP_ERR_NOT_DURING_ARENA_MATCH             = 78    
+    EQUIP_ERR_NOT_DURING_ARENA_MATCH             = 78
 
 };
 
@@ -151,8 +151,8 @@ enum EnchantmentSlot
     BONUS_ENCHANTMENT_SLOT      = 5,
     MAX_INSPECTED_ENCHANTMENT_SLOT = 6,
 
-    PROP_ENCHANTMENT_SLOT_0     = 6,                        // used with RandomSuffix 
-    PROP_ENCHANTMENT_SLOT_1     = 7,                        // used with RandomSuffix 
+    PROP_ENCHANTMENT_SLOT_0     = 6,                        // used with RandomSuffix
+    PROP_ENCHANTMENT_SLOT_1     = 7,                        // used with RandomSuffix
     PROP_ENCHANTMENT_SLOT_2     = 8,                        // used with RandomSuffix and RandomProperty
     PROP_ENCHANTMENT_SLOT_3     = 9,                        // used with RandomProperty
     PROP_ENCHANTMENT_SLOT_4     = 10,                       // used with RandomProperty

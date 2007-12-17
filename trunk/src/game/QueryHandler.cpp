@@ -99,7 +99,6 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
     uint32 entry;
     recv_data >> entry;
 
-
     CreatureInfo const *ci = objmgr.GetCreatureTemplate(entry);
     if (ci)
     {
@@ -145,10 +144,10 @@ void WorldSession::HandleCreatureQueryOpcode( WorldPacket & recv_data )
         sLog.outDebug(  "WORLD: Sent SMSG_CREATURE_QUERY_RESPONSE " );
     }
     else
-    {    
+    {
         uint64 guid;
         recv_data >> guid;
-        
+
         sLog.outDebug(  "WORLD: CMSG_CREATURE_QUERY - (%u) NO CREATURE INFO! (GUID: %u, ENTRY: %u)", uint32(GUID_LOPART(guid)), guid, entry );
         WorldPacket data( SMSG_CREATURE_QUERY_RESPONSE, 4 );
         data << uint32(entry | 0x80000000);

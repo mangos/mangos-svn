@@ -130,7 +130,7 @@ VisibleNotifier::Notify()
 
     // Now do operations that required done at object visibility change to visible
 
-    // target aura duration for caster show only if target exist at caster client 
+    // target aura duration for caster show only if target exist at caster client
     // send data at target visibility change (adding to client)
     for(std::set<WorldObject*>::const_iterator vItr = i_visibleNow.begin(); vItr != i_visibleNow.end(); ++vItr)
         if((*vItr)!=&i_player && (*vItr)->isType(TYPE_UNIT))

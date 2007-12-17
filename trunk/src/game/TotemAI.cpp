@@ -62,7 +62,7 @@ TotemAI::UpdateAI(const uint32 diff)
 
     // Search spell
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(i_totem.GetSpell());
-    if (!spellInfo) 
+    if (!spellInfo)
         return;
 
     // Get spell rangy
@@ -99,7 +99,7 @@ TotemAI::UpdateAI(const uint32 diff)
     if (victim)
     {
         // remember
-        i_victimGuid = victim->GetGUID(); 
+        i_victimGuid = victim->GetGUID();
 
         // attack
         i_totem.SetInFront(victim);                         // client change orientation by self

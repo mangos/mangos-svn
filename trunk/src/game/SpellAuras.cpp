@@ -423,6 +423,7 @@ Unit *caster, Item* castItem) : Aura(spellproto, eff, currentBasePoints, target,
 PersistentAreaAura::~PersistentAreaAura()
 {
 }
+
 Unit* Aura::GetCaster() const
 {
     if(m_caster_guid==m_target->GetGUID())
@@ -710,8 +711,8 @@ void Aura::SendAuraDurationForCaster(Player* caster)
     data.append(m_target->GetPackGUID());
     data << uint8(m_auraSlot);
     data << uint32(GetSpellProto()->Id);
-    data << uint32(GetAuraMaxDuration());               // full
-    data << uint32(GetAuraDuration());                  // remain
+    data << uint32(GetAuraMaxDuration());                   // full
+    data << uint32(GetAuraDuration());                      // remain
     caster->GetSession()->SendPacket(&data);
 }
 
@@ -790,7 +791,7 @@ void Aura::_AddAura()
                 uint32 value = m_target->GetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + flagslot));
 
                 uint8 value1 = (slot & 3) << 3;
-                
+
                 value &= ~((uint32)AFLAG_MASK << value1);
                 if (IsPositive())
                     value |= ((uint32)AFLAG_POSITIVE << value1);
@@ -976,7 +977,7 @@ void Aura::HandleAddModifier(bool apply, bool Real)
         SpellModifier *mod = new SpellModifier;
         mod->op = SpellModOp(m_modifier.m_miscvalue);
         mod->value = m_modifier.m_amount;
-        mod->type = SpellModType(m_modifier.m_auraname);    // SpellModType value == spell aura types 
+        mod->type = SpellModType(m_modifier.m_auraname);    // SpellModType value == spell aura types
         mod->spellId = m_spellId;
         mod->effectId = m_effIndex;
         mod->lastAffected = 0;
@@ -1260,10 +1261,7 @@ void Aura::HandleAuraMounted(bool apply, bool Real)
 
         uint32 team = 0;
         if (m_target->GetTypeId()==TYPEID_PLAYER)
-            if (((Player*)m_target)->GetTeam()==HORDE)
-                team = HORDE;
-            else if (((Player*)m_target)->GetTeam()==ALLIANCE)
-                team = ALLIANCE;
+            team = ((Player*)m_target)->GetTeam();
 
         uint32 displayId = (team==HORDE) ? ci->DisplayID_H : ci->DisplayID_A;
 
@@ -1580,7 +1578,8 @@ void Aura::HandleAuraTransform(bool apply, bool Real)
             }
             else
             {
-                m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, ci->DisplayID_A); // Will use the default model here
+                                                            // Will use the default model here
+                m_target->SetUInt32Value (UNIT_FIELD_DISPLAYID, ci->DisplayID_A);
             }
             m_target->setTransForm(GetSpellProto()->Id);
         }
@@ -2690,9 +2689,9 @@ void Aura::HandleModMechanicImmunity(bool apply, bool Real)
             next++;
             SpellEntry const *spell = iter->second->GetSpellProto();
             if( (1<<spell->Mechanic) & mechanic             //check for mechanic mask
-                    && !( spell->Attributes & 0x20000000)    //spells unaffected by invulnerability
-                    && !iter->second->IsPositive()          //only remove negative spells
-                    && spell->Id != GetId())
+                && !( spell->Attributes & 0x20000000)       //spells unaffected by invulnerability
+                && !iter->second->IsPositive()              //only remove negative spells
+                && spell->Id != GetId())
             {
                 m_target->RemoveAurasDueToSpell(spell->Id);
                 if(Auras.empty())
@@ -3122,7 +3121,7 @@ void Aura::HandleModSpellHealingPercent(bool apply, bool Real)
         return;
 
     //For ClientSide Display
-    m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_HEALING_DONE_POS, int32((m_modifier.m_amount/100.00f * m_target->GetStat(STAT_INTELLECT))),apply);		
+    m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_HEALING_DONE_POS, int32((m_modifier.m_amount/100.00f * m_target->GetStat(STAT_INTELLECT))),apply);
 }
 
 void Aura::HandleModSpellDamagePercent(bool apply, bool Real)
@@ -3133,9 +3132,10 @@ void Aura::HandleModSpellDamagePercent(bool apply, bool Real)
     //For ClientSide Display
     for(int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
     {
-        m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+i, int32((m_modifier.m_amount/100.00f * m_target->GetStat(STAT_INTELLECT))),apply);	
-    }		
+        m_target->ApplyModUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS+i, int32((m_modifier.m_amount/100.00f * m_target->GetStat(STAT_INTELLECT))),apply);
+    }
 }
+
 void Aura::HandleModHealingDone(bool apply, bool Real)
 {
     // implemented in Unit::SpellHealingBonus
@@ -3290,7 +3290,7 @@ void Aura::HandleModPowerRegen(bool apply, bool Real)       // drinking
         if( !(pt == POWER_RAGE && (m_target->isInCombat() || m_target->GetPower(POWER_RAGE) == 0)) )
         {
             if(pt != POWER_MANA)
-                m_target->ModifyPower(pt, m_modifier.m_amount*2/5);			
+                m_target->ModifyPower(pt, m_modifier.m_amount*2/5);
         }
     }
     m_isPeriodic = apply;
@@ -3303,7 +3303,7 @@ void Aura::HandleModManaRegen(bool apply, bool Real)
     //Already calculated in Player::UpdateManaRegen()
     //Note: an increase in regen does NOT cause threat.
     ((Player*)m_target)->UpdateManaRegen();
-    
+
 }
 
 void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
@@ -3394,6 +3394,7 @@ void Aura::HandleAuraModRegenInterrupt(bool apply, bool Real)
         return;
     ((Player*)m_target)->UpdateManaRegen();
 }
+
 void Aura::HandleAuraModCritPercent(bool apply, bool Real)
 {
     if(m_target->GetTypeId()!=TYPEID_PLAYER)
@@ -4034,6 +4035,7 @@ void Aura::HandleAuraModSpeedFlight(bool apply, bool Real)
 
     sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_FLY));
 }
+
 void Aura::HandleAuraModSpeedFlightAlways(bool apply, bool Real)
 {
     // all applied/removed only at real aura add/remove
@@ -4050,6 +4052,7 @@ void Aura::HandleAuraModSpeedFlightAlways(bool apply, bool Real)
 
     sLog.outDebug("ChangeSpeedTo:%f", m_target->GetSpeed(MOVE_FLY));
 }
+
 void Aura::HandleModRating(bool apply, bool Real)
 {
     if(m_target->GetTypeId() == TYPEID_PLAYER)

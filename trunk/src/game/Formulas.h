@@ -175,17 +175,17 @@ namespace MaNGOS
             {
                 switch(count)
                 {
-                case 0: 
-                case 1: 
-                case 2: 
-                    return 1.0f;
-                case 3: 
-                    return 1.166f;
-                case 4: 
-                    return 1.3f;
-                case 5: 
-                default:
-                    return 1.4f;
+                    case 0:
+                    case 1:
+                    case 2:
+                        return 1.0f;
+                    case 3:
+                        return 1.166f;
+                    case 4:
+                        return 1.3f;
+                    case 5:
+                    default:
+                        return 1.4f;
                 }
             }
         }

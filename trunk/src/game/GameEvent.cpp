@@ -533,8 +533,8 @@ void GameEvent::ChangeEquipOrModel(int16 event_id, bool activate)
                     }
                 }
             }
-        } 
-        else // If not spawned
+        }
+        else                                                // If not spawned
         {
             CreatureData const* data = objmgr.GetCreatureData(itr->first);
             if (data && activate)
@@ -551,8 +551,9 @@ void GameEvent::ChangeEquipOrModel(int16 event_id, bool activate)
                 itr->second.modelid_prev = display_id;
             }
         }
-        // now last step: put in data 
-        CreatureData& data2 = objmgr.NewOrExistCreatureData(itr->first); // just to have write access to it
+        // now last step: put in data
+                                                            // just to have write access to it
+        CreatureData& data2 = objmgr.NewOrExistCreatureData(itr->first);
         if (activate)
         {
             data2.displayid = itr->second.modelid;

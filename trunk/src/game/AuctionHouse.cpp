@@ -164,7 +164,7 @@ void WorldSession::SendAuctionOutbiddedMail(AuctionEntry *auction, uint32 newPri
     if(oldBidder || oldBidder_accId)
     {
         uint32 mailId = objmgr.GenerateMailID();
-        time_t dtime = time(NULL);                              //Instant since it's Auction House
+        time_t dtime = time(NULL);                          //Instant since it's Auction House
         time_t etime = dtime + (30 * DAY);
 
         std::ostringstream msgAuctionOutbiddedSubject;
@@ -197,7 +197,7 @@ void WorldSession::SendAuctionCancelledToBidderMail( AuctionEntry* auction )
     if(bidder || bidder_accId)
     {
         uint32 mailId = objmgr.GenerateMailID();
-        time_t dtime = time(NULL);                              //Instant since it's Auction House
+        time_t dtime = time(NULL);                          //Instant since it's Auction House
         time_t etime = dtime + (30 * DAY);
 
         std::ostringstream msgAuctionCancelledSubject;

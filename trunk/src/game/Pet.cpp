@@ -1044,7 +1044,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
 bool Pet::HaveInDiet(ItemPrototype const* item) const
 {
     if (!item->FoodType)
-        return false; 
+        return false;
 
     CreatureInfo const* cInfo = GetCreatureInfo();
     if(!cInfo)
@@ -1056,7 +1056,7 @@ bool Pet::HaveInDiet(ItemPrototype const* item) const
 
     uint32 diet = cFamily->petFoodMask;
     uint32 FoodMask = 1 << (item->FoodType-1);
-    return diet & FoodMask;  
+    return diet & FoodMask;
 }
 
 uint32 Pet::GetCurrentFoodBenefitLevel(uint32 itemlevel)
@@ -1580,7 +1580,7 @@ bool Pet::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float 
 
     SetUInt32Value(UNIT_FIELD_DISPLAYID, minfo->modelid);
     SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, minfo->modelid);
-    SetUInt32Value(UNIT_FIELD_BYTES_2, 1);                   // let creature used equiped weapon in fight
+    SetUInt32Value(UNIT_FIELD_BYTES_2, 1);                  // let creature used equiped weapon in fight
 
     SetName(GetCreatureInfo()->Name);
 

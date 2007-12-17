@@ -38,7 +38,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
     sLog.outDetail("WORLD: CMSG_USE_ITEM packet, data length = %i",recvPacket.size());
 
     Player* pUser = _player;
-   
+
     uint8 bagIndex, slot;
     uint16 tmp2;
 
@@ -73,7 +73,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
             {
                 pUser->SendEquipError(EQUIP_ERR_NOT_IN_COMBAT,pItem,NULL);
                 return;
-            } 
+            }
         }
     }
 
@@ -259,7 +259,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             _player->SendPreparedQuest( guid );
             return;
 
-        //Sitting: Wooden bench, chairs enzz
+            //Sitting: Wooden bench, chairs enzz
         case GAMEOBJECT_TYPE_CHAIR:                         //7
 
             info = obj->GetGOInfo();
@@ -267,13 +267,14 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             {
                 //spellId = info->data0;                   // this is not a spell or offset
                 _player->TeleportTo(obj->GetMapId(), obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(), obj->GetOrientation(),false,false);
-                _player->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT_LOW_CHAIR); // Using (3 + spellId) was wrong, this is a number of slot for chair/bench, not offset
+                                                            // Using (3 + spellId) was wrong, this is a number of slot for chair/bench, not offset
+                _player->SetFlag(UNIT_FIELD_BYTES_1,PLAYER_STATE_SIT_LOW_CHAIR);
                 _player->SetStandState(PLAYER_STATE_SIT_LOW_CHAIR);
                 return;
             }
             break;
 
-        //big gun, its a spell/aura
+            //big gun, its a spell/aura
         case GAMEOBJECT_TYPE_GOOBER:                        //10
             info = obj->GetGOInfo();
             spellId = info ? info->data10 : 0;
@@ -309,7 +310,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             }
             break;
 
-        //fishing bobber
+            //fishing bobber
         case GAMEOBJECT_TYPE_FISHINGNODE:                   //17
         {
             if(_player->GetGUID() != obj->GetOwnerGUID())
@@ -674,7 +675,7 @@ void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
 
     _player->RemoveAurasDueToSpell(spellId);
 
-    if (spellId == 2584)    // Waiting to resurrect spell cancel, we must remove player from resurrect queue
+    if (spellId == 2584)                                    // Waiting to resurrect spell cancel, we must remove player from resurrect queue
     {
         BattleGround *bg = _player->GetBattleGround();
         if(!bg)

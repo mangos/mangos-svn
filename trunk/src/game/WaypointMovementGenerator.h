@@ -84,8 +84,8 @@ class MANGOS_DLL_DECL WaypointMovementGenerator;
 
 template<>
 class MANGOS_DLL_DECL WaypointMovementGenerator<Creature>
-    : public MovementGeneratorMedium< Creature, WaypointMovementGenerator<Creature> >,
-      public PathMovementBase<Creature>
+: public MovementGeneratorMedium< Creature, WaypointMovementGenerator<Creature> >,
+public PathMovementBase<Creature>
 {
     TimeTracker i_nextMoveTime;
     std::vector<uint32> i_delays;
@@ -120,8 +120,8 @@ class MANGOS_DLL_DECL WaypointMovementGenerator<Creature>
  * and hence generates ground and activities for the player.
  */
 class MANGOS_DLL_DECL FlightPathMovementGenerator
-    : public MovementGeneratorMedium< Player, FlightPathMovementGenerator >, 
-      public PathMovementBase<Player>
+: public MovementGeneratorMedium< Player, FlightPathMovementGenerator >,
+public PathMovementBase<Player>
 {
     uint32 i_pathId;
     public:

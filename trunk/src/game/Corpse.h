@@ -64,7 +64,7 @@ class Corpse : public WorldObject
 
         bool isVisibleForInState(Player const* u, bool inVisibleList) const;
 
-        Loot loot;                    // remove insignia ONLY at BG
+        Loot loot;                                          // remove insignia ONLY at BG
         Player* lootRecipient;
         bool lootForBody;
 

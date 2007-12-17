@@ -214,7 +214,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
             }
         }
                                                             // guess size
-        WorldPacket data( SMSG_ITEM_QUERY_SINGLE_RESPONSE, 600);        
+        WorldPacket data( SMSG_ITEM_QUERY_SINGLE_RESPONSE, 600);
         data << pProto->ItemId;
         data << pProto->Class;
         data << pProto->SubClass;
@@ -334,7 +334,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
     }
     else
     {
-        sLog.outDebug(  "WORLD: CMSG_ITEM_QUERY_SINGLE - NO item INFO! (ENTRY: %u)", item );         
+        sLog.outDebug(  "WORLD: CMSG_ITEM_QUERY_SINGLE - NO item INFO! (ENTRY: %u)", item );
         WorldPacket data( SMSG_ITEM_QUERY_SINGLE_RESPONSE, 4);
         data << uint32(item | 0x80000000);
         SendPacket( &data );

@@ -717,10 +717,10 @@ enum MovementFlags
 
 // flags that use in movement check for example at spell casting
 MovementFlags const movementFlagsMask = MovementFlags(
-    MOVEMENTFLAG_FORWARD |MOVEMENTFLAG_BACKWARD|MOVEMENTFLAG_STRAFE_LEFT|MOVEMENTFLAG_STRAFE_RIGHT|
-    MOVEMENTFLAG_LEFT    |MOVEMENTFLAG_RIGHT   |MOVEMENTFLAG_PITCH_UP   |MOVEMENTFLAG_PITCH_DOWN|
-    MOVEMENTFLAG_WALK    |MOVEMENTFLAG_FLY_UNK1|MOVEMENTFLAG_JUMPING    |MOVEMENTFLAG_FALLING|
-    MOVEMENTFLAG_SWIMMING|MOVEMENTFLAG_FLY_UP  |MOVEMENTFLAG_FLYING     |MOVEMENTFLAG_SPLINE
+MOVEMENTFLAG_FORWARD |MOVEMENTFLAG_BACKWARD|MOVEMENTFLAG_STRAFE_LEFT|MOVEMENTFLAG_STRAFE_RIGHT|
+MOVEMENTFLAG_LEFT    |MOVEMENTFLAG_RIGHT   |MOVEMENTFLAG_PITCH_UP   |MOVEMENTFLAG_PITCH_DOWN|
+MOVEMENTFLAG_WALK    |MOVEMENTFLAG_FLY_UNK1|MOVEMENTFLAG_JUMPING    |MOVEMENTFLAG_FALLING|
+MOVEMENTFLAG_SWIMMING|MOVEMENTFLAG_FLY_UP  |MOVEMENTFLAG_FLYING     |MOVEMENTFLAG_SPLINE
 );
 
 typedef HM_NAMESPACE::hash_map< uint32, std::pair < uint32, uint32 > > BoundInstancesMap;
@@ -972,9 +972,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         void AddArmorProficiency(uint32 newflag) { m_ArmorProficiency |= newflag; }
         uint32 GetWeaponProficiency() const { return m_WeaponProficiency; }
         uint32 GetArmorProficiency() const { return m_ArmorProficiency; }
-        bool IsUseEquipedWeapon( bool mainhand ) const {
-            return m_form != FORM_CAT && m_form != FORM_BEAR && m_form != FORM_DIREBEAR && 
-                // disarm applied only to mainhand weapon
+        bool IsUseEquipedWeapon( bool mainhand ) const
+        {
+            return m_form != FORM_CAT && m_form != FORM_BEAR && m_form != FORM_DIREBEAR &&
+            // disarm applied only to mainhand weapon
                 (!mainhand || !HasFlag(UNIT_FIELD_FLAGS,UNIT_FLAG_DISARMED) );
         }
         void SendNewItem( Item *item, uint32 count, bool received, bool created, bool broadcast = false );
@@ -1418,7 +1419,6 @@ class MANGOS_DLL_SPEC Player : public Unit
             StopMirrorTimer(BREATH_TIMER);
             StopMirrorTimer(FIRE_TIMER);
         }
-
 
         void SetMovement(PlayerMovementType pType);
 

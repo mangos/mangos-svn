@@ -70,7 +70,6 @@ class MANGOS_DLL_SPEC MovementGeneratorMedium : public MovementGenerator
         bool Update(T &u, const uint32 &time_diff);
 };
 
-
 struct SelectableMovement : public FactoryHolder<MovementGenerator,MovementGeneratorType>
 {
     SelectableMovement(MovementGeneratorType mgt) : FactoryHolder<MovementGenerator,MovementGeneratorType>(mgt) {}

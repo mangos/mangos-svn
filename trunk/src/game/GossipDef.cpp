@@ -64,7 +64,6 @@ void GossipMenu::AddMenuItem(uint8 Icon, char const* Message, uint32 dtSender, u
     AddMenuItem(Icon, std::string(Message ? Message : ""), dtSender, dtAction, Coded);
 }
 
-
 uint32 GossipMenu::MenuItemSender( unsigned int ItemId )
 {
     if ( ItemId >= m_gItems.size() ) return 0;
@@ -658,7 +657,7 @@ void PlayerMenu::SendQuestGiverOfferReward( Quest const* pQuest, uint64 npcGUID,
     }
     else
         data << uint32(0);
-                                 
+
     data << uint32(0x00);                                   // new 2.0.3
 
     pSession->SendPacket( &data );

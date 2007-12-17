@@ -30,7 +30,7 @@ class MANGOS_DLL_SPEC HomeMovementGenerator;
 
 template <>
 class MANGOS_DLL_SPEC HomeMovementGenerator<Creature>
-    : public MovementGeneratorMedium< Creature, HomeMovementGenerator<Creature> >
+: public MovementGeneratorMedium< Creature, HomeMovementGenerator<Creature> >
 {
     public:
 
@@ -49,5 +49,4 @@ class MANGOS_DLL_SPEC HomeMovementGenerator<Creature>
 
         uint32 i_travel_timer;
 };
-
 #endif

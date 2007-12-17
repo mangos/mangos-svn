@@ -95,7 +95,7 @@ bool ChatHandler::HandleReloadAllScriptsCommand(const char*)
 {
     if(sWorld.IsScriptScheduled())
     {
-        PSendSysMessage("DB scripts used currently, please attempt reload later."); 
+        PSendSysMessage("DB scripts used currently, please attempt reload later.");
         return true;
     }
 
@@ -272,8 +272,6 @@ bool ChatHandler::HandleReloadSkillDiscoveryTemplateCommand(const char* args)
     return true;
 }
 
-
-
 bool ChatHandler::HandleReloadSpellAffectCommand(const char*)
 {
     sLog.outString( "Re-Loading SpellAffect definitions..." );
@@ -334,7 +332,7 @@ bool ChatHandler::HandleReloadButtonScriptsCommand(const char* arg)
 {
     if(sWorld.IsScriptScheduled())
     {
-        SendSysMessage("DB scripts used currently, please attempt reload later."); 
+        SendSysMessage("DB scripts used currently, please attempt reload later.");
         return true;
     }
 
@@ -353,7 +351,7 @@ bool ChatHandler::HandleReloadQuestEndScriptsCommand(const char* arg)
 {
     if(sWorld.IsScriptScheduled())
     {
-        SendSysMessage("DB scripts used currently, please attempt reload later."); 
+        SendSysMessage("DB scripts used currently, please attempt reload later.");
         return true;
     }
 
@@ -372,7 +370,7 @@ bool ChatHandler::HandleReloadQuestStartScriptsCommand(const char* arg)
 {
     if(sWorld.IsScriptScheduled())
     {
-        SendSysMessage("DB scripts used currently, please attempt reload later."); 
+        SendSysMessage("DB scripts used currently, please attempt reload later.");
         return true;
     }
 
@@ -391,7 +389,7 @@ bool ChatHandler::HandleReloadSpellScriptsCommand(const char* arg)
 {
     if(sWorld.IsScriptScheduled())
     {
-        SendSysMessage("DB scripts used currently, please attempt reload later."); 
+        SendSysMessage("DB scripts used currently, please attempt reload later.");
         return true;
     }
 
@@ -1644,7 +1642,6 @@ bool ChatHandler::HandleAddItemCommand(const char* args)
         return true;
     }
 
-
     //Adding items
     uint32 countForStore = count;
 
@@ -1906,8 +1903,8 @@ bool ChatHandler::HandleListItemCommand(const char* args)
     if(count > 0)
     {
         result=CharacterDatabase.PQuery(
-            //             0                  1               2                   3                  4               5                  6            
-            "SELECT `mail_items`.`item_guid`,`mail`.`sender`,`mail`.`receiver`,`char_s`.`account`,`char_s`.`name`,`char_r`.`account`,`char_r`.`name` "            
+            //             0                  1               2                   3                  4               5                  6
+            "SELECT `mail_items`.`item_guid`,`mail`.`sender`,`mail`.`receiver`,`char_s`.`account`,`char_s`.`name`,`char_r`.`account`,`char_r`.`name` "
             "FROM `mail`,`mail_items`,`character` as `char_s`,`character` as `char_r` "
             "WHERE `mail_items`.`item_template`='%u' AND `char_s`.`guid` = `mail`.`sender` AND `char_r`.`guid` = `mail`.`receiver` AND `mail`.`id`=`mail_items`.`mail_id` LIMIT %u",
             item_id,uint32(count));
@@ -2678,7 +2675,6 @@ bool ChatHandler::HandleLinkGraveCommand(const char* args)
         return true;
     }
 
-
     if(graveyard->map_id != areaEntry->mapid && g_team != 0)
     {
         SendSysMessage(LANG_COMMAND_GRAVEYARDWRONGTEAM);
@@ -3445,7 +3441,7 @@ static bool HandleResetStatsOrLevelHelper(Player* player)
     ChrClassesEntry const* cEntry = sChrClassesStore.LookupEntry(player->getClass());
     if(!cEntry)
     {
-        sLog.outError("Class %u not found in DBÑ (Wrong DBC files?)",player->getClass());
+        sLog.outError("Class %u not found in DBC (Wrong DBC files?)",player->getClass());
         return false;
     }
 
@@ -3480,23 +3476,23 @@ static bool HandleResetStatsOrLevelHelper(Player* player)
     {
         switch(player->getGender())
         {
-        case GENDER_FEMALE:
-            player->SetUInt32Value(UNIT_FIELD_DISPLAYID, info->displayId_f);
-            player->SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, info->displayId_f);
-            break;
-        case GENDER_MALE:
-            player->SetUInt32Value(UNIT_FIELD_DISPLAYID, info->displayId_m);
-            player->SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, info->displayId_m);
-            break;
-        default:
-            break;
+            case GENDER_FEMALE:
+                player->SetUInt32Value(UNIT_FIELD_DISPLAYID, info->displayId_f);
+                player->SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, info->displayId_f);
+                break;
+            case GENDER_MALE:
+                player->SetUInt32Value(UNIT_FIELD_DISPLAYID, info->displayId_m);
+                player->SetUInt32Value(UNIT_FIELD_NATIVEDISPLAYID, info->displayId_m);
+                break;
+            default:
+                break;
         }
     }
 
     // set UNIT_FIELD_BYTES_1 to init state but preserve m_form value
     player->SetUInt32Value(UNIT_FIELD_BYTES_1, player->m_form<<16 | unitfield );
 
-    player->SetUInt32Value(UNIT_FIELD_BYTES_2, 0x2800 );// 0x2800, 0x2801 2.0.8...
+    player->SetUInt32Value(UNIT_FIELD_BYTES_2, 0x2800 );    // 0x2800, 0x2801 2.0.8...
     player->SetUInt32Value(UNIT_FIELD_FLAGS , UNIT_FLAG_UNKNOWN1 );
 
     //-1 is default value
@@ -4290,47 +4286,47 @@ bool ChatHandler::HandleMovegensCommand(const char *args)
     {
         switch((*itr)->GetMovementGeneratorType())
         {
-        case IDLE_MOTION_TYPE:          SendSysMessage("   " LANG_MOVEGENS_IDLE);          break;
-        case RANDOM_MOTION_TYPE:        SendSysMessage("   " LANG_MOVEGENS_RANDOM);        break;
-        case WAYPOINT_MOTION_TYPE:      SendSysMessage("   " LANG_MOVEGENS_WAYPOINT);      break;
-        case ANIMAL_RANDOM_MOTION_TYPE: SendSysMessage("   " LANG_MOVEGENS_ANIMAL_RANDOM); break;
-        case CONFUSED_MOTION_TYPE:      SendSysMessage("   " LANG_MOVEGENS_CONFUSED);      break;
-        case TARGETED_MOTION_TYPE: 
-        {
-            if(unit->GetTypeId()==TYPEID_PLAYER)
+            case IDLE_MOTION_TYPE:          SendSysMessage("   " LANG_MOVEGENS_IDLE);          break;
+            case RANDOM_MOTION_TYPE:        SendSysMessage("   " LANG_MOVEGENS_RANDOM);        break;
+            case WAYPOINT_MOTION_TYPE:      SendSysMessage("   " LANG_MOVEGENS_WAYPOINT);      break;
+            case ANIMAL_RANDOM_MOTION_TYPE: SendSysMessage("   " LANG_MOVEGENS_ANIMAL_RANDOM); break;
+            case CONFUSED_MOTION_TYPE:      SendSysMessage("   " LANG_MOVEGENS_CONFUSED);      break;
+            case TARGETED_MOTION_TYPE:
             {
-                TargetedMovementGenerator<Player> const* mgen = static_cast<TargetedMovementGenerator<Player> const*>(*itr);
-                Unit* target = mgen->GetTarget();
-                if(target)
-                    PSendSysMessage("   " LANG_MOVEGENS_TARGETED_PLAYER,target->GetName(),target->GetGUIDLow()); 
+                if(unit->GetTypeId()==TYPEID_PLAYER)
+                {
+                    TargetedMovementGenerator<Player> const* mgen = static_cast<TargetedMovementGenerator<Player> const*>(*itr);
+                    Unit* target = mgen->GetTarget();
+                    if(target)
+                        PSendSysMessage("   " LANG_MOVEGENS_TARGETED_PLAYER,target->GetName(),target->GetGUIDLow());
+                    else
+                        SendSysMessage("   " LANG_MOVEGENS_TARGETED_NULL);
+                }
                 else
-                    SendSysMessage("   " LANG_MOVEGENS_TARGETED_NULL); 
+                {
+                    TargetedMovementGenerator<Creature> const* mgen = static_cast<TargetedMovementGenerator<Creature> const*>(*itr);
+                    Unit* target = mgen->GetTarget();
+                    if(target)
+                        PSendSysMessage("   " LANG_MOVEGENS_TARGETED_CREATURE,target->GetName(),target->GetGUIDLow());
+                    else
+                        SendSysMessage("   " LANG_MOVEGENS_TARGETED_NULL);
+                }
+                break;
             }
-            else
-            {
-                TargetedMovementGenerator<Creature> const* mgen = static_cast<TargetedMovementGenerator<Creature> const*>(*itr);
-                Unit* target = mgen->GetTarget();
-                if(target)
-                    PSendSysMessage("   " LANG_MOVEGENS_TARGETED_CREATURE,target->GetName(),target->GetGUIDLow()); 
+            case HOME_MOTION_TYPE:
+                if(unit->GetTypeId()==TYPEID_UNIT)
+                {
+                    float x,y,z;
+                    ((Creature*)unit)->GetRespawnCoord(x,y,z);
+                    PSendSysMessage("   " LANG_MOVEGENS_HOME_CREATURE,x,y,z);
+                }
                 else
-                    SendSysMessage("   " LANG_MOVEGENS_TARGETED_NULL); 
-            }
-            break;
-        }
-        case HOME_MOTION_TYPE:
-            if(unit->GetTypeId()==TYPEID_UNIT)
-            {
-                float x,y,z;
-                ((Creature*)unit)->GetRespawnCoord(x,y,z);
-                PSendSysMessage("   " LANG_MOVEGENS_HOME_CREATURE,x,y,z); 
-            }
-            else
-                SendSysMessage("   " LANG_MOVEGENS_HOME_PLAYER); 
-            break;
-        case FLIGHT_MOTION_TYPE:        SendSysMessage("   " LANG_MOVEGENS_FLIGHT);  break;
-        default: 
-            PSendSysMessage("   " LANG_MOVEGENS_UNKNOWN,(*itr)->GetMovementGeneratorType());
-            break;
+                    SendSysMessage("   " LANG_MOVEGENS_HOME_PLAYER);
+                break;
+            case FLIGHT_MOTION_TYPE:        SendSysMessage("   " LANG_MOVEGENS_FLIGHT);  break;
+            default:
+                PSendSysMessage("   " LANG_MOVEGENS_UNKNOWN,(*itr)->GetMovementGeneratorType());
+                break;
         }
     }
     return true;
@@ -4381,7 +4377,7 @@ bool ChatHandler::HandlePLimitCommand(const char *args)
         default:                secName = "<unknown>";     break;
     }
 
-    PSendSysMessage("Player limits: amount %u, min. security level %s.",pLimit,secName); 
+    PSendSysMessage("Player limits: amount %u, min. security level %s.",pLimit,secName);
 
     return true;
 }

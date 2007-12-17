@@ -488,7 +488,7 @@ bool GameObject::LoadFromDB(uint32 guid, uint32 InstanceId)
         m_respawnDelayTime=data->spawntimesecs;
         m_respawnTime=objmgr.GetGORespawnTime(stored_guid,InstanceId);
 
-        if(m_respawnTime && m_respawnTime <= time(NULL))        // ready to respawn
+        if(m_respawnTime && m_respawnTime <= time(NULL))    // ready to respawn
         {
             m_respawnTime = 0;
             objmgr.SaveGORespawnTime(m_DBTableGuid,GetInstanceId(),0);

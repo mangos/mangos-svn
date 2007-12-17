@@ -27,7 +27,7 @@
 
 template<class T>
 class MANGOS_DLL_DECL RandomMovementGenerator
-    : public MovementGeneratorMedium< T, RandomMovementGenerator<T> > 
+: public MovementGeneratorMedium< T, RandomMovementGenerator<T> >
 {
     public:
         RandomMovementGenerator(const Unit &) : i_nextMoveTime(0) {}

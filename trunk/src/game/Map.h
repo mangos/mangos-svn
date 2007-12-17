@@ -95,7 +95,7 @@ struct CreatureMover
 #pragma pack(push,1)
 #endif
 
-struct InstanceTemplate 
+struct InstanceTemplate
 {
     uint32 map;
     uint32 levelMin;

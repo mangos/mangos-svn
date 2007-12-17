@@ -934,35 +934,35 @@ void WorldSession::HandleGuildSaveEmblemOpcode(WorldPacket& recvPacket)
 
 void WorldSession::HandleGuildEventLogOpcode(WorldPacket& recvPacket)
 {
-    sLog.outDebug("WORLD: Received MSG_GUILD_EVENT_LOG");    // empty
+    sLog.outDebug("WORLD: Received MSG_GUILD_EVENT_LOG");   // empty
     recvPacket.hexlike();
 
     uint8 count = 0;
     WorldPacket data(MSG_GUILD_EVENT_LOG, 0);
-    data << uint8(count);       // count
+    data << uint8(count);                                   // count
     for(uint8 i = 0; i < count; ++i)
     {
         uint8 type = 0;
         switch(type)
         {
             case 1:
-                data << uint64(0);  // guid
-                data << uint64(0);  // guid
-                data << uint32(0);  // time
+                data << uint64(0);                          // guid
+                data << uint64(0);                          // guid
+                data << uint32(0);                          // time
                 break;
             case 2:
-                data << uint64(0);  // guid
-                data << uint32(0);  // time
+                data << uint64(0);                          // guid
+                data << uint32(0);                          // time
                 break;
             case 3:
-                data << uint64(0);  // guid
-                data << uint64(0);  // guid
-                data << uint8(0);   // unk
-                data << uint32(0);  // time
+                data << uint64(0);                          // guid
+                data << uint64(0);                          // guid
+                data << uint8(0);                           // unk
+                data << uint32(0);                          // time
                 break;
             case 6:
-                data << uint64(0);  // guid
-                data << uint32(0);  // time
+                data << uint64(0);                          // guid
+                data << uint32(0);                          // time
                 break;
         }
     }

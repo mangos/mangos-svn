@@ -247,7 +247,7 @@ i_resetTime(0), i_resetDelayTime(0), i_InstanceId(ainstanceId), i_maxPlayers(0),
         {
             i_maxPlayers = 0;
             i_resetDelayTime = 0;
-             sLog.outErrorDb("Instance (Map: %u) not have records in `instance_template` in DB. Using default settings.",id);
+            sLog.outErrorDb("Instance (Map: %u) not have records in `instance_template` in DB. Using default settings.",id);
         }
 
         if(i_InstanceId!=0)
@@ -258,7 +258,6 @@ i_resetTime(0), i_resetDelayTime(0), i_InstanceId(ainstanceId), i_maxPlayers(0),
                 Field* fields = result->Fetch();
                 i_resetTime = (time_t) fields[0].GetUInt64();
 
-                
                 const char* data = fields[1].GetString();
                 if(data && i_data)
                 {
@@ -269,7 +268,7 @@ i_resetTime(0), i_resetDelayTime(0), i_InstanceId(ainstanceId), i_maxPlayers(0),
                 delete result;
             }
         }
-           
+
         if (i_resetTime == 0) InitResetTime();
     }
     else

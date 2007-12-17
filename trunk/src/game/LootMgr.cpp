@@ -123,83 +123,82 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
             switch (condition)
             {
                 case CONDITION_AURA:
+                {
+                    if(!sSpellStore.LookupEntry(cond_value1))
                     {
-                        if(!sSpellStore.LookupEntry(cond_value1))
-                        {
-                            sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) requires to have non existing spell (Id: %d) in aura condition!", tablename, item, entry, cond_value1);
-                            continue;
-                        }
-                        if(cond_value2 > 2)
-                        {
-                            sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) requires to have non existing effect index (%u) in aura condition (must be 0..2)!", tablename, item, entry, cond_value2);
-                            continue;
-                        }
-                        break;
+                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) requires to have non existing spell (Id: %d) in aura condition!", tablename, item, entry, cond_value1);
+                        continue;
                     }
+                    if(cond_value2 > 2)
+                    {
+                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) requires to have non existing effect index (%u) in aura condition (must be 0..2)!", tablename, item, entry, cond_value2);
+                        continue;
+                    }
+                    break;
+                }
                 case CONDITION_ITEM:
+                {
+                    ItemPrototype const *proto = objmgr.GetItemPrototype(cond_value1);
+                    if(!proto)
                     {
-                        ItemPrototype const *proto = objmgr.GetItemPrototype(cond_value1);
-                        if(!proto)
-                        {
-                            sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) requires to have non existing item to be dropped (entry: %d)!", tablename, item, entry, cond_value1);
-                            continue;
-                        }
-                        break;
+                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) requires to have non existing item to be dropped (entry: %d)!", tablename, item, entry, cond_value1);
+                        continue;
                     }
+                    break;
+                }
                 case CONDITION_ITEM_EQUIPPED:
+                {
+                    ItemPrototype const *proto = objmgr.GetItemPrototype(cond_value1);
+                    if(!proto)
                     {
-                        ItemPrototype const *proto = objmgr.GetItemPrototype(cond_value1);
-                        if(!proto)
-                        {
-                            sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) requires non existing item (entry: %d) equipped to be dropped!", tablename, item, entry, cond_value1);
-                            continue;
-                        }
-                        if (cond_value2)
-                        {
-                            sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) requires item equipped, but item count is set (setting it to 0)", tablename, item, entry);
-                            cond_value2 = 0;
-                        }
-                        break;
+                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) requires non existing item (entry: %d) equipped to be dropped!", tablename, item, entry, cond_value1);
+                        continue;
                     }
+                    if (cond_value2)
+                    {
+                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) requires item equipped, but item count is set (setting it to 0)", tablename, item, entry);
+                        cond_value2 = 0;
+                    }
+                    break;
+                }
                 case CONDITION_ZONEID:
+                {
+                    AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(cond_value1);
+                    if(!areaEntry)
                     {
-                        AreaTableEntry const* areaEntry = GetAreaEntryByAreaID(cond_value1);
-                        if(!areaEntry)
-                        {
-                            sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) has set non existing area (%u) requirement!", tablename, item, entry,cond_value1);
-                            continue;
-                        }
+                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) has set non existing area (%u) requirement!", tablename, item, entry,cond_value1);
+                        continue;
+                    }
 
-                        if(areaEntry->zone!=0)
-                        {
-                            sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) has set to subzone (%u) instead zone requirement!", tablename, item, entry,cond_value1);
-                            continue;
-                        }
-                        break;
+                    if(areaEntry->zone!=0)
+                    {
+                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) has set to subzone (%u) instead zone requirement!", tablename, item, entry,cond_value1);
+                        continue;
                     }
+                    break;
+                }
                 case CONDITION_REPUTATION_RANK:
+                {
+                    FactionEntry const* factionEntry = sFactionStore.LookupEntry(cond_value1);
+                    if(!factionEntry)
                     {
-                        FactionEntry const* factionEntry = sFactionStore.LookupEntry(cond_value1);
-                        if(!factionEntry)
-                        {
-                            sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) has set non existing faction (%u), reputation requirement!", tablename, item, entry, cond_value1);
-                            continue;
-                        }
-                        break;
+                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) has set non existing faction (%u), reputation requirement!", tablename, item, entry, cond_value1);
+                        continue;
                     }
+                    break;
+                }
                 case CONDITION_TEAM:
+                {
+                    if (cond_value1 != ALLIANCE && cond_value1 != HORDE)
                     {
-                        if (cond_value1 != ALLIANCE && cond_value1 != HORDE)
-                        {
-                            sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) has set team drop condition to non-existing team!", tablename, item, entry);
-                            continue;
-                        }
-                        break;
+                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) has set team drop condition to non-existing team!", tablename, item, entry);
+                        continue;
                     }
+                    break;
+                }
             }
 
             lootstore[entry].push_back( LootStoreItem(item, displayid, chanceOrRef, questchance, freeforall, condition, cond_value1, cond_value2, mincount, maxcount) );
-
 
             count++;
         } while (result->NextRow());
@@ -372,8 +371,8 @@ void FillLoot(Loot* loot, uint32 loot_id, LootStore& store, Player* loot_owner, 
                     Item::GenerateItemRandomPropertyId(LootedItem->itemid))
                     );
 
-                // non-conditional one-player only items are counted here, 
-                // free for all items are counted in FillFFALoot(), 
+                // non-conditional one-player only items are counted here,
+                // free for all items are counted in FillFFALoot(),
                 // non-ffa conditionals are counted in FillNonQuestNonFFAConditionalLoot()
                 if( ! LootedItem->freeforall && ! LootedItem->condition)
                     loot->unlootedCount++;
@@ -439,8 +438,8 @@ bool MeetsConditions(Player * owner, LootItem * itm)
         }
     }
     else if (owner)
-        return true;    //empty condition, return true
-    return false;       //player not present, return false
+        return true;                                        //empty condition, return true
+    return false;                                           //player not present, return false
 }
 
 QuestItemList* FillFFALoot(Player* player, Loot *loot)
@@ -532,7 +531,7 @@ void Loot::NotifyItemRemoved(uint8 lootIndex)
 {
     // notify all players that are looting this that the item was removed
     // convert the index to the slot the player sees
-    std::set<uint64>::iterator i_next; 
+    std::set<uint64>::iterator i_next;
     for(std::set<uint64>::iterator i = PlayersLooting.begin(); i != PlayersLooting.end(); i = i_next)
     {
         i_next = i;
@@ -547,7 +546,7 @@ void Loot::NotifyItemRemoved(uint8 lootIndex)
 void Loot::NotifyMoneyRemoved()
 {
     // notify all players that are looting this that the money was removed
-    std::set<uint64>::iterator i_next; 
+    std::set<uint64>::iterator i_next;
     for(std::set<uint64>::iterator i = PlayersLooting.begin(); i != PlayersLooting.end(); i = i_next)
     {
         i_next = i;
@@ -566,7 +565,7 @@ void Loot::NotifyQuestItemRemoved(uint8 questIndex)
     // (other questitems can be looted by each group member)
     // bit inefficient but isnt called often
 
-    std::set<uint64>::iterator i_next; 
+    std::set<uint64>::iterator i_next;
     for(std::set<uint64>::iterator i = PlayersLooting.begin(); i != PlayersLooting.end(); i = i_next)
     {
         i_next = i;
@@ -648,7 +647,7 @@ ByteBuffer& operator<<(ByteBuffer& b, LootView const& lv)
             //group loot fix: you can see gold, and items set to underthreshold
             b << l.gold;                                    //gold
             for (uint8 i = 0; i < l.items.size(); ++i)
-                if (!l.items[i].is_looted && (l.items[i].is_blocked || l.items[i].is_underthreshold || l.items[i].freeforall) && (!l.items[i].condition || MeetsConditions(lv.viewer, &l.items[i]))) 
+                if (!l.items[i].is_looted && (l.items[i].is_blocked || l.items[i].is_underthreshold || l.items[i].freeforall) && (!l.items[i].condition || MeetsConditions(lv.viewer, &l.items[i])))
                     itemsShown++;
             b << itemsShown;                                //send the number of items shown
 

@@ -596,7 +596,7 @@ void WorldSession::HandleAddDynamicTargetObsoleteOpcode( WorldPacket& recvPacket
     {
         pet->SendPetCastFail(spellid, result);
         if(!pet->HasSpellCooldown(spellid))
-           pet->SendPetClearCooldown(spellid);
+            pet->SendPetClearCooldown(spellid);
 
         spell->finish(false);
         delete spell;

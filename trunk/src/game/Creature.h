@@ -310,7 +310,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool LoadCreaturesAddon();
         void SelectLevel(const CreatureInfo *cinfo);
         bool LoadEquipment(uint32 equip_entry, bool force=false);
-        
+
         uint32 GetDBTableGUIDLow() const { return m_DBTableGuid; }
         char const* GetSubName() const { return GetCreatureInfo()->SubName; }
 

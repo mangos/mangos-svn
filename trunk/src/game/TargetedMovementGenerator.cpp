@@ -157,7 +157,7 @@ TargetedMovementGenerator<T>::Update(T &owner, const uint32 & time_diff)
 }
 
 template<class T>
-Unit* 
+Unit*
 TargetedMovementGenerator<T>::GetTarget() const
 {
     return i_target.getTarget();

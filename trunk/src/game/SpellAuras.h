@@ -201,7 +201,7 @@ class Aura
         uint32 GetEffIndex() const{ return m_effIndex; }
         void SetEffIndex(uint32 eff) { m_effIndex = eff; }
         int32 GetBasePoints() const { return m_currentBasePoints; }
-        
+
         int32 GetAuraMaxDuration() const { return m_maxduration; }
         void SetAuraMaxDuration(int32 duration) { m_maxduration = duration; }
         int32 GetAuraDuration() const { return m_duration; }

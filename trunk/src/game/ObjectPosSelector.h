@@ -38,11 +38,11 @@ struct ObjectPosSelector
 
         float sign;
 
-        float size;                                     // size of point
-        float dist;                                     // dist to central point (including central point size)
+        float size;                                         // size of point
+        float dist;                                         // dist to central point (including central point size)
     };
 
-    typedef std::multimap<float,UsedPos> UsedPosList;           // abs(angle)->Node
+    typedef std::multimap<float,UsedPos> UsedPosList;       // abs(angle)->Node
 
     ObjectPosSelector(float x,float y,float size,float dist);
 
@@ -60,12 +60,11 @@ struct ObjectPosSelector
         float angle_step2  = GetAngle(nextUsedPos.second);
 
         float next_angle = nextUsedPos.first;
-        if(nextUsedPos.second.sign * sign < 0)                 // last node from diff. list (-pi+alpha)
-            next_angle = 2*M_PI-next_angle;                     // move to positive
+        if(nextUsedPos.second.sign * sign < 0)              // last node from diff. list (-pi+alpha)
+            next_angle = 2*M_PI-next_angle;                 // move to positive
 
         return fabs(angle)+angle_step2 <= next_angle;
     }
-
 
     bool CheckOriginal() const
     {
@@ -138,8 +137,8 @@ struct ObjectPosSelector
 
     float m_center_x;
     float m_center_y;
-    float m_size;                                       // size of object in center
-    float m_dist;                                       // distance for searching pos (including central object size)
+    float m_size;                                           // size of object in center
+    float m_dist;                                           // distance for searching pos (including central object size)
     float m_anglestep;
 
     UsedPosList m_UsedPosLists[2];
@@ -150,5 +149,4 @@ struct ObjectPosSelector
     bool  m_smallStepOk[2];
     UsedPosList::value_type const* m_smallStepNextUsedPos[2];
 };
-
 #endif

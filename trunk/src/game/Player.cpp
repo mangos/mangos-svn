@@ -672,7 +672,7 @@ void Player::HandleDrowning(uint32 UnderWaterTime)
 void Player::HandleLava()
 {
     bool ValidArea = false;
-    
+
     if ((m_isunderwater & 0x80) && isAlive())
     {
         //Single trigger Set BreathTimer
@@ -691,22 +691,22 @@ void Player::HandleLava()
             // Deal lava damage only in lava zones.
             switch(dmgZone)
             {
-               case 0x8D:
-                   ValidArea = false;
-                   break;
-               case 0x94:
-                   ValidArea = false;
-                   break;
-               case 0x2CE:
-                   ValidArea = false;
-                   break;
-               case 0x2CF:
-                   ValidArea = false;
-                   break;
-               default:
-                   if (dmgZone / 5 & 0x408)
-                       ValidArea = true;
-             }
+                case 0x8D:
+                    ValidArea = false;
+                    break;
+                case 0x94:
+                    ValidArea = false;
+                    break;
+                case 0x2CE:
+                    ValidArea = false;
+                    break;
+                case 0x2CF:
+                    ValidArea = false;
+                    break;
+                default:
+                    if (dmgZone / 5 & 0x408)
+                        ValidArea = true;
+            }
 
             // if is valid area and is not gamemaster then deal damage
             if ( ValidArea && !isGameMaster() )
@@ -737,7 +737,7 @@ void Player::SetDrunkValue(uint16 newDrunkValue)
     m_drunk = newDrunkValue;
     SetUInt32Value(PLAYER_BYTES_3,(GetUInt32Value(PLAYER_BYTES_3) & 0xFFFF0001) | (m_drunk & 0xFFFE));
 
-    // special drunk invisibility detection 
+    // special drunk invisibility detection
     if(m_drunk)
         m_detectInvisibilityMask |= (1<<6);
     else
@@ -890,7 +890,7 @@ void Player::Update( uint32 p_time )
 
     if(HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING))
     {
-        if(roll_chance_i(3) && GetTimeInnEnter() > 0)        //freeze update
+        if(roll_chance_i(3) && GetTimeInnEnter() > 0)       //freeze update
         {
             int time_inn = time(NULL)-GetTimeInnEnter();
             if (time_inn >= 10)                             //freeze update
@@ -1392,7 +1392,7 @@ void Player::SendIgnorelist()
         data << uint64(MAKE_GUID(*iter,HIGHGUID_PLAYER));
     }
 
-    data << uint8(0); // 0 muted players for now
+    data << uint8(0);                                       // 0 muted players for now
     /*data << uint8(m_mutelist.size());
 
     for(MuteList::iterator iter = m_mutelist.begin(); iter != m_mutelist.end(); ++iter)
@@ -1685,7 +1685,7 @@ void Player::RegenerateAll()
     uint32 regenDelay = 2000;
 
     // Not in combat or they have regeneration
-    if( !isInCombat() || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT) || 
+    if( !isInCombat() || HasAuraType(SPELL_AURA_MOD_REGEN_DURING_COMBAT) ||
         HasAuraType(SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT) || IsPolymorphed() )
     {
         RegenerateHealth();
@@ -1717,7 +1717,7 @@ void Player::Regenerate(Powers power)
                 addvalue = GetFloatValue(PLAYER_FIELD_MOD_MANA_REGEN_INTERRUPT) *  ManaIncreaseRate * 2.00f;
             else
             {
-                addvalue = GetFloatValue(PLAYER_FIELD_MOD_MANA_REGEN)* ManaIncreaseRate * 2.00f;   	
+                addvalue = GetFloatValue(PLAYER_FIELD_MOD_MANA_REGEN)* ManaIncreaseRate * 2.00f;
             }
         }   break;
         case POWER_RAGE:                                    // Regenerate rage
@@ -1774,7 +1774,7 @@ void Player::RegenerateHealth()
 
     float addvalue = 0.0f;
 
-    // polymorphed case 
+    // polymorphed case
     if ( IsPolymorphed() )
         addvalue = GetMaxHealth()/3;
     // normal regen case (maybe partly in combat case)
@@ -2232,8 +2232,8 @@ void Player::InitStatsForLevel(bool reapplyMods)
     SetUInt32Value(UNIT_FIELD_MOUNTDISPLAYID, 0);
 
     // cleanup unit flags (will be re-applied if need at aura load).
-    RemoveFlag( UNIT_FIELD_FLAGS, 
-        UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE   | UNIT_FLAG_PET_IN_COMBAT  | UNIT_FLAG_SILENCED | 
+    RemoveFlag( UNIT_FIELD_FLAGS,
+        UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_DISABLE_MOVE   | UNIT_FLAG_PET_IN_COMBAT  | UNIT_FLAG_SILENCED |
         UNIT_FLAG_PACIFIED       | UNIT_FLAG_DISABLE_ROTATE | UNIT_FLAG_IN_COMBAT      | UNIT_FLAG_DISARMED |
         UNIT_FLAG_CONFUSED       | UNIT_FLAG_FLEEING        | UNIT_FLAG_NOT_SELECTABLE | UNIT_FLAG_MOUNT );
 
@@ -2550,9 +2550,9 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
     else if (IsPassiveSpell(spell_id))
     {
         // if spell doesn't require a stance or the player is in the required stance
-        if( ( !spellInfo->Stances && 
+        if( ( !spellInfo->Stances &&
             spell_id != 5420 && spell_id != 5419 && spell_id != 7376 &&
-            spell_id != 7381 && spell_id != 21156 && spell_id != 21009 && 
+            spell_id != 7381 && spell_id != 21156 && spell_id != 21009 &&
             spell_id != 21178 && spell_id != 33948 && spell_id != 40121 ) ||
             m_form != 0 && (spellInfo->Stances & (1<<(m_form-1))) ||
             (spell_id ==  5420 && m_form == FORM_TREE) ||
@@ -3557,7 +3557,7 @@ void Player::CreateCorpse()
 
     uint32 flags = 0x04;
     if(InBattleGround())
-        flags |= 0x20;                                  // to be able to remove insignia
+        flags |= 0x20;                                      // to be able to remove insignia
     corpse->SetUInt32Value( CORPSE_FIELD_FLAGS, flags );
 
     corpse->SetUInt32Value( CORPSE_FIELD_DISPLAY_ID, GetUInt32Value(UNIT_FIELD_DISPLAYID) );
@@ -4026,7 +4026,7 @@ float Player::GetSpellCritFromIntellect()
 float Player::GetRatingCoefficient(uint16 index) const
 {
     uint32 level = getLevel();
-    uint32 CR_Id = index - PLAYER_FIELD_COMBAT_RATING_1;  
+    uint32 CR_Id = index - PLAYER_FIELD_COMBAT_RATING_1;
 
     if (level>GT_MAX_LEVEL) level = GT_MAX_LEVEL;
 
@@ -5252,7 +5252,7 @@ int32 Player::CalculateReputationGain(uint32 creatureOrQuestLevel, int32 rep, bo
 {
     // for grey creature kill received 20%, in other case 100.
     int32 percent = (!for_quest && (creatureOrQuestLevel <= MaNGOS::XP::GetGrayLevel(getLevel()))) ? 20 : 100;
-    
+
     int32 repMod = 0;
 
     AuraList const& mReputationGain = GetAurasByType(SPELL_AURA_MOD_REPUTATION_GAIN);
@@ -5418,7 +5418,7 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
             int32 v_rank =1;                                //need more info
 
             honor = ((f * diff_level * (190 + v_rank*10))/6);
-            honor *= ((float)k_level) / 70.0f;               //factor of dependence on levels of the killer
+            honor *= ((float)k_level) / 70.0f;              //factor of dependence on levels of the killer
 
             uint8 limit = sWorld.getConfig(CONFIG_HONOR_KILL_LIMIT);
             if(limit)
@@ -5790,7 +5790,6 @@ void Player::DuelComplete(uint8 type)
         duel->opponent->ClearComboPoints();
     else if(duel->opponent->GetComboTarget()==GetPetGUID())
         duel->opponent->ClearComboPoints();
-
 
     //cleanups
     SetUInt64Value(PLAYER_DUEL_ARBITER, 0);
@@ -6576,7 +6575,7 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             }
         }
     }
-    else if (IS_CORPSE_GUID(guid))        // remove insignia
+    else if (IS_CORPSE_GUID(guid))                          // remove insignia
     {
         Corpse *bones = ObjectAccessor::GetCorpse(*this, guid);
 
@@ -6756,7 +6755,6 @@ void Player::SendLoot(uint64 guid, LootType loot_type)
             conditional_list = itr->second;
     }
 
-
     // LOOT_PICKPOCKETING, LOOT_PROSPECTING, LOOT_DISENCHANTING and LOOT_INSIGNIA unsupported by client, sending LOOT_SKINNING instead
     if(loot_type == LOOT_PICKPOCKETING || loot_type == LOOT_DISENCHANTING || loot_type == LOOT_PROSPECTING || loot_type == LOOT_INSIGNIA)
         loot_type = LOOT_SKINNING;
@@ -6801,7 +6799,7 @@ void Player::SendUpdateWorldState(uint32 Field, uint32 Value)
 
 void Player::SendInitWorldStates()
 {
-    if (GetZoneId() == 3358)    // Zone 3358 - Arathi Basin. We send initworldstates from BG code
+    if (GetZoneId() == 3358)                                // Zone 3358 - Arathi Basin. We send initworldstates from BG code
         return;
 
     // data depends on zoneid/mapid...
@@ -10452,7 +10450,7 @@ void Player::ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool a
             {
                 if(getClass() == CLASS_SHAMAN)
                 {
-                    float addValue = 0.0f; 
+                    float addValue = 0.0f;
                     if(item->GetSlot() == EQUIPMENT_SLOT_MAINHAND)
                     {
                         addValue = float(enchant_amount * item->GetProto()->Delay/1000.0f);
@@ -10971,7 +10969,7 @@ void Player::AddQuest( Quest const *pQuest, Object *questGiver )
     questStatusData.m_status = QUEST_STATUS_INCOMPLETE;
     questStatusData.m_explored = false;
 
-    questStatusData.uState = uState;                    // mark quest as new or changed
+    questStatusData.uState = uState;                        // mark quest as new or changed
 
     if ( pQuest->HasFlag( QUEST_MANGOS_FLAGS_DELIVER ) )
     {
@@ -11228,7 +11226,7 @@ bool Player::SatisfyQuestPreviousQuest( Quest const* qInfo, bool msg )
 
         if( qPrevInfo && i_prevstatus != mQuestStatus.end() )
         {
-            // If any of the positive previous quests completed, return true 
+            // If any of the positive previous quests completed, return true
             if( *iter > 0 && i_prevstatus->second.m_rewarded )
             {
                 // skip one-from-all exclusive group
@@ -11240,7 +11238,7 @@ bool Player::SatisfyQuestPreviousQuest( Quest const* qInfo, bool msg )
                 ObjectMgr::ExclusiveQuestGroups::iterator iter = objmgr.mExclusiveQuestGroups.lower_bound(qPrevInfo->GetExclusiveGroup());
                 ObjectMgr::ExclusiveQuestGroups::iterator end  = objmgr.mExclusiveQuestGroups.upper_bound(qPrevInfo->GetExclusiveGroup());
 
-                assert(iter!=end);                                  // always must be found if qPrevInfo->ExclusiveGroup != 0
+                assert(iter!=end);                          // always must be found if qPrevInfo->ExclusiveGroup != 0
 
                 for(; iter != end; ++iter)
                 {
@@ -11275,7 +11273,7 @@ bool Player::SatisfyQuestPreviousQuest( Quest const* qInfo, bool msg )
                 ObjectMgr::ExclusiveQuestGroups::iterator iter = objmgr.mExclusiveQuestGroups.lower_bound(qPrevInfo->GetExclusiveGroup());
                 ObjectMgr::ExclusiveQuestGroups::iterator end  = objmgr.mExclusiveQuestGroups.upper_bound(qPrevInfo->GetExclusiveGroup());
 
-                assert(iter!=end);                                  // always must be found if qPrevInfo->ExclusiveGroup != 0
+                assert(iter!=end);                          // always must be found if qPrevInfo->ExclusiveGroup != 0
 
                 for(; iter != end; ++iter)
                 {
@@ -11326,11 +11324,11 @@ bool Player::SatisfyQuestRace( Quest const* qInfo, bool msg )
 
 bool Player::SatisfyQuestReputation( Quest const* qInfo, bool msg )
 {
-    uint32 fIdMin = qInfo->GetRequiredMinRepFaction();  //Min required rep
+    uint32 fIdMin = qInfo->GetRequiredMinRepFaction();      //Min required rep
     if(fIdMin && GetReputation(fIdMin) < qInfo->GetRequiredMinRepValue())
         return false;
 
-    uint32 fIdMax = qInfo->GetRequiredMaxRepFaction();  //Max required rep
+    uint32 fIdMax = qInfo->GetRequiredMaxRepFaction();      //Max required rep
     if(fIdMax && GetReputation(fIdMax) >= qInfo->GetRequiredMaxRepValue())
         return false;
 
@@ -11390,7 +11388,7 @@ bool Player::SatisfyQuestExclusiveGroup( Quest const* qInfo, bool msg )
     ObjectMgr::ExclusiveQuestGroups::iterator iter = objmgr.mExclusiveQuestGroups.lower_bound(qInfo->GetExclusiveGroup());
     ObjectMgr::ExclusiveQuestGroups::iterator end  = objmgr.mExclusiveQuestGroups.upper_bound(qInfo->GetExclusiveGroup());
 
-    assert(iter!=end);                                  // always must be found if qInfo->ExclusiveGroup != 0
+    assert(iter!=end);                                      // always must be found if qInfo->ExclusiveGroup != 0
 
     for(; iter != end; ++iter)
     {
@@ -11785,7 +11783,7 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
                         }
                         if ( CanCompleteQuest( questid ) )
                             CompleteQuest( questid );
-                        
+
                         // same objective target can be in many active quests, but not in 2 objectives for single quest (code optimization).
                         continue;
                     }
@@ -11858,6 +11856,7 @@ void Player::CastedCreatureOrGO( uint32 entry, uint64 guid, uint32 spell_id )
         }
     }
 }
+
 void Player::TalkedToCreature( uint32 entry, uint64 guid )
 {
     uint32 questid;
@@ -11878,13 +11877,15 @@ void Player::TalkedToCreature( uint32 entry, uint64 guid )
             {
                 for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
                 {
-                    if(qInfo->ReqSpell[j] > 0 || qInfo->ReqCreatureOrGOId[j] < 0)// skip spell casts and Gameobject objectives
+                                                            // skip spell casts and Gameobject objectives
+                    if(qInfo->ReqSpell[j] > 0 || qInfo->ReqCreatureOrGOId[j] < 0)
                         continue;
 
                     uint32 reqTarget = 0;
 
-                    if(qInfo->ReqCreatureOrGOId[j] > 0)            // creature activate objectives
-                        reqTarget = qInfo->ReqCreatureOrGOId[j];   // checked at quest_template loading
+                    if(qInfo->ReqCreatureOrGOId[j] > 0)     // creature activate objectives
+                                                            // checked at quest_template loading
+                        reqTarget = qInfo->ReqCreatureOrGOId[j];
                     else
                         continue;
 
@@ -11910,6 +11911,7 @@ void Player::TalkedToCreature( uint32 entry, uint64 guid )
         }
     }
 }
+
 void Player::MoneyChanged( uint32 count )
 {
     uint32 questid;
@@ -13047,7 +13049,8 @@ void Player::_LoadDailyQuestStatus(QueryResult *result)
     {
         uint32 quest_daily_idx = 0;
 
-        do{
+        do
+        {
             if(quest_daily_idx >= 10)                       // max amount with exist data in query
             {
                 sLog.outError("Player (GUID: %u) have more 10 daily quest records in `charcter_queststatus_daily`",GetGUIDLow());
@@ -14515,7 +14518,7 @@ void Player::HandleStealthedUnitsDetection()
                 sLog.outDebug("Object %u (Type: %u) is detected in stealth by player %u. Distance = %f",(*i)->GetGUIDLow(),(*i)->GetTypeId(),GetGUIDLow(),GetDistance(*i));
             #endif
 
-            // target aura duration for caster show only if target exist at caster client 
+            // target aura duration for caster show only if target exist at caster client
             // send data at target visibility change (adding to client)
             if((*i)!=this && (*i)->isType(TYPE_UNIT))
                 SendAuraDurationsForTarget(*i);
@@ -14741,7 +14744,7 @@ void Player::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool app
     if( forced )
     {
         if( mtype == MOVE_MOUNTED &&  ((Player*)this)->IsMounted() ||
-            mtype == MOVE_RUN     && !((Player*)this)->IsMounted() ) 
+            mtype == MOVE_RUN     && !((Player*)this)->IsMounted() )
             ++m_forced_speed_changes[MOVE_RUN];
         else if(mtype != MOVE_RUN && mtype != MOVE_MOUNTED )
             ++m_forced_speed_changes[mtype];
@@ -15304,7 +15307,7 @@ void Player::UpdateVisibilityOf(WorldObject* target)
                 sLog.outDebug("Object %u (Type: %u) is visible now for player %u. Distance = %f",target->GetGUIDLow(),target->GetTypeId(),GetGUIDLow(),GetDistance(target));
             #endif
 
-            // target aura duration for caster show only if target exist at caster client 
+            // target aura duration for caster show only if target exist at caster client
             // send data at target visibility change (adding to client)
             if(target!=this && target->isType(TYPE_UNIT))
                 SendAuraDurationsForTarget((Unit*)target);
@@ -15672,7 +15675,7 @@ void Player::ResetDailyQuestStatus()
 {
     for(uint32 quest_daily_idx = 0; quest_daily_idx < 10; ++quest_daily_idx)
         SetUInt32Value(PLAYER_FIELD_DAILY_QUESTS_1+quest_daily_idx,0);
-    
+
     // DB data deleted in caller
     m_DailyQuestChanged = false;
     m_lastDailyQuestTime = 0;

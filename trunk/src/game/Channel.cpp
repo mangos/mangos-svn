@@ -420,7 +420,7 @@ void Channel::List(Player* player)
             if( plr && ( plr->GetSession()->GetSecurity() == SEC_PLAYER || gmInWhoList && plr->IsVisibleGloballyFor(player) ) )
             {
                 data << uint64(i->first);
-                data << uint8(i->second.flags);                 // flags seems to be changed...
+                data << uint8(i->second.flags);             // flags seems to be changed...
                 ++count;
             }
         }
@@ -624,6 +624,7 @@ void Channel::DeVoice(uint64 guid1, uint64 guid2)
 {
 
 }
+
 // done
 void Channel::MakeNotifyPacket(WorldPacket *data, uint8 notify_type)
 {
@@ -631,18 +632,21 @@ void Channel::MakeNotifyPacket(WorldPacket *data, uint8 notify_type)
     *data << uint8(notify_type);
     *data << m_name;
 }
+
 // done 0x00
 void Channel::MakeJoined(WorldPacket *data, uint64 guid)
 {
     MakeNotifyPacket(data, CHAT_JOINED_NOTICE);
     *data << uint64(guid);
 }
+
 // done 0x01
 void Channel::MakeLeft(WorldPacket *data, uint64 guid)
 {
     MakeNotifyPacket(data, CHAT_LEFT_NOTICE);
     *data << uint64(guid);
 }
+
 // done 0x02
 void Channel::MakeYouJoined(WorldPacket *data)
 {
@@ -651,6 +655,7 @@ void Channel::MakeYouJoined(WorldPacket *data)
     *data << uint32(GetChannelId());
     *data << uint32(0);
 }
+
 // done 0x03
 void Channel::MakeYouLeft(WorldPacket *data)
 {
@@ -658,44 +663,52 @@ void Channel::MakeYouLeft(WorldPacket *data)
     *data << uint32(GetChannelId());
     *data << uint8(0);                                      // can be 0x00 and 0x01
 }
+
 // done 0x04
 void Channel::MakeWrongPassword(WorldPacket *data)
 {
     MakeNotifyPacket(data, CHAT_WRONG_PASSWORD_NOTICE);
 }
+
 // done 0x05
 void Channel::MakeNotMember(WorldPacket *data)
 {
     MakeNotifyPacket(data, CHAT_NOT_MEMBER_NOTICE);
 }
+
 // done 0x06
 void Channel::MakeNotModerator(WorldPacket *data)
 {
     MakeNotifyPacket(data, CHAT_NOT_MODERATOR_NOTICE);
 }
+
 // done 0x07
 void Channel::MakePasswordChanged(WorldPacket *data, uint64 guid)
 {
     MakeNotifyPacket(data, CHAT_PASSWORD_CHANGED_NOTICE);
     *data << uint64(guid);
 }
+
 // done 0x08
 void Channel::MakeOwnerChanged(WorldPacket *data, uint64 guid)
 {
     MakeNotifyPacket(data, CHAT_OWNER_CHANGED_NOTICE);
     *data << uint64(guid);
 }
+
 // done 0x09
 void Channel::MakePlayerNotFound(WorldPacket *data, std::string name)
 {
     MakeNotifyPacket(data, CHAT_PLAYER_NOT_FOUND_NOTICE);
     *data << name;
 }
+
 // done 0x0A
 void Channel::MakeNotOwner(WorldPacket *data)
 {
     MakeNotifyPacket(data, CHAT_NOT_OWNER_NOTICE);
 }
+
 // done 0x0B
 void Channel::MakeChannelOwner(WorldPacket *data)
 {
@@ -707,6 +720,7 @@ void Channel::MakeChannelOwner(WorldPacket *data)
     MakeNotifyPacket(data, CHAT_CHANNEL_OWNER_NOTICE);
     *data << ((IsConstant() || !m_ownerGUID) ? "Nobody" : name);
 }
+
 // done 0x0C
 void Channel::MakeModeChange(WorldPacket *data, uint64 guid, uint8 oldflags)
 {
@@ -715,35 +729,41 @@ void Channel::MakeModeChange(WorldPacket *data, uint64 guid, uint8 oldflags)
     *data << uint8(oldflags);
     *data << uint8(GetPlayerFlags(guid));
 }
+
 // done 0x0D
 void Channel::MakeAnnouncementsOn(WorldPacket *data, uint64 guid)
 {
     MakeNotifyPacket(data, CHAT_ANNOUNCEMENTS_ON_NOTICE);
     *data << uint64(guid);
 }
+
 // done 0x0E
 void Channel::MakeAnnouncementsOff(WorldPacket *data, uint64 guid)
 {
     MakeNotifyPacket(data, CHAT_ANNOUNCEMENTS_OFF_NOTICE);
     *data << uint64(guid);
 }
+
 // done 0x0F
 void Channel::MakeModerationOn(WorldPacket *data, uint64 guid)
 {
     MakeNotifyPacket(data, CHAT_MODERATION_ON_NOTICE);
     *data << uint64(guid);
 }
+
 // done 0x10
 void Channel::MakeModerationOff(WorldPacket *data, uint64 guid)
 {
     MakeNotifyPacket(data, CHAT_MODERATION_OFF_NOTICE);
     *data << uint64(guid);
 }
+
 // done 0x11
 void Channel::MakeMuted(WorldPacket *data)
 {
     MakeNotifyPacket(data, CHAT_MUTED_NOTICE);
 }
+
 // done 0x12
 void Channel::MakePlayerKicked(WorldPacket *data, uint64 bad, uint64 good)
 {
@@ -751,11 +771,13 @@ void Channel::MakePlayerKicked(WorldPacket *data, uint64 bad, uint64 good)
     *data << uint64(bad);
     *data << uint64(good);
 }
+
 // done 0x13
 void Channel::MakeBanned(WorldPacket *data)
 {
     MakeNotifyPacket(data, CHAT_BANNED_NOTICE);
 }
+
 // done 0x14
 void Channel::MakePlayerBanned(WorldPacket *data, uint64 bad, uint64 good)
 {
@@ -763,6 +785,7 @@ void Channel::MakePlayerBanned(WorldPacket *data, uint64 bad, uint64 good)
     *data << uint64(bad);
     *data << uint64(good);
 }
+
 // done 0x15
 void Channel::MakePlayerUnbanned(WorldPacket *data, uint64 bad, uint64 good)
 {
@@ -770,44 +793,52 @@ void Channel::MakePlayerUnbanned(WorldPacket *data, uint64 bad, uint64 good)
     *data << uint64(bad);
     *data << uint64(good);
 }
+
 // done 0x16
 void Channel::MakePlayerNotBanned(WorldPacket *data, uint64 guid)
 {
     MakeNotifyPacket(data, CHAT_PLAYER_NOT_BANNED_NOTICE);
     *data << uint64(guid);
 }
+
 // done 0x17
 void Channel::MakePlayerAlreadyMember(WorldPacket *data, uint64 guid)
 {
     MakeNotifyPacket(data, CHAT_PLAYER_ALREADY_MEMBER_NOTICE);
     *data << uint64(guid);
 }
+
 // done 0x18
 void Channel::MakeInvite(WorldPacket *data, uint64 guid)
 {
     MakeNotifyPacket(data, CHAT_INVITE_NOTICE);
     *data << uint64(guid);
 }
+
 // done 0x19
 void Channel::MakeInviteWrongFaction(WorldPacket *data)
 {
     MakeNotifyPacket(data, CHAT_INVITE_WRONG_FACTION_NOTICE);
 }
+
 // done 0x1A
 void Channel::MakeWrongFaction(WorldPacket *data)
 {
     MakeNotifyPacket(data, CHAT_WRONG_FACTION_NOTICE);
 }
+
 // done 0x1B
 void Channel::MakeInvalidName(WorldPacket *data)
 {
     MakeNotifyPacket(data, CHAT_INVALID_NAME_NOTICE);
 }
+
 // done 0x1C
 void Channel::MakeNotModerated(WorldPacket *data)
 {
     MakeNotifyPacket(data, CHAT_NOT_MODERATED_NOTICE);
 }
+
 // done 0x1D
 void Channel::MakePlayerInvited(WorldPacket *data, uint64 guid)
 {
@@ -819,33 +850,39 @@ void Channel::MakePlayerInvited(WorldPacket *data, uint64 guid)
     MakeNotifyPacket(data, CHAT_PLAYER_INVITED_NOTICE);
     *data << name;
 }
+
 // done 0x1E
 void Channel::MakePlayerInviteBanned(WorldPacket *data, uint64 guid)
 {
     MakeNotifyPacket(data, CHAT_PLAYER_INVITE_BANNED_NOTICE);
     *data << uint64(guid);
 }
+
 // done 0x1F
 void Channel::MakeThrottled(WorldPacket *data)
 {
     MakeNotifyPacket(data, CHAT_THROTTLED_NOTICE);
 }
+
 // done 0x20
 void Channel::MakeNotInArea(WorldPacket *data)
 {
     MakeNotifyPacket(data, CHAT_NOT_IN_AREA_NOTICE);
 }
+
 // done 0x21
 void Channel::MakeNotInLfg(WorldPacket *data)
 {
     MakeNotifyPacket(data, CHAT_NOT_IN_LFG_NOTICE);
 }
+
 // done 0x22
 void Channel::MakeVoiceOn(WorldPacket *data, uint64 guid)
 {
     MakeNotifyPacket(data, CHAT_VOICE_ON_NOTICE);
     *data << uint64(guid);
 }
+
 // done 0x23
 void Channel::MakeVoiceOff(WorldPacket *data, uint64 guid)
 {

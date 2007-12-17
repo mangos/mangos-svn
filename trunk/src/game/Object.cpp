@@ -308,7 +308,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
                 if(((Player*)this)->isInFlight())
                 {
                     WPAssert(!((Player*)this)->GetMotionMaster()->empty() && ((Player*)this)->GetMotionMaster()->top()->GetMovementGeneratorType() == FLIGHT_MOTION_TYPE);
-                    flags2 = (MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_SPLINE2); 
+                    flags2 = (MOVEMENTFLAG_FORWARD | MOVEMENTFLAG_SPLINE2);
                 }
             }
             break;
@@ -989,7 +989,7 @@ void WorldObject::GetRandomPoint( float x, float y, float z, float distance, flo
     rand_y = y + new_dist * sin(angle);
     rand_z = z;
 
-    UpdateGroundPositionZ(rand_x,rand_y,rand_z);                 // update to LOS height if available
+    UpdateGroundPositionZ(rand_x,rand_y,rand_z);            // update to LOS height if available
 }
 
 void WorldObject::UpdateGroundPositionZ(float x, float y, float &z) const
@@ -998,7 +998,7 @@ void WorldObject::UpdateGroundPositionZ(float x, float y, float &z) const
     {
         float new_z = MapManager::Instance().GetBaseMap(GetMapId())->GetHeight(x,y,z);
         if(new_z > VMAP_INVALID_HEIGHT)
-            z = new_z+ 0.05f;                                   // just to be sure that we are not a few pixel under the surface
+            z = new_z+ 0.05f;                               // just to be sure that we are not a few pixel under the surface
     }
 }
 
@@ -1146,10 +1146,7 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
     pCreature->SetInstanceId(GetInstanceId());
     uint32 team = 0;
     if (GetTypeId()==TYPEID_PLAYER)
-        if (((Player*)this)->GetTeam()==HORDE)
-            team = HORDE;
-        else if (((Player*)this)->GetTeam()==ALLIANCE)
-            team = ALLIANCE;
+        team = ((Player*)this)->GetTeam();
 
     if (!pCreature->Create(objmgr.GenerateLowGuid(HIGHGUID_UNIT), GetMapId(), x, y, z, ang, id, team))
     {
@@ -1163,82 +1160,83 @@ Creature* WorldObject::SummonCreature(uint32 id, float x, float y, float z, floa
     return pCreature;
 }
 
-namespace MaNGOS {
+namespace MaNGOS
+{
 
     class NearUsedPosDo
     {
-    public:
-        NearUsedPosDo(WorldObject const& obj, WorldObject const* searcher, float angle, ObjectPosSelector& selector) 
-            : i_object(obj), i_searcher(searcher), i_angle(angle), i_selector(selector) {}
+        public:
+            NearUsedPosDo(WorldObject const& obj, WorldObject const* searcher, float angle, ObjectPosSelector& selector)
+                : i_object(obj), i_searcher(searcher), i_angle(angle), i_selector(selector) {}
 
-        void operator()(Corpse* u) const {}
-        void operator()(DynamicObject* u) const {}
+            void operator()(Corpse* u) const {}
+            void operator()(DynamicObject* u) const {}
 
-        void operator()(Creature* c) const
-        {
-            // skip self or target
-            if(c==i_searcher || c==&i_object)
-                return;
-
-            float x,y,z;
-
-            if( !c->isAlive() || c->hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNDED) || c->GetMotionMaster()->top()->GetMovementGeneratorType() != TARGETED_MOTION_TYPE ||
-                !((TargetedMovementGenerator<Creature>*)(c->GetMotionMaster()->top()))->GetDestination(x,y,z) )
+            void operator()(Creature* c) const
             {
-                x = c->GetPositionX();
-                y = c->GetPositionY();
+                // skip self or target
+                if(c==i_searcher || c==&i_object)
+                    return;
+
+                float x,y,z;
+
+                if( !c->isAlive() || c->hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNDED) || c->GetMotionMaster()->top()->GetMovementGeneratorType() != TARGETED_MOTION_TYPE ||
+                    !((TargetedMovementGenerator<Creature>*)(c->GetMotionMaster()->top()))->GetDestination(x,y,z) )
+                {
+                    x = c->GetPositionX();
+                    y = c->GetPositionY();
+                }
+
+                add(c,x,y);
             }
 
-            add(c,x,y);
-        }
+            template<class T>
+                void operator()(T* u) const
+            {
+                // skip self or target
+                if(u==i_searcher || u==&i_object)
+                    return;
 
-        template<class T>
-        void operator()(T* u) const
-        {
-            // skip self or target
-            if(u==i_searcher || u==&i_object)
-                return;
+                float x,y;
 
-            float x,y;
+                x = u->GetPositionX();
+                y = u->GetPositionY();
 
-            x = u->GetPositionX();
-            y = u->GetPositionY();
+                add(u,x,y);
+            }
 
-            add(u,x,y);
-        }
+            // we must add used pos that can fill places around center
+            void add(WorldObject* u, float x, float y) const
+            {
+                // dist include size of u
+                float dist2d = i_object.GetDistance2d(x,y);
 
-        // we must add used pos that can fill places around center
-        void add(WorldObject* u, float x, float y) const
-        {
-            // dist include size of u 
-            float dist2d = i_object.GetDistance2d(x,y);
+                // u is too nearest to i_object
+                if(dist2d + i_object.GetObjectSize() + u->GetObjectSize() < i_selector.m_dist - i_selector.m_size)
+                    return;
 
-            // u is too nearest to i_object 
-            if(dist2d + i_object.GetObjectSize() + u->GetObjectSize() < i_selector.m_dist - i_selector.m_size)
-                return;
+                // u is too far away from i_object
+                if(dist2d + i_object.GetObjectSize() - u->GetObjectSize() > i_selector.m_dist + i_selector.m_size)
+                    return;
 
-            // u is too far away from i_object 
-            if(dist2d + i_object.GetObjectSize() - u->GetObjectSize() > i_selector.m_dist + i_selector.m_size)
-                return;
+                float angle = i_object.GetAngle(u)-i_angle;
 
-            float angle = i_object.GetAngle(u)-i_angle;
+                // move angle to range -pi ... +pi
+                while( angle > M_PI)
+                    angle -= 2.0f * M_PI;
+                while(angle < -M_PI)
+                    angle += 2.0f * M_PI;
 
-            // move angle to range -pi ... +pi
-            while( angle > M_PI)
-                angle -= 2.0f * M_PI;
-            while(angle < -M_PI)
-                angle += 2.0f * M_PI;
-
-            i_selector.AddUsedPos(u->GetObjectSize(),angle,dist2d + i_object.GetObjectSize());
-        }
-    private:
-        WorldObject const& i_object;
-        WorldObject const* i_searcher;
-        float              i_angle;
-        ObjectPosSelector& i_selector;
+                i_selector.AddUsedPos(u->GetObjectSize(),angle,dist2d + i_object.GetObjectSize());
+            }
+        private:
+            WorldObject const& i_object;
+            WorldObject const* i_searcher;
+            float              i_angle;
+            ObjectPosSelector& i_selector;
     };
 
-} // namespace MaNGOS
+}                                                           // namespace MaNGOS
 
 //===================================================================================================
 
@@ -1258,14 +1256,14 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, 
     // if detection disabled, return first point
     if(!sWorld.getConfig(CONFIG_DETECT_POS_COLLISION))
     {
-        UpdateGroundPositionZ(x,y,z);                                // update to LOS height if available
+        UpdateGroundPositionZ(x,y,z);                       // update to LOS height if available
         return;
     }
 
     // or remember first point
     float first_x = x;
     float first_y = y;
-    bool first_los_conflict = false;                                  // first point LOS problems
+    bool first_los_conflict = false;                        // first point LOS problems
 
     // prepare selector for for work
     ObjectPosSelector selector(GetPositionX(),GetPositionY(),GetObjectSize(),distance2d+size);
@@ -1291,22 +1289,22 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, 
     // maybe can just place in primary position
     if( selector.CheckOriginal() )
     {
-        UpdateGroundPositionZ(x,y,z);                                // update to LOS height if available
+        UpdateGroundPositionZ(x,y,z);                       // update to LOS height if available
 
         if(IsWithinLOS(x,y,z))
             return;
 
-        first_los_conflict = true;                                    // first point have LOS problems
+        first_los_conflict = true;                          // first point have LOS problems
     }
 
-    float angle;                                                // candidate of angle for free pos
+    float angle;                                            // candidate of angle for free pos
 
     // special case when one from list empty and then empty side preferred
     if(selector.FirstAngle(angle))
     {
         GetNearPoint2D(x,y,distance2d,absAngle+angle);
         z = GetPositionZ();
-        UpdateGroundPositionZ(x,y,z);                                // update to LOS height if available
+        UpdateGroundPositionZ(x,y,z);                       // update to LOS height if available
 
         if(IsWithinLOS(x,y,z))
             return;
@@ -1320,7 +1318,7 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, 
     {
         GetNearPoint2D(x,y,distance2d,absAngle+angle);
         z = GetPositionZ();
-        UpdateGroundPositionZ(x,y,z);                                // update to LOS height if available
+        UpdateGroundPositionZ(x,y,z);                       // update to LOS height if available
 
         if(IsWithinLOS(x,y,z))
             return;
@@ -1334,7 +1332,7 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, 
         x = first_x;
         y = first_y;
 
-        UpdateGroundPositionZ(x,y,z);                                // update to LOS height if available
+        UpdateGroundPositionZ(x,y,z);                       // update to LOS height if available
         return;
     }
 
@@ -1345,7 +1343,7 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, 
         {
             GetNearPoint2D(x,y,distance2d,absAngle+angle);
             z = GetPositionZ();
-            UpdateGroundPositionZ(x,y,z);                                // update to LOS height if available
+            UpdateGroundPositionZ(x,y,z);                   // update to LOS height if available
 
             if(IsWithinLOS(x,y,z))
                 return;
@@ -1356,11 +1354,11 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, 
     selector.InitializeAngle();
 
     // select in positions after current nodes (selection one by one)
-    while(selector.NextUsedAngle(angle))                        // angle for used pos but maybe without LOS problem
+    while(selector.NextUsedAngle(angle))                    // angle for used pos but maybe without LOS problem
     {
         GetNearPoint2D(x,y,distance2d,absAngle+angle);
         z = GetPositionZ();
-        UpdateGroundPositionZ(x,y,z);                                // update to LOS height if available
+        UpdateGroundPositionZ(x,y,z);                       // update to LOS height if available
 
         if(IsWithinLOS(x,y,z))
             return;
@@ -1370,5 +1368,5 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, 
     x = first_x;
     y = first_y;
 
-    UpdateGroundPositionZ(x,y,z);                                // update to LOS height if available
+    UpdateGroundPositionZ(x,y,z);                           // update to LOS height if available
 }
