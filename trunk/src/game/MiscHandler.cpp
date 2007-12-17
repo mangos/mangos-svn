@@ -1536,7 +1536,6 @@ void WorldSession::HandleResetInstancesOpcode( WorldPacket & recv_data )
     */
 }
 
-
 void WorldSession::HandleDungeonDifficultyOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data, 4);

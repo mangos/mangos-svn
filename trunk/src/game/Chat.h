@@ -344,7 +344,6 @@ class ChatHandler
         // common global flag
         static bool load_command_table;
 };
-
 #endif
 
 char const *fmtstring( char const *format, ... );
