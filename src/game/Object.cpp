@@ -304,6 +304,8 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
                 flags2 &= ~MOVEMENTFLAG_JUMPING;
                 flags2 &= ~MOVEMENTFLAG_FALLING;
                 flags2 &= ~MOVEMENTFLAG_SWIMMING;
+                flags2 &= ~MOVEMENTFLAG_UNK1;
+                flags2 &= ~MOVEMENTFLAG_UNK5;
 
                 if(((Player*)this)->isInFlight())
                 {
