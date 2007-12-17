@@ -124,7 +124,7 @@ uint32 GetSkillLevel(Player *player,uint32 trskill)
             spell_artisan    = 10769;
             spell_master     = 32679; // teached by 32678
             break;
-        case TRADESKILL_JAWELCRAFTING:
+        case TRADESKILL_JEWELCRAFTING:
             spell_apprentice = 25229; // teached by 25245
             spell_journeyman = 25230; // teached by 25246
             spell_expert     = 28894; // teached by 28896
