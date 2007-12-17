@@ -278,7 +278,7 @@ namespace MaNGOS
 
     // Last accepted by Check GO if any (Check can change requirements at each call)
     template<class Check>
-    struct MANGOS_DLL_DECL GameObjectLastSearcher
+        struct MANGOS_DLL_DECL GameObjectLastSearcher
     {
         GameObject* &i_object;
         Check& i_check;
@@ -322,7 +322,7 @@ namespace MaNGOS
 
     // Last accepted by Check Unit if any (Check can change requirements at each call)
     template<class Check>
-    struct MANGOS_DLL_DECL UnitLastSearcher
+        struct MANGOS_DLL_DECL UnitLastSearcher
     {
         Unit* &i_object;
         Check & i_check;
@@ -367,7 +367,7 @@ namespace MaNGOS
 
     // Last accepted by Check Creature if any (Check can change requirements at each call)
     template<class Check>
-    struct MANGOS_DLL_DECL CreatureLastSearcher
+        struct MANGOS_DLL_DECL CreatureLastSearcher
     {
         Creature* &i_object;
         Check & i_check;
@@ -380,7 +380,7 @@ namespace MaNGOS
     };
 
     template<class Check>
-    struct MANGOS_DLL_DECL CreatureListSearcher
+        struct MANGOS_DLL_DECL CreatureListSearcher
     {
         std::list<Creature*> &i_objects;
         Check& i_check;
@@ -452,15 +452,15 @@ namespace MaNGOS
 
     class GameObjectWithDbGUIDCheck
     {
-    public:
-        GameObjectWithDbGUIDCheck(WorldObject const& obj,uint32 db_guid) : i_obj(obj), i_db_guid(db_guid) {}
-        bool operator()(GameObject const* go) const
-        {
-            return go->GetDBTableGUIDLow() == i_db_guid;
-        }
-    private:
-        WorldObject const& i_obj;
-        uint32 i_db_guid;
+        public:
+            GameObjectWithDbGUIDCheck(WorldObject const& obj,uint32 db_guid) : i_obj(obj), i_db_guid(db_guid) {}
+            bool operator()(GameObject const* go) const
+            {
+                return go->GetDBTableGUIDLow() == i_db_guid;
+            }
+        private:
+            WorldObject const& i_obj;
+            uint32 i_db_guid;
     };
 
     // Unit checks
@@ -501,26 +501,26 @@ namespace MaNGOS
     // Success at unit in range, range update for next check (this can be use with UnitLastSearcher to find nearest unit)
     class NearestAttackableUnitInObjectRangeCheck
     {
-    public:
-        NearestAttackableUnitInObjectRangeCheck(WorldObject const* obj, Unit const* funit, float range) : i_obj(obj), i_funit(funit), i_range(range) {}
-        bool operator()(Unit* u)
-        {
-            if( u->isTargetableForAttack() && i_obj->IsWithinDistInMap(u, i_range) && 
-                !i_funit->IsFriendlyTo(u) && u->isVisibleForOrDetect(i_funit,false)  )
+        public:
+            NearestAttackableUnitInObjectRangeCheck(WorldObject const* obj, Unit const* funit, float range) : i_obj(obj), i_funit(funit), i_range(range) {}
+            bool operator()(Unit* u)
             {
-                i_range = i_obj->GetDistance(u);            // use found unit range as new range limit for next check
-                return true;
+                if( u->isTargetableForAttack() && i_obj->IsWithinDistInMap(u, i_range) &&
+                    !i_funit->IsFriendlyTo(u) && u->isVisibleForOrDetect(i_funit,false)  )
+                {
+                    i_range = i_obj->GetDistance(u);        // use found unit range as new range limit for next check
+                    return true;
+                }
+
+                return false;
             }
+        private:
+            WorldObject const* i_obj;
+            Unit const* i_funit;
+            float i_range;
 
-            return false;
-        }
-    private:
-        WorldObject const* i_obj;
-        Unit const* i_funit;
-        float i_range;
-
-        // prevent clone this object
-        NearestAttackableUnitInObjectRangeCheck(NearestAttackableUnitInObjectRangeCheck const&);
+            // prevent clone this object
+            NearestAttackableUnitInObjectRangeCheck(NearestAttackableUnitInObjectRangeCheck const&);
     };
 
     class AnyAoETargetUnitInObjectRangeCheck
@@ -657,7 +657,7 @@ namespace MaNGOS
     class NearestCreatureEntryWithLiveStateInObjectRangeCheck
     {
         public:
-            NearestCreatureEntryWithLiveStateInObjectRangeCheck(WorldObject const& obj,uint32 entry, bool alive, float range) 
+            NearestCreatureEntryWithLiveStateInObjectRangeCheck(WorldObject const& obj,uint32 entry, bool alive, float range)
                 : i_obj(obj), i_entry(entry), i_alive(alive), i_range(range) {}
 
             bool operator()(Creature* u)

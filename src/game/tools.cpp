@@ -28,7 +28,7 @@ bool readGUID(WorldPacket & data, uint64& guid)
     uint8 bit;
     uint8 shiftdata=0x1;
     uint64 Temp=0;
-    
+
     guid = 0;
 
     data >> guidmark;

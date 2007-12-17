@@ -5753,7 +5753,7 @@ bool ObjectMgr::LoadPlayerDump(std::string file, uint32 account, std::string nam
         {
             if (tn == dumpTables[i].name)
             {
-                type = dumpTables[i].type; 
+                type = dumpTables[i].type;
                 break;
             }
         }
@@ -5933,7 +5933,7 @@ bool ObjectMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl, bool msg)
             case 0:
                 continue;
 
-            // craft spell for crafting non-existed item (break client recipes list show)
+                // craft spell for crafting non-existed item (break client recipes list show)
             case SPELL_EFFECT_CREATE_ITEM:
             {
                 if(!GetItemPrototype( spellInfo->EffectItemType[i] ))

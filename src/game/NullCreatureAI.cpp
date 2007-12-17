@@ -21,4 +21,3 @@
 NullCreatureAI::~NullCreatureAI()
 {
 }
-

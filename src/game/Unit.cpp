@@ -1580,8 +1580,8 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             data << uint32(spellProto->Id);
             data << uint32(1);
             data << uint32(mod->m_auraname);
-            data << (uint32)pdamage;
             data << (uint32)0;                              // ?
+            data << (uint32)pdamage;
             SendMessageToSet(&data,true);
 
             int32 gain = ModifyPower(POWER_MANA, pdamage);
@@ -6537,7 +6537,7 @@ void Unit::CalculateSpellDamageAndDuration(int32* damage, int32* duration, Spell
         }
         else
             *duration = minduration;
-        
+
         if (*duration > 0)
         {
             int32 durationMod = 0;
@@ -6545,11 +6545,11 @@ void Unit::CalculateSpellDamageAndDuration(int32* damage, int32* duration, Spell
             for(AuraList::const_iterator i = mMechanicMod.begin();i != mMechanicMod.end(); ++i)
                 if((*i)->GetModifier()->m_miscvalue == int32(spellProto->Mechanic))
                     durationMod+= (*i)->GetModifier()->m_amount;
-            *duration = *duration * (100+durationMod) /100; 
+            *duration = *duration * (100+durationMod) /100;
             if (*duration < 0) *duration = 0;
         }
     }
-  
+
     if(unitPlayer && needClearCombo)
         unitPlayer->ClearComboPoints();
 }
