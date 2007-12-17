@@ -116,6 +116,7 @@ class Log : public MaNGOS::Singleton<Log, MaNGOS::ClassLevelLockable<Log, ZThrea
         uint32 getLogFilter() const { return m_logFilter; }
         bool IsOutDebug() const { return m_logLevel > 2 || m_logFileLevel > 2 && logfile; }
         bool IsOutCharDump() const { return m_charLog_Dump; }
+        bool IsIncludeTime() const { return m_includeTime; }
     private:
         FILE* raLogfile;
         FILE* logfile;
