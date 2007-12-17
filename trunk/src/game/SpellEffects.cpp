@@ -1223,6 +1223,22 @@ void Spell::EffectTeleportUnits(uint32 i)
         return;
     }
 
+    if(m_spellInfo->Id == 36563 && m_caster->GetTypeId() == TYPEID_PLAYER)
+    {
+        Unit *pTarget = ObjectAccessor::GetUnit(*m_caster, ((Player*)m_caster)->GetSelection());
+        if(!pTarget)
+            return;
+
+        float _target_x, _target_y, _target_z;
+        pTarget->GetClosePoint(_target_x, _target_y, _target_z, CONTACT_DISTANCE + pTarget->GetObjectSize() + m_caster->GetObjectSize(), M_PI);
+
+        if(!pTarget->IsWithinLOS(_target_x,_target_y,_target_z))
+            return;
+
+        ((Player*)m_caster)->TeleportTo(m_caster->GetMapId(),_target_x, _target_y, _target_z , pTarget->GetOrientation());
+        return;
+    }
+
     SpellTeleport const* st = objmgr.GetSpellTeleport(m_spellInfo->Id);
     if(!st)
     {
