@@ -923,14 +923,14 @@ const char* g_worldOpcodeNames[] =
     "UMSG_UNKNOWN_891",                                     // UMSG_UNKNOWN_891
     "UMSG_UNKNOWN_892",                                     // UMSG_UNKNOWN_892
     "UMSG_UNKNOWN_893",                                     // UMSG_UNKNOWN_893
-    "SMSG_MOVE_SET_FLY_SPEED",                              // SMSG_MOVE_SET_FLY_SPEED
+    "MSG_MOVE_SET_FLY_SPEED",                               // MSG_MOVE_SET_FLY_SPEED
     "UMSG_UNKNOWN_895",                                     // UMSG_UNKNOWN_895
-    "SMSG_MOVE_SET_FLY_BACK_SPEED",                         // SMSG_MOVE_SET_FLY_BACK_SPEED
+    "MSG_MOVE_SET_FLY_BACK_SPEED",                          // MSG_MOVE_SET_FLY_BACK_SPEED
     "SMSG_FORCE_FLY_SPEED_CHANGE",                          // SMSG_FORCE_FLY_SPEED_CHANGE
     "CMSG_FORCE_FLY_SPEED_CHANGE_ACK",                      // CMSG_FORCE_FLY_SPEED_CHANGE_ACK
     "SMSG_FORCE_FLY_BACK_SPEED_CHANGE",                     // SMSG_FORCE_FLY_BACK_SPEED_CHANGE
     "CMSG_FORCE_FLY_BACK_SPEED_CHANGE_ACK",                 // CMSG_FORCE_FLY_BACK_SPEED_CHANGE_ACK
-    "SMSG_MOVE_SET_FLY_SPEED2",                             // SMSG_MOVE_SET_FLY_SPEED2
+    "MSG_MOVE_SET_FLY_SPEED2",                              // MSG_MOVE_SET_FLY_SPEED2
     "SMSG_MOVE_SET_FLY_BACK_SPEED2",                        // SMSG_MOVE_SET_FLY_BACK_SPEED2
     "UMSG_UNKNOWN_903",                                     // UMSG_UNKNOWN_903
     "SMSG_FLIGHT_SPLINE_SYNC",                              // SMSG_FLIGHT_SPLINE_SYNC

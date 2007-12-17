@@ -920,9 +920,9 @@ enum OpCodes
     // 891
     // 892
     // 893
-    SMSG_MOVE_SET_FLY_SPEED                         = 894,  // all fly speed, packed guid, uint32 movement_flags, time, x,y,z,o,unk,speed...
+    MSG_MOVE_SET_FLY_SPEED                          = 894,  // all fly speed, packed guid, uint32 movement_flags, time, x,y,z,o,unk,speed...
     // 895
-    SMSG_MOVE_SET_FLY_BACK_SPEED                    = 896,
+    MSG_MOVE_SET_FLY_BACK_SPEED                     = 896,
     SMSG_FORCE_FLY_SPEED_CHANGE                     = 897,  // packed guid, uint32, speed
     CMSG_FORCE_FLY_SPEED_CHANGE_ACK                 = 898,
     SMSG_FORCE_FLY_BACK_SPEED_CHANGE                = 899,

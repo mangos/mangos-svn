@@ -6198,9 +6198,10 @@ void Unit::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply
                 data.Initialize(MSG_MOVE_SET_TURN_RATE, 8+4+1+4+4+4+4+4+4+4);
                 break;
             case MOVE_FLY:
-                data.Initialize(SMSG_MOVE_SET_FLY_SPEED, 8+4+1+4+4+4+4+4+4+4);
+                data.Initialize(MSG_MOVE_SET_FLY_SPEED, 8+4+1+4+4+4+4+4+4+4);
                 break;
             case MOVE_FLYBACK:
+                data.Initialize(MSG_MOVE_SET_FLY_BACK_SPEED, 8+4+1+4+4+4+4+4+4+4);                
                 break;
             default:
                 sLog.outError("Unit::SetSpeed: Unsupported move type (%d), data not sent to client.",mtype);
@@ -6246,6 +6247,7 @@ void Unit::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply
                 data.Initialize(SMSG_FORCE_FLY_SPEED_CHANGE, 16);
                 break;
             case MOVE_FLYBACK:
+                data.Initialize(SMSG_FORCE_FLY_BACK_SPEED_CHANGE, 16);
                 break;
             default:
                 sLog.outError("Unit::SetSpeed: Unsupported move type (%d), data not sent to client.",mtype);
