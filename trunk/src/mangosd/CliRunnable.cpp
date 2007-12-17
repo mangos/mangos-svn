@@ -66,6 +66,7 @@ void CliLoadPlayerDump(char*,pPrintf);
 void CliSave(char*,pPrintf);
 void CliSend(char*,pPrintf);
 void CliPLimit(char*,pPrintf);
+void CliSetPassword(char*,pPrintf);
 /// Table of known commands
 const CliCommand Commands[]=
 {
@@ -81,6 +82,7 @@ const CliCommand Commands[]=
     {"listbans", & CliBanList,"List bans"},
     {"unban", & CliRemoveBan,"Remove ban from account|ip"},
     {"setgm", & CliSetGM,"Edit user privileges"},
+    {"setpass", & CliSetPassword,"Set password for account"},
     {"setbc", & CliSetTBC,"Set user expansion allowed"},
     {"listgm", & CliListGM,"Display user privileges"},
     {"loadscripts", & CliLoadScripts,"Load script library"},
@@ -519,6 +521,48 @@ void CliSetGM(char *command,pPrintf zprintf)
     {
         zprintf("No account %s found\r\n",szAcc);
     }
+}
+
+/// Set password for account
+void CliSetPassword(char *command,pPrintf zprintf)
+{
+    ///- Get the command line arguments
+    char *szAcc = strtok(command," ");
+    char *szPassword1 =  strtok(NULL," ");
+    char *szPassword2 =  strtok(NULL," ");
+
+    if(!szAcc||!szPassword1 || !szPassword2)
+    {
+        zprintf("Syntax is: setpass $account $password $password\r\n");
+        return;
+    }
+
+    uint32 acc_id = accmgr.GetId(szAcc);
+    if (!acc_id)
+    {
+        zprintf("Account '%s' not exist!\r\n");
+        return;
+    }
+
+    std::string pass1 = szPassword1;
+    std::string pass2 = szPassword2;
+
+    if (pass1 != pass2)
+    {
+        zprintf("Password does not match the confirm password, password not changed!\r\n");
+        return;
+    }
+
+    if (pass1.size() > 16)
+    {
+        zprintf("Password can't be longer than 16 characters (client limit), password not changed!\r\n");
+        return;
+    }
+
+    if(accmgr.ChangePassword(acc_id, pass1) == 0)
+        zprintf("The password was changed for account '%s' (ID: %u).\r\n",szAcc,acc_id);
+    else
+        zprintf("Password not changed!\r\n");
 }
 
 /// Create an account
