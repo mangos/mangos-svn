@@ -19,7 +19,7 @@
 #include "ObjectPosSelector.h"
 
 ObjectPosSelector::ObjectPosSelector(float x,float y,float size,float dist)
-    : m_center_x(x),m_center_y(y),m_size(size),m_dist(dist)
+: m_center_x(x),m_center_y(y),m_size(size),m_dist(dist)
 {
     m_anglestep = acos(m_dist/(m_dist+2*m_size));
 
@@ -61,7 +61,6 @@ void ObjectPosSelector::AddUsedPos(float size,float angle,float dist)
         m_UsedPosLists[USED_POS_MINUS].insert(UsedPosList::value_type(-angle,UsedPos(-1.0,size,dist)));
 }
 
-
 void ObjectPosSelector::InitializeAngle()
 {
     m_nextUsedPos[USED_POS_PLUS]  = m_UsedPosLists[USED_POS_PLUS].begin();
@@ -86,8 +85,8 @@ bool ObjectPosSelector::FirstAngle(float& angle)
 
 bool ObjectPosSelector::NextAngle(float& angle)
 {
-    while(m_nextUsedPos[USED_POS_PLUS]!=m_UsedPosLists[USED_POS_PLUS].end() || 
-        m_nextUsedPos[USED_POS_MINUS]!=m_UsedPosLists[USED_POS_MINUS].end() || 
+    while(m_nextUsedPos[USED_POS_PLUS]!=m_UsedPosLists[USED_POS_PLUS].end() ||
+        m_nextUsedPos[USED_POS_MINUS]!=m_UsedPosLists[USED_POS_MINUS].end() ||
         m_smallStepOk[USED_POS_PLUS] || m_smallStepOk[USED_POS_MINUS] )
     {
         // calculate next possible angle
@@ -100,7 +99,7 @@ bool ObjectPosSelector::NextAngle(float& angle)
 
 bool ObjectPosSelector::NextUsedAngle(float& angle)
 {
-    while(m_nextUsedPos[USED_POS_PLUS]!=m_UsedPosLists[USED_POS_PLUS].end() || 
+    while(m_nextUsedPos[USED_POS_PLUS]!=m_UsedPosLists[USED_POS_PLUS].end() ||
         m_nextUsedPos[USED_POS_MINUS]!=m_UsedPosLists[USED_POS_MINUS].end() )
     {
         // calculate next possible angle
@@ -114,7 +113,7 @@ bool ObjectPosSelector::NextUsedAngle(float& angle)
 bool ObjectPosSelector::NextPosibleAngle( float& angle )
 {
     // ++ direction less updated
-    if( m_nextUsedPos[USED_POS_PLUS]!=m_UsedPosLists[USED_POS_PLUS].end() && 
+    if( m_nextUsedPos[USED_POS_PLUS]!=m_UsedPosLists[USED_POS_PLUS].end() &&
         (m_nextUsedPos[USED_POS_MINUS]==m_UsedPosLists[USED_POS_MINUS].end() || m_nextUsedPos[USED_POS_PLUS]->first <= m_nextUsedPos[USED_POS_MINUS]->first) )
     {
         bool ok;

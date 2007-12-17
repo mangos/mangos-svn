@@ -58,17 +58,16 @@ enum PermissionTypes
 };
 
 enum AdditionalLootCondition
-{   //QuestFFAorLootCondition < 0 (negative) condition_value1 condition_value2
-    CONDITION_NONE                  = 0,    // 0 0
-    CONDITION_AURA                  = 1,    // spell_id effindex
-    CONDITION_ITEM                  = 2,    // item_id count
-    CONDITION_ITEM_EQUIPPED         = 3,    // item_id 0
-    CONDITION_ZONEID                = 4,    // zone_id 0
-    CONDITION_REPUTATION_RANK       = 5,    // faction_id min_rank
-    CONDITION_TEAM                  = 6     // player_team 0
-                                            // 469 - Alliance 67 - Horde
+{                                                           //QuestFFAorLootCondition < 0 (negative) condition_value1 condition_value2
+    CONDITION_NONE                  = 0,                    // 0 0
+    CONDITION_AURA                  = 1,                    // spell_id effindex
+    CONDITION_ITEM                  = 2,                    // item_id count
+    CONDITION_ITEM_EQUIPPED         = 3,                    // item_id 0
+    CONDITION_ZONEID                = 4,                    // zone_id 0
+    CONDITION_REPUTATION_RANK       = 5,                    // faction_id min_rank
+    CONDITION_TEAM                  = 6                     // player_team 0
+    // 469 - Alliance 67 - Horde
 };
-
 
 class Player;
 
@@ -111,18 +110,18 @@ struct LootItem
     bool    is_counted        : 1;
 
     LootItem()
-        : itemid(0), displayid(0), randomSuffix(0), randomPropertyId(0), 
-        cond_value1(0), cond_value2(0), condition(0), count(1), 
+        : itemid(0), displayid(0), randomSuffix(0), randomPropertyId(0),
+        cond_value1(0), cond_value2(0), condition(0), count(1),
         is_looted(true), is_blocked(false), freeforall(false), is_underthreshold(false), is_counted(false) {}
 
     LootItem(uint32 _itemid, uint32 _displayid, uint32 _randomSuffix, int32 _randomProp, bool _freeforall, uint8 _condition, uint32 _cond_value1, uint32 _cond_value2, uint8 _count = 1)
-        : itemid(_itemid), displayid(_displayid), randomSuffix(_randomSuffix), randomPropertyId(_randomProp), 
-        cond_value1(_cond_value1), cond_value2(_cond_value2), condition(_condition), count(_count), 
+        : itemid(_itemid), displayid(_displayid), randomSuffix(_randomSuffix), randomPropertyId(_randomProp),
+        cond_value1(_cond_value1), cond_value2(_cond_value2), condition(_condition), count(_count),
         is_looted(false), is_blocked(false), freeforall(_freeforall), is_underthreshold(false), is_counted(false) {}
 
     LootItem(LootStoreItem const& li,uint8 _count, uint32 _randomSuffix = 0, int32 _randomProp = 0)
-        : itemid(li.itemid), displayid(li.displayid), randomSuffix(_randomSuffix), randomPropertyId(_randomProp), 
-        cond_value1(li.cond_value1), cond_value2(li.cond_value2), condition(li.condition), count(_count), 
+        : itemid(li.itemid), displayid(li.displayid), randomSuffix(_randomSuffix), randomPropertyId(_randomProp),
+        cond_value1(li.cond_value1), cond_value2(li.cond_value2), condition(li.condition), count(_count),
         is_looted(false), is_blocked(false), freeforall(li.freeforall), is_underthreshold(false), is_counted(false) {}
 
     static bool looted(LootItem &itm) { return itm.is_looted; }

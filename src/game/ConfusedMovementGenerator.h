@@ -26,8 +26,8 @@
 #define MAX_CONF_WAYPOINTS 24
 
 template<class T>
-class MANGOS_DLL_DECL ConfusedMovementGenerator 
-    : public MovementGeneratorMedium< T, ConfusedMovementGenerator<T> >
+class MANGOS_DLL_DECL ConfusedMovementGenerator
+: public MovementGeneratorMedium< T, ConfusedMovementGenerator<T> >
 {
     public:
         ConfusedMovementGenerator(const Unit &) : i_nextMoveTime(0) {}

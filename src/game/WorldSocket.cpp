@@ -289,8 +289,8 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     x.SetBinary(sha1.GetDigest(), sha1.GetLength());
     v = g.ModExp(x, N);
 
-    const char* sStr = s.AsHexStr();    //Must be freed by OPENSSL_free()
-    const char* vStr = v.AsHexStr();    //Must be freed by OPENSSL_free()
+    const char* sStr = s.AsHexStr();                        //Must be freed by OPENSSL_free()
+    const char* vStr = v.AsHexStr();                        //Must be freed by OPENSSL_free()
     sLog.outDebug("SOCKET: (s,v) check s: %s v_old: %s v_new: %s", sStr, fields[6].GetString(), vStr );
     loginDatabase.PExecute("UPDATE `account` SET `v` = '0', `s` = '0' WHERE `username` = '%s'", safe_account.c_str());
     if ( strcmp(vStr,fields[6].GetString() ) )
@@ -326,7 +326,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     security = fields[1].GetUInt16();
     K.SetHexStr(fields[2].GetString());
     time_t mutetime = time_t(fields[9].GetUInt64());
-    
+
     locale = fields[10].GetUInt8();
     if (locale>=MAX_LOCALE)
         locale=LOCALE_ENG;
@@ -348,11 +348,11 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     ///- Check locked state for server
     AccountTypes allowedAccountType = sWorld.GetPlayerSecurityLimit();
-    if( allowedAccountType > SEC_PLAYER && security < allowedAccountType) 
+    if( allowedAccountType > SEC_PLAYER && security < allowedAccountType)
     {
         WorldPacket Packet(SMSG_AUTH_RESPONSE, 15);
-        Packet << uint8(AUTH_UNAVAILABLE); 
-        SendPacket(&Packet);  
+        Packet << uint8(AUTH_UNAVAILABLE);
+        SendPacket(&Packet);
         return;
     }
 
@@ -431,7 +431,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
     uint32 QueueSize = sWorld.GetQueueSize();               //number of players in the queue
     Sessions--;                                             //so we don't count the user trying to login as a session and queue the socket that we are using
 
-    if( pLimit >  0 && Sessions >= pLimit && security == SEC_PLAYER ) 
+    if( pLimit >  0 && Sessions >= pLimit && security == SEC_PLAYER )
     {
         sWorld.AddQueuedPlayer(this);
         SendAuthWaitQue(sWorld.GetQueuePos(this));
@@ -628,7 +628,7 @@ void WorldSocket::SendAuthWaitQue(uint32 position)
     {
         WorldPacket packet( SMSG_AUTH_RESPONSE, 5 );
         packet << uint8( AUTH_WAIT_QUEUE );
-        packet << uint32 (position);                              //amount of players in queue
+        packet << uint32 (position);                        //amount of players in queue
         SendPacket(&packet);
     }
 }

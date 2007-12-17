@@ -477,7 +477,7 @@
 #define LANG_MOVEGENS_CONFUSED           "Confused"
 #define LANG_MOVEGENS_TARGETED_PLAYER    "Targeted to player %s (lowguid %u)"
 #define LANG_MOVEGENS_TARGETED_CREATURE  "Targeted to creature %s (lowguid %u)"
-#define LANG_MOVEGENS_TARGETED_NULL      "Targeted to <NULL>" 
+#define LANG_MOVEGENS_TARGETED_NULL      "Targeted to <NULL>"
 #define LANG_MOVEGENS_HOME_CREATURE      "Home movement to (X:%f Y:%f Z:%f)"
 #define LANG_MOVEGENS_HOME_PLAYER        "Home movement used for player?!?"
 #define LANG_MOVEGENS_FLIGHT             "Taxi flight"

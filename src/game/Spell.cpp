@@ -588,17 +588,17 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
 
             std::list<Unit *> tempUnitMap;
 
-			{
-				MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(m_caster, m_caster, max_range);
-				MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(tempUnitMap, u_check);
+            {
+                MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(m_caster, m_caster, max_range);
+                MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(tempUnitMap, u_check);
 
-				TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
-				TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
+                TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
+                TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
 
-	            CellLock<GridReadGuard> cell_lock(cell, p);
-		        cell_lock->Visit(cell_lock, world_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
-			    cell_lock->Visit(cell_lock, grid_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
-			}
+                CellLock<GridReadGuard> cell_lock(cell, p);
+                cell_lock->Visit(cell_lock, world_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+                cell_lock->Visit(cell_lock, grid_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+            }
 
             if(tempUnitMap.empty())
                 break;
@@ -626,7 +626,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             while(t && !tempUnitMap.empty() )
             {
                 Unit *next = *tempUnitMap.begin();
-                        
+
                 if(prev->GetDistanceSq(next) > CHAIN_SPELL_JUMP_RADIUS * CHAIN_SPELL_JUMP_RADIUS)
                     break;
 
@@ -659,7 +659,6 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                 if(!pUnitTarget)
                     break;
 
-
                 unMaxTargets = m_spellInfo->EffectChainTarget[i];
                 float max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
 
@@ -673,20 +672,20 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                 {
                     std::list<Unit *> tempUnitMap;
 
-					{
-						MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(pUnitTarget, originalCaster, max_range);
-						MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(tempUnitMap, u_check);
+                    {
+                        MaNGOS::AnyAoETargetUnitInObjectRangeCheck u_check(pUnitTarget, originalCaster, max_range);
+                        MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck> searcher(tempUnitMap, u_check);
 
-						TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
-						TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
+                        TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
+                        TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyAoETargetUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
 
-						CellLock<GridReadGuard> cell_lock(cell, p);
-						cell_lock->Visit(cell_lock, world_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
-						cell_lock->Visit(cell_lock, grid_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
-					}
-                    
+                        CellLock<GridReadGuard> cell_lock(cell, p);
+                        cell_lock->Visit(cell_lock, world_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+                        cell_lock->Visit(cell_lock, grid_unit_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+                    }
+
                     tempUnitMap.sort(TargetDistanceOrder(pUnitTarget));
-                    
+
                     if(tempUnitMap.empty())
                         break;
 
@@ -700,7 +699,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                     while(t && !tempUnitMap.empty() )
                     {
                         Unit *next = *tempUnitMap.begin();
-                        
+
                         if(prev->GetDistanceSq(next) > CHAIN_SPELL_JUMP_RADIUS * CHAIN_SPELL_JUMP_RADIUS)
                             break;
 
@@ -952,7 +951,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             {
                 unMaxTargets = m_spellInfo->EffectChainTarget[i];
                 float max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
-                    
+
                 std::list<Unit *> tempUnitMap;
 
                 CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
@@ -970,7 +969,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                 cell_lock->Visit(cell_lock, grid_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
 
                 tempUnitMap.sort(TargetDistanceOrder(pUnitTarget));
-                    
+
                 if(tempUnitMap.empty())
                     break;
 
@@ -984,7 +983,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                 while(t && !tempUnitMap.empty() )
                 {
                     Unit *next = *tempUnitMap.begin();
-                        
+
                     if(prev->GetDistanceSq(next) > CHAIN_SPELL_JUMP_RADIUS * CHAIN_SPELL_JUMP_RADIUS)
                         break;
 
@@ -995,7 +994,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
 
                     --t;
                 }
-           }
+            }
         }break;
         case TARGET_CURRENT_SELECTED_ENEMY:
         {
@@ -1992,7 +1991,7 @@ void Spell::SendSpellStart()
 
     data.append(m_caster->GetPackGUID());
     data << uint32(m_spellInfo->Id);
-    data << uint8(0);                           // unk 2.3.0
+    data << uint8(0);                                       // unk 2.3.0
     data << uint16(m_castFlags);
     data << uint32(m_timer);
 
@@ -2478,7 +2477,7 @@ uint8 Spell::CanCast(bool strict)
                 target = m_caster->GetPet();
                 if(!target)
                 {
-                    if(m_triggeredByAura)                          // not report pet not existence for triggered spells
+                    if(m_triggeredByAura)                   // not report pet not existence for triggered spells
                         return SPELL_FAILED_DONT_REPORT;
                     else
                         return SPELL_FAILED_NO_PET;
@@ -2584,7 +2583,7 @@ uint8 Spell::CanCast(bool strict)
                         CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
                         Cell cell = RedZone::GetZone(p);
                         cell.data.Part.reserved = ALL_DISTRICT;
-                        cell.SetNoCreate();                    // Really don't know what is that???
+                        cell.SetNoCreate();                 // Really don't know what is that???
 
                         SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
                         float max_range = GetMaxRange(srange);
@@ -2598,7 +2597,7 @@ uint8 Spell::CanCast(bool strict)
                         cell_lock->Visit(cell_lock, grid_creature_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
 
                         if(p_Creature )
-                        { 
+                        {
                             m_targetUnitGUIDs[j].push_back(p_Creature->GetGUID());
                             okDoo = true;
                         }
@@ -2630,7 +2629,7 @@ uint8 Spell::CanCast(bool strict)
                                 okDoo = true;
                             }
                         }
-                        else if( focusObject )                     //Focus Object
+                        else if( focusObject )              //Focus Object
                         {
                             m_targetGameobjectGUIDs[j].push_back(focusObject->GetGUID());
                             okDoo = true;
@@ -2638,11 +2637,11 @@ uint8 Spell::CanCast(bool strict)
                         break;
                     }
                 }
-                if(okDoo)                                          //Found and Set Target
+                if(okDoo)                                   //Found and Set Target
                     break;
             }
             if(!okDoo)
-                return SPELL_FAILED_BAD_TARGETS;                   //Missing DB Entry or targets for this spellEffect.
+                return SPELL_FAILED_BAD_TARGETS;            //Missing DB Entry or targets for this spellEffect.
         }
     }
 
@@ -2808,7 +2807,7 @@ uint8 Spell::CanCast(bool strict)
             }
             case SPELL_EFFECT_OPEN_LOCK:
             {
-                if( m_spellInfo->EffectImplicitTargetA[i] != TARGET_GAMEOBJECT && 
+                if( m_spellInfo->EffectImplicitTargetA[i] != TARGET_GAMEOBJECT &&
                     m_spellInfo->EffectImplicitTargetA[i] != TARGET_GAMEOBJECT_ITEM )
                     break;
 
@@ -2848,15 +2847,14 @@ uint8 Spell::CanCast(bool strict)
                 {
                     switch(go->GetGoType())
                     {
-                    case GAMEOBJECT_TYPE_CHEST:
-                        lockInfo = sLockStore.LookupEntry(go->GetGOInfo()->data0); break;
-                    case GAMEOBJECT_TYPE_DOOR:
-                        lockInfo = sLockStore.LookupEntry(go->GetGOInfo()->data1); break;
+                        case GAMEOBJECT_TYPE_CHEST:
+                            lockInfo = sLockStore.LookupEntry(go->GetGOInfo()->data0); break;
+                        case GAMEOBJECT_TYPE_DOOR:
+                            lockInfo = sLockStore.LookupEntry(go->GetGOInfo()->data1); break;
                     }
                 }
                 else if(Item* itm=m_targets.getItemTarget())
                     lockInfo = sLockStore.LookupEntry(itm->GetProto()->LockID);
-
 
                 // get the required lock value
                 int32 ReqValue=0;
@@ -3169,20 +3167,20 @@ uint8 Spell::CheckCasterAuars() const
                     //That is needed when your casting is prevented by multiple states and you are only immune to some of them.
                     switch(itr->second->GetModifier()->m_auraname)
                     {
-                    case SPELL_AURA_MOD_STUN:
-                        return SPELL_FAILED_STUNNED;
-                    case SPELL_AURA_MOD_CONFUSE:
-                        return SPELL_FAILED_CONFUSED;
-                    case SPELL_AURA_MOD_FEAR:
-                        return SPELL_FAILED_FLEEING;
-                    case SPELL_AURA_MOD_SILENCE:
-                        if(m_spellInfo->School != SPELL_SCHOOL_NORMAL)
-                            return SPELL_FAILED_SILENCED;
-                        break;
-                    case SPELL_AURA_MOD_PACIFY:
-                        if(m_spellInfo->School == SPELL_SCHOOL_NORMAL)
-                            return SPELL_FAILED_PACIFIED;
-                        break;
+                        case SPELL_AURA_MOD_STUN:
+                            return SPELL_FAILED_STUNNED;
+                        case SPELL_AURA_MOD_CONFUSE:
+                            return SPELL_FAILED_CONFUSED;
+                        case SPELL_AURA_MOD_FEAR:
+                            return SPELL_FAILED_FLEEING;
+                        case SPELL_AURA_MOD_SILENCE:
+                            if(m_spellInfo->School != SPELL_SCHOOL_NORMAL)
+                                return SPELL_FAILED_SILENCED;
+                            break;
+                        case SPELL_AURA_MOD_PACIFY:
+                            if(m_spellInfo->School == SPELL_SCHOOL_NORMAL)
+                                return SPELL_FAILED_PACIFIED;
+                            break;
                     }
                 }
             }
@@ -3229,9 +3227,9 @@ uint8 Spell::CheckRange(bool strict)
     // self cast doesnt need range checking -- also for Starshards fix
     if (m_spellInfo->rangeIndex == 1) return 0;
 
-    if (strict)              //add radius of caster
+    if (strict)                                             //add radius of caster
         range_mod = 1.25;
-    else                     //add radius of caster and ~5 yds "give"
+    else                                                    //add radius of caster and ~5 yds "give"
         range_mod = 6.25;
 
     SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
@@ -3397,10 +3395,10 @@ uint8 Spell::CheckItems()
         CellLock<GridReadGuard> cell_lock(cell, p);
         cell_lock->Visit(cell_lock, object_checker, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
 
-        if(!ok) 
+        if(!ok)
             return (uint8)SPELL_FAILED_REQUIRES_SPELL_FOCUS;
 
-        focusObject = ok;                                          // game object found in range
+        focusObject = ok;                                   // game object found in range
     }
 
     for(uint32 i=0;i<8;i++)
@@ -3799,9 +3797,9 @@ bool Spell::CheckTarget( Unit* target, uint32 eff, bool hitPhase )
     bool skipLOS = false;
     switch(m_spellInfo->Effect[eff])
     {
-    case SPELL_EFFECT_SUMMON_PLAYER:
-        skipLOS = true;
-        break;
+        case SPELL_EFFECT_SUMMON_PLAYER:
+            skipLOS = true;
+            break;
     }
 
     //Check targets for LOS visibility (except spells without range limitations )

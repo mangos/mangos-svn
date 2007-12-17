@@ -138,7 +138,7 @@ void WorldSession::SendTaxiMenu( uint64 guid )
 void WorldSession::SendDoFlight( uint16 MountId, uint32 path )
 {
     GetPlayer()->Mount( MountId, true );
-    
+
     FlightPathMovementGenerator *flight = new FlightPathMovementGenerator(path);
     GetPlayer()->GetMotionMaster()->Mutate(flight);
 

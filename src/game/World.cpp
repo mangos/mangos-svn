@@ -718,7 +718,7 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading BattleMasters..." );
     objmgr.LoadBattleMastersEntry();
 
-   ///- Handle outdated emails (delete/return)
+    ///- Handle outdated emails (delete/return)
     sLog.outString( "Returning old mails..." );
     objmgr.ReturnOrDeleteOldMails(false);
 
@@ -1186,7 +1186,8 @@ void World::ScriptsProcess()
                     break;
                 }
 
-                if((!target || target->GetTypeId() != TYPEID_PLAYER) && (!source || source->GetTypeId() != TYPEID_PLAYER))              // must be only Player
+                                                            // must be only Player
+                if((!target || target->GetTypeId() != TYPEID_PLAYER) && (!source || source->GetTypeId() != TYPEID_PLAYER))
                 {
                     sLog.outError("SCRIPT_COMMAND_TELEPORT_TO call for non-player (TypeIdSource: %u)(TypeIdTarget: %u), skipping.", source ? source->GetTypeId() : 0, target ? target->GetTypeId() : 0);
                     break;
@@ -1200,7 +1201,7 @@ void World::ScriptsProcess()
 
             case SCRIPT_COMMAND_TEMP_SUMMON_CREATURE:
             {
-                if(!step.script->datalong)              // creature not specified
+                if(!step.script->datalong)                  // creature not specified
                 {
                     sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON_CREATURE call for NULL creature.");
                     break;
@@ -1211,7 +1212,6 @@ void World::ScriptsProcess()
                     sLog.outError("SCRIPT_COMMAND_TEMP_SUMMON_CREATURE call for NULL world object.");
                     break;
                 }
-
 
                 WorldObject* summoner = dynamic_cast<WorldObject*>(source);
 
@@ -1257,7 +1257,6 @@ void World::ScriptsProcess()
                     break;
                 }
 
-
                 WorldObject* summoner = dynamic_cast<WorldObject*>(source);
 
                 if(!summoner)
@@ -1286,17 +1285,17 @@ void World::ScriptsProcess()
                     break;
                 }
 
-                if( go->GetGoType()==GAMEOBJECT_TYPE_FISHINGNODE || 
-                    go->GetGoType()==GAMEOBJECT_TYPE_FISHINGNODE || 
-                    go->GetGoType()==GAMEOBJECT_TYPE_DOOR        || 
-                    go->GetGoType()==GAMEOBJECT_TYPE_BUTTON      || 
+                if( go->GetGoType()==GAMEOBJECT_TYPE_FISHINGNODE ||
+                    go->GetGoType()==GAMEOBJECT_TYPE_FISHINGNODE ||
+                    go->GetGoType()==GAMEOBJECT_TYPE_DOOR        ||
+                    go->GetGoType()==GAMEOBJECT_TYPE_BUTTON      ||
                     go->GetGoType()==GAMEOBJECT_TYPE_TRAP )
                 {
                     sLog.outError("SCRIPT_COMMAND_RESPAWN_GAMEOBJECT can not be used with gameobject of type %u (guid: %u).", uint32(go->GetGoType()), step.script->datalong);
                     break;
                 }
 
-                if( go->isSpawned() ) 
+                if( go->isSpawned() )
                     break;                                  //gameobject already spawned
 
                 go->SetLootState(GO_CLOSED);
@@ -1352,7 +1351,7 @@ void World::ScriptsProcess()
                     break;
                 }
 
-                if( !door->GetUInt32Value(GAMEOBJECT_STATE) ) 
+                if( !door->GetUInt32Value(GAMEOBJECT_STATE) )
                     break;                                  //door already  open
 
                 door->SetUInt32Value(GAMEOBJECT_FLAGS,33);
@@ -1402,7 +1401,7 @@ void World::ScriptsProcess()
 
                 // quest id and flags checked at script loading
 
-                if( ((Unit*)source)->isAlive() && 
+                if( ((Unit*)source)->isAlive() &&
                     (step.script->datalong2==0 || ((Unit*)source)->IsWithinDistInMap((Unit*)target,float(step.script->datalong2))) )
                     ((Player*)target)->AreaExplored(step.script->datalong);
                 else
@@ -1501,8 +1500,6 @@ void World::KickAllQueued()
 
     m_QueuedPlayer.empty();
 }
-
-
 
 /// Kick (and save) the designated player
 bool World::KickPlayer(std::string playerName)

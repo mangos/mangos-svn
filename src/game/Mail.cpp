@@ -202,8 +202,8 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
             }
 
             CharacterDatabase.BeginTransaction();
-            mi.items[i]->DeleteFromInventoryDB();          //deletes item from character's inventory
-            mi.items[i]->SaveToDB();                       // recursive and not have transaction guard into self
+            mi.items[i]->DeleteFromInventoryDB();           //deletes item from character's inventory
+            mi.items[i]->SaveToDB();                        // recursive and not have transaction guard into self
             // owner in `data` will set at mail receive and item extracting
             CharacterDatabase.PExecute("UPDATE `item_instance` SET `owner_guid` = '%u' WHERE `guid`='%u'", GUID_LOPART(rc), mi.items[i]->GetGUIDLow());
             CharacterDatabase.CommitTransaction();
@@ -227,7 +227,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     else
         for(uint8 i = 0; i < mi.items_count; ++i)
             if (mi.items[i])
-                delete mi.items[i];                        //item is sent, but receiver isn't online .. so remove it from RAM
+                delete mi.items[i];                         //item is sent, but receiver isn't online .. so remove it from RAM
 
     // backslash all '
     CharacterDatabase.escape_string(subject);
@@ -302,7 +302,8 @@ void WorldSession::HandleReturnToSender(WorldPacket & recv_data )
     //so firstly delete the old one
     CharacterDatabase.BeginTransaction();
     CharacterDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'", mailId);
-    CharacterDatabase.PExecute("DELETE FROM `mail_items` WHERE `mail_id` = '%u'", mailId); // needed?
+                                                            // needed?
+    CharacterDatabase.PExecute("DELETE FROM `mail_items` WHERE `mail_id` = '%u'", mailId);
     CharacterDatabase.CommitTransaction();
     pl->RemoveMail(mailId);
 
@@ -353,7 +354,7 @@ void WorldSession::SendReturnToSender(uint32 mailId, uint8 messageType, uint32 s
             CharacterDatabase.BeginTransaction();
             for(uint8 i = 0; i < mi->items_count; ++i)
             {
-                mi->items[i]->SaveToDB();                       // recursive and not have transaction guard into self
+                mi->items[i]->SaveToDB();                   // recursive and not have transaction guard into self
                 // owner in `data` will set at mail receive and item extracting
                 CharacterDatabase.PExecute("UPDATE `item_instance` SET `owner_guid` = '%u' WHERE `guid`='%u'", receiver_guid, mi->items[i]->GetGUIDLow());
             }
@@ -376,7 +377,7 @@ void WorldSession::SendReturnToSender(uint32 mailId, uint8 messageType, uint32 s
                     delete mi->items[i];
         }
 
-        CharacterDatabase.escape_string(subject);                       //we cannot forget to delete COD, if returning mail with COD
+        CharacterDatabase.escape_string(subject);           //we cannot forget to delete COD, if returning mail with COD
         CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
             "VALUES ('%u', '0', '%u', '%u', '%s', '%u', '%u', '" I64FMTD "', '" I64FMTD "', '%u', '0', '%d')",
             mailId, sender_guid, receiver_guid, subject.c_str(), itemTextId, mi->items_count ? 1 : 0, (uint64)expire_time, (uint64)deliver_time, money,RETURNED_CHECKED);
@@ -408,7 +409,7 @@ void WorldSession::HandleTakeItem(WorldPacket & recv_data )
     uint16 dest;
     recv_data >> mailbox;
     recv_data >> mailId;
-    recv_data >> itemId; // item guid low?
+    recv_data >> itemId;                                    // item guid low?
     Player* pl = _player;
 
     Mail* m = pl->GetMail(mailId);
@@ -618,7 +619,8 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
 
         data << (uint32) (*itr)->money;                     // Gold
         data << (uint32) 0x04;                              // unknown, 0x4 - auction, 0x10 - normal
-        data << (float)  ((*itr)->expire_time-time(NULL))/DAY;// Time
+                                                            // Time
+        data << (float)  ((*itr)->expire_time-time(NULL))/DAY;
         data << (uint32) 0;                                 // Constant, unknown
         data << (*itr)->subject;                            // Subject string - once 00, when mail type = 3
 

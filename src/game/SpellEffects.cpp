@@ -205,7 +205,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //146 SPELL_EFFECT_146
     &Spell::EffectNULL,                                     //147 SPELL_EFFECT_147
     &Spell::EffectNULL,                                     //148 SPELL_EFFECT_148
-    &Spell::EffectNULL,                                     //149 SPELL_EFFECT_149                                                        
+    &Spell::EffectNULL,                                     //149 SPELL_EFFECT_149
 
 };
 
@@ -340,7 +340,7 @@ void Spell::EffectSchoolDMG(uint32 i)
                     Unit::AuraList const& auras = unitTarget->GetAurasByType(SPELL_AURA_PERIODIC_DAMAGE);
                     for(Unit::AuraList::const_iterator itr = auras.begin(); itr!=auras.end() && combo;)
                     {
-                        // Deadly poison 
+                        // Deadly poison
                         if((*itr)->GetSpellProto()->SpellFamilyName==SPELLFAMILY_ROGUE && ((*itr)->GetSpellProto()->SpellFamilyFlags & 0x10000) && (*itr)->GetSpellProto()->SpellVisual==5100)
                         {
                             --combo;
@@ -423,11 +423,11 @@ void Spell::EffectDummy(uint32 i)
 
                 switch(m_spellInfo->Id)
                 {
-                case 35029: spell_id = 35060; break;    //Rank 1
-                case 35030: spell_id = 35061; break;    //Rank 2
-                default:
-                    sLog.outError("Spell::EffectDummy: Spell %u not handled in FF",m_spellInfo->Id);
-                    return;
+                    case 35029: spell_id = 35060; break;    //Rank 1
+                    case 35030: spell_id = 35061; break;    //Rank 2
+                    default:
+                        sLog.outError("Spell::EffectDummy: Spell %u not handled in FF",m_spellInfo->Id);
+                        return;
                 }
 
                 /* FIX ME: must be applied as pet passive spell for _each_ pet after this talent learning
@@ -495,7 +495,8 @@ void Spell::EffectDummy(uint32 i)
 
                     ((Player*)m_caster)->AddSpellMod(mod, true);
                     m_caster->CastSpell(unitTarget,spell_proto,true,NULL);
-                    ((Player*)m_caster)->AddSpellMod(mod, false);   // mod deleted
+                                                            // mod deleted
+                    ((Player*)m_caster)->AddSpellMod(mod, false);
                 }
                 else
                     m_caster->CastSpell(unitTarget,spell_proto,true,NULL);
@@ -1102,7 +1103,7 @@ void Spell::EffectDummy(uint32 i)
             m_caster->CastSpell(unitTarget,1579,true);      // Tame Beast 3 spell learning
             return;
         }
-        
+
         //Training Lesson
         case 23357:
         {
@@ -1129,15 +1130,15 @@ void Spell::EffectDummy(uint32 i)
         {
             if(m_caster->GetTypeId() != TYPEID_PLAYER)
                 return;
-            
+
             uint32 spell_id = 0;
             switch(urand(1,5))
             {
-                case 1: spell_id = 8064; break; // Sleepy
-                case 2: spell_id = 8065; break; // Invigorate
-                case 3: spell_id = 8066; break; // Shrink
-                case 4: spell_id = 8067; break; // Party Time!
-                case 5: spell_id = 8068; break; // Healthy Spirit
+                case 1: spell_id = 8064; break;             // Sleepy
+                case 2: spell_id = 8065; break;             // Invigorate
+                case 3: spell_id = 8066; break;             // Shrink
+                case 4: spell_id = 8067; break;             // Party Time!
+                case 5: spell_id = 8068; break;             // Healthy Spirit
             }
             m_caster->CastSpell(m_caster,spell_id,true,NULL);
             return;
@@ -1148,17 +1149,19 @@ void Spell::EffectDummy(uint32 i)
         {
             if(m_caster->GetTypeId() != TYPEID_PLAYER)
                 return;
-            
+
             uint32 spell_id = 0;
             switch(urand(1,2))
             {
-                case 1: spell_id = (m_caster->getGender() == GENDER_MALE ? 8219 : 8220); break; // Flip Out - ninja
-                case 2: spell_id = (m_caster->getGender() == GENDER_MALE ? 8221 : 8222); break; // Yaaarrrr - pirate
+                                                            // Flip Out - ninja
+                case 1: spell_id = (m_caster->getGender() == GENDER_MALE ? 8219 : 8220); break;
+                                                            // Yaaarrrr - pirate
+                case 2: spell_id = (m_caster->getGender() == GENDER_MALE ? 8221 : 8222); break;
             }
             m_caster->CastSpell(m_caster,spell_id,true,NULL);
             return;
         }
-        
+
         //Mana-Tide Totem effect
         case 39610:
         {
@@ -1167,7 +1170,7 @@ void Spell::EffectDummy(uint32 i)
 
             //regen 6% of Total Mana Every 3 secs (-1 stored)
             int32 EffectBasePoints0 = unitTarget->GetMaxPower(POWER_MANA)  * m_triggeredByAura->GetModifier()->m_amount / 100 -1;
-            m_caster->CastCustomSpell(unitTarget,39609,&EffectBasePoints0,NULL,NULL,true,NULL,m_triggeredByAura,m_originalCasterGUID);            
+            m_caster->CastCustomSpell(unitTarget,39609,&EffectBasePoints0,NULL,NULL,true,NULL,m_triggeredByAura,m_originalCasterGUID);
             return;
         }
     }
@@ -1290,18 +1293,18 @@ void Spell::EffectApplyAura(uint32 i)
         {
             switch(m_spellInfo->EffectApplyAuraName[i])
             {
-            case SPELL_AURA_MOD_CONFUSE:
-                mech = DIMINISHING_MECHANIC_CONFUSE; break;
-            case SPELL_AURA_MOD_CHARM: 
-            case SPELL_AURA_MOD_FEAR:
-                mech = DIMINISHING_MECHANIC_CHARM; break;
-            case SPELL_AURA_MOD_STUN:
-                mech = DIMINISHING_MECHANIC_STUN; break;
-            case SPELL_AURA_MOD_ROOT:
-                mech = DIMINISHING_MECHANIC_ROOT; break;
-            case SPELL_AURA_MOD_DECREASE_SPEED:
-                mech = DIMINISHING_MECHANIC_SNARE; break;
-            default: break;
+                case SPELL_AURA_MOD_CONFUSE:
+                    mech = DIMINISHING_MECHANIC_CONFUSE; break;
+                case SPELL_AURA_MOD_CHARM:
+                case SPELL_AURA_MOD_FEAR:
+                    mech = DIMINISHING_MECHANIC_CHARM; break;
+                case SPELL_AURA_MOD_STUN:
+                    mech = DIMINISHING_MECHANIC_STUN; break;
+                case SPELL_AURA_MOD_ROOT:
+                    mech = DIMINISHING_MECHANIC_ROOT; break;
+                case SPELL_AURA_MOD_DECREASE_SPEED:
+                    mech = DIMINISHING_MECHANIC_SNARE; break;
+                default: break;
             }
         }
 
@@ -1441,34 +1444,34 @@ void Spell::EffectSendEvent(uint32 i)
                         ((BattleGroundWS*)bg)->EventPlayerPickedUpFlag(((Player*)m_caster));
                     sLog.outDebug("Send Event Horde Flag Picked Up");
                     break;
-                /* not used :
-                case 23334:                                 // Drop Horde Flag
-                    if(bg->GetTypeID()==BATTLEGROUND_WS)
-                        ((BattleGroundWS*)bg)->EventPlayerDroppedFlag(((Player*)m_caster));
-                    sLog.outDebug("Drop Horde Flag");
-                    break;
-                */
+                    /* not used :
+                    case 23334:                                 // Drop Horde Flag
+                        if(bg->GetTypeID()==BATTLEGROUND_WS)
+                            ((BattleGroundWS*)bg)->EventPlayerDroppedFlag(((Player*)m_caster));
+                        sLog.outDebug("Drop Horde Flag");
+                        break;
+                    */
                 case 23335:                                 // Pickup Alliance Flag
                     if(bg->GetTypeID()==BATTLEGROUND_WS)
                         ((BattleGroundWS*)bg)->EventPlayerPickedUpFlag(((Player*)m_caster));
                     sLog.outDebug("Send Event Alliance Flag Picked Up");
                     break;
-                /* not used :
-                case 23336:                                 // Drop Alliance Flag
-                    if(bg->GetTypeID()==BATTLEGROUND_WS)
-                        ((BattleGroundWS*)bg)->EventPlayerDroppedFlag(((Player*)m_caster));
-                    sLog.outDebug("Drop Alliance Flag");
-                    break;
-                case 23385:                                 // Alliance Flag Returns
-                    if(bg->GetTypeID()==BATTLEGROUND_WS)
-                        ((BattleGroundWS*)bg)->EventPlayerReturnedFlag(((Player*)m_caster));
-                    sLog.outDebug("Alliance Flag Returned");
-                    break;
-                case 23386:                                   // Horde Flag Returns
-                    if(bg->GetTypeID()==BATTLEGROUND_WS)
-                        ((BattleGroundWS*)bg)->EventPlayerReturnedFlag(((Player*)m_caster));
-                    sLog.outDebug("Horde Flag Returned");
-                    break;*/
+                    /* not used :
+                    case 23336:                                 // Drop Alliance Flag
+                        if(bg->GetTypeID()==BATTLEGROUND_WS)
+                            ((BattleGroundWS*)bg)->EventPlayerDroppedFlag(((Player*)m_caster));
+                        sLog.outDebug("Drop Alliance Flag");
+                        break;
+                    case 23385:                                 // Alliance Flag Returns
+                        if(bg->GetTypeID()==BATTLEGROUND_WS)
+                            ((BattleGroundWS*)bg)->EventPlayerReturnedFlag(((Player*)m_caster));
+                        sLog.outDebug("Alliance Flag Returned");
+                        break;
+                    case 23386:                                   // Horde Flag Returns
+                        if(bg->GetTypeID()==BATTLEGROUND_WS)
+                            ((BattleGroundWS*)bg)->EventPlayerReturnedFlag(((Player*)m_caster));
+                        sLog.outDebug("Horde Flag Returned");
+                        break;*/
                 default:
                     sLog.outDebug("Unknown spellid %u in BG event", m_spellInfo->Id);
                     break;
@@ -1727,7 +1730,7 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
                 // cast goober spell
                 gameObjTarget->AddUse(player);
                 gameObjTarget->SetLootState(GO_LOOTED);
-                if (gameObjTarget->GetGOInfo()->data1)     ///Gameobject is required to be destroyed for quest entry = data1
+                if (gameObjTarget->GetGOInfo()->data1)      ///Gameobject is required to be destroyed for quest entry = data1
                     if (player->GetQuestStatus(gameObjTarget->GetGOInfo()->data1) != QUEST_STATUS_NONE)
                         //this condition is useless, but it's used here only for optimalization
                         player->CastedCreatureOrGO(gameObjTarget->GetEntry(), gameObjTarget->GetGUID(), 0);
@@ -2435,7 +2438,7 @@ void Spell::EffectEnchantItemTmp(uint32 i)
 
         // enchanting id selected by calculated damage-per-sec stored in Effect[1] base value
         // with already applied percent bonus from Elemental Weapons talent
-        // Note: damage calculated (correctly) with rounding int32(float(v)) but 
+        // Note: damage calculated (correctly) with rounding int32(float(v)) but
         // RW enchantments applied damage int32(float(v)+0.5), this create  0..1 difference sometime
         switch(enchnting_damage)
         {
@@ -2524,9 +2527,9 @@ void Spell::EffectEnchantItemTmp(uint32 i)
 
     if(item_owner!=p_caster && p_caster->GetSession()->GetSecurity() > SEC_PLAYER && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
         sLog.outCommand("GM %s (Account: %u) enchanting(temp): %s (Entry: %d) for player: %s (Account: %u)",
-        p_caster->GetName(),p_caster->GetSession()->GetAccountId(),
-        itemTarget->GetProto()->Name1,itemTarget->GetEntry(),
-        item_owner->GetName(),item_owner->GetSession()->GetAccountId());
+            p_caster->GetName(),p_caster->GetSession()->GetAccountId(),
+            itemTarget->GetProto()->Name1,itemTarget->GetEntry(),
+            item_owner->GetName(),item_owner->GetSession()->GetAccountId());
 
     // remove old enchanting before applying new if equipped
     item_owner->ApplyEnchantment(itemTarget,TEMP_ENCHANTMENT_SLOT,false);
@@ -3406,10 +3409,7 @@ void Spell::EffectSummonTotem(uint32 i)
 
     uint32 team = 0;
     if (m_caster->GetTypeId()==TYPEID_PLAYER)
-        if (((Player*)m_caster)->GetTeam()==HORDE)
-            team = HORDE;
-        else if (((Player*)m_caster)->GetTeam()==ALLIANCE)
-            team = ALLIANCE;
+        team = ((Player*)m_caster)->GetTeam();
 
     Totem* pTotem = new Totem(m_caster);
 
@@ -3882,11 +3882,12 @@ void Spell::EffectPlayerPull(uint32 i)
 
     WorldPacket data(SMSG_MOVE_KNOCK_BACK, (8+4+4+4+4+4));
     data.append(unitTarget->GetPackGUID());
-    data << uint32(0);                                                      //Sequence
-    data << float(vcos);                                                    //xdirection
-    data << float(vsin);                                                    //ydirection
-    data << float(damage ? damage : unitTarget->GetDistance2d(m_caster));   //Horizontal speed
-    data << float(m_spellInfo->EffectMiscValue[i])/-10;                     //Z Movement speed
+    data << uint32(0);                                      //Sequence
+    data << float(vcos);                                    //xdirection
+    data << float(vsin);                                    //ydirection
+                                                            //Horizontal speed
+    data << float(damage ? damage : unitTarget->GetDistance2d(m_caster));
+    data << float(m_spellInfo->EffectMiscValue[i])/-10;     //Z Movement speed
 
     ((Player*)unitTarget)->SendMessageToSet(&data,true);
 }
@@ -4225,7 +4226,7 @@ void Spell::EffectStealBeneficialBuff(uint32 i)
         if( iter->second->IsPositive() &&                   //only steel positive spell
             !iter->second->IsPassive() &&                   //don't steal passive abilities
             !iter->second->IsPersistent() &&                //don't steal persistent auras
-            iter->second->GetSpellProto()->Dispel == m_spellInfo->Dispel ) 
+            iter->second->GetSpellProto()->Dispel == m_spellInfo->Dispel )
                                                             //only steal magic effects
             ++count;
     }
@@ -4252,7 +4253,7 @@ void Spell::EffectStealBeneficialBuff(uint32 i)
         {
             if(count==remove_prev_positive)
             {
-                spellId = iter->first.first;    // store the id of the last stealable spell
+                spellId = iter->first.first;                // store the id of the last stealable spell
                 break;
             }
 
@@ -4265,7 +4266,7 @@ void Spell::EffectStealBeneficialBuff(uint32 i)
     {
         // max duration 2 minutes (in msecs)
         const int32 max_dur = 2*MINUTE*1000;
-        
+
         // go through all the effects of the spell
         for(int i=0; i<3; ++i)
         {
@@ -4274,25 +4275,25 @@ void Spell::EffectStealBeneficialBuff(uint32 i)
 
             if(!aur)
                 continue;
-            
+
             // we have to check against the (remaining) duration on the victim
             int32 dur        = aur->GetAuraDuration();
             int32 basePoints = aur->GetBasePoints();
-            
+
             // construct the new aura for the attacker
             Aura * new_aur = new Aura(aur->GetSpellProto(), i, &basePoints, m_caster);
-            
+
             if(!new_aur)
                 continue;
-            
+
             // set its duration and maximum duration
             new_aur->SetAuraMaxDuration( max_dur > dur ? dur : max_dur );
             new_aur->SetAuraDuration( max_dur > dur ? dur : max_dur );
-            
+
             // add the new aura
             m_caster->AddAura(new_aur);
         }
-        
+
         // remove the auras caused by the stolen spell from the victim
         unitTarget->RemoveAurasDueToSpell(spellId);
     }

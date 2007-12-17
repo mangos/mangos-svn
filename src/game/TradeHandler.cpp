@@ -303,14 +303,14 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
         {
             if( _player->GetSession()->GetSecurity() > SEC_PLAYER && _player->tradeGold > 0)
                 sLog.outCommand("GM %s (Account: %u) give money (Amount: %u) to player: %s (Account: %u)",
-                _player->GetName(),_player->GetSession()->GetAccountId(),
-                _player->tradeGold,
-                _player->pTrader->GetName(),_player->pTrader->GetSession()->GetAccountId());
+                    _player->GetName(),_player->GetSession()->GetAccountId(),
+                    _player->tradeGold,
+                    _player->pTrader->GetName(),_player->pTrader->GetSession()->GetAccountId());
             if( _player->pTrader->GetSession()->GetSecurity() > SEC_PLAYER && _player->pTrader->tradeGold > 0)
                 sLog.outCommand("GM %s (Account: %u) give money (Amount: %u) to player: %s (Account: %u)",
-                _player->pTrader->GetName(),_player->pTrader->GetSession()->GetAccountId(),
-                _player->pTrader->tradeGold,
-                _player->GetName(),_player->GetSession()->GetAccountId());
+                    _player->pTrader->GetName(),_player->pTrader->GetSession()->GetAccountId(),
+                    _player->pTrader->tradeGold,
+                    _player->GetName(),_player->GetSession()->GetAccountId());
         }
 
         // update money

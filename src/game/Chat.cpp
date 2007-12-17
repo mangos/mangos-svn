@@ -218,7 +218,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { NULL,             0,                  NULL,                                           "", NULL }
     };
 
-
     static ChatCommand resetCommandTable[] =
     {
         { "honor",          SEC_ADMINISTRATOR,  &ChatHandler::HandleResetHonorCommand,          "", NULL },

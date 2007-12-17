@@ -35,7 +35,7 @@ class MANGOS_DLL_SPEC TargetedMovementGeneratorBase
 
 template<class T>
 class MANGOS_DLL_SPEC TargetedMovementGenerator
-    : public MovementGeneratorMedium< T, TargetedMovementGenerator<T> >, public TargetedMovementGeneratorBase
+: public MovementGeneratorMedium< T, TargetedMovementGenerator<T> >, public TargetedMovementGeneratorBase
 {
     public:
 

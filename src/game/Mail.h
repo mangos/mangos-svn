@@ -57,9 +57,9 @@ enum MailMessageType
 {
     MAIL_NORMAL         = 0,
     MAIL_AUCTION        = 2,
-    MAIL_CREATURE       = 3,    // client send CMSG_CREATURE_QUERY on this mailmessagetype
-    MAIL_GAMEOBJECT     = 4,    // client send CMSG_GAMEOBJECT_QUERY on this mailmessagetype
-    MAIL_ITEM           = 5,    // client send CMSG_ITEM_QUERY on this mailmessagetype
+    MAIL_CREATURE       = 3,                                // client send CMSG_CREATURE_QUERY on this mailmessagetype
+    MAIL_GAMEOBJECT     = 4,                                // client send CMSG_GAMEOBJECT_QUERY on this mailmessagetype
+    MAIL_ITEM           = 5,                                // client send CMSG_ITEM_QUERY on this mailmessagetype
     MAIL_GM             = 6                                 // custom type, don't use it as real mailmessagetype for sending to client (use MAIL_NORMAL instead)
 };
 
@@ -140,12 +140,12 @@ struct Mail
 
 struct MailItemsInfo
 {
-    uint8 items_count;                                  // item's count
-    uint8 item_slot[12];                                // slot in mail
-    uint16 item_pos[12];                                // inventory pos
-    uint64 item_guid[12];                               // item guid
-    uint32 item_template[12];                           // item entry
-    Item *items[12];                                    // item pointer
+    uint8 items_count;                                      // item's count
+    uint8 item_slot[12];                                    // slot in mail
+    uint16 item_pos[12];                                    // inventory pos
+    uint64 item_guid[12];                                   // item guid
+    uint32 item_template[12];                               // item entry
+    Item *items[12];                                        // item pointer
 
     MailItemsInfo()
     {

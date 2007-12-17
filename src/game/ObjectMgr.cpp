@@ -296,9 +296,8 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
         //prepare mail data... :
         uint32 mailId = this->GenerateMailID();
         uint32 itemTextId = this->CreateItemText( msgAuctionWonBody.str() );
-        time_t dtime = time(NULL);                              //Will always be instant when from Auction House.
+        time_t dtime = time(NULL);                          //Will always be instant when from Auction House.
         time_t etime = dtime + (30 * DAY);
-
 
         // set owner to bidder (to prevent delete item with sender char deleting)
         // owner in `data` will set at mail receive and item extracting
@@ -361,7 +360,7 @@ void ObjectMgr::SendAuctionSuccessfulMail( AuctionEntry * auction )
         uint32 itemTextId = this->CreateItemText( auctionSuccessfulBody.str() );
 
         uint32 mailId = this->GenerateMailID();
-        time_t dtime = time(NULL);                              //Instant because it's Auction House
+        time_t dtime = time(NULL);                          //Instant because it's Auction House
         time_t etime = dtime + (30 * DAY);
         uint32 profit = auction->bid + auction->deposit - auctionCut;
 
@@ -685,11 +684,13 @@ uint32 ObjectMgr::ChooseDisplayId(uint32 team, const CreatureInfo *cinfo, const 
     // Load creature model (display id)
     uint32 display_id;
     if (!data || data->displayid == 0)                      // use defaults from the template
+    {
         // DisplayID_A is used if no team is given
         if (team == HORDE)
             display_id = (cinfo->DisplayID_H2 != 0 && urand(0,1) == 0) ? cinfo->DisplayID_H2 : cinfo->DisplayID_H;
         else
             display_id = (cinfo->DisplayID_A2 != 0 && urand(0,1) == 0) ? cinfo->DisplayID_A2 : cinfo->DisplayID_A;
+    }
     else                                                    // overriden in creature data
         display_id = data->displayid;
 
@@ -712,7 +713,7 @@ CreatureModelInfo const* ObjectMgr::GetCreatureModelRandomGender(uint32 display_
             return minfo;                                   // not fatal, just use the previous one
         }
         else
-           return minfo_tmp;
+            return minfo_tmp;
     }
     else
         return minfo;
@@ -1230,7 +1231,6 @@ void ObjectMgr::LoadItemPrototypes()
 
         if(proto->RequiredReputationRank >= MAX_REPUTATION_RANK)
             sLog.outErrorDb("Item (Entry: %u) has wrong reputation rank in RequiredReputationRank (%u), item can't be used.",i,proto->RequiredReputationRank);
-
 
         if(proto->RequiredReputationFaction)
         {
@@ -2217,9 +2217,9 @@ void ObjectMgr::LoadQuests()
         // additional quest integrity checks (GO, creature_template and item_template must be loaded already)
 
         if (qinfo->QuestFlags & ~QUEST_MANGOS_FLAGS_DB_ALLOWED)
-        { 
+        {
             sLog.outErrorDb("Quest %u has `QuestFlags` = %u > max allowed value. Correct `SpecialFlags` to value <= %u",
-                 qinfo->GetQuestId(),qinfo->QuestFlags,QUEST_MANGOS_FLAGS_DB_ALLOWED >> 16);
+                qinfo->GetQuestId(),qinfo->QuestFlags,QUEST_MANGOS_FLAGS_DB_ALLOWED >> 16);
             qinfo->QuestFlags &= QUEST_MANGOS_FLAGS_DB_ALLOWED;
         }
 
@@ -2303,20 +2303,20 @@ void ObjectMgr::LoadQuests()
             {
                 sLog.outErrorDb("Quest %u has `SrcItemId` = %u but item with entry %u does not exist, quest can't be done.",
                     qinfo->GetQuestId(),qinfo->SrcItemId,qinfo->SrcItemId);
-                qinfo->SrcItemId = 0;                           // quest can't be done for this requirement
+                qinfo->SrcItemId = 0;                       // quest can't be done for this requirement
             }
             else if(qinfo->SrcItemCount==0)
             {
                 sLog.outErrorDb("Quest %u has `SrcItemId` = %u but `SrcItemCount` = 0, set to 1 but need fix in DB.",
                     qinfo->GetQuestId(),qinfo->SrcItemId);
-                qinfo->SrcItemCount = 1;                        // update to 1 for allow quest work for backward comptibility with DB
+                qinfo->SrcItemCount = 1;                    // update to 1 for allow quest work for backward comptibility with DB
             }
         }
         else if(qinfo->SrcItemCount>0)
         {
             sLog.outErrorDb("Quest %u has `SrcItemId` = 0 but `SrcItemCount` = %u, useless value.",
                 qinfo->GetQuestId(),qinfo->SrcItemCount);
-            qinfo->SrcItemCount=0;                              // no quest work changes in fact
+            qinfo->SrcItemCount=0;                          // no quest work changes in fact
         }
 
         if(qinfo->SrcSpell)
@@ -2381,14 +2381,14 @@ void ObjectMgr::LoadQuests()
                 {
                     sLog.outErrorDb("Quest %u has `ReqSourceId%d` = %u but `ReqSourceCount%d` = 0, quest can't be done.",
                         qinfo->GetQuestId(),j+1,id,j+1);
-                    qinfo->ReqSourceId[j] = 0;           // prevent incorrect work of quest
+                    qinfo->ReqSourceId[j] = 0;              // prevent incorrect work of quest
                 }
 
                 if(!qinfo->ReqSourceRef[j])
                 {
                     sLog.outErrorDb("Quest %u has `ReqSourceId%d` = %u but `ReqSourceRef%d` = 0, quest can't be done.",
                         qinfo->GetQuestId(),j+1,id,j+1);
-                    qinfo->ReqSourceId[j] = 0;           // prevent incorrect work of quest
+                    qinfo->ReqSourceId[j] = 0;              // prevent incorrect work of quest
                 }
             }
             else
@@ -2432,7 +2432,7 @@ void ObjectMgr::LoadQuests()
                     sLog.outErrorDb("Quest %u has `ReqItemId%u` = %u and `ReqSpellCast%u` = %u, quest can't have both fields <> 0, then can't be done.",
                         qinfo->GetQuestId(),ref,qinfo->ReqItemId[ref-1],ref,qinfo->ReqSpell[ref-1]);
                     // no changes, quest can't be done for this requirement
-                    qinfo->ReqSourceId[j] = 0;           // prevent incorrect work of quest
+                    qinfo->ReqSourceId[j] = 0;              // prevent incorrect work of quest
                 }
             }
         }
@@ -2478,7 +2478,7 @@ void ObjectMgr::LoadQuests()
             if(id)
             {
                 // In fact SpeakTo and Kill are quite same: either you can speak to mob:SpeakTo or you can't:Kill/Cast
-                
+
                 qinfo->SetFlag(QUEST_MANGOS_FLAGS_KILL_OR_CAST | QUEST_MANGOS_FLAGS_SPEAKTO);
 
                 if(!qinfo->ReqCreatureOrGOCount[j])
@@ -2505,7 +2505,7 @@ void ObjectMgr::LoadQuests()
                 {
                     sLog.outErrorDb("Quest %u has `RewChoiceItemId%d` = %u but item with entry %u does not exist, quest will not reward this item.",
                         qinfo->GetQuestId(),j+1,id,id);
-                    qinfo->RewChoiceItemId[j] = 0;              // no changes, quest will not reward this
+                    qinfo->RewChoiceItemId[j] = 0;          // no changes, quest will not reward this
                 }
 
                 if(!qinfo->RewChoiceItemCount[j])
@@ -2532,7 +2532,7 @@ void ObjectMgr::LoadQuests()
                 {
                     sLog.outErrorDb("Quest %u has `RewItemId%d` = %u but item with entry %u does not exist, quest will not reward this item.",
                         qinfo->GetQuestId(),j+1,id,id);
-                    qinfo->RewItemId[j] = 0;                    // no changes, quest will not reward this item
+                    qinfo->RewItemId[j] = 0;                // no changes, quest will not reward this item
                 }
 
                 if(!qinfo->RewItemCount[j])
@@ -2565,7 +2565,7 @@ void ObjectMgr::LoadQuests()
                 {
                     sLog.outErrorDb("Quest %u has `RewRepFaction%d` = %u but raw faction (faction.dbc) %u does not exist, quest will not reward reputation for this faction.",
                         qinfo->GetQuestId(),j+1,qinfo->RewRepFaction[j] ,qinfo->RewRepFaction[j] );
-                    qinfo->RewRepFaction[j] = 0;                // quest will not reward this
+                    qinfo->RewRepFaction[j] = 0;            // quest will not reward this
                 }
             }
             else if(qinfo->RewRepValue[j]!=0)
@@ -3206,10 +3206,10 @@ void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
                     continue;
                 }
 
-                if( info->type==GAMEOBJECT_TYPE_FISHINGNODE || 
-                    info->type==GAMEOBJECT_TYPE_FISHINGNODE || 
-                    info->type==GAMEOBJECT_TYPE_DOOR        || 
-                    info->type==GAMEOBJECT_TYPE_BUTTON      || 
+                if( info->type==GAMEOBJECT_TYPE_FISHINGNODE ||
+                    info->type==GAMEOBJECT_TYPE_FISHINGNODE ||
+                    info->type==GAMEOBJECT_TYPE_DOOR        ||
+                    info->type==GAMEOBJECT_TYPE_BUTTON      ||
                     info->type==GAMEOBJECT_TYPE_TRAP )
                 {
                     sLog.outErrorDb("Table `%s` have gameobject type (%u) unsupported by command SCRIPT_COMMAND_RESPAWN_GAMEOBJECT for script id %u",tablename,info->id,tmp.id);
@@ -3336,7 +3336,6 @@ void ObjectMgr::LoadSpellScripts()
             sLog.outErrorDb("Table `spell_scripts` has not existing spell (Id: %u) as script id",itr->first);
     }
 }
-
 
 void ObjectMgr::LoadItemTexts()
 {
@@ -4071,7 +4070,6 @@ GraveYardData const* ObjectMgr::FindGraveYardData(uint32 id, uint32 zoneId)
     return NULL;
 }
 
-
 bool ObjectMgr::AddGraveYardLink(uint32 id, uint32 zoneId, uint32 team, bool inDB)
 {
 
@@ -4536,7 +4534,7 @@ uint32 ObjectMgr::CreateItemText(std::string text)
     //any Delete query needed, itemTextId is maximum of all ids
     std::ostringstream query;
     query << "INSERT INTO `item_text` (`id`,`text`) VALUES ( '" << newItemTextId << "', '" << text << "')";
-    CharacterDatabase.Execute(query.str().c_str());                 //needs to be run this way, because mail body may be more than 1024 characters
+    CharacterDatabase.Execute(query.str().c_str());         //needs to be run this way, because mail body may be more than 1024 characters
     return newItemTextId;
 }
 
@@ -5539,7 +5537,6 @@ std::string ObjectMgr::GetPlayerDump(uint32 guid)
     return dump;
 }
 
-
 bool ObjectMgr::WritePlayerDump(std::string file, uint32 guid)
 {
     FILE *fout = fopen(file.c_str(), "w");
@@ -5883,7 +5880,7 @@ int ObjectMgr::GetOrNewIndexForLocale( LocaleConstant loc )
 
 void ObjectMgr::LoadBattleMastersEntry()
 {
-    mBattleMastersMap.clear();                           // need for reload case
+    mBattleMastersMap.clear();                              // need for reload case
 
     QueryResult *result = WorldDatabase.Query( "SELECT `entry`,`bg_template` FROM `battlemaster_entry`" );
 

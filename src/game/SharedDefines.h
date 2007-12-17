@@ -1002,11 +1002,10 @@ enum CreatureEliteType
     CREATURE_ELITE_RAREELITE       = 2,
     CREATURE_ELITE_WORLDBOSS       = 3,
     CREATURE_ELITE_RARE            = 4,
-    CREATURE_UNKNOWN               = 5  // found in 2.2.3 for 2 mobs
+    CREATURE_UNKNOWN               = 5                      // found in 2.2.3 for 2 mobs
 };
 
-
-// values based at QuestInfo.dbc 
+// values based at QuestInfo.dbc
 enum QuestTypes
 {
     QUEST_TYPE_ELITE               = 1,
@@ -1021,7 +1020,7 @@ enum QuestTypes
     QUEST_TYPE_DAILY               = 87
 };
 
-// values based at QuestSort.dbc 
+// values based at QuestSort.dbc
 enum QuestSort
 {
     QUEST_SORT_EPIC                = 1,
@@ -1258,9 +1257,9 @@ enum SkillCategory
     SKILL_CATEGORY_WEAPON        =  6,
     SKILL_CATEGORY_CLASS         =  7,
     SKILL_CATEGORY_ARMOR         =  8,
-    SKILL_CATEGORY_SECONDARY     =  9,                         // secondary professions
+    SKILL_CATEGORY_SECONDARY     =  9,                      // secondary professions
     SKILL_CATEGORY_LANGUAGES     = 10,
-    SKILL_CATEGORY_PROFESSION    = 11,                          // primary professions
+    SKILL_CATEGORY_PROFESSION    = 11,                      // primary professions
     SKILL_CATEGORY_NOT_DISPLAYED = 12
 };
 
@@ -1441,5 +1440,4 @@ enum PetDiet
 #define MAX_PET_DIET 9
 
 #define CHAIN_SPELL_JUMP_RADIUS 10
-
 #endif

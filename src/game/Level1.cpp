@@ -90,7 +90,7 @@ bool ChatHandler::HandleNpcWhisperCommand(const char* args)
     char* receiver = strtok((char*)args, " ");
     char* text = strtok(NULL, "");
 
-    uint64 guid = m_session->GetPlayer()->GetSelection();  
+    uint64 guid = m_session->GetPlayer()->GetSelection();
     Creature* pCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(), guid);
 
     if(!pCreature || !receiver || !text)
@@ -99,7 +99,7 @@ bool ChatHandler::HandleNpcWhisperCommand(const char* args)
     }
 
     pCreature->Whisper(atol(receiver), text);
-    
+
     return true;
 }
 
@@ -229,18 +229,18 @@ bool ChatHandler::HandleGPSCommand(const char* args)
     Map2ZoneCoordinates(zone_x,zone_y,zone_id);
 
     PSendSysMultilineMessage(LANG_MAP_POSITION,
-        obj->GetMapId(), (mapEntry ? mapEntry->name[sWorld.GetDBClang()] : "<unknown>" ), 
-        zone_id, (zoneEntry ? zoneEntry->area_name[sWorld.GetDBClang()] : "<unknown>" ), 
-        area_id, (areaEntry ? areaEntry->area_name[sWorld.GetDBClang()] : "<unknown>" ), 
+        obj->GetMapId(), (mapEntry ? mapEntry->name[sWorld.GetDBClang()] : "<unknown>" ),
+        zone_id, (zoneEntry ? zoneEntry->area_name[sWorld.GetDBClang()] : "<unknown>" ),
+        area_id, (areaEntry ? areaEntry->area_name[sWorld.GetDBClang()] : "<unknown>" ),
         obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
         obj->GetOrientation(),cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY(),obj->GetInstanceId(),
         zone_x,zone_y );
 
     sLog.outDebug("Player %s GPS call %s %u " LANG_MAP_POSITION, m_session->GetPlayer()->GetName(),
         (obj->GetTypeId() == TYPEID_PLAYER ? "player" : "creature"), obj->GetGUIDLow(),
-        obj->GetMapId(), (mapEntry ? mapEntry->name[sWorld.GetDBClang()] : "<unknown>" ), 
-        zone_id, (zoneEntry ? zoneEntry->area_name[sWorld.GetDBClang()] : "<unknown>" ), 
-        area_id, (areaEntry ? areaEntry->area_name[sWorld.GetDBClang()] : "<unknown>" ), 
+        obj->GetMapId(), (mapEntry ? mapEntry->name[sWorld.GetDBClang()] : "<unknown>" ),
+        zone_id, (zoneEntry ? zoneEntry->area_name[sWorld.GetDBClang()] : "<unknown>" ),
+        area_id, (areaEntry ? areaEntry->area_name[sWorld.GetDBClang()] : "<unknown>" ),
         obj->GetPositionX(), obj->GetPositionY(), obj->GetPositionZ(),
         obj->GetOrientation(), cell.GridX(), cell.GridY(), cell.CellX(), cell.CellY(),obj->GetInstanceId(),
         zone_x,zone_y );
@@ -2021,7 +2021,7 @@ bool ChatHandler::HandleGoXYZCommand(const char* args)
     uint32 mapid;
     if (pmapid)
         mapid = (uint32)atoi(pmapid);
-    else 
+    else
         mapid = _player->GetMapId();
 
     if(!MapManager::IsValidMapCoord(mapid,x,y))
@@ -2054,7 +2054,7 @@ bool ChatHandler::HandleGoZoneXYCommand(const char* args)
     char* py = strtok(NULL, " ");
     char* tail = strtok(NULL,"");
 
-    char* cAreaId = extractKeyFromLink(tail,"Harea");    // string or [name] Shift-click form |color|Harea:area_id|h[name]|h|r
+    char* cAreaId = extractKeyFromLink(tail,"Harea");       // string or [name] Shift-click form |color|Harea:area_id|h[name]|h|r
 
     if (!px || !py)
         return false;

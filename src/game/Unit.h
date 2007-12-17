@@ -442,21 +442,21 @@ enum ProcFlags
 
 enum AuraState
 {                                                           // (C) used in caster aurastate (T) used in target aura state
-    AURA_STATE_DEFENSE                      = 1,            // C 
+    AURA_STATE_DEFENSE                      = 1,            // C
     AURA_STATE_HEALTHLESS_20_PERCENT        = 2,            // CT
     AURA_STATE_RACE                         = 3,            // CT (?) FIX ME: not implemented yet!
     //AURA_STATE_UNKNOWN1                   = 4,            //    not used
-    AURA_STATE_JUDGEMENT                    = 5,            // C 
+    AURA_STATE_JUDGEMENT                    = 5,            // C
     //AURA_STATE_UNKNOWN2                   = 6,            //    not used
-    AURA_STATE_HUNTER_PARRY                 = 7,            // C  
+    AURA_STATE_HUNTER_PARRY                 = 7,            // C
     AURA_STATE_ROGUE_ATTACK_FROM_STEALTH    = 7,            // C  FIX ME: not implemented yet!
     //AURA_STATE_UNKNOWN3                   = 8,            //    not used
     //AURA_STATE_UNKNOWN4                   = 9,            //    not used
     AURA_STATE_WARRIOR_VICTORY_RUSH         = 10,           // C  warrior victory rush
     AURA_STATE_HUNTER_CRIT_STRIKE           = 10,           // C  hunter crit strike
-    AURA_STATE_CRIT                         = 11,           // C 
+    AURA_STATE_CRIT                         = 11,           // C
     //AURA_STATE_UNKNOWN6                   = 12,           //    not used
-    AURA_STATE_HEALTHLESS_35_PERCENT        = 13,           // C 
+    AURA_STATE_HEALTHLESS_35_PERCENT        = 13,           // C
     AURA_STATE_IMMOLATE                     = 14,           //  T
     AURA_STATE_SWIFTMEND                    = 15,           //  T
     AURA_STATE_DEADLY_POISON                = 16            //  T
@@ -471,7 +471,7 @@ enum Mechanics
     MECHANIC_FEAR             = 5,
     MECHANIC_FUMBLE           = 6,
     MECHANIC_ROOT             = 7,
-    MECHANIC_PACIFY           = 8,      //0 spells use this mechanic
+    MECHANIC_PACIFY           = 8,                          //0 spells use this mechanic
     MECHANIC_SILENCE          = 9,
     MECHANIC_SLEEP            = 10,
     MECHANIC_SNARE            = 11,
@@ -485,7 +485,7 @@ enum Mechanics
     MECHANIC_SHIELD           = 19,
     MECHANIC_SHACKLE          = 20,
     MECHANIC_MOUNT            = 21,
-    MECHANIC_PERSUADE         = 22,     //0 spells use this mechanic
+    MECHANIC_PERSUADE         = 22,                         //0 spells use this mechanic
     MECHANIC_TURN             = 23,
     MECHANIC_HORROR           = 24,
     MECHANIC_INVULNERABILITY  = 25,
@@ -588,7 +588,7 @@ inline SpellSchools immuneToSchool(ImmuneToSchool immune)
 
 enum MeleeHitOutcome
 {
-    MELEE_HIT_EVADE, MELEE_HIT_MISS, MELEE_HIT_DODGE, MELEE_HIT_BLOCK, MELEE_HIT_PARRY, 
+    MELEE_HIT_EVADE, MELEE_HIT_MISS, MELEE_HIT_DODGE, MELEE_HIT_BLOCK, MELEE_HIT_PARRY,
     MELEE_HIT_GLANCING, MELEE_HIT_CRIT, MELEE_HIT_CRUSHING, MELEE_HIT_NORMAL
 };
 struct CleanDamage
@@ -906,7 +906,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         bool HasAuraType(AuraType auraType) const;
         bool HasAura(uint32 spellId, uint32 effIndex) const
             { return m_Auras.find(spellEffectPair(spellId, effIndex)) != m_Auras.end(); }
-        
+
         bool virtual HasSpell(uint32 /*spellID*/) const { return false; }
 
         bool HasStealthAura()      const { return HasAuraType(SPELL_AURA_MOD_STEALTH); }

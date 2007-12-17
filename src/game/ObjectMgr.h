@@ -284,7 +284,7 @@ class ObjectMgr
         static ItemPrototype const* GetItemPrototype(uint32 id) { return sItemStorage.LookupEntry<ItemPrototype>(id); }
 
         static InstanceTemplate const* GetInstanceTemplate(uint32 map)
-        { 
+        {
             return sInstanceTemplate.LookupEntry<InstanceTemplate>(map);
         }
 
@@ -374,7 +374,7 @@ class ObjectMgr
             BattleMastersMap::const_iterator itr = mBattleMastersMap.find(entry);
             if(itr != mBattleMastersMap.end())
                 return itr->second;
-            return 2; //BATTLEGROUND_WS - i will not add include only for constant usage!
+            return 2;                                       //BATTLEGROUND_WS - i will not add include only for constant usage!
         }
 
         void AddGossipText(GossipText *pGText);

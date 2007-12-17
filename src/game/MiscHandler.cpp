@@ -560,7 +560,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
         return;
 
     normalizePlayerName(friendName);
-    CharacterDatabase.escape_string(friendName);                    // prevent SQL injection - normal name don't must changed by this call
+    CharacterDatabase.escape_string(friendName);            // prevent SQL injection - normal name don't must changed by this call
 
     sLog.outDebug(  "WORLD: %s asked to add friend : '%s'",
         GetPlayer()->GetName(), friendName.c_str() );
@@ -658,7 +658,7 @@ void WorldSession::HandleAddIgnoreOpcode( WorldPacket & recv_data )
         return;
 
     normalizePlayerName(IgnoreName);
-    CharacterDatabase.escape_string(IgnoreName);                    // prevent SQL injection - normal name don't must changed by this call
+    CharacterDatabase.escape_string(IgnoreName);            // prevent SQL injection - normal name don't must changed by this call
 
     sLog.outDebug(  "WORLD: %s asked to Ignore: '%s'",
         GetPlayer()->GetName(), IgnoreName.c_str() );
@@ -896,7 +896,7 @@ void WorldSession::HandleAreaTriggerOpcode(WorldPacket & recv_data)
         // calc rotated vector based on extent axis
         double rotateDx = dx*ec - dy*es;
         double rotateDy = dx*es + dy*ec;
-        
+
         if( (fabs(rotateDx) > atEntry->box_x/2 + delta) ||
             (fabs(rotateDy) > atEntry->box_y/2 + delta) ||
             (fabs(dz) > atEntry->box_z/2 + delta) )
@@ -1035,23 +1035,23 @@ void WorldSession::HandleNextCinematicCamera( WorldPacket & /*recv_data*/ )
 
 void WorldSession::HandleMoveTimeSkippedOpcode( WorldPacket & /*recv_data*/ )
 {
-/*  WorldSession::Update( getMSTime() );*/
+    /*  WorldSession::Update( getMSTime() );*/
     DEBUG_LOG( "WORLD: Time Lag/Synchronization Resent/Update" );
 
-/*
-    CHECK_PACKET_SIZE(recv_data,8+4);
-    uint64 guid;
-    uint32 time_skipped;
-    recv_data >> guid;
-    recv_data >> time_skipped;
-    sLog.outDebug( "WORLD: CMSG_MOVE_TIME_SKIPPED" );
+    /*
+        CHECK_PACKET_SIZE(recv_data,8+4);
+        uint64 guid;
+        uint32 time_skipped;
+        recv_data >> guid;
+        recv_data >> time_skipped;
+        sLog.outDebug( "WORLD: CMSG_MOVE_TIME_SKIPPED" );
 
-    /// TODO 
-	must be need use in mangos
-    We substract server Lags to move time ( AntiLags )
-    for exmaple
-    GetPlayer()->ModifyLastMoveTime( -int32(time_skipped) );
-*/
+        /// TODO
+        must be need use in mangos
+        We substract server Lags to move time ( AntiLags )
+        for exmaple
+        GetPlayer()->ModifyLastMoveTime( -int32(time_skipped) );
+    */
 }
 
 void WorldSession::HandleFeatherFallAck(WorldPacket &/*recv_data*/)
@@ -1061,11 +1061,11 @@ void WorldSession::HandleFeatherFallAck(WorldPacket &/*recv_data*/)
 
 void WorldSession::HandleMoveUnRootAck(WorldPacket&/* recv_data*/)
 {
-/*
-    CHECK_PACKET_SIZE(recv_data,8+8+4+4+4+4+4);
+    /*
+        CHECK_PACKET_SIZE(recv_data,8+8+4+4+4+4+4);
 
-    sLog.outDebug( "WORLD: CMSG_FORCE_MOVE_UNROOT_ACK" );
-    recv_data.hexlike();
+        sLog.outDebug( "WORLD: CMSG_FORCE_MOVE_UNROOT_ACK" );
+        recv_data.hexlike();
         uint64 guid;
         uint64 unknown1;
         uint32 unknown2;
@@ -1083,23 +1083,23 @@ void WorldSession::HandleMoveUnRootAck(WorldPacket&/* recv_data*/)
         recv_data >> Orientation;
 
         // TODO for later may be we can use for anticheat
-        //    DEBUG_LOG("Guid " I64FMTD,guid);
-        //    DEBUG_LOG("unknown1 " I64FMTD,unknown1);
-        //    DEBUG_LOG("unknown2 %u",unknown2);
-        //    DEBUG_LOG("X %f",PositionX);
-        //    DEBUG_LOG("Y %f",PositionY);
-        //    DEBUG_LOG("Z %f",PositionZ);
-        //    DEBUG_LOG("O %f",Orientation);
-*/
+        DEBUG_LOG("Guid " I64FMTD,guid);
+        DEBUG_LOG("unknown1 " I64FMTD,unknown1);
+        DEBUG_LOG("unknown2 %u",unknown2);
+        DEBUG_LOG("X %f",PositionX);
+        DEBUG_LOG("Y %f",PositionY);
+        DEBUG_LOG("Z %f",PositionZ);
+        DEBUG_LOG("O %f",Orientation);
+    */
 }
 
 void WorldSession::HandleMoveRootAck(WorldPacket&/* recv_data*/)
 {
-/*
-    CHECK_PACKET_SIZE(recv_data,8+8+4+4+4+4+4);
+    /*
+        CHECK_PACKET_SIZE(recv_data,8+8+4+4+4+4+4);
 
-    sLog.outDebug( "WORLD: CMSG_FORCE_MOVE_ROOT_ACK" );
-    recv_data.hexlike();
+        sLog.outDebug( "WORLD: CMSG_FORCE_MOVE_ROOT_ACK" );
+        recv_data.hexlike();
         uint64 guid;
         uint64 unknown1;
         uint32 unknown2;
@@ -1117,30 +1117,30 @@ void WorldSession::HandleMoveRootAck(WorldPacket&/* recv_data*/)
         recv_data >> Orientation;
 
         // for later may be we can use for anticheat
-        //    DEBUG_LOG("Guid " I64FMTD,guid);
-        //    DEBUG_LOG("unknown1 " I64FMTD,unknown1);
-        //    DEBUG_LOG("unknown1 %u",unknown2);
-        //    DEBUG_LOG("X %f",PositionX);
-        //    DEBUG_LOG("Y %f",PositionY);
-        //    DEBUG_LOG("Z %f",PositionZ);
-        //    DEBUG_LOG("O %f",Orientation);
-*/
+        DEBUG_LOG("Guid " I64FMTD,guid);
+        DEBUG_LOG("unknown1 " I64FMTD,unknown1);
+        DEBUG_LOG("unknown1 %u",unknown2);
+        DEBUG_LOG("X %f",PositionX);
+        DEBUG_LOG("Y %f",PositionY);
+        DEBUG_LOG("Z %f",PositionZ);
+        DEBUG_LOG("O %f",Orientation);
+    */
 }
 
 void WorldSession::HandleMoveTeleportAck(WorldPacket&/* recv_data*/)
 {
-/*    
-    CHECK_PACKET_SIZE(recv_data,8+4);
+    /* 
+        CHECK_PACKET_SIZE(recv_data,8+4);
 
-    sLog.outDebug("MSG_MOVE_TELEPORT_ACK");
-    uint64 guid;
-    uint32 flags, time;
+        sLog.outDebug("MSG_MOVE_TELEPORT_ACK");
+        uint64 guid;
+        uint32 flags, time;
 
-    recv_data >> guid;
-    recv_data >> flags >> time;
-    DEBUG_LOG("Guid " I64FMTD,guid);
-    DEBUG_LOG("Flags %u, time %u",flags, time/1000);
-*/
+        recv_data >> guid;
+        recv_data >> flags >> time;
+        DEBUG_LOG("Guid " I64FMTD,guid);
+        DEBUG_LOG("Flags %u, time %u",flags, time/1000);
+    */
 }
 
 void WorldSession::HandleSetActionBar(WorldPacket& recv_data)
@@ -1158,13 +1158,13 @@ void WorldSession::HandleSetActionBar(WorldPacket& recv_data)
 
 void WorldSession::HandleWardenDataOpcode(WorldPacket& /*recv_data*/)
 {
-/*    
-    CHECK_PACKET_SIZE(recv_data,1);
+    /* 
+        CHECK_PACKET_SIZE(recv_data,1);
 
-    uint8 tmp;
-    recv_data >> tmp;
-    sLog.outDebug("Received opcode CMSG_WARDEN_DATA, not resolve.uint8 = %u",tmp);
-*/
+        uint8 tmp;
+        recv_data >> tmp;
+        sLog.outDebug("Received opcode CMSG_WARDEN_DATA, not resolve.uint8 = %u",tmp);
+    */
 }
 
 void WorldSession::HandlePlayedTime(WorldPacket& /*recv_data*/)
@@ -1190,7 +1190,7 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
         _player->SetSelection(guid);
 
     Player *plr = objmgr.GetPlayer(guid);
-    if(!plr)    // wrong player
+    if(!plr)                                                // wrong player
         return;
 
     /*WorldPacket data(SMSG_INSPECT, 8); // not used in 2.3.0
@@ -1327,19 +1327,341 @@ void WorldSession::HandleWorldTeleportOpcode(WorldPacket& recv_data)
     sLog.outDebug("Received worldport command from player %s", GetPlayer()->GetName());
 }
 
-void WorldSession::SendNotification(const char *format,...)
+void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
 {
-    if(format)
-    {
-        va_list ap;
-        char szStr [1024];
-        szStr[0] = '\0';
-        va_start(ap, format);
-        vsnprintf( szStr, 1024, format, ap );
-        va_end(ap);
+    CHECK_PACKET_SIZE(recv_data, 1);
 
-        WorldPacket data(SMSG_NOTIFICATION, (strlen(szStr)+1));
-        data << szStr;
-        SendPacket(&data);
+    sLog.outDebug("Received opcode CMSG_WHOIS");
+    std::string charname, acc, email, lastip, msg;
+    recv_data >> charname;
+
+    if (GetSecurity() < SEC_ADMINISTRATOR)
+    {
+        SendNotification("You do not have permission to perform that function");
+        return;
     }
+
+    if(charname.empty())
+    {
+        SendNotification("Please provide character name");
+        return;
+    }
+
+    uint32 accid;
+    Field *fields;
+
+    Player *plr = objmgr.GetPlayer(charname.c_str());
+
+    if(plr)
+        accid = plr->GetSession()->GetAccountId();
+    else
+    {
+        SendNotification("Player %s not found or offline", charname.c_str());
+        return;
+    }
+
+    if(!accid)
+    {
+        SendNotification("Account for character %s not found", charname.c_str());
+        return;
+    }
+
+    QueryResult *result = loginDatabase.PQuery("SELECT `username`,`email`,`last_ip` FROM `account` WHERE `id`=%u", accid);
+    if(result)
+    {
+        fields = result->Fetch();
+        acc = fields[0].GetCppString();
+        if(acc.empty())
+            acc = "Unknown";
+        email = fields[1].GetCppString();
+        if(email.empty())
+            email = "Unknown";
+        lastip = fields[2].GetCppString();
+        if(lastip.empty())
+            lastip = "Unknown";
+        msg = charname + "'s " + "account is " + acc + ", e-mail: " + email + ", last ip: " + lastip;
+
+        WorldPacket data(SMSG_WHOIS, msg.size()+1);
+        data << msg;
+        _player->GetSession()->SendPacket(&data);
+    }
+    else
+        SendNotification("Account for character %s not found", charname.c_str());
+
+    delete result;
+    sLog.outDebug("Received whois command from player %s for character %s", GetPlayer()->GetName(), charname.c_str());
+}
+
+void WorldSession::HandleComplaintChatOpcode( WorldPacket & recv_data )
+{
+    CHECK_PACKET_SIZE(recv_data, 1+8);
+    sLog.outDebug("WORLD: CMSG_COMPLAINT_CHAT");
+    recv_data.hexlike();
+
+    uint8 spam_type;                                        // 0 - mail, 1 - chat
+    uint64 spammer_guid;
+    uint32 unk1, unk2, unk3, unk4 = 0;
+    std::string description = "";
+    recv_data >> spam_type;                                 // unk 0x01 const, may be spam type (mail/chat)
+    recv_data >> spammer_guid;                              // player guid
+    switch(spam_type)
+    {
+        case 0:
+            CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4+4+4);
+            recv_data >> unk1;                              // unk
+            recv_data >> unk2;                              // probably mail id
+            recv_data >> unk3;                              // unk
+            break;
+        case 1:
+            CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4+4+4+4+1);
+            recv_data >> unk1;                              // probably language
+            recv_data >> unk2;                              // message type?
+            recv_data >> unk3;                              // probably channel id
+            recv_data >> unk4;                              // unk random value
+            recv_data >> description;                       // spam description string (messagetype, channel name, player name, message)
+            break;
+    }
+
+    // NOTE: all chat messages from this spammer automatically ignored by spam reporter until logout in case chat spam.
+    // if it's mail spam - ALL mails from this spammer automatically removed by client
+
+    // Complaint Received message
+    WorldPacket data(SMSG_COMPLAINT_ADDED, 1);
+    data << uint8(0);
+    SendPacket(&data);
+
+    sLog.outDebug("REPORT SPAM: type %u, guid %u, unk1 %u, unk2 %u, unk3 %u, unk4 %u, message %s", spam_type, GUID_LOPART(spammer_guid), unk1, unk2, unk3, unk4, description.c_str());
+}
+
+void WorldSession::HandleRealmStateRequestOpcode( WorldPacket & recv_data )
+{
+    CHECK_PACKET_SIZE(recv_data, 4);
+
+    sLog.outDebug("CMSG_REALM_SPLIT_INFO_REQUEST");
+
+    uint32 unk;
+    std::string split_date = "01/01/01";
+    recv_data >> unk;
+
+    WorldPacket data(SMSG_REALM_SPLIT_INFO_RESPONSE, 4+4+split_date.size()+1);
+    data << unk;
+    data << uint32(0x00000000);                             // realm split state
+    // split states:
+    // 0x0 realm normal
+    // 0x1 realm split
+    // 0x2 realm split pending
+    data << split_date;
+    SendPacket(&data);
+    //sLog.outDebug("response sent %u", unk);
+}
+
+/// \todo Complete HandleCancelChanneling function
+void WorldSession::HandleCancelChanneling( WorldPacket & /*recv_data */)
+{
+    /*
+        CHECK_PACKET_SIZE(recv_data, 4);
+
+        uint32 spellid;
+        recv_data >> spellid;
+    */
+}
+
+void WorldSession::HandleFarSightOpcode( WorldPacket & recv_data )
+{
+    CHECK_PACKET_SIZE(recv_data, 1);
+
+    sLog.outDebug("WORLD: CMSG_FAR_SIGHT");
+    //recv_data.hexlike();
+
+    uint8 unk;
+    recv_data >> unk;
+
+    switch(unk)
+    {
+        case 0:
+            //WorldPacket data(SMSG_CLEAR_FAR_SIGHT_IMMEDIATE, 0)
+            //SendPacket(&data);
+            //_player->SetUInt64Value(PLAYER_FARSIGHT, 0);
+            sLog.outDebug("Removed FarSight from player %u", _player->GetGUIDLow());
+            break;
+        case 1:
+            sLog.outDebug("Added FarSight " I64FMTD " to player %u", _player->GetUInt64Value(PLAYER_FARSIGHT), _player->GetGUIDLow());
+            break;
+    }
+}
+
+void WorldSession::HandleChooseTitleOpcode( WorldPacket & recv_data )
+{
+    CHECK_PACKET_SIZE(recv_data, 4);
+
+    sLog.outDebug("CMSG_CHOOSE_TITLE");
+
+    uint32 title;
+    recv_data >> title;
+
+    uint32 available = GetPlayer()->GetUInt32Value(PLAYER__FIELD_KNOWN_TITLES);
+    if(!(available & (1<<title)))
+        return;
+
+    GetPlayer()->SetUInt32Value(PLAYER_CHOSEN_TITLE, title);
+    /*
+    PLAYER_FIELD_KNOWN_TITLES:
+    1 << title# (0=none)
+    */
+}
+
+void WorldSession::HandleAllowMoveAckOpcode( WorldPacket & recv_data )
+{
+    CHECK_PACKET_SIZE(recv_data, 4+4);
+
+    sLog.outDebug("CMSG_ALLOW_MOVE_ACK");
+
+    uint32 counter, time_;
+    recv_data >> counter >> time_;
+
+    // time_ seems always more than getMSTime()
+    uint32 diff = time_ - getMSTime();
+
+    sLog.outDebug("response sent: counter %u, time %u (HEX: %X), ms. time %u, diff %u", counter, time_, time_, getMSTime(), diff);
+}
+
+void WorldSession::HandleResetInstancesOpcode( WorldPacket & recv_data )
+{
+    sLog.outDebug("WORLD: CMSG_RESET_INSTANCES");
+    /*
+        uint32 mapid = 0;
+        WorldPacket data(SMSG_RESET_INSTANCES_SUCCESS, 4);
+        data << mapid;
+        _player->GetSession()->SendPacket(&data);
+    */
+}
+
+
+void WorldSession::HandleDungeonDifficultyOpcode( WorldPacket & recv_data )
+{
+    CHECK_PACKET_SIZE(recv_data, 4);
+
+    sLog.outDebug("MSG_SET_DUNGEON_DIFFICULTY");
+
+    uint32 difficulty;
+    recv_data >> difficulty;
+
+    GetPlayer()->SetDungeonDifficulty(difficulty);
+    GetPlayer()->SendDungeonDifficulty();
+}
+
+void WorldSession::HandleNewUnknownOpcode( WorldPacket & recv_data )
+{
+    sLog.outDebug("New Unknown Opcode %u", recv_data.GetOpcode());
+    recv_data.hexlike();
+    /*
+    New Unknown Opcode 837
+    STORAGE_SIZE: 60
+    02 00 00 00 00 00 00 00 | 00 00 00 00 01 20 00 00
+    89 EB 33 01 71 5C 24 C4 | 15 03 35 45 74 47 8B 42
+    BA B8 1B 40 00 00 00 00 | 00 00 00 00 77 66 42 BF
+    23 91 26 3F 00 00 60 41 | 00 00 00 00
+
+    New Unknown Opcode 837
+    STORAGE_SIZE: 44
+    02 00 00 00 00 00 00 00 | 00 00 00 00 00 00 80 00
+    7B 80 34 01 84 EA 2B C4 | 5F A1 36 45 C9 39 1C 42
+    BA B8 1B 40 CE 06 00 00 | 00 00 80 3F
+    */
+}
+
+void WorldSession::HandleDismountOpcode( WorldPacket & recv_data )
+{
+    sLog.outDebug("WORLD: CMSG_DISMOUNT");
+    //recv_data.hexlike();
+
+    //If player is not mounted, so go out :)
+    if (!_player->IsMounted())                              // not blizz like; no any messages on blizz
+    {
+        ChatHandler(this).SendSysMessage(LANG_CHAR_NON_MOUNTED);
+        return;
+    }
+
+    if(_player->isInFlight())                               // not blizz like; no any messages on blizz
+    {
+        ChatHandler(this).SendSysMessage(LANG_YOU_IN_FLIGHT);
+        return;
+    }
+
+    _player->Unmount();
+    _player->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+}
+
+void WorldSession::HandleMoveFlyModeChangeAckOpcode( WorldPacket & recv_data )
+{
+    CHECK_PACKET_SIZE(recv_data, 8+4+4);
+
+    // fly mode on/off
+    sLog.outDebug("WORLD: CMSG_MOVE_FLY_MODE_CHANGE_ACK");
+    //recv_data.hexlike();
+
+    uint64 guid;
+    uint32 unk;
+    uint32 flags;
+
+    recv_data >> guid >> unk >> flags;
+
+    _player->SetMovementFlags(flags);
+    /*
+    on:
+    25 00 00 00 00 00 00 00 | 00 00 00 00 00 00 80 00
+    85 4E A9 01 19 BA 7A C3 | 42 0D 70 44 44 B0 A8 42
+    78 15 94 40 39 03 00 00 | 00 00 80 3F
+    off:
+    25 00 00 00 00 00 00 00 | 00 00 00 00 00 00 00 00
+    10 FD A9 01 19 BA 7A C3 | 42 0D 70 44 44 B0 A8 42
+    78 15 94 40 39 03 00 00 | 00 00 00 00
+    */
+}
+
+void WorldSession::HandleSelfResOpcode( WorldPacket & /*recv_data*/ )
+{
+    sLog.outDebug("WORLD: CMSG_SELF_RES");                  // empty opcode
+
+    if(_player->GetUInt32Value(PLAYER_SELF_RES_SPELL))
+    {
+        SpellEntry const *spellInfo = sSpellStore.LookupEntry(_player->GetUInt32Value(PLAYER_SELF_RES_SPELL));
+        if(spellInfo)
+            _player->CastSpell(_player,spellInfo,false,0);
+
+        _player->SetUInt32Value(PLAYER_SELF_RES_SPELL, 0);
+    }
+}
+
+void WorldSession::HandleRequestPetInfoOpcode( WorldPacket & /*recv_data */)
+{
+    /*
+        sLog.outDebug("WORLD: CMSG_REQUEST_PET_INFO");
+        recv_data.hexlike();
+    */
+}
+
+void WorldSession::Handle1020( WorldPacket & recv_data )
+{
+    sLog.outDebug("WORLD: MSG_UNKNOWN_1020");
+    recv_data.hexlike();
+
+    WorldPacket data(MSG_UNKNOWN_1020, 4*15+1);
+    data << uint32(0);                                      // 0
+    data << uint32(0);                                      // rights
+    data << uint32(0);
+    data << uint8(0);                                       // 2 (tabs count?)
+    for(uint8 i = 0; i < 12; ++i)
+        data << uint32(0);                                  // tab permissions
+    SendPacket(&data);
+}
+
+void WorldSession::Handle1021( WorldPacket & recv_data )
+{
+    sLog.outDebug("WORLD: MSG_UNKNOWN_1021");
+    recv_data.hexlike();
+
+    WorldPacket data(MSG_UNKNOWN_1021, 4);
+    data << uint32(0);                                      // ??
+    SendPacket(&data);
 }

@@ -19,7 +19,7 @@
 #ifndef MANGOS_INSTANCE_DATA_H
 #define MANGOS_INSTANCE_DATA_H
 
-#include "Common.h" 
+#include "Common.h"
 
 class Map;
 class Unit;
@@ -40,7 +40,7 @@ class MANGOS_DLL_SPEC InstanceData
         virtual void Initialize() {}
 
         //On load
-        virtual void Load(const char* /*data*/) {} 
+        virtual void Load(const char* /*data*/) {}
 
         //When save is needed, this function generates the data
         virtual const char* Save() { return ""; }
@@ -61,5 +61,4 @@ class MANGOS_DLL_SPEC InstanceData
         //called on creature creation
         virtual void OnCreatureCreate(Creature * /*creature*/, uint32 /*creature_entry*/) {}
 };
-
 #endif

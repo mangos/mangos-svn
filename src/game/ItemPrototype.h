@@ -401,7 +401,8 @@ enum ItemSubclassJunk
 
 #define MAX_ITEM_SUBCLASS_JUNK                    5
 
-const uint32 MaxItemSubclassValues[MAX_ITEM_CLASS] = {
+const uint32 MaxItemSubclassValues[MAX_ITEM_CLASS] =
+{
     MAX_ITEM_SUBCLASS_CONSUMABLE,
     MAX_ITEM_SUBCLASS_CONTAINER,
     MAX_ITEM_SUBCLASS_WEAPON,
@@ -516,7 +517,7 @@ struct ItemPrototype
     uint32 PageText;
     uint32 LanguageID;
     uint32 PageMaterial;
-    uint32 StartQuest;                                      // id from QuestCache.wdb 
+    uint32 StartQuest;                                      // id from QuestCache.wdb
     uint32 LockID;
     uint32 Material;                                        // id from Material.dbc
     uint32 Sheath;

@@ -48,31 +48,31 @@ bool Player::UpdateStats(Stats stat)
 
     switch(stat)
     {
-    case STAT_STRENGTH:
-        UpdateAttackPowerAndDamage();
-        break;
-    case STAT_AGILITY:
-        UpdateArmor();
-        UpdateAttackPowerAndDamage(true);
-        if(getClass() == CLASS_ROGUE || getClass() == CLASS_HUNTER)
+        case STAT_STRENGTH:
             UpdateAttackPowerAndDamage();
+            break;
+        case STAT_AGILITY:
+            UpdateArmor();
+            UpdateAttackPowerAndDamage(true);
+            if(getClass() == CLASS_ROGUE || getClass() == CLASS_HUNTER)
+                UpdateAttackPowerAndDamage();
 
-        UpdateAllCritPercentages();
-        UpdateDodgePercentage();
-        break;
+            UpdateAllCritPercentages();
+            UpdateDodgePercentage();
+            break;
 
-    case STAT_STAMINA:   UpdateMaxHealth(); break;
-    case STAT_INTELLECT:
-        UpdateMaxPower(POWER_MANA);
-        UpdateAllSpellCritChances();
-        break;
+        case STAT_STAMINA:   UpdateMaxHealth(); break;
+        case STAT_INTELLECT:
+            UpdateMaxPower(POWER_MANA);
+            UpdateAllSpellCritChances();
+            break;
 
-    case STAT_SPIRIT:                       
-        UpdateManaRegen();
-        break;
+        case STAT_SPIRIT:
+            UpdateManaRegen();
+            break;
 
-    default:
-        break;
+        default:
+            break;
     }
 
     return true;
@@ -438,13 +438,13 @@ void Player::UpdateManaRegen()
 
     float Mp5 = power_regen_mod/5.00f + (GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN) * Intellect / 500.0f);
 
-
     float modManaRegenInterrupt = (float(GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN_INTERRUPT))/100.00f);
     SetStatFloatValue(PLAYER_FIELD_MOD_MANA_REGEN_INTERRUPT,(Mp5 + (SpiritBasedRegen * modManaRegenInterrupt)));
     SpiritBasedRegen += Mp5;
     SetStatFloatValue(PLAYER_FIELD_MOD_MANA_REGEN, SpiritBasedRegen);
 
 }
+
 void Player::_ApplyAllStatBonuses()
 {
     SetCanModifyStats(false);

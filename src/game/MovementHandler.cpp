@@ -339,8 +339,8 @@ void WorldSession::HandleForceSpeedChangeAck(WorldPacket &recv_data)
     switch(opcode)
     {
         case CMSG_FORCE_WALK_SPEED_CHANGE_ACK:      move_type = MOVE_WALK;     force_move_type = MOVE_WALK;     break;
-        case CMSG_FORCE_RUN_SPEED_CHANGE_ACK:       
-            if (_player->IsMounted())               move_type = MOVE_MOUNTED; 
+        case CMSG_FORCE_RUN_SPEED_CHANGE_ACK:
+            if (_player->IsMounted())               move_type = MOVE_MOUNTED;
             else                                    move_type = MOVE_RUN;
                                                                                force_move_type = MOVE_RUN;      break;
         case CMSG_FORCE_RUN_BACK_SPEED_CHANGE_ACK:  move_type = MOVE_WALKBACK; force_move_type = MOVE_WALKBACK; break;
