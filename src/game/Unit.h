@@ -682,6 +682,20 @@ struct CharmInfo
         uint32          m_petnumber;
 };
 
+// for clearing special attacks
+#define REACTIVE_TIMER_START 4000
+
+enum ReactiveType
+{
+    REACTIVE_DEFENSE      = 1,
+    REACTIVE_HUNTER_PARRY = 2,
+    REACTIVE_CRIT         = 3,
+    REACTIVE_HUNTER_CRIT  = 4,
+    REACTIVE_OVERPOWER    = 5
+};
+
+#define MAX_REACTIVE 6
+
 // delay time next attack to prevent client attack animation problems
 #define ATTACK_DISPLAY_DELAY 200
 
@@ -1173,6 +1187,12 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         ///----------End of Pet responses methods----------
 
         void propagateSpeedChange() { GetMotionMaster()->propagateSpeedChange(); }
+
+        // reactive attacks
+        void ClearAllReactives();
+        void StartReactiveTimer( ReactiveType reactive ) { m_reactiveTimer[reactive] = REACTIVE_TIMER_START;}
+        void UpdateReactives(uint32 p_time);
+
     protected:
         explicit Unit ( WorldObject *instantiator );
 
@@ -1217,6 +1237,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         MotionMaster i_motionMaster;
         bool m_moveRun;
+
+        uint32 m_reactiveTimer[MAX_REACTIVE];
 
     private:
         void SendAttackStop(Unit* victim);                  // only from AttackStop(Unit*)

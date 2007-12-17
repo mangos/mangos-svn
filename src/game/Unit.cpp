@@ -189,6 +189,10 @@ Unit::Unit( WorldObject *instantiator )
     m_removedAuras = 0;
     m_charmInfo = NULL;
     m_moveRun = false;
+
+    // remove aurastates allowing special moves
+    for(int i=0; i < MAX_REACTIVE; ++i)
+        m_reactiveTimer[i] = 0;;
 }
 
 Unit::~Unit()
@@ -261,6 +265,9 @@ void Unit::Update( uint32 p_time )
     {
         setAttackTimer(BASE_ATTACK, (p_time >= base_att ? 0 : base_att - p_time) );
     }
+
+    // update abilities avaiable only for fraction of time
+    UpdateReactives( p_time );
 
     ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, GetHealth() < GetMaxHealth()*0.20f);
     ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, GetHealth() < GetMaxHealth()*0.35f);
@@ -1738,17 +1745,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType 
 
 void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDamage, uint32 *blocked_amount, SpellSchools damageType, uint32 *hitInfo, VictimState *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType, SpellEntry const *spellCasted, bool isTriggeredSpell)
 {
-    pVictim->ModifyAuraState(AURA_STATE_DEFENSE, false);
-    if(getClass() == CLASS_WARRIOR && GetTypeId() == TYPEID_PLAYER)
-        ((Player*)this)->ClearComboPoints();
-
-    ModifyAuraState(AURA_STATE_CRIT, false);
-
-    if(getClass()==CLASS_HUNTER)
-        ModifyAuraState(AURA_STATE_HUNTER_CRIT_STRIKE, false);
-
-    if(pVictim->getClass()==CLASS_HUNTER)
-        pVictim->ModifyAuraState(AURA_STATE_HUNTER_PARRY, false);
+    bool unavoidable = spellCasted && (spellCasted->Attributes & 0x200000);
 
     MeleeHitOutcome outcome;
 
@@ -1866,15 +1863,19 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
                 ((Player*)this)->UpdateWeaponSkill(attType);
 
             ModifyAuraState(AURA_STATE_CRIT, true);
+            StartReactiveTimer( REACTIVE_CRIT );
 
             if(getClass()==CLASS_HUNTER)
+            {
                 ModifyAuraState(AURA_STATE_HUNTER_CRIT_STRIKE, true);
+                StartReactiveTimer( REACTIVE_HUNTER_CRIT );
+            }
 
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_WOUNDCRITICAL);
             break;
 
         case MELEE_HIT_PARRY:
-            if(attType == RANGED_ATTACK)                    //range attack - no parry
+            if(attType == RANGED_ATTACK || unavoidable)                    //range attack - no parry
                 break;
 
             cleanDamage->damage += *damage;
@@ -1930,15 +1931,21 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
 
             if (pVictim->getClass() == CLASS_HUNTER)
+            {
                 pVictim->ModifyAuraState(AURA_STATE_HUNTER_PARRY,true);
+                pVictim->StartReactiveTimer( REACTIVE_HUNTER_PARRY );
+            }
             else
+            {
                 pVictim->ModifyAuraState(AURA_STATE_DEFENSE, true);
+                pVictim->StartReactiveTimer( REACTIVE_DEFENSE );
+            }
 
             CastMeleeProcDamageAndSpell(pVictim, 0, attType, outcome, spellCasted, isTriggeredSpell);
             return;
 
         case MELEE_HIT_DODGE:
-            if(attType == RANGED_ATTACK)                    //range attack - no dodge
+            if(attType == RANGED_ATTACK || unavoidable )                    //range attack - no dodge
                 break;
             cleanDamage->damage += *damage;
             *damage = 0;
@@ -1950,16 +1957,25 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
 
             if (pVictim->getClass() != CLASS_ROGUE)         // Riposte
+            {
                 pVictim->ModifyAuraState(AURA_STATE_DEFENSE, true);
+                pVictim->StartReactiveTimer( REACTIVE_DEFENSE );
+            }
 
             // Overpower
             if (GetTypeId() == TYPEID_PLAYER && getClass() == CLASS_WARRIOR)
+            {
                 ((Player*)this)->AddComboPoints(pVictim, 1);
+                StartReactiveTimer( REACTIVE_OVERPOWER );
+            }
 
             CastMeleeProcDamageAndSpell(pVictim, 0, attType, outcome, spellCasted, isTriggeredSpell);
             return;
 
         case MELEE_HIT_BLOCK:
+            if( unavoidable )
+                break;
+
             *blocked_amount = pVictim->GetShieldBlockValue();
 
             if (pVictim->GetUnitBlockChance())
@@ -1976,7 +1992,10 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
 
             if(pVictim->GetTypeId() == TYPEID_PLAYER)
                 ((Player*)pVictim)->UpdateDefense();
+
             pVictim->ModifyAuraState(AURA_STATE_DEFENSE,true);
+            pVictim->StartReactiveTimer( REACTIVE_DEFENSE );
+
             break;
 
         case MELEE_HIT_GLANCING:
@@ -6290,6 +6309,8 @@ void Unit::setDeathState(DeathState s)
 
         ModifyAuraState(AURA_STATE_HEALTHLESS_20_PERCENT, false);
         ModifyAuraState(AURA_STATE_HEALTHLESS_35_PERCENT, false);
+        // remove aurastates allowing special moves
+        ClearAllReactives();
     }
     if (m_deathState != ALIVE && s == ALIVE)
     {
@@ -7538,5 +7559,70 @@ void Unit::ClearComboPointHolders()
             plr->ClearComboPoints();                        // remove also guid from m_ComboPointHolders;
         else
             m_ComboPointHolders.erase(lowguid);             // or remove manually
+    }
+}
+
+void Unit::ClearAllReactives()
+{
+
+    for(int i=0; i < MAX_REACTIVE; ++i)
+        m_reactiveTimer[i] = 0;
+
+    if (HasAuraState( AURA_STATE_DEFENSE))
+        ModifyAuraState(AURA_STATE_DEFENSE, false);
+    if (getClass() == CLASS_HUNTER && HasAuraState( AURA_STATE_HUNTER_PARRY))
+        ModifyAuraState(AURA_STATE_HUNTER_PARRY, false);
+    if (HasAuraState( AURA_STATE_CRIT))
+        ModifyAuraState(AURA_STATE_CRIT, false);
+    if (getClass() == CLASS_HUNTER && HasAuraState( AURA_STATE_HUNTER_CRIT_STRIKE)  )
+        ModifyAuraState(AURA_STATE_HUNTER_CRIT_STRIKE, false);
+
+    if(getClass() == CLASS_WARRIOR && GetTypeId() == TYPEID_PLAYER) 
+        ((Player*)this)->ClearComboPoints();
+}
+
+void Unit::UpdateReactives( uint32 p_time )
+{
+    for(int i = 0; i < MAX_REACTIVE; ++i)
+    {
+        ReactiveType reactive = ReactiveType(i);
+
+        if(!m_reactiveTimer[reactive])
+            continue;
+
+        if ( m_reactiveTimer[reactive] <= p_time)
+        {
+            m_reactiveTimer[reactive] = 0;
+
+            switch ( reactive )
+            {
+            case REACTIVE_DEFENSE:
+                if (HasAuraState(AURA_STATE_DEFENSE))
+                    ModifyAuraState(AURA_STATE_DEFENSE, false);
+                break;
+            case REACTIVE_HUNTER_PARRY:
+                if ( getClass() == CLASS_HUNTER && HasAuraState(AURA_STATE_HUNTER_PARRY))
+                    ModifyAuraState(AURA_STATE_HUNTER_PARRY, false);
+                break;
+            case REACTIVE_CRIT:
+                if (HasAuraState(AURA_STATE_CRIT))
+                    ModifyAuraState(AURA_STATE_CRIT, false);
+                break;
+            case REACTIVE_HUNTER_CRIT:
+                if ( getClass() == CLASS_HUNTER && HasAuraState(AURA_STATE_HUNTER_CRIT_STRIKE) )
+                    ModifyAuraState(AURA_STATE_HUNTER_CRIT_STRIKE, false);
+                break;
+            case REACTIVE_OVERPOWER:
+                if(getClass() == CLASS_WARRIOR && GetTypeId() == TYPEID_PLAYER) 
+                    ((Player*)this)->ClearComboPoints();
+                break;
+            default:
+                break;
+            }
+        }
+        else
+        {
+            m_reactiveTimer[reactive] -= p_time;
+        }
     }
 }

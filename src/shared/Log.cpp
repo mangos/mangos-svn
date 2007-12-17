@@ -509,9 +509,6 @@ void Log::outDebugInLine( const char * str, ... )
         if(m_colored)
             SetColor(true,m_colors[LogDebug]);
 
-        if(m_includeTime)
-            outTime();
-
         va_start(ap, str);
         vprintf( str, ap );
         va_end(ap);
