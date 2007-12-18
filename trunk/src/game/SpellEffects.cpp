@@ -1173,6 +1173,31 @@ void Spell::EffectDummy(uint32 i)
             m_caster->CastCustomSpell(unitTarget,39609,&EffectBasePoints0,NULL,NULL,true,NULL,m_triggeredByAura,m_originalCasterGUID);
             return;
         }
+
+        // Reindeer Transformation
+        case 25860:
+        {
+            if (!m_caster->HasAuraType(SPELL_AURA_MOUNTED))
+                return;
+
+            float flyspeed = m_caster->GetSpeedRate(MOVE_FLY);
+            float speed = m_caster->GetSpeedRate(MOVE_MOUNTED);
+
+            m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+
+            //5 different spells used depending on mounted speed and if mount can fly or not
+            if (flyspeed >= 4.1f)
+                m_caster->CastSpell(m_caster, 44827, true);//310% flying Reindeer
+            else if (flyspeed >= 3.8f)
+                m_caster->CastSpell(m_caster, 44825, true);//280% flying Reindeer
+            else if (flyspeed >= 1.6f)
+                m_caster->CastSpell(m_caster, 44824, true);//60% flying Reindeer
+            else if (speed >= 2.0f)
+                m_caster->CastSpell(m_caster, 25859, true);//100% ground Reindeer
+            else 
+                m_caster->CastSpell(m_caster, 25858, true); //60% ground Reindeer
+        }
+
     }
 }
 
@@ -3183,6 +3208,47 @@ void Spell::EffectScriptEffect(uint32 i)
             unitTarget->CastSpell(unitTarget,spellid,false);
             return;
         }
+
+        // Shadow Flame (All script effects, not just end ones to prevent player from dodging the last triggered spell)
+        case 22539:
+        case 22972:
+        case 22975:
+        case 22976:
+        case 22977:
+        case 22978:
+        case 22979:
+        case 22980:
+        case 22981:
+        case 22982:
+        case 22983:
+        case 22984:
+        case 22985:
+        {
+            if(!unitTarget || !unitTarget->isAlive())
+                return;
+
+            Unit::AuraList const& mDummyAuras = unitTarget->GetAurasByType(SPELL_AURA_DUMMY);
+
+            for(Unit::AuraList::const_iterator i = mDummyAuras.begin();i != mDummyAuras.end(); ++i)
+                if((*i)->GetId() == 22683)
+                    return;
+
+            m_caster->CastSpell(unitTarget, 22682, true);
+            return;
+        }
+        break;
+
+        //Summon Black Qiraji Battle Tank
+        case 26656:
+
+            //Prevent stacking of mounts
+            m_caster->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+
+            //Two seperate mounts depending on area id (allows use both in and out of specefic instance)
+            if (m_caster->GetAreaId() == 3428)
+                m_caster->CastSpell(m_caster, 25863, true);
+            else m_caster->CastSpell(m_caster, 26655, true);
+        break;
     }
 
     // paladin's holy light / flash of light

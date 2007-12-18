@@ -6673,6 +6673,9 @@ DiminishingMechanics Unit::Mechanic2DiminishingMechanics(uint32 mech)
 
         case MECHANIC_SNARE:
             return DIMINISHING_MECHANIC_SNARE;
+
+        case MECHANIC_BANISH:
+            return DIMINISHING_MECHANIC_BANISH;
         default:
             break;
     }
