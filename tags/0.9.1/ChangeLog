@@ -1,20 +1,3 @@
-MaNGOS 0.10   (??? ??? 2007) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.10
-
- MaNGOS 0.10 - Codename "???" - adds further improvements to the
- server core as well as to the majority of game classes and the game content
- database.
-
- ==== Game Features ====
-
- ==== Server Features ====
-
- ==== Statistics ====
- * Fixed Bugs: ???
- * Total number of changes: ???
-
- The complete list of closed tickets can be found here:
-   https://svn.mangosproject.org/trac/MaNGOS/query?status=closed&milestone=0.10
-
 MaNGOS 0.9    (Dec 14 2007) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.9
 
  MaNGOS 0.9 - Codename "Flight Master" - adds further improvements to the
