@@ -515,7 +515,8 @@ enum DiminishingMechanics
     DIMINISHING_MECHANIC_CHARM      = 2,                    // fear, mind control, sleep
     DIMINISHING_MECHANIC_STUN       = 3,                    // stun
     DIMINISHING_MECHANIC_ROOT       = 4,                    // roots, freeze
-    DIMINISHING_MECHANIC_SNARE      = 5                     // speed reduction (snares)
+    DIMINISHING_MECHANIC_SNARE      = 5,                    // speed reduction (snares)
+    DIMINISHING_MECHANIC_BANISH     = 6                     // banish and cyclone
 };
 
 enum DiminishingLevels
