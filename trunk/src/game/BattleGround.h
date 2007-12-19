@@ -26,33 +26,55 @@
 #include "BattleGroundMgr.h"
 #include "SharedDefines.h"
 
-#define SOUND_HORDE_WINS            8454
-#define SOUND_ALLIANCE_WINS         8455
-#define SOUND_BG_START              3439
-//TODO move these constant definitions to BG subclass
-#define ITEM_WS_MARK_LOSER         24950
-#define ITEM_WS_MARK_WINNER        24951
-#define ITEM_AB_MARK_LOSER          24952
-#define ITEM_AB_MARK_WINNER         24953
-#define ITEM_AV_MARK_LOSER          24954
-#define ITEM_AV_MARK_WINNER         24955
+enum BattleGroundSounds
+{
+    SOUND_HORDE_WINS                = 8454,
+    SOUND_ALLIANCE_WINS             = 8455,
+    SOUND_BG_START                  = 3439
+};
 
-#define SPELL_WAITING_FOR_RESURRECT 2584
-#define SPELL_SPIRIT_HEAL_CHANNEL   22011
-#define SPELL_SPIRIT_HEAL           22012
-#define SPELL_RESURRECTION_VISUAL   24171
-#define SPELL_ARENA_PREPARATION     32727
+enum BattleGroundMarks
+{
+    //TODO add EY mark spell
+    ITEM_WS_MARK_LOSER              = 24950,
+    ITEM_WS_MARK_WINNER             = 24951,
+    ITEM_AB_MARK_LOSER              = 24952,
+    ITEM_AB_MARK_WINNER             = 24953,
+    ITEM_AV_MARK_LOSER              = 24954,
+    ITEM_AV_MARK_WINNER             = 24955
+};
 
-#define RESURRECTION_INTERVAL       30000                   // ms
-#define REMIND_INTERVAL             30000                   // ms
-#define INVITE_ACCEPT_WAIT_TIME     120000                  // ms
-#define TIME_TO_AUTOREMOVE          120000                  // ms
-#define MAX_OFFLINE_TIME            300000                  // ms
-#define START_DELAY1                60000                   // ms
-#define START_DELAY2                30000                   // ms
-#define RESPAWN_ONE_DAY             86400                   // secs
-#define RESPAWN_IMMEDIATELY         0                       // secs
-#define BUFF_RESPAWN_TIME           180                     // secs
+enum BattleGroundSpells
+{
+    SPELL_WAITING_FOR_RESURRECT     = 2584,
+    SPELL_SPIRIT_HEAL_CHANNEL       = 22011,
+    SPELL_SPIRIT_HEAL               = 22012,
+    SPELL_RESURRECTION_VISUAL       = 24171,
+    SPELL_ARENA_PREPARATION         = 32727
+};
+
+enum BattleGroundTimeIntervals
+{
+    RESURRECTION_INTERVAL           = 30000,            // ms
+    REMIND_INTERVAL                 = 30000,            // ms
+    INVITE_ACCEPT_WAIT_TIME         = 120000,           // ms
+    TIME_TO_AUTOREMOVE              = 120000,           // ms
+    MAX_OFFLINE_TIME                = 300000,           // ms
+    START_DELAY0                    = 120000,           // ms
+    START_DELAY1                    = 60000,            // ms
+    START_DELAY2                    = 30000,            // ms
+    START_DELAY3                    = 15000,            // ms used only in arena
+    RESPAWN_ONE_DAY                 = 86400,            // secs
+    RESPAWN_IMMEDIATELY             = 0,                // secs
+    BUFF_RESPAWN_TIME               = 180               // secs
+};
+
+enum BattleGroundBuffObjects
+{
+    BG_OBJECTID_SPEEDBUFF_ENTRY     = 179871,
+    BG_OBJECTID_REGENBUFF_ENTRY     = 179904,
+    BG_OBJECTID_BERSERKERBUFF_ENTRY = 179905
+};
 
 enum BattleGroundStatus
 {
@@ -138,6 +160,12 @@ enum BattleGroundWinner
     WINNER_NONE             = 2
 };
 
+enum BattleGroundTeamId
+{
+    BG_TEAM_ALLIANCE        = 0,
+    BG_TEAM_HORDE           = 1
+};
+
 class BattleGroundScore
 {
     public:
@@ -171,6 +199,8 @@ class BattleGround
         {
             return true;
         }
+        void Reset();                                       // resets all common properties for battlegrounds
+        virtual void ResetBGSubclass() {}                   // must be implemented in BG subclass
 
         /* Battleground */
         // Get methods:
@@ -191,9 +221,9 @@ class BattleGround
         uint32 GetMaxPlayersPerTeam() const { return m_MaxPlayersPerTeam; }
         uint32 GetMinPlayersPerTeam() const { return m_MinPlayersPerTeam; }
 
-        int GetStartDelayTime() const       { return m_startDelay; }  ///sure int???
-        uint8 GetArenaType() const  { return m_ArenaType; }
-        uint8 GetWinner() const     { return m_Winner; }
+        int GetStartDelayTime() const       { return m_StartDelayTime; }
+        uint8 GetArenaType() const          { return m_ArenaType; }
+        uint8 GetWinner() const             { return m_Winner; }
 
         // Set methods:
         void SetName(char const* Name)      { m_Name = Name; }
@@ -210,10 +240,10 @@ class BattleGround
         void SetRated(bool state)           { m_IsRated = state; }
         void SetArenaType(uint8 type)       { m_ArenaType = type; }
         void SetArenaorBGType(bool _isArena) { m_IsArena = _isArena; }
-        void SetWinner(uint8 winner) { m_Winner = winner; }
+        void SetWinner(uint8 winner)        { m_Winner = winner; }
 
-        void ModifyStartDelayTime(int diff) { m_startDelay -= diff; }
-        void SetStartDelayTime(int Time)    { m_startDelay = Time; }
+        void ModifyStartDelayTime(int diff) { m_StartDelayTime -= diff; }
+        void SetStartDelayTime(int Time)    { m_StartDelayTime = Time; }
 
         void SetMaxPlayersPerTeam(uint32 MaxPlayers) { m_MaxPlayersPerTeam = MaxPlayers; }
         void SetMinPlayersPerTeam(uint32 MinPlayers) { m_MinPlayersPerTeam = MinPlayers; }
@@ -236,9 +266,6 @@ class BattleGround
         bool isArena() const        { return m_IsArena; }
         bool isBattleGround() const { return !m_IsArena; }
         bool isRated() const        { return m_IsRated; }
-
-        bool isDoorsSpawned() const { return m_doorsSpawned; }
-        void SetDoorsSpawned(bool state) { m_doorsSpawned = state; }
 
         std::map<uint64, BattleGroundPlayer> *GetPlayers() { return &m_Players; }
         uint32 GetPlayersSize() const { return m_Players.size(); }
@@ -270,6 +297,8 @@ class BattleGround
         }
 
         /* Packet Transfer */
+        // method that should fill worldpacket with actual world states (not yet implemented for all battlegrounds!)
+        virtual void FillInitialWorldStates(WorldPacket& data) {}
         void SendPacketToTeam(uint32 TeamID, WorldPacket *packet, Player *sender = NULL, bool self = true);
         void SendPacketToAll(WorldPacket *packet);
         void PlaySoundToTeam(uint32 SoundID, uint32 TeamID);
@@ -283,23 +312,11 @@ class BattleGround
 
         void SendMessageToAll(char const* text);
 
-        typedef std::vector<uint64> BGObjects;
-        typedef std::vector<uint64> BGCreatures;
-        BGObjects m_bgobjects;
-        BGCreatures m_bgcreatures;
-        void SpawnBGObject(uint32 type, uint32 respawntime);
-        bool AddObject(uint32 type, uint32 entry, float x, float y, float z, float o, float rotation0,  float rotation1,  float rotation2,  float rotation3, uint32 respawntime = 0);
-        Creature* AddCreature(uint32 entry, uint32 type, uint32 teamval, float x, float y, float z, float o);
-        bool DelCreature(uint32 type);
-        bool AddSpiritGuide(uint32 type, float x, float y, float z, float o, uint32 team);
-
-        void DoorOpen(uint32 type);
-
         /* Raid Group */
-        Group *GetBgRaid(uint32 TeamID) const { return TeamID == ALLIANCE ? m_raids[0] : m_raids[1]; }
+        Group *GetBgRaid(uint32 TeamID) const { return TeamID == ALLIANCE ? m_BgRaids[BG_TEAM_ALLIANCE] : m_BgRaids[BG_TEAM_HORDE]; }
         void SetBgRaid(uint32 TeamID, Group *bg_raid)
         {
-            Group* &old_raid = TeamID == ALLIANCE ? m_raids[0] : m_raids[1];
+            Group* &old_raid = TeamID == ALLIANCE ? m_BgRaids[BG_TEAM_ALLIANCE] : m_BgRaids[BG_TEAM_HORDE];
             if(old_raid) old_raid->SetBattlegroundGroup(NULL);
             if(bg_raid) bg_raid->SetBattlegroundGroup(this);
             old_raid = bg_raid;
@@ -307,7 +324,7 @@ class BattleGround
 
         virtual void UpdatePlayerScore(Player *Source, uint32 type, uint32 value);
 
-        uint8 GetTeamIndexByTeamId(uint32 Team) const { return Team == ALLIANCE ? 0 : 1; }
+        uint8 GetTeamIndexByTeamId(uint32 Team) const { return Team == ALLIANCE ? BG_TEAM_ALLIANCE : BG_TEAM_HORDE; }
         uint32 GetPlayersCountByTeam(uint32 Team) const { return m_PlayersCount[GetTeamIndexByTeamId(Team)]; }
         void UpdatePlayersCountByTeam(uint32 Team, bool remove)
         {
@@ -329,17 +346,36 @@ class BattleGround
         virtual void RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPacket);
                                                             // can be extended in in BG subclass
 
+        // TODO: make this protected:
+        typedef std::vector<uint64> BGObjects;
+        typedef std::vector<uint64> BGCreatures;
+        BGObjects m_BgObjects;
+        BGCreatures m_BgCreatures;
+        void SpawnBGObject(uint32 type, uint32 respawntime);
+        bool AddObject(uint32 type, uint32 entry, float x, float y, float z, float o, float rotation0, float rotation1, float rotation2, float rotation3, uint32 respawntime = 0);
+        Creature* AddCreature(uint32 entry, uint32 type, uint32 teamval, float x, float y, float z, float o);
+        bool DelCreature(uint32 type);
+        bool DelObject(uint32 type);
+        bool AddSpiritGuide(uint32 type, float x, float y, float z, float o, uint32 team);
+
+        void DoorOpen(uint32 type);
+
     protected:
+        //this method is called, when BG cannot spawn its own spirit guide, or something is wrong, It correctly ends BattleGround
+        void EndNow();
         /* Scorekeeping */
-        std::map<uint64, BattleGroundScore*> m_PlayerScores;// Player scores
+        std::map<uint64, BattleGroundScore*>    m_PlayerScores;// Player scores
         // must be implemented in BG subclass
         virtual void RemovePlayer(Player * /*player*/, uint64 /*guid*/) {}
 
-        virtual void _SendCurrentGameState(Player * /*plr*/) {}
-
         /* Player lists, those need to be accessible by inherited classes */
-        std::map<uint64, BattleGroundPlayer> m_Players;
-        std::map<uint64, std::vector<uint64> > m_ReviveQueue;// Spirit Guide guid + Player list GUIDS
+        std::map<uint64, BattleGroundPlayer>    m_Players;
+        std::map<uint64, std::vector<uint64> >  m_ReviveQueue;// Spirit Guide guid + Player list GUIDS
+
+        /*
+        this is important variable used for invitation messages
+        */
+        uint8 m_Events;
 
     private:
         /* Battleground */
@@ -356,8 +392,7 @@ class BattleGround
         //instead of uint8 (in previous line) is bool used
         bool   m_IsArena;
         uint8  m_Winner;                                    // 0=alliance, 1=horde, 2=none
-        int32  m_startDelay;
-        bool   m_doorsSpawned;
+        int32  m_StartDelayTime;
         bool   m_IsRated;                                   // is this battle rated?
         char const *m_Name;
 
@@ -372,7 +407,7 @@ class BattleGround
         uint32 m_InvitedHorde;
 
         /* Raid Group */
-        Group *m_raids[2];                                  // 0 - alliance, 1 - horde
+        Group *m_BgRaids[2];                                  // 0 - alliance, 1 - horde
 
         /* Players count by team */
         uint32 m_PlayersCount[2];

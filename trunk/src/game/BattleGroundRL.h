@@ -22,9 +22,15 @@ class BattleGround;
 
 enum BattleGroundRLObjectTypes
 {
-    BG_RL_OBJECT_DOOR_1      = 0,
-    BG_RL_OBJECT_DOOR_2      = 1,
-    BG_RL_OBJECT_MAX         = 2
+    BG_RL_OBJECT_DOOR_1         = 0,
+    BG_RL_OBJECT_DOOR_2         = 1,
+    BG_RL_OBJECT_MAX            = 2
+};
+
+enum BattleGroundRLObjects
+{
+    BG_RL_OBJECT_TYPE_DOOR_1    = 185918,
+    BG_RL_OBJECT_TYPE_DOOR_2    = 185917
 };
 
 class BattleGroundRLScore : public BattleGroundScore
@@ -50,6 +56,7 @@ class BattleGroundRL : public BattleGround
         void RemovePlayer(Player *plr, uint64 guid);
         void HandleAreaTrigger(Player *Source, uint32 Trigger);
         bool SetupBattleGround();
+        virtual void ResetBGSubclass();
         void HandleKillPlayer(Player* player, Player *killer);
 
     private:

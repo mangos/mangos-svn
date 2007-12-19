@@ -27,7 +27,7 @@
 
 BattleGroundNA::BattleGroundNA()
 {
-    m_bgobjects.resize(BG_NA_OBJECT_MAX);
+    m_BgObjects.resize(BG_NA_OBJECT_MAX);
 }
 
 BattleGroundNA::~BattleGroundNA()
@@ -40,39 +40,41 @@ void BattleGroundNA::Update(time_t diff)
     BattleGround::Update(diff);
 
     // after bg start we get there
-    if(GetStatus() == STATUS_WAIT_JOIN && !isDoorsSpawned() && GetPlayersSize() >= 1)
-    {
-        for(uint32 i = BG_NA_OBJECT_DOOR_1; i <= BG_NA_OBJECT_DOOR_4; i++)
-        {
-            SpawnBGObject(i, RESPAWN_IMMEDIATELY);
-        }
-        sLog.outDebug("BattlegroundNA: Doors spawned...");
-
-        SetDoorsSpawned(true);
-        SetStartDelayTime(START_DELAY1);
-
-        SendMessageToAll(LANG_ARENA_ONE_MINUTE);
-    }
-
-    // after bg start and doors spawn we get there
-    if(GetStatus() == STATUS_WAIT_JOIN && isDoorsSpawned())
+    if (GetStatus() == STATUS_WAIT_JOIN && GetPlayersSize())
     {
         ModifyStartDelayTime(diff);
 
-        // delay expired (1 minute)
-        if(GetStartDelayTime() < 0)
+        if (!(m_Events & 0x01))
         {
+            m_Events |= 0x01;
+            for(uint32 i = BG_NA_OBJECT_DOOR_1; i <= BG_NA_OBJECT_DOOR_4; i++)
+                SpawnBGObject(i, RESPAWN_IMMEDIATELY);
+
+            SetStartDelayTime(START_DELAY1);
+            SendMessageToAll(LANG_ARENA_ONE_MINUTE);
+        }
+        // After 30 seconds, warning is signalled
+        else if (GetStartDelayTime() <= START_DELAY2 && !(m_Events & 0x04))
+        {
+            m_Events |= 0x04;
+            SendMessageToAll(LANG_ARENA_THIRTY_SECONDS);
+        }
+        // After 15 seconds, warning is signalled
+        else if (GetStartDelayTime() <= START_DELAY3 && !(m_Events & 0x08))
+        {
+            m_Events |= 0x08;
+            SendMessageToAll(LANG_ARENA_FIFTEEN_SECONDS);
+        }
+        // delay expired (1 minute)
+        else if (GetStartDelayTime() <= 0 && !(m_Events & 0x10))
+        {
+            m_Events |= 0x10;
+
             for(uint32 i = BG_NA_OBJECT_DOOR_1; i <= BG_NA_OBJECT_DOOR_2; i++)
-            {
                 DoorOpen(i);
-            }
-            sLog.outDebug("Doors opened...");
 
             SendMessageToAll(LANG_ARENA_BEGUN);
-
             SetStatus(STATUS_IN_PROGRESS);
-
-            SetDoorsSpawned(false);
             SetStartDelayTime(0);
 
             for(std::map<uint64, BattleGroundPlayer>::const_iterator itr = GetPlayers()->begin(); itr != GetPlayers()->end(); ++itr)
@@ -111,7 +113,7 @@ void BattleGroundNA::HandleKillPlayer(Player *player, Player *killer)
 
     if(!killer)
     {
-        sLog.outError("Killer player not found");
+        sLog.outError("BattleGroundNA: Killer player not found");
         return;
     }
 
@@ -128,7 +130,6 @@ void BattleGroundNA::HandleKillPlayer(Player *player, Player *killer)
 
 void BattleGroundNA::HandleAreaTrigger(Player *Source, uint32 Trigger)
 {
-    // this is wrong way to implement these things. On official it done by gameobject spell cast.
     if(GetStatus() != STATUS_IN_PROGRESS)
         return;
 
@@ -161,17 +162,23 @@ void BattleGroundNA::HandleAreaTrigger(Player *Source, uint32 Trigger)
     }
 }
 
+void BattleGroundNA::ResetBGSubclass()
+{
+    m_TeamKills[BG_TEAM_ALLIANCE] = 0;
+    m_TeamKills[BG_TEAM_HORDE]    = 0;
+}
+
 bool BattleGroundNA::SetupBattleGround()
 {
     // gates
-    if(!AddObject(BG_NA_OBJECT_DOOR_1, 183978, 4031.854, 2966.833, 12.6462, -2.648788, 0, 0, 0.9697962, -0.2439165, 0))
+    if(    !AddObject(BG_NA_OBJECT_DOOR_1, BG_NA_OBJECT_TYPE_DOOR_1, 4031.854, 2966.833, 12.6462, -2.648788, 0, 0, 0.9697962, -0.2439165, RESPAWN_IMMEDIATELY)
+        || !AddObject(BG_NA_OBJECT_DOOR_2, BG_NA_OBJECT_TYPE_DOOR_2, 4081.179, 2874.97, 12.39171, 0.4928045, 0, 0, 0.2439165, 0.9697962, RESPAWN_IMMEDIATELY)
+        || !AddObject(BG_NA_OBJECT_DOOR_3, BG_NA_OBJECT_TYPE_DOOR_3, 4023.709, 2981.777, 10.70117, -2.648788, 0, 0, 0.9697962, -0.2439165, RESPAWN_IMMEDIATELY)
+        || !AddObject(BG_NA_OBJECT_DOOR_4, BG_NA_OBJECT_TYPE_DOOR_4, 4090.064, 2858.438, 10.23631, 0.4928045, 0, 0, 0.2439165, 0.9697962, RESPAWN_IMMEDIATELY))
+    {
+        sLog.outErrorDb("BatteGroundNA: Failed to spawn some object!");
         return false;
-    if(!AddObject(BG_NA_OBJECT_DOOR_2, 183980, 4081.179, 2874.97, 12.39171, 0.4928045, 0, 0, 0.2439165, 0.9697962, 0))
-        return false;
-    if(!AddObject(BG_NA_OBJECT_DOOR_3, 183977, 4023.709, 2981.777, 10.70117, -2.648788, 0, 0, 0.9697962, -0.2439165, 0))
-        return false;
-    if(!AddObject(BG_NA_OBJECT_DOOR_4, 183979, 4090.064, 2858.438, 10.23631, 0.4928045, 0, 0, 0.2439165, 0.9697962, 0))
-        return false;
+    }
 
     return true;
 }

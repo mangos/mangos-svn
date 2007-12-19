@@ -27,7 +27,7 @@
 
 BattleGroundRL::BattleGroundRL()
 {
-    m_bgobjects.resize(BG_RL_OBJECT_MAX);
+    m_BgObjects.resize(BG_RL_OBJECT_MAX);
 }
 
 BattleGroundRL::~BattleGroundRL()
@@ -39,40 +39,43 @@ void BattleGroundRL::Update(time_t diff)
 {
     BattleGround::Update(diff);
 
-    // after bg start we get there
-    if(GetStatus() == STATUS_WAIT_JOIN && !isDoorsSpawned() && GetPlayersSize() >= 1)
-    {
-        for(uint32 i = BG_RL_OBJECT_DOOR_1; i <= BG_RL_OBJECT_DOOR_2; i++)
-        {
-            SpawnBGObject(i, RESPAWN_IMMEDIATELY);
-        }
-        sLog.outDebug("Doors spawned...");
 
-        SetDoorsSpawned(true);
-        SetStartDelayTime(START_DELAY1);
-
-        SendMessageToAll(LANG_ARENA_ONE_MINUTE);
-    }
-
-    // after bg start and doors spawn we get there
-    if(GetStatus() == STATUS_WAIT_JOIN && isDoorsSpawned())
+    if (GetStatus() == STATUS_WAIT_JOIN && GetPlayersSize())
     {
         ModifyStartDelayTime(diff);
 
-        // delay expired (1 minute)
-        if(GetStartDelayTime() < 0)
+        if (!(m_Events & 0x01))
         {
+            m_Events |= 0x01;
+
             for(uint32 i = BG_RL_OBJECT_DOOR_1; i <= BG_RL_OBJECT_DOOR_2; i++)
-            {
+                SpawnBGObject(i, RESPAWN_IMMEDIATELY);
+
+            SetStartDelayTime(START_DELAY1);
+            SendMessageToAll(LANG_ARENA_ONE_MINUTE);
+        }
+        // After 30 seconds, warning is signalled
+        else if (GetStartDelayTime() <= START_DELAY2 && !(m_Events & 0x04))
+        {
+            m_Events |= 0x04;
+            SendMessageToAll(LANG_ARENA_THIRTY_SECONDS);
+        }
+        // After 15 seconds, warning is signalled
+        else if (GetStartDelayTime() <= START_DELAY3 && !(m_Events & 0x08))
+        {
+            m_Events |= 0x08;
+            SendMessageToAll(LANG_ARENA_FIFTEEN_SECONDS);
+        }
+        // delay expired (1 minute)
+        else if (GetStartDelayTime() <= 0 && !(m_Events & 0x10))
+        {
+            m_Events |= 0x10;
+
+            for(uint32 i = BG_RL_OBJECT_DOOR_1; i <= BG_RL_OBJECT_DOOR_2; i++)
                 DoorOpen(i);
-            }
-            sLog.outDebug("Doors opened...");
 
             SendMessageToAll(LANG_ARENA_BEGUN);
-
             SetStatus(STATUS_IN_PROGRESS);
-
-            SetDoorsSpawned(false);
             SetStartDelayTime(0);
 
             for(std::map<uint64, BattleGroundPlayer>::const_iterator itr = GetPlayers()->begin(); itr != GetPlayers()->end(); ++itr)
@@ -161,13 +164,21 @@ void BattleGroundRL::HandleAreaTrigger(Player *Source, uint32 Trigger)
     }
 }
 
+void BattleGroundRL::ResetBGSubclass()
+{
+    m_TeamKills[BG_TEAM_ALLIANCE] = 0;
+    m_TeamKills[BG_TEAM_HORDE]    = 0;
+}
+
 bool BattleGroundRL::SetupBattleGround()
 {
     // gates
-    if(!AddObject(BG_RL_OBJECT_DOOR_1, 185918, 1293.561, 1601.938, 31.60557, -1.457349, 0, 0, -0.6658813, 0.7460576, 0))
+    if(    !AddObject(BG_RL_OBJECT_DOOR_1, BG_RL_OBJECT_TYPE_DOOR_1, 1293.561, 1601.938, 31.60557, -1.457349, 0, 0, -0.6658813, 0.7460576, RESPAWN_IMMEDIATELY)
+        || !AddObject(BG_RL_OBJECT_DOOR_2, BG_RL_OBJECT_TYPE_DOOR_2, 1278.648, 1730.557, 31.60557, 1.684245, 0, 0, 0.7460582, 0.6658807, RESPAWN_IMMEDIATELY))
+    {
+        sLog.outErrorDb("BatteGroundRL: Failed to spawn some object!");
         return false;
-    if(!AddObject(BG_RL_OBJECT_DOOR_2, 185917, 1278.648, 1730.557, 31.60557, 1.684245, 0, 0, 0.7460582, 0.6658807, 0))
-        return false;
+    }
 
     return true;
 }

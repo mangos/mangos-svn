@@ -6799,9 +6799,6 @@ void Player::SendUpdateWorldState(uint32 Field, uint32 Value)
 
 void Player::SendInitWorldStates()
 {
-    if (GetZoneId() == 3358)                                // Zone 3358 - Arathi Basin. We send initworldstates from BG code
-        return;
-
     // data depends on zoneid/mapid...
     uint16 NumberOfFields = 0;
     uint32 mapid = GetMapId();
@@ -6967,7 +6964,7 @@ void Player::SendInitWorldStates()
             data << uint32(0x52f) << uint32(0x0);           // 80
             data << uint32(0x52d) << uint32(0x1);           // 81
             break;
-        case 3277:                                          // WSG
+        case 3277:                                          // WS
             data << uint32(0x62d) << uint32(0x0);           // 7 1581 alliance flag captures
             data << uint32(0x62e) << uint32(0x0);           // 8 1582 horde flag captures
             data << uint32(0x609) << uint32(0x0);           // 9 1545 unk, set to 1 on alliance flag pickup...
@@ -6978,38 +6975,44 @@ void Player::SendInitWorldStates()
             data << uint32(0x923) << uint32(0x1);           // 14 2339 alliance (0 - hide, 1 - flag ok, 2 - flag picked up (flashing), 3 - flag picked up (not flashing)
             break;
         case 3358:                                          // AB
-            data << uint32(0x6e7) << uint32(0x0);           // 7 1767 stables alliance
-            data << uint32(0x6e8) << uint32(0x0);           // 8 1768 stables horde
-            data << uint32(0x6e9) << uint32(0x0);           // 9 1769 unk, ST?
-            data << uint32(0x6ea) << uint32(0x0);           // 10 1770 stables (show/hide)
-            data << uint32(0x6ec) << uint32(0x0);           // 11 1772 farm (0 - horde controlled, 1 - alliance controlled)
-            data << uint32(0x6ed) << uint32(0x0);           // 12 1773 farm (show/hide)
-            data << uint32(0x6ee) << uint32(0x0);           // 13 1774 farm color
-            data << uint32(0x6ef) << uint32(0x0);           // 14 1775 gold mine color, may be FM?
-            data << uint32(0x6f0) << uint32(0x0);           // 15 1776 alliance resources
-            data << uint32(0x6f1) << uint32(0x0);           // 16 1777 horde resources
-            data << uint32(0x6f2) << uint32(0x0);           // 17 1778 horde bases
-            data << uint32(0x6f3) << uint32(0x0);           // 18 1779 alliance bases
-            data << uint32(0x6f4) << uint32(0x7d0);         // 19 1780 max resources (2000)
-            data << uint32(0x6f6) << uint32(0x0);           // 20 1782 blacksmith color
-            data << uint32(0x6f7) << uint32(0x0);           // 21 1783 blacksmith (show/hide)
-            data << uint32(0x6f8) << uint32(0x0);           // 22 1784 unk, bs?
-            data << uint32(0x6f9) << uint32(0x0);           // 23 1785 unk, bs?
-            data << uint32(0x6fb) << uint32(0x0);           // 24 1787 gold mine (0 - horde contr, 1 - alliance contr)
-            data << uint32(0x6fc) << uint32(0x0);           // 25 1788 gold mine (0 - conflict, 1 - horde)
-            data << uint32(0x6fd) << uint32(0x0);           // 26 1789 gold mine (1 - show/0 - hide)
-            data << uint32(0x6fe) << uint32(0x0);           // 27 1790 gold mine color
-            data << uint32(0x700) << uint32(0x0);           // 28 1792 gold mine color, wtf?, may be LM?
-            data << uint32(0x701) << uint32(0x0);           // 29 1793 lumber mill color (0 - conflict, 1 - horde contr)
-            data << uint32(0x702) << uint32(0x0);           // 30 1794 lumber mill (show/hide)
-            data << uint32(0x703) << uint32(0x0);           // 31 1795 lumber mill color color
-            data << uint32(0x732) << uint32(0x1);           // 32 1842 stables (1 - uncontrolled)
-            data << uint32(0x733) << uint32(0x1);           // 33 1843 gold mine (1 - uncontrolled)
-            data << uint32(0x734) << uint32(0x1);           // 34 1844 lumber mill (1 - uncontrolled)
-            data << uint32(0x735) << uint32(0x1);           // 35 1845 farm (1 - uncontrolled)
-            data << uint32(0x736) << uint32(0x1);           // 36 1846 blacksmith (1 - uncontrolled)
-            data << uint32(0x745) << uint32(0x2);           // 37 1861 unk
-            data << uint32(0x7a3) << uint32(0x708);         // 38 1955 warning limit (1800)
+            {
+                BattleGround* bg = this->GetBattleGround();
+                if (bg && bg->GetTypeID() == BATTLEGROUND_AB)
+                    bg->FillInitialWorldStates(data);
+                /* old code, handled in battleground subclass:
+                data << uint32(0x6e7) << uint32(0x0);           // 7 1767 stables alliance
+                data << uint32(0x6e8) << uint32(0x0);           // 8 1768 stables horde
+                data << uint32(0x6e9) << uint32(0x0);           // 9 1769 unk, ST?
+                data << uint32(0x6ea) << uint32(0x0);           // 10 1770 stables (show/hide)
+                data << uint32(0x6ec) << uint32(0x0);           // 11 1772 farm (0 - horde controlled, 1 - alliance controlled)
+                data << uint32(0x6ed) << uint32(0x0);           // 12 1773 farm (show/hide)
+                data << uint32(0x6ee) << uint32(0x0);           // 13 1774 farm color
+                data << uint32(0x6ef) << uint32(0x0);           // 14 1775 gold mine color, may be FM?
+                data << uint32(0x6f0) << uint32(0x0);           // 15 1776 alliance resources
+                data << uint32(0x6f1) << uint32(0x0);           // 16 1777 horde resources
+                data << uint32(0x6f2) << uint32(0x0);           // 17 1778 horde bases
+                data << uint32(0x6f3) << uint32(0x0);           // 18 1779 alliance bases
+                data << uint32(0x6f4) << uint32(0x7d0);         // 19 1780 max resources (2000)
+                data << uint32(0x6f6) << uint32(0x0);           // 20 1782 blacksmith color
+                data << uint32(0x6f7) << uint32(0x0);           // 21 1783 blacksmith (show/hide)
+                data << uint32(0x6f8) << uint32(0x0);           // 22 1784 unk, bs?
+                data << uint32(0x6f9) << uint32(0x0);           // 23 1785 unk, bs?
+                data << uint32(0x6fb) << uint32(0x0);           // 24 1787 gold mine (0 - horde contr, 1 - alliance contr)
+                data << uint32(0x6fc) << uint32(0x0);           // 25 1788 gold mine (0 - conflict, 1 - horde)
+                data << uint32(0x6fd) << uint32(0x0);           // 26 1789 gold mine (1 - show/0 - hide)
+                data << uint32(0x6fe) << uint32(0x0);           // 27 1790 gold mine color
+                data << uint32(0x700) << uint32(0x0);           // 28 1792 gold mine color, wtf?, may be LM?
+                data << uint32(0x701) << uint32(0x0);           // 29 1793 lumber mill color (0 - conflict, 1 - horde contr)
+                data << uint32(0x702) << uint32(0x0);           // 30 1794 lumber mill (show/hide)
+                data << uint32(0x703) << uint32(0x0);           // 31 1795 lumber mill color color
+                data << uint32(0x732) << uint32(0x1);           // 32 1842 stables (1 - uncontrolled)
+                data << uint32(0x733) << uint32(0x1);           // 33 1843 gold mine (1 - uncontrolled)
+                data << uint32(0x734) << uint32(0x1);           // 34 1844 lumber mill (1 - uncontrolled)
+                data << uint32(0x735) << uint32(0x1);           // 35 1845 farm (1 - uncontrolled)
+                data << uint32(0x736) << uint32(0x1);           // 36 1846 blacksmith (1 - uncontrolled)
+                data << uint32(0x745) << uint32(0x2);           // 37 1861 unk
+                data << uint32(0x7a3) << uint32(0x708);         // 38 1955 warning limit (1800)*/
+            }
             break;
         case 3483:                                          // Hellfire Peninsula
             data << uint32(0x9ba) << uint32(0x1);           // 10
