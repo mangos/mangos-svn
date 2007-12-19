@@ -2544,15 +2544,15 @@ void Spell::EffectEnchantItemTmp(uint32 i)
     // custom cases
     if(duration == 0)
     {
-        // rogue family enchantments always 30 min (some have spell damage=0, but some have wrong data in EffBasePoints)
-        if(m_spellInfo->SpellFamilyName==SPELLFAMILY_ROGUE)
+        // some explicit spell ids checks including one with rogue family
+        if(m_spellInfo->Id==3594 || m_spellInfo->Id==6650 || m_spellInfo->Id==38615)
             duration = 1800;                                // 30 mins
+        // other rogue family enchantments always 1 hour (some have spell damage=0, but some have wrong data in EffBasePoints)
+        else if(m_spellInfo->SpellFamilyName==SPELLFAMILY_ROGUE)
+            duration = 3600;                                // 1 hour
         // some fishing pole bonuses
         else if(m_spellInfo->SpellVisual==563)
             duration = 600;                                 // 10 mins
-        // some explicit spell ids checks
-        else if(m_spellInfo->Id==3594 || m_spellInfo->Id==6650)
-            duration = 1800;                                // 30 mins
         // spell damage based data if provided
         else if(damage > 1)
             duration = damage;
