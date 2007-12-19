@@ -466,7 +466,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                             if(((BattleGroundWS*)bg)->GetFlagState(ALLIANCE) != BG_WS_FLAG_STATE_ON_BASE)
                                 return;
                             // check if it's correct flag
-                            if(((BattleGroundWS*)bg)->m_bgobjects[BG_WS_OBJECT_A_FLAG] != obj->GetGUID())
+                            if(((BattleGroundWS*)bg)->m_BgObjects[BG_WS_OBJECT_A_FLAG] != obj->GetGUID())
                                 return;
                             // check player team
                             if(_player->GetTeam() == ALLIANCE)
@@ -481,7 +481,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
                             if(((BattleGroundWS*)bg)->GetFlagState(HORDE) != BG_WS_FLAG_STATE_ON_BASE)
                                 return;
                             // check if it's correct flag
-                            if(((BattleGroundWS*)bg)->m_bgobjects[BG_WS_OBJECT_H_FLAG] != obj->GetGUID())
+                            if(((BattleGroundWS*)bg)->m_BgObjects[BG_WS_OBJECT_H_FLAG] != obj->GetGUID())
                                 return;
                             // check player team
                             if(_player->GetTeam() == HORDE)

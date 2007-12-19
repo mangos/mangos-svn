@@ -1802,17 +1802,21 @@ void Spell::EffectOpenLock(uint32 i)
     if(gameObjTarget)
     {
         // Arathi Basin banner opening !
-        if ((gameObjTarget->GetGOInfo()->id >= BG_AB_OBJECTID_BANNER_A) && (gameObjTarget->GetGOInfo()->id <= BG_AB_OBJECTID_BANNER_CONT_H) ||
-            (gameObjTarget->GetGOInfo()->id >= BG_AB_OBJECTID_NODE_BANNER_0) && (gameObjTarget->GetGOInfo()->id <= BG_AB_OBJECTID_NODE_BANNER_4))
+        if (gameObjTarget->GetGOInfo()->type == GAMEOBJECT_TYPE_BUTTON && gameObjTarget->GetGOInfo()->data4 == 1 ||
+            gameObjTarget->GetGOInfo()->type == GAMEOBJECT_TYPE_GOOBER && gameObjTarget->GetGOInfo()->data16 == 1 )
         {
-            BattleGround *bg = player->GetBattleGround();
-            if(!bg)
+            if( player->InBattleGround() &&                // in battleground
+                !player->IsMounted() &&                    // not mounted
+                !player->HasStealthAura() &&               // not stealthed
+                !player->HasInvisibilityAura() &&          // not invisible
+                player->isAlive())                         // live player
+            {
+                BattleGround *bg = player->GetBattleGround();
+                // check if it's correct bg
+                if(bg && bg->GetTypeID() == BATTLEGROUND_AB)
+                    ((BattleGroundAB*)bg)->EventPlayerCapturedBanner(player);
                 return;
-            // check if it's correct bg
-            if(bg->GetTypeID() != BATTLEGROUND_AB)
-                return;
-            ((BattleGroundAB*)bg)->ClickBanner(player);
-            return;
+            }
         }
         lockId = gameObjTarget->GetGOInfo()->data0;
         guid = gameObjTarget->GetGUID();

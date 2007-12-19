@@ -650,6 +650,7 @@ uint32 BattleGroundMgr::CreateBattleGround(uint32 bgTypeId, uint32 MinPlayersPer
     }
 
     bg->SetMapId(MapID);
+    bg->Reset();
     if(!bg->SetupBattleGround())
     {
         delete bg;
@@ -662,11 +663,6 @@ uint32 BattleGroundMgr::CreateBattleGround(uint32 bgTypeId, uint32 MinPlayersPer
     {
         bg->SetArenaorBGType(bl->type == TYPE_ARENA);
     }
-
-    if(bg->isArena())
-        bg->SetArenaType(ARENA_TYPE_2v2);                   // 2x2
-    else
-        bg->SetArenaType(0);                                // battleground
 
     bg->SetTypeID(bgTypeId);
     bg->SetInstanceID(bgTypeId);                               // temporary

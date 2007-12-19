@@ -27,7 +27,7 @@
 
 BattleGroundBE::BattleGroundBE()
 {
-    m_bgobjects.resize(BG_BE_OBJECT_MAX);
+    m_BgObjects.resize(BG_BE_OBJECT_MAX);
 }
 
 BattleGroundBE::~BattleGroundBE()
@@ -40,51 +40,47 @@ void BattleGroundBE::Update(time_t diff)
     BattleGround::Update(diff);
 
     // after bg start we get there
-    if(GetStatus() == STATUS_WAIT_JOIN && !isDoorsSpawned() && GetPlayersSize() >= 1)
-    {
-        for(uint32 i = BG_BE_OBJECT_DOOR_1; i <= BG_BE_OBJECT_DOOR_4; i++)
-        {
-            SpawnBGObject(i, RESPAWN_IMMEDIATELY);
-        }
-        sLog.outDebug("Doors spawned...");
-
-        for(uint32 i = BG_BE_OBJECT_BUFF_1; i <= BG_BE_OBJECT_BUFF_2; i++)
-        {
-            SpawnBGObject(i, RESPAWN_ONE_DAY);
-        }
-        sLog.outDebug("Buffs despawned...");
-
-        SetDoorsSpawned(true);
-        SetStartDelayTime(START_DELAY1);
-
-        SendMessageToAll(LANG_ARENA_ONE_MINUTE);
-    }
-
-    // after bg start and doors spawn we get there
-    if(GetStatus() == STATUS_WAIT_JOIN && isDoorsSpawned())
+    if (GetStatus() == STATUS_WAIT_JOIN && GetPlayersSize())
     {
         ModifyStartDelayTime(diff);
 
-        // delay expired (1 minute)
-        if(GetStartDelayTime() < 0)
+        if (!(m_Events & 0x01))
         {
-            for(uint32 i = BG_BE_OBJECT_DOOR_1; i <= BG_BE_OBJECT_DOOR_2; i++)
-            {
-                DoorOpen(i);
-            }
-            sLog.outDebug("Doors opened...");
+            m_Events |= 0x01;
+            for(uint32 i = BG_BE_OBJECT_DOOR_1; i <= BG_BE_OBJECT_DOOR_4; i++)
+                SpawnBGObject(i, RESPAWN_IMMEDIATELY);
 
             for(uint32 i = BG_BE_OBJECT_BUFF_1; i <= BG_BE_OBJECT_BUFF_2; i++)
-            {
+                SpawnBGObject(i, RESPAWN_ONE_DAY);
+
+            SetStartDelayTime(START_DELAY1);
+            SendMessageToAll(LANG_ARENA_ONE_MINUTE);
+        }
+        // After 30 seconds, warning is signalled
+        else if (GetStartDelayTime() <= START_DELAY2 && !(m_Events & 0x04))
+        {
+            m_Events |= 0x04;
+            SendMessageToAll(LANG_ARENA_THIRTY_SECONDS);
+        }
+        // After 15 seconds, warning is signalled
+        else if (GetStartDelayTime() <= START_DELAY3 && !(m_Events & 0x08))
+        {
+            m_Events |= 0x08;
+            SendMessageToAll(LANG_ARENA_FIFTEEN_SECONDS);
+        }
+        // delay expired (1 minute)
+        else if (GetStartDelayTime() <= 0 && !(m_Events & 0x10))
+        {
+            m_Events |= 0x10;
+
+            for(uint32 i = BG_BE_OBJECT_DOOR_1; i <= BG_BE_OBJECT_DOOR_2; i++)
+                DoorOpen(i);
+
+            for(uint32 i = BG_BE_OBJECT_BUFF_1; i <= BG_BE_OBJECT_BUFF_2; i++)
                 SpawnBGObject(i, 60);
-            }
-            sLog.outDebug("Buffs prepared to spawn...");
 
             SendMessageToAll(LANG_ARENA_BEGUN);
-
             SetStatus(STATUS_IN_PROGRESS);
-
-            SetDoorsSpawned(false);
             SetStartDelayTime(0);
 
             for(std::map<uint64, BattleGroundPlayer>::const_iterator itr = GetPlayers()->begin(); itr != GetPlayers()->end(); ++itr)
@@ -149,10 +145,10 @@ void BattleGroundBE::HandleAreaTrigger(Player *Source, uint32 Trigger)
     switch(Trigger)
     {
         case 4538:                                          // buff trigger?
-            buff_guid = m_bgobjects[BG_BE_OBJECT_BUFF_1];
+            buff_guid = m_BgObjects[BG_BE_OBJECT_BUFF_1];
             break;
         case 4539:                                          // buff trigger?
-            buff_guid = m_bgobjects[BG_BE_OBJECT_BUFF_2];
+            buff_guid = m_BgObjects[BG_BE_OBJECT_BUFF_2];
             break;
         default:
             sLog.outError("WARNING: Unhandled AreaTrigger in Battleground: %u", Trigger);
@@ -176,22 +172,26 @@ void BattleGroundBE::HandleAreaTrigger(Player *Source, uint32 Trigger)
     }
 }
 
+void BattleGroundBE::ResetBGSubclass()
+{
+    m_TeamKills[BG_TEAM_ALLIANCE] = 0;
+    m_TeamKills[BG_TEAM_HORDE]    = 0;
+}
+
 bool BattleGroundBE::SetupBattleGround()
 {
     // gates
-    if(!AddObject(BG_BE_OBJECT_DOOR_1, 183971, 6287.277, 282.1877, 3.810925, -2.260201, 0, 0, 0.9044551, -0.4265689, 0))
-        return false;
-    if(!AddObject(BG_BE_OBJECT_DOOR_2, 183973, 6189.546, 241.7099, 3.101481, 0.8813917, 0, 0, 0.4265689, 0.9044551, 0))
-        return false;
-    if(!AddObject(BG_BE_OBJECT_DOOR_3, 183970, 6299.116, 296.5494, 3.308032, 0.8813917, 0, 0, 0.4265689, 0.9044551, 0))
-        return false;
-    if(!AddObject(BG_BE_OBJECT_DOOR_4, 183972, 6177.708, 227.3481, 3.604374, -2.260201, 0, 0, 0.9044551, -0.4265689, 0))
-        return false;
+    if(    !AddObject(BG_BE_OBJECT_DOOR_1, BG_BE_OBJECT_TYPE_DOOR_1, 6287.277, 282.1877, 3.810925, -2.260201, 0, 0, 0.9044551, -0.4265689, RESPAWN_IMMEDIATELY)
+        || !AddObject(BG_BE_OBJECT_DOOR_2, BG_BE_OBJECT_TYPE_DOOR_2, 6189.546, 241.7099, 3.101481, 0.8813917, 0, 0, 0.4265689, 0.9044551, RESPAWN_IMMEDIATELY)
+        || !AddObject(BG_BE_OBJECT_DOOR_3, BG_BE_OBJECT_TYPE_DOOR_3, 6299.116, 296.5494, 3.308032, 0.8813917, 0, 0, 0.4265689, 0.9044551, RESPAWN_IMMEDIATELY)
+        || !AddObject(BG_BE_OBJECT_DOOR_4, BG_BE_OBJECT_TYPE_DOOR_4, 6177.708, 227.3481, 3.604374, -2.260201, 0, 0, 0.9044551, -0.4265689, RESPAWN_IMMEDIATELY)
     // buffs
-    if(!AddObject(BG_BE_OBJECT_BUFF_1, 184663, 6249.042, 275.3239, 11.22033, -1.448624, 0, 0, 0.6626201, -0.7489557, 120))
+        || !AddObject(BG_BE_OBJECT_BUFF_1, BG_BE_OBJECT_TYPE_BUFF_1, 6249.042, 275.3239, 11.22033, -1.448624, 0, 0, 0.6626201, -0.7489557, 120)
+        || !AddObject(BG_BE_OBJECT_BUFF_2, BG_BE_OBJECT_TYPE_BUFF_2, 6228.26, 249.566, 11.21812, -0.06981307, 0, 0, 0.03489945, -0.9993908, 120))
+    {
+        sLog.outErrorDb("BatteGroundBE: Failed to spawn some object!");
         return false;
-    if(!AddObject(BG_BE_OBJECT_BUFF_2, 184664, 6228.26, 249.566, 11.21812, -0.06981307, 0, 0, 0.03489945, -0.9993908, 120))
-        return false;
+    }
 
     return true;
 }
@@ -204,7 +204,7 @@ void BattleGroundBE::UpdatePlayerScore(Player* Source, uint32 type, uint32 value
     if(itr == m_PlayerScores.end())                         // player not found...
         return;
 
-    //there is nothing special in this score nothing
+    //there is nothing special in this score
     BattleGround::UpdatePlayerScore(Source,type,value);
 
 }
