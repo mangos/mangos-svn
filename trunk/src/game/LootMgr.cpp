@@ -89,7 +89,7 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
             bar.step();
 
             entry = fields[0].GetUInt32();
-            item = fields[1].GetUInt32();;
+            item = fields[1].GetUInt32();
             chanceOrRef = fields[2].GetFloat();
             questchance = int32(fields[3].GetUInt32());
             mincount = fields[4].GetUInt32();

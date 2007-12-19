@@ -366,7 +366,7 @@ namespace VMAP
 
                     #ifdef _ASSEMBLER_DEBUG
                     int startgroup = 0;                     //2;
-                    int endgroup = INT_MAX;;                //2;
+                    int endgroup = INT_MAX;                 //2;
                     fprintf(::g_df,"-------------------------------------------------\n");
                     fprintf(::g_df,"%s\n", pModelFilename.c_str());
                     fprintf(::g_df,"-------------------------------------------------\n");

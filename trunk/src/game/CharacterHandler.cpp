@@ -758,7 +758,7 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
     if(newname.find_first_of(notAllowedChars) != newname.npos)
     {
         WorldPacket data(SMSG_CHAR_RENAME, 1);
-        data << (uint8)CHAR_NAME_INVALID_CHARACTER;;
+        data << (uint8)CHAR_NAME_INVALID_CHARACTER;
         SendPacket( &data );
         return;
     }

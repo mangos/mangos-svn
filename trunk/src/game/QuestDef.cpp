@@ -95,7 +95,7 @@ Quest::Quest(Field * questRecord)
     for (int i = 0; i < QUEST_REPUTATIONS_COUNT; ++i)
         RewRepValue[i] = questRecord[89+i].GetInt32();
 
-    RewOrReqMoney = questRecord[94].GetInt32();;
+    RewOrReqMoney = questRecord[94].GetInt32();
     RewXpOrMoney = questRecord[95].GetUInt32();
     RewSpell = questRecord[96].GetUInt32();
     PointMapId = questRecord[97].GetUInt32();

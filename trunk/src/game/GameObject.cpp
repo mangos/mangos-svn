@@ -440,7 +440,7 @@ void GameObject::SaveToDB()
         << GetFloatValue(GAMEOBJECT_ROTATION+3) << ", "
         << m_respawnDelayTime << ", "
         << GetUInt32Value (GAMEOBJECT_ANIMPROGRESS) << ", "
-        << GetUInt32Value (GAMEOBJECT_DYN_FLAGS) << ")";;
+        << GetUInt32Value (GAMEOBJECT_DYN_FLAGS) << ")";
 
     WorldDatabase.BeginTransaction();
     WorldDatabase.PExecuteLog("DELETE FROM `gameobject` WHERE `guid` = '%u'", m_DBTableGuid);
