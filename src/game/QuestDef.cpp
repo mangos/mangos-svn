@@ -96,7 +96,7 @@ Quest::Quest(Field * questRecord)
         RewRepValue[i] = questRecord[89+i].GetInt32();
 
     RewOrReqMoney = questRecord[94].GetInt32();
-    RewXpOrMoney = questRecord[95].GetUInt32();
+    RewMoneyMaxLevel = questRecord[95].GetUInt32();
     RewSpell = questRecord[96].GetUInt32();
     PointMapId = questRecord[97].GetUInt32();
     PointX = questRecord[98].GetFloat();
@@ -147,23 +147,23 @@ uint32 Quest::XPValue( Player *pPlayer ) const
 {
     if( pPlayer )
     {
-        if( RewXpOrMoney > 0 )
+        if( RewMoneyMaxLevel > 0 )
         {
             uint32 pLevel = pPlayer->getLevel();
             uint32 qLevel = QuestLevel;
             float fullxp = 0;
-            if (qLevel >= 15)
-                fullxp = RewXpOrMoney / 6.0f;
-            else if (qLevel == 14)
-                fullxp = RewXpOrMoney / 4.8f;
-            else if (qLevel == 13)
-                fullxp = RewXpOrMoney / 3.6f;
-            else if (qLevel == 12)
-                fullxp = RewXpOrMoney / 2.4f;
-            else if (qLevel == 11)
-                fullxp = RewXpOrMoney / 1.2f;
-            else if (qLevel > 0 && qLevel <= 10)
-                fullxp = RewXpOrMoney / 0.6f;
+            if (qLevel >= 65)
+                fullxp = RewMoneyMaxLevel / 6.0f;
+            else if (qLevel == 64)
+                fullxp = RewMoneyMaxLevel / 4.8f;
+            else if (qLevel == 63)
+                fullxp = RewMoneyMaxLevel / 3.6f;
+            else if (qLevel == 62)
+                fullxp = RewMoneyMaxLevel / 2.4f;
+            else if (qLevel == 61)
+                fullxp = RewMoneyMaxLevel / 1.2f;
+            else if (qLevel > 0 && qLevel <= 60)
+                 fullxp = RewMoneyMaxLevel / 0.6f;
 
             if( pLevel <= qLevel +  5 )
                 return (uint32)fullxp;

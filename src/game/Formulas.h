@@ -145,25 +145,6 @@ namespace MaNGOS
             return ((xp + 49) / 100) * 100;                 // use additional () for prevent free association operations in C++
         }
 
-        inline uint32 xp_to_money(uint32 rewXP, uint32 qlevel)
-        {
-            // for max_level
-            uint32 money = 0;
-            if (qlevel >= 15)
-                money = rewXP / 10;
-            else if (qlevel == 14)
-                money = rewXP / 8;
-            else if (qlevel == 13)
-                money = rewXP / 6;
-            else if (qlevel == 12)
-                money = rewXP / 4;
-            else if (qlevel == 11)
-                money = rewXP / 2;
-            else if (qlevel > 0 && qlevel <= 10)
-                money = rewXP;
-
-            return money;
-        }
         inline float xp_in_group_rate(uint32 count, bool isRaid)
         {
             if(isRaid)
