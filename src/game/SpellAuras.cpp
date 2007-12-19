@@ -2774,7 +2774,7 @@ void Aura::HandleAuraModSchoolImmunity(bool apply, bool Real)
                 next++;
                 SpellEntry const *spell = iter->second->GetSpellProto();
                 if( ( (1 << spell->School) & school_mask)   //Check for school mask
-                    && !( spell->AttributesEx & 0x10000)    //Spells unaffected by invulnerability
+                    && !( spell->Attributes & 0x20000000)   //Spells unaffected by invulnerability
                     && !iter->second->IsPositive()          //Don't remove positive spells
                     && spell->Id != GetId())                //Don't remove self
                 {
