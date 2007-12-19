@@ -190,7 +190,7 @@ class Quest
         std::string GetRequestItemsText() const { return RequestItemsText; }
         std::string GetEndText() const { return EndText; }
         int32  GetRewOrReqMoney() const { return RewOrReqMoney; }
-        uint32 GetRewXpOrMoney() const { return RewXpOrMoney; }
+        uint32 GetRewMoneyMaxLevel() const { return RewMoneyMaxLevel; }
         uint32 GetRewSpell() const { return RewSpell; }
         uint32 GetPointMapId() const { return PointMapId; }
         float  GetPointX() const { return PointX; }
@@ -271,7 +271,7 @@ class Quest
         std::string RequestItemsText;
         std::string EndText;
         int32  RewOrReqMoney;
-        uint32 RewXpOrMoney;
+        uint32 RewMoneyMaxLevel;
         uint32 RewSpell;
         uint32 PointMapId;
         float  PointX;

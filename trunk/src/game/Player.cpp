@@ -11107,7 +11107,7 @@ void Player::RewardQuest( Quest const *pQuest, uint32 reward, Object* questGiver
     if ( getLevel() < sWorld.getConfig(CONFIG_MAX_PLAYER_LEVEL) )
         GiveXP( XP , NULL );
     else
-        ModifyMoney( MaNGOS::XP::xp_to_money(pQuest->GetRewXpOrMoney(), pQuest->GetQuestLevel()) );
+        ModifyMoney( pQuest->GetRewMoneyMaxLevel() );
 
     ModifyMoney( pQuest->GetRewOrReqMoney() );
 
