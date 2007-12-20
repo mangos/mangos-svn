@@ -3000,6 +3000,13 @@ void Spell::EffectWeaponDmg(uint32 i)
 
     m_caster->DealDamage(unitTarget, eff_damage, &cleanDamage, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_NORMAL, NULL, 0, true);
 
+    // Hemorrhage
+    if(m_spellInfo->SpellFamilyName==SPELLFAMILY_ROGUE && (m_spellInfo->SpellFamilyFlags & 0x2000000))
+    {
+        if(m_caster->GetTypeId()==TYPEID_PLAYER)
+            ((Player*)m_caster)->AddComboPoints(unitTarget, 1);
+    }
+
     // take ammo
     if(m_caster->GetTypeId() == TYPEID_PLAYER)
     {

@@ -316,14 +316,15 @@ struct ItemRandomSuffixEntry
 
 struct ItemSetEntry
 {
-                                                            // 0 unused
+    //uint32    id                                          // 0 item set ID
     char*     name[16];                                     // 1-16
                                                             //17 string flags, unused
-                                                            //18-43 unused
-    uint32    spells[8];                                    //44-52
-    uint32    items_to_triggerspell[8];                     //53-61
-    uint32    required_skill_id;                            //62
-    uint32    required_skill_value;                         //63
+                                                            //18-28 items from set, but not have all items listed, use ItemPrototype::ItemSet instead
+                                                            //29-34 unused
+    uint32    spells[8];                                    //35-42
+    uint32    items_to_triggerspell[8];                     //43-50
+    uint32    required_skill_id;                            //51
+    uint32    required_skill_value;                         //52
 };
 
 struct LockEntry
