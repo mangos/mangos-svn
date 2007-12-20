@@ -236,8 +236,8 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNoImmediateEffect,                         //184 SPELL_AURA_MOD_ATTACKER_MELEE_HIT_CHANCE  implemented in Unit::RollMeleeOutcomeAgainst
     &Aura::HandleNoImmediateEffect,                         //185 SPELL_AURA_MOD_ATTACKER_RANGED_HIT_CHANCE implemented in Unit::RollMeleeOutcomeAgainst
     &Aura::HandleNoImmediateEffect,                         //186 SPELL_AURA_MOD_ATTACKER_SPELL_HIT_CHANCE  implemented in Unit::SpellMissChanceCalc
-    &Aura::HandleNULL,                                      //187 SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_CHANCE
-    &Aura::HandleNULL,                                      //188 SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_CHANCE
+    &Aura::HandleNoImmediateEffect,                         //187 SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_CHANCE  implemended in Unit::GetUnitCriticalChance
+    &Aura::HandleNoImmediateEffect,                         //188 SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_CHANCE implemented in Unit::GetUnitCriticalChance
     &Aura::HandleModRating,                                 //189 SPELL_AURA_MOD_RATING
     &Aura::HandleNULL,                                      //190 SPELL_AURA_MOD_FACTION_REPUTATION_GAIN
     &Aura::HandleNULL,                                      //191 SPELL_AURA_USE_NORMAL_MOVEMENT_SPEED
@@ -246,7 +246,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleModSpellDamagePercent,                     //194 SPELL_AURA_MOD_SPELL_DAMAGE_OF_INTELLECT  implemented in Unit::SpellDamageBonus
     &Aura::HandleModSpellHealingPercent,                    //195 SPELL_AURA_MOD_SPELL_HEALING_OF_INTELLECT implemented in Unit::SpellHealingBonu
     &Aura::HandleNULL,                                      //196
-    &Aura::HandleNoImmediateEffect,                         //197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE implemented in Unit::SpellCriticalBonus Unit::RollMeleeOutcomeAgainst Unit::RollPhysicalOutcomeAgainst
+    &Aura::HandleNoImmediateEffect,                         //197 SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE implemented in Unit::SpellCriticalBonus Unit::GetUnitCriticalChance
     &Aura::HandleNULL,                                      //198 SPELL_AURA_MOD_ALL_WEAPON_SKILLS
     &Aura::HandleNULL,                                      //199 SPELL_AURA_MOD_INCREASES_SPELL_PCT_TO_HIT
     &Aura::HandleNoImmediateEffect,                         //200 SPELL_AURA_MOD_XP_PCT

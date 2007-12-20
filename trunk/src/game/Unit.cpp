@@ -2249,7 +2249,7 @@ MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (Unit const *pVictim, WeaponAtt
     int32 miss_chance = (int32)(MeleeMissChanceCalc(pVictim));
 
     // Critical hit chance
-    float crit_chance = GetUnitCriticalChance(attType);
+    float crit_chance = GetUnitCriticalChance(attType, pVictim);
 
     // Only players can have Talent&Spell bonuses
     if (GetTypeId() == TYPEID_PLAYER)
@@ -2259,11 +2259,6 @@ MeleeHitOutcome Unit::RollPhysicalOutcomeAgainst (Unit const *pVictim, WeaponAtt
         for(AuraList::const_iterator i = mSpellCritSchool.begin(); i != mSpellCritSchool.end(); ++i)
             if((*i)->GetModifier()->m_miscvalue == -2 || ((*i)->GetModifier()->m_miscvalue & (int32)(1<<spellInfo->School)) != 0)
                 crit_chance += (*i)->GetModifier()->m_amount;
-
-        // flat
-        AuraList const& mAttackerSWCrit = pVictim->GetAurasByType(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE);
-        for(AuraList::const_iterator i = mAttackerSWCrit.begin(); i != mAttackerSWCrit.end(); ++i)
-            crit_chance += (*i)->GetModifier()->m_amount;
     }
 
     // Spellmods
@@ -2283,12 +2278,7 @@ MeleeHitOutcome Unit::RollMeleeOutcomeAgainst (const Unit *pVictim, WeaponAttack
     int32 miss_chance = (int32)(MeleeMissChanceCalc(pVictim));
 
     // Critical hit chance
-    float crit_chance = GetUnitCriticalChance(attType);
-
-    // flat
-    AuraList const& mAttackerSWCrit = pVictim->GetAurasByType(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE);
-    for(AuraList::const_iterator i = mAttackerSWCrit.begin(); i != mAttackerSWCrit.end(); ++i)
-        crit_chance += (*i)->GetModifier()->m_amount;
+    float crit_chance = GetUnitCriticalChance(attType, pVictim);
 
     // Useful if want to specify crit & miss chances for melee, else it could be removed
     DEBUG_LOG("MELEE OUTCOME: hit %f crit %u miss %u", m_modHitChance,crit_chance,miss_chance);
@@ -2641,6 +2631,41 @@ float Unit::GetUnitBlockChance() const
         else
             return 5;
     }
+}
+
+float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit *pVictim) const
+{
+    float crit;
+
+    if(GetTypeId() == TYPEID_PLAYER)
+    {
+        switch(attackType)
+        {
+        case BASE_ATTACK:   
+            crit = GetFloatValue( PLAYER_CRIT_PERCENTAGE ); 
+            crit+= pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_CHANCE);
+            break;
+        case OFF_ATTACK:
+            crit = GetFloatValue( PLAYER_OFFHAND_CRIT_PERCENTAGE );
+            crit+= pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_CHANCE);
+            break;
+        case RANGED_ATTACK: 
+            crit = GetFloatValue( PLAYER_RANGED_CRIT_PERCENTAGE );
+            crit+= pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_CHANCE);
+            break;
+        }
+    }
+    else
+        crit = 5.0;
+
+    // flat
+    AuraList const& mAttackerSWCrit = pVictim->GetAurasByType(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE);
+    for(AuraList::const_iterator i = mAttackerSWCrit.begin(); i != mAttackerSWCrit.end(); ++i)
+        crit += (*i)->GetModifier()->m_amount;
+
+    if (crit < 0)
+        crit = 0;
+    return crit;
 }
 
 uint16 Unit::GetWeaponSkillValue (WeaponAttackType attType) const
