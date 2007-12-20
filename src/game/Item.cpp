@@ -194,36 +194,13 @@ void Item::SaveToDB()
     {
         case ITEM_NEW:
         {
-            uint32 Rows=0;
+            std::ostringstream ss;
+            ss << "REPLACE INTO `item_instance` (`guid`,`owner_guid`,`data`) VALUES (" << guid << "," << GUID_LOPART(GetOwnerGUID()) << ",'";
+            for(uint16 i = 0; i < m_valuesCount; i++ )
+                ss << GetUInt32Value(i) << " ";
+            ss << "' )";
 
-            // it's better than rebuilding indexes multiple times
-            QueryResult *result = CharacterDatabase.PQuery("select count(*) as r from `item_instance` where `guid` = '%u'", guid);
-            if(result)
-            {
-                Rows = result->Fetch()[0].GetUInt32();
-                delete result;
-            }
-
-            // guess - instance exists ?
-            if (!Rows)
-            {
-                // no - we must insert new rec
-                std::ostringstream ss;
-                ss << "INSERT INTO `item_instance` (`guid`,`owner_guid`,`data`) VALUES (" << guid << "," << GUID_LOPART(GetOwnerGUID()) << ",'";
-                for(uint16 i = 0; i < m_valuesCount; i++ )
-                    ss << GetUInt32Value(i) << " ";
-                ss << "' )";
-
-                CharacterDatabase.Execute( ss.str().c_str() );
-            } else
-            {
-                std::ostringstream ss;
-                ss << "UPDATE `item_instance` SET `data` = '";
-                for(uint16 i = 0; i < m_valuesCount; i++ )
-                    ss << GetUInt32Value(i) << " ";
-                ss << "' WHERE `guid` = '" << guid << "'";
-                CharacterDatabase.Execute( ss.str().c_str() );
-            };
+            CharacterDatabase.Execute( ss.str().c_str() );
         } break;
         case ITEM_CHANGED:
         {
