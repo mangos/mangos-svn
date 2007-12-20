@@ -280,6 +280,9 @@ bool Item::LoadFromDB(uint32 guid, uint64 owner_guid, QueryResult *result)
         return false;
     }
 
+    // overwrite possible wrong/corrupted guid
+    SetUInt64Value(OBJECT_FIELD_GUID,MAKE_GUID(guid,HIGHGUID_ITEM));
+
     if (delete_result) delete result;
 
     if(owner_guid != 0)

@@ -12130,6 +12130,10 @@ bool Player::MinimalLoadFromDB( QueryResult *result, uint32 guid )
         return false;
     }
 
+    // overwrite possible wrong/corrupted guid
+    SetUInt64Value(OBJECT_FIELD_GUID,MAKE_GUID(guid,HIGHGUID_PLAYER));
+
+
     m_name = fields[1].GetCppString();
 
     Relocate(fields[2].GetFloat(),fields[3].GetFloat(),fields[4].GetFloat());
@@ -12259,6 +12263,10 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
         delete result;
         return false;
     }
+
+    // overwrite possible wrong/corrupted guid
+    SetUInt64Value(OBJECT_FIELD_GUID,MAKE_GUID(guid,HIGHGUID_PLAYER));
+
 
     // cleanup inventory related item value fields (its will be filled correctly in _LoadInventory)
     for(uint8 slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
