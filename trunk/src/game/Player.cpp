@@ -2438,16 +2438,16 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
         return false;
     }
 
-    if(!ObjectMgr::IsSpellValid(spellInfo))
+    if(!ObjectMgr::IsSpellValid(spellInfo,false))
     {
         // do character spell book cleanup (all characters)
         if(state == PLAYERSPELL_UNCHANGED)                  // spell load case
         {
-            sLog.outError("Player::addSpell: Depricated spell #%u request, deleting for all characters in `character_spell`.",spell_id);
+            sLog.outError("Player::addSpell: Broken spell #%u learning not allowed, deleting for all characters in `character_spell`.",spell_id);
             CharacterDatabase.PExecute("DELETE FROM `character_spell` WHERE `spell` = '%u'",spell_id);
         }
         else
-            sLog.outError("Player::addSpell: Depricated spell #%u request.",spell_id);
+            sLog.outError("Player::addSpell: Broken spell #%u learning not allowed.",spell_id);
 
         return false;
     }

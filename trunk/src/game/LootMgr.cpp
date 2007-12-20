@@ -196,6 +196,31 @@ void LoadLootTable(LootStore& lootstore,char const* tablename)
                     }
                     break;
                 }
+                case CONDITION_SKILL:
+                {
+                    SkillLineEntry const *pSkill = sSkillLineStore.LookupEntry(cond_value1);
+                    if (!pSkill)
+                    {
+                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) has set skill condition to non-existing skill!", tablename, item, entry);
+                        continue;
+                    }
+                    if (cond_value2 < 1 || cond_value2 > sWorld.GetConfigMaxSkillValue() )
+                    {
+                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) has set skill condition but skill value is invalid or to high!", tablename, item, entry);
+                        continue;
+                    }
+                    break;
+                }
+                case CONDITION_QUESTREWARDED:
+                {
+                    Quest const *Quest = objmgr.GetQuestTemplate(cond_value1);
+                    if (!Quest)
+                    {
+                        sLog.outErrorDb("Table: %s Dropped item (entry: %d) from loot (entry: %d) has quest rewarded condition set but quest does not exist!", tablename, item, entry);
+                        continue;
+                    }
+                    break;
+                }
             }
 
             lootstore[entry].push_back( LootStoreItem(item, displayid, chanceOrRef, questchance, freeforall, condition, cond_value1, cond_value2, mincount, maxcount) );
@@ -433,6 +458,10 @@ bool MeetsConditions(Player * owner, LootItem * itm)
             }
             case CONDITION_TEAM:
                 return owner->GetTeam() == itm->cond_value1;
+            case CONDITION_SKILL:
+                return owner->HasSkill(itm->cond_value1) && owner->GetPureSkillValue(itm->cond_value1) >= itm->cond_value2;
+            case CONDITION_QUESTREWARDED:
+                return owner->GetQuestRewardStatus(itm->cond_value1);
             default:
                 return false;
         }
