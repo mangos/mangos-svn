@@ -175,6 +175,9 @@ bool Corpse::LoadFromDB(uint32 guid, Field *fields)
         return false;
     }
 
+    // overwrite possible wrong/corrupted guid
+    SetUInt64Value(OBJECT_FIELD_GUID,MAKE_GUID(guid,HIGHGUID_CORPSE));
+
     // place
     SetInstanceId(instanceid);
     SetMapId(mapid);
