@@ -1403,7 +1403,7 @@ void Map::UpdateObjectVisibility( WorldObject* obj, Cell cell, CellPair cellpair
     MaNGOS::VisibleChangesNotifier notifier(*obj);
     TypeContainerVisitor<MaNGOS::VisibleChangesNotifier, WorldTypeMapContainer > player_notifier(notifier);
     CellLock<GridReadGuard> cell_lock(cell, cellpair);
-    cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(obj->GetMapId(), obj));
+    cell_lock->Visit(cell_lock, player_notifier, *this);
 }
 
 void Map::UpdatePlayerVisibility( Player* player, Cell cell, CellPair cellpair )
@@ -1426,8 +1426,8 @@ void Map::UpdateObjectsVisibilityFor( Player* player, Cell cell, CellPair cellpa
     TypeContainerVisitor<MaNGOS::VisibleNotifier, WorldTypeMapContainer > world_notifier(notifier);
     TypeContainerVisitor<MaNGOS::VisibleNotifier, GridTypeMapContainer  > grid_notifier(notifier);
     CellLock<GridReadGuard> cell_lock(cell, cellpair);
-    cell_lock->Visit(cell_lock, world_notifier, *MapManager::Instance().GetMap(player->GetMapId(), player));
-    cell_lock->Visit(cell_lock, grid_notifier,  *MapManager::Instance().GetMap(player->GetMapId(), player));
+    cell_lock->Visit(cell_lock, world_notifier, *this);
+    cell_lock->Visit(cell_lock, grid_notifier,  *this);
 
     // send data
     notifier.Notify();
