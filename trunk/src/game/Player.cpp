@@ -68,11 +68,6 @@ UpdateMask Player::updateVisualBits;
 Player::Player (WorldSession *session): Unit( 0 )
 {
     m_transport = 0;
-    m_transX = 0.0f;
-    m_transY = 0.0f;
-    m_transZ = 0.0f;
-    m_transO = 0.0f;
-    m_transTime = 0;
 
     m_speakTime = 0;
     m_speakCount = 0;
@@ -172,8 +167,6 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_bgBattleGroundID = 0;
     for (int j=0; j < PLAYER_MAX_BATTLEGROUND_QUEUES; j++)
         m_bgBattleGroundQueueID[j] = 0;
-
-    m_movement_flags = 0;
 
     m_logintime = time(NULL);
     m_Last_tick = m_logintime;
@@ -1460,11 +1453,11 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     {
         m_transport->RemovePassenger(this);
         m_transport = NULL;
-        m_transX = 0.0f;
-        m_transY = 0.0f;
-        m_transZ = 0.0f;
-        m_transO = 0.0f;
-        m_transTime = 0;
+        m_movementInfo.t_x = 0.0f;
+        m_movementInfo.t_y = 0.0f;
+        m_movementInfo.t_z = 0.0f;
+        m_movementInfo.t_o = 0.0f;
+        m_movementInfo.t_time = 0;
     }
 
     SetSemaphoreTeleport(true);
@@ -1480,7 +1473,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     }
 
     // reset movement flags at teleport, because player will continue move with these flags after teleport
-    SetMovementFlags(0);
+    m_movementInfo.SetMovementFlags(0);
 
     if ((this->GetMapId() == mapid) && (!m_transport))
     {
@@ -1587,7 +1580,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             data.Initialize(SMSG_NEW_WORLD, (20));
             if (m_transport)
             {
-                data << (uint32)mapid << m_transX << m_transY << m_transZ << m_transO;
+                data << (uint32)mapid << m_movementInfo.t_x << m_movementInfo.t_y << m_movementInfo.t_z << m_movementInfo.t_o;
             }
             else
             {
@@ -1610,10 +1603,10 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
 
             if(m_transport)
             {
-                final_x += m_transX;
-                final_y += m_transY;
-                final_z += m_transZ;
-                final_o += m_transO;
+                final_x += m_movementInfo.t_x;
+                final_y += m_movementInfo.t_y;
+                final_z += m_movementInfo.t_z;
+                final_o += m_movementInfo.t_o;
             }
 
             // set position
@@ -12322,10 +12315,10 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
 
     if (transGUID != 0)
     {
-        m_transX = fields[20].GetFloat();
-        m_transY = fields[21].GetFloat();
-        m_transZ = fields[22].GetFloat();
-        m_transO = fields[23].GetFloat();
+        m_movementInfo.t_x = fields[20].GetFloat();
+        m_movementInfo.t_y = fields[21].GetFloat();
+        m_movementInfo.t_z = fields[22].GetFloat();
+        m_movementInfo.t_o = fields[23].GetFloat();
 
         for (MapManager::TransportSet::iterator iter = MapManager::Instance().m_Transports.begin(); iter != MapManager::Instance().m_Transports.end(); ++iter)
         {
@@ -13365,13 +13358,13 @@ void Player::SaveToDB()
     ss << (uint64)m_resetTalentsTime;
 
     ss << ", ";
-    ss << m_transX;
+    ss << m_movementInfo.t_x;
     ss << ", ";
-    ss << m_transY;
+    ss << m_movementInfo.t_y;
     ss << ", ";
-    ss << m_transZ;
+    ss << m_movementInfo.t_z;
     ss << ", ";
-    ss << m_transO;
+    ss << m_movementInfo.t_o;
     ss << ", ";
     if (m_transport)
         ss << m_transport->GetGUIDLow();
@@ -15206,7 +15199,7 @@ void Player::LeaveBattleground()
     {
         bg->RemovePlayerAtLeave(GetGUID(), true, true);
 
-        if(bg->GetStatus() == STATUS_IN_PROGRESS && sWorld.getConfig(CONFIG_BATTLEGROUND_CAST_DESERTER))
+        if(bg->isBattleGround() && (bg->GetStatus() == STATUS_IN_PROGRESS) && sWorld.getConfig(CONFIG_BATTLEGROUND_CAST_DESERTER))
             CastSpell(this, 26013, true);                   // Deserter
     }
 }
@@ -15216,7 +15209,7 @@ bool Player::CanJoinToBattleground() const
     // check Deserter debuff
     AuraList const& mDummyAuras = GetAurasByType(SPELL_AURA_DUMMY);
     for(AuraList::const_iterator i = mDummyAuras.begin();i != mDummyAuras.end(); ++i)
-        if((*i)->GetId()==26013)
+        if((*i)->GetId() == 26013)
             return false;
 
     return true;

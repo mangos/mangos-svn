@@ -29,9 +29,8 @@ enum HIGHGUID
     HIGHGUID_DYNAMICOBJECT  = 0xF00A0000,                   // blizz F0090000, F0320000
     HIGHGUID_CORPSE         = 0xF0090000,                   // blizz F0090000, F0320000
     HIGHGUID_PLAYER_CORPSE  = 0xF0080000,                   // blizz F0090000, F0320000
-    HIGHGUID_MO_TRANSPORT   = 0x80000000,                   // blizz 1FC00000 (type 15)
-    //HIGHGUID_MO_TRANSPORT   = 0x1FC00000,                   // blizz 1FC00000 (type 15) - client crash :(
-    //HIGHGUID_TRANSPORT      = 0x1FA70000                    // blizz 1FA70000 (type 11)
+    HIGHGUID_MO_TRANSPORT   = 0x1FC00000,                   // blizz 1FC00000 (type 15)
+    HIGHGUID_TRANSPORT      = 0x1FA70000                    // blizz 1FA70000 (type 11)
 };
 
 #define IS_CREATURE_GUID(Guid)       ( GUID_HIPART(Guid) == HIGHGUID_UNIT )
@@ -41,6 +40,6 @@ enum HIGHGUID
 #define IS_DYNAMICOBJECT_GUID(Guid)  ( GUID_HIPART(Guid) == HIGHGUID_DYNAMICOBJECT )
 #define IS_CORPSE_GUID(Guid)         ( GUID_HIPART(Guid) == HIGHGUID_CORPSE )
 #define IS_PLAYER_CORPSE_GUID(Guid)  ( GUID_HIPART(Guid) == HIGHGUID_PLAYER_CORPSE )
-//#define IS_TRANSPORT(Guid)           ( GUID_HIPART(Guid) == HIGHGUID_TRANSPORT )
+#define IS_TRANSPORT(Guid)           ( GUID_HIPART(Guid) == HIGHGUID_TRANSPORT )
 #define IS_MO_TRANSPORT(Guid)        ( GUID_HIPART(Guid) == HIGHGUID_MO_TRANSPORT )
 #endif

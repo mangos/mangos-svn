@@ -4128,53 +4128,14 @@ bool ChatHandler::HandleSendOpcodeCommand(const char* args)
         return false;*/
 
     uint16 opcode = atoi(op);
-    uint32 value1 = atoi(val1);
+    uint64 value1 = atoi(val1);
     //uint32 value2 = atoi(val2);
     //uint32 value3 = atoi(val3);
 
-    //((Player*)unit)->GetSession()->SendGuildCommandResult(opcode, "test!", value1);
-
-    WorldPacket data(SMSG_GUILD_EVENT, 20);
-    data << uint8(opcode);
-    data << uint8(value1);
-    for(uint8 i = 0; i < value1; ++i)
-    {
-        std::string str = "test!";
-        data << str;
-    }
+    WorldPacket data(opcode, 8);
+    data << uint64(value1);
     ((Player*)unit)->GetSession()->SendPacket(&data);
 
-    /*WorldPacket data(opcode, 20);
-    data << uint32(value1);
-    data << uint32(value2);
-    data << uint32(value3);
-    ((Player*)unit)->GetSession()->SendPacket(&data);*/
-    /*data.append(unit->GetPackGUID());
-    data << urand(0, 1024);
-    data << urand(0, 1024);
-    data << urand(0, 1024);*/
-    /*uint32 random = urand(1, 3);
-    uint8 temp = 3;
-    if(temp == 1)
-    {
-        WorldPacket data(SMSG_AI_REACTION, 8+4);
-        data << unit->GetGUID();
-        data << random;
-        unit->SendMessageToSet(&data, true);
-    }
-    if(temp == 2)
-    {
-        WorldPacket data(SMSG_AI_UNKNOWN, 8+4);
-        data << unit->GetGUID();
-        data << random;
-        unit->SendMessageToSet(&data, true);
-    }
-    if(temp == 3)
-    {
-        WorldPacket data;
-        ((Player*)unit)->GetSession()->BuildArenaTeamEventPacket(&data, opcode, random, "str1", "str2", "str3");
-        ((Player*)unit)->GetSession()->SendPacket(&data);
-    }*/
     PSendSysMessage(LANG_COMMAND_OPCODESENT, opcode, unit->GetName());
     return true;
 }

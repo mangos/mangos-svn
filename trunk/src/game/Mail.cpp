@@ -621,7 +621,7 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         data << (uint32) 0x04;                              // unknown, 0x4 - auction, 0x10 - normal
                                                             // Time
         data << (float)  ((*itr)->expire_time-time(NULL))/DAY;
-        data << (uint32) 0;                                 // Constant, unknown
+        data << (uint32) 0;                                 // unk
         data << (*itr)->subject;                            // Subject string - once 00, when mail type = 3
 
         uint8 item_count = (*itr)->items.size();            // max count is 12

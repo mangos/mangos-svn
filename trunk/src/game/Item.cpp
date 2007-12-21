@@ -149,7 +149,8 @@ Item::Item( )
 {
     m_objectType |= TYPE_ITEM;
     m_objectTypeId = TYPEID_ITEM;
-    m_updateFlag = (UPDATEFLAG_HIGHGUID | UPDATEFLAG_ALL);  // 2.1.2 - 0x18
+                                                            // 2.3.2 - 0x18
+    m_updateFlag = (UPDATEFLAG_LOWGUID | UPDATEFLAG_HIGHGUID);
 
     m_valuesCount = ITEM_END;
     m_slot = 0;

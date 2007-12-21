@@ -788,6 +788,8 @@ void WorldSession::HandleChangePlayerNameOpcode(WorldPacket& recv_data)
         return;
     }
 
+    // we have to check character at_login_flag & AT_LOGIN_RENAME also (fake packets hehe)
+
     CharacterDatabase.escape_string(newname);
     CharacterDatabase.PExecute("UPDATE `character` set `name` = '%s', `at_login` = `at_login` & ~ '%u' WHERE `guid` ='%u'", newname.c_str(), uint32(AT_LOGIN_RENAME),GUID_LOPART(guid));
 

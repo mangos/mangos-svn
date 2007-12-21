@@ -1392,10 +1392,10 @@ void WorldSession::HandleWhoisOpcode(WorldPacket& recv_data)
     sLog.outDebug("Received whois command from player %s for character %s", GetPlayer()->GetName(), charname.c_str());
 }
 
-void WorldSession::HandleComplaintChatOpcode( WorldPacket & recv_data )
+void WorldSession::HandleReportSpamOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data, 1+8);
-    sLog.outDebug("WORLD: CMSG_COMPLAINT_CHAT");
+    sLog.outDebug("WORLD: CMSG_REPORT_SPAM");
     recv_data.hexlike();
 
     uint8 spam_type;                                        // 0 - mail, 1 - chat
@@ -1426,7 +1426,7 @@ void WorldSession::HandleComplaintChatOpcode( WorldPacket & recv_data )
     // if it's mail spam - ALL mails from this spammer automatically removed by client
 
     // Complaint Received message
-    WorldPacket data(SMSG_COMPLAINT_ADDED, 1);
+    WorldPacket data(SMSG_REPORT_SPAM_RESULT, 1);
     data << uint8(0);
     SendPacket(&data);
 
@@ -1605,7 +1605,7 @@ void WorldSession::HandleMoveFlyModeChangeAckOpcode( WorldPacket & recv_data )
 
     recv_data >> guid >> unk >> flags;
 
-    _player->SetMovementFlags(flags);
+    _player->m_movementInfo.SetMovementFlags(flags);
     /*
     on:
     25 00 00 00 00 00 00 00 | 00 00 00 00 00 00 80 00
