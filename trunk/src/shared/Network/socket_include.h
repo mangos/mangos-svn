@@ -166,6 +166,11 @@ typedef	in_port_t port_t;
 #include <string.h>
 #include <mach/port.h>
 typedef unsigned long ipaddr_t;
+
+#if !defined(port_t)
+typedef mach_port_t port_t;
+#endif
+
 #ifdef SOCKETS_NAMESPACE
 namespace SOCKETS_NAMESPACE {
 #endif
