@@ -446,7 +446,7 @@ struct SpellEntry
     uint32    modalNextSpell;                               //41
     uint32    StackAmount;                                  //42
     uint32    Totem[2];                                     //43-44
-    uint32    Reagent[8];                                   //45-52
+    int32     Reagent[8];                                   //45-52
     uint32    ReagentCount[8];                              //53-60
     int32     EquippedItemClass;                            //61 (value)
     int32     EquippedItemSubClassMask;                     //62 (mask)

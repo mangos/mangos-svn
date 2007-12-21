@@ -1939,6 +1939,7 @@ void Spell::SendCastResult(uint8 result)
         WorldPacket data(SMSG_CAST_RESULT, (4+2));
         data << m_spellInfo->Id;
         data << uint8(result);                              // problem
+        data << uint8(0);                                   // unkn
         switch (result)
         {
             case SPELL_FAILED_REQUIRES_SPELL_FOCUS:
@@ -2338,7 +2339,7 @@ void Spell::TakeReagents()
     Player* p_caster = (Player*)m_caster;
     for(uint32 x=0;x<8;x++)
     {
-        if(m_spellInfo->Reagent[x] == 0)
+        if(m_spellInfo->Reagent[x] <= 0)
             continue;
         uint32 itemid = m_spellInfo->Reagent[x];
         uint32 itemcount = m_spellInfo->ReagentCount[x];
@@ -3420,8 +3421,10 @@ uint8 Spell::CheckItems()
 
     for(uint32 i=0;i<8;i++)
     {
-        if((itemid = m_spellInfo->Reagent[i]) == 0)
+        if(m_spellInfo->Reagent[i] <= 0)
             continue;
+
+        itemid    = m_spellInfo->Reagent[i];
         itemcount = m_spellInfo->ReagentCount[i];
         // CastItem is also spell reagent
         if( m_CastItem && m_CastItem->GetEntry() == itemid )

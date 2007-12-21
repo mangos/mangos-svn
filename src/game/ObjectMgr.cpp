@@ -4801,7 +4801,7 @@ bool ObjectMgr::canStackSpellRanks(SpellEntry const *spellInfo,SpellEntry const 
             return true;
         if(spellInfo->manaPerSecondPerLevel > 0 && spellInfo->manaPerSecondPerLevel != spellInfo2->manaPerSecondPerLevel)
             return true;
-        if(spellInfo->Reagent[0] != 0 && spellInfo->Reagent[0] != spellInfo2->Reagent[0])
+        if(spellInfo->Reagent[0] > 0 && spellInfo->Reagent[0] != spellInfo2->Reagent[0])
             return true;
     }
     return false;
@@ -5925,6 +5925,8 @@ bool ObjectMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl, bool msg)
     if(!spellInfo)
         return false;
 
+    bool need_check_reagents = false;
+
     // check effects
     for(int i=0; i<3; ++i)
     {
@@ -5947,6 +5949,8 @@ bool ObjectMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl, bool msg)
                     }
                     return false;
                 }
+
+                need_check_reagents = true;
                 break;
             }
             case SPELL_EFFECT_LEARN_SPELL:
@@ -5957,13 +5961,31 @@ bool ObjectMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl, bool msg)
                     if(msg)
                     {
                         if(pl)
-                            ChatHandler(pl).PSendSysMessage("Spell %u learn to broken spell %u, and then",spellInfo->Id,spellInfo->EffectTriggerSpell[0]);
+                            ChatHandler(pl).PSendSysMessage("Spell %u learn to broken spell %u, and then...",spellInfo->Id,spellInfo->EffectTriggerSpell[0]);
                         else
-                            sLog.outErrorDb("Spell %u learn to invalid spell %u, and then",spellInfo->Id,spellInfo->EffectTriggerSpell[0]);
+                            sLog.outErrorDb("Spell %u learn to invalid spell %u, and then...",spellInfo->Id,spellInfo->EffectTriggerSpell[0]);
                     }
                     return false;
                 }
                 break;
+            }
+        }
+    }
+
+    if(need_check_reagents)
+    {
+        for(int j = 0; j < 8; ++j)
+        {
+            if(spellInfo->Reagent[j] > 0 && !GetItemPrototype( spellInfo->Reagent[j] ))
+            {
+                if(msg)
+                {
+                    if(pl)
+                        ChatHandler(pl).PSendSysMessage("Craft spell %u have not-exist reagent in DB item (Entry: %u) and then...",spellInfo->Id,spellInfo->Reagent[j]);
+                    else
+                        sLog.outErrorDb("Craft spell %u have not-exist reagent in DB item (Entry: %u) and then...",spellInfo->Id,spellInfo->Reagent[j]);
+                }
+                return false;
             }
         }
     }

@@ -122,13 +122,13 @@ void Creature::LoadTrainerSpells()
 
         if(!sSpellStore.LookupEntry(spellinfo->EffectTriggerSpell[0]))
         {
-            sLog.outError("LoadTrainerSpells: Trainer (Entry: %u) has learning spell(%u) without triggered spell (bad dbc?).", GetEntry(), spellid);
+            sLog.outErrorDb("LoadTrainerSpells: Trainer (Entry: %u) has learning spell(%u) without triggered spell (bad dbc?).", GetEntry(), spellid);
             continue;
         }
 
         if(!ObjectMgr::IsSpellValid(spellinfo))
         {
-            sLog.outError("LoadTrainerSpells: Trainer (Entry: %u) has broken learning spell %u.", GetEntry(), spellid);
+            sLog.outErrorDb("LoadTrainerSpells: Trainer (Entry: %u) has broken learning spell %u.", GetEntry(), spellid);
             continue;
         }
 
