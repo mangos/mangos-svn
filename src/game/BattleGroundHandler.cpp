@@ -76,12 +76,19 @@ void WorldSession::HandleBattleGroundJoinOpcode( WorldPacket & recv_data )
     recv_data >> guid;                                      // battlemaster guid
     recv_data >> bgTypeId;                                  // battleground type id (DBC id)
     recv_data >> instanceId;                                // instance id, 0 if First Available selected
-    recv_data >> joinAsGroup;                                   // join as group
+    recv_data >> joinAsGroup;                               // join as group
 
     sLog.outDebug( "WORLD: Recvd CMSG_BATTLEMASTER_JOIN Message from: " I64FMT, guid);
 
     // ignore if we already in BG or BG queue
     if(_player->InBattleGround())
+        return;
+
+    Creature *unit = ObjectAccessor::GetCreature(*_player, guid);
+    if(!unit)
+        return;
+
+    if(!unit->isBattleMaster())                             // it's not battlemaster
         return;
 
     // check Deserter debuff
@@ -238,7 +245,7 @@ void WorldSession::HandleBattleGroundListOpcode( WorldPacket &recv_data )
         return;
 
     uint32 bgTypeId;
-    recv_data >> bgTypeId;                                      // id from DBC
+    recv_data >> bgTypeId;                                  // id from DBC
 
     BattlemasterListEntry const* bl = sBattlemasterListStore.LookupEntry(bgTypeId);
 
@@ -395,6 +402,13 @@ void WorldSession::HandleAreaSpiritHealerQueryOpcode( WorldPacket & recv_data )
     uint64 guid;
     recv_data >> guid;
 
+    Creature *unit = ObjectAccessor::GetCreature(*_player, guid);
+    if(!unit)
+        return;
+
+    if(!unit->isSpiritService())                            // it's not spirit service
+        return;
+
     sBattleGroundMgr.SendAreaSpiritHealerQueryOpcode(_player, bg, guid);
 }
 
@@ -414,6 +428,13 @@ void WorldSession::HandleAreaSpiritHealerQueueOpcode( WorldPacket & recv_data )
     uint64 guid;
     recv_data >> guid;
 
+    Creature *unit = ObjectAccessor::GetCreature(*_player, guid);
+    if(!unit)
+        return;
+
+    if(!unit->isSpiritService())                            // it's not spirit service
+        return;
+
     bg->AddPlayerToResurrectQueue(guid, _player->GetGUID());
 }
 
@@ -424,11 +445,22 @@ void WorldSession::HandleBattleGroundArenaJoin( WorldPacket & recv_data )
     sLog.outDebug("WORLD: CMSG_ARENAMASTER_JOIN");
     recv_data.hexlike();
 
+    // ignore if we already in BG or BG queue
+    if(_player->InBattleGround() || _player->InBattleGroundQueue())
+        return;
+
     uint64 guid;                                            // arena Battlemaster guid
     uint8 type;                                             // 2v2, 3v3 or 5v5
     uint8 asGroup;                                          // asGroup
     uint8 isRated;                                          // isRated
     recv_data >> guid >> type >> asGroup >> isRated;
+
+    Creature *unit = ObjectAccessor::GetCreature(*_player, guid);
+    if(!unit)
+        return;
+
+    if(!unit->isBattleMaster())                             // it's not battle master
+        return;
 
     uint8 arenatype = 0;
 
@@ -448,8 +480,13 @@ void WorldSession::HandleBattleGroundArenaJoin( WorldPacket & recv_data )
             break;
     }
 
-    // ignore if we already in BG or BG queue
-    if(_player->InBattleGround() || _player->InBattleGroundQueue())
+    if(isRated && !_player->GetArenaTeamId(type))           // player not in arena team of that size
+    {
+        _player->GetSession()->SendNotInArenaTeamPacket(arenatype);
+        return;
+    }
+
+    if(asGroup && !_player->GetGroup())                     // player not in group
         return;
 
     // check existence

@@ -695,7 +695,7 @@ void Aura::UpdateAuraDuration()
         ((Player*)m_target)->SendDirectMessage(&data);
     }
 
-    // not send in case p,ayer loading (will not work anyway until player not added to map), sent in visibility change code
+    // not send in case player loading (will not work anyway until player not added to map), sent in visibility change code
     if(m_target->GetTypeId() == TYPEID_PLAYER && ((Player*)m_target)->GetSession()->PlayerLoading())
         return;
 

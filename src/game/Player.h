@@ -715,6 +715,40 @@ enum MovementFlags
     MOVEMENTFLAG_UNK3           = 0x40000000
 };
 
+struct MovementInfo
+{
+    // common
+    uint32  flags;
+    uint8   unk1;
+    uint32  time;
+    float   x, y, z, o;
+    // transport
+    uint64  t_guid;
+    float   t_x, t_y, t_z, t_o;
+    uint32  t_time;
+    // swimming and unk
+    float   s_angle;
+    // last fall time
+    uint32  fallTime;
+    // jumping
+    float   j_unk, j_sinAngle, j_cosAngle, j_xyspeed;
+    // spline
+    float   u_unk1;
+
+    MovementInfo()
+    {
+        flags = time = t_time = fallTime = 0;
+        unk1 = 0;
+        x = y = z = o = t_x = t_y = t_z = t_o = s_angle = j_unk = j_sinAngle = j_cosAngle = j_xyspeed = u_unk1 = 0.0f;
+        t_guid = 0;
+    }
+
+    void SetMovementFlags(uint32 _flags)
+    {
+        flags = _flags;
+    }
+};
+
 // flags that use in movement check for example at spell casting
 MovementFlags const movementFlagsMask = MovementFlags(
 MOVEMENTFLAG_FORWARD |MOVEMENTFLAG_BACKWARD|MOVEMENTFLAG_STRAFE_LEFT|MOVEMENTFLAG_STRAFE_RIGHT|
@@ -1648,10 +1682,10 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         /***                 VARIOUS SYSTEMS                   ***/
         /*********************************************************/
-        bool isMoving() const { return (m_movement_flags & movementFlagsMask) != 0; }
-        uint32 GetMovementFlags() const { return m_movement_flags; }
-        bool HasMovementFlags(uint32 flags) const { return m_movement_flags & flags; }
-        void SetMovementFlags(uint32 Flags) { m_movement_flags = Flags;}
+        MovementInfo m_movementInfo;
+        bool isMoving() const { return (m_movementInfo.flags & movementFlagsMask) != 0; }
+        uint32 GetMovementFlags() const { return m_movementInfo.flags; }
+        bool HasMovementFlags(uint32 flags) const { return m_movementInfo.flags & flags; }
 
         bool CanFly() const { return HasMovementFlags(MOVEMENTFLAG_CAN_FLY); }
         bool IsFlying() const { return HasMovementFlags(MOVEMENTFLAG_FLYING); }
@@ -1660,16 +1694,11 @@ class MANGOS_DLL_SPEC Player : public Unit
         Transport * GetTransport() const { return m_transport; }
         void SetTransport(Transport * t) { m_transport = t; }
 
-        void SetTransOffset(float x, float y, float z, float orientation)
-            { m_transX = x; m_transY = y; m_transZ = z; m_transO = orientation; }
-        void SetTransTime(uint32 Time) { m_transTime = Time; }
-        void GetTransOffset( float &x, float &y, float &z, float &o ) const
-            { x = m_transX; y = m_transY; z = m_transZ; o = m_transO; }
-        float GetTransOffsetX() const { return m_transX; }
-        float GetTransOffsetY() const { return m_transY; }
-        float GetTransOffsetZ() const { return m_transZ; }
-        float GetTransOffsetO() const { return m_transO; }
-        uint32 GetTransTime() const { return m_transTime; }
+        float GetTransOffsetX() const { return m_movementInfo.t_x; }
+        float GetTransOffsetY() const { return m_movementInfo.t_y; }
+        float GetTransOffsetZ() const { return m_movementInfo.t_z; }
+        float GetTransOffsetO() const { return m_movementInfo.t_o; }
+        uint32 GetTransTime() const { return m_movementInfo.t_time; }
 
         uint32 GetSaveTimer() const { return m_nextSave; }
         void   SetSaveTimer(uint32 timer) { m_nextSave = timer; }
@@ -1861,8 +1890,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         std::vector<Item*> m_itemUpdateQueue;
         bool m_itemUpdateQueueBlocked;
 
-        uint32 m_movement_flags;
-
         uint32 m_GMFlags;
         uint64 m_curTarget;
         uint64 m_curSelection;
@@ -1948,12 +1975,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         ////////////////////Rest System/////////////////////
 
         // Transports
-        float m_transX;
-        float m_transY;
-        float m_transZ;
-        float m_transO;
-        uint32 m_transTime;
-
         Transport * m_transport;
 
         uint32 m_resetTalentsCost;

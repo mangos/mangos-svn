@@ -33,11 +33,12 @@ enum OBJECT_UPDATE_TYPE
 
 enum OBJECT_UPDATE_FLAGS
 {
+    UPDATEFLAG_NONE         = 0x00,
     UPDATEFLAG_SELF         = 0x01,
     UPDATEFLAG_TRANSPORT    = 0x02,
     UPDATEFLAG_FULLGUID     = 0x04,
-    UPDATEFLAG_HIGHGUID     = 0x08,
-    UPDATEFLAG_ALL          = 0x10,
+    UPDATEFLAG_LOWGUID      = 0x08,
+    UPDATEFLAG_HIGHGUID     = 0x10,
     UPDATEFLAG_LIVING       = 0x20,
     UPDATEFLAG_HASPOSITION  = 0x40
 };
@@ -50,7 +51,7 @@ class UpdateData
         void AddOutOfRangeGUID(std::set<uint64>& guids);
         void AddOutOfRangeGUID(const uint64 &guid);
         void AddUpdateBlock(const ByteBuffer &block);
-        bool BuildPacket(WorldPacket *packet);
+        bool BuildPacket(WorldPacket *packet, bool hasTransport = false);
         bool HasData() { return m_blockCount > 0 || !m_outOfRangeGUIDs.empty(); }
         void Clear();
 

@@ -115,64 +115,72 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         return;
 
     /* extract packet */
-    uint32 flags, time, fallTime;
-    float x, y, z, orientation;
+    MovementInfo movementInfo;
 
-    uint64 t_GUID;
-    float  t_x, t_y, t_z, t_o;
-    uint32 t_time;
-    float  s_angle;
-    float  j_unk1, j_sinAngle, j_cosAngle, j_xyspeed;
-    float  u_unk1;
-    uint8 unk;
+    recv_data >> movementInfo.flags;
+    recv_data >> movementInfo.unk1;
+    recv_data >> movementInfo.time;
+    recv_data >> movementInfo.x;
+    recv_data >> movementInfo.y;
+    recv_data >> movementInfo.z;
+    recv_data >> movementInfo.o;
 
-    recv_data >> flags >> unk >> time;
-    recv_data >> x >> y >> z >> orientation;
-    if(flags & MOVEMENTFLAG_ONTRANSPORT)                    // and if opcode 909?
+    if(movementInfo.flags & MOVEMENTFLAG_ONTRANSPORT)
     {
         // recheck
         CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+8+4+4+4+4+4);
 
-        recv_data >> t_GUID;
-        recv_data >> t_x >> t_y >> t_z >> t_o >> t_time;
+        recv_data >> movementInfo.t_guid;
+        recv_data >> movementInfo.t_x;
+        recv_data >> movementInfo.t_y;
+        recv_data >> movementInfo.t_z;
+        recv_data >> movementInfo.t_o;
+        recv_data >> movementInfo.t_time;
     }
-    if(flags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_UNK5))
+
+    if(movementInfo.flags & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_UNK5))
     {
         // recheck
         CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4);
 
-        recv_data >> s_angle;                               // kind of angle, -1.55=looking down, 0=looking straight forward, +1.55=looking up
+        recv_data >> movementInfo.s_angle;                  // kind of angle, -1.55=looking down, 0=looking straight forward, +1.55=looking up
     }
 
     // recheck
     CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4);
 
-    recv_data >> fallTime;                                  // duration of last jump (when in jump duration from jump begin to now)
+    recv_data >> movementInfo.fallTime;                     // duration of last jump (when in jump duration from jump begin to now)
 
-    if((flags & MOVEMENTFLAG_JUMPING) || (flags & MOVEMENTFLAG_FALLING))
+    if(movementInfo.flags & MOVEMENTFLAG_JUMPING)
     {
         // recheck
         CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4+4+4+4);
 
-        recv_data >> j_unk1;                                // ?constant, but different when jumping in water and on land?
-        recv_data >> j_sinAngle >> j_cosAngle;              // sin + cos of angle between orientation0 and players orientation
-        recv_data >> j_xyspeed;                             // speed of xy movement
+        recv_data >> movementInfo.j_unk;                    // constant, but different when jumping in water and on land?
+        recv_data >> movementInfo.j_sinAngle;               // sin of angle between orientation0 and players orientation
+        recv_data >> movementInfo.j_cosAngle;               // cos of angle between orientation0 and players orientation
+        recv_data >> movementInfo.j_xyspeed;                // speed of xy movement
     }
 
-    if(flags & MOVEMENTFLAG_SPLINE)
+    if(movementInfo.flags & MOVEMENTFLAG_SPLINE)
     {
         // recheck
         CHECK_PACKET_SIZE(recv_data, recv_data.rpos()+4);
 
-        recv_data >> u_unk1;                                // unknown
+        recv_data >> movementInfo.u_unk1;                   // unknown
     }
     /*----------------*/
 
-    if (!MaNGOS::IsValidMapCoord(x, y))
+    if(recv_data.size() != recv_data.rpos())
+    {
+        sLog.outError("MovementHandler: here still some bytes remaining in packet :(");
+    }
+
+    if (!MaNGOS::IsValidMapCoord(movementInfo.x, movementInfo.y))
         return;
 
     /* handle special cases */
-    if (flags & MOVEMENTFLAG_ONTRANSPORT)
+    if (movementInfo.flags & MOVEMENTFLAG_ONTRANSPORT)
     {
         // if we boarded a transport, add us to it
         if (!GetPlayer()->m_transport)
@@ -182,7 +190,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
             for (MapManager::TransportSet::iterator iter = MapManager::Instance().m_Transports.begin(); iter != MapManager::Instance().m_Transports.end(); ++iter)
             {
-                if ((*iter)->GetGUID() == t_GUID)
+                if ((*iter)->GetGUID() == movementInfo.t_guid)
                 {
                     GetPlayer()->m_transport = (*iter);
                     (*iter)->AddPassenger(GetPlayer());
@@ -190,37 +198,32 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
                 }
             }
         }
-        GetPlayer()->m_transX = t_x;
-        GetPlayer()->m_transY = t_y;
-        GetPlayer()->m_transZ = t_z;
-        GetPlayer()->m_transO = t_o;
-        GetPlayer()->m_transTime = t_time;
     }
     else if (GetPlayer()->m_transport)                      // if we were on a transport, leave
     {
         GetPlayer()->m_transport->RemovePassenger(GetPlayer());
         GetPlayer()->m_transport = NULL;
-        GetPlayer()->m_transX = 0.0f;
-        GetPlayer()->m_transY = 0.0f;
-        GetPlayer()->m_transZ = 0.0f;
-        GetPlayer()->m_transO = 0.0f;
-        GetPlayer()->m_transTime = 0;
+        movementInfo.t_x = 0.0f;
+        movementInfo.t_y = 0.0f;
+        movementInfo.t_z = 0.0f;
+        movementInfo.t_o = 0.0f;
+        movementInfo.t_time = 0;
     }
 
-    if (GetPlayer()->HasMovementFlags(MOVEMENTFLAG_FALLING) && !(flags & MOVEMENTFLAG_FALLING))
+    if (GetPlayer()->HasMovementFlags(MOVEMENTFLAG_FALLING) && !(movementInfo.flags & MOVEMENTFLAG_FALLING))
     {
         Player *target = GetPlayer();
-        if (fallTime > 1100 && !target->isDead() && !target->isGameMaster() &&
+        if (movementInfo.fallTime > 1100 && !target->isDead() && !target->isGameMaster() &&
             !target->HasAuraType(SPELL_AURA_HOVER) && !target->HasAuraType(SPELL_AURA_FEATHER_FALL))
         {
             Map const *map = MapManager::Instance().GetBaseMap(target->GetMapId());
-            float posz = map->GetWaterLevel(x,y);
-            float fallperc = float(fallTime)*10/11000;
+            float posz = map->GetWaterLevel(movementInfo.x, movementInfo.y);
+            float fallperc = float(movementInfo.fallTime)*10/11000;
             uint32 damage = (uint32)(((fallperc*fallperc -1) / 9 * target->GetMaxHealth())*sWorld.getRate(RATE_DAMAGE_FALL));
 
             if (damage > 0 && damage < 2* target->GetMaxHealth())
-                target->EnvironmentalDamage(target->GetGUID(),DAMAGE_FALL, damage);
-            DEBUG_LOG("!! z=%f, pz=%f FallTime=%d posz=%f damage=%d" , z, target->GetPositionZ(),fallTime, posz, damage);
+                target->EnvironmentalDamage(target->GetGUID(), DAMAGE_FALL, damage);
+            DEBUG_LOG("!! z=%f, pz=%f FallTime=%d posz=%f damage=%d" , movementInfo.z, target->GetPositionZ(), movementInfo.fallTime, posz, damage);
         }
 
         //handle fall and logout at the sametime
@@ -236,7 +239,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         }
     }
 
-    if(((flags & MOVEMENTFLAG_SWIMMING) != 0) != GetPlayer()->IsInWater())
+    if(((movementInfo.flags & MOVEMENTFLAG_SWIMMING) != 0) != GetPlayer()->IsInWater())
         GetPlayer()->SetInWater( !GetPlayer()->IsInWater() );
     /*----------------------*/
 
@@ -247,8 +250,8 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     data.append(recv_data.contents(), recv_data.size());
     GetPlayer()->SendMessageToSet(&data, false);
 
-    GetPlayer()->SetPosition(x, y, z, orientation);
-    GetPlayer()->SetMovementFlags(flags);
+    GetPlayer()->SetPosition(movementInfo.x, movementInfo.y, movementInfo.z, movementInfo.o);
+    GetPlayer()->m_movementInfo = movementInfo;
 
     if(GetPlayer()->isMoving())
         GetPlayer()->RemoveSpellsCausingAura(SPELL_AURA_FEIGN_DEATH);

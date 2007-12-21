@@ -184,19 +184,6 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
         }
     }
 
-    // flags2 only used at LIVING objects
-    /*if(flags & UPDATEFLAG_LIVING)
-    {
-        if(m_objectTypeId == TYPEID_PLAYER && ((Player*)this)->GetTransport() != 0)
-            flags2 |= MOVEMENTFLAG_ONTRANSPORT;
-
-        if(m_objectTypeId == TYPEID_PLAYER)
-        {
-            updatetype = UPDATETYPE_CREATE_OBJECT2; // dunno when exactly this's used
-            //flags2 |= 0x00002000;
-        }
-    }*/
-
     //sLog.outDebug("BuildCreateUpdate: update-type: %u, object-type: %u got flags: %X, flags2: %X", updatetype, m_objectTypeId, flags, flags2);
 
     ByteBuffer buf(500);
@@ -271,9 +258,10 @@ void Object::DestroyForPlayer(Player *target) const
 
 void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 ) const
 {
-    *data << (uint8)flags;
+    *data << (uint8)flags;                                  // update flags
 
-    if (flags & UPDATEFLAG_LIVING)                          // 0x20
+    // 0x20
+    if (flags & UPDATEFLAG_LIVING)
     {
         switch(GetTypeId())
         {
@@ -299,13 +287,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
                     flags2 &= ~MOVEMENTFLAG_ONTRANSPORT;
 
                 // remove unknown, unused etc flags for now
-                flags2 &= ~MOVEMENTFLAG_SPLINE;
-                flags2 &= ~MOVEMENTFLAG_SPLINE2;
-                flags2 &= ~MOVEMENTFLAG_JUMPING;
-                flags2 &= ~MOVEMENTFLAG_FALLING;
-                flags2 &= ~MOVEMENTFLAG_SWIMMING;
-                flags2 &= ~MOVEMENTFLAG_UNK1;
-                flags2 &= ~MOVEMENTFLAG_UNK5;
+                flags2 &= ~MOVEMENTFLAG_SPLINE2;            // will be set manually
 
                 if(((Player*)this)->isInFlight())
                 {
@@ -316,14 +298,16 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
             break;
         }
 
-        *data << flags2;                                    // movement flags
+        *data << uint32(flags2);                            // movement flags
         *data << uint8(0);                                  // unk 2.3.0
-        *data << getMSTime();                               // this appears to be time in ms but can be any thing (mask, flags)
+        *data << uint32(getMSTime());                       // time (in milliseconds)
     }
 
-    if (flags & UPDATEFLAG_HASPOSITION)                     // 0x40
+    // 0x40
+    if (flags & UPDATEFLAG_HASPOSITION)
     {
-        if(flags & UPDATEFLAG_TRANSPORT)                    // 0x2
+        // 0x02
+        if(flags & UPDATEFLAG_TRANSPORT)
         {
             *data << (float)0;
             *data << (float)0;
@@ -339,9 +323,11 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
         }
     }
 
-    if (flags & UPDATEFLAG_LIVING)                          // 0x20
+    // 0x20
+    if(flags & UPDATEFLAG_LIVING)
     {
-        if(flags2 & MOVEMENTFLAG_ONTRANSPORT)               // 0x200
+        // 0x00000200
+        if(flags2 & MOVEMENTFLAG_ONTRANSPORT)
         {
             *data << (uint64)((Player*)this)->GetTransport()->GetGUID();
             *data << (float)((Player*)this)->GetTransOffsetX();
@@ -351,29 +337,47 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
             *data << (uint32)((Player*)this)->GetTransTime();
         }
 
-        /*if(flags2 & MOVEMENTFLAG_SWIMMING)  // 0x200000
+        // 0x02200000
+        if(flags2 & (MOVEMENTFLAG_SWIMMING | MOVEMENTFLAG_UNK5))
         {
-            // is't part of movement packet, we must store and send it...
-            *data << (float)0;              // we can get this value from movement packets?
-        }*/
+            if(GetTypeId() == TYPEID_PLAYER)
+                *data << (float)((Player*)this)->m_movementInfo.s_angle;
+            else
+                *data << (float)0;                          // is't part of movement packet, we must store and send it...
+        }
 
-        // fall time according movement packet structure...
-        *data << (uint32)0;                                 // unknown
+        if(GetTypeId() == TYPEID_PLAYER)
+            *data << (uint32)((Player*)this)->m_movementInfo.fallTime;
+        else
+            *data << (uint32)0;                             // last fall time
 
-        // 0x2000 or 0x4000
-        /*if((flags2 & MOVEMENTFLAG_JUMPING) || (flags2 & MOVEMENTFLAG_FALLING))
+        // 0x00001000
+        if(flags2 & MOVEMENTFLAG_JUMPING)
         {
-            // is't part of movement packet, we must store and send it...
-            *data << (float)0;
-            *data << (float)0;
-            *data << (float)0;
-            *data << (float)0;
-        }*/
+            if(GetTypeId() == TYPEID_PLAYER)
+            {
+                *data << (float)((Player*)this)->m_movementInfo.j_unk;
+                *data << (float)((Player*)this)->m_movementInfo.j_sinAngle;
+                *data << (float)((Player*)this)->m_movementInfo.j_cosAngle;
+                *data << (float)((Player*)this)->m_movementInfo.j_xyspeed;
+            }
+            else
+            {
+                *data << (float)0;
+                *data << (float)0;
+                *data << (float)0;
+                *data << (float)0;
+            }
+        }
 
-        /*if(flags2 & MOVEMENTFLAG_SPLINE)    // 0x4000000
+        // 0x04000000
+        if(flags2 & MOVEMENTFLAG_SPLINE)
         {
-            *data << uint32(0);
-        }*/
+            if(GetTypeId() == TYPEID_PLAYER)
+                *data << (float)((Player*)this)->m_movementInfo.u_unk1;
+            else
+                *data << (float)0;
+        }
 
         *data << ((Unit*)this)->GetSpeed( MOVE_WALK );
         *data << ( ((Unit*)this)->IsMounted() ? ((Unit*)this)->GetSpeed( MOVE_MOUNTED ) : ((Unit*)this)->GetSpeed( MOVE_RUN ) );
@@ -384,7 +388,8 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
         *data << ((Unit*)this)->GetSpeed( MOVE_FLYBACK );
         *data << ((Unit*)this)->GetSpeed( MOVE_TURN );
 
-        if(flags2 & MOVEMENTFLAG_SPLINE2)                   // 0x8000000
+        // 0x08000000
+        if(flags2 & MOVEMENTFLAG_SPLINE2)
         {
             if(!((Player*)this)->isInFlight())
             {
@@ -399,7 +404,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
             uint32 flags3 = 0x00000300;
 
             *data << uint32(flags3);                        // splines flag?
-            /* unused currently
+
             if(flags3 & 0x10000)                            // probably x,y,z coords there
             {
                 *data << (float)0;
@@ -416,7 +421,7 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
             {
                 *data << (float)0;
             }
-            */
+
             Path &path = fmg->GetPath();
 
             float x, y, z;
@@ -459,7 +464,8 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
         }
     }
 
-    if(flags & UPDATEFLAG_ALL)                              // 0x10
+    // 0x8
+    if(flags & UPDATEFLAG_LOWGUID)
     {
         switch(GetTypeId())
         {
@@ -486,7 +492,8 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
         }
     }
 
-    if(flags & UPDATEFLAG_HIGHGUID)                         // 0x8
+    // 0x10
+    if(flags & UPDATEFLAG_HIGHGUID)
     {
         switch(GetTypeId())
         {
@@ -504,12 +511,14 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
         }
     }
 
-    /*if(flags & UPDATEFLAG_FULLGUID)       // 0x4
+    // 0x4
+    if(flags & UPDATEFLAG_FULLGUID)
     {
-        packed guid (probably target guid)  // unk
-    }*/
+        *data << uint8(0);                                  // packed guid (probably target guid)
+    }
 
-    if(flags & UPDATEFLAG_TRANSPORT)                        // 0x2
+    // 0x2
+    if(flags & UPDATEFLAG_TRANSPORT)
     {
         *data << uint32(getMSTime());                       // ms time
     }

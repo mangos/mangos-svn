@@ -549,7 +549,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleAreaSpiritHealerQueueOpcode(WorldPacket& recv_data);
         void HandleDismountOpcode(WorldPacket& recv_data);
         void HandleSelfResOpcode(WorldPacket& recv_data);
-        void HandleComplaintChatOpcode(WorldPacket& recv_data);
+        void HandleReportSpamOpcode(WorldPacket& recv_data);
         void HandleRequestPetInfoOpcode(WorldPacket& recv_data);
 
         // Socket gem
