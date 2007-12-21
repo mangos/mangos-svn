@@ -118,8 +118,7 @@ struct MANGOS_DLL_DECL Cell
 
     Cell& operator=(const Cell &cell)
     {
-        this->~Cell();
-        new (this) Cell(cell);
+        this->data.All = cell.data.All;
         return *this;
     }
 

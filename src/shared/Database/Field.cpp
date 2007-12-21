@@ -59,13 +59,13 @@ mType(type)
 
 Field::~Field()
 {
-    delete [] mValue;
-    delete [] mName;
+    if(mValue) delete [] mValue;
+    if(mName) delete [] mName;
 }
 
 void Field::SetValue(const char *value)
 {
-    delete [] mValue;
+    if(mValue) delete [] mValue;
 
     if (value)
     {
@@ -78,7 +78,7 @@ void Field::SetValue(const char *value)
 
 void Field::SetName(const char *name)
 {
-    delete [] mName;
+    if(mName) delete [] mName;
 
     if (name)
     {

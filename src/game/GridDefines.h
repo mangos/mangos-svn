@@ -78,8 +78,8 @@ struct MANGOS_DLL_DECL CoordPair
     bool operator!=(const CoordPair<LIMIT> &obj) const { return !operator==(obj); }
     CoordPair<LIMIT>& operator=(const CoordPair<LIMIT> &obj)
     {
-        this->~CoordPair<LIMIT>();
-        new (this) CoordPair<LIMIT>(obj);
+        x_coord = obj.x_coord;
+        y_coord = obj.y_coord;
         return *this;
     }
 

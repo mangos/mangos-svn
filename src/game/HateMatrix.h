@@ -76,8 +76,8 @@ struct HateBinder
 
     HateBinder& operator=(const HateBinder &obj)
     {
-        this->~HateBinder();
-        new (this) HateBinder(obj);
+        i_hateValue = obj.i_hateValue;
+        i_unit = obj.i_unit;
         return *this;
     }
 };
