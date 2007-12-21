@@ -2438,7 +2438,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
         return false;
     }
 
-    if(!ObjectMgr::IsSpellValid(spellInfo,false))
+    if(!ObjectMgr::IsSpellValid(spellInfo,this,false))
     {
         // do character spell book cleanup (all characters)
         if(state == PLAYERSPELL_UNCHANGED)                  // spell load case
@@ -13976,7 +13976,7 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
         {
             for(uint32 i = 0; i < 7; ++i)
             {
-                if(spellInfo->Reagent[i])
+                if(spellInfo->Reagent[i] > 0)
                 {
                     uint16 dest;                            //for succubus, voidwalker, felhunter and felguard credit soulshard when despawn reason other than death (out of range, logout)
                     uint8 msg = CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, spellInfo->Reagent[i], spellInfo->ReagentCount[i], false );
