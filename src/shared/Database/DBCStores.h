@@ -72,6 +72,7 @@ float GetMinRange(SpellRangeEntry const *range);
 float GetMaxRange(SpellRangeEntry const *range);
 int32 GetDuration(SpellEntry const *spellInfo);
 int32 GetMaxDuration(SpellEntry const *spellInfo);
+inline uint32 GetRecoveryTime(SpellEntry const *spellInfo) { return spellInfo->RecoveryTime > spellInfo->CategoryRecoveryTime ? spellInfo->RecoveryTime : spellInfo->CategoryRecoveryTime; }
 char* GetPetName(uint32 petfamily, uint32 dbclang);
 bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);
 bool IsSealSpell(uint32 spellId);

@@ -1810,7 +1810,7 @@ void Creature::AddCreatureSpellCooldown(uint32 spellid)
     if(!spellInfo)
         return;
 
-    uint32 cooldown = spellInfo->CategoryRecoveryTime > spellInfo->RecoveryTime ? spellInfo->CategoryRecoveryTime : spellInfo->RecoveryTime;
+    uint32 cooldown = GetRecoveryTime(spellInfo);
     if(cooldown)
         _AddCreatureSpellCooldown(spellid, time(NULL) + cooldown/1000);
 

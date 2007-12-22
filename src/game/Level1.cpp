@@ -529,7 +529,7 @@ bool ChatHandler::HandleModifyHPCommand(const char* args)
         return true;
     }
 
-    PSendSysMessage(LANG_YOU_CHANGE_HP, hp, hpm, chr->GetName());
+    PSendSysMessage(LANG_YOU_CHANGE_HP, chr->GetName(), hp, hpm);
     ChatHandler(chr).PSendSysMessage(LANG_YOURS_HP_CHANGED, m_session->GetPlayer()->GetName(), hp, hpm);
 
     chr->SetMaxHealth( hpm );
@@ -570,7 +570,7 @@ bool ChatHandler::HandleModifyManaCommand(const char* args)
         return true;
     }
 
-    PSendSysMessage(LANG_YOU_CHANGE_MANA, mana, manam, chr->GetName());
+    PSendSysMessage(LANG_YOU_CHANGE_MANA, chr->GetName(), mana, manam);
     ChatHandler(chr).PSendSysMessage(LANG_YOURS_MANA_CHANGED, m_session->GetPlayer()->GetName(), mana, manam);
 
     chr->SetMaxPower(POWER_MANA,manam );
@@ -612,7 +612,7 @@ bool ChatHandler::HandleModifyEnergyCommand(const char* args)
         return true;
     }
 
-    PSendSysMessage(LANG_YOU_CHANGE_ENERGY, energy/10, energym/10, chr->GetName());
+    PSendSysMessage(LANG_YOU_CHANGE_ENERGY, chr->GetName(), energy/10, energym/10);
     ChatHandler(chr).PSendSysMessage(LANG_YOURS_ENERGY_CHANGED, m_session->GetPlayer()->GetName(), energy/10, energym/10);
 
     chr->SetMaxPower(POWER_ENERGY,energym );
@@ -656,7 +656,7 @@ bool ChatHandler::HandleModifyRageCommand(const char* args)
         return true;
     }
 
-    PSendSysMessage(LANG_YOU_CHANGE_RAGE, rage/10, ragem/10, chr->GetName());
+    PSendSysMessage(LANG_YOU_CHANGE_RAGE, chr->GetName(), rage/10, ragem/10);
     ChatHandler(chr).PSendSysMessage(LANG_YOURS_RAGE_CHANGED, m_session->GetPlayer()->GetName(), rage/10, ragem/10);
 
     chr->SetMaxPower(POWER_RAGE,ragem );

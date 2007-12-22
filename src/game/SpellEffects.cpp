@@ -746,8 +746,7 @@ void Spell::EffectDummy(uint32 i)
                 uint32 classspell = itr->first;
                 SpellEntry const *spellInfo = sSpellStore.LookupEntry(classspell);
 
-                if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && spellInfo->Id != 14185 &&
-                    (spellInfo->RecoveryTime > 0 || spellInfo->CategoryRecoveryTime > 0))
+                if (spellInfo->SpellFamilyName == SPELLFAMILY_ROGUE && spellInfo->Id != 14185 && GetRecoveryTime(spellInfo) > 0)
                 {
                     ((Player*)m_caster)->RemoveSpellCooldown(classspell);
 
@@ -772,8 +771,7 @@ void Spell::EffectDummy(uint32 i)
                 uint32 classspell = itr->first;
                 SpellEntry const *spellInfo = sSpellStore.LookupEntry(classspell);
 
-                if (spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && spellInfo->Id != 23989 &&
-                    (spellInfo->RecoveryTime > 0 || spellInfo->CategoryRecoveryTime > 0))
+                if (spellInfo->SpellFamilyName == SPELLFAMILY_HUNTER && spellInfo->Id != 23989 && GetRecoveryTime(spellInfo) > 0 )
                 {
                     ((Player*)m_caster)->RemoveSpellCooldown(classspell);
 
@@ -801,8 +799,8 @@ void Spell::EffectDummy(uint32 i)
                 uint32 classspell = itr->first;
                 SpellEntry const *spellInfo = sSpellStore.LookupEntry(classspell);
 
-                if (spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && spellInfo->School == SPELL_SCHOOL_FROST && spellInfo->Id != 12472 &&
-                    (spellInfo->RecoveryTime > 0 || spellInfo->CategoryRecoveryTime > 0))
+                if( spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && spellInfo->School == SPELL_SCHOOL_FROST && 
+                    spellInfo->Id != 12472 && GetRecoveryTime(spellInfo) > 0 )
                 {
                     ((Player*)m_caster)->RemoveSpellCooldown(classspell);
 
@@ -2917,7 +2915,7 @@ void Spell::EffectWeaponDmg(uint32 i)
             SpellEntry const *proto = (*itr)->GetSpellProto();
             if(proto->SpellVisual == 406 && proto->SpellIconID == 565)
             {
-                uint32 duration = GetDuration(proto);
+                int32 duration = GetDuration(proto);
                 (*itr)->SetAuraDuration(duration);
                 (*itr)->UpdateAuraDuration();
                 sunder_stacks++;

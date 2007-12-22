@@ -5117,7 +5117,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     if(damagetype == DOT)
     {
         CastingTime = 3500;
-        uint32 DotDuration = GetDuration(spellProto);
+        int32 DotDuration = GetDuration(spellProto);
         // 200% limit
         if(DotDuration > 0)
         {
@@ -5366,18 +5366,21 @@ uint32 Unit::SpellHealingBonus(SpellEntry const *spellProto, uint32 healamount, 
     if(damagetype == DOT)
     {
         CastingTime = 3500;
-        uint32 DotDuration = GetDuration(spellProto);
-        // 200% limit
-        if(DotDuration > 30000) DotDuration = 30000;
-        DotFactor = DotDuration / 15000.0f;
-        int x = 0;
-        for(int j = 0; j < 3; j++)
-            if(spellProto->Effect[j] == 6) x = j;
-        int DotTicks = 6;
-        if(spellProto->EffectAmplitude[x] != 0)
-            DotTicks = DotDuration / spellProto->EffectAmplitude[x];
-        if(DotTicks)
-            AdvertisedBenefit /= DotTicks;
+        int32 DotDuration = GetDuration(spellProto);
+        if(DotDuration > 0)
+        {
+            // 200% limit
+            if(DotDuration > 30000) DotDuration = 30000;
+            DotFactor = DotDuration / 15000.0f;
+            int x = 0;
+            for(int j = 0; j < 3; j++)
+                if(spellProto->Effect[j] == 6) x = j;
+            int DotTicks = 6;
+            if(spellProto->EffectAmplitude[x] != 0)
+                DotTicks = DotDuration / spellProto->EffectAmplitude[x];
+            if(DotTicks)
+                AdvertisedBenefit /= DotTicks;
+        }
     }
 
     // Level Factor

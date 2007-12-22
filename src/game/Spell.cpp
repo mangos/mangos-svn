@@ -1705,18 +1705,6 @@ void Spell::SendSpellCooldown()
                 if(*i_scset == m_spellInfo->Id)             // skip casted spell
                     continue;
 
-                // only send if different from client known cooldown
-                /*
-                if(cat != m_spellInfo->Category || m_spellInfo->CategoryRecoveryTime != uint32(catrec))
-                {
-                    WorldPacket data(SMSG_SPELL_COOLDOWN, (8+1+4+4));
-                    data << m_caster->GetGUID();
-                    data << uint8(0x0);
-                    data << uint32(*i_scset);
-                    data << uint32(catrec);
-                    _player->GetSession()->SendPacket(&data);
-                }
-                */
                 if(m_CastItem)
                     _player->AddSpellCooldown(*i_scset, m_CastItem->GetEntry(), catrecTime);
                 else
