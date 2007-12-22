@@ -656,6 +656,9 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
     count = 0;
     totalcount = 0;
     data << (uint32) 0;
+
+    std::transform( searchedname.begin(), searchedname.end(), searchedname.begin(), ::tolower );
+
     for (AuctionHouseObject::AuctionEntryMap::iterator itr = mAuctions->GetAuctionsBegin();itr != mAuctions->GetAuctionsEnd();++itr)
     {
         AuctionEntry *Aentry = itr->second;
@@ -678,8 +681,20 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
                                     if( ( levelmin == (0x00) || proto->RequiredLevel >= levelmin ) && ( levelmax == (0x00) || proto->RequiredLevel <= levelmax ) )
                                     {
                                         name = proto->Name1;
+
+                                        // local name
+                                        int loc_idx = GetSessionLocaleIndex();
+                                        if ( loc_idx >= 0 )
+                                        {
+                                            ItemLocale const *il = objmgr.GetItemLocale(proto->ItemId);
+                                            if (il)
+                                            {
+                                                if (il->Name.size() > loc_idx && !il->Name[loc_idx].empty())
+                                                    name = il->Name[loc_idx];
+                                            }
+                                        }
+
                                         std::transform( name.begin(), name.end(), name.begin(), ::tolower );
-                                        std::transform( searchedname.begin(), searchedname.end(), searchedname.begin(), ::tolower );
                                         if( searchedname.empty() || name.find( searchedname ) != std::string::npos )
                                         {
                                             if ((count < 50) && (totalcount >= listfrom))
