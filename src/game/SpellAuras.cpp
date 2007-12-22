@@ -151,7 +151,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAuraModAttackPower,                        // 99 SPELL_AURA_MOD_ATTACK_POWER
     &Aura::HandleNULL,                                      //100 SPELL_AURA_AURAS_VISIBLE
     &Aura::HandleModResistancePercent,                      //101 SPELL_AURA_MOD_RESISTANCE_PCT
-    &Aura::HandleNoImmediateEffect,                         //102 SPELL_AURA_MOD_CREATURE_ATTACK_POWER
+    &Aura::HandleNoImmediateEffect,                         //102 SPELL_AURA_MOD_MELEE_ATTACK_POWER_VERSUS implemented in Unit::MeleeDamageBonus
     &Aura::HandleAuraModTotalThreat,                        //103 SPELL_AURA_MOD_TOTAL_THREAT
     &Aura::HandleAuraWaterWalk,                             //104 SPELL_AURA_WATER_WALK
     &Aura::HandleAuraFeatherFall,                           //105 SPELL_AURA_FEATHER_FALL
@@ -176,11 +176,11 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleAuraModRangedAttackPower,                  //124 SPELL_AURA_MOD_RANGED_ATTACK_POWER
     &Aura::HandleNoImmediateEffect,                         //125 SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN
     &Aura::HandleNoImmediateEffect,                         //126 SPELL_AURA_MOD_MELEE_DAMAGE_TAKEN_PCT
-    &Aura::HandleNoImmediateEffect,                         //127 SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS
+    &Aura::HandleNoImmediateEffect,                         //127 SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS implemented in Unit::MeleeDamageBonus
     &Aura::HandleModPossessPet,                             //128 SPELL_AURA_MOD_POSSESS_PET
     &Aura::HandleAuraModIncreaseSpeedAlways,                //129 SPELL_AURA_MOD_INCREASE_SPEED_ALWAYS
     &Aura::HandleAuraModIncreaseMountedSpeedAlways,         //130 SPELL_AURA_MOD_MOUNTED_SPEED_ALWAYS
-    &Aura::HandleNULL,                                      //131 SPELL_AURA_MOD_CREATURE_RANGED_ATTACK_POWER
+    &Aura::HandleNoImmediateEffect,                         //131 SPELL_AURA_MOD_RANGED_ATTACK_POWER_VERSUS implemented in Unit::MeleeDamageBonus
     &Aura::HandleAuraModIncreaseEnergyPercent,              //132 SPELL_AURA_MOD_INCREASE_ENERGY_PERCENT
     &Aura::HandleAuraModIncreaseHealthPercent,              //133 SPELL_AURA_MOD_INCREASE_HEALTH_PERCENT
     &Aura::HandleAuraModRegenInterrupt,                     //134 SPELL_AURA_MOD_MANA_REGEN_INTERRUPT
