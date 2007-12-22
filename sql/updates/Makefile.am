@@ -523,12 +523,13 @@ pkgdata_DATA = \
 	4799_mangos_creature_addon.sql \
 	4815_mangos_quest_template.sql \
 	4829_mangos_command.sql \
-	4842_quest_template.sql \
+	4842_mangos_quest_template.sql \
 	4846_characters.sql \
 	4846_mangos_creature_template.sql \
 	4846_mangos_item_template.sql \
 	4846_mangos_npc_option.sql \
-	4875_quest_template.sql \
+	4875_mangos_quest_template.sql \
+	4890_mangos_item_template.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -1032,12 +1033,13 @@ EXTRA_DIST = \
 	4799_mangos_creature_addon.sql \
 	4815_mangos_quest_template.sql \
 	4829_mangos_command.sql \
-	4842_quest_template.sql \
+	4842_mangos_quest_template.sql \
 	4846_characters.sql \
 	4846_mangos_creature_template.sql \
 	4846_mangos_item_template.sql \
 	4846_mangos_npc_option.sql \
-	4875_quest_template.sql \
+	4875_mangos_quest_template.sql \
+	4890_mangos_item_template.sql \
 	README
 
 

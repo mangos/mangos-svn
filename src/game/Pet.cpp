@@ -1189,10 +1189,9 @@ void Pet::_LoadAuras(uint32 timediff)
     for (int i = 0; i < TOTAL_AURAS; i++)
         m_modAuras[i].clear();
 
-    for(uint8 i = 0; i < 48; i++)
-        SetUInt32Value((uint16)(UNIT_FIELD_AURA + i), 0);
-    for(uint8 j = 0; j < 6; j++)
-        SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + j), 0);
+    // all aura related fields
+    for(int i = UNIT_FIELD_AURA; i <= UNIT_FIELD_AURASTATE; ++i)
+        SetUInt32Value(i, 0);
 
     QueryResult *result = CharacterDatabase.PQuery("SELECT `caster_guid`,`spell`,`effect_index`,`amount`,`maxduration`,`remaintime`,`remaincharges` FROM `pet_aura` WHERE `guid` = '%u'",m_charmInfo->GetPetNumber());
 

@@ -114,23 +114,20 @@ enum ITEM_FLAGS
     ITEM_FLAGS_WRAPPED                          = 8
 };
 
-enum BAG_FAMILY
+enum BAG_FAMILY_MASK
 {
-    BAG_FAMILY_NONE                             = 0,
-    BAG_FAMILY_ARROWS                           = 1,
-    BAG_FAMILY_BULLETS                          = 2,
-    BAG_FAMILY_SOUL_SHARDS                      = 3,
-    BAG_FAMILY_LEATHERWORKING_SUPP              = 4,
-    //BAG_FAMILY_UNK1                           = 5,
-    BAG_FAMILY_HERBS                            = 6,
-    BAG_FAMILY_ENCHANTING_SUPP                  = 7,
-    BAG_FAMILY_ENGINEERING_SUPP                 = 8,
-    BAG_FAMILY_KEYS                             = 9,
-    BAG_FAMILY_GEMS                             = 10,
-    BAG_FAMILY_MINING_SUPP                      = 11
+    BAG_FAMILY_MASK_ARROWS                    = 0x00000001,
+    BAG_FAMILY_MASK_BULLETS                   = 0x00000002,
+    BAG_FAMILY_MASK_SHARDS                    = 0x00000004,
+    BAG_FAMILY_MASK_LEATHERWORKING_SUPP       = 0x00000008,
+    //BAG_FAMILY_MASK_UNK                     = 0x00000010, // not used currently
+    BAG_FAMILY_MASK_HERBS                     = 0x00000020,
+    BAG_FAMILY_MASK_ENCHANTING_SUPP           = 0x00000040,
+    BAG_FAMILY_MASK_ENGINEERING_SUPP          = 0x00000080,
+    BAG_FAMILY_MASK_KEYS                      = 0x00000100,
+    BAG_FAMILY_MASK_GEMS                      = 0x00000200,
+    BAG_FAMILY_MASK_MINING_SUPP               = 0x00000400
 };
-
-#define MAX_BAG_FAMILY                            12
 
 /* TODO: Not entirely positive on need for this??
 enum SOCKET_CONTENT ();

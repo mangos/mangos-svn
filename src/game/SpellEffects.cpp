@@ -4214,7 +4214,7 @@ void Spell::EffectProspecting(uint32 i)
         return;
 
     Player* p_caster = (Player*)m_caster;
-    if(!itemTarget || (itemTarget->GetProto()->BagFamily != BAG_FAMILY_MINING_SUPP))
+    if(!itemTarget || !(itemTarget->GetProto()->BagFamily & BAG_FAMILY_MASK_MINING_SUPP))
         return;
 
     if(itemTarget->GetCount() < 5)
