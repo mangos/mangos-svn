@@ -2039,7 +2039,14 @@ void Spell::EffectSummon(uint32 i)
     Pet* spawnCreature = new Pet(m_caster, SUMMON_PET);
 
     if(spawnCreature->LoadPetFromDB(m_caster,pet_entry))
+    {
+        // set timer for unsummon
+        int32 duration = GetDuration(m_spellInfo);
+        if(duration > 0)
+            spawnCreature->SetDuration(duration);
+
         return;
+    }
 
     // before caster
     float x,y,z;
@@ -2053,6 +2060,11 @@ void Spell::EffectSummon(uint32 i)
         delete spawnCreature;
         return;
     }
+
+    // set timer for unsummon
+    int32 duration = GetDuration(m_spellInfo);
+    if(duration > 0)
+        spawnCreature->SetDuration(duration);
 
     spawnCreature->SetUInt64Value(UNIT_FIELD_SUMMONEDBY,m_caster->GetGUID());
     spawnCreature->SetUInt32Value(UNIT_NPC_FLAGS , 0);
