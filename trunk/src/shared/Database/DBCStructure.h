@@ -600,13 +600,16 @@ struct StableSlotPricesEntry
 
 struct TalentEntry
 {
-    uint32    TalentID;
-    uint32    TalentTab;
-    uint32    Row;
-    uint32    Col;
-    uint32    RankID[5];
-    uint32    DependsOn;
-    uint32    DependsOnRank;
+    uint32    TalentID;                                     //0
+    uint32    TalentTab;                                    //1 index in TalentTab.dbc (TalentTabEntry)
+    uint32    Row;                                          //2
+    uint32    Col;                                          //3
+    uint32    RankID[5];                                    //4-8
+                                                            //9-12 not used, always 0, maybe not used high ranks
+    uint32    DependsOn;                                    //13 index in Talent.dbc (TalentEntry)
+                                                            //14-15 not used
+    uint32    DependsOnRank;                                //16
+                                                            //17-20 not used
 };
 
 struct TalentTabEntry
@@ -617,7 +620,7 @@ struct TalentTabEntry
     //unit32  spellicon;                                    //18
                                                             //19 not used
     uint32    ClassMask;                                    //20
-    //uint32  tabpage                                       //21
+    uint32    tabpage;                                      //21 
     //char*   internalname;                                 //22
 };
 
