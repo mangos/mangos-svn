@@ -2939,9 +2939,11 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
     Player *chr = NULL;
     uint64 chr_guid = 0;
 
+    std::string name;
+
     if(pname)                                               // player by name
     {
-        std::string name = pname;
+        name = pname;
         normalizePlayerName(name);
 
         chr = objmgr.GetPlayer(name.c_str());
@@ -2964,6 +2966,8 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
             SendSysMessage(LANG_NO_CHAR_SELECTED);
             return true;
         }
+
+        name = chr->GetName();
     }
 
     assert(chr || chr_guid);
@@ -3000,6 +3004,8 @@ bool ChatHandler::HandleLevelUpCommand(const char* args)
         Player::SaveValuesArrayInDB(values,chr_guid);
     }
 
+    if(m_session->GetPlayer() != chr)                                  // including chr==NULL
+        PSendSysMessage(LANG_YOU_CHANGE_LVL,name.c_str(),newlevel);
     return true;
 }
 

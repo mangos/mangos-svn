@@ -801,28 +801,33 @@ bool IsPositiveSpell(uint32 spellId)
 bool IsSingleTargetSpell(uint32 spellId)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
-    if (!spellInfo) return false;
+    if (!spellInfo)
+        return false;
 
     // cheap shot is an exception
-    if ( spellId == 1833 || spellId == 14902 ) return false;
+    if ( spellId == 1833 || spellId == 14902 )
+        return false;
 
     // hunter's mark and similar
-    if(spellInfo->SpellVisual == 3239) return true;
+    if(spellInfo->SpellVisual == 3239)
+        return true;
 
     // cannot be cast on another target while not cooled down anyway
     int32 duration = GetDuration(spellInfo);
-    if ( duration < int32(spellInfo->RecoveryTime)) return false;
-    if ( spellInfo->RecoveryTime == 0 && duration < int32(spellInfo->CategoryRecoveryTime)) return false;
+    if ( duration >= 0 && duration < int32(GetRecoveryTime(spellInfo)))
+        return false;
 
     // all other single target spells have if it has AttributesEx
-    if ( spellInfo->AttributesEx & (1<<18) ) return true;
+    if ( spellInfo->AttributesEx & (1<<18) )
+        return true;
 
     // other single target
                                                             //Fear
     if ((spellInfo->SpellIconID == 98 && spellInfo->SpellVisual == 336)
                                                             //Banish
-        || (spellInfo->SpellIconID == 96 && spellInfo->SpellVisual == 1305)
-        ) return true;
+        || (spellInfo->SpellIconID == 96 && spellInfo->SpellVisual == 1305) )
+        return true;
+
     // all other single target spells have if it has Attributes
     //if ( spellInfo->Attributes & (1<<30) ) return true;
     return false;

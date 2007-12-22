@@ -910,7 +910,7 @@ void Aura::_RemoveAura()
 
         // reset cooldown state for spells infinity/long aura (it's all self applied (?))
         int32 duration = GetDuration(GetSpellProto());
-        if(caster==m_target && (duration < 0 || uint32(duration) > GetSpellProto()->RecoveryTime))
+        if( caster==m_target && ( duration < 0 || uint32(duration) > GetRecoveryTime(GetSpellProto()) ))
             SendCoolDownEvent();
     }
     else                                                    // decrease count for spell
@@ -2136,7 +2136,7 @@ void Aura::HandleFeignDeath(bool Apply, bool Real)
         data << m_target->GetGUID();
         data << uint8(0x0);
         data << uint32(GetSpellProto()->Id);
-        data << uint32((GetSpellProto()->RecoveryTime > GetSpellProto()->CategoryRecoveryTime) ? GetSpellProto()->RecoveryTime : GetSpellProto()->CategoryRecoveryTime);
+        data << uint32(GetRecoveryTime(GetSpellProto()));
         ((Player*)m_target)->GetSession()->SendPacket(&data);
 
     }
