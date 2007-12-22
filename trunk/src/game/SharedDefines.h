@@ -352,7 +352,7 @@ enum SpellEffects
     SPELL_EFFECT_130                       = 130,
     SPELL_EFFECT_131                       = 131,
     SPELL_EFFECT_132                       = 132,
-    SPELL_EFFECT_133                       = 133,
+    SPELL_EFFECT_UNLEARN_SPECIALIZATION    = 133,
     SPELL_EFFECT_134                       = 134,
     SPELL_EFFECT_135                       = 135,
     SPELL_EFFECT_136                       = 136,
