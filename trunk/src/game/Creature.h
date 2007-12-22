@@ -352,7 +352,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         bool IsInEvadeMode() const;
 
-        void AIM_Initialize();
+        bool AIM_Initialize();
 
         void AI_SendMoveToPacket(float x, float y, float z, uint32 time, bool run, uint8 type);
         CreatureAI* AI() { return i_AI; }
@@ -553,6 +553,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         uint32 m_DBTableGuid;
         bool m_regenHealth;
+        bool m_AI_locked;
         uint32 m_equipmentId;
     private:
         GridReference<Creature> m_gridRef;
