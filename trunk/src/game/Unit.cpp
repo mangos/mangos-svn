@@ -5540,25 +5540,35 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
     // ..done
     // SPELL_AURA_MOD_DAMAGE_DONE included in weapon damage
 
-    // ..done (base at attack power and creature type)
-    AuraList const& mCreatureAttackPower = GetAurasByType(SPELL_AURA_MOD_CREATURE_ATTACK_POWER);
-    for(AuraList::const_iterator i = mCreatureAttackPower.begin();i != mCreatureAttackPower.end(); ++i)
-        if(creatureTypeMask & uint32((*i)->GetModifier()->m_miscvalue))
-            DoneFlatBenefit += int32((*i)->GetModifier()->m_amount/14.0f * GetAttackTime(attType)/1000);
-
-    // ..done (base at attack power for marked target)
+    // ..done (base at attack power for marked target and base at attack power for creature type)
+    int32 APbonus = 0;
     if(attType == RANGED_ATTACK)
     {
         AuraList const& mRangedAttackPowerAttackerBonus = pVictim->GetAurasByType(SPELL_AURA_RANGED_ATTACK_POWER_ATTACKER_BONUS);
         for(AuraList::const_iterator i = mRangedAttackPowerAttackerBonus.begin();i != mRangedAttackPowerAttackerBonus.end(); ++i)
-            DoneFlatBenefit += int32((*i)->GetModifier()->m_amount/14.0f * GetAttackTime(RANGED_ATTACK)/1000);
+            APbonus += (*i)->GetModifier()->m_amount;
+
+        // ..done (base at attack power and creature type)
+        AuraList const& mCreatureAttackPower = GetAurasByType(SPELL_AURA_MOD_RANGED_ATTACK_POWER_VERSUS);
+        for(AuraList::const_iterator i = mCreatureAttackPower.begin();i != mCreatureAttackPower.end(); ++i)
+          if(creatureTypeMask & uint32((*i)->GetModifier()->m_miscvalue))
+            APbonus += (*i)->GetModifier()->m_amount;
     }
     else
     {
         AuraList const& mMeleeAttackPowerAttackerBonus = pVictim->GetAurasByType(SPELL_AURA_MELEE_ATTACK_POWER_ATTACKER_BONUS);
         for(AuraList::const_iterator i = mMeleeAttackPowerAttackerBonus.begin();i != mMeleeAttackPowerAttackerBonus.end(); ++i)
-            DoneFlatBenefit += int32((*i)->GetModifier()->m_amount/14.0f * GetAttackTime(attType)/1000);
+            APbonus += (*i)->GetModifier()->m_amount;
+
+        // ..done (base at attack power and creature type)
+        AuraList const& mCreatureAttackPower = GetAurasByType(SPELL_AURA_MOD_MELEE_ATTACK_POWER_VERSUS);
+        for(AuraList::const_iterator i = mCreatureAttackPower.begin();i != mCreatureAttackPower.end(); ++i)
+          if(creatureTypeMask & uint32((*i)->GetModifier()->m_miscvalue))
+            APbonus += (*i)->GetModifier()->m_amount;
     }
+
+    if (APbonus!=0)  // Can be negative
+       DoneFlatBenefit += int32(APbonus/14.0f * GetAttackTime(attType)/1000);
 
     // ..taken
     AuraList const& mDamageTaken = pVictim->GetAurasByType(SPELL_AURA_MOD_DAMAGE_TAKEN);
