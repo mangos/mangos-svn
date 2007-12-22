@@ -189,7 +189,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectNULL,                                     //130 SPELL_EFFECT_130                      threat redirect
     &Spell::EffectNULL,                                     //131 SPELL_EFFECT_131                      unused
     &Spell::EffectNULL,                                     //132 SPELL_EFFECT_132                      taxi related, one spell: Brazen Taxi
-    &Spell::EffectNULL,                                     //133 SPELL_EFFECT_133                      one spell: Forget
+    &Spell::EffectUnlearnSpecialization,                    //133 SPELL_EFFECT_UNLEARN_SPECIALIZATION   unlearn profession specialization
     &Spell::EffectNULL,                                     //134 SPELL_EFFECT_134
     &Spell::EffectNULL,                                     //135 SPELL_EFFECT_135                      pet related
     &Spell::EffectNULL,                                     //136 SPELL_EFFECT_136
@@ -1428,6 +1428,14 @@ void Spell::EffectApplyAura(uint32 i)
                 cancel();
         }
     }
+}
+
+void Spell::EffectUnlearnSpecialization( uint32 i )
+{
+    if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
+        return;
+
+    ((Player*)unitTarget)->removeSpell(m_spellInfo->EffectTriggerSpell[i]);
 }
 
 void Spell::EffectManaDrain(uint32 i)
