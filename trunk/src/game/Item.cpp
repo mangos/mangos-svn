@@ -567,27 +567,31 @@ bool Item::CanGoIntoBag(ItemPrototype const *pBagProto)
                 case ITEM_SUBCLASS_CONTAINER:
                     return true;
                 case ITEM_SUBCLASS_SOUL_CONTAINER:
-                    if(pProto->BagFamily != BAG_FAMILY_SOUL_SHARDS)
+                    if(!(pProto->BagFamily & BAG_FAMILY_MASK_SHARDS))
                         return false;
                     return true;
                 case ITEM_SUBCLASS_HERB_CONTAINER:
-                    if(pProto->BagFamily != BAG_FAMILY_HERBS)
+                    if(!(pProto->BagFamily & BAG_FAMILY_MASK_HERBS))
                         return false;
                     return true;
                 case ITEM_SUBCLASS_ENCHANTING_CONTAINER:
-                    if(pProto->BagFamily != BAG_FAMILY_ENCHANTING_SUPP)
+                    if(!(pProto->BagFamily & BAG_FAMILY_MASK_ENCHANTING_SUPP))
                         return false;
                     return true;
                 case ITEM_SUBCLASS_MINING_CONTAINER:
-                    if(pProto->BagFamily != BAG_FAMILY_MINING_SUPP)
+                    if(!(pProto->BagFamily & BAG_FAMILY_MASK_MINING_SUPP))
                         return false;
                     return true;
                 case ITEM_SUBCLASS_ENGINEERING_CONTAINER:
-                    if(pProto->BagFamily != BAG_FAMILY_ENGINEERING_SUPP)
+                    if(!(pProto->BagFamily & BAG_FAMILY_MASK_ENGINEERING_SUPP))
                         return false;
                     return true;
                 case ITEM_SUBCLASS_GEM_CONTAINER:
-                    if(pProto->BagFamily != BAG_FAMILY_GEMS)
+                    if(!(pProto->BagFamily & BAG_FAMILY_MASK_GEMS))
+                        return false;
+                    return true;
+                case ITEM_SUBCLASS_LEATHERWORKING_CONTAINER:
+                    if(!(pProto->BagFamily & BAG_FAMILY_MASK_LEATHERWORKING_SUPP))
                         return false;
                     return true;
                 default:
@@ -597,11 +601,11 @@ bool Item::CanGoIntoBag(ItemPrototype const *pBagProto)
             switch(pBagProto->SubClass)
             {
                 case ITEM_SUBCLASS_QUIVER:
-                    if(pProto->BagFamily != BAG_FAMILY_ARROWS)
+                    if(!(pProto->BagFamily & BAG_FAMILY_MASK_ARROWS))
                         return false;
                     return true;
                 case ITEM_SUBCLASS_AMMO_POUCH:
-                    if(pProto->BagFamily != BAG_FAMILY_BULLETS)
+                    if(!(pProto->BagFamily & BAG_FAMILY_MASK_BULLETS))
                         return false;
                     return true;
                 default:

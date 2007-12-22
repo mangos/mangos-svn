@@ -1331,12 +1331,6 @@ void ObjectMgr::LoadItemPrototypes()
         if(proto->Map && !sMapStore.LookupEntry(proto->Map))
             sLog.outErrorDb("Item (Entry: %u) has wrong Map (%u)",i,proto->Map);
 
-        if(proto->BagFamily >= MAX_BAG_FAMILY)
-        {
-            sLog.outErrorDb("Item (Entry: %u) has wrong BagFamily (%u)",i,proto->BagFamily);
-            const_cast<ItemPrototype*>(proto)->BagFamily = BAG_FAMILY_NONE;
-        }
-
         if(proto->TotemCategory && !sTotemCategoryStore.LookupEntry(proto->TotemCategory))
             sLog.outErrorDb("Item (Entry: %u) has wrong TotemCategory (%u)",i,proto->TotemCategory);
 

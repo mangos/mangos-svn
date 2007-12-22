@@ -8001,9 +8001,9 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                 }
 
                 // search free slot - special bag case
-                if( pProto->BagFamily != BAG_FAMILY_NONE )
+                if( pProto->BagFamily )
                 {
-                    if(pProto->BagFamily == BAG_FAMILY_KEYS)
+                    if(pProto->BagFamily & BAG_FAMILY_MASK_KEYS)
                     {
                         uint32 keyringSize = GetMaxKeyringSize();
                         for(uint32 j = KEYRING_SLOT_START; j < KEYRING_SLOT_START+keyringSize; j++)
@@ -8137,7 +8137,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                     if( bag == INVENTORY_SLOT_BAG_0 )
                     {
                         // search free slot - keyring case
-                        if(pProto->BagFamily == BAG_FAMILY_KEYS)
+                        if(pProto->BagFamily & BAG_FAMILY_MASK_KEYS)
                         {
                             uint32 keyringSize = GetMaxKeyringSize();
                             for(uint32 j = KEYRING_SLOT_START; j < KEYRING_SLOT_START+keyringSize; j++)
@@ -8212,7 +8212,7 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
                         {
 
                             // keyring case
-                            if(slot >= KEYRING_SLOT_START && slot < KEYRING_SLOT_START+GetMaxKeyringSize() && pProto->BagFamily != BAG_FAMILY_KEYS)
+                            if(slot >= KEYRING_SLOT_START && slot < KEYRING_SLOT_START+GetMaxKeyringSize() && !(pProto->BagFamily & BAG_FAMILY_MASK_KEYS))
                                 return EQUIP_ERR_ITEM_DOESNT_GO_INTO_BAG;
 
                             // prevent cheating
@@ -8390,10 +8390,10 @@ uint8 Player::CanStoreItems( Item **pItems,int count) const
         }
 
         // special bag case
-        if( pProto->BagFamily != BAG_FAMILY_NONE )
+        if( pProto->BagFamily )
         {
             bool b_found = false;
-            if(pProto->BagFamily == BAG_FAMILY_KEYS)
+            if(pProto->BagFamily & BAG_FAMILY_MASK_KEYS)
             {
                 uint32 keyringSize = GetMaxKeyringSize();
                 for(uint32 t = KEYRING_SLOT_START; t < KEYRING_SLOT_START+keyringSize; ++t)
@@ -8672,7 +8672,7 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
                 }
 
                 // search place in special bag
-                if( pProto->BagFamily != BAG_FAMILY_NONE )
+                if( pProto->BagFamily )
                 {
                     for(int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
                     {
@@ -12559,10 +12559,9 @@ void Player::_LoadAuras(QueryResult *result, uint32 timediff)
     for (int i = 0; i < TOTAL_AURAS; i++)
         m_modAuras[i].clear();
 
-    for(uint8 i = 0; i < 48; i++)
-        SetUInt32Value((uint16)(UNIT_FIELD_AURA + i), 0);
-    for(uint8 j = 0; j < 6; j++)
-        SetUInt32Value((uint16)(UNIT_FIELD_AURAFLAGS + j), 0);
+    // all aura related fields
+    for(int i = UNIT_FIELD_AURA; i <= UNIT_FIELD_AURASTATE; ++i)
+        SetUInt32Value(i, 0);
 
     //QueryResult *result = CharacterDatabase.PQuery("SELECT `caster_guid`,`spell`,`effect_index`,`amount`,`maxduration`,`remaintime`,`remaincharges` FROM `character_aura` WHERE `guid` = '%u'",GetGUIDLow());
 
