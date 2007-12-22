@@ -91,6 +91,13 @@ DBCStorage <StableSlotPricesEntry> sStableSlotPricesStore(StableSlotPricesfmt);
 DBCStorage <TalentEntry> sTalentStore(TalentEntryfmt);
 TalentSpellCosts sTalentSpellCosts;
 DBCStorage <TalentTabEntry> sTalentTabStore(TalentTabEntryfmt);
+
+// store absolute bit position for first rank for talent inspect
+typedef std::map<uint32,uint32> TalentInspectMap;
+static TalentInspectMap sTalentPosInInspect;
+static TalentInspectMap sTalentTabSizeInInspect;
+static uint32 sTalentTabPages[12/*MAX_CLASSES*/][3];
+
 DBCStorage <TaxiNodesEntry> sTaxiNodesStore(TaxiNodesEntryfmt);
 TaxiMask sTaxiNodesMask;
 
@@ -260,6 +267,67 @@ void LoadDBCStores(std::string dataPath)
     }
 
     LoadDBC(bar,bad_dbc_files,sTalentTabStore,           dataPath+"dbc/TalentTab.dbc");
+
+    // preper fast data access to bit pos of talent ranks for use at inspecting
+    {
+        // fill table by amount of talent ranks and fill sTalentTabBitSizeInInspect
+        // store in with (row,col,talent)->size key for correct sorting by (row,col)
+        typedef std::map<uint32,uint32> TalentBitSize;
+        TalentBitSize sTalentBitSize;    
+        for(uint32 i = 1; i < sTalentStore.nCount; ++i)
+        {
+            TalentEntry const *talentInfo = sTalentStore.LookupEntry(i);
+            if (!talentInfo) continue;
+
+            TalentTabEntry const *talentTabInfo = sTalentTabStore.LookupEntry( talentInfo->TalentTab );
+            if(!talentTabInfo)
+                continue;
+
+            // find talent rank
+            uint32 curtalent_maxrank = 0;
+            for(uint32 k = 5; k > 0; --k)
+            {
+                if(talentInfo->RankID[k-1])
+                {
+                    curtalent_maxrank = k;
+                    break;
+                }
+            }
+
+            sTalentBitSize[(talentInfo->Row<<24) + (talentInfo->Col<<16)+talentInfo->TalentID] = curtalent_maxrank;
+            sTalentTabSizeInInspect[talentInfo->TalentTab] += curtalent_maxrank;
+        }
+
+        // now have all max ranks (and then bit amount used for store talent ranks in inspect) 
+        for(uint32 talentTabId = 1; talentTabId < sTalentTabStore.nCount; ++talentTabId)
+        {
+            TalentTabEntry const *talentTabInfo = sTalentTabStore.LookupEntry( talentTabId );
+            if(!talentTabInfo)
+                continue;
+
+            // store class talent tab pages
+            uint32 cls = 1;
+            for(uint32 m=1;!(m & talentTabInfo->ClassMask) && cls < 12 /*MAX_CLASSES*/;m <<=1, ++cls);
+            sTalentTabPages[cls][talentTabInfo->tabpage]=talentTabId;
+
+            // add total amount bits for first rank starting from talent tab first talent rank pos.
+            uint32 pos = 0;
+            for(TalentBitSize::iterator itr = sTalentBitSize.begin(); itr != sTalentBitSize.end(); ++itr)
+            {
+                uint32 talentId = itr->first & 0xFFFF;
+                TalentEntry const *talentInfo = sTalentStore.LookupEntry( talentId );
+                if(!talentInfo)
+                    continue;
+
+                if(talentInfo->TalentTab != talentTabId)
+                    continue;
+
+                sTalentPosInInspect[talentId] = pos;
+                pos+= itr->second;
+            }
+        }
+    }
+
     LoadDBC(bar,bad_dbc_files,sTaxiNodesStore,           dataPath+"dbc/TaxiNodes.dbc");
 
     // Initialize global taxinodes mask
@@ -843,12 +911,6 @@ bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredT
     return (itemEntry->categoryMask & reqEntry->categoryMask)==reqEntry->categoryMask;
 }
 
-//FIXME: move this and other game dependent code to game directory
-#define MAX_NUMBER_OF_GRIDS      64
-#define SIZE_OF_GRIDS            533.33333f
-#define MAP_SIZE                (SIZE_OF_GRIDS*MAX_NUMBER_OF_GRIDS)
-#define MAP_HALFSIZE            (MAP_SIZE/2)
-
 void Zone2MapCoordinates(float& x,float& y,uint32 zone)
 {
     WorldMapAreaEntry const* maEntry = sWorldMapAreaStore.LookupEntry(zone);
@@ -859,7 +921,7 @@ void Zone2MapCoordinates(float& x,float& y,uint32 zone)
 
     std::swap(x,y);                                         // at client map coords swapped
     x = x*((maEntry->x2-maEntry->x1)/100)+maEntry->x1;
-    y = y*((maEntry->y2-maEntry->y1)/100)+maEntry->y1;   // client y coord from top to down
+    y = y*((maEntry->y2-maEntry->y1)/100)+maEntry->y1;      // client y coord from top to down
 }
 
 void Map2ZoneCoordinates(float& x,float& y,uint32 zone)
@@ -871,14 +933,32 @@ void Map2ZoneCoordinates(float& x,float& y,uint32 zone)
         return;
 
     x = (x-maEntry->x1)/((maEntry->x2-maEntry->x1)/100);
-    y = (y-maEntry->y1)/((maEntry->y2-maEntry->y1)/100);   // client y coord from top to down
+    y = (y-maEntry->y1)/((maEntry->y2-maEntry->y1)/100);    // client y coord from top to down
     std::swap(x,y);                                         // client have map coords swapped
 }
-#undef MAX_NUMBER_OF_GRIDS
-#undef SIZE_OF_GRIDS
-#undef MAP_SIZE
-#undef MAP_HALFSIZE
 
+uint32 GetTalentInspectBitPosInTab(uint32 talentId)
+{
+    TalentInspectMap::const_iterator itr = sTalentPosInInspect.find(talentId);
+    if(itr == sTalentPosInInspect.end())
+        return 0;
+
+    return itr->second;
+}
+
+uint32 GetTalentTabInspectBitSize(uint32 talentTabId)
+{
+    TalentInspectMap::const_iterator itr = sTalentTabSizeInInspect.find(talentTabId);
+    if(itr == sTalentTabSizeInInspect.end())
+        return 0;
+
+    return itr->second;
+}
+
+uint32 const* GetTalentTabPages(uint32 cls)
+{
+    return sTalentTabPages[cls];
+}
 
 // script support functions
 MANGOS_DLL_SPEC DBCStorage <SpellEntry>      const* GetSpellStore()      { return &sSpellStore;      }
