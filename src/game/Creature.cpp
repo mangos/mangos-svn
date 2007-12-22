@@ -47,7 +47,8 @@ lootForPickPocketed(false), lootForBody(false), m_groupLootTimer(0), lootingGrou
 m_itemsLoaded(false), m_trainerSpellsLoaded(false), m_trainer_type(0), m_lootMoney(0), m_lootRecipient(0),
 m_deathTimer(0), m_respawnTime(0), m_respawnDelay(25), m_corpseDelay(60), m_respawnradius(0.0f),
 m_gossipOptionLoaded(false),m_NPCTextId(0), m_emoteState(0), m_isPet(false), m_isTotem(false),
-m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE), m_regenHealth(true), m_equipmentId(0)
+m_regenTimer(2000), m_defaultMovementType(IDLE_MOTION_TYPE), m_regenHealth(true), m_equipmentId(0),
+m_AI_locked(false)
 {
     m_valuesCount = UNIT_END;
 
@@ -244,7 +245,12 @@ void Creature::Update(uint32 diff)
                 break;
 
             if(!IsInEvadeMode())
+            {
+                // do not allow the AI to be changed during update
+                m_AI_locked = true;
                 i_AI->UpdateAI(diff);
+                m_AI_locked = false;
+            }
 
             if(m_regenTimer > 0)
             {
@@ -325,13 +331,21 @@ void Creature::RegenerateHealth()
     ModifyHealth(addvalue);
 }
 
-void Creature::AIM_Initialize()
+bool Creature::AIM_Initialize()
 {
+    // make sure nothing can change the AI during AI update
+    if(m_AI_locked)
+    {
+        sLog.outDebug("AIM_Initialize: failed to init, locked.");
+        return false;
+    }
+
     CreatureAI * oldAI = i_AI;
     i_motionMaster.Initialize();
     i_AI = FactorySelector::selectAI(this);
     if (oldAI)
         delete oldAI;
+    return true;
 }
 
 bool Creature::Create (uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 Entry, uint32 team, const CreatureData *data)
