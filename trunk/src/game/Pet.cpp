@@ -157,6 +157,18 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
         return false;
     }
 
+    uint32 summon_spell_id = fields[23].GetUInt32();
+    if(current)
+    {
+        // check temporary summoned pets like mage water elemental
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(summon_spell_id);
+        if(spellInfo && GetDuration(spellInfo) > 0)
+        {
+            delete result;
+            return false;
+        }
+    }
+
     float px, py, pz;
     owner->GetClosePoint(px, py, pz,PET_FOLLOW_DIST,PET_FOLLOW_ANGLE);
     uint32 guid=objmgr.GenerateLowGuid(HIGHGUID_UNIT);
@@ -168,7 +180,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
 
     setPetType(PetType(fields[24].GetUInt8()));
     SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,owner->getFaction());
-    SetUInt32Value(UNIT_CREATED_BY_SPELL, fields[23].GetUInt32());
+    SetUInt32Value(UNIT_CREATED_BY_SPELL, summon_spell_id);
 
     CreatureInfo const *cinfo = GetCreatureInfo();
     if(cinfo->type == CREATURE_TYPE_CRITTER)
@@ -491,17 +503,15 @@ void Pet::Update(uint32 diff)
                     return;
                 }
             }
-            else
+
+            if(m_duration > 0)
             {
-                if(m_duration > 0)
+                if(m_duration > diff)
+                    m_duration -= diff;
+                else
                 {
-                    if(m_duration > diff)
-                        m_duration -= diff;
-                    else
-                    {
-                        Remove(PET_SAVE_AS_DELETED);
-                        return;
-                    }
+                    Remove(getPetType() != SUMMON_PET ? PET_SAVE_AS_DELETED:PET_SAVE_NOT_IN_SLOT);
+                    return;
                 }
             }
 

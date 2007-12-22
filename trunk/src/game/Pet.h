@@ -117,6 +117,7 @@ class Pet : public Creature
         PetType getPetType() const { return m_petType; }
         void setPetType(PetType type) { m_petType = type; }
         bool isControlled() const { return getPetType()==SUMMON_PET || getPetType()==HUNTER_PET; }
+        bool isTemporarySummoned() const { return m_duration > 0; }
 
         bool Create (uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 Entry);
         bool CreateBaseAtCreature( Creature* creature );

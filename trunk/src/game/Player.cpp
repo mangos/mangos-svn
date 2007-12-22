@@ -1492,7 +1492,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
             //same map, only remove pet if out of range
             if(pet && !IsWithinDistInMap(pet, OWNER_MAX_DISTANCE))
             {
-                if(pet->isControlled())
+                if(pet->isControlled() && !pet->isTemporarySummoned() )
                     m_oldpetnumber = pet->GetCharmInfo()->GetPetNumber();
                 else
                     m_oldpetnumber = 0;
@@ -1538,7 +1538,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
         if(outofrange && pet)
         {
             //leaving map -> delete pet right away (doing this later will cause problems)
-            if(pet->isControlled())
+            if(pet->isControlled() && !pet->isTemporarySummoned())
                 m_oldpetnumber = pet->GetCharmInfo()->GetPetNumber();
             else
                 m_oldpetnumber = 0;
