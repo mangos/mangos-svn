@@ -5133,7 +5133,7 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
     if(pVictim->IsImmunedToSpellDamage(spellProto))
         return 0;
 
-    uint32 creatureTypeMask = GetCreatureTypeMask();
+    uint32 creatureTypeMask = pVictim->GetCreatureTypeMask();
 
     // Damage Done
     uint32 CastingTime = GetCastTime(sCastTimesStore.LookupEntry(spellProto->CastingTimeIndex));
@@ -5584,7 +5584,7 @@ void Unit::MeleeDamageBonus(Unit *pVictim, uint32 *pdamage,WeaponAttackType attT
     if(*pdamage == 0)
         return;
 
-    uint32 creatureTypeMask = GetCreatureTypeMask();
+    uint32 creatureTypeMask = pVictim->GetCreatureTypeMask();
 
     if(GetTypeId() != TYPEID_PLAYER && ((Creature*)this)->isPet())
     {
