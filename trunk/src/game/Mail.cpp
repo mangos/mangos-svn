@@ -577,46 +577,26 @@ void WorldSession::HandleGetMail(WorldPacket & recv_data )
         mails_count++;
         data << (uint16) 0x0040;                            // unknown 2.3.0, different values
         data << (uint32) (*itr)->messageID;                 // Message ID
-
-        if((*itr)->messageType == MAIL_GM)                  // not send custom message type to client
-            data << (uint8) 0;
-        else
-            data << (uint8) (*itr)->messageType;            // Message Type, once = 3
+        data << (uint8) (*itr)->messageType;                // Message Type
 
         switch((*itr)->messageType)
         {
             case MAIL_NORMAL:
-            case MAIL_GM:
                 data << (uint64) (*itr)->sender;            // sender guid
                 break;
             case MAIL_CREATURE:
             case MAIL_GAMEOBJECT:
-            case MAIL_ITEM:
-                data << (uint32) 0;                         // creature/gameobject/item entry
-                break;
             case MAIL_AUCTION:
-                data << (uint32) 2;                         // auctionhouse id(2==alliance?)
+                data << (uint32) (*itr)->sender;            // creature/gameobject entry, auction id
+                break;
+            case MAIL_ITEM:                                 // item entry (?) sender = "Unknown", NYI
                 break;
         }
 
         data << (uint32) (*itr)->COD;                       // COD
         data << (uint32) (*itr)->itemTextId;                // sure about this
         data << (uint32) 0;                                 // unknown
-
-        // stationery (Stationery.dbc)
-        switch((*itr)->messageType)
-        {
-            case MAIL_GM:
-                data << (uint32) MAIL_STATIONERY_GM;        // customer support mail
-                break;
-            case MAIL_AUCTION:
-                data << (uint32) MAIL_STATIONERY_AUCTION;   // auction mail
-                break;
-            default:
-                data << (uint32) MAIL_STATIONERY_NORMAL;    // normal mail
-                break;
-        }
-
+        data << (uint32) (uint32)(*itr)->stationery;        // stationery (Stationery.dbc)
         data << (uint32) (*itr)->money;                     // Gold
         data << (uint32) 0x04;                              // unknown, 0x4 - auction, 0x10 - normal
                                                             // Time
@@ -776,20 +756,15 @@ void WorldSession::HandleMsgQueryNextMailtime(WorldPacket & recv_data )
 
                 switch(m->messageType)
                 {
-                    case MAIL_GM:
-                        data << (uint32) 0;
-                        data << (uint32) 0;
-                        data << (uint32) MAIL_STATIONERY_GM;
-                        break;
                     case MAIL_AUCTION:
                         data << (uint32) 2;
                         data << (uint32) 2;
-                        data << (uint32) MAIL_STATIONERY_AUCTION;
+                        data << (uint32) m->stationery;
                         break;
                     default:
                         data << (uint32) 0;
                         data << (uint32) 0;
-                        data << (uint32) MAIL_STATIONERY_NORMAL;
+                        data << (uint32) m->stationery;
                         break;
                 }
                 data << (uint32) 0xC6000000;                // unk, time or something

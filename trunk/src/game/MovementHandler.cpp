@@ -213,17 +213,33 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
     if (GetPlayer()->HasMovementFlags(MOVEMENTFLAG_FALLING) && !(movementInfo.flags & MOVEMENTFLAG_FALLING))
     {
         Player *target = GetPlayer();
+
+        //Players with Feather Fall or low fall time are ignored
         if (movementInfo.fallTime > 1100 && !target->isDead() && !target->isGameMaster() &&
             !target->HasAuraType(SPELL_AURA_HOVER) && !target->HasAuraType(SPELL_AURA_FEATHER_FALL))
         {
-            Map const *map = MapManager::Instance().GetBaseMap(target->GetMapId());
-            float posz = map->GetWaterLevel(movementInfo.x, movementInfo.y);
-            float fallperc = float(movementInfo.fallTime)*10/11000;
-            uint32 damage = (uint32)(((fallperc*fallperc -1) / 9 * target->GetMaxHealth())*sWorld.getRate(RATE_DAMAGE_FALL));
+            //Safe fall, fall time reduction
+            uint32 safe_fall = target->GetTotalAuraModifier(SPELL_AURA_SAFE_FALL);
+            uint32 fall_time = (movementInfo.fallTime > (safe_fall*10)) ? movementInfo.fallTime - (safe_fall*10) : 0;
 
-            if (damage > 0 && damage < 2* target->GetMaxHealth())
+            //Fall Damage calculation
+            float fallperc = float(fall_time)/1100;
+            uint32 damage = (uint32)(((fallperc*fallperc -1) / 9 * target->GetMaxHealth())*sWorld.getRate(RATE_DAMAGE_FALL));
+            
+            Map const *map = MapManager::Instance().GetBaseMap(target->GetMapId());
+
+            //Prevent damage if damage is 0, fall time < 1100, or if player land in water
+            if (damage > 0 && fall_time > 1100 && map->GetWaterLevel(movementInfo.x, movementInfo.y) < map->GetHeight(movementInfo.x, movementInfo.y, movementInfo.z))
+            {
+                //Prevent fall damage from being more than the player maximum health
+                if (damage > target->GetMaxHealth())
+                    damage = target->GetMaxHealth();
+
                 target->EnvironmentalDamage(target->GetGUID(), DAMAGE_FALL, damage);
-            DEBUG_LOG("!! z=%f, pz=%f FallTime=%d posz=%f damage=%d" , movementInfo.z, target->GetPositionZ(), movementInfo.fallTime, posz, damage);
+            }
+
+            //Z given by moveinfo, LastZ, FallTime, WaterZ, MapZ, Damage, Safefall reduction
+            DEBUG_LOG("!! z=%f, pZ=%f FallTime=%d wZ=%f mZ=%f damage=%d SF=%d" , movementInfo.z, target->GetPositionZ(), movementInfo.fallTime, map->GetWaterLevel(movementInfo.x, movementInfo.y), map->GetHeight(movementInfo.x, movementInfo.y, movementInfo.z), damage, safe_fall);
         }
 
         //handle fall and logout at the sametime

@@ -12903,7 +12903,7 @@ void Player::_LoadMail()
 {
     m_mail.clear();
     //mails are in right order
-    QueryResult *result = CharacterDatabase.PQuery("SELECT `id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked` FROM `mail` WHERE `receiver` = '%u' ORDER BY `id` DESC",GetGUIDLow());
+    QueryResult *result = CharacterDatabase.PQuery("SELECT `id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`,`stationery` FROM `mail` WHERE `receiver` = '%u' ORDER BY `id` DESC",GetGUIDLow());
     if(result)
     {
         do
@@ -12922,6 +12922,7 @@ void Player::_LoadMail()
             m->money = fields[9].GetUInt32();
             m->COD = fields[10].GetUInt32();
             m->checked = fields[11].GetUInt32();
+            m->stationery = fields[12].GetUInt8();
             m->state = MAIL_STATE_UNCHANGED;
 
             if (has_items)

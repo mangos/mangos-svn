@@ -799,6 +799,7 @@ DROP TABLE IF EXISTS `mail`;
 CREATE TABLE `mail` (
   `id` int(11) unsigned NOT NULL default '0' COMMENT 'Identifier',
   `messageType` tinyint(3) unsigned NOT NULL default '0',
+  `stationery` tinyint(3) NOT NULL default '41',
   `sender` int(11) unsigned NOT NULL default '0' COMMENT 'Character Global Unique Identifier',
   `receiver` int(11) unsigned NOT NULL default '0' COMMENT 'Character Global Unique Identifier',
   `subject` longtext,
