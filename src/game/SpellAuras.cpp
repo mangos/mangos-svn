@@ -1674,18 +1674,7 @@ void Aura::HandleChannelDeathItem(bool apply, bool Real)
 
 void Aura::HandleAuraSafeFall(bool apply, bool Real)
 {
-    // only at real add/remove aura
-    if(!Real)
-        return;
-
-    WorldPacket data;
-    if(apply)
-        data.Initialize(SMSG_MOVE_FEATHER_FALL, 8+4);
-    else
-        data.Initialize(SMSG_MOVE_NORMAL_FALL, 8+4);
-    data.append(m_target->GetPackGUID());
-    data << uint32(0);
-    m_target->SendMessageToSet(&data,true);
+    //Handled in HandleMovementOpcodes
 }
 
 void Aura::HandleBindSight(bool apply, bool Real)

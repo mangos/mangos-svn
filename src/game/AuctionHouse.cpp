@@ -177,9 +177,9 @@ void WorldSession::SendAuctionOutbiddedMail(AuctionEntry *auction, uint32 newPri
             oldBidder->CreateMail(mailId, MAIL_AUCTION, auction->location, msgAuctionOutbiddedSubject.str(), 0, &mi, etime,dtime, auction->bid, 0, NOT_READ);
         }
 
-        CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-            "VALUES ('%u', '%d', '%u', '%u', '%s', '0', '0', '" I64FMTD "','" I64FMTD "', '%u', '0', '%d')",
-            mailId, MAIL_AUCTION, auction->location, auction->bidder, msgAuctionOutbiddedSubject.str().c_str(), (uint64)etime, (uint64)dtime, auction->bid, NOT_READ);
+        CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`stationery`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+            "VALUES ('%u', '%d', '%d', '%u', '%u', '%s', '0', '0', '" I64FMTD "','" I64FMTD "', '%u', '0', '%d')",
+            mailId, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->location, auction->bidder, msgAuctionOutbiddedSubject.str().c_str(), (uint64)etime, (uint64)dtime, auction->bid, NOT_READ);
     }
 }
 
@@ -210,9 +210,9 @@ void WorldSession::SendAuctionCancelledToBidderMail( AuctionEntry* auction )
             bidder->CreateMail(mailId, MAIL_AUCTION, auction->location, msgAuctionCancelledSubject.str(), 0, &mi, etime,dtime, auction->bid, 0, NOT_READ);
         }
 
-        CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-            "VALUES ('%u', '%d', '%u', '%u', '%s', '0', '0', '" I64FMTD "','" I64FMTD "', '%u', '0', '%d')",
-            mailId, MAIL_AUCTION, auction->location, auction->bidder, msgAuctionCancelledSubject.str().c_str(), (uint64)etime, (uint64)dtime, auction->bid, NOT_READ);
+        CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`stationery`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+            "VALUES ('%u', '%d', '%d', '%u', '%u', '%s', '0', '0', '" I64FMTD "','" I64FMTD "', '%u', '0', '%d')",
+            mailId, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->location, auction->bidder, msgAuctionCancelledSubject.str().c_str(), (uint64)etime, (uint64)dtime, auction->bid, NOT_READ);
     }
 }
 
@@ -481,9 +481,9 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
             MailItemsInfo mi;
             mi.AddItem(auction->item_guid, auction->item_template, pItem);
             pl->CreateMail( messageID, MAIL_AUCTION, auction->location, msgAuctionCanceledOwner.str(), 0, &mi, etime, dtime, 0, 0, 0);
-            CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
-                "VALUES ('%u', '%d', '%u', '%u', '%s', '0', '1', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
-                messageID, MAIL_AUCTION, auction->location , pl->GetGUIDLow() , msgAuctionCanceledOwner.str().c_str(), (uint64)etime, (uint64)dtime, NOT_READ);
+            CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`stationery`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
+                "VALUES ('%u', '%d', '%d', '%u', '%u', '%s', '0', '1', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
+                messageID, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->location , pl->GetGUIDLow() , msgAuctionCanceledOwner.str().c_str(), (uint64)etime, (uint64)dtime, NOT_READ);
             CharacterDatabase.PExecute("INSERT INTO `mail_items` (`mail_id`,`item_guid`,`item_template`) VALUES ('%u', '%u', '%u')", messageID, auction->item_guid, auction->item_template);
         }
         else
