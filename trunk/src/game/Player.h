@@ -274,6 +274,14 @@ struct LookingForGroup
         return false;
     }
 
+    bool Empty() const
+    {
+        for(int i = 0; i < MAX_LOOKING_FOR_GROUP_SLOT; ++i)
+            if(!slots[i].Empty())
+                return false;
+        return more.Empty();
+    }
+
     LookingForGroupSlot slots[MAX_LOOKING_FOR_GROUP_SLOT];
     LookingForGroupSlot more;
     std::string comment;
@@ -1460,6 +1468,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void LeftChannel(Channel *c);
         void CleanupChannels();
         void UpdateLocalChannels( uint32 newZone );
+        void LeaveLFGChannel();
 
         void BroadcastPacketToFriendListers(WorldPacket *packet, bool extern_result = false, QueryResult *result = NULL);
 

@@ -59,58 +59,64 @@ void Channel::Join(uint64 p, const char *pass)
             MakePlayerAlreadyMember(&data, p);
             SendToOne(&data, p);
         }
+        return;
     }
-    else if(IsBanned(p))
+
+    if(IsBanned(p))
     {
         MakeBanned(&data);
         SendToOne(&data, p);
+        return;
     }
-    else if(m_password.length() > 0 && strcmp(pass, m_password.c_str()))
+
+    if(m_password.length() > 0 && strcmp(pass, m_password.c_str()))
     {
         MakeWrongPassword(&data);
         SendToOne(&data, p);
+        return;
     }
-    else if(HasFlag(CHANNEL_FLAG_LFG))
+
+    Player *plr = objmgr.GetPlayer(p);
+
+    if(plr)
     {
-        MakeNotInLfg(&data);
-        SendToOne(&data, p);
+        if(HasFlag(CHANNEL_FLAG_LFG) && sWorld.getConfig(CONFIG_RESTRICTED_LFG_CHANNEL) && 
+            (plr->GetGroup() || plr->m_lookingForGroup.Empty()) )
+        {
+            MakeNotInLfg(&data);
+            SendToOne(&data, p);
+            return;
+        }
+
+        if(plr->GetGuildId() && (GetFlags() == 0x38))
+            return;
+
+        plr->JoinedChannel(this);
     }
-    else
+
+    if(m_announce)
     {
-        Player *plr = objmgr.GetPlayer(p);
+        MakeJoined(&data, p);
+        SendToAll(&data);
+    }
 
-        if(plr)
-        {
-            if(plr->GetGuildId() && (GetFlags() == 0x38))
-                return;
+    data.clear();
 
-            plr->JoinedChannel(this);
-        }
+    PlayerInfo pinfo;
+    pinfo.player = p;
+    pinfo.flags = 0;
+    players[p] = pinfo;
 
-        if(m_announce)
-        {
-            MakeJoined(&data, p);
-            SendToAll(&data);
-        }
+    MakeYouJoined(&data);
+    SendToOne(&data, p);
 
-        data.clear();
+    JoinNotify(p);
 
-        PlayerInfo pinfo;
-        pinfo.player = p;
-        pinfo.flags = 0;
-        players[p] = pinfo;
-
-        MakeYouJoined(&data);
-        SendToOne(&data, p);
-
-        JoinNotify(p);
-
-        // if no owner first logged will become
-        if(!IsConstant() && !m_ownerGUID)
-        {
-            SetOwner(p, (players.size() > 1 ? true : false));
-            players[p].SetModerator(true);
-        }
+    // if no owner first logged will become
+    if(!IsConstant() && !m_ownerGUID)
+    {
+        SetOwner(p, (players.size() > 1 ? true : false));
+        players[p].SetModerator(true);
     }
 }
 

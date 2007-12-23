@@ -3824,6 +3824,19 @@ void Player::UpdateLocalChannels(uint32 newZone )
     sLog.outDebug("Player: channels cleaned up!");
 }
 
+void Player::LeaveLFGChannel()
+{
+    for(JoinedChannelsList::iterator i = m_channels.begin(); i != m_channels.end(); ++i )
+    {
+        if((*i)->IsLFG())
+        {
+            (*i)->Leave(GetGUID());
+            break;
+        }
+    }
+}
+
+
 void Player::BroadcastPacketToFriendListers(WorldPacket *packet, bool extern_result, QueryResult *result)
 {
     /// this is sent out to those that have the player in their friendlist
