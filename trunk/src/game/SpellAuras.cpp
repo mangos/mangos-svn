@@ -193,7 +193,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleRangedAmmoHaste,                           //141 SPELL_AURA_MOD_RANGED_AMMO_HASTE
     &Aura::HandleAuraModBaseResistancePCT,                  //142 SPELL_AURA_MOD_BASE_RESISTANCE_PCT
     &Aura::HandleAuraModResistanceExclusive,                //143 SPELL_AURA_MOD_RESISTANCE_EXCLUSIVE
-    &Aura::HandleAuraSafeFall,                              //144 SPELL_AURA_SAFE_FALL
+    &Aura::HandleNoImmediateEffect,                         //144 SPELL_AURA_SAFE_FALL                  implemented in WorldSession::HandleMovementOpcodes
     &Aura::HandleNULL,                                      //145 SPELL_AURA_CHARISMA
     &Aura::HandleNULL,                                      //146 SPELL_AURA_PERSUADED
     &Aura::HandleNULL,                                      //147 SPELL_AURA_ADD_CREATURE_IMMUNITY
@@ -1670,11 +1670,6 @@ void Aura::HandleChannelDeathItem(bool apply, bool Real)
         else
             ((Player*)caster)->SendEquipError( msg, NULL, NULL );
     }
-}
-
-void Aura::HandleAuraSafeFall(bool apply, bool Real)
-{
-    //Handled in HandleMovementOpcodes
 }
 
 void Aura::HandleBindSight(bool apply, bool Real)
