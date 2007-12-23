@@ -238,6 +238,12 @@ ChatFlood.MessageDelay = 1
 # Default: 10 (in secs)
 ChatFlood.MuteTime = 10
 
+# Restrict use LookupForGroup channel only registered in LFG tool players
+#          0 (allow join to channel in any time)
+# Default: 1 (allow join to channel only if active in LFG)
+RestrictedLfgChannel = 1
+
+
 # Is GM accept whispers from player by default.
 # Default: 0 (false)
 #          1 (true) 

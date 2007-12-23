@@ -22,6 +22,7 @@
 #include "Player.h"
 #include "WorldPacket.h"
 #include "ObjectMgr.h"
+#include "World.h"
 
 static void AttemptJoin(Player* _player)
 {
@@ -62,7 +63,18 @@ static void AttemptJoin(Player* _player)
 
         // stop at success join
         if(plr->GetGroup()->AddMember(_player->GetGUID(), _player->GetName()))
+        {
+            if( sWorld.getConfig(CONFIG_RESTRICTED_LFG_CHANNEL) )
+                _player->LeaveLFGChannel();
+
             break;
+        }
+        // full
+        else
+        {
+            if(sWorld.getConfig(CONFIG_RESTRICTED_LFG_CHANNEL) )
+                plr->LeaveLFGChannel();
+        }
     }
 }
 
@@ -106,8 +118,26 @@ static void AttemptAddMore(Player* _player)
         }
 
         // stop at join fail (full)
-        if(!_player->GetGroup()->AddMember(plr->GetGUID(), plr->GetName()))
+        if(!_player->GetGroup()->AddMember(plr->GetGUID(), plr->GetName()) )
+        {
+            if( sWorld.getConfig(CONFIG_RESTRICTED_LFG_CHANNEL) )
+                _player->LeaveLFGChannel();
+
             break;
+        }
+
+        // joined
+        if( sWorld.getConfig(CONFIG_RESTRICTED_LFG_CHANNEL) )
+            plr->LeaveLFGChannel();
+
+        // and group full
+        if(_player->GetGroup()->IsFull() )
+        {
+            if( sWorld.getConfig(CONFIG_RESTRICTED_LFG_CHANNEL) )
+                _player->LeaveLFGChannel();
+
+            break;
+        }
     }
 }
 
@@ -151,6 +181,9 @@ void WorldSession::HandleLfgClearOpcode( WorldPacket & /*recv_data */ )
 
     for(int i = 0; i < MAX_LOOKING_FOR_GROUP_SLOT; ++i)
         _player->m_lookingForGroup.slots[i].Clear();
+
+    if( sWorld.getConfig(CONFIG_RESTRICTED_LFG_CHANNEL) )
+        _player->LeaveLFGChannel();
 }
 
 void WorldSession::HandleLfmSetNoneOpcode( WorldPacket & /*recv_data */)
