@@ -533,6 +533,7 @@ pkgdata_DATA = \
 	4895_mangos_command.sql \
 	4896_characters_mail.sql \
 	4898_mangos_playercreateinfo_item.sql \
+	4904_mangos_item_template.sql \
 	README
 
 ## Additional files to include when running 'make dist'
@@ -1046,6 +1047,7 @@ EXTRA_DIST = \
 	4895_mangos_command.sql \
 	4896_characters_mail.sql \
 	4898_mangos_playercreateinfo_item.sql \
+	4904_mangos_item_template.sql \
 	README
 
 
