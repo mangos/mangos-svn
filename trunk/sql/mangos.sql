@@ -341,6 +341,7 @@ INSERT INTO `command` (`name`,`security`,`help`) VALUES
  ('whispers',1,'Syntax: .whispers on|off\r\nEnable/disable accepting whispers by GM from players. By default use mangosd.conf setting.'),
  ('spawndist',2,'Syntax: .spawndist #dist\r\n\r\nAdjust spawndistance of selected creature to dist.'),
  ('spawntime',2,'Syntax: .spawntime #time \r\n\r\nAdjust spawntime of selected creature to time.'),
+ ('tele',1,'Syntax: .tele #location\r\n\r\nTeleport player to a given location.'),
  ('titles',1,'Syntax:\n.modify titles #mask\n.titles #mask\n\nAllows user to use all titles from #mask.\n\n #mask=0 disables the title-choose-field'),
  ('wp',2,'Using WP Command:\r\nEach Waypoint Command has it\'s own description!'),
  ('wp add',2,'Syntax: .wp add [#creature_guid or Select a Creature]'),
