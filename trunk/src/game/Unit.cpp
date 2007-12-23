@@ -1945,7 +1945,10 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
 
         case MELEE_HIT_PARRY:
             if(attType == RANGED_ATTACK || unavoidable)                    //range attack - no parry
+            {
+                outcome = MELEE_HIT_NORMAL;
                 break;
+            }
 
             cleanDamage->damage += *damage;
             *damage = 0;
@@ -2015,7 +2018,11 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
 
         case MELEE_HIT_DODGE:
             if(attType == RANGED_ATTACK || unavoidable )                    //range attack - no dodge
+            {
+                outcome = MELEE_HIT_NORMAL;
                 break;
+            }
+
             cleanDamage->damage += *damage;
             *damage = 0;
             *victimState = VICTIMSTATE_DODGE;
@@ -2043,7 +2050,10 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
 
         case MELEE_HIT_BLOCK:
             if( unavoidable )
+            {
+                outcome = MELEE_HIT_NORMAL;
                 break;
+            }
 
             *blocked_amount = pVictim->GetShieldBlockValue();
 
