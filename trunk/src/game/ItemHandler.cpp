@@ -272,7 +272,7 @@ void WorldSession::HandleItemQuerySingleOpcode( WorldPacket & recv_data )
             SpellEntry const* spell = sSpellStore.LookupEntry(pProto->Spells[s].SpellId);
             if(spell)
             {
-                bool db_data = pProto->Spells[s].SpellCooldown > 0 || pProto->Spells[s].SpellCategoryCooldown > 0;
+                bool db_data = pProto->Spells[s].SpellCooldown >= 0 || pProto->Spells[s].SpellCategoryCooldown >= 0;
 
                 data << pProto->Spells[s].SpellId;
                 data << pProto->Spells[s].SpellTrigger;

@@ -2761,8 +2761,7 @@ void Player::_LoadSpellCooldowns(QueryResult *result)
 }
 
 void Player::_SaveSpellCooldowns()
-{
-    CharacterDatabase.PExecute("DELETE FROM `character_spell_cooldown` WHERE `guid` = '%u'", GetGUIDLow());
+{    CharacterDatabase.PExecute("DELETE FROM `character_spell_cooldown` WHERE `guid` = '%u'", GetGUIDLow());
 
     time_t curTime = time(NULL);
 

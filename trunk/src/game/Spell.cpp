@@ -1623,8 +1623,8 @@ void Spell::SendSpellCooldown()
 
     // init cooldown values
     uint32 cat   = 0;
-    int32 rec    = 0;
-    int32 catrec = 0;
+    int32 rec    = -1;
+    int32 catrec = -1;
 
     // some special item spells without correct cooldown in SpellInfo
     // cooldown information stored in item prototype
@@ -1649,7 +1649,7 @@ void Spell::SendSpellCooldown()
     }
 
     // if no cooldown found above then base at DBC data
-    if(!rec && !catrec)
+    if(rec < 0 && catrec < 0)
     {
         cat = m_spellInfo->Category;
         rec = m_spellInfo->RecoveryTime;
@@ -1657,7 +1657,8 @@ void Spell::SendSpellCooldown()
     }
 
     // shoot spells used equipped item cooldown values already assigned in GetAttackTime(RANGED_ATTACK)
-    if (!rec && !catrec && (cat == 76 || cat == 351))
+    // prevent 0 cooldowns set by another way
+    if (rec <= 0 && catrec <= 0 && (cat == 76 || cat == 351))
         rec = _player->GetAttackTime(RANGED_ATTACK);
 
     // Now we have cooldown data (if found any), time to apply mods
@@ -1667,6 +1668,7 @@ void Spell::SendSpellCooldown()
     if(catrec > 0)
         _player->ApplySpellMod(m_spellInfo->Id, SPELLMOD_COOLDOWN, catrec);
 
+    // replace negative cooldowns by 0
     if (rec < 0) rec = 0;
     if (catrec < 0) catrec = 0;
 
