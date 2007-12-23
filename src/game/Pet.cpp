@@ -158,15 +158,15 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     }
 
     uint32 summon_spell_id = fields[23].GetUInt32();
-    if(current)
+    SpellEntry const* spellInfo = sSpellStore.LookupEntry(summon_spell_id);
+
+    bool is_temporary_summoned = spellInfo && GetDuration(spellInfo) > 0;
+
+    // check temporary summoned pets like mage water elemental
+    if(current && is_temporary_summoned)
     {
-        // check temporary summoned pets like mage water elemental
-        SpellEntry const* spellInfo = sSpellStore.LookupEntry(summon_spell_id);
-        if(spellInfo && GetDuration(spellInfo) > 0)
-        {
-            delete result;
-            return false;
-        }
+        delete result;
+        return false;
     }
 
     float px, py, pz;
@@ -259,35 +259,44 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     }
 
     //init AB
-    Tokens tokens = StrSplit(fields[18].GetString(), " ");
-
-    if(tokens.size() != 20)
+    if(is_temporary_summoned)
     {
-        delete result;
-        return false;
+        // Temporary summoned pets alwaas have initial spell list at load
+        InitPetCreateSpells();
     }
-
-    int index;
-    Tokens::iterator iter;
-    for(iter = tokens.begin(), index = 0; index < 10; ++iter, ++index )
+    else
     {
-        m_charmInfo->GetActionBarEntry(index)->Type = atol((*iter).c_str());
-        ++iter;
-        m_charmInfo->GetActionBarEntry(index)->SpellOrAction = atol((*iter).c_str());
-    }
+        // permanent controlled pets store state in DB
+        Tokens tokens = StrSplit(fields[18].GetString(), " ");
 
-    //init teach spells
-    tokens = StrSplit(fields[19].GetString(), " ");
-    for (iter = tokens.begin(), index = 0; index < 4; ++iter, ++index)
-    {
-        uint32 tmp = atol((*iter).c_str());
+        if(tokens.size() != 20)
+        {
+            delete result;
+            return false;
+        }
 
-        ++iter;
+        int index;
+        Tokens::iterator iter;
+        for(iter = tokens.begin(), index = 0; index < 10; ++iter, ++index )
+        {
+            m_charmInfo->GetActionBarEntry(index)->Type = atol((*iter).c_str());
+            ++iter;
+            m_charmInfo->GetActionBarEntry(index)->SpellOrAction = atol((*iter).c_str());
+        }
 
-        if(tmp)
-            AddTeachSpell(tmp, atol((*iter).c_str()));
-        else
-            break;
+        //init teach spells
+        tokens = StrSplit(fields[19].GetString(), " ");
+        for (iter = tokens.begin(), index = 0; index < 4; ++iter, ++index)
+        {
+            uint32 tmp = atol((*iter).c_str());
+
+            ++iter;
+
+            if(tmp)
+                AddTeachSpell(tmp, atol((*iter).c_str()));
+            else
+                break;
+        }
     }
 
     // since last save (in seconds)
