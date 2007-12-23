@@ -1076,17 +1076,42 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
             {
                 case MELEE_HIT_CRIT:
                 {
-                    *damage *= 2;
+                    uint32 bonusDmg = *damage;
+
+                    // Apply crit_damage bonus
+                    if(Player* modOwner = GetSpellModOwner())
+                        modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_CRIT_DAMAGE_BONUS, bonusDmg);
+    
+                    *damage += bonusDmg;
+
                     // Resilience - reduce crit damage by 2x%
                     uint32 resilienceReduction = uint32(pVictim->m_modResilience * 2/100 * (*damage));
                     cleanDamage->damage += resilienceReduction;
                     *damage -=  resilienceReduction;
                     *crit = true;
                     hitInfo |= HITINFO_CRITICALHIT;
+
+                    ModifyAuraState(AURA_STATE_CRIT, true);
+                    StartReactiveTimer( REACTIVE_CRIT );
+
+                    if(getClass()==CLASS_HUNTER)
+                    {
+                        ModifyAuraState(AURA_STATE_HUNTER_CRIT_STRIKE, true);
+                        StartReactiveTimer( REACTIVE_HUNTER_CRIT );
+                    }
+
                     break;
                 }
                 case MELEE_HIT_PARRY:
                 {
+                    // this special attack can't be parryed
+                    if ( spellInfo->Attributes & 0x200000 )
+                    {
+                        outcome = MELEE_HIT_NORMAL;
+                        cleanDamage->hitOutCome = MELEE_HIT_NORMAL;
+                        break;
+                    }
+
                     cleanDamage->damage += *damage;         // To Help Calculate Rage
                     *damage = 0;
                     victimState = VICTIMSTATE_PARRY;
@@ -1135,14 +1160,29 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
                     // Set parry flags
                     pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
 
-                    if (pVictim->getClass() == CLASS_HUNTER)// hunter parry case
+                    // Mongoose bite - set only Counterattack here
+                    if (pVictim->getClass() == CLASS_HUNTER)
+                    {
                         pVictim->ModifyAuraState(AURA_STATE_HUNTER_PARRY,true);
+                        pVictim->StartReactiveTimer( REACTIVE_HUNTER_PARRY );
+                    }
                     else
+                    {
                         pVictim->ModifyAuraState(AURA_STATE_DEFENSE, true);
+                        pVictim->StartReactiveTimer( REACTIVE_DEFENSE );
+                    }
                     break;
                 }
                 case MELEE_HIT_DODGE:
                 {
+                    // this special attack can't be dodged
+                    if ( spellInfo->Attributes & 0x200000 )
+                    {
+                        outcome = MELEE_HIT_NORMAL;
+                        cleanDamage->hitOutCome = MELEE_HIT_NORMAL;
+                        break;
+                    }
+
                     if(pVictim->GetTypeId() == TYPEID_PLAYER)
                         ((Player*)pVictim)->UpdateDefense();
 
@@ -1151,9 +1191,33 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
                     hitInfo |= HITINFO_SWINGNOHITSOUND;
                     victimState = VICTIMSTATE_DODGE;
                     break;
+
+                    // Set dodge flags
+
+                    pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
+                    // Overpower
+                    if (GetTypeId() == TYPEID_PLAYER && getClass() == CLASS_WARRIOR)
+                    {
+                        ((Player*)this)->AddComboPoints(pVictim, 1);
+                        StartReactiveTimer( REACTIVE_OVERPOWER );
+                    }
+                    // Riposte
+                    if (pVictim->getClass() != CLASS_ROGUE)
+                    {
+                        pVictim->ModifyAuraState(AURA_STATE_DEFENSE, true);
+                        pVictim->StartReactiveTimer( REACTIVE_DEFENSE );
+                    }
                 }
                 case MELEE_HIT_BLOCK:
                 {
+                    // this special attack can't be blocked
+                    if ( spellInfo->Attributes & 0x200000 )
+                    {
+                        outcome = MELEE_HIT_NORMAL;
+                        cleanDamage->hitOutCome = MELEE_HIT_NORMAL;
+                        break;
+                    }
+
                     blocked_amount = uint32(pVictim->GetShieldBlockValue());
                     if (blocked_amount >= *damage)
                     {
@@ -1168,6 +1232,10 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
                         cleanDamage->damage += blocked_amount;
                         *damage = *damage - blocked_amount;
                     }
+                        
+                    pVictim->ModifyAuraState(AURA_STATE_DEFENSE, true);
+                    pVictim->StartReactiveTimer( REACTIVE_DEFENSE );
+
                     break;
 
                 }
@@ -1179,8 +1247,9 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
                     break;
             }
 
-            // Update attack state
-            SendAttackStateUpdate(hitInfo, pVictim, 1, SpellSchools(spellInfo->School), *damage, 0,0,victimState,blocked_amount);
+            // Not correct, but this is what is used elsewhere to send misses and resists
+            if ( hitInfo & (HITINFO_ABSORB|HITINFO_RESIST|HITINFO_MISS) )
+                SendAttackStateUpdate(hitInfo & (HITINFO_ABSORB|HITINFO_RESIST|HITINFO_MISS), pVictim, 1, SpellSchools(spellInfo->School), *damage, 0,0,victimState,blocked_amount);
 
             // do all damage=0 cases here
             if(damage <= 0)
