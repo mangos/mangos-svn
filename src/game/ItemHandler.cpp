@@ -978,6 +978,37 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
         OldEnchants[i] = itemTarget->GetEnchantmentId(EnchantmentSlot(SOCK_ENCHANTMENT_SLOT+i));
     }
 
+    // check unique-equipped conditions
+    for(int i = 0; i < 3; ++i)
+    {
+        if (Gems[i] && (Gems[i]->GetProto()->Flags & ITEM_FLAGS_UNIQUE_EQUIPPED))
+        {
+            for (int j = 0; j < 3; ++j)
+            {
+                if ((i != j) && (Gems[j]) && (Gems[i]->GetProto()->ItemId == Gems[j]->GetProto()->ItemId))
+                {
+                    _player->SendEquipError( EQUIP_ERR_ITEM_UNIQUE_EQUIPPABLE_SOCKETED, itemTarget, NULL );
+                    return;
+                }
+            }
+            for (int j = 0; j < 3; ++j) 
+            {
+                if (OldEnchants[j])
+                {
+                    SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(OldEnchants[j]);
+                    if(!enchantEntry)
+                        continue;
+                
+                    if ((enchantEntry->GemID == Gems[i]->GetProto()->ItemId) && (i != j))
+                    {
+                        _player->SendEquipError( EQUIP_ERR_ITEM_UNIQUE_EQUIPPABLE_SOCKETED, itemTarget, NULL );
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
     SocketBonusActivated = itemTarget->GemsFitSockets();    //save state of socketbonus
     _player->ToggleMetaGemsActive(slot, false);             //turn off all metagems (except for the target item)
 

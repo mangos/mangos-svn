@@ -108,10 +108,16 @@ enum ItemBondingType
 // masks for ITEM_FIELD_FLAGS field
 enum ITEM_FLAGS
 {
-    ITEM_FLAGS_BINDED                           = 1,
-    ITEM_FLAGS_CONJURED                         = 2,
-    ITEM_FLAGS_OPENABLE                         = 4,
-    ITEM_FLAGS_WRAPPED                          = 8
+    ITEM_FLAGS_BINDED                         = 0x00000001,
+    ITEM_FLAGS_CONJURED                       = 0x00000002,
+    ITEM_FLAGS_OPENABLE                       = 0x00000004,
+    ITEM_FLAGS_WRAPPED                        = 0x00000008,
+    ITEM_FLAGS_WRAPPER                        = 0x00000100, // used or not used wrapper
+    ITEM_FLAGS_QUEST_OBJECTIVE                = 0x00000800,
+    ITEM_FLAGS_CHARTER                        = 0x00002000, // arena/guild charter
+    ITEM_FLAGS_UNIQUE_EQUIPPED                = 0x00080000,
+    ITEM_FLAGS_THROWABLE                      = 0x00400000, // not used in game for check trow possibility, only for item in game tooltip
+    ITEM_FLAGS_SPECIALUSE                     = 0x00800000  // last used flag in 2.3.0
 };
 
 enum BAG_FAMILY_MASK

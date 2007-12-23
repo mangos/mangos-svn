@@ -7855,6 +7855,22 @@ bool Player::HasItemEquipped( uint32 item ) const
         if( pItem && pItem->GetEntry() == item )
             return true;
     }
+
+    ItemPrototype const *pProto = objmgr.GetItemPrototype(item);
+    if (pProto && pProto->GemProperties)
+    {
+        for(int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
+        {
+            pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
+            if( pItem && pItem->GetProto()->Socket[0].Color )
+            {
+                if (pItem->GetGemCountWithID(item) > 0 )
+                    return true;
+            }
+        }
+
+    }
+
     return false;
 }
 
@@ -8508,6 +8524,28 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
             uint8 res = CanTakeMoreSimilarItems(pItem);
             if(res != EQUIP_ERR_OK)
                 return res;
+
+            // check unique-equipped on item
+            if (pProto->Flags & ITEM_FLAGS_UNIQUE_EQUIPPED) {
+                // there is an equip limit on this item
+                if (HasItemEquipped(pProto->ItemId))
+                    return EQUIP_ERR_ITEM_UNIQUE_EQUIPABLE;
+            }
+
+            // check unique-equipped on gems
+            for(uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+3; ++enchant_slot)
+            {
+                uint32 enchant_id = pItem->GetEnchantmentId(EnchantmentSlot(enchant_slot));
+                if(!enchant_id)
+                    continue;
+                SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+                if(!enchantEntry)
+                    continue;
+                
+                ItemPrototype const* pGem = objmgr.GetItemPrototype(enchantEntry->GemID);
+                if(pGem && (pGem->Flags & ITEM_FLAGS_UNIQUE_EQUIPPED) && HasItemEquipped(enchantEntry->GemID))
+                    return EQUIP_ERR_ITEM_UNIQUE_EQUIPABLE;
+            }
 
             if( isInCombat()&& pProto->Class != ITEM_CLASS_WEAPON && pProto->Class != ITEM_CLASS_PROJECTILE &&
                 pProto->SubClass != ITEM_SUBCLASS_ARMOR_SHIELD && pProto->InventoryType != INVTYPE_RELIC)
