@@ -101,7 +101,6 @@ class MANGOS_DLL_SPEC Aura
         void HandlePeriodicTriggerSpell(bool Apply, bool Real);
         void HandlePeriodicEnergize(bool Apply, bool Real);
         void HandleAuraModResistanceExclusive(bool Apply, bool Real);
-        void HandleAuraSafeFall(bool Apply, bool Real);
         void HandleAuraDamageShield(bool Apply, bool Real);
         void HandleModStealth(bool Apply, bool Real);
         void HandleModStealthDetect(bool Apply, bool Real);
