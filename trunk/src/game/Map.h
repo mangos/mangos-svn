@@ -227,6 +227,12 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         // NOTE: this duplicate of Instanceable(), but Instanceable() can be changed when BG also will be instanceable
         bool IsDungeon() const { return(i_mapEntry && ((i_mapEntry->map_type == MAP_INSTANCE) || (i_mapEntry->map_type == MAP_RAID))); }
         bool IsRaid() const { return(i_mapEntry && (i_mapEntry->map_type == MAP_RAID)); }
+        bool IsMountAllowed() const
+        { 
+            return !IsDungeon() || i_mapEntry && (
+                i_mapEntry->MapID==568 || i_mapEntry->MapID==309 || i_mapEntry->MapID==209 || i_mapEntry->MapID==534 ||
+                i_mapEntry->MapID==560 || i_mapEntry->MapID==509 || i_mapEntry->MapID==269 );
+        }
 
         virtual bool RemoveBones(uint64 guid, float x, float y);
         void InitResetTime();
