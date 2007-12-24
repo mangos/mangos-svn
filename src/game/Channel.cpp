@@ -414,7 +414,7 @@ void Channel::List(Player* player)
         size_t pos = data.wpos();
         data << uint32(0);                                  // size of list, placeholder
 
-        bool gmInWhoList         = sWorld.getConfig(CONFIG_GM_IN_WHO_LIST);
+        bool gmInWhoList = sWorld.getConfig(CONFIG_GM_IN_WHO_LIST) || player->GetSession()->GetSecurity() > SEC_PLAYER;
 
         uint32 count  = 0;
         for(PlayerList::iterator i = players.begin(); i != players.end(); ++i)
@@ -584,6 +584,34 @@ void Channel::Invite(uint64 p, const char *newname)
             }
             MakePlayerInvited(&data, newp->GetGUID());
             SendToOne(&data, p);
+        }
+    }
+}
+
+void Channel::SetOwner(uint64 guid, bool exclaim)
+{
+    if(m_ownerGUID)
+    {
+        // [] will re-add player after it possible removed
+        PlayerList::iterator p_itr = players.find(m_ownerGUID);
+        if(p_itr != players.end())
+            p_itr->second.SetOwner(false);
+    }
+
+    m_ownerGUID = guid;
+    if(m_ownerGUID)
+    {
+        uint8 oldFlag = GetPlayerFlags(m_ownerGUID);
+        players[m_ownerGUID].SetOwner(true);
+
+        WorldPacket data;
+        MakeModeChange(&data, m_ownerGUID, oldFlag);
+        SendToAll(&data);
+
+        if(exclaim)
+        {
+            MakeOwnerChanged(&data, m_ownerGUID);
+            SendToAll(&data);
         }
     }
 }

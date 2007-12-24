@@ -223,29 +223,6 @@ class Channel
             return p_itr->second.flags;
         }
 
-        void _SetOwner(uint64 guid, bool exclaim = true)
-        {
-            if(m_ownerGUID)
-                players[m_ownerGUID].SetOwner(false);
-
-            m_ownerGUID = guid;
-            if(m_ownerGUID)
-            {
-                uint8 oldFlag = GetPlayerFlags(m_ownerGUID);
-                players[m_ownerGUID].SetOwner(true);
-
-                WorldPacket data;
-                MakeModeChange(&data, m_ownerGUID, oldFlag);
-                SendToAll(&data);
-
-                if(exclaim)
-                {
-                    MakeOwnerChanged(&data, m_ownerGUID);
-                    SendToAll(&data);
-                }
-            }
-        }
-
         void SetModerator(uint64 p, bool set)
         {
             if(players[p].IsModerator() != set)
@@ -294,7 +271,7 @@ class Channel
         void UnBan(uint64 good, const char *badname);
         void Password(uint64 p, const char *pass);
         void SetMode(uint64 p, const char *p2n, bool mod, bool set);
-        void SetOwner(uint64 p, bool exclaim = true) { _SetOwner(p, exclaim); };
+        void SetOwner(uint64 p, bool exclaim = true);
         void SetOwner(uint64 p, const char *newname);
         void SendWhoOwner(uint64 p);
         void SetModerator(uint64 p, const char *newname) { SetMode(p, newname, true, true); }
