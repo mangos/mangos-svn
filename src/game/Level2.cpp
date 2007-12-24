@@ -629,7 +629,7 @@ bool ChatHandler::HandleDeleteCommand(const char* args)
         return true;
     }
 
-    unit->CombatStop(true);
+    unit->CombatStop();
 
     unit->DeleteFromDB();
 
@@ -2275,7 +2275,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
         if( wpGuid != 0 )
         {
             wpCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_GUID(wpGuid, HIGHGUID_UNIT));
-            wpCreature->CombatStop(true);
+            wpCreature->CombatStop();
             wpCreature->DeleteFromDB();
             ObjectAccessor::Instance().AddObjectToRemoveList(wpCreature);
         }
@@ -2334,7 +2334,7 @@ bool ChatHandler::HandleWpModifyCommand(const char* args)
             if( wpGuid != 0 )
             {
                 wpCreature = ObjectAccessor::GetCreature(*m_session->GetPlayer(),MAKE_GUID(wpGuid, HIGHGUID_UNIT));
-                wpCreature->CombatStop(true);
+                wpCreature->CombatStop();
                 wpCreature->DeleteFromDB();
                 ObjectAccessor::Instance().AddObjectToRemoveList(wpCreature);
                 // re-create
@@ -2796,7 +2796,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
                 }
                 else
                 {
-                    pCreature->CombatStop(true);
+                    pCreature->CombatStop();
                     pCreature->DeleteFromDB();
                     ObjectAccessor::Instance().AddObjectToRemoveList(pCreature);
                 }
@@ -2960,7 +2960,7 @@ bool ChatHandler::HandleWpShowCommand(const char* args)
             }
             else
             {
-                pCreature->CombatStop(true);
+                pCreature->CombatStop();
 
                 pCreature->DeleteFromDB();
 

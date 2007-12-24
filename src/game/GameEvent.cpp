@@ -464,7 +464,7 @@ void GameEvent::GameEventUnspawn(int16 event_id)
         //sLog.outDebug("Un-spawning creature %u",*itr);
         if (pCreature)
         {
-            pCreature->CombatStop(true);
+            pCreature->CombatStop();
             ObjectAccessor::Instance().AddObjectToRemoveList(pCreature);
         }
     }

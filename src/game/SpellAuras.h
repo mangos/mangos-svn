@@ -167,7 +167,6 @@ class MANGOS_DLL_SPEC Aura
         void HandleModTotalPercentStat(bool Apply, bool Real);
         void HandleAuraModTotalThreat(bool Apply, bool Real);
         void HandleModUnattackable(bool Apply, bool Real);
-        void HandleInterruptRegen(bool Apply, bool Real);
         void HandleAuraModPacify(bool Apply, bool Real);
         void HandleAuraGhost(bool Apply, bool Real);
         void HandleAuraAllowFlight(bool Apply, bool Real);

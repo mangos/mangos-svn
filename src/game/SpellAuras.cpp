@@ -143,7 +143,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNoImmediateEffect,                         // 91 SPELL_AURA_MOD_DETECT_RANGE
     &Aura::HandleNULL,                                      // 92 SPELL_AURA_PREVENTS_FLEEING
     &Aura::HandleModUnattackable,                           // 93 SPELL_AURA_MOD_UNATTACKABLE
-    &Aura::HandleInterruptRegen,                            // 94 SPELL_AURA_INTERRUPT_REGEN
+    &Aura::HandleNoImmediateEffect,                         // 94 SPELL_AURA_INTERRUPT_REGEN implemented in Player::RegenerateAll
     &Aura::HandleAuraGhost,                                 // 95 SPELL_AURA_GHOST
     &Aura::HandleNoImmediateEffect,                         // 96 SPELL_AURA_SPELL_MAGNET implemented in Spell::SelectMagnetTarget
     &Aura::HandleNoImmediateEffect,                         // 97 SPELL_AURA_MANA_SHIELD implemented in Unit::CalcAbsorbResist
@@ -1096,16 +1096,6 @@ void Aura::TriggerSpell()
 /*********************************************************/
 /***                  AURA EFFECTS                     ***/
 /*********************************************************/
-
-void Aura::HandleInterruptRegen(bool apply, bool Real)
-{
-    Unit* caster = GetCaster();
-
-    if(Real && apply)
-        caster->SetInCombat();
-
-    // Has no effect at removing
-}
 
 void Aura::HandleAuraDummy(bool apply, bool Real)
 {
@@ -4159,7 +4149,7 @@ void Aura::HandleAuraRetainComboPoints(bool apply, bool Real)
 void Aura::HandleModUnattackable( bool Apply, bool Real )
 {
     if(Real && Apply)
-        m_target->CombatStop(true);
+        m_target->CombatStop();
 
     m_target->ApplyModFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE,Apply);
 }

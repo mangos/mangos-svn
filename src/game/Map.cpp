@@ -1074,7 +1074,7 @@ bool Map::CreatureRespawnRelocation(Creature *c)
     CellPair resp_val = MaNGOS::ComputeCellPair(resp_x, resp_y);
     Cell resp_cell = RedZone::GetZone(resp_val);
 
-    c->CombatStop(true);
+    c->CombatStop();
     c->GetMotionMaster()->Clear();
 
     #ifdef MANGOS_DEBUG

@@ -115,7 +115,7 @@ void PetAI::_stopAttack()
         i_pet.GetMotionMaster()->Clear();
         i_pet.GetMotionMaster()->Idle();
         i_victimGuid = 0;
-        i_pet.CombatStop(true);
+        i_pet.CombatStop();
         i_pet.getHostilRefManager().deleteReferences();
 
         return;

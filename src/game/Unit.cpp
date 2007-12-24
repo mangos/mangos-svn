@@ -251,13 +251,10 @@ void Unit::Update( uint32 p_time )
         if(m_HostilRefManager.isEmpty())
         {
             // m_CombatTimer set at aura start and it will be freeze until aura removing
-            if(!HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
-            {
-                if ( m_CombatTimer <= p_time )
-                    ClearInCombat();
-                else
-                    m_CombatTimer -= p_time;
-            }
+            if ( m_CombatTimer <= p_time )
+                ClearInCombat();
+            else
+                m_CombatTimer -= p_time;
         }
     }
 
@@ -460,7 +457,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
         {
             pVictim->setDeathState(JUST_DIED);
             pVictim->SetHealth(0);
-            pVictim->CombatStop(true);
+            pVictim->CombatStop();
             pVictim->DeleteThreatList();
 
             // allow loot only if has loot_id in creature_template
@@ -582,7 +579,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
 
         DEBUG_LOG("DealDamageAttackStop");
         AttackStop();
-        pVictim->CombatStop(true);
+        pVictim->CombatStop();
 
         // if talent known but not triggered (check priest class for speedup check)
         Aura* spiritOfRedemtionTalentReady = NULL;
@@ -645,7 +642,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
             if(pet && pVictim->GetTypeId() != TYPEID_PLAYER)
             {
                 pet->setDeathState(JUST_DIED);
-                pet->CombatStop(true);
+                pet->CombatStop();
                 pet->SetHealth(0);
                 pet->addUnitState(UNIT_STAT_DIED);
                 pet->getHostilRefManager().deleteReferences();
@@ -5817,12 +5814,8 @@ void Unit::SetInCombat()
         SetFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PET_IN_COMBAT);
 }
 
-void Unit::ClearInCombat(bool force)
+void Unit::ClearInCombat()
 {
-    // wait aura and combat timer expire
-    if(!force && HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
-        return;
-
     m_CombatTimer = 0;
     RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT);
 
@@ -6412,7 +6405,7 @@ void Unit::setDeathState(DeathState s)
 {
     if (s != ALIVE)
     {
-        CombatStop(true);
+        CombatStop();
         ClearComboPointHolders();                           // any combo points pointed to unit lost at it death
 
         if(IsNonMeleeSpellCasted(false))
@@ -7185,7 +7178,7 @@ void Unit::CleanupsBeforeDelete()
     {
         InterruptNonMeleeSpells(true);
         m_Events.KillAllEvents();
-        CombatStop(true);
+        CombatStop();
         ClearComboPointHolders();
         DeleteThreatList();
         getHostilRefManager().setOnlineOfflineState(false);
