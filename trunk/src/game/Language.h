@@ -257,8 +257,8 @@
 #define LANG_WAYPOINT_INFO_TEXT          "Text %d: %s"
 #define LANG_WAYPOINT_INFO_AISCRIPT      "AIScript: %s"
 
-#define LANG_RENAME_PLAYER               "Forced rename for player %s will be requested on next login."
-#define LANG_RENAME_PLAYER_GUID          "Forced rename for player %s (GUID #%u) will be requested on next login."
+#define LANG_RENAME_PLAYER               "Forced rename for player %s will be requested at next login."
+#define LANG_RENAME_PLAYER_GUID          "Forced rename for player %s (GUID #%u) will be requested at next login."
 
 #define LANG_WAYPOINT_WPCREATNOTFOUND    "Waypoint-Creature (GUID: %u) Not found"
 #define LANG_WAYPOINT_NPCNOTFOUND        "Could not find NPC..."
@@ -276,10 +276,10 @@
 #define LANG_COMMAND_TARGETOBJNOTFOUND   "Nothing found!"
 #define LANG_COMMAND_GOOBJNOTFOUND       "Object not found!"
 #define LANG_COMMAND_GOCREATNOTFOUND     "Creature not found!"
-#define LANG_COMMAND_GOCREATMULTIPLE     "Warning: Mob found more than 1 time - you will be ported to the first one found inside DB."
+#define LANG_COMMAND_GOCREATMULTIPLE     "Warning: Mob found more than once - you will be teleported to the first one found in DB."
 #define LANG_COMMAND_DELCREATMESSAGE     "Creature Removed"
 #define LANG_COMMAND_CREATUREMOVED       "Creature moved."
-#define LANG_COMMAND_CREATUREATSAMEMAP   "Creature (GUID:%u) must be at same map with player!"
+#define LANG_COMMAND_CREATUREATSAMEMAP   "Creature (GUID:%u) must be on the same map as player!"
 #define LANG_COMMAND_OBJNOTFOUND         "Game Object (GUID: %u) not found"
 #define LANG_COMMAND_DELOBJREFERCREATURE "Game Object (GUID: %u) has references in not found creature %u GO list, can't be deleted."
 #define LANG_COMMAND_DELOBJMESSAGE       "Game Object (GUID: %u) removed"

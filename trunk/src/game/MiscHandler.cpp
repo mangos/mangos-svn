@@ -1197,67 +1197,70 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     WorldPacket data(SMSG_INSPECT_TALENTS, 4+talent_points);
     data << uint32(talent_points);
 
-    // fill by 0 talenst array
+    // fill by 0 talents array
     for(uint32 i = 0; i < talent_points; ++i)
         data << uint8(0);
 
-    // find class talent tabs (all players have 3 talent tabs)
-    uint32 const* talentTabIds = GetTalentTabPages(plr->getClass()); 
-
-    uint32 talentTabPos = 0;                                // pos of first talent rank in tab including all prev tabs
-    for(uint32 i = 0; i < 3; ++i)
+    if(sWorld.getConfig(CONFIG_TALENTS_INSPECTING) || _player->isGameMaster())
     {
-        uint32 talentTabId = talentTabIds[i];
+        // find class talent tabs (all players have 3 talent tabs)
+        uint32 const* talentTabIds = GetTalentTabPages(plr->getClass()); 
 
-        // fill by real data
-        for(uint32 talentId = 0; talentId < sTalentStore.GetNumRows(); ++talentId)
+        uint32 talentTabPos = 0;                                // pos of first talent rank in tab including all prev tabs
+        for(uint32 i = 0; i < 3; ++i)
         {
-            TalentEntry const* talentInfo = sTalentStore.LookupEntry(talentId);
-            if(!talentInfo)
-                continue;
+            uint32 talentTabId = talentTabIds[i];
 
-            // skip another tab talents
-            if(talentInfo->TalentTab != talentTabId)
-                continue;
-
-            // find talent rank
-            uint32 curtalent_maxrank = 0;
-            for(uint32 k = 5; k > 0; --k)
+            // fill by real data
+            for(uint32 talentId = 0; talentId < sTalentStore.GetNumRows(); ++talentId)
             {
-                if(talentInfo->RankID[k-1] && plr->HasSpell(talentInfo->RankID[k-1]))
+                TalentEntry const* talentInfo = sTalentStore.LookupEntry(talentId);
+                if(!talentInfo)
+                    continue;
+
+                // skip another tab talents
+                if(talentInfo->TalentTab != talentTabId)
+                    continue;
+
+                // find talent rank
+                uint32 curtalent_maxrank = 0;
+                for(uint32 k = 5; k > 0; --k)
                 {
-                    curtalent_maxrank = k;
-                    break;
+                    if(talentInfo->RankID[k-1] && plr->HasSpell(talentInfo->RankID[k-1]))
+                    {
+                        curtalent_maxrank = k;
+                        break;
+                    }
                 }
+
+                // not learned talent
+                if(!curtalent_maxrank)
+                    continue;
+
+                // 1 rank talent bit index
+                uint32 curtalent_index = talentTabPos + GetTalentInspectBitPosInTab(talentId);
+
+                uint32 curtalent_rank_index = curtalent_index+curtalent_maxrank-1;
+
+                // slot/offset in 7-bit bytes
+                uint32 curtalent_rank_slot7   = curtalent_rank_index / 7;
+                uint32 curtalent_rank_offset7 = curtalent_rank_index % 7;
+
+                // rank pos with skipped 8 bit
+                uint32 curtalent_rank_index2 = curtalent_rank_slot7 * 8 + curtalent_rank_offset7;
+
+                // slot/offset in 8-bit bytes with skipped high bit
+                uint32 curtalent_rank_slot = curtalent_rank_index2 / 8;
+                uint32 curtalent_rank_offset =  curtalent_rank_index2 % 8;
+
+                // apply mask
+                uint32 val = data.read<uint8>(4 + curtalent_rank_slot);
+                val |= (1 << curtalent_rank_offset);
+                data.put<uint8>(4 + curtalent_rank_slot,val & 0xFF);
             }
 
-            // not learned talent
-            if(!curtalent_maxrank)
-                continue;
-
-            // 1 rank talent bit index
-            uint32 curtalent_index = talentTabPos + GetTalentInspectBitPosInTab(talentId);
-
-            uint32 curtalent_rank_index = curtalent_index+curtalent_maxrank-1;
-
-            // slot/offset in 7-bit bytes
-            uint32 curtalent_rank_slot7   = curtalent_rank_index / 7;
-            uint32 curtalent_rank_offset7 = curtalent_rank_index % 7;
-
-            // rank pos with skipped 8 bit
-            uint32 curtalent_rank_index2 = curtalent_rank_slot7 * 8 + curtalent_rank_offset7;
-
-            // slot/offset in 8-bit bytes with skipped high bit
-            uint32 curtalent_rank_slot = curtalent_rank_index2 / 8;
-            uint32 curtalent_rank_offset =  curtalent_rank_index2 % 8;
-
-            // apply mask
-            uint32 val = data.read<uint8>(4 + curtalent_rank_slot);
-            val |= (1 << curtalent_rank_offset);
-            data.put<uint8>(4 + curtalent_rank_slot,val & 0xFF);
+            talentTabPos += GetTalentTabInspectBitSize(talentTabId);
         }
-
-        talentTabPos += GetTalentTabInspectBitSize(talentTabId);
     }
 
     SendPacket(&data);
