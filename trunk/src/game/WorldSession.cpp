@@ -605,7 +605,7 @@ void WorldSession::LogoutPlayer(bool Save)
         }
         else if (_player->isAttacked())
         {
-            _player->CombatStop(true);
+            _player->CombatStop();
             _player->getHostilRefManager().setOnlineOfflineState(false);
             _player->RemoveAllAurasOnDeath();
             _player->KillPlayer();

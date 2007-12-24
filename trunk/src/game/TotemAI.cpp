@@ -48,7 +48,7 @@ TotemAI::MoveInLineOfSight(Unit *u)
 
 void TotemAI::EnterEvadeMode()
 {
-    i_totem.CombatStop(true);
+    i_totem.CombatStop();
 }
 
 void

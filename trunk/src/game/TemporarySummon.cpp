@@ -166,7 +166,7 @@ void TemporarySummon::Summon(TempSummonType type, uint32 lifetime)
 
 void TemporarySummon::UnSummon()
 {
-    CombatStop(true);
+    CombatStop();
 
     CleanupsBeforeDelete();
     ObjectAccessor::Instance().AddObjectToRemoveList(this);

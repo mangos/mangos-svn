@@ -1682,11 +1682,12 @@ void Player::RegenerateAll()
         HasAuraType(SPELL_AURA_MOD_HEALTH_REGEN_IN_COMBAT) || IsPolymorphed() )
     {
         RegenerateHealth();
-        if (!isInCombat())
+        if (!isInCombat() && !HasAuraType(SPELL_AURA_INTERRUPT_REGEN))
             Regenerate(POWER_RAGE);
     }
 
     Regenerate( POWER_ENERGY );
+
     Regenerate( POWER_MANA );
 
     m_regenTimer = regenDelay;
@@ -1859,7 +1860,7 @@ void Player::SetGameMaster(bool on)
         setFaction(35);
         SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
         getHostilRefManager().setOnlineOfflineState(false);
-        CombatStop(true);
+        CombatStop();
     }
     else
     {
@@ -1868,6 +1869,8 @@ void Player::SetGameMaster(bool on)
         RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
         getHostilRefManager().setOnlineOfflineState(true);
     }
+
+    ObjectAccessor::UpdateVisibilityForPlayer(this);
 }
 
 void Player::SetGMVisible(bool on)
@@ -12476,7 +12479,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     }
 
     // make sure the unit is considered out of combat for proper loading
-    ClearInCombat(true);
+    ClearInCombat();
 
     // make sure the unit is considered not in duel for proper loading
     SetUInt64Value(PLAYER_DUEL_ARBITER, 0);
@@ -14042,7 +14045,7 @@ void Player::RemovePet(Pet* pet, PetSaveMode mode, bool returnreagent)
     if(GetPetGUID()==pet->GetGUID())
         SetPet(0);
 
-    pet->CombatStop(true);
+    pet->CombatStop();
 
     if(returnreagent)
     {
@@ -14650,7 +14653,7 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes)
     // Prepare to flight start now
 
     // stop combat at start taxi flight if any
-    CombatStop(true);
+    CombatStop();
 
     // clean not finished taxi path if any
     ClearTaxiDestinations();
@@ -15267,10 +15270,14 @@ bool Player::CanJoinToBattleground() const
 
 bool Player::IsVisibleInGridForPlayer( Player* pl ) const
 {
+    // gamemaster in GM mode see all, including ghosts
+    if(pl->isGameMaster())
+        return GetSession()->GetSecurity() <= pl->GetSession()->GetSecurity();
+
     // It seems in battleground everyone sees everyone, except the enemy-faction ghosts
     if (InBattleGround())
     {
-        if (!(isAlive() || m_deathTimer > 0) && !IsFriendlyTo(pl))
+        if (!(isAlive() || m_deathTimer > 0) && !IsFriendlyTo(pl) )
             return false;
         return true;
     }

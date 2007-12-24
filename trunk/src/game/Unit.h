@@ -768,7 +768,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         AttackerSet const& getAttackers() const { return m_attackers; }
         bool isAttackingPlayer() const;
         Unit* getVictim() const { return m_attacking; }
-        void CombatStop(bool force = false) { AttackStop(); RemoveAllAttackers(); ClearInCombat(force); }
+        void CombatStop() { AttackStop(); RemoveAllAttackers(); ClearInCombat(); }
 
         void addUnitState(uint32 f) { m_state |= f; };
         bool hasUnitState(const uint32 f) const { return (m_state & f); }
@@ -901,7 +901,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         //bool isInCombat()  const { return hasUnitState(UNIT_STAT_IN_COMBAT); }
         bool isInCombat()  const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT); }
         void SetInCombat();
-        void ClearInCombat(bool force = false);
+        void ClearInCombat();
 
         bool isAttacking() const { return hasUnitState(UNIT_STAT_ATTACKING); }
         bool isAttacked()  const { return hasUnitState(UNIT_STAT_ATTACK_BY); }
