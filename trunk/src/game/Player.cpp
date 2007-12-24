@@ -1246,7 +1246,7 @@ void Player::GetFriendInfo(uint64 friendGUID, FriendInfo &friendInfo)
     uint32 team = GetTeam();
     uint32 security = GetSession()->GetSecurity();
     bool allowTwoSideWhoList = sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
-    bool gmInWhoList         = sWorld.getConfig(CONFIG_GM_IN_WHO_LIST);
+    bool gmInWhoList = sWorld.getConfig(CONFIG_GM_IN_WHO_LIST) || security > SEC_PLAYER;
 
     // PLAYER see his team only and PLAYER can't see MODERATOR, GAME MASTER, ADMINISTRATOR characters
     // MODERATOR, GAME MASTER, ADMINISTRATOR can see all
@@ -3847,7 +3847,7 @@ void Player::BroadcastPacketToFriendListers(WorldPacket *packet, bool extern_res
 
     uint32 team              = GetTeam();
     uint32 security          = GetSession()->GetSecurity();
-    bool gmInWhoList         = sWorld.getConfig(CONFIG_GM_IN_WHO_LIST);
+    bool gmInWhoList = sWorld.getConfig(CONFIG_GM_IN_WHO_LIST);
     bool allowTwoSideWhoList = sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_WHO_LIST);
 
     do
