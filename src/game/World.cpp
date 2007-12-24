@@ -460,6 +460,8 @@ void World::SetInitialWorldSettings()
 
     m_configs[CONFIG_RESTRICTED_LFG_CHANNEL] = sConfig.GetIntDefault("RestrictedLfgChannel", 1);
 
+    m_configs[CONFIG_TALENTS_INSPECTING] = sConfig.GetIntDefault("TalentsInspecting", 1);
+
     m_VisibleUnitGreyDistance = sConfig.GetFloatDefault("Visibility.Distance.Grey.Unit", 1);
     if(m_VisibleUnitGreyDistance >  MAX_VISIBILITY_DISTANCE)
     {

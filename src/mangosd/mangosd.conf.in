@@ -243,6 +243,10 @@ ChatFlood.MuteTime = 10
 # Default: 1 (allow join to channel only if active in LFG)
 RestrictedLfgChannel = 1
 
+# Allow other players see character talents in inspect dialog (Characters in Gamemaster mode can inspect talents always)
+#          0 (not allow)
+# Default: 1 (allow)
+TalentsInspecting = 1
 
 # Is GM accept whispers from player by default.
 # Default: 0 (false)

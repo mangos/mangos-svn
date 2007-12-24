@@ -187,7 +187,7 @@ bool SpellCastTargets::read ( WorldPacket * data,Unit *caster )
         *data >> m_strTarget;
     }
 
-    if(( m_targetMask & TARGET_FLAG_CORPSE) || (m_targetMask & TARGET_FLAG_PVP_CORPSE ))
+    if( m_targetMask & (TARGET_FLAG_CORPSE | TARGET_FLAG_PVP_CORPSE ) )
         if(!readGUID(*data,m_CorpseTargetGUID))
             return false;
 
@@ -212,7 +212,7 @@ void SpellCastTargets::write ( WorldPacket * data, bool forceAppend)
             *data << (uint8)0;
     }
 
-    if(( m_targetMask & TARGET_FLAG_OBJECT )||(m_targetMask & TARGET_FLAG_OBJECT_UNK ))
+    if( m_targetMask & ( TARGET_FLAG_OBJECT | TARGET_FLAG_OBJECT_UNK ) )
     {
         if(m_GOTarget)
             data->append(m_GOTarget->GetPackGUID());
@@ -220,7 +220,7 @@ void SpellCastTargets::write ( WorldPacket * data, bool forceAppend)
             *data << (uint8)0;
     }
 
-    if(m_targetMask & TARGET_FLAG_ITEM)
+    if( m_targetMask & TARGET_FLAG_ITEM )
     {
         if(m_itemTarget)
             data->append(m_itemTarget->GetPackGUID());
@@ -228,19 +228,19 @@ void SpellCastTargets::write ( WorldPacket * data, bool forceAppend)
             *data << (uint8)0;
     }
 
-    if(m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
+    if( m_targetMask & TARGET_FLAG_SOURCE_LOCATION )
         *data << m_srcX << m_srcY << m_srcZ;
 
-    if(m_targetMask & TARGET_FLAG_DEST_LOCATION)
+    if( m_targetMask & TARGET_FLAG_DEST_LOCATION )
         *data << m_destX << m_destY << m_destZ;
 
-    if(m_targetMask & TARGET_FLAG_STRING)
+    if( m_targetMask & TARGET_FLAG_STRING )
         *data << m_strTarget;
 
-    if((m_targetMask & TARGET_FLAG_CORPSE) || (m_targetMask & TARGET_FLAG_PVP_CORPSE))
+    if( m_targetMask & ( TARGET_FLAG_CORPSE | TARGET_FLAG_PVP_CORPSE ) )
         data->appendPackGUID(m_CorpseTargetGUID);
 
-    if(forceAppend && data->size() == len)
+    if( forceAppend && data->size() == len )
         *data << (uint8)0;
 }
 
