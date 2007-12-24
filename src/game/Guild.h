@@ -101,12 +101,14 @@ enum GuildEvents
     GE_DISBANDED        = 0x08,
     GE_TABARDCHANGE     = 0x09,
     GE_UNK1             = 0x0A,                             // string, string
+    GE_UNK2             = 0x0B,
     GE_SIGNED_ON        = 0x0C,
     GE_SIGNED_OFF       = 0x0D,
-    GE_UNK2             = 0x0E,
-    GE_UNK3             = 0x11,                             // string 0000000000002710 is 1 gold
-    GE_UNK4             = 0x15,
-    GE_UNK5             = 0x19
+    GE_UNK3             = 0x0E,
+    GE_UNK4             = 0x0F,
+    GE_UNK5             = 0x10,
+    GE_UNK6             = 0x11,                             // string 0000000000002710 is 1 gold
+    GE_UNK7             = 0x12
 };
 
 enum PetitionTurns

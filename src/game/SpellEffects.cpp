@@ -1185,14 +1185,14 @@ void Spell::EffectDummy(uint32 i)
 
             //5 different spells used depending on mounted speed and if mount can fly or not
             if (flyspeed >= 4.1f)
-                m_caster->CastSpell(m_caster, 44827, true);//310% flying Reindeer
+                m_caster->CastSpell(m_caster, 44827, true); //310% flying Reindeer
             else if (flyspeed >= 3.8f)
-                m_caster->CastSpell(m_caster, 44825, true);//280% flying Reindeer
+                m_caster->CastSpell(m_caster, 44825, true); //280% flying Reindeer
             else if (flyspeed >= 1.6f)
-                m_caster->CastSpell(m_caster, 44824, true);//60% flying Reindeer
+                m_caster->CastSpell(m_caster, 44824, true); //60% flying Reindeer
             else if (speed >= 2.0f)
-                m_caster->CastSpell(m_caster, 25859, true);//100% ground Reindeer
-            else 
+                m_caster->CastSpell(m_caster, 25859, true); //100% ground Reindeer
+            else
                 m_caster->CastSpell(m_caster, 25858, true); //60% ground Reindeer
         }
 
@@ -1811,11 +1811,11 @@ void Spell::EffectOpenLock(uint32 i)
         if (gameObjTarget->GetGOInfo()->type == GAMEOBJECT_TYPE_BUTTON && gameObjTarget->GetGOInfo()->data4 == 1 ||
             gameObjTarget->GetGOInfo()->type == GAMEOBJECT_TYPE_GOOBER && gameObjTarget->GetGOInfo()->data16 == 1 )
         {
-            if( player->InBattleGround() &&                // in battleground
-                !player->IsMounted() &&                    // not mounted
-                !player->HasStealthAura() &&               // not stealthed
-                !player->HasInvisibilityAura() &&          // not invisible
-                player->isAlive())                         // live player
+            if( player->InBattleGround() &&                 // in battleground
+                !player->IsMounted() &&                     // not mounted
+                !player->HasStealthAura() &&                // not stealthed
+                !player->HasInvisibilityAura() &&           // not invisible
+                player->isAlive())                          // live player
             {
                 BattleGround *bg = player->GetBattleGround();
                 // check if it's correct bg
@@ -3277,7 +3277,7 @@ void Spell::EffectScriptEffect(uint32 i)
             if (m_caster->GetAreaId() == 3428)
                 m_caster->CastSpell(m_caster, 25863, true);
             else m_caster->CastSpell(m_caster, 26655, true);
-        break;
+            break;
     }
 
     // paladin's holy light / flash of light

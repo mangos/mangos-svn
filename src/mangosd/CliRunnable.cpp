@@ -540,7 +540,7 @@ void CliSetPassword(char *command,pPrintf zprintf)
     uint32 acc_id = accmgr.GetId(szAcc);
     if (!acc_id)
     {
-        zprintf("Account '%s' not exist!\r\n");
+        zprintf("Account '%s' not exist!\r\n", szAcc);
         return;
     }
 

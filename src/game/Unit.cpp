@@ -1941,7 +1941,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
             break;
 
         case MELEE_HIT_PARRY:
-            if(attType == RANGED_ATTACK || unavoidable)                    //range attack - no parry
+            if(attType == RANGED_ATTACK || unavoidable)     //range attack - no parry
             {
                 outcome = MELEE_HIT_NORMAL;
                 break;
@@ -2014,7 +2014,7 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
             return;
 
         case MELEE_HIT_DODGE:
-            if(attType == RANGED_ATTACK || unavoidable )                    //range attack - no dodge
+            if(attType == RANGED_ATTACK || unavoidable )    //range attack - no dodge
             {
                 outcome = MELEE_HIT_NORMAL;
                 break;
@@ -6330,7 +6330,7 @@ void Unit::ApplySpeedMod(UnitMoveType mtype, float rate, bool forced, bool apply
                 data.Initialize(MSG_MOVE_SET_FLY_SPEED, 8+4+1+4+4+4+4+4+4+4);
                 break;
             case MOVE_FLYBACK:
-                data.Initialize(MSG_MOVE_SET_FLY_BACK_SPEED, 8+4+1+4+4+4+4+4+4+4);                
+                data.Initialize(MSG_MOVE_SET_FLY_BACK_SPEED, 8+4+1+4+4+4+4+4+4+4);
                 break;
             default:
                 sLog.outError("Unit::SetSpeed: Unsupported move type (%d), data not sent to client.",mtype);
@@ -7690,7 +7690,7 @@ void Unit::ClearAllReactives()
     if (getClass() == CLASS_HUNTER && HasAuraState( AURA_STATE_HUNTER_CRIT_STRIKE)  )
         ModifyAuraState(AURA_STATE_HUNTER_CRIT_STRIKE, false);
 
-    if(getClass() == CLASS_WARRIOR && GetTypeId() == TYPEID_PLAYER) 
+    if(getClass() == CLASS_WARRIOR && GetTypeId() == TYPEID_PLAYER)
         ((Player*)this)->ClearComboPoints();
 }
 
@@ -7709,28 +7709,28 @@ void Unit::UpdateReactives( uint32 p_time )
 
             switch ( reactive )
             {
-            case REACTIVE_DEFENSE:
-                if (HasAuraState(AURA_STATE_DEFENSE))
-                    ModifyAuraState(AURA_STATE_DEFENSE, false);
-                break;
-            case REACTIVE_HUNTER_PARRY:
-                if ( getClass() == CLASS_HUNTER && HasAuraState(AURA_STATE_HUNTER_PARRY))
-                    ModifyAuraState(AURA_STATE_HUNTER_PARRY, false);
-                break;
-            case REACTIVE_CRIT:
-                if (HasAuraState(AURA_STATE_CRIT))
-                    ModifyAuraState(AURA_STATE_CRIT, false);
-                break;
-            case REACTIVE_HUNTER_CRIT:
-                if ( getClass() == CLASS_HUNTER && HasAuraState(AURA_STATE_HUNTER_CRIT_STRIKE) )
-                    ModifyAuraState(AURA_STATE_HUNTER_CRIT_STRIKE, false);
-                break;
-            case REACTIVE_OVERPOWER:
-                if(getClass() == CLASS_WARRIOR && GetTypeId() == TYPEID_PLAYER) 
-                    ((Player*)this)->ClearComboPoints();
-                break;
-            default:
-                break;
+                case REACTIVE_DEFENSE:
+                    if (HasAuraState(AURA_STATE_DEFENSE))
+                        ModifyAuraState(AURA_STATE_DEFENSE, false);
+                    break;
+                case REACTIVE_HUNTER_PARRY:
+                    if ( getClass() == CLASS_HUNTER && HasAuraState(AURA_STATE_HUNTER_PARRY))
+                        ModifyAuraState(AURA_STATE_HUNTER_PARRY, false);
+                    break;
+                case REACTIVE_CRIT:
+                    if (HasAuraState(AURA_STATE_CRIT))
+                        ModifyAuraState(AURA_STATE_CRIT, false);
+                    break;
+                case REACTIVE_HUNTER_CRIT:
+                    if ( getClass() == CLASS_HUNTER && HasAuraState(AURA_STATE_HUNTER_CRIT_STRIKE) )
+                        ModifyAuraState(AURA_STATE_HUNTER_CRIT_STRIKE, false);
+                    break;
+                case REACTIVE_OVERPOWER:
+                    if(getClass() == CLASS_WARRIOR && GetTypeId() == TYPEID_PLAYER)
+                        ((Player*)this)->ClearComboPoints();
+                    break;
+                default:
+                    break;
             }
         }
         else
