@@ -937,34 +937,23 @@ void WorldSession::HandleGuildEventLogOpcode(WorldPacket& recvPacket)
     sLog.outDebug("WORLD: Received MSG_GUILD_EVENT_LOG");   // empty
     recvPacket.hexlike();
 
-    uint8 count = 0;
+    uint8 count = 0,type = 0;
+
     WorldPacket data(MSG_GUILD_EVENT_LOG, 0);
-    data << uint8(count);                                   // count
+    data << uint8(count);                                   // count, max count == 100
     for(uint8 i = 0; i < count; ++i)
     {
-        uint8 type = 0;
-        switch(type)
-        {
-            case 1:
-                data << uint64(0);                          // guid
-                data << uint64(0);                          // guid
-                data << uint32(0);                          // time
-                break;
-            case 2:
-                data << uint64(0);                          // guid
-                data << uint32(0);                          // time
-                break;
-            case 3:
-                data << uint64(0);                          // guid
-                data << uint64(0);                          // guid
-                data << uint8(0);                           // unk
-                data << uint32(0);                          // time
-                break;
-            case 6:
-                data << uint64(0);                          // guid
-                data << uint32(0);                          // time
-                break;
-        }
+
+        data << uint8(type);
+        data << uint64(0);                                  // guid
+        if( type != 2 && type != 6 )
+            data << uint64(0);                              // guid
+
+        if( type == 3 || type == 4 )
+            data << uint8(0);
+
+        data << uint32(0);                                  // time
+
     }
     SendPacket(&data);
 }

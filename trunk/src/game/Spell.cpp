@@ -147,19 +147,19 @@ bool SpellCastTargets::read ( WorldPacket * data,Unit *caster )
         return true;
     }
 
-    if(m_targetMask & TARGET_FLAG_UNIT)
+    if( m_targetMask & TARGET_FLAG_UNIT )
         if(!readGUID(*data,m_unitTargetGUID))
             return false;
 
-    if(m_targetMask & TARGET_FLAG_OBJECT)
+    if( m_targetMask & ( TARGET_FLAG_OBJECT | TARGET_FLAG_OBJECT_UNK ))
         if(!readGUID(*data,m_GOTargetGUID))
             return false;
 
-    if((m_targetMask & (TARGET_FLAG_ITEM | TARGET_FLAG_TRADE_ITEM)) && caster->GetTypeId() == TYPEID_PLAYER)
+    if(( m_targetMask & ( TARGET_FLAG_ITEM | TARGET_FLAG_TRADE_ITEM )) && caster->GetTypeId() == TYPEID_PLAYER)
         if(!readGUID(*data,m_itemTargetGUID))
             return false;
 
-    if(m_targetMask & TARGET_FLAG_SOURCE_LOCATION)
+    if( m_targetMask & TARGET_FLAG_SOURCE_LOCATION )
     {
         if(data->rpos()+4+4+4 > data->size())
             return false;
@@ -169,7 +169,7 @@ bool SpellCastTargets::read ( WorldPacket * data,Unit *caster )
             return false;
     }
 
-    if(m_targetMask & TARGET_FLAG_DEST_LOCATION)
+    if( m_targetMask & TARGET_FLAG_DEST_LOCATION )
     {
         if(data->rpos()+4+4+4 > data->size())
             return false;
@@ -179,7 +179,7 @@ bool SpellCastTargets::read ( WorldPacket * data,Unit *caster )
             return false;
     }
 
-    if(m_targetMask & TARGET_FLAG_STRING)
+    if( m_targetMask & TARGET_FLAG_STRING )
     {
         if(data->rpos()+1 > data->size())
             return false;
@@ -187,7 +187,7 @@ bool SpellCastTargets::read ( WorldPacket * data,Unit *caster )
         *data >> m_strTarget;
     }
 
-    if((m_targetMask & TARGET_FLAG_CORPSE) || (m_targetMask & TARGET_FLAG_PVP_CORPSE))
+    if(( m_targetMask & TARGET_FLAG_CORPSE) || (m_targetMask & TARGET_FLAG_PVP_CORPSE ))
         if(!readGUID(*data,m_CorpseTargetGUID))
             return false;
 
@@ -212,7 +212,7 @@ void SpellCastTargets::write ( WorldPacket * data, bool forceAppend)
             *data << (uint8)0;
     }
 
-    if(m_targetMask & TARGET_FLAG_OBJECT)
+    if(( m_targetMask & TARGET_FLAG_OBJECT )||(m_targetMask & TARGET_FLAG_OBJECT_UNK ))
     {
         if(m_GOTarget)
             data->append(m_GOTarget->GetPackGUID());

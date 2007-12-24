@@ -573,7 +573,19 @@ enum TextEmotes
     TEXTEMOTE_WINK                 = 363,
     TEXTEMOTE_PAT                  = 364,
     TEXTEMOTE_SERIOUS              = 365,
-    TEXTEMOTE_MOUNTSPECIAL         = 366
+    TEXTEMOTE_MOUNTSPECIAL         = 366,
+    TEXTEMOTE_GOODLUCK             = 367,
+    TEXTEMOTE_BLAME                = 368,
+    TEXTEMOTE_BLANK                = 369,
+    TEXTEMOTE_BRANDISH             = 370,
+    TEXTEMOTE_BREATH               = 371,
+    TEXTEMOTE_DISAGREE             = 372,
+    TEXTEMOTE_DOUBT                = 373,
+    TEXTEMOTE_EMBARRASS            = 374,
+    TEXTEMOTE_ENCOURAGE            = 375,
+    TEXTEMOTE_ENEMY                = 376,
+    TEXTEMOTE_EYEBROW              = 377,
+    TEXTEMOTE_TOAST                = 378
 };
 
 enum Emote
@@ -906,7 +918,23 @@ enum Anim
     ANIM_ARROWBIRTH                = 204,
     ANIM_GROURARROWBIRTH           = 205,
     ANIM_CORPSEARROWBIRTH          = 206,
-    ANIM_GUIDEARROWBIRTH           = 207
+    ANIM_GUIDEARROWBIRTH           = 207,
+    ANIM_EMOTETALKNOSHEATHE        = 208,
+    ANIM_EMOTEPOINTNOSHEATHE       = 209,
+    ANIM_EMOTESALUTENOSHEATHE      = 210,
+    ANIM_EMOTEDANCESPECIAL         = 211,
+    ANIM_MUTILATE                  = 212,
+    ANIM_CUSTOMSPELL01             = 213,
+    ANIM_CUSTOMSPELL02             = 214,
+    ANIM_CUSTOMSPELL03             = 215,
+    ANIM_CUSTOMSPELL04             = 216,
+    ANIM_CUSTOMSPELL05             = 217,
+    ANIM_CUSTOMSPELL06             = 218,
+    ANIM_CUSTOMSPELL07             = 219,
+    ANIM_CUSTOMSPELL08             = 220,
+    ANIM_CUSTOMSPELL09             = 221,
+    ANIM_CUSTOMSPELL10             = 222,
+    ANIM_StealthRun                = 223
 };
 
 enum LockType
@@ -1311,7 +1339,6 @@ enum UnitFlags1
     UNIT_FLAG_WAR_PLAYER           = 0x1000
 };
 
-//#define SPELL_ID_AGGRO                    22764 not in 2.1.0 dbc
 #define SPELL_ID_AGGRO                    38192             //Tap Mob and Aggro Summoner
 
 enum WeatherTypes

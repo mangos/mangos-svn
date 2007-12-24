@@ -51,6 +51,7 @@ enum SpellCastTargetFlags
     TARGET_FLAG_ITEM             = 0x0010,
     TARGET_FLAG_SOURCE_LOCATION  = 0x0020,
     TARGET_FLAG_DEST_LOCATION    = 0x0040,
+    TARGET_FLAG_OBJECT_UNK       = 0x0080,                  //object?
     TARGET_FLAG_PVP_CORPSE       = 0x0200,
     TARGET_FLAG_OBJECT           = 0x0800,
     TARGET_FLAG_TRADE_ITEM       = 0x1000,
@@ -148,7 +149,7 @@ enum Rating
     SPELL_RATING_HIT_AVOIDANCE              = 0x0400000,    // 22
     SPELL_RATING_CRIT_AVOIDANCE             = 0x0800000,    // 23
     SPELL_RATING_RESILIENCE                 = 0x1000000     // 24
-    //SPELL_RATING_EXPERTISE
+    //SPELL_RATING_EXPERTISE                 = 0x2000000,    // 25
 };
 
 bool IsQuestTameSpell(uint32 spellId);

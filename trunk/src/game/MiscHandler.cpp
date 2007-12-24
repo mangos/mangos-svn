@@ -1454,17 +1454,6 @@ void WorldSession::HandleRealmStateRequestOpcode( WorldPacket & recv_data )
     //sLog.outDebug("response sent %u", unk);
 }
 
-/// \todo Complete HandleCancelChanneling function
-void WorldSession::HandleCancelChanneling( WorldPacket & /*recv_data */)
-{
-    /*
-        CHECK_PACKET_SIZE(recv_data, 4);
-
-        uint32 spellid;
-        recv_data >> spellid;
-    */
-}
-
 void WorldSession::HandleFarSightOpcode( WorldPacket & recv_data )
 {
     CHECK_PACKET_SIZE(recv_data, 1);
@@ -1615,20 +1604,6 @@ void WorldSession::HandleMoveFlyModeChangeAckOpcode( WorldPacket & recv_data )
     10 FD A9 01 19 BA 7A C3 | 42 0D 70 44 44 B0 A8 42
     78 15 94 40 39 03 00 00 | 00 00 00 00
     */
-}
-
-void WorldSession::HandleSelfResOpcode( WorldPacket & /*recv_data*/ )
-{
-    sLog.outDebug("WORLD: CMSG_SELF_RES");                  // empty opcode
-
-    if(_player->GetUInt32Value(PLAYER_SELF_RES_SPELL))
-    {
-        SpellEntry const *spellInfo = sSpellStore.LookupEntry(_player->GetUInt32Value(PLAYER_SELF_RES_SPELL));
-        if(spellInfo)
-            _player->CastSpell(_player,spellInfo,false,0);
-
-        _player->SetUInt32Value(PLAYER_SELF_RES_SPELL, 0);
-    }
 }
 
 void WorldSession::HandleRequestPetInfoOpcode( WorldPacket & /*recv_data */)

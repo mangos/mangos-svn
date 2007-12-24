@@ -656,7 +656,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     spell->prepare(&targets);
 }
 
-void WorldSession::HandleCancelCastOpcode(WorldPacket& recvPacket)
+void WorldSession::HandleCancelCastOpcode(WorldPacket&/* recvPacket*/)
 {
     if(_player->IsNonMeleeSpellCasted(false))
         _player->InterruptNonMeleeSpells(false);
@@ -727,14 +727,39 @@ void WorldSession::HandlePetCancelAuraOpcode( WorldPacket& recvPacket)
     pet->AddCreatureSpellCooldown(spellId);
 }
 
-void WorldSession::HandleCancelGrowthAuraOpcode( WorldPacket& recvPacket)
+void WorldSession::HandleCancelGrowthAuraOpcode( WorldPacket& /*recvPacket*/)
 {
     // nothing do
 }
 
-void WorldSession::HandleCancelAutoRepeatSpellOpcode( WorldPacket& recvPacket)
+void WorldSession::HandleCancelAutoRepeatSpellOpcode( WorldPacket& /*recvPacket*/)
 {
     // may be better send SMSG_CANCEL_AUTO_REPEAT?
     // cancel and prepare for deleting
     _player->InterruptSpell(CURRENT_AUTOREPEAT_SPELL);
+}
+
+/// \todo Complete HandleCancelChanneling function
+void WorldSession::HandleCancelChanneling( WorldPacket & /*recv_data */)
+{
+    /*
+        CHECK_PACKET_SIZE(recv_data, 4);
+
+        uint32 spellid;
+        recv_data >> spellid;
+    */
+}
+
+void WorldSession::HandleSelfResOpcode( WorldPacket & /*recv_data*/ )
+{
+    sLog.outDebug("WORLD: CMSG_SELF_RES");                  // empty opcode
+
+    if(_player->GetUInt32Value(PLAYER_SELF_RES_SPELL))
+    {
+        SpellEntry const *spellInfo = sSpellStore.LookupEntry(_player->GetUInt32Value(PLAYER_SELF_RES_SPELL));
+        if(spellInfo)
+            _player->CastSpell(_player,spellInfo,false,0);
+
+        _player->SetUInt32Value(PLAYER_SELF_RES_SPELL, 0);
+    }
 }
