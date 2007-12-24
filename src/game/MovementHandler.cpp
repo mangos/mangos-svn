@@ -67,6 +67,11 @@ void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
         }
     }
 
+    // mount allow check
+    if(!_player->GetBaseMap()->IsMountAllowed())
+        _player->RemoveSpellsCausingAura(SPELL_AURA_MOUNTED);
+
+    // battleground state preper
     if(_player->InBattleGround())
     {
         BattleGround *bg = _player->GetBattleGround();
