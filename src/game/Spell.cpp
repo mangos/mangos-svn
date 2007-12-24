@@ -2251,6 +2251,14 @@ void Spell::TakeCastItem()
 
     ItemPrototype const *proto = m_CastItem->GetProto();
 
+    if(!proto)
+    {
+        // This code is to avoid a crash
+        // I'm not sure, if this is really an error, but I guess every item needs a prototype
+        sLog.outError("Cast item has no item prototype highId=%d, lowId=%d",m_CastItem->GetGUIDHigh(), m_CastItem->GetGUIDLow());
+        return;
+    }
+
     bool expendable = false;
     bool withoutCharges = false;
 
