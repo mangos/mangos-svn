@@ -56,22 +56,28 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
     MailItemsInfo mi;
 
-    recv_data >> mi.items_count;                            // attached items count
+    uint8 items_count;
+    recv_data >> items_count;                               // attached items count
 
-    if(mi.items_count > 12)                                 // client limit
+    if(items_count > 12)                                 // client limit
         return;
 
-    if(mi.items_count)
+    if(items_count)
     {
-        for(uint8 i = 0; i < mi.items_count; ++i)
+        for(uint8 i = 0; i < items_count; ++i)
         {
-            recv_data >> mi.item_slot[i];
-            recv_data >> mi.item_guid[i];
+            uint8  item_slot;
+            uint64 item_guid;
+            recv_data >> item_slot;
+            recv_data >> item_guid;
+            mi.AddItem(item_guid, item_slot);
         }
     }
 
     recv_data >> money >> COD;                              // then there are two (uint32) 0;
     recv_data >> unk3 >> unk4 >> unk5;                      // unknown 2.3.0 (zero's)
+
+    items_count = mi.size(); // this is the real size after the duplicates have been removed
 
     if (receiver.empty())
         return;
@@ -81,7 +87,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
     Player* pl = _player;
 
-    sLog.outDetail("Player %u is sending mail to %s with subject %s and body %s includes %u items, %u copper and %u COD copper with unk1 = %u, unk2 = %u", pl->GetGUIDLow(), receiver.c_str(), subject.c_str(), body.c_str(), mi.items_count, money, COD, unk1, unk2);
+    sLog.outDetail("Player %u is sending mail to %s with subject %s and body %s includes %u items, %u copper and %u COD copper with unk1 = %u, unk2 = %u", pl->GetGUIDLow(), receiver.c_str(), subject.c_str(), body.c_str(), items_count, money, COD, unk1, unk2);
 
     uint64 rc = objmgr.GetPlayerGUIDByName(receiver);
     if (!rc)
@@ -97,8 +103,8 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     }
 
     uint32 reqmoney = money + 30;
-    if (mi.items_count)
-        reqmoney = money + (30 * mi.items_count);
+    if (items_count)
+        reqmoney = money + (30 * items_count);
 
     if (pl->GetMoney() < reqmoney)
     {
@@ -140,19 +146,21 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         return;
     }
 
-    if (mi.items_count)
+    if (items_count)
     {
-        for(uint8 i = 0; i < mi.items_count; ++i)
+        for(MailItemMap::iterator mailItemIter = mi.begin(); mailItemIter != mi.end(); ++mailItemIter)
         {
-            mi.item_pos[i] = pl->GetPosByGuid(mi.item_guid[i]);
-            mi.items[i] = pl->GetItemByPos(mi.item_pos[i]);
+            MailItem& mailItem = mailItemIter->second;
+
+            mailItem.item_pos = pl->GetPosByGuid(mailItem.item_guid);
+            mailItem.item = pl->GetItemByPos(mailItem.item_pos);
             // prevent sending bag with items (cheat: can be placed in bag after adding equipped empty bag to mail)
-            if(!mi.items[i] || !mi.items[i]->CanBeTraded())
+            if(!mailItem.item || !mailItem.item->CanBeTraded())
             {
                 pl->SendMailResult(0, 0, MAIL_ERR_INTERNAL_ERROR);
                 return;
             }
-            if (mi.items[i]->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_CONJURED))
+            if (mailItem.item->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_CONJURED))
             {
                 pl->SendMailResult(0, 0, MAIL_ERR_INTERNAL_ERROR);
                 return;
@@ -171,7 +179,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
 
     bool needItemDelay = false;
 
-    if (mi.items_count)
+    if (items_count)
     {
         uint32 rc_account = 0;
         if(receive)
@@ -179,33 +187,34 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         else
             rc_account = objmgr.GetPlayerAccountIdByGUID(rc);
 
-        for(uint8 i = 0; i < mi.items_count; ++i)
+        for(MailItemMap::iterator mailItemIter = mi.begin(); mailItemIter != mi.end(); ++mailItemIter)
         {
-            if(!mi.items[i])
+            MailItem& mailItem = mailItemIter->second;
+            if(!mailItem.item)
                 continue;
 
-            mi.item_template[i] = mi.items[i] ? mi.items[i]->GetEntry() : 0;
+            mailItem.item_template = mailItem.item ? mailItem.item->GetEntry() : 0;
 
             if( GetSecurity() > SEC_PLAYER && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
             {
                 sLog.outCommand("GM %s (Account: %u) mail item: %s (Entry: %u Count: %u) and money: %u to player: %s (Account: %u)",
-                    GetPlayerName(), GetAccountId(), mi.items[i]->GetProto()->Name1, mi.items[i]->GetEntry(), mi.items[i]->GetCount(), money, receiver.c_str(), rc_account);
+                    GetPlayerName(), GetAccountId(), mailItem.item->GetProto()->Name1, mailItem.item->GetEntry(), mailItem.item->GetCount(), money, receiver.c_str(), rc_account);
             }
 
-            pl->RemoveItem( (mi.item_pos[i] >> 8), (mi.item_pos[i] & 255), true );
-            mi.items[i]->RemoveFromUpdateQueueOf( pl );
+            pl->RemoveItem( (mailItem.item_pos >> 8), (mailItem.item_pos & 255), true );
+            mailItem.item->RemoveFromUpdateQueueOf( pl );
             //item reminds in item_instance table already, used it in mail now
-            if(mi.items[i]->IsInWorld())
+            if(mailItem.item->IsInWorld())
             {
-                mi.items[i]->RemoveFromWorld();
-                mi.items[i]->DestroyForPlayer( pl );
+                mailItem.item->RemoveFromWorld();
+                mailItem.item->DestroyForPlayer( pl );
             }
 
             CharacterDatabase.BeginTransaction();
-            mi.items[i]->DeleteFromInventoryDB();           //deletes item from character's inventory
-            mi.items[i]->SaveToDB();                        // recursive and not have transaction guard into self
+            mailItem.item->DeleteFromInventoryDB();           //deletes item from character's inventory
+            mailItem.item->SaveToDB();                        // recursive and not have transaction guard into self
             // owner in `data` will set at mail receive and item extracting
-            CharacterDatabase.PExecute("UPDATE `item_instance` SET `owner_guid` = '%u' WHERE `guid`='%u'", GUID_LOPART(rc), mi.items[i]->GetGUIDLow());
+            CharacterDatabase.PExecute("UPDATE `item_instance` SET `owner_guid` = '%u' WHERE `guid`='%u'", GUID_LOPART(rc), mailItem.item->GetGUIDLow());
             CharacterDatabase.CommitTransaction();
         }
 
@@ -225,20 +234,20 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     if (receive)
         receive->CreateMail(mailId, messagetype, pl->GetGUIDLow(), subject, itemTextId, &mi, etime, dtime, money, COD, NOT_READ);
     else
-        for(uint8 i = 0; i < mi.items_count; ++i)
-            if (mi.items[i])
-                delete mi.items[i];                         //item is sent, but receiver isn't online .. so remove it from RAM
+        mi.deleteIncludedItems();
 
     // backslash all '
     CharacterDatabase.escape_string(subject);
     //not needed : CharacterDatabase.PExecute("DELETE FROM `mail` WHERE `id` = '%u'",mID);
     CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
         "VALUES ('%u', '%u', '%u', '%u', '%s', '%u', '%u', '" I64FMTD "','" I64FMTD "', '%u', '%u', '%d')",
-        mailId, messagetype, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), itemTextId, mi.items_count ? 1 : 0, (uint64)etime, (uint64)dtime, money, COD, NOT_READ);
+        mailId, messagetype, pl->GetGUIDLow(), GUID_LOPART(rc), subject.c_str(), itemTextId, items_count ? 1 : 0, (uint64)etime, (uint64)dtime, money, COD, NOT_READ);
 
-    for(uint8 i = 0; i < mi.items_count; ++i)
-        CharacterDatabase.PExecute("INSERT INTO `mail_items` (`mail_id`,`item_guid`,`item_template`) VALUES ('%u', '%u', '%u')", mailId, GUID_LOPART(mi.item_guid[i]), mi.item_template[i]);
-
+    for(MailItemMap::iterator mailItemIter = mi.begin(); mailItemIter != mi.end(); ++mailItemIter)
+    {
+        MailItem& mailItem = mailItemIter->second;
+        CharacterDatabase.PExecute("INSERT INTO `mail_items` (`mail_id`,`item_guid`,`item_template`) VALUES ('%u', '%u', '%u')", mailId, GUID_LOPART(mailItem.item_guid), mailItem.item_template);
+    }
     CharacterDatabase.BeginTransaction();
     pl->SaveInventoryAndGoldToDB();
     CharacterDatabase.CommitTransaction();
@@ -345,18 +354,19 @@ void WorldSession::SendReturnToSender(uint32 mailId, uint8 messageType, uint32 s
     {
         bool needItemDelay = false;
 
-        if(mi->items_count)
+        if(mi->size())
         {
             // if item send to character at another account, then apply item delivery delay
             needItemDelay = sender_acc != rc_account;
 
             // set owner to new receiver (to prevent delete item with sender char deleting)
             CharacterDatabase.BeginTransaction();
-            for(uint8 i = 0; i < mi->items_count; ++i)
+            for(MailItemMap::iterator mailItemIter = mi->begin(); mailItemIter != mi->end(); ++mailItemIter)
             {
-                mi->items[i]->SaveToDB();                   // recursive and not have transaction guard into self
+                MailItem& mailItem = mailItemIter->second;
+                mailItem.item->SaveToDB();
                 // owner in `data` will set at mail receive and item extracting
-                CharacterDatabase.PExecute("UPDATE `item_instance` SET `owner_guid` = '%u' WHERE `guid`='%u'", receiver_guid, mi->items[i]->GetGUIDLow());
+                CharacterDatabase.PExecute("UPDATE `item_instance` SET `owner_guid` = '%u' WHERE `guid`='%u'", receiver_guid, mailItem.item->GetGUIDLow());
             }
             CharacterDatabase.CommitTransaction();
         }
@@ -372,28 +382,27 @@ void WorldSession::SendReturnToSender(uint32 mailId, uint8 messageType, uint32 s
         }
         else
         {
-            if (mi->items_count)
-                for(uint8 i = 0; i < mi->items_count; ++i)
-                    delete mi->items[i];
+            mi->deleteIncludedItems();
         }
 
         CharacterDatabase.escape_string(subject);           //we cannot forget to delete COD, if returning mail with COD
         CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
             "VALUES ('%u', '0', '%u', '%u', '%s', '%u', '%u', '" I64FMTD "', '" I64FMTD "', '%u', '0', '%d')",
-            mailId, sender_guid, receiver_guid, subject.c_str(), itemTextId, mi->items_count ? 1 : 0, (uint64)expire_time, (uint64)deliver_time, money,RETURNED_CHECKED);
+            mailId, sender_guid, receiver_guid, subject.c_str(), itemTextId, mi->size() ? 1 : 0, (uint64)expire_time, (uint64)deliver_time, money,RETURNED_CHECKED);
 
-        for(uint8 i = 0; i < mi->items_count; ++i)
-            CharacterDatabase.PExecute("INSERT INTO `mail_items` (`mail_id`,`item_guid`,`item_template`) VALUES ('%u', '%u', '%u')", mailId, GUID_LOPART(mi->item_guid[i]), mi->item_template[i]);
+            for(MailItemMap::iterator mailItemIter = mi->begin(); mailItemIter != mi->end(); ++mailItemIter)
+            {
+                MailItem& mailItem = mailItemIter->second;
+                CharacterDatabase.PExecute("INSERT INTO `mail_items` (`mail_id`,`item_guid`,`item_template`) VALUES ('%u', '%u', '%u')", mailId, GUID_LOPART(mailItem.item_guid), mailItem.item_template);
+            }
     }
     else
     {
-        if(mi->items_count)
+        for(MailItemMap::iterator mailItemIter = mi->begin(); mailItemIter != mi->end(); ++mailItemIter)
         {
-            for(uint8 i = 0; i < mi->items_count; ++i)
-            {
-                CharacterDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid`='%u'", mi->items[i]->GetGUIDLow());
-                delete mi->items[i];
-            }
+            MailItem& mailItem = mailItemIter->second;
+            CharacterDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid`='%u'", mailItem.item->GetGUIDLow());
+            mailItem.deleteItem();
         }
     }
 }

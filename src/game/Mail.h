@@ -18,6 +18,8 @@
 #ifndef MANGOS_MAIL_H
 #define MANGOS_MAIL_H
 
+#include <map>
+
 #define MAIL_BODY_ITEM_TEMPLATE 8383                        // - plain letter, A Dusty Unsent Letter: 889
 
 enum MAIL_RESPONSE
@@ -96,6 +98,79 @@ struct MailItemInfo
     uint32 item_template;
 };
 
+struct MailItem
+{
+    MailItem() : item(NULL) {}
+    uint8 item_slot;                                    // slot in mail
+    uint16 item_pos;                                    // inventory pos
+    uint64 item_guid;                                   // item guid
+    uint32 item_template;                               // item entry
+    Item *item;                                         // item pointer
+    
+    void deleteItem()
+    {
+        if(item)
+        {
+            delete item;
+            item=NULL;
+        }
+    }
+};
+
+typedef std::map<uint64, MailItem> MailItemMap;
+
+
+struct MailItemsInfo
+{
+    MailItemMap i_MailItemMap;                            // Keep the items in a map to avoid duplicate guids (which can happen)
+
+    MailItemMap::iterator begin() { return i_MailItemMap.begin(); }
+    MailItemMap::iterator end() { return i_MailItemMap.end(); }
+
+    void AddItem(uint32 guid, uint32 _template, Item *item, uint8 slot = 0, uint16 pos = 0)
+    {
+        MailItem mailItem;
+        mailItem.item_slot = slot;
+        mailItem.item_pos = pos;
+        mailItem.item_guid = guid;
+        mailItem.item_template = _template;
+        mailItem.item = item;
+        i_MailItemMap[guid] = mailItem;
+    }
+
+    void AddItem(uint64 guid, uint8 slot = 0)
+    {
+        MailItem mailItem;
+        mailItem.item_guid = guid;
+        mailItem.item_slot = slot;
+        i_MailItemMap[guid] = mailItem;
+    }
+    
+    bool hasGuid(uint64 pGuid)
+    {
+        return(i_MailItemMap.find(pGuid) != i_MailItemMap.end());
+    }
+
+    MailItem& getMailItemInfo(uint64 pGuid)
+    {
+        return i_MailItemMap.find(pGuid)->second;
+    }
+
+    uint8 size()
+    {
+        return i_MailItemMap.size();
+    }
+
+    void deleteIncludedItems()
+    {
+        for(MailItemMap::iterator mailItemIter = begin(); mailItemIter != end(); ++mailItemIter)
+        {
+            MailItem& mailItem = mailItemIter->second;
+            mailItem.deleteItem();
+        }
+    }
+};
+
 struct Mail
 {
     uint32 messageID;
@@ -122,6 +197,15 @@ struct Mail
         items.push_back(mii);
     }
 
+    void AddAllItems(MailItemsInfo& pMailItemsInfo)
+    {
+        for(MailItemMap::iterator mailItemIter = pMailItemsInfo.begin(); mailItemIter != pMailItemsInfo.end(); ++mailItemIter)
+        {
+            MailItem& mailItem = mailItemIter->second;
+            AddItem(GUID_LOPART(mailItem.item_guid), mailItem.item_template);
+        }
+    }
+
     bool RemoveItem(uint32 itemId)
     {
         for(std::vector<MailItemInfo>::iterator itr = items.begin(); itr != items.end(); ++itr)
@@ -138,28 +222,4 @@ struct Mail
     bool HasItems() { return items.empty() ? false : true; }
 };
 
-struct MailItemsInfo
-{
-    uint8 items_count;                                      // item's count
-    uint8 item_slot[12];                                    // slot in mail
-    uint16 item_pos[12];                                    // inventory pos
-    uint64 item_guid[12];                                   // item guid
-    uint32 item_template[12];                               // item entry
-    Item *items[12];                                        // item pointer
-
-    MailItemsInfo()
-    {
-        items_count = 0;
-    }
-
-    void AddItem(uint32 guid, uint32 _template, Item *item, uint8 slot = 0, uint16 pos = 0)
-    {
-        item_slot[items_count] = slot;
-        item_pos[items_count] = pos;
-        item_guid[items_count] = guid;
-        item_template[items_count] = _template;
-        items[items_count] = item;
-        items_count++;
-    }
-};
 #endif
