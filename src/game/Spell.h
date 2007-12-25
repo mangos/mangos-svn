@@ -586,7 +586,7 @@ class Spell
         bool IsMeleeSpell() const { return m_meleeSpell; }
         bool IsChanneledSpell() const { return m_spellInfo->ChannelInterruptFlags != 0; }
         bool IsChannelActive() const { return m_caster->GetUInt32Value(UNIT_CHANNEL_SPELL) != 0; }
-        bool IsMeleeAttackResetSpell() const { return !m_IsTriggeredSpell && (m_spellInfo->InterruptFlags & SPELL_INTURRUPT_FLAG_AUTOATTACK);  }
+        bool IsMeleeAttackResetSpell() const { return !m_IsTriggeredSpell && (m_spellInfo->InterruptFlags & SPELL_INTERRUPT_FLAG_AUTOATTACK);  }
 
         bool IsDeletable() const { return m_deletable; }
         void SetDeletable(bool deletable) { m_deletable = deletable; }
