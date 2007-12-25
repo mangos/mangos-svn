@@ -3812,7 +3812,7 @@ void Spell::EffectQuestComplete(uint32 i)
 
     uint32 quest_id = m_spellInfo->EffectMiscValue[i];
 
-    _player->AreaExplored(quest_id);
+    _player->AreaExploredOrEventHappens(quest_id);
 }
 
 void Spell::EffectSelfResurrect(uint32 i)

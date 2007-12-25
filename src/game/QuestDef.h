@@ -114,6 +114,7 @@ enum __QuestGiverStatus
 
 enum __QuestFlags
 {
+    // Flags used at server and sended to client
     QUEST_SPECIAL_FLAGS_STAY_ALIVE     = 1,                 // Not used currently
     QUEST_SPECIAL_FLAGS_EVENT          = 2,                 // Not used currently
     QUEST_SPECIAL_FLAGS_EXPLORATION    = 4,                 // Not used currently
@@ -128,11 +129,12 @@ enum __QuestFlags
     QUEST_SPECIAL_FLAGS_TBC_RACES      = 2048,              // Not used currently: Bloodelf/draenei starting zone quests
     QUEST_SPECIAL_FLAGS_DAILY          = 4096,              // Used to know quest is Daily one
 
-    // Mangos flags for internal use only
+    // Mangos flags for set SpecialFlags in DB if required but used only at server
     QUEST_MANGOS_FLAGS_REPEATABLE           = 0x010000,     // Set by 1 in SpecialFlags from DB
-    QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT = 0x020000,     // Set by 2 in SpecialFlags from DB or computed when possible
+    QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT = 0x020000,     // Set by 2 in SpecialFlags from DB (if reequired area explore, spell SPELL_EFFECT_QUEST_COMPLETE casting, table `*_script` command SCRIPT_COMMAND_QUEST_EXPLORED use, set from script DLL)
     QUEST_MANGOS_FLAGS_DB_ALLOWED = 0xFFFF | QUEST_MANGOS_FLAGS_REPEATABLE | QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT,
-                                                            // Used to check integrity of SpecialFlag value and correct if necessary
+
+    // Mangos flags for internal use only
     QUEST_MANGOS_FLAGS_DELIVER              = 0x040000,     // Internal flag computed only
     QUEST_MANGOS_FLAGS_SPEAKTO              = 0x080000,     // Internal flag computed only
     QUEST_MANGOS_FLAGS_KILL_OR_CAST         = 0x100000,     // Internal flag computed only

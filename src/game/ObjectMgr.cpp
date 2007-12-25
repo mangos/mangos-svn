@@ -2625,6 +2625,36 @@ void ObjectMgr::LoadQuests()
             qinfo->SetFlag(QUEST_MANGOS_FLAGS_TIMED);
     }
 
+    // check QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT for spell with SPELL_EFFECT_QUEST_COMPLETE
+    for (uint32 i = 0; i < sSpellStore.GetNumRows(); ++i)
+    {
+        SpellEntry const *spellInfo = sSpellStore.LookupEntry(i);
+        if(!spellInfo)
+            continue;
+
+        for(int j = 0; j < 3; ++j)
+        {
+            if(spellInfo->Effect[j] != SPELL_EFFECT_QUEST_COMPLETE)
+                continue;
+
+            uint32 quest_id = spellInfo->EffectMiscValue[j];
+
+            Quest const* quest = GetQuestTemplate(quest_id);
+
+            // some quest referenced in spells not exist (outdataed spells)
+            if(!quest)
+                continue;
+
+            if(!quest->HasFlag(QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT))
+            {
+                sLog.outErrorDb("Spell (id: %u) have SPELL_EFFECT_QUEST_COMPLETE for quest %u , but quest not have flag QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT. Quest flags must be fixed, quest modified to enable objective.",spellInfo->Id,quest_id);
+
+                // this will prevent quest completing without objective
+                const_cast<Quest*>(quest)->SetFlag(QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT);
+            }
+        }
+    }
+
     sLog.outString();
     sLog.outString( ">> Loaded %u quests definitions", mQuestTemplates.size() );
 }
@@ -3243,7 +3273,15 @@ void ObjectMgr::LoadScripts(ScriptMapMap& scripts, char const* tablename)
                     continue;
                 }
 
-                SetQuestFlag(tmp.datalong, QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT);
+                if(!quest->HasFlag(QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT))
+                {
+                    sLog.outErrorDb("Table `%s` has quest (ID: %u) in SCRIPT_COMMAND_QUEST_EXPLORED in `datalong` for script id %u, but quest not have flag QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT in quest flags. Script command or quest flags wrong. Quest modified to require objective.",tablename,tmp.datalong,tmp.id);
+
+                    // this will prevent quest completing without objective
+                    const_cast<Quest*>(quest)->SetFlag(QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT);
+
+                    // continue; - quest objective requiremet set and command can be allowed
+                }
 
                 if(float(tmp.datalong2) > DEFAULT_VISIBILITY_DISTANCE)
                 {
@@ -3707,24 +3745,35 @@ void ObjectMgr::LoadQuestAreaTriggers()
 
         Field *fields = result->Fetch();
 
-        uint32 Trigger_ID = fields[0].GetUInt32();
-        uint32 Quest_ID   = fields[1].GetUInt32();
+        uint32 trigger_ID = fields[0].GetUInt32();
+        uint32 quest_ID   = fields[1].GetUInt32();
 
-        AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(Trigger_ID);
+        AreaTriggerEntry const* atEntry = sAreaTriggerStore.LookupEntry(trigger_ID);
         if(!atEntry)
         {
-            sLog.outErrorDb("Area trigger (ID:%u) does not exist in `AreaTrigger.dbc`.",Trigger_ID);
+            sLog.outErrorDb("Area trigger (ID:%u) does not exist in `AreaTrigger.dbc`.",trigger_ID);
             continue;
         }
 
-        if(!mQuestTemplates[Quest_ID])
+        Quest const* quest = GetQuestTemplate(quest_ID);
+
+        if(!quest)
         {
-            sLog.outErrorDb("Table `areatrigger_involvedrelation` has record (id: %u) for not existing quest %u",Trigger_ID,Quest_ID);
+            sLog.outErrorDb("Table `areatrigger_involvedrelation` has record (id: %u) for not existing quest %u",trigger_ID,quest_ID);
             continue;
         }
 
-        mQuestAreaTriggerMap[Trigger_ID] = Quest_ID;
-        SetQuestFlag(Quest_ID, QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT);
+        if(!quest->HasFlag(QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT))
+        {
+            sLog.outErrorDb("Table `areatrigger_involvedrelation` has record (id: %u) for not quest %u, but quest not have flag QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT. Trigger or quest flags must be fixed, quest modified to require objective.",trigger_ID,quest_ID);
+
+            // this will prevent quest completing without objective
+            const_cast<Quest*>(quest)->SetFlag(QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT);
+
+            // continue; - quest modified to required obkective and trigger can be allowed.
+        }
+
+        mQuestAreaTriggerMap[trigger_ID] = quest_ID;
 
     } while( result->NextRow() );
 

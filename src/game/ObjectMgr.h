@@ -347,13 +347,6 @@ class ObjectMgr
         void GetTaxiPathNodes( uint32 path, Path &pathnodes );
         void GetTransportPathNodes( uint32 path, TransportPath &pathnodes );
 
-        void SetQuestFlag (uint32 quest_id, uint32 flag)
-        {
-            QuestMap::iterator itr = mQuestTemplates.find(quest_id);
-            if (itr != mQuestTemplates.end())
-                itr->second->SetFlag(flag);
-        }
-
         Quest const* GetQuestTemplate(uint32 quest_id) const
         {
             QuestMap::const_iterator itr = mQuestTemplates.find(quest_id);
