@@ -38,23 +38,15 @@
 // Passive Spell codes explicit used in code
 #define SPELL_PASSIVE_BATTLE_STANCE            2457
 #define SPELL_PASSIVE_RESURRECTION_SICKNESS   15007
-/*#define SPELL_PASSIVE_ENDURENCE               20550
-#define SPELL_PASSIVE_THROWING_SPECIALIZATION 20558
-#define SPELL_PASSIVE_AXE_SPECIALIZATION      20574
-#define SPELL_PASSIVE_SHADOW_RESISTANCE       20579
-#define SPELL_PASSIVE_NATURE_RESISTANCE       20583
-#define SPELL_PASSIVE_EXPANSIVE_MIND          20591
-#define SPELL_PASSIVE_ARCANE_RESISTANCE       20592
-#define SPELL_PASSIVE_GUN_SPECIALIZATION      20595
-#define SPELL_PASSIVE_FROST_RESISTANCE        20596
-#define SPELL_PASSIVE_SWORD_SPECIALIZATION    20597
-#define SPELL_PASSIVE_HUMAN_SPIRIT            20598
-#define SPELL_PASSIVE_DIPLOMACY               20599
-#define SPELL_PASSIVE_MACE_SPECIALIZATION     20864
-#define SPELL_PASSIVE_BOW_SPECIALIZATION      26290
 
-// Horde Racial Passives
-#define SPELL_HORDE_PASSIVE_NATURE_RESISTANCE 20551*/
+enum SpellInturruptFlags
+{
+    SPELL_INTURRUPT_FLAG_MOVEMENT     = 0x01,
+    SPELL_INTURRUPT_FLAG_DAMAGE       = 0x02,
+    SPELL_INTURRUPT_FLAG_INTURRUPT    = 0x04,
+    SPELL_INTURRUPT_FLAG_AUTOATTACK   = 0x08,
+    SPELL_INTURRUPT_FLAG_TURNING      = 0x10 
+};
 
 enum SpellChannelInterruptFlags
 {
@@ -898,7 +890,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         bool isInFlight()  const { return hasUnitState(UNIT_STAT_IN_FLIGHT); }
 
-        //bool isInCombat()  const { return hasUnitState(UNIT_STAT_IN_COMBAT); }
         bool isInCombat()  const { return HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IN_COMBAT); }
         void SetInCombat();
         void ClearInCombat();
@@ -989,7 +980,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void RemoveAllAuras();
         void RemoveAllAurasOnDeath();
         void DelayAura(uint32 spellId, uint32 effindex, int32 delaytime);
-        //void SetAura(Aura* Aur){ m_Auras = Aur; }
         bool SetAurDuration(uint32 spellId, uint32 effindex, uint32 duration);
         uint32 GetAurDuration(uint32 spellId, uint32 effindex);
 
@@ -1068,7 +1058,6 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         float GetTotalAttackPowerValue(WeaponAttackType attType) const;
         float GetWeaponDamageRange(WeaponAttackType attType ,WeaponDamageRange type) const;
         void SetBaseWeaponDamage(WeaponAttackType attType ,WeaponDamageRange damageRange, float value) { m_weaponDamage[attType][damageRange] = value; }
-        //
 
         bool isInFront(Unit const* target,float distance) const;
         void SetInFront(Unit const* target);
@@ -1100,7 +1089,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void TauntFadeOut(Unit *taunter);
         ThreatManager& getThreatManager() { return m_ThreatManager; }
         void addHatedBy(HostilReference* pHostilReference) { m_HostilRefManager.insertFirst(pHostilReference); };
-        void removeHatedBy(HostilReference* /*pHostilReference*/ ) {};  // nothing to do yet
+        void removeHatedBy(HostilReference* /*pHostilReference*/ ) { /* nothing to do yet */ }
         HostilRefManager& getHostilRefManager() { return m_HostilRefManager; }
 
         Aura* GetAura(uint32 spellId, uint32 effindex);
@@ -1151,7 +1140,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void CalculateSpellDamageAndDuration(int32* damage, int32* duration, SpellEntry const* spellProto, uint8 effect_index, int32 basePoints);
 
         void addFollower(FollowerReference* pRef) { m_FollowingRefManager.insertFirst(pRef); }
-        void removeFollower(FollowerReference* /*pRef*/ ) { } // nothing to do yet
+        void removeFollower(FollowerReference* /*pRef*/ ) { /* nothing to do yet */ }
         static Unit* GetUnit(WorldObject& object, uint64 guid);
 
         MotionMaster* GetMotionMaster() { return &i_motionMaster; }

@@ -1774,6 +1774,15 @@ void Spell::update(uint32 difftime)
         }
     }
 
+    // spells interrupted by turning
+    if( (m_caster->GetTypeId() == TYPEID_PLAYER && m_timer != 0) &&
+        (m_spellInfo->InterruptFlags & SPELL_INTURRUPT_FLAG_TURNING) &&
+        m_castOrientation != m_caster->GetOrientation() )
+    {
+        cancel();
+        return;
+    }
+
     // check if the player caster has moved before the spell finished
     if ((m_caster->GetTypeId() == TYPEID_PLAYER && m_timer != 0) &&
         (m_castPositionX != m_caster->GetPositionX() || m_castPositionY != m_caster->GetPositionY() || m_castPositionZ != m_caster->GetPositionZ()) &&
@@ -1783,7 +1792,7 @@ void Spell::update(uint32 difftime)
         if( m_spellState == SPELL_STATE_CASTING )
             cancel();
         // don't cancel for melee, autorepeat and instant spells
-        else if(!m_meleeSpell && !m_autoRepeat && casttime != 0)
+        else if(!m_meleeSpell && !m_autoRepeat && (m_spellInfo->InterruptFlags & SPELL_INTURRUPT_FLAG_MOVEMENT))
             cancel();
     }
 
@@ -3673,7 +3682,12 @@ void Spell::Delayed(int32 delaytime)
     if(!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    if (m_spellState == SPELL_STATE_DELAYED) return;        // spell is active and can't be time-backed
+    if (m_spellState == SPELL_STATE_DELAYED)
+        return;                                             // spell is active and can't be time-backed
+
+    // spells not loosing casting time ( slam, dynamites, bombs.. )
+    if(!(m_spellInfo->InterruptFlags & SPELL_INTURRUPT_FLAG_DAMAGE))
+        return;
 
     //check resist chance
     int32 resistChance = 100;                               //must be initialized to 100 for percent modifiers
