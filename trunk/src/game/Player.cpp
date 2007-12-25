@@ -11691,7 +11691,7 @@ uint16 Player::GetQuestSlot( uint32 quest_id )
     return 0;
 }
 
-void Player::AreaExplored( uint32 questId )
+void Player::AreaExploredOrEventHappens( uint32 questId )
 {
     if( questId )
     {

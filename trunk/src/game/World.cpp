@@ -1407,7 +1407,7 @@ void World::ScriptsProcess()
 
                 if( ((Unit*)source)->isAlive() &&
                     (step.script->datalong2==0 || ((Unit*)source)->IsWithinDistInMap((Unit*)target,float(step.script->datalong2))) )
-                    ((Player*)target)->AreaExplored(step.script->datalong);
+                    ((Player*)target)->AreaExploredOrEventHappens(step.script->datalong);
                 else
                     ((Player*)target)->FailQuest(step.script->datalong);
 
