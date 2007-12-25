@@ -21,6 +21,7 @@
 
 #include "GroupReference.h"
 #include "GroupRefManager.h"
+#include "LootMgr.h"
 
 #include <map>
 #include <vector>
@@ -100,6 +101,28 @@ enum GroupUpdateFlags
                                                             //0, 1, 2, 3, 4, 5, 6, 7, 8, 9
 static const uint8 GroupUpdateLength[GROUP_UPDATE_FLAGS_COUNT] = { 0, 1, 2, 2, 1, 2, 2, 2, 2, 4};
 
+class Roll : public LootValidatorRef
+{
+public:
+    Roll(): itemGUID(0), itemid(0), itemRandomPropId(0), totalPlayersRolling(0), totalNeed(0), totalGreed(0), totalPass(0), itemSlot(0) {}
+    ~Roll() { }
+    void setLoot(Loot *pLoot) { link(pLoot, this); }
+    Loot *getLoot() { return getTarget(); }
+    void targetObjectBuildLink();
+
+    uint64 itemGUID;
+    uint32 itemid;
+    uint32 itemRandomSuffix;
+    int32  itemRandomPropId;
+    typedef std::map<uint64, RollVote> PlayerVote;
+    PlayerVote playerVote;                          //vote position correspond with player position (in group)
+    uint8 totalPlayersRolling;
+    uint8 totalNeed;
+    uint8 totalGreed;
+    uint8 totalPass;
+    uint8 itemSlot;
+};
+
 /** request member stats checken **/
 /** todo: uninvite people that not accepted invite **/
 class MANGOS_DLL_SPEC Group
@@ -118,25 +141,7 @@ class MANGOS_DLL_SPEC Group
         typedef MemberSlotList::iterator member_witerator;
         typedef std::set<uint64> InvitesList;
 
-        struct Roll
-        {
-            Roll(): itemGUID(0), itemid(0), itemRandomPropId(0), totalPlayersRolling(0), totalNeed(0), totalGreed(0), totalPass(0), loot(NULL), itemSlot(0) {}
-
-            uint64 itemGUID;
-            uint32 itemid;
-            uint32 itemRandomSuffix;
-            int32  itemRandomPropId;
-            typedef std::map<uint64, RollVote> PlayerVote;
-            PlayerVote playerVote;                          //vote position correspond with player position (in group)
-            uint8 totalPlayersRolling;
-            uint8 totalNeed;
-            uint8 totalGreed;
-            uint8 totalPass;
-            Loot *loot;
-            uint8 itemSlot;
-        };
-
-        typedef std::vector<Roll> Rolls;
+        typedef std::vector<Roll*> Rolls;
 
     public:
         Group();
@@ -271,7 +276,7 @@ class MANGOS_DLL_SPEC Group
             Rolls::iterator iter;
             for (iter=RollId.begin(); iter != RollId.end(); ++iter)
             {
-                if (iter->itemGUID == Guid)
+                if ((*iter)->itemGUID == Guid)
                 {
                     return iter;
                 }
