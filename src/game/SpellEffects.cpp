@@ -3106,8 +3106,12 @@ void Spell::EffectInterruptCast(uint32 i)
     {
         if (unitTarget->m_currentSpells[i])
         {
-            unitTarget->ProhibitSpellScholl(SpellSchools(unitTarget->m_currentSpells[i]->m_spellInfo->School), GetDuration(m_spellInfo));
-            unitTarget->InterruptSpell(i);
+            // check if we can interrupt spell
+            if ( unitTarget->m_currentSpells[i]->m_spellInfo->InterruptFlags & SPELL_INTURRUPT_FLAG_INTURRUPT )
+            {
+                unitTarget->ProhibitSpellScholl(SpellSchools(unitTarget->m_currentSpells[i]->m_spellInfo->School), GetDuration(m_spellInfo));
+                unitTarget->InterruptSpell(i);
+            }
         }
     }
 }
