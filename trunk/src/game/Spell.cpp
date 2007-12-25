@@ -606,10 +606,13 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             tempUnitMap.sort(TargetDistanceOrder(m_caster));
 
             //Now to get us a random target that's in the initial range of the spell
-            uint32 t = 1;
+            uint32 t = 0;
             std::list<Unit *>::iterator itr = tempUnitMap.begin();
             while(itr!= tempUnitMap.end() && (*itr)->GetDistanceSq(m_caster) < radius * radius)
                 ++t, ++itr;
+
+            if(!t)
+                break;
 
             itr = tempUnitMap.begin();
             std::advance(itr, rand()%t);
@@ -622,18 +625,24 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
 
             t = unMaxTargets - 1;
             Unit *prev = pUnitTarget;
+            std::list<Unit*>::iterator next = tempUnitMap.begin();
 
-            while(t && !tempUnitMap.empty() )
+            while(t && next != tempUnitMap.end() )
             {
-                Unit *next = *tempUnitMap.begin();
-
-                if(prev->GetDistanceSq(next) > CHAIN_SPELL_JUMP_RADIUS * CHAIN_SPELL_JUMP_RADIUS)
+                if(prev->GetDistanceSq(*next) > CHAIN_SPELL_JUMP_RADIUS * CHAIN_SPELL_JUMP_RADIUS)
                     break;
 
-                prev = next;
-                TagUnitMap.push_back(next);
-                tempUnitMap.erase(tempUnitMap.begin());
-                tempUnitMap.sort(TargetDistanceOrder(next));
+                if(!prev->IsWithinLOSInMap(*next))
+                {
+                    next++;
+                    continue;
+                }
+
+                prev = *next;
+                TagUnitMap.push_back(prev);
+                tempUnitMap.erase(next);
+                tempUnitMap.sort(TargetDistanceOrder(prev));
+                next = tempUnitMap.begin();
 
                 --t;
             }
@@ -695,18 +704,24 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                     TagUnitMap.push_back(pUnitTarget);
                     uint32 t = unMaxTargets - 1;
                     Unit *prev = pUnitTarget;
+                    std::list<Unit*>::iterator next = tempUnitMap.begin();
 
-                    while(t && !tempUnitMap.empty() )
+                    while(t && next != tempUnitMap.end() )
                     {
-                        Unit *next = *tempUnitMap.begin();
-
-                        if(prev->GetDistanceSq(next) > CHAIN_SPELL_JUMP_RADIUS * CHAIN_SPELL_JUMP_RADIUS)
+                        if(prev->GetDistanceSq(*next) > CHAIN_SPELL_JUMP_RADIUS * CHAIN_SPELL_JUMP_RADIUS)
                             break;
 
-                        prev = next;
-                        TagUnitMap.push_back(next);
-                        tempUnitMap.erase(tempUnitMap.begin());
-                        tempUnitMap.sort(TargetDistanceOrder(next));
+                        if(!prev->IsWithinLOSInMap(*next))
+                        {
+                            next++;
+                            continue;
+                        }
+
+                        prev = *next;
+                        TagUnitMap.push_back(prev);
+                        tempUnitMap.erase(next);
+                        tempUnitMap.sort(TargetDistanceOrder(prev));
+                        next = tempUnitMap.begin();
 
                         --t;
                     }
@@ -954,19 +969,26 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
 
                 std::list<Unit *> tempUnitMap;
 
-                CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-                Cell cell = RedZone::GetZone(p);
-                cell.data.Part.reserved = ALL_DISTRICT;
-                cell.SetNoCreate();
+             
+                {
+                    CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+                    Cell cell = RedZone::GetZone(p);
+                    cell.data.Part.reserved = ALL_DISTRICT;
+                    cell.SetNoCreate();
+    
+                    MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, tempUnitMap, max_range, PUSH_SELF_CENTER, SPELL_TARGETS_FRIENDLY);
+    
+                    TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > world_object_notifier(notifier);
+                    TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer >  grid_object_notifier(notifier);
+    
+                    CellLock<GridReadGuard> cell_lock(cell, p);
+                    cell_lock->Visit(cell_lock, world_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+                    cell_lock->Visit(cell_lock, grid_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+    
+                }
 
-                MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, tempUnitMap, max_range, PUSH_SELF_CENTER, SPELL_TARGETS_FRIENDLY);
-
-                TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > world_object_notifier(notifier);
-                TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer >  grid_object_notifier(notifier);
-
-                CellLock<GridReadGuard> cell_lock(cell, p);
-                cell_lock->Visit(cell_lock, world_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
-                cell_lock->Visit(cell_lock, grid_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+                if(m_caster != pUnitTarget && std::find(tempUnitMap.begin(),tempUnitMap.end(),m_caster) == tempUnitMap.end() )
+                    tempUnitMap.push_front(m_caster);
 
                 tempUnitMap.sort(TargetDistanceOrder(pUnitTarget));
 
@@ -979,19 +1001,31 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                 TagUnitMap.push_back(pUnitTarget);
                 uint32 t = unMaxTargets - 1;
                 Unit *prev = pUnitTarget;
+                std::list<Unit*>::iterator next = tempUnitMap.begin();
 
-                while(t && !tempUnitMap.empty() )
+                while(t && next != tempUnitMap.end() )
                 {
-                    Unit *next = *tempUnitMap.begin();
-
-                    if(prev->GetDistanceSq(next) > CHAIN_SPELL_JUMP_RADIUS * CHAIN_SPELL_JUMP_RADIUS)
+                    if(prev->GetDistanceSq(*next) > CHAIN_SPELL_JUMP_RADIUS * CHAIN_SPELL_JUMP_RADIUS)
                         break;
 
-                    prev = next;
-                    TagUnitMap.push_back(next);
-                    tempUnitMap.erase(tempUnitMap.begin());
-                    tempUnitMap.sort(TargetDistanceOrder(next));
+                    if(!prev->IsWithinLOSInMap(*next))
+                    {
+                        next++;
+                        continue;
+                    }
 
+                    if((*next)->GetHealth() == (*next)->GetMaxHealth())
+                    {
+                        next = tempUnitMap.erase(next);
+                        continue;
+                    }
+
+                    prev = *next;
+                    TagUnitMap.push_back(prev);
+                    tempUnitMap.erase(next);
+                    tempUnitMap.sort(TargetDistanceOrder(prev));
+                    next = tempUnitMap.begin();
+ 
                     --t;
                 }
             }

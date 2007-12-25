@@ -11594,7 +11594,7 @@ bool Player::GetQuestRewardStatus( uint32 quest_id )
         QuestStatusMap::iterator itr = mQuestStatus.find( quest_id );
         if( itr != mQuestStatus.end() && itr->second.m_status != QUEST_STATUS_NONE
             && !qInfo->IsRepeatable() )
-            return mQuestStatus[quest_id].m_rewarded;
+            return itr->second.m_rewarded;
 
         return false;
     }
