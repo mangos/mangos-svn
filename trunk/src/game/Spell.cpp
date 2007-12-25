@@ -1911,7 +1911,7 @@ void Spell::finish(bool ok)
 
     m_ObjToDel.clear();*/
 
-    // other code realated only to successfully finished spells
+    // other code related only to successfully finished spells
     if(!ok)
         return;
 
@@ -1942,21 +1942,32 @@ void Spell::finish(bool ok)
     //handle SPELL_AURA_ADD_TARGET_TRIGGER auras
     Unit::AuraList const& targetTriggers = m_caster->GetAurasByType(SPELL_AURA_ADD_TARGET_TRIGGER);
     for(Unit::AuraList::const_iterator i = targetTriggers.begin(); i != targetTriggers.end(); ++i)
-        if (IsAffectedBy((*i)->GetSpellProto(),(*i)->GetEffIndex()))
-            for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[(*i)->GetEffIndex()].begin();iunit != m_targetUnitGUIDs[(*i)->GetEffIndex()].end();++iunit)
+    {
+        SpellEntry const *auraSpellInfo = (*i)->GetSpellProto();
+        uint32 auraSpellIdx = (*i)->GetEffIndex();
+        if (IsAffectedBy(auraSpellInfo, auraSpellIdx))
+        {
+            // Calculate chance at that moment (can be depend for example from combo points)
+            int32 chance = m_caster->CalculateSpellDamage(auraSpellInfo, auraSpellIdx, (*i)->GetBasePoints());
+            for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[auraSpellIdx].begin();iunit != m_targetUnitGUIDs[auraSpellIdx].end();++iunit)
             {
-        // check m_caster->GetGUID() let load auras at login and speedup most often case
+                // check m_caster->GetGUID() let load auras at login and speedup most often case
                 Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::GetUnit(*m_caster,*iunit);
-                if (unit && unit->isAlive() && roll_chance_f((*i)->GetModifier()->m_amount))
-                    m_caster->CastSpell(unit,(*i)->GetSpellProto()->EffectTriggerSpell[(*i)->GetEffIndex()],true,NULL,(*i));
+                if (unit && unit->isAlive() && roll_chance_i(chance))
+                    m_caster->CastSpell(unit, auraSpellInfo->EffectTriggerSpell[auraSpellIdx], true, NULL, (*i));
             }
-
+        }
+    }
     if (IsMeleeAttackResetSpell())
     {
         m_caster->resetAttackTimer(BASE_ATTACK);
         if(m_caster->haveOffhandWeapon())
             m_caster->resetAttackTimer(OFF_ATTACK);
     }
+
+    // Clear combo at finish state
+    if(m_caster->GetTypeId() == TYPEID_PLAYER)
+        ((Player*)m_caster)->ResetComboPointsIfNeed(m_spellInfo);
 }
 
 void Spell::SendCastResult(uint8 result)
@@ -3666,15 +3677,6 @@ uint8 Spell::CheckItems()
     }
 
     return uint8(0);
-}
-
-int32 Spell::CalculateDamage(uint8 i)
-{
-    int32 value;
-
-    m_caster->CalculateSpellDamageAndDuration(&value,NULL,m_spellInfo,i,m_currentBasePoints[i]);
-
-    return value;
 }
 
 void Spell::Delayed(int32 delaytime)

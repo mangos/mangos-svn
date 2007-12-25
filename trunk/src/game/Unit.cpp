@@ -6589,102 +6589,94 @@ bool Unit::SelectHostilTarget()
 //======================================================================
 //======================================================================
 
-void Unit::CalculateSpellDamageAndDuration(int32* damage, int32* duration, SpellEntry const* spellProto, uint8 effect_index, int32 effBasePoints)
+int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_index, int32 effBasePoints)
 {
     Player* unitPlayer = (GetTypeId() == TYPEID_PLAYER) ? (Player*)this : NULL;
 
     uint8 comboPoints = unitPlayer ? unitPlayer->GetComboPoints() : 0;
-    bool needClearCombo = false;
 
-    if(damage)
+    int32 value = 0;
+    uint32 level = 0;
+
+    level = getLevel() - spellProto->spellLevel;
+    if (level > spellProto->maxLevel && spellProto->maxLevel > 0)
+        level = spellProto->maxLevel;
+
+    float basePointsPerLevel = spellProto->EffectRealPointsPerLevel[effect_index];
+    float randomPointsPerLevel = spellProto->EffectDicePerLevel[effect_index];
+    int32 basePoints = int32(effBasePoints + level * basePointsPerLevel);
+    int32 randomPoints = int32(spellProto->EffectDieSides[effect_index] + level * randomPointsPerLevel);
+    float comboDamage = spellProto->EffectPointsPerComboPoint[effect_index];
+
+    value = basePoints + rand32(spellProto->EffectBaseDice[effect_index], randomPoints);
+    //random damage
+    if(int32(spellProto->EffectBaseDice[effect_index]) != randomPoints && GetTypeId() == TYPEID_UNIT && ((Creature*)this)->isPet())
+        value += ((Pet*)this)->GetBonusDamage();        //bonus damage only on spells without fixed basePoints?)
+
+    if(comboDamage != 0 && unitPlayer && m_attacking && (m_attacking->GetGUID() == unitPlayer->GetComboTarget()))
     {
-        int32 value = 0;
-        uint32 level = 0;
+        value += (int32)(comboDamage * comboPoints);
 
-        level = getLevel() - spellProto->spellLevel;
-        if (level > spellProto->maxLevel && spellProto->maxLevel > 0)
-            level = spellProto->maxLevel;
-
-        float basePointsPerLevel = spellProto->EffectRealPointsPerLevel[effect_index];
-        float randomPointsPerLevel = spellProto->EffectDicePerLevel[effect_index];
-        int32 basePoints = int32(effBasePoints + level * basePointsPerLevel);
-        int32 randomPoints = int32(spellProto->EffectDieSides[effect_index] + level * randomPointsPerLevel);
-        float comboDamage = spellProto->EffectPointsPerComboPoint[effect_index];
-
-        value = basePoints + rand32(spellProto->EffectBaseDice[effect_index], randomPoints);
-        //random damage
-        if(int32(spellProto->EffectBaseDice[effect_index]) != randomPoints && GetTypeId() == TYPEID_UNIT && ((Creature*)this)->isPet())
-            value += ((Pet*)this)->GetBonusDamage();        //bonus damage only on spells without fixed basePoints?)
-
-        if(comboDamage != 0 && unitPlayer && m_attacking && (m_attacking->GetGUID() == unitPlayer->GetComboTarget()))
-        {
-            value += (int32)(comboDamage * comboPoints);
-
-            // Eviscerate
-            if( spellProto->SpellIconID == 514 && spellProto->SpellFamilyName == SPELLFAMILY_ROGUE)
-                value += (int32)(GetTotalAttackPowerValue(BASE_ATTACK) * comboPoints * 0.03);
-
-            needClearCombo = true;
-        }
-
-        if(Player* modOwner = GetSpellModOwner())
-        {
-            modOwner->ApplySpellMod(spellProto->Id,SPELLMOD_ALL_EFFECTS, value);
-            switch(effect_index)
-            {
-                case 0:
-                    modOwner->ApplySpellMod(spellProto->Id,SPELLMOD_EFFECT1, value);
-                    break;
-                case 1:
-                    modOwner->ApplySpellMod(spellProto->Id,SPELLMOD_EFFECT2, value);
-                    break;
-                case 2:
-                    modOwner->ApplySpellMod(spellProto->Id,SPELLMOD_EFFECT3, value);
-                    break;
-            }
-            if( spellProto->Effect[effect_index] == SPELL_EFFECT_APPLY_AURA &&
-                (spellProto->EffectApplyAuraName[effect_index] == SPELL_AURA_PERIODIC_DAMAGE ||
-                spellProto->EffectApplyAuraName[effect_index] == SPELL_AURA_PERIODIC_HEAL ||
-                spellProto->EffectApplyAuraName[effect_index] == SPELL_AURA_PERIODIC_LEECH) )
-                modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_DOT, value);
-
-            modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_DAMAGE, value);
-        }
-
-        // overpower
-        if(spellProto->SpellFamilyName == SPELLFAMILY_WARRIOR && spellProto->SpellFamilyFlags == 0x4)
-            needClearCombo = true;
-
-        *damage = value;
+        // Eviscerate
+        if( spellProto->SpellIconID == 514 && spellProto->SpellFamilyName == SPELLFAMILY_ROGUE)
+            value += (int32)(GetTotalAttackPowerValue(BASE_ATTACK) * comboPoints * 0.03);
     }
 
-    if(duration)
+    if(Player* modOwner = GetSpellModOwner())
     {
-        int32 minduration = GetDuration(spellProto);
-        int32 maxduration = GetMaxDuration(spellProto);
-
-        if( minduration != -1 && minduration != maxduration )
+        modOwner->ApplySpellMod(spellProto->Id,SPELLMOD_ALL_EFFECTS, value);
+        switch(effect_index)
         {
-            *duration = minduration + int32((maxduration - minduration) * comboPoints / 5);
-            needClearCombo = true;
+        case 0:
+            modOwner->ApplySpellMod(spellProto->Id,SPELLMOD_EFFECT1, value);
+            break;
+        case 1:
+            modOwner->ApplySpellMod(spellProto->Id,SPELLMOD_EFFECT2, value);
+            break;
+        case 2:
+            modOwner->ApplySpellMod(spellProto->Id,SPELLMOD_EFFECT3, value);
+            break;
         }
-        else
-            *duration = minduration;
+        if( spellProto->Effect[effect_index] == SPELL_EFFECT_APPLY_AURA &&
+            (spellProto->EffectApplyAuraName[effect_index] == SPELL_AURA_PERIODIC_DAMAGE ||
+            spellProto->EffectApplyAuraName[effect_index] == SPELL_AURA_PERIODIC_HEAL ||
+            spellProto->EffectApplyAuraName[effect_index] == SPELL_AURA_PERIODIC_LEECH) )
+            modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_DOT, value);
 
-        if (*duration > 0)
-        {
-            int32 durationMod = 0;
-            AuraList const& mMechanicMod = GetAurasByType(SPELL_AURA_MECHANIC_DURATION_MOD);
-            for(AuraList::const_iterator i = mMechanicMod.begin();i != mMechanicMod.end(); ++i)
-                if((*i)->GetModifier()->m_miscvalue == int32(spellProto->Mechanic))
-                    durationMod+= (*i)->GetModifier()->m_amount;
-            *duration = *duration * (100+durationMod) /100;
-            if (*duration < 0) *duration = 0;
-        }
+        modOwner->ApplySpellMod(spellProto->Id, SPELLMOD_DAMAGE, value);
     }
 
-    if(unitPlayer && needClearCombo)
-        unitPlayer->ClearComboPoints();
+    return value;
+}
+
+int32 Unit::CalculateSpellDuration(SpellEntry const* spellProto)
+{
+    Player* unitPlayer = (GetTypeId() == TYPEID_PLAYER) ? (Player*)this : NULL;
+
+    uint8 comboPoints = unitPlayer ? unitPlayer->GetComboPoints() : 0;
+
+    int32 minduration = GetDuration(spellProto);
+    int32 maxduration = GetMaxDuration(spellProto);
+    
+    int32 duration;
+
+    if( minduration != -1 && minduration != maxduration )
+        duration = minduration + int32((maxduration - minduration) * comboPoints / 5);
+    else
+        duration = minduration;
+
+    if (duration > 0)
+    {
+        int32 durationMod = 0;
+        AuraList const& mMechanicMod = GetAurasByType(SPELL_AURA_MECHANIC_DURATION_MOD);
+        for(AuraList::const_iterator i = mMechanicMod.begin();i != mMechanicMod.end(); ++i)
+            if((*i)->GetModifier()->m_miscvalue == int32(spellProto->Mechanic))
+                durationMod+= (*i)->GetModifier()->m_amount;
+        duration = duration * (100+durationMod) /100;
+        if (duration < 0) duration = 0;
+    }
+    
+    return duration;
 }
 
 void Unit::AddDiminishing(DiminishingMechanics mech, uint32 hitTime, uint32 hitCount)
