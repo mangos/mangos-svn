@@ -2344,9 +2344,7 @@ void Player::CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::st
 
     if ( !m_mailsLoaded )
     {
-        for(uint8 i = 0; i < mi->items_count; ++i)
-            if ( mi->items[i] )
-                delete mi->items[i];
+        mi->deleteIncludedItems();
         return;
     }
     Mail * m = new Mail;
@@ -2357,8 +2355,7 @@ void Player::CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::st
     m->subject = subject;
     m->itemTextId = itemTextId;
 
-    for(uint8 i = 0; i < mi->items_count; ++i)
-        m->AddItem(GUID_LOPART(mi->item_guid[i]), mi->item_template[i]);
+    m->AddAllItems(*mi);
 
     m->expire_time = expire_time;
     m->deliver_time = deliver_time;
@@ -2369,9 +2366,12 @@ void Player::CreateMail(uint32 mailId, uint8 messageType, uint32 sender, std::st
 
     m_mail.push_front(m);                                   //to insert new mail to beginning of maillist
     if(m->HasItems())
-        for(uint8 i = 0; i < m->items.size(); ++i)
-            if(mi->items[i])
-                AddMItem(mi->items[i]);
+        for(MailItemMap::iterator mailItemIter = mi->begin(); mailItemIter != mi->end(); ++mailItemIter)
+        {
+            MailItem& mailItem = mailItemIter->second;
+            if(mailItem.item)
+                AddMItem(mailItem.item);
+        }
 }
 
 void Player::SendMailResult(uint32 mailId, uint32 mailAction, uint32 mailError, uint32 equipError, uint32 item_guid, uint32 item_count)
