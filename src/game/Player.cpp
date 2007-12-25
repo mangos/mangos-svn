@@ -2781,6 +2781,33 @@ void Player::_SaveSpellCooldowns()
     }
 }
 
+void Player::ResetComboPointsIfNeed(const SpellEntry *spellInfo)
+{
+    bool needClearCombo = false;
+    
+    // Check use combo points in damage calculations
+    bool comboDamageUsed = 
+        spellInfo->EffectPointsPerComboPoint[0] > 0 || 
+        spellInfo->EffectPointsPerComboPoint[1] > 0 || 
+        spellInfo->EffectPointsPerComboPoint[2] > 0;
+
+    if(comboDamageUsed &&  m_attacking && (m_attacking->GetGUID() == GetComboTarget()))
+        needClearCombo = true;
+
+    // Check in duration calculations
+    int32 minduration = GetDuration(spellInfo);
+    if(minduration != 1 && minduration != GetMaxDuration(spellInfo))
+        needClearCombo = true;
+
+    // overpower - need reset combopoints
+    if(spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && spellInfo->SpellFamilyFlags == 0x4)
+        needClearCombo = true;
+        
+    // Reset if need
+    if (needClearCombo)
+        ClearComboPoints();
+}
+
 uint32 Player::resetTalentsCost() const
 {
     // The first time reset costs 1 gold
