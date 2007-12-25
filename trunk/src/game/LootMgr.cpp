@@ -556,6 +556,8 @@ QuestItemList* FillNonQuestNonFFAConditionalLoot(Player* player, Loot *loot)
     return ql;
 }
 
+//===================================================
+
 void Loot::NotifyItemRemoved(uint8 lootIndex)
 {
     // notify all players that are looting this that the item was removed

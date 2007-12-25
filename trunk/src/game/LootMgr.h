@@ -25,6 +25,7 @@
 #include "ItemEnchantmentMgr.h"
 #include "ByteBuffer.h"
 #include "Util.h"
+#include "Utilities/LinkedReference/RefManager.h"
 
 #include <map>
 #include <vector>
@@ -141,10 +142,40 @@ struct QuestItem
         : index(_index), is_looted(_islooted) {}
 };
 
+
 typedef std::vector<QuestItem> QuestItemList;
 typedef std::map<uint32, QuestItemList *> QuestItemMap;
 typedef std::vector<LootStoreItem> LootStoreItemList;
 typedef HM_NAMESPACE::hash_map<uint32, LootStoreItemList > LootStore;
+
+//=====================================================
+
+struct Loot;
+class LootValidatorRef :  public Reference<Loot, LootValidatorRef>
+{
+public:
+    LootValidatorRef() {}
+    void targetObjectDestroyLink() {}
+    void sourceObjectDestroyLink() {}
+};
+
+//=====================================================
+
+class LootValidatorRefManager : public RefManager<Loot, LootValidatorRef>
+{
+    public:
+        typedef LinkedListHead::Iterator< LootValidatorRef > iterator;
+
+        LootValidatorRef* getFirst() { return (LootValidatorRef*)RefManager<Loot, LootValidatorRef>::getFirst(); }
+        LootValidatorRef* getLast() { return (LootValidatorRef*)RefManager<Loot, LootValidatorRef>::getLast(); }
+
+        iterator begin() { return iterator(getFirst()); }
+        iterator end() { return iterator(NULL); }
+        iterator rbegin() { return iterator(getLast()); }
+        iterator rend() { return iterator(NULL); }
+};
+
+//=====================================================
 
 struct Loot
 {
@@ -154,6 +185,8 @@ struct Loot
     QuestItemMap PlayerNonQuestNonFFAConditionalItems;
     std::vector<LootItem> items;
     std::vector<LootItem> quest_items;
+    // All rolls are registered here. They need to know, when the loot is not valid anymore
+    LootValidatorRefManager i_LootValidatorRefManager;
     uint32 gold;
     uint8 unlootedCount;
     bool released;
@@ -161,6 +194,13 @@ struct Loot
     Loot(uint32 _gold = 0) : gold(_gold), unlootedCount(0), released(false) {}
     ~Loot() { clear(); }
 
+    // if loot becomes invalid this reference is used to inform the listener
+    void addLootValidatorRef(LootValidatorRef* pLootValidatorRef)
+    { 
+        i_LootValidatorRefManager.insertFirst(pLootValidatorRef);
+    }
+
+   // void clear();
     void clear()
     {
         items.clear(); gold = 0; PlayersLooting.clear();
@@ -179,6 +219,7 @@ struct Loot
         quest_items.clear();
         gold = 0;
         unlootedCount = 0;
+        i_LootValidatorRefManager.clearReferences();
     }
 
     bool empty() const { return items.empty() && gold == 0; }
