@@ -276,7 +276,7 @@ class MANGOS_DLL_SPEC Group
             Rolls::iterator iter;
             for (iter=RollId.begin(); iter != RollId.end(); ++iter)
             {
-                if ((*iter)->itemGUID == Guid)
+                if ((*iter)->itemGUID == Guid && (*iter)->isValid())
                 {
                     return iter;
                 }

@@ -502,9 +502,9 @@ void Group::NeedBeforeGreed(uint64 playerGUID, Loot *loot, Creature *creature)
 void Group::CountRollVote(uint64 playerGUID, uint64 Guid, uint32 NumberOfPlayers, uint8 Choise)
 {
     Rolls::iterator rollI = GetRoll(Guid);
-    Roll* roll = *rollI;
     if (rollI == RollId.end())
         return;
+    Roll* roll = *rollI;
 
     Roll::PlayerVote::iterator itr = roll->playerVote.find(playerGUID);
     // this condition means that player joins to the party after roll begins
