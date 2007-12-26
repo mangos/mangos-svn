@@ -178,7 +178,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
     if(recv_data.size() != recv_data.rpos())
     {
-        sLog.outError("MovementHandler: here still some bytes remaining in packet :(");
+        sLog.outError("MovementHandler: here still %u bytes remaining in packet (Opcode: %u), expected %u but have %u :(",recv_data.size() - recv_data.rpos(),recv_data.GetOpcode(),recv_data.rpos(),recv_data.size());
     }
 
     if (!MaNGOS::IsValidMapCoord(movementInfo.x, movementInfo.y))

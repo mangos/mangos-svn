@@ -39,7 +39,7 @@
 #define SPELL_PASSIVE_BATTLE_STANCE            2457
 #define SPELL_PASSIVE_RESURRECTION_SICKNESS   15007
 
-enum SpellInturruptFlags
+enum SpellInterruptFlags
 {
     SPELL_INTERRUPT_FLAG_MOVEMENT     = 0x01,
     SPELL_INTERRUPT_FLAG_DAMAGE       = 0x02,
