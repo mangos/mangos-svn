@@ -934,33 +934,32 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
 
     if(owner->GetTypeId() == TYPEID_PLAYER)
     {
-        float val = 0;
-        float val2 = 0;
-
         switch(getPetType())
         {
             case SUMMON_PET:
                 switch(owner->getClass())
                 {
                     case CLASS_WARLOCK:
+                    {
 
                         //the damage bonus used for pets is either fire or shadow damage, whatever is higher
-                        val  = owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE);
-                        val2 = owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW);
-                        val  = (val > val2) ? val : val2;   //now val is warlock's damage bonus
+                        uint32 fire  = owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE);
+                        uint32 shadow = owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW);
+                        uint32 val  = (fire > shadow) ? fire : shadow;   
 
                         SetBonusDamage(int32 (val * 0.15f));
                         //bonusAP += val * 0.57;
                         break;
-
+                    }
                     case CLASS_MAGE:
+                    {
                                                             //40% damage bonus of mage's frost damage
-                        val = owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FROST) * 0.4;
+                        float val = owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FROST) * 0.4;
                         if(val < 0)
                             val = 0;
                         SetBonusDamage( int32(val));
                         break;
-
+                    }
                     default:
                         break;
                 }
