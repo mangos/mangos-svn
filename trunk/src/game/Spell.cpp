@@ -3843,8 +3843,9 @@ bool Spell::CheckTarget( Unit* target, uint32 eff, bool hitPhase )
             return false;
     }
 
-    //Check targets for not_selectable unit flag and remove
-    if (target != m_caster && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE))
+    // Check targets for not_selectable unit flag and remove
+    // A player can cast spells on his pet (or other controlled unit) though in any state
+    if (target != m_caster && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE) && target->GetCharmerOrOwnerGUID() != m_caster->GetGUID())
         return false;
 
     // Evade target (only at hit)
