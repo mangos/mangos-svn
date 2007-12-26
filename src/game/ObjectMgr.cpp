@@ -313,7 +313,10 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
             bidder->CreateMail(mailId, MAIL_AUCTION, auction->location, msgAuctionWonSubject.str(), itemTextId, &mi, etime, dtime, 0, 0, AUCTION_CHECKED);
         }
         else
+        {
+            objmgr.RemoveAItem(pItem->GetGUIDLow()); // we have to remove the item, before we delete it !!
             delete pItem;
+        }
 
         CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
             "VALUES ('%u', '%d', '%u', '%u', '%s', '%u', '1', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
@@ -324,6 +327,7 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
     else
     {
         CharacterDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid`='%u'", pItem->GetGUIDLow());
+        objmgr.RemoveAItem(pItem->GetGUIDLow()); // we have to remove the item, before we delete it !!
         delete pItem;
     }
 }
@@ -419,6 +423,7 @@ void ObjectMgr::SendAuctionExpiredMail( AuctionEntry * auction )
         }
         else
         {
+            objmgr.RemoveAItem(pItem->GetGUIDLow()); // we have to remove the item, before we delete it !!
             delete pItem;
         }
     }
@@ -426,6 +431,7 @@ void ObjectMgr::SendAuctionExpiredMail( AuctionEntry * auction )
     else
     {
         CharacterDatabase.PExecute("DELETE FROM `item_instance` WHERE `guid`='%u'",pItem->GetGUIDLow());
+        objmgr.RemoveAItem(pItem->GetGUIDLow()); // we have to remove the item, before we delete it !!
         delete pItem;
     }
 }
