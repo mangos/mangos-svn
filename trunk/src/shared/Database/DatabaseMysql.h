@@ -32,7 +32,7 @@
 #include <mysql.h>
 #endif
 
-class DatabaseMysql : public Database
+class MANGOS_DLL_SPEC DatabaseMysql : public Database
 {
     friend class MaNGOS::OperatorNew<DatabaseMysql>;
 
