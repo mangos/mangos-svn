@@ -361,6 +361,7 @@ class ObjectMgr
             return 0;
         }
         bool IsTavernAreaTrigger(uint32 Trigger_ID) const { return mTavernAreaTriggerSet.count(Trigger_ID) != 0; }
+        bool IsGameObjectForQuests(uint32 entry) const { return mGameObjectForQuestSet.count(entry) != 0; }
 
         uint32 GetBattleMasterBG(uint32 entry) const
         {
@@ -484,6 +485,7 @@ class ObjectMgr
         void LoadQuestAreaTriggers();
         void LoadTavernAreaTriggers();
         void LoadBattleMastersEntry();
+        void LoadGameObjectForQuests();
 
         void LoadSpellAffects();
         void LoadSpellProcEvents();
@@ -768,6 +770,7 @@ class ObjectMgr
         typedef HM_NAMESPACE::hash_map<uint32, uint32> BattleMastersMap;
         typedef HM_NAMESPACE::hash_map<uint32, std::string> ItemTextMap;
         typedef std::set<uint32> TavernAreaTriggerSet;
+        typedef std::set<uint32> GameObjectForQuestSet;
 
         GroupSet            mGroupSet;
         GuildSet            mGuildSet;
@@ -785,6 +788,7 @@ class ObjectMgr
         QuestAreaTriggerMap mQuestAreaTriggerMap;
         BattleMastersMap    mBattleMastersMap;
         TavernAreaTriggerSet mTavernAreaTriggerSet;
+        GameObjectForQuestSet mGameObjectForQuestSet;
         GossipTextMap       mGossipText;
         AreaTriggerMap      mAreaTriggers;
         SpellTeleportMap    mSpellTeleports;

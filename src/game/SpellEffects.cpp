@@ -3131,7 +3131,7 @@ void Spell::EffectSummonObjectWild(uint32 i)
     m_caster->GetClosePoint(x,y,z);
 
     if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), gameobject_id, target->GetMapId(),
-        x, y, z, target->GetOrientation(), 0, 0, 0, 0, 100, 0))
+        x, y, z, target->GetOrientation(), 0, 0, 0, 0, 100, 1))
     {
         delete pGameObj;
         return;
@@ -3400,7 +3400,7 @@ void Spell::EffectDuel(uint32 i)
         m_caster->GetPositionX()+(unitTarget->GetPositionX()-m_caster->GetPositionX())/2 ,
         m_caster->GetPositionY()+(unitTarget->GetPositionY()-m_caster->GetPositionY())/2 ,
         m_caster->GetPositionZ(),
-        m_caster->GetOrientation(), 0, 0, 0, 0, 0, 0))
+        m_caster->GetOrientation(), 0, 0, 0, 0, 0, 1))
     {
         delete pGameObj;
         return;
@@ -3701,7 +3701,7 @@ void Spell::EffectSummonObject(uint32 i)
     float x,y,z;
     m_caster->GetClosePoint(x,y,z);
 
-    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id,m_caster->GetMapId(), x, y, z, m_caster->GetOrientation(), 0, 0, rot2, rot3, 0, 0))
+    if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), display_id,m_caster->GetMapId(), x, y, z, m_caster->GetOrientation(), 0, 0, rot2, rot3, 0, 1))
     {
         delete pGameObj;
         return;
@@ -4172,7 +4172,7 @@ void Spell::EffectTransmitted(uint32 i)
     GameObject* pGameObj = new GameObject(m_caster);
 
     if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), name_id,cMap,
-        fx, fy, fz, m_caster->GetOrientation(), 0, 0, 0, 0, 100, 0))
+        fx, fy, fz, m_caster->GetOrientation(), 0, 0, 0, 0, 100, 1))
     {
         delete pGameObj;
         return;

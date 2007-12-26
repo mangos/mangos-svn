@@ -1097,6 +1097,8 @@ class MANGOS_DLL_SPEC Player : public Unit
         void TalkedToCreature( uint32 entry, uint64 guid );
         void MoneyChanged( uint32 value );
         bool HasQuestForItem( uint32 itemid );
+        bool HasQuestForGO(int32 GOId);
+        void UpdateForQuestsGO();
         bool CanShareQuest(uint32 quest_id);
 
         void SendQuestComplete( uint32 quest_id );

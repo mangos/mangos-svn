@@ -768,7 +768,7 @@ bool BattleGround::AddObject(uint32 type, uint32 entry, float x, float y, float 
     data.rotation3      = rotation3;
     data.spawntimesecs  = spawntime;
     data.animprogress   = 100;
-    data.dynflags       = 1;            //there was 0, i have no idea why we should change it
+    data.go_state       = 1;
     objmgr.AddGameobjectToGrid(guid, &data);
 
     m_BgObjects[type] = MAKE_GUID(guid, HIGHGUID_GAMEOBJECT);
