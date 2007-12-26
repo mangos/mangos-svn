@@ -260,13 +260,30 @@ void Spell::EffectSchoolDMG(uint32 i)
 {
     if( unitTarget && unitTarget->isAlive())
     {
+        uint32 BTAura = 0;
+
         switch(m_spellInfo->SpellFamilyName)
         {
             case SPELLFAMILY_WARRIOR:
             {
                 // Bloodthirst
-                if((m_spellInfo->SpellFamilyFlags & 0x2000000) && m_spellInfo->SpellVisual == 372)
-                    return EffectWeaponDmg(i);
+                if(m_spellInfo->SpellFamilyFlags & 0x40000000000LL)
+                {
+                    damage = uint32(damage * (m_caster->GetTotalAttackPowerValue(BASE_ATTACK)) / 100);
+
+                    switch(m_spellInfo->Id)
+                    {
+                    case 23881: BTAura = 23885; break;
+                    case 23892: BTAura = 23886; break;
+                    case 23893: BTAura = 23887; break;
+                    case 23894: BTAura = 23888; break;
+                    case 25251: BTAura = 25252; break;
+                    case 30335: BTAura = 30339; break;
+                    default:
+                        sLog.outError("Spell::EffectSchoolDMG: Spell %u not handled in BTAura",m_spellInfo->Id);
+                        break;
+                    }
+                }
                 // Shield Slam
                 else if(m_spellInfo->SpellFamilyFlags & 0x100000000LL)
                     damage += int32(m_caster->GetShieldBlockValue());
@@ -365,7 +382,12 @@ void Spell::EffectSchoolDMG(uint32 i)
         }
 
         if(damage >= 0)
-            m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell, true);
+        {
+            m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell, !BTAura);
+            
+            if (BTAura)
+                m_caster->CastSpell(m_caster,BTAura,true);
+        }
     }
 
     if (m_caster->GetTypeId()==TYPEID_PLAYER && m_spellInfo->Attributes == 0x150010)
@@ -2870,29 +2892,6 @@ void Spell::EffectWeaponDmg(uint32 i)
     if(!unitTarget->isAlive())
         return;
 
-    // Bloodthirst
-    uint32 BTAura = 0;
-    // Bloodthirst
-    if(m_spellInfo->SpellFamilyName==SPELLFAMILY_WARRIOR && (m_spellInfo->SpellFamilyFlags & 0x2000000) && m_spellInfo->SpellVisual == 372)
-    {
-        switch(m_spellInfo->Id)
-        {
-            case 23881: BTAura = 23885; break;
-            case 23892: BTAura = 23886; break;
-            case 23893: BTAura = 23887; break;
-            case 23894: BTAura = 23888; break;
-            case 25251: BTAura = 25252; break;
-            case 30335: BTAura = 30339; break;
-            default:
-                sLog.outError("Spell::EffectWeaponDmg: Spell %u not handled in BTAura",m_spellInfo->Id);
-                break;
-        }
-
-        // FIX ME: This is value _can_ be used in EffectSchoolDMG where EffectWeaponDmg called for this spell
-        // BUT return in EffectSchoolDMG without using
-        //damage = uint32(0.45 * (m_caster->GetTotalAttackPowerValue(BASE_ATTACK)));
-    }
-
     uint32 wp[4] = { SPELL_EFFECT_WEAPON_DAMAGE, SPELL_EFFECT_WEAPON_PERCENT_DAMAGE, SPELL_EFFECT_NORMALIZED_WEAPON_DMG, SPELL_EFFECT_WEAPON_DAMAGE_NOSCHOOL };
 
     // multiple weap dmg effect workaround
@@ -3001,10 +3000,6 @@ void Spell::EffectWeaponDmg(uint32 i)
         criticalhit = true;
 
     m_caster->SendSpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, eff_damage, (damageType==SPELL_SCHOOL_NORMAL ? SpellSchools(m_spellInfo->School) : damageType), absorbed_dmg, resisted_dmg, false, blocked_dmg, criticalhit);
-
-    // Bloodthirst
-    if (BTAura)
-        m_caster->CastSpell(m_caster,BTAura,true);
 
     if (eff_damage > (absorbed_dmg + resisted_dmg + blocked_dmg))
     {
