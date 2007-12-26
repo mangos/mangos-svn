@@ -19,7 +19,7 @@
 #if !defined(QUERYRESULT_H)
 #define QUERYRESULT_H
 
-class QueryResult
+class MANGOS_DLL_SPEC QueryResult
 {
     public:
         QueryResult(uint64 rowCount, uint32 fieldCount)

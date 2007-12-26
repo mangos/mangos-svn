@@ -33,7 +33,7 @@ typedef HM_NAMESPACE::hash_map<ZThread::ThreadImpl*, SqlResultQueue*> QueryQueue
 
 #define MAX_QUERY_LEN   1024
 
-class Database
+class MANGOS_DLL_SPEC Database
 {
     protected:
         Database() : m_threadBody(NULL), m_delayThread(NULL) {};
