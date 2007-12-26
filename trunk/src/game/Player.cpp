@@ -11082,6 +11082,8 @@ void Player::AddQuest( Quest const *pQuest, Object *questGiver )
     //starting initial quest script
     if(questGiver && pQuest->GetQuestStartScript()!=0)
         sWorld.ScriptsStart(sQuestStartScripts, pQuest->GetQuestStartScript(), questGiver, this);
+
+    UpdateForQuestsGO();
 }
 
 void Player::CompleteQuest( uint32 quest_id )
@@ -11664,6 +11666,8 @@ void Player::SetQuestStatus( uint32 quest_id, QuestStatus status )
         mQuestStatus[quest_id].m_status = status;
         if (mQuestStatus[quest_id].uState != QUEST_NEW) mQuestStatus[quest_id].uState = QUEST_CHANGED;
     }
+
+    UpdateForQuestsGO();
 }
 
 // not used in MaNGOS, but used in scripting code
@@ -11771,6 +11775,7 @@ void Player::ItemAddedQuestCheck( uint32 entry, uint32 count )
             }
         }
     }
+    UpdateForQuestsGO();
 }
 
 void Player::ItemRemovedQuestCheck( uint32 entry, uint32 count )
@@ -11812,6 +11817,7 @@ void Player::ItemRemovedQuestCheck( uint32 entry, uint32 count )
             }
         }
     }
+    UpdateForQuestsGO();
 }
 
 void Player::KilledMonster( uint32 entry, uint64 guid )
@@ -15298,8 +15304,8 @@ bool Player::CanJoinToBattleground() const
 bool Player::IsVisibleInGridForPlayer( Player* pl ) const
 {
     // gamemaster in GM mode see all, including ghosts
-    if(pl->isGameMaster())
-        return GetSession()->GetSecurity() <= pl->GetSession()->GetSecurity();
+    if(pl->isGameMaster() && GetSession()->GetSecurity() <= pl->GetSession()->GetSecurity())
+        return true;
 
     // It seems in battleground everyone sees everyone, except the enemy-faction ghosts
     if (InBattleGround())
@@ -15831,4 +15837,51 @@ bool Player::IsSpellFitByClassAndRace( uint32 spell_id ) const
         return false;
 
     return true;
+}
+
+bool Player::HasQuestForGO(int32 GOId)
+{
+    for( QuestStatusMap::iterator i = mQuestStatus.begin( ); i != mQuestStatus.end( ); ++i )
+    {
+        QuestStatusData qs=i->second;
+        if (qs.m_status == QUEST_STATUS_INCOMPLETE)
+        {
+            Quest const* qinfo = objmgr.GetQuestTemplate(i->first);
+            if(!qinfo)
+                continue;
+            
+            if(GetGroup() && GetGroup()->isRaidGroup() && qinfo->GetType() != QUEST_TYPE_RAID)
+                continue;
+
+            for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
+            {
+                if (qinfo->ReqCreatureOrGOId[j]>=0)         //skip non GO case
+                    continue;
+
+                if((-1)*GOId == qinfo->ReqCreatureOrGOId[j] && qs.m_creatureOrGOcount[j] < qinfo->ReqCreatureOrGOCount[j])
+                    return true;
+            }
+        }
+    }
+    return false;
+}
+
+void Player::UpdateForQuestsGO()
+{
+    if(m_clientGUIDs.size() == 0)
+        return;
+
+    UpdateData udata;
+    WorldPacket packet;
+    for(ClientGUIDs::iterator itr=m_clientGUIDs.begin(); itr!=m_clientGUIDs.end(); ++itr)
+    {
+        if(GUID_HIPART(*itr)==HIGHGUID_GAMEOBJECT)
+        {
+            GameObject *obj = HashMapHolder<GameObject>::Find(*itr);
+            if(obj)
+                obj->BuildValuesUpdateBlockForPlayer(&udata,this);
+        }
+    }
+    udata.BuildPacket(&packet);
+    GetSession()->SendPacket(&packet);
 }

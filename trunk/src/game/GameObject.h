@@ -88,7 +88,7 @@ struct GameObjectData
     float rotation3;
     int32  spawntimesecs;
     uint32 animprogress;
-    uint32 dynflags;
+    uint32 go_state;
 };
 
 // GCC have alternative #pragma pack() syntax and old gcc version not support pack(pop), also any gcc version not support it at some platform
@@ -122,7 +122,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         void AddToWorld();
         void RemoveFromWorld();
 
-        bool Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, uint32 dynflags);
+        bool Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, uint32 go_state);
         void Update(uint32 p_time);
         GameObjectInfo const* GetGOInfo() const;
 
@@ -147,7 +147,8 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
         bool LoadFromDB(uint32 guid, uint32 InstanceId);
         void DeleteFromDB();
         void SetLootState(LootState s) { m_lootState = s; }
-        uint32 GetLootId();
+        static uint32 GetLootId(GameObjectInfo const* info);
+        uint32 GetLootId() const { return GetLootId(GetGOInfo()); }
         void SetRespawnTime(int32 respawn)
         {
             m_respawnTime = respawn > 0 ? time(NULL) + respawn : 0;
@@ -189,6 +190,7 @@ class MANGOS_DLL_SPEC GameObject : public WorldObject
 
         bool hasQuest(uint32 quest_id) const;
         bool hasInvolvedQuest(uint32 quest_id) const;
+        bool ActivateToQuest(Player *pTarget) const;
 
         bool isVisibleForInState(Player const* u, bool inVisibleList) const;
 

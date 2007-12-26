@@ -716,6 +716,9 @@ void World::SetInitialWorldSettings()
     sLog.outString( "Loading ReservedNames..." );
     objmgr.LoadReservedPlayersNames();
 
+    sLog.outString( "Loading GameObject for quests..." );
+    objmgr.LoadGameObjectForQuests();
+
     sLog.outString( "Loading InstanceTemplate" );
     objmgr.LoadInstanceTemplate();
 

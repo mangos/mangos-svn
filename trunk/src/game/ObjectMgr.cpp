@@ -818,7 +818,7 @@ void ObjectMgr::LoadGameobjects()
     //                                                         0      1    2     3            4            5            6
     QueryResult *result = WorldDatabase.Query("SELECT `gameobject`.`guid`,`id`,`map`,`position_x`,`position_y`,`position_z`,`orientation`,"
     //   7           8           9           10          11               12             13        14
-        "`rotation0`,`rotation1`,`rotation2`,`rotation3`,`spawntimesecs`,`animprogress`,`dynflags`,`event` "
+        "`rotation0`,`rotation1`,`rotation2`,`rotation3`,`spawntimesecs`,`animprogress`,`state`,`event` "
         "FROM `gameobject` LEFT OUTER JOIN `game_event_gameobject` ON `gameobject`.`guid`=`game_event_gameobject`.`guid`");
 
     if(!result)
@@ -855,7 +855,7 @@ void ObjectMgr::LoadGameobjects()
         data.rotation3      = fields[10].GetFloat();
         data.spawntimesecs  = fields[11].GetInt32();
         data.animprogress   = fields[12].GetUInt32();
-        data.dynflags       = fields[13].GetUInt32();
+        data.go_state       = fields[13].GetUInt32();
         int16 gameEvent     = fields[14].GetInt16();
 
         if (gameEvent==0)                                   // if not this is to be managed by GameEvent System
@@ -6034,4 +6034,40 @@ bool ObjectMgr::IsSpellValid(SpellEntry const* spellInfo, Player* pl, bool msg)
     }
 
     return true;
+}
+
+void ObjectMgr::LoadGameObjectForQuests()
+{
+    mGameObjectForQuestSet.clear();                         // need for reload case
+
+    uint32 count = 0;
+    
+    // scan GO templates with loot including quest items
+    for(uint32 go_entry = 1; go_entry < sGOStorage.MaxEntry; ++go_entry)
+    {
+        GameObjectInfo const* goInfo = sGOStorage.LookupEntry<GameObjectInfo>(go_entry);
+        if(!goInfo)
+            continue;
+
+        uint32 loot_id = GameObject::GetLootId(goInfo);
+        
+        // find loot for GO
+        LootStore::const_iterator go_loot = LootTemplates_Gameobject.find(loot_id);
+        if(go_loot == LootTemplates_Gameobject.end())
+            continue;
+            
+        // scan loot for quest items
+        for(LootStoreItemList::const_iterator item_i = go_loot->second.begin(); item_i != go_loot->second.end(); ++item_i )
+        {
+            if(item_i->questChanceOrGroup > 0)
+            {
+                mGameObjectForQuestSet.insert(go_entry);
+                count++;
+                break;
+            }
+        }
+    }
+
+    sLog.outString();
+    sLog.outString( ">> Loaded %u GameObject for quests", count );
 }

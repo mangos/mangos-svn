@@ -81,7 +81,7 @@ void GameObject::RemoveFromWorld()
     Object::RemoveFromWorld();
 }
 
-bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, uint32 dynflags)
+bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, float y, float z, float ang, float rotation0, float rotation1, float rotation2, float rotation3, uint32 animprogress, uint32 go_state)
 {
     Relocate(x,y,z,ang);
     SetMapId(mapid);
@@ -131,11 +131,10 @@ bool GameObject::Create(uint32 guidlow, uint32 name_id, uint32 mapid, float x, f
 
     SetUInt32Value (GAMEOBJECT_DISPLAYID, goinfo->displayId);
 
-    SetUInt32Value (GAMEOBJECT_STATE, 1);
+    SetUInt32Value (GAMEOBJECT_STATE, go_state);
     SetUInt32Value (GAMEOBJECT_TYPE_ID, goinfo->type);
 
     SetUInt32Value (GAMEOBJECT_ANIMPROGRESS, animprogress);
-    SetUInt32Value (GAMEOBJECT_DYN_FLAGS, dynflags);
 
     //Notify the map's instance data.
     //Only works if you create the object in it, not if it is moves to that map.
@@ -422,7 +421,7 @@ void GameObject::SaveToDB()
     data.rotation3 = GetFloatValue(GAMEOBJECT_ROTATION+3);
     data.spawntimesecs = m_spawnedByDefault ? m_respawnDelayTime : -(int32)m_respawnDelayTime;
     data.animprogress = GetUInt32Value (GAMEOBJECT_ANIMPROGRESS);
-    data.dynflags = GetUInt32Value (GAMEOBJECT_DYN_FLAGS);
+    data.go_state = GetUInt32Value (GAMEOBJECT_STATE);
 
     // updated in DB
     std::ostringstream ss;
@@ -440,7 +439,7 @@ void GameObject::SaveToDB()
         << GetFloatValue(GAMEOBJECT_ROTATION+3) << ", "
         << m_respawnDelayTime << ", "
         << GetUInt32Value (GAMEOBJECT_ANIMPROGRESS) << ", "
-        << GetUInt32Value (GAMEOBJECT_DYN_FLAGS) << ")";
+        << GetUInt32Value (GAMEOBJECT_STATE) << ")";
 
     WorldDatabase.BeginTransaction();
     WorldDatabase.PExecuteLog("DELETE FROM `gameobject` WHERE `guid` = '%u'", m_DBTableGuid);
@@ -471,13 +470,13 @@ bool GameObject::LoadFromDB(uint32 guid, uint32 InstanceId)
     float rotation3 = data->rotation3;
 
     uint32 animprogress = data->animprogress;
-    uint32 dynflags = data->dynflags;
+    uint32 go_state = data->go_state;
 
     uint32 stored_guid = guid;
     if (InstanceId != 0) guid = objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT);
     SetInstanceId(InstanceId);
 
-    if (!Create(guid,entry, map_id, x, y, z, ang, rotation0, rotation1, rotation2, rotation3, animprogress, dynflags) )
+    if (!Create(guid,entry, map_id, x, y, z, ang, rotation0, rotation1, rotation2, rotation3, animprogress, go_state) )
         return false;
 
     m_DBTableGuid = stored_guid;
@@ -516,9 +515,8 @@ GameObjectInfo const *GameObject::GetGOInfo() const
     return objmgr.GetGameObjectInfo(GetUInt32Value (OBJECT_FIELD_ENTRY));
 }
 
-uint32 GameObject::GetLootId()
+uint32 GameObject::GetLootId(GameObjectInfo const* Ginfo)
 {
-    GameObjectInfo const* Ginfo = GetGOInfo();
     if (Ginfo && (Ginfo->type== GAMEOBJECT_TYPE_CHEST || Ginfo->type==GAMEOBJECT_TYPE_FISHINGHOLE ))
         return Ginfo->data1;
     else
@@ -582,4 +580,22 @@ void GameObject::Respawn()
         m_respawnTime = time(NULL);
         objmgr.SaveGORespawnTime(m_DBTableGuid,GetInstanceId(),0);
     }
+}
+
+bool GameObject::ActivateToQuest( Player *pTarget)const
+{   
+    if(!objmgr.IsGameObjectForQuests(GetEntry()))
+        return false;
+ 
+    LootStore::iterator tab = LootTemplates_Gameobject.find(GetLootId());
+    if (tab != LootTemplates_Gameobject.end())
+    {
+        for(LootStoreItemList::iterator item_iter = tab->second.begin(); item_iter != tab->second.end(); ++item_iter)
+        {
+            if(pTarget->HasQuestForItem(item_iter->itemid))
+                return true;
+        }
+    }
+
+    return false;
 }

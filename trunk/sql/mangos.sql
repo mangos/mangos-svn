@@ -1071,7 +1071,7 @@ CREATE TABLE `gameobject` (
   `rotation3` float NOT NULL default '0',
   `spawntimesecs` int(11) NOT NULL default '0',
   `animprogress` int(11) unsigned NOT NULL default '0',
-  `dynflags` int(11) unsigned NOT NULL default '0',
+  `state` int(11) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Gameobject System';
 

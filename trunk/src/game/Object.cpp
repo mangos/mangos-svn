@@ -197,7 +197,7 @@ void Object::BuildCreateUpdateBlockForPlayer(UpdateData *data, Player *target) c
     UpdateMask updateMask;
     updateMask.SetCount( m_valuesCount );
     _SetCreateBits( &updateMask, target );
-    _BuildValuesUpdate( &buf, &updateMask, target );
+    _BuildValuesUpdate(updatetype, &buf, &updateMask, target );
     data->AddUpdateBlock(buf);
 }
 
@@ -237,7 +237,7 @@ void Object::BuildValuesUpdateBlockForPlayer(UpdateData *data, Player *target) c
     updateMask.SetCount( m_valuesCount );
 
     _SetUpdateBits( &updateMask, target );
-    _BuildValuesUpdate( &buf, &updateMask, target );
+    _BuildValuesUpdate(UPDATETYPE_VALUES, &buf, &updateMask, target );
 
     data->AddUpdateBlock(buf);
 }
@@ -524,8 +524,36 @@ void Object::_BuildMovementUpdate(ByteBuffer * data, uint8 flags, uint32 flags2 
     }
 }
 
-void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask, Player *target) const
+void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask *updateMask, Player *target) const
 {
+    if(!target)
+        return;
+    
+    bool IsActivateToQuest = false;
+    if (updatetype == UPDATETYPE_CREATE_OBJECT || updatetype == UPDATETYPE_CREATE_OBJECT2)
+    {
+        if (isType(TYPE_GAMEOBJECT) && !((GameObject*)this)->IsTransport())
+        {   
+            if ( ((GameObject*)this)->ActivateToQuest(target))
+            {
+                IsActivateToQuest = true;
+                updateMask->SetBit(GAMEOBJECT_DYN_FLAGS);            
+            }
+        }
+    }
+    else            //case UPDATETYPE_VALUES
+    {
+        if (isType(TYPE_GAMEOBJECT) && !((GameObject*)this)->IsTransport())
+        {   
+            if ( ((GameObject*)this)->ActivateToQuest(target))
+            {
+                IsActivateToQuest = true;
+            }
+            updateMask->SetBit(GAMEOBJECT_DYN_FLAGS);            
+            updateMask->SetBit(GAMEOBJECT_ANIMPROGRESS);
+        }
+    }
+
     WPAssert(updateMask && updateMask->GetCount() == m_valuesCount);
 
     *data << (uint8)updateMask->GetBlockCount();
@@ -559,6 +587,25 @@ void Object::_BuildValuesUpdate(ByteBuffer * data, UpdateMask *updateMask, Playe
                     // send in current format (float as float, uint32 as uint32)
                     *data << m_uint32Values[ index ];
                 }
+            }
+        }
+    }
+    else if(isType(TYPE_GAMEOBJECT))                        // gameobject case
+    {
+        for( uint16 index = 0; index < m_valuesCount; index ++ )
+        {
+            if( updateMask->GetBit( index ) )
+            {
+                // send in current format (float as float, uint32 as uint32)
+                if ( index == GAMEOBJECT_DYN_FLAGS )
+                {
+                    if(IsActivateToQuest )
+                        *data << uint32(9);                 // enable quest object. Represent 9, but 1 for client before 2.3.0
+                    else
+                        *data << uint32(0);                 // disable quest object
+                }
+                else
+                    *data << m_uint32Values[ index ];       // other cases
             }
         }
     }
