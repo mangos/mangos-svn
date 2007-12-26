@@ -288,7 +288,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //236
     &Aura::HandleNULL,                                      //237
     &Aura::HandleNULL,                                      //238
-    &Aura::HandleNULL,                                      //239
+    &Aura::HandleAuraModScale,                              //239 SPELL_AURA_MOD_SCALE_2 only in Noggenfogger Elixir (16595) before 2.3.0 aura 61 
     &Aura::HandleNULL,                                      //240
     &Aura::HandleNULL,                                      //241
     &Aura::HandleNULL,                                      //242
