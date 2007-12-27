@@ -233,11 +233,12 @@ class MANGOS_DLL_SPEC Object
 
         uint16 m_valuesCount;
 
-        bool m_inWorld;
 
         bool m_objectUpdated;
 
     private:
+        bool m_inWorld;
+
         ByteBuffer m_PackGUID;
 
         // for output helpfull error messages from asserts
