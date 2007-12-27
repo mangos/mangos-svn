@@ -566,6 +566,9 @@ class MANGOS_DLL_SPEC WorldSession
         void Handle1021(WorldPacket& recv_data);
 
     private:
+        // private trade methods
+        void moveItems(Item* myItems[], Item* hisItems[]);
+
         Player *_player;
         WorldSocket *_socket;
 

@@ -140,13 +140,91 @@ void WorldSession::SendUpdateTrade()
     }
     SendPacket(&data);
 }
+//==============================================================
+// transfer the items to the players
+
+void WorldSession::moveItems(Item* myItems[], Item* hisItems[])
+{
+    for(int i=0; i<TRADE_SLOT_TRADED_COUNT; i++)
+    {
+        uint16 traderDst;
+        uint16 playerDst;
+        bool traderCanTrade = (myItems[i]==NULL || _player->pTrader->CanStoreItem( NULL_BAG, NULL_SLOT, traderDst, myItems[i], false ) == EQUIP_ERR_OK);
+        bool playerCanTrade = (hisItems[i]==NULL || _player->CanStoreItem( NULL_BAG, NULL_SLOT, playerDst, hisItems[i], false ) == EQUIP_ERR_OK);
+        if(traderCanTrade && playerCanTrade )
+        {
+            // Ok, if trade item exists and can be stored
+            // If we trade in both directions we had to check, if the trade will work before we actually do it
+            // A roll back is not possible after we stored it
+            if(myItems[i])
+            {
+                // logging
+                sLog.outDebug("partner storing: %u",myItems[i]->GetGUIDLow());
+                if( _player->GetSession()->GetSecurity() > SEC_PLAYER && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
+                    sLog.outCommand("GM %s (Account: %u) trade: %s (Entry: %d Count: %u) to player: %s (Account: %u)",
+                    _player->GetName(),_player->GetSession()->GetAccountId(),
+                    myItems[i]->GetProto()->Name1,myItems[i]->GetEntry(),myItems[i]->GetCount(),
+                    _player->pTrader->GetName(),_player->pTrader->GetSession()->GetAccountId());
+
+                // store
+                _player->pTrader->ItemAddedQuestCheck(myItems[i]->GetEntry(),myItems[i]->GetCount());
+                _player->pTrader->StoreItem( traderDst, myItems[i], true);
+            }
+            if(hisItems[i])
+            {
+                // logging
+                sLog.outDebug("player storing: %u",hisItems[i]->GetGUIDLow());
+                if( _player->pTrader->GetSession()->GetSecurity() > SEC_PLAYER && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
+                    sLog.outCommand("GM %s (Account: %u) trade: %s (Entry: %d Count: %u) to player: %s (Account: %u)",
+                    _player->pTrader->GetName(),_player->pTrader->GetSession()->GetAccountId(),
+                    hisItems[i]->GetProto()->Name1,hisItems[i]->GetEntry(),hisItems[i]->GetCount(),
+                    _player->GetName(),_player->GetSession()->GetAccountId());
+
+                // store
+                _player->ItemAddedQuestCheck(hisItems[i]->GetEntry(),hisItems[i]->GetCount());
+                _player->StoreItem( playerDst, hisItems[i], true);
+            }
+        }
+        else
+        {
+            // in case of fatal error log error message
+            // return the already removed items to the original owner
+            if(myItems[i])
+            {
+                if(!traderCanTrade)
+                    sLog.outError("trader can't store item: %u",myItems[i]->GetGUIDLow());
+                if(_player->CanStoreItem( NULL_BAG, NULL_SLOT, playerDst, myItems[i], false ) == EQUIP_ERR_OK)
+                {
+                    _player->ItemAddedQuestCheck(myItems[i]->GetEntry(),myItems[i]->GetCount());
+                    _player->StoreItem(playerDst, myItems[i], true);
+                }
+                else
+                    sLog.outError("player can't take item back: %u",myItems[i]->GetGUIDLow());
+            }
+            // return the already removed items to the original owner
+            if(hisItems[i])
+            {
+                if(!playerCanTrade)
+                    sLog.outError("player can't store item: %u",hisItems[i]->GetGUIDLow());
+                if(_player->pTrader->CanStoreItem( NULL_BAG, NULL_SLOT, traderDst, hisItems[i], false ) == EQUIP_ERR_OK)
+                {
+                    _player->pTrader->ItemAddedQuestCheck(hisItems[i]->GetEntry(),hisItems[i]->GetCount());
+                    _player->pTrader->StoreItem(traderDst, hisItems[i], true);
+                }
+                else
+                    sLog.outError("trader can't take item back: %u",hisItems[i]->GetGUIDLow());
+            }
+        }
+    }
+}
+
+//==============================================================
 
 void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
 {
     Item *myItems[TRADE_SLOT_TRADED_COUNT]  = { NULL, NULL, NULL, NULL, NULL, NULL };
     Item *hisItems[TRADE_SLOT_TRADED_COUNT] = { NULL, NULL, NULL, NULL, NULL, NULL };
     bool myCanCompleteTrade=true,hisCanCompleteTrade=true;
-    uint16 dst;
 
     if ( !GetPlayer()->pTrader )
         return;
@@ -245,58 +323,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
         }
 
         // execute trade: 2. store
-        for(int i=0; i<TRADE_SLOT_TRADED_COUNT; i++)
-        {
-            if(myItems[i])
-            {
-                if(_player->pTrader->CanStoreItem( NULL_BAG, NULL_SLOT, dst, myItems[i], false ) == EQUIP_ERR_OK)
-                {
-                    // logging
-                    sLog.outDebug("partner storing: %u",myItems[i]->GetGUIDLow());
-                    if( _player->GetSession()->GetSecurity() > SEC_PLAYER && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
-                        sLog.outCommand("GM %s (Account: %u) trade: %s (Entry: %d Count: %u) to player: %s (Account: %u)",
-                            _player->GetName(),_player->GetSession()->GetAccountId(),
-                            myItems[i]->GetProto()->Name1,myItems[i]->GetEntry(),myItems[i]->GetCount(),
-                            _player->pTrader->GetName(),_player->pTrader->GetSession()->GetAccountId());
-
-                    // store
-                    _player->pTrader->ItemAddedQuestCheck(myItems[i]->GetEntry(),myItems[i]->GetCount());
-                    _player->pTrader->StoreItem( dst, myItems[i], true);
-                }
-                else
-                {
-                    // in case of fatal error move items back
-                    sLog.outError("player can't store item: %u",hisItems[i]->GetGUIDLow());
-                    _player->ItemAddedQuestCheck(hisItems[i]->GetEntry(),hisItems[i]->GetCount());
-                    _player->StoreItem( dst, hisItems[i], true);
-                }
-            }
-            if(hisItems[i])
-            {
-                if(_player->CanStoreItem( NULL_BAG, NULL_SLOT, dst, hisItems[i], false ) == EQUIP_ERR_OK)
-                {
-                    // logging
-                    sLog.outDebug("player storing: %u",hisItems[i]->GetGUIDLow());
-                    if( _player->pTrader->GetSession()->GetSecurity() > SEC_PLAYER && sWorld.getConfig(CONFIG_GM_LOG_TRADE) )
-                        sLog.outCommand("GM %s (Account: %u) trade: %s (Entry: %d Count: %u) to player: %s (Account: %u)",
-                            _player->pTrader->GetName(),_player->pTrader->GetSession()->GetAccountId(),
-                            hisItems[i]->GetProto()->Name1,hisItems[i]->GetEntry(),hisItems[i]->GetCount(),
-                            _player->GetName(),_player->GetSession()->GetAccountId());
-
-                    // store
-                    _player->ItemAddedQuestCheck(hisItems[i]->GetEntry(),hisItems[i]->GetCount());
-                    _player->StoreItem( dst, hisItems[i], true);
-                }
-                else
-                {
-                    // in case of fatal error move items back
-                    sLog.outError("player can't store item: %u",hisItems[i]->GetGUIDLow());
-                    _player->pTrader->ItemAddedQuestCheck(myItems[i]->GetEntry(),myItems[i]->GetCount());
-                    _player->pTrader->StoreItem( dst, myItems[i], true);
-
-                }
-            }
-        }
+        moveItems(myItems, hisItems);
 
         // logging money
         if(sWorld.getConfig(CONFIG_GM_LOG_TRADE))
