@@ -636,7 +636,7 @@ void Spell::EffectDummy(uint32 i)
     if (m_triggeredByAura)
     {
         SpellEntry const *trig_info = m_triggeredByAura->GetSpellProto();
-        if ((trig_info->SpellIconID == 1485 && trig_info->SpellFamilyName == SPELLFAMILY_PRIEST) ||
+        if (trig_info && (trig_info->SpellIconID == 1485 && trig_info->SpellFamilyName == SPELLFAMILY_PRIEST) ||
             (trig_info->SpellIconID == 544 && trig_info->SpellFamilyName == SPELLFAMILY_WARLOCK))
         {
             if(!unitTarget)
