@@ -7175,8 +7175,8 @@ void Unit::CleanupsBeforeDelete()
         DeleteThreatList();
         getHostilRefManager().setOnlineOfflineState(false);
         RemoveAllAuras();
-        RemoveFromWorld();
     }
+    RemoveFromWorld();
 }
 
 CharmInfo* Unit::InitCharmInfo(Unit *charm)
