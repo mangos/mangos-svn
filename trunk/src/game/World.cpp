@@ -458,7 +458,8 @@ void World::SetInitialWorldSettings()
 
     m_configs[CONFIG_DETECT_POS_COLLISION] = sConfig.GetIntDefault("DetectPosCollision", 1);
 
-    m_configs[CONFIG_RESTRICTED_LFG_CHANNEL] = sConfig.GetIntDefault("RestrictedLfgChannel", 1);
+    m_configs[CONFIG_RESTRICTED_LFG_CHANNEL] = sConfig.GetIntDefault("Channel.RestrictedLfg", 1);
+    m_configs[CONFIG_SILENTLY_GM_JOIN_TO_CHANNEL] = sConfig.GetIntDefault("Channel.SilentlyGMJoin", 0);
 
     m_configs[CONFIG_TALENTS_INSPECTING] = sConfig.GetIntDefault("TalentsInspecting", 1);
 
