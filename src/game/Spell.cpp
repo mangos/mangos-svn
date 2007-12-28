@@ -2494,7 +2494,12 @@ uint8 Spell::CanCast(bool strict)
 {
     // check cooldowns to prevent cheating
     if(m_caster->GetTypeId()==TYPEID_PLAYER && ((Player*)m_caster)->HasSpellCooldown(m_spellInfo->Id))
-        return SPELL_FAILED_NOT_READY;
+    {
+        if(m_triggeredByAura)
+            return SPELL_FAILED_DONT_REPORT;
+         else
+            return SPELL_FAILED_NOT_READY;
+    }
 
     // cancel autorepeat spells if cast start when moving
     // (not wand currently autorepeat cast delayed to moving stop anyway in spell update code)
