@@ -4540,6 +4540,17 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
     // custom check for proc spell
     switch(auraSpellInfo->Id)
     {
+        // Mystical Skyfire Diamond trigger (Spell Focus Trigger)
+        case 32837:
+        {
+            // hidden cooldown 45sec, check manually for passive spell
+            if (GetTypeId() == TYPEID_PLAYER && !((Player*)this)->HasSpellCooldown(auraSpellInfo->Id))
+            {
+                CastSpell(this, trigger_spell_id, true, NULL, triggeredByAura);
+                ((Player*)this)->AddSpellCooldown(auraSpellInfo->Id,0,time(NULL) + 45);
+            }
+            return;
+        }
         // Bonus Healing (item spell)
         case 40971:
         {
