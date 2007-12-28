@@ -241,7 +241,12 @@ ChatFlood.MuteTime = 10
 # Restrict use LookupForGroup channel only registered in LFG tool players
 #          0 (allow join to channel in any time)
 # Default: 1 (allow join to channel only if active in LFG)
-RestrictedLfgChannel = 1
+Channel.RestrictedLfg = 1
+
+# Silently join GM characters (security level > 1) to channels
+# Default: 0 (join announcement in normal way)
+#          1 (GM join without announcement)
+Channel.SilentlyGMJoin = 0
 
 # Allow other players see character talents in inspect dialog (Characters in Gamemaster mode can inspect talents always)
 #          0 (not allow)

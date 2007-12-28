@@ -95,7 +95,7 @@ void Channel::Join(uint64 p, const char *pass)
         plr->JoinedChannel(this);
     }
 
-    if(m_announce)
+    if(m_announce && (!plr || plr->GetSession()->GetSecurity() < SEC_GAMEMASTER || !sWorld.getConfig(CONFIG_SILENTLY_GM_JOIN_TO_CHANNEL) ))
     {
         MakeJoined(&data, p);
         SendToAll(&data);
@@ -134,12 +134,13 @@ void Channel::Leave(uint64 p, bool send)
     }
     else
     {
+        Player *plr = objmgr.GetPlayer(p);
+
         if(send)
         {
             WorldPacket data;
             MakeYouLeft(&data);
             SendToOne(&data, p);
-            Player *plr = objmgr.GetPlayer(p);
             if(plr)
                 plr->LeftChannel(this);
             data.clear();
@@ -148,7 +149,7 @@ void Channel::Leave(uint64 p, bool send)
         bool changeowner = players[p].IsOwner();
 
         players.erase(p);
-        if(m_announce)
+        if(m_announce && (!plr || plr->GetSession()->GetSecurity() < SEC_GAMEMASTER || !sWorld.getConfig(CONFIG_SILENTLY_GM_JOIN_TO_CHANNEL) ))
         {
             WorldPacket data;
             MakeLeft(&data, p);
