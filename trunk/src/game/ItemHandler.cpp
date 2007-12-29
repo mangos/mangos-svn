@@ -918,7 +918,11 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
     item->SetState(ITEM_CHANGED, _player);
 
     if(item->GetState()==ITEM_NEW)                          // save new item, to have alway for `character_gifts` record in `item_template`
+    {
+        // after save it will be impossible to remove the item from the queue
+        item->RemoveFromUpdateQueueOf(_player);
         item->SaveToDB();
+    }
     CharacterDatabase.CommitTransaction();
 
     uint32 count = 1;
