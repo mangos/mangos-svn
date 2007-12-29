@@ -431,13 +431,21 @@ void Player::UpdateManaRegen()
     float Intellect = GetStat(STAT_INTELLECT);
     float SpiritBasedRegen = OCTRegenMPPerSpirit();
     float power_regen_mod = 0;
+    
     AuraList const& ModPowerRegenAuras = GetAurasByType(SPELL_AURA_MOD_POWER_REGEN);
     for(AuraList::const_iterator i = ModPowerRegenAuras.begin();i != ModPowerRegenAuras.end(); ++i)
         if ((*i)->GetModifier()->m_miscvalue == POWER_MANA)
             power_regen_mod += (*i)->GetModifier()->m_amount;
 
-    float Mp5 = power_regen_mod/5.00f + (GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN) * Intellect / 500.0f);
-
+    float power_mana_regen =  GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN);
+    
+    AuraList const& mDummy2Auras = GetAurasByType(SPELL_AURA_DUMMY_2);
+    for(AuraList::const_iterator i = mDummy2Auras.begin();i != mDummy2Auras.end(); ++i)
+        if((*i)->GetId() == 34074)                          // Aspect of the Viper
+            power_mana_regen += (*i)->GetModifier()->m_amount;
+            
+    float Mp5 = power_regen_mod/5.00f + (power_mana_regen * Intellect / 500.0f);
+    
     float modManaRegenInterrupt = (float(GetTotalAuraModifier(SPELL_AURA_MOD_MANA_REGEN_INTERRUPT))/100.00f);
     SetStatFloatValue(PLAYER_FIELD_MOD_MANA_REGEN_INTERRUPT,(Mp5 + (SpiritBasedRegen * modManaRegenInterrupt)));
     SpiritBasedRegen += Mp5;

@@ -4551,6 +4551,18 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
             }
             return;
         }
+        case 37189:
+        case 37227:
+        {
+            // hidden cooldown 60sec, check manually for passive spell
+            if (GetTypeId() == TYPEID_PLAYER && !((Player*)this)->HasSpellCooldown(auraSpellInfo->Id))
+            {
+                CastSpell(this, trigger_spell_id, true, NULL, triggeredByAura);
+                ((Player*)this)->AddSpellCooldown(auraSpellInfo->Id,0,time(NULL) + 60);
+            }
+            return;
+        }
+        
         // Bonus Healing (item spell)
         case 40971:
         {

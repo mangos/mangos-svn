@@ -4339,10 +4339,27 @@ void ObjectMgr::LoadSpellAffects()
 
         uint16 entry = fields[0].GetUInt16();
         uint8 effectId = fields[1].GetUInt8();
+        
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(entry);
 
-        if (!sSpellStore.LookupEntry(entry))
+        if (!spellInfo)
         {
             sLog.outErrorDb("Spell %u listed in `spell_affect` does not exist", entry);
+            continue;
+        }
+
+        if (effectId >= 3)
+        {
+            sLog.outErrorDb("Spell %u listed in `spell_affect` have invalid effect index (%u)", entry,effectId);
+            continue;
+        }
+
+        if( spellInfo->Effect[effectId] != SPELL_EFFECT_APPLY_AURA || 
+            spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_FLAT_MODIFIER &&
+            spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_PCT_MODIFIER  &&
+            spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_TARGET_TRIGGER )
+        {
+            sLog.outErrorDb("Spell %u listed in `spell_affect` have not SPELL_AURA_ADD_FLAT_MODIFIER (%u) or SPELL_AURA_ADD_PCT_MODIFIER (%u) or SPELL_AURA_ADD_TARGET_TRIGGER (%u) for effect index (%u)", entry,SPELL_AURA_ADD_FLAT_MODIFIER,SPELL_AURA_ADD_PCT_MODIFIER,SPELL_AURA_ADD_TARGET_TRIGGER,effectId);
             continue;
         }
 

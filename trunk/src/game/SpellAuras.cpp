@@ -275,7 +275,7 @@ pAuraHandler AuraHandler[TOTAL_AURAS]=
     &Aura::HandleNULL,                                      //223 unused
     &Aura::HandleNULL,                                      //224 unused
     &Aura::HandleNULL,                                      //225
-    &Aura::HandleNULL,                                      //226
+    &Aura::HandleNoImmediateEffect,                         //226 SPELL_AURA_DUMMY_2 dummy like aura, but at this moment only no immediate effect cases
     &Aura::HandleNULL,                                      //227
     &Aura::HandleNULL,                                      //228 detection
     &Aura::HandleNULL,                                      //228 avoidance
@@ -1130,6 +1130,34 @@ void Aura::HandleAuraDummy(bool apply, bool Real)
         }
 
         ((Player*)caster)->AddSpellMod(m_spellmod, apply);
+    }
+
+    // Improved Aspect of the Viper
+    if( GetId()==38390 && m_target->GetTypeId()==TYPEID_PLAYER )
+    {
+        if(apply)
+        {
+            // + effect value for Aspect of the Viper
+            SpellModifier *mod = new SpellModifier;
+            mod->op = SPELLMOD_DAMAGE;
+            mod->value = m_modifier.m_amount;
+            mod->type = SPELLMOD_FLAT;
+            mod->spellId = m_spellId;
+            mod->effectId = m_effIndex;
+            mod->lastAffected = 0;
+            mod->mask = 0x4000000000000LL;
+            mod->charges = 0;
+
+            m_spellmod = mod;           
+        }
+
+        ((Player*)m_target)->AddSpellMod(m_spellmod, apply);
+        
+        // update active aura
+        Unit::AuraList const& mDummy2Auras = m_target->GetAurasByType(SPELL_AURA_DUMMY_2);
+        for(Unit::AuraList::const_iterator i = mDummy2Auras.begin();i != mDummy2Auras.end(); ++i)
+            if((*i)->GetId() == 34074)                      // Aspect of the Viper
+                const_cast<int32&>((*i)->GetModifier()->m_amount) += (apply ? m_modifier.m_amount : -m_modifier.m_amount);
     }
 
     // Tame beast
