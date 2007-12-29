@@ -881,7 +881,7 @@ void WorldSession::HandleWrapItemOpcode(WorldPacket& recv_data)
         return;
     }
 
-    if(item->IsSoulBound() || item->GetProto()->Class == ITEM_CLASS_QUEST)
+    if(item->IsSoulBound())
     {
         _player->SendEquipError( EQUIP_ERR_BOUND_CANT_BE_WRAPPED, item, NULL );
         return;

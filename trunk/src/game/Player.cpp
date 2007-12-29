@@ -9124,8 +9124,7 @@ Item* Player::StoreItem( uint16 pos, Item *pItem, bool update )
         uint8 bag = pos >> 8;
         uint8 slot = pos & 255;
 
-        if( pItem->GetProto()->Class == ITEM_CLASS_QUEST ||
-            pItem->GetProto()->Bonding == BIND_WHEN_PICKED_UP ||
+        if( pItem->GetProto()->Bonding == BIND_WHEN_PICKED_UP ||
             pItem->GetProto()->Bonding == BIND_WHEN_EQUIPED && IsBankBagPos(bag,slot) )
             pItem->SetBinding( true );
 
