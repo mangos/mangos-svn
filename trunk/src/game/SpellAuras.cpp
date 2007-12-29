@@ -3472,12 +3472,12 @@ void Aura::HandleModSpellCritChanceShool(bool apply, bool Real)
 
 void Aura::HandleModCastingSpeed(bool apply, bool Real)
 {
-    m_target->ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED,-m_modifier.m_amount,apply);
+    m_target->ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED,m_modifier.m_amount,!apply);
 }
 
 void Aura::HandleModCombatSpeedPct(bool apply, bool Real)
 {
-    m_target->ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED,-m_modifier.m_amount,apply);
+    m_target->ApplyPercentModFloatValue(UNIT_MOD_CAST_SPEED,m_modifier.m_amount,!apply);
     m_target->ApplyAttackTimePercentMod(BASE_ATTACK,m_modifier.m_amount,apply);
     m_target->ApplyAttackTimePercentMod(OFF_ATTACK,m_modifier.m_amount,apply);
     if(m_modifier.m_amount >= 0)
