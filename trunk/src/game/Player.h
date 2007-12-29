@@ -759,10 +759,14 @@ struct MovementInfo
 
 // flags that use in movement check for example at spell casting
 MovementFlags const movementFlagsMask = MovementFlags(
-MOVEMENTFLAG_FORWARD |MOVEMENTFLAG_BACKWARD|MOVEMENTFLAG_STRAFE_LEFT|MOVEMENTFLAG_STRAFE_RIGHT|
-MOVEMENTFLAG_LEFT    |MOVEMENTFLAG_RIGHT   |MOVEMENTFLAG_PITCH_UP   |MOVEMENTFLAG_PITCH_DOWN|
-MOVEMENTFLAG_WALK    |MOVEMENTFLAG_FLY_UNK1|MOVEMENTFLAG_JUMPING    |MOVEMENTFLAG_FALLING|
-MOVEMENTFLAG_SWIMMING|MOVEMENTFLAG_FLY_UP  |MOVEMENTFLAG_FLYING     |MOVEMENTFLAG_SPLINE
+    MOVEMENTFLAG_FORWARD |MOVEMENTFLAG_BACKWARD  |MOVEMENTFLAG_STRAFE_LEFT|MOVEMENTFLAG_STRAFE_RIGHT|
+    MOVEMENTFLAG_PITCH_UP|MOVEMENTFLAG_PITCH_DOWN|MOVEMENTFLAG_WALK       |MOVEMENTFLAG_FLY_UNK1    |
+    MOVEMENTFLAG_JUMPING |MOVEMENTFLAG_FALLING   |MOVEMENTFLAG_SWIMMING   |MOVEMENTFLAG_FLY_UP      |
+    MOVEMENTFLAG_FLYING  |MOVEMENTFLAG_SPLINE
+);
+
+MovementFlags const movementOrTurningFlagsMask = MovementFlags(
+    movementFlagsMask | MOVEMENTFLAG_LEFT | MOVEMENTFLAG_RIGHT
 );
 
 typedef HM_NAMESPACE::hash_map< uint32, std::pair < uint32, uint32 > > BoundInstancesMap;
@@ -1696,6 +1700,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         /*********************************************************/
         MovementInfo m_movementInfo;
         bool isMoving() const { return (m_movementInfo.flags & movementFlagsMask) != 0; }
+        bool isMovingOrTurning() const { return (m_movementInfo.flags & movementOrTurningFlagsMask) != 0; }
         uint32 GetMovementFlags() const { return m_movementInfo.flags; }
         bool HasMovementFlags(uint32 flags) const { return m_movementInfo.flags & flags; }
 
