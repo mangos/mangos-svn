@@ -983,6 +983,17 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
     {
         if (Gems[i] && (Gems[i]->GetProto()->Flags & ITEM_FLAGS_UNIQUE_EQUIPPED))
         {
+            // for equipped item check all equipment for duplicate equipped gems
+            if(itemTarget->IsEquipped())
+            {
+                if(GetPlayer()->HasItemEquipped(Gems[i]->GetEntry()))
+                {
+                    _player->SendEquipError( EQUIP_ERR_ITEM_UNIQUE_EQUIPABLE, itemTarget, NULL );
+                    return;
+                }
+            }
+        
+            // continue check for case when attempt add 2 similar unique equipped gems in one item.
             for (int j = 0; j < 3; ++j)
             {
                 if ((i != j) && (Gems[j]) && (Gems[i]->GetProto()->ItemId == Gems[j]->GetProto()->ItemId))
