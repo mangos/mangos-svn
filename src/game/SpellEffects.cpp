@@ -2582,28 +2582,35 @@ void Spell::EffectEnchantItemTmp(uint32 i)
         sLog.outError("Spell %u Effect %u (SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY) have not existed enchanting id %u ",m_spellInfo->Id,i,enchant_id);
         return;
     }
+    
+    // select enchantment duration
+    uint32 duration;
 
-    int32 duration = GetDuration(m_spellInfo);
-
-    // custom cases
-    if(duration == 0)
-    {
-        // some explicit spell ids checks including one with rogue family
-        if(m_spellInfo->Id==3594 || m_spellInfo->Id==6650 || m_spellInfo->Id==38615)
-            duration = 1800;                                // 30 mins
-        // other rogue family enchantments always 1 hour (some have spell damage=0, but some have wrong data in EffBasePoints)
-        else if(m_spellInfo->SpellFamilyName==SPELLFAMILY_ROGUE)
-            duration = 3600;                                // 1 hour
-        // some fishing pole bonuses
-        else if(m_spellInfo->SpellVisual==563)
-            duration = 600;                                 // 10 mins
-        // spell damage based data if provided
-        else if(damage > 1)
-            duration = damage;
-        // default case
-        else
-            duration = 300;                                 // 5 mins
-    }
+    // rogue family enchantments exception by duration
+    if(m_spellInfo->Id==38615)
+        duration = 1800;                                    // 30 mins
+    // other rogue family enchantments always 1 hour (some have spell damage=0, but some have wrong data in EffBasePoints)
+    else if(m_spellInfo->SpellFamilyName==SPELLFAMILY_ROGUE)
+        duration = 3600;                                    // 1 hour
+    // shaman family enchantments 
+    else if(m_spellInfo->SpellFamilyName==SPELLFAMILY_SHAMAN)
+        duration = 3600;                                    // 1 hour
+    // other cases with this SpellVisual already selected
+    else if(m_spellInfo->SpellVisual==215)
+        duration = 1800;                                    // 30 mins
+    // some fishing pole bonuses
+    else if(m_spellInfo->SpellVisual==563)
+        duration = 600;                                     // 10 mins
+    // shaman rockbiter enchantments
+    else if(m_spellInfo->SpellVisual==0)
+        duration = 1800;                                    // 30 mins
+    else if(m_spellInfo->Id==29702)
+        duration = 300;                                     // 5 mins
+    else if(m_spellInfo->Id==37360)
+        duration = 300;                                     // 5 mins
+    // default case
+    else
+        duration = 3600;                                    // 1 hour
 
     // item can be in trade slot and have owner diff. from caster
     Player* item_owner = itemTarget->GetOwner();
