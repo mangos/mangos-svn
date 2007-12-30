@@ -812,7 +812,16 @@ void Map::Remove(Player *player, bool remove)
     }
 
     CellPair p = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
-    assert( p.x_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP && p.y_coord < TOTAL_NUMBER_OF_CELLS_PER_MAP );
+    if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP)
+    {
+        // invalid coordinates
+        player->RemoveFromWorld();
+
+        if( remove )
+            DeleteFromWorld(player);
+
+        return;
+    }
 
     Cell cell = RedZone::GetZone(p);
     uint64 mask = CalculateGridMask(cell.data.Part.grid_y);
