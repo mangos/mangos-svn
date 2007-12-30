@@ -303,6 +303,9 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
             void AddToGrid(T*, NGridType *, Cell const&);
 
         template<class T>
+            void AddNotifier(T*, Cell const&, CellPair const&);
+
+        template<class T>
             void RemoveFromGrid(T*, NGridType *, Cell const&);
 
         template<class T>

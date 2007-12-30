@@ -383,6 +383,23 @@ void Map::DeleteFromWorld(T* obj)
     delete obj;
 }
 
+template<class T>
+void Map::AddNotifier(T* , Cell const& , CellPair const& )
+{
+}
+
+template<>
+void Map::AddNotifier(Player* obj, Cell const& cell, CellPair const& cellpair)
+{
+    PlayerRelocationNotify(obj,cell,cellpair);
+}
+
+template<>
+void Map::AddNotifier(Creature* obj, Cell const& cell, CellPair const& cellpair)
+{
+    CreatureRelocationNotify(obj,cell,cellpair);
+}
+
 uint64
 Map::EnsureGridCreated(const GridPair &p)
 {
@@ -633,6 +650,8 @@ void Map::Add(Player *player)
 
     UpdatePlayerVisibility(player,cell,p);
     UpdateObjectsVisibilityFor(player,cell,p);
+    
+    AddNotifier(player,cell,p);
 
     // reinitialize reset time
     InitResetTime();
@@ -663,6 +682,8 @@ Map::Add(T *obj)
     DEBUG_LOG("Object %u enters grid[%u,%u]", GUID_LOPART(obj->GetGUID()), cell.GridX(), cell.GridY());
 
     UpdateObjectVisibility(obj,cell,p);
+
+    AddNotifier(obj,cell,p);
 }
 
 /*template<class T>
