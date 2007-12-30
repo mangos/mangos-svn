@@ -3561,6 +3561,16 @@ uint8 Spell::CheckItems()
                 break;
             }
             case SPELL_EFFECT_ENCHANT_ITEM:
+            {
+                Item* targetItem = m_targets.getItemTarget();
+                if(!targetItem)
+                    return SPELL_FAILED_ITEM_NOT_FOUND;
+                    
+                if(targetItem->GetProto()->ItemLevel < m_spellInfo->baseLevel)
+                    return SPELL_FAILED_LOWLEVEL;
+                
+                break;
+            }
             case SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY:
                 if(!m_targets.getItemTarget())
                     return SPELL_FAILED_ITEM_NOT_FOUND;
