@@ -186,6 +186,7 @@ class MANGOS_DLL_SPEC Aura
         void HandleAuraRetainComboPoints(bool apply, bool Real);
         void HandleModSpellDamagePercent(bool apply, bool Real);
         void HandleModSpellHealingPercent(bool apply, bool Real);
+        void HandleAuraModPacifyAndSilence(bool Apply, bool Real);
 
         Aura(SpellEntry const* spellproto, uint32 eff, int32 *currentBasePoints, Unit *target, Unit *caster = NULL, Item* castItem = NULL);
         virtual ~Aura();
