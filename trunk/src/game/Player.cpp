@@ -12915,8 +12915,13 @@ void Player::_LoadInventory(QueryResult *result, uint32 timediff)
             }
 
             // item's state may have changed after stored
-            if (success) item->SetState(ITEM_UNCHANGED, this);
-            else delete item;
+            if (success)
+                item->SetState(ITEM_UNCHANGED, this);
+            else
+            {
+                sLog.outError("Player::_LoadInventory: Player %s has item (GUID: %u Entry: %u) can't be loaded to inventory by some reason, skipped.", GetName(),item_guid, item_id);
+                delete item;
+            }
         } while (result->NextRow());
 
         delete result;
