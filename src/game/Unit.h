@@ -412,7 +412,7 @@ enum ProcFlags
     PROC_FLAG_HIT_SPECIAL        = 0x00000800,              // (!)Removed, may be reassigned in future
     PROC_FLAG_CRIT_MELEE         = 0x00001000,              // On crit melee
     PROC_FLAG_STRUCK_CRIT_MELEE  = 0x00002000,              // On being critically struck in melee
-    PROC_FLAG_CAST_SPELL         = 0x00004000,              // On cast spell (and broken Aspect of Hawk)
+    PROC_FLAG_CAST_SPELL         = 0x00004000,              // On cast spell
     PROC_FLAG_TAKE_DAMAGE        = 0x00008000,              // On take damage
     PROC_FLAG_CRIT_SPELL         = 0x00010000,              // On crit spell
     PROC_FLAG_HIT_SPELL          = 0x00020000,              // On hit spell

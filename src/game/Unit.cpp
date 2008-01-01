@@ -3973,7 +3973,7 @@ void Unit::CastMeleeProcDamageAndSpell(Unit* pVictim, uint32 damage, WeaponAttac
         ProcDamageAndSpell(pVictim, procAttacker, procVictim, damage, spellCasted, isTriggeredSpell, attType);
 }
 
-void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint32 effIndex, uint32 damage, Aura* triggredByAura, SpellEntry const * procSpell, uint32 procFlag)
+void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint32 effIndex, uint32 damage, Aura* triggeredByAura, SpellEntry const * procSpell, uint32 procFlag)
 {
     switch(dummySpell->Id )
     {
@@ -4000,17 +4000,17 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                     sLog.outError("Unit::HandleDummyAuraProc: non handled spell id: %u (IG)",dummySpell->Id);
                     return;
             };
-            CastCustomSpell(pVictim, 12654, &igniteDotBasePoints0, NULL, NULL, true, NULL, triggredByAura);
+            CastCustomSpell(pVictim, 12654, &igniteDotBasePoints0, NULL, NULL, true, NULL, triggeredByAura);
             return;
         }
 
         // Combustion
         case 11129:
         {
-            CastSpell(this, 28682, true, NULL, triggredByAura);
+            CastSpell(this, 28682, true, NULL, triggeredByAura);
             if (!(procFlag & PROC_FLAG_CRIT_SPELL))         //no crit
-                triggredByAura->m_procCharges += 1;         //-> reincrease procCharge count since it was decreased before
-            else if (triggredByAura->m_procCharges == 0)    //no more charges left and crit
+                triggeredByAura->m_procCharges += 1;         //-> reincrease procCharge count since it was decreased before
+            else if (triggeredByAura->m_procCharges == 0)    //no more charges left and crit
                 RemoveAurasDueToSpell(28682);               //-> remove Combustion auras
             return;
         }
@@ -4018,7 +4018,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
         case 18094:
         case 18095:
         {
-            CastSpell(this, 17941, true, NULL, triggredByAura);
+            CastSpell(this, 17941, true, NULL, triggeredByAura);
             return;
         }
         // VE
@@ -4027,11 +4027,11 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             if(!pVictim || !pVictim->isAlive())
                 return;
 
-            if(triggredByAura->GetCasterGUID() == pVictim->GetGUID())
+            if(triggeredByAura->GetCasterGUID() == pVictim->GetGUID())
             {
                                                             //VEHeal has a BaseDice of 0, so no decrement needed
-                int32 VEHealBasePoints0 = triggredByAura->GetModifier()->m_amount*damage/100;
-                pVictim->CastCustomSpell(pVictim, 15290, &VEHealBasePoints0, NULL, NULL, true, NULL, triggredByAura);
+                int32 VEHealBasePoints0 = triggeredByAura->GetModifier()->m_amount*damage/100;
+                pVictim->CastCustomSpell(pVictim, 15290, &VEHealBasePoints0, NULL, NULL, true, NULL, triggeredByAura);
             }
             return;
         }
@@ -4043,12 +4043,12 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 return;
 
             // return damage % to attacker but < 50% own total health
-            uint32 backDamage = triggredByAura->GetModifier()->m_amount*damage/100;
+            uint32 backDamage = triggeredByAura->GetModifier()->m_amount*damage/100;
             if(backDamage > GetMaxHealth()/2)
                 backDamage = GetMaxHealth()/2;
 
             int32 YYDamageBasePoints0 = backDamage-1;
-            CastCustomSpell(pVictim, 25997, &YYDamageBasePoints0, NULL, NULL, true, NULL, triggredByAura);
+            CastCustomSpell(pVictim, 25997, &YYDamageBasePoints0, NULL, NULL, true, NULL, triggeredByAura);
 
             return;
         }
@@ -4060,8 +4060,8 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
         {
             if(!procSpell)
                 return;
-            int32 HealthBasePoints0 = int32(damage*triggredByAura->GetModifier()->m_amount/100)-1;
-            CastCustomSpell(this,30294,&HealthBasePoints0,NULL,NULL,true,NULL,triggredByAura);
+            int32 HealthBasePoints0 = int32(damage*triggeredByAura->GetModifier()->m_amount/100)-1;
+            CastCustomSpell(this,30294,&HealthBasePoints0,NULL,NULL,true,NULL,triggeredByAura);
             return;
         }
 
@@ -4111,8 +4111,8 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             // if healed by another unit (pVictim)
             if(this != pVictim)
             {
-                int32 SAHealBasePoints0 = triggredByAura->GetModifier()->m_amount*damage/100-1;
-                CastCustomSpell(this, 31786, &SAHealBasePoints0, NULL, NULL, true, NULL, triggredByAura);
+                int32 SAHealBasePoints0 = triggeredByAura->GetModifier()->m_amount*damage/100-1;
+                CastCustomSpell(this, 31786, &SAHealBasePoints0, NULL, NULL, true, NULL, triggeredByAura);
             }
 
             return;
@@ -4124,11 +4124,11 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             if(GetTypeId() != TYPEID_PLAYER || !pVictim || !pVictim->isAlive())
                 return;
 
-            Item* castItem = ((Player*)this)->GetItemByGuid(triggredByAura->GetCastItemGUID());
+            Item* castItem = ((Player*)this)->GetItemByGuid(triggeredByAura->GetCastItemGUID());
             if(!castItem)
                 return;
 
-            CastSpell(pVictim,37379,true,castItem,triggredByAura);
+            CastSpell(pVictim,37379,true,castItem,triggeredByAura);
             return;
         }
         // Shadowflame Hellfire (item set effect)
@@ -4137,11 +4137,11 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             if(GetTypeId() != TYPEID_PLAYER || !pVictim || !pVictim->isAlive())
                 return;
 
-            Item* castItem = ((Player*)this)->GetItemByGuid(triggredByAura->GetCastItemGUID());
+            Item* castItem = ((Player*)this)->GetItemByGuid(triggeredByAura->GetCastItemGUID());
             if(!castItem)
                 return;
 
-            CastSpell(pVictim,37378,true,castItem,triggredByAura);
+            CastSpell(pVictim,37378,true,castItem,triggeredByAura);
             return;
         }
 
@@ -4154,7 +4154,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             if(dummySpell->SpellFamilyFlags==0x40000000000LL)
             {
                 int32 HealBasePoints0 = dummySpell->EffectBasePoints[0];
-                CastCustomSpell(this,379,&HealBasePoints0,NULL,NULL,true,NULL,triggredByAura);
+                CastCustomSpell(this,379,&HealBasePoints0,NULL,NULL,true,NULL,triggeredByAura);
                 return;
             }
             break;
@@ -4174,11 +4174,11 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             if(dummySpell->SpellFamilyName!=SPELLFAMILY_MAGE)
                 return;
 
-            int32 MEManaCostSave = procSpell->manaCost * triggredByAura->GetModifier()->m_amount/100;
+            int32 MEManaCostSave = procSpell->manaCost * triggeredByAura->GetModifier()->m_amount/100;
             if(MEManaCostSave <= 0)
                 return;
             int32 MEManaRestoreBasePoints0 = MEManaCostSave-1;
-            CastCustomSpell(this,29077,&MEManaRestoreBasePoints0,NULL,NULL,true,NULL, triggredByAura);
+            CastCustomSpell(this,29077,&MEManaRestoreBasePoints0,NULL,NULL,true,NULL, triggeredByAura);
 
             return;
         }
@@ -4188,10 +4188,10 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             if(!pVictim || !pVictim->isAlive())
                 return;
 
-            if(triggredByAura->GetCasterGUID() == pVictim->GetGUID())
+            if(triggeredByAura->GetCasterGUID() == pVictim->GetGUID())
             {
-                int32 VTEnergizeBasePoints0 = triggredByAura->GetModifier()->m_amount*damage/100 - 1;
-                pVictim->CastCustomSpell(pVictim,34919,&VTEnergizeBasePoints0,NULL,NULL,true,NULL, triggredByAura);
+                int32 VTEnergizeBasePoints0 = triggeredByAura->GetModifier()->m_amount*damage/100 - 1;
+                pVictim->CastCustomSpell(pVictim,34919,&VTEnergizeBasePoints0,NULL,NULL,true,NULL, triggeredByAura);
             }
             return;
         }
@@ -4209,11 +4209,11 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 (procSpell->SpellFamilyFlags & (0x40000 | 0x80000 | 0x100000 | 0x200000 | 0x800000000LL | 0x20000)) == 0)
                 return;
 
-            int32 QREnegyCostSave = procSpell->manaCost * (100 - triggredByAura->GetModifier()->m_amount)/100;
+            int32 QREnegyCostSave = procSpell->manaCost * (100 - triggeredByAura->GetModifier()->m_amount)/100;
             if(QREnegyCostSave <= 0)
                 return;
             int32 QREnergizeBasePoints0 = QREnegyCostSave-1;
-            CastCustomSpell(this,31663,&QREnergizeBasePoints0,NULL,NULL,true,NULL, triggredByAura);
+            CastCustomSpell(this,31663,&QREnergizeBasePoints0,NULL,NULL,true,NULL, triggeredByAura);
 
             return;
         }
@@ -4230,7 +4230,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
             if(THManaCostSave <= 0)
                 return;
             int32 THEnergizeBasePoints0 = THManaCostSave-1;
-            CastCustomSpell(this,34720,&THEnergizeBasePoints0,NULL,NULL,true,NULL, triggredByAura);
+            CastCustomSpell(this,34720,&THEnergizeBasePoints0,NULL,NULL,true,NULL, triggeredByAura);
 
             return;
         }
