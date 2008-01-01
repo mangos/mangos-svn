@@ -709,7 +709,7 @@ namespace MaNGOS
             for(PlayerMapType::iterator itr=m.begin(); itr != m.end(); ++itr)
             {
                 Player * pPlayer = itr->getSource();
-                if( !pPlayer->isAlive() )
+                if( !pPlayer->isAlive() || pPlayer->isInFlight())
                     continue;
 
                 if( i_originalCaster->IsFriendlyTo(pPlayer) )
@@ -747,7 +747,7 @@ namespace MaNGOS
 
             for(typename GridRefManager<T>::iterator itr = m.begin(); itr != m.end(); ++itr)
             {
-                if( !itr->getSource()->isAlive() )
+                if( !itr->getSource()->isAlive() || (itr->getSource()->GetTypeId() == TYPEID_PLAYER && ((Player*)itr->getSource())->isInFlight()))
                     continue;
 
                 switch (i_TargetType)

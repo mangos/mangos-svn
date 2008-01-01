@@ -537,7 +537,9 @@ namespace MaNGOS
             }
             bool operator()(Unit* u)
             {
-                if(u->isAlive() && (i_targetForPlayer ? !i_funit->IsFriendlyTo(u) : i_funit->IsHostileTo(u) )&& i_obj->IsWithinDistInMap(u, i_range))
+                if (!u->isAlive() || ( u->GetTypeId() == TYPEID_PLAYER && ((Player*)u)->isInFlight() ))
+                    return false;
+                if(( i_targetForPlayer ? !i_funit->IsFriendlyTo(u) : i_funit->IsHostileTo(u) )&& i_obj->IsWithinDistInMap(u, i_range))
                     return true;
 
                 return false;
