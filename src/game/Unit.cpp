@@ -4209,7 +4209,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 (procSpell->SpellFamilyFlags & (0x40000 | 0x80000 | 0x100000 | 0x200000 | 0x800000000LL | 0x20000)) == 0)
                 return;
 
-            int32 QREnegyCostSave = procSpell->manaCost * (100 - triggeredByAura->GetModifier()->m_amount)/100;
+            int32 QREnegyCostSave = procSpell->manaCost * triggeredByAura->GetModifier()->m_amount/100;
             if(QREnegyCostSave <= 0)
                 return;
             int32 QREnergizeBasePoints0 = QREnegyCostSave-1;
