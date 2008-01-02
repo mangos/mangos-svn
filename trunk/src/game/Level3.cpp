@@ -3205,7 +3205,7 @@ bool ChatHandler::HandleChangeWeather(const char* args)
         return true;
     }
 
-    wth->SetWeather(type, grade);
+    wth->SetWeather(WeatherType(type), grade);
 
     return true;
 }
