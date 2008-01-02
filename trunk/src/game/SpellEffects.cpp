@@ -963,8 +963,7 @@ void Spell::EffectDummy(uint32 i)
         // Righteous Defense (step 1)
         case 31789:
         {
-            // 31989 -> dummy effect (step 1)
-            //     L -> triggered spell effect -> 31980 -> dummy effect (step 2) -> 31709 (taunt like spell for each target)
+            // 31989 -> dummy effect (step 1) + dummy effect (step 2) -> 31709 (taunt like spell for each target)
 
             // non-standard cast requirement check
             if (!unitTarget || !unitTarget->hasUnitState(UNIT_STAT_ATTACK_BY))
@@ -984,54 +983,34 @@ void Spell::EffectDummy(uint32 i)
                 return;
             }
 
-            // ok, next effect in spell can be casted
-            return;
-        }
-
-        // Righteous Defense (step 2)
-        case 31980:
-        {
+            // Righteous Defense (step 2) (in old version 31980 dummy effect)
             // Note: this spell save selected targets in not used m_targetUnitGUIDs[2]
-
-            // unitTarget is one from around enemies
-            if(!unitTarget)
-                return;
 
             // something changed in spell system
             if(m_spellInfo->Effect[2] != 0)
                 return;
 
             std::list<uint64>& selectedTargets = m_targetUnitGUIDs[2];
+            selectedTargets.clear();
 
-            // already all selected
-            if(selectedTargets.size() >= 3)
-                return;
-
-            // this is triggered spell
-            // find original spell original target
-            if(!m_triggeringContainer)
-                return;
-            if (!(*m_triggeringContainer))
-                return;
-            Unit* originalTarget = (*m_triggeringContainer)->m_targets.getUnitTarget();
-            if(!originalTarget)
-                return;
-
-            Unit::AttackerSet const& attackers = originalTarget->getAttackers();
+            Unit::AttackerSet const& attackers = unitTarget->getAttackers();
 
             // not attacker or list empty
-            if(attackers.find(unitTarget)==attackers.end())
+            if(attackers.empty())
                 return;
 
             // chance to be selected from list
             float chance = 100.0f/(attackers.size());
+            
+            for(Unit::AttackerSet::const_iterator aItr = attackers.begin(); aItr != attackers.end() && selectedTargets.size() < 3; ++aItr)
+            {
+                if(!roll_chance_f(chance))
+                    continue;
 
-            if(!roll_chance_f(chance))
-                return;
+                selectedTargets.push_back((*aItr)->GetGUID());
+            }
 
-            selectedTargets.push_back(unitTarget->GetGUID());
-
-            m_caster->CastSpell(unitTarget,31790,true);
+            // now let next effect cast spell at each target.
             return;
         }
 
@@ -1223,11 +1202,34 @@ void Spell::EffectDummy(uint32 i)
 
 void Spell::EffectTriggerSpell(uint32 i)
 {
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry( m_spellInfo->EffectTriggerSpell[i] );
+    uint32 triggered_spell_id = m_spellInfo->EffectTriggerSpell[i];
+
+    // special cases
+    switch(triggered_spell_id)
+    {
+        // Righteous Defense
+        case 31980:
+        {
+            // something changed in spell system
+            if(m_spellInfo->Effect[2] != 0)
+                return;
+
+            std::list<uint64> const& selectedTargets = m_targetUnitGUIDs[2];
+            
+            for(std::list<uint64>::const_iterator itr = selectedTargets.begin(); itr != selectedTargets.end(); ++itr)
+                if(Unit* unit = ObjectAccessor::GetUnit(*m_caster,(*itr)))
+                    m_caster->CastSpell(unit,31790,true);
+                
+            return;
+        }
+    }
+         
+    // normal case
+    SpellEntry const *spellInfo = sSpellStore.LookupEntry( triggered_spell_id );
 
     if(!spellInfo)
     {
-        sLog.outError("WORLD: unknown spell id %i\n", m_spellInfo->EffectTriggerSpell[i]);
+        sLog.outError("WORLD: unknown spell id %i\n", triggered_spell_id);
         return;
     }
 
