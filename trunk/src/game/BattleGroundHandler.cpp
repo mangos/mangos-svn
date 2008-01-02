@@ -287,8 +287,8 @@ void WorldSession::HandleBattleGroundPlayerPortOpcode( WorldPacket &recv_data )
                     _player->GetSession()->SendPacket(&data);
                     // remove battleground queue status from BGmgr
                     sBattleGroundMgr.m_BattleGroundQueues[bgTypeId].RemovePlayer(_player->GetGUID(), false);
-                    // check if player is not deserter
-                    if( !_player->CanJoinToBattleground() )
+                    // check if player is not deserter, and do not allow to port players for one bg to another
+                    if( !_player->CanJoinToBattleground() || _player->InBattleGround())
                     {
                         WorldPacket data2;
                         data2.Initialize(SMSG_GROUP_JOINED_BATTLEGROUND, 4);
