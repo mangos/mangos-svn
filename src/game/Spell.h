@@ -497,7 +497,7 @@ class Spell
         void EffectDestroyAllTotems(uint32 i);
         void EffectDurabilityDamage(uint32 i);
         void EffectSkill(uint32 i);
-        void EffectAttackMe(uint32 i);
+        void EffectTaunt(uint32 i);
         void EffectDurabilityDamagePCT(uint32 i);
         void EffectReduceThreatPercent(uint32 i);
         void EffectResurrectNew(uint32 i);

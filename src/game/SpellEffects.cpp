@@ -170,7 +170,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
     &Spell::EffectDurabilityDamage,                         //111 SPELL_EFFECT_DURABILITY_DAMAGE
     &Spell::EffectSummonDemon,                              //112 SPELL_EFFECT_SUMMON_DEMON
     &Spell::EffectResurrectNew,                             //113 SPELL_EFFECT_RESURRECT_NEW
-    &Spell::EffectAttackMe,                                 //114 SPELL_EFFECT_ATTACK_ME
+    &Spell::EffectTaunt,                                 //114 SPELL_EFFECT_ATTACK_ME
     &Spell::EffectDurabilityDamagePCT,                      //115 SPELL_EFFECT_DURABILITY_DAMAGE_PCT
     &Spell::EffectSkinPlayerCorpse,                         //116 SPELL_EFFECT_SKIN_PLAYER_CORPSE       one spell: Remove Insignia, bg usage, required special corpse flags...
     &Spell::EffectSpiritHeal,                               //117 SPELL_EFFECT_SPIRIT_HEAL              one spell: Spirit Heal
@@ -2880,18 +2880,22 @@ void Spell::EffectLearnPetSpell(uint32 i)
     _player->PetSpellInitialize();
 }
 
-void Spell::EffectAttackMe(uint32 i)
+void Spell::EffectTaunt(uint32 i)
 {
-    // this effect use before EffectTaunt for prevent taunt already attacking target
+    // this effect use before aura Taunt apply for prevent taunt already attacking target
     // for spell as marked "non effective at already attacking target"
-    // Real attack will triggered next EffectTaunt
     if(unitTarget && unitTarget->GetTypeId() != TYPEID_PLAYER)
     {
         if(unitTarget->getVictim()==m_caster)
         {
             SendCastResult(SPELL_FAILED_DONT_REPORT);
+            return;
         }
     }
+    
+    //Also use this effect to set the taunter's threat to the taunted creature's highest value 
+    if(unitTarget->CanHaveThreatList())
+        unitTarget->getThreatManager().addThreat(m_caster,unitTarget->getThreatManager().getCurrentVictim()->getThreat());
 }
 
 void Spell::EffectWeaponDmg(uint32 i)
