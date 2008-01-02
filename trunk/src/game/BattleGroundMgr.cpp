@@ -164,7 +164,8 @@ void BattleGroundQueue::Update(uint32 bgTypeId, uint32 queue_id)
     for (itr = sBattleGroundMgr.BGFreeSlotQueue[bgTypeId].begin(); itr != sBattleGroundMgr.BGFreeSlotQueue[bgTypeId].end(); ++itr)
     {
         // battleground is running, so if:
-        if ((*itr)->GetQueueType() == queue_id && (*itr)->GetStatus() > STATUS_WAIT_QUEUE && (*itr)->GetStatus() < STATUS_WAIT_LEAVE)
+        // DO NOT allow queue manager to invite new player to running arena
+        if ((*itr)->isBattleGround() && (*itr)->GetQueueType() == queue_id && (*itr)->GetStatus() > STATUS_WAIT_QUEUE && (*itr)->GetStatus() < STATUS_WAIT_LEAVE)
         {
             //we must check both teams
             BattleGround* bg = *itr; //we have to store battleground pointer here, because when battleground is full, it is removed from free queue (not yet implemented!!)
@@ -264,6 +265,12 @@ void BattleGroundQueue::Update(uint32 bgTypeId, uint32 queue_id)
                 continue;
             }
 
+            /* TODO: (i'm not sure this code will be useful:
+            here should be some condition like if (bg2->isArena() && bg2->isRated())
+            {
+                invite players from 1 certain group on each faction to play arena match
+            } else if ....and existing code
+            */
             // player will be invited, if in bg there is a free slot for him
             if (bg2->HasFreeSlotsForTeam(plr->GetTeam()))
             {
