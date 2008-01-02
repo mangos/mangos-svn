@@ -3297,11 +3297,58 @@ void Spell::EffectScriptEffect(uint32 i)
     {
         switch(m_spellInfo->SpellFamilyFlags)
         {
-            // Holy Light & Flash of Light
-            case 0x80000000:
+            // Flash of Light
             case 0x40000000:
             {
-                EffectHeal(i);
+                if(!unitTarget)
+                    return;
+
+                int spell_id = 0;
+                switch(m_spellInfo->Id)    
+                {    
+                    case 19750: spell_id = 19993; break;    // Rank 1
+                    case 19939: spell_id = 35211; break;    // Rank 2
+                    case 19940: spell_id = 35212; break;    // Rank 3
+                    case 19941: spell_id = 35213; break;    // Rank 4
+                    case 19942: spell_id = 35214; break;    // Rank 5
+                    case 19943: spell_id = 35215; break;    // Rank 6
+                    case 27137: spell_id = 35216; break;    // Rank 7
+                    default:
+                        sLog.outError("Spell::EffectScriptEffect: Spell %u not handled in FoL",m_spellInfo->Id);
+                }
+                
+                int32 basePoint0 = damage-1;
+
+                m_caster->CastCustomSpell(unitTarget, spell_id, &basePoint0, NULL, NULL, true);
+                return;
+            }
+            // Holy Light 
+            case 0x80000000:
+            {
+                if(!unitTarget)
+                    return;
+
+                int spell_id = 0;
+                switch(m_spellInfo->Id)    
+                {    
+                case   635: spell_id = 19982; break;        // Rank 1
+                case   639: spell_id = 19981; break;        // Rank 2
+                case   647: spell_id = 19980; break;        // Rank 3
+                case  1026: spell_id = 19968; break;        // Rank 4
+                case  1042: spell_id = 35217; break;        // Rank 5
+                case  3472: spell_id = 35218; break;        // Rank 6
+                case 10328: spell_id = 35219; break;        // Rank 7
+                case 10329: spell_id = 35220; break;        // Rank 8
+                case 25292: spell_id = 35221; break;        // Rank 9
+                case 27135: spell_id = 35222; break;        // Rank 10
+                case 27136: spell_id = 35223; break;        // Rank 11
+                default:
+                    sLog.outError("Spell::EffectScriptEffect: Spell %u not handled in HL",m_spellInfo->Id);
+                }
+                
+                int32 basePoint0 = damage-1;
+
+                m_caster->CastCustomSpell(unitTarget, spell_id, &basePoint0, NULL, NULL, true);
                 return;
             }
             // Judgement
