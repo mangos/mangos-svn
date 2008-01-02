@@ -27,26 +27,11 @@
 #include "World.h"
 #include "Log.h"
 
-/// Weather defines
-enum WeatherSounds
-{
-    WEATHER_NOSOUND                = 0,
-    WEATHER_RAINLIGHT              = 8533,
-    WEATHER_RAINMEDIUM             = 8534,
-    WEATHER_RAINHEAVY              = 8535,
-    WEATHER_SNOWLIGHT              = 8536,
-    WEATHER_SNOWMEDIUM             = 8537,
-    WEATHER_SNOWHEAVY              = 8538,
-    WEATHER_SANDSTORMLIGHT         = 8556,
-    WEATHER_SANDSTORMMEDIUM        = 8557,
-    WEATHER_SANDSTORMHEAVY         = 8558
-};
-
 /// Create the Weather object
 Weather::Weather(uint32 zone, WeatherZoneChances const* weatherChances) : m_zone(zone), m_weatherChances(weatherChances)
 {
     m_timer.SetInterval(sWorld.getConfig(CONFIG_INTERVAL_CHANGEWEATHER));
-    m_type = 0;
+    m_type = WEATHER_TYPE_FINE;
     m_grade = 0;
 
     sLog.outDetail("WORLD: Starting weather system for zone %u (change every %u minutes).", m_zone, (uint32)(m_timer.GetInterval() / (1000*MINUTE)) );
@@ -79,7 +64,7 @@ bool Weather::ReGenerate()
 {
     if (!m_weatherChances)
     {
-        m_type = 0;
+        m_type = WEATHER_TYPE_FINE;
         m_grade = 0.0f;
         return false;
     }
@@ -95,7 +80,7 @@ bool Weather::ReGenerate()
         return false;
 
     // remember old values
-    uint32 old_type = m_type;
+    WeatherType old_type = m_type;
     float old_grade = m_grade;
 
     //78 days between January 1st and March 20nd; 365/4=91 days by season
@@ -110,23 +95,23 @@ bool Weather::ReGenerate()
 
     if ((u < 60) && (m_grade < 0.33333334f))                // Get fair
     {
-        m_type = 0;
+        m_type = WEATHER_TYPE_FINE;
         m_grade = 0.0f;
     }
 
-    if ((u < 60) && (m_type != 0))                          // Get better
+    if ((u < 60) && (m_type != WEATHER_TYPE_FINE))          // Get better
     {
         m_grade -= 0.33333334f;
         return true;
     }
 
-    if ((u < 90) && (m_type != 0))                          // Get worse
+    if ((u < 90) && (m_type != WEATHER_TYPE_FINE))          // Get worse
     {
         m_grade += 0.33333334f;
         return true;
     }
 
-    if (m_type != 0)
+    if (m_type != WEATHER_TYPE_FINE)
     {
         /// Radical change:
         ///- if light -> heavy
@@ -150,7 +135,7 @@ bool Weather::ReGenerate()
                     return true;
                 }
             }
-            m_type = 0;                                     // clear up
+            m_type = WEATHER_TYPE_FINE;                     // clear up
             m_grade = 0;
         }
     }
@@ -162,13 +147,13 @@ bool Weather::ReGenerate()
 
     uint32 rnd = urand(0, 99);
     if(rnd <= chance1)
-        m_type = 1;
+        m_type = WEATHER_TYPE_RAIN;
     else if(rnd <= chance2)
-        m_type = 2;
+        m_type = WEATHER_TYPE_SNOW;
     else if(rnd <= chance3)
-        m_type = 3;
+        m_type = WEATHER_TYPE_STORM;
     else
-        m_type = 0;
+        m_type = WEATHER_TYPE_FINE;
 
     /// New weather statistics (if not fine):
     ///- 85% light
@@ -176,7 +161,7 @@ bool Weather::ReGenerate()
     ///- 7% heavy
     /// If fine 100% sun (no fog)
 
-    if (m_type == 0)
+    if (m_type == WEATHER_TYPE_FINE)
     {
         m_grade = 0.0f;
     }
@@ -200,10 +185,9 @@ bool Weather::ReGenerate()
 
 void Weather::SendWeatherUpdateToPlayer(Player *player)
 {
-    uint32 sound = GetSound();
     WorldPacket data( SMSG_WEATHER, (4+4+4) );
 
-    data << (uint32)m_type << (float)m_grade << (uint32)sound << uint8(0);
+    data << uint32(GetWeatherState()) << (float)m_grade << uint8(0);
     player->GetSession()->SendPacket( &data );
 }
 
@@ -211,7 +195,7 @@ void Weather::SendFineWeatherUpdateToPlayer(Player *player)
 {
     WorldPacket data( SMSG_WEATHER, (4+4+4) );
 
-    data << (uint32)0 << (float)0.0f << (uint32)WEATHER_NOSOUND << uint8(0);
+    data << (uint32)WEATHER_STATE_FINE << (float)0.0f << uint8(0);
     player->GetSession()->SendPacket( &data );
 }
 
@@ -223,48 +207,55 @@ bool Weather::UpdateWeather()
         return false;
 
     ///- Send the weather packet to all players in this zone
-    uint32 sound = GetSound();
     if (m_grade >= 1)
         m_grade = 0.9999f;
     else if (m_grade < 0)
         m_grade = 0.0001f;
+        
+    WeatherState state = GetWeatherState();
 
     WorldPacket data( SMSG_WEATHER, (4+4+4) );
-    data << (uint32)m_type << (float)m_grade << (uint32)sound << uint8(0);
+    data << uint32(state) << (float)m_grade << uint8(0);
     player->SendMessageToSet( &data, true );
 
     ///- Log the event
     char const* wthstr;
-    switch(sound)
+    switch(state)
     {
-        case WEATHER_RAINLIGHT:
+        case WEATHER_STATE_LIGHT_RAIN:
             wthstr = "light rain";
             break;
-        case WEATHER_RAINMEDIUM:
+        case WEATHER_STATE_MEDIUM_RAIN:
             wthstr = "medium rain";
             break;
-        case WEATHER_RAINHEAVY:
+        case WEATHER_STATE_HEAVY_RAIN:
             wthstr = "heavy rain";
             break;
-        case WEATHER_SNOWLIGHT:
+        case WEATHER_STATE_LIGHT_SNOW:
             wthstr = "light snow";
             break;
-        case WEATHER_SNOWMEDIUM:
+        case WEATHER_STATE_MEDIUM_SNOW:
             wthstr = "medium snow";
             break;
-        case WEATHER_SNOWHEAVY:
+        case WEATHER_STATE_HEAVY_SNOW:
             wthstr = "heavy snow";
             break;
-        case WEATHER_SANDSTORMLIGHT:
+        case WEATHER_STATE_LIGHT_SANDSTORM:
             wthstr = "light sandstorm";
             break;
-        case WEATHER_SANDSTORMMEDIUM:
+        case WEATHER_STATE_MEDIUM_SANDSTORM:
             wthstr = "medium sandstorm";
             break;
-        case WEATHER_SANDSTORMHEAVY:
+        case WEATHER_STATE_HEAVY_SANDSTORM:
             wthstr = "heavy sandstorm";
             break;
-        case WEATHER_NOSOUND:
+        case WEATHER_STATE_THUNDERS:
+            wthstr = "thunders";
+            break;
+        case WEATHER_STATE_BLACKRAIN:
+            wthstr = "blackrain";
+            break;
+        case WEATHER_STATE_FINE:
         default:
             wthstr = "fine";
             break;
@@ -275,7 +266,7 @@ bool Weather::UpdateWeather()
 }
 
 /// Set the weather
-void Weather::SetWeather(uint32 type, float grade)
+void Weather::SetWeather(WeatherType type, float grade)
 {
     if(m_type == type && m_grade == grade)
         return;
@@ -286,39 +277,40 @@ void Weather::SetWeather(uint32 type, float grade)
 }
 
 /// Get the sound number associated with the current weather
-uint32 Weather::GetSound()
+WeatherState Weather::GetWeatherState() const
 {
-    uint32 sound;
+    if (m_grade<0.27f)
+        return WEATHER_STATE_FINE;
+
     switch(m_type)
     {
-        case 1:                                             //rain
-            if(m_grade<0.33333334f)
-                sound = WEATHER_RAINLIGHT;
-            else if(m_grade<0.6666667f)
-                sound = WEATHER_RAINMEDIUM;
+        case WEATHER_TYPE_RAIN:
+            if(m_grade<0.40f)
+                return WEATHER_STATE_LIGHT_RAIN;
+            else if(m_grade<0.70f)
+                return WEATHER_STATE_MEDIUM_RAIN;
             else
-                sound = WEATHER_RAINHEAVY;
-            break;
-        case 2:                                             //snow
-            if(m_grade<0.33333334f)
-                sound = WEATHER_SNOWLIGHT;
-            else if(m_grade<0.6666667f)
-                sound = WEATHER_SNOWMEDIUM;
+                return WEATHER_STATE_HEAVY_RAIN;
+        case WEATHER_TYPE_SNOW:
+            if(m_grade<0.40f)
+                return WEATHER_STATE_LIGHT_SNOW;
+            else if(m_grade<0.70f)
+                return WEATHER_STATE_MEDIUM_SNOW;
             else
-                sound = WEATHER_SNOWHEAVY;
-            break;
-        case 3:                                             //storm
-            if(m_grade<0.33333334f)
-                sound = WEATHER_SANDSTORMLIGHT;
-            else if(m_grade<0.6666667f)
-                sound = WEATHER_SANDSTORMMEDIUM;
+                return WEATHER_STATE_HEAVY_SNOW;
+        case WEATHER_TYPE_STORM:
+            if(m_grade<0.40f)
+                return WEATHER_STATE_LIGHT_SANDSTORM;
+            else if(m_grade<0.70f)
+                return WEATHER_STATE_MEDIUM_SANDSTORM;
             else
-                sound = WEATHER_SANDSTORMHEAVY;
-            break;
-        case 0:                                             //fine
+                return WEATHER_STATE_HEAVY_SANDSTORM;
+        case WEATHER_TYPE_BLACKRAIN:
+            return WEATHER_STATE_BLACKRAIN;
+        case WEATHER_TYPE_THUNDERS:
+            return WEATHER_STATE_THUNDERS;
+        case WEATHER_TYPE_FINE:
         default:
-            sound = WEATHER_NOSOUND;
-            break;
+            return WEATHER_STATE_FINE;
     }
-    return sound;
 }

@@ -29,6 +29,22 @@
 
 class Player;
 
+enum WeatherState
+{
+    WEATHER_STATE_FINE              = 0,
+    WEATHER_STATE_LIGHT_RAIN        = 3,
+    WEATHER_STATE_MEDIUM_RAIN       = 4,
+    WEATHER_STATE_HEAVY_RAIN        = 5,
+    WEATHER_STATE_LIGHT_SNOW        = 6,
+    WEATHER_STATE_MEDIUM_SNOW       = 7,
+    WEATHER_STATE_HEAVY_SNOW        = 8,
+    WEATHER_STATE_LIGHT_SANDSTORM   = 22,
+    WEATHER_STATE_MEDIUM_SANDSTORM  = 41,
+    WEATHER_STATE_HEAVY_SANDSTORM   = 42,
+    WEATHER_STATE_THUNDERS          = 86,
+    WEATHER_STATE_BLACKRAIN         = 90
+};
+
 /// Weather for one zone
 class Weather
 {
@@ -39,14 +55,14 @@ class Weather
         bool UpdateWeather();
         void SendWeatherUpdateToPlayer(Player *player);
         static void SendFineWeatherUpdateToPlayer(Player *player);
-        void SetWeather(uint32 type, float grade);
+        void SetWeather(WeatherType type, float grade);
         /// For which zone is this weather?
         uint32 GetZone() { return m_zone; };
         bool Update(time_t diff);
     private:
-        uint32 GetSound();
+        WeatherState GetWeatherState() const;
         uint32 m_zone;
-        uint32 m_type;
+        WeatherType m_type;
         float m_grade;
         IntervalTimer m_timer;
         WeatherZoneChances const* m_weatherChances;
