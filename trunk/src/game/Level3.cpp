@@ -2118,8 +2118,19 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
         return false;
     std::string namepart = args;
     WorldDatabase.escape_string(namepart);
+    
+    QueryResult *result = NULL;
+    
+    int loc_idx = m_session->GetSessionLocaleIndex();
+    if ( loc_idx < 0 )
+    {
+        result = WorldDatabase.PQuery("SELECT `entry`,`name` FROM `item_template` WHERE `name` LIKE \"%%%s%%\"",namepart.c_str());
+    }
+    else
+    {
+        result = WorldDatabase.PQuery("SELECT `entry`,`name_loc%u` FROM `locales_item` WHERE `name_loc%u` LIKE \"%%%s%%\"",loc_idx+1,loc_idx+1,namepart.c_str());
+    }
 
-    QueryResult *result=WorldDatabase.PQuery("SELECT `entry`,`name` FROM `item_template` WHERE `name` LIKE \"%%%s%%\"",namepart.c_str());
     if(!result)
     {
         SendSysMessage(LANG_COMMAND_NOITEMFOUND);
@@ -2300,7 +2311,18 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
     std::string namepart = args;
     WorldDatabase.escape_string(namepart);
 
-    QueryResult *result=WorldDatabase.PQuery("SELECT `entry`,`Title` FROM `quest_template` WHERE `Title` LIKE \"%%%s%%\" ORDER BY `entry`",namepart.c_str());
+    QueryResult *result = NULL;
+    
+    int loc_idx = m_session->GetSessionLocaleIndex();
+    if ( loc_idx < 0 )
+    {
+        result = WorldDatabase.PQuery("SELECT `entry`,`Title` FROM `quest_template` WHERE `Title` LIKE \"%%%s%%\" ORDER BY `entry`",namepart.c_str());
+    }
+    else
+    {
+        result = WorldDatabase.PQuery("SELECT `entry`,`Title_loc%u` FROM `locales_quest` WHERE `Title_loc%u` LIKE \"%%%s%%\"",loc_idx+1,loc_idx+1,namepart.c_str());
+    }
+    
     if(!result)
     {
         SendSysMessage(LANG_COMMAND_NOQUESTFOUND);
@@ -2340,8 +2362,19 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
 
     std::string namepart = args;
     WorldDatabase.escape_string(namepart);
+    
+    QueryResult *result = NULL;
 
-    QueryResult *result=WorldDatabase.PQuery("SELECT `entry`,`name` FROM `creature_template` WHERE `name` LIKE \"%%%s%%\"",namepart.c_str());
+    int loc_idx = m_session->GetSessionLocaleIndex();
+    if ( loc_idx < 0 )
+    {
+        result = WorldDatabase.PQuery("SELECT `entry`,`name` FROM `creature_template` WHERE `name` LIKE \"%%%s%%\"",namepart.c_str());
+    }
+    else
+    {
+        result = WorldDatabase.PQuery("SELECT `entry`,`name_loc%u` FROM `locales_creature` WHERE `name_loc%u` LIKE \"%%%s%%\"",loc_idx+1,loc_idx+1,namepart.c_str());
+    }
+
     if(!result)
     {
         SendSysMessage(LANG_COMMAND_NOCREATUREFOUND);
@@ -2368,7 +2401,18 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
     std::string namepart = args;
     WorldDatabase.escape_string(namepart);
 
-    QueryResult *result=WorldDatabase.PQuery("SELECT `entry`,`name` FROM `gameobject_template` WHERE `name` LIKE \"%%%s%%\"",namepart.c_str());
+    QueryResult *result = NULL;
+
+    int loc_idx = m_session->GetSessionLocaleIndex();
+    if ( loc_idx < 0 )
+    {
+        result = WorldDatabase.PQuery("SELECT `entry`,`name` FROM `gameobject_template` WHERE `name` LIKE \"%%%s%%\"",namepart.c_str());
+    }
+    else
+    {
+        result = WorldDatabase.PQuery("SELECT `entry`,`name_loc%u` FROM `locales_gameobject` WHERE `name_loc%u` LIKE \"%%%s%%\"",loc_idx+1,loc_idx+1,namepart.c_str());
+    }
+
     if(!result)
     {
         SendSysMessage(LANG_COMMAND_NOGAMEOBJECTFOUND);
