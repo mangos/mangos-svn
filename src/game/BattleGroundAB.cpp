@@ -342,7 +342,7 @@ void BattleGroundAB::_CreateBanner(uint8 node, uint8 type, uint8 teamIndex, bool
         else goId = BG_AB_OBJECTID_BANNER_H;
 
     m_bgobjects[obj] = new GameObject(NULL);
-    m_bgobjects[obj]->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), goId, GetMapId(), BG_AB_NodePositions[node][0], BG_AB_NodePositions[node][1], BG_AB_NodePositions[node][2], BG_AB_NodePositions[node][3], 0, 0, sin(BG_AB_NodePositions[node][3]/2), cos(BG_AB_NodePositions[node][3]/2), 0, 0);
+    m_bgobjects[obj]->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), goId, GetMapId(), BG_AB_NodePositions[node][0], BG_AB_NodePositions[node][1], BG_AB_NodePositions[node][2], BG_AB_NodePositions[node][3], 0, 0, sin(BG_AB_NodePositions[node][3]/2), cos(BG_AB_NodePositions[node][3]/2), 100, 1);
     MapManager::Instance().GetMap(GetMapId(), m_bgobjects[obj])->Add(m_bgobjects[obj]);
 
     // handle aura with banner
@@ -626,7 +626,7 @@ bool BattleGroundAB::SetupBattleGround()
     for (int banner = BG_AB_OBJECT_BANNER_NEUTRAL, i = 0; i < 5; banner += 8, ++i)
     {
         m_bgobjects[banner] = new GameObject(NULL);
-        if(!m_bgobjects[banner]->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), BG_AB_OBJECTID_NODE_BANNER_0+i, GetMapId(), BG_AB_NodePositions[i][0], BG_AB_NodePositions[i][1], BG_AB_NodePositions[i][2], BG_AB_NodePositions[i][3], 0, 0, sin(BG_AB_NodePositions[i][3]/2), cos(BG_AB_NodePositions[i][3]/2), 100, 0))
+        if(!m_bgobjects[banner]->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), BG_AB_OBJECTID_NODE_BANNER_0+i, GetMapId(), BG_AB_NodePositions[i][0], BG_AB_NodePositions[i][1], BG_AB_NodePositions[i][2], BG_AB_NodePositions[i][3], 0, 0, sin(BG_AB_NodePositions[i][3]/2), cos(BG_AB_NodePositions[i][3]/2), 100, 1))
            return false;
     }
 
