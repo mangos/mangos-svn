@@ -98,7 +98,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if (ChatHandler(this).ParseCommands(msg.c_str()) > 0)
                 break;
 
-            stripLineInvisibleChars(msg);
+            // strip invisible characters for non-addon messages
+            if (lang != LANG_ADDON)
+                stripLineInvisibleChars(msg);
+                
             if(msg.empty())
                 break;
 
@@ -117,7 +120,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             CHECK_PACKET_SIZE(recv_data,4+4+(to.size()+1)+1);
             recv_data >> msg;
 
-            stripLineInvisibleChars(msg);
+            // strip invisible characters for non-addon messages
+            if (lang != LANG_ADDON)
+                stripLineInvisibleChars(msg);
+
             if(msg.empty())
                 break;
 
@@ -168,7 +174,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if (ChatHandler(this).ParseCommands(msg.c_str()) > 0)
                 break;
 
-            stripLineInvisibleChars(msg);
+            // strip invisible characters for non-addon messages
+            if (lang != LANG_ADDON)
+                stripLineInvisibleChars(msg);
+
             if(msg.empty())
                 break;
 
@@ -192,7 +201,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if (ChatHandler(this).ParseCommands(msg.c_str()) > 0)
                 break;
 
-            stripLineInvisibleChars(msg);
+            // strip invisible characters for non-addon messages
+            if (lang != LANG_ADDON)
+                stripLineInvisibleChars(msg);
+
             if(msg.empty())
                 break;
 
@@ -216,7 +228,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if (ChatHandler(this).ParseCommands(msg.c_str()) > 0)
                 break;
 
-            stripLineInvisibleChars(msg);
+            // strip invisible characters for non-addon messages
+            if (lang != LANG_ADDON)
+                stripLineInvisibleChars(msg);
+
             if(msg.empty())
                 break;
 
@@ -239,7 +254,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if (ChatHandler(this).ParseCommands(msg.c_str()) > 0)
                 break;
 
-            stripLineInvisibleChars(msg);
+            // strip invisible characters for non-addon messages
+            if (lang != LANG_ADDON)
+                stripLineInvisibleChars(msg);
+
             if(msg.empty())
                 break;
 
@@ -262,7 +280,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             if (ChatHandler(this).ParseCommands(msg.c_str()) > 0)
                 break;
 
-            stripLineInvisibleChars(msg);
+            // strip invisible characters for non-addon messages
+            if (lang != LANG_ADDON)
+                stripLineInvisibleChars(msg);
+
             if(msg.empty())
                 break;
 
@@ -279,7 +300,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             std::string msg="";
             recv_data >> msg;
 
-            stripLineInvisibleChars(msg);
+            // strip invisible characters for non-addon messages
+            if (lang != LANG_ADDON)
+                stripLineInvisibleChars(msg);
+
             if(msg.empty())
                 break;
 
@@ -297,7 +321,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             std::string msg="";
             recv_data >> msg;
 
-            stripLineInvisibleChars(msg);
+            // strip invisible characters for non-addon messages
+            if (lang != LANG_ADDON)
+                stripLineInvisibleChars(msg);
+
             if(msg.empty())
                 break;
 
@@ -315,7 +342,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             std::string msg="";
             recv_data >> msg;
 
-            stripLineInvisibleChars(msg);
+            // strip invisible characters for non-addon messages
+            if (lang != LANG_ADDON)
+                stripLineInvisibleChars(msg);
+
             if(msg.empty())
                 break;
 
@@ -338,7 +368,10 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
 
             recv_data >> msg;
 
-            stripLineInvisibleChars(msg);
+            // strip invisible characters for non-addon messages
+            if (lang != LANG_ADDON)
+                stripLineInvisibleChars(msg);
+
             if(msg.empty())
                 break;
 
