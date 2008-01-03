@@ -1662,6 +1662,10 @@ void Player::RewardRage( uint32 damage, uint32 weaponSpeedHitFactor, bool attack
 
         // talent who gave more rage on attack
         addRage *= 1.0f + GetTotalAuraModifier(SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT) / 100.0f;
+        
+        // Berserker Rage effect
+        if(GetAura(18499,0))
+            addRage *= 1.3;
     }
     else
         addRage = damage/rageconversion*2.5;
