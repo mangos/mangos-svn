@@ -2748,7 +2748,7 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit *pVict
     for(AuraList::const_iterator i = mAttackerSWCrit.begin(); i != mAttackerSWCrit.end(); ++i)
         crit += (*i)->GetModifier()->m_amount;
 
-    if (crit < 0)
+    if (crit < 0.0f)
         crit = 0.0f;
     return crit;
 }

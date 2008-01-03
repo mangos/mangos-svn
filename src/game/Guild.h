@@ -153,7 +153,7 @@ class Guild
         bool create(uint64 lGuid, std::string gname);
         void Disband();
 
-        typedef std::map<uint64, MemberSlot> MemberList;
+        typedef std::map<uint32, MemberSlot> MemberList;
         typedef std::vector<RankInfo> RankList;
 
         uint32 GetId(){ return Id; }
@@ -184,9 +184,7 @@ class Guild
         void SetOFFNOTE(uint64 guid,std::string offnote);
         void SetEmblem(uint32 emblemStyle, uint32 emblemColor, uint32 borderStyle, uint32 borderColor, uint32 backgroundColor);
 
-        uint32 GetMemberSize(){ return members.size(); }
-        MemberList::iterator membersbegin(){ return members.begin(); }
-        MemberList::iterator membersEnd(){ return members.end(); }
+        uint32 GetMemberSize() const { return members.size(); }
 
         bool LoadGuildFromDB(uint32 GuildId);
         bool LoadRanksFromDB(uint32 GuildId);
