@@ -122,7 +122,7 @@ bool Guild::AddMember(uint64 plGuid, uint32 plRank)
     newmember.RankId = plRank;
     newmember.OFFnote = (std::string)"";
     newmember.Pnote = (std::string)"";
-    members[plGuid] = newmember;
+    members[GUID_LOPART(plGuid)] = newmember;
 
     std::string dbPnote = newmember.Pnote;
     std::string dbOFFnote = newmember.OFFnote;
@@ -253,7 +253,7 @@ bool Guild::LoadMembersFromDB(uint32 GuildId)
 
         newmember.Pnote = fields[2].GetCppString();
         newmember.OFFnote = fields[3].GetCppString();
-        members[guid] = newmember;
+        members[GUID_LOPART(guid)] = newmember;
 
     }while( result->NextRow() );
     delete result;
@@ -315,13 +315,11 @@ bool Guild::FillPlayerData(uint64 guid, MemberSlot* memslot)
 
 void Guild::LoadPlayerStatsByGuid(uint64 guid)
 {
-    Player *pl;
-
-    MemberList::iterator itr;
-    if ( (itr = members.find(guid)) == members.end() )
+    MemberList::iterator itr = members.find(GUID_LOPART(guid));
+    if (itr == members.end() )
         return;
 
-    pl = ObjectAccessor::FindPlayer(itr->first);
+    Player *pl = ObjectAccessor::FindPlayer(guid);
     if(!pl)
         return;
     itr->second.name  = pl->GetName();
@@ -393,7 +391,7 @@ void Guild::DelMember(uint64 guid, bool isDisbanding)
         }
     }
 
-    members.erase(guid);
+    members.erase(GUID_LOPART(guid));
 
     Player *player = objmgr.GetPlayer(guid);
     if(player)
@@ -412,8 +410,8 @@ void Guild::DelMember(uint64 guid, bool isDisbanding)
 
 void Guild::ChangeRank(uint64 guid, uint32 newRank)
 {
-    MemberList::iterator itr;
-    if ( (itr = members.find(guid)) != members.end() )
+    MemberList::iterator itr = members.find(GUID_LOPART(guid));
+    if( itr != members.end() )
         itr->second.RankId = newRank;
 
     Player *player = objmgr.GetPlayer(guid);
@@ -427,26 +425,26 @@ void Guild::ChangeRank(uint64 guid, uint32 newRank)
 
 void Guild::SetPNOTE(uint64 guid,std::string pnote)
 {
-    MemberList::iterator itr;
-    if ( (itr = members.find(guid)) == members.end() )
+    MemberList::iterator itr = members.find(GUID_LOPART(guid));
+    if( itr == members.end() )
         return;
 
     itr->second.Pnote = pnote;
 
     // pnote now can be used for encoding to DB
     CharacterDatabase.escape_string(pnote);
-    CharacterDatabase.PExecute("UPDATE `guild_member` SET `Pnote` = '%s' WHERE `guid` = '%u'", pnote.c_str(), GUID_LOPART(itr->first));
+    CharacterDatabase.PExecute("UPDATE `guild_member` SET `Pnote` = '%s' WHERE `guid` = '%u'", pnote.c_str(), itr->first);
 }
 
 void Guild::SetOFFNOTE(uint64 guid,std::string offnote)
 {
-    MemberList::iterator itr;
-    if ((itr = members.find(guid)) == members.end())
+    MemberList::iterator itr = members.find(GUID_LOPART(guid));
+    if( itr == members.end() )
         return;
     itr->second.OFFnote = offnote;
     // offnote now can be used for encoding to DB
     CharacterDatabase.escape_string(offnote);
-    CharacterDatabase.PExecute("UPDATE `guild_member` SET `OFFnote` = '%s' WHERE `guid` = '%u'", offnote.c_str(), GUID_LOPART(itr->first));
+    CharacterDatabase.PExecute("UPDATE `guild_member` SET `OFFnote` = '%s' WHERE `guid` = '%u'", offnote.c_str(), itr->first);
 }
 
 void Guild::BroadcastToGuild(WorldSession *session, std::string msg, uint32 language)
@@ -458,7 +456,7 @@ void Guild::BroadcastToGuild(WorldSession *session, std::string msg, uint32 lang
 
         for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
         {
-            Player *pl = ObjectAccessor::FindPlayer(itr->first);
+            Player *pl = ObjectAccessor::FindPlayer(MAKE_GUID(itr->first,HIGHGUID_PLAYER));
 
             if (pl && pl->GetSession() && HasRankRight(pl->GetRank(),GR_RIGHT_GCHATLISTEN) && !pl->HasInIgnoreList(session->GetPlayer()->GetGUID()) )
                 pl->GetSession()->SendPacket(&data);
@@ -470,15 +468,12 @@ void Guild::BroadcastToOfficers(WorldSession *session, std::string msg, uint32 l
 {
     if (session && session->GetPlayer() && HasRankRight(session->GetPlayer()->GetRank(),GR_RIGHT_OFFCHATSPEAK))
     {
-        Player *pl;
-        MemberList::iterator itr;
-
-        for (itr = members.begin(); itr != members.end(); itr++)
+        for(MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
         {
             WorldPacket data;
             ChatHandler::FillMessageData(&data, session, CHAT_MSG_OFFICER, language, NULL, 0, msg.c_str(),NULL);
 
-            pl = ObjectAccessor::FindPlayer(itr->first);
+            Player *pl = ObjectAccessor::FindPlayer(MAKE_GUID(itr->first,HIGHGUID_PLAYER));
 
             if (pl && pl->GetSession() && HasRankRight(pl->GetRank(),GR_RIGHT_OFFCHATLISTEN) && !pl->HasInIgnoreList(session->GetPlayer()->GetGUID()))
                 pl->GetSession()->SendPacket(&data);
@@ -488,11 +483,9 @@ void Guild::BroadcastToOfficers(WorldSession *session, std::string msg, uint32 l
 
 void Guild::BroadcastPacket(WorldPacket *packet)
 {
-    MemberList::iterator itr;
-
-    for (itr = members.begin(); itr != members.end(); itr++)
+    for(MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
     {
-        Player *player = ObjectAccessor::FindPlayer(itr->first);
+        Player *player = ObjectAccessor::FindPlayer(MAKE_GUID(itr->first,HIGHGUID_PLAYER));
         if(player)
             player->GetSession()->SendPacket(packet);
     }
@@ -581,11 +574,10 @@ void Guild::Disband()
     data << (uint8)GE_DISBANDED;
     this->BroadcastPacket(&data);
 
-    MemberList::iterator itr;
     while (!members.empty())
     {
-        itr = members.begin();
-        this->DelMember(itr->first, true);
+        MemberList::iterator itr = members.begin();
+        DelMember(MAKE_GUID(itr->first,HIGHGUID_PLAYER), true);
     }
 
     CharacterDatabase.BeginTransaction();
@@ -626,7 +618,7 @@ void Guild::Roster(WorldSession *session)
 
     for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
     {
-        pl = ObjectAccessor::FindPlayer(itr->first);
+        pl = ObjectAccessor::FindPlayer(MAKE_GUID(itr->first,HIGHGUID_PLAYER));
         if (pl)
         {
             data << pl->GetGUID();
@@ -642,20 +634,20 @@ void Guild::Roster(WorldSession *session)
         else
         {
             uint64 logout_time = 0;
-            QueryResult *result = CharacterDatabase.PQuery("SELECT `logout_time` FROM `character` WHERE `guid`='%u'", GUID_LOPART(itr->first));
+            QueryResult *result = CharacterDatabase.PQuery("SELECT `logout_time` FROM `character` WHERE `guid`='%u'", itr->first);
             if(result)
             {
                 logout_time = (*result)[0].GetUInt64();
                 delete result;
             }
 
-            data << itr->first;
+            data << uint64(MAKE_GUID(itr->first,HIGHGUID_PLAYER));
             data << (uint8)0;
             data << itr->second.name;
-            data << itr->second.RankId;
-            data << itr->second.level;
-            data << itr->second.Class;
-            data << itr->second.zoneId;
+            data << (uint32)itr->second.RankId;
+            data << (uint8)itr->second.level;
+            data << (uint8)itr->second.Class;
+            data << (uint32)itr->second.zoneId;
             data << (float(time(NULL)-logout_time) / DAY);
             data << itr->second.Pnote;
             data << itr->second.OFFnote;
