@@ -129,7 +129,6 @@ enum PetitionSigns
 
 struct MemberSlot
 {
-    uint64 guid;
     std::string name;
     uint32 RankId;
     uint8 level,Class;
@@ -154,7 +153,7 @@ class Guild
         bool create(uint64 lGuid, std::string gname);
         void Disband();
 
-        typedef std::list<MemberSlot> MemberList;
+        typedef std::map<uint64, MemberSlot> MemberList;
         typedef std::vector<RankInfo> RankList;
 
         uint32 GetId(){ return Id; }

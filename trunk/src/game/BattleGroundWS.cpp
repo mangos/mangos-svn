@@ -212,7 +212,7 @@ void BattleGroundWS::EventPlayerDroppedFlag(Player *Source)
     if(GetStatus() != STATUS_IN_PROGRESS)
         return;
 
-    const char *message;
+    const char *message = "";
     uint8 type = 0;
     bool set = false;
 
