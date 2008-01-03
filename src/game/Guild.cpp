@@ -122,7 +122,7 @@ bool Guild::AddMember(uint64 plGuid, uint32 plRank)
     newmember.RankId = plRank;
     newmember.OFFnote = (std::string)"";
     newmember.Pnote = (std::string)"";
-    members.push_back(newmember);
+    members[plGuid] = newmember;
 
     std::string dbPnote = newmember.Pnote;
     std::string dbOFFnote = newmember.OFFnote;
@@ -130,7 +130,7 @@ bool Guild::AddMember(uint64 plGuid, uint32 plRank)
     CharacterDatabase.escape_string(dbOFFnote);
 
     CharacterDatabase.PExecute("INSERT INTO `guild_member` (`guildid`,`guid`,`rank`,`Pnote`,`OFFnote`) VALUES ('%u', '%u', '%u','%s','%s')",
-        Id, GUID_LOPART(newmember.guid), newmember.RankId, dbPnote.c_str(), dbOFFnote.c_str());
+        Id, GUID_LOPART(plGuid), newmember.RankId, dbPnote.c_str(), dbOFFnote.c_str());
 
     Player* pl = objmgr.GetPlayer(plGuid);
     if(pl)
@@ -245,14 +245,15 @@ bool Guild::LoadMembersFromDB(uint32 GuildId)
         Field *fields = result->Fetch();
         MemberSlot newmember;
         newmember.RankId = fields[1].GetUInt32();
+        uint64 guid = MAKE_GUID(fields[0].GetUInt32(),HIGHGUID_PLAYER);
 
         // player not exist
-        if(!FillPlayerData(MAKE_GUID(fields[0].GetUInt32(),HIGHGUID_PLAYER), &newmember))
+        if(!FillPlayerData(guid, &newmember))
             continue;
 
         newmember.Pnote = fields[2].GetCppString();
         newmember.OFFnote = fields[3].GetCppString();
-        members.push_back(newmember);
+        members[guid] = newmember;
 
     }while( result->NextRow() );
     delete result;
@@ -305,7 +306,6 @@ bool Guild::FillPlayerData(uint64 guid, MemberSlot* memslot)
     }
 
     memslot->name = plName;
-    memslot->guid = guid;
     memslot->level = plLevel;
     memslot->Class = plClass;
     memslot->zoneId = plZone;
@@ -318,17 +318,15 @@ void Guild::LoadPlayerStatsByGuid(uint64 guid)
     Player *pl;
 
     MemberList::iterator itr;
-    for (itr = members.begin(); itr != members.end();itr++)
-    {
-        if (itr->guid == guid)
-        {
-            pl = ObjectAccessor::FindPlayer(itr->guid);
-            if(!pl)break;
-            itr->name  = pl->GetName();
-            itr->level = pl->getLevel();
-            itr->Class = pl->getClass();
-        }
-    }
+    if ( (itr = members.find(guid)) == members.end() )
+        return;
+
+    pl = ObjectAccessor::FindPlayer(itr->first);
+    if(!pl)
+        return;
+    itr->second.name  = pl->GetName();
+    itr->second.level = pl->getLevel();
+    itr->second.Class = pl->getClass();
 }
 
 void Guild::SetLeader(uint64 guid)
@@ -395,15 +393,7 @@ void Guild::DelMember(uint64 guid, bool isDisbanding)
         }
     }
 
-    MemberList::iterator itr;
-    for (itr = members.begin(); itr != members.end(); itr++)
-    {
-        if (itr->guid == guid)
-        {
-            members.erase(itr);
-            break;
-        }
-    }
+    members.erase(guid);
 
     Player *player = objmgr.GetPlayer(guid);
     if(player)
@@ -423,11 +413,8 @@ void Guild::DelMember(uint64 guid, bool isDisbanding)
 void Guild::ChangeRank(uint64 guid, uint32 newRank)
 {
     MemberList::iterator itr;
-    for (itr = members.begin(); itr != members.end();itr++)
-    {
-        if(itr->guid == guid)
-            itr->RankId = newRank;
-    }
+    if ( (itr = members.find(guid)) != members.end() )
+        itr->second.RankId = newRank;
 
     Player *player = objmgr.GetPlayer(guid);
     if(player)
@@ -441,34 +428,25 @@ void Guild::ChangeRank(uint64 guid, uint32 newRank)
 void Guild::SetPNOTE(uint64 guid,std::string pnote)
 {
     MemberList::iterator itr;
-    for (itr = members.begin(); itr != members.end();itr++)
-    {
-        if (itr->guid == guid)
-        {
-            itr->Pnote = pnote;
+    if ( (itr = members.find(guid)) == members.end() )
+        return;
 
-            // pnote now can be used for encoding to DB
-            CharacterDatabase.escape_string(pnote);
-            CharacterDatabase.PExecute("UPDATE `guild_member` SET `Pnote` = '%s' WHERE `guid` = '%u'", pnote.c_str(), GUID_LOPART(itr->guid));
-            break;
-        }
-    }
+    itr->second.Pnote = pnote;
+
+    // pnote now can be used for encoding to DB
+    CharacterDatabase.escape_string(pnote);
+    CharacterDatabase.PExecute("UPDATE `guild_member` SET `Pnote` = '%s' WHERE `guid` = '%u'", pnote.c_str(), GUID_LOPART(itr->first));
 }
 
 void Guild::SetOFFNOTE(uint64 guid,std::string offnote)
 {
     MemberList::iterator itr;
-    for (itr = members.begin(); itr != members.end();itr++)
-    {
-        if (itr->guid == guid)
-        {
-            itr->OFFnote = offnote;
-            // offnote now can be used for encoding to DB
-            CharacterDatabase.escape_string(offnote);
-            CharacterDatabase.PExecute("UPDATE `guild_member` SET `OFFnote` = '%s' WHERE `guid` = '%u'", offnote.c_str(), GUID_LOPART(itr->guid));
-            break;
-        }
-    }
+    if ((itr = members.find(guid)) == members.end())
+        return;
+    itr->second.OFFnote = offnote;
+    // offnote now can be used for encoding to DB
+    CharacterDatabase.escape_string(offnote);
+    CharacterDatabase.PExecute("UPDATE `guild_member` SET `OFFnote` = '%s' WHERE `guid` = '%u'", offnote.c_str(), GUID_LOPART(itr->first));
 }
 
 void Guild::BroadcastToGuild(WorldSession *session, std::string msg, uint32 language)
@@ -480,7 +458,7 @@ void Guild::BroadcastToGuild(WorldSession *session, std::string msg, uint32 lang
 
         for (MemberList::const_iterator itr = members.begin(); itr != members.end(); ++itr)
         {
-            Player *pl = ObjectAccessor::FindPlayer(itr->guid);
+            Player *pl = ObjectAccessor::FindPlayer(itr->first);
 
             if (pl && pl->GetSession() && HasRankRight(pl->GetRank(),GR_RIGHT_GCHATLISTEN) && !pl->HasInIgnoreList(session->GetPlayer()->GetGUID()) )
                 pl->GetSession()->SendPacket(&data);
@@ -500,7 +478,7 @@ void Guild::BroadcastToOfficers(WorldSession *session, std::string msg, uint32 l
             WorldPacket data;
             ChatHandler::FillMessageData(&data, session, CHAT_MSG_OFFICER, language, NULL, 0, msg.c_str(),NULL);
 
-            pl = ObjectAccessor::FindPlayer(itr->guid);
+            pl = ObjectAccessor::FindPlayer(itr->first);
 
             if (pl && pl->GetSession() && HasRankRight(pl->GetRank(),GR_RIGHT_OFFCHATLISTEN) && !pl->HasInIgnoreList(session->GetPlayer()->GetGUID()))
                 pl->GetSession()->SendPacket(&data);
@@ -514,7 +492,7 @@ void Guild::BroadcastPacket(WorldPacket *packet)
 
     for (itr = members.begin(); itr != members.end(); itr++)
     {
-        Player *player = ObjectAccessor::FindPlayer(itr->guid);
+        Player *player = ObjectAccessor::FindPlayer(itr->first);
         if(player)
             player->GetSession()->SendPacket(packet);
     }
@@ -603,20 +581,12 @@ void Guild::Disband()
     data << (uint8)GE_DISBANDED;
     this->BroadcastPacket(&data);
 
-    uint32 count = members.size();
-    uint64 *memberGuids = new uint64[count];
-
     MemberList::iterator itr;
-    uint32 i=0;
-    for (itr = members.begin(); itr != members.end(); itr++)
+    while (!members.empty())
     {
-        memberGuids[i] = itr->guid;
-        i++;
+        itr = members.begin();
+        this->DelMember(itr->first, true);
     }
-
-    for(uint32 j=0; j<count; j++)
-        this->DelMember(memberGuids[j], true);
-    delete[] memberGuids;
 
     CharacterDatabase.BeginTransaction();
     CharacterDatabase.PExecute("DELETE FROM `guild` WHERE `guildid` = '%u'",Id);
@@ -656,39 +626,39 @@ void Guild::Roster(WorldSession *session)
 
     for (MemberList::iterator itr = members.begin(); itr != members.end(); ++itr)
     {
-        pl = ObjectAccessor::FindPlayer(itr->guid);
+        pl = ObjectAccessor::FindPlayer(itr->first);
         if (pl)
         {
             data << pl->GetGUID();
             data << (uint8)1;
             data << (std::string)pl->GetName();
-            data << itr->RankId;
+            data << itr->second.RankId;
             data << (uint8)pl->getLevel();
             data << pl->getClass();
             data << pl->GetZoneId();
-            data << itr->Pnote;
-            data << itr->OFFnote;
+            data << itr->second.Pnote;
+            data << itr->second.OFFnote;
         }
         else
         {
             uint64 logout_time = 0;
-            QueryResult *result = CharacterDatabase.PQuery("SELECT `logout_time` FROM `character` WHERE `guid`='%u'", GUID_LOPART(itr->guid));
+            QueryResult *result = CharacterDatabase.PQuery("SELECT `logout_time` FROM `character` WHERE `guid`='%u'", GUID_LOPART(itr->first));
             if(result)
             {
                 logout_time = (*result)[0].GetUInt64();
                 delete result;
             }
 
-            data << itr->guid;
+            data << itr->first;
             data << (uint8)0;
-            data << itr->name;
-            data << itr->RankId;
-            data << itr->level;
-            data << itr->Class;
-            data << itr->zoneId;
+            data << itr->second.name;
+            data << itr->second.RankId;
+            data << itr->second.level;
+            data << itr->second.Class;
+            data << itr->second.zoneId;
             data << (float(time(NULL)-logout_time) / DAY);
-            data << itr->Pnote;
-            data << itr->OFFnote;
+            data << itr->second.Pnote;
+            data << itr->second.OFFnote;
         }
     }
     session->SendPacket(&data);

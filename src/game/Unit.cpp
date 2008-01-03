@@ -2519,6 +2519,11 @@ uint32 Unit::CalculateDamage (WeaponAttackType attType)
             min_damage = GetFloatValue(UNIT_FIELD_MINOFFHANDDAMAGE);
             max_damage = GetFloatValue(UNIT_FIELD_MAXOFFHANDDAMAGE);
             break;
+        // Just for good manner
+        default:
+            min_damage = 0.0f;
+            max_damage = 0.0f;
+            break;
     }
 
     if (min_damage > max_damage)
@@ -2729,10 +2734,14 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit *pVict
             crit = GetFloatValue( PLAYER_RANGED_CRIT_PERCENTAGE );
             crit+= pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_CHANCE);
             break;
+        // Just for good manner
+        default:
+            crit = 0.0f;
+            break;
         }
     }
     else
-        crit = 5.0;
+        crit = 5.0f;
 
     // flat
     AuraList const& mAttackerSWCrit = pVictim->GetAurasByType(SPELL_AURA_MOD_ATTACKER_SPELL_AND_WEAPON_CRIT_CHANCE);
@@ -2740,7 +2749,7 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit *pVict
         crit += (*i)->GetModifier()->m_amount;
 
     if (crit < 0)
-        crit = 0;
+        crit = 0.0f;
     return crit;
 }
 
