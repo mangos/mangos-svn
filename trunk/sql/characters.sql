@@ -473,8 +473,12 @@ CREATE TABLE `character_social` (
   `guid` int(11) unsigned NOT NULL default '0' COMMENT 'Global Unique Identifier',
   `name` varchar(21) NOT NULL default '',
   `friend` int(11) unsigned NOT NULL default '0' COMMENT 'Character Global Unique Identifier',
-  `flags` varchar(21) NOT NULL default '',
-  PRIMARY KEY  (`guid`,`friend`,`flags`)
+  `flags` tinyint(1) unsigned NOT NULL default '0',
+  PRIMARY KEY  (`guid`,`friend`,`flags`),
+  KEY (`guid`),
+  KEY (`friend`),
+  KEY `guid_flags` (`guid`,`flags`),
+  KEY `friend_flags` (`friend`,`flags`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
 
 --

@@ -1280,21 +1280,21 @@ bool Player::AddToFriendList(uint64 guid, std::string name)
     if(m_friendlist.size() >= (255-1))
         return false;
 
-    CharacterDatabase.PExecute("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) VALUES ('%u', '%s', '%u', 'FRIEND')",
-        GetGUIDLow(), name.c_str(), GUID_LOPART(guid));
+    CharacterDatabase.PExecute("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) "
+        "VALUES ('%u', '%s', '%u', 0)", GetGUIDLow(), name.c_str(), GUID_LOPART(guid));
     m_friendlist.insert(GUID_LOPART(guid));
     return true;
 }
 
 void Player::RemoveFromFriendList(uint64 guid)
 {
-    CharacterDatabase.PExecute("DELETE FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u' AND `friend` = '%u'", GetGUIDLow(), GUID_LOPART(guid));
+    CharacterDatabase.PExecute("DELETE FROM `character_social` WHERE `guid` = '%u' AND `friend` = '%u' AND `flags` = 0", GetGUIDLow(), GUID_LOPART(guid));
     m_friendlist.erase(GUID_LOPART(guid));
 }
 
 void Player::_LoadFriendList(QueryResult *result)
 {
-    //QueryResult *result = CharacterDatabase.PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'FRIEND' AND `guid` = '%u' LIMIT 255",GetGUIDLow());
+    //QueryResult *result = CharacterDatabase.PQuery("SELECT `friend` FROM `character_social` WHERE `guid` = '%u' AND `flags` = 0 LIMIT 255",GetGUIDLow());
     if(!result) return;
 
     do
@@ -1340,21 +1340,21 @@ bool Player::AddToIgnoreList(uint64 guid, std::string name)
     if(m_ignorelist.size() >= (255-1))
         return false;
 
-    CharacterDatabase.PExecute("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) VALUES ('%u', '%s', '%u', 'IGNORE')",
-        GetGUIDLow(), name.c_str(), GUID_LOPART(guid));
+    CharacterDatabase.PExecute("INSERT INTO `character_social` (`guid`,`name`,`friend`,`flags`) "
+        "VALUES ('%u', '%s', '%u', 1)", GetGUIDLow(), name.c_str(), GUID_LOPART(guid));
     m_ignorelist.insert(GUID_LOPART(guid));
     return true;
 }
 
 void Player::RemoveFromIgnoreList(uint64 guid)
 {
-    CharacterDatabase.PExecute("DELETE FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u' AND `friend` = '%u'",GetGUIDLow(), GUID_LOPART(guid));
+    CharacterDatabase.PExecute("DELETE FROM `character_social` WHERE `guid` = '%u' AND `friend` = '%u' AND `flags` = 1",GetGUIDLow(), GUID_LOPART(guid));
     m_ignorelist.erase(GUID_LOPART(guid));
 }
 
 void Player::_LoadIgnoreList(QueryResult *result)
 {
-    //QueryResult *result = CharacterDatabase.PQuery("SELECT `friend` FROM `character_social` WHERE `flags` = 'IGNORE' AND `guid` = '%u'", GetGUIDLow());
+    //QueryResult *result = CharacterDatabase.PQuery("SELECT `friend` FROM `character_social` WHERE `guid` = '%u' AND `flags` = 1", GetGUIDLow());
 
     if(!result) return;
 
@@ -3875,7 +3875,7 @@ void Player::BroadcastPacketToFriendListers(WorldPacket *packet, bool extern_res
     /// this is sent out to those that have the player in their friendlist
     /// (not necessarily those that are in the player's friendlist)
     if(!extern_result)
-        result = CharacterDatabase.PQuery("SELECT `guid` FROM `character_social` WHERE `flags` = 'FRIEND' AND `friend` = '%u'", GetGUIDLow());
+        result = CharacterDatabase.PQuery("SELECT `guid` FROM `character_social` WHERE `friend` = '%u' AND `flags` = 0", GetGUIDLow());
 
     if(!result) return;
 
@@ -11637,8 +11637,9 @@ QuestStatus Player::GetQuestStatus( uint32 quest_id )
 {
     if( quest_id )
     {
-        if( mQuestStatus.find( quest_id ) != mQuestStatus.end() )
-            return mQuestStatus[quest_id].m_status;
+        QuestStatusMap::iterator itr = mQuestStatus.find( quest_id );
+        if( itr != mQuestStatus.end() )
+            return itr->second.m_status;
     }
     return QUEST_STATUS_NONE;
 }
@@ -11647,9 +11648,10 @@ bool Player::CanShareQuest(uint32 quest_id)
 {
     if( quest_id )
     {
-        if( mQuestStatus.find( quest_id ) != mQuestStatus.end() )
-            return mQuestStatus[quest_id].m_status == QUEST_STATUS_NONE
-                || mQuestStatus[quest_id].m_status == QUEST_STATUS_INCOMPLETE;
+        QuestStatusMap::iterator itr = mQuestStatus.find( quest_id );
+        if( itr != mQuestStatus.end() )
+            return itr->second.m_status == QUEST_STATUS_NONE ||
+                   itr->second.m_status == QUEST_STATUS_INCOMPLETE;
     }
 
     return false;
