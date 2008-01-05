@@ -21,7 +21,6 @@
 #include "WorldSession.h"
 #include "Log.h"
 #include "GridStates.h"
-#include "RedZoneDistrict.h"
 #include "CellImpl.h"
 #include "InstanceData.h"
 #include "Map.h"
@@ -645,7 +644,7 @@ void Map::Add(Player *player)
 
     // update player state for other player and visa-versa
     CellPair p = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
-    Cell cell = RedZone::GetZone(p);
+    Cell cell(p);
     EnsureGridLoadedForPlayer(cell, player, true);
 
     UpdatePlayerVisibility(player,cell,p);
@@ -671,7 +670,7 @@ Map::Add(T *obj)
         return;
     }
 
-    Cell cell = RedZone::GetZone(p);
+    Cell cell(p);
     EnsureGridCreated(GridPair(cell.GridX(), cell.GridY()));
     NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
     assert( grid != NULL );
@@ -697,7 +696,7 @@ Map::Find(T *obj) const
         return false;
     }
 
-    Cell cell = RedZone::GetZone(p);
+    Cell cell(p);
     if(!i_grids[cell.GridX()][cell.GridY()])
         return false;
 
@@ -723,7 +722,7 @@ T* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl, T *fake)
     {
         for(cell_iter = xcell; abs(int(p.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
         {
-            Cell cell = RedZone::GetZone(cell_iter);
+            Cell cell(cell_iter);
             if(!i_grids[cell.GridX()][cell.GridY()])
                 continue;
 
@@ -753,7 +752,7 @@ void Map::MessageBroadcast(Player *player, WorldPacket *msg, bool to_self, bool 
         return;
     }
 
-    Cell cell = RedZone::GetZone(p);
+    Cell cell(p);
     cell.data.Part.reserved = ALL_DISTRICT;
 
     if( !loaded(GridPair(cell.data.Part.grid_x, cell.data.Part.grid_y)) )
@@ -775,7 +774,7 @@ void Map::MessageBroadcast(WorldObject *obj, WorldPacket *msg)
         return;
     }
 
-    Cell cell = RedZone::GetZone(p);
+    Cell cell(p);
     cell.data.Part.reserved = ALL_DISTRICT;
     cell.SetNoCreate();
 
@@ -844,7 +843,7 @@ void Map::Remove(Player *player, bool remove)
         return;
     }
 
-    Cell cell = RedZone::GetZone(p);
+    Cell cell(p);
     uint64 mask = CalculateGridMask(cell.data.Part.grid_y);
 
     if( !(i_gridMask[cell.data.Part.grid_x] & mask) )
@@ -895,7 +894,7 @@ Map::Remove(T *obj, bool remove)
         return;
     }
 
-    Cell cell = RedZone::GetZone(p);
+    Cell cell(p);
     if( !loaded(GridPair(cell.data.Part.grid_x, cell.data.Part.grid_y)) )
         return;
 
@@ -925,8 +924,8 @@ Map::PlayerRelocation(Player *player, float x, float y, float z, float orientati
     CellPair old_val = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
     CellPair new_val = MaNGOS::ComputeCellPair(x, y);
 
-    Cell old_cell = RedZone::GetZone(old_val);
-    Cell new_cell = RedZone::GetZone(new_val);
+    Cell old_cell(old_val);
+    Cell new_cell(new_val);
     new_cell |= old_cell;
     bool same_cell = (new_cell == old_cell);
 
@@ -975,7 +974,7 @@ Map::CreatureRelocation(Creature *creature, float x, float y, float z, float ang
     Cell old_cell = creature->GetCurrentCell();
 
     CellPair new_val = MaNGOS::ComputeCellPair(x, y);
-    Cell new_cell = RedZone::GetZone(new_val);
+    Cell new_cell(new_val);
 
     // delay creature move for grid/cell to grid/cell moves
     if( old_cell.DiffCell(new_cell) || old_cell.DiffGrid(new_cell) )
@@ -1014,7 +1013,7 @@ void Map::MoveAllCreaturesInMoveList()
 
         // calculate cells
         CellPair new_val = MaNGOS::ComputeCellPair(cm.x, cm.y);
-        Cell new_cell = RedZone::GetZone(new_val);
+        Cell new_cell(new_val);
 
         // do move or do move to respawn or remove creature if previous all fail
         if(CreatureCellRelocation(c,new_cell))
@@ -1102,7 +1101,7 @@ bool Map::CreatureRespawnRelocation(Creature *c)
     c->GetRespawnCoord(resp_x, resp_y, resp_z);
 
     CellPair resp_val = MaNGOS::ComputeCellPair(resp_x, resp_y);
-    Cell resp_cell = RedZone::GetZone(resp_val);
+    Cell resp_cell(resp_val);
 
     c->CombatStop();
     c->GetMotionMaster()->Clear();
@@ -1407,7 +1406,7 @@ bool Map::CheckGridIntegrity(Creature* c, bool moved) const
     Cell const& cur_cell = c->GetCurrentCell();
 
     CellPair xy_val = MaNGOS::ComputeCellPair(c->GetPositionX(), c->GetPositionY());
-    Cell xy_cell = RedZone::GetZone(xy_val);
+    Cell xy_cell(xy_val);
     if(xy_cell != cur_cell)
     {
         sLog.outError("ERROR: %s (GUID: %u) X: %f Y: %f (%s) in grid[%u,%u]cell[%u,%u] instead grid[%u,%u]cell[%u,%u]",

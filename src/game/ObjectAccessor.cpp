@@ -29,7 +29,6 @@
 #include "Item.h"
 #include "Container.h"
 #include "Corpse.h"
-#include "RedZoneDistrict.h"
 #include "GridNotifiers.h"
 #include "MapManager.h"
 #include "Map.h"
@@ -412,7 +411,7 @@ void
 ObjectAccessor::_buildChangeObjectForPlayer(WorldObject *obj, UpdateDataMapType &update_players)
 {
     CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
-    Cell cell = RedZone::GetZone(p);
+    Cell cell(p);
     cell.data.Part.reserved = ALL_DISTRICT;
     cell.SetNoCreate();
     WorldObjectChangeAccumulator notifier(*obj, update_players);
@@ -612,7 +611,7 @@ ObjectAccessor::Update(const uint32  &diff)
                     if( !map->marked_cells.test(cell_id) )
                     {
                         map->marked_cells.set(cell_id);
-                        Cell cell = RedZone::GetZone(cell_iter);
+                        Cell cell(cell_iter);
                         cell.data.Part.reserved = CENTER_DISTRICT;
                         cell.SetNoCreate();
                         CellLock<NullGuard> cell_lock(cell, cell_iter);
@@ -671,7 +670,7 @@ void
 ObjectAccessor::UpdateObjectVisibility(WorldObject *obj)
 {
     CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
-    Cell cell = RedZone::GetZone(p);
+    Cell cell(p);
 
     MapManager::Instance().GetMap(obj->GetMapId(), obj)->UpdateObjectVisibility(obj,cell,p);
 }
@@ -679,7 +678,7 @@ ObjectAccessor::UpdateObjectVisibility(WorldObject *obj)
 void ObjectAccessor::UpdateVisibilityForPlayer( Player* player )
 {
     CellPair p = MaNGOS::ComputeCellPair(player->GetPositionX(), player->GetPositionY());
-    Cell cell = RedZone::GetZone(p);
+    Cell cell(p);
     Map* m = MapManager::Instance().GetMap(player->GetMapId(),player);
 
     m->UpdatePlayerVisibility(player,cell,p);

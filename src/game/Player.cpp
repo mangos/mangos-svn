@@ -35,7 +35,6 @@
 #include "ChannelMgr.h"
 #include "MapManager.h"
 #include "MapInstanced.h"
-#include "RedZoneDistrict.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
@@ -14585,7 +14584,7 @@ void Player::HandleStealthedUnitsDetection()
     std::list<Unit*> stealthedUnits;
 
     CellPair p(MaNGOS::ComputeCellPair(GetPositionX(),GetPositionY()));
-    Cell cell = RedZone::GetZone(p);
+    Cell cell(p);
     cell.data.Part.reserved = ALL_DISTRICT;
     cell.SetNoCreate();
 

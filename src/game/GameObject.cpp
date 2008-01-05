@@ -250,6 +250,7 @@ void GameObject::Update(uint32 p_time)
             break;
 
         case GO_LOOTED:
+        {
             uint32 spellId = GetGOInfo()->data10;
             //if Gamebject should cast spell, then this, but some GOs (type = 10) should be destroyed
             if (GetGoType() == GAMEOBJECT_TYPE_GOOBER && spellId)
@@ -278,8 +279,6 @@ void GameObject::Update(uint32 p_time)
             loot.clear();
             SetLootState(GO_CLOSED);
 
-            SendDestroyObject(GetGUID());
-
             if(!m_spawnedByDefault)
             {
                 m_respawnTime = 0;
@@ -292,7 +291,10 @@ void GameObject::Update(uint32 p_time)
             if(sWorld.getConfig(CONFIG_SAVE_RESPAWN_TIME_IMMEDIATLY))
                 SaveRespawnTime();
 
+            ObjectAccessor::UpdateObjectVisibility(this);
+
             break;
+        }
     }
 
     SpellEntry const *createSpell = m_spellId ? sSpellStore.LookupEntry(m_spellId) : NULL;
@@ -306,7 +308,7 @@ void GameObject::Update(uint32 p_time)
     {
         // traps
         CellPair p(MaNGOS::ComputeCellPair(GetPositionX(),GetPositionY()));
-        Cell cell = RedZone::GetZone(p);
+        Cell cell(p);
         cell.data.Part.reserved = ALL_DISTRICT;
 
         Unit* owner = GetOwner();

@@ -38,7 +38,6 @@
 #include "WaypointMovementGenerator.h"
 #include "TargetedMovementGenerator.h"
 
-#include "RedZoneDistrict.h"
 #include "CellImpl.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
@@ -1329,7 +1328,7 @@ void WorldObject::GetNearPoint(WorldObject const* searcher, float &x, float &y, 
     // adding used positions around object
     {
         CellPair p(MaNGOS::ComputeCellPair(GetPositionX(), GetPositionY()));
-        Cell cell = RedZone::GetZone(p);
+        Cell cell(p);
         cell.data.Part.reserved = ALL_DISTRICT;
         cell.SetNoCreate();
 

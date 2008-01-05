@@ -79,7 +79,7 @@ TotemAI::UpdateAI(const uint32 diff)
         i_totem.IsFriendlyTo(victim) || !victim->isVisibleForOrDetect(&i_totem,false) )
     {
         CellPair p(MaNGOS::ComputeCellPair(i_totem.GetPositionX(),i_totem.GetPositionY()));
-        Cell cell = RedZone::GetZone(p);
+        Cell cell(p);
         cell.data.Part.reserved = ALL_DISTRICT;
 
         victim = NULL;

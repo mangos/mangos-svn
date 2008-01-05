@@ -35,7 +35,6 @@
 #include "UpdateData.h"
 #include "MapManager.h"
 #include "ObjectAccessor.h"
-#include "RedZoneDistrict.h"
 #include "CellImpl.h"
 #include "SharedDefines.h"
 #include "Pet.h"
@@ -843,7 +842,7 @@ void Spell::EffectDummy(uint32 i)
             float max_range = GetMaxRange(srange);
 
             CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-            Cell cell = RedZone::GetZone(p);
+            Cell cell(p);
             cell.data.Part.reserved = ALL_DISTRICT;
             cell.SetNoCreate();
 
@@ -2333,7 +2332,7 @@ void Spell::EffectSummonGuardian(uint32 i)
 
     {
         CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-        Cell cell = RedZone::GetZone(p);
+        Cell cell(p);
         cell.data.Part.reserved = ALL_DISTRICT;
         cell.SetNoCreate();
 
@@ -3173,7 +3172,7 @@ void Spell::EffectScriptEffect(uint32 i)
 
                 {
                     CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-                    Cell cell = RedZone::GetZone(p);
+                    Cell cell(p);
                     cell.data.Part.reserved = ALL_DISTRICT;
                     cell.SetNoCreate();
 
@@ -3958,7 +3957,7 @@ void Spell::EffectSummonCritter(uint32 i)
 
     {
         CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-        Cell cell = RedZone::GetZone(p);
+        Cell cell(p);
         cell.data.Part.reserved = ALL_DISTRICT;
         cell.SetNoCreate();
 
