@@ -12924,7 +12924,7 @@ void Player::_LoadInventory(QueryResult *result, uint32 timediff)
                 item->SetState(ITEM_UNCHANGED, this);
             else
             {
-                sLog.outError("Player::_LoadInventory: Player %s has item (GUID: %u Entry: %u) can't be loaded to inventory by some reason, skipped.", GetName(),item_guid, item_id);
+                sLog.outError("Player::_LoadInventory: Player %s has item (GUID: %u Entry: %u) can't be loaded to inventory (Bag GUID: %u Slot: %u) by some reason, skipped.", GetName(),item_guid, item_id, bag_guid, slot);
                 delete item;
             }
         } while (result->NextRow());

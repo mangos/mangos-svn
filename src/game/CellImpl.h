@@ -34,7 +34,7 @@ inline Cell::Cell(CellPair const& p)
     data.Part.loadgrids = LOAD_GRID_AT_VISIT;
     data.Part.reserved = 0;
     */
-    (*this) = RedZone::GetZone(p);
+    data.All = RedZone::GetZone(p).data.All;
 }
 
 template<class LOCK_TYPE,class T, class CONTAINER>
