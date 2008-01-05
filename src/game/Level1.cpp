@@ -29,6 +29,7 @@
 #include "MapManager.h"
 #include "ObjectAccessor.h"
 #include "Language.h"
+#include "CellImpl.h"
 #ifdef _DEBUG_VMAPS
 #include "VMapFactory.h"
 #endif

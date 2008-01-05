@@ -51,7 +51,6 @@
 #include "Database/DatabaseImpl.h"
 #include "WorldSocket.h"
 #include "RedZoneDistrict.h"
-
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 
