@@ -21,7 +21,6 @@
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
 #include "ObjectAccessor.h"
-#include "RedZoneDistrict.h"
 #include "Transports.h"
 #include "GridDefines.h"
 #include "MapInstanced.h"
@@ -151,7 +150,7 @@ bool MapManager::IsValidMapCoord(uint32 mapid, float x,float y)
 void MapManager::LoadGrid(int mapid, float x, float y, const WorldObject* obj, bool no_unload)
 {
     CellPair p = MaNGOS::ComputeCellPair(x,y);
-    Cell cell = RedZone::GetZone(p);
+    Cell cell(p);
     GetMap(mapid, obj)->LoadGrid(cell,no_unload);
 }
 

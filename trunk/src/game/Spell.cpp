@@ -37,7 +37,6 @@
 #include "UpdateData.h"
 #include "MapManager.h"
 #include "ObjectAccessor.h"
-#include "RedZoneDistrict.h"
 #include "CellImpl.h"
 #include "Policies/SingletonImp.h"
 #include "SharedDefines.h"
@@ -582,7 +581,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             float max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
 
             CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-            Cell cell = RedZone::GetZone(p);
+            Cell cell(p);
             cell.data.Part.reserved = ALL_DISTRICT;
             cell.SetNoCreate();
 
@@ -672,7 +671,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                 float max_range = radius + unMaxTargets * CHAIN_SPELL_JUMP_RADIUS;
 
                 CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-                Cell cell = RedZone::GetZone(p);
+                Cell cell(p);
                 cell.data.Part.reserved = ALL_DISTRICT;
                 cell.SetNoCreate();
 
@@ -737,7 +736,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             if (m_spellInfo->Effect[i]!=SPELL_EFFECT_PERSISTENT_AREA_AURA)
             {
                 CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-                Cell cell = RedZone::GetZone(p);
+                Cell cell(p);
                 cell.data.Part.reserved = ALL_DISTRICT;
                 cell.SetNoCreate();
 
@@ -797,7 +796,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
         case TARGET_ALL_AROUND_CASTER:
         {
             CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-            Cell cell = RedZone::GetZone(p);
+            Cell cell(p);
             cell.data.Part.reserved = ALL_DISTRICT;
             cell.SetNoCreate();
 
@@ -813,7 +812,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
         case TARGET_ALL_FRIENDLY_UNITS_AROUND_CASTER:
         {
             CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-            Cell cell = RedZone::GetZone(p);
+            Cell cell(p);
             cell.data.Part.reserved = ALL_DISTRICT;
             cell.SetNoCreate();
 
@@ -834,7 +833,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
         case TARGET_IN_FRONT_OF_CASTER:
         {
             CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-            Cell cell = RedZone::GetZone(p);
+            Cell cell(p);
             cell.data.Part.reserved = ALL_DISTRICT;
             cell.SetNoCreate();
 
@@ -885,7 +884,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
             if (m_spellInfo->Effect[i]!=SPELL_EFFECT_PERSISTENT_AREA_AURA)
             {
                 CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-                Cell cell = RedZone::GetZone(p);
+                Cell cell(p);
                 cell.data.Part.reserved = ALL_DISTRICT;
                 cell.SetNoCreate();
 
@@ -972,7 +971,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
              
                 {
                     CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-                    Cell cell = RedZone::GetZone(p);
+                    Cell cell(p);
                     cell.data.Part.reserved = ALL_DISTRICT;
                     cell.SetNoCreate();
     
@@ -1033,7 +1032,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
         case TARGET_CURRENT_SELECTED_ENEMY:
         {
             CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-            Cell cell = RedZone::GetZone(p);
+            Cell cell(p);
             cell.data.Part.reserved = ALL_DISTRICT;
             cell.SetNoCreate();
             MaNGOS::SpellNotifierPlayer notifier(*this, TagUnitMap, i, radius);
@@ -2656,7 +2655,7 @@ uint8 Spell::CanCast(bool strict)
                         Creature *p_Creature = NULL;
 
                         CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-                        Cell cell = RedZone::GetZone(p);
+                        Cell cell(p);
                         cell.data.Part.reserved = ALL_DISTRICT;
                         cell.SetNoCreate();                 // Really don't know what is that???
 
@@ -2685,7 +2684,7 @@ uint8 Spell::CanCast(bool strict)
                         if(i_spellST->second.targetEntry)
                         {
                             CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-                            Cell cell = RedZone::GetZone(p);
+                            Cell cell(p);
                             cell.data.Part.reserved = ALL_DISTRICT;
 
                             SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
@@ -3065,7 +3064,7 @@ uint8 Spell::CanCast(bool strict)
 
                                 // Find nearby creatures
                                 CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-                                Cell cell = RedZone::GetZone(p);
+                                Cell cell(p);
                                 cell.data.Part.reserved = ALL_DISTRICT;
 
                                 Creature* found_creature = NULL;
@@ -3462,7 +3461,7 @@ uint8 Spell::CheckItems()
     if(m_spellInfo->RequiresSpellFocus)
     {
         CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-        Cell cell = RedZone::GetZone(p);
+        Cell cell(p);
         cell.data.Part.reserved = ALL_DISTRICT;
 
         GameObject* ok = NULL;

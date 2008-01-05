@@ -33,7 +33,6 @@
 #include "SpellAuras.h"
 #include "ScriptCalls.h"
 #include "Language.h"
-#include "RedZoneDistrict.h"
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
 #include "Weather.h"
@@ -4115,7 +4114,7 @@ bool ChatHandler::HandleRespawnCommand(const char* args)
     Player* pl = m_session->GetPlayer();
 
     CellPair p(MaNGOS::ComputeCellPair(pl->GetPositionX(), pl->GetPositionY()));
-    Cell cell = RedZone::GetZone(p);
+    Cell cell(p);
     cell.data.Part.reserved = ALL_DISTRICT;
     cell.SetNoCreate();
 

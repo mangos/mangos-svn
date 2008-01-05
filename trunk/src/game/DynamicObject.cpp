@@ -27,7 +27,6 @@
 #include "Database/DatabaseEnv.h"
 #include "SpellAuras.h"
 #include "MapManager.h"
-#include "RedZoneDistrict.h"
 #include "GridNotifiers.h"
 #include "CellImpl.h"
 #include "GridNotifiersImpl.h"
@@ -105,7 +104,7 @@ void DynamicObject::Update(uint32 p_time)
 
     // TODO: make a timer and update this in larger intervals
     CellPair p(MaNGOS::ComputeCellPair(GetPositionX(), GetPositionY()));
-    Cell cell = RedZone::GetZone(p);
+    Cell cell(p);
     cell.data.Part.reserved = ALL_DISTRICT;
     cell.SetNoCreate();
 

@@ -20,7 +20,6 @@
 #include "ObjectAccessor.h"
 #include "ObjectMgr.h"
 #include "MapManager.h"
-#include "RedZoneDistrict.h"
 #include "Creature.h"
 #include "GameObject.h"
 #include "DynamicObject.h"
@@ -64,7 +63,7 @@ ObjectGridRespawnMover::Visit(CreatureMapType &m)
         float resp_x, resp_y, resp_z;
         c->GetRespawnCoord(resp_x, resp_y, resp_z);
         CellPair resp_val = MaNGOS::ComputeCellPair(resp_x, resp_y);
-        Cell resp_cell = RedZone::GetZone(resp_val);
+        Cell resp_cell(resp_val);
 
         if(cur_cell.DiffGrid(resp_cell))
         {
@@ -101,7 +100,7 @@ template<class T> void addUnitState(T *obj, CellPair const& cell_pair)
 
 template<> void addUnitState(Creature *obj, CellPair const& cell_pair)
 {
-    Cell cell = RedZone::GetZone(cell_pair);
+    Cell cell(cell_pair);
 
     obj->SetCurrentCell(cell);
     if(obj->isSpiritService())

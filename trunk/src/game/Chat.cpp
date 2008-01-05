@@ -29,8 +29,6 @@
 #include "UpdateMask.h"
 #include "Chat.h"
 #include "MapManager.h"
-
-#include "RedZoneDistrict.h"
 #include "GridNotifiersImpl.h"
 
 bool ChatHandler::load_command_table = true;
@@ -798,7 +796,7 @@ GameObject* ChatHandler::GetObjectGlobalyWithGuidOrNearWithDbGuid(uint32 lowguid
     {
         // search near player then
         CellPair p(MaNGOS::ComputeCellPair(pl->GetPositionX(), pl->GetPositionY()));
-        Cell cell = RedZone::GetZone(p);
+        Cell cell(p);
         cell.data.Part.reserved = ALL_DISTRICT;
 
         MaNGOS::GameObjectWithDbGUIDCheck go_check(*pl,lowguid);

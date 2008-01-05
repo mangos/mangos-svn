@@ -572,7 +572,7 @@ void WorldSession::HandleAddFriendOpcode( WorldPacket & recv_data )
         pFriend = ObjectAccessor::FindPlayer(friendGuid);
         if(pFriend==GetPlayer())
             friendResult = FRIEND_SELF;
-        else if(GetPlayer()->GetTeam()!=objmgr.GetPlayerTeamByGUID(friendGuid))
+        else if(GetPlayer()->GetTeam()!=objmgr.GetPlayerTeamByGUID(friendGuid) && !sWorld.getConfig(CONFIG_ALLOW_TWO_SIDE_ADD_FRIEND))
             friendResult = FRIEND_ENEMY;
         else if(GetPlayer()->HasInFriendList(friendGuid))
             friendResult = FRIEND_ALREADY;

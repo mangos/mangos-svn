@@ -24,6 +24,19 @@
 #include "RedZoneDistrict.h"
 #include <cmath>
 
+inline Cell::Cell(CellPair const& p)
+{
+    /* Possible replace for RedZone use, need performance testing
+    data.Part.grid_x = p.x_coord / MAX_NUMBER_OF_CELLS;
+    data.Part.cell_x = p.x_coord % MAX_NUMBER_OF_CELLS;
+    data.Part.grid_y = p.y_coord / MAX_NUMBER_OF_CELLS;
+    data.Part.cell_y = p.y_coord % MAX_NUMBER_OF_CELLS;
+    data.Part.loadgrids = LOAD_GRID_AT_VISIT;
+    data.Part.reserved = 0;
+    */
+    (*this) = RedZone::GetZone(p);
+}
+
 template<class LOCK_TYPE,class T, class CONTAINER>
 inline void
 Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &visitor, Map &m) const
@@ -34,7 +47,7 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
     if (standing_cell.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || standing_cell.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP)
         return;
 
-    switch( (district_t)this->data.Part.reserved )
+    switch( (District)this->data.Part.reserved )
     {
         case ALL_DISTRICT:
         {
@@ -45,7 +58,7 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
             {
                 for(cell_iter=update_cell; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
                 {
-                    Cell r_zone = RedZone::GetZone(cell_iter);
+                    Cell r_zone(cell_iter);
                     r_zone.data.Part.nocreate = l->data.Part.nocreate;
                     CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
                     m.Visit(lock, visitor);
@@ -67,7 +80,7 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
 
             for(cell_iter = update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter >> 1)
             {
-                Cell r_zone = RedZone::GetZone(cell_iter);
+                Cell r_zone(cell_iter);
                 r_zone.data.Part.nocreate = l->data.Part.nocreate;
                 CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
                 m.Visit(lock, visitor);
@@ -78,7 +91,7 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
 
             for(cell_iter=update_cell, cell_iter += 1; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
             {
-                Cell r_zone = RedZone::GetZone(cell_iter);
+                Cell r_zone(cell_iter);
                 r_zone.data.Part.nocreate = l->data.Part.nocreate;
                 CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
                 m.Visit(lock, visitor);
@@ -96,7 +109,7 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
 
             for(cell_iter = update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter << 1)
             {
-                Cell r_zone = RedZone::GetZone(cell_iter);
+                Cell r_zone(cell_iter);
                 r_zone.data.Part.nocreate = l->data.Part.nocreate;
                 CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
                 m.Visit(lock, visitor);
@@ -107,7 +120,7 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
 
             for(cell_iter=update_cell, cell_iter += 1; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
             {
-                Cell r_zone = RedZone::GetZone(cell_iter);
+                Cell r_zone(cell_iter);
                 r_zone.data.Part.nocreate = l->data.Part.nocreate;
                 CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
                 m.Visit(lock, visitor);
@@ -126,7 +139,7 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
 
             for(cell_iter = update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter >> 1)
             {
-                Cell r_zone = RedZone::GetZone(cell_iter);
+                Cell r_zone(cell_iter);
                 r_zone.data.Part.nocreate = l->data.Part.nocreate;
                 CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
                 m.Visit(lock, visitor);
@@ -137,7 +150,7 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
 
             for(cell_iter=update_cell, cell_iter -= 1; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter -= 1)
             {
-                Cell r_zone = RedZone::GetZone(cell_iter);
+                Cell r_zone(cell_iter);
                 r_zone.data.Part.nocreate = l->data.Part.nocreate;
                 CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
                 m.Visit(lock, visitor);
@@ -156,7 +169,7 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
 
             for(cell_iter=update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter << 1)
             {
-                Cell r_zone = RedZone::GetZone(cell_iter);
+                Cell r_zone(cell_iter);
                 r_zone.data.Part.nocreate = l->data.Part.nocreate;
                 CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
                 m.Visit(lock, visitor);
@@ -167,7 +180,7 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
 
             for(cell_iter=update_cell, cell_iter -= 1; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter -= 1)
             {
-                Cell r_zone = RedZone::GetZone(cell_iter);
+                Cell r_zone(cell_iter);
                 r_zone.data.Part.nocreate = l->data.Part.nocreate;
                 CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
                 m.Visit(lock, visitor);
@@ -186,7 +199,7 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
 
             for(cell_iter=update_cell; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
             {
-                Cell r_zone = RedZone::GetZone(cell_iter);
+                Cell r_zone(cell_iter);
                 r_zone.data.Part.nocreate = l->data.Part.nocreate;
                 CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
                 m.Visit(lock, visitor);
@@ -205,7 +218,7 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
 
             for(cell_iter=update_cell; abs(int(standing_cell.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
             {
-                Cell r_zone = RedZone::GetZone(cell_iter);
+                Cell r_zone(cell_iter);
                 r_zone.data.Part.nocreate = l->data.Part.nocreate;
                 CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
                 m.Visit(lock, visitor);
@@ -223,7 +236,7 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
 
             for(cell_iter=update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter >> 1)
             {
-                Cell r_zone = RedZone::GetZone(cell_iter);
+                Cell r_zone(cell_iter);
                 r_zone.data.Part.nocreate = l->data.Part.nocreate;
                 CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
                 m.Visit(lock, visitor);
@@ -242,7 +255,7 @@ Cell::Visit(const CellLock<LOCK_TYPE> &l, TypeContainerVisitor<T, CONTAINER> &vi
 
             for(cell_iter=update_cell; abs(int(standing_cell.x_coord - cell_iter.x_coord)) < 2; cell_iter >> 1)
             {
-                Cell r_zone = RedZone::GetZone(cell_iter);
+                Cell r_zone(cell_iter);
                 r_zone.data.Part.nocreate = l->data.Part.nocreate;
                 CellLock<LOCK_TYPE> lock(r_zone, cell_iter);
                 m.Visit(lock, visitor);

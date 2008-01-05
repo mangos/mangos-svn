@@ -44,13 +44,13 @@
 #include "BattleGroundMgr.h"
 #include "TemporarySummon.h"
 #include "TargetedMovementGenerator.h"
-#include "RedZoneDistrict.h"
 #include "WaypointMovementGenerator.h"
 #include "VMapFactory.h"
 #include "GlobalEvents.h"
 #include "GameEvent.h"
 #include "Database/DatabaseImpl.h"
 #include "WorldSocket.h"
+#include "RedZoneDistrict.h"
 
 #include "GridNotifiersImpl.h"
 #include "CellImpl.h"
@@ -389,6 +389,7 @@ void World::SetInitialWorldSettings()
     m_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_GUILD]   = sConfig.GetIntDefault("AllowTwoSide.Interaction.Guild",0);
     m_configs[CONFIG_ALLOW_TWO_SIDE_INTERACTION_TRADE]   = sConfig.GetIntDefault("AllowTwoSide.Interaction.Trade",0);
     m_configs[CONFIG_ALLOW_TWO_SIDE_WHO_LIST] = sConfig.GetIntDefault("AllowTwoSide.WhoList", 0);
+    m_configs[CONFIG_ALLOW_TWO_SIDE_ADD_FRIEND] = sConfig.GetBoolDefault("AllowTwoSide.AddFriend", 0);
     m_configs[CONFIG_MAX_PLAYER_LEVEL] = sConfig.GetIntDefault("MaxPlayerLevel", 60);
     if(m_configs[CONFIG_MAX_PLAYER_LEVEL] > 255)
     {
@@ -771,16 +772,19 @@ void World::SetInitialWorldSettings()
     mail_timer_expires = ( (DAY * 1000) / (m_timers[WUPDATE_AUCTIONS].GetInterval()));
     sLog.outDebug("Mail timer set to: %u, mail return is called every %u minutes", mail_timer, mail_timer_expires);
 
-    ///- Initialize Battlegrounds
-    sLog.outString( "Starting BattleGround System" );
-    sBattleGroundMgr.CreateInitialBattleGrounds();
-
-    ///- Initialize MapManager, AI, Waypoints, ...
-    MapManager::Instance().Initialize();
-    RedZone::Initialize();
+    ///- Initilize static helper structures
     AIRegistry::Initialize();
     WaypointMovementGenerator<Creature>::Initialize();
     Player::InitVisibleBits();
+    RedZone::Initialize();
+
+    ///- Initialize MapManager
+    sLog.outString( "Starting Map System" );
+    MapManager::Instance().Initialize();
+
+    ///- Initialize Battlegrounds
+    sLog.outString( "Starting BattleGround System" );
+    sBattleGroundMgr.CreateInitialBattleGrounds();
 
     //Not sure if this can be moved up in the sequence (with static data loading) as it uses MapManager
     sLog.outString( "Loading Transports..." );
@@ -1277,7 +1281,7 @@ void World::ScriptsProcess()
                 int32 time_to_despawn = step.script->datalong2<5 ? 5 : (int32)step.script->datalong2;
 
                 CellPair p(MaNGOS::ComputeCellPair(summoner->GetPositionX(), summoner->GetPositionY()));
-                Cell cell = RedZone::GetZone(p);
+                Cell cell(p);
                 cell.data.Part.reserved = ALL_DISTRICT;
 
                 MaNGOS::GameObjectWithDbGUIDCheck go_check(*summoner,step.script->datalong);
@@ -1338,7 +1342,7 @@ void World::ScriptsProcess()
                 int32 time_to_close = step.script->datalong2<5 ? 5 : (int32)step.script->datalong2;
 
                 CellPair p(MaNGOS::ComputeCellPair(caster->GetPositionX(), caster->GetPositionY()));
-                Cell cell = RedZone::GetZone(p);
+                Cell cell(p);
                 cell.data.Part.reserved = ALL_DISTRICT;
 
                 MaNGOS::GameObjectWithDbGUIDCheck go_check(*caster,step.script->datalong);

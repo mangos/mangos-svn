@@ -26,7 +26,7 @@
 
 class Map;
 
-typedef enum
+enum District
 {
     UPPER_DISTRICT = 1,
     LOWER_DISTRICT = 1 << 1,
@@ -38,7 +38,7 @@ typedef enum
     LOWER_LEFT_DISTRICT = (LOWER_DISTRICT | LEFT_DISTRICT),
     LOWER_RIGHT_DISTRICT = (LOWER_DISTRICT | RIGHT_DISTRICT),
     ALL_DISTRICT = (UPPER_DISTRICT | LOWER_DISTRICT | LEFT_DISTRICT | RIGHT_DISTRICT | CENTER_DISTRICT)
-} district_t;
+};
 
 template<class T> struct CellLock;
 
@@ -46,7 +46,8 @@ struct MANGOS_DLL_DECL Cell
 {
     Cell() { data.All = 0; }
     Cell(const Cell &cell) { data.All = cell.data.All; }
-
+    explicit Cell(CellPair const& p);
+    
     void operator|=(Cell &cell)
     {
         data.Part.reserved = 0;
@@ -102,12 +103,12 @@ struct MANGOS_DLL_DECL Cell
             data.Part.grid_y != cell.data.Part.grid_y );
     }
 
-    inline uint32 CellX(void) const { return data.Part.cell_x; }
-    inline uint32 CellY(void) const { return data.Part.cell_y; }
-    inline uint32 GridX(void) const { return data.Part.grid_x; }
-    inline uint32 GridY(void) const { return data.Part.grid_y; }
-    inline bool NoCreate(void) const { return data.Part.nocreate; }
-    inline void SetNoCreate(void) { data.Part.nocreate = 1; }
+    uint32 CellX() const { return data.Part.cell_x; }
+    uint32 CellY() const { return data.Part.cell_y; }
+    uint32 GridX() const { return data.Part.grid_x; }
+    uint32 GridY() const { return data.Part.grid_y; }
+    bool NoCreate() const { return data.Part.nocreate; }
+    void SetNoCreate() { data.Part.nocreate = 1; }
 
     CellPair cellPair() const
     {
@@ -139,7 +140,6 @@ struct MANGOS_DLL_DECL Cell
     } data;
 
     template<class LOCK_TYPE, class T, class CONTAINER> void Visit(const CellLock<LOCK_TYPE> &, TypeContainerVisitor<T, CONTAINER> &visitor, Map &) const;
-
 };
 
 template<class T>

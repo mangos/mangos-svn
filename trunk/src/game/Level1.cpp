@@ -29,7 +29,6 @@
 #include "MapManager.h"
 #include "ObjectAccessor.h"
 #include "Language.h"
-#include "RedZoneDistrict.h"
 #ifdef _DEBUG_VMAPS
 #include "VMapFactory.h"
 #endif
@@ -214,7 +213,7 @@ bool ChatHandler::HandleGPSCommand(const char* args)
     }
 
     CellPair cell_val = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
-    Cell cell = RedZone::GetZone(cell_val);
+    Cell cell(cell_val);
 
     uint32 zone_id = obj->GetZoneId();
     uint32 area_id = obj->GetAreaId();

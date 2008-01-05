@@ -84,7 +84,6 @@ class WorldSession;
 class Creature;
 class Player;
 class Map;
-class MapCell;
 class UpdateMask;
 class InstanceData;
 
