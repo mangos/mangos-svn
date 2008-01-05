@@ -4348,14 +4348,50 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                     if(!procSpell)
                         return;
 
-                    SpellEntry const *originalSpell = procSpell;
-
-                    // in case HShock procspell is triggered spell but we need mana cost of original casted spell
-                    if(procSpell->SpellFamilyName == SPELLFAMILY_PALADIN && procSpell->SpellFamilyFlags == 0x00200000)
+                    // procspell is triggered spell but we need mana cost of original casted spell
+                    uint32 originalSpellId = 0;
+                    if(procSpell->SpellFamilyName == SPELLFAMILY_PALADIN)
                     {
-                        uint32 originalSpellId = 0;
-                        switch(procSpell->Id)
+                        if(procSpell->SpellFamilyFlags & 0x00002000)
                         {
+                            switch(procSpell->Id)
+                            {
+                            case 19993: originalSpellId = 19750; break;
+                            case 35211: originalSpellId = 19939; break;
+                            case 35212: originalSpellId = 19940; break;
+                            case 35213: originalSpellId = 19941; break;
+                            case 35214: originalSpellId = 19942; break;
+                            case 35215: originalSpellId = 19943; break;
+                            case 35216: originalSpellId = 27137; break;
+                            default:
+                                sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in FoL",procSpell->Id);
+                                return;
+                            }
+                        }
+                        else if(procSpell->SpellFamilyFlags & 0x00004000)
+                        {
+                            switch(procSpell->Id)
+                            {
+                            case 19982: originalSpellId =   635; break;
+                            case 19981: originalSpellId =   639; break;
+                            case 19980: originalSpellId =   647; break;
+                            case 19968: originalSpellId =  1026; break;
+                            case 35217: originalSpellId =  1042; break;
+                            case 35218: originalSpellId =  3472; break;
+                            case 35219: originalSpellId = 10328; break;
+                            case 35220: originalSpellId = 10329; break;
+                            case 35221: originalSpellId = 25292; break;
+                            case 35222: originalSpellId = 27135; break;
+                            case 35223: originalSpellId = 27136; break;
+                            default:
+                                sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in HLight",procSpell->Id);
+                                return;
+                            }
+                        }
+                        else if(procSpell->SpellFamilyFlags & 0x00200000)
+                        {
+                            switch(procSpell->Id)
+                            {
                             case 25914: originalSpellId = 20473; break;
                             case 25913: originalSpellId = 20929; break;
                             case 25903: originalSpellId = 20930; break;
@@ -4364,14 +4400,15 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
                             default:
                                 sLog.outError("Unit::HandleProcTriggerSpell: Spell %u not handled in HShock",procSpell->Id);
                                 return;
+                            }
                         }
-                        SpellEntry const *HSSpell= sSpellStore.LookupEntry(originalSpellId);
-                        if(!HSSpell)
-                        {
-                            sLog.outError("Unit::HandleProcTriggerSpell: Spell %u unknown but used in HShock",originalSpellId);
-                            return;
-                        }
-                        originalSpell = HSSpell;
+                    }
+
+                    SpellEntry const *originalSpell = sSpellStore.LookupEntry(originalSpellId);
+                    if(!originalSpell)
+                    {
+                        sLog.outError("Unit::HandleProcTriggerSpell: Spell %u unknown but selected as original in Illu",originalSpellId);
+                        return;
                     }
 
                     // percent stored in effect 1 (class scripts) base points

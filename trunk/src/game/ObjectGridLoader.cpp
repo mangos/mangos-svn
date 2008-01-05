@@ -25,6 +25,7 @@
 #include "DynamicObject.h"
 #include "Corpse.h"
 #include "World.h"
+#include "CellImpl.h"
 
 class MANGOS_DLL_DECL ObjectGridRespawnMover
 {
