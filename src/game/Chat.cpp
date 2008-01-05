@@ -30,6 +30,7 @@
 #include "Chat.h"
 #include "MapManager.h"
 #include "GridNotifiersImpl.h"
+#include "CellImpl.h"
 
 bool ChatHandler::load_command_table = true;
 
