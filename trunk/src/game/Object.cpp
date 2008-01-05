@@ -37,7 +37,6 @@
 #include "VMapFactory.h"
 #include "WaypointMovementGenerator.h"
 #include "TargetedMovementGenerator.h"
-
 #include "CellImpl.h"
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"
