@@ -12078,7 +12078,7 @@ bool Player::HasQuestForItem( uint32 itemid )
                         if(qs.m_creatureOrGOcount[idx] * qinfo->ReqSourceCount[j] + GetItemCount(itemid) + GetBankItemCount(itemid) < qinfo->ReqCreatureOrGOCount[idx] * qinfo->ReqSourceCount[j])
                             return true;
                     }
-                    // spell with SPELL_EFFECT_QUEST_COMPLETE case
+                    // spell with SPELL_EFFECT_QUEST_COMPLETE or SPELL_EFFECT_SEND_EVENT (with script) case
                     else if(qinfo->ReqSpell[idx] != 0)
                     {
                         // not casted and need more reagents/item for use.

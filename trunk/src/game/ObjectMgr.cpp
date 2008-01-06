@@ -2455,16 +2455,27 @@ void ObjectMgr::LoadQuests()
                     bool found = false;
                     for(int k = 0; k < 3; ++k)
                     {
-                        if(spellInfo->Effect[k]==SPELL_EFFECT_QUEST_COMPLETE && spellInfo->EffectMiscValue[k]==qinfo->QuestId)
+                        if( spellInfo->Effect[k]==SPELL_EFFECT_QUEST_COMPLETE && spellInfo->EffectMiscValue[k]==qinfo->QuestId ||
+                            spellInfo->Effect[k]==SPELL_EFFECT_SEND_EVENT)
                         {
                             found = true;
                             break;
                         }
                     }
 
-                    if(!found)
+                    if(found)
                     {
-                        sLog.outErrorDb("Quest %u has `ReqSpellCast%d` = %u and ReqCreatureOrGOId%d = 0 but spell %u does not have SPELL_EFFECT_QUEST_COMPLETE effect for this quest, quest can't be done.",
+                        if(!qinfo->HasFlag(QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT))
+                        {
+                            sLog.outErrorDb("Spell (id: %u) have SPELL_EFFECT_QUEST_COMPLETE or SPELL_EFFECT_SEND_EVENT for quest %u and ReqCreatureOrGOId%d = 0, but quest not have flag QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT. Quest flags or ReqCreatureOrGOId%d must be fixed, quest modified to enable objective.",spellInfo->Id,qinfo->QuestId,j+1,j+1);
+
+                            // this will prevent quest completing without objective
+                            const_cast<Quest*>(qinfo)->SetFlag(QUEST_MANGOS_FLAGS_EXPLORATION_OR_EVENT);
+                        }
+                    }
+                    else
+                    {
+                        sLog.outErrorDb("Quest %u has `ReqSpellCast%d` = %u and ReqCreatureOrGOId%d = 0 but spell %u does not have SPELL_EFFECT_QUEST_COMPLETE or SPELL_EFFECT_SEND_EVENT effect for this quest, quest can't be done.",
                             qinfo->GetQuestId(),j+1,id,j+1,id);
                         // no changes, quest can't be done for this requirement
                     }
