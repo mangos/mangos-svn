@@ -12073,9 +12073,18 @@ bool Player::HasQuestForItem( uint32 itemid )
                         return true;
 
                     // total count of casted ReqCreatureOrGOs and SourceItems is less than ReqCreatureOrGOCount
-                    if (qinfo->ReqCreatureOrGOId[idx] != 0 &&
-                        qs.m_creatureOrGOcount[idx] * qinfo->ReqSourceCount[j] + GetItemCount(itemid) + GetBankItemCount(itemid) < qinfo->ReqCreatureOrGOCount[idx] * qinfo->ReqSourceCount[j])
-                        return true;
+                    if (qinfo->ReqCreatureOrGOId[idx] != 0)
+                    {
+                        if(qs.m_creatureOrGOcount[idx] * qinfo->ReqSourceCount[j] + GetItemCount(itemid) + GetBankItemCount(itemid) < qinfo->ReqCreatureOrGOCount[idx] * qinfo->ReqSourceCount[j])
+                            return true;
+                    }
+                    // spell with SPELL_EFFECT_QUEST_COMPLETE case
+                    else if(qinfo->ReqSpell[idx] != 0)
+                    {
+                        // not casted and need more reagents/item for use.
+                        if(!qs.m_explored && GetItemCount(itemid) + GetBankItemCount(itemid) < qinfo->ReqSourceCount[j])
+                            return true;
+                    }
                 }
             }
         }

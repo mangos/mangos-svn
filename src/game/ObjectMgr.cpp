@@ -2442,7 +2442,8 @@ void ObjectMgr::LoadQuests()
             uint32 id = qinfo->ReqSpell[j];
             if(id)
             {
-                if(!sSpellStore.LookupEntry(id))
+                SpellEntry const* spellInfo = sSpellStore.LookupEntry(id);
+                if(!spellInfo)
                 {
                     sLog.outErrorDb("Quest %u has `ReqSpellCast%d` = %u but spell %u does not exist, quest can't be done.",
                         qinfo->GetQuestId(),j+1,id,id);
@@ -2451,9 +2452,22 @@ void ObjectMgr::LoadQuests()
 
                 if(!qinfo->ReqCreatureOrGOId[j])
                 {
-                    sLog.outErrorDb("Quest %u has `ReqSpellCast%d` = %u but `ReqCreatureOrGOId%d` = 0, quest can't be done.",
-                        qinfo->GetQuestId(),j+1,id,j+1);
-                    // no changes, quest can be incorrectly done, but we already report this
+                    bool found = false;
+                    for(int k = 0; k < 3; ++k)
+                    {
+                        if(spellInfo->Effect[k]==SPELL_EFFECT_QUEST_COMPLETE && spellInfo->EffectMiscValue[k]==qinfo->QuestId)
+                        {
+                            found = true;
+                            break;
+                        }
+                    }
+
+                    if(!found)
+                    {
+                        sLog.outErrorDb("Quest %u has `ReqSpellCast%d` = %u and ReqCreatureOrGOId%d = 0 but spell %u does not have SPELL_EFFECT_QUEST_COMPLETE effect for this quest, quest can't be done.",
+                            qinfo->GetQuestId(),j+1,id,j+1,id);
+                        // no changes, quest can't be done for this requirement
+                    }
                 }
             }
         }
