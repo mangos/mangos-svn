@@ -121,17 +121,18 @@ void PlayerMenu::SendGossipMenu( uint32 TitleTextId, uint64 npcGUID )
 
     for ( unsigned int iI = 0; iI < pGossipMenu->MenuItemCount(); iI++ )
     {
+        GossipMenuItem const& gItem = pGossipMenu->GetItem(iI);
         data << uint32( iI );
-        data << uint8( pGossipMenu->GetItem(iI).m_gIcon );
+        data << uint8( gItem.m_gIcon );
         // icons:
         // 0 unlearn talents/misc
         // 1 trader
         // 2 taxi
         // 3 trainer
         // 9 BG/arena
-        data << uint8( pGossipMenu->GetItem(iI).m_gCoded );
+        data << uint8( gItem.m_gCoded );
         data << uint32(0);                                  // req money to open menu, 2.0.3
-        data << pGossipMenu->GetItem(iI).m_gMessage;
+        data << gItem.m_gMessage;
         data << uint8(0);                                   // unknown, 2.0.3
     }
 
@@ -139,11 +140,12 @@ void PlayerMenu::SendGossipMenu( uint32 TitleTextId, uint64 npcGUID )
 
     for ( uint16 iI = 0; iI < pQuestMenu->MenuItemCount(); iI++ )
     {
-        uint32 questID = pQuestMenu->GetItem(iI).m_qId;
+        QuestMenuItem const& qItem = pQuestMenu->GetItem(iI);
+        uint32 questID = qItem.m_qId;
         Quest const* pQuest = objmgr.GetQuestTemplate(questID);
 
         data << questID;
-        data << uint32( pQuestMenu->GetItem(iI).m_qIcon );
+        data << uint32( qItem.m_qIcon );
         data << uint32( pQuest ? pQuest->GetQuestLevel() : 0 );
         std::string Title = pQuest->GetTitle();
 

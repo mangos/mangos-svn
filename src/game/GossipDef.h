@@ -111,7 +111,7 @@ class MANGOS_DLL_SPEC GossipMenu
             return m_gItems.size();
         }
 
-        GossipMenuItem GetItem( unsigned int Id )
+        GossipMenuItem const& GetItem( unsigned int Id )
         {
             return m_gItems[ Id ];
         }
@@ -140,7 +140,7 @@ class QuestMenu
         }
         bool HasItem( uint32 questid );
 
-        QuestMenuItem GetItem( uint16 Id )
+        QuestMenuItem const& GetItem( uint16 Id )
         {
             return m_qItems[ Id ];
         }
