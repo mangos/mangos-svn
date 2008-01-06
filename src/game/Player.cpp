@@ -4161,9 +4161,15 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
             if(affectStats)
                 UpdateDefenseBonusesMod();
             break;
-        case PLAYER_FIELD_DODGE_RATING:                  UpdateDodgePercentage();                        break;
-        case PLAYER_FIELD_PARRY_RATING:                  UpdateParryPercentage();                        break;
-        case PLAYER_FIELD_BLOCK_RATING:                  UpdateBlockPercentage();                        break;
+        case PLAYER_FIELD_DODGE_RATING:
+            UpdateDodgePercentage();
+            break;
+        case PLAYER_FIELD_PARRY_RATING:
+            UpdateParryPercentage();
+            break;
+        case PLAYER_FIELD_BLOCK_RATING:
+            UpdateBlockPercentage();
+            break;
         case PLAYER_FIELD_MELEE_HIT_RATING:
             //Hit (melee): 10
             RatingChange = value/ RatingCoeffecient;
@@ -4181,13 +4187,16 @@ void Player::ApplyRatingMod(uint16 index, int32 value, bool apply)
             break;
         case PLAYER_FIELD_MELEE_CRIT_RATING:
             if(affectStats)
-                UpdateCritPercentage(BASE_ATTACK);                                                        break;
+                UpdateCritPercentage(BASE_ATTACK);
+            break;
         case PLAYER_FIELD_RANGED_CRIT_RATING:
             if(affectStats)
-                UpdateCritPercentage(RANGED_ATTACK);                                                      break;
+                UpdateCritPercentage(RANGED_ATTACK);
+            break;
         case PLAYER_FIELD_SPELL_CRIT_RATING:
             if(affectStats)
-                UpdateAllSpellCritChances();                                                              break;
+                UpdateAllSpellCritChances();
+            break;
         case PLAYER_FIELD_MELEE_HASTE_RATING:
             //Haste: 6.67
             RatingChange = value/ RatingCoeffecient;

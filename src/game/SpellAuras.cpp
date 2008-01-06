@@ -3446,7 +3446,8 @@ void Aura::HandleModSpellCritChance(bool Apply, bool Real)
 {
     if(m_target->GetTypeId() == TYPEID_PLAYER)
     {
-        ((Player*)m_target)->HandleBaseModValue(SPELL_CRIT_PERCENTAGE, FLAT_MOD, float(m_modifier.m_amount), Apply);
+        for(int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
+            ((Player*)m_target)->HandleBaseModValue( BaseModGroup(SPELL_CRIT_PERCENTAGE + i), FLAT_MOD, float(m_modifier.m_amount), Apply);
     }
     else
     {
@@ -3459,7 +3460,7 @@ void Aura::HandleModSpellCritChanceShool(bool apply, bool Real)
     if(m_target->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    for(int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; i++)
+    for(int i = SPELL_SCHOOL_HOLY; i < MAX_SPELL_SCHOOL; ++i)
     {
         if(m_modifier.m_miscvalue == -2 || (m_modifier.m_miscvalue & 1<<i) != 0)
             ((Player*)m_target)->HandleBaseModValue( BaseModGroup(SPELL_CRIT_PERCENTAGE + i), FLAT_MOD, float(m_modifier.m_amount), apply);
