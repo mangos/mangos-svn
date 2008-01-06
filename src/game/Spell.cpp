@@ -3552,15 +3552,21 @@ uint8 Spell::CheckItems()
                 if(!targetItem)
                     return SPELL_FAILED_ITEM_NOT_FOUND;
 
-                if(targetItem->GetProto()->ItemLevel < m_spellInfo->baseLevel)
+                if( targetItem->GetProto()->ItemLevel < m_spellInfo->baseLevel )
                     return SPELL_FAILED_LOWLEVEL;
 
                 break;
             }
             case SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY:
-                if(!m_targets.getItemTarget())
-                    return SPELL_FAILED_ITEM_NOT_FOUND;
+            {
+                Item *item = m_targets.getItemTarget();
+                if(!item)
+                   return SPELL_FAILED_ITEM_NOT_FOUND;
+                // not allow apply temporary enchantments in trade slot
+                if( item->GetOwner() != m_caster )
+                   return SPELL_FAILED_ITEM_NOT_FOUND;
                 break;
+            }
             case SPELL_EFFECT_ENCHANT_HELD_ITEM:
                 // check item existence in effect code (not output errors at offhand hold item effect to main hand for example
                 break;
