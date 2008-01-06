@@ -23,7 +23,7 @@
 
 class DOTCONFDocument;
 
-class Config 
+class Config
 {
     public:
         Config();

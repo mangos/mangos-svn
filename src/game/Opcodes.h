@@ -983,7 +983,7 @@ enum OpCodes
     SMSG_UNKNOWN_954                                = 954,
     CMSG_COMMENTATOR_INSTANCE_ENTER                 = 955,
     CMSG_COMMENTATOR_INSTANCE_EXIT                  = 956,
-    CMSG_COMMENTATOR_ADD_OR_REMOVE_PLAYER           = 957, 
+    CMSG_COMMENTATOR_ADD_OR_REMOVE_PLAYER           = 957,
     SMSG_UNKNOWN_958                                = 958,  // uint64 guid, cause client to send CMSG_SET_SELECTION
     CMSG_UNKNOWN_959                                = 959,  // uint8, uint8, uint8, string
     SMSG_UNKNOWN_960                                = 960,  // uint64 guid, uint32, uint32 (client sedn CMSG_ITEM_QUERY_SINGLE)

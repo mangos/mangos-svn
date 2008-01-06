@@ -115,7 +115,7 @@ uint32 GetSkillLevel(Player *player,uint32 trskill)
             spell_journeyman = 7734;
             spell_expert     = 7736;
             spell_artisan    = 18249;
-            spell_master     = 33098; // teached by 33100 
+            spell_master     = 33098; // teached by 33100
             break;
         case TRADESKILL_SKINNING:
             spell_apprentice = 8615;

@@ -440,10 +440,10 @@ bool AuthSocket::_HandleLogonChallenge()
                         b.SetRand(19 * 8);
                         BigNumber gmod=g.ModExp(b, N);
                         B = ((v * 3) + gmod) % N;
-                        
+
                         if (B.GetNumBytes() < 32)
                             sLog.outDetail("Interesting, calculation of B in realmd is < 32.");
-                        
+
                         ASSERT(gmod.GetNumBytes() <= 32);
 
                         BigNumber unk3;
@@ -473,7 +473,7 @@ bool AuthSocket::_HandleLogonChallenge()
                                 _localization=LOCALE_ENG;
                         }
                         else
-                            _localization=LOCALE_ENG; 
+                            _localization=LOCALE_ENG;
 
                         sLog.outBasic("[AuthChallenge] account %s is using '%c%c' locale (%u)", _login.c_str (), ch->country[3],ch->country[2], _localization);
                     }

@@ -382,8 +382,8 @@ void Spell::EffectSchoolDMG(uint32 i)
 
         if(damage >= 0)
         {
-            m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell, !BTAura);
-            
+            m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, damage, m_IsTriggeredSpell, true);
+
             if (BTAura)
                 m_caster->CastSpell(m_caster,BTAura,true);
         }
@@ -820,7 +820,7 @@ void Spell::EffectDummy(uint32 i)
                 uint32 classspell = itr->first;
                 SpellEntry const *spellInfo = sSpellStore.LookupEntry(classspell);
 
-                if( spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && spellInfo->School == SPELL_SCHOOL_FROST && 
+                if( spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && spellInfo->School == SPELL_SCHOOL_FROST &&
                     spellInfo->Id != 12472 && GetRecoveryTime(spellInfo) > 0 )
                 {
                     ((Player*)m_caster)->RemoveSpellCooldown(classspell);
@@ -1000,7 +1000,7 @@ void Spell::EffectDummy(uint32 i)
 
             // chance to be selected from list
             float chance = 100.0f/(attackers.size());
-            
+
             for(Unit::AttackerSet::const_iterator aItr = attackers.begin(); aItr != attackers.end() && selectedTargets.size() < 3; ++aItr)
             {
                 if(!roll_chance_f(chance))
@@ -1214,15 +1214,15 @@ void Spell::EffectTriggerSpell(uint32 i)
                 return;
 
             std::list<uint64> const& selectedTargets = m_targetUnitGUIDs[2];
-            
+
             for(std::list<uint64>::const_iterator itr = selectedTargets.begin(); itr != selectedTargets.end(); ++itr)
                 if(Unit* unit = ObjectAccessor::GetUnit(*m_caster,(*itr)))
                     m_caster->CastSpell(unit,31790,true);
-                
+
             return;
         }
     }
-         
+
     // normal case
     SpellEntry const *spellInfo = sSpellStore.LookupEntry( triggered_spell_id );
 
@@ -2583,7 +2583,7 @@ void Spell::EffectEnchantItemTmp(uint32 i)
         sLog.outError("Spell %u Effect %u (SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY) have not existed enchanting id %u ",m_spellInfo->Id,i,enchant_id);
         return;
     }
-    
+
     // select enchantment duration
     uint32 duration;
 
@@ -2593,7 +2593,7 @@ void Spell::EffectEnchantItemTmp(uint32 i)
     // other rogue family enchantments always 1 hour (some have spell damage=0, but some have wrong data in EffBasePoints)
     else if(m_spellInfo->SpellFamilyName==SPELLFAMILY_ROGUE)
         duration = 3600;                                    // 1 hour
-    // shaman family enchantments 
+    // shaman family enchantments
     else if(m_spellInfo->SpellFamilyName==SPELLFAMILY_SHAMAN)
         duration = 3600;                                    // 1 hour
     // other cases with this SpellVisual already selected
@@ -2891,8 +2891,8 @@ void Spell::EffectTaunt(uint32 i)
             return;
         }
     }
-    
-    //Also use this effect to set the taunter's threat to the taunted creature's highest value 
+
+    //Also use this effect to set the taunter's threat to the taunted creature's highest value
     if(unitTarget->CanHaveThreatList() && unitTarget->getThreatManager().getCurrentVictim())
         unitTarget->getThreatManager().addThreat(m_caster,unitTarget->getThreatManager().getCurrentVictim()->getThreat());
 }
@@ -3303,8 +3303,8 @@ void Spell::EffectScriptEffect(uint32 i)
                     return;
 
                 int spell_id = 0;
-                switch(m_spellInfo->Id)    
-                {    
+                switch(m_spellInfo->Id)
+                {
                     case 19750: spell_id = 19993; break;    // Rank 1
                     case 19939: spell_id = 35211; break;    // Rank 2
                     case 19940: spell_id = 35212; break;    // Rank 3
@@ -3315,21 +3315,21 @@ void Spell::EffectScriptEffect(uint32 i)
                     default:
                         sLog.outError("Spell::EffectScriptEffect: Spell %u not handled in FoL",m_spellInfo->Id);
                 }
-                
+
                 int32 basePoint0 = damage-1;
 
                 m_caster->CastCustomSpell(unitTarget, spell_id, &basePoint0, NULL, NULL, true);
                 return;
             }
-            // Holy Light 
+            // Holy Light
             case 0x80000000:
             {
                 if(!unitTarget)
                     return;
 
                 int spell_id = 0;
-                switch(m_spellInfo->Id)    
-                {    
+                switch(m_spellInfo->Id)
+                {
                 case   635: spell_id = 19982; break;        // Rank 1
                 case   639: spell_id = 19981; break;        // Rank 2
                 case   647: spell_id = 19980; break;        // Rank 3
@@ -3344,7 +3344,7 @@ void Spell::EffectScriptEffect(uint32 i)
                 default:
                     sLog.outError("Spell::EffectScriptEffect: Spell %u not handled in HL",m_spellInfo->Id);
                 }
-                
+
                 int32 basePoint0 = damage-1;
 
                 m_caster->CastCustomSpell(unitTarget, spell_id, &basePoint0, NULL, NULL, true);

@@ -79,7 +79,7 @@ void BattleGroundQueue::AddPlayer(Player *plr, uint32 bgTypeId)
     else
         m_QueuedPlayers[queue_id].Horde++;
 
-    /* temporary BG queue status message 
+    /* temporary BG queue status message
     std::ostringstream str;
     str << "Battleground queue invited status: horde: " << m_QueuedPlayers[queue_id].Horde << ", aliance: " << m_QueuedPlayers[queue_id].Alliance;
     plr->Say(str.str(), LANG_UNIVERSAL);*/
@@ -240,7 +240,7 @@ void BattleGroundQueue::Update(uint32 bgTypeId, uint32 queue_id)
     /* here will be a most of change, when we create battlegrounds instanciated */
     /* if (there is enought players to start new BG)
         Battleground* newbg = sBattleGroundMgr.CreateNewBattleGround(bgTypeId)
-        - that function will use the COPY constructor on BattleGround class ( in bg manager we should have one battleground as a template 
+        - that function will use the COPY constructor on BattleGround class ( in bg manager we should have one battleground as a template
             (battleground template will be used only to create new BGs, it will be an instance of BG class, but it won't ever start) */
 
     /* folowing code is working with current Battleground system and it should be removed, when BGs will work like instances */

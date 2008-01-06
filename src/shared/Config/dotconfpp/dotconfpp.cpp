@@ -83,7 +83,7 @@ int DOTCONFDocument::cleanupLine(char * line)
         if((*line == '#' || *line == ';') && !quoted){
             *bg = 0;
             if(strlen(start)){
-                
+
                 if(concat){
                     word = (char*)mempool->alloc(strlen(words.back())+strlen(start)+1);
                     strcpy(word, words.back());
@@ -97,7 +97,7 @@ int DOTCONFDocument::cleanupLine(char * line)
             }
             break;
         }
-        if(*line == '=' && !quoted){ 
+        if(*line == '=' && !quoted){
             *line = ' ';continue;
         }
 
@@ -116,10 +116,10 @@ int DOTCONFDocument::cleanupLine(char * line)
             *bg++ = '\r';
             line+=2; continue;
         }
-        if(*line == '\\' && (*(line+1) == '\n' || *(line+1) == '\r')){ 
+        if(*line == '\\' && (*(line+1) == '\n' || *(line+1) == '\r')){
             *bg = 0;
             if(strlen(start)){
-                
+
                 if(concat){
                     word = (char*)mempool->alloc(strlen(words.back())+strlen(start)+1);
                     strcpy(word, words.back());
@@ -134,14 +134,14 @@ int DOTCONFDocument::cleanupLine(char * line)
             multiline = true;
             break;
         }
-        if(*line == '"' || *line == '\''){ 
+        if(*line == '"' || *line == '\''){
             quoted = !quoted;
             line++; continue;
         }
         if(isspace(*line) && !quoted){
             *bg++ = 0;
             if(strlen(start)){
-                
+
                 if(concat){
                     word = (char*)mempool->alloc(strlen(words.back())+strlen(start)+1);
                     strcpy(word, words.back());
@@ -197,12 +197,12 @@ int DOTCONFDocument::parseLine()
 
         if(nodeName == NULL){
             nodeName = word;
-            bool closed = true; 
+            bool closed = true;
             if(*nodeName == '<'){
-                if(*(nodeName+1) != '/'){ 
+                if(*(nodeName+1) != '/'){
                     nodeName++;
                     closed = false;
-                } else { 
+                } else {
                     nodeName+=2;
                     std::list<DOTCONFDocumentNode*>::reverse_iterator itr=nodeTree.rbegin();
                     for(; itr!=nodeTree.rend(); ++itr){
@@ -303,7 +303,7 @@ int DOTCONFDocument::checkConfig(const std::list<DOTCONFDocumentNode*>::iterator
         }
         vi = 0;
         while( vi < tagNode->valuesCount ){
-            
+
             if(strstr(tagNode->values[vi], "${") && strchr(tagNode->values[vi], '}') ){
                 ret = macroSubstitute(tagNode, vi );
                 mempool->free();
@@ -385,10 +385,10 @@ int DOTCONFDocument::setContent(const char * _fileName)
                         error(tagNode->lineNum, fileName, "failed to open file '%s': %s", tagNode->values[vi], strerror(errno));
                         return -1;
                     }
-                    
+
                     fileName = strdup(realpathBuf);
                     from = nodeTree.end(); from--;
-                    
+
                     ret = parseFile();
                     (void) fclose(file);
                     if(ret == -1)
@@ -400,7 +400,7 @@ int DOTCONFDocument::setContent(const char * _fileName)
                 }
             }
         }
-        
+
 
         if(!requiredOptions.empty())
             ret = checkRequiredOptions();
@@ -547,7 +547,7 @@ const DOTCONFDocumentNode * DOTCONFDocument::getFirstNode() const
 
 const DOTCONFDocumentNode * DOTCONFDocument::findNode(const char * nodeName, const DOTCONFDocumentNode * parentNode, const DOTCONFDocumentNode * startNode) const
 {
-    
+
 
     std::list<DOTCONFDocumentNode*>::const_iterator i = nodeTree.begin();
 
@@ -562,7 +562,7 @@ const DOTCONFDocumentNode * DOTCONFDocument::findNode(const char * nodeName, con
     }
 
     for(; i!=nodeTree.end(); i++){
-        
+
     if((*i)->parentNode != parentNode){
             continue;
         }

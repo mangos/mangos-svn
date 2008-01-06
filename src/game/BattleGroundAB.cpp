@@ -207,7 +207,7 @@ void BattleGroundAB::Update(time_t diff)
                     m_bgbuffobjects[node].object = new GameObject(NULL);
                     if (!m_bgbuffobjects[node].object->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), BG_AB_BuffObjects[buff][0], GetMapId(), BG_AB_BuffPositions[node][0], BG_AB_BuffPositions[node][1], BG_AB_BuffPositions[node][2], BG_AB_BuffPositions[node][3], 0, 0, sin(BG_AB_BuffPositions[node][3]/2), cos(BG_AB_BuffPositions[node][3]/2), 0, 0))
                         ASSERT(0);
-                    m_bgbuffobjects[node].spellId = BG_AB_BuffObjects[buff][1]; 
+                    m_bgbuffobjects[node].spellId = BG_AB_BuffObjects[buff][1];
                     MapManager::Instance().GetMap(GetMapId(), m_bgbuffobjects[node].object)->Add(m_bgbuffobjects[node].object);
 
                 // pickup checking
@@ -753,4 +753,5 @@ void BattleGroundAB::UpdatePlayerScore(Player* Source, uint32 type, uint32 value
             break;
     }
 }
+
 

@@ -199,7 +199,7 @@ void Master::Run()
 #ifdef WIN32
         if (m_ServiceStatus == 0) World::m_stopEvent = true;
         while (m_ServiceStatus == 2) Sleep(1000);
-#endif        
+#endif
         if (realPrevTime > realCurrTime)
             realPrevTime = 0;
 

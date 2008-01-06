@@ -123,7 +123,7 @@ QueryResult* DatabasePostgre::Query(const char *sql)
     {
 #ifdef MANGOS_DEBUG
         sLog.outDebug("[%u ms] SQL: %s", getMSTime() - _s, sql );
-#endif         
+#endif
     }
 
     rowCount = PQntuples(result);
@@ -172,7 +172,7 @@ bool DatabasePostgre::Execute(const char *sql)
         {
 #ifdef MANGOS_DEBUG
         sLog.outDebug("[%u ms] SQL: %s", getMSTime() - _s, sql );
-#endif 
+#endif
         }
         PQclear(res);
 

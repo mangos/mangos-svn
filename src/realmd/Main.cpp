@@ -243,9 +243,9 @@ extern int main(int argc, char **argv)
             delete dbRealmServer.Query("SELECT 1 FROM `realmlist` LIMIT 1");
         }
 #ifdef WIN32
-	    if (m_ServiceStatus == 0) stopEvent = true;
-	    while (m_ServiceStatus == 2) Sleep(1000);
-#endif        
+        if (m_ServiceStatus == 0) stopEvent = true;
+        while (m_ServiceStatus == 2) Sleep(1000);
+#endif
     }
 
     ///- Wait for the delay thread to exit

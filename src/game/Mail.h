@@ -106,7 +106,7 @@ struct MailItem
     uint64 item_guid;                                   // item guid
     uint32 item_template;                               // item entry
     Item *item;                                         // item pointer
-    
+
     void deleteItem()
     {
         if(item)
@@ -145,7 +145,7 @@ struct MailItemsInfo
         mailItem.item_slot = slot;
         i_MailItemMap[guid] = mailItem;
     }
-    
+
     bool hasGuid(uint64 pGuid)
     {
         return(i_MailItemMap.find(pGuid) != i_MailItemMap.end());

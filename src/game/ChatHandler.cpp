@@ -101,7 +101,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             // strip invisible characters for non-addon messages
             if (lang != LANG_ADDON)
                 stripLineInvisibleChars(msg);
-                
+
             if(msg.empty())
                 break;
 

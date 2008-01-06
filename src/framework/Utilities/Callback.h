@@ -129,7 +129,7 @@ namespace MaNGOS
     };
 
     template < class Class, typename ParamType1 = void, typename ParamType2 = void, typename ParamType3 = void, typename ParamType4 = void >
-    class Callback : 
+    class Callback :
         public _ICallback< _Callback < Class, ParamType1, ParamType2, ParamType3, ParamType4 > >
     {
         private:
@@ -140,7 +140,7 @@ namespace MaNGOS
     };
 
     template < class Class, typename ParamType1, typename ParamType2, typename ParamType3 >
-    class Callback < Class, ParamType1, ParamType2, ParamType3 > : 
+    class Callback < Class, ParamType1, ParamType2, ParamType3 > :
         public _ICallback< _Callback < Class, ParamType1, ParamType2, ParamType3 > >
     {
         private:
@@ -151,7 +151,7 @@ namespace MaNGOS
     };
 
     template < class Class, typename ParamType1, typename ParamType2 >
-    class Callback < Class, ParamType1, ParamType2 > : 
+    class Callback < Class, ParamType1, ParamType2 > :
         public _ICallback< _Callback < Class, ParamType1, ParamType2 > >
     {
         private:
@@ -162,7 +162,7 @@ namespace MaNGOS
     };
 
     template < class Class, typename ParamType1 >
-    class Callback < Class, ParamType1 > : 
+    class Callback < Class, ParamType1 > :
         public _ICallback< _Callback < Class, ParamType1 > >
     {
         private:
@@ -209,7 +209,7 @@ namespace MaNGOS
     };
 
     template < class Class, typename ParamType1 = void, typename ParamType2 = void, typename ParamType3 = void >
-    class QueryCallback : 
+    class QueryCallback :
         public _IQueryCallback< _Callback < Class, QueryResult*, ParamType1, ParamType2, ParamType3 > >
     {
         private:
@@ -220,7 +220,7 @@ namespace MaNGOS
     };
 
     template < class Class, typename ParamType1, typename ParamType2 >
-    class QueryCallback < Class, ParamType1, ParamType2 > : 
+    class QueryCallback < Class, ParamType1, ParamType2 > :
         public _IQueryCallback< _Callback < Class, QueryResult*, ParamType1, ParamType2 > >
     {
         private:
@@ -231,7 +231,7 @@ namespace MaNGOS
     };
 
     template < class Class, typename ParamType1 >
-    class QueryCallback < Class, ParamType1 > : 
+    class QueryCallback < Class, ParamType1 > :
         public _IQueryCallback< _Callback < Class, QueryResult*, ParamType1 > >
     {
         private:
