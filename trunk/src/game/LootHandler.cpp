@@ -176,7 +176,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         }
 
         //if only one person is supposed to loot the item, then set it to looted
-        if (!item->freeforall) 
+        if (!item->freeforall)
             item->is_looted = true;
 
         loot->unlootedCount--;

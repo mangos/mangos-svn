@@ -1409,7 +1409,7 @@ void World::ScriptsProcess()
                     sLog.outError("SCRIPT_COMMAND_QUEST_EXPLORED call for non-player(TypeId: %u), skipping.",target->GetTypeId());
                     break;
                 }
-                
+
                 WorldObject* sourceWO = (WorldObject*)source;
                 Player* targetPlr = (Player*)target;
 

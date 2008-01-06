@@ -47,7 +47,7 @@ struct MANGOS_DLL_DECL Cell
     Cell() { data.All = 0; }
     Cell(const Cell &cell) { data.All = cell.data.All; }
     explicit Cell(CellPair const& p);
-    
+
     void operator|=(Cell &cell)
     {
         data.Part.reserved = 0;

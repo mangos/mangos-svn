@@ -585,10 +585,10 @@ void GameObject::Respawn()
 }
 
 bool GameObject::ActivateToQuest( Player *pTarget)const
-{   
+{
     if(!objmgr.IsGameObjectForQuests(GetEntry()))
         return false;
- 
+
     LootStore::iterator tab = LootTemplates_Gameobject.find(GetLootId());
     if (tab != LootTemplates_Gameobject.end())
     {

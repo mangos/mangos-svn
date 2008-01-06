@@ -1078,7 +1078,7 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
                     // Apply crit_damage bonus
                     if(Player* modOwner = GetSpellModOwner())
                         modOwner->ApplySpellMod(spellInfo->Id, SPELLMOD_CRIT_DAMAGE_BONUS, bonusDmg);
-    
+
                     *damage += bonusDmg;
 
                     // Resilience - reduce crit damage by 2x%
@@ -1229,7 +1229,7 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
                         cleanDamage->damage += blocked_amount;
                         *damage = *damage - blocked_amount;
                     }
-                        
+
                     pVictim->ModifyAuraState(AURA_STATE_DEFENSE, true);
                     pVictim->StartReactiveTimer( REACTIVE_DEFENSE );
 
@@ -2722,15 +2722,15 @@ float Unit::GetUnitCriticalChance(WeaponAttackType attackType, const Unit *pVict
     {
         switch(attackType)
         {
-        case BASE_ATTACK:   
-            crit = GetFloatValue( PLAYER_CRIT_PERCENTAGE ); 
+        case BASE_ATTACK:
+            crit = GetFloatValue( PLAYER_CRIT_PERCENTAGE );
             crit+= pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_CHANCE);
             break;
         case OFF_ATTACK:
             crit = GetFloatValue( PLAYER_OFFHAND_CRIT_PERCENTAGE );
             crit+= pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_MELEE_CRIT_CHANCE);
             break;
-        case RANGED_ATTACK: 
+        case RANGED_ATTACK:
             crit = GetFloatValue( PLAYER_RANGED_CRIT_PERCENTAGE );
             crit+= pVictim->GetTotalAuraModifier(SPELL_AURA_MOD_ATTACKER_RANGED_CRIT_CHANCE);
             break;
@@ -4608,7 +4608,7 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
             }
             return;
         }
-        
+
         // Bonus Healing (item spell)
         case 40971:
         {
@@ -6726,7 +6726,7 @@ int32 Unit::CalculateSpellDuration(SpellEntry const* spellProto)
 
     int32 minduration = GetDuration(spellProto);
     int32 maxduration = GetMaxDuration(spellProto);
-    
+
     int32 duration;
 
     if( minduration != -1 && minduration != maxduration )
@@ -6744,7 +6744,7 @@ int32 Unit::CalculateSpellDuration(SpellEntry const* spellProto)
         duration = duration * (100+durationMod) /100;
         if (duration < 0) duration = 0;
     }
-    
+
     return duration;
 }
 

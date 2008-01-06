@@ -211,7 +211,7 @@ bool Weather::UpdateWeather()
         m_grade = 0.9999f;
     else if (m_grade < 0)
         m_grade = 0.0001f;
-        
+
     WeatherState state = GetWeatherState();
 
     WorldPacket data( SMSG_WEATHER, (4+4+4) );

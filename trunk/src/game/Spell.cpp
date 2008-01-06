@@ -968,22 +968,22 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
 
                 std::list<Unit *> tempUnitMap;
 
-             
+
                 {
                     CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
                     Cell cell(p);
                     cell.data.Part.reserved = ALL_DISTRICT;
                     cell.SetNoCreate();
-    
+
                     MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, tempUnitMap, max_range, PUSH_SELF_CENTER, SPELL_TARGETS_FRIENDLY);
-    
+
                     TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > world_object_notifier(notifier);
                     TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer >  grid_object_notifier(notifier);
-    
+
                     CellLock<GridReadGuard> cell_lock(cell, p);
                     cell_lock->Visit(cell_lock, world_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
                     cell_lock->Visit(cell_lock, grid_object_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
-    
+
                 }
 
                 if(m_caster != pUnitTarget && std::find(tempUnitMap.begin(),tempUnitMap.end(),m_caster) == tempUnitMap.end() )
@@ -1024,7 +1024,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
                     tempUnitMap.erase(next);
                     tempUnitMap.sort(TargetDistanceOrder(prev));
                     next = tempUnitMap.begin();
- 
+
                     --t;
                 }
             }
@@ -1994,7 +1994,7 @@ void Spell::SendCastResult(uint8 result)
                     data << uint32(3842);
                 else if( m_spellInfo->Id==41617 || m_spellInfo->Id==41619 )
                     data << uint32(3905);
-                // normal case 
+                // normal case
                 else
                     data << uint32(m_spellInfo->AreaId);
                 break;
@@ -2614,7 +2614,7 @@ uint8 Spell::CanCast(bool strict)
     // zone check
     uint32 zone_id = m_caster->GetAreaId();
 
-    // normal case 
+    // normal case
     if( m_spellInfo->AreaId != zone_id && m_spellInfo->AreaId && m_spellInfo->AreaId != m_caster->GetAreaId() )
         return SPELL_FAILED_REQUIRES_AREA;
 
@@ -3564,10 +3564,10 @@ uint8 Spell::CheckItems()
                 Item* targetItem = m_targets.getItemTarget();
                 if(!targetItem)
                     return SPELL_FAILED_ITEM_NOT_FOUND;
-                    
+
                 if(targetItem->GetProto()->ItemLevel < m_spellInfo->baseLevel)
                     return SPELL_FAILED_LOWLEVEL;
-                
+
                 break;
             }
             case SPELL_EFFECT_ENCHANT_ITEM_TEMPORARY:

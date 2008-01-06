@@ -102,7 +102,7 @@ public:
 
     int setContent(const char * _fileName);
 
-    void setRequiredOptionNames(const char ** requiredOptionNames); 
+    void setRequiredOptionNames(const char ** requiredOptionNames);
     const DOTCONFDocumentNode * getFirstNode() const;
     const DOTCONFDocumentNode * findNode(const char * nodeName, const DOTCONFDocumentNode * parentNode = NULL, const DOTCONFDocumentNode * startNode = NULL) const;
 };

@@ -1129,7 +1129,7 @@ void WorldSession::HandleMoveRootAck(WorldPacket&/* recv_data*/)
 
 void WorldSession::HandleMoveTeleportAck(WorldPacket&/* recv_data*/)
 {
-    /* 
+    /*
         CHECK_PACKET_SIZE(recv_data,8+4);
 
         sLog.outDebug("MSG_MOVE_TELEPORT_ACK");
@@ -1158,7 +1158,7 @@ void WorldSession::HandleSetActionBar(WorldPacket& recv_data)
 
 void WorldSession::HandleWardenDataOpcode(WorldPacket& /*recv_data*/)
 {
-    /* 
+    /*
         CHECK_PACKET_SIZE(recv_data,1);
 
         uint8 tmp;
@@ -1204,7 +1204,7 @@ void WorldSession::HandleInspectOpcode(WorldPacket& recv_data)
     if(sWorld.getConfig(CONFIG_TALENTS_INSPECTING) || _player->isGameMaster())
     {
         // find class talent tabs (all players have 3 talent tabs)
-        uint32 const* talentTabIds = GetTalentTabPages(plr->getClass()); 
+        uint32 const* talentTabIds = GetTalentTabPages(plr->getClass());
 
         uint32 talentTabPos = 0;                                // pos of first talent rank in tab including all prev tabs
         for(uint32 i = 0; i < 3; ++i)

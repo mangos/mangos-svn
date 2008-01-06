@@ -945,7 +945,7 @@ bool Pet::InitStatsForLevel(uint32 petlevel)
                         //the damage bonus used for pets is either fire or shadow damage, whatever is higher
                         uint32 fire  = owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_FIRE);
                         uint32 shadow = owner->GetUInt32Value(PLAYER_FIELD_MOD_DAMAGE_DONE_POS + SPELL_SCHOOL_SHADOW);
-                        uint32 val  = (fire > shadow) ? fire : shadow;   
+                        uint32 val  = (fire > shadow) ? fire : shadow;
 
                         SetBonusDamage(int32 (val * 0.15f));
                         //bonusAP += val * 0.57;

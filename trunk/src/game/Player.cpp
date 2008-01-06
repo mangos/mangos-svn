@@ -1661,7 +1661,7 @@ void Player::RewardRage( uint32 damage, uint32 weaponSpeedHitFactor, bool attack
 
         // talent who gave more rage on attack
         addRage *= 1.0f + GetTotalAuraModifier(SPELL_AURA_MOD_RAGE_FROM_DAMAGE_DEALT) / 100.0f;
-        
+
         // Berserker Rage effect
         if(GetAura(18499,0))
             addRage *= 1.3;
@@ -1978,7 +1978,7 @@ void Player::GiveXP(uint32 xp, Unit* victim)
     // handle SPELL_AURA_MOD_XP_PCT auras
     Unit::AuraList const& ModXPPctAuras = GetAurasByType(SPELL_AURA_MOD_XP_PCT);
     for(Unit::AuraList::const_iterator i = ModXPPctAuras.begin();i != ModXPPctAuras.end(); ++i)
-        xp *= uint32(1.0f + (*i)->GetModifier()->m_amount / 100.0f);
+        xp = uint32(xp*(1.0f + (*i)->GetModifier()->m_amount / 100.0f));
 
     // XP resting bonus for kill
     uint32 rested_bonus_xp = victim ? GetXPRestBonus(xp) : 0;
@@ -2787,11 +2787,11 @@ void Player::_SaveSpellCooldowns()
 void Player::ResetComboPointsIfNeed(const SpellEntry *spellInfo)
 {
     bool needClearCombo = false;
-    
+
     // Check use combo points in damage calculations
-    bool comboDamageUsed = 
-        spellInfo->EffectPointsPerComboPoint[0] > 0 || 
-        spellInfo->EffectPointsPerComboPoint[1] > 0 || 
+    bool comboDamageUsed =
+        spellInfo->EffectPointsPerComboPoint[0] > 0 ||
+        spellInfo->EffectPointsPerComboPoint[1] > 0 ||
         spellInfo->EffectPointsPerComboPoint[2] > 0;
 
     if(comboDamageUsed &&  m_attacking && (m_attacking->GetGUID() == GetComboTarget()))
@@ -2805,7 +2805,7 @@ void Player::ResetComboPointsIfNeed(const SpellEntry *spellInfo)
     // overpower - need reset combopoints
     if(spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && spellInfo->SpellFamilyFlags == 0x4)
         needClearCombo = true;
-        
+
     // Reset if need
     if (needClearCombo)
         ClearComboPoints();
@@ -8586,7 +8586,7 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
                 SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
                 if(!enchantEntry)
                     continue;
-                
+
                 ItemPrototype const* pGem = objmgr.GetItemPrototype(enchantEntry->GemID);
                 if(pGem && (pGem->Flags & ITEM_FLAGS_UNIQUE_EQUIPPED) && HasItemEquipped(enchantEntry->GemID))
                     return EQUIP_ERR_ITEM_UNIQUE_EQUIPABLE;
@@ -15858,7 +15858,7 @@ bool Player::HasQuestForGO(int32 GOId)
             Quest const* qinfo = objmgr.GetQuestTemplate(i->first);
             if(!qinfo)
                 continue;
-            
+
             if(GetGroup() && GetGroup()->isRaidGroup() && qinfo->GetType() != QUEST_TYPE_RAID)
                 continue;
 

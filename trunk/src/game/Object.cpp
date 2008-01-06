@@ -526,28 +526,28 @@ void Object::_BuildValuesUpdate(uint8 updatetype, ByteBuffer * data, UpdateMask 
 {
     if(!target)
         return;
-    
+
     bool IsActivateToQuest = false;
     if (updatetype == UPDATETYPE_CREATE_OBJECT || updatetype == UPDATETYPE_CREATE_OBJECT2)
     {
         if (isType(TYPE_GAMEOBJECT) && !((GameObject*)this)->IsTransport())
-        {   
+        {
             if ( ((GameObject*)this)->ActivateToQuest(target))
             {
                 IsActivateToQuest = true;
-                updateMask->SetBit(GAMEOBJECT_DYN_FLAGS);            
+                updateMask->SetBit(GAMEOBJECT_DYN_FLAGS);
             }
         }
     }
     else            //case UPDATETYPE_VALUES
     {
         if (isType(TYPE_GAMEOBJECT) && !((GameObject*)this)->IsTransport())
-        {   
+        {
             if ( ((GameObject*)this)->ActivateToQuest(target))
             {
                 IsActivateToQuest = true;
             }
-            updateMask->SetBit(GAMEOBJECT_DYN_FLAGS);            
+            updateMask->SetBit(GAMEOBJECT_DYN_FLAGS);
             updateMask->SetBit(GAMEOBJECT_ANIMPROGRESS);
         }
     }

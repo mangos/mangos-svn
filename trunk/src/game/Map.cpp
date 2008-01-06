@@ -649,7 +649,7 @@ void Map::Add(Player *player)
 
     UpdatePlayerVisibility(player,cell,p);
     UpdateObjectsVisibilityFor(player,cell,p);
-    
+
     AddNotifier(player,cell,p);
 
     // reinitialize reset time

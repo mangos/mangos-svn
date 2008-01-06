@@ -996,7 +996,7 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
                     return;
                 }
             }
-        
+
             // continue check for case when attempt add 2 similar unique equipped gems in one item.
             for (int j = 0; j < 3; ++j)
             {
@@ -1006,14 +1006,14 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
                     return;
                 }
             }
-            for (int j = 0; j < 3; ++j) 
+            for (int j = 0; j < 3; ++j)
             {
                 if (OldEnchants[j])
                 {
                     SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(OldEnchants[j]);
                     if(!enchantEntry)
                         continue;
-                
+
                     if ((enchantEntry->GemID == Gems[i]->GetProto()->ItemId) && (i != j))
                     {
                         _player->SendEquipError( EQUIP_ERR_ITEM_UNIQUE_EQUIPPABLE_SOCKETED, itemTarget, NULL );

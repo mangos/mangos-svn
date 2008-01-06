@@ -196,7 +196,7 @@ struct Loot
 
     // if loot becomes invalid this reference is used to inform the listener
     void addLootValidatorRef(LootValidatorRef* pLootValidatorRef)
-    { 
+    {
         i_LootValidatorRefManager.insertFirst(pLootValidatorRef);
     }
 

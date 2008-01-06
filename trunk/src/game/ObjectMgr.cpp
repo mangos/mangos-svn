@@ -4339,7 +4339,7 @@ void ObjectMgr::LoadSpellAffects()
 
         uint16 entry = fields[0].GetUInt16();
         uint8 effectId = fields[1].GetUInt8();
-        
+
         SpellEntry const* spellInfo = sSpellStore.LookupEntry(entry);
 
         if (!spellInfo)
@@ -4354,7 +4354,7 @@ void ObjectMgr::LoadSpellAffects()
             continue;
         }
 
-        if( spellInfo->Effect[effectId] != SPELL_EFFECT_APPLY_AURA || 
+        if( spellInfo->Effect[effectId] != SPELL_EFFECT_APPLY_AURA ||
             spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_FLAT_MODIFIER &&
             spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_PCT_MODIFIER  &&
             spellInfo->EffectApplyAuraName[effectId] != SPELL_AURA_ADD_TARGET_TRIGGER )
@@ -6064,7 +6064,7 @@ void ObjectMgr::LoadGameObjectForQuests()
     mGameObjectForQuestSet.clear();                         // need for reload case
 
     uint32 count = 0;
-    
+
     // scan GO templates with loot including quest items
     for(uint32 go_entry = 1; go_entry < sGOStorage.MaxEntry; ++go_entry)
     {
@@ -6073,12 +6073,12 @@ void ObjectMgr::LoadGameObjectForQuests()
             continue;
 
         uint32 loot_id = GameObject::GetLootId(goInfo);
-        
+
         // find loot for GO
         LootStore::const_iterator go_loot = LootTemplates_Gameobject.find(loot_id);
         if(go_loot == LootTemplates_Gameobject.end())
             continue;
-            
+
         // scan loot for quest items
         for(LootStoreItemList::const_iterator item_i = go_loot->second.begin(); item_i != go_loot->second.end(); ++item_i )
         {

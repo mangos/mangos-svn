@@ -2117,9 +2117,9 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
         return false;
     std::string namepart = args;
     WorldDatabase.escape_string(namepart);
-    
+
     QueryResult *result = NULL;
-    
+
     int loc_idx = m_session->GetSessionLocaleIndex();
     if ( loc_idx < 0 )
     {
@@ -2314,7 +2314,7 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
     WorldDatabase.escape_string(namepart);
 
     QueryResult *result = NULL;
-    
+
     int loc_idx = m_session->GetSessionLocaleIndex();
     if ( loc_idx < 0 )
     {
@@ -2327,7 +2327,7 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
             "( SELECT `entry`,`Title` FROM `quest_template` WHERE `Title` LIKE \"%%%s%%\" ) ORDER BY `entry`",
             loc_idx+1,loc_idx+1,namepart.c_str(),namepart.c_str());
     }
-    
+
     if(!result)
     {
         SendSysMessage(LANG_COMMAND_NOQUESTFOUND);
@@ -2367,7 +2367,7 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
 
     std::string namepart = args;
     WorldDatabase.escape_string(namepart);
-    
+
     QueryResult *result = NULL;
 
     int loc_idx = m_session->GetSessionLocaleIndex();
@@ -4472,4 +4472,5 @@ bool ChatHandler::HandleCastBackCommand(const char* args)
 
     return true;
 }
+
 

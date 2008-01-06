@@ -198,7 +198,7 @@ void LoadDBCStores(std::string dataPath)
     LoadDBC(bar,bad_dbc_files,sChatChannelsStore,        dataPath+"dbc/ChatChannels.dbc");
     LoadDBC(bar,bad_dbc_files,sChrClassesStore,          dataPath+"dbc/ChrClasses.dbc");
     LoadDBC(bar,bad_dbc_files,sChrRacesStore,            dataPath+"dbc/ChrRaces.dbc");
-    LoadDBC(bar,bad_dbc_files,sCreatureDisplayInfoStore, dataPath+"dbc/CreatureDisplayInfo.dbc");    
+    LoadDBC(bar,bad_dbc_files,sCreatureDisplayInfoStore, dataPath+"dbc/CreatureDisplayInfo.dbc");
     LoadDBC(bar,bad_dbc_files,sCreatureFamilyStore,      dataPath+"dbc/CreatureFamily.dbc");
     LoadDBC(bar,bad_dbc_files,sDurabilityCostsStore,     dataPath+"dbc/DurabilityCosts.dbc");
     LoadDBC(bar,bad_dbc_files,sDurabilityQualityStore,   dataPath+"dbc/DurabilityQuality.dbc");
@@ -211,7 +211,7 @@ void LoadDBCStores(std::string dataPath)
         {
             SimpleFactionsList &flist = sFactionTeamMap[faction->team];
             flist.push_back(i);
-        }   
+        }
     }
     LoadDBC(bar,bad_dbc_files,sFactionTemplateStore,     dataPath+"dbc/FactionTemplate.dbc");
     LoadDBC(bar,bad_dbc_files,sGemPropertiesStore,       dataPath+"dbc/GemProperties.dbc");
@@ -273,7 +273,7 @@ void LoadDBCStores(std::string dataPath)
         // fill table by amount of talent ranks and fill sTalentTabBitSizeInInspect
         // store in with (row,col,talent)->size key for correct sorting by (row,col)
         typedef std::map<uint32,uint32> TalentBitSize;
-        TalentBitSize sTalentBitSize;    
+        TalentBitSize sTalentBitSize;
         for(uint32 i = 1; i < sTalentStore.nCount; ++i)
         {
             TalentEntry const *talentInfo = sTalentStore.LookupEntry(i);
@@ -298,7 +298,7 @@ void LoadDBCStores(std::string dataPath)
             sTalentTabSizeInInspect[talentInfo->TalentTab] += curtalent_maxrank;
         }
 
-        // now have all max ranks (and then bit amount used for store talent ranks in inspect) 
+        // now have all max ranks (and then bit amount used for store talent ranks in inspect)
         for(uint32 talentTabId = 1; talentTabId < sTalentTabStore.nCount; ++talentTabId)
         {
             TalentTabEntry const *talentTabInfo = sTalentTabStore.LookupEntry( talentTabId );

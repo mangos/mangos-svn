@@ -232,7 +232,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
             //Fall Damage calculation
             float fallperc = float(fall_time)/1100;
             uint32 damage = (uint32)(((fallperc*fallperc -1) / 9 * target->GetMaxHealth())*sWorld.getRate(RATE_DAMAGE_FALL));
-            
+
             Map const *map = MapManager::Instance().GetBaseMap(target->GetMapId());
 
             //Prevent damage if damage is 0, fall time < 1100, or if player land in water
@@ -437,7 +437,7 @@ void WorldSession::HandleMoveKnockBackAck( WorldPacket & recv_data )
     // Currently not used but maybe use later for recheck final player position
     // (must be at call same as into "recv_data >> x >> y >> z >> orientation;"
 
-    /* 
+    /*
     uint32 flags, time;
     float x, y, z, orientation;
     uint64 guid;

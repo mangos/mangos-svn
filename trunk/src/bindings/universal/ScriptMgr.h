@@ -104,7 +104,7 @@ struct MANGOS_DLL_DECL ScriptedAI : public CreatureAI
 
     // Called at any Damage to any victim (before damage apply)
     void DamageDeal(Unit *done_to, uint32 &damage) {}
-    
+
     // Called at any Damage from any attacker (before damage apply)
     void DamageTaken(Unit *done_by, uint32 &damage) {}
 

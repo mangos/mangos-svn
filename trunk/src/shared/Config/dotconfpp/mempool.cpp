@@ -21,7 +21,7 @@ AsyncDNSMemPool::AsyncDNSMemPool(size_t _defaultSize):
 }
 
 AsyncDNSMemPool::~AsyncDNSMemPool()
-{    
+{
     for(size_t i = 0; i<chunksCount; i++){
         delete chunks[i];
     }
@@ -66,7 +66,7 @@ void * AsyncDNSMemPool::alloc(size_t size)
 }
 
 void AsyncDNSMemPool::free()
-{    
+{
     size_t pu = 0;
     size_t psz = 0;
     poolUsageCounter++;
