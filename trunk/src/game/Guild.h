@@ -129,11 +129,14 @@ enum PetitionSigns
 
 struct MemberSlot
 {
-    std::string name;
+    uint64 logout_time;
+    std::string name; 
+    std::string Pnote;
+    std::string OFFnote;
     uint32 RankId;
-    uint8 level,Class;
     uint32 zoneId;
-    std::string Pnote, OFFnote;
+    uint8 level;
+    uint8 Class;
 };
 
 struct RankInfo
@@ -211,6 +214,8 @@ class Guild
 
         void Roster(WorldSession *session);
         void Query(WorldSession *session);
+
+        void UpdateLogoutTime(uint64 guid);
 
     protected:
         void AddRank(std::string name,uint32 rights);
