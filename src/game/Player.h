@@ -971,7 +971,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         static bool IsWeaponSlot( uint8 slot ) { return slot==EQUIPMENT_SLOT_MAINHAND || slot==EQUIPMENT_SLOT_OFFHAND || slot==EQUIPMENT_SLOT_RANGED; }
         bool HasBankBagSlot( uint8 slot ) const;
         bool HasItemCount( uint32 item, uint32 count ) const;
-        bool HasItemEquipped( uint32 item ) const;
+        Item* GetItemOrItemWithGemEquipped( uint32 item ) const;
         uint32 GetFreeSlots() const;
         uint8 CanTakeMoreSimilarItems(Item* pItem) const;
         uint8 CanStoreNewItem( uint8 bag, uint8 slot, uint16 &dest, uint32 item, uint32 count, bool swap ) const;

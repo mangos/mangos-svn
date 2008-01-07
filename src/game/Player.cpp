@@ -7900,14 +7900,14 @@ bool Player::HasItemCount( uint32 item, uint32 count ) const
     return false;
 }
 
-bool Player::HasItemEquipped( uint32 item ) const
+Item* Player::GetItemOrItemWithGemEquipped( uint32 item ) const
 {
     Item *pItem;
     for(int i = EQUIPMENT_SLOT_START; i < EQUIPMENT_SLOT_END; i++)
     {
         pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
         if( pItem && pItem->GetEntry() == item )
-            return true;
+            return pItem;
     }
 
     ItemPrototype const *pProto = objmgr.GetItemPrototype(item);
@@ -7919,13 +7919,12 @@ bool Player::HasItemEquipped( uint32 item ) const
             if( pItem && pItem->GetProto()->Socket[0].Color )
             {
                 if (pItem->GetGemCountWithID(item) > 0 )
-                    return true;
+                    return pItem;
             }
         }
-
     }
 
-    return false;
+    return NULL;
 }
 
 uint8 Player::CanStoreNewItem( uint8 bag, uint8 slot, uint16 &dest, uint32 item, uint32 count, bool swap ) const
@@ -8579,28 +8578,6 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
             if(res != EQUIP_ERR_OK)
                 return res;
 
-            // check unique-equipped on item
-            if (pProto->Flags & ITEM_FLAGS_UNIQUE_EQUIPPED) {
-                // there is an equip limit on this item
-                if (HasItemEquipped(pProto->ItemId))
-                    return EQUIP_ERR_ITEM_UNIQUE_EQUIPABLE;
-            }
-
-            // check unique-equipped on gems
-            for(uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+3; ++enchant_slot)
-            {
-                uint32 enchant_id = pItem->GetEnchantmentId(EnchantmentSlot(enchant_slot));
-                if(!enchant_id)
-                    continue;
-                SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
-                if(!enchantEntry)
-                    continue;
-
-                ItemPrototype const* pGem = objmgr.GetItemPrototype(enchantEntry->GemID);
-                if(pGem && (pGem->Flags & ITEM_FLAGS_UNIQUE_EQUIPPED) && HasItemEquipped(enchantEntry->GemID))
-                    return EQUIP_ERR_ITEM_UNIQUE_EQUIPABLE;
-            }
-
             if( isInCombat()&& pProto->Class != ITEM_CLASS_WEAPON && pProto->Class != ITEM_CLASS_PROJECTILE &&
                 pProto->SubClass != ITEM_SUBCLASS_ARMOR_SHIELD && pProto->InventoryType != INVTYPE_RELIC)
                 return EQUIP_ERR_NOT_IN_COMBAT;
@@ -8617,6 +8594,45 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
                 return msg;
             if( !swap && GetItemByPos( INVENTORY_SLOT_BAG_0, eslot ) )
                 return EQUIP_ERR_NO_EQUIPMENT_SLOT_AVAILABLE;
+
+            // check unique-equipped on item
+            if (pProto->Flags & ITEM_FLAGS_UNIQUE_EQUIPPED)
+            {
+                // there is an equip limit on this item
+                Item* tItem = GetItemOrItemWithGemEquipped(pProto->ItemId);
+                if (tItem && (!swap || tItem->GetSlot() != eslot ) )
+                    return EQUIP_ERR_ITEM_UNIQUE_EQUIPABLE;
+            }
+
+            // check unique-equipped on gems
+            for(uint32 enchant_slot = SOCK_ENCHANTMENT_SLOT; enchant_slot < SOCK_ENCHANTMENT_SLOT+3; ++enchant_slot)
+            {
+                uint32 enchant_id = pItem->GetEnchantmentId(EnchantmentSlot(enchant_slot));
+                if(!enchant_id)
+                    continue;
+                SpellItemEnchantmentEntry const* enchantEntry = sSpellItemEnchantmentStore.LookupEntry(enchant_id);
+                if(!enchantEntry)
+                    continue;
+
+                ItemPrototype const* pGem = objmgr.GetItemPrototype(enchantEntry->GemID);
+                if(pGem && (pGem->Flags & ITEM_FLAGS_UNIQUE_EQUIPPED))
+                {
+                    Item* tItem = GetItemOrItemWithGemEquipped(enchantEntry->GemID);
+                    if(tItem && (!swap || tItem->GetSlot() != eslot ))
+                        return EQUIP_ERR_ITEM_UNIQUE_EQUIPABLE;
+                }
+            }
+
+            // check unique-equipped special item classes
+            if (pProto->Class == ITEM_CLASS_QUIVER)
+            {
+                for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+                    if( Item* pBag = GetItemByPos( INVENTORY_SLOT_BAG_0, i ) )
+                        if( ItemPrototype const* pBagProto = pBag->GetProto() )
+                            if( pBagProto->Class==pProto->Class && (!swap || pBag->GetSlot() != eslot ))
+                                return EQUIP_ERR_CAN_EQUIP_ONLY1_QUIVER;
+            }
+
 
             uint32 type = pProto->InventoryType;
 

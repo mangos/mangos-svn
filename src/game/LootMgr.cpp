@@ -448,7 +448,7 @@ bool MeetsConditions(Player * owner, LootItem * itm)
             case CONDITION_ITEM:
                 return owner->HasItemCount(itm->cond_value1,itm->cond_value2);
             case CONDITION_ITEM_EQUIPPED:
-                return owner->HasItemEquipped(itm->cond_value1);
+                return owner->GetItemOrItemWithGemEquipped(itm->cond_value1) != NULL;
             case CONDITION_ZONEID:
                 return owner->GetZoneId() == itm->cond_value1;
             case CONDITION_REPUTATION_RANK:
