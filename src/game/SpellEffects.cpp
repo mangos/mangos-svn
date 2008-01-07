@@ -311,7 +311,7 @@ void Spell::EffectSchoolDMG(uint32 i)
                 {
                     damage += int32(m_caster->GetTotalAttackPowerValue(BASE_ATTACK)*0.2);
                 }
-                // Arcane Shoot
+                // Arcane Shot
                 else if((m_spellInfo->SpellFamilyFlags & 0x00000800) && m_spellInfo->maxLevel > 0)
                 {
                     damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.15);
@@ -319,7 +319,7 @@ void Spell::EffectSchoolDMG(uint32 i)
                 // Steady Shot
                 else if((m_spellInfo->SpellFamilyFlags & 0x100000000LL))
                 {
-                    damage += int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.2);
+                    damage += m_caster->CalculateDamage(RANGED_ATTACK)+int32(m_caster->GetTotalAttackPowerValue(RANGED_ATTACK)*0.2);
                 }
                 break;
             }
