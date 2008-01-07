@@ -990,7 +990,7 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
             // for equipped item check all equipment for duplicate equipped gems
             if(itemTarget->IsEquipped())
             {
-                if(GetPlayer()->HasItemEquipped(Gems[i]->GetEntry()))
+                if(GetPlayer()->GetItemOrItemWithGemEquipped(Gems[i]->GetEntry()))
                 {
                     _player->SendEquipError( EQUIP_ERR_ITEM_UNIQUE_EQUIPABLE, itemTarget, NULL );
                     return;
