@@ -55,39 +55,45 @@ float baseMoveSpeed[MAX_MOVE_TYPE] =
     7.0f                                                    // MOVE_MOUNTED
 };
 
-// auraTypes contains auras capable of proc'ing for attacker
-static Unit::AuraTypeSet GenerateAttakerProcAuraTypes()
+// auraTypes contains auras capable of proc'ing cast auras
+static Unit::AuraTypeSet GenerateProcCastAuraTypes()
 {
     static Unit::AuraTypeSet auraTypes;
     auraTypes.insert(SPELL_AURA_DUMMY);
     auraTypes.insert(SPELL_AURA_PROC_TRIGGER_SPELL);
+    return auraTypes;
+}
+
+// auraTypes contains auras capable of proc effect/damage (but not cast) for attacker
+static Unit::AuraTypeSet GenerateAttakerProcEffectAuraTypes()
+{
+    static Unit::AuraTypeSet auraTypes;
+    auraTypes.insert(SPELL_AURA_MOD_CASTING_SPEED);
     auraTypes.insert(SPELL_AURA_PROC_TRIGGER_DAMAGE);
     return auraTypes;
 }
 
-// auraTypes contains auras capable of proc'ing for attacker
-static Unit::AuraTypeSet GenerateVictimProcAuraTypes()
+// auraTypes contains auras capable of proc effect/damage (but not cast) for victim
+static Unit::AuraTypeSet GenerateVictimProcEffectAuraTypes()
 {
     static Unit::AuraTypeSet auraTypes;
-    auraTypes.insert(SPELL_AURA_PROC_TRIGGER_SPELL);
     auraTypes.insert(SPELL_AURA_PROC_TRIGGER_DAMAGE);
-    auraTypes.insert(SPELL_AURA_DUMMY);
-
-    // for charges counting
     auraTypes.insert(SPELL_AURA_MOD_PARRY_PERCENT);
     auraTypes.insert(SPELL_AURA_MOD_BLOCK_PERCENT);
     auraTypes.insert(SPELL_AURA_MOD_RESISTANCE);
     return auraTypes;
 }
 
-static Unit::AuraTypeSet attackerProcAuraTypes = GenerateAttakerProcAuraTypes();
-static Unit::AuraTypeSet victimProcAuraTypes   = GenerateVictimProcAuraTypes();
+static Unit::AuraTypeSet procCastAuraTypes = GenerateProcCastAuraTypes();
+static Unit::AuraTypeSet attackerProcEffectAuraTypes = GenerateAttakerProcEffectAuraTypes();
+static Unit::AuraTypeSet victimProcEffectAuraTypes   = GenerateVictimProcEffectAuraTypes();
 
 // auraTypes contains auras capable of proc'ing for attacker and victim
 static Unit::AuraTypeSet GenerateProcAuraTypes()
 {
-    static Unit::AuraTypeSet auraTypes = victimProcAuraTypes;
-    auraTypes.insert(attackerProcAuraTypes.begin(),attackerProcAuraTypes.end());
+    static Unit::AuraTypeSet auraTypes = procCastAuraTypes;
+    auraTypes.insert(victimProcEffectAuraTypes.begin(),victimProcEffectAuraTypes.end());
+    auraTypes.insert(attackerProcEffectAuraTypes.begin(),attackerProcEffectAuraTypes.end());
     return auraTypes;
 }
 
@@ -3891,14 +3897,18 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
     // Not much to do if no flags are set.
     if (procAttacker)
     {
-        ProcDamageAndSpellFor(false,pVictim,procAttacker,attackerProcAuraTypes,attType, procSpell, damage);
+        // procces auras that not generate casts at proc event before auras that generate casts to prevent proc aura added at prev. proc aura execute in set
+        ProcDamageAndSpellFor(false,pVictim,procAttacker,attackerProcEffectAuraTypes,attType, procSpell, damage);
+        ProcDamageAndSpellFor(false,pVictim,procAttacker,procCastAuraTypes,attType, procSpell, damage);
     }
 
     // Now go on with a victim's events'n'auras
     // Not much to do if no flags are set or there is no victim
     if(pVictim && pVictim->isAlive() && procVictim)
     {
-        pVictim->ProcDamageAndSpellFor(true,this,procVictim,victimProcAuraTypes,attType,procSpell, damage);
+        // procces auras that not generate casts at proc event before auras that generate casts to prevent proc aura added at prev. proc aura execute in set
+        pVictim->ProcDamageAndSpellFor(true,this,procVictim,victimProcEffectAuraTypes,attType,procSpell, damage);
+        pVictim->ProcDamageAndSpellFor(true,this,procVictim,procCastAuraTypes,attType,procSpell, damage);
     }
 }
 
