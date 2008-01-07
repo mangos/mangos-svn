@@ -122,6 +122,7 @@ bool Guild::AddMember(uint64 plGuid, uint32 plRank)
     newmember.RankId = plRank;
     newmember.OFFnote = (std::string)"";
     newmember.Pnote = (std::string)"";
+    newmember.logout_time = time(NULL);
     members[GUID_LOPART(plGuid)] = newmember;
 
     std::string dbPnote = newmember.Pnote;
@@ -235,7 +236,7 @@ bool Guild::LoadRanksFromDB(uint32 GuildId)
 
 bool Guild::LoadMembersFromDB(uint32 GuildId)
 {
-    QueryResult *result = CharacterDatabase.PQuery("SELECT `guid`,`rank`,`Pnote`,`OFFnote` FROM `guild_member` WHERE `guildid` = '%u'", GuildId);
+    QueryResult *result = CharacterDatabase.PQuery("SELECT `guild_member`.`guid`,`rank`,`Pnote`,`OFFnote`,`logout_time` FROM `guild_member` LEFT JOIN `character` ON `character`.`guid` = `guild_member`.`guid` WHERE `guildid` = '%u'", GuildId);
 
     if(!result)
         return false;
@@ -253,6 +254,7 @@ bool Guild::LoadMembersFromDB(uint32 GuildId)
 
         newmember.Pnote = fields[2].GetCppString();
         newmember.OFFnote = fields[3].GetCppString();
+        newmember.logout_time = fields[4].GetUInt64();
         members[GUID_LOPART(guid)] = newmember;
 
     }while( result->NextRow() );
@@ -633,14 +635,6 @@ void Guild::Roster(WorldSession *session)
         }
         else
         {
-            uint64 logout_time = 0;
-            QueryResult *result = CharacterDatabase.PQuery("SELECT `logout_time` FROM `character` WHERE `guid`='%u'", itr->first);
-            if(result)
-            {
-                logout_time = (*result)[0].GetUInt64();
-                delete result;
-            }
-
             data << uint64(MAKE_GUID(itr->first,HIGHGUID_PLAYER));
             data << (uint8)0;
             data << itr->second.name;
@@ -648,7 +642,7 @@ void Guild::Roster(WorldSession *session)
             data << (uint8)itr->second.level;
             data << (uint8)itr->second.Class;
             data << (uint32)itr->second.zoneId;
-            data << (float(time(NULL)-logout_time) / DAY);
+            data << (float(time(NULL)-itr->second.logout_time) / DAY);
             data << itr->second.Pnote;
             data << itr->second.OFFnote;
         }
@@ -693,3 +687,13 @@ void Guild::SetEmblem(uint32 emblemStyle, uint32 emblemColor, uint32 borderStyle
 
     CharacterDatabase.PExecute("UPDATE `guild` SET EmblemStyle=%u, EmblemColor=%u, BorderStyle=%u, BorderColor=%u, BackgroundColor=%u WHERE guildid = %u", EmblemStyle, EmblemColor, BorderStyle, BorderColor, BackgroundColor, Id);
 }
+
+void Guild::UpdateLogoutTime(uint64 guid)
+{
+    MemberList::iterator itr = members.find(GUID_LOPART(guid));
+    if (itr == members.end() )
+        return;
+
+    itr->second.logout_time = time(NULL);
+}
+
