@@ -121,4 +121,6 @@ inline void normalizePlayerName(std::string& name)
 }
 
 bool IsIPAddress(char const* ipaddress);
+uint32 CreatePIDFile(std::string filename);
+
 #endif
