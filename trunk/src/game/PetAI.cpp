@@ -272,7 +272,7 @@ void PetAI::UpdateAI(const uint32 diff)
 
         SpellEntry const *spellInfo = sSpellStore.LookupEntry(itr->first);
 
-        Spell *spell = new Spell(&i_pet, spellInfo, false, 0);
+        Spell *spell = new Spell(&i_pet, spellInfo, false);
 
         SpellCastTargets targets;
         targets.setUnitTarget( itr->second );

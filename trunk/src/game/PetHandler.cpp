@@ -184,7 +184,7 @@ void WorldSession::HandlePetAction( WorldPacket & recv_data )
 
             pet->clearUnitState(UNIT_STAT_FOLLOW);
 
-            Spell *spell = new Spell(pet, spellInfo, false, 0);
+            Spell *spell = new Spell(pet, spellInfo, false);
 
             int16 result = spell->PetCanCast(unit_target);
 
@@ -571,7 +571,7 @@ void WorldSession::HandleAddDynamicTargetObsoleteOpcode( WorldPacket& recvPacket
 
     pet->clearUnitState(UNIT_STAT_FOLLOW);
 
-    Spell *spell = new Spell(pet, spellInfo, false, 0);
+    Spell *spell = new Spell(pet, spellInfo, false);
     spell->m_targets = targets;
 
     int16 result = spell->PetCanCast(NULL);
