@@ -2669,16 +2669,8 @@ void Spell::EffectTameCreature(uint32 i)
 
     if(m_caster->getClass() == CLASS_HUNTER)
     {
-        creatureTarget->AttackStop();
-        if(m_caster->getVictim()==creatureTarget)
-            m_caster->AttackStop();
-
-        creatureTarget->setDeathState(JUST_DIED);
-        creatureTarget->RemoveCorpse();
-        creatureTarget->SetHealth(0);                       // just for nice GM-mode view
-
         // cast finish successfully
-        SendChannelUpdate(0);
+        //SendChannelUpdate(0);
         finish();
 
         Pet* pet = new Pet(m_caster, HUNTER_PET);
@@ -2689,12 +2681,16 @@ void Spell::EffectTameCreature(uint32 i)
             return;
         }
 
+        creatureTarget->setDeathState(JUST_DIED);
+        creatureTarget->RemoveCorpse();
+        creatureTarget->SetHealth(0);                       // just for nice GM-mode view
+
         pet->SetUInt64Value(UNIT_FIELD_SUMMONEDBY, m_caster->GetGUID());
         pet->SetUInt64Value(UNIT_FIELD_CREATEDBY, m_caster->GetGUID());
         pet->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
         pet->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
-        if(!pet->InitStatsForLevel( creatureTarget->getLevel() ) )
+        if(!pet->InitStatsForLevel(creatureTarget->getLevel()-1))
         {
             sLog.outError("ERROR: InitStatsForLevel() in EffectTameCreature failed! Pet deleted.");
             delete pet;
@@ -2715,6 +2711,8 @@ void Spell::EffectTameCreature(uint32 i)
             pet->SavePetToDB(PET_SAVE_AS_CURRENT);
             ((Player*)m_caster)->PetSpellInitialize();
         }
+
+        pet->GivePetXP(pet->GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP));
     }
 }
 

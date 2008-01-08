@@ -1849,7 +1849,7 @@ void Spell::update(uint32 difftime)
                                 break;
                             }
                             if(!targetLeft)
-                                cancel();
+                                finish();
                         }
                     }
                 }
