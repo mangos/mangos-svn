@@ -4644,6 +4644,17 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
     // but with dummy basepoints or other customs
     switch(trigger_spell_id)
     {
+        // Setup
+        case 15250:
+        {
+            // applied only for main target
+            if(!pVictim || pVictim != getVictim())
+                return;
+
+            // continue normal case
+            break;
+        }
+        
         // Shamanistic Rage triggered spell
         case 30824:
         {
