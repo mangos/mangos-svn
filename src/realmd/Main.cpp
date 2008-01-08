@@ -29,6 +29,7 @@
 #include "Network/ListenSocket.h"
 #include "AuthSocket.h"
 #include "SystemConfig.h"
+#include "Util.h"
 
 #ifdef WIN32
 #include "ServiceWin32.h"
@@ -153,6 +154,20 @@ extern int main(int argc, char **argv)
 
     sLog.outString( "MaNGOS realm daemon %s", _FULLVERSION );
     sLog.outString( "<Ctrl-C> to stop.\n" );
+
+    /// realmd PID file creation
+    std::string pidfile = sConfig.GetStringDefault("PidFile", "");
+    if(!pidfile.empty())
+    {
+        uint32 pid = CreatePIDFile(pidfile);
+        if( !pid )
+        {
+            sLog.outError( "Cannot create PID file %s.\n", pidfile.c_str() );
+            return 1;
+        }
+
+        sLog.outString( "Daemon PID: %u\n", pid );
+    }
 
     ///- Initialise the database connection
     std::string dbstring;

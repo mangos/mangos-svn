@@ -186,3 +186,23 @@ int32 rand32(void)
         rand32_state = test + m;
     return rand32_state - 1;
 }
+
+/// create PID file
+uint32 CreatePIDFile(std::string filename)
+{
+    FILE * pid_file = fopen (filename.c_str(), "w" );
+    if (pid_file == NULL)
+        return 0;
+
+#ifdef WIN32
+    DWORD pid = GetCurrentProcessId();
+#else
+    pid_t pid = getpid();
+#endif
+
+    fprintf(pid_file, "%d", pid );
+    fclose(pid_file);
+
+    return (uint32)pid;
+}
+

@@ -20,6 +20,11 @@ MaxPingTime = 30
 # Default RealmServerPort
 RealmServerPort = 3724
 
+# realmd daemon PID file
+# Default: ""             - do not create PID file
+#          "./realmd.pid" - create PID file (recommended name)
+PidFile = ""
+
 # Server console level of logging
 # 0 = Minimum; 1 = Error; 2 = Detail; 3 = Full/Debug
 # Default: 0

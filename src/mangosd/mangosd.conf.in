@@ -63,6 +63,11 @@ DBC.Locale = 255
 # 1 - Write SQL code to logfile
 LogSQL = 1
 
+# worldd daemon PID file
+# Default: ""             - do not create PID file
+#          "./worldd.pid" - create PID file (recommended name)
+PidFile = ""
+
 # Server console level of logging
 # 0 = Minimum; 1 = Basic&Error; 2 = Detail; 3 = Full/Debug
 # Default: 0

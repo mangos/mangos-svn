@@ -37,6 +37,7 @@
 #include "CliRunnable.h"
 #include "RASocket.h"
 #include "ScriptCalls.h"
+#include "Util.h"
 
 #include "Network/TcpSocket.h"
 #include "Network/Utility.h"
@@ -78,6 +79,20 @@ void Master::Run()
     sLog.outTitle( "MM   MM MM  MMM MM   MM  MMMMMM  MMMM   MMMMM");
     sLog.outTitle( "        MM  MMM http://www.mangosproject.org");
     sLog.outTitle( "        MMMMMM\n\n");
+
+    /// worldd PID file creation
+    std::string pidfile = sConfig.GetStringDefault("PidFile", "");
+    if(!pidfile.empty())
+    {
+        uint32 pid = CreatePIDFile(pidfile);
+        if( !pid )
+        {
+            sLog.outError( "Cannot create PID file %s.\n", pidfile.c_str() );
+            return;
+        }
+
+        sLog.outString( "Daemon PID: %u\n", pid );
+    }
 
     ///- Start the databases
     if (!_StartDB())
@@ -417,3 +432,4 @@ void Master::_UnhookSignals()
     signal(SIGBREAK, 0);
     #endif
 }
+
