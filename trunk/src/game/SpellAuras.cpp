@@ -2143,6 +2143,10 @@ void Aura::HandleFeignDeath(bool Apply, bool Real)
 
         m_target->addUnitState(UNIT_STAT_DIED);
         m_target->CombatStop();
+
+        // prevent interrupt message
+        if(m_caster_guid==m_target->GetGUID() && m_target->m_currentSpells[CURRENT_GENERIC_SPELL])
+            m_target->m_currentSpells[CURRENT_GENERIC_SPELL]->finish();
         m_target->InterruptNonMeleeSpells(true);
         ((Player*)m_target)->SendAttackSwingCancelAttack(); // melee and ranged forced attack cancel
         m_target->getHostilRefManager().deleteReferences();
