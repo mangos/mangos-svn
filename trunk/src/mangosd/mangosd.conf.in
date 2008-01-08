@@ -240,7 +240,7 @@ AllowTwoSide.AddFriend = 0
 # that use normal languages for sending data to another clients.
 # Default: 0 (disible fake messages preventing)
 #          1 (enabled fake messages preventing)
-ChatFakePreventing = 0
+ChatFakeMessagePreventing = 0
 
 # Chat anti-flood protection, haste message count to activate protection
 #          0 (disible anti-flood protection)
