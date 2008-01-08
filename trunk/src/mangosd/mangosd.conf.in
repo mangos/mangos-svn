@@ -235,6 +235,13 @@ AllowTwoSide.WhoList = 0
 #          1 (Allowed)
 AllowTwoSide.AddFriend = 0
 
+# Chat protection from creating fake messages using a lot spaces (other invisible symbols),
+# not applied to addon language messages, but can prevent working old addons 
+# that use normal languages for sending data to another clients.
+# Default: 0 (disible fake messages preventing)
+#          1 (enabled fake messages preventing)
+ChatFakePreventing = 0
+
 # Chat anti-flood protection, haste message count to activate protection
 #          0 (disible anti-flood protection)
 # Default: 10

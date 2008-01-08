@@ -99,7 +99,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 break;
 
             // strip invisible characters for non-addon messages
-            if (lang != LANG_ADDON)
+            if (lang != LANG_ADDON && sWorld.getConfig(CONFIG_CHAT_FAKE_MESSAGE_PREVENTING))
                 stripLineInvisibleChars(msg);
 
             if(msg.empty())
@@ -121,7 +121,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             recv_data >> msg;
 
             // strip invisible characters for non-addon messages
-            if (lang != LANG_ADDON)
+            if (lang != LANG_ADDON && sWorld.getConfig(CONFIG_CHAT_FAKE_MESSAGE_PREVENTING))
                 stripLineInvisibleChars(msg);
 
             if(msg.empty())
@@ -175,7 +175,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 break;
 
             // strip invisible characters for non-addon messages
-            if (lang != LANG_ADDON)
+            if (lang != LANG_ADDON && sWorld.getConfig(CONFIG_CHAT_FAKE_MESSAGE_PREVENTING))
                 stripLineInvisibleChars(msg);
 
             if(msg.empty())
@@ -202,7 +202,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 break;
 
             // strip invisible characters for non-addon messages
-            if (lang != LANG_ADDON)
+            if (lang != LANG_ADDON && sWorld.getConfig(CONFIG_CHAT_FAKE_MESSAGE_PREVENTING))
                 stripLineInvisibleChars(msg);
 
             if(msg.empty())
@@ -229,7 +229,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 break;
 
             // strip invisible characters for non-addon messages
-            if (lang != LANG_ADDON)
+            if (lang != LANG_ADDON && sWorld.getConfig(CONFIG_CHAT_FAKE_MESSAGE_PREVENTING))
                 stripLineInvisibleChars(msg);
 
             if(msg.empty())
@@ -255,7 +255,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 break;
 
             // strip invisible characters for non-addon messages
-            if (lang != LANG_ADDON)
+            if (lang != LANG_ADDON && sWorld.getConfig(CONFIG_CHAT_FAKE_MESSAGE_PREVENTING))
                 stripLineInvisibleChars(msg);
 
             if(msg.empty())
@@ -281,7 +281,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
                 break;
 
             // strip invisible characters for non-addon messages
-            if (lang != LANG_ADDON)
+            if (lang != LANG_ADDON && sWorld.getConfig(CONFIG_CHAT_FAKE_MESSAGE_PREVENTING))
                 stripLineInvisibleChars(msg);
 
             if(msg.empty())
@@ -301,7 +301,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             recv_data >> msg;
 
             // strip invisible characters for non-addon messages
-            if (lang != LANG_ADDON)
+            if (lang != LANG_ADDON && sWorld.getConfig(CONFIG_CHAT_FAKE_MESSAGE_PREVENTING))
                 stripLineInvisibleChars(msg);
 
             if(msg.empty())
@@ -322,7 +322,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             recv_data >> msg;
 
             // strip invisible characters for non-addon messages
-            if (lang != LANG_ADDON)
+            if (lang != LANG_ADDON && sWorld.getConfig(CONFIG_CHAT_FAKE_MESSAGE_PREVENTING))
                 stripLineInvisibleChars(msg);
 
             if(msg.empty())
@@ -343,7 +343,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             recv_data >> msg;
 
             // strip invisible characters for non-addon messages
-            if (lang != LANG_ADDON)
+            if (lang != LANG_ADDON && sWorld.getConfig(CONFIG_CHAT_FAKE_MESSAGE_PREVENTING))
                 stripLineInvisibleChars(msg);
 
             if(msg.empty())
@@ -369,7 +369,7 @@ void WorldSession::HandleMessagechatOpcode( WorldPacket & recv_data )
             recv_data >> msg;
 
             // strip invisible characters for non-addon messages
-            if (lang != LANG_ADDON)
+            if (lang != LANG_ADDON && sWorld.getConfig(CONFIG_CHAT_FAKE_MESSAGE_PREVENTING))
                 stripLineInvisibleChars(msg);
 
             if(msg.empty())
