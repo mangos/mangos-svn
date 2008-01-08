@@ -631,26 +631,6 @@ void Spell::EffectDummy(uint32 i)
             break;
     }
 
-    // starshards/curse of agony hack .. this applies to 1.10 only
-    if (m_triggeredByAura)
-    {
-        SpellEntry const *trig_info = m_triggeredByAura->GetSpellProto();
-        if (trig_info && ((trig_info->SpellIconID == 1485 && trig_info->SpellFamilyName == SPELLFAMILY_PRIEST) ||
-            (trig_info->SpellIconID == 544 && trig_info->SpellFamilyName == SPELLFAMILY_WARLOCK)))
-        {
-            if(!unitTarget)
-                return;
-
-            Unit *tmpTarget = unitTarget;
-            unitTarget = m_triggeredByAura->GetTarget();
-            damage = trig_info->EffectBasePoints[i]+1;
-            EffectSchoolDMG(i);
-            unitTarget = tmpTarget;
-            return;
-        }
-        // return incorrect in this case
-    }
-
     //All IconID Check in there
     switch(m_spellInfo->SpellIconID)
     {
@@ -938,11 +918,11 @@ void Spell::EffectDummy(uint32 i)
         // Touch of Weakness triggered spell
         case 28598:
         {
-            if(!unitTarget || !m_triggeredByAura)
+            if(!unitTarget || !m_triggeredByAuraSpell)
                 return;
 
             uint32 spellid = 0;
-            switch(m_triggeredByAura->GetId())
+            switch(m_triggeredByAuraSpell->Id)
             {
                 case 2652:  spellid =  2943; break;         // Rank 1
                 case 19261: spellid = 19249; break;         // Rank 2
@@ -952,7 +932,7 @@ void Spell::EffectDummy(uint32 i)
                 case 19266: spellid = 19254; break;         // Rank 6
                 case 25461: spellid = 25460; break;         // Rank 7
                 default:
-                    sLog.outError("Spell::EffectDummy: Spell 28598 triggered by unhandled spell %u",m_triggeredByAura->GetId());
+                    sLog.outError("Spell::EffectDummy: Spell 28598 triggered by unhandeled spell %u",m_triggeredByAuraSpell->Id);
                     return;
             }
             m_caster->CastSpell(unitTarget, spellid, true, NULL);
@@ -1163,12 +1143,12 @@ void Spell::EffectDummy(uint32 i)
         //Mana-Tide Totem effect
         case 39610:
         {
-            if(!unitTarget || unitTarget->getPowerType() != POWER_MANA || !m_triggeredByAura)
+            if(!unitTarget || unitTarget->getPowerType() != POWER_MANA)
                 return;
 
             //regen 6% of Total Mana Every 3 secs (-1 stored)
-            int32 EffectBasePoints0 = unitTarget->GetMaxPower(POWER_MANA)  * m_triggeredByAura->GetModifier()->m_amount / 100 -1;
-            m_caster->CastCustomSpell(unitTarget,39609,&EffectBasePoints0,NULL,NULL,true,NULL,m_triggeredByAura,m_originalCasterGUID);
+            int32 EffectBasePoints0 = unitTarget->GetMaxPower(POWER_MANA)  * damage / 100 -1;
+            m_caster->CastCustomSpell(unitTarget,39609,&EffectBasePoints0,NULL,NULL,true,NULL,NULL,m_originalCasterGUID);
             return;
         }
 
@@ -1196,6 +1176,44 @@ void Spell::EffectDummy(uint32 i)
                 m_caster->CastSpell(m_caster, 25858, true); //60% ground Reindeer
         }
 
+        // Crystal Prison Dummy DND
+        case 23019:
+        {
+            if(!unitTarget || !unitTarget->isAlive() || unitTarget->GetTypeId() != TYPEID_UNIT || ((Creature*)unitTarget)->isPet())
+                return;
+
+            Creature* creatureTarget = (Creature*)unitTarget;
+            if(creatureTarget->isPet())
+                return;
+
+            creatureTarget->setDeathState(JUST_DIED);
+            creatureTarget->RemoveCorpse();
+            creatureTarget->SetHealth(0);                   // just for nice GM-mode view
+
+            GameObject* pGameObj = new GameObject(m_caster);
+
+            if(!pGameObj->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), 179644 ,creatureTarget->GetMapId(),
+                creatureTarget->GetPositionX(), creatureTarget->GetPositionY(), creatureTarget->GetPositionZ(), 
+                creatureTarget->GetOrientation(), 0, 0, 0, 0, 100, 1) )
+            {
+                delete pGameObj;
+                return;
+            }
+
+            pGameObj->SetRespawnTime(creatureTarget->GetRespawnTime()-time(NULL));
+            pGameObj->SetOwnerGUID(m_caster->GetGUID() );
+            pGameObj->SetUInt32Value(GAMEOBJECT_LEVEL, m_caster->getLevel() );
+            pGameObj->SetSpellId(m_spellInfo->Id);
+
+            DEBUG_LOG("AddObject at SpellEfects.cpp EffectDummy\n");
+            MapManager::Instance().GetMap(creatureTarget->GetMapId(), pGameObj)->Add(pGameObj);
+
+            WorldPacket data(SMSG_GAMEOBJECT_SPAWN_ANIM, 8);
+            data << uint64(pGameObj->GetGUID());
+            m_caster->SendMessageToSet(&data,true);
+
+            return;
+        }
     }
 }
 
@@ -2657,6 +2675,7 @@ void Spell::EffectTameCreature(uint32 i)
 
         creatureTarget->setDeathState(JUST_DIED);
         creatureTarget->RemoveCorpse();
+        creatureTarget->SetHealth(0);                       // just for nice GM-mode view
 
         // cast finish successfully
         SendChannelUpdate(0);

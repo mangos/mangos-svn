@@ -509,10 +509,10 @@ class Spell
         void EffectStealBeneficialBuff(uint32 i);
         void EffectUnlearnSpecialization(uint32 i);
 
-        Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur = NULL, uint64 originalCasterGUID = 0, Spell** triggeringContainer = NULL );
+        Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 originalCasterGUID = 0, Spell** triggeringContainer = NULL );
         ~Spell();
 
-        void prepare(SpellCastTargets * targets);
+        void prepare(SpellCastTargets * targets, Aura* triggeredByAura = NULL);
         void cancel();
         void update(uint32 difftime);
         void cast(bool skipCheck = false);
@@ -665,7 +665,11 @@ class Spell
         float m_castPositionZ;
         float m_castOrientation;
         bool m_IsTriggeredSpell;
-        Aura* m_triggeredByAura;
+
+        // if need this can be replaced by Aura copy
+        // we can't store original aura link to prevent access to deleted auras
+        // and in same time need aura data and after aura deleting.
+        SpellEntry const* m_triggeredByAuraSpell;
 };
 
 enum ReplenishType

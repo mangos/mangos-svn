@@ -118,7 +118,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
                 continue;
             }
 
-            Spell *spell = new Spell(pUser, spellInfo, (count > 0) , 0);
+            Spell *spell = new Spell(pUser, spellInfo, (count > 0));
             spell->m_CastItem = pItem;
             spell->prepare(&targets);
 
@@ -576,7 +576,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
         return;
     }
 
-    Spell *spell = new Spell(spellCaster, spellInfo, false, 0);
+    Spell *spell = new Spell(spellCaster, spellInfo, false);
 
     SpellCastTargets targets;
     targets.setUnitTarget( spellTarget );
@@ -652,7 +652,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         }
     }
 
-    Spell *spell = new Spell(_player, spellInfo, false, 0);
+    Spell *spell = new Spell(_player, spellInfo, false);
     spell->prepare(&targets);
 }
 

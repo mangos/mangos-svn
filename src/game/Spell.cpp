@@ -243,7 +243,7 @@ void SpellCastTargets::write ( WorldPacket * data, bool forceAppend)
         *data << (uint8)0;
 }
 
-Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur, uint64 originalCasterGUID, Spell** triggeringContainer )
+Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 originalCasterGUID, Spell** triggeringContainer )
 {
     ASSERT( Caster != NULL && info != NULL );
     ASSERT( info == sSpellStore.LookupEntry( info->Id ) && "`info` must be pointer to sSpellStore element");
@@ -256,8 +256,6 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur, u
 
     if(originalCasterGUID)
         m_originalCasterGUID = originalCasterGUID;
-    else if(Aur)
-        m_originalCasterGUID = Aur->GetCasterGUID();
     else
         m_originalCasterGUID = m_caster->GetGUID();
 
@@ -282,7 +280,8 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, Aura* Aur, u
     gameObjTarget = NULL;
     focusObject = NULL;
 
-    m_triggeredByAura = Aur;
+    m_triggeredByAuraSpell  = NULL;
+
     m_autoRepeat = false;
     if( m_spellInfo->AttributesEx2 == 0x000020 )            //Auto Shot & Shoot
         m_autoRepeat = true;
@@ -1105,7 +1104,7 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
     }
 }
 
-void Spell::prepare(SpellCastTargets * targets)
+void Spell::prepare(SpellCastTargets * targets, Aura* triggeredByAura)
 {
     m_targets = *targets;
 
@@ -1116,6 +1115,9 @@ void Spell::prepare(SpellCastTargets * targets)
     m_castPositionZ = m_caster->GetPositionZ();
     m_castOrientation = m_caster->GetOrientation();
 
+    if(triggeredByAura)
+        m_triggeredByAuraSpell  = triggeredByAura->GetSpellProto();
+
     ReSetTimer();
 
     // create and add update event for this spell
@@ -1125,10 +1127,10 @@ void Spell::prepare(SpellCastTargets * targets)
     uint8 result = CanCast(true);
     if(result != 0)
     {
-        if(m_triggeredByAura)
+        if(triggeredByAura)
         {
             SendChannelUpdate(0);
-            m_triggeredByAura->SetAuraDuration(0);
+            triggeredByAura->SetAuraDuration(0);
         }
         SendCastResult(result);
         finish(false);
@@ -1280,7 +1282,7 @@ void Spell::cast(bool skipCheck)
     SendSpellGo();                                          // we must send smsg_spell_go packet before m_castItem delete in TakeCastItem()...
 
     // Pass cast spell event to handler (not send triggered by aura spells)
-    if (m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_MELEE && m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_RANGED && !m_triggeredByAura)
+    if (m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_MELEE && m_spellInfo->DmgClass != SPELL_DAMAGE_CLASS_RANGED && !m_triggeredByAuraSpell)
     {
         m_caster->ProcDamageAndSpell(m_targets.getUnitTarget(), PROC_FLAG_CAST_SPELL, PROC_FLAG_NONE, 0, m_spellInfo, m_IsTriggeredSpell);
 
@@ -2353,7 +2355,7 @@ void Spell::TakeCastItem()
 
 void Spell::TakePower(uint32 mana)
 {
-    if(m_CastItem || m_triggeredByAura)
+    if(m_CastItem || m_triggeredByAuraSpell)
         return;
 
     // health as power used
@@ -2471,7 +2473,7 @@ void Spell::TriggerSpell()
 {
     for(TriggerSpells::iterator si=m_TriggerSpells.begin(); si!=m_TriggerSpells.end(); ++si)
     {
-        Spell* spell = new Spell(m_caster, (*si), true, NULL, 0, this->m_selfContainer);
+        Spell* spell = new Spell(m_caster, (*si), true, m_originalCasterGUID, this->m_selfContainer);
         spell->prepare(&m_targets);                         // use original spell original targets
     }
 }
@@ -2481,7 +2483,7 @@ uint8 Spell::CanCast(bool strict)
     // check cooldowns to prevent cheating
     if(m_caster->GetTypeId()==TYPEID_PLAYER && ((Player*)m_caster)->HasSpellCooldown(m_spellInfo->Id))
     {
-        if(m_triggeredByAura)
+        if(m_triggeredByAuraSpell)
             return SPELL_FAILED_DONT_REPORT;
          else
             return SPELL_FAILED_NOT_READY;
@@ -2528,7 +2530,7 @@ uint8 Spell::CanCast(bool strict)
                 target = m_caster->GetPet();
                 if(!target)
                 {
-                    if(m_triggeredByAura)                   // not report pet not existence for triggered spells
+                    if(m_triggeredByAuraSpell)              // not report pet not existence for triggered spells
                         return SPELL_FAILED_DONT_REPORT;
                     else
                         return SPELL_FAILED_NO_PET;
@@ -3209,7 +3211,7 @@ uint8 Spell::CheckCasterAuars() const
         prevented_reason = SPELL_FAILED_FLEEING;
     else if(m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_SILENCED) && m_spellInfo->School != SPELL_SCHOOL_NORMAL)
         prevented_reason = SPELL_FAILED_SILENCED;
-    else if(m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED) && m_spellInfo->School == SPELL_SCHOOL_NORMAL && !m_triggeredByAura)
+    else if(m_caster->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_PACIFIED) && m_spellInfo->School == SPELL_SCHOOL_NORMAL && !m_triggeredByAuraSpell)
         prevented_reason = SPELL_FAILED_PACIFIED;
 
     // Attr must make flag drop spell totally immuned from all effects

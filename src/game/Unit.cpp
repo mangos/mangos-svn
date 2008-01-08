@@ -973,12 +973,15 @@ void Unit::CastSpell(Unit* Victim,SpellEntry const *spellInfo, bool triggered, I
     if (castItem)
         DEBUG_LOG("WORLD: cast Item spellId - %i", spellInfo->Id);
 
-    Spell *spell = new Spell(this, spellInfo, triggered, triggredByAura,originalCaster);
+    if(!originalCaster && triggredByAura)
+        originalCaster = triggredByAura->GetCasterGUID();
+
+    Spell *spell = new Spell(this, spellInfo, triggered, originalCaster );
 
     SpellCastTargets targets;
     targets.setUnitTarget( Victim );
     spell->m_CastItem = castItem;
-    spell->prepare(&targets);
+    spell->prepare(&targets, triggredByAura);
 }
 
 void Unit::CastCustomSpell(Unit* Victim,uint32 spellId, int32 const* bp0, int32 const* bp1, int32 const* bp2, bool triggered, Item *castItem, Aura* triggredByAura, uint64 originalCaster)
@@ -1005,7 +1008,10 @@ void Unit::CastCustomSpell(Unit* Victim,SpellEntry const *spellInfo, int32 const
     if (castItem)
         DEBUG_LOG("WORLD: cast Item spellId - %i", spellInfo->Id);
 
-    Spell *spell = new Spell(this, spellInfo, triggered, triggredByAura,originalCaster);
+    if(!originalCaster && triggredByAura)
+        originalCaster = triggredByAura->GetCasterGUID();
+
+    Spell *spell = new Spell(this, spellInfo, triggered, originalCaster);
 
     if(bp0)
         spell->m_currentBasePoints[0] = *bp0;
@@ -1019,7 +1025,7 @@ void Unit::CastCustomSpell(Unit* Victim,SpellEntry const *spellInfo, int32 const
     SpellCastTargets targets;
     targets.setUnitTarget( Victim );
     spell->m_CastItem = castItem;
-    spell->prepare(&targets);
+    spell->prepare(&targets, triggredByAura);
 }
 
 void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32 *damage, CleanDamage *cleanDamage, bool *crit, bool isTriggeredSpell)

@@ -1025,7 +1025,7 @@ void Aura::TriggerSpell()
     uint32 trigger_spell_id = GetSpellProto()->EffectTriggerSpell[m_effIndex];
     Unit* caster = GetCaster();
     Unit* target = m_target;
-    uint64 originalCasterGUID = 0;
+    uint64 originalCasterGUID = GetCasterGUID();
 
     // specific code for cases with no trigger spell provided in field
     switch(GetId())
@@ -1076,8 +1076,8 @@ void Aura::TriggerSpell()
             if(intelectLoss <= -90 && spiritLoss <= -90)
                 return;
 
-            originalCasterGUID = GetCasterGUID();
             caster = target;
+            originalCasterGUID = 0;
             break;
         }
     }
@@ -1090,6 +1090,19 @@ void Aura::TriggerSpell()
 
     if(!caster || !target)
         return;
+
+
+    // custom points code
+    switch(GetId())
+    {
+        // Mana Tide
+        case 16191:
+        {
+            int32 MTBasePoints = GetModifier()->m_amount-1;
+            caster->CastCustomSpell(target,trigger_spell_id,&MTBasePoints,NULL,NULL,true,NULL,this,originalCasterGUID);
+            return;
+        }
+    }
 
     caster->CastSpell(target,trigger_spell_id,true,NULL,this,originalCasterGUID);
 }
