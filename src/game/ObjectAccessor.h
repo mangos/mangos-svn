@@ -97,13 +97,12 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
 
         static Unit* GetObjectInWorld(uint64 guid, Unit* /*fake*/)
         {
-            uint32 guidHi = GUID_HIPART(guid);
-            Unit* u;
-            if (guidHi == HIGHGUID_PLAYER)
+            if (GUID_HIPART(guid) == HIGHGUID_PLAYER)
                 return (Unit*)HashMapHolder<Player>::Find(guid);
-            u = (Unit*)HashMapHolder<Pet>::Find(guid);
-            if (u)
+
+            if (Unit* u = (Unit*)HashMapHolder<Pet>::Find(guid))
                 return u;
+
             return (Unit*)HashMapHolder<Creature>::Find(guid);
         }
 

@@ -3369,7 +3369,7 @@ void ObjectMgr::LoadQuestEndScripts()
     objmgr.LoadScripts(sQuestEndScripts,  "quest_end_scripts");
 
     // check ids
-    for(ScriptMapMap::const_iterator itr = sButtonScripts.begin(); itr != sButtonScripts.end(); ++itr)
+    for(ScriptMapMap::const_iterator itr = sQuestEndScripts.begin(); itr != sQuestEndScripts.end(); ++itr)
     {
         if(!GetQuestTemplate(itr->first))
             sLog.outErrorDb("Table `quest_end_scripts` has not existing quest (Id: %u) as script id",itr->first);
@@ -3381,7 +3381,7 @@ void ObjectMgr::LoadQuestStartScripts()
     objmgr.LoadScripts(sQuestStartScripts,"quest_start_scripts");
 
     // check ids
-    for(ScriptMapMap::const_iterator itr = sButtonScripts.begin(); itr != sButtonScripts.end(); ++itr)
+    for(ScriptMapMap::const_iterator itr = sQuestStartScripts.begin(); itr != sQuestStartScripts.end(); ++itr)
     {
         if(!GetQuestTemplate(itr->first))
             sLog.outErrorDb("Table `quest_start_scripts` has not existing quest (Id: %u) as script id",itr->first);
@@ -3393,10 +3393,33 @@ void ObjectMgr::LoadSpellScripts()
     objmgr.LoadScripts(sSpellScripts,     "spell_scripts");
 
     // check ids
-    for(ScriptMapMap::const_iterator itr = sButtonScripts.begin(); itr != sButtonScripts.end(); ++itr)
+    for(ScriptMapMap::const_iterator itr = sSpellScripts.begin(); itr != sSpellScripts.end(); ++itr)
     {
-        if(!sSpellStore.LookupEntry(itr->first))
+        SpellEntry const* spellInfo = sSpellStore.LookupEntry(itr->first);
+
+        if(!spellInfo)
+        {
             sLog.outErrorDb("Table `spell_scripts` has not existing spell (Id: %u) as script id",itr->first);
+            continue;
+        }
+
+        //check for correct spellEffect
+        bool found = false;
+        for(int i=0; i<3; ++i)
+        {
+            // skip empty effects
+            if( !spellInfo->Effect[i] )
+                continue;
+            
+            if( spellInfo->Effect[i] == SPELL_EFFECT_SEND_EVENT || spellInfo->Effect[i] == SPELL_EFFECT_SCRIPT_EFFECT )
+            {
+                found =  true;
+                break;
+            }
+        }
+
+        if(!found)
+            sLog.outErrorDb("Table `spell_scripts` has unsupported spell (Id: %u) without SPELL_EFFECT_SCRIPT_EFFECT (%u) or SPELL_EFFECT_SEND_EVENT (%u) spell effect",itr->first,SPELL_EFFECT_SCRIPT_EFFECT,SPELL_EFFECT_SEND_EVENT);
     }
 }
 

@@ -536,7 +536,7 @@ bool Item::IsEquipped() const
 
 bool Item::CanBeTraded() const
 {
-    if(HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_BINDED) || GetProto()->Class == ITEM_CLASS_QUEST)
+    if(HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_BINDED))
         return false;
     if(IsBag() && !((Bag const*)this)->IsEmpty())
         return false;

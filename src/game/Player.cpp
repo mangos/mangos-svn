@@ -4298,17 +4298,23 @@ void Player::SetRegularAttackTime()
 //skill+1, checking for max value
 bool Player::UpdateSkill(uint32 skill_id)
 {
-    if(!skill_id) return false;
+    if(!skill_id)
+        return false;
+
     uint16 i=0;
     for (; i < PLAYER_MAX_SKILLS; i++)
-        if ((GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF) == skill_id) break;
-    if(i>=PLAYER_MAX_SKILLS) return false;
+        if ((GetUInt32Value(PLAYER_SKILL(i)) & 0x0000FFFF) == skill_id)
+            break;
+
+    if(i>=PLAYER_MAX_SKILLS)
+        return false;
 
     uint32 data = GetUInt32Value(PLAYER_SKILL(i)+1);
     uint32 value = SKILL_VALUE(data);
     uint32 max = SKILL_MAX(data);
 
-    if ((!max) || (!value) || (value >= max)) return false;
+    if ((!max) || (!value) || (value >= max))
+        return false;
 
     if (value*512 < max*urand(0,512))
     {
