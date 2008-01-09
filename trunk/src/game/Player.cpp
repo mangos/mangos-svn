@@ -14939,19 +14939,19 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
             ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(pProto->ExtendedCost);
             if(iece)
             {
-                if(GetHonorPoints() < iece->reqhonorpoints)
+                if(GetHonorPoints() < (iece->reqhonorpoints * count))
                 {
                     SendEquipError(EQUIP_ERR_NOT_ENOUGH_HONOR_POINTS, NULL, NULL);
                     return;
                 }
-                if(GetArenaPoints() < iece->reqarenapoints)
+                if(GetArenaPoints() < (iece->reqarenapoints * count))
                 {
                     SendEquipError(EQUIP_ERR_NOT_ENOUGH_ARENA_POINTS, NULL, NULL);
                     return;
                 }
-                if( (iece->reqitem1 && !HasItemCount(iece->reqitem1, iece->reqitemcount1)) ||
-                    (iece->reqitem2 && !HasItemCount(iece->reqitem2, iece->reqitemcount2)) ||
-                    (iece->reqitem3 && !HasItemCount(iece->reqitem3, iece->reqitemcount3)) )
+                if( (iece->reqitem1 && !HasItemCount(iece->reqitem1, (iece->reqitemcount1 * count))) ||
+                    (iece->reqitem2 && !HasItemCount(iece->reqitem2, (iece->reqitemcount2 * count))) ||
+                    (iece->reqitem3 && !HasItemCount(iece->reqitem3, (iece->reqitemcount3 * count))) )
                 {
                     SendEquipError(EQUIP_ERR_VENDOR_MISSING_TURNINS, NULL, NULL);
                     return;
@@ -15014,15 +15014,15 @@ void Player::BuyItemFromVendor(uint64 vendorguid, uint32 item, uint8 count, uint
                 {
                     ItemExtendedCostEntry const* iece = sItemExtendedCostStore.LookupEntry(pProto->ExtendedCost);
                     if(iece->reqhonorpoints)
-                        SetHonorPoints(GetHonorPoints() - iece->reqhonorpoints);
+                        SetHonorPoints(GetHonorPoints() - (iece->reqhonorpoints * count));
                     if(iece->reqarenapoints)
-                        SetArenaPoints(GetArenaPoints() - iece->reqarenapoints);
+                        SetArenaPoints(GetArenaPoints() - (iece->reqarenapoints * count));
                     if(iece->reqitem1)
-                        DestroyItemCount(iece->reqitem1, iece->reqitemcount1, true);
+                        DestroyItemCount(iece->reqitem1, (iece->reqitemcount1 * count), true);
                     if(iece->reqitem2)
-                        DestroyItemCount(iece->reqitem2, iece->reqitemcount2, true);
+                        DestroyItemCount(iece->reqitem2, (iece->reqitemcount2 * count), true);
                     if(iece->reqitem3)
-                        DestroyItemCount(iece->reqitem3, iece->reqitemcount3, true);
+                        DestroyItemCount(iece->reqitem3, (iece->reqitemcount3 * count), true);
                 }
                 Item *it = StoreNewItem( dest, item, pProto->BuyCount * count, true );
                 if( crItem->maxcount != 0 )
