@@ -97,11 +97,14 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
 
         static Unit* GetObjectInWorld(uint64 guid, Unit* /*fake*/)
         {
-            Unit *u = (Unit*)HashMapHolder<Player>::Find(guid);
-            if(u) return u;
-            u = (Unit*)HashMapHolder<Creature>::Find(guid);
-            if(u) return u;
-            return (Unit*)HashMapHolder<Pet>::Find(guid);
+            uint32 guidHi = GUID_HIPART(guid);
+            Unit* u;
+            if (guidHi == HIGHGUID_PLAYER)
+                return (Unit*)HashMapHolder<Player>::Find(guid);
+            u = (Unit*)HashMapHolder<Pet>::Find(guid);
+            if (u)
+                return u;
+            return (Unit*)HashMapHolder<Creature>::Find(guid);
         }
 
         template<class T> static T* GetObjectInWorld(uint32 mapid, float x, float y, uint64 guid, T* /*fake*/)
@@ -180,7 +183,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
 
         void DoDelayedMovesAndRemoves();
 
-        void Update(const uint32 &diff);
+        void Update(uint32 diff);
 
         Corpse* GetCorpseForPlayerGUID(uint64 guid);
         void RemoveCorpse(Corpse *corpse);
@@ -188,7 +191,7 @@ class MANGOS_DLL_DECL ObjectAccessor : public MaNGOS::Singleton<ObjectAccessor, 
         void AddCorpsesToGrid(GridPair const& gridpair,GridType& grid,Map* map);
         Corpse* ConvertCorpseForPlayer(uint64 player_guid);
 
-        bool PlayersNearGrid(const uint32 &x, const uint32 &y, const uint32 &m_id, const uint32 &i_id) const;
+        bool PlayersNearGrid(uint32 x,uint32 y,uint32 m_id,uint32 i_id) const;
 
         static void UpdateObject(Object* obj, Player* exceptPlayer);
         static void _buildUpdateObject(Object* obj, UpdateDataMapType &);
