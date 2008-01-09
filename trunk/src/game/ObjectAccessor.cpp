@@ -244,15 +244,15 @@ ObjectAccessor::_update()
     UpdateDataMapType update_players;
     {
         Guard guard(i_updateGuard);
-        for(std::set<Object *>::iterator iter=i_objects.begin(); iter != i_objects.end(); ++iter)
+        while(!i_objects.empty())
         {
-            // check for valid pointer
-            if (!*iter)
+            Object* obj = *i_objects.begin();
+            i_objects.erase(i_objects.begin());
+            if (!obj)
                 continue;
-            _buildUpdateObject(*iter, update_players);
-            (*iter)->ClearUpdateMask(false);
+            _buildUpdateObject(obj, update_players);
+            obj->ClearUpdateMask(false);
         }
-        i_objects.clear();
     }
 
     WorldPacket packet;                                     // here we allocate a std::vector with a size of 0x10000
@@ -561,7 +561,7 @@ ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid)
 }
 
 void
-ObjectAccessor::Update(const uint32  &diff)
+ObjectAccessor::Update(uint32 diff)
 {
     {
         typedef std::multimap<uint32, Player *> CreatureLocationHolderType;
@@ -633,7 +633,7 @@ ObjectAccessor::Update(const uint32  &diff)
 }
 
 bool
-ObjectAccessor::PlayersNearGrid(const uint32 &x, const uint32 &y, const uint32 &m_id, const uint32 &i_id) const
+ObjectAccessor::PlayersNearGrid(uint32 x, uint32 y, uint32 m_id, uint32 i_id) const
 {
     CellPair cell_min(x*MAX_NUMBER_OF_CELLS, y*MAX_NUMBER_OF_CELLS);
     CellPair cell_max(cell_min.x_coord + MAX_NUMBER_OF_CELLS, cell_min.y_coord+MAX_NUMBER_OF_CELLS);
