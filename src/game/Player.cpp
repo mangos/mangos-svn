@@ -12303,15 +12303,13 @@ bool Player::LoadPositionFromDB(uint32& mapid, float& x,float& y,float& z,float&
 
 bool Player::LoadValuesArrayFromDB(Tokens& data, uint64 guid)
 {
-    std::ostringstream ss;
-    ss<<"SELECT `data` FROM `character` WHERE `guid`='"<<GUID_LOPART(guid)<<"'";
-    QueryResult *result = CharacterDatabase.Query( ss.str().c_str() );
+    QueryResult *result = CharacterDatabase.PQuery("SELECT `data` FROM `character` WHERE `guid`='%u'",GUID_LOPART(guid));
     if( !result )
         return false;
 
     Field *fields = result->Fetch();
 
-    data = StrSplit(fields[0].GetString(), " ");
+    data = StrSplit(fields[0].GetCppString(), " ");
 
     delete result;
 
