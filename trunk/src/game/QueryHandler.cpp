@@ -51,10 +51,14 @@ void WorldSession::SendNameQueryOpcode(Player *p)
 void WorldSession::SendNameQueryOpcodeFromDB(uint64 guid)
 {
     std::string name;
+    uint32 field;
     if(!objmgr.GetPlayerNameByGUID(guid, name))
+    {
         name = LANG_NON_EXIST_CHARACTER;
-    uint32 field = Player::GetUInt32ValueFromDB(UNIT_FIELD_BYTES_0, guid);
-
+        field = 0;
+    }
+    else
+        field = Player::GetUInt32ValueFromDB(UNIT_FIELD_BYTES_0, guid);
                                                             // guess size
     WorldPacket data( SMSG_NAME_QUERY_RESPONSE, (8+1+4+4+4+10) );
     data << guid;
