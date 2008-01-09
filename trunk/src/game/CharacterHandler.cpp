@@ -174,7 +174,7 @@ void WorldSession::HandleCharCreateOpcode( WorldPacket & recv_data )
 
     std::string name;
     uint8 race_,class_;
-    bool pTbc = this->IsTBC() && sWorld.getConfig(CONFIG_EXPANSION);
+    bool pTbc = this->IsTBC() && sWorld.getConfig(CONFIG_EXPANSION) > 0;
     recv_data >> name;
 
     // recheck with known string size

@@ -939,7 +939,7 @@ void CliRunnable::run()
     /// \todo Shoudn't we use here also the sLog singleton?
     CliHelp(NULL,&printf);
 
-    if(sConfig.GetIntDefault("BeepAtStart", 1) > 0)
+    if(sConfig.GetBoolDefault("BeepAtStart", true))
     {
         printf("\a");                                       // \a = Alert
     }

@@ -32,7 +32,7 @@ bool Database::Initialize(const char *)
 {
     // Enable logging of SQL commands (usally only GM commands)
     // (See method: PExecuteLog)
-    m_logSQL = sConfig.GetIntDefault("LogSQL", 0);
+    m_logSQL = sConfig.GetBoolDefault("LogSQL", false);
     m_logsDir = sConfig.GetStringDefault("LogsDir","");
     if(!m_logsDir.empty())
     {

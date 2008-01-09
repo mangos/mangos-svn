@@ -102,8 +102,7 @@ class MANGOS_DLL_SPEC Database
         void SetResultQueue(SqlResultQueue * queue);
 
     private:
-        // 0 - do not log, 1 - log sql commands
-        uint32 m_logSQL;
+        bool m_logSQL;
         std::string m_logsDir;
 };
 #endif

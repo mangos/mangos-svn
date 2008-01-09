@@ -1411,7 +1411,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     if(!InBattleGround() && mEntry->map_type == MAP_BATTLEGROUND && !GetSession()->GetSecurity())
         return;
 
-    bool tbc = GetSession()->IsTBC() && sWorld.getConfig(CONFIG_EXPANSION);
+    bool tbc = GetSession()->IsTBC() && sWorld.getConfig(CONFIG_EXPANSION) > 0;
 
     // normal client and TBC map
     if(!tbc && IsExpansionMap(mEntry))

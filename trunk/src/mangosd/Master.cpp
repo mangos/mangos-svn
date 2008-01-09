@@ -127,9 +127,9 @@ void Master::Run()
     loginDatabase.PExecute("UPDATE `realmlist` SET `color` = 0, `population` = 0 WHERE `id` = '%d'",realmID);
 
 #ifdef WIN32
-    if (sConfig.GetBoolDefault("Console.Enable", 1) && (m_ServiceStatus == -1)/* need disable console in service mode*/)
+    if (sConfig.GetBoolDefault("Console.Enable", true) && (m_ServiceStatus == -1)/* need disable console in service mode*/)
 #else
-    if (sConfig.GetBoolDefault("Console.Enable", 1))
+    if (sConfig.GetBoolDefault("Console.Enable", true))
 #endif
     {
         ///- Launch CliRunnable thread
@@ -138,7 +138,7 @@ void Master::Run()
 
     ///- Launch the RA listener socket
     ListenSocket<RASocket> RAListenSocket(h);
-    if (sConfig.GetBoolDefault("Ra.Enable", 0))
+    if (sConfig.GetBoolDefault("Ra.Enable", false))
     {
         port_t raport = sConfig.GetIntDefault( "Ra.Port", 3443 );
         std::string stringip = sConfig.GetStringDefault( "Ra.IP", "0.0.0.0" );
@@ -185,7 +185,7 @@ void Master::Run()
             sLog.outString();
         }
 
-        uint32 Prio = sConfig.GetIntDefault("ProcessPriority", 0);
+        bool Prio = sConfig.GetBoolDefault("ProcessPriority", false);
 
 //        if(Prio && (m_ServiceStatus == -1)/* need set to default process priority class in service mode*/)
         if(Prio)
@@ -256,7 +256,7 @@ void Master::Run()
     sLog.outString( "Halting process..." );
 
     #ifdef WIN32
-    if (sConfig.GetBoolDefault("Console.Enable", 1))
+    if (sConfig.GetBoolDefault("Console.Enable", true))
     {
         // this only way to terminate CLI thread exist at Win32 (alt. way exist only in Windows Vista API)
         //_exit(1);
@@ -432,4 +432,6 @@ void Master::_UnhookSignals()
     signal(SIGBREAK, 0);
     #endif
 }
+
+
 
