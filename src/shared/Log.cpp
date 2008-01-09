@@ -183,7 +183,7 @@ void Log::Initialize()
     std::string logfn=sConfig.GetStringDefault("LogFile", "");
     if(logfn!="")
     {
-        if(sConfig.GetIntDefault("LogTimestamp",0))
+        if(sConfig.GetBoolDefault("LogTimestamp",false))
         {
             std::string logTimestamp = GetTimestampStr();
             logTimestamp.insert(0,"_");
@@ -206,7 +206,7 @@ void Log::Initialize()
     std::string charlogname = sConfig.GetStringDefault("CharLogFile", "");
     if(charlogname!="")
     {
-        if(sConfig.GetIntDefault("CharLogTimestamp",0))
+        if(sConfig.GetBoolDefault("CharLogTimestamp",false))
         {
             std::string charLogTimestamp = GetTimestampStr();
             charLogTimestamp.insert(0,"_");
@@ -229,21 +229,21 @@ void Log::Initialize()
     {
         raLogfile = fopen((logsDir+ralogname).c_str(), "a");
     }
-    m_includeTime  = sConfig.GetIntDefault("LogTime", 0);
+    m_includeTime  = sConfig.GetBoolDefault("LogTime", false);
     m_logLevel     = sConfig.GetIntDefault("LogLevel", 0);
     m_logFileLevel = sConfig.GetIntDefault("LogFileLevel", 0);
     InitColors(sConfig.GetStringDefault("LogColors", ""));
 
     m_logFilter = 0;
 
-    if(sConfig.GetIntDefault("LogFilter_TransportMoves", 0)!=0)
+    if(sConfig.GetBoolDefault("LogFilter_TransportMoves", false))
         m_logFilter |= LOG_FILTER_TRANSPORT_MOVES;
-    if(sConfig.GetIntDefault("LogFilter_CreatureMoves", 0)!=0)
+    if(sConfig.GetBoolDefault("LogFilter_CreatureMoves", false))
         m_logFilter |= LOG_FILTER_CREATURE_MOVES;
-    if(sConfig.GetIntDefault("LogFilter_VisibilityChanges", 0)!=0)
+    if(sConfig.GetBoolDefault("LogFilter_VisibilityChanges", false))
         m_logFilter |= LOG_FILTER_VISIBILITY_CHANGES;
 
-    m_charLog_Dump = sConfig.GetIntDefault("CharLogDump", 0) != 0;
+    m_charLog_Dump = sConfig.GetBoolDefault("CharLogDump", false);
 }
 
 void Log::outTimestamp(FILE* file)

@@ -3187,7 +3187,7 @@ bool ChatHandler::HandleChangeWeather(const char* args)
         return false;
 
     //Weather is OFF
-    if (sWorld.getConfig(CONFIG_WEATHER) == 0)
+    if (!sWorld.getConfig(CONFIG_WEATHER))
     {
         SendSysMessage(LANG_WEATHER_DISABLED);
         return true;
@@ -4472,5 +4472,7 @@ bool ChatHandler::HandleCastBackCommand(const char* args)
 
     return true;
 }
+
+
 
 

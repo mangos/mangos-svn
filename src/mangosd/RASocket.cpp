@@ -50,7 +50,7 @@ RASocket::RASocket(ISocketHandler &h): TcpSocket(h)
     iSess =iSession++ ;
 
     ///- Get the config parameters
-    bSecure = sConfig.GetBoolDefault( "RA.Secure", 1 );
+    bSecure = sConfig.GetBoolDefault( "RA.Secure", true );
     iMinLevel = sConfig.GetIntDefault( "RA.MinLevel", 3 );
 
     ///- Initialize buffer and data

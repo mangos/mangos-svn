@@ -228,7 +228,7 @@ extern int main(int argc, char **argv)
             sLog.outString();
         }
 
-        uint32 Prio = sConfig.GetIntDefault("ProcessPriority", 0);
+        bool Prio = sConfig.GetBoolDefault("ProcessPriority", false);
 
         if(Prio)
         {

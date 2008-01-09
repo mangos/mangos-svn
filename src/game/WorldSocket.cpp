@@ -268,7 +268,7 @@ void WorldSocket::_HandleAuthSession(WorldPacket& recvPacket)
 
     Field* fields = result->Fetch();
 
-    tbc = fields[8].GetUInt8() && sWorld.getConfig(CONFIG_EXPANSION);
+    tbc = fields[8].GetUInt8() && sWorld.getConfig(CONFIG_EXPANSION) > 0;
 
     N.SetHexStr("894B645E89E1535BBDAD5B8B290650530801B18EBFBF5E8FAB3C82872A3E9BB7");
     g.SetDword(7);
