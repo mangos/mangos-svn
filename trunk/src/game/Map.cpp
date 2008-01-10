@@ -802,10 +802,12 @@ void Map::Update(const uint32 &t_diff)
 
     for(unsigned int i=0; i < MAX_NUMBER_OF_GRIDS; ++i)
     {
-        uint64 mask = 1;
+        if(!i_gridMask[i])
+            continue;
+
         for(unsigned int j=0; j < MAX_NUMBER_OF_GRIDS; ++j)
         {
-            if( i_gridMask[i] & mask )
+            if( i_gridMask[i] & (uint64(1) << j) )
             {
                 // move all creatures with delayed move and remove in grid before new grid moves (and grid unload)
                 //ObjectAccessor::Instance().DoDelayedMovesAndRemoves();
@@ -815,7 +817,6 @@ void Map::Update(const uint32 &t_diff)
                 GridInfo &info(*i_info[i][j]);
                 si_GridStates[grid.GetGridState()]->Update(*this, grid, info, i, j, t_diff);
             }
-            mask <<= 1;
         }
     }
 
@@ -1186,13 +1187,12 @@ void Map::UnloadAll()
 
     for(unsigned int i=0; i < MAX_NUMBER_OF_GRIDS; ++i)
     {
-        uint64 mask = 1;
+        if(!i_gridMask[i])
+            continue;
+
         for(unsigned int j=0; j < MAX_NUMBER_OF_GRIDS; ++j)
-        {
-            if( i_gridMask[i] & mask )
+            if( i_gridMask[i] & (uint64(1) << j) )
                 UnloadGrid(i, j);
-            mask <<= 1;
-        }
     }
 }
 
