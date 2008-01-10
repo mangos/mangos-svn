@@ -1617,6 +1617,16 @@ void WorldSession::HandleRequestPetInfoOpcode( WorldPacket & /*recv_data */)
     */
 }
 
+void WorldSession::HandleSetTaxiBenchmarkOpcode( WorldPacket & recv_data )
+{
+    CHECK_PACKET_SIZE(recv_data, 1);
+    
+    uint8 mode;
+    recv_data >> mode;
+
+    sLog.outDebug("Client use \"/timetest %d\" command", mode);
+}
+
 void WorldSession::Handle1020( WorldPacket & recv_data )
 {
     sLog.outDebug("WORLD: MSG_UNKNOWN_1020");

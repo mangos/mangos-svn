@@ -560,6 +560,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleChannelEnableVoiceOpcode(WorldPacket & recv_data);
         void HandleVoiceSettingsOpcode(WorldPacket& recv_data);
         void HandleChannelVoiceChatQuery(WorldPacket& recv_data);
+        void HandleSetTaxiBenchmarkOpcode(WorldPacket& recv_data);
 
         // unknown
         void Handle1020(WorldPacket& recv_data);

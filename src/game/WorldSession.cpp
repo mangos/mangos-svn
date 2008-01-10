@@ -458,6 +458,7 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_CHANNEL_VOICE_ON ]                 = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleChannelEnableVoiceOpcode      );
     objmgr.opcodeTable[ CMSG_CHANNEL_VOICE_CHAT_QUERY ]         = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandleChannelVoiceChatQuery         );
     objmgr.opcodeTable[ CMSG_VOICE_SETTINGS ]                   = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandleVoiceSettingsOpcode           );
+    objmgr.opcodeTable[ CMSG_SET_TAXI_BENCHMARK_MODE ]          = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandleSetTaxiBenchmarkOpcode        );
     objmgr.opcodeTable[ MSG_UNKNOWN_1020 ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::Handle1020                          );
     objmgr.opcodeTable[ MSG_UNKNOWN_1021 ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::Handle1021                          );
 }
