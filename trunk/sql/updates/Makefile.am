@@ -1,4 +1,4 @@
-# Copyright (C) 2005,2006,2007 MaNGOS <http://www.mangosproject.org/>
+# Copyright (C) 2005-2008 MaNGOS <http://www.mangosproject.org/>
 #
 # This program is free software; you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -1075,5 +1075,4 @@ EXTRA_DIST = \
 	4975_mangos_spell_proc_event.sql \
 	4984_mangos_spell_proc_event.sql \
 	README
-
 

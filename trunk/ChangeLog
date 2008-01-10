@@ -1,4 +1,4 @@
-MaNGOS 0.10   (??? ??? 2007) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.10
+MaNGOS 0.10   (??? ??? 2008) http://www.mangosproject.org/trac/milestone/0.10
 
  MaNGOS 0.10 - Codename "???" - adds further improvements to the
  server core as well as to the majority of game classes and the game content
@@ -13,9 +13,9 @@ MaNGOS 0.10   (??? ??? 2007) https://svn.mangosproject.org/trac/MaNGOS/milestone
  * Total number of changes: ???
 
  The complete list of closed tickets can be found here:
-   https://svn.mangosproject.org/trac/MaNGOS/query?status=closed&milestone=0.10
+   http://www.mangosproject.org/trac/query?status=closed&milestone=0.10
 
-MaNGOS 0.9    (Dec 14 2007) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.9
+MaNGOS 0.9    (Dec 14 2007) http://www.mangosproject.org/trac/milestone/0.9
 
  MaNGOS 0.9 - Codename "Flight Master" - adds further improvements to the
  server core as well as to the majority of game classes and the game content
@@ -51,9 +51,9 @@ MaNGOS 0.9    (Dec 14 2007) https://svn.mangosproject.org/trac/MaNGOS/milestone/
  * Total number of changes: 228
 
  The complete list of closed tickets can be found here:
-   https://svn.mangosproject.org/trac/MaNGOS/query?status=closed&milestone=0.9
+   http://www.mangosproject.org/trac/query?status=closed&milestone=0.9
 
-MaNGOS 0.8    (Oct 16, 2007) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.8
+MaNGOS 0.8    (Oct 16, 2007) http://www.mangosproject.org/trac/milestone/0.8
 
  MaNGOS 0.8 - Codename "Innkeeper" - adds further improvements to the
  server core as well as to the majority of game classes and the game content
@@ -99,9 +99,9 @@ MaNGOS 0.8    (Oct 16, 2007) https://svn.mangosproject.org/trac/MaNGOS/milestone
  * Total number of changes: 558
 
  The complete list of closed tickets can be found here:
-   https://svn.mangosproject.org/trac/MaNGOS/query?status=closed&milestone=0.8
+   http://www.mangosproject.org/trac/query?status=closed&milestone=0.8
 
-MaNGOS 0.7    (Jul 9, 2007) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.7
+MaNGOS 0.7    (Jul 9, 2007) http://www.mangosproject.org/trac/milestone/0.7
 
  MaNGOS 0.7 - Codename "Eye of the Storm" -adds further improvements to the
  server core as well as to the majority of game classes and the game content
@@ -158,9 +158,9 @@ MaNGOS 0.7    (Jul 9, 2007) https://svn.mangosproject.org/trac/MaNGOS/milestone/
  * Total number of changes: 923
 
  The complete list of closed tickets can be found here:
-   https://svn.mangosproject.org/trac/MaNGOS/query?status=closed&milestone=0.7
+   http://www.mangosproject.org/trac/query?status=closed&milestone=0.7
 
-MaNGOS 0.6    (Jan 29, 2007) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.6
+MaNGOS 0.6    (Jan 29, 2007) http://www.mangosproject.org/trac/milestone/0.6
 
  MaNGOS 0.6 - Codename "Black Dragonflight" - adds further improvements to the
  server core as well as to the majority of game classes and the game content
@@ -201,9 +201,9 @@ MaNGOS 0.6    (Jan 29, 2007) https://svn.mangosproject.org/trac/MaNGOS/milestone
  * Total number of changes: 874
 
  The complete list of closed tickets can be found here:
-   https://svn.mangosproject.org/trac/MaNGOS/query?status=closed&milestone=0.6
+   http://www.mangosproject.org/trac/query?status=closed&milestone=0.6
 
-MaNGOS 0.5    (Sep 20, 2006) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.5
+MaNGOS 0.5    (Sep 20, 2006) http://www.mangosproject.org/trac/milestone/0.5
 
  MaNGOS 0.5 - Codename "Stable Master" - adds further improvements to the
  server core as well as to the majority of game classes and the game content
@@ -222,9 +222,9 @@ MaNGOS 0.5    (Sep 20, 2006) https://svn.mangosproject.org/trac/MaNGOS/milestone
  * Total number of changes: 1828.
 
  The complete list of closed tickets can be found here:
-   https://svn.mangosproject.org/trac/MaNGOS/query?status=closed&milestone=0.5
+   http://www.mangosproject.org/trac/query?status=closed&milestone=0.5
 
-MaNGOS 0.1    (Dec 04, 2005) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.1
+MaNGOS 0.1    (Dec 04, 2005) http://www.mangosproject.org/trac/milestone/0.1
 
  MaNGOS 0.1 - Codename "Lightbringer" -adds further improvements to the server
  core as well as to the majority of game classes and the game content database.
@@ -354,16 +354,16 @@ MaNGOS 0.1    (Dec 04, 2005) https://svn.mangosproject.org/trac/MaNGOS/milestone
  * Total number of changes: 193.
 
  The complete list of closed tickets can be found here:
-   https://svn.mangosproject.org/trac/MaNGOS/query?status=closed&milestone=0.1
+   http://www.mangosproject.org/trac/query?status=closed&milestone=0.1
 
-MaNGOS 0.0.3  (Nov 15, 2005) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.0.3
+MaNGOS 0.0.3  (Nov 15, 2005) http://www.mangosproject.org/trac/milestone/0.0.3
 
  MaNGOS 0.0.3 - Codename "Mango Carpet" - was mainly a bug fix release, which
  never was published on the web, and just marks a point in development where
  a damn lot of bugs had been fixed, but we still felt the need for further work
  to be done before a release could be pushed to the world.
 
-MaNGOS 0.0.2  (Oct 31, 2005) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.0.2
+MaNGOS 0.0.2  (Oct 31, 2005) http://www.mangosproject.org/trac/milestone/0.0.2
 
  MaNGOS 0.0.2 - Codename "Library" - adds another bunch of improvements, bug
  fixes and major enhancements to the overall functionality of the daemon. A
@@ -407,9 +407,9 @@ MaNGOS 0.0.2  (Oct 31, 2005) https://svn.mangosproject.org/trac/MaNGOS/milestone
  * Total number of changes: 225.
 
  The complete list of closed tickets can be found here:
-   https://svn.mangosproject.org/trac/MaNGOS/query?status=closed&milestone=0.0.2
+   http://www.mangosproject.org/trac/query?status=closed&milestone=0.0.2
 
-MaNGOS 0.0.1  (Sept 13, 2005) https://svn.mangosproject.org/trac/MaNGOS/milestone/0.0.1
+MaNGOS 0.0.1  (Sept 13, 2005) http://www.mangosproject.org/trac/milestone/0.0.1
 
  MaNGOS 0.0.1 - Codename "Endeavour" - contains a great number of new features,
  improvements and bug fixes. The following list contains all of them:
@@ -438,4 +438,4 @@ MaNGOS 0.0.1  (Sept 13, 2005) https://svn.mangosproject.org/trac/MaNGOS/mileston
  * Total number of changes: 53.
 
  The complete list of closed tickets can be found here:
-   https://svn.mangosproject.org/trac/MaNGOS/query?status=closed&milestone=0.0.1
+   http://www.mangosproject.org/trac/query?status=closed&milestone=0.0.1

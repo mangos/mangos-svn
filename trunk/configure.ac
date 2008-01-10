@@ -1,4 +1,4 @@
-# Copyright (C) 2007 MaNGOS project <http://www.mangosproject.org/>
+# Copyright (C) 2005-2008 MaNGOS project <http://www.mangosproject.org/>
 #
 # This file is free software; as a special exception the author gives
 # unlimited permission to copy and/or distribute it, with or without

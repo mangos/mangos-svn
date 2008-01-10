@@ -2,7 +2,7 @@
 --
 -- Host: localhost    Database: realmd
 -- ------------------------------------------------------
--- Server version	5.0.45-Debian_1ubuntu2-log
+-- Server version	5.0.45-Debian_1ubuntu3.1-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -37,7 +37,7 @@ CREATE TABLE `account` (
   `online` tinyint(4) NOT NULL default '0',
   `tbc` tinyint(3) unsigned NOT NULL default '0',
   `mutetime` bigint(40) unsigned NOT NULL default '0',
-  `locale` tinyint(3) unsigned NOT NULL DEFAULT '0',
+  `locale` tinyint(3) unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`),
   UNIQUE KEY `idx_username` (`username`),
   KEY `idx_gmlevel` (`gmlevel`)
@@ -111,8 +111,8 @@ UNLOCK TABLES;
 DROP TABLE IF EXISTS `localization`;
 CREATE TABLE `localization` (
   `locale` tinyint(3) unsigned NOT NULL default '0',
-  `string` char(2) NOT NULL DEFAULT '',
-  PRIMARY KEY (`locale`)
+  `string` char(2) NOT NULL default '',
+  PRIMARY KEY  (`locale`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8;
 
 --
@@ -162,8 +162,8 @@ CREATE TABLE `realmlist` (
   `icon` tinyint(3) unsigned NOT NULL default '0',
   `color` tinyint(3) unsigned NOT NULL default '2',
   `timezone` tinyint(3) unsigned NOT NULL default '0',
-  `allowedSecurityLevel` TINYINT(3) UNSIGNED NOT NULL DEFAULT 0,
-  `population` float(0) UNSIGNED NOT NULL DEFAULT 0.0,
+  `allowedSecurityLevel` tinyint(3) unsigned NOT NULL default '0',
+  `population` float unsigned NOT NULL default '0',
   PRIMARY KEY  (`id`),
   UNIQUE KEY `idx_name` (`name`)
 ) ENGINE=MyISAM AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Realm System';
@@ -175,7 +175,7 @@ CREATE TABLE `realmlist` (
 LOCK TABLES `realmlist` WRITE;
 /*!40000 ALTER TABLE `realmlist` DISABLE KEYS */;
 INSERT INTO `realmlist` VALUES
-(1,'MaNGOS','127.0.0.1',8085,1,0,1,0,0.0);
+(1,'MaNGOS','127.0.0.1',8085,1,0,1,0,0);
 /*!40000 ALTER TABLE `realmlist` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -188,4 +188,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2007-09-25 10:13:06
+-- Dump completed on 2008-01-10 11:37:06
