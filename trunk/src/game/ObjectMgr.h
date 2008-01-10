@@ -748,6 +748,7 @@ class ObjectMgr
         }
 
         int GetIndexForLocale(LocaleConstant loc);
+        LocaleConstant GetLocalForIndex(int);
     protected:
         uint32 m_auctionid;
         uint32 m_mailid;
@@ -805,7 +806,7 @@ class ObjectMgr
 
         GraveYardMap        mGraveYardMap;
 
-        typedef             std::vector<int> LocalToIndex;
+        typedef             std::vector<LocaleConstant> LocalToIndex;
         LocalToIndex        m_LocalToIndex;
         int GetOrNewIndexForLocale(LocaleConstant loc);
     private:

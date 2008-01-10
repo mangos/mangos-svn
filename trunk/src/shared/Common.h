@@ -151,9 +151,13 @@ enum AccountTypes
 
 enum LocaleConstant
 {
-    LOCALE_ENG = 0,
-    LOCALE_FR  = 2,
-    LOCALE_DE  = 3,
+    LOCALE_ENG = 0, // en_us
+    LOCALE_KO  = 1, // ko_kr
+    LOCALE_FR  = 2, // fr_fr
+    LOCALE_DE  = 3, // de_de
+    LOCALE_ZH  = 5, // zh_tw
+    LOCALE_ES  = 6, // es_es
+    LOCALE_RU  = 7,
     MAX_LOCALE = 8
 };
 

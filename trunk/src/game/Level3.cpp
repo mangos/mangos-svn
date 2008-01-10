@@ -2120,8 +2120,8 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
 
     QueryResult *result = NULL;
 
-    int loc_idx = m_session->GetSessionLocaleIndex();
-    if ( loc_idx < 0 )
+    int loc = objmgr.GetLocalForIndex( m_session->GetSessionLocaleIndex() );
+    if ( loc == LOCALE_ENG )
     {
         result = WorldDatabase.PQuery("SELECT `entry`,`name` FROM `item_template` WHERE `name` LIKE \"%%%s%%\" ORDER BY `entry` ",namepart.c_str());
     }
@@ -2130,7 +2130,7 @@ bool ChatHandler::HandleLookupItemCommand(const char* args)
         result = WorldDatabase.PQuery(
             "( SELECT `entry`,`name_loc%u` FROM `locales_item` WHERE `name_loc%u` LIKE \"%%%s%%\" ) UNION "
             "( SELECT `entry`,`name` FROM `item_template` WHERE `name` LIKE \"%%%s%%\" ) ORDER BY `entry`",
-            loc_idx+1,loc_idx+1,namepart.c_str(),namepart.c_str());
+            loc,loc,namepart.c_str(),namepart.c_str());
     }
 
     if(!result)
@@ -2315,8 +2315,8 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
 
     QueryResult *result = NULL;
 
-    int loc_idx = m_session->GetSessionLocaleIndex();
-    if ( loc_idx < 0 )
+    int loc = objmgr.GetLocalForIndex( m_session->GetSessionLocaleIndex() );
+    if ( loc == LOCALE_ENG )
     {
         result = WorldDatabase.PQuery("SELECT `entry`,`Title` FROM `quest_template` WHERE `Title` LIKE \"%%%s%%\" ORDER BY `entry`",namepart.c_str());
     }
@@ -2325,7 +2325,7 @@ bool ChatHandler::HandleLookupQuestCommand(const char* args)
         result = WorldDatabase.PQuery(
             "( SELECT `entry`,`Title_loc%u` FROM `locales_quest` WHERE `Title_loc%u` LIKE \"%%%s%%\" ) UNION "
             "( SELECT `entry`,`Title` FROM `quest_template` WHERE `Title` LIKE \"%%%s%%\" ) ORDER BY `entry`",
-            loc_idx+1,loc_idx+1,namepart.c_str(),namepart.c_str());
+            loc,loc,namepart.c_str(),namepart.c_str());
     }
 
     if(!result)
@@ -2370,8 +2370,8 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
 
     QueryResult *result = NULL;
 
-    int loc_idx = m_session->GetSessionLocaleIndex();
-    if ( loc_idx < 0 )
+    int loc = objmgr.GetLocalForIndex( m_session->GetSessionLocaleIndex() );
+    if ( loc == LOCALE_ENG )
     {
         result = WorldDatabase.PQuery("SELECT `entry`,`name` FROM `creature_template` WHERE `name` LIKE \"%%%s%%\" ORDER BY `entry`",namepart.c_str());
     }
@@ -2380,7 +2380,7 @@ bool ChatHandler::HandleLookupCreatureCommand(const char* args)
         result = WorldDatabase.PQuery(
             "( SELECT `entry`,`name_loc%u` FROM `locales_creature` WHERE `name_loc%u` LIKE \"%%%s%%\" ) UNION "
             "( SELECT `entry`,`name` FROM `creature_template` WHERE `name` LIKE \"%%%s%%\" ) ORDER BY `entry`",
-            loc_idx+1,loc_idx+1,namepart.c_str(),namepart.c_str());
+            loc,loc,namepart.c_str(),namepart.c_str());
     }
 
     if(!result)
@@ -2411,8 +2411,8 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
 
     QueryResult *result = NULL;
 
-    int loc_idx = m_session->GetSessionLocaleIndex();
-    if ( loc_idx < 0 )
+    int loc = objmgr.GetLocalForIndex( m_session->GetSessionLocaleIndex() );
+    if ( loc == LOCALE_ENG )
     {
         result = WorldDatabase.PQuery("SELECT `entry`,`name` FROM `gameobject_template` WHERE `name` LIKE \"%%%s%%\" ORDER BY `entry`",namepart.c_str());
     }
@@ -2421,7 +2421,7 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
         result = WorldDatabase.PQuery(
             "( SELECT `entry`,`name_loc%u` FROM `locales_gameobject` WHERE `name_loc%u` LIKE \"%%%s%%\" ) UNION "
             "( SELECT `entry`,`name` FROM `gameobject_template` WHERE `name` LIKE \"%%%s%%\" ) ORDER BY `entry`",
-            loc_idx+1,loc_idx+1,namepart.c_str(),namepart.c_str());
+            loc,loc,namepart.c_str(),namepart.c_str());
     }
 
     if(!result)
@@ -4472,6 +4472,7 @@ bool ChatHandler::HandleCastBackCommand(const char* args)
 
     return true;
 }
+
 
 
 
