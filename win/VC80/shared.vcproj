@@ -26,6 +26,8 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+                Description="Extract SVN revision"
+                CommandLine="cd ..\&#x0D;&#x0A;svn_revision.js&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -105,6 +107,8 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
+                Description="Extract SVN revision"
+                CommandLine="cd ..\&#x0D;&#x0A;svn_revision.js&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -740,6 +744,10 @@
 		</File>
 		<File
 			RelativePath="..\..\src\shared\ServiceWin32.h"
+			>
+		</File>
+		<File
+			RelativePath="..\..\src\shared\svn_revision.h"
 			>
 		</File>
 		<File

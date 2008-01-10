@@ -55,3 +55,6 @@ EXTRA_DIST += \
 	win/VC90/zlib.vcproj \
 	win/VC90/g3dlite.vcproj \
 	win/VC90/zthread.vcproj
+
+EXTRA_DIST += \
+	svn_revision.js

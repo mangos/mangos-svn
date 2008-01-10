@@ -20,6 +20,7 @@
 #define MANGOS_SYSTEMCONFIG_H
 
 #include "Platform/CompilerDefs.h"
+#include "svn_revision.h"
 
 #ifndef _VERSION
 #if PLATFORM == PLATFORM_WIN32

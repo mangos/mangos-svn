@@ -1,0 +1,13 @@
+#!/bin/bash
+
+LANG=C
+fname="$1"
+
+echo -n > $fname;
+echo "#ifndef __SVN_REVISION_H__" >> $fname;
+echo "#define __SVN_REVISION_H__" >> $fname;
+echo " #define SVN_REVISION \""`svn info . 2>/dev/null | grep 'Revision' | awk '{print $2}'`"\"" >> $fname;
+echo " #define SVN_DATE \""`svn info . 2>/dev/null | grep 'Last Changed Date' | awk '{print $4}'`"\"" >> $fname;
+echo " #define SVN_TIME \""`svn info . 2>/dev/null | grep 'Last Changed Date' | awk '{print $5}'`"\"" >> $fname;
+echo "#endif // __SVN_REVISION_H__" >> $fname;
+echo "" >> $fname;
