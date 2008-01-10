@@ -559,7 +559,7 @@ void ObjectMgr::ConvertCreatureAddonAuras(CreatureDataAddon* addon, char const* 
     char *p,*s;
     std::vector<int> val;
     s=p=(char*)reinterpret_cast<char const*>(addon->auras);
-    if(!p)
+    if(p)
     {
         while (p[0]!=0)
         {
