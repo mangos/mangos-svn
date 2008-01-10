@@ -456,13 +456,10 @@ void GameEvent::GameEventUnspawn(int16 event_id)
     for (GuidList::iterator itr = mGameEventCreatureGuids[max_event_id + event_id].begin();itr != mGameEventCreatureGuids[event_id + max_event_id].end();++itr)
     {
         // Remove the creature from grid
-        CreatureData const* data = objmgr.GetCreatureData(*itr);
-        objmgr.RemoveCreatureFromGrid(*itr, data);
+        if( CreatureData const* data = objmgr.GetCreatureData(*itr) )
+            objmgr.RemoveCreatureFromGrid(*itr, data);
 
-        Creature* pCreature;
-        pCreature = ObjectAccessor::Instance().GetObjectInWorld(MAKE_GUID(*itr, HIGHGUID_UNIT), (Creature*)NULL);
-        //sLog.outDebug("Un-spawning creature %u",*itr);
-        if (pCreature)
+        if( Creature* pCreature = ObjectAccessor::Instance().GetObjectInWorld(MAKE_GUID(*itr, HIGHGUID_UNIT), (Creature*)NULL) )
         {
             pCreature->CombatStop();
             ObjectAccessor::Instance().AddObjectToRemoveList(pCreature);
@@ -478,23 +475,17 @@ void GameEvent::GameEventUnspawn(int16 event_id)
     for (GuidList::iterator itr = mGameEventGameobjectGuids[max_event_id + event_id].begin();itr != mGameEventGameobjectGuids[max_event_id + event_id].end();++itr)
     {
         // Remove the gameobject from grid
-        GameObjectData const* data = objmgr.GetGOData(*itr);
-        objmgr.RemoveGameobjectFromGrid(*itr, data);
+        if(GameObjectData const* data = objmgr.GetGOData(*itr))
+            objmgr.RemoveGameobjectFromGrid(*itr, data);
 
-        GameObject* pGameobject;
-        pGameobject = ObjectAccessor::Instance().GetObjectInWorld(MAKE_GUID(*itr, HIGHGUID_GAMEOBJECT), (GameObject*)NULL);
-        //sLog.outDebug("Un-spawning gameobject %u",*itr);
-        if (pGameobject)
-        {
+        if( GameObject* pGameobject = ObjectAccessor::Instance().GetObjectInWorld(MAKE_GUID(*itr, HIGHGUID_GAMEOBJECT), (GameObject*)NULL) )
             ObjectAccessor::Instance().AddObjectToRemoveList(pGameobject);
-        }
     }
 }
 
 void GameEvent::ChangeEquipOrModel(int16 event_id, bool activate)
 {
-    ModelEquipList::iterator itr;
-    for (itr = mGameEventModelEquip[event_id].begin();itr != mGameEventModelEquip[event_id].end();++itr)
+    for(ModelEquipList::iterator itr = mGameEventModelEquip[event_id].begin();itr != mGameEventModelEquip[event_id].end();++itr)
     {
         // Update if spawned
         Creature* pCreature;
