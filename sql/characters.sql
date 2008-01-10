@@ -2,8 +2,7 @@
 --
 -- Host: localhost    Database: characters
 -- ------------------------------------------------------
--- Server version	5.0.45-community-nt
-
+-- Server version	5.0.45-Debian_1ubuntu3.1-log
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -17,7 +16,7 @@
 /*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
 
 --
--- Definition of table `arena_team`
+-- Table structure for table `arena_team`
 --
 
 DROP TABLE IF EXISTS `arena_team`;
@@ -38,12 +37,13 @@ CREATE TABLE `arena_team` (
 -- Dumping data for table `arena_team`
 --
 
+LOCK TABLES `arena_team` WRITE;
 /*!40000 ALTER TABLE `arena_team` DISABLE KEYS */;
 /*!40000 ALTER TABLE `arena_team` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `arena_team_member`
+-- Table structure for table `arena_team_member`
 --
 
 DROP TABLE IF EXISTS `arena_team_member`;
@@ -60,12 +60,13 @@ CREATE TABLE `arena_team_member` (
 -- Dumping data for table `arena_team_member`
 --
 
+LOCK TABLES `arena_team_member` WRITE;
 /*!40000 ALTER TABLE `arena_team_member` DISABLE KEYS */;
 /*!40000 ALTER TABLE `arena_team_member` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `arena_team_stats`
+-- Table structure for table `arena_team_stats`
 --
 
 DROP TABLE IF EXISTS `arena_team_stats`;
@@ -84,12 +85,13 @@ CREATE TABLE `arena_team_stats` (
 -- Dumping data for table `arena_team_stats`
 --
 
+LOCK TABLES `arena_team_stats` WRITE;
 /*!40000 ALTER TABLE `arena_team_stats` DISABLE KEYS */;
 /*!40000 ALTER TABLE `arena_team_stats` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `auctionhouse`
+-- Table structure for table `auctionhouse`
 --
 
 DROP TABLE IF EXISTS `auctionhouse`;
@@ -114,12 +116,13 @@ CREATE TABLE `auctionhouse` (
 -- Dumping data for table `auctionhouse`
 --
 
+LOCK TABLES `auctionhouse` WRITE;
 /*!40000 ALTER TABLE `auctionhouse` DISABLE KEYS */;
 /*!40000 ALTER TABLE `auctionhouse` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `bugreport`
+-- Table structure for table `bugreport`
 --
 
 DROP TABLE IF EXISTS `bugreport`;
@@ -134,12 +137,13 @@ CREATE TABLE `bugreport` (
 -- Dumping data for table `bugreport`
 --
 
+LOCK TABLES `bugreport` WRITE;
 /*!40000 ALTER TABLE `bugreport` DISABLE KEYS */;
 /*!40000 ALTER TABLE `bugreport` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `character`
+-- Table structure for table `character`
 --
 
 DROP TABLE IF EXISTS `character`;
@@ -186,12 +190,13 @@ CREATE TABLE `character` (
 -- Dumping data for table `character`
 --
 
+LOCK TABLES `character` WRITE;
 /*!40000 ALTER TABLE `character` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `character_action`
+-- Table structure for table `character_action`
 --
 
 DROP TABLE IF EXISTS `character_action`;
@@ -208,12 +213,13 @@ CREATE TABLE `character_action` (
 -- Dumping data for table `character_action`
 --
 
+LOCK TABLES `character_action` WRITE;
 /*!40000 ALTER TABLE `character_action` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_action` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `character_aura`
+-- Table structure for table `character_aura`
 --
 
 DROP TABLE IF EXISTS `character_aura`;
@@ -233,12 +239,13 @@ CREATE TABLE `character_aura` (
 -- Dumping data for table `character_aura`
 --
 
+LOCK TABLES `character_aura` WRITE;
 /*!40000 ALTER TABLE `character_aura` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_aura` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `character_gifts`
+-- Table structure for table `character_gifts`
 --
 
 DROP TABLE IF EXISTS `character_gifts`;
@@ -255,12 +262,13 @@ CREATE TABLE `character_gifts` (
 -- Dumping data for table `character_gifts`
 --
 
+LOCK TABLES `character_gifts` WRITE;
 /*!40000 ALTER TABLE `character_gifts` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_gifts` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `character_homebind`
+-- Table structure for table `character_homebind`
 --
 
 DROP TABLE IF EXISTS `character_homebind`;
@@ -278,12 +286,13 @@ CREATE TABLE `character_homebind` (
 -- Dumping data for table `character_homebind`
 --
 
+LOCK TABLES `character_homebind` WRITE;
 /*!40000 ALTER TABLE `character_homebind` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_homebind` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `character_instance`
+-- Table structure for table `character_instance`
 --
 
 DROP TABLE IF EXISTS `character_instance`;
@@ -301,12 +310,13 @@ CREATE TABLE `character_instance` (
 -- Dumping data for table `character_instance`
 --
 
+LOCK TABLES `character_instance` WRITE;
 /*!40000 ALTER TABLE `character_instance` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_instance` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `character_inventory`
+-- Table structure for table `character_inventory`
 --
 
 DROP TABLE IF EXISTS `character_inventory`;
@@ -324,12 +334,13 @@ CREATE TABLE `character_inventory` (
 -- Dumping data for table `character_inventory`
 --
 
+LOCK TABLES `character_inventory` WRITE;
 /*!40000 ALTER TABLE `character_inventory` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_inventory` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `character_kill`
+-- Table structure for table `character_kill`
 --
 
 DROP TABLE IF EXISTS `character_kill`;
@@ -344,12 +355,13 @@ CREATE TABLE `character_kill` (
 -- Dumping data for table `character_kill`
 --
 
+LOCK TABLES `character_kill` WRITE;
 /*!40000 ALTER TABLE `character_kill` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_kill` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `character_pet`
+-- Table structure for table `character_pet`
 --
 
 DROP TABLE IF EXISTS `character_pet`;
@@ -387,12 +399,13 @@ CREATE TABLE `character_pet` (
 -- Dumping data for table `character_pet`
 --
 
+LOCK TABLES `character_pet` WRITE;
 /*!40000 ALTER TABLE `character_pet` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_pet` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `character_queststatus`
+-- Table structure for table `character_queststatus`
 --
 
 DROP TABLE IF EXISTS `character_queststatus`;
@@ -418,12 +431,13 @@ CREATE TABLE `character_queststatus` (
 -- Dumping data for table `character_queststatus`
 --
 
+LOCK TABLES `character_queststatus` WRITE;
 /*!40000 ALTER TABLE `character_queststatus` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_queststatus` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `character_queststatus_daily`
+-- Table structure for table `character_queststatus_daily`
 --
 
 DROP TABLE IF EXISTS `character_queststatus_daily`;
@@ -439,12 +453,13 @@ CREATE TABLE `character_queststatus_daily` (
 -- Dumping data for table `character_queststatus_daily`
 --
 
+LOCK TABLES `character_queststatus_daily` WRITE;
 /*!40000 ALTER TABLE `character_queststatus_daily` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_queststatus_daily` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `character_reputation`
+-- Table structure for table `character_reputation`
 --
 
 DROP TABLE IF EXISTS `character_reputation`;
@@ -460,12 +475,13 @@ CREATE TABLE `character_reputation` (
 -- Dumping data for table `character_reputation`
 --
 
+LOCK TABLES `character_reputation` WRITE;
 /*!40000 ALTER TABLE `character_reputation` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_reputation` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `character_social`
+-- Table structure for table `character_social`
 --
 
 DROP TABLE IF EXISTS `character_social`;
@@ -475,8 +491,8 @@ CREATE TABLE `character_social` (
   `friend` int(11) unsigned NOT NULL default '0' COMMENT 'Character Global Unique Identifier',
   `flags` tinyint(1) unsigned NOT NULL default '0',
   PRIMARY KEY  (`guid`,`friend`,`flags`),
-  KEY (`guid`),
-  KEY (`friend`),
+  KEY `guid` (`guid`),
+  KEY `friend` (`friend`),
   KEY `guid_flags` (`guid`,`flags`),
   KEY `friend_flags` (`friend`,`flags`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8 ROW_FORMAT=DYNAMIC COMMENT='Player System';
@@ -485,12 +501,13 @@ CREATE TABLE `character_social` (
 -- Dumping data for table `character_social`
 --
 
+LOCK TABLES `character_social` WRITE;
 /*!40000 ALTER TABLE `character_social` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_social` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `character_spell`
+-- Table structure for table `character_spell`
 --
 
 DROP TABLE IF EXISTS `character_spell`;
@@ -506,12 +523,13 @@ CREATE TABLE `character_spell` (
 -- Dumping data for table `character_spell`
 --
 
+LOCK TABLES `character_spell` WRITE;
 /*!40000 ALTER TABLE `character_spell` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_spell` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `character_spell_cooldown`
+-- Table structure for table `character_spell_cooldown`
 --
 
 DROP TABLE IF EXISTS `character_spell_cooldown`;
@@ -527,12 +545,13 @@ CREATE TABLE `character_spell_cooldown` (
 -- Dumping data for table `character_spell_cooldown`
 --
 
+LOCK TABLES `character_spell_cooldown` WRITE;
 /*!40000 ALTER TABLE `character_spell_cooldown` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_spell_cooldown` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `character_ticket`
+-- Table structure for table `character_ticket`
 --
 
 DROP TABLE IF EXISTS `character_ticket`;
@@ -548,12 +567,13 @@ CREATE TABLE `character_ticket` (
 -- Dumping data for table `character_ticket`
 --
 
+LOCK TABLES `character_ticket` WRITE;
 /*!40000 ALTER TABLE `character_ticket` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_ticket` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `character_tutorial`
+-- Table structure for table `character_tutorial`
 --
 
 DROP TABLE IF EXISTS `character_tutorial`;
@@ -574,12 +594,13 @@ CREATE TABLE `character_tutorial` (
 -- Dumping data for table `character_tutorial`
 --
 
+LOCK TABLES `character_tutorial` WRITE;
 /*!40000 ALTER TABLE `character_tutorial` DISABLE KEYS */;
 /*!40000 ALTER TABLE `character_tutorial` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `corpse`
+-- Table structure for table `corpse`
 --
 
 DROP TABLE IF EXISTS `corpse`;
@@ -605,12 +626,13 @@ CREATE TABLE `corpse` (
 -- Dumping data for table `corpse`
 --
 
+LOCK TABLES `corpse` WRITE;
 /*!40000 ALTER TABLE `corpse` DISABLE KEYS */;
 /*!40000 ALTER TABLE `corpse` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `group`
+-- Table structure for table `group`
 --
 
 DROP TABLE IF EXISTS `group`;
@@ -637,12 +659,13 @@ CREATE TABLE `group` (
 -- Dumping data for table `group`
 --
 
+LOCK TABLES `group` WRITE;
 /*!40000 ALTER TABLE `group` DISABLE KEYS */;
 /*!40000 ALTER TABLE `group` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `group_member`
+-- Table structure for table `group_member`
 --
 
 DROP TABLE IF EXISTS `group_member`;
@@ -658,12 +681,13 @@ CREATE TABLE `group_member` (
 -- Dumping data for table `group_member`
 --
 
+LOCK TABLES `group_member` WRITE;
 /*!40000 ALTER TABLE `group_member` DISABLE KEYS */;
 /*!40000 ALTER TABLE `group_member` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `guild`
+-- Table structure for table `guild`
 --
 
 DROP TABLE IF EXISTS `guild`;
@@ -686,12 +710,13 @@ CREATE TABLE `guild` (
 -- Dumping data for table `guild`
 --
 
+LOCK TABLES `guild` WRITE;
 /*!40000 ALTER TABLE `guild` DISABLE KEYS */;
 /*!40000 ALTER TABLE `guild` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `guild_member`
+-- Table structure for table `guild_member`
 --
 
 DROP TABLE IF EXISTS `guild_member`;
@@ -707,12 +732,13 @@ CREATE TABLE `guild_member` (
 -- Dumping data for table `guild_member`
 --
 
+LOCK TABLES `guild_member` WRITE;
 /*!40000 ALTER TABLE `guild_member` DISABLE KEYS */;
 /*!40000 ALTER TABLE `guild_member` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `guild_rank`
+-- Table structure for table `guild_rank`
 --
 
 DROP TABLE IF EXISTS `guild_rank`;
@@ -728,12 +754,13 @@ CREATE TABLE `guild_rank` (
 -- Dumping data for table `guild_rank`
 --
 
+LOCK TABLES `guild_rank` WRITE;
 /*!40000 ALTER TABLE `guild_rank` DISABLE KEYS */;
 /*!40000 ALTER TABLE `guild_rank` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `instance`
+-- Table structure for table `instance`
 --
 
 DROP TABLE IF EXISTS `instance`;
@@ -751,12 +778,13 @@ CREATE TABLE `instance` (
 -- Dumping data for table `instance`
 --
 
+LOCK TABLES `instance` WRITE;
 /*!40000 ALTER TABLE `instance` DISABLE KEYS */;
 /*!40000 ALTER TABLE `instance` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `item_instance`
+-- Table structure for table `item_instance`
 --
 
 DROP TABLE IF EXISTS `item_instance`;
@@ -772,12 +800,13 @@ CREATE TABLE `item_instance` (
 -- Dumping data for table `item_instance`
 --
 
+LOCK TABLES `item_instance` WRITE;
 /*!40000 ALTER TABLE `item_instance` DISABLE KEYS */;
 /*!40000 ALTER TABLE `item_instance` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `item_text`
+-- Table structure for table `item_text`
 --
 
 DROP TABLE IF EXISTS `item_text`;
@@ -791,12 +820,13 @@ CREATE TABLE `item_text` (
 -- Dumping data for table `item_text`
 --
 
+LOCK TABLES `item_text` WRITE;
 /*!40000 ALTER TABLE `item_text` DISABLE KEYS */;
 /*!40000 ALTER TABLE `item_text` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `mail`
+-- Table structure for table `mail`
 --
 
 DROP TABLE IF EXISTS `mail`;
@@ -822,11 +852,13 @@ CREATE TABLE `mail` (
 -- Dumping data for table `mail`
 --
 
+LOCK TABLES `mail` WRITE;
 /*!40000 ALTER TABLE `mail` DISABLE KEYS */;
 /*!40000 ALTER TABLE `mail` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
--- Definition of table `mail_items`
+-- Table structure for table `mail_items`
 --
 
 DROP TABLE IF EXISTS `mail_items`;
@@ -841,11 +873,13 @@ CREATE TABLE `mail_items` (
 -- Dumping data for table `mail_items`
 --
 
+LOCK TABLES `mail_items` WRITE;
 /*!40000 ALTER TABLE `mail_items` DISABLE KEYS */;
 /*!40000 ALTER TABLE `mail_items` ENABLE KEYS */;
+UNLOCK TABLES;
 
 --
--- Definition of table `pet_aura`
+-- Table structure for table `pet_aura`
 --
 
 DROP TABLE IF EXISTS `pet_aura`;
@@ -865,12 +899,13 @@ CREATE TABLE `pet_aura` (
 -- Dumping data for table `pet_aura`
 --
 
+LOCK TABLES `pet_aura` WRITE;
 /*!40000 ALTER TABLE `pet_aura` DISABLE KEYS */;
 /*!40000 ALTER TABLE `pet_aura` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `pet_spell`
+-- Table structure for table `pet_spell`
 --
 
 DROP TABLE IF EXISTS `pet_spell`;
@@ -886,12 +921,13 @@ CREATE TABLE `pet_spell` (
 -- Dumping data for table `pet_spell`
 --
 
+LOCK TABLES `pet_spell` WRITE;
 /*!40000 ALTER TABLE `pet_spell` DISABLE KEYS */;
 /*!40000 ALTER TABLE `pet_spell` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `pet_spell_cooldown`
+-- Table structure for table `pet_spell_cooldown`
 --
 
 DROP TABLE IF EXISTS `pet_spell_cooldown`;
@@ -906,12 +942,13 @@ CREATE TABLE `pet_spell_cooldown` (
 -- Dumping data for table `pet_spell_cooldown`
 --
 
+LOCK TABLES `pet_spell_cooldown` WRITE;
 /*!40000 ALTER TABLE `pet_spell_cooldown` DISABLE KEYS */;
 /*!40000 ALTER TABLE `pet_spell_cooldown` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `petition`
+-- Table structure for table `petition`
 --
 
 DROP TABLE IF EXISTS `petition`;
@@ -928,12 +965,13 @@ CREATE TABLE `petition` (
 -- Dumping data for table `petition`
 --
 
+LOCK TABLES `petition` WRITE;
 /*!40000 ALTER TABLE `petition` DISABLE KEYS */;
 /*!40000 ALTER TABLE `petition` ENABLE KEYS */;
-
+UNLOCK TABLES;
 
 --
--- Definition of table `petition_sign`
+-- Table structure for table `petition_sign`
 --
 
 DROP TABLE IF EXISTS `petition_sign`;
@@ -949,11 +987,10 @@ CREATE TABLE `petition_sign` (
 -- Dumping data for table `petition_sign`
 --
 
+LOCK TABLES `petition_sign` WRITE;
 /*!40000 ALTER TABLE `petition_sign` DISABLE KEYS */;
 /*!40000 ALTER TABLE `petition_sign` ENABLE KEYS */;
-
-
-
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -963,3 +1000,5 @@ CREATE TABLE `petition_sign` (
 /*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2008-01-10 11:37:06
