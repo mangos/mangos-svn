@@ -5981,6 +5981,14 @@ int ObjectMgr::GetIndexForLocale( LocaleConstant loc )
     return -1;
 }
 
+LocaleConstant ObjectMgr::GetLocalForIndex(int i)
+{
+    if (i<0 || i>=m_LocalToIndex.size())
+        return LOCALE_ENG;
+
+    return m_LocalToIndex[i];
+}
+
 int ObjectMgr::GetOrNewIndexForLocale( LocaleConstant loc )
 {
     if(loc==LOCALE_ENG)
