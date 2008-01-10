@@ -46,11 +46,13 @@ libmangosshared_a_SOURCES = \
 	Timer.h \
 	Util.cpp \
 	Util.h \
-	WorldPacket.h
+	WorldPacket.h \
+	svn_revision.h
 
 ## Additional files to include when running 'make dist'
 #  Disabled packet logger
 EXTRA_DIST = \
+	gensvnrevision \
 	PacketLog.cpp \
 	PacketLog.h
 
