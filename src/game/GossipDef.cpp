@@ -564,9 +564,8 @@ void PlayerMenu::SendQuestQueryResponse( Quest const *pQuest )
 
 void PlayerMenu::SendQuestGiverOfferReward( Quest const* pQuest, uint64 npcGUID, bool EnbleNext )
 {
-    std::string Title,OfferRewardText;
-    Title = pQuest->GetTitle();
-    OfferRewardText = pQuest->GetOfferRewardText();
+    std::string Title = pQuest->GetTitle();
+    std::string OfferRewardText = pQuest->GetOfferRewardText();
 
     int loc_idx = pSession->GetSessionLocaleIndex();
     if (loc_idx >= 0)

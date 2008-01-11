@@ -2690,12 +2690,15 @@ void Spell::EffectTameCreature(uint32 i)
         pet->SetUInt32Value(UNIT_FIELD_FACTIONTEMPLATE,m_caster->getFaction());
         pet->SetUInt32Value(UNIT_CREATED_BY_SPELL, m_spellInfo->Id);
 
-        if(!pet->InitStatsForLevel(creatureTarget->getLevel()-1))
+        if(!pet->InitStatsForLevel(creatureTarget->getLevel()))
         {
             sLog.outError("ERROR: InitStatsForLevel() in EffectTameCreature failed! Pet deleted.");
             delete pet;
             return;
         }
+
+        // prepare visual effect for leveleup
+        pet->SetUInt32Value(UNIT_FIELD_LEVEL,creatureTarget->getLevel()-1);
 
         pet->GetCharmInfo()->SetPetNumber(objmgr.GeneratePetNumber(), true);
                                                             // this enables pet details window (Shift+P)
@@ -2705,14 +2708,15 @@ void Spell::EffectTameCreature(uint32 i)
 
         MapManager::Instance().GetMap(pet->GetMapId(), pet)->Add((Creature*)pet);
 
+        // visual effect for levelup
+        pet->SetUInt32Value(UNIT_FIELD_LEVEL,creatureTarget->getLevel());
+
         if(m_caster->GetTypeId() == TYPEID_PLAYER)
         {
             m_caster->SetPet(pet);
             pet->SavePetToDB(PET_SAVE_AS_CURRENT);
             ((Player*)m_caster)->PetSpellInitialize();
         }
-
-        pet->GivePetXP(pet->GetUInt32Value(UNIT_FIELD_PETNEXTLEVELEXP));
     }
 }
 
