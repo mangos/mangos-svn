@@ -1399,27 +1399,45 @@ void World::ScriptsProcess()
                     break;
                 }
 
-                if(source->GetTypeId()!=TYPEID_UNIT && source->GetTypeId()!=TYPEID_GAMEOBJECT)
-                {
-                    sLog.outError("SCRIPT_COMMAND_QUEST_EXPLORED call for non-creature and non-gameobject (TypeId: %u), skipping.",source->GetTypeId());
-                    break;
-                }
+                // when script called for item spell casting then target == (unit or GO) and source is player
+                WorldObject* worldObject;
+                Player* player;
 
-                if(target->GetTypeId()!=TYPEID_PLAYER)
+                if(target->GetTypeId()==TYPEID_PLAYER)
                 {
-                    sLog.outError("SCRIPT_COMMAND_QUEST_EXPLORED call for non-player(TypeId: %u), skipping.",target->GetTypeId());
-                    break;
-                }
+                    if(source->GetTypeId()!=TYPEID_UNIT && source->GetTypeId()!=TYPEID_GAMEOBJECT)
+                    {
+                        sLog.outError("SCRIPT_COMMAND_QUEST_EXPLORED call for non-creature and non-gameobject (TypeId: %u), skipping.",source->GetTypeId());
+                        break;
+                    }
 
-                WorldObject* sourceWO = (WorldObject*)source;
-                Player* targetPlr = (Player*)target;
+                    worldObject = (WorldObject*)source;
+                    player = (Player*)target;
+                }
+                else
+                {
+                    if(target->GetTypeId()!=TYPEID_UNIT && target->GetTypeId()!=TYPEID_GAMEOBJECT)
+                    {
+                        sLog.outError("SCRIPT_COMMAND_QUEST_EXPLORED call for non-creature and non-gameobject (TypeId: %u), skipping.",target->GetTypeId());
+                        break;
+                    }
+
+                    if(source->GetTypeId()!=TYPEID_PLAYER)
+                    {
+                        sLog.outError("SCRIPT_COMMAND_QUEST_EXPLORED call for non-player(TypeId: %u), skipping.",source->GetTypeId());
+                        break;
+                    }
+
+                    worldObject = (WorldObject*)target;
+                    player = (Player*)source;
+                }
 
                 // quest id and flags checked at script loading
-                if( (source->GetTypeId()!=TYPEID_UNIT || ((Unit*)source)->isAlive()) &&
-                    (step.script->datalong2==0 || sourceWO->IsWithinDistInMap(targetPlr,float(step.script->datalong2))) )
-                    targetPlr->AreaExploredOrEventHappens(step.script->datalong);
+                if( (worldObject->GetTypeId()!=TYPEID_UNIT || ((Unit*)worldObject)->isAlive()) &&
+                    (step.script->datalong2==0 || worldObject->IsWithinDistInMap(player,float(step.script->datalong2))) )
+                    player->AreaExploredOrEventHappens(step.script->datalong);
                 else
-                    targetPlr->FailQuest(step.script->datalong);
+                    player->FailQuest(step.script->datalong);
 
                 break;
             }

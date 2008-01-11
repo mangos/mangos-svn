@@ -157,7 +157,7 @@ const float BG_AB_NodePositions[5][4] = {
 // x, y, z, o, rot0, rot1, rot2, rot3
 const float BG_AB_DoorPositions[2][8] = {
     {1284.597f, 1281.167f, -15.97792f, 0.7068594f, 0.012957f, -0.060288f, 0.344959f, 0.93659f},
-    {708.0903f, 708.4479f, -17.3899f, -2.391099, 0.050291f, 0.015127f, 0.929217f, -0.365784f}
+    {708.0903f, 708.4479f, -17.8342f, -2.391099, 0.050291f, 0.015127f, 0.929217f, -0.365784f}
 };
 
 // Tick intervals and given points: case 0,1,2,3,4,5 captured nodes
