@@ -19,8 +19,9 @@
 #define MANGOSSERVER_PROGRESSBAR_H
 
 #include <stdio.h>
+#include "Platform/Define.h"
 
-class barGoLink
+class MANGOS_DLL_SPEC barGoLink
 {
     char const * empty;
     char const * full;

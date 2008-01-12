@@ -99,6 +99,7 @@ typedef uint32      DWORD;
 typedef uint64      OBJECT_HANDLE;
 
 #if PLATFORM == PLATFORM_WIN32
+#  define MANGOS_DLL_SPEC __declspec(dllexport)
 #  ifndef DECLSPEC_NORETURN
 #    define DECLSPEC_NORETURN __declspec(noreturn)
 #  endif
