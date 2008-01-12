@@ -1924,9 +1924,26 @@ void Spell::finish(bool ok)
         {
             // Some Script Spell Destroy the target or something and the target is always the player
             // then re-find it in grids if this creature
-            Creature* creature = m_caster->GetGUID()==m_targets.getUnitTargetGUID() ? (Creature*)m_caster : ObjectAccessor::GetCreature(*m_caster,m_targets.getUnitTargetGUID());
+            Creature* creature = ObjectAccessor::GetCreature(*m_caster,m_targets.getUnitTargetGUID());
             if( creature )
                 ((Player*)m_caster)->CastedCreatureOrGO(creature->GetEntry(),creature->GetGUID(),m_spellInfo->Id);
+        }
+        else
+        {
+            for(uint8 j = 0; j < 3; j++)
+            {
+                if( m_spellInfo->EffectImplicitTargetA[j] == TARGET_SCRIPT || m_spellInfo->EffectImplicitTargetB[j] == TARGET_SCRIPT )
+                {
+                    // always single target in first effect
+                    if(!m_targetUnitGUIDs[j].empty())
+                    {
+                        Creature* creature = ObjectAccessor::GetCreature(*m_caster,m_targetUnitGUIDs[j].front());
+                        if( creature )
+                            ((Player*)m_caster)->CastedCreatureOrGO(creature->GetEntry(),creature->GetGUID(),m_spellInfo->Id);
+                        break;
+                    }
+                }
+            }
         }
 
         if( m_targets.getGOTarget() )
@@ -2625,6 +2642,10 @@ uint8 Spell::CanCast(bool strict)
     //ImpliciteTargetA-B = 38, If fact there is 0 Spell with  ImpliciteTargetB=38
     for(uint8 j = 0; j < 3; j++)
     {
+        // skip second canCast apply (for delayed spells for example)
+        if(!m_targetUnitGUIDs[j].empty())
+            continue;
+
         if( m_spellInfo->EffectImplicitTargetA[j] == TARGET_SCRIPT || m_spellInfo->EffectImplicitTargetB[j] == TARGET_SCRIPT )
         {
             bool okDoo = false;
