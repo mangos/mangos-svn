@@ -5819,7 +5819,7 @@ bool ObjectMgr::LoadPlayerDump(std::string file, uint32 account, std::string nam
     else guid = m_hiCharGuid;
 
     // normalize the name if specified and check if it exists
-    if(name != "" && name.find_first_of(notAllowedChars) == name.npos)
+    if(!name.empty() && name.find_first_of(notAllowedChars) == name.npos)
     {
         CharacterDatabase.escape_string(name);
         normalizePlayerName(name);

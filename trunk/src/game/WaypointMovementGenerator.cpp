@@ -85,8 +85,8 @@ WaypointMovementGenerator<Creature>::LoadPath(Creature &c)
             std::string aiscript    = fields[14].GetCppString();
 
             if( (emote != 0) || (spell != 0)
-                || (text1 != "") || (text2 != "") || (text3 != "") || (text4 != "") || (text5 != "")
-                || (aiscript != "")
+                || !text1.empty() || !text2.empty() || !text3.empty() || !text4.empty() || !text5.empty()
+                || !aiscript.empty()
                 || (model1 != 0)  || (model2 != 0) || (orientation != 100))
             {
                 WaypointBehavior *tmpWPB = new WaypointBehavior;
@@ -218,34 +218,32 @@ WaypointMovementGenerator<Creature>::Update(Creature &creature, const uint32 &di
                 {
                     creature.SetUInt32Value(UNIT_NPC_EMOTESTATE,tmpBehavior->emote);
                 }
-                if(tmpBehavior->aiscript != "")
+                if(!tmpBehavior->aiscript.empty())
                 {
                     WPAIScript(creature, tmpBehavior->aiscript);
                 }
                 //sLog.outDebug("DEBUG: tmpBehavior->text[0] TEST");
-                if(tmpBehavior->text[0] != "")
+                if(!tmpBehavior->text[0].empty())
                 {
                     //sLog.outDebug("DEBUG: tmpBehavior->text[0] != \"\"");
                     // Only one text is set
-                    if( tmpBehavior->text[1] == "" )
+                    if( tmpBehavior->text[1].empty() )
                     {
                         //sLog.outDebug("DEBUG: tmpBehavior->text[1] == NULL");
                         creature.Say(tmpBehavior->text[0].c_str(), 0, 0);
                     }
                     else
                     {
-                        // Select one from max 5 texts
-                        for( int i = 0; i < 4; ++i )
-                        {
-                            if( tmpBehavior->text[i] == "" )
-                            {
-                                //sLog.outDebug("DEBUG: tmpBehavior->text[i] == \"\": %d", i);
-                                //sLog.outDebug("DEBUG: rand() % (i): %d", rand() % (i));
-
-                                creature.Say(tmpBehavior->text[rand() % i].c_str(), 0, 0);
+                        // Select one from max 5 texts (0 and 1 laready checked)
+                        int i = 2;
+                        for( ; i < 5; ++i )
+                            if( tmpBehavior->text[i].empty() )
                                 break;
-                            }
-                        }
+
+                        //sLog.outDebug("DEBUG: tmpBehavior->text[i] == \"\": %d", i);
+                        //sLog.outDebug("DEBUG: rand() % (i): %d", rand() % (i));
+
+                        creature.Say(tmpBehavior->text[rand() % i].c_str(), 0, 0);
                     }
                 }
                 if(tmpBehavior->spell != 0)
