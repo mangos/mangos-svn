@@ -537,7 +537,20 @@ void WorldSession::HandleSetTradeItemOpcode(WorldPacket& recvPacket)
         return;
     }
 
-    _player->tradeItems[tradeSlot] = (bag << 8) | slot;
+    uint16 pos = (bag << 8) | slot;
+
+    // prevent place single item into many trade slots using cheating and client bugs
+    for(int i = 0; i < TRADE_SLOT_COUNT; ++i)
+    {
+        if(_player->tradeItems[i]==pos)
+        {
+            // cheating attempt
+            SendTradeStatus(TRADE_STATUS_TRADE_CANCELED);
+            return;
+        }
+    }
+
+    _player->tradeItems[tradeSlot] = pos;
 
     _player->pTrader->GetSession()->SendUpdateTrade();
 }
