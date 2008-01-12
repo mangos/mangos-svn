@@ -2697,7 +2697,7 @@ void Spell::EffectTameCreature(uint32 i)
             return;
         }
 
-        // prepare visual effect for leveleup
+        // prepare visual effect for levelup
         pet->SetUInt32Value(UNIT_FIELD_LEVEL,creatureTarget->getLevel()-1);
 
         pet->GetCharmInfo()->SetPetNumber(objmgr.GeneratePetNumber(), true);
