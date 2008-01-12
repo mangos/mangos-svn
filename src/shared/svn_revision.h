@@ -1,6 +1,6 @@
 #ifndef __SVN_REVISION_H__
 #define __SVN_REVISION_H__
- #define SVN_REVISION "0"
- #define SVN_DATE "2007-10-19"
- #define SVN_TIME "19:36:46"
+ #define SVN_REVISION "5011"
+ #define SVN_DATE "2008-01-10"
+ #define SVN_TIME "14:57:25"
 #endif // __SVN_REVISION_H__

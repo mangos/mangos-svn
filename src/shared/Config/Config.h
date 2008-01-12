@@ -20,10 +20,11 @@
 #define CONFIG_H
 
 #include <Policies/Singleton.h>
+#include "Platform/Define.h"
 
 class DOTCONFDocument;
 
-class Config
+class MANGOS_DLL_SPEC Config
 {
     public:
         Config();
