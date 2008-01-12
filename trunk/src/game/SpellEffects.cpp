@@ -786,7 +786,7 @@ void Spell::EffectDummy(uint32 i)
         }
 
         // Cold Snap - immediately finishes the cooldown on Frost spells
-        case 12472:
+        case 11958:
         {
             if(m_caster->GetTypeId()!=TYPEID_PLAYER)
                 return;
