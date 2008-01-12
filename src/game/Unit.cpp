@@ -6685,7 +6685,7 @@ bool Unit::SelectHostilTarget()
 //======================================================================
 //======================================================================
 
-int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_index, int32 effBasePoints)
+int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_index, int32 effBasePoints, Unit const* target)
 {
     Player* unitPlayer = (GetTypeId() == TYPEID_PLAYER) ? (Player*)this : NULL;
 
@@ -6709,7 +6709,7 @@ int32 Unit::CalculateSpellDamage(SpellEntry const* spellProto, uint8 effect_inde
     if(int32(spellProto->EffectBaseDice[effect_index]) != randomPoints && GetTypeId() == TYPEID_UNIT && ((Creature*)this)->isPet())
         value += ((Pet*)this)->GetBonusDamage();        //bonus damage only on spells without fixed basePoints?)
 
-    if(comboDamage != 0 && unitPlayer && m_attacking && (m_attacking->GetGUID() == unitPlayer->GetComboTarget()))
+    if(comboDamage != 0 && unitPlayer && target && (target->GetGUID() == unitPlayer->GetComboTarget()))
     {
         value += (int32)(comboDamage * comboPoints);
 

@@ -2943,7 +2943,7 @@ void Spell::EffectWeaponDmg(uint32 i)
             if (j < i)
                 return;
             if (m_spellInfo->Effect[j] != SPELL_EFFECT_WEAPON_PERCENT_DAMAGE)
-                bonus += m_currentBasePoints[j]+1;
+                bonus += CalculateDamage(j,unitTarget);
         }
     }
 
@@ -2955,7 +2955,7 @@ void Spell::EffectWeaponDmg(uint32 i)
         {
             if(m_spellInfo->Effect[x]==SPELL_EFFECT_NORMALIZED_WEAPON_DMG)
             {
-                sp_bonus=m_spellInfo->EffectBasePoints[x]+1;
+                sp_bonus=CalculateDamage(x,unitTarget);
                 break;
             }
         }
@@ -3024,7 +3024,7 @@ void Spell::EffectWeaponDmg(uint32 i)
 
     for (j = 0; j < 3; j++)
         if (m_spellInfo->Effect[j] == SPELL_EFFECT_WEAPON_PERCENT_DAMAGE)
-            eff_damage = uint32(eff_damage * (m_currentBasePoints[j]+1) / 100);
+            eff_damage = uint32(eff_damage * (float(CalculateDamage(j,unitTarget)) / 100));
 
     if ((hitInfo & nohitMask) && attType != RANGED_ATTACK)  // not send ranged miss/etc
         m_caster->SendAttackStateUpdate(hitInfo & nohitMask, unitTarget, 1, SpellSchools(m_spellInfo->School), eff_damage, absorbed_dmg, resisted_dmg, VICTIMSTATE_NORMAL, blocked_dmg);
