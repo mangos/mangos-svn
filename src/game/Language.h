@@ -45,7 +45,6 @@
 #define LANG_COMMAND_NOTCHANGEPASSWORD   "Your password can't be longer than 16 characters (client limit), password not changed!"
 #define LANG_COMMAND_PASSWORD            "The password was changed"
 #define LANG_COMMAND_WRONGOLDPASSWORD    "The new passwords do not match or the old password is wrong"
-#define LANG_COMMAND_ACCLOCKPARAMETER    "You must send parameter"
 #define LANG_COMMAND_ACCLOCKLOCKED       "Your account is now locked."
 #define LANG_COMMAND_ACCLOCKUNLOCKED     "Your account is now unlocked."
 #define LANG_SPELL_RANK                  ", rank "
@@ -265,7 +264,7 @@
 
 #define LANG_MOVE_TYPE_SET               "Creature movement type set to '%s', waypoints removed (if any)."
 #define LANG_MOVE_TYPE_SET_NODEL         "Creature movement type set to '%s', waypoints were not removed."
-#define LANG_USE_BOL                     "Incorrect value, use 0 or 1"
+#define LANG_USE_BOL                     "Incorrect value, use on or off"
 #define LANG_VALUE_SAVED                 "Value saved."
 #define LANG_VALUE_SAVED_REJOIN          "Value saved, you may need to rejoin or clean your client cache."
 
@@ -400,7 +399,6 @@
 #define LANG_COMMAND_QUEST_COMPLETE      " [complete]"
 #define LANG_COMMAND_QUEST_ACTIVE        " [active]"
 
-#define LANG_COMMAND_FLYMODE_WRONGARG    "Incorrect arguments. Use .flymode on/off."
 #define LANG_COMMAND_FLYMODE_STATUS      "%s's Fly Mode %s"
 
 #define LANG_COMMAND_OPCODESENT          "Opcode %u sent to %s"

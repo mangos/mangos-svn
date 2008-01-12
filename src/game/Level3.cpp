@@ -4156,7 +4156,7 @@ bool ChatHandler::HandleFlyModeCommand(const char* args)
         data.SetOpcode(SMSG_FLY_MODE_STOP);
     else
     {
-        PSendSysMessage(LANG_COMMAND_FLYMODE_WRONGARG);
+        SendSysMessage(LANG_USE_BOL);
         return false;
     }
     data.append(unit->GetPackGUID());
