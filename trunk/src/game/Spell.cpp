@@ -1968,14 +1968,18 @@ void Spell::finish(bool ok)
         uint32 auraSpellIdx = (*i)->GetEffIndex();
         if (IsAffectedBy(auraSpellInfo, auraSpellIdx))
         {
-            // Calculate chance at that moment (can be depend for example from combo points)
-            int32 chance = m_caster->CalculateSpellDamage(auraSpellInfo, auraSpellIdx, (*i)->GetBasePoints());
             for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[auraSpellIdx].begin();iunit != m_targetUnitGUIDs[auraSpellIdx].end();++iunit)
             {
                 // check m_caster->GetGUID() let load auras at login and speedup most often case
                 Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::GetUnit(*m_caster,*iunit);
-                if (unit && unit->isAlive() && roll_chance_i(chance))
-                    m_caster->CastSpell(unit, auraSpellInfo->EffectTriggerSpell[auraSpellIdx], true, NULL, (*i));
+                if (unit && unit->isAlive())
+                {
+                    // Calculate chance at that moment (can be depend for example from combo points)
+                    int32 chance = m_caster->CalculateSpellDamage(auraSpellInfo, auraSpellIdx, (*i)->GetBasePoints(),unit);
+
+                    if(roll_chance_i(chance))
+                        m_caster->CastSpell(unit, auraSpellInfo->EffectTriggerSpell[auraSpellIdx], true, NULL, (*i));
+                }
             }
         }
     }
@@ -2460,7 +2464,7 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
 
     uint8 eff = m_spellInfo->Effect[i];
 
-    damage = uint32(CalculateDamage((uint8)i)*DamageMultiplier);
+    damage = uint32(CalculateDamage((uint8)i,unitTarget)*DamageMultiplier);
 
     sLog.outDebug( "Spell: Effect : %u", eff);
     if(unitTarget && unitTarget->IsImmunedToSpellEffect(eff))
@@ -3062,7 +3066,7 @@ uint8 Spell::CanCast(bool strict)
                 if(!m_targets.getUnitTarget())
                     return SPELL_FAILED_BAD_IMPLICIT_TARGETS;
 
-                if(int32(m_targets.getUnitTarget()->getLevel()) > CalculateDamage(i))
+                if(int32(m_targets.getUnitTarget()->getLevel()) > CalculateDamage(i,m_targets.getUnitTarget()))
                     return SPELL_FAILED_HIGHLEVEL;
             };break;
             case SPELL_AURA_MOD_STEALTH:

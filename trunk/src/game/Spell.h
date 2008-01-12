@@ -540,7 +540,7 @@ class Spell
         uint8 CheckMana(uint32 *mana);
         uint8 CheckCasterAuars() const;
 
-        int32 CalculateDamage(uint8 i) { return m_caster->CalculateSpellDamage(m_spellInfo,i,m_currentBasePoints[i]); }
+        int32 CalculateDamage(uint8 i, Unit* target) { return m_caster->CalculateSpellDamage(m_spellInfo,i,m_currentBasePoints[i],target); }
 
         void Delayed(int32 delaytime);
         void DelayedChannel(int32 delaytime);
