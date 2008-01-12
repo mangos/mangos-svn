@@ -6768,7 +6768,7 @@ int32 Unit::CalculateSpellDuration(SpellEntry const* spellProto)
         for(AuraList::const_iterator i = mMechanicMod.begin();i != mMechanicMod.end(); ++i)
             if((*i)->GetModifier()->m_miscvalue == int32(spellProto->Mechanic))
                 durationMod+= (*i)->GetModifier()->m_amount;
-        duration = duration * (100+durationMod) /100;
+        duration = int32(int64(duration) * (100+durationMod) /100);
         if (duration < 0) duration = 0;
     }
 
