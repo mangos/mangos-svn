@@ -143,7 +143,11 @@ bool ChatHandler::HandleNotifyCommand(const char* args)
 //Enable\Dissable GM Mode
 bool ChatHandler::HandleGMmodeCommand(const char* args)
 {
-    if(!*args) return false;
+    if(!*args)
+    {
+        SendSysMessage(LANG_USE_BOL);
+        return true;
+    }
 
     std::string argstr = (char*)args;
 
@@ -169,8 +173,8 @@ bool ChatHandler::HandleGMmodeCommand(const char* args)
         return true;
     }
 
-    SendSysMessage(LANG_BAD_VALUE);
-    return false;
+    SendSysMessage(LANG_USE_BOL);
+    return true;
 }
 
 //Enable\Dissable Invisible mode
@@ -199,7 +203,7 @@ bool ChatHandler::HandleVisibleCommand(const char* args)
         return true;
     }
 
-    SendSysMessage(LANG_BAD_VALUE);
+    SendSysMessage(LANG_USE_BOL);
     return true;
 }
 
@@ -819,7 +823,11 @@ bool ChatHandler::HandleModifyTalentCommand (const char* args)
 bool ChatHandler::HandleTaxiCheatCommand(const char* args)
 {
     if (!*args)
-        return false;
+    {
+        SendSysMessage(LANG_USE_BOL);
+        return true;
+    }
+
     std::string argstr = (char*)args;
 
     Player *chr = getSelectedPlayer();
@@ -849,7 +857,8 @@ bool ChatHandler::HandleTaxiCheatCommand(const char* args)
         return true;
     }
 
-    return false;
+    SendSysMessage(LANG_USE_BOL);
+    return true;
 }
 
 //Edit Player Aspeed
@@ -1614,7 +1623,8 @@ bool ChatHandler::HandleWhispersCommand(const char* args)
         return true;
     }
 
-    return false;
+    SendSysMessage(LANG_USE_BOL);
+    return true;
 }
 
 //Play sound

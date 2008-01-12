@@ -275,7 +275,7 @@ bool ChatHandler::HandleLockAccountCommand(const char* args)
 {
     if (!*args)
     {
-        SendSysMessage(LANG_COMMAND_ACCLOCKPARAMETER);
+        SendSysMessage(LANG_USE_BOL);
         return true;
     }
 
@@ -293,7 +293,7 @@ bool ChatHandler::HandleLockAccountCommand(const char* args)
         PSendSysMessage(LANG_COMMAND_ACCLOCKUNLOCKED);
         return true;
     }
-    else
-        SendSysMessage(LANG_BAD_VALUE);
+
+    SendSysMessage(LANG_USE_BOL);
     return true;
 }
