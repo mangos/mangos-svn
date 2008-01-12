@@ -1052,6 +1052,9 @@ const char* g_worldOpcodeNames[] =
     "MSG_UNKNOWN_1020",                                     // MSG_UNKNOWN_1020
     "MSG_UNKNOWN_1021",                                     // MSG_UNKNOWN_1021
     "MSG_GUILD_INFO_LOG",                                   // MSG_GUILD_INFO_LOG
-    //there would be declared new opcode, id 1023
+    "MSG_UNKNOWN_1023",                                     // MSG_UNKNOWN_1023
+    "CMSG_UNKNOWN_1024",                                    // CMSG_UNKNOWN_1024
+    "SMSG_UNKNOWN_1025",                                    // SMSG_UNKNOWN_1025
+    //there would be declared new opcode, id 1026
     //do not forget to change MAX_OPCODE_ID, if you add a line here!
 };
