@@ -678,7 +678,7 @@ enum OpCodes
     CMSG_ADD_PVP_MEDAL_CHEAT                        = 649,
     CMSG_DEL_PVP_MEDAL_CHEAT                        = 650,
     CMSG_SET_PVP_TITLE                              = 651,
-    SMSG_PVP_CREDIT                                 = 652,
+    SMSG_PVP_CREDIT                                 = 652,  // uint32, uint64, uint32
     SMSG_AUCTION_REMOVED_NOTIFICATION               = 653,
     CMSG_GROUP_RAID_CONVERT                         = 654,
     CMSG_GROUP_ASSISTANT                            = 655,
@@ -784,8 +784,8 @@ enum OpCodes
     CMSG_PET_SPELL_AUTOCAST                         = 755,
     SMSG_WEATHER                                    = 756,
     SMSG_PLAY_TIME_WARNING                          = 757,
-    SMSG_MINIGAME_SETUP                             = 758,
-    SMSG_MINIGAME_STATE                             = 759,
+    SMSG_MINIGAME_SETUP                             = 758,  // uint64, uint8
+    SMSG_MINIGAME_STATE                             = 759,  // no data?
     CMSG_MINIGAME_MOVE                              = 760,
     SMSG_MINIGAME_MOVE_FAILED                       = 761,
     SMSG_INSTANCE_RESET_SCHEDULED                   = 762,  // WARNING! %s is scheduled to reset in %u minutes! and other messages...
@@ -1048,11 +1048,14 @@ enum OpCodes
     SMSG_VOICESESSION_FULL                          = 1019, // The voice session you are attempting to join is full.
     MSG_UNKNOWN_1020                                = 1020, // probably guild related, client: empty, server: uint32, uint32, uint8, uint32, uint32
     MSG_UNKNOWN_1021                                = 1021, // guild related
-    MSG_GUILD_EVENT_LOG                             = 1022
+    MSG_GUILD_EVENT_LOG                             = 1022,
+    // 1023 not exist?
+    CMSG_UNKNOWN_1024                               = 1024, // empty
+    SMSG_UNKNOWN_1025                               = 1025, // empty?
 };
 
 //if you add new opcode .. Do NOT forget to change the following define MAX_OPCODE_ID and also add new opcode to table in opcodes.cpp
-#define MAX_OPCODE_ID 1023
+#define MAX_OPCODE_ID 1026
 
 /// Results of friend related commands
 enum FriendsResult
