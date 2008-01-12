@@ -104,6 +104,7 @@ typedef uint64      OBJECT_HANDLE;
 #    define DECLSPEC_NORETURN __declspec(noreturn)
 #  endif
 #else
+#  define MANGOS_DLL_SPEC
 #  define DECLSPEC_NORETURN
 #endif
 
