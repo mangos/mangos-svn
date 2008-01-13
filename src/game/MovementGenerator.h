@@ -34,7 +34,7 @@ class MANGOS_DLL_SPEC MovementGenerator
         virtual ~MovementGenerator();
 
         virtual void Initialize(Unit &) = 0;
-        virtual void Finalize(Unit &) {};
+        virtual void Finalize(Unit &) {}
 
         virtual void Reset(Unit &) = 0;
 
@@ -72,6 +72,7 @@ class MANGOS_DLL_SPEC MovementGeneratorMedium : public MovementGenerator
     public:
         // will not link if not overridden in the generators
         void Initialize(T &u);
+        void Finalize(T &u);
         void Reset(T &u);
         bool Update(T &u, const uint32 &time_diff);
 };
