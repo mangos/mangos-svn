@@ -801,7 +801,7 @@ void Spell::EffectDummy(uint32 i)
                 SpellEntry const *spellInfo = sSpellStore.LookupEntry(classspell);
 
                 if( spellInfo->SpellFamilyName == SPELLFAMILY_MAGE && spellInfo->School == SPELL_SCHOOL_FROST &&
-                    spellInfo->Id != 12472 && GetRecoveryTime(spellInfo) > 0 )
+                    spellInfo->Id != 11958 && GetRecoveryTime(spellInfo) > 0 )
                 {
                     ((Player*)m_caster)->RemoveSpellCooldown(classspell);
 

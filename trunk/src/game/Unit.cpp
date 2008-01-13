@@ -70,6 +70,7 @@ static Unit::AuraTypeSet GenerateAttakerProcEffectAuraTypes()
     static Unit::AuraTypeSet auraTypes;
     auraTypes.insert(SPELL_AURA_MOD_CASTING_SPEED);
     auraTypes.insert(SPELL_AURA_PROC_TRIGGER_DAMAGE);
+    auraTypes.insert(SPELL_AURA_MOD_DAMAGE_DONE);
     return auraTypes;
 }
 
