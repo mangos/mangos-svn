@@ -34,6 +34,7 @@ class MANGOS_DLL_SPEC MovementGenerator
         virtual ~MovementGenerator();
 
         virtual void Initialize(Unit &) = 0;
+        virtual void Finalize(Unit &) {};
 
         virtual void Reset(Unit &) = 0;
 
@@ -52,6 +53,11 @@ class MANGOS_DLL_SPEC MovementGeneratorMedium : public MovementGenerator
         {
             //u->AssertIsType<T>();
             (static_cast<D*>(this))->Initialize(*((T*)&u));
+        }
+        void Finalize(Unit &u)
+        {
+            //u->AssertIsType<T>();
+            (static_cast<D*>(this))->Finalize(*((T*)&u));
         }
         void Reset(Unit &u)
         {

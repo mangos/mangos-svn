@@ -36,6 +36,7 @@ MotionMaster::Initialize()
     while(!empty())
     {
         MovementGenerator *curr = top();
+        curr->Finalize(*i_owner);
         pop();
         if( !isStatic( curr ) )
             delete curr;
@@ -58,6 +59,7 @@ MotionMaster::~MotionMaster()
     while(!empty())
     {
         MovementGenerator *curr = top();
+        curr->Finalize(*i_owner);
         pop();
         if( !isStatic( curr ) )
             delete curr;
@@ -80,6 +82,7 @@ MotionMaster::Clear(bool reset)
     while( !empty() && size() > 1 )
     {
         MovementGenerator *curr = top();
+        curr->Finalize(*i_owner);
         pop();
         if( !isStatic( curr ) )
             delete curr;
@@ -96,6 +99,7 @@ MotionMaster::MovementExpired(bool reset)
         return;
 
     MovementGenerator *curr = top();
+    curr->Finalize(*i_owner);
     pop();
 
     if( !isStatic(curr) )
@@ -106,6 +110,7 @@ MotionMaster::MovementExpired(bool reset)
     {
         // Should check if target is still valid? If not valid it will crash.
         curr = top();
+        curr->Finalize(*i_owner);
         pop();
         delete curr;
     }
