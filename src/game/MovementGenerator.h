@@ -34,7 +34,7 @@ class MANGOS_DLL_SPEC MovementGenerator
         virtual ~MovementGenerator();
 
         virtual void Initialize(Unit &) = 0;
-        virtual void Finalize(Unit &) {}
+        virtual void Finalize(Unit &) = 0;
 
         virtual void Reset(Unit &) = 0;
 

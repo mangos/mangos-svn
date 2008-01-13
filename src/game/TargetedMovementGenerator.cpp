@@ -174,6 +174,8 @@ template void TargetedMovementGenerator<Player>::_setTargetLocation(Player &);
 template void TargetedMovementGenerator<Creature>::_setTargetLocation(Creature &);
 template void TargetedMovementGenerator<Player>::Initialize(Player &);
 template void TargetedMovementGenerator<Creature>::Initialize(Creature &);
+template void TargetedMovementGenerator<Player>::Finalize(Player &);
+template void TargetedMovementGenerator<Creature>::Finalize(Creature &);
 template void TargetedMovementGenerator<Player>::Reset(Player &);
 template void TargetedMovementGenerator<Creature>::Reset(Creature &);
 template bool TargetedMovementGenerator<Player>::Update(Player &, const uint32 &);
