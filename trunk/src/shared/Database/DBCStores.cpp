@@ -538,17 +538,6 @@ bool IsSealSpell(uint32 spellId)
         ( spellInfo->SpellFamilyFlags & 0xA000200 );
 }
 
-bool CanCastWhileMounted(uint32 spellId)
-{
-    SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
-
-    if(!spellInfo)
-        return false;
-
-    return (spellInfo->Attributes == 0x9050000 && spellInfo->AttributesEx2 == 0x10 && spellInfo->AttributesExEx == 0x200000) ||
-        (spellInfo->SpellFamilyName == SPELLFAMILY_WARRIOR && spellInfo->SpellFamilyFlags == 0x800000);
-}
-
 SpellSpecific GetSpellSpecific(uint32 spellId)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);

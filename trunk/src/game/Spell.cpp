@@ -2637,8 +2637,8 @@ uint8 Spell::CanCast(bool strict)
     if( (m_spellInfo->Id==41617 || m_spellInfo->Id==41619) && zone_id != 3717 && zone_id != 3607 && zone_id != 3715 && zone_id != 3716 )
         return SPELL_FAILED_REQUIRES_AREA;
 
-    // not let players cast non-triggered spells at mount (and let do it to creatures)
-    if(m_caster->IsMounted() && !m_IsTriggeredSpell && m_caster->GetTypeId()==TYPEID_PLAYER && !CanCastWhileMounted(m_spellInfo->Id))
+    // not let players cast spells at mount (and let do it to creatures)
+    if(m_caster->IsMounted() && m_caster->GetTypeId()==TYPEID_PLAYER && !(m_spellInfo->Attributes & 0x1000000))
         return SPELL_FAILED_NOT_MOUNTED;
 
     // always (except passive spells) check items (focus object can be required for any type casts)
