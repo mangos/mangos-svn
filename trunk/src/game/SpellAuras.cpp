@@ -1031,6 +1031,18 @@ void Aura::TriggerSpell()
     switch(GetId())
     {
         case 29528: trigger_spell_id = 28713; break;        // Inoculation
+        case 29602:                                         //Jom Gabbar
+        {
+            // remove at last tick instead cast
+            if(!m_duration)
+            {
+                m_target->RemoveAurasDueToSpell(trigger_spell_id);
+                return;
+            }
+
+            // continue stacking
+            break;
+        }
         case 29917: trigger_spell_id = 29916; break;        // Feed Captured Animal
         case   768:                                         // Cat Form (passive)
             // trigger_spell_id not set and unknown effect triggered in this case, ignoring for while
