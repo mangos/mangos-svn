@@ -86,6 +86,13 @@ TargetedMovementGenerator<T>::Initialize(T &owner)
 
 template<class T>
 void
+TargetedMovementGenerator<T>::Finalize(T &owner)
+{
+    owner.clearUnitState(UNIT_STAT_CHASE);
+}
+
+template<class T>
+void
 TargetedMovementGenerator<T>::Reset(T &owner)
 {
     Initialize(owner);
@@ -106,7 +113,7 @@ TargetedMovementGenerator<T>::Update(T &owner, const uint32 & time_diff)
     if( !owner.isInCombat() && !owner.hasUnitState(UNIT_STAT_FOLLOW) )
     {
         //owner.AIM_Initialize();   This case must be the one, when a creature aggroed you. By Initalized a new AI, we prevented to Ai::_stopAttack() to be executed properly.
-        return true;
+        return false;
     }
 
     // prevent crash after creature killed pet
