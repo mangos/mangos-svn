@@ -76,7 +76,6 @@ inline uint32 GetRecoveryTime(SpellEntry const *spellInfo) { return spellInfo->R
 char* GetPetName(uint32 petfamily, uint32 dbclang);
 bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);
 bool IsSealSpell(uint32 spellId);
-bool CanCastWhileMounted(uint32 spellId);
 int32 CompareAuraRanks(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);
 SpellSpecific GetSpellSpecific(uint32 spellId);
 bool IsSpellSingleEffectPerCaster(uint32 spellId);
