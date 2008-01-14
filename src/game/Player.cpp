@@ -3795,14 +3795,14 @@ void Player::LeftChannel(Channel *c)
 
 void Player::CleanupChannels()
 {
-    for(JoinedChannelsList::iterator i = m_channels.begin(), next; i != m_channels.end(); i = next)
+    while(!m_channels.empty())
     {
-        next = i; ++next;
-        (*i)->Leave(GetGUID(),false);                       // not send to client, not remove from player's channel list
-        std::string name = (*i)->GetName();                 // store name, (*i)erase in LeftChannel
-        LeftChannel(*i);                                    // remove from player's channel list
-        if(ChannelMgr* cMgr = channelMgr(GetTeam()))
-            cMgr->LeftChannel(name);                        // deleted channel if empty
+        Channel* ch = *m_channels.begin();
+        m_channels.erase(m_channels.begin());           // remove from player's channel list
+        ch->Leave(GetGUID(), false);                    // not send to client, not remove from player's channel list
+        if (ChannelMgr* cMgr = channelMgr(GetTeam()))
+            cMgr->LeftChannel(ch->GetName());           // deleted channel if empty
+
     }
     sLog.outDebug("Player: channels cleaned up!");
 }
