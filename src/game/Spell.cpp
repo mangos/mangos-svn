@@ -279,7 +279,7 @@ Spell::Spell( Unit* Caster, SpellEntry const *info, bool triggered, uint64 origi
     itemTarget = NULL;
     gameObjTarget = NULL;
     focusObject = NULL;
-
+    m_cast_count = 0;
     m_triggeredByAuraSpell  = NULL;
 
     m_autoRepeat = false;
@@ -1123,6 +1123,14 @@ void Spell::prepare(SpellCastTargets * targets, Aura* triggeredByAura)
     // create and add update event for this spell
     SpellEvent* Event = new SpellEvent(this);
     m_caster->m_Events.AddEvent(Event, m_caster->m_Events.CalculateTime(1));
+
+    //Prevent casting at cast another spell (ServerSide check)
+    if(m_caster->IsNonMeleeSpellCasted(false, true) && m_cast_count)
+    {
+        SendCastResult(SPELL_FAILED_SPELL_IN_PROGRESS);
+        finish(false);
+        return;
+    }
 
     uint8 result = CanCast(true);
     if(result != 0)
@@ -2005,10 +2013,10 @@ void Spell::SendCastResult(uint8 result)
 
     if(result != 0)
     {
-        WorldPacket data(SMSG_CAST_RESULT, (4+2));
+        WorldPacket data(SMSG_CAST_RESULT, (4+1+1));
         data << m_spellInfo->Id;
         data << uint8(result);                              // problem
-        data << uint8(0);                                   // unkn
+        data << uint8(m_cast_count);                        // single cast or multi 2.3 (0/1)
         switch (result)
         {
             case SPELL_FAILED_REQUIRES_SPELL_FOCUS:
@@ -2068,7 +2076,7 @@ void Spell::SendSpellStart()
 
     data.append(m_caster->GetPackGUID());
     data << uint32(m_spellInfo->Id);
-    data << uint8(0);                                       // unk 2.3.0
+    data << uint8(m_cast_count);                            // single cast or multi 2.3 (0/1)
     data << uint16(m_castFlags);
     data << uint32(m_timer);
 
