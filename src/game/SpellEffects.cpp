@@ -1586,7 +1586,12 @@ void Spell::EffectPowerBurn(uint32 i)
     int32 new_damage = (curPower < damage) ? curPower : damage;
 
     unitTarget->ModifyPower(POWER_MANA,-new_damage);
-    m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage/2, m_IsTriggeredSpell, true);
+    float multiplier = m_spellInfo->EffectMultipleValue[i];
+    if(Player *modOwner = m_caster->GetSpellModOwner())
+        modOwner->ApplySpellMod(m_spellInfo->Id, SPELLMOD_MULTIPLE_VALUE, multiplier);
+
+    new_damage = int32(new_damage*multiplier);
+    m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage, m_IsTriggeredSpell, true);
 }
 
 void Spell::EffectHeal( uint32 i )
@@ -1678,8 +1683,8 @@ void Spell::EffectHealthLeach(uint32 i)
 
         m_caster->ModifyHealth(tmpvalue);
 
-        if(unitTarget->GetTypeId() == TYPEID_PLAYER)
-            m_caster->SendHealSpellOnPlayer(unitTarget, m_spellInfo->Id, uint32(tmpvalue));
+        if(m_caster->GetTypeId() == TYPEID_PLAYER)
+            m_caster->SendHealSpellOnPlayer(m_caster, m_spellInfo->Id, uint32(tmpvalue));
 
     }
 
