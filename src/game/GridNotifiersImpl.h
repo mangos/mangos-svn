@@ -123,8 +123,11 @@ MaNGOS::CreatureRelocationNotifier::Visit(CreatureMapType &m)
         return;
 
     for(CreatureMapType::iterator iter=m.begin(); iter != m.end(); ++iter)
-        if( iter->getSource()->isAlive())
-            CreatureCreatureRelocationWorker(iter->getSource(), &i_creature);
+    {
+        Creature* c = iter->getSource();
+        if( c != &i_creature && c->isAlive())
+            CreatureCreatureRelocationWorker(c, &i_creature);
+    }
 }
 
 inline void MaNGOS::DynamicObjectUpdater::VisitHelper(Unit* target)

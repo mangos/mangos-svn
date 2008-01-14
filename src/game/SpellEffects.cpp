@@ -3849,17 +3849,23 @@ void Spell::EffectMomentMove(uint32 i)
 
         // before caster
         float fx,fy,fz;
-        m_caster->GetClosePoint(fx,fy,fz,dis);
+        unitTarget->GetClosePoint(fx,fy,fz,dis);
         float ox,oy,oz;
-        m_caster->GetPosition(ox,oy,oz);
-        VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(mapid, ox,oy,oz+0.5, fx,fy,oz+0.5,fx,fy,fz, -0.5);
-
-        unitTarget->UpdateGroundPositionZ(fx,fy,fz);
+        unitTarget->GetPosition(ox,oy,oz);
+        
+        float fx2,fy2,fz2;                                  // getObjectHitPos overwrite last args in any result case
+        if(VMAP::VMapFactory::createOrGetVMapManager()->getObjectHitPos(mapid, ox,oy,oz+0.5, fx,fy,oz+0.5,fx2,fy2,fz2, -0.5))
+        {
+            fx = fx2;
+            fy = fy2;
+            fz = fz2;
+            unitTarget->UpdateGroundPositionZ(fx,fy,fz);
+        }
 
         if(unitTarget->GetTypeId() == TYPEID_PLAYER)
-            ((Player*)unitTarget)->TeleportTo(mapid, fx, fy, fz, m_caster->GetOrientation(), false);
+            ((Player*)unitTarget)->TeleportTo(mapid, fx, fy, fz, unitTarget->GetOrientation(), false);
         else
-            MapManager::Instance().GetMap(mapid, m_caster)->CreatureRelocation((Creature*)m_caster, fx, fy, fz, m_caster->GetOrientation());
+            MapManager::Instance().GetMap(mapid, unitTarget)->CreatureRelocation((Creature*)unitTarget, fx, fy, fz, unitTarget->GetOrientation());
     }
 }
 
