@@ -652,10 +652,10 @@ bool BattleGroundAB::SetupBattleGround()
 
     // Starting gates
     m_bgobjects[BG_AB_OBJECT_GATE_A] = new GameObject(NULL);
-    if(!m_bgobjects[BG_AB_OBJECT_GATE_A]->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), BG_AB_OBJECTID_GATE_A, GetMapId(), BG_AB_DoorPositions[0][0], BG_AB_DoorPositions[0][1], BG_AB_DoorPositions[0][2], BG_AB_DoorPositions[0][3], BG_AB_DoorPositions[0][4], BG_AB_DoorPositions[0][5], BG_AB_DoorPositions[0][6], BG_AB_DoorPositions[0][7], 0, 0))
+    if(!m_bgobjects[BG_AB_OBJECT_GATE_A]->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), BG_AB_OBJECTID_GATE_A, GetMapId(), BG_AB_DoorPositions[0][0], BG_AB_DoorPositions[0][1], BG_AB_DoorPositions[0][2], BG_AB_DoorPositions[0][3], BG_AB_DoorPositions[0][4], BG_AB_DoorPositions[0][5], BG_AB_DoorPositions[0][6], BG_AB_DoorPositions[0][7], 100, 1))
         return false;
     m_bgobjects[BG_AB_OBJECT_GATE_H] = new GameObject(NULL);
-    if(!m_bgobjects[BG_AB_OBJECT_GATE_H]->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), BG_AB_OBJECTID_GATE_H, GetMapId(), BG_AB_DoorPositions[1][0], BG_AB_DoorPositions[1][1], BG_AB_DoorPositions[1][2], BG_AB_DoorPositions[1][3], BG_AB_DoorPositions[1][4], BG_AB_DoorPositions[1][5], BG_AB_DoorPositions[1][6], BG_AB_DoorPositions[1][7], 0, 0))
+    if(!m_bgobjects[BG_AB_OBJECT_GATE_H]->Create(objmgr.GenerateLowGuid(HIGHGUID_GAMEOBJECT), BG_AB_OBJECTID_GATE_H, GetMapId(), BG_AB_DoorPositions[1][0], BG_AB_DoorPositions[1][1], BG_AB_DoorPositions[1][2], BG_AB_DoorPositions[1][3], BG_AB_DoorPositions[1][4], BG_AB_DoorPositions[1][5], BG_AB_DoorPositions[1][6], BG_AB_DoorPositions[1][7], 100, 1))
         return false;
 
     // Initialize pickups table
