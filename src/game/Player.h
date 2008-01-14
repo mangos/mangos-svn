@@ -1292,7 +1292,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         int32 GetTotalFlatMods(uint32 spellId, uint8 op);
         int32 GetTotalPctMods(uint32 spellId, uint8 op);
         bool IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mod);
-        template <class T> T ApplySpellMod(uint32 spellId, uint8 op, T &basevalue);
+        template <class T> T ApplySpellMod(uint32 spellId, uint8 op, T &basevalue, unsigned int only_type = 0);
         void RemoveSpellMods(uint32 spellId);
 
         bool HasSpellCooldown(uint32 spell_id) const
@@ -2019,7 +2019,7 @@ void AddItemsSetItem(Player*player,Item *item);
 void RemoveItemsSetItem(Player*player,ItemPrototype const *proto);
 
 // "the bodies of template functions must be made available in a header file"
-template <class T> T Player::ApplySpellMod(uint32 spellId, uint8 op, T &basevalue)
+template <class T> T Player::ApplySpellMod(uint32 spellId, uint8 op, T &basevalue, unsigned int only_type)
 {
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId);
     if (!spellInfo) return 0;
@@ -2028,6 +2028,11 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, uint8 op, T &basevalu
     for (SpellModList::iterator itr = m_spellMods[op].begin(); itr != m_spellMods[op].end(); ++itr)
     {
         SpellModifier *mod = *itr;
+
+        // skip other mod types
+        if(only_type && mod->type != only_type)
+            continue;
+
         if(!IsAffectedBySpellmod(spellInfo,mod))
             continue;
         if (mod->type == SPELLMOD_FLAT)

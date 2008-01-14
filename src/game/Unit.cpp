@@ -1878,7 +1878,18 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
             CastSpell(pVictim, 1604, true);
     }
 
-    *damage += CalculateDamage (attType);
+    int32 white_damage = CalculateDamage (attType);
+
+    if(spellCasted)                                         //apply spellmod also to the weapon damage, *damage already have applied mod
+    {
+        if(Player* modOwner = GetSpellModOwner())
+        {
+            // SPELLMOD_FLAT already applied in Spell::EffectWeaponDmg
+            modOwner->ApplySpellMod(spellCasted->Id, SPELLMOD_DAMAGE, white_damage, SPELLMOD_PCT);
+        }
+    }
+    
+    *damage += white_damage;
 
     //Calculate the damage after armor mitigation if SPELL_SCHOOL_NORMAL
     if (damageType == SPELL_SCHOOL_NORMAL)
@@ -1886,13 +1897,6 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
         uint32 damageAfterArmor = CalcArmorReducedDamage(pVictim, *damage);
         cleanDamage->damage += *damage - damageAfterArmor;
         *damage = damageAfterArmor;
-    }
-    // Instant Attacks (Spellmods)
-    // TODO: AP bonus related to mainhand weapon
-    if(spellCasted)
-    {
-        if(Player* modOwner = GetSpellModOwner())
-            modOwner->ApplySpellMod(spellCasted->Id, SPELLMOD_DAMAGE, *damage);
     }
 
     if(GetTypeId() == TYPEID_PLAYER && pVictim->GetTypeId() != TYPEID_PLAYER && pVictim->GetCreatureType() != CREATURE_TYPE_CRITTER )
