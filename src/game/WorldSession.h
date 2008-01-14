@@ -32,6 +32,7 @@ struct AuctionEntry;
 class Creature;
 class Item;
 class Player;
+class Unit;
 class WorldPacket;
 class WorldSocket;
 class WorldSession;
@@ -123,6 +124,8 @@ class MANGOS_DLL_SPEC WorldSession
         void SendSpiritResurrect();
         void SendBindPoint(Creature* npc);
         void SendGMTicketGetTicket(uint32 status, char const* text);
+
+        void SendAttackStop(Unit const* enemy);
 
         void SendBattlegGroundList( uint64 guid, uint32 bgTypeId );
 
