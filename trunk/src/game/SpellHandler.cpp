@@ -596,7 +596,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     recvPacket >> spellId;
     recvPacket >> cast_count;
 
-    sLog.outError("WORLD: got cast spell packet, spellId - %u, cast_count: %u data length = %i",
+    sLog.outDebug("WORLD: got cast spell packet, spellId - %u, cast_count: %u data length = %i",
         spellId, cast_count, recvPacket.size());
  
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId );
