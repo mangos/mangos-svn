@@ -2261,12 +2261,14 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
 
             if (name.find(namepart) != std::string::npos)
             {
-                uint32 rank = objmgr.GetSpellRank(id);      // unit32 used to prevent interpreting uint8 as char at output
-
                 bool known = target->HasSpell(id);
                 bool learn = (spellInfo->Effect[0] == SPELL_EFFECT_LEARN_SPELL);
                 bool talent = (GetTalentSpellCost(id) > 0);
                 bool passive = IsPassiveSpell(id);
+
+                // unit32 used to prevent interpreting uint8 as char at output
+                // find rank of learned spell for learning spell
+                uint32 rank = objmgr.GetSpellRank(learn ? spellInfo->EffectTriggerSpell[0] : id);
 
                 // send spell in "id - [name, rank N] [talent] [passive] [learn] [known]" format
                 std::ostringstream ss;
