@@ -33,6 +33,7 @@ class MANGOS_DLL_SPEC Config
         bool SetSource(const char *file, bool ignorecase = true);
 
         bool GetString(const char* name, std::string *value);
+        bool GetString(const char* name, char const **value);
         std::string GetStringDefault(const char* name, const char* def);
 
         bool GetBool(const char* name, bool *value);
