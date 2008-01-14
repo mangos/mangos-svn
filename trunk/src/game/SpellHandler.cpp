@@ -33,16 +33,14 @@
 void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 {
     // TODO: add targets.read() check
-    CHECK_PACKET_SIZE(recvPacket,1+1+2);
-
-    sLog.outDetail("WORLD: CMSG_USE_ITEM packet, data length = %i",recvPacket.size());
+    CHECK_PACKET_SIZE(recvPacket,1+1+1+1);
 
     Player* pUser = _player;
-
     uint8 bagIndex, slot;
-    uint16 tmp2;
+    uint8 spell_count;                                      // number of spells at item, not used
+    uint8 cast_count;                                       // next cast if exists (single or not)
 
-    recvPacket >> bagIndex >> slot >> tmp2;
+    recvPacket >> bagIndex >> slot >> spell_count >> cast_count;
 
     Item *pItem = pUser->GetItemByPos(bagIndex, slot);
     if(!pItem)
@@ -50,7 +48,9 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         pUser->SendEquipError(EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL );
         return;
     }
-
+    
+    sLog.outDetail("WORLD: CMSG_USE_ITEM packet, bagIndex: %u, slot: %u, spell_count: %u , cast_count: %u, Item: %u, data length = %i", bagIndex, slot, spell_count, cast_count, pItem->GetEntry(), recvPacket.size());
+    
     ItemPrototype const *proto = pItem->GetProto();
     if(!proto)
     {
@@ -67,7 +67,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 
     if (pUser->isInCombat())
     {
-        for(int i = 0; i <5; ++i)
+        for(int i = 0; i < 5; ++i)
         {
             if (IsNonCombatSpell(proto->Spells[i].SpellId))
             {
@@ -99,7 +99,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
         // use triggered flag only for items with many spell casts and for not first cast
         int count = 0;
 
-        for(int i = 0; i <5; ++i)
+        for(int i = 0; i < 5; ++i)
         {
             _Spell const& spellData = pItem->GetProto()->Spells[i];
 
@@ -120,6 +120,7 @@ void WorldSession::HandleUseItemOpcode(WorldPacket& recvPacket)
 
             Spell *spell = new Spell(pUser, spellInfo, (count > 0));
             spell->m_CastItem = pItem;
+            spell->m_cast_count = cast_count;               //set count of casts
             spell->prepare(&targets);
 
             ++count;
@@ -227,8 +228,6 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
 
     // default spell caster is player that use GO
     Unit* spellCaster = GetPlayer();
-    // default spell target is player that use GO
-    Unit* spellTarget = GetPlayer();
 
     if (Script->GOHello(_player, obj))
         return;
@@ -412,7 +411,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
         {
             info = obj->GetGOInfo();
 
-            Player* targetPlayer = ObjectAccessor::FindPlayer(((Player*)spellCaster)->GetSelection());
+            Player* targetPlayer = ObjectAccessor::FindPlayer(_player->GetSelection());
 
             // accept only use by player from same group for caster except caster itself
             if(!targetPlayer || targetPlayer == GetPlayer() || !targetPlayer->IsInSameGroupWith(GetPlayer()))
@@ -563,7 +562,7 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
             }
             break;
         default:
-            sLog.outDebug("Unknown Object Type %u\n", obj->GetGoType());
+            sLog.outDebug("Unknown Object Type %u", obj->GetGoType());
             break;
     }
 
@@ -572,14 +571,15 @@ void WorldSession::HandleGameObjectUseOpcode( WorldPacket & recv_data )
     SpellEntry const *spellInfo = sSpellStore.LookupEntry( spellId );
     if(!spellInfo)
     {
-        sLog.outError("WORLD: unknown spell id %u\n", spellId);
+        sLog.outError("WORLD: unknown spell id %u", spellId);
         return;
     }
 
     Spell *spell = new Spell(spellCaster, spellInfo, false);
 
+    // spell target is player that use GO
     SpellCastTargets targets;
-    targets.setUnitTarget( spellTarget );
+    targets.setUnitTarget( _player );
 
     if(obj)
         targets.setGOTarget( obj );
@@ -592,18 +592,18 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     CHECK_PACKET_SIZE(recvPacket,4+1+2);
 
     uint32 spellId;
-    uint8  unk;
+    uint8  cast_count;
     recvPacket >> spellId;
-    recvPacket >> unk;
+    recvPacket >> cast_count;
 
-    sLog.outDetail("WORLD: got cast spell packet, spellId - %i, data length = %i",
-        spellId, recvPacket.size());
-
+    sLog.outError("WORLD: got cast spell packet, spellId - %u, cast_count: %u data length = %i",
+        spellId, cast_count, recvPacket.size());
+ 
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId );
 
     if(!spellInfo)
     {
-        sLog.outError("WORLD: unknown spell id %i\n", spellId);
+        sLog.outError("WORLD: unknown spell id %u", spellId);
         return;
     }
 
@@ -653,6 +653,7 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
     }
 
     Spell *spell = new Spell(_player, spellInfo, false);
+    spell->m_cast_count = cast_count;                       //set count of casts
     spell->prepare(&targets);
 }
 
@@ -686,11 +687,10 @@ void WorldSession::HandleCancelAuraOpcode( WorldPacket& recvPacket)
 
 void WorldSession::HandlePetCancelAuraOpcode( WorldPacket& recvPacket)
 {
-    CHECK_PACKET_SIZE(recvPacket, 8+2+2);
+    CHECK_PACKET_SIZE(recvPacket, 8+4);
 
     uint64 guid;
-    uint16 spellId;
-    //    uint16 unknown; what's this for? always 0 during tests
+    uint32 spellId;
 
     recvPacket >> guid;
     recvPacket >> spellId;
@@ -698,7 +698,7 @@ void WorldSession::HandlePetCancelAuraOpcode( WorldPacket& recvPacket)
     SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellId );
     if(!spellInfo)
     {
-        sLog.outError("WORLD: unknown PET spell id %i\n", spellId);
+        sLog.outError("WORLD: unknown PET spell id %u", spellId);
         return;
     }
 
@@ -706,13 +706,13 @@ void WorldSession::HandlePetCancelAuraOpcode( WorldPacket& recvPacket)
 
     if(!pet)
     {
-        sLog.outError( "Pet %u not exist.\n", uint32(GUID_LOPART(guid)) );
+        sLog.outError( "Pet %u not exist.", uint32(GUID_LOPART(guid)) );
         return;
     }
 
     if(pet != GetPlayer()->GetPet() && pet != GetPlayer()->GetCharm())
     {
-        sLog.outError( "HandlePetCancelAura.Pet %u isn't pet of player %s .\n", uint32(GUID_LOPART(guid)),GetPlayer()->GetName() );
+        sLog.outError( "HandlePetCancelAura.Pet %u isn't pet of player %s", uint32(GUID_LOPART(guid)),GetPlayer()->GetName() );
         return;
     }
 
