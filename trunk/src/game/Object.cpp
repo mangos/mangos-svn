@@ -1050,12 +1050,9 @@ void WorldObject::GetRandomPoint( float x, float y, float z, float distance, flo
 
 void WorldObject::UpdateGroundPositionZ(float x, float y, float &z) const
 {
-    if(VMAP::VMapFactory::createOrGetVMapManager()->isHeightCalcEnabled())
-    {
-        float new_z = MapManager::Instance().GetBaseMap(GetMapId())->GetHeight(x,y,z);
-        if(new_z > VMAP_INVALID_HEIGHT)
-            z = new_z+ 0.05f;                               // just to be sure that we are not a few pixel under the surface
-    }
+    float new_z = MapManager::Instance().GetBaseMap(GetMapId())->GetHeight(x,y,z);
+    if(new_z > VMAP_INVALID_HEIGHT)
+        z = new_z+ 0.05f;                                   // just to be sure that we are not a few pixel under the surface
 }
 
 bool WorldObject::IsPositionValid() const
