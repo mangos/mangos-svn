@@ -2753,7 +2753,7 @@ uint8 Spell::CanCast(bool strict)
             return castResult;
     }
 
-    if(uint8 castResult = CheckCasterAuars())
+    if(uint8 castResult = CheckCasterAuras())
         return castResult;
 
     for (int i = 0; i < 3; i++)
@@ -3215,7 +3215,7 @@ int16 Spell::PetCanCast(Unit* target)
         return -1;                                          //this allows to check spell fail 0, in combat
 }
 
-uint8 Spell::CheckCasterAuars() const
+uint8 Spell::CheckCasterAuras() const
 {
     // Flag drop spells totally immuned to caster auras
     // FIXME: find more nice check for all totally immuned spells
