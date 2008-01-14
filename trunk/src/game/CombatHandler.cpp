@@ -45,11 +45,7 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
             sLog.outError( "WORLD: Enemy %s %u not found",(GUID_HIPART(guid)==HIGHGUID_PLAYER ? "player" : "creature"),GUID_LOPART(guid));
 
         // stop attack state at client
-        WorldPacket data( SMSG_ATTACKSTOP, (4+20) );        // we guess size
-        data.append(GetPlayer()->GetPackGUID());
-        data << uint8(0x00);                                // must be packed guid
-        data << uint32(0);                                  // unk, can be 1 also
-        SendPacket(&data);
+        SendAttackStop(NULL);
         return;
     }
 
@@ -58,11 +54,15 @@ void WorldSession::HandleAttackSwingOpcode( WorldPacket & recv_data )
         sLog.outError( "WORLD: Enemy %s %u is friendly",(GUID_HIPART(guid)==HIGHGUID_PLAYER ? "player" : "creature"),GUID_LOPART(guid));
 
         // stop attack state at client
-        WorldPacket data( SMSG_ATTACKSTOP, (4+20) );        // we guess size
-        data.append(GetPlayer()->GetPackGUID());
-        data.append(pEnemy->GetPackGUID());                 // must be packed guid
-        data << uint32(0);                                  // unk, can be 1 also
-        SendPacket(&data);
+        SendAttackStop(pEnemy);
+        return;
+    }
+
+    // ignore swing changes out of melee combat distance
+    if( !_player->IsWithinDistInMap(pEnemy, ATTACK_DISTANCE) )
+    {
+        // stop attack state at client
+        SendAttackStop(pEnemy);
         return;
     }
 
@@ -84,4 +84,13 @@ void WorldSession::HandleSetSheathedOpcode( WorldPacket & recv_data )
     //sLog.outDebug( "WORLD: Recvd CMSG_SETSHEATHED Message guidlow:%u value1:%u", GetPlayer()->GetGUIDLow(), sheathed );
 
     GetPlayer()->SetSheath(sheathed);
+}
+
+void WorldSession::SendAttackStop(Unit const* enemy)
+{
+    WorldPacket data( SMSG_ATTACKSTOP, (4+20) );            // we guess size
+    data.append(GetPlayer()->GetPackGUID());
+    data.append(enemy ? enemy->GetPackGUID() : 0);          // must be packed guid
+    data << uint32(0);                                      // unk, can be 1 also
+    SendPacket(&data);
 }
