@@ -64,6 +64,20 @@ bool Config::GetString(const char* name, std::string *value)
     return true;
 }
 
+bool Config::GetString(const char* name, char const **value)
+{
+    if(!mConf)
+        return false;
+
+    DOTCONFDocumentNode const *node = mConf->findNode(name);
+    if(!node || !node->getValue())
+        return false;
+
+    *value = node->getValue();
+
+    return true;
+}
+
 
 std::string Config::GetStringDefault(const char* name, const char* def)
 {
