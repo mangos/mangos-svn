@@ -20,7 +20,7 @@ DELETE FROM `spell_proc_event` WHERE `entry` IN (24389);
 INSERT INTO `spell_proc_event` VALUES
  (24389,0x04,0,0,0,0,0x00020000,0);
 
-DELETE FROM `spell_proc_event` WHERE `entry` IN (24389);
+DELETE FROM `spell_proc_event` WHERE `entry` IN (28780);
 INSERT INTO `spell_proc_event` VALUES
  (28780,0,0,0,0,0,0x08020000,0);
 
