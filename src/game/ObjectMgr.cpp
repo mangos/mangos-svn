@@ -4993,14 +4993,32 @@ bool ObjectMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2)
     if(spellInfo_2->SpellFamilyFlags == 2048)
         return false;
 
-    // One more hack (Resurrection sickness)
-    if(spellInfo_2->Id==15007)
+    // Resurrection sickness
+    if((spellInfo_1->Id == 15007) != (spellInfo_2->Id==15007))
         return false;
 
     // Paladin Seals
     if( IsSealSpell(spellId_1) && IsSealSpell(spellId_2) )
         return true;
 
+    // Corruption and Unstable Affliction
+    if( spellInfo_1->SpellFamilyName == SPELLFAMILY_WARLOCK &&
+        spellInfo_2->SpellFamilyName == SPELLFAMILY_WARLOCK && (
+        spellInfo_1->SpellIconID == 313 && spellInfo_2->SpellIconID == 2039 ||
+        spellInfo_2->SpellIconID == 313 && spellInfo_1->SpellIconID == 2039 ) )
+        return false;
+
+    // Garrote and Garrote-Silence
+    if( spellInfo_1->SpellIconID == 498 && spellInfo_2->SpellIconID == 498 && (
+        spellInfo_1->SpellVisual == 0 && spellInfo_2->SpellVisual == 757 ||
+        spellInfo_2->SpellVisual == 0 && spellInfo_1->SpellVisual == 757 ) )
+        return false;
+
+    // Thunderfury
+    if( spellInfo_1->Id == 21992 && spellInfo_2->Id == 27648 || spellInfo_2->Id == 21992 && spellInfo_1->Id == 27648 )
+        return false;
+
+    // more generic checks
     if (spellInfo_1->SpellIconID == spellInfo_2->SpellIconID &&
         spellInfo_1->SpellIconID != 0 && spellInfo_2->SpellIconID != 0)
     {
@@ -5013,6 +5031,7 @@ bool ObjectMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2)
                 spellInfo_2->EffectApplyAuraName[i] == SPELL_AURA_ADD_PCT_MODIFIER )
                 isModifier = true;
         }
+
         if (!isModifier)
             return true;
     }
