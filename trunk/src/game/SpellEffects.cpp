@@ -1072,6 +1072,16 @@ void Spell::EffectDummy(uint32 i)
             return;
         }
 
+        //Warrior's Wrath
+        case 21977:
+        {
+            if(!unitTarget)
+                return;
+
+            m_caster->CastSpell(unitTarget,21887,true);     // spell mod
+            return;
+        }
+
         //Taming Lesson
         case 23356:
         {
