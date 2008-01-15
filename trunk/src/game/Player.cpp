@@ -2718,7 +2718,6 @@ void Player::RemoveAllSpellCooldown()
     {
         for(SpellCooldowns::const_iterator itr = m_spellCooldowns.begin();itr != m_spellCooldowns.end(); ++itr)
         {
-            sLog.outError("SpellID:%u",uint32(itr->first));
             WorldPacket data(SMSG_CLEAR_COOLDOWN, (4+8+4));
             data << uint32(itr->first);
             data << GetGUID();
@@ -4823,19 +4822,22 @@ bool Player::SetPosition(float x, float y, float z, float orientation, bool tele
         z = GetPositionZ();
     }
 
-    float water_z = m->GetWaterLevel(x,y);
-    float height_z =  m->GetHeight(x,y,z, false);
-    uint8 flag1 = m->GetTerrainType(x,y);
+    // code block for underwater state update
+    {
+        float water_z = m->GetWaterLevel(x,y);
+        float height_z =  m->GetHeight(x,y,z, false);
+        uint8 flag1 = m->GetTerrainType(x,y);
 
-    //!Underwater check, not in water if underground or above water level
-    if ((z < (height_z-2)) || (z > (water_z - 2)))
-        m_isunderwater&= 0x7A;
-    else if ((z < (water_z - 2)) && (flag1 & 0x01))
-        m_isunderwater|= 0x01;
+        //!Underwater check, not in water if underground or above water level
+        if ((z < (height_z-2)) || (z > (water_z - 2)))
+            m_isunderwater&= 0x7A;
+        else if ((z < (water_z - 2)) && (flag1 & 0x01))
+            m_isunderwater|= 0x01;
 
-    //!in lava check, anywhere under lava level
-    if ((z < (height_z - 0)) && (flag1 == 0x00) && IsInWater())
-        m_isunderwater|= 0x80;
+        //!in lava check, anywhere under lava level
+        if ((z < (height_z - 0)) && (flag1 == 0x00) && IsInWater())
+            m_isunderwater|= 0x80;
+    }
 
     CheckExploreSystem();
 

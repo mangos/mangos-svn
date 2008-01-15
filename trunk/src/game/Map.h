@@ -117,6 +117,9 @@ struct InstanceTemplate
 
 typedef HM_NAMESPACE::hash_map<Creature*, CreatureMover> CreatureMoveList;
 
+#define MAX_HEIGHT            100000.0f                     // can be use for find ground height at surface
+#define INVALID_HEIGHT        (VMAP_INVALID_HEIGHT)         // for check, real value for unknown height is VMAP_INVALID_HEIGHT_VALUE
+
 class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mutex>
 {
     public:
@@ -183,10 +186,9 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         static void InitStateMachine();
         static void DeleteStateMachine();
 
-                                                            // some calls like isInWater should not use vmaps due to processor power
+        // some calls like isInWater should not use vmaps due to processor power
+        // can return INVALID_HEIGHT if under z+2 z coord not found height
         float GetHeight(float x, float y, float z, bool pCheckVMap=true) const;
-        // return height of VMAP_INVALID_HEIGHT
-        float GetVMapHeight(float x, float y, float z) const;
         bool IsInWater(float x, float y, float z) const;    // does not use z pos. This is for future use
 
         uint16 GetAreaFlag(float x, float y ) const;
