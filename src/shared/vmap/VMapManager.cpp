@@ -421,7 +421,7 @@ namespace VMAP
     //int gGetHeightCounter = 0;
     float VMapManager::getHeight(unsigned int pMapId, float x, float y, float z)
     {
-        float height = VMAP_INVALID_HEIGHT;                 //no height
+        float height = VMAP_INVALID_HEIGHT_VALUE;           //no height
         if(isHeightCalcEnabled() && iInstanceMapTrees.containsKey(pMapId))
         {
             Vector3 pos = convertPositionToInternalRep(x,y,z);
@@ -429,7 +429,7 @@ namespace VMAP
             height = mapTree->getHeight(pos);
             if(!(height < inf()))
             {
-                height = VMAP_INVALID_HEIGHT;               //no height
+                height = VMAP_INVALID_HEIGHT_VALUE;         //no height
             }
             Command c = Command();
             c.fillTestHeightCmd(pMapId,Vector3(x,y,z),height);

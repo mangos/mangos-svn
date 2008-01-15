@@ -1997,7 +1997,7 @@ bool ChatHandler::HandleGoXYCommand(const char* args)
     }
 
     Map const *map = MapManager::Instance().GetBaseMap(mapid);
-    float z = std::max(map->GetHeight(x, y, 0), map->GetWaterLevel(x, y));
+    float z = std::max(map->GetHeight(x, y, MAX_HEIGHT), map->GetWaterLevel(x, y));
     _player->SaveRecallPosition();
     _player->TeleportTo(mapid, x, y, z, _player->GetOrientation());
 
@@ -2101,7 +2101,7 @@ bool ChatHandler::HandleGoZoneXYCommand(const char* args)
         return true;
     }
 
-    float z = std::max(map->GetHeight(x, y, 0), map->GetWaterLevel(x, y));
+    float z = std::max(map->GetHeight(x, y, MAX_HEIGHT), map->GetWaterLevel(x, y));
     _player->SaveRecallPosition();
     _player->TeleportTo(zoneEntry->mapid, x, y, z, _player->GetOrientation());
 
@@ -2145,7 +2145,7 @@ bool ChatHandler::HandleGoGridCommand(const char* args)
     }
 
     Map const *map = MapManager::Instance().GetBaseMap(mapid);
-    float z = std::max(map->GetHeight(x, y, 0), map->GetWaterLevel(x, y));
+    float z = std::max(map->GetHeight(x, y, MAX_HEIGHT), map->GetWaterLevel(x, y));
     _player->SaveRecallPosition();
     _player->TeleportTo(mapid, x, y, z, _player->GetOrientation());
 

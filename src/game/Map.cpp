@@ -1196,101 +1196,55 @@ void Map::UnloadAll()
     }
 }
 
-float Map::GetVMapHeight(float x, float y, float z) const
-{
-    VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
-
-    float height=VMAP_INVALID_HEIGHT;
-    if(vmgr->isHeightCalcEnabled())
-    {
-        height = vmgr->getHeight(GetId(), x, y, z + 2);     // look from a bit higher pos to find the floor
-        if(height > VMAP_INVALID_HEIGHT)
-        {
-            // we have a vmap height for that place, but now we have to test
-            // if the normal map height has higher priority here
-            // If normal map height has priority, we return VMAP_INVALID_HEIGHT
-            int gx,gy;
-            GridPair p = MaNGOS::ComputeGridPair(x, y);
-            gx=(int)(32-x/SIZE_OF_GRIDS) ;                  //grid x
-            gy=(int)(32-y/SIZE_OF_GRIDS);                   //grid y
-            if(GridMaps[gx][gy])
-            {
-                float lx,ly;
-                lx=MAP_RESOLUTION*(32 -x/SIZE_OF_GRIDS - gx);
-                ly=MAP_RESOLUTION*(32 -y/SIZE_OF_GRIDS - gy);
-                float normheight = GridMaps[gx][gy]->Z[(int)(lx)][(int)(ly)];
-                if((z>=(normheight-0.2f)) && fabs(normheight-z) < fabs(height-z))
-                    height=VMAP_INVALID_HEIGHT;             // normal map height has pri
-            }
-        }
-    }
-    return height;
-
-}
-
 float Map::GetHeight(float x, float y, float z, bool pUseVmaps) const
 {
-    //local x,y coords
-    float lx,ly;
-    int gx,gy;
     GridPair p = MaNGOS::ComputeGridPair(x, y);
-    //Note: p.x_coord = 63-gx...
-    /* method with no opt
-        x=32* SIZE_OF_GRIDS-x;
-        y=32* SIZE_OF_GRIDS-y;
-
-        gx=x/SIZE_OF_GRIDS ;//grid x
-        gy=y/SIZE_OF_GRIDS ;//grid y
-
-        lx= x*(MAP_RESOLUTION/SIZE_OF_GRIDS) - gx*MAP_RESOLUTION;
-        ly= y*(MAP_RESOLUTION/SIZE_OF_GRIDS) - gy*MAP_RESOLUTION;
-    */
 
     // half opt method
-    gx=(int)(32-x/SIZE_OF_GRIDS) ;                          //grid x
-    gy=(int)(32-y/SIZE_OF_GRIDS);                           //grid y
+    int gx=(int)(32-x/SIZE_OF_GRIDS);                       //grid x
+    int gy=(int)(32-y/SIZE_OF_GRIDS);                       //grid y
 
-    lx=MAP_RESOLUTION*(32 -x/SIZE_OF_GRIDS - gx);
-    ly=MAP_RESOLUTION*(32 -y/SIZE_OF_GRIDS - gy);
-    //DEBUG_LOG("my %d %d si %d %d",gx,gy,p.x_coord,p.y_coord);
+    float lx=MAP_RESOLUTION*(32 -x/SIZE_OF_GRIDS - gx);
+    float ly=MAP_RESOLUTION*(32 -y/SIZE_OF_GRIDS - gy);
 
     // ensure GridMap is loaded
     const_cast<Map*>(this)->EnsureGridCreated(GridPair(63-gx,63-gy));
 
-    VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
-    if(vmgr->isHeightCalcEnabled())
+    float height = VMAP_INVALID_HEIGHT_VALUE;
+    bool mapHeightFound = false;
+
+    if(GridMaps[gx][gy])
     {
-        float height = 0;
-        bool mapHeightFound = false;
-        if(GridMaps[gx][gy])
+        float mapheight = GridMaps[gx][gy]->Z[(int)(lx)][(int)(ly)];
+
+        // look from a bit higher pos to find the floor, ignore under surface case
+        if(z + 2.0f > mapheight)
         {
-            height = GridMaps[gx][gy]->Z[(int)(lx)][(int)(ly)];
+            height = mapheight;
             mapHeightFound = true;
         }
-        if(pUseVmaps)
+    }
+
+    if(pUseVmaps)
+    {
+        VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
+        if(vmgr->isHeightCalcEnabled())
         {
-                                                            // look from a bit higher pos to find the floor
-            float vmapheight = vmgr->getHeight(GetId(), x, y, z + 2);
-            // if the land map did not find the height or if we are already under the surface and vmap found a height
-            // or if the distance of the vmap height is less the land height distance
-            if(!mapHeightFound || (z<height && vmapheight > VMAP_INVALID_HEIGHT) || fabs(height-z) > fabs(vmapheight-z))
+            // look from a bit higher pos to find the floor
+            float vmapheight = vmgr->getHeight(GetId(), x, y, z + 2.0f);
+
+            if( vmapheight > INVALID_HEIGHT )
             {
-                height = vmapheight;
-                mapHeightFound = true;
+                //the land map did not find the height or if we are already under the surface and 
+                // or if the distance of the vmap height is less the land height distance
+                if( !mapHeightFound || z < height || fabs(height-z) > fabs(vmapheight-z) )
+                    height = vmapheight;
             }
         }
-        else if(!mapHeightFound)
-            height = z;
+    }
 
-        return height;
-    }
-    else
-    {
-        if(GridMaps[gx][gy])
-            return GridMaps[gx][gy]->Z[(int)(lx)][(int)(ly)];
-        else
-            return z;
-    }
+    // if height == VMAP_INVALID_HEIGHT_VALUE then height not found (no map and vmap height data)
+    return height;
 }
 
 uint16 Map::GetAreaFlag(float x, float y ) const
@@ -1361,7 +1315,6 @@ float Map::GetWaterLevel(float x, float y ) const
         return GridMaps[gx][gy]->liquid_level[(int)(lx)][(int)(ly)];
     else
         return 0;
-
 }
 
 uint32 Map::GetAreaId(uint16 areaflag)
@@ -1389,6 +1342,11 @@ bool Map::IsInWater(float x, float y, float pZ) const
     // This method is called too often to use vamps for that (4. parameter = false).
     // The z pos is taken anyway for future use
     float z = GetHeight(x,y,pZ,false);
+
+    // underground or instance without vmap
+    if(z < INVALID_HEIGHT)
+        return false;
+
     float water_z = GetWaterLevel(x,y);
     uint8 flag = GetTerrainType(x,y);
     return (z < (water_z-2)) && (flag & 0x01);

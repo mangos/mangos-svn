@@ -235,8 +235,11 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
 
             Map const *map = MapManager::Instance().GetBaseMap(target->GetMapId());
 
+            float height = map->GetHeight(movementInfo.x, movementInfo.y, movementInfo.z);
+            float water = map->GetWaterLevel(movementInfo.x, movementInfo.y);
+
             //Prevent damage if damage is 0, fall time < 1100, or if player land in water
-            if (damage > 0 && fall_time > 1100 && map->GetWaterLevel(movementInfo.x, movementInfo.y) < map->GetHeight(movementInfo.x, movementInfo.y, movementInfo.z))
+            if (damage > 0 && fall_time > 1100 && water < height)
             {
                 //Prevent fall damage from being more than the player maximum health
                 if (damage > target->GetMaxHealth())
@@ -246,7 +249,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
             }
 
             //Z given by moveinfo, LastZ, FallTime, WaterZ, MapZ, Damage, Safefall reduction
-            DEBUG_LOG("!! z=%f, pZ=%f FallTime=%d wZ=%f mZ=%f damage=%d SF=%d" , movementInfo.z, target->GetPositionZ(), movementInfo.fallTime, map->GetWaterLevel(movementInfo.x, movementInfo.y), map->GetHeight(movementInfo.x, movementInfo.y, movementInfo.z), damage, safe_fall);
+            DEBUG_LOG("!! z=%f, pZ=%f FallTime=%d wZ=%f mZ=%f damage=%d SF=%d" , movementInfo.z, target->GetPositionZ(), movementInfo.fallTime, water, height, damage, safe_fall);
         }
 
         //handle fall and logout at the sametime
