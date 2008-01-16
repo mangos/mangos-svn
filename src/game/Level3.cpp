@@ -357,7 +357,7 @@ bool ChatHandler::HandleReloadQuestEndScriptsCommand(const char* arg)
     if(*arg!='a')
         sLog.outString( "Re-Loading Scripts from `quest_end_scripts`...");
 
-    objmgr.LoadButtonScripts();
+    objmgr.LoadQuestEndScripts();
 
     if(*arg!='a')
         SendGlobalSysMessage("DB table `quest_end_scripts` reloaded.");
@@ -376,7 +376,7 @@ bool ChatHandler::HandleReloadQuestStartScriptsCommand(const char* arg)
     if(*arg!='a')
         sLog.outString( "Re-Loading Scripts from `quest_start_scripts`...");
 
-    objmgr.LoadButtonScripts();
+    objmgr.LoadQuestStartScripts();
 
     if(*arg!='a')
         SendGlobalSysMessage("DB table `quest_start_scripts` reloaded.");
@@ -395,7 +395,7 @@ bool ChatHandler::HandleReloadSpellScriptsCommand(const char* arg)
     if(*arg!='a')
         sLog.outString( "Re-Loading Scripts from `spell_scripts`...");
 
-    objmgr.LoadButtonScripts();
+    objmgr.LoadSpellScripts();
 
     if(*arg!='a')
         SendGlobalSysMessage("DB table `spell_scripts` reloaded.");
