@@ -19,7 +19,7 @@
 #ifndef MANGOS_OBJECTDEFINES_H
 #define MANGOS_OBJECTDEFINES_H
 
-enum HIGHGUID
+enum HighGuid
 {
     HIGHGUID_ITEM           = 0x40000000,                   // blizz 40000000
     HIGHGUID_CONTAINER      = 0x40000000,                   // blizz 40000000
