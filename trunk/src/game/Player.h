@@ -2030,7 +2030,7 @@ template <class T> T Player::ApplySpellMod(uint32 spellId, uint8 op, T &basevalu
         SpellModifier *mod = *itr;
 
         // skip other mod types
-        if(only_type && mod->type != only_type)
+        if(only_type && (unsigned int)mod->type != only_type)
             continue;
 
         if(!IsAffectedBySpellmod(spellInfo,mod))

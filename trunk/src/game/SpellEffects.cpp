@@ -252,7 +252,7 @@ void Spell::EffectInstaKill(uint32 i)
     }
 
     uint32 health = unitTarget->GetHealth();
-    m_caster->DealDamage(unitTarget, health, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_NORMAL, NULL, 0, false);
+    m_caster->DealDamage(unitTarget, health, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_NORMAL, NULL, false);
 }
 
 void Spell::EffectSchoolDMG(uint32 i)
@@ -608,7 +608,7 @@ void Spell::EffectDummy(uint32 i)
                 if(int32(m_caster->GetHealth()) > dmg)
                 {
                     m_caster->SendSpellNonMeleeDamageLog(m_caster, m_spellInfo->Id, dmg, SpellSchools(m_spellInfo->School), 0, 0, false, 0, false);
-                    m_caster->DealDamage(m_caster,dmg,NULL,DIRECT_DAMAGE,SpellSchools(m_spellInfo->School),m_spellInfo,PROC_FLAG_NONE,false);
+                    m_caster->DealDamage(m_caster,dmg,NULL,DIRECT_DAMAGE,SpellSchools(m_spellInfo->School),m_spellInfo,false);
 
                     int32 mana = dmg;
 
@@ -1846,7 +1846,7 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
     player->SendLoot(guid, loottype);
 }
 
-void Spell::EffectOpenLock(uint32 i)
+void Spell::EffectOpenLock(uint32 /*i*/)
 {
     if(!m_caster || m_caster->GetTypeId() != TYPEID_PLAYER)
     {
@@ -2051,7 +2051,7 @@ void Spell::EffectOpenSecretSafe(uint32 i)
     EffectOpenLock(i);                                      //no difference for now
 }
 
-void Spell::EffectProficiency(uint32 i)
+void Spell::EffectProficiency(uint32 /*i*/)
 {
     if (!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
@@ -2214,19 +2214,19 @@ void Spell::EffectDispel(uint32 i)                          // PBW
     }
 }
 
-void Spell::EffectDualWield(uint32 i)
+void Spell::EffectDualWield(uint32 /*i*/)
 {
     if (unitTarget->GetTypeId() == TYPEID_PLAYER)
         ((Player*)unitTarget)->SetCanDualWield(true);
 }
 
-void Spell::EffectPull(uint32 i)
+void Spell::EffectPull(uint32 /*i*/)
 {
     //Todo create a proper pull towards distract spell center for distract
     sLog.outDebug("WORLD: Spell Effect DUMMY");
 }
 
-void Spell::EffectDistract(uint32 i)
+void Spell::EffectDistract(uint32 /*i*/)
 {
     //Check for possible target
     if (!unitTarget)
@@ -2254,7 +2254,7 @@ void Spell::EffectDistract(uint32 i)
     #endif
 }
 
-void Spell::EffectPickPocket(uint32 i)
+void Spell::EffectPickPocket(uint32 /*i*/)
 {
     if( m_caster->GetTypeId() != TYPEID_PLAYER )
         return;
@@ -2489,7 +2489,7 @@ void Spell::EffectLearnSkill(uint32 i)
     ((Player*)unitTarget)->SetSkill(skillid,skillval?skillval:1,damage*75);
 }
 
-void Spell::EffectTradeSkill(uint32 i)
+void Spell::EffectTradeSkill(uint32 /*i*/)
 {
     if(unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
@@ -2666,7 +2666,7 @@ void Spell::EffectEnchantItemTmp(uint32 i)
     item_owner->ApplyEnchantment(itemTarget,TEMP_ENCHANTMENT_SLOT,true);
 }
 
-void Spell::EffectTameCreature(uint32 i)
+void Spell::EffectTameCreature(uint32 /*i*/)
 {
     if(m_caster->GetPetGUID())
         return;
@@ -2915,7 +2915,7 @@ void Spell::EffectLearnPetSpell(uint32 i)
     _player->PetSpellInitialize();
 }
 
-void Spell::EffectTaunt(uint32 i)
+void Spell::EffectTaunt(uint32 /*i*/)
 {
     // this effect use before aura Taunt apply for prevent taunt already attacking target
     // for spell as marked "non effective at already attacking target"
@@ -3059,7 +3059,7 @@ void Spell::EffectWeaponDmg(uint32 i)
         eff_damage = 0;
     }
 
-    m_caster->DealDamage(unitTarget, eff_damage, &cleanDamage, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_NORMAL, NULL, 0, true);
+    m_caster->DealDamage(unitTarget, eff_damage, &cleanDamage, SPELL_DIRECT_DAMAGE, SPELL_SCHOOL_NORMAL, NULL, true);
 
     // Hemorrhage
     if(m_spellInfo->SpellFamilyName==SPELLFAMILY_ROGUE && (m_spellInfo->SpellFamilyFlags & 0x2000000))
@@ -3106,7 +3106,7 @@ void Spell::EffectWeaponDmg(uint32 i)
     }*/
 }
 
-void Spell::EffectThreat(uint32 i)
+void Spell::EffectThreat(uint32 /*i*/)
 {
     if(!unitTarget || !unitTarget->isAlive() || !m_caster->isAlive())
         return;
@@ -3117,7 +3117,7 @@ void Spell::EffectThreat(uint32 i)
     unitTarget->AddThreat(m_caster, float(damage));
 }
 
-void Spell::EffectHealMaxHealth(uint32 i)
+void Spell::EffectHealMaxHealth(uint32 /*i*/)
 {
     if(!unitTarget)
         return;
@@ -3136,7 +3136,7 @@ void Spell::EffectHealMaxHealth(uint32 i)
         m_caster->SendHealSpellOnPlayer(unitTarget, m_spellInfo->Id, heal);
 }
 
-void Spell::EffectInterruptCast(uint32 i)
+void Spell::EffectInterruptCast(uint32 /*i*/)
 {
     if(!unitTarget)
         return;
@@ -3429,7 +3429,7 @@ void Spell::EffectScriptEffect(uint32 i)
     sWorld.ScriptsStart(sSpellScripts, m_spellInfo->Id, m_caster, unitTarget);
 }
 
-void Spell::EffectSanctuary(uint32 i)
+void Spell::EffectSanctuary(uint32 /*i*/)
 {
     if(!unitTarget)
         return;
@@ -3444,7 +3444,7 @@ void Spell::EffectSanctuary(uint32 i)
     }
 }
 
-void Spell::EffectAddComboPoints(uint32 i)
+void Spell::EffectAddComboPoints(uint32 /*i*/)
 {
     if(!unitTarget)
         return;
@@ -3532,7 +3532,7 @@ void Spell::EffectDuel(uint32 i)
     target->SetUInt64Value(PLAYER_DUEL_ARBITER,pGameObj->GetGUID());
 }
 
-void Spell::EffectStuck(uint32 i)
+void Spell::EffectStuck(uint32 /*i*/)
 {
     if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
@@ -3556,7 +3556,7 @@ void Spell::EffectStuck(uint32 i)
     spell.SendSpellCooldown();
 }
 
-void Spell::EffectSummonPlayer(uint32 i)
+void Spell::EffectSummonPlayer(uint32 /*i*/)
 {
     if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
@@ -3685,7 +3685,7 @@ void Spell::EffectEnchantHeldItem(uint32 i)
     }
 }
 
-void Spell::EffectDisEnchant(uint32 i)
+void Spell::EffectDisEnchant(uint32 /*i*/)
 {
     if(m_caster->GetTypeId() != TYPEID_PLAYER)
         return;

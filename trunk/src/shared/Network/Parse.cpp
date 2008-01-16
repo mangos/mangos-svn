@@ -80,7 +80,7 @@ Parse::Parse(const std::string&s,const std::string&sp)
 {
 }
 
-Parse::Parse(const std::string&s,const std::string&sp,short nospace)
+Parse::Parse(const std::string&s,const std::string&sp,short /*nospace*/)
 :pa_the_str(s)
 ,pa_splits(sp)
 ,pa_ord("")

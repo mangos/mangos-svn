@@ -18,47 +18,75 @@
 
 #include "sc_defines.h"
 
-bool GossipHello_default(Player *player, Creature *_Creature)
-{return false;}
+bool GossipHello_default(Player* /*player*/, Creature* /*_Creature*/)
+{
+    return false;
+}
 
-bool GossipSelect_default(Player *player, Creature *_Creature, uint32 sender, uint32 action )
-{return false;}
+bool GossipSelect_default(Player* /*player*/, Creature* /*_Creature*/, uint32 /*sender*/, uint32 /*action*/ )
+{
+    return false;
+}
 
-bool GossipSelectWithCode_default( Player *player, Creature *_Creature, uint32 sender, uint32 action, char* sCode )
-{return false;}
-bool QuestAccept_default(Player *player, Creature *_Creature, Quest const *_Quest )
-{return false;}
+bool GossipSelectWithCode_default( Player* /*player*/, Creature* /*_Creature*/, uint32 /*sender*/, uint32 /*action*/, char* /*sCode*/ )
+{
+    return false;
+}
 
-bool QuestSelect_default(Player *player, Creature *_Creature, Quest const *_Quest )
-{return false;}
+bool QuestAccept_default(Player* /*player*/, Creature* /*_Creature*/, Quest const* /*_Quest*/ )
+{
+    return false;
+}
 
-bool QuestComplete_default(Player *player, Creature *_Creature, Quest const *_Quest )
-{return false;}
+bool QuestSelect_default(Player* /*player*/, Creature* /*_Creature*/, Quest const* /*_Quest*/ )
+{
+    return false;
+}
 
-bool ChooseReward_default(Player *player, Creature *_Creature, Quest const *_Quest, uint32 opt )
-{return false;}
+bool QuestComplete_default(Player* /*player*/, Creature* /*_Creature*/, Quest const* /*_Quest*/ )
+{
+    return false;
+}
 
-uint32 NPCDialogStatus_default(Player *player, Creature *_Creature )
+bool ChooseReward_default(Player* /*player*/, Creature* /*_Creature*/, Quest const* /*_Quest*/, uint32 /*opt*/ )
+{
+    return false;
+}
+
+uint32 NPCDialogStatus_default(Player* /*player*/, Creature* /*_Creature*/ )
 {
     return 128;
 }
 
-bool ItemHello_default(Player *player, Item *_Item, Quest const *_Quest )
-{return false;}
+bool ItemHello_default(Player* /*player*/, Item* /*_Item*/, Quest const* /*_Quest*/ )
+{
+    return false;
+}
 
-bool ItemQuestAccept_default(Player *player, Item *_Item, Quest const *_Quest )
-{return false;}
+bool ItemQuestAccept_default(Player* /*player*/, Item* /*_Item*/, Quest const* /*_Quest*/ )
+{
+    return false;
+}
 
-bool GOHello_default(Player *player, GameObject *_GO )
-{return false;}
+bool GOHello_default(Player* /*player*/, GameObject* /*_GO*/ )
+{
+    return false;
+}
 
-bool GOQuestAccept_default(Player *player, GameObject *_GO, Quest const *_Quest )
-{return false;}
-bool GOChooseReward_default(Player *player, GameObject *_GO, Quest const *_Quest, uint32 opt )
-{return false;}
+bool GOQuestAccept_default(Player* /*player*/, GameObject* /*_GO*/, Quest const* /*_Quest*/ )
+{
+    return false;
+}
 
-bool AreaTrigger_default(Player *player, Quest const *_Quest, uint32 triggerID )
-{return false;}
+bool GOChooseReward_default(Player* /*player*/, GameObject* /*_GO*/, Quest const* /*_Quest*/, uint32 /*opt*/ )
+{
+    return false;
+}
+
+bool AreaTrigger_default(Player* /*player*/, Quest const* /*_Quest*/, uint32 /*triggerID*/ )
+{
+    return false;
+}
 
 void AddSC_default()
 {

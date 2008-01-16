@@ -42,7 +42,7 @@ TotemAI::TotemAI(Creature &c) : i_totem(static_cast<Totem&>(c)), i_victimGuid(0)
 }
 
 void
-TotemAI::MoveInLineOfSight(Unit *u)
+TotemAI::MoveInLineOfSight(Unit *)
 {
 }
 
@@ -52,7 +52,7 @@ void TotemAI::EnterEvadeMode()
 }
 
 void
-TotemAI::UpdateAI(const uint32 diff)
+TotemAI::UpdateAI(const uint32 /*diff*/)
 {
     if (i_totem.GetTotemType() != TOTEM_ACTIVE)
         return;
@@ -71,10 +71,11 @@ TotemAI::UpdateAI(const uint32 diff)
 
     // SPELLMOD_RANGE not applied in this place just because not existence range mods for attacking totems
 
-    Unit* victim = NULL;                                    // pointer to appropriate target if found any
+    // pointer to appropriate target if found any
+    Unit* victim = i_victimGuid ? ObjectAccessor::GetUnit(i_totem, i_victimGuid) : NULL;
 
     // Search victim if no, not attackable, or out of range, or friendly (possible in case duel end)
-    if( !i_victimGuid || !(victim = ObjectAccessor::GetUnit(i_totem, i_victimGuid)) ||
+    if( !victim ||
         !victim->isTargetableForAttack() || !i_totem.IsWithinDistInMap(victim, max_range) ||
         i_totem.IsFriendlyTo(victim) || !victim->isVisibleForOrDetect(&i_totem,false) )
     {
@@ -110,12 +111,12 @@ TotemAI::UpdateAI(const uint32 diff)
 }
 
 bool
-TotemAI::IsVisible(Unit *pl) const
+TotemAI::IsVisible(Unit *) const
 {
     return false;
 }
 
 void
-TotemAI::AttackStart(Unit *u)
+TotemAI::AttackStart(Unit *)
 {
 }

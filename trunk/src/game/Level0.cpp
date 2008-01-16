@@ -127,14 +127,14 @@ bool ChatHandler::HandleCommandsCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleAcctCommand(const char* args)
+bool ChatHandler::HandleAcctCommand(const char* /*args*/)
 {
     uint32 gmlevel = m_session->GetSecurity();
     PSendSysMessage(LANG_ACCOUNT_LEVEL, gmlevel);
     return true;
 }
 
-bool ChatHandler::HandleStartCommand(const char* args)
+bool ChatHandler::HandleStartCommand(const char* /*args*/)
 {
     Player *chr = m_session->GetPlayer();
 
@@ -155,7 +155,7 @@ bool ChatHandler::HandleStartCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleInfoCommand(const char* args)
+bool ChatHandler::HandleInfoCommand(const char* /*args*/)
 {
     uint32 clientsNum = sWorld.GetActiveSessionCount();
     uint32 maxClientsNum = sWorld.GetMaxSessionCount();
@@ -167,7 +167,7 @@ bool ChatHandler::HandleInfoCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleDismountCommand(const char* args)
+bool ChatHandler::HandleDismountCommand(const char* /*args*/)
 {
     //If player is not mounted, so go out :)
     if (!m_session->GetPlayer( )->IsMounted())
@@ -187,7 +187,7 @@ bool ChatHandler::HandleDismountCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleSaveCommand(const char* args)
+bool ChatHandler::HandleSaveCommand(const char* /*args*/)
 {
     Player *player=m_session->GetPlayer();
 
@@ -207,7 +207,7 @@ bool ChatHandler::HandleSaveCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleGMListCommand(const char* args)
+bool ChatHandler::HandleGMListCommand(const char* /*args*/)
 {
     bool first = true;
 

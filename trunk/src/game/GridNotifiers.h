@@ -141,7 +141,7 @@ namespace MaNGOS
             }
         }
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &m) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
     };
 
     struct MANGOS_DLL_DECL PlayerRelocationNotifier
@@ -202,7 +202,7 @@ namespace MaNGOS
         void Visit(CorpseMapType &m);
         void Visit(DynamicObjectMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &m) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
     };
 
     template<class Check>
@@ -219,7 +219,7 @@ namespace MaNGOS
         void Visit(GameObjectMapType &m);
         void Visit(DynamicObjectMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &m) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
     };
 
     template<class Do>
@@ -258,7 +258,7 @@ namespace MaNGOS
                 i_do(itr->getSource());
         }
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &m) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
     };
 
     // Gameobject searchers
@@ -273,7 +273,7 @@ namespace MaNGOS
 
         void Visit(GameObjectMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &m) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
     };
 
     // Last accepted by Check GO if any (Check can change requirements at each call)
@@ -287,7 +287,7 @@ namespace MaNGOS
 
         void Visit(GameObjectMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &m) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
     };
 
     template<class Check>
@@ -300,7 +300,7 @@ namespace MaNGOS
 
         void Visit(GameObjectMapType &m);
 
-        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &m) {}
+        template<class NOT_INTERESTED> void Visit(GridRefManager<NOT_INTERESTED> &) {}
     };
 
     // Unit searchers

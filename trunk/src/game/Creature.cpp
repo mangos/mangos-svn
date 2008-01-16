@@ -202,7 +202,7 @@ void Creature::Update(uint32 diff)
                 setDeathState( ALIVE );
                 clearUnitState(UNIT_STAT_ALL_STATE);
                 i_motionMaster.Clear();
-                LoadCreaturesAddon();
+                LoadCreaturesAddon(true);
                 MapManager::Instance().GetMap(GetMapId(), this)->Add(this);
             }
             break;
@@ -1750,7 +1750,7 @@ CreatureDataAddon const* Creature::GetCreatureAddon() const
 }
 
 //creature_addon table
-bool Creature::LoadCreaturesAddon()
+bool Creature::LoadCreaturesAddon(bool reload)
 {
     CreatureDataAddon const *cainfo = GetCreatureAddon();
     if(!cainfo)
@@ -1781,6 +1781,16 @@ bool Creature::LoadCreaturesAddon()
                 sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) has wrong spell %u defined in `auras` field.",GetGUIDLow(),GetEntry(),cAura->spell_id);
                 continue;
             }
+
+            // skip already applied aura
+            if(GetAura(cAura->spell_id,cAura->effect_idx))
+            {
+                if(!reload)
+                    sLog.outErrorDb("Creature (GUIDLow: %u Entry: %u ) has duplicate aura (spell %u effect %u) in `auras` field.",GetGUIDLow(),GetEntry(),cAura->spell_id,cAura->effect_idx);
+
+                continue;
+            }
+
             Aura* AdditionalAura = new Aura(AdditionalSpellInfo, cAura->effect_idx, NULL, this, this, 0);
             AddAura(AdditionalAura);
             sLog.outDebug("Spell: %u with Aura %u added to creature (GUIDLow: %u Entry: %u )", cAura->spell_id, AdditionalSpellInfo->EffectApplyAuraName[0],GetGUIDLow(),GetEntry());

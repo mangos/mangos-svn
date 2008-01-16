@@ -74,15 +74,16 @@ bool WinServiceInstall()
                 0);                                         // no password
             if (service)
             {
-
-                if (!(advapi32 = GetModuleHandle("ADVAPI32.DLL")))
+                advapi32 = GetModuleHandle("ADVAPI32.DLL");
+                if(!advapi32)
                 {
                     CloseServiceHandle(service);
                     CloseServiceHandle(serviceControlManager);
                     return false;
                 }
 
-                if (!(ChangeService_Config2 = (CSD_T) GetProcAddress(advapi32, "ChangeServiceConfig2A")))
+                ChangeService_Config2 = (CSD_T) GetProcAddress(advapi32, "ChangeServiceConfig2A");
+                if (!ChangeService_Config2)
                 {
                     CloseServiceHandle(service);
                     CloseServiceHandle(serviceControlManager);

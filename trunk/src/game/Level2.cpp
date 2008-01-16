@@ -445,7 +445,7 @@ bool ChatHandler::HandleGoCreatureCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleGUIDCommand(const char* args)
+bool ChatHandler::HandleGUIDCommand(const char* /*args*/)
 {
     uint64 guid = m_session->GetPlayer()->GetSelection();
 
@@ -459,7 +459,7 @@ bool ChatHandler::HandleGUIDCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleNameCommand(const char* args)
+bool ChatHandler::HandleNameCommand(const char* /*args*/)
 {
     /* Temp. disabled
         if(!*args)
@@ -506,7 +506,7 @@ bool ChatHandler::HandleNameCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleSubNameCommand(const char* args)
+bool ChatHandler::HandleSubNameCommand(const char* /*args*/)
 {
     /* Temp. disabled
 
@@ -620,7 +620,7 @@ bool ChatHandler::HandleAddSpwCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleDeleteCommand(const char* args)
+bool ChatHandler::HandleDeleteCommand(const char* /*args*/)
 {
     Creature *unit = getSelectedCreature();
     if(!unit || unit->isPet() || unit->isTotem())
@@ -879,7 +879,7 @@ bool ChatHandler::HandleMoveObjectCommand(const char* args)
 }
 
 //demorph player or unit
-bool ChatHandler::HandleDeMorphCommand(const char* args)
+bool ChatHandler::HandleDeMorphCommand(const char* /*args*/)
 {
     Unit *target = getSelectedUnit();
     if(!target)
@@ -3137,7 +3137,7 @@ bool ChatHandler::HandleAddHonorCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleHonorAddKillCommand(const char* args)
+bool ChatHandler::HandleHonorAddKillCommand(const char* /*args*/)
 {
     Unit *target = getSelectedUnit();
     if(!target)
@@ -3150,7 +3150,7 @@ bool ChatHandler::HandleHonorAddKillCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleHonorFlushKillsCommand(const char* args)
+bool ChatHandler::HandleHonorFlushKillsCommand(const char* /*args*/)
 {
     Player *target = getSelectedPlayer();
     if(!target)
@@ -3165,7 +3165,7 @@ bool ChatHandler::HandleHonorFlushKillsCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleUpdateHonorFieldsCommand(const char* args)
+bool ChatHandler::HandleUpdateHonorFieldsCommand(const char* /*args*/)
 {
     Player *target = getSelectedPlayer();
     if(!target)

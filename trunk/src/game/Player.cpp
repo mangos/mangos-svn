@@ -599,7 +599,7 @@ void Player::EnvironmentalDamage(uint64 Guid, uint8 Type, uint32 Amount)
     //m_session->SendPacket(&data);
     //Let other players see that you get damage
     SendMessageToSet(&data, true);
-    DealDamage((Unit*)this, Amount, NULL, SELF_DAMAGE, SPELL_SCHOOL_NORMAL, NULL, 0, true);
+    DealDamage((Unit*)this, Amount, NULL, SELF_DAMAGE, SPELL_SCHOOL_NORMAL, NULL, true);
 }
 
 void Player::HandleDrowning(uint32 UnderWaterTime)
@@ -1763,9 +1763,6 @@ void Player::RegenerateHealth()
     if (curValue >= maxValue) return;
 
     float HealthIncreaseRate = sWorld.getRate(RATE_HEALTH);
-
-    float Spirit = GetStat(STAT_SPIRIT);
-    uint8 Class = getClass();
 
     if( HealthIncreaseRate <= 0 ) HealthIncreaseRate = 1;
 

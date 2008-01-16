@@ -316,7 +316,7 @@ namespace G3D {
                     debugAssert(hi == splitBounds.high());
 
                     for (int i = 0; i < valueArray.length(); ++i) {
-                        const AABox& b = valueArray[i].bounds;
+                        debugStatement(const AABox& b = valueArray[i].bounds);
 
                         for(int axis = 0; axis < 3; ++axis) {
                             debugAssert(b.low()[axis] <= b.high()[axis]);

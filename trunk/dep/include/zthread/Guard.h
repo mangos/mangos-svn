@@ -220,7 +220,7 @@ class UnlockedScope {
    * @param lock2 LockType1& is the LockHolder that wants to share
    */
   template <class LockType1, class LockType2>
-  static void shareScope(LockHolder<LockType1>& l1, LockHolder<LockType2>& l2) {
+  static void shareScope(LockHolder<LockType1>& /*l1*/, LockHolder<LockType2>& l2) {
 
     l2.getLock().release();
 
