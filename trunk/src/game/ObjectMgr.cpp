@@ -5001,12 +5001,19 @@ bool ObjectMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2)
     if( IsSealSpell(spellId_1) && IsSealSpell(spellId_2) )
         return true;
 
-    // Corruption and Unstable Affliction
-    if( spellInfo_1->SpellFamilyName == SPELLFAMILY_WARLOCK &&
-        spellInfo_2->SpellFamilyName == SPELLFAMILY_WARLOCK && (
-        spellInfo_1->SpellIconID == 313 && spellInfo_2->SpellIconID == 2039 ||
-        spellInfo_2->SpellIconID == 313 && spellInfo_1->SpellIconID == 2039 ) )
-        return false;
+    // warlock auars
+    if( spellInfo_1->SpellFamilyName == SPELLFAMILY_WARLOCK && spellInfo_2->SpellFamilyName == SPELLFAMILY_WARLOCK)
+    {
+        // Siphon Life and Drain Life
+        if( spellInfo_1->SpellIconID == 152 && spellInfo_2->SpellIconID == 546 ||
+            spellInfo_2->SpellIconID == 152 && spellInfo_1->SpellIconID == 546 )
+            return false;
+
+        // Corruption and Unstable Affliction
+        if( spellInfo_1->SpellIconID == 313 && spellInfo_2->SpellIconID == 2039 ||
+            spellInfo_2->SpellIconID == 313 && spellInfo_1->SpellIconID == 2039 )
+            return false;
+    }
 
     // Garrote and Garrote-Silence
     if( spellInfo_1->SpellIconID == 498 && spellInfo_2->SpellIconID == 498 && (
