@@ -202,6 +202,7 @@ void Creature::Update(uint32 diff)
                 setDeathState( ALIVE );
                 clearUnitState(UNIT_STAT_ALL_STATE);
                 i_motionMaster.Clear();
+                LoadCreaturesAddon();
                 MapManager::Instance().GetMap(GetMapId(), this)->Add(this);
             }
             break;
