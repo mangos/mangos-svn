@@ -42,8 +42,8 @@ MaNGOS::Singleton<T, ThreadingModel, CreatePolicy, LifeTimePolicy >::Instance()
         {
             if( si_destroyed )
             {
-                LifeTimePolicy::OnDeadReference();
                 si_destroyed = false;
+                LifeTimePolicy::OnDeadReference();
             }
             si_instance = CreatePolicy::Create();
             LifeTimePolicy::ScheduleCall(&DestroySingleton);

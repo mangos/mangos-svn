@@ -519,7 +519,7 @@ class ObjectMgr
         void ReturnOrDeleteOldMails(bool serverUp);
 
         void SetHighestGuids();
-        uint32 GenerateLowGuid(uint32 guidhigh);
+        uint32 GenerateLowGuid(HighGuid guidhigh);
         uint32 GenerateAuctionID();
         uint32 GenerateMailID();
         uint32 GenerateItemTextID();

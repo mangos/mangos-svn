@@ -59,7 +59,7 @@ bool DynamicObject::Create( uint32 guidlow, Unit *caster, uint32 spellId, uint32
 {
     SetInstanceId(caster->GetInstanceId());
 
-    WorldObject::_Create(guidlow, 0xF0007000, caster->GetMapId(), x, y, z, 0, (uint8)-1);
+    WorldObject::_Create(guidlow, HIGHGUID_DYNAMICOBJECT, caster->GetMapId(), x, y, z, 0, (uint8)-1);
 
     SetUInt32Value( OBJECT_FIELD_ENTRY, spellId );
     SetFloatValue( OBJECT_FIELD_SCALE_X, 1 );

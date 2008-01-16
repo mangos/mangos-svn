@@ -407,7 +407,7 @@ void Unit::RemoveSpellbyDamageTaken(AuraType auraType, uint32 damage)
         RemoveSpellsCausingAura(auraType);
 }
 
-void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchools damageSchool, SpellEntry const *spellProto, uint32 procFlag, bool durabilityLoss)
+void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDamage, DamageEffectType damagetype, SpellSchools damageSchool, SpellEntry const *spellProto, bool durabilityLoss)
 {
     if (!pVictim->isAlive() || pVictim->isInFlight() || pVictim->GetTypeId() == TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())
         return;
@@ -681,13 +681,13 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
             if(pVictim->GetTypeId() == TYPEID_PLAYER)
                 PvP = true;
 
-            Unit* pet = NULL;
+            if(player->GetPetGUID())
+                if(Unit* pet = player->GetPet())
+                    pet->ClearInCombat();
 
-            if(player->GetPetGUID() && (pet = player->GetPet()))
-                pet->ClearInCombat();
-
-            if(player->GetCharmGUID() && (pet = player->GetCharm()))
-                pet->ClearInCombat();
+            if(player->GetCharmGUID())
+                if(Unit* pet = player->GetCharm())
+                    pet->ClearInCombat();
         }
         // FIXME: or charmed (can be player). Maybe must be check before GetTypeId() == TYPEID_PLAYER
         else if(GetCharmerOrOwnerGUID())                    // Pet or timed creature, etc
@@ -1200,23 +1200,24 @@ void Unit::DealDamageBySchool(Unit *pVictim, SpellEntry const *spellInfo, uint32
                     *damage = 0;
                     hitInfo |= HITINFO_SWINGNOHITSOUND;
                     victimState = VICTIMSTATE_DODGE;
-                    break;
 
                     // Set dodge flags
-
                     pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
+
                     // Overpower
                     if (GetTypeId() == TYPEID_PLAYER && getClass() == CLASS_WARRIOR)
                     {
                         ((Player*)this)->AddComboPoints(pVictim, 1);
                         StartReactiveTimer( REACTIVE_OVERPOWER );
                     }
+
                     // Riposte
                     if (pVictim->getClass() != CLASS_ROGUE)
                     {
                         pVictim->ModifyAuraState(AURA_STATE_DEFENSE, true);
                         pVictim->StartReactiveTimer( REACTIVE_DEFENSE );
                     }
+                    break;
                 }
                 case MELEE_HIT_BLOCK:
                 {
@@ -1375,7 +1376,7 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, 
         SendSpellNonMeleeDamageLog(pVictim, spellID, damage, SpellSchools(spellInfo->School), absorb, resist, false, 0, crit);
 
         // Deal damage done
-        DealDamage(pVictim, (damage-absorb-resist), &cleanDamage, SPELL_DIRECT_DAMAGE, SpellSchools(spellInfo->School), spellInfo, 0, true);
+        DealDamage(pVictim, (damage-absorb-resist), &cleanDamage, SPELL_DIRECT_DAMAGE, SpellSchools(spellInfo->School), spellInfo, true);
 
         // Shadow Word: Death - deals damage equal to damage done to caster if victim is not killed
         if( this != pVictim && pVictim->isAlive() && spellInfo->SpellFamilyName == SPELLFAMILY_PRIEST && spellInfo->SpellIconID == 1980 && (damage-absorb-resist) > 0 )
@@ -1458,7 +1459,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             data << (uint32)resist;
             SendMessageToSet(&data,true);
 
-            DealDamage(pVictim, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), &cleanDamage, DOT, SpellSchools(spellProto->School), spellProto, procFlag, true);
+            DealDamage(pVictim, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), &cleanDamage, DOT, SpellSchools(spellProto->School), spellProto, true);
             ProcDamageAndSpell(pVictim, PROC_FLAG_HIT_SPELL, PROC_FLAG_TAKE_DAMAGE, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), spellProto);
             break;
         }
@@ -1489,7 +1490,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
                 GetGUIDLow(), GetTypeId(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), pdamage, spellProto->Id,absorb);
 
             SendSpellNonMeleeDamageLog(pVictim, spellProto->Id, pdamage, SpellSchools(spellProto->School), absorb, resist, false, 0);
-            DealDamage(pVictim, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), &cleanDamage, DOT, SpellSchools(spellProto->School), spellProto, procFlag, false);
+            DealDamage(pVictim, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), &cleanDamage, DOT, SpellSchools(spellProto->School), spellProto, false);
             ProcDamageAndSpell(pVictim, PROC_FLAG_HIT_SPELL, PROC_FLAG_TAKE_DAMAGE, (pdamage <= absorb+resist) ? 0 : (pdamage-absorb-resist), spellProto);
             if (!pVictim->isAlive() && IsNonMeleeSpellCasted(false))
             {
@@ -1567,7 +1568,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
                     SendSpellNonMeleeDamageLog(this, spellProto->Id, gain, SpellSchools(spellProto->School), 0, 0, false, 0, false);
 
                     CleanDamage cleanDamage =  CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL );
-                    DealDamage(this, gain, &cleanDamage, NODAMAGE, SpellSchools(spellProto->School), spellProto, PROC_FLAG_HEAL, true);
+                    DealDamage(this, gain, &cleanDamage, NODAMAGE, SpellSchools(spellProto->School), spellProto, true);
                 }
             }
 
@@ -2319,7 +2320,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool is
         else
             damage = 0;
 
-        DealDamage (pVictim, damage, &cleanDamage, DIRECT_DAMAGE, meleeSchool, NULL, 0, true);
+        DealDamage (pVictim, damage, &cleanDamage, DIRECT_DAMAGE, meleeSchool, NULL, true);
 
         if(GetTypeId() == TYPEID_PLAYER && pVictim->isAlive())
         {
@@ -7551,7 +7552,7 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
         for(ProcTriggeredList::iterator i = procTriggered.begin(); i != procTriggered.end(); ++i)
         {
             // Some auras can be deleted in function called in this loop (except first, ofc)
-            // Until storing auars in std::multimap to hard check deleting by another way
+            // Until storing auras in std::multimap to hard check deleting by another way
             if(i != procTriggered.begin())
             {
                 bool found = false;

@@ -531,7 +531,7 @@ void WorldSession::QueuePacket(WorldPacket& packet)
 }
 
 /// Update the WorldSession (triggered by World update)
-bool WorldSession::Update(uint32 diff)
+bool WorldSession::Update(uint32 /*diff*/)
 {
     WorldPacket *packet;
 

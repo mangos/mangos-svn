@@ -207,7 +207,7 @@ bool ChatHandler::HandleVisibleCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleGPSCommand(const char* args)
+bool ChatHandler::HandleGPSCommand(const char* /*args*/)
 {
     WorldObject *obj = getSelectedUnit();
 
@@ -1654,7 +1654,7 @@ bool ChatHandler::HandlePlaySoundCommand(const char* args)
 }
 
 //Save all players in the world
-bool ChatHandler::HandleSaveAllCommand(const char* args)
+bool ChatHandler::HandleSaveAllCommand(const char* /*args*/)
 {
     ObjectAccessor::Instance().SaveAllPlayers();
     SendSysMessage(LANG_PLAYERS_SAVED);

@@ -103,7 +103,7 @@ void GuardAI::EnterEvadeMode()
         i_creature.GetMotionMaster()->TargetedHome();
 }
 
-void GuardAI::UpdateAI(const uint32 diff)
+void GuardAI::UpdateAI(const uint32 /*diff*/)
 {
     // update i_victimGuid if i_creature.getVictim() !=0 and changed
     if(!i_creature.SelectHostilTarget() || !i_creature.getVictim())

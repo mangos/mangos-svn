@@ -298,7 +298,7 @@ class BattleGround
 
         /* Packet Transfer */
         // method that should fill worldpacket with actual world states (not yet implemented for all battlegrounds!)
-        virtual void FillInitialWorldStates(WorldPacket& data) {}
+        virtual void FillInitialWorldStates(WorldPacket& /*data*/) {}
         void SendPacketToTeam(uint32 TeamID, WorldPacket *packet, Player *sender = NULL, bool self = true);
         void SendPacketToAll(WorldPacket *packet);
         void PlaySoundToTeam(uint32 SoundID, uint32 TeamID);

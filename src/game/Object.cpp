@@ -110,7 +110,7 @@ void Object::_InitValues()
     m_objectUpdated = false;
 }
 
-void Object::_Create( uint32 guidlow, uint32 guidhigh )
+void Object::_Create( uint32 guidlow, HighGuid guidhigh )
 {
     if(!m_uint32Values) _InitValues();
 
@@ -880,7 +880,7 @@ WorldObject::WorldObject( WorldObject *instantiator )
     }
 }
 
-void WorldObject::_Create( uint32 guidlow, uint32 guidhigh, uint32 mapid, float x, float y, float z, float ang, uint32 nameId )
+void WorldObject::_Create( uint32 guidlow, HighGuid guidhigh, uint32 mapid, float x, float y, float z, float ang, uint32 nameId )
 {
     Object::_Create(guidlow, guidhigh);
 

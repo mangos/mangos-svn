@@ -2444,7 +2444,6 @@ void Aura::HandleAuraModRoot(bool apply, bool Real)
     if(!Real)
         return;
 
-    Unit* caster = GetCaster();
     uint32 apply_stat = UNIT_STAT_ROOT;
     if (apply)
     {
@@ -4245,5 +4244,5 @@ void Aura::HandleSpiritOfRedemption( bool apply, bool Real )
     }
     // die at aura end
     else
-        m_target->DealDamage(m_target, m_target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_NORMAL, GetSpellProto(), 0, false);
+        m_target->DealDamage(m_target, m_target->GetHealth(), NULL, DIRECT_DAMAGE, SPELL_SCHOOL_NORMAL, GetSpellProto(), false);
 }

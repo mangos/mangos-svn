@@ -307,7 +307,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
 
         bool Create (uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 Entry, uint32 team, const CreatureData *data = NULL);
         bool CreateFromProto(uint32 guidlow,uint32 Entry,uint32 team, const CreatureData *data = NULL);
-        bool LoadCreaturesAddon();
+        bool LoadCreaturesAddon(bool reload = false);
         void SelectLevel(const CreatureInfo *cinfo);
         bool LoadEquipment(uint32 equip_entry, bool force=false);
 

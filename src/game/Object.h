@@ -24,6 +24,7 @@
 #include "UpdateFields.h"
 #include "UpdateData.h"
 #include "GameSystem/GridReference.h"
+#include "ObjectDefines.h"
 
 #include <set>
 #include <string>
@@ -208,7 +209,7 @@ class MANGOS_DLL_SPEC Object
         Object ( );
 
         void _InitValues();
-        void _Create (uint32 guidlow, uint32 guidhigh);
+        void _Create (uint32 guidlow, HighGuid guidhigh);
 
         virtual void _SetUpdateBits(UpdateMask *updateMask, Player *target) const;
 
@@ -253,7 +254,7 @@ class MANGOS_DLL_SPEC WorldObject : public Object
 
         virtual void Update ( uint32 /*time_diff*/ ) { }
 
-        void _Create (uint32 guidlow, uint32 guidhigh, uint32 mapid, float x, float y, float z, float ang, uint32 nameId);
+        void _Create (uint32 guidlow, HighGuid guidhigh, uint32 mapid, float x, float y, float z, float ang, uint32 nameId);
 
         void Relocate(float x, float y, float z, float orientation)
         {

@@ -146,7 +146,7 @@ uint32 Bag::GetFreeSlots() const
     return slots;
 }
 
-void Bag::RemoveItem( uint8 slot, bool update )
+void Bag::RemoveItem( uint8 slot, bool /*update*/ )
 {
     assert(slot < MAX_BAG_SIZE);
 
@@ -157,7 +157,7 @@ void Bag::RemoveItem( uint8 slot, bool update )
     SetUInt64Value( CONTAINER_FIELD_SLOT_1 + (slot * 2), 0 );
 }
 
-void Bag::StoreItem( uint8 slot, Item *pItem, bool update )
+void Bag::StoreItem( uint8 slot, Item *pItem, bool /*update*/ )
 {
     assert(slot < MAX_BAG_SIZE);
 

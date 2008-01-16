@@ -4662,7 +4662,7 @@ uint32 ObjectMgr::CreateItemText(std::string text)
     return newItemTextId;
 }
 
-uint32 ObjectMgr::GenerateLowGuid(uint32 guidhigh)
+uint32 ObjectMgr::GenerateLowGuid(HighGuid guidhigh)
 {
     switch(guidhigh)
     {
