@@ -25,12 +25,12 @@
 
 #include "Common.h"
 #include "Auth/BigNumber.h"
-#include "Network/TcpSocket.h"
-#include "Network/SocketHandler.h"
-#include "Network/ListenSocket.h"
-#include "Network/Utility.h"
-#include "Network/Parse.h"
-#include "Network/Socket.h"
+#include "sockets/TcpSocket.h"
+#include "sockets/SocketHandler.h"
+#include "sockets/ListenSocket.h"
+#include "sockets/Utility.h"
+#include "sockets/Parse.h"
+#include "sockets/Socket.h"
 
 /// Handle login commands
 class AuthSocket: public TcpSocket

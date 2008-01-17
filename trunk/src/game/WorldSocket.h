@@ -23,7 +23,7 @@
 #ifndef __WORLDSOCKET_H
 #define __WORLDSOCKET_H
 
-#include "Network/TcpSocket.h"
+#include "sockets/TcpSocket.h"
 #include "Auth/AuthCrypt.h"
 
 enum ResponseCodes

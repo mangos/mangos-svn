@@ -21,8 +21,8 @@
 */
 
 #include "Master.h"
-#include "Network/SocketHandler.h"
-#include "Network/ListenSocket.h"
+#include "sockets/SocketHandler.h"
+#include "sockets/ListenSocket.h"
 #include "WorldSocket.h"
 #include "WorldSocketMgr.h"
 #include "WorldRunnable.h"
@@ -39,10 +39,10 @@
 #include "ScriptCalls.h"
 #include "Util.h"
 
-#include "Network/TcpSocket.h"
-#include "Network/Utility.h"
-#include "Network/Parse.h"
-#include "Network/Socket.h"
+#include "sockets/TcpSocket.h"
+#include "sockets/Utility.h"
+#include "sockets/Parse.h"
+#include "sockets/Socket.h"
 
 #ifdef WIN32
 #include "ServiceWin32.h"

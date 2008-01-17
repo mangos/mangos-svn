@@ -158,6 +158,35 @@ EXTRA_DIST += \
 EXTRA_DIST += \
 	sqlite/sqlite.h
 
+#  Sockets header files for Win32 builds
+EXTRA_DIST += \
+	sockets\Base64.h \
+	sockets\CircularBuffer.h \
+	sockets\IFile.h \
+	sockets\Ipv4Address.h \
+	sockets\Ipv6Address.h \
+	sockets\ISocketHandler.h \
+	sockets\ListenSocket.h \
+	sockets\Mutex.h \
+	sockets\Parse.h \
+	sockets\RandomNumber.h \
+	sockets\ResolvServer.h \
+	sockets\ResolvSocket.h \
+	sockets\SctpSocket.h \
+	sockets\Socket.h \
+	sockets\socket_include.h \
+	sockets\SocketAddress.h \
+	sockets\SocketHandler.h \
+	sockets\sockets-config.h \
+	sockets\StdLog.h \
+	sockets\StdoutLog.h \
+	sockets\TcpSocket.h \
+	sockets\Thread.h \
+	sockets\UdpSocket.h \
+	sockets\Uid.h \
+	sockets\Utility.h \
+	sqlite/sqlite.h
+
 #  VLD header files for Win32 builds
 EXTRA_DIST += \
 	vld/vld.h
@@ -214,4 +243,5 @@ EXTRA_DIST += \
 	zthread/Time.h \
 	zthread/Waitable.h \
 	zthread/ZThread.h
+
 
