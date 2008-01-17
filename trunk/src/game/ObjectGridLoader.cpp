@@ -34,7 +34,7 @@ class MANGOS_DLL_DECL ObjectGridRespawnMover
 
         void Move(GridType &grid);
 
-        template<class T> void Visit(GridRefManager<T> &m) {}
+        template<class T> void Visit(GridRefManager<T> &) {}
         void Visit(CreatureMapType &m);
 };
 
@@ -84,8 +84,7 @@ class ObjectWorldLoader
 
         void Visit(CorpseMapType &m);
 
-        template<class T>
-            void Visit(GridRefManager<T>&) { }
+        template<class T> void Visit(GridRefManager<T>&) { }
 
     private:
         Cell i_cell;
@@ -95,7 +94,7 @@ class ObjectWorldLoader
         uint32 i_corpses;
 };
 
-template<class T> void addUnitState(T *obj, CellPair const& cell_pair)
+template<class T> void addUnitState(T* /*obj*/, CellPair const& /*cell_pair*/)
 {
 }
 
@@ -303,5 +302,5 @@ ObjectGridStoper::Visit(CreatureMapType &m)
     }
 }
 
-template void ObjectGridUnloader::Visit(GameObjectMapType &m);
-template void ObjectGridUnloader::Visit(DynamicObjectMapType &m);
+template void ObjectGridUnloader::Visit(GameObjectMapType &);
+template void ObjectGridUnloader::Visit(DynamicObjectMapType &);

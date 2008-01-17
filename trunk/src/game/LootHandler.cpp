@@ -187,7 +187,7 @@ void WorldSession::HandleAutostoreLootItemOpcode( WorldPacket & recv_data )
         player->SendEquipError( msg, NULL, NULL );
 }
 
-void WorldSession::HandleLootMoneyOpcode( WorldPacket & recv_data )
+void WorldSession::HandleLootMoneyOpcode( WorldPacket & /*recv_data*/ )
 {
     sLog.outDebug("WORLD: CMSG_LOOT_MONEY");
 

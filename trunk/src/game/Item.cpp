@@ -406,7 +406,6 @@ int32 Item::GenerateItemRandomPropertyId(uint32 item_id)
 
         return -int32(random_id->ID);
     }
-    return 0;
 }
 
 void Item::SetItemRandomProperties(int32 randomPropId)

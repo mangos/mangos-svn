@@ -4821,9 +4821,9 @@ bool Player::SetPosition(float x, float y, float z, float orientation, bool tele
 
     // code block for underwater state update
     {
-        float water_z = m->GetWaterLevel(x,y);
-        float height_z =  m->GetHeight(x,y,z, false);
-        uint8 flag1 = m->GetTerrainType(x,y);
+        float water_z  = m->GetWaterLevel(x,y);
+        float height_z = m->GetHeight(x,y,z, false);        // use .map base surface height
+        uint8 flag1    = m->GetTerrainType(x,y);
 
         //!Underwater check, not in water if underground or above water level
         if ((z < (height_z-2)) || (z > (water_z - 2)))
@@ -5394,7 +5394,6 @@ void Player::UpdateHonorFields(bool force)
 {
     /// called when rewarding honor and at each save
     uint32 today = uint32(time(NULL) / DAY) * DAY;
-    uint32 yesterday = today - DAY;
 
     if ((m_honorPending && m_lastHonorDate < today) || force)
     {
@@ -7307,13 +7306,14 @@ void Player::SendTalentWipeConfirm(uint64 guid)
     GetSession()->SendPacket( &data );
 }
 
-void Player::SendPetSkillWipeConfirm(uint64 guid)
+void Player::SendPetSkillWipeConfirm()
 {
-    if(!GetPet())
+    Pet* pet = GetPet();
+    if(!pet)
         return;
     WorldPacket data(SMSG_PET_UNLEARN_CONFIRM, (8+4));
-    data << GetPet()->GetGUID();
-    data << uint32(GetPet()->resetTalentsCost());
+    data << pet->GetGUID();
+    data << uint32(pet->resetTalentsCost());
     GetSession()->SendPacket( &data );
 }
 
@@ -8322,7 +8322,6 @@ uint8 Player::CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bo
         return EQUIP_ERR_ITEM_NOT_FOUND;
     else
         return EQUIP_ERR_ITEMS_CANT_BE_SWAPPED;
-    return 0;
 }
 
 //////////////////////////////////////////////////////////////////////////
@@ -8998,7 +8997,6 @@ uint8 Player::CanBankItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, boo
         return EQUIP_ERR_ITEM_NOT_FOUND;
     else
         return EQUIP_ERR_ITEMS_CANT_BE_SWAPPED;
-    return 0;
 }
 
 uint8 Player::CanUseItem( Item *pItem, bool not_loading ) const
@@ -11436,11 +11434,19 @@ bool Player::SatisfyQuestReputation( Quest const* qInfo, bool msg )
 {
     uint32 fIdMin = qInfo->GetRequiredMinRepFaction();      //Min required rep
     if(fIdMin && GetReputation(fIdMin) < qInfo->GetRequiredMinRepValue())
+    {
+        if( msg )
+            SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
         return false;
+    }
 
     uint32 fIdMax = qInfo->GetRequiredMaxRepFaction();      //Max required rep
     if(fIdMax && GetReputation(fIdMax) >= qInfo->GetRequiredMaxRepValue())
+    {
+        if( msg )
+            SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
         return false;
+    }
 
     return true;
 }
@@ -11513,7 +11519,11 @@ bool Player::SatisfyQuestExclusiveGroup( Quest const* qInfo, bool msg )
         // alternative quest already started or completed
         if( i_exstatus != mQuestStatus.end()
             && (i_exstatus->second.m_status == QUEST_STATUS_COMPLETE || i_exstatus->second.m_status == QUEST_STATUS_INCOMPLETE) )
+        {
+            if( msg )
+                SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
             return false;
+        }
     }
     return true;
 }
@@ -11527,7 +11537,11 @@ bool Player::SatisfyQuestNextChain( Quest const* qInfo, bool msg )
     QuestStatusMap::iterator itr = mQuestStatus.find( qInfo->GetNextQuestInChain() );
     if( itr != mQuestStatus.end()
         && (itr->second.m_status == QUEST_STATUS_COMPLETE || itr->second.m_status == QUEST_STATUS_INCOMPLETE) )
+    {
+        if( msg )
+            SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
         return false;
+    }
 
     // check for all quests further up the chain
     // only necessary if there are quest chains with more than one quest that can be skipped
@@ -11552,7 +11566,11 @@ bool Player::SatisfyQuestPrevChain( Quest const* qInfo, bool msg )
             // If any of the previous quests in chain active, return false
             if( i_prevstatus->second.m_status == QUEST_STATUS_INCOMPLETE
                 || (i_prevstatus->second.m_status == QUEST_STATUS_COMPLETE && !GetQuestRewardStatus(prevId)))
+            {
+                if( msg )
+                    SendCanTakeQuestResponse( INVALIDREASON_DONT_HAVE_REQ );
                 return false;
+            }
         }
 
         // check for all quests further down the chain
@@ -12579,7 +12597,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     if( HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_GHOST) )
         m_deathState = DEAD;
 
-    _LoadSpells(holder->GetResult(PLAYER_LOGIN_QUERY_LOADSPELLS), time_diff);
+    _LoadSpells(holder->GetResult(PLAYER_LOGIN_QUERY_LOADSPELLS));
 
     // after spell load
     InitTalentForLevel();
@@ -13266,7 +13284,7 @@ void Player::_LoadReputation(QueryResult *result)
     }
 }
 
-void Player::_LoadSpells(QueryResult *result, uint32 timediff)
+void Player::_LoadSpells(QueryResult *result)
 {
     for (PlayerSpellMap::iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
         delete itr->second;
@@ -14823,7 +14841,7 @@ void Player::ProhibitSpellScholl(SpellSchools idSchool, uint32 unTimeMs )
             ASSERT(spellInfo);
             continue;
         }
-        if(idSchool == spellInfo->School && GetSpellCooldownDelay(unSpellId) < unTimeMs )
+        if(idSchool == SpellSchools(spellInfo->School) && GetSpellCooldownDelay(unSpellId) < unTimeMs )
         {
             data << unSpellId;
             data << unTimeMs;                               // in m.secs

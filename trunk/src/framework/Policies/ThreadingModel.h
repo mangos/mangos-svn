@@ -108,7 +108,7 @@ namespace MaNGOS
             class Lock
             {
                 public:
-                    Lock(T &host) { ClassLevelLockable<T, MUTEX>::si_mtx.acquire(); }
+                    Lock(T& /*host*/) { ClassLevelLockable<T, MUTEX>::si_mtx.acquire(); }
                     Lock(ClassLevelLockable<T, MUTEX> &) { ClassLevelLockable<T, MUTEX>::si_mtx.acquire(); }
                     Lock() { ClassLevelLockable<T, MUTEX>::si_mtx.acquire(); }
                     ~Lock() { ClassLevelLockable<T, MUTEX>::si_mtx.release(); }

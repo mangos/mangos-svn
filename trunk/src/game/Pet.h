@@ -178,7 +178,7 @@ class Pet : public Creature
         void _SaveSpellCooldowns();
         void _LoadAuras(uint32 timediff);
         void _SaveAuras();
-        void _LoadSpells(uint32 timediff);
+        void _LoadSpells();
         void _SaveSpells();
 
         bool addSpell(uint16 spell_id,uint16 active = ACT_DECIDE, PetSpellState state = PETSPELL_NEW, uint16 slot_id=0xffff);

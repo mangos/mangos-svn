@@ -60,13 +60,13 @@ void WorldSession::SendTradeStatus(uint32 status)
     SendPacket(&data);
 }
 
-void WorldSession::HandleIgnoreTradeOpcode(WorldPacket& recvPacket)
+void WorldSession::HandleIgnoreTradeOpcode(WorldPacket& /*recvPacket*/)
 {
     sLog.outDebug( "WORLD: Ignore Trade %u",_player->GetGUIDLow());
     // recvPacket.print_storage();
 }
 
-void WorldSession::HandleBusyTradeOpcode(WorldPacket& recvPacket)
+void WorldSession::HandleBusyTradeOpcode(WorldPacket& /*recvPacket*/)
 {
     sLog.outDebug( "WORLD: Busy Trade %u",_player->GetGUIDLow());
     // recvPacket.print_storage();
@@ -220,7 +220,7 @@ void WorldSession::moveItems(Item* myItems[], Item* hisItems[])
 
 //==============================================================
 
-void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
+void WorldSession::HandleAcceptTradeOpcode(WorldPacket& /*recvPacket*/)
 {
     Item *myItems[TRADE_SLOT_TRADED_COUNT]  = { NULL, NULL, NULL, NULL, NULL, NULL };
     Item *hisItems[TRADE_SLOT_TRADED_COUNT] = { NULL, NULL, NULL, NULL, NULL, NULL };
@@ -367,7 +367,7 @@ void WorldSession::HandleAcceptTradeOpcode(WorldPacket& recvPacket)
     }
 }
 
-void WorldSession::HandleUnacceptTradeOpcode(WorldPacket& recvPacket)
+void WorldSession::HandleUnacceptTradeOpcode(WorldPacket& /*recvPacket*/)
 {
     if ( !GetPlayer()->pTrader )
         return;
@@ -376,7 +376,7 @@ void WorldSession::HandleUnacceptTradeOpcode(WorldPacket& recvPacket)
     _player->acceptTrade = false;
 }
 
-void WorldSession::HandleBeginTradeOpcode(WorldPacket& recvPacket)
+void WorldSession::HandleBeginTradeOpcode(WorldPacket& /*recvPacket*/)
 {
     if(!_player->pTrader)
         return;
@@ -393,7 +393,7 @@ void WorldSession::SendCancelTrade()
     SendTradeStatus(TRADE_STATUS_TRADE_CANCELED);
 }
 
-void WorldSession::HandleCancelTradeOpcode(WorldPacket& recvPacket)
+void WorldSession::HandleCancelTradeOpcode(WorldPacket& /*recvPacket*/)
 {
     // sended also after LOGOUT COMPLETE
     if(_player)

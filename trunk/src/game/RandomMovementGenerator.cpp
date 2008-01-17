@@ -43,7 +43,7 @@ RandomMovementGenerator<Creature>::Initialize(Creature &creature)
 
     Map const* map = MapManager::Instance().GetBaseMap(mapid);
     // Initialization is done in bulk. Don’t use vamps for that (4. parameter = false). It is too costly when entering a new map grid
-    z2 = map->GetHeight(x,y,z, false);
+    z2 = map->GetHeight(x,y,z, false);                      // use .map base surface height
     if( fabs( z2 - z ) < 5 )
         z = z2;
 
@@ -77,7 +77,8 @@ RandomMovementGenerator<Creature>::Initialize(Creature &creature)
             continue;
         }
 
-        // Initialization is done in bulk. Don’t use vamps for that (4. parameter = false). It is too costly when entering a new map grid
+        // Initialization is done in bulk. Don’t use vamps for that (4. parameter = false).
+        // It is too costly when entering a new map grid, use .map base surface height
         z2 = map->GetHeight(i_waypoints[idx][0],i_waypoints[idx][1],z, false);
         if( fabs( z2 - z ) < 5 )
             z = z2;

@@ -208,7 +208,7 @@ pEffect SpellEffects[TOTAL_SPELL_EFFECTS]=
 
 };
 
-void Spell::EffectNULL(uint32 i)
+void Spell::EffectNULL(uint32 /*i*/)
 {
     sLog.outDebug("WORLD: Spell Effect DUMMY");
 }
@@ -226,7 +226,7 @@ void Spell::EffectResurrectNew(uint32 i)
     SendResurrectRequest((Player*)unitTarget);
 }
 
-void Spell::EffectInstaKill(uint32 i)
+void Spell::EffectInstaKill(uint32 /*i*/)
 {
     if( !unitTarget || !unitTarget->isAlive() )
         return;
@@ -255,7 +255,7 @@ void Spell::EffectInstaKill(uint32 i)
     m_caster->DealDamage(unitTarget, health, NULL, DIRECT_DAMAGE, SPELL_SCHOOL_NORMAL, NULL, false);
 }
 
-void Spell::EffectSchoolDMG(uint32 i)
+void Spell::EffectSchoolDMG(uint32 /*i*/)
 {
     if( unitTarget && unitTarget->isAlive())
     {
@@ -1281,7 +1281,7 @@ void Spell::EffectTriggerSpell(uint32 i)
         m_TriggerSpells.push_back(spellInfo);
 }
 
-void Spell::EffectTeleportUnits(uint32 i)
+void Spell::EffectTeleportUnits(uint32 /*i*/)
 {
     if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
@@ -1373,9 +1373,6 @@ void Spell::EffectApplyAura(uint32 i)
 
     // Update aura duration based at diminishingMod
     {
-        // Diminishing modifier calculation
-        float diminishingMod = 1.0f;
-
         // Use Spell->Mechanic if possible
         DiminishingMechanics mech = Unit::Mechanic2DiminishingMechanics(Aur->GetSpellProto()->Mechanic);
 
@@ -1528,7 +1525,7 @@ void Spell::EffectManaDrain(uint32 i)
     }
 }
 
-void Spell::EffectSendEvent(uint32 i)
+void Spell::EffectSendEvent(uint32 /*i*/)
 {
     if (m_caster->GetTypeId() == TYPEID_PLAYER && ((Player*)m_caster)->InBattleGround())
     {
@@ -1604,7 +1601,7 @@ void Spell::EffectPowerBurn(uint32 i)
     m_caster->SpellNonMeleeDamageLog(unitTarget, m_spellInfo->Id, new_damage, m_IsTriggeredSpell, true);
 }
 
-void Spell::EffectHeal( uint32 i )
+void Spell::EffectHeal( uint32 /*i*/ )
 {
     if( unitTarget && unitTarget->isAlive() && damage >= 0)
     {
@@ -3701,7 +3698,7 @@ void Spell::EffectDisEnchant(uint32 /*i*/)
     // item will be removed at disenchanting end
 }
 
-void Spell::EffectInebriate(uint32 i)
+void Spell::EffectInebriate(uint32 /*i*/)
 {
     if(m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
@@ -3745,7 +3742,7 @@ void Spell::EffectFeedPet(uint32 i)
     m_caster->CastCustomSpell(m_caster,m_spellInfo->EffectTriggerSpell[i],&feedCustomBasePoints0,NULL,NULL,true);
 }
 
-void Spell::EffectDismissPet(uint32 i)
+void Spell::EffectDismissPet(uint32 /*i*/)
 {
     if(m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
@@ -3833,7 +3830,7 @@ void Spell::EffectResurrect(uint32 i)
     SendResurrectRequest(pTarget);
 }
 
-void Spell::EffectAddExtraAttacks(uint32 i)
+void Spell::EffectAddExtraAttacks(uint32 /*i*/)
 {
     if(!unitTarget || !unitTarget->isAlive() || unitTarget->GetTypeId()!= TYPEID_PLAYER)
         return;
@@ -3844,7 +3841,7 @@ void Spell::EffectAddExtraAttacks(uint32 i)
     ((Player*)unitTarget)->m_extraAttacks = damage;
 }
 
-void Spell::EffectParry(uint32 i)
+void Spell::EffectParry(uint32 /*i*/)
 {
     if (unitTarget->GetTypeId() == TYPEID_PLAYER)
     {
@@ -3952,7 +3949,7 @@ void Spell::EffectSelfResurrect(uint32 i)
     plr->SaveToDB();
 }
 
-void Spell::EffectSkinning(uint32 i)
+void Spell::EffectSkinning(uint32 /*i*/)
 {
     if(unitTarget->GetTypeId() != TYPEID_UNIT )
         return;
@@ -3972,7 +3969,7 @@ void Spell::EffectSkinning(uint32 i)
     ((Player*)m_caster)->UpdateGatherSkill(SKILL_SKINNING, skinningValue, reqValue, ((Creature*)unitTarget)->isElite() ? 2 : 1 );
 }
 
-void Spell::EffectCharge(uint32 i)
+void Spell::EffectCharge(uint32 /*i*/)
 {
     if(!unitTarget || !m_caster)
         return;
@@ -4127,7 +4124,7 @@ void Spell::EffectDispelMechanic(uint32 i)
     return;
 }
 
-void Spell::EffectSummonDeadPet(uint32 i)
+void Spell::EffectSummonDeadPet(uint32 /*i*/)
 {
     if(m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
@@ -4151,7 +4148,7 @@ void Spell::EffectSummonDeadPet(uint32 i)
     pet->SavePetToDB(PET_SAVE_AS_CURRENT);
 }
 
-void Spell::EffectDestroyAllTotems(uint32 i)
+void Spell::EffectDestroyAllTotems(uint32 /*i*/)
 {
     float mana = 0;
     for(int slot = 0;  slot < 4; ++slot)
@@ -4220,7 +4217,7 @@ void Spell::EffectDurabilityDamagePCT(uint32 i)
     ((Player*)unitTarget)->DurabilityLoss(slot,double(damage)/100);
 }
 
-void Spell::EffectReduceThreatPercent(uint32 i)
+void Spell::EffectReduceThreatPercent(uint32 /*i*/)
 {
     if(!unitTarget)
         return;
@@ -4326,7 +4323,7 @@ void Spell::EffectTransmitted(uint32 i)
     m_caster->SendMessageToSet(&data,true);
 }
 
-void Spell::EffectProspecting(uint32 i)
+void Spell::EffectProspecting(uint32 /*i*/)
 {
     if(m_caster->GetTypeId() != TYPEID_PLAYER)
         return;
@@ -4348,7 +4345,7 @@ void Spell::EffectProspecting(uint32 i)
     ((Player*)m_caster)->SendLoot(itemTarget->GetGUID(), LOOT_PROSPECTING);
 }
 
-void Spell::EffectSkill(uint32 i)
+void Spell::EffectSkill(uint32 /*i*/)
 {
     sLog.outDebug("WORLD: SkillEFFECT");
 }
@@ -4398,7 +4395,7 @@ void Spell::EffectSummonDemon(uint32 i)
    If we would handle the resurrection here, the spiritguide would instantly disappear as the
    player revives, and so we wouldn't see the spirit heal visual effect on the npc.
    This is why we use a half sec delay between the visual effect and the resurrection itself */
-void Spell::EffectSpiritHeal(uint32 i)
+void Spell::EffectSpiritHeal(uint32 /*i*/)
 {
     /*
     if(!unitTarget) return;
@@ -4414,7 +4411,7 @@ void Spell::EffectSpiritHeal(uint32 i)
 }
 
 // remove insignia spell effect
-void Spell::EffectSkinPlayerCorpse(uint32 i)
+void Spell::EffectSkinPlayerCorpse(uint32 /*i*/)
 {
     sLog.outDebug("Effect: SkinPlayerCorpse");
     if ( (m_caster->GetTypeId() != TYPEID_PLAYER) || (unitTarget->GetTypeId() != TYPEID_PLAYER) || (unitTarget->isAlive()) )
@@ -4423,7 +4420,7 @@ void Spell::EffectSkinPlayerCorpse(uint32 i)
     ((Player*)unitTarget)->RemovedInsignia( (Player*)m_caster );
 }
 
-void Spell::EffectStealBeneficialBuff(uint32 i)
+void Spell::EffectStealBeneficialBuff(uint32 /*i*/)
 {
     sLog.outDebug("Effect: StealBeneficialBuff");
 

@@ -668,7 +668,7 @@ bool Object::LoadValues(const char* data)
     return true;
 }
 
-void Object::_SetUpdateBits(UpdateMask *updateMask, Player *target) const
+void Object::_SetUpdateBits(UpdateMask *updateMask, Player* /*target*/) const
 {
     for( uint16 index = 0; index < m_valuesCount; index ++ )
     {
@@ -677,7 +677,7 @@ void Object::_SetUpdateBits(UpdateMask *updateMask, Player *target) const
     }
 }
 
-void Object::_SetCreateBits(UpdateMask *updateMask, Player *target) const
+void Object::_SetCreateBits(UpdateMask *updateMask, Player* /*target*/) const
 {
     for( uint16 index = 0; index < m_valuesCount; index++ )
     {
@@ -880,12 +880,9 @@ WorldObject::WorldObject( WorldObject *instantiator )
     }
 }
 
-void WorldObject::_Create( uint32 guidlow, HighGuid guidhigh, uint32 mapid, float x, float y, float z, float ang, uint32 nameId )
+void WorldObject::_Create( uint32 guidlow, HighGuid guidhigh, uint32 mapid, float x, float y, float z, float ang )
 {
     Object::_Create(guidlow, guidhigh);
-
-    // nameId not required, it set in other place...
-    //SetUInt32Value( OBJECT_FIELD_ENTRY,nameId);
 
     m_mapId = mapid;
     m_positionX = x;
@@ -1163,7 +1160,7 @@ void WorldObject::BuildTeleportAckMsg(WorldPacket *data, float x, float y, float
     *data << uint32(0);
 }
 
-void WorldObject::SendMessageToSet(WorldPacket *data, bool bToSelf)
+void WorldObject::SendMessageToSet(WorldPacket *data, bool /*bToSelf*/)
 {
     MapManager::Instance().GetMap(m_mapId, this)->MessageBroadcast(this, data);
 }
@@ -1222,8 +1219,8 @@ namespace MaNGOS
             NearUsedPosDo(WorldObject const& obj, WorldObject const* searcher, float angle, ObjectPosSelector& selector)
                 : i_object(obj), i_searcher(searcher), i_angle(angle), i_selector(selector) {}
 
-            void operator()(Corpse* u) const {}
-            void operator()(DynamicObject* u) const {}
+            void operator()(Corpse*) const {}
+            void operator()(DynamicObject*) const {}
 
             void operator()(Creature* c) const
             {

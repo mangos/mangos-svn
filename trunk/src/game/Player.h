@@ -1156,7 +1156,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetBindPoint(uint64 guid);
         void SendTalentWipeConfirm(uint64 guid);
         void RewardRage( uint32 damage, uint32 weaponSpeedHitFactor, bool attacker );
-        void SendPetSkillWipeConfirm(uint64 guid);
+        void SendPetSkillWipeConfirm();
         void CalcRage( uint32 damage,bool attacker );
         void RegenerateAll();
         void Regenerate(Powers power);
@@ -1836,7 +1836,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _LoadDailyQuestStatus(QueryResult *result);
         void _LoadGroup(QueryResult *result);
         void _LoadReputation(QueryResult *result);
-        void _LoadSpells(QueryResult *result, uint32 timediff);
+        void _LoadSpells(QueryResult *result);
         void _LoadTaxiMask(const char* data);
         void _LoadTutorials(QueryResult *result);
         void _LoadIgnoreList(QueryResult *result);

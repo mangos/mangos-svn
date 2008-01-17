@@ -4062,7 +4062,7 @@ bool SpellEvent::Execute(uint64 e_time, uint32 p_time)
     return(false);                                          // event not complete
 }
 
-void SpellEvent::Abort(uint64 e_time)
+void SpellEvent::Abort(uint64 /*e_time*/)
 {
     // oops, the spell we try to do is aborted
     if (m_Spell->getState() != SPELL_STATE_FINISHED)

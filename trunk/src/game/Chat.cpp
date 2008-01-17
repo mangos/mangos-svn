@@ -406,7 +406,7 @@ ChatCommand * ChatHandler::getCommandTable()
                         for(uint32 j = 0; ptable[j].Name != NULL; j++)
                         {
                             // first case for "" named subcommand
-                            if (ptable[j].Name == "" && name == commandTable[i].Name ||
+                            if (ptable[j].Name[0]=='\0' && name == commandTable[i].Name ||
                                 name == fmtstring("%s %s", commandTable[i].Name, ptable[j].Name) )
                             {
                                 ptable[j].SecurityLevel = (uint16)fields[1].GetUInt16();
@@ -532,7 +532,7 @@ bool ChatHandler::ExecuteCommandInTable(ChatCommand *table, const char* text)
             {
                 if(table[i].Help != "")
                     SendSysMultilineMessage(table[i].Help.c_str());
-                else if(table[i].Name != "")
+                else if(table[i].Name && table[i].Name[0] != '\0')
                     SendSysMessage(LANG_NO_SUBCMD);
                 else
                     SendSysMessage(LANG_CMD_SYNTAX);

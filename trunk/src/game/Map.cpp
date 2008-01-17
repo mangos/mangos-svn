@@ -1210,41 +1210,65 @@ float Map::GetHeight(float x, float y, float z, bool pUseVmaps) const
     // ensure GridMap is loaded
     const_cast<Map*>(this)->EnsureGridCreated(GridPair(63-gx,63-gy));
 
-    float height = VMAP_INVALID_HEIGHT_VALUE;
-    bool mapHeightFound = false;
-
+    // find raw .map surface under Z coordinates
+    float mapHeight;
     if(GridMaps[gx][gy])
     {
-        float mapheight = GridMaps[gx][gy]->Z[(int)(lx)][(int)(ly)];
+        float _mapheight = GridMaps[gx][gy]->Z[(int)(lx)][(int)(ly)];
 
         // look from a bit higher pos to find the floor, ignore under surface case
-        if(z + 2.0f > mapheight)
-        {
-            height = mapheight;
-            mapHeightFound = true;
-        }
+        if(z + 2.0f > _mapheight)
+            mapHeight = _mapheight;
+        else
+            mapHeight = VMAP_INVALID_HEIGHT_VALUE;
     }
+    else
+        mapHeight = VMAP_INVALID_HEIGHT_VALUE;
 
+    float vmapHeight;
     if(pUseVmaps)
     {
         VMAP::IVMapManager* vmgr = VMAP::VMapFactory::createOrGetVMapManager();
         if(vmgr->isHeightCalcEnabled())
         {
             // look from a bit higher pos to find the floor
-            float vmapheight = vmgr->getHeight(GetId(), x, y, z + 2.0f);
-
-            if( vmapheight > INVALID_HEIGHT )
-            {
-                //the land map did not find the height or if we are already under the surface and 
-                // or if the distance of the vmap height is less the land height distance
-                if( !mapHeightFound || z < height || fabs(height-z) > fabs(vmapheight-z) )
-                    height = vmapheight;
-            }
+            vmapHeight = vmgr->getHeight(GetId(), x, y, z + 2.0f);
         }
+        else
+            vmapHeight = VMAP_INVALID_HEIGHT_VALUE;
     }
+    else
+        vmapHeight = VMAP_INVALID_HEIGHT_VALUE;
 
-    // if height == VMAP_INVALID_HEIGHT_VALUE then height not found (no map and vmap height data)
-    return height;
+    // mapHeight set for any above raw ground Z or <= INVALID_HEIGHT
+    // vmapheight set for any under Z value or <= INVALID_HEIGHT
+
+    if( vmapHeight > INVALID_HEIGHT )
+    {
+        if( mapHeight > INVALID_HEIGHT )
+        {
+            // we have mapheight and vmapheight and must select more appropriate
+
+            // we are already under the surface or vmap height above map heigt
+            // or if the distance of the vmap height is less the land height distance
+            if( z < mapHeight || vmapHeight > mapHeight || fabs(mapHeight-z) > fabs(vmapHeight-z) )
+                return vmapHeight;
+            else
+                return mapHeight;                           // better use .map surface height
+
+        }
+        else
+            return vmapHeight;                              // we have only vmapHeight (if have)
+    }
+    else
+    {
+        if(!pUseVmaps)
+            return mapHeight;                               // explicitly use map data (if have) 
+        else if(mapHeight > INVALID_HEIGHT && z < mapHeight)
+            return mapHeight;                               // explicitly use map data if original z < mapHeight but map found (z+2 > mapHeight)
+        else
+            return VMAP_INVALID_HEIGHT_VALUE;               // we not have any height
+    }
 }
 
 uint16 Map::GetAreaFlag(float x, float y ) const
@@ -1340,8 +1364,8 @@ uint32 Map::GetZoneId(uint16 areaflag)
 bool Map::IsInWater(float x, float y, float pZ) const
 {
     // This method is called too often to use vamps for that (4. parameter = false).
-    // The z pos is taken anyway for future use
-    float z = GetHeight(x,y,pZ,false);
+    // The pZ pos is taken anyway for future use
+    float z = GetHeight(x,y,pZ,false);                      // use .map base surface height
 
     // underground or instance without vmap
     if(z < INVALID_HEIGHT)

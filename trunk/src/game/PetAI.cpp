@@ -235,9 +235,12 @@ void PetAI::UpdateAI(const uint32 diff)
 
     for (uint8 i = 0; i < i_pet.GetPetAutoSpellSize(); i++)
     {
-        SpellEntry const *spellInfo;
         uint32 spellID = i_pet.GePetAutoSpellOnPos(i);
-        if (!spellID || !(spellInfo = sSpellStore.LookupEntry(spellID)))
+        if (!spellID)
+            continue;
+
+        SpellEntry const *spellInfo = sSpellStore.LookupEntry(spellID);
+        if (!spellInfo)
             continue;
 
         Spell *spell = new Spell(&i_pet, spellInfo, false, 0);
