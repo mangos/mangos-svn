@@ -18,7 +18,7 @@
 
 #include "Util.h"
 
-#include "Network/socket_include.h"
+#include "sockets/socket_include.h"
 
 Tokens StrSplit(const std::string &src, const std::string &sep)
 {

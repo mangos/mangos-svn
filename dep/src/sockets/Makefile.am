@@ -19,54 +19,29 @@
 ## Sub-directories to parse
 
 ## CPP flags for includes, defines, etc.
-AM_CPPFLAGS = $(MYSQL_INCLUDES) $(POSTGRE_INCLUDES) -I$(top_builddir)/src/shared -I$(srcdir) -I$(srcdir)/../../../dep/include -I$(srcdir)/../../framework -I$(srcdir)/../../shared -I$(srcdir)/../../../dep/include/g3dlite
+AM_CPPFLAGS = -I$(srcdir) -I$(srcdir)/../../include/sockets
 
 ## Build MaNGOS shared library and its parts as convenience library.
 #  All libraries will be convenience libraries. Might be changed to shared
 #  later.
-noinst_LIBRARIES = libmangosnetwork.a
+noinst_LIBRARIES = libmangossockets.a
 
-libmangosnetwork_a_SOURCES = \
+libmangossockets_a_SOURCES = \
 	Base64.cpp \
-	Base64.h \
 	CircularBuffer.cpp \
-	CircularBuffer.h \
-	IFile.h \
 	ISocketHandler.cpp \
-	ISocketHandler.h \
 	Ipv4Address.cpp \
-	Ipv4Address.h \
 	Ipv6Address.cpp \
-	Ipv6Address.h \
-	ListenSocket.h \
 	Mutex.cpp \
-	Mutex.h \
 	Parse.cpp \
-	Parse.h \
 	RandomNumber.cpp \
-	RandomNumber.h \
 	ResolvServer.cpp \
-	ResolvServer.h \
 	ResolvSocket.cpp \
-	ResolvSocket.h \
-	SctpSocket.h \
 	Socket.cpp \
-	Socket.h \
-	SocketAddress.h \
 	SocketHandler.cpp \
-	SocketHandler.h \
-	StdLog.h \
 	StdoutLog.cpp \
-	StdoutLog.h \
 	TcpSocket.cpp \
-	TcpSocket.h \
 	Thread.cpp \
-	Thread.h \
 	UdpSocket.cpp \
-	UdpSocket.h \
-	Uid.h \
 	Utility.cpp \
-	Utility.h \
-	socket_include.cpp \
-	socket_include.h \
-	sockets-config.h
+	socket_include.cpp
