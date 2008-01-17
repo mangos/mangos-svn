@@ -66,12 +66,21 @@ class TransportPath
         std::vector<PathNode> i_nodes;
 };
 
-class Transport : public GameObject
+class Transport : private GameObject
 {
     public:
         explicit Transport( WorldObject *instantiator );
 
-        bool Create(uint32 guidlow, uint32 displayId, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress, uint32 dynflags);
+        // prevent using Transports as normal GO, but allow call some inherited functions
+        using GameObject::IsTransport;
+        using GameObject::GetEntry;
+        using GameObject::GetGUID;
+        using GameObject::GetGUIDLow;
+        using GameObject::GetMapId;
+        using GameObject::BuildCreateUpdateBlockForPlayer;
+        using GameObject::BuildOutOfRangeUpdateBlock;
+
+        bool Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress, uint32 dynflags);
         bool GenerateWaypoints(uint32 pathid, std::set<uint32> &mapids);
         void Update(uint32 p_time);
         bool AddPassenger(Player* passenger);
@@ -110,7 +119,7 @@ class Transport : public GameObject
         uint32 m_period;
 
     private:
-        void TeleportTransport(uint32 oldMapid, uint32 newMapid, float x, float y, float z);
+        void TeleportTransport(uint32 newMapid, float x, float y, float z);
         WayPointMap::iterator GetNextWayPoint();
 };
 #endif

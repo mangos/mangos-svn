@@ -58,13 +58,13 @@ ReactorAI::AttackStart(Unit *p)
 }
 
 bool
-ReactorAI::IsVisible(Unit *pl) const
+ReactorAI::IsVisible(Unit *) const
 {
     return false;
 }
 
 void
-ReactorAI::UpdateAI(const uint32 time_diff)
+ReactorAI::UpdateAI(const uint32 /*time_diff*/)
 {
     // update i_victimGuid if i_creature.getVictim() !=0 and changed
     if(!i_creature.SelectHostilTarget() || !i_creature.getVictim())

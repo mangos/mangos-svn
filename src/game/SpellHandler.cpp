@@ -641,11 +641,10 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
                     break;
 
                 // if found appropriate level
-                if(targets.getUnitTarget()->getLevel() + 10 >= nextSpellInfo->spellLevel)
-                {
-                    SpellEntry const *spellInfo = sSpellStore.LookupEntry(nextSpellId);
+                if(targets.getUnitTarget()->getLevel() + 10 < nextSpellInfo->spellLevel)
                     break;
-                }
+
+                spellInfo = nextSpellInfo;
             }
 
             // if appropriate spell rank not found spellInfo store original casted spell and will output error in Spell::CanCast

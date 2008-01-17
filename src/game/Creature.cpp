@@ -761,7 +761,7 @@ void Creature::OnGossipSelect(Player* player, uint32 option)
             break;
         case GOSSIP_OPTION_UNLEARNPETSKILLS:
             player->PlayerTalkClass->CloseGossip();
-            player->SendPetSkillWipeConfirm(guid);
+            player->SendPetSkillWipeConfirm();
             break;
         case GOSSIP_OPTION_TAXIVENDOR:
             player->GetSession()->SendTaxiMenu(guid);

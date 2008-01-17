@@ -225,7 +225,7 @@ void WorldSession::HandleActivateTaxiFarOpcode ( WorldPacket & recv_data )
     GetPlayer()->ActivateTaxiPathTo(nodes);
 }
 
-void WorldSession::HandleTaxiNextDestinationOpcode(WorldPacket& recvPacket)
+void WorldSession::HandleTaxiNextDestinationOpcode(WorldPacket& /*recvPacket*/)
 {
     uint32 sourcenode,destinationnode;
     uint16 MountId;

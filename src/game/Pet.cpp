@@ -323,7 +323,7 @@ bool Pet::LoadPetFromDB( Unit* owner, uint32 petentry, uint32 petnumber, bool cu
     MapManager::Instance().GetMap(owner->GetMapId(), owner)->Add((Creature*)this);
 
     // Spells should be loaded after pet is added to map, because in CanCast is check on it
-    _LoadSpells(timediff);
+    _LoadSpells();
     _LoadSpellCooldowns();
 
     owner->SetPet(this);                                    // in DB stored only full controlled creature
@@ -1162,7 +1162,7 @@ void Pet::_SaveSpellCooldowns()
     }
 }
 
-void Pet::_LoadSpells(uint32 timediff)
+void Pet::_LoadSpells()
 {
     for (PetSpellMap::iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
         delete itr->second;

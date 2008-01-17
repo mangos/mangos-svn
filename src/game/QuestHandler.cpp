@@ -292,7 +292,7 @@ void WorldSession::HandleQuestgiverRequestRewardOpcode( WorldPacket & recv_data 
     }
 }
 
-void WorldSession::HandleQuestgiverCancel(WorldPacket& recv_data )
+void WorldSession::HandleQuestgiverCancel(WorldPacket& /*recv_data*/ )
 {
     sLog.outDebug(  "WORLD: Received CMSG_QUESTGIVER_CANCEL" );
 
@@ -388,7 +388,7 @@ void WorldSession::HandleQuestComplete(WorldPacket& recv_data)
     }
 }
 
-void WorldSession::HandleQuestAutoLaunch(WorldPacket& recvPacket)
+void WorldSession::HandleQuestAutoLaunch(WorldPacket& /*recvPacket*/)
 {
     sLog.outDebug(  "WORLD: Received CMSG_QUESTGIVER_QUEST_AUTOLAUNCH (Send your log to anakin if you see this message)" );
 }

@@ -72,7 +72,7 @@ bool Corpse::Create( uint32 guidlow, Player *owner, uint32 mapid, float x, float
 {
     SetInstanceId(owner->GetInstanceId());
 
-    WorldObject::_Create(guidlow, HIGHGUID_CORPSE, mapid, x, y, z, ang, (uint8)-1);
+    WorldObject::_Create(guidlow, HIGHGUID_CORPSE, mapid, x, y, z, ang);
 
     if(!IsPositionValid())
     {

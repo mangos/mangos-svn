@@ -428,7 +428,7 @@ void WorldSession::HandleGMTicketSystemStatusOpcode( WorldPacket & /*recv_data*/
     SendPacket( &data );
 }
 
-void WorldSession::HandleTogglePvP(WorldPacket& recvPacket)
+void WorldSession::HandleTogglePvP(WorldPacket& /*recvPacket*/)
 {
     GetPlayer()->ToggleFlag(PLAYER_FLAGS, PLAYER_FLAGS_IN_PVP);
 
@@ -1516,7 +1516,7 @@ void WorldSession::HandleAllowMoveAckOpcode( WorldPacket & recv_data )
     sLog.outDebug("response sent: counter %u, time %u (HEX: %X), ms. time %u, diff %u", counter, time_, time_, getMSTime(), diff);
 }
 
-void WorldSession::HandleResetInstancesOpcode( WorldPacket & recv_data )
+void WorldSession::HandleResetInstancesOpcode( WorldPacket & /*recv_data*/ )
 {
     sLog.outDebug("WORLD: CMSG_RESET_INSTANCES");
     /*
@@ -1560,7 +1560,7 @@ void WorldSession::HandleNewUnknownOpcode( WorldPacket & recv_data )
     */
 }
 
-void WorldSession::HandleDismountOpcode( WorldPacket & recv_data )
+void WorldSession::HandleDismountOpcode( WorldPacket & /*recv_data*/ )
 {
     sLog.outDebug("WORLD: CMSG_DISMOUNT");
     //recv_data.hexlike();

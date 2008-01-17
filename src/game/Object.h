@@ -254,7 +254,7 @@ class MANGOS_DLL_SPEC WorldObject : public Object
 
         virtual void Update ( uint32 /*time_diff*/ ) { }
 
-        void _Create (uint32 guidlow, HighGuid guidhigh, uint32 mapid, float x, float y, float z, float ang, uint32 nameId);
+        void _Create( uint32 guidlow, HighGuid guidhigh, uint32 mapid, float x, float y, float z, float ang );
 
         void Relocate(float x, float y, float z, float orientation)
         {

@@ -1177,7 +1177,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         void _UpdateSpells(uint32 time);
 
-        void _UpdateAutoRepeatSpell(uint32 time);
+        void _UpdateAutoRepeatSpell();
         bool m_AutoRepeatFirstCast;
 
         uint32 m_attackTimer[3];

@@ -1408,7 +1408,6 @@ void Unit::SpellNonMeleeDamageLog(Unit *pVictim, uint32 spellID, uint32 damage, 
 
 void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier *mod, uint8 effect_idx)
 {
-    uint32 procFlag = 0;
     if(!this || !pVictim || !isAlive() || !pVictim->isAlive())
     {
         return;
@@ -2830,7 +2829,7 @@ uint16 Unit::GetPureWeaponSkillValue (WeaponAttackType attType) const
 void Unit::_UpdateSpells( uint32 time )
 {
     if(m_currentSpells[CURRENT_AUTOREPEAT_SPELL])
-        _UpdateAutoRepeatSpell( time );
+        _UpdateAutoRepeatSpell();
 
     // remove finished spells from current pointers
     for (uint32 i = 0; i < CURRENT_MAX_SPELL; i++)
@@ -2908,7 +2907,7 @@ void Unit::_UpdateSpells( uint32 time )
     }
 }
 
-void Unit::_UpdateAutoRepeatSpell( uint32 time )
+void Unit::_UpdateAutoRepeatSpell()
 {
     if(m_currentSpells[CURRENT_AUTOREPEAT_SPELL]->getState() == SPELL_STATE_FINISHED)
     {

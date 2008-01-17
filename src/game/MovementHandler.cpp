@@ -28,7 +28,7 @@
 #include "Transports.h"
 #include "BattleGround.h"
 
-void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & recv_data )
+void WorldSession::HandleMoveWorldportAckOpcode( WorldPacket & /*recv_data*/ )
 {
     sLog.outDebug( "WORLD: got MSG_MOVE_WORLDPORT_ACK." );
 
@@ -423,7 +423,7 @@ void WorldSession::HandleSetActiveMoverOpcode(WorldPacket &recv_data)
     SendPacket(&data);
 }
 
-void WorldSession::HandleMountSpecialAnimOpcode(WorldPacket &recvdata)
+void WorldSession::HandleMountSpecialAnimOpcode(WorldPacket& /*recvdata*/)
 {
     //sLog.outDebug("WORLD: Recvd CMSG_MOUNTSPECIAL_ANIM");
 
@@ -433,7 +433,7 @@ void WorldSession::HandleMountSpecialAnimOpcode(WorldPacket &recvdata)
     GetPlayer()->SendMessageToSet(&data, false);
 }
 
-void WorldSession::HandleMoveKnockBackAck( WorldPacket & recv_data )
+void WorldSession::HandleMoveKnockBackAck( WorldPacket & /*recv_data*/ )
 {
     // CHECK_PACKET_SIZE(recv_data,?);
     sLog.outDebug("CMSG_MOVE_KNOCK_BACK_ACK");
@@ -463,12 +463,12 @@ void WorldSession::HandleMoveKnockBackAck( WorldPacket & recv_data )
     */
 }
 
-void WorldSession::HandleMoveHoverAck( WorldPacket & recv_data )
+void WorldSession::HandleMoveHoverAck( WorldPacket& /*recv_data*/ )
 {
     sLog.outDebug("CMSG_MOVE_HOVER_ACK");
 }
 
-void WorldSession::HandleMoveWaterWalkAck(WorldPacket& recv_data)
+void WorldSession::HandleMoveWaterWalkAck(WorldPacket& /*recv_data*/)
 {
     sLog.outDebug("CMSG_MOVE_WATER_WALK_ACK");
 }

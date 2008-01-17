@@ -1659,9 +1659,9 @@ void Aura::HandleForceReaction(bool Apply, bool Real)
     uint32 faction_rank = m_modifier.m_amount;
 
     if(Apply)
-        player->m_forcedReactions[m_modifier.m_miscvalue] = ReputationRank(faction_rank);
+        player->m_forcedReactions[faction_id] = ReputationRank(faction_rank);
     else
-        player->m_forcedReactions.erase(m_modifier.m_miscvalue);
+        player->m_forcedReactions.erase(faction_id);
 
     WorldPacket data;
     data.Initialize(SMSG_SET_FORCED_REACTIONS, 4+player->m_forcedReactions.size()*(4+4));

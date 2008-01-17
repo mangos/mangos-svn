@@ -84,7 +84,7 @@ void MapManager::LoadTransports()
         x = t->m_WayPoints[0].x; y = t->m_WayPoints[0].y; z = t->m_WayPoints[0].z; mapid = t->m_WayPoints[0].mapid; o = 1;
 
                                                             // creates the Gameobject
-        if(!t->Create(entry, goinfo->displayId, mapid, x, y, z, o, 100, 0))
+        if(!t->Create(entry, mapid, x, y, z, o, 100, 0))
         {
             delete t;
             continue;
@@ -130,7 +130,7 @@ Transport::Transport( WorldObject *instantiator ) : GameObject( instantiator )
     m_updateFlag = (UPDATEFLAG_TRANSPORT | UPDATEFLAG_LOWGUID | UPDATEFLAG_HIGHGUID | UPDATEFLAG_HASPOSITION);
 }
 
-bool Transport::Create(uint32 guidlow, uint32 displayId, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress, uint32 dynflags)
+bool Transport::Create(uint32 guidlow, uint32 mapid, float x, float y, float z, float ang, uint32 animprogress, uint32 dynflags)
 {
     Relocate(x,y,z,ang);
 
@@ -419,7 +419,7 @@ Transport::WayPointMap::iterator Transport::GetNextWayPoint()
     return iter;
 }
 
-void Transport::TeleportTransport(uint32 oldMapid, uint32 newMapid, float x, float y, float z)
+void Transport::TeleportTransport(uint32 newMapid, float x, float y, float z)
 {
     //MapManager::Instance().GetMap(oldMapid)->Remove((GameObject *)this, false);
     SetMapId(newMapid);
@@ -467,7 +467,7 @@ bool Transport::RemovePassenger(Player* passenger)
     return true;
 }
 
-void Transport::Update(uint32 p_time)
+void Transport::Update(uint32 /*p_time*/)
 {
     if (m_WayPoints.size() <= 1)
         return;
@@ -483,7 +483,7 @@ void Transport::Update(uint32 p_time)
         // first check help in case client-server transport coordinates de-synchronization
         if (m_curr->second.mapid != GetMapId() || m_curr->second.teleport)
         {
-            TeleportTransport(GetMapId(), m_curr->second.mapid, m_curr->second.x, m_curr->second.y, m_curr->second.z);
+            TeleportTransport(m_curr->second.mapid, m_curr->second.x, m_curr->second.y, m_curr->second.z);
         }
         else
         {

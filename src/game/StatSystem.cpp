@@ -426,8 +426,6 @@ void Player::UpdateAllSpellCritChances()
 
 void Player::UpdateManaRegen()
 {
-    uint8 PlayerClass = getClass();
-    float Spirit = GetStat(STAT_SPIRIT);
     float Intellect = GetStat(STAT_INTELLECT);
     float SpiritBasedRegen = OCTRegenMPPerSpirit();
     float power_regen_mod = 0;
@@ -484,7 +482,7 @@ void Player::_RemoveAllStatBonuses()
 ########                         ########
 #######################################*/
 
-bool Creature::UpdateStats(Stats stat)
+bool Creature::UpdateStats(Stats /*stat*/)
 {
     return true;
 }
