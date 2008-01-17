@@ -1170,7 +1170,7 @@ class MANGOS_DLL_SPEC Player : public Unit
             if(d < 0)
                 SetMoney (GetMoney() > uint32(-d) ? GetMoney() + d : 0);
             else
-                SetMoney (GetMoney() + d > 0 ? GetMoney() + d : 0);
+                SetMoney (GetMoney() < 0xFFFFFFFF - d ? GetMoney() + d : 0xFFFFFFFF);
         }
         void SetMoney( uint32 value )
         {
