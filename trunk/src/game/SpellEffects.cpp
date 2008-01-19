@@ -4252,7 +4252,6 @@ void Spell::EffectTransmitted(uint32 i)
         Map* map = MapManager::Instance().GetMap(cMap, m_caster);
         if ( !map->IsInWater(fx,fy,fz) )
         {
-
             SendCastResult(SPELL_FAILED_NOT_HERE);
             SendChannelUpdate(0);
             return;

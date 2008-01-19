@@ -288,8 +288,6 @@ void Creature::RegenerateMana()
 
     float Spirit = GetStat(STAT_SPIRIT);
 
-    if( ManaIncreaseRate <= 0 ) ManaIncreaseRate = 1;
-
     uint32 addvalue = 0;
 
     if (isInCombat() || isPet())
@@ -314,8 +312,6 @@ void Creature::RegenerateHealth()
     float HealthIncreaseRate = sWorld.getRate(RATE_HEALTH);
 
     float Spirit = GetStat(STAT_SPIRIT);
-
-    if( HealthIncreaseRate <= 0 ) HealthIncreaseRate = 1;
 
     uint32 addvalue = 0;
 

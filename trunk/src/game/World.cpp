@@ -321,9 +321,24 @@ void World::SetInitialWorldSettings()
 
     ///- Read all rates from the config file
     rate_values[RATE_HEALTH]      = sConfig.GetFloatDefault("Rate.Health", 1);
+    if(rate_values[RATE_HEALTH] < 0)
+    {
+        sLog.outError("Rate.Health (%f) mustbe > 0. Using 1 instead.",rate_values[RATE_HEALTH]);
+        rate_values[RATE_HEALTH] = 1;
+    }
     rate_values[RATE_POWER_MANA]  = sConfig.GetFloatDefault("Rate.Mana", 1);
+    if(rate_values[RATE_POWER_MANA] < 0)
+    {
+        sLog.outError("Rate.Mana (%f) mustbe > 0. Using 1 instead.",rate_values[RATE_POWER_MANA]);
+        rate_values[RATE_POWER_MANA] = 1;
+    }
     rate_values[RATE_POWER_RAGE_INCOME] = sConfig.GetFloatDefault("Rate.Rage.Income", 1);
     rate_values[RATE_POWER_RAGE_LOSS]   = sConfig.GetFloatDefault("Rate.Rage.Loss", 1);
+    if(rate_values[RATE_POWER_RAGE_LOSS] < 0)
+    {
+        sLog.outError("Rate.Rage.Loss (%f) mustbe > 0. Using 1 instead.",rate_values[RATE_POWER_RAGE_LOSS]);
+        rate_values[RATE_POWER_RAGE_LOSS] = 1;
+    }
     rate_values[RATE_POWER_FOCUS] = sConfig.GetFloatDefault("Rate.Focus", 1);
     rate_values[RATE_LOYALTY]     = sConfig.GetFloatDefault("Rate.Loyalty", 1);
     rate_values[RATE_DROP_ITEMS]  = sConfig.GetFloatDefault("Rate.Drop.Items", 1);

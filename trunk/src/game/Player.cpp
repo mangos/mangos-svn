@@ -1720,7 +1720,6 @@ void Player::Regenerate(Powers power)
         case POWER_RAGE:                                    // Regenerate rage
         {
             float RageDecreaseRate = sWorld.getRate(RATE_POWER_RAGE_LOSS);
-            if( RageDecreaseRate <= 0 ) RageDecreaseRate = 1;
             addvalue = 30 * RageDecreaseRate;               // 3 rage by tick
         }   break;
         case POWER_ENERGY:                                  // Regenerate energy (rogue)
@@ -1763,8 +1762,6 @@ void Player::RegenerateHealth()
     if (curValue >= maxValue) return;
 
     float HealthIncreaseRate = sWorld.getRate(RATE_HEALTH);
-
-    if( HealthIncreaseRate <= 0 ) HealthIncreaseRate = 1;
 
     float addvalue = 0.0f;
 
@@ -4826,14 +4823,14 @@ bool Player::SetPosition(float x, float y, float z, float orientation, bool tele
         uint8 flag1    = m->GetTerrainType(x,y);
 
         //!Underwater check, not in water if underground or above water level
-        if ((z < (height_z-2)) || (z > (water_z - 2)))
-            m_isunderwater&= 0x7A;
+        if (height_z <= INVALID_HEIGHT || z < (height_z-2) || z > (water_z - 2) )
+            m_isunderwater &= 0x7A;
         else if ((z < (water_z - 2)) && (flag1 & 0x01))
-            m_isunderwater|= 0x01;
+            m_isunderwater |= 0x01;
 
         //!in lava check, anywhere under lava level
-        if ((z < (height_z - 0)) && (flag1 == 0x00) && IsInWater())
-            m_isunderwater|= 0x80;
+        if ((height_z <= INVALID_HEIGHT || z < (height_z - 0)) && (flag1 == 0x00) && IsInWater())
+            m_isunderwater |= 0x80;
     }
 
     CheckExploreSystem();

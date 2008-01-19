@@ -24,6 +24,7 @@
 #include "zthread/Lockable.h"
 #include "zthread/Mutex.h"
 #include "zthread/FairReadWriteLock.h"
+#include "vmap/IVMapManager.h"
 #include "Database/DBCStructure.h"
 #include "GridDefines.h"
 #include "Cell.h"
