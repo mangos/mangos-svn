@@ -589,8 +589,18 @@ void AreaAura::Update(uint32 diff)
                     // apply aura to players in range that dont have it yet
                     if (!t_aura)
                     {
-                        AreaAura *aur = new AreaAura(GetSpellProto(), m_effIndex, &m_currentBasePoints, Target, caster);
-                        Target->AddAura(aur);
+                        // if rank not found 
+                        if(SpellEntry const *actualSpellInfo = objmgr.SelectAuraRankForPlayerLevel(GetSpellProto(),Target->getLevel()))
+                        {
+                            int32 actualBasePoints = m_currentBasePoints;
+
+                            // recalculate basepoints for lower rank (all AreaAura spell not use custom basepoints?)
+                            if(actualSpellInfo != GetSpellProto())
+                                actualBasePoints = actualSpellInfo->EffectBasePoints[m_effIndex];
+
+                            AreaAura *aur = new AreaAura(actualSpellInfo, m_effIndex, &actualBasePoints, Target, caster);
+                            Target->AddAura(aur);
+                        }
                     }
                 }
                 else

@@ -2543,7 +2543,7 @@ uint8 Spell::CanCast(bool strict)
             return SPELL_FAILED_LINE_OF_SIGHT;
 
         // auto selection spell rank implemented in WorldSession::HandleCastSpellOpcode
-        // this case can be triggered if rank not found (too low-levele target for first rank)
+        // this case can be triggered if rank not found (too low-level target for first rank)
         if(m_caster->GetTypeId() == TYPEID_PLAYER && !IsPassiveSpell(m_spellInfo->Id) && !m_CastItem)
         {
             for(int i=0;i<3;i++)
