@@ -5095,7 +5095,7 @@ bool ObjectMgr::IsPrimaryProfessionFirstRankSpell(uint32 spellId)
     return IsPrimaryProfessionSpell(spellId) && GetSpellRank(spellId)==1;
 }
 
-SpellEntry const* ObjectMgr::SelectAuraRankForPlayerLevel(SpellEntry const* spellInfo, UINT32 playerLevel)
+SpellEntry const* ObjectMgr::SelectAuraRankForPlayerLevel(SpellEntry const* spellInfo, uint32 playerLevel)
 {
     // ignore passive spells
     if(IsPassiveSpell(spellInfo->Id))
