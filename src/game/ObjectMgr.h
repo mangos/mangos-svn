@@ -650,7 +650,7 @@ class ObjectMgr
             return false;
         }
 
-        SpellEntry const* SelectAuraRankForPlayerLevel(SpellEntry const* spellInfo, UINT32 playerLevel);
+        SpellEntry const* SelectAuraRankForPlayerLevel(SpellEntry const* spellInfo, uint32 playerLevel);
 
         WeatherZoneChances const* GetWeatherChances(uint32 zone_id) const
         {
