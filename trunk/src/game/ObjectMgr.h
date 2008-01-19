@@ -650,6 +650,8 @@ class ObjectMgr
             return false;
         }
 
+        SpellEntry const* SelectAuraRankForPlayerLevel(SpellEntry const* spellInfo, UINT32 playerLevel);
+
         WeatherZoneChances const* GetWeatherChances(uint32 zone_id) const
         {
             WeatherZoneMap::const_iterator itr = mWeatherZoneMap.find(zone_id);

@@ -5095,6 +5095,46 @@ bool ObjectMgr::IsPrimaryProfessionFirstRankSpell(uint32 spellId)
     return IsPrimaryProfessionSpell(spellId) && GetSpellRank(spellId)==1;
 }
 
+SpellEntry const* ObjectMgr::SelectAuraRankForPlayerLevel(SpellEntry const* spellInfo, UINT32 playerLevel)
+{
+    // ignore passive spells
+    if(IsPassiveSpell(spellInfo->Id))
+        return spellInfo;
+
+    bool needRankSelection = false;
+    for(int i=0;i<3;i++)
+    {
+        if( IsPositiveEffect(spellInfo->Id, i) && (
+            spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA ||
+            spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AREA_AURA
+            ) )
+        {
+            needRankSelection = true;
+            break;
+        }
+    }
+
+    // not required
+    if(!needRankSelection)
+        return spellInfo;
+
+    for(uint32 nextSpellId = spellInfo->Id; nextSpellId != 0; nextSpellId = GetPrevSpellInChain(nextSpellId))
+    {
+        SpellEntry const *nextSpellInfo = sSpellStore.LookupEntry(nextSpellId);
+        if(!nextSpellInfo)
+            break;
+
+        // if found appropriate level
+        if(playerLevel + 10 >= nextSpellInfo->spellLevel)
+            return nextSpellInfo;
+
+        // one rank less then
+    }
+
+    // not found
+    return NULL;
+}
+
 void ObjectMgr::LoadReputationOnKill()
 {
     uint32 count = 0;

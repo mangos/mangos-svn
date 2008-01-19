@@ -620,35 +620,13 @@ void WorldSession::HandleCastSpellOpcode(WorldPacket& recvPacket)
         return;
 
     // auto-selection buff level base at target level (in spellInfo)
-    if(!IsPassiveSpell(spellId) && targets.getUnitTarget())
+    if(targets.getUnitTarget())
     {
-        bool needRankSelection = false;
-        for(int i=0;i<3;i++)
-        {
-            if(IsPositiveEffect(spellId, i) && spellInfo->Effect[i] == SPELL_EFFECT_APPLY_AURA)
-            {
-                needRankSelection = true;
-                break;
-            }
-        }
+        SpellEntry const *actualSpellInfo = objmgr.SelectAuraRankForPlayerLevel(spellInfo,targets.getUnitTarget()->getLevel());
 
-        if(needRankSelection)
-        {
-            for(uint32 nextSpellId = spellId; nextSpellId!=0; nextSpellId = objmgr.GetPrevSpellInChain(nextSpellId))
-            {
-                SpellEntry const *nextSpellInfo = sSpellStore.LookupEntry(nextSpellId);
-                if(!nextSpellInfo)
-                    break;
-
-                // if found appropriate level
-                if(targets.getUnitTarget()->getLevel() + 10 < nextSpellInfo->spellLevel)
-                    break;
-
-                spellInfo = nextSpellInfo;
-            }
-
-            // if appropriate spell rank not found spellInfo store original casted spell and will output error in Spell::CanCast
-        }
+        // if rank not found then function return NULL but in explicit cast case original spell can be casted and later failed with appropriate error message
+        if(actualSpellInfo)
+            spellInfo = actualSpellInfo;
     }
 
     Spell *spell = new Spell(_player, spellInfo, false);
