@@ -4774,6 +4774,14 @@ bool Unit::IsHostileTo(Unit const* unit) const
         if(((Player const*)tester)->duel && ((Player const*)tester)->duel->opponent == target && ((Player const*)tester)->duel->startTime != 0)
             return true;
 
+        // Group
+        if(((Player*)tester)->GetGroup() && ((Player*)tester)->GetGroup()==((Player*)target)->GetGroup())
+            return false;
+
+        // PvP FFA state
+        if(((Player*)tester)->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP) && ((Player*)target)->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP))
+            return true;
+
         //= PvP states
         // Green/Blue (can't attack)
         if(((Player*)tester)->GetTeam()==((Player*)target)->GetTeam())
@@ -4863,6 +4871,14 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
     {
         // Duel
         if(((Player const*)tester)->duel && ((Player const*)tester)->duel->opponent == target && ((Player const*)tester)->duel->startTime != 0)
+            return false;
+
+        // Group
+        if(((Player*)tester)->GetGroup() && ((Player*)tester)->GetGroup()==((Player*)target)->GetGroup())
+            return true;
+
+        // PvP FFA state
+        if(((Player*)tester)->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP) && ((Player*)target)->HasFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP))
             return false;
 
         //= PvP states
