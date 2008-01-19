@@ -454,6 +454,7 @@ ObjectAccessor::RemoveCorpse(Corpse *corpse)
     uint32 cell_id = (cell_pair.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_pair.x_coord;
 
     objmgr.DeleteCorpseCellData(corpse->GetMapId(),cell_id,corpse->GetOwnerGUID());
+    corpse->RemoveFromWorld();
 
     i_player2corpse.erase(iter);
 }
@@ -550,9 +551,6 @@ ObjectAccessor::ConvertCorpseForPlayer(uint64 player_guid)
     // add bones in grid store if grid loaded where corpse placed
     if(!map->IsRemovalGrid(bones->GetPositionX(),bones->GetPositionY()))
         map->Add(bones);
-    // or prepare to delete at next tick if grid not loaded
-    else
-        bones->DeleteBonesFromWorld();
 
     // all references to the corpse should be removed at this point
     delete corpse;
