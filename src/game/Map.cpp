@@ -1368,7 +1368,7 @@ bool Map::IsInWater(float x, float y, float pZ) const
     float z = GetHeight(x,y,pZ,false);                      // use .map base surface height
 
     // underground or instance without vmap
-    if(z < INVALID_HEIGHT)
+    if(z <= INVALID_HEIGHT)
         return false;
 
     float water_z = GetWaterLevel(x,y);
