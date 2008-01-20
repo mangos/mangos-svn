@@ -123,10 +123,6 @@
 #define SI64FMTD "%lld"
 #endif
 
-#define GUID_HIPART(x)   (uint32)((x) >> 32)
-#define GUID_LOPART(x)   (uint32)((x) & 0xFFFFFFFFULL)
-#define MAKE_GUID(l, h)  uint64( uint32(l) | ( uint64(h) << 32 ) )
-
 #define atol(a) strtoul( a, NULL, 10)
 
 #define STRINGIZE(a) #a

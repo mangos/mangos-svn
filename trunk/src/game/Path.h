@@ -19,6 +19,7 @@
 #ifndef MANGOSSERVER_PATH_H
 #define MANGOSSERVER_PATH_H
 
+#include "Common.h"
 #include <vector>
 
 class Path

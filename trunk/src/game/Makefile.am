@@ -207,6 +207,8 @@ libmangosgame_a_SOURCES = \
 	SkillDiscovery.cpp \
 	SkillDiscovery.h \
 	SpellHandler.cpp \
+	SpellMgr.cpp \
+	SpellMgr.h \
 	StatSystem.cpp \
 	TargetedMovementGenerator.cpp \
 	TargetedMovementGenerator.h \

@@ -40,7 +40,11 @@ struct Modifier
 
 class Unit;
 struct SpellEntry;
+struct SpellModifier;
 struct ProcTriggerSpell;
+
+// forward decl
+class Aura;
 
 typedef void(Aura::*pAuraHandler)(bool Apply, bool Real);
 // Real == true at aura add/remove

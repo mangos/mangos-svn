@@ -20,13 +20,11 @@
 #define __SPELL_H
 
 #include "GridDefines.h"
-#include "Database/DBCStores.h"
 
 class WorldSession;
 class Unit;
 class DynamicObj;
 class Player;
-class Item;
 class GameObject;
 class Group;
 class Aura;
@@ -60,59 +58,12 @@ enum SpellCastTargetFlags
     TARGET_FLAG_CORPSE           = 0x8000
 };
 
-enum Targets
-{
-    TARGET_SELF                        = 1,
-    TARGET_RANDOM_ENEMY_CHAIN_IN_AREA  = 2,                 // only one spell has that, but regardless, it's a target type after all
-    TARGET_PET                         = 5,
-    TARGET_CHAIN_DAMAGE                = 6,
-    TARGET_AREAEFFECT_CUSTOM           = 8,
-    TARGET_ALL_ENEMY_IN_AREA           = 15,
-    TARGET_ALL_ENEMY_IN_AREA_INSTANT   = 16,
-    TARGET_EFFECT_SELECT               = 18,                // highly depends on the spell effect
-    TARGET_ALL_PARTY_AROUND_CASTER     = 20,
-    TARGET_SINGLE_FRIEND               = 21,
-    TARGET_ALL_AROUND_CASTER           = 22,                // used only in TargetA, target selection dependent from TargetB
-    TARGET_GAMEOBJECT                  = 23,
-    TARGET_IN_FRONT_OF_CASTER          = 24,
-    TARGET_DUELVSPLAYER                = 25,
-    TARGET_GAMEOBJECT_ITEM             = 26,
-    TARGET_MASTER                      = 27,
-    TARGET_ALL_ENEMY_IN_AREA_CHANNELED = 28,
-    TARGET_ALL_FRIENDLY_UNITS_AROUND_CASTER = 30,           // in TargetB used only with TARGET_ALL_AROUND_CASTER and in self casting range in TargetA
-    TARGET_MINION                      = 32,
-    TARGET_ALL_PARTY                   = 33,
-    TARGET_SINGLE_PARTY                = 35,
-    TARGET_AREAEFFECT_PARTY            = 37,
-    TARGET_SCRIPT                      = 38,
-    TARGET_SELF_FISHING                = 39,
-    TARGET_TOTEM_EARTH                 = 41,
-    TARGET_TOTEM_WATER                 = 42,
-    TARGET_TOTEM_AIR                   = 43,
-    TARGET_TOTEM_FIRE                  = 44,
-    TARGET_CHAIN_HEAL                  = 45,
-    TARGET_DYNAMIC_OBJECT              = 47,
-    TARGET_AREAEFFECT_CUSTOM_2         = 52,
-    TARGET_CURRENT_SELECTED_ENEMY      = 53,
-    TARGET_SINGLE_FRIEND_2             = 57,
-    TARGET_AREAEFFECT_PARTY_AND_CLASS  = 61,
-    TARGET_SINGLE_ENEMY                = 77,
-};
-
 enum SpellCastFlags
 {
     CAST_FLAG_UNKNOWN1           = 0x2,
     CAST_FLAG_UNKNOWN2           = 0x10,
     CAST_FLAG_AMMO               = 0x20,
     CAST_FLAG_UNKNOWN3           = 0x100
-};
-
-enum SpellDmgClass
-{
-    SPELL_DAMAGE_CLASS_NONE     = 0,
-    SPELL_DAMAGE_CLASS_MAGIC    = 1,
-    SPELL_DAMAGE_CLASS_MELEE    = 2,
-    SPELL_DAMAGE_CLASS_RANGED   = 3
 };
 
 enum SpellNotifyPushType

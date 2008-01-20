@@ -22,6 +22,7 @@
 #include "WorldSession.h"
 #include "World.h"
 #include "ObjectMgr.h"
+#include "SpellMgr.h"
 #include "Creature.h"
 #include "QuestDef.h"
 #include "GossipDef.h"
@@ -127,13 +128,13 @@ void Creature::LoadTrainerSpells()
             continue;
         }
 
-        if(!ObjectMgr::IsSpellValid(spellinfo))
+        if(!SpellMgr::IsSpellValid(spellinfo))
         {
             sLog.outErrorDb("LoadTrainerSpells: Trainer (Entry: %u) has broken learning spell %u.", GetEntry(), spellid);
             continue;
         }
 
-        if(ObjectMgr::IsProfessionSpell(spellinfo->EffectTriggerSpell[0]))
+        if(SpellMgr::IsProfessionSpell(spellinfo->EffectTriggerSpell[0]))
             m_trainer_type = 2;
 
         TrainerSpell tspell;

@@ -24,77 +24,16 @@
 #include "dbcfile.h"
 #include "DBCStructure.h"
 
-enum SpellSpecific
-{
-    SPELL_NORMAL = 0,
-    SPELL_SEAL = 1,
-    SPELL_BLESSING = 2,
-    SPELL_AURA = 3,
-    SPELL_STING = 4,
-    SPELL_CURSE = 5,
-    SPELL_ASPECT = 6,
-    SPELL_TRACKER = 7,
-    SPELL_WARLOCK_ARMOR = 8,
-    SPELL_MAGE_ARMOR = 9,
-    SPELL_ELEMENTAL_SHIELD = 10,
-    SPELL_MAGE_POLYMORPH = 11
-};
-
-enum SpellFamilyNames
-{
-    SPELLFAMILY_GENERIC = 0,
-    SPELLFAMILY_MAGE = 3,
-    SPELLFAMILY_WARRIOR = 4,
-    SPELLFAMILY_WARLOCK = 5,
-    SPELLFAMILY_PRIEST = 6,
-    SPELLFAMILY_DRUID = 7,
-    SPELLFAMILY_ROGUE = 8,
-    SPELLFAMILY_HUNTER = 9,
-    SPELLFAMILY_PALADIN = 10,
-    SPELLFAMILY_SHAMAN = 11,
-    SPELLFAMILY_POTION = 13
-};
-
-//SpellFamilyFlags
-#define SPELLFAMILYFLAG_ROGUE_VANISH     0x00000800
-#define SPELLFAMILYFLAG_ROGUE_STEALTH    0x00400000
-#define SPELLFAMILYFLAG_ROGUE_BACKSTAB   0x00800004
-#define SPELLFAMILYFLAG_ROGUE_SAP        0x00000080
-#define SPELLFAMILYFLAG_ROGUE_FEINT      0x08000000
-#define SPELLFAMILYFLAG_ROGUE_KIDNEYSHOT 0x00200000
-
 typedef std::list<uint32> SimpleFactionsList;
 
 SimpleFactionsList const* GetFactionTeamList(uint32 faction);
-float GetRadius(SpellRadiusEntry const *radius);
-uint32 GetCastTime(SpellCastTimesEntry const*time);
-float GetMinRange(SpellRangeEntry const *range);
-float GetMaxRange(SpellRangeEntry const *range);
-int32 GetDuration(SpellEntry const *spellInfo);
-int32 GetMaxDuration(SpellEntry const *spellInfo);
-inline uint32 GetRecoveryTime(SpellEntry const *spellInfo) { return spellInfo->RecoveryTime > spellInfo->CategoryRecoveryTime ? spellInfo->RecoveryTime : spellInfo->CategoryRecoveryTime; }
 char* GetPetName(uint32 petfamily, uint32 dbclang);
-bool IsNoStackAuraDueToAura(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);
-bool IsSealSpell(uint32 spellId);
-int32 CompareAuraRanks(uint32 spellId_1, uint32 effIndex_1, uint32 spellId_2, uint32 effIndex_2);
-SpellSpecific GetSpellSpecific(uint32 spellId);
-bool IsSpellSingleEffectPerCaster(uint32 spellId);
-bool IsPassiveSpell(uint32 spellId);
-bool IsNonCombatSpell(uint32 spellId);
 uint32 GetTalentSpellCost(uint32 spellId);
-
-bool IsPositiveSpell(uint32 spellId);
-bool IsPositiveEffect(uint32 spellId, uint32 effIndex);
-bool IsPositiveTarget(uint32 targetA, uint32 targetB);
-
-bool IsSingleTargetSpell(uint32 spellId);
-bool IsSingleTargetSpells(SpellEntry const *spellInfo1, SpellEntry const *spellInfo2);
 
 AreaTableEntry const* GetAreaEntryByAreaID(uint32 area_id);
 AreaTableEntry const* GetAreaEntryByAreaFlag(uint32 area_flag);
 uint32 GetAreaFlagByMapId(uint32 mapid);
 inline bool IsNoDamageXPArea(uint32 area_id) { return area_id==3712 || area_id==3803; }
-bool CanUsedWhileStealthed(uint32 spellId);
 ChatChannelsEntry const* GetChannelEntryFor(uint32 channel_id);
 
 bool IsTotemCategoryCompatiableWith(uint32 itemTotemCategoryId, uint32 requiredTotemCategoryId);

@@ -17,6 +17,7 @@
  */
 
 #include "Common.h"
+#include "SharedDefines.h"
 #include "Database/DatabaseEnv.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -25,6 +26,7 @@
 #include "UpdateMask.h"
 #include "World.h"
 #include "ObjectMgr.h"
+#include "SpellMgr.h"
 #include "Player.h"
 #include "Unit.h"
 #include "CreatureAI.h"
@@ -1313,7 +1315,7 @@ void Spell::EffectTeleportUnits(uint32 /*i*/)
         return;
     }
 
-    SpellTeleport const* st = objmgr.GetSpellTeleport(m_spellInfo->Id);
+    SpellTeleport const* st = spellmgr.GetSpellTeleport(m_spellInfo->Id);
     if(!st)
     {
         sLog.outError( "SPELL: unknown Teleport coordinates for spell ID %u\n", m_spellInfo->Id );

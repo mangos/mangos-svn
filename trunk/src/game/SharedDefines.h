@@ -19,6 +19,9 @@
 #ifndef MANGOS_SHAREDDEFINES_H
 #define MANGOS_SHAREDDEFINES_H
 
+#include "Platform/Define.h"
+#include <cassert>
+
 enum Gender
 {
     GENDER_MALE                        = 0,
@@ -381,6 +384,173 @@ enum SpellEffects
     SPELL_EFFECT_148                       = 148,
     SPELL_EFFECT_149                       = 149,
     TOTAL_SPELL_EFFECTS                    = 150
+};
+
+// Spell aura states
+enum AuraState
+{                                                           // (C) used in caster aurastate (T) used in target aura state
+    AURA_STATE_DEFENSE                      = 1,            // C
+    AURA_STATE_HEALTHLESS_20_PERCENT        = 2,            // CT
+    AURA_STATE_RACE                         = 3,            // CT (?) FIX ME: not implemented yet!
+    //AURA_STATE_UNKNOWN1                   = 4,            //    not used
+    AURA_STATE_JUDGEMENT                    = 5,            // C
+    //AURA_STATE_UNKNOWN2                   = 6,            //    not used
+    AURA_STATE_HUNTER_PARRY                 = 7,            // C
+    AURA_STATE_ROGUE_ATTACK_FROM_STEALTH    = 7,            // C  FIX ME: not implemented yet!
+    //AURA_STATE_UNKNOWN3                   = 8,            //    not used
+    //AURA_STATE_UNKNOWN4                   = 9,            //    not used
+    AURA_STATE_WARRIOR_VICTORY_RUSH         = 10,           // C  warrior victory rush
+    AURA_STATE_HUNTER_CRIT_STRIKE           = 10,           // C  hunter crit strike
+    AURA_STATE_CRIT                         = 11,           // C
+    //AURA_STATE_UNKNOWN6                   = 12,           //    not used
+    AURA_STATE_HEALTHLESS_35_PERCENT        = 13,           // C
+    AURA_STATE_IMMOLATE                     = 14,           //  T
+    AURA_STATE_SWIFTMEND                    = 15,           //  T
+    AURA_STATE_DEADLY_POISON                = 16            //  T
+};
+
+// Spell mechanics
+enum Mechanics
+{
+    MECHANIC_CHARM            = 1,
+    MECHANIC_CONFUSED         = 2,
+    MECHANIC_DISARM           = 3,
+    MECHANIC_DISTRACT         = 4,
+    MECHANIC_FEAR             = 5,
+    MECHANIC_FUMBLE           = 6,
+    MECHANIC_ROOT             = 7,
+    MECHANIC_PACIFY           = 8,                          //0 spells use this mechanic
+    MECHANIC_SILENCE          = 9,
+    MECHANIC_SLEEP            = 10,
+    MECHANIC_SNARE            = 11,
+    MECHANIC_STUN             = 12,
+    MECHANIC_FREEZE           = 13,
+    MECHANIC_KNOCKOUT         = 14,
+    MECHANIC_BLEED            = 15,
+    MECHANIC_BANDAGE          = 16,
+    MECHANIC_POLYMORPH        = 17,
+    MECHANIC_BANISH           = 18,
+    MECHANIC_SHIELD           = 19,
+    MECHANIC_SHACKLE          = 20,
+    MECHANIC_MOUNT            = 21,
+    MECHANIC_PERSUADE         = 22,                         //0 spells use this mechanic
+    MECHANIC_TURN             = 23,
+    MECHANIC_HORROR           = 24,
+    MECHANIC_INVULNERABILITY  = 25,
+    MECHANIC_INTERRUPT        = 26,
+    MECHANIC_DAZE             = 27,
+    MECHANIC_DISCOVERY        = 28
+};
+
+//To all Immune system,if target has immunes,
+//some spell that related to ImmuneToDispel or ImmuneToSchool or ImmuneToDamage type can't cast to it,
+//some spell_effects that related to ImmuneToEffect<effect>(only this effect in the spell) can't cast to it,
+//some aura(related to Mechanics or ImmuneToState<aura>) can't apply to it.
+enum SpellImmunity
+{
+    IMMUNITY_EFFECT                = 0,
+    IMMUNITY_STATE                 = 1,
+    IMMUNITY_SCHOOL                = 2,
+    IMMUNITY_DAMAGE                = 3,
+    IMMUNITY_DISPEL                = 4,
+    IMMUNITY_MECHANIC              = 5
+};
+
+enum ImmuneToDispel
+{
+    IMMUNE_DISPEL_MAGIC        = 1,
+    IMMUNE_DISPEL_CURSE        = 2,
+    IMMUNE_DISPEL_DISEASE      = 3,
+    IMMUNE_DISPEL_POISON       = 4,
+    IMMUNE_DISPEL_STEALTH      = 5,
+    IMMUNE_DISPEL_INVISIBILITY = 6,
+    IMMUNE_DISPEL_ALL          = 7,
+    IMMUNE_DISPEL_SPE_NPC_ONLY = 8,
+    IMMUNE_DISPEL_CRAZY        = 9,
+    IMMUNE_DISPEL_ZG_TICKET    = 10
+};
+
+enum ImmuneToDamage
+{
+    IMMUNE_DAMAGE_PHYSICAL     = 1,
+    IMMUNE_DAMAGE_MAGIC        = 126
+};
+
+enum ImmuneToSchool
+{
+    IMMUNE_SCHOOL_PHYSICAL     = 1,
+    IMMUNE_SCHOOL_HOLY         = 2,
+    IMMUNE_SCHOOL_FIRE         = 4,
+    IMMUNE_SCHOOL_NATURE       = 8,
+    IMMUNE_SCHOOL_FROST        = 16,
+    IMMUNE_SCHOOL_SHADOW       = 32,
+    IMMUNE_SCHOOL_ARCANE       = 64,
+    IMMUNE_SCHOOL_MAGIC        = 126
+};
+
+inline SpellSchools immuneToSchool(ImmuneToSchool immune)
+{
+    switch(immune)
+    {
+    case IMMUNE_SCHOOL_PHYSICAL: return SPELL_SCHOOL_NORMAL;
+    case IMMUNE_SCHOOL_HOLY:     return SPELL_SCHOOL_HOLY;
+    case IMMUNE_SCHOOL_FIRE:     return SPELL_SCHOOL_FIRE;
+    case IMMUNE_SCHOOL_NATURE:   return SPELL_SCHOOL_NATURE;
+    case IMMUNE_SCHOOL_FROST:    return SPELL_SCHOOL_FROST;
+    case IMMUNE_SCHOOL_SHADOW:   return SPELL_SCHOOL_SHADOW;
+    case IMMUNE_SCHOOL_ARCANE:   return SPELL_SCHOOL_ARCANE;
+    case IMMUNE_SCHOOL_MAGIC:    break;
+    }
+
+    assert(false);
+    return SPELL_SCHOOL_NORMAL;
+}
+
+enum Targets
+{
+    TARGET_SELF                        = 1,
+    TARGET_RANDOM_ENEMY_CHAIN_IN_AREA  = 2,                 // only one spell has that, but regardless, it's a target type after all
+    TARGET_PET                         = 5,
+    TARGET_CHAIN_DAMAGE                = 6,
+    TARGET_AREAEFFECT_CUSTOM           = 8,
+    TARGET_ALL_ENEMY_IN_AREA           = 15,
+    TARGET_ALL_ENEMY_IN_AREA_INSTANT   = 16,
+    TARGET_EFFECT_SELECT               = 18,                // highly depends on the spell effect
+    TARGET_ALL_PARTY_AROUND_CASTER     = 20,
+    TARGET_SINGLE_FRIEND               = 21,
+    TARGET_ALL_AROUND_CASTER           = 22,                // used only in TargetA, target selection dependent from TargetB
+    TARGET_GAMEOBJECT                  = 23,
+    TARGET_IN_FRONT_OF_CASTER          = 24,
+    TARGET_DUELVSPLAYER                = 25,
+    TARGET_GAMEOBJECT_ITEM             = 26,
+    TARGET_MASTER                      = 27,
+    TARGET_ALL_ENEMY_IN_AREA_CHANNELED = 28,
+    TARGET_ALL_FRIENDLY_UNITS_AROUND_CASTER = 30,           // in TargetB used only with TARGET_ALL_AROUND_CASTER and in self casting range in TargetA
+    TARGET_MINION                      = 32,
+    TARGET_ALL_PARTY                   = 33,
+    TARGET_SINGLE_PARTY                = 35,
+    TARGET_AREAEFFECT_PARTY            = 37,
+    TARGET_SCRIPT                      = 38,
+    TARGET_SELF_FISHING                = 39,
+    TARGET_TOTEM_EARTH                 = 41,
+    TARGET_TOTEM_WATER                 = 42,
+    TARGET_TOTEM_AIR                   = 43,
+    TARGET_TOTEM_FIRE                  = 44,
+    TARGET_CHAIN_HEAL                  = 45,
+    TARGET_DYNAMIC_OBJECT              = 47,
+    TARGET_AREAEFFECT_CUSTOM_2         = 52,
+    TARGET_CURRENT_SELECTED_ENEMY      = 53,
+    TARGET_SINGLE_FRIEND_2             = 57,
+    TARGET_AREAEFFECT_PARTY_AND_CLASS  = 61,
+    TARGET_SINGLE_ENEMY                = 77,
+};
+
+enum SpellDmgClass
+{
+    SPELL_DAMAGE_CLASS_NONE     = 0,
+    SPELL_DAMAGE_CLASS_MAGIC    = 1,
+    SPELL_DAMAGE_CLASS_MELEE    = 2,
+    SPELL_DAMAGE_CLASS_RANGED   = 3
 };
 
 enum GameobjectTypes

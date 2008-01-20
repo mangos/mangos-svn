@@ -23,6 +23,7 @@
 #include "Database/DBCStores.h"
 #include "MapManager.h"
 #include "ObjectAccessor.h"
+#include "SpellMgr.h"
 
 #include "GridNotifiers.h"
 #include "GridNotifiersImpl.h"

@@ -22,6 +22,7 @@
 #include "WorldSession.h"
 #include "WorldPacket.h"
 #include "ObjectMgr.h"
+#include "SpellMgr.h"
 #include "Pet.h"
 #include "MapManager.h"
 #include "Formulas.h"
@@ -677,14 +678,14 @@ bool Pet::CanTakeMoreActiveSpells(uint32 spellid)
     if(IsPassiveSpell(spellid))
         return true;
 
-    chainstartstore[0] = objmgr.GetFirstSpellInChain(spellid);
+    chainstartstore[0] = spellmgr.GetFirstSpellInChain(spellid);
 
     for (PetSpellMap::iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
         if(IsPassiveSpell(itr->first))
             continue;
 
-        uint32 chainstart = objmgr.GetFirstSpellInChain(itr->first);
+        uint32 chainstart = spellmgr.GetFirstSpellInChain(itr->first);
 
         uint8 x;
 
@@ -721,13 +722,13 @@ int32 Pet::GetTPForSpell(uint32 spellid)
 
     uint32 basetrainp = newAbility->reqtrainpoints;
     uint32 spenttrainp = 0;
-    uint32 chainstart = objmgr.GetFirstSpellInChain(spellid);
+    uint32 chainstart = spellmgr.GetFirstSpellInChain(spellid);
 
     for (PetSpellMap::iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr)
     {
         if(itr->second->state == PETSPELL_REMOVED) continue;
 
-        if(objmgr.GetFirstSpellInChain(itr->first) == chainstart)
+        if(spellmgr.GetFirstSpellInChain(itr->first) == chainstart)
         {
             SkillLineAbilityEntry const *oldAbility = sSkillLineAbilityStore.LookupEntry(itr->first);
             if(oldAbility && oldAbility->reqtrainpoints > spenttrainp)
@@ -1345,13 +1346,13 @@ bool Pet::addSpell(uint16 spell_id, uint16 active, PetSpellState state, uint16 s
     else
         newspell->active = active;
 
-    uint32 chainstart = objmgr.GetFirstSpellInChain(spell_id);
+    uint32 chainstart = spellmgr.GetFirstSpellInChain(spell_id);
 
     for (PetSpellMap::iterator itr = m_spells.begin(); itr != m_spells.end(); itr++)
     {
         if(itr->second->state == PETSPELL_REMOVED) continue;
 
-        if(objmgr.GetFirstSpellInChain(itr->first) == chainstart)
+        if(spellmgr.GetFirstSpellInChain(itr->first) == chainstart)
         {
             slot_id = itr->second->slotId;
             newspell->active = itr->second->active;

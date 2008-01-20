@@ -25,6 +25,7 @@
 #include "UpdateMask.h"
 #include "World.h"
 #include "ObjectMgr.h"
+#include "SpellMgr.h"
 #include "Player.h"
 #include "Unit.h"
 #include "Spell.h"
@@ -590,7 +591,7 @@ void AreaAura::Update(uint32 diff)
                     if (!t_aura)
                     {
                         // if rank not found 
-                        if(SpellEntry const *actualSpellInfo = objmgr.SelectAuraRankForPlayerLevel(GetSpellProto(),Target->getLevel()))
+                        if(SpellEntry const *actualSpellInfo = spellmgr.SelectAuraRankForPlayerLevel(GetSpellProto(),Target->getLevel()))
                         {
                             int32 actualBasePoints = m_currentBasePoints;
 
@@ -993,7 +994,7 @@ void Aura::HandleAddModifier(bool apply, bool Real)
         mod->effectId = m_effIndex;
         mod->lastAffected = 0;
 
-        SpellAffection const *spellAffect = objmgr.GetSpellAffection(m_spellId, m_effIndex);
+        SpellAffection const *spellAffect = spellmgr.GetSpellAffection(m_spellId, m_effIndex);
 
         if (spellAffect && spellAffect->SpellFamilyMask)
             mod->mask = spellAffect->SpellFamilyMask;

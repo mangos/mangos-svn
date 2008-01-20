@@ -24,7 +24,7 @@
 #define __WEATHER_H
 
 #include "Common.h"
-#include "ObjectMgr.h"
+#include "SharedDefines.h"
 #include "Timer.h"
 
 class Player;
@@ -44,6 +44,8 @@ enum WeatherState
     WEATHER_STATE_THUNDERS          = 86,
     WEATHER_STATE_BLACKRAIN         = 90
 };
+
+struct WeatherZoneChances;
 
 /// Weather for one zone
 class Weather

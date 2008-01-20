@@ -22,7 +22,7 @@
 #include "Opcodes.h"
 #include "Log.h"
 #include "World.h"
-#include "ObjectMgr.h"
+#include "Corpse.h"
 #include "Player.h"
 #include "MapManager.h"
 #include "Transports.h"

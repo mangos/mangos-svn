@@ -19,6 +19,8 @@
 #ifndef DBCSTRUCTURE_H
 #define DBCSTRUCTURE_H
 
+#include "Platform/Define.h"
+
 #include <map>
 #include <set>
 #include <vector>
@@ -523,17 +525,6 @@ struct SpellFocusObjectEntry
 */
 
 // stored in SQL table
-struct SpellProcEventEntry
-{
-    uint32      schoolMask;                                 // if nonzero - bit mask for matching proc condition based on spell candidate's school: Fire=2, Mask=1<<(2-1)=2
-    uint32      category;                                   // if nonzero - match proc condition based on candidate spell's category
-    uint32      skillId;                                    // if nonzero - for matching proc condition based on candidate spell's skillId from SkillLineAbility.dbc (Shadow Bolt = Destruction)
-    uint32      spellFamilyName;                            // if nonzero - for matching proc condition based on candidate spell's SpellFamilyNamer value
-    uint64      spellFamilyMask;                            // if nonzero - for matching proc condition based on candidate spell's SpellFamilyFlags (like auras 107 and 108 do)
-    uint32      procFlags;                                  // bitmask for matching proc event
-    float       ppmRate;                                    // for melee (ranged?) damage spells - proc rate per minute. if zero, falls back to flat chance from Spell.dbc
-};
-
 struct SpellThreatEntry
 {
     uint32      spellId;

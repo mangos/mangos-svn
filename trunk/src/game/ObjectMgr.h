@@ -51,7 +51,6 @@ extern SQLStorage sEquipmentStorage;
 extern SQLStorage sGOStorage;
 extern SQLStorage sPageTextStore;
 extern SQLStorage sItemStorage;
-extern SQLStorage sSpellThreatStore;
 extern SQLStorage sInstanceTemplate;
 
 class Group;
@@ -93,15 +92,6 @@ struct AreaTrigger
     float  target_Orientation;
 };
 
-struct SpellTeleport
-{
-    uint32 target_mapId;
-    float  target_X;
-    float  target_Y;
-    float  target_Z;
-    float  target_Orientation;
-};
-
 typedef std::set<uint32> CellGuidSet;
 typedef std::map<uint32/*player guid*/,uint32/*instance*/> CellCorpseSet;
 struct CellObjectGuids
@@ -125,24 +115,6 @@ typedef HM_NAMESPACE::hash_map<uint32,NpcTextLocale> NpcTextLocaleMap;
 typedef HM_NAMESPACE::hash_map<uint32,PageTextLocale> PageTextLocaleMap;
 
 typedef std::multimap<uint32,uint32> QuestRelations;
-
-enum SpellTargetType
-{
-    SPELL_TARGET_TYPE_GAMEOBJECT = 0,
-    SPELL_TARGET_TYPE_CREATURE   = 1,
-    SPELL_TARGET_TYPE_DEAD       = 2
-};
-
-#define MAX_SPELL_TARGET_TYPE 3
-
-struct SpellTargetEntry
-{
-    SpellTargetEntry(SpellTargetType type_,uint32 targetEntry_) : type(type_), targetEntry(targetEntry_) {}
-    SpellTargetType type;
-    uint32 targetEntry;
-};
-
-typedef std::multimap<uint32,SpellTargetEntry> SpellScriptTarget;
 
 struct PetLevelInfo
 {
@@ -186,17 +158,6 @@ struct WeatherZoneChances
     WeatherSeasonChances data[WEATHER_SEASONS];
 };
 
-struct SpellAffection
-{
-    uint16 SpellId;
-    uint8 SchoolMask;
-    uint16 Category;
-    uint16 SkillId;
-    uint8 SpellFamily;
-    uint64 SpellFamilyMask;
-    uint16 Charges;
-};
-
 /// Player state
 enum SessionStatus
 {
@@ -235,7 +196,6 @@ class ObjectMgr
         typedef std::set< ArenaTeam * > ArenaTeamSet;
 
         typedef HM_NAMESPACE::hash_map<uint32, AreaTrigger> AreaTriggerMap;
-        typedef HM_NAMESPACE::hash_map<uint32, SpellTeleport> SpellTeleportMap;
 
         typedef HM_NAMESPACE::hash_map<uint32, ReputationOnKillEntry> RepOnKillMap;
 
@@ -387,35 +347,6 @@ class ObjectMgr
             return NULL;
         }
 
-        SpellTeleport const* GetSpellTeleport(uint32 spell_id) const
-        {
-            SpellTeleportMap::const_iterator itr = mSpellTeleports.find( spell_id );
-            if( itr != mSpellTeleports.end( ) )
-                return &itr->second;
-            return NULL;
-        }
-
-        SpellAffection const* GetSpellAffection(uint16 spellId, uint8 effectId) const
-        {
-            SpellAffectMap::const_iterator itr = mSpellAffectMap.find((spellId<<8) + effectId);
-            if( itr != mSpellAffectMap.end( ) )
-                return &itr->second;
-            return NULL;
-        }
-        bool IsAffectedBySpell(SpellEntry const *spellInfo, uint32 spellId, uint8 effectId, uint64 const& familyFlags);
-
-        SpellProcEventEntry const* GetSpellProcEvent(uint32 spellId) const
-        {
-            SpellProcEventMap::const_iterator itr = mSpellProcEventMap.find(spellId);
-            if( itr != mSpellProcEventMap.end( ) )
-                return &itr->second;
-            return NULL;
-        }
-
-        static bool IsSpellProcEventCanTriggeredBy( SpellProcEventEntry const * spellProcEvent, SpellEntry const * procSpell, uint32 procFlags );
-
-        static bool IsSpellValid(SpellEntry const * spellInfo, Player* pl = NULL, bool msg = true);
-
         ReputationOnKillEntry const* GetReputationOnKilEntry(uint32 id) const
         {
             RepOnKillMap::const_iterator itr = mRepOnKill.find(id);
@@ -449,17 +380,10 @@ class ObjectMgr
         QuestRelations mCreatureQuestRelations;
         QuestRelations mCreatureQuestInvolvedRelations;
 
-        void LoadSpellChains();
-        void LoadSpellLearnSkills();
-        void LoadSpellLearnSpells();
-
         void LoadButtonScripts();
         void LoadQuestEndScripts();
         void LoadQuestStartScripts();
         void LoadSpellScripts();
-
-        SpellScriptTarget mSpellScriptTarget;
-        void LoadSpellScriptTarget();
 
         void LoadPetCreateSpells();
         void LoadCreatureLocales();
@@ -486,11 +410,6 @@ class ObjectMgr
         void LoadTavernAreaTriggers();
         void LoadBattleMastersEntry();
         void LoadGameObjectForQuests();
-
-        void LoadSpellAffects();
-        void LoadSpellProcEvents();
-        void LoadSpellTeleports();
-        void LoadSpellThreats();
 
         void LoadItemTexts();
         void LoadPageTexts();
@@ -537,120 +456,6 @@ class ObjectMgr
 
         typedef std::multimap<int32, uint32> ExclusiveQuestGroups;
         ExclusiveQuestGroups mExclusiveQuestGroups;
-
-        struct SpellChainNode
-        {
-            uint32 prev;
-            uint32 first;
-            uint8  rank;
-        };
-
-        typedef HM_NAMESPACE::hash_map<uint32, SpellChainNode> SpellChainMap;
-        SpellChainMap mSpellChains;
-
-        uint32 GetFirstSpellInChain(uint32 spell_id)
-        {
-            SpellChainMap::iterator itr = mSpellChains.find(spell_id);
-            if(itr == mSpellChains.end())
-                return spell_id;
-
-            return itr->second.first;
-        }
-
-        uint32 GetPrevSpellInChain(uint32 spell_id)
-        {
-            SpellChainMap::iterator itr = mSpellChains.find(spell_id);
-            if(itr == mSpellChains.end())
-                return 0;
-
-            return itr->second.prev;
-        }
-
-        uint8 GetSpellRank(uint32 spell_id)
-        {
-            SpellChainMap::iterator itr = mSpellChains.find(spell_id);
-            if(itr == mSpellChains.end())
-                return 0;
-
-            return itr->second.rank;
-        }
-
-        uint32 GetLastSpellInChain(uint32 spell_id)
-        {
-            // fast check non ranked spell
-            SpellChainMap::iterator spell_itr = mSpellChains.find(spell_id);
-            if(spell_itr == mSpellChains.end())
-                return 0;
-
-            for(SpellChainMap::iterator itr = mSpellChains.begin(); itr != mSpellChains.end(); ++itr)
-            {
-                if(itr->second.first==spell_itr->second.first && itr->second.rank > spell_itr->second.rank)
-                    spell_itr = itr;
-            }
-
-            return spell_itr->first;
-        }
-
-        bool IsRankSpellDueToSpell(SpellEntry const *spellInfo_1,uint32 spellId_2);
-        bool canStackSpellRanks(SpellEntry const *spellInfo,SpellEntry const *spellInfo2);
-        bool IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2);
-        static bool IsProfessionSpell(uint32 spellId);
-        static bool IsPrimaryProfessionSpell(uint32 spellId);
-        bool IsPrimaryProfessionFirstRankSpell(uint32 spellId);
-
-        struct SpellLearnSkillNode
-        {
-            uint32 skill;
-            uint32 value;                                   // 0  - max skill value for player level
-            uint32 maxvalue;                                // 0  - max skill value for player level
-        };
-
-        typedef std::map<uint32, SpellLearnSkillNode> SpellLearnSkillMap;
-        SpellLearnSkillMap mSpellLearnSkills;
-
-        SpellLearnSkillNode const* GetSpellLearnSkill(uint32 spell_id)
-        {
-            SpellLearnSkillMap::const_iterator itr = mSpellLearnSkills.find(spell_id);
-            if(itr != mSpellLearnSkills.end())
-                return &itr->second;
-            else
-                return NULL;
-        }
-
-        struct SpellLearnSpellNode
-        {
-            uint32 spell;
-            uint32 ifNoSpell;
-            uint32 autoLearned;
-        };
-
-        typedef std::multimap<uint32, SpellLearnSpellNode> SpellLearnSpellMap;
-        SpellLearnSpellMap mSpellLearnSpells;
-
-        bool IsSpellLearnSpell(uint32 spell_id) const
-        {
-            return mSpellLearnSpells.count(spell_id)!=0;
-        }
-        SpellLearnSpellMap::const_iterator GetBeginSpellLearnSpell(uint32 spell_id) const
-        {
-            return mSpellLearnSpells.lower_bound(spell_id);
-        }
-        SpellLearnSpellMap::const_iterator GetEndSpellLearnSpell(uint32 spell_id) const
-        {
-            return mSpellLearnSpells.upper_bound(spell_id);
-        }
-
-        bool IsSpellLearnToSpell(uint32 spell_id1,uint32 spell_id2) const
-        {
-            SpellLearnSpellMap::const_iterator b = GetBeginSpellLearnSpell(spell_id1);
-            SpellLearnSpellMap::const_iterator e = GetEndSpellLearnSpell(spell_id1);
-            for(SpellLearnSpellMap::const_iterator i = b; i != e; ++i)
-                if(i->second.spell==spell_id2)
-                    return true;
-            return false;
-        }
-
-        SpellEntry const* SelectAuraRankForPlayerLevel(SpellEntry const* spellInfo, uint32 playerLevel);
 
         WeatherZoneChances const* GetWeatherChances(uint32 zone_id) const
         {
@@ -794,7 +599,6 @@ class ObjectMgr
         GameObjectForQuestSet mGameObjectForQuestSet;
         GossipTextMap       mGossipText;
         AreaTriggerMap      mAreaTriggers;
-        SpellTeleportMap    mSpellTeleports;
 
         RepOnKillMap        mRepOnKill;
 
@@ -840,12 +644,6 @@ class ObjectMgr
         PageTextLocaleMap mPageTextLocaleMap;
         RespawnTimes mCreatureRespawnTimes;
         RespawnTimes mGORespawnTimes;
-
-        typedef HM_NAMESPACE::hash_map<uint32, SpellAffection> SpellAffectMap;
-        SpellAffectMap mSpellAffectMap;
-
-        typedef HM_NAMESPACE::hash_map<uint32, SpellProcEventEntry> SpellProcEventMap;
-        SpellProcEventMap mSpellProcEventMap;
 };
 
 #define objmgr MaNGOS::Singleton<ObjectMgr>::Instance()

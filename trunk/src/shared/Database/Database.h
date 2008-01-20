@@ -16,7 +16,7 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
-#if !defined(DATABASE_H)
+#ifndef DATABASE_H
 #define DATABASE_H
 
 #include "zthread/Thread.h"

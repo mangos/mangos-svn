@@ -22,7 +22,7 @@
 
 #include "Log.h"
 #include "Database/DatabaseEnv.h"
-#include "Common.h"
+#include "Platform/Define.h"
 #include "MapManager.h"
 #include "ObjectAccessor.h"
 #include "GlobalEvents.h"

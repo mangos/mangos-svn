@@ -21,7 +21,6 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "World.h"
-#include "ObjectMgr.h"
 #include "Player.h"
 #include "Opcodes.h"
 #include "Chat.h"

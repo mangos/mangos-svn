@@ -21,7 +21,7 @@
 #include "Player.h"
 #include "UpdateMask.h"
 #include "MapManager.h"
-#include "ObjectMgr.h"
+#include "ObjectAccessor.h"
 #include "Database/DatabaseEnv.h"
 #include "Opcodes.h"
 #include "WorldSession.h"

@@ -23,6 +23,7 @@
 #include "WorldSession.h"
 #include "World.h"
 #include "ObjectMgr.h"
+#include "SpellMgr.h"
 #include "Unit.h"
 #include "QuestDef.h"
 #include "Player.h"
@@ -3335,7 +3336,7 @@ void Unit::RemoveRankAurasDueToSpell(uint32 spellId)
         uint32 i_spellId = (*i).second->GetId();
         if((*i).second && i_spellId && i_spellId != spellId)
         {
-            if(objmgr.IsRankSpellDueToSpell(spellInfo,i_spellId))
+            if(spellmgr.IsRankSpellDueToSpell(spellInfo,i_spellId))
             {
                 RemoveAurasDueToSpell(i_spellId);
 
@@ -3378,7 +3379,7 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
                 continue;
 
             // passive non-stackable spells not stackable only with another rank of same spell
-            if (!objmgr.IsRankSpellDueToSpell(Aur->GetSpellProto(), i_spellId))
+            if (!spellmgr.IsRankSpellDueToSpell(Aur->GetSpellProto(), i_spellId))
                 continue;
         }
 
@@ -3427,10 +3428,10 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
                 if (Aur->GetCasterGUID() == (*i).second->GetCasterGUID())
                     if (GetSpellSpecific(spellId) == GetSpellSpecific(i_spellId))
                         sec_match = true;
-            if( sec_match || objmgr.IsNoStackSpellDueToSpell(spellId, i_spellId) && !is_sec && !is_i_sec )
+            if( sec_match || spellmgr.IsNoStackSpellDueToSpell(spellId, i_spellId) && !is_sec && !is_i_sec )
             {
                 // if sec_match this isn't always true, needs to be rechecked
-                if (objmgr.IsRankSpellDueToSpell(Aur->GetSpellProto(), i_spellId))
+                if (spellmgr.IsRankSpellDueToSpell(Aur->GetSpellProto(), i_spellId))
                     if(CompareAuraRanks(spellId, effIndex, i_spellId, i_effIndex) < 0)
                         return false;                       // cannot remove higher rank
 
@@ -7488,7 +7489,7 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
             if(!spellProto)
                 continue;
 
-            SpellProcEventEntry const *spellProcEvent = objmgr.GetSpellProcEvent(spellProto->Id);
+            SpellProcEventEntry const *spellProcEvent = spellmgr.GetSpellProcEvent(spellProto->Id);
             if(!spellProcEvent)
             {
                 // used to prevent spam in log about same non-handled spells
@@ -7505,7 +7506,7 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
             }
 
             // Check spellProcEvent data requirements
-            if(!ObjectMgr::IsSpellProcEventCanTriggeredBy(spellProcEvent, procSpell,procFlag))
+            if(!SpellMgr::IsSpellProcEventCanTriggeredBy(spellProcEvent, procSpell,procFlag))
                 continue;
 
             // Check if current equipment allows aura to proc

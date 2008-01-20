@@ -20,9 +20,10 @@
 #include "Player.h"
 #include "BattleGround.h"
 #include "BattleGroundWS.h"
+#include "ObjectAccessor.h"
 #include "Creature.h"
+#include "Gameobject.h"
 #include "Chat.h"
-#include "ObjectMgr.h"
 #include "MapManager.h"
 #include "Language.h"
 

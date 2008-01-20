@@ -25,6 +25,7 @@
 #include "Log.h"
 #include "World.h"
 #include "ObjectMgr.h"
+#include "SpellMgr.h"
 #include "Player.h"
 #include "GossipDef.h"
 #include "SpellAuras.h"
@@ -148,7 +149,7 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
 
         ++count;
 
-        bool primary_prof_first_rank = objmgr.IsPrimaryProfessionFirstRankSpell(itr->spell->EffectTriggerSpell[0]);
+        bool primary_prof_first_rank = spellmgr.IsPrimaryProfessionFirstRankSpell(itr->spell->EffectTriggerSpell[0]);
 
         data << uint32(itr->spell->Id);
         data << uint8(_player->GetTrainerSpellState(&*itr));
@@ -159,7 +160,7 @@ void WorldSession::SendTrainerList( uint64 guid,std::string strTitle )
         data << uint8(itr->reqlevel ? itr->reqlevel : itr->spell->spellLevel);
         data << uint32(itr->reqskill);
         data << uint32(itr->reqskillvalue);
-        data << uint32(objmgr.GetPrevSpellInChain(itr->spell->EffectTriggerSpell[0]));
+        data << uint32(spellmgr.GetPrevSpellInChain(itr->spell->EffectTriggerSpell[0]));
         data << uint32(0);
         data << uint32(0);
     }

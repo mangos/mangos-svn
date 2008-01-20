@@ -18,7 +18,6 @@
 
 #include "Database/DatabaseEnv.h"
 #include "Log.h"
-#include "ObjectMgr.h"
 #include "ProgressBar.h"
 #include "Policies/SingletonImp.h"
 #include "ObjectAccessor.h"

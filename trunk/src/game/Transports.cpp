@@ -16,12 +16,13 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
  */
 
+#include "Common.h"
+
 #include "Transports.h"
 #include "MapManager.h"
 #include "ObjectMgr.h"
 #include "Path.h"
 
-#include "Common.h"
 #include "WorldPacket.h"
 #include "Database/DBCStores.h"
 #include "ProgressBar.h"

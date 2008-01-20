@@ -27,6 +27,7 @@
 #include "UpdateMask.h"
 #include "World.h"
 #include "ObjectMgr.h"
+#include "SpellMgr.h"
 #include "Player.h"
 #include "Pet.h"
 #include "Unit.h"
@@ -2461,7 +2462,7 @@ void Spell::HandleThreatSpells(uint32 spellId)
 
     m_targets.getUnitTarget()->AddThreat(m_caster, float(threatSpell->threat));
 
-    DEBUG_LOG("Spell %u, rank %u, added an additional %i threat", spellId, objmgr.GetSpellRank(spellId), threatSpell->threat);
+    DEBUG_LOG("Spell %u, rank %u, added an additional %i threat", spellId, spellmgr.GetSpellRank(spellId), threatSpell->threat);
 }
 
 void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTarget,uint32 i, float DamageMultiplier)
@@ -2646,7 +2647,7 @@ uint8 Spell::CanCast(bool strict)
         return SPELL_FAILED_REQUIRES_AREA;
 
     // not let players cast spells at mount (and let do it to creatures)
-    if(m_caster->IsMounted() && m_caster->GetTypeId()==TYPEID_PLAYER && !m_IsTriggeredSpell && !(m_spellInfo->Attributes & 0x1000000))
+    if(m_caster->IsMounted() && m_caster->GetTypeId()==TYPEID_PLAYER && !m_IsTriggeredSpell && !IsPassiveSpell(m_spellInfo->Id) && !(m_spellInfo->Attributes & 0x1000000))
         return SPELL_FAILED_NOT_MOUNTED;
 
     // always (except passive spells) check items (focus object can be required for any type casts)
@@ -2665,8 +2666,8 @@ uint8 Spell::CanCast(bool strict)
         {
             bool okDoo = false;
 
-            SpellScriptTarget::const_iterator lower = objmgr.mSpellScriptTarget.lower_bound(m_spellInfo->Id);
-            SpellScriptTarget::const_iterator upper = objmgr.mSpellScriptTarget.upper_bound(m_spellInfo->Id);
+            SpellScriptTarget::const_iterator lower = spellmgr.GetBeginSpellScriptTarget(m_spellInfo->Id);
+            SpellScriptTarget::const_iterator upper = spellmgr.GetEndSpellScriptTraget(m_spellInfo->Id);
             if(lower==upper)
                 sLog.outErrorDb("Spell (ID: %u) has effect EffectImplicitTargetA/EffectImplicitTargetB = %u (TARGET_SCRIPT), but does not have record in `spell_script_target`",m_spellInfo->Id,TARGET_SCRIPT);
 
@@ -2674,34 +2675,6 @@ uint8 Spell::CanCast(bool strict)
             {
                 switch(i_spellST->second.type)
                 {
-                    case SPELL_TARGET_TYPE_CREATURE:
-                    case SPELL_TARGET_TYPE_DEAD:
-                    {
-                        Creature *p_Creature = NULL;
-
-                        CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-                        Cell cell(p);
-                        cell.data.Part.reserved = ALL_DISTRICT;
-                        cell.SetNoCreate();                 // Really don't know what is that???
-
-                        SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
-                        float max_range = GetMaxRange(srange);
-
-                        MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*m_caster,i_spellST->second.targetEntry,i_spellST->second.type!=SPELL_TARGET_TYPE_DEAD,max_range);
-                        MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(p_Creature, u_check);
-
-                        TypeContainerVisitor<MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck>, GridTypeMapContainer >  grid_creature_searcher(searcher);
-
-                        CellLock<GridReadGuard> cell_lock(cell, p);
-                        cell_lock->Visit(cell_lock, grid_creature_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
-
-                        if(p_Creature )
-                        {
-                            m_targetUnitGUIDs[j].push_back(p_Creature->GetGUID());
-                            okDoo = true;
-                        }
-                        break;
-                    }
                     case SPELL_TARGET_TYPE_GAMEOBJECT:
                     {
                         GameObject* p_GameObject = NULL;
@@ -2731,6 +2704,35 @@ uint8 Spell::CanCast(bool strict)
                         else if( focusObject )              //Focus Object
                         {
                             m_targetGameobjectGUIDs[j].push_back(focusObject->GetGUID());
+                            okDoo = true;
+                        }
+                        break;
+                    }
+                    case SPELL_TARGET_TYPE_CREATURE:
+                    case SPELL_TARGET_TYPE_DEAD:
+                    default:
+                    {
+                        Creature *p_Creature = NULL;
+
+                        CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+                        Cell cell(p);
+                        cell.data.Part.reserved = ALL_DISTRICT;
+                        cell.SetNoCreate();                 // Really don't know what is that???
+
+                        SpellRangeEntry const* srange = sSpellRangeStore.LookupEntry(m_spellInfo->rangeIndex);
+                        float max_range = GetMaxRange(srange);
+
+                        MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck u_check(*m_caster,i_spellST->second.targetEntry,i_spellST->second.type!=SPELL_TARGET_TYPE_DEAD,max_range);
+                        MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck> searcher(p_Creature, u_check);
+
+                        TypeContainerVisitor<MaNGOS::CreatureLastSearcher<MaNGOS::NearestCreatureEntryWithLiveStateInObjectRangeCheck>, GridTypeMapContainer >  grid_creature_searcher(searcher);
+
+                        CellLock<GridReadGuard> cell_lock(cell, p);
+                        cell_lock->Visit(cell_lock, grid_creature_searcher, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+
+                        if(p_Creature )
+                        {
+                            m_targetUnitGUIDs[j].push_back(p_Creature->GetGUID());
                             okDoo = true;
                         }
                         break;
@@ -3840,7 +3842,7 @@ void Spell::UpdatePointers()
 
 bool Spell::IsAffectedBy(SpellEntry const *spellInfo, uint32 effectId)
 {
-    return objmgr.IsAffectedBySpell(m_spellInfo,spellInfo->Id,effectId,spellInfo->EffectItemType[effectId]);
+    return spellmgr.IsAffectedBySpell(m_spellInfo,spellInfo->Id,effectId,spellInfo->EffectItemType[effectId]);
 }
 
 bool Spell::CheckTargetCreatureType(Unit* target) const

@@ -22,6 +22,7 @@
 #include "WorldSession.h"
 #include "World.h"
 #include "ObjectMgr.h"
+#include "SpellMgr.h"
 #include "Player.h"
 #include "Opcodes.h"
 #include "GameObject.h"
@@ -274,7 +275,7 @@ bool ChatHandler::HandleReloadSkillDiscoveryTemplateCommand(const char* /*args*/
 bool ChatHandler::HandleReloadSpellAffectCommand(const char*)
 {
     sLog.outString( "Re-Loading SpellAffect definitions..." );
-    objmgr.LoadSpellAffects();
+    spellmgr.LoadSpellAffects();
     SendGlobalSysMessage("DB table `spell_affect` (spell mods apply requirements) reloaded.");
     return true;
 }
@@ -282,7 +283,7 @@ bool ChatHandler::HandleReloadSpellAffectCommand(const char*)
 bool ChatHandler::HandleReloadSpellChainCommand(const char*)
 {
     sLog.outString( "Re-Loading Spell Chain Data... " );
-    objmgr.LoadSpellChains();
+    spellmgr.LoadSpellChains();
     SendGlobalSysMessage("DB table `spell_chain` (spell ranks) reloaded.");
     return true;
 }
@@ -290,7 +291,7 @@ bool ChatHandler::HandleReloadSpellChainCommand(const char*)
 bool ChatHandler::HandleReloadSpellLearnSkillCommand(const char*)
 {
     sLog.outString( "Re-Loading Spell Learn Skills..." );
-    objmgr.LoadSpellLearnSkills();
+    spellmgr.LoadSpellLearnSkills();
     SendGlobalSysMessage("DB table `spell_learn_skill` reloaded.");
     return true;
 }
@@ -298,7 +299,7 @@ bool ChatHandler::HandleReloadSpellLearnSkillCommand(const char*)
 bool ChatHandler::HandleReloadSpellLearnSpellCommand(const char*)
 {
     sLog.outString( "Re-Loading Spell Learn Spells..." );
-    objmgr.LoadSpellLearnSpells();
+    spellmgr.LoadSpellLearnSpells();
     SendGlobalSysMessage("DB table `spell_learn_spell` reloaded.");
     return true;
 }
@@ -306,7 +307,7 @@ bool ChatHandler::HandleReloadSpellLearnSpellCommand(const char*)
 bool ChatHandler::HandleReloadSpellProcEventCommand(const char*)
 {
     sLog.outString( "Re-Loading Spell Proc Event conditions..." );
-    objmgr.LoadSpellProcEvents();
+    spellmgr.LoadSpellProcEvents();
     SendGlobalSysMessage("DB table `spell_proc_event` (spell proc trigger requirements) reloaded.");
     return true;
 }
@@ -314,7 +315,7 @@ bool ChatHandler::HandleReloadSpellProcEventCommand(const char*)
 bool ChatHandler::HandleReloadSpellScriptTargetCommand(const char*)
 {
     sLog.outString( "Re-Loading SpellsScriptTarget..." );
-    objmgr.LoadSpellScriptTarget();
+    spellmgr.LoadSpellScriptTarget();
     SendGlobalSysMessage("DB table `spell_script_target` (spell targets selection in case specific creature/GO requirements.");
     return true;
 }
@@ -322,7 +323,7 @@ bool ChatHandler::HandleReloadSpellScriptTargetCommand(const char*)
 bool ChatHandler::HandleReloadSpellTeleportCommand(const char*)
 {
     sLog.outString( "Re-Loading Spell teleport coordinates..." );
-    objmgr.LoadSpellTeleports();
+    spellmgr.LoadSpellTeleports();
     SendGlobalSysMessage("DB table `spell_teleport` reloaded.");
     return true;
 }
@@ -1302,7 +1303,7 @@ bool ChatHandler::HandleLearnAllCommand(const char* /*args*/)
             continue;
 
         SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell);
-        if(!spellInfo || !ObjectMgr::IsSpellValid(spellInfo,m_session->GetPlayer()))
+        if(!spellInfo || !SpellMgr::IsSpellValid(spellInfo,m_session->GetPlayer()))
         {
             PSendSysMessage(LANG_COMMAND_SPELL_BROKEN,spell);
             continue;
@@ -1342,7 +1343,7 @@ bool ChatHandler::HandleLearnAllGMCommand(const char* /*args*/)
         uint32 spell = atol((char*)gmSpellList[gmSpellIter++]);
 
         SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell);
-        if(!spellInfo || !ObjectMgr::IsSpellValid(spellInfo,m_session->GetPlayer()))
+        if(!spellInfo || !SpellMgr::IsSpellValid(spellInfo,m_session->GetPlayer()))
         {
             PSendSysMessage(LANG_COMMAND_SPELL_BROKEN,spell);
             continue;
@@ -1397,12 +1398,12 @@ bool ChatHandler::HandleLearnAllMySpellsCommand(const char* /*args*/)
         //TODO: skip triggered spells
 
         // skip spells with first rank learned as talent (and all talents then also)
-        uint32 first_rank = objmgr.GetFirstSpellInChain(spellInfo->Id);
+        uint32 first_rank = spellmgr.GetFirstSpellInChain(spellInfo->Id);
         if(GetTalentSpellCost(first_rank) > 0 )
             continue;
 
         // skip broken spells
-        if(!ObjectMgr::IsSpellValid(spellInfo,m_session->GetPlayer(),false))
+        if(!SpellMgr::IsSpellValid(spellInfo,m_session->GetPlayer(),false))
             continue;
 
         m_session->GetPlayer()->learnSpell(i);
@@ -1446,7 +1447,7 @@ bool ChatHandler::HandleLearnAllMyTalentsCommand(const char* /*args*/)
             continue;
 
         // get possible non talent last spell in chain
-        uint32 last_spell_id = objmgr.GetLastSpellInChain(spellid);
+        uint32 last_spell_id = spellmgr.GetLastSpellInChain(spellid);
 
         // already known high rank;
         if(player->HasSpell(last_spell_id))
@@ -1461,17 +1462,17 @@ bool ChatHandler::HandleLearnAllMyTalentsCommand(const char* /*args*/)
         }
 
         SpellEntry const* spellInfo = sSpellStore.LookupEntry(spellid);
-        if(!spellInfo || !ObjectMgr::IsSpellValid(spellInfo,m_session->GetPlayer(),false))
+        if(!spellInfo || !SpellMgr::IsSpellValid(spellInfo,m_session->GetPlayer(),false))
             continue;
 
         // learn highest rank of talent
         player->learnSpell(spellid);
 
         // and learn all non-talent spell ranks
-        for(uint32 cur_id = last_spell_id; cur_id != spellid && cur_id != 0; cur_id = objmgr.GetPrevSpellInChain(cur_id))
+        for(uint32 cur_id = last_spell_id; cur_id != spellid && cur_id != 0; cur_id = spellmgr.GetPrevSpellInChain(cur_id))
         {
             SpellEntry const* spellInfo2 = sSpellStore.LookupEntry(cur_id);
-            if(!spellInfo2 || !ObjectMgr::IsSpellValid(spellInfo2,m_session->GetPlayer(),false))
+            if(!spellInfo2 || !SpellMgr::IsSpellValid(spellInfo2,m_session->GetPlayer(),false))
                 continue;
 
             player->learnSpell(cur_id);
@@ -1522,7 +1523,7 @@ bool ChatHandler::HandleLearnAllCraftsCommand(const char* /*args*/)
                     continue;
 
                 SpellEntry const* spellInfo = sSpellStore.LookupEntry(skillLine->spellId);
-                if(!spellInfo || !ObjectMgr::IsSpellValid(spellInfo,m_session->GetPlayer(),false))
+                if(!spellInfo || !SpellMgr::IsSpellValid(spellInfo,m_session->GetPlayer(),false))
                     continue;
 
                 m_session->GetPlayer()->learnSpell(skillLine->spellId);
@@ -1563,7 +1564,7 @@ bool ChatHandler::HandleLearnCommand(const char* args)
     }
 
     SpellEntry const* spellInfo = sSpellStore.LookupEntry(spell);
-    if(!spellInfo || !ObjectMgr::IsSpellValid(spellInfo,m_session->GetPlayer()))
+    if(!spellInfo || !SpellMgr::IsSpellValid(spellInfo,m_session->GetPlayer()))
     {
         PSendSysMessage(LANG_COMMAND_SPELL_BROKEN,spell);
         return true;
@@ -2268,7 +2269,7 @@ bool ChatHandler::HandleLookupSpellCommand(const char* args)
 
                 // unit32 used to prevent interpreting uint8 as char at output
                 // find rank of learned spell for learning spell
-                uint32 rank = objmgr.GetSpellRank(learn ? spellInfo->EffectTriggerSpell[0] : id);
+                uint32 rank = spellmgr.GetSpellRank(learn ? spellInfo->EffectTriggerSpell[0] : id);
 
                 // send spell in "id - [name, rank N] [talent] [passive] [learn] [known]" format
                 std::ostringstream ss;
@@ -4434,7 +4435,7 @@ bool ChatHandler::HandleCastCommand(const char* args)
     if(!spellInfo)
         return false;
 
-    if(!ObjectMgr::IsSpellValid(spellInfo,m_session->GetPlayer()))
+    if(!SpellMgr::IsSpellValid(spellInfo,m_session->GetPlayer()))
     {
         PSendSysMessage(LANG_COMMAND_SPELL_BROKEN,spell);
         return true;
