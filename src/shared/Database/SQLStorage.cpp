@@ -19,7 +19,7 @@
 #include "SQLStorage.h"
 #include "ProgressBar.h"
 #include "Log.h"
-#include "DBCFile.h"
+#include "dbcfile.h"
 
 #ifdef DO_POSTGRESQL
 extern DatabasePostgre  WorldDatabase;
