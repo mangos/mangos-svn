@@ -22,7 +22,7 @@
 #include "BattleGroundWS.h"
 #include "ObjectAccessor.h"
 #include "Creature.h"
-#include "Gameobject.h"
+#include "GameObject.h"
 #include "Chat.h"
 #include "MapManager.h"
 #include "Language.h"
