@@ -124,7 +124,7 @@ uint32 GenerateEnchSuffixFactor(uint32 item_id)
 {
     float suffixFactor = 0;
 
-    ItemPrototype const *itemProto = sItemStorage.LookupEntry<ItemPrototype>(item_id);
+    ItemPrototype const *itemProto = objmgr.GetItemPrototype(item_id);
 
     if(!itemProto)
         return 0;

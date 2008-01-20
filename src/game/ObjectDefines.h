@@ -19,6 +19,8 @@
 #ifndef MANGOS_OBJECTDEFINES_H
 #define MANGOS_OBJECTDEFINES_H
 
+#include "Platform/Define.h"
+
 enum HighGuid
 {
     HIGHGUID_ITEM           = 0x40000000,                   // blizz 40000000
@@ -32,6 +34,10 @@ enum HighGuid
     HIGHGUID_MO_TRANSPORT   = 0x1FC00000,                   // blizz 1FC00000 (type 15)
     HIGHGUID_TRANSPORT      = 0x1FA70000                    // blizz 1FA70000 (type 11)
 };
+
+#define GUID_HIPART(x)   (uint32)(uint64(x) >> 32)
+#define GUID_LOPART(x)   (uint32)(uint64(x) & 0xFFFFFFFFULL)
+#define MAKE_GUID(l, h)  uint64( uint32(l) | ( uint64(h) << 32 ) )
 
 #define IS_CREATURE_GUID(Guid)       ( GUID_HIPART(Guid) == HIGHGUID_UNIT )
 #define IS_PLAYER_GUID(Guid)         ( GUID_HIPART(Guid) == HIGHGUID_PLAYER )

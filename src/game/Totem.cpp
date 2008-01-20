@@ -19,11 +19,11 @@
 #include "Totem.h"
 #include "WorldPacket.h"
 #include "MapManager.h"
-#include "Database/DBCStores.h"
 #include "Log.h"
 #include "Group.h"
 #include "Player.h"
 #include "ObjectMgr.h"
+#include "SpellMgr.h"
 
 Totem::Totem( WorldObject *instantiator ) : Creature( instantiator )
 {

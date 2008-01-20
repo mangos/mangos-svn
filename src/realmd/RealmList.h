@@ -24,7 +24,6 @@
 #define _REALMLIST_H
 
 #include "Common.h"
-//#include "Database/DatabaseEnv.h"
 
 /// Storage object for a realm
 struct Realm

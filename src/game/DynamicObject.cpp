@@ -23,7 +23,7 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "World.h"
-#include "ObjectMgr.h"
+#include "ObjectAccessor.h"
 #include "Database/DatabaseEnv.h"
 #include "SpellAuras.h"
 #include "MapManager.h"

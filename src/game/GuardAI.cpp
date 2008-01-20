@@ -21,7 +21,6 @@
 #include "Creature.h"
 #include "Player.h"
 #include "TargetedMovementGenerator.h"
-#include "Database/DBCStores.h"
 #include "ObjectAccessor.h"
 #include "World.h"
 

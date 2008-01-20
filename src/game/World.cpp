@@ -33,6 +33,7 @@
 #include "SkillDiscovery.h"
 #include "World.h"
 #include "ObjectMgr.h"
+#include "SpellMgr.h"
 #include "Chat.h"
 #include "Database/DBCStores.h"
 #include "LootMgr.h"
@@ -600,19 +601,19 @@ void World::SetInitialWorldSettings()
     objmgr.LoadGameobjectInfo();
 
     sLog.outString( "Loading Spell Chain Data..." );
-    objmgr.LoadSpellChains();
+    spellmgr.LoadSpellChains();
 
     sLog.outString( "Loading Spell Learn Skills..." );
-    objmgr.LoadSpellLearnSkills();                          // must be after LoadSpellChains
+    spellmgr.LoadSpellLearnSkills();                          // must be after LoadSpellChains
 
     sLog.outString( "Loading Spell Learn Spells..." );
-    objmgr.LoadSpellLearnSpells();
+    spellmgr.LoadSpellLearnSpells();
 
     sLog.outString( "Loading Spell Proc Event conditions..." );
-    objmgr.LoadSpellProcEvents();
+    spellmgr.LoadSpellProcEvents();
 
     sLog.outString( "Loading Aggro Spells Definitions...");
-    objmgr.LoadSpellThreats();
+    spellmgr.LoadSpellThreats();
 
     sLog.outString( "Loading NPC Texts..." );
     objmgr.LoadGossipText();
@@ -639,7 +640,7 @@ void World::SetInitialWorldSettings()
     objmgr.LoadCreatureTemplates();
 
     sLog.outString( "Loading SpellsScriptTarget...");
-    objmgr.LoadSpellScriptTarget();                         // must be after LoadCreatureTemplates and LoadGameobjectInfo
+    spellmgr.LoadSpellScriptTarget();                       // must be after LoadCreatureTemplates and LoadGameobjectInfo
 
     sLog.outString( "Loading Creature Reputation OnKill Data..." );
     objmgr.LoadReputationOnKill();
@@ -687,10 +688,10 @@ void World::SetInitialWorldSettings()
     objmgr.LoadGraveyardZones();
 
     sLog.outString( "Loading Spell teleport coordinates..." );
-    objmgr.LoadSpellTeleports();
+    spellmgr.LoadSpellTeleports();
 
     sLog.outString( "Loading SpellAffect definitions..." );
-    objmgr.LoadSpellAffects();
+    spellmgr.LoadSpellAffects();
 
     sLog.outString( "Loading player Create Info & Level Stats..." );
     objmgr.LoadPlayerInfo();

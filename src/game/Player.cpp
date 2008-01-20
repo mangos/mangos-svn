@@ -22,6 +22,7 @@
 #include "Log.h"
 #include "Opcodes.h"
 #include "ObjectMgr.h"
+#include "SpellMgr.h"
 #include "World.h"
 #include "WorldPacket.h"
 #include "WorldSession.h"
@@ -941,7 +942,7 @@ void Player::Update( uint32 p_time )
         {
             // m_nextSave reseted in SaveToDB call
             SaveToDB();
-            sLog.outBasic("Player '%u' '%s' Saved", GetGUIDLow(), GetName());
+            sLog.outDetail("Player '%u' '%s' Saved", GetGUIDLow(), GetName());
         }
         else
         {
@@ -2431,7 +2432,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
         return false;
     }
 
-    if(!ObjectMgr::IsSpellValid(spellInfo,this,false))
+    if(!SpellMgr::IsSpellValid(spellInfo,this,false))
     {
         // do character spell book cleanup (all characters)
         if(state == PLAYERSPELL_UNCHANGED)                  // spell load case
@@ -2471,7 +2472,7 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
     bool superceded_old = false;
 
     // replace spells in action bars and spellbook to bigger rank if only one spell rank must be accessible
-    if(newspell->active && objmgr.GetSpellRank(spellInfo->Id) != 0)
+    if(newspell->active && spellmgr.GetSpellRank(spellInfo->Id) != 0)
     {
         for( PlayerSpellMap::iterator itr = m_spells.begin(); itr != m_spells.end(); ++itr )
         {
@@ -2479,14 +2480,14 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
             SpellEntry const *i_spellInfo = sSpellStore.LookupEntry(itr->first);
             if(!i_spellInfo) continue;
 
-            if( objmgr.IsRankSpellDueToSpell(spellInfo,itr->first) &&
-                !objmgr.canStackSpellRanks(spellInfo,i_spellInfo) )
+            if( spellmgr.IsRankSpellDueToSpell(spellInfo,itr->first) &&
+                !SpellMgr::canStackSpellRanks(spellInfo,i_spellInfo) )
             {
                 if(itr->second->active)
                 {
                     WorldPacket data(SMSG_SUPERCEDED_SPELL, (4));
 
-                    if(objmgr.GetSpellRank(spell_id) >= objmgr.GetSpellRank(itr->first))
+                    if(spellmgr.GetSpellRank(spell_id) >= spellmgr.GetSpellRank(itr->first))
                     {
                         data << uint16(itr->first);
                         data << uint16(spell_id);
@@ -2567,14 +2568,14 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
     // update free primary prof.points (if any, can be none in case GM .learn prof. learning)
     if(uint32 freeProfs = GetFreePrimaryProffesionPoints())
     {
-        if(objmgr.IsPrimaryProfessionFirstRankSpell(spell_id))
+        if(spellmgr.IsPrimaryProfessionFirstRankSpell(spell_id))
             SetFreePrimaryProffesions(freeProfs-1);
     }
 
     // add dependent skills
     uint16 maxskill     = GetMaxSkillValueForLevel();
 
-    ObjectMgr::SpellLearnSkillNode const* spellLearnSkill = objmgr.GetSpellLearnSkill(spell_id);
+    SpellLearnSkillNode const* spellLearnSkill = spellmgr.GetSpellLearnSkill(spell_id);
 
     if(spellLearnSkill)
     {
@@ -2593,10 +2594,10 @@ bool Player::addSpell(uint16 spell_id, uint8 active, PlayerSpellState state, uin
     }
 
     // learn dependent spells
-    ObjectMgr::SpellLearnSpellMap::const_iterator spell_begin = objmgr.GetBeginSpellLearnSpell(spell_id);
-    ObjectMgr::SpellLearnSpellMap::const_iterator spell_end   = objmgr.GetEndSpellLearnSpell(spell_id);
+    SpellLearnSpellMap::const_iterator spell_begin = spellmgr.GetBeginSpellLearnSpell(spell_id);
+    SpellLearnSpellMap::const_iterator spell_end   = spellmgr.GetEndSpellLearnSpell(spell_id);
 
-    for(ObjectMgr::SpellLearnSpellMap::const_iterator itr = spell_begin; itr != spell_end; ++itr)
+    for(SpellLearnSpellMap::const_iterator itr = spell_begin; itr != spell_end; ++itr)
     {
         if(!itr->second.autoLearned && (!itr->second.ifNoSpell || !HasSpell(itr->second.ifNoSpell)))
             learnSpell(itr->second.spell);
@@ -2652,7 +2653,7 @@ void Player::removeSpell(uint16 spell_id)
     }
 
     // update free primary prof.points (if not overflow setting, can be in case GM use before .learn prof. learning)
-    if(objmgr.IsPrimaryProfessionFirstRankSpell(spell_id))
+    if(spellmgr.IsPrimaryProfessionFirstRankSpell(spell_id))
     {
         uint32 freeProfs = GetFreePrimaryProffesionPoints()+1;
         if(freeProfs <= sWorld.getConfig(CONFIG_MAX_PRIMARY_TRADE_SKILL))
@@ -2660,21 +2661,21 @@ void Player::removeSpell(uint16 spell_id)
     }
 
     // remove dependent skill
-    ObjectMgr::SpellLearnSkillNode const* spellLearnSkill = objmgr.GetSpellLearnSkill(spell_id);
+    SpellLearnSkillNode const* spellLearnSkill = spellmgr.GetSpellLearnSkill(spell_id);
 
     if(spellLearnSkill)
     {
-        uint32 prev_spell = objmgr.GetPrevSpellInChain(spell_id);
+        uint32 prev_spell = spellmgr.GetPrevSpellInChain(spell_id);
         if(!prev_spell)                                     // first rank, remove skill
             SetSkill(spellLearnSkill->skill,0,0);
         else
         {
             // search prev. skill setting by spell ranks chain
-            ObjectMgr::SpellLearnSkillNode const* prevSkill = objmgr.GetSpellLearnSkill(prev_spell);
+            SpellLearnSkillNode const* prevSkill = spellmgr.GetSpellLearnSkill(prev_spell);
             while(!prevSkill && prev_spell)
             {
-                prev_spell = objmgr.GetPrevSpellInChain(prev_spell);
-                prevSkill = objmgr.GetSpellLearnSkill(objmgr.GetFirstSpellInChain(prev_spell));
+                prev_spell = spellmgr.GetPrevSpellInChain(prev_spell);
+                prevSkill = spellmgr.GetSpellLearnSkill(spellmgr.GetFirstSpellInChain(prev_spell));
             }
 
             if(!prevSkill)                                  // not found prev skill setting, remove skill
@@ -2699,10 +2700,10 @@ void Player::removeSpell(uint16 spell_id)
     }
 
     // remove dependent spells
-    ObjectMgr::SpellLearnSpellMap::const_iterator spell_begin = objmgr.GetBeginSpellLearnSpell(spell_id);
-    ObjectMgr::SpellLearnSpellMap::const_iterator spell_end   = objmgr.GetEndSpellLearnSpell(spell_id);
+    SpellLearnSpellMap::const_iterator spell_begin = spellmgr.GetBeginSpellLearnSpell(spell_id);
+    SpellLearnSpellMap::const_iterator spell_end   = spellmgr.GetEndSpellLearnSpell(spell_id);
 
-    for(ObjectMgr::SpellLearnSpellMap::const_iterator itr = spell_begin; itr != spell_end; ++itr)
+    for(SpellLearnSpellMap::const_iterator itr = spell_begin; itr != spell_end; ++itr)
         removeSpell(itr->second.spell);
 }
 
@@ -2896,10 +2897,10 @@ bool Player::resetTalents(bool no_cost)
                 }
 
                 // remove learned spells (all ranks)
-                uint32 itrFirstId = objmgr.GetFirstSpellInChain(itr->first);
+                uint32 itrFirstId = spellmgr.GetFirstSpellInChain(itr->first);
 
                 // unlearn if first rank is talent or learned by talent
-                if (itrFirstId == talentInfo->RankID[j] || objmgr.IsSpellLearnToSpell(talentInfo->RankID[j],itrFirstId))
+                if (itrFirstId == talentInfo->RankID[j] || spellmgr.IsSpellLearnToSpell(talentInfo->RankID[j],itrFirstId))
                 {
                     RemoveAurasDueToSpell(itr->first);
                     removeSpell(itr->first);
@@ -3178,7 +3179,7 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
         return TRAINER_SPELL_RED;
 
     // check prev.rank requirement
-    uint32 prev_id =  objmgr.GetPrevSpellInChain(learned_spell_id);
+    uint32 prev_id =  spellmgr.GetPrevSpellInChain(learned_spell_id);
     if(prev_id && !HasSpell(prev_id))
         return TRAINER_SPELL_RED;
 
@@ -3193,7 +3194,7 @@ TrainerSpellState Player::GetTrainerSpellState(TrainerSpell const* trainer_spell
         return TRAINER_SPELL_GREEN;
 
     // check primary prof. limit
-    if(objmgr.IsPrimaryProfessionFirstRankSpell(learned_spell_id) && GetFreePrimaryProffesionPoints() == 0)
+    if(spellmgr.IsPrimaryProfessionFirstRankSpell(learned_spell_id) && GetFreePrimaryProffesionPoints() == 0)
         return TRAINER_SPELL_RED;
 
     return TRAINER_SPELL_GREEN;
@@ -14481,7 +14482,7 @@ bool Player::IsAffectedBySpellmod(SpellEntry const *spellInfo, SpellModifier *mo
     if ((mod->charges == -1) && (mod->lastAffected != spellInfo->Id))
         return false;
 
-    return objmgr.IsAffectedBySpell(spellInfo,mod->spellId,mod->effectId,mod->mask);
+    return spellmgr.IsAffectedBySpell(spellInfo,mod->spellId,mod->effectId,mod->mask);
 }
 
 void Player::AddSpellMod(SpellModifier* mod, bool apply)

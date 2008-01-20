@@ -20,11 +20,11 @@
 #include "WorldPacket.h"
 #include "WorldSession.h"
 #include "World.h"
-#include "ObjectMgr.h"
 #include "Log.h"
 #include "Opcodes.h"
 #include "UpdateData.h"
 #include "MapManager.h"
+#include "Player.h"
 
 void WorldSession::HandleDuelAcceptedOpcode(WorldPacket& recvPacket)
 {

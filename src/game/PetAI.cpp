@@ -24,7 +24,7 @@
 #include "Database/DBCStores.h"
 #include "Spell.h"
 #include "ObjectAccessor.h"
-#include "ObjectMgr.h"
+#include "SpellMgr.h"
 #include "Creature.h"
 #include "World.h"
 

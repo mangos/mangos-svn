@@ -652,6 +652,12 @@
 				RelativePath="..\..\src\game\RedZoneDistrict.h">
 			</File>
 			<File
+				RelativePath="..\..\src\game\SpellMgr.cpp">
+			</File>
+			<File
+				RelativePath="..\..\src\game\SpellMgr.h">
+			</File>
+			<File
 				RelativePath="..\..\src\game\StatSystem.cpp">
 			</File>
 			<File
