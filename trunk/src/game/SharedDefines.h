@@ -539,7 +539,7 @@ enum Targets
     TARGET_CHAIN_HEAL                  = 45,
     TARGET_DYNAMIC_OBJECT              = 47,
     TARGET_AREAEFFECT_CUSTOM_2         = 52,
-    TARGET_CURRENT_SELECTED_ENEMY      = 53,
+    TARGET_CURRENT_SELECTED_ENEMY      = 53,                // if used in A and B==16 then enemy and nearest enemies, in B no visible affect different from provided A
     TARGET_SINGLE_FRIEND_2             = 57,
     TARGET_AREAEFFECT_PARTY_AND_CLASS  = 61,
     TARGET_SINGLE_ENEMY                = 77,

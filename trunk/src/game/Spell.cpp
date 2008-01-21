@@ -360,16 +360,28 @@ void Spell::FillTargetMap()
         std::list<Unit*> tmpUnitMap;
 
         // TargetA/TargetB dependent from each other, we not switch to full support this dependences
-        // but need it support inn some know cases
-        if( m_spellInfo->EffectImplicitTargetA[i]==TARGET_ALL_AROUND_CASTER &&
-            (m_spellInfo->EffectImplicitTargetB[i]==TARGET_ALL_PARTY || m_spellInfo->EffectImplicitTargetB[i]==TARGET_ALL_FRIENDLY_UNITS_AROUND_CASTER) )
+        // but need it support in some know cases
+        switch(m_spellInfo->EffectImplicitTargetA[i])
         {
-            SetTargetMap(i,m_spellInfo->EffectImplicitTargetB[i],tmpUnitMap);
-        }
-        else
-        {
-            SetTargetMap(i,m_spellInfo->EffectImplicitTargetA[i],tmpUnitMap);
-            SetTargetMap(i,m_spellInfo->EffectImplicitTargetB[i],tmpUnitMap);
+            case TARGET_ALL_AROUND_CASTER:
+                if( m_spellInfo->EffectImplicitTargetB[i]==TARGET_ALL_PARTY || 
+                    m_spellInfo->EffectImplicitTargetB[i]==TARGET_ALL_FRIENDLY_UNITS_AROUND_CASTER )
+                {
+                    SetTargetMap(i,m_spellInfo->EffectImplicitTargetB[i],tmpUnitMap);
+                }
+                else
+                {
+                    SetTargetMap(i,m_spellInfo->EffectImplicitTargetA[i],tmpUnitMap);
+                    SetTargetMap(i,m_spellInfo->EffectImplicitTargetB[i],tmpUnitMap);
+                }
+                break;
+            case TARGET_CURRENT_SELECTED_ENEMY:
+                SetTargetMap(i,m_spellInfo->EffectImplicitTargetA[i],tmpUnitMap);
+                break;
+            default:
+                SetTargetMap(i,m_spellInfo->EffectImplicitTargetA[i],tmpUnitMap);
+                SetTargetMap(i,m_spellInfo->EffectImplicitTargetB[i],tmpUnitMap);
+                break;
         }
 
         if( (m_spellInfo->EffectImplicitTargetA[i]==0 || m_spellInfo->EffectImplicitTargetA[i]==TARGET_EFFECT_SELECT) &&
@@ -1031,14 +1043,26 @@ void Spell::SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap)
         }break;
         case TARGET_CURRENT_SELECTED_ENEMY:
         {
-            CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
-            Cell cell(p);
-            cell.data.Part.reserved = ALL_DISTRICT;
-            cell.SetNoCreate();
-            MaNGOS::SpellNotifierPlayer notifier(*this, TagUnitMap, i, radius);
-            TypeContainerVisitor<MaNGOS::SpellNotifierPlayer, WorldTypeMapContainer > player_notifier(notifier);
-            CellLock<GridReadGuard> cell_lock(cell, p);
-            cell_lock->Visit(cell_lock, player_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+            Unit* currentTarget = m_targets.getUnitTarget();
+
+            if(currentTarget)
+            {
+                TagUnitMap.push_back(currentTarget);
+
+                if(m_spellInfo->EffectImplicitTargetB[i]==TARGET_ALL_ENEMY_IN_AREA_INSTANT)
+                {
+                    CellPair p(MaNGOS::ComputeCellPair(m_caster->GetPositionX(), m_caster->GetPositionY()));
+                    Cell cell(p);
+                    cell.data.Part.reserved = ALL_DISTRICT;
+                    cell.SetNoCreate();
+                    MaNGOS::SpellNotifierCreatureAndPlayer notifier(*this, TagUnitMap, radius,PUSH_TARGET_CENTER, SPELL_TARGETS_AOE_DAMAGE);
+                    TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, WorldTypeMapContainer > world_notifier(notifier);
+                    TypeContainerVisitor<MaNGOS::SpellNotifierCreatureAndPlayer, GridTypeMapContainer > grid_notifier(notifier);
+                    CellLock<GridReadGuard> cell_lock(cell, p);
+                    cell_lock->Visit(cell_lock, world_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+                    cell_lock->Visit(cell_lock, grid_notifier, *MapManager::Instance().GetMap(m_caster->GetMapId(), m_caster));
+                }
+            }
         }break;
         default:
         {
