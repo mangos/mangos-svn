@@ -427,6 +427,12 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
         return;
     }
 
+    if( GetPlayer()->isInFlight() )
+    {
+        SendTradeStatus(TRADE_STATUS_TARGET_TO_FAR);
+        return;
+    }
+
     recvPacket >> ID;
 
     Player* pOther = ObjectAccessor::FindPlayer( ID );
@@ -446,6 +452,12 @@ void WorldSession::HandleInitiateTradeOpcode(WorldPacket& recvPacket)
     if( !pOther->isAlive() )
     {
         SendTradeStatus(TRADE_STATUS_TARGET_DEAD);
+        return;
+    }
+
+    if( pOther->isInFlight() )
+    {
+        SendTradeStatus(TRADE_STATUS_TARGET_TO_FAR);
         return;
     }
 
