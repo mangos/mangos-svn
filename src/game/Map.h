@@ -24,7 +24,6 @@
 #include "zthread/Lockable.h"
 #include "zthread/Mutex.h"
 #include "zthread/FairReadWriteLock.h"
-#include "vmap/IVMapManager.h"
 #include "Database/DBCStructure.h"
 #include "GridDefines.h"
 #include "Cell.h"
@@ -119,7 +118,7 @@ struct InstanceTemplate
 typedef HM_NAMESPACE::hash_map<Creature*, CreatureMover> CreatureMoveList;
 
 #define MAX_HEIGHT            100000.0f                     // can be use for find ground height at surface
-#define INVALID_HEIGHT        (VMAP_INVALID_HEIGHT)         // for check, real value for unknown height is VMAP_INVALID_HEIGHT_VALUE
+#define INVALID_HEIGHT       -100000.0f                     // for check, must be equal to VMAP_INVALID_HEIGHT, real value for unknown height is VMAP_INVALID_HEIGHT_VALUE
 
 class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mutex>
 {
