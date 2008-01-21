@@ -1262,6 +1262,40 @@ void Spell::EffectTriggerSpell(uint32 i)
         return;
     }
 
+    // some triggred spells require specific equippemnt
+    if(spellInfo->EquippedItemClass >=0 && m_caster->GetTypeId()==TYPEID_PLAYER)
+    {
+        Player* p_caster = (Player*)m_caster;
+
+        // main hand weapon required
+        if(spellInfo->AttributesEx3 & 0x0000000000000400)
+        {
+            Item* item = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND);
+
+            // skip spell if no weapon in slot or broken
+            if(!item || item->IsBroken() )
+                return;
+
+            // skip spell if weapon not fit to triggered spell
+            if(!item->IsFitToSpellRequirements(spellInfo))
+                return;
+        }
+
+        // offhand hand weapon required
+        if(spellInfo->AttributesEx3 & 0x0000000001000000)
+        {
+            Item* item = ((Player*)m_caster)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+
+            // skip spell if no weapon in slot or broken
+            if(!item || item->IsBroken() )
+                return;
+
+            // skip spell if weapon not fit to triggered spell
+            if(!item->IsFitToSpellRequirements(spellInfo))
+                return;
+        }
+    }
+
     // some triggered spells must be casted instantly (for example, if next effect case instant kill caster)
     bool instant = false;
     for(uint32 j = i+1; j < 3; ++j)
@@ -3002,7 +3036,11 @@ void Spell::EffectWeaponDmg(uint32 i)
     bool criticalhit = false;
 
     WeaponAttackType attType = BASE_ATTACK;
-    if(m_spellInfo->rangeIndex != 1 && m_spellInfo->rangeIndex != 2 && m_spellInfo->rangeIndex != 7)
+
+    // offhand hand weapon required (not used with mainhand required (spellInfo->AttributesEx3 & 0x0000000000000400) in spell with damage effect 
+    if(m_spellInfo->AttributesEx3 & 0x0000000001000000)
+        attType = OFF_ATTACK;
+    else if(m_spellInfo->rangeIndex != 1 && m_spellInfo->rangeIndex != 2 && m_spellInfo->rangeIndex != 7)
     {
         attType = RANGED_ATTACK;
 
