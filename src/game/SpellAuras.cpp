@@ -3353,7 +3353,9 @@ void Aura::HandleModManaRegen(bool apply, bool Real)
 
 void Aura::HandleAuraModIncreaseHealth(bool apply, bool Real)
 {
-    if(GetSpellProto()->Id == 12976)                        //Warrior Last Stand triggered spell
+    // Special case with temporary increase max/current health
+    if( GetId() == 12976 ||                                 //Warrior Last Stand triggered spell
+        GetId() == 44055 )                                  //Item spell
     {
         if(Real)
         {
