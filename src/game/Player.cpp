@@ -14750,6 +14750,9 @@ bool Player::ActivateTaxiPathTo(std::vector<uint32> const& nodes)
     // stop combat at start taxi flight if any
     CombatStop();
 
+    // stop trade (client cancel trade at taxi map open but cheating tools can be used for reopen it)
+    TradeCancel(true);
+
     // clean not finished taxi path if any
     ClearTaxiDestinations();
 
