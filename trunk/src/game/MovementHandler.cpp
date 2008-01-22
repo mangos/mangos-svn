@@ -217,7 +217,7 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
         movementInfo.t_time = 0;
     }
 
-    if (GetPlayer()->HasMovementFlags(MOVEMENTFLAG_FALLING) && !(movementInfo.flags & MOVEMENTFLAG_FALLING))
+    if (recv_data.GetOpcode() == MSG_MOVE_FALL_LAND)
     {
         Player *target = GetPlayer();
 
@@ -229,30 +229,30 @@ void WorldSession::HandleMovementOpcodes( WorldPacket & recv_data )
             uint32 safe_fall = target->GetTotalAuraModifier(SPELL_AURA_SAFE_FALL);
             uint32 fall_time = (movementInfo.fallTime > (safe_fall*10)) ? movementInfo.fallTime - (safe_fall*10) : 0;
 
-            //Fall Damage calculation
-            float fallperc = float(fall_time)/1100;
-            uint32 damage = (uint32)(((fallperc*fallperc -1) / 9 * target->GetMaxHealth())*sWorld.getRate(RATE_DAMAGE_FALL));
-
-            Map const *map = MapManager::Instance().GetBaseMap(target->GetMapId());
-
-            float height = map->GetHeight(movementInfo.x, movementInfo.y, movementInfo.z);
-            float water = map->GetWaterLevel(movementInfo.x, movementInfo.y);
-
-            //Prevent damage if damage is 0, fall time < 1100, or if player land in water
-            if (damage > 0 && fall_time > 1100 && water < height)
+            if(fall_time > 1100)                            //Prevent damage if fall time < 1100
             {
-                //Prevent fall damage from being more than the player maximum health
-                if (damage > target->GetMaxHealth())
-                    damage = target->GetMaxHealth();
+                //Fall Damage calculation
+                float fallperc = float(fall_time)/1100;
+                uint32 damage = (uint32)(((fallperc*fallperc -1) / 9 * target->GetMaxHealth())*sWorld.getRate(RATE_DAMAGE_FALL));
 
-                target->EnvironmentalDamage(target->GetGUID(), DAMAGE_FALL, damage);
+                float height = movementInfo.z;
+                target->UpdateGroundPositionZ(movementInfo.x,movementInfo.y,height);
+
+                if (damage > 0)
+                {
+                    //Prevent fall damage from being more than the player maximum health
+                    if (damage > target->GetMaxHealth())
+                        damage = target->GetMaxHealth();
+
+                    target->EnvironmentalDamage(target->GetGUID(), DAMAGE_FALL, damage);
+                }
+
+                //Z given by moveinfo, LastZ, FallTime, WaterZ, MapZ, Damage, Safefall reduction
+                DEBUG_LOG("FALLDAMAGE z=%f sz=%f pZ=%f FallTime=%d mZ=%f damage=%d SF=%d" , movementInfo.z, height, target->GetPositionZ(), movementInfo.fallTime, height, damage, safe_fall);
             }
-
-            //Z given by moveinfo, LastZ, FallTime, WaterZ, MapZ, Damage, Safefall reduction
-            DEBUG_LOG("!! z=%f, pZ=%f FallTime=%d wZ=%f mZ=%f damage=%d SF=%d" , movementInfo.z, target->GetPositionZ(), movementInfo.fallTime, water, height, damage, safe_fall);
         }
 
-        //handle fall and logout at the sametime
+        //handle fall and logout at the sametime (logout started before fall finished)
         if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_DISABLE_ROTATE))
         {
             target->SetFlag(UNIT_FIELD_BYTES_1, PLAYER_STATE_SIT);
