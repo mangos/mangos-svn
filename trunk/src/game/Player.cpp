@@ -7512,14 +7512,24 @@ uint8 Player::FindEquipSlot( ItemPrototype const* proto, uint32 slot, bool swap 
     }
     else
     {
-        // search empty slot at first
+        // search free slot at first
         for (int i = 0; i < 4; i++)
         {
             if ( slots[i] != NULL_SLOT && !GetItemByPos( INVENTORY_SLOT_BAG_0, slots[i] ) )
-                return slots[i];
+            {
+                // in case 2hand equipped weapon offhand slot empty but not free
+                if(slots[i]==EQUIPMENT_SLOT_OFFHAND)
+                {
+                    Item* mainItem = GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_MAINHAND );
+                    if(!mainItem || mainItem->GetProto()->InventoryType != INVTYPE_2HWEAPON)
+                        return slots[i];
+                }
+                else
+                    return slots[i];
+            }
         }
 
-        // if not found empty and can swap return first appropriate
+        // if not found free and can swap return first appropriate from used
         for (int i = 0; i < 4; i++)
         {
             if ( slots[i] != NULL_SLOT && swap )
@@ -7550,26 +7560,6 @@ Item* Player::CreateItem( uint32 item, uint32 count ) const
             delete pItem;
     }
     return NULL;
-}
-
-uint32 Player::GetFreeSlots() const
-{
-    uint32 count = 0;
-    for(int i = INVENTORY_SLOT_ITEM_START; i < INVENTORY_SLOT_ITEM_END; i++)
-    {
-        Item* pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-        if( !pItem )
-            ++count;
-    }
-
-    for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
-    {
-        Bag *pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
-        if( pBag )
-            count += pBag->GetFreeSlots();
-    }
-
-    return count;
 }
 
 uint8 Player::CanUnequipItems( uint32 item, uint32 count ) const
@@ -8629,10 +8619,22 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
             if (pProto->Class == ITEM_CLASS_QUIVER)
             {
                 for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; ++i)
+                {
                     if( Item* pBag = GetItemByPos( INVENTORY_SLOT_BAG_0, i ) )
+                    {
                         if( ItemPrototype const* pBagProto = pBag->GetProto() )
-                            if( pBagProto->Class==pProto->Class && (!swap || pBag->GetSlot() != eslot ))
-                                return EQUIP_ERR_CAN_EQUIP_ONLY1_QUIVER;
+                        {
+                            if( pBagProto->Class==pProto->Class && pBagProto->SubClass==pProto->SubClass && 
+                                (!swap || pBag->GetSlot() != eslot ) )
+                            {
+                                if(pBagProto->SubClass == ITEM_SUBCLASS_AMMO_POUCH)
+                                    return EQUIP_ERR_CAN_EQUIP_ONLY1_AMMOPOUCH;
+                                else
+                                    return EQUIP_ERR_CAN_EQUIP_ONLY1_QUIVER;
+                            }
+                        }
+                    }
+                }
             }
 
 
@@ -8659,12 +8661,19 @@ uint8 Player::CanEquipItem( uint8 slot, uint16 &dest, Item *pItem, bool swap, bo
                 }
             }
 
+            // equip two-hand weapon case (with possible unequip 2 items)
             if( type == INVTYPE_2HWEAPON )
             {
-                uint8 twinslot = ( eslot == EQUIPMENT_SLOT_MAINHAND ? EQUIPMENT_SLOT_OFFHAND : EQUIPMENT_SLOT_MAINHAND );
-                Item *twinItem = GetItemByPos( INVENTORY_SLOT_BAG_0, twinslot );
-                if( twinItem )
+                if(eslot != EQUIPMENT_SLOT_MAINHAND)
                     return EQUIP_ERR_ITEM_CANT_BE_EQUIPPED;
+
+                // offhand item must can be stored in inventitory for offhand item and it also must be unequipped
+                Item *offItem = GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND );
+                uint16 off_dest;
+                if( offItem && (
+                    CanUnequipItem(uint16(INVENTORY_SLOT_BAG_0) << 8 | EQUIPMENT_SLOT_OFFHAND,false) !=  EQUIP_ERR_OK ||
+                    CanStoreItem( NULL_BAG, NULL_SLOT, off_dest, offItem, false ) !=  EQUIP_ERR_OK ) )
+                    return EQUIP_ERR_ITEMS_CANT_BE_SWAPPED;
             }
             dest = ((INVENTORY_SLOT_BAG_0 << 8) | eslot);
             return EQUIP_ERR_OK;
@@ -9243,6 +9252,25 @@ Item* Player::EquipItem( uint16 pos, Item *pItem, bool update )
 {
     if( pItem )
     {
+        // special case (need unequip offhand item, already must allowed by CanEquip)
+        if(pItem->GetProto()->InventoryType == INVTYPE_2HWEAPON)
+        {
+            if(Item *offItem = GetItemByPos( INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND ))
+            {
+                uint16 off_dest;
+                uint8 off_msg = CanStoreItem( NULL_BAG, NULL_SLOT, off_dest, offItem, false );
+                if( off_msg == EQUIP_ERR_OK )
+                {
+                    RemoveItem(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND, true);
+                    StoreItem( off_dest, offItem, true );
+                }
+                else
+                {
+                    sLog.outError("Player::EquipItem: Can's store offhand item at 2hand item equip for player (GUID: %u).",GetGUIDLow());
+                }
+            }
+        }
+
         AddEnchantmentDurations(pItem);
 
         uint8 bag = pos >> 8;
