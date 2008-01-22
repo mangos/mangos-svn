@@ -31,8 +31,8 @@ void
 ActiveState::Update(Map &m, NGridType &grid, GridInfo & info, const uint32 &x, const uint32 &y, const uint32 &t_diff) const
 {
     // Only check grid activity every (grid_expiry/10) ms, because it's really useless to do it every cycle
-    info.i_timer.Update(t_diff);
-    if( info.i_timer.Passed() )
+    info.UpdateTimeTracker(t_diff);
+    if( info.getTimeTracker().Passed() )
     {
         if( grid.ActiveObjectsInGrid() == 0 && !ObjectAccessor::Instance().PlayersNearGrid(x, y, m.GetId(), m.GetInstanceId()) )
         {
@@ -42,7 +42,7 @@ ActiveState::Update(Map &m, NGridType &grid, GridInfo & info, const uint32 &x, c
         }
         else
         {
-            m.ResetGridExpiry(info, 0.1f);
+            m.ResetGridExpiry(grid, 0.1f);
         }
     }
 }
@@ -50,23 +50,23 @@ ActiveState::Update(Map &m, NGridType &grid, GridInfo & info, const uint32 &x, c
 void
 IdleState::Update(Map &m, NGridType &grid, GridInfo &info, const uint32 &x, const uint32 &y, const uint32 &) const
 {
-    m.ResetGridExpiry(info);
+    m.ResetGridExpiry(grid);
     grid.SetGridState(GRID_STATE_REMOVAL);
     sLog.outDebug("Grid[%u,%u] on map %u moved to IDLE state", x, y, m.GetId());
 }
 
 void
-RemovalState::Update(Map &m, NGridType &/*grid*/, GridInfo &info, const uint32 &x, const uint32 &y, const uint32 &t_diff) const
+RemovalState::Update(Map &m, NGridType &grid, GridInfo &info, const uint32 &x, const uint32 &y, const uint32 &t_diff) const
 {
-    if(info.i_unloadflag)
+    if(info.getUnloadFlag())
     {
-        info.i_timer.Update(t_diff);
-        if( info.i_timer.Passed() )
+        info.UpdateTimeTracker(t_diff);
+        if( info.getTimeTracker().Passed() )
         {
             if( !m.UnloadGrid(x, y) )
             {
                 sLog.outDebug("Grid[%u,%u] for map %u differed unloading due to players nearby", x, y, m.GetId());
-                m.ResetGridExpiry(info);
+                m.ResetGridExpiry(grid);
             }
         }
     }

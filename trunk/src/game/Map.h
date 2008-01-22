@@ -30,6 +30,7 @@
 #include "Object.h"
 #include "Timer.h"
 #include "SharedDefines.h"
+#include "GameSystem/GridRefManager.h"
 
 #include <bitset>
 #include <list>
@@ -63,14 +64,6 @@ struct WGuard
 typedef RGuard<GridRWLock, ZThread::Lockable> GridReadGuard;
 typedef WGuard<GridRWLock, ZThread::Lockable> GridWriteGuard;
 typedef MaNGOS::SingleThreaded<GridRWLock>::Lock NullGuard;
-
-struct GridInfo
-{
-    GridInfo(time_t expiry, bool unload = true ) : i_timer(expiry), i_unloadflag(unload) {}
-    GridRWLock i_lock;
-    TimeTracker i_timer;
-    bool i_unloadflag;
-};
 
 typedef struct
 {
@@ -120,7 +113,7 @@ typedef HM_NAMESPACE::hash_map<Creature*, CreatureMover> CreatureMoveList;
 #define MAX_HEIGHT            100000.0f                     // can be use for find ground height at surface
 #define INVALID_HEIGHT       -100000.0f                     // for check, must be equal to VMAP_INVALID_HEIGHT, real value for unknown height is VMAP_INVALID_HEIGHT_VALUE
 
-class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mutex>
+class MANGOS_DLL_DECL Map : public GridRefManager<NGridType>, public MaNGOS::ObjectLevelLockable<Map, ZThread::Mutex>
 {
     public:
         typedef std::list<Player*> PlayerList;
@@ -147,33 +140,21 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
 
         template<class LOCK_TYPE, class T, class CONTAINER> void Visit(const CellLock<LOCK_TYPE> &cell, TypeContainerVisitor<T, CONTAINER> &visitor);
 
-        /*        inline bool IsActiveGrid(WorldObject *obj) const
-                {
-                    return IsActiveGrid(obj->GetPositionX(),obj->GetPositionY());
-                }
-
-                inline bool IsActiveGrid(float x, float y) const
-                {
-                    GridPair p = MaNGOS::ComputeGridPair(x, y);
-                    return( i_grids[p.x_coord][p.y_coord]->GetGridState() == GRID_STATE_ACTIVE );
-                }
-        */
-
         inline bool IsRemovalGrid(float x, float y) const
         {
             GridPair p = MaNGOS::ComputeGridPair(x, y);
-            return( !i_grids[p.x_coord][p.y_coord] || i_grids[p.x_coord][p.y_coord]->GetGridState() == GRID_STATE_REMOVAL );
+            return( !getNGrid(p.x_coord, p.y_coord) || getNGrid(p.x_coord, p.y_coord)->GetGridState() == GRID_STATE_REMOVAL );
         }
 
-        bool GetUnloadFlag(const GridPair &p) const { return i_info[p.x_coord][p.y_coord]->i_unloadflag; }
-        void SetUnloadFlag(const GridPair &p, bool unload) { i_info[p.x_coord][p.y_coord]->i_unloadflag = unload; }
+        bool GetUnloadFlag(const GridPair &p) const { return getNGrid(p.x_coord, p.y_coord)->getUnloadFlag(); }
+        void SetUnloadFlag(const GridPair &p, bool unload) { getNGrid(p.x_coord, p.y_coord)->setUnloadFlag(unload); }
         void LoadGrid(const Cell& cell, bool no_unload = false);
         bool UnloadGrid(const uint32 &x, const uint32 &y);
         virtual void UnloadAll();
 
-        void ResetGridExpiry(GridInfo &info, float factor = 1) const
+        void ResetGridExpiry(NGridType &grid, float factor = 1) const
         {
-            info.i_timer.Reset((time_t)((float)i_gridExpiry*factor));
+            grid.ResetTimeTracker((time_t)((float)i_gridExpiry*factor));
         }
 
         time_t GetGridExpiry(void) const { return i_gridExpiry; }
@@ -239,19 +220,19 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         virtual bool RemoveBones(uint64 guid, float x, float y);
         void InitResetTime();
 
-        GridMap *GridMaps[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
-
-        std::bitset<TOTAL_NUMBER_OF_CELLS_PER_MAP*TOTAL_NUMBER_OF_CELLS_PER_MAP> marked_cells;
-
         void UpdateObjectVisibility(WorldObject* obj, Cell cell, CellPair cellpair);
         void UpdatePlayerVisibility(Player* player, Cell cell, CellPair cellpair);
         void UpdateObjectsVisibilityFor(Player* player, Cell cell, CellPair cellpair);
+
+        void resetMarkedCells() { marked_cells.reset(); }
+        bool isCellMarked(uint32 pCellId) { return marked_cells.test(pCellId); }
+        void markCell(uint32 pCellId) { marked_cells.set(pCellId); }
     private:
         void LoadVMap(int pX, int pY);
         void LoadMap(uint32 mapid, uint32 instanceid, int x,int y);
 
         void SetTimer(uint32 t) { i_gridExpiry = t < MIN_GRID_DELAY ? MIN_GRID_DELAY : t; }
-        uint64 CalculateGridMask(const uint32 &y) const;
+        //uint64 CalculateGridMask(const uint32 &y) const;
 
         void SendInitSelf( Player * player );
 
@@ -268,16 +249,32 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
 
         bool loaded(const GridPair &) const;
         void EnsureGridLoadedForPlayer(const Cell&, Player*, bool add_player);
-        uint64  EnsureGridCreated(const GridPair &);
+        void  EnsureGridCreated(const GridPair &);
+
+        void buildNGridLinkage(NGridType* pNGridType) { pNGridType->link(this); }
 
         template<class T> void AddType(T *obj);
         template<class T> void RemoveType(T *obj, bool);
 
-        uint32 i_id;
 
-        volatile uint64 i_gridMask[MAX_NUMBER_OF_GRIDS];
-        volatile uint64 i_gridStatus[MAX_NUMBER_OF_GRIDS];
+        NGridType* getNGrid(uint32 x, uint32 y) const
+        {
+            return i_grids[x][y];
+        }
 
+        bool isGridObjectDataLoaded(uint32 x, uint32 y) const { return getNGrid(x,y)->isGridObjectDataLoaded(); }
+        void setGridObjectDataLoaded(bool pLoaded, uint32 x, uint32 y) { getNGrid(x,y)->setGridObjectDataLoaded(pLoaded); }
+
+
+        inline void setNGrid(NGridType* grid, uint32 x, uint32 y)
+        {
+            if(x >= MAX_NUMBER_OF_GRIDS || y >= MAX_NUMBER_OF_GRIDS)
+            {
+                sLog.outError("map::setNGrid() Invalid grid coordinates found: %d, %d!",x,y);
+                assert(false);
+            }
+            i_grids[x][y] = grid;
+        }
     protected:
         typedef MaNGOS::ObjectLevelLockable<Map, ZThread::Mutex>::Lock Guard;
 
@@ -285,8 +282,10 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
         typedef GridReadGuard ReadGuard;
         typedef GridWriteGuard WriteGuard;
 
+        uint32 i_id;
         NGridType* i_grids[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
-        GridInfo *i_info[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
+        GridMap *GridMaps[MAX_NUMBER_OF_GRIDS][MAX_NUMBER_OF_GRIDS];
+        std::bitset<TOTAL_NUMBER_OF_CELLS_PER_MAP*TOTAL_NUMBER_OF_CELLS_PER_MAP> marked_cells;
 
         time_t i_gridExpiry;
 
@@ -314,7 +313,7 @@ class MANGOS_DLL_DECL Map : public MaNGOS::ObjectLevelLockable<Map, ZThread::Mut
             void DeleteFromWorld(T*);
 };
 
-inline
+/*inline
 uint64
 Map::CalculateGridMask(const uint32 &y) const
 {
@@ -322,6 +321,7 @@ Map::CalculateGridMask(const uint32 &y) const
     mask <<= y;
     return mask;
 }
+*/
 
 template<class LOCK_TYPE, class T, class CONTAINER>
 inline void
@@ -335,8 +335,8 @@ Map::Visit(const CellLock<LOCK_TYPE> &cell, TypeContainerVisitor<T, CONTAINER> &
     if( !cell->NoCreate() || loaded(GridPair(x,y)) )
     {
         EnsureGridLoadedForPlayer(cell, NULL, false);
-        LOCK_TYPE guard(i_info[x][y]->i_lock);
-        i_grids[x][y]->Visit(cell_x, cell_y, visitor);
+        //LOCK_TYPE guard(i_info[x][y]->i_lock);
+        getNGrid(x, y)->Visit(cell_x, cell_y, visitor);
     }
 }
 #endif
