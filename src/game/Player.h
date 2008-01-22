@@ -972,7 +972,6 @@ class MANGOS_DLL_SPEC Player : public Unit
         bool HasBankBagSlot( uint8 slot ) const;
         bool HasItemCount( uint32 item, uint32 count ) const;
         Item* GetItemOrItemWithGemEquipped( uint32 item ) const;
-        uint32 GetFreeSlots() const;
         uint8 CanTakeMoreSimilarItems(Item* pItem) const;
         uint8 CanStoreNewItem( uint8 bag, uint8 slot, uint16 &dest, uint32 item, uint32 count, bool swap ) const;
         uint8 CanStoreItem( uint8 bag, uint8 slot, uint16 &dest, Item *pItem, bool swap ) const;
