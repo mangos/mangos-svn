@@ -42,7 +42,7 @@
 // magic *.map header
 const char MAP_MAGIC[] = "MAP_1.02";
 
-static GridState* si_GridStates[MAX_GRID_STATE];
+GridState* si_GridStates[MAX_GRID_STATE];
 
 Map::~Map()
 {
@@ -135,8 +135,8 @@ void Map::LoadMap(uint32 mapid, uint32 instanceid, int x,int y)
         if (!baseMap->GridMaps[x][y])
             baseMap->EnsureGridCreated(GridPair(63-x,63-y));
 
-        if (!baseMap->GridMaps[x][y])
-            return;
+//+++        if (!baseMap->GridMaps[x][y])  don't check for GridMaps[gx][gy], we need the management for vmaps
+//            return;
 
         ((MapInstanced*)(baseMap))->AddGridMapReference(GridPair(x,y));
         baseMap->SetUnloadFlag(GridPair(63-x,63-y), false);
@@ -188,7 +188,8 @@ void Map::LoadMap(uint32 mapid, uint32 instanceid, int x,int y)
 void Map::LoadMapAndVMap(uint32 mapid, uint32 instanceid, int x,int y)
 {
     LoadMap(mapid,instanceid,x,y);
-    LoadVMap(x, y);
+    if(instanceid == 0)
+        LoadVMap(x, y); // Only load the data for the base map
 }
 
 void Map::InitStateMachine()
@@ -213,15 +214,11 @@ i_resetTime(0), i_resetDelayTime(0), i_InstanceId(ainstanceId), i_maxPlayers(0),
 {
     for(unsigned int idx=0; idx < MAX_NUMBER_OF_GRIDS; ++idx)
     {
-        i_gridMask[idx] = 0;
-        i_gridStatus[idx] = 0;
         for(unsigned int j=0; j < MAX_NUMBER_OF_GRIDS; ++j)
         {
             //z code
             GridMaps[idx][j] =NULL;
-
-            i_grids[idx][j] = NULL;
-            i_info[idx][j] = NULL;
+            setNGrid(NULL, idx, j);
         }
     }
 
@@ -280,14 +277,12 @@ i_resetTime(0), i_resetDelayTime(0), i_InstanceId(ainstanceId), i_maxPlayers(0),
 template<class T>
 void Map::AddToGrid(T* obj, NGridType *grid, Cell const& cell)
 {
-    WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
     (*grid)(cell.CellX(), cell.CellY()).template AddGridObject<T>(obj, obj->GetGUID());
 }
 
 template<>
 void Map::AddToGrid(Player* obj, NGridType *grid, Cell const& cell)
 {
-    WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
     (*grid)(cell.CellX(), cell.CellY()).AddWorldObject(obj, obj->GetGUID());
 }
 
@@ -297,13 +292,11 @@ void Map::AddToGrid(Corpse *obj, NGridType *grid, Cell const& cell)
     // add to world object registry in grid
     if(obj->GetType()==CORPSE_RESURRECTABLE)
     {
-        WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
         (*grid)(cell.CellX(), cell.CellY()).AddWorldObject(obj, obj->GetGUID());
     }
     // add to grid object store
     else
     {
-        WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
         (*grid)(cell.CellX(), cell.CellY()).AddGridObject(obj, obj->GetGUID());
     }
 }
@@ -314,14 +307,12 @@ void Map::AddToGrid(Creature* obj, NGridType *grid, Cell const& cell)
     // add to world object registry in grid
     if(obj->isPet())
     {
-        WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
         (*grid)(cell.CellX(), cell.CellY()).AddWorldObject<Creature>(obj, obj->GetGUID());
         obj->SetCurrentCell(cell);
     }
     // add to grid object store
     else
     {
-        WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
         (*grid)(cell.CellX(), cell.CellY()).AddGridObject<Creature>(obj, obj->GetGUID());
         obj->SetCurrentCell(cell);
     }
@@ -330,14 +321,12 @@ void Map::AddToGrid(Creature* obj, NGridType *grid, Cell const& cell)
 template<class T>
 void Map::RemoveFromGrid(T* obj, NGridType *grid, Cell const& cell)
 {
-    WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
     (*grid)(cell.CellX(), cell.CellY()).template RemoveGridObject<T>(obj, obj->GetGUID());
 }
 
 template<>
 void Map::RemoveFromGrid(Player* obj, NGridType *grid, Cell const& cell)
 {
-    WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
     (*grid)(cell.CellX(), cell.CellY()).RemoveWorldObject(obj, obj->GetGUID());
 }
 
@@ -347,13 +336,11 @@ void Map::RemoveFromGrid(Corpse *obj, NGridType *grid, Cell const& cell)
     // remove from world object registry in grid
     if(obj->GetType()==CORPSE_RESURRECTABLE)
     {
-        WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
         (*grid)(cell.CellX(), cell.CellY()).RemoveWorldObject(obj, obj->GetGUID());
     }
     // remove from grid object store
     else
     {
-        WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
         (*grid)(cell.CellX(), cell.CellY()).RemoveGridObject(obj, obj->GetGUID());
     }
 }
@@ -364,13 +351,11 @@ void Map::RemoveFromGrid(Creature* obj, NGridType *grid, Cell const& cell)
     // remove from world object registry in grid
     if(obj->isPet())
     {
-        WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
         (*grid)(cell.CellX(), cell.CellY()).RemoveWorldObject<Creature>(obj, obj->GetGUID());
     }
     // remove from grid object store
     else
     {
-        WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
         (*grid)(cell.CellX(), cell.CellY()).RemoveGridObject<Creature>(obj, obj->GetGUID());
     }
 }
@@ -399,22 +384,21 @@ void Map::AddNotifier(Creature* obj, Cell const& cell, CellPair const& cellpair)
     CreatureRelocationNotify(obj,cell,cellpair);
 }
 
-uint64
+void
 Map::EnsureGridCreated(const GridPair &p)
 {
-    //char tmp[128];
-    uint64 mask = CalculateGridMask(p.y_coord);
-
-    if( !(i_gridMask[p.x_coord] & mask) )
+    if(!getNGrid(p.x_coord, p.y_coord))
     {
         Guard guard(*this);
-        if( !(i_gridMask[p.x_coord] & mask) )
+        if(!getNGrid(p.x_coord, p.y_coord))
         {
-            i_grids[p.x_coord][p.y_coord] = new NGridType(p.x_coord*MAX_NUMBER_OF_GRIDS + p.y_coord);
-            i_info[p.x_coord][p.y_coord] = new GridInfo(i_gridExpiry,sWorld.getConfig(CONFIG_GRID_UNLOAD));
-            i_gridMask[p.x_coord] |= mask;
+            setNGrid(new NGridType(p.x_coord*MAX_NUMBER_OF_GRIDS + p.y_coord, p.x_coord, p.y_coord, i_gridExpiry, sWorld.getConfig(CONFIG_GRID_UNLOAD)),
+                p.x_coord, p.y_coord);
 
-            i_grids[p.x_coord][p.y_coord]->SetGridState(GRID_STATE_IDLE);
+            // build a linkage between this map and NGridType
+            buildNGridLinkage(getNGrid(p.x_coord, p.y_coord));
+
+            getNGrid(p.x_coord, p.y_coord)->SetGridState(GRID_STATE_IDLE);
 
             //z coord
             int gx=63-p.x_coord;
@@ -424,46 +408,39 @@ Map::EnsureGridCreated(const GridPair &p)
                 Map::LoadMapAndVMap(i_id,i_InstanceId,gx,gy);
         }
     }
-
-    return mask;
 }
 
 void
 Map::EnsureGridLoadedForPlayer(const Cell &cell, Player *player, bool add_player)
 {
-    uint64 mask = EnsureGridCreated(GridPair(cell.GridX(), cell.GridY()));
-    NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
+    EnsureGridCreated(GridPair(cell.GridX(), cell.GridY()));
+    NGridType *grid = getNGrid(cell.GridX(), cell.GridY());
 
     assert(grid != NULL);
-    if( !(i_gridStatus[cell.GridX()] & mask) )
+    if( !isGridObjectDataLoaded(cell.GridX(), cell.GridY()) )
     {
-        WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
-        if( !(i_gridStatus[cell.GridX()] & mask) )
+        if( player != NULL )
         {
-            if( player != NULL )
-            {
-                player->SendDelayResponse(MAX_GRID_LOAD_TIME);
-                DEBUG_LOG("Player %s enter cell[%u,%u] triggers of loading grid[%u,%u] on map %u", player->GetName(), cell.CellX(), cell.CellY(), cell.GridX(), cell.GridY(), i_id);
-            }
-            else
-            {
-                DEBUG_LOG("Player nearby triggers of loading grid [%u,%u] on map %u", cell.GridX(), cell.GridY(), i_id);
-            }
-
-            ObjectGridLoader loader(*grid, this, cell);
-            loader.LoadN();
-
-            // Add resurrectable corpses to world object list in grid
-            ObjectAccessor::Instance().AddCorpsesToGrid(GridPair(cell.GridX(),cell.GridY()),(*grid)(cell.CellX(), cell.CellY()), this);
-
-            ResetGridExpiry(*i_info[cell.GridX()][cell.GridY()], 0.1f);
-            grid->SetGridState(GRID_STATE_ACTIVE);
-
-            if( add_player && player != NULL )
-                (*grid)(cell.CellX(), cell.CellY()).AddWorldObject(player, player->GetGUID());
-            i_gridStatus[cell.GridX()] |= mask;
-            LoadVMap(63-cell.GridX(),63-cell.GridY());
+            player->SendDelayResponse(MAX_GRID_LOAD_TIME);
+            DEBUG_LOG("Player %s enter cell[%u,%u] triggers of loading grid[%u,%u] on map %u", player->GetName(), cell.CellX(), cell.CellY(), cell.GridX(), cell.GridY(), i_id);
         }
+        else
+        {
+            DEBUG_LOG("Player nearby triggers of loading grid [%u,%u] on map %u", cell.GridX(), cell.GridY(), i_id);
+        }
+
+        ObjectGridLoader loader(*grid, this, cell);
+        loader.LoadN();
+        setGridObjectDataLoaded(true, cell.GridX(), cell.GridY());
+
+        // Add resurrectable corpses to world object list in grid
+        ObjectAccessor::Instance().AddCorpsesToGrid(GridPair(cell.GridX(),cell.GridY()),(*grid)(cell.CellX(), cell.CellY()), this);
+
+        ResetGridExpiry(*getNGrid(cell.GridX(), cell.GridY()), 0.1f);
+        grid->SetGridState(GRID_STATE_ACTIVE);
+
+        if( add_player && player != NULL )
+            (*grid)(cell.CellX(), cell.CellY()).AddWorldObject(player, player->GetGUID());
     }
     else if( player && add_player )
         AddToGrid(player,grid,cell);
@@ -472,26 +449,21 @@ Map::EnsureGridLoadedForPlayer(const Cell &cell, Player *player, bool add_player
 void
 Map::LoadGrid(const Cell& cell, bool no_unload)
 {
-    uint64 mask = EnsureGridCreated(GridPair(cell.GridX(), cell.GridY()));
-    NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
+    EnsureGridCreated(GridPair(cell.GridX(), cell.GridY()));
+    NGridType *grid = getNGrid(cell.GridX(), cell.GridY());
 
     assert(grid != NULL);
-    if( !(i_gridStatus[cell.GridX()] & mask) )
+    if( !isGridObjectDataLoaded(cell.GridX(), cell.GridY()) )
     {
-        WriteGuard guard(i_info[cell.GridX()][cell.GridY()]->i_lock);
-        if( !(i_gridStatus[cell.GridX()] & mask) )
-        {
-            ObjectGridLoader loader(*grid, this, cell);
-            loader.LoadN();
+        ObjectGridLoader loader(*grid, this, cell);
+        loader.LoadN();
 
-            // Add resurrectable corpses to world object list in grid
-            ObjectAccessor::Instance().AddCorpsesToGrid(GridPair(cell.GridX(),cell.GridY()),(*grid)(cell.CellX(), cell.CellY()), this);
+        // Add resurrectable corpses to world object list in grid
+        ObjectAccessor::Instance().AddCorpsesToGrid(GridPair(cell.GridX(),cell.GridY()),(*grid)(cell.CellX(), cell.CellY()), this);
 
-            i_gridStatus[cell.GridX()] |= mask;
-            if(no_unload)
-                i_info[cell.GridX()][cell.GridY()]->i_unloadflag = false;
-
-        }
+        setGridObjectDataLoaded(true,cell.GridX(), cell.GridY());
+        if(no_unload)
+            getNGrid(cell.GridX(), cell.GridY())->setUnloadFlag(false);
     }
     LoadVMap(63-cell.GridX(),63-cell.GridY());
 }
@@ -672,7 +644,7 @@ Map::Add(T *obj)
 
     Cell cell(p);
     EnsureGridCreated(GridPair(cell.GridX(), cell.GridY()));
-    NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
+    NGridType *grid = getNGrid(cell.GridX(), cell.GridY());
     assert( grid != NULL );
 
     AddToGrid(obj,grid,cell);
@@ -684,63 +656,6 @@ Map::Add(T *obj)
 
     AddNotifier(obj,cell,p);
 }
-
-/*template<class T>
-bool
-Map::Find(T *obj) const
-{
-    CellPair p = MaNGOS::ComputeCellPair(obj->GetPositionX(), obj->GetPositionY());
-    if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
-    {
-        sLog.outError("Map::Find: Object " I64FMTD " have invalid coordinates X:%f Y:%f grid cell [%u:%u]", obj->GetGUID(), obj->GetPositionX(), obj->GetPositionY(), p.x_coord, p.y_coord);
-        return false;
-    }
-
-    Cell cell(p);
-    if(!i_grids[cell.GridX()][cell.GridY()])
-        return false;
-
-    NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
-    assert( grid != NULL );
-    return this->FindInGrid<T>(obj->GetGUID(),grid,cell, (T*)NULL)!=0;
-}
-
-template <class T>
-T* Map::GetObjectNear(float x, float y, OBJECT_HANDLE hdl, T *fake)
-{
-    CellPair p = MaNGOS::ComputeCellPair(x,y);
-    if(p.x_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP || p.y_coord >= TOTAL_NUMBER_OF_CELLS_PER_MAP )
-    {
-        sLog.outError("Map::GetObjectNear: invalid coordiates supplied X:%u Y:%u grid cell [%u:%u]", x, y, p.x_coord, p.y_coord);
-        return false;
-    }
-
-    CellPair xcell(p), cell_iter;
-    xcell << 1;
-    xcell -= 1;
-    for(; abs(int(p.x_coord - xcell.x_coord)) < 2; xcell >> 1)
-    {
-        for(cell_iter = xcell; abs(int(p.y_coord - cell_iter.y_coord)) < 2; cell_iter += 1)
-        {
-            Cell cell(cell_iter);
-            if(!i_grids[cell.GridX()][cell.GridY()])
-                continue;
-
-            NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
-            assert( grid != NULL );
-
-            T *result = FindInGrid<T>(hdl,grid,cell, fake);
-            if (result) return result;
-
-            if (cell_iter.y_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)
-                break;
-        }
-
-        if (cell_iter.x_coord == TOTAL_NUMBER_OF_CELLS_PER_MAP-1)
-            break;
-    }
-    return NULL;
-}*/
 
 void Map::MessageBroadcast(Player *player, WorldPacket *msg, bool to_self, bool own_team_only)
 {
@@ -789,8 +704,7 @@ void Map::MessageBroadcast(WorldObject *obj, WorldPacket *msg)
 
 bool Map::loaded(const GridPair &p) const
 {
-    uint64 mask = CalculateGridMask(p.y_coord);
-    return ( (i_gridMask[p.x_coord] & mask) != 0  && (i_gridStatus[p.x_coord] & mask) != 0 );
+    return ( getNGrid(p.x_coord, p.y_coord) && isGridObjectDataLoaded(p.x_coord, p.y_coord) );
 }
 
 void Map::Update(const uint32 &t_diff)
@@ -800,26 +714,14 @@ void Map::Update(const uint32 &t_diff)
     if ((i_id == 489) || (i_id == 529))                     // WS, AB
         return;
 
-    for(unsigned int i=0; i < MAX_NUMBER_OF_GRIDS; ++i)
+    for (GridRefManager<NGridType>::iterator i = GridRefManager<NGridType>::begin(); i != GridRefManager<NGridType>::end(); )
     {
-        if(!i_gridMask[i])
-            continue;
-
-        for(unsigned int j=0; j < MAX_NUMBER_OF_GRIDS; ++j)
-        {
-            if( i_gridMask[i] & (uint64(1) << j) )
-            {
-                // move all creatures with delayed move and remove in grid before new grid moves (and grid unload)
-                //ObjectAccessor::Instance().DoDelayedMovesAndRemoves();
-
-                assert(i_grids[i][j] != NULL && i_info[i][j] != NULL);
-                NGridType &grid(*i_grids[i][j]);
-                GridInfo &info(*i_info[i][j]);
-                si_GridStates[grid.GetGridState()]->Update(*this, grid, info, i, j, t_diff);
-            }
-        }
+        NGridType *grid = i->getSource();
+        GridInfo *info = i->getSource()->getGridInfoRef();
+        ++i; // The update might delete the map and we need the next map before the iterator gets invalid
+        assert(grid->GetGridState() >= 0 && grid->GetGridState() < MAX_GRID_STATE);
+        si_GridStates[grid->GetGridState()]->Update(*this, *grid, *info, grid->getX(), grid->getY(), t_diff);
     }
-
     if(i_data)
         i_data->Update(t_diff);
 }
@@ -845,16 +747,15 @@ void Map::Remove(Player *player, bool remove)
     }
 
     Cell cell(p);
-    uint64 mask = CalculateGridMask(cell.data.Part.grid_y);
 
-    if( !(i_gridMask[cell.data.Part.grid_x] & mask) )
+    if( !getNGrid(cell.data.Part.grid_x, cell.data.Part.grid_y) )
     {
-        // assert( false );
+        sLog.outError("Map::Remove() i_grids was NULL x:%d, y:%d",cell.data.Part.grid_x,cell.data.Part.grid_y);
         return;
     }
 
     DEBUG_LOG("Remove player %s from grid[%u,%u]", player->GetName(), cell.GridX(), cell.GridY());
-    NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
+    NGridType *grid = getNGrid(cell.GridX(), cell.GridY());
     assert(grid != NULL);
 
     RemoveFromGrid(player,grid,cell);
@@ -900,7 +801,7 @@ Map::Remove(T *obj, bool remove)
         return;
 
     DEBUG_LOG("Remove object " I64FMTD " from grid[%u,%u]", obj->GetGUID(), cell.data.Part.grid_x, cell.data.Part.grid_y);
-    NGridType *grid = i_grids[cell.GridX()][cell.GridY()];
+    NGridType *grid = getNGrid(cell.GridX(), cell.GridY());
     assert( grid != NULL );
 
     RemoveFromGrid(obj,grid,cell);
@@ -940,16 +841,10 @@ Map::PlayerRelocation(Player *player, float x, float y, float z, float orientati
         if(player->GetGroup() && player->isInFlight())
             player->SetGroupUpdateFlag(GROUP_UPDATE_FLAG_POSITION);
 
-        NGridType &grid(*i_grids[old_cell.GridX()][old_cell.GridY()]);
-
-        {
-            assert(i_info[old_cell.GridX()][old_cell.GridY()] != NULL);
-
-            RemoveFromGrid(player,&grid,old_cell);
-
-            if( !old_cell.DiffGrid(new_cell) )
-                AddToGrid(player,&grid,new_cell);
-        }
+        NGridType* oldGrid = getNGrid(old_cell.GridX(), old_cell.GridY());
+        RemoveFromGrid(player, oldGrid,old_cell);
+        if( !old_cell.DiffGrid(new_cell) )
+            AddToGrid(player, oldGrid,new_cell);
 
         if( old_cell.DiffGrid(new_cell) )
             EnsureGridLoadedForPlayer(new_cell, player, true);
@@ -959,11 +854,11 @@ Map::PlayerRelocation(Player *player, float x, float y, float z, float orientati
     UpdatePlayerVisibility(player,new_cell,new_val);
     UpdateObjectsVisibilityFor(player,new_cell,new_val);
     PlayerRelocationNotify(player,new_cell,new_val);
-
-    if( !same_cell && i_grids[new_cell.GridX()][new_cell.GridY()]->GetGridState()!=GRID_STATE_ACTIVE )
+    NGridType* newGrid = getNGrid(new_cell.GridX(), new_cell.GridY());
+    if( !same_cell && newGrid->GetGridState()!= GRID_STATE_ACTIVE )
     {
-        ResetGridExpiry(*i_info[new_cell.GridX()][new_cell.GridY()], 0.1f);
-        i_grids[new_cell.GridX()][new_cell.GridY()]->SetGridState(GRID_STATE_ACTIVE);
+        ResetGridExpiry(*newGrid, 0.1f);
+        newGrid->SetGridState(GRID_STATE_ACTIVE);
     }
 }
 
@@ -1054,11 +949,10 @@ bool Map::CreatureCellRelocation(Creature *c, Cell new_cell)
                 sLog.outDebug("Creature (GUID: %u Entry: %u) moved in grid[%u,%u] from cell[%u,%u] to cell[%u,%u].", c->GetGUIDLow(), c->GetEntry(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.CellX(), new_cell.CellY());
             #endif
 
-            assert(i_info[old_cell.GridX()][old_cell.GridY()] != NULL);
             if( !old_cell.DiffGrid(new_cell) )
             {
-                RemoveFromGrid(c,i_grids[old_cell.GridX()][old_cell.GridY()],old_cell);
-                AddToGrid(c,i_grids[new_cell.GridX()][new_cell.GridY()],new_cell);
+                RemoveFromGrid(c,getNGrid(old_cell.GridX(), old_cell.GridY()),old_cell);
+                AddToGrid(c,getNGrid(new_cell.GridX(), new_cell.GridY()),new_cell);
                 c->SetCurrentCell(new_cell);
             }
         }
@@ -1078,10 +972,10 @@ bool Map::CreatureCellRelocation(Creature *c, Cell new_cell)
             sLog.outDebug("Creature (GUID: %u Entry: %u) moved from grid[%u,%u]cell[%u,%u] to grid[%u,%u]cell[%u,%u].", c->GetGUIDLow(), c->GetEntry(), old_cell.GridX(), old_cell.GridY(), old_cell.CellX(), old_cell.CellY(), new_cell.GridX(), new_cell.GridY(), new_cell.CellX(), new_cell.CellY());
         #endif
 
-        RemoveFromGrid(c,i_grids[old_cell.GridX()][old_cell.GridY()],old_cell);
+        RemoveFromGrid(c,getNGrid(old_cell.GridX(), old_cell.GridY()),old_cell);
         {
             EnsureGridCreated(GridPair(new_cell.GridX(), new_cell.GridY()));
-            AddToGrid(c,i_grids[new_cell.GridX()][new_cell.GridY()],new_cell);
+            AddToGrid(c,getNGrid(new_cell.GridX(), new_cell.GridY()),new_cell);
         }
     }
     else
@@ -1126,8 +1020,8 @@ bool Map::CreatureRespawnRelocation(Creature *c)
 
 bool Map::UnloadGrid(const uint32 &x, const uint32 &y)
 {
-    NGridType *grid = i_grids[x][y];
-    assert( grid != NULL && i_info[x][y] != NULL );
+    NGridType *grid = getNGrid(x, y);
+    assert( grid != NULL);
 
     {
         if( ObjectAccessor::Instance().PlayersNearGrid(x, y, i_id, i_InstanceId) )
@@ -1146,36 +1040,26 @@ bool Map::UnloadGrid(const uint32 &x, const uint32 &y)
         // Finish creature moves, remove and delete all creatures with delayed remove before unload
         ObjectAccessor::Instance().DoDelayedMovesAndRemoves();
 
-        {
-            WriteGuard guard(i_info[x][y]->i_lock);
-            uint64 mask = CalculateGridMask(y);
-            i_gridMask[x] &= ~mask;
-            i_gridStatus[x] &= ~mask;
-            unloader.UnloadN();
-            delete i_grids[x][y];
-            i_grids[x][y] = NULL;
-        }
+        unloader.UnloadN();
+        delete getNGrid(x, y);
+        setNGrid(NULL, x, y);
     }
-    delete i_info[x][y];
-    i_info[x][y] = NULL;
-
-    //z coordinate
-
     int gx=63-x;
     int gy=63-y;
 
     // delete grid map, but don't delete if it is from parent map (and thus only reference)
-    if (GridMaps[gx][gy])
+    //+++if (GridMaps[gx][gy]) don't check for GridMaps[gx][gy], we might have to unload vmaps
     {
         if (i_InstanceId == 0)
-            delete (GridMaps[gx][gy]);
+        {
+            if(GridMaps[gx][gy]) delete (GridMaps[gx][gy]);
+            // x and y are swaped
+            VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(GetId(), gy, gx);
+        }
         else
             ((MapInstanced*)(MapManager::Instance().GetBaseMap(i_id)))->RemoveGridMapReference(GridPair(gx, gy));
         GridMaps[gx][gy] = NULL;
     }
-                                                            // x and y are swaped
-    VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(GetId(), gy, gx);
-
     DEBUG_LOG("Unloading grid[%u,%u] for map %u finished", x,y, i_id);
     return true;
 }
@@ -1185,14 +1069,11 @@ void Map::UnloadAll()
     // clear all delayed moves, useless anyway do this moves before map unload.
     i_creaturesToMove.clear();
 
-    for(unsigned int i=0; i < MAX_NUMBER_OF_GRIDS; ++i)
+    while(!GridRefManager<NGridType>::isEmpty())
     {
-        if(!i_gridMask[i])
-            continue;
-
-        for(unsigned int j=0; j < MAX_NUMBER_OF_GRIDS; ++j)
-            if( i_gridMask[i] & (uint64(1) << j) )
-                UnloadGrid(i, j);
+        GridRefManager<NGridType>::iterator i = GridRefManager<NGridType>::begin();
+        NGridType &grid(*i->getSource());
+        UnloadGrid(grid.getX(), grid.getY()); // deleted the grid and removes it from the GridRefManager
     }
 }
 

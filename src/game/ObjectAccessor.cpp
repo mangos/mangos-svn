@@ -582,7 +582,7 @@ ObjectAccessor::Update(uint32 diff)
 
         for(CreatureLocationHolderType::iterator iter=creature_locations.begin(); iter != creature_locations.end(); ++iter)
         {
-            MapManager::Instance().GetMap((*iter).first, (*iter).second)->marked_cells.reset();
+            MapManager::Instance().GetMap((*iter).first, (*iter).second)->resetMarkedCells();
         }
 
         for(CreatureLocationHolderType::iterator iter=creature_locations.begin(); iter != creature_locations.end(); ++iter)
@@ -606,9 +606,9 @@ ObjectAccessor::Update(uint32 diff)
                 for(CellPair cell_iter=update_cell; abs(int32(standing_cell.y_coord) - int32(cell_iter.y_coord)) < 2; cell_iter += 1 )
                 {
                     uint32 cell_id = (cell_iter.y_coord*TOTAL_NUMBER_OF_CELLS_PER_MAP) + cell_iter.x_coord;
-                    if( !map->marked_cells.test(cell_id) )
+                    if( !map->isCellMarked(cell_id) )
                     {
-                        map->marked_cells.set(cell_id);
+                        map->markCell(cell_id);
                         Cell cell(cell_iter);
                         cell.data.Part.reserved = CENTER_DISTRICT;
                         cell.SetNoCreate();

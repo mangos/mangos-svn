@@ -48,7 +48,6 @@ void MapInstanced::Update(const uint32& t)
                 // avoid doing ++ on invalid data
                 InstancedMaps::iterator i_old = i;
                 ++i;
-                VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(i_old->second->GetId());
                 // erase map
                 delete i_old->second;
                 m_InstancedMaps.erase(i_old);
@@ -307,7 +306,6 @@ void MapInstanced::CreateInstance(uint32 InstanceId, Map* &map)
 
             map->Reset();
             m_InstancedMaps.erase(InstanceId);
-            VMAP::VMapFactory::createOrGetVMapManager()->unloadMap(GetId());
             delete map;
             map = NULL;
         }

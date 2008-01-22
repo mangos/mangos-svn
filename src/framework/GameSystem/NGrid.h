@@ -23,6 +23,25 @@
  */
 
 #include "GameSystem/Grid.h"
+#include "GameSystem/GridReference.h"
+#include "Timer.h"
+
+class GridInfo
+{
+public:
+    GridInfo() : i_timer(0) {}
+    GridInfo(time_t expiry, bool unload = true ) : i_timer(expiry), i_unloadflag(unload) {}
+    const TimeTracker& getTimeTracker() const { return i_timer; }
+    bool getUnloadFlag() const { return i_unloadflag; }
+    void setUnloadFlag( bool pFlag) { i_unloadflag = pFlag; }
+    void setTimer(const TimeTracker& pTimer) { i_timer = pTimer; }
+    void ResetTimeTracker(time_t interval) { i_timer.Reset(interval); }
+    void UpdateTimeTracker(time_t diff) { i_timer.Update(diff); }
+
+private:
+    TimeTracker i_timer;
+    bool i_unloadflag;
+};
 
 typedef enum
 {
@@ -46,7 +65,11 @@ class MANGOS_DLL_DECL NGrid
     public:
 
         typedef Grid<ACTIVE_OBJECT, WORLD_OBJECT_TYPES, GRID_OBJECT_TYPES, ThreadModel> GridType;
-        NGrid(uint32 id) : i_gridId(id), i_cellstate(GRID_STATE_INVALID) {}
+        NGrid(uint32 id, int32 x, int32 y, time_t expiry, bool unload = true) : 
+            i_gridId(id), i_cellstate(GRID_STATE_INVALID), i_x(x), i_y(y), i_GridObjectDataLoaded(false)
+            {
+                i_GridInfo = GridInfo(expiry, unload);
+            }
 
         const GridType& operator()(unsigned short x, unsigned short y) const { return i_cells[x][y]; }
         GridType& operator()(unsigned short x, unsigned short y) { return i_cells[x][y]; }
@@ -55,6 +78,22 @@ class MANGOS_DLL_DECL NGrid
         inline void SetGridId(const uint32 id) const { i_gridId = id; }
         inline grid_state_t GetGridState(void) const { return i_cellstate; }
         inline void SetGridState(grid_state_t s) { i_cellstate = s; }
+        inline int32 getX() const { return i_x; }
+        inline int32 getY() const { return i_y; }
+
+        void link(GridRefManager<NGrid<N, ACTIVE_OBJECT, WORLD_OBJECT_TYPES, GRID_OBJECT_TYPES, ThreadModel> >* pTo)
+        {
+            i_Reference.link(pTo, this);
+        }
+        bool isGridObjectDataLoaded() const { return i_GridObjectDataLoaded; }
+        void setGridObjectDataLoaded(bool pLoaded) { i_GridObjectDataLoaded = pLoaded; }
+
+        GridInfo* getGridInfoRef() { return &i_GridInfo; }
+        const TimeTracker& getTimeTracker() const { return i_GridInfo.getTimeTracker(); }
+        bool getUnloadFlag() const { return i_GridInfo.getUnloadFlag(); }
+        void setUnloadFlag( bool pFlag) { i_GridInfo.setUnloadFlag(pFlag); }
+        void ResetTimeTracker(time_t interval) { i_GridInfo.ResetTimeTracker(interval); }
+        void UpdateTimeTracker(time_t diff) { i_GridInfo.UpdateTimeTracker(diff); }
 
         template<class SPECIFIC_OBJECT> void AddWorldObject(const uint32 x, const uint32 y, SPECIFIC_OBJECT *obj, OBJECT_HANDLE hdl)
         {
@@ -110,7 +149,12 @@ class MANGOS_DLL_DECL NGrid
     private:
 
         uint32 i_gridId;
+        GridInfo i_GridInfo;
+        GridReference<NGrid<N, ACTIVE_OBJECT, WORLD_OBJECT_TYPES, GRID_OBJECT_TYPES, ThreadModel> > i_Reference;
+        int32 i_x;
+        int32 i_y;
         grid_state_t i_cellstate;
         GridType i_cells[N][N];
+        bool i_GridObjectDataLoaded;
 };
 #endif

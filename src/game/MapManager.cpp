@@ -32,6 +32,8 @@
 INSTANTIATE_SINGLETON_2(MapManager, CLASS_LOCK);
 INSTANTIATE_CLASS_MUTEX(MapManager, ZThread::Mutex);
 
+extern GridState* si_GridStates[]; // debugging code, should be deleted some day
+
 MapManager::MapManager() : i_gridCleanUpDelay(sWorld.getConfig(CONFIG_INTERVAL_GRIDCLEAN))
 {
     i_timer.SetInterval(sWorld.getConfig(CONFIG_INTERVAL_MAPUPDATE));
@@ -53,7 +55,43 @@ MapManager::Initialize()
 {
     Map::InitStateMachine();
 
+    // debugging code, should be deleted some day
+    {
+        for(int i=0;i<MAX_GRID_STATE; i++) 
+        {
+            i_GridStates[i] = si_GridStates[i];
+        }
+        i_GridStateErrorCount = 0;
+    }
+
     InitMaxInstanceId();
+}
+
+// debugging code, should be deleted some day
+void MapManager::checkAndCorrectGridStatesArray()
+{
+    bool ok = true;
+    for(int i=0;i<MAX_GRID_STATE; i++) 
+    {
+        if(i_GridStates[i] != si_GridStates[i])
+        {
+            sLog.outError("MapManager::checkGridStates(), GridState: si_GridStates is currupt !!!"); 
+            ok = false;
+            si_GridStates[i] = i_GridStates[i];
+        }
+#ifdef MANGOS_DEBUG
+        // inner class checking only when compiled with debug
+        if(!si_GridStates[i]->checkMagic())
+        {
+            ok = false;
+            si_GridStates[i]->setMagic();
+        }
+#endif
+    }
+    if(!ok) 
+        i_GridStateErrorCount++;
+    if(i_GridStateErrorCount > 2)
+        assert(false); // force a crash. Too many errors
 }
 
 Map*
@@ -113,7 +151,10 @@ MapManager::Update(time_t diff)
         return;
 
     for(MapMapType::iterator iter=i_maps.begin(); iter != i_maps.end(); ++iter)
+    {
+        checkAndCorrectGridStatesArray(); // debugging code, should be deleted some day
         iter->second->Update(i_timer.GetCurrent());
+    }
 
     ObjectAccessor::Instance().Update(i_timer.GetCurrent());
     for (TransportSet::iterator iter = m_Transports.begin(); iter != m_Transports.end(); ++iter)
