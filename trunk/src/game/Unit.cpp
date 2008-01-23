@@ -1891,8 +1891,17 @@ void Unit::DoAttackDamage (Unit *pVictim, int32 init_damage, uint32 *damage, Cle
 
     int32 white_damage = CalculateDamage (attType);
 
-    if(spellCasted)                                         //apply spellmod also to the weapon damage, *damage already have applied mod
+    if(spellCasted)
     {
+        // single only spell with 2 weapon white damage apply if have
+        if(GetTypeId()==TYPEID_PLAYER && spellCasted->SpellFamilyName == SPELLFAMILY_WARRIOR && (spellCasted->SpellFamilyFlags & 0x00000400000000LL))
+        {
+            Item* item = ((Player*)this)->GetItemByPos(INVENTORY_SLOT_BAG_0, EQUIPMENT_SLOT_OFFHAND);
+            if (item && item->GetProto()->Class == ITEM_CLASS_WEAPON && !item->IsBroken() && ((Player*)this)->IsUseEquipedWeapon(false))
+                white_damage += CalculateDamage (OFF_ATTACK);
+        }
+
+        //apply spellmod also to the weapon damage, *damage already have applied mod
         if(Player* modOwner = GetSpellModOwner())
         {
             // SPELLMOD_FLAT already applied in Spell::EffectWeaponDmg
