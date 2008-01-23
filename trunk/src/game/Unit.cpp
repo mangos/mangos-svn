@@ -848,8 +848,18 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
 
         if(damagetype != DOT)
         {
-            //start melee attacks only after melee hit
-            Attack(pVictim,(damagetype == DIRECT_DAMAGE));
+            if(getVictim())
+            {
+                // if have target and damage pVictim just call AI recation
+                if(pVictim != getVictim() && pVictim->GetTypeId()==TYPEID_UNIT && ((Creature*)pVictim)->AI())
+                    ((Creature*)pVictim)->AI()->AttackedBy(this);
+            }
+            else
+            {
+                // if not have main target then attack state with target (including AI call)
+                //start melee attacks only after melee hit
+                Attack(pVictim,(damagetype == DIRECT_DAMAGE));
+            }
         }
 
         // polymorphed and other negative transformed cases
@@ -5016,8 +5026,6 @@ bool Unit::Attack(Unit *victim, bool playerMeleeAttack)
     {
         ((Creature*)this)->CallAssistence();
     }
-    //if(!isAttackReady(BASE_ATTACK))
-    //resetAttackTimer(BASE_ATTACK);
 
     // delay offhand weapon attack to next attack time
     if(haveOffhandWeapon())
