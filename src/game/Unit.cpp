@@ -1823,7 +1823,7 @@ void Unit::CalcAbsorbResist(Unit *pVictim,SpellSchools school, DamageEffectType 
     *absorb = damage - RemainingDamage - *resist;
 }
 
-void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDamage, uint32 *blocked_amount, SpellSchools damageType, uint32 *hitInfo, VictimState *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType, SpellEntry const *spellCasted, bool isTriggeredSpell)
+void Unit::DoAttackDamage (Unit *pVictim, int32 init_damage, uint32 *damage, CleanDamage *cleanDamage, uint32 *blocked_amount, SpellSchools damageType, uint32 *hitInfo, VictimState *victimState, uint32 *absorbDamage, uint32 *resistDamage, WeaponAttackType attType, SpellEntry const *spellCasted, bool isTriggeredSpell)
 {
     bool unavoidable = spellCasted && (spellCasted->Attributes & 0x200000);
 
@@ -1889,8 +1889,14 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
             modOwner->ApplySpellMod(spellCasted->Id, SPELLMOD_DAMAGE, white_damage, SPELLMOD_PCT);
         }
     }
-    
-    *damage += white_damage;
+
+    // calculate full damage (init_damage can be negative)
+    {
+       int32 temp_damage = init_damage + white_damage;
+       if(temp_damage < 0)
+            temp_damage = 0;
+       *damage = uint32(temp_damage);
+    }
 
     //Calculate the damage after armor mitigation if SPELL_SCHOOL_NORMAL
     if (damageType == SPELL_SCHOOL_NORMAL)
@@ -2078,10 +2084,10 @@ void Unit::DoAttackDamage (Unit *pVictim, uint32 *damage, CleanDamage *cleanDama
                 pVictim->HandleEmoteCommand(EMOTE_ONESHOT_PARRYUNARMED);
 
             //Only set VICTIMSTATE_BLOCK on a full block
-            if (*blocked_amount >= *damage)
+            if (*blocked_amount >= uint32(*damage))
             {
                 *victimState = VICTIMSTATE_BLOCKS;
-                *blocked_amount = *damage;
+                *blocked_amount = uint32(*damage);
             }
 
             if(pVictim->GetTypeId() == TYPEID_PLAYER)
@@ -2305,7 +2311,7 @@ void Unit::AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType, bool is
         return;
     }
 
-    DoAttackDamage (pVictim, &damage, &cleanDamage, &blocked_dmg, meleeSchool, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType);
+    DoAttackDamage (pVictim, 0, &damage, &cleanDamage, &blocked_dmg, meleeSchool, &hitInfo, &victimState, &absorbed_dmg, &resisted_dmg, attType);
 
     if (hitInfo & HITINFO_MISS)
         //send miss
