@@ -40,6 +40,8 @@
 #include "Totem.h"
 #include "BattleGround.h"
 #include "MovementGenerator.h"
+#include "GridNotifiersImpl.h"
+#include "CellImpl.h"
 
 #include <math.h>
 
@@ -4221,6 +4223,62 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
     // Non SpellID checks
     switch(dummySpell->SpellIconID)
     {
+        case 515:
+        {
+            if(dummySpell->SpellVisual == 211)
+            {
+                //Sweeping Strikes
+                CellPair p(MaNGOS::ComputeCellPair(GetPositionX(), GetPositionY()));
+                Cell cell(p);
+                cell.data.Part.reserved = ALL_DISTRICT;
+                cell.SetNoCreate();
+
+                std::list<Unit *> targets;
+
+                {
+                    MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, this, ATTACK_DISTANCE);
+                    MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
+
+                    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
+                    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
+
+                    CellLock<GridReadGuard> cell_lock(cell, p);
+                    cell_lock->Visit(cell_lock, world_unit_searcher, *MapManager::Instance().GetMap(GetMapId(), this));
+                    cell_lock->Visit(cell_lock, grid_unit_searcher, *MapManager::Instance().GetMap(GetMapId(), this));
+                }
+
+                // remove current target
+                if(pVictim)
+                    targets.remove(pVictim);
+
+                // remove not LoS targets
+                for(std::list<Unit *>::iterator tIter = targets.begin(); tIter != targets.end();)
+                {
+                    if(!IsWithinLOSInMap(*tIter))
+                    {
+                        std::list<Unit *>::iterator tIter2 = tIter;
+                        ++tIter;
+                        targets.erase(tIter2);
+                    }
+                    else
+                        ++tIter;
+                }
+
+                // no appropriate targets
+                if(targets.empty())
+                    return;
+
+                // select random
+                uint32 rIdx = rand32(0,targets.size()-1);
+                std::list<Unit *>::const_iterator tIter = targets.begin();
+                for(uint32 i = 0; i < rIdx; ++i)
+                    ++tIter;
+
+                CastSpell(*tIter, 26654, true, NULL, triggeredByAura);
+                return;
+            }
+            break;
+        }
         // Master of Elements
         case 1920:
         {
@@ -4793,6 +4851,10 @@ bool Unit::IsHostileTo(Unit const* unit) const
     Unit const* tester = testerOwner ? testerOwner : this;
     Unit const* target = targetOwner ? targetOwner : unit;
 
+    // always non-hostile to target with common owner, or to owner/pet
+    if(tester==target)
+        return false;
+
     // special cases (Duel, etc)
     if(tester->GetTypeId()==TYPEID_PLAYER && target->GetTypeId()==TYPEID_PLAYER)
     {
@@ -4891,6 +4953,10 @@ bool Unit::IsFriendlyTo(Unit const* unit) const
 
     Unit const* tester = testerOwner ? testerOwner : this;
     Unit const* target = targetOwner ? targetOwner : unit;
+
+    // always friendly to target with common owner, or to owner/pet
+    if(tester==target)
+        return true;
 
     // special cases (Duel)
     if(tester->GetTypeId()==TYPEID_PLAYER && target->GetTypeId()==TYPEID_PLAYER)
