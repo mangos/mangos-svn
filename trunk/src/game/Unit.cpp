@@ -58,8 +58,18 @@ float baseMoveSpeed[MAX_MOVE_TYPE] =
     7.0f                                                    // MOVE_MOUNTED
 };
 
-// auraTypes contains auras capable of proc'ing cast auras
-static Unit::AuraTypeSet GenerateProcCastAuraTypes()
+// auraTypes contains attacker auras capable of proc'ing cast auras
+static Unit::AuraTypeSet GenerateAttakerProcCastAuraTypes()
+{
+    static Unit::AuraTypeSet auraTypes;
+    auraTypes.insert(SPELL_AURA_DUMMY);
+    auraTypes.insert(SPELL_AURA_PROC_TRIGGER_SPELL);
+    auraTypes.insert(SPELL_AURA_MOD_HASTE);
+    return auraTypes;
+}
+
+// auraTypes contains victim auras capable of proc'ing cast auras
+static Unit::AuraTypeSet GenerateVictimProcCastAuraTypes()
 {
     static Unit::AuraTypeSet auraTypes;
     auraTypes.insert(SPELL_AURA_DUMMY);
@@ -88,16 +98,20 @@ static Unit::AuraTypeSet GenerateVictimProcEffectAuraTypes()
     return auraTypes;
 }
 
-static Unit::AuraTypeSet procCastAuraTypes = GenerateProcCastAuraTypes();
+static Unit::AuraTypeSet attackerProcCastAuraTypes = GenerateAttakerProcCastAuraTypes();
 static Unit::AuraTypeSet attackerProcEffectAuraTypes = GenerateAttakerProcEffectAuraTypes();
+
+static Unit::AuraTypeSet victimProcCastAuraTypes = GenerateVictimProcCastAuraTypes();
 static Unit::AuraTypeSet victimProcEffectAuraTypes   = GenerateVictimProcEffectAuraTypes();
 
 // auraTypes contains auras capable of proc'ing for attacker and victim
 static Unit::AuraTypeSet GenerateProcAuraTypes()
 {
-    static Unit::AuraTypeSet auraTypes = procCastAuraTypes;
-    auraTypes.insert(victimProcEffectAuraTypes.begin(),victimProcEffectAuraTypes.end());
+    Unit::AuraTypeSet auraTypes;
+    auraTypes.insert(attackerProcCastAuraTypes.begin(),attackerProcCastAuraTypes.end());
     auraTypes.insert(attackerProcEffectAuraTypes.begin(),attackerProcEffectAuraTypes.end());
+    auraTypes.insert(victimProcCastAuraTypes.begin(),victimProcCastAuraTypes.end());
+    auraTypes.insert(victimProcEffectAuraTypes.begin(),victimProcEffectAuraTypes.end());
     return auraTypes;
 }
 
@@ -3938,7 +3952,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
     {
         // procces auras that not generate casts at proc event before auras that generate casts to prevent proc aura added at prev. proc aura execute in set
         ProcDamageAndSpellFor(false,pVictim,procAttacker,attackerProcEffectAuraTypes,attType, procSpell, damage);
-        ProcDamageAndSpellFor(false,pVictim,procAttacker,procCastAuraTypes,attType, procSpell, damage);
+        ProcDamageAndSpellFor(false,pVictim,procAttacker,attackerProcCastAuraTypes,attType, procSpell, damage);
     }
 
     // Now go on with a victim's events'n'auras
@@ -3947,7 +3961,7 @@ void Unit::ProcDamageAndSpell(Unit *pVictim, uint32 procAttacker, uint32 procVic
     {
         // procces auras that not generate casts at proc event before auras that generate casts to prevent proc aura added at prev. proc aura execute in set
         pVictim->ProcDamageAndSpellFor(true,this,procVictim,victimProcEffectAuraTypes,attType,procSpell, damage);
-        pVictim->ProcDamageAndSpellFor(true,this,procVictim,procCastAuraTypes,attType,procSpell, damage);
+        pVictim->ProcDamageAndSpellFor(true,this,procVictim,victimProcCastAuraTypes,attType,procSpell, damage);
     }
 }
 
@@ -4225,56 +4239,29 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
     {
         case 515:
         {
+            //Sweeping Strikes
             if(dummySpell->SpellVisual == 211)
             {
-                //Sweeping Strikes
-                CellPair p(MaNGOS::ComputeCellPair(GetPositionX(), GetPositionY()));
-                Cell cell(p);
-                cell.data.Part.reserved = ALL_DISTRICT;
-                cell.SetNoCreate();
-
-                std::list<Unit *> targets;
-
-                {
-                    MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, this, ATTACK_DISTANCE);
-                    MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
-
-                    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
-                    TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
-
-                    CellLock<GridReadGuard> cell_lock(cell, p);
-                    cell_lock->Visit(cell_lock, world_unit_searcher, *MapManager::Instance().GetMap(GetMapId(), this));
-                    cell_lock->Visit(cell_lock, grid_unit_searcher, *MapManager::Instance().GetMap(GetMapId(), this));
-                }
-
-                // remove current target
-                if(pVictim)
-                    targets.remove(pVictim);
-
-                // remove not LoS targets
-                for(std::list<Unit *>::iterator tIter = targets.begin(); tIter != targets.end();)
-                {
-                    if(!IsWithinLOSInMap(*tIter))
-                    {
-                        std::list<Unit *>::iterator tIter2 = tIter;
-                        ++tIter;
-                        targets.erase(tIter2);
-                    }
-                    else
-                        ++tIter;
-                }
-
-                // no appropriate targets
-                if(targets.empty())
+                Unit* additionalTarget = SelectNearbyTarget();
+                if(!additionalTarget)
                     return;
 
-                // select random
-                uint32 rIdx = rand32(0,targets.size()-1);
-                std::list<Unit *>::const_iterator tIter = targets.begin();
-                for(uint32 i = 0; i < rIdx; ++i)
-                    ++tIter;
+                CastSpell(additionalTarget, 26654, true, NULL,triggeredByAura);
+                return;
+            }
+            break;
+        }
+        case 1477:
+        {
+            //Blade Flurry
+            if(dummySpell->SpellVisual == 211)
+            {
+                Unit* additionalTarget = SelectNearbyTarget();
+                if(!additionalTarget)
+                    return;
 
-                CastSpell(*tIter, 26654, true, NULL, triggeredByAura);
+                int32 basePoint0 = damage;              // EffBaseDice = 0
+                CastCustomSpell(additionalTarget, 22482, &basePoint0, 0, 0, true, NULL, triggeredByAura);
                 return;
             }
             break;
@@ -7645,7 +7632,8 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                 switch(*aur)
                 {
                     case SPELL_AURA_PROC_TRIGGER_SPELL: i_spell_param = procFlag;    break;
-                    case SPELL_AURA_DUMMY:              i_spell_param = i_spell_eff; break;
+                    case SPELL_AURA_DUMMY:
+                    case SPELL_AURA_MOD_HASTE:          i_spell_param = i_spell_eff; break;
                     default: i_spell_param = (*i)->GetModifier()->m_amount;          break;
                 }
 
@@ -7704,6 +7692,12 @@ void Unit::ProcDamageAndSpellFor( bool isVictim, Unit * pTarget, uint32 procFlag
                 case SPELL_AURA_DUMMY:
                 {
                     sLog.outDebug("ProcDamageAndSpell: casting spell id %u (triggered by %s dummy aura of spell %u)", i->spellInfo->Id,(isVictim?"a victim's":"an attacker's"),i->triggeredByAura->GetId());
+                    HandleDummyAuraProc(pTarget, i->spellInfo, i->spellParam, damage, i->triggeredByAura, procSpell, procFlag);
+                    break;
+                }
+                case SPELL_AURA_MOD_HASTE:
+                {
+                    sLog.outDebug("ProcDamageAndSpell: casting spell id %u (triggered by %s haste aura of spell %u)", i->spellInfo->Id,(isVictim?"a victim's":"an attacker's"),i->triggeredByAura->GetId());
                     HandleDummyAuraProc(pTarget, i->spellInfo, i->spellParam, damage, i->triggeredByAura, procSpell, procFlag);
                     break;
                 }
@@ -7937,4 +7931,55 @@ void Unit::UpdateReactives( uint32 p_time )
             m_reactiveTimer[reactive] -= p_time;
         }
     }
+}
+
+Unit* Unit::SelectNearbyTarget() const
+{
+    CellPair p(MaNGOS::ComputeCellPair(GetPositionX(), GetPositionY()));
+    Cell cell(p);
+    cell.data.Part.reserved = ALL_DISTRICT;
+    cell.SetNoCreate();
+
+    std::list<Unit *> targets;
+
+    {
+        MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck u_check(this, this, ATTACK_DISTANCE);
+        MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck> searcher(targets, u_check);
+
+        TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck>, WorldTypeMapContainer > world_unit_searcher(searcher);
+        TypeContainerVisitor<MaNGOS::UnitListSearcher<MaNGOS::AnyUnfriendlyUnitInObjectRangeCheck>, GridTypeMapContainer >  grid_unit_searcher(searcher);
+
+        CellLock<GridReadGuard> cell_lock(cell, p);
+        cell_lock->Visit(cell_lock, world_unit_searcher, *MapManager::Instance().GetMap(GetMapId(), this));
+        cell_lock->Visit(cell_lock, grid_unit_searcher, *MapManager::Instance().GetMap(GetMapId(), this));
+    }
+
+    // remove current target
+    if(getVictim())
+        targets.remove(getVictim());
+
+    // remove not LoS targets
+    for(std::list<Unit *>::iterator tIter = targets.begin(); tIter != targets.end();)
+    {
+        if(!IsWithinLOSInMap(*tIter))
+        {
+            std::list<Unit *>::iterator tIter2 = tIter;
+            ++tIter;
+            targets.erase(tIter2);
+        }
+        else
+            ++tIter;
+    }
+
+    // no appropriate targets
+    if(targets.empty())
+        return NULL;
+
+    // select random
+    uint32 rIdx = rand32(0,targets.size()-1);
+    std::list<Unit *>::const_iterator tIter = targets.begin();
+    for(uint32 i = 0; i < rIdx; ++i)
+        ++tIter;
+
+    return *tIter;
 }
