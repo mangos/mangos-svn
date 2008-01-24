@@ -116,6 +116,14 @@ TargetedMovementGenerator<T>::Update(T &owner, const uint32 & time_diff)
         return false;
     }
 
+    // prevent movement while casting spells with cast time or channel time
+    if ( owner.IsNonMeleeSpellCasted(false, false,  true))
+    {
+        if (!owner.IsStopped())
+            owner.StopMoving();
+        return true;
+    }
+
     // prevent crash after creature killed pet
     if (!owner.hasUnitState(UNIT_STAT_FOLLOW) && owner.getVictim() != i_target.getTarget())
         return true;
