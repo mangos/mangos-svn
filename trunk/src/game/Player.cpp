@@ -11939,7 +11939,7 @@ void Player::KilledMonster( uint32 entry, uint64 guid )
                             mQuestStatus[questid].m_creatureOrGOcount[j] = curkillcount + addkillcount;
                             if (mQuestStatus[questid].uState != QUEST_NEW) mQuestStatus[questid].uState = QUEST_CHANGED;
 
-                            SendQuestUpdateAddCreature( qInfo, guid, j, curkillcount, addkillcount);
+                            SendQuestUpdateAddCreatureOrGo( qInfo, guid, j, curkillcount, addkillcount);
                         }
                         if ( CanCompleteQuest( questid ) )
                             CompleteQuest( questid );
@@ -12003,7 +12003,7 @@ void Player::CastedCreatureOrGO( uint32 entry, uint64 guid, uint32 spell_id )
                             mQuestStatus[questid].m_creatureOrGOcount[j] = curCastCount + addCastCount;
                             if (mQuestStatus[questid].uState != QUEST_NEW) mQuestStatus[questid].uState = QUEST_CHANGED;
 
-                            SendQuestUpdateAddCreature( qInfo, guid, j, curCastCount, addCastCount);
+                            SendQuestUpdateAddCreatureOrGo( qInfo, guid, j, curCastCount, addCastCount);
                         }
                         if ( CanCompleteQuest( questid ) )
                             CompleteQuest( questid );
@@ -12058,7 +12058,7 @@ void Player::TalkedToCreature( uint32 entry, uint64 guid )
                             mQuestStatus[questid].m_creatureOrGOcount[j] = curTalkCount + addTalkCount;
                             if (mQuestStatus[questid].uState != QUEST_NEW) mQuestStatus[questid].uState = QUEST_CHANGED;
 
-                            SendQuestUpdateAddCreature( qInfo, guid, j, curTalkCount, addTalkCount);
+                            SendQuestUpdateAddCreatureOrGo( qInfo, guid, j, curTalkCount, addTalkCount);
                         }
                         if ( CanCompleteQuest( questid ) )
                             CompleteQuest( questid );
@@ -12253,22 +12253,27 @@ void Player::SendQuestUpdateAddItem( Quest const* pQuest, uint32 item_idx, uint3
     GetSession()->SendPacket( &data );
 }
 
-void Player::SendQuestUpdateAddCreature( Quest const* pQuest, uint64 guid, uint32 creature_idx, uint32 old_count, uint32 add_count )
+void Player::SendQuestUpdateAddCreatureOrGo( Quest const* pQuest, uint64 guid, uint32 creatureOrGO_idx, uint32 old_count, uint32 add_count )
 {
     assert(old_count + add_count < 64 && "mob/GO count store in 6 bits 2^6 = 64 (0..63)");
 
-    WorldPacket data( SMSG_QUESTUPDATE_ADD_KILL, (24) );
+    int32 entry = pQuest->ReqCreatureOrGOId[ creatureOrGO_idx ];
+    if (entry < 0)
+        // client expected gameobject template id in form (id|0x80000000)
+        entry = (-entry) | 0x80000000;
+
+    WorldPacket data( SMSG_QUESTUPDATE_ADD_KILL, (4*4+8) );
     sLog.outDebug( "WORLD: Sent SMSG_QUESTUPDATE_ADD_KILL" );
-    data << pQuest->GetQuestId();
-    data << uint32(pQuest->ReqCreatureOrGOId[ creature_idx ]);
-    data << old_count + add_count;
-    data << pQuest->ReqCreatureOrGOCount[ creature_idx ];
-    data << guid;
+    data << uint32(pQuest->GetQuestId());
+    data << uint32(entry);
+    data << uint32(old_count + add_count);
+    data << uint32(pQuest->ReqCreatureOrGOCount[ creatureOrGO_idx ]);
+    data << uint64(guid);
     GetSession()->SendPacket(&data);
 
     uint16 log_slot = GetQuestSlot( pQuest->GetQuestId() );
     uint32 kills = GetUInt32Value( log_slot + 1 );
-    kills = kills + (add_count << ( 6 * creature_idx ));
+    kills = kills + (add_count << ( 6 * creatureOrGO_idx ));
     SetUInt32Value( log_slot + 1, kills );
 }
 
