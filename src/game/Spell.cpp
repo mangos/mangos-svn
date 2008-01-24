@@ -1978,6 +1978,13 @@ void Spell::finish(bool ok)
                             ((Player*)m_caster)->CastedCreatureOrGO(creature->GetEntry(),creature->GetGUID(),m_spellInfo->Id);
                         break;
                     }
+                    if(!m_targetGameobjectGUIDs[j].empty())
+                    {
+                        GameObject* go = ObjectAccessor::GetGameObject(*m_caster,m_targetGameobjectGUIDs[j].front());
+                        if( go )
+                            ((Player*)m_caster)->CastedCreatureOrGO(go->GetEntry(),go->GetGUID(),m_spellInfo->Id);
+                        break;
+                    }
                 }
             }
         }
