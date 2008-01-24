@@ -1226,6 +1226,37 @@ void Spell::EffectDummy(uint32 i)
 
             return;
         }
+
+        // Purify Helboar Meat
+        case 29200:
+        {
+            if(m_caster->GetTypeId() != TYPEID_PLAYER)
+                return;
+
+            Player *player = (Player*)m_caster;
+
+            uint32 newitemid = rand_chance() > 50 ? 23248 : 23355;
+
+            uint16 dest;
+            uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, newitemid, 1, false);
+            if( msg != EQUIP_ERR_OK )
+            {
+                player->SendEquipError( msg, NULL, NULL );
+                return;
+            }
+
+            Item *pItem = player->StoreNewItem( dest, newitemid, 1, true,Item::GenerateItemRandomPropertyId(newitemid));
+
+            if(!pItem)
+            {
+                player->SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL );
+                return;
+            }
+
+            player->SendNewItem(pItem, 1, true, true);
+
+            return;
+        }
     }
 }
 
