@@ -411,12 +411,27 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
     Item *pItem = _player->GetItemByPos( pos );
     if( pItem )
     {
+        // prevent sell not owner item
+        if(_player->GetGUID()!=pItem->GetOwnerGUID())
+        {
+            _player->SendSellError( SELL_ERR_CANT_SELL_ITEM, pCreature, itemguid, 0);
+            return;
+        }
+
         // prevent sell non empty bag by drag-and-drop at vendor's item list
         if(pItem->IsBag() && !((Bag*)pItem)->IsEmpty())
         {
             _player->SendSellError( SELL_ERR_CANT_SELL_ITEM, pCreature, itemguid, 0);
             return;
         }
+
+        // prevent sell currently looted item
+        if(_player->GetLootGUID()==pItem->GetGUID())
+        {
+            _player->SendSellError( SELL_ERR_CANT_SELL_ITEM, pCreature, itemguid, 0);
+            return;
+        }
+
 
         // special case at auto sell (sell all)
         if(count==0)

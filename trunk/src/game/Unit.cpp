@@ -1449,11 +1449,14 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             uint32 resist=0;
             CleanDamage cleanDamage =  CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL );
 
+            // ignore non positive values (can be result apply spellmods to aura damage
+            uint32 amount = mod->m_amount > 0 ? mod->m_amount : 0;
+
             uint32 pdamage;
 
             if(mod->m_auraname == SPELL_AURA_PERIODIC_DAMAGE)
             {
-                pdamage = mod->m_amount;
+                pdamage = amount;
 
                 //Calculate armor mitigation if it is a physical spell
                 if (spellProto->School == SPELL_SCHOOL_NORMAL)
@@ -1468,7 +1471,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
                 pdamage = SpellDamageBonus(pVictim,spellProto,pdamage,DOT);
             }
             else
-                pdamage = uint32(pVictim->GetMaxHealth()*mod->m_amount/100);
+                pdamage = uint32(pVictim->GetMaxHealth()*amount/100);
 
             sLog.outDetail("PeriodicAuraLog: %u (TypeId: %u) attacked %u (TypeId: %u) for %u dmg inflicted by %u abs is %u",
                 GetGUIDLow(), GetTypeId(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), pdamage, spellProto->Id,absorb);
@@ -1495,7 +1498,7 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             uint32 resist=0;
             CleanDamage cleanDamage =  CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL );
 
-            uint32 pdamage = mod->m_amount;
+            uint32 pdamage = mod->m_amount > 0 ? mod->m_amount : 0;
 
             //Calculate armor mitigation if it is a physical spell
             if (spellProto->School == SPELL_SCHOOL_NORMAL)
@@ -1542,12 +1545,15 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         case SPELL_AURA_PERIODIC_HEAL:
         case SPELL_AURA_OBS_MOD_HEALTH:
         {
+            // ignore non positive values (can be result apply spellmods to aura damage
+            uint32 amount = mod->m_amount > 0 ? mod->m_amount : 0;
+
             uint32 pdamage;
 
             if(mod->m_auraname==SPELL_AURA_OBS_MOD_HEALTH)
-                pdamage = uint32(pVictim->GetMaxHealth() * mod->m_amount/100);
+                pdamage = uint32(pVictim->GetMaxHealth() * amount/100);
             else
-                pdamage = mod->m_amount;
+                pdamage = amount;
 
             pdamage = SpellHealingBonus(spellProto, pdamage, DOT, pVictim);
 
@@ -1604,7 +1610,8 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         }
         case SPELL_AURA_PERIODIC_MANA_LEECH:
         {
-            uint32 pdamage = mod->m_amount;
+            // ignore non positive values (can be result apply spellmods to aura damage
+            uint32 pdamage = mod->m_amount > 0 ? mod->m_amount : 0;
 
             sLog.outDetail("PeriodicAuraLog: %u (TypeId: %u) power leech of %u (TypeId: %u) for %u dmg inflicted by %u",
                 GetGUIDLow(), GetTypeId(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), pdamage, spellProto->Id);
@@ -1650,7 +1657,8 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         }
         case SPELL_AURA_PERIODIC_ENERGIZE:
         {
-            uint32 pdamage = mod->m_amount;
+            // ignore non positive values (can be result apply spellmods to aura damage
+            uint32 pdamage = mod->m_amount > 0 ? mod->m_amount : 0;
 
             sLog.outDetail("PeriodicAuraLog: %u (TypeId: %u) energize %u (TypeId: %u) for %u dmg inflicted by %u",
                 GetGUIDLow(), GetTypeId(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), pdamage, spellProto->Id);
@@ -1679,7 +1687,10 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
         }
         case SPELL_AURA_OBS_MOD_MANA:
         {
-            uint32 pdamage = uint32(pVictim->GetMaxPower(POWER_MANA) * mod->m_amount/100);
+            // ignore non positive values (can be result apply spellmods to aura damage
+            uint32 amount = mod->m_amount > 0 ? mod->m_amount : 0;
+
+            uint32 pdamage = uint32(pVictim->GetMaxPower(POWER_MANA) * amount/100);
 
             sLog.outDetail("PeriodicAuraLog: %u (TypeId: %u) energize %u (TypeId: %u) for %u mana inflicted by %u",
                 GetGUIDLow(), GetTypeId(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), pdamage, spellProto->Id);

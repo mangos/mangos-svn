@@ -3029,7 +3029,7 @@ void Spell::EffectWeaponDmg(uint32 i)
     //Devastate bonus and sunder armor refresh
     if(m_spellInfo->SpellVisual == 671 && m_spellInfo->SpellIconID == 1508)
     {
-        uint32 sp_bonus = 0;
+        int32 sp_bonus = 0;
         for(int x=1;x<=3;x++)
         {
             if(m_spellInfo->Effect[x]==SPELL_EFFECT_NORMALIZED_WEAPON_DMG)
