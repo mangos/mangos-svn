@@ -2504,7 +2504,7 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
 
     uint8 eff = m_spellInfo->Effect[i];
 
-    damage = uint32(CalculateDamage((uint8)i,unitTarget)*DamageMultiplier);
+    damage = int32(CalculateDamage((uint8)i,unitTarget)*DamageMultiplier);
 
     sLog.outDebug( "Spell: Effect : %u", eff);
     if(unitTarget && unitTarget->IsImmunedToSpellEffect(eff))
@@ -3926,8 +3926,19 @@ bool Spell::CheckTarget( Unit* target, uint32 eff, bool hitPhase )
 
     // Check targets for not_selectable unit flag and remove
     // A player can cast spells on his pet (or other controlled unit) though in any state
-    if (target != m_caster && target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE | UNIT_FLAG_NOT_SELECTABLE) && target->GetCharmerOrOwnerGUID() != m_caster->GetGUID())
-        return false;
+    if (target != m_caster && target->GetCharmerOrOwnerGUID() != m_caster->GetGUID())
+    {
+        // any unattackable target skipped
+        if (target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NON_ATTACKABLE))
+            return false;
+
+        // unselectable targets skipped in all cases except TARGET_SCRIPT targeting
+        // in case TARGET_SCRIPT target selected by server always and can't be cheated
+        if( target->HasFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE) && 
+            m_spellInfo->EffectImplicitTargetA[eff] != TARGET_SCRIPT &&
+            m_spellInfo->EffectImplicitTargetB[eff] != TARGET_SCRIPT )
+            return false;
+    }
 
     // Evade target (only at hit)
     if( hitPhase && target->GetTypeId()==TYPEID_UNIT && ((Creature*)target)->IsInEvadeMode() )
