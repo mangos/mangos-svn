@@ -3853,11 +3853,11 @@ void Aura::HandleShapeshiftBoosts(bool apply)
             spellId = 33948;
             break;
         case FORM_SWIFT_FLIGHT:
-            m_target->SetSpeed(MOVE_FLY,3.8f,true);
-            spellId = 40122;
+            spellId  = 40122;
+            spellId2 = 40121;
             break;
         case FORM_SPIRITOFREDEMPTION:
-            spellId= 27792;
+            spellId  = 27792;
             spellId2 = 27795;                               // must be second, this important at aura remove to prevent to early iterator invalidation.
             break;
         case FORM_GHOSTWOLF:
