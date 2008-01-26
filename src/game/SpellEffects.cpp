@@ -1895,13 +1895,13 @@ void Spell::SendLoot(uint64 guid, LootType loottype)
 
             case GAMEOBJECT_TYPE_GOOBER:
                 // cast goober spell
+                if (gameObjTarget->GetGOInfo()->data1)      ///Quest (entry = data1) require to be active for GO using
+                    if(player->GetQuestStatus(gameObjTarget->GetGOInfo()->data1) != QUEST_STATUS_INCOMPLETE)
+                        return;
+
                 gameObjTarget->AddUse(player);
                 gameObjTarget->SetLootState(GO_LOOTED);
-                if (gameObjTarget->GetGOInfo()->data1)      ///Gameobject is required to be destroyed for quest entry = data1
-                    if (player->GetQuestStatus(gameObjTarget->GetGOInfo()->data1) != QUEST_STATUS_NONE)
-                        //this condition is useless, but it's used here only for optimalization
-                        player->CastedCreatureOrGO(gameObjTarget->GetEntry(), gameObjTarget->GetGUID(), 0);
-
+                player->CastedCreatureOrGO(gameObjTarget->GetEntry(), gameObjTarget->GetGUID(), 0);
                 return;
         }
     }
@@ -3631,21 +3631,16 @@ void Spell::EffectSummonPlayer(uint32 /*i*/)
     if(!unitTarget || unitTarget->GetTypeId() != TYPEID_PLAYER)
         return;
 
-    if(!unitTarget->isAlive() || unitTarget->isInFlight() || unitTarget->isInCombat() )
-        return;
-
-    //FIXME: must send accepting request for summon to target instead explicit teleportation
-    // SMSG_SUMMON_REQUEST (683)
-    // uint64 summoner_guid
-    // uint32 summon_zoneid
-    // uint32 ms_time (auto decline?)
-    // CMSG_SUMMON_RESPONSE - empty
-
-    // before caster
     float x,y,z;
     m_caster->GetClosePoint(x,y,z);
 
-    ((Player*)unitTarget)->TeleportTo(m_caster->GetMapId(), x, y, z,unitTarget->GetOrientation());
+    ((Player*)unitTarget)->SetSummonPoint(m_caster->GetMapId(),x,y,z);
+
+    WorldPacket data(SMSG_SUMMON_REQUEST, 8+4+4);
+    data << uint64(m_caster->GetGUID());                    // summoner guid
+    data << uint32(m_caster->GetZoneId());                  // summoner zone
+    data << uint32(MAX_PLAYER_SUMMON_DELAY*1000);           // auto decline after msecs
+    ((Player*)unitTarget)->GetSession()->SendPacket(&data);
 }
 
 void Spell::EffectSummonTotem(uint32 i)

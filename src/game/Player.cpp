@@ -227,6 +227,13 @@ Player::Player (WorldSession *session): Unit( 0 )
     m_lastKillDate = 0;
     m_flushKills = false;
     m_saveKills = false;
+
+    // Player summoning
+    m_summon_expire = 0;
+    m_summon_mapid = 0;
+    m_summon_x = 0.0f;
+    m_summon_y = 0.0f;
+    m_summon_z = 0.0f;
 }
 
 Player::~Player ()
@@ -11749,7 +11756,7 @@ void Player::SetQuestStatus( uint32 quest_id, QuestStatus status )
 }
 
 // not used in MaNGOS, but used in scripting code
-uint32 Player::GetReqKillOrCastCurrentCount(uint32 quest_id, uint32 entry)
+uint32 Player::GetReqKillOrCastCurrentCount(uint32 quest_id, int32 entry)
 {
     Quest const* qInfo = objmgr.GetQuestTemplate(quest_id);
 
@@ -11757,7 +11764,7 @@ uint32 Player::GetReqKillOrCastCurrentCount(uint32 quest_id, uint32 entry)
         return 0;
 
     uint32 curkillcount;
-    uint32 reqkill;
+    int32 reqkill;
 
     for (int j = 0; j < QUEST_OBJECTIVES_COUNT; j++)
     {
@@ -15982,4 +15989,15 @@ void Player::UpdateForQuestsGO()
     }
     udata.BuildPacket(&packet);
     GetSession()->SendPacket(&packet);
+}
+
+void Player::SummonIfPossible()
+{
+    // expire and auto declined
+    if(m_summon_expire < time(NULL))
+        return;
+
+    m_summon_expire = 0;
+
+    TeleportTo(m_summon_mapid, m_summon_x, m_summon_y, m_summon_z,GetOrientation());
 }

@@ -252,22 +252,26 @@ void GameObject::Update(uint32 /*p_time*/)
 
         case GO_LOOTED:
         {
-            uint32 spellId = GetGOInfo()->data10;
             //if Gamebject should cast spell, then this, but some GOs (type = 10) should be destroyed
-            if (GetGoType() == GAMEOBJECT_TYPE_GOOBER && spellId)
+            if (GetGoType() == GAMEOBJECT_TYPE_GOOBER)
             {
-                std::set<uint32>::iterator it = m_unique_users.begin();
-                std::set<uint32>::iterator end = m_unique_users.end();
-                for (; it != end; it++)
-                {
-                    Unit* owner = Unit::GetUnit(*this, uint64(*it));
-                    if (owner) owner->CastSpell(owner, spellId, false);
-                }
+                uint32 spellId = GetGOInfo()->data10;
 
-                m_unique_users.clear();
-                m_usetimes = 0;
-                SetLootState(GO_CLOSED);
-                break;
+                if(spellId)
+                {
+                    std::set<uint32>::iterator it = m_unique_users.begin();
+                    std::set<uint32>::iterator end = m_unique_users.end();
+                    for (; it != end; it++)
+                    {
+                        Unit* owner = Unit::GetUnit(*this, uint64(*it));
+                        if (owner) owner->CastSpell(owner, spellId, false);
+                    }
+
+                    m_unique_users.clear();
+                    m_usetimes = 0;
+                    SetLootState(GO_CLOSED);
+                    break;
+                }
             }
 
             if(GetOwnerGUID())
@@ -518,12 +522,19 @@ GameObjectInfo const *GameObject::GetGOInfo() const
     return objmgr.GetGameObjectInfo(GetUInt32Value (OBJECT_FIELD_ENTRY));
 }
 
-uint32 GameObject::GetLootId(GameObjectInfo const* Ginfo)
+uint32 GameObject::GetLootId(GameObjectInfo const* ginfo)
 {
-    if (Ginfo && (Ginfo->type== GAMEOBJECT_TYPE_CHEST || Ginfo->type==GAMEOBJECT_TYPE_FISHINGHOLE ))
-        return Ginfo->data1;
-    else
+    if (!ginfo)
         return 0;
+        
+    switch(ginfo->type)
+    {
+        case GAMEOBJECT_TYPE_CHEST:
+        case GAMEOBJECT_TYPE_FISHINGHOLE:
+            return ginfo->data1;
+        default:
+            return 0;
+    }
 }
 
 /*********************************************************/
@@ -590,14 +601,24 @@ bool GameObject::ActivateToQuest( Player *pTarget)const
     if(!objmgr.IsGameObjectForQuests(GetEntry()))
         return false;
 
-    LootStore::iterator tab = LootTemplates_Gameobject.find(GetLootId());
-    if (tab != LootTemplates_Gameobject.end())
+    switch(GetGoType())
     {
-        for(LootStoreItemList::iterator item_iter = tab->second.begin(); item_iter != tab->second.end(); ++item_iter)
+        // scan GO chest with loot including quest items
+        case GAMEOBJECT_TYPE_CHEST:
         {
-            if(pTarget->HasQuestForItem(item_iter->itemid))
-                return true;
+            LootStore::iterator tab = LootTemplates_Gameobject.find(GetLootId());
+            if (tab != LootTemplates_Gameobject.end())
+            {
+                for(LootStoreItemList::iterator item_iter = tab->second.begin(); item_iter != tab->second.end(); ++item_iter)
+                {
+                    if(pTarget->HasQuestForItem(item_iter->itemid))
+                    return true;
+                }
+            }
+            break;
         }
+        default:
+            break;
     }
 
     return false;

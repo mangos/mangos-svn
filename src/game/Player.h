@@ -822,6 +822,9 @@ enum PlayerLoginQueryIndex
 
 #define MAX_PLAYER_LOGIN_QUERY                    20
 
+// Player summoning auto-decline time (in secs)
+#define MAX_PLAYER_SUMMON_DELAY                   (2*MINUTE)
+
 class MANGOS_DLL_SPEC Player : public Unit
 {
     friend class WorldSession;
@@ -838,6 +841,16 @@ class MANGOS_DLL_SPEC Player : public Unit
         void RemoveFromWorld();
 
         void TeleportTo(uint32 mapid, float x, float y, float z, float orientation, bool outofrange = true, bool ignore_transport = true, bool is_gm_command = false);
+
+        void SetSummonPoint(uint32 mapid, float x, float y, float z)
+        {
+            m_summon_expire = time(NULL) + MAX_PLAYER_SUMMON_DELAY;
+            m_summon_mapid = mapid;
+            m_summon_x = x;
+            m_summon_y = y;
+            m_summon_z = z;
+        }
+        void SummonIfPossible();
 
         bool Create ( uint32 guidlow, WorldPacket &data );
 
@@ -1089,7 +1102,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void SetDailyQuestStatus( uint32 quest_id );
         void ResetDailyQuestStatus();
 
-        uint32 GetReqKillOrCastCurrentCount(uint32 quest_id, uint32 entry);
+        uint32 GetReqKillOrCastCurrentCount(uint32 quest_id, int32 entry);
         void AdjustQuestReqItemCount( Quest const* pQuest );
         uint16 GetQuestSlot( uint32 quest_id );
         void AreaExploredOrEventHappens( uint32 questId );
@@ -2010,6 +2023,12 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint32 m_oldpetnumber;
         uint32 m_oldpetspell;
 
+        // Player summoning
+        time_t m_summon_expire;
+        uint32 m_summon_mapid;
+        float  m_summon_x;
+        float  m_summon_y;
+        float  m_summon_z;
     private:
         GridReference<Player> m_gridRef;
 };
