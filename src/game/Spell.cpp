@@ -2454,28 +2454,37 @@ void Spell::TakeReagents()
         return;
 
     Player* p_caster = (Player*)m_caster;
+
     for(uint32 x=0;x<8;x++)
     {
         if(m_spellInfo->Reagent[x] <= 0)
             continue;
+
         uint32 itemid = m_spellInfo->Reagent[x];
         uint32 itemcount = m_spellInfo->ReagentCount[x];
 
-        if(m_CastItem && m_CastItem->GetProto()->ItemId == itemid)
+        // if CastItem is also spell reagent
+        if (m_CastItem)
         {
-            itemcount += 1;
-            m_CastItem = NULL;
+            ItemPrototype const *proto = m_CastItem->GetProto();
+            if( proto && proto->ItemId == itemid )
+            {
+                for(int s=0;s<5;s++)
+                {
+                    // CastItem will be used up and does not count as reagent
+                    int32 charges = m_CastItem->GetSpellCharges(s);
+                    if (proto->Spells[s].SpellCharges < 0 && abs(charges) < 2)
+                    {
+                        itemcount++;
+                        break;
+                    }
+                }
+
+                m_CastItem = NULL;
+            }
         }
 
-        if( p_caster->HasItemCount(itemid,itemcount) )
-        {
-            p_caster->DestroyItemCount(itemid, itemcount, true);
-        }
-        else
-        {
-            SendCastResult(SPELL_FAILED_ITEM_NOT_READY);
-            return;
-        }
+        p_caster->DestroyItemCount(itemid, itemcount, true);
     }
 }
 
@@ -3546,7 +3555,8 @@ uint8 Spell::CheckItems()
 
         itemid    = m_spellInfo->Reagent[i];
         itemcount = m_spellInfo->ReagentCount[i];
-        // CastItem is also spell reagent
+        
+        // if CastItem is also spell reagent
         if( m_CastItem && m_CastItem->GetEntry() == itemid )
         {
             ItemPrototype const *proto = m_CastItem->GetProto();
