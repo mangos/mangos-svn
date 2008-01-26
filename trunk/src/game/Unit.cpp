@@ -4257,6 +4257,10 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 if(!additionalTarget)
                     return;
 
+                // prevent chain of triggred spell from same triggred spell
+                if(procSpell && procSpell->Id==26654)
+                    return;
+
                 CastSpell(additionalTarget, 26654, true, NULL,triggeredByAura);
                 return;
             }
@@ -4271,7 +4275,7 @@ void Unit::HandleDummyAuraProc(Unit *pVictim, SpellEntry const *dummySpell, uint
                 if(!additionalTarget)
                     return;
 
-                int32 basePoint0 = damage;              // EffBaseDice = 0
+                int32 basePoint0 = damage;                  // EffBaseDice = 0
                 CastCustomSpell(additionalTarget, 22482, &basePoint0, 0, 0, true, NULL, triggeredByAura);
                 return;
             }
@@ -4741,7 +4745,12 @@ void Unit::HandleProcTriggerSpell(Unit *pVictim, uint32 damage, Aura* triggeredB
             // continue normal case
             break;
         }
-        
+        // Seal of Command
+        case 20424:
+            // prevent chain of triggred spell from same triggred spell
+            if(procSpell && procSpell->Id==20424)
+                return;
+            break;
         // Shamanistic Rage triggered spell
         case 30824:
         {
