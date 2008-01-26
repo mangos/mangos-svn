@@ -968,10 +968,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         Item* CreateItem( uint32 item, uint32 count ) const;
         uint32 GetItemCount( uint32 item, Item* eItem = NULL ) const;
         uint32 GetBankItemCount( uint32 item, Item* eItem = NULL ) const;
-        uint16 GetPosByGuid( uint64 guid ) const;
+        Item* GetItemByGuid( uint64 guid ) const;
         Item* GetItemByPos( uint16 pos ) const;
         Item* GetItemByPos( uint8 bag, uint8 slot ) const;
-        Item* GetItemByGuid( uint64 guid ) const { return GetItemByPos(GetPosByGuid(guid)); }
         std::vector<Item *> &GetItemUpdateQueue() { return m_itemUpdateQueue; }
         static bool IsInventoryPos( uint16 pos ) { return IsInventoryPos(pos >> 8,pos & 255); }
         static bool IsInventoryPos( uint8 bag, uint8 slot );
@@ -1589,7 +1588,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         void _ApplyItemBonuses(ItemPrototype const *proto,uint8 slot,bool apply);
         void _ApplyAmmoBonuses();
         bool EnchantmentFitsRequirements(uint32 enchantmentcondition, int8 slot);
-        void ToggleMetaGemsActive(uint16 exceptslot, bool apply);
+        void ToggleMetaGemsActive(uint8 exceptslot, bool apply);
         void CorrectMetaGemEnchants(uint8 slot, bool apply);
         void InitDataForForm();
 

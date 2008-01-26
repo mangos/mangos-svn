@@ -70,7 +70,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
             uint64 item_guid;
             recv_data >> item_slot;
             recv_data >> item_guid;
-            mi.AddItem(item_guid, item_slot);
+            mi.AddItem(GUID_LOPART(item_guid), item_slot);
         }
     }
 
@@ -152,14 +152,13 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         {
             MailItem& mailItem = mailItemIter->second;
 
-            if(!mailItem.item_guid)
+            if(!mailItem.item_guidlow)
             {
                 pl->SendMailResult(0, 0, MAIL_ERR_INTERNAL_ERROR);
                 return;
             }
 
-            mailItem.item_pos = pl->GetPosByGuid(mailItem.item_guid);
-            mailItem.item = pl->GetItemByPos(mailItem.item_pos);
+            mailItem.item = pl->GetItemByGuid(MAKE_GUID(mailItem.item_guidlow,HIGHGUID_ITEM));
             // prevent sending bag with items (cheat: can be placed in bag after adding equipped empty bag to mail)
             if(!mailItem.item || !mailItem.item->CanBeTraded())
             {
@@ -207,7 +206,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
                     GetPlayerName(), GetAccountId(), mailItem.item->GetProto()->Name1, mailItem.item->GetEntry(), mailItem.item->GetCount(), money, receiver.c_str(), rc_account);
             }
 
-            pl->RemoveItem( (mailItem.item_pos >> 8), (mailItem.item_pos & 255), true );
+            pl->RemoveItem( mailItem.item->GetBagSlot(), mailItem.item->GetSlot(), true );
             mailItem.item->RemoveFromUpdateQueueOf( pl );
             //item reminds in item_instance table already, used it in mail now
             if(mailItem.item->IsInWorld())
@@ -252,7 +251,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
     for(MailItemMap::iterator mailItemIter = mi.begin(); mailItemIter != mi.end(); ++mailItemIter)
     {
         MailItem& mailItem = mailItemIter->second;
-        CharacterDatabase.PExecute("INSERT INTO `mail_items` (`mail_id`,`item_guid`,`item_template`) VALUES ('%u', '%u', '%u')", mailId, GUID_LOPART(mailItem.item_guid), mailItem.item_template);
+        CharacterDatabase.PExecute("INSERT INTO `mail_items` (`mail_id`,`item_guid`,`item_template`) VALUES ('%u', '%u', '%u')", mailId, mailItem.item_guidlow, mailItem.item_template);
     }
     CharacterDatabase.BeginTransaction();
     pl->SaveInventoryAndGoldToDB();
@@ -399,7 +398,7 @@ void WorldSession::SendReturnToSender(uint32 mailId, uint8 messageType, uint32 s
             for(MailItemMap::iterator mailItemIter = mi->begin(); mailItemIter != mi->end(); ++mailItemIter)
             {
                 MailItem& mailItem = mailItemIter->second;
-                CharacterDatabase.PExecute("INSERT INTO `mail_items` (`mail_id`,`item_guid`,`item_template`) VALUES ('%u', '%u', '%u')", mailId, GUID_LOPART(mailItem.item_guid), mailItem.item_template);
+                CharacterDatabase.PExecute("INSERT INTO `mail_items` (`mail_id`,`item_guid`,`item_template`) VALUES ('%u', '%u', '%u')", mailId, mailItem.item_guidlow, mailItem.item_template);
             }
     }
     else

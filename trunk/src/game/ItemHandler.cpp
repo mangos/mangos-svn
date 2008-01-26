@@ -410,8 +410,7 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
         return;
     }
 
-    uint16 pos = _player->GetPosByGuid(itemguid);
-    Item *pItem = _player->GetItemByPos( pos );
+    Item *pItem = _player->GetItemByGuid( itemguid );
     if( pItem )
     {
         // prevent sell not owner item
@@ -470,7 +469,7 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
                 }
                 else
                 {
-                    _player->RemoveItem( (pos >> 8), (pos & 255), true);
+                    _player->RemoveItem( pItem->GetBagSlot(), pItem->GetSlot(), true);
                     pItem->RemoveFromUpdateQueueOf(_player);
                     _player->AddItemToBuyBackSlot( pItem );
                 }
@@ -968,21 +967,15 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
     if((guids[1] && (guids[1] == guids[2] || guids[1] == guids[3])) || (guids[2] && (guids[2] == guids[3])))
         return;
 
-    uint16 pos = _player->GetPosByGuid(guids[0]);
-    Item *itemTarget = _player->GetItemByPos(pos);
+    Item *itemTarget = _player->GetItemByGuid(guids[0]);
     if(!itemTarget)                                         //missing item to socket
         return;
 
-    uint16 slot = pos & 255;                                //this slot is excepted when applying / removing meta gem bonus
+    //this slot is excepted when applying / removing meta gem bonus
+    uint8 slot = itemTarget->IsEquipped() ? itemTarget->GetSlot() : NULL_SLOT;
 
     for(int i = 0; i < 3; i++)
-    {
-        if(guids[i + 1])
-        {
-            pos = _player->GetPosByGuid(guids[i + 1]);
-            Gems[i] = _player->GetItemByPos(pos);
-        }
-    }
+        Gems[i] = guids[i + 1] ? _player->GetItemByGuid(guids[i + 1]) : NULL;
 
     GemPropertiesEntry const *GemProps[3];
     for(int i = 0; i < 3; ++i)                              //get geminfo from dbc storage
@@ -1062,8 +1055,8 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
         if(GemEnchants[i])
         {
             itemTarget->SetEnchantment(EnchantmentSlot(SOCK_ENCHANTMENT_SLOT+i), GemEnchants[i],0,0);
-            pos = _player->GetPosByGuid(guids[i + 1]);
-            _player->DestroyItem((pos >> 8), (pos & 255), true );
+            if(Item* guidItem = _player->GetItemByGuid(guids[i + 1]))
+                _player->DestroyItem(guidItem->GetBagSlot(), guidItem->GetSlot(), true );
         }
     }
 

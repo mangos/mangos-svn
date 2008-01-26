@@ -217,6 +217,7 @@ class MANGOS_DLL_SPEC Item : public Object
         Bag *GetContainer() { return m_container; }
         uint8 GetBagSlot() const;
         void SetSlot(uint8 slot) {m_slot = slot;}
+        uint16 GetPos() const { return uint16(GetBagSlot()) << 8 | GetSlot(); }
         void SetContainer(Bag *container) { m_container = container; }
         bool CanGoIntoBag(ItemPrototype const *pBagProto);
 

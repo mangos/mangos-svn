@@ -922,7 +922,7 @@ void World::Update(time_t diff)
                     ///- In any case clear the auction
                     //No SQL injection (Id is integer)
                     CharacterDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",itr->second->Id);
-                    objmgr.RemoveAItem(itr->second->item_guid);
+                    objmgr.RemoveAItem(itr->second->item_guidlow);
                     delete itr->second;
                     AuctionMap->RemoveAuction(itr->first);
                 }

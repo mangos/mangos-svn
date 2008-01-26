@@ -100,12 +100,12 @@ struct MailItemInfo
 
 struct MailItem
 {
-    MailItem() : item(NULL) {}
-    uint8 item_slot;                                    // slot in mail
-    uint16 item_pos;                                    // inventory pos
-    uint64 item_guid;                                   // item guid
-    uint32 item_template;                               // item entry
-    Item *item;                                         // item pointer
+    MailItem() : item_slot(0), item_guidlow(0), item_template(0), item(NULL) {}
+
+    uint8 item_slot;                                        // slot in mail
+    uint32 item_guidlow;                                    // item guid (low part)
+    uint32 item_template;                                   // item entry
+    Item *item;                                             // item pointer
 
     void deleteItem()
     {
@@ -117,43 +117,32 @@ struct MailItem
     }
 };
 
-typedef std::map<uint64, MailItem> MailItemMap;
+typedef std::map<uint32, MailItem> MailItemMap;
 
 
 struct MailItemsInfo
 {
-    MailItemMap i_MailItemMap;                            // Keep the items in a map to avoid duplicate guids (which can happen)
+    MailItemMap i_MailItemMap;                              // Keep the items in a map to avoid duplicate guids (which can happen), store only low part of guid
 
     MailItemMap::iterator begin() { return i_MailItemMap.begin(); }
     MailItemMap::iterator end() { return i_MailItemMap.end(); }
 
-    void AddItem(uint32 guid, uint32 _template, Item *item, uint8 slot = 0, uint16 pos = 0)
+    void AddItem(uint32 guidlow, uint32 _template, Item *item, uint8 slot = 0)
     {
         MailItem mailItem;
         mailItem.item_slot = slot;
-        mailItem.item_pos = pos;
-        mailItem.item_guid = guid;
+        mailItem.item_guidlow = guidlow;
         mailItem.item_template = _template;
         mailItem.item = item;
-        i_MailItemMap[guid] = mailItem;
+        i_MailItemMap[guidlow] = mailItem;
     }
 
-    void AddItem(uint64 guid, uint8 slot = 0)
+    void AddItem(uint32 guidlow, uint8 slot = 0)
     {
         MailItem mailItem;
-        mailItem.item_guid = guid;
+        mailItem.item_guidlow = guidlow;
         mailItem.item_slot = slot;
-        i_MailItemMap[guid] = mailItem;
-    }
-
-    bool hasGuid(uint64 pGuid)
-    {
-        return(i_MailItemMap.find(pGuid) != i_MailItemMap.end());
-    }
-
-    MailItem& getMailItemInfo(uint64 pGuid)
-    {
-        return i_MailItemMap.find(pGuid)->second;
+        i_MailItemMap[guidlow] = mailItem;
     }
 
     uint8 size()
@@ -189,10 +178,10 @@ struct Mail
     uint32 checked;
     Mail_state state;
 
-    void AddItem(uint32 itemId, uint32 item_template)
+    void AddItem(uint32 itemGuidLow, uint32 item_template)
     {
         MailItemInfo mii;
-        mii.item_guid = itemId;
+        mii.item_guid = itemGuidLow;
         mii.item_template = item_template;
         items.push_back(mii);
     }
@@ -202,7 +191,7 @@ struct Mail
         for(MailItemMap::iterator mailItemIter = pMailItemsInfo.begin(); mailItemIter != pMailItemsInfo.end(); ++mailItemIter)
         {
             MailItem& mailItem = mailItemIter->second;
-            AddItem(GUID_LOPART(mailItem.item_guid), mailItem.item_template);
+            AddItem(mailItem.item_guidlow, mailItem.item_template);
         }
     }
 

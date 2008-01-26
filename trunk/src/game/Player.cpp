@@ -3268,7 +3268,7 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
                     {
                         Field *fields2 = resultItems->Fetch();
 
-                        uint32 item_guid = fields2[0].GetUInt32();
+                        uint32 item_guidlow = fields2[0].GetUInt32();
                         uint32 item_template = fields2[1].GetUInt32();
 
                         ItemPrototype const* itemProto = objmgr.GetItemPrototype(item_template);
@@ -3276,13 +3276,13 @@ void Player::DeleteFromDB(uint64 playerguid, uint32 accountId, bool updateRealmC
                             continue;
 
                         Item* pItem = NewItemOrBag(itemProto);
-                        if(!pItem->LoadFromDB(item_guid,MAKE_GUID(guid, HIGHGUID_PLAYER)))
+                        if(!pItem->LoadFromDB(item_guidlow,MAKE_GUID(guid, HIGHGUID_PLAYER)))
                         {
                             delete pItem;
                             continue;
                         }
 
-                        mi.AddItem(item_guid, item_template, pItem);
+                        mi.AddItem(item_guidlow, item_template, pItem);
                     }
                     while (resultItems->NextRow());
 
@@ -7708,66 +7708,57 @@ uint32 Player::GetBankItemCount( uint32 item, Item* eItem ) const
     return count;
 }
 
-uint16 Player::GetPosByGuid( uint64 guid ) const
+Item* Player::GetItemByGuid( uint64 guid ) const
 {
-    Item *pItem;
-    uint16 pos;
     for(int i = EQUIPMENT_SLOT_START; i < INVENTORY_SLOT_ITEM_END; i++)
     {
-        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
-        pItem = GetItemByPos( pos );
+        Item *pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
         if( pItem && pItem->GetGUID() == guid )
-            return pos;
+            return pItem;
     }
     for(int i = KEYRING_SLOT_START; i < KEYRING_SLOT_END; i++)
     {
-        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
-        pItem = GetItemByPos( pos );
+        Item *pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, i );
         if( pItem && pItem->GetGUID() == guid )
-            return pos;
+            return pItem;
     }
-    Bag *pBag;
-    ItemPrototype const *pBagProto;
+
     for(int i = INVENTORY_SLOT_BAG_START; i < INVENTORY_SLOT_BAG_END; i++)
     {
-        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
-        pBag = (Bag*)GetItemByPos( pos );
+        Bag *pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
         if( pBag )
         {
-            pBagProto = pBag->GetProto();
+            ItemPrototype const *pBagProto = pBag->GetProto();
             if( pBagProto )
             {
                 for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                 {
-                    pos = ((i << 8) | j);
-                    pItem = GetItemByPos( pos );
+                    Item* pItem = pBag->GetItemByPos( j );
                     if( pItem && pItem->GetGUID() == guid )
-                        return pos;
+                        return pItem;
                 }
             }
         }
     }
     for(int i = BANK_SLOT_BAG_START; i < BANK_SLOT_BAG_END; i++)
     {
-        pos = ((INVENTORY_SLOT_BAG_0 << 8) | i);
-        pBag = (Bag*)GetItemByPos( pos );
+        Bag *pBag = (Bag*)GetItemByPos( INVENTORY_SLOT_BAG_0, i );
         if( pBag )
         {
-            pBagProto = pBag->GetProto();
+            ItemPrototype const *pBagProto = pBag->GetProto();
             if( pBagProto )
             {
                 for(uint32 j = 0; j < pBagProto->ContainerSlots; j++)
                 {
-                    pos = ((i << 8) | j);
-                    pItem = GetItemByPos( pos );
+                    Item* pItem = pBag->GetItemByPos( j );
                     if( pItem && pItem->GetGUID() == guid )
-                        return pos;
+                        return pItem;
                 }
             }
         }
     }
 
-    return 0;
+    return NULL;
 }
 
 Item* Player::GetItemByPos( uint16 pos ) const
@@ -9801,8 +9792,7 @@ void Player::DestroyItemCount( Item* pItem, uint32 &count, bool update )
     {
         count-= pItem->GetCount();
 
-        uint16 pos = GetPosByGuid(pItem->GetGUID());
-        DestroyItem( (pos >> 8),(pos & 255), update);
+        DestroyItem( pItem->GetBagSlot(),pItem->GetSlot(), update);
     }
     else
     {
@@ -13041,22 +13031,22 @@ void Player::_LoadMailedItems(Mail *mail)
     do
     {
         fields = result->Fetch();
-        uint32 item_guid = fields[0].GetUInt32();
+        uint32 item_guid_low = fields[0].GetUInt32();
         uint32 item_template = fields[1].GetUInt32();
 
-        mail->AddItem(item_guid, item_template);
+        mail->AddItem(item_guid_low, item_template);
 
         ItemPrototype const *proto = objmgr.GetItemPrototype(item_template);
 
         if(!proto)
         {
-            sLog.outError( "Player %u have unknown item_template (ProtoType) in mailed items(GUID: %u template: %u) in mail, skipped.", GetGUIDLow(), item_guid, item_template);
+            sLog.outError( "Player %u have unknown item_template (ProtoType) in mailed items(GUID: %u template: %u) in mail, skipped.", GetGUIDLow(), item_guid_low, item_template);
             continue;
         }
         Item *item = NewItemOrBag(proto);
-        if(!item->LoadFromDB(item_guid, 0))
+        if(!item->LoadFromDB(item_guid_low, 0))
         {
-            sLog.outError( "Player::_LoadMailedItems - Mailed Item doesn't exist!!!! - item guid: %u", item_guid);
+            sLog.outError( "Player::_LoadMailedItems - Mailed Item doesn't exist!!!! - item guid: %u", item_guid_low);
             delete item;
             continue;
         }
@@ -15352,13 +15342,14 @@ void Player::CorrectMetaGemEnchants(uint8 exceptslot, bool apply)
 }
 
                                                             //if false -> then toggled off if was on| if true -> toggled on if was off AND meets requirements
-void Player::ToggleMetaGemsActive(uint16 exceptslot, bool apply)
+void Player::ToggleMetaGemsActive(uint8 exceptslot, bool apply)
 {
-                                                            //cycle all equipped items
-    for(int slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; slot++)
+    //cycle all equipped items
+    for(int slot = EQUIPMENT_SLOT_START; slot < EQUIPMENT_SLOT_END; ++slot)
     {
         //enchants for the slot being socketed are handled by WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
-        if(slot == exceptslot) continue;
+        if(slot == exceptslot)
+            continue;
 
         Item *pItem = GetItemByPos( INVENTORY_SLOT_BAG_0, slot );
 

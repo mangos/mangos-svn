@@ -697,8 +697,7 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
     }
 
     // and at last charter item check
-    uint16 pos = _player->GetPosByGuid(petitionguid);
-    Item *item = _player->GetItemByPos(pos);
+    Item *item = _player->GetItemByGuid(petitionguid);
     if(!item)
     {
         delete result;
@@ -708,7 +707,7 @@ void WorldSession::HandleTurnInPetitionOpcode(WorldPacket & recv_data)
     // OK!
 
     // delete charter item
-    _player->DestroyItem((pos >> 8),(pos & 255), true);
+    _player->DestroyItem(item->GetBagSlot(),item->GetSlot(), true);
 
     if(type == 9)                                           // create guild
     {

@@ -542,7 +542,7 @@ bool Item::CanBeTraded() const
 
     if(Player* owner = GetOwner())
     {
-        if(owner->CanUnequipItem(uint16(GetBagSlot()) << 8 | GetSlot(),false) !=  EQUIP_ERR_OK )
+        if(owner->CanUnequipItem(GetPos(),false) !=  EQUIP_ERR_OK )
             return false;
         if(owner->GetLootGUID()==GetGUID())
             return false;
