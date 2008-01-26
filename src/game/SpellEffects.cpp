@@ -3066,11 +3066,17 @@ void Spell::EffectWeaponDmg(uint32 i)
     CleanDamage cleanDamage =  CleanDamage(0, BASE_ATTACK, MELEE_HIT_NORMAL );
     bool criticalhit = false;
 
-    WeaponAttackType attType = BASE_ATTACK;
+    // select weapon attack type...
+    WeaponAttackType attType;
 
     // offhand hand weapon required (not used with mainhand required (spellInfo->AttributesEx3 & 0x0000000000000400) in spell with damage effect 
     if(m_spellInfo->AttributesEx3 & 0x0000000001000000)
         attType = OFF_ATTACK;
+    // some melee weapon spells have non-standard spell range
+    // FIXME: find better way to select melee/ranged weapon attack sorting
+    // FIXME: we also need select OFF_ATTACK if trigering some spell at offhand attack
+    else if(m_spellInfo->SpellVisual==3136)
+        attType = BASE_ATTACK;
     else if(m_spellInfo->rangeIndex != 1 && m_spellInfo->rangeIndex != 2 && m_spellInfo->rangeIndex != 7)
     {
         attType = RANGED_ATTACK;
@@ -3091,6 +3097,8 @@ void Spell::EffectWeaponDmg(uint32 i)
             damageType = SpellSchools(pItem->GetProto()->Damage->DamageType);
         }
     }
+    else
+        attType = BASE_ATTACK;
 
     if(damageType==SPELL_SCHOOL_NORMAL && unitTarget->IsImmunedToPhysicalDamage() )
     {
