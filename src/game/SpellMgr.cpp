@@ -796,18 +796,34 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
     if( IsSealSpell(spellId_1) && IsSealSpell(spellId_2) )
         return true;
 
-    // warlock auars
-    if( spellInfo_1->SpellFamilyName == SPELLFAMILY_WARLOCK && spellInfo_2->SpellFamilyName == SPELLFAMILY_WARLOCK)
+    // Specific spell family spells
+    switch(spellInfo_1->SpellFamilyName)
     {
-        // Siphon Life and Drain Life
-        if( spellInfo_1->SpellIconID == 152 && spellInfo_2->SpellIconID == 546 ||
-            spellInfo_2->SpellIconID == 152 && spellInfo_1->SpellIconID == 546 )
-            return false;
+        case SPELLFAMILY_WARLOCK:
+            if( spellInfo_2->SpellFamilyName == SPELLFAMILY_WARLOCK )
+            {
+                // Siphon Life and Drain Life
+                if( spellInfo_1->SpellIconID == 152 && spellInfo_2->SpellIconID == 546 ||
+                    spellInfo_2->SpellIconID == 152 && spellInfo_1->SpellIconID == 546 )
+                    return false;
 
-        // Corruption and Unstable Affliction
-        if( spellInfo_1->SpellIconID == 313 && spellInfo_2->SpellIconID == 2039 ||
-            spellInfo_2->SpellIconID == 313 && spellInfo_1->SpellIconID == 2039 )
-            return false;
+                // Corruption and Unstable Affliction
+                if( spellInfo_1->SpellIconID == 313 && spellInfo_2->SpellIconID == 2039 ||
+                    spellInfo_2->SpellIconID == 313 && spellInfo_1->SpellIconID == 2039 )
+                    return false;
+            }
+            break;
+        case SPELLFAMILY_SHAMAN:
+            if( spellInfo_2->SpellFamilyName == SPELLFAMILY_SHAMAN )
+            {
+                //Devouring Plague and Shadow Vulnerability
+                if( (spellInfo_1->SpellFamilyFlags & 0x2000000) && (spellInfo_2->SpellFamilyFlags & 0x800000000LL) ||
+                    (spellInfo_2->SpellFamilyFlags & 0x2000000) && (spellInfo_1->SpellFamilyFlags & 0x800000000LL) )
+                    return false;
+            }
+            break;
+        default:
+            break;
     }
 
     // Garrote and Garrote-Silence

@@ -399,6 +399,9 @@ void WorldSession::HandleSellItemOpcode( WorldPacket & recv_data )
 
     recv_data >> vendorguid >> itemguid >> count;
 
+    if(!itemguid)
+        return;
+
     Creature *pCreature = ObjectAccessor::GetNPCIfCanInteractWith(*_player, vendorguid,UNIT_NPC_FLAG_VENDOR);
     if (!pCreature)
     {
@@ -958,6 +961,9 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
     for(int i = 0; i < 4; i++)
         recv_data >> guids[i];
 
+    if(!guids[0])
+        return;
+
     //cheat -> tried to socket same gem multiple times
     if((guids[1] && (guids[1] == guids[2] || guids[1] == guids[3])) || (guids[2] && (guids[2] == guids[3])))
         return;
@@ -971,8 +977,11 @@ void WorldSession::HandleSocketOpcode(WorldPacket& recv_data)
 
     for(int i = 0; i < 3; i++)
     {
-        pos = _player->GetPosByGuid(guids[i + 1]);
-        Gems[i] = _player->GetItemByPos(pos);
+        if(guids[i + 1])
+        {
+            pos = _player->GetPosByGuid(guids[i + 1]);
+            Gems[i] = _player->GetItemByPos(pos);
+        }
     }
 
     GemPropertiesEntry const *GemProps[3];

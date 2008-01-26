@@ -152,6 +152,12 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
         {
             MailItem& mailItem = mailItemIter->second;
 
+            if(!mailItem.item_guid)
+            {
+                pl->SendMailResult(0, 0, MAIL_ERR_INTERNAL_ERROR);
+                return;
+            }
+
             mailItem.item_pos = pl->GetPosByGuid(mailItem.item_guid);
             mailItem.item = pl->GetItemByPos(mailItem.item_pos);
             // prevent sending bag with items (cheat: can be placed in bag after adding equipped empty bag to mail)
