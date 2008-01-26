@@ -813,8 +813,8 @@ bool SpellMgr::IsNoStackSpellDueToSpell(uint32 spellId_1, uint32 spellId_2) cons
                     return false;
             }
             break;
-        case SPELLFAMILY_SHAMAN:
-            if( spellInfo_2->SpellFamilyName == SPELLFAMILY_SHAMAN )
+        case SPELLFAMILY_PRIEST:
+            if( spellInfo_2->SpellFamilyName == SPELLFAMILY_PRIEST )
             {
                 //Devouring Plague and Shadow Vulnerability
                 if( (spellInfo_1->SpellFamilyFlags & 0x2000000) && (spellInfo_2->SpellFamilyFlags & 0x800000000LL) ||
