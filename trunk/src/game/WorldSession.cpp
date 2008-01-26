@@ -331,6 +331,8 @@ void WorldSession::FillOpcodeHandlerHashTable()
 
     objmgr.opcodeTable[ CMSG_RECLAIM_CORPSE ]                   = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleCorpseReclaimOpcode           );
     objmgr.opcodeTable[ CMSG_RESURRECT_RESPONSE ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleResurrectResponseOpcode       );
+    objmgr.opcodeTable[ CMSG_SUMMON_RESPONSE ]                  = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleSummonResponseOpcode          );
+
     objmgr.opcodeTable[ CMSG_AUCTION_LIST_ITEMS ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAuctionListItems              );
     objmgr.opcodeTable[ CMSG_AUCTION_LIST_BIDDER_ITEMS ]        = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAuctionListBidderItems        );
     objmgr.opcodeTable[ CMSG_AUCTION_SELL_ITEM ]                = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleAuctionSellItem               );

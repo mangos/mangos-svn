@@ -414,7 +414,10 @@ namespace MaNGOS
             GameObjectFocusCheck(Unit const* unit,uint32 focusId) : i_unit(unit), i_focusId(focusId) {}
             bool operator()(GameObject* go) const
             {
-                if(go->GetGOInfo()->type != GAMEOBJECT_TYPE_SPELL_FOCUS || go->GetGOInfo()->data0 != i_focusId)
+                if(go->GetGOInfo()->type != GAMEOBJECT_TYPE_SPELL_FOCUS)
+                    return false;
+
+                if(go->GetGOInfo()->data0 != i_focusId)
                     return false;
 
                 float dist = go->GetGOInfo()->data1;

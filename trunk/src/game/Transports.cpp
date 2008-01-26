@@ -61,7 +61,14 @@ void MapManager::LoadTransports()
 
         if(!goinfo)
         {
-            sLog.outErrorDb("Transport ID:%u, Name: %s, will not be loaded gameobject_template Missing", entry, name.c_str());
+            sLog.outErrorDb("Transport ID:%u, Name: %s, will not be loaded, gameobject_template missing", entry, name.c_str());
+            delete t;
+            continue;
+        }
+
+        if(goinfo->type != GAMEOBJECT_TYPE_MO_TRANSPORT)
+        {
+            sLog.outErrorDb("Transport ID:%u, Name: %s, will not be loaded, gameobject_template type wrong", entry, name.c_str());
             delete t;
             continue;
         }

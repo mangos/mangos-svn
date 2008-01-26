@@ -457,6 +457,7 @@ class MANGOS_DLL_SPEC WorldSession
         void HandleCorpseReclaimOpcode( WorldPacket& recvPacket );
         void HandleCorpseQueryOpcode( WorldPacket& recvPacket );
         void HandleResurrectResponseOpcode(WorldPacket& recvPacket);
+        void HandleSummonResponseOpcode(WorldPacket& recv_data);
 
         void HandleChannelJoin(WorldPacket& recvPacket);
         void HandleChannelLeave(WorldPacket& recvPacket);

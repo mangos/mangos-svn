@@ -5261,29 +5261,39 @@ void ObjectMgr::LoadGameObjectForQuests()
 
     uint32 count = 0;
 
-    // scan GO templates with loot including quest items
+    // collect GO entries for GO that must activated
     for(uint32 go_entry = 1; go_entry < sGOStorage.MaxEntry; ++go_entry)
     {
         GameObjectInfo const* goInfo = sGOStorage.LookupEntry<GameObjectInfo>(go_entry);
         if(!goInfo)
             continue;
 
-        uint32 loot_id = GameObject::GetLootId(goInfo);
-
-        // find loot for GO
-        LootStore::const_iterator go_loot = LootTemplates_Gameobject.find(loot_id);
-        if(go_loot == LootTemplates_Gameobject.end())
-            continue;
-
-        // scan loot for quest items
-        for(LootStoreItemList::const_iterator item_i = go_loot->second.begin(); item_i != go_loot->second.end(); ++item_i )
+        switch(goInfo->type)
         {
-            if(item_i->questChanceOrGroup > 0)
+            // scan GO chest with loot including quest items
+            case GAMEOBJECT_TYPE_CHEST:
             {
-                mGameObjectForQuestSet.insert(go_entry);
-                count++;
+                uint32 loot_id = GameObject::GetLootId(goInfo);
+
+                // find loot for GO
+                LootStore::const_iterator go_loot = LootTemplates_Gameobject.find(loot_id);
+                if(go_loot == LootTemplates_Gameobject.end())
+                    continue;
+
+                // scan loot for quest items
+                for(LootStoreItemList::const_iterator item_i = go_loot->second.begin(); item_i != go_loot->second.end(); ++item_i )
+                {
+                    if(item_i->questChanceOrGroup > 0)
+                    {
+                        mGameObjectForQuestSet.insert(go_entry);
+                        count++;
+                        break;
+                    }
+                }
                 break;
             }
+            default:
+                break;
         }
     }
 

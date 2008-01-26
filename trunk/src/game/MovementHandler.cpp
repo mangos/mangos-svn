@@ -472,3 +472,16 @@ void WorldSession::HandleMoveWaterWalkAck(WorldPacket& /*recv_data*/)
 {
     sLog.outDebug("CMSG_MOVE_WATER_WALK_ACK");
 }
+
+void WorldSession::HandleSummonResponseOpcode(WorldPacket& /*recv_data*/)
+{
+    if(!_player->isAlive() || _player->isInCombat() )
+        return;
+
+    //FIXME: this is non-standart requirement, but we can't allow safe flight termination currently
+    if(_player->isInFlight())
+        return;
+
+    _player->SummonIfPossible();
+}
+
