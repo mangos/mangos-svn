@@ -2066,7 +2066,7 @@ void Spell::EffectSummonChangeItem(uint32 i)
     if(!newitemid)
         return;
 
-    uint16 pos = (m_CastItem->GetBagSlot() << 8) | m_CastItem->GetSlot();
+    uint16 pos = m_CastItem->GetPos();
 
     Item *pNewItem = player->CreateItem( newitemid, 1 );
     if( !pNewItem )

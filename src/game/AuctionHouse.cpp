@@ -76,7 +76,7 @@ void WorldSession::SendAuctionHello( uint64 guid, Creature* unit )
 //this function inserts to WorldPacket auction's data
 bool WorldSession::SendAuctionInfo(WorldPacket & data, AuctionEntry* auction)
 {
-    Item *pItem = objmgr.GetAItem(auction->item_guid);
+    Item *pItem = objmgr.GetAItem(auction->item_guidlow);
     if (!pItem)
     {
         sLog.outError("auction to item, that doesn't exist !!!!");
@@ -237,8 +237,7 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
         return;
     }
 
-    uint16 pos = pl->GetPosByGuid(item);
-    Item *it = pl->GetItemByPos( pos );
+    Item *it = pl->GetItemByGuid( item );
     //do not allow to sell already auctioned items
     if(objmgr.GetAItem(GUID_LOPART(item)))
     {
@@ -288,7 +287,7 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     AuctionEntry *AH = new AuctionEntry;
     AH->Id = objmgr.GenerateAuctionID();
     AH->auctioneer = GUID_LOPART(auctioneer);
-    AH->item_guid = GUID_LOPART(item);
+    AH->item_guidlow = GUID_LOPART(item);
     AH->item_template = it->GetEntry();
     AH->owner = pl->GetGUIDLow();
     AH->startbid = bid;
@@ -304,7 +303,7 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     mAuctions->AddAuction(AH);
 
     objmgr.AddAItem(it);
-    pl->RemoveItem( (pos >> 8),(pos & 255), true);
+    pl->RemoveItem( it->GetBagSlot(), it->GetSlot(), true);
     it->RemoveFromUpdateQueueOf(pl);
     it->RemoveFromWorld();
     it->DestroyForPlayer( pl );
@@ -314,7 +313,7 @@ void WorldSession::HandleAuctionSellItem( WorldPacket & recv_data )
     it->SaveToDB();                                         // recursive and not have transaction guard into self
     CharacterDatabase.PExecute("INSERT INTO `auctionhouse` (`id`,`auctioneerguid`,`itemguid`,`item_template`,`itemowner`,`buyoutprice`,`time`,`buyguid`,`lastbid`,`startbid`,`deposit`,`location`) "
         "VALUES ('%u', '%u', '%u', '%u', '%u', '%u', '" I64FMTD "', '%u', '%u', '%u', '%u', '%u')",
-        AH->Id, AH->auctioneer, AH->item_guid, AH->item_template, AH->owner, AH->buyout, (uint64)AH->time, AH->bidder, AH->bid, AH->startbid, AH->deposit, AH->location);
+        AH->Id, AH->auctioneer, AH->item_guidlow, AH->item_template, AH->owner, AH->buyout, (uint64)AH->time, AH->bidder, AH->bid, AH->startbid, AH->deposit, AH->location);
     pl->SaveInventoryAndGoldToDB();
     CharacterDatabase.CommitTransaction();
 
@@ -413,7 +412,7 @@ void WorldSession::HandleAuctionPlaceBid( WorldPacket & recv_data )
 
             SendAuctionCommandResult(auction->Id, AUCTION_PLACE_BID, AUCTION_OK);
 
-            objmgr.RemoveAItem(auction->item_guid);
+            objmgr.RemoveAItem(auction->item_guidlow);
             mAuctions->RemoveAuction(auction->Id);
             CharacterDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",auction->Id);
 
@@ -458,7 +457,7 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
 
     if (auction && auction->owner == pl->GetGUIDLow())
     {
-        Item *pItem = objmgr.GetAItem(auction->item_guid);
+        Item *pItem = objmgr.GetAItem(auction->item_guidlow);
         if (pItem)
         {
             if (auction->bidder > 0)                        // If we have a bidder, we have to send him the money he paid
@@ -479,16 +478,16 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
             time_t etime = dtime + (30 * DAY);
 
             MailItemsInfo mi;
-            mi.AddItem(auction->item_guid, auction->item_template, pItem);
+            mi.AddItem(auction->item_guidlow, auction->item_template, pItem);
             pl->CreateMail( messageID, MAIL_AUCTION, auction->location, msgAuctionCanceledOwner.str(), 0, &mi, etime, dtime, 0, 0, 0);
             CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`stationery`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
                 "VALUES ('%u', '%d', '%d', '%u', '%u', '%s', '0', '1', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
                 messageID, MAIL_AUCTION, MAIL_STATIONERY_AUCTION, auction->location , pl->GetGUIDLow() , msgAuctionCanceledOwner.str().c_str(), (uint64)etime, (uint64)dtime, NOT_READ);
-            CharacterDatabase.PExecute("INSERT INTO `mail_items` (`mail_id`,`item_guid`,`item_template`) VALUES ('%u', '%u', '%u')", messageID, auction->item_guid, auction->item_template);
+            CharacterDatabase.PExecute("INSERT INTO `mail_items` (`mail_id`,`item_guid`,`item_template`) VALUES ('%u', '%u', '%u')", messageID, auction->item_guidlow, auction->item_template);
         }
         else
         {
-            sLog.outError("Auction id: %u has non-existed item (item guid : %u)!!!", auction->Id, auction->item_guid);
+            sLog.outError("Auction id: %u has non-existed item (item guid : %u)!!!", auction->Id, auction->item_guidlow);
             SendAuctionCommandResult( 0, AUCTION_CANCEL, AUCTION_INTERNAL_ERROR );
             return;
         }
@@ -508,7 +507,7 @@ void WorldSession::HandleAuctionRemoveItem( WorldPacket & recv_data )
     CharacterDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",auction->Id);
     pl->SaveInventoryAndGoldToDB();
     CharacterDatabase.CommitTransaction();
-    objmgr.RemoveAItem( auction->item_guid );
+    objmgr.RemoveAItem( auction->item_guidlow );
     mAuctions->RemoveAuction( auction->Id );
     delete auction;
 }
@@ -662,7 +661,7 @@ void WorldSession::HandleAuctionListItems( WorldPacket & recv_data )
     for (AuctionHouseObject::AuctionEntryMap::iterator itr = mAuctions->GetAuctionsBegin();itr != mAuctions->GetAuctionsEnd();++itr)
     {
         AuctionEntry *Aentry = itr->second;
-        Item *item = objmgr.GetAItem(Aentry->item_guid);
+        Item *item = objmgr.GetAItem(Aentry->item_guidlow);
         if( item )
         {
             ItemPrototype const *proto = item->GetProto();

@@ -372,8 +372,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
     }
     else if (IS_ITEM_GUID(lguid))
     {
-        uint16 pos = player->GetPosByGuid( lguid );
-        Item *pItem = player->GetItemByPos(pos);
+        Item *pItem = player->GetItemByGuid(lguid );
         if(!pItem)
             return;
         if( (pItem->GetProto()->BagFamily & BAG_FAMILY_MASK_MINING_SUPP) &&
@@ -388,7 +387,7 @@ void WorldSession::HandleLootReleaseOpcode( WorldPacket & recv_data )
         }
         else
             // FIXME: item don't must be deleted in case not fully looted state. But this pre-request implement loot saving in DB at item save. Or checting possible.
-            player->DestroyItem( (pos >> 8),(pos & 255), true);
+            player->DestroyItem( pItem->GetBagSlot(),pItem->GetSlot(), true);
         return;                                             // item can be looted only single player
     }
     else

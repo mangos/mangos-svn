@@ -39,7 +39,7 @@ struct AuctionEntry
 {
     uint32 Id;
     uint32 auctioneer;
-    uint32 item_guid;
+    uint32 item_guidlow;
     uint32 item_template;
     uint32 owner;
     uint32 startbid;                                        //maybe useless

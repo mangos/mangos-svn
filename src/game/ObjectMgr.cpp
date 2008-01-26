@@ -235,7 +235,7 @@ uint32 ObjectMgr::GetAuctionOutBid(uint32 currentBid)
 //does not clear ram
 void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
 {
-    Item *pItem = objmgr.GetAItem(auction->item_guid);
+    Item *pItem = objmgr.GetAItem(auction->item_guidlow);
     if(!pItem)
         return;
 
@@ -310,7 +310,7 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
             bidder->GetSession()->SendAuctionBidderNotification( auction->location, auction->Id, bidder_guid, 0, 0, auction->item_template);
 
             MailItemsInfo mi;
-            mi.AddItem(auction->item_guid, auction->item_template, pItem);
+            mi.AddItem(auction->item_guidlow, auction->item_template, pItem);
             bidder->CreateMail(mailId, MAIL_AUCTION, auction->location, msgAuctionWonSubject.str(), itemTextId, &mi, etime, dtime, 0, 0, AUCTION_CHECKED);
         }
         else
@@ -322,7 +322,7 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
         CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
             "VALUES ('%u', '%d', '%u', '%u', '%s', '%u', '1', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
             mailId, MAIL_AUCTION, auction->location, auction->bidder, msgAuctionWonSubject.str().c_str(), itemTextId, (uint64)etime, (uint64)dtime, AUCTION_CHECKED);
-        CharacterDatabase.PExecute("INSERT INTO `mail_items` (`mail_id`,`item_guid`,`item_template`) VALUES ('%u', '%u', '%u')", mailId, auction->item_guid, auction->item_template);
+        CharacterDatabase.PExecute("INSERT INTO `mail_items` (`mail_id`,`item_guid`,`item_template`) VALUES ('%u', '%u', '%u')", mailId, auction->item_guidlow, auction->item_template);
     }
     // receiver not exist
     else
@@ -336,7 +336,7 @@ void ObjectMgr::SendAuctionWonMail( AuctionEntry *auction )
 //call this method to send mail to auction owner, when auction is successful, it does not clear ram
 void ObjectMgr::SendAuctionSuccessfulMail( AuctionEntry * auction )
 {
-    Item *pItem = objmgr.GetAItem(auction->item_guid);
+    Item *pItem = objmgr.GetAItem(auction->item_guidlow);
     if(!pItem)
         return;
 
@@ -387,10 +387,10 @@ void ObjectMgr::SendAuctionSuccessfulMail( AuctionEntry * auction )
 //does not clear ram
 void ObjectMgr::SendAuctionExpiredMail( AuctionEntry * auction )
 {                                                           //return an item in auction to its owner by mail
-    Item *pItem = objmgr.GetAItem(auction->item_guid);
+    Item *pItem = objmgr.GetAItem(auction->item_guidlow);
     if(!pItem)
     {
-        sLog.outError("Auction item (GUID: %u) not found, and lost.",auction->item_guid);
+        sLog.outError("Auction item (GUID: %u) not found, and lost.",auction->item_guidlow);
         return;
     }
 
@@ -413,13 +413,13 @@ void ObjectMgr::SendAuctionExpiredMail( AuctionEntry * auction )
         CharacterDatabase.PExecute("INSERT INTO `mail` (`id`,`messageType`,`sender`,`receiver`,`subject`,`itemTextId`,`has_items`,`expire_time`,`deliver_time`,`money`,`cod`,`checked`) "
             "VALUES ('%u', '2', '%u', '%u', '%s', '0', '1', '" I64FMTD "','" I64FMTD "', '0', '0', '%d')",
             messageId, auction->location, auction->owner, subject.str().c_str(), (uint64)etime, (uint64)dtime, NOT_READ);
-        CharacterDatabase.PExecute("INSERT INTO `mail_items` (`mail_id`,`item_guid`,`item_template`) VALUES ('%u', '%u', '%u')", messageId, auction->item_guid, auction->item_template);
+        CharacterDatabase.PExecute("INSERT INTO `mail_items` (`mail_id`,`item_guid`,`item_template`) VALUES ('%u', '%u', '%u')", messageId, auction->item_guidlow, auction->item_template);
         if ( owner )
         {
             owner->GetSession()->SendAuctionOwnerNotification( auction );
 
             MailItemsInfo mi;
-            mi.AddItem(auction->item_guid, auction->item_template, pItem);
+            mi.AddItem(auction->item_guidlow, auction->item_template, pItem);
             owner->CreateMail(messageId, MAIL_AUCTION, auction->location, subject.str(), 0, &mi, etime, dtime, 0, 0, NOT_READ);
         }
         else
@@ -1088,7 +1088,7 @@ void ObjectMgr::LoadAuctions()
         aItem = new AuctionEntry;
         aItem->Id = fields[0].GetUInt32();
         aItem->auctioneer = fields[1].GetUInt32();
-        aItem->item_guid = fields[2].GetUInt32();
+        aItem->item_guidlow = fields[2].GetUInt32();
         aItem->item_template = fields[3].GetUInt32();
         aItem->owner = fields[4].GetUInt32();
         aItem->buyout = fields[5].GetUInt32();
@@ -1099,14 +1099,14 @@ void ObjectMgr::LoadAuctions()
         aItem->deposit = fields[10].GetUInt32();
         aItem->location = fields[11].GetUInt8();
         //check if sold item exists
-        if ( this->GetAItem( aItem->item_guid ) )
+        if ( this->GetAItem( aItem->item_guidlow ) )
         {
             GetAuctionsMap( aItem->location )->AddAuction(aItem);
         }
         else
         {
             CharacterDatabase.PExecute("DELETE FROM `auctionhouse` WHERE `id` = '%u'",aItem->Id);
-            sLog.outError("Auction %u has not a existing item : %u", aItem->Id, aItem->item_guid);
+            sLog.outError("Auction %u has not a existing item : %u", aItem->Id, aItem->item_guidlow);
             delete aItem;
         }
     } while (result->NextRow());
@@ -3449,10 +3449,10 @@ void ObjectMgr::ReturnOrDeleteOldMails(bool serverUp)
                 {
                     Field *fields2 = resultItems->Fetch();
 
-                    uint32 item_guid = fields2[0].GetUInt32();
+                    uint32 item_guid_low = fields2[0].GetUInt32();
                     uint32 item_template = fields2[1].GetUInt32();
 
-                    m->AddItem(item_guid, item_template);
+                    m->AddItem(item_guid_low, item_template);
                 }
                 while (resultItems->NextRow());
 

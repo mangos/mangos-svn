@@ -783,9 +783,10 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
     {
         sLog.outDebug("ITEM: Repair item, itemGUID = %u, npcGUID = %u", GUID_LOPART(itemGUID), GUID_LOPART(npcGUID));
 
-        uint16 pos = _player->GetPosByGuid(itemGUID);
+        Item* item = _player->GetItemByGuid(itemGUID);
 
-        _player->DurabilityRepair(pos,true,discountMod);
+        if(item)
+            _player->DurabilityRepair(item->GetPos(),true,discountMod);
 
     }
     else
