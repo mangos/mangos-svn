@@ -424,14 +424,6 @@ bool ChatHandler::HandleLoadScriptsCommand(const char* args)
     return true;
 }
 
-/** \brief GM command level 3 - Create a guild.
- *
- * This command allows a GM (level 3) to create a guild.
- *
- * The "args" parameter contains the name of the guild leader
- * and then the name of the guild.
- *
- */
 bool ChatHandler::HandleSecurityCommand(const char* args)
 {
     char* arg1 = strtok((char*)args, " ");
@@ -2445,7 +2437,15 @@ bool ChatHandler::HandleLookupObjectCommand(const char* args)
     return true;
 }
 
-bool ChatHandler::HandleCreateGuildCommand(const char* args)
+/** \brief GM command level 3 - Create a guild.
+*
+* This command allows a GM (level 3) to create a guild.
+*
+* The "args" parameter contains the name of the guild leader
+* and then the name of the guild.
+*
+*/
+bool ChatHandler::HandleGuildCreateCommand(const char* args)
 {
 
     if (!*args)
@@ -2494,7 +2494,136 @@ bool ChatHandler::HandleCreateGuildCommand(const char* args)
     return true;
 }
 
-//float max_creature_distance = 160;
+bool ChatHandler::HandleGuildInviteCommand(const char *args)
+{
+    if(!*args)
+        return false;
+
+    char* par1 = strtok((char*)args, " ");
+    char* par2 = strtok (NULL, "");
+    if(!par1 || !par2)
+        return false;
+
+    std::string glName = par2;
+    Guild* targetGuild = objmgr.GetGuildByName(glName);
+    if(!targetGuild)
+        return false;
+
+    std::string plName = par1;
+    normalizePlayerName(plName);
+
+    uint64 plGuid = 0;
+    if(Player* targetPlayer = ObjectAccessor::Instance().FindPlayerByName(plName.c_str()))
+        plGuid = targetPlayer->GetGUID();
+    else
+        plGuid = objmgr.GetPlayerGUIDByName(plName.c_str());
+
+    if(!plGuid)
+        false;
+
+    // players's guild membership checked in AddMember before add
+    if(!targetGuild->AddMember(plGuid,targetGuild->GetLowestRank()))
+        return false;
+
+    return true;
+}
+
+bool ChatHandler::HandleGuildUninviteCommand(const char *args)
+{
+    if(!*args)
+        return false;
+
+    char* par1 = strtok((char*)args, " ");
+    if(!par1)
+        return false;
+    std::string plName = par1;
+    normalizePlayerName(plName);
+
+    uint64 plGuid = 0;
+    uint32 glId   = 0;
+    if(Player* targetPlayer = ObjectAccessor::Instance().FindPlayerByName(plName.c_str()))
+    {
+        plGuid = targetPlayer->GetGUID();
+        glId   = targetPlayer->GetGuildId();
+    }
+    else
+    {
+        plGuid = objmgr.GetPlayerGUIDByName(plName.c_str());
+        glId = Player::GetGuildIdFromDB(plGuid);
+    }
+
+    if(!plGuid || !glId)
+        return false;
+
+    Guild* targetGuild = objmgr.GetGuildById(glId);
+    if(!targetGuild)
+        return false;
+
+    targetGuild->DelMember(plGuid);
+
+    return true;
+}
+
+bool ChatHandler::HandleGuildRankCommand(const char *args)
+{
+    if(!*args)
+        return false;
+
+    char* par1 = strtok((char*)args, " ");
+    char* par2 = strtok(NULL, " ");
+    if(!par1 || !par2)
+        return false;
+    std::string plName = par1;
+    normalizePlayerName(plName);
+
+    uint64 plGuid = 0;
+    uint32 glId   = 0;
+    if(Player* targetPlayer = ObjectAccessor::Instance().FindPlayerByName(plName.c_str()))
+    {
+        plGuid = targetPlayer->GetGUID();
+        glId   = targetPlayer->GetGuildId();
+    }
+    else
+    {
+        plGuid = objmgr.GetPlayerGUIDByName(plName.c_str());
+        glId = Player::GetGuildIdFromDB(plGuid);
+    }
+
+    if(!plGuid || !glId)
+        return false;
+
+    Guild* targetGuild = objmgr.GetGuildById(glId);
+    if(!targetGuild)
+        return false;
+
+    uint32 newrank = uint32(atoi(par2));
+    if(newrank > targetGuild->GetLowestRank())
+        return false;
+
+    targetGuild->ChangeRank(plGuid,newrank);
+
+    return true;
+}
+
+bool ChatHandler::HandleGuildDeleteCommand(const char* args)
+{
+    if(!*args)
+        return false;
+
+    char* par1 = strtok((char*)args, " ");
+    if(!par1)
+        return false;
+
+    std::string gld = par1;
+
+    Guild* targetGuild = objmgr.GetGuildByName(gld);
+    if(!targetGuild)
+        return false;
+
+    targetGuild->Disband();
+
+    return true;
+}
 
 bool ChatHandler::HandleGetDistanceCommand(const char* /*args*/)
 {
@@ -4477,8 +4606,3 @@ bool ChatHandler::HandleCastBackCommand(const char* args)
 
     return true;
 }
-
-
-
-
-
