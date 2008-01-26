@@ -202,6 +202,17 @@ ChatCommand * ChatHandler::getCommandTable()
         { NULL,             0,                  NULL,                                           "", NULL }
     };
 
+    static ChatCommand guildCommandTable[] =
+    {
+        { "create",        SEC_GAMEMASTER,     &ChatHandler::HandleGuildCreateCommand,          "", NULL },
+        { "delete",        SEC_GAMEMASTER,     &ChatHandler::HandleGuildDeleteCommand,          "", NULL },
+        { "invite",        SEC_GAMEMASTER,     &ChatHandler::HandleGuildInviteCommand,          "", NULL },
+        { "uninvite",      SEC_GAMEMASTER,     &ChatHandler::HandleGuildUninviteCommand,        "", NULL },
+        { "rank",          SEC_GAMEMASTER,     &ChatHandler::HandleGuildRankCommand,            "", NULL },
+
+        { NULL,            0,                  NULL,                                            "", NULL }
+    };
+
     static ChatCommand lookupCommandTable[] =
     {
         { "area",           SEC_MODERATOR,      &ChatHandler::HandleLookupAreaCommand,          "", NULL },
@@ -305,7 +316,6 @@ ChatCommand * ChatHandler::getCommandTable()
         { "spawntime",   SEC_GAMEMASTER,    &ChatHandler::HandleSpawnTimeCommand,        "",   NULL },
         { "additem",     SEC_ADMINISTRATOR, &ChatHandler::HandleAddItemCommand,          "",   NULL },
         { "additemset",  SEC_ADMINISTRATOR, &ChatHandler::HandleAddItemSetCommand,       "",   NULL },
-        { "createguild", SEC_ADMINISTRATOR, &ChatHandler::HandleCreateGuildCommand,      "",   NULL },
         { "update",      SEC_ADMINISTRATOR, &ChatHandler::HandleUpdate,                  "",   NULL },
         { "bank",        SEC_ADMINISTRATOR, &ChatHandler::HandleBankCommand,             "",   NULL },
         { "wchange",     SEC_ADMINISTRATOR, &ChatHandler::HandleChangeWeather,           "",   NULL },
@@ -370,6 +380,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "mute",        SEC_GAMEMASTER,    &ChatHandler::HandleMuteCommand,             "",   NULL },
         { "unmute",      SEC_GAMEMASTER,    &ChatHandler::HandleUnmuteCommand,           "",   NULL },
         { "honor",       SEC_GAMEMASTER,    NULL,                                        "",   honorCommandTable },
+        { "guild",       SEC_ADMINISTRATOR, NULL,                                        "",   guildCommandTable },
         { "movegens",    SEC_ADMINISTRATOR, &ChatHandler::HandleMovegensCommand,         "",   NULL },
         { "cast",        SEC_ADMINISTRATOR, &ChatHandler::HandleCastCommand,             "",   NULL },
         { "castback",    SEC_ADMINISTRATOR, &ChatHandler::HandleCastBackCommand,         "",   NULL },
