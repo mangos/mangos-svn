@@ -43,6 +43,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\realmd"
 				PreprocessorDefinitions="VERSION=&quot;0.2-SVN&quot;,WIN32,NDEBUG,_CONSOLE"
@@ -138,6 +139,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\dep\include;..\..\src\framework;..\..\src\shared;..\..\src\realmd"
 				PreprocessorDefinitions="VERSION=&quot;0.2-SVN&quot;;WIN32;_DEBUG;MANGOS_DEBUG;_CONSOLE"

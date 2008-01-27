@@ -26,8 +26,8 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-                Description="Extract SVN revision"
-                CommandLine="cd ..\&#x0D;&#x0A;svn_revision.js&#x0D;&#x0A;"
+				Description="Extract SVN revision"
+				CommandLine="cd ..\&#x0D;&#x0A;svn_revision.js&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -43,6 +43,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include\g3dlite;..\..\src\framework;..\..\src\shared"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE"
@@ -107,8 +108,8 @@
 			>
 			<Tool
 				Name="VCPreBuildEventTool"
-                Description="Extract SVN revision"
-                CommandLine="cd ..\&#x0D;&#x0A;svn_revision.js&#x0D;&#x0A;"
+				Description="Extract SVN revision"
+				CommandLine="cd ..\&#x0D;&#x0A;svn_revision.js&#x0D;&#x0A;"
 			/>
 			<Tool
 				Name="VCCustomBuildTool"
@@ -124,6 +125,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
+				AdditionalOptions="/MP"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\dep\include;..\..\dep\include\g3dlite;..\..\src\framework;..\..\src\shared"
 				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_LIB;_CRT_SECURE_NO_DEPRECATE"
