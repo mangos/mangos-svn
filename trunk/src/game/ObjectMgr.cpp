@@ -4791,7 +4791,7 @@ void ObjectMgr::LoadQuestRelationsHelper(QuestRelations& map,char const* table)
 
 // Character Dumps (Write/Load)
 
-#define DUMP_TABLE_COUNT 13
+#define DUMP_TABLE_COUNT 17
 
 struct DumpTable
 {
@@ -4813,7 +4813,11 @@ static DumpTable dumpTables[DUMP_TABLE_COUNT] =
     { "character_spell_cooldown", 0 },
     { "item_instance",            3 },
     { "character_ticket",         0 },
-    { "character_tutorial",       0 }
+    { "character_tutorial",       0 },
+    { "character_pet",            4 },
+    { "pet_aura",                 5 },
+    { "pet_spell",                5 },
+    { "pet_spell_cooldown",       5 }
 };
 
 std::string CreateDumpString(char const* tableName, QueryResult *result)
@@ -4839,16 +4843,73 @@ std::string CreateDumpString(char const* tableName, QueryResult *result)
 
 bool DumpPlayerTable(std::string& dump, uint32 guid, char const*tableFrom, char const*tableTo, uint8 type = 0)
 {
-    if (!tableFrom || !tableTo) return false;
-    QueryResult *result = CharacterDatabase.PQuery("SELECT * FROM `%s` WHERE `%s` = '%d'", tableFrom, type != 3 ? "guid" : "owner_guid", guid);
-    if (!result) return false;
+    char const* wherestr = "";
+    uint32 whereguid = 0;
+    QueryResult *result_pet = NULL;
+    
+    switch ( type )
+    {
+        case 3:
+            wherestr  = "owner_guid";
+            whereguid = guid;
+            break;
+        case 4:
+            wherestr  = "owner";
+            whereguid = guid;
+            break;
+        case 5:
+            wherestr  = "guid";
+            whereguid = guid;
+        
+            result_pet = CharacterDatabase.PQuery("SELECT `id` FROM `character_pet` WHERE owner = '%d'", whereguid);
+            if(!result_pet)
+                return false;
+
+            do
+            {
+                // get character_pet.id
+                Field *fields_pet = result_pet->Fetch();
+                whereguid = fields_pet[0].GetUInt32();
+
+                QueryResult *result_pet2 = CharacterDatabase.PQuery("SELECT * FROM `%s` WHERE `%s` = '%d'", tableFrom, wherestr, whereguid);
+                if (!result_pet2)
+                    return false;
+
+                do
+                {
+                    dump += CreateDumpString(tableTo, result_pet2);
+                    dump += "\n";
+                }
+                while (result_pet2->NextRow());
+
+                delete result_pet2;
+            }
+            while(result_pet->NextRow());
+            delete result_pet;
+
+            return true;
+        default:
+            wherestr  = "guid";
+            whereguid = guid;
+            break;
+    }
+
+    if (!tableFrom || !tableTo)
+        return false;
+
+    QueryResult *result = CharacterDatabase.PQuery("SELECT * FROM `%s` WHERE `%s` = '%d'", tableFrom, wherestr, whereguid);
+    if (!result)
+        return false;
+
     do
     {
         dump += CreateDumpString(tableTo, result);
         dump += "\n";
     }
     while (result->NextRow());
+
     delete result;
+
     return true;
 }
 
@@ -4858,7 +4919,7 @@ std::string ObjectMgr::GetPlayerDump(uint32 guid)
     for(int i = 0; i < DUMP_TABLE_COUNT; i++)
         DumpPlayerTable(dump, guid, dumpTables[i].name, dumpTables[i].name, dumpTables[i].type);
 
-    // TODO: Add pets/instance/group/gifts..
+    // TODO: Add instance/group/gifts..
     // TODO: Add a dump level option to skip some non-important tables
 
     return dump;
@@ -5015,7 +5076,7 @@ bool ObjectMgr::LoadPlayerDump(std::string file, uint32 account, std::string nam
     if(!fin) return false;
 
     QueryResult * result = NULL;
-    char newguid[20], chraccount[20];
+    char newguid[20], chraccount[20], newpetid[20], currpetid[20], lastpetid[20];
 
     // make sure the same guid doesn't already exist and is safe to use
     bool incHighest = true;
@@ -5047,9 +5108,15 @@ bool ObjectMgr::LoadPlayerDump(std::string file, uint32 account, std::string nam
 
     snprintf(newguid, 20, "%d", guid);
     snprintf(chraccount, 20, "%d", account);
+    snprintf(newpetid, 20, "%d", ObjectMgr::GeneratePetNumber());
+    snprintf(lastpetid, 20, "%s", "");
 
     std::map<uint32, uint32> items;
     char buf[32000] = "";
+    
+    typedef std::map<uint32, uint32> PetIds;                // old->new petid relation
+    typedef PetIds::value_type PetIdsPair;
+    PetIds petids;
 
     CharacterDatabase.BeginTransaction();
     while(!feof(fin))
@@ -5094,51 +5161,103 @@ bool ObjectMgr::LoadPlayerDump(std::string file, uint32 account, std::string nam
         // change the data to server values
         if(type <= 2)                                       // most tables
             if(!changenth(line, 1, newguid)) ROLLBACK;
-        if(type == 1)                                       // character t.
+
+        switch(type)
         {
-            // guid, data field:guid, items
-            if(!changenth(line, 2, chraccount)) ROLLBACK;
-            std::string vals = getnth(line, 3);
-            if(!changetoknth(vals, OBJECT_FIELD_GUID+1, newguid)) ROLLBACK;
-            for(uint16 field = PLAYER_FIELD_INV_SLOT_HEAD; field < PLAYER_FARSIGHT; field++)
-                if(!changetokItem(vals, field+1, items, m_hiItemGuid, true)) ROLLBACK;
-            if(!changenth(line, 3, vals.c_str())) ROLLBACK;
-            if (name == "")
+            case 1:                                         // character t.
             {
-                // check if the original name already exists
-                name = getnth(line, 4);
-                result = CharacterDatabase.PQuery("SELECT * FROM `character` WHERE `name` = '%s'", name.c_str());
-                if (result)
+                // guid, data field:guid, items
+                if(!changenth(line, 2, chraccount)) ROLLBACK;
+                std::string vals = getnth(line, 3);
+                if(!changetoknth(vals, OBJECT_FIELD_GUID+1, newguid)) ROLLBACK;
+                for(uint16 field = PLAYER_FIELD_INV_SLOT_HEAD; field < PLAYER_FARSIGHT; field++)
+                    if(!changetokItem(vals, field+1, items, m_hiItemGuid, true)) ROLLBACK;
+                if(!changenth(line, 3, vals.c_str())) ROLLBACK;
+                if (name == "")
                 {
-                    delete result;
-                    if(!changenth(line, 29, "1")) ROLLBACK; // rename on login
+                    // check if the original name already exists
+                    name = getnth(line, 4);
+                    result = CharacterDatabase.PQuery("SELECT * FROM `character` WHERE `name` = '%s'", name.c_str());
+                    if (result)
+                    {
+                        delete result;
+                        if(!changenth(line, 29, "1")) ROLLBACK; // rename on login
+                    }
                 }
+                else if(!changenth(line, 4, name.c_str())) ROLLBACK;
+
+                break;
             }
-            else if(!changenth(line, 4, name.c_str())) ROLLBACK;
-        }
-        else if(type == 2)                                  // character_inventory t.
-        {
-            // bag, item
-            if(!changeItem(line, 2, items, m_hiItemGuid, true)) ROLLBACK;
-            if(!changeItem(line, 4, items, m_hiItemGuid)) ROLLBACK;
-        }
-        else if(type == 3)                                  // item_instance t.
-        {
-            // item, owner, data field:item, owner guid
-            if(!changeItem(line, 1, items, m_hiItemGuid)) ROLLBACK;
-            if(!changenth(line, 2, newguid)) ROLLBACK;
-            std::string vals = getnth(line,3);
-            if(!changetokItem(vals, OBJECT_FIELD_GUID+1, items, m_hiItemGuid)) ROLLBACK;
-            if(!changetoknth(vals, ITEM_FIELD_OWNER+1, newguid)) ROLLBACK;
-            if(!changenth(line, 3, vals.c_str())) ROLLBACK;
+            case 2:                                         // character_inventory t.
+            {
+                // bag, item
+                if(!changeItem(line, 2, items, m_hiItemGuid, true)) ROLLBACK;
+                if(!changeItem(line, 4, items, m_hiItemGuid)) ROLLBACK;
+                break;
+            }
+            case 3:                                         // item_instance t.
+            {
+                // item, owner, data field:item, owner guid
+                if(!changeItem(line, 1, items, m_hiItemGuid)) ROLLBACK;
+                if(!changenth(line, 2, newguid)) ROLLBACK;
+                std::string vals = getnth(line,3);
+                if(!changetokItem(vals, OBJECT_FIELD_GUID+1, items, m_hiItemGuid)) ROLLBACK;
+                if(!changetoknth(vals, ITEM_FIELD_OWNER+1, newguid)) ROLLBACK;
+                if(!changenth(line, 3, vals.c_str())) ROLLBACK;
+                break;
+            }
+            case 4:                                         // character_pet t
+            {
+                //store a map of old pet id to new inserted pet id for use by type 5 tables
+                snprintf(currpetid, 20, "%s", getnth(line, 1).c_str());
+                if(lastpetid == "") snprintf(lastpetid, 20, "%s", currpetid);
+                if(lastpetid != currpetid) {
+                    snprintf(newpetid, 20, "%d", ObjectMgr::GeneratePetNumber());
+                    snprintf(lastpetid, 20, "%s", currpetid);
+                }
+                
+                std::map<uint32, uint32> :: const_iterator petids_iter = petids.find(atoi(currpetid));
+                
+                if(petids_iter == petids.end()){
+                    petids.insert(PetIdsPair(atoi(currpetid), atoi(newpetid)));
+                }
+                
+                // item, entry, owner, ...
+                if(!changenth(line, 1, newpetid)) ROLLBACK;
+                if(!changenth(line, 3, newguid)) ROLLBACK;
+
+                break;
+            }
+            case 5:                                         // pet_aura, pet_spell, pet_spell_cooldown t
+            {
+                snprintf(currpetid, 20, "%s", getnth(line, 1).c_str());
+                
+                // lookup currpetid and match to new inserted pet id
+                std::map<uint32, uint32> :: const_iterator petids_iter = petids.find(atoi(currpetid));
+                if(petids_iter == petids.end()) ROLLBACK;   // couldn't find new inserted id
+
+                snprintf(newpetid, 20, "%d", petids_iter->second);
+                    
+                if(!changenth(line, 1, newpetid)) ROLLBACK;
+
+                break;
+            }
+            default:
+                break;
         }
 
         if(!CharacterDatabase.Execute(line.c_str())) ROLLBACK;
     }
+
     CharacterDatabase.CommitTransaction();
+
     m_hiItemGuid += items.size();
-    if(incHighest) m_hiCharGuid++;
+
+    if(incHighest)
+        m_hiCharGuid++;
+
     fclose(fin);
+
     return true;
 }
 
