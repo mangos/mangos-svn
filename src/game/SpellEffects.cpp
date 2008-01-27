@@ -28,6 +28,7 @@
 #include "ObjectMgr.h"
 #include "SpellMgr.h"
 #include "Player.h"
+#include "SkillExtraItems.h"
 #include "Unit.h"
 #include "CreatureAI.h"
 #include "Spell.h"
@@ -1793,27 +1794,61 @@ void Spell::DoCreateItem(uint32 i, uint32 itemtype)
     if (num_to_add > pProto->Stackable)
         num_to_add = pProto->Stackable;
 
+    // init items_count to 1, since 1 item will be created regardless of specialization
+    int items_count=1;
+    // the chance to create additional items
+    float additionalCreateChance=0.0f;
+    // the maximum number of created additional items
+    uint8 additionalMaxNum=0;
+    // get the chance and maximum number for creating extra items
+    if ( canCreateExtraItems(player, m_spellInfo->Id, additionalCreateChance, additionalMaxNum) )
+    {
+        // roll with this chance till we roll not to create or we create the max num
+        while ( roll_chance_f(additionalCreateChance) && items_count<=additionalMaxNum )
+            ++items_count;
+    }
+
     uint16 dest;
-    uint8 msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, newitemid, num_to_add, false);
-    if( msg != EQUIP_ERR_OK )
+    uint8 msg;
+    // will this creation mean a levelup?
+    bool skill_levelup=false;
+
+    // try to create and store the items
+    for(int i=0; i<items_count; i++)
     {
-        player->SendEquipError( msg, NULL, NULL );
-        return;
+        // can the player store the new item?
+        msg = player->CanStoreNewItem( NULL_BAG, NULL_SLOT, dest, newitemid, num_to_add, false);
+        if( msg != EQUIP_ERR_OK )
+        {
+            // send equip error if not
+            player->SendEquipError( msg, NULL, NULL );
+            break;
+        }
+
+        // create the new item and store it
+        Item *pItem = player->StoreNewItem( dest, newitemid, num_to_add, true,Item::GenerateItemRandomPropertyId(newitemid));
+
+        // was it successful? return error if not
+        if(!pItem)
+        {
+            player->SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL );
+            break;
+        }
+
+        // set the "Crafted by ..." property of the item
+        if( pItem->GetProto()->Class != ITEM_CLASS_CONSUMABLE && pItem->GetProto()->Class != ITEM_CLASS_QUEST)
+            pItem->SetUInt32Value(ITEM_FIELD_CREATOR,player->GetGUIDLow());
+
+        // send info to the client
+        player->SendNewItem(pItem, num_to_add, true, true);
+
+        // we succeeded in creating at least one item, so a levelup is possible
+        skill_levelup=true;
     }
 
-    Item *pItem = player->StoreNewItem( dest, newitemid, num_to_add, true,Item::GenerateItemRandomPropertyId(newitemid));
-
-    if(!pItem)
-    {
-        player->SendEquipError( EQUIP_ERR_ITEM_NOT_FOUND, NULL, NULL );
-        return;
-    }
-
-    if( pItem->GetProto()->Class != ITEM_CLASS_CONSUMABLE && pItem->GetProto()->Class != ITEM_CLASS_QUEST)
-        pItem->SetUInt32Value(ITEM_FIELD_CREATOR,player->GetGUIDLow());
-
-    player->SendNewItem(pItem, num_to_add, true, true);
-    player->UpdateCraftSkill(m_spellInfo->Id);
+    // if levelup is possible, update the craft skill
+    if(skill_levelup)
+        player->UpdateCraftSkill(m_spellInfo->Id);
 }
 
 void Spell::EffectCreateItem(uint32 i)
