@@ -146,7 +146,7 @@ enum VictimState
     VICTIMSTATE_NORMAL         = 1,
     VICTIMSTATE_DODGE          = 2,
     VICTIMSTATE_PARRY          = 3,
-    VICTIMSTATE_UNKNOWN2       = 4,
+    VICTIMSTATE_INTERRUPT      = 4,
     VICTIMSTATE_BLOCKS         = 5,
     VICTIMSTATE_EVADES         = 6,
     VICTIMSTATE_IS_IMMUNE      = 7,
@@ -688,6 +688,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
         void AttackerStateUpdate (Unit *pVictim, WeaponAttackType attType = BASE_ATTACK, bool isTriggered = false);
         uint32 SpellMissChanceCalc(Unit *pVictim) const;
         int32 MeleeMissChanceCalc(const Unit *pVictim) const;
+        SpellMissInfo SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool canReflect = false);
 
         float GetUnitDodgeChance()    const;
         float GetUnitParryChance()    const;
@@ -811,7 +812,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         bool AddAura(Aura *aur);
 
-        void RemoveFirstAuraByDispel(uint32 dispel_type, Unit *pCaster);
+        bool RemoveFirstAuraByDispel(uint32 dispel_type, Unit *pCaster);
         void RemoveAura(AuraMap::iterator &i, bool onDeath = false);
         void RemoveAura(uint32 spellId, uint32 effindex);
         void RemoveSingleAuraFromStack(uint32 spellId, uint32 effindex);

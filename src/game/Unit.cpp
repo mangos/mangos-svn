@@ -2660,6 +2660,42 @@ uint32 Unit::SpellMissChanceCalc(Unit *pVictim) const
     return misschance < 100 ? 100 : misschance;
 }
 
+SpellMissInfo Unit::SpellHitResult(Unit *pVictim, SpellEntry const *spell, bool CanReflect)
+{
+    // Return evade for units in evade mode
+    if (pVictim->GetTypeId()==TYPEID_UNIT && ((Creature*)pVictim)->IsInEvadeMode())
+        return SPELL_MISS_EVADE;
+
+    // Check for immune 
+    if (pVictim->IsImmunedToSpell(spell))
+        return SPELL_MISS_IMMUNE;
+
+    // All positive spells can`t miss
+    // TODO: client not show miss log for this spells - so need find info for this in dbc and use it!
+    if (IsPositiveSpell(spell->Id)) 
+        return SPELL_MISS_NONE;
+
+    // Immune check
+    if (pVictim->IsImmunedToSpellDamage(spell)) 
+        return SPELL_MISS_IMMUNE;   
+
+    // Try victim reflect spell
+    if (CanReflect)
+    {
+        int32 reflectchance = pVictim->GetTotalAuraModifier(SPELL_AURA_REFLECT_SPELLS);
+        Unit::AuraList const& mReflectSpellsSchool = pVictim->GetAurasByType(SPELL_AURA_REFLECT_SPELLS_SCHOOL);
+        for(Unit::AuraList::const_iterator i = mReflectSpellsSchool.begin(); i != mReflectSpellsSchool.end(); ++i)
+            if((*i)->GetModifier()->m_miscvalue & int32(1 << spell->School))
+                reflectchance += (*i)->GetModifier()->m_amount;
+        if (reflectchance > 0 && roll_chance_i(reflectchance))
+            return SPELL_MISS_REFLECT;
+    }
+
+    // TODO need add here hit result calculation for spells
+
+    return SPELL_MISS_NONE;
+}
+
 int32 Unit::MeleeMissChanceCalc(const Unit *pVictim) const
 {
     if(!pVictim)
@@ -3512,7 +3548,7 @@ bool Unit::RemoveNoStackAurasDueToAura(Aura *Aur)
     return true;
 }
 
-void Unit::RemoveFirstAuraByDispel(uint32 dispel_type, Unit *pCaster)
+bool Unit::RemoveFirstAuraByDispel(uint32 dispel_type, Unit *pCaster)
 {
     AuraMap::iterator i;
     for (i = m_Auras.begin(); i != m_Auras.end();)
@@ -3538,11 +3574,13 @@ void Unit::RemoveFirstAuraByDispel(uint32 dispel_type, Unit *pCaster)
                 }
             }
             RemoveAura(i);
-            break;
+            return true;
         }
         else
             ++i;
     }
+
+    return false;
 }
 
 void Unit::RemoveAreaAurasByOthers(uint64 guid)
@@ -5350,9 +5388,6 @@ uint32 Unit::SpellDamageBonus(Unit *pVictim, SpellEntry const *spellProto, uint3
 {
     if(!spellProto || !pVictim || damagetype==DIRECT_DAMAGE )
         return pdamage;
-
-    if(pVictim->IsImmunedToSpellDamage(spellProto))
-        return 0;
 
     uint32 creatureTypeMask = pVictim->GetCreatureTypeMask();
 

@@ -482,9 +482,6 @@ class Spell
         uint64 handle_delayed(uint64 t_offset);
         // handler helpers
         void _handle_immediate_phase();
-        void _handle_unit_phase(const uint64 targetGUID, const uint32 effectNumber, std::set<uint64>* reflectTargets);
-        void _handle_go_phase(const uint64 targetGUID, const uint32 effectNumber);
-        void _handle_reflection_phase(std::set<uint64>* reflectTargets);
         void _handle_finish_phase();
 
         uint8 CheckItems();
@@ -496,14 +493,13 @@ class Spell
 
         void Delayed(int32 delaytime);
         void DelayedChannel(int32 delaytime);
-        void reflect(Unit *refunit);
         inline uint32 getState() const { return m_spellState; }
         void setState(uint32 state) { m_spellState = state; }
 
         void DoCreateItem(uint32 i, uint32 itemtype);
 
-        void writeSpellGoTargets( WorldPacket * data );
-        void writeAmmoToPacket( WorldPacket * data );
+        void WriteSpellGoTargets( WorldPacket * data );
+        void WriteAmmoToPacket( WorldPacket * data );
         void FillTargetMap();
 
         void SetTargetMap(uint32 i,uint32 cur,std::list<Unit*> &TagUnitMap);
@@ -574,13 +570,10 @@ class Spell
         bool m_autoRepeat;
         bool m_meleeSpell;
         bool m_rangedShoot;
-        bool m_needAliveTarget[3];
 
         // Delayed spells system
         uint64 m_delayStart;                                // time of spell delay start, filled by event handler, zero = just started
         uint64 m_delayMoment;                               // moment of next delay call, used internally
-        SpellTargetTimeMap m_unitsHitList[3];               // time of units to hit by effect (used by delayed spells only)
-        SpellTargetTimeMap m_objectsHitList[3];             // time of GOs to hit by effect (used by delayed spells only)
         bool m_immediateHandled;                            // were immediate actions handled? (used by delayed spells only)
 
         // These vars are used in both delayed spell system and modified immediate spell system
@@ -599,10 +592,49 @@ class Spell
         // -------------------------------------------
         GameObject* focusObject;
 
-        // List of all Spell targets
-        std::list<uint64> m_targetUnitGUIDs[3];
-        std::list<Item*> m_targetItems[3];
-        std::list<uint64> m_targetGameobjectGUIDs[3];
+        //*****************************************
+        // Spell target subsystem
+        //*****************************************
+        // Targets store structures and data
+        uint32 m_countOfHit;
+        uint32 m_countOfMiss;
+        struct TargetInfo
+        {
+             uint64 targetGUID;
+             uint64 timeDelay;
+             SpellMissInfo missCondition;
+             SpellMissInfo reflectResult;
+             uint8  effectMask;
+        };
+        std::list<TargetInfo> m_UniqueTargetInfo;
+        uint8 m_needAliveTargetMask;                        // Mask req. alive targets
+
+        struct GOTargetInfo
+        {
+             uint64 targetGUID;
+             uint64 timeDelay;
+             uint8  effectMask;
+        };
+        std::list<GOTargetInfo> m_UniqeGOTargetInfo;
+
+        struct ItemTargetInfo
+        {
+            Item  *item;
+            uint8 effectMask;
+        };
+        std::list<ItemTargetInfo> m_UniqeItemInfo;
+
+        void CleanupTargetList();
+        void AddUnitTarget(Unit* target, uint32 effIndex);
+        void AddUnitTarget(uint64 unitGUID, uint32 effIndex);
+        void AddGOTarget(GameObject* target, uint32 effIndex);
+        void AddGOTarget(uint64 goGUID, uint32 effIndex);
+        void AddItemTarget(Item* target, uint32 effIndex);
+        void DoAllEffectOnTarget(TargetInfo *target);
+        void DoSpellHitOnUnit(Unit *unit, uint32 effectMask);
+        void DoAllEffectOnTarget(GOTargetInfo *target);
+        void DoAllEffectOnTarget(ItemTargetInfo *target);
+        bool IsAliveUnitPresentInTargetList();
         // -------------------------------------------
 
         //List For Triggered Spells
