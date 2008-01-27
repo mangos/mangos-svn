@@ -41,7 +41,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/Zl"
+				AdditionalOptions="/Zl /MP"
 				Optimization="0"
 				AdditionalIncludeDirectories="..\..\src\framework"
 				PreprocessorDefinitions="WIN32;_DEBUG;MANGOS_DEBUG;_LIB"
@@ -115,7 +115,7 @@
 			/>
 			<Tool
 				Name="VCCLCompilerTool"
-				AdditionalOptions="/Zl"
+				AdditionalOptions="/Zl /MP"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="..\..\src\framework"
 				PreprocessorDefinitions="WIN32;NDEBUG;_LIB"
