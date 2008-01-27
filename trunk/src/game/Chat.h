@@ -163,6 +163,7 @@ class ChatHandler
         bool HandleReloadQuestTemplateCommand(const char* args);
         bool HandleReloadReservedNameCommand(const char*);
         bool HandleReloadSkillDiscoveryTemplateCommand(const char* args);
+        bool HandleReloadSkillExtraItemTemplateCommand(const char* args);
         bool HandleReloadSpellAffectCommand(const char* args);
         bool HandleReloadSpellChainCommand(const char* args);
         bool HandleReloadSpellLearnSkillCommand(const char* args);

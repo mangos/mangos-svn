@@ -39,6 +39,7 @@
 #include "Weather.h"
 #include "TargetedMovementGenerator.h"
 #include "SkillDiscovery.h"
+#include "SkillExtraItems.h"
 #include "SystemConfig.h"
 #include "Config/ConfigEnv.h"
 
@@ -111,6 +112,7 @@ bool ChatHandler::HandleReloadAllScriptsCommand(const char*)
 bool ChatHandler::HandleReloadAllSpellCommand(const char*)
 {
     HandleReloadSkillDiscoveryTemplateCommand("a");
+    HandleReloadSkillExtraItemTemplateCommand("a");
     HandleReloadSpellAffectCommand("a");
     HandleReloadSpellChainCommand("a");
     HandleReloadSpellLearnSkillCommand("a");
@@ -269,6 +271,14 @@ bool ChatHandler::HandleReloadSkillDiscoveryTemplateCommand(const char* /*args*/
     sLog.outString( "Re-Loading Skill Discovery Table..." );
     LoadSkillDiscoveryTable();
     SendGlobalSysMessage("DB table `skill_discovery_template` (recipes discovered at crafting) reloaded.");
+    return true;
+}
+
+bool ChatHandler::HandleReloadSkillExtraItemTemplateCommand(const char* /*args*/)
+{
+    sLog.outString( "Re-Loading Skill Extra Item Table..." );
+    LoadSkillExtraItemTable();
+    SendGlobalSysMessage("DB table `skill_extra_item_template` (extra item creation when crafting) reloaded.");
     return true;
 }
 

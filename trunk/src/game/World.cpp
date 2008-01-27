@@ -30,6 +30,7 @@
 #include "WorldPacket.h"
 #include "Weather.h"
 #include "Player.h"
+#include "SkillExtraItems.h"
 #include "SkillDiscovery.h"
 #include "World.h"
 #include "ObjectMgr.h"
@@ -716,6 +717,9 @@ void World::SetInitialWorldSettings()
 
     sLog.outString( "Loading Skill Discovery Table..." );
     LoadSkillDiscoveryTable();
+
+    sLog.outString( "Loading Skill Extra Item Table..." );
+    LoadSkillExtraItemTable();
 
     ///- Load dynamic data tables from the database
     sLog.outString( "Loading Auctions..." );

@@ -206,6 +206,8 @@ libmangosgame_a_SOURCES = \
 	Spell.h \
 	SkillDiscovery.cpp \
 	SkillDiscovery.h \
+	SkillExtraItems.cpp \
+	SkillExtraItems.h \
 	SpellHandler.cpp \
 	SpellMgr.cpp \
 	SpellMgr.h \

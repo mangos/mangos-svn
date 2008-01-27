@@ -179,6 +179,7 @@ ChatCommand * ChatHandler::getCommandTable()
         { "quest_template",              SEC_ADMINISTRATOR, &ChatHandler::HandleReloadQuestTemplateCommand,           "", NULL },
         { "reserved_name",               SEC_ADMINISTRATOR, &ChatHandler::HandleReloadReservedNameCommand,            "", NULL },
         { "skill_discovery_template",    SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSkillDiscoveryTemplateCommand,  "", NULL },
+        { "skill_extra_item_template",   SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSkillExtraItemTemplateCommand,  "", NULL },
         { "spell_affect",                SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellAffectCommand,             "", NULL },
         { "spell_chain",                 SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellChainCommand,              "", NULL },
         { "spell_learn_skill",           SEC_ADMINISTRATOR, &ChatHandler::HandleReloadSpellLearnSkillCommand,         "", NULL },
