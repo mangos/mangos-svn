@@ -76,7 +76,7 @@ void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
         if( GetPlayer()->duel->opponent )
             GetPlayer()->duel->opponent->CombatStop();
         GetPlayer()->CastSpell(GetPlayer(), 7267, true);    // beg
-        GetPlayer()->DuelComplete(1);
+        GetPlayer()->DuelComplete(DUEL_WON);
         return;
     }
 
@@ -85,5 +85,5 @@ void WorldSession::HandleDuelCancelledOpcode(WorldPacket& recvPacket)
     uint64 guid;
     recvPacket >> guid;
 
-    GetPlayer()->DuelComplete(0);
+    GetPlayer()->DuelComplete(DUEL_INTERUPTED);
 }

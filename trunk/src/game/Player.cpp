@@ -239,7 +239,7 @@ Player::Player (WorldSession *session): Unit( 0 )
 Player::~Player ()
 {
     if(m_uint32Values)                                      // only for fully created Object
-        DuelComplete(0);
+        DuelComplete(DUEL_INTERUPTED);
 
     CleanupsBeforeDelete();
 
@@ -1480,7 +1480,7 @@ void Player::TeleportTo(uint32 mapid, float x, float y, float z, float orientati
     {
         GameObject* obj = ObjectAccessor::GetGameObject(*this, GetUInt64Value(PLAYER_DUEL_ARBITER));
         if (obj)
-            DuelComplete(2);
+            DuelComplete(DUEL_FLED);
     }
 
     // reset movement flags at teleport, because player will continue move with these flags after teleport
@@ -5771,27 +5771,26 @@ void Player::CheckDuelDistance(time_t currTime)
         }
         else if(currTime >= (duel->outOfBound+10))
         {
-            DuelComplete(2);
+            DuelComplete(DUEL_FLED);
         }
     }
 }
 
-//type: 0=cleanup ; 1=i won ; 2=i fled
-void Player::DuelComplete(uint8 type)
+void Player::DuelComplete(DuelCompleteType type)
 {
     // duel not requested
     if(!duel)
         return;
 
     WorldPacket data(SMSG_DUEL_COMPLETE, (1));
-    data << (uint8)((type!=0) ? 1 : 0);
+    data << (uint8)((type != DUEL_INTERUPTED) ? 1 : 0);
     GetSession()->SendPacket(&data);
     duel->opponent->GetSession()->SendPacket(&data);
 
-    if(type != 0)
+    if(type != DUEL_INTERUPTED)
     {
         data.Initialize(SMSG_DUEL_WINNER, (1+20));          // we guess size
-        data << (uint8)((type==1) ? 0 : 1);                 // 0 = just won; 1 = fled
+        data << (uint8)((type==DUEL_WON) ? 0 : 1);          // 0 = just won; 1 = fled
         data << duel->opponent->GetName();
         data << GetName();
         SendMessageToSet(&data,true);
