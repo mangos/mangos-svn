@@ -965,14 +965,10 @@ void Spell::EffectDummy(uint32 i)
             }
 
             // Righteous Defense (step 2) (in old version 31980 dummy effect)
-            // Note: this spell save selected targets in not used m_targetUnitGUIDs[2]
-
-            // something changed in spell system
-            if(m_spellInfo->Effect[2] != 0)
-                return;
-
-            std::list<uint64>& selectedTargets = m_targetUnitGUIDs[2];
-            selectedTargets.clear();
+            // Clear targets for eff 1
+            for(std::list<TargetInfo>::iterator ihit= m_UniqueTargetInfo.begin();ihit != m_UniqueTargetInfo.end();++ihit)
+                if( ihit->effectMask & 0x01 )
+                    ihit->effectMask = 0;
 
             Unit::AttackerSet const& attackers = unitTarget->getAttackers();
 
@@ -982,13 +978,13 @@ void Spell::EffectDummy(uint32 i)
 
             // chance to be selected from list
             float chance = 100.0f/(attackers.size());
-
-            for(Unit::AttackerSet::const_iterator aItr = attackers.begin(); aItr != attackers.end() && selectedTargets.size() < 3; ++aItr)
+            uint32 count=0;
+            for(Unit::AttackerSet::const_iterator aItr = attackers.begin(); aItr != attackers.end() && count < 3; ++aItr)
             {
                 if(!roll_chance_f(chance))
                     continue;
-
-                selectedTargets.push_back((*aItr)->GetGUID());
+                count++;
+                AddUnitTarget((*aItr), 1);
             }
 
             // now let next effect cast spell at each target.
@@ -1270,16 +1266,7 @@ void Spell::EffectTriggerSpell(uint32 i)
         // Righteous Defense
         case 31980:
         {
-            // something changed in spell system
-            if(m_spellInfo->Effect[2] != 0)
-                return;
-
-            std::list<uint64> const& selectedTargets = m_targetUnitGUIDs[2];
-
-            for(std::list<uint64>::const_iterator itr = selectedTargets.begin(); itr != selectedTargets.end(); ++itr)
-                if(Unit* unit = ObjectAccessor::GetUnit(*m_caster,(*itr)))
-                    m_caster->CastSpell(unit,31790,true);
-
+            m_caster->CastSpell(unitTarget, 31790, true);
             return;
         }
     }
@@ -1341,7 +1328,7 @@ void Spell::EffectTriggerSpell(uint32 i)
     if(instant)
     {
         // in case multi-targets, spell must be casted one time, at last target in list)
-        if(unitTarget && m_targetUnitGUIDs[i].back()==unitTarget->GetGUID())
+        if (unitTarget && m_UniqueTargetInfo.back().targetGUID==unitTarget->GetGUID())
             m_caster->CastSpell(unitTarget,spellInfo,true,NULL,NULL,m_originalCasterGUID);
     }
     else
@@ -2252,30 +2239,17 @@ void Spell::EffectLearnSpell(uint32 i)
     sLog.outDebug( "Spell: Player %u have learned spell %u from NpcGUID=%u", player->GetGUIDLow(), spellToLearn, m_caster->GetGUIDLow() );
 }
 
-void Spell::EffectDispel(uint32 i)                          // PBW
+void Spell::EffectDispel(uint32 i)
 {
-    for(int n = 0; n < (m_currentBasePoints[i]+1); n++)
-    {
-        if(m_spellInfo->rangeIndex == 1)
-        {
-            //ToDo: Shaman Totems (Poison Cleansing Totem[8168] and Disease Cleansing Totem[8171]) are SelfOnly spells
-            //      and will dispel one poison/disease from one party member every 5 second that activated ...
-            m_caster->RemoveFirstAuraByDispel(m_spellInfo->EffectMiscValue[i], m_caster);
-            sLog.outDebug("Spell: Removed aura type %u from caster", m_spellInfo->EffectMiscValue[i]);
-        }
-        else
-        {
-            for(std::list<uint64>::iterator iunit= m_targetUnitGUIDs[i].begin();iunit != m_targetUnitGUIDs[i].end();++iunit)
-            {
-                Unit* unit = m_caster->GetGUID()==*iunit ? m_caster : ObjectAccessor::GetUnit(*m_caster,*iunit);
-                if(unit && unit->isAlive() && (unit->GetTypeId() == TYPEID_PLAYER || unit->GetTypeId() == TYPEID_UNIT))
-                {
-                    unit->RemoveFirstAuraByDispel(m_spellInfo->EffectMiscValue[i], m_caster);
-                    sLog.outDebug("Spell: Removed aura type %u from %u", m_spellInfo->EffectMiscValue[i], unit->GetGUIDLow());
-                }
-            }
-        }
-    }
+    if(!unitTarget)
+        return;
+
+    for(int n = 0 ; n < damage; ++n)
+        if(unitTarget->RemoveFirstAuraByDispel(m_spellInfo->EffectMiscValue[i], m_caster))
+            sLog.outDebug("Spell: Removed aura type %u from %s %u (removed by %s %u)", 
+                m_spellInfo->EffectMiscValue[i], 
+                unitTarget->GetTypeId()==TYPEID_PLAYER ? "player" : "creature", unitTarget->GetGUIDLow(),
+                m_caster->GetTypeId()==TYPEID_PLAYER ? "player" : "creature", m_caster->GetGUIDLow() );
 }
 
 void Spell::EffectDualWield(uint32 /*i*/)
