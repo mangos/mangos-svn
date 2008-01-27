@@ -1473,6 +1473,15 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             else
                 pdamage = uint32(pVictim->GetMaxHealth()*amount/100);
 
+            //As of 2.2 resilience reduces damage from DoT ticks as much as the chance to not be critically hit
+            if(m_modResilience)
+            {
+                if(m_modResilience > 100)
+                    pdamage = 0;
+                else
+                    pdamage = uint32(pdamage * (100 - m_modResilience)/100);
+            }
+
             sLog.outDetail("PeriodicAuraLog: %u (TypeId: %u) attacked %u (TypeId: %u) for %u dmg inflicted by %u abs is %u",
                 GetGUIDLow(), GetTypeId(), pVictim->GetGUIDLow(), pVictim->GetTypeId(), pdamage, spellProto->Id,absorb);
 
@@ -1511,6 +1520,15 @@ void Unit::PeriodicAuraLog(Unit *pVictim, SpellEntry const *spellProto, Modifier
             CalcAbsorbResist(pVictim, SpellSchools(spellProto->School), DOT, pdamage, &absorb, &resist);
 
             pdamage = SpellDamageBonus(pVictim,spellProto,pdamage,DOT);
+
+            //As of 2.2 resilience reduces damage from DoT ticks as much as the chance to not be critically hit
+            if(m_modResilience)
+            {
+                if(m_modResilience > 100)
+                    pdamage = 0;
+                else
+                    pdamage = uint32(pdamage * (100 - m_modResilience)/100);
+            }
 
             if(pVictim->GetHealth() < pdamage)
                 pdamage = uint32(pVictim->GetHealth());
@@ -1961,6 +1979,7 @@ void Unit::DoAttackDamage (Unit *pVictim, int32 init_damage, uint32 *damage, Cle
     switch (outcome)
     {
         case MELEE_HIT_CRIT:
+        {
             //*hitInfo = 0xEA;
             // 0xEA
             *hitInfo  = HITINFO_CRITICALHIT | HITINFO_NORMALSWING2 | 0x8;
@@ -1990,8 +2009,7 @@ void Unit::DoAttackDamage (Unit *pVictim, int32 init_damage, uint32 *damage, Cle
             }
 
             // Resilience - reduce crit damage by 2x%
-            uint32 resilienceReduction;
-            resilienceReduction = uint32(pVictim->m_modResilience * 2/100 * (*damage));
+            uint32 resilienceReduction = uint32(pVictim->m_modResilience * 2/100 * (*damage));
             *damage -= resilienceReduction;
             cleanDamage->damage += resilienceReduction;
 
@@ -2009,7 +2027,7 @@ void Unit::DoAttackDamage (Unit *pVictim, int32 init_damage, uint32 *damage, Cle
 
             pVictim->HandleEmoteCommand(EMOTE_ONESHOT_WOUNDCRITICAL);
             break;
-
+        }
         case MELEE_HIT_PARRY:
             if(attType == RANGED_ATTACK || unavoidable)     //range attack - no parry
             {
