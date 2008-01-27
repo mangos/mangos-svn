@@ -796,6 +796,13 @@ enum RestType
     REST_TYPE_IN_CITY   = 2
 };
 
+enum DuelCompleteType
+{
+    DUEL_INTERUPTED = 0,
+    DUEL_WON        = 1,
+    DUEL_FLED       = 2
+};
+
 // used at player loading query list prepering, and later result selection
 enum PlayerLoginQueryIndex
 {
@@ -1361,7 +1368,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         DuelInfo *duel;
         void UpdateDuelFlag(time_t currTime);
         void CheckDuelDistance(time_t currTime);
-        void DuelComplete(uint8 type);
+        void DuelComplete(DuelCompleteType type);
 
         bool IsGroupVisibleFor(Player* p) const;
         bool IsInSameGroupWith(Player const* p) const;

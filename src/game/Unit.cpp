@@ -820,7 +820,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
             DEBUG_LOG("Monster kill Monster");
         }
 
-        // last damage from duel opponent or opponent controlled creature?
+        // last damage from non duel opponent or opponent controlled creature
         if(duel_hasEnded)
         {
             assert(pVictim->GetTypeId()==TYPEID_PLAYER);
@@ -841,7 +841,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
             if(he->IsNonMeleeSpellCasted(true))
                 he->InterruptNonMeleeSpells(true);
 
-            he->DuelComplete(0);
+            he->DuelComplete(DUEL_INTERUPTED);
         }
     }
     else                                                    // if (health <= damage)
@@ -970,7 +970,7 @@ void Unit::DealDamage(Unit *pVictim, uint32 damage, CleanDamage const* cleanDama
             he->CombatStop();
 
             he->CastSpell(he, 7267, true);                  // beg
-            he->DuelComplete(1);
+            he->DuelComplete(DUEL_WON);
         }
     }
 
