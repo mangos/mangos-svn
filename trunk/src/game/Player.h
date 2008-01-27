@@ -238,6 +238,7 @@ struct EnchantDuration
 };
 
 typedef std::list<EnchantDuration> EnchantDurationList;
+typedef std::list<Item*> ItemDurationList;
 
 struct LookingForGroupSlot
 {
@@ -1045,6 +1046,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         uint16 GetItemPosByTradeSlot(uint32 slot) const { return tradeItems[slot]; }
 
         void UpdateEnchantTime(uint32 time);
+        void UpdateItemDuration(uint32 time, bool realtimeonly=false);
         void ReducePoisonCharges(uint32 enchantId);
         void AddEnchantmentDurations(Item *item);
         void RemoveEnchantmentDurations(Item *item);
@@ -1052,6 +1054,9 @@ class MANGOS_DLL_SPEC Player : public Unit
         void ApplyEnchantment(Item *item,EnchantmentSlot slot,bool apply, bool apply_dur = true, bool ignore_condition = false);
         void ApplyEnchantment(Item *item,bool apply);
         void SendEnchantmentDurations();
+        void AddItemDurations(Item *item);
+        void RemoveItemDurations(Item *item);
+        void SendItemDurations();
         void LoadCorpse();
         void LoadPet();
         void RemoveAreaAurasFromGroup();
@@ -1942,6 +1947,7 @@ class MANGOS_DLL_SPEC Player : public Unit
         int32 m_totalSpellMod[32][64];                      // 32 = SPELLMOD_COUNT; 64 = size of SpellFamilyFlags
         int32 m_SpellModRemoveCount;
         EnchantDurationList m_enchantDuration;
+        ItemDurationList m_itemDuration;
 
         uint64 m_resurrectGUID;
         float m_resurrectX, m_resurrectY, m_resurrectZ;

@@ -19,6 +19,7 @@
 #include "Common.h"
 #include "Item.h"
 #include "ObjectMgr.h"
+#include "WorldPacket.h"
 #include "Database/DatabaseEnv.h"
 #include "ItemEnchantmentMgr.h"
 
@@ -183,9 +184,26 @@ bool Item::Create( uint32 guidlow, uint32 itemid, Player* owner)
         SetSpellCharges(i,itemProto->Spells[i].SpellCharges);
 
     SetUInt32Value(ITEM_FIELD_FLAGS, itemProto->Flags);
-    //SetUInt32Value(ITEM_FIELD_DURATION, itemProto->Delay); ITEM_FIELD_DURATION is time until item expires, not speed
+    SetUInt32Value(ITEM_FIELD_DURATION, abs(itemProto->Duration)); 
 
     return true;
+}
+
+void Item::UpdateDuration(Player* owner, uint32 diff)
+{
+    if (!GetUInt32Value(ITEM_FIELD_DURATION))
+        return;
+
+    sLog.outDebug("Item::UpdateDuration Item (Entry: %u Duration %u Diff %u)",GetEntry(),GetUInt32Value(ITEM_FIELD_DURATION),diff);
+
+    if (GetUInt32Value(ITEM_FIELD_DURATION)<=diff)
+    {
+        owner->DestroyItem(GetBagSlot(), GetSlot(), true);
+        return;
+    }
+
+    SetUInt32Value(ITEM_FIELD_DURATION, GetUInt32Value(ITEM_FIELD_DURATION) - diff);
+    SetState(ITEM_CHANGED);                                 // save new time in database
 }
 
 void Item::SaveToDB()
@@ -742,3 +760,18 @@ bool Item::IsLimitedToAnotherMapOrZone( uint32 cur_mapId, uint32 cur_zoneId) con
     ItemPrototype const* proto = GetProto();
     return proto && (proto->Map && proto->Map != cur_mapId || proto->Area && proto->Area != cur_zoneId );
 }
+
+// Though the client has the information in the item's data field,
+// we have to send SMSG_ITEM_TIME_UPDATE to display the remaining
+// time.
+void Item::SendTimeUpdate(Player* owner)
+{
+    if (!GetUInt32Value(ITEM_FIELD_DURATION))
+        return;
+
+    WorldPacket data(SMSG_ITEM_TIME_UPDATE, (8+4));
+    data << (uint64)GetGUID();
+    data << (uint32)GetUInt32Value(ITEM_FIELD_DURATION);
+    owner->GetSession()->SendPacket(&data);
+}
+

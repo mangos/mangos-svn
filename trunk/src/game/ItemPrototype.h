@@ -545,6 +545,7 @@ struct ItemPrototype
     uint32 FoodType;
     uint32 MinMoneyLoot;
     uint32 MaxMoneyLoot;
+    int32 Duration;                                         // negative = realtime, positive = ingame time
 };
 
 struct ItemLocale
