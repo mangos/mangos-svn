@@ -165,7 +165,7 @@ void WorldSession::HandleSendMail(WorldPacket & recv_data )
                 pl->SendMailResult(0, 0, MAIL_ERR_INTERNAL_ERROR);
                 return;
             }
-            if (mailItem.item->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_CONJURED))
+            if (mailItem.item->HasFlag(ITEM_FIELD_FLAGS, ITEM_FLAGS_CONJURED) || mailItem.item->GetUInt32Value(ITEM_FIELD_DURATION))
             {
                 pl->SendMailResult(0, 0, MAIL_ERR_INTERNAL_ERROR);
                 return;

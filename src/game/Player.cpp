@@ -782,6 +782,10 @@ void Player::Update( uint32 p_time )
 
     CheckExploreSystem();
 
+    // Update items that have just a limited lifetime
+    if (now>m_Last_tick)
+        UpdateItemDuration(uint32(now- m_Last_tick));
+
     if (!m_timedquests.empty())
     {
         std::set<uint32>::iterator iter = m_timedquests.begin();
@@ -9205,6 +9209,7 @@ Item* Player::StoreItem( uint16 pos, Item *pItem, bool update )
             }
 
             AddEnchantmentDurations(pItem);
+            AddItemDurations(pItem);
         }
         else
         {
@@ -9225,7 +9230,10 @@ Item* Player::StoreItem( uint16 pos, Item *pItem, bool update )
             pItem2->SetState(ITEM_CHANGED, this);
 
             RemoveEnchantmentDurations(pItem);
+            RemoveItemDurations(pItem);
+
             AddEnchantmentDurations(pItem2);
+            // AddItemDurations(pItem2); - pItem2 already have duration listed for player
             return pItem2;
         }
     }
@@ -9398,6 +9406,7 @@ void Player::RemoveItem( uint8 bag, uint8 slot, bool update )
         sLog.outDebug( "STORAGE: RemoveItem bag = %u, slot = %u, item = %u", bag, slot, pItem->GetEntry());
 
         RemoveEnchantmentDurations(pItem);
+        RemoveItemDurations(pItem);
 
         if( bag == INVENTORY_SLOT_BAG_0 )
         {
@@ -9557,6 +9566,7 @@ void Player::DestroyItem( uint8 bag, uint8 slot, bool update )
         ItemPrototype const *pProto = pItem->GetProto();
 
         RemoveEnchantmentDurations(pItem);
+        RemoveItemDurations(pItem);
 
         if( bag == INVENTORY_SLOT_BAG_0 )
         {
@@ -10314,6 +10324,20 @@ void Player::TradeCancel(bool sendback)
     }
 }
 
+void Player::UpdateItemDuration(uint32 time, bool realtimeonly)
+{
+    sLog.outDebug("Player::UpdateItemDuration(%u,%u)", time,realtimeonly);
+
+    for(ItemDurationList::iterator itr = m_itemDuration.begin();itr != m_itemDuration.end(); )
+    {
+        Item* item = *itr;
+        ++itr;                                              // current element can be erased in UpdateDuration
+
+        if (realtimeonly && item->GetProto()->Duration < 0 || !realtimeonly)
+            item->UpdateDuration(this,time);
+    }
+}
+
 void Player::UpdateEnchantTime(uint32 time)
 {
     for(EnchantDurationList::iterator itr = m_enchantDuration.begin(),next;itr != m_enchantDuration.end();itr=next)
@@ -10627,6 +10651,15 @@ void Player::SendEnchantmentDurations()
         GetSession()->SendItemEnchantTimeUpdate(GetGUID(), itr->item->GetGUID(),itr->slot,uint32(itr->leftduration)/1000);
     }
 }
+
+void Player::SendItemDurations()
+{
+    for(ItemDurationList::iterator itr = m_itemDuration.begin();itr != m_itemDuration.end();++itr)
+    {
+        (*itr)->SendTimeUpdate(this);
+    }
+}
+
 
 void Player::ReducePoisonCharges(uint32 enchantId)
 {
@@ -12639,6 +12672,9 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
     _LoadReputation(holder->GetResult(PLAYER_LOGIN_QUERY_LOADREPUTATION));
 
     _LoadInventory(holder->GetResult(PLAYER_LOGIN_QUERY_LOADINVENTORY), time_diff);
+
+    // update items with duration and realtime
+    UpdateItemDuration(time_diff, true);
 
     _LoadActions(holder->GetResult(PLAYER_LOGIN_QUERY_LOADACTIONS));
 
@@ -15730,6 +15766,7 @@ void Player::SendInitialPacketsAfterAddToMap()
     }
 
     SendEnchantmentDurations();                             // must be after add to map
+    SendItemDurations();                                    // must be after add to map
 }
 
 void Player::SendUpdateToOutOfRangeGroupMembers()
@@ -15991,4 +16028,25 @@ void Player::SummonIfPossible()
     m_summon_expire = 0;
 
     TeleportTo(m_summon_mapid, m_summon_x, m_summon_y, m_summon_z,GetOrientation());
+}
+
+void Player::RemoveItemDurations( Item *item )
+{
+    for(ItemDurationList::iterator itr = m_itemDuration.begin();itr != m_itemDuration.end(); ++itr)
+    {
+        if(*itr==item)
+        {
+            m_itemDuration.erase(itr);
+            break;
+        }
+    }
+}
+
+void Player::AddItemDurations( Item *item )
+{
+    if(item->GetUInt32Value(ITEM_FIELD_DURATION))
+    {
+        m_itemDuration.push_back(item);
+        item->SendTimeUpdate(this);
+    }
 }

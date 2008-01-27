@@ -1519,6 +1519,7 @@ CREATE TABLE `item_template` (
   `FoodType` tinyint(3) unsigned NOT NULL default '0',
   `minMoneyLoot` int(11) unsigned NOT NULL default '0',
   `maxMoneyLoot` int(11) unsigned NOT NULL default '0',
+  `Duration` int(11) NOT NULL DEFAULT '0' COMMENT 'Duration in seconds. Negative value means realtime, postive value ingame time',
   PRIMARY KEY  (`entry`),
   KEY `items_index` (`class`)
 ) ENGINE=MyISAM DEFAULT CHARSET=utf8 ROW_FORMAT=FIXED COMMENT='Item System';
