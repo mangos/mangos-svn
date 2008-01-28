@@ -43,7 +43,7 @@ template<class T>
 void
 TargetedMovementGenerator<T>::_setTargetLocation(T &owner)
 {
-    if( !&i_target || !&owner )
+    if( !i_target.isValid() || !&owner )
         return;
 
     if( owner.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNDED) )
@@ -103,10 +103,9 @@ bool
 TargetedMovementGenerator<T>::Update(T &owner, const uint32 & time_diff)
 {
     if(!i_target.isValid())
-    {
         return false;
-    }
-    if( !&owner || !owner.isAlive() || !&i_target )
+
+    if( !&owner || !owner.isAlive())
         return true;
     if( owner.hasUnitState(UNIT_STAT_ROOT | UNIT_STAT_STUNDED | UNIT_STAT_FLEEING) )
         return true;
