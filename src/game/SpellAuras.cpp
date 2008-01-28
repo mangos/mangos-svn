@@ -2040,18 +2040,19 @@ void Aura::HandleModConfuse(bool apply, bool Real)
 
         // Rogue/Blind ability stops attack
         // TODO: does all confuses ?
-        if ( caster && (GetSpellProto()->Mechanic == MECHANIC_CONFUSED) && (GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE))
+        if (caster && GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE &&
+            (GetSpellProto()->Mechanic == MECHANIC_CONFUSED || GetSpellProto()->EffectMechanic[GetEffIndex()] == MECHANIC_CONFUSED))
             caster->AttackStop();
+
         // only at real add aura
         if(Real)
         {
             //This fixes blind so it doesn't continue to attack
             // TODO: may other spells casted confuse aura (but not all) stop attack
-            if( caster && caster->GetTypeId() == TYPEID_PLAYER &&
-                GetSpellProto()->Mechanic == MECHANIC_CONFUSED && GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE )
-            {
+            if(caster && caster->GetTypeId() == TYPEID_PLAYER && 
+                GetSpellProto()->SpellFamilyName == SPELLFAMILY_ROGUE && 
+                (GetSpellProto()->Mechanic == MECHANIC_CONFUSED || GetSpellProto()->EffectMechanic[GetEffIndex()] == MECHANIC_CONFUSED))
                 caster->AttackStop();
-            }
 
             if (m_target->GetTypeId() == TYPEID_UNIT)
                 m_target->GetMotionMaster()->Mutate(new ConfusedMovementGenerator<Creature>(*((Creature*)m_target)));
@@ -2237,9 +2238,8 @@ void Aura::HandleAuraModStun(bool apply, bool Real)
         if (caster)
         {
             // Stop attack if spell has knockout effect
-            if(GetSpellProto()->Mechanic == MECHANIC_KNOCKOUT)
+            if(GetSpellProto()->Mechanic == MECHANIC_KNOCKOUT || GetSpellProto()->EffectMechanic[GetEffIndex()] == MECHANIC_KNOCKOUT)
                 caster->AttackStop();
-
         }
 
         //Save last orientation
@@ -2723,8 +2723,11 @@ void Aura::HandleAuraModIncreaseSwimSpeed(bool apply, bool Real)
 void Aura::HandleModMechanicImmunity(bool apply, bool Real)
 {
     uint32 mechanic = 1 << m_modifier.m_miscvalue;
+    
     //immune movement impairement and loss of control
-    if(GetId()==(uint32)42292)mechanic=0x9967da6;
+    if(GetId()==42292)
+        mechanic=0x9967da6;
+
     if(apply)
     {
         Unit::AuraMap& Auras = m_target->GetAuras();
@@ -2733,16 +2736,19 @@ void Aura::HandleModMechanicImmunity(bool apply, bool Real)
             next = iter;
             next++;
             SpellEntry const *spell = iter->second->GetSpellProto();
-            if( (1<<spell->Mechanic) & mechanic             //check for mechanic mask
-                && !( spell->Attributes & 0x20000000)       //spells unaffected by invulnerability
-                && !iter->second->IsPositive()              //only remove negative spells
+            if (!( spell->Attributes & 0x20000000)	//spells unaffected by invulnerability
+                && !iter->second->IsPositive()		//only remove negative spells
                 && spell->Id != GetId())
             {
-                m_target->RemoveAurasDueToSpell(spell->Id);
-                if(Auras.empty())
-                    break;
-                else
-                    next = Auras.begin();
+                //check for mechanic mask
+                if( ((1<<spell->Mechanic) & mechanic) || ((1<<spell->EffectMechanic[iter->second->GetEffIndex()]) & mechanic))
+                {
+                    m_target->RemoveAurasDueToSpell(spell->Id);
+                    if(Auras.empty())
+                        break;
+                    else
+                        next = Auras.begin();
+                } 
             }
         }
     }

@@ -2499,15 +2499,15 @@ void Spell::HandleEffects(Unit *pUnitTarget,Item *pItemTarget,GameObject *pGOTar
     gameObjTarget = pGOTarget;
 
     uint8 eff = m_spellInfo->Effect[i];
+    uint32 mechanic = m_spellInfo->EffectMechanic[i];
 
     damage = int32(CalculateDamage((uint8)i,unitTarget)*DamageMultiplier);
 
     sLog.outDebug( "Spell: Effect : %u", eff);
-    if(unitTarget && unitTarget->IsImmunedToSpellEffect(eff))
-    {
-        SendCastResult(SPELL_FAILED_IMMUNE);
+
+    //Simply return. Do not display "immune" in red text on client
+    if(unitTarget && unitTarget->IsImmunedToSpellEffect(eff, mechanic))
         return;
-    }
 
     if(eff<TOTAL_SPELL_EFFECTS)
     {

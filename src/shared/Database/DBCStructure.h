@@ -462,7 +462,7 @@ struct SpellEntry
     float     EffectDicePerLevel[3];                        // 73-75
     float     EffectRealPointsPerLevel[3];                  // 76-78
     int32     EffectBasePoints[3];                          // 79-81 (don't must be used in spell/auras explicitly, must be used cached Spell::m_currentBasePoints)
-                                                            // 82-84 not used
+    uint32    EffectMechanic[3];                            // 82-84
     uint32    EffectImplicitTargetA[3];                     // 85-87
     uint32    EffectImplicitTargetB[3];                     // 88-90
     uint32    EffectRadiusIndex[3];                         // 91-93 - spellradius.dbc

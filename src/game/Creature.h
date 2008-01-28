@@ -332,6 +332,7 @@ class MANGOS_DLL_SPEC Creature : public Unit
         bool isCanTrainingAndResetTalentsOf(Player* pPlayer) const;
         bool IsOutOfThreatArea(Unit* pVictim) const;
         bool IsImmunedToSpell(SpellEntry const* spellInfo) const;
+        bool IsImmunedToSpellEffect(uint32 effect, uint32 mechanic) const;
                                                             // redefine Unit::IsImmunedTo
         bool isElite() const
         {

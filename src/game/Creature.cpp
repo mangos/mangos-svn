@@ -1568,6 +1568,31 @@ bool Creature::IsImmunedToSpell(SpellEntry const* spellInfo) const
     return Unit::IsImmunedToSpell(spellInfo);
 }
 
+bool Creature::IsImmunedToSpellEffect(uint32 effect, uint32 mechanic) const
+{
+    if( isWorldBoss() && (
+        (MECHANIC_CHARM         == mechanic) ||
+        (MECHANIC_CONFUSED      == mechanic) ||
+        (MECHANIC_DISTRACT      == mechanic) ||
+        (MECHANIC_FEAR          == mechanic) ||
+        (MECHANIC_ROOT          == mechanic) ||
+        (MECHANIC_SILENCE       == mechanic) ||
+        (MECHANIC_SLEEP         == mechanic) ||
+        (MECHANIC_SNARE         == mechanic) ||
+        (MECHANIC_STUN          == mechanic) ||
+        (MECHANIC_FREEZE        == mechanic) ||
+        (MECHANIC_KNOCKOUT      == mechanic) ||
+        (MECHANIC_POLYMORPH     == mechanic) ||
+        (MECHANIC_BANISH        == mechanic) ||
+        (MECHANIC_SHACKLE       == mechanic) ||
+        (MECHANIC_TURN          == mechanic) ||
+        (MECHANIC_HORROR        == mechanic) ||
+        (MECHANIC_DAZE          == mechanic) ))
+        return true;
+
+    return Unit::IsImmunedToSpellEffect(effect, mechanic);
+}
+
 SpellEntry const *Creature::reachWithSpellAttack(Unit *pVictim)
 {
     if(!pVictim)
