@@ -1145,7 +1145,7 @@ float Map::GetHeight(float x, float y, float z, bool pUseVmaps) const
     {
         if(!pUseVmaps)
             return mapHeight;                               // explicitly use map data (if have) 
-        else if(mapHeight > INVALID_HEIGHT && z < mapHeight)
+        else if(mapHeight > INVALID_HEIGHT && (z < mapHeight || z == MAX_HEIGHT))
             return mapHeight;                               // explicitly use map data if original z < mapHeight but map found (z+2 > mapHeight)
         else
             return VMAP_INVALID_HEIGHT_VALUE;               // we not have any height
