@@ -1868,6 +1868,10 @@ void Player::SetGameMaster(bool on)
         m_GMFlags |= GM_ON;
         setFaction(35);
         SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
+
+        if(sWorld.IsFFAPvPRealm())
+            RemoveFlag(PLAYER_FLAGS,PLAYER_FLAGS_FFA_PVP);
+
         getHostilRefManager().setOnlineOfflineState(false);
         CombatStop();
     }
@@ -1876,6 +1880,10 @@ void Player::SetGameMaster(bool on)
         m_GMFlags &= ~GM_ON;
         setFactionForRace(getRace());
         RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_GM);
+
+        if(sWorld.IsFFAPvPRealm())
+            SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_FFA_PVP);
+
         getHostilRefManager().setOnlineOfflineState(true);
     }
 
@@ -5456,7 +5464,7 @@ bool Player::RewardHonor(Unit *uVictim, uint32 groupsize, float honor)
         {
             Player *pVictim = (Player *)uVictim;
 
-            if( GetTeam() == pVictim->GetTeam() )
+            if( GetTeam() == pVictim->GetTeam() && !sWorld.IsFFAPvPRealm() )
                 return false;
 
             float f = 1;                                    //need for total kills (?? need more info)
@@ -5689,6 +5697,9 @@ void Player::UpdateZone(uint32 newZone)
     if((zone->flags & 0x800) != 0)                          // in sanctuary
     {
         UpdatePvP(false, true);                             // i'm right? need disable PvP in this area...
+
+        if(sWorld.IsFFAPvPRealm())
+            RemoveFlag(PLAYER_FLAGS,PLAYER_FLAGS_FFA_PVP);
     }
 
     if((zone->flags & 0x100) != 0)                          // in capital city
@@ -5696,6 +5707,9 @@ void Player::UpdateZone(uint32 newZone)
         SetFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
         SetRestType(REST_TYPE_IN_CITY);
         InnEnter(time(0),GetMapId(),0,0,0);
+
+        if(sWorld.IsFFAPvPRealm())
+            RemoveFlag(PLAYER_FLAGS,PLAYER_FLAGS_FFA_PVP);
     }
     else                                                    // anywhere else
     {
@@ -5707,12 +5721,19 @@ void Player::UpdateZone(uint32 newZone)
                 {
                     RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
                     SetRestType(REST_TYPE_NO);
+
+                    if(sWorld.IsFFAPvPRealm())
+                        SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_FFA_PVP);
                 }
             }
             else                                            // not in tavern (leave city then)
             {
                 RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_RESTING);
                 SetRestType(REST_TYPE_NO);
+
+                // Set player to FFA PVP when not in rested enviroment.
+                if(sWorld.IsFFAPvPRealm())
+                    SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_FFA_PVP);
             }
         }
     }
@@ -12725,6 +12746,7 @@ bool Player::LoadFromDB( uint32 guid, SqlQueryHolder *holder )
                 break;
         }
     }
+
     //Unmount Player from previous mount, so speed bug with mount is no more...
     if(IsMounted())
     {

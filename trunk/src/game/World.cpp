@@ -573,7 +573,10 @@ void World::SetInitialWorldSettings()
 
     ///- Update the realm entry in the database with the realm type from the config file
     //No SQL injection as values are treated as integers
-    loginDatabase.PExecute("UPDATE `realmlist` SET `icon` = %u WHERE `id` = '%d'", m_configs[CONFIG_GAME_TYPE],realmID);
+
+    // not send custom type REALM_FFA_PVP to realm list
+    uint32 server_type = IsFFAPvPRealm() ? REALM_PVP : m_configs[CONFIG_GAME_TYPE];
+    loginDatabase.PExecute("UPDATE `realmlist` SET `icon` = %u WHERE `id` = '%d'", server_type, realmID);
 
     ///- Remove the bones after a restart
     CharacterDatabase.PExecute("DELETE FROM `corpse` WHERE `bones_flag` = '1'");
