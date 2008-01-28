@@ -967,7 +967,8 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
                                                             // redefined in Creature
         bool IsImmunedToPhysicalDamage() const;
         bool IsImmunedToSpellDamage(SpellEntry const* spellInfo) const;
-        bool IsImmunedToSpellEffect(uint32 effect) const;
+        virtual bool IsImmunedToSpellEffect(uint32 effect, uint32 mechanic) const;
+                                                            // redefined in Creature
 
         uint32 CalcArmorReducedDamage(Unit* pVictim, const uint32 damage);
         void CalcAbsorbResist(Unit *pVictim, SpellSchools school, DamageEffectType damagetype, const uint32 damage, uint32 *absorb, uint32 *resist);

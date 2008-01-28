@@ -1428,8 +1428,12 @@ void Spell::EffectApplyAura(uint32 i)
 
     // Update aura duration based at diminishingMod
     {
-        // Use Spell->Mechanic if possible
-        DiminishingMechanics mech = Unit::Mechanic2DiminishingMechanics(Aur->GetSpellProto()->Mechanic);
+        //Use Effect mechanic
+        DiminishingMechanics mech = Unit::Mechanic2DiminishingMechanics(Aur->GetSpellProto()->EffectMechanic[i]);
+
+        //Use Spell mechanic
+        if (mech == DIMINISHING_NONE)
+            mech = Unit::Mechanic2DiminishingMechanics(Aur->GetSpellProto()->Mechanic);
 
         if(mech == DIMINISHING_NONE)
         {
@@ -4197,7 +4201,7 @@ void Spell::EffectDispelMechanic(uint32 i)
         next = iter;
         next++;
         SpellEntry const *spell = sSpellStore.LookupEntry(iter->second->GetSpellProto()->Id);
-        if(spell->Mechanic == mechanic)
+        if(spell->Mechanic == mechanic || spell->EffectMechanic[iter->second->GetEffIndex()] == mechanic)
         {
             unitTarget->RemoveAurasDueToSpell(spell->Id);
             if(Auras.empty())

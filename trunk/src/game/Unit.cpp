@@ -3738,9 +3738,13 @@ void Unit::RemoveAura(AuraMap::iterator &i, bool onDeath)
     Aura* Aur = i->second;
 
     DiminishingMechanics mech = DIMINISHING_NONE;
-    if(Aur->GetSpellProto()->Mechanic)
+    if(Aur->GetSpellProto()->Mechanic || Aur->GetSpellProto()->EffectMechanic[Aur->GetEffIndex()])
     {
-        mech = Unit::Mechanic2DiminishingMechanics(Aur->GetSpellProto()->Mechanic);
+        mech = Unit::Mechanic2DiminishingMechanics(Aur->GetSpellProto()->EffectMechanic[Aur->GetEffIndex()]);
+
+        if (mech == DIMINISHING_NONE)
+            mech = Unit::Mechanic2DiminishingMechanics(Aur->GetSpellProto()->Mechanic);
+
         if(mech == DIMINISHING_MECHANIC_STUN || GetTypeId() == TYPEID_PLAYER && mech != DIMINISHING_NONE)
             UpdateDiminishingTime(mech);
     }
@@ -5824,12 +5828,17 @@ bool Unit::IsImmunedToSpell(SpellEntry const* spellInfo) const
     return false;
 }
 
-bool Unit::IsImmunedToSpellEffect(uint32 effect) const
+bool Unit::IsImmunedToSpellEffect(uint32 effect, uint32 mechanic) const
 {
     //If m_immuneToEffect type contain this effect type, IMMUNE effect.
     SpellImmuneList const& effectList = m_spellImmune[IMMUNITY_EFFECT];
     for (SpellImmuneList::const_iterator itr = effectList.begin(); itr != effectList.end(); ++itr)
         if(itr->type == effect)
+            return true;
+
+    SpellImmuneList const& mechanicList = m_spellImmune[IMMUNITY_MECHANIC];
+    for (SpellImmuneList::const_iterator itr = effectList.begin(); itr != effectList.end(); ++itr)
+        if(itr->type == mechanic)
             return true;
 
     return false;
