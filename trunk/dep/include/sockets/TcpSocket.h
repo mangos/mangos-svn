@@ -30,15 +30,16 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef _SOCKETS_TcpSocket_H
 #define _SOCKETS_TcpSocket_H
 #include "sockets-config.h"
-#include "Socket.h"
-#include "CircularBuffer.h"
+#include "StreamSocket.h"
 #ifdef HAVE_OPENSSL
 #include <openssl/ssl.h>
 #include "SSLInitializer.h"
 #endif
 
+#include <string.h>
 
 #define TCP_BUFSIZE_READ 16400
+#define TCP_OUTPUT_CAPACITY 1024000
 
 
 #ifdef SOCKETS_NAMESPACE
@@ -50,27 +51,84 @@ class SocketAddress;
 
 /** Socket implementation for TCP. 
 	\ingroup basic */
-class TcpSocket : public Socket
+class TcpSocket : public StreamSocket
 {
-	/** Dynamic output buffer storage struct. 
+	/** \defgroup internal Internal utility */
+protected:
+	/** Buffer class containing one read/write circular buffer. 
 		\ingroup internal */
-	struct MES {
-		MES( const char *buf_in,size_t len_in)
-		:buf(new  char[len_in])
-		,len(len_in)
-		,ptr(0)
-		{
-			memcpy(buf,buf_in,len);
-		}
-		~MES() { delete[] buf; }
-		size_t left() { return len - ptr; }
-		 char *curbuf() { return buf + ptr; }
-		 char *buf;
-		size_t len;
-		size_t ptr;
+	class CircularBuffer
+	{
+	public:
+		CircularBuffer(size_t size);
+		~CircularBuffer();
+
+		/** append l bytes from p to buffer */
+		bool Write(const char *p,size_t l);
+		/** copy l bytes from buffer to dest */
+		bool Read(char *dest,size_t l);
+        /** copy l bytes from buffer to dest, dont touch buffer pointers */
+        bool SoftRead(char *dest, size_t l);
+		/** skip l bytes from buffer */
+		bool Remove(size_t l);
+		/** read l bytes from buffer, returns as string. */
+		std::string ReadString(size_t l);
+
+		/** total buffer length */
+		size_t GetLength();
+		/** pointer to circular buffer beginning */
+		const char *GetStart();
+		/** return number of bytes from circular buffer beginning to buffer physical end */
+		size_t GetL();
+		/** return free space in buffer, number of bytes until buffer overrun */
+		size_t Space();
+
+		/** return total number of bytes written to this buffer, ever */
+		unsigned long ByteCounter(bool clear = false);
+
+	private:
+		CircularBuffer(const CircularBuffer& s) {}
+		CircularBuffer& operator=(const CircularBuffer& ) { return *this; }
+		char *buf;
+		size_t m_max;
+		size_t m_q;
+		size_t m_b;
+		size_t m_t;
+		unsigned long m_count;
 	};
-	/** Dynamic output buffer list. */
-	typedef std::list<MES *> ucharp_v;
+	/** Output buffer struct.
+		\ingroup internal */
+	struct OUTPUT {
+		OUTPUT() : _b(0), _t(0), _q(0) {}
+		OUTPUT(const char *buf, size_t len) : _b(0), _t(len), _q(len) {
+			memcpy(_buf, buf, len);
+		}
+		size_t Space() {
+			return TCP_OUTPUT_CAPACITY - _t;
+		}
+		void Add(const char *buf, size_t len) {
+			memcpy(_buf + _t, buf, len);
+			_t += len;
+			_q += len;
+		}
+		size_t Remove(size_t len) {
+			_b += len;
+			_q -= len;
+			return _q;
+		}
+		const char *Buf() {
+			return _buf + _b;
+		}
+		size_t Len() {
+			return _q;
+		}
+		size_t _b;
+		size_t _t;
+		size_t _q;
+		char _buf[TCP_OUTPUT_CAPACITY];
+	};
+	typedef std::list<OUTPUT *> output_l;
+
 public:
 	/** Constructor with standard values on input/output buffers. */
 	TcpSocket(ISocketHandler& );
@@ -105,6 +163,14 @@ public:
 		\param host Hostname
 		\param port Port number */
 	bool Open(const std::string &host,port_t port);
+
+	/** Connect timeout callback. */
+	void OnConnectTimeout();
+#ifdef _WIN32
+	/** Connection failed reported as exception on win32 */
+	void OnException();
+#endif
+
 	/** Close file descriptor - internal use only. 
 		\sa SetCloseAndDelete */
 	int Close();
@@ -125,6 +191,11 @@ public:
 		\param len Length of the data */
 	virtual void OnRawData(const char *buf,size_t len);
 
+	/** Called when output buffer has been sent.
+	    Note: Will only be called IF the output buffer has been used.
+	    Send's that was successful without needing the output buffer
+	    will not generate a call to this method. */
+	virtual void OnWriteComplete();
 	/** Number of bytes in input buffer. */
 	size_t GetInputLength();
 	/** Number of bytes in output buffer. */
@@ -183,9 +254,21 @@ public:
 
 	void SetLineProtocol(bool = true);
 
+	// TCP options
+	bool SetTcpNodelay(bool = true);
+
+	virtual int Protocol();
+
+	/** Trigger limit for callback OnTransferLimit. */
+	void SetTransferLimit(size_t sz);
+	/** This callback fires when the output buffer drops below the value
+	    set by SetTransferLimit. Default: 0 (disabled). */
+	virtual void OnTransferLimit();
+
 protected:
-	TcpSocket(const TcpSocket& s);
+	TcpSocket(const TcpSocket& );
 	void OnRead();
+	void OnRead( char *buf, size_t n );
 	void OnWrite();
 #ifdef HAVE_OPENSSL
 	/** SSL; Initialize ssl context for a client socket. 
@@ -196,6 +279,12 @@ protected:
 		\param password Password for private key 
 		\param meth_in SSL method */
 	void InitializeContext(const std::string& context, const std::string& keyfile, const std::string& password, SSL_METHOD *meth_in = NULL);
+	/** SSL; Initialize ssl context for a server socket. 
+		\param certfile Separate certificate file
+		\param keyfile Combined private key/certificate file 
+		\param password Password for private key 
+		\param meth_in SSL method */
+	void InitializeContext(const std::string& context, const std::string& certfile, const std::string& keyfile, const std::string& password, SSL_METHOD *meth_in = NULL);
 	/** SSL; Password callback method. */
 static	int SSL_password_cb(char *buf,int num,int rwflag,void *userdata);
 	/** SSL; Get pointer to ssl context structure. */
@@ -209,20 +298,29 @@ static	int SSL_password_cb(char *buf,int num,int rwflag,void *userdata);
 #endif
 
 	CircularBuffer ibuf; ///< Circular input buffer
-	CircularBuffer obuf; ///< Circular output buffer
 
 private:
 	TcpSocket& operator=(const TcpSocket& ) { return *this; }
+
+	/** the actual send() */
+	int TryWrite(const char *buf, size_t len);
+	/** add data to output buffer top */
+	void Buffer(const char *buf, size_t len);
+
+	//
 	bool m_b_input_buffer_disabled;
 	uint64_t m_bytes_sent;
 	uint64_t m_bytes_received;
 	bool m_skip_c; ///< Skip second char of CRLF or LFCR sequence in OnRead
 	char m_c; ///< First char in CRLF or LFCR sequence
 	std::string m_line; ///< Current line in line protocol mode
-	ucharp_v m_mes; ///< overflow protection, dynamic output buffer
 #ifdef SOCKETS_DYNAMIC_TEMP
 	char *m_buf; ///< temporary read buffer
 #endif
+	output_l m_obuf; ///< output buffer
+	OUTPUT *m_obuf_top; ///< output buffer on top
+	size_t m_transfer_limit;
+	size_t m_output_length;
 
 #ifdef HAVE_OPENSSL
 static	SSLInitializer m_ssl_init;
@@ -257,3 +355,4 @@ static	SSLInitializer m_ssl_init;
 #endif
 
 #endif // _SOCKETS_TcpSocket_H
+

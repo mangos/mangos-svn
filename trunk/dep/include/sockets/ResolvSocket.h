@@ -32,17 +32,30 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "sockets-config.h"
 #ifdef ENABLE_RESOLVER
 #include "TcpSocket.h"
+#include <map>
 
 #ifdef SOCKETS_NAMESPACE
 namespace SOCKETS_NAMESPACE {
 #endif
 
+class Mutex;
+
 /** Async DNS resolver socket. 
 	\ingroup async */
 class ResolvSocket : public TcpSocket
 {
+	typedef std::map<std::string, /* type */
+			std::map<std::string, std::string> > cache_t; /* host, result */
+	typedef std::map<std::string, /* type */
+			std::map<std::string, time_t> > timeout_t; /* host, time */
+
 public:
-	ResolvSocket(ISocketHandler&,Socket *parent = NULL);
+	ResolvSocket(ISocketHandler&);
+	ResolvSocket(ISocketHandler&, Socket *parent, const std::string& host, port_t port, bool ipv6 = false);
+	ResolvSocket(ISocketHandler&, Socket *parent, ipaddr_t);
+#ifdef ENABLE_IPV6
+	ResolvSocket(ISocketHandler&, Socket *parent, in6_addr&);
+#endif
 	~ResolvSocket();
 
 	void OnAccept() { m_bServer = true; }
@@ -51,12 +64,8 @@ public:
 	void OnDelete();
 
 	void SetId(int x) { m_resolv_id = x; }
-	void SetHost(const std::string& x) { m_resolv_host = x; }
-	void SetAddress(ipaddr_t x) { m_resolv_address = x; }
-#ifdef ENABLE_IPV6
-	void SetAddress(in6_addr& a) { m_resolv_address6 = a; m_resolve_ipv6 = true; }
-#endif
-	void SetPort(port_t x) { m_resolv_port = x; }
+	int GetId() { return m_resolv_id; }
+
 	void OnConnect();
 
 #ifdef ENABLE_IPV6
@@ -79,6 +88,10 @@ private:
 	bool m_resolve_ipv6;
 	in6_addr m_resolv_address6;
 #endif
+	static cache_t m_cache;
+	static timeout_t m_cache_to;
+	static Mutex m_cache_mutex;
+	bool m_cached;
 };
 
 
@@ -90,3 +103,4 @@ private:
 
 #endif // ENABLE_RESOLVER
 #endif // _SOCKETS_ResolvSocket_H
+

@@ -54,3 +54,4 @@ public:
 #endif
 
 #endif // _SOCKETS_StdoutLog_H
+

@@ -1,5 +1,5 @@
-/** \file ISocketHandler.h
- **	\date  2004-02-13
+/** \file File.h
+ **	\date  2005-04-25
  **	\author grymse@alhem.net
 **/
 /*
@@ -27,83 +27,58 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-#include "ISocketHandler.h"
+#ifndef _SOCKETS_File_H
+#define _SOCKETS_File_H
 
+#include "sockets-config.h"
+#include "IFile.h"
+#include <stdio.h>
 
 #ifdef SOCKETS_NAMESPACE
 namespace SOCKETS_NAMESPACE {
 #endif
 
 
-#ifdef _DEBUG
-#define DEB(x) x
-#else
-#define DEB(x) 
-#endif
-
-
-ISocketHandler::ISocketHandler(StdLog *log)
-: m_stdlog(log)
-#ifdef ENABLE_DETACH
-, m_slave(false)
-#endif
-, m_mutex(m_mutex)
-, m_b_use_mutex(false)
+/** IFile implementation of a disk file. 
+	\ingroup file */
+class File : public IFile
 {
-}
+public:
+	File();
+	~File();
+
+	bool fopen(const std::string&, const std::string&);
+	void fclose();
+
+	size_t fread(char *, size_t, size_t) const;
+	size_t fwrite(const char *, size_t, size_t);
+
+	char *fgets(char *, int) const;
+	void fprintf(const char *format, ...);
+
+	off_t size() const;
+	bool eof() const;
+
+	void reset_read() const;
+	void reset_write();
+
+private:
+	File(const File& ) {} // copy constructor
+	File& operator=(const File& ) { return *this; } // assignment operator
+
+	std::string m_path;
+	std::string m_mode;
+	FILE *m_fil;
+	mutable long m_rptr;
+	long m_wptr;
+};
 
 
-ISocketHandler::ISocketHandler(Mutex& mutex,StdLog *log)
-: m_stdlog(log)
-#ifdef ENABLE_DETACH
-, m_slave(false)
-#endif
-, m_mutex(mutex)
-, m_b_use_mutex(true)
-{
-}
-
-
-ISocketHandler::~ISocketHandler()
-{
-}
-
-
-Mutex& ISocketHandler::GetMutex() const
-{
-	return m_mutex; 
-}
-
-
-#ifdef ENABLE_DETACH
-void ISocketHandler::SetSlave(bool x)
-{
-	m_slave = x;
-}
-
-
-bool ISocketHandler::IsSlave()
-{
-	return m_slave;
-}
-#endif
-
-
-void ISocketHandler::RegStdLog(StdLog *log)
-{
-	m_stdlog = log;
-}
-
-
-void ISocketHandler::LogError(Socket *p,const std::string& user_text,int err,const std::string& sys_err,loglevel_t t)
-{
-	if (m_stdlog)
-	{
-		m_stdlog -> error(this, p, user_text, err, sys_err, t);
-	}
-}
 
 
 #ifdef SOCKETS_NAMESPACE
-} // namespace SOCKETS_NAMESPACE {
+}
 #endif
+
+#endif // _SOCKETS_File_H
+

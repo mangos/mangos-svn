@@ -35,6 +35,7 @@
 #include "WorldLog.h"
 #include "AddonHandler.h"
 #include <cwctype>                                          // needs for towupper
+#include "sockets/Utility.h"
 
 // GCC have alternative #pragma pack(N) syntax and old gcc version not support pack(push,N), also any gcc version not support it at some platform
 #if defined( __GNUC__ )

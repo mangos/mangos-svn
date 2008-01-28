@@ -28,7 +28,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #ifdef _WIN32
+#ifdef _MSC_VER
 #pragma warning(disable:4786)
+#endif
 #include <stdlib.h>
 #else
 #include <errno.h>
@@ -41,13 +43,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include <openssl/rand.h>
 #include <openssl/err.h>
 #endif
+#include <map>
 
 #include "TcpSocket.h"
 #include "Utility.h"
 #include "Ipv4Address.h"
 #include "Ipv6Address.h"
 #include "Mutex.h"
-#include "Uid.h"
 #include "IFile.h"
 
 #ifdef SOCKETS_NAMESPACE
@@ -69,12 +71,11 @@ SSLInitializer TcpSocket::m_ssl_init;
 
 
 // thanks, q
-#ifdef _WIN32
+#ifdef _MSC_VER
 #pragma warning(disable:4355)
 #endif
-TcpSocket::TcpSocket(ISocketHandler& h) : Socket(h)
-,ibuf(*this, TCP_BUFSIZE_READ)
-,obuf(*this, 32768)
+TcpSocket::TcpSocket(ISocketHandler& h) : StreamSocket(h)
+,ibuf(TCP_BUFSIZE_READ)
 ,m_b_input_buffer_disabled(false)
 ,m_bytes_sent(0)
 ,m_bytes_received(0)
@@ -82,6 +83,9 @@ TcpSocket::TcpSocket(ISocketHandler& h) : Socket(h)
 #ifdef SOCKETS_DYNAMIC_TEMP
 ,m_buf(new char[TCP_BUFSIZE_READ + 1])
 #endif
+,m_obuf_top(NULL)
+,m_transfer_limit(0)
+,m_output_length(0)
 #ifdef HAVE_OPENSSL
 ,m_ssl_ctx(NULL)
 ,m_ssl(NULL)
@@ -99,17 +103,16 @@ TcpSocket::TcpSocket(ISocketHandler& h) : Socket(h)
 #endif
 {
 }
-#ifdef _WIN32
+#ifdef _MSC_VER
 #pragma warning(default:4355)
 #endif
 
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #pragma warning(disable:4355)
 #endif
-TcpSocket::TcpSocket(ISocketHandler& h,size_t isize,size_t osize) : Socket(h)
-,ibuf(*this, isize)
-,obuf(*this, osize)
+TcpSocket::TcpSocket(ISocketHandler& h,size_t isize,size_t osize) : StreamSocket(h)
+,ibuf(isize)
 ,m_b_input_buffer_disabled(false)
 ,m_bytes_sent(0)
 ,m_bytes_received(0)
@@ -117,6 +120,9 @@ TcpSocket::TcpSocket(ISocketHandler& h,size_t isize,size_t osize) : Socket(h)
 #ifdef SOCKETS_DYNAMIC_TEMP
 ,m_buf(new char[TCP_BUFSIZE_READ + 1])
 #endif
+,m_obuf_top(NULL)
+,m_transfer_limit(0)
+,m_output_length(0)
 #ifdef HAVE_OPENSSL
 ,m_ssl_ctx(NULL)
 ,m_ssl(NULL)
@@ -134,26 +140,17 @@ TcpSocket::TcpSocket(ISocketHandler& h,size_t isize,size_t osize) : Socket(h)
 #endif
 {
 }
-#ifdef _WIN32
+#ifdef _MSC_VER
 #pragma warning(default:4355)
 #endif
 
 
 TcpSocket::~TcpSocket()
 {
-	if (!m_mes.empty())
-	{
-		Handler().LogError(this, "TcpSocket destructor", 0, "Output buffer not empty", LOG_LEVEL_WARNING);
-	}
-	while (!m_mes.empty())
-	{
-		MES *p = m_mes.front();
-		m_mes.pop_front();
-		delete p;
-	}
 #ifdef SOCKETS_DYNAMIC_TEMP
 	delete[] m_buf;
 #endif
+	// %! empty m_obuf
 #ifdef HAVE_OPENSSL
 	if (m_ssl)
 	{
@@ -322,7 +319,7 @@ bool TcpSocket::Open(const std::string &host,port_t port)
 	if (IsIpv6())
 	{
 #ifdef ENABLE_RESOLVER
-		if (!Handler().ResolvedEnabled() || Utility::isipv4(host) )
+		if (!Handler().ResolverEnabled() || Utility::isipv6(host) )
 		{
 #endif
 			in6_addr a;
@@ -367,6 +364,7 @@ bool TcpSocket::Open(const std::string &host,port_t port)
 #ifdef ENABLE_RESOLVER
 void TcpSocket::OnResolved(int id,ipaddr_t a,port_t port)
 {
+DEB(	fprintf(stderr, "TcpSocket::OnResolved id %d addr %x port %d\n", id, a, port);)
 	if (id == m_resolver_id)
 	{
 		if (a && port)
@@ -448,6 +446,7 @@ void TcpSocket::OnRead()
 				break;
 			case SSL_ERROR_ZERO_RETURN:
 DEB(				fprintf(stderr, "SSL_read() returns zero - closing socket\n");)
+				OnDisconnect();
 				SetCloseAndDelete(true);
 				SetFlushBeforeClose(false);
 #ifdef ENABLE_POOL
@@ -456,6 +455,7 @@ DEB(				fprintf(stderr, "SSL_read() returns zero - closing socket\n");)
 				break;
 			default:
 DEB(				fprintf(stderr, "SSL read problem, errcode = %d\n",n);)
+				OnDisconnect();
 				SetCloseAndDelete(true);
 				SetFlushBeforeClose(false);
 #ifdef ENABLE_POOL
@@ -467,7 +467,7 @@ DEB(				fprintf(stderr, "SSL read problem, errcode = %d\n",n);)
 		else
 		if (!n)
 		{
-			Handler().LogError(this, "SSL_read", 0, "read returns 0", LOG_LEVEL_FATAL);
+			OnDisconnect();
 			SetCloseAndDelete(true);
 			SetFlushBeforeClose(false);
 #ifdef ENABLE_POOL
@@ -501,6 +501,7 @@ DEB(				fprintf(stderr, "SSL read problem, errcode = %d\n",n);)
 		if (n == -1)
 		{
 			Handler().LogError(this, "read", Errno, StrError(Errno), LOG_LEVEL_FATAL);
+			OnDisconnect();
 			SetCloseAndDelete(true);
 			SetFlushBeforeClose(false);
 #ifdef ENABLE_POOL
@@ -511,6 +512,7 @@ DEB(				fprintf(stderr, "SSL read problem, errcode = %d\n",n);)
 		else
 		if (!n)
 		{
+			OnDisconnect();
 			SetCloseAndDelete(true);
 			SetFlushBeforeClose(false);
 #ifdef ENABLE_POOL
@@ -537,20 +539,26 @@ DEB(				fprintf(stderr, "SSL read problem, errcode = %d\n",n);)
 			Handler().LogError(this, "OnRead", n, "abnormal value from recv", LOG_LEVEL_ERROR);
 		}
 	}
+	//
+	OnRead( buf, n );
+}
+
+
+void TcpSocket::OnRead( char *buf, size_t n )
+{
 	// unbuffered
 	if (n > 0 && n <= TCP_BUFSIZE_READ)
 	{
 		if (LineProtocol())
 		{
-			size_t x = 0;
-
 			buf[n] = 0;
-			int i = 0;
+			size_t i = 0;
 			if (m_skip_c && (buf[i] == 13 || buf[i] == 10) && buf[i] != m_c)
 			{
 				m_skip_c = false;
 				i++;
 			}
+			size_t x = i;
 			for (; i < n && LineProtocol(); i++)
 			{
 				while ((buf[i] == 13 || buf[i] == 10) && LineProtocol())
@@ -614,19 +622,33 @@ DEB(				fprintf(stderr, "SSL read problem, errcode = %d\n",n);)
 }
 
 
+void TcpSocket::OnWriteComplete()
+{
+}
+
+
 void TcpSocket::OnWrite()
 {
 	if (Connecting())
 	{
-		if (CheckConnect())
+		int err = SoError();
+
+		// don't reset connecting flag on error here, we want the OnConnectFailed timeout later on
+		if (!err) // ok
 		{
+			Set(!IsDisableRead(), false);
+			SetConnecting(false);
 			SetCallOnConnect();
 			return;
 		}
+		Handler().LogError(this, "tcp: connect failed", err, StrError(err), LOG_LEVEL_FATAL);
+		Set(false, false); // no more monitoring because connection failed
+
 		// failed
 #ifdef ENABLE_SOCKS4
 		if (Socks4())
 		{
+			// %! leave 'Connecting' flag set?
 			OnSocks4ConnectFailed();
 			return;
 		}
@@ -646,15 +668,71 @@ void TcpSocket::OnWrite()
 		OnConnectFailed();
 		return;
 	}
+	// try send next block in buffer
+	// if full block is sent, repeat
+	// if all blocks are sent, reset m_wfds
+
+	bool repeat = false;
+	size_t sz = m_transfer_limit ? GetOutputLength() : 0;
+	do
+	{
+		output_l::iterator it = m_obuf.begin();
+		OUTPUT *p = *it;
+		repeat = false;
+		int n = TryWrite(p -> Buf(), p -> Len());
+		if (n > 0)
+		{
+			size_t left = p -> Remove(n);
+			m_output_length -= n;
+			if (!left)
+			{
+				delete p;
+				m_obuf.erase(it);
+				if (!m_obuf.size())
+				{
+					m_obuf_top = NULL;
+					OnWriteComplete();
+				}
+				else
+				{
+					repeat = true;
+				}
+			}
+		}
+	} while (repeat);
+
+	if (m_transfer_limit && sz > m_transfer_limit && GetOutputLength() < m_transfer_limit)
+	{
+		OnTransferLimit();
+	}
+
+	// check output buffer set, set/reset m_wfds accordingly
+	{
+		bool br;
+		bool bw;
+		bool bx;
+		Handler().Get(GetSocket(), br, bw, bx);
+		if (m_obuf.size())
+			Set(br, true);
+		else
+			Set(br, false);
+	}
+}
+
+
+int TcpSocket::TryWrite(const char *buf, size_t len)
+{
+	int n = 0;
 #ifdef HAVE_OPENSSL
 	if (IsSSL())
 	{
-		int n = SSL_write(m_ssl,obuf.GetStart(),(int)obuf.GetLength());
-		int errnr = n < 1 ? SSL_get_error(m_ssl, n) : 0;
+		n = SSL_write(m_ssl, buf, (int)len);
 		if (n == -1)
 		{
+			int errnr = SSL_get_error(m_ssl, n);
 			if ( errnr != SSL_ERROR_WANT_READ && errnr != SSL_ERROR_WANT_WRITE )
 			{
+				OnDisconnect();
 				SetCloseAndDelete(true);
 				SetFlushBeforeClose(false);
 #ifdef ENABLE_POOL
@@ -663,126 +741,88 @@ void TcpSocket::OnWrite()
 				const char *errbuf = ERR_error_string(errnr, NULL);
 				Handler().LogError(this, "OnWrite/SSL_write", errnr, errbuf, LOG_LEVEL_FATAL);
 			}
+			return 0;
 		}
 		else
 		if (!n)
 		{
+			OnDisconnect();
 			SetCloseAndDelete(true);
 			SetFlushBeforeClose(false);
 #ifdef ENABLE_POOL
 			SetLost();
 #endif
-DEB(			const char *errbuf = ERR_error_string(errnr, NULL);
+DEB(			int errnr = SSL_get_error(m_ssl, n);
+			const char *errbuf = ERR_error_string(errnr, NULL);
 			fprintf(stderr, "SSL_write() returns 0: %d : %s\n",errnr, errbuf);)
 		}
-		else
-		{
-			m_bytes_sent += n;
-			if (GetTrafficMonitor())
-			{
-				GetTrafficMonitor() -> fwrite(obuf.GetStart(), 1, n);
-			}
-			obuf.Remove(n);
-			// move data from m_mes to immediate output buffer
-			while (obuf.Space() && !m_mes.empty())
-			{
-				ucharp_v::iterator it = m_mes.begin();
-				MES *p = *it;
-				if (obuf.Space() > p -> left())
-				{
-					obuf.Write(p -> curbuf(),p -> left());
-					delete p;
-					m_mes.erase(it);
-				}
-				else
-				{
-					size_t sz = obuf.Space();
-					obuf.Write(p -> curbuf(),sz);
-					p -> ptr += sz;
-				}
-			}
-		}
-		//
-		{
-			bool br;
-			bool bw;
-			bool bx;
-			Handler().Get(GetSocket(), br, bw, bx);
-			if (obuf.GetLength() || !m_mes.empty())
-				Set(br, true);
-			else
-				Set(br, false);
-		}
-		return;
 	}
+	else
 #endif // HAVE_OPENSSL
-	int n = send(GetSocket(),obuf.GetStart(),(int)obuf.GetLength(),MSG_NOSIGNAL);
-/*
-When writing onto a connection-oriented socket that has been shut down (by the  local
-or the remote end) SIGPIPE is sent to the writing process and EPIPE is returned.  The
-signal is not sent when the write call specified the MSG_NOSIGNAL flag.
-*/
-	if (n == -1)
 	{
-	// normal error codes:
-	// WSAEWOULDBLOCK
-	//       EAGAIN or EWOULDBLOCK
+		n = send(GetSocket(), buf, (int)len, MSG_NOSIGNAL);
+		if (n == -1)
+		{
+		// normal error codes:
+		// WSAEWOULDBLOCK
+		//       EAGAIN or EWOULDBLOCK
 #ifdef _WIN32
-		if (Errno != WSAEWOULDBLOCK)
+			if (Errno != WSAEWOULDBLOCK)
 #else
-		if (Errno != EWOULDBLOCK)
+			if (Errno != EWOULDBLOCK)
 #endif
-		{	
-			Handler().LogError(this, "send", Errno, StrError(Errno), LOG_LEVEL_FATAL);
-			SetCloseAndDelete(true);
-			SetFlushBeforeClose(false);
+			{	
+				Handler().LogError(this, "send", Errno, StrError(Errno), LOG_LEVEL_FATAL);
+				OnDisconnect();
+				SetCloseAndDelete(true);
+				SetFlushBeforeClose(false);
 #ifdef ENABLE_POOL
-			SetLost();
+				SetLost();
 #endif
+			}
+			return 0;
 		}
 	}
-	else
-	if (!n)
-	{
-//		SetCloseAndDelete(true);
-	}
-	else
+	if (n > 0)
 	{
 		m_bytes_sent += n;
 		if (GetTrafficMonitor())
 		{
-			GetTrafficMonitor() -> fwrite(obuf.GetStart(), 1, n);
+			GetTrafficMonitor() -> fwrite(buf, 1, n);
 		}
-		obuf.Remove(n);
-		// move data from m_mes to immediate output buffer
-		while (obuf.Space() && !m_mes.empty())
+	}
+	return n;
+}
+
+
+void TcpSocket::Buffer(const char *buf, size_t len)
+{
+	size_t ptr = 0;
+	m_output_length += len;
+	while (ptr < len)
+	{
+		// buf/len => pbuf/sz
+		size_t space = 0;
+		if (m_obuf_top && (space = m_obuf_top -> Space()) > 0)
 		{
-			ucharp_v::iterator it = m_mes.begin();
-			MES *p = *it;
-			if (obuf.Space() > p -> left())
+			const char *pbuf = buf + ptr;
+			size_t sz = len - ptr;
+			if (space >= sz)
 			{
-				obuf.Write(p -> curbuf(),p -> left());
-				delete p;
-				m_mes.erase(it);
+				m_obuf_top -> Add(pbuf, sz);
+				ptr += sz;
 			}
 			else
 			{
-				size_t sz = obuf.Space();
-				obuf.Write(p -> curbuf(),sz);
-				p -> ptr += sz;
+				m_obuf_top -> Add(pbuf, space);
+				ptr += space;
 			}
 		}
-	}
-	// set write flag if data still left to write
-	{
-		bool br;
-		bool bw;
-		bool bx;
-		Handler().Get(GetSocket(), br, bw, bx);
-		if (obuf.GetLength() || !m_mes.empty())
-			Set(br, true);
 		else
-			Set(br, false);
+		{
+			m_obuf_top = new OUTPUT;
+			m_obuf.push_back( m_obuf_top );
+		}
 	}
 }
 
@@ -795,7 +835,6 @@ void TcpSocket::Send(const std::string &str,int i)
 
 void TcpSocket::SendBuf(const char *buf,size_t len,int)
 {
-	size_t n = obuf.GetLength();
 	if (!Ready() && !Connecting())
 	{
 		Handler().LogError(this, "SendBuf", -1, "Attempt to write to a non-ready socket" ); // warning
@@ -810,36 +849,37 @@ void TcpSocket::SendBuf(const char *buf,size_t len,int)
 	if (!IsConnected())
 	{
 		Handler().LogError(this, "SendBuf", -1, "Attempt to write to a non-connected socket, will be sent on connect" ); // warning
+		Buffer(buf, len);
+		return;
 	}
-	//
-	size_t ptr = 0;
-	if (m_mes.empty() && obuf.Space())
+	if (m_obuf_top)
 	{
-		if (len <= obuf.Space()) // entire block of data fits
-		{
-			ptr = len;
-			obuf.Write(buf, len);
-		}
-		else // a part of the block fits
-		{
-			ptr = obuf.Space();
-			obuf.Write(buf, ptr);
-		}
+		Buffer(buf, len);
+		return;
 	}
-	/// \todo check good value for max blocksize
-#define MAX_BLOCKSIZE 1024000
-	while (ptr < len) // data still left to buffer
+	int n = TryWrite(buf, len);
+	if (n >= 0 && n < (int)len)
 	{
-		size_t sz = len - ptr; // size of data block that has not been buffered
-		if (sz > MAX_BLOCKSIZE)
-			sz = MAX_BLOCKSIZE;
-		m_mes.push_back(new MES(buf + ptr, sz));
-		ptr += sz;
+		Buffer(buf + n, len - n);
 	}
-	// kick a real write
-	if (!n && IsConnected())
+	// if ( data in buffer || !IsConnected )
+	// {
+	//   add to buffer
+	// }
+	// else
+	// try_send
+	// if any data is unsent, buffer it and set m_wfds
+
+	// check output buffer set, set/reset m_wfds accordingly
 	{
-		OnWrite();
+		bool br;
+		bool bw;
+		bool bx;
+		Handler().Get(GetSocket(), br, bw, bx);
+		if (m_obuf.size())
+			Set(br, true);
+		else
+			Set(br, false);
 	}
 }
 
@@ -849,16 +889,15 @@ void TcpSocket::OnLine(const std::string& )
 }
 
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #pragma warning(disable:4355)
 #endif
 TcpSocket::TcpSocket(const TcpSocket& s)
-:Socket(s)
-,ibuf(*this,0)
-,obuf(*this,0)
+:StreamSocket(s)
+,ibuf(0)
 {
 }
-#ifdef _WIN32
+#ifdef _MSC_VER
 #pragma warning(default:4355)
 #endif
 
@@ -1021,7 +1060,7 @@ DEB(			fprintf(stderr, " m_sbio is NULL\n");)
 			return;
 		}
 		SSL_set_bio(m_ssl, m_sbio, m_sbio);
-//		if (!SSLNegotiate())
+		if (!SSLNegotiate())
 		{
 			SetSSLNegotiate();
 		}
@@ -1235,6 +1274,42 @@ void TcpSocket::InitializeContext(const std::string& context,const std::string& 
 }
 
 
+void TcpSocket::InitializeContext(const std::string& context,const std::string& certfile,const std::string& keyfile,const std::string& password,SSL_METHOD *meth_in)
+{
+	/* Create our context*/
+	static std::map<std::string, SSL_CTX *> server_contexts;
+	if (server_contexts.find(context) == server_contexts.end())
+	{
+		SSL_METHOD *meth = meth_in ? meth_in : SSLv3_method();
+		m_ssl_ctx = server_contexts[context] = SSL_CTX_new(meth);
+		SSL_CTX_set_mode(m_ssl_ctx, SSL_MODE_AUTO_RETRY);
+		// session id
+		if (context.size())
+			SSL_CTX_set_session_id_context(m_ssl_ctx, (const unsigned char *)context.c_str(), (unsigned int)context.size());
+		else
+			SSL_CTX_set_session_id_context(m_ssl_ctx, (const unsigned char *)"--empty--", 9);
+	}
+	else
+	{
+		m_ssl_ctx = server_contexts[context];
+	}
+
+	/* Load our keys and certificates*/
+	if (!(SSL_CTX_use_certificate_file(m_ssl_ctx, certfile.c_str(), SSL_FILETYPE_PEM)))
+	{
+		Handler().LogError(this, "TcpSocket InitializeContext", 0, "Couldn't read certificate file " + keyfile, LOG_LEVEL_FATAL);
+	}
+
+	m_password = password;
+	SSL_CTX_set_default_passwd_cb(m_ssl_ctx, SSL_password_cb);
+	SSL_CTX_set_default_passwd_cb_userdata(m_ssl_ctx, this);
+	if (!(SSL_CTX_use_PrivateKey_file(m_ssl_ctx, keyfile.c_str(), SSL_FILETYPE_PEM)))
+	{
+		Handler().LogError(this, "TcpSocket InitializeContext", 0, "Couldn't read private key file " + keyfile, LOG_LEVEL_FATAL);
+	}
+}
+
+
 int TcpSocket::SSL_password_cb(char *buf,int num,int rwflag,void *userdata)
 {
 	Socket *p0 = static_cast<Socket *>(userdata);
@@ -1252,6 +1327,30 @@ int TcpSocket::SSL_password_cb(char *buf,int num,int rwflag,void *userdata)
 
 int TcpSocket::Close()
 {
+	if (GetSocket() == INVALID_SOCKET) // this could happen
+	{
+		Handler().LogError(this, "Socket::Close", 0, "file descriptor invalid", LOG_LEVEL_WARNING);
+		return 0;
+	}
+	int n;
+	SetNonblocking(true);
+	if (IsConnected() && !(GetShutdown() & SHUT_WR))
+	{
+		if (shutdown(GetSocket(), SHUT_WR) == -1)
+		{
+			// failed...
+			Handler().LogError(this, "shutdown", Errno, StrError(Errno), LOG_LEVEL_ERROR);
+		}
+	}
+	//
+	char tmp[1000];
+	if ((n = recv(GetSocket(),tmp,1000,0)) >= 0)
+	{
+		if (n)
+		{
+			Handler().LogError(this, "read() after shutdown", n, "bytes read", LOG_LEVEL_WARNING);
+		}
+	}
 #ifdef HAVE_OPENSSL
 	if (IsSSL() && m_ssl)
 		SSL_shutdown(m_ssl);
@@ -1303,7 +1402,7 @@ size_t TcpSocket::GetInputLength()
 
 size_t TcpSocket::GetOutputLength()
 {
-	return obuf.GetLength();
+	return m_output_length;
 }
 
 
@@ -1362,23 +1461,297 @@ void TcpSocket::DisableInputBuffer(bool x)
 void TcpSocket::OnOptions(int family,int type,int protocol,SOCKET s)
 {
 DEB(	fprintf(stderr, "Socket::OnOptions()\n");)
-/*
-	Handler().LogError(this, "OnOptions", family, "Address Family", LOG_LEVEL_INFO);
-	Handler().LogError(this, "OnOptions", type, "Type", LOG_LEVEL_INFO);
-	Handler().LogError(this, "OnOptions", protocol, "Protocol", LOG_LEVEL_INFO);
-*/
-	SetReuse(true);
-	SetKeepalive(true);
+#ifdef SO_NOSIGPIPE
+	SetSoNosigpipe(true);
+#endif
+	SetSoReuseaddr(true);
+	SetSoKeepalive(true);
 }
 
 
 void TcpSocket::SetLineProtocol(bool x)
 {
-	Socket::SetLineProtocol(x);
+	StreamSocket::SetLineProtocol(x);
 	DisableInputBuffer(x);
+}
+
+
+bool TcpSocket::SetTcpNodelay(bool x)
+{
+#ifdef TCP_NODELAY
+	int optval = x ? 1 : 0;
+	if (setsockopt(GetSocket(), IPPROTO_TCP, TCP_NODELAY, (char *)&optval, sizeof(optval)) == -1)
+	{
+		Handler().LogError(this, "setsockopt(IPPROTO_TCP, TCP_NODELAY)", Errno, StrError(Errno), LOG_LEVEL_FATAL);
+		return false;
+	}
+	return true;
+#else
+	Handler().LogError(this, "socket option not available", 0, "TCP_NODELAY", LOG_LEVEL_INFO);
+	return false;
+#endif
+}
+
+
+TcpSocket::CircularBuffer::CircularBuffer(size_t size)
+:buf(new char[2 * size])
+,m_max(size)
+,m_q(0)
+,m_b(0)
+,m_t(0)
+,m_count(0)
+{
+}
+
+
+TcpSocket::CircularBuffer::~CircularBuffer()
+{
+	delete[] buf;
+}
+
+
+bool TcpSocket::CircularBuffer::Write(const char *s,size_t l)
+{
+	if (m_q + l > m_max)
+	{
+		return false; // overflow
+	}
+	m_count += (unsigned long)l;
+	if (m_t + l > m_max) // block crosses circular border
+	{
+		size_t l1 = m_max - m_t; // size left until circular border crossing
+		// always copy full block to buffer(buf) + top pointer(m_t)
+		// because we have doubled the buffer size for performance reasons
+		memcpy(buf + m_t, s, l);
+		memcpy(buf, s + l1, l - l1);
+		m_t = l - l1;
+		m_q += l;
+	}
+	else
+	{
+		memcpy(buf + m_t, s, l);
+		memcpy(buf + m_max + m_t, s, l);
+		m_t += l;
+		if (m_t >= m_max)
+			m_t -= m_max;
+		m_q += l;
+	}
+	return true;
+}
+
+
+bool TcpSocket::CircularBuffer::Read(char *s,size_t l)
+{
+	if (l > m_q)
+	{
+		return false; // not enough chars
+	}
+	if (m_b + l > m_max) // block crosses circular border
+	{
+		size_t l1 = m_max - m_b;
+		if (s)
+		{
+			memcpy(s, buf + m_b, l1);
+			memcpy(s + l1, buf, l - l1);
+		}
+		m_b = l - l1;
+		m_q -= l;
+	}
+	else
+	{
+		if (s)
+		{
+			memcpy(s, buf + m_b, l);
+		}
+		m_b += l;
+		if (m_b >= m_max)
+			m_b -= m_max;
+		m_q -= l;
+	}
+	if (!m_q)
+	{
+		m_b = m_t = 0;
+	}
+	return true;
+}
+
+bool TcpSocket::CircularBuffer::SoftRead(char *s, size_t l)
+{
+    if (l > m_q)
+    {
+        return false;
+    }
+    if (m_b + l > m_max)                          // block crosses circular border
+    {
+        size_t l1 = m_max - m_b;
+        if (s)
+        {
+            memcpy(s, buf + m_b, l1);
+            memcpy(s + l1, buf, l - l1);
+        }
+    }
+    else
+    {
+        if (s)
+        {
+            memcpy(s, buf + m_b, l);
+        }
+    }
+    return true;
+}
+
+
+
+
+bool TcpSocket::CircularBuffer::Remove(size_t l)
+{
+	return Read(NULL, l);
+}
+
+
+size_t TcpSocket::CircularBuffer::GetLength()
+{
+	return m_q;
+}
+
+
+const char *TcpSocket::CircularBuffer::GetStart()
+{
+	return buf + m_b;
+}
+
+
+size_t TcpSocket::CircularBuffer::GetL()
+{
+	return (m_b + m_q > m_max) ? m_max - m_b : m_q;
+}
+
+
+size_t TcpSocket::CircularBuffer::Space()
+{
+	return m_max - m_q;
+}
+
+
+unsigned long TcpSocket::CircularBuffer::ByteCounter(bool clear)
+{
+	if (clear)
+	{
+		unsigned long x = m_count;
+		m_count = 0;
+		return x;
+	}
+	return m_count;
+}
+
+
+std::string TcpSocket::CircularBuffer::ReadString(size_t l)
+{
+	char *sz = new char[l + 1];
+	if (!Read(sz, l)) // failed, debug printout in Read() method
+	{
+		delete[] sz;
+		return "";
+	}
+	sz[l] = 0;
+	std::string tmp = sz;
+	delete[] sz;
+	return tmp;
+}
+
+
+void TcpSocket::OnConnectTimeout()
+{
+	Handler().LogError(this, "connect", -1, "connect timeout", LOG_LEVEL_FATAL);
+#ifdef ENABLE_SOCKS4
+	if (Socks4())
+	{
+		OnSocks4ConnectFailed();
+		// retry direct connection
+	}
+	else
+#endif
+	if (GetConnectionRetry() == -1 ||
+		(GetConnectionRetry() && GetConnectionRetries() < GetConnectionRetry()) )
+	{
+		IncreaseConnectionRetries();
+		// ask socket via OnConnectRetry callback if we should continue trying
+		if (OnConnectRetry())
+		{
+			SetRetryClientConnect();
+		}
+		else
+		{
+			SetCloseAndDelete( true );
+			/// \todo state reason why connect failed
+			OnConnectFailed();
+		}
+	}
+	else
+	{
+		SetCloseAndDelete(true);
+		/// \todo state reason why connect failed
+		OnConnectFailed();
+	}
+	//
+	SetConnecting(false);
+}
+
+
+#ifdef _WIN32
+void TcpSocket::OnException()
+{
+	if (Connecting())
+	{
+#ifdef ENABLE_SOCKS4
+		if (Socks4())
+			OnSocks4ConnectFailed();
+		else
+#endif
+		if (GetConnectionRetry() == -1 ||
+			(GetConnectionRetry() &&
+			 GetConnectionRetries() < GetConnectionRetry() ))
+		{
+			// even though the connection failed at once, only retry after
+			// the connection timeout
+			// should we even try to connect again, when CheckConnect returns
+			// false it's because of a connection error - not a timeout...
+		}
+		else
+		{
+			SetConnecting(false); // tnx snibbe
+			SetCloseAndDelete();
+			OnConnectFailed();
+		}
+		return;
+	}
+	// %! exception doesn't always mean something bad happened, this code should be reworked
+	// errno valid here?
+	int err = SoError();
+	Handler().LogError(this, "exception on select", err, StrError(err), LOG_LEVEL_FATAL);
+	SetCloseAndDelete();
+}
+#endif // _WIN32
+
+
+int TcpSocket::Protocol()
+{
+	return IPPROTO_TCP;
+}
+
+
+void TcpSocket::SetTransferLimit(size_t sz)
+{
+	m_transfer_limit = sz;
+}
+
+
+void TcpSocket::OnTransferLimit()
+{
 }
 
 
 #ifdef SOCKETS_NAMESPACE
 }
 #endif
+

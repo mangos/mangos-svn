@@ -31,13 +31,11 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define _SOCKETS_ISocketHandler_H
 #include "sockets-config.h"
 
-#include <map>
 #include <list>
 
 #include "socket_include.h"
-#include "StdLog.h"
-#include "Mutex.h"
 #include "Socket.h"
+#include "StdLog.h"
 
 #ifdef SOCKETS_NAMESPACE
 namespace SOCKETS_NAMESPACE {
@@ -48,12 +46,13 @@ typedef enum {
 #ifdef ENABLE_DETACH
 	LIST_DETACH,
 #endif
-	LIST_CONNECTING,
+	LIST_TIMEOUT,
 	LIST_RETRY,
 	LIST_CLOSE
 } list_t;
 
 class SocketAddress;
+class Mutex;
 
 
 /** Socket container class, event generator. 
@@ -84,30 +83,17 @@ public:
 #endif
 
 public:
-	/** ISocketHandler constructor.
-		\param log Optional log class pointer */
-	ISocketHandler(StdLog *log);
-	/** ISocketHandler threadsafe constructor.
-		\param mutex Externally declared mutex variable
-		\param log Optional log class pointer */
-	ISocketHandler(Mutex& mutex,StdLog *log);
-	virtual ~ISocketHandler();
+	virtual ~ISocketHandler() {}
 
 	/** Get mutex reference for threadsafe operations. */
-	Mutex& GetMutex() const;
-
-#ifdef ENABLE_DETACH
-	/** Indicates that the handler runs under SocketThread. */
-	void SetSlave(bool x = true);
-	/** Indicates that the handler runs under SocketThread. */
-	bool IsSlave();
-#endif
+	virtual Mutex& GetMutex() const = 0;
 
 	/** Register StdLog object for error callback. 
 		\param log Pointer to log class */
-	void RegStdLog(StdLog *log);
+	virtual void RegStdLog(StdLog *log) = 0;
+
 	/** Log error to log class for print out / storage. */
-	void LogError(Socket *p,const std::string& user_text,int err,const std::string& sys_err,loglevel_t t = LOG_LEVEL_WARNING);
+	virtual void LogError(Socket *p,const std::string& user_text,int err,const std::string& sys_err,loglevel_t t = LOG_LEVEL_WARNING) = 0;
 
 	// -------------------------------------------------------------------------
 	// Socket stuff
@@ -147,16 +133,12 @@ public:
 	// -------------------------------------------------------------------------
 #ifdef ENABLE_POOL
 	/** Find available open connection (used by connection pool). */
-	virtual ISocketHandler::PoolSocket *FindConnection(int /*type*/,const std::string& /*protocol*/,SocketAddress&) {
-		return NULL;
-	}
+	virtual ISocketHandler::PoolSocket *FindConnection(int type,const std::string& protocol,SocketAddress&) = 0;
 	/** Enable connection pool (by default disabled). */
-	virtual void EnablePool(bool = true) {}
+	virtual void EnablePool(bool = true) = 0;
 	/** Check pool status. 
 		\return true if connection pool is enabled */
-	virtual bool PoolEnabled() {
-		return false;
-	}
+	virtual bool PoolEnabled() = 0;
 #endif // ENABLE_POOL
 
 	// -------------------------------------------------------------------------
@@ -164,33 +146,27 @@ public:
 	// -------------------------------------------------------------------------
 #ifdef ENABLE_SOCKS4
 	/** Set socks4 server ip that all new tcp sockets should use. */
-	virtual void SetSocks4Host(ipaddr_t) {}
+	virtual void SetSocks4Host(ipaddr_t) = 0;
 	/** Set socks4 server hostname that all new tcp sockets should use. */
-	virtual void SetSocks4Host(const std::string& ) {}
+	virtual void SetSocks4Host(const std::string& ) = 0;
 	/** Set socks4 server port number that all new tcp sockets should use. */
-	virtual void SetSocks4Port(port_t) {};
+	virtual void SetSocks4Port(port_t) = 0;
 	/** Set optional socks4 userid. */
-	virtual void SetSocks4Userid(const std::string& ) {}
+	virtual void SetSocks4Userid(const std::string& ) = 0;
 	/** If connection to socks4 server fails, immediately try direct connection to final host. */
-	virtual void SetSocks4TryDirect(bool = true) {}
+	virtual void SetSocks4TryDirect(bool = true) = 0;
 	/** Get socks4 server ip. 
 		\return socks4 server ip */
-	virtual ipaddr_t GetSocks4Host() {
-		return (ipaddr_t)0;
-	}
+	virtual ipaddr_t GetSocks4Host() = 0;
 	/** Get socks4 port number.
 		\return socks4 port number */
-	virtual port_t GetSocks4Port() {
-		return 0;
-	}
+	virtual port_t GetSocks4Port() = 0;
 	/** Get socks4 userid (optional).
 		\return socks4 userid */
 	virtual const std::string& GetSocks4Userid() = 0;
 	/** Check status of socks4 try direct flag.
 		\return true if direct connection should be tried if connection to socks4 server fails */
-	virtual bool Socks4TryDirect() {
-		return false;
-	}
+	virtual bool Socks4TryDirect() = 0;
 #endif // ENABLE_SOCKS4
 
 	// -------------------------------------------------------------------------
@@ -199,49 +175,52 @@ public:
 #ifdef ENABLE_RESOLVER
 	/** Enable asynchronous DNS. 
 		\param port Listen port of asynchronous dns server */
-	virtual void EnableResolver(port_t = 16667) {}
+	virtual void EnableResolver(port_t = 16667) = 0;
 	/** Check resolver status.
 		\return true if resolver is enabled */
-	virtual bool ResolverEnabled() {
-		return false;
-	}
+	virtual bool ResolverEnabled() = 0;
 	/** Queue a dns request.
 		\param host Hostname to be resolved
 		\param port Port number will be echoed in Socket::OnResolved callback */
-	virtual int Resolve(Socket *,const std::string& /*host*/,port_t /*port*/) {
-		return -1;
-	}
+	virtual int Resolve(Socket *,const std::string& host,port_t port) = 0;
 #ifdef ENABLE_IPV6
-	virtual int Resolve6(Socket *,const std::string& host,port_t port) {
-		return -1;
-	}
+	virtual int Resolve6(Socket *,const std::string& host,port_t port) = 0;
 #endif
 	/** Do a reverse dns lookup. */
-	virtual int Resolve(Socket *,ipaddr_t) {
-		return -1;
-	}
+	virtual int Resolve(Socket *,ipaddr_t a) = 0;
 #ifdef ENABLE_IPV6
-	virtual int Resolve(Socket *,in6_addr& a) {
-		return -1;
-	}
+	virtual int Resolve(Socket *,in6_addr& a) = 0;
 #endif
 	/** Get listen port of asynchronous dns server. */
-	virtual port_t GetResolverPort() {
-		return 0;
-	}
+	virtual port_t GetResolverPort() = 0;
 	/** Resolver thread ready for queries. */
-	virtual bool ResolverReady() {
-		return false;
-	}
-#endif
+	virtual bool ResolverReady() = 0;
+	/** Returns true if socket waiting for a resolve event. */
+	virtual bool Resolving(Socket *) = 0;
+#endif // ENABLE_RESOLVER
 
-protected:
-	StdLog *m_stdlog; ///< Registered log class, or NULL
+#ifdef ENABLE_TRIGGERS
+	/** Fetch unique trigger id. */
+	virtual int TriggerID(Socket *src) = 0;
+	/** Subscribe socket to trigger id. */
+	virtual bool Subscribe(int id, Socket *dst) = 0;
+	/** Unsubscribe socket from trigger id. */
+	virtual bool Unsubscribe(int id, Socket *dst) = 0;
+	/** Execute OnTrigger for subscribed sockets.
+		\param id Trigger ID
+		\param data Data passed from source to destination
+		\param erase Empty trigger id source and destination maps if 'true',
+			Leave them in place if 'false' - if a trigger should be called many times */
+	virtual void Trigger(int id, Socket::TriggerData& data, bool erase = true) = 0;
+#endif // ENABLE_TRIGGERS
+
 #ifdef ENABLE_DETACH
-	bool m_slave; ///< Indicates that this is a ISocketHandler run in SocketThread
-#endif
-	Mutex& m_mutex; ///< Thread safety mutex
-	bool m_b_use_mutex; ///< Mutex correctly initialized
+	/** Indicates that the handler runs under SocketThread. */
+	virtual void SetSlave(bool x = true) = 0;
+	/** Indicates that the handler runs under SocketThread. */
+	virtual bool IsSlave() = 0;
+#endif // ENABLE_DETACH
+
 };
 
 
@@ -250,3 +229,4 @@ protected:
 #endif
 
 #endif // _SOCKETS_ISocketHandler_H
+

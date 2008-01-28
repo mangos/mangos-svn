@@ -1,9 +1,9 @@
-/** \file Uid.h
- **	\date  2004-04-06
+/** \file Lock.cpp
+ **	\date  2005-08-22
  **	\author grymse@alhem.net
 **/
 /*
-Copyright (C) 2004-2007  Anders Hedstrom
+Copyright (C) 2005,2007  Anders Hedstrom
 
 This library is made available under the terms of the GNU GPL.
 
@@ -27,37 +27,24 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-#ifndef _SOCKETS_Uid_H
-#define _SOCKETS_Uid_H
-
-#include "sockets-config.h"
-// donerat till Tekton 2003-11-12 / AH
-
-#include <string>
+#include "Mutex.h"
+#include "Lock.h"
 
 #ifdef SOCKETS_NAMESPACE
 namespace SOCKETS_NAMESPACE {
 #endif
 
-/** Generate 128-bit globally unique identifier. 
-	\ingroup util */
-class Uid
+
+Lock::Lock(Mutex& m) : m_mutex(m)
 {
-public:
-	Uid();
-	Uid(const std::string& );
-	Uid(const unsigned char *);
-	~Uid();
+	m_mutex.Lock();
+}
 
-	std::string GetUid();
-	const unsigned char *GetBuf();
 
-private:
-	Uid(const Uid& ) {}
-	Uid& operator=(const Uid& ) { return *this; }
-	unsigned char m_bufuid[16];
-//	std::string m_uid;
-};
+Lock::~Lock()
+{
+	m_mutex.Unlock();
+}
 
 
 
@@ -66,4 +53,3 @@ private:
 }
 #endif
 
-#endif // _SOCKETS_Uid_H

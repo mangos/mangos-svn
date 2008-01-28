@@ -23,8 +23,10 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #ifndef _SOCKETS_CONFIG_H
 #define _SOCKETS_CONFIG_H
 
+#ifndef _RUN_DP
 /* First undefine symbols if already defined. */
 #undef HAVE_OPENSSL
+#undef ENABLE_IPV6
 #undef USE_SCTP
 #undef NO_GETADDRINFO
 #undef ENABLE_POOL
@@ -32,6 +34,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #undef ENABLE_RESOLVER
 #undef ENABLE_RECONNECT
 #undef ENABLE_DETACH
+#undef ENABLE_TRIGGERS
+#undef ENABLE_EXCEPTIONS
+#endif // _RUN_DP
 
 
 /* OpenSSL support. */
@@ -48,9 +53,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
 /* Define NO_GETADDRINFO if your operating system does not support
    the "getaddrinfo" and "getnameinfo" function calls. */
-#ifdef _WIN32
 #define NO_GETADDRINFO
-#endif
 
 
 /* Connection pool support. */
@@ -75,6 +78,13 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 /* Enable socket thread detach functionality. */
 #define ENABLE_DETACH
 
+
+/* Enable socket to socket triggers. Not yet in use. */
+//#define ENABLE_TRIGGERS
+
+
+/* Enabled exceptions. */
+#define ENABLE_EXCEPTIONS
 
 
 /* Resolver uses the detach function so either enable both or disable both. */

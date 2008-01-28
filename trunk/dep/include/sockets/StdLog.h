@@ -57,6 +57,7 @@ class StdLog
 {
 public:
 	virtual ~StdLog() {}
+
 	virtual void error(ISocketHandler *,Socket *,
 		const std::string& user_text,
 		int err,
@@ -70,3 +71,4 @@ public:
 #endif
 
 #endif // _SOCKETS_StdLog_H
+

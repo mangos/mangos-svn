@@ -46,7 +46,7 @@ public:
 		\param h ISocketHandler reference
 		\param ibufsz Maximum size of receive message (extra bytes will be truncated)
 		\param ipv6 'true' if this is an ipv6 socket */
-	UdpSocket(ISocketHandler& h,int ibufsz = 16384,bool ipv6 = false);
+	UdpSocket(ISocketHandler& h,int ibufsz = 16384,bool ipv6 = false, int retries = 0);
 	~UdpSocket();
 
 	/** Called when incoming data has been received.
@@ -55,6 +55,14 @@ public:
 		\param sa Pointer to sockaddr struct of sender
 		\param sa_len Length of sockaddr struct */
 	virtual void OnRawData(const char *buf,size_t len,struct sockaddr *sa,socklen_t sa_len);
+
+	/** Called when incoming data has been received and read timestamp is enabled.
+		\param buf Pointer to data
+		\param len Length of data
+		\param sa Pointer to sockaddr struct of sender
+		\param sa_len Length of sockaddr struct
+		\param ts Timestamp from message */
+	virtual void OnRawData(const char *buf,size_t len,struct sockaddr *sa,socklen_t sa_len,struct timeval *ts);
 
 	/** To receive incoming data, call Bind to setup an incoming port.
 		\param port Incoming port number
@@ -174,9 +182,16 @@ public:
 
 	int GetLastSizeWritten();
 
+	/** Also read timestamp information from incoming message */
+	void SetTimestamp(bool = true);
+
 protected:
 	UdpSocket(const UdpSocket& s) : Socket(s) {}
 	void OnRead();
+#if defined(LINUX) || defined(MACOSX)
+	/** This method emulates socket recvfrom, but uses messages so we can get the timestamp */
+	int ReadTS(char *ioBuf, int inBufSize, struct sockaddr *from, socklen_t fromlen, struct timeval *ts);
+#endif
 
 private:
 	UdpSocket& operator=(const UdpSocket& ) { return *this; }
@@ -187,6 +202,8 @@ private:
 	bool m_bind_ok; ///< Bind completed successfully
 	port_t m_port; ///< Bind port number
 	int m_last_size_written;
+	int m_retries;
+	bool m_b_read_ts;
 };
 
 
@@ -195,3 +212,4 @@ private:
 #endif
 
 #endif // _SOCKETS_UdpSocket_H
+

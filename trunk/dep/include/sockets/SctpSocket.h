@@ -24,8 +24,7 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define _SOCKETS_SctpSocket_H
 #include "sockets-config.h"
 
-#include <map>
-#include "Socket.h"
+#include "StreamSocket.h"
 #ifdef USE_SCTP
 #include <netinet/sctp.h>
 
@@ -38,7 +37,7 @@ namespace SOCKETS_NAMESPACE {
 class SocketAddress;
 
 
-class SctpSocket : public Socket
+class SctpSocket : public StreamSocket
 {
 public:
 	/** SctpSocket constructor.
@@ -60,9 +59,19 @@ public:
 	/** connect() */
 	int Open(const std::string&,port_t);
 	int Open(SocketAddress&);
+
+	/** Connect timeout callback. */
+	void OnConnectTimeout();
+#ifdef _WIN32
+	/** Connection failed reported as exception on win32 */
+	void OnException();
+#endif
+
+#ifndef SOLARIS
 	/** sctp_connectx() */
 	int AddConnection(const std::string&,port_t);
 	int AddConnection(SocketAddress&);
+#endif
 
 	/** Get peer addresses of an association. */
 	int getpaddrs(sctp_assoc_t id,std::list<std::string>&);
@@ -77,11 +86,15 @@ public:
 
 	void OnOptions(int,int,int,SOCKET) {}
 
+	virtual int Protocol();
+
 protected:
+	SctpSocket(const SctpSocket& s) : StreamSocket(s) {}
 	void OnRead();
 	void OnWrite();
 
 private:
+	SctpSocket& operator=(const SctpSocket& s) { return *this; }
 	int m_type; ///< SCTP_STREAM or SCTP_SEQPACKET
 	char *m_buf; ///< Temporary receive buffer
 };
@@ -93,3 +106,4 @@ private:
 
 #endif // USE_SCTP
 #endif // _SOCKETS_SctpSocket_H
+
