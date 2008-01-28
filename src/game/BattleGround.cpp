@@ -25,6 +25,7 @@
 #include "Language.h"                                       // for chat messages
 #include "Chat.h"
 #include "SpellAuras.h"
+#include "World.h"
 
 BattleGround::BattleGround()
 {
@@ -479,7 +480,9 @@ void BattleGround::RemovePlayerAtLeave(uint64 guid, bool Transport, bool SendPac
     {
         if(isArena())
         {
-            plr->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
+            if(!sWorld.IsFFAPvPRealm())
+                plr->RemoveFlag(PLAYER_FLAGS, PLAYER_FLAGS_FFA_PVP);
+
             plr->RemoveAurasDueToSpell(SPELL_ARENA_PREPARATION);
         }
 

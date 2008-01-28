@@ -579,6 +579,10 @@ void WorldSession::HandlePlayerLogin(LoginQueryHolder * holder)
     if(pCurrChar->isAlive())
         pCurrChar->LoadPet();
 
+    // Set FFA PvP for non GM in non-rest mode
+    if(sWorld.IsFFAPvPRealm() && !pCurrChar->isGameMaster() && !pCurrChar->HasFlag(PLAYER_FLAGS,PLAYER_FLAGS_RESTING) )
+        pCurrChar->SetFlag(PLAYER_FLAGS,PLAYER_FLAGS_FFA_PVP);
+
     // Apply at_login requests
     if(pCurrChar->HasAtLoginFlag(AT_LOGIN_RESET_SPELLS))
     {

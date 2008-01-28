@@ -176,7 +176,9 @@ enum RealmType
     REALM_PVP = 1,
     REALM_NORMAL2 = 4,
     REALM_RP = 6,
-    REALM_RPPVP = 8
+    REALM_RPPVP = 8,
+    REALM_FFA_PVP = 16                                      // custom, free for all pvp mode like arena PvP in all zones except rest activated places and sanctuaries
+                                                            // replaced by REALM_PVP in realm list
 };
 
 /// Ban function return codes
@@ -339,7 +341,8 @@ class World
         }
 
         /// Are we on a "Player versus Player" server?
-        bool IsPvPRealm() { return (getConfig(CONFIG_GAME_TYPE) == REALM_PVP || getConfig(CONFIG_GAME_TYPE) == REALM_RPPVP); }
+        bool IsPvPRealm() { return (getConfig(CONFIG_GAME_TYPE) == REALM_PVP || getConfig(CONFIG_GAME_TYPE) == REALM_RPPVP || getConfig(CONFIG_GAME_TYPE) == REALM_FFA_PVP); }
+        bool IsFFAPvPRealm() { return getConfig(CONFIG_GAME_TYPE) == REALM_FFA_PVP; }
 
         bool KickPlayer(std::string playerName);
         void KickAll();
