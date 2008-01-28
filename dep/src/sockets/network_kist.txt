@@ -1,19 +1,19 @@
-Unique1: The following are the only .cpp files used from the new network library. This file is just for future reference.
+The following are the only .cpp files used from the new network library (v2.2.8) This file is just for future reference.
 
 Base64.cpp
-CircularBuffer.cpp
+Exception.cpp
 Ipv4Address.cpp
 Ipv6Address.cpp
-ISocketHandler.cpp
+Lock.cpp
 Mutex.cpp
 Parse.cpp
-RandomNumber.cpp
 ResolvServer.cpp
 ResolvSocket.cpp
 Socket.cpp
 SocketHandler.cpp
 socket_include.cpp
 StdoutLog.cpp
+StreamSocket.cpp
 TcpSocket.cpp
 Thread.cpp
 UdpSocket.cpp

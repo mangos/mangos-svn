@@ -31,18 +31,29 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Parse.h"
 #include "Ipv4Address.h"
 #include "Ipv6Address.h"
-#include "RandomNumber.h"
+#include "Base64.h"
 #include <vector>
 #ifdef _WIN32
 #include <time.h>
 #else
 #include <netdb.h>
+#include <pthread.h>
 #endif
 #include <map>
 
 #ifdef SOCKETS_NAMESPACE
 namespace SOCKETS_NAMESPACE {
 #endif
+
+
+// defines for the random number generator
+#define TWIST_IA        397
+#define TWIST_IB       (TWIST_LEN - TWIST_IA)
+#define UMASK           0x80000000
+#define LMASK           0x7FFFFFFF
+#define MATRIX_A        0x9908B0DF
+#define TWIST(b,i,j)   ((b)[i] & UMASK) | ((b)[j] & LMASK)
+#define MAGIC_TWIST(s) (((s) & 1) * MATRIX_A)
 
 
 // statics
@@ -561,15 +572,18 @@ bool Utility::u2ip(const std::string& host, struct sockaddr_in& sa, int ai_flags
 	memcpy(&sa.sin_addr, he -> h_addr, sizeof(sa.sin_addr));
 #else
 	struct hostent he;
-	struct hostent *result;
-	int myerrno;
+	struct hostent *result = NULL;
+	int myerrno = 0;
 	char buf[2000];
 	int n = gethostbyname_r(host.c_str(), &he, buf, sizeof(buf), &result, &myerrno);
-	if (n)
+	if (n || !result)
 	{
 		return false;
 	}
-	memcpy(&sa.sin_addr, he.h_addr, 4);
+	if (he.h_addr_list && he.h_addr_list[0])
+		memcpy(&sa.sin_addr, he.h_addr, 4);
+	else
+		return false;
 #endif
 	return true;
 #else
@@ -592,20 +606,17 @@ bool Utility::u2ip(const std::string& host, struct sockaddr_in& sa, int ai_flags
 	int n = getaddrinfo(host.c_str(), NULL, &hints, &res);
 	if (!n)
 	{
-		RandomNumber prng( true );
 		std::vector<struct addrinfo *> vec;
 		struct addrinfo *ai = res;
 		while (ai)
 		{
 			if (ai -> ai_addrlen == sizeof(sa))
 				vec.push_back( ai );
-			prng.next();
-			//
 			ai = ai -> ai_next;
 		}
 		if (vec.empty())
 			return false;
-		ai = vec[prng.next() % vec.size()];
+		ai = vec[Utility::Rnd() % vec.size()];
 		{
 			memcpy(&sa, ai -> ai_addr, ai -> ai_addrlen);
 		}
@@ -709,20 +720,17 @@ bool Utility::u2ip(const std::string& host, struct sockaddr_in6& sa, int ai_flag
 	int n = getaddrinfo(host.c_str(), NULL, &hints, &res);
 	if (!n)
 	{
-		RandomNumber prng( true );
 		std::vector<struct addrinfo *> vec;
 		struct addrinfo *ai = res;
 		while (ai)
 		{
 			if (ai -> ai_addrlen == sizeof(sa))
 				vec.push_back( ai );
-			prng.next();
-			//
 			ai = ai -> ai_next;
 		}
 		if (vec.empty())
 			return false;
-		ai = vec[prng.next() % vec.size()];
+		ai = vec[Utility::Rnd() % vec.size()];
 		{
 			memcpy(&sa, ai -> ai_addr, ai -> ai_addrlen);
 		}
@@ -900,14 +908,92 @@ unsigned long Utility::ThreadID()
 {
 #ifdef _WIN32
 	return GetCurrentThreadId();
-#elif defined(__FreeBSD__) || defined(__NetBSD__) || defined(__APPLE_CC__)
-    return reinterpret_cast<unsigned long>(pthread_self());
 #else
-	return pthread_self();
+	return (unsigned long)pthread_self();
 #endif
 }
 
+
+std::string Utility::ToLower(const std::string& str)
+{
+	std::string r;
+	for (size_t i = 0; i < str.size(); i++)
+	{
+		if (str[i] >= 'A' && str[i] <= 'Z')
+			r += str[i] | 32;
+		else
+			r += str[i];
+	}
+	return r;
+}
+
+
+std::string Utility::ToUpper(const std::string& str)
+{
+	std::string r;
+	for (size_t i = 0; i < str.size(); i++)
+	{
+		if (str[i] >= 'a' && str[i] <= 'z')
+			r += (char)(str[i] - 32);
+		else
+			r += str[i];
+	}
+	return r;
+}
+
+
+std::string Utility::ToString(double d)
+{
+	char tmp[100];
+	sprintf(tmp, "%f", d);
+	return tmp;
+}
+
+
+unsigned long Utility::Rnd()
+{
+static	Utility::Rng generator( time(NULL) );
+	return generator.Get();
+}
+
+
+Utility::Rng::Rng(unsigned long seed) : m_value( 0 )
+{
+	m_tmp[0]= seed & 0xffffffffUL;
+	for (int i = 1; i < TWIST_LEN; i++)
+	{
+		m_tmp[i] = (1812433253UL * (m_tmp[i - 1] ^ (m_tmp[i - 1] >> 30)) + i);
+	}
+}
+					
+
+unsigned long Utility::Rng::Get()
+{
+	unsigned long val = m_tmp[m_value];
+	++m_value;
+	if (m_value == TWIST_LEN)
+	{
+		for (int i = 0; i < TWIST_IB; ++i)
+		{
+			unsigned long s = TWIST(m_tmp, i, i + 1);
+			m_tmp[i] = m_tmp[i + TWIST_IA] ^ (s >> 1) ^ MAGIC_TWIST(s);
+		}
+		{
+			for (int i = 0; i < TWIST_LEN - 1; ++i)
+			{
+				unsigned long s = TWIST(m_tmp, i, i + 1);
+				m_tmp[i] = m_tmp[i - TWIST_IB] ^ (s >> 1) ^ MAGIC_TWIST(s);
+			}
+		}
+		unsigned long s = TWIST(m_tmp, TWIST_LEN - 1, 0);
+		m_tmp[TWIST_LEN - 1] = m_tmp[TWIST_IA - 1] ^ (s >> 1) ^ MAGIC_TWIST(s);
+
+		m_value = 0;
+	}
+	return val;
+}
 
 #ifdef SOCKETS_NAMESPACE
 }
 #endif
+

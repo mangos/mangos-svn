@@ -1,17 +1,10 @@
-/** \file Mutex.h
- **	\date  2004-10-30
+/**
+ **	\file Exception.h
+ **	\date  2007-09-28
  **	\author grymse@alhem.net
 **/
 /*
-Copyright (C) 2004-2007  Anders Hedstrom
-
-This library is made available under the terms of the GNU GPL.
-
-If you would like to use this library in a closed-source application,
-a separate license agreement is available. For information about 
-the closed-source license agreement for the C++ sockets library,
-please visit http://www.alhem.net/Sockets/license.html and/or
-email license@alhem.net.
+Copyright (C) 2007  Anders Hedstrom
 
 This program is free software; you can redistribute it and/or
 modify it under the terms of the GNU General Public License
@@ -27,42 +20,39 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-#ifndef _SOCKETS_Mutex_H
-#define _SOCKETS_Mutex_H
+#ifndef _Sockets_Exception_H
+#define _Sockets_Exception_H
 
-#include "sockets-config.h"
-#ifndef _WIN32
-#include <pthread.h>
-#else
-#include <windows.h>
-#endif
+#include <string>
 
 #ifdef SOCKETS_NAMESPACE
 namespace SOCKETS_NAMESPACE {
 #endif
 
-/** Mutex container class, used by Lock. 
-	\ingroup threading */
-class Mutex
-{
-	friend class Lock;
-public:
-	Mutex();
-	~Mutex();
 
-	void Lock();
-	void Unlock();
+
+class Exception
+{
+public:
+	Exception(const std::string& description);
+	virtual ~Exception() {}
+
+	virtual const std::string ToString() const;
+
+	Exception(const Exception& ) {} // copy constructor
+
+	Exception& operator=(const Exception& ) { return *this; } // assignment operator
+
 private:
-#ifdef _WIN32
-	HANDLE m_mutex;
-#else
-	pthread_mutex_t m_mutex;
-#endif
+	std::string m_description;
+
 };
 
 
+
 #ifdef SOCKETS_NAMESPACE
-}
+} // namespace SOCKETS_NAMESPACE {
 #endif
-#endif // _SOCKETS_Mutex_H
+
+#endif // _Sockets_Exception_H
 

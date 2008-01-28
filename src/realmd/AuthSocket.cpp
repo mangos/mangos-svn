@@ -777,7 +777,7 @@ bool AuthSocket::_HandleXferAccept()
 /// Check if there is lag on the connection to the client
 bool AuthSocket::IsLag()
 {
-    return (TCP_BUFSIZE_READ-obuf.GetLength()< 2*ChunkSize);
+    return (TCP_BUFSIZE_READ-GetOutputLength()< 2*ChunkSize);
 }
 
 PatcherRunnable::PatcherRunnable(class AuthSocket * as)

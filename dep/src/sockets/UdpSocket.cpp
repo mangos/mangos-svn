@@ -28,7 +28,9 @@ along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
 #ifdef _WIN32
+#ifdef _MSC_VER
 #pragma warning(disable:4786)
+#endif
 #include <stdlib.h>
 #else
 #include <errno.h>
@@ -39,6 +41,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "Utility.h"
 #include "Ipv4Address.h"
 #include "Ipv6Address.h"
+#ifdef ENABLE_EXCEPTIONS
+#include "Exception.h"
+#endif
 // include this to see strange sights
 //#include <linux/in6.h>
 
@@ -48,12 +53,14 @@ namespace SOCKETS_NAMESPACE {
 #endif
 
 
-UdpSocket::UdpSocket(ISocketHandler& h, int ibufsz, bool ipv6) : Socket(h)
+UdpSocket::UdpSocket(ISocketHandler& h, int ibufsz, bool ipv6, int retries) : Socket(h)
 , m_ibuf(new char[ibufsz])
 , m_ibufsz(ibufsz)
 , m_bind_ok(false)
 , m_port(0)
 , m_last_size_written(-1)
+, m_retries(retries)
+, m_b_read_ts(false)
 {
 #ifdef ENABLE_IPV6
 #ifdef IPPROTO_IPV6
@@ -150,6 +157,9 @@ int UdpSocket::Bind(SocketAddress& ad, int range)
 		{
 			Handler().LogError(this, "bind", Errno, StrError(Errno), LOG_LEVEL_FATAL);
 			SetCloseAndDelete();
+#ifdef ENABLE_EXCEPTIONS
+			throw Exception("bind() failed for UdpSocket, port:range: " + Utility::l2string(ad.GetPort()) + ":" + Utility::l2string(range));
+#endif
 			return -1;
 		}
 		m_bind_ok = true;
@@ -367,6 +377,72 @@ void UdpSocket::Send(const std::string& str, int flags)
 }
 
 
+#if defined(LINUX) || defined(MACOSX)
+int UdpSocket::ReadTS(char *ioBuf, int inBufSize, struct sockaddr *from, socklen_t fromlen, struct timeval *ts)
+{
+	struct msghdr msg;
+	struct iovec vec[1];
+	union {
+		struct cmsghdr cm;
+#ifdef MACOSX
+#ifdef __DARWIN_UNIX03
+#define ALIGNBYTES __DARWIN_ALIGNBYTES
+#endif
+#define myALIGN(p) (((unsigned int)(p) + ALIGNBYTES) &~ ALIGNBYTES)
+#define myCMSG_SPACE(l) (myALIGN(sizeof(struct cmsghdr)) + myALIGN(l))
+		char data[ myCMSG_SPACE(sizeof(struct timeval)) ];
+#else
+		char data[ CMSG_SPACE(sizeof(struct timeval)) ];
+#endif
+	} cmsg_un;
+	struct cmsghdr *cmsg;
+	struct timeval *tv;
+
+	vec[0].iov_base = ioBuf;
+	vec[0].iov_len = inBufSize;
+
+	memset(&msg, 0, sizeof(msg));
+	memset(from, 0, fromlen);
+	memset(ioBuf, 0, inBufSize);
+	memset(&cmsg_un, 0, sizeof(cmsg_un));
+
+	msg.msg_name = (caddr_t)from;
+	msg.msg_namelen = fromlen;
+	msg.msg_iov = vec;
+	msg.msg_iovlen = 1;
+	msg.msg_control = cmsg_un.data;
+	msg.msg_controllen = sizeof(cmsg_un.data);
+	msg.msg_flags = 0;
+
+	// Original version - for reference only
+	//int n = recvfrom(GetSocket(), m_ibuf, m_ibufsz, 0, (struct sockaddr *)&sa, &sa_len);
+
+	int n = recvmsg(GetSocket(), &msg, MSG_DONTWAIT);
+
+	// now ioBuf will contain the data, as if we used recvfrom
+
+	// Now get the time
+	if(n != -1 && msg.msg_controllen >= sizeof(struct cmsghdr) && !(msg.msg_flags & MSG_CTRUNC))
+	{
+		tv = 0;
+		for (cmsg = CMSG_FIRSTHDR(&msg); cmsg != NULL; cmsg = CMSG_NXTHDR(&msg, cmsg))
+		{
+			if (cmsg->cmsg_level == SOL_SOCKET && cmsg->cmsg_type == SCM_TIMESTAMP)
+			{
+				tv = (struct timeval *)CMSG_DATA(cmsg);
+			}
+		}
+		if (tv)
+		{
+			memcpy(ts, tv, sizeof(struct timeval));
+		}
+	}
+	// The address is in network order, but that's OK right now
+	return n;
+}
+#endif
+
+
 void UdpSocket::OnRead()
 {
 #ifdef ENABLE_IPV6
@@ -375,8 +451,33 @@ void UdpSocket::OnRead()
 	{
 		struct sockaddr_in6 sa;
 		socklen_t sa_len = sizeof(sa);
+		if (m_b_read_ts)
+		{
+			struct timeval ts;
+			Utility::GetTime(&ts);
+#if !defined(LINUX) && !defined(MACOSX)
+			int n = recvfrom(GetSocket(), m_ibuf, m_ibufsz, 0, (struct sockaddr *)&sa, &sa_len);
+#else
+			int n = ReadTS(m_ibuf, m_ibufsz, (struct sockaddr *)&sa, sa_len, &ts);
+#endif
+			if (n > 0)
+			{
+				this -> OnRawData(m_ibuf, n, (struct sockaddr *)&sa, sa_len, &ts);
+			}
+			else
+			if (n == -1)
+			{
+#ifdef _WIN32
+				if (Errno != WSAEWOULDBLOCK)
+#else
+				if (Errno != EWOULDBLOCK)
+#endif
+					Handler().LogError(this, "recvfrom", Errno, StrError(Errno), LOG_LEVEL_ERROR);
+			}
+			return;
+		}
 		int n = recvfrom(GetSocket(), m_ibuf, m_ibufsz, 0, (struct sockaddr *)&sa, &sa_len);
-		int q = 10; // receive max 10 at one cycle
+		int q = m_retries; // receive max 10 at one cycle
 		while (n > 0)
 		{
 			if (sa_len != sizeof(sa))
@@ -404,8 +505,33 @@ void UdpSocket::OnRead()
 #endif
 	struct sockaddr_in sa;
 	socklen_t sa_len = sizeof(sa);
+	if (m_b_read_ts)
+	{
+		struct timeval ts;
+		Utility::GetTime(&ts);
+#if !defined(LINUX) && !defined(MACOSX)
+		int n = recvfrom(GetSocket(), m_ibuf, m_ibufsz, 0, (struct sockaddr *)&sa, &sa_len);
+#else
+		int n = ReadTS(m_ibuf, m_ibufsz, (struct sockaddr *)&sa, sa_len, &ts);
+#endif
+		if (n > 0)
+		{
+			this -> OnRawData(m_ibuf, n, (struct sockaddr *)&sa, sa_len, &ts);
+		}
+		else
+		if (n == -1)
+		{
+#ifdef _WIN32
+			if (Errno != WSAEWOULDBLOCK)
+#else
+			if (Errno != EWOULDBLOCK)
+#endif
+				Handler().LogError(this, "recvfrom", Errno, StrError(Errno), LOG_LEVEL_ERROR);
+		}
+		return;
+	}
 	int n = recvfrom(GetSocket(), m_ibuf, m_ibufsz, 0, (struct sockaddr *)&sa, &sa_len);
-	int q = 10;
+	int q = m_retries;
 	while (n > 0)
 	{
 		if (sa_len != sizeof(sa))
@@ -696,6 +822,11 @@ void UdpSocket::OnRawData(const char *buf, size_t len, struct sockaddr *sa, sock
 }
 
 
+void UdpSocket::OnRawData(const char *buf, size_t len, struct sockaddr *sa, socklen_t sa_len, struct timeval *ts)
+{
+}
+
+
 port_t UdpSocket::GetPort()
 {
 	return m_port;
@@ -708,7 +839,14 @@ int UdpSocket::GetLastSizeWritten()
 }
 
 
+void UdpSocket::SetTimestamp(bool x)
+{
+	m_b_read_ts = x;
+}
+
+
 #ifdef SOCKETS_NAMESPACE
 }
 #endif
+
 

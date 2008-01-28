@@ -48,14 +48,18 @@ public:
 	virtual bool fopen(const std::string&, const std::string&) = 0;
 	virtual void fclose() = 0;
 
-	virtual size_t fread(char *, size_t, size_t) = 0;
+	virtual size_t fread(char *, size_t, size_t) const = 0;
 	virtual size_t fwrite(const char *, size_t, size_t) = 0;
 
-	virtual char *fgets(char *, int) = 0;
+	virtual char *fgets(char *, int) const = 0;
 	virtual void fprintf(const char *format, ...) = 0;
 
-	virtual off_t size() = 0;
-	virtual bool eof() = 0;
+	virtual off_t size() const = 0;
+	virtual bool eof() const = 0;
+
+	virtual void reset_read() const = 0;
+	virtual void reset_write() = 0;
+
 };
 
 
@@ -64,3 +68,4 @@ public:
 #endif
 
 #endif // _SOCKETS_IFile_H
+

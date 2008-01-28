@@ -1,9 +1,9 @@
-/** \file Mutex.h
- **	\date  2004-10-30
+/** \file Lock.h
+ **	\date  2005-08-22
  **	\author grymse@alhem.net
 **/
 /*
-Copyright (C) 2004-2007  Anders Hedstrom
+Copyright (C) 2005,2007  Anders Hedstrom
 
 This library is made available under the terms of the GNU GPL.
 
@@ -27,42 +27,33 @@ You should have received a copy of the GNU General Public License
 along with this program; if not, write to the Free Software
 Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 */
-#ifndef _SOCKETS_Mutex_H
-#define _SOCKETS_Mutex_H
+#ifndef _SOCKETS_Lock_H
+#define _SOCKETS_Lock_H
 
 #include "sockets-config.h"
-#ifndef _WIN32
-#include <pthread.h>
-#else
-#include <windows.h>
-#endif
-
 #ifdef SOCKETS_NAMESPACE
 namespace SOCKETS_NAMESPACE {
 #endif
 
-/** Mutex container class, used by Lock. 
-	\ingroup threading */
-class Mutex
-{
-	friend class Lock;
-public:
-	Mutex();
-	~Mutex();
+class Mutex;
 
-	void Lock();
-	void Unlock();
+/** Mutex encapsulation class. 
+	\ingroup threading */
+class Lock
+{
+public:
+	Lock(Mutex&);
+	~Lock();
+
 private:
-#ifdef _WIN32
-	HANDLE m_mutex;
-#else
-	pthread_mutex_t m_mutex;
-#endif
+	Mutex& m_mutex;
 };
+
+
 
 
 #ifdef SOCKETS_NAMESPACE
 }
 #endif
-#endif // _SOCKETS_Mutex_H
+#endif // _SOCKETS_Lock_H
 

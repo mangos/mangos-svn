@@ -31,11 +31,8 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define _SOCKETS_socket_include_H
 #include "sockets-config.h"
 
-#ifdef _WIN32
+#ifdef _MSC_VER
 #pragma warning(disable:4514)
-
-// Unique1: Remove stupid redifinition warnings.
-#pragma warning(disable:4005) 
 #endif
 
 // common defines affecting library and applications using library
@@ -45,28 +42,28 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #define SOCKETS_DYNAMIC_TEMP
 
 
-// getaddrinfo / getnameinfo replacements
-#ifdef NO_GETADDRINFO
-#ifndef AI_NUMERICHOST
-#define AI_NUMERICHOST 1
-#endif
-#ifndef NI_NUMERICHOST
-#define NI_NUMERICHOST 1
-#endif
-#endif
-
-
 // platform specific stuff
 #if (defined(__unix__) || defined(unix)) && !defined(USG)
 #include <sys/param.h>
 #endif
 #include <list>
 
+// int64
+#ifdef _WIN32
+typedef unsigned __int64 uint64_t;
+#else
+#include <stdlib.h>
+#ifdef SOLARIS
+# include <sys/types.h>
+#else
+# include <stdint.h>
+#endif
+#endif
+
 #ifndef _WIN32 
 // ----------------------------------------
 // common unix includes / defines
 #include <unistd.h>
-#include <string.h>
 #include <sys/time.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -153,24 +150,16 @@ namespace SOCKETS_NAMESPACE {
 #  error FreeBSD versions prior to 400014 does not support ipv6
 # endif
 
-#elif defined __NetBSD__
-#  if !defined(MSG_NOSIGNAL)
-#   define MSG_NOSIGNAL 0
-#  endif
-#  include <netinet/in.h>
-typedef	in_addr_t ipaddr_t;
-typedef	in_port_t port_t;
-#elif defined __APPLE_CC__ 
+#elif defined MACOSX 
 // ----------------------------------------
 // Mac OS X
 #include <string.h>
+#ifdef __DARWIN_UNIX03
+typedef unsigned short port_t;
+#else
 #include <mach/port.h>
+#endif // __DARWIN_UNIX03
 typedef unsigned long ipaddr_t;
-
-#if !defined(port_t)
-typedef mach_port_t port_t;
-#endif
-
 #ifdef SOCKETS_NAMESPACE
 namespace SOCKETS_NAMESPACE {
 #endif
@@ -188,7 +177,9 @@ namespace SOCKETS_NAMESPACE {
 #elif defined _WIN32 
 // ----------------------------------------
 // Win32
+#ifdef _MSC_VER
 #pragma comment(lib, "wsock32.lib")
+#endif
 #define strcasecmp _stricmp
 
 typedef unsigned long ipaddr_t;
@@ -213,13 +204,13 @@ namespace SOCKETS_NAMESPACE {
 #define WIN32_LEAN_AND_MEAN
 #include <winsock2.h>
 #include <ws2tcpip.h>
-#if MSC_VER < 1200
+#if _MSC_VER < 1200
 #ifndef __CYGWIN__
 #ifdef ENABLE_IPV6
 #include <tpipv6.h>  // For IPv6 Tech Preview.
 #endif
 #endif
-#endif // MSC_VER < 1200
+#endif // _MSC_VER < 1200
 
 
 #define MSG_NOSIGNAL 0
@@ -286,4 +277,16 @@ namespace SOCKETS_NAMESPACE {
 #endif
 
 
+// getaddrinfo / getnameinfo replacements
+#ifdef NO_GETADDRINFO
+#ifndef AI_NUMERICHOST
+#define AI_NUMERICHOST 1
+#endif
+#ifndef NI_NUMERICHOST
+#define NI_NUMERICHOST 1
+#endif
+#endif
+
+
 #endif // _SOCKETS_socket_include_H
+

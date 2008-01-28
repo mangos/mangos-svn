@@ -53,8 +53,6 @@ const char Base64::rstr[] = {
 
 Base64::Base64()
 {
-//	for (int i = 0; i < 64; i++)
-//		rstr[(int)bstr[i]] = i;
 }
 
 

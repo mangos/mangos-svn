@@ -186,7 +186,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\sockets\CircularBuffer.h"
+				RelativePath="..\..\dep\src\sockets\File.h"
 				>
 			</File>
 			<File
@@ -215,10 +215,6 @@
 			</File>
 			<File
 				RelativePath="..\..\dep\src\sockets\Parse.h"
-				>
-			</File>
-			<File
-				RelativePath="..\..\dep\src\sockets\RandomNumber.h"
 				>
 			</File>
 			<File
@@ -274,10 +270,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\sockets\Uid.h"
-				>
-			</File>
-			<File
 				RelativePath="..\..\dep\src\sockets\Utility.h"
 				>
 			</File>
@@ -290,7 +282,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\sockets\CircularBuffer.cpp"
+				RelativePath="..\..\dep\src\sockets\Exception.cpp"
 				>
 			</File>
 			<File
@@ -302,7 +294,7 @@
 				>
 			</File>
 			<File
-				RelativePath="..\..\dep\src\sockets\ISocketHandler.cpp"
+				RelativePath="..\..\dep\src\sockets\Lock.cpp"
 				>
 			</File>
 			<File
@@ -311,10 +303,6 @@
 			</File>
 			<File
 				RelativePath="..\..\dep\src\sockets\Parse.cpp"
-				>
-			</File>
-			<File
-				RelativePath="..\..\dep\src\sockets\RandomNumber.cpp"
 				>
 			</File>
 			<File
@@ -339,6 +327,10 @@
 			</File>
 			<File
 				RelativePath="..\..\dep\src\sockets\StdoutLog.cpp"
+				>
+			</File>
+			<File
+				RelativePath="..\..\dep\src\sockets\StreamSocket.cpp"
 				>
 			</File>
 			<File

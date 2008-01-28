@@ -43,6 +43,9 @@ Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 #include "SctpSocket.h"
 #include "Ipv4Address.h"
 #include "Ipv6Address.h"
+#ifdef ENABLE_EXCEPTIONS
+#include "Exception.h"
+#endif
 
 #ifdef SOCKETS_NAMESPACE
 namespace SOCKETS_NAMESPACE {
@@ -58,7 +61,7 @@ public:
 	/** Constructor.
 		\param h ISocketHandler reference
 		\param use_creator Optional use of creator (default true) */
-	ListenSocket(ISocketHandler& h,bool use_creator = true) : Socket(h), m_port(0), m_depth(0), m_creator(NULL)
+	ListenSocket(ISocketHandler& h,bool use_creator = true) : Socket(h), m_depth(0), m_creator(NULL)
 	,m_bHasCreate(false)
 	{
 		if (use_creator)
@@ -271,32 +274,19 @@ public:
 		{
 			Handler().LogError(this, "bind", Errno, StrError(Errno), LOG_LEVEL_FATAL);
 			closesocket(s);
+#ifdef ENABLE_EXCEPTIONS
+			throw Exception("bind() failed for port " + Utility::l2string(ad.GetPort()) + ": " + StrError(Errno));
+#endif
 			return -1;
 		}
 		if (listen(s, depth) == -1)
 		{
 			Handler().LogError(this, "listen", Errno, StrError(Errno), LOG_LEVEL_FATAL);
 			closesocket(s);
+#ifdef ENABLE_EXCEPTIONS
+			throw Exception("listen() failed for port " + Utility::l2string(ad.GetPort()) + ": " + StrError(Errno));
+#endif
 			return -1;
-		}
-		// retrieve bound port
-#ifdef ENABLE_IPV6
-#ifdef IPPROTO_IPV6
-		if (IsIpv6())
-		{
-			struct sockaddr_in6 sa;
-			socklen_t sockaddr_length = sizeof(struct sockaddr_in6);
-			getsockname(s, (struct sockaddr *)&sa, (socklen_t*)&sockaddr_length);
-			m_port = ntohs(sa.sin6_port);
-		}
-		else
-#endif
-#endif
-		{
-			struct sockaddr_in sa;
-			socklen_t sockaddr_length = sizeof(struct sockaddr_in);
-			getsockname(s, (struct sockaddr *)&sa, (socklen_t*)&sockaddr_length);
-			m_port = ntohs(sa.sin_port);
 		}
 		m_depth = depth;
 		Attach(s);
@@ -306,7 +296,7 @@ public:
 	/** Return assigned port number. */
 	port_t GetPort()
 	{
-		return m_port;
+		return GetSockPort();
 	}
 
 	/** Return listen queue depth. */
@@ -407,13 +397,14 @@ public:
 
         bool HasCreator() { return m_bHasCreate; }
 
-	void OnOptions(int,int,int,SOCKET) {}
+	void OnOptions(int,int,int,SOCKET) {
+		SetSoReuseaddr(true);
+	}
 
 protected:
-	ListenSocket(const ListenSocket& ) {}
+	ListenSocket(const ListenSocket& s) : Socket(s) {}
 private:
 	ListenSocket& operator=(const ListenSocket& ) { return *this; }
-	port_t m_port;
 	int m_depth;
 	X *m_creator;
 	bool m_bHasCreate;
@@ -426,3 +417,4 @@ private:
 #endif
 
 #endif // _SOCKETS_ListenSocket_H
+
