@@ -778,6 +778,7 @@ class MANGOS_DLL_SPEC Unit : public WorldObject
 
         void SendAttackStateUpdate(uint32 HitInfo, Unit *target, uint8 SwingType, SpellSchools DamageType, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, VictimState TargetState, uint32 BlockedAmount);
         void SendSpellNonMeleeDamageLog(Unit *target,uint32 SpellID,uint32 Damage, SpellSchools DamageType,uint32 AbsorbedDamage, uint32 Resist,bool PhysicalDamage, uint32 Blocked, bool CriticalHit = false);
+        void SendSpellMiss(Unit *target, uint32 spellID, SpellMissInfo missInfo);
 
         void SendMonsterMove(float NewPosX, float NewPosY, float NewPosZ, uint8 type, bool Run, uint32 Time);
 

@@ -3955,6 +3955,26 @@ void Unit::SendSpellNonMeleeDamageLog(Unit *target,uint32 SpellID,uint32 Damage,
     SendMessageToSet( &data, true );
 }
 
+void Unit::SendSpellMiss(Unit *target, uint32 spellID, SpellMissInfo missInfo)
+{
+    WorldPacket data(SMSG_SPELLLOGMISS, (4+8+1+4+8+1));
+    data << uint32(spellID);
+    data << uint64(GetGUID());
+    data << uint8(0);                                       // someflag
+    data << uint32(1);                                      // target count
+    // loop
+    // {
+    data << uint64(target->GetGUID());                      // target GUID
+    data << uint8(missInfo);
+    // if(someflag)
+    // {
+    // data << float
+    // data << float
+    // }
+    // }
+    SendMessageToSet(&data, true);
+}
+
 void Unit::SendAttackStateUpdate(uint32 HitInfo, Unit *target, uint8 SwingType, SpellSchools DamageType, uint32 Damage, uint32 AbsorbDamage, uint32 Resist, VictimState TargetState, uint32 BlockedAmount)
 {
     sLog.outDebug("WORLD: Sending SMSG_ATTACKERSTATEUPDATE");

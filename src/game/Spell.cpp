@@ -688,6 +688,13 @@ void Spell::DoSpellHitOnUnit(Unit *unit, const uint32 effectMask)
     if(!unit || !effectMask)
         return;
 
+    // Recheck immune (only for delayed spells)
+    if (m_spellInfo->speed && (unit->IsImmunedToSpell(m_spellInfo) || unit->IsImmunedToSpellDamage(m_spellInfo)))
+    {
+        m_caster->SendSpellMiss(unit, m_spellInfo->Id, SPELL_MISS_IMMUNE);
+        return;
+    }
+
     for(uint32 effectNumber=0;effectNumber<3;effectNumber++)
     {
         if (effectMask & (1<<effectNumber))

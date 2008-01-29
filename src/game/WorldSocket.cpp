@@ -73,6 +73,9 @@ WorldSocket::WorldSocket(ISocketHandler &sh): TcpSocket(sh), _cmd(0), _remaining
     _seed = 0xDEADBABE;
     m_LastPingMSTime = 0;                                   // first time it will counted as overspeed maybe, but this is not important
     m_OverSpeedPings = 0;
+
+    if (sWorld.getConfig(CONFIG_TCP_NO_DELAY))
+        SetTcpNodelay(true);
 }
 
 /// WorldSocket destructor
