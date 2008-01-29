@@ -2122,7 +2122,7 @@ void Aura::HandleModFear(bool Apply, bool Real)
         {
             m_target->GetMotionMaster()->MovementExpired(false);
 
-            if(m_target->GetTypeId() != TYPEID_PLAYER)
+            if( m_target->GetTypeId() != TYPEID_PLAYER && m_target->isAlive() )
             {
                 // restore appropriate movement generator
                 if(m_target->getVictim())
