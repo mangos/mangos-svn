@@ -156,6 +156,11 @@ ProcessPriority = 1
 #          9 (best compression) 
 Compression = 1
 
+# TCP Nagle algorithm setting
+# Default: 0 (enable Nagle algorithm, less traffic, more latency)
+#          1 (TCP_NO_DELAY, disable Nagle algorithm, more traffic but less latency)
+TcpNoDelay = 0
+
 # Maximum number of players in the world. Excluding Mods, GM's and Admins
 # Default: 100
 #          0 (for infinite players)
