@@ -38,6 +38,7 @@
 #include "WaypointMovementGenerator.h"
 #include "BattleGroundMgr.h"
 #include "BattleGround.h"
+#include "Guild.h"
 
 void WorldSession::HandleTabardVendorActivateOpcode( WorldPacket & recv_data )
 {
@@ -761,13 +762,14 @@ void WorldSession::HandleStableSwapPet( WorldPacket & recv_data )
 
 void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
 {
-    CHECK_PACKET_SIZE(recv_data,8+8);
+    CHECK_PACKET_SIZE(recv_data,8+8+1);
 
     sLog.outDebug("WORLD: CMSG_REPAIR_ITEM");
 
     uint64 npcGUID, itemGUID;
+    uint8 guildBank;                                // new in 2.3.2, bool that means from guild bank money
 
-    recv_data >> npcGUID >> itemGUID;
+    recv_data >> npcGUID >> itemGUID >> guildBank;
 
     Creature *unit = ObjectAccessor::GetNPCIfCanInteractWith(*_player, npcGUID, UNIT_NPC_FLAG_REPAIR);
     if (!unit)
@@ -779,6 +781,7 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
     // reputation discount
     float discountMod = _player->GetReputationPriceDiscount(unit);
 
+    uint32 TotalCost = 0;
     if (itemGUID)
     {
         sLog.outDebug("ITEM: Repair item, itemGUID = %u, npcGUID = %u", GUID_LOPART(itemGUID), GUID_LOPART(npcGUID));
@@ -786,13 +789,23 @@ void WorldSession::HandleRepairItemOpcode( WorldPacket & recv_data )
         Item* item = _player->GetItemByGuid(itemGUID);
 
         if(item)
-            _player->DurabilityRepair(item->GetPos(),true,discountMod);
-
+            TotalCost= _player->DurabilityRepair(item->GetPos(),true,discountMod,guildBank>0?true:false);
     }
     else
     {
         sLog.outDebug("ITEM: Repair all items, npcGUID = %u", GUID_LOPART(npcGUID));
 
-        _player->DurabilityRepairAll(true,discountMod);
+        TotalCost = _player->DurabilityRepairAll(true,discountMod,guildBank>0?true:false);
+    }
+    if (guildBank)
+    {
+        uint32 GuildId = _player->GetGuildId();
+        if (!GuildId)
+            return;
+        Guild *pGuild = objmgr.GetGuildById(GuildId);
+        if (!pGuild)
+            return;
+        pGuild->LogBankEvent(GUILD_BANK_LOG_REPAIR_MONEY, 0, _player->GetGUIDLow(), TotalCost);
+        pGuild->SendMoneyInfo(this, _player->GetGUIDLow());
     }
 }

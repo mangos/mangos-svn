@@ -461,8 +461,16 @@ void WorldSession::FillOpcodeHandlerHashTable()
     objmgr.opcodeTable[ CMSG_CHANNEL_VOICE_CHAT_QUERY ]         = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandleChannelVoiceChatQuery         );
     objmgr.opcodeTable[ CMSG_VOICE_SETTINGS ]                   = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandleVoiceSettingsOpcode           );
     objmgr.opcodeTable[ CMSG_SET_TAXI_BENCHMARK_MODE ]          = OpcodeHandler( STATUS_AUTHED,   &WorldSession::HandleSetTaxiBenchmarkOpcode        );
-    objmgr.opcodeTable[ MSG_UNKNOWN_1020 ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::Handle1020                          );
-    objmgr.opcodeTable[ MSG_UNKNOWN_1021 ]                      = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::Handle1021                          );
+    objmgr.opcodeTable[ MSG_GUILD_BANK_GET_RIGHTS ]             = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildBankGetRights            );
+    objmgr.opcodeTable[ MSG_GUILD_BANK_GET_MONEY_AMOUNT ]       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildBankGetMoneyAmount       );
+    objmgr.opcodeTable[ CMSG_GUILD_BANK ]                       = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildBankQuery                );
+    objmgr.opcodeTable[ CMSG_GUILD_BANK_TAB_COLON ]             = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildBankTabColon             );
+    objmgr.opcodeTable[ MSG_GUILD_BANK_LOG ]                    = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildBankLog                  );
+    objmgr.opcodeTable[ CMSG_GUILD_BANK_DEPOSIT ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildBankDeposit              );
+    objmgr.opcodeTable[ CMSG_GUILD_BANK_WITHDRAW ]              = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildBankWithdraw             );
+    objmgr.opcodeTable[ CMSG_GUILD_BANK_DEPOSIT_ITEM ]          = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildBankDepositItem          );
+    objmgr.opcodeTable[ CMSG_GUILD_BANK_MODIFY_TAB ]            = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildBankModifyTab            );
+    objmgr.opcodeTable[ CMSG_GUILD_BANK_BUY_TAB ]               = OpcodeHandler( STATUS_LOGGEDIN, &WorldSession::HandleGuildBankBuyTab               );
 }
 
 void WorldSession::SizeError(WorldPacket const& packet, uint32 size) const

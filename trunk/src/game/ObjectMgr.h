@@ -322,6 +322,16 @@ class ObjectMgr
         }
         bool IsTavernAreaTrigger(uint32 Trigger_ID) const { return mTavernAreaTriggerSet.count(Trigger_ID) != 0; }
         bool IsGameObjectForQuests(uint32 entry) const { return mGameObjectForQuestSet.count(entry) != 0; }
+        bool IsGuildVaultGameObject(uint32 guid) const
+        {
+            const GameObjectData *pGoData = GetGOData(guid);
+            if (!pGoData)
+                return false;
+            const GameObjectInfo *pGoInfo = GetGameObjectInfo(pGoData->id);
+            if (pGoInfo && pGoInfo->type == GAMEOBJECT_TYPE_GUILD_BANK)
+                return true;
+            return false;
+        }
 
         uint32 GetBattleMasterBG(uint32 entry) const
         {
@@ -547,7 +557,7 @@ class ObjectMgr
         void AddGameobjectToGrid(uint32 guid, GameObjectData const* data);
         void RemoveGameobjectFromGrid(uint32 guid, GameObjectData const* data);
 
-        //reserved names
+        // reserved names
         void LoadReservedPlayersNames();
         bool IsReservedName(std::string name) const
         {
@@ -556,6 +566,9 @@ class ObjectMgr
 
         int GetIndexForLocale(LocaleConstant loc);
         LocaleConstant GetLocalForIndex(int);
+        // guild bank tabs
+        const uint32 GetGuildBankTabPrice(uint8 Index) { return Index < GUILD_BANK_MAX_TABS ? mGuildBankTabPrice[Index] : 0; }
+        
     protected:
         uint32 m_auctionid;
         uint32 m_mailid;
@@ -644,6 +657,9 @@ class ObjectMgr
         PageTextLocaleMap mPageTextLocaleMap;
         RespawnTimes mCreatureRespawnTimes;
         RespawnTimes mGORespawnTimes;
+
+        typedef std::vector<uint32> GuildBankTabPriceMap;
+        GuildBankTabPriceMap mGuildBankTabPrice;
 };
 
 #define objmgr MaNGOS::Singleton<ObjectMgr>::Instance()

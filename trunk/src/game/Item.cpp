@@ -169,8 +169,8 @@ bool Item::Create( uint32 guidlow, uint32 itemid, Player* owner)
     SetUInt32Value(OBJECT_FIELD_ENTRY, itemid);
     SetFloatValue(OBJECT_FIELD_SCALE_X, 1.0f);
 
-    SetUInt64Value(ITEM_FIELD_OWNER, owner->GetGUID());
-    SetUInt64Value(ITEM_FIELD_CONTAINED, owner->GetGUID());
+    SetUInt64Value(ITEM_FIELD_OWNER, owner ? owner->GetGUID() : 0);
+    SetUInt64Value(ITEM_FIELD_CONTAINED, owner ? owner->GetGUID() : 0);
 
     ItemPrototype const *itemProto = objmgr.GetItemPrototype(itemid);
     if(!itemProto)
@@ -774,4 +774,6 @@ void Item::SendTimeUpdate(Player* owner)
     data << (uint32)GetUInt32Value(ITEM_FIELD_DURATION);
     owner->GetSession()->SendPacket(&data);
 }
+
+
 

@@ -1024,14 +1024,14 @@ enum OpCodes
     CMSG_UNKNOWN_995                                = 995,  // uint64 guid, lua: NotifyUnitIsPVPAFK
     SMSG_PVP_REPORT_AFK_SYSTEM_STATUS               = 996,  // uint8, uint8, uint8, uint64
     CMSG_GUILD_BANK                                 = 997,  // click on guildbank object, uint64 guid + uint8 unk
-    CMSG_GUILDBANK_TAB_COLON                        = 998,  // response to 999, uint64 guid + uint8 + uint8
+    CMSG_GUILD_BANK_TAB_COLON                       = 998,  // response to 999, uint64 guid + uint8 + uint8
     SMSG_GUILD_BANK_LIST                            = 999,  // uint32 + uint32 + uint8 + uint8 + uint16 count1 + uint8 + uint8 count2 + for (count2) { uint8 unk } + uint16 + for(count1) { uint32 counter + uint8 unk }
-    CMSG_UNKNOWN_1000                               = 1000, // uint64 guid, uint8, uint8, uint8 count, for(count) uint8 unk
-    CMSG_BUY_GUILDBANK_TAB                          = 1001, // uint64 guid + uint8 unk
-    CMSG_UNKNOWN_1002                               = 1002, // uint64, uint8, string, string, lua: SetGuildBankTabInfo
-    CMSG_GUILDBANK_DEPOSIT                          = 1003, // uint64 guid + uint32
-    CMSG_GUILDBANK_WITHDRAW                         = 1004, // uint64 guid + uint32
-    MSG_GUILDBANK_LOG                               = 1005, // guild bank log? client: empty, server: uint8 count, for count (uint8 unk(type?), uint64 guid, uint32 unk(amount?))
+    CMSG_GUILD_BANK_DEPOSIT_ITEM                    = 1000, // uint64 guid, uint8, uint8, uint8 count, for(count) uint8 unk
+    CMSG_GUILD_BANK_BUY_TAB                         = 1001, // uint64 guid + uint8 unk
+    CMSG_GUILD_BANK_MODIFY_TAB                      = 1002, // uint64, uint8, string, string, lua: SetGuildBankTabInfo
+    CMSG_GUILD_BANK_DEPOSIT                         = 1003, // uint64 guid + uint32
+    CMSG_GUILD_BANK_WITHDRAW                        = 1004, // uint64 guid + uint32
+    MSG_GUILD_BANK_LOG                              = 1005, // guild bank log client: empty, server: uint8 count, for count (uint8 unk(type?), uint64 guid, uint32 unk(amount?))
     CMSG_CHANNEL_WATCH                              = 1006, // string channel name
     SMSG_PLAYER_JOINED_CHANNEL                      = 1007, // uint64, uint8, uint8, uint32, string channel name
     SMSG_PLAYER_LEFT_CHANNEL                        = 1008, // uint64, uint8, uint32, string channel name
@@ -1046,8 +1046,8 @@ enum OpCodes
     // 1017 not exist?
     // 1018 not exist?
     SMSG_VOICESESSION_FULL                          = 1019, // The voice session you are attempting to join is full.
-    MSG_UNKNOWN_1020                                = 1020, // probably guild related, client: empty, server: uint32, uint32, uint8, uint32, uint32
-    MSG_UNKNOWN_1021                                = 1021, // guild related
+    MSG_GUILD_BANK_GET_RIGHTS                       = 1020, // guild related, client: empty, server: uint32, uint32, uint8, uint32, uint32
+    MSG_GUILD_BANK_GET_MONEY_AMOUNT                 = 1021, // uint32 money
     MSG_GUILD_EVENT_LOG                             = 1022,
     // 1023 not exist?
     CMSG_UNKNOWN_1024                               = 1024, // empty
