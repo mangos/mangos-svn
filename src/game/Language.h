@@ -213,8 +213,8 @@
 
 #define LANG_RESET_SPELLS_ONLINE         "Spells of %s reset."
 #define LANG_RESET_SPELLS_OFFLINE        "Spells of %s will reset at next login."
-#define LANG_RESET_TALENTS_ONLINE        "Spells of %s reset."
-#define LANG_RESET_TALENTS_OFFLINE       "Spells of %s will reset at next login."
+#define LANG_RESET_TALENTS_ONLINE        "Talents of %s reset."
+#define LANG_RESET_TALENTS_OFFLINE       "Talents of %s will reset at next login."
 #define LANG_RESET_SPELLS                "Your spells reset."
 #define LANG_RESET_TALENTS               "Your talents reset."
 
