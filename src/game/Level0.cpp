@@ -48,7 +48,7 @@ bool ChatHandler::ShowHelpForCommand(ChatCommand *table, const char* cmd)
             }
 
             // no help for command with subcommands, show list subcommands with permissions
-            if(table[i].Help== "")
+            if(table[i].Help.empty())
             {
                 std::string list;
                 for(uint32 j = 0; table[i].ChildCommands[j].Name != NULL; ++j)
@@ -75,7 +75,7 @@ bool ChatHandler::ShowHelpForCommand(ChatCommand *table, const char* cmd)
         if(m_session->GetSecurity() < table[i].SecurityLevel)
             continue;
 
-        if(table[i].Help == "")
+        if(table[i].Help.empty())
         {
             SendSysMessage(LANG_NO_HELP_CMD);
             return true;

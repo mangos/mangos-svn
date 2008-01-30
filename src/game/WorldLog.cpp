@@ -42,7 +42,7 @@ void WorldLog::Initialize()
     }
 
     std::string logname = sConfig.GetStringDefault("WorldLogFile", "");
-    if(logname!="")
+    if(!logname.empty())
     {
         i_file = fopen((logsDir+logname).c_str(), "w");
     }

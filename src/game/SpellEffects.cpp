@@ -2938,7 +2938,7 @@ void Spell::EffectSummonPet(uint32 i)
 
             // generate new name for summon pet
             std::string new_name=objmgr.GeneratePetName(petentry);
-            if(new_name!="")
+            if(!new_name.empty())
                 NewSummon->SetName(new_name);
         }
         else if(NewSummon->getPetType()==HUNTER_PET)

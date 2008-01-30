@@ -50,7 +50,7 @@ namespace FactorySelector
         std::string ainame=cinfo->AIName;
 
         // select by script name
-        if( ainame!="")
+        if( !ainame.empty())
             ai_factory = ai_registry.GetRegistryItem( ainame.c_str() );
 
         // select by NPC flags

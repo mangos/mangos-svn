@@ -739,8 +739,8 @@ CREATE TABLE `guild_bank_eventlog` (
 --
 
 LOCK TABLES `guild_bank_eventlog` WRITE;
-/*!40000 ALTER TABLE `guild` DISABLE KEYS */;
-/*!40000 ALTER TABLE `guild` ENABLE KEYS */;
+/*!40000 ALTER TABLE `guild_bank_eventlog` DISABLE KEYS */;
+/*!40000 ALTER TABLE `guild_bank_eventlog` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -761,8 +761,8 @@ CREATE TABLE `guild_bank_item` (
 --
 
 LOCK TABLES `guild_bank_item` WRITE;
-/*!40000 ALTER TABLE `guild` DISABLE KEYS */;
-/*!40000 ALTER TABLE `guild` ENABLE KEYS */;
+/*!40000 ALTER TABLE `guild_bank_item` DISABLE KEYS */;
+/*!40000 ALTER TABLE `guild_bank_item` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -784,8 +784,8 @@ CREATE TABLE `guild_bank_right` (
 --
 
 LOCK TABLES `guild_bank_right` WRITE;
-/*!40000 ALTER TABLE `guild` DISABLE KEYS */;
-/*!40000 ALTER TABLE `guild` ENABLE KEYS */;
+/*!40000 ALTER TABLE `guild_bank_right` DISABLE KEYS */;
+/*!40000 ALTER TABLE `guild_bank_right` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --
@@ -806,8 +806,8 @@ CREATE TABLE `guild_bank_tab` (
 --
 
 LOCK TABLES `guild_bank_tab` WRITE;
-/*!40000 ALTER TABLE `guild` DISABLE KEYS */;
-/*!40000 ALTER TABLE `guild` ENABLE KEYS */;
+/*!40000 ALTER TABLE `guild_bank_tab` DISABLE KEYS */;
+/*!40000 ALTER TABLE `guild_bank_tab` ENABLE KEYS */;
 UNLOCK TABLES;
 
 --

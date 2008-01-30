@@ -37,7 +37,7 @@ const int LogType_count = int(LogError) +1;
 
 void Log::InitColors(std::string str)
 {
-    if(str=="")
+    if(str.empty())
     {
         m_colored = false;
         return;
@@ -181,7 +181,7 @@ void Log::Initialize()
     }
 
     std::string logfn=sConfig.GetStringDefault("LogFile", "");
-    if(logfn!="")
+    if(!logfn.empty())
     {
         if(sConfig.GetBoolDefault("LogTimestamp",false))
         {
@@ -198,13 +198,13 @@ void Log::Initialize()
     }
 
     std::string gmlogname = sConfig.GetStringDefault("GMLogFile", "");
-    if(gmlogname!="")
+    if(!gmlogname.empty())
     {
         gmLogfile = fopen((logsDir+gmlogname).c_str(), "a");
     }
 
     std::string charlogname = sConfig.GetStringDefault("CharLogFile", "");
-    if(charlogname!="")
+    if(!charlogname.empty())
     {
         if(sConfig.GetBoolDefault("CharLogTimestamp",false))
         {
@@ -220,12 +220,12 @@ void Log::Initialize()
     }
 
     std::string dberlogname = sConfig.GetStringDefault("DBErrorLogFile", "");
-    if(dberlogname!="")
+    if(!dberlogname.empty())
     {
         dberLogfile = fopen((logsDir+dberlogname).c_str(), "a");
     }
     std::string ralogname = sConfig.GetStringDefault("RaLogFile", "");
-    if(ralogname!="")
+    if(!ralogname.empty())
     {
         raLogfile = fopen((logsDir+ralogname).c_str(), "a");
     }
