@@ -389,11 +389,21 @@ void LoadDBCStores(std::string dataPath)
         exit(1);
     }
 
-    // check at up-to-date DBC files (45743 is last added spell in 2.3.2)
+    // check at up-to-date DBC files (45743 is last added spell in 2.3.2 and 2.3.3)
     if( !sSpellStore.LookupEntry(45743))
     {
         sLog.outError("\nYou have _outdated_ DBC files. Please extract correct versions from current using client.");
         exit(1);
+    }
+
+    // check at up-to-date DBC files (44958 changes in 2.3.3)
+    if(SkillLineAbilityEntry const* ability = sSkillLineAbilityStore.LookupEntry(44958))
+    {
+        if( ability->max_value != 250 )
+        {
+            sLog.outError("\nYou have _outdated_ DBC files. Please extract correct versions from current using client.");
+            exit(1);
+        }
     }
 
     sLog.outString();
