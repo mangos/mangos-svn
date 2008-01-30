@@ -1347,14 +1347,9 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
             uint32 ItemEntry = pItemBank->GetEntry();
             if (!pItemChar)                                 // Put in an empty slot of char
             {
-                if (SplitedAmount)                          // transaction can be done, client checked it
+                                                            // transaction can be done, client checked it
+                if (SplitedAmount && SplitedAmount < pItemBank->GetCount())
                 {
-                    if (SplitedAmount == pItemBank->GetCount())
-                    {                                       // Something left on bank slot
-                        sLog.outError("GUILDBANK: Received invalid split request!");
-                        CharacterDatabase.RollbackTransaction();
-                        return;
-                    }
                     Item *pItemToStore = NewItemOrBag(objmgr.GetItemPrototype(ItemEntry));
                     uint32 NewGuid = objmgr.GenerateLowGuid(HIGHGUID_ITEM);
                     pItemToStore->Create(NewGuid, ItemEntry, GetPlayer());
@@ -1406,8 +1401,8 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
             }
             else                                            // To bank -> char but char as existing item
             {
-                if (SplitedAmount)  // just update counts
-                {
+                if (SplitedAmount && SplitedAmount < pItemBank->GetCount())
+                {                                           // just update counts
                     pItemChar->SetCount(pItemChar->GetCount()+SplitedAmount);
                     pItemBank->SetCount(pItemBank->GetCount()-SplitedAmount);
                     pItemChar->SetState(ITEM_CHANGED);
@@ -1442,23 +1437,27 @@ void WorldSession::HandleGuildBankDepositItem( WorldPacket & recv_data )
                     pItemChar->DeleteFromInventoryDB();
                     pItemChar->SaveToDB();                  // this item is now in bank
 
-                    uint16 Dest;
-                    uint8 msg;
-                    msg = pl->CanStoreItem(PlayerBag, PlayerSlot, Dest, pItemBankOld, false);
-                    if( msg == EQUIP_ERR_OK )
+                    if(pItemBankOld)                        // if swap with item
                     {
-                        pl->StoreItem(Dest, pItemBankOld, true);
-                        pItemBankOld->SaveToDB();
-                        pItemBankOld->SetState(ITEM_NEW);
-                        pGuild->MemberItemWithdraw(BankTab, pl->GetGUIDLow());
-                        pGuild->LogBankEvent(GUILD_BANK_LOG_WITHDRAW_ITEM, BankTab, pl->GetGUIDLow(), pItemBankOld->GetEntry());
-                        pl->SaveInventoryAndGoldToDB();
-                    }
-                    else
-                    {
-                        CharacterDatabase.RollbackTransaction();
-                        sLog.outError("GUILDBANK: Could not add back item (GUID: %u) to character inventory after swap with item (GUID: %u)!",pItemBankOld->GetGUIDLow(),pItemChar->GetGUIDLow());
-                        return;
+                        uint16 Dest;
+                        uint8 msg;
+                        msg = pl->CanStoreItem(PlayerBag, PlayerSlot, Dest, pItemBankOld, false);
+                        if( msg == EQUIP_ERR_OK )
+                        {
+                            pl->StoreItem(Dest, pItemBankOld, true);
+                            pItemBankOld->SaveToDB();
+                            pItemBankOld->SetState(ITEM_NEW);
+                            pGuild->MemberItemWithdraw(BankTab, pl->GetGUIDLow());
+                            pGuild->LogBankEvent(GUILD_BANK_LOG_WITHDRAW_ITEM, BankTab, pl->GetGUIDLow(), pItemBankOld->GetEntry());
+                            pl->SaveInventoryAndGoldToDB();
+                        }
+                        else
+                        {
+                            CharacterDatabase.RollbackTransaction();
+
+                            sLog.outError("GUILDBANK: Could not add back item (GUID: %u) to character inventory after swap with item (GUID: %u)!",pItemBankOld->GetGUIDLow(),pItemChar->GetGUIDLow() );
+                            return;
+                        }
                     }
                 }
             }
